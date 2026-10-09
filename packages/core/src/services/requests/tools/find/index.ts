@@ -58,7 +58,7 @@ export const findRequestsAgentTool = (options: CollectionToolOptions = {}) =>
 			});
 			if (result.error) return result;
 
-			const count = result.data.output.meta.pagination.count;
+			const count = result.data.output.pagination.count;
 			return {
 				error: undefined,
 				data: {

@@ -1,7 +1,9 @@
 import z from "zod";
 
 export const inputSchema = z.object({
-	id: z.number().int().positive(),
+	mediaId: z.number().int().positive().meta({
+		description: "Media ID, eg. from media_find.",
+	}),
 	inline: z.boolean().default(false).meta({
 		description:
 			"Return image bytes even when a public delivery URL is available.",

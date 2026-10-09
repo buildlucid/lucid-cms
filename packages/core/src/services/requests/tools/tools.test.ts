@@ -226,6 +226,9 @@ test("finds and reads requests only within the tool's collections", async () => 
 		);
 
 	//* without a query it lists open requests, most recently changed first
+	expect(await run.call(agentTools.findRequests(), {})).toMatchObject({
+		pagination: { page: 1, perPage: 20 },
+	});
 	const open = await find(agentTools.findRequests(), {});
 	expect(open.slice(0, 2)).toEqual([postRequest, pageRequest]);
 	expect(open).not.toContain(closedRequest);
@@ -691,6 +694,18 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 	expect(
 		afterApproval.events.find((event) => event.type === "approved"),
 	).toMatchObject({ user: { id: user.id }, agent: { key: reviewer.key } });
+	//* agents see the agent behind activity, as they do for comments
+	expect(
+		getOutputSchema.parse(
+			await run.call(getRequest, { requestId, include: ["activity"] }),
+		).data.activity,
+	).toContainEqual(
+		expect.objectContaining({
+			type: "approved",
+			author: { id: user.id, name: "Will" },
+			agent: reviewer.name,
+		}),
+	);
 
 	const withdrawn = await toolkit.requests.unapprove({ id: requestId, actor });
 	assert(!withdrawn.error, JSON.stringify(withdrawn.error));

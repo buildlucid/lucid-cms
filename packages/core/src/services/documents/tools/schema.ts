@@ -1,6 +1,10 @@
 import z from "zod";
 import { requestTypeSchema } from "../../../libs/db/tables/requests.js";
 
+export const documentIdInput = z.number().int().positive().meta({
+	description: "Document ID, eg. from documents_find or requests_get.",
+});
+
 export const writeInput = {
 	collectionKey: z.string().min(1),
 	contentLocale: z.string().min(1).optional().meta({

@@ -96,7 +96,7 @@ const run = async (
 	const prepared = await previewMediaMcpTool()[
 		toolDefinitionInternal
 	].prepareInput({
-		id: 1,
+		mediaId: 1,
 		inline,
 	});
 	if (prepared.type !== "ready") throw new Error("Expected valid input");

@@ -65,11 +65,11 @@ const deleteDocument: ServiceFn<
 		};
 	}
 
-	const document = { collectionKey: collection.key, id: input.id };
+	const document = { collectionKey: collection.key, id: input.documentId };
 	if (!requested) {
 		const deleted = await deleteSingle(context, {
 			collectionKey: collection.key,
-			id: input.id,
+			id: input.documentId,
 			userId: user.id,
 			agentRunId: props.actor.agentRunId,
 		});
@@ -87,7 +87,7 @@ const deleteDocument: ServiceFn<
 		type: "delete",
 		document: {
 			collectionKey: collection.key,
-			documentId: input.id,
+			documentId: input.documentId,
 			targets: [],
 		},
 		requestId: input.requestId,
@@ -101,7 +101,7 @@ const deleteDocument: ServiceFn<
 					collection:
 						context.translate(collection.getData.details.labels.singular) ??
 						collection.key,
-					id: input.id,
+					id: input.documentId,
 				},
 			}),
 		),

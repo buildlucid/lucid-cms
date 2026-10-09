@@ -15,6 +15,7 @@ import { projectRoute, selectFields } from "../../helpers/project-document.js";
 import projectEditableValue from "../../helpers/project-editable-value.js";
 import readDocumentContent from "../../helpers/read-document-content.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
+import projectMeta from "../helpers/project-meta.js";
 import {
 	type agentInputSchema,
 	type outputSchema,
@@ -73,7 +74,7 @@ const getDocument: ServiceFn<
 		const versionId = requestRes.data.documents.find(
 			(document) =>
 				document.collection_key === input.collectionKey &&
-				document.document_id === input.id &&
+				document.document_id === input.documentId &&
 				document.source === "latest",
 		)?.source_version_id;
 		if (!versionId) {
@@ -86,7 +87,7 @@ const getDocument: ServiceFn<
 							collection:
 								context.translate(collection.getData.details.labels.singular) ??
 								collection.key,
-							id: input.id,
+							id: input.documentId,
 						},
 					}),
 					status: 404,
@@ -106,14 +107,17 @@ const getDocument: ServiceFn<
 			: input.version,
 		versionId: proposal?.versionId,
 		includeRequestVersions: proposal !== undefined,
-		query: { include: input.include, filter: { id: { value: input.id } } },
+		query: {
+			include: input.include,
+			filter: { id: { value: input.documentId } },
+		},
 		allowedCollectionKeys: props.allowedCollectionKeys,
 	});
 	if (documentRes.error) return documentRes;
 
 	const contentRes = await readDocumentContent(context, {
 		collectionKey: input.collectionKey,
-		id: input.id,
+		id: input.documentId,
 		version: proposal ? undefined : input.version,
 		versionId: proposal?.versionId,
 	});
@@ -142,6 +146,10 @@ const getDocument: ServiceFn<
 	}
 
 	const document = documentRes.data.document;
+	const metaRes = document.meta
+		? await projectMeta(context, { meta: document.meta })
+		: undefined;
+	if (metaRes?.error) return metaRes;
 	const { fixed, builder, embedded } = projected.data.bricks;
 	const bricks = paginate(
 		input.include?.includes("bricks")
@@ -174,7 +182,7 @@ const getDocument: ServiceFn<
 					route: projectRoute(document.route, contentLocale),
 					fields: selectFields(projected.data.fields, input.fieldKeys),
 					bricks: bricks.data,
-					...(document.meta && { meta: document.meta }),
+					...(metaRes && { meta: metaRes.data }),
 					links: {
 						edit: proposal
 							? getRequestLink(context, proposal.requestId, {

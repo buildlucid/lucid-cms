@@ -1,12 +1,12 @@
 import { generateSourceHTML } from "@lucidcms/rich-text/server";
 import type z from "zod";
+import { formatPerson } from "../../../../libs/tools/person.js";
 import type { RequestEvent } from "../../../../types/response.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getSingle from "../../get-single.js";
 import getRequestLink from "../../helpers/get-request-link.js";
 import checkCollections from "../helpers/check-collections.js";
-import formatUser from "../helpers/format-user.js";
 import type { RequestToolProps } from "../types.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
@@ -65,12 +65,13 @@ const getRequest: ServiceFn<
 					approved: request.approved,
 					approvals: {
 						given: request.approvals.map(
-							(approval) => approval.user && formatUser(approval.user),
+							(approval) => approval.user && formatPerson(approval.user),
 						),
 						required: request.requiredApprovals,
 					},
-					createdBy: request.createdBy && formatUser(request.createdBy),
-					reviewers: request.reviewers.map(formatUser),
+					createdBy: request.createdBy && formatPerson(request.createdBy),
+					createdByAgent: request.createdByAgent?.name ?? null,
+					reviewers: request.reviewers.map(formatPerson),
 					scheduledAt: request.scheduledAt,
 					failure: request.failure,
 					completedAt: request.completedAt,
@@ -103,7 +104,7 @@ const getRequest: ServiceFn<
 					}),
 					comments: comments.map((comment) => ({
 						id: comment.id,
-						author: comment.user && formatUser(comment.user),
+						author: comment.user && formatPerson(comment.user),
 						agent: comment.agent?.name ?? null,
 						byYou: byYou(comment),
 						body: generateSourceHTML(comment.body),
@@ -111,7 +112,7 @@ const getRequest: ServiceFn<
 						resolution: comment.resolution,
 						replies: comment.replies.map((reply) => ({
 							id: reply.id,
-							author: reply.user && formatUser(reply.user),
+							author: reply.user && formatPerson(reply.user),
 							agent: reply.agent?.name ?? null,
 							byYou: byYou(reply),
 							body: generateSourceHTML(reply.body),
@@ -140,10 +141,10 @@ const getRequest: ServiceFn<
 									...("reviewer" in details
 										? {
 												reviewer:
-													details.reviewer && formatUser(details.reviewer),
+													details.reviewer && formatPerson(details.reviewer),
 											}
 										: {}),
-									user: user && formatUser(user),
+									author: user && formatPerson(user),
 									agent: agent?.name ?? null,
 								},
 							];

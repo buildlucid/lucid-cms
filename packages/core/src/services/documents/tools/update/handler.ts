@@ -82,7 +82,7 @@ const updateDocument: ServiceFn<
 				type: "publish",
 				document: {
 					collectionKey: collection.key,
-					documentId: input.id,
+					documentId: input.documentId,
 					source: "latest",
 					targets: ["latest"],
 				},
@@ -93,7 +93,7 @@ const updateDocument: ServiceFn<
 				details: requestDetails(
 					input.request,
 					context.translate("server:core.tools.documents.request.update", {
-						data: { collection: collectionLabel, id: input.id },
+						data: { collection: collectionLabel, id: input.documentId },
 					}),
 				),
 			})
@@ -104,7 +104,7 @@ const updateDocument: ServiceFn<
 	const versionId = requestRes?.data.document.source_version_id ?? undefined;
 	const currentRes = await readDocumentContent(context, {
 		collectionKey: collection.key,
-		id: input.id,
+		id: input.documentId,
 		versionId,
 	});
 	if (currentRes.error) return currentRes;
@@ -124,7 +124,7 @@ const updateDocument: ServiceFn<
 	const written = await writeSingle(context, {
 		kind: "patch",
 		collectionKey: collection.key,
-		id: input.id,
+		id: input.documentId,
 		versionId,
 		ifUnchanged: currentRes.data.editToken,
 		operations: operationsRes.data,
@@ -142,7 +142,7 @@ const updateDocument: ServiceFn<
 			: {
 					type: "document",
 					collectionKey: collection.key,
-					documentId: input.id,
+					documentId: input.documentId,
 				},
 	});
 	if (linked.error) return linked;
@@ -152,12 +152,17 @@ const updateDocument: ServiceFn<
 		data: {
 			output: {
 				outcome: request ? "requested" : "applied",
-				document: { collectionKey: collection.key, id: input.id },
+				document: { collectionKey: collection.key, id: input.documentId },
 				request: request ?? null,
 				links: request
 					? { request: getRequestLink(context, request.id) }
 					: {
-							edit: getEditLink(context, collection.key, "latest", input.id),
+							edit: getEditLink(
+								context,
+								collection.key,
+								"latest",
+								input.documentId,
+							),
 						},
 			},
 		},

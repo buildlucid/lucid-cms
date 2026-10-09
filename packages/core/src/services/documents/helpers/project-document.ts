@@ -5,6 +5,7 @@ import type {
 	FieldTypes,
 	RegisteredFieldDefinition,
 } from "../../../libs/collection/custom-fields/types.js";
+import { agentNameSchema, personSchema } from "../../../libs/tools/person.js";
 import type { DocumentRoute } from "../../../types/response.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 
@@ -23,11 +24,32 @@ export const documentRouteSchema = z
 /** Version and audit metadata, returned when documents_get includes meta. */
 export const documentMetaSchema = z.object({
 	versionId: z.number().nullable(),
-	versions: z.record(z.string(), z.looseObject({}).nullable()),
+	versions: z
+		.record(
+			z.string(),
+			z
+				.object({
+					id: z.number(),
+					contentId: z.string().meta({
+						description:
+							"Versions with the same contentId hold the same content.",
+					}),
+					createdAt: z.string().nullable(),
+					updatedAt: z.string().nullable(),
+					createdBy: personSchema.nullable(),
+					createdByAgent: agentNameSchema,
+				})
+				.nullable(),
+		)
+		.meta({
+			description: "Latest and each publishing target, or null when empty.",
+		}),
 	createdAt: z.string().nullable(),
 	updatedAt: z.string().nullable(),
-	createdBy: z.number().nullable(),
-	updatedBy: z.number().nullable(),
+	createdBy: personSchema.nullable(),
+	createdByAgent: agentNameSchema,
+	updatedBy: personSchema.nullable(),
+	updatedByAgent: agentNameSchema,
 });
 
 /** Referenced documents, media and users grouped by resource. */

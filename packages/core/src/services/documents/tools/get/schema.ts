@@ -9,10 +9,11 @@ import {
 	documentRefsSchema,
 	documentRouteSchema,
 } from "../../helpers/project-document.js";
+import { documentIdInput } from "../schema.js";
 
 export const inputSchema = z.object({
 	collectionKey: z.string().min(1),
-	id: z.number().int().positive(),
+	documentId: documentIdInput,
 	version: z.string().trim().min(1).default("latest").meta({
 		description: "Content version, usually latest or a publishing target.",
 	}),

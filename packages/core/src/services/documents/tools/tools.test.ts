@@ -315,16 +315,20 @@ test("creates documents as create requests attributed to the run, then edits the
 	]);
 
 	const proposal = await run.read({
-		id: documentId,
+		documentId: documentId,
 		version: `request:${requestId}`,
 	});
 	expect(
 		await run.fail(getDocument, {
 			collectionKey: pages.key,
-			id: await createPage(),
+			documentId: await createPage(),
 			version: `request:${requestId}`,
 		}),
 	).toContain(`Request ${requestId} has no proposal`);
+	expect(proposal.meta).toMatchObject({
+		createdBy: { id: userId },
+		createdByAgent: agent.name,
+	});
 	expect(proposal.fields).toMatchObject({
 		title: "Spring launch",
 		body: "<p>Hello <strong>world</strong></p>",
@@ -346,7 +350,7 @@ test("creates documents as create requests attributed to the run, then edits the
 
 	const updated = await run.write(update, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		requestId,
 		fields: { title: "Summer launch" },
 	});
@@ -355,7 +359,7 @@ test("creates documents as create requests attributed to the run, then edits the
 		request: { id: requestId, type: "create" },
 	});
 	const reread = await run.read({
-		id: documentId,
+		documentId: documentId,
 		version: `request:${requestId}`,
 	});
 	expect(reread.fields).toMatchObject({
@@ -370,12 +374,12 @@ test("proposes updates in one request per chat and leaves latest unchanged", asy
 
 	const first = await run.write(update, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		fields: { title: "First change" },
 	});
 	const second = await run.write(update, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		fields: { body: "<p>Second change</p>" },
 	});
 	expect(first).toMatchObject({
@@ -387,14 +391,14 @@ test("proposes updates in one request per chat and leaves latest unchanged", asy
 	assert(first.request);
 	const requestId = first.request.id;
 	const proposal = await run.read({
-		id: documentId,
+		documentId: documentId,
 		version: `request:${requestId}`,
 	});
 	expect(proposal.fields).toMatchObject({
 		title: "First change",
 		body: "<p>Second change</p>",
 	});
-	const latest = await run.read({ id: documentId });
+	const latest = await run.read({ documentId: documentId });
 	expect(latest.fields).toMatchObject({ title: "Hello" });
 
 	const events = await context.db.kysely
@@ -411,7 +415,7 @@ test("proposes updates in one request per chat and leaves latest unchanged", asy
 test("direct updates write one locale and merge bricks and items by ref", async () => {
 	const documentId = await createPage();
 	const run = await startRun();
-	const read = await run.read({ id: documentId, contentLocale: "fr" });
+	const read = await run.read({ documentId: documentId, contentLocale: "fr" });
 	expect(read.fields).toMatchObject({
 		title: "Bonjour",
 		links: [{ fields: { label: "Lire" } }],
@@ -424,7 +428,7 @@ test("direct updates write one locale and merge bricks and items by ref", async 
 
 	const updated = await run.write(directUpdate, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		contentLocale: "fr",
 		fields: {
 			title: "Salut",
@@ -438,10 +442,13 @@ test("direct updates write one locale and merge bricks and items by ref", async 
 	expect(updated).toMatchObject({ outcome: "applied", request: null });
 
 	//* what documents_get returns can be sent straight back, and a ref's key must match
-	const reread = await run.read({ id: documentId, contentLocale: "fr" });
+	const reread = await run.read({
+		documentId: documentId,
+		contentLocale: "fr",
+	});
 	await run.write(directUpdate, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		contentLocale: "fr",
 		fields: reread.fields,
 		bricks: reread.bricks,
@@ -449,7 +456,7 @@ test("direct updates write one locale and merge bricks and items by ref", async 
 	expect(
 		await run.fail(directUpdate, {
 			collectionKey: pages.key,
-			id: documentId,
+			documentId: documentId,
 			bricks: [{ ref: heroRef, key: "seo", fields: {} }],
 		}),
 	).toContain(heroRef);
@@ -520,7 +527,7 @@ test("deletes and unpublishes through requests unless direct", async () => {
 
 	const deleted = await run.write(remove, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 	});
 	expect(deleted).toMatchObject({
 		outcome: "requested",
@@ -528,7 +535,7 @@ test("deletes and unpublishes through requests unless direct", async () => {
 	});
 	const unpublished = await run.write(unpublish, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		target: "production",
 	});
 	expect(unpublished).toMatchObject({
@@ -538,14 +545,14 @@ test("deletes and unpublishes through requests unless direct", async () => {
 	expect(
 		await run.write(directUnpublish, {
 			collectionKey: pages.key,
-			id: documentId,
+			documentId: documentId,
 			target: "production",
 		}),
 	).toMatchObject({ outcome: "applied", request: null });
 
 	const binned = await run.write(directDelete, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 	});
 	expect(binned).toMatchObject({ outcome: "applied", request: null });
 	const tables = await getTableNames(context, pages.key);
@@ -648,7 +655,7 @@ test("accepts a fixed brick by ref and a single media ID, and explains media out
 
 	const message = await run.fail(directUpdate, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		bricks: [{ ref: "seo", fields: { image: personal } }],
 	});
 	expect(message.split("\n")).toEqual([
@@ -658,11 +665,11 @@ test("accepts a fixed brick by ref and a single media ID, and explains media out
 
 	await run.write(directUpdate, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		bricks: [{ ref: "seo", fields: { image: library } }],
 	});
 	const read = await run.read({
-		id: documentId,
+		documentId: documentId,
 		include: ["bricks", "refs.media"],
 	});
 	expect(read.bricks).toContainEqual({
@@ -672,7 +679,7 @@ test("accepts a fixed brick by ref and a single media ID, and explains media out
 	});
 	const refs = await run.call(getDocument, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		include: ["bricks", "refs.media"],
 	});
 	expect(readOutputSchema.parse(refs).meta.refs?.media).toEqual([
@@ -786,10 +793,10 @@ test("keeps unchanged rich text exactly and checks the key of a fixed brick name
 	const documentId = created.data.id;
 	const run = await startRun();
 
-	const read = await run.read({ id: documentId });
+	const read = await run.read({ documentId: documentId });
 	await run.write(directUpdate, {
 		collectionKey: pages.key,
-		id: documentId,
+		documentId: documentId,
 		fields: { ...read.fields, title: "Spaced" },
 		bricks: read.bricks,
 	});
@@ -806,7 +813,7 @@ test("keeps unchanged rich text exactly and checks the key of a fixed brick name
 	expect(
 		await run.fail(directUpdate, {
 			collectionKey: pages.key,
-			id: documentId,
+			documentId: documentId,
 			bricks: [{ ref: "seo", key: "hero", fields: { description: "Wrong" } }],
 		}),
 	).toContain("seo");
@@ -840,12 +847,12 @@ test("keeps rich text spacing as written, for untouched text and spacing fixes a
 	});
 	assert(created.data, JSON.stringify(created.error));
 	const run = await startRun();
-	const read = await run.read({ id: created.data.id });
+	const read = await run.read({ documentId: created.data.id });
 	assert(typeof read.fields.body === "string");
 
 	await run.write(directUpdate, {
 		collectionKey: pages.key,
-		id: created.data.id,
+		documentId: created.data.id,
 		fields: {
 			body: read.fields.body
 				.replace("First", "Changed first")
@@ -868,11 +875,11 @@ test("keeps rich text spacing as written, for untouched text and spacing fixes a
 		],
 	});
 
-	const fixed = await run.read({ id: created.data.id });
+	const fixed = await run.read({ documentId: created.data.id });
 	assert(typeof fixed.fields.body === "string");
 	await run.write(directUpdate, {
 		collectionKey: pages.key,
-		id: created.data.id,
+		documentId: created.data.id,
 		fields: {
 			body: fixed.fields.body.replace(
 				"  Keep  this  spacing  ",

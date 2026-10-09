@@ -1,9 +1,9 @@
 import z from "zod";
-import { writeInput, writeOutputSchema } from "../schema.js";
+import { documentIdInput, writeInput, writeOutputSchema } from "../schema.js";
 
 export const inputSchema = z.object({
 	collectionKey: writeInput.collectionKey,
-	id: z.number().int().positive(),
+	documentId: documentIdInput,
 	requestId: writeInput.requestId,
 	request: writeInput.request,
 });

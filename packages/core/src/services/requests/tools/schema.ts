@@ -1,4 +1,5 @@
 import z from "zod";
+import { personSchema } from "../../../libs/tools/person.js";
 
 export const requestIdInput = z.number().int().positive().meta({
 	description: "Request ID, eg. from requests_find or a chat reference.",
@@ -6,12 +7,10 @@ export const requestIdInput = z.number().int().positive().meta({
 
 export const htmlInput = z.string().trim().min(1).max(10000);
 
-export const requestUserSchema = z
-	.object({ id: z.number(), name: z.string() })
-	.meta({
-		description:
-			'A person. Mention them in HTML with <span data-lucid-mention data-lucid-user-id="ID"></span>.',
-	});
+export const requestUserSchema = personSchema.meta({
+	description:
+		'A person. Mention them in HTML with <span data-lucid-mention data-lucid-user-id="ID"></span>.',
+});
 
 export const requestLinksSchema = z
 	.object({ request: z.string() })

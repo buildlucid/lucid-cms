@@ -1,5 +1,5 @@
 import z from "zod";
-import { writeInput, writeOutputSchema } from "../schema.js";
+import { documentIdInput, writeInput, writeOutputSchema } from "../schema.js";
 
 export const brickChangeSchema = z
 	.object({
@@ -27,7 +27,7 @@ export const brickChangeSchema = z
 export const inputSchema = z
 	.object({
 		collectionKey: writeInput.collectionKey,
-		id: z.number().int().positive(),
+		documentId: documentIdInput,
 		contentLocale: writeInput.contentLocale,
 		requestId: writeInput.requestId,
 		fields: writeInput.fields.optional(),

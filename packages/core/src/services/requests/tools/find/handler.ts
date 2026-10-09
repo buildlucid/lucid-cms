@@ -1,10 +1,10 @@
 import type z from "zod";
 import { getPagination } from "../../../../libs/tools/pagination.js";
+import { formatPerson } from "../../../../libs/tools/person.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getMultiple from "../../get-multiple.js";
 import getRequestLink from "../../helpers/get-request-link.js";
-import formatUser from "../helpers/format-user.js";
 import type { RequestToolProps } from "../types.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
@@ -34,8 +34,9 @@ const findRequests: ServiceFn<
 					title: request.title,
 					status: request.status,
 					approved: request.approved,
-					createdBy: request.createdBy && formatUser(request.createdBy),
-					reviewers: request.reviewers.map(formatUser),
+					createdBy: request.createdBy && formatPerson(request.createdBy),
+					createdByAgent: request.createdByAgent?.name ?? null,
+					reviewers: request.reviewers.map(formatPerson),
 					documents: request.documents.map((document) => ({
 						collectionKey: document.collectionKey,
 						documentId: document.documentId,
@@ -46,13 +47,11 @@ const findRequests: ServiceFn<
 					updatedAt: request.updatedAt,
 					links: { request: getRequestLink(context, request.id) },
 				})),
-				meta: {
-					pagination: getPagination(
-						requestsRes.data.count,
-						input.query.page,
-						input.query.perPage,
-					),
-				},
+				pagination: getPagination(
+					requestsRes.data.count,
+					input.query.page,
+					input.query.perPage,
+				),
 			},
 		},
 	};

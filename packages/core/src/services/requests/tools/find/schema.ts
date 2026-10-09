@@ -11,6 +11,7 @@ import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
+import { agentNameSchema } from "../../../../libs/tools/person.js";
 import { controllerSchemas } from "../../../../schemas/requests.js";
 import { requestLinksSchema, requestUserSchema } from "../schema.js";
 
@@ -61,6 +62,7 @@ export const outputSchema = z.object({
 			status: requestStatusSchema,
 			approved: z.boolean(),
 			createdBy: requestUserSchema.nullable(),
+			createdByAgent: agentNameSchema,
 			reviewers: z.array(requestUserSchema),
 			documents: z.array(
 				z.object({
@@ -78,5 +80,5 @@ export const outputSchema = z.object({
 			links: requestLinksSchema,
 		}),
 	),
-	meta: z.object({ pagination: paginationSchema }),
+	pagination: paginationSchema,
 });

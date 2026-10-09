@@ -258,7 +258,7 @@ test("MCP document reads use real custom-field, brick and repeater filters", asy
 	}
 	const document = await call("documents_get", {
 		collectionKey: pages.key,
-		id: aboutId,
+		documentId: aboutId,
 		contentLocale: "fr",
 	});
 	expect(document.isError).not.toBe(true);
@@ -271,7 +271,7 @@ test("MCP document reads use real custom-field, brick and repeater filters", asy
 	);
 	const denied = await call("documents_get", {
 		collectionKey: restricted.key,
-		id: aboutId,
+		documentId: aboutId,
 	});
 	expect(denied.isError).toBe(true);
 });
@@ -293,7 +293,7 @@ test("MCP document reads respect pagination, field selection and content locales
 	});
 	const selected = await call("documents_get", {
 		collectionKey: pages.key,
-		id: aboutId,
+		documentId: aboutId,
 		fieldKeys: ["fullSlug"],
 	});
 	expect(selected.structuredContent).toMatchObject({
@@ -307,7 +307,7 @@ test("MCP document reads respect pagination, field selection and content locales
 	expect(Object.keys(selectedData.data.fields)).toEqual(["fullSlug"]);
 	const invalidLocale = await call("documents_get", {
 		collectionKey: pages.key,
-		id: aboutId,
+		documentId: aboutId,
 		contentLocale: "unknown",
 	});
 	expect(invalidLocale.isError).toBe(true);
@@ -383,7 +383,7 @@ test("agent content tools share the read services but enforce collection permiss
 	const document = await executeAgentTool({
 		context,
 		tool: agentTools.getDocument(),
-		input: { collectionKey: pages.key, id: aboutId },
+		input: { collectionKey: pages.key, documentId: aboutId },
 		execution,
 	});
 	expect(document).toMatchObject({
@@ -394,7 +394,7 @@ test("agent content tools share the read services but enforce collection permiss
 		await executeAgentTool({
 			context,
 			tool: agentTools.getDocument(),
-			input: { collectionKey: restricted.key, id: aboutId },
+			input: { collectionKey: restricted.key, documentId: aboutId },
 			execution,
 		}),
 	).toEqual({ type: "forbidden" });

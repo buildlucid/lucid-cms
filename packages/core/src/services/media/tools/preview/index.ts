@@ -176,7 +176,7 @@ export const previewMediaMcpTool = () =>
 		annotations: { readOnlyHint: true },
 		handler: async ({ context, input, execution }) => {
 			const mediaRes = await getSingle(context, {
-				id: input.id,
+				id: input.mediaId,
 				actor: { type: "content" },
 			});
 			if (mediaRes.error) return mediaRes;
@@ -219,7 +219,7 @@ export const previewMediaMcpTool = () =>
 						output: {
 							data: {
 								kind: "link" as const,
-								id: input.id,
+								id: input.mediaId,
 								url: link,
 								mimeType,
 							},
@@ -228,7 +228,7 @@ export const previewMediaMcpTool = () =>
 							{
 								type: "resource_link",
 								uri: link,
-								name: source?.fileName ?? `media-${input.id}`,
+								name: source?.fileName ?? `media-${input.mediaId}`,
 								mimeType,
 							},
 						],
@@ -259,7 +259,7 @@ export const previewMediaMcpTool = () =>
 					output: {
 						data: {
 							kind: "inline" as const,
-							id: input.id,
+							id: input.mediaId,
 							mimeType: imageRes.data.mimeType,
 							byteLength: imageRes.data.buffer.byteLength,
 						},

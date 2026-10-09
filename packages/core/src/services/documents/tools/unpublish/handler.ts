@@ -67,11 +67,11 @@ const unpublishDocument: ServiceFn<
 		};
 	}
 
-	const document = { collectionKey: collection.key, id: input.id };
+	const document = { collectionKey: collection.key, id: input.documentId };
 	if (!requested) {
 		const unpublished = await unpublish(context, {
 			collectionKey: collection.key,
-			documentId: input.id,
+			documentId: input.documentId,
 			target: input.target,
 			user,
 			agentRunId: props.actor.agentRunId,
@@ -84,7 +84,7 @@ const unpublishDocument: ServiceFn<
 			reference: {
 				type: "document",
 				collectionKey: collection.key,
-				documentId: input.id,
+				documentId: input.documentId,
 			},
 		});
 		if (linked.error) return linked;
@@ -97,7 +97,12 @@ const unpublishDocument: ServiceFn<
 					document,
 					request: null,
 					links: {
-						edit: getEditLink(context, collection.key, "latest", input.id),
+						edit: getEditLink(
+							context,
+							collection.key,
+							"latest",
+							input.documentId,
+						),
 					},
 				},
 			},
@@ -108,7 +113,7 @@ const unpublishDocument: ServiceFn<
 		type: "unpublish",
 		document: {
 			collectionKey: collection.key,
-			documentId: input.id,
+			documentId: input.documentId,
 			targets: [input.target],
 		},
 		requestId: input.requestId,
@@ -122,7 +127,7 @@ const unpublishDocument: ServiceFn<
 					collection:
 						context.translate(collection.getData.details.labels.singular) ??
 						collection.key,
-					id: input.id,
+					id: input.documentId,
 					target: input.target,
 				},
 			}),

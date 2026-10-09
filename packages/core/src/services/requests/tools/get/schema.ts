@@ -4,6 +4,7 @@ import {
 	requestStatusSchema,
 	requestTypeSchema,
 } from "../../../../libs/db/tables/requests.js";
+import { agentNameSchema } from "../../../../libs/tools/person.js";
 import {
 	requestIdInput,
 	requestLinksSchema,
@@ -24,9 +25,7 @@ export const inputSchema = z.object({
 const commentShape = {
 	id: z.number(),
 	author: requestUserSchema.nullable(),
-	agent: z.string().nullable().meta({
-		description: "The agent that wrote it for the author, if any.",
-	}),
+	agent: agentNameSchema,
 	byYou: z.boolean().meta({
 		description:
 			"Written by you, so you can change, resolve or remove it with requests_update_comment.",
@@ -48,6 +47,7 @@ export const outputSchema = z.object({
 			required: z.number(),
 		}),
 		createdBy: requestUserSchema.nullable(),
+		createdByAgent: agentNameSchema,
 		reviewers: z.array(requestUserSchema),
 		scheduledAt: z.string().nullable(),
 		failure: z
@@ -112,7 +112,8 @@ export const outputSchema = z.object({
 				z
 					.looseObject({
 						type: z.string(),
-						user: requestUserSchema.nullable(),
+						author: requestUserSchema.nullable(),
+						agent: agentNameSchema,
 						createdAt: z.string().nullable(),
 					})
 					.meta({ description: "Other details depend on the type." }),
