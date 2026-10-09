@@ -19,3 +19,21 @@ export const formatPerson = (
 		user.email ||
 		`#${user.id}`,
 });
+
+/** A user in tool output, eg. from users_find or a document's refs. */
+export const userSchema = personSchema.extend({
+	username: z.string(),
+	profilePicture: z
+		.string()
+		.nullable()
+		.meta({ description: "Profile picture URL." }),
+});
+
+/** Keeps a user to what tools need, leaving out their email. */
+export const formatUser = (
+	user: RequestUser & { username: string },
+): z.output<typeof userSchema> => ({
+	...formatPerson(user),
+	username: user.username,
+	profilePicture: user.profilePicture?.url ?? null,
+});

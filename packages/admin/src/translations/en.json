@@ -1581,6 +1581,8 @@
 	"integrations.scopes.media.resolve_url": "Resolve URLs",
 	"integrations.scopes.locales.read": "Read",
 	"integrations.scopes.requests.read": "Read",
+	"integrations.scopes.users.list": "List",
+	"integrations.scopes.users.list.description": "Find people by name, with their usernames and profile pictures.",
 	"integrations.scopes.mcp.access": "Access Tools",
 	"common.comment": "Comment",
 	"common.comments": "Comments",

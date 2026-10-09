@@ -13,7 +13,7 @@ export const writeInput = {
 	}),
 	fields: z.record(z.string(), z.unknown()).meta({
 		description:
-			"Field values by key, in the shape documents_get returns: plain values in contentLocale, rich text as HTML (spaces are kept as written, line breaks are formatting, so use <br> for one), media as lists of media library IDs (move personal uploads to the library first) and relations as lists of {id, collectionKey}. To write several languages at once, give a localized field an object keyed by language, eg. {en: 'Hello', fr: 'Bonjour'}; required localized fields need a value in every language when creating. Repeaters are lists of {ref?, fields}: keep an item's ref to change it, omit ref for a new item and leave an item out to remove it.",
+			"Field values by key, in the shape documents_get returns: plain values in contentLocale, rich text as HTML (spaces are kept as written, line breaks are formatting, so use <br> for one), media as lists of media library IDs (move personal uploads to the library first), users as lists of user IDs from users_find and relations as lists of {id, collectionKey}. To write several languages at once, give a localized field an object keyed by language, eg. {en: 'Hello', fr: 'Bonjour'}; required localized fields need a value in every language when creating. Repeaters are lists of {ref?, fields}: keep an item's ref to change it, omit ref for a new item and leave an item out to remove it.",
 	}),
 	requestId: z.number().int().positive().optional().meta({
 		description:

@@ -415,6 +415,10 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
+					"filter[name]": queryString.schema.filter(false, {
+						example: "John Smith",
+						description: "Matches the full name or username.",
+					}),
 					"filter[firstName]": queryString.schema.filter(false, {
 						example: "John",
 					}),
@@ -468,6 +472,7 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
+						name: queryFormatted.schema.filters.single.optional(),
 						firstName: queryFormatted.schema.filters.single.optional(),
 						lastName: queryFormatted.schema.filters.single.optional(),
 						email: queryFormatted.schema.filters.single.optional(),

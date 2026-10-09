@@ -43,6 +43,10 @@ import { replyToRequestAgentTool } from "../../services/requests/tools/reply/ind
 import { scheduleRequestAgentTool } from "../../services/requests/tools/schedule/index.js";
 import { updateRequestAgentTool } from "../../services/requests/tools/update/index.js";
 import { updateRequestCommentAgentTool } from "../../services/requests/tools/update-comment/index.js";
+import {
+	findUsersAgentTool,
+	findUsersMcpTool,
+} from "../../services/users/tools/find/index.js";
 import type { CollectionToolOptions } from "../permission/readable-collections.js";
 
 /**
@@ -80,6 +84,7 @@ export const agentTools = {
 	getDocument: getDocumentAgentTool,
 	findMedia: findMediaAgentTool,
 	listLocales: listLocalesAgentTool,
+	findUsers: findUsersAgentTool,
 	createDocument: createDocumentAgentTool,
 	updateDocument: updateDocumentAgentTool,
 	deleteDocument: deleteDocumentAgentTool,
@@ -96,7 +101,7 @@ export const agentTools = {
 	completeRequest: completeRequestAgentTool,
 	/** Schedules approved requests for completion, asking for approval unless the chat or routine disables it. */
 	scheduleRequest: scheduleRequestAgentTool,
-	/** Every content reading tool: collections, documents, media and locales. */
+	/** Every content reading tool: collections, documents, media, locales and users. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),
 		describeCollectionAgentTool(options),
@@ -104,6 +109,7 @@ export const agentTools = {
 		getDocumentAgentTool(options),
 		findMediaAgentTool(),
 		listLocalesAgentTool(),
+		findUsersAgentTool(options),
 	],
 	/** Bundles document creation, updates, deletion and unpublishing for use alongside `content()` reads. */
 	editing: (options: DocumentWriteToolOptions = {}) => [
@@ -144,9 +150,10 @@ export const mcpTools = {
 	findMedia: findMediaMcpTool,
 	previewMedia: previewMediaMcpTool,
 	listLocales: listLocalesMcpTool,
+	findUsers: findUsersMcpTool,
 	findRequests: findRequestsMcpTool,
 	getRequest: getRequestMcpTool,
-	/** Every content reading tool: collections, documents, media and locales. */
+	/** Every content reading tool: collections, documents, media, locales and users. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsMcpTool(options),
 		describeCollectionMcpTool(options),
@@ -155,6 +162,7 @@ export const mcpTools = {
 		findMediaMcpTool(),
 		previewMediaMcpTool(),
 		listLocalesMcpTool(),
+		findUsersMcpTool(options),
 	],
 	/** Provides request finding and reading with the `requests:read` scope. */
 	requests: (options: CollectionToolOptions = {}) => [

@@ -14,6 +14,7 @@ const coreToolkitKeys = {
 	notifications: true,
 	previews: true,
 	requests: true,
+	users: true,
 } satisfies Record<keyof CoreToolkit, true>;
 const unsafeToolkitKeys = new Set(["__proto__", "constructor", "prototype"]);
 const toolkitKeyPattern = /^[A-Za-z_$][A-Za-z0-9_$]*$/;

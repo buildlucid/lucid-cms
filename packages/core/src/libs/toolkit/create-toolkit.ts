@@ -10,6 +10,7 @@ import createNotificationsToolkit from "./notifications/index.js";
 import createPreviewsToolkit from "./previews/index.js";
 import createRequestsToolkit from "./requests/index.js";
 import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
+import createUsersToolkit from "./users/index.js";
 
 /**
  * Creates server-side helpers bound to a Lucid service context.
@@ -50,6 +51,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 		notifications: createNotificationsToolkit(context),
 		previews: createPreviewsToolkit(context),
 		requests: createRequestsToolkit(context),
+		users: createUsersToolkit(context),
 	};
 	const toolkit: Toolkit = { ...core };
 

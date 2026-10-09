@@ -12,6 +12,7 @@ import type { ToolkitNotifications } from "./notifications/index.js";
 import type { ToolkitPreviews } from "./previews/index.js";
 import type { ToolkitRequests } from "./requests/index.js";
 import type { toolkitActorSchema } from "./schema.js";
+import type { ToolkitUsers } from "./users/index.js";
 
 /** A user whose live permissions are checked, or a trusted system operation. Agent tools receive theirs as `execution.actor`. */
 export type ToolkitActor = z.infer<typeof toolkitActorSchema>;
@@ -43,6 +44,8 @@ export type CoreToolkit = {
 	previews: ToolkitPreviews;
 	/** Helpers for reading, discussing and managing requests. */
 	requests: ToolkitRequests;
+	/** Helpers for reading users, such as to fill user fields or choose reviewers. */
+	users: ToolkitUsers;
 };
 
 /**
@@ -128,8 +131,12 @@ export type * from "./requests/documents/add/index.js";
 export type * from "./requests/documents/remove/index.js";
 export type * from "./requests/documents/set-targets/index.js";
 export type * from "./requests/get-multiple/index.js";
+export type * from "./requests/get-reviewers/index.js";
 export type * from "./requests/get-single/index.js";
 export type * from "./requests/index.js";
 export type * from "./requests/reopen/index.js";
 export type * from "./requests/schedule/index.js";
 export type * from "./requests/update-single/index.js";
+export type * from "./users/get-multiple/index.js";
+export type * from "./users/get-single/index.js";
+export type * from "./users/index.js";

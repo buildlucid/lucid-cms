@@ -1,9 +1,16 @@
-import { sql } from "kysely";
+import {
+	type ExpressionBuilder,
+	type OperandExpression,
+	type SqlBool,
+	sql,
+} from "kysely";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
+import type { QueryParamFilterCondition } from "../../types/query-params.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../db/query-builder/index.js";
+import compileFilterExpression from "../db/query-builder/utils/compile-filter-expression.js";
 import type { LucidUsers } from "../db/tables/index.js";
 import { usersTable } from "../db/tables/users.js";
 import type { Select } from "../db/types.js";
@@ -749,7 +756,12 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					{
 						queryParams: props.queryParams,
 						database: this.dbAdapter.config,
-						meta: this.config.queryConfig,
+						meta: {
+							...this.config.queryConfig,
+							customFilters: {
+								name: ({ eb, filter }) => this.nameCondition(eb, filter),
+							},
+						},
 					},
 				);
 
@@ -1099,5 +1111,28 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		}
 
 		return { error: undefined, data: [...ids] };
+	}
+	/** Matches full names or usernames, defaulting to contains and requiring neither to match for negated operators. */
+	private nameCondition<DB, Table extends keyof DB>(
+		eb: ExpressionBuilder<DB, Table>,
+		filter: QueryParamFilterCondition,
+	): OperandExpression<SqlBool> {
+		const operator = filter.operator ?? "contains";
+		const negated =
+			operator === "!=" || operator === "is-not" || operator.startsWith("not-");
+		const conditions = [
+			sql<string>`trim(coalesce(lucid_users.first_name, '') || ' ' || coalesce(lucid_users.last_name, ''))`,
+			this.db.dynamic.ref("lucid_users.username"),
+		].map((reference) =>
+			compileFilterExpression({
+				eb,
+				reference,
+				filter: { value: filter.value, operator },
+				caseInsensitiveLikeOperator:
+					this.dbAdapter.config.caseInsensitiveLikeOperator,
+			}),
+		);
+
+		return negated ? eb.and(conditions) : eb.or(conditions);
 	}
 }

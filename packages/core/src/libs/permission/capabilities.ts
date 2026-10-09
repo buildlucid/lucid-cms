@@ -130,6 +130,23 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 			},
 		);
 
+		//* matches the admin, where any signed-in person can list users to fill user fields
+		if (group.key === "users_permissions") {
+			capabilities.push({
+				key: ExternalScopes.UsersList,
+				details: {
+					name: copy("admin:integrations.scopes.users.list"),
+					description: copy("admin:integrations.scopes.users.list.description"),
+				},
+				core: true,
+				external: {
+					scope: ExternalScopes.UsersList,
+					userPermission: null,
+				},
+				availableToIntegrations: true,
+			});
+		}
+
 		if (group.key === "media_permissions") {
 			capabilities.push({
 				key: ExternalScopes.MediaResolveUrl,

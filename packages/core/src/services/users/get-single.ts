@@ -2,7 +2,7 @@ import type { QueryBuilderWhere } from "../../libs/db/query-builder/index.js";
 import { usersFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { User } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -13,7 +13,7 @@ const getSingle: ServiceFn<
 			userId: number;
 			/** When true, it will only return users that are active and not soft-deleted  */
 			activeUser?: boolean;
-			authUser: LucidAuth;
+			authUser: LucidActor;
 		},
 	],
 	User

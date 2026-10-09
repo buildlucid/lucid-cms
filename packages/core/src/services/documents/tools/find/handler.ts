@@ -6,6 +6,7 @@ import getMultiple from "../../content/get-multiple.js";
 import getEditLink from "../../helpers/get-edit-link.js";
 import {
 	projectFieldMap,
+	projectRefs,
 	projectRoute,
 	selectFields,
 } from "../../helpers/project-document.js";
@@ -82,7 +83,9 @@ const findDocuments: ServiceFn<
 					collectionKey: props.input.collectionKey,
 					version: props.input.version,
 					contentLocale,
-					...(documentsRes.data.refs && { refs: documentsRes.data.refs }),
+					...(documentsRes.data.refs && {
+						refs: projectRefs(documentsRes.data.refs),
+					}),
 				},
 			},
 		},

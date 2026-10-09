@@ -1,4 +1,4 @@
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { Account, User } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 import { Permissions } from "../permission/definitions.js";
@@ -48,7 +48,7 @@ type ContentAccountPropT = Pick<
 
 const formatMultiple = (props: {
 	users: UserPropT[];
-	authUser?: LucidAuth;
+	authUser?: LucidActor;
 	mediaOptions: MediaFormatterOptions;
 }) => {
 	return props.users.map((u) =>
@@ -62,7 +62,7 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	user: UserPropT;
-	authUser?: LucidAuth;
+	authUser?: LucidActor;
 	mediaOptions: MediaFormatterOptions;
 	pendingEmailChange?: {
 		email: string;

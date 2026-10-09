@@ -1,7 +1,7 @@
 import formatter, { usersFormatter } from "../../libs/formatters/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { User } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -10,7 +10,7 @@ const getMultiple: ServiceFn<
 	[
 		{
 			query: GetMultipleQueryParams;
-			authUser: LucidAuth;
+			authUser: LucidActor;
 		},
 	],
 	{

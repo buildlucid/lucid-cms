@@ -2,6 +2,7 @@ import type { CollectionDocumentKey } from "../../../exports/types.js";
 import type {
 	RequestDetail,
 	RequestExecutionReceipt,
+	RequestUser,
 } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -43,6 +44,9 @@ import getMultiple, {
 	type ToolkitRequestsGetMultipleInput,
 	type ToolkitRequestsGetMultipleResult,
 } from "./get-multiple/index.js";
+import getReviewers, {
+	type ToolkitRequestsGetReviewersInput,
+} from "./get-reviewers/index.js";
 import getSingle, {
 	type ToolkitRequestsGetSingleInput,
 } from "./get-single/index.js";
@@ -84,6 +88,24 @@ export type ToolkitRequests = {
 	getSingle: (
 		input: ToolkitRequestsGetSingleInput,
 	) => ServiceResponse<RequestDetail>;
+	/**
+	 * Lists eligible request reviewers, excluding the creator unless the collections allow self-approval.
+	 *
+	 * @example
+	 * ```ts
+	 * const reviewers = await toolkit.requests.getReviewers({ id: 1 });
+	 * if (reviewers.error) return reviewers;
+	 *
+	 * await toolkit.requests.updateSingle({
+	 *   id: 1,
+	 *   actor: { kind: "system" },
+	 *   reviewerIds: reviewers.data.map((user) => user.id),
+	 * });
+	 * ```
+	 */
+	getReviewers: (
+		input: ToolkitRequestsGetReviewersInput,
+	) => ServiceResponse<RequestUser[]>;
 	/**
 	 * Opens a publish, unpublish or delete request for people to review.
 	 *
@@ -206,6 +228,7 @@ export const createRequestsToolkit = (
 ): ToolkitRequests => ({
 	getMultiple: (input) => getMultiple(context, input),
 	getSingle: (input) => getSingle(context, input),
+	getReviewers: (input) => getReviewers(context, input),
 	createSingle: (input) => createSingle(context, input),
 	updateSingle: (input) => updateSingle(context, input),
 	close: (input) => close(context, input),

@@ -29,7 +29,7 @@ export const changeSchema = z.discriminatedUnion("type", [
 		type: z.literal("reviewers"),
 		reviewerIds: z.array(z.number().int().positive()).meta({
 			description:
-				"Replaces the people asked to review. They must be able to read the request.",
+				"Replaces the people asked to review. Find people who can approve it with users_find and {key:'canReview',value:requestId}.",
 		}),
 	}),
 	z.object({

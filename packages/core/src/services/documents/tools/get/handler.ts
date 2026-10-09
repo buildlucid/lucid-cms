@@ -11,7 +11,11 @@ import loadRequest from "../../../requests/helpers/load-request.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getSingle from "../../content/get-single.js";
 import getEditLink from "../../helpers/get-edit-link.js";
-import { projectRoute, selectFields } from "../../helpers/project-document.js";
+import {
+	projectRefs,
+	projectRoute,
+	selectFields,
+} from "../../helpers/project-document.js";
 import projectEditableValue from "../../helpers/project-editable-value.js";
 import readDocumentContent from "../../helpers/read-document-content.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
@@ -202,7 +206,9 @@ const getDocument: ServiceFn<
 					version: input.version,
 					contentLocale,
 					brickPagination: bricks.pagination,
-					...(documentRes.data.refs && { refs: documentRes.data.refs }),
+					...(documentRes.data.refs && {
+						refs: projectRefs(documentRes.data.refs),
+					}),
 				},
 			},
 		},

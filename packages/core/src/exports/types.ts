@@ -605,12 +605,18 @@ export type {
 	ToolkitRequestsGetMultipleInput,
 	ToolkitRequestsGetMultipleQuery,
 	ToolkitRequestsGetMultipleResult,
+	ToolkitRequestsGetReviewersInput,
 	ToolkitRequestsGetSingleInput,
 	ToolkitRequestsReopenInput,
 	ToolkitRequestsScheduleInput,
 	ToolkitRequestsUpdateSingleInput,
 	ToolkitRequestTarget,
 	ToolkitServices,
+	ToolkitUsers,
+	ToolkitUsersGetMultipleInput,
+	ToolkitUsersGetMultipleQuery,
+	ToolkitUsersGetMultipleResult,
+	ToolkitUsersGetSingleInput,
 } from "../libs/toolkit/types.js";
 export type {
 	AgentToolAuthority,

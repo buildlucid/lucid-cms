@@ -1,5 +1,6 @@
 const externalScopeValues = {
 	AccountRead: "account:read",
+	UsersList: "users:list",
 	MediaRead: "media:read",
 	MediaCreate: "media:create",
 	MediaUpdate: "media:update",

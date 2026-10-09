@@ -42,7 +42,7 @@ export const inputSchema = z.object({
 					filter: hasStatus
 						? filters.filter
 						: { status: { value: "open" }, ...filters.filter },
-					sort: sort ?? [{ key: "updatedAt", direction: "desc" }],
+					sort: sort?.length ? sort : [{ key: "updatedAt", direction: "desc" }],
 				};
 			},
 		)

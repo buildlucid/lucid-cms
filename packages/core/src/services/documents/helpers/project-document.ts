@@ -5,8 +5,13 @@ import type {
 	FieldTypes,
 	RegisteredFieldDefinition,
 } from "../../../libs/collection/custom-fields/types.js";
-import { agentNameSchema, personSchema } from "../../../libs/tools/person.js";
-import type { DocumentRoute } from "../../../types/response.js";
+import {
+	agentNameSchema,
+	formatUser,
+	personSchema,
+	userSchema,
+} from "../../../libs/tools/person.js";
+import type { DocumentRoute, Refs } from "../../../types/response.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 
 /** The route returned by document tools after locale projection. */
@@ -53,10 +58,17 @@ export const documentMetaSchema = z.object({
 });
 
 /** Referenced documents, media and users grouped by resource. */
-export const documentRefsSchema = z.partialRecord(
-	z.enum(["documents", "media", "users"]),
-	z.array(z.unknown()),
-);
+export const documentRefsSchema = z.object({
+	documents: z.array(z.unknown()).optional(),
+	media: z.array(z.unknown()).optional(),
+	users: z.array(userSchema).optional(),
+});
+
+/** Keeps referenced users to what tools need, as users_find returns them. */
+export const projectRefs = ({ users, ...refs }: Refs) => ({
+	...refs,
+	...(users && { users: users.map(formatUser) }),
+});
 
 /** Keeps only the requested top-level fields, or every field when none are requested. */
 export const selectFields = (

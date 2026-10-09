@@ -1,11 +1,11 @@
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { RequestUser } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getEligibleReviewers from "./helpers/get-eligible-reviewers.js";
 import loadRequest from "./helpers/load-request.js";
 
 const getReviewers: ServiceFn<
-	[{ id: number; user: LucidUser }],
+	[{ id: number; user: LucidActor }],
 	RequestUser[]
 > = async (context, data) => {
 	const requestRes = await loadRequest(context, data);

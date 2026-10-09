@@ -14,6 +14,7 @@ export type CoreExternalScope =
 			| "publish"
 			| "review"}`
 	| "account:read"
+	| "users:list"
 	| "media:read"
 	| "media:create"
 	| "media:update"
