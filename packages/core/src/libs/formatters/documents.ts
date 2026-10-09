@@ -152,7 +152,9 @@ const formatSingle = (props: {
 		isDeleted: formatter.formatBoolean(props.document.is_deleted),
 		createRequestId: props.document.create_request_id ?? null,
 		createdBy: props.document.created_by ?? null,
+		createdByRunId: props.document.created_by_run_id ?? null,
 		updatedBy: props.document.updated_by ?? null,
+		updatedByRunId: props.document.updated_by_run_id ?? null,
 		createdAt: formatter.formatDate(props.document.created_at),
 		updatedAt: formatter.formatDate(props.document.updated_at),
 	} satisfies InternalCollectionDocument;
@@ -180,6 +182,7 @@ const formatVersions = (props: {
 				createdAt: formatter.formatDate(version.created_at),
 				updatedAt: formatter.formatDate(version.updated_at),
 				createdBy: version.created_by,
+				createdByRunId: version.created_by_run_id ?? null,
 			};
 		}
 	}
@@ -269,6 +272,8 @@ const formatContentSingle = <TCollectionKey extends string>(props: {
 						updatedAt: props.document.updatedAt,
 						createdBy: props.document.createdBy,
 						updatedBy: props.document.updatedBy,
+						createdByRunId: props.document.createdByRunId,
+						updatedByRunId: props.document.updatedByRunId,
 					},
 				}
 			: undefined),

@@ -18,7 +18,7 @@ import { readyNotification } from "./notifications/ready.js";
  * count, but an approved request goes back to waiting for approval.
  */
 const unapprove: ServiceFn<
-	[{ id: number; user: LucidUser }],
+	[{ id: number; user: LucidUser; agentRunId?: string }],
 	undefined
 > = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
@@ -86,6 +86,7 @@ const unapprove: ServiceFn<
 			{
 				request_id: request.id,
 				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
 				type: "approval_dismissed",
 			},
 		],

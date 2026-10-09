@@ -79,6 +79,53 @@ const createIndexOperations = (
 };
 
 /**
+ * Rebuilds the generated indexes on columns that are dropped and added again.
+ * Otherwise SQLite refuses to drop an indexed column, and Postgres drops the
+ * index with it and never adds it back.
+ */
+const rebuildIndexOperations = (props: {
+	rebuiltColumns: Set<string>;
+	existingIndexes: InferredTable["indexes"];
+	expectedIndexes: CollectionSchema["tables"][number]["indexes"];
+	planned: IndexOperation[];
+}): IndexOperation[] => {
+	const operations: IndexOperation[] = [];
+	const isPlanned = (type: IndexOperation["type"], name: string) =>
+		props.planned.some(
+			(operation) => operation.type === type && operation.index.name === name,
+		);
+
+	for (const index of props.existingIndexes ?? []) {
+		if (
+			!index.name.startsWith(constants.db.generatedIndexPrefix) ||
+			!index.columns.some((column) => props.rebuiltColumns.has(column))
+		) {
+			continue;
+		}
+
+		if (!isPlanned("remove", index.name)) {
+			operations.push({
+				type: "remove",
+				index: {
+					name: index.name,
+					columns: index.columns,
+					unique: index.unique,
+				},
+			});
+		}
+
+		const expected = props.expectedIndexes?.find(
+			(item) => item.name === index.name,
+		);
+		if (expected && !isPlanned("add", index.name)) {
+			operations.push({ type: "add", index: expected });
+		}
+	}
+
+	return operations;
+};
+
+/**
  * Generates a migration plan for a collection
  */
 const generateMigrationPlan = (props: {
@@ -163,6 +210,7 @@ const generateMigrationPlan = (props: {
 			table.indexes,
 			targetTable.indexes,
 		);
+		const rebuiltColumns = new Set<string>();
 
 		for (const column of table.columns) {
 			const targetColumn = targetTable.columns.find(
@@ -183,6 +231,7 @@ const generateMigrationPlan = (props: {
 					const modType = determineColumnModType(modifications, props.db);
 
 					if (modType === "drop-and-add") {
+						rebuiltColumns.add(modifications.column.name);
 						columnOperations.push({
 							type: "remove",
 							columnName: modifications.column.name,
@@ -216,6 +265,15 @@ const generateMigrationPlan = (props: {
 				columnName: column.name,
 			});
 		}
+
+		indexOperations.push(
+			...rebuildIndexOperations({
+				rebuiltColumns,
+				existingIndexes: targetTable.indexes,
+				expectedIndexes: table.indexes,
+				planned: indexOperations,
+			}),
+		);
 
 		if (columnOperations.length || indexOperations.length) {
 			const tablePrioRes = getTablePriority("collection-inferred", table);

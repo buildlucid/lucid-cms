@@ -9,8 +9,7 @@ export interface Params {
 	id: number;
 	body: {
 		body?: RichTextJSON;
-		revision: number;
-		expectedTargets: Record<string, Record<string, number | null>>;
+		ifUnchanged: string;
 	};
 }
 

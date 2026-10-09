@@ -74,6 +74,8 @@ export type DocumentVersionSummary = {
 	createdAt: string | null;
 	updatedAt: string | null;
 	createdBy: number | null;
+	/** The agent run that acted for createdBy, resolved through `refs.agents`. */
+	createdByRunId: string | null;
 };
 
 export type DocumentEnvironmentStatus =
@@ -171,6 +173,10 @@ export type CollectionDocumentMeta<
 	updatedAt: string | null;
 	createdBy: number | null;
 	updatedBy: number | null;
+	/** The agent run that acted for createdBy, resolved through `refs.agents`. */
+	createdByRunId: string | null;
+	/** The agent run that acted for updatedBy, resolved through `refs.agents`. */
+	updatedByRunId: string | null;
 };
 
 export type CollectionDocumentVersion<TCollectionKey extends string = string> =
@@ -293,6 +299,8 @@ export interface DocumentVersion {
 	contentId: string;
 	createdAt: string | null;
 	createdBy: number | null;
+	/** The agent run that acted for createdBy, resolved through `refs.agents`. */
+	createdByRunId: string | null;
 	document: {
 		id: number | null;
 		collectionKey: string | null;
@@ -854,9 +862,13 @@ export interface InternalCollectionDocument {
 	/** The open create request requesting this document. Null once the document is created. */
 	createRequestId: number | null;
 	createdBy: number | null;
+	/** The agent run that acted for createdBy, resolved through `refs.agents`. */
+	createdByRunId: string | null;
 	createdAt: string | null;
 	updatedAt: string | null;
 	updatedBy: number | null;
+	/** The agent run that acted for updatedBy, resolved through `refs.agents`. */
+	updatedByRunId: string | null;
 	bricks?: Array<InternalDocumentBrick> | null;
 	fields?: Array<InternalDocumentField> | null;
 	workflow?: DocumentWorkflow | null;

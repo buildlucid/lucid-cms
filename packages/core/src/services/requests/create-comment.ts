@@ -2,7 +2,7 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import { generateText } from "@lucidcms/rich-text/server";
 import { copy } from "../../libs/i18n/index.js";
 import { RequestEventsRepository } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendNotification from "../notifications/send.js";
 import commentExcerpt from "./helpers/comment-excerpt.js";
@@ -14,15 +14,18 @@ import notifyMentions from "./helpers/notify-mentions.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 import { commentedNotification } from "./notifications/commented.js";
 
-/**
- * Anyone who can read a request can comment on it, whatever its status. A
- * comment withdraws an approval, so the request is approved again once it
- * has been dealt with. Replies join a comment's thread and leave the request
- * as it is.
- */
+/** Adds a comment or reply for a request reader, withdrawing approvals only for top-level comments. */
 const createComment: ServiceFn<
-	[{ id: number; user: LucidUser; body: RichTextJSON; parentId?: number }],
-	undefined
+	[
+		{
+			id: number;
+			user: LucidActor;
+			agentRunId?: string;
+			body: RichTextJSON;
+			parentId?: number;
+		},
+	],
+	{ id: number }
 > = async (context, data) => {
 	const RequestEvents = new RequestEventsRepository(context.db);
 
@@ -69,18 +72,19 @@ const createComment: ServiceFn<
 	const bodyRes = await resolveMentions(context, { request, body: data.body });
 	if (bodyRes.error) return bodyRes;
 
-	const eventsRes = await RequestEvents.createEvents({
-		data: [
-			{
-				request_id: request.id,
-				user_id: data.user.id,
-				parent_id: data.parentId ?? null,
-				type: "comment",
-				body: bodyRes.data,
-			},
-		],
+	const commentRes = await RequestEvents.createSingle({
+		data: {
+			request_id: request.id,
+			user_id: data.user.id,
+			agent_run_id: data.agentRunId ?? null,
+			parent_id: data.parentId ?? null,
+			type: "comment",
+			body: bodyRes.data,
+		},
+		returning: ["id"],
+		validation: { enabled: true },
 	});
-	if (eventsRes.error) return eventsRes;
+	if (commentRes.error) return commentRes;
 
 	if (data.parentId === undefined && request.approvals.length > 0) {
 		const dismissRes = await dismissApproval(context, {
@@ -94,6 +98,7 @@ const createComment: ServiceFn<
 		request,
 		body: bodyRes.data,
 		actorUserId: data.user.id,
+		actorRunId: data.agentRunId,
 	});
 	if (mentionsRes.error) return mentionsRes;
 
@@ -107,21 +112,22 @@ const createComment: ServiceFn<
 						? [event.user_id]
 						: [],
 				);
-	const commentRes = await sendNotification(context, {
+	const notifyRes = await sendNotification(context, {
 		definition: commentedNotification,
 		recipients: [...getRequestParticipants(request), ...thread].filter(
 			(userId) => !mentionsRes.data.includes(userId),
 		),
 		actorUserId: data.user.id,
+		actorRunId: data.agentRunId,
 		data: {
 			requestId: request.id,
 			title: request.title,
 			excerpt: commentExcerpt(bodyRes.data),
 		},
 	});
-	if (commentRes.error) return commentRes;
+	if (notifyRes.error) return notifyRes;
 
-	return { error: undefined, data: undefined };
+	return { error: undefined, data: { id: commentRes.data.id } };
 };
 
 export default createComment;

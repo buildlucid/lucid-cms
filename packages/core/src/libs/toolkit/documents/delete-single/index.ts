@@ -40,7 +40,11 @@ const deleteSingle = (
 			if (actor.error) return actor;
 
 			const { actor: _, ...values } = data;
-			return deleteSingle(context, { ...values, userId: actor.data.userId });
+			return deleteSingle(context, {
+				...values,
+				userId: actor.data.userId,
+				agentRunId: actor.data.agentRunId,
+			});
 		},
 		name: {
 			key: "core.toolkit.documents.delete-single.error.name",

@@ -7,6 +7,7 @@ import {
 } from "../libs/db/tables/requests.js";
 import { jobStatusSchema } from "../libs/jobs/payload.js";
 import type { RequestEvent } from "../types/response.js";
+import { agentActorSchema } from "./agent.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaImagePreviewResponseSchema } from "./media.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
@@ -23,6 +24,9 @@ const requestUserSchema = z.object({
 const requestEventBaseShape = {
 	id: z.number(),
 	user: requestUserSchema.nullable(),
+	agent: agentActorSchema.nullable().meta({
+		description: "The agent that acted, for user or the system",
+	}),
 	createdAt: z.string().nullable(),
 	updatedAt: z.string().nullable(),
 };
@@ -37,6 +41,7 @@ const requestEventSchema: z.ZodType<RequestEvent> = z.discriminatedUnion(
 			body: richTextJSONSchema,
 			resolution: requestCommentResolutionSchema.nullable(),
 			resolvedBy: requestUserSchema.nullable(),
+			resolvedByAgent: agentActorSchema.nullable(),
 			replies: z.array(
 				z.object({ ...requestEventBaseShape, body: richTextJSONSchema }),
 			),
@@ -188,6 +193,7 @@ const requestResponseSchema = z.object({
 	revision: z.number(),
 	executionJobId: z.string().nullable(),
 	createdBy: requestUserSchema.nullable(),
+	createdByAgent: agentActorSchema.nullable(),
 	approvals: z
 		.array(
 			z.object({
@@ -216,6 +222,10 @@ const requestResponseSchema = z.object({
 	openComments: z.number().meta({
 		description: "Comments still waiting to be resolved or closed",
 	}),
+	reviewToken: z.string().meta({
+		description:
+			"Fingerprints the revision, content and targets as read. Acknowledgements and approvals made with it are rejected once any of them change",
+	}),
 	permissions: z.object({
 		edit: z.boolean(),
 		approve: z.boolean(),
@@ -232,6 +242,7 @@ const requestSummaryResponseSchema = requestResponseSchema
 		status: true,
 		approved: true,
 		createdBy: true,
+		createdByAgent: true,
 		reviewers: true,
 		scheduledAt: true,
 		scheduledTimezone: true,
@@ -278,7 +289,7 @@ export const requestOverviewResponseSchema = z.object({
 	}),
 });
 
-const requestDocumentInputSchema = z.object({
+export const requestDocumentInputSchema = z.object({
 	collectionKey: z.string().trim().min(1),
 	documentId: z.number().int().positive(),
 	source: z.string().trim().min(1).optional().meta({
@@ -525,11 +536,10 @@ export const controllerSchemas = {
 	approve: {
 		body: z.object({
 			body: richTextJSONSchema.optional(),
-			revision: z.number().int().positive(),
-			expectedTargets: z.record(
-				z.string(),
-				z.record(z.string(), z.number().int().positive().nullable()),
-			),
+			ifUnchanged: z.string().min(1).meta({
+				description:
+					"The request's reviewToken when you reviewed it. Approval is refused if the revision, content or targets have changed since.",
+			}),
 		}),
 		query: noQuery,
 		params: requestParams,

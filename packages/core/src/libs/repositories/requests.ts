@@ -26,6 +26,7 @@ export interface RequestSummaryQueryResponse
 		| "failure"
 		| "completed_at"
 		| "created_by"
+		| "created_by_run_id"
 		| "created_at"
 		| "updated_at"
 	> {
@@ -40,7 +41,7 @@ export interface RequestSummaryQueryResponse
 
 /** Requests are visible to users who can read every included collection. */
 type RequestAccess = {
-	userId: number;
+	userId: number | null;
 	/** Null skips the collection check, eg. for super admins. */
 	collectionKeys: string[] | null;
 	/** The collections the user can update, for the addable filter. Null skips the check. */
@@ -285,6 +286,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 			"lucid_requests.failure",
 			"lucid_requests.completed_at",
 			"lucid_requests.created_by",
+			"lucid_requests.created_by_run_id",
 			"lucid_requests.created_at",
 			"lucid_requests.updated_at",
 			this.database.fn
@@ -359,6 +361,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 				"failure",
 				"completed_at",
 				"created_by",
+				"created_by_run_id",
 				"created_at",
 				"updated_at",
 				"documents",

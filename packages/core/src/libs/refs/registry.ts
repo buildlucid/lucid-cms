@@ -1,4 +1,5 @@
 import type { RefResource } from "../../exports/types.js";
+import agentRefResource from "./agents/index.js";
 import { refResourceKeys } from "./constants.js";
 import documentRefResource from "./documents/index.js";
 import mediaRefResource from "./media/index.js";
@@ -8,6 +9,7 @@ const registeredRefResources = {
 	documents: documentRefResource,
 	media: mediaRefResource,
 	users: userRefResource,
+	agents: agentRefResource,
 } as const satisfies {
 	[TResource in RefResource]: { resource: TResource };
 };

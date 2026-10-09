@@ -1,6 +1,7 @@
 export type {
 	Account,
 	Agent,
+	AgentActor,
 	AgentApprovalMode,
 	AgentCapabilities,
 	AgentCatalog,
@@ -18,6 +19,7 @@ export type {
 	AgentLucidToolName,
 	AgentMessage,
 	AgentMessagePart,
+	AgentRef,
 	AgentReference,
 	AgentReferenceInput,
 	AgentReferenceSnapshot,

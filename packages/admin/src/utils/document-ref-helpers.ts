@@ -1,4 +1,4 @@
-import type { DocumentRef, Refs, UserRef } from "@types";
+import type { AgentRef, DocumentRef, Refs, UserRef } from "@types";
 import { isObjectRecord } from "@/utils/type-guards";
 
 const normalizeRefs = <TRef>(refs: TRef | TRef[]): TRef[] =>
@@ -34,6 +34,16 @@ export const isDocumentRef = (value: unknown): value is DocumentRef => {
 		typeof value.collectionKey === "string" &&
 		"fields" in value
 	);
+};
+
+/** The agent behind a run ID on document or version metadata, from `refs.agents`. */
+export const findDocumentAgentRef = (
+	refs: Refs | undefined,
+	runId: string | null | undefined,
+): AgentRef | undefined => {
+	if (typeof runId !== "string") return undefined;
+
+	return refs?.agents?.find((agent) => agent.id === runId);
 };
 
 export const findDocumentUserRef = (

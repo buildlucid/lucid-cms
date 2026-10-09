@@ -28,6 +28,21 @@ import {
 	findMediaMcpTool,
 } from "../../services/media/tools/find/index.js";
 import { previewMediaMcpTool } from "../../services/media/tools/preview/index.js";
+import { acknowledgeRequestAgentTool } from "../../services/requests/tools/acknowledge/index.js";
+import { commentOnRequestAgentTool } from "../../services/requests/tools/comment/index.js";
+import { completeRequestAgentTool } from "../../services/requests/tools/complete/index.js";
+import {
+	findRequestsAgentTool,
+	findRequestsMcpTool,
+} from "../../services/requests/tools/find/index.js";
+import {
+	getRequestAgentTool,
+	getRequestMcpTool,
+} from "../../services/requests/tools/get/index.js";
+import { replyToRequestAgentTool } from "../../services/requests/tools/reply/index.js";
+import { scheduleRequestAgentTool } from "../../services/requests/tools/schedule/index.js";
+import { updateRequestAgentTool } from "../../services/requests/tools/update/index.js";
+import { updateRequestCommentAgentTool } from "../../services/requests/tools/update-comment/index.js";
 import type { CollectionToolOptions } from "../permission/readable-collections.js";
 
 /**
@@ -39,6 +54,10 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * Document writes open requests for people to review by default. Pass
  * `direct: true` to let them save changes as a person could in the admin.
  *
+ * Request tools let agents read, discuss and manage requests. They can't
+ * approve them, so people stay in charge of what goes live. A request is
+ * only in reach when all its documents are in the tool's `collections`.
+ *
  * @example
  * ```ts
  * defineAgent({
@@ -48,6 +67,8 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * 		agentTools.content({ collections: ["pages"] }),
  * 		agentTools.editing({ collections: ["pages"] }),
  * 		agentTools.deleteDocument({ collections: ["pages"], direct: true }),
+ * 		agentTools.requests({ collections: ["pages"] }),
+ * 		agentTools.reviewing({ collections: ["pages"] }),
  * 	],
  * });
  * ```
@@ -63,6 +84,18 @@ export const agentTools = {
 	updateDocument: updateDocumentAgentTool,
 	deleteDocument: deleteDocumentAgentTool,
 	unpublishDocument: unpublishDocumentAgentTool,
+	findRequests: findRequestsAgentTool,
+	getRequest: getRequestAgentTool,
+	commentOnRequest: commentOnRequestAgentTool,
+	replyToRequest: replyToRequestAgentTool,
+	updateRequestComment: updateRequestCommentAgentTool,
+	acknowledgeRequest: acknowledgeRequestAgentTool,
+	/** Changes a request's details, reviewers, documents and status. */
+	updateRequest: updateRequestAgentTool,
+	/** Completes approved requests, asking for approval unless the chat or routine disables it. */
+	completeRequest: completeRequestAgentTool,
+	/** Schedules approved requests for completion, asking for approval unless the chat or routine disables it. */
+	scheduleRequest: scheduleRequestAgentTool,
 	/** Every content reading tool: collections, documents, media and locales. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),
@@ -79,16 +112,28 @@ export const agentTools = {
 		deleteDocumentAgentTool(options),
 		unpublishDocumentAgentTool(options),
 	],
+	/** Finding and reading requests, with their documents, blockers and comments. */
+	requests: (options: CollectionToolOptions = {}) => [
+		findRequestsAgentTool(options),
+		getRequestAgentTool(options),
+	],
+	/** Commenting on and replying to requests, managing the agent's own comments and acknowledging changed targets, for use alongside `requests()`. */
+	reviewing: (options: CollectionToolOptions = {}) => [
+		commentOnRequestAgentTool(options),
+		replyToRequestAgentTool(options),
+		updateRequestCommentAgentTool(options),
+		acknowledgeRequestAgentTool(options),
+	],
 };
 
 /**
  * Lucid's tools for MCP clients. Call one to add it to `ai.mcp.tools`, or use
- * `content()` for all of them. MCP only serves the tools it lists. Every tool
+ * a bundle such as `content()`. MCP only serves the tools it lists. Every tool
  * uses the connection's granted scopes.
  *
  * @example
  * ```ts
- * ai: { mcp: { tools: [mcpTools.content()] } }
+ * ai: { mcp: { tools: [mcpTools.content(), mcpTools.requests()] } }
  * ```
  */
 export const mcpTools = {
@@ -99,6 +144,8 @@ export const mcpTools = {
 	findMedia: findMediaMcpTool,
 	previewMedia: previewMediaMcpTool,
 	listLocales: listLocalesMcpTool,
+	findRequests: findRequestsMcpTool,
+	getRequest: getRequestMcpTool,
 	/** Every content reading tool: collections, documents, media and locales. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsMcpTool(options),
@@ -108,5 +155,10 @@ export const mcpTools = {
 		findMediaMcpTool(),
 		previewMediaMcpTool(),
 		listLocalesMcpTool(),
+	],
+	/** Provides request finding and reading with the `requests:read` scope. */
+	requests: (options: CollectionToolOptions = {}) => [
+		findRequestsMcpTool(options),
+		getRequestMcpTool(options),
 	],
 };

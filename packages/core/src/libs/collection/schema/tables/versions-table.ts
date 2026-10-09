@@ -126,8 +126,8 @@ const createVersionsTable = (props: {
 						type: props.db.getDataType("text"),
 						nullable: true,
 						foreignKey: {
-							table: "lucid_agent_runs",
-							column: "id",
+							table: "lucid_agent_attributions",
+							column: "run_id",
 							onDelete: "set null",
 						},
 					},
@@ -148,8 +148,8 @@ const createVersionsTable = (props: {
 						type: props.db.getDataType("text"),
 						nullable: true,
 						foreignKey: {
-							table: "lucid_agent_runs",
-							column: "id",
+							table: "lucid_agent_attributions",
+							column: "run_id",
 							onDelete: "set null",
 						},
 					},

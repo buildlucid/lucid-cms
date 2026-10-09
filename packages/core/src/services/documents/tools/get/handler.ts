@@ -3,19 +3,23 @@ import constants from "../../../../constants/constants.js";
 import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { documentEditableDataSchema } from "../../../../libs/toolkit/documents/authoring-values-schema.js";
-import type { DocumentActor } from "../../../../libs/toolkit/documents/types.js";
+import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
 import { paginate } from "../../../../libs/tools/pagination.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
 import loadRequest from "../../../requests/helpers/load-request.js";
+import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getSingle from "../../content/get-single.js";
 import getEditLink from "../../helpers/get-edit-link.js";
 import { projectRoute, selectFields } from "../../helpers/project-document.js";
 import projectEditableValue from "../../helpers/project-editable-value.js";
 import readDocumentContent from "../../helpers/read-document-content.js";
-import resolveActorUser from "../../helpers/resolve-actor-user.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
-import type { agentInputSchema, outputSchema } from "./schema.js";
+import {
+	type agentInputSchema,
+	type outputSchema,
+	parseRequestVersion,
+} from "./schema.js";
 
 /** Reads selected fields and bricks from a document or request proposal in the shape accepted by write tools. */
 const getDocument: ServiceFn<
@@ -24,7 +28,7 @@ const getDocument: ServiceFn<
 			input: z.output<typeof agentInputSchema>;
 			allowedCollectionKeys: string[];
 			/** Who reads request proposals. Only agent tools can read them. */
-			actor?: DocumentActor;
+			actor?: ToolkitActor;
 		},
 	],
 	{ output: z.output<typeof outputSchema> }
@@ -52,13 +56,16 @@ const getDocument: ServiceFn<
 	if (localeRes.error) return localeRes;
 	const contentLocale = localeRes.data;
 
+	const requestId = props.actor
+		? parseRequestVersion(input.version)
+		: undefined;
 	let proposal: { requestId: number; versionId: number } | undefined;
-	if (input.requestId !== undefined && props.actor) {
+	if (requestId !== undefined && props.actor) {
 		const userRes = await resolveActorUser(context, { actor: props.actor });
 		if (userRes.error) return userRes;
 
 		const requestRes = await loadRequest(context, {
-			id: input.requestId,
+			id: requestId,
 			user: userRes.data,
 		});
 		if (requestRes.error) return requestRes;
@@ -73,14 +80,22 @@ const getDocument: ServiceFn<
 			return {
 				error: {
 					type: "basic",
-					message: copy("server:core.documents.not.found.message"),
+					message: copy("server:core.tools.documents.proposal.not.found", {
+						data: {
+							requestId,
+							collection:
+								context.translate(collection.getData.details.labels.singular) ??
+								collection.key,
+							id: input.id,
+						},
+					}),
 					status: 404,
 				},
 				data: undefined,
 			};
 		}
 
-		proposal = { requestId: input.requestId, versionId };
+		proposal = { requestId, versionId };
 	}
 
 	//* bricks come from the editable content below; the content read still includes them for their refs
@@ -99,7 +114,7 @@ const getDocument: ServiceFn<
 	const contentRes = await readDocumentContent(context, {
 		collectionKey: input.collectionKey,
 		id: input.id,
-		version: input.version,
+		version: proposal ? undefined : input.version,
 		versionId: proposal?.versionId,
 	});
 	if (contentRes.error) return contentRes;

@@ -1,15 +1,13 @@
 import { copy } from "../../libs/i18n/index.js";
 import { RequestEventsRepository } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import isCommentAuthor from "./helpers/is-comment-author.js";
 import loadRequest from "./helpers/load-request.js";
 
-/**
- * People can delete their own comments and replies, and super admins can
- * delete anyone's. Deleting a comment removes its replies too.
- */
+/** Deletes the actor's comment and replies, allowing super admins and the system to moderate only without an agent. */
 const deleteComment: ServiceFn<
-	[{ id: number; eventId: number; user: LucidUser }],
+	[{ id: number; eventId: number; user: LucidActor; agentRunId?: string }],
 	undefined
 > = async (context, data) => {
 	const RequestEvents = new RequestEventsRepository(context.db);
@@ -20,7 +18,13 @@ const deleteComment: ServiceFn<
 	const comment = requestRes.data.events.find(
 		(event) => event.id === data.eventId && event.type === "comment",
 	);
-	if (!comment || (comment.user_id !== data.user.id && !data.user.superAdmin)) {
+	const authorRes = comment
+		? await isCommentAuthor(context, { ...data, comment })
+		: undefined;
+	if (authorRes?.error) return authorRes;
+	//* agents never moderate, even for a super admin
+	const moderator = data.user.superAdmin && data.agentRunId === undefined;
+	if (!comment || (!authorRes?.data && !moderator)) {
 		return {
 			error: {
 				type: "basic",

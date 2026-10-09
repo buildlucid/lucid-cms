@@ -14,6 +14,8 @@ export type TimelineItem = {
 	updatedAt: string | null;
 	timelineAt: string | null;
 	createdBy: number | null;
+	/** The agent run that acted for createdBy, resolved through `refs.agents`. */
+	createdByRunId: string | null;
 	promotedFrom: number | null;
 	contentId: string | null;
 	isReleased: boolean;

@@ -10,6 +10,8 @@ const deleteMultipleWithResults: ServiceFn<
 			collectionKey: string;
 			ids: number[];
 			userId: number | null;
+			/** The agent run doing it, for `userId` or the system. */
+			agentRunId?: string;
 			hard: boolean;
 		},
 	],
@@ -29,6 +31,7 @@ const deleteMultipleWithResults: ServiceFn<
 			const result = await deleteSingle(context, {
 				collectionKey: data.collectionKey,
 				userId: data.userId,
+				agentRunId: data.agentRunId,
 				hard: data.hard,
 				id,
 			});

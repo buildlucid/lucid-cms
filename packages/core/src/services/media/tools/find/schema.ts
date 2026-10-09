@@ -1,10 +1,13 @@
 import z from "zod";
 import { querySchema } from "../../../../libs/toolkit/media/get-multiple/schema.js";
 import {
+	filterConditionsInput,
+	toQueryFilters,
+} from "../../../../libs/tools/filter-conditions.js";
+import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
-import { queryFormatted } from "../../../../schemas/helpers/querystring.js";
 import { mediaStatusSchema } from "../../../../schemas/media.js";
 import type { MediaType } from "../../../../types/response.js";
 
@@ -21,25 +24,14 @@ export const inputSchema = z.object({
 	query: querySchema
 		.omit({ filter: true })
 		.extend({
-			filter: z
-				.array(
-					queryFormatted.schema.filterOr.unwrap().element.element.extend({
-						key: querySchema.shape.filter.unwrap().keyof(),
-					}),
-				)
-				.optional(),
+			filter: filterConditionsInput(querySchema.shape.filter.unwrap().keyof()),
 			perPage: paginationInput.perPage,
 		})
 		.prefault({})
 		.transform(
 			({ filter, filterOr, ...query }): z.input<typeof querySchema> => ({
 				...query,
-				// Keep repeated columns and combine AND conditions with each optional OR group.
-				filterOr: filter?.length
-					? filterOr?.length
-						? filterOr.map((group) => [...filter, ...group])
-						: [filter]
-					: filterOr,
+				...toQueryFilters(filter, filterOr),
 			}),
 		)
 		.pipe(querySchema)

@@ -4,4 +4,5 @@ export const refResourceKeys = [
 	"documents",
 	"media",
 	"users",
+	"agents",
 ] as const satisfies readonly RefResource[];

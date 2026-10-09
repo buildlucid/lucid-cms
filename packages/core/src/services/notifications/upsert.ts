@@ -24,6 +24,7 @@ const upsert = <Definition extends AnyNotificationDefinition>(
 		fingerprint?: string;
 		recipients?: number[];
 		actorUserId?: number | null;
+		actorRunId?: string | null;
 	},
 ): ServiceResponse<NotificationReceipt> =>
 	writeNotification(context, { ...data, mode: "upsert" });

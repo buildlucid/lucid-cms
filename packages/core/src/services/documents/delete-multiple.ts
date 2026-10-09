@@ -18,6 +18,8 @@ const deleteMultiple: ServiceFn<
 			ids: number[];
 			collectionKey: string;
 			userId: number | null;
+			/** The agent run doing it, for `userId` or the system. */
+			agentRunId?: string;
 			/** The delete request doing the deleting, which keeps its approval. */
 			requestId?: number;
 		},
@@ -159,6 +161,7 @@ const deleteMultiple: ServiceFn<
 								is_deleted: true,
 								is_deleted_at: new Date().toISOString(),
 								deleted_by: data.userId,
+								deleted_by_run_id: data.agentRunId ?? null,
 							},
 							validation: {
 								enabled: true,

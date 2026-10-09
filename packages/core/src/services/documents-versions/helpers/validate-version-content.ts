@@ -1,6 +1,6 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDuplicateOrder from "../../documents-bricks/checks/check-duplicate-order.js";
 import checkValidateBricksFields from "../../documents-bricks/checks/check-validate-bricks-fields.js";
@@ -13,7 +13,7 @@ const validateVersionContent: ServiceFn<
 			collection: CollectionBuilder;
 			documentId: number;
 			versionId: number;
-			user?: LucidUser;
+			user?: LucidActor;
 		},
 	],
 	undefined

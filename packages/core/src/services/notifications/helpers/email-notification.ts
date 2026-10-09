@@ -1,5 +1,6 @@
 import constants from "../../../constants/constants.js";
 import formatter from "../../../libs/formatters/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { getNotificationDefinition } from "../../../libs/notifications/registry.js";
 import {
 	NotificationRecipientsRepository,
@@ -11,6 +12,7 @@ import {
 	getBaseUrl,
 } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import getAgentActors from "../../agent/helpers/get-agent-actors.js";
 import sendEmail from "../../email/send-email.js";
 import getTypeSettings from "./get-type-settings.js";
 
@@ -45,6 +47,7 @@ const emailNotification: ServiceFn<
 			"href",
 			"data",
 			"actor_user_id",
+			"actor_run_id",
 			"resolved_at",
 		],
 		where: [{ key: "id", operator: "=", value: data.notificationId }],
@@ -74,14 +77,31 @@ const emailNotification: ServiceFn<
 				});
 	if (actorRes?.error) return actorRes;
 
+	const agentsRes = await getAgentActors(context, {
+		runIds: [notification.actor_run_id],
+	});
+	if (agentsRes.error) return agentsRes;
+
 	const baseUrl = getBaseUrl(context);
 	const title = context.translate(notification.title);
 	const body = context.translate(notification.body ?? undefined) ?? null;
-	const actor = actorRes?.data
+	const person = actorRes?.data
 		? [actorRes.data.first_name, actorRes.data.last_name]
 				.filter(Boolean)
 				.join(" ") || actorRes.data.username
 		: null;
+	const agent = notification.actor_run_id
+		? agentsRes.data.get(notification.actor_run_id)?.name
+		: undefined;
+	const actor = agent
+		? person
+			? context.translate(
+					copy("server:core.notifications.actor.agent", {
+						data: { agent, person },
+					}),
+				)
+			: agent
+		: person;
 
 	for (const recipient of data.recipients) {
 		const claimRes = await Recipients.claimEmail({

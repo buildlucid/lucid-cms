@@ -1,5 +1,6 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
+import { toolkitActorSchema } from "../../../libs/toolkit/schema.js";
 import LucidAPIError from "../../../utils/errors/lucid-api-error.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import execute from "../execute.js";
@@ -17,7 +18,8 @@ export const executeRequestJob = defineJob({
 	input: z.object({
 		requestId: z.number().int().positive(),
 		revision: z.number().int().positive(),
-		userId: z.number().int().positive().nullable(),
+		/** Null when the person who scheduled it was deleted, so it fails rather than running as someone else. */
+		actor: toolkitActorSchema.nullable(),
 	}),
 	retry: { type: "none" },
 	transaction: true,
@@ -28,7 +30,7 @@ export const executeRequestJob = defineJob({
 			id: input.requestId,
 			jobId: execution.jobId,
 			revision: input.revision,
-			userId: input.userId,
+			actor: input.actor,
 		}),
 	onPermanentFailure: async ({ context, failure }) => {
 		const diagnostics = failure.error?.cause;
@@ -38,7 +40,11 @@ export const executeRequestJob = defineJob({
 			id: failure.input.requestId,
 			jobId: failure.jobId,
 			revision: failure.input.revision,
-			userId: failure.input.userId,
+			userId:
+				failure.input.actor?.kind === "user"
+					? failure.input.actor.userId
+					: null,
+			agentRunId: failure.input.actor?.agentRunId,
 			message: failure.errorMessage,
 			requestDocumentId:
 				diagnostics instanceof RequestExecutionError

@@ -99,6 +99,17 @@ const createDocumentTable = (props: {
 						},
 					},
 					{
+						name: "deleted_by_run_id",
+						source: "core",
+						type: props.db.getDataType("text"),
+						nullable: true,
+						foreignKey: {
+							table: "lucid_agent_attributions",
+							column: "run_id",
+							onDelete: "set null",
+						},
+					},
+					{
 						name: "create_request_id",
 						source: "core",
 						type: props.db.getDataType("integer"),
@@ -126,8 +137,8 @@ const createDocumentTable = (props: {
 						type: props.db.getDataType("text"),
 						nullable: true,
 						foreignKey: {
-							table: "lucid_agent_runs",
-							column: "id",
+							table: "lucid_agent_attributions",
+							column: "run_id",
 							onDelete: "set null",
 						},
 					},
@@ -155,8 +166,8 @@ const createDocumentTable = (props: {
 						type: props.db.getDataType("text"),
 						nullable: true,
 						foreignKey: {
-							table: "lucid_agent_runs",
-							column: "id",
+							table: "lucid_agent_attributions",
+							column: "run_id",
 							onDelete: "set null",
 						},
 					},
@@ -221,6 +232,12 @@ const createDocumentTable = (props: {
 						db: props.db,
 						tableName,
 						columns: ["updated_by_run_id"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["deleted_by_run_id"],
 						source: "core",
 					}),
 				],

@@ -4,6 +4,7 @@ import { summaryMessage } from "../../libs/agent/context.js";
 import { inputMessageParts } from "../../libs/agent/input.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
+	AgentAttributionsRepository,
 	AgentCompactionsRepository,
 	AgentConversationsRepository,
 	AgentMessagesRepository,
@@ -58,7 +59,13 @@ const startRun: ServiceFn<
 	const AgentConversations = new AgentConversationsRepository(context.db);
 
 	const conversation = await AgentConversations.selectSingle({
-		select: ["approval_mode", "routine_id", "model_selection", "queue_paused"],
+		select: [
+			"agent_key",
+			"approval_mode",
+			"routine_id",
+			"model_selection",
+			"queue_paused",
+		],
 		where: [{ key: "id", operator: "=", value: input.conversationId }],
 	});
 	if (conversation.error) return conversation;
@@ -73,6 +80,7 @@ const startRun: ServiceFn<
 		};
 	}
 	const {
+		agent_key: agentKey,
 		approval_mode: approvalMode,
 		routine_id: routineId,
 		model_selection: modelSelection,
@@ -91,6 +99,7 @@ const startRun: ServiceFn<
 		const conversations = new AgentConversationsRepository(context.db);
 		const messages = new AgentMessagesRepository(context.db);
 		const runs = new AgentRunsRepository(context.db);
+		const attributions = new AgentAttributionsRepository(context.db);
 		const compactions = new AgentCompactionsRepository(context.db);
 
 		const latest = await compactions.selectLatest(input.conversationId);
@@ -245,6 +254,14 @@ const startRun: ServiceFn<
 			updated_at: now,
 		});
 		if (run.error) return run;
+
+		const attribution = await attributions.createOnce({
+			runId: input.requestId,
+			agentKey,
+			system: input.userId === null,
+			conversationId: input.conversationId,
+		});
+		if (attribution.error) return attribution;
 		if (!run.data) {
 			return {
 				data: undefined,

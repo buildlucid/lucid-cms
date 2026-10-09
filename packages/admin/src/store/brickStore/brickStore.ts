@@ -54,12 +54,15 @@ interface BrickSnapshotPayload {
 	fields?: Array<InternalDocumentField>;
 }
 
+/** Resources that field pickers can add, excluding agents supplied through responses. */
+type FieldRefResource = Exclude<RefResource, "agents">;
+
 type AddRefInput = {
-	[TResource in RefResource]: {
+	[TResource in FieldRefResource]: {
 		resource: TResource;
 		ref: RefResourceMap[TResource] | RefResourceMap[TResource][];
 	};
-}[RefResource];
+}[FieldRefResource];
 
 /** Initializes defaults before a new brick is ever expanded or saved. */
 const createBrickFields = (props: {

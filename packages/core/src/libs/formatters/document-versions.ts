@@ -56,6 +56,7 @@ const formatSingle = (props: {
 		contentId: props.version.content_id,
 		createdAt: formatter.formatDate(props.version.created_at),
 		createdBy: props.version.created_by ?? null,
+		createdByRunId: props.version.created_by_run_id ?? null,
 		document: {
 			id: props.version.document_id ?? null,
 			collectionKey: props.version.collection_key,

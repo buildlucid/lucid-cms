@@ -29,6 +29,7 @@ const send = <Definition extends AnyNotificationDefinition>(
 				fingerprint: data.fingerprint,
 				recipients: data.recipients,
 				actorUserId: data.actorUserId,
+				actorRunId: data.actorRunId,
 			});
 		},
 		name: {

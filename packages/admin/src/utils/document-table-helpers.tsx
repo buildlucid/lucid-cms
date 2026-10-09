@@ -145,13 +145,11 @@ const documentListingRefResources = [
 	"documents",
 	"media",
 	"users",
+	"agents",
 ] as const satisfies RefResource[];
 export type DocumentListingRefInclude = `refs.${RefResource}`;
 
-/**
- * Enables response ref resources only for field types whose table cells need
- * hydrated data to render labels/previews.
- */
+/** Includes refs required by table fields and always includes users and agents for author columns. */
 export const documentListingRefIncludes = (
 	fields: CollectionLeafFieldConfig[],
 ): Record<DocumentListingRefInclude, boolean> => {
@@ -164,7 +162,9 @@ export const documentListingRefIncludes = (
 	return documentListingRefResources.reduce(
 		(includes, resource) => {
 			includes[`refs.${resource}`] =
-				resource === "users" || fieldResources.has(resource);
+				resource === "users" ||
+				resource === "agents" ||
+				fieldResources.has(resource);
 			return includes;
 		},
 		{} as Record<DocumentListingRefInclude, boolean>,

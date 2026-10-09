@@ -35,7 +35,9 @@ const recordTable: ServiceFn<
 		}
 
 		for (const target of collect(row)) {
-			if (typeof target.value !== "number") continue;
+			if (typeof target.value !== "number" || target.resource === "agents") {
+				continue;
+			}
 
 			const reference: LucidDocumentReferences = {
 				generation,

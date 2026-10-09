@@ -1,3 +1,4 @@
+import type { AgentActor } from "../agent/types.js";
 import type { RequestUser } from "../requests/types.js";
 
 export type NotificationLevel = "info" | "success" | "warning" | "error";
@@ -24,6 +25,8 @@ export type Notification = {
 	data: Record<string, unknown>;
 	/** The person whose action caused it, when there was one. */
 	actor: RequestUser | null;
+	/** The agent that acted, for actor or the system. */
+	actorAgent: AgentActor | null;
 	readAt: string | null;
 	archivedAt: string | null;
 	resolvedAt: string | null;

@@ -3,7 +3,11 @@ import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
 import { richTextJSONSchema } from "../../../schemas/shared/rich-text.js";
 import { defineTable } from "../client/table/definition.js";
-import type { TimestampImmutable, TimestampMutable } from "../types.js";
+import type {
+	BooleanInt,
+	TimestampImmutable,
+	TimestampMutable,
+} from "../types.js";
 
 export const requestStatusSchema = z.enum(["open", "completed", "closed"]);
 /**
@@ -59,6 +63,14 @@ export const requestsTable = defineTable("lucid_requests", () => ({
 		scheduled_by: {
 			schema: z.number().nullable(),
 			type: "integer",
+		},
+		scheduled_by_system: {
+			schema: z.union([z.boolean(), z.literal(0), z.literal(1)]),
+			type: "boolean",
+		},
+		scheduled_by_run_id: {
+			schema: z.uuid().nullable(),
+			type: "text",
 		},
 		execution_job_id: {
 			schema: z.string().nullable(),
@@ -155,6 +167,10 @@ export interface LucidRequests {
 	scheduled_at: TimestampMutable;
 	scheduled_timezone: string | null;
 	scheduled_by: number | null;
+	/** Scheduled by the system, eg. a routine defined in code. A schedule whose person was deleted has neither. */
+	scheduled_by_system: Generated<BooleanInt>;
+	/** The agent run that scheduled it, for `scheduled_by` or the system. */
+	scheduled_by_run_id: string | null;
 	execution_job_id: string | null;
 	failure: string | null;
 	failure_request_document_id: number | null;

@@ -14,8 +14,7 @@ export const inputSchema = z.object({
 	collectionKey: z.string().min(1),
 	id: z.number().int().positive(),
 	version: z.string().trim().min(1).default("latest").meta({
-		description:
-			"Content version, usually latest or a publishing target. Ignored with requestId.",
+		description: "Content version, usually latest or a publishing target.",
 	}),
 	contentLocale: z.string().min(1).optional().meta({
 		description:
@@ -32,12 +31,19 @@ export const inputSchema = z.object({
 	}),
 });
 
+/** Agents also read request proposals, as the version `request:ID`. */
 export const agentInputSchema = inputSchema.extend({
-	requestId: z.number().int().positive().optional().meta({
+	version: inputSchema.shape.version.meta({
 		description:
-			"Read the document's proposal in this request instead, eg. one opened by documents_create or documents_update.",
+			"Content version: latest, a publishing target, or request:ID for the document's proposal in that request, eg. request:12 for one opened by documents_create or documents_update.",
 	}),
 });
+
+/** The request whose proposal a `request:ID` version reads. */
+export const parseRequestVersion = (version: string) => {
+	const match = /^request:(\d+)$/.exec(version);
+	return match ? Number(match[1]) : undefined;
+};
 
 /** A brick in the shape the write tools accept. */
 const brickSchema = z.object({

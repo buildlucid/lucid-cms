@@ -18,6 +18,8 @@ const deleteSingle: ServiceFn<
 			id: number;
 			collectionKey: string;
 			userId: number | null;
+			/** The agent run doing it, for `userId` or the system. */
+			agentRunId?: string;
 			hard?: boolean;
 			ifUnchanged?: DocumentEditToken;
 		},
@@ -67,6 +69,7 @@ const deleteSingle: ServiceFn<
 								is_deleted: true,
 								is_deleted_at: new Date().toISOString(),
 								deleted_by: data.userId,
+								deleted_by_run_id: data.agentRunId ?? null,
 							},
 							returning: ["id"],
 							validation: {

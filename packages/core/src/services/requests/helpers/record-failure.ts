@@ -20,6 +20,7 @@ const recordFailure: ServiceFn<
 			revision: number;
 			message: string;
 			userId: number | null;
+			agentRunId?: string;
 			requestDocumentId?: number | null;
 			target?: string | null;
 		},
@@ -83,6 +84,7 @@ const recordFailure: ServiceFn<
 			{
 				request_id: data.id,
 				user_id: data.userId,
+				agent_run_id: data.agentRunId ?? null,
 				type: "failed",
 				metadata,
 			},

@@ -4,7 +4,7 @@ import {
 	RequestsRepository,
 	RequestTargetsRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import canEditDocument from "./helpers/can-edit-document.js";
@@ -25,7 +25,8 @@ const reviewTarget: ServiceFn<
 			revision: number;
 			targetVersionId: number | null;
 			reviewed: boolean;
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 		},
 	],
 	undefined
@@ -109,6 +110,7 @@ const reviewTarget: ServiceFn<
 			{
 				request_id: request.id,
 				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
 				type: data.reviewed ? "target_reviewed" : "target_unreviewed",
 				metadata: { target: data.target, requestDocumentId: document.id },
 			},

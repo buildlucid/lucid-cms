@@ -1,6 +1,9 @@
 import z from "zod";
 import { querySchema } from "../../../../libs/toolkit/documents/get-multiple/schema.js";
-import { normalizePaginatedDocumentQuery } from "../../../../libs/toolkit/utils.js";
+import {
+	filterConditionsInput,
+	toQueryFilters,
+} from "../../../../libs/tools/filter-conditions.js";
 import {
 	paginationInput,
 	paginationSchema,
@@ -23,7 +26,9 @@ export const inputSchema = z.object({
 		description: "Only return these top-level content fields.",
 	}),
 	query: querySchema
+		.omit({ filter: true })
 		.extend({
+			filter: filterConditionsInput(z.string().min(1)),
 			...paginationInput,
 			//* bricks are read with documents_get, in the shape the write tools accept
 			include: z
@@ -31,10 +36,13 @@ export const inputSchema = z.object({
 				.optional(),
 		})
 		.prefault({})
-		.transform(normalizePaginatedDocumentQuery)
+		.transform(({ filter, filterOr, ...query }) => ({
+			...query,
+			...toQueryFilters(filter, filterOr),
+		}))
 		.meta({
 			description:
-				"Content query with nested AND/OR filters, sort, refs includes and pagination (perPage max 50). Prefix custom field keys with _, including routing.field: for example {_fullSlug:{operator:'starts-with',value:'/blog/'}}. Brick and repeater fields use nested keys.",
+				"All query fields are optional. Use {} to list documents. filter is a list of conditions combined with AND: include only the conditions you need. Prefix custom field keys with _, eg. {filter:[{key:'_fullSlug',value:'/blog/',operator:'starts-with'}]}. Brick fields use dotted keys, eg. {key:'hero._heading',value:'Spring',operator:'contains'}, repeaters add their key, eg. hero.links._label, top-level repeaters start with fields, eg. fields.links._label, and relation fields name the target collection, eg. {key:'_author.people._name',value:'Will'}. Also id, createdBy, updatedBy, createdAt and updatedAt. filterOr takes groups of conditions where any group can match. Sort, refs includes and pagination (perPage max 50).",
 		}),
 });
 

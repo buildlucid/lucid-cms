@@ -45,7 +45,7 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_get",
 		title: copy("admin:core.tools.documents_get.title"),
 		description:
-			"Read a document's selected content fields and bricks from a collection, or its proposal in a request. Values use the shape documents_update accepts.",
+			"Read a document's selected content fields and bricks from a collection, or its proposal in a request with version request:ID. Values use the shape documents_update accepts.",
 		input: agentInputSchema,
 		output: outputSchema,
 		permissions: [],

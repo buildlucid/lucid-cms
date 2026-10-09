@@ -20,6 +20,7 @@ export type CoreExternalScope =
 	| "media:delete"
 	| "media:resolve-url"
 	| "locales:read"
+	| "requests:read"
 	| "mcp:access";
 
 /** Project scopes added by Lucid type generation or a plugin. */

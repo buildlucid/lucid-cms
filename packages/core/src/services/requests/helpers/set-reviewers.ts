@@ -23,6 +23,7 @@ const setReviewers: ServiceFn<
 			};
 			reviewerIds: number[];
 			userId: number | null;
+			agentRunId?: string;
 		},
 	],
 	undefined
@@ -85,12 +86,14 @@ const setReviewers: ServiceFn<
 				...addedIds.map((userId) => ({
 					request_id: data.request.id,
 					user_id: data.userId,
+					agent_run_id: data.agentRunId ?? null,
 					type: "reviewer_added" as const,
 					metadata: { userId },
 				})),
 				...removedIds.map((userId) => ({
 					request_id: data.request.id,
 					user_id: data.userId,
+					agent_run_id: data.agentRunId ?? null,
 					type: "reviewer_removed" as const,
 					metadata: { userId },
 				})),
@@ -105,6 +108,7 @@ const setReviewers: ServiceFn<
 			key: requestNotificationKeys.review(data.request.id, userId),
 			recipients: [userId],
 			actorUserId: data.userId,
+			actorRunId: data.agentRunId,
 			data: { requestId: data.request.id, title: data.request.title },
 		});
 		if (sendRes.error) return sendRes;

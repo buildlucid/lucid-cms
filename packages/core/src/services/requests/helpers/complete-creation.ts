@@ -10,7 +10,13 @@ import landProposalWorkflow from "./land-proposal-workflow.js";
  * stage and assignees, as the proposal is removed once completed.
  */
 const completeCreation: ServiceFn<
-	[{ document: RequestDocumentRecord; userId: number }],
+	[
+		{
+			document: RequestDocumentRecord;
+			userId: number | null;
+			agentRunId?: string;
+		},
+	],
 	undefined
 > = async (context, data) => {
 	const Documents = new DocumentsRepository(context.db);
@@ -23,6 +29,7 @@ const completeCreation: ServiceFn<
 			data: {
 				create_request_id: null,
 				updated_by: data.userId,
+				updated_by_run_id: data.agentRunId ?? null,
 				updated_at: new Date().toISOString(),
 			},
 			where: [{ key: "id", operator: "=", value: data.document.document_id }],

@@ -45,6 +45,7 @@ const deleteMultiple = (
 			return deleteMultipleWithResults(context, {
 				...values,
 				userId: actor.data.userId,
+				agentRunId: actor.data.agentRunId,
 			});
 		},
 		name: {

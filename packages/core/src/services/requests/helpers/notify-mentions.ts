@@ -27,6 +27,7 @@ const notifyMentions: ServiceFn<
 			body: RichTextJSON;
 			previous?: RichTextJSON | null;
 			actorUserId: number | null;
+			actorRunId?: string;
 		},
 	],
 	number[]
@@ -45,6 +46,7 @@ const notifyMentions: ServiceFn<
 		definition: mentionedNotification,
 		recipients: userIds,
 		actorUserId: data.actorUserId,
+		actorRunId: data.actorRunId,
 		data: {
 			requestId: data.request.id,
 			title: data.request.title,

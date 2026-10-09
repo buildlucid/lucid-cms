@@ -34,6 +34,8 @@ const promoteVersion: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			userId: number | null;
+			/** The agent run promoting it, for `userId` or the system. */
+			agentRunId?: string;
 			skipRevisionCheck?: boolean;
 			/** If set to false, a revision will not be created even if the collection supports revisions. */
 			createRevision?: boolean;
@@ -236,7 +238,7 @@ const promoteVersion: ServiceFn<
 										type: "revision",
 										collection_migration_id: migrationIdRes.data,
 										promoted_from: data.fromVersionId,
-										created_by: data.userId,
+										//* the replaced latest keeps its author, as when a save creates a revision
 									},
 								},
 								{
@@ -271,7 +273,9 @@ const promoteVersion: ServiceFn<
 								collection_key: data.collectionKey,
 								collection_migration_id: migrationIdRes.data,
 								created_by: data.userId,
+								created_by_run_id: data.agentRunId ?? null,
 								updated_by: data.userId,
+								updated_by_run_id: data.agentRunId ?? null,
 								is_deleted: false,
 								updated_at: new Date().toISOString(),
 							},
@@ -297,7 +301,9 @@ const promoteVersion: ServiceFn<
 							promoted_from: data.fromVersionId,
 							content_id: versionRes.data.content_id,
 							created_by: data.userId,
+							created_by_run_id: data.agentRunId ?? null,
 							updated_by: data.userId,
+							updated_by_run_id: data.agentRunId ?? null,
 						},
 						{
 							tableName: tableNameRes.data.version,
@@ -396,6 +402,7 @@ const promoteVersion: ServiceFn<
 				target: data.toVersionType,
 				requestId: data.requestId,
 				userId: data.userId,
+				agentRunId: data.agentRunId,
 			});
 			if (publishedRes.error) return publishedRes;
 

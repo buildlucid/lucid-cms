@@ -4,7 +4,7 @@ import {
 	RequestDocumentsRepository,
 	RequestEventsRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import deleteVersions from "./helpers/delete-versions.js";
@@ -16,7 +16,14 @@ import getRequestAccess from "./helpers/get-request-access.js";
  * hooks what the request still holds. A request always keeps one document.
  */
 const removeDocument: ServiceFn<
-	[{ id: number; requestDocumentId: number; user: LucidUser }],
+	[
+		{
+			id: number;
+			requestDocumentId: number;
+			user: LucidActor;
+			agentRunId?: string;
+		},
+	],
 	undefined
 > = async (context, data) => {
 	const RequestDocuments = new RequestDocumentsRepository(context.db);
@@ -99,6 +106,7 @@ const removeDocument: ServiceFn<
 			{
 				request_id: request.id,
 				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
 				type: "document_removed",
 				metadata: {
 					collectionKey: document.collection_key,

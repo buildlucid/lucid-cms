@@ -1,6 +1,6 @@
-import type { Media, ResolvedAdminCopy, User } from "@types";
+import type { AgentActor, Media, ResolvedAdminCopy, User } from "@types";
 import type { Accessor, Setter } from "solid-js";
-import { translateAdminCopy } from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 import { getTranslation } from "./translation-helpers";
 
@@ -187,6 +187,21 @@ const formatUserName = (
 };
 
 // ---------------------------------------------
+// Format actor name
+const formatActorName = (
+	user: Parameters<typeof formatUserName>[0],
+	agent: AgentActor | null | undefined,
+): string => {
+	const name = formatUserName(user, "name");
+	if (!agent) return name;
+	if (name) return T()("agent.actor.for", { agent: agent.name, user: name });
+
+	return agent.system
+		? agent.name
+		: T()("agent.actor.deleted", { agent: agent.name });
+};
+
+// ---------------------------------------------
 // Format User Initials
 const formatUserInitials = (user: {
 	firstName?: User["firstName"];
@@ -269,6 +284,7 @@ const helpers = {
 	getMediaType,
 	formatFileNameTitle,
 	formatUserName,
+	formatActorName,
 	formatUserInitials,
 	updateTranslation,
 	getTranslation,

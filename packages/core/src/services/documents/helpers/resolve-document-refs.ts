@@ -100,6 +100,8 @@ const resolveDocumentRefs: ServiceFn<
 				targets,
 				format: mediaFormat,
 			}),
+		agents: (targets) =>
+			registeredRefResources.agents.resolve(context, { targets }),
 	};
 	const refsRes = await resolveRefs({
 		targets: targetsRes.data,

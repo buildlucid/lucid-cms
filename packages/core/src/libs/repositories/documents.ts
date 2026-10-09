@@ -50,6 +50,7 @@ export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	version_promoted_from?: number | null;
 	version_created_at?: Date | string | null;
 	version_created_by?: number | null;
+	version_created_by_run_id?: string | null;
 	workflow_id?: number | null;
 	workflow_stage_key?: string | null;
 	workflow_created_by?: number | null;
@@ -91,6 +92,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					is_deleted: eb.ref("excluded.is_deleted"),
 					is_deleted_at: eb.ref("excluded.is_deleted_at"),
 					deleted_by: eb.ref("excluded.deleted_by"),
+					deleted_by_run_id: eb.ref("excluded.deleted_by_run_id"),
 					updated_at: eb.ref("excluded.updated_at"),
 					updated_by: eb.ref("excluded.updated_by"),
 					updated_by_run_id: eb.ref("excluded.updated_by_run_id"),
@@ -148,6 +150,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					is_deleted: eb.ref("excluded.is_deleted"),
 					is_deleted_at: eb.ref("excluded.is_deleted_at"),
 					deleted_by: eb.ref("excluded.deleted_by"),
+					deleted_by_run_id: eb.ref("excluded.deleted_by_run_id"),
 					updated_at: eb.ref("excluded.updated_at"),
 					updated_by: eb.ref("excluded.updated_by"),
 					updated_by_run_id: eb.ref("excluded.updated_by_run_id"),
@@ -201,9 +204,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				`${dynamicConfig.tableName}.id`,
 				`${dynamicConfig.tableName}.collection_key`,
 				`${dynamicConfig.tableName}.created_by`,
+				`${dynamicConfig.tableName}.created_by_run_id`,
 				`${dynamicConfig.tableName}.created_at`,
 				`${dynamicConfig.tableName}.updated_at`,
 				`${dynamicConfig.tableName}.updated_by`,
+				`${dynamicConfig.tableName}.updated_by_run_id`,
 				`${dynamicConfig.tableName}.is_deleted`,
 				`${dynamicConfig.tableName}.create_request_id`,
 			])
@@ -221,6 +226,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									`${props.tables.versions}.content_id`,
 									`${props.tables.versions}.created_at`,
 									`${props.tables.versions}.created_by`,
+									`${props.tables.versions}.created_by_run_id`,
 									`${props.tables.versions}.updated_at`,
 									`${props.tables.versions}.updated_by`,
 								])
@@ -270,6 +276,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						`${props.tables.versions}.content_id as version_content_id`,
 						`${props.tables.versions}.created_at as version_created_at`,
 						`${props.tables.versions}.created_by as version_created_by`,
+						`${props.tables.versions}.created_by_run_id as version_created_by_run_id`,
 						`${props.tables.versions}.updated_at as version_updated_at`,
 						`${props.tables.versions}.updated_by as version_updated_by`,
 					]),
@@ -297,6 +304,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						`${props.tables.versions}.content_id as version_content_id`,
 						`${props.tables.versions}.created_at as version_created_at`,
 						`${props.tables.versions}.created_by as version_created_by`,
+						`${props.tables.versions}.created_by_run_id as version_created_by_run_id`,
 						`${props.tables.versions}.updated_at as version_updated_at`,
 						`${props.tables.versions}.updated_by as version_updated_by`,
 					]),
@@ -361,9 +369,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${dynamicConfig.tableName}.id`,
 					`${dynamicConfig.tableName}.collection_key`,
 					`${dynamicConfig.tableName}.created_by`,
+					`${dynamicConfig.tableName}.created_by_run_id`,
 					`${dynamicConfig.tableName}.created_at`,
 					`${dynamicConfig.tableName}.updated_at`,
 					`${dynamicConfig.tableName}.updated_by`,
+					`${dynamicConfig.tableName}.updated_by_run_id`,
 					`${dynamicConfig.tableName}.is_deleted`,
 					`${dynamicConfig.tableName}.create_request_id`,
 				])
@@ -381,6 +391,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										`${props.tables.versions}.content_id`,
 										`${props.tables.versions}.created_at`,
 										`${props.tables.versions}.created_by`,
+										`${props.tables.versions}.created_by_run_id`,
 										`${props.tables.versions}.updated_at`,
 										`${props.tables.versions}.updated_by`,
 									])
@@ -800,9 +811,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${dynamicConfig.tableName}.id`,
 					`${dynamicConfig.tableName}.collection_key`,
 					`${dynamicConfig.tableName}.created_by`,
+					`${dynamicConfig.tableName}.created_by_run_id`,
 					`${dynamicConfig.tableName}.created_at`,
 					`${dynamicConfig.tableName}.updated_at`,
 					`${dynamicConfig.tableName}.updated_by`,
+					`${dynamicConfig.tableName}.updated_by_run_id`,
 					`${dynamicConfig.tableName}.is_deleted`,
 					`${dynamicConfig.tableName}.create_request_id`,
 				])
@@ -820,6 +833,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										`${props.tables.versions}.content_id`,
 										`${props.tables.versions}.created_at`,
 										`${props.tables.versions}.created_by`,
+										`${props.tables.versions}.created_by_run_id`,
 										`${props.tables.versions}.updated_at`,
 										`${props.tables.versions}.updated_by`,
 									])

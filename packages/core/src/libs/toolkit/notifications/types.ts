@@ -14,8 +14,10 @@ export type ToolkitNotificationsSendInput<
 	/** Change it to tell recipients again, eg. when a threshold climbs. */
 	fingerprint?: string;
 	recipients?: number[];
-	/** The person whose action caused it. They are left out of the recipients. */
+	/** The person whose action caused it. They are left out of the recipients, unless an agent acted for them. */
 	actorUserId?: number | null;
+	/** The agent run that acted for the actor, eg. `execution.actor.agentRunId`. People see the agent as the actor, and the person it acted for is told too. */
+	actorRunId?: string | null;
 };
 
 export type ToolkitNotificationsUpsertInput<

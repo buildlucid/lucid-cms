@@ -299,6 +299,7 @@ export const DocumentsList: Component<{
 				"refs.media": () => getListingRefIncludes()["refs.media"],
 				"refs.documents": () => getListingRefIncludes()["refs.documents"],
 				"refs.users": () => getListingRefIncludes()["refs.users"],
+				"refs.agents": () => getListingRefIncludes()["refs.agents"],
 			},
 		},
 		enabled: () => documentQueryEnabled(),

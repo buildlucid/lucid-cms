@@ -10,7 +10,7 @@ import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-s
 import { createTranslationStore } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
-import type { DocumentActor } from "../../../libs/toolkit/documents/types.js";
+import type { ToolkitActor } from "../../../libs/toolkit/types.js";
 import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
 import { agentTools } from "../../../libs/tools/lucid-tools.js";
 import type { AgentToolDefinition } from "../../../libs/tools/types.js";
@@ -142,8 +142,17 @@ const startRun = async (principal: "user" | "system" = "user") => {
 			status: "running",
 		})
 		.execute();
+	await context.db.kysely
+		.insertInto("lucid_agent_attributions")
+		.values({
+			run_id: runId,
+			agent_key: agent.key,
+			system: runUserId === null,
+			conversation_id: conversation.data.id,
+		})
+		.execute();
 
-	const actor: DocumentActor =
+	const actor: ToolkitActor =
 		runUserId === null
 			? { kind: "system", agentRunId: runId }
 			: { kind: "user", userId: runUserId, agentRunId: runId };
@@ -168,6 +177,7 @@ const startRun = async (principal: "user" | "system" = "user") => {
 					id: runId,
 					conversationId: conversation.data.id,
 					userId: runUserId,
+					agentKey: agent.key,
 				},
 			},
 		});
@@ -193,7 +203,12 @@ const startRun = async (principal: "user" | "system" = "user") => {
 					actor,
 					signal: AbortSignal.timeout(10_000),
 					operationId: `${runId}:${randomUUID()}`,
-					run: { id: runId, conversationId: conversation.data.id, userId },
+					run: {
+						id: runId,
+						conversationId: conversation.data.id,
+						userId,
+						agentKey: agent.key,
+					},
 				},
 			});
 			assert(result.type === "failed", JSON.stringify(result));
@@ -299,7 +314,17 @@ test("creates documents as create requests attributed to the run, then edits the
 		expect.objectContaining({ type: "request", requestId }),
 	]);
 
-	const proposal = await run.read({ id: documentId, requestId });
+	const proposal = await run.read({
+		id: documentId,
+		version: `request:${requestId}`,
+	});
+	expect(
+		await run.fail(getDocument, {
+			collectionKey: pages.key,
+			id: await createPage(),
+			version: `request:${requestId}`,
+		}),
+	).toContain(`Request ${requestId} has no proposal`);
 	expect(proposal.fields).toMatchObject({
 		title: "Spring launch",
 		body: "<p>Hello <strong>world</strong></p>",
@@ -329,7 +354,10 @@ test("creates documents as create requests attributed to the run, then edits the
 		outcome: "requested",
 		request: { id: requestId, type: "create" },
 	});
-	const reread = await run.read({ id: documentId, requestId });
+	const reread = await run.read({
+		id: documentId,
+		version: `request:${requestId}`,
+	});
 	expect(reread.fields).toMatchObject({
 		title: "Summer launch",
 		body: "<p>Hello <strong>world</strong></p>",
@@ -358,7 +386,10 @@ test("proposes updates in one request per chat and leaves latest unchanged", asy
 
 	assert(first.request);
 	const requestId = first.request.id;
-	const proposal = await run.read({ id: documentId, requestId });
+	const proposal = await run.read({
+		id: documentId,
+		version: `request:${requestId}`,
+	});
 	expect(proposal.fields).toMatchObject({
 		title: "First change",
 		body: "<p>Second change</p>",
@@ -453,6 +484,27 @@ test("direct updates write one locale and merge bricks and items by ref", async 
 		updated_by: userId,
 		updated_by_run_id: run.runId,
 	});
+
+	const attributed = await createToolkit(context).documents.getSingle({
+		collectionKey: pages.key,
+		version: "latest",
+		query: {
+			filter: { id: { value: documentId } },
+			include: ["meta", "refs.agents"],
+		},
+	});
+	assert(attributed.data, JSON.stringify(attributed.error));
+	expect(attributed.data.document.meta).toMatchObject({
+		updatedBy: userId,
+		updatedByRunId: run.runId,
+	});
+	expect(attributed.data.refs?.agents).toContainEqual({
+		id: run.runId,
+		key: agent.key,
+		name: "Editor",
+		system: false,
+		conversationId: run.conversationId,
+	});
 });
 
 test("deletes and unpublishes through requests unless direct", async () => {
@@ -500,10 +552,14 @@ test("deletes and unpublishes through requests unless direct", async () => {
 	assert(tables.data);
 	const document = await context.db.kysely
 		.selectFrom(tables.data.document)
-		.select(["is_deleted"])
+		.select(["is_deleted", "deleted_by", "deleted_by_run_id"])
 		.where("id", "=", documentId)
 		.executeTakeFirstOrThrow();
 	expect(Boolean(document.is_deleted)).toBe(true);
+	expect(document).toMatchObject({
+		deleted_by: userId,
+		deleted_by_run_id: run.runId,
+	});
 });
 
 test("direct writes still open requests where the collection requires review", async () => {

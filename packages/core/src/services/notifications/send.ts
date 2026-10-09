@@ -22,8 +22,10 @@ const send = <Definition extends AnyNotificationDefinition>(
 		fingerprint?: string;
 		/** Required for types with a `recipients` audience. */
 		recipients?: number[];
-		/** Left out of the recipients. */
+		/** Left out of the recipients, unless an agent acted for them. */
 		actorUserId?: number | null;
+		/** The agent run that acted for the actor or the system. The actor is then told too. */
+		actorRunId?: string | null;
 	},
 ): ServiceResponse<NotificationReceipt> =>
 	writeNotification(context, { ...data, mode: "send" });

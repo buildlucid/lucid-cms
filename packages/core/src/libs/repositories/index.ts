@@ -1,3 +1,4 @@
+export { default as AgentAttributionsRepository } from "./agent-attributions.js";
 export { default as AgentCompactionsRepository } from "./agent-compactions.js";
 export { default as AgentConversationsRepository } from "./agent-conversations.js";
 export { default as AgentDocumentReferencesRepository } from "./agent-document-references.js";

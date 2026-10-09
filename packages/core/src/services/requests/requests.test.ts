@@ -3,12 +3,14 @@ import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
 import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
+import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import { consumeJob } from "../../libs/jobs/consume/index.js";
 import { recoverExpiredJobs } from "../../libs/jobs/maintenance.js";
 import { getJobDefinitionRuntime } from "../../libs/jobs/registry.js";
 import { getCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { Permissions } from "../../libs/permission/definitions.js";
+import systemActor from "../../libs/permission/system-actor.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { RequestDetail } from "../../types/response.js";
@@ -302,15 +304,7 @@ const createRequest = async (
 };
 const reviewInput = (request: RequestDetail) => ({
 	id: request.id,
-	revision: request.revision,
-	expectedTargets: Object.fromEntries(
-		request.documents.map((document) => [
-			document.id,
-			Object.fromEntries(
-				document.targets.map((target) => [target.target, target.versionId]),
-			),
-		]),
-	),
+	ifUnchanged: request.reviewToken,
 });
 const approveRequest = async (id: number, user = reviewer) => {
 	const approved = await approve(context, {
@@ -431,6 +425,29 @@ test("manual publication replaces a future schedule and its old delivery cannot 
 	expect(await fieldOf(documentId, "summary", "staging")).toBe("Original");
 });
 
+test("a schedule set by the system completes as the system", async () => {
+	const documentId = await createDocument();
+	const request = await createRequest(documentId);
+	await approveRequest(request.id);
+	const scheduled = await updateSingle(context, {
+		id: request.id,
+		user: systemActor,
+		scheduledAt: new Date(Date.now() + 60_000).toISOString(),
+		scheduledTimezone: "UTC",
+	});
+	assert(!scheduled.error, JSON.stringify(scheduled.error));
+	const jobId = (await readRequest(request.id)).executionJobId;
+	assert(jobId);
+	await context.db.kysely
+		.updateTable("lucid_jobs")
+		.set({ available_at: new Date().toISOString() })
+		.where("job_id", "=", jobId)
+		.execute();
+
+	expect(await consumeJob(context, { jobId })).toEqual({ type: "completed" });
+	expect(await fieldOf(documentId, "summary", "staging")).toBe("Original");
+});
+
 test("a failure hook can enrich polling's recovery without duplicate activity", async () => {
 	const request = await createRequest(await createDocument(), [
 		"staging",
@@ -459,7 +476,7 @@ test("a failure hook can enrich polling's recovery without duplicate activity", 
 		input: {
 			requestId: request.id,
 			revision: approved.revision,
-			userId: creator.id,
+			actor: { kind: "user", userId: creator.id },
 		},
 		attempts: 1,
 		errorMessage: "Production is frozen",
@@ -839,6 +856,25 @@ test("proposals can complete into latest, and every latest edit asks for a revie
 	await completeNow(request);
 	expect(await fieldOf(id, "summary", "latest")).toBe("Proposed");
 	expect(await fieldOf(id, "summary", "staging")).toBe("Proposed");
+});
+
+test("the latest a request replaces keeps its author as a revision", async () => {
+	const id = await createDocument();
+	const request = await createRequest(id, ["latest"]);
+	await editProposal(request, "Proposed");
+	await approveRequest(request.id);
+	await completeRequest(request.id, reviewer);
+
+	const tables = await getTableNames(context, "request_pages");
+	assert(tables.data);
+	const versions = await context.db.kysely
+		.selectFrom(tables.data.version)
+		.select(["type", "created_by"])
+		.where("document_id", "=", id)
+		.where("type", "in", ["latest", "revision"])
+		.execute();
+	expect(versions).toContainEqual({ type: "revision", created_by: creator.id });
+	expect(versions).toContainEqual({ type: "latest", created_by: reviewer.id });
 });
 
 test("adding latest later asks for a review only when latest changed since the proposal", async () => {
@@ -2425,7 +2461,11 @@ test("one scheduled job publishes mixed proposals and snapshots for the group", 
 			})
 		).error,
 	).toBeUndefined();
-	const job = { id: created.data.id, revision, userId: creator.id };
+	const job = {
+		id: created.data.id,
+		revision,
+		actor: { kind: "user" as const, userId: creator.id },
+	};
 	expect(
 		(await execute(context, { ...job, jobId: "stale-job" })).error,
 	).toBeUndefined();

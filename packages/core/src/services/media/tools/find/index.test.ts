@@ -83,7 +83,10 @@ test("uses media filters and returns localized, bounded search details", async (
 		toolDefinitionInternal
 	].prepareInput({
 		query: {
-			filter: [{ key: "title", value: "Cascade", operator: "contains" }],
+			filter: [
+				{ key: "title", value: "Cascade", operator: "contains" },
+				{ key: "isDeleted", value: true },
+			],
 		},
 		contentLocale: "fr",
 	});
@@ -95,16 +98,13 @@ test("uses media filters and returns localized, bounded search details", async (
 			signal: new AbortController().signal,
 		},
 	});
-	expect(vi.mocked(getMultiple).mock.calls[0]?.[1].query).toMatchObject({
+	expect(vi.mocked(getMultiple).mock.calls[0]?.[1].query).toEqual({
 		filter: {
+			title: { value: "Cascade", operator: "contains" },
 			isDeleted: { value: false, operator: "=" },
 		},
-		filterOr: [[{ key: "title", value: "Cascade", operator: "contains" }]],
 		page: 1,
 		perPage: 20,
-	});
-	expect(vi.mocked(getMultiple).mock.calls[0]?.[1].query.filter).toEqual({
-		isDeleted: { value: false, operator: "=" },
 	});
 	expect(result.type).toBe("success");
 	if (result.type !== "success") return;
@@ -135,7 +135,7 @@ test("model schemas offer selected conditions and accept a type-only search", ()
 		inputSchema.parse({ query: { filter: [{ key: "type", value: "image" }] } }),
 	).toEqual({
 		query: {
-			filterOr: [[{ key: "type", value: "image" }]],
+			filter: { type: { value: "image" } },
 			page: 1,
 			perPage: 20,
 		},
@@ -147,7 +147,7 @@ test("model schemas offer selected conditions and accept a type-only search", ()
 	).toBe(false);
 });
 
-test("preserves ranges and combines selected filters with OR groups", () => {
+test("keeps ranges by adding repeated conditions to each OR group", () => {
 	const filter = [
 		{ key: "width", value: 600, operator: ">=" },
 		{ key: "width", value: 1200, operator: "<=" },
@@ -159,7 +159,8 @@ test("preserves ranges and combines selected filters with OR groups", () => {
 	expect(
 		inputSchema.parse({ query: { filter, filterOr: groups } }).query,
 	).toEqual({
-		filterOr: groups.map((group) => [...filter, ...group]),
+		filter: { width: { value: 600, operator: ">=" } },
+		filterOr: groups.map((group) => [filter[1], ...group]),
 		page: 1,
 		perPage: 20,
 	});

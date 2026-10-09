@@ -9,9 +9,9 @@ import {
 	Show,
 } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
+import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import DateText from "@/components/DateText/DateText";
 import Modal from "@/components/Modal/Modal";
-import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -19,11 +19,7 @@ import helpers from "@/utils/helpers";
 import { RequestRichTextContent } from "./RequestRichTextContent";
 import { RequestRichTextEditor } from "./RequestRichTextEditor";
 
-/**
- * One message in a comment thread, either the comment that starts it or a
- * reply. Replies are indented to line up with the author's name. Authors can
- * edit theirs, and they or a super admin can delete it.
- */
+/** Renders a comment or reply with author controls, allowing only super admins to delete agent messages. */
 export const RequestCommentMessage: Component<{
 	request: RequestDetail;
 	message: RequestCommentReply;
@@ -51,7 +47,9 @@ export const RequestCommentMessage: Component<{
 	// ----------------------------------------
 	// Memos
 	const own = createMemo(
-		() => props.message.user?.id === userStore.get.user?.id,
+		() =>
+			props.message.agent === null &&
+			props.message.user?.id === userStore.get.user?.id,
 	);
 	const canDelete = createMemo(
 		() => own() || userStore.get.user?.superAdmin === true,
@@ -86,12 +84,16 @@ export const RequestCommentMessage: Component<{
 	return (
 		<div class="group/message">
 			<div class="flex items-center gap-2.5">
-				<UserDisplay user={props.message.user ?? {}} variant="icon" size="xs" />
+				<ActorDisplay
+					user={props.message.user}
+					agent={props.message.agent}
+					variant="icon"
+				/>
 				<div class="flex min-w-0 grow flex-wrap items-center gap-x-2 gap-y-1">
 					<span class="truncate text-sm font-medium text-title">
-						{props.message.user
-							? helpers.formatUserName(props.message.user, "name")
-							: T()("common.unknown")}
+						{props.message.agent?.name ||
+							helpers.formatUserName(props.message.user, "name") ||
+							T()("common.unknown")}
 					</span>
 					<span class="text-xs text-body">
 						<DateText

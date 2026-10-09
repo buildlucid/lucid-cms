@@ -1,9 +1,10 @@
 import type { RequestCommentResolution } from "../../libs/db/tables/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { RequestEventsRepository } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRequestAccess from "./helpers/get-request-access.js";
+import isCommentAuthor from "./helpers/is-comment-author.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
 
@@ -17,7 +18,8 @@ const updateCommentResolution: ServiceFn<
 		{
 			id: number;
 			eventId: number;
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 			resolution: RequestCommentResolution | null;
 		},
 	],
@@ -52,9 +54,11 @@ const updateCommentResolution: ServiceFn<
 	}
 
 	const access = getRequestAccess(context, { request, user: data.user });
+	const authorRes = await isCommentAuthor(context, { ...data, comment });
+	if (authorRes.error) return authorRes;
 	if (
 		request.status !== "open" ||
-		(comment.user_id !== data.user.id && !access.edit && !access.approve)
+		(!authorRes.data && !access.edit && !access.approve)
 	) {
 		return {
 			error: {
@@ -70,6 +74,7 @@ const updateCommentResolution: ServiceFn<
 		data: {
 			resolution: data.resolution,
 			resolved_by: data.resolution ? data.user.id : null,
+			resolved_by_run_id: data.resolution ? (data.agentRunId ?? null) : null,
 			resolved_at: data.resolution ? new Date().toISOString() : null,
 		},
 		where: [{ key: "id", operator: "=", value: comment.id }],

@@ -36,12 +36,19 @@ export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
-/** Document write tools link what they change to the chat. */
-export const documentWriteTools: readonly string[] = [
+/** Document and request write tools link what they change to the chat, and open or change requests. */
+export const writeTools: readonly string[] = [
 	"documents_create",
 	"documents_update",
 	"documents_delete",
 	"documents_unpublish",
+	"requests_comment",
+	"requests_reply",
+	"requests_update_comment",
+	"requests_acknowledge",
+	"requests_update",
+	"requests_complete",
+	"requests_schedule",
 ] satisfies AgentLucidToolName[];
 
 /**

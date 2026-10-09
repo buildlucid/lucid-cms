@@ -242,9 +242,9 @@ test("MCP discovery describes routing and excludes inaccessible collections", as
 
 test("MCP document reads use real custom-field, brick and repeater filters", async () => {
 	for (const filter of [
-		{ _fullSlug: { value: "/about" } },
-		{ hero: { _heading: { value: "About heading" } } },
-		{ fields: { links: { _caption: { value: "Team" } } } },
+		[{ key: "_fullSlug", value: "/about" }],
+		[{ key: "hero._heading", value: "About heading" }],
+		[{ key: "fields.links._caption", value: "Team" }],
 	]) {
 		const result = await call("documents_find", {
 			collectionKey: pages.key,
@@ -313,12 +313,12 @@ test("MCP document reads respect pagination, field selection and content locales
 	expect(invalidLocale.isError).toBe(true);
 });
 
-test("MCP document filters preserve content API operators and nested OR groups", async () => {
+test("MCP document filters preserve content API operators and OR groups", async () => {
 	for (const filter of [
-		{ _fullSlug: { operator: "contains", value: "bout" } },
-		{ _fullSlug: { operator: "starts-with", value: "/abo" } },
-		{ _fullSlug: { operator: "!=", value: "/contact" } },
-		{ _fullSlug: { operator: "in", value: ["/about"] } },
+		[{ key: "_fullSlug", operator: "contains", value: "bout" }],
+		[{ key: "_fullSlug", operator: "starts-with", value: "/abo" }],
+		[{ key: "_fullSlug", operator: "!=", value: "/contact" }],
+		[{ key: "_fullSlug", operator: "in", value: ["/about"] }],
 	]) {
 		const result = await call("documents_find", {
 			collectionKey: pages.key,
@@ -334,13 +334,15 @@ test("MCP document filters preserve content API operators and nested OR groups",
 	const orResult = await call("documents_find", {
 		collectionKey: pages.key,
 		query: {
-			filter: [
-				{ hero: { _heading: { operator: "contains", value: "About" } } },
-				{
-					fields: {
-						links: { _caption: { operator: "starts-with", value: "Email" } },
+			filterOr: [
+				[{ key: "hero._heading", operator: "contains", value: "About" }],
+				[
+					{
+						key: "fields.links._caption",
+						operator: "starts-with",
+						value: "Email",
 					},
-				},
+				],
 			],
 		},
 	});
@@ -362,7 +364,12 @@ test("agent content tools share the read services but enforce collection permiss
 		},
 		signal: AbortSignal.timeout(5000),
 		operationId: "test:read",
-		run: { id: "run", conversationId: "conversation", userId: 1 },
+		run: {
+			id: "run",
+			conversationId: "conversation",
+			userId: 1,
+			agentKey: "agent",
+		},
 	};
 	const listed = await executeAgentTool({
 		context,

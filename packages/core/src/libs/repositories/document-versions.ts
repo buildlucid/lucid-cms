@@ -335,6 +335,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 					`${dynamicConfig.tableName}.promoted_from`,
 					`${dynamicConfig.tableName}.created_at`,
 					`${dynamicConfig.tableName}.created_by`,
+					`${dynamicConfig.tableName}.created_by_run_id`,
 					`${dynamicConfig.tableName}.document_id`,
 					`${dynamicConfig.tableName}.collection_key`,
 					`${dynamicConfig.tableName}.content_id`,

@@ -38,13 +38,13 @@ import {
 } from "@/utils/agent-references";
 import {
 	analyzeMediaTool,
-	documentWriteTools,
 	previewMediaTool,
 	readFileTool,
 	registerReferencesTool,
 	removeReferenceTool,
 	webFetchTool,
 	webSearchTool,
+	writeTools,
 } from "@/utils/agent-tools";
 
 /** Input the server has not yet accepted, kept so a retry reuses its request ID. */
@@ -136,7 +136,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			queryKey: queryKeys.agent.conversationDetails(id),
 			exact: true,
 		});
-	/** Tools that change references or web sources refresh them during the run. */
+	/** Tools that change references, requests or web sources refresh them during the run. */
 	const refreshAfterTool = (id: string, name: string) => {
 		if (
 			name === previewMediaTool ||
@@ -144,12 +144,18 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			name === removeReferenceTool ||
 			name === analyzeMediaTool ||
 			name === readFileTool ||
-			documentWriteTools.includes(name)
+			writeTools.includes(name)
 		) {
 			void refreshReferences(id);
 		}
 		if (name === webSearchTool || name === webFetchTool) {
 			void refreshDetails(id);
+		}
+		//* write tools open and change requests, so cached ones would show old details
+		if (writeTools.includes(name)) {
+			void queryClient.invalidateQueries({
+				queryKey: queryKeys.requests.all(),
+			});
 		}
 	};
 	/** Applies a change to the cached conversation, so the chat updates before the server confirms it. */

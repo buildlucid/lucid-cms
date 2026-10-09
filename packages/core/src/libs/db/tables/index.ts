@@ -1,3 +1,4 @@
+import { agentAttributionsTable } from "./agent-attributions.js";
 import { agentCompactionsTable } from "./agent-compactions.js";
 import { agentConversationsTable } from "./agent-conversations.js";
 import { agentDocumentReferencesTable } from "./agent-document-references.js";
@@ -67,6 +68,7 @@ import { userRolesTable } from "./user-roles.js";
 import { userTokensTable } from "./user-tokens.js";
 import { usersTable } from "./users.js";
 
+export * from "./agent-attributions.js";
 export * from "./agent-compactions.js";
 export * from "./agent-conversations.js";
 export * from "./agent-document-references.js";
@@ -142,6 +144,7 @@ export const coreTableDefinitions = [
 	agentMediaReferencesTable,
 	agentDocumentReferencesTable,
 	agentRequestReferencesTable,
+	agentAttributionsTable,
 	agentCompactionsTable,
 	agentInputsTable,
 	agentConversationsTable,

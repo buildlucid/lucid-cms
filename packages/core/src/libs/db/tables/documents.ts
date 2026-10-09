@@ -45,6 +45,10 @@ export const documentsTable = defineTable(
 				schema: z.number().nullable(),
 				type: "integer",
 			},
+			deleted_by_run_id: {
+				schema: z.string().nullable(),
+				type: "text",
+			},
 			create_request_id: {
 				schema: z.number().nullable(),
 				type: "integer",
@@ -108,6 +112,8 @@ export interface LucidDocumentTable {
 	is_deleted: BooleanInt;
 	is_deleted_at: TimestampMutable;
 	deleted_by: number | null;
+	/** The agent run that moved it to the bin, for `deleted_by` or the system. */
+	deleted_by_run_id: string | null;
 	/** The open create request requesting this document. Null once created. */
 	create_request_id: number | null;
 	created_by: number | null;

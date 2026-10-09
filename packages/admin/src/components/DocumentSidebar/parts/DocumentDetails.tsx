@@ -78,6 +78,7 @@ export const DocumentDetails: Component<{
 				value: (
 					<UserDetailValue
 						userId={document?.createdBy ?? null}
+						runId={document?.createdByRunId ?? null}
 						refs={props.refs()}
 					/>
 				),
@@ -88,6 +89,7 @@ export const DocumentDetails: Component<{
 				value: (
 					<UserDetailValue
 						userId={document?.updatedBy ?? null}
+						runId={document?.updatedByRunId ?? null}
 						refs={props.refs()}
 					/>
 				),

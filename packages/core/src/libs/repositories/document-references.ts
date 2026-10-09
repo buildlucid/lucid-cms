@@ -1,10 +1,10 @@
-import type { RefResource } from "../../exports/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import { documentReferencesTable } from "../db/tables/document-references.js";
 import type {
 	LucidBrickTableName,
 	LucidDocumentReferences,
 } from "../db/tables/index.js";
+import type { FieldRefResource } from "../refs/types.js";
 import StaticRepository from "./parents/static-repository.js";
 
 /** Stored reverse references shared by document, media and user changes. */
@@ -65,7 +65,7 @@ export default class DocumentReferencesRepository extends StaticRepository<"luci
 	}
 	/** Embedded identities stay because authored JSON still contains them. */
 	async deleteDirectTargets(props: {
-		resource: RefResource;
+		resource: FieldRefResource;
 		table: string;
 		ids: number[];
 	}) {
@@ -180,7 +180,7 @@ export default class DocumentReferencesRepository extends StaticRepository<"luci
 		});
 	}
 	async selectDependants(props: {
-		resource: RefResource;
+		resource: FieldRefResource;
 		table: string;
 		ids: number[];
 	}) {

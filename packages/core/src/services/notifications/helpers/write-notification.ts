@@ -37,6 +37,7 @@ const writeNotification: ServiceFn<
 			fingerprint?: string;
 			recipients?: number[];
 			actorUserId?: number | null;
+			actorRunId?: string | null;
 		},
 	],
 	NotificationReceipt
@@ -88,7 +89,8 @@ const writeNotification: ServiceFn<
 		definition,
 		roleIds: settingsRes.data.roleIds,
 		recipients: input.recipients,
-		actorUserId,
+		//* an agent's action isn't the person's own, so they hear about it like anyone else
+		actorUserId: input.actorRunId ? null : actorUserId,
 	});
 	if (recipientsRes.error) return recipientsRes;
 
@@ -121,6 +123,7 @@ const writeNotification: ServiceFn<
 		href: rendered.href ?? null,
 		data,
 		actor_user_id: actorUserId,
+		actor_run_id: input.actorRunId ?? null,
 	};
 
 	//* inserting first means two sends with the same key can't both create one

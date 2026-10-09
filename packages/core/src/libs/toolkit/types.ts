@@ -1,3 +1,4 @@
+import type z from "zod";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { ToolkitAgent } from "./agent/index.js";
 import type { ToolkitAuth } from "./auth/index.js";
@@ -9,6 +10,11 @@ import type { ToolkitLocales } from "./locales/index.js";
 import type { ToolkitMedia } from "./media/index.js";
 import type { ToolkitNotifications } from "./notifications/index.js";
 import type { ToolkitPreviews } from "./previews/index.js";
+import type { ToolkitRequests } from "./requests/index.js";
+import type { toolkitActorSchema } from "./schema.js";
+
+/** A user whose live permissions are checked, or a trusted system operation. Agent tools receive theirs as `execution.actor`. */
+export type ToolkitActor = z.infer<typeof toolkitActorSchema>;
 
 /** Lucid service context used by `createToolkit()`. */
 export type ToolkitContext = ServiceContext;
@@ -35,6 +41,8 @@ export type CoreToolkit = {
 	notifications: ToolkitNotifications;
 	/** Helpers for resolving and handling previews. */
 	previews: ToolkitPreviews;
+	/** Helpers for reading, discussing and managing requests. */
+	requests: ToolkitRequests;
 };
 
 /**
@@ -108,3 +116,20 @@ export type * from "./notifications/index.js";
 export type * from "./previews/index.js";
 export type * from "./previews/resolve/index.js";
 export type * from "./previews/state/index.js";
+export type * from "./requests/acknowledge/index.js";
+export type * from "./requests/close/index.js";
+export type * from "./requests/comments/create/index.js";
+export type * from "./requests/comments/delete/index.js";
+export type * from "./requests/comments/resolve/index.js";
+export type * from "./requests/comments/update/index.js";
+export type * from "./requests/complete/index.js";
+export type * from "./requests/create-single/index.js";
+export type * from "./requests/documents/add/index.js";
+export type * from "./requests/documents/remove/index.js";
+export type * from "./requests/documents/set-targets/index.js";
+export type * from "./requests/get-multiple/index.js";
+export type * from "./requests/get-single/index.js";
+export type * from "./requests/index.js";
+export type * from "./requests/reopen/index.js";
+export type * from "./requests/schedule/index.js";
+export type * from "./requests/update-single/index.js";

@@ -5,7 +5,10 @@ import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { findDocumentUserRef } from "@/utils/document-ref-helpers";
+import {
+	findDocumentAgentRef,
+	findDocumentUserRef,
+} from "@/utils/document-ref-helpers";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -213,6 +216,12 @@ export function useDocumentHistoryState() {
 			selectedItem()?.createdBy,
 		) satisfies UserRef | undefined;
 	});
+	const selectedCreatedByAgent = createMemo(() =>
+		findDocumentAgentRef(
+			selectedVersionDocumentQuery.data?.refs,
+			selectedItem()?.createdByRunId,
+		),
+	);
 	const selectedRetention = createMemo((): RetentionInfo => {
 		const item = selectedItem();
 		const revisions = collection()?.revisions;
@@ -432,6 +441,7 @@ export function useDocumentHistoryState() {
 		revisionName,
 		selectedItem,
 		selectedCreatedByUser,
+		selectedCreatedByAgent,
 		selectedRetention,
 		canRestoreSelectedItem,
 		restorePermission,

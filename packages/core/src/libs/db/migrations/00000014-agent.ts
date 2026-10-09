@@ -503,6 +503,40 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			])
 			.execute();
 
+		//* outlives its run and chat, so changes stay attributed to the agent once a chat is deleted
+		await db.schema
+			.createTable("lucid_agent_attributions")
+			.addColumn("run_id", adapter.getDataType("text"), (col) =>
+				col.primaryKey(),
+			)
+			.addColumn("agent_key", adapter.getDataType("text"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("system", adapter.getDataType("boolean"), (col) =>
+				col
+					.notNull()
+					.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.getDefault("boolean", "false"),
+						),
+					),
+			)
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_conversations.id").onDelete("set null"),
+			)
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col
+					.notNull()
+					.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+			)
+			.execute();
+
 		await db.schema
 			.alterTable("lucid_ai_generations")
 			.addColumn("agent_run_id", adapter.getDataType("text"), (col) =>
@@ -519,7 +553,14 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 		await db.schema
 			.alterTable("lucid_requests")
 			.addColumn("created_by_run_id", adapter.getDataType("text"), (col) =>
-				col.references("lucid_agent_runs.id").onDelete("set null"),
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
+			)
+			.execute();
+
+		await db.schema
+			.alterTable("lucid_requests")
+			.addColumn("scheduled_by_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
 			)
 			.execute();
 
@@ -532,7 +573,21 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 		await db.schema
 			.alterTable("lucid_request_events")
 			.addColumn("agent_run_id", adapter.getDataType("text"), (col) =>
-				col.references("lucid_agent_runs.id").onDelete("set null"),
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
+			)
+			.execute();
+
+		await db.schema
+			.alterTable("lucid_request_events")
+			.addColumn("resolved_by_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
+			)
+			.execute();
+
+		await db.schema
+			.alterTable("lucid_notifications")
+			.addColumn("actor_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
 			)
 			.execute();
 

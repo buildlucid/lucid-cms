@@ -1,5 +1,6 @@
 import { Collapsible } from "@kobalte/core";
 import type {
+	AgentRef,
 	Collection,
 	InternalCollectionDocument,
 	Permission,
@@ -28,13 +29,13 @@ import {
 	Suspense,
 	Switch,
 } from "solid-js";
+import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import Button from "@/components/Button/Button";
 import Copy from "@/components/Copy/Copy";
 import DateText from "@/components/DateText/DateText";
 import Link from "@/components/Link/Link";
 import Pill, { type PillProps } from "@/components/Pill/Pill";
 import RequestCompactList from "@/components/RequestCompactList/RequestCompactList";
-import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import type {
 	RetentionInfo,
 	TimelineItem,
@@ -80,6 +81,7 @@ const TimelineDetails: Component<{
 	selectedVersionDocument: Accessor<InternalCollectionDocument | undefined>;
 	selectedVersionDocumentLoading: Accessor<boolean>;
 	createdByUser: Accessor<UserRef | undefined>;
+	createdByAgent: Accessor<AgentRef | undefined>;
 	retention: Accessor<RetentionInfo>;
 	requests: Accessor<RequestSummary[]>;
 	requestsLoading: Accessor<boolean>;
@@ -222,6 +224,7 @@ const TimelineDetails: Component<{
 							value={
 								<AuthorDisplay
 									user={props.createdByUser()}
+									agent={props.createdByAgent()}
 									fallbackId={props.item.createdBy}
 								/>
 							}
@@ -451,10 +454,11 @@ const DetailRow: Component<{
 
 const AuthorDisplay: Component<{
 	user?: UserRef;
+	agent?: AgentRef;
 	fallbackId: number | null;
 }> = (props) => (
 	<Show
-		when={props.user}
+		when={props.user || props.agent}
 		fallback={
 			<span class="inline-flex items-center gap-2">
 				<TbOutlineUser size={12} />
@@ -462,14 +466,7 @@ const AuthorDisplay: Component<{
 			</span>
 		}
 	>
-		{(user) => (
-			<UserDisplay
-				user={user()}
-				variant="horizontal"
-				size="xs"
-				nameFormat="name"
-			/>
-		)}
+		<ActorDisplay user={props.user} agent={props.agent} />
 	</Show>
 );
 

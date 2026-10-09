@@ -93,6 +93,10 @@ export const requestEventsTable = defineTable("lucid_request_events", () => ({
 			schema: z.number().nullable(),
 			type: "integer",
 		},
+		resolved_by_run_id: {
+			schema: z.uuid().nullable(),
+			type: "text",
+		},
 		resolved_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
@@ -188,6 +192,8 @@ export interface LucidRequestEvents {
 	/** How a comment was dealt with. Null while it is still open. */
 	resolution: RequestCommentResolution | null;
 	resolved_by: number | null;
+	/** The agent run that resolved it, for `resolved_by` or the system. */
+	resolved_by_run_id: string | null;
 	resolved_at: TimestampMutable;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutable;

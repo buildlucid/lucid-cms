@@ -1,5 +1,5 @@
 import type { CollectionToolOptions } from "../../../libs/permission/readable-collections.js";
-import type { DocumentActor } from "../../../libs/toolkit/documents/types.js";
+import type { ToolkitActor } from "../../../libs/toolkit/types.js";
 
 export type DocumentWriteToolOptions = CollectionToolOptions & {
 	/**
@@ -12,7 +12,7 @@ export type DocumentWriteToolOptions = CollectionToolOptions & {
 };
 
 export type DocumentWriteToolProps = {
-	actor: DocumentActor;
+	actor: ToolkitActor;
 	conversationId: string;
 	toolName: string;
 	direct: boolean;

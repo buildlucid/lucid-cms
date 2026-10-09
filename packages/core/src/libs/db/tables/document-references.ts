@@ -1,4 +1,5 @@
 import z from "zod";
+import type { FieldRefResource } from "../../refs/types.js";
 import { defineTable } from "../client/table/definition.js";
 
 export const documentReferencesTable = defineTable(
@@ -33,7 +34,7 @@ export interface LucidDocumentReferences {
 	source_column: string;
 	locale: string;
 	kind: "direct" | "embedded";
-	target_resource: "documents" | "media" | "users";
+	target_resource: FieldRefResource;
 	target_table: string;
 	target_id: number;
 }

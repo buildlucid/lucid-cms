@@ -14,6 +14,7 @@ export const sendSchema = z.object({
 	fingerprint: z.string().trim().min(1).optional(),
 	recipients: z.array(z.number().int().positive()).optional(),
 	actorUserId: z.number().int().positive().nullable().optional(),
+	actorRunId: z.uuid().nullable().optional(),
 });
 
 export const upsertSchema = sendSchema.extend({

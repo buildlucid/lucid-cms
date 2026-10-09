@@ -1,15 +1,12 @@
 import type z from "zod";
 import type writeSingle from "../../../services/documents/write-single.js";
 import type {
-	documentActorSchema,
 	documentDataSchema,
 	documentEditableDataSchema,
 	documentEditTokenSchema,
 	documentPatchSchema,
 } from "./authoring-values-schema.js";
 
-/** A user with collection permissions, or a trusted system operation. */
-export type DocumentActor = z.infer<typeof documentActorSchema>;
 /** Pass a token returned by getEditable to reject a write if that document has changed. */
 export type DocumentEditToken = z.infer<typeof documentEditTokenSchema>;
 /** Partial document values. Arrays set their items, merging those that keep their ref; JSON and rich text replace the whole field. */

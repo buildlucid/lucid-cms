@@ -128,7 +128,12 @@ const executionFor = async (): Promise<AgentToolExecution> => {
 		actor: { kind: "user", userId: 1 },
 		signal: new AbortController().signal,
 		operationId: randomUUID(),
-		run: { id: randomUUID(), conversationId: chat.data.id, userId: null },
+		run: {
+			id: randomUUID(),
+			conversationId: chat.data.id,
+			userId: null,
+			agentKey: "assistant",
+		},
 	};
 };
 const createMedia = async (props?: {

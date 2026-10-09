@@ -49,6 +49,7 @@ const executeReadBatch: ServiceFn<
 			id: run.id,
 			conversationId: run.conversation_id,
 			userId: run.user_id,
+			agentKey: run.agent_key,
 		},
 	});
 

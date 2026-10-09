@@ -2,14 +2,23 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import { generateText } from "@lucidcms/rich-text/server";
 import { copy } from "../../libs/i18n/index.js";
 import { RequestEventsRepository } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import isCommentAuthor from "./helpers/is-comment-author.js";
 import loadRequest from "./helpers/load-request.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 
-/** People can only edit their own comments and replies. */
+/** People can only edit their own comments and replies, and agents only theirs. */
 const updateComment: ServiceFn<
-	[{ id: number; eventId: number; user: LucidUser; body: RichTextJSON }],
+	[
+		{
+			id: number;
+			eventId: number;
+			user: LucidActor;
+			agentRunId?: string;
+			body: RichTextJSON;
+		},
+	],
 	undefined
 > = async (context, data) => {
 	const RequestEvents = new RequestEventsRepository(context.db);
@@ -31,7 +40,11 @@ const updateComment: ServiceFn<
 	const comment = requestRes.data.events.find(
 		(event) => event.id === data.eventId && event.type === "comment",
 	);
-	if (!comment || comment.user_id !== data.user.id) {
+	const authorRes = comment
+		? await isCommentAuthor(context, { ...data, comment })
+		: undefined;
+	if (authorRes?.error) return authorRes;
+	if (!comment || !authorRes?.data) {
 		return {
 			error: {
 				type: "basic",

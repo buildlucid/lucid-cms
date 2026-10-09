@@ -134,6 +134,23 @@ export type AgentRunnerToolName =
 	| "lucid_load_skill"
 	| "lucid_finish_run";
 
+/** An agent that acted, for the person shown alongside it or for the system. */
+export type AgentActor = {
+	key: string;
+	/** The agent's name, or its key once it is no longer configured. */
+	name: string;
+	/** It acted as the system rather than for a person. A missing person with this false was deleted. */
+	system: boolean;
+	/** The chat it acted in. Null once the chat is deleted. */
+	conversationId: string | null;
+};
+
+/** The agent behind a run, returned in `refs.agents` for the run IDs on documents and versions. */
+export type AgentRef = AgentActor & {
+	/** The run ID. */
+	id: string;
+};
+
 /** Lucid's own agent tools that the admin handles in their own way, eg. with custom views or by refreshing chat references. */
 export type AgentLucidToolName =
 	| "web_search"
@@ -143,7 +160,14 @@ export type AgentLucidToolName =
 	| "documents_create"
 	| "documents_update"
 	| "documents_delete"
-	| "documents_unpublish";
+	| "documents_unpublish"
+	| "requests_comment"
+	| "requests_reply"
+	| "requests_update_comment"
+	| "requests_acknowledge"
+	| "requests_update"
+	| "requests_complete"
+	| "requests_schedule";
 
 /** Widgets the runner creates itself, including media galleries, questions and approvals. */
 export type AgentRunnerWidgetKey =

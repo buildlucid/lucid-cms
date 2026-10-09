@@ -1,12 +1,14 @@
 import canEditDocument from "../../services/requests/helpers/can-edit-document.js";
 import countOpenComments from "../../services/requests/helpers/count-open-comments.js";
+import getReviewToken from "../../services/requests/helpers/get-review-token.js";
 import getTargetReview from "../../services/requests/helpers/get-target-review.js";
 import type {
 	RequestRecord,
 	RequestState,
 } from "../../services/requests/types.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type {
+	AgentActor,
 	RequestBlocker,
 	RequestDetail,
 	RequestDocument,
@@ -60,12 +62,16 @@ const formatEvent = (props: {
 	event: Select<LucidRequestEvents>;
 	replies: Select<LucidRequestEvents>[];
 	users: Map<number, RequestUser>;
+	agents: Map<string, AgentActor>;
 }): RequestEvent | null => {
 	const userOrNull = (id: number | null) =>
 		id === null ? null : (props.users.get(id) ?? null);
+	const agentOrNull = (runId: string | null) =>
+		runId === null ? null : (props.agents.get(runId) ?? null);
 	const base = {
 		id: props.event.id,
 		user: userOrNull(props.event.user_id),
+		agent: agentOrNull(props.event.agent_run_id),
 		createdAt: formatter.formatDate(props.event.created_at),
 		updatedAt: formatter.formatDate(props.event.updated_at),
 	};
@@ -80,12 +86,14 @@ const formatEvent = (props: {
 				body: props.event.body,
 				resolution: props.event.resolution,
 				resolvedBy: userOrNull(props.event.resolved_by),
+				resolvedByAgent: agentOrNull(props.event.resolved_by_run_id),
 				replies: props.replies.flatMap((reply) =>
 					reply.body
 						? [
 								{
 									id: reply.id,
 									user: userOrNull(reply.user_id),
+									agent: agentOrNull(reply.agent_run_id),
 									body: reply.body,
 									createdAt: formatter.formatDate(reply.created_at),
 									updatedAt: formatter.formatDate(reply.updated_at),
@@ -207,8 +215,9 @@ const formatSingle = (props: {
 	blockers: RequestBlocker[];
 	permissions: RequestPermissions;
 	requiredApprovals: number;
-	user: LucidUser;
+	user: LucidActor;
 	users: Map<number, RequestUser>;
+	agents: Map<string, AgentActor>;
 }): RequestDetail => {
 	const userOrNull = (id: number | null) =>
 		id === null ? null : (props.users.get(id) ?? null);
@@ -228,6 +237,10 @@ const formatSingle = (props: {
 		revision: props.request.revision,
 		executionJobId: props.request.execution_job_id,
 		createdBy: userOrNull(props.request.created_by),
+		createdByAgent:
+			props.request.created_by_run_id === null
+				? null
+				: (props.agents.get(props.request.created_by_run_id) ?? null),
 		approvals: props.request.approvals.map((approval) => ({
 			user: userOrNull(approval.user_id),
 			approvedAt: formatter.formatDate(approval.approved_at),
@@ -294,11 +307,13 @@ const formatSingle = (props: {
 				event,
 				replies: repliesByParent.get(event.id) ?? [],
 				users: props.users,
+				agents: props.agents,
 			});
 			return formatted ? [formatted] : [];
 		}),
 		blockers: props.blockers,
 		openComments: countOpenComments({ events: props.request.events }),
+		reviewToken: getReviewToken(props),
 		permissions: props.permissions,
 	};
 };
@@ -307,6 +322,7 @@ const formatSummary = (props: {
 	request: RequestSummaryQueryResponse;
 	permissions: RequestPermissions;
 	users: Map<number, RequestUser>;
+	agents: Map<string, AgentActor>;
 }): RequestSummary => ({
 	id: props.request.id,
 	type: props.request.type,
@@ -317,6 +333,10 @@ const formatSummary = (props: {
 		props.request.created_by === null
 			? null
 			: (props.users.get(props.request.created_by) ?? null),
+	createdByAgent:
+		props.request.created_by_run_id === null
+			? null
+			: (props.agents.get(props.request.created_by_run_id) ?? null),
 	reviewers: props.request.reviewers.flatMap((reviewer) => {
 		const user = props.users.get(reviewer.user_id);
 		return user ? [user] : [];

@@ -22,6 +22,7 @@ import getBlockers from "./helpers/get-blockers.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestState from "./helpers/get-request-state.js";
 import getRequiredApprovals from "./helpers/get-required-approvals.js";
+import getReviewToken from "./helpers/get-review-token.js";
 import scheduleRequest from "./helpers/schedule-request.js";
 import { approvedNotification } from "./notifications/approved.js";
 import { failedNotification } from "./notifications/failed.js";
@@ -29,15 +30,19 @@ import { requestNotificationKeys } from "./notifications/keys.js";
 import { readyNotification } from "./notifications/ready.js";
 import { reviewRequestedNotification } from "./notifications/review-requested.js";
 
-/** Records the user's approval and freezes content or target versions once the required count is reached. */
+/**
+ * Records the user's approval and freezes content or target versions once the
+ * required count is reached. `ifUnchanged` is the `reviewToken` the user
+ * reviewed, so changes made since then are never approved.
+ */
 const approve: ServiceFn<
 	[
 		{
 			id: number;
 			user: LucidUser;
+			agentRunId?: string;
 			body?: RichTextJSON;
-			revision: number;
-			expectedTargets: Record<string, Record<string, number | null>>;
+			ifUnchanged: string;
 		},
 	],
 	undefined
@@ -109,25 +114,7 @@ const approve: ServiceFn<
 	if (stateRes.error) return stateRes;
 
 	const states = stateRes.data;
-	if (
-		data.revision !== request.revision ||
-		Object.keys(data.expectedTargets).length !== request.documents.length ||
-		request.documents.some((document) => {
-			const expected = data.expectedTargets[document.id];
-			const state = states.get(document.id);
-			return (
-				!expected ||
-				!state ||
-				Object.keys(expected).length !== document.targets.length ||
-				document.targets.some(
-					(target) =>
-						!Object.hasOwn(expected, target.target) ||
-						expected[target.target] !==
-							(state.versions.get(target.target)?.id ?? null),
-				)
-			);
-		})
-	) {
+	if (getReviewToken({ request, state: states }) !== data.ifUnchanged) {
 		return {
 			error: {
 				type: "basic",
@@ -196,6 +183,7 @@ const approve: ServiceFn<
 			{
 				request_id: request.id,
 				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
 				type: "approved",
 				body: data.body ?? null,
 			},
@@ -213,6 +201,7 @@ const approve: ServiceFn<
 		definition: approvedNotification,
 		recipients: request.created_by === null ? [] : [request.created_by],
 		actorUserId: data.user.id,
+		actorRunId: data.agentRunId,
 		data: { requestId: request.id, title: request.title },
 	});
 	if (approvedRes.error) return approvedRes;
@@ -235,6 +224,7 @@ const approve: ServiceFn<
 				toVersionType:
 					constants.collectionBuilder.publishing.snapshotVersionType,
 				userId: data.user.id,
+				agentRunId: data.agentRunId,
 			});
 			if (snapshotRes.error) return snapshotRes;
 
@@ -304,6 +294,7 @@ const approve: ServiceFn<
 		key: requestNotificationKeys.ready(request.id),
 		recipients: request.created_by === null ? [] : [request.created_by],
 		actorUserId: data.user.id,
+		actorRunId: data.agentRunId,
 		data: {
 			requestId: request.id,
 			title: request.title,

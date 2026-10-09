@@ -11,9 +11,13 @@ const document = {
 	is_deleted_at: null,
 	deleted_by: 1,
 	created_by: 10,
+	created_by_run_id: "run-created",
 	created_at: "2026-08-21T10:00:00.000Z",
 	updated_by: 20,
+	updated_by_run_id: null,
 	updated_at: "2026-08-21T11:00:00.000Z",
+	version_created_by: 35,
+	version_created_by_run_id: "run-revision",
 	workflow_updated_by: 40,
 	workflow_assignees: [
 		{
@@ -34,7 +38,9 @@ const document = {
 			promoted_from: null,
 			content_id: "content-id",
 			created_by: 30,
+			created_by_run_id: "run-version",
 			updated_by: null,
+			updated_by_run_id: null,
 			created_at: "2026-08-21T10:00:00.000Z",
 			updated_at: null,
 		},
@@ -64,8 +70,22 @@ const getTargetIds = (includeMeta: boolean) =>
 	}).map((target) => target.value);
 
 describe("collectDocumentRefTargets", () => {
-	it("contributes deduplicated metadata and workflow user targets", () => {
-		expect(getTargetIds(true)).toEqual([10, 20, 30, 40, 50, 60, 70, 80, 90]);
+	it("contributes deduplicated metadata and workflow user and agent targets", () => {
+		expect(getTargetIds(true)).toEqual([
+			10,
+			20,
+			35,
+			30,
+			40,
+			50,
+			60,
+			70,
+			80,
+			90,
+			"run-created",
+			"run-revision",
+			"run-version",
+		]);
 	});
 
 	it("omits document metadata when the content response excludes it", () => {

@@ -1,4 +1,4 @@
-import type { RefResource } from "../../exports/types.js";
+import type { FieldRefResource } from "../../libs/refs/types.js";
 import { DocumentReferencesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import notifyDependants from "./notify-dependants.js";
@@ -8,7 +8,7 @@ import notifyDependants from "./notify-dependants.js";
 const removeTarget: ServiceFn<
 	[
 		{
-			resource: RefResource;
+			resource: FieldRefResource;
 			table: string;
 			ids: number[];
 			collectionKey?: string;

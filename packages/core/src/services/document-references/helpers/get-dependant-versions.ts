@@ -1,7 +1,7 @@
-import type { RefResource } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import type { FieldRefResource } from "../../../libs/refs/types.js";
 import {
 	DocumentReferencesRepository,
 	DocumentVersionsRepository,
@@ -10,7 +10,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import { resolveRelatedDocumentVersionType } from "../../documents/helpers/resolve-relation-version-type.js";
 
 export type ChangedTarget = {
-	resource: RefResource;
+	resource: FieldRefResource;
 	table: string;
 	ids: number[];
 	collectionKey?: string;

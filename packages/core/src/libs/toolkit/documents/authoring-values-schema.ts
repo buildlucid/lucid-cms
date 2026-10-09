@@ -1,18 +1,5 @@
 import z from "zod";
 
-/** The agent run making a change for the actor. Agent tools receive it as `execution.actor`. */
-const agentRunIdSchema = z.uuid().optional();
-
-/** Identifies who is making a document change. System writes have no user attribution. */
-export const documentActorSchema = z.discriminatedUnion("kind", [
-	z.strictObject({ kind: z.literal("system"), agentRunId: agentRunIdSchema }),
-	z.strictObject({
-		kind: z.literal("user"),
-		userId: z.number().int().positive(),
-		agentRunId: agentRunIdSchema,
-	}),
-]);
-
 export const documentRefSchema = z.string().min(1).max(128);
 
 export const documentEditTokenSchema = z

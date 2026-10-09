@@ -129,15 +129,7 @@ const approved = async (documentId: number, target: string) => {
 	const decision = await approve(context, {
 		id: request.data.id,
 		user: actor,
-		revision: request.data.revision,
-		expectedTargets: Object.fromEntries(
-			request.data.documents.map((document) => [
-				document.id,
-				Object.fromEntries(
-					document.targets.map((target) => [target.target, target.versionId]),
-				),
-			]),
-		),
+		ifUnchanged: request.data.reviewToken,
 	});
 	assert(!decision.error, JSON.stringify(decision.error));
 	const read = await getSingle(context, { id: request.data.id, user: actor });
@@ -374,18 +366,7 @@ test.skipIf(!postgresUrl)(
 				await approve(context, {
 					id: request.data.id,
 					user: actor,
-					revision: request.data.revision,
-					expectedTargets: Object.fromEntries(
-						request.data.documents.map((document) => [
-							document.id,
-							Object.fromEntries(
-								document.targets.map((target) => [
-									target.target,
-									target.versionId,
-								]),
-							),
-						]),
-					),
+					ifUnchanged: request.data.reviewToken,
 				})
 			).error,
 		).toBeDefined();

@@ -94,7 +94,9 @@ const resolveRequest: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: copy("server:core.tools.documents.request.unsupported"),
+				message: copy("server:core.tools.documents.request.unsupported", {
+					data: { requestId },
+				}),
 				status: 400,
 			},
 			data: undefined,
@@ -138,7 +140,9 @@ const resolveRequest: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: copy("server:core.tools.documents.request.unsupported"),
+				message: copy("server:core.tools.documents.request.unsupported", {
+					data: { requestId },
+				}),
 				status: 400,
 			},
 			data: undefined,

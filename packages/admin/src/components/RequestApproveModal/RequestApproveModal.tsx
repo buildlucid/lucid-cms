@@ -29,10 +29,7 @@ const RequestApproveModal: Component<{
 	// ----------------------------------------
 	// State & Mutations
 	const [comment, setComment] = createSignal<RichTextJSON>();
-	const [review, setReview] = createSignal<{
-		revision: number;
-		expectedTargets: Record<string, Record<string, number | null>>;
-	}>();
+	const [reviewToken, setReviewToken] = createSignal<string>();
 	const publish = api.requests.useComplete({
 		onSuccess: () => props.setOpen(false),
 	});
@@ -66,22 +63,8 @@ const RequestApproveModal: Component<{
 	createEffect(() => {
 		if (!props.open) return;
 		setComment(undefined);
-		setReview(
-			untrack(() => ({
-				revision: props.request.revision,
-				expectedTargets: Object.fromEntries(
-					props.request.documents.map((document) => [
-						document.id,
-						Object.fromEntries(
-							document.targets.map((target) => [
-								target.target,
-								target.versionId,
-							]),
-						),
-					]),
-				),
-			})),
-		);
+		//* approve what was on screen when the modal opened, not later changes
+		setReviewToken(untrack(() => props.request.reviewToken));
 		approve.reset();
 		publish.reset();
 	});
@@ -95,12 +78,12 @@ const RequestApproveModal: Component<{
 				onSubmit={(event) => {
 					event.preventDefault();
 					const body = comment();
-					const reviewed = review();
-					if (!reviewed || !props.request.permissions.approve) return;
+					const ifUnchanged = reviewToken();
+					if (!ifUnchanged || !props.request.permissions.approve) return;
 					approve.action.mutate({
 						id: props.request.id,
 						body: {
-							...reviewed,
+							ifUnchanged,
 							body: richTextHasContent(body) ? body : undefined,
 						},
 					});

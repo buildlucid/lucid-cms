@@ -2,7 +2,7 @@ import collections from "../../../libs/collection/collections.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
-import type { DocumentActor } from "../../../libs/toolkit/documents/types.js";
+import type { ToolkitActor } from "../../../libs/toolkit/types.js";
 import type { LucidUser } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import loadActiveUser from "../../users/helpers/load-active-user.js";
@@ -11,7 +11,7 @@ import loadActiveUser from "../../users/helpers/load-active-user.js";
 const resolveDocumentActor: ServiceFn<
 	[
 		{
-			actor: DocumentActor;
+			actor: ToolkitActor;
 			collectionKey: string;
 			action: "read" | "create" | "update" | "delete";
 		},

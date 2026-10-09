@@ -140,6 +140,7 @@ const DocumentHistoryPage: Component = () => {
 										state.selectedVersionDocumentQuery.isLoading
 									}
 									createdByUser={state.selectedCreatedByUser}
+									createdByAgent={state.selectedCreatedByAgent}
 									retention={state.selectedRetention}
 									requests={() => state.requestsQuery.data?.data ?? []}
 									requestsLoading={() => state.requestsQuery.isLoading}

@@ -1,6 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
 import { notificationLevelSchema } from "../libs/db/tables/notifications.js";
+import { agentActorSchema } from "./agent.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaImagePreviewResponseSchema } from "./media.js";
 
@@ -34,6 +35,9 @@ const notificationResponseSchema = z.object({
 			profilePicture: mediaImagePreviewResponseSchema.nullable(),
 		})
 		.nullable(),
+	actorAgent: agentActorSchema.nullable().meta({
+		description: "The agent that acted, for actor or the system",
+	}),
 	readAt: z.string().nullable(),
 	archivedAt: z.string().nullable(),
 	resolvedAt: z.string().nullable(),

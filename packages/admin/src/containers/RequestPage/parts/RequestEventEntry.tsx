@@ -43,8 +43,9 @@ export const RequestEventEntry: Component<{
 				T()("common.unknown")
 			: T()("common.unknown");
 	const name = createMemo(() =>
-		props.event.user
-			? userName(props.event.user)
+		props.event.user || props.event.agent
+			? helpers.formatActorName(props.event.user, props.event.agent) ||
+				T()("common.unknown")
 			: T()("requests.activity.system"),
 	);
 	//* grouped requests say which document an event is about

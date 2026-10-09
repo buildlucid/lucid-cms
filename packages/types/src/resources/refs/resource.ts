@@ -1,1 +1,1 @@
-export type RefResource = "documents" | "media" | "users";
+export type RefResource = "documents" | "media" | "users" | "agents";

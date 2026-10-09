@@ -1,3 +1,4 @@
+import type { AgentRef } from "../agent/types.js";
 import type {
 	DocumentFieldMap,
 	DocumentFieldValueMap,
@@ -16,6 +17,7 @@ export interface RefResourceMap {
 	>;
 	media: NonNullable<MediaRef>;
 	users: NonNullable<UserRef>;
+	agents: AgentRef;
 }
 
 /** Referenced resources returned alongside response data. */

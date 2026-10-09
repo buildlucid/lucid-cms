@@ -67,7 +67,12 @@ beforeAll(async () => {
 afterAll(testConfig.destroy);
 
 const user = { type: "user", userId: 1 } as const;
-const run = { id: "test-run", conversationId: "test-conversation", userId: 1 };
+const run = {
+	id: "test-run",
+	conversationId: "test-conversation",
+	userId: 1,
+	agentKey: "test-agent",
+};
 const runAgent = (authority: AgentToolAuthority) =>
 	executeAgentTool({
 		context,

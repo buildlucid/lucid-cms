@@ -53,16 +53,19 @@ export const RequestCommentResolutionSelect: Component<{
 	const editable = createMemo(
 		() =>
 			props.request.status === "open" &&
-			(props.comment.user?.id === userStore.get.user?.id ||
+			((props.comment.agent === null &&
+				props.comment.user?.id === userStore.get.user?.id) ||
 				props.request.permissions.edit ||
 				props.request.permissions.approve),
 	);
 	const resolvedBy = createMemo(() =>
-		props.comment.resolvedBy
+		props.comment.resolvedBy || props.comment.resolvedByAgent
 			? T()("requests.comment.resolution.by", {
 					name:
-						helpers.formatUserName(props.comment.resolvedBy, "name") ||
-						T()("common.unknown"),
+						helpers.formatActorName(
+							props.comment.resolvedBy,
+							props.comment.resolvedByAgent,
+						) || T()("common.unknown"),
 				})
 			: undefined,
 	);

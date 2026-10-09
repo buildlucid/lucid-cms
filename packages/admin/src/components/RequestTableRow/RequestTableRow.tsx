@@ -1,5 +1,6 @@
 import type { Collection, RequestSummary } from "@types";
 import { type Component, Show } from "solid-js";
+import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import Table from "@/components/Table/Table";
 import TableUserStackCell from "@/components/TableUserStackCell/TableUserStackCell";
@@ -83,10 +84,19 @@ const RequestTableRow: Component<{
 				variant={requestStates[getRequestState(props.request)].pill}
 			/>
 			<TableUserStackCell column="reviewers" users={props.request.reviewers} />
-			<TableUserStackCell
-				column="createdBy"
-				users={props.request.createdBy ? [props.request.createdBy] : []}
-			/>
+			<Table.Cell column="createdBy">
+				<Show
+					when={props.request.createdBy || props.request.createdByAgent}
+					fallback={
+						<span class="text-sm text-body">{T()("common.unknown")}</span>
+					}
+				>
+					<ActorDisplay
+						user={props.request.createdBy}
+						agent={props.request.createdByAgent}
+					/>
+				</Show>
+			</Table.Cell>
 			<Table.Date
 				column="scheduledAt"
 				date={props.request.scheduledAt}

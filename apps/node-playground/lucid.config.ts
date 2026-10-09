@@ -93,7 +93,9 @@ export default defineConfig({
 			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
 		ai: {
-			mcp: { tools: [mcpTools.content(), echoTool, addTool] },
+			mcp: {
+				tools: [mcpTools.content(), mcpTools.requests(), echoTool, addTool],
+			},
 			agents: [assistantAgent, seoAgent],
 			features: { mcp: true },
 		},

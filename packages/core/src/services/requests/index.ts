@@ -1,3 +1,4 @@
+export { default as acknowledge } from "./acknowledge.js";
 export { default as addDocuments } from "./add-documents.js";
 export { default as approve } from "./approve.js";
 export { default as close } from "./close.js";

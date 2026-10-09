@@ -3,7 +3,7 @@ import {
 	RequestEventsRepository,
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendNotification from "../notifications/send.js";
 import getRequestAccess from "./helpers/get-request-access.js";
@@ -14,10 +14,10 @@ import resolveRequestNotifications from "./helpers/resolve-request-notifications
 import { closedNotification } from "./notifications/closed.js";
 
 /** Closes a request without publishing it. It can be reopened later. */
-const close: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
-	context,
-	data,
-) => {
+const close: ServiceFn<
+	[{ id: number; user: LucidActor; agentRunId?: string }],
+	undefined
+> = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
 	const RequestEvents = new RequestEventsRepository(context.db);
 
@@ -55,7 +55,14 @@ const close: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
 	if (updateRes.error) return updateRes;
 
 	const eventsRes = await RequestEvents.createEvents({
-		data: [{ request_id: data.id, user_id: data.user.id, type: "closed" }],
+		data: [
+			{
+				request_id: data.id,
+				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
+				type: "closed",
+			},
+		],
 	});
 	if (eventsRes.error) return eventsRes;
 
@@ -67,6 +74,7 @@ const close: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
 		definition: closedNotification,
 		recipients: getRequestParticipants(request),
 		actorUserId: data.user.id,
+		actorRunId: data.agentRunId,
 		data: { requestId: data.id, title: request.title, reopened: false },
 	});
 	if (closedRes.error) return closedRes;

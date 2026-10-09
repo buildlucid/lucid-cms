@@ -194,6 +194,19 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("scheduled_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
+				.addColumn(
+					"scheduled_by_system",
+					adapter.getDataType("boolean"),
+					(col) =>
+						col
+							.notNull()
+							.defaultTo(
+								adapter.formatDefaultValue(
+									"boolean",
+									adapter.getDefault("boolean", "false"),
+								),
+							),
+				)
 				.addColumn("execution_job_id", adapter.getDataType("text"))
 				.addColumn("failure", adapter.getDataType("text"))
 				.addColumn(

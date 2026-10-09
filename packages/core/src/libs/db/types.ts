@@ -4,6 +4,7 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import type { Toolkit } from "../toolkit/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 import type {
+	LucidAgentAttributions,
 	LucidAgentCompactions,
 	LucidAgentConversations,
 	LucidAgentDocumentReferences,
@@ -346,6 +347,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_agent_routines: LucidAgentRoutines;
 	lucid_agent_routine_tools: LucidAgentRoutineTools;
 	lucid_agent_runs: LucidAgentRuns;
+	lucid_agent_attributions: LucidAgentAttributions;
 	lucid_agent_url_keys: LucidAgentUrlKeys;
 	lucid_auth_states: LucidAuthStates;
 }

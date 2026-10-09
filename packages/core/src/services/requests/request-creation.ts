@@ -179,6 +179,7 @@ const requestCreation: ServiceFn<
 			request: { id: requestRes.data.id, title: data.title },
 			body: descriptionRes.data,
 			actorUserId: data.user.id,
+			actorRunId: data.agentRunId,
 		});
 		if (mentionsRes.error) return mentionsRes;
 	}

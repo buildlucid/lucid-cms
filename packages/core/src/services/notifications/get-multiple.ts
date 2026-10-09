@@ -5,6 +5,7 @@ import { NotificationsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/notifications.js";
 import type { Notification } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import getAgentActors from "../agent/helpers/get-agent-actors.js";
 import getRequestUsers from "../requests/helpers/get-request-users.js";
 
 const getMultiple: ServiceFn<
@@ -21,10 +22,16 @@ const getMultiple: ServiceFn<
 	if (notificationsRes.error) return notificationsRes;
 
 	const [notifications, count] = notificationsRes.data;
-	const actorsRes = await getRequestUsers(context, {
-		ids: notifications.map((notification) => notification.actor_user_id),
-	});
+	const [actorsRes, agentsRes] = await Promise.all([
+		getRequestUsers(context, {
+			ids: notifications.map((notification) => notification.actor_user_id),
+		}),
+		getAgentActors(context, {
+			runIds: notifications.map((notification) => notification.actor_run_id),
+		}),
+	]);
 	if (actorsRes.error) return actorsRes;
+	if (agentsRes.error) return agentsRes;
 
 	return {
 		error: undefined,
@@ -32,6 +39,7 @@ const getMultiple: ServiceFn<
 			data: notificationsFormatter.formatMultiple({
 				notifications,
 				actors: actorsRes.data,
+				agents: agentsRes.data,
 				config: context.config,
 				translate: context.translate,
 			}),

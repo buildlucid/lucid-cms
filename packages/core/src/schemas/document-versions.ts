@@ -33,6 +33,10 @@ export const documentVersionResponseSchema = z.object({
 		description: "User ID who created this version",
 		example: 1,
 	}),
+	createdByRunId: z.string().nullable().meta({
+		description:
+			"The agent run that acted for createdBy, resolved through refs.agents",
+	}),
 	document: z.object({
 		id: z.number().nullable().meta({
 			description: "The document's ID",

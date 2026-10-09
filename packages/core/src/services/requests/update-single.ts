@@ -5,7 +5,7 @@ import {
 	RequestEventsRepository,
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import loadRequest from "./helpers/load-request.js";
@@ -24,7 +24,8 @@ const updateSingle: ServiceFn<
 	[
 		{
 			id: number;
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 			title?: string;
 			description?: RichTextJSON | null;
 			reviewerIds?: number[];
@@ -94,6 +95,11 @@ const updateSingle: ServiceFn<
 						scheduled_at: schedule.scheduledAt,
 						scheduled_timezone: schedule.timezone,
 						scheduled_by: schedule.scheduledAt ? data.user.id : null,
+						scheduled_by_system:
+							schedule.scheduledAt !== null && data.user.id === null,
+						scheduled_by_run_id: schedule.scheduledAt
+							? (data.agentRunId ?? null)
+							: null,
 						execution_job_id: null,
 						failure: null,
 					}
@@ -110,6 +116,7 @@ const updateSingle: ServiceFn<
 				{
 					request_id: request.id,
 					user_id: data.user.id,
+					agent_run_id: data.agentRunId ?? null,
 					type: "schedule_updated",
 					metadata: {
 						scheduledAt: schedule.scheduledAt,
@@ -132,6 +139,7 @@ const updateSingle: ServiceFn<
 			request,
 			reviewerIds: data.reviewerIds,
 			userId: data.user.id,
+			agentRunId: data.agentRunId,
 		});
 		if (reviewersRes.error) return reviewersRes;
 	}
@@ -142,6 +150,7 @@ const updateSingle: ServiceFn<
 			body: descriptionRes.data,
 			previous: request.description,
 			actorUserId: data.user.id,
+			actorRunId: data.agentRunId,
 		});
 		if (mentionsRes.error) return mentionsRes;
 	}

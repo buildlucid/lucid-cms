@@ -5,7 +5,8 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 /**
  * Who a notification goes to. Named recipients are checked to be active people,
  * audience types go to the configured roles or everyone with the permission,
- * and the person who caused it is never told about their own action.
+ * and the person who caused it is never told about their own action. Pass no
+ * actor for an agent's action, as the person it acted for didn't take it.
  */
 const resolveRecipients: ServiceFn<
 	[

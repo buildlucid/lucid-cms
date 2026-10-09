@@ -7,6 +7,7 @@ import {
 	TbOutlineUserCheck,
 } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
+import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import Button from "@/components/Button/Button";
 import DateText from "@/components/DateText/DateText";
 import DetailsList, {
@@ -163,16 +164,15 @@ export const RequestSidebar: Component<{
 	const details = createMemo<DetailsListProps["items"]>(() => [
 		{
 			label: T()("common.created.by"),
-			value: props.request.createdBy ? (
-				<UserDisplay
-					user={props.request.createdBy}
-					variant="horizontal"
-					size="xs"
-					nameFormat="name"
-				/>
-			) : (
-				T()("common.unknown")
-			),
+			value:
+				props.request.createdBy || props.request.createdByAgent ? (
+					<ActorDisplay
+						user={props.request.createdBy}
+						agent={props.request.createdByAgent}
+					/>
+				) : (
+					T()("common.unknown")
+				),
 		},
 		{
 			label: T()("common.created.at"),

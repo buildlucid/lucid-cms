@@ -4,9 +4,10 @@ import {
 	JobsRepository,
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { RequestExecutionReceipt } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import getExecutionActor from "./helpers/get-execution-actor.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
@@ -18,7 +19,7 @@ import { executeRequestJob } from "./jobs/execute.js";
  * completing it again.
  */
 const complete: ServiceFn<
-	[{ id: number; user: LucidUser }],
+	[{ id: number; user: LucidActor; agentRunId?: string }],
 	RequestExecutionReceipt
 > = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
@@ -81,9 +82,13 @@ const complete: ServiceFn<
 		payload: {
 			requestId: request.id,
 			revision: request.revision,
-			userId: data.user.id,
+			actor: getExecutionActor({
+				userId: data.user.id,
+				system: data.user.id === null,
+				agentRunId: data.agentRunId,
+			}),
 		},
-		options: { createdByUserId: data.user.id },
+		options: { createdByUserId: data.user.id ?? undefined },
 	});
 	if (queueRes.error) return queueRes;
 

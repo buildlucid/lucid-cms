@@ -1,7 +1,7 @@
 import type { RequestType } from "../../libs/db/tables/requests.js";
 import formatter from "../../libs/formatters/index.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type {
 	RequestOverview,
 	RequestOverviewCounts,
@@ -10,7 +10,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getListAccess from "./helpers/get-list-access.js";
 
 /** Counts the open requests a user can see for each type, for dashboards and filter presets. */
-const getOverview: ServiceFn<[{ user: LucidUser }], RequestOverview> = async (
+const getOverview: ServiceFn<[{ user: LucidActor }], RequestOverview> = async (
 	context,
 	data,
 ) => {

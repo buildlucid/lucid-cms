@@ -13,6 +13,7 @@ import {
 	RequestEventsRepository,
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
+import type { ToolkitActor } from "../../libs/toolkit/types.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import deleteMultiple from "../documents/delete-multiple.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
@@ -21,7 +22,7 @@ import validateVersionContent from "../documents-versions/helpers/validate-versi
 import promoteVersion from "../documents-versions/promote-version.js";
 import unpublishVersion from "../documents-versions/unpublish-version.js";
 import sendNotification from "../notifications/send.js";
-import loadActiveUser from "../users/helpers/load-active-user.js";
+import resolveActorUser from "../users/helpers/resolve-actor-user.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import completeCreation from "./helpers/complete-creation.js";
 import deleteVersions from "./helpers/delete-versions.js";
@@ -38,7 +39,15 @@ import type { RequestDocumentRecord } from "./types.js";
 
 /** Executes queued requests atomically, deferring promotion hooks and change notifications until all documents complete. */
 const execute: ServiceFn<
-	[{ id: number; jobId: string; revision: number; userId: number | null }],
+	[
+		{
+			id: number;
+			jobId: string;
+			revision: number;
+			/** Who completes it. Null when the person who scheduled it was deleted, so it fails. */
+			actor: ToolkitActor | null;
+		},
+	],
 	undefined
 > = async (context, data) => {
 	let failureRequestDocumentId: number | null = null;
@@ -63,13 +72,11 @@ const execute: ServiceFn<
 			return { error: undefined, data: undefined };
 		}
 
-		const userRes =
-			data.userId === null
-				? { error: undefined, data: null }
-				: await loadActiveUser(context, { id: data.userId });
-		if (userRes.error) return userRes;
-
-		const user = userRes.data;
+		const userRes = data.actor
+			? await resolveActorUser(context, { actor: data.actor })
+			: undefined;
+		const user = userRes?.data;
+		const agentRunId = data.actor?.agentRunId;
 		if (!user || !getRequestAccess(context, { request, user }).request) {
 			return {
 				error: {
@@ -178,6 +185,7 @@ const execute: ServiceFn<
 					fromVersionId: approvedVersionId,
 					toVersionType: target.target,
 					userId: user.id,
+					agentRunId,
 					skipDocumentWriteClaims: true,
 					requestId: request.id,
 					deferEffects: true,
@@ -207,6 +215,7 @@ const execute: ServiceFn<
 				ids: documents.map((document) => document.document_id),
 				collectionKey: first.collection_key,
 				userId: user.id,
+				agentRunId,
 				requestId: request.id,
 			});
 			if (deleteRes.error) return deleteRes;
@@ -226,6 +235,7 @@ const execute: ServiceFn<
 				documentIds: entries.map((entry) => entry.document.document_id),
 				target: first.target,
 				userId: user.id,
+				agentRunId,
 				requestId: request.id,
 				deferEffects: true,
 			});
@@ -240,6 +250,7 @@ const execute: ServiceFn<
 				const createdRes = await completeCreation(context, {
 					document,
 					userId: user.id,
+					agentRunId,
 				});
 				if (createdRes.error) return createdRes;
 			} else if (
@@ -434,7 +445,14 @@ const execute: ServiceFn<
 		}
 
 		const eventsRes = await RequestEvents.createEvents({
-			data: [{ request_id: request.id, user_id: user.id, type: "completed" }],
+			data: [
+				{
+					request_id: request.id,
+					user_id: user.id,
+					agent_run_id: agentRunId ?? null,
+					type: "completed",
+				},
+			],
 		});
 		if (eventsRes.error) return eventsRes;
 
@@ -442,6 +460,7 @@ const execute: ServiceFn<
 			definition: completedNotification,
 			recipients: getRequestParticipants(request),
 			actorUserId: user.id,
+			actorRunId: agentRunId,
 			data: { requestId: request.id, title: request.title },
 		});
 		if (completedRes.error) return completedRes;

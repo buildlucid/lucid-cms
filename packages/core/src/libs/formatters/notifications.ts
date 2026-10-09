@@ -1,5 +1,6 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type {
+	AgentActor,
 	Notification,
 	NotificationPreference,
 	NotificationType,
@@ -29,6 +30,7 @@ type NotificationRow = Pick<
 	| "href"
 	| "data"
 	| "actor_user_id"
+	| "actor_run_id"
 	| "resolved_at"
 	| "created_at"
 	| "updated_at"
@@ -50,6 +52,7 @@ const formatCategory = (props: {
 const formatMultiple = (props: {
 	notifications: NotificationRow[];
 	actors: Map<number, RequestUser>;
+	agents: Map<string, AgentActor>;
 	config: Pick<ResolvedLucidConfig, "notifications">;
 	translate: Translator;
 }): Notification[] =>
@@ -73,6 +76,10 @@ const formatMultiple = (props: {
 			notification.actor_user_id === null
 				? null
 				: (props.actors.get(notification.actor_user_id) ?? null),
+		actorAgent:
+			notification.actor_run_id === null
+				? null
+				: (props.agents.get(notification.actor_run_id) ?? null),
 		readAt: formatter.formatDate(notification.read_at),
 		archivedAt: formatter.formatDate(notification.archived_at),
 		resolvedAt: formatter.formatDate(notification.resolved_at),

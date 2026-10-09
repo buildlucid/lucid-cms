@@ -172,12 +172,14 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 			<DocumentAuthorCell
 				column="createdBy"
 				userId={props.document.createdBy}
+				runId={props.document.createdByRunId}
 				refs={props.refs}
 				minWidth={180}
 			/>
 			<DocumentAuthorCell
 				column="updatedBy"
 				userId={props.document.updatedBy}
+				runId={props.document.updatedByRunId}
 				refs={props.refs}
 				minWidth={180}
 			/>

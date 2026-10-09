@@ -66,6 +66,9 @@ const externalPermissionDetails: Partial<
 	[Permissions.MediaDelete]: {
 		name: copy("admin:integrations.scopes.media.delete"),
 	},
+	[Permissions.RequestsRead]: {
+		name: copy("admin:integrations.scopes.requests.read"),
+	},
 };
 
 const externalPermissionScopes: Partial<
@@ -75,6 +78,7 @@ const externalPermissionScopes: Partial<
 	[Permissions.MediaCreate]: ExternalScopes.MediaCreate,
 	[Permissions.MediaUpdate]: ExternalScopes.MediaUpdate,
 	[Permissions.MediaDelete]: ExternalScopes.MediaDelete,
+	[Permissions.RequestsRead]: ExternalScopes.RequestsRead,
 };
 
 const collectionPermissionDetails = {
@@ -119,7 +123,9 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 									externalPermissionDetails[permission.key as StaticPermission],
 							}
 						: undefined,
-					availableToIntegrations: permission.key === Permissions.MediaRead,
+					availableToIntegrations:
+						permission.key === Permissions.MediaRead ||
+						permission.key === Permissions.RequestsRead,
 				};
 			},
 		);

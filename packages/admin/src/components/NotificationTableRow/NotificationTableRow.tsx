@@ -128,9 +128,10 @@ const NotificationTableRow: Component<NotificationTableRowProps> = (props) => {
 			<Table.Text
 				column="actor"
 				text={
-					props.notification.actor
-						? helpers.formatUserName(props.notification.actor, "name")
-						: undefined
+					helpers.formatActorName(
+						props.notification.actor,
+						props.notification.actorAgent,
+					) || undefined
 				}
 				minWidth={160}
 				maxLines={1}

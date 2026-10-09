@@ -1,6 +1,9 @@
 import type { RefResource, Refs } from "../../exports/types.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 
+/** Resources custom fields can reference. Agents are only referenced by document metadata. */
+export type FieldRefResource = Exclude<RefResource, "agents">;
+
 export type RefTarget = {
 	resource: RefResource;
 	table: string;

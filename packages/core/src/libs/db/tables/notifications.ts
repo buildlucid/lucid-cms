@@ -72,6 +72,10 @@ export const notificationsTable = defineTable(
 				schema: z.number().nullable(),
 				type: "integer",
 			},
+			actor_run_id: {
+				schema: z.uuid().nullable(),
+				type: "text",
+			},
 			resolved_at: {
 				schema: z.union([z.string(), z.date()]).nullable(),
 				type: "timestamp",
@@ -132,6 +136,8 @@ export interface LucidNotifications {
 	/** Sender-supplied marker. Recipients are told again when it changes. */
 	fingerprint: string | null;
 	actor_user_id: number | null;
+	/** The agent run that acted, for `actor_user_id` or the system. */
+	actor_run_id: string | null;
 	resolved_at: TimestampMutable;
 	created_at: TimestampImmutable;
 	updated_at: TimestampRequired;

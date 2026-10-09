@@ -5,8 +5,8 @@ import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasAccess from "../../../../libs/permission/has-access.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
+import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import deleteSingle from "../../delete-single.js";
-import resolveActorUser from "../../helpers/resolve-actor-user.js";
 import linkReferences from "../helpers/link-references.js";
 import requestDetails from "../helpers/request-details.js";
 import resolveRequest from "../helpers/resolve-request.js";
@@ -71,6 +71,7 @@ const deleteDocument: ServiceFn<
 			collectionKey: collection.key,
 			id: input.id,
 			userId: user.id,
+			agentRunId: props.actor.agentRunId,
 		});
 		if (deleted.error) return deleted;
 

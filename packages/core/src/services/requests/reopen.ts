@@ -3,7 +3,7 @@ import {
 	RequestEventsRepository,
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendNotification from "../notifications/send.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
@@ -19,10 +19,10 @@ import { reviewRequestedNotification } from "./notifications/review-requested.js
  * Reopens a closed request. Content may have changed while it was closed, so
  * any earlier approval is dismissed.
  */
-const reopen: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
-	context,
-	data,
-) => {
+const reopen: ServiceFn<
+	[{ id: number; user: LucidActor; agentRunId?: string }],
+	undefined
+> = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
 	const RequestEvents = new RequestEventsRepository(context.db);
 
@@ -56,7 +56,14 @@ const reopen: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
 	if (updateRes.error) return updateRes;
 
 	const eventsRes = await RequestEvents.createEvents({
-		data: [{ request_id: data.id, user_id: data.user.id, type: "reopened" }],
+		data: [
+			{
+				request_id: data.id,
+				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
+				type: "reopened",
+			},
+		],
 	});
 	if (eventsRes.error) return eventsRes;
 
@@ -71,6 +78,7 @@ const reopen: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
 		definition: closedNotification,
 		recipients: getRequestParticipants(request),
 		actorUserId: data.user.id,
+		actorRunId: data.agentRunId,
 		data: { requestId: data.id, title: request.title, reopened: true },
 	});
 	if (reopenedRes.error) return reopenedRes;
@@ -81,6 +89,7 @@ const reopen: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
 			key: requestNotificationKeys.review(data.id, reviewer.user_id),
 			recipients: [reviewer.user_id],
 			actorUserId: data.user.id,
+			actorRunId: data.agentRunId,
 			data: { requestId: data.id, title: request.title },
 		});
 		if (reviewRes.error) return reviewRes;

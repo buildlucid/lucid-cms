@@ -1,7 +1,9 @@
+import formatter from "../../../libs/formatters/index.js";
 import { enqueueJob } from "../../../libs/jobs/enqueue.js";
 import { RequestsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { executeRequestJob } from "../jobs/execute.js";
+import getExecutionActor from "./get-execution-actor.js";
 import lockRequest from "./lock-request.js";
 
 /** The queue only holds jobs this far ahead. Later schedules wait for the dispatch job. */
@@ -31,6 +33,8 @@ const scheduleRequest: ServiceFn<
 			"approved_revision",
 			"scheduled_at",
 			"scheduled_by",
+			"scheduled_by_system",
+			"scheduled_by_run_id",
 			"execution_job_id",
 		],
 		where: [{ key: "id", operator: "=", value: data.id }],
@@ -62,7 +66,11 @@ const scheduleRequest: ServiceFn<
 		payload: {
 			requestId: request.id,
 			revision: request.revision,
-			userId: request.scheduled_by,
+			actor: getExecutionActor({
+				userId: request.scheduled_by,
+				system: formatter.formatBoolean(request.scheduled_by_system),
+				agentRunId: request.scheduled_by_run_id,
+			}),
 		},
 		options: {
 			runAt,

@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import { agentActorSchema } from "./agent.js";
 import { brickInputSchema, brickResponseSchema } from "./collection-bricks.js";
 import { fieldInputSchema, fieldResponseSchema } from "./collection-fields.js";
 import {
@@ -53,6 +54,10 @@ const documentResponseVersionSchema = z.object({
 	createdBy: z.number().nullable().meta({
 		description: "The ID of the user who created this version",
 		example: 42,
+	}),
+	createdByRunId: z.string().nullable().meta({
+		description:
+			"The agent run that acted for createdBy, resolved through refs.agents",
 	}),
 });
 
@@ -123,7 +128,9 @@ const documentResponseBaseSchema = z.object({
 		example: null,
 	}),
 	createdBy: z.number().nullable(),
+	createdByRunId: z.string().nullable(),
 	updatedBy: z.number().nullable(),
+	updatedByRunId: z.string().nullable(),
 	createdAt: z.string().nullable().meta({
 		description: "The timestamp when this document was created",
 		example: "2025-04-08T09:00:00Z",
@@ -159,6 +166,10 @@ export const documentRefsResponseSchema = z
 		documents: z.array(documentRefResponseSchema).optional(),
 		media: z.array(mediaResponseSchema).optional(),
 		users: z.array(documentUserRefResponseSchema).optional(),
+		agents: z
+			.array(agentActorSchema.extend({ id: z.string() }))
+			.optional()
+			.meta({ description: "Agents behind run IDs, keyed by run ID" }),
 	})
 	.strict();
 
@@ -188,13 +199,15 @@ const documentContentResponseSchema = z.object({
 			updatedAt: z.string().nullable(),
 			createdBy: z.number().nullable(),
 			updatedBy: z.number().nullable(),
+			createdByRunId: z.string().nullable(),
+			updatedByRunId: z.string().nullable(),
 		})
 		.optional(),
 });
 
 const documentRefsIncludeSchema = z.union([
 	z.literal("refs"),
-	z.enum(["refs.documents", "refs.media", "refs.users"]),
+	z.enum(["refs.documents", "refs.media", "refs.users", "refs.agents"]),
 ]);
 
 //* underscore-prefixed top-level field sorts are resolved later
@@ -787,7 +800,7 @@ export const controllerSchemas = {
 								"Target a repeater field by adding a repeater key after the brick key",
 						}),
 					include: queryString.schema.include(
-						"refs,refs.documents,refs.media,refs.users",
+						"refs,refs.documents,refs.media,refs.users,refs.agents",
 					),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,order,_customFieldKey",
@@ -859,7 +872,7 @@ export const controllerSchemas = {
 		query: {
 			string: z.object({
 				include: queryString.schema.include(
-					"bricks,refs,refs.documents,refs.media,refs.users",
+					"bricks,refs,refs.documents,refs.media,refs.users,refs.agents",
 				),
 			}),
 			formatted: z.object({
@@ -1039,7 +1052,7 @@ export const controllerSchemas = {
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include(
-							"bricks,refs,refs.documents,refs.media,refs.users,meta",
+							"bricks,refs,refs.documents,refs.media,refs.users,refs.agents,meta",
 						),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
@@ -1139,7 +1152,7 @@ export const controllerSchemas = {
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include(
-							"bricks,refs,refs.documents,refs.media,refs.users,meta",
+							"bricks,refs,refs.documents,refs.media,refs.users,refs.agents,meta",
 						),
 						sort: queryString.schema.sort(
 							"createdAt,updatedAt,order,_customFieldKey",

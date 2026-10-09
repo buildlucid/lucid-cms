@@ -1,8 +1,6 @@
 import z from "zod";
-import {
-	documentActorSchema,
-	documentEditTokenSchema,
-} from "./authoring-values-schema.js";
+import { toolkitActorSchema } from "../schema.js";
+import { documentEditTokenSchema } from "./authoring-values-schema.js";
 
 export const documentCollectionSchema = z.strictObject({
 	/** Key of the registered collection. */
@@ -16,7 +14,7 @@ export const documentTargetSchema = documentCollectionSchema.extend({
 
 export const documentWriteSchema = documentCollectionSchema.extend({
 	/** Use a system actor for scripts, or a user actor to check that user's current permissions. */
-	actor: documentActorSchema,
+	actor: toolkitActorSchema,
 });
 
 export const documentUpdateSchema = documentWriteSchema.extend({

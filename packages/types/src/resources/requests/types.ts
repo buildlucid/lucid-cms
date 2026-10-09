@@ -1,3 +1,4 @@
+import type { AgentActor } from "../agent/types.js";
 import type { RichTextJSON } from "../documents/types.js";
 import type { JobStatus } from "../jobs/types.js";
 import type { ProfilePicture } from "../media/types.js";
@@ -76,6 +77,8 @@ export type RequestBlocker = {
 type RequestEventBase = {
 	id: number;
 	user: RequestUser | null;
+	/** The agent that acted, for user or for the system when user is null. */
+	agent: AgentActor | null;
 	createdAt: string | null;
 	updatedAt: string | null;
 };
@@ -88,6 +91,7 @@ export type RequestEvent = RequestEventBase &
 				/** How the comment was dealt with. Null while it is open. */
 				resolution: RequestCommentResolution | null;
 				resolvedBy: RequestUser | null;
+				resolvedByAgent: AgentActor | null;
 				/** Oldest first. */
 				replies: RequestCommentReply[];
 		  }
@@ -163,6 +167,8 @@ export type RequestDetail = {
 	/** The current request attempt, retained until the request plan changes. */
 	executionJobId: string | null;
 	createdBy: RequestUser | null;
+	/** The agent that opened it, for createdBy or the system. */
+	createdByAgent: AgentActor | null;
 	/** Approvals of the current revision. */
 	approvals: RequestApproval[];
 	/** Approvals the request needs, the highest its collections ask for. */
@@ -183,6 +189,8 @@ export type RequestDetail = {
 	blockers: RequestBlocker[];
 	/** Comments still waiting to be resolved or closed. These stop approval. */
 	openComments: number;
+	/** Fingerprints the revision, content and targets as read. Acknowledgements and approvals made with it are rejected once any of them change. */
+	reviewToken: string;
 	permissions: RequestPermissions;
 };
 
@@ -220,6 +228,7 @@ export type RequestSummary = Pick<
 	| "status"
 	| "approved"
 	| "createdBy"
+	| "createdByAgent"
 	| "reviewers"
 	| "scheduledAt"
 	| "scheduledTimezone"

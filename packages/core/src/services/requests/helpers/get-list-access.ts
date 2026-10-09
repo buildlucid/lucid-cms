@@ -1,15 +1,21 @@
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
+import { Permissions } from "../../../libs/permission/definitions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
+import { limitCollections } from "../../../libs/permission/readable-collections.js";
 import type { CollectionPermissionAction } from "../../../libs/permission/types.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
-/** The collection access that request lists and counts are filtered by. */
-const getListAccess = (context: ServiceContext, user: LucidUser) => {
+/** Resolves collection access for request lists and counts, requiring every document to belong to the supplied collections. */
+const getListAccess = (
+	context: ServiceContext,
+	user: LucidActor,
+	only?: readonly string[],
+) => {
 	const collectionKeys = (action: CollectionPermissionAction) =>
-		user.superAdmin
+		user.superAdmin && !only
 			? null
-			: context.config.collections
+			: limitCollections(context.config.collections, only)
 					.filter((collection) =>
 						hasAccess({
 							user,
@@ -22,7 +28,12 @@ const getListAccess = (context: ServiceContext, user: LucidUser) => {
 
 	return {
 		userId: user.id,
-		collectionKeys: collectionKeys("read"),
+		collectionKeys: hasAccess({
+			user,
+			requiredPermissions: [Permissions.RequestsRead],
+		})
+			? collectionKeys("read")
+			: [],
 		updateKeys: collectionKeys("update"),
 	};
 };

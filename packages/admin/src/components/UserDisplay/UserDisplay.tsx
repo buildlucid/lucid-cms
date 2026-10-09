@@ -29,6 +29,39 @@ export interface UserDisplayProps {
 	class?: string;
 }
 
+/** The avatar circle's classes, shared with avatars standing in for a user. */
+export const userAvatarClasses = (props: {
+	variant: UserDisplayVariant;
+	size: UserDisplaySize;
+	bordered: boolean;
+}) =>
+	classNames(
+		"flex items-center justify-center overflow-hidden rounded-full bg-input font-bold text-title",
+		{
+			"border border-border": props.bordered,
+			"h-16 w-16 min-w-16 text-sm":
+				props.variant === "icon" && props.size === "lg",
+			"h-10 w-10 min-w-10 text-[10px]":
+				(props.variant === "icon" && props.size === "md") ||
+				(props.variant === "stacked" && props.size === "lg"),
+			"h-8 w-8 min-w-8 text-[10px]":
+				props.variant === "stacked" && props.size === "md",
+			"h-7 w-7 min-w-7 text-[8px]":
+				(props.variant === "icon" && props.size === "sm") ||
+				(props.variant === "stacked" && props.size === "sm"),
+			"h-5 w-5 min-w-5 text-[7px]":
+				(props.variant === "icon" && props.size === "xs") ||
+				(props.variant === "stacked" && props.size === "xs"),
+			"me-2 h-5 w-5 min-w-5 text-[7px]":
+				props.variant === "horizontal" && props.size === "xs",
+			"me-2 h-7 w-7 min-w-7 text-[8px]":
+				props.variant === "horizontal" && props.size === "sm",
+			"me-2.5 h-8 w-8 min-w-8 text-[10px]":
+				props.variant === "horizontal" &&
+				(props.size === "md" || props.size === "lg"),
+		},
+	);
+
 /**
  * A user's profile picture or initials, with their name.
  *
@@ -52,30 +85,11 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 	);
 	const hasProfilePicture = createMemo(() => !!props.user.profilePicture?.url);
 	const avatarClasses = createMemo(() =>
-		classNames(
-			"flex items-center justify-center overflow-hidden rounded-full bg-input font-bold text-title",
-			{
-				"border border-border": !hasProfilePicture(),
-				"h-16 w-16 min-w-16 text-sm": variant() === "icon" && size() === "lg",
-				"h-10 w-10 min-w-10 text-[10px]":
-					(variant() === "icon" && size() === "md") ||
-					(variant() === "stacked" && size() === "lg"),
-				"h-8 w-8 min-w-8 text-[10px]":
-					variant() === "stacked" && size() === "md",
-				"h-7 w-7 min-w-7 text-[8px]":
-					(variant() === "icon" && size() === "sm") ||
-					(variant() === "stacked" && size() === "sm"),
-				"h-5 w-5 min-w-5 text-[7px]":
-					(variant() === "icon" && size() === "xs") ||
-					(variant() === "stacked" && size() === "xs"),
-				"me-2 h-5 w-5 min-w-5 text-[7px]":
-					variant() === "horizontal" && size() === "xs",
-				"me-2 h-7 w-7 min-w-7 text-[8px]":
-					variant() === "horizontal" && size() === "sm",
-				"me-2.5 h-8 w-8 min-w-8 text-[10px]":
-					variant() === "horizontal" && (size() === "md" || size() === "lg"),
-			},
-		),
+		userAvatarClasses({
+			variant: variant(),
+			size: size(),
+			bordered: !hasProfilePicture(),
+		}),
 	);
 
 	// ----------------------------------------

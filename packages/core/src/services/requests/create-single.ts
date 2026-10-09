@@ -106,6 +106,7 @@ const createSingle: ServiceFn<
 			},
 			reviewerIds: data.reviewerIds,
 			userId: data.user.id,
+			agentRunId: data.agentRunId,
 		});
 		if (reviewersRes.error) return reviewersRes;
 	}
@@ -115,6 +116,7 @@ const createSingle: ServiceFn<
 			request: { id: requestRes.data.id, title: data.title },
 			body: descriptionRes.data,
 			actorUserId: data.user.id,
+			actorRunId: data.agentRunId,
 		});
 		if (mentionsRes.error) return mentionsRes;
 	}

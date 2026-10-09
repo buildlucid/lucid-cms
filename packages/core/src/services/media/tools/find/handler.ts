@@ -35,11 +35,12 @@ const findMedia: ServiceFn<
 		};
 	}
 
+	//* binned media is never searched, whatever the filters ask for
 	const query = {
 		...props.input.query,
 		filter: {
-			isDeleted: { value: false, operator: "=" },
 			...props.input.query.filter,
+			isDeleted: { value: false, operator: "=" },
 		},
 	} satisfies Parameters<typeof getMultiple>[1]["query"];
 
