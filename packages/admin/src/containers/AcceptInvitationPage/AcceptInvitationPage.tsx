@@ -17,6 +17,7 @@ import ProviderButton from "@/components/ProviderButton/ProviderButton";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import constants from "@/constants";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
@@ -24,6 +25,7 @@ import spawnToast from "@/utils/spawn-toast";
 const AcceptInvitationPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("routes.auth.accept.invitation.title"));
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [targetProviderKey, setTargetProviderKey] = createSignal<string | null>(

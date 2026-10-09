@@ -8,12 +8,14 @@ import LucidConnection from "@/components/LucidConnection/LucidConnection";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { Permissions } from "@/constants/permissions";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 
 const SystemOperationsPage: Component = () => {
 	// ----------------------------------------
 	// State / Hooks
+	usePageTitle(() => T()("routes.system.operations.title"));
 	const [getOpenClearAllProcessedImages, setOpenClearAllProcessedImages] =
 		createSignal(false);
 	const [getOpenClearCache, setOpenClearCache] = createSignal(false);

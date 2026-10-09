@@ -18,6 +18,7 @@ import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import Table, { type TableSelectActionItem } from "@/components/Table/Table";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	pagination,
 	sort,
@@ -36,6 +37,7 @@ import {
 const NotificationsPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("notifications.title"));
 	const queryClient = useQueryClient();
 	const searchParams = useQueryState({
 		mode: "url",

@@ -17,6 +17,7 @@ import {
 	pagination,
 	sort,
 	textFilter,
+	usePageTitle,
 	usePermissions,
 	useQueryState,
 	useSession,
@@ -33,6 +34,7 @@ const DiagnosticsRoute: RouteComponent = () => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();
+	usePageTitle(() => t("playground.admin.title"));
 	const session = useSession();
 	const permissions = usePermissions();
 	const client = useQueryClient();

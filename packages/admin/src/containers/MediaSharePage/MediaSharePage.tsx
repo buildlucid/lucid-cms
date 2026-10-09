@@ -25,6 +25,7 @@ import ErrorState from "@/components/ErrorState/ErrorState";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
 import Spinner from "@/components/Spinner/Spinner";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
@@ -91,6 +92,8 @@ const MediaSharePage: Component = () => {
 
 	// --------------------------------------------
 	// Effects
+	usePageTitle(() => grantedAccess()?.name);
+
 	createEffect(() => {
 		posterShareUrl();
 		shareUrl();

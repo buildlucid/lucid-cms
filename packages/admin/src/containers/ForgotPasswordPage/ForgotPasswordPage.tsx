@@ -11,12 +11,14 @@ import ErrorState from "@/components/ErrorState/ErrorState";
 import ForgotPasswordForm from "@/components/ForgotPasswordForm/ForgotPasswordForm";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 
 const ForgotPasswordPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("routes.auth.forgot.password.title"));
 	const navigate = useNavigate();
 
 	// ----------------------------------------

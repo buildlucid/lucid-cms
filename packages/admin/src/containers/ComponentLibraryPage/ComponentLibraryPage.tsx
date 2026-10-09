@@ -94,6 +94,7 @@ import UserDisplay, {
 	type UserDisplaySize,
 	type UserDisplayVariant,
 } from "@/components/UserDisplay/UserDisplay";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	pagination,
 	sort,
@@ -338,6 +339,7 @@ const Row: Component<{ label: string; children: JSXElement }> = (props) => (
 const ComponentLibraryPage: Component = () => {
 	// ----------------------------------------
 	// State
+	usePageTitle(() => "Component Library");
 	const [inputValue, setInputValue] = createSignal("Sample text");
 	const [textareaValue, setTextareaValue] = createSignal(
 		"This is a sample textarea.\n\nIt supports multiple lines.",

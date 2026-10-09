@@ -3,11 +3,16 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import NotificationTypeSettings from "@/components/NotificationTypeSettings/NotificationTypeSettings";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import { groupByCategory } from "@/utils/notifications";
 
 const SystemNotificationsPage: Component = () => {
+	// ----------------------------------------
+	// State & Hooks
+	usePageTitle(() => T()("routes.system.notifications.title"));
+
 	// ----------------------------------------
 	// Queries
 	const types = api.notifications.useGetTypes();

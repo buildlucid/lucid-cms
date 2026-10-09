@@ -12,12 +12,14 @@ import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 
 const EmailChangeConfirmPage: Component = () => {
 	// ---------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("routes.auth.email.change.confirm.title"));
 	const location = useLocation();
 	const [completed, setCompleted] = createSignal(false);
 

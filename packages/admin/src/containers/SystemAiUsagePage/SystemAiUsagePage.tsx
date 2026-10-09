@@ -10,6 +10,7 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	numberFilter,
 	pagination,
@@ -28,6 +29,7 @@ import {
 const SystemAiUsagePage: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	usePageTitle(() => T()("routes.system.ai.usage.title"));
 	const queryClient = useQueryClient();
 	//* the open session lives in the URL, so other pages can link to it
 	const [urlParams, setUrlParams] = useSearchParams<{ session?: string }>();

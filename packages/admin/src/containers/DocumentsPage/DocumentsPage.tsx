@@ -21,6 +21,7 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, { sort } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
@@ -206,6 +207,8 @@ const DocumentsPage: Component = () => {
 
 	// ----------------------------------
 	// Effects
+	usePageTitle(collectionName);
+
 	//* reset order mode and the filter section when switching collections -
 	//* closing the section also clears its uncommitted draft rows
 	createEffect(

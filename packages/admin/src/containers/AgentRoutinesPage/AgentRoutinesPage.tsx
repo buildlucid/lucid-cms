@@ -10,6 +10,7 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	sort,
 	textFilter,
@@ -21,6 +22,9 @@ import { getAgentAccess } from "@/utils/agent-access";
 const AgentRoutinesPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(
+		() => `${T()("routes.agent.routines")} · ${T()("routes.agent.title")}`,
+	);
 	const queryClient = useQueryClient();
 	const [createOpen, setCreateOpen] = createSignal(false);
 	const searchParams = useQueryState({

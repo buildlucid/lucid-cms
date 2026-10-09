@@ -5,6 +5,7 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import Pill from "@/components/Pill/Pill";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
@@ -15,6 +16,10 @@ import { getStorageUsage } from "@/utils/media-storage";
 const STORAGE_DANGER_PERCENT = 90;
 
 const SystemOverviewPage: Component = () => {
+	// ----------------------------------------
+	// State & Hooks
+	usePageTitle(() => T()("routes.system.overview.title"));
+
 	// ----------------------------------
 	// Queries
 	const settingsData = api.settings.useGetSettings({

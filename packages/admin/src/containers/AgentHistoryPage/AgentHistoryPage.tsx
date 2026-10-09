@@ -9,6 +9,7 @@ import CreateMenu, {
 import type { FilterField } from "@/components/FilterPanel/FilterPanel";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	sort,
 	textFilter,
@@ -23,6 +24,9 @@ import { getNewChatHref } from "@/utils/home-view";
 const AgentHistoryPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(
+		() => `${T()("routes.agent.history")} · ${T()("routes.agent.title")}`,
+	);
 	const queryClient = useQueryClient();
 	//* the agent home's search link opens this page with the filters showing
 	const location = useLocation<{ filtersOpen?: boolean }>();

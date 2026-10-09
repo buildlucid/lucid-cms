@@ -12,7 +12,10 @@ import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHea
 import RestoreRevisionModal from "@/components/RestoreRevisionModal/RestoreRevisionModal";
 import { useDocumentHistoryState } from "@/hooks/useDocumentHistoryState/useDocumentHistoryState";
 import { useDocumentHistoryUIState } from "@/hooks/useDocumentHistoryUIState/useDocumentHistoryUIState";
+import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import T from "@/translations";
+import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import TimelineCardWrapper from "./parts/TimelineCard";
 import TimelineDetails from "./parts/TimelineDetails";
 
@@ -25,9 +28,21 @@ const DocumentHistoryPage: Component = () => {
 		collectionQuery: state.collectionQuery,
 		collection: state.collection,
 	});
+	const { contentLocale } = createDocumentLocalization(state.collection);
 
 	// ----------------------------------
 	// Effects
+	usePageTitle(() => {
+		const document = state.document();
+		const subject = document
+			? getDocumentPreviewLabel({
+					collection: state.collection(),
+					document,
+					contentLocale: contentLocale() ?? "",
+				})
+			: state.collectionName();
+		return subject ? `${T()("common.history")} · ${subject}` : undefined;
+	});
 
 	//* Redirect out of the history view when the document/collection isn't available.
 	//* Multiple collections fall back to their document list, everything else to the dashboard.

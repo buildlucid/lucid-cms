@@ -3,9 +3,14 @@ import { AccountContent } from "@/components/AccountContent/AccountContent";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import T from "@/translations";
 
 const AccountPage: Component = () => {
+	// ----------------------------------------
+	// State & Hooks
+	usePageTitle(() => T()("routes.account.title"));
+
 	// ----------------------------------------
 	// Render
 	return (

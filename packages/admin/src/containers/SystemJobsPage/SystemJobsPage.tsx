@@ -3,9 +3,14 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import { JobSchedulesList } from "@/components/JobSchedulesList/JobSchedulesList";
 import { JobsList } from "@/components/JobsList/JobsList";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import T from "@/translations";
 
 const SystemJobsPage: Component = () => {
+	// ----------------------------------------
+	// State & Hooks
+	usePageTitle(() => T()("routes.system.jobs.title"));
+
 	// ----------------------------------
 	// Render
 	return (

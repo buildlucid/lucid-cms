@@ -6,12 +6,14 @@ import Link from "@/components/Link/Link";
 import SetupForm from "@/components/SetupForm/SetupForm";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 
 const SetupPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("routes.auth.setup.page.title"));
 	const navigate = useNavigate();
 
 	// ----------------------------------------

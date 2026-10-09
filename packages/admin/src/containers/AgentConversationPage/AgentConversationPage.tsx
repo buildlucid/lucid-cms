@@ -35,6 +35,7 @@ import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/Upse
 import ViewAgentRoutineRunsDrawer from "@/components/ViewAgentRoutineRunsDrawer/ViewAgentRoutineRunsDrawer";
 import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
 import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
@@ -192,6 +193,8 @@ const AgentConversationPage: Component = () => {
 
 	// ----------------------------------------
 	// Effects
+	usePageTitle(() => conversation()?.title || T()("agent.chat.new"));
+
 	/**
 	 * A chat from the agent home opens before it is saved, so sending never waits
 	 * there. It is saved here, then its first message is sent. If it

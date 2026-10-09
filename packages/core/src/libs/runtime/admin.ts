@@ -27,5 +27,6 @@ export const createAdminShellResponse = (html: string, method: string) =>
 		headers: {
 			"Cache-Control": "no-store",
 			"Content-Type": "text/html; charset=utf-8",
+			"X-Robots-Tag": "noindex, nofollow",
 		},
 	});

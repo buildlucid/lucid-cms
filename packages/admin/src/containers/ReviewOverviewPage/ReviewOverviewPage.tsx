@@ -2,6 +2,7 @@ import { type Component, createMemo, Show } from "solid-js";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RequestQueues from "@/components/RequestQueues/RequestQueues";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -16,6 +17,10 @@ import TargetTable, {
  * collection's documents in every publish target are behind latest.
  */
 const ReviewOverviewPage: Component = () => {
+	// ----------------------------------------
+	// State & Hooks
+	usePageTitle(() => T()("routes.review.title"));
+
 	// ----------------------------------------
 	// Queries
 	const collections = api.collections.useGetAll({

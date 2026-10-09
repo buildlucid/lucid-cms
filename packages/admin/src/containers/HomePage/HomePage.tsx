@@ -12,6 +12,7 @@ import AgentHome from "@/components/AgentHome/AgentHome";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getGreeting } from "@/utils/greeting";
@@ -26,6 +27,7 @@ import HomeViewSwitch from "./parts/HomeViewSwitch";
 const HomePage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("common.home"));
 	const [editing, setEditing] = createSignal(false);
 
 	// ----------------------------------------

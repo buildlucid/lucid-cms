@@ -21,6 +21,7 @@ import RequestTitleModal from "@/components/RequestTitleModal/RequestTitleModal"
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import { requestDocumentLimit } from "@/constants/requests";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import { RequestActivity } from "./parts/RequestActivity";
@@ -111,6 +112,10 @@ const RequestPage: Component = () => {
 			})),
 		};
 	});
+
+	// ----------------------------------------
+	// Effects
+	usePageTitle(() => storedRequest()?.title);
 
 	// ----------------------------------------
 	// Render

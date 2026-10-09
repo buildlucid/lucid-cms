@@ -30,6 +30,7 @@ import type { LucidAdapterInstances } from "../runtime/create-lucid-adapters.js"
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import createCorsMiddleware from "./middleware/cors.js";
 import logRoute from "./middleware/log-route.js";
+import noIndex from "./middleware/no-index.js";
 import routes from "./routes/index.js";
 import type { HttpExtension } from "./types.js";
 import featureSupportChecks from "./utils/feature-support-checks.js";
@@ -106,6 +107,7 @@ const createApp = async (props: {
 
 	app
 		.use(logRoute)
+		.use(noIndex)
 		.use(createCorsMiddleware(props.config))
 		.use(
 			secureHeaders(

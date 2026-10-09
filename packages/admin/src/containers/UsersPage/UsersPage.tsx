@@ -16,6 +16,7 @@ import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { UserList } from "@/components/UserList/UserList";
 import { Permissions } from "@/constants/permissions";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
 	numberFilter,
@@ -30,6 +31,7 @@ import T from "@/translations";
 const UsersPage: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	usePageTitle(() => T()("routes.users.title"));
 	const queryClient = useQueryClient();
 	const searchParams = useQueryState({
 		mode: "url",

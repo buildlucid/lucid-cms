@@ -3,6 +3,7 @@ import type { Component } from "solid-js";
 import { EmailsList } from "@/components/EmailsList/EmailsList";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	numberFilter,
 	sort,
@@ -14,6 +15,7 @@ import T from "@/translations";
 const EmailsPage: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	usePageTitle(() => T()("routes.email.title"));
 	const queryClient = useQueryClient();
 	const searchParams = useQueryState({
 		mode: "url",

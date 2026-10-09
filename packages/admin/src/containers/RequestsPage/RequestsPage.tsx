@@ -21,6 +21,7 @@ import RequestTableRow from "@/components/RequestTableRow/RequestTableRow";
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
 import Table from "@/components/Table/Table";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
 	numberFilter,
@@ -42,6 +43,7 @@ import {
 const RequestsPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("requests.title"));
 	const queryClient = useQueryClient();
 	const [createOpen, setCreateOpen] = createSignal(false);
 	const [unpublishOpen, setUnpublishOpen] = createSignal(false);

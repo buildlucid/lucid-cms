@@ -16,6 +16,7 @@ import ProviderButton from "@/components/ProviderButton/ProviderButton";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import constants from "@/constants";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import { getLoginReturnPath } from "@/utils/login-route";
@@ -24,6 +25,7 @@ import spawnToast from "@/utils/spawn-toast";
 const LoginPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("routes.auth.login.page.title"));
 	const navigate = useNavigate();
 	const [targetProviderKey, setTargetProviderKey] = createSignal<string | null>(
 		null,

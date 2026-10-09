@@ -25,6 +25,7 @@ import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
 	numberFilter,
@@ -194,9 +195,25 @@ const MediaPage: Component = () => {
 			},
 		},
 	});
+	//* matches MediaList's folder query, so the open folder's name comes from the shared cache
+	const folders = api.mediaFolders.useGetMultiple({
+		queryParams: {
+			filters: {
+				parentFolderId: folderIdFilter,
+			},
+			perPage: -1,
+		},
+		enabled: () => typeof folderIdFilter() === "number",
+	});
 
 	// ----------------------------------------
 	// Effects
+	usePageTitle(() => {
+		const library = T()("routes.media.title");
+		const folder = folders.data?.data.breadcrumbs.at(-1)?.title;
+		return folder ? `${folder} · ${library}` : library;
+	});
+
 	createEffect(() => {
 		if (showingDeleted()) {
 			mediaStore.get.reset();

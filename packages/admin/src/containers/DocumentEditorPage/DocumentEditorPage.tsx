@@ -45,11 +45,13 @@ import { useDocumentState } from "@/hooks/useDocumentState/useDocumentState";
 import { useDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/usePageBuilderState/usePageBuilderState";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import { usePreviewFocus } from "@/hooks/usePreviewFocus/usePreviewFocus";
 import brickStore from "@/store/brickStore/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getRequestRoute } from "@/utils/route-helpers";
 import { PageBuilderModals } from "./parts/PageBuilderModals";
@@ -279,6 +281,24 @@ const DocumentEditorPage: Component<{
 
 	// ---------------------------------
 	// Effects
+	usePageTitle(() => {
+		if (props.mode === "create") {
+			return T()("actions.create.document", {
+				collectionSingle: docState.collectionSingularName(),
+			});
+		}
+		const context = props.request?.()?.title ?? docState.collectionName();
+		const document = docState.document();
+		if (!document) return context;
+
+		const label = getDocumentPreviewLabel({
+			collection: docState.collection(),
+			document,
+			contentLocale: docState.contentLocale() ?? "",
+		});
+		return context ? `${label} · ${context}` : label;
+	});
+
 	createEffect(
 		on(
 			() => [

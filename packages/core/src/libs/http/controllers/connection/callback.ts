@@ -52,7 +52,6 @@ const callbackController = factory.createHandlers(
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");
 		c.header("Referrer-Policy", "no-referrer");
-		c.header("X-Robots-Tag", "noindex, nofollow");
 
 		if (result.error) {
 			const fallback = new URL(

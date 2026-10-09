@@ -12,12 +12,14 @@ import Link from "@/components/Link/Link";
 import ResetPasswordForm from "@/components/ResetPasswordForm/ResetPasswordForm";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 
 const ResetPasswordPage: Component = () => {
 	// ----------------------------------------
 	// State
+	usePageTitle(() => T()("routes.auth.reset.password.title"));
 	const location = useLocation();
 	const navigate = useNavigate();
 

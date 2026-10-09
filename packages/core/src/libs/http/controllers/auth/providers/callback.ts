@@ -53,7 +53,6 @@ const providerCallbackController = factory.createHandlers(
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");
 		c.header("Referrer-Policy", "no-referrer");
-		c.header("X-Robots-Tag", "noindex, nofollow");
 
 		const flowCookieName = getAuthProviderFlowCookieName(context, state);
 		const browserState = getCookie(c, flowCookieName);

@@ -9,6 +9,7 @@ import { RolesList } from "@/components/RolesList/RolesList";
 import UpsertRoleDrawer from "@/components/UpsertRoleDrawer/UpsertRoleDrawer";
 import { Permissions } from "@/constants/permissions";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
 	sort,
@@ -21,6 +22,7 @@ import T from "@/translations";
 const RolesPage: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	usePageTitle(() => T()("routes.roles.title"));
 	const queryClient = useQueryClient();
 	const searchParams = useQueryState({
 		mode: "url",

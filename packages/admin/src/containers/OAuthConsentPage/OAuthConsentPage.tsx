@@ -21,6 +21,7 @@ import Button from "@/components/Button/Button";
 import IconContainer from "@/components/IconContainer/IconContainer";
 import Pill from "@/components/Pill/Pill";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
 import { LucidError } from "@/utils/error-handling";
@@ -29,6 +30,7 @@ import mediaUrl from "@/utils/media-url";
 const OAuthConsentPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("oauth.consent.title"));
 	const params = useParams<{ requestId: string }>();
 	const [principalType, setPrincipalType] = createSignal<"user" | "system">(
 		"user",

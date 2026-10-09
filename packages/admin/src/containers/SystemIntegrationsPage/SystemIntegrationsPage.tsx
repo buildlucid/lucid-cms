@@ -1,6 +1,7 @@
 import { type Component, createSignal } from "solid-js";
 import { IntegrationsList } from "@/components/IntegrationsList/IntegrationsList";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
 	sort,
@@ -11,6 +12,7 @@ import T from "@/translations";
 const SystemIntegrationsPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	usePageTitle(() => T()("routes.system.integrations.title"));
 	const searchParams = useQueryState({
 		mode: "url",
 		schema: {
