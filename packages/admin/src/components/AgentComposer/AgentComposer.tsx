@@ -450,7 +450,11 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				<Show when={props.screen}>
 					{(screen) => (
 						<div class="-mb-3 flex px-3 pt-3">
-							<AgentScreenBadge screen={screen()} variant="pill" />
+							<AgentScreenBadge
+								screen={screen()}
+								variant="pill"
+								builder={props.features?.builder}
+							/>
 						</div>
 					)}
 				</Show>

@@ -9,6 +9,7 @@ import AgentMessage, {
 import { layoutOf } from "@/components/AgentWidget/slots";
 import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
 import T from "@/translations";
+import { replyBuilderChanges } from "@/utils/agent-builder-changes";
 import { placeCompactions } from "@/utils/agent-chat";
 import type { AgentReferenceItem } from "@/utils/agent-references";
 
@@ -51,6 +52,12 @@ const AgentChatTranscript: Component<{
 		if (layoutOf(part) === "row") return "row";
 		return part.type === "text" ? undefined : "thinking";
 	});
+	const builderChanges = createMemo(() =>
+		replyBuilderChanges(
+			props.chat.messages,
+			props.chat.working() ? props.chat.activeRunId() : undefined,
+		),
+	);
 	const runError = createMemo(() => {
 		const run = latestRun();
 		return !props.chat.streaming() && run?.status === "failed"
@@ -64,7 +71,11 @@ const AgentChatTranscript: Component<{
 		(props.chat.messages[index]?.parts ?? [])
 			.map(layoutOf)
 			.filter((layout) => layout !== "hidden");
-	const endsInRow = (index: number) => shownLayouts(index).at(-1) === "row";
+	const hasChanges = (index: number) =>
+		builderChanges().has(props.chat.messages[index]?.id ?? "");
+	//* a reply's builder changes come after its last part
+	const endsInRow = (index: number) =>
+		shownLayouts(index).at(-1) === "row" && !hasChanges(index);
 	/**
 	 * Whether a message starts with a row straight after one that ended with
 	 * one. Each model turn is its own message, so this lets rows read as one
@@ -101,7 +112,9 @@ const AgentChatTranscript: Component<{
 							class={classnames("flex flex-col", {
 								"-mt-5": continuesRows(index()),
 								hidden:
-									message.role !== "user" && shownLayouts(index()).length === 0,
+									message.role !== "user" &&
+									shownLayouts(index()).length === 0 &&
+									!hasChanges(index()),
 							})}
 						>
 							<AgentMessage
@@ -114,6 +127,7 @@ const AgentChatTranscript: Component<{
 								onSelectTool={props.onSelectTool}
 								live={props.chat.streaming() && isLast(index())}
 								working={activity() === "row" && isLast(index())}
+								builderChanges={builderChanges().get(message.id)}
 							/>
 						</div>
 					</>

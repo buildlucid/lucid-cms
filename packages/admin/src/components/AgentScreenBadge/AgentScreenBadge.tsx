@@ -1,5 +1,5 @@
 import { Tooltip } from "@kobalte/core";
-import type { AgentScreen } from "@types";
+import type { Agent, AgentScreen } from "@types";
 import classnames from "classnames";
 import { TbOutlineFileText, TbOutlineGitPullRequest } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
@@ -9,6 +9,8 @@ import T from "@/translations";
 const AgentScreenBadge: Component<{
 	screen: AgentScreen;
 	variant: "pill" | "icon";
+	/** The agent's builder tools, which decide what the pill says it can do with a document. */
+	builder?: Agent["features"]["builder"];
 	class?: string;
 }> = (props) => {
 	// ----------------------------------------
@@ -21,15 +23,23 @@ const AgentScreenBadge: Component<{
 			{ name: props.screen.label },
 		),
 	);
+	//* sent messages only say where the person was, as the agent's tools may have changed since
 	const hint = createMemo(() => {
 		const isDocument = props.screen.type === "document";
-		if (props.variant === "pill") {
+		if (props.variant === "icon") {
 			return T()(
-				isDocument ? "agent.screen.hint.document" : "agent.screen.hint",
+				isDocument
+					? "agent.screen.sent.hint.document"
+					: "agent.screen.sent.hint",
 			);
 		}
+		if (!isDocument || !props.builder?.read) {
+			return T()("agent.screen.hint");
+		}
 		return T()(
-			isDocument ? "agent.screen.sent.hint.document" : "agent.screen.sent.hint",
+			props.builder.edit
+				? "agent.screen.hint.document.edit"
+				: "agent.screen.hint.document",
 		);
 	});
 

@@ -274,7 +274,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					>
 						<TbOutlineGripHorizontal size={14} />
 					</button>
-					<h3 class="flex min-h-8 min-w-0 flex-1 items-center">
+					<h3
+						data-preview-focus-label
+						class="flex min-h-8 min-w-0 flex-1 items-center"
+					>
 						{helpers.getLocaleValue({
 							value: config()?.details.label,
 							fallback: config()?.key,

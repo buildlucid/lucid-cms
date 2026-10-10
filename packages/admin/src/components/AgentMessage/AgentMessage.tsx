@@ -1,4 +1,5 @@
 import type {
+	AgentBuilderChangesData,
 	AgentInteractionAction,
 	AgentMessage as AgentMessageData,
 } from "@types";
@@ -13,6 +14,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AgentBuilderChanges from "@/components/AgentBuilderChanges/AgentBuilderChanges";
 import AgentMediaPreview from "@/components/AgentMediaPreview/AgentMediaPreview";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import AgentScreenBadge from "@/components/AgentScreenBadge/AgentScreenBadge";
@@ -56,6 +58,8 @@ export interface AgentMessageProps {
 	live?: boolean;
 	/** Whether the agent is still working on the message's last row, which shimmers until it moves on. */
 	working?: boolean;
+	/** Builder changes for the reply ending with this message, displayed after its parts. */
+	builderChanges?: AgentBuilderChangesData[];
 }
 
 /**
@@ -271,6 +275,13 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 									</Show>
 								);
 							}}
+						</For>
+						<For each={props.builderChanges}>
+							{(changes) => (
+								<div data-layout="block" class="flex flex-col">
+									<AgentBuilderChanges data={changes} />
+								</div>
+							)}
 						</For>
 					</div>
 				</Match>

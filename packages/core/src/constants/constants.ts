@@ -234,6 +234,8 @@ export default Object.freeze({
 			question: "lucid-question" satisfies AgentCoreWidgetKey,
 			/** Asks the open admin screen to answer a builder tool without showing a widget. */
 			screen: "lucid-screen" satisfies AgentCoreWidgetKey,
+			/** Lists what a builder update changed, linking to each field. */
+			builderChanges: "lucid-builder-changes" satisfies AgentCoreWidgetKey,
 			confirmation: "lucid-tool-confirmation" satisfies AgentCoreWidgetKey,
 			confirmationBatch:
 				"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey,

@@ -8,6 +8,8 @@ import {
 	onCleanup,
 } from "solid-js";
 import api from "@/services/api";
+import T from "@/translations";
+import { LucidError } from "@/utils/error-handling";
 import { tabId } from "@/utils/tab-id";
 
 //* the server forgets a tab 90 seconds after its last heartbeat, and hidden tabs may slow timers to once a minute
@@ -25,6 +27,9 @@ export const useDocumentEditors = (props: {
 	// State & Hooks
 	const [editors, setEditors] = createSignal<DocumentEditors>();
 	const [takingOver, setTakingOver] = createSignal(false);
+	const [takeOverError, setTakeOverError] = createSignal<string>();
+	//* the hold the person closed the notice for, so it shows again when someone else takes hold
+	const [dismissed, setDismissed] = createSignal<string>();
 
 	// ----------------------------------------
 	// Memos
@@ -47,13 +52,17 @@ export const useDocumentEditors = (props: {
 				previous?.requestId === next?.requestId,
 		},
 	);
+	const holdKey = createMemo(() => {
+		const holder = editors()?.holder;
+		return holder ? `${holder.user.id}:${holder.since}` : undefined;
+	});
 
 	// ----------------------------------------
 	// Functions
-	/** Sends a heartbeat now and keeps its answer, unless the editor moved to another document meanwhile. */
+	/** Sends a heartbeat, ignores responses after navigation, and returns any error. */
 	const send = async (takeOver = false) => {
 		const current = location();
-		if (!current) return;
+		if (!current) return undefined;
 
 		try {
 			const response = await api.documents.updateEditorReq({
@@ -61,13 +70,24 @@ export const useDocumentEditors = (props: {
 				takeOver,
 			});
 			if (location() === current) setEditors(response.data);
-		} catch {}
+			return undefined;
+		} catch (error) {
+			return error;
+		}
 	};
-	/** Takes hold of the document from the tab that holds it. */
+	/** Takes over the document, reopening the notice with an explanation if the attempt fails. */
 	const takeOver = async () => {
 		setTakingOver(true);
+		setTakeOverError(undefined);
 		try {
-			await send(true);
+			const error = await send(true);
+			if (error !== undefined) {
+				setTakeOverError(
+					(error instanceof LucidError ? error.errorRes.message : undefined) ??
+						T()("documents.held.take.over.failed"),
+				);
+				setDismissed(undefined);
+			}
 		} finally {
 			setTakingOver(false);
 		}
@@ -117,8 +137,15 @@ export const useDocumentEditors = (props: {
 		holder: () => editors()?.holder ?? null,
 		takeOver,
 		takingOver,
+		takeOverError,
+		/** Shows the hold notice until dismissed, keeping it closed for that hold. */
+		noticeOpen: () => holdKey() !== undefined && holdKey() !== dismissed(),
+		dismissNotice: () => {
+			setDismissed(holdKey());
+			setTakeOverError(undefined);
+		},
 		/** Checks who holds the document now, eg. after a save was refused. */
-		refresh: () => send(),
+		refresh: () => void send(),
 	};
 };
 

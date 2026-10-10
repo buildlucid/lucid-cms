@@ -1,5 +1,6 @@
 import z from "zod";
 import type {
+	AgentBuilderChange,
 	AgentBuilderTarget,
 	AgentScreen,
 	AgentScreenResponse,
@@ -60,6 +61,22 @@ export const agentBuilderContentSchema = z.object({
 	fields: z.array(fieldInputSchema),
 	bricks: z.array(brickInputSchema),
 });
+
+/** A change the builder update tool hands the builder, then saves for the chat once it is applied. */
+export const agentBuilderChangeSchema = z.object({
+	brick: z
+		.object({
+			type: z.enum(["builder", "fixed", "embedded"]),
+			key: z.string(),
+			ref: z.string(),
+		})
+		.nullable(),
+	status: z.enum(["added", "removed", "changed"]),
+	moved: z.boolean(),
+	fields: z.array(
+		z.object({ path: z.array(z.string()), locales: z.array(z.string()) }),
+	),
+}) satisfies z.ZodType<AgentBuilderChange>;
 
 /** Defines screen tool responses whose document content is checked again during conversion. */
 export const agentScreenResponseSchema = z.discriminatedUnion("status", [

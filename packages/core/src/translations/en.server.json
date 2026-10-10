@@ -892,7 +892,7 @@
 	"agent.screen.unavailable.moved": "The person has moved to another screen, so nothing happened on the one they sent the message from. Check with them before working on what they have open now.",
 	"agent.screen.unavailable.moved.to": "The person has moved to another screen, {{name}}, so nothing happened on the one they sent the message from. Check with them before working on what they have open now.",
 	"agent.screen.unavailable.locked": "The document can't be edited right now, eg. someone else is editing the document or the person can't change it. Nothing was changed.",
-	"agent.screen.unavailable.changed": "The person edited the document while your changes were applied, so they weren't applied. Read it again with lucid_builder_read and retry.",
+	"agent.screen.unavailable.changed": "The person edited the same fields or bricks, or reordered bricks, while your changes were being applied, so they weren't applied. Read it again with lucid_builder_read and retry.",
 	"agent.screen.unavailable.missing": "That field or brick isn't in the document. Check its key and ref with lucid_builder_read.",
 	"agent.screen.unavailable.unsupported": "The person's screen doesn't answer this tool.",
 	"agent.screen.response.invalid": "The person's screen sent an answer that couldn't be read. Try again.",

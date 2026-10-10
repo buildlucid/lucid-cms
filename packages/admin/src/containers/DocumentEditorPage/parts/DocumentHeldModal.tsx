@@ -1,38 +1,29 @@
 import type { DocumentEditors } from "@types";
-import { type Component, createMemo, createSignal } from "solid-js";
+import type { Component } from "solid-js";
 import Button from "@/components/Button/Button";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Modal from "@/components/Modal/Modal";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 /** Warns when another tab holds the document, with dismissal keeping this tab read only until the hold changes. */
 const DocumentHeldModal: Component<{
+	open: boolean;
 	holder: DocumentEditors["holder"];
 	takingOver: boolean;
+	/** Why the last take over failed. */
+	error?: string;
+	onDismiss: () => void;
 	onLeave: () => void;
 	onTakeOver: () => void;
 }> = (props) => {
 	// ----------------------------------------
-	// State & Hooks
-	//* the hold that was dismissed, so the modal opens again when someone else takes hold
-	const [dismissed, setDismissed] = createSignal<string>();
-
-	// ----------------------------------------
-	// Memos
-	const holdKey = createMemo(() =>
-		props.holder ? `${props.holder.user.id}:${props.holder.since}` : undefined,
-	);
-	const open = createMemo(
-		() => holdKey() !== undefined && holdKey() !== dismissed(),
-	);
-
-	// ----------------------------------------
 	// Render
 	return (
 		<Modal.Root
-			open={open()}
-			onOpenChange={(value) => {
-				if (!value) setDismissed(holdKey());
+			open={props.open}
+			onOpenChange={(open) => {
+				if (!open) props.onDismiss();
 			}}
 		>
 			<Modal.Header>
@@ -52,6 +43,7 @@ const DocumentHeldModal: Component<{
 				</Modal.Description>
 			</Modal.Header>
 			<Modal.Footer>
+				<ErrorMessage theme="basic" message={props.error} />
 				<Modal.Actions>
 					<Button
 						variant="outline"

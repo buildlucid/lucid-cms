@@ -52,6 +52,54 @@ export type AgentBuilderContent = {
 	bricks: DocumentVersionCheckBrick[];
 };
 
+/** Parts an update replaces, adds or removes while preserving the builder's remaining content. */
+export type AgentBuilderContentChanges = {
+	/** The document's own fields that changed, replacing the builder's fields with the same keys. */
+	fields: DocumentVersionCheckField[];
+	/** Bricks that were added or whose fields changed, replacing the builder's bricks with the same refs. */
+	bricks: DocumentVersionCheckBrick[];
+	/** Refs of builder and embedded bricks that were removed. */
+	removed: string[];
+	/** Every builder brick's ref in its new order, or null when the order stayed the same. */
+	order: string[] | null;
+};
+
+/** A field an update changed. */
+export type AgentBuilderFieldChange = {
+	/** Field keys from the brick down, with repeater item refs between them, eg. `["items", "Xy12ab", "title"]`. */
+	path: string[];
+	/** Changed content languages, empty for untranslated fields or repeater item changes. */
+	locales: string[];
+};
+
+/** A brick, or the document's own fields, that an update changed. */
+export type AgentBuilderChange = {
+	/** The brick, or null for the document's own fields. */
+	brick: {
+		type: DocumentVersionCheckBrick["type"];
+		key: string;
+		ref: string;
+	} | null;
+	status: "added" | "removed" | "changed";
+	/** Whether a builder brick the agent kept moved to another position. */
+	moved: boolean;
+	/** The fields that changed, for a changed brick or the document's own fields. */
+	fields: AgentBuilderFieldChange[];
+};
+
+/** Saved data for the `lucid-builder-changes` card, listing what one builder update changed. */
+export type AgentBuilderChangesData = {
+	document: {
+		collectionKey: string;
+		/** Null when the document was being created, before it was saved. */
+		documentId: number | null;
+		/** The request whose proposal changed, or null for latest. */
+		requestId: number | null;
+		label: string;
+	};
+	changes: AgentBuilderChange[];
+};
+
 /** A field or brick in the document builder to scroll to. */
 export type AgentBuilderTarget = {
 	/** A builder brick's ref or a fixed brick's key. Omit it for the document's own fields. */
@@ -67,13 +115,17 @@ export type AgentScreenCall =
 	| {
 			action: "update";
 			screen: Extract<AgentScreen, { type: "document" }>;
-			/** The revision the update was built from. A builder that changed since refuses it. */
+			/** The read revision used to reject updates when their affected fields, bricks or brick order have changed. */
 			revision: number;
 			/** The version the content belongs to, or null before the document is saved. */
 			versionId: number | null;
-			content: AgentBuilderContent;
-			/** Media, documents and users the new content links to, so fields can show them. */
+			content: AgentBuilderContentChanges;
+			/** Media, documents and users the changed content links to, so fields can show them. */
 			refs: Refs;
+			/** What changed, which the tool saves for the chat once the builder applies it. */
+			changes: AgentBuilderChange[];
+			/** Validation errors in the updated document, which the tool reports once the builder applies it. */
+			validationErrors: string[];
 	  }
 	| {
 			action: "focus";
@@ -263,7 +315,8 @@ export type AgentCoreWidgetKey =
 	| "lucid-tool-confirmation"
 	| "lucid-tool-confirmation-batch"
 	| "lucid-media-select"
-	| "lucid-screen";
+	| "lucid-screen"
+	| "lucid-builder-changes";
 
 /** The lifecycle state of an agent run. */
 export type AgentRunStatus =

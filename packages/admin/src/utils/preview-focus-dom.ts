@@ -30,13 +30,15 @@ type RevealPreviewFieldOptions = {
 const FIELD_ID_PREFIX = "lucid-preview-field";
 const STRUCTURE_ID_PREFIX = "lucid-preview-structure";
 
-/** Finds the label owned by a field wrapper so the indicator stays compact. */
+/** Finds the field or trigger's own label to position the focus indicator. */
 const getPreviewFieldIndicator = (field: HTMLElement): HTMLElement => {
 	const labels = field.querySelectorAll<HTMLElement>(
 		"label, [data-preview-focus-label]",
 	);
+	//* a trigger isn't a field, so only labels outside any field are its own
+	const owner = field.hasAttribute("data-preview-focus-field") ? field : null;
 	for (const label of labels) {
-		if (label.closest("[data-preview-focus-field]") === field) return label;
+		if (label.closest("[data-preview-focus-field]") === owner) return label;
 	}
 	return field;
 };

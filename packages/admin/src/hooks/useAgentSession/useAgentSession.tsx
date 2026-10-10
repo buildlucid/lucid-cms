@@ -1,5 +1,6 @@
-import { useLocation } from "@solidjs/router";
+import { useLocation, useNavigate } from "@solidjs/router";
 import type {
+	AgentBuilderChangesData,
 	AgentConfirmationMode,
 	AgentScreen,
 	AgentScreenCall,
@@ -33,9 +34,10 @@ import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import { getAgentAccess } from "@/utils/agent-access";
 import type { AgentReferenceItem } from "@/utils/agent-references";
-import { isSameScreen } from "@/utils/agent-screen";
+import { isSameScreen, showsDocument } from "@/utils/agent-screen";
 import { getHomeView } from "@/utils/home-view";
 import { isNavigationLinkActive } from "@/utils/navigation";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import { tabId } from "@/utils/tab-id";
 
 //* the panel's chat is kept per tab, like chat box drafts
@@ -48,11 +50,25 @@ type ReturnedMessage = {
 	references: AgentReferenceItem[];
 };
 
+/** A field or brick to show in the document builder. */
+export type AgentBuilderFocus = {
+	/** A builder brick's ref or a fixed brick's key. Omit it for the document's own fields. */
+	brick?: string;
+	/** Field keys interleaved with repeater item refs, such as `["items", "Xy12ab", "title"]`, with an empty path showing the brick. */
+	path: string[];
+	/** Switches the editor to this content language first. */
+	contentLocale?: string;
+};
+
+type BuilderDocument = AgentBuilderChangesData["document"];
+
 /** An admin screen open in this tab, which tells the agent where the person is. The document builder also answers its builder tools. */
 export type AgentScreenRegistration = {
 	screen: Accessor<AgentScreen | undefined>;
 	/** Answers a call made for this screen. Screens that only tell the agent where the person is leave it out. */
 	answer?: (call: AgentScreenCall) => Promise<AgentScreenResponse>;
+	/** Shows a field or brick and reports whether it was found, omitted for screens without a builder. */
+	focus?: (target: AgentBuilderFocus) => Promise<boolean>;
 };
 
 export type AgentSession = {
@@ -92,6 +108,8 @@ export type AgentSession = {
 		current: Accessor<AgentScreen | undefined>;
 		/** Registers this tab's screen context and tool handler, returning a function that unregisters them. */
 		register: (registration: AgentScreenRegistration) => () => void;
+		/** Shows a field or brick in a document's builder, opening the document first when this tab shows something else. */
+		focus: (document: BuilderDocument, target: AgentBuilderFocus) => void;
 	};
 };
 
@@ -117,6 +135,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const location = useLocation();
+	const navigate = useNavigate();
 	const xl = useMediaQuery("(width >= 80rem)");
 	const [conversationId, setConversationId] = createSignal(readChat());
 	//* a new chat opens before it is saved, so its chat waits to load until it is
@@ -130,6 +149,11 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 		createSignal<AgentScreenRegistration>();
 	//* screen calls this tab is answering, so a call is answered once
 	const answering = new Set<string>();
+	//* a field to show once the document opened for it is ready
+	const [pendingFocus, setPendingFocus] = createSignal<{
+		document: BuilderDocument;
+		target: AgentBuilderFocus;
+	}>();
 
 	// ----------------------------------------
 	// Memos
@@ -205,6 +229,33 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 		return { id, created };
 	};
 
+	const focusBuilder: AgentSession["screen"]["focus"] = (document, target) => {
+		const registration = untrack(screenRegistration);
+		const screen = registration?.screen();
+		if (screen && showsDocument(screen, document)) {
+			void registration?.focus?.(target);
+			return;
+		}
+		//* a document that was never saved has no page to open
+		if (document.documentId === null) return;
+
+		setPendingFocus({ document, target });
+		navigate(
+			document.requestId === null
+				? getDocumentRoute("edit", {
+						collectionKey: document.collectionKey,
+						documentId: document.documentId,
+					})
+				: getRequestRoute({
+						requestId: document.requestId,
+						content: {
+							collectionKey: document.collectionKey,
+							documentId: document.documentId,
+						},
+					}),
+		);
+	};
+
 	/** Answers a screen call made from this tab, or says the screen has gone when it isn't open any more. */
 	const answerScreenCall = async (
 		pending: NonNullable<ReturnType<AgentChat["screenCall"]>>,
@@ -237,6 +288,18 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	createEffect(() => {
 		if (!creating()) writeChat(conversationId());
 	});
+	//* the builder registers its screen once its document has loaded, so it can show the field then
+	createEffect(
+		on(currentScreen, (screen) => {
+			const pending = untrack(pendingFocus);
+			if (!pending || !screen) return;
+
+			setPendingFocus(undefined);
+			if (showsDocument(screen, pending.document)) {
+				void untrack(screenRegistration)?.focus?.(pending.target);
+			}
+		}),
+	);
 	//* other tabs answer the calls made for their screens
 	createEffect(
 		on(chat.screenCall, (pending) => {
@@ -276,6 +339,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 								current === registration ? undefined : current,
 							);
 					},
+					focus: focusBuilder,
 				},
 			}}
 		>

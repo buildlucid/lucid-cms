@@ -34,6 +34,7 @@ import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
 import syncLocales from "../../sync/sync-locales.js";
 import readDocumentContent from "../helpers/read-document-content.js";
+import resolveContentRefs from "../helpers/resolve-content-refs.js";
 import publish from "../publish.js";
 import { outputSchema as readOutputSchema } from "./get/schema.js";
 import { writeOutputSchema } from "./schema.js";
@@ -1158,14 +1159,35 @@ test("builder tools read unsaved content from the builder and hand changes back 
 	const apply = waitOn(
 		await callBuilderTool(runnerTools.builderUpdate.name, change, readAnswer),
 	);
+	//* only what changed goes back, keeping the French title the builder held
 	expect(apply).toMatchObject({
 		action: "update",
 		revision: 3,
 		versionId: null,
+		content: {
+			fields: [
+				{
+					key: "title",
+					translations: { en: "From the agent", fr: "Bonjour" },
+				},
+			],
+			bricks: [{ type: "fixed", key: "seo" }],
+			removed: [],
+			order: null,
+		},
+		changes: [
+			{
+				brick: null,
+				status: "changed",
+				fields: [{ path: ["title"], locales: ["en"] }],
+			},
+			{
+				brick: { type: "fixed", key: "seo" },
+				status: "changed",
+				fields: [{ path: ["image"] }],
+			},
+		],
 	});
-	expect(JSON.stringify(apply)).toContain("From the agent");
-	//* the French title the builder held is kept
-	expect(JSON.stringify(apply)).toContain("Bonjour");
 
 	const changed = await callBuilderTool(
 		runnerTools.builderUpdate.name,
@@ -1188,7 +1210,19 @@ test("builder tools read unsaved content from the builder and hand changes back 
 			status: "done",
 		},
 	);
-	expect(applied).toMatchObject({ failed: false, output: { applied: true } });
+	expect(applied).toMatchObject({
+		failed: false,
+		output: { applied: true },
+		widgets: [
+			{
+				key: "lucid-builder-changes",
+				data: {
+					document: { collectionKey: pages.key, documentId, requestId: null },
+					changes: [{ brick: null }, { brick: { key: "seo" } }],
+				},
+			},
+		],
+	});
 	assert(applied.kind === "result");
 	expect(JSON.stringify(applied.output)).toContain("bricks.seo.image");
 
@@ -1198,4 +1232,41 @@ test("builder tools read unsaved content from the builder and hand changes back 
 		id: documentId,
 	});
 	expect(JSON.stringify(after.data?.data)).not.toContain("From the agent");
+});
+
+test("resolves refs for content the builder takes back, by each field's own config", async () => {
+	const documentId = await createPage();
+	const stored = await readDocumentContent(context, {
+		collectionKey: pages.key,
+		id: documentId,
+	});
+	assert(stored.data, JSON.stringify(stored.error));
+	const media = await context.db.kysely
+		.insertInto("lucid_media")
+		.values({
+			key: randomUUID(),
+			storage_adapter_key: "test",
+			origin: "human",
+			type: "image",
+			mime_type: "image/png",
+			file_extension: "png",
+			file_size: 1,
+			owner_user_id: null,
+		})
+		.returning(["id"])
+		.executeTakeFirstOrThrow();
+
+	const content = structuredClone(stored.data.stored);
+	const image = content.bricks
+		.find((brick) => brick.key === "seo")
+		?.fields?.find((field) => field.key === "image");
+	assert(image);
+	image.value = [media.id];
+
+	const refs = await resolveContentRefs(context, {
+		collection: pages,
+		content,
+	});
+	expect(refs.error).toBeUndefined();
+	expect(refs.data?.media).toEqual([expect.objectContaining({ id: media.id })]);
 });

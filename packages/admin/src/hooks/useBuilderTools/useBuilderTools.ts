@@ -1,6 +1,5 @@
 import type {
 	AgentBuilderContent,
-	AgentBuilderTarget,
 	AgentScreen,
 	AgentScreenCall,
 	AgentScreenResponse,
@@ -11,7 +10,10 @@ import type {
 } from "@types";
 import { type Accessor, createMemo, onCleanup, onMount } from "solid-js";
 import { unwrap } from "solid-js/store";
-import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
+import {
+	type AgentBuilderFocus,
+	useAgentSession,
+} from "@/hooks/useAgentSession/useAgentSession";
 import { resolvePreviewFieldTarget } from "@/hooks/usePreviewFocus/utils/resolve-preview-field-target";
 import brickStore from "@/store/brickStore/brickStore";
 import {
@@ -19,6 +21,12 @@ import {
 	createContentComparisonSnapshot,
 } from "@/store/brickStore/utils/snapshots";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
+import {
+	applyBuilderChanges,
+	type BuilderContentKeys,
+	builderContentKeys,
+	updateConflicts,
+} from "@/utils/agent-builder-changes";
 import { screenLabel } from "@/utils/agent-screen";
 import brickHelpers from "@/utils/brick-helpers";
 import {
@@ -67,15 +75,44 @@ const toInternalContent = (content: AgentBuilderContent) => ({
 	),
 });
 
-/** The content as the person sees it, without whether bricks and groups are open, to tell whether it changed. */
-const contentKey = () =>
-	JSON.stringify(
+/** The builder's content in the shape the admin saves. */
+const currentContent = (): AgentBuilderContent =>
+	structuredClone(
+		unwrap({
+			fields: brickHelpers.getCollectionPseudoBrickFields(),
+			bricks: brickHelpers.getUpsertBricks(),
+		}),
+	);
+
+const contentKeys = () =>
+	builderContentKeys(
 		createContentComparisonSnapshot(
 			createBricksSnapshot(brickStore.get.bricks),
 		),
 	);
 
-/** Registers the open builder for agent tools that read unsaved content, apply unsaved edits and reveal fields or bricks. */
+/** Resolves field keys and repeater refs to builder positions, stopping at the repeater if an item is missing. */
+const previewPath = (fields: InternalDocumentField[], path: string[]) => {
+	const resolved: Array<string | number> = [];
+	let scope = fields;
+	for (let index = 0; index < path.length; index += 2) {
+		const key = path[index];
+		if (key === undefined) break;
+		resolved.push(key);
+
+		const ref = path[index + 1];
+		if (ref === undefined || path[index + 2] === undefined) break;
+		const groups = scope.find((field) => field.key === key)?.groups ?? [];
+		const position = groups.findIndex((group) => group.ref === ref);
+		const group = groups[position];
+		if (!group) break;
+		resolved.push(position);
+		scope = group.fields;
+	}
+	return resolved;
+};
+
+/** Registers the open builder for agent reads, unsaved edits and field or brick navigation from tools and chat links. */
 export const useBuilderTools = (props: {
 	enabled: Accessor<boolean>;
 	collection: Accessor<Collection | undefined>;
@@ -93,8 +130,8 @@ export const useBuilderTools = (props: {
 	// ----------------------------------------
 	// State & Hooks
 	const session = useAgentSession();
-	//* the content each read handed out, so an update built from it applies only to the same content
-	let lastRead: { revision: number; key: string } | undefined;
+	//* the content each read handed out, so an update built from it applies only where the builder still matches it
+	let lastRead: { revision: number; keys: BuilderContentKeys } | undefined;
 
 	// ----------------------------------------
 	// Memos
@@ -114,18 +151,16 @@ export const useBuilderTools = (props: {
 	// ----------------------------------------
 	// Functions
 	const read = (): AgentScreenResponse => {
-		lastRead = { revision: (lastRead?.revision ?? 0) + 1, key: contentKey() };
+		lastRead = {
+			revision: (lastRead?.revision ?? 0) + 1,
+			keys: contentKeys(),
+		};
 		return {
 			status: "done",
 			document: {
 				revision: lastRead.revision,
 				versionId: props.versionId() ?? null,
-				content: structuredClone(
-					unwrap({
-						fields: brickHelpers.getCollectionPseudoBrickFields(),
-						bricks: brickHelpers.getUpsertBricks(),
-					}),
-				),
+				content: currentContent(),
 				contentLocale: contentLocaleStore.get.contentLocale ?? null,
 				unsaved: brickStore.getDocumentMutated(),
 				editable: props.editable(),
@@ -136,29 +171,29 @@ export const useBuilderTools = (props: {
 		call: Extract<AgentScreenCall, { action: "update" }>,
 	): AgentScreenResponse => {
 		if (!props.editable()) return { status: "unavailable", reason: "locked" };
-		//* the person edited, or the editor loaded another version, since the read the update was built from
+
+		//* the person can keep editing while the agent works, but not what the update changes, or load another version
 		if (
 			lastRead?.revision !== call.revision ||
-			lastRead.key !== contentKey() ||
-			(props.versionId() ?? null) !== call.versionId
+			(props.versionId() ?? null) !== call.versionId ||
+			updateConflicts(lastRead.keys, contentKeys(), call.content)
 		) {
 			return { status: "unavailable", reason: "changed" };
 		}
 
 		brickStore.get.applyContent({
-			content: toInternalContent(call.content),
+			content: toInternalContent(
+				applyBuilderChanges(currentContent(), call.content),
+			),
 			refs: call.refs,
 			collection: props.collection(),
 		});
 		lastRead = undefined;
 		return { status: "done" };
 	};
-	const focus = async (
-		target: AgentBuilderTarget,
-	): Promise<AgentScreenResponse> => {
+	const focus = async (target: AgentBuilderFocus) => {
 		const collection = props.collection();
-		const missing = { status: "unavailable", reason: "missing" } as const;
-		if (!collection) return missing;
+		if (!collection) return false;
 
 		if (
 			target.contentLocale &&
@@ -168,26 +203,25 @@ export const useBuilderTools = (props: {
 		}
 
 		const bricks = brickStore.get.bricks;
-		const brickIndex =
+		const brickIndex = bricks.findIndex((brick) =>
 			target.brick === undefined
-				? -1
-				: bricks.findIndex((brick) =>
-						brick.type === "fixed"
-							? brick.key === target.brick
-							: brick.type === "builder" && brick.ref === target.brick,
-					);
+				? brick.type === "collection-fields"
+				: brick.type === "fixed"
+					? brick.key === target.brick
+					: brick.type === "builder" && brick.ref === target.brick,
+		);
 		const brick = bricks[brickIndex];
-		if (target.brick !== undefined && !brick) return missing;
+		if (!brick) return false;
 
 		//* a builder brick on its own shows its header, as it has no field of its own
-		if (!target.field) {
-			if (brick?.type !== "builder") return missing;
+		if (target.path.length === 0) {
+			if (brick.type !== "builder") return false;
 			const shown = await revealPreviewField({
 				fieldId: getPreviewStructureId({ brickIndex, type: "brick" }),
 				structureIds: [],
 				signal: AbortSignal.timeout(focusWaitMs),
 			});
-			return shown ? { status: "done" } : missing;
+			return shown !== null;
 		}
 
 		const resolution = resolvePreviewFieldTarget({
@@ -195,24 +229,27 @@ export const useBuilderTools = (props: {
 				collectionKey: props.collectionKey(),
 				//* only the brick and path find the field
 				documentId: props.documentId() ?? 0,
-				brick: brick && {
-					type: brick.type === "fixed" ? "fixed" : "builder",
-					key: brick.key,
-					order: brick.order,
-				},
-				path: [target.field],
+				brick:
+					brick.type === "collection-fields"
+						? undefined
+						: {
+								type: brick.type === "fixed" ? "fixed" : "builder",
+								key: brick.key,
+								order: brick.order,
+							},
+				path: previewPath(brick.fields, target.path),
 			},
 			collection,
 			bricks,
 		});
-		if (!resolution) return missing;
+		if (!resolution) return false;
 
 		const shown = await revealPreviewField({
 			fieldId: resolution.fieldId,
 			structureIds: resolution.structureIds,
 			signal: AbortSignal.timeout(focusWaitMs),
 		});
-		return shown ? { status: "done" } : missing;
+		return shown !== null;
 	};
 
 	// ----------------------------------------
@@ -226,10 +263,19 @@ export const useBuilderTools = (props: {
 						return read();
 					case "update":
 						return update(call);
-					case "focus":
-						return focus(call.target);
+					case "focus": {
+						const shown = await focus({
+							brick: call.target.brick,
+							path: call.target.field ? [call.target.field] : [],
+							contentLocale: call.target.contentLocale,
+						});
+						return shown
+							? { status: "done" }
+							: { status: "unavailable", reason: "missing" };
+					}
 				}
 			},
+			focus,
 		});
 		onCleanup(unregister);
 	});

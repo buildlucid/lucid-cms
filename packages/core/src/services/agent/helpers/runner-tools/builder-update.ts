@@ -1,9 +1,10 @@
-import { isDeepStrictEqual } from "node:util";
 import z from "zod";
+import constants from "../../../../constants/constants.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
 import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import { agentBuilderContentSchema } from "../../../../schemas/agent-screen.js";
+import { agentBuilderChangeSchema } from "../../../../schemas/agent-screen.js";
+import type { AgentBuilderChangesData } from "../../../../types/response.js";
 import fromDocumentInput from "../../../documents/helpers/from-document-input.js";
 import patchDocumentData from "../../../documents/helpers/patch-document-data.js";
 import resolveContentLocale from "../../../documents/helpers/resolve-content-locale.js";
@@ -11,6 +12,7 @@ import resolveContentRefs from "../../../documents/helpers/resolve-content-refs.
 import toDocumentInput from "../../../documents/helpers/to-document-input.js";
 import buildOperations from "../../../documents/tools/update/build-operations.js";
 import { toolErrorFailure, toolFailure, toolResult } from "../tool-outcome.js";
+import builderChanges from "./builder-changes.js";
 import builderValidation from "./builder-validation.js";
 import {
 	resolveBuilderScreen,
@@ -21,13 +23,13 @@ import {
 import type { RunnerToolInputHandler } from "./types.js";
 
 const title = copy("admin:core.tools.lucid_builder_update.title");
-//* what the update call handed the builder, so the result can report its validation errors
+//* what the update call handed the builder, which the result reports once it's applied
 const appliedSchema = z.object({
-	content: agentBuilderContentSchema,
-	versionId: z.number().nullable(),
+	changes: z.array(agentBuilderChangeSchema),
+	validationErrors: z.array(z.string()),
 });
 
-/** Reads the builder's unsaved content, then applies unsaved edits only if its revision still matches, leaving saving to the person. */
+/** Applies only the changed parts of the builder's unsaved content when those parts still match the read, leaving saving to the person. */
 const builderUpdate: RunnerToolInputHandler<
 	typeof runnerTools.builderUpdate
 > = async (context, props) => {
@@ -50,15 +52,7 @@ const builderUpdate: RunnerToolInputHandler<
 	}
 	if (answered.action === "update") {
 		const sent = appliedSchema.safeParse(answered.sent);
-		const validationErrors = sent.success
-			? await builderValidation(context, {
-					call: props,
-					collection,
-					content: sent.data.content,
-					documentId: screen.documentId,
-					versionId: sent.data.versionId,
-				})
-			: [];
+		const validationErrors = sent.success ? sent.data.validationErrors : [];
 
 		return toolResult({
 			output: {
@@ -66,9 +60,26 @@ const builderUpdate: RunnerToolInputHandler<
 				validationErrors,
 				note: validationErrors.length
 					? "The changes are in the person's document builder as unsaved edits, but some fields aren't valid yet, so fix them before you finish. Paths name bricks by ref, or by key for fixed bricks."
-					: "The changes are in the person's document builder as unsaved edits. They review and save them, and autosave waits until they do.",
+					: "The changes are in the person's document builder as unsaved edits. They review and save them, and autosave waits until they do. The chat lists the fields you changed.",
 			},
 			summary: copy("admin:core.tools.lucid_builder_update.summary"),
+			widgets: sent.success
+				? [
+						{
+							key: constants.agent.widgets.builderChanges,
+							version: 1,
+							data: {
+								document: {
+									collectionKey: screen.collectionKey,
+									documentId: screen.documentId,
+									requestId: screen.requestId,
+									label: screen.label,
+								},
+								changes: sent.data.changes,
+							} satisfies AgentBuilderChangesData,
+						},
+					]
+				: undefined,
 		});
 	}
 	if (!response.document) {
@@ -136,7 +147,46 @@ const builderUpdate: RunnerToolInputHandler<
 			"server:agent.screen.response.invalid",
 		);
 	}
-	if (isDeepStrictEqual(patched.data, current.data)) {
+
+	//* both sides go through the same conversion, so only real changes differ
+	const before = toDocumentInput(
+		contentContext,
+		current.data,
+		response.document.content,
+	);
+	if (before.error) {
+		return toolErrorFailure(
+			context,
+			before.error,
+			"server:agent.screen.response.invalid",
+		);
+	}
+
+	const after = toDocumentInput(
+		contentContext,
+		patched.data,
+		response.document.content,
+	);
+	if (after.error) {
+		return toolErrorFailure(
+			context,
+			after.error,
+			"server:agent.screen.response.invalid",
+		);
+	}
+
+	const { content, changes } = builderChanges(
+		before.data,
+		after.data,
+		new Set(
+			props.input.bricks?.flatMap((brick) =>
+				brick.ref !== undefined && brick.before !== undefined && !brick.remove
+					? [brick.ref]
+					: [],
+			),
+		),
+	);
+	if (changes.length === 0) {
 		return toolResult({
 			output: {
 				applied: false,
@@ -146,22 +196,9 @@ const builderUpdate: RunnerToolInputHandler<
 		});
 	}
 
-	const content = toDocumentInput(
-		contentContext,
-		patched.data,
-		response.document.content,
-	);
-	if (content.error) {
-		return toolErrorFailure(
-			context,
-			content.error,
-			"server:agent.screen.response.invalid",
-		);
-	}
-
 	const refs = await resolveContentRefs(context, {
 		collection,
-		content: content.data,
+		content: { fields: content.fields, bricks: content.bricks },
 	});
 	if (refs.error) {
 		return toolErrorFailure(
@@ -171,6 +208,14 @@ const builderUpdate: RunnerToolInputHandler<
 		);
 	}
 
+	const validationErrors = await builderValidation(context, {
+		call: props,
+		collection,
+		content: after.data,
+		documentId: screen.documentId,
+		versionId: response.document.versionId,
+	});
+
 	return screenCall(context, {
 		callId: props.call.id,
 		title,
@@ -179,8 +224,10 @@ const builderUpdate: RunnerToolInputHandler<
 			screen,
 			revision: response.document.revision,
 			versionId: response.document.versionId,
-			content: content.data,
+			content,
 			refs: refs.data,
+			changes,
+			validationErrors,
 		},
 	});
 };

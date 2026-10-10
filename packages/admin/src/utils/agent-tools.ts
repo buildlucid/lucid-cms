@@ -1,4 +1,5 @@
 import type {
+	AgentBuilderChangesData,
 	AgentCoreWidgetKey,
 	AgentFileReadOutput,
 	AgentLucidToolName,
@@ -32,6 +33,9 @@ export const mediaSelectWidget =
 	"lucid-media-select" satisfies AgentCoreWidgetKey;
 /** Asks this tab's open screen to answer a builder tool. The session answers it, so it never shows. */
 export const screenWidget = "lucid-screen" satisfies AgentCoreWidgetKey;
+/** Stores builder updates shown together at the end of a reply. */
+export const builderChangesWidget =
+	"lucid-builder-changes" satisfies AgentCoreWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
@@ -170,6 +174,16 @@ export const isScreenCallData = (value: unknown): value is AgentScreenCall =>
 	(value.action === "read" ||
 		value.action === "update" ||
 		value.action === "focus");
+
+/** Builder changes come from the server, so only the parts the card reads are checked. */
+export const isBuilderChangesData = (
+	value: unknown,
+): value is AgentBuilderChangesData =>
+	isObjectRecord(value) &&
+	isObjectRecord(value.document) &&
+	typeof value.document.collectionKey === "string" &&
+	typeof value.document.label === "string" &&
+	Array.isArray(value.changes);
 
 export const isFileReadOutput = (
 	value: unknown,

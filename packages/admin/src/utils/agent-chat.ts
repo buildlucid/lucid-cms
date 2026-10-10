@@ -14,6 +14,7 @@ import { createStore, reconcile, unwrap } from "solid-js/store";
 import { translateAdminCopy } from "@/translations";
 import {
 	askTool,
+	builderChangesWidget,
 	finishTool,
 	progressTool,
 	screenWidget,
@@ -62,7 +63,10 @@ export const partLayout = (
 			return "hidden";
 		}
 		case "widget": {
-			if (part.key === screenWidget) return "hidden";
+			//* a reply lists its builder changes together at its end
+			if (part.key === screenWidget || part.key === builderChangesWidget) {
+				return "hidden";
+			}
 			if (!part.interaction) return hasRow(part) ? "row" : "block";
 
 			return part.interaction.placement === "inline" &&

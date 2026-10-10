@@ -25,3 +25,16 @@ export const isSameScreen = (a: AgentScreen, b: AgentScreen) => {
 		? a.requestId === b.requestId
 		: false;
 };
+
+/** Whether a screen is the document builder for a document version, eg. the one a builder change was made in. */
+export const showsDocument = (
+	screen: AgentScreen,
+	document: Pick<
+		Extract<AgentScreen, { type: "document" }>,
+		"collectionKey" | "documentId" | "requestId"
+	>,
+) =>
+	screen.type === "document" &&
+	screen.collectionKey === document.collectionKey &&
+	screen.documentId === document.documentId &&
+	screen.requestId === document.requestId;

@@ -81,7 +81,10 @@ const DocumentEditorPage: Component<{
 	);
 	const versionId = createMemo(() => props.versionId?.() ?? routeVersionId());
 	let snapshotTimeout: ReturnType<typeof setTimeout> | undefined;
-	let hydratedViewKey: string | null = null;
+	//* the document and version the builder's content was loaded for, which the router can move on from before it reloads
+	const [hydratedViewKey, setHydratedViewKey] = createSignal<string | null>(
+		null,
+	);
 	let capturePreviewScroll:
 		| (() => Promise<PreviewScrollState | null>)
 		| undefined;
@@ -105,8 +108,27 @@ const DocumentEditorPage: Component<{
 		document: docState.document,
 		versionId: versionId,
 		//* the server refused a save as another tab took over, which the next heartbeat would only show later
-		onHeld: () => void editors.refresh(),
+		onHeld: () => editors.refresh(),
 	});
+
+	//* which document and version the route shows, to tell when the builder's content belongs to another
+	const getViewKey = (): string | null => {
+		if (props.mode === "create") {
+			return `create:${docState.collectionKey()}`;
+		}
+
+		const routeDocumentId = docState.documentId();
+		if (routeDocumentId === undefined) return null;
+
+		const routeVersionKey =
+			versionType() === "revision"
+				? `revision:${versionId() ?? "unknown"}`
+				: versionType() === "snapshot" || versionType() === "proposal"
+					? `${versionType()}:${versionId() ?? "unknown"}`
+					: `status:${versionType()}`;
+
+		return `${docState.collectionKey()}:${routeDocumentId}:${routeVersionKey}`;
+	};
 
 	const uiState = useDocumentUIState({
 		collectionQuery: docState.collectionQuery,
@@ -152,10 +174,12 @@ const DocumentEditorPage: Component<{
 			contentLocale: docState.contentLocale() ?? "",
 		});
 	});
-	//* the agent works on what this editor shows, unsaved changes included
+	//* the agent works on what this editor shows, unsaved changes included, once the content for this document and version has loaded
 	useBuilderTools({
 		enabled: () =>
 			uiState.isSuccess() &&
+			getViewKey() !== null &&
+			hydratedViewKey() === getViewKey() &&
 			(props.mode === "create" ||
 				(docState.document() !== undefined &&
 					(versionType() === "latest" || versionType() === "proposal"))),
@@ -244,23 +268,6 @@ const DocumentEditorPage: Component<{
 
 	// ------------------------------------------
 	// Setup document state
-	const getViewKey = (): string | null => {
-		if (props.mode === "create") {
-			return `create:${docState.collectionKey()}`;
-		}
-
-		const routeDocumentId = docState.documentId();
-		if (routeDocumentId === undefined) return null;
-
-		const routeVersionKey =
-			versionType() === "revision"
-				? `revision:${versionId() ?? "unknown"}`
-				: versionType() === "snapshot" || versionType() === "proposal"
-					? `${versionType()}:${versionId() ?? "unknown"}`
-					: `status:${versionType()}`;
-
-		return `${docState.collectionKey()}:${routeDocumentId}:${routeVersionKey}`;
-	};
 	const setDocumentState = () => {
 		if (brickStore.get.relationFieldDragCount > 0) return;
 
@@ -275,7 +282,8 @@ const DocumentEditorPage: Component<{
 		}
 
 		const nextViewKey = getViewKey();
-		const shouldMerge = nextViewKey !== null && hydratedViewKey === nextViewKey;
+		const shouldMerge =
+			nextViewKey !== null && hydratedViewKey() === nextViewKey;
 		const hasUnsavedChanges =
 			brickStore.get.initialSnapshot !== null &&
 			brickStore.getDocumentMutated();
@@ -330,7 +338,7 @@ const DocumentEditorPage: Component<{
 			}, 0);
 		}
 
-		hydratedViewKey = nextViewKey;
+		setHydratedViewKey(nextViewKey);
 
 		if (!shouldMerge) {
 			setStateLoading(false);
@@ -376,7 +384,7 @@ const DocumentEditorPage: Component<{
 
 	onCleanup(() => {
 		if (snapshotTimeout !== undefined) clearTimeout(snapshotTimeout);
-		hydratedViewKey = null;
+		setHydratedViewKey(null);
 		capturePreviewScroll = undefined;
 		pendingPreviewScroll = null;
 		brickStore.get.reset();
@@ -655,22 +663,32 @@ const DocumentEditorPage: Component<{
 								{T()("documents.locked.message")}
 							</Alert>
 						</Show>
-						<Show when={editors.holder()}>
-							<Alert
-								variant="warning"
-								appearance="pill"
-								class="pointer-events-auto"
-							>
-								{T()("documents.held.view.only")}
-								<button
-									type="button"
-									class="ml-3 rounded-sm font-medium text-warning-foreground underline underline-offset-2 decoration-warning-foreground/50 hover:text-warning-foreground hover:decoration-warning-foreground focus:ring-warning-foreground focus-visible:ring-1"
-									disabled={editors.takingOver()}
-									onClick={() => void editors.takeOver()}
+						{/* takes over from the modal once it's closed */}
+						<Show when={!editors.noticeOpen() && editors.holder()}>
+							{(holder) => (
+								<Alert
+									variant="warning"
+									appearance="pill"
+									class="pointer-events-auto"
 								>
-									{T()("documents.held.take.over")}
-								</button>
-							</Alert>
+									{holder().self
+										? T()("documents.held.self.view.only")
+										: T()("documents.held.view.only", {
+												name: helpers.formatUserName(holder().user, "name"),
+											})}
+									<button
+										type="button"
+										class="ml-3 rounded-sm font-medium text-warning-foreground underline underline-offset-2 decoration-warning-foreground/50 hover:text-warning-foreground hover:decoration-warning-foreground focus:ring-warning-foreground focus-visible:ring-1"
+										disabled={editors.takingOver()}
+										aria-busy={editors.takingOver()}
+										onClick={() => void editors.takeOver()}
+									>
+										{editors.takingOver()
+											? T()("documents.held.taking.over")
+											: T()("documents.held.take.over")}
+									</button>
+								</Alert>
+							)}
 						</Show>
 						<Show when={uiState.collectionNeedsMigrating()}>
 							<Alert
@@ -904,8 +922,11 @@ const DocumentEditorPage: Component<{
 						}}
 					/>
 					<DocumentHeldModal
+						open={editors.noticeOpen()}
 						holder={editors.holder()}
 						takingOver={editors.takingOver()}
+						error={editors.takeOverError()}
+						onDismiss={editors.dismissNotice}
 						onLeave={leave}
 						onTakeOver={() => void editors.takeOver()}
 					/>
