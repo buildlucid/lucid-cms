@@ -16,8 +16,10 @@ export const completeRequestAgentTool = (options: CollectionToolOptions = {}) =>
 	defineAgentTool({
 		name,
 		title: copy("admin:core.tools.requests_complete.title"),
-		description:
-			"Complete an approved request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests the person asked you to. To complete one later, use requests_schedule.",
+		description: ({ mode }) =>
+			mode === "routine"
+				? "Complete an approved request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests your instructions call for. To complete one later, use requests_schedule."
+				: "Complete an approved request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests the person asked you to. To complete one later, use requests_schedule.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],

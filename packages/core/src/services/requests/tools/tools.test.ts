@@ -162,6 +162,11 @@ const startRun = async (
 			assert(result.type === "failed", JSON.stringify(result));
 			return result.message;
 		},
+		invalid: async (tool: AgentToolDefinition, input: unknown) => {
+			const result = await execute(tool, input);
+			assert(result.type === "invalid-input", JSON.stringify(result));
+			return result.message;
+		},
 	};
 };
 
@@ -366,18 +371,24 @@ test("agents comment and reply as their run and only change comments their agent
 	await later.fail(updateComment, {
 		requestId,
 		commentId: person.data.id,
-		action: "resolve",
+		action: { type: "resolve" },
 	});
 	await (await startRun(editor.key)).fail(updateComment, {
 		requestId,
 		commentId: commented.comment.id,
-		action: "remove",
+		action: { type: "remove" },
 	});
+	expect(
+		await later.invalid(updateComment, {
+			requestId,
+			commentId: commented.comment.id,
+			action: { type: "resolve", body: "<p>Thanks</p>" },
+		}),
+	).toContain("body");
 	await later.call(updateComment, {
 		requestId,
 		commentId: commented.comment.id,
-		action: "resolve",
-		body: "<p>Ignored unless editing</p>",
+		action: { type: "resolve" },
 	});
 	expect((await readRequest(later, requestId)).comments[0]).toMatchObject({
 		body: "<p>The title needs work</p>",
@@ -386,7 +397,7 @@ test("agents comment and reply as their run and only change comments their agent
 	await later.call(updateComment, {
 		requestId,
 		commentId: commented.comment.id,
-		action: "remove",
+		action: { type: "remove" },
 	});
 	expect(
 		(await readRequest(later, requestId)).comments.map((comment) => comment.id),
@@ -444,7 +455,7 @@ test("an agent's comments stay the agent's, even after its chat is deleted", asy
 	await (await startRun()).call(updateComment, {
 		requestId,
 		commentId: commented.comment.id,
-		action: "reopen",
+		action: { type: "reopen" },
 	});
 });
 
@@ -467,8 +478,7 @@ test("the system's agent never takes over comments it wrote for a person who was
 		await system.fail(updateComment, {
 			requestId,
 			commentId: commented.comment.id,
-			action: "edit",
-			body: "<p>Taken over</p>",
+			action: { type: "edit", body: "<p>Taken over</p>" },
 		}),
 	).toContain("wasn't written by you");
 	const [comment] = (await readRequest(system, requestId)).comments;

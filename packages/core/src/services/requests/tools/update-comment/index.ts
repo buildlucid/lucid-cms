@@ -45,7 +45,7 @@ export const updateRequestCommentAgentTool = (
 				data: {
 					output: result.data.output,
 					summary: copy(
-						`admin:core.tools.requests_update_comment.summary.${input.action}`,
+						`admin:core.tools.requests_update_comment.summary.${input.action.type}`,
 						{ data: { id: input.requestId } },
 					),
 				},

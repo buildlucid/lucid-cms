@@ -65,13 +65,14 @@ const updateRequestComment: ServiceFn<
 		user,
 		agentRunId: props.actor.agentRunId,
 	};
+	const { action } = input;
 	const actionRes =
-		input.action === "remove"
+		action.type === "remove"
 			? await deleteComment(context, target)
-			: input.action === "edit"
+			: action.type === "edit"
 				? await updateComment(context, {
 						...target,
-						body: parseSourceHTML(input.body ?? ""),
+						body: parseSourceHTML(action.body),
 					})
 				: await updateCommentResolution(context, {
 						...target,
@@ -79,7 +80,7 @@ const updateRequestComment: ServiceFn<
 							resolve: "resolved" as const,
 							close: "closed" as const,
 							reopen: null,
-						}[input.action],
+						}[action.type],
 					});
 	if (actionRes.error) return actionRes;
 
