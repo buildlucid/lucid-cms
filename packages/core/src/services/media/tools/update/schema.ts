@@ -48,7 +48,7 @@ export const inputSchema = z
 	});
 
 export const outputSchema = z.object({
-	data: mediaItemSchema,
+	media: mediaItemSchema.meta({ description: "The media after the update." }),
 	meta: z
 		.object({
 			contentLocale: z

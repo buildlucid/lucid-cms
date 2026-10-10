@@ -3,23 +3,20 @@ import constants from "../../../constants/constants.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentConversation,
 	AiModelSelection,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/**
- * Inserts a chat with an agent. A null user makes a chat for a code routine, shared with the agent's managers.
- * Routine chats always use tool defaults, so the routine's tool settings decide approvals.
- */
+/** Creates agent chats, sharing code routine chats with the agent's managers when the user is null and using tool defaults with routine confirmation overrides. */
 const insertConversation: ServiceFn<
 	[
 		{
 			/** Chosen by the caller, such as the admin opening a chat before it is saved. */
 			id?: string;
 			agentKey: string;
-			approvalMode?: AgentApprovalMode;
+			confirmationMode?: AgentConfirmationMode;
 			modelSelection?: AiModelSelection;
 			userId: number | null;
 			title?: string;
@@ -41,7 +38,9 @@ const insertConversation: ServiceFn<
 					: input.routineId
 						? "own-routine"
 						: "chat",
-			approval_mode: input.routineId ? "tool-defaults" : input.approvalMode,
+			confirmation_mode: input.routineId
+				? "tool-defaults"
+				: input.confirmationMode,
 			//* resolved when each run starts, so saving a chat never waits on the Lucid service
 			model_selection: input.modelSelection ?? null,
 			title: input.title ?? constants.agent.defaultTitle,

@@ -32,7 +32,7 @@ const createCollection = (
 				}),
 			},
 		},
-		publishing: { targets: environments },
+		publishing: { environments: environments },
 	});
 
 describe("resolve relation version type", () => {

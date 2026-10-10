@@ -48,7 +48,7 @@ const callAgent = (
 	const runId = randomUUID();
 	return executeAgentTool({
 		context,
-		tool: agentTools.getAiUsage(),
+		tool: agentTools.aiUsage.get(),
 		input,
 		execution: {
 			authority: {

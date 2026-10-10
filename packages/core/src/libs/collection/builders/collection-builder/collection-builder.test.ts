@@ -212,7 +212,7 @@ test("collection options are correct along with field includes and filters", asy
 		routing: null,
 		preview: null,
 		publishing: {
-			targets: [],
+			environments: [],
 			scheduling: false,
 		},
 	});
@@ -369,7 +369,7 @@ test("collection workflow features normalizes defaults", async () => {
 			},
 		},
 		publishing: {
-			targets: [
+			environments: [
 				{
 					key: "production",
 					label: copy("admin:tests.environments.production.name", {
@@ -429,7 +429,7 @@ test("review environments expand true, and unpublish follows publish unless set"
 			mode: "multiple",
 			details: { labels: { singular: "Page", plural: "Pages" } },
 			publishing: {
-				targets: [
+				environments: [
 					{ key: "staging", label: "Staging" },
 					{ key: "production", label: "Production" },
 				],
@@ -463,7 +463,7 @@ test("collection environment version mappings normalizes defaults", async () => 
 			},
 		},
 		publishing: {
-			targets: [
+			environments: [
 				{
 					key: "staging",
 					label: copy("admin:tests.environments.staging.name", {
@@ -483,7 +483,7 @@ test("collection environment version mappings normalizes defaults", async () => 
 			],
 		},
 	});
-	expect(collection.getData.publishing.targets).toEqual([
+	expect(collection.getData.publishing.environments).toEqual([
 		{
 			key: "staging",
 			label: copy("admin:tests.environments.staging.name", {

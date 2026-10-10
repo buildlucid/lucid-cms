@@ -18,7 +18,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 		embedded: [RichTextCalloutBrick],
 	},
 	publishing: {
-		targets: [
+		environments: [
 			{
 				key: "staging",
 				label: copy("admin:collections.blog.environments.staging.name"),

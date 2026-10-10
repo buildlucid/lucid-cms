@@ -80,7 +80,8 @@ export const RequestChecks: Component<{
 				//* workflow and review blockers have their own rows
 				blockers: blockers.filter(
 					(blocker) =>
-						blocker.code !== "workflow" && blocker.code !== "review_required",
+						blocker.code !== "workflow" &&
+						blocker.code !== "acknowledge_required",
 				),
 				workflowAllowed:
 					workflowCheckable() && !unavailable

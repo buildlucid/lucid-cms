@@ -49,7 +49,7 @@ export const mediaItemSchema = z.object({
 		.meta({ description: "Media library folder ID; null at the top level." }),
 	personal: z.boolean().meta({
 		description:
-			"Whether this is the user's personal media, such as a chat upload. Personal media stays private and out of folders and documents until media_remove_ownership adds it to the library.",
+			"Whether this is personal media, such as a chat upload. It stays private, and out of folders and documents, until it is added to the library.",
 	}),
 	createdAt: z.string().nullable().meta({ description: "Creation time." }),
 	updatedAt: z.string().nullable().meta({ description: "Last update time." }),

@@ -7,7 +7,7 @@ import {
 } from "../libs/agent/model-selection.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentDelivery,
 	AgentInput,
 	AgentInputAction,
@@ -110,11 +110,11 @@ export const agentRunStatusSchema = z.enum([
 	"cancelled",
 ]) satisfies z.ZodType<AgentRunStatus>;
 
-export const agentApprovalModeSchema = z.enum([
+export const agentConfirmationModeSchema = z.enum([
 	"confirm-all",
 	"tool-defaults",
 	"automatic",
-]) satisfies z.ZodType<AgentApprovalMode>;
+]) satisfies z.ZodType<AgentConfirmationMode>;
 
 export const agentTitleStatusSchema = z.enum([
 	"provisional",
@@ -144,13 +144,13 @@ export const agentInteractionSchema = agentInteractionRequestSchema
 		id: z.string().min(1),
 		toolCallId: z.string().min(1),
 		answeredByUserId: z.number().optional(),
-		approval: z
+		confirmation: z
 			.object({
 				toolName: z.string(),
 				input: z.record(z.string(), z.unknown()),
 			})
 			.optional(),
-		approvals: z
+		confirmations: z
 			.array(
 				z.object({
 					toolCallId: z.string().min(1),
@@ -287,7 +287,7 @@ const agentConversationDetailsResponseSchema = z.object({
 });
 
 const agentConversationResponseSchema = z.object({
-	approvalMode: agentApprovalModeSchema,
+	confirmationMode: agentConfirmationModeSchema,
 	modelSelection: aiModelSelectionSchema.nullable(),
 	queuePaused: z.boolean(),
 	inputs: z.array(agentInputSchema).optional(),
@@ -357,7 +357,7 @@ const agentCatalogResponseSchema = z.object({
 				z.object({
 					name: z.string(),
 					title: resolvedAdminCopySchema,
-					requiresApproval: z.boolean(),
+					requiresConfirmation: z.boolean(),
 					interactive: z.boolean(),
 					permissions: z.array(z.string()),
 				}),
@@ -383,7 +383,7 @@ const agentRunResponseSchema = z.object({
 /** Per-tool settings for a routine, keyed by tool name. Missing settings use the tool's defaults. */
 export const routineToolsSchema = z.record(
 	z.string().min(1).max(128),
-	z.object({ requiresApproval: z.boolean().optional() }).strict(),
+	z.object({ requiresConfirmation: z.boolean().optional() }).strict(),
 );
 
 const agentRoutineResponseSchema = z.object({
@@ -542,7 +542,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createConversation: {
 		body: z.object({
-			approvalMode: agentApprovalModeSchema.optional(),
+			confirmationMode: agentConfirmationModeSchema.optional(),
 			modelSelection: aiModelSelectionSchema.optional(),
 			/** Lets the admin open the chat before it is saved. */
 			id: z.uuid().optional(),
@@ -586,7 +586,7 @@ export const controllerSchemas = {
 	updateConversation: {
 		body: z.object({
 			title: z.string().trim().min(1).max(255).optional(),
-			approvalMode: agentApprovalModeSchema.optional(),
+			confirmationMode: agentConfirmationModeSchema.optional(),
 			modelSelection: aiModelSelectionSchema.optional(),
 		}),
 		query: noQuery,

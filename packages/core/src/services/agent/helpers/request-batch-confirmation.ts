@@ -9,11 +9,8 @@ import recordToolResult from "./record-tool-result.js";
 import type { RunSession } from "./run-session.js";
 import { failedToolRun } from "./tool-outcome.js";
 
-/**
- * Checks each call before asking, then saves one approval covering the calls
- * that can run. Fewer than two leaves the rest to the single-call path.
- */
-const requestBatchApproval: ServiceFn<
+/** Checks calls before saving one confirmation for those that can run, leaving fewer than two to the single-call path. */
+const requestBatchConfirmation: ServiceFn<
 	[
 		{
 			checkpoint: Checkpoint;
@@ -25,7 +22,7 @@ const requestBatchApproval: ServiceFn<
 	"completed" | "waiting"
 > = async (context, props) => {
 	const { checkpoint, session } = props;
-	const approvals = [];
+	const confirmations = [];
 
 	for (const { call, tool } of props.batch) {
 		const prepared = await preflightAgentTool({
@@ -45,7 +42,7 @@ const requestBatchApproval: ServiceFn<
 			continue;
 		}
 
-		approvals.push({
+		confirmations.push({
 			toolCallId: call.id,
 			toolName: tool.name,
 			title: context.translate(tool.describe(call.input)),
@@ -53,19 +50,19 @@ const requestBatchApproval: ServiceFn<
 		});
 	}
 
-	const first = approvals[0];
-	if (approvals.length < 2 || !first) {
+	const first = confirmations[0];
+	if (confirmations.length < 2 || !first) {
 		return { error: undefined, data: "completed" };
 	}
 
 	checkpoint.pending = createInteraction({
 		callId: first.toolCallId,
-		key: constants.agent.widgets.approvalBatch,
-		title: context.translate("server:agent.tool.approval.batch", {
-			data: { count: approvals.length },
+		key: constants.agent.widgets.confirmationBatch,
+		title: context.translate("server:agent.tool.confirmation.batch", {
+			data: { count: confirmations.length },
 		}),
 		data: {},
-		approvals,
+		confirmations,
 	});
 	checkpoint.parts.push(checkpoint.pending.widget);
 
@@ -80,4 +77,4 @@ const requestBatchApproval: ServiceFn<
 	return { error: undefined, data: "waiting" };
 };
 
-export default requestBatchApproval;
+export default requestBatchConfirmation;

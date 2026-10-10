@@ -71,7 +71,7 @@ const propagateRouteSegmentUpdates: ServiceFn<
 
 			const versionTypes = [
 				"latest",
-				...collectionInstance.getData.publishing.targets.map(
+				...collectionInstance.getData.publishing.environments.map(
 					(environment) => environment.key,
 				),
 			].filter((versionType) => {

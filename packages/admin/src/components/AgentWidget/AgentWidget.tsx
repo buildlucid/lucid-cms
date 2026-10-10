@@ -19,8 +19,8 @@ import Button from "@/components/Button/Button";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import T from "@/translations";
 import {
-	approvalBatchWidget,
-	approvalWidget,
+	confirmationBatchWidget,
+	confirmationWidget,
 	isWidgetSupported,
 	mediaSelectWidget,
 	questionWidget,
@@ -48,8 +48,8 @@ const AgentWidget: Component<{
 	const [submitting, setSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string>();
 	const [showInput, setShowInput] = createSignal(false);
-	const [approvedCalls, setApprovedCalls] = createSignal<string[]>([]);
-	const [approvalStep, setApprovalStep] = createSignal(0);
+	const [confirmedCalls, setConfirmedCalls] = createSignal<string[]>([]);
+	const [confirmationStep, setConfirmationStep] = createSignal(0);
 	const [draft, setDraft] = createSignal<{
 		id: string;
 		response: Record<string, unknown>;
@@ -70,35 +70,39 @@ const AgentWidget: Component<{
 	const supported = createMemo(() => isWidgetSupported(props.widget));
 	const active = createMemo(() => !!pending() && !!props.onRespond);
 	const batch = createMemo(() =>
-		supported() ? pending()?.approvals : undefined,
+		supported() ? pending()?.confirmations : undefined,
 	);
-	const approvalOnly = createMemo(
+	const confirmationOnly = createMemo(
 		() =>
 			supported() &&
-			(props.widget.key === approvalWidget ||
-				props.widget.key === approvalBatchWidget),
+			(props.widget.key === confirmationWidget ||
+				props.widget.key === confirmationBatchWidget),
 	);
-	const currentApproval = createMemo(() => batch()?.[approvalStep()]);
-	const approval = createMemo(() => currentApproval() ?? pending()?.approval);
-	const hasApproval = createMemo(
-		() => approval() !== undefined || batch() !== undefined,
+	const currentConfirmation = createMemo(() => batch()?.[confirmationStep()]);
+	const confirmation = createMemo(
+		() => currentConfirmation() ?? pending()?.confirmation,
+	);
+	const hasConfirmation = createMemo(
+		() => confirmation() !== undefined || batch() !== undefined,
 	);
 	const waitingText = createMemo(() => {
-		const approvals = batch();
-		if (approvals) {
-			return T()("agent.approval.waiting.step", {
-				current: approvalStep() + 1,
-				total: approvals.length,
+		const confirmations = batch();
+		if (confirmations) {
+			return T()("agent.confirmation.waiting.step", {
+				current: confirmationStep() + 1,
+				total: confirmations.length,
 			});
 		}
 
 		return T()(
-			hasApproval() ? "agent.approval.waiting" : "agent.interaction.waiting",
+			hasConfirmation()
+				? "agent.confirmation.waiting"
+				: "agent.interaction.waiting",
 		);
 	});
-	const collapsed = createMemo(() => approvalOnly() && !showInput());
+	const collapsed = createMemo(() => confirmationOnly() && !showInput());
 	const ready = createMemo(
-		() => approvalOnly() || draft()?.id === pending()?.id,
+		() => confirmationOnly() || draft()?.id === pending()?.id,
 	);
 	const question = createMemo(() => {
 		const { question, options } = props.widget.data;
@@ -162,29 +166,29 @@ const AgentWidget: Component<{
 			setSubmitting(false);
 		}
 	};
-	/** Grouped approvals collect each decision locally and submit once after the last call. */
+	/** Grouped confirmations collect each decision locally and submit once after the last call. */
 	const decide = (action: AgentInteractionAction) => {
 		if (submitting() || (action === "submit" && !ready())) return;
 
-		const current = currentApproval();
+		const current = currentConfirmation();
 		if (!current) {
 			void submit(action === "cancel" ? {} : (draft()?.response ?? {}), action);
 			return;
 		}
 
-		const approvedToolCallIds =
+		const confirmedToolCallIds =
 			action === "submit"
-				? [...approvedCalls(), current.toolCallId]
-				: approvedCalls();
+				? [...confirmedCalls(), current.toolCallId]
+				: confirmedCalls();
 
-		if (approvalStep() + 1 < (batch()?.length ?? 0)) {
-			setApprovedCalls(approvedToolCallIds);
-			setApprovalStep((step) => step + 1);
+		if (confirmationStep() + 1 < (batch()?.length ?? 0)) {
+			setConfirmedCalls(confirmedToolCallIds);
+			setConfirmationStep((step) => step + 1);
 			setError(undefined);
 			return;
 		}
 
-		void submit({ approvedToolCallIds });
+		void submit({ confirmedToolCallIds });
 	};
 	const answer = async (value: string) =>
 		(await submit({ answer: value })).error === undefined;
@@ -195,8 +199,8 @@ const AgentWidget: Component<{
 		on(
 			() => pending()?.id,
 			() => {
-				setApprovalStep(0);
-				setApprovedCalls([]);
+				setConfirmationStep(0);
+				setConfirmedCalls([]);
 			},
 		),
 	);
@@ -226,11 +230,11 @@ const AgentWidget: Component<{
 						<Show when={props.view === "composer" && pending()}>
 							{(state) => (
 								<AgentInteractionBar
-									title={currentApproval()?.title ?? state().title}
+									title={currentConfirmation()?.title ?? state().title}
 									onRedirect={props.onRedirect}
 									onStop={props.onStop}
 									details={
-										approvalOnly()
+										confirmationOnly()
 											? {
 													open: showInput(),
 													onToggle: () => setShowInput((open) => !open),
@@ -248,8 +252,8 @@ const AgentWidget: Component<{
 								}}
 							>
 								<Show
-									when={!approvalOnly()}
-									fallback={<JSONPreview json={approval()?.input ?? {}} />}
+									when={!confirmationOnly()}
+									fallback={<JSONPreview json={confirmation()?.input ?? {}} />}
 								>
 									<Show
 										when={contribution()}
@@ -298,9 +302,9 @@ const AgentWidget: Component<{
 								</Show>
 								<Show when={props.view === "inline"}>
 									<p class="min-w-0 grow text-xs text-muted">
-										{currentApproval()?.title ?? pending()?.title}
+										{currentConfirmation()?.title ?? pending()?.title}
 									</p>
-									<Show when={approvalOnly()}>
+									<Show when={confirmationOnly()}>
 										<Button
 											type="button"
 											variant="ghost"
@@ -331,8 +335,8 @@ const AgentWidget: Component<{
 									onClick={() => decide("cancel")}
 								>
 									{T()(
-										hasApproval()
-											? "agent.approval.deny"
+										hasConfirmation()
+											? "agent.confirmation.deny"
 											: "agent.interaction.cancel",
 									)}
 								</Button>
@@ -342,13 +346,13 @@ const AgentWidget: Component<{
 									disabled={
 										!ready() ||
 										submitting() ||
-										(!approvalOnly() && !contribution())
+										(!confirmationOnly() && !contribution())
 									}
 									onClick={() => decide("submit")}
 								>
 									{T()(
-										hasApproval()
-											? "agent.approval.approve"
+										hasConfirmation()
+											? "agent.confirmation.confirm"
 											: "agent.interaction.continue",
 									)}
 								</Button>

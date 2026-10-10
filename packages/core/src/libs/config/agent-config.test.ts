@@ -18,7 +18,7 @@ const agent = defineAgent({
 	key: "seo",
 	name: "SEO Agent",
 	description: "Reviews metadata.",
-	tools: [agentTools.content()],
+	tools: [agentTools.read()],
 	routines: [routine],
 });
 const check = (agents: AgentDefinition[]) => () =>
@@ -160,7 +160,7 @@ test("routine tools accept the agent's tools and reject unknown names", () => {
 				routines: [
 					{
 						...routine,
-						tools: { collections_list: { requiresApproval: true } },
+						tools: { collections_list: { requiresConfirmation: true } },
 					},
 				],
 			},
@@ -173,7 +173,7 @@ test("routine tools accept the agent's tools and reject unknown names", () => {
 				routines: [
 					{
 						...routine,
-						tools: { unknown_tool: { requiresApproval: false } },
+						tools: { unknown_tool: { requiresConfirmation: false } },
 					},
 				],
 			},

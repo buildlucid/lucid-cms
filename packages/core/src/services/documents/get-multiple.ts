@@ -149,7 +149,7 @@ const getMultiple: ServiceFn<
 	if (relationFiltersRes.error) return relationFiltersRes;
 
 	const environmentKeys = new Set(
-		collectionRes.data.getData.publishing.targets.map(
+		collectionRes.data.getData.publishing.environments.map(
 			(environment) => environment.key,
 		),
 	);

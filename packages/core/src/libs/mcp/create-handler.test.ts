@@ -88,7 +88,7 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 		ai: {
 			...base.ai,
 			features: { ...base.ai.features, mcp: true },
-			mcp: { tools: [...mcpTools.content(), restricted, echo], skills: [] },
+			mcp: { tools: [...mcpTools.all(), restricted, echo], skills: [] },
 		},
 	};
 	const context = createServiceContext({

@@ -14,7 +14,7 @@ export const runJobScheduleAgentTool = () =>
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.JobsRun],
-		requiresApproval: true,
+		requiresConfirmation: true,
 		describe: (input) =>
 			copy("admin:core.tools.jobs_run_schedule.describe", {
 				data: { schedule: input.scheduleKey },

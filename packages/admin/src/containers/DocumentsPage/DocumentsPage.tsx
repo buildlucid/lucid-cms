@@ -128,10 +128,10 @@ const DocumentsPage: Component = () => {
 					},
 				]
 			: []),
-		//* grouped by status, so each status's targets sit together
+		//* grouped by status, so each status's environments sit together
 		...(["unreleased", "out-of-sync"] as const).flatMap((status) =>
-			(collectionData()?.publishing.targets ?? []).map((target) => ({
-				key: `${status}.${target.key}`,
+			(collectionData()?.publishing.environments ?? []).map((environment) => ({
+				key: `${status}.${environment.key}`,
 				label: T()(
 					status === "unreleased"
 						? "documents.filter.unreleased"
@@ -139,13 +139,13 @@ const DocumentsPage: Component = () => {
 					{
 						target:
 							helpers.getLocaleValue({
-								value: target.label,
-								fallback: target.key,
-							}) || target.key,
+								value: environment.label,
+								fallback: environment.key,
+							}) || environment.key,
 					},
 				),
 				filters: {
-					[`envStatus.${target.key}`]: { value: status, operator: "=" },
+					[`envStatus.${environment.key}`]: { value: status, operator: "=" },
 				},
 			})),
 		),

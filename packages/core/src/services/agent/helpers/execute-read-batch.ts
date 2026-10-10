@@ -1,5 +1,5 @@
 import {
-	needsApproval,
+	needsConfirmation,
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
 import type { Checkpoint, ToolCall } from "../../../libs/agent/types.js";
@@ -11,7 +11,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import type { ReadCall } from "./get-read-batch.js";
 import invokeAgentTool from "./invoke-agent-tool.js";
 import recordToolResult from "./record-tool-result.js";
-import requestBatchApproval from "./request-batch-approval.js";
+import requestBatchConfirmation from "./request-batch-confirmation.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import { type ToolResult, toolFailure } from "./tool-outcome.js";
 
@@ -54,8 +54,12 @@ const executeReadBatch: ServiceFn<
 	});
 
 	const first = batch[0];
-	if (!checkpoint.pending && first && needsApproval(checkpoint, first.tool)) {
-		return requestBatchApproval(context, {
+	if (
+		!checkpoint.pending &&
+		first &&
+		needsConfirmation(checkpoint, first.tool)
+	) {
+		return requestBatchConfirmation(context, {
 			checkpoint,
 			session,
 			batch,
@@ -69,7 +73,7 @@ const executeReadBatch: ServiceFn<
 		if (answer?.action === "cancel") {
 			return toolFailure(context.translate("server:agent.tool.denied"));
 		}
-		if (needsApproval(checkpoint, tool) && !answer) {
+		if (needsConfirmation(checkpoint, tool) && !answer) {
 			return toolFailure(context.translate("server:agent.tool.unavailable"));
 		}
 

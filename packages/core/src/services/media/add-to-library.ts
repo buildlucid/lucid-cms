@@ -5,12 +5,8 @@ import updateSingle from "./update-single.js";
 
 type Translations = { localeCode: string | null; value: string | null }[];
 
-/**
- * Removes ownership of personal media so it joins the shared media library,
- * such as a chat upload that should appear on a page. Only its owner can do this, and
- * it's private unless `public` is set.
- */
-const removeOwnership: ServiceFn<
+/** Adds personal media to the shared library for its owner, keeping it private unless `public` is set. */
+const addToLibrary: ServiceFn<
 	[
 		{
 			id: number;
@@ -54,7 +50,7 @@ const removeOwnership: ServiceFn<
 
 	return updateSingle(context, {
 		id: data.id,
-		removeOwnership: true,
+		addToLibrary: true,
 		public: data.public,
 		folderId: data.folderId,
 		title: data.title,
@@ -64,4 +60,4 @@ const removeOwnership: ServiceFn<
 	});
 };
 
-export default removeOwnership;
+export default addToLibrary;

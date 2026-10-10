@@ -22,6 +22,7 @@ import insertConversation from "../../agent/helpers/insert-conversation.js";
 import syncLocales from "../../sync/sync-locales.js";
 import { outputSchema as getOutputSchema } from "./get/schema.js";
 import { outputSchema as selectOutputSchema } from "./select/schema.js";
+import { outputSchema as updateOutputSchema } from "./update/schema.js";
 
 const fixture = getTestConfig();
 const agent = defineAgent({
@@ -49,7 +50,7 @@ beforeAll(async () => {
 			ai: {
 				...config.ai,
 				features: { ...config.ai.features, mcp: true },
-				mcp: { tools: [mcpTools.getMedia()], skills: [] },
+				mcp: { tools: [mcpTools.media.get()], skills: [] },
 				agents: { definitions: [agent] },
 			},
 		},
@@ -103,7 +104,10 @@ const insertMedia = async (
 };
 
 /** Starts a chat with a run, as the runner would before calling tools. */
-const startRun = async (userId: number | null) => {
+const startRun = async (
+	userId: number | null,
+	permissions: string[] = [Permissions.MediaRead, Permissions.MediaUpdate],
+) => {
 	const conversation = await insertConversation(context, {
 		agentKey: agent.key,
 		userId,
@@ -133,7 +137,7 @@ const startRun = async (userId: number | null) => {
 		authority: {
 			principal:
 				userId === null ? { type: "system" } : { type: "user", userId },
-			permissions: [Permissions.MediaRead, Permissions.MediaUpdate],
+			permissions,
 			superAdmin: false,
 		},
 		actor:
@@ -198,7 +202,7 @@ test("media_get reads library media over MCP and the run owner's personal media 
 	expect((await mcp(personal)).type).toBe("failed");
 
 	const run = await startRun(owner);
-	const read = await run.call(agentTools.getMedia(), { mediaId: personal });
+	const read = await run.call(agentTools.media.get(), { mediaId: personal });
 	assert(read.type === "success", JSON.stringify(read));
 	expect(getOutputSchema.parse(read.data.output).data).toMatchObject({
 		id: personal,
@@ -207,7 +211,7 @@ test("media_get reads library media over MCP and the run owner's personal media 
 		folderId: null,
 	});
 	expect(
-		(await run.call(agentTools.getMedia(), { mediaId: othersPersonal })).type,
+		(await run.call(agentTools.media.get(), { mediaId: othersPersonal })).type,
 	).toBe("failed");
 });
 
@@ -215,26 +219,26 @@ test("media_update changes one locale, records the run and links the media as a 
 	const mediaId = await insertMedia({ type: "document" });
 	const run = await startRun(owner);
 
-	const updated = await run.call(agentTools.updateMedia(), {
+	const updated = await run.call(agentTools.media.update(), {
 		mediaId,
 		contentLocale: "fr",
 		title: "Guide",
 		summary: "Un guide",
 	});
 	assert(updated.type === "success", JSON.stringify(updated));
-	expect(getOutputSchema.parse(updated.data.output)).toMatchObject({
-		data: { title: "Guide", description: "Un guide" },
+	expect(updateOutputSchema.parse(updated.data.output)).toMatchObject({
+		media: { title: "Guide", description: "Un guide" },
 		meta: { contentLocale: "fr" },
 	});
 
 	//* text left out keeps its value in that locale
-	const summarised = await run.call(agentTools.updateMedia(), {
+	const summarised = await run.call(agentTools.media.update(), {
 		mediaId,
 		contentLocale: "fr",
 		summary: "Un guide pratique",
 	});
 	assert(summarised.type === "success", JSON.stringify(summarised));
-	expect(getOutputSchema.parse(summarised.data.output).data).toMatchObject({
+	expect(updateOutputSchema.parse(summarised.data.output).media).toMatchObject({
 		title: "Guide",
 		description: "Un guide pratique",
 	});
@@ -250,6 +254,26 @@ test("media_update changes one locale, records the run and links the media as a 
 	]);
 });
 
+test("people manage their own uploads without media permissions, but library updates need media:update", async () => {
+	const library = await insertMedia();
+	const personal = await insertMedia({ ownerUserId: owner });
+	const update = (run: Awaited<ReturnType<typeof startRun>>, mediaId: number) =>
+		run.call(agentTools.media.update(), { mediaId, title: "Renamed" });
+
+	const unpermitted = await startRun(owner, []);
+	expect(
+		(await unpermitted.call(agentTools.media.get(), { mediaId: personal }))
+			.type,
+	).toBe("success");
+	expect((await update(unpermitted, personal)).type).toBe("success");
+
+	const reader = await startRun(owner, [Permissions.MediaRead]);
+	expect(
+		(await reader.call(agentTools.media.get(), { mediaId: library })).type,
+	).toBe("success");
+	expect((await update(reader, library)).type).toBe("failed");
+});
+
 test("media_update refuses fields the media type lacks and folders for personal media", async () => {
 	const document = await insertMedia({ type: "document" });
 	const personal = await insertMedia({ ownerUserId: owner });
@@ -262,7 +286,7 @@ test("media_update refuses fields the media type lacks and folders for personal 
 
 	expect(
 		(
-			await run.call(agentTools.updateMedia(), {
+			await run.call(agentTools.media.update(), {
 				mediaId: document,
 				alt: "A guide",
 			})
@@ -270,20 +294,20 @@ test("media_update refuses fields the media type lacks and folders for personal 
 	).toBe("failed");
 	expect(
 		(
-			await run.call(agentTools.updateMedia(), {
+			await run.call(agentTools.media.update(), {
 				mediaId: personal,
 				folderId: folder.id,
 			})
 		).type,
 	).toBe("failed");
 	expect(
-		(await run.call(agentTools.updateMedia(), { mediaId: personal })).type,
+		(await run.call(agentTools.media.update(), { mediaId: personal })).type,
 	).toBe("invalid-input");
 	expect(await references(run.conversationId)).toEqual([]);
 });
 
 test("media_select offers personal media only to user runs, then checks and links the picked media", async () => {
-	const tool = agentTools.selectMedia();
+	const tool = agentTools.media.select();
 	const interaction = tool[toolDefinitionInternal].interaction;
 	assert(interaction);
 	const library = await insertMedia();

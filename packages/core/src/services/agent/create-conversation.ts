@@ -1,5 +1,5 @@
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentConversation,
 	AiModelSelection,
 } from "../../types/response.js";
@@ -14,7 +14,7 @@ const createConversation: ServiceFn<
 			agentKey: string;
 			userId: number;
 			title?: string;
-			approvalMode?: AgentApprovalMode;
+			confirmationMode?: AgentConfirmationMode;
 			modelSelection?: AiModelSelection;
 		},
 	],

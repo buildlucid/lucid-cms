@@ -1,5 +1,5 @@
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentConversation,
 	AiModelSelection,
 	ResponseBody,
@@ -16,7 +16,7 @@ const useCreateConversation = (props?: {
 			id?: string;
 			agentKey: string;
 			title?: string;
-			approvalMode?: AgentApprovalMode;
+			confirmationMode?: AgentConfirmationMode;
 			modelSelection?: AiModelSelection;
 		},
 		ResponseBody<AgentConversation>

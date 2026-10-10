@@ -58,7 +58,7 @@ const callAgent = (
 	const runId = randomUUID();
 	return executeAgentTool({
 		context,
-		tool: agentTools.findNotifications(),
+		tool: agentTools.notifications.find(),
 		input,
 		execution: {
 			authority: { principal, permissions: [], superAdmin: false },
@@ -99,7 +99,7 @@ test("finds the person's own notifications with a link, and routines have none",
 			category: "requests",
 			actionRequired: true,
 			actor: { id: author, name: expect.any(String) },
-			link: expect.stringMatching(/\/lucid\/requests\/7$/),
+			links: { open: expect.stringMatching(/\/lucid\/requests\/7$/) },
 		}),
 	]);
 

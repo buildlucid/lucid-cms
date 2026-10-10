@@ -17,7 +17,7 @@ export const getRequestMcpTool = (options: CollectionToolOptions = {}) =>
 		name: "requests_get",
 		title: copy("admin:core.tools.requests_get.title"),
 		description:
-			"Read a review request: its documents and targets, approvals, blockers and comment threads.",
+			"Read a request: its documents and targets, approvals, blockers and comment threads.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [ExternalScopes.RequestsRead],
@@ -39,7 +39,7 @@ export const getRequestAgentTool = (options: CollectionToolOptions = {}) =>
 		name: "requests_get",
 		title: copy("admin:core.tools.requests_get.title"),
 		description:
-			"Read a review request: its documents and targets, approvals, blockers, comment threads and what you can do. To review a proposal, read it with documents_get and version request:ID, and compare it with the target version. To request changes, comment with requests_comment.",
+			"Read a request: its documents and targets, approvals, blockers, comment threads and what you can do. To review a proposal, read it with documents_get and version request:ID, and compare it with the target version. To request changes, comment with requests_comment. Change your own comments, marked byYou, with requests_update_comment.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],

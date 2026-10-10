@@ -6,7 +6,9 @@ export const inputSchema = z
 			.number()
 			.int()
 			.positive()
-			.describe("ID of the user's personal media, such as a chat upload."),
+			.describe(
+				"ID of personal media of the person you act for, such as a chat upload.",
+			),
 		public: z
 			.boolean()
 			.default(true)
@@ -18,17 +20,20 @@ export const inputSchema = z
 			.trim()
 			.max(255)
 			.optional()
-			.describe("A title for the media library, in the default locale."),
+			.describe(
+				"A title for the media library, in the default content language.",
+			),
 		alt: z
 			.string()
 			.trim()
 			.max(1000)
 			.optional()
-			.describe("Alt text for an image, in the default locale."),
+			.describe("Alt text for an image, in the default content language."),
 	})
 	.strict();
 
 export const outputSchema = z.object({
-	mediaId: z.number(),
-	public: z.boolean(),
+	media: z
+		.object({ id: z.number(), public: z.boolean() })
+		.meta({ description: "The media added to the library." }),
 });

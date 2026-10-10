@@ -1,7 +1,7 @@
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
 import {
-	agentApprovalModeSchema,
+	agentConfirmationModeSchema,
 	agentContextSchema,
 	agentConversationKindSchema,
 	agentRunOutcomeSchema,
@@ -24,7 +24,7 @@ export const agentConversationsTable = defineTable(
 	() => ({
 		columns: {
 			id: { schema: z.uuid(), type: "text" },
-			approval_mode: { schema: agentApprovalModeSchema, type: "text" },
+			confirmation_mode: { schema: agentConfirmationModeSchema, type: "text" },
 			model_selection: {
 				schema: aiModelSelectionSchema.nullable(),
 				type: "json",
@@ -84,7 +84,7 @@ export interface LucidAgentConversations {
 	agent_key: string;
 	/** The workflow that owns this chat, retained when its routine is deleted. */
 	kind: z.infer<typeof agentConversationKindSchema>;
-	approval_mode: Generated<z.infer<typeof agentApprovalModeSchema>>;
+	confirmation_mode: Generated<z.infer<typeof agentConfirmationModeSchema>>;
 	/** The chat's choice for its next run. Null uses the routine or agent default. */
 	model_selection: JSONColumnType<
 		AiModelSelection | null,

@@ -62,8 +62,8 @@ const publish: ServiceFn<
 			});
 			if (collectionRes.error) return collectionRes;
 
-			const target = collectionRes.data.getData.publishing.targets.find(
-				(target) => target.key === data.target,
+			const target = collectionRes.data.getData.publishing.environments.find(
+				(environment) => environment.key === data.target,
 			);
 			if (!target) {
 				return {

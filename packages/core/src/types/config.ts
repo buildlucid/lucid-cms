@@ -336,7 +336,7 @@ export interface LucidConfig {
 				features?: AiFeatureConfig;
 				/** Tools and skills served over MCP when `features.mcp` is true. */
 				mcp?: {
-					/** The tools MCP clients can call, such as `mcpTools.content()` or your own `defineMcpTool` tools. Bundles are flattened. */
+					/** Tools MCP clients can call, including flattened bundles such as `mcpTools.all()` and custom `defineMcpTool` tools. */
 					tools?: (McpToolDefinition | readonly McpToolDefinition[])[];
 					skills?: SkillDefinition[];
 				};

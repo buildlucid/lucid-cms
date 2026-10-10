@@ -70,7 +70,7 @@ const callAgent = (
 	const runId = randomUUID();
 	return executeAgentTool({
 		context,
-		tool: agentTools.getSettings(),
+		tool: agentTools.settings.get(),
 		input,
 		execution: {
 			authority: {
@@ -114,7 +114,7 @@ test("reads every section by default and only the sections asked for", async () 
 		from: { name: "Support" },
 	});
 
-	const email = await callAgent({ includes: ["email"] });
+	const email = await callAgent({ include: ["email"] });
 	assert(email.type === "success", JSON.stringify(email));
 	expect(Object.keys(email.data.output.data)).toEqual(["email"]);
 

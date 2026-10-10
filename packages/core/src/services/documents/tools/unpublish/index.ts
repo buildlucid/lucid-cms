@@ -17,12 +17,12 @@ export const unpublishDocumentAgentTool = (
 		name,
 		title: copy("admin:core.tools.documents_unpublish.title"),
 		description: options.direct
-			? "Unpublish a document from a publishing target, eg. production. Targets that require review open an unpublish request instead. Pass requestId to add it to an open unpublish request."
-			: "Request unpublishing a document from a publishing target, eg. production. It opens an unpublish request, and the document stays published until people approve it. This chat's open unpublish request for the document is reused. Pass requestId to add it to another open unpublish request.",
+			? "Unpublish a document from an environment, eg. production. Environments that require review open an unpublish request instead. Pass requestId to add it to an open unpublish request."
+			: "Request unpublishing a document from an environment, eg. production. It opens an unpublish request, and the document stays published until people approve it. This chat's open unpublish request for the document is reused. Pass requestId to add it to another open unpublish request.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],
-		requiresApproval: options.direct ?? false,
+		requiresConfirmation: options.direct ?? false,
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],

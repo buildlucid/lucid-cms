@@ -40,7 +40,7 @@ const buildContext = () =>
 					key: "page",
 					getData: {
 						publishing: {
-							targets: [
+							environments: [
 								{
 									key: "staging",
 									collectionVersions: { article: "review" },
@@ -51,7 +51,7 @@ const buildContext = () =>
 				},
 				{
 					key: "article",
-					getData: { publishing: { targets: [{ key: "review" }] } },
+					getData: { publishing: { environments: [{ key: "review" }] } },
 				},
 			],
 		},

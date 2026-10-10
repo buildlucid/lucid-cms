@@ -1,5 +1,4 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
@@ -24,10 +23,11 @@ export const getMediaAgentTool = () =>
 		name: "media_get",
 		title: copy("admin:core.tools.media_get.title"),
 		description:
-			"Read a media item's metadata: title, alt text, description, file details, folder and delivery URL. Works for library media and the user's personal media, such as chat uploads. Values use the shape media_update accepts.",
+			"Read a media item's metadata: title, alt text, description, file details, folder and delivery URL. Works for library media and personal media of the person you act for, such as chat uploads. Values use the shape media_update accepts.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.MediaRead],
+		//* media access is checked when resolved, so people can read their own uploads without `media:read`
+		permissions: [],
 		readOnly: true,
 		parallelSafe: true,
 		handler: async ({ context, input, execution }) => {

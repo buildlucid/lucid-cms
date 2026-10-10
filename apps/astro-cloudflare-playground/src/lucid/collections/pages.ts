@@ -19,7 +19,7 @@ const PageCollection = new CollectionBuilder("page", {
 	revisions: true,
 	preview: true,
 	publishing: {
-		targets: [
+		environments: [
 			{
 				key: "production",
 				label: "Production",

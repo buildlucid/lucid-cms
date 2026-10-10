@@ -19,7 +19,7 @@ export const acknowledgeRequestAgentTool = (
 		name,
 		title: copy("admin:core.tools.requests_acknowledge.title"),
 		description:
-			"Acknowledge targets someone else published to after a review request was opened, once you have compared what they now hold with the request. Requests can't be approved until these are acknowledged.",
+			"Acknowledge targets someone else published to after the request was opened, once you have compared what they now hold with the request. Requests can't be approved until these are acknowledged.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],

@@ -1,5 +1,4 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import type { AgentLucidToolName } from "../../../../types/response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -13,10 +12,12 @@ export const updateMediaAgentTool = () =>
 		name,
 		title: copy("admin:core.tools.media_update.title"),
 		description:
-			"Update a media item's title, alt text, description or summary in one content language, or its file name and folder. Send only what changes. Works for library media and the user's personal media, which can't go in folders.",
+			"Update a media item's title, alt text, description or summary in one content language, or its file name and folder. Send only what changes. Works for library media and personal media of the person you act for, which can't go in folders. Changes are saved straight away.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.MediaUpdate],
+		//* library media needs `media:update`, checked by the handler, so people can update their own uploads without it
+		permissions: [],
+		requiresConfirmation: true,
 		describe: (input) =>
 			copy("admin:core.tools.media_update.describe", {
 				data: { id: input.mediaId },

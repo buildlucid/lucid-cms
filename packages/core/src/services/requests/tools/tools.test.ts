@@ -30,7 +30,7 @@ const collection = (key: string) =>
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
-		publishing: { targets: [{ key: "production", label: "Production" }] },
+		publishing: { environments: [{ key: "production", label: "Production" }] },
 	}).addText("title", { useAsLabel: true });
 const pages = collection("request_tool_pages");
 const posts = collection("request_tool_posts");
@@ -165,12 +165,11 @@ const startRun = async (
 	};
 };
 
-const getRequest = agentTools.getRequest();
-const [commentOnRequest, replyToRequest, updateComment, acknowledgeRequest] =
-	agentTools.reviewing();
-assert(
-	commentOnRequest && replyToRequest && updateComment && acknowledgeRequest,
-);
+const getRequest = agentTools.requests.get();
+const commentOnRequest = agentTools.requests.comment();
+const replyToRequest = agentTools.requests.reply();
+const updateComment = agentTools.requests.updateComment();
+const acknowledgeRequest = agentTools.requests.acknowledge();
 
 const readRequest = async (
 	run: Awaited<ReturnType<typeof startRun>>,
@@ -226,14 +225,14 @@ test("finds and reads requests only within the tool's collections", async () => 
 		);
 
 	//* without a query it lists open requests, most recently changed first
-	expect(await run.call(agentTools.findRequests(), {})).toMatchObject({
+	expect(await run.call(agentTools.requests.find(), {})).toMatchObject({
 		pagination: { page: 1, perPage: 20 },
 	});
-	const open = await find(agentTools.findRequests(), {});
+	const open = await find(agentTools.requests.find(), {});
 	expect(open.slice(0, 2)).toEqual([postRequest, pageRequest]);
 	expect(open).not.toContain(closedRequest);
 	expect(
-		await find(agentTools.findRequests(), {
+		await find(agentTools.requests.find(), {
 			query: {
 				filter: [
 					{ key: "status", value: ["open", "closed"], operator: "in" },
@@ -242,19 +241,19 @@ test("finds and reads requests only within the tool's collections", async () => 
 			},
 		}),
 	).toEqual(expect.arrayContaining([closedRequest, pageRequest]));
-	const pageOnly = await find(agentTools.findRequests(), {
+	const pageOnly = await find(agentTools.requests.find(), {
 		query: { filter: [{ key: "collectionKey", value: pages.key }] },
 	});
 	expect(pageOnly).toContain(pageRequest);
 	expect(pageOnly).not.toContain(closedRequest);
 	expect(pageOnly).not.toContain(postRequest);
 	const limited = await find(
-		agentTools.findRequests({ collections: [pages.key] }),
+		agentTools.requests.find({ collections: [pages.key] }),
 		{ query: { perPage: 50 } },
 	);
 	expect(limited).toContain(pageRequest);
 	expect(limited).not.toContain(postRequest);
-	await run.fail(agentTools.getRequest({ collections: [pages.key] }), {
+	await run.fail(agentTools.requests.get({ collections: [pages.key] }), {
 		requestId: postRequest,
 	});
 
@@ -279,7 +278,7 @@ test("finds and reads requests only within the tool's collections", async () => 
 test("MCP reads only reach collections the connection can read", async () => {
 	const pageRequest = await createRequest();
 	const postRequest = await createRequest(posts.key);
-	const [, mcpGetRequest] = mcpTools.requests();
+	const mcpGetRequest = mcpTools.requests.get();
 	assert(mcpGetRequest);
 
 	const read = async (requestId: number) => {
@@ -325,13 +324,13 @@ test("agents comment and reply as their run and only change comments their agent
 	expect(
 		await run.fail(replyToRequest, {
 			requestId,
-			replyTo: 999_999,
+			commentId: 999_999,
 			body: "<p>Done</p>",
 		}),
 	).toContain("requests_comment");
 	await run.call(replyToRequest, {
 		requestId,
-		replyTo: person.data.id,
+		commentId: person.data.id,
 		body: "<p>Thanks</p>",
 	});
 
@@ -526,7 +525,10 @@ test("acknowledges targets someone else published to, as they were read", async 
 
 	const changed = await readRequest(run, requestId);
 	expect(changed.blockers).toContainEqual(
-		expect.objectContaining({ code: "review_required", target: "production" }),
+		expect.objectContaining({
+			code: "acknowledge_required",
+			target: "production",
+		}),
 	);
 	await run.fail(acknowledgeRequest, { requestId, reviewToken: "stale" });
 
@@ -550,7 +552,7 @@ test("acknowledges targets someone else published to, as they were read", async 
 		acknowledged: true,
 	});
 	expect(acknowledged.blockers).not.toContainEqual(
-		expect.objectContaining({ code: "review_required" }),
+		expect.objectContaining({ code: "acknowledge_required" }),
 	);
 });
 
@@ -561,7 +563,7 @@ test("updates details, documents and status together", async () => {
 	assert(original);
 	const added = await createDocument();
 
-	await run.call(agentTools.updateRequest(), {
+	await run.call(agentTools.requests.update(), {
 		requestId,
 		changes: [
 			{ type: "status", status: "closed" },
@@ -599,7 +601,7 @@ test("updates details, documents and status together", async () => {
 		},
 	});
 
-	await run.call(agentTools.updateRequest(), {
+	await run.call(agentTools.requests.update(), {
 		requestId,
 		changes: [{ type: "status", status: "open" }],
 	});
@@ -609,10 +611,10 @@ test("updates details, documents and status together", async () => {
 test("schedules completion but can't complete requests that aren't approved", async () => {
 	const requestId = await createRequest();
 	const run = await startRun();
-	const complete = agentTools.completeRequest();
-	const schedule = agentTools.scheduleRequest();
-	expect(complete.requiresApproval).toBe(true);
-	expect(schedule.requiresApproval).toBe(true);
+	const complete = agentTools.requests.complete();
+	const schedule = agentTools.requests.schedule();
+	expect(complete.requiresConfirmation).toBe(true);
+	expect(schedule.requiresConfirmation).toBe(true);
 
 	await run.call(schedule, { requestId, at: "2030-01-01T09:00:00.000Z" });
 	expect((await readRequest(run, requestId)).scheduledAt).toBe(
@@ -704,7 +706,7 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 		expect.objectContaining({
 			type: "approved",
 			author: { id: user.id, name: "Will" },
-			agent: reviewer.name,
+			authorAgent: reviewer.name,
 		}),
 	);
 
@@ -724,10 +726,10 @@ test("agents and the system complete requests", async () => {
 	//* an agent's completion is attributed to it all the way through the job
 	const byAgent = await createRequest();
 	await approveRequest(byAgent);
-	const started = (await run.call(agentTools.completeRequest(), {
+	const started = (await run.call(agentTools.requests.complete(), {
 		requestId: byAgent,
-	})) as { job: { id: string } };
-	expect(await jobStatus(started.job.id)).toBe("completed");
+	})) as { job: { jobId: string } };
+	expect(await jobStatus(started.job.jobId)).toBe("completed");
 	const completed = await toolkit.requests.getSingle({ id: byAgent });
 	assert(completed.data, JSON.stringify(completed.error));
 	expect(completed.data.status).toBe("completed");
@@ -745,7 +747,7 @@ test("agents and the system complete requests", async () => {
 			.executeTakeFirst(),
 	).toEqual({ created_by: user.id, created_by_run_id: run.runId });
 	expect(
-		await run.fail(agentTools.updateRequest(), {
+		await run.fail(agentTools.requests.update(), {
 			requestId: byAgent,
 			changes: [{ type: "status", status: "open" }],
 		}),

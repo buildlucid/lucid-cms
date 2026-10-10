@@ -17,7 +17,7 @@ const saveRoutineTools: ServiceFn<
 	const data = Object.entries(input.tools).map(([tool_name, settings]) => ({
 		routine_id: input.routineId,
 		tool_name,
-		requires_approval: settings.requiresApproval ?? null,
+		requires_confirmation: settings.requiresConfirmation ?? null,
 	}));
 	if (data.length) {
 		const created = await RoutineTools.createMultiple({ data });

@@ -27,7 +27,7 @@ const RequestPublishDraft: Component<{
 	//* environments can only start a request when they have content to move on
 	const sources = createMemo(() => [
 		{ value: "latest", label: T()("requests.source.latest") },
-		...(props.collection?.publishing.targets ?? [])
+		...(props.collection?.publishing.environments ?? [])
 			.filter(
 				(environment) =>
 					props.document?.versions[environment.key] &&

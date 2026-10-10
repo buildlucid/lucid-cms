@@ -355,7 +355,7 @@ test("advertises a default file reader and allows opting out", () => {
 			mode: "chat",
 			hasHistory: false,
 		});
-	expect(tool.requiresApproval).toBe(false);
+	expect(tool.requiresConfirmation).toBe(false);
 	expect(setup(agent).instructions).toContain(
 		`Read Lucid text files with ${tool.name}.`,
 	);

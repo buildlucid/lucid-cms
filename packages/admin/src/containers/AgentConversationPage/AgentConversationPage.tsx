@@ -1,6 +1,6 @@
 import { useLocation, useNavigate, useParams } from "@solidjs/router";
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentInteractionAction,
 	AiModelSelection,
 } from "@types";
@@ -72,7 +72,7 @@ const AgentConversationPage: Component = () => {
 		message?: string;
 		references?: AgentReferenceItem[];
 		agentKey?: string;
-		approvalMode?: AgentApprovalMode;
+		confirmationMode?: AgentConfirmationMode;
 		modelSelection?: AiModelSelection;
 	}>();
 	const navigate = useNavigate();
@@ -94,7 +94,7 @@ const AgentConversationPage: Component = () => {
 	const [sidebar, setSidebar] = createSignal<HTMLElement>();
 	const [routineOpen, setRoutineOpen] = createSignal(false);
 	const [runRoutineOpen, setRunRoutineOpen] = createSignal(false);
-	const [focusApprovals, setFocusApprovals] = createSignal(false);
+	const [focusConfirmations, setFocusConfirmations] = createSignal(false);
 	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
 	const [runsOpen, setRunsOpen] = createSignal(false);
 	let composer: AgentComposerHandle | undefined;
@@ -201,7 +201,7 @@ const AgentConversationPage: Component = () => {
 	 * cannot be saved, the message goes back to the agent home.
 	 */
 	onMount(async () => {
-		const { message, agentKey, approvalMode, modelSelection, references } =
+		const { message, agentKey, confirmationMode, modelSelection, references } =
 			location.state ?? {};
 		if (message === undefined) return;
 		navigate(location.pathname, { replace: true, state: {} });
@@ -210,13 +210,13 @@ const AgentConversationPage: Component = () => {
 				await createConversation.action.mutateAsync({
 					id: params.conversationId,
 					agentKey,
-					approvalMode,
+					confirmationMode,
 					modelSelection,
 				});
 			} catch {
 				navigate(getNewChatHref(), {
 					replace: true,
-					state: { message, approvalMode, modelSelection, references },
+					state: { message, confirmationMode, modelSelection, references },
 				});
 				return;
 			}
@@ -455,8 +455,8 @@ const AgentConversationPage: Component = () => {
 										}
 										onRespond={respond}
 										onSend={() => scroll.scrollToEnd("smooth")}
-										onEditRoutineApprovals={() => {
-											setFocusApprovals(true);
+										onEditRoutineConfirmations={() => {
+											setFocusConfirmations(true);
 											setRoutineOpen(true);
 										}}
 									/>
@@ -483,7 +483,7 @@ const AgentConversationPage: Component = () => {
 								}}
 								onRoutineRuns={() => setRunsOpen(true)}
 								onRoutineOpen={() => {
-									setFocusApprovals(false);
+									setFocusConfirmations(false);
 									setRoutineOpen(true);
 								}}
 								onRoutineClose={() => setRoutineCardOpen(false)}
@@ -510,7 +510,7 @@ const AgentConversationPage: Component = () => {
 					state={{ open: renameOpen(), setOpen: setRenameOpen }}
 				/>
 				<UpsertAgentRoutineDrawer
-					focusApprovals={focusApprovals()}
+					focusConfirmations={focusConfirmations()}
 					routine={routine}
 					state={{ open: routineOpen(), setOpen: setRoutineOpen }}
 				/>

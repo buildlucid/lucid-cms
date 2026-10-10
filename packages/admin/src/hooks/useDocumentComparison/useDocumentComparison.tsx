@@ -110,14 +110,15 @@ export const useDocumentComparison = (props: {
 				}),
 			},
 		];
-		for (const target of props.state.collection()?.publishing.targets ?? []) {
+		for (const environment of props.state.collection()?.publishing
+			.environments ?? []) {
 			options.push({
-				key: target.key,
+				key: environment.key,
 				label: helpers.getLocaleValue({
-					value: target.label,
-					fallback: target.key,
+					value: environment.label,
+					fallback: environment.key,
 				}),
-				versionId: document.versions[target.key]?.id ?? null,
+				versionId: document.versions[environment.key]?.id ?? null,
 				editable: false,
 			});
 		}

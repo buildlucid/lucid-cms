@@ -66,24 +66,24 @@ import {
 import type { CollectionToolOptions } from "../permission/readable-collections.js";
 
 /**
- * Lucid's tools for agents. Call one to add it to an agent's `tools`, or use
- * a bundle such as `content()`. Web, media analysis, file reading and library tools are
- * built in and configured with `defineAgent`'s `features`. Every tool uses the
- * permissions of the person the agent acts for.
+ * Lucid's tools for agents, grouped by what they work on and named after the
+ * tools they create, eg. `agentTools.documents.find()` creates `documents_find`.
+ * Pick the tools an agent's purpose needs, or start from a bundle such as
+ * `read()`. Bundles never share tools, so they combine freely. Web, media
+ * analysis, file reading and library tools are built in and configured with
+ * `defineAgent`'s `features`. Every tool uses the permissions of the person
+ * the agent acts for.
  *
  * Document writes open requests for people to review by default. Pass
  * `direct: true` to let them save changes as a person could in the admin.
- *
- * Media tools read and update metadata for library media and the person's own
- * files, and let people pick media in the chat.
  *
  * Request tools let agents read, discuss and manage requests. They can't
  * approve them, so people stay in charge of what goes live. A request is
  * only in reach when all its documents are in the tool's `collections`.
  *
- * Admin tools read how the CMS is running: emails and their delivery, jobs
- * and their schedules, settings and AI usage. Resending an email or running
- * a schedule early are separate tools that ask first.
+ * Tools that act straight away, such as resending an email or completing a
+ * request, ask the person to confirm first unless the chat or routine turns
+ * that off.
  *
  * @example
  * ```ts
@@ -91,60 +91,106 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * 	key: "seo",
  * 	name: "SEO Agent",
  * 	tools: [
- * 		agentTools.content({ collections: ["pages"] }),
- * 		agentTools.editing({ collections: ["pages"] }),
- * 		agentTools.deleteDocument({ collections: ["pages"], direct: true }),
- * 		agentTools.requests({ collections: ["pages"] }),
- * 		agentTools.reviewing({ collections: ["pages"] }),
- * 		agentTools.admin(),
+ * 		agentTools.read({ collections: ["pages"] }),
+ * 		agentTools.edit({ collections: ["pages"] }),
+ * 		agentTools.review({ collections: ["pages"] }),
+ * 		agentTools.requests.complete({ collections: ["pages"] }),
+ * 		agentTools.system(),
  * 	],
  * });
  * ```
  */
 export const agentTools = {
-	listCollections: listCollectionsAgentTool,
-	describeCollection: describeCollectionAgentTool,
-	findDocuments: findDocumentsAgentTool,
-	getDocument: getDocumentAgentTool,
-	findMedia: findMediaAgentTool,
-	getMedia: getMediaAgentTool,
-	/** Updates media titles, alt text, descriptions, file names and folders. */
-	updateMedia: updateMediaAgentTool,
-	/** Asks the person to pick or upload media in the chat, then links it. */
-	selectMedia: selectMediaAgentTool,
-	listLocales: listLocalesAgentTool,
-	findUsers: findUsersAgentTool,
-	createDocument: createDocumentAgentTool,
-	updateDocument: updateDocumentAgentTool,
-	deleteDocument: deleteDocumentAgentTool,
-	unpublishDocument: unpublishDocumentAgentTool,
-	findRequests: findRequestsAgentTool,
-	getRequest: getRequestAgentTool,
-	commentOnRequest: commentOnRequestAgentTool,
-	replyToRequest: replyToRequestAgentTool,
-	updateRequestComment: updateRequestCommentAgentTool,
-	acknowledgeRequest: acknowledgeRequestAgentTool,
-	/** Changes a request's details, reviewers, documents and status. */
-	updateRequest: updateRequestAgentTool,
-	/** Completes approved requests, asking for approval unless the chat or routine disables it. */
-	completeRequest: completeRequestAgentTool,
-	/** Schedules approved requests for completion, asking for approval unless the chat or routine disables it. */
-	scheduleRequest: scheduleRequestAgentTool,
-	findEmails: findEmailsAgentTool,
-	getEmail: getEmailAgentTool,
-	/** Sends a stored email again, asking for approval unless the chat or routine disables it. */
-	resendEmail: resendEmailAgentTool,
-	findJobs: findJobsAgentTool,
-	getJob: getJobAgentTool,
-	listJobSchedules: listJobSchedulesAgentTool,
-	/** Queues a job schedule to run now, asking for approval unless the chat or routine disables it. */
-	runJobSchedule: runJobScheduleAgentTool,
-	getSettings: getSettingsAgentTool,
-	getAiUsage: getAiUsageAgentTool,
-	/** Reads notifications only for runs acting as a person. */
-	findNotifications: findNotificationsAgentTool,
-	/** Every content reading tool: collections, documents, media, locales and users. */
-	content: (options: CollectionToolOptions = {}) => [
+	collections: {
+		/** Lists the collections the agent can read. */
+		list: listCollectionsAgentTool,
+		/** Describes a collection's fields, bricks, environments and review rules. */
+		describe: describeCollectionAgentTool,
+	},
+	documents: {
+		/** Searches a collection's documents with filters. */
+		find: findDocumentsAgentTool,
+		/** Reads a document's fields and bricks, or its proposal in a request. */
+		get: getDocumentAgentTool,
+		/** Creates a document through a create request, or directly with `direct: true`. */
+		create: createDocumentAgentTool,
+		/** Updates a document through a request, or directly with `direct: true`. */
+		update: updateDocumentAgentTool,
+		/** Deletes a document through a delete request, or directly with `direct: true`. */
+		delete: deleteDocumentAgentTool,
+		/** Unpublishes a document through an unpublish request, or directly with `direct: true`. */
+		unpublish: unpublishDocumentAgentTool,
+	},
+	media: {
+		/** Searches the media library. */
+		find: findMediaAgentTool,
+		/** Reads library media and the person's own uploads. */
+		get: getMediaAgentTool,
+		/** Updates media titles, alt text, descriptions, file names and folders, after the person confirms. */
+		update: updateMediaAgentTool,
+		/** Asks the person to pick or upload media in the chat, then links it. */
+		select: selectMediaAgentTool,
+	},
+	locales: {
+		/** Lists content and interface languages. */
+		list: listLocalesAgentTool,
+	},
+	users: {
+		/** Finds people, eg. for user fields, mentions and request reviewers. */
+		find: findUsersAgentTool,
+	},
+	requests: {
+		/** Finds requests, open ones by default. */
+		find: findRequestsAgentTool,
+		/** Reads a request with its documents, blockers and comments. */
+		get: getRequestAgentTool,
+		/** Comments on a request, which blocks approval until it is resolved or closed. */
+		comment: commentOnRequestAgentTool,
+		/** Replies to a comment on a request. */
+		reply: replyToRequestAgentTool,
+		/** Resolves, closes, reopens, edits or removes the agent's own comments. */
+		updateComment: updateRequestCommentAgentTool,
+		/** Acknowledges targets that changed while a request was open. */
+		acknowledge: acknowledgeRequestAgentTool,
+		/** Changes a request's details, reviewers, documents, targets and status. */
+		update: updateRequestAgentTool,
+		/** Completes approved requests, after the person confirms. */
+		complete: completeRequestAgentTool,
+		/** Schedules approved requests for completion, after the person confirms. */
+		schedule: scheduleRequestAgentTool,
+	},
+	emails: {
+		/** Finds sent emails and delivery failures. */
+		find: findEmailsAgentTool,
+		/** Reads an email with its delivery attempts. */
+		get: getEmailAgentTool,
+		/** Sends a stored email again, after the person confirms. */
+		resend: resendEmailAgentTool,
+	},
+	jobs: {
+		/** Finds background jobs and failures. */
+		find: findJobsAgentTool,
+		/** Reads a background job with its error stack. */
+		get: getJobAgentTool,
+		/** Lists job schedules and their next runs. */
+		listSchedules: listJobSchedulesAgentTool,
+		/** Queues a job schedule to run now, after the person confirms. */
+		runSchedule: runJobScheduleAgentTool,
+	},
+	settings: {
+		/** Reads how the CMS is set up. */
+		get: getSettingsAgentTool,
+	},
+	aiUsage: {
+		/** Reads AI credits, sessions and daily totals. */
+		get: getAiUsageAgentTool,
+	},
+	notifications: {
+		/** Finds notifications for the person the run acts for, excluding system routines. */
+		find: findNotificationsAgentTool,
+	},
+	/** Reads collections, documents, media, locales and users. */
+	read: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),
 		describeCollectionAgentTool(options),
 		findDocumentsAgentTool(options),
@@ -154,27 +200,24 @@ export const agentTools = {
 		listLocalesAgentTool(),
 		findUsersAgentTool(options),
 	],
-	/** Bundles document creation, updates, deletion and unpublishing for use alongside `content()` reads. */
-	editing: (options: DocumentWriteToolOptions = {}) => [
+	/** Creates, updates, deletes and unpublishes documents for use alongside `read()`. */
+	edit: (options: DocumentWriteToolOptions = {}) => [
 		createDocumentAgentTool(options),
 		updateDocumentAgentTool(options),
 		deleteDocumentAgentTool(options),
 		unpublishDocumentAgentTool(options),
 	],
-	/** Finding and reading requests, with their documents, blockers and comments. */
-	requests: (options: CollectionToolOptions = {}) => [
+	/** Finds and reads requests, comments on them and acknowledges changed targets. */
+	review: (options: CollectionToolOptions = {}) => [
 		findRequestsAgentTool(options),
 		getRequestAgentTool(options),
-	],
-	/** Commenting on and replying to requests, managing the agent's own comments and acknowledging changed targets, for use alongside `requests()`. */
-	reviewing: (options: CollectionToolOptions = {}) => [
 		commentOnRequestAgentTool(options),
 		replyToRequestAgentTool(options),
 		updateRequestCommentAgentTool(options),
 		acknowledgeRequestAgentTool(options),
 	],
-	/** Bundles admin reads for emails, jobs, schedules, settings and AI usage; add `resendEmail` or `runJobSchedule` for writes. */
-	admin: () => [
+	/** Reads emails, jobs, schedules, settings and AI usage; add `emails.resend` or `jobs.runSchedule` to act on them. */
+	system: () => [
 		findEmailsAgentTool(),
 		getEmailAgentTool(),
 		findJobsAgentTool(),
@@ -186,29 +229,52 @@ export const agentTools = {
 };
 
 /**
- * Lucid's tools for MCP clients. Call one to add it to `ai.mcp.tools`, or use
- * a bundle such as `content()`. MCP only serves the tools it lists. Every tool
- * uses the connection's granted scopes.
+ * Lucid's tools for MCP clients, grouped and named like `agentTools`. Add them
+ * to `ai.mcp.tools`, or use `all()`. MCP only serves the tools it lists. Every
+ * tool only reads, using the connection's granted scopes.
  *
  * @example
  * ```ts
- * ai: { mcp: { tools: [mcpTools.content(), mcpTools.requests()] } }
+ * ai: { mcp: { tools: [mcpTools.all()] } }
  * ```
  */
 export const mcpTools = {
-	listCollections: listCollectionsMcpTool,
-	describeCollection: describeCollectionMcpTool,
-	findDocuments: findDocumentsMcpTool,
-	getDocument: getDocumentMcpTool,
-	findMedia: findMediaMcpTool,
-	getMedia: getMediaMcpTool,
-	previewMedia: previewMediaMcpTool,
-	listLocales: listLocalesMcpTool,
-	findUsers: findUsersMcpTool,
-	findRequests: findRequestsMcpTool,
-	getRequest: getRequestMcpTool,
-	/** Every content reading tool: collections, documents, media, locales and users. */
-	content: (options: CollectionToolOptions = {}) => [
+	collections: {
+		/** Lists the collections the connection can read. */
+		list: listCollectionsMcpTool,
+		/** Describes a collection's fields, bricks, environments and review rules. */
+		describe: describeCollectionMcpTool,
+	},
+	documents: {
+		/** Searches a collection's documents with filters. */
+		find: findDocumentsMcpTool,
+		/** Reads a document's fields and bricks. */
+		get: getDocumentMcpTool,
+	},
+	media: {
+		/** Searches the media library. */
+		find: findMediaMcpTool,
+		/** Reads a media library item. */
+		get: getMediaMcpTool,
+		/** Returns an image or video poster as a link or inline image. */
+		preview: previewMediaMcpTool,
+	},
+	locales: {
+		/** Lists content and interface languages. */
+		list: listLocalesMcpTool,
+	},
+	users: {
+		/** Finds people, eg. who a user field or request names. */
+		find: findUsersMcpTool,
+	},
+	requests: {
+		/** Finds requests, open ones by default. */
+		find: findRequestsMcpTool,
+		/** Reads a request with its documents, blockers and comments. */
+		get: getRequestMcpTool,
+	},
+	/** Every MCP tool. */
+	all: (options: CollectionToolOptions = {}) => [
 		listCollectionsMcpTool(options),
 		describeCollectionMcpTool(options),
 		findDocumentsMcpTool(options),
@@ -218,9 +284,6 @@ export const mcpTools = {
 		previewMediaMcpTool(),
 		listLocalesMcpTool(),
 		findUsersMcpTool(options),
-	],
-	/** Provides request finding and reading with the `requests:read` scope. */
-	requests: (options: CollectionToolOptions = {}) => [
 		findRequestsMcpTool(options),
 		getRequestMcpTool(options),
 	],

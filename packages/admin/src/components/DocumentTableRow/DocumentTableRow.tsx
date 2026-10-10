@@ -147,7 +147,7 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 				)}
 			</For>
 			<Show when={props.showEnvironmentStatus}>
-				<For each={props.collection.publishing.targets}>
+				<For each={props.collection.publishing.environments}>
 					{(environment) => (
 						<DocumentEnvironmentStatusCell
 							column={`envStatus.${environment.key}`}

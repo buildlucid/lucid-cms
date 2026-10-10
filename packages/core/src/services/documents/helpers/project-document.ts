@@ -47,7 +47,7 @@ export const documentMetaSchema = z.object({
 				.nullable(),
 		)
 		.meta({
-			description: "Latest and each publishing target, or null when empty.",
+			description: "Latest and each environment, or null when empty.",
 		}),
 	createdAt: z.string().nullable(),
 	updatedAt: z.string().nullable(),

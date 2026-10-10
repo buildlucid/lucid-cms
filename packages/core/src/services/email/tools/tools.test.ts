@@ -159,7 +159,7 @@ const callAgent = (
 };
 
 const findAs = async (userId: number, input: unknown) => {
-	const result = await callAgent(userId, agentTools.findEmails(), input);
+	const result = await callAgent(userId, agentTools.emails.find(), input);
 	assert(result.type === "success", JSON.stringify(result));
 	return findOutputSchema.parse(result.data.output).data;
 };
@@ -189,12 +189,12 @@ test("finds emails newest first, by delivery status, and shows system emails to 
 	expect((await findAs(admin, {})).map((email) => email.id)).toContain(system);
 
 	expect(
-		await callAgent(support, agentTools.findEmails(), {}, []),
+		await callAgent(support, agentTools.emails.find(), {}, []),
 	).toMatchObject({ type: "forbidden" });
 });
 
 test("reads one email with redacted data and its latest delivery attempts, rendering HTML only when asked", async () => {
-	const result = await callAgent(support, agentTools.getEmail(), {
+	const result = await callAgent(support, agentTools.emails.get(), {
 		emailId: failed,
 	});
 	assert(result.type === "success", JSON.stringify(result));
@@ -216,26 +216,28 @@ test("reads one email with redacted data and its latest delivery attempts, rende
 	expect(email.deliveries[0]).not.toHaveProperty("strategyData");
 
 	expect(
-		await callAgent(support, agentTools.getEmail(), { emailId: 999_999 }),
+		await callAgent(support, agentTools.emails.get(), { emailId: 999_999 }),
 	).toMatchObject({ type: "failed" });
 	//* system emails stay hidden from single reads too, so listings and reads agree
 	expect(
-		await callAgent(support, agentTools.getEmail(), { emailId: system }),
+		await callAgent(support, agentTools.emails.get(), { emailId: system }),
 	).toMatchObject({ type: "failed" });
 	expect(
-		(await callAgent(admin, agentTools.getEmail(), { emailId: system })).type,
+		(await callAgent(admin, agentTools.emails.get(), { emailId: system })).type,
 	).toBe("success");
 });
 
-test("resends a stored email after approval, but not one outside the resend window", async () => {
-	const resend = agentTools.resendEmail();
-	expect(resend.requiresApproval).toBe(true);
+test("resends a stored email after confirmation, but not one outside the resend window", async () => {
+	const resend = agentTools.emails.resend();
+	expect(resend.requiresConfirmation).toBe(true);
 
 	const result = await callAgent(support, resend, { emailId: sent }, [
 		Permissions.EmailSend,
 	]);
 	assert(result.type === "success", JSON.stringify(result));
-	expect(result.data.output).toMatchObject({ job: { id: expect.any(String) } });
+	expect(result.data.output).toMatchObject({
+		job: { jobId: expect.any(String) },
+	});
 	const deliveries = await context.db.kysely
 		.selectFrom("lucid_email_transactions")
 		.select("id")

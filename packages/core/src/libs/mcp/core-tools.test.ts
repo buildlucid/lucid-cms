@@ -121,7 +121,7 @@ beforeAll(async () => {
 			ai: {
 				...config.ai,
 				features: { ...config.ai.features, mcp: true },
-				mcp: { tools: mcpTools.content(), skills: [] },
+				mcp: { tools: mcpTools.all(), skills: [] },
 			},
 			localization: {
 				defaultLocale: "en",
@@ -373,7 +373,7 @@ test("agent content tools share the read services but enforce collection permiss
 	};
 	const listed = await executeAgentTool({
 		context,
-		tool: agentTools.listCollections(),
+		tool: agentTools.collections.list(),
 		input: {},
 		execution,
 	});
@@ -382,7 +382,7 @@ test("agent content tools share the read services but enforce collection permiss
 	expect(JSON.stringify(listed)).not.toContain(restricted.key);
 	const document = await executeAgentTool({
 		context,
-		tool: agentTools.getDocument(),
+		tool: agentTools.documents.get(),
 		input: { collectionKey: pages.key, documentId: aboutId },
 		execution,
 	});
@@ -393,7 +393,7 @@ test("agent content tools share the read services but enforce collection permiss
 	expect(
 		await executeAgentTool({
 			context,
-			tool: agentTools.getDocument(),
+			tool: agentTools.documents.get(),
 			input: { collectionKey: restricted.key, documentId: aboutId },
 			execution,
 		}),
@@ -401,7 +401,7 @@ test("agent content tools share the read services but enforce collection permiss
 	expect(
 		await executeAgentTool({
 			context,
-			tool: agentTools.describeCollection(),
+			tool: agentTools.collections.describe(),
 			input: { collectionKey: restricted.key },
 			execution,
 		}),

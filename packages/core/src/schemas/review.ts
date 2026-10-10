@@ -15,7 +15,7 @@ export const controllerSchemas = {
 				z.object({
 					collectionKey: z.string(),
 					total: z.number(),
-					targets: z.array(
+					environments: z.array(
 						z.object({
 							key: z.string(),
 							inSync: z.number(),

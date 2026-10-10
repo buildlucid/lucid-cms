@@ -17,7 +17,7 @@ const factory = createFactory();
 const getOverviewController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Get open request counts, and how each readable collection's documents in every publish target compare to latest.",
+			"Get open request counts, and how each readable collection's documents in every environment compare to latest.",
 		tags: ["review"],
 		summary: "Get Review Overview",
 		responses: openAPI.responses({

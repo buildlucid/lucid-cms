@@ -38,7 +38,7 @@ const collection = new CollectionBuilder(key, {
 			targets: [],
 			selfApproval: true,
 		},
-		targets: [{ key: "staging", label: "Staging" }],
+		environments: [{ key: "staging", label: "Staging" }],
 	},
 })
 	.addText("title", { localized: false, validation: { required: true } })

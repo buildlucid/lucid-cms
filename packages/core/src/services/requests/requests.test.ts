@@ -66,7 +66,7 @@ const collections = [
 			publishing: {
 				scheduling: true,
 				review: { publish: ["production"], selfApproval: false },
-				targets: [
+				environments: [
 					{ key: "staging", label: "Staging" },
 					{ key: "production", label: "Production", requires: ["staging"] },
 				],
@@ -80,7 +80,7 @@ const collections = [
 		mode: "multiple",
 		revisions: true,
 		publishing: {
-			targets: [
+			environments: [
 				{ key: "staging", label: "Staging" },
 				{ key: "production", label: "Production", requires: ["staging"] },
 			],
@@ -105,7 +105,7 @@ const collections = [
 		revisions: true,
 		publishing: {
 			review: { create: true },
-			targets: [{ key: "staging", label: "Staging" }],
+			environments: [{ key: "staging", label: "Staging" }],
 			workflow: {
 				initial: "draft",
 				stages: [
@@ -123,7 +123,7 @@ const collections = [
 		mode: "multiple",
 		publishing: {
 			review: { publish: ["staging"], approvals: 2 },
-			targets: [{ key: "staging", label: "Staging" }],
+			environments: [{ key: "staging", label: "Staging" }],
 		},
 	})
 		.addText("title")
@@ -132,7 +132,7 @@ const collections = [
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		publishing: {
-			targets: [{ key: "staging", label: "Staging" }],
+			environments: [{ key: "staging", label: "Staging" }],
 			workflow: {
 				initial: "draft",
 				stages: [
@@ -161,7 +161,7 @@ const collections = [
 	new CollectionBuilder("checked_pages", {
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
-		publishing: { targets: [{ key: "staging", label: "Staging" }] },
+		publishing: { environments: [{ key: "staging", label: "Staging" }] },
 		hooks: [
 			{
 				service: "requests",
@@ -849,7 +849,7 @@ test("proposals can complete into latest, and every latest edit asks for a revie
 	assert(updated.data, JSON.stringify(updated.error));
 	expect((await readRequest(request.id)).blockers).toContainEqual({
 		requestDocumentId: member(request).id,
-		code: "review_required",
+		code: "acknowledge_required",
 		target: "latest",
 	});
 	await acknowledge(request, "latest");
@@ -925,7 +925,7 @@ test("parallel proposals and later latest edits remain independent during public
 	]);
 	expect(changed.blockers).toContainEqual({
 		requestDocumentId: member(changed).id,
-		code: "review_required",
+		code: "acknowledge_required",
 		target: "staging",
 	});
 	await acknowledge(changed, "staging");
@@ -1025,7 +1025,7 @@ test("a request closed while its target is published asks for review once reopen
 	).toBeUndefined();
 	expect((await readRequest(request.id)).blockers).toContainEqual({
 		requestDocumentId: member(request).id,
-		code: "review_required",
+		code: "acknowledge_required",
 		target: "staging",
 	});
 });
@@ -1101,7 +1101,7 @@ test("publishing records activity on other open requests, including targets adde
 	expect((await alignContent(retargeted, "staging")).error).toBeUndefined();
 	expect(
 		(await readRequest(request.id)).blockers.some(
-			(blocker) => blocker.code === "review_required",
+			(blocker) => blocker.code === "acknowledge_required",
 		),
 	).toBe(true);
 });
@@ -2348,7 +2348,11 @@ test("drift review is scoped to its member, and edits to either proposal dismiss
 	expect(first.targets[0]?.changedSinceCreation).toBe(true);
 	expect(second.targets[0]?.changedSinceCreation).toBe(false);
 	expect(changed.blockers).toEqual([
-		{ code: "review_required", target: "staging", requestDocumentId: first.id },
+		{
+			code: "acknowledge_required",
+			target: "staging",
+			requestDocumentId: first.id,
+		},
 	]);
 	const reviewed = await reviewTarget(context, {
 		id: changed.id,
@@ -3038,7 +3042,7 @@ test("an earlier approval approves the request once its collections need fewer",
 							mode: "multiple",
 							publishing: {
 								review: { publish: ["staging"] },
-								targets: [{ key: "staging", label: "Staging" }],
+								environments: [{ key: "staging", label: "Staging" }],
 							},
 						})
 							.addText("title")

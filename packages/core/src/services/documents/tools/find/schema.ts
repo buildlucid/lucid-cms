@@ -16,7 +16,7 @@ import {
 export const inputSchema = z.object({
 	collectionKey: z.string().min(1),
 	version: z.string().trim().min(1).default("latest").meta({
-		description: "Content version, usually latest or a publishing target.",
+		description: "Content version, usually latest or an environment.",
 	}),
 	contentLocale: z.string().min(1).optional().meta({
 		description:

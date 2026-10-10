@@ -11,12 +11,12 @@ import AgentTranscriptRow from "@/components/AgentTranscriptRow/AgentTranscriptR
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
 import {
-	approvalBatchWidget,
-	approvalWidget,
+	confirmationBatchWidget,
+	confirmationWidget,
 	isWidgetSupported,
 	questionWidget,
 } from "@/utils/agent-tools";
-import AgentApprovalDetails from "./AgentApprovalDetails";
+import AgentConfirmationDetails from "./AgentConfirmationDetails";
 import AgentWidgetUnavailable from "./AgentWidgetUnavailable";
 import { resolveAgentSlot } from "./slots";
 
@@ -27,8 +27,9 @@ const interactionStatus = (interaction: AgentInteraction, key: string) => {
 		case "dismissed":
 			return T()("agent.question.dismissed.short");
 		case "answered":
-			if (interaction.approvals) return T()("agent.approval.batch.reviewed");
-			if (interaction.approval) return T()("agent.approval.approved");
+			if (interaction.confirmations)
+				return T()("agent.confirmation.batch.reviewed");
+			if (interaction.confirmation) return T()("agent.confirmation.confirmed");
 			return T()(
 				key === questionWidget
 					? "agent.interaction.answered"
@@ -36,8 +37,8 @@ const interactionStatus = (interaction: AgentInteraction, key: string) => {
 			);
 		case "cancelled":
 			return T()(
-				interaction.approval || interaction.approvals
-					? "agent.approval.denied"
+				interaction.confirmation || interaction.confirmations
+					? "agent.confirmation.denied"
 					: "agent.interaction.cancelled",
 			);
 	}
@@ -70,7 +71,7 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 			: undefined;
 	});
 	const selectedCalls = createMemo(() => {
-		const ids = response()?.approvedToolCallIds;
+		const ids = response()?.confirmedToolCallIds;
 		return Array.isArray(ids)
 			? ids.filter((id): id is string => typeof id === "string")
 			: [];
@@ -79,10 +80,10 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 		() =>
 			!supported() ||
 			question() ||
-			props.widget.interaction?.approval !== undefined ||
-			props.widget.interaction?.approvals !== undefined ||
-			(props.widget.key !== approvalWidget &&
-				props.widget.key !== approvalBatchWidget &&
+			props.widget.interaction?.confirmation !== undefined ||
+			props.widget.interaction?.confirmations !== undefined ||
+			(props.widget.key !== confirmationWidget &&
+				props.widget.key !== confirmationBatchWidget &&
 				response() !== undefined),
 	);
 
@@ -103,7 +104,9 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 										<TbOutlineHelpCircle size={10} />
 									</Match>
 									<Match
-										when={interaction().approval || interaction().approvals}
+										when={
+											interaction().confirmation || interaction().confirmations
+										}
 									>
 										<TbOutlineShieldHalf size={10} />
 									</Match>
@@ -158,17 +161,17 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 									</Match>
 									<Match when={true}>
 										<div class="flex flex-col gap-5">
-											<Show when={interaction().approvals}>
-												{(approvals) => (
-													<AgentApprovalDetails
-														approvals={approvals()}
+											<Show when={interaction().confirmations}>
+												{(confirmations) => (
+													<AgentConfirmationDetails
+														confirmations={confirmations()}
 														selected={selectedCalls()}
 														status={interaction().status}
 													/>
 												)}
 											</Show>
-											<Show when={interaction().approval}>
-												{(approval) => (
+											<Show when={interaction().confirmation}>
+												{(confirmation) => (
 													<>
 														<div class="-mt-3 flex flex-wrap items-center gap-2">
 															<Pill
@@ -184,14 +187,14 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 																{status()}
 															</Pill>
 															<code class="rounded bg-input px-1.5 py-0.5 text-[11px] text-body">
-																{approval().toolName}
+																{confirmation().toolName}
 															</code>
 														</div>
 														<AgentToolDetails
 															sections={[
 																{
 																	label: T()("agent.tool.input"),
-																	value: approval().input,
+																	value: confirmation().input,
 																},
 															]}
 														/>
@@ -200,8 +203,8 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 											</Show>
 											<Show
 												when={
-													props.widget.key !== approvalWidget &&
-													props.widget.key !== approvalBatchWidget &&
+													props.widget.key !== confirmationWidget &&
+													props.widget.key !== confirmationBatchWidget &&
 													response()
 												}
 											>

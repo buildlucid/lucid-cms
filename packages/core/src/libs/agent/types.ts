@@ -1,6 +1,6 @@
 import z from "zod";
 import {
-	agentApprovalModeSchema,
+	agentConfirmationModeSchema,
 	type agentContextSchema,
 	agentInteractiveWidgetSchema,
 	agentMessagePartSchema,
@@ -67,7 +67,7 @@ export const checkpointSchema = z.object({
 	/** The model and effort for this run, resolved once when it starts. */
 	selection: aiModelSelectionSchema.optional(),
 	/** Captured when the run starts, so changing chat settings never changes a pending decision. */
-	approvalMode: agentApprovalModeSchema,
+	confirmationMode: agentConfirmationModeSchema,
 	/** Routine tool settings captured when this run starts. */
 	routineTools: routineToolsSchema.optional(),
 	/** Input receipts survive compaction and a crash before acknowledgement. */
@@ -165,7 +165,7 @@ export type DefineRoutineOptions<Key extends string> = {
 	conversationMode?: AgentRoutineConversationMode;
 	/** The model each run uses, eg. `{ modelId: "openai/gpt-6-luna", reasoningEffort: "low" }`. Defaults to the agent's model. */
 	model?: AiModelSelection;
-	/** Per-tool settings by tool name, eg. `{ save_note: { requiresApproval: true } }`. Omitted tools and settings keep the tool's defaults. */
+	/** Per-tool settings by tool name, eg. `{ save_note: { requiresConfirmation: true } }`. Omitted tools and settings keep the tool's defaults. */
 	tools?: Readonly<RoutineTools>;
 	schedule: {
 		/** Five-field cron expression with minute precision. */
@@ -197,7 +197,7 @@ export type DefineAgentOptions<Key extends string> = {
 	description: string;
 	/** Added to the agent's system prompt. Common indentation is removed. */
 	instructions?: string;
-	/** The tools the agent can call, such as `agentTools.content()` or your own `defineAgentTool` tools. Bundles are flattened. */
+	/** The tools the agent can call, such as `agentTools.read()` or your own `defineAgentTool` tools. Bundles are flattened. */
 	tools?: readonly (AgentToolDefinition | readonly AgentToolDefinition[])[];
 	skills?: readonly SkillDefinition[];
 	/** Built-in features and the tools behind them. Every feature is enabled unless set to false. */

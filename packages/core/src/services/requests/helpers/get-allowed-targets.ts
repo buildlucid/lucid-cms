@@ -10,8 +10,8 @@ const getAllowedTargets = (data: {
 	if (data.type === "create") return ["latest"];
 	if (data.type === "delete") return [];
 
-	const environments = data.collection.getData.publishing.targets.map(
-		(target) => target.key,
+	const environments = data.collection.getData.publishing.environments.map(
+		(environment) => environment.key,
 	);
 	if (data.type === "unpublish") return environments;
 	if (data.source === null) return [];

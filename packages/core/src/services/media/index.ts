@@ -1,4 +1,5 @@
 export { default as abortUploadSession } from "./abort-upload-session.js";
+export { default as addToLibrary } from "./add-to-library.js";
 export { default as adjustStorageUsage } from "./adjust-storage-usage.js";
 export * as checks from "./checks/index.js";
 export { default as completeUploadSession } from "./complete-upload-session.js";
@@ -14,7 +15,6 @@ export { default as getStorageUsage } from "./get-storage-usage.js";
 export { default as getUploadPartUrls } from "./get-upload-part-urls.js";
 export { default as getUploadSession } from "./get-upload-session.js";
 export { default as moveFolder } from "./move-folder.js";
-export { default as removeOwnership } from "./remove-ownership.js";
 export { default as requestDownload } from "./request-download.js";
 export { default as resolveUrl } from "./resolve-url.js";
 export { default as restoreMultiple } from "./restore-multiple.js";

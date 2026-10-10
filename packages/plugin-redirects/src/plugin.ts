@@ -31,7 +31,7 @@ const plugin: LucidPlugin<RedirectsPluginOptions> = (givenOptions) =>
 				draft.localization,
 				draft.collections.map((collection) => ({
 					key: collection.key,
-					targets: collection.config.publishing?.targets,
+					environments: collection.config.publishing?.environments,
 				})),
 			);
 			draft.collections.push(createRedirectsCollection(options));

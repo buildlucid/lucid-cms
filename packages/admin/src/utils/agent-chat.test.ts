@@ -269,7 +269,7 @@ describe("findPendingInteraction", () => {
 			{
 				type: "widget",
 				messageId: "m1",
-				key: "lucid-approval",
+				key: "lucid-confirmation",
 				version: 1,
 				data: { question: "Publish?" },
 				interaction: {
@@ -317,19 +317,19 @@ describe("placeCompactions", () => {
 	});
 });
 
-it("a skipped tool dismisses its approval and steering receipts deduplicate on reconnect", () => {
+it("a skipped tool dismisses its confirmation and steering receipts deduplicate on reconnect", () => {
 	const before = apply([
 		{ type: "start", runId: "run", messageId: "assistant" },
 		{
 			type: "widget",
 			messageId: "assistant",
-			key: "lucid-approval",
+			key: "lucid-confirmation",
 			version: 1,
-			data: { question: "Approve?" },
+			data: { question: "Confirm?" },
 			interaction: {
-				id: "approval",
+				id: "confirmation",
 				toolCallId: "write",
-				title: "Approve?",
+				title: "Confirm?",
 				placement: "composer",
 				status: "pending",
 			},

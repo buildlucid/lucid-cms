@@ -87,8 +87,8 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 						});
 					if (
 						source.version !== "latest" &&
-						!collection.getData.publishing.targets.some(
-							(target) => target.key === source.version,
+						!collection.getData.publishing.environments.some(
+							(environment) => environment.key === source.version,
 						)
 					) {
 						throw new LucidError({

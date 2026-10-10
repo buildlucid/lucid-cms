@@ -12,12 +12,12 @@ import {
 	on,
 	Show,
 } from "solid-js";
-import AgentApprovalPicker from "@/components/AgentApprovalPicker/AgentApprovalPicker";
 import AgentComposer, {
 	type AgentComposerHandle,
 	type AgentComposerProps,
 } from "@/components/AgentComposer/AgentComposer";
 import AgentComposerStack from "@/components/AgentComposerStack/AgentComposerStack";
+import AgentConfirmationPicker from "@/components/AgentConfirmationPicker/AgentConfirmationPicker";
 import AgentContextRing from "@/components/AgentContextRing/AgentContextRing";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
@@ -32,11 +32,7 @@ import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import type { AgentReferenceItem } from "@/utils/agent-references";
 
-/**
- * Everything below the transcript: queued input, then the chat box with its
- * approval, context and model controls. A composer interaction takes the chat
- * box's place until it is answered, or set aside to send instructions instead.
- */
+/** Shows queued input and chat controls, with composer interactions replacing the chat box until answered or set aside. */
 const AgentChatComposer: Component<{
 	chat: AgentChat;
 	conversationId: string;
@@ -53,7 +49,7 @@ const AgentChatComposer: Component<{
 	) => Promise<AgentWidgetSubmitResult>;
 	/** Called as a message is sent, eg. to scroll to the end. */
 	onSend: () => void;
-	onEditRoutineApprovals: () => void;
+	onEditRoutineConfirmations: () => void;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -207,20 +203,20 @@ const AgentChatComposer: Component<{
 						controls={
 							<Show when={conversation()}>
 								{(current) => (
-									<AgentApprovalPicker
+									<AgentConfirmationPicker
 										routine={
 											current().routineId
 												? {
 														disabled: !props.routine,
-														onEdit: props.onEditRoutineApprovals,
+														onEdit: props.onEditRoutineConfirmations,
 													}
 												: undefined
 										}
-										value={current().approvalMode}
-										onChange={(approvalMode) =>
+										value={current().confirmationMode}
+										onChange={(confirmationMode) =>
 											updateConversation.action.mutate({
 												id: props.conversationId,
-												body: { approvalMode },
+												body: { confirmationMode },
 											})
 										}
 									/>

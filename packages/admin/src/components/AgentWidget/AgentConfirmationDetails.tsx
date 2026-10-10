@@ -5,24 +5,24 @@ import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
 
 /** The transcript retains each exact call and its individual decision. */
-const AgentApprovalDetails: Component<{
-	approvals: NonNullable<AgentInteraction["approvals"]>;
+const AgentConfirmationDetails: Component<{
+	confirmations: NonNullable<AgentInteraction["confirmations"]>;
 	selected: string[];
 	status: AgentInteraction["status"];
 }> = (props) => {
 	// ----------------------------------------
 	// Functions
-	const approved = (toolCallId: string) => props.selected.includes(toolCallId);
+	const confirmed = (toolCallId: string) => props.selected.includes(toolCallId);
 
 	// ----------------------------------------
 	// Render
 	return (
 		<div class="flex flex-col gap-4">
-			<For each={props.approvals}>
-				{(approval) => (
+			<For each={props.confirmations}>
+				{(confirmation) => (
 					<section class="flex flex-col gap-2">
 						<div class="flex flex-wrap items-center gap-2">
-							<span class="text-xs text-subtitle">{approval.title}</span>
+							<span class="text-xs text-subtitle">{confirmation.title}</span>
 							<Show
 								when={
 									props.status === "answered" || props.status === "cancelled"
@@ -31,21 +31,21 @@ const AgentApprovalDetails: Component<{
 								<Pill
 									size="xs"
 									variant={
-										approved(approval.toolCallId)
+										confirmed(confirmation.toolCallId)
 											? "success-subtle"
 											: "danger-subtle"
 									}
 								>
 									{T()(
-										approved(approval.toolCallId)
-											? "agent.approval.approved"
-											: "agent.approval.denied",
+										confirmed(confirmation.toolCallId)
+											? "agent.confirmation.confirmed"
+											: "agent.confirmation.denied",
 									)}
 								</Pill>
 							</Show>
 						</div>
-						<code class="text-[11px] text-muted">{approval.toolName}</code>
-						<JSONPreview json={approval.input} />
+						<code class="text-[11px] text-muted">{confirmation.toolName}</code>
+						<JSONPreview json={confirmation.input} />
 					</section>
 				)}
 			</For>
@@ -53,4 +53,4 @@ const AgentApprovalDetails: Component<{
 	);
 };
 
-export default AgentApprovalDetails;
+export default AgentConfirmationDetails;

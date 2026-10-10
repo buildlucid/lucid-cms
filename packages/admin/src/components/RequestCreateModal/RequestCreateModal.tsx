@@ -22,7 +22,7 @@ const RequestCreateModal: Component<{
 			description: T()("requests.create.description"),
 		}}
 		canPick={(collection) =>
-			collection.publishing.targets.length > 0 &&
+			collection.publishing.environments.length > 0 &&
 			userStore.get.hasPermission([
 				collection.permissions.read,
 				collection.permissions.update,

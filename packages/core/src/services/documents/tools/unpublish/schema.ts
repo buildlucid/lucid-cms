@@ -6,7 +6,7 @@ export const inputSchema = z.object({
 	documentId: documentIdInput,
 	target: z.string().trim().min(1).meta({
 		description:
-			"The publishing target to remove the document from, from collections_describe.",
+			"The environment to remove the document from, from collections_describe.",
 	}),
 	requestId: writeInput.requestId,
 	request: writeInput.request,

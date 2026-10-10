@@ -231,8 +231,9 @@ export default Object.freeze({
 		widgets: {
 			previewMedia: "lucid-media-preview" satisfies AgentCoreWidgetKey,
 			question: "lucid-question" satisfies AgentCoreWidgetKey,
-			approval: "lucid-tool-approval" satisfies AgentCoreWidgetKey,
-			approvalBatch: "lucid-tool-approval-batch" satisfies AgentCoreWidgetKey,
+			confirmation: "lucid-tool-confirmation" satisfies AgentCoreWidgetKey,
+			confirmationBatch:
+				"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey,
 			reservedPrefix: "lucid-",
 			/** Interaction keys for core tools, by tool name. */
 			tools: {

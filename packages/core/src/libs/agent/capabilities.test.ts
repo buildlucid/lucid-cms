@@ -14,7 +14,7 @@ const tools = defineAgent({
 	key: "test",
 	name: "Test",
 	description: "Test",
-	tools: [agentTools.content()],
+	tools: [agentTools.read()],
 }).tools;
 
 test("combines tool capabilities into what an agent can do", () => {
@@ -44,7 +44,7 @@ test("analysis needs an analysis tool but no library permissions", () => {
 	expect(
 		summariseCapabilities(
 			getCapabilityProviders({
-				tools: agentTools.content(),
+				tools: agentTools.read(),
 			}),
 		),
 	).toEqual({

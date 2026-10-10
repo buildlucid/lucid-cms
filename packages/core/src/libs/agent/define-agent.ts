@@ -1,6 +1,6 @@
 import { analyzeMediaAgentTool } from "../../services/agent/tools/analyze-media/index.js";
 import { readFileAgentTool } from "../../services/agent/tools/read-file/index.js";
-import { removeMediaOwnershipAgentTool } from "../../services/media/tools/remove-ownership/index.js";
+import { addMediaToLibraryAgentTool } from "../../services/media/tools/add-to-library/index.js";
 import { resolveWebToolOptions } from "../../services/web/helpers/web-tool-options.js";
 import { webFetchAgentTool } from "../../services/web/tools/fetch/index.js";
 import { webSearchAgentTool } from "../../services/web/tools/search/index.js";
@@ -18,7 +18,7 @@ import type { AgentDefinition, DefineAgentOptions } from "./types.js";
  * 	key: "seo",
  * 	name: "SEO Agent",
  * 	description: "Reviews and improves page metadata.",
- * 	tools: [agentTools.content(), customAgentTool],
+ * 	tools: [agentTools.read(), customAgentTool],
  * 	features: { web: { allowedDomains: ["example.com"] } },
  * 	models: {
  * 		default: { modelId: "openai/gpt-6-sol", reasoningEffort: "low" },
@@ -70,7 +70,7 @@ const defineAgent = <const Key extends string>(
 						}),
 					]
 				: []),
-			...(features.media.upload ? [removeMediaOwnershipAgentTool()] : []),
+			...(features.media.upload ? [addMediaToLibraryAgentTool()] : []),
 			...(options.tools?.flat() ?? []),
 		],
 		skills: options.skills ?? [],

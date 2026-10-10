@@ -755,13 +755,13 @@ export interface Collection {
 				key: string;
 				label: ResolvedAdminCopy;
 				color: WorkflowStageColor;
-				/** Includes "latest" when create requests can complete from this stage. */
+				/** Request targets available from this stage: environments, and "latest" for create requests. */
 				targets: string[];
 				/** Stage to move back to when content changes while in this stage. */
 				resetTo: string | null;
 			}>;
 		};
-		targets: {
+		environments: {
 			key: string;
 			label: ResolvedAdminCopy;
 			requires: string[];

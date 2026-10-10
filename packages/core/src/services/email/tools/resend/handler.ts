@@ -21,7 +21,7 @@ const resendEmail: ServiceFn<
 
 	return {
 		error: undefined,
-		data: { output: { job: { id: resendRes.data.jobId } } },
+		data: { output: { job: { jobId: resendRes.data.jobId } } },
 	};
 };
 

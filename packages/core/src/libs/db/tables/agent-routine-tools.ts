@@ -8,7 +8,7 @@ export const agentRoutineToolsTable = defineTable(
 		columns: {
 			routine_id: { schema: z.uuid(), type: "text" },
 			tool_name: { schema: z.string(), type: "text" },
-			requires_approval: {
+			requires_confirmation: {
 				schema: z.union([z.boolean(), z.literal(0), z.literal(1)]).nullable(),
 				type: "boolean",
 			},
@@ -20,5 +20,5 @@ export const agentRoutineToolsTable = defineTable(
 export interface LucidAgentRoutineTools {
 	routine_id: string;
 	tool_name: string;
-	requires_approval: BooleanInt | null;
+	requires_confirmation: BooleanInt | null;
 }

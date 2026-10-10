@@ -61,7 +61,7 @@ const startRun: ServiceFn<
 	const conversation = await AgentConversations.selectSingle({
 		select: [
 			"agent_key",
-			"approval_mode",
+			"confirmation_mode",
 			"routine_id",
 			"model_selection",
 			"queue_paused",
@@ -81,7 +81,7 @@ const startRun: ServiceFn<
 	}
 	const {
 		agent_key: agentKey,
-		approval_mode: approvalMode,
+		confirmation_mode: confirmationMode,
 		routine_id: routineId,
 		model_selection: modelSelection,
 		queue_paused: queuePaused,
@@ -232,7 +232,7 @@ const startRun: ServiceFn<
 			status: "queued",
 			checkpoint: {
 				version: 1,
-				approvalMode,
+				confirmationMode,
 				routineTools: routineId ? routineTools.data[routineId] : undefined,
 				messages: latest.data ? [summaryMessage(latest.data.summary)] : [],
 				//* the run loads history, including this message, after the latest summary

@@ -832,7 +832,7 @@ const callReferenceTool = async (
 		mode: "chat",
 		checkpoint: {
 			version: 1,
-			approvalMode: "automatic",
+			confirmationMode: "automatic",
 			messages: [],
 			nudges: 0,
 			requestId: randomUUID(),

@@ -11,7 +11,7 @@ import Select from "@/components/Select/Select";
 import api from "@/services/api";
 import T from "@/translations";
 
-const RemoveMediaOwnershipModal: Component<{
+const AddMediaToLibraryModal: Component<{
 	id: Accessor<number | undefined>;
 	state: {
 		open: boolean;
@@ -29,7 +29,7 @@ const RemoveMediaOwnershipModal: Component<{
 		queryParams: {},
 		enabled: () => props.state.open,
 	});
-	const removeOwnership = api.media.useRemoveOwnership({
+	const addToLibrary = api.media.useAddToLibrary({
 		onSuccess: () => {
 			props.state.setOpen(false);
 		},
@@ -57,7 +57,7 @@ const RemoveMediaOwnershipModal: Component<{
 		const id = props.id();
 		if (id === undefined) return;
 
-		removeOwnership.action.mutate({
+		addToLibrary.action.mutate({
 			id,
 			body: { public: getPublic(), folderId: getFolderId() },
 		});
@@ -69,7 +69,7 @@ const RemoveMediaOwnershipModal: Component<{
 		if (!props.state.open) return;
 		setPublic(false);
 		setFolderId(null);
-		removeOwnership.reset();
+		addToLibrary.reset();
 	});
 
 	// ----------------------------------------
@@ -78,12 +78,12 @@ const RemoveMediaOwnershipModal: Component<{
 		<Modal.Confirm
 			open={props.state.open}
 			onOpenChange={props.state.setOpen}
-			title={T()("modals.media.ownership.remove.title")}
-			description={T()("modals.media.ownership.remove.description")}
-			confirmLabel={T()("media.ownership.remove.action")}
+			title={T()("modals.media.library.add.title")}
+			description={T()("modals.media.library.add.description")}
+			confirmLabel={T()("media.library.add.action")}
 			confirmVariant="danger"
-			loading={removeOwnership.action.isPending}
-			error={removeOwnership.errors()?.message}
+			loading={addToLibrary.action.isPending}
+			error={addToLibrary.errors()?.message}
 			onConfirm={onConfirm}
 		>
 			<div class="flex flex-col gap-3">
@@ -111,4 +111,4 @@ const RemoveMediaOwnershipModal: Component<{
 	);
 };
 
-export default RemoveMediaOwnershipModal;
+export default AddMediaToLibraryModal;

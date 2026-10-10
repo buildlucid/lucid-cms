@@ -79,7 +79,7 @@ function defineAgentTool<
 		permissions: options.permissions,
 		readOnly: options.readOnly ?? false,
 		parallelSafe: options.parallelSafe ?? false,
-		requiresApproval: options.requiresApproval ?? false,
+		requiresConfirmation: options.requiresConfirmation ?? false,
 		capabilities: options.capabilities,
 		outputVersion: options.outputVersion,
 	};

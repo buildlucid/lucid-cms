@@ -242,7 +242,7 @@ const collectionResponseSchema = z.object({
 		});
 	},
 	publishing: z.object({
-		targets: z.array(
+		environments: z.array(
 			z.object({
 				key: z.string().meta({
 					description: "The environment key",
@@ -313,7 +313,7 @@ const collectionResponseSchema = z.object({
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 						targets: z.array(z.string()).meta({
 							description:
-								"Publishing targets available from this stage. Latest lets create requests complete",
+								"Request targets available from this stage: environments, and latest for create requests",
 						}),
 						resetTo: z.string().nullable().meta({
 							description:

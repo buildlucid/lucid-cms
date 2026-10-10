@@ -81,7 +81,7 @@ export interface Agent {
 	tools: {
 		name: string;
 		title: ResolvedAdminCopy;
-		requiresApproval: boolean;
+		requiresConfirmation: boolean;
 		interactive: boolean;
 		permissions: Permission[];
 	}[];
@@ -98,7 +98,7 @@ export type AgentRoutineSource = "code" | "database";
 
 /** A routine's settings for one tool. Missing settings use the tool's defaults. */
 export type AgentRoutineToolSettings = {
-	requiresApproval?: boolean;
+	requiresConfirmation?: boolean;
 };
 
 /** Where input sent while the agent is busy goes: after the current run, or into it as a correction. */
@@ -176,8 +176,8 @@ export type AgentLucidToolName =
 export type AgentCoreWidgetKey =
 	| "lucid-media-preview"
 	| "lucid-question"
-	| "lucid-tool-approval"
-	| "lucid-tool-approval-batch"
+	| "lucid-tool-confirmation"
+	| "lucid-tool-confirmation-batch"
 	| "lucid-media-select";
 
 /** The lifecycle state of an agent run. */
@@ -214,8 +214,11 @@ export type AgentToolStatus =
 	| "failed"
 	| "skipped";
 
-/** Determines when agent tools pause for approval. Permission checks always apply. */
-export type AgentApprovalMode = "confirm-all" | "tool-defaults" | "automatic";
+/** Determines when agent tools pause for confirmation. Permission checks always apply. */
+export type AgentConfirmationMode =
+	| "confirm-all"
+	| "tool-defaults"
+	| "automatic";
 
 /** Submit or cancel a tool's input request. */
 export type AgentInteractionAction = "submit" | "cancel";
@@ -227,9 +230,9 @@ export type AgentInteraction = {
 	title: string;
 	placement: "inline" | "composer";
 	/** Present when submission also authorises this invocation. */
-	approval?: { toolName: string; input: Record<string, unknown> };
-	/** Exact independent calls covered by a grouped approval. Unselected calls are denied. */
-	approvals?: {
+	confirmation?: { toolName: string; input: Record<string, unknown> };
+	/** Exact independent calls covered by a grouped confirmation. Unselected calls are denied. */
+	confirmations?: {
 		toolCallId: string;
 		toolName: string;
 		title: string;
@@ -372,7 +375,7 @@ export interface AgentCompaction {
 }
 
 export interface AgentConversation {
-	approvalMode: AgentApprovalMode;
+	confirmationMode: AgentConfirmationMode;
 	/** The model for the next run. Null uses the routine or agent default. */
 	modelSelection: AiModelSelection | null;
 	/** Queued messages wait until the user resumes, after a run was stopped or failed. */

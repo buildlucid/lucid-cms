@@ -27,7 +27,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 		key: "reviewer",
 		name: "Reviewer",
 		description: "Reviews content.",
-		tools: [agentTools.content()],
+		tools: [agentTools.read()],
 		suggestions: [
 			{
 				title: copy("admin:review.title"),

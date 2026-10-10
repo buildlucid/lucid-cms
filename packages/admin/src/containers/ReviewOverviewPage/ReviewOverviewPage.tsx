@@ -6,15 +6,15 @@ import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import type { TargetCounts } from "./parts/TargetStatus";
-import TargetTable, {
-	type TargetColumn,
-	type TargetRow,
-} from "./parts/TargetTable";
+import type { EnvironmentCounts } from "./parts/EnvironmentStatus";
+import EnvironmentTable, {
+	type EnvironmentColumn,
+	type EnvironmentRow,
+} from "./parts/EnvironmentTable";
 
 /**
  * What needs reviewing: the open request queues, then how far each
- * collection's documents in every publish target are behind latest.
+ * collection's documents in every environment are behind latest.
  */
 const ReviewOverviewPage: Component = () => {
 	// ----------------------------------------
@@ -40,52 +40,55 @@ const ReviewOverviewPage: Component = () => {
 			]),
 		);
 		return (overview.data?.data.collections ?? []).flatMap(
-			(item): TargetRow[] => {
+			(item): EnvironmentRow[] => {
 				const collection = collectionsByKey.get(item.collectionKey);
 				if (!collection) return [];
 				return [
 					{
 						collection,
 						total: item.total,
-						targets: new Map(
-							item.targets.map((target) => [target.key, target]),
+						environments: new Map(
+							item.environments.map((environment) => [
+								environment.key,
+								environment,
+							]),
 						),
 					},
 				];
 			},
 		);
 	});
-	//* columns follow the order collections first configure each target
-	const targets = createMemo(() => {
-		const columns = new Map<string, TargetColumn>();
+	//* columns follow the order collections first configure each environment
+	const environments = createMemo(() => {
+		const columns = new Map<string, EnvironmentColumn>();
 		for (const row of rows()) {
-			for (const target of row.collection.publishing.targets) {
-				if (columns.has(target.key)) continue;
-				columns.set(target.key, {
-					key: target.key,
+			for (const environment of row.collection.publishing.environments) {
+				if (columns.has(environment.key)) continue;
+				columns.set(environment.key, {
+					key: environment.key,
 					label:
 						helpers.getLocaleValue({
-							value: target.label,
-							fallback: target.key,
-						}) || target.key,
+							value: environment.label,
+							fallback: environment.key,
+						}) || environment.key,
 				});
 			}
 		}
 		return Array.from(columns.values());
 	});
 	const totals = createMemo(() => {
-		const counts = new Map<string, TargetCounts>();
+		const counts = new Map<string, EnvironmentCounts>();
 		for (const row of rows()) {
-			for (const [key, target] of row.targets) {
+			for (const [key, environment] of row.environments) {
 				const current = counts.get(key) ?? {
 					inSync: 0,
 					outOfSync: 0,
 					unreleased: 0,
 				};
 				counts.set(key, {
-					inSync: current.inSync + target.inSync,
-					outOfSync: current.outOfSync + target.outOfSync,
-					unreleased: current.unreleased + target.unreleased,
+					inSync: current.inSync + environment.inSync,
+					outOfSync: current.outOfSync + environment.outOfSync,
+					unreleased: current.unreleased + environment.unreleased,
 				});
 			}
 		}
@@ -130,21 +133,21 @@ const ReviewOverviewPage: Component = () => {
 						</section>
 						<section>
 							<div class="mb-3">
-								<h2>{T()("review.targets.title")}</h2>
+								<h2>{T()("review.environments.title")}</h2>
 								<p class="mt-0.5 text-sm text-body">
-									{T()("review.targets.description")}
+									{T()("review.environments.description")}
 								</p>
 							</div>
 							<Show
 								when={rows().length > 0}
 								fallback={
 									<p class="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted">
-										{T()("review.targets.empty")}
+										{T()("review.environments.empty")}
 									</p>
 								}
 							>
-								<TargetTable
-									targets={targets()}
+								<EnvironmentTable
+									environments={environments()}
 									rows={rows()}
 									totals={totals()}
 								/>

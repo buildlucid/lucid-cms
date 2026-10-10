@@ -163,10 +163,10 @@ export type DefineAgentToolOptions<
 	/** Safe to run alongside other independent reads. Requires readOnly. Defaults to false, including for paid or state-dependent reads. */
 	parallelSafe?: boolean;
 	/** Ask before executing in tool-defaults mode. Routines can override this. Defaults to false. */
-	requiresApproval?: boolean;
+	requiresConfirmation?: boolean;
 	/** What this tool lets the agent do, shown to people in the chat. */
 	capabilities?: AgentToolCapabilities;
-	/** Describes a call before it runs, eg. while it waits for approval. Defaults to the title. */
+	/** Describes a call before it runs, eg. while it waits for confirmation. Defaults to the title. */
 	describe?: (input: z.output<Input>) => AdminCopyInput;
 	/** Saved with each call. Bump it when the output shape changes so the admin can keep rendering older results. */
 	outputVersion?: number;
@@ -281,7 +281,7 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly permissions: readonly Permission[];
 	readonly readOnly: boolean;
 	readonly parallelSafe: boolean;
-	readonly requiresApproval: boolean;
+	readonly requiresConfirmation: boolean;
 	readonly capabilities?: AgentToolCapabilities;
 	/** Describes a call before it runs. Invalid input, or a tool without `describe`, uses the title. */
 	readonly describe: (input: Record<string, unknown>) => ResolvedAdminCopy;

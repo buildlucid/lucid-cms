@@ -13,7 +13,7 @@ const checkCollectionEnvironmentVersionMap = (config: ResolvedLucidConfig) => {
 	);
 
 	for (const collection of config.collections) {
-		for (const environment of collection.getData.publishing.targets) {
+		for (const environment of collection.getData.publishing.environments) {
 			for (const [targetCollectionKey, targetVersionType] of Object.entries(
 				environment.collectionVersions ?? {},
 			)) {
@@ -37,7 +37,7 @@ const checkCollectionEnvironmentVersionMap = (config: ResolvedLucidConfig) => {
 				if (targetVersionType === latestVersionType) continue;
 
 				const targetEnvironmentExists =
-					targetCollection.getData.publishing.targets.some(
+					targetCollection.getData.publishing.environments.some(
 						(targetEnvironment) => targetEnvironment.key === targetVersionType,
 					);
 

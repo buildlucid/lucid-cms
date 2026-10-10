@@ -3,7 +3,7 @@ import { getAllowedTargets } from "./requests";
 
 const collection = {
 	publishing: {
-		targets: [{ key: "staging" }, { key: "production" }],
+		environments: [{ key: "staging" }, { key: "production" }],
 	},
 };
 

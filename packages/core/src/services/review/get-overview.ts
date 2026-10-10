@@ -9,7 +9,7 @@ import type { ReviewOverview } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRequestOverview from "../requests/get-overview.js";
 
-/** Publish target status counts for each readable collection, and open request counts, for the Review overview. */
+/** Environment status counts for each readable collection, and open request counts, for the Review overview. */
 const getOverview: ServiceFn<
 	[
 		{
@@ -23,7 +23,7 @@ const getOverview: ServiceFn<
 
 	const readableCollections = collectionsRes.data.filter(
 		(collection) =>
-			collection.getData.publishing.targets.length > 0 &&
+			collection.getData.publishing.environments.length > 0 &&
 			hasAccess({
 				user: data.user,
 				requiredPermissions: [
@@ -39,13 +39,13 @@ const getOverview: ServiceFn<
 			const tableNamesRes = await getTableNames(context, collection.key);
 			if (tableNamesRes.error) return tableNamesRes;
 
-			const targets = collection.getData.publishing.targets.map(
-				(target) => target.key,
+			const environments = collection.getData.publishing.environments.map(
+				(environment) => environment.key,
 			);
 
 			const countsRes = await Documents.selectEnvironmentStatusCounts(
 				{
-					environmentKeys: targets,
+					environmentKeys: environments,
 					versionTableName: tableNamesRes.data.version,
 				},
 				{
@@ -58,7 +58,7 @@ const getOverview: ServiceFn<
 				error: undefined,
 				data: {
 					key: collection.key,
-					targets,
+					environments,
 					counts: countsRes.data,
 				},
 			};

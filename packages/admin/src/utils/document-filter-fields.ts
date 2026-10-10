@@ -285,7 +285,7 @@ export const documentFilterPanelFields = (
 		},
 	];
 
-	for (const environment of collection?.publishing.targets ?? []) {
+	for (const environment of collection?.publishing.environments ?? []) {
 		const environmentLabel =
 			helpers.getLocaleValue({
 				value: environment.label,

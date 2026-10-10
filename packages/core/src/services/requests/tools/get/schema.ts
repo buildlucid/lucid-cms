@@ -25,11 +25,8 @@ export const inputSchema = z.object({
 const commentShape = {
 	id: z.number(),
 	author: requestUserSchema.nullable(),
-	agent: agentNameSchema,
-	byYou: z.boolean().meta({
-		description:
-			"Written by you, so you can change, resolve or remove it with requests_update_comment.",
-	}),
+	authorAgent: agentNameSchema,
+	byYou: z.boolean().meta({ description: "Written by you." }),
 	body: z.string().meta({ description: "HTML." }),
 	createdAt: z.string().nullable(),
 };
@@ -62,7 +59,7 @@ export const outputSchema = z.object({
 				label: z.string().nullable(),
 				source: z.string().nullable().meta({
 					description:
-						"latest when the request holds a proposal: read it with documents_get and version request:ID, and compare it with the target versions. An environment when it holds a snapshot of that environment. Null for unpublish and delete requests.",
+						"latest when the request holds a proposal to compare with the target versions. An environment when it holds a snapshot of that environment. Null for unpublish and delete requests.",
 				}),
 				deleted: z.enum(["bin", "permanent"]).nullable(),
 				workflowStage: z.string().nullable(),
@@ -81,7 +78,7 @@ export const outputSchema = z.object({
 				),
 				allowedTargets: z.array(z.string()).meta({
 					description:
-						"Every target this document can have, including latest when it can. Change targets with requests_update.",
+						"Every target this document can have, including latest when it can.",
 				}),
 			}),
 		),
@@ -97,7 +94,7 @@ export const outputSchema = z.object({
 			)
 			.meta({
 				description:
-					"What stops approval or completion, eg. review_required for targets to acknowledge, workflow for stages, comments_open for comments to resolve or close, or check for a collection's own checks with a message.",
+					"What stops approval or completion, eg. acknowledge_required for targets to acknowledge, workflow for stages, comments_open for comments to resolve or close, or check for a collection's own checks with a message.",
 			}),
 		comments: z
 			.array(
@@ -117,7 +114,7 @@ export const outputSchema = z.object({
 					.looseObject({
 						type: z.string(),
 						author: requestUserSchema.nullable(),
-						agent: agentNameSchema,
+						authorAgent: agentNameSchema,
 						createdAt: z.string().nullable(),
 					})
 					.meta({ description: "Other details depend on the type." }),
@@ -138,7 +135,7 @@ export const outputSchema = z.object({
 			.meta({ description: "What the person you act for can do." }),
 		reviewToken: z.string().optional().meta({
 			description:
-				"Pass to requests_acknowledge to acknowledge changes as you read them.",
+				"Identifies the request as you read it, so changes are acknowledged as you saw them.",
 		}),
 		links: requestLinksSchema,
 	}),

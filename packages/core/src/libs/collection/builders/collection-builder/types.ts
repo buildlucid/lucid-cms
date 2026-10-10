@@ -23,8 +23,8 @@ export type CollectionLabelFieldOptions = CollectionListFieldOptions & {
 	/** Use this field when displaying a document label. */
 	useAsLabel?: UseAsLabel;
 };
-/** Maps related collection keys to the version to read when resolving references for a publishing target. */
-export type CollectionTargetVersionMap = Record<string, string>;
+/** Maps related collection keys to the version to read when resolving references for an environment. */
+export type CollectionEnvironmentVersionMap = Record<string, string>;
 /** A navigation group key, or a key with display copy and sort order. */
 export type CollectionGroupOptions =
 	| string
@@ -151,7 +151,7 @@ export type CollectionRevisionOptions = {
 	retentionDays?: number | false;
 };
 
-/** Optional publishing targets and editorial review rules. */
+/** Optional environments and editorial review rules. */
 export type CollectionPublishingOptions = {
 	/** Allow scheduled publishing. Defaults to false. */
 	scheduling?: boolean;
@@ -181,22 +181,22 @@ export type CollectionPublishingOptions = {
 			label: AdminCopyInput;
 			/** Stage badge color. Defaults to grey. */
 			color?: PublishingWorkflowStageColor;
-			/** Publishing targets available from this stage, including "latest". A target no stage lists is never gated by the workflow. */
+			/** Request targets available from this stage (environments or "latest" for create requests); targets absent from every stage bypass workflow gates. */
 			targets?: string[];
 			/** Stage to move back to when content changes while in this stage. */
 			resetTo?: string;
 		}>;
 	};
 	/** Named versions that editors may publish to. */
-	targets?: Array<{
-		/** Unique publishing target key. */
+	environments?: Array<{
+		/** Unique environment key. */
 		key: string;
-		/** Publishing target label shown to editors. */
+		/** Environment label shown to editors. */
 		label: AdminCopyInput;
-		/** Targets that must contain the current content before publishing to this target. */
+		/** Environments that must contain the current content before publishing to this one. */
 		requires?: string[];
-		/** Versions to use when resolving related documents from this target. */
-		collectionVersions?: CollectionTargetVersionMap;
+		/** Versions to use when resolving related documents from this environment. */
+		collectionVersions?: CollectionEnvironmentVersionMap;
 	}>;
 };
 
@@ -225,7 +225,7 @@ export type CollectionOptions<
 	autoSave?: boolean;
 	/** Allow editors to reorder documents. Defaults to false. */
 	orderable?: boolean;
-	/** Publishing targets, scheduling, review and workflow settings. */
+	/** Environments, scheduling, review and workflow settings. */
 	publishing?: CollectionPublishingOptions;
 	/** Top-level field containing each document's complete public path. */
 	routing?: { field: string };
@@ -263,11 +263,11 @@ export type CollectionData = {
 		scheduling: boolean;
 		review?: PublishingReviewConfig;
 		workflow?: PublishingWorkflowConfig;
-		targets: {
+		environments: {
 			key: string;
 			label: ResolvedAdminCopy;
 			requires: string[];
-			collectionVersions: CollectionTargetVersionMap;
+			collectionVersions: CollectionEnvironmentVersionMap;
 		}[];
 	};
 	routing: {

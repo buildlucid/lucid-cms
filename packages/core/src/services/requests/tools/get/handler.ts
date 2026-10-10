@@ -118,7 +118,7 @@ const getRequest: ServiceFn<
 					comments: comments.map((comment) => ({
 						id: comment.id,
 						author: comment.user && formatPerson(comment.user),
-						agent: comment.agent?.name ?? null,
+						authorAgent: comment.agent?.name ?? null,
 						byYou: byYou(comment),
 						body: generateSourceHTML(comment.body),
 						createdAt: comment.createdAt,
@@ -126,7 +126,7 @@ const getRequest: ServiceFn<
 						replies: comment.replies.map((reply) => ({
 							id: reply.id,
 							author: reply.user && formatPerson(reply.user),
-							agent: reply.agent?.name ?? null,
+							authorAgent: reply.agent?.name ?? null,
 							byYou: byYou(reply),
 							body: generateSourceHTML(reply.body),
 							createdAt: reply.createdAt,
@@ -158,7 +158,7 @@ const getRequest: ServiceFn<
 											}
 										: {}),
 									author: user && formatPerson(user),
-									agent: agent?.name ?? null,
+									authorAgent: agent?.name ?? null,
 								},
 							];
 						}),

@@ -49,7 +49,9 @@ const findNotifications: ServiceFn<
 					readAt: notification.readAt,
 					resolvedAt: notification.resolvedAt,
 					createdAt: notification.createdAt,
-					link: notification.href && new URL(notification.href, baseUrl).href,
+					links: {
+						open: notification.href && new URL(notification.href, baseUrl).href,
+					},
 				})),
 				pagination: getPagination(
 					notificationsRes.data.count,

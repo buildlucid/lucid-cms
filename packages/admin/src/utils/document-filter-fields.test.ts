@@ -23,7 +23,7 @@ const buildCollection = (
 	builderBricks: unknown[] = [],
 ): Collection =>
 	({
-		publishing: { targets: [], scheduling: false },
+		publishing: { environments: [], scheduling: false },
 		fields,
 		fixedBricks,
 		builderBricks,
@@ -338,7 +338,7 @@ describe("documentFilterPanelFields", () => {
 			...buildCollection([]),
 			publishing: {
 				scheduling: false,
-				targets: [
+				environments: [
 					{
 						key: "production",
 						label: literal("Production"),
@@ -370,7 +370,7 @@ describe("documentFilterPanelFields", () => {
 				{ key: "title", type: "text", details: { label: literal("Title") } },
 			]),
 			publishing: {
-				targets: [],
+				environments: [],
 				scheduling: false,
 				workflow: {
 					initial: "draft",
@@ -417,7 +417,7 @@ describe("documentFilterPanelFields", () => {
 			]),
 			publishing: {
 				scheduling: false,
-				targets: [
+				environments: [
 					{
 						key: "production",
 						label: literal("Production"),

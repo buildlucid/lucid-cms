@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentConversation,
 	AiModelSelection,
 	ResponseBody,
@@ -14,7 +14,7 @@ type Params = {
 	id: string;
 	body: {
 		title?: string;
-		approvalMode?: AgentApprovalMode;
+		confirmationMode?: AgentConfirmationMode;
 		modelSelection?: AiModelSelection;
 	};
 };

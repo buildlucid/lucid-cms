@@ -21,7 +21,7 @@ const getPublished = (
 	document: InternalCollectionDocument | undefined,
 	collection: Collection | undefined,
 ) =>
-	(collection?.publishing.targets ?? [])
+	(collection?.publishing.environments ?? [])
 		.filter((environment) => document?.versions[environment.key])
 		.map((environment) => environment.key);
 
@@ -40,7 +40,7 @@ const RequestUnpublishModal: Component<{
 			description: T()("requests.create.unpublish.description"),
 		}}
 		canPick={(collection) =>
-			collection.publishing.targets.length > 0 &&
+			collection.publishing.environments.length > 0 &&
 			userStore.get.hasPermission([collection.permissions.read]).all &&
 			userStore.get.hasPermission([
 				collection.permissions.update,

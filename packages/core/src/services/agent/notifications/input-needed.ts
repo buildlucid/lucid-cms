@@ -12,7 +12,7 @@ export const inputNeededNotification = defineNotification({
 	}),
 	description: copy("admin:core.notifications.agent.input-needed.description", {
 		defaultMessage:
-			"An agent is waiting for your answer or approval, and you have not replied for a few minutes.",
+			"An agent is waiting for your answer or confirmation, and you have not replied for a few minutes.",
 	}),
 	level: "warning",
 	actionRequired: true,

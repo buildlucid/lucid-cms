@@ -32,7 +32,7 @@ const completeRequest: ServiceFn<
 		error: undefined,
 		data: {
 			output: {
-				job: { id: completeRes.data.jobId },
+				job: { jobId: completeRes.data.jobId },
 				links: { request: getRequestLink(context, props.requestId) },
 			},
 		},

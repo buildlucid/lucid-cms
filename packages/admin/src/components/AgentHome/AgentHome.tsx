@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import type { Agent, AgentApprovalMode, AiModelSelection } from "@types";
+import type { Agent, AgentConfirmationMode, AiModelSelection } from "@types";
 import classnames from "classnames";
 import {
 	type Component,
@@ -9,10 +9,10 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import AgentApprovalPicker from "@/components/AgentApprovalPicker/AgentApprovalPicker";
 import AgentComposer, {
 	type AgentComposerHandle,
 } from "@/components/AgentComposer/AgentComposer";
+import AgentConfirmationPicker from "@/components/AgentConfirmationPicker/AgentConfirmationPicker";
 import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
 import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
@@ -47,7 +47,7 @@ const AgentHome: Component = () => {
 	const location = useLocation<{
 		message?: string;
 		references?: AgentReferenceItem[];
-		approvalMode?: AgentApprovalMode;
+		confirmationMode?: AgentConfirmationMode;
 		modelSelection?: AiModelSelection;
 	}>();
 	const navigate = useNavigate();
@@ -57,9 +57,10 @@ const AgentHome: Component = () => {
 		createSignal<AiModelSelection | null>(
 			location.state?.modelSelection ?? null,
 		);
-	const [approvalMode, setApprovalMode] = createSignal<AgentApprovalMode>(
-		location.state?.approvalMode ?? "tool-defaults",
-	);
+	const [confirmationMode, setConfirmationMode] =
+		createSignal<AgentConfirmationMode>(
+			location.state?.confirmationMode ?? "tool-defaults",
+		);
 	const [composerBlank, setComposerBlank] = createSignal(true);
 	const painted = useFirstPaint();
 	const definitions = api.agent.useGetDefinitions();
@@ -130,7 +131,7 @@ const AgentHome: Component = () => {
 						message: text,
 						references,
 						agentKey: selected.key,
-						approvalMode: approvalMode(),
+						confirmationMode: confirmationMode(),
 						modelSelection: modelSelection() ?? undefined,
 					},
 				}),
@@ -189,9 +190,9 @@ const AgentHome: Component = () => {
 									capabilities={current().capabilities}
 									onSubmit={start}
 									controls={
-										<AgentApprovalPicker
-											value={approvalMode()}
-											onChange={setApprovalMode}
+										<AgentConfirmationPicker
+											value={confirmationMode()}
+											onChange={setConfirmationMode}
 										/>
 									}
 									start={

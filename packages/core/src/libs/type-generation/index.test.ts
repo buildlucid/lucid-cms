@@ -118,7 +118,7 @@ test("generates collection-aware client document types that lean on the public L
 			builder: [BannerBrick],
 		},
 		publishing: {
-			targets: [
+			environments: [
 				{
 					key: "published",
 					label: copy("admin:tests.environments.published.name", {

@@ -48,8 +48,7 @@ const updateSingle: ServiceFn<
 			fileName?: string;
 			folderId?: number | null;
 			public?: boolean;
-			/** Removes ownership of personal media, so it joins the shared media library. */
-			removeOwnership?: boolean;
+			addToLibrary?: boolean;
 			isDeleted?: boolean;
 			origin?: MediaOrigin;
 			aiGenerationRequestId?: string;
@@ -119,7 +118,7 @@ const updateSingle: ServiceFn<
 	});
 	if (accessError) return { error: accessError, data: undefined };
 
-	const ownership: MediaOwnership = data.removeOwnership
+	const ownership: MediaOwnership = data.addToLibrary
 		? { type: "library" }
 		: currentOwnership;
 
@@ -401,7 +400,7 @@ const updateSingle: ServiceFn<
 		is_light: updateObjectRes ? (data.isLight ?? null) : data.isLight,
 		folder_id: data.folderId,
 		public: isPublic ?? data.public,
-		owner_user_id: data.removeOwnership ? null : undefined,
+		owner_user_id: data.addToLibrary ? null : undefined,
 		is_deleted: data.isDeleted,
 		is_deleted_at: data.isDeleted
 			? new Date().toISOString()

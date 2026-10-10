@@ -79,7 +79,9 @@ const getDependantVersions: ServiceFn<
 		const affectedTypes = new Set(
 			[
 				"latest",
-				...collection.getData.publishing.targets.map((item) => item.key),
+				...collection.getData.publishing.environments.map(
+					(environment) => environment.key,
+				),
 			].filter(
 				(version) =>
 					target.version === undefined ||

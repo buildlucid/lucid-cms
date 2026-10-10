@@ -549,7 +549,7 @@ describe("code routines", () => {
 				{
 					...auditRoutine,
 					name: "Monday audit",
-					tools: { collections_list: { requiresApproval: true } },
+					tools: { collections_list: { requiresConfirmation: true } },
 				},
 			],
 		};
@@ -568,7 +568,7 @@ describe("code routines", () => {
 		expect(Boolean(updated?.enabled)).toBe(false);
 		const id = created?.id ?? "";
 		expect((await getRoutineTools(context, [id])).data?.[id]).toEqual({
-			collections_list: { requiresApproval: true },
+			collections_list: { requiresConfirmation: true },
 		});
 		await syncAgentRoutines(context);
 		expect((await getRoutineTools(context, [id])).data?.[id]).toEqual({});

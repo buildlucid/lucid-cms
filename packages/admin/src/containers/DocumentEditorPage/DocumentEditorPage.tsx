@@ -384,14 +384,15 @@ const DocumentEditorPage: Component<{
 				contentId: document.versions.latest.contentId,
 			});
 		}
-		for (const target of docState.collection()?.publishing.targets ?? []) {
-			const version = document.versions[target.key];
+		for (const environment of docState.collection()?.publishing.environments ??
+			[]) {
+			const version = document.versions[environment.key];
 			if (version) {
 				sources.push({
-					key: target.key,
+					key: environment.key,
 					label: helpers.getLocaleValue({
-						value: target.label,
-						fallback: target.key,
+						value: environment.label,
+						fallback: environment.key,
 					}),
 					contentId: version.contentId,
 				});

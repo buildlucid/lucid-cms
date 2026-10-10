@@ -13,7 +13,7 @@ const getSettingsForTool: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const settingsRes = await getSettings(context, {
-		includes: props.input.includes,
+		includes: props.input.include,
 		authUser: userRes.data,
 	});
 	if (settingsRes.error) return settingsRes;

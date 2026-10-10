@@ -13,25 +13,24 @@ export const questionResponseSchema = z.object({
 	answer: z.string().trim().min(1).max(20_000),
 });
 
-export const approvalBatchResponseSchema = z.object({
-	approvedToolCallIds: z.array(z.string()).max(constants.agent.readConcurrency),
+export const confirmationBatchResponseSchema = z.object({
+	confirmedToolCallIds: z
+		.array(z.string())
+		.max(constants.agent.readConcurrency),
 });
 
-/**
- * Whether the run's approval policy asks before an agent tool runs. Tool
- * defaults use each tool's own setting, which a routine can override.
- */
-export const needsApproval = (
+/** Determines whether an agent tool needs confirmation under the run's policy, applying routine overrides in tool-defaults mode. */
+export const needsConfirmation = (
 	checkpoint: Checkpoint,
 	tool: AgentToolDefinition,
 ) => {
-	switch (checkpoint.approvalMode) {
+	switch (checkpoint.confirmationMode) {
 		case "confirm-all":
 			return true;
 		case "tool-defaults":
 			return (
-				checkpoint.routineTools?.[tool.name]?.requiresApproval ??
-				tool.requiresApproval
+				checkpoint.routineTools?.[tool.name]?.requiresConfirmation ??
+				tool.requiresConfirmation
 			);
 		case "automatic":
 			return false;
@@ -46,35 +45,36 @@ export const toolInteractionAnswer = (
 	const pending = checkpoint.pending;
 	if (!pending?.answer) return undefined;
 
-	const approvals = pending.widget.interaction.approvals;
-	if (!approvals) {
+	const confirmations = pending.widget.interaction.confirmations;
+	if (!confirmations) {
 		return pending.widget.interaction.toolCallId === call.id
 			? pending.answer
 			: undefined;
 	}
 
-	const covered = approvals.some(
-		(approval) =>
-			approval.toolCallId === call.id &&
-			approval.toolName === call.name &&
-			isDeepStrictEqual(approval.input, call.input),
+	const covered = confirmations.some(
+		(confirmation) =>
+			confirmation.toolCallId === call.id &&
+			confirmation.toolName === call.name &&
+			isDeepStrictEqual(confirmation.input, call.input),
 	);
 	if (!covered) return undefined;
 	if (pending.answer.action === "cancel") return pending.answer;
 
-	//* calls left out of the approved list were denied
-	const response = approvalBatchResponseSchema.safeParse(
+	//* calls left out of the confirmed list were denied
+	const response = confirmationBatchResponseSchema.safeParse(
 		pending.answer.response,
 	);
-	return response.success && response.data.approvedToolCallIds.includes(call.id)
+	return response.success &&
+		response.data.confirmedToolCallIds.includes(call.id)
 		? { action: "submit", response: {} }
 		: { action: "cancel" };
 };
 
 export const createInteraction = (props: {
 	callId: string;
-	approval?: AgentInteraction["approval"];
-	approvals?: AgentInteraction["approvals"];
+	confirmation?: AgentInteraction["confirmation"];
+	confirmations?: AgentInteraction["confirmations"];
 	key: string;
 	version?: number;
 	title: string;
@@ -89,8 +89,8 @@ export const createInteraction = (props: {
 		interaction: {
 			id: randomUUID(),
 			toolCallId: props.callId,
-			approval: props.approval,
-			approvals: props.approvals,
+			confirmation: props.confirmation,
+			confirmations: props.confirmations,
 			title: props.title,
 			placement: props.placement ?? "composer",
 			status: "pending",

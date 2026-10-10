@@ -67,7 +67,7 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 		autoSave: false,
 		orderable: false,
 		publishing: {
-			targets: options.targets,
+			environments: options.environments,
 			scheduling: false,
 		},
 	});

@@ -4,7 +4,7 @@ export const seoAgent = defineAgent({
 	key: "seo",
 	name: "SEO Agent",
 	description: "Reviews page metadata and suggests improvements.",
-	tools: [agentTools.content({ collections: ["page"] })],
+	tools: [agentTools.read({ collections: ["page"] })],
 	instructions: `
 		Focus on page titles, descriptions and slugs. Suggest concrete changes,
 		and explain why each one helps.

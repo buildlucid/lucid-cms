@@ -17,7 +17,7 @@ export const updateRequestAgentTool = (options: CollectionToolOptions = {}) =>
 		name,
 		title: copy("admin:core.tools.requests_update.title"),
 		description:
-			"Change a review request: its title, description or reviewers, its documents and their targets, or close or reopen it. List only the changes to make. Read it with requests_get first. To change a proposal's content, use documents_update with requestId.",
+			"Change a request: its title, description or reviewers, its documents and their targets, or close or reopen it. List only the changes to make. Read it with requests_get first. To change a proposal's content, use documents_update with requestId.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],

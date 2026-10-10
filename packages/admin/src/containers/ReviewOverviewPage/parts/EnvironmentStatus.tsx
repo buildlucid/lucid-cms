@@ -8,21 +8,17 @@ import {
 	getDocumentEnvironmentStatusLabel,
 } from "@/utils/document-environment-status";
 
-export type TargetCounts = Pick<
-	ReviewOverview["collections"][number]["targets"][number],
+export type EnvironmentCounts = Pick<
+	ReviewOverview["collections"][number]["environments"][number],
 	"inSync" | "outOfSync" | "unreleased"
 >;
 
 const linkClass =
 	"rounded-sm text-xs leading-none text-muted transition-colors hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary";
 
-/**
- * How a collection's documents in one target compare to latest: a bar split
- * into in sync and behind, with links to the documents that need releasing.
- * A single shows its one document's status instead.
- */
-const TargetStatus: Component<{
-	counts: TargetCounts;
+/** Shows environment counts against latest with optional status links, or one document's status for single collections. */
+const EnvironmentStatus: Component<{
+	counts: EnvironmentCounts;
 	single?: boolean;
 	/** Where each status's documents are listed. Unset for totals. */
 	href?: (status: Exclude<DocumentEnvironmentStatus, "in-sync">) => string;
@@ -48,7 +44,9 @@ const TargetStatus: Component<{
 	return (
 		<Switch>
 			<Match when={total() === 0}>
-				<span class="text-xs text-muted">{T()("review.targets.none")}</span>
+				<span class="text-xs text-muted">
+					{T()("review.environments.none")}
+				</span>
 			</Match>
 			<Match when={props.single}>
 				<span class="flex items-center gap-2 text-xs text-subtitle">
@@ -77,18 +75,18 @@ const TargetStatus: Component<{
 					<p class="flex flex-wrap gap-x-2 gap-y-1 text-xs leading-none text-muted">
 						<Show
 							when={props.counts.outOfSync > 0 || props.counts.unreleased > 0}
-							fallback={T()("review.targets.synced")}
+							fallback={T()("review.environments.synced")}
 						>
 							<Show when={props.counts.outOfSync > 0}>
 								<Show
 									when={props.href}
-									fallback={T()("review.targets.behind", {
+									fallback={T()("review.environments.behind", {
 										count: props.counts.outOfSync,
 									})}
 								>
 									{(href) => (
 										<A href={href()("out-of-sync")} class={linkClass}>
-											{T()("review.targets.behind", {
+											{T()("review.environments.behind", {
 												count: props.counts.outOfSync,
 											})}
 										</A>
@@ -98,13 +96,13 @@ const TargetStatus: Component<{
 							<Show when={props.counts.unreleased > 0}>
 								<Show
 									when={props.href}
-									fallback={T()("review.targets.unreleased", {
+									fallback={T()("review.environments.unreleased", {
 										count: props.counts.unreleased,
 									})}
 								>
 									{(href) => (
 										<A href={href()("unreleased")} class={linkClass}>
-											{T()("review.targets.unreleased", {
+											{T()("review.environments.unreleased", {
 												count: props.counts.unreleased,
 											})}
 										</A>
@@ -119,4 +117,4 @@ const TargetStatus: Component<{
 	);
 };
 
-export default TargetStatus;
+export default EnvironmentStatus;

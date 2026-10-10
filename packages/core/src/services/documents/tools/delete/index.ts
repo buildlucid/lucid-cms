@@ -22,7 +22,7 @@ export const deleteDocumentAgentTool = (
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],
-		requiresApproval: options.direct ?? false,
+		requiresConfirmation: options.direct ?? false,
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],

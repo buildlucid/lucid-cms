@@ -156,7 +156,7 @@ defineAgentTool({
 defineMcpTool({
 	...base,
 	scopes: [],
-	// @ts-expect-error Approval policy is specific to agent tools.
-	requiresApproval: true,
+	// @ts-expect-error Confirmation policy is specific to agent tools.
+	requiresConfirmation: true,
 	handler,
 });

@@ -34,7 +34,7 @@ const listCollections: ServiceFn<
 			routing: collection.routing,
 			labelFields: collection.labelFields,
 			localization: collection.localized,
-			publishingTargetCount: collection.publishing.targets.length,
+			environmentCount: collection.publishing.environments.length,
 		}))
 		.sort((a, b) => a.key.localeCompare(b.key));
 

@@ -17,11 +17,11 @@ export const completeRequestAgentTool = (options: CollectionToolOptions = {}) =>
 		name,
 		title: copy("admin:core.tools.requests_complete.title"),
 		description:
-			"Complete an approved review request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests the person asked you to. To complete one later, use requests_schedule.",
+			"Complete an approved request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests the person asked you to. To complete one later, use requests_schedule.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],
-		requiresApproval: true,
+		requiresConfirmation: true,
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(completeRequest, {
 				transaction: true,

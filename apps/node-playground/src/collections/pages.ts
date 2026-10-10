@@ -67,7 +67,7 @@ const PageCollection = new CollectionBuilder("page", {
 		builder: [BannerBrick, IntroBrick, TestingBrick, AllFieldsBrick],
 	},
 	publishing: {
-		targets: [
+		environments: [
 			{
 				key: "staging",
 				label: copy("admin:collections.page.environments.staging.name"),

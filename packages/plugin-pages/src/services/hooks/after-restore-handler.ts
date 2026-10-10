@@ -20,7 +20,9 @@ const afterRestoreHandler =
 
 		const versionTypes = [
 			"latest",
-			...meta.collection.getData.publishing.targets.map((target) => target.key),
+			...meta.collection.getData.publishing.environments.map(
+				(environment) => environment.key,
+			),
 		];
 		const batchSize = context.config.db.getQueryBatchSize({
 			parametersPerItem: 1,

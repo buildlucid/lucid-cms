@@ -30,7 +30,7 @@ const fieldEntrySchema = z.object({
 		description:
 			"Field keys from the document or brick root to this field, as documents_get returns them. Tabs and inline groups add no key.",
 	}),
-	fieldType: z.string().meta({ description: "Lucid custom-field type." }),
+	type: z.string().meta({ description: "Lucid custom-field type." }),
 	label: z
 		.string()
 		.meta({ description: "Editor label in the current interface language." }),
@@ -66,7 +66,7 @@ export const entrySchema = z.discriminatedUnion("kind", [
 	fieldEntrySchema,
 	z.object({
 		kind: z.literal("brick"),
-		brickType: z
+		type: z
 			.enum(["fixed", "builder", "embedded"])
 			.meta({ description: "How the brick participates in documents." }),
 		key: z.string().meta({ description: "Brick key." }),
@@ -94,22 +94,22 @@ export const entrySchema = z.discriminatedUnion("kind", [
 		label: z.string().meta({ description: "Displayed option label." }),
 	}),
 	z.object({
-		kind: z.literal("publishingTarget"),
+		kind: z.literal("environment"),
 		key: z.string().meta({
 			description:
-				"An environment. Requests from latest can also target latest itself.",
+				"Environment key. Publish requests from latest can also target latest itself.",
 		}),
-		label: z.string().meta({ description: "Publishing target label." }),
+		label: z.string().meta({ description: "Environment label." }),
 		requires: z.array(z.string()).meta({
 			description:
-				"Other target keys required before publishing to this target.",
+				"Other environment keys required before publishing to this one.",
 		}),
 	}),
 ]);
 
 export const outputSchema = z.object({
 	data: z.array(entrySchema).meta({
-		description: "One page of fields, bricks, options and publishing targets.",
+		description: "One page of fields, bricks, options and environments.",
 	}),
 	pagination: paginationSchema,
 	meta: z
@@ -136,7 +136,7 @@ export const outputSchema = z.object({
 					localization: collectionLocalizationSchema,
 					publishing: z
 						.object({
-							targetCount: z.number(),
+							environmentCount: z.number(),
 							review: z
 								.object({
 									create: z.boolean(),
@@ -146,11 +146,11 @@ export const outputSchema = z.object({
 								})
 								.meta({
 									description:
-										"Actions that always need an approved request: creating, deleting, and publishing or unpublishing these targets.",
+										"Actions that always need an approved request: creating, deleting, and publishing to or unpublishing from these environments.",
 								}),
 						})
 						.meta({
-							description: "Publishing target count and review requirements.",
+							description: "Environment count and review requirements.",
 						}),
 				})
 				.meta({ description: "Collection identity and content settings." }),

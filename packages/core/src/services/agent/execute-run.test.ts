@@ -41,7 +41,7 @@ import { agentTools } from "../../libs/tools/lucid-tools.js";
 import type { AgentToolHandler } from "../../libs/tools/types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentReferenceInput,
 	AgentRunOutcome,
 	AgentStreamEvent,
@@ -213,12 +213,12 @@ const selectionWriteTool = defineAgentTool({
 	...selectionOptions,
 	name: "test_select_write",
 });
-const approvalTool = defineAgentTool({
-	name: "test_approval",
+const confirmationTool = defineAgentTool({
+	name: "test_confirmation",
 	title: "save API note",
-	description: "A tool that opts in to approval",
+	description: "A tool that opts in to confirmation",
 	permissions: [],
-	requiresApproval: true,
+	requiresConfirmation: true,
 	input: z.object({}),
 	output: z.object({ done: z.boolean() }),
 	handler: writeHandler,
@@ -232,9 +232,9 @@ const testAgent = defineAgent({
 		web: { search: false, read: false },
 	},
 	tools: [
-		agentTools.content(),
+		agentTools.read(),
 		writeTool,
-		approvalTool,
+		confirmationTool,
 		readTool,
 		parallelTool,
 		selectionTool,
@@ -340,13 +340,13 @@ beforeEach(() => {
 
 const prepare = async (props?: {
 	routineId?: string;
-	approvalMode?: AgentApprovalMode;
+	confirmationMode?: AgentConfirmationMode;
 	text?: string;
 	agentKey?: string;
 }) => {
 	const conversation = await insertConversation(context, {
 		agentKey: props?.agentKey ?? testAgent.key,
-		approvalMode: props?.approvalMode,
+		confirmationMode: props?.confirmationMode,
 		userId,
 		routineId: props?.routineId,
 	});
@@ -679,8 +679,8 @@ describe("independent read batches", () => {
 		);
 	});
 
-	test("groups exact approvals, rejects forged decisions and never grants a future call", async () => {
-		const prepared = await prepare({ approvalMode: "confirm-all" });
+	test("groups exact confirmations, rejects forged decisions and never grants a future call", async () => {
+		const prepared = await prepare({ confirmationMode: "confirm-all" });
 		callTools([
 			parallelCall("a"),
 			parallelCall("b"),
@@ -695,23 +695,23 @@ describe("independent read batches", () => {
 		const widget = (await selectRun(prepared.runId))?.checkpoint?.pending
 			?.widget;
 		expect(widget).toMatchObject({
-			key: "lucid-tool-approval-batch",
+			key: "lucid-tool-confirmation-batch",
 			interaction: {
-				approvals: [
+				confirmations: [
 					{ toolCallId: "a", input: { id: "a" } },
 					{ toolCallId: "b", input: { id: "b" } },
 					{ toolCallId: "c", input: { id: "c" } },
 				],
 			},
 		});
-		for (const approvedToolCallIds of [["future"], ["a", "a"]]) {
+		for (const confirmedToolCallIds of [["future"], ["a", "a"]]) {
 			expect(
 				await executeRun(context, {
 					runId: prepared.runId,
 					answer: {
 						interactionId: id,
 						action: "submit",
-						response: { approvedToolCallIds },
+						response: { confirmedToolCallIds },
 						userId,
 					},
 				}),
@@ -723,7 +723,7 @@ describe("independent read batches", () => {
 				answer: {
 					interactionId: id,
 					action: "submit",
-					response: { approvedToolCallIds: ["a", "c"] },
+					response: { confirmedToolCallIds: ["a", "c"] },
 					userId,
 				},
 			}),
@@ -751,7 +751,7 @@ describe("independent read batches", () => {
 	});
 
 	test("preflight rejects invalid input and input-dependent permissions before asking", async () => {
-		const prepared = await prepare({ approvalMode: "confirm-all" });
+		const prepared = await prepare({ confirmationMode: "confirm-all" });
 		callTools([
 			{ id: "invalid", name: parallelTool.name, input: { id: 123 } },
 			parallelCall("restricted"),
@@ -768,14 +768,14 @@ describe("independent read batches", () => {
 				expect.objectContaining({ id: "restricted", status: "failed" }),
 			]),
 		);
-		expect(checkpoint?.pending?.widget.interaction.approval).toMatchObject({
+		expect(checkpoint?.pending?.widget.interaction.confirmation).toMatchObject({
 			input: { id: "valid" },
 		});
 	});
 
-	test("approval does not retain permissions revoked before execution", async () => {
+	test("confirmation does not retain permissions revoked before execution", async () => {
 		livePermissions = ["users:create"];
-		const prepared = await prepare({ approvalMode: "confirm-all" });
+		const prepared = await prepare({ confirmationMode: "confirm-all" });
 		callTools([parallelCall("restricted"), parallelCall("allowed")]);
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "waiting" },
@@ -788,7 +788,7 @@ describe("independent read batches", () => {
 				answer: {
 					interactionId: await interactionId(prepared.conversationId),
 					action: "submit",
-					response: { approvedToolCallIds: ["restricted", "allowed"] },
+					response: { confirmedToolCallIds: ["restricted", "allowed"] },
 					userId,
 				},
 			}),
@@ -1004,11 +1004,11 @@ describe("agent runner", () => {
 	});
 
 	test.each([
-		{ tool: approvalTool, override: undefined, waits: true },
-		{ tool: approvalTool, override: false, waits: false },
+		{ tool: confirmationTool, override: undefined, waits: true },
+		{ tool: confirmationTool, override: false, waits: false },
 		{ tool: writeTool, override: true, waits: true },
 		{ tool: writeTool, override: undefined, waits: false },
-	])("routine approval for $tool.name with override $override", async ({
+	])("routine confirmation for $tool.name with override $override", async ({
 		tool,
 		override,
 		waits,
@@ -1016,7 +1016,7 @@ describe("agent runner", () => {
 		const routine = await createRoutine(context, {
 			agentKey: testAgent.key,
 			userId,
-			name: "Approval policy",
+			name: "Confirmation policy",
 			instructions: "Write a note",
 			cron: "0 9 * * 1",
 			timezone: "UTC",
@@ -1024,7 +1024,7 @@ describe("agent runner", () => {
 			tools:
 				override === undefined
 					? {}
-					: { [tool.name]: { requiresApproval: override } },
+					: { [tool.name]: { requiresConfirmation: override } },
 		});
 		if (routine.error) throw routine.error;
 		expect(
@@ -1032,11 +1032,11 @@ describe("agent runner", () => {
 		).toEqual(
 			override === undefined
 				? {}
-				: { [tool.name]: { requiresApproval: override } },
+				: { [tool.name]: { requiresConfirmation: override } },
 		);
 		const prepared = await prepare({
 			routineId: routine.data.id,
-			approvalMode: "automatic",
+			confirmationMode: "automatic",
 		});
 		callTool({ id: "routine-policy", name: tool.name, input: {} });
 		finishRun({ outcome: "done", summary: "Written" });
@@ -1060,7 +1060,7 @@ describe("agent runner", () => {
 		expect(writeHandler).toHaveBeenCalledOnce();
 	});
 
-	test("routine settings apply to follow-ups and edits leave a pending approval intact", async () => {
+	test("routine settings apply to follow-ups and edits leave a pending confirmation intact", async () => {
 		const routine = await createRoutine(context, {
 			agentKey: testAgent.key,
 			userId,
@@ -1069,7 +1069,7 @@ describe("agent runner", () => {
 			cron: "0 9 * * 1",
 			timezone: "UTC",
 			enabled: false,
-			tools: { [writeTool.name]: { requiresApproval: true } },
+			tools: { [writeTool.name]: { requiresConfirmation: true } },
 		});
 		if (routine.error) throw routine.error;
 		const prepared = await prepare({ routineId: routine.data.id });
@@ -1087,14 +1087,14 @@ describe("agent runner", () => {
 			).error,
 		).toBeUndefined();
 		expect((await selectRun(prepared.runId))?.checkpoint?.routineTools).toEqual(
-			{ [writeTool.name]: { requiresApproval: true } },
+			{ [writeTool.name]: { requiresConfirmation: true } },
 		);
 		expect(
 			(
 				await updateConversation(context, {
 					id: prepared.conversationId,
 					userId,
-					approvalMode: "automatic",
+					confirmationMode: "automatic",
 				})
 			).error?.status,
 		).toBe(400);
@@ -1117,7 +1117,7 @@ describe("agent runner", () => {
 		});
 		if (followup.error) throw followup.error;
 		expect((await selectRun(followup.data.runId))?.checkpoint).toMatchObject({
-			approvalMode: "tool-defaults",
+			confirmationMode: "tool-defaults",
 			routineTools: {},
 		});
 		callTool({ id: "followup", name: writeTool.name, input: {} });
@@ -1137,7 +1137,7 @@ describe("agent runner", () => {
 			cron: "0 9 * * 1",
 			timezone: "UTC",
 			enabled: false,
-			tools: { [selectionTool.name]: { requiresApproval: false } },
+			tools: { [selectionTool.name]: { requiresConfirmation: false } },
 		});
 		if (routine.error) throw routine.error;
 		const prepared = await prepare({ routineId: routine.data.id });
@@ -1152,13 +1152,13 @@ describe("agent runner", () => {
 
 	test.each([
 		{ mode: "tool-defaults", tool: writeTool, waits: false },
-		{ mode: "tool-defaults", tool: approvalTool, waits: true },
-		{ mode: "automatic", tool: approvalTool, waits: false },
+		{ mode: "tool-defaults", tool: confirmationTool, waits: true },
+		{ mode: "automatic", tool: confirmationTool, waits: false },
 		{ mode: "confirm-all", tool: writeTool, waits: true },
 		{ mode: "confirm-all", tool: readTool, waits: true },
 	] as const)("$mode applies to $tool.name", async ({ mode, tool, waits }) => {
 		const handler = tool === readTool ? readHandler : writeHandler;
-		const prepared = await prepare({ approvalMode: mode });
+		const prepared = await prepare({ confirmationMode: mode });
 		callTool({ id: "policy", name: tool.name, input: {} });
 		reply("Done");
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
@@ -1181,11 +1181,11 @@ describe("agent runner", () => {
 	});
 
 	test("denial skips execution and a chat policy change only affects later runs", async () => {
-		const prepared = await prepare({ approvalMode: "confirm-all" });
+		const prepared = await prepare({ confirmationMode: "confirm-all" });
 		const AgentConversations = new AgentConversationsRepository(context.db);
 		await AgentConversations.updateSingle({
 			where: [{ key: "id", operator: "=", value: prepared.conversationId }],
-			data: { approval_mode: "automatic" },
+			data: { confirmation_mode: "automatic" },
 		});
 		callTool({ id: "denied", name: writeTool.name, input: {} });
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
@@ -1218,14 +1218,14 @@ describe("agent runner", () => {
 			requestId: randomUUID(),
 		});
 		if (next.error) throw next.error;
-		expect((await selectRun(next.data.runId))?.checkpoint?.approvalMode).toBe(
-			"automatic",
-		);
+		expect(
+			(await selectRun(next.data.runId))?.checkpoint?.confirmationMode,
+		).toBe("automatic");
 	});
 
 	test("only the person the run acts for can respond", async () => {
-		const prepared = await prepare({ approvalMode: "tool-defaults" });
-		callTool({ id: "approval", name: approvalTool.name, input: {} });
+		const prepared = await prepare({ confirmationMode: "tool-defaults" });
+		callTool({ id: "confirmation", name: confirmationTool.name, input: {} });
 		await executeRun(context, { runId: prepared.runId });
 		const otherUserId = (
 			await context.db.kysely
@@ -1253,16 +1253,16 @@ describe("agent runner", () => {
 		expect((await selectRun(prepared.runId))?.status).toBe("waiting");
 	});
 
-	test("an interactive write collects validated input and approval in one submission", async () => {
+	test("an interactive write collects validated input and confirmation in one submission", async () => {
 		prepareSelection.mockClear();
 		selectedHandler.mockClear();
-		const prepared = await prepare({ approvalMode: "confirm-all" });
+		const prepared = await prepare({ confirmationMode: "confirm-all" });
 		callTool({ id: "combined", name: selectionWriteTool.name, input: {} });
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "waiting" },
 		});
 		const pending = (await selectRun(prepared.runId))?.checkpoint?.pending;
-		expect(pending?.widget.interaction.approval?.toolName).toBe(
+		expect(pending?.widget.interaction.confirmation?.toolName).toBe(
 			selectionWriteTool.name,
 		);
 		const id = await interactionId(prepared.conversationId);
@@ -1736,7 +1736,7 @@ describe("agent runner", () => {
 				agentKey: testAgent.key,
 				userId,
 				name: "Automatic write",
-				tools: { [approvalTool.name]: { requiresApproval: false } },
+				tools: { [confirmationTool.name]: { requiresConfirmation: false } },
 				instructions: "Write a note.",
 				cron: "0 9 * * 1",
 				timezone: "UTC",
@@ -1747,11 +1747,11 @@ describe("agent runner", () => {
 		}
 		const prepared = await prepare({
 			routineId,
-			approvalMode: mode === "routine" ? "confirm-all" : "automatic",
+			confirmationMode: mode === "routine" ? "confirm-all" : "automatic",
 		});
 		callTool({
 			id: "automatic",
-			name: mode === "routine" ? approvalTool.name : writeTool.name,
+			name: mode === "routine" ? confirmationTool.name : writeTool.name,
 			input: {},
 		});
 		if (mode === "routine") {
@@ -3703,9 +3703,13 @@ describe("runs acting as the system", () => {
 		return { runId: run.data.runId, conversationId: conversation.data.id };
 	};
 
-	test("a manager approves a system write without lending it their identity", async () => {
+	test("a manager confirms a system write without lending it their identity", async () => {
 		const prepared = await prepareSystem();
-		callTool({ id: "system-approval", name: approvalTool.name, input: {} });
+		callTool({
+			id: "system-confirmation",
+			name: confirmationTool.name,
+			input: {},
+		});
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "waiting" },
 		});
@@ -4011,14 +4015,14 @@ const webCalls = () =>
 		options.body?.feature?.key.startsWith("web."),
 	);
 
-test("confirm actions asks before web research and runs it once approved", async () => {
+test("confirm actions asks before web research and runs it once confirmed", async () => {
 	const prepared = await prepare({
 		agentKey: webAgent.key,
-		approvalMode: "confirm-all",
+		confirmationMode: "confirm-all",
 	});
 	remoteRequest.mockResolvedValue(webResponse("search", { results: [] }));
 	callTool({
-		id: "approved-search",
+		id: "confirmed-search",
 		name: "web_search",
 		input: { query: "Example docs" },
 	});
@@ -4044,7 +4048,7 @@ test("confirm actions asks before web research and runs it once approved", async
 test("reads only pages whose URL already appeared in the chat", async () => {
 	const prepared = await prepare({
 		agentKey: webAgent.key,
-		approvalMode: "automatic",
+		confirmationMode: "automatic",
 		text: "Summarise example.com/about for me.",
 	});
 	const page = {
@@ -4140,7 +4144,7 @@ test("a run stops before calling a model that accepts fewer tools than the agent
 
 test("confirm-all asks before media analysis starts", async () => {
 	const prepared = await prepare({
-		approvalMode: "confirm-all",
+		confirmationMode: "confirm-all",
 		agentKey: webAgent.key,
 	});
 	callTool({
@@ -4163,7 +4167,7 @@ test("confirm-all asks before media analysis starts", async () => {
 		expect.objectContaining({
 			type: "widget",
 			interaction: expect.objectContaining({
-				approval: {
+				confirmation: {
 					toolName: "media_analyze",
 					input: {
 						mediaId: 1,

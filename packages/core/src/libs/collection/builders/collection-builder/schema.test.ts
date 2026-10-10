@@ -216,7 +216,7 @@ test("collection workflow features validates stages, targets and palette", async
 			},
 		},
 		publishing: {
-			targets: [
+			environments: [
 				{
 					key: "production",
 					label: copy("admin:tests.environments.production.name", {
@@ -456,7 +456,7 @@ test("collection environment version mappings passes schema validation", async (
 				},
 			},
 			publishing: {
-				targets: [
+				environments: [
 					{
 						key: "staging",
 						label: copy("admin:tests.environments.staging.name", {
@@ -490,7 +490,7 @@ test("collection environment requires features validates environment references"
 			},
 		},
 		publishing: {
-			targets: [
+			environments: [
 				{
 					key: "staging",
 					label: copy("admin:tests.environments.staging.name", {
@@ -518,7 +518,7 @@ test("collection environment requires features validates environment references"
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
 			publishing: {
-				targets: [
+				environments: [
 					{
 						key: "production",
 						label: copy("admin:tests.environments.production.name", {
@@ -537,7 +537,7 @@ test("collection environment requires features validates environment references"
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
 			publishing: {
-				targets: [
+				environments: [
 					{
 						key: "production",
 						label: copy("admin:tests.environments.production.name", {

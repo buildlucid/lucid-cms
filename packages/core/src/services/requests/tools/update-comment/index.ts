@@ -19,7 +19,7 @@ export const updateRequestCommentAgentTool = (
 		name,
 		title: copy("admin:core.tools.requests_update_comment.title"),
 		description:
-			"Resolve, close, reopen, edit or remove a comment you wrote on a review request. Comments by people and other agents can't be changed: answer them with requests_reply instead.",
+			"Resolve, close, reopen, edit or remove a comment you wrote on a request. Comments by people and other agents can't be changed: answer them with requests_reply instead.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],

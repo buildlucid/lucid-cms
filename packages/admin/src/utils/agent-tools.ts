@@ -29,10 +29,10 @@ export const registerReferencesTool =
 export const removeReferenceTool =
 	"lucid_remove_reference" satisfies AgentRunnerToolName;
 export const questionWidget = "lucid-question" satisfies AgentCoreWidgetKey;
-export const approvalWidget =
-	"lucid-tool-approval" satisfies AgentCoreWidgetKey;
-export const approvalBatchWidget =
-	"lucid-tool-approval-batch" satisfies AgentCoreWidgetKey;
+export const confirmationWidget =
+	"lucid-tool-confirmation" satisfies AgentCoreWidgetKey;
+export const confirmationBatchWidget =
+	"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey;
 export const mediaSelectWidget =
 	"lucid-media-select" satisfies AgentCoreWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;

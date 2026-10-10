@@ -1,4 +1,4 @@
-import type { AgentApprovalMode } from "@types";
+import type { AgentConfirmationMode } from "@types";
 import classnames from "classnames";
 import {
 	TbOutlineChevronDown,
@@ -14,14 +14,14 @@ const modes = [
 	"confirm-all",
 	"tool-defaults",
 	"automatic",
-] as const satisfies readonly AgentApprovalMode[];
+] as const satisfies readonly AgentConfirmationMode[];
 
-/** Chooses the approval policy for the conversation's next run. A run keeps the policy it started with. */
-const AgentApprovalPicker: Component<{
-	value: AgentApprovalMode;
+/** Chooses the next run's confirmation policy without changing any run that has already started. */
+const AgentConfirmationPicker: Component<{
+	value: AgentConfirmationMode;
 	disabled?: boolean;
 	routine?: { onEdit: () => void; disabled: boolean };
-	onChange: (mode: AgentApprovalMode) => void;
+	onChange: (mode: AgentConfirmationMode) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -35,13 +35,13 @@ const AgentApprovalPicker: Component<{
 							composerTriggerClasses,
 							"min-w-0 max-w-48 px-2 disabled:opacity-50",
 						)}
-						aria-label={T()("agent.approval.mode.label")}
-						title={T()("agent.approval.mode.hint")}
+						aria-label={T()("agent.confirmation.mode.label")}
+						title={T()("agent.confirmation.mode.hint")}
 						disabled={props.disabled}
 					>
 						<TbOutlineShieldHalf size={11} class="shrink-0" />
 						<span class="truncate">
-							{T()(`agent.approval.mode.${props.value}`)}
+							{T()(`agent.confirmation.mode.${props.value}`)}
 						</span>
 						<TbOutlineChevronDown size={9} class="shrink-0" />
 					</Menu.Trigger>
@@ -50,15 +50,15 @@ const AgentApprovalPicker: Component<{
 							{(mode) => (
 								<Menu.Item
 									class="[&>span]:line-clamp-none"
-									textValue={T()(`agent.approval.mode.${mode}`)}
+									textValue={T()(`agent.confirmation.mode.${mode}`)}
 									selected={props.value === mode}
 									onSelect={() => props.onChange(mode)}
 								>
 									<span class="block">
-										{T()(`agent.approval.mode.${mode}`)}
+										{T()(`agent.confirmation.mode.${mode}`)}
 									</span>
 									<span class="block text-xs text-muted whitespace-normal">
-										{T()(`agent.approval.mode.${mode}.description`)}
+										{T()(`agent.confirmation.mode.${mode}.description`)}
 									</span>
 								</Menu.Item>
 							)}
@@ -74,14 +74,14 @@ const AgentApprovalPicker: Component<{
 						composerTriggerClasses,
 						"min-w-0 max-w-48 px-2 disabled:opacity-50",
 					)}
-					title={T()("agent.routine.approvals.open")}
-					aria-label={T()("agent.routine.approvals.open")}
+					title={T()("agent.routine.confirmations.open")}
+					aria-label={T()("agent.routine.confirmations.open")}
 					disabled={routine().disabled}
 					onClick={() => routine().onEdit()}
 				>
 					<TbOutlineShieldHalf size={11} class="shrink-0" />
 					<span class="truncate">
-						{T()("agent.approval.mode.tool-defaults")}
+						{T()("agent.confirmation.mode.tool-defaults")}
 					</span>
 					<TbOutlineChevronRight size={9} class="shrink-0" />
 				</button>
@@ -90,4 +90,4 @@ const AgentApprovalPicker: Component<{
 	);
 };
 
-export default AgentApprovalPicker;
+export default AgentConfirmationPicker;

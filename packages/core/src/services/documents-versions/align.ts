@@ -47,8 +47,8 @@ const align: ServiceFn<
 			if (updateContextRes.error) return updateContextRes;
 
 			const allowedSource =
-				updateContextRes.data.collection.getData.publishing.targets.some(
-					(target) => target.key === data.source,
+				updateContextRes.data.collection.getData.publishing.environments.some(
+					(environment) => environment.key === data.source,
 				) ||
 				(updateContextRes.data.versionType ===
 					constants.collectionBuilder.publishing.proposalVersionType &&

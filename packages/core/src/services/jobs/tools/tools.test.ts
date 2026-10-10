@@ -93,7 +93,7 @@ test("finds jobs by name and reads one by its public ID with its stack trace", a
 	});
 	assert(enqueued.data, JSON.stringify(enqueued.error));
 
-	const found = await callAgent(agentTools.findJobs(), {
+	const found = await callAgent(agentTools.jobs.find(), {
 		query: { filter: [{ key: "jobName", value: tidyJob.name }] },
 	});
 	assert(found.type === "success", JSON.stringify(found));
@@ -102,7 +102,7 @@ test("finds jobs by name and reads one by its public ID with its stack trace", a
 	expect(jobs[0]).not.toHaveProperty("queueAdapterKey");
 	expect(jobs[0]).not.toHaveProperty("errorStack");
 
-	const read = await callAgent(agentTools.getJob(), {
+	const read = await callAgent(agentTools.jobs.get(), {
 		jobId: enqueued.data.jobId,
 	});
 	assert(read.type === "success", JSON.stringify(read));
@@ -113,18 +113,18 @@ test("finds jobs by name and reads one by its public ID with its stack trace", a
 	});
 
 	expect(
-		await callAgent(agentTools.getJob(), { jobId: randomUUID() }),
+		await callAgent(agentTools.jobs.get(), { jobId: randomUUID() }),
 	).toMatchObject({ type: "failed" });
-	expect(await callAgent(agentTools.getJob(), { jobId: "3b? " })).toMatchObject(
-		{ type: "invalid-input" },
-	);
-	expect(await callAgent(agentTools.findJobs(), {}, [])).toMatchObject({
+	expect(
+		await callAgent(agentTools.jobs.get(), { jobId: "3b? " }),
+	).toMatchObject({ type: "invalid-input" });
+	expect(await callAgent(agentTools.jobs.find(), {}, [])).toMatchObject({
 		type: "forbidden",
 	});
 });
 
-test("lists schedules and runs one early after approval, attributing the job to the person", async () => {
-	const listed = await callAgent(agentTools.listJobSchedules(), {});
+test("lists schedules and runs one early after confirmation, attributing the job to the person", async () => {
+	const listed = await callAgent(agentTools.jobs.listSchedules(), {});
 	assert(listed.type === "success", JSON.stringify(listed));
 	const schedules = schedulesOutputSchema.parse(listed.data.output).data;
 	expect(schedules).toEqual([
@@ -135,8 +135,8 @@ test("lists schedules and runs one early after approval, attributing the job to 
 		}),
 	]);
 
-	const run = agentTools.runJobSchedule();
-	expect(run.requiresApproval).toBe(true);
+	const run = agentTools.jobs.runSchedule();
+	expect(run.requiresConfirmation).toBe(true);
 	const ran = await callAgent(run, { scheduleKey: `${tidyJob.name}/nightly` }, [
 		Permissions.JobsRun,
 	]);
@@ -145,7 +145,7 @@ test("lists schedules and runs one early after approval, attributing the job to 
 		job: { jobId: expect.any(String), name: tidyJob.name, version: 1 },
 	});
 
-	const read = await callAgent(agentTools.getJob(), {
+	const read = await callAgent(agentTools.jobs.get(), {
 		jobId: ran.data.output.job.jobId,
 	});
 	assert(read.type === "success", JSON.stringify(read));

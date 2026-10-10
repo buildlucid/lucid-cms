@@ -80,7 +80,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("tool_name", adapter.getDataType("text"), (col) =>
 				col.notNull(),
 			)
-			.addColumn("requires_approval", adapter.getDataType("boolean"))
+			.addColumn("requires_confirmation", adapter.getDataType("boolean"))
 			.addPrimaryKeyConstraint("pk_agent_routine_tools", [
 				"routine_id",
 				"tool_name",
@@ -90,7 +90,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 		await db.schema
 			.createTable("lucid_agent_conversations")
 			.addColumn("kind", adapter.getDataType("text"), (col) => col.notNull())
-			.addColumn("approval_mode", adapter.getDataType("text"), (col) =>
+			.addColumn("confirmation_mode", adapter.getDataType("text"), (col) =>
 				col.notNull().defaultTo("tool-defaults"),
 			)
 			.addColumn("model_selection", adapter.getDataType("json"))

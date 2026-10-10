@@ -15,7 +15,7 @@ export const reviewNoteTool = defineAgentTool({
 	input: z.object({ title: z.string().max(100), body: z.string().max(1000) }),
 	output: z.object({ saved: z.boolean(), title: z.string(), body: z.string() }),
 	permissions: [],
-	requiresApproval: true,
+	requiresConfirmation: true,
 	interaction: {
 		key: "playground-note-editor",
 		version: 1,

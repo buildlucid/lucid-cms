@@ -12,14 +12,12 @@ import getMcpActor from "../../../requests/tools/helpers/get-mcp-actor.js";
 import findUsers from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-const description =
-	"Find people who use the CMS, eg. to fill a user field, mention someone in a comment or choose who reviews a request. Call it without a query to list everyone, and search by name to narrow that down. Before changing a request's reviewers, find who can approve it with canReview.";
-
 export const findUsersMcpTool = (options: CollectionToolOptions = {}) =>
 	defineMcpTool({
 		name: "users_find",
 		title: copy("admin:core.tools.users_find.title"),
-		description,
+		description:
+			"Find people who use the CMS, eg. to see who a user field or request names. Call it without a query to list everyone, and search by name to narrow that down. Find who can approve a request with canReview.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [ExternalScopes.UsersList],
@@ -44,7 +42,8 @@ export const findUsersAgentTool = (options: CollectionToolOptions = {}) =>
 	defineAgentTool({
 		name: "users_find",
 		title: copy("admin:core.tools.users_find.title"),
-		description,
+		description:
+			"Find people who use the CMS, eg. to fill a user field, mention someone in a comment or choose who reviews a request. Call it without a query to list everyone, and search by name to narrow that down. Before changing a request's reviewers, find who can approve it with canReview.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

@@ -20,7 +20,7 @@ const readDocumentContent = async (
 	input: {
 		collectionKey: string;
 		id: number;
-		/** Reads this version type, eg. a publishing target. Defaults to latest. */
+		/** Version type to read (eg. an environment), defaulting to latest. */
 		version?: string;
 		/** Reads this version, eg. a request proposal, instead of a version type. */
 		versionId?: number;

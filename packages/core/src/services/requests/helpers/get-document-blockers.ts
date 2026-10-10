@@ -60,7 +60,7 @@ const getDocumentBlockers = (
 		if (approved && target.approved_version_id !== currentVersionId) {
 			blockers.push({ code: "target_changed", target: target.target });
 		} else if (!approved && review.changedSinceCreation && !review.reviewed) {
-			blockers.push({ code: "review_required", target: target.target });
+			blockers.push({ code: "acknowledge_required", target: target.target });
 		}
 
 		if (
@@ -78,7 +78,7 @@ const getDocumentBlockers = (
 		const config =
 			request.type === "unpublish"
 				? undefined
-				: state.collection.getData.publishing.targets.find(
+				: state.collection.getData.publishing.environments.find(
 						(environment) => environment.key === target.target,
 					);
 		for (const required of config?.requires ?? []) {

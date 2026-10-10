@@ -18,7 +18,7 @@ export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
 		name,
 		title: copy("admin:core.tools.requests_reply.title"),
 		description:
-			"Reply to a comment on a review request, using a comment ID from requests_get. Replies join its thread and don't block approval. To raise something new, use requests_comment.",
+			"Reply to a comment on a request, using a comment ID from requests_get. Replies join its thread and don't block approval. To raise something new, use requests_comment.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],
@@ -26,7 +26,9 @@ export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
 			const result = await serviceWrapper(commentOnRequest, {
 				transaction: true,
 			})(context, {
-				...input,
+				requestId: input.requestId,
+				body: input.body,
+				replyTo: input.commentId,
 				actor: execution.actor,
 				allowedCollectionKeys: getPermittedCollectionKeys(
 					context.config,

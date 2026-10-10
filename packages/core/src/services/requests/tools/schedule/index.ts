@@ -17,11 +17,11 @@ export const scheduleRequestAgentTool = (options: CollectionToolOptions = {}) =>
 		name,
 		title: copy("admin:core.tools.requests_schedule.title"),
 		description:
-			"Schedule when a review request completes once it is approved, or pass at as null to remove the schedule. Changes go live at that time, so only schedule requests the person asked you to.",
+			"Schedule when a request completes once it is approved, or pass at as null to remove the schedule. Changes go live at that time, so only schedule requests the person asked you to.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],
-		requiresApproval: true,
+		requiresConfirmation: true,
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(scheduleRequest, {
 				transaction: true,

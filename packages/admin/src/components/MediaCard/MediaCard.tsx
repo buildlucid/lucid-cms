@@ -34,7 +34,7 @@ interface MediaCardProps {
 			| "createShareLink"
 			| "deleteAllShareLinks"
 			| "download"
-			| "removeOwnership"
+			| "addToLibrary"
 		>
 	>;
 	contentLocale?: string;
@@ -83,7 +83,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			| "createShareLink"
 			| "deleteAllShareLinks"
 			| "download"
-			| "removeOwnership",
+			| "addToLibrary",
 	) => {
 		props.rowTarget.setTargetId(props.media.id);
 		props.rowTarget.setTrigger(trigger, true);
@@ -286,10 +286,10 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			show: !props.showingDeleted?.() && props.media.status === "ready",
 		},
 		{
-			label: T()("media.ownership.remove.action"),
+			label: T()("media.library.add.action"),
 			type: "button",
 			icon: "user",
-			onClick: () => openMediaAction("removeOwnership"),
+			onClick: () => openMediaAction("addToLibrary"),
 			permission: hasCreatePermission(),
 			show: isOwn() && !props.showingDeleted?.(),
 			variant: "danger",

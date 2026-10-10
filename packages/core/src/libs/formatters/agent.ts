@@ -86,7 +86,7 @@ const formatDefinitions = (props: {
 					? agent.tools.map((tool) => ({
 							name: tool.name,
 							title: withDefaultMessage(tool.title),
-							requiresApproval: tool.requiresApproval,
+							requiresConfirmation: tool.requiresConfirmation,
 							interactive: Boolean(tool.interaction),
 							permissions: [...tool.permissions],
 						}))
@@ -148,7 +148,7 @@ const formatConversation = (props: {
 	compactions?: Pick<Select<LucidAgentCompactions>, "id" | "created_at">[];
 }): AgentConversation => ({
 	id: props.conversation.id,
-	approvalMode: props.conversation.approval_mode,
+	confirmationMode: props.conversation.confirmation_mode,
 	modelSelection: props.conversation.model_selection,
 	queuePaused: Boolean(props.conversation.queue_paused),
 	context: formatContext({

@@ -9,7 +9,7 @@ const environmentKeySchema = z
 	.max(50)
 	.regex(/^[a-z0-9-_]+$/, {
 		message:
-			"Publishing target key must contain only lowercase letters, numbers, hyphens and underscores",
+			"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
 	});
 
 const reviewEnvironmentsSchema = z.union([
@@ -148,7 +148,7 @@ const CollectionConfigSchema = z
 			.optional(),
 		publishing: z
 			.strictObject({
-				targets: z
+				environments: z
 					.array(
 						z.strictObject({
 							key: environmentKeySchema.refine(
@@ -157,7 +157,7 @@ const CollectionConfigSchema = z
 										val,
 									),
 								{
-									message: `Publishing target key cannot be one of the protected publishing targets: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
+									message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
 								},
 							),
 							label: adminCopyInputSchema,
@@ -238,41 +238,42 @@ const CollectionConfigSchema = z
 	})
 	.superRefine((data, ctx) => {
 		const environmentKeys = new Set(
-			data.publishing?.targets?.map((environment) => environment.key) ?? [],
+			data.publishing?.environments?.map((environment) => environment.key) ??
+				[],
 		);
 
 		for (const [environmentIndex, environment] of (
-			data.publishing?.targets ?? []
+			data.publishing?.environments ?? []
 		).entries()) {
-			for (const [targetIndex, target] of (
+			for (const [requiredIndex, required] of (
 				environment.requires ?? []
 			).entries()) {
-				if (target === environment.key) {
+				if (required === environment.key) {
 					ctx.addIssue({
 						code: "custom",
 						path: [
 							"publishing",
-							"targets",
+							"environments",
 							environmentIndex,
 							"requires",
-							targetIndex,
+							requiredIndex,
 						],
-						message: `Publishing target "${environment.key}" cannot require itself`,
+						message: `Environment "${environment.key}" cannot require itself`,
 					});
 					continue;
 				}
 
-				if (environmentKeys.has(target)) continue;
+				if (environmentKeys.has(required)) continue;
 				ctx.addIssue({
 					code: "custom",
 					path: [
 						"publishing",
-						"targets",
+						"environments",
 						environmentIndex,
 						"requires",
-						targetIndex,
+						requiredIndex,
 					],
-					message: `Publishing target requires target "${target}" must reference a configured publishing target`,
+					message: `Environment requirement "${required}" must reference a configured environment`,
 				});
 			}
 		}
@@ -280,12 +281,12 @@ const CollectionConfigSchema = z
 		for (const key of ["publish", "unpublish"] as const) {
 			const environments = review?.[key];
 			if (environments === undefined || environments === true) continue;
-			for (const [targetIndex, target] of environments.entries()) {
-				if (environmentKeys.has(target)) continue;
+			for (const [environmentIndex, environment] of environments.entries()) {
+				if (environmentKeys.has(environment)) continue;
 				ctx.addIssue({
 					code: "custom",
-					path: ["publishing", "review", key, targetIndex],
-					message: `Review ${key} environment "${target}" must reference a configured publishing target`,
+					path: ["publishing", "review", key, environmentIndex],
+					message: `Review ${key} environment "${environment}" must reference a configured environment`,
 				});
 			}
 		}
@@ -350,7 +351,7 @@ const CollectionConfigSchema = z
 						"targets",
 						targetIndex,
 					],
-					message: `Workflow stage target "${target}" must reference a configured publishing target`,
+					message: `Workflow stage target "${target}" must be latest or a configured environment`,
 				});
 			}
 

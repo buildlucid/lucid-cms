@@ -142,17 +142,19 @@ export const DocumentsList: Component<{
 			: [],
 	);
 	const environmentHeadColumns = createMemo(() =>
-		(props.state.collection?.publishing.targets ?? []).map((environment) => ({
-			label:
-				helpers.getLocaleValue({
-					value: environment.label,
-					fallback: environment.key,
-				}) || environment.key,
-			key: `envStatus.${environment.key}`,
-			icon: <TbOutlineCloudUpload />,
-			minWidth: 140,
-			sortable: false,
-		})),
+		(props.state.collection?.publishing.environments ?? []).map(
+			(environment) => ({
+				label:
+					helpers.getLocaleValue({
+						value: environment.label,
+						fallback: environment.key,
+					}) || environment.key,
+				key: `envStatus.${environment.key}`,
+				icon: <TbOutlineCloudUpload />,
+				minWidth: 140,
+				sortable: false,
+			}),
+		),
 	);
 	const documentQueryEnabled = createMemo(
 		() =>

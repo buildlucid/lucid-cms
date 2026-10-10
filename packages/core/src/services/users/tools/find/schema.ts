@@ -74,7 +74,7 @@ export const outputSchema = z.object({
 		userSchema.extend({
 			id: z.number().meta({
 				description:
-					"User ID for user fields, requests_update reviewers and mentions.",
+					"User ID, as user fields, request reviewers and mentions use it.",
 			}),
 			status: z.enum(["joined", "invited", "locked"]).optional().meta({
 				description:

@@ -227,7 +227,9 @@ export function useDocumentUIState(props: {
 
 		const isEnvironment = props
 			.collection()
-			?.publishing.targets.some((environment) => environment.key === version);
+			?.publishing.environments.some(
+				(environment) => environment.key === version,
+			);
 		return isEnvironment && props.document()?.versions[version]
 			? version
 			: undefined;
@@ -292,8 +294,9 @@ export function useDocumentUIState(props: {
 
 		const environmentPermission = props
 			.collection()
-			?.publishing.targets.find((environment) => environment.key === target)
-			?.permissions.publish;
+			?.publishing.environments.find(
+				(environment) => environment.key === target,
+			)?.permissions.publish;
 
 		const permission =
 			target !== null

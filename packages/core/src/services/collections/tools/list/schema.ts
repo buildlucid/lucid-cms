@@ -31,9 +31,9 @@ export const outputSchema = z.object({
 					.array(z.string())
 					.meta({ description: "Fields used to identify documents in lists." }),
 				localization: collectionLocalizationSchema,
-				publishingTargetCount: z
+				environmentCount: z
 					.number()
-					.meta({ description: "Number of configured publishing targets." }),
+					.meta({ description: "Number of configured environments." }),
 			}),
 		)
 		.meta({ description: "Readable collection summaries for this page." }),

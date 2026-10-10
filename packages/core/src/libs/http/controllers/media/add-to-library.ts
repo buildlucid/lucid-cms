@@ -15,34 +15,34 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const removeOwnershipController = factory.createHandlers(
+const addToLibraryController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Removes your ownership of personal media, such as an agent chat upload, so it joins the shared media library.",
+			"Adds your personal media, such as an agent chat upload, to the shared media library.",
 		tags: ["media"],
-		summary: "Remove Media Ownership",
+		summary: "Add Media to Library",
 		responses: openAPI.responses({
 			noProperties: true,
 		}),
 		parameters: openAPI.parameters({
-			params: controllerSchemas.removeOwnership.params,
+			params: controllerSchemas.addToLibrary.params,
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: openAPI.requestBody(controllerSchemas.removeOwnership.body),
+		requestBody: openAPI.requestBody(controllerSchemas.addToLibrary.body),
 	}),
 	validateCSRF,
 	authenticate(),
 	permissions([Permissions.MediaCreate]),
-	validate("param", controllerSchemas.removeOwnership.params),
-	validate("json", controllerSchemas.removeOwnership.body),
+	validate("param", controllerSchemas.addToLibrary.params),
+	validate("json", controllerSchemas.addToLibrary.body),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 		const context = createServiceContext(c);
 
-		const moved = await serviceWrapper(mediaServices.removeOwnership, {
+		const moved = await serviceWrapper(mediaServices.addToLibrary, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -62,4 +62,4 @@ const removeOwnershipController = factory.createHandlers(
 	},
 );
 
-export default removeOwnershipController;
+export default addToLibraryController;

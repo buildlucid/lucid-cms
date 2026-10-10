@@ -232,7 +232,9 @@ class CollectionBuilder<
 	};
 	#resolveReviewEnvironments = (environments?: string[] | true): string[] =>
 		environments === true
-			? (this.config.publishing?.targets ?? []).map((target) => target.key)
+			? (this.config.publishing?.environments ?? []).map(
+					(environment) => environment.key,
+				)
 			: [...(environments ?? [])];
 	// ------------------------------------
 	// Getters
@@ -282,12 +284,12 @@ class CollectionBuilder<
 			publishing: {
 				scheduling:
 					publishing?.scheduling ?? constants.collectionBuilder.scheduling,
-				targets:
-					publishing?.targets?.map((target) => ({
-						...target,
-						label: normalizeCopy(target.label),
-						requires: [...(target.requires ?? [])],
-						collectionVersions: { ...target.collectionVersions },
+				environments:
+					publishing?.environments?.map((environment) => ({
+						...environment,
+						label: normalizeCopy(environment.label),
+						requires: [...(environment.requires ?? [])],
+						collectionVersions: { ...environment.collectionVersions },
 					})) ?? [],
 				review: review
 					? {

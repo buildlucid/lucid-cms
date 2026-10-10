@@ -36,7 +36,7 @@ test("orders completed calls within their turn without moving earlier tool histo
 	const second = { id: "second", name: "read", input: {} };
 	const checkpoint: Checkpoint = {
 		version: 1,
-		approvalMode: "confirm-all",
+		confirmationMode: "confirm-all",
 		nudges: 0,
 		requestId: randomUUID(),
 		messageId,
@@ -106,7 +106,7 @@ test("a call settled without a summary keeps the one it had while running", () =
 	const call = { id: "write", name: "write", input: {} };
 	const checkpoint: Checkpoint = {
 		version: 1,
-		approvalMode: "confirm-all",
+		confirmationMode: "confirm-all",
 		nudges: 0,
 		requestId: randomUUID(),
 		messageId,

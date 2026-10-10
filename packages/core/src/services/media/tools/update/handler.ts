@@ -1,5 +1,7 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
+import { Permissions } from "../../../../libs/permission/definitions.js";
+import hasPermission from "../../../../libs/permission/has-permission.js";
 import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
 import type { AgentToolAuthority } from "../../../../libs/tools/types.js";
 import type {
@@ -56,6 +58,21 @@ const updateMedia: ServiceFn<
 	if (mediaRes.error) return mediaRes;
 
 	const media = mediaRes.data;
+	//* personal media belongs to the person, so only library media needs the update permission
+	if (
+		media.ownership.type === "library" &&
+		!hasPermission(props.authority, Permissions.MediaUpdate)
+	) {
+		return {
+			error: {
+				type: "basic",
+				status: 403,
+				message: copy("server:core.permissions.denied"),
+			},
+			data: undefined,
+		};
+	}
+
 	const unsupported = typedFields.find(
 		({ field, types }) =>
 			input[field] !== undefined && !types.includes(media.type),
@@ -134,7 +151,7 @@ const updateMedia: ServiceFn<
 		error: undefined,
 		data: {
 			output: {
-				data: formatMediaItem(currentRes.data, localeRes.data),
+				media: formatMediaItem(currentRes.data, localeRes.data),
 				meta: { contentLocale: localeRes.data },
 			},
 		},

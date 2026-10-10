@@ -56,7 +56,7 @@ const acknowledge: ServiceFn<
 				document,
 				state: documentState,
 			}).flatMap((blocker) =>
-				blocker.code === "review_required" && blocker.target
+				blocker.code === "acknowledge_required" && blocker.target
 					? [
 							{
 								collectionKey: document.collection_key,

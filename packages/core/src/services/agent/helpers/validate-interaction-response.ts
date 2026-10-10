@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import {
-	approvalBatchResponseSchema,
+	confirmationBatchResponseSchema,
 	type InteractionAnswer,
 	type PendingInteraction,
 	questionResponseSchema,
@@ -69,19 +69,19 @@ const validateInteractionResponse: ServiceFn<
 			},
 		};
 	}
-	if (pending.widget.key === widgets.approval) {
+	if (pending.widget.key === widgets.confirmation) {
 		return { error: undefined, data: { action: "submit", response: {} } };
 	}
-	if (pending.widget.key === widgets.approvalBatch) {
-		const parsed = approvalBatchResponseSchema.safeParse(props.response);
-		const ids = parsed.data?.approvedToolCallIds ?? [];
+	if (pending.widget.key === widgets.confirmationBatch) {
+		const parsed = confirmationBatchResponseSchema.safeParse(props.response);
+		const ids = parsed.data?.confirmedToolCallIds ?? [];
 		const offered = new Set(
-			pending.widget.interaction.approvals?.map(
-				(approval) => approval.toolCallId,
+			pending.widget.interaction.confirmations?.map(
+				(confirmation) => confirmation.toolCallId,
 			),
 		);
 
-		//* each approved call must be one this widget offered, listed once
+		//* each confirmed call must be one this widget offered, listed once
 		const valid =
 			parsed.success &&
 			offered.size > 0 &&
@@ -100,7 +100,7 @@ const validateInteractionResponse: ServiceFn<
 
 		return {
 			error: undefined,
-			data: { action: "submit", response: { approvedToolCallIds: ids } },
+			data: { action: "submit", response: { confirmedToolCallIds: ids } },
 		};
 	}
 

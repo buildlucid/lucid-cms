@@ -150,21 +150,23 @@ const formatSingle = (props: {
 				)
 			: [],
 		publishing: {
-			targets: collectionData.publishing.targets.map((environment) => ({
-				key: environment.key,
-				label: environment.label,
-				requires: environment.requires,
-				permissions: {
-					publish: resolveCollectionPermission({
-						collection: props.collection,
-						action: "publish",
-					}),
-					review: resolveCollectionPermission({
-						collection: props.collection,
-						action: "review",
-					}),
-				},
-			})),
+			environments: collectionData.publishing.environments.map(
+				(environment) => ({
+					key: environment.key,
+					label: environment.label,
+					requires: environment.requires,
+					permissions: {
+						publish: resolveCollectionPermission({
+							collection: props.collection,
+							action: "publish",
+						}),
+						review: resolveCollectionPermission({
+							collection: props.collection,
+							action: "review",
+						}),
+					},
+				}),
+			),
 			review: collectionData.publishing.review,
 			workflow: collectionData.publishing.workflow,
 			scheduling: collectionData.publishing.scheduling,

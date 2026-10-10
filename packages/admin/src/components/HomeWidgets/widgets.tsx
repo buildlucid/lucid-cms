@@ -61,7 +61,7 @@ const builtInWidgets: HomeWidget[] = [
 			can(Permissions.RequestsRead) &&
 			(context.collections ?? []).some(
 				(collection) =>
-					(collection.publishing.targets.length > 0 &&
+					(collection.publishing.environments.length > 0 &&
 						userStore.get.hasPermission([collection.permissions.read]).all) ||
 					(collection.mode === "multiple" &&
 						userStore.get.hasPermission([

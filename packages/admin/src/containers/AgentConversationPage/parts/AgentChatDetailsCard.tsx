@@ -60,8 +60,10 @@ const AgentChatDetailsCard: Component<{
 				<AgentCardDetail label={T()("agent.chat.details.agent")}>
 					{getAgentName(props.conversation.agentKey)}
 				</AgentCardDetail>
-				<AgentCardDetail label={T()("agent.approval.mode.label")}>
-					{T()(`agent.approval.mode.${props.conversation.approvalMode}`)}
+				<AgentCardDetail label={T()("agent.confirmation.mode.label")}>
+					{T()(
+						`agent.confirmation.mode.${props.conversation.confirmationMode}`,
+					)}
 				</AgentCardDetail>
 				<AgentCardDetail label={T()("agent.chat.details.started")}>
 					<Timestamp value={props.conversation.createdAt} />

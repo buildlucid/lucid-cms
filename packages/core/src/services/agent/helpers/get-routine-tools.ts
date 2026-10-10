@@ -12,7 +12,7 @@ const getRoutineTools: ServiceFn<
 
 	const rows = await RoutineTools.selectMultiple({
 		validation: { enabled: true },
-		select: ["routine_id", "tool_name", "requires_approval"],
+		select: ["routine_id", "tool_name", "requires_confirmation"],
 		where: [{ key: "routine_id", operator: "in", value: routineIds }],
 	});
 	if (rows.error) return rows;
@@ -24,9 +24,9 @@ const getRoutineTools: ServiceFn<
 		const tools = data[row.routine_id];
 		if (!tools) continue;
 		tools[row.tool_name] =
-			row.requires_approval === null
+			row.requires_confirmation === null
 				? {}
-				: { requiresApproval: Boolean(row.requires_approval) };
+				: { requiresConfirmation: Boolean(row.requires_confirmation) };
 	}
 
 	return { error: undefined, data };

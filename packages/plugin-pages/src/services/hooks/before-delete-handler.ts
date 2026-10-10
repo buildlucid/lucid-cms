@@ -40,8 +40,9 @@ const beforeDeleteHandler =
 
 		const versionTypes = [
 			"latest",
-			...(meta.collection.getData.publishing.targets?.map((env) => env.key) ||
-				[]),
+			...(meta.collection.getData.publishing.environments?.map(
+				(environment) => environment.key,
+			) || []),
 		];
 
 		for (const versionType of versionTypes) {

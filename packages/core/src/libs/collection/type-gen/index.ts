@@ -595,7 +595,7 @@ const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 		"latest",
 		"revision",
 		constants.collectionBuilder.publishing.snapshotVersionType,
-		...collection.getData.publishing.targets.map(
+		...collection.getData.publishing.environments.map(
 			(environment) => environment.key,
 		),
 	]);
@@ -605,7 +605,7 @@ const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",
-		...collection.getData.publishing.targets.map(
+		...collection.getData.publishing.environments.map(
 			(environment) => environment.key,
 		),
 	]);

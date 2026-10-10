@@ -16,10 +16,12 @@ const defineRoutine = <const Key extends string>(
 	model: options.model,
 	//* unset settings are dropped so sync compares code and stored settings exactly
 	tools: Object.fromEntries(
-		Object.entries(options.tools ?? {}).map(([name, { requiresApproval }]) => [
-			name,
-			requiresApproval === undefined ? {} : { requiresApproval },
-		]),
+		Object.entries(options.tools ?? {}).map(
+			([name, { requiresConfirmation }]) => [
+				name,
+				requiresConfirmation === undefined ? {} : { requiresConfirmation },
+			],
+		),
 	),
 	schedule: {
 		cron: options.schedule.cron.trim().split(/\s+/).join(" "),

@@ -229,7 +229,7 @@ export const getTargetLabel = (
 	if (target === "latest") return T()("requests.target.latest");
 	if (target === "proposal") return T()("requests.target.proposal");
 
-	const environment = collection?.publishing.targets.find(
+	const environment = collection?.publishing.environments.find(
 		(environment) => environment.key === target,
 	);
 	return (
@@ -240,13 +240,15 @@ export const getTargetLabel = (
 
 /** Lists a source's publish destinations in request order, returning none when the request has no source. */
 export const getAllowedTargets = (
-	collection: { publishing: { targets: Array<{ key: string }> } } | undefined,
+	collection:
+		| { publishing: { environments: Array<{ key: string }> } }
+		| undefined,
 	source: string | null,
 ) => {
 	if (source === null) return [];
 
-	const environments = (collection?.publishing.targets ?? []).map(
-		(target) => target.key,
+	const environments = (collection?.publishing.environments ?? []).map(
+		(environment) => environment.key,
 	);
 	if (source === "latest") return ["latest", ...environments];
 
@@ -256,7 +258,9 @@ export const getAllowedTargets = (
 
 /** New requests start on the first environment they can move to, as latest is opt in. */
 export const getDefaultTargets = (
-	collection: { publishing: { targets: Array<{ key: string }> } } | undefined,
+	collection:
+		| { publishing: { environments: Array<{ key: string }> } }
+		| undefined,
 	source: string,
 ) =>
 	getAllowedTargets(collection, source)
@@ -388,10 +392,10 @@ export const getBlockerCopy = (
 					required,
 				}),
 			};
-		case "review_required":
+		case "acknowledge_required":
 			return {
 				title: T()("requests.checks.published", { target }),
-				description: T()("requests.blocker.review.required", { target }),
+				description: T()("requests.blocker.acknowledge.required", { target }),
 			};
 		case "target_changed":
 			return {

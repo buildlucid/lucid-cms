@@ -125,7 +125,7 @@ const requestBlockersSchema = z.array(
 			"target_unavailable",
 			"workflow",
 			"prerequisite",
-			"review_required",
+			"acknowledge_required",
 			"target_changed",
 			"scheduling_unavailable",
 			"comments_open",

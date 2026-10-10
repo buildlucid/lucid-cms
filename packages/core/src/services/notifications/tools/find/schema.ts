@@ -56,10 +56,9 @@ export const outputSchema = z.object({
 				readAt: z.string().nullable(),
 				resolvedAt: z.string().nullable(),
 				createdAt: z.string().nullable(),
-				link: z
-					.string()
-					.nullable()
-					.meta({ description: "Admin URL the notification opens." }),
+				links: z
+					.object({ open: z.string().nullable() })
+					.meta({ description: "Admin link the notification opens, if any." }),
 			}),
 		)
 		.meta({ description: "Matching notifications for this page." }),

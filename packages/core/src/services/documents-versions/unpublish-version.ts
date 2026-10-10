@@ -59,8 +59,8 @@ const unpublishVersion: ServiceFn<
 			}
 
 			if (
-				!collectionRes.data.getData.publishing.targets.some(
-					(target) => target.key === data.target,
+				!collectionRes.data.getData.publishing.environments.some(
+					(environment) => environment.key === data.target,
 				)
 			) {
 				return {

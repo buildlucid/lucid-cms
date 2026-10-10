@@ -1,7 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import { AgentConversationsRepository } from "../../libs/repositories/index.js";
 import type {
-	AgentApprovalMode,
+	AgentConfirmationMode,
 	AgentConversation,
 	AiModelSelection,
 } from "../../types/response.js";
@@ -16,7 +16,7 @@ const updateConversation: ServiceFn<
 			id: string;
 			userId: number;
 			title?: string;
-			approvalMode?: AgentApprovalMode;
+			confirmationMode?: AgentConfirmationMode;
 			modelSelection?: AiModelSelection;
 		},
 	],
@@ -27,15 +27,15 @@ const updateConversation: ServiceFn<
 
 	if (
 		conversation.data.routine_id &&
-		input.approvalMode !== undefined &&
-		input.approvalMode !== "tool-defaults"
+		input.confirmationMode !== undefined &&
+		input.confirmationMode !== "tool-defaults"
 	) {
 		return {
 			data: undefined,
 			error: {
 				type: "basic",
 				status: 400,
-				message: copy("server:agent.routine.approval.locked"),
+				message: copy("server:agent.routine.confirmation.locked"),
 			},
 		};
 	}
@@ -78,7 +78,7 @@ const updateConversation: ServiceFn<
 		data: {
 			title: input.title,
 			title_status: input.title !== undefined ? "user_set" : undefined,
-			approval_mode: input.approvalMode,
+			confirmation_mode: input.confirmationMode,
 			model_selection: model?.data.selection,
 			context: nextContext,
 			updated_at: new Date().toISOString(),

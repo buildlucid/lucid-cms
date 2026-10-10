@@ -35,7 +35,7 @@ const findSegmentDependents: ServiceFn<
 		//* the page versions that read the segment from the target environment
 		const versionTypes = [
 			"latest",
-			...collectionInstance.getData.publishing.targets.map(
+			...collectionInstance.getData.publishing.environments.map(
 				(environment) => environment.key,
 			),
 		].filter(

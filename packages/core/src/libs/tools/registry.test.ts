@@ -145,7 +145,7 @@ test("a tool name can only be registered once in each placement", async () => {
 				secrets: "a".repeat(64),
 				ai: {
 					mcp: {
-						tools: [mcpTools.listCollections(), mcpTools.listCollections()],
+						tools: [mcpTools.collections.list(), mcpTools.collections.list()],
 					},
 				},
 			},
@@ -159,8 +159,8 @@ test("a tool name can only be registered once in each placement", async () => {
 				ai: {
 					agents: [
 						agent("test", [
-							agentTools.listCollections(),
-							agentTools.listCollections(),
+							agentTools.collections.list(),
+							agentTools.collections.list(),
 						]),
 					],
 				},
@@ -216,5 +216,5 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets, e
 		'Agent tool "test_picker" needs an interaction key',
 	);
 	expect(check(picker("test-picker"))).not.toThrow();
-	expect(check(agentTools.selectMedia())).not.toThrow();
+	expect(check(agentTools.media.select())).not.toThrow();
 });

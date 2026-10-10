@@ -94,7 +94,7 @@ export default defineConfig({
 		},
 		ai: {
 			mcp: {
-				tools: [mcpTools.content(), mcpTools.requests(), echoTool, addTool],
+				tools: [mcpTools.all(), echoTool, addTool],
 			},
 			agents: [assistantAgent, seoAgent],
 			features: { mcp: true },

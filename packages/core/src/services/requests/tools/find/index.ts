@@ -13,7 +13,7 @@ import findRequests from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 const description =
-	"Find review requests for creating, publishing, unpublishing or deleting documents. Call it without a query to list every open request, most recently changed first, and add filters only to narrow that down. Read one with requests_get for its documents, comments and blockers.";
+	"Find requests for creating, publishing, unpublishing or deleting documents. Call it without a query to list every open request, most recently changed first, and add filters only to narrow that down. Read one with requests_get for its documents, comments and blockers.";
 
 export const findRequestsMcpTool = (options: CollectionToolOptions = {}) =>
 	defineMcpTool({

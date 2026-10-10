@@ -28,14 +28,14 @@ const recordToolResult: ServiceFn<
 
 	const part = settleToolCall(checkpoint, call, { status, output, summary });
 
-	//* a grouped approval stays pending until every call it covers has a receipt
-	const approvals = checkpoint.pending?.widget.interaction.approvals;
-	const approvalsSettled =
-		!approvals ||
-		approvals.every((approval) =>
-			isToolCallComplete(checkpoint, approval.toolCallId),
+	//* a grouped confirmation stays pending until every call it covers has a receipt
+	const confirmations = checkpoint.pending?.widget.interaction.confirmations;
+	const confirmationsSettled =
+		!confirmations ||
+		confirmations.every((confirmation) =>
+			isToolCallComplete(checkpoint, confirmation.toolCallId),
 		);
-	if (approvalsSettled) checkpoint.pending = undefined;
+	if (confirmationsSettled) checkpoint.pending = undefined;
 
 	advanceToolCursor(checkpoint);
 

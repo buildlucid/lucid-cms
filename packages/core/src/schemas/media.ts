@@ -747,7 +747,7 @@ export const createMediaSchema = z.object({
 		.boolean()
 		.meta({
 			description:
-				"Makes the media personal to you. It must be private and outside folders, and stays out of the media library until you remove your ownership.",
+				"Makes the media personal to you. It must be private and outside folders, and stays out of the media library until you add it to the library.",
 			example: false,
 		})
 		.optional(),
@@ -1079,7 +1079,7 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
-	removeOwnership: {
+	addToLibrary: {
 		body: z.object({
 			public: z.boolean().meta({
 				description: "Whether the media is public once it's in the library",

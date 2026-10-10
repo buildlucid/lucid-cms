@@ -8,8 +8,8 @@ type Tool = Agent["tools"][number];
 type RoutineTools = AgentRoutine["tools"];
 type Choice = "default" | "ask" | "run";
 
-/** Chooses whether each tool asks for approval in a routine. "Default" removes the setting so the tool's own default applies. */
-const AgentRoutineToolApprovals: Component<{
+/** Chooses a routine's tool confirmations, with "Default" removing overrides so each tool's own policy applies. */
+const AgentRoutineToolConfirmations: Component<{
 	tools: Agent["tools"];
 	value: RoutineTools;
 	onChange: (value: RoutineTools) => void;
@@ -26,16 +26,16 @@ const AgentRoutineToolApprovals: Component<{
 	// ----------------------------------------
 	// Functions
 	const choiceFor = (tool: Tool): Choice => {
-		const requiresApproval = props.value[tool.name]?.requiresApproval;
-		if (requiresApproval === undefined) return "default";
-		return requiresApproval ? "ask" : "run";
+		const requiresConfirmation = props.value[tool.name]?.requiresConfirmation;
+		if (requiresConfirmation === undefined) return "default";
+		return requiresConfirmation ? "ask" : "run";
 	};
 	const setChoice = (tool: Tool, choice: Choice) => {
 		const { [tool.name]: _, ...rest } = props.value;
 		props.onChange(
 			choice === "default"
 				? rest
-				: { ...rest, [tool.name]: { requiresApproval: choice === "ask" } },
+				: { ...rest, [tool.name]: { requiresConfirmation: choice === "ask" } },
 		);
 	};
 	const removeTool = (name: string) => {
@@ -46,11 +46,11 @@ const AgentRoutineToolApprovals: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<section id="agent-routine-tool-approvals" class="mt-2 w-full">
+		<section id="agent-routine-tool-confirmations" class="mt-2 w-full">
 			<UnavailableGrants
 				keys={unavailable()}
-				title={T()("agent.routine.approvals.unavailable.title")}
-				description={T()("agent.routine.approvals.unavailable.description")}
+				title={T()("agent.routine.confirmations.unavailable.title")}
+				description={T()("agent.routine.confirmations.unavailable.description")}
 				onRemove={removeTool}
 				disabled={props.disabled}
 			/>
@@ -76,18 +76,18 @@ const AgentRoutineToolApprovals: Component<{
 										{
 											value: "default",
 											label: T()(
-												tool.requiresApproval
-													? "agent.routine.approvals.option.default.ask"
-													: "agent.routine.approvals.option.default.run",
+												tool.requiresConfirmation
+													? "agent.routine.confirmations.option.default.ask"
+													: "agent.routine.confirmations.option.default.run",
 											),
 										},
 										{
 											value: "ask",
-											label: T()("agent.routine.approvals.option.ask"),
+											label: T()("agent.routine.confirmations.option.ask"),
 										},
 										{
 											value: "run",
-											label: T()("agent.routine.approvals.option.run"),
+											label: T()("agent.routine.confirmations.option.run"),
 										},
 									]}
 									onChange={(value) => {
@@ -109,4 +109,4 @@ const AgentRoutineToolApprovals: Component<{
 	);
 };
 
-export default AgentRoutineToolApprovals;
+export default AgentRoutineToolConfirmations;

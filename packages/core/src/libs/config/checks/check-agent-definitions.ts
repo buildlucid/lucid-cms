@@ -149,7 +149,7 @@ const checkAgentDefinitions = (config: {
 				)
 			) {
 				throw new Error(
-					`Routine "${label}" tools must name tools available to its agent and only set "requiresApproval" to a boolean.`,
+					`Routine "${label}" tools must name tools available to its agent and only set "requiresConfirmation" to a boolean.`,
 				);
 			}
 

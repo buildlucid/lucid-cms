@@ -15,7 +15,7 @@ export const inputSchema = z.object({
 	collectionKey: z.string().min(1),
 	documentId: documentIdInput,
 	version: z.string().trim().min(1).default("latest").meta({
-		description: "Content version, usually latest or a publishing target.",
+		description: "Content version, usually latest or an environment.",
 	}),
 	contentLocale: z.string().min(1).optional().meta({
 		description:
@@ -36,7 +36,7 @@ export const inputSchema = z.object({
 export const agentInputSchema = inputSchema.extend({
 	version: inputSchema.shape.version.meta({
 		description:
-			"Content version: latest, a publishing target, or request:ID for the document's proposal in that request, eg. request:12 for one opened by documents_create or documents_update.",
+			"Content version: latest, an environment, or request:ID for the document's proposal in that request, eg. request:12 for one opened by documents_create or documents_update.",
 	}),
 });
 
@@ -73,7 +73,7 @@ export const outputSchema = z.object({
 			route: documentRouteSchema,
 			fields: z.record(z.string(), z.unknown()).meta({
 				description:
-					"Selected field values in the content language, as documents_update accepts them. Rich text is HTML and repeater items keep their refs.",
+					"Selected field values in the content language. Rich text is HTML and repeater items keep their refs.",
 			}),
 			bricks: z.array(brickSchema).meta({
 				description:

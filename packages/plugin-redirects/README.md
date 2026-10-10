@@ -34,4 +34,4 @@ export default defineConfig({
 });
 ```
 
-Publishing targets are inferred when the selected collections use the same setup. Configure `targets` explicitly when they differ. Use `navigationGroup` to place Redirects in an existing admin group.
+Environments are inferred when the selected collections use the same setup. Configure `environments` explicitly when they differ. Use `navigationGroup` to place Redirects in an existing admin group.

@@ -167,9 +167,10 @@ const formatVersions = (props: {
 	const versions: InternalCollectionDocument["versions"] = {
 		latest: null,
 	};
-	if (props.collection.getData.publishing.targets) {
-		for (const env of props.collection.getData.publishing.targets) {
-			versions[env.key] = null;
+	if (props.collection.getData.publishing.environments) {
+		for (const environment of props.collection.getData.publishing
+			.environments) {
+			versions[environment.key] = null;
 		}
 	}
 

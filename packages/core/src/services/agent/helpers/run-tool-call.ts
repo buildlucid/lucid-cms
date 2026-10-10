@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
 import {
 	createInteraction,
-	needsApproval,
+	needsConfirmation,
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
 import { prepareAgentTool } from "../../../libs/tools/execute-tool.js";
@@ -23,11 +23,7 @@ import {
 	toolResult,
 } from "./tool-outcome.js";
 
-/**
- * Handles one tool invocation. Runner tools run straight away. Agent tools
- * follow the run's approval policy, may pause for input, and record writes
- * before they run so a crash never repeats one.
- */
+/** Runs runner tools immediately and agent tools under the run's confirmation policy, pausing for input when needed and recording writes before execution to prevent repeats after crashes. */
 const runToolCall = async (
 	context: ServiceContext,
 	props: Omit<RunnerToolCall, "answer"> & {
@@ -42,8 +38,8 @@ const runToolCall = async (
 	if (answer?.action === "cancel") {
 		return toolFailure(
 			context.translate(
-				pending?.widget.interaction.approval ||
-					pending?.widget.interaction.approvals
+				pending?.widget.interaction.confirmation ||
+					pending?.widget.interaction.confirmations
 					? "server:agent.tool.denied"
 					: "server:agent.tool.dismissed",
 			),
@@ -58,8 +54,8 @@ const runToolCall = async (
 		return toolFailure(context.translate("server:agent.tool.unavailable"));
 	}
 
-	const requiresApproval = needsApproval(checkpoint, tool);
-	const approval = requiresApproval
+	const requiresConfirmation = needsConfirmation(checkpoint, tool);
+	const confirmation = requiresConfirmation
 		? { toolName: tool.name, input: call.input }
 		: undefined;
 	const execution: AgentToolExecution = {
@@ -86,7 +82,7 @@ const runToolCall = async (
 				: undefined,
 	};
 
-	//* an interactive tool asks once; when approval is required, its submission also approves the call
+	//* an interactive tool asks once; when confirmation is required, its submission also confirms the call
 	if (tool.interaction && !answer) {
 		const prepared = await prepareAgentTool({
 			context,
@@ -105,20 +101,20 @@ const runToolCall = async (
 				callId: call.id,
 				key: tool.interaction.key,
 				version: tool.interaction.version,
-				approval,
+				confirmation,
 				...prepared.data.interaction,
 			}),
 		};
 	}
-	if (approval && !answer) {
+	if (confirmation && !answer) {
 		return {
 			kind: "pending",
 			pending: createInteraction({
 				callId: call.id,
-				key: constants.agent.widgets.approval,
+				key: constants.agent.widgets.confirmation,
 				title: context.translate(tool.describe(call.input)),
 				data: {},
-				approval,
+				confirmation,
 			}),
 		};
 	}

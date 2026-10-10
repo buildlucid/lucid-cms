@@ -10,7 +10,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 	},
 	localized: true,
 	publishing: {
-		targets: [
+		environments: [
 			{
 				key: "production",
 				label: "Production",

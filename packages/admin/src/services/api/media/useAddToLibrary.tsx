@@ -12,26 +12,26 @@ interface Params {
 	};
 }
 
-export const removeOwnershipReq = (params: Params) => {
+export const addToLibraryReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/media/${params.id}/remove-ownership`,
+		url: `/lucid/api/v1/media/${params.id}/add-to-library`,
 		csrf: true,
 		method: "POST",
 		body: params.body,
 	});
 };
 
-interface UseRemoveOwnershipProps {
+interface UseAddToLibraryProps {
 	onSuccess?: () => void;
 	onError?: () => void;
 }
 
-const useRemoveOwnership = (props?: UseRemoveOwnershipProps) => {
+const useAddToLibrary = (props?: UseAddToLibraryProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
-		mutationFn: removeOwnershipReq,
+		mutationFn: addToLibraryReq,
 		getSuccessToast: () => ({
-			title: T()("toasts.media.ownership.removed.title"),
-			message: T()("toasts.media.ownership.removed.message"),
+			title: T()("toasts.media.library.added.title"),
+			message: T()("toasts.media.library.added.message"),
 		}),
 		invalidates: [
 			queryKeys.media.all(),
@@ -43,4 +43,4 @@ const useRemoveOwnership = (props?: UseRemoveOwnershipProps) => {
 	});
 };
 
-export default useRemoveOwnership;
+export default useAddToLibrary;

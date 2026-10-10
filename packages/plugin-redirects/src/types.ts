@@ -1,21 +1,21 @@
 import type { CollectionOptions } from "@lucidcms/core/types";
-/** A publishing target used by redirect documents. */
-export type RedirectTarget = NonNullable<
-	NonNullable<CollectionOptions<"redirects">["publishing"]>["targets"]
+/** An environment used by redirect documents. */
+export type RedirectEnvironment = NonNullable<
+	NonNullable<CollectionOptions<"redirects">["publishing"]>["environments"]
 >[number];
 
 export interface RedirectsPluginOptions {
 	/** Collections available as redirect destinations. */
 	collections: string[];
-	/** Publishing targets. Inferred when all target collections match. */
-	targets?: RedirectTarget[];
+	/** Redirect environments, inferred when all target collections match. */
+	environments?: RedirectEnvironment[];
 	/** Admin navigation group key. Defaults to `redirects`. */
 	navigationGroup?: string;
 }
 
 export type RedirectsPluginOptionsInternal = {
 	collections: string[];
-	targets: RedirectTarget[];
+	environments: RedirectEnvironment[];
 	navigationGroup?: string;
 	locales: Array<{
 		code: string;

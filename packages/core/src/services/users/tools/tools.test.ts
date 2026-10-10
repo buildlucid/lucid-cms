@@ -26,7 +26,7 @@ const collection = (key: string) =>
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
-		publishing: { targets: [{ key: "production", label: "Production" }] },
+		publishing: { environments: [{ key: "production", label: "Production" }] },
 	}).addText("title", { useAsLabel: true });
 const pages = collection("user_tool_pages");
 const posts = collection("user_tool_posts");
@@ -49,7 +49,7 @@ beforeAll(async () => {
 			ai: {
 				...config.ai,
 				features: { ...config.ai.features, mcp: true },
-				mcp: { tools: [mcpTools.findUsers()], skills: [] },
+				mcp: { tools: [mcpTools.users.find()], skills: [] },
 			},
 		},
 		database: await fixture.getDatabase(),
@@ -151,7 +151,7 @@ const callAgent = (
 	const runId = randomUUID();
 	return executeAgentTool({
 		context,
-		tool: options.tool ?? agentTools.findUsers(),
+		tool: options.tool ?? agentTools.users.find(),
 		input,
 		execution: {
 			authority: {
@@ -288,7 +288,7 @@ test("canReview lists people who can approve a request in reach, leaving out its
 		await callAgent(
 			admin,
 			{ query: { filter: [{ key: "canReview", value: requestId }] } },
-			{ tool: agentTools.findUsers({ collections: [posts.key] }) },
+			{ tool: agentTools.users.find({ collections: [posts.key] }) },
 		),
 	).toMatchObject({ type: "failed" });
 	//* reading requests needs requests:read, even when finding people doesn't

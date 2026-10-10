@@ -50,12 +50,14 @@ const describeCollection: ServiceFn<
 		include: { bricks: true, fields: true },
 	});
 
-	const entries: Entry[] = formatted.publishing.targets.map((target) => ({
-		kind: "publishingTarget",
-		key: target.key,
-		label: context.translate(target.label) ?? target.key,
-		requires: target.requires,
-	}));
+	const entries: Entry[] = formatted.publishing.environments.map(
+		(environment) => ({
+			kind: "environment",
+			key: environment.key,
+			label: context.translate(environment.label) ?? environment.key,
+			requires: environment.requires,
+		}),
+	);
 
 	const addFields = (
 		fields: unknown[],
@@ -83,7 +85,7 @@ const describeCollection: ServiceFn<
 				owner,
 				brickKey,
 				path,
-				fieldType: field.type,
+				type: field.type,
 				label: context.translate(field.details.label) ?? field.key,
 				description: context.translate(field.details.description) ?? null,
 				localized: field.localized === true,
@@ -138,7 +140,7 @@ const describeCollection: ServiceFn<
 		for (const brick of bricks) {
 			entries.push({
 				kind: "brick",
-				brickType,
+				type: brickType,
 				key: brick.key,
 				label: context.translate(brick.details.label) ?? brick.key,
 				description: context.translate(brick.details.description) ?? null,
@@ -171,7 +173,7 @@ const describeCollection: ServiceFn<
 							: null,
 						localization: formatted.localized,
 						publishing: {
-							targetCount: formatted.publishing.targets.length,
+							environmentCount: formatted.publishing.environments.length,
 							review: {
 								create: selected.getData.publishing.review?.create ?? false,
 								delete: selected.getData.publishing.review?.delete ?? false,

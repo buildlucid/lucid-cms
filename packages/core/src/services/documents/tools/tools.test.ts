@@ -37,7 +37,7 @@ const pages = new CollectionBuilder("agent_pages", {
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
-	publishing: { targets: [{ key: "production", label: "Production" }] },
+	publishing: { environments: [{ key: "production", label: "Production" }] },
 	bricks: {
 		builder: [new BrickBuilder("hero").addText("heading", { localized: true })],
 		fixed: [new BrickBuilder("seo").addText("description").addMedia("image")],
@@ -223,11 +223,11 @@ const startRun = async (principal: "user" | "system" = "user") => {
 	};
 };
 
-const tools = agentTools.editing();
-const direct = agentTools.editing({ direct: true });
+const tools = agentTools.edit();
+const direct = agentTools.edit({ direct: true });
 const [create, update, remove, unpublish] = tools;
 const [directCreate, directUpdate, directDelete, directUnpublish] = direct;
-const getDocument = agentTools.getDocument();
+const getDocument = agentTools.documents.get();
 assert(create && update && remove && unpublish);
 assert(directCreate && directUpdate && directDelete && directUnpublish);
 
@@ -598,7 +598,7 @@ test("routines defined in code open requests as the system", async () => {
 
 test("describes tab fields by their stored paths, explains invalid fields and accepts every language at once", async () => {
 	const run = await startRun();
-	const described = await run.call(agentTools.describeCollection(), {
+	const described = await run.call(agentTools.collections.describe(), {
 		collectionKey: required.key,
 	});
 	const paths = describeOutputSchema
@@ -749,7 +749,7 @@ test("registering a requested document needs access to its request", async () =>
 		mode: "chat",
 		checkpoint: {
 			version: 1,
-			approvalMode: "automatic",
+			confirmationMode: "automatic",
 			messages: [],
 			nudges: 0,
 			requestId: randomUUID(),

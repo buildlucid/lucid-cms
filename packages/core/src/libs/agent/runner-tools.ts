@@ -35,12 +35,7 @@ const finishInput = z.object({
 	summary: z.string().trim().min(1).max(4000),
 });
 
-/**
- * Tools the runner handles itself: how an agent asks, checks in, reads back
- * history, loads skills and finishes. They always run and never need
- * approval. Their names are reserved, so agent tools cannot use them. Their
- * handlers live in `services/agent/helpers/runner-tools`.
- */
+/** Defines reserved tools the runner executes without confirmation, with handlers in `services/agent/helpers/runner-tools`. */
 const runnerTools = {
 	previewMedia: {
 		name: "lucid_preview_media",

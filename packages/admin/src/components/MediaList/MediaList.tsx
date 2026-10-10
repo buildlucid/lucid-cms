@@ -16,6 +16,7 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import AddMediaToLibraryModal from "@/components/AddMediaToLibraryModal/AddMediaToLibraryModal";
 import Button from "@/components/Button/Button";
 import ClearProcessedMedia from "@/components/ClearProcessedImagesModal/ClearProcessedImagesModal";
 import CopyShareLinkURLModal from "@/components/CopyShareLinkURLModal/CopyShareLinkURLModal";
@@ -42,7 +43,6 @@ import MoveToFolderModal, {
 } from "@/components/MoveToFolderModal/MoveToFolderModal";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import RemoveMediaOwnershipModal from "@/components/RemoveMediaOwnershipModal/RemoveMediaOwnershipModal";
 import RestoreMediaBatchModal from "@/components/RestoreMediaBatchModal/RestoreMediaBatchModal";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
 import UpdateMediaFolderModal from "@/components/UpdateMediaFolderModal/UpdateMediaFolderModal";
@@ -100,7 +100,7 @@ export const MediaList: Component<{
 			deleteAllShareLinks: false,
 			quickCrop: false,
 			download: false,
-			removeOwnership: false,
+			addToLibrary: false,
 		},
 	});
 	const mediaAltGeneration = useMediaAltGeneration();
@@ -551,12 +551,12 @@ export const MediaList: Component<{
 					params: getMoveModalParams(),
 				}}
 			/>
-			<RemoveMediaOwnershipModal
+			<AddMediaToLibraryModal
 				id={rowTarget.getTargetId}
 				state={{
-					open: rowTarget.getTriggers().removeOwnership,
+					open: rowTarget.getTriggers().addToLibrary,
 					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("removeOwnership", state);
+						rowTarget.setTrigger("addToLibrary", state);
 					},
 				}}
 			/>

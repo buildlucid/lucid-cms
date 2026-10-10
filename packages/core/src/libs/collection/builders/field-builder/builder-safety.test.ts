@@ -47,7 +47,9 @@ describe("builder ownership", () => {
 			...collectionOptions,
 			details: { labels: { singular: label, plural: "Articles" } },
 			bricks: { fixed: [brick, brick] },
-			publishing: { targets: [{ key: "live", label, requires: ["review"] }] },
+			publishing: {
+				environments: [{ key: "live", label, requires: ["review"] }],
+			},
 		} satisfies CollectionOptions;
 		const collection = new CollectionBuilder("articles", options);
 		const clone = collection.clone();
@@ -55,7 +57,7 @@ describe("builder ownership", () => {
 		expect(collection.config.bricks?.fixed).toHaveLength(1);
 		label.defaultMessage = "Changed input";
 		brick.addText("later");
-		options.publishing.targets[0]?.requires.push("changed");
+		options.publishing.environments[0]?.requires.push("changed");
 		expect(collection.fixedBricks[0]?.fields.map((field) => field.key)).toEqual(
 			["title"],
 		);
@@ -65,15 +67,19 @@ describe("builder ownership", () => {
 		expect(brick.config.details.label).toMatchObject({
 			defaultMessage: "Hero",
 		});
-		expect(collection.getData.publishing.targets[0]?.requires).toEqual([
+		expect(collection.getData.publishing.environments[0]?.requires).toEqual([
 			"review",
 		]);
 		collection.config.bricks?.fixed?.[0]?.addText("original_only");
-		collection.config.publishing?.targets?.[0]?.requires?.push("original_only");
+		collection.config.publishing?.environments?.[0]?.requires?.push(
+			"original_only",
+		);
 		expect(clone.fixedBricks[0]?.fields.map((field) => field.key)).toEqual([
 			"title",
 		]);
-		expect(clone.getData.publishing.targets[0]?.requires).toEqual(["review"]);
+		expect(clone.getData.publishing.environments[0]?.requires).toEqual([
+			"review",
+		]);
 		const data = clone.getData;
 		if (data.details.labels.singular.type !== "lucid.copy")
 			throw new Error("Expected copy descriptor");

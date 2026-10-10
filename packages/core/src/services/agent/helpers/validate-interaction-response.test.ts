@@ -14,7 +14,7 @@ import validateInteractionResponse from "./validate-interaction-response.js";
 const testConfig = getTestConfig();
 afterAll(testConfig.destroy);
 
-test("system approvals require live code routine permission and user approvals stay private", async () => {
+test("system confirmations require live code routine permission and user confirmations stay private", async () => {
 	await testConfig.migrate();
 	const config = await testConfig.getConfig();
 	const agent = defineAgent({
@@ -50,14 +50,14 @@ test("system approvals require live code routine permission and user approvals s
 		.execute();
 	const pending = createInteraction({
 		callId: "write",
-		key: constants.agent.widgets.approval,
-		title: "Approve write",
+		key: constants.agent.widgets.confirmation,
+		title: "Confirm write",
 		data: {},
-		approval: { toolName: "write", input: {} },
+		confirmation: { toolName: "write", input: {} },
 	});
 	const checkpoint: Checkpoint = {
 		version: 1,
-		approvalMode: "tool-defaults",
+		confirmationMode: "tool-defaults",
 		messages: [],
 		turns: 0,
 		nudges: 0,

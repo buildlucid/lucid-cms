@@ -4,9 +4,9 @@ import type {
 	RedirectsPluginOptions,
 	RedirectsPluginOptionsInternal,
 } from "../types.js";
-import resolveTargets, {
+import resolveEnvironments, {
 	type TargetCollection,
-} from "../utils/resolve-targets.js";
+} from "../utils/resolve-environments.js";
 
 const resolvePluginOptions = (
 	given: RedirectsPluginOptions,
@@ -41,7 +41,7 @@ const resolvePluginOptions = (
 
 	return {
 		collections,
-		targets: resolveTargets(given.targets, targetCollections),
+		environments: resolveEnvironments(given.environments, targetCollections),
 		navigationGroup: given.navigationGroup?.trim() || undefined,
 		locales: localization.locales.map((locale) => ({
 			code: locale.code,

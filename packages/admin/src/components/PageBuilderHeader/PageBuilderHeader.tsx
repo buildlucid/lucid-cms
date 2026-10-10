@@ -247,8 +247,8 @@ export const PageBuilderHeader: Component<{
 			});
 		}
 
-		for (const environment of props.state.collection()?.publishing.targets ??
-			[]) {
+		for (const environment of props.state.collection()?.publishing
+			.environments ?? []) {
 			const status = getDocumentEnvironmentStatus({
 				versions: props.state.document()?.versions,
 				environmentKey: environment.key,
@@ -318,7 +318,7 @@ export const PageBuilderHeader: Component<{
 			return [];
 		}
 
-		const environments = collection.publishing.targets ?? [];
+		const environments = collection.publishing.environments ?? [];
 		const publishReview = collection.publishing.review;
 		const workflow = collection.publishing.workflow;
 		const workflowStage = workflow?.stages.find(
@@ -457,7 +457,9 @@ export const PageBuilderHeader: Component<{
 
 		const isEnvironment = props.state
 			.collection()
-			?.publishing.targets.some((environment) => environment.key === version);
+			?.publishing.environments.some(
+				(environment) => environment.key === version,
+			);
 		if (!isEnvironment) return undefined;
 
 		return releaseOptions().find((option) => option.value === version);
@@ -484,7 +486,7 @@ export const PageBuilderHeader: Component<{
 		//* a requested document only exists as its create request's proposal
 		if (props.state.document()?.createRequestId) return false;
 
-		const environments = collection.publishing.targets ?? [];
+		const environments = collection.publishing.environments ?? [];
 
 		return (
 			props.mode !== "create" &&

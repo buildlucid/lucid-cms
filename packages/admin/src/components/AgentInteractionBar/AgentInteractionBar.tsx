@@ -15,7 +15,7 @@ const AgentInteractionBar: Component<{
 	onRedirect?: () => void;
 	redirecting?: boolean;
 	onStop?: () => void;
-	/** Shows a button that reveals the data the interaction acts on, such as an approval's input. */
+	/** Shows a button that reveals the data the interaction acts on, such as a confirmation's input. */
 	details?: { open: boolean; onToggle: () => void };
 	class?: string;
 }> = (props) => {

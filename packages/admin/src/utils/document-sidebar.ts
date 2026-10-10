@@ -3,13 +3,13 @@ import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 /**
- * Formats a publish target key with the collection environment label when one exists.
+ * Formats an environment key with the collection's environment label when one exists.
  */
 export const formatTargetName = (props: {
 	collection?: Collection;
 	target: string;
 }) => {
-	const environment = props.collection?.publishing.targets.find(
+	const environment = props.collection?.publishing.environments.find(
 		(environment) => environment.key === props.target,
 	);
 

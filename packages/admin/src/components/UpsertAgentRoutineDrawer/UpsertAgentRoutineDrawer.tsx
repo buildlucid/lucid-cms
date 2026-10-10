@@ -35,17 +35,13 @@ import { getDefaultTimezone } from "@/utils/request-schedule";
 import AgentRoutineDetails from "./parts/AgentRoutineDetails";
 import AgentRoutineInstructions from "./parts/AgentRoutineInstructions";
 import AgentRoutineModelField from "./parts/AgentRoutineModelField";
-import AgentRoutineToolApprovals from "./parts/AgentRoutineToolApprovals";
+import AgentRoutineToolConfirmations from "./parts/AgentRoutineToolConfirmations";
 import AgentScheduleField from "./parts/AgentScheduleField";
 
-/**
- * Creates a routine, or edits one when `routine` is set. Code routines are read
- * only. Fields are split into tabs: the task, when it runs, tool approvals, and
- * the model and chat history.
- */
+/** Creates a routine or edits the supplied `routine`, keeping code routines read only. */
 const UpsertAgentRoutineDrawer: Component<{
 	routine?: Accessor<AgentRoutine | undefined>;
-	focusApprovals?: boolean;
+	focusConfirmations?: boolean;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -133,7 +129,7 @@ const UpsertAgentRoutineDrawer: Component<{
 				setTimezone(routine?.timezone ?? getDefaultTimezone());
 				setEnabled(routine?.enabled ?? true);
 				setRunAfterCreate(false);
-				setActiveTab(props.focusApprovals ? "approvals" : "task");
+				setActiveTab(props.focusConfirmations ? "confirmations" : "task");
 			},
 		),
 	);
@@ -207,8 +203,8 @@ const UpsertAgentRoutineDrawer: Component<{
 								invalid: tabInvalid(["cron", "timezone", "enabled"]),
 							},
 							{
-								value: "approvals",
-								label: T()("agent.routine.approvals.title"),
+								value: "confirmations",
+								label: T()("agent.routine.confirmations.title"),
 								invalid: tabInvalid(["tools"]),
 							},
 							{
@@ -291,8 +287,8 @@ const UpsertAgentRoutineDrawer: Component<{
 							/>
 						</Show>
 					</Show>
-					<Show when={activeTab() === "approvals"}>
-						<AgentRoutineToolApprovals
+					<Show when={activeTab() === "confirmations"}>
+						<AgentRoutineToolConfirmations
 							tools={agentTools()}
 							value={routineTools()}
 							onChange={setRoutineTools}
