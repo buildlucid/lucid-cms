@@ -20,10 +20,12 @@ export const RequestReadiness: Component<{
 	// Memos
 	const collectionFor = (key: string) =>
 		props.collections.find((collection) => collection.key === key);
-	//* blockers that belong to no document, eg. scheduling
+	//* blockers that belong to no document, eg. scheduling. Comments have their own row
 	const requestBlockers = createMemo(() =>
 		props.request.blockers.filter(
-			(blocker) => blocker.requestDocumentId === undefined,
+			(blocker) =>
+				blocker.requestDocumentId === undefined &&
+				blocker.code !== "comments_open",
 		),
 	);
 	const approverNames = createMemo(() =>

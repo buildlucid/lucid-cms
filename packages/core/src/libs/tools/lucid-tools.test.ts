@@ -60,3 +60,18 @@ test("web features reject invalid domains when the config loads", () => {
 		}),
 	).not.toThrow();
 });
+
+test("the admin bundle holds the reads, and the admin writes ask first", () => {
+	expect(agentTools.admin().map((tool) => tool.name)).toEqual([
+		"emails_find",
+		"emails_get",
+		"jobs_find",
+		"jobs_get",
+		"jobs_list_schedules",
+		"settings_get",
+		"ai_usage_get",
+	]);
+	expect(agentTools.admin().every((tool) => tool.readOnly)).toBe(true);
+	expect(agentTools.resendEmail().requiresApproval).toBe(true);
+	expect(agentTools.runJobSchedule().requiresApproval).toBe(true);
+});

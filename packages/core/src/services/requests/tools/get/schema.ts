@@ -79,6 +79,10 @@ export const outputSchema = z.object({
 						acknowledged: z.boolean(),
 					}),
 				),
+				allowedTargets: z.array(z.string()).meta({
+					description:
+						"Every target this document can have, including latest when it can. Change targets with requests_update.",
+				}),
 			}),
 		),
 		blockers: z
@@ -93,7 +97,7 @@ export const outputSchema = z.object({
 			)
 			.meta({
 				description:
-					"What stops approval or completion, eg. review_required for targets to acknowledge, workflow for stages, or check for a collection's own checks with a message.",
+					"What stops approval or completion, eg. review_required for targets to acknowledge, workflow for stages, comments_open for comments to resolve or close, or check for a collection's own checks with a message.",
 			}),
 		comments: z
 			.array(

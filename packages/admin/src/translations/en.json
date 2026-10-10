@@ -2067,6 +2067,7 @@
 	"requests.blocker.prerequisite.title": "{{required}} Needed First",
 	"requests.blocker.scheduling.unavailable": "Scheduling is not available for this document.",
 	"requests.blocker.scheduling.unavailable.title": "Scheduling Unavailable",
+	"requests.blocker.comments.open.title": "Comments to Resolve",
 	"requests.source": "Content source",
 	"requests.source.latest": "Latest",
 	"requests.targets": "Publish To",

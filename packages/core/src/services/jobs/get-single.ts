@@ -4,12 +4,9 @@ import { JobsRepository } from "../../libs/repositories/index.js";
 import type { JobDetails } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+/** Reads one job by its row ID, or by the public job ID that receipts and listings return. */
 const getSingle: ServiceFn<
-	[
-		{
-			id: number;
-		},
-	],
+	[{ id: number } | { jobId: string }],
 	JobDetails
 > = async (context, data) => {
 	const Jobs = new JobsRepository(context.db);
@@ -44,7 +41,7 @@ const getSingle: ServiceFn<
 			"created_by_user_id",
 			"updated_at",
 		],
-		id: data.id,
+		...data,
 		validation: {
 			enabled: true,
 			defaultError: {

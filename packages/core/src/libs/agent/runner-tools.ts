@@ -68,7 +68,7 @@ const runnerTools = {
 		name: "lucid_register_references",
 		title: copy("admin:core.tools.lucid_register_references.title"),
 		description:
-			"Link media, documents or requests to this chat using their resource IDs. Existing references are reused.",
+			"Link documents, media or requests to this chat. Nothing else can be linked.",
 		input: z.object({
 			references: z.array(agentReferenceInputSchema).min(1).max(50),
 		}),

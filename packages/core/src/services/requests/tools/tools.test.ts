@@ -268,6 +268,7 @@ test("finds and reads requests only within the tool's collections", async () => 
 				collectionKey: pages.key,
 				source: "latest",
 				targets: [{ target: "production", changedByOthers: false }],
+				allowedTargets: ["latest", "production"],
 			},
 		],
 		permissions: { edit: true, complete: true },

@@ -403,6 +403,11 @@ export const getBlockerCopy = (
 				title: T()("requests.blocker.scheduling.unavailable.title"),
 				description: T()("requests.blocker.scheduling.unavailable"),
 			};
+		case "comments_open":
+			return {
+				title: T()("requests.blocker.comments.open.title"),
+				description: T()("requests.readiness.comments.open"),
+			};
 		case "check":
 			return {
 				title: target

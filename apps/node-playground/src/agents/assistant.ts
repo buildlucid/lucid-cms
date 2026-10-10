@@ -19,6 +19,8 @@ export const assistantAgent = defineAgent({
 		agentTools.updateRequest(),
 		agentTools.updateMedia(),
 		agentTools.selectMedia(),
+		agentTools.admin(),
+		agentTools.findNotifications(),
 		echoAgentTool,
 		addAgentTool,
 		saveNoteTool,

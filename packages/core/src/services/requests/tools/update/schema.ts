@@ -11,7 +11,7 @@ const documentShape = {
 };
 const targetsInput = z.array(z.string().min(1)).meta({
 	description:
-		"Publish requests take environments, or latest from latest. Unpublish requests take the environments to remove the document from. Delete requests take none.",
+		"See allowedTargets in requests_get. Publish requests from latest can also target latest, which completing replaces with the proposal. Unpublish requests take environments. Delete requests take none.",
 });
 
 export const changeSchema = z.discriminatedUnion("type", [

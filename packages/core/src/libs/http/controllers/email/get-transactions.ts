@@ -54,6 +54,7 @@ const getTransactionsController = factory.createHandlers(
 		})(context, {
 			emailId: Number.parseInt(id, 10),
 			query: formattedQuery,
+			authUser: c.get("auth"),
 		});
 		if (transactions.error) throw new LucidAPIError(transactions.error);
 

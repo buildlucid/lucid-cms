@@ -61,6 +61,7 @@ export type RequestBlockerCode =
 	| "review_required"
 	| "target_changed"
 	| "scheduling_unavailable"
+	| "comments_open"
 	| "check";
 
 /** Something that stops a request from being approved or completed. */

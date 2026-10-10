@@ -32,7 +32,7 @@ const emailResponseSchema = z.object({
 	}),
 	mailDetails: z.object({
 		from: z.object({
-			address: z.email().meta({
+			address: z.string().meta({
 				description: "The sender's email address",
 				example: "admin@lucidcms.io",
 			}),

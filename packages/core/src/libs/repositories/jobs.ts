@@ -22,16 +22,14 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 	>(
 		props: QueryProps<
 			V,
-			{
-				id: number;
-				select: K[];
-			}
+			{ select: K[] } & ({ id: number } | { jobId: string })
 		>,
 	) {
-		const query = this.db
-			.selectFrom("lucid_jobs")
-			.select(props.select)
-			.where("id", "=", props.id);
+		const selected = this.db.selectFrom("lucid_jobs").select(props.select);
+		const query =
+			"jobId" in props
+				? selected.where("job_id", "=", props.jobId)
+				: selected.where("id", "=", props.id);
 
 		const exec = await this.executeQuery(
 			() =>

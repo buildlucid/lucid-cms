@@ -14,11 +14,13 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 
 	// ----------------------------------------
 	// queries
+	/** System emails are hidden unless `includeSystem` is set, matching listings. */
 	async selectSingleById<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				id: number;
+				includeSystem?: boolean;
 			}
 		>,
 	) {
@@ -65,7 +67,14 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"created_at",
 				"updated_at",
 			])
-			.where("id", "=", props.id);
+			.where("id", "=", props.id)
+			.$if(props.includeSystem !== true, (qb) =>
+				qb.where(
+					"is_system",
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				),
+			);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",

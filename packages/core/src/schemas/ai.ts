@@ -7,6 +7,7 @@ import {
 import { generatedContentSchema } from "../libs/lucid-remote/schema/generated-content.js";
 import type {
 	AiCredits,
+	AiUsageFeatureKey,
 	AiUsageRecord,
 	AiUsageSession,
 	AiUsageSessionType,
@@ -158,13 +159,29 @@ const mediaImageCompletionResponseSchema =
 			.strict(),
 	});
 
-const aiUsageChartDateSchema = z
+export const aiUsageChartDateSchema = z
 	.string()
 	.trim()
 	.regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const aiUsageChartDimensionSchema = z.enum(["day"]);
-const aiUsageChartMetricSchema = z.enum(["requests", "totalTokens", "credits"]);
+export const aiUsageChartMetricSchema = z.enum([
+	"requests",
+	"totalTokens",
+	"credits",
+]);
+
+export const aiUsageFeatureKeySchema = z.enum([
+	"agent.chat",
+	"agent.compact",
+	"agent.title.generate",
+	"web.search",
+	"web.fetch",
+	"media.analyze",
+	"custom-field.input.generate",
+	"media.alt.generate",
+	"media.image.generate",
+]) satisfies z.ZodType<AiUsageFeatureKey>;
 
 export const aiUsageSessionTypeSchema = z.enum([
 	"agent",

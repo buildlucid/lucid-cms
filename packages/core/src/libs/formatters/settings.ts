@@ -1,5 +1,5 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import { getAgents } from "../agent/registry.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
@@ -16,7 +16,7 @@ interface SettingsPropsT {
 	emailSimulated: boolean;
 	emailTemplates: string[];
 	mediaDeliveryAdapterKey: string;
-	runtimeKey: string;
+	runtimeKey: string | null;
 	queueKey: string;
 	kvKey: string;
 	databaseKey: string;
@@ -26,7 +26,7 @@ const formatSingle = (props: {
 	settings: SettingsPropsT;
 	config: ResolvedLucidConfig;
 	includes: SettingsInclude[] | undefined;
-	authUser?: LucidAuth;
+	authUser?: LucidActor;
 }): Settings => {
 	const includes = props.includes ?? [];
 	if (includes.length === 0) return {};
@@ -56,7 +56,17 @@ const formatSingle = (props: {
 		response.email = {
 			simulated: props.settings.emailSimulated,
 			templates: props.settings.emailTemplates,
-			from: props.config.email?.from ?? null,
+			//* unset env vars leave undefined fields, which JSON consumers such as tools reject
+			from: props.config.email?.from
+				? {
+						...(props.config.email.from.email !== undefined && {
+							email: props.config.email.from.email,
+						}),
+						...(props.config.email.from.name !== undefined && {
+							name: props.config.email.from.name,
+						}),
+					}
+				: null,
 		};
 	}
 

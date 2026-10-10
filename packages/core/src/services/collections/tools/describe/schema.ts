@@ -95,9 +95,10 @@ export const entrySchema = z.discriminatedUnion("kind", [
 	}),
 	z.object({
 		kind: z.literal("publishingTarget"),
-		key: z
-			.string()
-			.meta({ description: "Version target accepted by document tools." }),
+		key: z.string().meta({
+			description:
+				"An environment. Requests from latest can also target latest itself.",
+		}),
 		label: z.string().meta({ description: "Publishing target label." }),
 		requires: z.array(z.string()).meta({
 			description:

@@ -1239,6 +1239,7 @@ test("comments withdraw approval, and every comment must be resolved before appr
 	});
 	assert(!commented.error, JSON.stringify(commented.error));
 	const withComment = await readRequest(request.id);
+	expect(withComment.blockers).toContainEqual({ code: "comments_open" });
 	expect(
 		(await approve(context, { ...reviewInput(withComment), user: reviewer }))
 			.error?.status,
@@ -1252,7 +1253,9 @@ test("comments withdraw approval, and every comment must be resolved before appr
 		resolution: "resolved",
 	});
 	assert(!resolved.error, JSON.stringify(resolved.error));
-	expect((await readRequest(request.id)).openComments).toBe(0);
+	const withResolved = await readRequest(request.id);
+	expect(withResolved.openComments).toBe(0);
+	expect(withResolved.blockers).toEqual([]);
 	await approveRequest(request.id);
 	//* the approver's own comment withdraws the approval and must be resolved too
 	await createComment(context, { id: request.id, user: reviewer, body });

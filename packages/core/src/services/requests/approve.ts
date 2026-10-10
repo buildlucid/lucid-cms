@@ -16,7 +16,6 @@ import resolveNotification from "../notifications/resolve.js";
 import sendNotification from "../notifications/send.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import addReviewer from "./helpers/add-reviewer.js";
-import countOpenComments from "./helpers/count-open-comments.js";
 import deleteVersions from "./helpers/delete-versions.js";
 import getBlockers from "./helpers/get-blockers.js";
 import getRequestAccess from "./helpers/get-request-access.js";
@@ -93,17 +92,6 @@ const approve: ServiceFn<
 			error: {
 				type: "basic",
 				message: copy("server:core.requests.approval.given"),
-				status: 409,
-			},
-			data: undefined,
-		};
-	}
-
-	if (countOpenComments({ events: request.events }) > 0) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.requests.comments.open"),
 				status: 409,
 			},
 			data: undefined,

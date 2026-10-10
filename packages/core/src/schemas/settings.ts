@@ -29,6 +29,18 @@ const settingsResponseSchema = z.object({
 						description: "Whether AI custom field generation is enabled",
 						example: true,
 					}),
+					chatRename: z.boolean().meta({
+						description: "Whether agent chats are titled automatically",
+						example: true,
+					}),
+					agents: z.boolean().meta({
+						description: "Whether agents are enabled",
+						example: true,
+					}),
+					mcp: z.boolean().meta({
+						description: "Whether the MCP server is enabled",
+						example: true,
+					}),
 				})
 				.strict(),
 		})
@@ -46,11 +58,11 @@ const settingsResponseSchema = z.object({
 			}),
 			from: z
 				.object({
-					email: z.email().meta({
+					email: z.string().optional().meta({
 						description: "The default from address",
 						example: "admin@lucidcms.io",
 					}),
-					name: z.string().meta({
+					name: z.string().optional().meta({
 						description: "The default from name",
 						example: "Admin",
 					}),
@@ -123,7 +135,7 @@ const settingsResponseSchema = z.object({
 		.optional(),
 	system: z
 		.object({
-			runtime: z.string().meta({
+			runtime: z.string().nullable().meta({
 				description: "The runtime adapter key",
 				example: "node",
 			}),

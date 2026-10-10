@@ -1,11 +1,14 @@
 import { copy } from "../../libs/i18n/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+/** Deletes one email, including system emails only for super admins. */
 const deleteSingle: ServiceFn<
 	[
 		{
 			id: number;
+			authUser: LucidActor;
 		},
 	],
 	undefined
@@ -14,6 +17,7 @@ const deleteSingle: ServiceFn<
 
 	const emailRes = await Emails.selectSingleById({
 		id: data.id,
+		includeSystem: data.authUser.superAdmin,
 		validation: {
 			enabled: true,
 			defaultError: {

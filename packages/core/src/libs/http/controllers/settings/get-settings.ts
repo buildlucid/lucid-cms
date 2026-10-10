@@ -45,7 +45,6 @@ const getSettingsController = factory.createHandlers(
 			},
 		})(context, {
 			includes: formattedQuery.include,
-			runtime: c.get("runtimeContext").runtime,
 			authUser: c.get("auth"),
 		});
 		if (settings.error) throw new LucidAPIError(settings.error);

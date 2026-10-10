@@ -1,15 +1,40 @@
 import formatter, { emailsFormatter } from "../../libs/formatters/index.js";
-import { EmailTransactionsRepository } from "../../libs/repositories/index.js";
+import { copy } from "../../libs/i18n/index.js";
+import {
+	EmailsRepository,
+	EmailTransactionsRepository,
+} from "../../libs/repositories/index.js";
 import type { GetTransactionsQueryParams } from "../../schemas/email.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { EmailTransaction } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-/** Returns the delivery transactions recorded for one email. */
+/** Returns the delivery transactions recorded for one email the actor can see. */
 const getTransactions: ServiceFn<
-	[{ emailId: number; query: GetTransactionsQueryParams }],
+	[
+		{
+			emailId: number;
+			query: GetTransactionsQueryParams;
+			authUser: LucidActor;
+		},
+	],
 	{ data: EmailTransaction[]; count: number }
 > = async (context, data) => {
+	const Emails = new EmailsRepository(context.db);
 	const EmailTransactions = new EmailTransactionsRepository(context.db);
+
+	const emailRes = await Emails.selectSingleById({
+		id: data.emailId,
+		includeSystem: data.authUser.superAdmin,
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: copy("server:core.email.not.found.message"),
+				status: 404,
+			},
+		},
+	});
+	if (emailRes.error) return emailRes;
 
 	const transactions = await EmailTransactions.selectMultipleFiltered({
 		select: [

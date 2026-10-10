@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { settingsFormatter } from "../../libs/formatters/index.js";
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getMediaStorageUsage from "../media/get-storage-usage.js";
@@ -11,8 +11,7 @@ const getSettings: ServiceFn<
 	[
 		{
 			includes?: SettingsInclude[];
-			runtime: string;
-			authUser: LucidAuth;
+			authUser: LucidActor;
 		},
 	],
 	Settings
@@ -46,7 +45,7 @@ const getSettings: ServiceFn<
 				emailSimulated: isEmailSimulated(context),
 				emailTemplates,
 				mediaDeliveryAdapterKey: context.mediaDelivery.key,
-				runtimeKey: data.runtime,
+				runtimeKey: context.runtimeContext?.runtime ?? null,
 				queueKey: context.queue.key,
 				kvKey: context.kv.key,
 				databaseKey: context.config.db.adapter,

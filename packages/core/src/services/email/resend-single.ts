@@ -6,13 +6,16 @@ import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { sendEmailJob } from "./jobs/send-email.js";
 
+/** Resends a stored email, including system emails only for super admins. */
 const resendSingle: ServiceFn<
 	[
 		{
 			id: number;
+			authUser: LucidActor;
 		},
 	],
 	{
@@ -24,6 +27,7 @@ const resendSingle: ServiceFn<
 
 	const emailRes = await Emails.selectSingleById({
 		id: data.id,
+		includeSystem: data.authUser.superAdmin,
 		validation: {
 			enabled: true,
 			defaultError: {

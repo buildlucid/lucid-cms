@@ -2,9 +2,10 @@ import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import type { RequestBlocker } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { RequestRecord, RequestState } from "../types.js";
+import countOpenComments from "./count-open-comments.js";
 import getDocumentBlockers from "./get-document-blockers.js";
 
-/** Collects approval and completion blockers from document checks and collection hooks. */
+/** Collects approval and completion blockers from document checks, open comments and collection hooks. */
 const getBlockers: ServiceFn<
 	[{ request: RequestRecord; state: RequestState }],
 	RequestBlocker[]
@@ -23,6 +24,10 @@ const getBlockers: ServiceFn<
 	);
 	if (data.request.status !== "open") {
 		return { error: undefined, data: blockers };
+	}
+	//* comments withdraw approval, so open ones only ever hold up approving
+	if (countOpenComments({ events: data.request.events }) > 0) {
+		blockers.push({ code: "comments_open" });
 	}
 
 	const checkable = data.request.documents.flatMap((document) => {

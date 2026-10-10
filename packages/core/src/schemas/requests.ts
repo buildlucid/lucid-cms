@@ -128,6 +128,7 @@ const requestBlockersSchema = z.array(
 			"review_required",
 			"target_changed",
 			"scheduling_unavailable",
+			"comments_open",
 			"check",
 		]),
 		target: z.string().optional(),

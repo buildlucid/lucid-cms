@@ -44,7 +44,7 @@ export interface Settings {
 		}[];
 	};
 	system?: {
-		runtime: string;
+		runtime: string | null;
 		database: string;
 		kv: string;
 		queue: string;

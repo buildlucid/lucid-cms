@@ -5,6 +5,7 @@ import type { RequestEvent } from "../../../../types/response.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getSingle from "../../get-single.js";
+import getAllowedTargets from "../../helpers/get-allowed-targets.js";
 import getRequestLink from "../../helpers/get-request-link.js";
 import checkCollections from "../helpers/check-collections.js";
 import type { RequestToolProps } from "../types.js";
@@ -75,20 +76,32 @@ const getRequest: ServiceFn<
 					scheduledAt: request.scheduledAt,
 					failure: request.failure,
 					completedAt: request.completedAt,
-					documents: request.documents.map((document) => ({
-						collectionKey: document.collectionKey,
-						documentId: document.documentId,
-						label: document.documentLabel,
-						source: document.source,
-						deleted: document.deleted,
-						workflowStage: document.workflowStage,
-						targets: document.targets.map((target) => ({
-							target: target.target,
-							changes: target.changed,
-							changedByOthers: target.changedSinceCreation,
-							acknowledged: target.reviewed,
-						})),
-					})),
+					documents: request.documents.map((document) => {
+						const collection = context.config.collections.find(
+							(collection) => collection.key === document.collectionKey,
+						);
+						return {
+							collectionKey: document.collectionKey,
+							documentId: document.documentId,
+							label: document.documentLabel,
+							source: document.source,
+							deleted: document.deleted,
+							workflowStage: document.workflowStage,
+							targets: document.targets.map((target) => ({
+								target: target.target,
+								changes: target.changed,
+								changedByOthers: target.changedSinceCreation,
+								acknowledged: target.reviewed,
+							})),
+							allowedTargets: collection
+								? getAllowedTargets({
+										collection,
+										type: request.type,
+										source: document.source,
+									})
+								: [],
+						};
+					}),
 					blockers: request.blockers.map((blocker) => {
 						const document =
 							blocker.requestDocumentId === undefined

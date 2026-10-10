@@ -1,3 +1,4 @@
+import { getAiUsageAgentTool } from "../../services/ai/tools/usage/index.js";
 import {
 	describeCollectionAgentTool,
 	describeCollectionMcpTool,
@@ -19,6 +20,13 @@ import {
 import type { DocumentWriteToolOptions } from "../../services/documents/tools/types.js";
 import { unpublishDocumentAgentTool } from "../../services/documents/tools/unpublish/index.js";
 import { updateDocumentAgentTool } from "../../services/documents/tools/update/index.js";
+import { findEmailsAgentTool } from "../../services/email/tools/find/index.js";
+import { getEmailAgentTool } from "../../services/email/tools/get/index.js";
+import { resendEmailAgentTool } from "../../services/email/tools/resend/index.js";
+import { findJobsAgentTool } from "../../services/jobs/tools/find/index.js";
+import { getJobAgentTool } from "../../services/jobs/tools/get/index.js";
+import { listJobSchedulesAgentTool } from "../../services/jobs/tools/list-schedules/index.js";
+import { runJobScheduleAgentTool } from "../../services/jobs/tools/run-schedule/index.js";
 import {
 	listLocalesAgentTool,
 	listLocalesMcpTool,
@@ -34,6 +42,7 @@ import {
 import { previewMediaMcpTool } from "../../services/media/tools/preview/index.js";
 import { selectMediaAgentTool } from "../../services/media/tools/select/index.js";
 import { updateMediaAgentTool } from "../../services/media/tools/update/index.js";
+import { findNotificationsAgentTool } from "../../services/notifications/tools/find/index.js";
 import { acknowledgeRequestAgentTool } from "../../services/requests/tools/acknowledge/index.js";
 import { commentOnRequestAgentTool } from "../../services/requests/tools/comment/index.js";
 import { completeRequestAgentTool } from "../../services/requests/tools/complete/index.js";
@@ -49,6 +58,7 @@ import { replyToRequestAgentTool } from "../../services/requests/tools/reply/ind
 import { scheduleRequestAgentTool } from "../../services/requests/tools/schedule/index.js";
 import { updateRequestAgentTool } from "../../services/requests/tools/update/index.js";
 import { updateRequestCommentAgentTool } from "../../services/requests/tools/update-comment/index.js";
+import { getSettingsAgentTool } from "../../services/settings/tools/get/index.js";
 import {
 	findUsersAgentTool,
 	findUsersMcpTool,
@@ -71,6 +81,10 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * approve them, so people stay in charge of what goes live. A request is
  * only in reach when all its documents are in the tool's `collections`.
  *
+ * Admin tools read how the CMS is running: emails and their delivery, jobs
+ * and their schedules, settings and AI usage. Resending an email or running
+ * a schedule early are separate tools that ask first.
+ *
  * @example
  * ```ts
  * defineAgent({
@@ -82,6 +96,7 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * 		agentTools.deleteDocument({ collections: ["pages"], direct: true }),
  * 		agentTools.requests({ collections: ["pages"] }),
  * 		agentTools.reviewing({ collections: ["pages"] }),
+ * 		agentTools.admin(),
  * 	],
  * });
  * ```
@@ -115,6 +130,19 @@ export const agentTools = {
 	completeRequest: completeRequestAgentTool,
 	/** Schedules approved requests for completion, asking for approval unless the chat or routine disables it. */
 	scheduleRequest: scheduleRequestAgentTool,
+	findEmails: findEmailsAgentTool,
+	getEmail: getEmailAgentTool,
+	/** Sends a stored email again, asking for approval unless the chat or routine disables it. */
+	resendEmail: resendEmailAgentTool,
+	findJobs: findJobsAgentTool,
+	getJob: getJobAgentTool,
+	listJobSchedules: listJobSchedulesAgentTool,
+	/** Queues a job schedule to run now, asking for approval unless the chat or routine disables it. */
+	runJobSchedule: runJobScheduleAgentTool,
+	getSettings: getSettingsAgentTool,
+	getAiUsage: getAiUsageAgentTool,
+	/** Reads notifications only for runs acting as a person. */
+	findNotifications: findNotificationsAgentTool,
 	/** Every content reading tool: collections, documents, media, locales and users. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),
@@ -144,6 +172,16 @@ export const agentTools = {
 		replyToRequestAgentTool(options),
 		updateRequestCommentAgentTool(options),
 		acknowledgeRequestAgentTool(options),
+	],
+	/** Bundles admin reads for emails, jobs, schedules, settings and AI usage; add `resendEmail` or `runJobSchedule` for writes. */
+	admin: () => [
+		findEmailsAgentTool(),
+		getEmailAgentTool(),
+		findJobsAgentTool(),
+		getJobAgentTool(),
+		listJobSchedulesAgentTool(),
+		getSettingsAgentTool(),
+		getAiUsageAgentTool(),
 	],
 };
 

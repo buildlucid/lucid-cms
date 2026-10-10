@@ -49,11 +49,7 @@ export const RequestHeaderActions: Component<{
 	const canWithdraw = createMemo(
 		() => open() && approvedByMe() && props.request.permissions.approve,
 	);
-	const blocked = createMemo(
-		() =>
-			props.request.blockers.length > 0 ||
-			(!props.request.approved && props.request.openComments > 0),
-	);
+	const blocked = createMemo(() => props.request.blockers.length > 0);
 	const primary = createMemo(() => {
 		if (!open()) return undefined;
 		if (canApprove()) {

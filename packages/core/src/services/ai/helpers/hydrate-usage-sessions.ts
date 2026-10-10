@@ -16,12 +16,9 @@ import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
-/**
- * Formats sessions with their users. An agent session links its chat only
- * when the viewer could open that chat, so other people's titles stay private.
- */
+/** Formats usage sessions with users, exposing chat titles and links only when a viewer is present and can open the chat. */
 const hydrateUsageSessions: ServiceFn<
-	[{ sessions: AiUsageSessionPropT[]; viewerId: number }],
+	[{ sessions: AiUsageSessionPropT[]; viewerId: number | null }],
 	AiUsageSession[]
 > = async (context, input) => {
 	const userIds = Array.from(
@@ -52,7 +49,9 @@ const hydrateUsageSessions: ServiceFn<
 					validation: { enabled: true },
 				})
 			: { error: undefined, data: [] },
-		resolveUserAccess(context, { userId: input.viewerId }),
+		input.viewerId === null
+			? { error: undefined, data: null }
+			: resolveUserAccess(context, { userId: input.viewerId }),
 	]);
 	if (users.error) return users;
 	if (conversations.error) return conversations;
@@ -70,6 +69,7 @@ const hydrateUsageSessions: ServiceFn<
 		conversations.data
 			.filter(
 				(conversation) =>
+					viewer.data !== null &&
 					getAgent(context.config, conversation.agent_key) !== undefined &&
 					(conversation.user_id === null ||
 						conversation.user_id === input.viewerId) &&

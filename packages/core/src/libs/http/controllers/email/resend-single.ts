@@ -58,6 +58,7 @@ const resendSingleController = factory.createHandlers(
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),
+			authUser: c.get("auth"),
 		});
 		if (emailRes.error) throw new LucidAPIError(emailRes.error);
 

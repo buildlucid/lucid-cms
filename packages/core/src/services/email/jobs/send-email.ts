@@ -30,8 +30,10 @@ const sendEmail: JobHandler<z.infer<typeof input>> = async ({
 	const Emails = new EmailsRepository(context.db);
 	const EmailTransactions = new EmailTransactionsRepository(context.db);
 
+	//* the worker delivers every stored email, including system ones hidden from people
 	const emailRes = await Emails.selectSingleById({
 		id: input.emailId,
+		includeSystem: true,
 		validation: {
 			enabled: true,
 			defaultError: {

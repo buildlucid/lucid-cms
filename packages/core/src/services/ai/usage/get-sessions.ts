@@ -6,7 +6,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import hydrateUsageSessions from "../helpers/hydrate-usage-sessions.js";
 
 const getSessions: ServiceFn<
-	[{ query: GetUsageSessionsQueryParams; viewerId: number }],
+	[{ query: GetUsageSessionsQueryParams; viewerId: number | null }],
 	{ data: AiUsageSession[]; count: number }
 > = async (context, input) => {
 	const AiGenerations = new AiGenerationsRepository(context.db);
