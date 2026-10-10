@@ -170,6 +170,7 @@ export const settleToolCall = (
 		status: AgentToolStatus;
 		output: unknown;
 		summary?: AgentToolDetails["summary"];
+		changes?: AgentToolDetails["changes"];
 	},
 ) => {
 	let settled: AgentToolDetails | undefined;
@@ -178,6 +179,7 @@ export const settleToolCall = (
 			part.status = result.status;
 			part.output = result.output;
 			if (result.summary) part.summary = result.summary;
+			if (result.changes?.length) part.changes = result.changes;
 			settled = part;
 		}
 	}

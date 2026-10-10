@@ -1,11 +1,10 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import updateMedia from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-const name = "media_update" satisfies AgentLucidToolName;
+const name = "media_update";
 
 export const updateMediaAgentTool = () =>
 	defineAgentTool({
@@ -38,6 +37,7 @@ export const updateMediaAgentTool = () =>
 				error: undefined,
 				data: {
 					...result.data,
+					changes: [{ type: "media", mediaId: input.mediaId }],
 					summary: copy("admin:core.tools.media_update.summary", {
 						data: { id: input.mediaId },
 					}),

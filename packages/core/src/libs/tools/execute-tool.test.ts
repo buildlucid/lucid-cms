@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, expect, test, vi } from "vitest";
+import { afterAll, assert, beforeAll, expect, test, vi } from "vitest";
 import z from "zod";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
@@ -260,6 +260,61 @@ test("describes a call from its input, or by its title when the input is invalid
 	});
 	expect(tool.describe({ id: 7 })).toEqual(copy.literal("Read source 7"));
 	expect(tool.describe({ id: "7" })).toEqual(copy.literal("Read source"));
+});
+
+test("keeps the resources a call changed and drops an invalid list without failing the call", async () => {
+	const execute = (tool: ReturnType<typeof defineAgentTool>) =>
+		executeAgentTool({
+			context,
+			tool,
+			input: {},
+			execution: {
+				authority: { principal: user, permissions: [], superAdmin: true },
+				actor: { kind: "user", userId: 1 },
+				run,
+				signal: AbortSignal.timeout(1000),
+				operationId: "run:call",
+			},
+		});
+	const changed = defineAgentTool({
+		name: "change_source",
+		description: "Changes a source",
+		input: schema,
+		output,
+		permissions: [],
+		handler: async () => ({
+			error: undefined,
+			data: {
+				output: { source: "agent" },
+				summary: "Changed the source.",
+				changes: [{ type: "request", requestId: 7 }],
+			},
+		}),
+	});
+	const invalid = defineAgentTool({
+		name: "change_source_badly",
+		description: "Changes a source",
+		input: schema,
+		output,
+		permissions: [],
+		handler: async () => ({
+			error: undefined,
+			data: {
+				output: { source: "agent" },
+				summary: "Changed the source.",
+				// @ts-expect-error custom tools can still return unchecked values at runtime
+				changes: [{ type: "request", requestId: "7" }],
+			},
+		}),
+	});
+
+	expect(await execute(changed)).toMatchObject({
+		type: "success",
+		data: { changes: [{ type: "request", requestId: 7 }] },
+	});
+	const dropped = await execute(invalid);
+	assert(dropped.type === "success");
+	expect(dropped.data.changes).toBeUndefined();
 });
 
 test("interaction schemas preserve raw JSON across validation and apply transforms once in the handler", async () => {

@@ -124,7 +124,7 @@ export const AutoSaveStatusPill: Component<{
 	// Render
 	return (
 		<Show when={showAutoSaveStatus()}>
-			<div class="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 pointer-events-none">
+			<div class="fixed bottom-4 right-[calc(var(--spacing-agent-panel)+--spacing(4))] md:bottom-6 md:right-[calc(var(--spacing-agent-panel)+--spacing(8.5))] z-36 pointer-events-none">
 				<div class="relative">
 					<div
 						class={classNames(

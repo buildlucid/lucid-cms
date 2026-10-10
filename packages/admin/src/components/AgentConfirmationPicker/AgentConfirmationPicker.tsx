@@ -40,7 +40,7 @@ const AgentConfirmationPicker: Component<{
 						disabled={props.disabled}
 					>
 						<TbOutlineShieldHalf size={11} class="shrink-0" />
-						<span class="truncate">
+						<span class="hidden truncate @md/composer:inline">
 							{T()(`agent.confirmation.mode.${props.value}`)}
 						</span>
 						<TbOutlineChevronDown size={9} class="shrink-0" />

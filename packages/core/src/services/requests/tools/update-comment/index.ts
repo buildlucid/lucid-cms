@@ -5,12 +5,11 @@ import {
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import updateRequestComment from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-const name = "requests_update_comment" satisfies AgentLucidToolName;
+const name = "requests_update_comment";
 
 export const updateRequestCommentAgentTool = (
 	options: CollectionToolOptions = {},
@@ -44,6 +43,7 @@ export const updateRequestCommentAgentTool = (
 				error: undefined,
 				data: {
 					output: result.data.output,
+					changes: [{ type: "request", requestId: input.requestId }],
 					summary: copy(
 						`admin:core.tools.requests_update_comment.summary.${input.action.type}`,
 						{ data: { id: input.requestId } },

@@ -7,9 +7,11 @@ import {
 	type JSXElement,
 	Show,
 } from "solid-js";
+import AgentPanel from "@/components/AgentPanel/AgentPanel";
 import FullPageLoading from "@/components/FullPageLoading/FullPageLoading";
 import { Navigation } from "@/components/Navigation/Navigation";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import { AgentSessionProvider } from "@/hooks/useAgentSession/useAgentSession";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore/siteStore";
@@ -67,38 +69,43 @@ const NavigationShell: Component<{
 	// Render
 	return (
 		<Show when={isLoading() || isSuccess()}>
-			<div class="grid grid-cols-1 md:grid-cols-main-layout min-h-full relative">
-				<Navigation />
-				<main
-					class={classNames(
-						"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-var(--spacing-sidebar)-(--spacing(4)))]",
-						{
-							"md:pr-4": interfaceDirection.isLTR(),
-							"md:pl-4": interfaceDirection.isRTL(),
-						},
-					)}
-					aria-busy={isLoading()}
-				>
-					<Show
-						when={isSuccess() && synced()}
-						fallback={
-							<PageLayout.Root>
-								<PageLayout.Body>
-									<div />
-								</PageLayout.Body>
-							</PageLayout.Root>
-						}
+			<AgentSessionProvider>
+				<div class="grid grid-cols-1 md:grid-cols-main-layout min-h-full relative">
+					<Navigation />
+					<main
+						class={classNames(
+							"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-var(--spacing-sidebar)-var(--spacing-agent-panel)-(--spacing(4)))]",
+							{
+								"md:pr-4": interfaceDirection.isLTR(),
+								"md:pl-4": interfaceDirection.isRTL(),
+							},
+						)}
+						aria-busy={isLoading()}
 					>
-						{/* an empty frame while a page's code loads, without a Suspense boundary, which would also hide the page, dropping focus, whenever a query it read refetched */}
-						<LazyPageFallback.Provider value={() => <PageLayout.Root />}>
-							{props.children}
-						</LazyPageFallback.Provider>
+						<Show
+							when={isSuccess() && synced()}
+							fallback={
+								<PageLayout.Root>
+									<PageLayout.Body>
+										<div />
+									</PageLayout.Body>
+								</PageLayout.Root>
+							}
+						>
+							{/* an empty frame while a page's code loads, without a Suspense boundary, which would also hide the page, dropping focus, whenever a query it read refetched */}
+							<LazyPageFallback.Provider value={() => <PageLayout.Root />}>
+								{props.children}
+							</LazyPageFallback.Provider>
+						</Show>
+						<Show when={isLoading()}>
+							<FullPageLoading />
+						</Show>
+					</main>
+					<Show when={isSuccess() && synced()}>
+						<AgentPanel />
 					</Show>
-					<Show when={isLoading()}>
-						<FullPageLoading />
-					</Show>
-				</main>
-			</div>
+				</div>
+			</AgentSessionProvider>
 		</Show>
 	);
 };

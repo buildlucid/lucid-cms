@@ -4,16 +4,16 @@ import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType } from "../media/types.js";
 import type { Permission } from "../users/types.js";
 
-/** A media item, document or request linked to a chat. */
-export type AgentReferenceInput =
+/** A media item, document or request in Lucid. */
+export type AgentResource =
 	| { type: "media"; mediaId: number }
-	| {
-			type: "document";
-			collectionKey: string;
-			documentId: number;
-			versionId?: number;
-	  }
+	| { type: "document"; collectionKey: string; documentId: number }
 	| { type: "request"; requestId: number };
+
+/** A media item, document or request linked to a chat. A document can be pinned to one version. */
+export type AgentReferenceInput =
+	| Exclude<AgentResource, { type: "document" }>
+	| (Extract<AgentResource, { type: "document" }> & { versionId?: number });
 
 /** A reference with the details saved when it was attached, so a message keeps what was sent. */
 export type AgentReferenceSnapshot = AgentReferenceInput & {
@@ -158,19 +158,7 @@ export type AgentLucidToolName =
 	| "web_fetch"
 	| "media_analyze"
 	| "media_read_file"
-	| "media_select"
-	| "media_update"
-	| "documents_create"
-	| "documents_update"
-	| "documents_delete"
-	| "documents_unpublish"
-	| "requests_comment"
-	| "requests_reply"
-	| "requests_update_comment"
-	| "requests_acknowledge"
-	| "requests_update"
-	| "requests_complete"
-	| "requests_schedule";
+	| "media_select";
 
 /** Widgets supplied by Lucid's runner and core tools. */
 export type AgentCoreWidgetKey =
@@ -265,6 +253,8 @@ export type AgentToolDetails = {
 	/** The shape version of a built-in tool's output, so older results keep a matching view. */
 	outputVersion?: number;
 	status: AgentToolStatus;
+	/** Resources a completed call changed, so the admin can refresh its views of them. */
+	changes?: AgentResource[];
 };
 
 export type AgentToolSummary = Omit<AgentToolDetails, "input" | "output"> & {

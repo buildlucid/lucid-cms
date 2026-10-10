@@ -21,6 +21,7 @@ export const SECTION_PREFERENCE_KEYS = [
 	"request.sidebar.schedule",
 	"request.sidebar.status",
 	"agent.chat.details",
+	"agent.panel",
 ] as const;
 
 export type SectionPreferenceKey = (typeof SECTION_PREFERENCE_KEYS)[number];

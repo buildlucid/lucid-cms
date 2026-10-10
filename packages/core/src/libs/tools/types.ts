@@ -5,6 +5,7 @@ import type {
 import type { z } from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidExternalAuth } from "../../types/hono.js";
+import type { AgentResource } from "../../types/response.js";
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -56,6 +57,7 @@ export type McpToolResult<Output> = {
 	/** Replaces the default JSON text block, eg. to return an image. */
 	content?: ContentBlock[];
 	widgets?: never;
+	changes?: never;
 };
 export type AgentToolResult<Output> = {
 	output: Output;
@@ -63,6 +65,8 @@ export type AgentToolResult<Output> = {
 	summary: AdminCopyInput;
 	/** Trusted UI data rendered through the agent.widget slot. */
 	widgets?: { key: string; version: number; data: Record<string, JsonValue> }[];
+	/** Media, documents and requests the call changed, so admin views of them refresh as the agent works. Invalid entries are logged and dropped. */
+	changes?: AgentResource[];
 	content?: never;
 };
 

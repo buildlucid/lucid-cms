@@ -1,4 +1,11 @@
 @layer base {
+	/* The open agent panel docks beside the content from xl, matching the content-* variants. */
+	@media (width >= 80rem) {
+		:root[data-agent-panel] {
+			--spacing-agent-panel: 25rem;
+		}
+	}
+
 	*,
 	::after,
 	::before,

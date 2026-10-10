@@ -428,7 +428,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			/>
 			<form
 				class={classnames(
-					"relative rounded-2xl border bg-card shadow-sm transition-colors focus-within:border-primary",
+					"@container/composer relative rounded-2xl border bg-card shadow-sm transition-colors focus-within:border-primary",
 					props.header ? "border-primary-low-border" : "border-border",
 				)}
 				onSubmit={(event) => {
@@ -477,7 +477,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 					aria-hidden="true"
 					class="pointer-events-none relative -mt-2.5 h-2.5 bg-linear-to-t from-card to-transparent"
 				/>
-				<div class="flex items-center gap-0.5 px-3 pb-3">
+				<div class="flex min-w-0 items-center gap-0.5 px-3 pb-3">
 					{props.start}
 					<AgentReferenceMenu
 						features={props.features}
@@ -493,7 +493,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 					/>
 					{props.controls}
 					<AgentCapabilityHints capabilities={props.capabilities} />
-					<div class="ms-auto flex items-center gap-0.5">
+					<div class="ms-auto flex min-w-0 items-center gap-0.5">
 						{props.end}
 						<Show
 							when={!(props.onStop && blank())}
@@ -502,7 +502,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 									shape="circle"
 									size="xs"
 									variant="secondary"
-									class="focus-visible:ring-inset"
+									class="shrink-0 focus-visible:ring-inset"
 									onClick={() => props.onStop?.()}
 									aria-label={T()("agent.composer.stop")}
 									title={T()("agent.composer.stop")}
@@ -515,7 +515,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 								type="submit"
 								shape="circle"
 								size="xs"
-								class="focus-visible:ring-inset"
+								class="shrink-0 focus-visible:ring-inset"
 								disabled={
 									blank() ||
 									uploads.uploading() ||

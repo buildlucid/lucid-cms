@@ -36,3 +36,11 @@ export const setNavigationLinkActiveState = (
 		link.removeAttribute("aria-current");
 	}
 };
+
+/** Whether a click asks for a link somewhere other than in place, eg. in a new tab. */
+export const isModifiedClick = (event: MouseEvent) =>
+	event.button !== 0 ||
+	event.metaKey ||
+	event.ctrlKey ||
+	event.shiftKey ||
+	event.altKey;

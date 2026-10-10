@@ -5,12 +5,11 @@ import {
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import acknowledgeRequest from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-const name = "requests_acknowledge" satisfies AgentLucidToolName;
+const name = "requests_acknowledge";
 
 export const acknowledgeRequestAgentTool = (
 	options: CollectionToolOptions = {},
@@ -45,6 +44,7 @@ export const acknowledgeRequestAgentTool = (
 				error: undefined,
 				data: {
 					output: result.data.output,
+					changes: [{ type: "request", requestId: input.requestId }],
 					summary: copy(
 						count === 1
 							? "admin:core.tools.requests_acknowledge.summary.one"

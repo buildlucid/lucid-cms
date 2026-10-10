@@ -91,6 +91,10 @@ export const createBrickStore = (idPrefix = "") => {
 		autoSavePaused: boolean;
 		relationFieldDragCount: number;
 		locked: boolean;
+		/** The saved content the editor's state is based on, sent with saves so one based on content saved since is refused. Null until loaded, or after a save whose content the next load brings. */
+		baseContentId: string | null;
+		/** The saved content moved on while there were unsaved edits, eg. the agent changed it. Autosave waits until the reader chooses. */
+		contentChanged: boolean;
 		refs: Refs;
 		collectionLocalized: boolean;
 		documentRevision: number;
@@ -199,6 +203,8 @@ export const createBrickStore = (idPrefix = "") => {
 		brickErrors: [],
 		initialSnapshot: null,
 		locked: false,
+		baseContentId: null,
+		contentChanged: false,
 		autoSaveCounter: 0,
 		autoSavePaused: false,
 		relationFieldDragCount: 0,
@@ -221,6 +227,8 @@ export const createBrickStore = (idPrefix = "") => {
 				set("autoSavePaused", false);
 				set("relationFieldDragCount", 0);
 				set("collectionLocalized", false);
+				set("baseContentId", null);
+				set("contentChanged", false);
 				set("refs", {});
 				markDocumentChange({ content: true, structure: true });
 				set("snapshotRevision", (previous) => previous + 1);

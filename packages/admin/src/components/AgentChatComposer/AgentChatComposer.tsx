@@ -26,6 +26,7 @@ import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
@@ -49,14 +50,16 @@ const AgentChatComposer: Component<{
 	) => Promise<AgentWidgetSubmitResult>;
 	/** Called as a message is sent, eg. to scroll to the end. */
 	onSend: () => void;
-	onEditRoutineConfirmations: () => void;
+	/** Opens the routine's settings. Without it, a routine chat's confirmations can't be edited from here. */
+	onEditRoutineConfirmations?: () => void;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
+	const session = useAgentSession();
 	const updateConversation = api.agent.useUpdateConversation();
 	//* the composer interaction set aside to send instructions instead
 	const [redirecting, setRedirecting] = createSignal<string>();
-	let composer: AgentComposerHandle | undefined;
+	const [composer, setComposer] = createSignal<AgentComposerHandle>();
 
 	// ----------------------------------------
 	// Memos
@@ -110,7 +113,7 @@ const AgentChatComposer: Component<{
 	/** Editing takes a queued message back into the chat box. */
 	const edit = async (input: AgentInput) => {
 		if (await props.chat.updateInput({ kind: "cancel", id: input.id })) {
-			composer?.insert(input.text, input.references);
+			composer()?.insert(input.text, input.references);
 		}
 	};
 	const editLast = () => {
@@ -132,6 +135,14 @@ const AgentChatComposer: Component<{
 			{ defer: true },
 		),
 	);
+	//* a first message the agent did not accept comes back to its chat box
+	createEffect(() => {
+		const message = session.returned();
+		const handle = composer();
+		if (!handle || message?.conversationId !== props.conversationId) return;
+		session.takeReturned();
+		handle.insert(message.text, message.references);
+	});
 
 	// ----------------------------------------
 	// Render
@@ -166,7 +177,7 @@ const AgentChatComposer: Component<{
 				<Show when={!activeWidget()}>
 					<AgentComposer
 						ref={(handle) => {
-							composer = handle;
+							setComposer(handle);
 							props.ref(handle);
 						}}
 						class="agent-composer-morph"
@@ -207,8 +218,10 @@ const AgentChatComposer: Component<{
 										routine={
 											current().routineId
 												? {
-														disabled: !props.routine,
-														onEdit: props.onEditRoutineConfirmations,
+														disabled:
+															!props.routine ||
+															!props.onEditRoutineConfirmations,
+														onEdit: () => props.onEditRoutineConfirmations?.(),
 													}
 												: undefined
 										}

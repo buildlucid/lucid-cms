@@ -25,7 +25,7 @@ const HomeCustomizeBar: Component<{
 	// Render
 	return (
 		//* positioned like the table selection pill, as the page layout clips sticky
-		<div class="pointer-events-none fixed right-0 bottom-4 left-0 z-40 flex items-center justify-center px-4 md:bottom-6 md:left-sidebar">
+		<div class="pointer-events-none fixed right-agent-panel bottom-4 left-0 z-36 flex items-center justify-center px-4 md:bottom-6 md:left-sidebar">
 			<div class="pointer-events-auto flex items-center gap-1 rounded-md border border-border bg-card p-2">
 				<Menu.Root placement="top">
 					<Menu.Trigger class="flex h-9 items-center gap-2 rounded-md border border-border bg-input px-3 text-sm text-subtitle transition-colors hover:border-transparent hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary">

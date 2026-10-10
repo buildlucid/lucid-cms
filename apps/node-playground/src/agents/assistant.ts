@@ -13,7 +13,9 @@ export const assistantAgent = defineAgent({
 		"Answers questions about your content and tries out playground tools.",
 	tools: [
 		agentTools.read(),
-		agentTools.edit(),
+		agentTools.edit({
+			direct: true,
+		}),
 		agentTools.review(),
 		agentTools.requests.update(),
 		agentTools.requests.complete(),

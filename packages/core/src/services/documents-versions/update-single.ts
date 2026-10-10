@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { documentVersionsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentsRepository,
 	DocumentVersionsRepository,
@@ -35,6 +36,8 @@ const updateSingle: ServiceFn<
 			versionId: number;
 			/** Callers that already hold the document's write claim, eg. request syncs. */
 			skipDocumentWriteClaims?: boolean;
+			/** The content the edit was based on. The update is refused when the version has been saved since. */
+			baseContentId?: string;
 
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
@@ -68,6 +71,21 @@ const updateSingle: ServiceFn<
 				authUser: data.authUser,
 			});
 			if (updateContextRes.error) return updateContextRes;
+
+			if (
+				data.baseContentId !== undefined &&
+				data.baseContentId !== updateContextRes.data.contentId
+			) {
+				return {
+					error: {
+						type: "basic",
+						name: copy("server:core.documents.versions.changed.name"),
+						message: copy("server:core.documents.versions.changed.message"),
+						status: 409,
+					},
+					data: undefined,
+				};
+			}
 
 			// Fire beforeUpsert transform hooks
 			const hookResponse = await executeHooks(

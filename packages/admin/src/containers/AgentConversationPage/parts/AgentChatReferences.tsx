@@ -15,8 +15,8 @@ import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
+import { agentReferenceHref } from "@/utils/agent-references";
 import helpers from "@/utils/helpers";
-import { getDocumentRoute } from "@/utils/route-helpers";
 
 //* matches `grid-cols-4`; the card only renders in the fixed-width sidebar, so the grid never reflows
 const mediaColumns = 4;
@@ -107,16 +107,6 @@ const AgentChatReferences: Component<{
 			conversationId: props.conversationId,
 			referenceId: reference.id,
 		});
-	const rowHref = (reference: Exclude<AgentReference, { type: "media" }>) =>
-		reference.type === "request"
-			? `/lucid/requests/${reference.requestId}`
-			: getDocumentRoute("edit", {
-					collectionKey: reference.collectionKey,
-					documentId: reference.documentId,
-					versionId: reference.versionId,
-					version:
-						reference.versionId === undefined ? undefined : reference.version,
-				});
 	const rowDetails = (reference: Exclude<AgentReference, { type: "media" }>) =>
 		(reference.type === "request"
 			? [T()("common.request"), sourceLabel(reference)]
@@ -218,7 +208,7 @@ const AgentChatReferences: Component<{
 								{(reference) => (
 									<li class="group relative">
 										<A
-											href={rowHref(reference)}
+											href={agentReferenceHref(reference)}
 											class="-mx-1.5 flex items-center gap-2.5 rounded-md py-1.5 ps-1.5 pe-8 hover:bg-card-hover focus-visible:outline-2 focus-visible:outline-primary"
 										>
 											<span class="block h-9 w-7 shrink-0 overflow-hidden rounded border border-border">

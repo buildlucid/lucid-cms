@@ -8,6 +8,7 @@ import type {
 	AgentInteractionAction,
 	AgentMessage,
 	AgentReferenceInput,
+	AgentResource,
 	ResponseBody,
 } from "@types";
 import {
@@ -23,6 +24,7 @@ import { createStore, reconcile, unwrap } from "solid-js/store";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
+import { refreshAgentChanges } from "@/utils/agent-changes";
 import {
 	awaitsDelivery,
 	completedTools,
@@ -37,16 +39,9 @@ import {
 	agentReferenceInput,
 } from "@/utils/agent-references";
 import {
-	analyzeMediaTool,
-	mediaReferenceTools,
-	previewMediaTool,
-	readFileTool,
-	registerReferencesTool,
-	removeReferenceTool,
-	updateMediaTool,
+	referenceTools,
 	webFetchTool,
 	webSearchTool,
-	writeTools,
 } from "@/utils/agent-tools";
 
 /** Input the server has not yet accepted, kept so a retry reuses its request ID. */
@@ -64,7 +59,13 @@ type PendingSubmission = {
  * agent is busy queue on the server, so they are delivered even if the chat is
  * closed.
  */
-export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
+export const useAgentChat = (
+	conversationId: Accessor<string | undefined>,
+	options: {
+		/** Called with what each completed tool call changed, after its views refresh. */
+		onChanges?: (changes: AgentResource[]) => void;
+	} = {},
+) => {
 	// ----------------------------------------
 	// State & Hooks
 	const queryClient = useQueryClient();
@@ -138,38 +139,19 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			queryKey: queryKeys.agent.conversationDetails(id),
 			exact: true,
 		});
-	/** Tools that change references, requests, media or web sources refresh them during the run. */
-	const refreshAfterTool = (id: string, name: string) => {
-		if (
-			name === previewMediaTool ||
-			name === registerReferencesTool ||
-			name === removeReferenceTool ||
-			name === analyzeMediaTool ||
-			name === readFileTool ||
-			mediaReferenceTools.includes(name) ||
-			writeTools.includes(name)
-		) {
+	/** Refreshes what a completed call changed during the run: the chat's references and web sources, and open views of the resources it reports. */
+	const refreshAfterTool = (
+		id: string,
+		tool: ReturnType<typeof completedTools>[number],
+	) => {
+		if (tool.changes.length > 0 || referenceTools.has(tool.name)) {
 			void refreshReferences(id);
 		}
-		//* media updates can change titles and folders shown in the media library
-		if (name === updateMediaTool) {
-			for (const queryKey of [
-				queryKeys.media.all(),
-				queryKeys.mediaFolders.list(),
-				queryKeys.mediaFolders.hierarchy(),
-			]) {
-				void queryClient.invalidateQueries({ queryKey });
-			}
-		}
-		if (name === webSearchTool || name === webFetchTool) {
+		if (tool.name === webSearchTool || tool.name === webFetchTool) {
 			void refreshDetails(id);
 		}
-		//* write tools open and change requests, so cached ones would show old details
-		if (writeTools.includes(name)) {
-			void queryClient.invalidateQueries({
-				queryKey: queryKeys.requests.all(),
-			});
-		}
+		refreshAgentChanges(queryClient, tool.changes);
+		if (tool.changes.length > 0) options.onChanges?.(tool.changes);
 	};
 	/** Applies a change to the cached conversation, so the chat updates before the server confirms it. */
 	const patchConversation = (
@@ -287,7 +269,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 						for (const tool of completedTools(event)) {
 							if (refreshedTools.has(tool.key)) continue;
 							refreshedTools.add(tool.key);
-							refreshAfterTool(id, tool.name);
+							refreshAfterTool(id, tool);
 						}
 
 						transcript.apply(event, id);

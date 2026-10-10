@@ -337,6 +337,10 @@ export const controllerSchemas = {
 					description: "Collection field values",
 				})
 				.optional(),
+			baseContentId: z.string().min(1).optional().meta({
+				description:
+					"The latest content ID the edit was based on. When set, the save is refused with a 409 if latest has been saved since.",
+			}),
 		}),
 		query: {
 			string: undefined,
@@ -373,6 +377,10 @@ export const controllerSchemas = {
 					description: "Collection field values",
 				})
 				.optional(),
+			baseContentId: z.string().min(1).optional().meta({
+				description:
+					"The version content ID the edit was based on. When set, the update is refused with a 409 if the version has been saved since.",
+			}),
 		}),
 		query: {
 			string: undefined,

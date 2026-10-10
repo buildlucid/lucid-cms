@@ -16,6 +16,7 @@ export type ToolResult = { kind: "result" } & (
 			output: { error: string };
 			summary?: undefined;
 			widgets?: undefined;
+			changes?: undefined;
 			failed: true;
 	  }
 );

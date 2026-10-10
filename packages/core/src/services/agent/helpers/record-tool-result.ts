@@ -22,11 +22,16 @@ const recordToolResult: ServiceFn<
 	],
 	"completed"
 > = async (_context, { call, checkpoint, session, outcome }) => {
-	const { output, summary, failed } = outcome;
+	const { output, summary, changes, failed } = outcome;
 
 	const status = failed ? "failed" : "complete";
 
-	const part = settleToolCall(checkpoint, call, { status, output, summary });
+	const part = settleToolCall(checkpoint, call, {
+		status,
+		output,
+		summary,
+		changes,
+	});
 
 	//* a grouped confirmation stays pending until every call it covers has a receipt
 	const confirmations = checkpoint.pending?.widget.interaction.confirmations;

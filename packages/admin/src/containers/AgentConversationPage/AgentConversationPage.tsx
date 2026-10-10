@@ -1,59 +1,37 @@
 import { useLocation, useNavigate, useParams } from "@solidjs/router";
-import type {
-	AgentConfirmationMode,
-	AgentInteractionAction,
-	AiModelSelection,
-} from "@types";
 import classnames from "classnames";
-import { TbOutlineArrowDown } from "solid-icons/tb";
 import {
 	type Component,
+	createComputed,
 	createEffect,
 	createMemo,
 	createSignal,
-	Match,
 	on,
 	onCleanup,
-	onMount,
 	Show,
-	Switch,
 } from "solid-js";
-import type { AgentComposerHandle } from "@/components/AgentComposer/AgentComposer";
-import {
-	type AgentMediaAttachments,
-	AgentTranscriptContext,
-} from "@/components/AgentTranscriptRow/AgentTranscriptContext";
-import Button from "@/components/Button/Button";
+import AgentChatHeader from "@/components/AgentChatHeader/AgentChatHeader";
+import AgentChatThread from "@/components/AgentChatThread/AgentChatThread";
+import AgentDetailsDialog from "@/components/AgentDetailsDialog/AgentDetailsDialog";
+import { AgentTranscriptContext } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
 import DeleteAgentConversationModal from "@/components/DeleteAgentConversationModal/DeleteAgentConversationModal";
-import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
-import LoadingState from "@/components/LoadingState/LoadingState";
 import RenameAgentConversationModal from "@/components/RenameAgentConversationModal/RenameAgentConversationModal";
 import RunAgentRoutineModal from "@/components/RunAgentRoutineModal/RunAgentRoutineModal";
-import Spinner from "@/components/Spinner/Spinner";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
 import ViewAgentRoutineRunsDrawer from "@/components/ViewAgentRoutineRunsDrawer/ViewAgentRoutineRunsDrawer";
-import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
+import useAgentChatView from "@/hooks/useAgentChatView/useAgentChatView";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
+import { useMediaQuery } from "@/hooks/useMediaQuery/useMediaQuery";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getAgentUnavailableReason } from "@/utils/agent-access";
-import {
-	type AgentReferenceItem,
-	agentReferenceKey,
-	canAttachMedia,
-} from "@/utils/agent-references";
-import { isToolRow, retriedToolIds } from "@/utils/agent-tools";
 import { getNewChatHref } from "@/utils/home-view";
+import { isModifiedClick, isNavigationLinkActive } from "@/utils/navigation";
 import AgentChatActions from "./parts/AgentChatActions";
-import AgentChatComposer from "./parts/AgentChatComposer";
-import AgentChatHeader from "./parts/AgentChatHeader";
 import AgentChatSidebar from "./parts/AgentChatSidebar";
-import AgentChatTimeline from "./parts/AgentChatTimeline";
-import AgentChatTranscript from "./parts/AgentChatTranscript";
 
 /**
  * A single chat with the agent: a header, then messages that scroll on their
@@ -61,80 +39,41 @@ import AgentChatTranscript from "./parts/AgentChatTranscript";
  * fixed below them. A tool call opens in a floating panel beside the chat,
  * which closes with its close button, Escape, or by selecting the call again.
  * The chat's details card sits above it, toggled from the header and
- * remembered between chats.
+ * remembered between chats. The chat is the one open across the admin, so
+ * leaving for something it links to keeps it open in the agent panel.
  */
 const AgentConversationPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const params = useParams<{ conversationId: string }>();
-	//* a chat started from the agent home arrives unsaved, with the agent and first message
-	const location = useLocation<{
-		message?: string;
-		references?: AgentReferenceItem[];
-		agentKey?: string;
-		confirmationMode?: AgentConfirmationMode;
-		modelSelection?: AiModelSelection;
-	}>();
+	const location = useLocation();
 	const navigate = useNavigate();
-	const [creating, setCreating] = createSignal(
-		location.state?.agentKey !== undefined,
-	);
-	const chat = useAgentChat(() =>
-		creating() ? undefined : params.conversationId,
-	);
-	const definitions = api.agent.useGetDefinitions();
-	const createConversation = api.agent.useCreateConversation();
+	const session = useAgentSession();
+	const chat = session.chat;
+	const view = useAgentChatView({
+		chat,
+		conversationId: () => params.conversationId,
+	});
 	const scroll = useChatScroll({
 		hasEarlier: () => chat.history.hasNextPage,
 		loadEarlier: () => chat.history.fetchNextPage(),
 	});
 	const [renameOpen, setRenameOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
-	const [selectedId, setSelectedId] = createSignal<string>();
 	const [sidebar, setSidebar] = createSignal<HTMLElement>();
+	const [details, setDetails] = createSignal<HTMLElement>();
+	//* the sidebar shows from lg; narrower chats open details in a dialog instead
+	const lg = useMediaQuery("(width >= 64rem)");
+	const xl = useMediaQuery("(width >= 80rem)");
 	const [routineOpen, setRoutineOpen] = createSignal(false);
 	const [runRoutineOpen, setRunRoutineOpen] = createSignal(false);
 	const [focusConfirmations, setFocusConfirmations] = createSignal(false);
 	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
 	const [runsOpen, setRunsOpen] = createSignal(false);
-	let composer: AgentComposerHandle | undefined;
-	const [attached, setAttached] = createSignal(false);
-	const [attachedKeys, setAttachedKeys] = createSignal<ReadonlySet<string>>();
 
 	// ----------------------------------------
 	// Memos
 	const conversation = createMemo(() => chat.data());
-	const references = api.agent.useGetReferences({
-		id: () => conversation()?.id,
-	});
-	const referenceDetails = createMemo(() =>
-		Object.fromEntries(
-			(references.data?.data ?? []).map((reference) => [
-				agentReferenceKey(reference),
-				reference,
-			]),
-		),
-	);
-	const agent = createMemo(() =>
-		definitions.data?.data.agents.find(
-			(agent) => agent.key === conversation()?.agentKey,
-		),
-	);
-	const unavailable = createMemo(() => getAgentUnavailableReason());
-	const mediaAttachments = createMemo((): AgentMediaAttachments | undefined => {
-		const keys = attachedKeys();
-		const features = agent()?.features;
-		if (!keys || !features || unavailable()) return undefined;
-		const canReadLibrary = userStore.get.hasPermission(["media:read"]).all;
-
-		return {
-			canAttach: (media) => canAttachMedia(media, { features, canReadLibrary }),
-			isAttached: (mediaId) =>
-				keys.has(agentReferenceKey({ type: "media", mediaId })),
-			toggle: (media) =>
-				composer?.toggleReference({ type: "media", mediaId: media.id }),
-		};
-	});
 	const routineQuery = api.agent.useGetRoutine({
 		id: () => conversation()?.routineId ?? undefined,
 	});
@@ -148,85 +87,36 @@ const AgentConversationPage: Component = () => {
 		() => userPreferencesStore.getSectionOpen("agent.chat.details") ?? false,
 	);
 	const sidebarOpen = createMemo(
-		() => routineCard() !== undefined || detailsOpen() || !!selectedId(),
+		() => routineCard() !== undefined || detailsOpen() || !!view.selectedId(),
 	);
-	const tools = createMemo(() =>
-		chat.messages.flatMap((message) =>
-			message.parts
-				.filter(isToolRow)
-				.map((part) => ({ messageId: message.id, part })),
-		),
-	);
-	const selectedTool = createMemo(() =>
-		tools().find((tool) => tool.part.id === selectedId()),
-	);
-	const retriedTools = createMemo(() => retriedToolIds(chat.messages));
 
 	// ----------------------------------------
 	// Functions
-	const respond = async (
-		interactionId: string,
-		response: Record<string, unknown>,
-		action: AgentInteractionAction = "submit",
-	) => {
-		const reason = unavailable();
-		if (reason) return { error: T()(`agent.unavailable.${reason}.title`) };
-		const pending = chat.pendingInteraction();
-		if (!pending || pending.id !== interactionId) {
-			return { error: T()("agent.interaction.unavailable") };
-		}
-
-		const result = await chat.respond(pending, response, action);
-		if (
-			result.error === undefined &&
-			pending.widget.interaction?.placement === "inline"
-		) {
-			composer?.focus();
-		}
-
-		return result;
-	};
 	const setDetailsOpen = (open: boolean) =>
 		userPreferencesStore.setSectionOpen("agent.chat.details", open);
-	const selectTool = (id: string) =>
-		setSelectedId((current) => (current === id ? undefined : id));
+	/** Following a link out of the agent's pages keeps this chat open beside what it opens, where the panel docks. */
+	const dockOnLeave = (event: MouseEvent) => {
+		//* the panel docks from xl, and would cover what the link opens on smaller screens
+		if (isModifiedClick(event) || !xl()) return;
+		const link =
+			event.target instanceof Element ? event.target.closest("a") : null;
+		const href = link?.getAttribute("href");
+		if (
+			!href?.startsWith("/lucid/") ||
+			isNavigationLinkActive(href, "/lucid/agent") ||
+			link?.target === "_blank"
+		) {
+			return;
+		}
+		session.panel.setOpen(true);
+	};
 
 	// ----------------------------------------
 	// Effects
 	usePageTitle(() => conversation()?.title || T()("agent.chat.new"));
 
-	/**
-	 * A chat from the agent home opens before it is saved, so sending never waits
-	 * there. It is saved here, then its first message is sent. If it
-	 * cannot be saved, the message goes back to the agent home.
-	 */
-	onMount(async () => {
-		const { message, agentKey, confirmationMode, modelSelection, references } =
-			location.state ?? {};
-		if (message === undefined) return;
-		navigate(location.pathname, { replace: true, state: {} });
-		if (agentKey) {
-			try {
-				await createConversation.action.mutateAsync({
-					id: params.conversationId,
-					agentKey,
-					confirmationMode,
-					modelSelection,
-				});
-			} catch {
-				navigate(getNewChatHref(), {
-					replace: true,
-					state: { message, confirmationMode, modelSelection, references },
-				});
-				return;
-			}
-			setCreating(false);
-		}
-		//* a message the agent did not accept goes into the chat box to try again
-		if (!(await chat.send(message, "send", references))) {
-			composer?.insert(message, references);
-		}
-	});
+	//* set before the first render, so the page never shows the chat open before it
+	createComputed(() => session.open(params.conversationId));
 	//* a run's request message shares the run's id, so `?runId=` scrolls to where the run starts, loading older pages until it is found
 	createEffect(
 		on(
@@ -258,21 +148,11 @@ const AgentConversationPage: Component = () => {
 			},
 		),
 	);
-	createEffect(() => {
-		if (!selectedId()) return;
-		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape" && !event.defaultPrevented) {
-				setSelectedId(undefined);
-			}
-		};
-		window.addEventListener("keydown", onKeyDown);
-		onCleanup(() => window.removeEventListener("keydown", onKeyDown));
-	});
 	createEffect(
 		on(
 			[() => params.conversationId, () => location.search],
 			() => {
-				setSelectedId(undefined);
+				view.setSelectedId(undefined);
 				setRunsOpen(false);
 				setRunRoutineOpen(false);
 				if (!new URLSearchParams(location.search).has("runId")) {
@@ -288,15 +168,18 @@ const AgentConversationPage: Component = () => {
 	return (
 		<AgentTranscriptContext.Provider
 			value={{
-				selected: selectedId,
-				select: setSelectedId,
-				sidebar,
-				mediaAttachments,
+				selected: view.selectedId,
+				select: view.setSelectedId,
+				sidebar: () => (lg() ? sidebar() : details()),
+				mediaAttachments: view.mediaAttachments,
 			}}
 		>
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: only watches clicks on the links inside */}
+			{/* biome-ignore lint/a11y/useKeyWithClickEvents: links fire click events from the keyboard too */}
 			<div
 				data-agent-chat
-				class="flex h-[calc(100dvh-4.25rem)] flex-col overflow-hidden rounded-t-xl border-x border-t border-border bg-background md:h-[calc(100dvh-1rem)]"
+				onClick={dockOnLeave}
+				class="flex h-[calc(100dvh-4.25rem)] flex-col overflow-hidden rounded-t-xl border-x border-t border-border bg-background bg-clip-padding md:h-[calc(100dvh-1rem)]"
 			>
 				<AgentChatHeader
 					conversation={conversation()}
@@ -316,7 +199,7 @@ const AgentConversationPage: Component = () => {
 											disabled:
 												runRoutineOpen() ||
 												chat.working() ||
-												unavailable() !== undefined,
+												view.unavailable() !== undefined,
 											onRun: () => setRunRoutineOpen(true),
 										}
 									: undefined
@@ -337,132 +220,23 @@ const AgentConversationPage: Component = () => {
 							{ "lg:me-96": sidebarOpen() },
 						)}
 					>
-						<Switch>
-							<Match when={chat.conversation.isError}>
-								<ErrorState
-									title={T()("agent.chat.missing.title")}
-									description={T()("agent.chat.missing.description")}
-									actions={
-										<Link variant="primary" size="sm" href={getNewChatHref()}>
-											{T()("agent.chat.new")}
-										</Link>
-									}
-								/>
-							</Match>
-							<Match when={chat.history.isLoading}>
-								<LoadingState class="grow" />
-							</Match>
-							<Match when={true}>
-								<div class="@container relative flex min-h-0 grow flex-col">
-									<div
-										ref={scroll.setViewport}
-										class="min-h-0 grow overflow-y-auto scrollbar [overflow-anchor:none]"
-									>
-										<div ref={scroll.setSentinel} aria-hidden="true" />
-										<div
-											ref={scroll.setContent}
-											class={classnames(
-												"mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-8 md:px-6",
-												attached() ? "pb-32" : "pb-10",
-											)}
-										>
-											<AgentChatTranscript
-												chat={chat}
-												referenceDetails={referenceDetails()}
-												selectedToolId={selectedId()}
-												retriedToolIds={retriedTools()}
-												onSelectTool={selectTool}
-												onRespond={respond}
-												canRetry={!unavailable()}
-											/>
-										</div>
-									</div>
-									<div
-										aria-hidden="true"
-										class={classnames(
-											"pointer-events-none absolute inset-x-0 -bottom-2.5 bg-linear-to-t from-background to-transparent",
-											attached() ? "h-18" : "h-10.5",
-										)}
-									/>
-									<div
-										aria-hidden="true"
-										class="pointer-events-none absolute inset-x-0 top-0 h-8 bg-linear-to-b from-background to-transparent"
-									/>
-									<AgentChatTimeline
-										messages={chat.messages}
-										viewport={scroll.viewport()}
-										onSelect={scroll.scrollToMessage}
-									/>
-									<Show when={scroll.loadingEarlier()}>
-										<div class="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
-											<Spinner size="sm" variant="subtle" />
-										</div>
-									</Show>
-									<Show when={!scroll.following()}>
-										<div
-											class={classnames(
-												"pointer-events-none absolute inset-x-0 flex justify-center",
-												attached() ? "bottom-32" : "bottom-3",
-											)}
-										>
-											<Button
-												variant="secondary"
-												size="xs"
-												shape="circle"
-												class="group pointer-events-auto shadow-md"
-												aria-label={T()("agent.chat.latest")}
-												title={T()("agent.chat.latest")}
-												onClick={() => scroll.scrollToEnd("smooth")}
-											>
-												<Show
-													when={chat.working() && !chat.pendingInteraction()}
-													fallback={<TbOutlineArrowDown size={11} />}
-												>
-													<Spinner
-														size="sm"
-														variant="secondary"
-														class="group-hover:hidden group-focus-visible:hidden"
-													/>
-													<TbOutlineArrowDown
-														size={11}
-														class="hidden group-hover:block group-focus-visible:block"
-													/>
-												</Show>
-											</Button>
-										</div>
-									</Show>
-								</div>
-							</Match>
-						</Switch>
-						<Show when={!chat.conversation.isError}>
-							<div class="relative mx-auto w-full max-w-3xl shrink-0 px-4 pb-4 md:px-6 md:pb-6">
-								<div class="-mx-2.5">
-									<AgentChatComposer
-										chat={chat}
-										conversationId={params.conversationId}
-										agent={agent()}
-										routine={routine()}
-										referenceDetails={referenceDetails()}
-										ref={(handle) => {
-											composer = handle;
-										}}
-										onAttachedChange={setAttached}
-										onReferencesChange={(references) =>
-											setAttachedKeys(
-												references &&
-													new Set(references.map(agentReferenceKey)),
-											)
-										}
-										onRespond={respond}
-										onSend={() => scroll.scrollToEnd("smooth")}
-										onEditRoutineConfirmations={() => {
-											setFocusConfirmations(true);
-											setRoutineOpen(true);
-										}}
-									/>
-								</div>
-							</div>
-						</Show>
+						<AgentChatThread
+							chat={chat}
+							view={view}
+							scroll={scroll}
+							conversationId={params.conversationId}
+							variant="page"
+							routine={routine()}
+							missingAction={
+								<Link variant="primary" size="sm" href={getNewChatHref()}>
+									{T()("agent.chat.new")}
+								</Link>
+							}
+							onEditRoutineConfirmations={() => {
+								setFocusConfirmations(true);
+								setRoutineOpen(true);
+							}}
+						/>
 					</section>
 					<Show when={sidebarOpen() && conversation()}>
 						{(current) => (
@@ -471,8 +245,8 @@ const AgentConversationPage: Component = () => {
 								conversation={current()}
 								routine={routineCard()}
 								detailsOpen={detailsOpen()}
-								selectedTool={selectedTool()}
-								retriedToolIds={retriedTools()}
+								selectedTool={lg() ? view.selectedTool() : undefined}
+								retriedToolIds={view.retriedTools()}
 								onRoutineRun={(runId) => {
 									//* older runs may not be loaded yet, and the runId link loads pages until it finds them
 									if (chat.messages.some((message) => message.id === runId)) {
@@ -488,14 +262,21 @@ const AgentConversationPage: Component = () => {
 								}}
 								onRoutineClose={() => setRoutineCardOpen(false)}
 								onDetailsClose={() => setDetailsOpen(false)}
-								onToolClose={() => setSelectedId(undefined)}
+								onToolClose={() => view.setSelectedId(undefined)}
 							/>
 						)}
 					</Show>
 				</div>
+				<Show when={!lg()}>
+					<AgentDetailsDialog
+						view={view}
+						conversationId={params.conversationId}
+						ref={setDetails}
+					/>
+				</Show>
 				<RunAgentRoutineModal
 					id={() => routine()?.id}
-					disabled={chat.working() || unavailable() !== undefined}
+					disabled={chat.working() || view.unavailable() !== undefined}
 					state={{ open: runRoutineOpen(), setOpen: setRunRoutineOpen }}
 					onRun={(conversationId) => {
 						if (conversationId === params.conversationId) {
@@ -521,7 +302,10 @@ const AgentConversationPage: Component = () => {
 				<DeleteAgentConversationModal
 					id={() => params.conversationId}
 					state={{ open: deleteOpen(), setOpen: setDeleteOpen }}
-					onDeleted={() => navigate(getNewChatHref())}
+					onDeleted={() => {
+						session.open(undefined);
+						navigate(getNewChatHref());
+					}}
 				/>
 			</div>
 		</AgentTranscriptContext.Provider>

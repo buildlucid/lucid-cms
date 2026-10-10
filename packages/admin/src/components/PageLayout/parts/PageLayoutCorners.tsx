@@ -7,7 +7,7 @@ export const PageLayoutCorners: Component = () => {
 		<>
 			<span
 				aria-hidden="true"
-				class="fixed top-0 inset-s-sidebar inset-e-0 z-35 hidden h-4 bg-sidebar md:block"
+				class="fixed top-0 inset-s-sidebar inset-e-agent-panel z-35 hidden h-4 bg-sidebar md:block"
 			/>
 			<div
 				aria-hidden="true"

@@ -27,6 +27,7 @@ export type {
 	AgentReferenceInput,
 	AgentReferenceSnapshot,
 	AgentReferenceSource,
+	AgentResource,
 	AgentRoutine,
 	AgentRoutineConversationMode,
 	AgentRoutineSource,

@@ -28,6 +28,7 @@ import {
 	agentReferenceInputSchema,
 	agentReferenceSchema,
 	agentReferenceSnapshotSchema,
+	agentResourceSchema,
 } from "./agent-references.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaResponseSchema, uploadSessionResponseSchema } from "./media.js";
@@ -206,6 +207,7 @@ export const agentToolDetailsSchema = z
 			"failed",
 			"skipped",
 		]) satisfies z.ZodType<AgentToolStatus>,
+		changes: z.array(agentResourceSchema).optional(),
 	})
 	.strict() satisfies z.ZodType<AgentToolDetails>;
 

@@ -97,9 +97,12 @@ export function useDocumentMutations(props: {
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
+			//* the response has no content ID, so the next load sets the base
+			brickStore.set("baseContentId", null);
 			brickStore.get.captureInitialSnapshot();
 		},
 		onError: (errors) => {
+			if (errors?.status === 409) brickStore.set("contentChanged", true);
 			brickStore.set(
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],
@@ -135,6 +138,7 @@ export function useDocumentMutations(props: {
 
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
+			brickStore.set("baseContentId", data.data.contentId);
 			setAutoSaveMetadata(data.data);
 
 			// If new edits landed after this autosave started, keep the current
@@ -157,6 +161,7 @@ export function useDocumentMutations(props: {
 		onError: (errors) => {
 			latestAutoSaveRequestCounter = null;
 			latestAutoSaveSnapshot = null;
+			if (errors?.status === 409) brickStore.set("contentChanged", true);
 			brickStore.set(
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],
@@ -266,6 +271,7 @@ export function useDocumentMutations(props: {
 				body: {
 					bricks: brickHelpers.getUpsertBricks(),
 					fields: brickHelpers.getCollectionPseudoBrickFields(),
+					baseContentId: brickStore.get.baseContentId ?? undefined,
 				},
 			});
 		} else {
@@ -275,6 +281,7 @@ export function useDocumentMutations(props: {
 				body: {
 					bricks: brickHelpers.getUpsertBricks(),
 					fields: brickHelpers.getCollectionPseudoBrickFields(),
+					baseContentId: brickStore.get.baseContentId ?? undefined,
 				},
 			});
 		}

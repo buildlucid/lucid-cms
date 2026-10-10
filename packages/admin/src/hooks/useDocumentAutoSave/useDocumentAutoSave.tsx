@@ -123,7 +123,7 @@ export function useDocumentAutoSave(props: {
 			requestCounter,
 		});
 		if (!draftCheckIsCurrent) return;
-		if (brickStore.get.autoSavePaused) {
+		if (brickStore.get.autoSavePaused || brickStore.get.contentChanged) {
 			lastAttemptedDraftCounter = 0;
 			return;
 		}
@@ -133,7 +133,10 @@ export function useDocumentAutoSave(props: {
 				collectionKey: collectionKey,
 				documentId: documentId,
 				versionId: versionId,
-				body: buildRequestBody(),
+				body: {
+					...buildRequestBody(),
+					baseContentId: brickStore.get.baseContentId ?? undefined,
+				},
 			});
 		}
 	}, AUTO_SAVE_DEBOUNCE_MS);
@@ -164,7 +167,8 @@ export function useDocumentAutoSave(props: {
 			debouncedAutoSave.clear();
 			return;
 		}
-		if (brickStore.get.autoSavePaused) {
+		//* changed content waits for the reader to reload or keep their edits
+		if (brickStore.get.autoSavePaused || brickStore.get.contentChanged) {
 			debouncedAutoSave.clear();
 			return;
 		}

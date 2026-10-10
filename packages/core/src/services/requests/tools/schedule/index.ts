@@ -5,12 +5,11 @@ import {
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import scheduleRequest from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-const name = "requests_schedule" satisfies AgentLucidToolName;
+const name = "requests_schedule";
 
 export const scheduleRequestAgentTool = (options: CollectionToolOptions = {}) =>
 	defineAgentTool({
@@ -43,6 +42,7 @@ export const scheduleRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				error: undefined,
 				data: {
 					output: result.data.output,
+					changes: [{ type: "request", requestId: input.requestId }],
 					summary: copy(
 						input.at === null
 							? "admin:core.tools.requests_schedule.summary.removed"

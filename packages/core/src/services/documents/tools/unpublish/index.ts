@@ -2,13 +2,13 @@ import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import writeChanges from "../helpers/write-changes.js";
 import type { DocumentWriteToolOptions } from "../types.js";
 import unpublishDocument from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-const name = "documents_unpublish" satisfies AgentLucidToolName;
+const name = "documents_unpublish";
 
 export const unpublishDocumentAgentTool = (
 	options: DocumentWriteToolOptions = {},
@@ -52,6 +52,7 @@ export const unpublishDocumentAgentTool = (
 				error: undefined,
 				data: {
 					output,
+					changes: writeChanges(output),
 					summary: copy(
 						output.outcome === "requested"
 							? "admin:core.tools.documents_unpublish.summary.requested"

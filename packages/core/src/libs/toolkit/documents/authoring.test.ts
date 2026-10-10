@@ -819,6 +819,46 @@ describe("document authoring toolkit", () => {
 		expect(stale.error?.status).toBe(409);
 	});
 
+	test("refuses an admin save based on content saved since", async () => {
+		const created = await create();
+		assert(created.data, JSON.stringify(created.error));
+		const target = { collectionKey: collection.key, id: created.data.id };
+		const opened = await readDocumentContent(context, target);
+		assert(opened.data);
+		const changed = await toolkit.documents.updateSingle({
+			...target,
+			actor,
+			data: { fields: { featured: true } },
+		});
+		assert(changed.data, JSON.stringify(changed.error));
+		//* saving keeps a revision, so the edit lands on the new latest version
+		const current = await readDocumentContent(context, target);
+		assert(current.data);
+		const save = (baseContentId: string) =>
+			updateVersion(context, {
+				collectionKey: collection.key,
+				documentId: target.id,
+				versionId: current.data.version.id,
+				userId: null,
+				baseContentId,
+				...opened.data.stored,
+			});
+		const saveRevision = (baseContentId: string) =>
+			upsertSingle(context, {
+				collectionKey: collection.key,
+				documentId: target.id,
+				userId: null,
+				baseContentId,
+				...opened.data.stored,
+			});
+
+		expect((await save(opened.data.version.contentId)).error?.status).toBe(409);
+		expect(
+			(await saveRevision(opened.data.version.contentId)).error?.status,
+		).toBe(409);
+		expect((await save(current.data.version.contentId)).error).toBeUndefined();
+	});
+
 	test("connects and disconnects relations, supports both delete modes and reports batch failures", async () => {
 		const first = await create("First");
 		const second = await create("Second");

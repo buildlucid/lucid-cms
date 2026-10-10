@@ -15,8 +15,6 @@ import { isObjectRecord } from "@/utils/type-guards";
 export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
 
 //* typed against the server's names, so a rename there fails to compile here
-export const previewMediaTool =
-	"lucid_preview_media" satisfies AgentRunnerToolName;
 export const previewMediaWidget =
 	"lucid-media-preview" satisfies AgentCoreWidgetKey;
 export const askTool = "lucid_ask_user" satisfies AgentRunnerToolName;
@@ -24,10 +22,6 @@ export const finishTool = "lucid_finish_run" satisfies AgentRunnerToolName;
 export const progressTool =
 	"lucid_share_progress" satisfies AgentRunnerToolName;
 export const skillTool = "lucid_load_skill" satisfies AgentRunnerToolName;
-export const registerReferencesTool =
-	"lucid_register_references" satisfies AgentRunnerToolName;
-export const removeReferenceTool =
-	"lucid_remove_reference" satisfies AgentRunnerToolName;
 export const questionWidget = "lucid-question" satisfies AgentCoreWidgetKey;
 export const confirmationWidget =
 	"lucid-tool-confirmation" satisfies AgentCoreWidgetKey;
@@ -39,26 +33,15 @@ export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
-export const updateMediaTool = "media_update" satisfies AgentLucidToolName;
-/** Media tools that link the media they pick or change to the chat. */
-export const mediaReferenceTools: readonly string[] = [
+/** Tools that link or remove chat references without reporting changes. Tools that change resources link those too. */
+export const referenceTools: ReadonlySet<string> = new Set([
+	"lucid_preview_media",
+	"lucid_register_references",
+	"lucid_remove_reference",
+	analyzeMediaTool,
+	readFileTool,
 	"media_select",
-	updateMediaTool,
-] satisfies AgentLucidToolName[];
-/** Document and request write tools link what they change to the chat, and open or change requests. */
-export const writeTools: readonly string[] = [
-	"documents_create",
-	"documents_update",
-	"documents_delete",
-	"documents_unpublish",
-	"requests_comment",
-	"requests_reply",
-	"requests_update_comment",
-	"requests_acknowledge",
-	"requests_update",
-	"requests_complete",
-	"requests_schedule",
-] satisfies AgentLucidToolName[];
+] satisfies (AgentRunnerToolName | AgentLucidToolName)[]);
 
 /**
  * Built-in widgets render only the versions this admin knows. Other versions

@@ -81,6 +81,8 @@
 	--breakpoint-3xl: 1600px;
 	--spacing-15: 15px;
 	--spacing-sidebar: 13.75rem;
+	/* The room the docked agent panel takes beside the content. Set in base.css while it is docked. */
+	--spacing-agent-panel: 0rem;
 	--ease-emphasized: cubic-bezier(0.32, 0.72, 0, 1);
 	--animate-enter: animation-enter 0.2s ease;
 	--animate-leave: animation-leave 0.2s ease forwards;
@@ -106,7 +108,36 @@
 }
 
 @utility grid-cols-main-layout {
-	grid-template-columns: auto 1fr;
+	grid-template-columns: auto 1fr auto;
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * The lg and xl breakpoints for the main content. From xl, the open agent
+ * panel docks beside it and takes 25rem, so these wait for that much more room.
+ */
+@custom-variant content-lg {
+	@media (width >= 64rem) and (width < 80rem) {
+		@slot;
+	}
+	@media (width >= 80rem) {
+		&:where(:root:not([data-agent-panel]) *) {
+			@slot;
+		}
+	}
+	@media (width >= 89rem) {
+		@slot;
+	}
+}
+
+@custom-variant content-xl {
+	@media (width >= 80rem) {
+		&:where(:root:not([data-agent-panel]) *) {
+			@slot;
+		}
+	}
+	@media (width >= 105rem) {
+		@slot;
+	}
+}

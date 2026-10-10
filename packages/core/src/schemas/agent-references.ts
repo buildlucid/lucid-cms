@@ -2,10 +2,11 @@ import z from "zod";
 import type {
 	AgentReferenceInput,
 	AgentReferenceSnapshot,
+	AgentResource,
 } from "../types/response.js";
 
-/** A Lucid resource linked to a conversation. */
-export const agentReferenceInputSchema = z.discriminatedUnion("type", [
+/** A media item, document or request in Lucid, eg. one a tool call changed. */
+export const agentResourceSchema = z.discriminatedUnion("type", [
 	z
 		.object({ type: z.literal("media"), mediaId: z.number().int().positive() })
 		.strict(),
@@ -14,7 +15,6 @@ export const agentReferenceInputSchema = z.discriminatedUnion("type", [
 			type: z.literal("document"),
 			collectionKey: z.string().min(1),
 			documentId: z.number().int().positive(),
-			versionId: z.number().int().positive().optional(),
 		})
 		.strict(),
 	z
@@ -23,6 +23,15 @@ export const agentReferenceInputSchema = z.discriminatedUnion("type", [
 			requestId: z.number().int().positive(),
 		})
 		.strict(),
+]) satisfies z.ZodType<AgentResource>;
+
+/** A Lucid resource linked to a conversation. */
+export const agentReferenceInputSchema = z.discriminatedUnion("type", [
+	agentResourceSchema.options[0],
+	agentResourceSchema.options[1].extend({
+		versionId: z.number().int().positive().optional(),
+	}),
+	agentResourceSchema.options[2],
 ]) satisfies z.ZodType<AgentReferenceInput>;
 
 /** Whether a person attached a resource to a message or a tool linked it. */

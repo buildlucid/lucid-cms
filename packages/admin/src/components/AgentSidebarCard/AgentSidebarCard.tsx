@@ -56,7 +56,7 @@ const AgentSidebarCard: ParentComponent<{
 			ref={card}
 			aria-labelledby={id}
 			class={classnames(
-				"flex scroll-my-4 flex-col gap-5 rounded-xl border border-border bg-card p-4 animate-slide-from-right-in md:p-5",
+				"flex scroll-my-4 flex-col gap-5 rounded-xl border border-border bg-card p-4 animate-slide-from-right-in in-data-agent-details:animate-none md:p-5",
 				props.class,
 			)}
 		>

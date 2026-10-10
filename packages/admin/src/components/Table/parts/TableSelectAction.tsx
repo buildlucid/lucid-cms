@@ -191,7 +191,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 	return (
 		<>
 			<Show when={shouldShow()}>
-				<div class="fixed bottom-4 md:bottom-6 left-0 md:left-sidebar right-0 flex justify-center items-center z-40 pointer-events-none px-4">
+				<div class="fixed bottom-4 md:bottom-6 left-0 md:left-sidebar right-agent-panel flex justify-center items-center z-36 pointer-events-none px-4">
 					<div class="pointer-events-auto flex w-full max-w-100 items-center justify-between gap-3 rounded-md border border-border bg-card p-2">
 						<div class="flex min-w-0 items-center gap-1">
 							<Button

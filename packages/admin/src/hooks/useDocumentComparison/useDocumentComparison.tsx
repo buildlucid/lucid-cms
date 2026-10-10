@@ -7,9 +7,10 @@ import {
 	createMemo,
 	createSignal,
 	on,
-	onCleanup,
 } from "solid-js";
 import { Permissions } from "@/constants/permissions";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
+import { useMediaQuery } from "@/hooks/useMediaQuery/useMediaQuery";
 import api from "@/services/api";
 import { createBrickStore } from "@/store/brickStore/brickStore";
 import userStore from "@/store/userStore/userStore";
@@ -30,9 +31,6 @@ export type ComparisonOption = {
 	/** Where an editable option is edited. */
 	location?: string;
 };
-
-/** Side-by-side columns only fit on wide screens, matching the `xl` breakpoint. */
-const WIDE_QUERY = "(min-width: 1280px)";
 
 /**
  * The view people picked from the view selector while comparing, per document.
@@ -61,9 +59,9 @@ export const useDocumentComparison = (props: {
 	const [pinned, setPinned] =
 		createSignal<ResponseBody<InternalCollectionDocument, Refs>>();
 	const [pinnedKey, setPinnedKey] = createSignal<string>();
-	const [wide, setWide] = createSignal(
-		typeof window === "undefined" || window.matchMedia(WIDE_QUERY).matches,
-	);
+	const session = useAgentSession();
+	const xl = useMediaQuery("(width >= 80rem)");
+	const xlBesidePanel = useMediaQuery("(width >= 105rem)");
 
 	// ----------------------------------------
 	// Queries
@@ -90,6 +88,10 @@ export const useDocumentComparison = (props: {
 
 	// ----------------------------------------
 	// Memos
+	//* side-by-side columns only fit wide content, matching the content-xl variant, which waits for the docked agent panel's width too
+	const wide = createMemo(
+		() => xl() && (!session.panel.docked() || xlBesidePanel()),
+	);
 	const available = createMemo(() => props.available() && wide());
 	const documentKey = createMemo(
 		() => `${props.state.collectionKey()}:${props.state.documentId()}`,
@@ -238,14 +240,6 @@ export const useDocumentComparison = (props: {
 
 	// ----------------------------------------
 	// Effects
-	createEffect(() => {
-		if (typeof window === "undefined") return;
-
-		const media = window.matchMedia(WIDE_QUERY);
-		const update = () => setWide(media.matches);
-		media.addEventListener("change", update);
-		onCleanup(() => media.removeEventListener("change", update));
-	});
 	//* narrow screens can't fit two columns, so the comparison closes instead of stacking
 	createEffect(
 		on(wide, (isWide) => {

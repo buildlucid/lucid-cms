@@ -3,6 +3,11 @@ import classNames from "classnames";
 import { TbOutlineCaretRight } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 
+/**
+ * A trail of links to the current page, kept to one line. Earlier crumbs
+ * truncate first and drop out when the trail's own width is narrow, so the
+ * current page stays readable beside other header content.
+ */
 export const Breadcrumbs: Component<{
 	breadcrumbs?: {
 		link?: string;
@@ -16,74 +21,65 @@ export const Breadcrumbs: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const includedBreadcrumbs = createMemo(() => {
-		return (props.breadcrumbs ?? []).filter((b) => b.include !== false);
-	});
-	const lastBreadcrumb = createMemo(() => {
-		const crumbs = includedBreadcrumbs();
-		return crumbs.length ? crumbs[crumbs.length - 1] : undefined;
-	});
+	const crumbs = createMemo(() =>
+		(props.breadcrumbs ?? []).filter((crumb) => crumb.include !== false),
+	);
 
 	// ----------------------------------------
 	// Render
 	return (
-		<Show when={props.breadcrumbs}>
+		<Show when={crumbs().length > 0}>
 			<nav
-				class={classNames("block", {
+				class={classNames("@container/breadcrumbs block min-w-0", {
 					"border-b border-border": props.options?.noBorder !== true,
 					"px-4 md:px-6 py-4": props.options?.noPadding !== true,
 				})}
 			>
-				<div class="block lg:hidden">
-					<Show when={lastBreadcrumb()}>
-						{(breadcrumb) => (
-							<Show when={breadcrumb().link}>
-								<A
-									href={breadcrumb().link || ""}
-									class="flex items-center text-body hover:text-primaryDark text-sm"
+				<ol class="flex min-w-0 items-center">
+					<For each={crumbs()}>
+						{(crumb, index) => {
+							const last = () => index() === crumbs().length - 1;
+							return (
+								<li
+									//* list items and links take the base text size from base.css, so both set it
+									class={classNames("min-w-0 items-center text-sm", {
+										"flex flex-1": last(),
+										"hidden max-w-48 shrink @lg/breadcrumbs:flex": !last(),
+									})}
+									aria-current={last() ? "page" : undefined}
 								>
-									{breadcrumb().label}
-								</A>
-							</Show>
-						)}
-					</Show>
-					<Show when={lastBreadcrumb() && !lastBreadcrumb()?.link}>
-						<span class="flex items-center text-body hover:text-primaryDark text-sm">
-							{lastBreadcrumb()?.label}
-						</span>
-					</Show>
-				</div>
-
-				<ul class="hidden lg:flex items-center">
-					<For each={props.breadcrumbs}>
-						{(breadcrumb, i) => (
-							<Show when={breadcrumb.include !== false}>
-								<li class="flex items-center">
-									<Show when={breadcrumb.link}>
-										<A
-											href={breadcrumb.link || ""}
-											class="flex items-center text-body hover:text-primaryDark text-sm"
-										>
-											{breadcrumb.label}
-										</A>
-									</Show>
-									<Show when={!breadcrumb.link}>
-										<span class="flex items-center text-body hover:text-primaryDark text-sm">
-											{breadcrumb.label}
-										</span>
-									</Show>
 									<Show
-										when={
-											props.breadcrumbs && i() < props.breadcrumbs.length - 1
+										when={crumb.link}
+										fallback={
+											<span
+												class="truncate whitespace-nowrap text-body"
+												title={crumb.label}
+											>
+												{crumb.label}
+											</span>
 										}
 									>
-										<TbOutlineCaretRight class="mx-2 text-sm" />
+										{(link) => (
+											<A
+												href={link()}
+												class="truncate whitespace-nowrap text-sm text-body hover:text-title"
+												title={crumb.label}
+											>
+												{crumb.label}
+											</A>
+										)}
+									</Show>
+									<Show when={!last()}>
+										<TbOutlineCaretRight
+											class="mx-2 shrink-0 text-sm"
+											aria-hidden="true"
+										/>
 									</Show>
 								</li>
-							</Show>
-						)}
+							);
+						}}
 					</For>
-				</ul>
+				</ol>
 			</nav>
 		</Show>
 	);

@@ -625,7 +625,7 @@ export const PageBuilderHeader: Component<{
 					</div>
 					<Show when={props.mode === "edit"}>
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 shrink-0 text-xs md:text-sm">
-							<div class="hidden lg:flex items-center gap-x-3 gap-y-1.5 flex-wrap">
+							<div class="hidden content-lg:flex items-center gap-x-3 gap-y-1.5 flex-wrap">
 								<div class="flex items-center gap-1.5 text-body">
 									<TbOutlineCalendarPlus size={12} />
 									<DateText date={props.state.document()?.createdAt} />
@@ -685,9 +685,9 @@ export const PageBuilderHeader: Component<{
 			<div
 				ref={stickyBarRef}
 				style={{ "view-transition-name": "document-builder-header" }}
-				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background border-x border-b border-border rounded-b-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-2.5"
+				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background border-x border-b border-border rounded-b-xl flex flex-col content-lg:flex-row content-lg:items-center content-lg:justify-between gap-3 content-lg:gap-2.5"
 			>
-				<div class="flex items-center gap-2.5 w-full lg:w-auto">
+				<div class="flex items-center gap-2.5 w-full content-lg:w-auto">
 					<div class="flex flex-col gap-1">
 						<div class="flex flex-wrap items-center gap-2">
 							<Show when={props.mode === "create"}>
@@ -724,7 +724,7 @@ export const PageBuilderHeader: Component<{
 						props.mode !== undefined
 					}
 				>
-					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full lg:w-auto">
+					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full content-lg:w-auto">
 						<Show when={props.mode !== undefined}>
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
 								<Show
@@ -733,7 +733,7 @@ export const PageBuilderHeader: Component<{
 										hasMultipleLocales()
 									}
 								>
-									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
+									<div class="flex-1 min-w-0 content-lg:flex-none content-lg:w-54">
 										<ContentLocaleSelect
 											locales={documentLocalization.locales()}
 											invalid={props.state.ui.brickTranslationErrors?.()}

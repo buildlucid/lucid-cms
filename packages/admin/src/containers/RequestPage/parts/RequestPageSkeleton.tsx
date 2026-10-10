@@ -19,7 +19,7 @@ export const RequestPageSkeleton: Component = () => {
 				</div>
 			</div>
 			<PageLayout.Body>
-				<div class="flex w-full grow flex-col lg:flex-row">
+				<div class="flex w-full grow flex-col content-xl:flex-row">
 					<div class="flex min-w-0 grow flex-col gap-10 px-4 pt-4 md:px-6 md:pt-6">
 						<span class="skeleton block h-20 w-full" />
 						<section>
@@ -35,7 +35,7 @@ export const RequestPageSkeleton: Component = () => {
 							</div>
 						</section>
 					</div>
-					<aside class="w-full shrink-0 border-t border-border p-4 md:p-6 lg:w-82.5 lg:border-t-0 lg:border-s">
+					<aside class="w-full shrink-0 border-t border-border p-4 md:p-6 content-xl:w-82.5 content-xl:border-t-0 content-xl:border-s">
 						<div class="grid gap-6">
 							<For each={[0, 1, 2]}>
 								{() => (

@@ -148,7 +148,7 @@ const RequestPage: Component = () => {
 									}
 								/>
 								<PageLayout.Body>
-									<div class="flex w-full grow flex-col lg:flex-row">
+									<div class="flex w-full grow flex-col content-xl:flex-row">
 										<div class="flex min-w-0 grow flex-col gap-10 px-4 pt-4 md:px-6 md:pt-6">
 											<Show when={publishing()}>
 												<RequestPublishing
@@ -170,7 +170,7 @@ const RequestPage: Component = () => {
 											</Show>
 											<section>
 												<SectionHeading title={T()("requests.documents")} />
-												<div class="grid gap-4">
+												<div class="grid grid-cols-1 gap-4">
 													<For each={data().documents}>
 														{(document) => (
 															<RequestDocumentCard

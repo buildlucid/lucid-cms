@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import {
+	agentChangesHref,
 	canAgentOpen,
 	canAttachMedia,
 	preserveSelectedDocumentVersions,
@@ -108,4 +109,20 @@ it("attaches personal files with uploads alone, and library media only with atta
 			{ features: features(true, true), canReadLibrary: true },
 		),
 	).toBe(false);
+});
+
+it("links a tool call's changes to the request holding them, or else the document", () => {
+	const document = {
+		type: "document",
+		collectionKey: "pages",
+		documentId: 4,
+	} as const;
+
+	expect(agentChangesHref([document, { type: "request", requestId: 9 }])).toBe(
+		"/lucid/requests/9",
+	);
+	expect(agentChangesHref([document])).toBe(
+		"/lucid/collections/pages/latest/4",
+	);
+	expect(agentChangesHref([{ type: "media", mediaId: 2 }])).toBeUndefined();
 });

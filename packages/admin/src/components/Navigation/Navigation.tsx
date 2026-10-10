@@ -18,6 +18,7 @@ import {
 	isNavigationLinkActive,
 	setNavigationLinkActiveState,
 } from "@/utils/navigation";
+import { AgentPanelToggle } from "./parts/AgentPanelToggle";
 import { NavigationMenuContent } from "./parts/NavigationMenuContent";
 
 const NavigationLogo: Component = () => (
@@ -101,6 +102,7 @@ export const Navigation: Component = () => {
 						<NavigationLogo />
 					</A>
 					<div class="flex items-center gap-1">
+						<AgentPanelToggle size="md" />
 						<NotificationBell size="md" />
 						<button
 							type="button"
@@ -125,7 +127,10 @@ export const Navigation: Component = () => {
 			<aside class="hidden md:flex w-sidebar flex-col bg-sidebar max-h-screen sticky top-0 z-40">
 				<div class="pt-6 pb-3 ps-6 pe-4 flex items-center justify-between gap-2">
 					<NavigationLogo />
-					<NotificationBell />
+					<div class="flex items-center gap-0.5">
+						<AgentPanelToggle />
+						<NotificationBell />
+					</div>
 				</div>
 				<NavigationMenuContent />
 			</aside>

@@ -301,18 +301,30 @@ export const settlesInteraction = (
 	);
 };
 
-/** The completed tool calls an event reports, keyed by message and call. */
+/** The completed tool calls an event reports, keyed by message and call, with what each changed. */
 export const completedTools = (event: AgentStreamEvent) => {
 	if (event.type === "tool") {
 		return event.status === "complete"
-			? [{ key: `${event.messageId}:${event.id}`, name: event.name }]
+			? [
+					{
+						key: `${event.messageId}:${event.id}`,
+						name: event.name,
+						changes: event.changes ?? [],
+					},
+				]
 			: [];
 	}
 	if (event.type !== "message") return [];
 
 	return event.message.parts.flatMap((part) =>
 		part.type === "tool" && part.status === "complete"
-			? [{ key: `${event.message.id}:${part.id}`, name: part.name }]
+			? [
+					{
+						key: `${event.message.id}:${part.id}`,
+						name: part.name,
+						changes: part.changes ?? [],
+					},
+				]
 			: [],
 	);
 };

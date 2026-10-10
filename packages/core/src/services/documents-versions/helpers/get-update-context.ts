@@ -33,6 +33,8 @@ const getUpdateContext: ServiceFn<
 		tableNames: CollectionTableNames;
 		migrationId: number;
 		versionType: Select<LucidVersionTable>["type"];
+		/** Changes with every save, so callers can tell whether the version moved on. */
+		contentId: string;
 		/** The request that owns the version, when it is a proposal. */
 		request?: DocumentHookRequest;
 	}
@@ -88,7 +90,7 @@ const getUpdateContext: ServiceFn<
 
 	const versionExistsRes = await Version.selectSingle(
 		{
-			select: ["id", "type"],
+			select: ["id", "type", "content_id"],
 			where: [
 				{
 					key: "id",
@@ -175,6 +177,7 @@ const getUpdateContext: ServiceFn<
 			tableNames: tableNamesRes.data,
 			migrationId: migrationIdRes.data,
 			versionType: versionExistsRes.data.type,
+			contentId: versionExistsRes.data.content_id,
 			request,
 		},
 	};

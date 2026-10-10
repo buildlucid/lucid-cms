@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import type { Agent, AgentConfirmationMode, AiModelSelection } from "@types";
+import type { Agent, AgentConfirmationMode } from "@types";
 import classnames from "classnames";
 import {
 	type Component,
@@ -9,13 +9,12 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import AgentComposer, {
-	type AgentComposerHandle,
-} from "@/components/AgentComposer/AgentComposer";
+import AgentComposer from "@/components/AgentComposer/AgentComposer";
 import AgentConfirmationPicker from "@/components/AgentConfirmationPicker/AgentConfirmationPicker";
 import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
 import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
@@ -27,6 +26,7 @@ import {
 import { getAvailableModelSelection } from "@/utils/agent-models";
 import type { AgentReferenceItem } from "@/utils/agent-references";
 import { getGreeting } from "@/utils/greeting";
+import { getNewChatHref } from "@/utils/home-view";
 import { startViewTransition } from "@/utils/view-transition";
 
 import AgentPicker from "./parts/AgentPicker";
@@ -37,30 +37,21 @@ const grownHeight = 96;
 
 /**
  * The agent's home: a greeting, a chat box that starts a new chat, suggestions
- * and the chats waiting on the reader. Sending opens the chat straight away and
- * the chat page saves it, so there is no wait here. Shown on the agent page
- * and on Home's Ask view.
+ * and the chats waiting on the reader. Sending opens the chat straight away
+ * while it saves, so there is no wait here. Shown on the agent page, on Home's
+ * Ask view and, more compactly, in the agent panel, where chats open in place.
  */
-const AgentHome: Component = () => {
+const AgentHome: Component<{
+	/** @default "page" */
+	variant?: "page" | "panel";
+}> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	const location = useLocation<{
-		message?: string;
-		references?: AgentReferenceItem[];
-		confirmationMode?: AgentConfirmationMode;
-		modelSelection?: AiModelSelection;
-	}>();
+	const location = useLocation();
 	const navigate = useNavigate();
-	const returned = location.state?.message;
-	const returnedReferences = location.state?.references;
-	const [returnedModelSelection, setReturnedModelSelection] =
-		createSignal<AiModelSelection | null>(
-			location.state?.modelSelection ?? null,
-		);
+	const session = useAgentSession();
 	const [confirmationMode, setConfirmationMode] =
-		createSignal<AgentConfirmationMode>(
-			location.state?.confirmationMode ?? "tool-defaults",
-		);
+		createSignal<AgentConfirmationMode>("tool-defaults");
 	const [composerBlank, setComposerBlank] = createSignal(true);
 	const painted = useFirstPaint();
 	const definitions = api.agent.useGetDefinitions();
@@ -98,10 +89,10 @@ const AgentHome: Component = () => {
 		if (!key || !models.isSuccess) return null;
 		return getAvailableModelSelection(
 			models.data.data,
-			returnedModelSelection() ??
-				userPreferencesStore.getAgentModelSelection(key),
+			userPreferencesStore.getAgentModelSelection(key),
 		);
 	});
+	const panel = createMemo(() => props.variant === "panel");
 	const greeting = createMemo(getGreeting);
 	const waitingAgentKey = createMemo(() =>
 		agents().length > 1 ? agent()?.key : undefined,
@@ -124,28 +115,35 @@ const AgentHome: Component = () => {
 			return false;
 		}
 
-		startViewTransition(
-			() =>
-				navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
-					state: {
-						message: text,
-						references,
-						agentKey: selected.key,
-						confirmationMode: confirmationMode(),
-						modelSelection: modelSelection() ?? undefined,
-					},
-				}),
-			{ ready: "[data-agent-chat] .agent-composer-morph" },
-		);
+		const { id, created } = session.start({
+			text,
+			references,
+			agentKey: selected.key,
+			confirmationMode: confirmationMode(),
+			modelSelection: modelSelection() ?? undefined,
+		});
+		//* the panel shows the new chat in place
+		if (panel()) return true;
+
+		const href = `/lucid/agent/chats/${id}`;
+		//* the chat route skips fetching a chat that arrives unsaved
+		startViewTransition(() => navigate(href, { state: { unsaved: true } }), {
+			ready: "[data-agent-chat] .agent-composer-morph",
+		});
+		//* a chat that could not be saved returns its message to this chat box
+		void created.then((saved) => {
+			if (!saved && location.pathname === href) {
+				navigate(getNewChatHref(), { replace: true });
+			}
+		});
 		return true;
 	};
 
 	// ----------------------------------------
 	// Effects
 	onMount(() => {
-		void import("@/containers/AgentConversationPage/AgentConversationPage");
-		if (returned !== undefined) {
-			navigate(location.pathname, { replace: true, state: {} });
+		if (!panel()) {
+			void import("@/containers/AgentConversationPage/AgentConversationPage");
 		}
 	});
 
@@ -160,21 +158,37 @@ const AgentHome: Component = () => {
 		>
 			<Show when={agent()}>
 				{(current) => (
-					<section class="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-[18vh] pb-10">
+					<section
+						class={classnames(
+							"flex w-full flex-col",
+							panel()
+								? "gap-6 px-3 pt-[12vh] pb-3"
+								: "mx-auto max-w-3xl gap-8 pt-[18vh] pb-10",
+						)}
+					>
 						<div class="flex flex-col items-center gap-1.5 text-center">
-							<h2 class="text-2xl font-medium text-title">{greeting()}</h2>
-							<p class="text-base text-body">{T()("agent.home.title")}</p>
+							<h2
+								class={classnames(
+									"font-medium text-title",
+									panel() ? "text-lg" : "text-2xl",
+								)}
+							>
+								{greeting()}
+							</h2>
+							<p
+								class={classnames(
+									"text-body",
+									panel() ? "text-sm" : "text-base",
+								)}
+							>
+								{T()("agent.home.title")}
+							</p>
 						</div>
 						<AgentUnavailableNotice>
 							<div class="flex flex-col">
 								<AgentComposer
-									ref={(handle: AgentComposerHandle) => {
-										if (returned !== undefined) {
-											handle.insert(returned, returnedReferences);
-										}
-									}}
 									class="agent-composer-morph"
-									size="lg"
+									size={panel() ? "md" : "lg"}
 									grow={showSuggestions() ? 0 : grownHeight}
 									autofocus={true}
 									onBlankChange={setComposerBlank}
@@ -200,10 +214,9 @@ const AgentHome: Component = () => {
 											<AgentPicker
 												agents={agents()}
 												selected={current()}
-												onSelect={(agent) => {
-													userPreferencesStore.setAgentKey(agent.key);
-													setReturnedModelSelection(null);
-												}}
+												onSelect={(agent) =>
+													userPreferencesStore.setAgentKey(agent.key)
+												}
 											/>
 										</Show>
 									}
@@ -211,13 +224,12 @@ const AgentHome: Component = () => {
 										<AgentModelPicker
 											agentKey={current().key}
 											value={modelSelection()}
-											onChange={(selection) => {
+											onChange={(selection) =>
 												userPreferencesStore.setAgentModelSelection(
 													current().key,
 													selection,
-												);
-												setReturnedModelSelection(null);
-											}}
+												)
+											}
 										/>
 									}
 								/>
@@ -235,7 +247,11 @@ const AgentHome: Component = () => {
 											<p class="px-1 text-xs text-muted">
 												{T()("agent.home.suggestions")}
 											</p>
-											<ul class="grid gap-2.5 sm:grid-cols-2">
+											<ul
+												class={classnames("grid gap-2.5", {
+													"sm:grid-cols-2": !panel(),
+												})}
+											>
 												<For each={shownSuggestions()}>
 													{(suggestion) => (
 														<AgentSuggestionButton
@@ -253,7 +269,11 @@ const AgentHome: Component = () => {
 										</div>
 									</div>
 								</div>
-								<AgentWaitingChats agentKey={waitingAgentKey()} class="pt-6" />
+								<AgentWaitingChats
+									agentKey={waitingAgentKey()}
+									class="pt-6"
+									onOpen={panel() ? session.open : undefined}
+								/>
 							</div>
 						</AgentUnavailableNotice>
 					</section>

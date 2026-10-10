@@ -3,10 +3,13 @@ import type {
 	AgentCapabilities,
 	AgentReferenceInput,
 	AgentReferenceSnapshot,
+	AgentResource,
+	DocumentVersionType,
 	Media,
 } from "@types";
 import T from "@/translations";
 import mediaUrl from "@/utils/media-url";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import { getTranslation } from "@/utils/translation-helpers";
 
 /** A reference shown in chat, with a preview when one is known. */
@@ -262,4 +265,28 @@ export const agentReferenceTilt = (reference: AgentReferenceInput) => {
 	}
 
 	return tilts[Math.abs(hash) % tilts.length] ?? 0;
+};
+
+/** The page a linked document or request opens on. Media has no page of its own. */
+export const agentReferenceHref = (
+	reference: Exclude<AgentReferenceInput, { type: "media" }> & {
+		version?: DocumentVersionType;
+	},
+) =>
+	reference.type === "request"
+		? getRequestRoute({ requestId: reference.requestId })
+		: getDocumentRoute("edit", {
+				collectionKey: reference.collectionKey,
+				documentId: reference.documentId,
+				versionId: reference.versionId,
+				version:
+					reference.versionId === undefined ? undefined : reference.version,
+			});
+
+/** Where a tool call's changes are reviewed: the request holding them, or else the document it changed. */
+export const agentChangesHref = (changes: AgentResource[]) => {
+	const changed =
+		changes.find((change) => change.type === "request") ??
+		changes.find((change) => change.type === "document");
+	return changed ? agentReferenceHref(changed) : undefined;
 };

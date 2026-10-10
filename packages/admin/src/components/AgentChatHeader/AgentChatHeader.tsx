@@ -1,4 +1,5 @@
 import type { AgentConversation } from "@types";
+import classnames from "classnames";
 import {
 	type Component,
 	createEffect,
@@ -7,13 +8,18 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 
-/** The top of the chat column: the agent, the chat's title and its actions. It stays put while the messages scroll. */
+/** The top of a chat: the agent, the chat's title and its actions. It stays put while the messages scroll. */
 const AgentChatHeader: Component<{
 	conversation?: AgentConversation;
+	/** Shown when there is no chat to load, eg. before a new one starts. Otherwise a missing chat shows as loading. */
+	emptyTitle?: string;
+	/** The panel sits beside a page's own heading, so it uses a smaller inset and a second-level heading. @default "page" */
+	variant?: "page" | "panel";
 	actions: JSXElement;
 }> = (props) => {
 	// ----------------------------------------
@@ -57,10 +63,29 @@ const AgentChatHeader: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<header class="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3 md:px-6">
+		<header
+			class={classnames(
+				"flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3",
+				{ "md:px-6": props.variant !== "panel" },
+			)}
+		>
 			<Show
 				when={props.conversation}
-				fallback={<span class="skeleton block h-5 w-48" />}
+				fallback={
+					<Show
+						when={props.emptyTitle}
+						fallback={<span class="skeleton block h-5 w-48" />}
+					>
+						{(title) => (
+							<Dynamic
+								component={props.variant === "panel" ? "h2" : "h1"}
+								class="min-w-0 truncate text-sm font-medium text-title"
+							>
+								{title()}
+							</Dynamic>
+						)}
+					</Show>
+				}
 			>
 				{(conversation) => (
 					<div class="flex min-w-0 items-center gap-2.5">
@@ -76,9 +101,12 @@ const AgentChatHeader: Component<{
 								{T()("agent.routine.run")}
 							</Pill>
 						</Show>
-						<h1 class="min-w-0 truncate text-sm font-medium text-title">
+						<Dynamic
+							component={props.variant === "panel" ? "h2" : "h1"}
+							class="min-w-0 truncate text-sm font-medium text-title"
+						>
 							{displayTitle()}
-						</h1>
+						</Dynamic>
 					</div>
 				)}
 			</Show>

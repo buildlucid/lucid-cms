@@ -16,11 +16,15 @@ const AgentPicker: Component<{
 	return (
 		<Menu.Root placement="top-start">
 			<Menu.Trigger
-				class={classnames(composerTriggerClasses, "max-w-48 px-2")}
+				class={classnames(composerTriggerClasses, "min-w-0 max-w-48 px-2")}
 				aria-label={T()("agent.select.label")}
+				title={props.selected.name}
 			>
 				<TbOutlineRobot size={11} class="shrink-0" />
-				<span class="truncate">{props.selected.name}</span>
+				{/* a narrow chat box keeps the icon, with the name in the title */}
+				<span class="hidden truncate @md/composer:inline">
+					{props.selected.name}
+				</span>
 				<TbOutlineChevronDown size={9} class="shrink-0" />
 			</Menu.Trigger>
 			<Menu.Content>

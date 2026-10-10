@@ -138,7 +138,7 @@ const AgentModelPicker: Component<{
 				</span>
 				<Show when={saved().effort}>
 					{(value) => (
-						<span class="hidden shrink-0 opacity-60 sm:inline">
+						<span class="hidden shrink-0 opacity-60 @md/composer:inline">
 							{T()(`agent.models.effort.${value()}`)}
 						</span>
 					)}

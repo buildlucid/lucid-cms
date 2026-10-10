@@ -6,6 +6,7 @@ const modKey = isMac() ? "⌘" : "Ctrl";
 export const shortcutText = {
 	changeLocale: `${modKey}+Shift+.`,
 	newEntry: "Shift+T",
+	toggleAgentPanel: `${modKey}+J`,
 };
 
 export const inModal = () =>
@@ -17,6 +18,10 @@ const useKeyboardShortcuts = (options: {
 		callback: () => void;
 	};
 	newEntry?: {
+		permission: () => boolean;
+		callback: () => void;
+	};
+	toggleAgentPanel?: {
 		permission: () => boolean;
 		callback: () => void;
 	};
@@ -44,6 +49,19 @@ const useKeyboardShortcuts = (options: {
 			) {
 				e.preventDefault();
 				options.newEntry.callback();
+			}
+		}
+
+		// toggle agent panel: meta/ctrl + j
+		if (options.toggleAgentPanel?.permission()) {
+			if (
+				(e.metaKey || e.ctrlKey) &&
+				!e.shiftKey &&
+				!e.altKey &&
+				e.code === "KeyJ"
+			) {
+				e.preventDefault();
+				options.toggleAgentPanel.callback();
 			}
 		}
 

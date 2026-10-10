@@ -1,6 +1,7 @@
 import { z } from "zod";
 import constants from "../../constants/constants.js";
 import { agentInteractionRequestSchema } from "../../schemas/agent.js";
+import { agentResourceSchema } from "../../schemas/agent-references.js";
 import { isJsonObject } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -23,6 +24,7 @@ import type {
 } from "./types.js";
 
 const summaryTextSchema = z.string().trim().min(1).max(2000);
+const changesSchema = z.array(agentResourceSchema).optional();
 
 /**
  * Defines a tool for agents. Register it with an agent's `tools`. It runs with
@@ -88,23 +90,36 @@ function defineAgentTool<
 		result: AgentToolResult<unknown>,
 		context: ServiceContext,
 	) => {
+		//* changes and the summary only shape the admin, so bad ones never fail a call whose work is done
+		const changes = changesSchema.safeParse(result.changes);
+		if (!changes.success) {
+			logger.error({
+				event: "tools.changes.invalid",
+				message: `Tool ${options.name} returned invalid changes`,
+				error: changes.error,
+			});
+		}
+		const checked = {
+			...result,
+			changes: changes.success ? changes.data : undefined,
+		};
+
 		const summary = adminCopyInputSchema.safeParse(result.summary);
 		if (
 			summary.success &&
 			summaryTextSchema.safeParse(context.translate(summary.data)).success
 		) {
 			return checkOutput(
-				{ ...result, summary: normalizeCopy(summary.data) },
+				{ ...checked, summary: normalizeCopy(summary.data) },
 				context,
 			);
 		}
 
-		//* the summary is display copy, so a bad one never fails a call whose work is done
 		logger.error({
 			event: "tools.summary.invalid",
 			message: `Tool ${options.name} returned an invalid summary`,
 		});
-		return checkOutput({ ...result, summary: title }, context);
+		return checkOutput({ ...checked, summary: title }, context);
 	};
 
 	if (!("interaction" in options)) {

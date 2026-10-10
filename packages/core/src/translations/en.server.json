@@ -635,6 +635,8 @@
 	"core.error.schema.migration.required.name": "Schema Migration Required",
 	"core.error.schema.migration.required.message": "The collection requires a schema migration. Please run the migration command to update the database.",
 	"core.documents.versions.not.found.message": "The version you are trying to access does not exist.",
+	"core.documents.versions.changed.name": "Document changed",
+	"core.documents.versions.changed.message": "This document changed after you opened it. Reload it to see the changes, or keep your edits to replace them.",
 	"core.error.update.non.latest.version.name": "Update Version Error",
 	"core.error.update.non.latest.version.message": "Only the latest document version can be updated.",
 	"core.email.failed.to.send": "An error occurred while sending the email.",

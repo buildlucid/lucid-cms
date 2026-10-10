@@ -15,6 +15,8 @@ export interface Params {
 	body: {
 		bricks?: Array<BrickData>;
 		fields?: Array<InternalDocumentField>;
+		/** The content the edit was based on, so a save over content saved since is refused. */
+		baseContentId?: string;
 	};
 }
 

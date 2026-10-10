@@ -54,6 +54,7 @@ import T from "@/translations";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getRequestRoute } from "@/utils/route-helpers";
+import DocumentChangedBar from "./parts/DocumentChangedBar";
 import { PageBuilderModals } from "./parts/PageBuilderModals";
 
 const DocumentEditorPage: Component<{
@@ -244,8 +245,15 @@ const DocumentEditorPage: Component<{
 
 			//* preserve local unsaved edits during same-view background query updates
 			//* - Without this guard, selecting a relation field can trigger a refetch that rehydrates store fields from stale server data and wipes local changes
+			//* - Content saved since, eg. by the agent, waits for the reader to reload or keep their edits
 			if (shouldMerge && hasUnsavedChanges) {
 				brickStore.set("locked", uiState.isBuilderLocked());
+				const saved = document?.contentId ?? null;
+				if (brickStore.get.baseContentId === null) {
+					brickStore.set("baseContentId", saved);
+				} else if (saved !== null && saved !== brickStore.get.baseContentId) {
+					brickStore.set("contentChanged", true);
+				}
 				return;
 			}
 
@@ -256,6 +264,8 @@ const DocumentEditorPage: Component<{
 			}
 			brickStore.get.setRefs(docState.refs());
 			brickStore.set("locked", uiState.isBuilderLocked());
+			brickStore.set("baseContentId", document?.contentId ?? null);
+			brickStore.set("contentChanged", false);
 			didHydrateStore = true;
 		});
 
@@ -453,6 +463,21 @@ const DocumentEditorPage: Component<{
 
 		return `${option.location}?compare=${encodeURIComponent(keep)}`;
 	};
+	/** Drops unsaved edits for the saved content that changed under them. */
+	const reloadChangedContent = async () => {
+		autoSave.debouncedAutoSave.clear();
+		await docState.documentQuery.refetch();
+		//* the edits are dropped, so they stop counting as unsaved and the merge replaces them
+		brickStore.get.captureInitialSnapshot();
+		setDocumentState();
+	};
+	/** Keeps unsaved edits, so the next save replaces the content that changed under them. */
+	const keepEdits = async () => {
+		await docState.documentQuery.refetch();
+		brickStore.set("baseContentId", docState.document()?.contentId ?? null);
+		brickStore.set("contentChanged", false);
+		autoSave.debouncedAutoSave();
+	};
 	const selectLeftVersion = (option: ComparisonOption) => {
 		const compared = comparison.selectedKey();
 		if (!option.location || !compared) return;
@@ -551,13 +576,13 @@ const DocumentEditorPage: Component<{
 							beforeVersionChange: resolveVersionChange,
 						}}
 					/>
-					{/* the sidebar offset is this page's, so the alerts stay unaware of it */}
+					{/* the sidebar and agent panel offsets are this page's, so the alerts stay unaware of them */}
 					<div
 						class={classnames(
-							"fixed bottom-6 left-0 md:left-sidebar right-0 z-30 flex justify-center gap-4 px-4 pointer-events-none",
+							"fixed bottom-6 left-0 md:left-sidebar right-agent-panel z-30 flex justify-center gap-4 px-4 pointer-events-none",
 							uiState.getPreviewOpen()
-								? "xl:right-4 xl:translate-x-[-27.5%]"
-								: "xl:right-80",
+								? "content-xl:right-[calc(var(--spacing-agent-panel)+(--spacing(4)))] content-xl:translate-x-[-27.5%]"
+								: "content-xl:right-[calc(var(--spacing-agent-panel)+(--spacing(80)))]",
 						)}
 					>
 						<Show when={uiState.isBuilderLocked()}>
@@ -617,11 +642,18 @@ const DocumentEditorPage: Component<{
 									}
 								/>
 							</Show>
-							<div class="w-full min-h-0 flex flex-col xl:flex-row grow items-stretch xl:items-start">
+							<Show when={brickStore.get.contentChanged}>
+								<DocumentChangedBar
+									reloading={docState.documentQuery.isFetching}
+									onKeep={() => void keepEdits()}
+									onReload={() => void reloadChangedContent()}
+								/>
+							</Show>
+							<div class="w-full min-h-0 flex flex-col content-xl:flex-row grow items-stretch content-xl:items-start">
 								<ComparisonColumn
 									sticky={comparison.open()}
 									class={classnames("w-full min-w-0 grow flex flex-col", {
-										"xl:w-1/2 xl:flex-none": comparison.open(),
+										"content-xl:w-1/2 content-xl:flex-none": comparison.open(),
 									})}
 								>
 									<CollectionPseudoBrick
@@ -657,7 +689,7 @@ const DocumentEditorPage: Component<{
 								<Show when={comparison.open()}>
 									<ComparisonColumn
 										sticky={true}
-										class="w-full min-w-0 xl:w-1/2 xl:flex-none border-t xl:border-t-0 xl:border-s border-border"
+										class="w-full min-w-0 content-xl:w-1/2 content-xl:flex-none border-t content-xl:border-t-0 content-xl:border-s border-border"
 									>
 										<Show when={comparison.changed()}>
 											<Alert variant="warning" appearance="bar">
@@ -720,7 +752,7 @@ const DocumentEditorPage: Component<{
 								</Show>
 
 								<Show when={uiState.getPreviewOpen()}>
-									<div class="relative w-full min-h-[70vh] xl:w-[55%] xl:min-h-0 xl:flex-none xl:sticky xl:top-(--document-header-bar-height) xl:self-start xl:h-[calc(100vh-var(--document-header-bar-height))]">
+									<div class="relative w-full min-h-[70vh] content-xl:w-[55%] content-xl:min-h-0 content-xl:flex-none content-xl:sticky content-xl:top-(--document-header-bar-height) content-xl:self-start content-xl:h-[calc(100vh-var(--document-header-bar-height))]">
 										<DocumentPreview
 											open={uiState.getPreviewOpen}
 											collectionKey={docState.collectionKey}

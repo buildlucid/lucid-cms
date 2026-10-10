@@ -5,13 +5,12 @@ import {
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import commentOnRequest from "../comment/handler.js";
 import { outputSchema } from "../comment/schema.js";
 import { inputSchema } from "./schema.js";
 
-const name = "requests_reply" satisfies AgentLucidToolName;
+const name = "requests_reply";
 
 export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
 	defineAgentTool({
@@ -45,6 +44,7 @@ export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				error: undefined,
 				data: {
 					output: result.data.output,
+					changes: [{ type: "request", requestId: input.requestId }],
 					summary: copy("admin:core.tools.requests_reply.summary", {
 						data: { id: input.requestId },
 					}),
