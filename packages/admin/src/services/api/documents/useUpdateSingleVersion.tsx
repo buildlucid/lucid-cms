@@ -9,6 +9,7 @@ import { queryKeys } from "@/services/query-keys";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { tabId } from "@/utils/tab-id";
 
 export interface Params {
 	collectionKey: string;
@@ -27,7 +28,8 @@ export const updateSingleVersionReq = (params: Params) => {
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}`,
 		csrf: true,
 		method: "PATCH",
-		body: params.body,
+		//* a tab that no longer holds the document is refused, eg. once someone took over
+		body: { ...params.body, editorTabId: tabId },
 	});
 };
 

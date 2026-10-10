@@ -1,3 +1,4 @@
+import { deleteEditorReq, updateEditorReq } from "./editors";
 import useAlign from "./useAlign";
 import useCheckSingleVersion from "./useCheckSingleVersion";
 import useCreatePreview from "./useCreatePreview";
@@ -24,6 +25,8 @@ import useUpdateSingleVersion from "./useUpdateSingleVersion";
 import useUpdateWorkflow from "./useUpdateWorkflow";
 
 const exportObject = {
+	updateEditorReq,
+	deleteEditorReq,
 	useAlign,
 	useGetMultiple,
 	useCreatePreview,

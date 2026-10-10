@@ -7,6 +7,7 @@ import {
 	agentRunOutcomeSchema,
 	routineToolsSchema,
 } from "../../schemas/agent.js";
+import { agentScreenSchema } from "../../schemas/agent-screen.js";
 import type {
 	AgentRoutineConversationMode,
 	AiModelConfig,
@@ -72,6 +73,8 @@ export const checkpointSchema = z.object({
 	routineTools: routineToolsSchema.optional(),
 	/** Input receipts survive compaction and a crash before acknowledgement. */
 	inputIds: z.array(z.uuid()).optional(),
+	/** The admin screen the person's latest message came from, which answers builder tools. */
+	screen: agentScreenSchema.optional(),
 	messages: z.array(
 		modelMessageSchema.and(z.object({ sourceId: z.uuid().optional() })),
 	),
@@ -230,6 +233,13 @@ export type AgentFeatures = {
 	documents: {
 		/** Let people select CMS documents in the composer. */
 		attach: boolean;
+	};
+	/** Enables tools to read and edit the person's open document builder, including unsaved content, with changes remaining unsaved until the person saves them. */
+	builder: {
+		/** Register lucid_builder_read and lucid_builder_focus. */
+		read: boolean;
+		/** Register lucid_builder_update. Needs `read`. */
+		edit: boolean;
 	};
 	web: {
 		/** Register Lucid's web search tool. Disable when providing your own. */

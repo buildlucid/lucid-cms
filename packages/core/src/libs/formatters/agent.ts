@@ -69,6 +69,7 @@ const formatDefinitions = (props: {
 						attach: agent.features.media.attach,
 					},
 					documents: { attach: agent.features.documents.attach },
+					builder: agent.features.builder,
 				},
 				capabilities: summariseCapabilities(
 					getCapabilityProviders({
@@ -193,6 +194,7 @@ const formatInput = (props: {
 	id: props.input.id,
 	text: props.input.text,
 	references: props.input.references,
+	screen: props.input.screen,
 	status: props.input.status === "claimed" ? "claimed" : "pending",
 	delivery: props.input.target_run_id
 		? { kind: "steer", targetRunId: props.input.target_run_id }

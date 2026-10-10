@@ -5,6 +5,7 @@ import checkVersion from "../../../controllers/documents/check-version.js";
 import createPreview from "../../../controllers/documents/create-preview.js";
 import createSingle from "../../../controllers/documents/create-single.js";
 import createVersion from "../../../controllers/documents/create-version.js";
+import deleteEditor from "../../../controllers/documents/delete-editor.js";
 import deleteMultiple from "../../../controllers/documents/delete-multiple.js";
 import deleteMultiplePermanently from "../../../controllers/documents/delete-multiple-permanently.js";
 import deleteSingle from "../../../controllers/documents/delete-single.js";
@@ -20,6 +21,7 @@ import requestCreation from "../../../controllers/documents/request-creation.js"
 import restoreMultiple from "../../../controllers/documents/restore-multiple.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
 import unpublish from "../../../controllers/documents/unpublish.js";
+import updateEditor from "../../../controllers/documents/update-editor.js";
 import updateOrder from "../../../controllers/documents/update-order.js";
 import updateVersion from "../../../controllers/documents/update-version.js";
 import updateWorkflow from "../../../controllers/documents/update-workflow.js";
@@ -39,6 +41,8 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:collectionKey/workflow/assignees", ...getWorkflowAssignees)
 	.patch("/:collectionKey/:id/workflow", ...updateWorkflow)
 	.patch("/:collectionKey/:id/order", ...updateOrder)
+	.put("/:collectionKey/:id/editors/:tabId", ...updateEditor)
+	.delete("/:collectionKey/:id/editors/:tabId", ...deleteEditor)
 	.post("/:collectionKey/:id/preview", ...createPreview)
 	.get("/:collectionKey/:version", ...getMultiple)
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)

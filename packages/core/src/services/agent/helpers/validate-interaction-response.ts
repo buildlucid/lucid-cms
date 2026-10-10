@@ -9,6 +9,7 @@ import type { Checkpoint } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import { toolDefinitionInternal } from "../../../libs/tools/registry.js";
+import { agentScreenResponseSchema } from "../../../schemas/agent-screen.js";
 import type { AgentInteractionAction } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess from "./check-agent-access.js";
@@ -104,6 +105,24 @@ const validateInteractionResponse: ServiceFn<
 		};
 	}
 
+	if (pending.widget.key === widgets.screen) {
+		const parsed = agentScreenResponseSchema.safeParse(props.response);
+		if (!parsed.success) {
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 400,
+					message: copy("server:agent.interaction.invalid"),
+				},
+			};
+		}
+
+		return {
+			error: undefined,
+			data: { action: "submit", response: parsed.data },
+		};
+	}
 	if (pending.widget.key === widgets.question) {
 		const parsed = questionResponseSchema.safeParse(props.response);
 		if (!parsed.success) {
@@ -135,6 +154,7 @@ const validateInteractionResponse: ServiceFn<
 		...executionAccess.data,
 		mode: run.routine_id ? "routine" : "chat",
 		hasHistory: checkpoint.trimmed === true,
+		screen: checkpoint.screen,
 	}).tools.find((tool) => tool.name === call?.name);
 	const interaction = tool?.[toolDefinitionInternal].interaction;
 

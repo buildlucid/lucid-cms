@@ -551,6 +551,50 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.on("lucid_document_workflow_assignees")
 				.columns(["workflow_id", "user_id"])
 				.execute();
+
+			//* one row per document version someone holds in the editor, so claiming it is a single atomic write
+			await db.schema
+				.createTable("lucid_document_holds")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				//* latest, or request:{id} for a request's proposal
+				.addColumn("target", adapter.getDataType("varchar", 64), (col) =>
+					col.notNull(),
+				)
+				.addColumn("tab_id", adapter.getDataType("varchar", 64), (col) =>
+					col.notNull(),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_users.id").onDelete("cascade"),
+				)
+				.addColumn("held_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("seen_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addForeignKeyConstraint(
+					"fk_document_holds_document",
+					["collection_key", "document_id"],
+					"lucid_document_identities",
+					["collection_key", "document_id"],
+					(constraint) => constraint.onDelete("cascade"),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_holds_target")
+				.on("lucid_document_holds")
+				.columns(["collection_key", "document_id", "target"])
+				.unique()
+				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},
 	};

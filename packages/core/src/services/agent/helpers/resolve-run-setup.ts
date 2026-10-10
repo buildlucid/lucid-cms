@@ -13,6 +13,7 @@ import type {
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
 import hasPermission from "../../../libs/permission/has-permission.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
+import type { AgentScreen } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
 //* definitions are immutable, so each input schema only needs converting once
@@ -34,10 +35,16 @@ const resolveRunSetup = (
 		authority: AgentToolAuthority;
 		mode: RunMode;
 		hasHistory: boolean;
+		/** The admin screen the person's latest message came from. */
+		screen?: AgentScreen;
 	},
 ) => {
 	const { agent, authority } = props;
 	const tools = getAvailableTools(agent, authority);
+	const screen =
+		props.screen && agent.features.builder.read
+			? { type: props.screen.type, edit: agent.features.builder.edit }
+			: undefined;
 
 	const skills = agent.skills.filter((skill) =>
 		skill.scopes.every((scope) => {
@@ -54,6 +61,7 @@ const resolveRunSetup = (
 		mode: props.mode,
 		hasSkills: skills.length > 0,
 		hasHistory: props.hasHistory,
+		screen,
 	});
 	//* Runner controls first, then task tools in their configured order. Keep this stable between turns.
 	const orderedTools = [...runnerTools, ...tools];
@@ -79,7 +87,7 @@ const resolveRunSetup = (
 				name: tool.name,
 				description:
 					typeof tool.description === "function"
-						? tool.description({ mode: props.mode })
+						? tool.description({ mode: props.mode, screen: screen?.type })
 						: tool.description,
 				inputSchema: toInputSchema(tool.input),
 			}),
@@ -90,6 +98,7 @@ const resolveRunSetup = (
 			skills,
 			capabilities: getCapabilityProviders({ tools }),
 			hasHistory: props.hasHistory,
+			screen,
 		}),
 	};
 };

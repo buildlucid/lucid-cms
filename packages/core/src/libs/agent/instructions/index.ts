@@ -1,5 +1,6 @@
 import type { SkillDefinition } from "../../skills/types.js";
 import type { getCapabilityProviders } from "../capabilities.js";
+import type { RunnerToolContext } from "../runner-tools.js";
 import type { AgentDefinition, RunMode } from "../types.js";
 import { agentInstructions } from "./agent.js";
 import { capabilityInstructions } from "./capabilities.js";
@@ -7,6 +8,7 @@ import { chatInstructions } from "./chat.js";
 import { historyInstructions } from "./history.js";
 import { referenceInstructions } from "./references.js";
 import { routineInstructions } from "./routine.js";
+import { screenInstructions } from "./screen.js";
 import { skillInstructions } from "./skills.js";
 import { terminologyInstructions } from "./terminology.js";
 
@@ -20,12 +22,14 @@ const buildInstructions = (props: {
 	skills: readonly Pick<SkillDefinition, "name" | "description">[];
 	capabilities: ReturnType<typeof getCapabilityProviders>;
 	hasHistory: boolean;
+	screen?: RunnerToolContext["screen"];
 }) =>
 	[
 		agentInstructions(props.agent),
 		terminologyInstructions,
 		props.mode === "chat" ? chatInstructions : routineInstructions,
 		referenceInstructions,
+		props.screen ? screenInstructions(props.screen) : "",
 		capabilityInstructions(props.capabilities),
 		skillInstructions(props.skills),
 		props.hasHistory ? historyInstructions : "",

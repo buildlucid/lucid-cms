@@ -6,6 +6,7 @@ import type {
 	AgentMessage,
 	AgentMessagePart,
 	AgentRunnerToolName,
+	AgentScreenCall,
 	AgentWebFetchOutput,
 	AgentWebSearchOutput,
 	AgentWidgetPart,
@@ -29,6 +30,8 @@ export const confirmationBatchWidget =
 	"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey;
 export const mediaSelectWidget =
 	"lucid-media-select" satisfies AgentCoreWidgetKey;
+/** Asks this tab's open screen to answer a builder tool. The session answers it, so it never shows. */
+export const screenWidget = "lucid-screen" satisfies AgentCoreWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
@@ -158,6 +161,15 @@ export const isMediaSelectData = (
 	typeof value.agentKey === "string" &&
 	typeof value.includePersonal === "boolean" &&
 	typeof value.upload === "boolean";
+
+/** Screen calls come from the server, so only the parts the session routes on are checked. */
+export const isScreenCallData = (value: unknown): value is AgentScreenCall =>
+	isObjectRecord(value) &&
+	isObjectRecord(value.screen) &&
+	typeof value.screen.tabId === "string" &&
+	(value.action === "read" ||
+		value.action === "update" ||
+		value.action === "focus");
 
 export const isFileReadOutput = (
 	value: unknown,

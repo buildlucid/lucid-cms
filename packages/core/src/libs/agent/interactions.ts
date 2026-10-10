@@ -113,7 +113,11 @@ export const answerInteraction = (
 			: {
 					...widget.interaction,
 					status: "answered",
-					response: answer.response,
+					//* a screen's answer carries unsaved content, which only the waiting tool reads
+					response:
+						widget.key === constants.agent.widgets.screen
+							? {}
+							: answer.response,
 				};
 	checkpoint.parts = checkpoint.parts.map((part) =>
 		part.type === "widget" && part.interaction?.id === widget.interaction.id

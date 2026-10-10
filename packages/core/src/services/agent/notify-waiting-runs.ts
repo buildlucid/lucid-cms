@@ -30,9 +30,12 @@ const notifyWaitingRuns: ServiceFn<[], number> = async (context) => {
 
 	for (const run of waiting.data) {
 		const checkpoint = checkpointSchema.safeParse(run.checkpoint);
-		const interaction = checkpoint.success
-			? checkpoint.data.pending?.widget.interaction
+		const widget = checkpoint.success
+			? checkpoint.data.pending?.widget
 			: undefined;
+		//* the person's screen answers screen calls, and expireScreenCalls those it doesn't
+		if (widget?.key === constants.agent.widgets.screen) continue;
+		const interaction = widget?.interaction;
 		const userId = run.user_id;
 
 		try {
@@ -40,11 +43,17 @@ const notifyWaitingRuns: ServiceFn<[], number> = async (context) => {
 				const AgentRuns = new AgentRunsRepository(context.db);
 
 				//* marking first means overlapping ticks can't both notify, and a run with nothing to ask isn't picked again
+				//* the execution version pins the wait this tick read, not a later one
 				const marked = await AgentRuns.updateSingle({
 					data: { input_notified_at: new Date().toISOString() },
 					where: [
 						{ key: "id", operator: "=", value: run.id },
 						{ key: "status", operator: "=", value: "waiting" },
+						{
+							key: "execution_version",
+							operator: "=",
+							value: run.execution_version,
+						},
 						{ key: "input_notified_at", operator: "is", value: null },
 					],
 					returning: ["id"],

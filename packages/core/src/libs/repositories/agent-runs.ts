@@ -287,6 +287,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				"lucid_agent_runs.conversation_id",
 				"lucid_agent_runs.user_id",
 				"lucid_agent_runs.checkpoint",
+				"lucid_agent_runs.execution_version",
 				"lucid_agent_conversations.title",
 			])
 			.where("lucid_agent_runs.status", "=", "waiting")

@@ -12,7 +12,12 @@ import type {
 import { batch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { translateAdminCopy } from "@/translations";
-import { askTool, finishTool, progressTool } from "@/utils/agent-tools";
+import {
+	askTool,
+	finishTool,
+	progressTool,
+	screenWidget,
+} from "@/utils/agent-tools";
 
 export const shouldPollTitle = (
 	conversation: Pick<
@@ -52,7 +57,12 @@ export const partLayout = (
 				? "hidden"
 				: "row";
 		}
+		//* user messages show the screen they came from by themselves
+		case "screen": {
+			return "hidden";
+		}
 		case "widget": {
+			if (part.key === screenWidget) return "hidden";
 			if (!part.interaction) return hasRow(part) ? "row" : "block";
 
 			return part.interaction.placement === "inline" &&

@@ -117,6 +117,7 @@ export function useDocumentHistoryUIState(props: {
 		saveDisabled,
 		canPublishDocument,
 		isBuilderLocked,
+		isDocumentLocked: isBuilderLocked,
 		isPublished,
 		showRevisionNavigation,
 		showUpsertButton,

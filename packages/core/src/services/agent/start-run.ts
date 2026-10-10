@@ -14,6 +14,7 @@ import type { StoredAgentMessagePart } from "../../schemas/agent.js";
 import type {
 	AgentReferenceInput,
 	AgentRoutineTrigger,
+	AgentScreen,
 } from "../../types/response.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
@@ -40,11 +41,23 @@ const startRun: ServiceFn<
 			/** Extra model context that is not shown as part of the message. */
 			context?: string;
 		} & (
-			| { purpose: "compact" | "retry"; text?: never; routine?: never }
-			| { purpose?: never; text: string; routine?: never }
+			| {
+					purpose: "compact" | "retry";
+					text?: never;
+					screen?: never;
+					routine?: never;
+			  }
+			| {
+					purpose?: never;
+					text: string;
+					/** The admin screen the message was sent from, which answers builder tools. */
+					screen?: AgentScreen;
+					routine?: never;
+			  }
 			| {
 					purpose?: never;
 					text?: never;
+					screen?: never;
 					routine: {
 						id: string;
 						name: string;
@@ -130,6 +143,7 @@ const startRun: ServiceFn<
 				data: inputMessageParts({
 					text: input.text ?? "",
 					references: references.data,
+					screen: input.screen,
 				}),
 			};
 		};
@@ -238,6 +252,7 @@ const startRun: ServiceFn<
 				//* the run loads history, including this message, after the latest summary
 				historyAfter: latest.data?.through_position ?? 0,
 				extraContext: input.context,
+				screen: input.screen,
 				purpose: input.purpose === "compact" ? "compact" : undefined,
 				//* routine runs leave the chat's choice to resolve to the routine's model
 				selection: input.routine ? undefined : (modelSelection ?? undefined),

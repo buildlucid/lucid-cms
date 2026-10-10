@@ -101,12 +101,13 @@ const driveRun: ServiceFn<
 		if (saved.error) return saved;
 	}
 
-	//* resolved before each model turn, since trimmed context adds the history tool
+	//* resolved before each model turn, since trimmed context adds the history tool and steering can move the person to another screen
 	const resolve = () =>
 		resolveRunSetup(context, {
 			...access.data,
 			mode,
 			hasHistory: checkpoint.trimmed === true,
+			screen: checkpoint.screen,
 		});
 
 	if (checkpoint.inFlightWrite) {

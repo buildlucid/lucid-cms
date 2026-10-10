@@ -1,4 +1,4 @@
-import type { AgentReferenceInput } from "../../types/response.js";
+import type { AgentReferenceInput, AgentScreen } from "../../types/response.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import { agentInputsTable } from "../db/tables/agent-inputs.js";
 import StaticRepository from "./parents/static-repository.js";
@@ -19,6 +19,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 		userId: number;
 		text: string;
 		references?: AgentReferenceInput[];
+		screen?: AgentScreen;
 		targetRunId: string | null;
 	}) {
 		const query = this.db
@@ -29,6 +30,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				user_id: input.userId,
 				text: input.text,
 				references: input.references ?? [],
+				screen: input.screen ?? null,
 				target_run_id: input.targetRunId,
 				status: "pending",
 				created_at: new Date().toISOString(),

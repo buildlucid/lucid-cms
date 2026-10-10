@@ -30,6 +30,7 @@ import {
 	agentReferenceSnapshotSchema,
 	agentResourceSchema,
 } from "./agent-references.js";
+import { agentScreenSchema } from "./agent-screen.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaResponseSchema, uploadSessionResponseSchema } from "./media.js";
 
@@ -70,6 +71,7 @@ export const agentInputSchema = z.object({
 	id: z.uuid(),
 	text: z.string(),
 	references: z.array(agentReferenceInputSchema).default([]),
+	screen: agentScreenSchema.nullable(),
 	status: z.enum(["pending", "claimed"]),
 	delivery: agentDeliverySchema,
 }) satisfies z.ZodType<AgentInput>;
@@ -227,6 +229,10 @@ const agentReferencePartSchema = z
 	})
 	.strict();
 
+const agentScreenPartSchema = z
+	.object({ type: z.literal("screen"), screen: agentScreenSchema })
+	.strict();
+
 const agentRoutinePartSchema = z
 	.object({
 		type: z.literal("routine"),
@@ -249,6 +255,7 @@ const agentRunResultPartSchema = z
 export const agentMessagePartSchema = z.discriminatedUnion("type", [
 	agentTextPartSchema,
 	agentReferencePartSchema,
+	agentScreenPartSchema,
 	agentRoutinePartSchema,
 	agentToolDetailsSchema,
 	agentWidgetSchema,
@@ -259,6 +266,7 @@ export type StoredAgentMessagePart = z.output<typeof agentMessagePartSchema>;
 const agentChatPartSchema = z.discriminatedUnion("type", [
 	agentTextPartSchema,
 	agentReferencePartSchema,
+	agentScreenPartSchema,
 	agentRoutinePartSchema,
 	agentRunResultPartSchema,
 	agentToolSummarySchema,
@@ -341,6 +349,7 @@ const agentCatalogResponseSchema = z.object({
 			features: z.object({
 				media: z.object({ upload: z.boolean(), attach: z.boolean() }),
 				documents: z.object({ attach: z.boolean() }),
+				builder: z.object({ read: z.boolean(), edit: z.boolean() }),
 			}),
 			capabilities: z.object({
 				mediaAnalysis: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
@@ -636,6 +645,10 @@ export const controllerSchemas = {
 			.object({
 				text: z.string().trim().max(20_000),
 				references: z.array(agentReferenceInputSchema).max(50).default([]),
+				screen: agentScreenSchema.optional().meta({
+					description:
+						"The admin screen the message was sent from. The document builder answers the agent's builder tools.",
+				}),
 				delivery: agentDeliverySchema.default({ kind: "queue" }),
 				requestId: z.uuid(),
 			})
@@ -670,7 +683,11 @@ export const controllerSchemas = {
 			action: agentInteractionActionSchema,
 			response: z
 				.record(z.string(), z.unknown())
-				.refine((value) => JSON.stringify(value).length <= 20_000),
+				.refine(
+					(value) =>
+						JSON.stringify(value).length <=
+						constants.agent.limits.responseChars,
+				),
 		}),
 		query: noQuery,
 		params: idParams,

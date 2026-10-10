@@ -1,17 +1,22 @@
 import type { StoredAgentMessagePart } from "../../schemas/agent.js";
-import type { AgentReferenceSnapshot } from "../../types/response.js";
+import type {
+	AgentReferenceSnapshot,
+	AgentScreen,
+} from "../../types/response.js";
 import { routineRequest } from "./instructions/messages.js";
 
-/** Keeps attached resources alongside the message that introduced them. */
+/** Keeps attached resources, and the admin screen it was sent from, alongside the message that introduced them. */
 export const inputMessageParts = (input: {
 	text: string;
 	references?: AgentReferenceSnapshot[];
+	screen?: AgentScreen | null;
 }): StoredAgentMessagePart[] => [
 	...(input.text ? [{ type: "text" as const, text: input.text }] : []),
 	...(input.references ?? []).map((reference) => ({
 		type: "reference" as const,
 		reference,
 	})),
+	...(input.screen ? [{ type: "screen" as const, screen: input.screen }] : []),
 ];
 
 const escapeAttribute = (value: string | number) =>
@@ -47,20 +52,31 @@ const attachmentAttributes = (reference: AgentReferenceSnapshot) => {
 };
 
 /** Labels come from CMS content, so they stay quoted attribute values rather than message text. */
-const attachmentTag = (reference: AgentReferenceSnapshot) => {
-	const attributes = attachmentAttributes(reference);
-
-	return `<attachment ${Object.entries(attributes)
+const contextTag = (
+	name: string,
+	attributes: Record<string, string | number | undefined>,
+) =>
+	`<${name} ${Object.entries(attributes)
 		.flatMap(([key, value]) =>
 			value === undefined ? [] : [`${key}="${escapeAttribute(value)}"`],
 		)
 		.join(" ")} />`;
-};
 
 export const textFromParts = (parts: StoredAgentMessagePart[]) =>
 	parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
 
-/** A message as the model sees it: its text, then the resources attached to it. Contents are never fetched. */
+const screenAttributes = (screen: AgentScreen) =>
+	screen.type === "document"
+		? {
+				type: "document_builder",
+				collection_key: screen.collectionKey,
+				document_id: screen.documentId ?? undefined,
+				request_id: screen.requestId ?? undefined,
+				name: screen.label,
+			}
+		: { type: "request", request_id: screen.requestId, name: screen.label };
+
+/** Formats message text, attached resource labels and its originating admin screen for the model without fetching resource contents. */
 export const messageText = (parts: StoredAgentMessagePart[]) => {
 	const routine = parts.find((part) => part.type === "routine");
 	let text = textFromParts(parts);
@@ -73,7 +89,14 @@ export const messageText = (parts: StoredAgentMessagePart[]) => {
 	const references = parts.flatMap((part) =>
 		part.type === "reference" ? [part.reference] : [],
 	);
-	if (!references.length) return text;
+	if (references.length) {
+		text = `${text}\n\n<attachments>\n${references.map((reference) => contextTag("attachment", attachmentAttributes(reference))).join("\n")}\n</attachments>`;
+	}
 
-	return `${text}\n\n<attachments>\n${references.map(attachmentTag).join("\n")}\n</attachments>`.trim();
+	const screen = parts.find((part) => part.type === "screen");
+	if (screen) {
+		text = `${text}\n\n${contextTag("current_screen", screenAttributes(screen.screen))}`;
+	}
+
+	return text.trim();
 };

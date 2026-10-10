@@ -95,6 +95,8 @@ export const createBrickStore = (idPrefix = "") => {
 		baseContentId: string | null;
 		/** The saved content moved on while there were unsaved edits, eg. the agent changed it. Autosave waits until the reader chooses. */
 		contentChanged: boolean;
+		/** The agent changed the content through its builder tools. Autosave waits until the person saves, so they review its changes first. */
+		agentEdited: boolean;
 		refs: Refs;
 		collectionLocalized: boolean;
 		documentRevision: number;
@@ -107,9 +109,14 @@ export const createBrickStore = (idPrefix = "") => {
 			collection?: Collection,
 		) => void;
 		syncBricks: (
-			document?: InternalCollectionDocument,
+			document?: Pick<InternalCollectionDocument, "bricks" | "fields">,
 			collection?: Collection,
 		) => void;
+		applyContent: (props: {
+			content: Pick<InternalCollectionDocument, "bricks" | "fields">;
+			refs: Refs;
+			collection?: Collection;
+		}) => void;
 		captureInitialSnapshot: (snapshot?: BrickSnapshot[]) => void;
 		createSnapshotFromPayload: (
 			payload: BrickSnapshotPayload,
@@ -194,6 +201,7 @@ export const createBrickStore = (idPrefix = "") => {
 		}) => void;
 		setRefs: (refs?: Refs) => void;
 		addRef: (input: AddRefInput) => void;
+		addRefs: (refs: Refs) => void;
 		mergeDraftCheckResponse: (response: DocumentVersionCheckResponse) => void;
 		startRelationFieldDrag: () => void;
 		endRelationFieldDrag: () => void;
@@ -205,6 +213,7 @@ export const createBrickStore = (idPrefix = "") => {
 		locked: false,
 		baseContentId: null,
 		contentChanged: false,
+		agentEdited: false,
 		autoSaveCounter: 0,
 		autoSavePaused: false,
 		relationFieldDragCount: 0,
@@ -229,6 +238,7 @@ export const createBrickStore = (idPrefix = "") => {
 				set("collectionLocalized", false);
 				set("baseContentId", null);
 				set("contentChanged", false);
+				set("agentEdited", false);
 				set("refs", {});
 				markDocumentChange({ content: true, structure: true });
 				set("snapshotRevision", (previous) => previous + 1);
@@ -322,6 +332,15 @@ export const createBrickStore = (idPrefix = "") => {
 				markDocumentChange({ content: true, structure: true });
 			});
 			rebuildAllBrickFieldIndexes();
+		},
+		/** Applies external content as unsaved edits while preserving open bricks and groups and pausing autosave until the person saves. */
+		applyContent(props) {
+			batch(() => {
+				get.syncBricks(props.content, props.collection);
+				get.addRefs(props.refs);
+				set("autoSaveCounter", (previous) => previous + 1);
+				set("agentEdited", true);
+			});
 		},
 		/** Appends an initialized builder brick and schedules autosave for the structural change. */
 		addBrick(props) {
@@ -904,6 +923,16 @@ export const createBrickStore = (idPrefix = "") => {
 					return existing.id === next.id;
 				}),
 			);
+		},
+		/** Upserts every resource in a refs response, eg. the media an agent's changes link to. */
+		addRefs(refs) {
+			batch(() => {
+				if (refs.documents) {
+					get.addRef({ resource: "documents", ref: refs.documents });
+				}
+				if (refs.media) get.addRef({ resource: "media", ref: refs.media });
+				if (refs.users) get.addRef({ resource: "users", ref: refs.users });
+			});
 		},
 		/** Merges draft-check field data into existing bricks so validation feedback does not reset editor UI state. */
 		mergeDraftCheckResponse(response) {

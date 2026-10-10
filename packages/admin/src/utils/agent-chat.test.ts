@@ -376,6 +376,7 @@ describe("awaitsDelivery", () => {
 		id: "input",
 		text: "Next",
 		references: [],
+		screen: null,
 		status: "pending" as const,
 	};
 	const run = (status: AgentRunStatus) => ({

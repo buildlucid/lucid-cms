@@ -1,3 +1,4 @@
+import type { PublicErrorData } from "../types/errors.js";
 import type {
 	AgentCoreWidgetKey,
 	AgentLucidToolName,
@@ -231,6 +232,8 @@ export default Object.freeze({
 		widgets: {
 			previewMedia: "lucid-media-preview" satisfies AgentCoreWidgetKey,
 			question: "lucid-question" satisfies AgentCoreWidgetKey,
+			/** Asks the open admin screen to answer a builder tool without showing a widget. */
+			screen: "lucid-screen" satisfies AgentCoreWidgetKey,
 			confirmation: "lucid-tool-confirmation" satisfies AgentCoreWidgetKey,
 			confirmationBatch:
 				"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey,
@@ -253,6 +256,8 @@ export default Object.freeze({
 			partsChars: 262_144,
 			/** Serialised size of the data a tool saves for its interaction widget. */
 			interactionDataChars: 100_000,
+			/** Maximum serialised interaction response size, allowing builder reads to return unsaved document content. */
+			responseChars: 2_000_000,
 		},
 		/** A slice is one uninterrupted stretch of execution before it hands off to the queue. */
 		sliceMs: 240_000,
@@ -270,8 +275,16 @@ export default Object.freeze({
 		staleQueuedMs: 120_000,
 		/** How long a run waits on its person before they are notified, so someone still in the chat can answer first. */
 		inputNotifyDelayMs: 120_000,
+		/** Builder response timeout, checked each agent tick before reporting the screen as closed. */
+		screenCallTimeoutMs: 30_000,
 		batchSize: 50,
 		modelCatalogTtlSeconds: 300,
+	} as const,
+	documentEditors: {
+		/** Heartbeat expiry, allowing 30-second admin heartbeats to slow to a minute in hidden tabs. */
+		ttlMs: 90_000,
+		/** The error code of a save refused because another tab took over the document. */
+		heldCode: "document_held" satisfies PublicErrorData["code"],
 	} as const,
 	oauth: {
 		accessTokenExpirationSeconds: 300,

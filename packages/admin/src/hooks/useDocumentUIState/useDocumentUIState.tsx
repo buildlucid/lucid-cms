@@ -24,6 +24,8 @@ export function useDocumentUIState(props: {
 	version: Accessor<"latest" | string>;
 	versionId: Accessor<number | undefined>;
 	proposalEditable?: Accessor<boolean>;
+	/** Another tab holds the document, so this one only views it. */
+	heldElsewhere?: Accessor<boolean>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
 	requestCreationMutation?: ReturnType<typeof api.documents.useRequestCreation>;
 	createSingleVersionMutation?: ReturnType<
@@ -144,6 +146,8 @@ export function useDocumentUIState(props: {
 			return false;
 		}
 		if (props.document()?.isDeleted) return false;
+		//* the person saves the agent's changes themselves, once they've reviewed them
+		if (brickStore.get.agentEdited || props.heldElsewhere?.()) return false;
 
 		return hasUpdateAccess() && autoSave() && autoSaveUserEnabled();
 	});
@@ -160,7 +164,8 @@ export function useDocumentUIState(props: {
 		return !brickStore.getDocumentMutated() && !isSaving() && !mutateErrors();
 	});
 
-	const isBuilderLocked = createMemo(() => {
+	/** Whether the document can't be edited in any tab, eg. it's locked or a read-only version. */
+	const isDocumentLocked = createMemo(() => {
 		if (props.mode === "history") return true;
 		if (props.version() === "proposal" && props.proposalEditable?.() !== true) {
 			return true;
@@ -180,6 +185,9 @@ export function useDocumentUIState(props: {
 
 		return false;
 	});
+	const isBuilderLocked = createMemo(
+		() => isDocumentLocked() || props.heldElsewhere?.() === true,
+	);
 
 	const isPublished = createMemo(() => {
 		return (
@@ -394,6 +402,7 @@ export function useDocumentUIState(props: {
 		saveDisabled,
 		canPublishDocument,
 		isBuilderLocked,
+		isDocumentLocked,
 		isPublished,
 		showRevisionNavigation,
 		showUpsertButton,

@@ -34,11 +34,13 @@ import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/Me
 import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHeader";
 import type { ViewSelectorOption } from "@/components/PageBuilderHeader/parts/ViewSelector";
 import WorkflowStageSelect from "@/components/WorkflowStageSelect/WorkflowStageSelect";
+import { useBuilderTools } from "@/hooks/useBuilderTools/useBuilderTools";
 import { useDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
 import {
 	type ComparisonOption,
 	useDocumentComparison,
 } from "@/hooks/useDocumentComparison/useDocumentComparison";
+import { useDocumentEditors } from "@/hooks/useDocumentEditors/useDocumentEditors";
 import { useDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import { useDocumentPreview } from "@/hooks/useDocumentPreview/useDocumentPreview";
 import { useDocumentState } from "@/hooks/useDocumentState/useDocumentState";
@@ -55,6 +57,7 @@ import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getRequestRoute } from "@/utils/route-helpers";
 import DocumentChangedBar from "./parts/DocumentChangedBar";
+import DocumentHeldModal from "./parts/DocumentHeldModal";
 import { PageBuilderModals } from "./parts/PageBuilderModals";
 
 const DocumentEditorPage: Component<{
@@ -83,6 +86,8 @@ const DocumentEditorPage: Component<{
 		| (() => Promise<PreviewScrollState | null>)
 		| undefined;
 	let pendingPreviewScroll: PreviewScrollState | null = null;
+	//* set from the editors below, which need the UI state to know whether this tab can hold the document
+	const [heldElsewhere, setHeldElsewhere] = createSignal(false);
 
 	const docState = useDocumentState({
 		mode: props.mode,
@@ -99,6 +104,8 @@ const DocumentEditorPage: Component<{
 		mode: props.mode,
 		document: docState.document,
 		versionId: versionId,
+		//* the server refused a save as another tab took over, which the next heartbeat would only show later
+		onHeld: () => void editors.refresh(),
 	});
 
 	const uiState = useDocumentUIState({
@@ -118,6 +125,48 @@ const DocumentEditorPage: Component<{
 		proposalEditable: () =>
 			props.request?.()?.status === "open" &&
 			props.requestDocument?.()?.permissions.edit === true,
+		heldElsewhere,
+	});
+	//* one tab at a time edits a document, so the agent's other tools can't replace unsaved changes either
+	const editors = useDocumentEditors({
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		requestId: () => props.request?.()?.id ?? null,
+		enabled: () =>
+			props.mode === "edit" &&
+			docState.document() !== undefined &&
+			!uiState.isDocumentLocked() &&
+			uiState.hasSavePermission(),
+	});
+	createEffect(() => setHeldElsewhere(!editors.holding()));
+	const documentLabel = createMemo(() => {
+		const document = docState.document();
+		if (props.mode === "create" || !document) {
+			return T()("actions.create.document", {
+				collectionSingle: docState.collectionSingularName(),
+			});
+		}
+		return getDocumentPreviewLabel({
+			collection: docState.collection(),
+			document,
+			contentLocale: docState.contentLocale() ?? "",
+		});
+	});
+	//* the agent works on what this editor shows, unsaved changes included
+	useBuilderTools({
+		enabled: () =>
+			uiState.isSuccess() &&
+			(props.mode === "create" ||
+				(docState.document() !== undefined &&
+					(versionType() === "latest" || versionType() === "proposal"))),
+		collection: docState.collection,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		versionId: () => docState.document()?.versionId ?? undefined,
+		requestId: () => props.request?.()?.id ?? null,
+		label: documentLabel,
+		locales: docState.contentLocales,
+		editable: () => !uiState.isBuilderLocked(),
 	});
 
 	const autoSave = useDocumentAutoSave({
@@ -292,21 +341,11 @@ const DocumentEditorPage: Component<{
 	// ---------------------------------
 	// Effects
 	usePageTitle(() => {
-		if (props.mode === "create") {
-			return T()("actions.create.document", {
-				collectionSingle: docState.collectionSingularName(),
-			});
-		}
+		if (props.mode === "create") return documentLabel();
 		const context = props.request?.()?.title ?? docState.collectionName();
-		const document = docState.document();
-		if (!document) return context;
+		if (!docState.document()) return context;
 
-		const label = getDocumentPreviewLabel({
-			collection: docState.collection(),
-			document,
-			contentLocale: docState.contentLocale() ?? "",
-		});
-		return context ? `${label} · ${context}` : label;
+		return context ? `${documentLabel()} · ${context}` : documentLabel();
 	});
 
 	createEffect(
@@ -325,6 +364,15 @@ const DocumentEditorPage: Component<{
 			},
 		),
 	);
+
+	//* another tab taking hold, or letting go, locks or unlocks the builder straight away
+	createEffect(() => brickStore.set("locked", uiState.isBuilderLocked()));
+	//* once the person saves or drops the agent's changes, autosave carries on
+	createEffect(() => {
+		if (brickStore.get.agentEdited && !brickStore.getDocumentMutated()) {
+			brickStore.set("agentEdited", false);
+		}
+	});
 
 	onCleanup(() => {
 		if (snapshotTimeout !== undefined) clearTimeout(snapshotTimeout);
@@ -463,6 +511,19 @@ const DocumentEditorPage: Component<{
 
 		return `${option.location}?compare=${encodeURIComponent(keep)}`;
 	};
+	/** Leaves a document another tab holds, for the request or list it was opened from. */
+	const leave = () => {
+		const link = requestLink();
+		if (link) {
+			navigate(link);
+			return;
+		}
+		navigate(
+			docState.collection()?.mode === "multiple"
+				? `/lucid/collections/${docState.collectionKey()}`
+				: "/lucid",
+		);
+	};
 	/** Drops unsaved edits for the saved content that changed under them. */
 	const reloadChangedContent = async () => {
 		autoSave.debouncedAutoSave.clear();
@@ -585,13 +646,30 @@ const DocumentEditorPage: Component<{
 								: "content-xl:right-[calc(var(--spacing-agent-panel)+(--spacing(80)))]",
 						)}
 					>
-						<Show when={uiState.isBuilderLocked()}>
+						<Show when={uiState.isDocumentLocked()}>
 							<Alert
 								variant="warning"
 								appearance="pill"
 								class="pointer-events-auto"
 							>
 								{T()("documents.locked.message")}
+							</Alert>
+						</Show>
+						<Show when={editors.holder()}>
+							<Alert
+								variant="warning"
+								appearance="pill"
+								class="pointer-events-auto"
+							>
+								{T()("documents.held.view.only")}
+								<button
+									type="button"
+									class="ml-3 rounded-sm font-medium text-warning-foreground underline underline-offset-2 decoration-warning-foreground/50 hover:text-warning-foreground hover:decoration-warning-foreground focus:ring-warning-foreground focus-visible:ring-1"
+									disabled={editors.takingOver()}
+									onClick={() => void editors.takeOver()}
+								>
+									{T()("documents.held.take.over")}
+								</button>
 							</Alert>
 						</Show>
 						<Show when={uiState.collectionNeedsMigrating()}>
@@ -824,6 +902,12 @@ const DocumentEditorPage: Component<{
 							uiState: uiState,
 							navigationGuard: navigationGuard,
 						}}
+					/>
+					<DocumentHeldModal
+						holder={editors.holder()}
+						takingOver={editors.takingOver()}
+						onLeave={leave}
+						onTakeOver={() => void editors.takeOver()}
 					/>
 					<CustomFieldGenerationModal />
 					<MediaAltGenerationModal />

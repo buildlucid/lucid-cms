@@ -9,6 +9,7 @@ import type {
 	AgentMessage,
 	AgentReferenceInput,
 	AgentResource,
+	AgentScreen,
 	ResponseBody,
 } from "@types";
 import {
@@ -39,7 +40,9 @@ import {
 	agentReferenceInput,
 } from "@/utils/agent-references";
 import {
+	isScreenCallData,
 	referenceTools,
+	screenWidget,
 	webFetchTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
@@ -48,6 +51,7 @@ import {
 type PendingSubmission = {
 	text: string;
 	references: AgentReferenceInput[];
+	screen?: AgentScreen;
 	delivery: AgentDelivery;
 	requestId: string;
 };
@@ -64,6 +68,8 @@ export const useAgentChat = (
 	options: {
 		/** Called with what each completed tool call changed, after its views refresh. */
 		onChanges?: (changes: AgentResource[]) => void;
+		/** The admin screen messages are sent from, which answers the agent's builder tools. */
+		screen?: Accessor<AgentScreen | undefined>;
 	} = {},
 ) => {
 	// ----------------------------------------
@@ -109,10 +115,21 @@ export const useAgentChat = (
 			.toReversed()
 			.flatMap((page) => page.data),
 	);
-	const pendingInteraction = createMemo(() =>
+	const waitingOn = createMemo(() =>
 		latestRun()?.status === "waiting" && (!streaming() || responding())
 			? findPendingInteraction(messages, latestRun()?.id)
 			: undefined,
+	);
+	//* a screen call is answered by the screen, not the person, so the chat stays working while it waits
+	const screenCall = createMemo(() => {
+		const pending = waitingOn();
+		return pending?.widget.key === screenWidget &&
+			isScreenCallData(pending.widget.data)
+			? { ...pending, call: pending.widget.data }
+			: undefined;
+	});
+	const pendingInteraction = createMemo(() =>
+		screenCall() ? undefined : waitingOn(),
 	);
 	const activeRunId = createMemo(
 		() =>
@@ -319,6 +336,7 @@ export const useAgentChat = (
 					id: pending.requestId,
 					text: pending.text,
 					references: pending.references,
+					screen: pending.screen ?? null,
 					status: "pending",
 					delivery: pending.delivery,
 				},
@@ -416,8 +434,14 @@ export const useAgentChat = (
 		activeRunId,
 		error,
 		streaming,
-		working: createMemo(() => streaming() || background()),
-		waiting: createMemo(() => latestRun()?.status === "waiting"),
+		/** The screen call the run waits on, for this tab's screen to answer. */
+		screenCall,
+		working: createMemo(
+			() => streaming() || background() || screenCall() !== undefined,
+		),
+		waiting: createMemo(
+			() => latestRun()?.status === "waiting" && screenCall() === undefined,
+		),
 		inputs,
 		queuePaused: createMemo(() => data()?.queuePaused ?? false),
 		/** Sends a message. While the agent is busy it queues, or steers the current run. */
@@ -427,6 +451,7 @@ export const useAgentChat = (
 			attachments: AgentReferenceItem[] = [],
 		) => {
 			const references = attachments.map(agentReferenceInput);
+			const screen = options.screen?.();
 			const id = conversationId();
 			if (!id) return false;
 			const targetRunId = activeRunId();
@@ -438,16 +463,23 @@ export const useAgentChat = (
 				retrySubmission?.text === text &&
 				JSON.stringify(retrySubmission.references) ===
 					JSON.stringify(references) &&
+				JSON.stringify(retrySubmission.screen) === JSON.stringify(screen) &&
 				JSON.stringify(retrySubmission.delivery) === JSON.stringify(delivery)
 					? retrySubmission
-					: { text, references, delivery, requestId: crypto.randomUUID() };
+					: {
+							text,
+							references,
+							screen,
+							delivery,
+							requestId: crypto.randomUUID(),
+						};
 			retrySubmission = pending;
 
 			//* anything the server may still be delivering goes through the queue, to keep order
 			const queued =
 				streaming() ||
 				background() ||
-				pendingInteraction() !== undefined ||
+				waitingOn() !== undefined ||
 				data()?.queuePaused ||
 				(data()?.inputs?.length ?? 0) > 0;
 			const accepted = queued
@@ -468,6 +500,7 @@ export const useAgentChat = (
 										type: "reference" as const,
 										reference,
 									})),
+									...(screen ? [{ type: "screen" as const, screen }] : []),
 								],
 								createdAt: new Date().toISOString(),
 							},

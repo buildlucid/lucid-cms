@@ -48,6 +48,7 @@ const sendMessageController = factory.createHandlers(
 			dispatch: !streaming,
 			text: body.text,
 			references: body.references,
+			screen: body.screen,
 			delivery: body.delivery,
 			requestId: body.requestId,
 		});

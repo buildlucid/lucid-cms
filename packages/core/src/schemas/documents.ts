@@ -12,6 +12,7 @@ import {
 	mediaImagePreviewResponseSchema,
 	mediaResponseSchema,
 } from "./media.js";
+import { requestUserSchema } from "./requests.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
 
 const previewTokenSchema = z.string().meta({
@@ -225,7 +226,64 @@ const documentSortSchema = z
 	)
 	.optional();
 
+const documentEditorParams = z.object({
+	collectionKey: z.string().trim().meta({
+		description: "The collection key",
+		example: "page",
+	}),
+	id: z.string().trim().meta({
+		description: "The document's ID",
+		example: 1,
+	}),
+	tabId: z.string().trim().min(1).max(64).meta({
+		description: "The browser tab with the document open",
+		example: "7f3a2c1e-5b4d-4e6f-8a9b-0c1d2e3f4a5b",
+	}),
+});
+
 export const controllerSchemas = {
+	updateEditor: {
+		body: z.object({
+			requestId: z.number().int().positive().nullable().meta({
+				description:
+					"The request whose proposal is open, or null for latest. Holding it needs the same access as saving it",
+				example: null,
+			}),
+			takeOver: z.boolean().default(false).meta({
+				description: "Takes hold of the document from the tab that holds it",
+				example: false,
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: documentEditorParams,
+		response: z.object({
+			holding: z.boolean().meta({
+				description: "Whether this tab holds the document and can edit it",
+			}),
+			holder: z
+				.object({
+					user: requestUserSchema,
+					self: z.boolean().meta({
+						description: "Whether it's the same person, in another tab",
+					}),
+					since: z.string(),
+				})
+				.nullable()
+				.meta({ description: "The tab that holds it, when it isn't this one" }),
+		}),
+	} satisfies ControllerSchema,
+	deleteEditor: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: documentEditorParams,
+		response: undefined,
+	} satisfies ControllerSchema,
 	createSingle: {
 		body: z.object({
 			bricks: z
@@ -341,6 +399,10 @@ export const controllerSchemas = {
 				description:
 					"The latest content ID the edit was based on. When set, the save is refused with a 409 if latest has been saved since.",
 			}),
+			editorTabId: z.string().trim().min(1).max(64).optional().meta({
+				description:
+					"The admin tab saving. A tab that has the document open but no longer holds it, eg. after someone took over, is refused with a 409.",
+			}),
 		}),
 		query: {
 			string: undefined,
@@ -380,6 +442,10 @@ export const controllerSchemas = {
 			baseContentId: z.string().min(1).optional().meta({
 				description:
 					"The version content ID the edit was based on. When set, the update is refused with a 409 if the version has been saved since.",
+			}),
+			editorTabId: z.string().trim().min(1).max(64).optional().meta({
+				description:
+					"The admin tab saving. A tab that has the document open but no longer holds it, eg. after someone took over, is refused with a 409.",
 			}),
 		}),
 		query: {

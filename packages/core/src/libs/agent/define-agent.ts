@@ -37,6 +37,12 @@ const defineAgent = <const Key extends string>(
 			readFile: options.features?.media?.readFile ?? true,
 		},
 		documents: { attach: options.features?.documents?.attach ?? true },
+		builder: {
+			read: options.features?.builder?.read ?? true,
+			edit:
+				(options.features?.builder?.read ?? true) &&
+				(options.features?.builder?.edit ?? true),
+		},
 		web: {
 			search: options.features?.web?.search ?? true,
 			read: options.features?.web?.read ?? true,

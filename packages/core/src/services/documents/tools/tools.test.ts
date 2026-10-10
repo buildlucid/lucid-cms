@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import defineAgent from "../../../libs/agent/define-agent.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
+import type { Checkpoint } from "../../../libs/agent/types.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
@@ -22,12 +23,17 @@ import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import insertConversation from "../../agent/helpers/insert-conversation.js";
 import resolveRunSetup from "../../agent/helpers/resolve-run-setup.js";
 import { runnerToolHandlers } from "../../agent/helpers/runner-tools/index.js";
+import type { ToolOutcome } from "../../agent/helpers/tool-outcome.js";
 import list from "../../agent/references/list.js";
 import register from "../../agent/references/register.js";
 import { outputSchema as describeOutputSchema } from "../../collections/tools/describe/schema.js";
+import checkSaveHold from "../../document-editors/check-save-hold.js";
+import heartbeat from "../../document-editors/heartbeat.js";
+import release from "../../document-editors/release.js";
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
 import syncLocales from "../../sync/sync-locales.js";
+import readDocumentContent from "../helpers/read-document-content.js";
 import publish from "../publish.js";
 import { outputSchema as readOutputSchema } from "./get/schema.js";
 import { writeOutputSchema } from "./schema.js";
@@ -59,9 +65,11 @@ const required = new CollectionBuilder("agent_required_pages", {
 	details: { labels: { singular: "Required page", plural: "Required pages" } },
 	bricks: {
 		builder: [
-			new BrickBuilder("banner")
-				.addTab("content_tab")
-				.addText("title", { localized: true, validation: { required: true } }),
+			new BrickBuilder("banner").addTab("content_tab").addText("title", {
+				localized: true,
+				details: { description: "The banner's heading" },
+				validation: { required: true },
+			}),
 		],
 	},
 }).addText("title", {
@@ -601,10 +609,11 @@ test("describes tab fields by their stored paths, explains invalid fields and ac
 	const described = await run.call(agentTools.collections.describe(), {
 		collectionKey: required.key,
 	});
-	const paths = describeOutputSchema
+	const fields = describeOutputSchema
 		.parse(described)
-		.data.flatMap((entry) => (entry.kind === "field" ? [entry.path] : []));
-	expect(paths).toEqual([["title"], ["title"]]);
+		.data.flatMap((entry) => (entry.kind === "field" ? [entry] : []));
+	expect(fields.map((field) => field.path)).toEqual([["title"], ["title"]]);
+	expect(fields[1]?.description).toBe("The banner's heading");
 
 	const message = await run.fail(create, {
 		collectionKey: required.key,
@@ -721,6 +730,11 @@ test("registering a requested document needs access to its request", async () =>
 
 	const handler = runnerToolHandlers.get(runnerTools.registerReferences.name);
 	assert(handler);
+	const authority = {
+		principal: { type: "user" as const, userId: reader.id },
+		superAdmin: false,
+		permissions: [getCollectionPermission(pages.key, "read")],
+	};
 	const result = await handler(context, {
 		call: {
 			id: randomUUID(),
@@ -759,15 +773,12 @@ test("registering a requested document needs access to its request", async () =>
 			cursor: 0,
 			phase: "tools",
 		},
+		authority,
 		setup: resolveRunSetup(context, {
 			agent,
 			mode: "chat",
 			hasHistory: false,
-			authority: {
-				principal: { type: "user", userId: reader.id },
-				superAdmin: false,
-				permissions: [getCollectionPermission(pages.key, "read")],
-			},
+			authority,
 		}),
 	});
 	expect(result).toMatchObject({ failed: true });
@@ -900,4 +911,291 @@ test("keeps rich text spacing as written, for untouched text and spacing fixes a
 			{ type: "bulletList", content: [item("A"), item("  b  ")] },
 		],
 	});
+});
+
+test("refuses direct writes to a document someone holds in the editor, until they let go", async () => {
+	const documentId = await createPage();
+	const latest = await readDocumentContent(context, {
+		collectionKey: pages.key,
+		id: documentId,
+	});
+	assert(latest.data, JSON.stringify(latest.error));
+	const versionId = latest.data.version.id;
+	const run = await startRun();
+	const open = (tabId: string, takeOver = false, person = user) =>
+		heartbeat(context, {
+			collectionKey: pages.key,
+			documentId,
+			requestId: null,
+			tabId,
+			user: person,
+			takeOver,
+		});
+
+	expect((await open("first")).data).toEqual({ holding: true, holder: null });
+	expect((await open("second")).data).toMatchObject({
+		holding: false,
+		holder: { self: true, user: { id: userId } },
+	});
+	//* holding needs the same access as saving, so people who can only read can't take over
+	const reader = {
+		...user,
+		superAdmin: false,
+		permissions: [getCollectionPermission(pages.key, "read")],
+	};
+	expect((await open("reader", true, reader)).error).toMatchObject({
+		status: 403,
+	});
+	expect((await open("second", true)).data).toMatchObject({ holding: true });
+	expect((await open("first")).data).toMatchObject({ holding: false });
+
+	//* saves from the tab that was taken over are refused, before its next heartbeat shows it
+	const saveFrom = (tabId: string) =>
+		checkSaveHold(context, {
+			collectionKey: pages.key,
+			documentId,
+			requestId: null,
+			tabId,
+			userId,
+		});
+	expect((await saveFrom("first")).error).toMatchObject({
+		status: 409,
+		code: "document_held",
+	});
+	expect((await saveFrom("second")).error).toBeUndefined();
+
+	const change = {
+		collectionKey: pages.key,
+		documentId,
+		fields: { title: "Held" },
+	};
+	expect(await run.fail(directUpdate, change)).toContain(
+		"lucid_builder_update",
+	);
+	expect(
+		await run.fail(directDelete, { collectionKey: pages.key, documentId }),
+	).toContain("lucid_builder_update");
+	//* a request leaves latest alone, so it doesn't replace anything
+	expect(await run.write(update, change)).toMatchObject({
+		outcome: "requested",
+	});
+
+	//* a tab whose heartbeats lapsed can't save over a new holder, but takes a free hold back
+	await context.db.kysely
+		.updateTable("lucid_document_holds")
+		.set({ seen_at: new Date(0).toISOString() })
+		.where("document_id", "=", documentId)
+		.execute();
+	expect((await open("third")).data).toMatchObject({ holding: true });
+	expect((await saveFrom("second")).error).toMatchObject({ status: 409 });
+	await release(context, {
+		collectionKey: pages.key,
+		documentId,
+		tabId: "third",
+		userId,
+	});
+	expect((await saveFrom("second")).error).toBeUndefined();
+
+	await release(context, {
+		collectionKey: pages.key,
+		documentId,
+		tabId: "second",
+		userId,
+	});
+	expect(await run.write(directUpdate, change)).toMatchObject({
+		outcome: "applied",
+	});
+
+	//* saving replaced latest with a new version, which tabs still hold and take over
+	const saved = await readDocumentContent(context, {
+		collectionKey: pages.key,
+		id: documentId,
+	});
+	expect(saved.data?.version.id).not.toBe(versionId);
+	expect((await open("first")).data).toMatchObject({ holding: true });
+	expect((await open("second", true)).data).toMatchObject({ holding: true });
+});
+
+test("only one of two tabs opening a document at once holds it", async () => {
+	const documentId = await createPage();
+
+	const opened = await Promise.all(
+		["left", "right"].map((tabId) =>
+			heartbeat(context, {
+				collectionKey: pages.key,
+				documentId,
+				requestId: null,
+				tabId,
+				user,
+				takeOver: false,
+			}),
+		),
+	);
+	expect(opened.map((result) => result.data?.holding).sort()).toEqual([
+		false,
+		true,
+	]);
+});
+
+test("builder tools read unsaved content from the builder and hand changes back as unsaved edits", async () => {
+	const documentId = await createPage();
+	const conversation = await insertConversation(context, {
+		agentKey: agent.key,
+		userId,
+	});
+	assert(conversation.data, JSON.stringify(conversation.error));
+	const stored = await readDocumentContent(context, {
+		collectionKey: pages.key,
+		id: documentId,
+	});
+	assert(stored.data, JSON.stringify(stored.error));
+	const unsaved = structuredClone(stored.data.stored);
+	const title = unsaved.fields.find((field) => field.key === "title");
+	assert(title?.translations);
+	title.translations.en = "Unsaved";
+
+	const authority = {
+		principal: { type: "user" as const, userId },
+		superAdmin: true,
+		permissions: [],
+	};
+	const checkpoint: Checkpoint = {
+		version: 1,
+		confirmationMode: "automatic",
+		screen: {
+			type: "document",
+			tabId: "tab",
+			label: "Hello",
+			collectionKey: pages.key,
+			documentId,
+			requestId: null,
+		},
+		messages: [],
+		nudges: 0,
+		requestId: randomUUID(),
+		messageId: randomUUID(),
+		parts: [],
+		calls: [],
+		cursor: 0,
+		phase: "tools",
+	};
+	/** Calls a builder tool the way the runner does, answering what it waited on with `response`. */
+	const callBuilderTool = async (
+		name: string,
+		input: Record<string, unknown>,
+		response?: Record<string, unknown>,
+	): Promise<ToolOutcome> => {
+		const handler = runnerToolHandlers.get(name);
+		assert(handler);
+		return handler(context, {
+			call: { id: "call", name, input },
+			run: {
+				id: randomUUID(),
+				conversation_id: conversation.data.id,
+				routine_id: null,
+				user_id: userId,
+				execution_version: 1,
+				agent_key: agent.key,
+				conversation_user_id: userId,
+				conversation_kind: "chat",
+				conversation_routine_id: null,
+			},
+			mode: "chat",
+			checkpoint,
+			authority,
+			setup: resolveRunSetup(context, {
+				agent,
+				mode: "chat",
+				hasHistory: false,
+				authority,
+				screen: checkpoint.screen,
+			}),
+			answer: response && { action: "submit", response },
+		});
+	};
+	/** Waits on the screen call an outcome asks for, as the runner saves it. */
+	const waitOn = (outcome: ToolOutcome) => {
+		assert(outcome.kind === "pending", JSON.stringify(outcome));
+		checkpoint.pending = outcome.pending;
+		checkpoint.parts.push(outcome.pending.widget);
+		return outcome.pending.widget.data;
+	};
+	const readAnswer = {
+		status: "done",
+		document: {
+			revision: 3,
+			versionId: null,
+			content: unsaved,
+			contentLocale: "en",
+			unsaved: true,
+			editable: true,
+		},
+	};
+
+	expect(
+		waitOn(await callBuilderTool(runnerTools.builderRead.name, {})),
+	).toMatchObject({ action: "read", screen: { tabId: "tab" } });
+	const read = await callBuilderTool(
+		runnerTools.builderRead.name,
+		{},
+		readAnswer,
+	);
+	assert(read.kind === "result" && !read.failed, JSON.stringify(read));
+	expect(read.output).toMatchObject({
+		unsaved: true,
+		fields: { title: "Unsaved" },
+		validationErrors: [],
+	});
+	//* the screen call never reaches the saved reply
+	expect(checkpoint.parts).toEqual([]);
+
+	//* media outside the library applies, but is reported for the agent to fix
+	const change = {
+		fields: { title: "From the agent" },
+		bricks: [{ ref: "seo", fields: { image: [999_999] } }],
+	};
+	waitOn(await callBuilderTool(runnerTools.builderUpdate.name, change));
+	const apply = waitOn(
+		await callBuilderTool(runnerTools.builderUpdate.name, change, readAnswer),
+	);
+	expect(apply).toMatchObject({
+		action: "update",
+		revision: 3,
+		versionId: null,
+	});
+	expect(JSON.stringify(apply)).toContain("From the agent");
+	//* the French title the builder held is kept
+	expect(JSON.stringify(apply)).toContain("Bonjour");
+
+	const changed = await callBuilderTool(
+		runnerTools.builderUpdate.name,
+		change,
+		{
+			status: "unavailable",
+			reason: "changed",
+		},
+	);
+	expect(changed).toMatchObject({ failed: true });
+
+	waitOn(await callBuilderTool(runnerTools.builderUpdate.name, change));
+	waitOn(
+		await callBuilderTool(runnerTools.builderUpdate.name, change, readAnswer),
+	);
+	const applied = await callBuilderTool(
+		runnerTools.builderUpdate.name,
+		change,
+		{
+			status: "done",
+		},
+	);
+	expect(applied).toMatchObject({ failed: false, output: { applied: true } });
+	assert(applied.kind === "result");
+	expect(JSON.stringify(applied.output)).toContain("bricks.seo.image");
+
+	//* nothing was saved for the person
+	const after = await readDocumentContent(context, {
+		collectionKey: pages.key,
+		id: documentId,
+	});
+	expect(JSON.stringify(after.data?.data)).not.toContain("From the agent");
 });

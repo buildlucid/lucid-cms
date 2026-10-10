@@ -8,6 +8,7 @@ import type { BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { tabId } from "@/utils/tab-id";
 
 export interface Params {
 	collectionKey: string;
@@ -29,7 +30,8 @@ export const createSingleVersionReq = (params: Params) => {
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}`,
 		csrf: true,
 		method: "POST",
-		body: params.body,
+		//* a tab that no longer holds the document is refused, eg. once someone took over
+		body: { ...params.body, editorTabId: tabId },
 	});
 };
 

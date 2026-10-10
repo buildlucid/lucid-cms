@@ -42,14 +42,21 @@ const fieldIssues = (
 		];
 	});
 
+/** Write tools name a brick by its key, and its position among bricks with that key. */
+const brickInputPath = (brick: BrickError) =>
+	brick.ref === `fixed:${brick.key}`
+		? `bricks.${brick.key}`
+		: `bricks.${brick.key}[${brick.order}]`;
+
 /**
- * Formats field errors by tool input path, combining matching errors across locales.
+ * Formats field errors by tool input path across locales, using `brickPath` to address bricks.
  *
  * @example "bricks.seo.socialImage[0] (en, fr): Media 3 isn't in the media library."
  */
 const describeErrorDetails = (
 	context: ServiceContext,
 	error: LucidErrorData,
+	brickPath: (brick: BrickError) => string = brickInputPath,
 ): string[] => {
 	const bricks = error.errors?.bricks;
 	const fields = error.errors?.fields;
@@ -61,13 +68,7 @@ const describeErrorDetails = (
 			? bricks
 					.filter(isBrickError)
 					.flatMap((brick) =>
-						fieldIssues(
-							context,
-							brick.fields,
-							brick.ref === `fixed:${brick.key}`
-								? `bricks.${brick.key}`
-								: `bricks.${brick.key}[${brick.order}]`,
-						),
+						fieldIssues(context, brick.fields, brickPath(brick)),
 					)
 			: []),
 	];

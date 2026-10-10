@@ -1,6 +1,6 @@
 import { debounce } from "@solid-primitives/scheduled";
 import { Editor } from "@tiptap/core";
-import type { Agent, AgentReferenceInput } from "@types";
+import type { Agent, AgentReferenceInput, AgentScreen } from "@types";
 import classnames from "classnames";
 import { TbOutlineArrowUp, TbOutlinePlayerStop } from "solid-icons/tb";
 import {
@@ -16,6 +16,7 @@ import {
 } from "solid-js";
 import AgentMarkdownPill from "@/components/AgentMarkdownPill/AgentMarkdownPill";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
+import AgentScreenBadge from "@/components/AgentScreenBadge/AgentScreenBadge";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import useAgentUploads from "@/hooks/useAgentUploads/useAgentUploads";
@@ -88,6 +89,8 @@ export interface AgentComposerProps {
 	start?: JSX.Element;
 	controls?: JSX.Element;
 	header?: JSX.Element;
+	/** The admin screen the message goes with, shown as a pill above it. */
+	screen?: AgentScreen;
 	end?: JSX.Element;
 	/** @default "md" */
 	size?: "md" | "lg";
@@ -443,6 +446,13 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				</Show>
 				<Show when={props.header}>
 					<div class="overflow-hidden rounded-t-2xl">{props.header}</div>
+				</Show>
+				<Show when={props.screen}>
+					{(screen) => (
+						<div class="-mb-3 flex px-3 pt-3">
+							<AgentScreenBadge screen={screen()} variant="pill" />
+						</div>
+					)}
 				</Show>
 				<ErrorMessage
 					theme="basic"

@@ -183,6 +183,7 @@ const AgentChatComposer: Component<{
 						class="agent-composer-morph"
 						autofocus={true}
 						draftKey={props.conversationId}
+						screen={session.screen.current()}
 						floatAttachments={true}
 						onAttachedChange={props.onAttachedChange}
 						onReferencesChange={props.onReferencesChange}

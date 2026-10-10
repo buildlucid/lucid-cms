@@ -5,7 +5,7 @@ import type {
 import type { z } from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidExternalAuth } from "../../types/hono.js";
-import type { AgentResource } from "../../types/response.js";
+import type { AgentResource, AgentScreen } from "../../types/response.js";
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -111,7 +111,11 @@ export type AgentToolCapabilities = {
 	webRead?: boolean;
 };
 
-export type AgentToolDescriptionProps = { mode: RunMode };
+export type AgentToolDescriptionProps = {
+	mode: RunMode;
+	/** The kind of admin screen the person has open, when the agent can use builder tools on it. */
+	screen?: AgentScreen["type"];
+};
 
 export type AgentToolDescription =
 	| string

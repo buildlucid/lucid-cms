@@ -27,7 +27,9 @@ export interface PublicErrorData {
 		| "access_denied"
 		| "unsupported_response_type"
 		| "unsupported_grant_type"
-		| "server_error";
+		| "server_error"
+		/** A save from a tab that no longer holds the document. */
+		| "document_held";
 	key?: string;
 	errors?: ErrorResult;
 }

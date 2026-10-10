@@ -2,6 +2,7 @@ import type {
 	AgentDelivery,
 	AgentInputAction,
 	AgentReferenceInput,
+	AgentScreen,
 } from "@types";
 import request from "@/utils/request";
 import { runStreamUrls } from "./stream-run";
@@ -11,6 +12,7 @@ export const submitInput = (props: {
 	conversationId: string;
 	text: string;
 	references: AgentReferenceInput[];
+	screen?: AgentScreen;
 	requestId: string;
 	delivery: AgentDelivery;
 }) =>
@@ -21,6 +23,7 @@ export const submitInput = (props: {
 		body: {
 			text: props.text,
 			references: props.references,
+			screen: props.screen,
 			requestId: props.requestId,
 			delivery: props.delivery,
 		},

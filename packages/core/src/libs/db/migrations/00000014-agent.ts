@@ -330,6 +330,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("references", adapter.getDataType("json"), (col) =>
 				col.notNull().defaultTo("[]"),
 			)
+			.addColumn("screen", adapter.getDataType("json"))
 			.addColumn("target_run_id", adapter.getDataType("text"))
 			.addColumn("status", adapter.getDataType("text"), (col) =>
 				col.notNull().defaultTo("pending"),

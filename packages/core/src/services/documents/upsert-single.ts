@@ -1,6 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import checkSaveHold from "../document-editors/check-save-hold.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import readDocumentState from "./helpers/read-document-state.js";
 import saveDocument from "./helpers/save-document.js";
@@ -11,10 +12,12 @@ const upsertSingle: ServiceFn<
 		Parameters<typeof saveDocument>[1] & {
 			/** The latest content the edit was based on. The save is refused when latest has been saved since. */
 			baseContentId?: string;
+			/** The admin tab saving, refused if another tab holds latest. */
+			editorTabId?: string;
 		},
 	],
 	number
-> = (context, { baseContentId, ...data }) =>
+> = (context, { baseContentId, editorTabId, ...data }) =>
 	withTransaction(
 		context,
 		async (context) => {
@@ -45,6 +48,21 @@ const upsertSingle: ServiceFn<
 						data: undefined,
 					};
 				}
+			}
+
+			if (
+				editorTabId !== undefined &&
+				data.documentId !== undefined &&
+				data.userId !== null
+			) {
+				const held = await checkSaveHold(context, {
+					collectionKey: data.collectionKey,
+					documentId: data.documentId,
+					requestId: null,
+					tabId: editorTabId,
+					userId: data.userId,
+				});
+				if (held.error) return held;
 			}
 
 			return await saveDocument(context, data);

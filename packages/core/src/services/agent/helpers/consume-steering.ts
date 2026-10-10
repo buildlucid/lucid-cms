@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import {
 	isToolCallComplete,
 	settleToolCall,
@@ -54,6 +55,13 @@ const consumeSteering: ServiceFn<
 				output,
 			});
 
+			//* screen calls are only for their tool, so they leave the reply rather than stay in it dismissed
+			checkpoint.parts = checkpoint.parts.filter(
+				(part) =>
+					part.type !== "widget" ||
+					part.key !== constants.agent.widgets.screen ||
+					part.interaction?.toolCallId !== call.id,
+			);
 			for (const part of checkpoint.parts) {
 				if (
 					part.type === "widget" &&
@@ -85,6 +93,7 @@ const consumeSteering: ServiceFn<
 				id: input.id,
 				text: input.text,
 				references: input.references,
+				screen: input.screen,
 				createdAt: new Date(input.created_at).toISOString(),
 			});
 			if (appended.error) return appended;
@@ -104,6 +113,8 @@ const consumeSteering: ServiceFn<
 			...(checkpoint.inputIds ?? []),
 			...fresh.map((input) => input.id),
 		];
+		//* builder tools follow the person to the screen their latest message came from
+		checkpoint.screen = fresh.at(-1)?.screen ?? undefined;
 		startNextTurn(checkpoint);
 
 		const persisted = await session.save();

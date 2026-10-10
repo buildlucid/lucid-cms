@@ -3,16 +3,9 @@ import type { AdminCopyInput } from "../../../i18n/types.js";
 import type { FieldConfig, FieldTypes } from "../types.js";
 
 /** Copy-bearing keys that may appear on a field config's `details` object. */
-const detailCopyKeys = ["label", "summary", "placeholder", "true", "false"];
+const detailCopyKeys = ["label", "description", "placeholder", "true", "false"];
 
-/**
- * Normalises author-supplied copy on a field config in place.
- *
- * Plain strings authored against `details` (label/summary/placeholder, checkbox
- * `true`/`false`) and select `options[].label` become literal copy so the
- * runtime config only ever holds descriptor/literal objects. Keys that are not
- * present are left untouched so the config shape is preserved.
- */
+/** Normalises existing field detail and select option copy in place, converting plain strings to literals while preserving absent keys. */
 const normalizeFieldCopy = (config: FieldConfig<FieldTypes>): void => {
 	const details = (config as { details?: Record<string, AdminCopyInput> })
 		.details;

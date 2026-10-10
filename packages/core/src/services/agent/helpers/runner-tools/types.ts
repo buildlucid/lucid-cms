@@ -5,6 +5,7 @@ import type {
 	RunMode,
 	ToolCall,
 } from "../../../../libs/agent/types.js";
+import type { AgentToolAuthority } from "../../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import type { RunSetup } from "../resolve-run-setup.js";
 import type { SessionRun } from "../run-session.js";
@@ -16,6 +17,8 @@ export type RunnerToolCall = {
 	call: ToolCall;
 	checkpoint: Checkpoint;
 	setup: RunSetup;
+	/** Who the run acts for, whose permissions tools check. */
+	authority: AgentToolAuthority;
 	/** A person's answer, when the call paused for one. */
 	answer?: InteractionAnswer;
 };

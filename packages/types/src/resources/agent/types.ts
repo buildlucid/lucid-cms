@@ -1,7 +1,12 @@
 import type { AiModelSelection } from "../ai/types.js";
-import type { DocumentVersionType } from "../documents/types.js";
+import type {
+	DocumentVersionCheckBrick,
+	DocumentVersionCheckField,
+	DocumentVersionType,
+} from "../documents/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType } from "../media/types.js";
+import type { Refs } from "../refs/types.js";
 import type { Permission } from "../users/types.js";
 
 /** A media item, document or request in Lucid. */
@@ -25,6 +30,91 @@ export type AgentReferenceSnapshot = AgentReferenceInput & {
 export type AgentReferenceSource =
 	| { type: "message" }
 	| { type: "tool"; toolName: string };
+
+/** Describes the originating admin screen so the agent knows what is open and can send builder tool calls to its browser. */
+export type AgentScreen =
+	| {
+			type: "document";
+			/** The browser tab the screen is open in, which answers builder tools. */
+			tabId: string;
+			label: string;
+			collectionKey: string;
+			/** Null when creating a document, before it is saved. */
+			documentId: number | null;
+			/** The request whose proposal is open, or null for latest. */
+			requestId: number | null;
+	  }
+	| { type: "request"; tabId: string; label: string; requestId: number };
+
+/** A document's unsaved content as the builder holds it, in the shape the admin saves. */
+export type AgentBuilderContent = {
+	fields: DocumentVersionCheckField[];
+	bricks: DocumentVersionCheckBrick[];
+};
+
+/** A field or brick in the document builder to scroll to. */
+export type AgentBuilderTarget = {
+	/** A builder brick's ref or a fixed brick's key. Omit it for the document's own fields. */
+	brick?: string;
+	field?: string;
+	/** Switches the editor to this content language first. */
+	contentLocale?: string;
+};
+
+/** What a tool asks the person's open screen to do, sent as the data of a `lucid-screen` interaction. */
+export type AgentScreenCall =
+	| { action: "read"; screen: AgentScreen }
+	| {
+			action: "update";
+			screen: Extract<AgentScreen, { type: "document" }>;
+			/** The revision the update was built from. A builder that changed since refuses it. */
+			revision: number;
+			/** The version the content belongs to, or null before the document is saved. */
+			versionId: number | null;
+			content: AgentBuilderContent;
+			/** Media, documents and users the new content links to, so fields can show them. */
+			refs: Refs;
+	  }
+	| {
+			action: "focus";
+			screen: Extract<AgentScreen, { type: "document" }>;
+			target: AgentBuilderTarget;
+	  };
+
+/** Why a screen could not answer a tool call. */
+export type AgentScreenUnavailableReason =
+	/** The screen was closed, or it did not answer in time. */
+	| "closed"
+	/** The person moved to another screen. */
+	| "moved"
+	/** The document can't be edited, eg. someone else holds it. */
+	| "locked"
+	/** The content changed since it was read, so the update was not applied. */
+	| "changed"
+	/** The field or brick to focus wasn't found. */
+	| "missing";
+
+/** A screen's answer to a tool call. */
+export type AgentScreenResponse =
+	| {
+			status: "done";
+			/** The builder's state, answering a read. */
+			document?: {
+				revision: number;
+				/** The version the builder's content belongs to, or null before the document is saved. */
+				versionId: number | null;
+				content: AgentBuilderContent;
+				contentLocale: string | null;
+				unsaved: boolean;
+				editable: boolean;
+			};
+	  }
+	| {
+			status: "unavailable";
+			reason: AgentScreenUnavailableReason;
+			/** Where the person is now, when they moved. */
+			screen?: AgentScreen;
+	  };
 
 /** A linked resource with its current display details. */
 export type AgentReference = {
@@ -64,10 +154,11 @@ export interface Agent {
 	key: string;
 	name: string;
 	description: string;
-	/** What the composer offers: personal uploads, existing media and documents. */
+	/** Configures composer attachments and tools for reading and editing the person's open document builder. */
 	features: {
 		media: { upload: boolean; attach: boolean };
 		documents: { attach: boolean };
+		builder: { read: boolean; edit: boolean };
 	};
 	/** What the agent can do for the current user, such as open attached files or search the web. */
 	capabilities: AgentCapabilities;
@@ -111,6 +202,8 @@ export interface AgentInput {
 	id: string;
 	text: string;
 	references: AgentReferenceInput[];
+	/** The admin screen it was sent from. */
+	screen: AgentScreen | null;
 	/** `claimed` input is being delivered and can no longer change. */
 	status: "pending" | "claimed";
 	delivery: AgentDelivery;
@@ -133,7 +226,10 @@ export type AgentRunnerToolName =
 	| "lucid_share_progress"
 	| "lucid_read_history"
 	| "lucid_load_skill"
-	| "lucid_finish_run";
+	| "lucid_finish_run"
+	| "lucid_builder_read"
+	| "lucid_builder_update"
+	| "lucid_builder_focus";
 
 /** An agent that acted, for the person shown alongside it or for the system. */
 export type AgentActor = {
@@ -166,7 +262,8 @@ export type AgentCoreWidgetKey =
 	| "lucid-question"
 	| "lucid-tool-confirmation"
 	| "lucid-tool-confirmation-batch"
-	| "lucid-media-select";
+	| "lucid-media-select"
+	| "lucid-screen";
 
 /** The lifecycle state of an agent run. */
 export type AgentRunStatus =
@@ -265,6 +362,8 @@ export type AgentToolSummary = Omit<AgentToolDetails, "input" | "output"> & {
 export type AgentMessagePart =
 	| { type: "text"; text: string }
 	| { type: "reference"; reference: AgentReferenceSnapshot }
+	/** The admin screen the message was sent from. */
+	| { type: "screen"; screen: AgentScreen }
 	/** Starts a routine run. The instructions stay here for display, and a text part repeats them only when the agent needs them. */
 	| {
 			type: "routine";

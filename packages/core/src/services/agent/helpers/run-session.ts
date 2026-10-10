@@ -24,6 +24,7 @@ import type { StoredAgentMessagePart } from "../../../schemas/agent.js";
 import type {
 	AgentReferenceInput,
 	AgentRunStatus,
+	AgentScreen,
 	AgentStreamEvent,
 } from "../../../types/response.js";
 import type {
@@ -203,6 +204,7 @@ const openRunSession = async (
 				id: string;
 				text: string;
 				references: AgentReferenceInput[];
+				screen: AgentScreen | null;
 				createdAt: string;
 			}) =>
 				withTransaction<StoredAgentMessagePart[]>(context, async (context) => {
@@ -217,6 +219,7 @@ const openRunSession = async (
 					const parts = inputMessageParts({
 						text: input.text,
 						references: references.data,
+						screen: input.screen,
 					});
 
 					const AgentMessages = new AgentMessagesRepository(context.db);

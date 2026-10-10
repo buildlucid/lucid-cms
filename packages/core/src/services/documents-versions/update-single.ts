@@ -12,6 +12,7 @@ import type { LucidActor } from "../../types/hono.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import checkSaveHold from "../document-editors/check-save-hold.js";
 import resetStage from "../document-workflows/reset-stage.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
@@ -38,6 +39,8 @@ const updateSingle: ServiceFn<
 			skipDocumentWriteClaims?: boolean;
 			/** The content the edit was based on. The update is refused when the version has been saved since. */
 			baseContentId?: string;
+			/** The admin tab saving, refused if another tab holds the version. */
+			editorTabId?: string;
 
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
@@ -85,6 +88,17 @@ const updateSingle: ServiceFn<
 					},
 					data: undefined,
 				};
+			}
+
+			if (data.editorTabId !== undefined && data.userId !== null) {
+				const held = await checkSaveHold(context, {
+					collectionKey: data.collectionKey,
+					documentId: data.documentId,
+					requestId: updateContextRes.data.request?.id ?? null,
+					tabId: data.editorTabId,
+					userId: data.userId,
+				});
+				if (held.error) return held;
 			}
 
 			// Fire beforeUpsert transform hooks

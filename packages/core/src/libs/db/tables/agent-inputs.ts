@@ -2,7 +2,11 @@ import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
 import { agentInputStatusSchema } from "../../../schemas/agent.js";
 import { agentReferenceInputSchema } from "../../../schemas/agent-references.js";
-import type { AgentReferenceInput } from "../../../types/response.js";
+import { agentScreenSchema } from "../../../schemas/agent-screen.js";
+import type {
+	AgentReferenceInput,
+	AgentScreen,
+} from "../../../types/response.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable } from "../types.js";
 
@@ -14,6 +18,7 @@ export const agentInputsTable = defineTable("lucid_agent_inputs", () => ({
 		user_id: { schema: z.number(), type: "integer" },
 		text: { schema: z.string(), type: "text" },
 		references: { schema: z.array(agentReferenceInputSchema), type: "json" },
+		screen: { schema: agentScreenSchema.nullable(), type: "json" },
 		target_run_id: { schema: z.uuid().nullable(), type: "text" },
 		status: { schema: agentInputStatusSchema, type: "text" },
 		created_at: { schema: z.union([z.string(), z.date()]), type: "timestamp" },
@@ -32,6 +37,12 @@ export interface LucidAgentInputs {
 		AgentReferenceInput[],
 		AgentReferenceInput[],
 		AgentReferenceInput[]
+	>;
+	/** The admin screen it was sent from, which answers the agent's builder tools. */
+	screen: JSONColumnType<
+		AgentScreen | null,
+		AgentScreen | null,
+		AgentScreen | null
 	>;
 	target_run_id: string | null;
 	status: Generated<z.infer<typeof agentInputStatusSchema>>;

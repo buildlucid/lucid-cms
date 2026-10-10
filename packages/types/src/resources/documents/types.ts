@@ -1,6 +1,7 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType, ProfilePicture } from "../media/types.js";
 import type { RefResource } from "../refs/resource.js";
+import type { RequestUser } from "../requests/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
 export type BrickType = "builder" | "fixed" | "embedded";
@@ -909,4 +910,18 @@ export interface DocumentVersionCheckBrick {
 export interface DocumentVersionCheckResponse {
 	bricks: Array<DocumentVersionCheckBrick>;
 	fields: Array<DocumentVersionCheckField>;
+}
+
+/** A tab's view of the document or request proposal holder, who alone can edit until another tab takes over. */
+export interface DocumentEditors {
+	/** Whether this tab holds the document. */
+	holding: boolean;
+	/** The tab that holds it, when it isn't this one. */
+	holder: {
+		user: RequestUser;
+		/** Whether it's the same person, in another tab. */
+		self: boolean;
+		/** When that tab took hold of the document. */
+		since: string;
+	} | null;
 }

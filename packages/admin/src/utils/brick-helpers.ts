@@ -494,7 +494,7 @@ const preserveRepeaterGroupOpenState = (
  * collection pseudo brick and any missing fixed brick placeholders.
  */
 const buildBricks = (props: {
-	document?: InternalCollectionDocument;
+	document?: Pick<InternalCollectionDocument, "bricks" | "fields">;
 	collection?: Collection;
 }): Array<{
 	ref: string;

@@ -40,7 +40,7 @@ const updateVersionController = factory.createHandlers(
 	//* proposals follow their request's edit access, and latest needs update access, so the service checks writes
 	collectionPermissions("read"),
 	async (c) => {
-		const { bricks, fields, baseContentId } = c.req.valid("json");
+		const { bricks, fields, baseContentId, editorTabId } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
 		const context = createServiceContext(c);
 
@@ -63,6 +63,7 @@ const updateVersionController = factory.createHandlers(
 			bricks,
 			fields,
 			baseContentId,
+			editorTabId,
 		});
 		if (updateRes.error) throw new LucidAPIError(updateRes.error);
 

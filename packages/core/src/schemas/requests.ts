@@ -12,7 +12,7 @@ import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaImagePreviewResponseSchema } from "./media.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
 
-const requestUserSchema = z.object({
+export const requestUserSchema = z.object({
 	id: z.number(),
 	email: z.string().nullable(),
 	username: z.string().nullable(),

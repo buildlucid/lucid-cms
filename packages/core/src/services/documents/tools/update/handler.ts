@@ -5,6 +5,7 @@ import { getCollectionPermission } from "../../../../libs/permission/collection-
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasAccess from "../../../../libs/permission/has-access.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
+import checkNotHeld from "../../../document-editors/check-not-held.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getEditLink from "../../helpers/get-edit-link.js";
@@ -102,6 +103,14 @@ const updateDocument: ServiceFn<
 
 	const request = requestRes?.data.request;
 	const versionId = requestRes?.data.document.source_version_id ?? undefined;
+	const held = await checkNotHeld(context, {
+		collectionKey: collection.key,
+		documentId: input.documentId,
+		requestId: request?.id ?? null,
+		userId: props.actor.kind === "user" ? props.actor.userId : null,
+	});
+	if (held.error) return held;
+
 	const currentRes = await readDocumentContent(context, {
 		collectionKey: collection.key,
 		id: input.documentId,

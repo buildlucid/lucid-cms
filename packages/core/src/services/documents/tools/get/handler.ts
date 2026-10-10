@@ -1,22 +1,15 @@
 import type z from "zod";
 import constants from "../../../../constants/constants.js";
-import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import { documentEditableDataSchema } from "../../../../libs/toolkit/documents/authoring-values-schema.js";
 import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
-import { paginate } from "../../../../libs/tools/pagination.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
 import loadRequest from "../../../requests/helpers/load-request.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getSingle from "../../content/get-single.js";
 import getEditLink from "../../helpers/get-edit-link.js";
-import {
-	projectRefs,
-	projectRoute,
-	selectFields,
-} from "../../helpers/project-document.js";
-import projectEditableValue from "../../helpers/project-editable-value.js";
+import { projectRefs, projectRoute } from "../../helpers/project-document.js";
+import projectEditableDocument from "../../helpers/project-editable-document.js";
 import readDocumentContent from "../../helpers/read-document-content.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
 import projectMeta from "../helpers/project-meta.js";
@@ -127,52 +120,24 @@ const getDocument: ServiceFn<
 	});
 	if (contentRes.error) return contentRes;
 
-	const projected = documentEditableDataSchema.safeParse(
-		projectEditableValue(
-			getDocumentShape({
-				collection,
-				localization: context.config.localization,
-			}),
-			contentRes.data.data,
+	const projected = projectEditableDocument(
+		{ collection, localization: context.config.localization },
+		{
+			data: contentRes.data.data,
 			contentLocale,
-		),
+			fieldKeys: input.fieldKeys,
+			includeBricks: input.include?.includes("bricks") === true,
+			bricksPage: input.bricksPage,
+			bricksPerPage: input.bricksPerPage,
+		},
 	);
-	if (!projected.success) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.documents.authoring.structure.invalid"),
-				status: 500,
-				zod: projected.error,
-			},
-			data: undefined,
-		};
-	}
+	if (projected.error) return projected;
 
 	const document = documentRes.data.document;
 	const metaRes = document.meta
 		? await projectMeta(context, { meta: document.meta })
 		: undefined;
 	if (metaRes?.error) return metaRes;
-	const { fixed, builder, embedded } = projected.data.bricks;
-	const bricks = paginate(
-		input.include?.includes("bricks")
-			? [
-					...Object.entries(fixed).map(([key, fields]) => ({
-						key,
-						type: "fixed" as const,
-						fields,
-					})),
-					...builder.map((brick) => ({ ...brick, type: "builder" as const })),
-					...embedded.map((brick) => ({
-						...brick,
-						type: "embedded" as const,
-					})),
-				]
-			: [],
-		input.bricksPage,
-		input.bricksPerPage,
-	);
 
 	return {
 		error: undefined,
@@ -184,8 +149,8 @@ const getDocument: ServiceFn<
 					version: document.version,
 					requestId: proposal?.requestId ?? null,
 					route: projectRoute(document.route, contentLocale),
-					fields: selectFields(projected.data.fields, input.fieldKeys),
-					bricks: bricks.data,
+					fields: projected.data.fields,
+					bricks: projected.data.bricks,
 					...(metaRes && { meta: metaRes.data }),
 					links: {
 						edit: proposal
@@ -205,7 +170,7 @@ const getDocument: ServiceFn<
 					collectionKey: input.collectionKey,
 					version: input.version,
 					contentLocale,
-					brickPagination: bricks.pagination,
+					brickPagination: projected.data.brickPagination,
 					...(documentRes.data.refs && {
 						refs: projectRefs(documentRes.data.refs),
 					}),

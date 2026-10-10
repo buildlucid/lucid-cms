@@ -15,6 +15,7 @@ import {
 } from "solid-js";
 import AgentMediaPreview from "@/components/AgentMediaPreview/AgentMediaPreview";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
+import AgentScreenBadge from "@/components/AgentScreenBadge/AgentScreenBadge";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
 import { layoutOf } from "@/components/AgentWidget/slots";
@@ -76,6 +77,9 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 		props.message.parts.find((part) => part.type === "run-result"),
 	);
 	const user = createMemo(() => props.message.role === "user");
+	const screen = createMemo(() =>
+		props.message.parts.find((part) => part.type === "screen"),
+	);
 	const text = createMemo(() => messageText(props.message));
 	const hasText = createMemo(() =>
 		props.message.parts.some((part) => part.type === "text" && part.text),
@@ -289,6 +293,11 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 							>
 								{dateHelpers.formatTimestamp(createdAt())}
 							</time>
+						)}
+					</Show>
+					<Show when={screen()}>
+						{(part) => (
+							<AgentScreenBadge screen={part().screen} variant="icon" />
 						)}
 					</Show>
 					<button

@@ -25,6 +25,8 @@ export function useDocumentMutations(props: {
 	mode: "create" | "edit" | "revisions";
 	document?: () => InternalCollectionDocument | undefined;
 	versionId: () => number | undefined;
+	/** Called when a save is refused because another tab took over the document. */
+	onHeld?: () => void;
 }) {
 	const brickStore = useBrickStore();
 	const navigate = useNavigate();
@@ -102,6 +104,10 @@ export function useDocumentMutations(props: {
 			brickStore.get.captureInitialSnapshot();
 		},
 		onError: (errors) => {
+			if (errors?.code === "document_held") {
+				props.onHeld?.();
+				return;
+			}
 			if (errors?.status === 409) brickStore.set("contentChanged", true);
 			brickStore.set(
 				"fieldsErrors",
@@ -161,6 +167,10 @@ export function useDocumentMutations(props: {
 		onError: (errors) => {
 			latestAutoSaveRequestCounter = null;
 			latestAutoSaveSnapshot = null;
+			if (errors?.code === "document_held") {
+				props.onHeld?.();
+				return;
+			}
 			if (errors?.status === 409) brickStore.set("contentChanged", true);
 			brickStore.set(
 				"fieldsErrors",

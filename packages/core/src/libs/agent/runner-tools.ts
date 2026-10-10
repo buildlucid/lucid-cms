@@ -2,7 +2,11 @@ import z from "zod";
 import constants from "../../constants/constants.js";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
 import { agentReferenceInputSchema } from "../../schemas/agent-references.js";
-import type { AgentRunnerToolName } from "../../types/response.js";
+import { agentBuilderTargetSchema } from "../../schemas/agent-screen.js";
+import { inputSchema as getDocumentInput } from "../../services/documents/tools/get/schema.js";
+import { writeInput } from "../../services/documents/tools/schema.js";
+import { brickChangeSchema } from "../../services/documents/tools/update/schema.js";
+import type { AgentRunnerToolName, AgentScreen } from "../../types/response.js";
 import { copy } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import type { RunMode } from "./types.js";
@@ -11,6 +15,8 @@ export type RunnerToolContext = {
 	mode: RunMode;
 	hasSkills: boolean;
 	hasHistory: boolean;
+	/** The admin screen the person's latest message came from, when the agent can use builder tools. */
+	screen?: { type: AgentScreen["type"]; edit: boolean };
 };
 
 type RunnerToolDefinition = {
@@ -121,6 +127,46 @@ const runnerTools = {
 			"End this routine run with an outcome and a short summary for run history and future runs. Requires a reply with the result first.",
 		input: finishInput,
 		available: ({ mode }) => mode === "routine",
+	},
+	builderRead: {
+		name: "lucid_builder_read",
+		title: copy("admin:core.tools.lucid_builder_read.title"),
+		description:
+			"Read the document the person has open in the document builder, as they see it, including changes they haven't saved. Returns fields and bricks in the shape documents_get returns, with the refs lucid_builder_update needs, and any validation errors.",
+		input: getDocumentInput.pick({
+			contentLocale: true,
+			fieldKeys: true,
+			bricksPage: true,
+			bricksPerPage: true,
+		}),
+		available: ({ screen }) => screen?.type === "document",
+	},
+	builderUpdate: {
+		name: "lucid_builder_update",
+		title: copy("admin:core.tools.lucid_builder_update.title"),
+		description:
+			"Change the document the person has open in the document builder, sending only what changes, in the shape documents_update takes. Read it with lucid_builder_read first and reuse its refs. Changes show in the builder as unsaved edits for them to review and save, so nothing is saved for them. Returns any validation errors the changed content has, so fix those before finishing. It is refused when they edited the document while it applied, so read it again and retry.",
+		input: z
+			.object({
+				contentLocale: writeInput.contentLocale,
+				fields: writeInput.fields.optional(),
+				bricks: z.array(brickChangeSchema).optional().meta({
+					description:
+						"Brick changes in order, using refs and keys from lucid_builder_read. Omitted bricks and fields keep their values.",
+				}),
+			})
+			.refine((input) => input.fields !== undefined || input.bricks?.length, {
+				message: "Give fields or bricks to change",
+			}),
+		available: ({ screen }) => screen?.type === "document" && screen.edit,
+	},
+	builderFocus: {
+		name: "lucid_builder_focus",
+		title: copy("admin:core.tools.lucid_builder_focus.title"),
+		description:
+			"Scroll the person's document builder to a field or brick and highlight it, eg. to show them one you are asking about.",
+		input: agentBuilderTargetSchema,
+		available: ({ screen }) => screen?.type === "document",
 	},
 } as const satisfies Record<string, RunnerToolDefinition>;
 

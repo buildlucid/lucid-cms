@@ -199,6 +199,7 @@ const AgentHome: Component<{
 											: "agent.composer.placeholder",
 									)}
 									draftKey="new"
+									screen={session.screen.current()}
 									agentKey={current().key}
 									features={current().features}
 									capabilities={current().capabilities}

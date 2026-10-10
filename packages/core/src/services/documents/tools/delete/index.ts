@@ -16,9 +16,17 @@ export const deleteDocumentAgentTool = (
 	defineAgentTool({
 		name,
 		title: copy("admin:core.tools.documents_delete.title"),
-		description: options.direct
-			? "Delete a document by moving it to the bin, where people can restore it. Collections that require review open a delete request instead. Pass requestId to add it to an open delete request."
-			: "Request deleting a document. It opens a delete request, and the document is only moved to the bin once people approve it. This chat's open delete request for the document is reused. Pass requestId to add it to another open delete request.",
+		description: ({ screen }) =>
+			[
+				options.direct
+					? "Delete a document by moving it to the bin, where people can restore it. Collections that require review open a delete request instead. Pass requestId to add it to an open delete request."
+					: "Request deleting a document. It opens a delete request, and the document is only moved to the bin once people approve it. This chat's open delete request for the document is reused. Pass requestId to add it to another open delete request.",
+				options.direct && screen === "document"
+					? "Deleting a document someone has open in the document builder is refused, including the one the person has open."
+					: "",
+			]
+				.filter(Boolean)
+				.join(" "),
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

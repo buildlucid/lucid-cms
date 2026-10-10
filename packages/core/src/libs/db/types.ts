@@ -22,6 +22,7 @@ import type {
 	LucidBrickTableName,
 	LucidCollectionMigrations,
 	LucidCollections,
+	LucidDocumentHolds,
 	LucidDocumentIdentities,
 	LucidDocumentReferences,
 	LucidDocumentTable,
@@ -307,6 +308,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_document_references: LucidDocumentReferences;
 	lucid_document_version_identities: LucidDocumentVersionIdentities;
 	lucid_document_identities: LucidDocumentIdentities;
+	lucid_document_holds: LucidDocumentHolds;
 	lucid_document_workflows: LucidDocumentWorkflows;
 	lucid_document_workflow_assignees: LucidDocumentWorkflowAssignees;
 	lucid_preview_sessions: LucidPreviewSessions;

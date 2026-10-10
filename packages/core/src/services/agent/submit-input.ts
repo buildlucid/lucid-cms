@@ -7,6 +7,7 @@ import {
 import type {
 	AgentDelivery,
 	AgentReferenceInput,
+	AgentScreen,
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveNotification from "../notifications/resolve.js";
@@ -30,6 +31,8 @@ const submitInput: ServiceFn<
 			requestId: string;
 			text: string;
 			references?: AgentReferenceInput[];
+			/** The admin screen it was sent from, which answers builder tools. */
+			screen?: AgentScreen;
 			delivery: AgentDelivery;
 			dispatch?: boolean;
 		},
@@ -75,13 +78,14 @@ const submitInput: ServiceFn<
 		userId: input.userId,
 		text: input.text,
 		references,
+		screen: input.screen,
 		targetRunId,
 	});
 	if (submitted.error) return submitted;
 
 	//* a retry must repeat the original submission
 	const receipt = await Inputs.selectSingle({
-		select: ["conversation_id", "user_id", "text", "references"],
+		select: ["conversation_id", "user_id", "text", "references", "screen"],
 		where: [{ key: "id", operator: "=", value: input.requestId }],
 	});
 	if (receipt.error) return receipt;
@@ -90,7 +94,8 @@ const submitInput: ServiceFn<
 		receipt.data?.conversation_id !== input.conversationId ||
 		receipt.data.user_id !== input.userId ||
 		receipt.data.text !== input.text ||
-		!isDeepStrictEqual(receipt.data.references, references)
+		!isDeepStrictEqual(receipt.data.references, references) ||
+		!isDeepStrictEqual(receipt.data.screen, input.screen ?? null)
 	) {
 		return {
 			data: undefined,

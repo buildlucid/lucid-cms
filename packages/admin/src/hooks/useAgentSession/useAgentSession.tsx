@@ -1,5 +1,11 @@
 import { useLocation } from "@solidjs/router";
-import type { AgentConfirmationMode, AiModelSelection } from "@types";
+import type {
+	AgentConfirmationMode,
+	AgentScreen,
+	AgentScreenCall,
+	AgentScreenResponse,
+	AiModelSelection,
+} from "@types";
 import {
 	type Accessor,
 	batch,
@@ -8,7 +14,9 @@ import {
 	createMemo,
 	createSignal,
 	For,
+	on,
 	type ParentComponent,
+	untrack,
 	useContext,
 } from "solid-js";
 import {
@@ -25,8 +33,10 @@ import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import { getAgentAccess } from "@/utils/agent-access";
 import type { AgentReferenceItem } from "@/utils/agent-references";
+import { isSameScreen } from "@/utils/agent-screen";
 import { getHomeView } from "@/utils/home-view";
 import { isNavigationLinkActive } from "@/utils/navigation";
+import { tabId } from "@/utils/tab-id";
 
 //* the panel's chat is kept per tab, like chat box drafts
 const chatStorageKey = "lucid:agent-session";
@@ -36,6 +46,13 @@ type ReturnedMessage = {
 	conversationId: string;
 	text: string;
 	references: AgentReferenceItem[];
+};
+
+/** An admin screen open in this tab, which tells the agent where the person is. The document builder also answers its builder tools. */
+export type AgentScreenRegistration = {
+	screen: Accessor<AgentScreen | undefined>;
+	/** Answers a call made for this screen. Screens that only tell the agent where the person is leave it out. */
+	answer?: (call: AgentScreenCall) => Promise<AgentScreenResponse>;
 };
 
 export type AgentSession = {
@@ -70,6 +87,12 @@ export type AgentSession = {
 		/** Whether the panel shows docked beside the content, from xl, taking its width. */
 		docked: Accessor<boolean>;
 	};
+	screen: {
+		/** The screen this tab has open, sent with messages so the agent knows what the person sees. */
+		current: Accessor<AgentScreen | undefined>;
+		/** Registers this tab's screen context and tool handler, returning a function that unregisters them. */
+		register: (registration: AgentScreenRegistration) => () => void;
+	};
 };
 
 const readChat = () => {
@@ -89,13 +112,7 @@ const writeChat = (conversationId: string | undefined) => {
 
 const AgentSessionContext = createContext<AgentSession>();
 
-/**
- * Keeps one agent chat open across the admin, so the panel and the chat page
- * show the same chat and its replies keep streaming while the reader moves
- * between pages. Tool calls that change documents, requests or media refresh
- * the pages showing them, and completions the agent starts refresh them again
- * once they have run.
- */
+/** Shares streaming chat across admin views, refreshes affected pages after tool changes or completed jobs, and answers this tab's builder calls while the panel is closed. */
 export const AgentSessionProvider: ParentComponent = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -109,6 +126,10 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	const [watchedRequests, setWatchedRequests] = createSignal<
 		ReadonlySet<number>
 	>(new Set());
+	const [screenRegistration, setScreenRegistration] =
+		createSignal<AgentScreenRegistration>();
+	//* screen calls this tab is answering, so a call is answered once
+	const answering = new Set<string>();
 
 	// ----------------------------------------
 	// Memos
@@ -124,6 +145,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 		() => userPreferencesStore.getSectionOpen("agent.panel") ?? false,
 	);
 	const panelVisible = createMemo(() => panelAvailable() && panelOpen());
+	const currentScreen = createMemo(() => screenRegistration()?.screen());
 
 	// ----------------------------------------
 	// Queries & Mutations
@@ -141,6 +163,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 				if (requestIds.length === 0) return;
 				setWatchedRequests((current) => new Set([...current, ...requestIds]));
 			},
+			screen: currentScreen,
 		},
 	);
 
@@ -182,11 +205,48 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 		return { id, created };
 	};
 
+	/** Answers a screen call made from this tab, or says the screen has gone when it isn't open any more. */
+	const answerScreenCall = async (
+		pending: NonNullable<ReturnType<AgentChat["screenCall"]>>,
+	) => {
+		const registration = untrack(screenRegistration);
+		const screen = registration?.screen();
+		const same =
+			screen !== undefined && isSameScreen(screen, pending.call.screen);
+		const response: AgentScreenResponse =
+			same && registration?.answer
+				? await registration
+						.answer(pending.call)
+						.catch(() => ({ status: "unavailable", reason: "closed" }))
+				: {
+						status: "unavailable",
+						reason: screen && !same ? "moved" : "closed",
+						screen,
+					};
+
+		const result = await chat.respond(
+			{ runId: pending.runId, id: pending.id },
+			response,
+		);
+		//* a call that couldn't be answered yet is tried again when the chat next shows it
+		if (result.error) answering.delete(pending.id);
+	};
+
 	// ----------------------------------------
 	// Effects
 	createEffect(() => {
 		if (!creating()) writeChat(conversationId());
 	});
+	//* other tabs answer the calls made for their screens
+	createEffect(
+		on(chat.screenCall, (pending) => {
+			if (!pending || pending.call.screen.tabId !== tabId) return;
+			if (answering.has(pending.id)) return;
+
+			answering.add(pending.id);
+			void answerScreenCall(pending);
+		}),
+	);
 
 	// ----------------------------------------
 	// Render
@@ -206,6 +266,16 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 						userPreferencesStore.setSectionOpen("agent.panel", open),
 					visible: panelVisible,
 					docked: () => panelVisible() && xl(),
+				},
+				screen: {
+					current: currentScreen,
+					register: (registration) => {
+						setScreenRegistration(() => registration);
+						return () =>
+							setScreenRegistration((current) =>
+								current === registration ? undefined : current,
+							);
+					},
 				},
 			}}
 		>

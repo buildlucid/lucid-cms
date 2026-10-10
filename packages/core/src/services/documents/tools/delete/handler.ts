@@ -4,6 +4,7 @@ import { getCollectionPermission } from "../../../../libs/permission/collection-
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasAccess from "../../../../libs/permission/has-access.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
+import checkNotHeld from "../../../document-editors/check-not-held.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import deleteSingle from "../../delete-single.js";
@@ -67,6 +68,15 @@ const deleteDocument: ServiceFn<
 
 	const document = { collectionKey: collection.key, id: input.documentId };
 	if (!requested) {
+		//* binning it closes every version someone might have open with unsaved changes
+		const held = await checkNotHeld(context, {
+			collectionKey: collection.key,
+			documentId: input.documentId,
+			requestId: undefined,
+			userId: props.actor.kind === "user" ? props.actor.userId : null,
+		});
+		if (held.error) return held;
+
 		const deleted = await deleteSingle(context, {
 			collectionKey: collection.key,
 			id: input.documentId,

@@ -5,10 +5,7 @@ import {
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
 import { prepareAgentTool } from "../../../libs/tools/execute-tool.js";
-import type {
-	AgentToolAuthority,
-	AgentToolExecution,
-} from "../../../libs/tools/types.js";
+import type { AgentToolExecution } from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import invokeAgentTool from "./invoke-agent-tool.js";
 import type { RunSession } from "./run-session.js";
@@ -26,10 +23,7 @@ import {
 /** Runs runner tools immediately and agent tools under the run's confirmation policy, pausing for input when needed and recording writes before execution to prevent repeats after crashes. */
 const runToolCall = async (
 	context: ServiceContext,
-	props: Omit<RunnerToolCall, "answer"> & {
-		session: RunSession;
-		authority: AgentToolAuthority;
-	},
+	props: Omit<RunnerToolCall, "answer"> & { session: RunSession },
 ): Promise<ToolOutcome> => {
 	const { run, call, checkpoint, session, setup } = props;
 	const { pending } = checkpoint;

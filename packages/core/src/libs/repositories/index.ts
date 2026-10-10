@@ -15,6 +15,7 @@ export { default as AuthStatesRepository } from "./auth-states.js";
 export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
 export { default as CollectionsRepository } from "./collections.js";
 export { default as DocumentBricksRepository } from "./document-bricks.js";
+export { default as DocumentHoldsRepository } from "./document-holds.js";
 export { default as DocumentIdentitiesRepository } from "./document-identities.js";
 export { default as DocumentReferencesRepository } from "./document-references.js";
 export { default as DocumentVersionsRepository } from "./document-versions.js";

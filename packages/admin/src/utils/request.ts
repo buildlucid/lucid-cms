@@ -20,6 +20,8 @@ export interface RequestParams<Data = unknown> {
 	csrf?: boolean;
 	/** Shows a toast when the request fails. */
 	displayErrorToast?: boolean;
+	/** Lets the request finish after the page closes, eg. letting go of a document. */
+	keepalive?: boolean;
 }
 
 export const getFetchURL = (url: string, query?: QueryBuilderProps): string => {
@@ -105,6 +107,7 @@ export const sendRequest = async <Data = unknown>(
 			body,
 			headers,
 			signal: params.signal,
+			keepalive: params.keepalive,
 		});
 		if (response.ok) return response;
 

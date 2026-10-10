@@ -16,9 +16,17 @@ export const updateDocumentAgentTool = (
 	defineAgentTool({
 		name,
 		title: copy("admin:core.tools.documents_update.title"),
-		description: options.direct
-			? "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Changes are saved to latest. Pass requestId to change a request's proposal instead, eg. a document waiting in a create request."
-			: "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Changes are proposed in a request for people to review and approve, and this chat's open request for the document is reused. Pass requestId to change a specific request, eg. a document waiting in a create request.",
+		description: ({ screen }) =>
+			[
+				options.direct
+					? "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Changes are saved to latest. Pass requestId to change a request's proposal instead, eg. a document waiting in a create request."
+					: "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Changes are proposed in a request for people to review and approve, and this chat's open request for the document is reused. Pass requestId to change a specific request, eg. a document waiting in a create request.",
+				screen === "document"
+					? "For the document the person has open in the document builder, use lucid_builder_update instead, which keeps their unsaved changes."
+					: "",
+			]
+				.filter(Boolean)
+				.join(" "),
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

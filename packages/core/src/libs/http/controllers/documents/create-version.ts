@@ -39,7 +39,7 @@ const createVersionController = factory.createHandlers(
 	validate("param", controllerSchemas.createVersion.params),
 	collectionPermissions("update"),
 	async (c) => {
-		const { bricks, fields, baseContentId } = c.req.valid("json");
+		const { bricks, fields, baseContentId, editorTabId } = c.req.valid("json");
 		const { collectionKey, id } = c.req.valid("param");
 		const context = createServiceContext(c);
 
@@ -58,6 +58,7 @@ const createVersionController = factory.createHandlers(
 			bricks,
 			fields,
 			baseContentId,
+			editorTabId,
 		});
 		if (documentId.error) throw new LucidAPIError(documentId.error);
 
