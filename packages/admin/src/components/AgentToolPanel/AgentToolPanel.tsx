@@ -41,17 +41,14 @@ const outputViewTools: ReadonlySet<string> = new Set([
 	analyzeMediaTool,
 ]);
 
-/**
- * A tool call in the chat's sidebar. Web research shows the pages it found or
- * read, with its query or site as the title. File analysis shows its answer,
- * and file reading shows the passages it read.
- * Other tools show their status, with the raw input and output folded away.
- */
+/** Shows web results, file analysis, read excerpts or tool status in the sidebar, with raw input and output collapsed unless `detailsOpen` is set. */
 const AgentToolPanel: Component<{
 	conversationId: string;
 	messageId: string;
 	part: AgentToolPart;
 	retried?: boolean;
+	/** Shows the raw input and output unfolded, eg. in a dialog with room for them. */
+	detailsOpen?: boolean;
 	onClose: () => void;
 	class?: string;
 }> = (props) => {
@@ -180,6 +177,7 @@ const AgentToolPanel: Component<{
 									</p>
 								</Show>
 								<AgentToolDetails
+									defaultOpen={props.detailsOpen}
 									sections={[
 										{
 											label: T()("agent.tool.input"),

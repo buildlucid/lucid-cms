@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import {
 	type Component,
+	createMemo,
 	For,
 	type JSXElement,
 	Match,
@@ -11,6 +12,7 @@ import Pill, { type PillSize, type PillVariant } from "@/components/Pill/Pill";
 
 export type DetailsListVariant = "card" | "plain";
 export type DetailsListPadding = "sm" | "md";
+export type DetailsListLayout = "spread" | "columns";
 export type DetailsListItemType = "text" | "pill";
 
 export interface DetailsListItem {
@@ -35,11 +37,17 @@ export interface DetailsListProps {
 	variant?: DetailsListVariant;
 	/** Ignored by the `plain` variant. @default "md" */
 	padding?: DetailsListPadding;
+	/**
+	 * Uses `spread` for values at row ends in narrow layouts or `columns` for a left-aligned value column in wider layouts.
+	 *
+	 * @default "spread"
+	 */
+	layout?: DetailsListLayout;
 	class?: string;
 }
 
 /**
- * A list of labels and values. Values can be shown as text or as a pill.
+ * Lists labels and values as text or pills, aligned at each row's end or in a separate column.
  *
  * @example
  * ```tsx
@@ -60,6 +68,10 @@ export interface DetailsListProps {
  */
 const DetailsList: Component<DetailsListProps> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const columns = createMemo(() => props.layout === "columns");
+
+	// ----------------------------------------
 	// Render
 	return (
 		<ul
@@ -67,6 +79,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 			class={classNames(
 				"w-full",
 				{
+					"sm:grid sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-16": columns(),
 					"rounded-md border border-border bg-card": props.variant !== "plain",
 					"p-3": props.variant !== "plain" && props.padding === "sm",
 					"px-4 py-3": props.variant !== "plain" && props.padding !== "sm",
@@ -81,12 +94,19 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 							data-details-list-item
 							class={classNames(
 								"mb-2 flex gap-x-2 gap-y-1 border-b border-border pb-2 last:mb-0 last:border-b-0 last:pb-0",
-								{
-									"flex-col items-start lg:justify-between":
-										item.type !== "pill",
-									"items-center justify-between": item.type === "pill",
-									"lg:flex-row lg:items-center": !item.stacked,
-								},
+								columns()
+									? {
+											"flex-col items-start sm:col-span-2": true,
+											//* a subgrid uses its own column gap, so it matches the list's
+											"sm:grid sm:grid-cols-subgrid sm:items-center sm:gap-x-16":
+												!item.stacked,
+										}
+									: {
+											"flex-col items-start lg:justify-between":
+												item.type !== "pill",
+											"items-center justify-between": item.type === "pill",
+											"lg:flex-row lg:items-center": !item.stacked,
+										},
 							)}
 						>
 							<span class="text-sm font-medium text-subtitle">
@@ -98,6 +118,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 										<Pill
 											variant={item.pillVariant ?? "primary"}
 											size={item.pillSize}
+											class={columns() ? "justify-self-start" : undefined}
 										>
 											{item.value}
 										</Pill>
@@ -105,7 +126,8 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 									<Match when={item.type !== "pill"}>
 										<span
 											class={classNames("text-sm font-medium text-muted", {
-												"min-w-0 text-left break-all lg:text-right": item.wrap,
+												"min-w-0 break-all": item.wrap,
+												"text-left lg:text-right": item.wrap && !columns(),
 											})}
 										>
 											{item.value}

@@ -7,7 +7,6 @@ const aiConfig = (mcp: boolean) => ({
 	features: {
 		imageGeneration: true,
 		altGeneration: true,
-		customFieldGeneration: true,
 		agents: true,
 		mcp,
 	},

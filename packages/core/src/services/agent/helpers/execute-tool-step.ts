@@ -28,6 +28,10 @@ const executeToolStep: ServiceFn<
 	"completed" | "waiting"
 > = async (context, props) => {
 	const { call, checkpoint, session } = props;
+	const linked = {
+		conversationId: props.run.conversation_id,
+		since: new Date().toISOString(),
+	};
 	const outcome = await runToolCall(context, props);
 
 	if (outcome.kind === "pending") {
@@ -52,13 +56,20 @@ const executeToolStep: ServiceFn<
 			call,
 			checkpoint,
 			session,
+			linked,
 			outcome: toolResult({
 				output: { finished: true },
 				summary: copy("admin:core.tools.lucid_finish_run.summary"),
 			}),
 		});
 	}
-	return recordToolResult(context, { call, checkpoint, session, outcome });
+	return recordToolResult(context, {
+		call,
+		checkpoint,
+		session,
+		outcome,
+		linked,
+	});
 };
 
 export default executeToolStep;

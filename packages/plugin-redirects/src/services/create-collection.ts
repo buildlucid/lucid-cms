@@ -104,7 +104,6 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 		},
 		localized: false,
 		index: true,
-		ai: { enabled: false },
 		validation: {
 			required: true,
 			zod: sourcePathSchema,
@@ -206,7 +205,6 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 				placeholder: "/new-page",
 			},
 			localized: false,
-			ai: { enabled: false },
 			validation: {
 				required: true,
 				zod: targetUrlSchema,

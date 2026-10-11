@@ -162,6 +162,7 @@ const ViewUserPanelContent: Component<{
 			/>
 			<Show when={activeTab() === "details"}>
 				<DetailsList
+					layout="columns"
 					class="mb-3 last:mb-0"
 					items={[
 						{
@@ -208,11 +209,16 @@ const ViewUserPanelContent: Component<{
 						title={T()("account.auth.providers.title")}
 						level={3}
 					/>
-					<DetailsList class="mb-3 last:mb-0" items={authProviderItems()} />
+					<DetailsList
+						layout="columns"
+						class="mb-3 last:mb-0"
+						items={authProviderItems()}
+					/>
 				</Show>
 			</Show>
 			<Show when={activeTab() === "meta"}>
 				<DetailsList
+					layout="columns"
 					class="mb-6 last:mb-0"
 					items={[
 						{

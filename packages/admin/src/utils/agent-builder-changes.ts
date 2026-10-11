@@ -183,8 +183,6 @@ export const mergeBuilderChanges = (
 			document: update.document,
 			changes: new Map(),
 		};
-		//* the latest label, as the agent may have renamed the document
-		entry.document = update.document;
 		documents.set(key, entry);
 
 		for (const change of update.changes) {

@@ -34,6 +34,8 @@ import AgentSuggestionButton from "./parts/AgentSuggestionButton";
 import AgentWaitingChats from "./parts/AgentWaitingChats";
 
 const grownHeight = 96;
+//* the panel's box holds the current page pill too, so it keeps some room while suggestions show
+const panelSuggestionsHeight = 32;
 
 /**
  * The agent's home: a greeting, a chat box that starts a new chat, suggestions
@@ -162,7 +164,7 @@ const AgentHome: Component<{
 						class={classnames(
 							"flex w-full flex-col",
 							panel()
-								? "gap-6 px-3 pt-[12vh] pb-3"
+								? "gap-6 px-3 pt-[12vh] pb-10"
 								: "mx-auto max-w-3xl gap-8 pt-[18vh] pb-10",
 						)}
 					>
@@ -189,7 +191,13 @@ const AgentHome: Component<{
 								<AgentComposer
 									class="agent-composer-morph"
 									size={panel() ? "md" : "lg"}
-									grow={showSuggestions() ? 0 : grownHeight}
+									grow={
+										showSuggestions()
+											? panel()
+												? panelSuggestionsHeight
+												: 0
+											: grownHeight
+									}
 									autofocus={true}
 									onBlankChange={setComposerBlank}
 									disabled={!models.isSuccess}

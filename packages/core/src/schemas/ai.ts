@@ -12,8 +12,6 @@ import type {
 	AiUsageSession,
 	AiUsageSessionType,
 } from "../types/response.js";
-import { brickInputSchema } from "./collection-bricks.js";
-import { fieldInputSchema } from "./collection-fields.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaImagePreviewResponseSchema } from "./media.js";
 
@@ -178,7 +176,6 @@ export const aiUsageFeatureKeySchema = z.enum([
 	"web.search",
 	"web.fetch",
 	"media.analyze",
-	"custom-field.input.generate",
 	"media.alt.generate",
 	"media.image.generate",
 ]) satisfies z.ZodType<AiUsageFeatureKey>;
@@ -187,7 +184,6 @@ export const aiUsageSessionTypeSchema = z.enum([
 	"agent",
 	"media-image",
 	"media-alt",
-	"custom-field",
 ]) satisfies z.ZodType<AiUsageSessionType>;
 
 const aiUsageTokensResponseSchema = z
@@ -482,46 +478,6 @@ export const controllerSchemas = {
 			})
 			.strict() satisfies z.ZodType<AiCredits>,
 	} satisfies ControllerSchema,
-	customFieldInput: {
-		body: z
-			.object({
-				/** Groups attempts made together, such as regenerating until the result fits. */
-				sessionId: z.uuid().optional(),
-				instruction: z.string().trim().min(1).max(8_000).optional(),
-				guidance: z.string().trim().min(1).optional(),
-				value: z.unknown(),
-				document: z
-					.object({
-						fields: z.array(fieldInputSchema).optional(),
-						bricks: z.array(brickInputSchema).optional(),
-					})
-					.strict()
-					.optional(),
-				target: z
-					.object({
-						collectionKey: z.string().trim().min(1),
-						brickKey: z.string().trim().min(1).optional(),
-						fieldKey: z.string().trim().min(1),
-					})
-					.strict(),
-				locale: localeSchema,
-			})
-			.strict(),
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
-		params: undefined,
-		response: cmsAiGenerateCompletedDataSchema.extend({
-			feature: z
-				.object({
-					key: z.literal("custom-field.input.generate"),
-					version: z.literal("v1"),
-				})
-				.strict(),
-			output: generatedContentSchema(z.unknown()),
-		}),
-	} satisfies ControllerSchema,
 	mediaAlt: {
 		body: z
 			.object({
@@ -644,9 +600,6 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 };
 
-export type CustomFieldInputBody = z.infer<
-	typeof controllerSchemas.customFieldInput.body
->;
 export type MediaAltBody = z.infer<typeof controllerSchemas.mediaAlt.body>;
 export type MediaImageGenerateBody = z.infer<
 	typeof controllerSchemas.mediaImageGenerate.body

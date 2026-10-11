@@ -1,4 +1,3 @@
-import useCustomFieldGenerate from "./useCustomFieldGenerate";
 import useGetCredits from "./useGetCredits";
 import useGetUsageChart from "./useGetUsageChart";
 import useGetUsageSession from "./useGetUsageSession";
@@ -8,7 +7,6 @@ import useMediaAltGenerate from "./useMediaAltGenerate";
 import useMediaImageGenerate from "./useMediaImageGenerate";
 
 const exportObject = {
-	useCustomFieldGenerate,
 	useGetCredits,
 	useGetUsageChart,
 	useGetUsageSession,

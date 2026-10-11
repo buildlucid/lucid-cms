@@ -141,6 +141,9 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const isSelected = createMemo(() => {
 		return mediaStore.get.selectedMedia.includes(props.media.id);
 	});
+	const showCheckbox = createMemo(
+		() => isSelected() || mediaStore.get.selectedMedia.length > 0,
+	);
 	const canSelect = createMemo(() => {
 		if (props.showingDeleted?.()) {
 			return canEdit() || canDelete();
@@ -351,86 +354,91 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
 				<ActionMenu actions={actionMenuActions()} placement="bottom-start" />
 			</div>
-			<Show when={ownershipLabel()}>
-				{(label) => (
-					<span
-						class="absolute top-3 left-3 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-subtitle shadow-sm"
-						role="img"
-						aria-label={label()}
-						title={`${label()}. ${
-							ownership().type === "system"
-								? T()("media.ownership.system.description")
-								: T()("media.ownership.user.description")
-						}`}
-					>
-						<Show
-							when={ownership().type === "system"}
-							fallback={<TbOutlineUserShield size={11} />}
-						>
-							<TbOutlineSettings size={11} />
-						</Show>
-					</span>
-				)}
-			</Show>
 			{/* Image */}
-			<AspectRatio
-				ratio="16:9"
-				contentClass={classNames("overflow-hidden z-0 bg-card-hover", {
-					"rectangle-background":
-						props.media.type === "image" ||
-						(props.media.type === "video" && props.media.poster),
-				})}
-			>
-				<MediaPreview
-					media={{
-						status: props.media.status,
-						type: props.media.type,
-						url: props.media.url,
-						delivery: props.media.delivery,
-						sources:
-							props.media.type === "video" ? props.media.sources : undefined,
-						poster:
-							props.media.type === "video" ? props.media.poster : undefined,
-						mimeType: props.media.meta.mimeType,
-					}}
-					alt={alt() || displayTitle() || ""}
-					imageFit={
-						props.media.type === "image" ||
-						(props.media.type === "video" && props.media.poster)
-							? "contain"
-							: undefined
-					}
-				/>
-			</AspectRatio>
-			{/* Content */}
-			<div class="p-3 border-t border-border">
-				<div class="flex items-start gap-3">
-					<Show when={canSelect()}>
-						{/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation */}
-						{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
-						<div class="pt-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-							<Checkbox
-								id={`media-card-${props.media.id}`}
-								value={isSelected()}
-								onChange={() => {
-									if (isSelected()) {
-										mediaStore.get.removeSelectedMedia(props.media.id);
-									} else {
-										mediaStore.get.addSelectedMedia(props.media.id);
-									}
-								}}
-							/>
-						</div>
-					</Show>
-					<div class="min-w-0 flex-1">
-						<h3 class="mb-0.5 line-clamp-1 text-sm">{displayTitle() || "-"}</h3>
-						<Copy.Button
-							label={props.media.key}
-							value={props.media.url}
-							class="text-xs"
+			<div class="relative">
+				<Show when={canSelect()}>
+					{/** biome-ignore lint/a11y/useKeyWithClickEvents: the checkbox inside handles the keyboard */}
+					{/** biome-ignore lint/a11y/noStaticElementInteractions: stops the card opening when the checkbox is clicked */}
+					<div
+						class={classNames(
+							"absolute top-3 left-3 z-30 flex size-7 items-center justify-center rounded-md border border-border bg-card shadow-sm transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100",
+							{ "opacity-0": !showCheckbox() },
+						)}
+						onClick={(e) => e.stopPropagation()}
+					>
+						<Checkbox
+							id={`media-card-${props.media.id}`}
+							value={isSelected()}
+							aria-label={T()("common.select")}
+							onChange={() => {
+								if (isSelected()) {
+									mediaStore.get.removeSelectedMedia(props.media.id);
+								} else {
+									mediaStore.get.addSelectedMedia(props.media.id);
+								}
+							}}
 						/>
 					</div>
-				</div>
+				</Show>
+				<Show when={ownershipLabel()}>
+					{(label) => (
+						<span
+							class="absolute bottom-2 left-2 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-subtitle shadow-sm"
+							role="img"
+							aria-label={label()}
+							title={`${label()}. ${
+								ownership().type === "system"
+									? T()("media.ownership.system.description")
+									: T()("media.ownership.user.description")
+							}`}
+						>
+							<Show
+								when={ownership().type === "system"}
+								fallback={<TbOutlineUserShield size={11} />}
+							>
+								<TbOutlineSettings size={11} />
+							</Show>
+						</span>
+					)}
+				</Show>
+				<AspectRatio
+					ratio="16:9"
+					contentClass={classNames("overflow-hidden z-0 bg-card-hover", {
+						"rectangle-background":
+							props.media.type === "image" ||
+							(props.media.type === "video" && props.media.poster),
+					})}
+				>
+					<MediaPreview
+						media={{
+							status: props.media.status,
+							type: props.media.type,
+							url: props.media.url,
+							delivery: props.media.delivery,
+							sources:
+								props.media.type === "video" ? props.media.sources : undefined,
+							poster:
+								props.media.type === "video" ? props.media.poster : undefined,
+							mimeType: props.media.meta.mimeType,
+						}}
+						alt={alt() || displayTitle() || ""}
+						imageFit={
+							props.media.type === "image" ||
+							(props.media.type === "video" && props.media.poster)
+								? "contain"
+								: undefined
+						}
+					/>
+				</AspectRatio>
+			</div>
+			{/* Content */}
+			<div class="min-w-0 border-t border-border p-3">
+				<h3 class="mb-0.5 line-clamp-1 text-sm">{displayTitle() || "-"}</h3>
+				<Copy.Button
+					label={props.media.key}
+					value={props.media.url}
+					class="text-xs"
+				/>
 			</div>
 		</li>
 	);

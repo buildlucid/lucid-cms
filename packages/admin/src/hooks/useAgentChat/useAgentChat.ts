@@ -41,6 +41,7 @@ import {
 } from "@/utils/agent-references";
 import {
 	isScreenCallData,
+	referencesWidget,
 	referenceTools,
 	screenWidget,
 	webFetchTool,
@@ -274,13 +275,21 @@ export const useAgentChat = (
 								break;
 						}
 
-						if (
-							event.type === "message" &&
-							event.message.parts.some((part) => part.type === "reference") &&
-							!referencedMessages.has(event.message.id)
-						) {
-							referencedMessages.add(event.message.id);
+						//* attachments and references widgets mean new links; snapshots repeat them, so each count refreshes once
+						if (event.type === "widget" && event.key === referencesWidget) {
 							void refreshReferences(id);
+						}
+						if (event.type === "message") {
+							const linked = event.message.parts.filter(
+								(part) =>
+									part.type === "reference" ||
+									(part.type === "widget" && part.key === referencesWidget),
+							).length;
+							const key = `${event.message.id}:${linked}`;
+							if (linked > 0 && !referencedMessages.has(key)) {
+								referencedMessages.add(key);
+								void refreshReferences(id);
+							}
 						}
 						//* watch snapshots repeat completed calls, so each one refreshes once
 						for (const tool of completedTools(event)) {

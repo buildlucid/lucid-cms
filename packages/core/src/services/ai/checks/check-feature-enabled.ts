@@ -5,11 +5,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 const checkFeatureEnabled: ServiceFn<
 	[
 		{
-			feature:
-				| "imageGeneration"
-				| "altGeneration"
-				| "customFieldGeneration"
-				| "chatRename";
+			feature: "imageGeneration" | "altGeneration" | "chatRename";
 		},
 	],
 	undefined

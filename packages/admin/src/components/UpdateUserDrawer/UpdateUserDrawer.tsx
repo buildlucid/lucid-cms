@@ -262,6 +262,7 @@ const UpdateUserDrawer: Component<{
 						</Show>
 						<Show when={activeTab() === "details"}>
 							<DetailsList
+								layout="columns"
 								class="mb-6 last:mb-0"
 								items={[
 									{
@@ -374,6 +375,7 @@ const UpdateUserDrawer: Component<{
 						</Show>
 						<Show when={activeTab() === "meta"}>
 							<DetailsList
+								layout="columns"
 								class="mb-6 last:mb-0"
 								items={[
 									{

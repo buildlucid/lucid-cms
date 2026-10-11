@@ -1706,6 +1706,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 							</Show>
 							<Show when={activeTab() === "meta" && props.id !== undefined}>
 								<DetailsList
+									layout="columns"
 									class="mb-6 last:mb-0"
 									items={[
 										{

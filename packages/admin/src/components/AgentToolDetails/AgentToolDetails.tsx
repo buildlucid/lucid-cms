@@ -4,17 +4,15 @@ import { type Component, For } from "solid-js";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import T from "@/translations";
 
-/**
- * Raw values behind a tool call, such as its input and output, folded away so
- * people who do not need JSON never see it. Sections without a value are left out.
- */
+/** Shows tool values as collapsible JSON, omitting undefined sections and opening initially only when `defaultOpen` is set. */
 const AgentToolDetails: Component<{
 	sections: { label: string; value: unknown }[];
+	defaultOpen?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Collapsible.Root>
+		<Collapsible.Root defaultOpen={props.defaultOpen}>
 			<Collapsible.Trigger class="group flex items-center gap-1 self-start rounded text-[11px] text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary">
 				{T()("agent.tool.details")}
 				<TbOutlineChevronRight

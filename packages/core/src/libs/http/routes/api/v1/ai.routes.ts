@@ -11,7 +11,6 @@ const aiRoutes = new Hono<LucidHonoGeneric>()
 		"/usage/sessions/:type/:id/records",
 		...aiController.getUsageSessionRecords,
 	)
-	.post("/custom-field", ...aiController.customFieldInputGenerate)
 	.post("/media-image", ...aiController.mediaImageGenerate)
 	.post("/media-image/:requestId", ...aiController.mediaImageCompletion)
 	.post("/media-alt", ...aiController.mediaAltGenerate);

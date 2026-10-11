@@ -31,6 +31,7 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 	return (
 		<>
 			<DetailsList
+				layout="columns"
 				items={[
 					{ label: T()("common.name"), value: props.routine.name },
 					{

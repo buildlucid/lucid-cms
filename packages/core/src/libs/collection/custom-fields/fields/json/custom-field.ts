@@ -1,17 +1,14 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../exports/types.js";
-import { isJsonContainerValue } from "../../../../../utils/helpers/get-typed-value.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CustomFieldAiFormatResponse,
 	FieldConfig,
 	FieldOptions,
 	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
-import { zodToJsonSchema } from "../../utils/helpers.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { jsonFieldConfig } from "./config.js";
@@ -37,7 +34,6 @@ class JsonCustomField extends CustomField<"json"> {
 				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
-			ai: this.props?.ai,
 			localized: this.props?.localized ?? false,
 			default: this.props?.default ?? null,
 			index: this.props?.index,
@@ -49,16 +45,6 @@ class JsonCustomField extends CustomField<"json"> {
 			},
 			validation: this.props?.validation,
 		} satisfies FieldConfig<"json">;
-	}
-	override get supportsAi() {
-		return true;
-	}
-	override get jsonSchema() {
-		return zodToJsonSchema(this.config.validation?.zod, {
-			type: "string",
-			description:
-				"A serialized JSON value. Return only JSON.stringify(value) for the generated JSON field value. The decoded value may be an object, array, string, number, boolean, or null.",
-		});
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -85,35 +71,6 @@ class JsonCustomField extends CustomField<"json"> {
 	override normalizeInputValue(value: unknown) {
 		if (typeof value === "string" && value.trim() === "") return null;
 		return value;
-	}
-	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
-		if (typeof value === "string") {
-			try {
-				const parsed = JSON.parse(value) as unknown;
-
-				return {
-					success: true,
-					value: isJsonContainerValue(parsed) ? parsed : { value: parsed },
-				};
-			} catch {
-				return {
-					success: true,
-					value: { value },
-				};
-			}
-		}
-
-		if (isJsonContainerValue(value)) {
-			return {
-				success: true,
-				value,
-			};
-		}
-
-		return {
-			success: true,
-			value: { value },
-		};
 	}
 	uniqueValidation(value: unknown) {
 		if (Array.isArray(value)) {

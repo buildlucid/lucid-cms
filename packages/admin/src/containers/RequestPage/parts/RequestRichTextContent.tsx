@@ -89,7 +89,7 @@ export const RequestRichTextContent: Component<{
 			</div>
 			<Popover.Portal>
 				<Popover.Content
-					class="z-60 w-64 max-w-[calc(100vw-2rem)] rounded-md border border-border bg-popover p-3 shadow-md animate-dropdown focus:outline-hidden"
+					class="z-60 w-max max-w-72 rounded-md border border-border bg-popover px-2.5 py-2 shadow-md animate-dropdown focus:outline-hidden"
 					onMouseEnter={() => clearTimeout(timer)}
 					onMouseLeave={() => schedule(false, CLOSE_DELAY)}
 					onOpenAutoFocus={(event) => event.preventDefault()}
@@ -97,17 +97,21 @@ export const RequestRichTextContent: Component<{
 				>
 					<Show when={user()}>
 						{(user) => (
-							<div class="flex items-center gap-3">
-								<UserDisplay user={user()} variant="icon" size="md" />
+							<div class="flex items-center gap-2.5">
+								<UserDisplay user={user()} variant="icon" size="sm" />
 								<div class="min-w-0">
-									<p class="truncate text-sm font-medium text-title">
+									<p class="truncate text-sm leading-5 font-medium text-title">
 										{helpers.formatUserName(user(), "name")}
 									</p>
 									<Show when={user().username}>
-										<p class="truncate text-xs text-body">@{user().username}</p>
+										<p class="truncate text-xs leading-4 text-body">
+											@{user().username}
+										</p>
 									</Show>
 									<Show when={user().email}>
-										<p class="truncate text-xs text-muted">{user().email}</p>
+										<p class="truncate text-xs leading-4 text-muted">
+											{user().email}
+										</p>
 									</Show>
 								</div>
 							</div>

@@ -35,7 +35,6 @@ export const Permissions = {
 	RequestsRead: "requests:read",
 
 	// AI permissions
-	AiCustomFieldValue: "ai:custom-field-value",
 	AiImageGenerate: "ai:image-generate",
 	AiAltGenerate: "ai:alt-generate",
 
@@ -220,15 +219,6 @@ export const PermissionGroups = Object.freeze({
 		},
 		core: true,
 		permissions: [
-			{
-				key: Permissions.AiCustomFieldValue,
-				details: {
-					name: copy("admin:core.permissions.custom.field.value", {
-						defaultMessage: "Generate Field Values",
-					}),
-				},
-				core: true,
-			},
 			{
 				key: Permissions.AiImageGenerate,
 				details: {

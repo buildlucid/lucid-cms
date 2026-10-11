@@ -39,18 +39,6 @@ export type CmsAiGenerateRequestInput =
 	| CmsAiGenerateRequestInputText
 	| CmsAiGenerateRequestInputImage;
 
-export type CmsAiGenerateRequestItem =
-	| {
-			type: "text";
-			label: string;
-			value: string;
-	  }
-	| {
-			type: "json";
-			label: string;
-			value: unknown;
-	  };
-
 type CmsAiGenerateBaseRequest<
 	TFeature extends {
 		key: string;
@@ -64,99 +52,6 @@ type CmsAiGenerateBaseRequest<
 	sessionId?: string;
 	input: TInput[];
 	context: TContext;
-};
-
-export type CustomFieldInputDocumentContextFields = Record<string, unknown>;
-
-export type CustomFieldInputDocumentContext = {
-	fields: CustomFieldInputDocumentContextFields;
-	bricks: Array<{
-		key: string;
-		type: "builder" | "fixed" | "embedded";
-		fields: CustomFieldInputDocumentContextFields;
-	}>;
-};
-
-export type CustomFieldInputDefinitionField = {
-	type: string;
-	label?: string;
-	summary?: string;
-	localized: boolean;
-	collection?: string | string[];
-	multiple?: boolean;
-	options?: Array<{
-		value: string;
-		label?: string;
-	}>;
-	fields?: Record<string, CustomFieldInputDefinitionField>;
-};
-
-export type CustomFieldInputDefinitionBrick = {
-	name?: string;
-	summary?: string;
-	fields: Record<string, CustomFieldInputDefinitionField>;
-};
-
-export type CustomFieldInputCollectionContext = {
-	key: string;
-	name?: string;
-	singularName?: string;
-	summary?: string;
-	fields: Record<string, CustomFieldInputDefinitionField>;
-	fixedBricks: Record<string, CustomFieldInputDefinitionBrick>;
-	builderBricks: Record<string, CustomFieldInputDefinitionBrick>;
-	embeddedBricks: Record<string, CustomFieldInputDefinitionBrick>;
-};
-
-export type CustomFieldInputTargetCollectionContext = {
-	key: string;
-	name?: string;
-	singularName?: string;
-	summary?: string;
-};
-
-export type CustomFieldInputTargetBrickContext = {
-	key: string;
-	name?: string;
-	summary?: string;
-};
-
-export type CustomFieldInputTargetFieldContext = {
-	key: string;
-	type: string;
-	label?: string;
-	summary?: string;
-	value: unknown;
-};
-
-export type CustomFieldInputTargetContext = {
-	collection: CustomFieldInputTargetCollectionContext;
-	brick?: CustomFieldInputTargetBrickContext;
-	field: CustomFieldInputTargetFieldContext;
-};
-
-export type CustomFieldInputV1Context = {
-	locale: {
-		source?: string;
-		target: string | string[] | null;
-	};
-	target: CustomFieldInputTargetContext;
-	collection: CustomFieldInputCollectionContext;
-	items: CmsAiGenerateRequestItem[];
-	document?: CustomFieldInputDocumentContext;
-};
-
-export type CustomFieldInputV1Request = CmsAiGenerateBaseRequest<
-	{
-		key: "custom-field.input.generate";
-		version: "v1";
-	},
-	CmsAiGenerateRequestInputText<
-		"user-instruction" | "field-instruction" | "guidance"
-	>,
-	CustomFieldInputV1Context
-> & {
-	outputSchema: unknown;
 };
 
 export type MediaAltGenerateV1Request = CmsAiGenerateBaseRequest<
@@ -224,7 +119,6 @@ export type AgentTitleGenerateV1Request = CmsAiGenerateBaseRequest<
 export type CmsAiGenerateRequest =
 	| MediaAnalyzeRequest
 	| AgentTitleGenerateV1Request
-	| CustomFieldInputV1Request
 	| MediaAltGenerateV1Request
 	| MediaImageGenerateV1Request;
 

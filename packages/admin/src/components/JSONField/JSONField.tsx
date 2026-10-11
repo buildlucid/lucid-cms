@@ -10,7 +10,6 @@ import {
 } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
@@ -38,7 +37,6 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	// State & Hooks
 	const brickStore = useBrickStore();
 	const [getValue, setValue] = createSignal("");
-	const customFieldGeneration = useCustomFieldGeneration();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -71,69 +69,6 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	const disabled = createMemo(
 		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
-	const aiGuidance = createMemo(
-		() =>
-			props.state.fieldConfig.ai?.guidance?.map((item) => ({
-				key: item.key,
-				label: helpers.getLocaleValue({
-					value: item.label,
-					fallback: item.key,
-				}),
-			})) ?? [],
-	);
-
-	const AiGenerationButton = customFieldGeneration.createActionButton({
-		field: () => ({
-			key: props.state.fieldConfig.key,
-			type: "json" as const,
-			label: helpers.getLocaleValue({
-				value: props.state.fieldConfig.details.label,
-				fallback: props.state.fieldConfig.key,
-			}),
-			localized: props.state.localised,
-			guidance: aiGuidance(),
-		}),
-		request: () => ({
-			collectionKey: fieldRenderState.collectionKey(),
-			brickKey: fieldRenderState.brickKey(),
-			fieldKey: props.state.fieldConfig.key,
-			locale: {
-				source: fieldRenderState.contentLocale() || undefined,
-				target: fieldRenderState.contentLocale()
-					? [fieldRenderState.contentLocale()]
-					: [],
-			},
-		}),
-		value: (localeCode?: string) =>
-			brickHelpers.getFieldValue<JsonFieldValue>({
-				fieldData: fieldData(),
-				fieldConfig: props.state.fieldConfig,
-				contentLocale: localeCode ?? fieldRenderState.contentLocale(),
-			}),
-		document: () => ({
-			fields: brickHelpers.getCollectionPseudoBrickFields(),
-			bricks: brickHelpers.getUpsertBricks(),
-		}),
-		setValue: (value: unknown, localeCode?: string) => {
-			const targetLocale = localeCode ?? fieldRenderState.contentLocale();
-			brickStore.get.setFieldValue({
-				brickIndex: fieldRenderState.brickIndex(),
-				fieldConfig: props.state.fieldConfig,
-				key: props.state.fieldConfig.key,
-				ref: props.state.groupRef,
-				repeaterKey: props.state.repeaterKey,
-				value: value as FieldValue,
-				contentLocale: targetLocale,
-			});
-			if (
-				!props.state.localised ||
-				targetLocale === fieldRenderState.contentLocale()
-			) {
-				setValue(stringifyJsonFieldValue(value as JsonFieldValue));
-			}
-		},
-		disabled,
-	});
 
 	// -------------------------------
 	// Effects
@@ -209,11 +144,6 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 						localised={props.state.localised}
 						fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 					/>
-				}
-				labelEnd={
-					props.state.fieldConfig.ai?.enabled === true ? (
-						<AiGenerationButton />
-					) : undefined
 				}
 			/>
 		</Suspense>

@@ -9,7 +9,6 @@ export interface Settings {
 		features: {
 			imageGeneration: boolean;
 			altGeneration: boolean;
-			customFieldGeneration: boolean;
 			chatRename: boolean;
 			agents: boolean;
 			mcp: boolean;

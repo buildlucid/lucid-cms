@@ -1,17 +1,14 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
-import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CustomFieldAiFormatResponse,
 	FieldConfig,
 	FieldOptions,
 	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
-import { zodToJsonSchema } from "../../utils/helpers.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { textFieldConfig } from "./config.js";
@@ -37,7 +34,6 @@ class TextCustomField extends CustomField<"text"> {
 				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
-			ai: this.props?.ai,
 			localized: this.props?.localized ?? true,
 			default: this.props?.default ?? "",
 			index: this.props?.index,
@@ -49,17 +45,6 @@ class TextCustomField extends CustomField<"text"> {
 			},
 			validation: this.props?.validation,
 		} satisfies FieldConfig<"text">;
-	}
-	override get supportsAi() {
-		return true;
-	}
-	protected override get defaultAiGuidance() {
-		return defaultTextFieldAiGuidance;
-	}
-	override get jsonSchema() {
-		return zodToJsonSchema(this.config.validation?.zod, {
-			type: "string",
-		});
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -82,12 +67,6 @@ class TextCustomField extends CustomField<"text"> {
 		return (value ??
 			this.config.default ??
 			null) satisfies FieldResponse<"text">["value"];
-	}
-	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
-		return {
-			success: true,
-			value: typeof value === "string" ? value : String(value ?? ""),
-		};
 	}
 	override normalizeInputValue(value: unknown) {
 		return typeof value === "string" ? value.trim() : value;

@@ -197,6 +197,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 				/>
 				<Show when={activeTab() === "details"}>
 					<DetailsList
+						layout="columns"
 						class="mb-6 last:mb-0"
 						items={[
 							{

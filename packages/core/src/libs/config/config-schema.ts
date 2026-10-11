@@ -115,7 +115,6 @@ const AiConfigSchema = z.strictObject({
 		.strictObject({
 			imageGeneration: z.boolean().default(true),
 			altGeneration: z.boolean().default(true),
-			customFieldGeneration: z.boolean().default(true),
 			chatRename: z.boolean().default(true),
 			agents: z.boolean().default(true),
 			mcp: z.boolean().default(false),

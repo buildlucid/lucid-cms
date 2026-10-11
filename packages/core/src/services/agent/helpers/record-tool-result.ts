@@ -7,6 +7,7 @@ import type { Checkpoint, ToolCall } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import type { AgentWidgetPart } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import addedReferencesWidget from "./added-references-widget.js";
 import type { RunSession } from "./run-session.js";
 import type { ToolResult } from "./tool-outcome.js";
 
@@ -18,10 +19,12 @@ const recordToolResult: ServiceFn<
 			checkpoint: Checkpoint;
 			session: RunSession;
 			outcome: ToolResult;
+			/** The chat and when the call started, to show the references it linked. */
+			linked?: { conversationId: string; since: string };
 		},
 	],
 	"completed"
-> = async (_context, { call, checkpoint, session, outcome }) => {
+> = async (context, { call, checkpoint, session, outcome, linked }) => {
 	const { output, summary, changes, failed } = outcome;
 
 	const status = failed ? "failed" : "complete";
@@ -52,6 +55,14 @@ const recordToolResult: ServiceFn<
 				version,
 				data,
 			}));
+	if (linked && !failed) {
+		const references = await addedReferencesWidget(context, {
+			...linked,
+			parts: [...checkpoint.parts, ...widgets],
+		});
+		if (references.error) return references;
+		if (references.data) widgets.push(references.data);
+	}
 	checkpoint.parts.push(...widgets);
 
 	const saved = await session.save();

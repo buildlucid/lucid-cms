@@ -1,11 +1,5 @@
-import type {
-	InternalDocumentField,
-	Locale,
-	Media,
-	MediaTranslation,
-} from "@types";
+import type { Locale, Media, MediaTranslation } from "@types";
 import type { Accessor } from "solid-js";
-import type { RichTextOptions } from "@/components/RichText/types";
 
 export type AiImageSource = {
 	file?: File | null;
@@ -50,67 +44,7 @@ export interface MediaImageGenerationTarget {
 	disabled?: Accessor<boolean>;
 }
 
-export type CustomFieldGenerationFieldType =
-	| "code"
-	| "json"
-	| "rich-text"
-	| "text"
-	| "textarea";
-
-export type CustomFieldGenerationGuidance = {
-	key: string;
-	label: string;
-};
-
-export type CustomFieldGenerationDocument = {
-	fields?: InternalDocumentField[];
-	bricks?: Array<{
-		ref: string;
-		key: string;
-		order: number;
-		type: "builder" | "fixed" | "embedded";
-		open?: boolean;
-		fields?: InternalDocumentField[];
-		id?: number | null;
-	}>;
-};
-
-export interface CustomFieldGenerationTarget {
-	field: Accessor<{
-		key: string;
-		type: CustomFieldGenerationFieldType;
-		label?: string;
-		localized: boolean;
-		guidance: CustomFieldGenerationGuidance[];
-		/** Language options for code fields. */
-		languages?: string[];
-	}>;
-	request: Accessor<{
-		collectionKey?: string;
-		brickKey?: string;
-		fieldKey: string;
-		locale: {
-			source?: string;
-			target: string[];
-		};
-	}>;
-	value: (_localeCode?: string) => unknown;
-	document: Accessor<CustomFieldGenerationDocument>;
-	preview?: {
-		richTextOptions?: Accessor<RichTextOptions>;
-	};
-	setValue: (value: unknown, _localeCode?: string) => void | Promise<void>;
-	disabled?: Accessor<boolean>;
-}
-
 export type ModalRegistry = {
-	customFieldGeneration: {
-		data: {
-			target: CustomFieldGenerationTarget;
-			targetId: string;
-			zIndex?: number;
-		};
-	};
 	mediaAltGeneration: {
 		data: {
 			target: MediaAltGenerationTarget;

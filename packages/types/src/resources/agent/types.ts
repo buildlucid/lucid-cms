@@ -95,9 +95,13 @@ export type AgentBuilderChangesData = {
 		documentId: number | null;
 		/** The request whose proposal changed, or null for latest. */
 		requestId: number | null;
-		label: string;
 	};
 	changes: AgentBuilderChange[];
+};
+
+/** Saved data for the `lucid-references` card, listing the references one tool call linked to the chat. */
+export type AgentReferencesData = {
+	references: AgentReferenceInput[];
 };
 
 /** A field or brick in the document builder to scroll to. */
@@ -316,7 +320,8 @@ export type AgentCoreWidgetKey =
 	| "lucid-tool-confirmation-batch"
 	| "lucid-media-select"
 	| "lucid-screen"
-	| "lucid-builder-changes";
+	| "lucid-builder-changes"
+	| "lucid-references";
 
 /** The lifecycle state of an agent run. */
 export type AgentRunStatus =

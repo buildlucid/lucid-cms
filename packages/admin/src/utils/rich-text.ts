@@ -1,11 +1,6 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import { generateText } from "@lucidcms/rich-text/browser";
 
-export const createEmptyRichTextValue = (): RichTextJSON => ({
-	type: "doc",
-	content: [{ type: "paragraph" }],
-});
-
 export const getRichTextPlainText = (value?: RichTextJSON | null): string => {
 	if (!value) return "";
 

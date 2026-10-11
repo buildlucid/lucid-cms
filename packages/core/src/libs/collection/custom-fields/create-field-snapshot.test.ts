@@ -2,7 +2,7 @@ import { expect, expectTypeOf, test } from "vitest";
 import type { FieldSnapshot } from "../builders/field-builder/types.js";
 import createFieldSnapshot from "./create-field-snapshot.js";
 import SelectCustomField from "./fields/select/custom-field.js";
-import type { CustomFieldAiContext, FieldOptions } from "./types.js";
+import type { FieldOptions } from "./types.js";
 
 test("field inspection copies configuration and excludes the internal field instance", () => {
 	const field = new SelectCustomField("layout", {
@@ -32,9 +32,6 @@ test("field inspection copies configuration and excludes the internal field inst
 	expect(snapshot).not.toHaveProperty("validate");
 
 	expectTypeOf(snapshot).toEqualTypeOf<FieldSnapshot<"select">>();
-	expectTypeOf<CustomFieldAiContext<"select">["field"]>().toEqualTypeOf<
-		FieldSnapshot<"select">
-	>();
 	expectTypeOf<FieldOptions<"text">>().not.toHaveProperty("key");
 	expectTypeOf<FieldOptions<"repeater">>().not.toHaveProperty("fields");
 	expectTypeOf<FieldOptions<"relation">>().not.toHaveProperty("resource");

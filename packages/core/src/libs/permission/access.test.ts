@@ -50,7 +50,6 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 		features: {
 			imageGeneration: true,
 			altGeneration: true,
-			customFieldGeneration: true,
 			agents: true,
 			mcp: false,
 		},

@@ -23,7 +23,6 @@ export type CorePermission =
 	| "jobs:update"
 	| "requests:read"
 	| `documents:${string}:${"read" | "create" | "create-request" | "update" | "delete" | "delete-request" | "unpublish-request" | "restore" | "publish" | "review"}`
-	| "ai:custom-field-value"
 	| "ai:image-generate"
 	| "ai:alt-generate"
 	| `agents:${string}:${"chat" | "manage-own-routines" | "manage-code-routines"}`

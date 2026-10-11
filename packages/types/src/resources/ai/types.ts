@@ -43,18 +43,6 @@ export type AiGenerateUsage = {
 	cost: AiGenerateCost;
 };
 
-export type CustomFieldInputGenerateResponse = {
-	mode: AiGenerateMode;
-	status?: "complete";
-	requestId: string;
-	feature: {
-		key: "custom-field.input.generate";
-		version: "v1";
-	};
-	output: AiGeneratedContent<unknown>;
-	usage: AiGenerateUsage;
-};
-
 export type MediaAltGenerateResponse = {
 	mode: AiGenerateMode;
 	status?: "complete";
@@ -114,16 +102,11 @@ export type AiUsageFeatureKey =
 	| "web.search"
 	| "web.fetch"
 	| "media.analyze"
-	| "custom-field.input.generate"
 	| "media.alt.generate"
 	| "media.image.generate";
 
 /** What a usage session was for. Agent sessions are chats, including routine runs. */
-export type AiUsageSessionType =
-	| "agent"
-	| "media-image"
-	| "media-alt"
-	| "custom-field";
+export type AiUsageSessionType = "agent" | "media-image" | "media-alt";
 
 export type AiUsageTokens = {
 	input: number;

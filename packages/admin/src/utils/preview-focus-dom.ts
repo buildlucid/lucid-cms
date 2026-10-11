@@ -63,19 +63,45 @@ export const getPreviewStructureId = (props: PreviewFocusStructure) => {
 	)}`;
 };
 
-/** Scrolls a rendered preview target into the builder viewport. */
+//* space kept between the document header and the revealed label
+const revealGap = 16;
+
+/**
+ * Scrolls a target and its label into the builder viewport, centred in the
+ * space below the sticky document header, or aligned just under it when the
+ * target is too tall to fit.
+ */
 const scrollPreviewFieldIntoView = (
 	element: HTMLElement,
+	indicator: HTMLElement,
 	targetWindow: Window = window,
 ) => {
 	const reducedMotion =
 		targetWindow.matchMedia?.("(prefers-reduced-motion: reduce)").matches ===
 		true;
+	const header =
+		Number.parseFloat(
+			targetWindow
+				.getComputedStyle(element.ownerDocument.documentElement)
+				.getPropertyValue("--document-header-bar-height"),
+		) || 0;
+	const labelAbove = Math.max(
+		0,
+		element.getBoundingClientRect().top - indicator.getBoundingClientRect().top,
+	);
+	const margin = header + revealGap + labelAbove;
+
+	//* the margin makes room for the header and label; the scroll target is set when the scroll starts, so it can be removed straight after
+	element.style.scrollMarginTop = `${margin}px`;
 	element.scrollIntoView({
 		behavior: reducedMotion ? "auto" : "smooth",
-		block: "center",
+		block:
+			element.offsetHeight + margin <= targetWindow.innerHeight
+				? "center"
+				: "start",
 		inline: "nearest",
 	});
+	element.style.removeProperty("scroll-margin-top");
 };
 
 /** Waits for lazy builder content to render after an ancestor opens. */
@@ -153,8 +179,8 @@ export const revealPreviewField = async (
 	});
 	if (!field || options.signal.aborted) return null;
 
-	scrollPreviewFieldIntoView(field, targetWindow);
 	const indicator = getPreviewFieldIndicator(field);
+	scrollPreviewFieldIntoView(field, indicator, targetWindow);
 	indicator.classList.add("preview-field-target-highlight");
 
 	let active = true;

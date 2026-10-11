@@ -25,7 +25,7 @@ Developers get a code-first collection system, typed APIs for consuming content,
 - **Handle media and email properly:** folders, private media, shareable links, image processing, cropping, email logs, previews, and redaction policies.
 - **Extend it for your project:** plugins, service hooks, toolkit, and custom routes let you add content behavior, integrations, and side effects.
 - **Choose your infrastructure:** Node.js or Cloudflare Workers, PostgreSQL, LibSQL, SQLite, D1, queues, KV, email, storage.
-- **Use AI where it helps:** generate and edit images, generate alt text, create custom field values, and track AI usage.
+- **Use AI where it helps:** generate and edit images, generate alt text, and track AI usage.
 
 AI features require a subscription with Lucid. This is planned to become publicly available with the beta release.
 

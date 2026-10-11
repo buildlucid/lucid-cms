@@ -13,7 +13,7 @@ import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 
-/** The top of a chat: the agent, the chat's title and its actions. It stays put while the messages scroll. */
+/** Keeps the chat title and actions visible above scrolling messages, with the agent name omitted in the panel. */
 const AgentChatHeader: Component<{
 	conversation?: AgentConversation;
 	/** Shown when there is no chat to load, eg. before a new one starts. Otherwise a missing chat shows as loading. */
@@ -89,9 +89,11 @@ const AgentChatHeader: Component<{
 			>
 				{(conversation) => (
 					<div class="flex min-w-0 items-center gap-2.5">
-						<Pill size="sm" variant="neutral" class="shrink-0">
-							{getAgentName(conversation().agentKey)}
-						</Pill>
+						<Show when={props.variant !== "panel"}>
+							<Pill size="sm" variant="neutral" class="shrink-0">
+								{getAgentName(conversation().agentKey)}
+							</Pill>
+						</Show>
 						<Show when={conversation().routineId}>
 							<Pill
 								size="sm"

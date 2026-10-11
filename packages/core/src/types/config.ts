@@ -219,8 +219,6 @@ export type AiFeatureConfig = {
 	imageGeneration?: boolean;
 	/** Allow media alt text generation. Defaults to true. */
 	altGeneration?: boolean;
-	/** Allow field value generation. Defaults to true. */
-	customFieldGeneration?: boolean;
 	/** Allow the agents in `ai.agents`. Defaults to true. */
 	agents?: boolean;
 	/** Serve tools and skills over MCP at `/lucid/mcp`. Defaults to false. */

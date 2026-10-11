@@ -3,7 +3,7 @@ import {
 	CLIENT_INFO_META_KEY,
 	PROTOCOL_VERSION_META_KEY,
 } from "@modelcontextprotocol/server";
-import { afterAll, assert, beforeAll, expect, test, vi } from "vitest";
+import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import z from "zod";
 import syncCollections from "../../services/sync/sync-collections.js";
 import syncLocales from "../../services/sync/sync-locales.js";
@@ -24,9 +24,6 @@ import type { McpToolAuthority } from "../tools/types.js";
 import { createHandler } from "./create-handler.js";
 
 const fixture = getTestConfig();
-const generationContext = vi.fn(() => [
-	{ type: "text" as const, label: "dynamic", value: "unused" },
-]);
 const pages = new CollectionBuilder("mcp_pages", {
 	mode: "multiple",
 	localized: true,
@@ -39,7 +36,6 @@ const pages = new CollectionBuilder("mcp_pages", {
 	.addText("title", {
 		localized: true,
 		useAsLabel: true,
-		ai: { context: generationContext },
 	})
 	.addNumber("rank")
 	.addText("fullSlug", { localized: false })
@@ -229,7 +225,6 @@ test("MCP discovery describes routing and excludes inaccessible collections", as
 			},
 		},
 	});
-	expect(generationContext).not.toHaveBeenCalled();
 	const locales = await call("locales_list", {});
 	expect(locales.structuredContent).toMatchObject({
 		data: expect.arrayContaining([

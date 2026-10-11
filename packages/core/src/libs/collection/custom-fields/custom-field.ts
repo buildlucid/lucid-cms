@@ -7,12 +7,8 @@ import type { RefTarget } from "../../refs/types.js";
 import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
-	CustomFieldAiConfig,
-	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
-	CustomFieldGuidanceConfig,
 	CustomFieldResponseFormatContext,
-	CustomFieldUserAiConfig,
 	CustomFieldValidateResponse,
 	FieldConfig,
 	FieldOptions,
@@ -61,35 +57,6 @@ abstract class CustomField<T extends FieldTypes> {
 			skipZodValidation: false,
 		};
 	}
-	/** Whether this field type supports Lucid AI features. */
-	get supportsAi() {
-		return false;
-	}
-	/** Default guidance presets for fields that support Lucid AI features. */
-	protected get defaultAiGuidance(): CustomFieldGuidanceConfig[] {
-		return [];
-	}
-	/** Normalized field metadata used by Lucid AI features. */
-	get aiConfig(): CustomFieldAiConfig {
-		const aiConfig = (
-			this.config as FieldConfig<T> & {
-				ai?: CustomFieldUserAiConfig;
-			}
-		).ai;
-		const enabled =
-			this.supportsAi === true ? (aiConfig?.enabled ?? true) : false;
-
-		return {
-			enabled,
-			instructions: aiConfig?.instructions,
-			guidance: enabled ? (aiConfig?.guidance ?? this.defaultAiGuidance) : [],
-			context: aiConfig?.context,
-		};
-	}
-	/** JSON schema for AI generated values, when a field supports generation. */
-	get jsonSchema(): Record<string, unknown> | null {
-		return null;
-	}
 	/** Public field display metadata. */
 	get details(): FieldConfig<T>["details"] {
 		return this.config.details;
@@ -97,13 +64,6 @@ abstract class CustomField<T extends FieldTypes> {
 	/** Normalizes input values before validation and persistence. */
 	public normalizeInputValue(value: unknown): unknown {
 		return value;
-	}
-	/** Formats a single AI-generated locale value before it is returned. */
-	public formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
-		return {
-			success: true,
-			value,
-		};
 	}
 	/** Whether this field should be processed with localization translations. */
 	get localizedEnabled(): boolean {

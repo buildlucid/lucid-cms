@@ -10,6 +10,7 @@
 
 - Document and version links now use shared identity tables with automatic cleanup on deletion.
 - Removed system alerts in favour of the new notification system.
+- Removed AI generation for individual custom fields, including the field `ai` option, the `ai.features.customFieldGeneration` flag and the `ai:custom-field-value` permission.
 
 ### Bug Fixes:
 

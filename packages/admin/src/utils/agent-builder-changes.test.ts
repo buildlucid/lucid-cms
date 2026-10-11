@@ -68,7 +68,6 @@ describe("mergeBuilderChanges", () => {
 		collectionKey: "pages",
 		documentId: 1,
 		requestId: null,
-		label: "Home",
 	};
 
 	it("lists each brick once across a reply's updates", () => {
@@ -91,7 +90,7 @@ describe("mergeBuilderChanges", () => {
 				],
 			},
 			{
-				document: { ...document, label: "Homepage" },
+				document,
 				changes: [
 					{
 						brick: null,
@@ -111,7 +110,7 @@ describe("mergeBuilderChanges", () => {
 
 		expect(merged).toEqual([
 			{
-				document: { ...document, label: "Homepage" },
+				document,
 				changes: [
 					{
 						brick: null,
@@ -131,7 +130,6 @@ describe("replyBuilderChanges", () => {
 			collectionKey: "pages",
 			documentId: 1,
 			requestId: null,
-			label: "Home",
 		},
 		changes: [
 			{

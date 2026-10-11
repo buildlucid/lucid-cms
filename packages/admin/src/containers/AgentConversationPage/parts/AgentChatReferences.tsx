@@ -1,4 +1,3 @@
-import { A } from "@solidjs/router";
 import type { AgentReference } from "@types";
 import {
 	type Component,
@@ -12,10 +11,10 @@ import {
 import AgentReferenceThumb from "@/components/AgentReferenceFiles/parts/AgentReferenceThumb";
 import AgentReferenceLock from "@/components/AgentReferenceLock/AgentReferenceLock";
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
+import AgentReferenceRow from "@/components/AgentReferenceRow/AgentReferenceRow";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
-import { agentReferenceHref } from "@/utils/agent-references";
 import helpers from "@/utils/helpers";
 
 //* matches `grid-cols-4`; the card only renders in the fixed-width sidebar, so the grid never reflows
@@ -206,41 +205,30 @@ const AgentChatReferences: Component<{
 						>
 							<For each={showAll() ? rows() : rows().slice(0, shownRows)}>
 								{(reference) => (
-									<li class="group relative">
-										<A
-											href={agentReferenceHref(reference)}
-											class="-mx-1.5 flex items-center gap-2.5 rounded-md py-1.5 ps-1.5 pe-8 hover:bg-card-hover focus-visible:outline-2 focus-visible:outline-primary"
-										>
-											<span class="block h-9 w-7 shrink-0 overflow-hidden rounded border border-border">
-												<AgentReferenceThumb reference={reference} />
-											</span>
-											<span class="min-w-0">
-												<span class="block truncate text-xs text-title">
-													{reference.label}
-												</span>
-												<span class="block truncate text-[11px] text-muted">
-													{rowDetails(reference)}
-												</span>
-											</span>
-										</A>
-										<Show
-											when={!reference.managed}
-											fallback={
-												<AgentReferenceLock
-													label={T()("agent.references.managed", {
-														label: reference.label,
-													})}
+									<AgentReferenceRow
+										reference={reference}
+										details={rowDetails(reference)}
+										class="-mx-1.5 w-[calc(100%+0.75rem)] pe-8"
+										end={
+											<Show
+												when={!reference.managed}
+												fallback={
+													<AgentReferenceLock
+														label={T()("agent.references.managed", {
+															label: reference.label,
+														})}
+														class="inset-e-0 top-1/2 -translate-y-1/2"
+													/>
+												}
+											>
+												<AgentReferenceRemoveButton
+													{...unlinkLabels(reference.label)}
 													class="inset-e-0 top-1/2 -translate-y-1/2"
+													onRemove={() => remove(reference)}
 												/>
-											}
-										>
-											<AgentReferenceRemoveButton
-												{...unlinkLabels(reference.label)}
-												class="inset-e-0 top-1/2 -translate-y-1/2"
-												onRemove={() => remove(reference)}
-											/>
-										</Show>
-									</li>
+											</Show>
+										}
+									/>
 								)}
 							</For>
 						</ul>

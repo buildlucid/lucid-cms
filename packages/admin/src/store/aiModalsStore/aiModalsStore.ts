@@ -9,10 +9,6 @@ import type {
 
 export type {
 	AiImageSource,
-	CustomFieldGenerationDocument,
-	CustomFieldGenerationFieldType,
-	CustomFieldGenerationGuidance,
-	CustomFieldGenerationTarget,
 	MediaAltGenerationTarget,
 	MediaImageGenerationFileMeta,
 	MediaImageGenerationTarget,

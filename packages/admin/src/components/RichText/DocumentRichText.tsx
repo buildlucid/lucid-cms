@@ -6,7 +6,6 @@ import {
 	type Component,
 	createMemo,
 	createSignal,
-	type JSXElement,
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
@@ -37,7 +36,6 @@ export interface DocumentRichTextProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	labelRightSlot?: JSXElement;
 	options?: RichTextOptions;
 	translations?: {
 		value: (locale: string) => RichTextJSON | null | undefined;
@@ -94,7 +92,6 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 						altLocaleError={props.altLocaleError}
 						localised={props.localised}
 						fieldColumnIsMissing={props.fieldColumnIsMissing}
-						rightSlot={props.labelRightSlot}
 					/>
 				</div>
 			</Show>

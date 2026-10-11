@@ -293,49 +293,6 @@ test("formats code response values", async () => {
 });
 
 // -----------------------------------------------
-// AI generation
-test("formats AI generated values into the code shape", async () => {
-	const field = new CodeCustomField("field", {
-		languages: ["javascript", "typescript"],
-	});
-
-	// object with a configured language passes through
-	expect(
-		field.formatAiGeneratedValue({
-			language: "typescript",
-			value: "const a = 1;",
-		}),
-	).toEqual({
-		success: true,
-		value: { language: "typescript", value: "const a = 1;" },
-	});
-
-	// unknown languages fall back to the first configured language
-	expect(
-		field.formatAiGeneratedValue({ language: "python", value: "print(1)" }),
-	).toEqual({
-		success: true,
-		value: { language: "javascript", value: "print(1)" },
-	});
-
-	// serialized JSON output is parsed
-	expect(
-		field.formatAiGeneratedValue(
-			JSON.stringify({ language: "javascript", value: "console.log(1);" }),
-		),
-	).toEqual({
-		success: true,
-		value: { language: "javascript", value: "console.log(1);" },
-	});
-
-	// raw code strings are wrapped with the fallback language
-	expect(field.formatAiGeneratedValue("console.log(1);")).toEqual({
-		success: true,
-		value: { language: "javascript", value: "console.log(1);" },
-	});
-});
-
-// -----------------------------------------------
 // Storage
 test("defines a nullable json column for storage", async () => {
 	const field = new CodeCustomField("field");

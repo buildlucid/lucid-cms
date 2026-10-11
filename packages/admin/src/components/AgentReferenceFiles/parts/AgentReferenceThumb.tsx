@@ -1,3 +1,4 @@
+import classnames from "classnames";
 import {
 	TbOutlineFile,
 	TbOutlineFileMusic,
@@ -28,7 +29,12 @@ const AgentReferenceThumb: Component<{
 	return (
 		<Switch
 			fallback={
-				<span class="flex h-full w-full items-center justify-center bg-input text-subtitle">
+				<span
+					class={classnames(
+						"flex h-full w-full items-center justify-center bg-input",
+						kind() === "request" ? "text-muted" : "text-subtitle",
+					)}
+				>
 					<Switch fallback={<TbOutlineFile size={size()} />}>
 						<Match when={kind() === "image"}>
 							<TbOutlinePhoto size={size()} />

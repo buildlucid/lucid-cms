@@ -151,6 +151,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 						</Show>
 						<SectionHeading title={T()("jobs.run")} level={3} />
 						<DetailsList
+							layout="columns"
 							class="mb-3 last:mb-0"
 							items={[
 								{
@@ -178,6 +179,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 						/>
 						<SectionHeading title={T()("jobs.timeline")} level={3} />
 						<DetailsList
+							layout="columns"
 							class="mb-3 last:mb-0"
 							items={[
 								{
@@ -212,6 +214,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 						/>
 						<SectionHeading title={T()("common.queue")} level={3} />
 						<DetailsList
+							layout="columns"
 							class="mb-3 last:mb-0"
 							items={[
 								{
@@ -254,6 +257,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 				</Show>
 				<Show when={activeTab() === "schedule"}>
 					<DetailsList
+						layout="columns"
 						class="mb-6 last:mb-0"
 						items={[
 							{

@@ -179,7 +179,7 @@ test("retrying the same text with different references creates a new submission"
 	}
 });
 
-test("ordinary tools do not refresh references, and repeated watch snapshots refresh each relevant call once", async () => {
+test("ordinary tools do not refresh references, and repeated watch snapshots refresh each new link once", async () => {
 	const ended = Promise.withResolvers<void>();
 	mocks.stream.mockReset().mockReturnValue(ended.promise);
 	mocks.refresh.mockClear();
@@ -214,13 +214,19 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 			status: "complete" as const,
 			detailsAvailable: true,
 		};
+		const linked = {
+			type: "widget" as const,
+			key: "lucid-references",
+			version: 1,
+			data: { references: [{ type: "media", mediaId: 12 }] },
+		};
 		for (let index = 0; index < 3; index++) {
 			stream.onEvent({
 				type: "message",
 				message: {
 					...message,
 					id: "reply",
-					parts: [reference, { type: "text", text: String(index) }],
+					parts: [reference, linked, { type: "text", text: String(index) }],
 				},
 			});
 		}

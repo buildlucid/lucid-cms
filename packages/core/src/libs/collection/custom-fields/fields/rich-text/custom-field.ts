@@ -7,10 +7,8 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { getObject } from "../../../../../utils/helpers/get-typed-value.js";
 import richTextHasContent from "../../../../../utils/helpers/rich-text-has-content.js";
 import { copy } from "../../../../i18n/index.js";
-import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
 	CustomFieldResponseFormatContext,
 	CustomFieldValidationError,
@@ -61,7 +59,6 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
-			ai: this.props?.ai,
 			localized: this.props?.localized ?? true,
 			default: this.props?.default ?? {
 				type: "doc",
@@ -78,12 +75,6 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			validation: this.props?.validation,
 		} satisfies FieldConfig<"rich-text">;
 	}
-	override get supportsAi() {
-		return true;
-	}
-	protected override get defaultAiGuidance() {
-		return defaultTextFieldAiGuidance;
-	}
 	override get errors(): {
 		fieldType: CustomFieldErrorItem;
 		required: CustomFieldErrorItem;
@@ -98,53 +89,6 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 					errors.required.condition?.(value) === true ||
 					(getObject(value) !== null && !richTextHasContent(value)),
 				message: errors.required.message,
-			},
-		};
-	}
-	override get jsonSchema() {
-		const textNodeSchema = {
-			type: "object",
-			additionalProperties: false,
-			required: ["type", "text"],
-			properties: {
-				type: {
-					type: "string",
-					const: "text",
-				},
-				text: {
-					type: "string",
-				},
-			},
-		};
-		const paragraphNodeSchema = {
-			type: "object",
-			additionalProperties: false,
-			required: ["type", "content"],
-			properties: {
-				type: {
-					type: "string",
-					const: "paragraph",
-				},
-				content: {
-					type: "array",
-					items: textNodeSchema,
-				},
-			},
-		};
-
-		return {
-			type: "object",
-			additionalProperties: false,
-			required: ["type", "content"],
-			properties: {
-				type: {
-					type: "string",
-					const: "doc",
-				},
-				content: {
-					type: "array",
-					items: paragraphNodeSchema,
-				},
 			},
 		};
 	}
@@ -222,19 +166,6 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			}
 		}
 		return input;
-	}
-	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
-		if (value && typeof value === "object" && !Array.isArray(value)) {
-			return {
-				success: true,
-				value,
-			};
-		}
-
-		return {
-			success: false,
-			message: copy("server:core.routes.ai.generate.error.message"),
-		};
 	}
 	uniqueValidation(value: unknown, refData?: RichTextValidationData) {
 		const valueSchema = z.record(

@@ -14,8 +14,6 @@ export type {
 	CmsAiGenerateRequestInput,
 	CmsAiGenerateRequestInputImage,
 	CmsAiGenerateRequestInputText,
-	CmsAiGenerateRequestItem,
-	CustomFieldInputV1Request,
 	MediaAltGenerateV1Request,
 	MediaImageGenerateV1Request,
 } from "./services/generate-cms-ai/type.js";

@@ -5,7 +5,6 @@ import type {
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { RefTargets } from "../../../../refs/types.js";
 import type {
-	CustomFieldUserAiConfig,
 	FieldUIConfig,
 	FieldValidation,
 	SharedFieldConfig,
@@ -32,8 +31,6 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 		/** Hint shown while the input is empty. */
 		placeholder?: AdminCopyInput;
 	};
-	/** Generation instructions and context for this field. */
-	ai?: CustomFieldUserAiConfig<"rich-text">;
 	/** Store a value per content locale when collection localization is enabled. Defaults to true. */
 	localized?: boolean;
 	/** Initial value for a new field. */

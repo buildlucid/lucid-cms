@@ -48,6 +48,7 @@ const ScheduleDetailsDrawer: Component<ScheduleDetailsPanelProps> = (props) => {
 			<Drawer.Body>
 				<SectionHeading title={T()("common.details")} level={3} />
 				<DetailsList
+					layout="columns"
 					class="mb-3 last:mb-0"
 					items={[
 						{ label: T()("common.status"), value: schedule()?.state },
@@ -81,6 +82,7 @@ const ScheduleDetailsDrawer: Component<ScheduleDetailsPanelProps> = (props) => {
 				<Show when={schedule()?.lastRun}>
 					<SectionHeading title={T()("jobs.schedules.last.run")} level={3} />
 					<DetailsList
+						layout="columns"
 						class="mb-3 last:mb-0"
 						items={[
 							{

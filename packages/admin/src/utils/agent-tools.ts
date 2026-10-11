@@ -6,6 +6,7 @@ import type {
 	AgentMediaSelectData,
 	AgentMessage,
 	AgentMessagePart,
+	AgentReferencesData,
 	AgentRunnerToolName,
 	AgentScreenCall,
 	AgentWebFetchOutput,
@@ -36,19 +37,17 @@ export const screenWidget = "lucid-screen" satisfies AgentCoreWidgetKey;
 /** Stores builder updates shown together at the end of a reply. */
 export const builderChangesWidget =
 	"lucid-builder-changes" satisfies AgentCoreWidgetKey;
+/** Lists the references a tool call linked, where it linked them. */
+export const referencesWidget = "lucid-references" satisfies AgentCoreWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
-/** Tools that link or remove chat references without reporting changes. Tools that change resources link those too. */
+/** Tools that change chat references without a references widget: previews show their media in a gallery instead, and removals show nothing. */
 export const referenceTools: ReadonlySet<string> = new Set([
 	"lucid_preview_media",
-	"lucid_register_references",
 	"lucid_remove_reference",
-	analyzeMediaTool,
-	readFileTool,
-	"media_select",
-] satisfies (AgentRunnerToolName | AgentLucidToolName)[]);
+] satisfies AgentRunnerToolName[]);
 
 /**
  * Built-in widgets render only the versions this admin knows. Other versions
@@ -182,8 +181,25 @@ export const isBuilderChangesData = (
 	isObjectRecord(value) &&
 	isObjectRecord(value.document) &&
 	typeof value.document.collectionKey === "string" &&
-	typeof value.document.label === "string" &&
 	Array.isArray(value.changes);
+
+/** References widgets come from the server, so only the identities the card reads are checked. */
+export const isReferencesData = (
+	value: unknown,
+): value is AgentReferencesData =>
+	isObjectRecord(value) &&
+	Array.isArray(value.references) &&
+	value.references.every(
+		(reference) =>
+			isObjectRecord(reference) &&
+			(reference.type === "media"
+				? typeof reference.mediaId === "number"
+				: reference.type === "request"
+					? typeof reference.requestId === "number"
+					: reference.type === "document" &&
+						typeof reference.collectionKey === "string" &&
+						typeof reference.documentId === "number"),
+	);
 
 export const isFileReadOutput = (
 	value: unknown,

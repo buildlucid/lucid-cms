@@ -3,7 +3,6 @@ import { type Component, createMemo } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import Textarea from "@/components/Textarea/Textarea";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
@@ -26,7 +25,6 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
 	const brickStore = useBrickStore();
-	const customFieldGeneration = useCustomFieldGeneration();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -44,62 +42,6 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 	const disabled = createMemo(
 		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
-	const aiGuidance = createMemo(
-		() =>
-			props.state.fieldConfig.ai?.guidance?.map((item) => ({
-				key: item.key,
-				label: helpers.getLocaleValue({
-					value: item.label,
-					fallback: item.key,
-				}),
-			})) ?? [],
-	);
-
-	const AiGenerationButton = customFieldGeneration.createActionButton({
-		field: () => ({
-			key: props.state.fieldConfig.key,
-			type: "textarea" as const,
-			label: helpers.getLocaleValue({
-				value: props.state.fieldConfig.details.label,
-				fallback: props.state.fieldConfig.key,
-			}),
-			localized: props.state.localised,
-			guidance: aiGuidance(),
-		}),
-		request: () => ({
-			collectionKey: fieldRenderState.collectionKey(),
-			brickKey: fieldRenderState.brickKey(),
-			fieldKey: props.state.fieldConfig.key,
-			locale: {
-				source: fieldRenderState.contentLocale() || undefined,
-				target: fieldRenderState.contentLocale()
-					? [fieldRenderState.contentLocale()]
-					: [],
-			},
-		}),
-		value: (localeCode?: string) =>
-			brickHelpers.getFieldValue<string>({
-				fieldData: fieldData(),
-				fieldConfig: props.state.fieldConfig,
-				contentLocale: localeCode ?? fieldRenderState.contentLocale(),
-			}),
-		document: () => ({
-			fields: brickHelpers.getCollectionPseudoBrickFields(),
-			bricks: brickHelpers.getUpsertBricks(),
-		}),
-		setValue: (value: unknown, localeCode?: string) => {
-			brickStore.get.setFieldValue({
-				brickIndex: fieldRenderState.brickIndex(),
-				fieldConfig: props.state.fieldConfig,
-				key: props.state.fieldConfig.key,
-				ref: props.state.groupRef,
-				repeaterKey: props.state.repeaterKey,
-				value: typeof value === "string" ? value : String(value ?? ""),
-				contentLocale: localeCode ?? fieldRenderState.contentLocale(),
-			});
-		},
-		disabled,
-	});
 
 	// -------------------------------
 	// Render
@@ -136,11 +78,6 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 			disabled={disabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
-			labelEnd={
-				props.state.fieldConfig.ai?.enabled === true ? (
-					<AiGenerationButton />
-				) : undefined
-			}
 			labelStart={
 				<FieldLabelMarkers
 					altLocaleError={props.state.altLocaleError}

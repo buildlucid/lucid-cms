@@ -4,14 +4,12 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CustomFieldAiFormatResponse,
 	FieldConfig,
 	FieldOptions,
 	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
-import { zodToJsonSchema } from "../../utils/helpers.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { codeFieldConfig } from "./config.js";
@@ -43,7 +41,6 @@ class CodeCustomField extends CustomField<"code"> {
 				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
-			ai: this.props?.ai,
 			localized: this.props?.localized ?? false,
 			default: this.props?.default ?? null,
 			languages: this.props?.languages ?? [
@@ -58,30 +55,6 @@ class CodeCustomField extends CustomField<"code"> {
 			},
 			validation: this.props?.validation,
 		} satisfies FieldConfig<"code">;
-	}
-	override get supportsAi() {
-		return true;
-	}
-	override get jsonSchema() {
-		return zodToJsonSchema(this.config.validation?.zod, {
-			type: "object",
-			description: "A code snippet with its language.",
-			properties: {
-				language: {
-					type: "string",
-					enum: this.config.languages,
-					description:
-						"The language of the code snippet. Infer it from the existing value or the instruction, and keep the existing language unless asked to change it.",
-				},
-				value: {
-					type: "string",
-					description:
-						"The raw code snippet content. Do not wrap it in markdown code fences.",
-				},
-			},
-			required: ["language", "value"],
-			additionalProperties: false,
-		});
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -108,59 +81,6 @@ class CodeCustomField extends CustomField<"code"> {
 		return parsed.success
 			? (parsed.data satisfies FieldResponse<"code">["value"])
 			: null;
-	}
-	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
-		if (typeof value === "string") {
-			try {
-				const parsed = JSON.parse(value) as unknown;
-				const coerced = this.coerceAiCodeValue(parsed);
-				if (coerced) {
-					return {
-						success: true,
-						value: coerced,
-					};
-				}
-			} catch {
-				// not serialized JSON - treat the string as raw code content
-			}
-
-			return {
-				success: true,
-				value: {
-					language: this.fallbackAiLanguage(),
-					value: value,
-				},
-			};
-		}
-
-		const coerced = this.coerceAiCodeValue(value);
-		return {
-			success: true,
-			value: coerced ?? {
-				language: this.fallbackAiLanguage(),
-				value: String(value ?? ""),
-			},
-		};
-	}
-	/** Coerces AI output into a `{ language, value }` shape with a configured language. */
-	private coerceAiCodeValue(value: unknown): CodeValue | null {
-		if (!value || typeof value !== "object" || Array.isArray(value))
-			return null;
-
-		const code = value as Partial<CodeValue>;
-		if (typeof code.value !== "string") return null;
-
-		return {
-			language:
-				typeof code.language === "string" &&
-				this.config.languages.includes(code.language)
-					? code.language
-					: this.fallbackAiLanguage(),
-			value: code.value,
-		};
-	}
-	private fallbackAiLanguage() {
-		return this.config.languages[0] ?? "text";
 	}
 	override normalizeInputValue(value: unknown) {
 		if (typeof value === "string" && value.trim() === "") return null;

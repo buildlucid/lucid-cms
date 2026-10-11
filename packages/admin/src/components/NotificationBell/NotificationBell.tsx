@@ -99,10 +99,11 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 					</Show>
 				</Popover.Trigger>
 				<Popover.Content
-					class="z-60 flex w-88 max-w-[calc(100vw-2rem)] flex-col rounded-md border border-border bg-popover shadow-md animate-dropdown focus:outline-hidden"
+					//* capped to the space Kobalte measures, so only the list scrolls and the footer stays in view
+					class="z-60 flex w-88 max-w-[calc(100vw-2rem)] max-h-(--kb-popper-content-available-height) flex-col rounded-md border border-border bg-popover shadow-md animate-dropdown focus:outline-hidden"
 					onOpenAutoFocus={(event) => event.preventDefault()}
 				>
-					<div class="max-h-96 overflow-y-auto scrollbar p-1">
+					<div class="max-h-96 min-h-0 overflow-y-auto scrollbar p-1">
 						<Switch
 							fallback={
 								<ul class="flex flex-col">
@@ -141,7 +142,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 							</Match>
 						</Switch>
 					</div>
-					<footer class="flex items-center justify-between gap-3 border-t border-border px-3 py-2">
+					<footer class="flex shrink-0 items-center justify-between gap-3 border-t border-border px-3 py-2">
 						<ViewAllLink
 							href="/lucid/notifications"
 							label={T()("notifications.view.all")}

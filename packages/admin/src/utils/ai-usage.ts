@@ -24,7 +24,6 @@ const aiUsageSessionTypes = [
 	"agent",
 	"media-image",
 	"media-alt",
-	"custom-field",
 ] as const satisfies AiUsageSessionType[];
 
 export const formatAiUsageNumber = (value?: number | null) => {
@@ -52,8 +51,6 @@ const aiUsageFeatureLabels = {
 	"web.search": "ai.usage.features.web.search",
 	"web.fetch": "ai.usage.features.web.fetch",
 	"media.analyze": "ai.usage.features.media.analyze",
-	"custom-field.input.generate":
-		"ai.usage.features.custom.field.input.generate",
 	"media.alt.generate": "ai.usage.features.media.alt.generate",
 	"media.image.generate": "ai.usage.features.media.image.generate",
 } satisfies Record<AiUsageFeatureKey, string>;

@@ -171,7 +171,6 @@ export default defineConfig({
 		// 	features: {
 		// 		imageGeneration: false,
 		// 		altGeneration: false,
-		// 		customFieldGeneration: false,
 		// 	},
 		// },
 		// media: {

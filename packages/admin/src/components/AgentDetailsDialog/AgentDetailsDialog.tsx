@@ -52,7 +52,7 @@ const AgentDetailsDialog: Component<{
 						<LayerContext.Provider value={layer}>
 							<div
 								ref={props.ref}
-								class="pointer-events-auto m-auto flex w-full max-w-xl flex-col gap-4"
+								class="pointer-events-auto m-auto flex w-full max-w-2xl flex-col gap-4"
 							>
 								<Show when={props.conversationId} keyed>
 									{(id) => (
@@ -65,6 +65,7 @@ const AgentDetailsDialog: Component<{
 													retried={props.view
 														.retriedTools()
 														.has(tool().part.id)}
+													detailsOpen={true}
 													onClose={() => props.view.setSelectedId(undefined)}
 												/>
 											)}

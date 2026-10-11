@@ -25,10 +25,6 @@ const settingsResponseSchema = z.object({
 						description: "Whether AI alt text generation is enabled",
 						example: true,
 					}),
-					customFieldGeneration: z.boolean().meta({
-						description: "Whether AI custom field generation is enabled",
-						example: true,
-					}),
 					chatRename: z.boolean().meta({
 						description: "Whether agent chats are titled automatically",
 						example: true,

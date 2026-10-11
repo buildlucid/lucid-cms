@@ -236,6 +236,8 @@ export default Object.freeze({
 			screen: "lucid-screen" satisfies AgentCoreWidgetKey,
 			/** Lists what a builder update changed, linking to each field. */
 			builderChanges: "lucid-builder-changes" satisfies AgentCoreWidgetKey,
+			/** Lists the references a tool call linked to the chat. */
+			references: "lucid-references" satisfies AgentCoreWidgetKey,
 			confirmation: "lucid-tool-confirmation" satisfies AgentCoreWidgetKey,
 			confirmationBatch:
 				"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey,

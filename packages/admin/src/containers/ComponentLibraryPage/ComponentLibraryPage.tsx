@@ -692,10 +692,26 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- DetailsList */}
 					<InfoRow.Root
 						title={"DetailsList"}
-						description={"items, variant, padding"}
+						description={"items, variant, padding, layout"}
 					>
 						<InfoRow.Content title={"Card"}>
 							<DetailsList
+								items={[
+									{ label: "Created at", value: "23 June 2025" },
+									{ label: "Author", value: "Ada Lovelace" },
+									{
+										label: "Status",
+										type: "pill",
+										value: "Published",
+										pillVariant: "success-subtle",
+										pillSize: "xs",
+									},
+								]}
+							/>
+						</InfoRow.Content>
+						<InfoRow.Content title={"Columns, for drawers and page sections"}>
+							<DetailsList
+								layout="columns"
 								items={[
 									{ label: "Created at", value: "23 June 2025" },
 									{ label: "Author", value: "Ada Lovelace" },

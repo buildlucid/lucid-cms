@@ -461,19 +461,10 @@ type RequiredValidation = {
 	required?: boolean;
 };
 
-export type CollectionFieldAiConfig = {
-	enabled: boolean;
-	guidance: Array<{
-		key: string;
-		label: ResolvedAdminCopy;
-	}>;
-};
-
 type SharedCollectionFieldConfig<TType extends FieldType> = {
 	key: string;
 	type: TType;
 	details: FieldDetails;
-	ai?: CollectionFieldAiConfig;
 };
 
 export interface CheckboxFieldConfig

@@ -73,7 +73,6 @@ const builderUpdate: RunnerToolInputHandler<
 									collectionKey: screen.collectionKey,
 									documentId: screen.documentId,
 									requestId: screen.requestId,
-									label: screen.label,
 								},
 								changes: sent.data.changes,
 							} satisfies AgentBuilderChangesData,

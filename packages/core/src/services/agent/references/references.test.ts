@@ -44,6 +44,7 @@ import createUpload from "../create-upload.js";
 import deleteReference from "../delete-reference.js";
 import getMediaPreviews from "../get-media-previews.js";
 import getReferences from "../get-references.js";
+import addedReferencesWidget from "../helpers/added-references-widget.js";
 import checkUploadAccess from "../helpers/check-upload-access.js";
 import insertConversation from "../helpers/insert-conversation.js";
 import resolveRunSetup from "../helpers/resolve-run-setup.js";
@@ -1390,4 +1391,78 @@ test("chat uploads only take the uploader's own images as posters", async () => 
 		where: [{ key: "id", operator: "=", value: libraryId }],
 	});
 	expect(library.data).toEqual({ owner_user_id: null, parent_media_id: null });
+});
+
+test("a references widget lists what tools newly linked since a call started, skipping references the reply already shows", async () => {
+	const conversationId = await createChat();
+	const [existing, added, attached, previewed, shown] = await Promise.all([
+		createMedia(),
+		createMedia(),
+		createMedia(),
+		createMedia(),
+		createMedia(),
+	]);
+	const document = await createDocument();
+	const toolLink = (references: AgentReferenceInput[]) =>
+		register(context, {
+			conversationId,
+			references,
+			source: { type: "tool", toolName: "reference_test" },
+		});
+
+	expect(
+		(await toolLink([{ type: "media", mediaId: existing }])).error,
+	).toBeUndefined();
+	//* creation times have millisecond precision, so the call starts after the earlier link
+	await new Promise((resolve) => setTimeout(resolve, 2));
+	const since = new Date().toISOString();
+	expect(
+		(
+			await toolLink([
+				{ type: "media", mediaId: existing },
+				{ type: "media", mediaId: added },
+				{ type: "media", mediaId: previewed },
+				{ type: "media", mediaId: shown },
+				{
+					type: "document",
+					collectionKey: collection.key,
+					documentId: document.id,
+				},
+			])
+		).error,
+	).toBeUndefined();
+	expect(
+		(await link(conversationId, [{ type: "media", mediaId: attached }])).error,
+	).toBeUndefined();
+
+	const widget = await addedReferencesWidget(context, {
+		conversationId,
+		since,
+		parts: [
+			{
+				type: "widget",
+				key: constants.agent.widgets.references,
+				version: 1,
+				data: { references: [{ type: "media", mediaId: shown }] },
+			},
+			{
+				type: "widget",
+				key: constants.agent.widgets.previewMedia,
+				version: 1,
+				data: { mediaIds: [previewed] },
+			},
+		],
+	});
+
+	expect(widget.error).toBeUndefined();
+	expect(widget.data?.data).toEqual({
+		references: [
+			{
+				type: "document",
+				collectionKey: collection.key,
+				documentId: document.id,
+			},
+			{ type: "media", mediaId: added },
+		],
+	});
 });

@@ -9,9 +9,6 @@ import {
 	structuredDataSchema,
 } from "../shared/validation.js";
 
-const copyInstructions =
-	"Use only facts supported by the document context. Write in the selected content locale. Be specific to this page, concise and natural. Avoid keyword stuffing, clickbait, repeated branding and invented claims, prices, offers or statistics. Return only the requested copy, without HTML or quotation marks. Length suggestions are editorial guidance, not ranking requirements.";
-
 /** Creates an independent fixed brick using Lucid's native inputs and validation. */
 const createSeoBrick = ({
 	brickKey,
@@ -23,33 +20,11 @@ const createSeoBrick = ({
 	const titleOptions: FieldOptions<"text"> = {
 		localized,
 		validation: { zod: nonBlankTextSchema },
-		ai: {
-			instructions: `Write a descriptive page title. ${copyInstructions}`,
-			guidance: [
-				{
-					key: "concise",
-					label: copy("admin:plugin.seo.ai.concise"),
-					instructions:
-						"Shorten the existing title without losing its subject or inventing information.",
-				},
-			],
-		},
 	};
 
 	const descriptionOptions: FieldOptions<"textarea"> = {
 		localized,
 		validation: { zod: nonBlankTextSchema },
-		ai: {
-			instructions: `Summarize the actual page content and why it is useful to the reader. ${copyInstructions}`,
-			guidance: [
-				{
-					key: "concise",
-					label: copy("admin:plugin.seo.ai.concise"),
-					instructions:
-						"Shorten the existing summary while keeping its most useful, supported details.",
-				},
-			],
-		},
 	};
 
 	const imageOptions: FieldOptions<"media"> = {
@@ -114,7 +89,6 @@ const createSeoBrick = ({
 			})
 			.addText(fields.socialImageAlt, {
 				localized,
-				ai: { enabled: false },
 				details: {
 					label: copy("admin:plugin.seo.field.socialImageAlt"),
 				},
@@ -184,7 +158,6 @@ const createSeoBrick = ({
 			})
 			.addText(fields.xImageAlt, {
 				localized,
-				ai: { enabled: false },
 				details: {
 					label: copy("admin:plugin.seo.field.xImageAlt"),
 				},
@@ -198,7 +171,6 @@ const createSeoBrick = ({
 			})
 			.addText(fields.canonicalUrl, {
 				localized,
-				ai: { enabled: false },
 				details: {
 					label: copy("admin:plugin.seo.field.canonicalUrl"),
 					description: copy("admin:plugin.seo.help.canonicalUrl"),
@@ -300,7 +272,6 @@ const createSeoBrick = ({
 			})
 			.addJSON(fields.structuredData, {
 				localized,
-				ai: { enabled: false },
 				details: {
 					label: copy("admin:plugin.seo.field.structuredData"),
 					description: copy("admin:plugin.seo.help.structuredData"),
@@ -341,7 +312,6 @@ const createSeoBrick = ({
 			})
 			.addText(fields.name, {
 				localized: false,
-				ai: { enabled: false },
 				details: {
 					label: copy("admin:plugin.seo.field.name"),
 				},
@@ -350,7 +320,6 @@ const createSeoBrick = ({
 			})
 			.addText(fields.content, {
 				localized,
-				ai: { enabled: false },
 				details: {
 					label: copy("admin:plugin.seo.field.content"),
 				},

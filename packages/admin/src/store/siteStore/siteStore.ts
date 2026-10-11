@@ -18,7 +18,6 @@ const defaultAiSettings = (): AiSettings => ({
 	features: {
 		imageGeneration: true,
 		altGeneration: true,
-		customFieldGeneration: true,
 		chatRename: true,
 		agents: true,
 		mcp: false,
@@ -43,8 +42,7 @@ const [get, set] = createStore<SiteStoreT>({
 			this.ai.enabled &&
 			(this.ai.agents.length > 0 ||
 				features.imageGeneration ||
-				features.altGeneration ||
-				features.customFieldGeneration)
+				features.altGeneration)
 		);
 	},
 });

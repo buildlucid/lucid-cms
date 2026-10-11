@@ -55,7 +55,7 @@ const AgentPanelContent: Component = () => {
 					style={{ "z-index": panelLayer }}
 					class="fixed inset-0 flex md:inset-y-2 md:start-auto md:end-2 md:w-96 xl:sticky xl:top-0 xl:h-dvh xl:w-agent-panel xl:pt-4 xl:pe-2"
 				>
-					<div class="relative flex min-w-0 grow flex-col overflow-hidden bg-background bg-clip-padding motion-safe:animate-fade-in md:rounded-xl md:border md:border-border md:shadow-lg xl:rounded-b-none xl:border-b-0 xl:shadow-none">
+					<div class="relative flex min-w-0 grow flex-col overflow-hidden bg-background bg-clip-padding motion-safe:animate-from-right md:rounded-xl md:border md:border-border md:shadow-lg xl:rounded-b-none xl:border-b-0 xl:shadow-none">
 						<AgentChatHeader
 							variant="panel"
 							conversation={chat.data()}

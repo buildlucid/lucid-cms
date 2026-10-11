@@ -17,6 +17,7 @@ import {
 import AgentBuilderChanges from "@/components/AgentBuilderChanges/AgentBuilderChanges";
 import AgentMediaPreview from "@/components/AgentMediaPreview/AgentMediaPreview";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
+import AgentReferences from "@/components/AgentReferences/AgentReferences";
 import AgentScreenBadge from "@/components/AgentScreenBadge/AgentScreenBadge";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
@@ -33,6 +34,7 @@ import {
 	isToolRow,
 	previewMediaWidget,
 	progressTool,
+	referencesWidget,
 	toolGroupAt,
 } from "@/utils/agent-tools";
 import dateHelpers from "@/utils/date-helpers";
@@ -245,6 +247,20 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 													>
 														{(widget) => (
 															<AgentMediaPreview
+																conversationId={props.message.conversationId}
+																widget={widget()}
+															/>
+														)}
+													</Match>
+													<Match
+														when={
+															part.type === "widget" &&
+															part.key === referencesWidget &&
+															part
+														}
+													>
+														{(widget) => (
+															<AgentReferences
 																conversationId={props.message.conversationId}
 																widget={widget()}
 															/>

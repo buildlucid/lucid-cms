@@ -109,6 +109,7 @@ const SystemOverviewPage: Component = () => {
 							})}
 						>
 							<DetailsList
+								layout="columns"
 								variant="plain"
 								items={[
 									{
@@ -137,6 +138,7 @@ const SystemOverviewPage: Component = () => {
 					>
 						<InfoRow.Content title={T()("system.email.delivery.title")}>
 							<DetailsList
+								layout="columns"
 								variant="plain"
 								items={[
 									{
@@ -209,6 +211,7 @@ const SystemOverviewPage: Component = () => {
 							description={T()("system.adapters.description")}
 						>
 							<DetailsList
+								layout="columns"
 								variant="plain"
 								items={[
 									{
@@ -249,6 +252,7 @@ const SystemOverviewPage: Component = () => {
 							)}
 						>
 							<DetailsList
+								layout="columns"
 								variant="plain"
 								items={
 									contentLocales().map((locale) => ({

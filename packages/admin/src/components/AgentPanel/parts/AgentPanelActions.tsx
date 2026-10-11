@@ -2,6 +2,7 @@ import {
 	TbOutlineArrowsDiagonal,
 	TbOutlineDots,
 	TbOutlineHistory,
+	TbOutlineList,
 	TbOutlinePlus,
 	TbOutlineX,
 } from "solid-icons/tb";
@@ -14,8 +15,10 @@ import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 
 const recentChats = 5;
+const triggerClasses =
+	"flex size-7 items-center justify-center rounded-md text-icon transition-colors hover:bg-background-hover hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary data-expanded:bg-background-hover";
 
-/** The agent panel's header actions: a menu with a new chat, the chat's full page and recent chats, then closing the panel. */
+/** The agent panel's header actions: recent chats, a menu with a new chat and the chat's full page, then closing the panel. */
 const AgentPanelActions: Component<{
 	conversationId?: string;
 	onOpen: (conversationId: string | undefined) => void;
@@ -33,32 +36,13 @@ const AgentPanelActions: Component<{
 		<>
 			<Menu.Root placement="bottom-end">
 				<Menu.Trigger
-					class="flex size-7 items-center justify-center rounded-md text-icon transition-colors hover:bg-background-hover hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary data-expanded:bg-background-hover"
-					aria-label={T()("agent.panel.menu")}
-					title={T()("agent.panel.menu")}
+					class={triggerClasses}
+					aria-label={T()("agent.panel.recent")}
+					title={T()("agent.panel.recent")}
 				>
-					<TbOutlineDots size={12} />
+					<TbOutlineHistory size={12} />
 				</Menu.Trigger>
 				<Menu.Content class="w-72">
-					<Show when={props.conversationId} keyed>
-						{(id) => (
-							<>
-								<Menu.Item
-									icon={<TbOutlinePlus size={12} />}
-									onSelect={() => props.onOpen(undefined)}
-								>
-									{T()("agent.chat.new")}
-								</Menu.Item>
-								<Menu.Item
-									icon={<TbOutlineArrowsDiagonal size={12} />}
-									href={`/lucid/agent/chats/${id}`}
-								>
-									{T()("agent.panel.expand")}
-								</Menu.Item>
-								<Menu.Separator />
-							</>
-						)}
-					</Show>
 					<Menu.Label>{T()("agent.panel.recent")}</Menu.Label>
 					<For
 						each={recent.data?.data ?? []}
@@ -90,14 +74,42 @@ const AgentPanelActions: Component<{
 							</Menu.Item>
 						)}
 					</For>
+					<Menu.Separator />
 					<Menu.Item
-						icon={<TbOutlineHistory size={12} />}
+						icon={<TbOutlineList size={12} />}
 						href="/lucid/agent/history"
 					>
 						{T()("agent.panel.recent.all")}
 					</Menu.Item>
 				</Menu.Content>
 			</Menu.Root>
+			<Show when={props.conversationId} keyed>
+				{(id) => (
+					<Menu.Root placement="bottom-end">
+						<Menu.Trigger
+							class={triggerClasses}
+							aria-label={T()("agent.panel.menu")}
+							title={T()("agent.panel.menu")}
+						>
+							<TbOutlineDots size={12} />
+						</Menu.Trigger>
+						<Menu.Content>
+							<Menu.Item
+								icon={<TbOutlinePlus size={12} />}
+								onSelect={() => props.onOpen(undefined)}
+							>
+								{T()("agent.chat.new")}
+							</Menu.Item>
+							<Menu.Item
+								icon={<TbOutlineArrowsDiagonal size={12} />}
+								href={`/lucid/agent/chats/${id}`}
+							>
+								{T()("agent.panel.expand")}
+							</Menu.Item>
+						</Menu.Content>
+					</Menu.Root>
+				)}
+			</Show>
 			<Button
 				size="xs"
 				shape="square"

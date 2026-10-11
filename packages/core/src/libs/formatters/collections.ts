@@ -2,8 +2,6 @@ import type { LocalizationConfig } from "../../types/config.js";
 import type { Collection } from "../../types/response.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
-import type CustomField from "../collection/custom-fields/custom-field.js";
 import type {
 	FieldConfig,
 	FieldTypes,
@@ -143,11 +141,7 @@ const formatSingle = (props: {
 				) ?? [])
 			: [],
 		fields: props.include?.fields
-			? formatFields(
-					props.collection.fieldTree,
-					getFieldBuilderState(props.collection).fields,
-					documentTargetCollectionKeys,
-				)
+			? formatFields(props.collection.fieldTree, documentTargetCollectionKeys)
 			: [],
 		publishing: {
 			environments: collectionData.publishing.environments.map(
@@ -185,39 +179,30 @@ const formatBrick = (props: {
 	thumbnail: props.brick.config.thumbnail,
 	fields: formatFields(
 		props.brick.fieldTree,
-		getFieldBuilderState(props.brick).fields,
 		props.documentTargetCollectionKeys,
 	),
 });
 
 const formatFields = (
 	fields: FieldConfig<FieldTypes>[],
-	instances: Map<string, CustomField<FieldTypes>>,
 	documentTargetCollectionKeys: Set<string>,
 ): Collection["fields"] => {
 	return fields.map((field) =>
-		formatField(field, instances, documentTargetCollectionKeys),
+		formatField(field, documentTargetCollectionKeys),
 	);
 };
 
 const formatField = (
 	field: FieldConfig<FieldTypes>,
-	instances: Map<string, CustomField<FieldTypes>>,
 	documentTargetCollectionKeys: Set<string>,
 ): Collection["fields"][number] => {
 	const nestedFields =
 		"fields" in field && Array.isArray(field.fields) ? field.fields : undefined;
 
-	const fieldInstance = instances.get(field.key);
-	const aiConfig = fieldInstance
-		? getFieldAiConfig(field, fieldInstance)
-		: undefined;
-
 	const formattedField = {
 		...field,
 	} as Collection["fields"][number] & {
 		fields?: Collection["fields"];
-		ai?: Collection["fields"][number]["ai"];
 	};
 	if (
 		"validation" in field &&
@@ -227,11 +212,6 @@ const formatField = (
 	) {
 		const { zod: _schema, ...validation } = field.validation;
 		formattedField.validation = validation;
-	}
-	if (aiConfig) {
-		formattedField.ai = aiConfig;
-	} else {
-		delete formattedField.ai;
 	}
 
 	if (formattedField.type === "relation") {
@@ -252,7 +232,6 @@ const formatField = (
 	if (nestedFields) {
 		formattedField.fields = formatFields(
 			nestedFields,
-			instances,
 			documentTargetCollectionKeys,
 		);
 	}
@@ -263,31 +242,6 @@ const formatField = (
 const getDocumentTargetCollectionKeys = (props: {
 	collections: CollectionBuilder[];
 }) => new Set(props.collections.map((collection) => collection.key));
-
-const getFieldAiConfig = (
-	field: FieldConfig<FieldTypes>,
-	fieldInstance: CustomField<FieldTypes>,
-): Collection["fields"][number]["ai"] => {
-	if (!fieldInstance.supportsAi) return undefined;
-
-	const fieldHasAiConfig = Object.hasOwn(field, "ai");
-	const aiConfig = fieldInstance.aiConfig;
-	if (
-		aiConfig.enabled !== true &&
-		aiConfig.guidance.length === 0 &&
-		fieldHasAiConfig === false
-	) {
-		return undefined;
-	}
-
-	return {
-		enabled: aiConfig.enabled,
-		guidance: aiConfig.guidance.map((guidance) => ({
-			key: guidance.key,
-			label: guidance.label,
-		})),
-	};
-};
 
 const getDocumentId = (
 	collectionKey: string,

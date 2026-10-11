@@ -9,9 +9,7 @@ import type {
 import type { RefResource, Refs } from "../../../types/response.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { InferredForeignKey, OnDelete, OnUpdate } from "../../db/types.js";
-import type { AdminCopyDescriptor, AdminCopyInput } from "../../i18n/types.js";
-import type { FieldSnapshot } from "../builders/field-builder/types.js";
-import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
+import type { AdminCopyInput } from "../../i18n/types.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaIndex,
@@ -196,72 +194,6 @@ export type FieldStaticConfig<T extends string = string> = {
 	database: FieldDatabaseConfig<T>;
 	capabilities: FieldCapabilities;
 };
-
-/** A named generation instruction editors can choose. */
-export type CustomFieldGuidanceConfig = {
-	key: string;
-	label: AdminCopyDescriptor;
-	instructions: string;
-};
-
-export type CustomFieldAiConfig<T extends FieldTypes = FieldTypes> = {
-	enabled: boolean;
-	/** Additional instructions sent when generating this field. */
-	instructions?: string;
-	guidance: CustomFieldGuidanceConfig[];
-	/** Supply additional text or JSON context for generation. */
-	context?: CustomFieldAiContextCallback<T>;
-};
-
-/** Labelled text or JSON supplied to the generation prompt. */
-export type CustomFieldAiContextItem =
-	| {
-			type: "text";
-			label: string;
-			value: string;
-	  }
-	| {
-			type: "json";
-			label: string;
-			value: unknown;
-	  };
-
-export type CustomFieldAiContext<T extends FieldTypes = FieldTypes> = {
-	collection: CollectionBuilder;
-	brick?: BrickBuilder;
-	field: FieldSnapshot<T>;
-	locale: {
-		source?: string;
-		target: string[] | null;
-	};
-};
-
-/** Receives the collection, optional brick, field and locale selection. Return additional labelled text or JSON context. */
-export type CustomFieldAiContextCallback<T extends FieldTypes = FieldTypes> = (
-	context: CustomFieldAiContext<T>,
-) => CustomFieldAiContextItem[] | Promise<CustomFieldAiContextItem[]>;
-
-/** Optional AI generation controls for a field. */
-export type CustomFieldUserAiConfig<T extends FieldTypes = FieldTypes> = {
-	/** Enable generation for this field when AI features are available. */
-	enabled?: boolean;
-	/** Additional instructions sent when generating this field. */
-	instructions?: string;
-	/** Named generation instructions offered to editors. */
-	guidance?: CustomFieldGuidanceConfig[];
-	/** Supply additional text or JSON context for generation. */
-	context?: CustomFieldAiContextCallback<T>;
-};
-
-export type CustomFieldAiFormatResponse =
-	| {
-			success: true;
-			value: unknown;
-	  }
-	| {
-			success: false;
-			message?: ErrorCopy;
-	  };
 
 // -----------------------------------------------
 // Custom Field Map

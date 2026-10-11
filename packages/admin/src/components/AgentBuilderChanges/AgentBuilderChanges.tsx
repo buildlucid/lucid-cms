@@ -154,10 +154,8 @@ const AgentBuilderChanges: Component<{ data: AgentBuilderChangesData }> = (
 		<section class="rounded-2xl border border-border bg-card">
 			<div class="flex items-center gap-2 px-3.5 py-2">
 				<TbOutlinePencil size={11} class="shrink-0 text-muted" />
-				<span class="min-w-0 grow truncate text-xs text-title">
-					{T()("agent.builder.changes.title", {
-						name: props.data.document.label,
-					})}
+				<span class="min-w-0 grow truncate text-xs text-muted">
+					{T()("agent.builder.changes.title")}
 				</span>
 				<span class="shrink-0 text-xs text-muted tabular-nums">
 					{count() === 1

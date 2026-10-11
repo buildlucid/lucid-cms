@@ -193,6 +193,7 @@ export const AccountContent: Component = () => {
 					align="center"
 				>
 					<DetailsList
+						layout="columns"
 						variant="plain"
 						items={[
 							{

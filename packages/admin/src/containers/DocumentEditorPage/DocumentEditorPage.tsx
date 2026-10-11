@@ -22,7 +22,6 @@ import AlignDocumentModal, {
 import { BuilderBricks } from "@/components/BuilderBricks/BuilderBricks";
 import Button from "@/components/Button/Button";
 import { CollectionPseudoBrick } from "@/components/CollectionPseudoBrick/CollectionPseudoBrick";
-import CustomFieldGenerationModal from "@/components/CustomFieldGenerationModal/CustomFieldGenerationModal";
 import ComparisonColumn from "@/components/DocumentComparison/ComparisonColumn";
 import DocumentComparisonBar from "@/components/DocumentComparison/DocumentComparisonBar";
 import ReadOnlyDocument from "@/components/DocumentComparison/ReadOnlyDocument";
@@ -930,7 +929,6 @@ const DocumentEditorPage: Component<{
 						onLeave={leave}
 						onTakeOver={() => void editors.takeOver()}
 					/>
-					<CustomFieldGenerationModal />
 					<MediaAltGenerationModal />
 					<MediaImageGenerationModal />
 				</PageBuilderStateProvider>

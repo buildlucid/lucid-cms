@@ -86,6 +86,11 @@ const executeReadBatch: ServiceFn<
 		});
 	};
 
+	//* reads run together, so each records the references linked since the batch started that the reply does not show yet
+	const linked = {
+		conversationId: run.conversation_id,
+		since: new Date().toISOString(),
+	};
 	const running = new Map<string, Promise<Completion>>();
 	for (const read of batch) {
 		running.set(
@@ -115,6 +120,7 @@ const executeReadBatch: ServiceFn<
 			outcome: completed.outcome,
 			checkpoint,
 			session,
+			linked,
 		});
 		if (saved.error) {
 			await Promise.all(running.values());

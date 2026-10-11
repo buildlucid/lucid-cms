@@ -21,7 +21,6 @@ import {
 import type { RichTextOptions } from "@/components/RichText/types";
 import { Permissions } from "@/constants/permissions";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
@@ -52,7 +51,6 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
 	const brickStore = useBrickStore();
-	const customFieldGeneration = useCustomFieldGeneration();
 	const fieldRenderState = useFieldRenderState();
 	const pageBuilderState = usePageBuilderState();
 	const [brickSelectOpen, setBrickSelectOpen] = createSignal(false);
@@ -390,67 +388,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		}
 		return errors;
 	});
-	const aiGuidance = createMemo(
-		() =>
-			props.state.fieldConfig.ai?.guidance?.map((item) => ({
-				key: item.key,
-				label: helpers.getLocaleValue({
-					value: item.label,
-					fallback: item.key,
-				}),
-			})) ?? [],
-	);
 
-	const AiGenerationButton = customFieldGeneration.createActionButton({
-		field: () => ({
-			key: props.state.fieldConfig.key,
-			type: "rich-text" as const,
-			label: helpers.getLocaleValue({
-				value: props.state.fieldConfig.details.label,
-				fallback: props.state.fieldConfig.key,
-			}),
-			localized: props.state.localised,
-			guidance: aiGuidance(),
-		}),
-		request: () => ({
-			collectionKey: fieldRenderState.collectionKey(),
-			brickKey: fieldRenderState.brickKey(),
-			fieldKey: props.state.fieldConfig.key,
-			locale: {
-				source: fieldRenderState.contentLocale() || undefined,
-				target: fieldRenderState.contentLocale()
-					? [fieldRenderState.contentLocale()]
-					: [],
-			},
-		}),
-		value: (localeCode?: string) =>
-			brickHelpers.getFieldValue<RichTextJSON | null>({
-				fieldData: fieldData(),
-				fieldConfig: props.state.fieldConfig,
-				contentLocale: localeCode ?? fieldRenderState.contentLocale(),
-			}),
-		document: () => ({
-			fields: brickHelpers.getCollectionPseudoBrickFields(),
-			bricks: brickHelpers.getUpsertBricks(),
-		}),
-		preview: {
-			richTextOptions,
-		},
-		// TODO: Extend rich-text AI generation once the model contract can safely
-		// describe and validate media, document, variable, and embedded-brick refs.
-		setValue: (value: unknown, localeCode?: string) => {
-			brickStore.get.setFieldValue({
-				brickIndex: fieldRenderState.brickIndex(),
-				fieldConfig: props.state.fieldConfig,
-				key: props.state.fieldConfig.key,
-				ref: props.state.groupRef,
-				repeaterKey: props.state.repeaterKey,
-				value: value as RichTextJSON,
-				contentLocale: localeCode ?? fieldRenderState.contentLocale(),
-			});
-		},
-		disabled,
-	});
 	const setRichTextValue = (value: RichTextJSON, contentLocale: string) => {
 		brickStore.get.setFieldValue({
 			brickIndex: fieldRenderState.brickIndex(),
@@ -495,11 +433,6 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				errors={richTextErrors()}
 				required={props.state.fieldConfig.validation?.required || false}
 				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-				labelRightSlot={
-					props.state.fieldConfig.ai?.enabled === true ? (
-						<AiGenerationButton />
-					) : undefined
-				}
 				options={richTextOptions()}
 				translations={
 					props.state.localised

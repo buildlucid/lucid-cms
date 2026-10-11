@@ -43,6 +43,17 @@
 		}
 	}
 
+	@keyframes animation-from-right {
+		0% {
+			transform: translateX(8px);
+			opacity: 0;
+		}
+		100% {
+			transform: translateX(0px);
+			opacity: 1;
+		}
+	}
+
 	@keyframes animation-rise-in {
 		0% {
 			opacity: 0;
