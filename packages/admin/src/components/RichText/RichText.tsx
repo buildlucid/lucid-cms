@@ -201,7 +201,12 @@ const RichText: Component<RichTextProps> = (props) => {
 							{props.placeholder || T()("editor.rich.text.placeholder")}
 						</div>
 					</Show>
-					<div {...ariaProps} data-rich-text-control ref={setContainer} />
+					<div
+						{...ariaProps}
+						data-rich-text-control
+						data-owns-undo
+						ref={setContainer}
+					/>
 				</div>
 			</div>
 			<Field.Error />

@@ -14,7 +14,6 @@ import {
 	type AgentBuilderFocus,
 	useAgentSession,
 } from "@/hooks/useAgentSession/useAgentSession";
-import { resolvePreviewFieldTarget } from "@/hooks/usePreviewFocus/utils/resolve-preview-field-target";
 import brickStore from "@/store/brickStore/brickStore";
 import {
 	createBricksSnapshot,
@@ -30,21 +29,19 @@ import {
 import { screenLabel } from "@/utils/agent-screen";
 import brickHelpers from "@/utils/brick-helpers";
 import {
-	getPreviewStructureId,
-	revealPreviewField,
-} from "@/utils/preview-focus-dom";
+	type BuilderFieldPath,
+	revealBuilderField,
+} from "@/utils/builder-reveal";
 import { tabId } from "@/utils/tab-id";
 
-//* lazy builder content can take a moment to render once its brick opens
-const focusWaitMs = 3_000;
-
-/** Fills in the editor state the save shape leaves out, so content from the server can go back into the store. */
+/** Restores editor state omitted by the save shape, preserving unchanged fields and their resources from the store so they do not count as edits. */
 const toInternalField = (
-	field: DocumentVersionCheckField,
+	field: DocumentVersionCheckField & Pick<InternalDocumentField, "resource">,
 	groupRef?: string,
 ): InternalDocumentField => ({
 	key: field.key,
 	type: field.type,
+	...(field.resource !== undefined && { resource: field.resource }),
 	...(groupRef !== undefined && { groupRef }),
 	...(field.translations !== undefined && {
 		translations: field.translations,
@@ -93,7 +90,7 @@ const contentKeys = () =>
 
 /** Resolves field keys and repeater refs to builder positions, stopping at the repeater if an item is missing. */
 const previewPath = (fields: InternalDocumentField[], path: string[]) => {
-	const resolved: Array<string | number> = [];
+	const resolved: BuilderFieldPath = [];
 	let scope = fields;
 	for (let index = 0; index < path.length; index += 2) {
 		const key = path[index];
@@ -169,6 +166,7 @@ export const useBuilderTools = (props: {
 	};
 	const update = (
 		call: Extract<AgentScreenCall, { action: "update" }>,
+		runId: string,
 	): AgentScreenResponse => {
 		if (!props.editable()) return { status: "unavailable", reason: "locked" };
 
@@ -187,6 +185,7 @@ export const useBuilderTools = (props: {
 			),
 			refs: call.refs,
 			collection: props.collection(),
+			runId,
 		});
 		lastRead = undefined;
 		return { status: "done" };
@@ -213,43 +212,14 @@ export const useBuilderTools = (props: {
 		const brick = bricks[brickIndex];
 		if (!brick) return false;
 
-		//* a builder brick on its own shows its header, as it has no field of its own
-		if (target.path.length === 0) {
-			if (brick.type !== "builder") return false;
-			const shown = await revealPreviewField({
-				fieldId: getPreviewStructureId({ brickIndex, type: "brick" }),
-				structureIds: [],
-				signal: AbortSignal.timeout(focusWaitMs),
-			});
-			return shown !== null;
-		}
-
-		const resolution = resolvePreviewFieldTarget({
-			target: {
-				collectionKey: props.collectionKey(),
-				//* only the brick and path find the field
-				documentId: props.documentId() ?? 0,
-				brick:
-					brick.type === "collection-fields"
-						? undefined
-						: {
-								type: brick.type === "fixed" ? "fixed" : "builder",
-								key: brick.key,
-								order: brick.order,
-							},
-				path: previewPath(brick.fields, target.path),
-			},
+		return revealBuilderField({
 			collection,
+			collectionKey: props.collectionKey(),
+			documentId: props.documentId(),
 			bricks,
+			brickIndex,
+			path: previewPath(brick.fields, target.path),
 		});
-		if (!resolution) return false;
-
-		const shown = await revealPreviewField({
-			fieldId: resolution.fieldId,
-			structureIds: resolution.structureIds,
-			signal: AbortSignal.timeout(focusWaitMs),
-		});
-		return shown !== null;
 	};
 
 	// ----------------------------------------
@@ -257,12 +227,12 @@ export const useBuilderTools = (props: {
 	onMount(() => {
 		const unregister = session.screen.register({
 			screen,
-			answer: async (call) => {
+			answer: async (call, runId) => {
 				switch (call.action) {
 					case "read":
 						return read();
 					case "update":
-						return update(call);
+						return update(call, runId);
 					case "focus": {
 						const shown = await focus({
 							brick: call.target.brick,

@@ -295,7 +295,10 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 						<For each={props.builderChanges}>
 							{(changes) => (
 								<div data-layout="block" class="flex flex-col">
-									<AgentBuilderChanges data={changes} />
+									<AgentBuilderChanges
+										data={changes}
+										runId={props.message.runId ?? props.message.id}
+									/>
 								</div>
 							)}
 						</For>

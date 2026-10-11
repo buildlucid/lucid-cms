@@ -6,6 +6,8 @@ import type {
 } from "@types";
 import classNames from "classnames";
 import {
+	TbOutlineArrowBackUp,
+	TbOutlineArrowForwardUp,
 	TbOutlineCalendarPlus,
 	TbOutlineClock,
 	TbOutlineEye,
@@ -21,10 +23,12 @@ import Button from "@/components/Button/Button";
 import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
 import DateText from "@/components/DateText/DateText";
 import { Permissions } from "@/constants/permissions";
+import type { UseBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import type { UseDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
+import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
@@ -44,6 +48,10 @@ import {
 } from "./parts/ReleaseTrigger";
 import { ViewSelector, type ViewSelectorOption } from "./parts/ViewSelector";
 
+//* ghost buttons are already faint, so disabled ones fade further and ignore hover
+const editButtonClass =
+	"disabled:opacity-40! disabled:hover:bg-transparent disabled:hover:text-muted";
+
 type HeaderBreadcrumb = {
 	link?: string;
 	label: string;
@@ -60,6 +68,8 @@ export const PageBuilderHeader: Component<{
 	/** The request that owns the proposal being edited. */
 	requestLink?: string;
 	currentViewLabel?: Accessor<string | undefined>;
+	/** Undo and redo controls, omitted when the document cannot be edited. */
+	edits?: UseBuilderEdits;
 	state: {
 		collection: Accessor<Collection | undefined>;
 		collectionKey: Accessor<string>;
@@ -724,9 +734,42 @@ export const PageBuilderHeader: Component<{
 						props.mode !== undefined
 					}
 				>
-					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full content-lg:w-auto">
+					{/* the title wraps rather than this row shrinking, which would push the locale select under the save button */}
+					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full content-lg:w-auto content-lg:shrink-0">
 						<Show when={props.mode !== undefined}>
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
+								<Show when={props.edits}>
+									{(edits) => (
+										<div class="flex items-center gap-1">
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												shape="square"
+												title={`${T()("builder.undo")} (${shortcutText.undo})`}
+												aria-label={T()("builder.undo")}
+												disabled={!edits().canUndo()}
+												class={editButtonClass}
+												onClick={() => edits().undo()}
+											>
+												<TbOutlineArrowBackUp />
+											</Button>
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												shape="square"
+												title={`${T()("builder.redo")} (${shortcutText.redo})`}
+												aria-label={T()("builder.redo")}
+												disabled={!edits().canRedo()}
+												class={editButtonClass}
+												onClick={() => edits().redo()}
+											>
+												<TbOutlineArrowForwardUp />
+											</Button>
+										</div>
+									)}
+								</Show>
 								<Show
 									when={
 										Boolean(props.state.collection()?.localized) &&

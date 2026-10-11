@@ -7,6 +7,8 @@ export const shortcutText = {
 	changeLocale: `${modKey}+Shift+.`,
 	newEntry: "Shift+T",
 	toggleAgentPanel: `${modKey}+J`,
+	undo: `${modKey}+Z`,
+	redo: `${modKey}+Shift+Z`,
 };
 
 export const inModal = () =>

@@ -75,6 +75,19 @@ const getExtensions = (options?: RichTextOptions, custom?: Extensions) =>
 		return disabledBy[extension.name] !== true;
 	});
 
+/** Resets undo history after external content replaces the document by re-registering the history plugin. */
+const resetHistory = (instance: Editor) => {
+	const plugin = instance.state.plugins.find(
+		(candidate) =>
+			"key" in candidate &&
+			typeof candidate.key === "string" &&
+			candidate.key.startsWith("history$"),
+	);
+	if (!plugin) return;
+	instance.unregisterPlugin("history");
+	instance.registerPlugin(plugin);
+};
+
 /** Creates and synchronizes the shared rich-text editor instance. */
 const useEditor = (config: {
 	value: RichTextJSON | null;
@@ -150,6 +163,7 @@ const useEditor = (config: {
 				instance.commands.setContent(value, {
 					emitUpdate: false,
 				});
+				resetHistory(instance);
 			},
 		),
 	);

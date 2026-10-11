@@ -33,6 +33,7 @@ import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/Me
 import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHeader";
 import type { ViewSelectorOption } from "@/components/PageBuilderHeader/parts/ViewSelector";
 import WorkflowStageSelect from "@/components/WorkflowStageSelect/WorkflowStageSelect";
+import { useBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import { useBuilderTools } from "@/hooks/useBuilderTools/useBuilderTools";
 import { useDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
 import {
@@ -199,6 +200,13 @@ const DocumentEditorPage: Component<{
 		locales: docState.contentLocales,
 		editable: () => !uiState.isBuilderLocked(),
 	});
+	const edits = useBuilderEdits({
+		enabled: () => !uiState.isBuilderLocked(),
+		collection: docState.collection,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		locales: docState.contentLocales,
+	});
 
 	const autoSave = useDocumentAutoSave({
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
@@ -322,6 +330,11 @@ const DocumentEditorPage: Component<{
 			}
 
 			if (shouldMerge) {
+				//* steps survive this tab's own saves, but not content saved elsewhere, which they weren't made against
+				const base = brickStore.get.baseContentId;
+				if (base !== null && base !== (document?.contentId ?? null)) {
+					brickStore.edits.clear();
+				}
 				brickStore.get.syncBricks(document, collection);
 			} else {
 				brickStore.get.setBricks(document, collection);
@@ -622,6 +635,7 @@ const DocumentEditorPage: Component<{
 								: undefined
 						}
 						requestLink={requestLink()}
+						edits={uiState.isBuilderLocked() ? undefined : edits}
 						state={{
 							collection: docState.collection,
 							collectionKey: docState.collectionKey,
@@ -708,7 +722,11 @@ const DocumentEditorPage: Component<{
 							</Alert>
 						</Show>
 					</div>
-					<div class="mt-2 flex min-h-0 grow flex-col overflow-visible">
+					{/* inputs in here write to the document, so undo belongs to it rather than the browser */}
+					<div
+						data-document-builder
+						class="mt-2 flex min-h-0 grow flex-col overflow-visible"
+					>
 						<div class="w-full min-h-0 flex flex-col grow bg-background rounded-t-xl border border-border [--comparison-bar-height:2.75rem]">
 							<Show when={comparison.open()}>
 								<DocumentComparisonBar

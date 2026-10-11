@@ -63,6 +63,41 @@ export const getPreviewStructureId = (props: PreviewFocusStructure) => {
 	)}`;
 };
 
+/** The height of the sticky document header, which covers the top of the builder. */
+const getHeaderHeight = (targetDocument: Document, targetWindow: Window) =>
+	Number.parseFloat(
+		targetWindow
+			.getComputedStyle(targetDocument.documentElement)
+			.getPropertyValue("--document-header-bar-height"),
+	) || 0;
+
+//* the highlight each indicator shows now, so highlighting it again restarts it
+const activeHighlights = new WeakMap<HTMLElement, () => void>();
+
+/** Briefly highlights a field label, restarting any existing animation and returning a function to remove it early. */
+const highlightIndicator = (
+	indicator: HTMLElement,
+	targetWindow: Window,
+	highlightMs = 1500,
+) => {
+	activeHighlights.get(indicator)?.();
+	//* reading layout between removing and adding the class restarts its animation
+	void indicator.offsetWidth;
+	indicator.classList.add("preview-field-target-highlight");
+
+	let active = true;
+	const cleanup = () => {
+		if (!active) return;
+		active = false;
+		targetWindow.clearTimeout(timeout);
+		activeHighlights.delete(indicator);
+		indicator.classList.remove("preview-field-target-highlight");
+	};
+	const timeout = targetWindow.setTimeout(cleanup, highlightMs);
+	activeHighlights.set(indicator, cleanup);
+	return cleanup;
+};
+
 //* space kept between the document header and the revealed label
 const revealGap = 16;
 
@@ -79,12 +114,7 @@ const scrollPreviewFieldIntoView = (
 	const reducedMotion =
 		targetWindow.matchMedia?.("(prefers-reduced-motion: reduce)").matches ===
 		true;
-	const header =
-		Number.parseFloat(
-			targetWindow
-				.getComputedStyle(element.ownerDocument.documentElement)
-				.getPropertyValue("--document-header-bar-height"),
-		) || 0;
+	const header = getHeaderHeight(element.ownerDocument, targetWindow);
 	const labelAbove = Math.max(
 		0,
 		element.getBoundingClientRect().top - indicator.getBoundingClientRect().top,
@@ -181,18 +211,42 @@ export const revealPreviewField = async (
 
 	const indicator = getPreviewFieldIndicator(field);
 	scrollPreviewFieldIntoView(field, indicator, targetWindow);
-	indicator.classList.add("preview-field-target-highlight");
-
-	let active = true;
+	const removeHighlight = highlightIndicator(
+		indicator,
+		targetWindow,
+		options.highlightMs,
+	);
 	const cleanup = () => {
-		if (!active) return;
-		active = false;
-		targetWindow.clearTimeout(timeout);
 		options.signal.removeEventListener("abort", cleanup);
-		indicator.classList.remove("preview-field-target-highlight");
+		removeHighlight();
 	};
-	const timeout = targetWindow.setTimeout(cleanup, options.highlightMs ?? 1500);
 	options.signal.addEventListener("abort", cleanup, { once: true });
 
 	return cleanup;
+};
+
+/** Highlights rendered fields without opening hidden content, scrolling only when none are in view and returning the highlighted count. */
+export const highlightPreviewFields = (fieldIds: string[]) => {
+	const shown = fieldIds.flatMap((id) => {
+		const element = document.getElementById(id);
+		//* collapsed content can stay in the page without taking up space
+		return element instanceof HTMLElement && element.getClientRects().length
+			? [element]
+			: [];
+	});
+	const [first] = shown;
+	if (!first) return 0;
+
+	const header = getHeaderHeight(document, window);
+	const inView = shown.some((element) => {
+		const rect = element.getBoundingClientRect();
+		return rect.bottom > header && rect.top < window.innerHeight;
+	});
+	if (!inView) {
+		scrollPreviewFieldIntoView(first, getPreviewFieldIndicator(first));
+	}
+	for (const element of shown) {
+		highlightIndicator(getPreviewFieldIndicator(element), window);
+	}
+	return shown.length;
 };

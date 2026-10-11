@@ -71,22 +71,27 @@ const EmbeddedBrickEditDrawer: Component<{
 
 	// ----------------------------------------
 	// Effects
+	//* the edits made while the drawer is open become one undo step, or none when they're cancelled
 	createEffect(() => {
 		if (!props.state.open || !brick() || capturedBrickRef === brick()?.ref) {
 			return;
 		}
+		//* a brick opened from inside another one, or returning to it, ends the last brick's step first
+		if (capturedBrickRef !== undefined) brickStore.edits.endBatch();
 		fieldSnapshot = structuredClone(unwrap(brick()?.fields ?? []));
 		capturedBrickRef = brick()?.ref;
 		brickStore.set("autoSavePaused", true);
+		brickStore.edits.beginBatch();
 	});
 
 	onCleanup(() => {
-		brickStore.set("autoSavePaused", false);
+		resetTransaction();
 	});
 
 	// ----------------------------------------
 	// Functions
 	const resetTransaction = () => {
+		if (capturedBrickRef !== undefined) brickStore.edits.endBatch();
 		fieldSnapshot = undefined;
 		capturedBrickRef = undefined;
 		brickStore.set("autoSavePaused", false);

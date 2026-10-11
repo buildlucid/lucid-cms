@@ -25,7 +25,7 @@ export const createBricksSnapshot = (
 ): BrickSnapshot[] => bricks.map(createBrickSnapshot);
 
 /** Normalizes UI-only repeater state before comparing document content. */
-const normalizeGroupOpenState = (
+export const normalizeGroupOpenState = (
 	fields: InternalDocumentField[],
 ): InternalDocumentField[] =>
 	fields.map((field) => ({

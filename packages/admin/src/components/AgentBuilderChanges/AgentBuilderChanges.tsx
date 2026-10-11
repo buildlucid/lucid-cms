@@ -10,11 +10,13 @@ import {
 	type AgentBuilderFocus,
 	useAgentSession,
 } from "@/hooks/useAgentSession/useAgentSession";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import type { CollectionFieldConfig } from "@/types/collection-config";
 import { changeTarget } from "@/utils/agent-builder-changes";
+import { showsDocument } from "@/utils/agent-screen";
 import helpers from "@/utils/helpers";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 
@@ -68,13 +70,16 @@ const fieldLabel = (configs: CollectionFieldConfig[], path: string[]) => {
 	return labels.join(" › ");
 };
 
-/** Lists what the agent changed in a document's builder during one reply, linking each field and brick to where it is. */
-const AgentBuilderChanges: Component<{ data: AgentBuilderChangesData }> = (
-	props,
-) => {
+/** Lists and links a reply's builder changes, with undo available while that run's edits are the latest steps. */
+const AgentBuilderChanges: Component<{
+	data: AgentBuilderChangesData;
+	/** The run that made the changes, whose steps the card can undo. */
+	runId: string;
+}> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const session = useAgentSession();
+	const brickStore = useBrickStore();
 	const [expanded, setExpanded] = createSignal(false);
 
 	// ----------------------------------------
@@ -141,11 +146,33 @@ const AgentBuilderChanges: Component<{ data: AgentBuilderChangesData }> = (
 	const visibleRows = createMemo(() =>
 		expanded() ? rows() : rows().slice(0, shownRows),
 	);
+	/** Whether the next undo step is this run's, in the builder this tab shows for the document. */
+	const undoable = createMemo(() => {
+		const screen = session.screen.current();
+		if (!screen || !showsDocument(screen, props.data.document)) return false;
+		if (brickStore.get.locked) return false;
+		const next = brickStore.edits.peekUndo();
+		return next?.source.type === "agent" && next.source.runId === props.runId;
+	});
 
 	// ----------------------------------------
 	// Functions
 	const show = (row: Row) => {
 		if (row.target) session.screen.focus(props.data.document, row.target);
+	};
+	/** Undoes this run's latest consecutive steps, then reveals its first changed field or brick. */
+	const undo = () => {
+		while (undoable()) brickStore.edits.undo();
+
+		const change = props.data.changes[0];
+		const target =
+			change &&
+			changeTarget(
+				change,
+				change.fields[0],
+				contentLocaleStore.get.contentLocale,
+			);
+		if (target) session.screen.focus(props.data.document, target);
 	};
 
 	// ----------------------------------------
@@ -162,6 +189,15 @@ const AgentBuilderChanges: Component<{ data: AgentBuilderChangesData }> = (
 						? T()("agent.builder.changes.count.one")
 						: T()("agent.builder.changes.count", { count: count() })}
 				</span>
+				<Show when={undoable()}>
+					<button
+						type="button"
+						class="shrink-0 rounded-sm text-xs text-primary underline-offset-2 hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						onClick={undo}
+					>
+						{T()("agent.builder.changes.undo")}
+					</button>
+				</Show>
 			</div>
 			<ul class="flex flex-col border-t border-border p-1.5">
 				<For each={visibleRows()}>

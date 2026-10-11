@@ -4,11 +4,7 @@ import { EditorView, keymap, placeholder } from "@codemirror/view";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { basicSetup } from "codemirror";
-import {
-	createCodeMirror,
-	createEditorControlledValue,
-	createEditorReadonly,
-} from "solid-codemirror";
+import { createCodeMirror, createEditorReadonly } from "solid-codemirror";
 import { TbOutlineCheck, TbOutlineChevronDown } from "solid-icons/tb";
 import {
 	type Component,
@@ -18,11 +14,13 @@ import {
 	For,
 	type JSX,
 	type JSXElement,
+	on,
 	Show,
 	splitProps,
 } from "solid-js";
 import Field from "@/components/Field/Field";
 import Menu from "@/components/Menu/Menu";
+import getEditShortcut from "@/hooks/useKeyboardShortcuts/utils/edit-shortcut";
 import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
 import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
@@ -60,6 +58,16 @@ export interface CodeEditorProps extends JSX.AriaAttributes {
 
 const CODE_EDITOR_MIN_HEIGHT = "9rem";
 const isBlank = (value: string) => value.trim() === "";
+/** Formats JSON, returning an empty string for blank content or undefined for invalid JSON. */
+const formatJson = (doc: string) => {
+	if (isBlank(doc)) return "";
+	try {
+		return JSON.stringify(JSON.parse(doc), null, 2);
+	} catch {
+		//* the lint error already explains why
+		return undefined;
+	}
+};
 
 /**
  * A code editor with syntax highlighting, a label, description and validation
@@ -172,7 +180,6 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 		},
 	});
 
-	createEditorControlledValue(editorView, code);
 	createEditorReadonly(editorView, () => props.disabled ?? false);
 
 	const languageCompartment = new Compartment();
@@ -180,7 +187,21 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 	const lintCompartment = new Compartment();
 	const themeCompartment = new Compartment();
 
-	createExtension(basicSetup);
+	const reconfigureSetup = createExtension(basicSetup);
+	//* a value from elsewhere, eg. undo, replaces the document, and the editor's own undo history with it, so that can't work against text that is no longer there
+	createEffect(
+		on([editorView, code], ([view, value]) => {
+			if (!view) return;
+			const current = view.state.doc.toString();
+			if (current === value) return;
+
+			view.dispatch({
+				changes: { from: 0, to: current.length, insert: value },
+			});
+			reconfigureSetup([]);
+			reconfigureSetup(basicSetup);
+		}),
+	);
 	createExtension(keymap.of([indentWithTab]));
 	createExtension(languageCompartment.of([]));
 	createExtension(placeholderCompartment.of([]));
@@ -223,29 +244,29 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 			setInputFocus(update.view.hasFocus);
 			if (update.view.hasFocus) return;
 
-			if (props.format) {
-				const doc = update.view.state.doc.toString();
-				if (isBlank(doc)) {
-					setParseError(null);
-					if (doc !== "") props.onChange("");
-				} else {
-					try {
-						const formatted = JSON.stringify(JSON.parse(doc), null, 2);
-						setParseError(null);
-						if (formatted !== doc) props.onChange(formatted);
-					} catch {
-						//* leave it alone, the lint error already explains why
-					}
-				}
-			}
-
 			props.onBlur?.();
 		}),
 	);
 	createExtension(
 		EditorView.domEventHandlers({
+			//* formatting is an edit in the editor, so it can be undone there and doesn't arrive back as an outside change that clears the history
+			blur(_event, view) {
+				if (!props.format) return;
+
+				const doc = view.state.doc.toString();
+				const formatted = formatJson(doc);
+				if (formatted === undefined) return;
+
+				setParseError(null);
+				if (formatted !== doc) {
+					view.dispatch({
+						changes: { from: 0, to: doc.length, insert: formatted },
+					});
+				}
+			},
+			//* keys stay in the editor so page shortcuts don't fire while typing, except undo and redo, which reach the document when the editor has nothing to undo
 			keydown(e) {
-				e.stopPropagation();
+				if (!getEditShortcut(e)) e.stopPropagation();
 			},
 		}),
 	);
@@ -392,6 +413,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 				<div
 					{...ariaProps}
 					data-code-editor-control
+					data-owns-undo
 					id={props.id}
 					ref={editorRef}
 					class={classnames("overflow-hidden", {

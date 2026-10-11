@@ -69,8 +69,11 @@ type BuilderDocument = AgentBuilderChangesData["document"];
 /** An admin screen open in this tab, which tells the agent where the person is. The document builder also answers its builder tools. */
 export type AgentScreenRegistration = {
 	screen: Accessor<AgentScreen | undefined>;
-	/** Answers a call made for this screen. Screens that only tell the agent where the person is leave it out. */
-	answer?: (call: AgentScreenCall) => Promise<AgentScreenResponse>;
+	/** Answers this screen's calls for the given run, omitted when the screen only reports the person's location. */
+	answer?: (
+		call: AgentScreenCall,
+		runId: string,
+	) => Promise<AgentScreenResponse>;
 	/** Shows a field or brick and reports whether it was found, omitted for screens without a builder. */
 	focus?: (target: AgentBuilderFocus) => Promise<boolean>;
 };
@@ -294,7 +297,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 		const response: AgentScreenResponse =
 			same && registration?.answer
 				? await registration
-						.answer(pending.call)
+						.answer(pending.call, pending.runId)
 						.catch(() => ({ status: "unavailable", reason: "closed" }))
 				: {
 						status: "unavailable",
