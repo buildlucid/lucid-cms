@@ -110,7 +110,7 @@ const InputRow: Component<
 			icon={
 				<Switch fallback={<TbOutlineClock size={11} />}>
 					<Match when={props.input.status === "claimed" || steering()}>
-						<Spinner size="sm" variant="subtle" />
+						<Spinner size="xs" variant="subtle" />
 					</Match>
 				</Switch>
 			}

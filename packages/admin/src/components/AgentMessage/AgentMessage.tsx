@@ -15,6 +15,7 @@ import {
 	Switch,
 } from "solid-js";
 import AgentBuilderChanges from "@/components/AgentBuilderChanges/AgentBuilderChanges";
+import AgentGeneratingImage from "@/components/AgentGeneratingImage/AgentGeneratingImage";
 import AgentMediaPreview from "@/components/AgentMediaPreview/AgentMediaPreview";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import AgentReferences from "@/components/AgentReferences/AgentReferences";
@@ -31,6 +32,8 @@ import {
 	agentReferenceKey,
 } from "@/utils/agent-references";
 import {
+	imageSettingsWidget,
+	isGeneratingImage,
 	isToolRow,
 	previewMediaWidget,
 	progressTool,
@@ -118,6 +121,37 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
+	const settingsWidget = (toolCallId: string) =>
+		props.message.parts.find(
+			(part) =>
+				part.type === "widget" &&
+				part.key === imageSettingsWidget &&
+				part.interaction?.toolCallId === toolCallId,
+		);
+	/** Finds the running image tool whose placeholder follows this part, preferring its settings widget. */
+	const generatingImageAfter = (index: number) => {
+		const part = props.message.parts[index];
+		const callId =
+			part?.type === "tool"
+				? part.id
+				: part?.type === "widget" && part.key === imageSettingsWidget
+					? part.interaction?.toolCallId
+					: undefined;
+		if (!callId) return undefined;
+		if (part?.type === "tool" && settingsWidget(callId)) return undefined;
+
+		const tool = props.message.parts.find(
+			(candidate) => candidate.type === "tool" && candidate.id === callId,
+		);
+		return tool?.type === "tool" && isGeneratingImage(tool) ? tool : undefined;
+	};
+	const answeredSettings = (toolCallId: string) => {
+		const widget = settingsWidget(toolCallId);
+		return widget?.type === "widget" &&
+			widget.interaction?.status === "answered"
+			? widget.interaction.response
+			: undefined;
+	};
 	const visible = (index: number) => {
 		const part = props.message.parts[index];
 		return (
@@ -183,112 +217,131 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 									live === true && part.type === "widget",
 								);
 								return (
-									<Show when={visible(index())}>
-										<div
-											data-layout={layoutOf(part)}
-											class={classnames("flex flex-col", {
-												"motion-safe:animate-rise-in": entering(),
-											})}
-											onAnimationEnd={(event) => {
-												if (event.target === event.currentTarget) {
-													setEntering(false);
-												}
-											}}
-										>
-											{/* the shimmer animates its own element, as swapping animations on one element replays the entrance each time the shimmer stops */}
+									<>
+										<Show when={visible(index())}>
 											<div
+												data-layout={layoutOf(part)}
 												class={classnames("flex flex-col", {
-													"agent-shimmer w-fit max-w-full":
-														!isToolRow(part) && shimmers(index()),
+													"motion-safe:animate-rise-in": entering(),
 												})}
+												onAnimationEnd={(event) => {
+													if (event.target === event.currentTarget) {
+														setEntering(false);
+													}
+												}}
 											>
-												<Switch>
-													<Match when={part.type === "text" && part}>
-														{(text) => (
-															<AgentMarkdown
-																text={text().text}
-																animate={live}
-															/>
-														)}
-													</Match>
-													<Match
-														when={
-															part.type === "tool" &&
-															part.name === progressTool &&
-															part
-														}
-													>
-														{(tool) => (
-															<AgentMarkdown
-																text={messageText({ parts: [tool()] })}
-																animate={live}
-															/>
-														)}
-													</Match>
-													<Match
-														when={toolGroupAt(props.message.parts, index())}
-													>
-														{(group) => (
-															<AgentToolGroup
-																group={group()}
-																retriedIds={props.retriedToolIds}
-																selectedToolId={props.selectedToolId}
-																onSelect={props.onSelectTool}
-																working={shimmers(index())}
-															/>
-														)}
-													</Match>
-													<Match
-														when={
-															part.type === "widget" &&
-															part.key === previewMediaWidget &&
-															part
-														}
-													>
-														{(widget) => (
-															<AgentMediaPreview
-																conversationId={props.message.conversationId}
-																widget={widget()}
-															/>
-														)}
-													</Match>
-													<Match
-														when={
-															part.type === "widget" &&
-															part.key === referencesWidget &&
-															part
-														}
-													>
-														{(widget) => (
-															<AgentReferences
-																conversationId={props.message.conversationId}
-																widget={widget()}
-															/>
-														)}
-													</Match>
-													<Match when={part.type === "widget" && part}>
-														{(widget) => (
-															<Show
-																when={layoutOf(widget()) === "block"}
-																fallback={<AgentWidgetRow widget={widget()} />}
-															>
-																<AgentWidget
-																	widget={widget()}
-																	view="inline"
-																	onRespond={
-																		widget().interaction?.id ===
-																		props.pendingInteractionId
-																			? props.onRespond
-																			: undefined
-																	}
+												{/* the shimmer animates its own element, as swapping animations on one element replays the entrance each time the shimmer stops */}
+												<div
+													class={classnames("flex flex-col", {
+														"agent-shimmer w-fit max-w-full":
+															!isToolRow(part) && shimmers(index()),
+													})}
+												>
+													<Switch>
+														<Match when={part.type === "text" && part}>
+															{(text) => (
+																<AgentMarkdown
+																	text={text().text}
+																	animate={live}
 																/>
-															</Show>
-														)}
-													</Match>
-												</Switch>
+															)}
+														</Match>
+														<Match
+															when={
+																part.type === "tool" &&
+																part.name === progressTool &&
+																part
+															}
+														>
+															{(tool) => (
+																<AgentMarkdown
+																	text={messageText({ parts: [tool()] })}
+																	animate={live}
+																/>
+															)}
+														</Match>
+														<Match
+															when={toolGroupAt(props.message.parts, index())}
+														>
+															{(group) => (
+																<AgentToolGroup
+																	group={group()}
+																	retriedIds={props.retriedToolIds}
+																	selectedToolId={props.selectedToolId}
+																	onSelect={props.onSelectTool}
+																	working={shimmers(index())}
+																/>
+															)}
+														</Match>
+														<Match
+															when={
+																part.type === "widget" &&
+																part.key === previewMediaWidget &&
+																part
+															}
+														>
+															{(widget) => (
+																<AgentMediaPreview
+																	conversationId={props.message.conversationId}
+																	widget={widget()}
+																/>
+															)}
+														</Match>
+														<Match
+															when={
+																part.type === "widget" &&
+																part.key === referencesWidget &&
+																part
+															}
+														>
+															{(widget) => (
+																<AgentReferences
+																	conversationId={props.message.conversationId}
+																	widget={widget()}
+																/>
+															)}
+														</Match>
+														<Match when={part.type === "widget" && part}>
+															{(widget) => (
+																<Show
+																	when={layoutOf(widget()) === "block"}
+																	fallback={
+																		<AgentWidgetRow widget={widget()} />
+																	}
+																>
+																	<AgentWidget
+																		widget={widget()}
+																		view="inline"
+																		onRespond={
+																			widget().interaction?.id ===
+																			props.pendingInteractionId
+																				? props.onRespond
+																				: undefined
+																		}
+																	/>
+																</Show>
+															)}
+														</Match>
+													</Switch>
+												</div>
 											</div>
-										</div>
-									</Show>
+										</Show>
+										<Show when={generatingImageAfter(index())}>
+											{(tool) => (
+												<div
+													data-layout="block"
+													class="flex flex-col motion-safe:animate-rise-in"
+												>
+													<AgentGeneratingImage
+														conversationId={props.message.conversationId}
+														messageId={props.message.id}
+														part={tool()}
+														settings={answeredSettings(tool().id)}
+													/>
+												</div>
+											)}
+										</Show>
+									</>
 								);
 							}}
 						</For>

@@ -227,6 +227,8 @@ export type AgentCapabilities = {
 	webSearch: boolean;
 	/** Whether the agent can read public webpages. */
 	webRead: boolean;
+	/** Whether the agent can generate images with Lucid AI. */
+	imageGeneration: boolean;
 };
 
 /** An agent name used in navigation and saved chat labels. */
@@ -244,7 +246,8 @@ export interface Agent {
 	description: string;
 	/** Configures composer attachments and tools for reading and editing the person's open document builder. */
 	features: {
-		media: { upload: boolean; attach: boolean };
+		/** Composer image generation creates personal uploads and requires `upload`. */
+		media: { upload: boolean; attach: boolean; generateImage: boolean };
 		documents: { attach: boolean };
 		requests: { attach: boolean };
 		builder: { read: boolean; edit: boolean };
@@ -315,10 +318,7 @@ export type AgentRunnerToolName =
 	| "lucid_share_progress"
 	| "lucid_read_history"
 	| "lucid_load_skill"
-	| "lucid_finish_run"
-	| "lucid_builder_read"
-	| "lucid_builder_update"
-	| "lucid_builder_focus";
+	| "lucid_finish_run";
 
 /** An agent that acted, for the person shown alongside it or for the system. */
 export type AgentActor = {
@@ -343,7 +343,12 @@ export type AgentLucidToolName =
 	| "web_fetch"
 	| "media_analyze"
 	| "media_read_file"
-	| "media_select";
+	| "media_select"
+	| "media_generate_image"
+	| "media_edit_image"
+	| "lucid_builder_read"
+	| "lucid_builder_update"
+	| "lucid_builder_focus";
 
 /** Widgets supplied by Lucid's runner and core tools. */
 export type AgentCoreWidgetKey =
@@ -354,7 +359,39 @@ export type AgentCoreWidgetKey =
 	| "lucid-media-select"
 	| "lucid-screen"
 	| "lucid-builder-changes"
-	| "lucid-references";
+	| "lucid-references"
+	| "lucid-image-settings";
+
+/** Image settings reviewed before generation. */
+export type AgentImageSettings = {
+	instruction: string;
+	title: string;
+	/** The saved media's alt text, or null to use the title. */
+	alt: string | null;
+	guidance:
+		| "natural"
+		| "lifestyle"
+		| "product"
+		| "illustration"
+		| "cinematic"
+		| null;
+	size:
+		| "auto"
+		| "1024x1024"
+		| "1536x1024"
+		| "1024x1536"
+		| "2048x2048"
+		| "2048x1152"
+		| "3840x2160"
+		| "2160x3840";
+	quality: "auto" | "low" | "medium" | "high";
+	outputFormat: "webp" | "png" | "jpeg";
+};
+
+/** Saved image settings and edit source for a `lucid-image-settings` interaction whose response is `AgentImageSettings`. */
+export type AgentImageSettingsData = AgentImageSettings & {
+	editMediaId: number | null;
+};
 
 /** The lifecycle state of an agent run. */
 export type AgentRunStatus =

@@ -20,8 +20,6 @@ import {
 	type FilterPreset,
 	findActiveFilterPreset,
 } from "@/components/FilterPanel/preset-state";
-import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
-import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { MediaList } from "@/components/MediaList/MediaList";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
@@ -600,8 +598,6 @@ const MediaPage: Component = () => {
 					/>
 				</PageLayout.Header>
 				<PageLayout.Body>
-					<MediaAltGenerationModal />
-					<MediaImageGenerationModal />
 					<MediaList
 						state={{
 							searchParams: searchParams,

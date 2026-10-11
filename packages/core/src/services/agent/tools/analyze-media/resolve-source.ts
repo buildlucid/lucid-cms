@@ -6,8 +6,8 @@ import {
 } from "../../../../libs/lucid-remote/schema/media.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
+import hasFileSignature from "../../helpers/file-signature.js";
 import readMedia from "../../helpers/read-media.js";
-import hasFileSignature from "./file-signature.js";
 
 /** Resolves authorised media as inline data for the remote analysis model. */
 const resolveSource: ServiceFn<

@@ -9,8 +9,6 @@ import CreateMenu, {
 	type CreateMenuAction,
 } from "@/components/CreateMenu/CreateMenu";
 import CreateUserDrawer from "@/components/CreateUserDrawer/CreateUserDrawer";
-import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
-import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { UserList } from "@/components/UserList/UserList";
@@ -245,8 +243,6 @@ const UsersPage: Component = () => {
 				/>
 			</PageLayout.Header>
 			<PageLayout.Body>
-				<MediaAltGenerationModal />
-				<MediaImageGenerationModal />
 				<UserList
 					state={{
 						searchParams: searchParams,

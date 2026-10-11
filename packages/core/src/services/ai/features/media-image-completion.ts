@@ -2,8 +2,8 @@ import type {
 	MediaImageGenerateCompletionPollResponse,
 	MediaImageGenerateCompletionResponse,
 } from "@lucidcms/types";
-import z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
+import { cmsAiImageOutputSchema } from "../../../libs/lucid-remote/schema/ai.js";
 import { getCmsAiRequest } from "../../../libs/lucid-remote/services/index.js";
 import {
 	isCmsAiGenerateAcceptedData,
@@ -14,22 +14,9 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
+import generatedImageUrl from "../helpers/generated-image-url.js";
 import completeStoredGeneration from "../storage/complete-stored-generation.js";
 import storeFailedGeneration from "../storage/store-failed-generation.js";
-
-const mediaImageOutputSchema = z
-	.object({
-		id: z.string(),
-		url: z.string(),
-		storageKey: z.string(),
-		byteSize: z.number().int().nonnegative(),
-		mimeType: z.string(),
-		extension: z.string(),
-		size: z.string(),
-		quality: z.string(),
-		outputFormat: z.string(),
-	})
-	.strict();
 
 const mediaImageCompletion: ServiceFn<
 	[
@@ -118,7 +105,7 @@ const mediaImageCompletion: ServiceFn<
 		};
 	}
 
-	const outputParse = mediaImageOutputSchema.safeParse(
+	const outputParse = cmsAiImageOutputSchema.safeParse(
 		requestRes.data.json.data.output,
 	);
 	if (!outputParse.success) {
@@ -149,7 +136,11 @@ const mediaImageCompletion: ServiceFn<
 			key: "media.image.generate",
 			version: "v1",
 		},
-		output: outputParse.data,
+		//* Proxy protected images through the CMS for authenticated admin access.
+		output: {
+			...outputParse.data,
+			url: generatedImageUrl(outputParse.data.storageKey),
+		},
 		usage: requestRes.data.json.data.usage,
 	};
 

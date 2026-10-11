@@ -19,6 +19,8 @@ export type {
 	AgentCoreWidgetKey,
 	AgentDelivery,
 	AgentFileReadOutput,
+	AgentImageSettings,
+	AgentImageSettingsData,
 	AgentInput,
 	AgentInputAction,
 	AgentInteraction,

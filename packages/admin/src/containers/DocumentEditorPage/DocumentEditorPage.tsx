@@ -28,8 +28,6 @@ import ReadOnlyDocument from "@/components/DocumentComparison/ReadOnlyDocument";
 import { DocumentPreview } from "@/components/DocumentPreview/DocumentPreview";
 import { DocumentSidebar } from "@/components/DocumentSidebar/DocumentSidebar";
 import { FixedBricks } from "@/components/FixedBricks/FixedBricks";
-import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
-import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHeader";
 import type { ViewSelectorOption } from "@/components/PageBuilderHeader/parts/ViewSelector";
 import WorkflowStageSelect from "@/components/WorkflowStageSelect/WorkflowStageSelect";
@@ -956,8 +954,6 @@ const DocumentEditorPage: Component<{
 						onLeave={leave}
 						onTakeOver={() => void editors.takeOver()}
 					/>
-					<MediaAltGenerationModal />
-					<MediaImageGenerationModal />
 				</PageBuilderStateProvider>
 			</Match>
 		</Switch>

@@ -210,7 +210,12 @@ const PROGRESS_BAR_SIZES = valuesOf<ProgressBarSize>({
 	md: true,
 	lg: true,
 });
-const SPINNER_SIZES = valuesOf<SpinnerSize>({ sm: true, md: true, lg: true });
+const SPINNER_SIZES = valuesOf<SpinnerSize>({
+	xs: true,
+	sm: true,
+	md: true,
+	lg: true,
+});
 const STATUS_INDICATOR_VARIANTS = valuesOf<StatusIndicatorVariant>({
 	primary: true,
 	"primary-subtle": true,

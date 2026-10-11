@@ -67,24 +67,16 @@ import {
 import type { CollectionToolOptions } from "../permission/readable-collections.js";
 
 /**
- * Lucid's tools for agents, grouped by what they work on and named after the
- * tools they create, eg. `agentTools.documents.find()` creates `documents_find`.
- * Pick the tools an agent's purpose needs, or start from a bundle such as
- * `read()`. Bundles never share tools, so they combine freely. Web, media
- * analysis, file reading and library tools are built in and configured with
- * `defineAgent`'s `features`. Every tool uses the permissions of the person
- * the agent acts for.
+ * Lucid's agent tools and composable bundles, using the run's permissions.
  *
- * Document writes open requests for people to review by default. Pass
- * `direct: true` to let them save changes as a person could in the admin.
- *
- * Request tools let agents read, discuss and manage requests. They can't
- * approve them, so people stay in charge of what goes live. A request is
- * only in reach when all its documents are in the tool's `collections`.
- *
- * Tools that act straight away, such as resending an email or completing a
- * request, ask the person to confirm first unless the chat or routine turns
- * that off.
+ * @remarks
+ * Tools are grouped by resource, e.g. `agentTools.documents.find()` creates `documents_find`.
+ * Bundles contain distinct tools and can be combined.
+ * `defineAgent.features` configures built-in web, media analysis, file reading,
+ * image generation, library and builder tools.
+ * Document writes open review requests by default; `direct: true` saves changes directly.
+ * Request tools cannot approve requests and only reach requests whose documents are all in the tool's `collections`.
+ * Immediate actions require confirmation unless the chat or routine disables it.
  *
  * @example
  * ```ts

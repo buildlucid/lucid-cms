@@ -28,7 +28,11 @@ const uploadSingle: ServiceFn<
 			public?: boolean;
 			/** Marks media another record manages. Only applies to new media. */
 			isSystem?: boolean;
+			/** Creates personal media owned by this user. */
+			ownerUserId?: number | null;
 			origin?: MediaOrigin;
+			/** The Lucid AI request that produced the file, for AI origins. */
+			aiGenerationRequestId?: string;
 			folderId?: number | null;
 			title?: { localeCode: string | null; value: string | null }[];
 			alt?: { localeCode: string | null; value: string | null }[];

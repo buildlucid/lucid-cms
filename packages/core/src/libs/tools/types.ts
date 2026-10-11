@@ -45,6 +45,8 @@ export type AgentToolExecution = {
 		userId: number | null;
 		agentKey: string;
 	};
+	/** The admin screen that originated the person's latest message. */
+	screen?: AgentScreen;
 	/** Saved input supplied by the runner after an interaction. */
 	interaction?: {
 		data: Record<string, unknown>;
@@ -109,6 +111,8 @@ export type AgentToolCapabilities = {
 	webSearch?: boolean;
 	/** Reads public webpages. */
 	webRead?: boolean;
+	/** Generates images with Lucid AI. */
+	imageGeneration?: boolean;
 };
 
 export type AgentToolDescriptionProps = {
@@ -120,6 +124,12 @@ export type AgentToolDescriptionProps = {
 export type AgentToolDescription =
 	| string
 	| ((props: AgentToolDescriptionProps) => string);
+
+export type AgentToolAvailabilityProps = {
+	config: ResolvedLucidConfig;
+	/** The originating screen type, when the run has a screen. */
+	screen?: AgentScreen["type"];
+};
 
 type ToolOptions<
 	Name extends string,
@@ -174,6 +184,8 @@ export type DefineAgentToolOptions<
 	requiresConfirmation?: boolean;
 	/** What this tool lets the agent do, shown to people in the chat. */
 	capabilities?: AgentToolCapabilities;
+	/** Controls whether the tool is offered, defaulting to always available. */
+	available?: (props: AgentToolAvailabilityProps) => boolean;
 	/** Describes a call before it runs, eg. while it waits for confirmation. Defaults to the title. */
 	describe?: (input: z.output<Input>) => AdminCopyInput;
 	/** Saved with each call. Bump it when the output shape changes so the admin can keep rendering older results. */
@@ -181,7 +193,7 @@ export type DefineAgentToolOptions<
 	handler: AgentToolHandler<z.output<Input>, z.output<Output>>;
 };
 
-/** Read-only preparation either completes the call or asks for one structured response. */
+/** Requests a structured response before the tool proceeds. */
 export type AgentToolInteraction<Data> = {
 	interaction: {
 		title: string;
@@ -190,40 +202,59 @@ export type AgentToolInteraction<Data> = {
 	};
 };
 
+/** Returned by an optional interaction's preparation to run the tool without asking. */
+export type AgentToolProceed = { proceed: true };
+
+/** Supplies no answer when an optional interaction is skipped. */
+type AgentToolAnswer<
+	Data extends z.ZodType,
+	Response extends z.ZodType,
+	Optional extends boolean,
+> =
+	| { data: z.output<Data>; response: z.output<Response> }
+	| (Optional extends true ? { data: undefined; response: undefined } : never);
+
 export type DefineInteractiveAgentToolOptions<
 	Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
-	Data extends z.ZodObject,
-	Response extends z.ZodObject,
+	Data extends z.ZodType<Record<string, unknown>>,
+	Response extends z.ZodType<Record<string, unknown>>,
+	Optional extends boolean = false,
 > = Omit<DefineAgentToolOptions<Name, Input, Output>, "handler"> & {
 	interaction: {
 		/** Matches an `agent.widget` admin slot. Keys starting with `lucid-` are reserved. */
 		key: string;
 		/** Bump when the data or response shape changes, so saved interactions stop matching. */
 		version: number;
+		/** Object or union schema for saved widget data. */
 		data: Data;
 		/** Derive allowed responses from the saved data, rather than trusting the browser. */
 		response: (data: z.output<Data>) => Response;
+		/** Allows `prepare` to return `{ proceed: true }` and routines to skip asking, passing undefined data and response to the handler. */
+		optional?: Optional;
 		/** Read-only and safe to retry. Return an interaction to ask the person, or a result to finish without asking. */
 		prepare: ToolHandler<
 			z.output<Input>,
-			AgentToolInteraction<z.input<Data>> | AgentToolResult<z.output<Output>>,
+			| AgentToolInteraction<z.input<Data>>
+			| AgentToolResult<z.output<Output>>
+			| (Optional extends true ? AgentToolProceed : never),
 			AgentToolExecution
 		>;
 	};
-	/** Runs once the person submits, with the saved data and their response. */
+	/** Handles an answer or skipped optional review, and may ask again before writing anything. */
 	handler: (
-		args: Parameters<AgentToolHandler<z.output<Input>, z.output<Output>>>[0] & {
-			data: z.output<Data>;
-			response: z.output<Response>;
-		},
-	) => ServiceResponse<AgentToolResult<z.output<Output>>>;
+		args: Parameters<AgentToolHandler<z.output<Input>, z.output<Output>>>[0] &
+			AgentToolAnswer<Data, Response, Optional>,
+	) => ServiceResponse<
+		AgentToolResult<z.output<Output>> | AgentToolInteraction<z.input<Data>>
+	>;
 };
 
 export type AgentToolPreparation =
 	| ResolvedAgentToolResult<Record<string, JsonValue>>
-	| AgentToolInteraction<Record<string, JsonValue>>;
+	| AgentToolInteraction<Record<string, JsonValue>>
+	| AgentToolProceed;
 
 export type ToolRunResult<Result> =
 	| { type: "success"; data: Result }
@@ -280,7 +311,7 @@ export type McpToolDefinition<Name extends string = string> = Definition<
 export type AgentToolDefinition<Name extends string = string> = Definition<
 	Name,
 	AgentToolExecution,
-	ResolvedAgentToolResult<Record<string, JsonValue>>,
+	AgentToolPreparation,
 	Permission,
 	AgentToolDescription
 > & {
@@ -291,10 +322,16 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly parallelSafe: boolean;
 	readonly requiresConfirmation: boolean;
 	readonly capabilities?: AgentToolCapabilities;
+	readonly available?: (props: AgentToolAvailabilityProps) => boolean;
 	/** Describes a call before it runs. Invalid input, or a tool without `describe`, uses the title. */
 	readonly describe: (input: Record<string, unknown>) => ResolvedAdminCopy;
 	readonly outputVersion?: number;
-	readonly interaction?: { readonly key: string; readonly version: number };
+	readonly interaction?: {
+		readonly key: string;
+		readonly version: number;
+		/** Allows execution without an answer, including in routine runs. */
+		readonly optional: boolean;
+	};
 	readonly [toolDefinitionInternal]: {
 		readonly interaction?: {
 			readonly prepareInput: (

@@ -2,6 +2,8 @@ import type {
 	AgentBuilderChangesData,
 	AgentCoreWidgetKey,
 	AgentFileReadOutput,
+	AgentImageSettings,
+	AgentImageSettingsData,
 	AgentLucidToolName,
 	AgentMediaSelectData,
 	AgentMessage,
@@ -43,6 +45,16 @@ export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
+export const generateImageTool =
+	"media_generate_image" satisfies AgentLucidToolName;
+export const editImageTool = "media_edit_image" satisfies AgentLucidToolName;
+/** Image tools shown as placeholders while running. */
+export const imageTools: ReadonlySet<string> = new Set([
+	generateImageTool,
+	editImageTool,
+]);
+export const imageSettingsWidget =
+	"lucid-image-settings" satisfies AgentCoreWidgetKey;
 /** Tools that change chat references without a references widget: previews show their media in a gallery instead, and removals show nothing. */
 export const referenceTools: ReadonlySet<string> = new Set([
 	"lucid_preview_media",
@@ -58,12 +70,22 @@ export const isWidgetSupported = (
 	widget: Pick<AgentWidgetPart, "key" | "version">,
 ) => !widget.key.startsWith("lucid-") || widget.version === 1;
 
+export const isGeneratingImage = (part: AgentToolPart) =>
+	imageTools.has(part.name) && part.status === "running";
+
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 	part.type === "tool" &&
 	part.name !== askTool &&
 	(part.name !== finishTool || part.status !== "complete") &&
 	part.name !== progressTool;
+
+/** Returns the ratio for sizes such as "1536x1024", defaulting to 1 for automatic or unknown sizes. */
+export const imageSizeRatio = (input: unknown) => {
+	if (!isObjectRecord(input) || typeof input.size !== "string") return 1;
+	const match = /^(\d+)x(\d+)$/.exec(input.size);
+	return match ? Number(match[1]) / Number(match[2]) : 1;
+};
 
 /** The displayed tool status, including recovered failures shown as retried. */
 export type AgentToolDisplayStatus = AgentToolPart["status"] | "retried";
@@ -164,6 +186,31 @@ export const isMediaSelectData = (
 	typeof value.agentKey === "string" &&
 	typeof value.includePersonal === "boolean" &&
 	typeof value.upload === "boolean";
+
+const imageSizes: ReadonlySet<string> = new Set([
+	"auto",
+	"1024x1024",
+	"1536x1024",
+	"1024x1536",
+	"2048x2048",
+	"2048x1152",
+	"3840x2160",
+	"2160x3840",
+] satisfies AgentImageSettings["size"][]);
+
+export const isImageSettingsData = (
+	value: unknown,
+): value is AgentImageSettingsData =>
+	isObjectRecord(value) &&
+	typeof value.instruction === "string" &&
+	typeof value.title === "string" &&
+	(value.alt === null || typeof value.alt === "string") &&
+	(value.guidance === null || typeof value.guidance === "string") &&
+	typeof value.size === "string" &&
+	imageSizes.has(value.size) &&
+	typeof value.quality === "string" &&
+	typeof value.outputFormat === "string" &&
+	(value.editMediaId === null || typeof value.editMediaId === "number");
 
 /** Screen calls come from the server, so only the parts the session routes on are checked. */
 export const isScreenCallData = (value: unknown): value is AgentScreenCall =>

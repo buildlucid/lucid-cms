@@ -44,6 +44,8 @@ const createUploadController = factory.createHandlers(
 			width: body.width,
 			height: body.height,
 			posterId: body.posterId,
+			origin: body.origin,
+			aiGenerationRequestId: body.aiGenerationRequestId,
 			user: c.get("auth"),
 		});
 		if (media.error) throw new LucidAPIError(media.error);

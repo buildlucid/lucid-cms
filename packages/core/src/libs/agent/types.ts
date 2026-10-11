@@ -231,6 +231,8 @@ export type AgentFeatures = {
 		analyze: boolean;
 		/** Register Lucid's text file reader. Disable when providing your own. */
 		readFile: boolean;
+		/** Registers image tools requiring the `imageGeneration` AI feature and image generation permission, plus composer generation when `upload` is on. */
+		generateImage: boolean;
 	};
 	documents: {
 		/** Let people select CMS documents in the composer. */
@@ -240,7 +242,7 @@ export type AgentFeatures = {
 		/** Let people add requests to a message, eg. selected ones from the requests list. */
 		attach: boolean;
 	};
-	/** Enables tools to read and edit the person's open document builder, including unsaved content, with changes remaining unsaved until the person saves them. */
+	/** Offers builder tools on document screens, including unsaved content, and leaves edits unsaved for the person to review. */
 	builder: {
 		/** Register lucid_builder_read and lucid_builder_focus. */
 		read: boolean;

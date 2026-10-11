@@ -11,8 +11,11 @@ import handleProtectedResourceUnauthorized from "../../connection/helpers/handle
 import getAccessToken from "../../connection/token-manager.js";
 import trackPaidRequest from "./track-paid-request.js";
 
-/** The same UUID for every attempt at one tool call, so a replay returns the first result instead of charging again. */
-const requestIdFor = (featureKey: AiUsageFeatureKey, operationId: string) => {
+/** Derives a stable request and usage ID so retries reuse the result without another charge. */
+export const requestIdFor = (
+	featureKey: AiUsageFeatureKey,
+	operationId: string,
+) => {
 	const hash = createHash("sha256")
 		.update(`lucid-${featureKey}:${operationId}`)
 		.digest("hex");

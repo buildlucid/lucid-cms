@@ -4,7 +4,9 @@ import type {
 	AgentBuilderTarget,
 	AgentScreen,
 	AgentScreenResponse,
+	Refs,
 } from "../types/response.js";
+import { isJsonObject } from "../utils/helpers/is-json-object.js";
 import { brickInputSchema } from "./collection-bricks.js";
 import { fieldInputSchema } from "./collection-fields.js";
 
@@ -18,17 +20,20 @@ const screenDetails = {
 /** A list's applied filter preset, labelled like its name. */
 const screenFilter = z.string().trim().max(screenLabelLength).nullable();
 
+/** A document open in the builder, which the builder tools work on. */
+const documentScreenSchema = z
+	.object({
+		type: z.literal("document"),
+		...screenDetails,
+		collectionKey: z.string().min(1),
+		documentId: z.number().int().positive().nullable(),
+		requestId: z.number().int().positive().nullable(),
+	})
+	.strict();
+
 /** The admin screen a message was sent from. */
 export const agentScreenSchema = z.discriminatedUnion("type", [
-	z
-		.object({
-			type: z.literal("document"),
-			...screenDetails,
-			collectionKey: z.string().min(1),
-			documentId: z.number().int().positive().nullable(),
-			requestId: z.number().int().positive().nullable(),
-		})
-		.strict(),
+	documentScreenSchema,
 	z
 		.object({
 			type: z.literal("request"),
@@ -113,6 +118,32 @@ export const agentBuilderChangeSchema = z.object({
 		z.object({ path: z.array(z.string()), locales: z.array(z.string()) }),
 	),
 }) satisfies z.ZodType<AgentBuilderChange>;
+
+const agentBuilderContentChangesSchema = agentBuilderContentSchema.extend({
+	removed: z.array(z.string()),
+	order: z.array(z.string()).nullable(),
+});
+
+/** Saved `lucid-screen` requests for the browser to read, update, or focus the builder. */
+export const agentScreenCallSchema = z.discriminatedUnion("action", [
+	z.object({ action: z.literal("read"), screen: agentScreenSchema }),
+	z.object({
+		action: z.literal("update"),
+		screen: documentScreenSchema,
+		revision: z.number().int().nonnegative(),
+		versionId: z.number().int().positive().nullable(),
+		content: agentBuilderContentChangesSchema,
+		//* Database-resolved refs only need JSON shape validation.
+		refs: z.custom<Refs>(isJsonObject),
+		changes: z.array(agentBuilderChangeSchema),
+		validationErrors: z.array(z.string()),
+	}),
+	z.object({
+		action: z.literal("focus"),
+		screen: documentScreenSchema,
+		target: agentBuilderTargetSchema,
+	}),
+]);
 
 /** Defines screen tool responses whose document content is checked again during conversion. */
 export const agentScreenResponseSchema = z.discriminatedUnion("status", [

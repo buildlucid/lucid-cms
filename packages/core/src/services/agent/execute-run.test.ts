@@ -213,6 +213,131 @@ const selectionWriteTool = defineAgentTool({
 	...selectionOptions,
 	name: "test_select_write",
 });
+/** Returns a second interaction before completing. */
+const stepHandler = vi.fn(
+	async ({ data, response }: { data: { step: number }; response: unknown }) =>
+		data.step === 1
+			? {
+					error: undefined,
+					data: {
+						interaction: {
+							title: "Second question",
+							placement: "inline" as const,
+							data: { step: 2 },
+						},
+					},
+				}
+			: {
+					error: undefined,
+					data: {
+						output: { answer: response },
+						summary: "Finished both questions.",
+					},
+				},
+);
+const stepOptions = {
+	description: "Asks two questions",
+	input: z.object({}),
+	output: z.object({ answer: z.unknown() }),
+	permissions: [],
+	interaction: {
+		key: "test-steps",
+		version: 1,
+		data: z.object({ step: z.number() }),
+		response: () => z.object({ value: z.string() }),
+		prepare: async () => ({
+			error: undefined,
+			data: {
+				interaction: {
+					title: "First question",
+					placement: "inline" as const,
+					data: { step: 1 },
+				},
+			},
+		}),
+	},
+	handler: ({
+		data,
+		response,
+	}: {
+		data: { step: number };
+		response: { value: string };
+	}) => stepHandler({ data, response }),
+};
+const stepTool = defineAgentTool({
+	...stepOptions,
+	name: "test_steps",
+	readOnly: true,
+});
+/** Requires both responses before writing. */
+const stepWriteTool = defineAgentTool({
+	...stepOptions,
+	name: "test_step_write",
+});
+const optionalHandler = vi.fn(
+	async ({ response }: { response: { value: string } | undefined }) => ({
+		error: undefined,
+		data: {
+			output: { value: response?.value ?? "default" },
+			summary: "Finished the optional step.",
+		},
+	}),
+);
+const optionalTool = defineAgentTool({
+	name: "test_optional",
+	description: "Asks only when told to",
+	input: z.object({ ask: z.boolean() }),
+	output: z.object({ value: z.string() }),
+	permissions: [],
+	interaction: {
+		key: "test-optional",
+		version: 1,
+		data: z.object({}),
+		response: () => z.object({ value: z.string() }),
+		optional: true,
+		prepare: async ({ input }) => ({
+			error: undefined,
+			data: input.ask
+				? {
+						interaction: {
+							title: "Pick a value",
+							placement: "inline" as const,
+							data: {},
+						},
+					}
+				: { proceed: true as const },
+		}),
+	},
+	handler: ({ response }) => optionalHandler({ response }),
+});
+const screenHandler = vi.fn(async () => ({
+	error: undefined,
+	data: { output: { done: true }, summary: "Changed the open document." },
+}));
+const screenTool = defineAgentTool({
+	name: "test_screen",
+	description: "Changes the open screen",
+	input: z.object({}),
+	output: z.object({ done: z.boolean() }),
+	permissions: [],
+	interaction: {
+		key: constants.agent.widgets.screen,
+		version: 1,
+		data: z.object({ action: z.literal("read") }),
+		response: () => z.object({ status: z.literal("done") }),
+		prepare: async () => ({
+			error: undefined,
+			data: {
+				interaction: {
+					title: "Read the screen",
+					placement: "composer" as const,
+					data: { action: "read" as const },
+				},
+			},
+		}),
+	},
+	handler: screenHandler,
+});
 const confirmationTool = defineAgentTool({
 	name: "test_confirmation",
 	title: "save API note",
@@ -240,6 +365,10 @@ const testAgent = defineAgent({
 		selectionTool,
 		selectionWriteTool,
 		restrictedWriteTool,
+		stepTool,
+		stepWriteTool,
+		optionalTool,
+		screenTool,
 	],
 });
 //* its own agent, so web and analysis tool descriptions leave the compaction tests' token budgets alone
@@ -4229,4 +4358,323 @@ test("retrying a failed chat answers again without adding a message", async () =
 			})
 		).error?.status,
 	).toBe(409);
+});
+
+describe("interactive tools", () => {
+	test("a handler can ask again, and each question is saved before the tool finishes", async () => {
+		const prepared = await prepare();
+		callTool({ id: "steps", name: stepTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		expect(
+			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget.data,
+		).toEqual({ step: 1 });
+
+		const first = await interactionId(prepared.conversationId);
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: first,
+					action: "submit",
+					response: { value: "one" },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "waiting" } });
+		expect(
+			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget,
+		).toMatchObject({
+			key: stepTool.interaction?.key,
+			data: { step: 2 },
+			interaction: { title: "Second question", toolCallId: "steps" },
+		});
+
+		const second = await interactionId(prepared.conversationId);
+		expect(second).not.toBe(first);
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: second,
+					action: "submit",
+					response: { value: "two" },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(stepHandler).toHaveBeenCalledTimes(2);
+
+		const parts = await partsOf(prepared.conversationId);
+		expect(
+			parts?.filter(
+				(part) => part.type === "widget" && part.key === "test-steps",
+			),
+		).toHaveLength(2);
+		expect(parts).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "steps",
+				status: "complete",
+				output: { answer: { value: "two" } },
+			}),
+		);
+	});
+
+	test("a screen tool confirms on its own first, and its answered screen calls leave the transcript", async () => {
+		const prepared = await prepare({ confirmationMode: "confirm-all" });
+		callTool({ id: "screen", name: screenTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		//* The browser answers automatically, so required confirmation must happen first.
+		expect(
+			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget,
+		).toMatchObject({
+			key: constants.agent.widgets.confirmation,
+			interaction: { confirmation: { toolName: screenTool.name } },
+		});
+
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: {},
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "waiting" } });
+		const screenCall = (await selectRun(prepared.runId))?.checkpoint?.pending
+			?.widget;
+		expect(screenCall).toMatchObject({
+			key: constants.agent.widgets.screen,
+			data: { action: "read" },
+		});
+		expect(screenCall?.interaction.confirmation).toBeUndefined();
+		expect(screenHandler).not.toHaveBeenCalled();
+
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: { status: "done" },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(screenHandler).toHaveBeenCalledOnce();
+
+		const parts = await partsOf(prepared.conversationId);
+		expect(
+			parts?.filter(
+				(part) =>
+					part.type === "widget" && part.key === constants.agent.widgets.screen,
+			),
+		).toEqual([]);
+		expect(parts).toContainEqual(
+			expect.objectContaining({
+				type: "widget",
+				key: constants.agent.widgets.confirmation,
+			}),
+		);
+		expect(parts).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "screen",
+				status: "complete",
+			}),
+		);
+	});
+
+	test("a write that asks again isn't treated as interrupted when the person answers", async () => {
+		const prepared = await prepare();
+		callTool({ id: "step-write", name: stepWriteTool.name, input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: { value: "one" },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "waiting" } });
+		expect(
+			(await selectRun(prepared.runId))?.checkpoint?.inFlightWrite,
+		).toBeUndefined();
+
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: { value: "two" },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "step-write",
+				status: "complete",
+			}),
+		);
+	});
+
+	test("an optional question is skipped when the tool proceeds, and confirmation is still asked", async () => {
+		const prepared = await prepare({ confirmationMode: "confirm-all" });
+		callTool({
+			id: "optional",
+			name: optionalTool.name,
+			input: { ask: false },
+		});
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		expect(
+			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget.key,
+		).toBe(constants.agent.widgets.confirmation);
+		expect(optionalHandler).not.toHaveBeenCalled();
+
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: {},
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(optionalHandler).toHaveBeenCalledWith({ response: undefined });
+	});
+
+	test("routines never stop for an optional question", async () => {
+		optionalHandler.mockClear();
+		const routine = await createRoutine(context, {
+			agentKey: testAgent.key,
+			userId,
+			name: "Optional question",
+			instructions: "Pick a value",
+			cron: "0 9 * * 1",
+			timezone: "UTC",
+			enabled: false,
+		});
+		if (routine.error) throw routine.error;
+		const prepared = await prepare({
+			routineId: routine.data.id,
+			confirmationMode: "automatic",
+		});
+		callTool({ id: "optional", name: optionalTool.name, input: { ask: true } });
+		finishRun({ outcome: "done", summary: "Done" });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(optionalHandler).toHaveBeenCalledWith({ response: undefined });
+	});
+
+	test("a failed run marks its unfinished calls failed instead of leaving them waiting", async () => {
+		const prepared = await prepare();
+		callTool({ id: "step-write", name: stepWriteTool.name, input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		//* Simulate the in-flight write left by an interrupted run.
+		const Runs = new AgentRunsRepository(context.db);
+		const run = await selectRun(prepared.runId);
+		assert(run?.checkpoint);
+		await Runs.updateSingle({
+			where: [{ key: "id", operator: "=", value: prepared.runId }],
+			data: {
+				checkpoint: {
+					...run.checkpoint,
+					pending: undefined,
+					inFlightWrite: "step-write",
+				},
+				status: "queued",
+			},
+		});
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "failed" },
+		});
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "step-write",
+				status: "failed",
+				output: {
+					error: context.translate("server:agent.run.write.interrupted"),
+				},
+			}),
+		);
+	});
+
+	test("a cancelled screen call leaves the reply and tells the model the screen closed", async () => {
+		const prepared = await prepare();
+		callTool({ id: "screen-cancel", name: screenTool.name, input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "cancel",
+					response: {},
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		const parts = await partsOf(prepared.conversationId);
+		expect(
+			parts?.filter(
+				(part) =>
+					part.type === "widget" && part.key === constants.agent.widgets.screen,
+			),
+		).toEqual([]);
+		expect(parts).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "screen-cancel",
+				status: "failed",
+				output: {
+					error: context.translate("server:agent.screen.unavailable.closed"),
+				},
+			}),
+		);
+	});
+
+	test("a write waiting on a follow-up question saves as running", async () => {
+		const prepared = await prepare();
+		callTool({ id: "step-running", name: stepWriteTool.name, input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		await executeRun(context, {
+			runId: prepared.runId,
+			answer: {
+				interactionId: await interactionId(prepared.conversationId),
+				action: "submit",
+				response: { value: "one" },
+				userId,
+			},
+		});
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "step-running",
+				status: "running",
+			}),
+		);
+	});
 });

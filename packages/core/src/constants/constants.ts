@@ -231,6 +231,8 @@ export default Object.freeze({
 		/** Lucid's widgets, with reserved interaction keys available only to the core tools listed in `tools`. */
 		widgets: {
 			previewMedia: "lucid-media-preview" satisfies AgentCoreWidgetKey,
+			mediaSelect: "lucid-media-select" satisfies AgentCoreWidgetKey,
+			imageSettings: "lucid-image-settings" satisfies AgentCoreWidgetKey,
 			question: "lucid-question" satisfies AgentCoreWidgetKey,
 			/** Asks the open admin screen to answer a builder tool without showing a widget. */
 			screen: "lucid-screen" satisfies AgentCoreWidgetKey,
@@ -242,10 +244,15 @@ export default Object.freeze({
 			confirmationBatch:
 				"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey,
 			reservedPrefix: "lucid-",
-			/** Interaction keys for core tools, by tool name. */
+			/** Reserved interaction and result widget keys allowed for each core tool. */
 			tools: {
-				media_select: "lucid-media-select",
-			} satisfies Partial<Record<AgentLucidToolName, AgentCoreWidgetKey>>,
+				media_select: ["lucid-media-select"],
+				media_generate_image: ["lucid-image-settings", "lucid-media-preview"],
+				media_edit_image: ["lucid-image-settings", "lucid-media-preview"],
+				lucid_builder_read: ["lucid-screen"],
+				lucid_builder_update: ["lucid-screen", "lucid-builder-changes"],
+				lucid_builder_focus: ["lucid-screen"],
+			} satisfies Partial<Record<AgentLucidToolName, AgentCoreWidgetKey[]>>,
 		},
 		runStatuses: {
 			active: ["queued", "running", "waiting", "interrupted"],

@@ -77,6 +77,21 @@ export const cmsAiGenerateAcceptedDataSchema = z
 	})
 	.strict();
 
+/** Stored image metadata returned by the Lucid service. */
+export const cmsAiImageOutputSchema = z
+	.object({
+		id: z.string(),
+		url: z.string(),
+		storageKey: z.string(),
+		byteSize: z.number().int().nonnegative(),
+		mimeType: z.string(),
+		extension: z.string(),
+		size: z.string(),
+		quality: z.string(),
+		outputFormat: z.string(),
+	})
+	.strict();
+
 export const cmsAiGenerateDataSchema = z.union([
 	cmsAiGenerateCompletedDataSchema,
 	cmsAiGenerateAcceptedDataSchema,

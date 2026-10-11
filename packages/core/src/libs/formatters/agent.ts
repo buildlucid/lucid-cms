@@ -67,6 +67,7 @@ const formatDefinitions = (props: {
 					media: {
 						upload: agent.features.media.upload,
 						attach: agent.features.media.attach,
+						generateImage: agent.features.media.generateImage,
 					},
 					documents: { attach: agent.features.documents.attach },
 					requests: { attach: agent.features.requests.attach },
@@ -74,7 +75,7 @@ const formatDefinitions = (props: {
 				},
 				capabilities: summariseCapabilities(
 					getCapabilityProviders({
-						tools: getAvailableTools(agent, grant),
+						tools: getAvailableTools(agent, grant, { config: props.config }),
 					}),
 				),
 				suggestions: canChat
@@ -85,13 +86,17 @@ const formatDefinitions = (props: {
 						}))
 					: [],
 				tools: hasAgentPermission(grant, agent.key)
-					? agent.tools.map((tool) => ({
-							name: tool.name,
-							title: withDefaultMessage(tool.title),
-							requiresConfirmation: tool.requiresConfirmation,
-							interactive: Boolean(tool.interaction),
-							permissions: [...tool.permissions],
-						}))
+					? agent.tools
+							.filter(
+								(tool) => tool.available?.({ config: props.config }) ?? true,
+							)
+							.map((tool) => ({
+								name: tool.name,
+								title: withDefaultMessage(tool.title),
+								requiresConfirmation: tool.requiresConfirmation,
+								interactive: Boolean(tool.interaction),
+								permissions: [...tool.permissions],
+							}))
 					: [],
 			};
 		}),

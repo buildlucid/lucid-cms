@@ -21,6 +21,7 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import useAgentUploads from "@/hooks/useAgentUploads/useAgentUploads";
 import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
+import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
@@ -138,6 +139,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 		onUploaded: (reference) =>
 			setReferences((current) => mergeAgentReferences(current, [reference])),
 	});
+	const imageGeneration = useMediaImageGeneration();
 
 	// ----------------------------------------
 	// Memos
@@ -146,6 +148,14 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			props.agentKey !== undefined &&
 			props.features?.media.upload === true &&
 			!props.disabled,
+	);
+	//* Generated images are personal uploads and require upload access.
+	const canGenerate = createMemo(
+		() =>
+			canUpload() &&
+			props.features?.media.generateImage === true &&
+			imageGeneration.isFeatureEnabled() &&
+			imageGeneration.hasPermission(),
 	);
 	const unsupportedReferences = createMemo(() => {
 		const features = props.features;
@@ -515,6 +525,18 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 						references={references()}
 						disabled={props.disabled || submitting()}
 						onUpload={canUpload() ? () => fileInput?.click() : undefined}
+						onGenerate={
+							canGenerate()
+								? () =>
+										imageGeneration.open({
+											image: () => null,
+											setFile: (file, ai) =>
+												ai
+													? uploads.addGenerated(file, ai)
+													: uploads.add([file]),
+										})
+								: undefined
+						}
 						onSelect={(type, selected) =>
 							setReferences((current) => [
 								...current.filter((reference) => reference.type !== type),

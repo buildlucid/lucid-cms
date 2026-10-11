@@ -18,4 +18,9 @@ export const capabilityInstructions = (
 				)
 			: ["There are no tools that support reading text media."]),
 		"Ensure the MIME type of the media you are trying to infer information on matches what the tools support. Explain in plain English when no tool can read it.",
+		...(providers.imageGeneration.length
+			? [
+					`Create or edit images with ${providers.imageGeneration.join(" or ")} only when the person explicitly asks for an image to be created or changed. Never generate one on your own initiative, eg. to fill an empty image field; suggest it instead. A new image needs only a text instruction. When the image is for a document or field, save it to the library and set it in that field in the same reply.`,
+				]
+			: ["There are no tools that generate images."]),
 	].join("\n");

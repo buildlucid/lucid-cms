@@ -23,6 +23,7 @@ const getCmsAiRequest: ServiceFn<
 			retries: 0,
 			method: "GET",
 			accessToken: props.accessToken,
+			signal: props.signal,
 		},
 	);
 	if (result.error) return result;

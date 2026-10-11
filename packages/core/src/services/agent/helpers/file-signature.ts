@@ -1,4 +1,4 @@
-import type { MediaMimeType } from "../../../../libs/lucid-remote/schema/media.js";
+import type { MediaMimeType } from "../../../libs/lucid-remote/schema/media.js";
 
 const startsWith = (bytes: Buffer, text: string, offset = 0) =>
 	bytes.toString("latin1", offset, offset + text.length) === text;
@@ -30,7 +30,7 @@ const signatures: Record<MediaMimeType, (bytes: Buffer) => boolean> = {
 		startsWith(bytes, "\x00\x00\x01\xb3"),
 };
 
-/** Whether a file's leading bytes match its stored type, so a mislabelled file is never sent for analysis. */
+/** Checks whether the file header matches its MIME type. */
 const hasFileSignature = (bytes: Buffer, mimeType: MediaMimeType) =>
 	signatures[mimeType](bytes);
 

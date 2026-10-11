@@ -1,5 +1,8 @@
-import { expect, test } from "vitest";
+import { beforeAll, expect, test } from "vitest";
 import z from "zod";
+import type { ResolvedLucidConfig } from "../../types/config.js";
+import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import { Permissions } from "../permission/definitions.js";
 import defineAgentTool from "../tools/define-agent-tool.js";
 import { agentTools } from "../tools/lucid-tools.js";
 import {
@@ -16,6 +19,11 @@ const tools = defineAgent({
 	description: "Test",
 	tools: [agentTools.read()],
 }).tools;
+let config: ResolvedLucidConfig;
+
+beforeAll(async () => {
+	config = await getTestConfig().getConfig();
+});
 
 test("combines tool capabilities into what an agent can do", () => {
 	expect(
@@ -37,6 +45,7 @@ test("combines tool capabilities into what an agent can do", () => {
 		},
 		webSearch: true,
 		webRead: true,
+		imageGeneration: true,
 	});
 });
 
@@ -52,12 +61,40 @@ test("analysis needs an analysis tool but no library permissions", () => {
 		fileRead: null,
 		webSearch: false,
 		webRead: false,
+		imageGeneration: false,
 	});
 	expect(
 		getCapabilityProviders({
-			tools: getAvailableTools({ tools }, noPermissions),
+			tools: getAvailableTools({ tools }, noPermissions, { config }),
 		}).mediaAnalysis,
 	).toHaveLength(1);
+});
+
+test("image generation needs its permission and the CMS feature, and is hidden without them", () => {
+	const generate = {
+		superAdmin: false,
+		permissions: [Permissions.AiImageGenerate],
+	};
+	const providers = (grant: typeof generate, enabled = true) =>
+		getCapabilityProviders({
+			tools: getAvailableTools({ tools }, grant, {
+				config: {
+					...config,
+					ai: {
+						...config.ai,
+						features: { ...config.ai.features, imageGeneration: enabled },
+					},
+				},
+			}),
+		});
+
+	expect(providers(generate).imageGeneration).toEqual([
+		"media_generate_image",
+		"media_edit_image",
+	]);
+	expect(providers(noPermissions).imageGeneration).toEqual([]);
+	expect(providers(generate, false).imageGeneration).toEqual([]);
+	expect(summariseCapabilities(providers(generate)).imageGeneration).toBe(true);
 });
 
 test("custom providers report support with Lucid's corresponding tools disabled", () => {
@@ -92,7 +129,7 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 	expect(
 		summariseCapabilities(
 			getCapabilityProviders({
-				tools: getAvailableTools(agent, noPermissions),
+				tools: getAvailableTools(agent, noPermissions, { config }),
 			}),
 		),
 	).toEqual({
@@ -100,5 +137,6 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 		fileRead: { mimeTypes: ["text/plain"] },
 		webSearch: true,
 		webRead: true,
+		imageGeneration: false,
 	});
 });

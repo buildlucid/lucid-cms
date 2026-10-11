@@ -1,11 +1,11 @@
 import type z from "zod";
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import describeErrorDetails from "../../../../libs/tools/describe-error-details.js";
+import type { AgentToolExecution } from "../../../../libs/tools/types.js";
 import type { agentBuilderContentSchema } from "../../../../schemas/agent-screen.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import checkValidateBricksFields from "../../../documents-bricks/checks/check-validate-bricks-fields.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
-import type { RunnerToolCall } from "./types.js";
 
 /**
  * Returns builder validation errors as shown on save, identifying bricks by ref or by key for fixed bricks.
@@ -15,22 +15,19 @@ import type { RunnerToolCall } from "./types.js";
 const builderValidation = async (
 	context: ServiceContext,
 	props: {
-		call: RunnerToolCall;
+		execution: AgentToolExecution;
 		collection: CollectionBuilder;
 		content: z.output<typeof agentBuilderContentSchema>;
 		documentId: number | null;
 		versionId: number | null;
 	},
 ): Promise<string[]> => {
+	const { run } = props.execution;
 	const user =
-		props.call.run.user_id === null
+		run.userId === null
 			? undefined
 			: await resolveActorUser(context, {
-					actor: {
-						kind: "user",
-						userId: props.call.run.user_id,
-						agentRunId: props.call.run.id,
-					},
+					actor: { kind: "user", userId: run.userId, agentRunId: run.id },
 				});
 
 	const checked = await checkValidateBricksFields(context, {

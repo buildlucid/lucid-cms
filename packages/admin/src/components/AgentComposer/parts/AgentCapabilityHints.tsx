@@ -1,7 +1,12 @@
 import { Tooltip } from "@kobalte/core";
 import type { AgentCapabilities } from "@types";
 import classnames from "classnames";
-import { TbOutlineEye, TbOutlineEyeOff, TbOutlineWorld } from "solid-icons/tb";
+import {
+	TbOutlineEye,
+	TbOutlineEyeOff,
+	TbOutlinePhotoAi,
+	TbOutlineWorld,
+} from "solid-icons/tb";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import T from "@/translations";
 import {
@@ -46,10 +51,7 @@ const CapabilityHint: Component<{
 	);
 };
 
-/**
- * What the agent can do beyond the CMS: open attached files and use the web.
- * Custom tools light these up through their `capabilities`.
- */
+/** Shows capabilities declared by the agent's tools. */
 const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 	props,
 ) => {
@@ -104,6 +106,20 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 						web() === undefined
 							? "agent.capabilities.web.none.description"
 							: "agent.capabilities.web.description",
+					)}
+				/>
+				<CapabilityHint
+					active={props.capabilities?.imageGeneration === true}
+					icon={<TbOutlinePhotoAi size={11} />}
+					title={T()(
+						props.capabilities?.imageGeneration
+							? "agent.capabilities.image"
+							: "agent.capabilities.image.none",
+					)}
+					description={T()(
+						props.capabilities?.imageGeneration
+							? "agent.capabilities.image.description"
+							: "agent.capabilities.image.none.description",
 					)}
 				/>
 			</div>

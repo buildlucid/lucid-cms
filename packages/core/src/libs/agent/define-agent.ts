@@ -1,4 +1,9 @@
 import { analyzeMediaAgentTool } from "../../services/agent/tools/analyze-media/index.js";
+import { builderFocusAgentTool } from "../../services/agent/tools/builder-focus/index.js";
+import { builderReadAgentTool } from "../../services/agent/tools/builder-read/index.js";
+import { builderUpdateAgentTool } from "../../services/agent/tools/builder-update/index.js";
+import { editImageAgentTool } from "../../services/agent/tools/edit-image/index.js";
+import { generateImageAgentTool } from "../../services/agent/tools/generate-image/index.js";
 import { readFileAgentTool } from "../../services/agent/tools/read-file/index.js";
 import { addMediaToLibraryAgentTool } from "../../services/media/tools/add-to-library/index.js";
 import { resolveWebToolOptions } from "../../services/web/helpers/web-tool-options.js";
@@ -35,6 +40,7 @@ const defineAgent = <const Key extends string>(
 			attach: options.features?.media?.attach ?? true,
 			analyze: options.features?.media?.analyze ?? true,
 			readFile: options.features?.media?.readFile ?? true,
+			generateImage: options.features?.media?.generateImage ?? true,
 		},
 		documents: { attach: options.features?.documents?.attach ?? true },
 		requests: { attach: options.features?.requests?.attach ?? true },
@@ -64,6 +70,9 @@ const defineAgent = <const Key extends string>(
 		tools: [
 			...(features.media.analyze ? [analyzeMediaAgentTool()] : []),
 			...(features.media.readFile ? [readFileAgentTool()] : []),
+			...(features.media.generateImage
+				? [generateImageAgentTool(), editImageAgentTool()]
+				: []),
 			...(features.web.search
 				? [
 						webSearchAgentTool({
@@ -79,6 +88,10 @@ const defineAgent = <const Key extends string>(
 					]
 				: []),
 			...(features.media.upload ? [addMediaToLibraryAgentTool()] : []),
+			...(features.builder.read
+				? [builderReadAgentTool(), builderFocusAgentTool()]
+				: []),
+			...(features.builder.edit ? [builderUpdateAgentTool()] : []),
 			...(options.tools?.flat() ?? []),
 		],
 		skills: options.skills ?? [],

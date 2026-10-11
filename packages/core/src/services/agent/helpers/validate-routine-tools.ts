@@ -18,7 +18,9 @@ const validateRoutineTools: ServiceFn<
 	});
 	if (access.error) return access;
 
-	const tools = getAvailableTools(access.data.agent, access.data.authority);
+	const tools = getAvailableTools(access.data.agent, access.data.authority, {
+		config: context.config,
+	});
 	if (names.some((name) => !tools.some((tool) => tool.name === name))) {
 		return {
 			data: undefined,

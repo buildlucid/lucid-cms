@@ -51,6 +51,7 @@ const executeReadBatch: ServiceFn<
 			userId: run.user_id,
 			agentKey: run.agent_key,
 		},
+		screen: checkpoint.screen,
 	});
 
 	const first = batch[0];
@@ -77,13 +78,17 @@ const executeReadBatch: ServiceFn<
 			return toolFailure(context.translate("server:agent.tool.unavailable"));
 		}
 
-		return invokeAgentTool(context, {
+		const outcome = await invokeAgentTool(context, {
 			call,
 			tool,
 			execution: executionFor(call),
 			messageId: checkpoint.messageId,
 			emit: session.emit,
 		});
+		//* Parallel read batches cannot pause for interactions.
+		return outcome.kind === "result"
+			? outcome
+			: toolFailure(context.translate("server:agent.tool.unavailable"));
 	};
 
 	//* reads run together, so each records the references linked since the batch started that the reply does not show yet

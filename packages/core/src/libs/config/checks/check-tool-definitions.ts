@@ -18,12 +18,12 @@ const agentToolCapabilitiesSchema = z
 		fileRead: mimeCapabilitySchema.optional(),
 		webSearch: z.boolean().optional(),
 		webRead: z.boolean().optional(),
+		imageGeneration: z.boolean().optional(),
 	})
 	.strict()
 	.optional();
 
-//* core tools may use their own reserved interaction key, so the admin renders Lucid's widget
-const coreToolWidgets: ReadonlyMap<string, string> = new Map(
+const coreToolWidgets: ReadonlyMap<string, readonly string[]> = new Map(
 	Object.entries(constants.agent.widgets.tools),
 );
 
@@ -81,7 +81,7 @@ const checkTool = (
 				(tool.interaction.key.startsWith(
 					constants.agent.widgets.reservedPrefix,
 				) &&
-					coreToolWidgets.get(tool.name) !== tool.interaction.key) ||
+					!coreToolWidgets.get(tool.name)?.includes(tool.interaction.key)) ||
 				!Number.isInteger(tool.interaction.version) ||
 				tool.interaction.version < 1)
 		) {

@@ -2,10 +2,13 @@ import classnames from "classnames";
 import type { Component } from "solid-js";
 import T from "@/translations";
 
-export type SpinnerSize = "sm" | "md" | "lg";
+export type SpinnerSize = "xs" | "sm" | "md" | "lg";
 
 export interface SpinnerProps {
-	/** @default "md" */
+	/**
+	 * `xs` matches small transcript icons.
+	 * @default "md"
+	 */
 	size?: SpinnerSize;
 	/**
 	 * `secondary` sits on secondary surfaces, such as a secondary button, with a rail tinted from its text colour.
@@ -38,6 +41,7 @@ const Spinner: Component<SpinnerProps> = (props) => {
 					"text-border fill-muted": props.variant === "subtle",
 					"text-secondary-foreground/25 fill-secondary-foreground":
 						props.variant === "secondary",
+					"size-2.5": props.size === "xs",
 					"w-4 h-4": props.size === "sm",
 					"w-6 h-6": props.size === undefined || props.size === "md",
 					"w-8 h-8": props.size === "lg",

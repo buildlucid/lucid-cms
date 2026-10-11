@@ -4,6 +4,7 @@ import {
 	TbOutlineArrowUpRight,
 	TbOutlineBan,
 	TbOutlineClock,
+	TbOutlinePhotoAi,
 	TbOutlineRefresh,
 	TbOutlineSearch,
 	TbOutlineTool,
@@ -16,6 +17,7 @@ import T, { translateAdminCopy } from "@/translations";
 import { agentChangesHref } from "@/utils/agent-references";
 import {
 	type AgentToolPart,
+	imageTools,
 	toolDisplayStatus,
 	webFetchTool,
 	webSearchTool,
@@ -52,7 +54,7 @@ export const AgentToolIcon: Component<{
 					<TbOutlineClock size={10} />
 				</Match>
 				<Match when={props.part.status === "running"}>
-					<Spinner size="sm" variant="subtle" />
+					<Spinner size="xs" variant="subtle" />
 				</Match>
 				<Match when={props.part.status === "complete"}>
 					<Switch fallback={<TbOutlineTool size={10} />}>
@@ -61,6 +63,9 @@ export const AgentToolIcon: Component<{
 						</Match>
 						<Match when={props.part.name === webFetchTool}>
 							<TbOutlineWorld size={10} />
+						</Match>
+						<Match when={imageTools.has(props.part.name)}>
+							<TbOutlinePhotoAi size={10} />
 						</Match>
 					</Switch>
 				</Match>

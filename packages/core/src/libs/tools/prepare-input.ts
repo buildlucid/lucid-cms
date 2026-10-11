@@ -21,12 +21,17 @@ type ResultCheck<Result, Checked> = (
 	context: ServiceContext,
 ) => Promise<ToolRunResult<Checked>>;
 
+const coreToolWidgets: ReadonlyMap<string, readonly string[]> = new Map(
+	Object.entries(constants.agent.widgets.tools),
+);
+
 export const checkToolResult =
 	(tool: { name: string; output: z.ZodObject }) =>
 	async <Result extends AgentToolResult<unknown> | McpToolResult<unknown>>(
 		result: Result,
 		context: ServiceContext,
 	): Promise<ToolRunResult<Result & { output: Record<string, JsonValue> }>> => {
+		const reservedKeys = coreToolWidgets.get(tool.name) ?? [];
 		const output = await tool.output.safeParseAsync(result.output);
 		if (!output.success || !isJsonObject(output.data)) {
 			logger.error({
@@ -47,7 +52,8 @@ export const checkToolResult =
 			result.widgets?.some(
 				(widget) =>
 					!widget.key ||
-					widget.key.startsWith(constants.agent.widgets.reservedPrefix) ||
+					(widget.key.startsWith(constants.agent.widgets.reservedPrefix) &&
+						!reservedKeys.includes(widget.key)) ||
 					!Number.isInteger(widget.version) ||
 					widget.version < 1 ||
 					!isJsonObject(widget.data),

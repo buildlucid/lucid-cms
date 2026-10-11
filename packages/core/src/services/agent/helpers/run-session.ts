@@ -3,6 +3,8 @@ import constants from "../../../constants/constants.js";
 import {
 	type ContextSetup,
 	conversationContext,
+	isToolCallComplete,
+	settleToolCall,
 } from "../../../libs/agent/context.js";
 import { inputMessageParts } from "../../../libs/agent/input.js";
 import { isTerminalRunStatus } from "../../../libs/agent/run-status.js";
@@ -318,6 +320,24 @@ const openRunSession = async (
 					}
 				}
 
+				//* Settle unfinished calls with the run error so the UI stops waiting.
+				const abandoned =
+					status === "failed"
+						? checkpoint.calls
+								.filter((call) => !isToolCallComplete(checkpoint, call.id))
+								.map((call) =>
+									settleToolCall(checkpoint, call, {
+										status: "failed",
+										output: {
+											error:
+												errorMessage ??
+												context.translate("server:agent.tool.unavailable"),
+										},
+									}),
+								)
+						: [];
+				if (abandoned.length) checkpoint.pending = undefined;
+
 				const finishedAt = new Date().toISOString();
 				const routineResult =
 					status === "failed"
@@ -327,6 +347,12 @@ const openRunSession = async (
 							: undefined;
 
 				const finishRun = async (writeContext: ServiceContext) => {
+					//* Save the reply before changing run status, while reply writes are still allowed.
+					if (abandoned.length) {
+						const reply = await saveReply(writeContext);
+						if (reply.error) return reply;
+					}
+
 					const saved = await write(
 						status,
 						{
@@ -377,6 +403,13 @@ const openRunSession = async (
 				//* the status, release and hooks commit together, so a run can't end without its hooks
 				const finished = await withTransaction(context, finishRun);
 				if (finished.error) return finished;
+
+				for (const part of abandoned) {
+					await emit({
+						messageId: checkpoint.messageId,
+						...agentFormatter.formatTool({ part }),
+					});
+				}
 
 				if (status === "completed" && run.routine_id && checkpoint.finish) {
 					await emit({

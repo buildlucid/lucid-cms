@@ -16,9 +16,14 @@ test("built-in features are enabled by default and explicit bundles flatten", ()
 	expect(agent.tools.map((tool) => tool.name)).toEqual([
 		"media_analyze",
 		"media_read_file",
+		"media_generate_image",
+		"media_edit_image",
 		"web_search",
 		"web_fetch",
 		"media_add_to_library",
+		"lucid_builder_read",
+		"lucid_builder_focus",
+		"lucid_builder_update",
 		...agentTools.read().map((tool) => tool.name),
 	]);
 	expect(mcpTools.all().map((tool) => tool.name)).toContain("media_preview");
@@ -45,12 +50,39 @@ test("all features can be disabled without registering supporting tools", () => 
 	const agent = defineAgent({
 		...options,
 		features: {
-			media: { upload: false, attach: false, analyze: false, readFile: false },
+			media: {
+				upload: false,
+				attach: false,
+				analyze: false,
+				readFile: false,
+				generateImage: false,
+			},
 			documents: { attach: false },
+			builder: { read: false },
 			web: { search: false, read: false },
 		},
 	});
 	expect(agent.tools).toEqual([]);
+});
+
+test("builder editing needs builder reading, and the builder tools only appear on a document screen", () => {
+	const names = (builder: { read?: boolean; edit?: boolean }) =>
+		defineAgent({ ...options, features: { builder } })
+			.tools.filter((tool) => tool.name.startsWith("lucid_builder_"))
+			.map((tool) => tool.name);
+	expect(names({ edit: false })).toEqual([
+		"lucid_builder_read",
+		"lucid_builder_focus",
+	]);
+	expect(names({ read: false, edit: true })).toEqual([]);
+
+	const [read] = defineAgent(options).tools.filter(
+		(tool) => tool.name === "lucid_builder_read",
+	);
+	const config = {} as never;
+	expect(read?.available?.({ config, screen: "document" })).toBe(true);
+	expect(read?.available?.({ config, screen: "media" })).toBe(false);
+	expect(read?.available?.({ config })).toBe(false);
 });
 
 test("library promotion follows uploads, as personal files only come from them", () => {

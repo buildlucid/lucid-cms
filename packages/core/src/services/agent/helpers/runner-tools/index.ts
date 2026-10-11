@@ -4,9 +4,6 @@ import { describeInputIssues } from "../../../../libs/tools/prepare-input.js";
 import type { AgentRunnerToolName } from "../../../../types/response.js";
 import { toolFailure } from "../tool-outcome.js";
 import ask from "./ask.js";
-import builderFocus from "./builder-focus.js";
-import builderRead from "./builder-read.js";
-import builderUpdate from "./builder-update.js";
 import finish from "./finish.js";
 import history from "./history.js";
 import previewMedia from "./preview-media.js";
@@ -54,18 +51,6 @@ export const runnerToolHandlers: ReadonlyMap<string, RunnerToolHandler> =
 			[runnerTools.history.name]: withInput(runnerTools.history, history),
 			[runnerTools.skill.name]: withInput(runnerTools.skill, skill),
 			[runnerTools.finish.name]: withInput(runnerTools.finish, finish),
-			[runnerTools.builderRead.name]: withInput(
-				runnerTools.builderRead,
-				builderRead,
-			),
-			[runnerTools.builderUpdate.name]: withInput(
-				runnerTools.builderUpdate,
-				builderUpdate,
-			),
-			[runnerTools.builderFocus.name]: withInput(
-				runnerTools.builderFocus,
-				builderFocus,
-			),
 		} satisfies Record<AgentRunnerToolName, RunnerToolHandler>),
 	);
 

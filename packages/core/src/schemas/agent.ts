@@ -491,6 +491,15 @@ export const controllerSchemas = {
 					"A video's poster: another of your uploads, such as a captured frame",
 				example: 42,
 			}),
+			origin: z.enum(["ai_generated", "ai_modified"]).optional().meta({
+				description:
+					"How the file was made, when it was generated with Lucid AI. Requires aiGenerationRequestId.",
+				example: "ai_generated",
+			}),
+			aiGenerationRequestId: z.uuid().optional().meta({
+				description: "The Lucid AI image generation request that made the file",
+				example: "123e4567-e89b-12d3-a456-426614174000",
+			}),
 		}),
 		params: undefined,
 		query: noQuery,

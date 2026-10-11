@@ -2,16 +2,22 @@ import type { AgentCapabilities } from "../../types/response.js";
 import hasPermission, {
 	type PermissionGrant,
 } from "../permission/has-permission.js";
-import type { AgentToolDefinition } from "../tools/types.js";
+import type {
+	AgentToolAvailabilityProps,
+	AgentToolDefinition,
+} from "../tools/types.js";
 import type { AgentDefinition } from "./types.js";
 
-/** The agent's tools the principal holds every permission for. Execution checks permissions again. */
+/** Filters available tools by permission, which execution checks again. */
 export const getAvailableTools = (
 	agent: Pick<AgentDefinition, "tools">,
 	grant: PermissionGrant,
+	availability: AgentToolAvailabilityProps,
 ) =>
-	agent.tools.filter((tool) =>
-		tool.permissions.every((permission) => hasPermission(grant, permission)),
+	agent.tools.filter(
+		(tool) =>
+			(tool.available?.(availability) ?? true) &&
+			tool.permissions.every((permission) => hasPermission(grant, permission)),
 	);
 
 /**
@@ -42,6 +48,9 @@ export const getCapabilityProviders = (props: {
 	webRead: props.tools.flatMap((tool) =>
 		tool.capabilities?.webRead ? [tool.name] : [],
 	),
+	imageGeneration: props.tools.flatMap((tool) =>
+		tool.capabilities?.imageGeneration ? [tool.name] : [],
+	),
 });
 
 export const summariseCapabilities = (
@@ -67,4 +76,5 @@ export const summariseCapabilities = (
 		: null,
 	webSearch: providers.webSearch.length > 0,
 	webRead: providers.webRead.length > 0,
+	imageGeneration: providers.imageGeneration.length > 0,
 });

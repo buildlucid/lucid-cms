@@ -485,16 +485,7 @@ const MediaImageGenerationModal: Component = () => {
 	): Promise<MediaImageGenerateBody["image"]> {
 		if (!currentSource) return undefined;
 
-		if (currentSource.type === "generation" && currentSource.image.url) {
-			return {
-				type: "url",
-				url: currentSource.image.url,
-				detail: "auto",
-				filename: currentSource.image.filename,
-				mimeType: normalizeMimeType(currentSource.image.mimeType),
-			};
-		}
-
+		//* Inline image data lets Lucid read sources served behind CMS authentication.
 		const prepared = await prepareAiImage(currentSource.image, {
 			maxEdge: 1536,
 			quality: 0.9,

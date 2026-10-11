@@ -25,7 +25,7 @@ export const selectMediaAgentTool = () =>
 		permissions: [Permissions.MediaRead],
 		readOnly: true,
 		interaction: {
-			key: constants.agent.widgets.tools.media_select,
+			key: constants.agent.widgets.mediaSelect,
 			version: 1,
 			data: dataSchema,
 			response: responseSchema,

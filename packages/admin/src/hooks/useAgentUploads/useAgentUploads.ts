@@ -1,5 +1,6 @@
 import { type Accessor, createMemo, createSignal, onCleanup } from "solid-js";
 import api from "@/services/api";
+import type { MediaImageGenerationFileMeta } from "@/store/aiModalsStore/aiModalsStore";
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
@@ -11,7 +12,7 @@ import helpers from "@/utils/helpers";
 import { uploadMediaFile } from "@/utils/upload-session";
 import { captureVideoPosterFrame } from "@/utils/video-frame";
 
-/** Uploads files in the background as private personal media outside the library, returning attachment references with video posters when available. */
+/** Uploads private personal media outside the library, preserving video posters and AI provenance. */
 const useAgentUploads = (props: {
 	agentKey: Accessor<string | undefined>;
 	onUploaded: (reference: AgentReferenceItem) => void;
@@ -83,7 +84,11 @@ const useAgentUploads = (props: {
 			return undefined;
 		}
 	};
-	const upload = async (agentKey: string, file: File) => {
+	const upload = async (
+		agentKey: string,
+		file: File,
+		ai?: MediaImageGenerationFileMeta,
+	) => {
 		const id = crypto.randomUUID();
 		const controller = new AbortController();
 		controllers.set(id, controller);
@@ -111,6 +116,7 @@ const useAgentUploads = (props: {
 				key: uploaded.data,
 				fileName: file.name,
 				posterId: await poster,
+				ai,
 				signal: controller.signal,
 			});
 			if (controller.signal.aborted) return;
@@ -140,6 +146,10 @@ const useAgentUploads = (props: {
 			const agentKey = props.agentKey();
 			if (!agentKey) return;
 			for (const file of files) void upload(agentKey, file);
+		},
+		addGenerated: (file: File, ai: MediaImageGenerationFileMeta) => {
+			const agentKey = props.agentKey();
+			if (agentKey) void upload(agentKey, file, ai);
 		},
 		/** Cancels an upload or dismisses a failed one. */
 		remove,

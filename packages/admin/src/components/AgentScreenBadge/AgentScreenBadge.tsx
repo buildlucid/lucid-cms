@@ -74,7 +74,7 @@ const AgentScreenBadge: Component<{
 				class={classnames(
 					"focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
 					props.variant === "pill"
-						? "inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-xs text-subtitle"
+						? "inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border border-border bg-input px-2.5 py-0.5 text-xs text-subtitle"
 						: "flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body",
 					props.class,
 				)}

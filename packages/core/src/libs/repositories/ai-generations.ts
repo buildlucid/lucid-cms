@@ -385,6 +385,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				"agent.compact",
 				"web.search",
 				"web.fetch",
+				"media.image.generate",
 			])
 			.where("feature_version", "=", "v1")
 			.where("status", "=", "pending")

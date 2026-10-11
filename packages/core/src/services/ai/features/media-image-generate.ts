@@ -10,21 +10,12 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
+import {
+	imageGuidanceInstructions,
+	imageGuidanceSchema,
+} from "../helpers/image-guidance.js";
 import storeGeneration from "../storage/store-generation.js";
 import storePendingGeneration from "../storage/store-pending-generation.js";
-
-const imageGuidanceInstructions = {
-	natural:
-		"Create a realistic photograph with natural light, believable texture, accurate perspective, and minimal stylization.",
-	lifestyle:
-		"Create a polished lifestyle image suited to a brand story or magazine article, with a real-world setting, composed framing, and natural lighting.",
-	product:
-		"Create a clean studio product image with crisp detail, controlled lighting, accurate materials, and minimal background distractions.",
-	illustration:
-		"Create a polished non-photographic illustration with clear shapes, cohesive colors, intentional texture, and no photorealistic camera effects.",
-	cinematic:
-		"Create a story-led cinematic image with dramatic composition, atmospheric lighting, depth, and a believable mood.",
-} as const;
 
 const mediaImageGenerate: ServiceFn<
 	[
@@ -69,10 +60,9 @@ const mediaImageGenerate: ServiceFn<
 
 	const input: MediaImageGenerateV1Request["input"] = [];
 	const instruction = props.instruction?.trim();
-	const guidance = props.guidance
-		? imageGuidanceInstructions[
-				props.guidance as keyof typeof imageGuidanceInstructions
-			]
+	const guidanceKey = imageGuidanceSchema.safeParse(props.guidance);
+	const guidance = guidanceKey.success
+		? imageGuidanceInstructions[guidanceKey.data]
 		: undefined;
 
 	if (props.guidance && !guidance) {

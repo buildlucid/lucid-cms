@@ -2,7 +2,9 @@ import type { Agent, AgentReferenceInput, DocumentRef } from "@types";
 import {
 	TbOutlineFileText,
 	TbOutlineGitPullRequest,
+	TbOutlineLibraryPhoto,
 	TbOutlinePhoto,
+	TbOutlinePhotoAi,
 	TbOutlinePlus,
 	TbOutlineUpload,
 } from "solid-icons/tb";
@@ -25,13 +27,15 @@ import {
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import { composerTriggerClasses } from "../AgentComposer";
 
-/** Adds existing media, documents and requests to the message, or uploads new files when `onUpload` is set. */
+/** Adds references, uploads files, or generates images through the provided callbacks. */
 const AgentReferenceMenu: Component<{
 	features?: Agent["features"];
 	references: AgentReferenceItem[];
 	disabled?: boolean;
 	/** Opens the file picker. Uploads are personal, so they don't need media library access. */
 	onUpload?: () => void;
+	/** Opens image generation, attaching the accepted image as a personal upload. */
+	onGenerate?: () => void;
 	onSelect: (
 		type: AgentReferenceInput["type"],
 		references: AgentReferenceItem[],
@@ -111,7 +115,13 @@ const AgentReferenceMenu: Component<{
 	return (
 		<>
 			<Show
-				when={props.onUpload || canMedia() || canDocuments() || canRequests()}
+				when={
+					props.onUpload ||
+					props.onGenerate ||
+					canMedia() ||
+					canDocuments() ||
+					canRequests()
+				}
 			>
 				<Menu.Root placement="top-start">
 					<Menu.Trigger
@@ -123,23 +133,40 @@ const AgentReferenceMenu: Component<{
 						<TbOutlinePlus size={11} />
 					</Menu.Trigger>
 					<Menu.Content>
-						<Show when={props.onUpload}>
-							{(upload) => (
-								<Menu.Item
-									icon={<TbOutlineUpload size={12} />}
-									onSelect={() => upload()()}
-								>
-									{T()("agent.uploads.add")}
-								</Menu.Item>
-							)}
-						</Show>
-						<Show when={canMedia()}>
-							<Menu.Item
+						<Show when={props.onUpload || props.onGenerate || canMedia()}>
+							<Menu.Sub
+								label={T()("agent.references.add.media")}
 								icon={<TbOutlinePhoto size={12} />}
-								onSelect={() => setMediaOpen(true)}
 							>
-								{T()("agent.references.add.media")}
-							</Menu.Item>
+								<Show when={canMedia()}>
+									<Menu.Item
+										icon={<TbOutlineLibraryPhoto size={12} />}
+										onSelect={() => setMediaOpen(true)}
+									>
+										{T()("agent.references.select.media")}
+									</Menu.Item>
+								</Show>
+								<Show when={props.onUpload}>
+									{(upload) => (
+										<Menu.Item
+											icon={<TbOutlineUpload size={12} />}
+											onSelect={() => upload()()}
+										>
+											{T()("agent.uploads.add")}
+										</Menu.Item>
+									)}
+								</Show>
+								<Show when={props.onGenerate}>
+									{(generate) => (
+										<Menu.Item
+											icon={<TbOutlinePhotoAi size={12} />}
+											onSelect={() => generate()()}
+										>
+											{T()("agent.uploads.generate")}
+										</Menu.Item>
+									)}
+								</Show>
+							</Menu.Sub>
 						</Show>
 						<Show when={canDocuments()}>
 							<Menu.Item

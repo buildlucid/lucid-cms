@@ -5,7 +5,11 @@ import {
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
 import { prepareAgentTool } from "../../../libs/tools/execute-tool.js";
-import type { AgentToolExecution } from "../../../libs/tools/types.js";
+import type {
+	AgentToolExecution,
+	AgentToolInteraction,
+} from "../../../libs/tools/types.js";
+import type { JsonValue } from "../../../utils/helpers/is-json-object.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import invokeAgentTool from "./invoke-agent-tool.js";
 import type { RunSession } from "./run-session.js";
@@ -28,6 +32,22 @@ const runToolCall = async (
 	const { run, call, checkpoint, session, setup } = props;
 	const { pending } = checkpoint;
 	const answer = toolInteractionAnswer(checkpoint, call);
+	//* Remove browser-only interactions from the reply once answered.
+	const screenAnswered =
+		answer !== undefined &&
+		pending?.widget.key === constants.agent.widgets.screen;
+	if (screenAnswered) {
+		checkpoint.parts = checkpoint.parts.filter(
+			(part) =>
+				part.type !== "widget" ||
+				part.interaction?.id !== pending.widget.interaction.id,
+		);
+	}
+	if (screenAnswered && answer.action === "cancel") {
+		return toolFailure(
+			context.translate("server:agent.screen.unavailable.closed"),
+		);
+	}
 	//* the model needs to know a refusal was deliberate, so it does not simply try again
 	if (answer?.action === "cancel") {
 		return toolFailure(
@@ -47,6 +67,13 @@ const runToolCall = async (
 	if (!tool) {
 		return toolFailure(context.translate("server:agent.tool.unavailable"));
 	}
+
+	//* Browser-only interactions need separate confirmation when required.
+	const screenTool = tool.interaction?.key === constants.agent.widgets.screen;
+	const interactionAnswered =
+		answer !== undefined &&
+		pending !== undefined &&
+		pending.widget.key === tool.interaction?.key;
 
 	const requiresConfirmation = needsConfirmation(checkpoint, tool);
 	const confirmation = requiresConfirmation
@@ -70,14 +97,20 @@ const runToolCall = async (
 			userId: run.user_id,
 			agentKey: run.agent_key,
 		},
+		screen: checkpoint.screen,
 		interaction:
-			tool.interaction && pending && answer
+			interactionAnswered && answer
 				? { data: pending.widget.data, response: answer.response }
 				: undefined,
 	};
 
-	//* an interactive tool asks once; when confirmation is required, its submission also confirms the call
-	if (tool.interaction && !answer) {
+	//* Routines skip optional interactions and execute with the tool input.
+	const asks =
+		tool.interaction !== undefined &&
+		!interactionAnswered &&
+		!(tool.interaction.optional && props.mode === "routine");
+	let question: AgentToolInteraction<Record<string, JsonValue>> | undefined;
+	if (asks) {
 		const prepared = await prepareAgentTool({
 			context,
 			tool,
@@ -85,36 +118,59 @@ const runToolCall = async (
 			execution,
 		});
 		if (prepared.type !== "success") return failedToolRun(context, prepared);
-		if ("output" in prepared.data) {
-			return toolResult(prepared.data);
-		}
+		if ("output" in prepared.data) return toolResult(prepared.data);
+		if ("interaction" in prepared.data) question = prepared.data;
+	}
 
-		return {
-			kind: "pending",
-			pending: createInteraction({
-				callId: call.id,
-				key: tool.interaction.key,
-				version: tool.interaction.version,
-				confirmation,
-				...prepared.data.interaction,
-			}),
-		};
+	const ask = (request: {
+		key: string;
+		version?: number;
+		confirmation?: typeof confirmation;
+		interaction: AgentToolInteraction<Record<string, JsonValue>>["interaction"];
+	}): ToolOutcome => ({
+		kind: "pending",
+		pending: createInteraction({
+			callId: call.id,
+			key: request.key,
+			version: request.version,
+			confirmation: request.confirmation,
+			...request.interaction,
+		}),
+	});
+
+	//* Visible interactions also confirm the call when required.
+	if (question && tool.interaction && !screenTool) {
+		return ask({
+			key: tool.interaction.key,
+			version: tool.interaction.version,
+			confirmation,
+			interaction: question.interaction,
+		});
 	}
 	if (confirmation && !answer) {
-		return {
-			kind: "pending",
-			pending: createInteraction({
-				callId: call.id,
-				key: constants.agent.widgets.confirmation,
+		return ask({
+			key: constants.agent.widgets.confirmation,
+			confirmation,
+			interaction: {
 				title: context.translate(tool.describe(call.input)),
+				placement: "composer",
 				data: {},
-				confirmation,
-			}),
-		};
+			},
+		});
 	}
-	//* Every write is recorded before execution, including unattended writes.
+	if (question && tool.interaction) {
+		return ask({
+			key: tool.interaction.key,
+			version: tool.interaction.version,
+			interaction: question.interaction,
+		});
+	}
+	//* Persist writes as running before execution so reloads retain their status.
 	if (!tool.readOnly) {
 		checkpoint.inFlightWrite = call.id;
+		for (const part of checkpoint.parts) {
+			if (part.type === "tool" && part.id === call.id) part.status = "running";
+		}
 
 		const saved = await session.save();
 		if (saved.error) {
@@ -124,15 +180,16 @@ const runToolCall = async (
 		}
 	}
 
-	const result = await invokeAgentTool(context, {
+	const outcome = await invokeAgentTool(context, {
 		call,
 		tool,
 		execution,
 		messageId: checkpoint.messageId,
 		emit: session.emit,
 	});
+	//* Handlers must request another interaction before writing anything.
 	if (!tool.readOnly) checkpoint.inFlightWrite = undefined;
-	return result;
+	return outcome;
 };
 
 export default runToolCall;

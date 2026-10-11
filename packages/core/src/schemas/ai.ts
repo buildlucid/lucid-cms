@@ -75,31 +75,33 @@ const mediaImageCustomSizeSchema = z
 		}
 	});
 
+export const mediaImageSizePresetSchema = z.enum([
+	"auto",
+	"1024x1024",
+	"1536x1024",
+	"1024x1536",
+	"2048x2048",
+	"2048x1152",
+	"3840x2160",
+	"2160x3840",
+]);
+export const mediaImageQualitySchema = z.enum([
+	"auto",
+	"low",
+	"medium",
+	"high",
+]);
+export const mediaImageOutputFormatSchema = z.enum(["webp", "png", "jpeg"]);
+
 const mediaImageGenerationSchema = z
 	.object({
 		size: z
-			.union(
-				[
-					z.enum([
-						"auto",
-						"1024x1024",
-						"1536x1024",
-						"1024x1536",
-						"2048x2048",
-						"2048x1152",
-						"3840x2160",
-						"2160x3840",
-					]),
-					mediaImageCustomSizeSchema,
-				],
-				{
-					error:
-						"Image resolution must be a preset or custom width and height.",
-				},
-			)
+			.union([mediaImageSizePresetSchema, mediaImageCustomSizeSchema], {
+				error: "Image resolution must be a preset or custom width and height.",
+			})
 			.default("1024x1024"),
-		quality: z.enum(["auto", "low", "medium", "high"]).default("medium"),
-		outputFormat: z.enum(["webp", "png", "jpeg"]).default("webp"),
+		quality: mediaImageQualitySchema.default("medium"),
+		outputFormat: mediaImageOutputFormatSchema.default("webp"),
 	})
 	.strict()
 	.default({
@@ -581,6 +583,22 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		response: mediaImageGenerateResponseSchema,
+	} satisfies ControllerSchema,
+	mediaImageStream: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z
+			.object({
+				//* Restrict this proxy to generated-image storage keys.
+				key: z
+					.string()
+					.regex(/^generated-images\/[0-9a-f-]{36}\.(webp|png|jpe?g)$/),
+			})
+			.strict(),
+		response: undefined,
 	} satisfies ControllerSchema,
 	mediaImageCompletion: {
 		body: undefined,

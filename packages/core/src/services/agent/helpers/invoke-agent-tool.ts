@@ -1,3 +1,4 @@
+import { createInteraction } from "../../../libs/agent/interactions.js";
 import type { ToolCall } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
@@ -9,12 +10,12 @@ import type { AgentStreamEvent } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import {
 	failedToolRun,
-	type ToolResult,
+	type ToolOutcome,
 	toolFailure,
 	toolResult,
 } from "./tool-outcome.js";
 
-/** Invokes an agent tool without access to mutable runner state. */
+/** Executes a tool without mutable runner state, returning a result or another interaction. */
 const invokeAgentTool = async (
 	context: ServiceContext,
 	props: {
@@ -24,7 +25,7 @@ const invokeAgentTool = async (
 		messageId: string;
 		emit: (event: AgentStreamEvent) => Promise<void>;
 	},
-): Promise<ToolResult> => {
+): Promise<ToolOutcome> => {
 	if (props.execution.signal.aborted) {
 		return toolFailure(context.translate("server:agent.tool.unavailable"));
 	}
@@ -51,9 +52,23 @@ const invokeAgentTool = async (
 		execution: props.execution,
 	});
 
-	return executed.type === "success"
-		? toolResult(executed.data)
-		: failedToolRun(context, executed);
+	if (executed.type !== "success") return failedToolRun(context, executed);
+	if ("output" in executed.data) return toolResult(executed.data);
+
+	const interaction = props.tool.interaction;
+	if (!interaction || !("interaction" in executed.data)) {
+		return toolFailure(context.translate("server:agent.interaction.invalid"));
+	}
+
+	return {
+		kind: "pending",
+		pending: createInteraction({
+			callId: props.call.id,
+			key: interaction.key,
+			version: interaction.version,
+			...executed.data.interaction,
+		}),
+	};
 };
 
 export default invokeAgentTool;

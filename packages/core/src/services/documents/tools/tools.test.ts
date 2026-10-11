@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import defineAgent from "../../../libs/agent/define-agent.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
-import type { Checkpoint } from "../../../libs/agent/types.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
@@ -12,10 +11,17 @@ import { createTranslationStore } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
 import type { ToolkitActor } from "../../../libs/toolkit/types.js";
-import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
+import {
+	executeAgentTool,
+	prepareAgentTool,
+} from "../../../libs/tools/execute-tool.js";
 import { agentTools } from "../../../libs/tools/lucid-tools.js";
-import type { AgentToolDefinition } from "../../../libs/tools/types.js";
+import type {
+	AgentToolDefinition,
+	AgentToolExecution,
+} from "../../../libs/tools/types.js";
 import type { LucidUser } from "../../../types/hono.js";
+import type { AgentScreen } from "../../../types/response.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -23,9 +29,11 @@ import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import insertConversation from "../../agent/helpers/insert-conversation.js";
 import resolveRunSetup from "../../agent/helpers/resolve-run-setup.js";
 import { runnerToolHandlers } from "../../agent/helpers/runner-tools/index.js";
-import type { ToolOutcome } from "../../agent/helpers/tool-outcome.js";
 import list from "../../agent/references/list.js";
 import register from "../../agent/references/register.js";
+import { builderFocusToolName } from "../../agent/tools/builder-focus/constants.js";
+import { builderReadToolName } from "../../agent/tools/builder-read/constants.js";
+import { builderUpdateToolName } from "../../agent/tools/builder-update/constants.js";
 import { outputSchema as describeOutputSchema } from "../../collections/tools/describe/schema.js";
 import checkSaveHold from "../../document-editors/check-save-hold.js";
 import heartbeat from "../../document-editors/heartbeat.js";
@@ -1116,66 +1124,61 @@ test("builder tools read unsaved content from the builder and hand changes back 
 		superAdmin: true,
 		permissions: [],
 	};
-	const checkpoint: Checkpoint = {
-		version: 1,
-		confirmationMode: "automatic",
-		screen: {
-			type: "document",
-			tabId: "tab",
-			label: "Hello",
-			collectionKey: pages.key,
-			documentId,
-			requestId: null,
-		},
-		messages: [],
-		nudges: 0,
-		requestId: randomUUID(),
-		messageId: randomUUID(),
-		parts: [],
-		calls: [],
-		cursor: 0,
-		phase: "tools",
+	const screen: AgentScreen = {
+		type: "document",
+		tabId: "tab",
+		label: "Hello",
+		collectionKey: pages.key,
+		documentId,
+		requestId: null,
 	};
-	/** Calls a builder tool the way the runner does, answering what it waited on with `response`. */
+	const setup = resolveRunSetup(context, {
+		agent,
+		mode: "chat",
+		hasHistory: false,
+		authority,
+		screen,
+	});
+	/** Prepares or resumes builder tools using the runner's interaction flow. */
 	const callBuilderTool = async (
 		name: string,
 		input: Record<string, unknown>,
-		response?: Record<string, unknown>,
-	): Promise<ToolOutcome> => {
-		const handler = runnerToolHandlers.get(name);
-		assert(handler);
-		return handler(context, {
-			call: { id: "call", name, input },
-			run: {
-				id: randomUUID(),
-				conversation_id: conversation.data.id,
-				routine_id: null,
-				user_id: userId,
-				execution_version: 1,
-				agent_key: agent.key,
-				conversation_user_id: userId,
-				conversation_kind: "chat",
-				conversation_routine_id: null,
-			},
-			mode: "chat",
-			checkpoint,
-			authority,
-			setup: resolveRunSetup(context, {
-				agent,
-				mode: "chat",
-				hasHistory: false,
+		answer?: {
+			data: Record<string, unknown>;
+			response: Record<string, unknown>;
+		},
+	) => {
+		const tool = setup.tools.find((tool) => tool.name === name);
+		assert(tool, `${name} is not offered on a document screen`);
+		const args = {
+			context,
+			tool,
+			input,
+			execution: {
 				authority,
-				screen: checkpoint.screen,
-			}),
-			answer: response && { action: "submit", response },
-		});
+				actor: { kind: "user", userId } as const,
+				signal: new AbortController().signal,
+				operationId: randomUUID(),
+				run: {
+					id: randomUUID(),
+					conversationId: conversation.data.id,
+					userId,
+					agentKey: agent.key,
+				},
+				screen,
+				interaction: answer,
+			} satisfies AgentToolExecution,
+		};
+		return answer ? executeAgentTool(args) : prepareAgentTool(args);
 	};
-	/** Waits on the screen call an outcome asks for, as the runner saves it. */
-	const waitOn = (outcome: ToolOutcome) => {
-		assert(outcome.kind === "pending", JSON.stringify(outcome));
-		checkpoint.pending = outcome.pending;
-		checkpoint.parts.push(outcome.pending.widget);
-		return outcome.pending.widget.data;
+	const waitOn = (
+		result: Awaited<ReturnType<typeof callBuilderTool>>,
+	): Record<string, unknown> => {
+		assert(
+			result.type === "success" && "interaction" in result.data,
+			JSON.stringify(result),
+		);
+		return result.data.interaction.data;
 	};
 	const readAnswer = {
 		status: "done",
@@ -1189,31 +1192,44 @@ test("builder tools read unsaved content from the builder and hand changes back 
 		},
 	};
 
-	expect(
-		waitOn(await callBuilderTool(runnerTools.builderRead.name, {})),
-	).toMatchObject({ action: "read", screen: { tabId: "tab" } });
-	const read = await callBuilderTool(
-		runnerTools.builderRead.name,
-		{},
-		readAnswer,
+	expect(setup.tools.map((tool) => tool.name)).toEqual(
+		expect.arrayContaining([
+			builderReadToolName,
+			builderUpdateToolName,
+			builderFocusToolName,
+		]),
 	);
-	assert(read.kind === "result" && !read.failed, JSON.stringify(read));
-	expect(read.output).toMatchObject({
+	const readCall = waitOn(await callBuilderTool(builderReadToolName, {}));
+	expect(readCall).toMatchObject({ action: "read", screen: { tabId: "tab" } });
+	const read = await callBuilderTool(
+		builderReadToolName,
+		{},
+		{ data: readCall, response: readAnswer },
+	);
+	assert(
+		read.type === "success" && "output" in read.data,
+		JSON.stringify(read),
+	);
+	expect(read.data.output).toMatchObject({
 		unsaved: true,
 		fields: { title: "Unsaved" },
 		validationErrors: [],
 	});
-	//* the screen call never reaches the saved reply
-	expect(checkpoint.parts).toEqual([]);
 
 	//* media outside the library applies, but is reported for the agent to fix
 	const change = {
 		fields: { title: "From the agent" },
 		bricks: [{ ref: "seo", fields: { image: [999_999] } }],
 	};
-	waitOn(await callBuilderTool(runnerTools.builderUpdate.name, change));
+	const updateRead = waitOn(
+		await callBuilderTool(builderUpdateToolName, change),
+	);
+	expect(updateRead).toMatchObject({ action: "read" });
 	const apply = waitOn(
-		await callBuilderTool(runnerTools.builderUpdate.name, change, readAnswer),
+		await callBuilderTool(builderUpdateToolName, change, {
+			data: updateRead,
+			response: readAnswer,
+		}),
 	);
 	//* only what changed goes back, keeping the French title the builder held
 	expect(apply).toMatchObject({
@@ -1245,29 +1261,24 @@ test("builder tools read unsaved content from the builder and hand changes back 
 		],
 	});
 
-	const changed = await callBuilderTool(
-		runnerTools.builderUpdate.name,
-		change,
-		{
-			status: "unavailable",
-			reason: "changed",
-		},
-	);
-	expect(changed).toMatchObject({ failed: true });
+	const changed = await callBuilderTool(builderUpdateToolName, change, {
+		data: apply,
+		response: { status: "unavailable", reason: "changed" },
+	});
+	expect(changed).toMatchObject({
+		type: "failed",
+		message: context.translate("server:agent.screen.unavailable.changed"),
+	});
 
-	waitOn(await callBuilderTool(runnerTools.builderUpdate.name, change));
-	waitOn(
-		await callBuilderTool(runnerTools.builderUpdate.name, change, readAnswer),
+	const applied = await callBuilderTool(builderUpdateToolName, change, {
+		data: apply,
+		response: { status: "done" },
+	});
+	assert(
+		applied.type === "success" && "output" in applied.data,
+		JSON.stringify(applied),
 	);
-	const applied = await callBuilderTool(
-		runnerTools.builderUpdate.name,
-		change,
-		{
-			status: "done",
-		},
-	);
-	expect(applied).toMatchObject({
-		failed: false,
+	expect(applied.data).toMatchObject({
 		output: { applied: true },
 		widgets: [
 			{
@@ -1279,8 +1290,7 @@ test("builder tools read unsaved content from the builder and hand changes back 
 			},
 		],
 	});
-	assert(applied.kind === "result");
-	expect(JSON.stringify(applied.output)).toContain("bricks.seo.image");
+	expect(JSON.stringify(applied.data.output)).toContain("bricks.seo.image");
 
 	//* nothing was saved for the person
 	const after = await readDocumentContent(context, {
@@ -1288,6 +1298,15 @@ test("builder tools read unsaved content from the builder and hand changes back 
 		id: documentId,
 	});
 	expect(JSON.stringify(after.data?.data)).not.toContain("From the agent");
+
+	expect(
+		resolveRunSetup(context, {
+			agent,
+			mode: "chat",
+			hasHistory: false,
+			authority,
+		}).tools.some((tool) => tool.name.startsWith("lucid_builder_")),
+	).toBe(false);
 });
 
 test("resolves refs for content the builder takes back, by each field's own config", async () => {

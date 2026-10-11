@@ -51,7 +51,7 @@ export const parseAgentVersion = (version: string) => {
 };
 
 /** A brick in the shape the write tools accept. */
-const brickSchema = z.object({
+export const brickSchema = z.object({
 	ref: z.string().optional().meta({
 		description:
 			"Stable ref for builder and embedded bricks. Fixed bricks use their key.",

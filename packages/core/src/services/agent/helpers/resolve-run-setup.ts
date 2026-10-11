@@ -40,10 +40,13 @@ const resolveRunSetup = (
 	},
 ) => {
 	const { agent, authority } = props;
-	const tools = getAvailableTools(agent, authority);
 	const screen = props.screen
 		? { type: props.screen.type, builder: agent.features.builder }
 		: undefined;
+	const tools = getAvailableTools(agent, authority, {
+		config: context.config,
+		screen: screen?.type,
+	});
 
 	const skills = agent.skills.filter((skill) =>
 		skill.scopes.every((scope) => {
@@ -60,7 +63,6 @@ const resolveRunSetup = (
 		mode: props.mode,
 		hasSkills: skills.length > 0,
 		hasHistory: props.hasHistory,
-		screen,
 	});
 	//* Runner controls first, then task tools in their configured order. Keep this stable between turns.
 	const orderedTools = [...runnerTools, ...tools];

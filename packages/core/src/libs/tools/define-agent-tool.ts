@@ -16,7 +16,9 @@ import {
 } from "./tool-definition-internal.js";
 import type {
 	AgentToolDefinition,
+	AgentToolInteraction,
 	AgentToolPreparation,
+	AgentToolProceed,
 	AgentToolResult,
 	DefineAgentToolOptions,
 	DefineInteractiveAgentToolOptions,
@@ -35,15 +37,17 @@ function defineAgentTool<
 	const Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
-	Data extends z.ZodObject,
-	Response extends z.ZodObject,
+	Data extends z.ZodType<Record<string, unknown>>,
+	Response extends z.ZodType<Record<string, unknown>>,
+	Optional extends boolean = false,
 >(
 	options: DefineInteractiveAgentToolOptions<
 		Name,
 		Input,
 		Output,
 		Data,
-		Response
+		Response,
+		Optional
 	>,
 ): AgentToolDefinition<Name>;
 function defineAgentTool<
@@ -57,12 +61,19 @@ function defineAgentTool<
 	const Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
-	Data extends z.ZodObject,
-	Response extends z.ZodObject,
+	Data extends z.ZodType<Record<string, unknown>>,
+	Response extends z.ZodType<Record<string, unknown>>,
 >(
 	options:
 		| DefineAgentToolOptions<Name, Input, Output>
-		| DefineInteractiveAgentToolOptions<Name, Input, Output, Data, Response>,
+		| DefineInteractiveAgentToolOptions<
+				Name,
+				Input,
+				Output,
+				Data,
+				Response,
+				boolean
+		  >,
 ): AgentToolDefinition<Name> {
 	//* the transcript always shows a name, so an untitled tool uses its name with spaces
 	const title = normalizeCopy(
@@ -83,13 +94,67 @@ function defineAgentTool<
 		parallelSafe: options.parallelSafe ?? false,
 		requiresConfirmation: options.requiresConfirmation ?? false,
 		capabilities: options.capabilities,
+		available: options.available,
 		outputVersion: options.outputVersion,
 	};
 	const checkOutput = checkToolResult(options);
-	const checkResult = async (
-		result: AgentToolResult<unknown>,
+	const checkInteraction = async (
+		result: AgentToolInteraction<unknown>,
 		context: ServiceContext,
-	) => {
+	): Promise<ToolRunResult<AgentToolPreparation>> => {
+		if (!("interaction" in options)) {
+			logger.error({
+				event: "tools.interaction.invalid",
+				message: `Tool ${options.name} asked for input without defining an interaction`,
+			});
+			return {
+				type: "failed",
+				message: context.translate("server:agent.interaction.invalid"),
+			};
+		}
+
+		const { data, ...request } = result.interaction;
+		const parsedRequest = agentInteractionRequestSchema.safeParse(request);
+		const parsedData = await options.interaction.data.safeParseAsync(data);
+		//* Screen calls include document content and bypass the widget data size limit.
+		const bounded =
+			options.interaction.key === constants.agent.widgets.screen ||
+			JSON.stringify(data).length <=
+				constants.agent.limits.interactionDataChars;
+		if (
+			!parsedRequest.success ||
+			!parsedData.success ||
+			!isJsonObject(data) ||
+			!bounded
+		) {
+			return {
+				type: "failed",
+				message: context.translate("server:agent.interaction.invalid"),
+			};
+		}
+
+		return {
+			type: "success",
+			data: { interaction: { ...parsedRequest.data, data } },
+		};
+	};
+	const checkResult = async (
+		result:
+			| AgentToolResult<unknown>
+			| AgentToolInteraction<unknown>
+			| AgentToolProceed,
+		context: ServiceContext,
+	): Promise<ToolRunResult<AgentToolPreparation>> => {
+		if ("proceed" in result) {
+			return "interaction" in options && options.interaction.optional
+				? { type: "success", data: { proceed: true } }
+				: {
+						type: "failed",
+						message: context.translate("server:agent.interaction.invalid"),
+					};
+		}
+		if (!("output" in result)) return checkInteraction(result, context);
+
 		//* changes and the summary only shape the admin, so bad ones never fail a call whose work is done
 		const changes = changesSchema.safeParse(result.changes);
 		if (!changes.success) {
@@ -183,7 +248,11 @@ function defineAgentTool<
 
 	return {
 		...definition,
-		interaction: { key: interaction.key, version: interaction.version },
+		interaction: {
+			key: interaction.key,
+			version: interaction.version,
+			optional: interaction.optional ?? false,
+		},
 		[toolDefinitionInternal]: {
 			prepareInput: (input) =>
 				prepareToolInput(
@@ -191,6 +260,14 @@ function defineAgentTool<
 						...options,
 						requirements: options.requiredPermissions,
 						handler: async (args) => {
+							if (!args.execution.interaction && interaction.optional) {
+								return options.handler({
+									...args,
+									data: undefined,
+									response: undefined,
+								});
+							}
+
 							const parsed = await parseInteraction(
 								args.execution.interaction?.data,
 								args.execution.interaction?.response,
@@ -210,36 +287,7 @@ function defineAgentTool<
 							...options,
 							requirements: options.requiredPermissions,
 							handler: interaction.prepare,
-							checkResult: async (
-								result,
-								context,
-							): Promise<ToolRunResult<AgentToolPreparation>> => {
-								if ("output" in result) return checkResult(result, context);
-
-								const { data, ...request } = result.interaction;
-								const parsedRequest =
-									agentInteractionRequestSchema.safeParse(request);
-								const parsedData = await interaction.data.safeParseAsync(data);
-								if (
-									!parsedRequest.success ||
-									!parsedData.success ||
-									!isJsonObject(data) ||
-									JSON.stringify(data).length >
-										constants.agent.limits.interactionDataChars
-								) {
-									return {
-										type: "failed",
-										message: context.translate(
-											"server:agent.interaction.invalid",
-										),
-									};
-								}
-
-								return {
-									type: "success",
-									data: { interaction: { ...parsedRequest.data, data } },
-								};
-							},
+							checkResult,
 						},
 						input,
 					),

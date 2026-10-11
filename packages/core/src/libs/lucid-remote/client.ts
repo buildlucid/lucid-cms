@@ -25,6 +25,11 @@ type LucidRemoteClient = {
 		path: string,
 		props?: LucidRemoteRequestProps,
 	) => ServiceResponse<LucidRemoteRequestData<T>>;
+	/** Returns a binary response for streaming, parsing errors as JSON. */
+	stream: (
+		path: string,
+		props?: Pick<LucidRemoteRequestProps, "accessToken" | "signal">,
+	) => ServiceResponse<Response>;
 };
 
 type LucidRemoteErrorResponse = {
@@ -209,16 +214,31 @@ export const createRemoteError = (
 	};
 };
 
+const requestFailed = (
+	error: unknown,
+	status = 500,
+): { error: LucidErrorData; data: undefined } => ({
+	error: {
+		type: "basic",
+		status,
+		message: copy("server:core.lucid.remote.request.failed", {
+			defaultMessage:
+				error instanceof Error ? error.message : "Lucid remote request failed.",
+		}),
+	},
+	data: undefined,
+});
+
 const createLucidRemoteClient = (props: {
 	apiDomain: string;
 	origin: string;
-}): LucidRemoteClient => ({
-	request: async <T>(
-		path: string,
-		requestProps: LucidRemoteRequestProps = {},
+}): LucidRemoteClient => {
+	const buildHeaders = (
+		requestProps: Pick<
+			LucidRemoteRequestProps,
+			"accessToken" | "headers" | "origin"
+		>,
 	) => {
-		const retries = requestProps.retries ?? 0;
-		const url = new URL(path, props.apiDomain).toString();
 		const headers = new Headers(requestProps.headers);
 
 		if (requestProps.accessToken) {
@@ -237,96 +257,96 @@ const createLucidRemoteClient = (props: {
 			headers.set("Origin", requestProps.origin ?? props.origin);
 		}
 
-		const body =
-			requestProps.body === undefined
-				? undefined
-				: typeof requestProps.body === "string"
-					? requestProps.body
-					: JSON.stringify(requestProps.body);
+		return headers;
+	};
 
-		if (body !== undefined && !headers.has("Content-Type")) {
-			headers.set("Content-Type", "application/json");
-		}
+	return {
+		request: async <T>(
+			path: string,
+			requestProps: LucidRemoteRequestProps = {},
+		) => {
+			const retries = requestProps.retries ?? 0;
+			const url = new URL(path, props.apiDomain).toString();
+			const headers = buildHeaders(requestProps);
 
-		for (let attempt = 0; attempt <= retries; attempt++) {
+			const body =
+				requestProps.body === undefined
+					? undefined
+					: typeof requestProps.body === "string"
+						? requestProps.body
+						: JSON.stringify(requestProps.body);
+
+			if (body !== undefined && !headers.has("Content-Type")) {
+				headers.set("Content-Type", "application/json");
+			}
+
+			for (let attempt = 0; attempt <= retries; attempt++) {
+				try {
+					const response = await fetch(url, {
+						method: requestProps.method ?? "GET",
+						headers,
+						body,
+						redirect: "error",
+						signal: requestProps.signal,
+					});
+
+					if (response.status >= 500 && attempt < retries) {
+						continue;
+					}
+
+					const responseBody = await response.text();
+					let json: unknown;
+
+					try {
+						json = responseBody ? JSON.parse(responseBody) : {};
+					} catch (error) {
+						return requestFailed(error, response.status || 500);
+					}
+
+					if (!response.ok) {
+						return createRemoteError(response, json);
+					}
+
+					return {
+						error: undefined,
+						data: {
+							response,
+							json: json as LucidRemoteRequestData<T>["json"],
+						},
+					};
+				} catch (error) {
+					if (attempt < retries) {
+						continue;
+					}
+
+					return requestFailed(error);
+				}
+			}
+
+			return requestFailed(undefined);
+		},
+		stream: async (path, requestProps = {}) => {
+			const headers = buildHeaders({
+				accessToken: requestProps.accessToken,
+				headers: { Accept: "*/*" },
+			});
+
 			try {
-				const response = await fetch(url, {
-					method: requestProps.method ?? "GET",
+				const response = await fetch(new URL(path, props.apiDomain), {
 					headers,
-					body,
 					redirect: "error",
 					signal: requestProps.signal,
 				});
+				if (response.ok) return { error: undefined, data: response };
 
-				if (response.status >= 500 && attempt < retries) {
-					continue;
-				}
-
-				const responseBody = await response.text();
-				let json: unknown;
-
-				try {
-					json = responseBody ? JSON.parse(responseBody) : {};
-				} catch (error) {
-					return {
-						error: {
-							type: "basic",
-							status: response.status || 500,
-							message: copy("server:core.lucid.remote.request.failed", {
-								defaultMessage:
-									error instanceof Error
-										? error.message
-										: "Lucid remote request failed.",
-							}),
-						},
-						data: undefined,
-					};
-				}
-
-				if (!response.ok) {
-					return createRemoteError(response, json);
-				}
-
-				return {
-					error: undefined,
-					data: {
-						response,
-						json: json as LucidRemoteRequestData<T>["json"],
-					},
-				};
+				const json: unknown = await response.json().catch(() => undefined);
+				return createRemoteError(response, json);
 			} catch (error) {
-				if (attempt < retries) {
-					continue;
-				}
-
-				return {
-					error: {
-						type: "basic",
-						status: 500,
-						message: copy("server:core.lucid.remote.request.failed", {
-							defaultMessage:
-								error instanceof Error
-									? error.message
-									: "Lucid remote request failed.",
-						}),
-					},
-					data: undefined,
-				};
+				return requestFailed(error);
 			}
-		}
-
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-				message: copy("server:core.lucid.remote.request.failed", {
-					defaultMessage: "Lucid remote request failed.",
-				}),
-			},
-			data: undefined,
-		};
-	},
-});
+		},
+	};
+};
 
 /**
  * Returns a cached client for Lucid-owned remote services.

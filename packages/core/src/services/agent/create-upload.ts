@@ -1,7 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
-import type { Media } from "../../types/response.js";
+import type { Media, MediaOrigin } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createMedia from "../media/create-single.js";
 import checkUploadAccess from "./helpers/check-upload-access.js";
@@ -21,6 +21,9 @@ const createUpload: ServiceFn<
 			height?: number;
 			/** Another of the user's personal uploads, such as a captured video frame. */
 			posterId?: number;
+			/** AI origin recorded for generated chat attachments. */
+			origin?: Extract<MediaOrigin, "ai_generated" | "ai_modified">;
+			aiGenerationRequestId?: string;
 			user: LucidUser;
 		},
 	],
@@ -60,7 +63,8 @@ const createUpload: ServiceFn<
 		posterId: input.posterId,
 		folderId: null,
 		ownerUserId: input.user.id,
-		origin: "human",
+		origin: input.origin ?? "human",
+		aiGenerationRequestId: input.aiGenerationRequestId,
 		actor: { type: "user", user: input.user },
 		userId: input.user.id,
 	});

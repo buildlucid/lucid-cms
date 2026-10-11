@@ -6,6 +6,7 @@ import getUsageSessions from "./get-usage-sessions.js";
 import mediaAltGenerate from "./media-alt-generate.js";
 import mediaImageCompletion from "./media-image-completion.js";
 import mediaImageGenerate from "./media-image-generate.js";
+import mediaImageStream from "./media-image-stream.js";
 
 export default {
 	getCredits,
@@ -15,5 +16,6 @@ export default {
 	getUsageSessions,
 	mediaImageCompletion,
 	mediaImageGenerate,
+	mediaImageStream,
 	mediaAltGenerate,
 };
