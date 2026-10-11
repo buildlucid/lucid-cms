@@ -1,5 +1,8 @@
 import { expect, test } from "vitest";
+import z from "zod";
+import isPlainObject from "../../utils/helpers/is-plain-object.js";
 import defineAgent from "../agent/define-agent.js";
+import runnerTools from "../agent/runner-tools.js";
 import { agentTools, mcpTools } from "./lucid-tools.js";
 
 const options = {
@@ -89,4 +92,51 @@ test("the system bundle holds the reads, and the system writes ask first", () =>
 	expect(agentTools.system().every((tool) => tool.readOnly)).toBe(true);
 	expect(agentTools.emails.resend().requiresConfirmation).toBe(true);
 	expect(agentTools.jobs.runSchedule().requiresConfirmation).toBe(true);
+});
+
+const allowsNull = (schema: unknown): boolean =>
+	isPlainObject(schema) &&
+	(schema.type === "null" ||
+		(Array.isArray(schema.type) && schema.type.includes("null")) ||
+		(Array.isArray(schema.anyOf) && schema.anyOf.some(allowsNull)));
+
+/** Paths of optional properties that also take null. */
+const optionalNullable = (schema: unknown, path = ""): string[] => {
+	if (Array.isArray(schema)) {
+		return schema.flatMap((item) => optionalNullable(item, path));
+	}
+	if (!isPlainObject(schema)) return [];
+
+	const required = new Set(
+		Array.isArray(schema.required) ? schema.required : [],
+	);
+	const properties = isPlainObject(schema.properties) ? schema.properties : {};
+	return [
+		...Object.entries(properties).flatMap(([key, value]) => [
+			...(!required.has(key) && allowsNull(value) ? [`${path}${key}`] : []),
+			...optionalNullable(value, `${path}${key}.`),
+		]),
+		...["items", "anyOf", "oneOf", "allOf", "additionalProperties"].flatMap(
+			(key) => optionalNullable(schema[key], path),
+		),
+	];
+};
+
+//* models fill every optional key that takes null with null, so null can't also mean "clear it"
+test("agent tool inputs never take null in an optional field", () => {
+	const tools = [
+		...defineAgent(options).tools,
+		...Object.values(agentTools).flatMap((group) =>
+			typeof group === "function"
+				? []
+				: Object.values(group).map((create) => create()),
+		),
+		...Object.values(runnerTools),
+	];
+	const found = tools.flatMap((tool) =>
+		optionalNullable(z.toJSONSchema(tool.input, { io: "input" })).map(
+			(path) => `${tool.name}: ${path}`,
+		),
+	);
+	expect(found).toEqual([]);
 });

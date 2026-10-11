@@ -28,21 +28,27 @@ import useQueryState, {
 import api from "@/services/api";
 import T from "@/translations";
 
+/** The picked request IDs, with the requests that were shown when picked. */
+type RequestSelection = { value: number[]; refs: RequestSummary[] };
+
 interface RequestSelectDrawerProps {
 	state: {
 		open: boolean;
 		setOpen: (state: boolean) => void;
-		/** Only requests this document can be added to are listed. */
-		document: { collectionKey: string; documentId: number };
-		selected?: RequestSummary;
+		/** Only lists requests this document can be added to. Open requests are listed without it. */
+		document?: { collectionKey: string; documentId: number };
+		multiple?: boolean;
+		selected?: number[];
+		/** Details of already selected requests, so confirming them again keeps them. */
+		selectedRefs?: RequestSummary[];
 		zIndex?: number;
 	};
 	callbacks: {
-		onSelect: (request: RequestSummary) => void;
+		onSelect: (selection: RequestSelection) => void;
 	};
 }
 
-/** Picks an open publish request for a document in a bottom panel. */
+/** Picks open requests in a bottom panel, eg. a publish request to add a document to. */
 const RequestSelectDrawer: Component<RequestSelectDrawerProps> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -59,10 +65,12 @@ const RequestSelectDrawer: Component<RequestSelectDrawerProps> = (props) => {
 			<Drawer.Body>
 				<RequestSelectContent
 					document={props.state.document}
+					multiple={props.state.multiple}
 					selected={props.state.selected}
+					selectedRefs={props.state.selectedRefs}
 					onClose={() => props.state.setOpen(false)}
-					onSelect={(request) => {
-						props.callbacks.onSelect(request);
+					onSelect={(selection) => {
+						props.callbacks.onSelect(selection);
 						props.state.setOpen(false);
 					}}
 				/>
@@ -72,14 +80,18 @@ const RequestSelectDrawer: Component<RequestSelectDrawerProps> = (props) => {
 };
 
 const RequestSelectContent: Component<{
-	document: { collectionKey: string; documentId: number };
-	selected?: RequestSummary;
+	document?: { collectionKey: string; documentId: number };
+	multiple?: boolean;
+	selected?: number[];
+	selectedRefs?: RequestSummary[];
 	onClose: () => void;
-	onSelect: (request: RequestSummary) => void;
+	onSelect: (selection: RequestSelection) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	const [selected, setSelected] = createSignal<RequestSummary>();
+	const [selected, setSelected] = createSignal<number[]>([]);
+	//* picked requests, kept so they still come back after changing page
+	const picked = new Map<number, RequestSummary>();
 	const [filterPanelOpen, setFilterPanelOpen] = createSignal(false);
 	const searchParams = useQueryState({
 		mode: "memory",
@@ -107,7 +119,10 @@ const RequestSelectContent: Component<{
 			queryString: searchParams.queryString,
 			filters: {
 				addable: () =>
-					`${props.document.collectionKey}:${props.document.documentId}`,
+					props.document
+						? `${props.document.collectionKey}:${props.document.documentId}`
+						: undefined,
+				status: () => (props.document ? undefined : "open"),
 			},
 		},
 		enabled: () => searchParams.ready(),
@@ -117,18 +132,33 @@ const RequestSelectContent: Component<{
 	// ----------------------------------------
 	// Functions
 	const toggleSelected = (request: RequestSummary) => {
-		setSelected((current) =>
-			current?.id === request.id ? undefined : request,
-		);
+		picked.set(request.id, request);
+		setSelected((current) => {
+			if (current.includes(request.id)) {
+				return current.filter((id) => id !== request.id);
+			}
+			return props.multiple ? [...current, request.id] : [request.id];
+		});
 	};
-	const confirmSelection = () => {
-		const request = selected();
-		if (request) props.onSelect(request);
-	};
+	const confirmSelection = () =>
+		props.onSelect({
+			value: selected(),
+			refs: selected().flatMap((id) => {
+				const request =
+					picked.get(id) ??
+					requests.data?.data.find((candidate) => candidate.id === id);
+				return request ? [request] : [];
+			}),
+		});
 
 	// ----------------------------------------
 	// Effects
-	createEffect(() => setSelected(props.selected));
+	createEffect(() => {
+		for (const request of props.selectedRefs ?? []) {
+			picked.set(request.id, request);
+		}
+		setSelected(props.selected ?? []);
+	});
 
 	// ----------------------------------------
 	// Render
@@ -255,7 +285,7 @@ const RequestSelectContent: Component<{
 								collections={collections.data?.data ?? []}
 								onClick={() => toggleSelected(request())}
 								selection={{
-									selected: selected()?.id === request().id,
+									selected: selected().includes(request().id),
 									onChange: () => toggleSelected(request()),
 								}}
 							/>
@@ -284,7 +314,7 @@ const RequestSelectContent: Component<{
 						variant="primary"
 						size="md"
 						onClick={confirmSelection}
-						disabled={selected() === undefined}
+						disabled={!props.multiple && selected().length === 0}
 					>
 						{T()("common.confirm")}
 					</Button>

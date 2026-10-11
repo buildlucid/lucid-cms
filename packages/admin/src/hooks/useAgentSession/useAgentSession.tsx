@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import type {
+	Agent,
 	AgentBuilderChangesData,
 	AgentConfirmationMode,
 	AgentScreen,
@@ -33,7 +34,10 @@ import { useMediaQuery } from "@/hooks/useMediaQuery/useMediaQuery";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import { getAgentAccess } from "@/utils/agent-access";
-import type { AgentReferenceItem } from "@/utils/agent-references";
+import {
+	type AgentReferenceItem,
+	mergeAgentReferences,
+} from "@/utils/agent-references";
 import { isSameScreen, showsDocument } from "@/utils/agent-screen";
 import { getHomeView } from "@/utils/home-view";
 import { isNavigationLinkActive } from "@/utils/navigation";
@@ -92,8 +96,15 @@ export type AgentSession = {
 	returned: Accessor<ReturnedMessage | undefined>;
 	/** Takes the returned message for a chat box to restore. */
 	takeReturned: () => void;
+	/** Adds resources to the chat box, eg. items selected in a list, opening the panel to show it. */
+	attach: (references: AgentReferenceItem[]) => void;
+	/** Identifies the sidebar agent receiving attached resources so lists offer supported items, returning undefined while details load or no agent is available. */
+	attachAgent: Accessor<Agent | undefined>;
+	/** Resources waiting for the shown chat box to take. */
+	attached: Accessor<AgentReferenceItem[] | undefined>;
+	takeAttached: () => void;
 	panel: {
-		/** Whether the panel can show here. The agent's own pages already show the chat. */
+		/** Allows the panel when the reader can chat with a sidebar agent and the current page does not already show an agent chat. */
 		available: Accessor<boolean>;
 		/** Whether the reader keeps the panel open, remembered between visits. */
 		open: Accessor<boolean>;
@@ -141,6 +152,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	//* a new chat opens before it is saved, so its chat waits to load until it is
 	const [creating, setCreating] = createSignal<string>();
 	const [returned, setReturned] = createSignal<ReturnedMessage>();
+	const [attached, setAttached] = createSignal<AgentReferenceItem[]>();
 	//* requests the agent changed, followed until any completion they started has run
 	const [watchedRequests, setWatchedRequests] = createSignal<
 		ReadonlySet<number>
@@ -164,7 +176,9 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 			(isNavigationLinkActive(location.pathname, "/lucid") &&
 				getHomeView() === "ask"),
 	);
-	const panelAvailable = createMemo(() => canChat() && !onAgentPage());
+	const panelAvailable = createMemo(
+		() => getAgentAccess().sidebar.length > 0 && !onAgentPage(),
+	);
 	const panelOpen = createMemo(
 		() => userPreferencesStore.getSectionOpen("agent.panel") ?? false,
 	);
@@ -174,6 +188,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	// ----------------------------------------
 	// Queries & Mutations
 	const createConversation = api.agent.useCreateConversation();
+	const definitions = api.agent.useGetDefinitions({ enabled: canChat });
 	const chat = useAgentChat(
 		() => {
 			const id = conversationId();
@@ -190,6 +205,18 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 			screen: currentScreen,
 		},
 	);
+
+	// ----------------------------------------
+	// Memos
+	//* the panel shows the open chat when its agent is a sidebar one, and otherwise the new chat box's agent
+	const attachAgent = createMemo(() => {
+		const sidebar = getAgentAccess().sidebar;
+		const key =
+			[chat.data()?.agentKey, userPreferencesStore.getAgentKey()].find(
+				(candidate) => sidebar.some((agent) => agent.key === candidate),
+			) ?? sidebar[0]?.key;
+		return definitions.data?.data.agents.find((agent) => agent.key === key);
+	});
 
 	// ----------------------------------------
 	// Functions
@@ -322,6 +349,16 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 				start,
 				returned,
 				takeReturned: () => setReturned(undefined),
+				attach: (references) =>
+					batch(() => {
+						setAttached((current) =>
+							mergeAgentReferences(current ?? [], references),
+						);
+						userPreferencesStore.setSectionOpen("agent.panel", true);
+					}),
+				attachAgent,
+				attached,
+				takeAttached: () => setAttached(undefined),
 				panel: {
 					available: panelAvailable,
 					open: panelOpen,

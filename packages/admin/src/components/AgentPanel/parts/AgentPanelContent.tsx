@@ -1,4 +1,11 @@
-import { type Component, createEffect, createSignal, on, Show } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	on,
+	Show,
+} from "solid-js";
 import AgentChatHeader from "@/components/AgentChatHeader/AgentChatHeader";
 import AgentChatThread from "@/components/AgentChatThread/AgentChatThread";
 import AgentDetailsDialog from "@/components/AgentDetailsDialog/AgentDetailsDialog";
@@ -10,6 +17,7 @@ import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 import AgentPanelActions from "./AgentPanelActions";
 
 //* above the page's fixed bars (36), below drawers (40) and modals (50) opened from the page
@@ -21,10 +29,15 @@ const AgentPanelContent: Component = () => {
 	// State & Hooks
 	const session = useAgentSession();
 	const chat = session.chat;
-	const view = useAgentChatView({
-		chat,
-		conversationId: session.conversationId,
+	//* a chat with an agent kept out of the sidebar, eg. one opened on its page, stays there
+	const conversationId = createMemo(() => {
+		const agentKey = chat.data()?.agentKey;
+		return agentKey === undefined ||
+			getAgentAccess().sidebar.some((agent) => agent.key === agentKey)
+			? session.conversationId()
+			: undefined;
 	});
+	const view = useAgentChatView({ chat, conversationId });
 	const scroll = useChatScroll({
 		hasEarlier: () => chat.history.hasNextPage,
 		loadEarlier: () => chat.history.fetchNextPage(),
@@ -33,9 +46,7 @@ const AgentPanelContent: Component = () => {
 
 	// ----------------------------------------
 	// Effects
-	createEffect(
-		on(session.conversationId, () => scroll.scrollToEnd(), { defer: true }),
-	);
+	createEffect(on(conversationId, () => scroll.scrollToEnd(), { defer: true }));
 
 	// ----------------------------------------
 	// Render
@@ -58,13 +69,11 @@ const AgentPanelContent: Component = () => {
 					<div class="relative flex min-w-0 grow flex-col overflow-hidden bg-background bg-clip-padding motion-safe:animate-from-right md:rounded-xl md:border md:border-border md:shadow-lg xl:rounded-b-none xl:border-b-0 xl:shadow-none">
 						<AgentChatHeader
 							variant="panel"
-							conversation={chat.data()}
-							emptyTitle={
-								session.conversationId() ? undefined : T()("agent.chat.new")
-							}
+							conversation={conversationId() ? chat.data() : undefined}
+							emptyTitle={conversationId() ? undefined : T()("agent.chat.new")}
 							actions={
 								<AgentPanelActions
-									conversationId={session.conversationId()}
+									conversationId={conversationId()}
 									onOpen={session.open}
 									onClose={() => session.panel.setOpen(false)}
 								/>
@@ -72,10 +81,10 @@ const AgentPanelContent: Component = () => {
 						/>
 						{/* keyed, as the chat box saves its draft under the chat's ID while it unmounts */}
 						<Show
-							when={session.conversationId()}
+							when={conversationId()}
 							keyed
 							fallback={
-								<div class="flex min-h-0 grow flex-col overflow-y-auto scrollbar">
+								<div class="blur-background flex min-h-0 grow flex-col overflow-y-auto scrollbar">
 									<AgentHome variant="panel" />
 								</div>
 							}
@@ -103,7 +112,7 @@ const AgentPanelContent: Component = () => {
 				</aside>
 				<AgentDetailsDialog
 					view={view}
-					conversationId={session.conversationId()}
+					conversationId={conversationId()}
 					ref={setDetails}
 				/>
 			</AgentTranscriptContext.Provider>

@@ -32,18 +32,22 @@ export const inputSchema = z.object({
 	}),
 });
 
-/** Agents also read request proposals, as the version `request:ID`. */
+/** Agents also read request proposals as the version `request:ID`, and any of the document's versions as `version:ID`. */
 export const agentInputSchema = inputSchema.extend({
 	version: inputSchema.shape.version.meta({
 		description:
-			"Content version: latest, an environment, or request:ID for the document's proposal in that request, eg. request:12 for one opened by documents_create or documents_update.",
+			"Content version: latest, an environment, request:ID for the document's proposal in that request, eg. request:12 for one opened by documents_create or documents_update, or version:ID for one of the document's versions, eg. the version_id of a document_history screen.",
 	}),
 });
 
-/** The request whose proposal a `request:ID` version reads. */
-export const parseRequestVersion = (version: string) => {
-	const match = /^request:(\d+)$/.exec(version);
-	return match ? Number(match[1]) : undefined;
+/** The request or version ID a `request:ID` or `version:ID` version names. */
+export const parseAgentVersion = (version: string) => {
+	const match = /^(request|version):(\d+)$/.exec(version);
+	if (!match) return undefined;
+	return {
+		kind: match[1] === "request" ? "request" : "version",
+		id: Number(match[2]),
+	} as const;
 };
 
 /** A brick in the shape the write tools accept. */
@@ -66,10 +70,9 @@ export const outputSchema = z.object({
 				.string()
 				.nullable()
 				.meta({ description: "Resolved content version." }),
-			requestId: z
-				.number()
-				.nullable()
-				.meta({ description: "The request whose proposal was read." }),
+			requestId: z.number().nullable().meta({
+				description: "The request whose proposal or snapshot was read.",
+			}),
 			route: documentRouteSchema,
 			fields: z.record(z.string(), z.unknown()).meta({
 				description:

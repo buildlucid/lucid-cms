@@ -2,10 +2,12 @@ import { type Component, createMemo, Show } from "solid-js";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RequestQueues from "@/components/RequestQueues/RequestQueues";
+import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { tabId } from "@/utils/tab-id";
 import type { EnvironmentCounts } from "./parts/EnvironmentStatus";
 import EnvironmentTable, {
 	type EnvironmentColumn,
@@ -20,6 +22,11 @@ const ReviewOverviewPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	usePageTitle(() => T()("routes.review.title"));
+	useAgentScreen(() => ({
+		type: "review",
+		tabId,
+		label: T()("routes.review.title"),
+	}));
 
 	// ----------------------------------------
 	// Queries

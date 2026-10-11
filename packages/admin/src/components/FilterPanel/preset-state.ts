@@ -2,6 +2,7 @@ import type {
 	FilterState,
 	FilterValue,
 	OrFilterGroups,
+	QueryStateResponse,
 } from "@/hooks/useQueryState/useQueryState";
 
 export interface FilterPreset {
@@ -71,3 +72,17 @@ export const isFilterPresetActive = (options: {
 		filterStatesMatch(options.currentFilters.get(key), expected),
 	);
 };
+
+/** The preset matching a list's applied filters, eg. to tell the agent which list is shown. */
+export const findActiveFilterPreset = (
+	presets: FilterPreset[],
+	queryState: Pick<QueryStateResponse, "filterStates" | "orFilterGroups">,
+) =>
+	presets.find((preset) =>
+		isFilterPresetActive({
+			currentFilters: queryState.filterStates(),
+			orFilterGroups: queryState.orFilterGroups(),
+			hasDraftRows: false,
+			preset,
+		}),
+	);

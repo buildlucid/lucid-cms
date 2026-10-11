@@ -37,6 +37,7 @@ const defineAgent = <const Key extends string>(
 			readFile: options.features?.media?.readFile ?? true,
 		},
 		documents: { attach: options.features?.documents?.attach ?? true },
+		requests: { attach: options.features?.requests?.attach ?? true },
 		builder: {
 			read: options.features?.builder?.read ?? true,
 			edit:
@@ -56,6 +57,7 @@ const defineAgent = <const Key extends string>(
 		type: "agent-definition",
 		key: options.key,
 		enabled: options.enabled ?? true,
+		sidebar: options.sidebar ?? true,
 		name: options.name,
 		description: options.description,
 		instructions: options.instructions ? dedent(options.instructions) : "",

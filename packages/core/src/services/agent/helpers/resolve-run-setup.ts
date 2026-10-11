@@ -41,10 +41,9 @@ const resolveRunSetup = (
 ) => {
 	const { agent, authority } = props;
 	const tools = getAvailableTools(agent, authority);
-	const screen =
-		props.screen && agent.features.builder.read
-			? { type: props.screen.type, edit: agent.features.builder.edit }
-			: undefined;
+	const screen = props.screen
+		? { type: props.screen.type, builder: agent.features.builder }
+		: undefined;
 
 	const skills = agent.skills.filter((skill) =>
 		skill.scopes.every((scope) => {
@@ -87,7 +86,10 @@ const resolveRunSetup = (
 				name: tool.name,
 				description:
 					typeof tool.description === "function"
-						? tool.description({ mode: props.mode, screen: screen?.type })
+						? tool.description({
+								mode: props.mode,
+								screen: screen?.builder.read ? screen.type : undefined,
+							})
 						: tool.description,
 				inputSchema: toInputSchema(tool.input),
 			}),

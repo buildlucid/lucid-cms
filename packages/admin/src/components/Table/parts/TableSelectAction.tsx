@@ -1,4 +1,3 @@
-import { TbOutlineX } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -7,15 +6,18 @@ import {
 	type Setter,
 	Show,
 } from "solid-js";
-import Button, { type ButtonVariant } from "@/components/Button/Button";
+import type { ActionIconName } from "@/components/ActionIcon/ActionIcon";
+import type { ButtonVariant } from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
-import SplitButton, {
-	type SplitButtonAction,
-} from "@/components/SplitButton/SplitButton";
+import SelectionBar, {
+	type SelectionBarAction,
+} from "@/components/SelectionBar/SelectionBar";
 import T from "@/translations";
 
 export interface TableSelectActionItem {
 	label: string;
+	/** Shown beside it in the actions menu. */
+	icon: ActionIconName;
 	/** @default "outline" */
 	variant?: ButtonVariant;
 	confirm?: {
@@ -58,40 +60,24 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const shouldShow = createMemo(() => {
-		if (props.selectedCount() === 0) return false;
-		if (
-			!props.callbacks.delete &&
-			!props.callbacks.restore &&
-			!props.callbacks.deletePermanently &&
-			props.actions.length === 0
-		)
-			return false;
-		return true;
-	});
-	const showDeleteAction = createMemo(() => {
-		if (!props.allowDelete) return false;
-		if (!props.callbacks.delete) return false;
-		return true;
-	});
-	const showRestoreAction = createMemo(() => {
-		if (!props.allowRestore) return false;
-		if (!props.callbacks.restore) return false;
-		return true;
-	});
-	const showDeletePermanentlyAction = createMemo(() => {
-		if (!props.allowDeletePermanently) return false;
-		if (!props.callbacks.deletePermanently) return false;
-		return true;
-	});
+	const showDeleteAction = createMemo(
+		() => props.allowDelete && props.callbacks.delete !== undefined,
+	);
+	const showRestoreAction = createMemo(
+		() => props.allowRestore && props.callbacks.restore !== undefined,
+	);
+	const showDeletePermanentlyAction = createMemo(
+		() =>
+			props.allowDeletePermanently &&
+			props.callbacks.deletePermanently !== undefined,
+	);
 	//* the built-in actions come first, so the first one is the main button
-	const items = createMemo<
-		Array<{ label: string; variant: ButtonVariant; onSelect: () => void }>
-	>(() => [
+	const items = createMemo<SelectionBarAction[]>(() => [
 		...(showRestoreAction()
 			? [
 					{
 						label: T()("common.restore"),
+						icon: "restore" as const,
 						variant: "primary" as const,
 						onSelect: () => setRestoreModalOpen(true),
 					},
@@ -101,6 +87,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 			? [
 					{
 						label: T()("common.delete"),
+						icon: "trash" as const,
 						variant: "danger" as const,
 						onSelect: () => setDeleteModalOpen(true),
 					},
@@ -110,6 +97,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 			? [
 					{
 						label: T()("common.delete"),
+						icon: "trash" as const,
 						variant: "danger" as const,
 						onSelect: () => setDeletePermanentlyModalOpen(true),
 					},
@@ -117,24 +105,14 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 			: []),
 		...props.actions.map((action) => ({
 			label: action.label,
-			variant: action.variant ?? ("outline" as const),
+			icon: action.icon,
+			variant: action.variant,
 			onSelect: () => {
 				setPendingAction(action);
 				if (!action.confirm) void runAction(action);
 			},
 		})),
 	]);
-	const mainItem = createMemo(() => items()[0]);
-	//* the main button's variant only makes sense for the menu's danger items
-	const menuItems = createMemo<SplitButtonAction[]>(() =>
-		items()
-			.slice(1)
-			.map((item) => ({
-				label: item.label,
-				onSelect: item.onSelect,
-				variant: item.variant === "danger" ? "danger" : undefined,
-			})),
-	);
 
 	// ----------------------------------------
 	// Handlers
@@ -190,57 +168,17 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 	// Render
 	return (
 		<>
-			<Show when={shouldShow()}>
-				<div class="fixed bottom-4 md:bottom-6 left-0 md:left-sidebar right-agent-panel flex justify-center items-center z-36 pointer-events-none px-4">
-					<div class="pointer-events-auto flex w-full max-w-100 items-center justify-between gap-3 rounded-md border border-border bg-card p-2">
-						<div class="flex min-w-0 items-center gap-1">
-							<Button
-								variant="ghost"
-								size="sm"
-								shape="square"
-								onClick={resetHandler}
-								aria-label={T()("common.reset")}
-								title={T()("common.reset")}
-							>
-								<TbOutlineX size={12} />
-							</Button>
-							<p class="truncate text-sm">
-								<span class="font-bold">
-									{props.selectedCount() > 1
-										? `${props.selectedCount()} ${T()("common.items")}`
-										: `1 ${T()("common.item")}`}
-								</span>{" "}
-								{T()("common.selected")}
-							</p>
-						</div>
-						<Show when={mainItem()}>
-							{(main) => (
-								<Show
-									when={menuItems().length > 0}
-									fallback={
-										<Button
-											variant={main().variant}
-											size="sm"
-											loading={isRunningAction()}
-											onClick={main().onSelect}
-										>
-											{main().label}
-										</Button>
-									}
-								>
-									<SplitButton
-										label={main().label}
-										variant={main().variant}
-										size="sm"
-										loading={isRunningAction()}
-										onClick={main().onSelect}
-										actions={menuItems()}
-									/>
-								</Show>
-							)}
-						</Show>
-					</div>
-				</div>
+			<Show when={props.selectedCount() > 0 && items().length > 0}>
+				<SelectionBar
+					count={
+						props.selectedCount() > 1
+							? `${props.selectedCount()} ${T()("common.items")}`
+							: `1 ${T()("common.item")}`
+					}
+					actions={items()}
+					loading={isRunningAction()}
+					onClear={resetHandler}
+				/>
 			</Show>
 			<Show when={pendingAction()?.confirm && pendingAction()}>
 				{(action) => (

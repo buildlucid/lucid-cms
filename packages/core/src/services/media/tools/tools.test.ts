@@ -306,6 +306,37 @@ test("media_update refuses fields the media type lacks and folders for personal 
 	expect(await references(run.conversationId)).toEqual([]);
 });
 
+test("media_update only clears the fields it lists, and clearing one the type lacks changes nothing", async () => {
+	const mediaId = await insertMedia();
+	const run = await startRun(owner);
+	const update = async (input: Record<string, unknown>) => {
+		const result = await run.call(agentTools.media.update(), {
+			mediaId,
+			...input,
+		});
+		assert(result.type === "success", JSON.stringify(result));
+		return updateOutputSchema.parse(result.data.output).media;
+	};
+
+	await update({ title: "Dog", alt: "A dog" });
+	expect(
+		await update({ alt: "A cat", clear: ["description", "summary"] }),
+	).toMatchObject({ title: "Dog", alt: "A cat" });
+	expect(await update({ clear: ["title"] })).toMatchObject({
+		title: null,
+		alt: "A cat",
+	});
+	expect(
+		(
+			await run.call(agentTools.media.update(), {
+				mediaId,
+				alt: "A bird",
+				clear: ["alt"],
+			})
+		).type,
+	).toBe("invalid-input");
+});
+
 test("media_select offers personal media only to user runs, then checks and links the picked media", async () => {
 	const tool = agentTools.media.select();
 	const interaction = tool[toolDefinitionInternal].interaction;

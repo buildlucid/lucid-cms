@@ -9,14 +9,14 @@ import { brickChangeSchema } from "../../services/documents/tools/update/schema.
 import type { AgentRunnerToolName, AgentScreen } from "../../types/response.js";
 import { copy } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
-import type { RunMode } from "./types.js";
+import type { AgentFeatures, RunMode } from "./types.js";
 
 export type RunnerToolContext = {
 	mode: RunMode;
 	hasSkills: boolean;
 	hasHistory: boolean;
-	/** The admin screen the person's latest message came from, when the agent can use builder tools. */
-	screen?: { type: AgentScreen["type"]; edit: boolean };
+	/** The admin screen the person's latest message came from, and the builder tools the agent can use on it. */
+	screen?: { type: AgentScreen["type"]; builder: AgentFeatures["builder"] };
 };
 
 type RunnerToolDefinition = {
@@ -139,7 +139,8 @@ const runnerTools = {
 			bricksPage: true,
 			bricksPerPage: true,
 		}),
-		available: ({ screen }) => screen?.type === "document",
+		available: ({ screen }) =>
+			screen?.type === "document" && screen.builder.read,
 	},
 	builderUpdate: {
 		name: "lucid_builder_update",
@@ -158,7 +159,8 @@ const runnerTools = {
 			.refine((input) => input.fields !== undefined || input.bricks?.length, {
 				message: "Give fields or bricks to change",
 			}),
-		available: ({ screen }) => screen?.type === "document" && screen.edit,
+		available: ({ screen }) =>
+			screen?.type === "document" && screen.builder.edit,
 	},
 	builderFocus: {
 		name: "lucid_builder_focus",
@@ -166,7 +168,8 @@ const runnerTools = {
 		description:
 			"Scroll the person's document builder to a field or brick and highlight it, eg. to show them one you are asking about.",
 		input: agentBuilderTargetSchema,
-		available: ({ screen }) => screen?.type === "document",
+		available: ({ screen }) =>
+			screen?.type === "document" && screen.builder.read,
 	},
 } as const satisfies Record<string, RunnerToolDefinition>;
 

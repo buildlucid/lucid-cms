@@ -29,6 +29,7 @@ import RestoreDocumentModal from "@/components/RestoreDocumentModal/RestoreDocum
 import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import { resolveSlots } from "@/extensions/slot-policy";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
@@ -37,8 +38,10 @@ import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
+import type { AgentReferenceItem } from "@/utils/agent-references";
 import {
 	documentListingRefIncludes,
+	getDocumentPreviewLabel,
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
@@ -65,6 +68,7 @@ export const DocumentsList: Component<{
 	const navigate = useNavigate();
 	const params = useParams<{ collectionKey: string }>();
 	const queryClient = useQueryClient();
+	const session = useAgentSession();
 	const rowTarget = useRowTarget({
 		triggers: {
 			duplicate: false,
@@ -164,21 +168,12 @@ export const DocumentsList: Component<{
 	const collectionPermissions = createMemo(
 		() => props.state.collection?.permissions,
 	);
-	const rowsAreSelectable = createMemo(() => {
-		//* bulk selection is disabled while reordering, and requests are managed from their request
-		if (props.state.orderMode() || props.state.showingRequests()) return false;
-
-		const permissions = collectionPermissions();
-		if (!permissions) return false;
-
-		if (props.state.showingDeleted()) {
-			return userStore.get.hasPermission([
-				permissions.restore,
-				permissions.delete,
-			]).some;
-		}
-		return userStore.get.hasPermission([permissions.delete]).some;
-	});
+	const canAddToChat = createMemo(
+		() =>
+			session.panel.available() &&
+			session.attachAgent()?.features.documents.attach === true &&
+			!props.state.showingDeleted(),
+	);
 	const canRestoreDocuments = createMemo(() => {
 		const permission = collectionPermissions()?.restore;
 		if (!permission) return false;
@@ -343,6 +338,26 @@ export const DocumentsList: Component<{
 
 	// ----------------------------------
 	// Functions
+	const addSelectedToChat = async (selected: boolean[]) =>
+		session.attach(
+			(documents.data?.data ?? []).flatMap(
+				(row, index): AgentReferenceItem[] =>
+					selected[index]
+						? [
+								{
+									type: "document",
+									collectionKey: collectionKey(),
+									documentId: row.id,
+									label: getDocumentPreviewLabel({
+										collection: props.state.collection,
+										document: row,
+										contentLocale: contentLocale(),
+									}),
+								},
+							]
+						: [],
+			),
+		);
 	const reorderRows = (dragIndex: number, targetIndex: number) => {
 		const rows = documents.data?.data ?? [];
 		const dragged = rows[dragIndex];
@@ -461,7 +476,21 @@ export const DocumentsList: Component<{
 						},
 					]}
 					loading={documents.isFetching || props.state.isLoading}
-					selectable={rowsAreSelectable()}
+					//* bulk selection is off while reordering, and requests are managed from their request
+					selectable={
+						!props.state.orderMode() && !props.state.showingRequests()
+					}
+					selectActions={
+						canAddToChat()
+							? [
+									{
+										label: T()("agent.attach"),
+										icon: "chat",
+										onClick: addSelectedToChat,
+									},
+								]
+							: []
+					}
 					allowRestore={props.state.showingDeleted() && canRestoreDocuments()}
 					allowDelete={
 						!props.state.showingDeleted() &&

@@ -48,6 +48,7 @@ import { useNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuar
 import { PageBuilderStateProvider } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import { usePreviewFocus } from "@/hooks/usePreviewFocus/usePreviewFocus";
+import { useStoredVersionRedirect } from "@/hooks/useStoredVersionRedirect/useStoredVersionRedirect";
 import brickStore from "@/store/brickStore/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import userStore from "@/store/userStore/userStore";
@@ -95,6 +96,13 @@ const DocumentEditorPage: Component<{
 		mode: props.mode,
 		version: versionType,
 		versionId: versionId,
+	});
+	const redirecting = useStoredVersionRedirect({
+		enabled: () => props.mode === "edit" && props.request === undefined,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		versionType,
+		versionId,
 	});
 
 	const mutations = useDocumentMutations({
@@ -566,6 +574,7 @@ const DocumentEditorPage: Component<{
 		<Switch>
 			<Match
 				when={
+					redirecting() ||
 					uiState.isLoading() ||
 					getStateLoading() ||
 					docState.collectionsQuery.isLoading

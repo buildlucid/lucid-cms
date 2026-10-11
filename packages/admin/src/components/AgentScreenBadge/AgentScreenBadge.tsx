@@ -1,9 +1,29 @@
 import { Tooltip } from "@kobalte/core";
 import type { Agent, AgentScreen } from "@types";
 import classnames from "classnames";
-import { TbOutlineFileText, TbOutlineGitPullRequest } from "solid-icons/tb";
+import type { IconTypes } from "solid-icons";
+import {
+	TbOutlineCloudUpload,
+	TbOutlineFileText,
+	TbOutlineGitPullRequest,
+	TbOutlineHistory,
+	TbOutlinePackages,
+	TbOutlinePhotoVideo,
+} from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import T from "@/translations";
+
+//* list screens share their navigation link's icon
+const icons = {
+	document: TbOutlineFileText,
+	request: TbOutlineGitPullRequest,
+	documents: TbOutlinePackages,
+	media: TbOutlinePhotoVideo,
+	requests: TbOutlineGitPullRequest,
+	review: TbOutlineCloudUpload,
+	history: TbOutlineHistory,
+} satisfies Record<AgentScreen["type"], IconTypes>;
 
 /** Shows a message's admin screen as a composer pill or sent-message icon, with a tooltip explaining the agent's access. */
 const AgentScreenBadge: Component<{
@@ -59,22 +79,12 @@ const AgentScreenBadge: Component<{
 					props.class,
 				)}
 			>
-				<Show
-					when={props.screen.type === "request"}
-					fallback={
-						<TbOutlineFileText
-							size={props.variant === "pill" ? 12 : 11}
-							class="shrink-0"
-							aria-hidden="true"
-						/>
-					}
-				>
-					<TbOutlineGitPullRequest
-						size={props.variant === "pill" ? 12 : 11}
-						class="shrink-0"
-						aria-hidden="true"
-					/>
-				</Show>
+				<Dynamic
+					component={icons[props.screen.type]}
+					size={props.variant === "pill" ? 12 : 11}
+					class="shrink-0"
+					aria-hidden="true"
+				/>
 				<Show when={props.variant === "pill"}>
 					<span class="truncate">{label()}</span>
 				</Show>

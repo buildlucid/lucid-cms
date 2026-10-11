@@ -10,7 +10,10 @@ import {
 import { type Component, createMemo, createSignal, Index } from "solid-js";
 import CreateMenu from "@/components/CreateMenu/CreateMenu";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import type { FilterPreset } from "@/components/FilterPanel/preset-state";
+import {
+	type FilterPreset,
+	findActiveFilterPreset,
+} from "@/components/FilterPanel/preset-state";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
@@ -20,6 +23,8 @@ import RequestDeleteModal from "@/components/RequestDeleteModal/RequestDeleteMod
 import RequestTableRow from "@/components/RequestTableRow/RequestTableRow";
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
 import Table from "@/components/Table/Table";
+import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
@@ -32,6 +37,7 @@ import useQueryState, {
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
+import type { AgentReferenceItem } from "@/utils/agent-references";
 import helpers from "@/utils/helpers";
 import {
 	countRequestQueue,
@@ -39,12 +45,14 @@ import {
 	requestTypeKeys,
 	requestTypes,
 } from "@/utils/requests";
+import { tabId } from "@/utils/tab-id";
 
 const RequestsPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	usePageTitle(() => T()("requests.title"));
 	const queryClient = useQueryClient();
+	const session = useAgentSession();
 	const [createOpen, setCreateOpen] = createSignal(false);
 	const [unpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
@@ -136,7 +144,25 @@ const RequestsPage: Component = () => {
 	);
 
 	// ----------------------------------------
+	// Functions
+	const addSelectedToChat = async (selected: boolean[]) =>
+		session.attach(
+			(requests.data?.data ?? []).flatMap(
+				(request, index): AgentReferenceItem[] =>
+					selected[index]
+						? [{ type: "request", requestId: request.id, label: request.title }]
+						: [],
+			),
+		);
+
+	// ----------------------------------------
 	// Effects
+	useAgentScreen(() => ({
+		type: "requests",
+		tabId,
+		label: T()("requests.title"),
+		filter: findActiveFilterPreset(presets(), searchParams)?.label ?? null,
+	}));
 	useKeyboardShortcuts({
 		newEntry: {
 			permission: () => true,
@@ -289,6 +315,18 @@ const RequestsPage: Component = () => {
 						id="requests.list"
 						rowCount={requests.data?.data.length ?? 0}
 						queryState={searchParams}
+						selectActions={
+							session.panel.available() &&
+							session.attachAgent()?.features.requests.attach === true
+								? [
+										{
+											label: T()("agent.attach"),
+											icon: "chat",
+											onClick: addSelectedToChat,
+										},
+									]
+								: []
+						}
 						columns={[
 							{
 								label: T()("requests.request"),

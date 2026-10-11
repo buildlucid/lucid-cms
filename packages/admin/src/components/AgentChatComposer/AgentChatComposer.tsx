@@ -40,7 +40,7 @@ const AgentChatComposer: Component<{
 	agent?: Agent;
 	routine?: AgentRoutine;
 	referenceDetails: Readonly<Record<string, AgentReferenceItem>>;
-	ref: (handle: AgentComposerHandle) => void;
+	ref: (handle: AgentComposerHandle | undefined) => void;
 	onAttachedChange: (attached: boolean) => void;
 	onReferencesChange: AgentComposerProps["onReferencesChange"];
 	onRespond: (
@@ -52,6 +52,8 @@ const AgentChatComposer: Component<{
 	onSend: () => void;
 	/** Opens the routine's settings. Without it, a routine chat's confirmations can't be edited from here. */
 	onEditRoutineConfirmations?: () => void;
+	/** @default true */
+	capabilityHints?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -143,6 +145,14 @@ const AgentChatComposer: Component<{
 		session.takeReturned();
 		handle.insert(message.text, message.references);
 	});
+	//* resources added from a page, eg. selected media, wait for the box while an interaction replaces it
+	createEffect(() => {
+		const references = session.attached();
+		const handle = composer();
+		if (!handle || !references) return;
+		session.takeAttached();
+		handle.attach(references);
+	});
 
 	// ----------------------------------------
 	// Render
@@ -191,6 +201,7 @@ const AgentChatComposer: Component<{
 						agentKey={props.agent?.key}
 						features={props.agent?.features}
 						capabilities={props.agent?.capabilities}
+						capabilityHints={props.capabilityHints}
 						disabled={!models.isSuccess}
 						placeholder={placeholder()}
 						header={

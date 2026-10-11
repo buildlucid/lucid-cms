@@ -1,9 +1,12 @@
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import { DocumentsRepository } from "../../../libs/repositories/index.js";
+import {
+	DocumentsRepository,
+	RequestDocumentsRepository,
+} from "../../../libs/repositories/index.js";
 import type { AgentReferenceInput } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/** Replaces pending document references with their create requests, leaving pinned versions and other resources unchanged. */
+/** Replaces pending create documents and pinned request proposals with their request references, leaving other versions and resources unchanged. */
 const linkRequestedDocuments: ServiceFn<
 	[{ references: AgentReferenceInput[] }],
 	AgentReferenceInput[]
@@ -45,15 +48,45 @@ const linkRequestedDocuments: ServiceFn<
 		}
 	}
 
+	//* a proposal is the version a request edits from latest
+	const proposalIds = input.references.flatMap((reference) =>
+		reference.type === "document" && reference.versionId !== undefined
+			? [reference.versionId]
+			: [],
+	);
+	if (proposalIds.length > 0) {
+		const RequestDocuments = new RequestDocumentsRepository(context.db);
+		const proposals = await RequestDocuments.selectMultiple({
+			select: [
+				"request_id",
+				"collection_key",
+				"document_id",
+				"source_version_id",
+			],
+			where: [
+				{ key: "source", operator: "=", value: "latest" },
+				{ key: "source_version_id", operator: "in", value: proposalIds },
+			],
+		});
+		if (proposals.error) return proposals;
+
+		for (const row of proposals.data ?? []) {
+			requested.set(
+				`${row.collection_key}:${row.document_id}:${row.source_version_id}`,
+				row.request_id,
+			);
+		}
+	}
+
 	return {
 		error: undefined,
 		data: input.references.map((reference) => {
-			if (reference.type !== "document" || reference.versionId !== undefined) {
-				return reference;
-			}
+			if (reference.type !== "document") return reference;
 
 			const requestId = requested.get(
-				`${reference.collectionKey}:${reference.documentId}`,
+				reference.versionId === undefined
+					? `${reference.collectionKey}:${reference.documentId}`
+					: `${reference.collectionKey}:${reference.documentId}:${reference.versionId}`,
 			);
 			return requestId === undefined
 				? reference

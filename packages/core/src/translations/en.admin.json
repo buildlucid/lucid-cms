@@ -31,6 +31,8 @@
 	"core.tools.users_find.summary.one": "Found {{count}} user",
 	"core.tools.requests_get.title": "Get request",
 	"core.tools.requests_get.summary": "Read request #{{id}}",
+	"core.tools.requests_overview.title": "Read requests overview",
+	"core.tools.requests_overview.summary": "Read the requests and environments overview",
 	"core.tools.requests_comment.title": "Comment on request",
 	"core.tools.requests_comment.summary": "Commented on request #{{id}}",
 	"core.tools.requests_reply.title": "Reply on request",

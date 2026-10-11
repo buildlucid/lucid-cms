@@ -93,15 +93,6 @@ export const UserList: Component<{
 		}
 		return openCreateUserPanel;
 	});
-	const rowsAreSelectable = createMemo(() => {
-		if (props.state.showingDeleted()) {
-			return userStore.get.hasPermission([
-				Permissions.UsersUpdate,
-				Permissions.UsersDelete,
-			]).some;
-		}
-		return false;
-	});
 	const canRestoreUsers = createMemo(
 		() => userStore.get.hasPermission([Permissions.UsersUpdate]).some,
 	);
@@ -203,7 +194,6 @@ export const UserList: Component<{
 						},
 					]}
 					loading={isLoading()}
-					selectable={rowsAreSelectable()}
 					allowRestore={props.state.showingDeleted() && canRestoreUsers()}
 					allowDeletePermanently={
 						props.state.showingDeleted() && canDeleteUsersPermanently()

@@ -1,125 +1,90 @@
-import classNames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
-import Button from "@/components/Button/Button";
+import SelectionBar, {
+	type SelectionBarAction,
+} from "@/components/SelectionBar/SelectionBar";
 import T from "@/translations";
 
+/** Shows available selection actions for media and folders. */
 export const MediaSelectionActions: Component<{
 	state: {
 		selectedFolders: Array<number>;
 		selectedMedia: Array<number>;
+		/** Deleted media has no folders, so only media is counted. */
+		showingDeleted?: boolean;
 	};
 	actions: {
-		addSelectedFolder: (folder: number) => void;
-		addSelectedMedia: (media: number) => void;
-		resetSelectedFolders: () => void;
-		resetSelectedMedia: () => void;
-		deleteAction?: () => void;
-		restoreAction?: () => void;
-		deletePermanentlyAction?: () => void;
-	};
-	options?: {
-		showingDeleted?: boolean;
-		allowDelete?: boolean;
-		allowRestore?: boolean;
-		allowDeletePermanently?: boolean;
+		clear: () => void;
+		restore?: () => void;
+		delete?: () => void;
+		deletePermanently?: () => void;
+		/** Adds the selected media to the agent's chat box. */
+		addToChat?: () => void;
 	};
 }> = (props) => {
 	// ----------------------------------------
-	// Memons
-	const hasSelected = createMemo(() => {
-		return (
+	// Memos
+	const hasSelected = createMemo(
+		() =>
 			props.state.selectedFolders.length > 0 ||
-			props.state.selectedMedia.length > 0
-		);
-	});
-	const showDeleteAction = createMemo(() => {
-		if (!props.options?.allowDelete) return false;
-		return !!props.actions.deleteAction;
-	});
-	const showRestoreAction = createMemo(() => {
-		if (!props.options?.allowRestore) return false;
-		return !!props.actions.restoreAction;
-	});
-	const showDeletePermanentlyAction = createMemo(() => {
-		if (!props.options?.allowDeletePermanently) return false;
-		return !!props.actions.deletePermanentlyAction;
-	});
-	const isWidePill = createMemo(() => {
-		let count = 1; // reset
-		if (showRestoreAction()) count++;
-		if (showDeleteAction()) count++;
-		if (showDeletePermanentlyAction()) count++;
-		return count > 2;
+			props.state.selectedMedia.length > 0,
+	);
+	const count = createMemo(() =>
+		props.state.showingDeleted
+			? `${props.state.selectedMedia.length} ${T()("common.media")}`
+			: `${props.state.selectedFolders.length} ${T()("common.folders")}, ${props.state.selectedMedia.length} ${T()("common.media")}`,
+	);
+	//* the built-in actions come first, so the first one is the main button
+	const actions = createMemo(() => {
+		const items: SelectionBarAction[] = [];
+		const {
+			restore,
+			delete: remove,
+			deletePermanently,
+			addToChat,
+		} = props.actions;
+		if (restore) {
+			items.push({
+				label: T()("common.restore"),
+				icon: "restore",
+				variant: "primary",
+				onSelect: restore,
+			});
+		}
+		if (remove) {
+			items.push({
+				label: T()("common.delete"),
+				icon: "trash",
+				variant: "danger",
+				onSelect: remove,
+			});
+		}
+		if (deletePermanently) {
+			items.push({
+				label: T()("common.delete"),
+				icon: "trash",
+				variant: "danger",
+				onSelect: deletePermanently,
+			});
+		}
+		if (addToChat) {
+			items.push({
+				label: T()("agent.attach"),
+				icon: "chat",
+				onSelect: addToChat,
+			});
+		}
+		return items;
 	});
 
 	// ----------------------------------------
 	// Render
 	return (
-		<Show when={hasSelected()}>
-			<div class="fixed bottom-4 md:bottom-6 left-0 md:left-sidebar right-agent-panel flex justify-center items-center z-36 pointer-events-none px-4">
-				<div
-					class={classNames(
-						"pointer-events-auto bg-card p-2 border border-border rounded-md w-full justify-between flex items-center",
-						isWidePill() ? "max-w-[460px]" : "max-w-[400px]",
-					)}
-				>
-					<p class="text-sm">
-						<span class="font-bold">
-							{hasSelected()
-								? props.options?.showingDeleted
-									? `${props.state.selectedMedia.length} ${T()("common.media")}`
-									: `${props.state.selectedFolders.length} ${T()("common.folders")}, ${props.state.selectedMedia.length} ${T()("common.media")}`
-								: T()("common.nothing.selected")}
-						</span>{" "}
-						{T()("common.selected")}
-					</p>
-					<div class="ml-2 flex gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => {
-								props.actions.resetSelectedFolders();
-								props.actions.resetSelectedMedia();
-							}}
-						>
-							{T()("common.reset")}
-						</Button>
-						<Show when={showRestoreAction()}>
-							<Button
-								variant="primary"
-								size="sm"
-								onClick={() => {
-									props.actions.restoreAction?.();
-								}}
-							>
-								{T()("common.restore")}
-							</Button>
-						</Show>
-						<Show when={showDeleteAction()}>
-							<Button
-								variant="danger"
-								size="sm"
-								onClick={() => {
-									props.actions.deleteAction?.();
-								}}
-							>
-								{T()("common.delete")}
-							</Button>
-						</Show>
-						<Show when={showDeletePermanentlyAction()}>
-							<Button
-								variant="danger"
-								size="sm"
-								onClick={() => {
-									props.actions.deletePermanentlyAction?.();
-								}}
-							>
-								{T()("common.delete")}
-							</Button>
-						</Show>
-					</div>
-				</div>
-			</div>
+		<Show when={hasSelected() && actions().length > 0}>
+			<SelectionBar
+				count={count()}
+				actions={actions()}
+				onClear={() => props.actions.clear()}
+			/>
 		</Show>
 	);
 };

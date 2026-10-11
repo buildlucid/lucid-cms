@@ -16,13 +16,17 @@ import CreateMenu, {
 } from "@/components/CreateMenu/CreateMenu";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import type { FilterField } from "@/components/FilterPanel/FilterPanel";
-import type { FilterPreset } from "@/components/FilterPanel/preset-state";
+import {
+	type FilterPreset,
+	findActiveFilterPreset,
+} from "@/components/FilterPanel/preset-state";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { MediaList } from "@/components/MediaList/MediaList";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
+import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
@@ -40,7 +44,9 @@ import mediaStore from "@/store/mediaStore/mediaStore";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { screenLabel } from "@/utils/agent-screen";
 import helpers from "@/utils/helpers";
+import { tabId } from "@/utils/tab-id";
 
 const MediaPage: Component = () => {
 	// ----------------------------------
@@ -207,11 +213,28 @@ const MediaPage: Component = () => {
 	});
 
 	// ----------------------------------------
+	// Memos
+	const folderTitle = createMemo(
+		() => folders.data?.data.breadcrumbs.at(-1)?.title,
+	);
+
+	// ----------------------------------------
 	// Effects
 	usePageTitle(() => {
 		const library = T()("routes.media.title");
-		const folder = folders.data?.data.breadcrumbs.at(-1)?.title;
+		const folder = folderTitle();
 		return folder ? `${folder} · ${library}` : library;
+	});
+	useAgentScreen(() => {
+		const folderId = folderIdFilter();
+		return {
+			type: "media",
+			tabId,
+			label: screenLabel(folderTitle() || T()("routes.media.title")),
+			folderId: typeof folderId === "number" ? folderId : null,
+			filter:
+				findActiveFilterPreset(mediaPresets(), searchParams)?.label ?? null,
+		};
 	});
 
 	createEffect(() => {

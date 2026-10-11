@@ -10,6 +10,7 @@ import resolveUserAccess from "../../users/resolve-access.js";
 import describe from "./describe.js";
 import mediaOwnership from "./media-ownership.js";
 import referenceNotFound from "./reference-not-found.js";
+import requestCollections from "./request-collections.js";
 
 /** Checks attachments against the agent's settings, the sender's current access and whether each resource exists. Personal media can only be attached by its owner. */
 const checkInput: ServiceFn<
@@ -19,7 +20,7 @@ const checkInput: ServiceFn<
 	if (!input.references.length) return { error: undefined, data: undefined };
 
 	const agent = getAgent(context.config, input.agentKey);
-	const [access, details, ownership] = await Promise.all([
+	const [access, details, ownership, collections] = await Promise.all([
 		resolveUserAccess(context, { userId: input.userId }),
 		describe(context, { references: input.references }),
 		mediaOwnership(context, {
@@ -27,19 +28,26 @@ const checkInput: ServiceFn<
 				reference.type === "media" ? [reference.mediaId] : [],
 			),
 		}),
+		requestCollections(context, {
+			requestIds: input.references.flatMap((reference) =>
+				reference.type === "request" ? [reference.requestId] : [],
+			),
+		}),
 	]);
 	if (access.error) return access;
 	if (details.error) return details;
 	if (ownership.error) return ownership;
+	if (collections.error) return collections;
 
 	for (const reference of input.references) {
-		//* requests are only linked by tools for now
 		const attachable =
 			reference.type === "media"
 				? agent?.features.media.attach ||
 					(ownership.data.get(reference.mediaId)?.type === "user" &&
 						agent?.features.media.upload)
-				: reference.type === "document" && agent?.features.documents.attach;
+				: reference.type === "document"
+					? agent?.features.documents.attach
+					: agent?.features.requests.attach;
 
 		const detail = details.data.get(referenceKey(reference));
 
@@ -50,6 +58,10 @@ const checkInput: ServiceFn<
 				ownership:
 					reference.type === "media"
 						? ownership.data.get(reference.mediaId)
+						: undefined,
+				requestCollections:
+					reference.type === "request"
+						? collections.data.get(reference.requestId)
 						: undefined,
 				userId: input.userId,
 				grant: access.data,

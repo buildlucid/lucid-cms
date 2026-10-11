@@ -1,6 +1,7 @@
 import type { Agent, AgentReferenceInput, DocumentRef } from "@types";
 import {
 	TbOutlineFileText,
+	TbOutlineGitPullRequest,
 	TbOutlinePhoto,
 	TbOutlinePlus,
 	TbOutlineUpload,
@@ -9,6 +10,8 @@ import { type Component, createMemo, createSignal, Show } from "solid-js";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import Menu from "@/components/Menu/Menu";
+import RequestSelectDrawer from "@/components/RequestSelectDrawer/RequestSelectDrawer";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
@@ -22,7 +25,7 @@ import {
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import { composerTriggerClasses } from "../AgentComposer";
 
-/** Adds existing media and documents to the message, or uploads new files when `onUpload` is set. */
+/** Adds existing media, documents and requests to the message, or uploads new files when `onUpload` is set. */
 const AgentReferenceMenu: Component<{
 	features?: Agent["features"];
 	references: AgentReferenceItem[];
@@ -38,6 +41,7 @@ const AgentReferenceMenu: Component<{
 	// State & Hooks
 	const [mediaOpen, setMediaOpen] = createSignal(false);
 	const [documentsOpen, setDocumentsOpen] = createSignal(false);
+	const [requestsOpen, setRequestsOpen] = createSignal(false);
 	const collections = api.collections.useGetAll({
 		queryParams: { include: { fields: true } },
 		enabled: () => props.features?.documents.attach === true,
@@ -62,6 +66,11 @@ const AgentReferenceMenu: Component<{
 	const canDocuments = createMemo(
 		() =>
 			props.features?.documents.attach === true && collectionKeys().length > 0,
+	);
+	const canRequests = createMemo(
+		() =>
+			props.features?.requests.attach === true &&
+			userStore.get.hasPermission([Permissions.RequestsRead]).all,
 	);
 	// ----------------------------------------
 	// Functions
@@ -101,7 +110,9 @@ const AgentReferenceMenu: Component<{
 	// Render
 	return (
 		<>
-			<Show when={props.onUpload || canMedia() || canDocuments()}>
+			<Show
+				when={props.onUpload || canMedia() || canDocuments() || canRequests()}
+			>
 				<Menu.Root placement="top-start">
 					<Menu.Trigger
 						class={`${composerTriggerClasses} w-7`}
@@ -136,6 +147,14 @@ const AgentReferenceMenu: Component<{
 								onSelect={() => setDocumentsOpen(true)}
 							>
 								{T()("agent.references.add.document")}
+							</Menu.Item>
+						</Show>
+						<Show when={canRequests()}>
+							<Menu.Item
+								icon={<TbOutlineGitPullRequest size={12} />}
+								onSelect={() => setRequestsOpen(true)}
+							>
+								{T()("agent.references.add.request")}
 							</Menu.Item>
 						</Show>
 					</Menu.Content>
@@ -213,6 +232,42 @@ const AgentReferenceMenu: Component<{
 										),
 									),
 								),
+							),
+					}}
+				/>
+			</Show>
+			<Show when={requestsOpen() && canRequests()}>
+				<RequestSelectDrawer
+					state={{
+						open: true,
+						setOpen: setRequestsOpen,
+						multiple: true,
+						selected: props.references.flatMap((reference) =>
+							reference.type === "request" ? [reference.requestId] : [],
+						),
+					}}
+					callbacks={{
+						onSelect: (selection) =>
+							props.onSelect(
+								"request",
+								selection.value.map((requestId) => {
+									const request = selection.refs.find(
+										(ref) => ref.id === requestId,
+									);
+									if (request) {
+										return {
+											type: "request",
+											requestId,
+											label: request.title,
+										};
+									}
+									return agentReferenceItem(
+										props.references.find(
+											(item) =>
+												item.type === "request" && item.requestId === requestId,
+										) ?? { type: "request", requestId },
+									);
+								}),
 							),
 					}}
 				/>

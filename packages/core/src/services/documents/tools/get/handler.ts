@@ -1,11 +1,8 @@
 import type z from "zod";
-import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
-import loadRequest from "../../../requests/helpers/load-request.js";
-import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getSingle from "../../content/get-single.js";
 import getEditLink from "../../helpers/get-edit-link.js";
 import { projectRefs, projectRoute } from "../../helpers/project-document.js";
@@ -13,19 +10,16 @@ import projectEditableDocument from "../../helpers/project-editable-document.js"
 import readDocumentContent from "../../helpers/read-document-content.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
 import projectMeta from "../helpers/project-meta.js";
-import {
-	type agentInputSchema,
-	type outputSchema,
-	parseRequestVersion,
-} from "./schema.js";
+import resolveVersion from "./resolve-version.js";
+import type { agentInputSchema, outputSchema } from "./schema.js";
 
-/** Reads selected fields and bricks from a document or request proposal in the shape accepted by write tools. */
+/** Reads document versions and request proposals as selected fields and bricks in the shape accepted by write tools. */
 const getDocument: ServiceFn<
 	[
 		{
 			input: z.output<typeof agentInputSchema>;
 			allowedCollectionKeys: string[];
-			/** Who reads request proposals. Only agent tools can read them. */
+			/** The reader for pinned versions, available only to agent tools. */
 			actor?: ToolkitActor;
 		},
 	],
@@ -54,56 +48,27 @@ const getDocument: ServiceFn<
 	if (localeRes.error) return localeRes;
 	const contentLocale = localeRes.data;
 
-	const requestId = props.actor
-		? parseRequestVersion(input.version)
+	const versionRes = props.actor
+		? await resolveVersion(context, {
+				collectionKey: input.collectionKey,
+				collectionLabel:
+					context.translate(collection.getData.details.labels.singular) ??
+					collection.key,
+				documentId: input.documentId,
+				version: input.version,
+				actor: props.actor,
+			})
 		: undefined;
-	let proposal: { requestId: number; versionId: number } | undefined;
-	if (requestId !== undefined && props.actor) {
-		const userRes = await resolveActorUser(context, { actor: props.actor });
-		if (userRes.error) return userRes;
-
-		const requestRes = await loadRequest(context, {
-			id: requestId,
-			user: userRes.data,
-		});
-		if (requestRes.error) return requestRes;
-
-		const versionId = requestRes.data.documents.find(
-			(document) =>
-				document.collection_key === input.collectionKey &&
-				document.document_id === input.documentId &&
-				document.source === "latest",
-		)?.source_version_id;
-		if (!versionId) {
-			return {
-				error: {
-					type: "basic",
-					message: copy("server:core.tools.documents.proposal.not.found", {
-						data: {
-							requestId,
-							collection:
-								context.translate(collection.getData.details.labels.singular) ??
-								collection.key,
-							id: input.documentId,
-						},
-					}),
-					status: 404,
-				},
-				data: undefined,
-			};
-		}
-
-		proposal = { requestId, versionId };
-	}
+	if (versionRes?.error) return versionRes;
+	const pinned = versionRes?.data;
+	const requestId = pinned?.requestId ?? null;
 
 	//* bricks come from the editable content below; the content read still includes them for their refs
 	const documentRes = await getSingle(context, {
 		collectionKey: input.collectionKey,
-		versionType: proposal
-			? constants.collectionBuilder.publishing.proposalVersionType
-			: input.version,
-		versionId: proposal?.versionId,
-		includeRequestVersions: proposal !== undefined,
+		versionType: pinned?.versionType ?? input.version,
+		versionId: pinned?.versionId ?? undefined,
+		includeRequestVersions: requestId !== null,
 		query: {
 			include: input.include,
 			filter: { id: { value: input.documentId } },
@@ -115,8 +80,8 @@ const getDocument: ServiceFn<
 	const contentRes = await readDocumentContent(context, {
 		collectionKey: input.collectionKey,
 		id: input.documentId,
-		version: proposal ? undefined : input.version,
-		versionId: proposal?.versionId,
+		version: pinned?.versionType ?? input.version,
+		versionId: pinned?.versionId ?? undefined,
 	});
 	if (contentRes.error) return contentRes;
 
@@ -147,23 +112,25 @@ const getDocument: ServiceFn<
 					id: document.id,
 					collectionKey: document.collectionKey,
 					version: document.version,
-					requestId: proposal?.requestId ?? null,
+					requestId,
 					route: projectRoute(document.route, contentLocale),
 					fields: projected.data.fields,
 					bricks: projected.data.bricks,
 					...(metaRes && { meta: metaRes.data }),
 					links: {
-						edit: proposal
-							? getRequestLink(context, proposal.requestId, {
-									collectionKey: input.collectionKey,
-									documentId: document.id,
-								})
-							: getEditLink(
-									context,
-									input.collectionKey,
-									input.version,
-									document.id,
-								),
+						edit:
+							requestId !== null
+								? getRequestLink(context, requestId, {
+										collectionKey: input.collectionKey,
+										documentId: document.id,
+									})
+								: getEditLink(
+										context,
+										input.collectionKey,
+										pinned?.versionType ?? input.version,
+										document.id,
+										pinned?.versionId ?? undefined,
+									),
 					},
 				},
 				meta: {

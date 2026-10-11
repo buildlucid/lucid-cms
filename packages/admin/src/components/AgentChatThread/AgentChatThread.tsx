@@ -164,6 +164,8 @@ const AgentChatThread: Component<{
 							onRespond={props.view.respond}
 							onSend={() => props.scroll.scrollToEnd("smooth")}
 							onEditRoutineConfirmations={props.onEditRoutineConfirmations}
+							//* the panel is narrow, so its toolbar keeps to the controls
+							capabilityHints={props.variant === "page"}
 						/>
 					</div>
 				</div>

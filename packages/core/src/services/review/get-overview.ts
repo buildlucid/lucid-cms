@@ -4,7 +4,7 @@ import { reviewFormatter } from "../../libs/formatters/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import hasAccess from "../../libs/permission/has-access.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ReviewOverview } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRequestOverview from "../requests/get-overview.js";
@@ -13,7 +13,9 @@ import getRequestOverview from "../requests/get-overview.js";
 const getOverview: ServiceFn<
 	[
 		{
-			user: LucidAuth;
+			user: LucidActor;
+			/** Limits both to these collections, eg. an agent tool's. */
+			collectionKeys?: readonly string[];
 		},
 	],
 	ReviewOverview
@@ -24,6 +26,8 @@ const getOverview: ServiceFn<
 	const readableCollections = collectionsRes.data.filter(
 		(collection) =>
 			collection.getData.publishing.environments.length > 0 &&
+			(data.collectionKeys === undefined ||
+				data.collectionKeys.includes(collection.key)) &&
 			hasAccess({
 				user: data.user,
 				requiredPermissions: [
@@ -71,7 +75,10 @@ const getOverview: ServiceFn<
 		collectionCounts.push(result.data);
 	}
 
-	const requestsRes = await getRequestOverview(context, { user: data.user });
+	const requestsRes = await getRequestOverview(context, {
+		user: data.user,
+		collectionKeys: data.collectionKeys,
+	});
 	if (requestsRes.error) return requestsRes;
 
 	return {

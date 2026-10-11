@@ -6,8 +6,6 @@ import {
 	createSignal,
 	For,
 	Match,
-	onCleanup,
-	onMount,
 	Show,
 	Switch,
 } from "solid-js";
@@ -23,7 +21,7 @@ import RequestTitleModal from "@/components/RequestTitleModal/RequestTitleModal"
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import { requestDocumentLimit } from "@/constants/requests";
-import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
+import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
@@ -43,7 +41,6 @@ const RequestPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const params = useParams();
-	const session = useAgentSession();
 	const [approveOpen, setApproveOpen] = createSignal(false);
 	const [completeAfterApproval, setCompleteAfterApproval] = createSignal(false);
 	const [requestOpen, setRequestOpen] = createSignal(false);
@@ -123,21 +120,16 @@ const RequestPage: Component = () => {
 	// Effects
 	usePageTitle(() => storedRequest()?.title);
 	//* the agent knows which request is open. Its fields save straight away, so there's nothing unsaved for builder tools
-	onMount(() => {
-		const unregister = session.screen.register({
-			screen: () => {
-				const data = storedRequest();
-				return data
-					? {
-							type: "request",
-							tabId,
-							label: screenLabel(data.title),
-							requestId: data.id,
-						}
-					: undefined;
-			},
-		});
-		onCleanup(unregister);
+	useAgentScreen(() => {
+		const data = storedRequest();
+		return data
+			? {
+					type: "request",
+					tabId,
+					label: screenLabel(data.title),
+					requestId: data.id,
+				}
+			: undefined;
 	});
 
 	// ----------------------------------------

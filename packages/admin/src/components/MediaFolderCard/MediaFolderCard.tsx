@@ -44,9 +44,6 @@ export const MediaFolderCard: Component<{
 
 	// ----------------------------------
 	// Memos
-	const hasUpdatePermission = createMemo(() => {
-		return userStore.get.hasPermission([Permissions.MediaUpdate]).all;
-	});
 	const hasDeletePermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.MediaDelete]).all;
 	});
@@ -61,7 +58,8 @@ export const MediaFolderCard: Component<{
 	// Handlers
 	const navigateToFolder = (event?: MouseEvent) => {
 		if (props.isDragging()) return;
-		if (event?.shiftKey && hasUpdatePermission()) {
+		//* deleting is the only action for selected folders
+		if (event?.shiftKey && hasDeletePermission()) {
 			if (isSelected()) {
 				mediaStore.get.removeSelectedFolder(props.folder.id);
 			} else {
@@ -132,7 +130,7 @@ export const MediaFolderCard: Component<{
 					placement={interfaceDirection.isRTL() ? "bottom-start" : "bottom-end"}
 				/>
 			</div>
-			<Show when={hasUpdatePermission()}>
+			<Show when={hasDeletePermission()}>
 				<Checkbox
 					id={`media-folder-card-${props.folder.id}`}
 					value={isSelected()}

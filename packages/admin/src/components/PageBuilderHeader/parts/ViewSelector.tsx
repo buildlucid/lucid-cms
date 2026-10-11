@@ -140,11 +140,13 @@ export const ViewSelector: Component<{
 	// Render
 	return (
 		<Menu.Root>
-			<Menu.Trigger class="group flex items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
+			<Menu.Trigger class="group flex min-w-0 max-w-full items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
 				<StatusIndicator variant={currentStatusVariant()} size="md" />
+				{/* long names, eg. a request's proposal, stay on one line on narrow screens */}
 				<span
-					class="group-hover:text-body transition-colors duration-200 inline-block"
+					class="group-hover:text-body transition-colors duration-200 line-clamp-1 text-start"
 					classList={{ capitalize: currentOption()?.type !== "proposal" }}
+					title={currentOptionLabel()}
 				>
 					{currentOptionLabel()}
 				</span>
@@ -213,7 +215,8 @@ export const ViewSelector: Component<{
 											</span>
 										}
 									>
-										{optionLabel(item)}
+										{/* menu items clamp to one line, so long names show in full on hover */}
+										<span title={optionLabel(item)}>{optionLabel(item)}</span>
 									</Menu.Item>
 								)}
 							</For>

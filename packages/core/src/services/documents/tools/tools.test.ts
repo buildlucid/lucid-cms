@@ -43,6 +43,7 @@ const fixture = getTestConfig();
 const pages = new CollectionBuilder("agent_pages", {
 	mode: "multiple",
 	localized: true,
+	revisions: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	publishing: { environments: [{ key: "production", label: "Production" }] },
 	bricks: {
@@ -410,6 +411,29 @@ test("proposes updates in one request per chat and leaves latest unchanged", asy
 	const latest = await run.read({ documentId: documentId });
 	expect(latest.fields).toMatchObject({ title: "Hello" });
 
+	//* a proposal only opens inside its request, so it is linked as the request
+	const proposalVersion = await context.db.kysely
+		.selectFrom("lucid_request_documents")
+		.select("source_version_id")
+		.where("request_id", "=", requestId)
+		.executeTakeFirstOrThrow();
+	assert(proposalVersion.source_version_id);
+	const registered = await register(context, {
+		conversationId: run.conversationId,
+		references: [
+			{
+				type: "document",
+				collectionKey: pages.key,
+				documentId,
+				versionId: proposalVersion.source_version_id,
+			},
+		],
+		source: { type: "tool", toolName: "lucid_register_references" },
+	});
+	expect(registered.data).toEqual([
+		expect.objectContaining({ type: "request", requestId }),
+	]);
+
 	const events = await context.db.kysely
 		.selectFrom("lucid_request_events")
 		.select(["type", "agent_run_id"])
@@ -419,6 +443,38 @@ test("proposes updates in one request per chat and leaves latest unchanged", asy
 	expect(events).toEqual([
 		{ type: "proposal_edited", agent_run_id: run.runId },
 	]);
+});
+
+test("reads one of a document's versions by ID, eg. one picked in its history", async () => {
+	const documentId = await createPage();
+	const run = await startRun();
+	await run.write(directUpdate, {
+		collectionKey: pages.key,
+		documentId,
+		fields: { title: "Changed" },
+	});
+
+	const tables = await getTableNames(context, pages.key);
+	assert(tables.data, JSON.stringify(tables.error));
+	const revision = await context.db.kysely
+		.selectFrom(tables.data.version)
+		.select("id")
+		.where("document_id", "=", documentId)
+		.where("type", "=", "revision")
+		.executeTakeFirstOrThrow();
+
+	const read = await run.read({
+		documentId,
+		version: `version:${revision.id}`,
+	});
+	expect(read.fields).toMatchObject({ title: "Hello" });
+	expect(read.links.edit).toContain(`/revision/${documentId}/${revision.id}`);
+	//* a version ID only reaches its own document
+	await run.fail(getDocument, {
+		collectionKey: pages.key,
+		documentId: await createPage(),
+		version: `version:${revision.id}`,
+	});
 });
 
 test("direct updates write one locale and merge bricks and items by ref", async () => {

@@ -60,6 +60,19 @@ const readReference = (value: unknown): AgentReferenceItem[] => {
 		];
 	}
 
+	if (
+		value.type === "request" &&
+		"requestId" in value &&
+		typeof value.requestId === "number"
+	) {
+		return [
+			{
+				...agentReferenceItem({ type: "request", requestId: value.requestId }),
+				...readDetails(value),
+			},
+		];
+	}
+
 	return [];
 };
 

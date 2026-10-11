@@ -687,9 +687,9 @@ export const PageBuilderHeader: Component<{
 				style={{ "view-transition-name": "document-builder-header" }}
 				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background border-x border-b border-border rounded-b-xl flex flex-col content-lg:flex-row content-lg:items-center content-lg:justify-between gap-3 content-lg:gap-2.5"
 			>
-				<div class="flex items-center gap-2.5 w-full content-lg:w-auto">
-					<div class="flex flex-col gap-1">
-						<div class="flex flex-wrap items-center gap-2">
+				<div class="flex min-w-0 items-center gap-2.5 w-full content-lg:w-auto">
+					<div class="flex min-w-0 flex-col gap-1">
+						<div class="flex min-w-0 flex-wrap items-center gap-2">
 							<Show when={props.mode === "create"}>
 								<h2 class="text-base font-medium text-title">
 									{T()("actions.create.document", {

@@ -2,6 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import {
 	type Component,
 	createEffect,
+	createMemo,
 	For,
 	Match,
 	Show,
@@ -10,12 +11,15 @@ import {
 import Button from "@/components/Button/Button";
 import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHeader";
 import RestoreRevisionModal from "@/components/RestoreRevisionModal/RestoreRevisionModal";
+import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { useDocumentHistoryState } from "@/hooks/useDocumentHistoryState/useDocumentHistoryState";
 import { useDocumentHistoryUIState } from "@/hooks/useDocumentHistoryUIState/useDocumentHistoryUIState";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import T from "@/translations";
+import { screenLabel } from "@/utils/agent-screen";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
+import { tabId } from "@/utils/tab-id";
 import TimelineCardWrapper from "./parts/TimelineCard";
 import TimelineDetails from "./parts/TimelineDetails";
 
@@ -31,17 +35,37 @@ const DocumentHistoryPage: Component = () => {
 	const { contentLocale } = createDocumentLocalization(state.collection);
 
 	// ----------------------------------
-	// Effects
-	usePageTitle(() => {
+	// Memos
+	const documentLabel = createMemo(() => {
 		const document = state.document();
-		const subject = document
+		return document
 			? getDocumentPreviewLabel({
 					collection: state.collection(),
 					document,
 					contentLocale: contentLocale() ?? "",
 				})
-			: state.collectionName();
+			: undefined;
+	});
+
+	// ----------------------------------
+	// Effects
+	usePageTitle(() => {
+		const subject = documentLabel() ?? state.collectionName();
 		return subject ? `${T()("common.history")} · ${subject}` : undefined;
+	});
+	//* the agent reads the selected version itself, so the screen only names it
+	useAgentScreen(() => {
+		const label = documentLabel();
+		const documentId = state.documentId();
+		if (label === undefined || documentId === undefined) return undefined;
+		return {
+			type: "history",
+			tabId,
+			label: screenLabel(`${T()("common.history")} · ${label}`),
+			collectionKey: state.collectionKey(),
+			documentId,
+			versionId: state.selectedItem()?.id ?? null,
+		};
 	});
 
 	//* Redirect out of the history view when the document/collection isn't available.

@@ -50,6 +50,7 @@ import UpsertShareLinkDrawer from "@/components/UpsertShareLinkDrawer/UpsertShar
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import ViewShareLinksDrawer from "@/components/ViewShareLinksDrawer/ViewShareLinksDrawer";
 import { Permissions } from "@/constants/permissions";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
@@ -59,6 +60,7 @@ import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import mediaStore from "@/store/mediaStore/mediaStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { canAttachMedia, mediaReferenceItem } from "@/utils/agent-references";
 import helpers from "@/utils/helpers";
 import {
 	type ImageCropProvenance,
@@ -80,6 +82,7 @@ export const MediaList: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
+	const session = useAgentSession();
 	const rowTarget = useRowTarget({
 		triggers: {
 			update: false,
@@ -177,6 +180,32 @@ export const MediaList: Component<{
 	// ----------------------------------
 	// Mutations
 	const updateMediaAlt = api.media.useUpdateSingle();
+
+	// ----------------------------------
+	// Memos
+	/** Whether the panel's chat takes this media: what its agent allows, and only the person's own personal uploads. */
+	const canAddToChat = (item: Media) => {
+		const features = session.attachAgent()?.features;
+		if (!features || !session.panel.available()) return false;
+		if (props.state.showingDeleted()) return false;
+		if (
+			item.ownership.type === "user" &&
+			item.ownership.userId !== userStore.get.user?.id
+		) {
+			return false;
+		}
+		return canAttachMedia(item, {
+			features,
+			canReadLibrary: userStore.get.hasPermission([Permissions.MediaRead]).all,
+		});
+	};
+	//* only shown media can be added, and only selected media the panel's chat accepts
+	const attachableMedia = createMemo(() => {
+		const selected = new Set(mediaStore.get.selectedMedia);
+		return (media.data?.data ?? []).filter(
+			(item) => selected.has(item.id) && canAddToChat(item),
+		);
+	});
 
 	// ----------------------------------------
 	// Functions
@@ -488,6 +517,7 @@ export const MediaList: Component<{
 														: undefined
 												}
 												showingDeleted={props.state.showingDeleted}
+												canAddToChat={canAddToChat}
 												isDragging={isDragging}
 												onGenerateAlt={openAltGeneration}
 												onCrop={openQuickCrop}
@@ -510,28 +540,35 @@ export const MediaList: Component<{
 					state={{
 						selectedFolders: mediaStore.get.selectedFolders,
 						selectedMedia: mediaStore.get.selectedMedia,
+						showingDeleted: props.state.showingDeleted(),
 					}}
 					actions={{
-						addSelectedFolder: mediaStore.get.addSelectedFolder,
-						addSelectedMedia: mediaStore.get.addSelectedMedia,
-						resetSelectedFolders: mediaStore.get.resetSelectedFolders,
-						resetSelectedMedia: mediaStore.get.resetSelectedMedia,
-						deleteAction: () => {
-							rowTarget.setTrigger("deleteBatch", true);
-						},
-						restoreAction: () => {
-							rowTarget.setTrigger("restoreBatch", true);
-						},
-						deletePermanentlyAction: () => {
-							rowTarget.setTrigger("deleteBatchPermanently", true);
-						},
-					}}
-					options={{
-						showingDeleted: props.state.showingDeleted(),
-						allowDelete: !props.state.showingDeleted(),
-						allowRestore: props.state.showingDeleted() && canRestoreMedia(),
-						allowDeletePermanently:
-							props.state.showingDeleted() && canDeleteMedia(),
+						clear: mediaStore.get.reset,
+						restore:
+							props.state.showingDeleted() && canRestoreMedia()
+								? () => rowTarget.setTrigger("restoreBatch", true)
+								: undefined,
+						delete:
+							!props.state.showingDeleted() && canDeleteMedia()
+								? () => rowTarget.setTrigger("deleteBatch", true)
+								: undefined,
+						deletePermanently:
+							props.state.showingDeleted() && canDeleteMedia()
+								? () => rowTarget.setTrigger("deleteBatchPermanently", true)
+								: undefined,
+						addToChat:
+							attachableMedia().length > 0
+								? () => {
+										session.attach(
+											attachableMedia().map((item) =>
+												mediaReferenceItem(item, {
+													contentLocale: contentLocale(),
+												}),
+											),
+										);
+										mediaStore.get.reset();
+									}
+								: undefined,
 					}}
 				/>
 			</QueryBoundary>

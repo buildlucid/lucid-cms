@@ -54,6 +54,7 @@ import {
 	getRequestAgentTool,
 	getRequestMcpTool,
 } from "../../services/requests/tools/get/index.js";
+import { getRequestsOverviewAgentTool } from "../../services/requests/tools/overview/index.js";
 import { replyToRequestAgentTool } from "../../services/requests/tools/reply/index.js";
 import { scheduleRequestAgentTool } from "../../services/requests/tools/schedule/index.js";
 import { updateRequestAgentTool } from "../../services/requests/tools/update/index.js";
@@ -144,6 +145,8 @@ export const agentTools = {
 		find: findRequestsAgentTool,
 		/** Reads a request with its documents, blockers and comments. */
 		get: getRequestAgentTool,
+		/** Counts open requests and how far each environment is behind latest, like the Review page. */
+		overview: getRequestsOverviewAgentTool,
 		/** Comments on a request, which blocks approval until it is resolved or closed. */
 		comment: commentOnRequestAgentTool,
 		/** Replies to a comment on a request. */
@@ -207,10 +210,11 @@ export const agentTools = {
 		deleteDocumentAgentTool(options),
 		unpublishDocumentAgentTool(options),
 	],
-	/** Finds and reads requests, comments on them and acknowledges changed targets. */
+	/** Finds and reads requests and the review overview, comments on requests and acknowledges changed targets. */
 	review: (options: CollectionToolOptions = {}) => [
 		findRequestsAgentTool(options),
 		getRequestAgentTool(options),
+		getRequestsOverviewAgentTool(options),
 		commentOnRequestAgentTool(options),
 		replyToRequestAgentTool(options),
 		updateRequestCommentAgentTool(options),

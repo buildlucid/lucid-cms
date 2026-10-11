@@ -6,7 +6,10 @@ import CollectionBuilder from "../../../libs/collection/builders/collection-buil
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../../libs/i18n/index.js";
+import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
+import { Permissions } from "../../../libs/permission/definitions.js";
 import { ExternalScopes } from "../../../libs/permission/external-scopes.js";
+import { UserRolesRepository } from "../../../libs/repositories/index.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
 import type { ToolkitActor } from "../../../libs/toolkit/types.js";
 import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
@@ -19,11 +22,14 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import deleteConversation from "../../agent/delete-conversation.js";
 import insertConversation from "../../agent/helpers/insert-conversation.js";
+import checkReferenceInput from "../../agent/references/check-input.js";
 import list from "../../agent/references/list.js";
 import publish from "../../documents/publish.js";
+import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
 import syncLocales from "../../sync/sync-locales.js";
 import { outputSchema as getOutputSchema } from "./get/schema.js";
+import { outputSchema as overviewOutputSchema } from "./overview/schema.js";
 
 const fixture = getTestConfig();
 const collection = (key: string) =>
@@ -278,6 +284,39 @@ test("finds and reads requests only within the tool's collections", async () => 
 		permissions: { edit: true, complete: true },
 	});
 	expect(request.reviewToken).toEqual(expect.any(String));
+});
+
+test("the overview counts open requests and environment status within the tool's collections", async () => {
+	const run = await startRun();
+	const overview = async () =>
+		overviewOutputSchema.parse(
+			await run.call(
+				agentTools.requests.overview({ collections: [pages.key] }),
+				{},
+			),
+		).data;
+
+	const before = await overview();
+	await createRequest();
+	await createRequest(posts.key);
+	const after = await overview();
+
+	expect(after.requests.publish.awaitingApproval).toBe(
+		before.requests.publish.awaitingApproval + 1,
+	);
+	expect(after.collections).toEqual([
+		{
+			collectionKey: pages.key,
+			total: (before.collections[0]?.total ?? 0) + 1,
+			environments: [
+				expect.objectContaining({
+					key: "production",
+					unreleased:
+						(before.collections[0]?.environments[0]?.unreleased ?? 0) + 1,
+				}),
+			],
+		},
+	]);
 });
 
 test("MCP reads only reach collections the connection can read", async () => {
@@ -805,4 +844,61 @@ test("toolkit reads and writes use the actor's live permissions", async () => {
 
 	const system = await toolkit.requests.getSingle({ id: requestId });
 	expect(system.data?.id).toBe(requestId);
+});
+
+test("people attach requests they can read in every collection, unless the agent turns it off", async () => {
+	const pageRequest = await createRequest();
+	const postRequest = await createRequest(posts.key);
+	const pageReader = await insertUser(false);
+	const role = await createRole(context, {
+		name: randomUUID(),
+		permissions: [
+			Permissions.RequestsRead,
+			getCollectionPermission(pages.key, "read"),
+		],
+	});
+	assert(role.data, JSON.stringify(role.error));
+	expect(
+		(
+			await new UserRolesRepository(context.db).createSingle({
+				data: { user_id: pageReader.id, role_id: role.data },
+			})
+		).error,
+	).toBeUndefined();
+	const attach = (
+		userId: number,
+		requestId: number,
+		checkContext: ServiceContext = context,
+	) =>
+		checkReferenceInput(checkContext, {
+			userId,
+			agentKey: reviewer.key,
+			references: [{ type: "request", requestId }],
+		});
+
+	expect((await attach(pageReader.id, pageRequest)).error).toBeUndefined();
+	expect((await attach(pageReader.id, postRequest)).error?.status).toBe(403);
+
+	const withoutRequests = {
+		...context,
+		config: {
+			...context.config,
+			ai: {
+				...context.config.ai,
+				agents: {
+					definitions: [
+						defineAgent({
+							key: reviewer.key,
+							name: reviewer.name,
+							description: reviewer.description,
+							features: { requests: { attach: false } },
+						}),
+					],
+				},
+			},
+		},
+	};
+	expect(
+		(await attach(user.id, pageRequest, withoutRequests)).error?.status,
+	).toBe(403);
 });

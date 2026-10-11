@@ -22,6 +22,8 @@ export const getAgentAccess = () => {
 				can(agent, "manage-code-routines"),
 		),
 		chat: agents.filter((agent) => can(agent, "chat")),
+		/** Agents offered in the sidebar beside admin pages. */
+		sidebar: agents.filter((agent) => agent.sidebar && can(agent, "chat")),
 		ownRoutines: agents.filter((agent) => can(agent, "manage-own-routines")),
 		codeRoutines: agents.filter((agent) => can(agent, "manage-code-routines")),
 	};

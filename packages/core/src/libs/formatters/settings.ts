@@ -40,6 +40,7 @@ const formatSingle = (props: {
 			agents: getAgents(props.config).map((agent) => ({
 				key: agent.key,
 				name: agent.name,
+				sidebar: agent.sidebar,
 			})),
 			features: {
 				imageGeneration: props.config.ai.features.imageGeneration,

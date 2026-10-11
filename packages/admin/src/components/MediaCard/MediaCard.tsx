@@ -40,6 +40,8 @@ interface MediaCardProps {
 	contentLocale?: string;
 	ownerName?: string;
 	showingDeleted?: Accessor<boolean>;
+	/** Whether the media can be added to the agent's chat, which makes it selectable. */
+	canAddToChat?: (media: Media) => boolean;
 	isDragging: Accessor<boolean>;
 	onGenerateAlt?: (_media: Media) => void;
 	onCrop?: (_media: Media) => void;
@@ -144,11 +146,12 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const showCheckbox = createMemo(
 		() => isSelected() || mediaStore.get.selectedMedia.length > 0,
 	);
+	//* selectable when a selection action can take it: restoring or deleting, or adding it to the chat
 	const canSelect = createMemo(() => {
 		if (props.showingDeleted?.()) {
 			return canEdit() || canDelete();
 		}
-		return canEdit();
+		return canDelete() || props.canAddToChat?.(props.media) === true;
 	});
 	const aiAltAccessDisabledToast = createMemo(() => {
 		if (

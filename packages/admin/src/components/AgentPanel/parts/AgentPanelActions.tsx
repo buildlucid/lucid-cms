@@ -12,6 +12,7 @@ import Menu from "@/components/Menu/Menu";
 import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import api from "@/services/api";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 import dateHelpers from "@/utils/date-helpers";
 
 const recentChats = 5;
@@ -26,8 +27,14 @@ const AgentPanelActions: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Queries
+	//* only chats with agents offered in the sidebar open here
 	const recent = api.agent.useGetConversations({
-		queryParams: { perPage: recentChats },
+		queryParams: {
+			filters: {
+				agentKey: () => getAgentAccess().sidebar.map((agent) => agent.key),
+			},
+			perPage: recentChats,
+		},
 	});
 
 	// ----------------------------------------
@@ -43,7 +50,6 @@ const AgentPanelActions: Component<{
 					<TbOutlineHistory size={12} />
 				</Menu.Trigger>
 				<Menu.Content class="w-72">
-					<Menu.Label>{T()("agent.panel.recent")}</Menu.Label>
 					<For
 						each={recent.data?.data ?? []}
 						fallback={

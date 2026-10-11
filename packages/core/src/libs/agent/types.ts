@@ -195,6 +195,8 @@ export type DefineAgentOptions<Key extends string> = {
 	key: Key;
 	/** Set to false to turn the agent off without removing it. Its chats and routines are kept. Defaults to true. */
 	enabled?: boolean;
+	/** Shows the agent in the admin sidebar by default, with `false` hiding it there while keeping its chats available on agent pages. */
+	sidebar?: boolean;
 	name: string;
 	/** Helps people choose the agent. */
 	description: string;
@@ -234,6 +236,10 @@ export type AgentFeatures = {
 		/** Let people select CMS documents in the composer. */
 		attach: boolean;
 	};
+	requests: {
+		/** Let people add requests to a message, eg. selected ones from the requests list. */
+		attach: boolean;
+	};
 	/** Enables tools to read and edit the person's open document builder, including unsaved content, with changes remaining unsaved until the person saves them. */
 	builder: {
 		/** Register lucid_builder_read and lucid_builder_focus. */
@@ -256,6 +262,7 @@ export type AgentDefinition<Key extends string = string> = {
 	readonly type: "agent-definition";
 	readonly key: Key;
 	readonly enabled: boolean;
+	readonly sidebar: boolean;
 	readonly name: string;
 	readonly description: string;
 	readonly instructions: string;

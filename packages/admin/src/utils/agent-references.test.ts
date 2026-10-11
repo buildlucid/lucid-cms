@@ -75,6 +75,7 @@ it("attaches personal files with uploads alone, and library media only with atta
 	const features = (upload: boolean, attach: boolean) => ({
 		media: { upload, attach },
 		documents: { attach: false },
+		requests: { attach: false },
 		builder: { read: true, edit: true },
 	});
 	const personal = { ownership: { type: "user" as const, userId: 1 } };

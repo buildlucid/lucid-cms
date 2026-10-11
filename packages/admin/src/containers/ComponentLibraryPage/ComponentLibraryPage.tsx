@@ -1815,7 +1815,6 @@ const ComponentLibraryPage: Component = () => {
 							<Table.Root
 								id="components.table.selectable"
 								rowCount={demoRows.length}
-								selectable={true}
 								allowDelete={true}
 								onDeleteRows={async () => {}}
 								columns={[

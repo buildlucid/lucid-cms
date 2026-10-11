@@ -10,14 +10,20 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getListAccess from "./helpers/get-list-access.js";
 
 /** Counts the open requests a user can see for each type, for dashboards and filter presets. */
-const getOverview: ServiceFn<[{ user: LucidActor }], RequestOverview> = async (
-	context,
-	data,
-) => {
+const getOverview: ServiceFn<
+	[
+		{
+			user: LucidActor;
+			/** Only counts requests whose documents all belong to these collections. */
+			collectionKeys?: readonly string[];
+		},
+	],
+	RequestOverview
+> = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
 
 	const overviewRes = await Requests.selectOverview({
-		access: getListAccess(context, data.user),
+		access: getListAccess(context, data.user, data.collectionKeys),
 	});
 	if (overviewRes.error) return overviewRes;
 

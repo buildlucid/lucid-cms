@@ -37,6 +37,8 @@ const TableTextCell: Component<TableTextCellProps> = (props) => {
 				component={props.href ? "a" : "span"}
 				href={props.href}
 				class={classNames("text-sm", {
+					//* the row shows it's clickable, so the link keeps its colour
+					"hover:text-body": props.href !== undefined,
 					"line-clamp-1": maxLines() === 1,
 					"line-clamp-2": maxLines() === 2,
 					"line-clamp-3": maxLines() === 3,

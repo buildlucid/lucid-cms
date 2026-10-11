@@ -3,13 +3,16 @@ import type { Agent, AgentConfirmationMode } from "@types";
 import classnames from "classnames";
 import {
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	For,
 	onMount,
 	Show,
 } from "solid-js";
-import AgentComposer from "@/components/AgentComposer/AgentComposer";
+import AgentComposer, {
+	type AgentComposerHandle,
+} from "@/components/AgentComposer/AgentComposer";
 import AgentConfirmationPicker from "@/components/AgentConfirmationPicker/AgentConfirmationPicker";
 import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
 import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
@@ -55,13 +58,19 @@ const AgentHome: Component<{
 	const [confirmationMode, setConfirmationMode] =
 		createSignal<AgentConfirmationMode>("tool-defaults");
 	const [composerBlank, setComposerBlank] = createSignal(true);
+	const [composer, setComposer] = createSignal<AgentComposerHandle>();
 	const painted = useFirstPaint();
 	const definitions = api.agent.useGetDefinitions();
 
 	// ----------------------------------------
 	// Memos
 	const agents = createMemo(() => {
-		const usable = new Set(getAgentAccess().chat.map((agent) => agent.key));
+		const access = getAgentAccess();
+		const usable = new Set(
+			(props.variant === "panel" ? access.sidebar : access.chat).map(
+				(agent) => agent.key,
+			),
+		);
 		return (
 			definitions.data?.data.agents.filter((agent) => usable.has(agent.key)) ??
 			[]
@@ -96,8 +105,9 @@ const AgentHome: Component<{
 	});
 	const panel = createMemo(() => props.variant === "panel");
 	const greeting = createMemo(getGreeting);
+	//* the panel only lists its agents' chats, as other agents are kept out of the sidebar
 	const waitingAgentKey = createMemo(() =>
-		agents().length > 1 ? agent()?.key : undefined,
+		agents().length > 1 || panel() ? agent()?.key : undefined,
 	);
 
 	// ----------------------------------------
@@ -148,6 +158,13 @@ const AgentHome: Component<{
 			void import("@/containers/AgentConversationPage/AgentConversationPage");
 		}
 	});
+	createEffect(() => {
+		const references = session.attached();
+		const handle = composer();
+		if (!handle || !references) return;
+		session.takeAttached();
+		handle.attach(references);
+	});
 
 	// ----------------------------------------
 	// Render
@@ -164,7 +181,7 @@ const AgentHome: Component<{
 						class={classnames(
 							"flex w-full flex-col",
 							panel()
-								? "gap-6 px-3 pt-[12vh] pb-10"
+								? "my-auto gap-6 px-5 py-10"
 								: "mx-auto max-w-3xl gap-8 pt-[18vh] pb-10",
 						)}
 					>
@@ -172,7 +189,7 @@ const AgentHome: Component<{
 							<h2
 								class={classnames(
 									"font-medium text-title",
-									panel() ? "text-lg" : "text-2xl",
+									panel() ? "text-base" : "text-2xl",
 								)}
 							>
 								{greeting()}
@@ -189,6 +206,7 @@ const AgentHome: Component<{
 						<AgentUnavailableNotice>
 							<div class="flex flex-col">
 								<AgentComposer
+									ref={setComposer}
 									class="agent-composer-morph"
 									size={panel() ? "md" : "lg"}
 									grow={
@@ -211,6 +229,7 @@ const AgentHome: Component<{
 									agentKey={current().key}
 									features={current().features}
 									capabilities={current().capabilities}
+									capabilityHints={!panel()}
 									onSubmit={start}
 									controls={
 										<AgentConfirmationPicker

@@ -41,7 +41,7 @@ export interface TableRootProps {
 	/** Number of placeholder rows shown while loading. @default 10 */
 	loadingRows?: number;
 	caption?: string;
-	/** Adds checkboxes for selecting rows. */
+	/** Set to false to turn selection off, eg. while reordering. Rows only get checkboxes when an action can take them. */
 	selectable?: boolean;
 	selectActions?: TableSelectActionItem[];
 	/** @default "md" */
@@ -218,7 +218,15 @@ const TableRoot: Component<TableRootProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const isSelectable = createMemo(() => props.selectable ?? false);
+	const isSelectable = createMemo(
+		() =>
+			props.selectable !== false &&
+			((props.allowRestore === true && props.onRestoreRows !== undefined) ||
+				(props.allowDelete === true && props.onDeleteRows !== undefined) ||
+				(props.allowDeletePermanently === true &&
+					props.onDeletePermanentlyRows !== undefined) ||
+				(props.selectActions?.length ?? 0) > 0),
+	);
 	const padding = createMemo<TablePadding>(() => props.padding ?? "md");
 	const allSelected = createMemo(() => {
 		if (!selected()) return false;

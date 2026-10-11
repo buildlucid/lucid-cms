@@ -76,6 +76,10 @@ const ReleaseEnvironmentModal: Component<{
 
 	// ----------------------------------------
 	// Memos
+	const existingRefs = createMemo(() => {
+		const request = existing();
+		return request ? [request] : [];
+	});
 	const environment = createMemo(() =>
 		getTargetLabel(props.collection, props.target ?? ""),
 	);
@@ -267,9 +271,10 @@ const ReleaseEnvironmentModal: Component<{
 					open: pickerOpen(),
 					setOpen: setPickerOpen,
 					document: props.document,
-					selected: existing(),
+					selected: existingRefs().map((request) => request.id),
+					selectedRefs: existingRefs(),
 				}}
-				callbacks={{ onSelect: setExisting }}
+				callbacks={{ onSelect: (selection) => setExisting(selection.refs[0]) }}
 			/>
 		</Modal.Root>
 	);

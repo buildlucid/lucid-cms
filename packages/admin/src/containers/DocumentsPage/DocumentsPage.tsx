@@ -16,10 +16,14 @@ import CreateMenu, {
 	type CreateMenuAction,
 } from "@/components/CreateMenu/CreateMenu";
 import { DocumentsList } from "@/components/DocumentsList/DocumentsList";
-import type { FilterPreset } from "@/components/FilterPanel/preset-state";
+import {
+	type FilterPreset,
+	findActiveFilterPreset,
+} from "@/components/FilterPanel/preset-state";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
+import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, { sort } from "@/hooks/useQueryState/useQueryState";
@@ -28,6 +32,7 @@ import { queryKeys } from "@/services/query-keys";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { screenLabel } from "@/utils/agent-screen";
 import {
 	buildDocumentFilterSchema,
 	documentFilterPanelFields,
@@ -39,6 +44,7 @@ import {
 import helpers from "@/utils/helpers";
 import { getDocumentCreateActions } from "@/utils/requests";
 import { getDocumentRoute } from "@/utils/route-helpers";
+import { tabId } from "@/utils/tab-id";
 
 const DocumentsPage: Component = () => {
 	let filterSchemaKey: string | undefined;
@@ -208,6 +214,19 @@ const DocumentsPage: Component = () => {
 	// ----------------------------------
 	// Effects
 	usePageTitle(collectionName);
+	useAgentScreen(() => {
+		const collection = collectionData();
+		if (collection?.mode !== "multiple") return undefined;
+		return {
+			type: "documents",
+			tabId,
+			label: screenLabel(collectionName()),
+			collectionKey: collection.key,
+			contentLocale: contentLocaleStore.get.contentLocale ?? null,
+			filter:
+				findActiveFilterPreset(getFilterPresets(), searchParams)?.label ?? null,
+		};
+	});
 
 	//* reset order mode and the filter section when switching collections -
 	//* closing the section also clears its uncommitted draft rows

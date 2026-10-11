@@ -73,6 +73,7 @@ const updateMedia: ServiceFn<
 		};
 	}
 
+	//* clearing a field the type lacks changes nothing, so only text for one is a mistake
 	const unsupported = typedFields.find(
 		({ field, types }) =>
 			input[field] !== undefined && !types.includes(media.type),
@@ -91,9 +92,12 @@ const updateMedia: ServiceFn<
 	}
 
 	//* the service replaces a locale's whole translation, so text left out is sent back unchanged
-	const changesText = textFields.some((field) => input[field] !== undefined);
+	const cleared = new Set(input.clear);
+	const changesText = textFields.some(
+		(field) => input[field] !== undefined || cleared.has(field),
+	);
 	const translation = (
-		value: string | null | undefined,
+		field: (typeof textFields)[number],
 		current: MediaTranslationMap,
 	) =>
 		changesText
@@ -101,9 +105,10 @@ const updateMedia: ServiceFn<
 					{
 						localeCode: localeRes.data,
 						value:
-							value === undefined
-								? translateText(current, localeRes.data)
-								: value,
+							input[field] ??
+							(cleared.has(field)
+								? null
+								: translateText(current, localeRes.data)),
 					},
 				]
 			: undefined;
@@ -114,17 +119,17 @@ const updateMedia: ServiceFn<
 	const updated = await updateSingle(context, {
 		id: input.mediaId,
 		fileName: input.fileName,
-		folderId: input.folderId,
-		title: translation(input.title, media.title),
-		alt: translation(input.alt, media.type === "image" ? media.alt : null),
+		folderId: input.folderId ?? (cleared.has("folderId") ? null : undefined),
+		title: translation("title", media.title),
+		alt: translation("alt", media.type === "image" ? media.alt : null),
 		description: translation(
-			input.description,
+			"description",
 			media.type === "video" || media.type === "audio"
 				? media.description
 				: null,
 		),
 		summary: translation(
-			input.summary,
+			"summary",
 			media.type === "document" ? media.summary : null,
 		),
 		actor,

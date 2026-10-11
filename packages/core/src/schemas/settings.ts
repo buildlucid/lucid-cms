@@ -9,6 +9,9 @@ const settingsResponseSchema = z.object({
 				z.object({
 					key: z.string(),
 					name: z.string(),
+					sidebar: z.boolean().meta({
+						description: "Whether the agent is offered in the agent sidebar.",
+					}),
 				}),
 			),
 			enabled: z.boolean().meta({

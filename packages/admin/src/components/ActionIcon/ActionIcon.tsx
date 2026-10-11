@@ -20,6 +20,7 @@ import {
 	TbOutlineLink,
 	TbOutlineLock,
 	TbOutlineMail,
+	TbOutlineMessagePlus,
 	TbOutlinePencil,
 	TbOutlinePhoto,
 	TbOutlinePlus,
@@ -43,6 +44,7 @@ export type ActionIconName =
 	| "bullseye"
 	| "calendar"
 	| "chart"
+	| "chat"
 	| "check"
 	| "clock"
 	| "cloud-off"
@@ -94,6 +96,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <TbOutlineCalendar class={iconClasses()} size={iconSize()} />;
 			case "chart":
 				return <TbOutlineChartBar class={iconClasses()} size={iconSize()} />;
+			case "chat":
+				return <TbOutlineMessagePlus class={iconClasses()} size={iconSize()} />;
 			case "check":
 				return <TbOutlineCheck class={iconClasses()} size={iconSize()} />;
 			case "cloud-off":

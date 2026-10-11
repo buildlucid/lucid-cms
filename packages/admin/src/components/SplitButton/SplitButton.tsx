@@ -1,6 +1,6 @@
 import classnames from "classnames";
 import { TbOutlineChevronDown } from "solid-icons/tb";
-import { type Component, For } from "solid-js";
+import { type Component, For, type JSXElement } from "solid-js";
 import Button, {
 	type ButtonSize,
 	type ButtonVariant,
@@ -11,6 +11,7 @@ import T from "@/translations";
 
 export interface SplitButtonAction {
 	label: string;
+	icon?: JSXElement;
 	onSelect: () => void;
 	variant?: MenuItemVariant;
 	disabled?: boolean;
@@ -64,6 +65,7 @@ const SplitButton: Component<SplitButtonProps> = (props) => {
 							<Menu.Item
 								variant={action.variant}
 								disabled={action.disabled}
+								icon={action.icon}
 								onSelect={action.onSelect}
 							>
 								{action.label}

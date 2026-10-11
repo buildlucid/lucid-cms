@@ -44,6 +44,8 @@ export interface AgentComposerHandle {
 	toggleReference: (
 		reference: AgentReferenceInput | AgentReferenceItem,
 	) => void;
+	/** Attaches resources, keeping any already attached. */
+	attach: (references: (AgentReferenceInput | AgentReferenceItem)[]) => void;
 	focus: () => void;
 }
 
@@ -55,6 +57,11 @@ export interface AgentComposerProps {
 	features?: Agent["features"];
 	/** What the agent can do, shown on attached files and in the toolbar. */
 	capabilities?: Agent["capabilities"];
+	/**
+	 * Shows what the agent can do, eg. search the web, as icons in the toolbar.
+	 * @default true
+	 */
+	capabilityHints?: boolean;
 	/** Current details for resources already linked to the chat, keyed by `agentReferenceKey`. */
 	referenceDetails?: Readonly<Record<string, AgentReferenceItem>>;
 	/** Resolves false when the message was not accepted, which puts it back in the box. */
@@ -97,7 +104,8 @@ export interface AgentComposerProps {
 	/** Pixels added to the editor's resting height, animated as it changes. */
 	grow?: number;
 	class?: string;
-	ref?: (handle: AgentComposerHandle) => void;
+	/** Receives the box's handle, then undefined once it unmounts, eg. while an interaction replaces it. */
+	ref?: (handle: AgentComposerHandle | undefined) => void;
 }
 
 const editorHeight = { md: "1.5rem", lg: "4.5rem" } as const;
@@ -146,13 +154,24 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			references().some((reference) =>
 				reference.type === "media"
 					? !(features.media.attach || features.media.upload)
-					: !features.documents.attach,
+					: reference.type === "document"
+						? !features.documents.attach
+						: !features.requests.attach,
 			)
 		);
 	});
 
 	// ----------------------------------------
 	// Functions
+	const addReferences = (added: (AgentReferenceInput | AgentReferenceItem)[]) =>
+		setReferences((current) =>
+			mergeAgentReferences(
+				current,
+				added.map((reference) =>
+					agentReferenceItem(reference, props.referenceDetails),
+				),
+			),
+		);
 	const updateBlank = (instance: Editor) => {
 		const value = isBlank(instance) && references().length === 0;
 		setBlank(value);
@@ -280,14 +299,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 		updateBlank(instance);
 		props.ref?.({
 			insert: (markdown, added = []) => {
-				setReferences((current) =>
-					mergeAgentReferences(
-						current,
-						added.map((reference) =>
-							agentReferenceItem(reference, props.referenceDetails),
-						),
-					),
-				);
+				addReferences(added);
 				const joined = isBlank(instance)
 					? markdown
 					: `${instance.getMarkdown().trim()}\n\n${markdown}`;
@@ -307,6 +319,10 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 								agentReferenceItem(reference, props.referenceDetails),
 							],
 				);
+			},
+			attach: (added) => {
+				addReferences(added);
+				instance.commands.focus("end");
 			},
 			focus: () => instance.commands.focus("end"),
 		});
@@ -377,6 +393,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 
 	//* a pending save is written rather than dropped, so leaving never loses or revives text
 	onCleanup(() => {
+		props.ref?.(undefined);
 		saveDraft.clear();
 		const instance = editor();
 		if (!instance) return;
@@ -506,7 +523,9 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 						}
 					/>
 					{props.controls}
-					<AgentCapabilityHints capabilities={props.capabilities} />
+					<Show when={props.capabilityHints !== false}>
+						<AgentCapabilityHints capabilities={props.capabilities} />
+					</Show>
 					<div class="ms-auto flex min-w-0 items-center gap-0.5">
 						{props.end}
 						<Show

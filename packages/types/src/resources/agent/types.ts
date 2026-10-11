@@ -31,20 +31,47 @@ export type AgentReferenceSource =
 	| { type: "message" }
 	| { type: "tool"; toolName: string };
 
-/** Describes the originating admin screen so the agent knows what is open and can send builder tool calls to its browser. */
-export type AgentScreen =
+/** Describes the originating admin screen, whose browser tab answers builder tool calls when it is a document builder. */
+export type AgentScreen = {
+	/** The browser tab the screen is open in, which answers builder tools. */
+	tabId: string;
+	label: string;
+} & (
 	| {
 			type: "document";
-			/** The browser tab the screen is open in, which answers builder tools. */
-			tabId: string;
-			label: string;
 			collectionKey: string;
 			/** Null when creating a document, before it is saved. */
 			documentId: number | null;
 			/** The request whose proposal is open, or null for latest. */
 			requestId: number | null;
 	  }
-	| { type: "request"; tabId: string; label: string; requestId: number };
+	| { type: "request"; requestId: number }
+	| {
+			/** A collection's document list. */
+			type: "documents";
+			collectionKey: string;
+			contentLocale: string | null;
+			/** The filter preset applied, or null when none is. */
+			filter: string | null;
+	  }
+	| {
+			/** The media library. */
+			type: "media";
+			/** The open folder, or null for the top level. */
+			folderId: number | null;
+			filter: string | null;
+	  }
+	| { type: "requests"; filter: string | null }
+	| { type: "review" }
+	| {
+			/** A document's version history. */
+			type: "history";
+			collectionKey: string;
+			documentId: number;
+			/** The version selected in the timeline. */
+			versionId: number | null;
+	  }
+);
 
 /** A document's unsaved content as the builder holds it, in the shape the admin saves. */
 export type AgentBuilderContent = {
@@ -203,7 +230,12 @@ export type AgentCapabilities = {
 };
 
 /** An agent name used in navigation and saved chat labels. */
-export type AgentSummary = { key: string; name: string };
+export type AgentSummary = {
+	key: string;
+	name: string;
+	/** Whether the agent is offered in the agent sidebar beside admin pages. */
+	sidebar: boolean;
+};
 
 /** Agent details available to the current admin user. */
 export interface Agent {
@@ -214,6 +246,7 @@ export interface Agent {
 	features: {
 		media: { upload: boolean; attach: boolean };
 		documents: { attach: boolean };
+		requests: { attach: boolean };
 		builder: { read: boolean; edit: boolean };
 	};
 	/** What the agent can do for the current user, such as open attached files or search the web. */

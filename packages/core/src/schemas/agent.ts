@@ -349,6 +349,7 @@ const agentCatalogResponseSchema = z.object({
 			features: z.object({
 				media: z.object({ upload: z.boolean(), attach: z.boolean() }),
 				documents: z.object({ attach: z.boolean() }),
+				requests: z.object({ attach: z.boolean() }),
 				builder: z.object({ read: z.boolean(), edit: z.boolean() }),
 			}),
 			capabilities: z.object({
@@ -516,7 +517,9 @@ export const controllerSchemas = {
 			string: z
 				.object({
 					"filter[title]": queryString.schema.filter(false),
-					"filter[agentKey]": queryString.schema.filter(false),
+					"filter[agentKey]": queryString.schema.filter(true, {
+						example: "assistant,seo",
+					}),
 					"filter[routineId]": queryString.schema.filter(false),
 					"filter[status]": queryString.schema.filter(true, {
 						example: "waiting",
@@ -530,7 +533,7 @@ export const controllerSchemas = {
 				filter: z
 					.object({
 						title: queryFormatted.schema.filters.single.optional(),
-						agentKey: queryFormatted.schema.filters.single.optional(),
+						agentKey: queryFormatted.schema.filters.union.optional(),
 						routineId: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
 					})

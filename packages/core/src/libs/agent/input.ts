@@ -65,16 +65,55 @@ const contextTag = (
 export const textFromParts = (parts: StoredAgentMessagePart[]) =>
 	parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
 
-const screenAttributes = (screen: AgentScreen) =>
-	screen.type === "document"
-		? {
+const screenAttributes = (screen: AgentScreen) => {
+	switch (screen.type) {
+		case "document":
+			return {
 				type: "document_builder",
 				collection_key: screen.collectionKey,
 				document_id: screen.documentId ?? undefined,
 				request_id: screen.requestId ?? undefined,
 				name: screen.label,
-			}
-		: { type: "request", request_id: screen.requestId, name: screen.label };
+			};
+		case "request":
+			return {
+				type: "request",
+				request_id: screen.requestId,
+				name: screen.label,
+			};
+		case "documents":
+			return {
+				type: "document_list",
+				collection_key: screen.collectionKey,
+				content_locale: screen.contentLocale ?? undefined,
+				filter: screen.filter ?? undefined,
+				name: screen.label,
+			};
+		case "media":
+			return {
+				type: "media_library",
+				folder_id: screen.folderId ?? undefined,
+				filter: screen.filter ?? undefined,
+				name: screen.label,
+			};
+		case "requests":
+			return {
+				type: "request_list",
+				filter: screen.filter ?? undefined,
+				name: screen.label,
+			};
+		case "review":
+			return { type: "review_overview", name: screen.label };
+		case "history":
+			return {
+				type: "document_history",
+				collection_key: screen.collectionKey,
+				document_id: screen.documentId,
+				version_id: screen.versionId ?? undefined,
+				name: screen.label,
+			};
+	}
+};
 
 /** Formats message text, attached resource labels and its originating admin screen for the model without fetching resource contents. */
 export const messageText = (parts: StoredAgentMessagePart[]) => {

@@ -2,21 +2,14 @@ import z from "zod";
 import { mediaItemSchema } from "../helpers/schema.js";
 
 const translation = (max: number, description: string) =>
-	z
-		.string()
-		.trim()
-		.min(1)
-		.max(max)
-		.nullable()
-		.optional()
-		.meta({ description: `${description} Pass null to clear it.` });
+	z.string().trim().min(1).max(max).optional().meta({ description });
 
-const changeKeys = [
+/** Fields explicitly removed by `clear`, so omitted values remain unchanged. */
+const clearableKeys = [
 	"title",
 	"alt",
 	"description",
 	"summary",
-	"fileName",
 	"folderId",
 ] as const;
 
@@ -37,14 +30,25 @@ export const inputSchema = z
 			description:
 				"File name used in the library and for downloads, eg. 'team-photo.jpg'. Keep the extension.",
 		}),
-		folderId: z.number().int().positive().nullable().optional().meta({
+		folderId: z.number().int().positive().optional().meta({
 			description:
-				"Media library folder ID; null moves it to the top level. Personal media can't go in folders.",
+				"Media library folder ID to move it to. Personal media can't go in folders.",
+		}),
+		clear: z.array(z.enum(clearableKeys)).optional().meta({
+			description:
+				"Fields to remove: text in contentLocale, or folderId to move it to the top level. Only list fields you were asked to remove.",
 		}),
 	})
 	.strict()
-	.refine((input) => changeKeys.some((key) => input[key] !== undefined), {
-		message: "Include at least one change.",
+	.refine(
+		(input) =>
+			clearableKeys.some((key) => input[key] !== undefined) ||
+			input.fileName !== undefined ||
+			(input.clear?.length ?? 0) > 0,
+		{ message: "Include at least one change." },
+	)
+	.refine((input) => !input.clear?.some((key) => input[key] !== undefined), {
+		message: "Don't set and clear the same field.",
 	});
 
 export const outputSchema = z.object({

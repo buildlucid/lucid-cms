@@ -11,19 +11,28 @@ export const screenLabel = (label: string) => {
 		: trimmed;
 };
 
-/** Whether two screens are the same one in the same tab, eg. the one a call was made for and the one open now. */
+/** Checks whether two screens identify the same place in the same tab, allowing labels and filters to change. */
 export const isSameScreen = (a: AgentScreen, b: AgentScreen) => {
 	if (a.tabId !== b.tabId) return false;
-	if (a.type === "document" && b.type === "document") {
-		return (
-			a.collectionKey === b.collectionKey &&
-			a.documentId === b.documentId &&
-			a.requestId === b.requestId
-		);
+	switch (a.type) {
+		case "document":
+			return showsDocument(b, a);
+		case "request":
+			return b.type === "request" && a.requestId === b.requestId;
+		case "documents":
+			return b.type === "documents" && a.collectionKey === b.collectionKey;
+		case "media":
+			return b.type === "media" && a.folderId === b.folderId;
+		case "history":
+			return (
+				b.type === "history" &&
+				a.collectionKey === b.collectionKey &&
+				a.documentId === b.documentId
+			);
+		case "requests":
+		case "review":
+			return a.type === b.type;
 	}
-	return a.type === "request" && b.type === "request"
-		? a.requestId === b.requestId
-		: false;
 };
 
 /** Whether a screen is the document builder for a document version, eg. the one a builder change was made in. */

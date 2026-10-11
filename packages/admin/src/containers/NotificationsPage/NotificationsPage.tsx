@@ -117,6 +117,7 @@ const NotificationsPage: Component = () => {
 		showingArchived()
 			? {
 					label: T()("notifications.unarchive"),
+					icon: "restore",
 					variant: "primary",
 					confirm: {
 						title: T()("modals.notifications.unarchive.items.title"),
@@ -128,6 +129,7 @@ const NotificationsPage: Component = () => {
 				}
 			: {
 					label: T()("notifications.archive"),
+					icon: "archive",
 					variant: "danger",
 					confirm: {
 						title: T()("modals.notifications.archive.items.title"),
@@ -139,6 +141,7 @@ const NotificationsPage: Component = () => {
 				},
 		{
 			label: T()("notifications.mark.read"),
+			icon: "check",
 			confirm: {
 				title: T()("modals.notifications.read.items.title"),
 				description: T()("modals.notifications.read.items.description"),
@@ -147,6 +150,7 @@ const NotificationsPage: Component = () => {
 		},
 		{
 			label: T()("notifications.mark.unread"),
+			icon: "email",
 			confirm: {
 				title: T()("modals.notifications.unread.items.title"),
 				description: T()("modals.notifications.unread.items.description"),
@@ -237,7 +241,6 @@ const NotificationsPage: Component = () => {
 						data={notifications.data?.data}
 						queryState={searchParams}
 						loading={summary.isLoading || notifications.isLoading}
-						selectable
 						selectActions={selectActions()}
 						columns={[
 							{
