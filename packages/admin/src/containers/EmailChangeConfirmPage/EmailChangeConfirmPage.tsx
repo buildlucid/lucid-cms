@@ -73,7 +73,7 @@ const EmailChangeConfirmPage: Component = () => {
 			</Match>
 			<Match when={completed()}>
 				<div class="text-center max-w-sm mx-auto">
-					<ThemeLogoIcon class="h-10 mx-auto mb-6" />
+					<ThemeLogoIcon class="h-8 mx-auto mb-6" />
 					<h1 class="mb-1">
 						{T()("routes.auth.email.change.confirmed.title")}
 					</h1>
@@ -85,7 +85,7 @@ const EmailChangeConfirmPage: Component = () => {
 			</Match>
 			<Match when={checkToken.isSuccess}>
 				<div class="text-center max-w-sm mx-auto">
-					<ThemeLogoIcon class="h-10 mx-auto mb-6" />
+					<ThemeLogoIcon class="h-8 mx-auto mb-6" />
 					<h1 class="mb-1">{T()("routes.auth.email.change.confirm.title")}</h1>
 					<p>{T()("routes.auth.email.change.confirm.description")}</p>
 					<div class="mt-8 flex justify-center">

@@ -63,7 +63,7 @@ export const toolbarStyles = `
 }
 
 .action:focus-visible {
-	outline: 2px solid #c1fe77;
+	outline: 2px solid #97f85f;
 	outline-offset: 1px;
 }
 
@@ -82,8 +82,8 @@ export const toolbarStyles = `
 
 .lucid-icon {
 	display: block;
-	width: 15px;
-	height: 15px;
+	width: 13px;
+	height: 13px;
 }
 
 .brand-label {
@@ -115,8 +115,8 @@ export const toolbarStyles = `
 	width: 5px;
 	height: 5px;
 	border-radius: 50%;
-	background: #c1fe77;
-	box-shadow: 0 0 0 3px rgba(193,254,119,.1);
+	background: #97f85f;
+	box-shadow: 0 0 0 3px rgba(151,248,95,.1);
 }
 
 .status[data-mode="scoped"] .status-dot {

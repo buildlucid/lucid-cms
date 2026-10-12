@@ -111,7 +111,7 @@ const LoginPage: Component = () => {
 				/>
 			</Match>
 			<Match when={isSuccess()}>
-				<ThemeLogoIcon class="h-10 mx-auto mb-6" />
+				<ThemeLogoIcon class="h-8 mx-auto mb-6" />
 				<h1 class="mb-1 text-center">{T()("routes.auth.login.title")}</h1>
 				<p class="text-center max-w-sm mx-auto">
 					{T()("routes.auth.login.description")}

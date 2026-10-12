@@ -23,8 +23,8 @@ import { NavigationMenuContent } from "./parts/NavigationMenuContent";
 
 const NavigationLogo: Component = () => (
 	<>
-		<img src={LogoLight} alt="Lucid CMS Logo" class="h-5 dark:hidden" />
-		<img src={LogoDark} alt="Lucid CMS Logo" class="hidden h-5 dark:block" />
+		<img src={LogoLight} alt="Lucid CMS Logo" class="h-4 dark:hidden" />
+		<img src={LogoDark} alt="Lucid CMS Logo" class="hidden h-4 dark:block" />
 	</>
 );
 

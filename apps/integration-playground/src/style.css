@@ -6,8 +6,8 @@
 		"Segoe UI", sans-serif;
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
-	--primary: #c1fe77;
-	--primary-hover: #d0ff96;
+	--primary: #97f85f;
+	--primary-hover: #acfa7f;
 	--primary-muted: #2f3a20;
 	--title: #f1f1f1;
 	--subtitle: #c9c9c9;
@@ -40,7 +40,7 @@ body {
 	background:
 		radial-gradient(
 			900px 580px at 10% -10%,
-			rgba(193, 254, 119, 0.08),
+			rgba(151, 248, 95, 0.08),
 			transparent 62%
 		),
 		radial-gradient(
@@ -111,15 +111,15 @@ a:focus-visible {
 	width: 38px;
 	height: 38px;
 	place-items: center;
-	border: 1px solid rgba(193, 254, 119, 0.2);
+	border: 1px solid rgba(151, 248, 95, 0.2);
 	border-radius: 11px;
-	background: rgba(193, 254, 119, 0.06);
-	box-shadow: inset 0 0 22px rgba(193, 254, 119, 0.05);
+	background: rgba(151, 248, 95, 0.06);
+	box-shadow: inset 0 0 22px rgba(151, 248, 95, 0.05);
 }
 
 .brand-mark img {
-	width: 25px;
-	height: 25px;
+	width: 20px;
+	height: 20px;
 }
 
 .brand > span:last-child {
@@ -171,7 +171,7 @@ a:focus-visible {
 
 .server-state[data-state="ready"] .status-dot {
 	background: var(--primary);
-	box-shadow: 0 0 0 3px rgba(193, 254, 119, 0.12);
+	box-shadow: 0 0 0 3px rgba(151, 248, 95, 0.12);
 }
 
 .server-state[data-state="error"] .status-dot {
@@ -275,7 +275,7 @@ h1 {
 }
 
 .flow-step.is-complete > span {
-	border-color: rgba(193, 254, 119, 0.35);
+	border-color: rgba(151, 248, 95, 0.35);
 	background: var(--primary-muted);
 	color: var(--primary);
 }
@@ -311,8 +311,8 @@ h1 {
 }
 
 .notice[data-kind="success"] {
-	border-color: rgba(193, 254, 119, 0.25);
-	background: rgba(193, 254, 119, 0.06);
+	border-color: rgba(151, 248, 95, 0.25);
+	background: rgba(151, 248, 95, 0.06);
 }
 
 .notice-icon {
@@ -328,7 +328,7 @@ h1 {
 }
 
 .notice[data-kind="success"] .notice-icon {
-	background: rgba(193, 254, 119, 0.13);
+	background: rgba(151, 248, 95, 0.13);
 	color: var(--primary);
 }
 
@@ -397,9 +397,9 @@ h1 {
 	align-items: center;
 	min-height: 27px;
 	padding: 0 9px;
-	border: 1px solid rgba(193, 254, 119, 0.16);
+	border: 1px solid rgba(151, 248, 95, 0.16);
 	border-radius: 999px;
-	background: rgba(193, 254, 119, 0.055);
+	background: rgba(151, 248, 95, 0.055);
 	color: var(--primary);
 	font-size: 9px;
 	font-weight: 650;
@@ -414,8 +414,8 @@ h1 {
 }
 
 .status-pill.is-active {
-	border-color: rgba(193, 254, 119, 0.2);
-	background: rgba(193, 254, 119, 0.07);
+	border-color: rgba(151, 248, 95, 0.2);
+	background: rgba(151, 248, 95, 0.07);
 	color: var(--primary);
 }
 
@@ -470,7 +470,7 @@ textarea:hover {
 input:focus,
 select:focus,
 textarea:focus {
-	border-color: rgba(193, 254, 119, 0.5);
+	border-color: rgba(151, 248, 95, 0.5);
 	background: #1b1b1b;
 	outline: none;
 }
@@ -533,7 +533,7 @@ textarea {
 }
 
 .button-secondary:not(:disabled):hover {
-	border-color: rgba(193, 254, 119, 0.18);
+	border-color: rgba(151, 248, 95, 0.18);
 	background: #202020;
 	color: var(--title);
 }
@@ -685,8 +685,8 @@ textarea {
 }
 
 .scope-option:has(input:checked) {
-	border-color: rgba(193, 254, 119, 0.26);
-	background: rgba(193, 254, 119, 0.055);
+	border-color: rgba(151, 248, 95, 0.26);
+	background: rgba(151, 248, 95, 0.055);
 }
 
 .scope-option input {
@@ -842,9 +842,9 @@ textarea {
 	align-items: center;
 	margin-bottom: 17px;
 	padding: 13px;
-	border: 1px solid rgba(193, 254, 119, 0.14);
+	border: 1px solid rgba(151, 248, 95, 0.14);
 	border-radius: 9px;
-	background: rgba(193, 254, 119, 0.045);
+	background: rgba(151, 248, 95, 0.045);
 }
 
 .principal-icon {
@@ -1007,9 +1007,9 @@ textarea {
 .api-key-field {
 	margin: -5px 0 18px;
 	padding: 13px;
-	border: 1px solid rgba(193, 254, 119, 0.13);
+	border: 1px solid rgba(151, 248, 95, 0.13);
 	border-radius: 9px;
-	background: rgba(193, 254, 119, 0.035);
+	background: rgba(151, 248, 95, 0.035);
 }
 
 .request-line {

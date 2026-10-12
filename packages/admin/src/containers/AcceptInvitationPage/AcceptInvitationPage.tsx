@@ -128,7 +128,7 @@ const AcceptInvitationPage: Component = () => {
 				/>
 			</Match>
 			<Match when={isReady()}>
-				<ThemeLogoIcon class="h-10 mx-auto mb-6" />
+				<ThemeLogoIcon class="h-8 mx-auto mb-6" />
 				<h1 class="mb-1 text-center">
 					{T()("routes.auth.accept.invitation.title")}
 				</h1>

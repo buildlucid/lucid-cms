@@ -1,13 +1,13 @@
 export const previewFieldHintStyles = `
 @keyframes lucid-preview-field-hint-glimmer {
-	0%, 100% { outline-color: rgba(193, 254, 119, .85); }
+	0%, 100% { outline-color: rgba(151, 248, 95, .85); }
 	40% { outline-color: rgba(56, 189, 248, .85); }
 	70% { outline-color: rgba(167, 139, 250, .85); }
 }
 
 [data-lucid-preview-target-hint] {
 	border-radius: 6px;
-	outline: 2px solid rgba(193, 254, 119, .85);
+	outline: 2px solid rgba(151, 248, 95, .85);
 	outline-offset: 6px;
 	animation: lucid-preview-field-hint-glimmer 2s ease-in-out infinite;
 	cursor: crosshair;
@@ -16,7 +16,7 @@ export const previewFieldHintStyles = `
 @media (prefers-reduced-motion: reduce) {
 	[data-lucid-preview-target-hint] {
 		animation: none;
-		outline-color: rgba(193, 254, 119, .9);
+		outline-color: rgba(151, 248, 95, .9);
 	}
 }
 

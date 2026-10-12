@@ -1,7 +1,7 @@
 const emailConstants = Object.freeze({
 	renderedOutput: "email-templates.json",
 	assets: {
-		logo: "/lucid/assets/email-logo.svg",
+		logo: "/lucid/assets/email-logo.png",
 	},
 	locations: {
 		resetPassword: "/lucid/reset-password",

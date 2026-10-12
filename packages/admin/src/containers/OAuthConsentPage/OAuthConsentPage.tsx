@@ -190,7 +190,7 @@ const OAuthConsentPage: Component = () => {
 						<header class="mb-6 text-center">
 							<div class="mb-2.5 flex items-center justify-center">
 								<IconContainer theme="default">
-									<ThemeLogoIcon alt="" class="size-6" />
+									<ThemeLogoIcon alt="" class="size-5" />
 								</IconContainer>
 								<Show when={authorization().clientLogo}>
 									{(logo) => (

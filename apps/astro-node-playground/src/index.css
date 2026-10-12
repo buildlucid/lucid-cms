@@ -1,6 +1,6 @@
 :root {
-	--primary-base: #c1fe77;
-	--primary-hover: #d0ff96;
+	--primary-base: #97f85f;
+	--primary-hover: #acfa7f;
 	--primary-contrast: #131313;
 	--background-base: #171717;
 	--panel-base: #0f0f0f;
@@ -51,7 +51,7 @@ a {
 	background:
 		radial-gradient(
 			900px 600px at 5% 0,
-			rgba(193, 254, 119, 0.07),
+			rgba(151, 248, 95, 0.07),
 			transparent 60%
 		),
 		radial-gradient(
@@ -86,7 +86,7 @@ a {
 
 .brand-logo {
 	width: auto;
-	height: 30px;
+	height: 24px;
 	display: block;
 }
 
@@ -286,7 +286,7 @@ a {
 	background:
 		radial-gradient(
 			circle at top left,
-			rgba(193, 254, 119, 0.2),
+			rgba(151, 248, 95, 0.2),
 			transparent 55%
 		),
 		var(--card-strong);

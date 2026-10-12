@@ -55,7 +55,7 @@ const SetupPage: Component = () => {
 				when={setupRequired.isSuccess && setupRequired.data.data.setupRequired}
 			>
 				<div class="mb-10 text-center">
-					<ThemeLogoIcon class="h-10 mx-auto mb-6" />
+					<ThemeLogoIcon class="h-8 mx-auto mb-6" />
 					<h1 class="mb-1">{T()("routes.auth.setup.title")}</h1>
 					<p class="max-w-sm mx-auto">{T()("routes.auth.setup.description")}</p>
 				</div>

@@ -88,7 +88,7 @@ const ResetPasswordPage: Component = () => {
 					providers.data?.data.disablePassword === false
 				}
 			>
-				<ThemeLogoIcon class="h-10 mx-auto mb-6" />
+				<ThemeLogoIcon class="h-8 mx-auto mb-6" />
 				<h1 class="mb-1 text-center">
 					{T()("routes.auth.reset.password.title")}
 				</h1>
