@@ -16,5 +16,5 @@ export type ConnectionPending = z.infer<typeof connectionPendingSchema>;
 
 export type StoredConnectionDisplay = Pick<
 	ConnectionStatus,
-	"connection" | "organisation" | "scope" | "resource"
+	"connection" | "organisation" | "ai" | "scope" | "resource"
 >;

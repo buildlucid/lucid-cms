@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import { aiAccessSchema } from "../libs/lucid-remote/schema/connection.js";
 
 const connectionStatusResponseSchema = z
 	.object({
@@ -21,6 +22,7 @@ const connectionStatusResponseSchema = z
 			})
 			.strict()
 			.nullable(),
+		ai: aiAccessSchema.nullable(),
 		scope: z.literal("cms:ai"),
 		resource: z.string(),
 		lastAttempt: z.number().int().nullable(),

@@ -3,6 +3,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import defineAgent from "../agent/define-agent.js";
 import { copy } from "../i18n/copy.js";
+import { aiAccessFeatureSchema } from "../lucid-remote/schema/connection.js";
 import { getAgentPermission } from "../permission/agent-permissions.js";
 import { agentTools } from "../tools/lucid-tools.js";
 import agentFormatter from "./agent.js";
@@ -47,6 +48,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 	const format = (permissions: string[]) =>
 		agentFormatter.formatDefinitions({
 			config,
+			aiAccess: aiAccessFeatureSchema.options,
 			authUser: authUser(permissions),
 			adminTranslations: { "review.title": "Review content" },
 		});
@@ -79,6 +81,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 					agents: { ...config.ai.agents, enabled: false },
 				},
 			},
+			aiAccess: aiAccessFeatureSchema.options,
 			authUser: authUser([]),
 			adminTranslations: {},
 		}),

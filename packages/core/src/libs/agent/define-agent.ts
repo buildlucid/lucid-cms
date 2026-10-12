@@ -31,9 +31,8 @@ const resolveGenerate = (
 		: { image: generate.image ?? true, audio: generate.audio ?? true };
 
 /**
- * Defines an agent for the admin. `features` turns Lucid's built-in tools on
- * or off, and `tools` adds more. Every tool uses the permissions of the person
- * the agent acts for.
+ * Defines an admin agent with built-in and custom tools.
+ * @remarks `features` controls built-in tools, `tools` adds custom tools, and permissions follow the run's principal.
  *
  * @example
  * const seoAgent = defineAgent({
@@ -43,8 +42,8 @@ const resolveGenerate = (
  * 	tools: [agentTools.read(), customAgentTool],
  * 	features: { web: { allowedDomains: ["example.com"] } },
  * 	models: {
- * 		default: { modelId: "openai/gpt-6-sol", reasoningEffort: "low" },
- * 		available: ["openai/gpt-6-luna", "openai/gpt-6-sol"],
+ * 		default: { modelId: "openai/gpt-sol", reasoningEffort: "low" },
+ * 		available: ["openai/gpt-luna", "openai/gpt-sol"],
  * 	},
  * });
  */

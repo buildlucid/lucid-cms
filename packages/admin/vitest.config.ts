@@ -67,6 +67,12 @@ export default defineConfig({
 					import.meta.url,
 				),
 			),
+			"@ai-feature-access": fileURLToPath(
+				new URL(
+					"../core/src/libs/config/ai-feature-access.ts",
+					import.meta.url,
+				),
+			),
 			"@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
 		},
 	},

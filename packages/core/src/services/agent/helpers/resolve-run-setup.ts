@@ -13,7 +13,7 @@ import type {
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
 import hasPermission from "../../../libs/permission/has-permission.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
-import type { AgentScreen } from "../../../types/response.js";
+import type { AgentScreen, AiAccessFeature } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
 //* definitions are immutable, so each input schema only needs converting once
@@ -33,6 +33,8 @@ const resolveRunSetup = (
 	props: {
 		agent: AgentDefinition;
 		authority: AgentToolAuthority;
+		/** Organisation AI permissions used to filter available tools. */
+		aiAccess: readonly AiAccessFeature[];
 		mode: RunMode;
 		hasHistory: boolean;
 		/** The admin screen the person's latest message came from. */
@@ -45,6 +47,7 @@ const resolveRunSetup = (
 		: undefined;
 	const tools = getAvailableTools(agent, authority, {
 		config: context.config,
+		aiAccess: props.aiAccess,
 		screen: screen?.type,
 	});
 

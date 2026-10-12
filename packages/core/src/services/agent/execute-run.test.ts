@@ -25,6 +25,7 @@ import { streamRun } from "../../libs/http/utils/agent-stream-events.js";
 import * as httpServiceContext from "../../libs/http/utils/create-service-context.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
+import { aiAccessFeatureSchema } from "../../libs/lucid-remote/schema/connection.js";
 import type { AnyNotificationDefinition } from "../../libs/notifications/types.js";
 import {
 	AgentConversationsRepository,
@@ -1115,6 +1116,7 @@ describe("agent runner", () => {
 	] as const)("tool descriptions receive %s context", (mode) => {
 		const setup = resolveRunSetup(context, {
 			agent: testAgent,
+			aiAccess: aiAccessFeatureSchema.options,
 			authority: {
 				principal: { type: "user", userId },
 				permissions: livePermissions,
@@ -1438,6 +1440,10 @@ describe("agent runner", () => {
 		expect(events).toContainEqual(
 			expect.objectContaining({ type: "text-delta", text: "Done." }),
 		);
+		expect(model.mock.calls[0]?.[1].actor).toEqual({
+			type: "user",
+			id: userId,
+		});
 		expect(model.mock.calls[0]?.[1].tools.map((tool) => tool.name)).toEqual(
 			expect.arrayContaining([
 				"collections_list",
@@ -4050,7 +4056,11 @@ test("web tools use normal transcript rows and persist non-model usage", async (
 	expect(webCalls).toHaveLength(1);
 	expect(webCalls[0]?.[1]).toMatchObject({
 		retries: 0,
-		body: { feature, context: { query: "Example docs" } },
+		body: {
+			feature,
+			actor: { type: "user", id: userId },
+			context: { query: "Example docs" },
+		},
 	});
 	expect(events).toContainEqual(
 		expect.objectContaining({

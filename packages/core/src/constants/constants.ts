@@ -221,7 +221,10 @@ export default Object.freeze({
 		scope: "cms:ai" as const,
 		pendingExpirationSeconds: 300,
 		accessTokenCacheThresholdSeconds: 60,
-		statusRecheckIntervalSeconds: 3600,
+		/** Recheck interval in seconds for stored connection status and organisation AI access. */
+		statusRecheckIntervalSeconds: 300,
+		/** Cooldown in seconds for forced organisation AI access refreshes. */
+		aiAccessRefreshCooldownSeconds: 60,
 		remoteRequestTimeoutMs: 10_000,
 	},
 	agent: {

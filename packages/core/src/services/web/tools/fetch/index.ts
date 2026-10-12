@@ -24,6 +24,7 @@ export const webFetchAgentTool = (options: WebToolOptions = {}) => {
 		permissions: [],
 		readOnly: true,
 		capabilities: { webRead: true },
+		available: ({ aiAccess }) => aiAccess.includes("web_research"),
 		handler: ({ context, input, execution }) =>
 			fetchWeb(context, { input, execution, allowedDomains }),
 	});

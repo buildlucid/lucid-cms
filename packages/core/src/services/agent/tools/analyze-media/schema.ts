@@ -15,7 +15,7 @@ export const inputSchema = z
 			.min(1)
 			.max(8000)
 			.describe(
-				"What to examine or extract from the image, audio recording, video or PDF.",
+				"What to examine or extract from the image, audio recording or PDF.",
 			),
 	})
 	.strict();

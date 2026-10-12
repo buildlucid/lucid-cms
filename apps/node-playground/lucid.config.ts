@@ -98,7 +98,7 @@ export default defineConfig({
 			},
 			agents: [assistantAgent, seoAgent],
 			// mediaGeneration: {
-			// 	image: { models: { default: "x-ai/grok-imagine-image-2.0" } },
+			// 	image: { models: { default: "openai/gpt-image" } },
 			// 	audio: false,
 			// },
 			// altGeneration: false,

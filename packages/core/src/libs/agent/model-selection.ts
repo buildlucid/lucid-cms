@@ -57,10 +57,10 @@ export const aiModelCatalogSchema = z.object({
 }) satisfies z.ZodType<AiModelCatalog>;
 
 /**
- * Picks the model for a run. The agent's `available` list narrows the hosted
- * catalogue, then the first choice it still offers wins: the chat's, the
- * routine's, the agent's default, then the hosted default. A missing or
- * unsupported effort falls back to the model's default, or its lowest effort.
+ * Resolves a run's hosted model and reasoning effort.
+ * @remarks Uses the full catalogue if no configured model remains available.
+ * Model preference is chat, routine, agent default, hosted default, then the first offered model.
+ * Missing or unsupported effort uses the model default, then its first supported effort.
  */
 export const resolveModelSelection = (props: {
 	catalog: AiModelCatalog;
@@ -69,10 +69,10 @@ export const resolveModelSelection = (props: {
 	selection?: AiModelSelection | null;
 }) => {
 	const available = props.agent?.available;
-
-	const models = available
+	const narrowed = available
 		? props.catalog.models.filter((model) => available.includes(model.id))
-		: props.catalog.models;
+		: [];
+	const models = narrowed.length > 0 ? narrowed : props.catalog.models;
 
 	const preferred = [
 		props.selection,

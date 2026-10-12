@@ -10,6 +10,7 @@ import planCollectionMigrations from "../../../libs/collection/plan-collection-m
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy, createTranslationStore } from "../../../libs/i18n/index.js";
 import { getJobDefinitionRuntime } from "../../../libs/jobs/registry.js";
+import { aiAccessFeatureSchema } from "../../../libs/lucid-remote/schema/connection.js";
 import { getAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import { Permissions } from "../../../libs/permission/definitions.js";
 import {
@@ -845,6 +846,7 @@ const callReferenceTool = async (
 		},
 		setup: resolveRunSetup(context, {
 			agent,
+			aiAccess: aiAccessFeatureSchema.options,
 			mode: "chat",
 			hasHistory: false,
 			authority: {

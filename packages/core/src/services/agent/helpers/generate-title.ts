@@ -3,14 +3,17 @@ import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { AgentTitleGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
-import { isCmsAiGenerateCompletedData } from "../../../libs/lucid-remote/utils.js";
+import {
+	cmsAiActor,
+	isCmsAiGenerateCompletedData,
+} from "../../../libs/lucid-remote/utils.js";
 import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import storeGeneration from "../../ai/storage/store-generation.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 
 const titleSchema = z.object({ title: z.string().trim().min(1) });
@@ -36,6 +39,7 @@ const generateTitle: ServiceFn<
 	[
 		{
 			conversationId: string;
+			/** User associated with title-generation usage, or null for system requests such as code routine chats. */
 			userId: number | null;
 			scope: "first-message" | "conversation";
 			runId?: string;
@@ -121,13 +125,12 @@ const generateTitle: ServiceFn<
 
 	const generated = await generateCmsAi(context, {
 		accessToken: token.data.accessToken,
+		actor: cmsAiActor(input.userId),
 		idempotencyKey: input.idempotencyKey,
 		request,
 	});
 	if (generated.error) {
-		if (generated.error.status === 401) {
-			await handleProtectedResourceUnauthorized(context);
-		}
+		await handleRemoteError(context, generated.error);
 		return generated;
 	}
 

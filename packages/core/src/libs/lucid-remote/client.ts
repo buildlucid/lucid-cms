@@ -175,6 +175,21 @@ const getErrorCopy = (errorKey?: string) => {
 				name: copy("server:core.ai.remote.provider.failed.name"),
 				message: copy("server:core.ai.remote.provider.failed.message"),
 			};
+		case "ai_content_blocked":
+			return {
+				name: copy("server:core.ai.remote.content.blocked.name"),
+				message: copy("server:core.ai.remote.content.blocked.message"),
+			};
+		case "ai_access_restricted":
+			return {
+				name: copy("server:core.ai.remote.access.restricted.name"),
+				message: copy("server:core.ai.remote.access.restricted.message"),
+			};
+		case "ai_feature_disabled":
+			return {
+				name: copy("server:core.ai.remote.feature.disabled.name"),
+				message: copy("server:core.ai.remote.feature.disabled.message"),
+			};
 		default:
 			return undefined;
 	}

@@ -15,6 +15,7 @@ import type {
 	AgentToolDetails,
 	AgentToolSummary,
 	AgentUsage,
+	AiAccessFeature,
 } from "../../types/response.js";
 import {
 	getAvailableTools,
@@ -38,6 +39,7 @@ import formatter from "./helpers.js";
 
 const formatDefinitions = (props: {
 	config: ResolvedLucidConfig;
+	aiAccess: readonly AiAccessFeature[];
 	authUser: LucidAuth;
 	adminTranslations: Record<string, string>;
 }): AgentCatalog => {
@@ -53,6 +55,7 @@ const formatDefinitions = (props: {
 		superAdmin: props.authUser.superAdmin,
 		permissions: props.authUser.permissions ?? [],
 	};
+	const availability = { config: props.config, aiAccess: props.aiAccess };
 
 	return {
 		enabled: isAiFeatureEnabled(props.config, "agents"),
@@ -75,7 +78,7 @@ const formatDefinitions = (props: {
 				},
 				capabilities: summariseCapabilities(
 					getCapabilityProviders({
-						tools: getAvailableTools(agent, grant, { config: props.config }),
+						tools: getAvailableTools(agent, grant, availability),
 					}),
 				),
 				suggestions: canChat
@@ -87,9 +90,7 @@ const formatDefinitions = (props: {
 					: [],
 				tools: hasAgentPermission(grant, agent.key)
 					? agent.tools
-							.filter(
-								(tool) => tool.available?.({ config: props.config }) ?? true,
-							)
+							.filter((tool) => tool.available?.(availability) ?? true)
 							.map((tool) => ({
 								name: tool.name,
 								title: withDefaultMessage(tool.title),

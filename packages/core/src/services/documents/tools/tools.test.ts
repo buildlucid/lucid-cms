@@ -8,6 +8,7 @@ import CollectionBuilder from "../../../libs/collection/builders/collection-buil
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../../libs/i18n/index.js";
+import { aiAccessFeatureSchema } from "../../../libs/lucid-remote/schema/connection.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
 import type { ToolkitActor } from "../../../libs/toolkit/types.js";
@@ -841,6 +842,7 @@ test("registering a requested document needs access to its request", async () =>
 		authority,
 		setup: resolveRunSetup(context, {
 			agent,
+			aiAccess: aiAccessFeatureSchema.options,
 			mode: "chat",
 			hasHistory: false,
 			authority,
@@ -1134,6 +1136,7 @@ test("builder tools read unsaved content from the builder and hand changes back 
 	};
 	const setup = resolveRunSetup(context, {
 		agent,
+		aiAccess: aiAccessFeatureSchema.options,
 		mode: "chat",
 		hasHistory: false,
 		authority,
@@ -1302,6 +1305,7 @@ test("builder tools read unsaved content from the builder and hand changes back 
 	expect(
 		resolveRunSetup(context, {
 			agent,
+			aiAccess: aiAccessFeatureSchema.options,
 			mode: "chat",
 			hasHistory: false,
 			authority,

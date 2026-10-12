@@ -1,5 +1,5 @@
 import type { AgentSummary } from "../agent/types.js";
-import type { AiFeature } from "../ai/types.js";
+import type { AiAccessFeature, AiFeature } from "../ai/types.js";
 
 export type SettingsInclude = "email" | "media" | "system" | "ai" | "mcp";
 
@@ -73,6 +73,10 @@ export interface ConnectionStatus {
 	organisation: {
 		id: string;
 		name: string;
+	} | null;
+	/** The AI features the organisation allows this CMS to use. */
+	ai: {
+		features: AiAccessFeature[];
 	} | null;
 	scope: "cms:ai";
 	resource: string;

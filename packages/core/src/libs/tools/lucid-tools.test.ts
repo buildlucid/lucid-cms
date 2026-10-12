@@ -81,9 +81,13 @@ test("builder editing needs builder reading, and the builder tools only appear o
 		(tool) => tool.name === "lucid_builder_read",
 	);
 	const config = {} as never;
-	expect(read?.available?.({ config, screen: "document" })).toBe(true);
-	expect(read?.available?.({ config, screen: "media" })).toBe(false);
-	expect(read?.available?.({ config })).toBe(false);
+	expect(read?.available?.({ config, aiAccess: [], screen: "document" })).toBe(
+		true,
+	);
+	expect(read?.available?.({ config, aiAccess: [], screen: "media" })).toBe(
+		false,
+	);
+	expect(read?.available?.({ config, aiAccess: [] })).toBe(false);
 });
 
 test("library promotion follows uploads, as personal files only come from them", () => {

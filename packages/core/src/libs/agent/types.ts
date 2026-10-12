@@ -44,7 +44,7 @@ export const modelMessageSchema = z.discriminatedUnion("role", [
 ]);
 
 export const modelEventSchema = z.discriminatedUnion("type", [
-	/** The model serving the turn and how much input it accepts. */
+	/** The turn's model family ID, matching the catalogue, and its input limit. */
 	z.object({
 		type: z.literal("start"),
 		model: z.string(),
@@ -84,7 +84,7 @@ export const checkpointSchema = z.object({
 	/** Model context for the run's request, added once history has loaded. */
 	extraContext: z.string().optional(),
 	purpose: z.literal("compact").optional(),
-	/** The model serving this run and its input limit, as the API last reported. */
+	/** The run's model family and input limit last reported by the API. */
 	model: z
 		.object({
 			id: z.string(),
@@ -167,7 +167,7 @@ export type DefineRoutineOptions<Key extends string> = {
 	instructions: string;
 	/** New chats by default. Reuse continues the routine's saved chat, including human follow-ups. */
 	conversationMode?: AgentRoutineConversationMode;
-	/** The model each run uses, eg. `{ modelId: "openai/gpt-6-luna", reasoningEffort: "low" }`. Defaults to the agent's model. */
+	/** Routine model selection, such as `{ modelId: "openai/gpt-luna", reasoningEffort: "low" }`, defaulting to the agent's model. */
 	model?: AiModelSelection;
 	/** Per-tool settings by tool name, eg. `{ save_note: { requiresConfirmation: true } }`. Omitted tools and settings keep the tool's defaults. */
 	tools?: Readonly<RoutineTools>;

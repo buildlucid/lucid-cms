@@ -15,10 +15,6 @@ export const mediaMimeTypeSchema = z.enum([
 	"audio/ogg",
 	"audio/flac",
 	"audio/mp4",
-	"video/mp4",
-	"video/webm",
-	"video/quicktime",
-	"video/mpeg",
 ]);
 
 /** File bytes read from Lucid media and sent for analysis. */

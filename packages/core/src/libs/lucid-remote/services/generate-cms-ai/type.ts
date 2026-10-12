@@ -6,6 +6,9 @@ import type {
 
 import type { MediaAnalyzeRequest } from "../../schema/media.js";
 
+/** Request principal used by Lucid to derive a safety identity. */
+export type CmsAiActor = { type: "user"; id: number } | { type: "system" };
+
 export type CmsAiGenerateRequestInputText<TRole extends string = string> = {
 	type: "text";
 	role: TRole;
@@ -137,6 +140,7 @@ export type CmsAiGenerateRequestFeature = CmsAiGenerateRequest["feature"];
 
 export type GenerateCmsAiProps = {
 	accessToken: string;
+	actor: CmsAiActor;
 	request: CmsAiGenerateRequest;
 	idempotencyKey?: string;
 	/** Stops waiting when the caller cancels the request. */

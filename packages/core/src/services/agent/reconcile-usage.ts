@@ -8,7 +8,7 @@ import {
 	formatDbTimestamp,
 	parseStoredTimestamp,
 } from "../ai/helpers/date-helpers.js";
-import handleProtectedResourceUnauthorized from "../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../connection/token-manager.js";
 import storeFailedUsage from "./helpers/store-failed-usage.js";
 import storeUsage from "./helpers/store-usage.js";
@@ -72,9 +72,7 @@ const reconcileUsage: ServiceFn<
 				signal: AbortSignal.timeout(10_000),
 			},
 		);
-		if (response.error?.status === 401) {
-			await handleProtectedResourceUnauthorized(context);
-		}
+		if (response.error) await handleRemoteError(context, response.error);
 		if (response.error && response.error.status !== 404) return response;
 
 		const ageMs = Date.now() - parseStoredTimestamp(row.created_at).getTime();

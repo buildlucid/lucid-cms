@@ -14,13 +14,14 @@ import { copy } from "../../../libs/i18n/index.js";
 import { createRemoteError } from "../../../libs/lucid-remote/client.js";
 import { lucidRemotePaths } from "../../../libs/lucid-remote/constants.js";
 import { getLucidRemoteConfigFromEnv } from "../../../libs/lucid-remote/origin.js";
+import type { CmsAiActor } from "../../../libs/lucid-remote/types.js";
 import type { AiModelSelection } from "../../../types/response.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type {
 	ServiceFn,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 
 type FinishEvent = Extract<ModelEvent, { type: "finish" }>;
@@ -38,6 +39,7 @@ const streamModelTurn: ServiceFn<
 			requestId: string;
 			/** The conversation, so the Lucid service can group usage per chat. */
 			sessionId: string;
+			actor: CmsAiActor;
 			/** Resolved when the run starts, so it is only missing if that step was skipped. */
 			selection: AiModelSelection | undefined;
 			purpose?: "compact";
@@ -94,6 +96,7 @@ const streamModelTurn: ServiceFn<
 				body: JSON.stringify({
 					requestId: input.requestId,
 					sessionId: input.sessionId,
+					actor: input.actor,
 					selection: input.selection,
 					...(input.purpose ? { purpose: input.purpose } : {}),
 					instructionVersion,
@@ -104,14 +107,12 @@ const streamModelTurn: ServiceFn<
 			},
 		);
 		if (!response.ok) {
-			if (response.status === 401) {
-				await handleProtectedResourceUnauthorized(context);
-			}
-
-			return createRemoteError(
+			const failed = createRemoteError(
 				response,
 				await response.json().catch(() => undefined),
 			);
+			await handleRemoteError(context, failed.error);
+			return failed;
 		}
 		if (
 			!response.body ||
@@ -160,6 +161,17 @@ const streamModelTurn: ServiceFn<
 
 				const event = parsed.data;
 
+				if (event.type === "error" && event.message === "ai_content_blocked") {
+					return {
+						data: undefined,
+						error: {
+							type: "basic",
+							status: 400,
+							key: event.message,
+							message: copy("server:core.ai.remote.content.blocked.message"),
+						},
+					};
+				}
 				if (event.type === "error") {
 					return {
 						data: undefined,

@@ -26,7 +26,7 @@ describe("model selection", () => {
 			})?.selection,
 		).toEqual(catalog.default);
 	});
-	test("keeps to the agent's models and falls back when a choice is removed", () => {
+	test("keeps to the agent's models, falling back to the hosted ones when none are offered", () => {
 		const result = resolveModelSelection({
 			catalog,
 			agent: { available: ["small-model"] },
@@ -38,8 +38,9 @@ describe("model selection", () => {
 			reasoningEffort: null,
 		});
 		expect(
-			resolveModelSelection({ catalog, agent: { available: ["retired"] } }),
-		).toBeUndefined();
+			resolveModelSelection({ catalog, agent: { available: ["retired"] } })
+				?.models,
+		).toEqual(catalog.models);
 	});
 	test("falls back to the model's default effort without changing its model", () => {
 		expect(

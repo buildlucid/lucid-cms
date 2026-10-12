@@ -2,6 +2,7 @@ import { getAvailableTools } from "../../../libs/agent/capabilities.js";
 import type { RoutineTools } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import getAiAccess from "../../connection/get-ai-access.js";
 import checkAgentAccess from "./check-agent-access.js";
 
 const validateRoutineTools: ServiceFn<
@@ -17,9 +18,12 @@ const validateRoutineTools: ServiceFn<
 		action: "manage-own-routines",
 	});
 	if (access.error) return access;
+	const aiAccess = await getAiAccess(context, {});
+	if (aiAccess.error) return aiAccess;
 
 	const tools = getAvailableTools(access.data.agent, access.data.authority, {
 		config: context.config,
+		aiAccess: aiAccess.data,
 	});
 	if (names.some((name) => !tools.some((tool) => tool.name === name))) {
 		return {

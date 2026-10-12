@@ -99,6 +99,7 @@ const verify: ServiceFn<
 	const display = {
 		connection: remote.data.connection,
 		organisation: remote.data.organisation,
+		ai: remote.data.ai,
 		scope: remote.data.scope,
 		resource: remote.data.resource,
 	};

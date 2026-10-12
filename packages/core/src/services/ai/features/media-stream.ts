@@ -7,7 +7,7 @@ import hasAccess from "../../../libs/permission/has-access.js";
 import type { LucidUser } from "../../../types/hono.js";
 import type { MediaGenerationType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 
@@ -33,6 +33,7 @@ const mediaStream: ServiceFn<
 
 	const featureEnabledRes = await checkFeatureEnabled(context, {
 		feature: `${type}Generation`,
+		started: true,
 	});
 	if (featureEnabledRes.error) return featureEnabledRes;
 
@@ -62,9 +63,7 @@ const mediaStream: ServiceFn<
 		range: props.range,
 		signal: props.signal,
 	});
-	if (mediaRes.error?.status === 401) {
-		await handleProtectedResourceUnauthorized(context);
-	}
+	if (mediaRes.error) await handleRemoteError(context, mediaRes.error);
 
 	return mediaRes;
 };

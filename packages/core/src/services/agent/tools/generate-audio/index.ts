@@ -27,7 +27,8 @@ export const generateAudioAgentTool = () =>
 		outputVersion: 1,
 		permissions: [Permissions.AiAudioGenerate],
 		capabilities: { audioGeneration: true },
-		available: ({ config }) => isAiFeatureEnabled(config, "audioGeneration"),
+		available: ({ config, aiAccess }) =>
+			isAiFeatureEnabled(config, "audioGeneration", aiAccess),
 		describe: () => copy("admin:core.tools.media_generate_audio.describe"),
 		interaction: {
 			key: constants.agent.widgets.audioSettings,

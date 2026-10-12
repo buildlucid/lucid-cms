@@ -3,6 +3,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { hasAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import checkFeatureEnabled from "../../ai/checks/check-feature-enabled.js";
 import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
@@ -50,6 +51,8 @@ const resolveAgentAccess: ServiceFn<
 	if (input.requireConnection) {
 		const connection = await getAccessToken(context, {});
 		if (connection.error) return connection;
+		const enabled = await checkFeatureEnabled(context, { feature: "agents" });
+		if (enabled.error) return enabled;
 	}
 
 	return { error: undefined, data: access };

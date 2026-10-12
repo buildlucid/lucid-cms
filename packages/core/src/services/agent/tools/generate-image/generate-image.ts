@@ -49,6 +49,17 @@ const generateImage: ServiceFn<
 > = async (context, props) => {
 	const { input, execution } = props;
 	const catalog = await getMediaModelOptions(context, { type: "image" });
+	//* Give local organisation denials the same stop instructions as remote denials.
+	if (catalog.error?.key === "ai_feature_disabled") {
+		return {
+			data: undefined,
+			error: {
+				...catalog.error,
+				status: 424,
+				message: copy("server:agent.tool.feature.disabled"),
+			},
+		};
+	}
 	if (catalog.error) return catalog;
 
 	const library = await checkMediaLibrary(context, {

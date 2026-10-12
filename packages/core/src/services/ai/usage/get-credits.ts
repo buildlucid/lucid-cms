@@ -1,7 +1,7 @@
 import getRemoteCredits from "../../../libs/lucid-remote/services/get-credits.js";
 import type { AiCredits } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 
 const getCredits: ServiceFn<[], AiCredits> = async (context) => {
@@ -11,9 +11,7 @@ const getCredits: ServiceFn<[], AiCredits> = async (context) => {
 	const credits = await getRemoteCredits(context, {
 		accessToken: token.data.accessToken,
 	});
-	if (credits.error?.status === 401) {
-		await handleProtectedResourceUnauthorized(context);
-	}
+	if (credits.error) await handleRemoteError(context, credits.error);
 
 	return credits;
 };

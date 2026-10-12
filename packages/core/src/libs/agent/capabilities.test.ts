@@ -1,7 +1,9 @@
 import { beforeAll, expect, test } from "vitest";
 import z from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
+import type { AiAccessFeature } from "../../types/response.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import { aiAccessFeatureSchema } from "../lucid-remote/schema/connection.js";
 import { Permissions } from "../permission/definitions.js";
 import defineAgentTool from "../tools/define-agent-tool.js";
 import { agentTools } from "../tools/lucid-tools.js";
@@ -13,6 +15,7 @@ import {
 import defineAgent from "./define-agent.js";
 
 const noPermissions = { superAdmin: false, permissions: [] };
+const aiAccess = aiAccessFeatureSchema.options;
 const tools = defineAgent({
 	key: "test",
 	name: "Test",
@@ -34,7 +37,7 @@ test("combines tool capabilities into what an agent can do", () => {
 		),
 	).toEqual({
 		mediaAnalysis: {
-			mimeTypes: expect.arrayContaining(["application/pdf", "video/mp4"]),
+			mimeTypes: expect.arrayContaining(["application/pdf", "audio/mpeg"]),
 		},
 		fileRead: {
 			mimeTypes: expect.arrayContaining([
@@ -67,7 +70,7 @@ test("analysis needs an analysis tool but no library permissions", () => {
 	});
 	expect(
 		getCapabilityProviders({
-			tools: getAvailableTools({ tools }, noPermissions, { config }),
+			tools: getAvailableTools({ tools }, noPermissions, { config, aiAccess }),
 		}).mediaAnalysis,
 	).toHaveLength(1);
 });
@@ -80,6 +83,7 @@ test("media generation needs its permission and the CMS feature, and is hidden w
 	const providers = (grant: typeof generate, enabled = true) =>
 		getCapabilityProviders({
 			tools: getAvailableTools({ tools }, grant, {
+				aiAccess,
 				config: {
 					...config,
 					ai: {
@@ -105,6 +109,49 @@ test("media generation needs its permission and the CMS feature, and is hidden w
 	expect(summariseCapabilities(providers(generate))).toMatchObject({
 		imageGeneration: true,
 		audioGeneration: true,
+	});
+});
+
+test("tools for features the organisation turns off are not offered", () => {
+	const grant = {
+		superAdmin: false,
+		permissions: [Permissions.AiImageGenerate, Permissions.AiAudioGenerate],
+	};
+	const enabled = {
+		...config,
+		ai: {
+			...config.ai,
+			mediaGeneration: {
+				image: { ...config.ai.mediaGeneration.image, enabled: true },
+				audio: { ...config.ai.mediaGeneration.audio, enabled: true },
+			},
+		},
+	};
+	const capabilities = (access: readonly AiAccessFeature[]) =>
+		summariseCapabilities(
+			getCapabilityProviders({
+				tools: getAvailableTools({ tools }, grant, {
+					config: enabled,
+					aiAccess: access,
+				}),
+			}),
+		);
+
+	expect(capabilities(aiAccess)).toMatchObject({
+		mediaAnalysis: { mimeTypes: expect.any(Array) },
+		webSearch: true,
+		webRead: true,
+		imageGeneration: true,
+		audioGeneration: true,
+	});
+	//* reading text files runs in the CMS, so the organisation can't turn it off
+	expect(capabilities(["agent"])).toMatchObject({
+		mediaAnalysis: null,
+		fileRead: { mimeTypes: expect.any(Array) },
+		webSearch: false,
+		webRead: false,
+		imageGeneration: false,
+		audioGeneration: false,
 	});
 });
 
@@ -140,7 +187,7 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 	expect(
 		summariseCapabilities(
 			getCapabilityProviders({
-				tools: getAvailableTools(agent, noPermissions, { config }),
+				tools: getAvailableTools(agent, noPermissions, { config, aiAccess }),
 			}),
 		),
 	).toEqual({

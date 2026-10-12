@@ -31,7 +31,8 @@ export const editImageAgentTool = () =>
 		outputVersion: 1,
 		permissions: [Permissions.AiImageGenerate],
 		capabilities: { imageGeneration: true },
-		available: ({ config }) => isAiFeatureEnabled(config, "imageGeneration"),
+		available: ({ config, aiAccess }) =>
+			isAiFeatureEnabled(config, "imageGeneration", aiAccess),
 		describe: (input) =>
 			copy("admin:core.tools.media_edit_image.describe", {
 				data: { id: input.mediaId },

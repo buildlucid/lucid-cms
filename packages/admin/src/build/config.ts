@@ -85,6 +85,10 @@ export const createAdminConfig = ({
 				adminRoot,
 				"dist/shared/match-permissions.js",
 			),
+			"@ai-feature-access": path.join(
+				adminRoot,
+				"dist/shared/ai-feature-access.js",
+			),
 			"@lucidcms/preview-protocol": path.join(
 				adminRoot,
 				"dist/shared/preview.js",

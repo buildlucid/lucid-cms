@@ -62,6 +62,7 @@ export type {
 	AgentWebSearchOutput,
 	AgentWebSource,
 	AgentWidgetPart,
+	AiAccessFeature,
 	AiCredits,
 	AiFeature,
 	AiGenerateCost,

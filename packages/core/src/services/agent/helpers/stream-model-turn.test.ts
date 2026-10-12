@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, expect, test, vi } from "vitest";
 import type { ModelEvent } from "../../../libs/agent/types.js";
-import { createTranslationStore } from "../../../libs/i18n/index.js";
+import { copy, createTranslationStore } from "../../../libs/i18n/index.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import { agentModelCatalog } from "../../../utils/test-helpers/agent-models.js";
@@ -85,6 +85,7 @@ test("forwards fragmented SSE text before the response completes", async () => {
 	const result = streamModelTurn(context, {
 		requestId,
 		sessionId,
+		actor: { type: "user", id: 1 },
 		selection: agentModelCatalog.default,
 		messages: [{ role: "user", content: "Hi" }],
 		instructions: "Test",
@@ -101,6 +102,7 @@ test("forwards fragmented SSE text before the response completes", async () => {
 	expect(pending).toHaveBeenCalledWith(1);
 	expect(JSON.parse(String(fetch.mock.calls[0]?.[1].body))).toMatchObject({
 		sessionId,
+		actor: { type: "user", id: 1 },
 		selection: agentModelCatalog.default,
 		instructionVersion: 1,
 	});
@@ -127,6 +129,7 @@ test("rejects a truncated response instead of treating it as completion", async 
 	const result = await streamModelTurn(context, {
 		requestId: randomUUID(),
 		sessionId: randomUUID(),
+		actor: { type: "system" },
 		selection: agentModelCatalog.default,
 		messages: [],
 		instructions: "Test",
@@ -142,6 +145,7 @@ test.each([
 	["Provider failed", "agent_model_failed"],
 	["cms_ai_compaction_incomplete", "agent_compaction_failed"],
 	["cms_ai_context_exceeded", "agent_context_exceeded"],
+	["ai_content_blocked", "ai_content_blocked"],
 ])("classifies a durable failure: %s", async (message, key) => {
 	vi.stubGlobal(
 		"fetch",
@@ -158,6 +162,7 @@ test.each([
 	const result = await streamModelTurn(context, {
 		requestId: randomUUID(),
 		sessionId: randomUUID(),
+		actor: { type: "system" },
 		selection: agentModelCatalog.default,
 		messages: [],
 		instructions: "Test",
@@ -166,6 +171,39 @@ test.each([
 		emit: async () => {},
 	});
 	expect(result.error?.key).toBe(key);
+});
+
+test("refuses a turn with Lucid's copy when the organisation turned the agent off", async () => {
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async () =>
+			Response.json(
+				{
+					status: 403,
+					code: "FORBIDDEN",
+					key: "ai_feature_disabled",
+					message: "Feature disabled",
+				},
+				{ status: 403 },
+			),
+		),
+	);
+	const result = await streamModelTurn(context, {
+		requestId: randomUUID(),
+		sessionId: randomUUID(),
+		actor: { type: "system" },
+		selection: agentModelCatalog.default,
+		messages: [],
+		instructions: "Test",
+		tools: [],
+		signal: new AbortController().signal,
+		emit: async () => {},
+	});
+	expect(result.error).toMatchObject({
+		status: 403,
+		key: "ai_feature_disabled",
+		message: copy("server:core.ai.remote.feature.disabled.message"),
+	});
 });
 
 test("finishes on the terminal event without waiting for the connection to close", async () => {
@@ -193,6 +231,7 @@ test("finishes on the terminal event without waiting for the connection to close
 	const result = await streamModelTurn(context, {
 		requestId,
 		sessionId: randomUUID(),
+		actor: { type: "system" },
 		selection: agentModelCatalog.default,
 		messages: [],
 		instructions: "Test",

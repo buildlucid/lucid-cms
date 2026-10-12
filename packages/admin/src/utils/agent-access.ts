@@ -38,7 +38,16 @@ export const conversationModeLabels = {
 	reuse: "agent.routine.conversation.reuse",
 } as const satisfies Record<AgentRoutineConversationMode, TranslationKeys>;
 
-export type AgentUnavailableReason = "no-connection" | "connection-revoked";
+export type AgentUnavailableReason =
+	| "no-connection"
+	| "connection-revoked"
+	| "organisation-disabled";
+
+const routinePauseReasons = {
+	"no-connection": "agent.routine.status.unavailable",
+	"connection-revoked": "agent.routine.status.unavailable",
+	"organisation-disabled": "agent.routine.status.organisation-disabled",
+} as const satisfies Record<AgentUnavailableReason, TranslationKeys>;
 
 /**
  * Why agents cannot run right now, or undefined when they can. Only running is
@@ -52,16 +61,20 @@ export const getAgentUnavailableReason = ():
 		return "no-connection";
 	}
 	if (connection.status === "revoked") return "connection-revoked";
+	if (connection.ai && !connection.ai.features.includes("agent")) {
+		return "organisation-disabled";
+	}
 	return undefined;
 };
 
 /**
- * Whether a routine is paused, and why when it is only paused for the connection.
- * Display only: its `enabled` setting is kept, so it resumes once agents can run.
+ * Returns a routine's displayed pause state and agent availability reason.
+ * @remarks Preserves `enabled`, allowing routines to resume when agent access returns.
  */
 export const getRoutinePause = (routine: Pick<AgentRoutine, "enabled">) => {
 	if (!routine.enabled) return { paused: true, reason: undefined };
-	return getAgentUnavailableReason()
-		? { paused: true, reason: T()("agent.routine.status.unavailable") }
+	const unavailable = getAgentUnavailableReason();
+	return unavailable
+		? { paused: true, reason: T()(routinePauseReasons[unavailable]) }
 		: { paused: false, reason: undefined };
 };

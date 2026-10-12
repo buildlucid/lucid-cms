@@ -9,12 +9,14 @@ import {
 	type WebResponse,
 	webResponseSchema,
 } from "../../schema/web.js";
+import type { CmsAiActor } from "../generate-cms-ai/type.js";
 
 /** Runs a paid web operation with a stable identity for safe replay. */
 const researchWeb: ServiceFn<
 	[
 		{
 			accessToken: string;
+			actor: CmsAiActor;
 			requestId: string;
 			request: WebRequest;
 			signal: AbortSignal;
@@ -31,7 +33,7 @@ const researchWeb: ServiceFn<
 	let response = await client.request<unknown>(lucidRemotePaths.generateCmsAi, {
 		method: "POST",
 		...auth,
-		body: input.request,
+		body: { ...input.request, actor: input.actor },
 		retries: 0,
 		signal: input.signal,
 	});

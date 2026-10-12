@@ -3,13 +3,14 @@ import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
 import logger from "../../libs/logger/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkFeatureEnabled from "../ai/checks/check-feature-enabled.js";
 import getAccessToken from "../connection/token-manager.js";
 import checkAgentAccess from "./helpers/check-agent-access.js";
 import startRoutineRun from "./helpers/start-routine-run.js";
 
 /**
- * Claims each due occurrence, then starts a run unless the routine is still
- * working on an earlier one. Skipped and missed occurrences are not caught up.
+ * Claims due occurrences and starts eligible routines without an active run.
+ * @remarks Logs agent unavailability; skipped and missed occurrences are not replayed.
  */
 const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 	const now = new Date();
@@ -22,8 +23,10 @@ const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 	if (due.error) return due;
 	if (!due.data.length) return { error: undefined, data: 0 };
 
-	// The connection is site-wide, so check it once. Occurrences are still claimed without it.
+	//* Check site-wide availability once; claim occurrences even when access is unavailable.
 	const connection = await getAccessToken(context, {});
+	const enabled = await checkFeatureEnabled(context, { feature: "agents" });
+	const unavailable = connection.error ?? enabled.error;
 	let started = 0;
 
 	for (const routine of due.data) {
@@ -43,15 +46,23 @@ const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 			now: now.toISOString(),
 		});
 		if (claim.error) return claim;
-		if (!claim.data || connection.error) continue;
+		if (!claim.data) continue;
 
 		//* code routines act as the system, so only their agent needs to exist
-		const access = await checkAgentAccess(context, {
-			userId: routine.user_id,
-			agentKey: routine.agent_key,
-			action: "manage-own-routines",
-		});
-		if (access.error) continue;
+		const access = unavailable
+			? { error: unavailable }
+			: await checkAgentAccess(context, {
+					userId: routine.user_id,
+					agentKey: routine.agent_key,
+					action: "manage-own-routines",
+				});
+		if (access.error) {
+			logger.warn({
+				message: `Agent routine ${routine.id} skipped: ${context.translate(access.error.message)}`,
+				scope: constants.logScopes.ai,
+			});
+			continue;
+		}
 
 		const run = await startRoutineRun(context, {
 			routineId: routine.id,

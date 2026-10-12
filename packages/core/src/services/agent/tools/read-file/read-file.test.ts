@@ -10,6 +10,7 @@ import {
 } from "vitest";
 import defineAgent from "../../../../libs/agent/define-agent.js";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
+import { aiAccessFeatureSchema } from "../../../../libs/lucid-remote/schema/connection.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import {
 	AgentMediaReferencesRepository,
@@ -347,6 +348,7 @@ test("advertises a default file reader and allows opting out", () => {
 	const setup = (definition: typeof agent) =>
 		resolveRunSetup(context, {
 			agent: definition,
+			aiAccess: aiAccessFeatureSchema.options,
 			authority: {
 				principal: { type: "user", userId: 1 },
 				superAdmin: false,

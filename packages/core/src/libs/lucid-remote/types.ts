@@ -6,6 +6,7 @@ export type {
 	RemoteConnectionData,
 } from "./schema/connection.js";
 export type {
+	CmsAiActor,
 	CmsAiGenerateAcceptedData,
 	CmsAiGenerateCompletedData,
 	CmsAiGenerateData,

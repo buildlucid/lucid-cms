@@ -5,12 +5,16 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import type { LucidRemoteConnections } from "../db/tables/index.js";
 import type { Select } from "../db/types.js";
 import { getLucidRemoteConfigFromEnv } from "../lucid-remote/origin.js";
-import { remoteConnectionDataSchema } from "../lucid-remote/schema/connection.js";
+import {
+	aiAccessSchema,
+	remoteConnectionDataSchema,
+} from "../lucid-remote/schema/connection.js";
 
 const displaySchema = z
 	.object({
 		connection: remoteConnectionDataSchema.shape.connection.nullable(),
 		organisation: remoteConnectionDataSchema.shape.organisation.nullable(),
+		ai: aiAccessSchema,
 		scope: remoteConnectionDataSchema.shape.scope,
 		resource: remoteConnectionDataSchema.shape.resource,
 	})
@@ -40,6 +44,7 @@ const formatStatus = (
 		status,
 		connection: display?.connection ?? null,
 		organisation: display?.organisation ?? null,
+		ai: display?.ai ?? null,
 		scope: constants.connection.scope,
 		resource: getLucidRemoteConfigFromEnv(context.env).resource,
 		lastAttempt: row?.last_attempt_at ?? null,

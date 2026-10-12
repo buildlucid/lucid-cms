@@ -10,12 +10,14 @@ import {
 	mediaAnalyzeResponseSchema,
 } from "../../schema/media.js";
 import generateCmsAi from "../generate-cms-ai/index.js";
+import type { CmsAiActor } from "../generate-cms-ai/type.js";
 
 /** Analyses a file and recovers a request already running under the same identity. */
 const analyzeMedia: ServiceFn<
 	[
 		{
 			accessToken: string;
+			actor: CmsAiActor;
 			requestId: string;
 			request: MediaAnalyzeRequest;
 			signal: AbortSignal;
@@ -25,6 +27,7 @@ const analyzeMedia: ServiceFn<
 > = async (context, input) => {
 	const response = await generateCmsAi(context, {
 		accessToken: input.accessToken,
+		actor: input.actor,
 		idempotencyKey: input.requestId,
 		request: input.request,
 		signal: input.signal,

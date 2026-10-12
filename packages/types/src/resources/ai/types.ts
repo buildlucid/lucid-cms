@@ -66,6 +66,16 @@ export type AiFeature =
 	| "agents"
 	| "mcp";
 
+/** Lucid AI features an organisation can allow its connected CMSs to use. */
+export type AiAccessFeature =
+	| "agent"
+	| "chat_titles"
+	| "alt_text"
+	| "media_analysis"
+	| "image_generation"
+	| "audio_generation"
+	| "web_research";
+
 /** The Lucid feature behind each media type. */
 export type MediaGenerateFeatures = {
 	image: { key: "media.image.generate"; version: "v1" };
@@ -308,7 +318,7 @@ export type AiReasoningEffort = "minimal" | "low" | "medium" | "high" | "xhigh";
 
 /** A model choice. Leave out the effort to use the model's default. */
 export type AiModelSelection = {
-	/** A model ID from the Lucid service, such as `"openai/gpt-6-luna"`. */
+	/** Lucid model family ID, such as `"openai/gpt-luna"`, resolving to the family's newest model. */
 	modelId: string;
 	reasoningEffort?: AiReasoningEffort | null;
 };
@@ -335,6 +345,6 @@ export type AiModelCatalog = {
 export type AiModelConfig = {
 	/** Used when nothing more specific is chosen. Falls back to an available default when it is not offered. */
 	default?: AiModelSelection;
-	/** Model IDs to offer. Leave out to offer every model the Lucid service provides. */
+	/** Model families to offer, such as `openai/gpt-luna`, defaulting to the full catalogue when omitted or none remain available. */
 	available?: readonly string[];
 };

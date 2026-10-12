@@ -1,11 +1,13 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type {
+	AiAccessFeature,
 	AiFeature,
 	MediaGenerateFeatures,
 	MediaGenerationType,
 } from "../../types/response.js";
 import { Permissions } from "../permission/definitions.js";
 import type { Permission } from "../permission/types.js";
+import { aiFeatureAccess } from "./ai-feature-access.js";
 
 /** The media types Lucid can generate, in the order the admin lists them. */
 export const mediaGenerationTypes = [
@@ -70,8 +72,22 @@ export const aiFeatureFlags = (
 	mcp: ai.mcp.enabled,
 });
 
-/** Whether an AI feature is on, including the `ai.enabled` switch. */
+/**
+ * Checks AI configuration and, when provided, organisation feature access.
+ * @remarks Omitting `access` checks configuration alone.
+ */
 export const isAiFeatureEnabled = (
 	config: Pick<ResolvedLucidConfig, "ai">,
 	feature: AiFeature,
-) => config.ai.enabled && aiFeatureFlags(config.ai)[feature];
+	access?: readonly AiAccessFeature[],
+) => {
+	const accessFeature = aiFeatureAccess[feature];
+
+	return (
+		config.ai.enabled &&
+		aiFeatureFlags(config.ai)[feature] &&
+		(access === undefined ||
+			accessFeature === null ||
+			access.includes(accessFeature))
+	);
+};

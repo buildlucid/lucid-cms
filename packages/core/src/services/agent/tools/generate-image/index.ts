@@ -31,7 +31,8 @@ export const generateImageAgentTool = () =>
 		outputVersion: 1,
 		permissions: [Permissions.AiImageGenerate],
 		capabilities: { imageGeneration: true },
-		available: ({ config }) => isAiFeatureEnabled(config, "imageGeneration"),
+		available: ({ config, aiAccess }) =>
+			isAiFeatureEnabled(config, "imageGeneration", aiAccess),
 		describe: () => copy("admin:core.tools.media_generate_image.describe"),
 		interaction: {
 			key: constants.agent.widgets.imageSettings,

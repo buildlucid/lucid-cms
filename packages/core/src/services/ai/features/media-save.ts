@@ -51,6 +51,7 @@ const mediaSave: ServiceFn<
 
 	const featureEnabledRes = await checkFeatureEnabled(context, {
 		feature: `${type}Generation`,
+		started: true,
 	});
 	if (featureEnabledRes.error) return featureEnabledRes;
 

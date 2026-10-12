@@ -21,6 +21,7 @@
 			"@match-permissions": [
 				"../core/src/libs/permission/match-permissions.ts"
 			],
+			"@ai-feature-access": ["../core/src/libs/config/ai-feature-access.ts"],
 			"@/*": ["src/*"],
 			"@types": ["../core/src/exports/types.ts"],
 			"@field-conditions": [

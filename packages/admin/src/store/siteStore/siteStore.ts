@@ -1,3 +1,4 @@
+import { aiFeatureAccess } from "@ai-feature-access";
 import type { ConnectionStatus, Settings } from "@types";
 import { createStore } from "solid-js/store";
 
@@ -33,8 +34,15 @@ const [get, set] = createStore<SiteStoreT>({
 		set("connection", null);
 		set("ai", defaultAiSettings());
 	},
+	//* When organisation access is unknown, use configuration alone; Lucid still checks remote requests.
 	isAiFeatureEnabled(feature) {
-		return this.ai.enabled && this.ai.features[feature];
+		const accessFeature = aiFeatureAccess[feature];
+		const access = this.connection?.ai?.features;
+		return (
+			this.ai.enabled &&
+			this.ai.features[feature] &&
+			(accessFeature === null || !access || access.includes(accessFeature))
+		);
 	},
 	//* only features billed through Lucid count, so MCP alone does not show AI usage
 	hasAnyAiFeatureEnabled() {

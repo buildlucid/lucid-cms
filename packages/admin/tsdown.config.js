@@ -42,6 +42,7 @@ export default defineConfig([
 				"../core/src/libs/collection/custom-fields/conditions/index.ts",
 			capabilities: "../core/src/libs/collection/custom-fields/capabilities.ts",
 			"match-permissions": "../core/src/libs/permission/match-permissions.ts",
+			"ai-feature-access": "../core/src/libs/config/ai-feature-access.ts",
 			preview: "../preview-protocol/src/index.ts",
 		},
 		outDir: "dist/shared",

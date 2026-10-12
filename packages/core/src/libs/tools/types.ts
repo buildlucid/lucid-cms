@@ -5,7 +5,11 @@ import type {
 import type { z } from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidExternalAuth } from "../../types/hono.js";
-import type { AgentResource, AgentScreen } from "../../types/response.js";
+import type {
+	AgentResource,
+	AgentScreen,
+	AiAccessFeature,
+} from "../../types/response.js";
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -129,6 +133,8 @@ export type AgentToolDescription =
 
 export type AgentToolAvailabilityProps = {
 	config: ResolvedLucidConfig;
+	/** The Lucid AI features the organisation allows this CMS to use. */
+	aiAccess: readonly AiAccessFeature[];
 	/** The originating screen type, when the run has a screen. */
 	screen?: AgentScreen["type"];
 };

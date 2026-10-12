@@ -25,9 +25,7 @@ const AgentRoutineModelField: Component<{
 	const catalog = createMemo(() =>
 		query.isSuccess ? query.data.data : undefined,
 	);
-	const unavailable = createMemo(
-		() => getAgentUnavailableReason() !== undefined,
-	);
+	const unavailable = createMemo(() => getAgentUnavailableReason());
 	const model = createMemo(() =>
 		catalog()?.models.find((model) => model.id === props.value?.modelId),
 	);
@@ -84,11 +82,13 @@ const AgentRoutineModelField: Component<{
 				placeholder={defaultLabel()}
 				label={T()("agent.models.label")}
 				description={
-					unavailable()
-						? T()("agent.models.unavailable.connection")
-						: query.isError
-							? T()("agent.models.unavailable")
-							: T()("agent.models.routine.description")
+					unavailable() === "organisation-disabled"
+						? T()("agent.models.unavailable.organisation")
+						: unavailable()
+							? T()("agent.models.unavailable.connection")
+							: query.isError
+								? T()("agent.models.unavailable")
+								: T()("agent.models.routine.description")
 				}
 				disabled={props.disabled || !catalog()}
 				errors={props.errors}

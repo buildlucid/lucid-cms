@@ -13,6 +13,7 @@ import { agentFormatter } from "../../../libs/formatters/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import getAiAccess from "../../connection/get-ai-access.js";
 import checkAgentAccess from "./check-agent-access.js";
 import compactContext from "./compact-context.js";
 import consumeSteering from "./consume-steering.js";
@@ -74,6 +75,8 @@ const driveRun: ServiceFn<
 				context.translate("server:agent.access.unavailable"),
 		);
 	}
+	const aiAccess = await getAiAccess(context, {});
+	if (aiAccess.error) return aiAccess;
 
 	if (!checkpoint.selection || !checkpoint.model) {
 		const model = await resolveModel(context, {
@@ -105,6 +108,7 @@ const driveRun: ServiceFn<
 	const resolve = () =>
 		resolveRunSetup(context, {
 			...access.data,
+			aiAccess: aiAccess.data,
 			mode,
 			hasHistory: checkpoint.trimmed === true,
 			screen: checkpoint.screen,

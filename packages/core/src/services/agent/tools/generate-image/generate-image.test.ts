@@ -10,6 +10,7 @@ import {
 } from "vitest";
 import defineAgent from "../../../../libs/agent/define-agent.js";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
+import { aiAccessFeatureSchema } from "../../../../libs/lucid-remote/schema/connection.js";
 import generateMedia from "../../../../libs/lucid-remote/services/generate-media/index.js";
 import getGeneratedMedia from "../../../../libs/lucid-remote/services/get-generated-media/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
@@ -725,6 +726,7 @@ test("the tool needs its permission and the CMS feature, and is off when the age
 			},
 			{
 				agent,
+				aiAccess: aiAccessFeatureSchema.options,
 				authority: {
 					principal: { type: "system" },
 					permissions,

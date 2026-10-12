@@ -12,6 +12,7 @@ import {
 } from "../../../libs/agent/context.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
+import { cmsAiActor } from "../../../libs/lucid-remote/utils.js";
 import { AgentMessagesRepository } from "../../../libs/repositories/index.js";
 import type {
 	ServiceContext,
@@ -100,6 +101,7 @@ const summariseContext: ServiceFn<[CompactionProps], boolean> = async (
 			streamModelTurn(context, {
 				requestId: pending.requestId,
 				sessionId: run.conversation_id,
+				actor: cmsAiActor(run.user_id),
 				purpose: "compact",
 				instructions: setup.instructions,
 				selection: checkpoint.selection,
@@ -216,7 +218,11 @@ const compactContext = async (
 		return {
 			kind: "stop",
 			status: permanent ? "failed" : "interrupted",
-			message: context.translate("server:agent.compaction.failed"),
+			message: context.translate(
+				compacted.error.key === "ai_content_blocked"
+					? "server:core.ai.remote.content.blocked.message"
+					: "server:agent.compaction.failed",
+			),
 		};
 	}
 

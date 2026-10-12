@@ -5,6 +5,7 @@ import { textFromParts } from "../../../libs/agent/input.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
+import { cmsAiActor } from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import isPermanentFailure from "./is-permanent-failure.js";
 import type { RunSetup } from "./resolve-run-setup.js";
@@ -115,6 +116,7 @@ const runModelTurn: ServiceFn<
 			streamModelTurn(context, {
 				requestId: checkpoint.requestId,
 				sessionId: run.conversation_id,
+				actor: cmsAiActor(run.user_id),
 				instructions: setup.instructions,
 				selection: checkpoint.selection,
 				messages: modelMessages(checkpoint.messages),

@@ -217,7 +217,7 @@ export type HttpConfig = {
 export type AiModelOptions = {
 	/** Model used unless overridden, falling back to configured availability, Lucid's default or the first offered model. */
 	default?: string;
-	/** Allowed model IDs, defaulting to all models Lucid offers. */
+	/** Allowed model families, such as `openai/gpt-image`, defaulting to the full catalogue when omitted or none remain available. */
 	available?: string[];
 };
 
@@ -340,7 +340,7 @@ export interface LucidConfig {
 	 * ```ts
 	 * ai: {
 	 * 	mediaGeneration: {
-	 * 		image: { models: { default: "x-ai/grok-imagine-image-2.0" } },
+	 * 		image: { models: { default: "openai/gpt-image" } },
 	 * 		audio: false,
 	 * 	},
 	 * 	agents: [seoAgent],

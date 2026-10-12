@@ -6,6 +6,7 @@ import { cmsAiGenerateCompletedDataSchema } from "../../schema/ai.js";
 import { isCmsAiGenerateAcceptedData } from "../../utils.js";
 import generateCmsAi from "../generate-cms-ai/index.js";
 import type {
+	CmsAiActor,
 	CmsAiGenerateData,
 	MediaAudioGenerateV1Request,
 	MediaImageGenerateV1Request,
@@ -22,6 +23,7 @@ const generateMedia: ServiceFn<
 	[
 		{
 			accessToken: string;
+			actor: CmsAiActor;
 			requestId: string;
 			request: MediaImageGenerateV1Request | MediaAudioGenerateV1Request;
 			signal: AbortSignal;
@@ -31,6 +33,7 @@ const generateMedia: ServiceFn<
 > = async (context, input) => {
 	const started = await generateCmsAi(context, {
 		accessToken: input.accessToken,
+		actor: input.actor,
 		idempotencyKey: input.requestId,
 		request: input.request,
 		signal: input.signal,

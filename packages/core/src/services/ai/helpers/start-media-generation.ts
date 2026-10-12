@@ -11,7 +11,7 @@ import {
 	isCmsAiGenerateCompletedData,
 } from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 import storeGeneration from "../storage/store-generation.js";
 import storePendingGeneration from "../storage/store-pending-generation.js";
@@ -50,13 +50,12 @@ const startMediaGeneration: ServiceFn<
 
 	const generateRes = await generateCmsAi(context, {
 		accessToken: accessTokenRes.data.accessToken,
+		actor: { type: "user", id: props.userId },
 		request: props.request,
 		idempotencyKey,
 	});
 	if (generateRes.error) {
-		if (generateRes.error.status === 401) {
-			await handleProtectedResourceUnauthorized(context);
-		}
+		await handleRemoteError(context, generateRes.error);
 		return generateRes;
 	}
 	const responseData = generateRes.data.json.data;

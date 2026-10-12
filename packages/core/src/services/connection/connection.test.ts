@@ -8,6 +8,7 @@ import {
 	test,
 	vi,
 } from "vitest";
+import constants from "../../constants/constants.js";
 import testingConstants from "../../constants/testing-constants.js";
 import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import type {
@@ -21,6 +22,7 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import callback from "./callback.js";
 import connect from "./connect.js";
 import disconnect from "./disconnect.js";
+import getAiAccess from "./get-ai-access.js";
 import reset from "./reset.js";
 import {
 	getConnectionGrant,
@@ -67,6 +69,9 @@ const remoteConnection: RemoteConnectionData = {
 	organisation: {
 		id: "organisation-1",
 		name: "Example Organisation",
+	},
+	ai: {
+		features: ["agent", "chat_titles", "web_research"],
 	},
 	scope: "cms:ai",
 	resource,
@@ -305,6 +310,31 @@ describe.sequential("Lucid remote connection", () => {
 		expect(getConnectionGrant(context, stored.data)?.refreshToken).toBe(
 			"refresh-token",
 		);
+	});
+
+	test("refreshes stale organisation access, forcing refreshes at most once per cooldown", async () => {
+		const fetchMock = installOAuthFetch();
+		const context = makeContext();
+		const row = await resolveWritableConnection(context);
+		if (!row.data) throw new Error("Missing connection");
+		const checkedAt = now() - constants.connection.statusRecheckIntervalSeconds;
+		await replaceConnectionRegistration(context, row.data.id, registration);
+		await persistConnectionGrantState(context, row.data.id, grant(), {
+			status: "connected",
+			display: { ...remoteConnection, ai: { features: [] } },
+			lastAttempt: checkedAt,
+			lastVerified: checkedAt,
+		});
+
+		expect((await getAiAccess(context, {})).data).toEqual(
+			remoteConnection.ai.features,
+		);
+		const verifiedCalls = fetchMock.mock.calls.length;
+		expect(verifiedCalls).toBeGreaterThan(0);
+
+		await getAiAccess(context, {});
+		await getAiAccess(context, { refresh: true });
+		expect(fetchMock).toHaveBeenCalledTimes(verifiedCalls);
 	});
 
 	test("keeps AI usage when its remote connection is removed", async () => {

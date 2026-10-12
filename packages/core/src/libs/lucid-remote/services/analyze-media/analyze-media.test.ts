@@ -8,6 +8,7 @@ import {
 	mediaAnalyzeRequestSchema,
 	mediaSourceSchema,
 } from "../../schema/media.js";
+import type { CmsAiActor } from "../generate-cms-ai/type.js";
 import analyzeMedia from "./index.js";
 
 const testConfig = getTestConfig();
@@ -56,6 +57,7 @@ const request = mediaAnalyzeRequestSchema.parse({
 		source: { type: "base64", data: "aGVsbG8=", mimeType: "image/png" },
 	},
 });
+const actor: CmsAiActor = { type: "user", id: 1 };
 const result = {
 	mode: "sync",
 	requestId: randomUUID(),
@@ -64,7 +66,7 @@ const result = {
 	usage,
 };
 
-test("posts inline sources with the billing identity and parses analysis", async () => {
+test("posts inline sources with the billing identity and actor, then parses analysis", async () => {
 	const requests: Request[] = [];
 	vi.stubGlobal("fetch", async (url: URL, init: RequestInit) => {
 		requests.push(new Request(url, init));
@@ -75,11 +77,12 @@ test("posts inline sources with the billing identity and parses analysis", async
 		requestId,
 		request,
 		accessToken: "test",
+		actor,
 		signal: new AbortController().signal,
 	});
 	expect(response.data?.output).toEqual({ analysis: "A mountain." });
 	expect(requests[0]?.headers.get("idempotency-key")).toBe(requestId);
-	expect(await requests[0]?.json()).toEqual(request);
+	expect(await requests[0]?.json()).toEqual({ ...request, actor });
 });
 
 test("polls an existing analysis instead of resubmitting a paid request", async () => {
@@ -101,6 +104,7 @@ test("polls an existing analysis instead of resubmitting a paid request", async 
 		requestId: randomUUID(),
 		request,
 		accessToken: "test",
+		actor,
 		signal: new AbortController().signal,
 	});
 	expect(response.data?.output.analysis).toBe("A mountain.");
@@ -118,6 +122,7 @@ test.each([
 				requestId: randomUUID(),
 				request,
 				accessToken: "test",
+				actor,
 				signal: new AbortController().signal,
 			})
 		).error?.status,

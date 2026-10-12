@@ -1,4 +1,5 @@
 import type {
+	CmsAiActor,
 	CmsAiGenerateAcceptedData,
 	CmsAiGenerateCompletedData,
 	CmsAiGenerateData,
@@ -13,3 +14,7 @@ export const isCmsAiGenerateAcceptedData = (
 ): data is CmsAiGenerateAcceptedData =>
 	data.mode === "async" &&
 	(data.status === "queued" || data.status === "processing");
+
+/** Returns a user actor when an ID is supplied, otherwise the system actor. */
+export const cmsAiActor = (userId: number | null): CmsAiActor =>
+	userId === null ? { type: "system" } : { type: "user", id: userId };

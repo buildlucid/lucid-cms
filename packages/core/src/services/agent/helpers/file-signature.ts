@@ -19,15 +19,6 @@ const signatures: Record<MediaMimeType, (bytes: Buffer) => boolean> = {
 	"audio/ogg": (bytes) => startsWith(bytes, "OggS"),
 	"audio/flac": (bytes) => startsWith(bytes, "fLaC"),
 	"audio/mp4": (bytes) => startsWith(bytes, "ftyp", 4),
-	"video/mp4": (bytes) => startsWith(bytes, "ftyp", 4),
-	"video/quicktime": (bytes) =>
-		startsWith(bytes, "ftyp", 4) ||
-		startsWith(bytes, "moov", 4) ||
-		startsWith(bytes, "wide", 4),
-	"video/webm": (bytes) => startsWith(bytes, "\x1a\x45\xdf\xa3"),
-	"video/mpeg": (bytes) =>
-		startsWith(bytes, "\x00\x00\x01\xba") ||
-		startsWith(bytes, "\x00\x00\x01\xb3"),
 };
 
 /** Checks whether the file header matches its MIME type. */

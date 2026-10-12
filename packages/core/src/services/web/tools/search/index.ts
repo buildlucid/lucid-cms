@@ -24,6 +24,7 @@ export const webSearchAgentTool = (options: WebToolOptions = {}) => {
 		permissions: [],
 		readOnly: true,
 		capabilities: { webSearch: true },
+		available: ({ aiAccess }) => aiAccess.includes("web_research"),
 		handler: ({ context, input, execution }) =>
 			searchWeb(context, { input, execution, allowedDomains }),
 	});

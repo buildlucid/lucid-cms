@@ -318,7 +318,7 @@ const withImageModels = (models: {
 	};
 };
 
-test("model options keep the configured models Lucid offers and default to the configured choice", async () => {
+test("model options keep the configured models Lucid offers, or all of them when none are, and default to the configured choice", async () => {
 	const pick = async (models: { default?: string; available?: string[] }) => {
 		const options = await getMediaModelOptions(withImageModels(models), {
 			type: "image",
@@ -345,7 +345,11 @@ test("model options keep the configured models Lucid offers and default to the c
 		models: ["a", "c"],
 		status: undefined,
 	});
-	expect((await pick({ available: ["x"] })).status).toBe(503);
+	expect(await pick({ available: ["x"] })).toEqual({
+		default: "b",
+		models: ["a", "b", "c"],
+		status: undefined,
+	});
 });
 
 test("generations use the default model options, and reject models outside them", async () => {

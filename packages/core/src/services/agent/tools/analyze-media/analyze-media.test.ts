@@ -10,6 +10,7 @@ import {
 } from "vitest";
 import defineAgent from "../../../../libs/agent/define-agent.js";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
+import { aiAccessFeatureSchema } from "../../../../libs/lucid-remote/schema/connection.js";
 import {
 	MAX_MEDIA_BYTES,
 	mediaAnalyzeResponseSchema,
@@ -153,9 +154,7 @@ const createMedia = async (props?: {
 				? "image"
 				: mimeType.startsWith("audio/")
 					? "audio"
-					: mimeType.startsWith("video/")
-						? "video"
-						: "document",
+					: "document",
 			mime_type: mimeType,
 			file_extension: mimeType.split("/")[1] ?? "bin",
 			file_size: props?.fileSize ?? 4,
@@ -280,16 +279,6 @@ test.each([
 		bytes: new TextEncoder().encode("%PDF-1.7\n"),
 	},
 	{ mimeType: "audio/mpeg", bytes: new TextEncoder().encode("ID3") },
-	{
-		mimeType: "video/mp4",
-		bytes: new Uint8Array([
-			0,
-			0,
-			0,
-			24,
-			...new TextEncoder().encode("ftypmp42"),
-		]),
-	},
 ])("sends unreferenced $mimeType whose contents match its type", async ({
 	mimeType,
 	bytes,
@@ -319,6 +308,7 @@ test("analysis is on by default without library permission and can be disabled",
 	const setup = (definition: typeof agent) =>
 		resolveRunSetup(context, {
 			agent: definition,
+			aiAccess: aiAccessFeatureSchema.options,
 			authority: {
 				principal: { type: "user", userId: 1 },
 				superAdmin: false,

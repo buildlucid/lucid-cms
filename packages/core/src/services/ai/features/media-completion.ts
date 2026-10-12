@@ -16,7 +16,7 @@ import hasAccess from "../../../libs/permission/has-access.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { LucidUser } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import { mediaOutputSchema } from "../helpers/media-output.js";
@@ -77,6 +77,7 @@ const mediaCompletion: ServiceFn<
 
 	const featureEnabledRes = await checkFeatureEnabled(context, {
 		feature: `${type}Generation`,
+		started: true,
 	});
 	if (featureEnabledRes.error) return featureEnabledRes;
 
@@ -89,15 +90,16 @@ const mediaCompletion: ServiceFn<
 		feature,
 	});
 	if (requestRes.error) {
-		if (requestRes.error.status === 401) {
-			await handleProtectedResourceUnauthorized(context);
-		}
+		await handleRemoteError(context, requestRes.error);
 		if (
 			requestRes.error.key?.startsWith("ai_provider_") ||
 			requestRes.error.key === "cms_ai_generation_request_not_found" ||
 			requestRes.error.key === "cms_ai_generated_media_not_found" ||
 			requestRes.error.key === "cms_ai_generation_option_not_supported" ||
-			requestRes.error.key === "cms_ai_model_unavailable"
+			requestRes.error.key === "cms_ai_model_unavailable" ||
+			requestRes.error.key === "ai_content_blocked" ||
+			requestRes.error.key === "ai_access_restricted" ||
+			requestRes.error.key === "ai_feature_disabled"
 		) {
 			const storeRes = await storeFailedGeneration(context, {
 				requestId: props.requestId,

@@ -1,13 +1,16 @@
 import { createHash } from "node:crypto";
 import type z from "zod";
+import { copy } from "../../../libs/i18n/index.js";
 import type { cmsAgentUsageSchema } from "../../../libs/lucid-remote/schema/ai.js";
+import type { CmsAiActor } from "../../../libs/lucid-remote/types.js";
+import { cmsAiActor } from "../../../libs/lucid-remote/utils.js";
 import type { AgentToolExecution } from "../../../libs/tools/types.js";
 import type { AiUsageFeatureKey } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 import trackPaidRequest from "./track-paid-request.js";
 
@@ -27,9 +30,8 @@ export const requestIdFor = (
 };
 
 /**
- * Runs a paid Lucid request for an agent tool call and records its usage
- * against the run. Failures keep a client status, as their messages are
- * Lucid's own and tell the agent whether to try another source or stop.
+ * Runs a paid tool request as the run's principal and records usage against the run.
+ * @remarks Paid-request failures use 424, preserving messages or replacing policy, access and feature denials with stop instructions.
  */
 const runPaidToolRequest = async <
 	Data extends { usage: z.infer<typeof cmsAgentUsageSchema> },
@@ -41,12 +43,14 @@ const runPaidToolRequest = async <
 		timeoutMs: number;
 		send: (request: {
 			accessToken: string;
+			actor: CmsAiActor;
 			requestId: string;
 			signal: AbortSignal;
 		}) => ServiceResponse<Data>;
 	},
 ): ServiceResponse<Data> => {
 	const { execution } = props;
+	const { principal } = execution.authority;
 	const token = await getAccessToken(context, {});
 	if (token.error) return token;
 
@@ -67,6 +71,7 @@ const runPaidToolRequest = async <
 
 			const result = await props.send({
 				accessToken: token.data.accessToken,
+				actor: cmsAiActor(principal.type === "user" ? principal.userId : null),
 				requestId,
 				signal: AbortSignal.any([
 					execution.signal,
@@ -80,11 +85,24 @@ const runPaidToolRequest = async <
 	});
 	if (!response.error) return response;
 
-	if (response.error.status === 401) {
-		await handleProtectedResourceUnauthorized(context);
-	}
+	await handleRemoteError(context, response.error);
 
-	return { data: undefined, error: { ...response.error, status: 424 } };
+	return {
+		data: undefined,
+		error: {
+			...response.error,
+			status: 424,
+			...(response.error.key === "ai_content_blocked" && {
+				message: copy("server:agent.tool.content.blocked"),
+			}),
+			...(response.error.key === "ai_access_restricted" && {
+				message: copy("server:agent.tool.access.restricted"),
+			}),
+			...(response.error.key === "ai_feature_disabled" && {
+				message: copy("server:agent.tool.feature.disabled"),
+			}),
+		},
+	};
 };
 
 export default runPaidToolRequest;

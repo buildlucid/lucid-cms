@@ -5,6 +5,7 @@ import { hasAgentPermission } from "../../../libs/permission/agent-permissions.j
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import checkFeatureEnabled from "../../ai/checks/check-feature-enabled.js";
 import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
@@ -16,9 +17,9 @@ const systemAuthority: AgentToolAuthority = {
 };
 
 /**
- * Resolves who a run acts for on one agent. A user needs the requested workflow
- * permission, or any agent permission when no action is given. A null user acts
- * as the system. Execution also requires a usable AI connection.
+ * Resolves an agent run's principal and checks its workflow permission.
+ * @remarks Null users act as the system; omitted actions accept any agent permission.
+ * `requireConnection` also checks the AI connection and organisation agent access.
  */
 const checkAgentAccess: ServiceFn<
 	[
@@ -69,6 +70,8 @@ const checkAgentAccess: ServiceFn<
 	if (input.requireConnection) {
 		const connection = await getAccessToken(context, {});
 		if (connection.error) return connection;
+		const enabled = await checkFeatureEnabled(context, { feature: "agents" });
+		if (enabled.error) return enabled;
 	}
 
 	return { error: undefined, data: { agent, authority } };
