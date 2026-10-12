@@ -36,7 +36,7 @@ const getAgentModels: ServiceFn<
 	AiModelCatalog
 > = async (context, input) => {
 	const result = await getLucidRemoteClient(context).request<unknown>(
-		lucidRemotePaths.getAgentModels,
+		`${lucidRemotePaths.getModels}?feature=agent`,
 		{
 			method: "GET",
 			retries: 0,

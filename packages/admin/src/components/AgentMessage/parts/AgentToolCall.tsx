@@ -8,6 +8,7 @@ import {
 	TbOutlineRefresh,
 	TbOutlineSearch,
 	TbOutlineTool,
+	TbOutlineVolume,
 	TbOutlineWorld,
 	TbOutlineX,
 } from "solid-icons/tb";
@@ -17,6 +18,7 @@ import T, { translateAdminCopy } from "@/translations";
 import { agentChangesHref } from "@/utils/agent-references";
 import {
 	type AgentToolPart,
+	generateAudioTool,
 	imageTools,
 	toolDisplayStatus,
 	webFetchTool,
@@ -66,6 +68,9 @@ export const AgentToolIcon: Component<{
 						</Match>
 						<Match when={imageTools.has(props.part.name)}>
 							<TbOutlinePhotoAi size={10} />
+						</Match>
+						<Match when={props.part.name === generateAudioTool}>
+							<TbOutlineVolume size={10} />
 						</Match>
 					</Switch>
 				</Match>

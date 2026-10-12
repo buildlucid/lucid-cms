@@ -12,6 +12,7 @@ import {
 	Switch,
 } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
+import AgentAudioSettings from "@/components/AgentAudioSettings/AgentAudioSettings";
 import AgentImageSettings from "@/components/AgentImageSettings/AgentImageSettings";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentMediaSelect from "@/components/AgentMediaSelect/AgentMediaSelect";
@@ -21,6 +22,7 @@ import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import type { AdminOptions } from "@/extensions/types/config";
 import T from "@/translations";
 import {
+	audioSettingsWidget,
 	confirmationBatchWidget,
 	confirmationWidget,
 	imageSettingsWidget,
@@ -46,6 +48,7 @@ const coreEntries: ReadonlyMap<
 > = new Map([
 	[mediaSelectWidget, { component: AgentMediaSelect, options: undefined }],
 	[imageSettingsWidget, { component: AgentImageSettings, options: undefined }],
+	[audioSettingsWidget, { component: AgentAudioSettings, options: undefined }],
 ]);
 
 const AgentWidget: Component<{
@@ -228,17 +231,25 @@ const AgentWidget: Component<{
 		<div aria-busy={submitting()}>
 			<Switch>
 				<Match when={props.widget.key === questionWidget && supported()}>
-					<AgentQuestionPanel
-						question={question()}
-						onAnswer={answer}
-						onSubmit={answer}
-						onStop={props.onStop}
-					/>
+					{/* capped like the review widgets, so long questions scroll inside the composer */}
+					<div
+						classList={{
+							"max-h-[60vh] overflow-y-auto rounded-2xl":
+								props.view === "composer",
+						}}
+					>
+						<AgentQuestionPanel
+							question={question()}
+							onAnswer={answer}
+							onSubmit={answer}
+							onStop={props.onStop}
+						/>
+					</div>
 				</Match>
 				<Match when={true}>
 					<section
 						class={classnames({
-							"overflow-hidden rounded-2xl border border-primary-low-border bg-card shadow-sm transition-colors focus-within:border-primary":
+							"flex max-h-[60vh] flex-col overflow-hidden rounded-2xl border border-primary-low-border bg-card shadow-sm transition-colors focus-within:border-primary":
 								props.view === "composer",
 							"rounded-2xl border border-border bg-card p-3":
 								props.view === "inline" && pending(),
@@ -247,6 +258,7 @@ const AgentWidget: Component<{
 						<Show when={props.view === "composer" && pending()}>
 							{(state) => (
 								<AgentInteractionBar
+									class="shrink-0"
 									title={currentConfirmation()?.title ?? state().title}
 									onRedirect={props.onRedirect}
 									onStop={props.onStop}
@@ -264,42 +276,64 @@ const AgentWidget: Component<{
 						<Show when={!collapsed()}>
 							<div
 								classList={{
-									"p-3": props.view === "composer",
-									"mb-3": props.view === "inline",
+									"relative flex min-h-0 flex-1 flex-col":
+										props.view === "composer",
 								}}
 							>
-								<Show
-									when={!confirmationOnly()}
-									fallback={<JSONPreview json={confirmation()?.input ?? {}} />}
+								<Show when={props.view === "composer"}>
+									<div
+										aria-hidden="true"
+										class="pointer-events-none absolute inset-x-0 top-0 z-10 h-2.5 bg-linear-to-b from-card to-transparent"
+									/>
+									<div
+										aria-hidden="true"
+										class="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-2.5 bg-linear-to-t from-card to-transparent"
+									/>
+								</Show>
+								<div
+									classList={{
+										"min-h-0 flex-1 overflow-y-auto px-3 py-3.5":
+											props.view === "composer",
+										"mb-3": props.view === "inline",
+									}}
 								>
 									<Show
-										when={contribution()}
-										keyed
-										fallback={<AgentWidgetUnavailable widget={props.widget} />}
+										when={!confirmationOnly()}
+										fallback={
+											<JSONPreview json={confirmation()?.input ?? {}} />
+										}
 									>
-										{(entry) => {
-											const Renderer = entry.component;
-											return (
-												<AdminExtensionBoundary
-													name={props.widget.key}
-													placement="content"
-												>
-													<fieldset disabled={submitting()} class="min-w-0">
-														<Renderer
-															slot="agent.widget"
-															key={props.widget.key}
-															version={props.widget.version}
-															data={props.widget.data}
-															options={entry.options}
-															view={props.view}
-															interaction={interaction()}
-														/>
-													</fieldset>
-												</AdminExtensionBoundary>
-											);
-										}}
+										<Show
+											when={contribution()}
+											keyed
+											fallback={
+												<AgentWidgetUnavailable widget={props.widget} />
+											}
+										>
+											{(entry) => {
+												const Renderer = entry.component;
+												return (
+													<AdminExtensionBoundary
+														name={props.widget.key}
+														placement="content"
+													>
+														<fieldset disabled={submitting()} class="min-w-0">
+															<Renderer
+																slot="agent.widget"
+																key={props.widget.key}
+																version={props.widget.version}
+																data={props.widget.data}
+																options={entry.options}
+																view={props.view}
+																interaction={interaction()}
+															/>
+														</fieldset>
+													</AdminExtensionBoundary>
+												);
+											}}
+										</Show>
 									</Show>
-								</Show>
+								</div>
 							</div>
 						</Show>
 						<Show when={active()}>
@@ -308,7 +342,7 @@ const AgentWidget: Component<{
 									"flex flex-wrap items-center justify-end gap-2",
 									props.view === "composer"
 										? {
-												"px-3 py-3": true,
+												"shrink-0 px-3 py-3": true,
 												"border-t border-border": !collapsed(),
 											}
 										: { "border-t border-border pt-3": !collapsed() },

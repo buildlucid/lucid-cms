@@ -39,6 +39,7 @@ it("opens media only when a tool accepts its type, and leaves documents unanswer
 		webSearch: false,
 		webRead: false,
 		imageGeneration: false,
+		audioGeneration: false,
 	};
 	const media = (mimeType?: string) => ({
 		type: "media" as const,
@@ -74,7 +75,7 @@ it("opens media only when a tool accepts its type, and leaves documents unanswer
 
 it("attaches personal files with uploads alone, and library media only with attachments and read access", () => {
 	const features = (upload: boolean, attach: boolean) => ({
-		media: { upload, attach, generateImage: false },
+		media: { upload, attach, generate: { image: false, audio: false } },
 		documents: { attach: false },
 		requests: { attach: false },
 		builder: { read: true, edit: true },

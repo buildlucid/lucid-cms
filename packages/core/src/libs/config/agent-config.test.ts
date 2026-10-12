@@ -28,27 +28,48 @@ const check = (agents: AgentDefinition[]) => () =>
 		}),
 	);
 
-test("MCP stays off until its feature is switched on, and agents default to none", () => {
+test("MCP stays off until it is configured, and agents default to none", () => {
 	const config = ConfigSchema.pick({ ai: true });
 	expect(config.parse({}).ai).toMatchObject({
-		features: { agents: true, mcp: false },
-		mcp: { tools: [], skills: [] },
-		agents: { definitions: [] },
+		mcp: { enabled: false, tools: [], skills: [] },
+		agents: { enabled: true, definitions: [] },
 	});
-	expect(config.parse({ ai: { mcp: {} } }).ai.features.mcp).toBe(false);
+	expect(config.parse({ ai: { mcp: {} } }).ai.mcp.enabled).toBe(true);
+	expect(config.parse({ ai: { mcp: false } }).ai.mcp.enabled).toBe(false);
 	expect(config.parse({ ai: false }).ai.enabled).toBe(false);
 });
 
-test("agent arrays and objects resolve to the same config", () => {
+test("agent shorthands resolve to the same config", () => {
 	const schema = ConfigSchema.pick({ ai: true });
 	const shorthand = schema.parse({ ai: { agents: [agent] } });
 	const object = schema.parse({ ai: { agents: { definitions: [agent] } } });
 
-	expect(shorthand.ai.agents).toEqual({ definitions: [agent] });
+	expect(shorthand.ai.agents).toEqual({ enabled: true, definitions: [agent] });
 	expect(object.ai.agents).toEqual(shorthand.ai.agents);
-	expect(schema.parse({ ai: { agents: {} } }).ai.agents).toEqual({
+	expect(schema.parse({ ai: { agents: false } }).ai.agents).toEqual({
+		enabled: false,
 		definitions: [],
 	});
+});
+
+test("media generation takes a boolean for every type, or settings per type", () => {
+	const schema = ConfigSchema.pick({ ai: true });
+	const media = (mediaGeneration: unknown) =>
+		schema.parse({ ai: { mediaGeneration } }).ai.mediaGeneration;
+
+	expect(media(false)).toEqual({
+		image: { enabled: false, models: {} },
+		audio: { enabled: false, models: {} },
+	});
+	expect(
+		media({ image: { models: { available: ["a", "b"] } }, audio: false }),
+	).toEqual({
+		image: { enabled: true, models: { available: ["a", "b"] } },
+		audio: { enabled: false, models: {} },
+	});
+	expect(() =>
+		media({ image: { models: { default: "c", available: ["a"] } } }),
+	).toThrow("The default model must be one of the available models.");
 });
 
 test("only enabled agents are used, and only while their feature is on", () => {
@@ -58,15 +79,18 @@ test("only enabled agents are used, and only while their feature is on", () => {
 		description: "Switched off.",
 		enabled: false,
 	});
-	const resolve = (features: { agents?: boolean }, enabled = true) =>
+	const resolve = (agentsEnabled = true, enabled = true) =>
 		getAgents(
 			ConfigSchema.pick({ ai: true }).parse({
-				ai: { enabled, features, agents: [agent, off] },
+				ai: {
+					enabled,
+					agents: { enabled: agentsEnabled, definitions: [agent, off] },
+				},
 			}),
 		).map((item) => item.key);
-	expect(resolve({})).toEqual(["seo"]);
-	expect(resolve({ agents: false })).toEqual([]);
-	expect(resolve({}, false)).toEqual([]);
+	expect(resolve()).toEqual(["seo"]);
+	expect(resolve(false)).toEqual([]);
+	expect(resolve(true, false)).toEqual([]);
 });
 
 test("routines normalise their schedule and default to UTC", () => {

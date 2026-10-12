@@ -35,6 +35,7 @@ import { isSkillDefinition } from "../skills/registry.js";
 import type { SkillDefinition } from "../skills/types.js";
 import { isToolDefinition } from "../tools/registry.js";
 import type { McpToolDefinition } from "../tools/types.js";
+import { mediaGenerationTypes } from "./ai-features.js";
 import {
 	hookSchema,
 	migrationSchema,
@@ -109,36 +110,78 @@ const AgentDefinitionSchema = z.custom<AgentDefinition>(isAgentDefinition, {
 	message: "Expected an agent definition created with defineAgent",
 });
 
+const AiModelOptionsSchema = z
+	.strictObject({
+		default: z.string().min(1).optional(),
+		available: z.array(z.string().min(1)).min(1).optional(),
+	})
+	.refine(
+		(models) =>
+			!models.default ||
+			!models.available ||
+			models.available.includes(models.default),
+		{ message: "The default model must be one of the available models." },
+	);
+
+const enabledShorthand = (value: unknown) =>
+	typeof value === "boolean" ? { enabled: value } : value;
+
+const MediaGenerationTypeSchema = z
+	.preprocess(
+		enabledShorthand,
+		z.strictObject({
+			enabled: z.boolean().default(true),
+			models: AiModelOptionsSchema.default({}),
+		}),
+	)
+	.prefault({});
+
 const AiConfigSchema = z.strictObject({
 	enabled: z.boolean().default(true),
-	features: z
-		.strictObject({
-			imageGeneration: z.boolean().default(true),
-			altGeneration: z.boolean().default(true),
-			chatRename: z.boolean().default(true),
-			agents: z.boolean().default(true),
-			mcp: z.boolean().default(false),
-		})
-		.prefault({}),
-	mcp: z
-		.strictObject({
-			tools: z
-				.array(
-					z.union([McpToolDefinitionSchema, z.array(McpToolDefinitionSchema)]),
-				)
-				.default([])
-				.transform((tools) => tools.flat()),
-			skills: z.array(SkillDefinitionSchema).default([]),
-		})
+	chatRename: z.boolean().default(true),
+	altGeneration: z.boolean().default(true),
+	mediaGeneration: z
+		.preprocess(
+			(value) =>
+				typeof value === "boolean"
+					? Object.fromEntries(
+							mediaGenerationTypes.map((type) => [type, value]),
+						)
+					: value,
+			z.strictObject({
+				image: MediaGenerationTypeSchema,
+				audio: MediaGenerationTypeSchema,
+			}),
+		)
 		.prefault({}),
 	agents: z
 		.preprocess(
-			(value) => (Array.isArray(value) ? { definitions: value } : value),
+			(value) =>
+				Array.isArray(value) ? { definitions: value } : enabledShorthand(value),
 			z.strictObject({
+				enabled: z.boolean().default(true),
 				definitions: z.array(AgentDefinitionSchema).default([]),
 			}),
 		)
 		.prefault({}),
+	mcp: z
+		.preprocess(
+			enabledShorthand,
+			z.strictObject({
+				enabled: z.boolean().default(true),
+				tools: z
+					.array(
+						z.union([
+							McpToolDefinitionSchema,
+							z.array(McpToolDefinitionSchema),
+						]),
+					)
+					.default([])
+					.transform((tools) => tools.flat()),
+				skills: z.array(SkillDefinitionSchema).default([]),
+			}),
+		)
+		.prefault({ enabled: false }),
 });
 
 const KVAdapterSchema = z.custom<

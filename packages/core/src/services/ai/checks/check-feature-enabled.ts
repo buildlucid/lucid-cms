@@ -1,11 +1,12 @@
 import { isAiFeatureEnabled } from "../../../libs/config/ai-features.js";
 import { copy } from "../../../libs/i18n/index.js";
+import type { AiFeature } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkFeatureEnabled: ServiceFn<
 	[
 		{
-			feature: "imageGeneration" | "altGeneration" | "chatRename";
+			feature: AiFeature;
 		},
 	],
 	undefined

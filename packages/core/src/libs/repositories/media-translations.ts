@@ -11,6 +11,7 @@ export default class MediaTranslationsRepository extends StaticRepository<"lucid
 	}
 	// ------------------------------------------
 	// queries
+	/** Upserts a locale row, updating only translation fields present in `data`. */
 	async upsertSingle<
 		K extends keyof Select<LucidMediaTranslations>,
 		V extends boolean = false,
@@ -32,10 +33,23 @@ export default class MediaTranslationsRepository extends StaticRepository<"lucid
 					? oc.columns(["media_id"]).where("locale_code", "is", null)
 					: oc.columns(["media_id", "locale_code"])
 				).doUpdateSet((eb) => ({
-					title: eb.ref("excluded.title"),
-					alt: eb.ref("excluded.alt"),
-					description: eb.ref("excluded.description"),
-					summary: eb.ref("excluded.summary"),
+					//* keeps the set clause valid when no translation column was sent
+					media_id: eb.ref("excluded.media_id"),
+					...(props.data.title !== undefined && {
+						title: eb.ref("excluded.title"),
+					}),
+					...(props.data.alt !== undefined && {
+						alt: eb.ref("excluded.alt"),
+					}),
+					...(props.data.description !== undefined && {
+						description: eb.ref("excluded.description"),
+					}),
+					...(props.data.summary !== undefined && {
+						summary: eb.ref("excluded.summary"),
+					}),
+					...(props.data.transcript !== undefined && {
+						transcript: eb.ref("excluded.transcript"),
+					}),
 				})),
 			)
 			.$if(

@@ -46,6 +46,7 @@ test("combines tool capabilities into what an agent can do", () => {
 		webSearch: true,
 		webRead: true,
 		imageGeneration: true,
+		audioGeneration: true,
 	});
 });
 
@@ -62,6 +63,7 @@ test("analysis needs an analysis tool but no library permissions", () => {
 		webSearch: false,
 		webRead: false,
 		imageGeneration: false,
+		audioGeneration: false,
 	});
 	expect(
 		getCapabilityProviders({
@@ -70,10 +72,10 @@ test("analysis needs an analysis tool but no library permissions", () => {
 	).toHaveLength(1);
 });
 
-test("image generation needs its permission and the CMS feature, and is hidden without them", () => {
+test("media generation needs its permission and the CMS feature, and is hidden without them", () => {
 	const generate = {
 		superAdmin: false,
-		permissions: [Permissions.AiImageGenerate],
+		permissions: [Permissions.AiImageGenerate, Permissions.AiAudioGenerate],
 	};
 	const providers = (grant: typeof generate, enabled = true) =>
 		getCapabilityProviders({
@@ -82,7 +84,10 @@ test("image generation needs its permission and the CMS feature, and is hidden w
 					...config,
 					ai: {
 						...config.ai,
-						features: { ...config.ai.features, imageGeneration: enabled },
+						mediaGeneration: {
+							image: { ...config.ai.mediaGeneration.image, enabled },
+							audio: { ...config.ai.mediaGeneration.audio, enabled },
+						},
 					},
 				},
 			}),
@@ -92,9 +97,15 @@ test("image generation needs its permission and the CMS feature, and is hidden w
 		"media_generate_image",
 		"media_edit_image",
 	]);
+	expect(providers(generate).audioGeneration).toEqual(["media_generate_audio"]);
 	expect(providers(noPermissions).imageGeneration).toEqual([]);
+	expect(providers(noPermissions).audioGeneration).toEqual([]);
 	expect(providers(generate, false).imageGeneration).toEqual([]);
-	expect(summariseCapabilities(providers(generate)).imageGeneration).toBe(true);
+	expect(providers(generate, false).audioGeneration).toEqual([]);
+	expect(summariseCapabilities(providers(generate))).toMatchObject({
+		imageGeneration: true,
+		audioGeneration: true,
+	});
 });
 
 test("custom providers report support with Lucid's corresponding tools disabled", () => {
@@ -138,5 +149,6 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 		webSearch: true,
 		webRead: true,
 		imageGeneration: false,
+		audioGeneration: false,
 	});
 });

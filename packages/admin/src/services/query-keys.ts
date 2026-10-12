@@ -1,4 +1,4 @@
-import type { AgentToolStatus } from "@types";
+import type { AgentToolStatus, MediaGenerationType } from "@types";
 import type { QueryBuilderProps } from "@/utils/query-builder";
 
 /**
@@ -154,6 +154,8 @@ export const queryKeys = {
 			["lucid", "ai", "usage", "sessions", type, id, "records"] as const,
 		usageChart: () => ["lucid", "ai", "usage", "chart"] as const,
 		credits: () => ["lucid", "ai", "credits"] as const,
+		mediaModels: (type: MediaGenerationType) =>
+			["lucid", "ai", "models", type] as const,
 	},
 	auth: {
 		all: () => ["lucid", "auth"] as const,

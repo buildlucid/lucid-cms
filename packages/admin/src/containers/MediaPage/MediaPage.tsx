@@ -26,7 +26,7 @@ import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
-import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
+import useMediaGeneration from "@/hooks/useMediaGeneration/useMediaGeneration";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
@@ -39,7 +39,6 @@ import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import mediaStore from "@/store/mediaStore/mediaStore";
-import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { screenLabel } from "@/utils/agent-screen";
@@ -85,14 +84,14 @@ const MediaPage: Component = () => {
 		singleSort: true,
 	});
 	const params = useParams();
-	const mediaImageGeneration = useMediaImageGeneration();
+	const mediaGeneration = useMediaGeneration();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =
 		createSignal<boolean>(false);
 	const [getOpenCreateMediaFolderModal, setOpenCreateMediaFolderModal] =
 		createSignal<boolean>(false);
 	const [getOpenBulkUploadModal, setOpenBulkUploadModal] =
 		createSignal<boolean>(false);
-	const [getOpenImageGenerationOnCreate, setOpenImageGenerationOnCreate] =
+	const [getOpenMediaGenerationOnCreate, setOpenMediaGenerationOnCreate] =
 		createSignal(false);
 	const [getSingleUploadInitialFile, setSingleUploadInitialFile] =
 		createSignal<File | null>(null);
@@ -169,14 +168,9 @@ const MediaPage: Component = () => {
 		}
 		return presets;
 	});
-	const aiImageGenerationEnabled = createMemo(() =>
-		siteStore.get.isAiFeatureEnabled("imageGeneration"),
-	);
-	const aiImageGenerationAccess = createMemo(() =>
-		mediaImageGeneration.accessState(),
-	);
-	const aiImageGenerationDisabledToast = createMemo(() => {
-		const access = aiImageGenerationAccess();
+	const mediaGenerationOffered = createMemo(() => mediaGeneration.isOffered());
+	const mediaGenerationDisabledToast = createMemo(() => {
+		const access = mediaGeneration.accessState();
 		if (!access.disabled) return undefined;
 
 		return {
@@ -247,7 +241,7 @@ const MediaPage: Component = () => {
 	// Functions
 	const resetCreateMediaPanelIntent = () => {
 		setSingleUploadInitialFile(null);
-		setOpenImageGenerationOnCreate(false);
+		setOpenMediaGenerationOnCreate(false);
 	};
 	const hasDraggedFiles = (event: DragEvent) => {
 		return Array.from(event.dataTransfer?.types ?? []).includes("Files");
@@ -263,7 +257,7 @@ const MediaPage: Component = () => {
 		setOpenBulkUploadModal(state);
 	};
 	const openSingleUploadWithFile = (file: File) => {
-		setOpenImageGenerationOnCreate(false);
+		setOpenMediaGenerationOnCreate(false);
 		setSingleUploadInitialFile(file);
 		setOpenCreateMediaPanel(true);
 	};
@@ -271,11 +265,11 @@ const MediaPage: Component = () => {
 		setBulkUploadInitialFiles(files);
 		setOpenBulkUploadModal(true);
 	};
-	const openCreateMediaPanelWithImageGeneration = () => {
-		if (!aiImageGenerationEnabled()) return;
-		if (aiImageGenerationAccess().disabled) return;
+	const openCreateMediaPanelWithMediaGeneration = () => {
+		if (!mediaGenerationOffered()) return;
+		if (mediaGeneration.accessState().disabled) return;
 		setSingleUploadInitialFile(null);
-		setOpenImageGenerationOnCreate(true);
+		setOpenMediaGenerationOnCreate(true);
 		setOpenCreateMediaPanel(true);
 	};
 	const onDragEnter = (event: DragEvent) => {
@@ -325,14 +319,14 @@ const MediaPage: Component = () => {
 			},
 		];
 
-		if (aiImageGenerationEnabled()) {
+		if (mediaGenerationOffered()) {
 			actions.push({
 				type: "button",
-				label: T()("ai.media.image.generate.modal.title"),
+				label: T()("ai.media.generate.modal.title"),
 				icon: "sparkle",
-				disabled: aiImageGenerationAccess().disabled,
-				disabledToast: aiImageGenerationDisabledToast(),
-				onClick: openCreateMediaPanelWithImageGeneration,
+				disabled: mediaGeneration.accessState().disabled,
+				disabledToast: mediaGenerationDisabledToast(),
+				onClick: openCreateMediaPanelWithMediaGeneration,
 			});
 		}
 
@@ -609,15 +603,15 @@ const MediaPage: Component = () => {
 					<CreateUpdateMediaDrawer
 						allowOwned={true}
 						initialFile={getSingleUploadInitialFile}
-						openImageGenerationOnCreate={getOpenImageGenerationOnCreate}
+						openMediaGenerationOnCreate={getOpenMediaGenerationOnCreate}
 						state={{
 							open: getOpenCreateMediaPanel(),
 							setOpen: setCreateMediaPanelOpen,
 							parentFolderId: folderIdFilter,
 						}}
 						callbacks={{
-							onImageGenerationOpened: () => {
-								setOpenImageGenerationOnCreate(false);
+							onMediaGenerationOpened: () => {
+								setOpenMediaGenerationOnCreate(false);
 							},
 						}}
 					/>

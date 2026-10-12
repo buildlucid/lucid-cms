@@ -43,6 +43,7 @@ import type {
 import type { SeedDefinition } from "../libs/seed/types.js";
 import type { SkillDefinition } from "../libs/skills/types.js";
 import type { McpToolDefinition } from "../libs/tools/types.js";
+import type { MediaGenerationType } from "./response.js";
 
 /** Content languages available to editors. Omit localization to keep content unassigned. */
 export type LocalizationConfig = {
@@ -212,18 +213,32 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
-export type AiFeatureConfig = {
-	/** Allow AI-generated chat titles, both automatic and from the rename dialog. Defaults to true. */
-	chatRename?: boolean;
-	/** Allow image generation. Defaults to true. */
-	imageGeneration?: boolean;
-	/** Allow media alt text generation. Defaults to true. */
-	altGeneration?: boolean;
-	/** Allow the agents in `ai.agents`. Defaults to true. */
-	agents?: boolean;
-	/** Serve tools and skills over MCP at `/lucid/mcp`. Defaults to false. */
-	mcp?: boolean;
+/** Model choices from the connected Lucid service. */
+export type AiModelOptions = {
+	/** Model used unless overridden, falling back to configured availability, Lucid's default or the first offered model. */
+	default?: string;
+	/** Allowed model IDs, defaulting to all models Lucid offers. */
+	available?: string[];
 };
+
+/** Generation settings for one media type, with booleans as shorthand for `{ enabled }`. */
+export type MediaGenerationTypeConfig =
+	| boolean
+	| {
+			/** Defaults to true. */
+			enabled?: boolean;
+			models?: AiModelOptions;
+	  };
+
+/** Generation settings for each media type, with booleans enabling or disabling all types. */
+export type MediaGenerationConfig =
+	| boolean
+	| {
+			/** Image generation and editing. Defaults to true. */
+			image?: MediaGenerationTypeConfig;
+			/** Text to speech. Defaults to true. */
+			audio?: MediaGenerationTypeConfig;
+	  };
 
 /** Separate secrets for encryption and signing. Keep these stable between deployments. */
 export type SecretConfig = {
@@ -319,7 +334,19 @@ export interface LucidConfig {
 		providers?: AuthProvider[];
 	};
 	/**
-	 * AI feature availability. Pass a boolean to toggle every AI feature at once.
+	 * AI settings, with booleans enabling or disabling all features.
+	 *
+	 * @example
+	 * ```ts
+	 * ai: {
+	 * 	mediaGeneration: {
+	 * 		image: { models: { default: "x-ai/grok-imagine-image-2.0" } },
+	 * 		audio: false,
+	 * 	},
+	 * 	agents: [seoAgent],
+	 * 	mcp: { tools: [mcpTools.all()] },
+	 * }
+	 * ```
 	 */
 	ai?:
 		| boolean
@@ -328,18 +355,31 @@ export interface LucidConfig {
 				 * Allow AI features, including agents and MCP, in the admin and API. Defaults to true.
 				 */
 				enabled?: boolean;
-				/**
-				 * Turns each AI feature on or off. MCP is off unless `mcp` is true; the rest default to on.
-				 */
-				features?: AiFeatureConfig;
-				/** Tools and skills served over MCP when `features.mcp` is true. */
-				mcp?: {
-					/** Tools MCP clients can call, including flattened bundles such as `mcpTools.all()` and custom `defineMcpTool` tools. */
-					tools?: (McpToolDefinition | readonly McpToolDefinition[])[];
-					skills?: SkillDefinition[];
-				};
-				/** Agents available in the admin, created with `defineAgent`. Requires a connected Lucid AI account. */
-				agents?: AgentDefinition[] | { definitions?: AgentDefinition[] };
+				/** AI-generated chat titles, including manual renames, enabled by default. */
+				chatRename?: boolean;
+				/** Media alt text generation, enabled by default. */
+				altGeneration?: boolean;
+				/** Image generation and text to speech for the admin and agents, with all media types enabled by default. */
+				mediaGeneration?: MediaGenerationConfig;
+				/** Agents created with `defineAgent`, requiring a connected Lucid AI account and disabled with `false`. */
+				agents?:
+					| false
+					| AgentDefinition[]
+					| {
+							/** Defaults to true. */
+							enabled?: boolean;
+							definitions?: AgentDefinition[];
+					  };
+				/** Serves tools and skills at `/lucid/mcp`, disabled unless configured. */
+				mcp?:
+					| false
+					| {
+							/** Defaults to true once `mcp` is set. */
+							enabled?: boolean;
+							/** Tools MCP clients can call, including flattened bundles such as `mcpTools.all()` and custom `defineMcpTool` tools. */
+							tools?: (McpToolDefinition | readonly McpToolDefinition[])[];
+							skills?: SkillDefinition[];
+					  };
 		  };
 	/**
 	 * Content localization settings.
@@ -649,12 +689,18 @@ export interface ResolvedLucidConfig {
 	};
 	ai: {
 		enabled: boolean;
-		features: Required<AiFeatureConfig>;
+		chatRename: boolean;
+		altGeneration: boolean;
+		mediaGeneration: Record<
+			MediaGenerationType,
+			{ enabled: boolean; models: AiModelOptions }
+		>;
+		agents: { enabled: boolean; definitions: AgentDefinition[] };
 		mcp: {
+			enabled: boolean;
 			tools: McpToolDefinition[];
 			skills: SkillDefinition[];
 		};
-		agents: { definitions: AgentDefinition[] };
 	};
 	localization: LocalizationConfig;
 	i18n: Required<I18nConfig>;

@@ -1,19 +1,13 @@
 import formatter from "../../libs/formatters/helpers.js";
 import { copy } from "../../libs/i18n/index.js";
-import {
-	MediaAwaitingSyncRepository,
-	MediaRepository,
-} from "../../libs/repositories/index.js";
+import { MediaRepository } from "../../libs/repositories/index.js";
 import type { MediaOrigin } from "../../types/response.js";
-import { generateKey, getFileMetadata } from "../../utils/media/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkCanStoreMedia from "./checks/check-can-store-media.js";
-import checkHasMediaStorage from "./checks/check-has-media-storage.js";
 import createSingle from "./create-single.js";
 import deletePendingUpload from "./helpers/delete-pending-upload.js";
+import storePendingUpload from "./helpers/store-pending-upload.js";
 import {
-	boundUploadBody,
 	type MediaUploadFile,
 	normalizeUploadFile,
 } from "./helpers/upload-file.js";
@@ -38,6 +32,7 @@ const uploadSingle: ServiceFn<
 			alt?: { localeCode: string | null; value: string | null }[];
 			description?: { localeCode: string | null; value: string | null }[];
 			summary?: { localeCode: string | null; value: string | null }[];
+			transcript?: { localeCode: string | null; value: string | null }[];
 			width?: number;
 			height?: number;
 			duration?: number | null;
@@ -55,9 +50,6 @@ const uploadSingle: ServiceFn<
 > = async (context, input) => {
 	const file = normalizeUploadFile(input.file);
 
-	const storage = await checkHasMediaStorage(context);
-	if (storage.error) return storage;
-
 	if (context.db.isTransaction) {
 		return {
 			error: {
@@ -68,18 +60,6 @@ const uploadSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-
-	const size = await checkCanStoreMedia(context, {
-		size: file.size,
-		maxBytes: input.validation?.maxBytes,
-	});
-	if (size.error) return size;
-
-	const metadata = await getFileMetadata({
-		fileName: file.fileName,
-		mimeType: file.mimeType || null,
-	});
-	if (metadata.error) return metadata;
 
 	const Media = new MediaRepository(context.db);
 	const existing =
@@ -100,35 +80,23 @@ const uploadSingle: ServiceFn<
 		input.public ??
 		(existing ? formatter.formatBoolean(existing.data.public) : false);
 
-	const key = generateKey({ name: file.fileName, public: isPublic });
-	if (key.error) return key;
-
-	const pending = new MediaAwaitingSyncRepository(context.db);
-	const tracked = await pending.createSingle({
-		data: { key: key.data, timestamp: new Date().toISOString() },
-		validation: { enabled: true },
+	const stored = await storePendingUpload(context, {
+		file,
+		public: isPublic,
+		maxBytes: input.validation?.maxBytes,
 	});
-	if (tracked.error) return tracked;
+	if (stored.error) return stored;
+	const key = stored.data.key;
 
 	let registered = false;
 	try {
-		const stored = await storage.data.upload(context, {
-			key: key.data,
-			body: boundUploadBody(file),
-			size: file.size,
-			mimeType: metadata.data.mimeType,
-			extension: metadata.data.extension,
-			type: metadata.data.type,
-		});
-		if (stored.error) return stored;
-
 		if (input.id !== undefined) {
 			const result = await serviceWrapper(updateSingle, { transaction: true })(
 				context,
 				{
 					...input,
 					id: input.id,
-					key: key.data,
+					key,
 					fileName: file.fileName,
 					expectedSize: file.size,
 					actor: { type: "internal" },
@@ -144,7 +112,7 @@ const uploadSingle: ServiceFn<
 			context,
 			{
 				...input,
-				key: key.data,
+				key,
 				fileName: file.fileName,
 				expectedSize: file.size,
 				origin: input.origin ?? "human",
@@ -156,7 +124,7 @@ const uploadSingle: ServiceFn<
 		registered = true;
 		return { error: undefined, data: { id: result.data.id } };
 	} finally {
-		if (!registered) await deletePendingUpload(context, { key: key.data });
+		if (!registered) await deletePendingUpload(context, { key });
 	}
 };
 

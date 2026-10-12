@@ -4,15 +4,15 @@ import type { FocalPoint } from "@/components/FocalPointEditorModal/FocalPointEd
 import ImageCropEditorModal from "@/components/ImageCropEditorModal/ImageCropEditorModal";
 import type {
 	SingleFileUploadImageCrop,
-	SingleFileUploadImageGeneration,
+	SingleFileUploadMediaGeneration,
 	SingleFileUploadProps,
 } from "@/components/SingleFileUpload/SingleFileUpload";
 import { SingleFileUpload } from "@/components/SingleFileUpload/SingleFileUpload";
-import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
+import useMediaGeneration from "@/hooks/useMediaGeneration/useMediaGeneration";
 import type {
 	AiImageSource,
-	MediaImageGenerationFileMeta,
-	MediaImageGenerationTarget,
+	MediaGenerationFileMeta,
+	MediaGenerationTarget,
 } from "@/store/aiModalsStore/aiModalsStore";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -22,6 +22,7 @@ import {
 	type ImageCropSource,
 	isSupportedCropMimeType,
 } from "@/utils/image-crop";
+import { acceptedGenerationTypes } from "@/utils/media-generation";
 import {
 	getImageMeta as getFileImageMeta,
 	type ImageMeta,
@@ -56,8 +57,8 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	const [cropEditorOpen, setCropEditorOpen] = createSignal(false);
 	const [cropEditorSource, setCropEditorSource] =
 		createSignal<ImageCropSource | null>(null);
-	const mediaImageGeneration = useMediaImageGeneration();
-	const imageGenerationTargetId = mediaImageGeneration.getTargetId();
+	const mediaGeneration = useMediaGeneration();
+	const mediaGenerationTargetId = mediaGeneration.getTargetId();
 
 	// ----------------------------------------
 	// Functions
@@ -87,14 +88,11 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 
 	// ----------------------------------------
 	// Functions
-	const imageGenerationEnabled = () => {
-		return (
-			mediaImageGeneration.isFeatureEnabled() &&
-			data.imageGeneration !== undefined &&
-			(data.imageGeneration.enabled?.() ?? true)
-		);
-	};
-	const imageGenerationTarget: MediaImageGenerationTarget = {
+	const accept = () =>
+		typeof data.accept === "function" ? data.accept() : data.accept;
+	const mediaGenerationTarget: MediaGenerationTarget = {
+		types: () =>
+			data.mediaGeneration?.types?.() ?? acceptedGenerationTypes(accept()),
 		image: () => imageGenerationSource(),
 		setFile: async (file, meta) => {
 			setGetFile(file);
@@ -102,27 +100,34 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			setFocalPoint(null);
 			setFileProvenance(meta);
 			setCropHistory([]);
-			await data.imageGeneration?.onSetFile?.(file, meta);
+			await data.mediaGeneration?.onSetFile?.(file, meta);
 		},
 		disabled: () =>
-			data.disabled === true || data.imageGeneration?.disabled?.() === true,
+			data.disabled === true || data.mediaGeneration?.disabled?.() === true,
 	};
-	const imageGeneration = (): SingleFileUploadImageGeneration | undefined => {
-		if (!imageGenerationEnabled()) return undefined;
+	const mediaGenerationAction = ():
+		| SingleFileUploadMediaGeneration
+		| undefined => {
+		if (
+			data.mediaGeneration === undefined ||
+			data.mediaGeneration.enabled?.() === false ||
+			!mediaGeneration.isOffered(mediaGenerationTarget)
+		) {
+			return undefined;
+		}
 
 		return {
 			state: {
-				loading: mediaImageGeneration.isTargetLoading(imageGenerationTargetId),
-				disabled: mediaImageGeneration.isDisabled(imageGenerationTarget),
-				disabledClickable: mediaImageGeneration.accessState().disabled,
-				tooltip: mediaImageGeneration.getTooltip(imageGenerationTarget),
+				label: mediaGeneration.getLabel(mediaGenerationTarget),
+				loading: mediaGeneration.isTargetLoading(mediaGenerationTargetId),
+				disabled: mediaGeneration.isDisabled(mediaGenerationTarget),
+				disabledClickable: mediaGeneration.accessState(mediaGenerationTarget)
+					.disabled,
+				tooltip: mediaGeneration.getTooltip(mediaGenerationTarget),
 			},
 			callbacks: {
 				open: () =>
-					mediaImageGeneration.open(
-						imageGenerationTarget,
-						imageGenerationTargetId,
-					),
+					mediaGeneration.open(mediaGenerationTarget, mediaGenerationTargetId),
 			},
 		};
 	};
@@ -277,7 +282,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	};
 	const setGeneratedFile = async (
 		file: File,
-		provenance?: MediaImageGenerationFileMeta,
+		provenance?: MediaGenerationFileMeta,
 	) => {
 		setGetFile(file);
 		setCropFile(null);
@@ -287,7 +292,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		setFocalPoint(null);
 		setFileProvenance(provenance);
 		setCropHistory([]);
-		await data.imageGeneration?.onSetFile?.(file, provenance);
+		await data.mediaGeneration?.onSetFile?.(file, provenance);
 	};
 	const applyCrop = async (
 		file: File,
@@ -352,8 +357,8 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		getImageMeta,
 		getCropImageMeta,
 		getImageCrop: imageCrop,
-		openImageGeneration: () => {
-			imageGeneration()?.callbacks.open();
+		openMediaGeneration: () => {
+			mediaGenerationAction()?.callbacks.open();
 		},
 		reset: () => {
 			setGetFile(null);
@@ -422,16 +427,14 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 					id={data.id}
 					name={data.name}
 					copy={data.copy}
-					accept={
-						typeof data.accept === "function" ? data.accept() : data.accept
-					}
+					accept={accept()}
 					required={data.required}
 					disabled={data.disabled}
 					progress={data.progress?.()}
 					errors={
 						data.errors ? getBodyError(data.name, data.errors) : undefined
 					}
-					imageGeneration={imageGeneration()}
+					mediaGeneration={mediaGenerationAction()}
 					imageCrop={imageCrop()}
 					pendingChange={pendingChange()}
 				/>

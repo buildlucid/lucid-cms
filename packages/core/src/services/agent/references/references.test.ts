@@ -80,7 +80,7 @@ beforeAll(async () => {
 		config: {
 			...config,
 			collections: [collection],
-			ai: { ...config.ai, agents: { definitions: [agent] } },
+			ai: { ...config.ai, agents: { enabled: true, definitions: [agent] } },
 		},
 		database: await fixture.getDatabase(),
 		translationStore: createTranslationStore({
@@ -1311,7 +1311,10 @@ test("upload-only agents accept owned files without enabling existing media or d
 		...context,
 		config: {
 			...context.config,
-			ai: { ...context.config.ai, agents: { definitions: [uploadOnly] } },
+			ai: {
+				...context.config.ai,
+				agents: { enabled: true, definitions: [uploadOnly] },
+			},
 		},
 	};
 	const mediaId = await createMedia({ owner_user_id: ownerId });
@@ -1353,6 +1356,7 @@ test("chat uploads only take the uploader's own images as posters", async () => 
 			ai: {
 				...context.config.ai,
 				agents: {
+					enabled: true,
 					definitions: [
 						defineAgent({
 							key: agent.key,

@@ -1,8 +1,8 @@
 import type {
+	AgentAudioSettings,
 	AgentBuilderChangesData,
 	AgentCoreWidgetKey,
 	AgentFileReadOutput,
-	AgentImageSettings,
 	AgentImageSettingsData,
 	AgentLucidToolName,
 	AgentMediaSelectData,
@@ -55,6 +55,15 @@ export const imageTools: ReadonlySet<string> = new Set([
 ]);
 export const imageSettingsWidget =
 	"lucid-image-settings" satisfies AgentCoreWidgetKey;
+export const generateAudioTool =
+	"media_generate_audio" satisfies AgentLucidToolName;
+export const audioSettingsWidget =
+	"lucid-audio-settings" satisfies AgentCoreWidgetKey;
+/** Settings widgets that determine where a running media tool shows its placeholder. */
+export const mediaSettingsWidgets: ReadonlySet<string> = new Set([
+	imageSettingsWidget,
+	audioSettingsWidget,
+]);
 /** Tools that change chat references without a references widget: previews show their media in a gallery instead, and removals show nothing. */
 export const referenceTools: ReadonlySet<string> = new Set([
 	"lucid_preview_media",
@@ -70,8 +79,12 @@ export const isWidgetSupported = (
 	widget: Pick<AgentWidgetPart, "key" | "version">,
 ) => !widget.key.startsWith("lucid-") || widget.version === 1;
 
-export const isGeneratingImage = (part: AgentToolPart) =>
-	imageTools.has(part.name) && part.status === "running";
+/** The media type shown as a placeholder while a tool runs. */
+export const generatingMediaType = (part: AgentToolPart) => {
+	if (part.status !== "running") return undefined;
+	if (imageTools.has(part.name)) return "image";
+	return part.name === generateAudioTool ? "audio" : undefined;
+};
 
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
@@ -80,10 +93,11 @@ export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 	(part.name !== finishTool || part.status !== "complete") &&
 	part.name !== progressTool;
 
-/** Returns the ratio for sizes such as "1536x1024", defaulting to 1 for automatic or unknown sizes. */
-export const imageSizeRatio = (input: unknown) => {
-	if (!isObjectRecord(input) || typeof input.size !== "string") return 1;
-	const match = /^(\d+)x(\d+)$/.exec(input.size);
+/** Returns the width over height for aspect ratios such as "16:9", defaulting to 1 for `auto` or unknown ratios. */
+export const imageAspectRatio = (input: unknown) => {
+	const value = isObjectRecord(input) ? input.aspectRatio : undefined;
+	const match =
+		typeof value === "string" ? /^([\d.]+):([\d.]+)$/.exec(value) : null;
 	return match ? Number(match[1]) / Number(match[2]) : 1;
 };
 
@@ -187,16 +201,8 @@ export const isMediaSelectData = (
 	typeof value.includePersonal === "boolean" &&
 	typeof value.upload === "boolean";
 
-const imageSizes: ReadonlySet<string> = new Set([
-	"auto",
-	"1024x1024",
-	"1536x1024",
-	"1024x1536",
-	"2048x2048",
-	"2048x1152",
-	"3840x2160",
-	"2160x3840",
-] satisfies AgentImageSettings["size"][]);
+const isNullableString = (value: unknown) =>
+	value === null || typeof value === "string";
 
 export const isImageSettingsData = (
 	value: unknown,
@@ -204,13 +210,24 @@ export const isImageSettingsData = (
 	isObjectRecord(value) &&
 	typeof value.instruction === "string" &&
 	typeof value.title === "string" &&
-	(value.alt === null || typeof value.alt === "string") &&
-	(value.guidance === null || typeof value.guidance === "string") &&
-	typeof value.size === "string" &&
-	imageSizes.has(value.size) &&
-	typeof value.quality === "string" &&
-	typeof value.outputFormat === "string" &&
+	isNullableString(value.alt) &&
+	isNullableString(value.guidance) &&
+	typeof value.aspectRatio === "string" &&
+	isNullableString(value.resolution) &&
+	isNullableString(value.quality) &&
+	isNullableString(value.outputFormat) &&
+	isNullableString(value.model) &&
 	(value.editMediaId === null || typeof value.editMediaId === "number");
+
+export const isAudioSettingsData = (
+	value: unknown,
+): value is AgentAudioSettings =>
+	isObjectRecord(value) &&
+	typeof value.script === "string" &&
+	typeof value.title === "string" &&
+	isNullableString(value.instruction) &&
+	isNullableString(value.model) &&
+	isNullableString(value.voice);
 
 /** Screen calls come from the server, so only the parts the session routes on are checked. */
 export const isScreenCallData = (value: unknown): value is AgentScreenCall =>

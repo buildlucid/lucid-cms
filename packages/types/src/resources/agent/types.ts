@@ -1,4 +1,4 @@
-import type { AiModelSelection } from "../ai/types.js";
+import type { AiModelSelection, MediaGenerationType } from "../ai/types.js";
 import type {
 	DocumentVersionCheckBrick,
 	DocumentVersionCheckField,
@@ -229,6 +229,8 @@ export type AgentCapabilities = {
 	webRead: boolean;
 	/** Whether the agent can generate images with Lucid AI. */
 	imageGeneration: boolean;
+	/** Whether the agent can generate audio with Lucid AI. */
+	audioGeneration: boolean;
 };
 
 /** An agent name used in navigation and saved chat labels. */
@@ -246,8 +248,12 @@ export interface Agent {
 	description: string;
 	/** Configures composer attachments and tools for reading and editing the person's open document builder. */
 	features: {
-		/** Composer image generation creates personal uploads and requires `upload`. */
-		media: { upload: boolean; attach: boolean; generateImage: boolean };
+		/** Composer media generation creates personal uploads and requires `upload`. */
+		media: {
+			upload: boolean;
+			attach: boolean;
+			generate: Record<MediaGenerationType, boolean>;
+		};
 		documents: { attach: boolean };
 		requests: { attach: boolean };
 		builder: { read: boolean; edit: boolean };
@@ -346,6 +352,7 @@ export type AgentLucidToolName =
 	| "media_select"
 	| "media_generate_image"
 	| "media_edit_image"
+	| "media_generate_audio"
 	| "lucid_builder_read"
 	| "lucid_builder_update"
 	| "lucid_builder_focus";
@@ -360,7 +367,8 @@ export type AgentCoreWidgetKey =
 	| "lucid-screen"
 	| "lucid-builder-changes"
 	| "lucid-references"
-	| "lucid-image-settings";
+	| "lucid-image-settings"
+	| "lucid-audio-settings";
 
 /** Image settings reviewed before generation. */
 export type AgentImageSettings = {
@@ -375,22 +383,33 @@ export type AgentImageSettings = {
 		| "illustration"
 		| "cinematic"
 		| null;
-	size:
-		| "auto"
-		| "1024x1024"
-		| "1536x1024"
-		| "1024x1536"
-		| "2048x2048"
-		| "2048x1152"
-		| "3840x2160"
-		| "2160x3840";
-	quality: "auto" | "low" | "medium" | "high";
-	outputFormat: "webp" | "png" | "jpeg";
+	aspectRatio: string;
+	/** Null for the model's default, or for models that pick their own. */
+	resolution: string | null;
+	/** Null for the model's default, or for models without a quality setting. */
+	quality: string | null;
+	/** Null for the model's default, or for models that return their own format. */
+	outputFormat: string | null;
+	/** The image model, or null for the configured default. */
+	model: string | null;
 };
 
 /** Saved image settings and edit source for a `lucid-image-settings` interaction whose response is `AgentImageSettings`. */
 export type AgentImageSettingsData = AgentImageSettings & {
 	editMediaId: number | null;
+};
+
+/** Audio settings reviewed before generation, and the saved settings for a `lucid-audio-settings` interaction. */
+export type AgentAudioSettings = {
+	/** The text to speak. */
+	script: string;
+	title: string;
+	/** Delivery instructions, such as tone and pacing, for models that take them. */
+	instruction: string | null;
+	/** The speech model, or null for the configured default. */
+	model: string | null;
+	/** The voice, or null for the model's default. */
+	voice: string | null;
 };
 
 /** The lifecycle state of an agent run. */

@@ -55,44 +55,133 @@ export type MediaAltGenerateResponse = {
 	usage: AiGenerateUsage;
 };
 
-export type MediaImageGenerateCompletionStatus = "complete";
-export type MediaImageGenerateStatus = "queued" | "processing";
+/** The media types Lucid can generate. */
+export type MediaGenerationType = "image" | "audio";
 
-export type MediaImageGenerateResponse = {
-	mode: "async";
-	requestId: string;
-	feature: {
-		key: "media.image.generate";
-		version: "v1";
-	};
-	status: MediaImageGenerateStatus;
+/** AI features the CMS config turns on or off. */
+export type AiFeature =
+	| "chatRename"
+	| "altGeneration"
+	| `${MediaGenerationType}Generation`
+	| "agents"
+	| "mcp";
+
+/** The Lucid feature behind each media type. */
+export type MediaGenerateFeatures = {
+	image: { key: "media.image.generate"; version: "v1" };
+	audio: { key: "media.audio.generate"; version: "v1" };
 };
 
-export type MediaImageGenerateCompletionResponse = {
-	mode: AiGenerateMode;
-	status?: MediaImageGenerateCompletionStatus;
-	requestId: string;
-	feature: {
-		key: "media.image.generate";
-		version: "v1";
+export type MediaGenerateStatus = "queued" | "processing";
+
+/** A pending media generation whose `type` identifies its feature. */
+export type MediaGenerateResponse = {
+	[Type in MediaGenerationType]: {
+		mode: "async";
+		requestId: string;
+		type: Type;
+		feature: MediaGenerateFeatures[Type];
+		status: MediaGenerateStatus;
 	};
-	output: {
+}[MediaGenerationType];
+
+type GeneratedMediaFile = {
+	id: string;
+	/** A CMS URL that streams the file for previews, until it is saved. */
+	url: string;
+	storageKey: string;
+	byteSize: number;
+	mimeType: string;
+	extension: string;
+};
+
+/** Each media type's generated file and the settings it was made with. */
+export type MediaGenerateOutputs = {
+	image: GeneratedMediaFile & {
+		aspectRatio: string;
+		/** Null when the model picked its own resolution. */
+		resolution: string | null;
+		/** Null when the model has no quality setting. */
+		quality: string | null;
+	};
+	audio: GeneratedMediaFile & {
+		voice: string;
+		/** How many characters were spoken. */
+		characters: number;
+	};
+};
+
+/** A finished media generation whose `type` identifies its output. */
+export type MediaGenerateCompletionResponse = {
+	[Type in MediaGenerationType]: {
+		mode: AiGenerateMode;
+		status?: "complete";
+		requestId: string;
+		feature: MediaGenerateFeatures[Type];
+		usage: AiGenerateUsage;
+		type: Type;
+		output: MediaGenerateOutputs[Type];
+	};
+}[MediaGenerationType];
+
+export type MediaGenerateCompletionPollResponse =
+	| MediaGenerateResponse
+	| MediaGenerateCompletionResponse;
+
+/** A generated file copied into media storage, ready to create or replace media with its key. */
+export type SavedGeneratedMedia = {
+	key: string;
+	fileName: string;
+	mimeType: string;
+	size: number;
+};
+
+/** A voice a speech model can speak with. */
+export type MediaGenerationVoice = {
+	id: string;
+	name: string;
+	/** A BCP 47 tag, for voices made for one language. */
+	language?: string;
+	/** A short sample recording of the voice. */
+	previewUrl: string;
+};
+
+/** The models each media type can generate with, and the options each supports. */
+export type MediaGenerationModels = {
+	image: {
 		id: string;
-		url: string;
-		storageKey: string;
-		byteSize: number;
-		mimeType: string;
-		extension: string;
-		size: string;
-		quality: string;
-		outputFormat: string;
+		name: string;
+		description: string;
+		aspectRatios: string[];
+		/** Empty when the model picks its own resolution. */
+		resolutions: string[];
+		/** Empty when the model has no quality setting. */
+		qualities: string[];
+		/** Empty when the model returns its own format. */
+		outputFormats: string[];
+		/** Takes a source image to edit. */
+		sourceImage: boolean;
 	};
-	usage: AiGenerateUsage;
+	audio: {
+		id: string;
+		name: string;
+		description: string;
+		/** Audio output format. */
+		format: string;
+		voices: MediaGenerationVoice[];
+		defaultVoice: string;
+		/** Takes delivery instructions, such as tone and pacing. */
+		instructions: boolean;
+		/** The longest script one request can speak. */
+		maxCharacters: number;
+	};
 };
 
-export type MediaImageGenerateCompletionPollResponse =
-	| MediaImageGenerateResponse
-	| MediaImageGenerateCompletionResponse;
+/** The models people can pick for a media type, and the one used by default. */
+export type MediaModelCatalog<Type extends MediaGenerationType> = {
+	default: string;
+	models: MediaGenerationModels[Type][];
+};
 
 /** Lucid AI features that record usage. */
 export type AiUsageFeatureKey =
@@ -103,10 +192,13 @@ export type AiUsageFeatureKey =
 	| "web.fetch"
 	| "media.analyze"
 	| "media.alt.generate"
-	| "media.image.generate";
+	| MediaGenerateFeatures[MediaGenerationType]["key"];
 
 /** What a usage session was for. Agent sessions are chats, including routine runs. */
-export type AiUsageSessionType = "agent" | "media-image" | "media-alt";
+export type AiUsageSessionType =
+	| "agent"
+	| "media-alt"
+	| `media-${MediaGenerationType}`;
 
 export type AiUsageTokens = {
 	input: number;
@@ -145,7 +237,7 @@ export type AiUsageRecord = {
 	createdAt: string | null;
 };
 
-/** Requests made together, such as one agent chat or one image generation modal. */
+/** Requests made together, such as one agent chat or one media generation modal. */
 export type AiUsageSession = {
 	type: AiUsageSessionType;
 	id: string;

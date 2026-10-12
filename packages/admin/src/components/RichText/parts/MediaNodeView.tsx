@@ -13,6 +13,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AudioPill from "@/components/AudioPill/AudioPill";
 import Copy from "@/components/Copy/Copy";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
@@ -181,7 +182,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 								</div>
 							</div>
 							<div
-								class="relative z-10 flex max-h-64 min-h-24 w-full items-center justify-center [&_audio]:max-h-64 [&_img]:max-h-64 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-64 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full"
+								class="relative z-10 flex max-h-64 min-h-24 w-full items-center justify-center [&_img]:max-h-64 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-64 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full"
 								data-lucid-rich-text-media-preview-content=""
 							>
 								<Switch
@@ -215,11 +216,10 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 										/>
 									</Match>
 									<Match when={reference().type === "audio"}>
-										{/* biome-ignore lint/a11y/useMediaCaption: referenced CMS audio may not have a caption track */}
-										<audio
+										<AudioPill
 											src={reference().url}
-											controls
-											class="relative z-10 m-5 max-h-64 w-[calc(100%-2.5rem)]"
+											label={alt()}
+											class="relative z-10 m-5 w-[calc(100%-2.5rem)]"
 										/>
 									</Match>
 									<Match when={reference().type === "video"}>

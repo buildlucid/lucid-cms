@@ -24,6 +24,7 @@ import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
 import { layoutOf } from "@/components/AgentWidget/slots";
 import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
+import AudioPill from "@/components/AudioPill/AudioPill";
 import { createCopy } from "@/components/Copy/copyValue";
 import T from "@/translations";
 import { messageText } from "@/utils/agent-chat";
@@ -32,9 +33,9 @@ import {
 	agentReferenceKey,
 } from "@/utils/agent-references";
 import {
-	imageSettingsWidget,
-	isGeneratingImage,
+	generatingMediaType,
 	isToolRow,
+	mediaSettingsWidgets,
 	previewMediaWidget,
 	progressTool,
 	referencesWidget,
@@ -125,16 +126,16 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 		props.message.parts.find(
 			(part) =>
 				part.type === "widget" &&
-				part.key === imageSettingsWidget &&
+				mediaSettingsWidgets.has(part.key) &&
 				part.interaction?.toolCallId === toolCallId,
 		);
-	/** Finds the running image tool whose placeholder follows this part, preferring its settings widget. */
-	const generatingImageAfter = (index: number) => {
+	/** Finds the running media tool whose placeholder follows this part, preferring its settings widget. */
+	const generatingMediaAfter = (index: number) => {
 		const part = props.message.parts[index];
 		const callId =
 			part?.type === "tool"
 				? part.id
-				: part?.type === "widget" && part.key === imageSettingsWidget
+				: part?.type === "widget" && mediaSettingsWidgets.has(part.key)
 					? part.interaction?.toolCallId
 					: undefined;
 		if (!callId) return undefined;
@@ -143,7 +144,9 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 		const tool = props.message.parts.find(
 			(candidate) => candidate.type === "tool" && candidate.id === callId,
 		);
-		return tool?.type === "tool" && isGeneratingImage(tool) ? tool : undefined;
+		if (tool?.type !== "tool") return undefined;
+		const type = generatingMediaType(tool);
+		return type ? { tool, type } : undefined;
 	};
 	const answeredSettings = (toolCallId: string) => {
 		const widget = settingsWidget(toolCallId);
@@ -326,18 +329,23 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 												</div>
 											</div>
 										</Show>
-										<Show when={generatingImageAfter(index())}>
-											{(tool) => (
+										<Show when={generatingMediaAfter(index())}>
+											{(generating) => (
 												<div
 													data-layout="block"
 													class="flex flex-col motion-safe:animate-rise-in"
 												>
-													<AgentGeneratingImage
-														conversationId={props.message.conversationId}
-														messageId={props.message.id}
-														part={tool()}
-														settings={answeredSettings(tool().id)}
-													/>
+													<Show
+														when={generating().type === "image"}
+														fallback={<AudioPill class="w-full max-w-80" />}
+													>
+														<AgentGeneratingImage
+															conversationId={props.message.conversationId}
+															messageId={props.message.id}
+															part={generating().tool}
+															settings={answeredSettings(generating().tool.id)}
+														/>
+													</Show>
 												</div>
 											)}
 										</Show>

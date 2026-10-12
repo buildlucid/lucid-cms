@@ -10,7 +10,7 @@ export const getMediaMcpTool = () =>
 		name: "media_get",
 		title: copy("admin:core.tools.media_get.title"),
 		description:
-			"Read a media library item's metadata: title, alt text, description, file details, folder and delivery URL.",
+			"Read a media library item's metadata: title, alt text, description, audio transcript, file details, folder and delivery URL.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [ExternalScopes.MediaRead],
@@ -23,7 +23,7 @@ export const getMediaAgentTool = () =>
 		name: "media_get",
 		title: copy("admin:core.tools.media_get.title"),
 		description:
-			"Read a media item's metadata: title, alt text, description, file details, folder and delivery URL. Works for library media and personal media of the person you act for, such as chat uploads. Values use the shape media_update accepts.",
+			"Read a media item's metadata: title, alt text, description, audio transcript, file details, folder and delivery URL. Works for library media and personal media of the person you act for, such as chat uploads. Values use the shape media_update accepts.",
 		input: inputSchema,
 		output: outputSchema,
 		//* media access is checked when resolved, so people can read their own uploads without `media:read`

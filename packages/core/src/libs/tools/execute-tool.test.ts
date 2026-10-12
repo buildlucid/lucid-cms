@@ -53,8 +53,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				features: { ...config.ai.features, mcp: true },
-				mcp: { tools: [mcpTool], skills: [] },
+				mcp: { enabled: true, tools: [mcpTool], skills: [] },
 			},
 		},
 		database: await testConfig.getDatabase(),

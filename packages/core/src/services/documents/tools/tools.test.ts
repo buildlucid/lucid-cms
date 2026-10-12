@@ -110,7 +110,7 @@ beforeAll(async () => {
 					{ code: "fr", label: "French" },
 				],
 			},
-			ai: { ...config.ai, agents: { definitions: [agent] } },
+			ai: { ...config.ai, agents: { enabled: true, definitions: [agent] } },
 		},
 		database: await fixture.getDatabase(),
 		translationStore: createTranslationStore({

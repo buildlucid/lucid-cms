@@ -32,7 +32,11 @@ import {
 } from "./agent-references.js";
 import { agentScreenSchema } from "./agent-screen.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaResponseSchema, uploadSessionResponseSchema } from "./media.js";
+import {
+	mediaListItemResponseSchema,
+	mediaResponseSchema,
+	uploadSessionResponseSchema,
+} from "./media.js";
 
 /** A conversation keeps its workflow after its routine is deleted. */
 /** An agent that acted, for the person shown alongside it or for the system. */
@@ -497,7 +501,7 @@ export const controllerSchemas = {
 				example: "ai_generated",
 			}),
 			aiGenerationRequestId: z.uuid().optional().meta({
-				description: "The Lucid AI image generation request that made the file",
+				description: "The Lucid AI generation request that made the file",
 				example: "123e4567-e89b-12d3-a456-426614174000",
 			}),
 		}),
@@ -592,7 +596,7 @@ export const controllerSchemas = {
 		body: undefined,
 		query: noQuery,
 		params: idParams,
-		response: z.array(mediaResponseSchema),
+		response: z.array(mediaListItemResponseSchema),
 	} satisfies ControllerSchema,
 	getReferences: {
 		body: undefined,

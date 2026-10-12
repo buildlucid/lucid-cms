@@ -8,6 +8,8 @@ import {
 
 export interface MenuItemProps {
 	onSelect?: () => void;
+	/** Called when the pointer or keyboard highlights the item. */
+	onHighlight?: () => void;
 	/** Renders the item as a link. */
 	href?: string;
 	target?: "_blank" | "_self";
@@ -55,6 +57,7 @@ const MenuItem: Component<MenuItemProps> = (props) => {
 						props.closeOnSelect !== false && props.unavailable !== true
 					}
 					onSelect={() => props.onSelect?.()}
+					onFocus={() => props.onHighlight?.()}
 					onClick={(event) => event.stopPropagation()}
 					class={menuItemClasses(props)}
 				>
@@ -76,6 +79,7 @@ const MenuItem: Component<MenuItemProps> = (props) => {
 					props.closeOnSelect !== false && props.unavailable !== true
 				}
 				onSelect={() => props.onSelect?.()}
+				onFocus={() => props.onHighlight?.()}
 				onClick={(event: MouseEvent) => {
 					event.stopPropagation();
 					if (props.disabled || props.unavailable) event.preventDefault();

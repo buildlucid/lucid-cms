@@ -2,8 +2,8 @@ import type { AgentMessage } from "@types";
 import { expect, it } from "vitest";
 import {
 	type AgentToolPart,
-	imageSizeRatio,
-	isGeneratingImage,
+	generatingMediaType,
+	imageAspectRatio,
 	isToolRow,
 	retriedToolIds,
 } from "./agent-tools";
@@ -51,23 +51,30 @@ it("marks failures retried only once a later call to the same tool in the run co
 	).toEqual(new Set(["create-1", "create-2"]));
 });
 
-it("shows a placeholder only while an image tool runs, not while it waits on the person", () => {
+it("shows a placeholder only while a media tool runs, not while it waits on the person", () => {
 	const generating = tool("image", "media_generate_image", "running");
-	expect(isGeneratingImage(generating)).toBe(true);
-	expect(isGeneratingImage({ ...generating, name: "media_edit_image" })).toBe(
-		true,
+	expect(generatingMediaType(generating)).toBe("image");
+	expect(generatingMediaType({ ...generating, name: "media_edit_image" })).toBe(
+		"image",
 	);
-	expect(isGeneratingImage({ ...generating, status: "pending" })).toBe(false);
-	expect(isGeneratingImage({ ...generating, status: "complete" })).toBe(false);
-	expect(isGeneratingImage(tool("search", "web_search", "running"))).toBe(
-		false,
+	expect(
+		generatingMediaType({ ...generating, name: "media_generate_audio" }),
+	).toBe("audio");
+	expect(generatingMediaType({ ...generating, status: "pending" })).toBe(
+		undefined,
 	);
+	expect(generatingMediaType({ ...generating, status: "complete" })).toBe(
+		undefined,
+	);
+	expect(
+		generatingMediaType(tool("search", "web_search", "running")),
+	).toBeUndefined();
 	expect(isToolRow(generating)).toBe(true);
 });
 
-it("reads the tile's shape from the requested size", () => {
-	expect(imageSizeRatio({ size: "1536x1024" })).toBe(1.5);
-	expect(imageSizeRatio({ size: "1024x1536" })).toBeCloseTo(2 / 3);
-	expect(imageSizeRatio({ size: "auto" })).toBe(1);
-	expect(imageSizeRatio(undefined)).toBe(1);
+it("reads the tile's shape from the requested aspect ratio", () => {
+	expect(imageAspectRatio({ aspectRatio: "3:2" })).toBe(1.5);
+	expect(imageAspectRatio({ aspectRatio: "9:16" })).toBeCloseTo(9 / 16);
+	expect(imageAspectRatio({ aspectRatio: "auto" })).toBe(1);
+	expect(imageAspectRatio(undefined)).toBe(1);
 });

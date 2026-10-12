@@ -29,10 +29,7 @@ const getCmsAiRequest: ServiceFn<
 	if (result.error) return result;
 
 	const parsed = parseCmsAiRemoteData(result.data.json, {
-		feature: {
-			key: "media.image.generate",
-			version: "v1",
-		},
+		feature: props.feature,
 		requestId: props.requestId,
 	});
 	if (!parsed) {

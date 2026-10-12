@@ -15,6 +15,7 @@ export type {
 	CmsAiGenerateRequestInputImage,
 	CmsAiGenerateRequestInputText,
 	MediaAltGenerateV1Request,
+	MediaAudioGenerateV1Request,
 	MediaImageGenerateV1Request,
 } from "./services/generate-cms-ai/type.js";
 

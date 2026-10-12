@@ -23,6 +23,7 @@ import ActionIcon, {
 import ActionMenu, {
 	type ActionMenuProps,
 } from "@/components/ActionMenu/ActionMenu";
+import AudioPill from "@/components/AudioPill/AudioPill";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import FocalPointEditorModal, {
 	type FocalPoint,
@@ -34,8 +35,10 @@ import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-export type SingleFileUploadImageGeneration = {
+export type SingleFileUploadMediaGeneration = {
 	state: {
+		/** Names the media type it generates, eg. "Generate image". */
+		label: string;
 		loading: boolean;
 		disabled: boolean;
 		disabledClickable: boolean;
@@ -105,7 +108,7 @@ export interface SingleFileUploadProps {
 	errors?: ErrorResult;
 	localised?: boolean;
 	altLocaleError?: boolean;
-	imageGeneration?: SingleFileUploadImageGeneration;
+	mediaGeneration?: SingleFileUploadMediaGeneration;
 	imageCrop?: SingleFileUploadImageCrop;
 	pendingChange?: {
 		reset: () => void;
@@ -266,7 +269,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 							actions={{
 								clearFile,
 								uploadFile,
-								imageGeneration: props.imageGeneration,
+								mediaGeneration: props.mediaGeneration,
 								imageCrop: props.imageCrop,
 							}}
 						/>
@@ -326,7 +329,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								clearFile: props.disableRemoveCurrent ? undefined : clearFile,
 								downloadFile,
 								uploadFile,
-								imageGeneration: props.imageGeneration,
+								mediaGeneration: props.mediaGeneration,
 								imageCrop: props.imageCrop,
 							}}
 						/>
@@ -334,9 +337,9 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 				</Switch>
 			</div>
 			<Show
-				when={showState() === "no-file" ? props.imageGeneration : undefined}
+				when={showState() === "no-file" ? props.mediaGeneration : undefined}
 			>
-				{(imageGeneration) => (
+				{(mediaGeneration) => (
 					<div class="mt-2">
 						<button
 							type="button"
@@ -344,31 +347,31 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								"inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input px-3 text-sm font-medium text-subtitle transition-colors duration-200 hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-70",
 								{
 									"cursor-not-allowed opacity-70":
-										imageGeneration().state.disabled,
+										mediaGeneration().state.disabled,
 								},
 							)}
 							disabled={
-								imageGeneration().state.disabled &&
-								!imageGeneration().state.disabledClickable
+								mediaGeneration().state.disabled &&
+								!mediaGeneration().state.disabledClickable
 							}
-							title={imageGeneration().state.tooltip}
-							aria-label={T()("ai.media.image.generate.action")}
+							title={mediaGeneration().state.tooltip}
+							aria-label={mediaGeneration().state.label}
 							aria-disabled={
-								imageGeneration().state.disabled ? "true" : undefined
+								mediaGeneration().state.disabled ? "true" : undefined
 							}
-							aria-busy={imageGeneration().state.loading ? "true" : undefined}
+							aria-busy={mediaGeneration().state.loading ? "true" : undefined}
 							onClick={(event) => {
 								event.preventDefault();
 								event.stopPropagation();
-								imageGeneration().callbacks.open();
+								mediaGeneration().callbacks.open();
 							}}
 						>
-							{imageGeneration().state.loading ? (
+							{mediaGeneration().state.loading ? (
 								<Spinner size="sm" />
 							) : (
 								<TbOutlineWand size={13} aria-hidden="true" />
 							)}
-							<span>{T()("ai.media.image.generate.action")}</span>
+							<span>{mediaGeneration().state.label}</span>
 						</button>
 					</div>
 				)}
@@ -407,7 +410,7 @@ interface FilePreviewScreenProps {
 		clearFile?: () => void;
 		downloadFile?: () => void;
 		uploadFile: () => void;
-		imageGeneration?: SingleFileUploadImageGeneration;
+		mediaGeneration?: SingleFileUploadMediaGeneration;
 		imageCrop?: SingleFileUploadImageCrop;
 	};
 }
@@ -430,6 +433,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 			props.focalPoint !== undefined,
 	);
 	const quickActions = createMemo<PreviewQuickAction[]>(() => {
+		const mediaGeneration = props.actions.mediaGeneration;
 		return [
 			{
 				label: T()("media.file.pending.reset"),
@@ -451,16 +455,19 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				disabled: props.actions.imageCrop?.state.disabled,
 				onClick: () => props.actions.imageCrop?.callbacks.remove(),
 			},
-			{
-				label: T()("ai.media.image.generate.action"),
-				icon: "sparkle" as const,
-				show: isReady() && props.actions.imageGeneration !== undefined,
-				disabled:
-					props.actions.imageGeneration?.state.disabled === true &&
-					props.actions.imageGeneration.state.disabledClickable !== true,
-				loading: props.actions.imageGeneration?.state.loading,
-				onClick: () => props.actions.imageGeneration?.callbacks.open(),
-			},
+			...(mediaGeneration && isReady()
+				? [
+						{
+							label: mediaGeneration.state.label,
+							icon: "sparkle" as const,
+							disabled:
+								mediaGeneration.state.disabled &&
+								!mediaGeneration.state.disabledClickable,
+							loading: mediaGeneration.state.loading,
+							onClick: () => mediaGeneration.callbacks.open(),
+						},
+					]
+				: []),
 			{
 				label: T()("media.file.replace"),
 				icon: "upload" as const,
@@ -607,8 +614,11 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 								)}
 							>
 								<Show when={renderNativeMedia()}>
-									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-									<audio src={props.data.url} class="w-2/3" controls />
+									<AudioPill
+										src={props.data.url}
+										label={props.data.name}
+										class="w-2/3 max-w-96"
+									/>
 								</Show>
 							</div>
 						</Match>

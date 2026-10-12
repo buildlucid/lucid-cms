@@ -11,6 +11,7 @@ import {
 } from "solid-js";
 import AgentReferenceThumb from "@/components/AgentReferenceFiles/parts/AgentReferenceThumb";
 import { useAgentTranscript } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
+import AudioPill from "@/components/AudioPill/AudioPill";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import api from "@/services/api";
 import T from "@/translations";
@@ -20,10 +21,8 @@ import AgentPreviewAttach from "./parts/AgentPreviewAttach";
 import AgentPreviewLightbox from "./parts/AgentPreviewLightbox";
 
 /**
- * A gallery the agent showed in the chat. It saves media IDs only, so each
- * viewer sees current details with their own access. Selecting a tile expands
- * it; Cmd/Ctrl-clicking it, or its plus button, attaches the media to the chat
- * box. Hovering a tile shows copy link and download buttons.
+ * Shows chat media references with inline audio and preview, attach, copy and download controls.
+ * @remarks Stores only media IDs, so each viewer loads current details with their own access.
  */
 const AgentMediaPreviewV1: Component<{
 	conversationId: string;
@@ -49,10 +48,11 @@ const AgentMediaPreviewV1: Component<{
 			? value
 			: [];
 	});
+	//* audio plays in place, so the lightbox only steps through tiles
 	const readyItems = createMemo(() =>
 		mediaIds().flatMap((id) => {
 			const media = previews.data?.data.find((item) => item.id === id);
-			return media?.status === "ready" ? [media] : [];
+			return media?.status === "ready" && media.type !== "audio" ? [media] : [];
 		}),
 	);
 	const single = createMemo(() => mediaIds().length === 1);
@@ -101,6 +101,39 @@ const AgentMediaPreviewV1: Component<{
 		</Show>
 	);
 
+	const tile = (media: Media): JSX.Element => (
+		<div
+			class={classnames("group relative", tileSize())}
+			title={mediaLabel(media)}
+		>
+			<button
+				type="button"
+				disabled={media.status !== "ready"}
+				class={tileClasses(media)}
+				aria-label={T()("agent.preview.expand", {
+					name: mediaLabel(media),
+				})}
+				onClick={(event) => {
+					onTileClick(event, media);
+					if (!event.defaultPrevented) setExpandedId(media.id);
+				}}
+			>
+				{tileContent(media)}
+			</button>
+			<AgentPreviewAttach
+				media={media}
+				revealOnHover
+				class="absolute top-1.5 left-1.5 z-30"
+			/>
+			<Show when={media.status === "ready"}>
+				<AgentPreviewActions
+					media={media}
+					class="absolute top-1.5 right-1.5 z-30 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+				/>
+			</Show>
+		</div>
+	);
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -139,36 +172,26 @@ const AgentMediaPreviewV1: Component<{
 							}
 						>
 							{(media) => (
-								<div
-									class={classnames("group relative", tileSize())}
-									title={mediaLabel(media())}
+								<Show
+									when={media().type === "audio" && media().status === "ready"}
+									fallback={tile(media())}
 								>
-									<button
-										type="button"
-										disabled={media().status !== "ready"}
-										class={tileClasses(media())}
-										aria-label={T()("agent.preview.expand", {
-											name: mediaLabel(media()),
-										})}
-										onClick={(event) => {
-											onTileClick(event, media());
-											if (!event.defaultPrevented) setExpandedId(media().id);
-										}}
-									>
-										{tileContent(media())}
-									</button>
-									<AgentPreviewAttach
-										media={media()}
-										revealOnHover
-										class="absolute top-1.5 left-1.5 z-30"
-									/>
-									<Show when={media().status === "ready"}>
-										<AgentPreviewActions
-											media={media()}
-											class="absolute top-1.5 right-1.5 z-30 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+									{/* audio plays in place, so it shows as a player rather than a tile */}
+									<div class="group flex w-full max-w-96 min-w-0 items-center gap-2">
+										<AudioPill
+											src={media().url}
+											label={mediaLabel(media())}
+											class="w-full max-w-80"
 										/>
-									</Show>
-								</div>
+										<div class="flex shrink-0 items-center gap-1">
+											<AgentPreviewAttach media={media()} revealOnHover />
+											<AgentPreviewActions
+												media={media()}
+												class="opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+											/>
+										</div>
+									</div>
+								</Show>
 							)}
 						</Show>
 					)}

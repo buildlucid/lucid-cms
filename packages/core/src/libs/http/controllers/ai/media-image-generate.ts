@@ -23,7 +23,8 @@ const factory = createFactory();
 
 const mediaImageGenerateController = factory.createHandlers(
 	describeRoute({
-		description: "Generate a media image using Lucid AI.",
+		description:
+			"Generate or edit an image with Lucid AI. Poll the request until the image is ready.",
 		tags: ["ai"],
 		summary: "Generate Media Image",
 		responses: openAPI.responses({

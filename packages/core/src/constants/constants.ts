@@ -212,6 +212,10 @@ export default Object.freeze({
 			public: "public",
 		} as const,
 		previewableTypes: ["image", "video", "audio"] as const,
+		/** Maximum character count for audio transcripts and agent speech scripts. */
+		transcriptMaxLength: 20_000,
+		/** How long Lucid's media generation model catalogues are cached. */
+		modelCatalogTtlSeconds: 300,
 	},
 	connection: {
 		scope: "cms:ai" as const,
@@ -233,6 +237,7 @@ export default Object.freeze({
 			previewMedia: "lucid-media-preview" satisfies AgentCoreWidgetKey,
 			mediaSelect: "lucid-media-select" satisfies AgentCoreWidgetKey,
 			imageSettings: "lucid-image-settings" satisfies AgentCoreWidgetKey,
+			audioSettings: "lucid-audio-settings" satisfies AgentCoreWidgetKey,
 			question: "lucid-question" satisfies AgentCoreWidgetKey,
 			/** Asks the open admin screen to answer a builder tool without showing a widget. */
 			screen: "lucid-screen" satisfies AgentCoreWidgetKey,
@@ -249,6 +254,7 @@ export default Object.freeze({
 				media_select: ["lucid-media-select"],
 				media_generate_image: ["lucid-image-settings", "lucid-media-preview"],
 				media_edit_image: ["lucid-image-settings", "lucid-media-preview"],
+				media_generate_audio: ["lucid-audio-settings", "lucid-media-preview"],
 				lucid_builder_read: ["lucid-screen"],
 				lucid_builder_update: ["lucid-screen", "lucid-builder-changes"],
 				lucid_builder_focus: ["lucid-screen"],

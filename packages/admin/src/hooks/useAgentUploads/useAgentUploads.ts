@@ -1,6 +1,7 @@
 import { type Accessor, createMemo, createSignal, onCleanup } from "solid-js";
 import api from "@/services/api";
-import type { MediaImageGenerationFileMeta } from "@/store/aiModalsStore/aiModalsStore";
+import { mediaSaveReq } from "@/services/api/ai/useMediaSave";
+import type { MediaGenerationFileMeta } from "@/store/aiModalsStore/aiModalsStore";
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
@@ -87,33 +88,49 @@ const useAgentUploads = (props: {
 	const upload = async (
 		agentKey: string,
 		file: File,
-		ai?: MediaImageGenerationFileMeta,
+		ai?: MediaGenerationFileMeta,
 	) => {
 		const id = crypto.randomUUID();
 		const controller = new AbortController();
 		controllers.set(id, controller);
-		setUploads((current) => [...current, { id, name: file.name, progress: 0 }]);
+		setUploads((current) => [
+			...current,
+			{ id, name: file.name, progress: ai ? null : 0 },
+		]);
 
 		const poster =
 			helpers.getMediaType(file.type) === "video"
 				? uploadPoster(agentKey, file, controller.signal)
 				: undefined;
-		const uploaded = await store(agentKey, file, {
-			signal: controller.signal,
-			onProgress: (progress) => update(id, { progress }),
-		});
-		if (controller.signal.aborted) return;
-		if (uploaded.error) {
-			update(id, {
-				error: uploaded.error.message ?? T()("media.upload.failed"),
-			});
-			return;
-		}
-
 		try {
+			let key: string;
+			if (ai) {
+				//* Server-side copies of generated files have no upload progress.
+				const saved = await mediaSaveReq({
+					requestId: ai.aiGenerationRequestId,
+					public: false,
+					signal: controller.signal,
+				});
+				key = saved.data.key;
+				update(id, { progress: 100 });
+			} else {
+				const uploaded = await store(agentKey, file, {
+					signal: controller.signal,
+					onProgress: (progress) => update(id, { progress }),
+				});
+				if (controller.signal.aborted) return;
+				if (uploaded.error) {
+					update(id, {
+						error: uploaded.error.message ?? T()("media.upload.failed"),
+					});
+					return;
+				}
+				key = uploaded.data;
+			}
+
 			const media = await api.agent.createUploadReq({
 				agentKey,
-				key: uploaded.data,
+				key,
 				fileName: file.name,
 				posterId: await poster,
 				ai,
@@ -147,7 +164,7 @@ const useAgentUploads = (props: {
 			if (!agentKey) return;
 			for (const file of files) void upload(agentKey, file);
 		},
-		addGenerated: (file: File, ai: MediaImageGenerationFileMeta) => {
+		addGenerated: (file: File, ai: MediaGenerationFileMeta) => {
 			const agentKey = props.agentKey();
 			if (agentKey) void upload(agentKey, file, ai);
 		},

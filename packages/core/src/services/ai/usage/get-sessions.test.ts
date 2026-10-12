@@ -92,6 +92,7 @@ beforeAll(async () => {
 			ai: {
 				...config.ai,
 				agents: {
+					enabled: true,
 					definitions: [
 						defineAgent({ key: "test", name: "Test", description: "Tests." }),
 					],

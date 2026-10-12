@@ -86,6 +86,9 @@ export const mediaShareLinksTable = defineTable(
 			media_height: {
 				schema: z.number().nullable().optional(),
 			},
+			media_duration: {
+				schema: z.number().nullable().optional(),
+			},
 			media_focal_x: {
 				schema: z.number().nullable().optional(),
 			},

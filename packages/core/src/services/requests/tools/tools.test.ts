@@ -60,7 +60,10 @@ beforeAll(async () => {
 		config: {
 			...config,
 			collections: [pages, posts],
-			ai: { ...config.ai, agents: { definitions: [reviewer, editor] } },
+			ai: {
+				...config.ai,
+				agents: { enabled: true, definitions: [reviewer, editor] },
+			},
 		},
 		database: await fixture.getDatabase(),
 		translationStore: createTranslationStore({
@@ -886,6 +889,7 @@ test("people attach requests they can read in every collection, unless the agent
 			ai: {
 				...context.config.ai,
 				agents: {
+					enabled: true,
 					definitions: [
 						defineAgent({
 							key: reviewer.key,

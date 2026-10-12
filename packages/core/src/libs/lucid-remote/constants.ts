@@ -1,8 +1,8 @@
 export const lucidRemotePaths = {
 	agent: "/v1/cms/ai/agent",
-	getAgentModels: "/v1/cms/ai/agent/models",
+	getModels: "/v1/cms/ai/models",
 	generateCmsAi: "/v1/cms/ai/generate",
 	getCmsAiRequest: "/v1/cms/ai/requests",
-	getCmsAiImage: "/v1/cms/ai/images",
+	getCmsAiMedia: "/v1/cms/ai/media",
 	getCredits: "/v1/cms/credits",
 } as const;

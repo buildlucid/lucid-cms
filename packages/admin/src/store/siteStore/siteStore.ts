@@ -17,6 +17,7 @@ const defaultAiSettings = (): AiSettings => ({
 	enabled: true,
 	features: {
 		imageGeneration: true,
+		audioGeneration: true,
 		altGeneration: true,
 		chatRename: true,
 		agents: true,
@@ -42,6 +43,7 @@ const [get, set] = createStore<SiteStoreT>({
 			this.ai.enabled &&
 			(this.ai.agents.length > 0 ||
 				features.imageGeneration ||
+				features.audioGeneration ||
 				features.altGeneration)
 		);
 	},

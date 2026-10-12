@@ -1,5 +1,5 @@
 import type { Media, ResponseBody, UploadSessionResponse } from "@types";
-import type { MediaImageGenerationFileMeta } from "@/store/aiModalsStore/aiModalsStore";
+import type { MediaGenerationFileMeta } from "@/store/aiModalsStore/aiModalsStore";
 import request from "@/utils/request";
 
 export const createUploadSessionReq = (props: {
@@ -20,8 +20,8 @@ export const createUploadReq = (props: {
 	fileName: string;
 	/** Another upload to use as a video's poster. */
 	posterId?: number;
-	/** Generation metadata saved with the uploaded image. */
-	ai?: MediaImageGenerationFileMeta;
+	/** Generation metadata saved with the uploaded file. */
+	ai?: MediaGenerationFileMeta;
 	signal?: AbortSignal;
 }) =>
 	request<ResponseBody<Media>>({

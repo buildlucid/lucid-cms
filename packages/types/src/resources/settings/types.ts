@@ -1,4 +1,5 @@
 import type { AgentSummary } from "../agent/types.js";
+import type { AiFeature } from "../ai/types.js";
 
 export type SettingsInclude = "email" | "media" | "system" | "ai" | "mcp";
 
@@ -6,13 +7,7 @@ export interface Settings {
 	ai?: {
 		enabled: boolean;
 		agents: AgentSummary[];
-		features: {
-			imageGeneration: boolean;
-			altGeneration: boolean;
-			chatRename: boolean;
-			agents: boolean;
-			mcp: boolean;
-		};
+		features: Record<AiFeature, boolean>;
 	};
 	email?: {
 		simulated: boolean;

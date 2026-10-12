@@ -269,6 +269,7 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("alt", adapter.getDataType("text"))
 				.addColumn("description", adapter.getDataType("text"))
 				.addColumn("summary", adapter.getDataType("text"))
+				.addColumn("transcript", adapter.getDataType("text"))
 				.addUniqueConstraint(
 					"lucid_media_translations_media_id_locale_code_unique",
 					["media_id", "locale_code"],

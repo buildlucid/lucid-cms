@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../../../../constants/constants.js";
 import { mediaItemSchema } from "../helpers/schema.js";
 
 const translation = (max: number, description: string) =>
@@ -10,6 +11,7 @@ const clearableKeys = [
 	"alt",
 	"description",
 	"summary",
+	"transcript",
 	"folderId",
 ] as const;
 
@@ -20,12 +22,16 @@ export const inputSchema = z
 		}),
 		contentLocale: z.string().trim().min(1).optional().meta({
 			description:
-				"Content language for title, alt, description and summary; defaults to the CMS content language.",
+				"Content language for title, alt, description, summary and transcript; defaults to the CMS content language.",
 		}),
 		title: translation(255, "Title for any media type."),
 		alt: translation(1000, "Alt text, for images only."),
 		description: translation(5000, "Description, for video and audio only."),
 		summary: translation(5000, "Summary, for documents only."),
+		transcript: translation(
+			constants.media.transcriptMaxLength,
+			"Transcript of the words spoken, for audio only.",
+		),
 		fileName: z.string().trim().min(1).max(255).optional().meta({
 			description:
 				"File name used in the library and for downloads, eg. 'team-photo.jpg'. Keep the extension.",

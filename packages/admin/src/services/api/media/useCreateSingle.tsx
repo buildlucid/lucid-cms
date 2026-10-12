@@ -27,6 +27,10 @@ interface Params {
 		localeCode: string | null;
 		value: string | null;
 	}>;
+	transcript?: Array<{
+		localeCode: string | null;
+		value: string | null;
+	}>;
 	origin: Media["origin"];
 	aiGenerationRequestId?: string;
 	folderId?: number | null;

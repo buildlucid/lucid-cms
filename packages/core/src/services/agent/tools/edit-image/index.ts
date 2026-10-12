@@ -5,7 +5,7 @@ import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { editImageToolName } from "../generate-image/constants.js";
-import generateMedia from "../generate-image/generate-media.js";
+import generateImage from "../generate-image/generate-image.js";
 import prepareImageSettings from "../generate-image/prepare.js";
 import {
 	outputSchema,
@@ -62,7 +62,7 @@ export const editImageAgentTool = () =>
 			});
 			if (source.error) return source;
 
-			return generateMedia(context, {
+			return generateImage(context, {
 				toolName: editImageToolName,
 				input,
 				settings: response,

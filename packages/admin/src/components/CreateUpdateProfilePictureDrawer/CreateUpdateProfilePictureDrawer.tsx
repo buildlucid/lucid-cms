@@ -15,7 +15,7 @@ import Input from "@/components/Input/Input";
 import Textarea from "@/components/Textarea/Textarea";
 import { useCreateMedia } from "@/hooks/useCreateMedia/useCreateMedia";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
-import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
+import useMediaGeneration from "@/hooks/useMediaGeneration/useMediaGeneration";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload/useSingleFileUpload";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
@@ -50,7 +50,7 @@ const CreateUpdateProfilePictureDrawer: Component<
 	const [uploadProgress, setUploadProgress] = createSignal(0);
 	const createMedia = useCreateMedia();
 	const profileAltGeneration = useMediaAltGeneration();
-	const profileImageGeneration = useMediaImageGeneration();
+	const profileMediaGeneration = useMediaGeneration();
 
 	const MediaFile = useSingleFileUpload({
 		id: "file",
@@ -63,8 +63,7 @@ const CreateUpdateProfilePictureDrawer: Component<
 			active: uploadLoading(),
 			value: uploadProgress(),
 		}),
-		imageGeneration: {
-			enabled: () => true,
+		mediaGeneration: {
 			disabled: () => coreMutateIsLoading(),
 			onSetFile: () => {
 				setUploadErrors(undefined);
@@ -195,7 +194,7 @@ const CreateUpdateProfilePictureDrawer: Component<
 		return (
 			coreMutateIsLoading() ||
 			profileAltGeneration.isLoading() ||
-			profileImageGeneration.isLoading()
+			profileMediaGeneration.isLoading()
 		);
 	});
 

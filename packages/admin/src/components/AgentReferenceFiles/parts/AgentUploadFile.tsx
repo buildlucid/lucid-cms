@@ -40,11 +40,18 @@ const AgentUploadFile: Component<{
 						})}
 						aria-valuemin={0}
 						aria-valuemax={100}
-						aria-valuenow={Math.round(props.upload.progress)}
+						aria-valuenow={
+							props.upload.progress === null
+								? undefined
+								: Math.round(props.upload.progress)
+						}
 					>
 						<span
 							class="block h-full rounded-full bg-primary transition-[width]"
-							style={{ width: `${props.upload.progress}%` }}
+							classList={{
+								"motion-safe:animate-pulse": props.upload.progress === null,
+							}}
+							style={{ width: `${props.upload.progress ?? 100}%` }}
 						/>
 					</span>
 				</Show>

@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import type { Media } from "../../types/response.js";
+import type { MediaListItem } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getMultipleMedia from "../media/get-multiple.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
@@ -12,7 +12,7 @@ import list from "./references/list.js";
  */
 const getMediaPreviews: ServiceFn<
 	[{ id: string; userId: number }],
-	Media[]
+	MediaListItem[]
 > = async (context, input) => {
 	const conversation = await getAccessibleConversation(context, input);
 	if (conversation.error) return conversation;

@@ -23,6 +23,7 @@ export const Permissions = {
 	JobsUpdate: "jobs:update",
 	RequestsRead: "requests:read",
 	AiImageGenerate: "ai:image-generate",
+	AiAudioGenerate: "ai:audio-generate",
 	AiAltGenerate: "ai:alt-generate",
 	IntegrationsRead: "integrations:read",
 	IntegrationsCreate: "integrations:create",

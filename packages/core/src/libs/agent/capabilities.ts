@@ -51,6 +51,9 @@ export const getCapabilityProviders = (props: {
 	imageGeneration: props.tools.flatMap((tool) =>
 		tool.capabilities?.imageGeneration ? [tool.name] : [],
 	),
+	audioGeneration: props.tools.flatMap((tool) =>
+		tool.capabilities?.audioGeneration ? [tool.name] : [],
+	),
 });
 
 export const summariseCapabilities = (
@@ -77,4 +80,5 @@ export const summariseCapabilities = (
 	webSearch: providers.webSearch.length > 0,
 	webRead: providers.webRead.length > 0,
 	imageGeneration: providers.imageGeneration.length > 0,
+	audioGeneration: providers.audioGeneration.length > 0,
 });

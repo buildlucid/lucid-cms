@@ -19,6 +19,7 @@ const agentToolCapabilitiesSchema = z
 		webSearch: z.boolean().optional(),
 		webRead: z.boolean().optional(),
 		imageGeneration: z.boolean().optional(),
+		audioGeneration: z.boolean().optional(),
 	})
 	.strict()
 	.optional();

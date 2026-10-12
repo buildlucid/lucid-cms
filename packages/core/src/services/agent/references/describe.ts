@@ -8,7 +8,11 @@ import {
 	DocumentsRepository,
 	RequestsRepository,
 } from "../../../libs/repositories/index.js";
-import type { AgentReferenceInput, Media } from "../../../types/response.js";
+import type {
+	AgentReferenceInput,
+	Media,
+	MediaListItem,
+} from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getDocumentLabel from "../../documents/helpers/get-document-label.js";
 import getMultipleMedia from "../../media/get-multiple.js";
@@ -22,7 +26,7 @@ const thumbnailUrl = (url: string, delivery: Media["delivery"]) => {
 };
 
 /** An image's thumbnail, or a video's poster, falling back to its delivery thumbnail. */
-const previewUrl = (media: Media) => {
+const previewUrl = (media: MediaListItem) => {
 	if (media.type === "image") {
 		return media.url ? thumbnailUrl(media.url, media.delivery) : undefined;
 	}

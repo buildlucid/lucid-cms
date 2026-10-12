@@ -70,6 +70,8 @@ export interface SelectProps<Option extends SelectOption = SelectOption>
 	class?: string;
 	renderValue?: (_props: { option: Option }) => JSXElement;
 	renderOption?: (_props: { option: Option; selected: boolean }) => JSXElement;
+	/** Called with the option the pointer or keyboard highlights, and with `undefined` when the menu closes. */
+	onHighlight?: (_option: Option | undefined) => void;
 }
 
 /**
@@ -125,6 +127,7 @@ function Select<Option extends SelectOption = SelectOption>(
 		"class",
 		"renderValue",
 		"renderOption",
+		"onHighlight",
 	]);
 	const [open, setOpen] = createSignal(false);
 	const [debouncedValue, setDebouncedValue] = createSignal("");
@@ -205,7 +208,10 @@ function Select<Option extends SelectOption = SelectOption>(
 		>
 			<Menu.Root
 				open={open()}
-				onOpenChange={(open) => setOpen(!props.disabled && open)}
+				onOpenChange={(open) => {
+					setOpen(!props.disabled && open);
+					if (!open) props.onHighlight?.(undefined);
+				}}
 				gutter={5}
 			>
 				<Show when={props.label !== undefined || props.labelEnd !== undefined}>
@@ -340,6 +346,7 @@ function Select<Option extends SelectOption = SelectOption>(
 										textValue={option.label}
 										disabled={props.disabled}
 										selected={props.value === option.value}
+										onHighlight={() => props.onHighlight?.(option)}
 										onSelect={() => {
 											if (props.disabled) {
 												return;

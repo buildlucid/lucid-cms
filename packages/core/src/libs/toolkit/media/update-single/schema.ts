@@ -17,6 +17,7 @@ export const inputSchema = z.object({
 	alt: translationsSchema.optional(),
 	description: translationsSchema.optional(),
 	summary: translationsSchema.optional(),
+	transcript: translationsSchema.optional(),
 	width: z.number().positive().nullable().optional(),
 	height: z.number().positive().nullable().optional(),
 	duration: z.number().nonnegative().nullable().optional(),

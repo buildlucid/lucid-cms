@@ -11,7 +11,7 @@ export const updateMediaAgentTool = () =>
 		name,
 		title: copy("admin:core.tools.media_update.title"),
 		description:
-			"Update a media item's title, alt text, description or summary in one content language, or its file name and folder. Send only the fields that change, and list any to remove in clear. Works for library media and personal media of the person you act for, which can't go in folders. Changes are saved straight away.",
+			"Update a media item's title, alt text, description, summary or audio transcript in one content language, or its file name and folder. Send only the fields that change, and list any to remove in clear. Works for library media and personal media of the person you act for, which can't go in folders. Changes are saved straight away.",
 		input: inputSchema,
 		output: outputSchema,
 		//* library media needs `media:update`, checked by the handler, so people can update their own uploads without it

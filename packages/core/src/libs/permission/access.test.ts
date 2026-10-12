@@ -47,13 +47,14 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 	access: groups.map((value) => accessGroupSchema.parse(value)),
 	ai: {
 		enabled: true,
-		features: {
-			imageGeneration: true,
-			altGeneration: true,
-			agents: true,
-			mcp: false,
+		chatRename: true,
+		altGeneration: true,
+		mediaGeneration: {
+			image: { enabled: true, models: {} },
+			audio: { enabled: true, models: {} },
 		},
-		agents: { definitions: [] },
+		agents: { enabled: true, definitions: [] },
+		mcp: { enabled: false, tools: [], skills: [] },
 	},
 });
 

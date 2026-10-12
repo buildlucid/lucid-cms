@@ -12,7 +12,7 @@ import {
 import Modal from "@/components/Modal/Modal";
 import { mediaAlt, mediaLabel } from "../helpers";
 
-/** A large preview of one gallery item. Arrow keys move between items. */
+/** Previews a gallery image or video with arrow-key navigation. */
 const AgentPreviewLightbox: Component<{
 	items: Media[];
 	activeId: number | undefined;
@@ -33,8 +33,14 @@ const AgentPreviewLightbox: Component<{
 		if (next) props.onActiveChange(next.id);
 	};
 	const onKeyDown = (event: KeyboardEvent) => {
-		//* players use arrow keys to seek
-		if (event.target instanceof HTMLMediaElement) return;
+		//* players and inputs, such as seek sliders, use arrow keys themselves
+		const target = event.target;
+		if (
+			target instanceof HTMLMediaElement ||
+			target instanceof HTMLInputElement
+		) {
+			return;
+		}
 		if (event.key === "ArrowLeft") step(-1);
 		if (event.key === "ArrowRight") step(1);
 	};
@@ -97,16 +103,6 @@ const AgentPreviewLightbox: Component<{
 														)}
 													</For>
 												</video>
-											</Match>
-											<Match when={item.type === "audio"}>
-												{/* biome-ignore lint/a11y/useMediaCaption: plays the original media, which has no generated captions */}
-												<audio
-													src={item.url}
-													controls
-													autoplay
-													class="w-[min(90vw,32rem)]"
-													aria-label={mediaLabel(item)}
-												/>
 											</Match>
 										</Switch>
 									)}

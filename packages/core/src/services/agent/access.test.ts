@@ -49,7 +49,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: { definitions: [agent("seo"), agent("copy")] },
+				agents: { enabled: true, definitions: [agent("seo"), agent("copy")] },
 			},
 		},
 		database: await testConfig.getDatabase(),

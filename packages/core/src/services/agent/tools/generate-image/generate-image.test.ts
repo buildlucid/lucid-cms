@@ -10,8 +10,8 @@ import {
 } from "vitest";
 import defineAgent from "../../../../libs/agent/define-agent.js";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
-import generateImage from "../../../../libs/lucid-remote/services/generate-image/index.js";
-import getGeneratedImage from "../../../../libs/lucid-remote/services/get-generated-image/index.js";
+import generateMedia from "../../../../libs/lucid-remote/services/generate-media/index.js";
+import getGeneratedMedia from "../../../../libs/lucid-remote/services/get-generated-media/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import { MediaRepository } from "../../../../libs/repositories/index.js";
 import {
@@ -22,6 +22,7 @@ import type { AgentToolExecution } from "../../../../libs/tools/types.js";
 import createServiceContext from "../../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
+import getMediaModelOptions from "../../../ai/features/get-media-model-options.js";
 import streamMedia from "../../../media/stream.js";
 import uploadSingle from "../../../media/upload-single.js";
 import insertConversation from "../../helpers/insert-conversation.js";
@@ -34,12 +35,15 @@ import { generateImageAgentTool } from "./index.js";
 
 vi.mock("../../../media/stream.js", () => ({ default: vi.fn() }));
 vi.mock("../../../media/upload-single.js", () => ({ default: vi.fn() }));
+vi.mock("../../../ai/features/get-media-model-options.js", () => ({
+	default: vi.fn(),
+}));
 vi.mock(
-	"../../../../libs/lucid-remote/services/generate-image/index.js",
+	"../../../../libs/lucid-remote/services/generate-media/index.js",
 	() => ({ default: vi.fn() }),
 );
 vi.mock(
-	"../../../../libs/lucid-remote/services/get-generated-image/index.js",
+	"../../../../libs/lucid-remote/services/get-generated-media/index.js",
 	() => ({ default: vi.fn() }),
 );
 vi.mock("../../../connection/token-manager.js", () => ({
@@ -77,10 +81,43 @@ const withoutUploads = defineAgent({
 	features: { media: { upload: false } },
 });
 const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+const imageModel = (
+	id: string,
+	options: {
+		aspectRatios: string[];
+		resolutions: string[];
+		sourceImage?: boolean;
+	},
+) => ({
+	id,
+	name: id,
+	description: "",
+	aspectRatios: options.aspectRatios,
+	resolutions: options.resolutions,
+	qualities:
+		options.resolutions.length > 0 ? [] : ["auto", "low", "medium", "high"],
+	outputFormats: options.resolutions.length > 0 ? [] : ["webp", "png"],
+	sourceImage: options.sourceImage ?? true,
+});
+const imageModels = [
+	imageModel("image/formats", {
+		aspectRatios: ["auto", "1:1", "3:2"],
+		resolutions: [],
+	}),
+	imageModel("image/resolutions", {
+		aspectRatios: ["1:1", "16:9"],
+		resolutions: ["1K", "2K"],
+	}),
+	imageModel("image/text-only", {
+		aspectRatios: ["1:1"],
+		resolutions: [],
+		sourceImage: false,
+	}),
+];
 let context: ServiceContext;
 
 const generated = (output?: Partial<{ mimeType: string; extension: string }>) =>
-	vi.mocked(generateImage).mockResolvedValue({
+	vi.mocked(generateMedia).mockResolvedValue({
 		error: undefined,
 		data: {
 			mode: "async",
@@ -94,9 +131,9 @@ const generated = (output?: Partial<{ mimeType: string; extension: string }>) =>
 				byteSize: png.length,
 				mimeType: "image/webp",
 				extension: "webp",
-				size: "1024x1024",
-				quality: "medium",
-				outputFormat: "webp",
+				aspectRatio: "1:1",
+				resolution: null,
+				quality: null,
 				...output,
 			},
 			usage: {
@@ -132,7 +169,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: { definitions: [agent, withoutUploads] },
+				agents: { enabled: true, definitions: [agent, withoutUploads] },
 			},
 		},
 		database: await fixture.getDatabase(),
@@ -145,11 +182,15 @@ beforeAll(async () => {
 });
 afterAll(() => fixture.destroy());
 beforeEach(() => {
+	vi.mocked(getMediaModelOptions).mockResolvedValue({
+		error: undefined,
+		data: { default: "image/formats", models: imageModels },
+	});
 	vi.mocked(streamMedia).mockReset();
-	vi.mocked(generateImage).mockReset();
+	vi.mocked(generateMedia).mockReset();
 	vi.mocked(uploadSingle).mockReset();
-	vi.mocked(getGeneratedImage).mockReset();
-	vi.mocked(getGeneratedImage).mockImplementation(async () => ({
+	vi.mocked(getGeneratedMedia).mockReset();
+	vi.mocked(getGeneratedMedia).mockImplementation(async () => ({
 		error: undefined,
 		data: {
 			body: new Response(png).body as ReadableStream<Uint8Array>,
@@ -239,13 +280,14 @@ test("generates an image for the person and saves it as their personal media, sh
 	const result = await generate(execution, {
 		instruction: "A sunrise over rolling hills",
 		guidance: "natural",
-		size: "1536x1024",
+		aspectRatio: "3:2",
+		resolution: "2K",
 	});
 	assert(result.type === "success", JSON.stringify(result));
 	assert("output" in result.data);
 
 	const requestId = requestIdFor("media.image.generate", execution.operationId);
-	expect(vi.mocked(generateImage).mock.calls[0]?.[1]).toMatchObject({
+	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]).toMatchObject({
 		requestId,
 		request: {
 			feature: { key: "media.image.generate", version: "v1" },
@@ -259,13 +301,18 @@ test("generates an image for the person and saves it as their personal media, sh
 				{ type: "text", role: "guidance" },
 			],
 			generation: {
-				size: "1536x1024",
-				quality: "medium",
+				model: "image/formats",
+				aspectRatio: "3:2",
+				quality: "auto",
 				outputFormat: "webp",
 			},
 		},
 	});
-	expect(vi.mocked(getGeneratedImage).mock.calls[0]?.[1]).toEqual({
+	//* the default model picks its own resolution, so the agent's is left out
+	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]?.request).toMatchObject({
+		generation: { resolution: undefined },
+	});
+	expect(vi.mocked(getGeneratedMedia).mock.calls[0]?.[1]).toEqual({
 		accessToken: "token",
 		storageKey: "images/img_1.webp",
 		signal: execution.signal,
@@ -326,7 +373,7 @@ test("edits a Lucid image the person asked to change, and marks the result as mo
 	assert("output" in result.data);
 
 	expect(
-		vi.mocked(generateImage).mock.calls[0]?.[1]?.request.input,
+		vi.mocked(generateMedia).mock.calls[0]?.[1]?.request.input,
 	).toContainEqual({
 		type: "image",
 		role: "source-image",
@@ -342,6 +389,63 @@ test("edits a Lucid image the person asked to change, and marks the result as mo
 		alt: [{ localeCode: locale(), value: "Hills at dusk" }],
 	});
 	expect(context.translate(result.data.summary)).toContain(`${editId}`);
+});
+
+test("edits without a chosen model use the first model that takes a source image", async () => {
+	const execution = await executionFor();
+	const editId = await createMedia("image/png");
+	await markAnalysed(execution, editId);
+	vi.mocked(streamMedia).mockResolvedValue({
+		error: undefined,
+		data: {
+			body: new Response(png).body as ReadableStream<Uint8Array>,
+			contentLength: png.length,
+			contentType: "image/png",
+			fileName: "source.png",
+		},
+	});
+	vi.mocked(getMediaModelOptions).mockResolvedValueOnce({
+		error: undefined,
+		data: {
+			default: "image/text-only",
+			models: imageModels.toReversed(),
+		},
+	});
+	generated();
+	const result = await generate(
+		execution,
+		{ instruction: "Make it dusk", mediaId: editId, skipReview: true },
+		editImageTool,
+	);
+	assert(result.type === "success", JSON.stringify(result));
+	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]?.request).toMatchObject({
+		generation: { model: "image/resolutions" },
+	});
+});
+
+test("editing fails before generating when no model takes a source image", async () => {
+	const execution = await executionFor();
+	const editId = await createMedia("image/png");
+	await markAnalysed(execution, editId);
+	vi.mocked(getMediaModelOptions).mockResolvedValueOnce({
+		error: undefined,
+		data: {
+			default: "image/text-only",
+			models: imageModels.filter((model) => !model.sourceImage),
+		},
+	});
+	const result = await generate(
+		execution,
+		{ instruction: "Make it dusk", mediaId: editId, skipReview: true },
+		editImageTool,
+	);
+	expect(result).toMatchObject({
+		type: "failed",
+		message: context.translate(
+			"server:agent.media.generate.source.unsupported",
+		),
+	});
+	expect(generateMedia).not.toHaveBeenCalled();
 });
 
 test("system runs save straight to the library, and agents without uploads are not told to move it", async () => {
@@ -409,7 +513,7 @@ test("library saves media ready for documents, and needs permission to add to th
 	});
 	expect(denied).toMatchObject({
 		type: "failed",
-		message: context.translate("server:agent.image.generate.library.denied"),
+		message: context.translate("server:agent.media.generate.library.denied"),
 	});
 	expect(uploadSingle).not.toHaveBeenCalled();
 });
@@ -419,7 +523,7 @@ test("chats check the settings first unless told to skip, then generate with the
 	const input = {
 		title: "Sunrise over hills",
 		instruction: "A sunrise",
-		size: "1536x1024",
+		aspectRatio: "16:9",
 	};
 	expect(
 		await prepareAgentTool({
@@ -447,9 +551,11 @@ test("chats check the settings first unless told to skip, then generate with the
 			title: "Sunrise over hills",
 			alt: null,
 			guidance: null,
-			size: "1536x1024",
-			quality: "medium",
-			outputFormat: "webp",
+			aspectRatio: "16:9",
+			resolution: null,
+			quality: null,
+			outputFormat: null,
+			model: null,
 			editMediaId: null,
 		},
 	});
@@ -468,20 +574,26 @@ test("chats check the settings first unless told to skip, then generate with the
 					title: "Sunset over hills",
 					alt: null,
 					guidance: "cinematic",
-					size: "1024x1024",
-					quality: "low",
-					outputFormat: "png",
+					aspectRatio: "16:9",
+					resolution: "2K",
+					quality: null,
+					outputFormat: null,
+					model: "image/resolutions",
 				},
 			},
 		},
 	});
 	assert(result.type === "success", JSON.stringify(result));
-	expect(vi.mocked(generateImage).mock.calls[0]?.[1]?.request).toMatchObject({
+	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]?.request).toMatchObject({
 		input: [
 			{ type: "text", role: "user-instruction", value: "A sunset" },
 			{ type: "text", role: "guidance" },
 		],
-		generation: { size: "1024x1024", quality: "low", outputFormat: "png" },
+		generation: {
+			model: "image/resolutions",
+			aspectRatio: "16:9",
+			resolution: "2K",
+		},
 	});
 	expect(vi.mocked(uploadSingle).mock.calls[0]?.[1]).toMatchObject({
 		title: [{ localeCode: locale(), value: "Sunset over hills" }],
@@ -503,7 +615,7 @@ test("editing an image the agent hasn't seen asks it to look first, unless it ca
 	expect(
 		await executeAgentTool({ context, tool: editImageTool, input, execution }),
 	).toMatchObject({ type: "failed" });
-	expect(generateImage).not.toHaveBeenCalled();
+	expect(generateMedia).not.toHaveBeenCalled();
 
 	await markAnalysed(execution, unseen);
 	expect(await prepare()).toMatchObject({ type: "success" });
@@ -526,7 +638,10 @@ test("editing an image the agent hasn't seen asks it to look first, unless it ca
 					...context.config,
 					ai: {
 						...context.config.ai,
-						agents: { definitions: [agent, withoutUploads, withoutAnalysis] },
+						agents: {
+							enabled: true,
+							definitions: [agent, withoutUploads, withoutAnalysis],
+						},
 					},
 				},
 			},
@@ -576,7 +691,7 @@ test("editing checks the image before asking about settings", async () => {
 
 test("a failed download fails the call without saving media", async () => {
 	generated();
-	vi.mocked(getGeneratedImage).mockResolvedValue({
+	vi.mocked(getGeneratedMedia).mockResolvedValue({
 		data: undefined,
 		error: { type: "basic", status: 401, message: "Unauthorised" },
 	});
@@ -585,7 +700,7 @@ test("a failed download fails the call without saving media", async () => {
 	});
 	expect(result).toMatchObject({
 		type: "failed",
-		message: context.translate("server:agent.image.generate.download.failed"),
+		message: context.translate("server:agent.media.generate.download.failed"),
 	});
 	expect(uploadSingle).not.toHaveBeenCalled();
 });
@@ -598,7 +713,13 @@ test("the tool needs its permission and the CMS feature, and is off when the age
 					...context.config,
 					ai: {
 						...context.config.ai,
-						features: { ...context.config.ai.features, imageGeneration },
+						mediaGeneration: {
+							...context.config.ai.mediaGeneration,
+							image: {
+								...context.config.ai.mediaGeneration.image,
+								enabled: imageGeneration,
+							},
+						},
 					},
 				},
 			},
@@ -626,7 +747,7 @@ test("the tool needs its permission and the CMS feature, and is off when the age
 			key: "plain",
 			name: "Plain",
 			description: "No image generation.",
-			features: { media: { generateImage: false } },
+			features: { media: { generate: { image: false } } },
 		})
 			.tools.map((tool) => tool.name)
 			.filter((name) => name.startsWith("media_") && name.endsWith("_image")),

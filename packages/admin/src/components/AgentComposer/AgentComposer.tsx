@@ -21,7 +21,9 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import useAgentUploads from "@/hooks/useAgentUploads/useAgentUploads";
 import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
-import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
+import useMediaGeneration, {
+	type MediaGenerationTarget,
+} from "@/hooks/useMediaGeneration/useMediaGeneration";
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
@@ -29,6 +31,7 @@ import {
 	agentReferenceKey,
 	mergeAgentReferences,
 } from "@/utils/agent-references";
+import { mediaGenerationTypes } from "@/utils/media-generation";
 import { readDraft, restoreSubmittedDraft, writeDraft } from "./draft";
 import { composerExtensions, isBlank } from "./editor";
 import AgentCapabilityHints from "./parts/AgentCapabilityHints";
@@ -111,9 +114,6 @@ export interface AgentComposerProps {
 
 const editorHeight = { md: "1.5rem", lg: "4.5rem" } as const;
 
-export const composerTriggerClasses =
-	"flex h-7 items-center justify-center gap-1.5 rounded-md text-xs text-subtitle transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary";
-
 /**
  * The message box for talking to the agent. It supports markdown formatting as
  * you type, shows a formatting pill when text is selected, and sends markdown.
@@ -139,7 +139,16 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 		onUploaded: (reference) =>
 			setReferences((current) => mergeAgentReferences(current, [reference])),
 	});
-	const imageGeneration = useMediaImageGeneration();
+	const mediaGeneration = useMediaGeneration();
+	const generationTarget: MediaGenerationTarget = {
+		types: () =>
+			mediaGenerationTypes.filter(
+				(type) => props.features?.media.generate[type] === true,
+			),
+		image: () => null,
+		setFile: (file, ai) =>
+			ai ? uploads.addGenerated(file, ai) : uploads.add([file]),
+	};
 
 	// ----------------------------------------
 	// Memos
@@ -149,13 +158,9 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			props.features?.media.upload === true &&
 			!props.disabled,
 	);
-	//* Generated images are personal uploads and require upload access.
 	const canGenerate = createMemo(
 		() =>
-			canUpload() &&
-			props.features?.media.generateImage === true &&
-			imageGeneration.isFeatureEnabled() &&
-			imageGeneration.hasPermission(),
+			canUpload() && mediaGeneration.targetTypes(generationTarget).length > 0,
 	);
 	const unsupportedReferences = createMemo(() => {
 		const features = props.features;
@@ -527,14 +532,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 						onUpload={canUpload() ? () => fileInput?.click() : undefined}
 						onGenerate={
 							canGenerate()
-								? () =>
-										imageGeneration.open({
-											image: () => null,
-											setFile: (file, ai) =>
-												ai
-													? uploads.addGenerated(file, ai)
-													: uploads.add([file]),
-										})
+								? () => mediaGeneration.open(generationTarget)
 								: undefined
 						}
 						onSelect={(type, selected) =>

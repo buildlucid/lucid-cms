@@ -1,16 +1,22 @@
 import { copy } from "@lucidcms/core";
-import type { Media, ServiceFn } from "@lucidcms/core/types";
+import type { MediaListItem, ServiceFn } from "@lucidcms/core/types";
 import type { IndexRecord, MediaSource } from "../types.js";
 import normalizeRecords from "../utils/normalize-records.js";
 
-const translatedFields = new Set(["title", "alt", "description", "summary"]);
+const translatedFields = new Set([
+	"title",
+	"alt",
+	"description",
+	"summary",
+	"transcript",
+]);
 
 /** Projects ready media using Lucid's current file and crop formatting. */
 const projectMedia: ServiceFn<
 	[
 		{
 			source: MediaSource;
-			media: Media[];
+			media: MediaListItem[];
 			revision: string;
 			maxRecordsPerItem: number;
 		},

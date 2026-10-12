@@ -67,7 +67,7 @@ const formatDefinitions = (props: {
 					media: {
 						upload: agent.features.media.upload,
 						attach: agent.features.media.attach,
-						generateImage: agent.features.media.generateImage,
+						generate: agent.features.media.generate,
 					},
 					documents: { attach: agent.features.documents.attach },
 					requests: { attach: agent.features.requests.attach },

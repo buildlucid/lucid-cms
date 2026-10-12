@@ -1,3 +1,5 @@
+import type { MediaGenerationType } from "../../types/response.js";
+
 const HTTP_STATIC_PREFIX = "http:static:";
 
 const cacheKeys = {
@@ -9,6 +11,7 @@ const cacheKeys = {
 	},
 	ai: {
 		agentModels: "ai:agent-models",
+		mediaModels: (type: MediaGenerationType) => `ai:media-models:${type}`,
 	},
 	/**
 	 * Generate cache keys for rate limiting (used by rate limiter middleware)

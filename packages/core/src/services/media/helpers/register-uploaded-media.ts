@@ -230,6 +230,7 @@ const registerUploadedMedia: ServiceFn<
 				? (data.description ?? [])
 				: [],
 		summary: uploaded.type === "document" ? (data.summary ?? []) : [],
+		transcript: uploaded.type === "audio" ? (data.transcript ?? []) : [],
 		mediaId: mediaRes.data.id,
 	});
 	if (translations.length > 0) {

@@ -1,4 +1,9 @@
-import type { Locale, Media, MediaTranslation } from "@types";
+import type {
+	Locale,
+	Media,
+	MediaGenerationType,
+	MediaTranslation,
+} from "@types";
 import type { Accessor } from "solid-js";
 
 export type AiImageSource = {
@@ -20,7 +25,8 @@ type AltSetter = (
 		| ((_previous: MediaTranslation[]) => MediaTranslation[]),
 ) => void | Promise<void>;
 
-export type MediaImageGenerationFileMeta = {
+/** How a generated file was made, saved with the media it creates or replaces. */
+export type MediaGenerationFileMeta = {
 	origin: Extract<Media["origin"], "ai_generated" | "ai_modified">;
 	aiGenerationRequestId: string;
 };
@@ -35,10 +41,13 @@ export interface MediaAltGenerationTarget {
 
 type FileSetter = (
 	file: File,
-	meta?: MediaImageGenerationFileMeta,
+	meta?: MediaGenerationFileMeta,
 ) => void | Promise<void>;
 
-export interface MediaImageGenerationTarget {
+export interface MediaGenerationTarget {
+	/** Accepted media types, with a single type locking the modal and omission allowing all types. */
+	types?: Accessor<readonly MediaGenerationType[]>;
+	/** The target's current image, offered as a source to edit. */
 	image: Accessor<AiImageSource | null>;
 	setFile: FileSetter;
 	disabled?: Accessor<boolean>;
@@ -51,9 +60,9 @@ export type ModalRegistry = {
 			targetId: string;
 		};
 	};
-	mediaImageGeneration: {
+	mediaGeneration: {
 		data: {
-			target: MediaImageGenerationTarget;
+			target: MediaGenerationTarget;
 			targetId: string;
 		};
 	};

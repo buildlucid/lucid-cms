@@ -21,7 +21,7 @@ const featuresSchema = z
 				attach: z.boolean(),
 				analyze: z.boolean(),
 				readFile: z.boolean(),
-				generateImage: z.boolean(),
+				generate: z.object({ image: z.boolean(), audio: z.boolean() }).strict(),
 			})
 			.strict(),
 		documents: z.object({ attach: z.boolean() }).strict(),

@@ -10,6 +10,7 @@ import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getAudioMeta, getVideoMeta, type ImageMeta } from "@/utils/media-meta";
+import { saveGeneratedMedia } from "@/utils/save-generated-media";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 export const useCreateMedia = () => {
@@ -17,6 +18,7 @@ export const useCreateMedia = () => {
 	const [getAlt, setAlt] = createSignal<MediaTranslation[]>([]);
 	const [getDescription, setDescription] = createSignal<MediaTranslation[]>([]);
 	const [getSummary, setSummary] = createSignal<MediaTranslation[]>([]);
+	const [getTranscript, setTranscript] = createSignal<MediaTranslation[]>([]);
 	const [getKey, setKey] = createSignal<string>();
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,
@@ -77,6 +79,17 @@ export const useCreateMedia = () => {
 			setUploadLoading(false);
 		}
 	};
+	const saveGeneratedFile = async (requestId: string, publicValue: boolean) => {
+		setUploadLoading(true);
+		const key = await saveGeneratedMedia({
+			requestId,
+			public: publicValue,
+			onError: (error) => setUploadErrors(error),
+		});
+		setUploadLoading(false);
+		if (key) setKey(key);
+		return key;
+	};
 	const createMedia = async (
 		file: File | null,
 		imageMeta: ImageMeta | null,
@@ -85,6 +98,7 @@ export const useCreateMedia = () => {
 			alt?: MediaTranslation[];
 			description?: MediaTranslation[];
 			summary?: MediaTranslation[];
+			transcript?: MediaTranslation[];
 			folderId?: number | null;
 			public?: boolean;
 			posterId?: number | null;
@@ -109,7 +123,9 @@ export const useCreateMedia = () => {
 			file && mediaType === "audio" ? await getAudioMeta(file) : null;
 
 		if (file) {
-			const uploadFileRes = await uploadFile(file, isPublic);
+			const uploadFileRes = options?.aiGenerationRequestId
+				? await saveGeneratedFile(options.aiGenerationRequestId, isPublic)
+				: await uploadFile(file, isPublic);
 			if (!uploadFileRes) return null;
 			fileKey = uploadFileRes;
 		}
@@ -129,6 +145,10 @@ export const useCreateMedia = () => {
 			summary:
 				mediaType === "document"
 					? (options?.summary ?? getSummary())
+					: undefined,
+			transcript:
+				mediaType === "audio"
+					? (options?.transcript ?? getTranscript())
 					: undefined,
 			origin: options?.origin ?? "human",
 			aiGenerationRequestId: options?.aiGenerationRequestId,
@@ -202,6 +222,7 @@ export const useCreateMedia = () => {
 		setAlt,
 		setDescription,
 		setSummary,
+		setTranscript,
 		setFolderId,
 		setPublic,
 		setOwned,
@@ -213,6 +234,7 @@ export const useCreateMedia = () => {
 			alt: getAlt,
 			description: getDescription,
 			summary: getSummary,
+			transcript: getTranscript,
 			key: getKey,
 			folderId: getFolderId,
 			public: getPublic,
@@ -224,6 +246,7 @@ export const useCreateMedia = () => {
 			setAlt([]);
 			setDescription([]);
 			setSummary([]);
+			setTranscript([]);
 			setKey(undefined);
 			setFolderId(undefined);
 			setPublic(true);

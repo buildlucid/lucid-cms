@@ -56,6 +56,7 @@ const updateSingle: ServiceFn<
 			alt?: { localeCode: string | null; value: string | null }[];
 			description?: { localeCode: string | null; value: string | null }[];
 			summary?: { localeCode: string | null; value: string | null }[];
+			transcript?: { localeCode: string | null; value: string | null }[];
 			width?: number | null;
 			height?: number | null;
 			duration?: number | null;
@@ -247,6 +248,7 @@ const updateSingle: ServiceFn<
 				? (data.description ?? [])
 				: [],
 		summary: finalType === "document" ? (data.summary ?? []) : [],
+		transcript: finalType === "audio" ? (data.transcript ?? []) : [],
 		mediaId: mediaRes.data.id,
 	});
 

@@ -1,12 +1,15 @@
 import type { AgentImageSettings as ImageSettings } from "@types";
-import { createEffect, createMemo, createSignal, on, Show } from "solid-js";
+import {
+	createEffect,
+	createMemo,
+	createSignal,
+	For,
+	on,
+	Show,
+} from "solid-js";
 import { mediaAlt, mediaLabel } from "@/components/AgentMediaPreview/helpers";
 import type { AgentWidgetComponent } from "@/components/AgentWidget/types";
 import Input from "@/components/Input/Input";
-import {
-	imageGuidanceOptions,
-	resolutionPresets,
-} from "@/components/MediaImageGenerationModal/utils/media-image-generation";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import Select from "@/components/Select/Select";
 import Textarea from "@/components/Textarea/Textarea";
@@ -14,37 +17,18 @@ import type { AdminOptions } from "@/extensions/types/config";
 import api from "@/services/api";
 import T from "@/translations";
 import { isImageSettingsData } from "@/utils/agent-tools";
+import {
+	fitImageOptions,
+	imageGuidanceOptions,
+	imageOptionSelects,
+	imageSelectOptions,
+} from "@/utils/media-generation";
 
-const sizeOptions = () =>
-	resolutionPresets.flatMap((option) =>
-		option.value === "custom"
-			? []
-			: [
-					{
-						value: option.value satisfies ImageSettings["size"],
-						label: T()(option.label),
-					},
-				],
-	);
 const guidanceOptions = () =>
 	imageGuidanceOptions.map((option) => ({
 		value: option.key satisfies NonNullable<ImageSettings["guidance"]>,
 		label: T()(option.label),
 	}));
-const qualityOptions = () =>
-	(["medium", "low", "high", "auto"] satisfies ImageSettings["quality"][]).map(
-		(value) => ({
-			value,
-			label: T()(`ai.media.image.generate.quality.option.${value}`),
-		}),
-	);
-const formatOptions = () =>
-	(["webp", "png", "jpeg"] satisfies ImageSettings["outputFormat"][]).map(
-		(value) => ({
-			value,
-			label: T()(`ai.media.image.generate.format.option.${value}`),
-		}),
-	);
 
 /** Reviews image settings and media metadata before generation, showing the source image for edits. */
 const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
@@ -64,11 +48,41 @@ const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
 		},
 	});
 
+	const models = api.ai.useGetMediaModels({ type: () => "image" });
+
 	// ----------------------------------------
 	// Memos
 	const data = createMemo(() =>
 		isImageSettingsData(props.data) ? props.data : undefined,
 	);
+	const catalog = createMemo(() => models.data?.data);
+	const modelOptions = createMemo(() =>
+		(catalog()?.models ?? []).filter(
+			(option) => !data()?.editMediaId || option.sourceImage,
+		),
+	);
+	//* Fall back to the first eligible model when the selected or default model is unavailable.
+	const model = createMemo(() => {
+		const options = modelOptions();
+		const id = settings()?.model ?? catalog()?.default;
+		return options.find((option) => option.id === id) ?? options[0];
+	});
+	//* Keep settings unchanged until the model catalogue loads.
+	const fitted = createMemo(() => {
+		const current = settings();
+		const selected = model();
+		if (!current || !selected) return current;
+
+		return {
+			...current,
+			...fitImageOptions(selected, current),
+			model: selected.id,
+		};
+	});
+	const optionSelects = createMemo(() => {
+		const current = model();
+		return current ? imageOptionSelects(current) : [];
+	});
 	const disabled = createMemo(
 		() =>
 			props.interaction?.status !== "active" || props.interaction.submitting,
@@ -92,7 +106,7 @@ const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
 		const interaction = props.interaction;
 		if (interaction?.status !== "active") return;
 
-		const current = settings();
+		const current = fitted();
 		const instruction = current?.instruction.trim();
 		const title = current?.title.trim();
 		interaction.setResponse(
@@ -111,7 +125,7 @@ const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
 	// Render
 	return (
 		<Show
-			when={settings()}
+			when={fitted()}
 			fallback={
 				<p class="text-sm text-muted">{T()("agent.widget.unavailable")}</p>
 			}
@@ -156,6 +170,24 @@ const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
 						rows={4}
 						resize
 					/>
+					<Select
+						id="agent-image-settings-model"
+						name="agent-image-settings-model"
+						label={T()("ai.models.label")}
+						value={model()?.id}
+						onChange={(value) => update({ model: value ?? null })}
+						options={modelOptions().map((option) => ({
+							value: option.id,
+							label: option.name,
+						}))}
+						description={model()?.description}
+						errors={
+							models.isError
+								? { message: T()("ai.media.generate.models.unavailable") }
+								: undefined
+						}
+						disabled={disabled() || !catalog()}
+					/>
 					<div class="grid min-w-0 gap-3 sm:grid-cols-2">
 						<Select
 							id="agent-image-settings-guidance"
@@ -169,38 +201,33 @@ const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
 							disabled={disabled()}
 						/>
 						<Select
-							id="agent-image-settings-size"
-							name="agent-image-settings-size"
-							label={T()("ai.media.image.generate.resolution.label")}
-							value={current().size}
-							onChange={(size) => {
-								if (size) update({ size });
+							id="agent-image-settings-aspect-ratio"
+							name="agent-image-settings-aspect-ratio"
+							label={T()("ai.media.image.generate.aspect.ratio.label")}
+							value={current().aspectRatio}
+							onChange={(aspectRatio) => {
+								if (typeof aspectRatio === "string") update({ aspectRatio });
 							}}
-							options={sizeOptions()}
-							disabled={disabled()}
+							options={imageSelectOptions(model()?.aspectRatios ?? [])}
+							disabled={disabled() || !model()}
 						/>
-						<Select
-							id="agent-image-settings-quality"
-							name="agent-image-settings-quality"
-							label={T()("ai.media.image.generate.quality.label")}
-							value={current().quality}
-							onChange={(quality) => {
-								if (quality) update({ quality });
-							}}
-							options={qualityOptions()}
-							disabled={disabled()}
-						/>
-						<Select
-							id="agent-image-settings-format"
-							name="agent-image-settings-format"
-							label={T()("ai.media.image.generate.format.label")}
-							value={current().outputFormat}
-							onChange={(outputFormat) => {
-								if (outputFormat) update({ outputFormat });
-							}}
-							options={formatOptions()}
-							disabled={disabled()}
-						/>
+						<For each={optionSelects()}>
+							{(select) => (
+								<Select
+									id={`agent-image-settings-${select.key}`}
+									name={`agent-image-settings-${select.key}`}
+									label={select.label}
+									value={current()[select.key] ?? undefined}
+									onChange={(value) => {
+										if (typeof value === "string") {
+											update({ [select.key]: value });
+										}
+									}}
+									options={select.options}
+									disabled={disabled()}
+								/>
+							)}
+						</For>
 					</div>
 					<div class="grid min-w-0 gap-3 sm:grid-cols-2">
 						<Input

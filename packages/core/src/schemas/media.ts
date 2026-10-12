@@ -404,7 +404,16 @@ const mediaImageResponseShape = {
 	...mediaStateResponseShape,
 };
 
-export const mediaResponseSchema = z.union([
+const mediaAudioResponseShape = {
+	id: mediaIdResponseSchema,
+	type: z.literal("audio"),
+	...mediaBaseResponseShape,
+	description: mediaTranslationsResponseSchema,
+	...mediaAudioFileResponseShape,
+	...mediaStateResponseShape,
+};
+
+const mediaTypeResponseSchemas = [
 	z.discriminatedUnion("sourceType", [
 		z.object({
 			...mediaImageResponseShape,
@@ -424,14 +433,6 @@ export const mediaResponseSchema = z.union([
 		poster: mediaPosterResponseSchema.nullable().meta({
 			description: "Poster image data",
 		}),
-		...mediaStateResponseShape,
-	}),
-	z.object({
-		id: mediaIdResponseSchema,
-		type: z.literal("audio"),
-		...mediaBaseResponseShape,
-		description: mediaTranslationsResponseSchema,
-		...mediaAudioFileResponseShape,
 		...mediaStateResponseShape,
 	}),
 	z.object({
@@ -456,6 +457,22 @@ export const mediaResponseSchema = z.union([
 		...mediaFileResponseShape,
 		...mediaStateResponseShape,
 	}),
+] as const;
+
+export const mediaResponseSchema = z.union([
+	...mediaTypeResponseSchemas,
+	z.object({
+		...mediaAudioResponseShape,
+		transcript: mediaTranslationsResponseSchema.meta({
+			description: "The words spoken, as a text alternative to the audio",
+		}),
+	}),
+]);
+
+/** List responses omit audio transcripts, which single-media responses include. */
+export const mediaListItemResponseSchema = z.union([
+	...mediaTypeResponseSchemas,
+	z.object(mediaAudioResponseShape),
 ]);
 
 const mediaGetMultipleQueryStringSchema = z
@@ -669,6 +686,20 @@ export const createMediaSchema = z.object({
 			}),
 		)
 		.optional(),
+	transcript: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Transcript of the audio",
+				}),
+			}),
+		)
+		.optional(),
 	width: z
 		.number()
 		.meta({
@@ -850,6 +881,20 @@ export const updateMediaSchema = z.object({
 			}),
 		)
 		.optional(),
+	transcript: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Transcript of the audio",
+				}),
+			}),
+		)
+		.optional(),
 	width: z
 		.number()
 		.nullable()
@@ -947,7 +992,7 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		body: undefined,
-		response: z.array(mediaResponseSchema),
+		response: z.array(mediaListItemResponseSchema),
 	} satisfies ControllerSchema,
 	getSingle: {
 		body: undefined,
@@ -1281,7 +1326,7 @@ export const controllerSchemas = {
 			},
 			params: undefined,
 			body: undefined,
-			response: z.array(mediaResponseSchema),
+			response: z.array(mediaListItemResponseSchema),
 		} satisfies ControllerSchema,
 	},
 };

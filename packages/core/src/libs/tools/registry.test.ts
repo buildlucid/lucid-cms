@@ -62,7 +62,6 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 		{
 			secrets: "a".repeat(64),
 			ai: {
-				features: { mcp: true },
 				mcp: { tools: [echo] },
 				agents: { definitions: [agent("configured")] },
 			},
@@ -79,7 +78,7 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 		},
 		{ resolvedDb: adapter, skipValidation: true },
 	);
-	expect(config.ai.features.mcp).toBe(true);
+	expect(config.ai.mcp.enabled).toBe(true);
 	expect([...getMcpToolRegistry(config).keys()]).toEqual([
 		"plugin_dummy",
 		"test_echo",
@@ -97,9 +96,9 @@ test("ai boolean shorthand keeps the remaining AI defaults", async () => {
 	);
 	expect(config.ai).toMatchObject({
 		enabled: false,
-		features: { imageGeneration: true },
-		mcp: { tools: [], skills: [] },
-		agents: { definitions: [] },
+		mediaGeneration: { image: { enabled: true } },
+		mcp: { enabled: false, tools: [], skills: [] },
+		agents: { enabled: true, definitions: [] },
 	});
 });
 
@@ -205,7 +204,7 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets, e
 			...base,
 			ai: {
 				...base.ai,
-				agents: { definitions: [agent("test", [tool])] },
+				agents: { enabled: true, definitions: [agent("test", [tool])] },
 			},
 		});
 

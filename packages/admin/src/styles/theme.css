@@ -93,6 +93,7 @@
 	--animate-fade-in: animation-fade-in 0.2s ease;
 	--animate-rise-in: animation-rise-in 220ms ease-out;
 	--animate-progress: animation-progress 1.6s ease-in-out infinite;
+	--animate-wave: animation-wave 1.2s ease-in-out infinite;
 	--animate-slide-from-right-in: animate-slide-from-right-in 200ms ease;
 	--animate-slide-from-right-out: animate-slide-from-right-out 200ms ease 100ms
 		forwards;

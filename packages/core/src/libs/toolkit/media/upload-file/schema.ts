@@ -24,6 +24,7 @@ export const inputSchema = fileMetadataSchema.extend({
 	alt: translationsSchema.optional(),
 	description: translationsSchema.optional(),
 	summary: translationsSchema.optional(),
+	transcript: translationsSchema.optional(),
 	/** Additional file size and MIME type restrictions. */
 	validation: uploadValidationSchema.optional(),
 });

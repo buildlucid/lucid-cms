@@ -20,6 +20,7 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import insertConversation from "../../agent/helpers/insert-conversation.js";
 import syncLocales from "../../sync/sync-locales.js";
+import { addMediaToLibraryAgentTool } from "./add-to-library/index.js";
 import { outputSchema as getOutputSchema } from "./get/schema.js";
 import { outputSchema as selectOutputSchema } from "./select/schema.js";
 import { outputSchema as updateOutputSchema } from "./update/schema.js";
@@ -49,9 +50,8 @@ beforeAll(async () => {
 			},
 			ai: {
 				...config.ai,
-				features: { ...config.ai.features, mcp: true },
-				mcp: { tools: [mcpTools.media.get()], skills: [] },
-				agents: { definitions: [agent] },
+				mcp: { enabled: true, tools: [mcpTools.media.get()], skills: [] },
+				agents: { enabled: true, definitions: [agent] },
 			},
 		},
 		database: await fixture.getDatabase(),
@@ -335,6 +335,54 @@ test("media_update only clears the fields it lists, and clearing one the type la
 			})
 		).type,
 	).toBe("invalid-input");
+});
+
+test("media_add_to_library with only a title keeps the audio's description and transcript", async () => {
+	const media = await context.db.kysely
+		.insertInto("lucid_media")
+		.values({
+			key: randomUUID(),
+			storage_adapter_key: "test",
+			origin: "ai_generated",
+			type: "audio",
+			mime_type: "audio/mpeg",
+			file_extension: "mp3",
+			file_name: "welcome.mp3",
+			file_size: 1,
+			owner_user_id: owner,
+		})
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	await context.db.kysely
+		.insertInto("lucid_media_translations")
+		.values({
+			media_id: media.id,
+			locale_code: "en",
+			description: "A short welcome",
+			transcript: "Hello and welcome.",
+		})
+		.execute();
+	const run = await startRun(owner, [Permissions.MediaCreate]);
+
+	const added = await run.call(addMediaToLibraryAgentTool(), {
+		mediaId: media.id,
+		title: "Welcome",
+	});
+	assert(added.type === "success", JSON.stringify(added));
+
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_media_translations")
+			.select(["title", "description", "transcript"])
+			.where("media_id", "=", media.id)
+			.execute(),
+	).toEqual([
+		{
+			title: "Welcome",
+			description: "A short welcome",
+			transcript: "Hello and welcome.",
+		},
+	]);
 });
 
 test("media_select offers personal media only to user runs, then checks and links the picked media", async () => {

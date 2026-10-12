@@ -327,10 +327,8 @@ const accountCapabilityGroup: CapabilityGroup = {
 
 export type AccessConfig = Pick<
 	ResolvedLucidConfig,
-	"collections" | "access"
-> & {
-	ai: Pick<ResolvedLucidConfig["ai"], "enabled" | "features" | "agents">;
-};
+	"collections" | "access" | "ai"
+>;
 
 const resolveDetails = (details: AccessPermission): PermissionDetails => ({
 	name: normalizeCopy(details.name),

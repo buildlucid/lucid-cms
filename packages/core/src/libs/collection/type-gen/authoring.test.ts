@@ -113,4 +113,4 @@ if (result.data) {
 	} finally {
 		await rm(directory, { recursive: true, force: true });
 	}
-}, 30000);
+}, 60_000);

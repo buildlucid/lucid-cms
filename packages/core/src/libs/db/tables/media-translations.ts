@@ -34,6 +34,10 @@ export const mediaTranslationsTable = defineTable(
 				schema: z.string().nullable(),
 				type: "text",
 			},
+			transcript: {
+				schema: z.string().nullable(),
+				type: "text",
+			},
 		},
 	}),
 );
@@ -46,4 +50,5 @@ export interface LucidMediaTranslations {
 	alt: string | null;
 	description: string | null;
 	summary: string | null;
+	transcript: string | null;
 }

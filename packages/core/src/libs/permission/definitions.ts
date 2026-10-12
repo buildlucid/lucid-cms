@@ -36,6 +36,7 @@ export const Permissions = {
 
 	// AI permissions
 	AiImageGenerate: "ai:image-generate",
+	AiAudioGenerate: "ai:audio-generate",
 	AiAltGenerate: "ai:alt-generate",
 
 	// Integration permissions
@@ -224,6 +225,15 @@ export const PermissionGroups = Object.freeze({
 				details: {
 					name: copy("admin:core.permissions.image.generate", {
 						defaultMessage: "Generate Images",
+					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.AiAudioGenerate,
+				details: {
+					name: copy("admin:core.permissions.audio.generate", {
+						defaultMessage: "Generate Audio",
 					}),
 				},
 				core: true,

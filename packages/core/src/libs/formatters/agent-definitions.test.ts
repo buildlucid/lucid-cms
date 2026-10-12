@@ -41,8 +41,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 		ai: {
 			...base.ai,
 			enabled: true,
-			features: { ...base.ai.features, agents: true },
-			agents: { definitions: [agent] },
+			agents: { enabled: true, definitions: [agent] },
 		},
 	};
 	const format = (permissions: string[]) =>
@@ -77,7 +76,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 				...config,
 				ai: {
 					...config.ai,
-					features: { ...config.ai.features, agents: false },
+					agents: { ...config.ai.agents, enabled: false },
 				},
 			},
 			authUser: authUser([]),

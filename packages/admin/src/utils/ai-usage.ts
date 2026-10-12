@@ -23,6 +23,7 @@ const aiUsageChartMetrics = [
 const aiUsageSessionTypes = [
 	"agent",
 	"media-image",
+	"media-audio",
 	"media-alt",
 ] as const satisfies AiUsageSessionType[];
 
@@ -53,6 +54,7 @@ const aiUsageFeatureLabels = {
 	"media.analyze": "ai.usage.features.media.analyze",
 	"media.alt.generate": "ai.usage.features.media.alt.generate",
 	"media.image.generate": "ai.usage.features.media.image.generate",
+	"media.audio.generate": "ai.usage.features.media.audio.generate",
 } satisfies Record<AiUsageFeatureKey, string>;
 
 export const getAiUsageFeatureOptions = () =>

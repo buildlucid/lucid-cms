@@ -6,8 +6,8 @@ import {
 	TbOutlineShieldHalf,
 } from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
-import { composerTriggerClasses } from "@/components/AgentComposer/AgentComposer";
 import Menu from "@/components/Menu/Menu";
+import { composerTriggerClasses } from "@/components/ModelPicker/triggerClasses";
 import T from "@/translations";
 
 const modes = [

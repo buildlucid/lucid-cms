@@ -421,7 +421,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: { definitions: [testAgent, webAgent] },
+				agents: { enabled: true, definitions: [testAgent, webAgent] },
 			},
 		},
 		database,
@@ -3331,6 +3331,7 @@ describe("queued and steering inputs", () => {
 				ai: {
 					...context.config.ai,
 					agents: {
+						enabled: true,
 						definitions: [
 							{
 								...testAgent,

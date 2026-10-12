@@ -95,18 +95,28 @@ export type MediaImageGenerateV1Request = {
 		previousInstructions?: string[];
 	};
 	generation: {
-		size:
-			| "auto"
-			| "1024x1024"
-			| "1536x1024"
-			| "1024x1536"
-			| "2048x2048"
-			| "2048x1152"
-			| "3840x2160"
-			| "2160x3840"
-			| [number, number];
-		quality: "auto" | "low" | "medium" | "high";
-		outputFormat: "webp" | "png" | "jpeg";
+		/** Defaults to Lucid's default image model. */
+		model?: string;
+		aspectRatio: string;
+		/** Left out for the model's default. */
+		resolution?: string;
+		quality?: string;
+		outputFormat?: string;
+	};
+};
+
+export type MediaAudioGenerateV1Request = {
+	feature: {
+		key: "media.audio.generate";
+		version: "v1";
+	};
+	sessionId?: string;
+	input: CmsAiGenerateRequestInputText<"script" | "user-instruction">[];
+	generation: {
+		/** Defaults to Lucid's default speech model. */
+		model?: string;
+		/** Defaults to the model's default voice. */
+		voice?: string;
 	};
 };
 
@@ -120,7 +130,8 @@ export type CmsAiGenerateRequest =
 	| MediaAnalyzeRequest
 	| AgentTitleGenerateV1Request
 	| MediaAltGenerateV1Request
-	| MediaImageGenerateV1Request;
+	| MediaImageGenerateV1Request
+	| MediaAudioGenerateV1Request;
 
 export type CmsAiGenerateRequestFeature = CmsAiGenerateRequest["feature"];
 

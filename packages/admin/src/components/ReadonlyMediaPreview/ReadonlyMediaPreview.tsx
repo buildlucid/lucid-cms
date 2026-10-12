@@ -9,7 +9,9 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AudioPill from "@/components/AudioPill/AudioPill";
 import MediaStatusPreview from "@/components/MediaStatusPreview/MediaStatusPreview";
+import T from "@/translations";
 
 const ReadonlyMediaPreview: Component<{
 	media: {
@@ -95,16 +97,10 @@ const ReadonlyMediaPreview: Component<{
 						<Match when={props.media.type === "audio"}>
 							<div class="w-full h-full relative z-10 bg-input flex justify-center items-center">
 								<Show when={renderNativeMedia()}>
-									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-									<audio
+									<AudioPill
 										src={props.media.url}
-										class="w-2/3"
-										controls
-										draggable={false}
-										onDragStart={(e) => {
-											e.preventDefault();
-											e.stopPropagation();
-										}}
+										label={props.alt || T()("common.untitled")}
+										class="w-2/3 max-w-96"
 									/>
 								</Show>
 							</div>

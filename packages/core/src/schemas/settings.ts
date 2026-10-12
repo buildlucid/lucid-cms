@@ -24,6 +24,10 @@ const settingsResponseSchema = z.object({
 						description: "Whether AI image generation is enabled",
 						example: true,
 					}),
+					audioGeneration: z.boolean().meta({
+						description: "Whether AI text to speech is enabled",
+						example: true,
+					}),
 					altGeneration: z.boolean().meta({
 						description: "Whether AI alt text generation is enabled",
 						example: true,

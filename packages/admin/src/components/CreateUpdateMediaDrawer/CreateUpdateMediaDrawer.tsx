@@ -41,11 +41,11 @@ import Select from "@/components/Select/Select";
 import Textarea from "@/components/Textarea/Textarea";
 import { useCreateMedia } from "@/hooks/useCreateMedia/useCreateMedia";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
-import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
+import useMediaGeneration from "@/hooks/useMediaGeneration/useMediaGeneration";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload/useSingleFileUpload";
 import { useUpdateMedia } from "@/hooks/useUpdateMedia/useUpdateMedia";
 import api from "@/services/api";
-import type { MediaImageGenerationTarget } from "@/store/aiModalsStore/aiModalsStore";
+import type { MediaGenerationTarget } from "@/store/aiModalsStore/aiModalsStore";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
@@ -57,6 +57,10 @@ import {
 	isSupportedCropMimeType,
 	resolveStoredImageCropSource,
 } from "@/utils/image-crop";
+import {
+	acceptedGenerationTypes,
+	mediaGenerationTypes,
+} from "@/utils/media-generation";
 import mediaUrl from "@/utils/media-url";
 import {
 	getTranslation,
@@ -72,7 +76,8 @@ interface CreateUpdateMediaPanelProps {
 	/** Offers to make new uploads personal. Leave it off where media must go in content, such as the document editor. */
 	allowOwned?: boolean;
 	initialFile?: Accessor<File | null | undefined>;
-	openImageGenerationOnCreate?: Accessor<boolean>;
+	/** Opens media generation as soon as the drawer opens to create media. */
+	openMediaGenerationOnCreate?: Accessor<boolean>;
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
@@ -82,7 +87,7 @@ interface CreateUpdateMediaPanelProps {
 	};
 	callbacks?: {
 		onSuccess?: (_media: Media) => void;
-		onImageGenerationOpened?: () => void;
+		onMediaGenerationOpened?: () => void;
 	};
 }
 
@@ -111,8 +116,8 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 	const createPosterMedia = useCreateMedia();
 	const updateMedia = props.id ? useUpdateMedia(props.id) : null;
 	const mediaAltGeneration = useMediaAltGeneration();
-	const mediaImageGeneration = useMediaImageGeneration();
-	const posterImageGenerationTargetId = mediaImageGeneration.getTargetId();
+	const mediaGeneration = useMediaGeneration();
+	const posterGenerationTargetId = mediaGeneration.getTargetId();
 
 	const MediaFile = useSingleFileUpload({
 		id: "file",
@@ -135,8 +140,13 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 				Boolean(targetAction()?.isLoading()) && targetUploadProgress() > 0,
 			value: targetUploadProgress(),
 		}),
-		imageGeneration: {
-			enabled: () => showMediaImageGenerationAction(),
+		mediaGeneration: {
+			types: () =>
+				panelMode() === "update"
+					? mediaGenerationTypes.filter(
+							(type) => type === media.data?.data.type,
+						)
+					: acceptedGenerationTypes(props.state.accept),
 			disabled: () => coreMutateIsLoading(),
 			onSetFile: () => {
 				setUploadErrors(undefined);
@@ -216,16 +226,15 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 	const showPosterInput = createMemo(() => {
 		return currentMediaType() === "video";
 	});
-	const showMediaImageGenerationAction = createMemo(() => {
-		if (panelMode() === "create") return true;
-		return media.data?.data.type === "image";
-	});
 	const showDescriptionInput = createMemo(() => {
 		const type = currentMediaType();
 		return type === "video" || type === "audio";
 	});
 	const showSummaryInput = createMemo(() => {
 		return currentMediaType() === "document";
+	});
+	const showTranscriptInput = createMemo(() => {
+		return currentMediaType() === "audio";
 	});
 	const showPosterAltInput = createMemo(() => {
 		return (
@@ -524,11 +533,16 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 			mutateErrors(),
 		)?.children;
 		const summaryErrors = getBodyError("summary", mutateErrors())?.children;
+		const transcriptErrors = getBodyError(
+			"transcript",
+			mutateErrors(),
+		)?.children;
 		return (
 			(titleErrors && titleErrors.length > 0) ||
 			(altErrors && altErrors.length > 0) ||
 			(descriptionErrors && descriptionErrors.length > 0) ||
-			(summaryErrors && summaryErrors.length > 0)
+			(summaryErrors && summaryErrors.length > 0) ||
+			(transcriptErrors && transcriptErrors.length > 0)
 		);
 	});
 	const hasDetailsErrors = createMemo(() => {
@@ -537,7 +551,8 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 			Boolean(getBodyError("title", mutateErrors())) ||
 			Boolean(getBodyError("alt", mutateErrors())) ||
 			Boolean(getBodyError("description", mutateErrors())) ||
-			Boolean(getBodyError("summary", mutateErrors()))
+			Boolean(getBodyError("summary", mutateErrors())) ||
+			Boolean(getBodyError("transcript", mutateErrors()))
 		);
 	});
 	const hasAccessErrors = createMemo(() => {
@@ -611,7 +626,8 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 		setAlt: setPosterAlt,
 		disabled: coreMutateIsLoading,
 	});
-	const posterImageGenerationTarget: MediaImageGenerationTarget = {
+	const posterGenerationTarget: MediaGenerationTarget = {
+		types: () => ["image"],
 		image: posterImageGenerationSource,
 		setFile: async (file, meta) => {
 			await PosterFile.setGeneratedFile(file, meta);
@@ -624,7 +640,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 		return (
 			coreMutateIsLoading() ||
 			mediaAltGeneration.isLoading() ||
-			mediaImageGeneration.isLoading()
+			mediaGeneration.isLoading()
 		);
 	});
 
@@ -650,6 +666,11 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 						? recordToTranslations(locales(), item.summary)
 						: []
 					: undefined,
+				transcript: showTranscriptInput()
+					? item?.type === "audio"
+						? recordToTranslations(locales(), item.transcript)
+						: []
+					: undefined,
 				folderId: item?.folderId ?? null,
 				public: item?.public ?? true,
 				posterId: showPosterInput() ? (poster?.id ?? null) : undefined,
@@ -668,6 +689,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 				alt: showAltInput() ? state?.alt() : undefined,
 				description: showDescriptionInput() ? state?.description() : undefined,
 				summary: showSummaryInput() ? state?.summary() : undefined,
+				transcript: showTranscriptInput() ? state?.transcript() : undefined,
 				folderId: state?.folderId(),
 				public: state?.public(),
 				posterId: showPosterInput()
@@ -768,6 +790,11 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 	}
 	function summaryError(index: number) {
 		const errors = getBodyError("summary", mutateErrors())?.children;
+		if (errors) return errors[index];
+		return undefined;
+	}
+	function transcriptError(index: number) {
+		const errors = getBodyError("transcript", mutateErrors())?.children;
 		if (errors) return errors[index];
 		return undefined;
 	}
@@ -1104,6 +1131,11 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 						? recordToTranslations(locales(), mediaData.summary)
 						: [],
 				);
+				updateMedia?.setTranscript(
+					mediaData.type === "audio"
+						? recordToTranslations(locales(), mediaData.transcript)
+						: [],
+				);
 				updateMedia?.setFolderId(mediaData.folderId ?? null);
 				updateMedia?.setPublic(mediaData.public ?? true);
 				const poster = mediaData.type === "video" ? mediaData.poster : null;
@@ -1213,13 +1245,13 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 		if (
 			!props.state.open ||
 			panelMode() !== "create" ||
-			props.openImageGenerationOnCreate?.() !== true
+			props.openMediaGenerationOnCreate?.() !== true
 		) {
 			return;
 		}
 
-		props.callbacks?.onImageGenerationOpened?.();
-		MediaFile.openImageGeneration();
+		props.callbacks?.onMediaGenerationOpened?.();
+		MediaFile.openMediaGeneration();
 	});
 
 	createEffect(() => {
@@ -1358,6 +1390,29 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													name={`summary-${locale.code}`}
 													label={T()("common.summary")}
 													errors={getErrorObject(summaryError(index()))}
+												/>
+											</Show>
+											<Show when={showTranscriptInput()}>
+												<Textarea
+													id={`transcript-${locale.code}`}
+													value={
+														getTranslation(
+															targetState()?.transcript(),
+															locale.code,
+														) || ""
+													}
+													onChange={(val) => {
+														updateTranslation(targetAction()?.setTranscript, {
+															localeCode: locale.code,
+															value: val,
+														});
+													}}
+													name={`transcript-${locale.code}`}
+													label={T()("common.transcript")}
+													description={T()("media.transcript.description")}
+													errors={getErrorObject(transcriptError(index()))}
+													rows={6}
+													resize
 												/>
 											</Show>
 										</Show>
@@ -1503,7 +1558,9 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													<TbOutlinePhoto size={14} />
 												</Button>
 											</Show>
-											<Show when={mediaImageGeneration.isFeatureEnabled()}>
+											<Show
+												when={mediaGeneration.isOffered(posterGenerationTarget)}
+											>
 												<Button
 													type="button"
 													variant="ghost"
@@ -1512,39 +1569,42 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													onClick={(event) => {
 														event.preventDefault();
 														event.stopPropagation();
-														mediaImageGeneration.open(
-															posterImageGenerationTarget,
-															posterImageGenerationTargetId,
+														mediaGeneration.open(
+															posterGenerationTarget,
+															posterGenerationTargetId,
 														);
 													}}
-													title={mediaImageGeneration.getTooltip(
-														posterImageGenerationTarget,
+													title={mediaGeneration.getTooltip(
+														posterGenerationTarget,
 													)}
-													aria-label={T()("ai.media.image.generate.action")}
+													aria-label={mediaGeneration.getLabel(
+														posterGenerationTarget,
+													)}
 													aria-disabled={
-														mediaImageGeneration.isDisabled(
-															posterImageGenerationTarget,
-														)
+														mediaGeneration.isDisabled(posterGenerationTarget)
 															? "true"
 															: undefined
 													}
 													aria-busy={
-														mediaImageGeneration.isTargetLoading(
-															posterImageGenerationTargetId,
+														mediaGeneration.isTargetLoading(
+															posterGenerationTargetId,
 														)
 															? "true"
 															: undefined
 													}
-													loading={mediaImageGeneration.isTargetLoading(
-														posterImageGenerationTargetId,
+													loading={mediaGeneration.isTargetLoading(
+														posterGenerationTargetId,
 													)}
 													disabled={
-														mediaImageGeneration.isDisabled(
-															posterImageGenerationTarget,
-														) && !mediaImageGeneration.accessState().disabled
+														mediaGeneration.isDisabled(
+															posterGenerationTarget,
+														) &&
+														!mediaGeneration.accessState(posterGenerationTarget)
+															.disabled
 													}
 													class={
-														mediaImageGeneration.accessState().disabled
+														mediaGeneration.accessState(posterGenerationTarget)
+															.disabled
 															? "opacity-80 cursor-not-allowed"
 															: undefined
 													}

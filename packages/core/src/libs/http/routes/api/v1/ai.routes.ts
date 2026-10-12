@@ -11,9 +11,12 @@ const aiRoutes = new Hono<LucidHonoGeneric>()
 		"/usage/sessions/:type/:id/records",
 		...aiController.getUsageSessionRecords,
 	)
-	.post("/media-image", ...aiController.mediaImageGenerate)
-	.get("/media-image/images/:key", ...aiController.mediaImageStream)
-	.post("/media-image/:requestId", ...aiController.mediaImageCompletion)
+	.get("/models/:type", ...aiController.getMediaModels)
+	.post("/media/image", ...aiController.mediaImageGenerate)
+	.post("/media/audio", ...aiController.mediaAudioGenerate)
+	.get("/media/files/:key", ...aiController.mediaStream)
+	.post("/media/requests/:requestId", ...aiController.mediaCompletion)
+	.post("/media/requests/:requestId/save", ...aiController.mediaSave)
 	.post("/media-alt", ...aiController.mediaAltGenerate);
 
 export default aiRoutes;

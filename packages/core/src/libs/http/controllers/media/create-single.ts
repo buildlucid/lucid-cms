@@ -54,6 +54,7 @@ const createSingleController = factory.createHandlers(
 			alt: body.alt,
 			description: body.description,
 			summary: body.summary,
+			transcript: body.transcript,
 			width: body.width,
 			height: body.height,
 			duration: body.duration,

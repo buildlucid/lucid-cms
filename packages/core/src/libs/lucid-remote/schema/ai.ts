@@ -1,4 +1,5 @@
 import z from "zod";
+import type { MediaGenerationType } from "../../../types/response.js";
 
 /** Lucid charges whole credits, so they can be stored and summed as integers. */
 export const aiCreditsChargedSchema = z
@@ -77,20 +78,31 @@ export const cmsAiGenerateAcceptedDataSchema = z
 	})
 	.strict();
 
-/** Stored image metadata returned by the Lucid service. */
-export const cmsAiImageOutputSchema = z
-	.object({
-		id: z.string(),
-		url: z.string(),
-		storageKey: z.string(),
-		byteSize: z.number().int().nonnegative(),
-		mimeType: z.string(),
-		extension: z.string(),
-		size: z.string(),
-		quality: z.string(),
-		outputFormat: z.string(),
-	})
-	.strict();
+const cmsAiMediaFileSchema = z.object({
+	id: z.string(),
+	url: z.string(),
+	storageKey: z.string(),
+	byteSize: z.number().int().nonnegative(),
+	mimeType: z.string(),
+	extension: z.string(),
+});
+
+/** Stored media metadata returned by the Lucid service, for each media type. */
+export const cmsAiMediaOutputSchemas = {
+	image: cmsAiMediaFileSchema
+		.extend({
+			aspectRatio: z.string(),
+			resolution: z.string().nullable(),
+			quality: z.string().nullable(),
+		})
+		.strict(),
+	audio: cmsAiMediaFileSchema
+		.extend({
+			voice: z.string(),
+			characters: z.number().int().nonnegative(),
+		})
+		.strict(),
+} satisfies Record<MediaGenerationType, z.ZodType>;
 
 export const cmsAiGenerateDataSchema = z.union([
 	cmsAiGenerateCompletedDataSchema,

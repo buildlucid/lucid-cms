@@ -6,7 +6,7 @@ import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { builderUpdateToolName } from "../builder-update/constants.js";
 import { generateImageToolName } from "./constants.js";
-import generateMedia from "./generate-media.js";
+import generateImage from "./generate-image.js";
 import prepareImageSettings from "./prepare.js";
 import {
 	inputSchema,
@@ -43,7 +43,7 @@ export const generateImageAgentTool = () =>
 				prepareImageSettings(context, { input, editMediaId: null }),
 		},
 		handler: ({ context, input, execution, response }) =>
-			generateMedia(context, {
+			generateImage(context, {
 				toolName: generateImageToolName,
 				input,
 				settings: response,

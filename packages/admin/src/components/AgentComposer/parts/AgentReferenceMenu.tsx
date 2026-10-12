@@ -12,6 +12,7 @@ import { type Component, createMemo, createSignal, Show } from "solid-js";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import Menu from "@/components/Menu/Menu";
+import { composerTriggerClasses } from "@/components/ModelPicker/triggerClasses";
 import RequestSelectDrawer from "@/components/RequestSelectDrawer/RequestSelectDrawer";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -25,9 +26,7 @@ import {
 	selectedMediaItems,
 } from "@/utils/agent-references";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
-import { composerTriggerClasses } from "../AgentComposer";
 
-/** Adds references, uploads files, or generates images through the provided callbacks. */
 const AgentReferenceMenu: Component<{
 	features?: Agent["features"];
 	references: AgentReferenceItem[];

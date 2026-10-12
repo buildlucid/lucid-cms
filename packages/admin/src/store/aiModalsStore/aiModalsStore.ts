@@ -10,8 +10,8 @@ import type {
 export type {
 	AiImageSource,
 	MediaAltGenerationTarget,
-	MediaImageGenerationFileMeta,
-	MediaImageGenerationTarget,
+	MediaGenerationFileMeta,
+	MediaGenerationTarget,
 	ModalRegistry,
 	ModalState,
 	ModalType,

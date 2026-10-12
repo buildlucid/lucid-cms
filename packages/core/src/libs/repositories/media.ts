@@ -369,6 +369,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"lucid_media_translations.alt",
 								"lucid_media_translations.description",
 								"lucid_media_translations.summary",
+								"lucid_media_translations.transcript",
 								"lucid_media_translations.locale_code",
 							])
 							.whereRef(
@@ -656,6 +657,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"lucid_media_translations.alt",
 								"lucid_media_translations.description",
 								"lucid_media_translations.summary",
+								"lucid_media_translations.transcript",
 								"lucid_media_translations.locale_code",
 							])
 							.whereRef(
@@ -801,6 +803,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			{
 				queryParams: GetMultipleQueryParams;
 				access: MediaListAccess;
+				/** Loads audio transcripts, which lists otherwise leave out. */
+				transcripts?: boolean;
 			}
 		>,
 	) {
@@ -873,6 +877,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 										"lucid_media_translations.summary",
 										"lucid_media_translations.locale_code",
 									])
+									.$if(props.transcripts === true, (qb) =>
+										qb.select("lucid_media_translations.transcript"),
+									)
 									.whereRef(
 										"lucid_media_translations.media_id",
 										"=",

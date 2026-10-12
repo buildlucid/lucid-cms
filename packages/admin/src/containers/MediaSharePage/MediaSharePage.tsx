@@ -20,6 +20,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AudioPill from "@/components/AudioPill/AudioPill";
 import Button from "@/components/Button/Button";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import { Form } from "@/components/Form/Form";
@@ -201,11 +202,12 @@ const MediaSharePage: Component = () => {
 													}
 												>
 													<div class="w-full p-4 flex flex-col items-center gap-2">
-														{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-														<audio
+														<AudioPill
 															src={shareUrl()}
+															label={
+																grantedAccess()?.name || T()("common.untitled")
+															}
 															class="w-full max-w-xs"
-															controls
 														/>
 													</div>
 												</Match>

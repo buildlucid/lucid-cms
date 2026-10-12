@@ -292,7 +292,7 @@ const AgentChatComposer: Component<{
 				<Show when={composerWidget()}>
 					{(pending) => (
 						<div
-							class="max-h-[60vh] overflow-y-auto motion-safe:animate-rise-in"
+							class="motion-safe:animate-rise-in"
 							classList={{ hidden: !activeWidget() }}
 						>
 							<AgentWidget

@@ -235,6 +235,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 						alt: z.string().nullable(),
 						description: z.string().nullable(),
 						summary: z.string().nullable(),
+						transcript: z.string().nullable().optional(),
 						locale_code: z.string().nullable(),
 					}),
 				)

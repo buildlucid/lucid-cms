@@ -96,7 +96,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: { definitions: [agent, withoutAnalysis] },
+				agents: { enabled: true, definitions: [agent, withoutAnalysis] },
 			},
 		},
 		database: await fixture.getDatabase(),

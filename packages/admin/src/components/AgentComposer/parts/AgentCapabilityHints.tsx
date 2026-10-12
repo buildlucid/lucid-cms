@@ -5,6 +5,7 @@ import {
 	TbOutlineEye,
 	TbOutlineEyeOff,
 	TbOutlinePhotoAi,
+	TbOutlineVolume,
 	TbOutlineWorld,
 } from "solid-icons/tb";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
@@ -120,6 +121,20 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 						props.capabilities?.imageGeneration
 							? "agent.capabilities.image.description"
 							: "agent.capabilities.image.none.description",
+					)}
+				/>
+				<CapabilityHint
+					active={props.capabilities?.audioGeneration === true}
+					icon={<TbOutlineVolume size={11} />}
+					title={T()(
+						props.capabilities?.audioGeneration
+							? "agent.capabilities.audio"
+							: "agent.capabilities.audio.none",
+					)}
+					description={T()(
+						props.capabilities?.audioGeneration
+							? "agent.capabilities.audio.description"
+							: "agent.capabilities.audio.none.description",
 					)}
 				/>
 			</div>

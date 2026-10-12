@@ -1,27 +1,21 @@
-import type { MediaImageGenerateResponse } from "@lucidcms/types";
+import type { MediaGenerateResponse } from "@lucidcms/types";
 import { copy } from "../../../libs/i18n/index.js";
 import type { MediaImageGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
-import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
-import {
-	isCmsAiGenerateAcceptedData,
-	isCmsAiGenerateCompletedData,
-} from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
-import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import {
 	imageGuidanceInstructions,
 	imageGuidanceSchema,
 } from "../helpers/image-guidance.js";
-import storeGeneration from "../storage/store-generation.js";
-import storePendingGeneration from "../storage/store-pending-generation.js";
+import resolveMediaModel from "../helpers/resolve-media-model.js";
+import startMediaGeneration from "../helpers/start-media-generation.js";
 
+/** Generates or edits an image for the admin from an instruction, with an optional style preset and source image. */
 const mediaImageGenerate: ServiceFn<
 	[
 		{
 			sessionId?: string;
-			instruction?: string;
+			instruction: string;
 			guidance?: string;
 			image?: Extract<
 				MediaImageGenerateV1Request["input"][number],
@@ -33,33 +27,14 @@ const mediaImageGenerate: ServiceFn<
 			userId: number;
 		},
 	],
-	MediaImageGenerateResponse
+	MediaGenerateResponse
 > = async (context, props) => {
 	const featureEnabledRes = await checkFeatureEnabled(context, {
 		feature: "imageGeneration",
 	});
 	if (featureEnabledRes.error) return featureEnabledRes;
 
-	const requestStartedAt = Date.now();
-	const accessTokenRes = await getAccessToken(context, {});
-	if (accessTokenRes.error) return accessTokenRes;
-
-	const idempotencyKey = props.idempotencyKey?.trim();
-	if (!idempotencyKey) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: copy(
-					"server:core.ai.media.image.generate.idempotency.key.required",
-				),
-			},
-			data: undefined,
-		};
-	}
-
-	const input: MediaImageGenerateV1Request["input"] = [];
-	const instruction = props.instruction?.trim();
+	const instruction = props.instruction.trim();
 	const guidanceKey = imageGuidanceSchema.safeParse(props.guidance);
 	const guidance = guidanceKey.success
 		? imageGuidanceInstructions[guidanceKey.data]
@@ -76,27 +51,28 @@ const mediaImageGenerate: ServiceFn<
 		};
 	}
 
-	if (!instruction && (!props.guidance || !props.image)) {
+	if (!instruction) {
 		return {
 			error: {
 				type: "basic",
 				status: 400,
 				message: copy(
-					"server:core.ai.media.image.generate.instruction.or.guidance.required",
+					"server:core.ai.media.image.generate.instruction.required",
 				),
 			},
 			data: undefined,
 		};
 	}
 
-	if (instruction) {
-		input.push({
-			type: "text",
-			role: "user-instruction",
-			value: instruction,
-		});
-	}
+	const model = await resolveMediaModel(context, {
+		type: "image",
+		modelId: props.generation.model,
+	});
+	if (model.error) return model;
 
+	const input: MediaImageGenerateV1Request["input"] = [
+		{ type: "text", role: "user-instruction", value: instruction },
+	];
 	if (guidance) {
 		input.push({
 			type: "text",
@@ -104,7 +80,6 @@ const mediaImageGenerate: ServiceFn<
 			value: guidance,
 		});
 	}
-
 	if (props.image) {
 		input.push({
 			type: "image",
@@ -113,110 +88,36 @@ const mediaImageGenerate: ServiceFn<
 		});
 	}
 
-	const request: MediaImageGenerateV1Request = {
-		feature: {
-			key: "media.image.generate",
-			version: "v1",
+	const generation = { ...props.generation, model: model.data };
+	return startMediaGeneration(context, {
+		request: {
+			feature: { key: "media.image.generate", version: "v1" },
+			sessionId: props.sessionId,
+			input,
+			context: {
+				previousInstructions:
+					props.previousInstructions && props.previousInstructions.length > 0
+						? props.previousInstructions
+						: undefined,
+			},
+			generation,
 		},
-		sessionId: props.sessionId,
-		input,
-		context: {
-			previousInstructions:
-				props.previousInstructions && props.previousInstructions.length > 0
-					? props.previousInstructions
-					: undefined,
+		target: {
+			generation,
+			guidance: props.guidance ?? null,
+			previousInstructions: props.previousInstructions ?? [],
+			sourceImage: props.image
+				? {
+						type: props.image.type,
+						detail: props.image.detail ?? null,
+						filename: props.image.filename ?? null,
+						mimeType: props.image.mimeType ?? null,
+					}
+				: null,
 		},
-		generation: props.generation,
-	};
-
-	const generateRes = await generateCmsAi(context, {
-		accessToken: accessTokenRes.data.accessToken,
-		request,
-		idempotencyKey,
-	});
-	if (generateRes.error) {
-		if (generateRes.error.status === 401) {
-			await handleProtectedResourceUnauthorized(context);
-		}
-		return generateRes;
-	}
-	const responseData = generateRes.data.json.data;
-
-	const target = {
-		generation: props.generation,
-		guidance: props.guidance ?? null,
-		previousInstructions: props.previousInstructions ?? [],
-		sourceImage: props.image
-			? {
-					type: props.image.type,
-					detail: props.image.detail ?? null,
-					filename: props.image.filename ?? null,
-					mimeType: props.image.mimeType ?? null,
-				}
-			: null,
-	};
-
-	if (isCmsAiGenerateAcceptedData(responseData)) {
-		const storeRes = await storePendingGeneration(context, {
-			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
-			userId: props.userId,
-			requestId: responseData.requestId,
-			feature: {
-				key: "media.image.generate",
-				version: "v1",
-			},
-			session: { type: "media-image", id: props.sessionId },
-			target,
-		});
-		if (storeRes.error) return storeRes;
-
-		return {
-			error: undefined,
-			data: {
-				mode: "async",
-				requestId: responseData.requestId,
-				feature: {
-					key: "media.image.generate",
-					version: "v1",
-				},
-				status: responseData.status,
-			},
-		};
-	}
-
-	if (!isCmsAiGenerateCompletedData(responseData)) {
-		return {
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy("server:core.routes.ai.generate.error.message"),
-			},
-			data: undefined,
-		};
-	}
-
-	const storeRes = await storeGeneration(context, {
-		lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
+		idempotencyKey: props.idempotencyKey,
 		userId: props.userId,
-		response: responseData,
-		session: { type: "media-image", id: props.sessionId },
-		requestStartedAt,
-		target,
 	});
-	if (storeRes.error) return storeRes;
-
-	return {
-		error: undefined,
-		data: {
-			mode: "async",
-			requestId: responseData.requestId,
-			feature: {
-				key: "media.image.generate",
-				version: "v1",
-			},
-			status: "processing",
-		},
-	};
 };
 
 export default mediaImageGenerate;

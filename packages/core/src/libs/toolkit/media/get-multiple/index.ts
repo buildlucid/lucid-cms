@@ -1,5 +1,5 @@
 import type z from "zod";
-import type { Media } from "../../../../types/response.js";
+import type { MediaListItem } from "../../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -12,9 +12,9 @@ export type ToolkitMediaGetMultipleQuery = z.input<typeof querySchema>;
 /** Optional filters and pagination for server-side media lookup. */
 export type ToolkitMediaGetMultipleInput = z.input<typeof inputSchema>;
 
-/** Matching media and the total count before pagination. */
+/** Matching media, with audio transcripts, and the total count before pagination. */
 export type ToolkitMediaGetMultipleResult = {
-	data: Media[];
+	data: MediaListItem[];
 	count: number;
 };
 
@@ -33,6 +33,7 @@ const getMultiple = async (
 			return getMultipleMedia(context, {
 				query: data.query,
 				actor: { type: "internal" },
+				transcripts: true,
 			});
 		},
 		name: {

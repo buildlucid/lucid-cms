@@ -20,8 +20,8 @@ export type AgentReferenceItem = AgentReferenceSnapshot & {
 export type AgentUpload = {
 	id: string;
 	name: string;
-	/** Percent uploaded, from 0 to 100. */
-	progress: number;
+	/** Percent uploaded, from 0 to 100, or null while the server copies a generated file and can't report it. */
+	progress: number | null;
 	error?: string;
 };
 

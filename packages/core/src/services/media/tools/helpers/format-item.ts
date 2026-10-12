@@ -1,11 +1,11 @@
 import type z from "zod";
-import type { Media } from "../../../../types/response.js";
+import type { MediaListItem } from "../../../../types/response.js";
 import type { mediaItemSchema } from "./schema.js";
 import translateText from "./translate-text.js";
 
 /** Formats media for tool output in one content locale, without storage keys or private URLs. */
 const formatMediaItem = (
-	media: Media,
+	media: MediaListItem,
 	locale: string | null,
 ): z.output<typeof mediaItemSchema> => ({
 	id: media.id,

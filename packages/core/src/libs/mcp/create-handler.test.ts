@@ -87,8 +87,11 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 		...base,
 		ai: {
 			...base.ai,
-			features: { ...base.ai.features, mcp: true },
-			mcp: { tools: [...mcpTools.all(), restricted, echo], skills: [] },
+			mcp: {
+				enabled: true,
+				tools: [...mcpTools.all(), restricted, echo],
+				skills: [],
+			},
 		},
 	};
 	const context = createServiceContext({
@@ -169,8 +172,7 @@ test("tool input is parsed once, so transforms reach the handler intact", async 
 				...base,
 				ai: {
 					...base.ai,
-					features: { ...base.ai.features, mcp: true },
-					mcp: { tools: [measure], skills: [] },
+					mcp: { enabled: true, tools: [measure], skills: [] },
 				},
 			},
 			database: await testConfig.getDatabase(),
@@ -210,8 +212,7 @@ test("oversized text results ask the client for a smaller request", async () => 
 				...base,
 				ai: {
 					...base.ai,
-					features: { ...base.ai.features, mcp: true },
-					mcp: { tools: [large], skills: [] },
+					mcp: { enabled: true, tools: [large], skills: [] },
 				},
 			},
 			database: await testConfig.getDatabase(),
@@ -255,8 +256,7 @@ test("serves skills the caller can use with digests that match SKILL.md", async 
 				...base,
 				ai: {
 					...base.ai,
-					features: { ...base.ai.features, mcp: true },
-					mcp: { tools: [], skills: [seo, locales] },
+					mcp: { enabled: true, tools: [], skills: [seo, locales] },
 				},
 			},
 			database: await testConfig.getDatabase(),

@@ -1,7 +1,7 @@
 import formatter, { mediaFormatter } from "../../libs/formatters/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/media.js";
-import type { Media } from "../../types/response.js";
+import type { MediaListItem } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import {
 	getMediaListAccess,
@@ -9,16 +9,20 @@ import {
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-/** Lists library media, or personal and system media when the ownership filter asks for it and the actor can see it. */
+/**
+ * Lists media allowed by the ownership filter and actor access.
+ * @remarks Audio transcripts are omitted unless `transcripts` is set.
+ */
 const getMultiple: ServiceFn<
 	[
 		{
 			query: GetMultipleQueryParams;
 			actor: MediaActor;
+			transcripts?: boolean;
 		},
 	],
 	{
-		data: Media[];
+		data: MediaListItem[];
 		count: number;
 	}
 > = async (context, data) => {
@@ -27,6 +31,7 @@ const getMultiple: ServiceFn<
 	const mediaRes = await Media.selectMultipleFilteredFixed({
 		queryParams: data.query,
 		access: getMediaListAccess(data.actor),
+		transcripts: data.transcripts,
 		validation: {
 			enabled: true,
 		},
@@ -38,6 +43,7 @@ const getMultiple: ServiceFn<
 		data: {
 			data: mediaFormatter.formatMultiple({
 				media: mediaRes.data[0],
+				transcripts: data.transcripts,
 				options: {
 					host: getBaseUrl(context),
 					delivery: context.mediaDelivery,

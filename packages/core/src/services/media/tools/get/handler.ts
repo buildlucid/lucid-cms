@@ -4,6 +4,7 @@ import type { ServiceFn } from "../../../../utils/services/types.js";
 import formatMediaItem from "../helpers/format-item.js";
 import getToolMedia from "../helpers/get-tool-media.js";
 import resolveMediaLocale from "../helpers/resolve-locale.js";
+import translateText from "../helpers/translate-text.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
 const getMedia: ServiceFn<
@@ -19,11 +20,18 @@ const getMedia: ServiceFn<
 	});
 	if (mediaRes.error) return mediaRes;
 
+	const media = mediaRes.data;
 	return {
 		error: undefined,
 		data: {
 			output: {
-				data: formatMediaItem(mediaRes.data, localeRes.data),
+				data: {
+					...formatMediaItem(media, localeRes.data),
+					transcript:
+						media.type === "audio"
+							? translateText(media.transcript, localeRes.data)
+							: null,
+				},
 				meta: { contentLocale: localeRes.data },
 			},
 		},

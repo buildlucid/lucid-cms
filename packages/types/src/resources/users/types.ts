@@ -24,6 +24,7 @@ export type CorePermission =
 	| "requests:read"
 	| `documents:${string}:${"read" | "create" | "create-request" | "update" | "delete" | "delete-request" | "unpublish-request" | "restore" | "publish" | "review"}`
 	| "ai:image-generate"
+	| "ai:audio-generate"
 	| "ai:alt-generate"
 	| `agents:${string}:${"chat" | "manage-own-routines" | "manage-code-routines"}`
 	| "integrations:read"

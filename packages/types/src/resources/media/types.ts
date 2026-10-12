@@ -169,6 +169,8 @@ export interface MediaVideoThumbnail {
 export type MediaAudio = MediaBase<"audio"> &
 	MediaAudioFile & {
 		description: MediaTranslationMap;
+		/** The words spoken, as a text alternative to the audio. */
+		transcript: MediaTranslationMap;
 	};
 
 export type MediaAudioFile = MediaFile<MediaAudioMeta>;
@@ -189,6 +191,11 @@ export type Media =
 	| MediaDocument
 	| MediaArchive
 	| MediaUnknown;
+
+/** List media with audio transcripts omitted unless explicitly requested, such as for search indexing. */
+export type MediaListItem =
+	| Exclude<Media, MediaAudio>
+	| (Omit<MediaAudio, "transcript"> & Partial<Pick<MediaAudio, "transcript">>);
 
 export interface MediaTranslation {
 	localeCode: string | null;

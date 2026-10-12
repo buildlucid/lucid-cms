@@ -26,7 +26,7 @@ test("system confirmations require live code routine permission and user confirm
 	const context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: { definitions: [agent] } },
+			ai: { ...config.ai, agents: { enabled: true, definitions: [agent] } },
 		},
 		database: await testConfig.getDatabase(),
 		translationStore: createTranslationStore({

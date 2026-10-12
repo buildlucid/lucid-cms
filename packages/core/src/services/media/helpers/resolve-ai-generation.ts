@@ -1,3 +1,4 @@
+import { mediaGenerationOf } from "../../../libs/config/ai-features.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { MediaOrigin } from "../../../types/response.js";
@@ -75,7 +76,7 @@ const resolveAiGeneration: ServiceFn<
 	if (aiGenerationRes.error) return aiGenerationRes;
 	if (
 		aiGenerationRes.data === undefined ||
-		aiGenerationRes.data.feature_key !== "media.image.generate" ||
+		mediaGenerationOf(aiGenerationRes.data.feature_key) === undefined ||
 		aiGenerationRes.data.status !== "success"
 	) {
 		return {

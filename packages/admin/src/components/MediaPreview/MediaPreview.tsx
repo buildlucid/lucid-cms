@@ -17,9 +17,11 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AudioPill from "@/components/AudioPill/AudioPill";
 import Image from "@/components/Image/Image";
 import MediaStatusPreview from "@/components/MediaStatusPreview/MediaStatusPreview";
 import PdfBadge from "@/components/PdfBadge/PdfBadge";
+import T from "@/translations";
 import mediaUrl, { type MediaPreset } from "@/utils/media-url";
 
 interface MediaPreviewProps {
@@ -103,16 +105,10 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 							<Switch>
 								<Match when={props.richPreview}>
 									<Show when={renderNativeMedia()}>
-										{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-										<audio
+										<AudioPill
 											src={props.media.url}
-											class="w-2/3"
-											controls
-											draggable={false}
-											onDragStart={(e) => {
-												e.preventDefault();
-												e.stopPropagation();
-											}}
+											label={props.alt || T()("common.untitled")}
+											class="w-2/3 max-w-96"
 										/>
 									</Show>
 								</Match>

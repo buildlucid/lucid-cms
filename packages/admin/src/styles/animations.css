@@ -242,4 +242,14 @@
 			box-shadow: 0 0 0 4px transparent;
 		}
 	}
+
+	@keyframes animation-wave {
+		0%,
+		100% {
+			transform: scaleY(0.35);
+		}
+		50% {
+			transform: scaleY(1);
+		}
+	}
 }

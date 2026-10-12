@@ -4,10 +4,7 @@ import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasPermission from "../../../../libs/permission/has-permission.js";
 import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
 import type { AgentToolAuthority } from "../../../../libs/tools/types.js";
-import type {
-	MediaTranslationMap,
-	MediaType,
-} from "../../../../types/response.js";
+import type { MediaType } from "../../../../types/response.js";
 import type { MediaActor } from "../../../../utils/media/index.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import register from "../../../agent/references/register.js";
@@ -16,19 +13,25 @@ import updateSingle from "../../update-single.js";
 import formatMediaItem from "../helpers/format-item.js";
 import getToolMedia from "../helpers/get-tool-media.js";
 import resolveMediaLocale from "../helpers/resolve-locale.js";
-import translateText from "../helpers/translate-text.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
-const textFields = ["title", "alt", "description", "summary"] as const;
+const textFields = [
+	"title",
+	"alt",
+	"description",
+	"summary",
+	"transcript",
+] as const;
 
 /** Translated fields that only some media types have. Titles apply to every type. */
 const typedFields: {
-	field: "alt" | "description" | "summary";
+	field: "alt" | "description" | "summary" | "transcript";
 	types: readonly MediaType[];
 }[] = [
 	{ field: "alt", types: ["image"] },
 	{ field: "description", types: ["video", "audio"] },
 	{ field: "summary", types: ["document"] },
+	{ field: "transcript", types: ["audio"] },
 ];
 
 /** Updates one locale's media metadata, keeping personal media private and outside folders and linking it to the chat in the same transaction. */
@@ -91,27 +94,13 @@ const updateMedia: ServiceFn<
 		};
 	}
 
-	//* the service replaces a locale's whole translation, so text left out is sent back unchanged
 	const cleared = new Set(input.clear);
-	const changesText = textFields.some(
-		(field) => input[field] !== undefined || cleared.has(field),
-	);
-	const translation = (
-		field: (typeof textFields)[number],
-		current: MediaTranslationMap,
-	) =>
-		changesText
-			? [
-					{
-						localeCode: localeRes.data,
-						value:
-							input[field] ??
-							(cleared.has(field)
-								? null
-								: translateText(current, localeRes.data)),
-					},
-				]
-			: undefined;
+	const translation = (field: (typeof textFields)[number]) => {
+		const value = input[field] ?? (cleared.has(field) ? null : undefined);
+		return value === undefined
+			? undefined
+			: [{ localeCode: localeRes.data, value }];
+	};
 	const user = userRes.data;
 	const actor: MediaActor =
 		user.id === null ? { type: "internal" } : { type: "user", user };
@@ -120,18 +109,11 @@ const updateMedia: ServiceFn<
 		id: input.mediaId,
 		fileName: input.fileName,
 		folderId: input.folderId ?? (cleared.has("folderId") ? null : undefined),
-		title: translation("title", media.title),
-		alt: translation("alt", media.type === "image" ? media.alt : null),
-		description: translation(
-			"description",
-			media.type === "video" || media.type === "audio"
-				? media.description
-				: null,
-		),
-		summary: translation(
-			"summary",
-			media.type === "document" ? media.summary : null,
-		),
+		title: translation("title"),
+		alt: translation("alt"),
+		description: translation("description"),
+		summary: translation("summary"),
+		transcript: translation("transcript"),
 		actor,
 		userId: user.id,
 		agentRunId: props.actor.agentRunId,

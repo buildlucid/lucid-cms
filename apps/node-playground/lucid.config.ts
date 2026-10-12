@@ -97,7 +97,11 @@ export default defineConfig({
 				tools: [mcpTools.all(), echoTool, addTool],
 			},
 			agents: [assistantAgent, seoAgent],
-			features: { mcp: true },
+			// mediaGeneration: {
+			// 	image: { models: { default: "x-ai/grok-imagine-image-2.0" } },
+			// 	audio: false,
+			// },
+			// altGeneration: false,
 		},
 		localization: {
 			locales: [
@@ -167,12 +171,6 @@ export default defineConfig({
 				},
 			},
 		},
-		// ai: {
-		// 	features: {
-		// 		imageGeneration: false,
-		// 		altGeneration: false,
-		// 	},
-		// },
 		// media: {
 		// 	images: {
 		// 		presets: {

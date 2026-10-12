@@ -445,8 +445,6 @@ describe("unassigned content locales", () => {
 				locale_code: "de",
 				title: null,
 				alt: "Bild",
-				description: null,
-				summary: null,
 			},
 		]);
 	});

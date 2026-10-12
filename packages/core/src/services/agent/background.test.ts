@@ -89,7 +89,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: { definitions: [testAgent] } },
+			ai: { ...config.ai, agents: { enabled: true, definitions: [testAgent] } },
 		},
 		database,
 		translationStore: createTranslationStore({
@@ -196,7 +196,7 @@ test("a title queue failure leaves the first message and provisional title intac
 });
 
 test("turning off chat rename keeps the provisional title and refuses generated ones", async () => {
-	context.config.ai.features.chatRename = false;
+	context.config.ai.chatRename = false;
 	const queue = vi.spyOn(jobQueue, "enqueueJob");
 	try {
 		const created = await insertConversation(context, {
@@ -222,7 +222,7 @@ test("turning off chat rename keeps the provisional title and refuses generated 
 		});
 		expect(generated.error?.status).toBe(403);
 	} finally {
-		context.config.ai.features.chatRename = true;
+		context.config.ai.chatRename = true;
 		queue.mockRestore();
 	}
 });
@@ -559,7 +559,7 @@ describe("code routines", () => {
 				...context.config,
 				ai: {
 					...context.config.ai,
-					agents: { definitions: [renamed] },
+					agents: { enabled: true, definitions: [renamed] },
 				},
 			},
 		});
@@ -577,7 +577,10 @@ describe("code routines", () => {
 			...context,
 			config: {
 				...context.config,
-				ai: { ...context.config.ai, agents: { definitions: [] } },
+				ai: {
+					...context.config.ai,
+					agents: { enabled: true, definitions: [] },
+				},
 			},
 		});
 		expect(await codeRoutine()).toBeUndefined();
@@ -599,6 +602,7 @@ describe("code routines", () => {
 			ai: {
 				...context.config.ai,
 				agents: {
+					enabled: true,
 					definitions: [
 						{
 							...testAgent,

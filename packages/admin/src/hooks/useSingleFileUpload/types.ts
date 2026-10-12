@@ -1,8 +1,12 @@
-import type { ErrorResponse, MediaCropState } from "@types";
+import type {
+	ErrorResponse,
+	MediaCropState,
+	MediaGenerationType,
+} from "@types";
 import type { Accessor } from "solid-js";
 import type { FocalPoint } from "@/components/FocalPointEditorModal/FocalPointEditorModal";
 import type { SingleFileUploadProps } from "@/components/SingleFileUpload/SingleFileUpload";
-import type { MediaImageGenerationFileMeta } from "@/store/aiModalsStore/aiModalsStore";
+import type { MediaGenerationFileMeta } from "@/store/aiModalsStore/aiModalsStore";
 import type { ImageCropProvenance } from "@/utils/image-crop";
 
 export interface UseSingleFileUploadProps {
@@ -18,12 +22,15 @@ export interface UseSingleFileUploadProps {
 	disabled?: SingleFileUploadProps["disabled"];
 	progress?: Accessor<SingleFileUploadProps["progress"]>;
 	errors?: Accessor<ErrorResponse | undefined>;
-	imageGeneration?: {
+	/** Offers media generation for the types `accept` allows. */
+	mediaGeneration?: {
+		/** The types to offer instead, when `accept` doesn't describe them. */
+		types?: Accessor<readonly MediaGenerationType[]>;
 		enabled?: Accessor<boolean>;
 		disabled?: Accessor<boolean>;
 		onSetFile?: (
 			_file: File,
-			_meta?: MediaImageGenerationFileMeta,
+			_meta?: MediaGenerationFileMeta,
 		) => void | Promise<void>;
 	};
 	imageCrop?: {

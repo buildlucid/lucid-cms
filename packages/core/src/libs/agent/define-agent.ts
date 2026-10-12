@@ -3,6 +3,7 @@ import { builderFocusAgentTool } from "../../services/agent/tools/builder-focus/
 import { builderReadAgentTool } from "../../services/agent/tools/builder-read/index.js";
 import { builderUpdateAgentTool } from "../../services/agent/tools/builder-update/index.js";
 import { editImageAgentTool } from "../../services/agent/tools/edit-image/index.js";
+import { generateAudioAgentTool } from "../../services/agent/tools/generate-audio/index.js";
 import { generateImageAgentTool } from "../../services/agent/tools/generate-image/index.js";
 import { readFileAgentTool } from "../../services/agent/tools/read-file/index.js";
 import { addMediaToLibraryAgentTool } from "../../services/media/tools/add-to-library/index.js";
@@ -11,7 +12,23 @@ import { webFetchAgentTool } from "../../services/web/tools/fetch/index.js";
 import { webSearchAgentTool } from "../../services/web/tools/search/index.js";
 import dedent from "../../utils/helpers/dedent.js";
 import { normalizeCopy } from "../i18n/copy.js";
-import type { AgentDefinition, DefineAgentOptions } from "./types.js";
+import type {
+	AgentDefinition,
+	AgentFeatures,
+	DefineAgentOptions,
+} from "./types.js";
+
+type GenerateOption = NonNullable<
+	NonNullable<DefineAgentOptions<string>["features"]>["media"]
+>["generate"];
+
+//* true and false turn every media type on or off; omitted types stay on
+const resolveGenerate = (
+	generate: GenerateOption = true,
+): AgentFeatures["media"]["generate"] =>
+	typeof generate === "boolean"
+		? { image: generate, audio: generate }
+		: { image: generate.image ?? true, audio: generate.audio ?? true };
 
 /**
  * Defines an agent for the admin. `features` turns Lucid's built-in tools on
@@ -40,7 +57,7 @@ const defineAgent = <const Key extends string>(
 			attach: options.features?.media?.attach ?? true,
 			analyze: options.features?.media?.analyze ?? true,
 			readFile: options.features?.media?.readFile ?? true,
-			generateImage: options.features?.media?.generateImage ?? true,
+			generate: resolveGenerate(options.features?.media?.generate),
 		},
 		documents: { attach: options.features?.documents?.attach ?? true },
 		requests: { attach: options.features?.requests?.attach ?? true },
@@ -70,9 +87,10 @@ const defineAgent = <const Key extends string>(
 		tools: [
 			...(features.media.analyze ? [analyzeMediaAgentTool()] : []),
 			...(features.media.readFile ? [readFileAgentTool()] : []),
-			...(features.media.generateImage
+			...(features.media.generate.image
 				? [generateImageAgentTool(), editImageAgentTool()]
 				: []),
+			...(features.media.generate.audio ? [generateAudioAgentTool()] : []),
 			...(features.web.search
 				? [
 						webSearchAgentTool({

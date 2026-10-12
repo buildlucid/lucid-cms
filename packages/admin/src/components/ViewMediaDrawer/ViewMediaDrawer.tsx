@@ -14,6 +14,7 @@ import Input from "@/components/Input/Input";
 import MediaLinkAccess from "@/components/MediaLinkAccess/MediaLinkAccess";
 import ReadonlyMediaPreview from "@/components/ReadonlyMediaPreview/ReadonlyMediaPreview";
 import Select from "@/components/Select/Select";
+import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
@@ -63,6 +64,38 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 	});
 	const showAltInput = createMemo(() => {
 		return media.data?.data.type === "image";
+	});
+	const longTexts = createMemo(() => {
+		const item = media.data?.data;
+		if (item?.type === "audio") {
+			return [
+				{
+					key: "description",
+					label: T()("common.description"),
+					value: item.description,
+				},
+				{
+					key: "transcript",
+					label: T()("common.transcript"),
+					value: item.transcript,
+				},
+			];
+		}
+		if (item?.type === "video") {
+			return [
+				{
+					key: "description",
+					label: T()("common.description"),
+					value: item.description,
+				},
+			];
+		}
+		if (item?.type === "document") {
+			return [
+				{ key: "summary", label: T()("common.summary"), value: item.summary },
+			];
+		}
+		return [];
 	});
 	const imageMeta = createMemo(() => {
 		const item = media.data?.data;
@@ -221,6 +254,26 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 												disabled={true}
 											/>
 										</Show>
+										<For each={longTexts()}>
+											{(text) => (
+												<Show
+													when={helpers.getTranslation(text.value, locale.code)}
+												>
+													{(value) => (
+														<Textarea
+															id={`${text.key}-${locale.code}`}
+															name={`${text.key}-${locale.code}`}
+															value={value()}
+															onChange={() => {}}
+															label={text.label}
+															disabled={true}
+															rows={4}
+															resize
+														/>
+													)}
+												</Show>
+											)}
+										</For>
 									</Show>
 								)}
 							</For>

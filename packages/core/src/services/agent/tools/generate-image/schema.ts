@@ -1,8 +1,7 @@
 import z from "zod";
 import {
-	mediaImageOutputFormatSchema,
-	mediaImageQualitySchema,
-	mediaImageSizePresetSchema,
+	mediaImageAspectRatioSchema,
+	mediaImageOptionSchema,
 } from "../../../../schemas/ai.js";
 import type {
 	AgentImageSettings,
@@ -28,12 +27,14 @@ export const inputSchema = z
 			description:
 				"A style preset applied with the instruction. Leave it out when the instruction already sets the style.",
 		}),
-		size: mediaImageSizePresetSchema.default("1024x1024").meta({
+		aspectRatio: mediaImageAspectRatioSchema.default("1:1").meta({
 			description:
-				"Output resolution, width by height. auto lets the model choose.",
+				"The image's shape as width:height, such as 16:9 for a wide banner or 9:16 for a tall one. auto lets the model choose. Models without it use their own default.",
 		}),
-		quality: mediaImageQualitySchema.default("medium"),
-		outputFormat: mediaImageOutputFormatSchema.default("webp"),
+		resolution: mediaImageOptionSchema.optional().meta({
+			description:
+				"Such as 1K, 2K or 4K. Leave it out unless asked for a larger image. Models without it pick their own.",
+		}),
 		title: z.string().trim().min(1).max(255).meta({
 			description: "A short title for the saved media, in the CMS language.",
 		}),
@@ -47,7 +48,7 @@ export const inputSchema = z
 		}),
 		skipReview: z.boolean().default(false).meta({
 			description:
-				"In chats the person checks and can adjust the instruction, style, size and quality before generating. Only skip that when they already gave the settings or asked you to go ahead without checking. Routines never ask.",
+				"In chats the person checks and can adjust the instruction, style, model, shape and quality before generating. Only skip that when they already gave the settings or asked you to go ahead without checking. Routines never ask.",
 		}),
 	})
 	.strict();
@@ -59,9 +60,11 @@ export const settingsResponseSchema = z
 		title: inputSchema.shape.title,
 		alt: z.string().trim().min(1).max(1_000).nullable(),
 		guidance: imageGuidanceSchema.nullable(),
-		size: mediaImageSizePresetSchema,
-		quality: mediaImageQualitySchema,
-		outputFormat: mediaImageOutputFormatSchema,
+		aspectRatio: mediaImageAspectRatioSchema,
+		resolution: mediaImageOptionSchema.nullable(),
+		quality: mediaImageOptionSchema.nullable(),
+		outputFormat: mediaImageOptionSchema.nullable(),
+		model: z.string().trim().min(1).max(200).nullable(),
 	})
 	.strict() satisfies z.ZodType<AgentImageSettings>;
 
@@ -70,16 +73,4 @@ export const settingsDataSchema = settingsResponseSchema.extend({
 	editMediaId: z.number().int().positive().nullable(),
 }) satisfies z.ZodType<AgentImageSettingsData>;
 
-export const outputSchema = z.object({
-	media: z.object({
-		id: z.number().meta({ description: "The saved media's ID." }),
-		fileName: z.string(),
-		mimeType: z.string(),
-		personal: z.boolean().meta({
-			description:
-				"Whether the media is personal to the person, rather than in the media library.",
-		}),
-	}),
-	requestId: z.string().meta({ description: "The Lucid AI request ID." }),
-	note: z.string(),
-});
+export { generatedMediaOutputSchema as outputSchema } from "../../helpers/generated-media-schema.js";

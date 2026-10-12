@@ -4,13 +4,14 @@ import { getInvalidExternalScopes, getValidExternalScopes } from "./scopes.js";
 
 const aiConfig = (mcp: boolean) => ({
 	enabled: true,
-	features: {
-		imageGeneration: true,
-		altGeneration: true,
-		agents: true,
-		mcp,
+	chatRename: true,
+	altGeneration: true,
+	mediaGeneration: {
+		image: { enabled: true, models: {} },
+		audio: { enabled: true, models: {} },
 	},
-	agents: { definitions: [] },
+	agents: { enabled: true, definitions: [] },
+	mcp: { enabled: mcp, tools: [], skills: [] },
 });
 
 describe("external scopes", () => {

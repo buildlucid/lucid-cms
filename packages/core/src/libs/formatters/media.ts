@@ -5,6 +5,7 @@ import type {
 	MediaImageFile,
 	MediaImageMeta,
 	MediaImagePreview,
+	MediaListItem,
 	MediaOrigin,
 	MediaOriginalFile,
 	MediaPoster,
@@ -32,6 +33,7 @@ type MediaTranslationProps = {
 	alt: string | null;
 	description?: string | null;
 	summary?: string | null;
+	transcript?: string | null;
 	locale_code: string | null;
 };
 
@@ -234,7 +236,7 @@ const formatImageFile = (
 
 const translationsFor = (
 	media: MediaPosterPropsT,
-	field: "title" | "alt" | "description" | "summary",
+	field: "title" | "alt" | "description" | "summary" | "transcript",
 	options: Pick<MediaFormatterOptions, "defaultLocale" | "locales">,
 ): MediaTranslationMap => {
 	const { defaultLocale, locales } = options;
@@ -477,6 +479,7 @@ const formatSingle = (props: {
 				status: props.media.status,
 				...details,
 				description: translationsFor(props.media, "description", props.options),
+				transcript: translationsFor(props.media, "transcript", props.options),
 				key: file.key,
 				fileName: file.fileName,
 				url: file.url,
@@ -522,16 +525,22 @@ const formatSingle = (props: {
 	}
 };
 
+/** Formats media for lists, leaving audio transcripts out unless `transcripts` is set and the query loaded them. */
 const formatMultiple = (props: {
 	media: MediaPropsT[];
 	options: MediaFormatterOptions;
-}): Media[] =>
-	props.media.map((media) =>
-		formatSingle({
+	transcripts?: boolean;
+}): MediaListItem[] =>
+	props.media.map((media) => {
+		const item = formatSingle({
 			media,
 			options: props.options,
-		}),
-	);
+		});
+		if (item.type !== "audio" || props.transcripts) return item;
+
+		const { transcript: _transcript, ...listed } = item;
+		return listed;
+	});
 
 export default {
 	formatMultiple,

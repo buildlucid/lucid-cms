@@ -10,6 +10,7 @@ import { type Accessor, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAudioMeta, getVideoMeta, type ImageMeta } from "@/utils/media-meta";
+import { saveGeneratedMedia } from "@/utils/save-generated-media";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
@@ -17,6 +18,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getAlt, setAlt] = createSignal<MediaTranslation[]>([]);
 	const [getDescription, setDescription] = createSignal<MediaTranslation[]>([]);
 	const [getSummary, setSummary] = createSignal<MediaTranslation[]>([]);
+	const [getTranscript, setTranscript] = createSignal<MediaTranslation[]>([]);
 	const [getKey, setKey] = createSignal<string>();
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,
@@ -78,6 +80,18 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			setUploadLoading(false);
 		}
 	};
+	const saveGeneratedFile = async (requestId: string) => {
+		setUploadLoading(true);
+		const key = await saveGeneratedMedia({
+			requestId,
+			public: getPublic(),
+			temporary: true,
+			onError: (error) => setUploadErrors(error),
+		});
+		setUploadLoading(false);
+		if (key) setKey(key);
+		return key;
+	};
 	const updateMedia = async (
 		file: File | null,
 		imageMeta: ImageMeta | null,
@@ -103,7 +117,9 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			file && mediaType === "audio" ? await getAudioMeta(file) : null;
 
 		if (file) {
-			const uploadFileRes = await uploadFile(file);
+			const uploadFileRes = options?.aiGenerationRequestId
+				? await saveGeneratedFile(options.aiGenerationRequestId)
+				: await uploadFile(file);
 			if (!uploadFileRes) return false;
 			fileKey = uploadFileRes;
 		}
@@ -123,6 +139,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 						? getDescription()
 						: undefined,
 				summary: mediaType === "document" ? getSummary() : undefined,
+				transcript: mediaType === "audio" ? getTranscript() : undefined,
 				origin: file ? (options?.origin ?? "human") : options?.origin,
 				aiGenerationRequestId: options?.aiGenerationRequestId,
 				folderId: getFolderId() ?? null,
@@ -198,6 +215,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		setAlt,
 		setDescription,
 		setSummary,
+		setTranscript,
 		setFolderId,
 		setPublic,
 		setPosterId,
@@ -210,6 +228,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			alt: getAlt,
 			description: getDescription,
 			summary: getSummary,
+			transcript: getTranscript,
 			key: getKey,
 			folderId: getFolderId,
 			public: getPublic,
@@ -221,6 +240,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			setAlt([]);
 			setDescription([]);
 			setSummary([]);
+			setTranscript([]);
 			setKey(undefined);
 			setFolderId(undefined);
 			setPublic(true);

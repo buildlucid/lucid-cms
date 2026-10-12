@@ -1,114 +1,59 @@
 import z from "zod";
+import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../exports/types.js";
+import { mediaGenerationTypes } from "../libs/config/ai-features.js";
 import {
 	cmsAiGenerateAcceptedDataSchema,
 	cmsAiGenerateCompletedDataSchema,
+	cmsAiMediaOutputSchemas,
 } from "../libs/lucid-remote/schema/ai.js";
 import { generatedContentSchema } from "../libs/lucid-remote/schema/generated-content.js";
+import { mediaModelCatalogSchemas } from "../libs/lucid-remote/services/get-media-models.js";
 import type {
 	AiCredits,
 	AiUsageFeatureKey,
 	AiUsageRecord,
 	AiUsageSession,
 	AiUsageSessionType,
+	MediaGenerationType,
+	SavedGeneratedMedia,
 } from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaImagePreviewResponseSchema } from "./media.js";
 
 const aiMaxBase64ImageLength = 8_000_000;
 const aiImageDetailSchema = z.enum(["low", "high", "auto"]).default("low");
-const mediaImageMaxEdgeLength = 3_840;
-const mediaImageMinPixels = 655_360;
-const mediaImageMaxPixels = 8_294_400;
-const mediaImageMaxAspectRatio = 3;
-const mediaImageSizeIncrement = 16;
-
-const mediaImageCustomSizeSchema = z
-	.tuple([z.number(), z.number()])
-	.superRefine(([width, height], context) => {
-		const hasValidEdges =
-			Number.isInteger(width) &&
-			Number.isInteger(height) &&
-			width > 0 &&
-			height > 0;
-
-		if (!hasValidEdges) {
-			context.addIssue({
-				code: "custom",
-				message: "Image width and height must be positive whole pixels.",
-			});
-			return;
-		}
-
-		if (width > mediaImageMaxEdgeLength || height > mediaImageMaxEdgeLength) {
-			context.addIssue({
-				code: "custom",
-				message: `Image width and height must not exceed ${mediaImageMaxEdgeLength}px.`,
-			});
-		}
-
-		if (
-			width % mediaImageSizeIncrement !== 0 ||
-			height % mediaImageSizeIncrement !== 0
-		) {
-			context.addIssue({
-				code: "custom",
-				message: `Image width and height must be multiples of ${mediaImageSizeIncrement}px.`,
-			});
-		}
-
-		const longEdge = Math.max(width, height);
-		const shortEdge = Math.min(width, height);
-		if (longEdge / shortEdge > mediaImageMaxAspectRatio) {
-			context.addIssue({
-				code: "custom",
-				message: `Image long edge to short edge ratio must not exceed ${mediaImageMaxAspectRatio}:1.`,
-			});
-		}
-
-		const pixels = width * height;
-		if (pixels < mediaImageMinPixels || pixels > mediaImageMaxPixels) {
-			context.addIssue({
-				code: "custom",
-				message: `Image total pixels must be between ${mediaImageMinPixels} and ${mediaImageMaxPixels}.`,
-			});
-		}
+const mediaModelIdSchema = z.string().trim().min(1).max(200);
+//* Open strings accept new model options without a CMS update.
+export const mediaImageOptionSchema = z.string().trim().min(1).max(20);
+export const mediaImageAspectRatioSchema = z
+	.string()
+	.regex(/^(auto|\d+(\.\d+)?:\d+(\.\d+)?)$/, {
+		error: "Aspect ratio must be auto or a width:height ratio.",
 	});
-
-export const mediaImageSizePresetSchema = z.enum([
-	"auto",
-	"1024x1024",
-	"1536x1024",
-	"1024x1536",
-	"2048x2048",
-	"2048x1152",
-	"3840x2160",
-	"2160x3840",
-]);
-export const mediaImageQualitySchema = z.enum([
-	"auto",
-	"low",
-	"medium",
-	"high",
-]);
-export const mediaImageOutputFormatSchema = z.enum(["webp", "png", "jpeg"]);
 
 const mediaImageGenerationSchema = z
 	.object({
-		size: z
-			.union([mediaImageSizePresetSchema, mediaImageCustomSizeSchema], {
-				error: "Image resolution must be a preset or custom width and height.",
-			})
-			.default("1024x1024"),
-		quality: mediaImageQualitySchema.default("medium"),
-		outputFormat: mediaImageOutputFormatSchema.default("webp"),
+		model: mediaModelIdSchema.optional().meta({
+			description: "The image model. Defaults to the configured default.",
+		}),
+		aspectRatio: mediaImageAspectRatioSchema
+			.default("1:1")
+			.meta({ description: "The image's shape, such as 16:9, or auto." }),
+		resolution: mediaImageOptionSchema.optional().meta({
+			description:
+				"A resolution the model offers, such as 2K. Defaults to the model's own.",
+		}),
+		quality: mediaImageOptionSchema.optional().meta({
+			description: "A quality the model offers. Defaults to the model's own.",
+		}),
+		outputFormat: mediaImageOptionSchema.optional().meta({
+			description:
+				"A file format the model offers. Defaults to the model's own.",
+		}),
 	})
 	.strict()
-	.default({
-		size: "1024x1024",
-		quality: "medium",
-		outputFormat: "webp",
-	});
+	.default({ aspectRatio: "1:1" });
 
 const localeSchema = z
 	.object({
@@ -128,36 +73,50 @@ const localeSchema = z
 	})
 	.strict();
 
-const mediaImageFeatureSchema = z
+const mediaGenerationTypeSchema = z.enum(
+	mediaGenerationTypes,
+) satisfies z.ZodType<MediaGenerationType>;
+
+const mediaGenerateFeatureSchema = z.union([
+	z
+		.object({
+			key: z.literal("media.image.generate"),
+			version: z.literal("v1"),
+		})
+		.strict(),
+	z
+		.object({
+			key: z.literal("media.audio.generate"),
+			version: z.literal("v1"),
+		})
+		.strict(),
+]);
+
+const mediaGenerateResponseSchema = cmsAiGenerateAcceptedDataSchema.extend({
+	type: mediaGenerationTypeSchema,
+	feature: mediaGenerateFeatureSchema,
+});
+
+const mediaGenerateCompletedSchema = cmsAiGenerateCompletedDataSchema
+	.omit({ output: true })
+	.extend({ feature: mediaGenerateFeatureSchema });
+
+const mediaGenerateCompletionResponseSchema = z.discriminatedUnion("type", [
+	mediaGenerateCompletedSchema.extend({
+		type: z.literal("image"),
+		output: cmsAiMediaOutputSchemas.image,
+	}),
+	mediaGenerateCompletedSchema.extend({
+		type: z.literal("audio"),
+		output: cmsAiMediaOutputSchemas.audio,
+	}),
+]);
+
+const mediaGenerationRequestParamsSchema = z
 	.object({
-		key: z.literal("media.image.generate"),
-		version: z.literal("v1"),
+		requestId: z.uuid(),
 	})
 	.strict();
-
-const mediaImageGenerateResponseSchema = cmsAiGenerateAcceptedDataSchema.extend(
-	{
-		feature: mediaImageFeatureSchema,
-	},
-);
-
-const mediaImageCompletionResponseSchema =
-	cmsAiGenerateCompletedDataSchema.extend({
-		feature: mediaImageFeatureSchema,
-		output: z
-			.object({
-				id: z.string(),
-				url: z.string(),
-				storageKey: z.string(),
-				byteSize: z.number().int().nonnegative(),
-				mimeType: z.string(),
-				extension: z.string(),
-				size: z.string(),
-				quality: z.string(),
-				outputFormat: z.string(),
-			})
-			.strict(),
-	});
 
 export const aiUsageChartDateSchema = z
 	.string()
@@ -180,11 +139,13 @@ export const aiUsageFeatureKeySchema = z.enum([
 	"media.analyze",
 	"media.alt.generate",
 	"media.image.generate",
+	"media.audio.generate",
 ]) satisfies z.ZodType<AiUsageFeatureKey>;
 
 export const aiUsageSessionTypeSchema = z.enum([
 	"agent",
 	"media-image",
+	"media-audio",
 	"media-alt",
 ]) satisfies z.ZodType<AiUsageSessionType>;
 
@@ -539,12 +500,29 @@ export const controllerSchemas = {
 			output: generatedContentSchema(z.string()),
 		}),
 	} satisfies ControllerSchema,
+	getMediaModels: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({ type: mediaGenerationTypeSchema }).strict(),
+		response: z.object({
+			default: z.string(),
+			models: z.array(
+				z.union([
+					mediaModelCatalogSchemas.image.shape.models.element,
+					mediaModelCatalogSchemas.audio.shape.models.element,
+				]),
+			),
+		}),
+	} satisfies ControllerSchema,
 	mediaImageGenerate: {
 		body: z
 			.object({
 				/** Groups attempts made together, such as regenerating until the result fits. */
 				sessionId: z.uuid().optional(),
-				instruction: z.string().trim().min(1).max(8_000).optional(),
+				instruction: z.string().trim().min(1).max(8_000),
 				guidance: z.string().trim().min(1).optional(),
 				previousInstructions: z
 					.array(z.string().trim().min(1).max(8_000))
@@ -582,9 +560,84 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: mediaImageGenerateResponseSchema,
+		response: mediaGenerateResponseSchema,
 	} satisfies ControllerSchema,
-	mediaImageStream: {
+	mediaAudioGenerate: {
+		body: z
+			.object({
+				/** Groups attempts made together, such as regenerating until the result fits. */
+				sessionId: z.uuid().optional(),
+				script: z
+					.string()
+					.trim()
+					.min(1)
+					.max(constants.media.transcriptMaxLength)
+					.meta({
+						description: "The text to speak.",
+					}),
+				instruction: z.string().trim().min(1).max(2_000).optional().meta({
+					description:
+						"Delivery instructions, such as tone and pacing, for models that take them.",
+				}),
+				generation: z
+					.object({
+						model: mediaModelIdSchema.optional().meta({
+							description:
+								"The speech model. Defaults to the configured default.",
+						}),
+						voice: z.string().trim().min(1).max(200).optional().meta({
+							description: "The voice. Defaults to the model's default voice.",
+						}),
+					})
+					.strict()
+					.default({}),
+			})
+			.strict(),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: mediaGenerateResponseSchema,
+	} satisfies ControllerSchema,
+	mediaCompletion: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: mediaGenerationRequestParamsSchema,
+		response: z.union([
+			mediaGenerateResponseSchema,
+			mediaGenerateCompletionResponseSchema,
+		]),
+	} satisfies ControllerSchema,
+	mediaSave: {
+		body: z
+			.object({
+				public: z.boolean().meta({
+					description:
+						"Store the file under a public key. Match the media it will create.",
+				}),
+				temporary: z.boolean().optional().meta({
+					description:
+						"Store the file under a temporary key, for replacing an existing media item's file.",
+				}),
+			})
+			.strict(),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: mediaGenerationRequestParamsSchema,
+		response: z.object({
+			key: z.string(),
+			fileName: z.string(),
+			mimeType: z.string(),
+			size: z.number().int().nonnegative(),
+		}) satisfies z.ZodType<SavedGeneratedMedia>,
+	} satisfies ControllerSchema,
+	mediaStream: {
 		body: undefined,
 		query: {
 			string: undefined,
@@ -592,29 +645,13 @@ export const controllerSchemas = {
 		},
 		params: z
 			.object({
-				//* Restrict this proxy to generated-image storage keys.
+				//* Restrict this proxy to generated media storage keys.
 				key: z
 					.string()
-					.regex(/^generated-images\/[0-9a-f-]{36}\.(webp|png|jpe?g)$/),
+					.regex(/^generated-media\/[0-9a-f-]{36}\.(webp|png|jpe?g|mp3|wav)$/),
 			})
 			.strict(),
 		response: undefined,
-	} satisfies ControllerSchema,
-	mediaImageCompletion: {
-		body: undefined,
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
-		params: z
-			.object({
-				requestId: z.uuid(),
-			})
-			.strict(),
-		response: z.union([
-			mediaImageGenerateResponseSchema,
-			mediaImageCompletionResponseSchema,
-		]),
 	} satisfies ControllerSchema,
 };
 
@@ -622,8 +659,8 @@ export type MediaAltBody = z.infer<typeof controllerSchemas.mediaAlt.body>;
 export type MediaImageGenerateBody = z.infer<
 	typeof controllerSchemas.mediaImageGenerate.body
 >;
-export type MediaImageCompletionParams = z.infer<
-	typeof controllerSchemas.mediaImageCompletion.params
+export type MediaAudioGenerateBody = z.infer<
+	typeof controllerSchemas.mediaAudioGenerate.body
 >;
 export type GetUsageChartQueryParams = z.infer<
 	typeof controllerSchemas.getUsageChart.query.string

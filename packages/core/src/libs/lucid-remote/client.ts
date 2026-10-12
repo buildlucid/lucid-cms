@@ -25,10 +25,12 @@ type LucidRemoteClient = {
 		path: string,
 		props?: LucidRemoteRequestProps,
 	) => ServiceResponse<LucidRemoteRequestData<T>>;
-	/** Returns a binary response for streaming, parsing errors as JSON. */
+	/** Streams binary responses with optional byte ranges, parsing errors as JSON. */
 	stream: (
 		path: string,
-		props?: Pick<LucidRemoteRequestProps, "accessToken" | "signal">,
+		props?: Pick<LucidRemoteRequestProps, "accessToken" | "signal"> & {
+			range?: string;
+		},
 	) => ServiceResponse<Response>;
 };
 
@@ -114,15 +116,15 @@ const getErrorCopy = (errorKey?: string) => {
 				name: copy("server:core.ai.remote.image.source.invalid.name"),
 				message: copy("server:core.ai.remote.image.source.invalid.message"),
 			};
-		case "cms_ai_image_storage_configuration_missing":
+		case "cms_ai_media_storage_configuration_missing":
 			return {
-				name: copy("server:core.ai.remote.image.storage.unavailable.name"),
+				name: copy("server:core.ai.remote.media.storage.unavailable.name"),
 				message: copy(
-					"server:core.ai.remote.image.storage.unavailable.message",
+					"server:core.ai.remote.media.storage.unavailable.message",
 				),
 			};
 		case "cms_ai_generation_request_not_found":
-		case "cms_ai_generated_image_not_found":
+		case "cms_ai_generated_media_not_found":
 			return {
 				name: copy("server:core.ai.remote.generation.not.found.name"),
 				message: copy("server:core.ai.remote.generation.not.found.message"),
@@ -139,6 +141,11 @@ const getErrorCopy = (errorKey?: string) => {
 			return {
 				name: copy("server:core.ai.remote.model.unavailable.name"),
 				message: copy("server:core.ai.remote.model.unavailable.message"),
+			};
+		case "cms_ai_generation_option_not_supported":
+			return {
+				name: copy("server:core.ai.remote.option.not.supported.name"),
+				message: copy("server:core.ai.remote.option.not.supported.message"),
 			};
 		case "web_provider_unavailable":
 			return {
@@ -328,7 +335,10 @@ const createLucidRemoteClient = (props: {
 		stream: async (path, requestProps = {}) => {
 			const headers = buildHeaders({
 				accessToken: requestProps.accessToken,
-				headers: { Accept: "*/*" },
+				headers: {
+					Accept: "*/*",
+					...(requestProps.range && { Range: requestProps.range }),
+				},
 			});
 
 			try {

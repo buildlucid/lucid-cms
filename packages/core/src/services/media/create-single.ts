@@ -28,6 +28,7 @@ const createSingle: ServiceFn<
 			alt?: { localeCode: string | null; value: string | null }[];
 			description?: { localeCode: string | null; value: string | null }[];
 			summary?: { localeCode: string | null; value: string | null }[];
+			transcript?: { localeCode: string | null; value: string | null }[];
 			width?: number;
 			height?: number;
 			duration?: number | null;

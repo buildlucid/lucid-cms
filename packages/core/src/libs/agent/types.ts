@@ -12,6 +12,7 @@ import type {
 	AgentRoutineConversationMode,
 	AiModelConfig,
 	AiModelSelection,
+	MediaGenerationType,
 } from "../../types/response.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
@@ -207,7 +208,12 @@ export type DefineAgentOptions<Key extends string> = {
 	skills?: readonly SkillDefinition[];
 	/** Built-in features and the tools behind them. Every feature is enabled unless set to false. */
 	features?: {
-		[Key in keyof AgentFeatures]?: Partial<AgentFeatures[Key]>;
+		[Key in keyof AgentFeatures]?: Key extends "media"
+			? Partial<Omit<AgentFeatures["media"], "generate">> & {
+					/** Lucid's per-type generation tools, with booleans enabling or disabling all types. */
+					generate?: boolean | Partial<AgentFeatures["media"]["generate"]>;
+				}
+			: Partial<AgentFeatures[Key]>;
 	};
 	/** The default model and the models people can choose. Leave out to offer every model the Lucid service provides. */
 	models?: AiModelConfig;
@@ -231,8 +237,11 @@ export type AgentFeatures = {
 		analyze: boolean;
 		/** Register Lucid's text file reader. Disable when providing your own. */
 		readFile: boolean;
-		/** Registers image tools requiring the `imageGeneration` AI feature and image generation permission, plus composer generation when `upload` is on. */
-		generateImage: boolean;
+		/**
+		 * Registers generation tools requiring each media type's AI feature and permission.
+		 * @remarks Composer generation also requires `upload`.
+		 */
+		generate: Record<MediaGenerationType, boolean>;
 	};
 	documents: {
 		/** Let people select CMS documents in the composer. */

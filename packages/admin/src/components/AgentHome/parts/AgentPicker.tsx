@@ -2,8 +2,8 @@ import type { Agent } from "@types";
 import classnames from "classnames";
 import { TbOutlineChevronDown, TbOutlineRobot } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
-import { composerTriggerClasses } from "@/components/AgentComposer/AgentComposer";
 import Menu from "@/components/Menu/Menu";
+import { composerTriggerClasses } from "@/components/ModelPicker/triggerClasses";
 import T from "@/translations";
 
 const AgentPicker: Component<{

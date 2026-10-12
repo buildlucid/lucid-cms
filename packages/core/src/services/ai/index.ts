@@ -1,8 +1,11 @@
 export * as checks from "./checks/index.js";
+export { default as getMediaModelOptions } from "./features/get-media-model-options.js";
 export { default as mediaAltGenerate } from "./features/media-alt-generate.js";
-export { default as mediaImageCompletion } from "./features/media-image-completion.js";
+export { default as mediaAudioGenerate } from "./features/media-audio-generate.js";
+export { default as mediaCompletion } from "./features/media-completion.js";
 export { default as mediaImageGenerate } from "./features/media-image-generate.js";
-export { default as mediaImageStream } from "./features/media-image-stream.js";
+export { default as mediaSave } from "./features/media-save.js";
+export { default as mediaStream } from "./features/media-stream.js";
 export { default as getCredits } from "./usage/get-credits.js";
 export { default as getUsageSession } from "./usage/get-session.js";
 export { default as getUsageSessionRecords } from "./usage/get-session-records.js";

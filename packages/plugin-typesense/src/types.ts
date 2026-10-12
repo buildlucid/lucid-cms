@@ -2,6 +2,7 @@ import type {
 	CollectionDocument,
 	CollectionDocumentMultipleInclude,
 	Media,
+	MediaListItem,
 	Refs,
 } from "@lucidcms/core/types";
 import type { Client } from "typesense";
@@ -76,8 +77,8 @@ export type CollectionSource = {
 } & Projection<ProjectionContext>;
 
 export type MediaProjectionContext = {
-	/** Formatted media, including its current delivery URL, crop and translations. */
-	readonly media: Media;
+	/** Formatted media, including its current delivery URL, crop and translations, and audio transcripts. */
+	readonly media: MediaListItem;
 	readonly locale: string | null;
 };
 
@@ -89,7 +90,7 @@ export type MediaSource = {
 	readonly visibility?: "public" | "all";
 } & Projection<
 	MediaProjectionContext,
-	keyof Media | "alt" | "description" | "summary"
+	keyof Media | "alt" | "description" | "summary" | "transcript"
 >;
 
 /** Sources currently supported by this plugin. */

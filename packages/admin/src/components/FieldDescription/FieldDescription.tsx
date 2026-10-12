@@ -12,9 +12,11 @@ import T from "@/translations";
 interface DescribedByProps {
 	id?: string;
 	describedBy?: string;
+	/** Replaces the default spacing and colour. */
 	class?: string;
 }
 
+/** Text clamped to two lines, with a show more button when it runs longer. */
 export const FieldDescription: Component<DescribedByProps> = (props) => {
 	// ----------------------------------
 	// State & Hooks
@@ -52,7 +54,12 @@ export const FieldDescription: Component<DescribedByProps> = (props) => {
 	// Render
 	return (
 		<Show when={props?.describedBy}>
-			<div class={classNames("text-sm leading-5 mt-2 text-muted", props.class)}>
+			<div
+				class={classNames(
+					"text-sm leading-5",
+					props.class ?? "mt-2 text-muted",
+				)}
+			>
 				<div
 					id={id()}
 					class="overflow-hidden"

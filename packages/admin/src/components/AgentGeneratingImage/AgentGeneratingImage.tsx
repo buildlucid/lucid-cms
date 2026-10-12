@@ -1,10 +1,9 @@
-import { TbOutlinePhotoAi } from "solid-icons/tb";
 import { type Component, createMemo } from "solid-js";
+import GeneratingImage from "@/components/GeneratingImage/GeneratingImage";
 import api from "@/services/api";
-import T from "@/translations";
-import { type AgentToolPart, imageSizeRatio } from "@/utils/agent-tools";
+import { type AgentToolPart, imageAspectRatio } from "@/utils/agent-tools";
 
-/** Reserves preview space using the requested or reviewed image size. */
+/** Reserves preview space using the requested or reviewed aspect ratio. */
 const AgentGeneratingImage: Component<{
 	conversationId: string;
 	messageId: string;
@@ -23,32 +22,14 @@ const AgentGeneratingImage: Component<{
 	// ----------------------------------------
 	// Memos
 	const ratio = createMemo(() =>
-		imageSizeRatio(props.settings ?? details.data?.data.input),
+		imageAspectRatio(props.settings ?? details.data?.data.input),
 	);
 
 	// ----------------------------------------
 	// Render
 	return (
 		<div class="w-full max-w-80">
-			<div
-				role="img"
-				aria-label={T()("agent.image.generating")}
-				title={T()("agent.image.generating")}
-				class="rectangle-background relative w-full overflow-hidden rounded-lg border border-border transition-[aspect-ratio] duration-300 ease-emphasized motion-reduce:transition-none"
-				style={{ "aspect-ratio": ratio() }}
-			>
-				<div
-					aria-hidden="true"
-					class="skeleton-shimmer absolute inset-0 z-10 opacity-70"
-				/>
-				<div class="absolute inset-0 z-20 flex items-center justify-center text-muted">
-					<TbOutlinePhotoAi
-						size={28}
-						class="motion-safe:animate-pulse"
-						aria-hidden="true"
-					/>
-				</div>
-			</div>
+			<GeneratingImage ratio={ratio()} />
 		</div>
 	);
 };

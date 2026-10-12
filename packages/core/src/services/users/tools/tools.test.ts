@@ -48,8 +48,7 @@ beforeAll(async () => {
 			collections: [pages, posts],
 			ai: {
 				...config.ai,
-				features: { ...config.ai.features, mcp: true },
-				mcp: { tools: [mcpTools.users.find()], skills: [] },
+				mcp: { enabled: true, tools: [mcpTools.users.find()], skills: [] },
 			},
 		},
 		database: await fixture.getDatabase(),

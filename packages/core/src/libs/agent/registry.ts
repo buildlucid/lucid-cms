@@ -17,9 +17,9 @@ export const isRoutineDefinition = (
 	value.type === "routine-definition";
 
 /** The agents in use: AI and the agents feature must be on, and the agent itself enabled. */
-export const getAgents = (config: {
-	ai: Pick<ResolvedLucidConfig["ai"], "enabled" | "features" | "agents">;
-}): readonly AgentDefinition[] =>
+export const getAgents = (
+	config: Pick<ResolvedLucidConfig, "ai">,
+): readonly AgentDefinition[] =>
 	isAiFeatureEnabled(config, "agents")
 		? config.ai.agents.definitions.filter((agent) => agent.enabled)
 		: [];

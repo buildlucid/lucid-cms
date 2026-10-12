@@ -113,6 +113,8 @@ export type AgentToolCapabilities = {
 	webRead?: boolean;
 	/** Generates images with Lucid AI. */
 	imageGeneration?: boolean;
+	/** Generates audio with Lucid AI. */
+	audioGeneration?: boolean;
 };
 
 export type AgentToolDescriptionProps = {

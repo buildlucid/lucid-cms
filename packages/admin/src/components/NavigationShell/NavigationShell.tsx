@@ -10,7 +10,7 @@ import {
 import AgentPanel from "@/components/AgentPanel/AgentPanel";
 import FullPageLoading from "@/components/FullPageLoading/FullPageLoading";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
-import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
+import MediaGenerationModal from "@/components/MediaGenerationModal/MediaGenerationModal";
 import { Navigation } from "@/components/Navigation/Navigation";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import { AgentSessionProvider } from "@/hooks/useAgentSession/useAgentSession";
@@ -107,7 +107,7 @@ const NavigationShell: Component<{
 						<AgentPanel />
 						{/* Keep one shared instance of each AI modal for pages and the composer. */}
 						<MediaAltGenerationModal />
-						<MediaImageGenerationModal />
+						<MediaGenerationModal />
 					</Show>
 				</div>
 			</AgentSessionProvider>
