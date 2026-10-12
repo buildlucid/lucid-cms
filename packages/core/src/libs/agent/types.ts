@@ -169,7 +169,10 @@ export type DefineRoutineOptions<Key extends string> = {
 	conversationMode?: AgentRoutineConversationMode;
 	/** Routine model selection, such as `{ modelId: "openai/gpt-luna", reasoningEffort: "low" }`, defaulting to the agent's model. */
 	model?: AiModelSelection;
-	/** Per-tool settings by tool name, eg. `{ save_note: { requiresConfirmation: true } }`. Omitted tools and settings keep the tool's defaults. */
+	/**
+	 * Per-tool overrides keyed by name, such as `{ save_note: { requiresConfirmation: false } }`.
+	 * @remarks Omitted settings keep tool defaults; system runs refuse confirmation unless overridden with `requiresConfirmation: false`.
+	 */
 	tools?: Readonly<RoutineTools>;
 	schedule: {
 		/** Five-field cron expression with minute precision. */

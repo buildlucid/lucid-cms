@@ -12,6 +12,7 @@ import linkReferences from "../helpers/link-references.js";
 import requestDetails from "../helpers/request-details.js";
 import resolveRequest from "../helpers/resolve-request.js";
 import type { DocumentWriteToolProps } from "../types.js";
+import unpublishRequested from "./requested.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
 /** Unpublishes through a request, or directly when enabled, no request is supplied and review is optional. */
@@ -40,11 +41,7 @@ const unpublishDocument: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const user = userRes.data;
-	const requested =
-		!props.direct ||
-		input.requestId !== undefined ||
-		collection.getData.publishing.review?.unpublish.includes(input.target) ===
-			true;
+	const requested = !props.direct || unpublishRequested(context.config, input);
 	if (
 		!hasAccess({
 			user,

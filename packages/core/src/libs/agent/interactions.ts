@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import z from "zod";
 import constants from "../../constants/constants.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AgentInteraction } from "../../types/response.js";
+import { toolDefinitionInternal } from "../tools/tool-definition-internal.js";
 import type { AgentToolDefinition } from "../tools/types.js";
 import type { Checkpoint, ToolCall } from "./types.js";
 
@@ -19,18 +21,24 @@ export const confirmationBatchResponseSchema = z.object({
 		.max(constants.agent.readConcurrency),
 });
 
-/** Determines whether an agent tool needs confirmation under the run's policy, applying routine overrides in tool-defaults mode. */
-export const needsConfirmation = (
-	checkpoint: Checkpoint,
-	tool: AgentToolDefinition,
-) => {
+/**
+ * Resolves per-call confirmation under the run policy.
+ * @remarks Routine overrides apply only in tool-defaults mode.
+ */
+export const needsConfirmation = (props: {
+	checkpoint: Pick<Checkpoint, "confirmationMode" | "routineTools">;
+	tool: AgentToolDefinition;
+	input: Record<string, unknown>;
+	config: ResolvedLucidConfig;
+}) => {
+	const { checkpoint, tool } = props;
 	switch (checkpoint.confirmationMode) {
 		case "confirm-all":
 			return true;
 		case "tool-defaults":
 			return (
 				checkpoint.routineTools?.[tool.name]?.requiresConfirmation ??
-				tool.requiresConfirmation
+				tool[toolDefinitionInternal].requiresConfirmation(props)
 			);
 		case "automatic":
 			return false;

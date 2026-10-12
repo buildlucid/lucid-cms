@@ -54,11 +54,18 @@ const executeReadBatch: ServiceFn<
 		screen: checkpoint.screen,
 	});
 
+	const attended = authority.principal.type === "user";
 	const first = batch[0];
 	if (
+		attended &&
 		!checkpoint.pending &&
 		first &&
-		needsConfirmation(checkpoint, first.tool)
+		needsConfirmation({
+			checkpoint,
+			tool: first.tool,
+			input: first.call.input,
+			config: context.config,
+		})
 	) {
 		return requestBatchConfirmation(context, {
 			checkpoint,
@@ -74,8 +81,22 @@ const executeReadBatch: ServiceFn<
 		if (answer?.action === "cancel") {
 			return toolFailure(context.translate("server:agent.tool.denied"));
 		}
-		if (needsConfirmation(checkpoint, tool) && !answer) {
-			return toolFailure(context.translate("server:agent.tool.unavailable"));
+		if (
+			needsConfirmation({
+				checkpoint,
+				tool,
+				input: call.input,
+				config: context.config,
+			}) &&
+			!answer
+		) {
+			return toolFailure(
+				context.translate(
+					attended
+						? "server:agent.tool.unavailable"
+						: "server:agent.tool.confirmation.unattended",
+				),
+			);
 		}
 
 		const outcome = await invokeAgentTool(context, {

@@ -30,7 +30,10 @@ export const updateDocumentAgentTool = (
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],
-		requiresConfirmation: options.direct ?? false,
+		//* Requests already receive review, so only direct writes need confirmation.
+		requiresConfirmation: options.direct
+			? ({ input }) => input.requestId === undefined
+			: false,
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],

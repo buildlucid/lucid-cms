@@ -188,8 +188,16 @@ export type DefineAgentToolOptions<
 	readOnly?: boolean;
 	/** Safe to run alongside other independent reads. Requires readOnly. Defaults to false, including for paid or state-dependent reads. */
 	parallelSafe?: boolean;
-	/** Ask before executing in tool-defaults mode. Routines can override this. Defaults to false. */
-	requiresConfirmation?: boolean;
+	/**
+	 * Confirmation policy in tool-defaults mode, as a boolean or validated-input callback, defaulting to false.
+	 * @remarks Routines can override it; callbacks can distinguish direct writes from reviewed requests.
+	 */
+	requiresConfirmation?:
+		| boolean
+		| ((props: {
+				input: z.output<Input>;
+				config: ResolvedLucidConfig;
+		  }) => boolean);
 	/** What this tool lets the agent do, shown to people in the chat. */
 	capabilities?: AgentToolCapabilities;
 	/** Controls whether the tool is offered, defaulting to always available. */
@@ -328,6 +336,7 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly permissions: readonly Permission[];
 	readonly readOnly: boolean;
 	readonly parallelSafe: boolean;
+	/** Default confirmation flag in tool-defaults mode, with callback policies reported as true. */
 	readonly requiresConfirmation: boolean;
 	readonly capabilities?: AgentToolCapabilities;
 	readonly available?: (props: AgentToolAvailabilityProps) => boolean;
@@ -341,6 +350,11 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 		readonly optional: boolean;
 	};
 	readonly [toolDefinitionInternal]: {
+		/** Evaluates confirmation in tool-defaults mode, requiring confirmation for invalid input when the policy is a callback. */
+		readonly requiresConfirmation: (props: {
+			input: Record<string, unknown>;
+			config: ResolvedLucidConfig;
+		}) => boolean;
 		readonly interaction?: {
 			readonly prepareInput: (
 				input: unknown,

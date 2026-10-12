@@ -12,6 +12,7 @@ import linkReferences from "../helpers/link-references.js";
 import requestDetails from "../helpers/request-details.js";
 import resolveRequest from "../helpers/resolve-request.js";
 import type { DocumentWriteToolProps } from "../types.js";
+import deleteRequested from "./requested.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
 /** Deletes through a request, or bins the document when direct writes are enabled, no request is supplied and review is optional. */
@@ -40,10 +41,7 @@ const deleteDocument: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const user = userRes.data;
-	const requested =
-		!props.direct ||
-		input.requestId !== undefined ||
-		collection.getData.publishing.review?.delete === true;
+	const requested = !props.direct || deleteRequested(context.config, input);
 	if (
 		!hasAccess({
 			user,

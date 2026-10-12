@@ -2,6 +2,7 @@ import { z } from "zod";
 import constants from "../../constants/constants.js";
 import { agentInteractionRequestSchema } from "../../schemas/agent.js";
 import { agentResourceSchema } from "../../schemas/agent-references.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { isJsonObject } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -29,9 +30,9 @@ const summaryTextSchema = z.string().trim().min(1).max(2000);
 const changesSchema = z.array(agentResourceSchema).optional();
 
 /**
- * Defines a tool for agents. Register it with an agent's `tools`. It runs with
- * the run's authority, and an `interaction` pauses the run for one structured
- * response from the run owner or an agent manager for system runs.
+ * Defines an agent tool executed with the run's authority.
+ * @remarks Register through an agent's `tools`; interactions pause user runs for a structured response.
+ * System runs omit tools with required interactions.
  */
 function defineAgentTool<
 	const Name extends string,
@@ -79,7 +80,7 @@ function defineAgentTool<
 	const title = normalizeCopy(
 		options.title ?? options.name.replaceAll("_", " "),
 	);
-	const { describe } = options;
+	const { describe, requiresConfirmation = false } = options;
 	const definition = {
 		...toolDefinitionBase(options),
 		title,
@@ -92,10 +93,21 @@ function defineAgentTool<
 		permissions: options.permissions,
 		readOnly: options.readOnly ?? false,
 		parallelSafe: options.parallelSafe ?? false,
-		requiresConfirmation: options.requiresConfirmation ?? false,
+		requiresConfirmation: requiresConfirmation !== false,
 		capabilities: options.capabilities,
 		available: options.available,
 		outputVersion: options.outputVersion,
+	};
+	const confirms = (props: {
+		input: Record<string, unknown>;
+		config: ResolvedLucidConfig;
+	}) => {
+		if (typeof requiresConfirmation === "boolean") return requiresConfirmation;
+		const parsed = options.input.safeParse(props.input);
+		return (
+			!parsed.success ||
+			requiresConfirmation({ input: parsed.data, config: props.config })
+		);
 	};
 	const checkOutput = checkToolResult(options);
 	const checkInteraction = async (
@@ -191,6 +203,7 @@ function defineAgentTool<
 		return {
 			...definition,
 			[toolDefinitionInternal]: {
+				requiresConfirmation: confirms,
 				prepareInput: (input) =>
 					prepareToolInput(
 						{
@@ -254,6 +267,7 @@ function defineAgentTool<
 			optional: interaction.optional ?? false,
 		},
 		[toolDefinitionInternal]: {
+			requiresConfirmation: confirms,
 			prepareInput: (input) =>
 				prepareToolInput(
 					{

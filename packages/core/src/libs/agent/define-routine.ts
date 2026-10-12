@@ -2,8 +2,9 @@ import dedent from "../../utils/helpers/dedent.js";
 import type { DefineRoutineOptions, RoutineDefinition } from "./types.js";
 
 /**
- * Defines a scheduled routine that runs as the system. Edit its settings in
- * code; agent managers can pause, start and review its runs in the admin.
+ * Defines a scheduled system routine with settings managed in code.
+ * @remarks Agent managers can pause, start and review runs in the admin.
+ * Runs never wait for a person; tools needing confirmation are refused unless overridden with `requiresConfirmation: false`.
  */
 const defineRoutine = <const Key extends string>(
 	options: DefineRoutineOptions<Key>,

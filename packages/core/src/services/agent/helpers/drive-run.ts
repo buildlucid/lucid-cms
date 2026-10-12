@@ -230,7 +230,11 @@ const driveRun: ServiceFn<
 
 			if (!call) break;
 
-			const batch = getReadBatch({ checkpoint, setup });
+			const batch = getReadBatch({
+				checkpoint,
+				setup,
+				config: context.config,
+			});
 			if (batch.length > 1) {
 				const step = await executeReadBatch(context, {
 					run,

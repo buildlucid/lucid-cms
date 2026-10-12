@@ -2,14 +2,17 @@ import constants from "../../../../constants/constants.js";
 import { createInteraction } from "../../../../libs/agent/interactions.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import { toolResult } from "../tool-outcome.js";
+import { toolFailure, toolResult } from "../tool-outcome.js";
 import type { RunnerToolInputHandler } from "./types.js";
 
-/** Pauses for a person's answer, then returns it to the model. */
+/** Pauses user runs for an answer and returns it to the model, rejecting system runs. */
 const ask: RunnerToolInputHandler<typeof runnerTools.ask> = async (
-	_context,
-	{ call, input, answer },
+	context,
+	{ call, input, answer, authority },
 ) => {
+	if (authority.principal.type === "system") {
+		return toolFailure(context.translate("server:agent.tool.unavailable"));
+	}
 	if (answer?.action === "submit") {
 		return toolResult({
 			output: answer.response,

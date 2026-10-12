@@ -2,7 +2,10 @@ import type { CollectionToolOptions } from "../../../libs/permission/readable-co
 import type { ToolkitActor } from "../../../libs/toolkit/types.js";
 
 export type DocumentWriteToolOptions = CollectionToolOptions & {
-	/** Saves as the acting person without a request unless the collection requires review, asking for confirmation unless disabled by the chat or routine; defaults to false. */
+	/**
+	 * Allows direct writes as the acting principal when collection review is optional, defaulting to false.
+	 * @remarks Writes bypassing requests require confirmation unless chat or routine policy disables it.
+	 */
 	direct?: boolean;
 };
 

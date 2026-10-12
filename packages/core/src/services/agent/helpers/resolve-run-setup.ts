@@ -27,7 +27,10 @@ const toInputSchema = (input: z.ZodObject) => {
 	return schema;
 };
 
-/** A run's tools, skills and instructions, limited to what its principal can access. Resolved before each model turn. */
+/**
+ * Resolves accessible tools, skills and instructions before each model turn.
+ * @remarks System runs omit tools with required interactions and controls that ask a person.
+ */
 const resolveRunSetup = (
 	context: Pick<ServiceContext, "config">,
 	props: {
@@ -45,11 +48,12 @@ const resolveRunSetup = (
 	const screen = props.screen
 		? { type: props.screen.type, builder: agent.features.builder }
 		: undefined;
+	const attended = authority.principal.type === "user";
 	const tools = getAvailableTools(agent, authority, {
 		config: context.config,
 		aiAccess: props.aiAccess,
 		screen: screen?.type,
-	});
+	}).filter((tool) => attended || (tool.interaction?.optional ?? true));
 
 	const skills = agent.skills.filter((skill) =>
 		skill.scopes.every((scope) => {
@@ -64,6 +68,7 @@ const resolveRunSetup = (
 
 	const runnerTools = getRunnerTools({
 		mode: props.mode,
+		attended,
 		hasSkills: skills.length > 0,
 		hasHistory: props.hasHistory,
 	});

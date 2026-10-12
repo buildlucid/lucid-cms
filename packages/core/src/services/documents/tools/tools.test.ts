@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import defineAgent from "../../../libs/agent/define-agent.js";
+import { needsConfirmation } from "../../../libs/agent/interactions.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
@@ -653,6 +654,28 @@ test("direct writes still open requests where the collection requires review", a
 		outcome: "requested",
 		request: { type: "create" },
 	});
+});
+
+test("direct writes only ask for confirmation when they skip a request", () => {
+	const asks = (tool: AgentToolDefinition, input: Record<string, unknown>) =>
+		needsConfirmation({
+			checkpoint: { confirmationMode: "tool-defaults" },
+			tool,
+			input,
+			config: context.config,
+		});
+	const page = { collectionKey: pages.key, documentId: 1 };
+	const change = { ...page, fields: { title: "Changed" } };
+
+	expect(asks(directCreate, { collectionKey: pages.key })).toBe(true);
+	expect(asks(directCreate, { collectionKey: reviewed.key })).toBe(false);
+	expect(asks(directUpdate, change)).toBe(true);
+	expect(asks(directUpdate, { ...change, requestId: 1 })).toBe(false);
+	expect(asks(directDelete, page)).toBe(true);
+	expect(asks(directDelete, { ...page, collectionKey: reviewed.key })).toBe(
+		false,
+	);
+	expect(asks(create, { collectionKey: pages.key })).toBe(false);
 });
 
 test("routines defined in code open requests as the system", async () => {

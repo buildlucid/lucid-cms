@@ -14,7 +14,7 @@ import validateInteractionResponse from "./validate-interaction-response.js";
 const testConfig = getTestConfig();
 afterAll(testConfig.destroy);
 
-test("system confirmations require live code routine permission and user confirmations stay private", async () => {
+test("only the person a run acts for can answer it", async () => {
 	await testConfig.migrate();
 	const config = await testConfig.getConfig();
 	const agent = defineAgent({
@@ -48,6 +48,14 @@ test("system confirmations require live code routine permission and user confirm
 		.insertInto("lucid_user_roles")
 		.values({ user_id: user.id, role_id: role.id })
 		.execute();
+	await context.db.kysely
+		.insertInto("lucid_role_permissions")
+		.values({
+			role_id: role.id,
+			permission: getAgentPermission(agent.key, "manage-code-routines"),
+			core: true,
+		})
+		.execute();
 	const pending = createInteraction({
 		callId: "write",
 		key: constants.agent.widgets.confirmation,
@@ -69,67 +77,31 @@ test("system confirmations require live code routine permission and user confirm
 		phase: "tools",
 		pending,
 	};
+	//* a follow-up in a code routine's chat acts for the person who sent it
 	const run: SessionRun = {
 		id: randomUUID(),
 		conversation_id: randomUUID(),
-		routine_id: randomUUID(),
-		user_id: null,
+		routine_id: null,
+		user_id: user.id,
 		execution_version: 0,
 		agent_key: agent.key,
 		conversation_user_id: null,
 		conversation_kind: "code-routine",
 		conversation_routine_id: null,
 	};
-	const answer = () =>
+	const answer = (userId: number | null) =>
 		validateInteractionResponse(context, {
-			run,
+			run: { ...run, user_id: userId },
 			checkpoint,
 			pending,
 			action: "submit",
 			response: {},
 			userId: user.id,
 		});
-	expect((await answer()).error?.status).toBe(403);
-	await context.db.kysely
-		.insertInto("lucid_role_permissions")
-		.values({
-			role_id: role.id,
-			permission: getAgentPermission(agent.key, "chat"),
-			core: true,
-		})
-		.execute();
-	expect((await answer()).error?.status).toBe(403);
-	await context.db.kysely
-		.insertInto("lucid_role_permissions")
-		.values({
-			role_id: role.id,
-			permission: getAgentPermission(agent.key, "manage-code-routines"),
-			core: true,
-		})
-		.execute();
-	expect(await answer()).toMatchObject({
+
+	expect(await answer(user.id)).toMatchObject({
 		data: { action: "submit", response: {} },
 	});
-	expect(
-		(
-			await validateInteractionResponse(context, {
-				run: { ...run, user_id: user.id + 1 },
-				checkpoint,
-				pending,
-				action: "submit",
-				response: {},
-				userId: user.id,
-			})
-		).error?.status,
-	).toBe(403);
-	await context.db.kysely
-		.deleteFrom("lucid_role_permissions")
-		.where("role_id", "=", role.id)
-		.where(
-			"permission",
-			"=",
-			getAgentPermission(agent.key, "manage-code-routines"),
-		)
-		.execute();
-	expect((await answer()).error?.status).toBe(403);
+	expect((await answer(null)).error?.status).toBe(403);
+	expect((await answer(user.id + 1)).error?.status).toBe(403);
 });

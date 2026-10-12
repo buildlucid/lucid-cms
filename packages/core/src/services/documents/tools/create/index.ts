@@ -6,6 +6,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import writeChanges from "../helpers/write-changes.js";
 import type { DocumentWriteToolOptions } from "../types.js";
 import createDocument from "./handler.js";
+import createRequested from "./requested.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 const name = "documents_create";
@@ -22,7 +23,10 @@ export const createDocumentAgentTool = (
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],
-		requiresConfirmation: options.direct ?? false,
+		//* Requests already receive review, so only direct writes need confirmation.
+		requiresConfirmation: options.direct
+			? ({ input, config }) => !createRequested(config, input)
+			: false,
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],

@@ -15,6 +15,7 @@ import writeSingle from "../../write-single.js";
 import linkReferences from "../helpers/link-references.js";
 import requestDetails from "../helpers/request-details.js";
 import type { DocumentWriteToolProps } from "../types.js";
+import createRequested from "./requested.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
 /** Creates a document, as a create request unless direct writes are allowed and the collection doesn't require review. */
@@ -50,8 +51,7 @@ const createDocument: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const user = userRes.data;
-	const requested =
-		!props.direct || collection.getData.publishing.review?.create === true;
+	const requested = !props.direct || createRequested(context.config, input);
 	if (
 		!hasAccess({
 			user,

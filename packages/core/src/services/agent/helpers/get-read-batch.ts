@@ -3,6 +3,7 @@ import { isToolCallComplete } from "../../../libs/agent/context.js";
 import { needsConfirmation } from "../../../libs/agent/interactions.js";
 import type { Checkpoint, ToolCall } from "../../../libs/agent/types.js";
 import type { AgentToolDefinition } from "../../../libs/tools/types.js";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
 import type { RunSetup } from "./resolve-run-setup.js";
 
 export type ReadCall = { call: ToolCall; tool: AgentToolDefinition };
@@ -11,8 +12,9 @@ export type ReadCall = { call: ToolCall; tool: AgentToolDefinition };
 const getReadBatch = (props: {
 	checkpoint: Checkpoint;
 	setup: RunSetup;
+	config: ResolvedLucidConfig;
 }): ReadCall[] => {
-	const { checkpoint, setup } = props;
+	const { checkpoint, setup, config } = props;
 	const confirmations = checkpoint.pending?.widget.interaction.confirmations;
 	if (checkpoint.pending && !confirmations) return [];
 
@@ -32,8 +34,13 @@ const getReadBatch = (props: {
 		const first = batch[0];
 		const samePolicy =
 			!first ||
-			needsConfirmation(checkpoint, tool) ===
-				needsConfirmation(checkpoint, first.tool);
+			needsConfirmation({ checkpoint, tool, input: call.input, config }) ===
+				needsConfirmation({
+					checkpoint,
+					tool: first.tool,
+					input: first.call.input,
+					config,
+				});
 		if (!samePolicy) break;
 
 		batch.push({ call, tool });

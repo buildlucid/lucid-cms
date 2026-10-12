@@ -18,8 +18,8 @@ import resolveRunSetup from "./resolve-run-setup.js";
 import type { SessionRun } from "./run-session.js";
 
 /**
- * Users answer their own runs; agent managers answer system runs. Execution
- * keeps the original authority. Responses use the saved interaction and current schemas.
+ * Validates the acting user's response against the saved interaction and current schemas.
+ * @remarks System runs cannot accept responses.
  */
 const validateInteractionResponse: ServiceFn<
 	[
@@ -35,7 +35,7 @@ const validateInteractionResponse: ServiceFn<
 	InteractionAnswer
 > = async (context, props) => {
 	const { pending, run, checkpoint } = props;
-	if (run.user_id !== null && run.user_id !== props.userId) {
+	if (run.user_id !== props.userId) {
 		return {
 			data: undefined,
 			error: {

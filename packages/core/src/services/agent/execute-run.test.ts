@@ -3839,42 +3839,25 @@ describe("runs acting as the system", () => {
 		return { runId: run.data.runId, conversationId: conversation.data.id };
 	};
 
-	test("a manager confirms a system write without lending it their identity", async () => {
+	test("tools that would ask are refused instead of pausing", async () => {
 		const prepared = await prepareSystem();
 		callTool({
 			id: "system-confirmation",
 			name: confirmationTool.name,
 			input: {},
 		});
+		reply("Done");
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: "waiting" },
+			data: { status: "completed" },
 		});
-		reply("Written");
-		expect(
-			await executeRun(context, {
-				runId: prepared.runId,
-				answer: {
-					interactionId: await interactionId(prepared.conversationId),
-					action: "submit",
-					response: {},
-					userId,
-				},
-			}),
-		).toMatchObject({ data: { status: "completed" } });
-		expect(writeHandler).toHaveBeenCalledWith(
-			expect.objectContaining({
-				execution: expect.objectContaining({
-					authority: expect.objectContaining({ principal: { type: "system" } }),
-				}),
-			}),
-		);
+		expect(writeHandler).not.toHaveBeenCalled();
 		expect(await partsOf(prepared.conversationId)).toContainEqual(
 			expect.objectContaining({
-				type: "widget",
-				interaction: expect.objectContaining({
-					status: "answered",
-					answeredByUserId: userId,
-				}),
+				type: "tool",
+				id: "system-confirmation",
+				output: {
+					error: context.translate("server:agent.tool.confirmation.unattended"),
+				},
 			}),
 		);
 	});
@@ -3895,7 +3878,7 @@ describe("runs acting as the system", () => {
 		);
 	});
 
-	test("interactive tools are offered for agent managers to answer", async () => {
+	test("tools that wait on a person are left out", async () => {
 		const prepared = await prepareSystem();
 		reply("Done");
 		await executeRun(context, { runId: prepared.runId });
@@ -3903,8 +3886,9 @@ describe("runs acting as the system", () => {
 			.at(-1)?.[1]
 			.tools.map((tool: { name: string }) => tool.name);
 		expect(offered).toContain(writeTool.name);
-		expect(offered).toContain(selectionTool.name);
-		expect(offered).toContain("lucid_ask_user");
+		expect(offered).toContain(optionalTool.name);
+		expect(offered).not.toContain(selectionTool.name);
+		expect(offered).not.toContain("lucid_ask_user");
 	});
 
 	test("a steer from someone else becomes a follow-up that acts for them", async () => {

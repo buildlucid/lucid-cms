@@ -75,7 +75,17 @@ const runToolCall = async (
 		pending !== undefined &&
 		pending.widget.key === tool.interaction?.key;
 
-	const requiresConfirmation = needsConfirmation(checkpoint, tool);
+	const requiresConfirmation = needsConfirmation({
+		checkpoint,
+		tool,
+		input: call.input,
+		config: context.config,
+	});
+	if (requiresConfirmation && props.authority.principal.type === "system") {
+		return toolFailure(
+			context.translate("server:agent.tool.confirmation.unattended"),
+		);
+	}
 	const confirmation = requiresConfirmation
 		? { toolName: tool.name, input: call.input }
 		: undefined;

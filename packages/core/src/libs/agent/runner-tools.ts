@@ -9,6 +9,8 @@ import type { RunMode } from "./types.js";
 
 export type RunnerToolContext = {
 	mode: RunMode;
+	/** Whether a user can answer the run, which excludes system runs. */
+	attended: boolean;
 	hasSkills: boolean;
 	hasHistory: boolean;
 };
@@ -86,7 +88,7 @@ const runnerTools = {
 			question: z.string().min(1).max(2000),
 			options: z.array(z.string().max(200)).max(10).optional(),
 		}),
-		available: () => true,
+		available: ({ attended }) => attended,
 	},
 	progress: {
 		name: "lucid_share_progress",
