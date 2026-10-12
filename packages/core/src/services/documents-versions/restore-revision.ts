@@ -2,11 +2,15 @@ import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { DocumentsRepository } from "../../libs/repositories/index.js";
+import {
+	DocumentsRepository,
+	DocumentVersionsRepository,
+} from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
 import promoteVersion from "./promote-version.js";
 
+/** Restores a document's own revision to latest, excluding request proposals and snapshots. */
 const restoreRevision: ServiceFn<
 	[
 		{
@@ -19,6 +23,7 @@ const restoreRevision: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Documents = new DocumentsRepository(context.db);
+	const Versions = new DocumentVersionsRepository(context.db);
 
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
@@ -42,6 +47,7 @@ const restoreRevision: ServiceFn<
 	const documentAccessRes = await checkDocumentAccess(context, {
 		collectionKey: data.collectionKey,
 		id: data.documentId,
+		pending: false,
 	});
 	if (documentAccessRes.error) return documentAccessRes;
 
@@ -80,6 +86,28 @@ const restoreRevision: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const versionRes = await Versions.selectSingle(
+		{
+			select: ["id"],
+			where: [
+				{ key: "id", operator: "=", value: data.versionId },
+				{ key: "document_id", operator: "=", value: data.documentId },
+				{ key: "type", operator: "=", value: "revision" },
+			],
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: copy("server:core.documents.version.not.found.message"),
+					status: 404,
+				},
+			},
+		},
+		{
+			tableName: tableNamesRes.data.version,
+		},
+	);
+	if (versionRes.error) return versionRes;
 
 	const response = await promoteVersion(context, {
 		documentId: data.documentId,

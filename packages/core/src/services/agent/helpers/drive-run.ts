@@ -8,7 +8,7 @@ import {
 } from "../../../libs/agent/context.js";
 import { textFromParts } from "../../../libs/agent/input.js";
 import { routineContinuation } from "../../../libs/agent/instructions/messages.js";
-import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
+import type { Checkpoint } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentRunStatus } from "../../../types/response.js";
@@ -33,7 +33,7 @@ const driveRun: ServiceFn<
 	{ status: AgentRunStatus }
 > = async (context, { run, checkpoint, session }) => {
 	const { limits } = constants.agent;
-	const mode: RunMode = run.routine_id ? "routine" : "chat";
+	const { mode } = checkpoint;
 	const deadline = Date.now() + constants.agent.sliceMs;
 
 	const completeRoutineRun = async () => {

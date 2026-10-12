@@ -85,11 +85,12 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		}
 	}
 
-	if (
-		(versionType ===
+	const requestVersion =
+		versionType ===
 			constants.collectionBuilder.publishing.proposalVersionType ||
-			versionType ===
-				constants.collectionBuilder.publishing.snapshotVersionType) &&
+		versionType === constants.collectionBuilder.publishing.snapshotVersionType;
+	if (
+		requestVersion &&
 		!data.includeRequestVersions &&
 		!(preview?.mode === "scoped" && preview.target === "entry")
 	) {
@@ -184,6 +185,8 @@ const getSingle: ContentDocumentsGetSingleService = async <
 			collection: collectionRes.data,
 			config: context.config,
 			relationVersionType: relationVersionTypeRes.data.versionType,
+			//* pending documents are readable only through their request's versions
+			pending: requestVersion ? undefined : false,
 			tables: { versions: tableNameRes.data.version },
 		},
 		{ tableName: tableNameRes.data.document },

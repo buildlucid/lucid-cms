@@ -30,6 +30,7 @@ import unpublish from "../documents/unpublish.js";
 import upsertSingle from "../documents/upsert-single.js";
 import align from "../documents-versions/align.js";
 import readVersionContent from "../documents-versions/helpers/read-version-content.js";
+import restoreRevision from "../documents-versions/restore-revision.js";
 import updateVersion from "../documents-versions/update-single.js";
 import syncCollections from "../sync/sync-collections.js";
 import addDocuments from "./add-documents.js";
@@ -877,6 +878,56 @@ test("the latest a request replaces keeps its author as a revision", async () =>
 	expect(versions).toContainEqual({ type: "latest", created_by: reviewer.id });
 });
 
+test("revisions are restored to latest before publishing, and requests' versions are never restored", async () => {
+	const id = await createDocument();
+	const request = await createRequest(id, ["latest"]);
+	await editProposal(request, "Proposed");
+	await approveRequest(request.id);
+	await completeRequest(request.id, reviewer);
+
+	const tables = await getTableNames(context, "request_pages");
+	assert(tables.data);
+	const revision = await context.db.kysely
+		.selectFrom(tables.data.version)
+		.select("id")
+		.where("document_id", "=", id)
+		.where("type", "=", "revision")
+		.executeTakeFirstOrThrow();
+	const proposal = await createRequest(id, ["staging"]);
+
+	expect(
+		(
+			await publish(context, {
+				collectionKey: "request_pages",
+				documentId: id,
+				target: "staging",
+				sourceVersionId: revision.id,
+				user: creator,
+			})
+		).error?.status,
+	).toBe(400);
+	expect(
+		(
+			await restoreRevision(context, {
+				collectionKey: "request_pages",
+				documentId: id,
+				versionId: versionOf(proposal),
+				userId: creator.id,
+			})
+		).error?.status,
+	).toBe(404);
+	assert(
+		!(
+			await restoreRevision(context, {
+				collectionKey: "request_pages",
+				documentId: id,
+				versionId: revision.id,
+				userId: creator.id,
+			})
+		).error,
+	);
+});
+
 test("adding latest later asks for a review only when latest changed since the proposal", async () => {
 	const id = await createDocument();
 	const before = await createRequest(id);
@@ -1220,7 +1271,7 @@ test("adding and removing reviewers is added to the activity", async () => {
 	]);
 });
 
-test("comments withdraw approval, and every comment must be resolved before approving again", async () => {
+test("comments withdraw approval when posted or reopened, and every comment must be resolved before approving again", async () => {
 	const id = await createDocument();
 	const request = await createRequest(id);
 	const body = {
@@ -1257,7 +1308,21 @@ test("comments withdraw approval, and every comment must be resolved before appr
 	expect(withResolved.openComments).toBe(0);
 	expect(withResolved.blockers).toEqual([]);
 	await approveRequest(request.id);
-	//* the approver's own comment withdraws the approval and must be resolved too
+	const reopened = await updateCommentResolution(context, {
+		id: request.id,
+		eventId: comment.id,
+		user: reviewer,
+		resolution: null,
+	});
+	assert(!reopened.error, JSON.stringify(reopened.error));
+	expect((await readRequest(request.id)).approved).toBe(false);
+	await updateCommentResolution(context, {
+		id: request.id,
+		eventId: comment.id,
+		user: reviewer,
+		resolution: "resolved",
+	});
+	await approveRequest(request.id);
 	await createComment(context, { id: request.id, user: reviewer, body });
 	const withOwnComment = await readRequest(request.id);
 	expect(withOwnComment.approved).toBe(false);
@@ -1349,7 +1414,7 @@ test("replies leave approval alone, go one level deep and are deleted with their
 	expect(remaining).toEqual([]);
 });
 
-test("mentions in comments and descriptions are limited to people who can read the request", async () => {
+test("mentions in comments, descriptions and approval notes are limited to people who can read the request", async () => {
 	const request = await createRequest(await createDocument());
 	const outsider = await context.db.kysely
 		.insertInto("lucid_users")
@@ -1388,6 +1453,15 @@ test("mentions in comments and descriptions are limited to people who can read t
 				id: request.id,
 				user: creator,
 				description: mention(outsider.id),
+			})
+		).error?.status,
+	).toBe(400);
+	expect(
+		(
+			await approve(context, {
+				...reviewInput(await readRequest(request.id)),
+				user: reviewer,
+				body: mention(outsider.id),
 			})
 		).error?.status,
 	).toBe(400);
@@ -2613,6 +2687,20 @@ test("requested documents only exist as their create request's proposal until co
 		fields: [{ key: "title", type: "text", value: "Direct" }],
 	});
 	expect(direct.error?.status).toBe(403);
+	const directSave = await upsertSingle(context, {
+		collectionKey: "create_request_pages",
+		documentId: requested.id,
+		userId: creator.id,
+		fields: [{ key: "title", type: "text", value: "Direct" }],
+	});
+	expect(directSave.error?.status).toBe(404);
+	const directPublish = await publish(context, {
+		collectionKey: "create_request_pages",
+		documentId: requested.id,
+		target: "staging",
+		user: creator,
+	});
+	expect(directPublish.error?.status).toBe(404);
 
 	const relating = await requestCreation(context, {
 		collectionKey: "create_request_pages",
@@ -3148,6 +3236,52 @@ test("direct unpublishing is limited to environments that don't need review", as
 	assert(!(await removal("staging")).error);
 	expect(await fieldOf(documentId, "summary", "staging")).toBeNull();
 	expect((await removal("staging")).error?.status).toBe(404);
+});
+
+test("people only use their own request permission on requests they made", async () => {
+	const read = [
+		Permissions.RequestsRead,
+		getCollectionPermission("request_pages", "read"),
+		getCollectionPermission("request_articles", "read"),
+	];
+	const owner: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: [
+			...read,
+			getCollectionPermission("request_articles", "delete"),
+		],
+	};
+	const other: LucidUser = {
+		...reviewer,
+		superAdmin: false,
+		permissions: [
+			...read,
+			getCollectionPermission("request_articles", "delete"),
+			getCollectionPermission("request_pages", "delete-request"),
+		],
+	};
+	const created = await createSingle(context, {
+		type: "delete",
+		title: "Clean up",
+		documents: [
+			{
+				collectionKey: "request_articles",
+				documentId: await createDocument("request_articles"),
+			},
+		],
+		user: owner,
+	});
+	assert(created.data, JSON.stringify(created.error));
+
+	const added = await addDocuments(context, {
+		id: created.data.id,
+		documents: [
+			{ collectionKey: "request_pages", documentId: await createDocument() },
+		],
+		user: other,
+	});
+	expect(added.error?.status).toBe(403);
 });
 
 test("delete requests move documents to the bin with delete access, and requesters keep their own", async () => {

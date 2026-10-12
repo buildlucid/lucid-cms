@@ -656,6 +656,26 @@ test("direct writes still open requests where the collection requires review", a
 	});
 });
 
+test("read tools stay within their collections", async () => {
+	const run = await startRun();
+	const scoped = { collections: [reviewed.key] };
+	const missing = context.translate(
+		"server:core.collections.not.found.message",
+	);
+
+	expect(
+		await run.fail(agentTools.documents.get(scoped), {
+			collectionKey: pages.key,
+			documentId: await createPage(),
+		}),
+	).toBe(missing);
+	expect(
+		await run.fail(agentTools.documents.find(scoped), {
+			collectionKey: pages.key,
+		}),
+	).toBe(missing);
+});
+
 test("direct writes only ask for confirmation when they skip a request", () => {
 	const asks = (tool: AgentToolDefinition, input: Record<string, unknown>) =>
 		needsConfirmation({
@@ -1245,7 +1265,10 @@ test("builder tools read unsaved content from the builder and hand changes back 
 	//* media outside the library applies, but is reported for the agent to fix
 	const change = {
 		fields: { title: "From the agent" },
-		bricks: [{ ref: "seo", fields: { image: [999_999] } }],
+		bricks: [
+			{ ref: "seo", fields: { image: [999_999] } },
+			{ key: "hero", fields: { heading: "New brick" } },
+		],
 	};
 	const updateRead = waitOn(
 		await callBuilderTool(builderUpdateToolName, change),
@@ -1269,9 +1292,16 @@ test("builder tools read unsaved content from the builder and hand changes back 
 					translations: { en: "From the agent", fr: "Bonjour" },
 				},
 			],
-			bricks: [{ type: "fixed", key: "seo" }],
+			bricks: [
+				{ type: "fixed", key: "seo" },
+				{
+					type: "builder",
+					key: "hero",
+					fields: [{ key: "heading", translations: { en: "New brick" } }],
+				},
+			],
 			removed: [],
-			order: null,
+			order: [expect.any(String), expect.any(String)],
 		},
 		changes: [
 			{
@@ -1284,6 +1314,7 @@ test("builder tools read unsaved content from the builder and hand changes back 
 				status: "changed",
 				fields: [{ path: ["image"] }],
 			},
+			{ brick: { type: "builder", key: "hero" }, status: "added" },
 		],
 	});
 
@@ -1311,7 +1342,11 @@ test("builder tools read unsaved content from the builder and hand changes back 
 				key: "lucid-builder-changes",
 				data: {
 					document: { collectionKey: pages.key, documentId, requestId: null },
-					changes: [{ brick: null }, { brick: { key: "seo" } }],
+					changes: [
+						{ brick: null },
+						{ brick: { key: "seo" } },
+						{ brick: { key: "hero" } },
+					],
 				},
 			},
 		],

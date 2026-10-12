@@ -22,6 +22,8 @@ import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestState from "./helpers/get-request-state.js";
 import getRequiredApprovals from "./helpers/get-required-approvals.js";
 import getReviewToken from "./helpers/get-review-token.js";
+import notifyMentions from "./helpers/notify-mentions.js";
+import resolveMentions from "./helpers/resolve-mentions.js";
 import scheduleRequest from "./helpers/schedule-request.js";
 import { approvedNotification } from "./notifications/approved.js";
 import { failedNotification } from "./notifications/failed.js";
@@ -149,6 +151,12 @@ const approve: ServiceFn<
 		if (validateRes.error) return validateRes;
 	}
 
+	const bodyRes = data.body
+		? await resolveMentions(context, { request, body: data.body })
+		: undefined;
+	if (bodyRes?.error) return bodyRes;
+	const body = bodyRes?.data ?? null;
+
 	if (!approvedBefore) {
 		const approvalRes = await RequestApprovals.createSingle({
 			data: {
@@ -173,11 +181,21 @@ const approve: ServiceFn<
 				user_id: data.user.id,
 				agent_run_id: data.agentRunId ?? null,
 				type: "approved",
-				body: data.body ?? null,
+				body,
 			},
 		],
 	});
 	if (eventsRes.error) return eventsRes;
+
+	if (body) {
+		const mentionsRes = await notifyMentions(context, {
+			request,
+			body,
+			actorUserId: data.user.id,
+			actorRunId: data.agentRunId,
+		});
+		if (mentionsRes.error) return mentionsRes;
+	}
 
 	const reviewDoneRes = await resolveNotification(context, {
 		definition: reviewRequestedNotification,

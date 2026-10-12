@@ -2720,6 +2720,26 @@ describe("conversation compaction", () => {
 		inputTokenLimit = 6_000;
 	});
 
+	test("a summary outlives the run that wrote it", async () => {
+		inputTokenLimit = 6_000;
+		const prepared = await compactAfterReply();
+		reply("Current goal: draft content.");
+		await executeRun(context, { runId: prepared.compactId });
+		await context.db.kysely
+			.deleteFrom("lucid_agent_runs")
+			.where("id", "=", prepared.compactId)
+			.execute();
+
+		const records = await context.db.kysely
+			.selectFrom("lucid_agent_compactions")
+			.select(["run_id", "summary"])
+			.where("conversation_id", "=", prepared.conversationId)
+			.execute();
+		expect(records).toEqual([
+			{ run_id: null, summary: "Current goal: draft content." },
+		]);
+	});
+
 	test("manual compaction keeps history and continues from only the newest summary", async () => {
 		inputTokenLimit = 6_000;
 		const prepared = await compactAfterReply();
@@ -3918,6 +3938,19 @@ describe("runs acting as the system", () => {
 			).data,
 		).toEqual({ user_id: userId });
 	});
+});
+
+test("input cannot take the ID of another chat's run", async () => {
+	const first = await prepare();
+	const second = await prepare();
+	const submitted = await submitInput(context, {
+		conversationId: second.conversationId,
+		userId,
+		requestId: first.runId,
+		text: "Reused",
+		delivery: { kind: "queue" },
+	});
+	expect(submitted.error?.status).toBe(409);
 });
 
 vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => {

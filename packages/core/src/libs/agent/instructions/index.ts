@@ -18,6 +18,8 @@ export const instructionVersion = 1;
 const buildInstructions = (props: {
 	agent: Pick<AgentDefinition, "name" | "instructions">;
 	mode: RunMode;
+	/** Whether a person can answer the run's questions. */
+	attended: boolean;
 	skills: readonly Pick<SkillDefinition, "name" | "description">[];
 	capabilities: ReturnType<typeof getCapabilityProviders>;
 	hasHistory: boolean;
@@ -26,7 +28,9 @@ const buildInstructions = (props: {
 	[
 		agentInstructions(props.agent),
 		terminologyInstructions,
-		props.mode === "chat" ? chatInstructions : routineInstructions,
+		props.mode === "chat"
+			? chatInstructions
+			: routineInstructions(props.attended),
 		referenceInstructions,
 		props.screen ? screenInstructions(props.screen) : "",
 		capabilityInstructions(props.capabilities),

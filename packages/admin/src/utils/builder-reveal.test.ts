@@ -1,6 +1,7 @@
-import type { InternalDocumentField } from "@types";
+import type { Collection, InternalDocumentField } from "@types";
 import { expect, test } from "vitest";
-import { getChangedFieldPaths } from "./builder-reveal";
+import { getChangedFieldPaths, revealBuilderField } from "./builder-reveal";
+import { getPreviewStructureId } from "./preview-focus-dom";
 
 const links = (
 	items: Array<{ ref: string; label: string; open?: boolean }>,
@@ -44,4 +45,39 @@ test("items added, removed or reordered point at their repeater", () => {
 	];
 
 	expect(getChangedFieldPaths(after, before)).toEqual([["links"]]);
+});
+
+test("a fixed brick on its own reveals its header", async () => {
+	const header = document.createElement("div");
+	header.id = getPreviewStructureId({ brickIndex: 1, type: "brick" });
+	document.body.append(header);
+
+	const shown = await revealBuilderField({
+		collection: {} as Collection,
+		collectionKey: "page",
+		documentId: 1,
+		bricks: [
+			{
+				ref: "fields",
+				key: "fields",
+				order: 0,
+				type: "collection-fields",
+				open: true,
+				fields: [],
+			},
+			{
+				ref: "fixed:seo",
+				key: "seo",
+				order: 1,
+				type: "fixed",
+				open: false,
+				fields: [],
+			},
+		],
+		brickIndex: 1,
+		path: [],
+	});
+
+	expect(shown).toBe(true);
+	header.remove();
 });

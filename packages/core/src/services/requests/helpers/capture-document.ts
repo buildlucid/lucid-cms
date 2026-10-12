@@ -16,16 +16,21 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
 import cloneVersion from "../../documents-versions/clone-version.js";
+import canWriteDocument from "./can-write-document.js";
 import checkPublishedTargets from "./check-published-targets.js";
 import createTargets from "./create-targets.js";
-import requestTypePermissions from "./request-type-permissions.js";
 import resolveTargets from "./resolve-targets.js";
 
 /** Adds a document's targets to a request and captures its source content for publish requests. */
 const captureDocument: ServiceFn<
 	[
 		RequestDocumentInput & {
-			request: { id: number; type: Exclude<RequestType, "create"> };
+			request: {
+				id: number;
+				type: Exclude<RequestType, "create">;
+				/** Only the request's creator writes with their own request permission. */
+				created_by: number | null;
+			};
 			user: LucidActor;
 			agentRunId?: string;
 			/** Callers that already hold the document's write claim. */
@@ -37,19 +42,17 @@ const captureDocument: ServiceFn<
 	const Versions = new DocumentVersionsRepository(context.db);
 	const RequestDocuments = new RequestDocumentsRepository(context.db);
 
-	const { write, ownWrite } = requestTypePermissions[data.request.type];
 	if (
 		!hasAccess({
 			user: data.user,
 			requiredPermissions: [
 				getCollectionPermission(data.collectionKey, "read"),
 			],
-			optionalPermissions: [
-				getCollectionPermission(data.collectionKey, write),
-				...(ownWrite
-					? [getCollectionPermission(data.collectionKey, ownWrite)]
-					: []),
-			],
+		}) ||
+		!canWriteDocument({
+			request: data.request,
+			collectionKey: data.collectionKey,
+			user: data.user,
 		})
 	) {
 		return {
@@ -102,6 +105,7 @@ const captureDocument: ServiceFn<
 		checkDocumentAccess(context, {
 			collectionKey: data.collectionKey,
 			id: data.documentId,
+			pending: false,
 		}),
 		getTableNames(context, data.collectionKey),
 	]);

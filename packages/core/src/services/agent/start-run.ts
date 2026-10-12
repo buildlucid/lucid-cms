@@ -7,6 +7,7 @@ import {
 	AgentAttributionsRepository,
 	AgentCompactionsRepository,
 	AgentConversationsRepository,
+	AgentInputsRepository,
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
@@ -114,6 +115,7 @@ const startRun: ServiceFn<
 		const runs = new AgentRunsRepository(context.db);
 		const attributions = new AgentAttributionsRepository(context.db);
 		const compactions = new AgentCompactionsRepository(context.db);
+		const inputs = new AgentInputsRepository(context.db);
 
 		const latest = await compactions.selectLatest(input.conversationId);
 		if (latest.error) return latest;
@@ -195,13 +197,31 @@ const startRun: ServiceFn<
 
 			return { error: undefined, data: { runId: existing.data.id } };
 		}
+		//* retry and compaction IDs must not consume IDs reserved by queued inputs
+		if (input.purpose) {
+			const taken = await inputs.selectSingle({
+				select: ["id"],
+				where: [{ key: "id", operator: "=", value: input.requestId }],
+			});
+			if (taken.error) return taken;
+			if (taken.data) {
+				return {
+					data: undefined,
+					error: {
+						type: "basic",
+						status: 409,
+						message: copy("server:agent.request.already.used"),
+					},
+				};
+			}
+		}
 
 		const claim = await conversations.claimRun({
 			conversationId: input.conversationId,
 			runId: input.requestId,
 			updatedAt: now,
-			//* a failed run pauses the queue, and retrying is how a person picks it back up
-			allowPaused: input.purpose !== undefined,
+			//* paused user-input queues still allow retries, compaction and routine runs
+			allowPaused: input.purpose !== undefined || input.routine !== undefined,
 		});
 		if (claim.error) return claim;
 		if (!claim.data) {
@@ -246,6 +266,7 @@ const startRun: ServiceFn<
 			status: "queued",
 			checkpoint: {
 				version: 1,
+				mode: input.routine ? "routine" : "chat",
 				confirmationMode,
 				routineTools: routineId ? routineTools.data[routineId] : undefined,
 				messages: latest.data ? [summaryMessage(latest.data.summary)] : [],

@@ -767,7 +767,7 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 	const afterWithdrawal = await read();
 	expect(afterWithdrawal.approved).toBe(false);
 	expect(
-		afterWithdrawal.events.find((event) => event.type === "approval_dismissed"),
+		afterWithdrawal.events.find((event) => event.type === "approval_withdrawn"),
 	).toMatchObject({ user: { id: user.id }, agent: { key: reviewer.key } });
 });
 

@@ -136,7 +136,15 @@ export type RequestEvent = RequestEventBase &
 				/** Null once the user is deleted. */
 				reviewer: RequestUser | null;
 		  }
-		| { type: "approval_dismissed" | "completed" | "closed" | "reopened" }
+		| {
+				/** Dismissed means changes reset approval; withdrawn means the approver took theirs back. */
+				type:
+					| "approval_dismissed"
+					| "approval_withdrawn"
+					| "completed"
+					| "closed"
+					| "reopened";
+		  }
 	);
 
 export type RequestEventType = RequestEvent["type"];

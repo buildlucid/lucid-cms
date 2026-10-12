@@ -14,11 +14,7 @@ import promoteVersion from "../documents-versions/promote-version.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 
-/**
- * Publishes saved content straight to an environment, from latest unless
- * another saved version is given. Environments that need review can only be
- * published through an approved request.
- */
+/** Publishes saved content from latest by default or a specified environment, requiring approved requests for targets that need review. */
 const publish: ServiceFn<
 	[
 		{
@@ -101,6 +97,8 @@ const publish: ServiceFn<
 			const accessRes = await checkDocumentAccess(context, {
 				collectionKey: data.collectionKey,
 				id: data.documentId,
+				pending: false,
+				deleted: false,
 			});
 			if (accessRes.error) return accessRes;
 
@@ -146,6 +144,18 @@ const publish: ServiceFn<
 						type: "basic",
 						message: copy("server:core.documents.publish.request.version"),
 						status: 403,
+					},
+					data: undefined,
+				};
+			}
+
+			//* revisions must be restored to latest before publishing
+			if (source.type === "revision") {
+				return {
+					error: {
+						type: "basic",
+						message: copy("server:core.documents.publish.revision.version"),
+						status: 400,
 					},
 					data: undefined,
 				};

@@ -154,6 +154,27 @@ test("reconciles a paid turn once and leaves its first usage immutable", async (
 	});
 });
 
+test("settles usage whose run was deleted", async () => {
+	const input = await pending();
+	await (await testConfig.getDatabase()).client
+		.deleteFrom("lucid_agent_runs")
+		.where("id", "=", input.runId)
+		.execute();
+	request.mockImplementation(async () => ({
+		error: undefined,
+		data: {
+			json: { data: { requestId: input.requestId, status: "complete", usage } },
+		},
+	}));
+	expect((await reconcileUsage(context)).data).toBe(1);
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
+		requestId: input.requestId,
+		select: ["status", "credits"],
+	});
+	expect(stored.data).toMatchObject({ status: "success", credits: 1 });
+});
+
 test("closes an old missing request without a charge", async () => {
 	const input = await pending();
 	request.mockResolvedValue({

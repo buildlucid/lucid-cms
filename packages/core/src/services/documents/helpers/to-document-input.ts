@@ -16,7 +16,10 @@ import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import readDocumentObject from "./read-document-object.js";
 
-/** Converts authoring values to the full payload used by admin document saves. */
+/**
+ * Converts authoring values to the full payload used by admin document saves.
+ * @remarks Omit unset `open` values to keep builder screen payloads valid JSON.
+ */
 const toDocumentInput = (
 	context: ContentContext,
 	data: DocumentEditableData,
@@ -89,7 +92,7 @@ const toDocumentInput = (
 					groups.push({
 						ref: group.ref,
 						order,
-						open: previous?.open,
+						...(previous?.open !== undefined && { open: previous.open }),
 						fields: children.data,
 					});
 				}
@@ -132,7 +135,7 @@ const toDocumentInput = (
 
 		bricks.push({
 			ref: prior?.ref ?? `fixed:${brick.key}`,
-			open: prior?.open,
+			...(prior?.open !== undefined && { open: prior.open }),
 			key: brick.key,
 			type: "fixed",
 			order: bricks.length,
@@ -172,7 +175,7 @@ const toDocumentInput = (
 				...item,
 				type,
 				order,
-				open: prior?.open,
+				...(prior?.open !== undefined && { open: prior.open }),
 				fields: fields.data,
 			});
 		}

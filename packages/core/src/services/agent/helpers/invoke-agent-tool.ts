@@ -57,7 +57,9 @@ const invokeAgentTool = async (
 
 	const interaction = props.tool.interaction;
 	if (!interaction || !("interaction" in executed.data)) {
-		return toolFailure(context.translate("server:agent.interaction.invalid"));
+		return toolFailure(
+			context.translate("server:core.tools.interaction.invalid"),
+		);
 	}
 
 	return {

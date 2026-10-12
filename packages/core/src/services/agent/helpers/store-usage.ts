@@ -7,7 +7,8 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 export type UsageRequest = {
 	requestId: string;
 	featureKey: string;
-	runId: string;
+	/** Null once the run is deleted; its usage still settles. */
+	runId: string | null;
 	conversationId: string;
 	userId: number | null;
 	connectionId: number;

@@ -534,7 +534,8 @@ export const controllerSchemas = {
 				example: "production",
 			}),
 			sourceVersionId: z.number().int().positive().optional().meta({
-				description: "The saved version to publish. Defaults to latest",
+				description:
+					"The latest or environment version to publish. Defaults to latest. Revisions are restored to latest first.",
 				example: 1,
 			}),
 		}),

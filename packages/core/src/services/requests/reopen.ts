@@ -70,6 +70,7 @@ const reopen: ServiceFn<
 	const dismissRes = await dismissApproval(context, {
 		ids: [data.id],
 		userId: data.user.id,
+		agentRunId: data.agentRunId,
 	});
 	if (dismissRes.error) return dismissRes;
 

@@ -1,5 +1,5 @@
 import type { AgentConversation, AgentMessage } from "@types";
-import { createRoot } from "solid-js";
+import { createRoot, createSignal } from "solid-js";
 import { expect, test, vi } from "vitest";
 import type streamRun from "@/services/api/agent/stream-run";
 import useAgentChat from "./useAgentChat";
@@ -136,6 +136,26 @@ test.each([
 		expect(await result).toEqual({ error: undefined });
 		expect(chat.pendingInteraction()).toBeUndefined();
 		expect(chat.streaming()).toBe(true);
+	} finally {
+		ended.resolve();
+		dispose();
+	}
+});
+
+test("switching chats leaves the old chat's stream behind straight away", async () => {
+	const ended = Promise.withResolvers<void>();
+	mocks.stream.mockReset().mockReturnValue(ended.promise);
+	const { chat, setId, dispose } = createRoot((dispose) => {
+		const [id, setId] = createSignal("conversation");
+		return { chat: useAgentChat(id), setId, dispose };
+	});
+	try {
+		void chat.respond({ runId: "run", id: "selection" }, { id: 1 });
+		mocks.stream.mock.calls[0]?.[0].onAccepted?.();
+		expect(chat.streaming()).toBe(true);
+
+		setId("other");
+		expect(chat.streaming()).toBe(false);
 	} finally {
 		ended.resolve();
 		dispose();

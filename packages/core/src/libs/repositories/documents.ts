@@ -785,6 +785,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			versionId?: number;
 			/** The version used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
+			/** False excludes documents awaiting completion of their create request. */
+			pending?: false;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
 			relationDocumentFilters: RelationDocumentFilter[];
@@ -871,6 +873,9 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				])
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.version)
+				.$if(props.pending === false, (qb) =>
+					qb.where(`${dynamicConfig.tableName}.create_request_id`, "is", null),
+				)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(
 						`${props.tables.versions}.id`,

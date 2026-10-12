@@ -121,7 +121,7 @@ function defineAgentTool<
 			});
 			return {
 				type: "failed",
-				message: context.translate("server:agent.interaction.invalid"),
+				message: context.translate("server:core.tools.interaction.invalid"),
 			};
 		}
 
@@ -133,15 +133,28 @@ function defineAgentTool<
 			options.interaction.key === constants.agent.widgets.screen ||
 			JSON.stringify(data).length <=
 				constants.agent.limits.interactionDataChars;
+		//* malformed interaction payloads violate the tool contract
 		if (
 			!parsedRequest.success ||
 			!parsedData.success ||
 			!isJsonObject(data) ||
 			!bounded
 		) {
+			logger.error({
+				event: "tools.interaction.invalid",
+				message: `Tool ${options.name} asked for input with an invalid interaction`,
+				error:
+					parsedRequest.error ??
+					parsedData.error ??
+					new Error(
+						bounded
+							? "Interaction data is not lossless JSON"
+							: "Interaction data is too large",
+					),
+			});
 			return {
 				type: "failed",
-				message: context.translate("server:agent.interaction.invalid"),
+				message: context.translate("server:core.tools.interaction.invalid"),
 			};
 		}
 
@@ -162,7 +175,7 @@ function defineAgentTool<
 				? { type: "success", data: { proceed: true } }
 				: {
 						type: "failed",
-						message: context.translate("server:agent.interaction.invalid"),
+						message: context.translate("server:core.tools.interaction.invalid"),
 					};
 		}
 		if (!("output" in result)) return checkInteraction(result, context);

@@ -127,7 +127,16 @@ const HomeOverview: Component<{
 	};
 	const finish = (save: boolean) => {
 		const current = draft();
-		if (save && current) userPreferencesStore.setHomeWidgets(current.widgets);
+		if (save && current) {
+			//* preserve settings for widgets that are temporarily unavailable
+			const keys = new Set(current.widgets?.map((widget) => widget.key));
+			const unavailable = (userPreferencesStore.getHomeWidgets() ?? []).filter(
+				(widget) => !keys.has(widget.key),
+			);
+			userPreferencesStore.setHomeWidgets(
+				current.widgets && [...current.widgets, ...unavailable],
+			);
+		}
 		setDraft(undefined);
 		props.onEditingChange(false);
 	};

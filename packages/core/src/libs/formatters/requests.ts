@@ -202,6 +202,7 @@ const formatEvent = (props: {
 			};
 		}
 		case "approval_dismissed":
+		case "approval_withdrawn":
 		case "completed":
 		case "closed":
 		case "reopened":

@@ -77,9 +77,13 @@ export const RequestEventEntry: Component<{
 					return {
 						icon: TbOutlineRotateClockwise2,
 						tone: "default",
-						text: event.user
-							? T()("requests.activity.withdrawn", { name: name() })
-							: T()("requests.activity.dismissed"),
+						text: T()("requests.activity.dismissed"),
+					};
+				case "approval_withdrawn":
+					return {
+						icon: TbOutlineRotateClockwise2,
+						tone: "default",
+						text: T()("requests.activity.withdrawn", { name: name() }),
 					};
 				case "schedule_updated":
 					return {

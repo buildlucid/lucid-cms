@@ -59,9 +59,8 @@ const reconcileUsage: ServiceFn<
 	let settled = 0;
 
 	for (const row of pending.data ?? []) {
-		if (row.agent_run_id === null || row.lucid_remote_connection_id === null) {
-			continue;
-		}
+		//* settle usage for deleted runs to avoid starving later rows
+		if (row.lucid_remote_connection_id === null) continue;
 
 		const response = await client.request<unknown>(
 			`${lucidRemotePaths.agent}/${encodeURIComponent(row.request_id)}`,

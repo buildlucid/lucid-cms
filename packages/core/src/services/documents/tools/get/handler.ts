@@ -27,7 +27,9 @@ const getDocument: ServiceFn<
 > = async (context, props) => {
 	const { input } = props;
 	const collection = context.config.collections.find(
-		(candidate) => candidate.key === input.collectionKey,
+		(candidate) =>
+			candidate.key === input.collectionKey &&
+			props.allowedCollectionKeys.includes(candidate.key),
 	);
 	if (!collection) {
 		return {

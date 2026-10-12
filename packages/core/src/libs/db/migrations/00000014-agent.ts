@@ -614,8 +614,9 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 					.references("lucid_agent_conversations.id")
 					.onDelete("cascade"),
 			)
+			//* chat summaries must survive deletion of their originating run
 			.addColumn("run_id", adapter.getDataType("text"), (col) =>
-				col.notNull().references("lucid_agent_runs.id").onDelete("cascade"),
+				col.references("lucid_agent_runs.id").onDelete("set null"),
 			)
 			.addColumn("through_position", adapter.getDataType("integer"), (col) =>
 				col.notNull(),
@@ -630,6 +631,12 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.createIndex("idx_agent_compactions_conversation_position")
 			.on("lucid_agent_compactions")
 			.columns(["conversation_id", "through_position"])
+			.execute();
+
+		await db.schema
+			.createIndex("idx_agent_compactions_run")
+			.on("lucid_agent_compactions")
+			.column("run_id")
 			.execute();
 	},
 	async down(_db: Kysely<unknown>) {},

@@ -3,16 +3,13 @@ import { copy } from "../../libs/i18n/index.js";
 import { RequestEventsRepository } from "../../libs/repositories/index.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import dismissApproval from "./helpers/dismiss-approval.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import isCommentAuthor from "./helpers/is-comment-author.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
 
-/**
- * Resolves or closes a comment on an open request, or reopens it with null.
- * The comment's author and anyone who can edit or approve the request can.
- * Replies are resolved with their thread.
- */
+/** Updates an open request's comment-thread resolution for its author, editors or approvers, using null to reopen and dismiss approvals. */
 const updateCommentResolution: ServiceFn<
 	[
 		{
@@ -80,6 +77,15 @@ const updateCommentResolution: ServiceFn<
 		where: [{ key: "id", operator: "=", value: comment.id }],
 	});
 	if (updateRes.error) return updateRes;
+
+	if (data.resolution === null && request.approvals.length > 0) {
+		const dismissRes = await dismissApproval(context, {
+			ids: [request.id],
+			userId: data.user.id,
+			agentRunId: data.agentRunId,
+		});
+		if (dismissRes.error) return dismissRes;
+	}
 
 	return { error: undefined, data: undefined };
 };

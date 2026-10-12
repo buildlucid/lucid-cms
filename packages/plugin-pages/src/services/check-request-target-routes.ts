@@ -6,15 +6,12 @@ import type {
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
 import findRouteConflicts from "./find-route-conflicts.js";
+import projectRequestTargetDescendants from "./project-request-target-descendants.js";
 import projectRequestTargetRoutes, {
 	type RequestTargetMember,
 } from "./project-request-target-routes.js";
 
-/**
- * Reports pages a request could not give a valid, unique route in one target
- * environment: a parent missing there, parents that loop, or a route another
- * page outside the request already holds.
- */
+/** Reports missing or cyclic parents and duplicate target routes for request pages and their descendants. */
 const checkRequestTargetRoutes: ServiceFn<
 	[
 		{
@@ -38,18 +35,33 @@ const checkRequestTargetRoutes: ServiceFn<
 		data.members.map((member) => [member.documentId, member.requestDocumentId]),
 	);
 
+	const descendantsRes = await projectRequestTargetDescendants(context, {
+		...data,
+		projection,
+	});
+	if (descendantsRes.error) return descendantsRes;
+	const rootOf = new Map(
+		descendantsRes.data.map((document) => [
+			document.documentId,
+			document.rootDocumentId,
+		]),
+	);
+	const projected = [...projection.projected, ...descendantsRes.data];
+
 	const conflictsRes = await findRouteConflicts(context, {
 		collection: data.collection,
-		projectedFullSlugs: projection.projected,
+		projectedFullSlugs: projected,
 		scope: projection.scope,
 		tables: data.tables,
-		excludeDocumentIds: [...memberIds.keys()],
+		excludeDocumentIds: projected.map((document) => document.documentId),
 	});
 	if (conflictsRes.error) return conflictsRes;
 
 	const seen = new Set<string>();
 	for (const conflict of conflictsRes.data) {
-		const requestDocumentId = memberIds.get(conflict.documentId);
+		const requestDocumentId = memberIds.get(
+			rootOf.get(conflict.documentId) ?? conflict.documentId,
+		);
 		if (requestDocumentId === undefined) continue;
 		const message = context.translate(
 			copy("server:plugin.pages.request.route.duplicate", {

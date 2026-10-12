@@ -66,6 +66,8 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 /** Everything needed to resume a run exactly where it stopped. */
 export const checkpointSchema = z.object({
 	version: z.literal(1),
+	/** Run mode fixed at creation, independent of later routine deletion. */
+	mode: z.enum(["chat", "routine"]),
 	/** The model and effort for this run, resolved once when it starts. */
 	selection: aiModelSelectionSchema.optional(),
 	/** Captured when the run starts, so changing chat settings never changes a pending decision. */
@@ -156,7 +158,7 @@ export type ModelEvent = z.infer<typeof modelEventSchema>;
 export type ModelUsage = Extract<ModelEvent, { type: "finish" }>["usage"];
 export type Checkpoint = z.infer<typeof checkpointSchema>;
 export type ConversationContext = z.infer<typeof agentContextSchema>;
-export type RunMode = "chat" | "routine";
+export type RunMode = Checkpoint["mode"];
 export type RoutineTools = z.infer<typeof routineToolsSchema>;
 
 export type DefineRoutineOptions<Key extends string> = {

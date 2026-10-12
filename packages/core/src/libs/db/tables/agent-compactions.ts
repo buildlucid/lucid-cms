@@ -8,7 +8,7 @@ export const agentCompactionsTable = defineTable(
 		columns: {
 			id: { schema: z.uuid(), type: "text" },
 			conversation_id: { schema: z.uuid(), type: "text" },
-			run_id: { schema: z.uuid(), type: "text" },
+			run_id: { schema: z.uuid().nullable(), type: "text" },
 			through_position: {
 				schema: z.number().int().positive(),
 				type: "integer",
@@ -25,7 +25,8 @@ export const agentCompactionsTable = defineTable(
 export interface LucidAgentCompactions {
 	id: string;
 	conversation_id: string;
-	run_id: string;
+	/** Null once the run that wrote it is deleted. */
+	run_id: string | null;
 	through_position: number;
 	summary: string;
 	created_at: TimestampImmutable;

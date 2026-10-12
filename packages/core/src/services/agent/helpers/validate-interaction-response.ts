@@ -143,20 +143,14 @@ const validateInteractionResponse: ServiceFn<
 		};
 	}
 
-	const executionAccess = await checkAgentAccess(context, {
-		userId: run.user_id,
-		agentKey: run.agent_key,
-		action: getConversationPermission(run.conversation_kind),
-	});
-	if (executionAccess.error) return executionAccess;
 	const aiAccess = await getAiAccess(context, {});
 	if (aiAccess.error) return aiAccess;
 
 	const call = checkpoint.calls[checkpoint.cursor];
 	const tool = resolveRunSetup(context, {
-		...executionAccess.data,
+		...access.data,
 		aiAccess: aiAccess.data,
-		mode: run.routine_id ? "routine" : "chat",
+		mode: checkpoint.mode,
 		hasHistory: checkpoint.trimmed === true,
 		screen: checkpoint.screen,
 	}).tools.find((tool) => tool.name === call?.name);

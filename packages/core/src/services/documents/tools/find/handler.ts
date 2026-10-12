@@ -19,7 +19,9 @@ const findDocuments: ServiceFn<
 	{ output: z.output<typeof outputSchema> }
 > = async (context, props) => {
 	const collection = context.config.collections.find(
-		(candidate) => candidate.key === props.input.collectionKey,
+		(candidate) =>
+			candidate.key === props.input.collectionKey &&
+			props.allowedCollectionKeys.includes(candidate.key),
 	);
 	if (!collection) {
 		return {

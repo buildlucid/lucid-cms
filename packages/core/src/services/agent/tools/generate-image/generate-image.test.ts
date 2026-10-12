@@ -9,7 +9,7 @@ import {
 	vi,
 } from "vitest";
 import defineAgent from "../../../../libs/agent/define-agent.js";
-import { createTranslationStore } from "../../../../libs/i18n/index.js";
+import { copy, createTranslationStore } from "../../../../libs/i18n/index.js";
 import { aiAccessFeatureSchema } from "../../../../libs/lucid-remote/schema/connection.js";
 import generateMedia from "../../../../libs/lucid-remote/services/generate-media/index.js";
 import getGeneratedMedia from "../../../../libs/lucid-remote/services/get-generated-media/index.js";
@@ -257,12 +257,30 @@ const createMedia = async (mimeType = "image/webp") => {
 	return media.data.id;
 };
 const locale = () => context.config.localization.defaultLocale;
+let messagePosition = 0;
 const markAnalysed = (execution: AgentToolExecution, mediaId: number) =>
-	register(context, {
-		conversationId: execution.run.conversationId,
-		references: [{ type: "media", mediaId }],
-		source: { type: "tool", toolName: "media_analyze" },
-	});
+	context.db.kysely
+		.insertInto("lucid_agent_messages")
+		.values({
+			id: randomUUID(),
+			conversation_id: execution.run.conversationId,
+			run_id: null,
+			role: "assistant",
+			position: ++messagePosition,
+			parts: [
+				{
+					type: "tool",
+					id: randomUUID(),
+					name: "media_analyze",
+					summary: copy.literal("Analysed the image"),
+					input: { mediaId, question: "What does it show?" },
+					status: "complete",
+				},
+			],
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
+		})
+		.execute();
 const generate = (
 	execution: AgentToolExecution,
 	input: Record<string, unknown>,
@@ -619,6 +637,13 @@ test("editing an image the agent hasn't seen asks it to look first, unless it ca
 	expect(generateMedia).not.toHaveBeenCalled();
 
 	await markAnalysed(execution, unseen);
+	expect(await prepare()).toMatchObject({ type: "success" });
+	//* reattaching must preserve evidence of prior analysis
+	await register(context, {
+		conversationId: execution.run.conversationId,
+		references: [{ type: "media", mediaId: unseen }],
+		source: { type: "message" },
+	});
 	expect(await prepare()).toMatchObject({ type: "success" });
 
 	const withoutAnalysis = defineAgent({

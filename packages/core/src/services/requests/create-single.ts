@@ -85,7 +85,11 @@ const createSingle: ServiceFn<
 	)) {
 		const captureRes = await captureDocument(context, {
 			...document,
-			request: { id: requestRes.data.id, type: data.type },
+			request: {
+				id: requestRes.data.id,
+				type: data.type,
+				created_by: data.user.id,
+			},
 			user: data.user,
 			agentRunId: data.agentRunId,
 		});

@@ -87,7 +87,7 @@ const unapprove: ServiceFn<
 				request_id: request.id,
 				user_id: data.user.id,
 				agent_run_id: data.agentRunId ?? null,
-				type: "approval_dismissed",
+				type: "approval_withdrawn",
 			},
 		],
 	});

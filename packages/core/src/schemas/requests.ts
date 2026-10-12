@@ -106,7 +106,13 @@ const requestEventSchema: z.ZodType<RequestEvent> = z.discriminatedUnion(
 		}),
 		z.object({
 			...requestEventBaseShape,
-			type: z.enum(["approval_dismissed", "completed", "closed", "reopened"]),
+			type: z.enum([
+				"approval_dismissed",
+				"approval_withdrawn",
+				"completed",
+				"closed",
+				"reopened",
+			]),
 		}),
 	],
 );

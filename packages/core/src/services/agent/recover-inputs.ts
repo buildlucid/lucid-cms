@@ -1,3 +1,5 @@
+import constants from "../../constants/constants.js";
+import logger from "../../libs/logger/index.js";
 import { AgentInputsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import advanceInputs from "./advance-inputs.js";
@@ -13,7 +15,12 @@ const recoverInputs: ServiceFn<[], undefined> = async (context) => {
 		const result = await advanceInputs(context, {
 			conversationId: item.conversation_id,
 		});
-		if (result.error) return result;
+		if (result.error) {
+			logger.error({
+				message: `Agent inputs for conversation ${item.conversation_id} could not be recovered: ${context.translate(result.error.message)}`,
+				scope: constants.logScopes.ai,
+			});
+		}
 	}
 
 	return { error: undefined, data: undefined };

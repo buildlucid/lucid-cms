@@ -79,7 +79,11 @@ const addDocuments: ServiceFn<
 	for (const document of data.documents) {
 		const captureRes = await captureDocument(context, {
 			...document,
-			request: { id: request.id, type: request.type },
+			request: {
+				id: request.id,
+				type: request.type,
+				created_by: request.created_by,
+			},
 			user: data.user,
 			agentRunId: data.agentRunId,
 			skipDocumentWriteClaims: true,
@@ -90,6 +94,7 @@ const addDocuments: ServiceFn<
 	const dismissRes = await dismissApproval(context, {
 		ids: [request.id],
 		userId: data.user.id,
+		agentRunId: data.agentRunId,
 	});
 	if (dismissRes.error) return dismissRes;
 

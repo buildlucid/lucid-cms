@@ -14,7 +14,7 @@ import notifyMentions from "./helpers/notify-mentions.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 import { commentedNotification } from "./notifications/commented.js";
 
-/** Adds a comment or reply for a request reader, withdrawing approvals only for top-level comments. */
+/** Adds a comment or reply for a request reader, dismissing approvals only for top-level comments. */
 const createComment: ServiceFn<
 	[
 		{
@@ -90,6 +90,7 @@ const createComment: ServiceFn<
 		const dismissRes = await dismissApproval(context, {
 			ids: [request.id],
 			userId: data.user.id,
+			agentRunId: data.agentRunId,
 		});
 		if (dismissRes.error) return dismissRes;
 	}

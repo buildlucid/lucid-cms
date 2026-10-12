@@ -3,6 +3,8 @@ import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
 	AgentInputsRepository,
+	AgentMessagesRepository,
+	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
 import type {
 	AgentDelivery,
@@ -57,6 +59,37 @@ const submitInput: ServiceFn<
 
 	const Inputs = new AgentInputsRepository(context.db);
 	const Conversations = new AgentConversationsRepository(context.db);
+	const Runs = new AgentRunsRepository(context.db);
+	const Messages = new AgentMessagesRepository(context.db);
+
+	//* input IDs become run and message IDs, so reject unrelated collisions
+	const [existingInput, existingRun, existingMessage] = await Promise.all([
+		Inputs.selectSingle({
+			select: ["id"],
+			where: [{ key: "id", operator: "=", value: input.requestId }],
+		}),
+		Runs.selectSingle({
+			select: ["id"],
+			where: [{ key: "id", operator: "=", value: input.requestId }],
+		}),
+		Messages.selectSingle({
+			select: ["id"],
+			where: [{ key: "id", operator: "=", value: input.requestId }],
+		}),
+	]);
+	if (existingInput.error) return existingInput;
+	if (existingRun.error) return existingRun;
+	if (existingMessage.error) return existingMessage;
+	if (!existingInput.data && (existingRun.data || existingMessage.data)) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 409,
+				message: copy("server:agent.request.already.used"),
+			},
+		};
+	}
 
 	//* a stale target is queued rather than injected into another run
 	let targetRunId: string | null = null;

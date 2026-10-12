@@ -14,7 +14,7 @@ const revealWaitMs = 3_000;
 /** A field's keys and repeater item positions from its brick down, which an empty path leaves at the brick itself. */
 export type BuilderFieldPath = Array<string | number>;
 
-/** A field, or a builder brick's header, in the bricks as the builder has them. */
+/** A field, or a brick's header, in the bricks as the builder has them. */
 export type BuilderFieldTarget = {
 	brickIndex: number;
 	path: BuilderFieldPath;
@@ -89,17 +89,17 @@ const resolveBuilderTarget = (
 	const brick = context.bricks[target.brickIndex];
 	if (!brick) return null;
 
-	//* a builder brick on its own shows its header, as it has no field of its own
+	//* a brick on its own shows its header, as it has no field of its own
 	if (target.path.length === 0) {
-		return brick.type === "builder"
-			? {
+		return brick.type === "collection-fields"
+			? null
+			: {
 					fieldId: getPreviewStructureId({
 						brickIndex: target.brickIndex,
 						type: "brick",
 					}),
 					structureIds: [],
-				}
-			: null;
+				};
 	}
 
 	return resolvePreviewFieldTarget({
@@ -122,7 +122,7 @@ const resolveBuilderTarget = (
 	});
 };
 
-/** Opens and scrolls to a field or builder brick header, returning whether it was shown. */
+/** Opens and scrolls to a field or brick header, returning whether it was shown. */
 export const revealBuilderField = async (
 	props: BuilderTargetContext & BuilderFieldTarget,
 ) => {

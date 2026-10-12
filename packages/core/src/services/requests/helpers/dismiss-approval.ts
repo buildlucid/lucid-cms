@@ -17,7 +17,7 @@ import { reviewRequestedNotification } from "../notifications/review-requested.j
  * earlier approvals no longer apply. Requests that had approvals record why.
  */
 const dismissApproval: ServiceFn<
-	[{ ids: number[]; userId?: number | null }],
+	[{ ids: number[]; userId?: number | null; agentRunId?: string }],
 	undefined
 > = async (context, data) => {
 	const ids = [...new Set(data.ids)];
@@ -64,6 +64,7 @@ const dismissApproval: ServiceFn<
 		data: approvedIds.map((requestId) => ({
 			request_id: requestId,
 			user_id: data.userId ?? null,
+			agent_run_id: data.agentRunId ?? null,
 			type: "approval_dismissed" as const,
 		})),
 	});

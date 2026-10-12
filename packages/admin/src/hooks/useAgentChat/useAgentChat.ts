@@ -88,6 +88,8 @@ export const useAgentChat = (
 	//* a failed submission keeps its request id, so resending it cannot create a duplicate
 	let retrySubmission: PendingSubmission | undefined;
 	let controller: AbortController | undefined;
+	/** Identifies the chat that owns the active stream. */
+	let streamingConversationId: string | undefined;
 
 	// ----------------------------------------
 	// Queries & Mutations
@@ -208,6 +210,7 @@ export const useAgentChat = (
 		let connected = false;
 
 		controller = current;
+		streamingConversationId = id;
 		setError(undefined);
 		setStreaming(true);
 		transcript.replace(options.prepare?.(saved()) ?? saved());
@@ -374,8 +377,12 @@ export const useAgentChat = (
 	//* History changes are infrequent; text deltas patch the store directly.
 	createEffect(
 		on(saved, (rows) => {
-			if (!untrack(streaming)) transcript.replace(rows);
-			else {
+			if (
+				!untrack(streaming) ||
+				streamingConversationId !== untrack(conversationId)
+			) {
+				transcript.replace(rows);
+			} else {
 				const current = untrack(() => [...messages]);
 				const first = current[0]?.position;
 				transcript.replace([
@@ -390,6 +397,12 @@ export const useAgentChat = (
 			conversationId,
 			() => {
 				controller?.abort();
+				controller = undefined;
+				streamingConversationId = undefined;
+				setStreaming(false);
+				setLiveRunId(undefined);
+				setLiveContext(undefined);
+				transcript.replace(untrack(saved));
 				retrySubmission = undefined;
 				setError(undefined);
 			},

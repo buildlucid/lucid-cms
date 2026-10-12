@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import logger from "../../libs/logger/index.js";
 import {
 	AgentConversationsRepository,
 	AgentRunsRepository,
@@ -79,7 +80,12 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 
 				return { error: undefined, data: undefined };
 			});
-			if (failed.error) return failed;
+			if (failed.error) {
+				logger.error({
+					message: `Agent run ${run.id} could not be failed: ${context.translate(failed.error.message)}`,
+					scope: constants.logScopes.ai,
+				});
+			}
 
 			continue;
 		}
@@ -104,8 +110,12 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 
 			return { error: undefined, data: true };
 		});
-		if (requeued.error) return requeued;
-		if (requeued.data) recovered++;
+		if (requeued.error) {
+			logger.error({
+				message: `Agent run ${run.id} could not be requeued: ${context.translate(requeued.error.message)}`,
+				scope: constants.logScopes.ai,
+			});
+		} else if (requeued.data) recovered++;
 	}
 
 	return { error: undefined, data: recovered };

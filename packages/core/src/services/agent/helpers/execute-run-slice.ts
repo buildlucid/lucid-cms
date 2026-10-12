@@ -163,7 +163,13 @@ const executeRunSlice: ServiceFn<
 		}
 
 		return await driveRun(context, { run, checkpoint, session: session.data });
-	} catch {
+	} catch (error) {
+		logger.error({
+			error,
+			message: "Agent run was interrupted by an unexpected error",
+			scope: constants.logScopes.ai,
+			data: { runId: run.id },
+		});
 		await session.data.save();
 
 		return await session.data.finish(

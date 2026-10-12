@@ -490,7 +490,7 @@ describe("routine chat reuse", () => {
 			).data?.conversationId,
 		).toBe(second.data.conversationId);
 	});
-	test("refuses an active or paused target chat without creating another chat", async () => {
+	test("refuses an active target chat without creating another chat, and carries on in a paused one", async () => {
 		const routine = await dueRoutine("reuse");
 		const first = await runRoutine(context, { id: routine.id, userId });
 		if (first.error) throw first.error;
@@ -506,14 +506,14 @@ describe("routine chat reuse", () => {
 			(await runRoutine(context, { id: routine.id, userId })).error?.status,
 		).toBe(409);
 		await finishOccurrence(manual.data.runId, first.data.conversationId);
+		//* routine runs bypass a paused user-input queue
 		await Conversations.updateSingle({
 			where: [{ key: "id", operator: "=", value: first.data.conversationId }],
 			data: { queue_paused: true },
 		});
-		expect(
-			(await runRoutine(context, { id: routine.id, userId })).error?.status,
-		).toBe(409);
-		expect(await routineRuns(routine.id)).toHaveLength(1);
+		const next = await runRoutine(context, { id: routine.id, userId });
+		expect(next.data?.conversationId).toBe(first.data.conversationId);
+		expect(await routineRuns(routine.id)).toHaveLength(2);
 	});
 });
 

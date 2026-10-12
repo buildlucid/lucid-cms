@@ -9,6 +9,7 @@ const requestEventTypeSchema = z.enum([
 	"comment",
 	"approved",
 	"approval_dismissed",
+	"approval_withdrawn",
 	"schedule_updated",
 	"completed",
 	"failed",
@@ -125,6 +126,7 @@ export type RequestEventMetadataByType = {
 	comment: null;
 	approved: null;
 	approval_dismissed: null;
+	approval_withdrawn: null;
 	completed: null;
 	closed: null;
 	reopened: null;

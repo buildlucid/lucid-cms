@@ -25,7 +25,7 @@ const getBlockers: ServiceFn<
 	if (data.request.status !== "open") {
 		return { error: undefined, data: blockers };
 	}
-	//* comments withdraw approval, so open ones only ever hold up approving
+	//* posting or reopening a top-level comment dismisses approvals, so open comments block approval
 	if (countOpenComments({ events: data.request.events }) > 0) {
 		blockers.push({ code: "comments_open" });
 	}

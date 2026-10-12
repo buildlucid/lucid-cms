@@ -107,6 +107,7 @@ const resolveRunSetup = (
 		instructions: buildInstructions({
 			agent,
 			mode: props.mode,
+			attended,
 			skills,
 			capabilities: getCapabilityProviders({ tools }),
 			hasHistory: props.hasHistory,

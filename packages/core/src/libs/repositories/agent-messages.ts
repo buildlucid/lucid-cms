@@ -62,12 +62,21 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 					.where("status", "=", "running"),
 			)
 			.onConflict((conflict) =>
-				conflict.column("id").doUpdateSet((eb) => ({
-					parts: eb.ref("excluded.parts"),
-					updated_at: eb.ref("excluded.updated_at"),
-					execution_version: eb.ref("excluded.execution_version"),
-					revision: eb.ref("excluded.revision"),
-				})),
+				conflict
+					.column("id")
+					.doUpdateSet((eb) => ({
+						parts: eb.ref("excluded.parts"),
+						updated_at: eb.ref("excluded.updated_at"),
+						execution_version: eb.ref("excluded.execution_version"),
+						revision: eb.ref("excluded.revision"),
+					}))
+					.where(
+						"lucid_agent_messages.conversation_id",
+						"=",
+						props.conversationId,
+					)
+					.where("lucid_agent_messages.run_id", "=", props.runId)
+					.where("lucid_agent_messages.role", "=", props.role ?? "assistant"),
 			)
 			.returning("id");
 

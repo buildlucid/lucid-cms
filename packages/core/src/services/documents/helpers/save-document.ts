@@ -115,6 +115,7 @@ const saveDocument: ServiceFn<
 		const existingDocumentRes = await checkDocumentAccess(context, {
 			collectionKey: data.collectionKey,
 			id: data.documentId,
+			pending: false,
 		});
 		if (existingDocumentRes.error) return existingDocumentRes;
 	}

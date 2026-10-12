@@ -1,19 +1,13 @@
 import { type CollectionBuilder, copy } from "@lucidcms/core";
 import type {
 	CollectionTableNames,
-	FieldInputSchema,
 	ServiceFn,
 	Toolkit,
 } from "@lucidcms/core/types";
-import constants from "../constants.js";
-import type {
-	CollectionConfig,
-	ProjectedFullSlug,
-	RouteScope,
-} from "../types/types.js";
+import type { CollectionConfig, RouteScope } from "../types/types.js";
 import resolvePagesCollectionLocalization from "../utils/resolve-pages-collection-localization.js";
 import findRouteConflicts from "./find-route-conflicts.js";
-import buildDescendantFullSlugs from "./hooks/helpers/build-descendant-full-slugs.js";
+import projectRequestTargetDescendants from "./project-request-target-descendants.js";
 import projectRequestTargetRoutes, {
 	type RequestTargetMember,
 } from "./project-request-target-routes.js";
@@ -65,45 +59,14 @@ const refreshRequestTargetRoutes: ServiceFn<
 	const memberIds = new Set(
 		projection.members.map((member) => member.document_id),
 	);
-	const projectedById = new Map(
-		projection.projected.map((document) => [document.documentId, document]),
-	);
 
-	const descendants: ProjectedFullSlug[] = [];
-	for (const root of projection.roots) {
-		const route = projectedById.get(root);
-		if (!route) continue;
+	const descendantsRes = await projectRequestTargetDescendants(context, {
+		...data,
+		projection,
+	});
+	if (descendantsRes.error) return descendantsRes;
 
-		const parentFullSlugField: FieldInputSchema = {
-			key: constants.fields.fullSlug.key,
-			type: "text",
-			...(localization.enabled
-				? {
-						translations: Object.fromEntries(
-							[...route.values].filter(([locale]) => locale !== null),
-						),
-					}
-				: { value: route.values.get(null) ?? null }),
-		};
-		const descendantsRes = await buildDescendantFullSlugs(context, {
-			documentIds: [root],
-			scope,
-			tables: data.tables,
-			collection: data.collection,
-			collectionInstance: data.collectionInstance,
-			parentFullSlugField,
-		});
-		if (descendantsRes.error) return descendantsRes;
-
-		//* completed pages below the root already hold their projected route
-		descendants.push(
-			...descendantsRes.data.filter(
-				(document) => !memberIds.has(document.documentId),
-			),
-		);
-	}
-
-	const projected = [...projection.projected, ...descendants];
+	const projected = [...projection.projected, ...descendantsRes.data];
 	const conflictsRes = await findRouteConflicts(context, {
 		collection: data.collection,
 		projectedFullSlugs: projected,
