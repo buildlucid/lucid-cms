@@ -859,6 +859,8 @@
 	"agent.routine.code.locked": "Routines defined in code can only be paused, resumed or run.",
 	"agent.input.steer.denied": "Only the person a run acts for can correct it. Send your message as a follow-up instead.",
 	"agent.conversation.not.found": "Chat not found.",
+	"agent.message.not.found": "Message not found.",
+	"agent.branch.unfinished": "Wait for the agent to finish this reply before branching from it.",
 	"agent.title.context.empty": "This chat does not have enough text to generate a title.",
 	"agent.title.generate.failed": "The chat title could not be generated.",
 	"agent.routine.schedule.invalid": "Invalid cron expression or timezone.",

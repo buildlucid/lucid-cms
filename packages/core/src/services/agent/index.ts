@@ -1,3 +1,4 @@
+export { default as branchConversation } from "./branch-conversation.js";
 export { default as cancelRun } from "./cancel-run.js";
 export { default as compactConversation } from "./compact-conversation.js";
 export { default as createConversation } from "./create-conversation.js";

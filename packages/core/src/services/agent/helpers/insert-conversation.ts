@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
+import type { LucidAgentConversations } from "../../../libs/db/tables/agent-conversations.js";
+import type { Select } from "../../../libs/db/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
 import type {
@@ -20,6 +22,8 @@ const insertConversation: ServiceFn<
 			modelSelection?: AiModelSelection;
 			userId: number | null;
 			title?: string;
+			/** Preserves a copied title's status, including eligibility for automatic generation. */
+			titleStatus?: Select<LucidAgentConversations>["title_status"];
 			routineId?: string;
 		},
 	],
@@ -45,7 +49,8 @@ const insertConversation: ServiceFn<
 			model_selection: input.modelSelection ?? null,
 			title: input.title ?? constants.agent.defaultTitle,
 			title_status:
-				input.title && !input.routineId ? "user_set" : "provisional",
+				input.titleStatus ??
+				(input.title && !input.routineId ? "user_set" : "provisional"),
 			user_id: input.userId,
 			routine_id: input.routineId ?? null,
 			active_run_id: null,

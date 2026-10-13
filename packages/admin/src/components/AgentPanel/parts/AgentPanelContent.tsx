@@ -96,6 +96,7 @@ const AgentPanelContent: Component = () => {
 									scroll={scroll}
 									conversationId={id}
 									variant="panel"
+									onBranched={session.open}
 									missingAction={
 										<Button
 											variant="primary"

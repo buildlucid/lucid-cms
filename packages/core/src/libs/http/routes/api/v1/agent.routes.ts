@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import branchConversation from "../../../controllers/agent/branch-conversation.js";
 import cancelRun from "../../../controllers/agent/cancel-run.js";
 import compactConversation from "../../../controllers/agent/compact-conversation.js";
 import createConversation from "../../../controllers/agent/create-conversation.js";
@@ -55,6 +56,7 @@ const agentRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/conversations/:id/inputs", ...updateInput)
 	.post("/conversations/:id/compact", ...compactConversation)
 	.post("/conversations/:id/retry", ...retryConversation)
+	.post("/conversations/:id/branch", ...branchConversation)
 	.post("/runs/:id/respond", ...respondRun)
 	.post("/runs/:id/cancel", ...cancelRun)
 	.get("/runs/:id/events", ...watchRun)

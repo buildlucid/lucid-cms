@@ -3,6 +3,7 @@ import classnames from "classnames";
 import { TbOutlineArrowDown } from "solid-icons/tb";
 import {
 	type Component,
+	createMemo,
 	createSignal,
 	type JSXElement,
 	Match,
@@ -11,6 +12,7 @@ import {
 } from "solid-js";
 import AgentChatComposer from "@/components/AgentChatComposer/AgentChatComposer";
 import AgentChatTranscript from "@/components/AgentChatTranscript/AgentChatTranscript";
+import BranchAgentConversationModal from "@/components/BranchAgentConversationModal/BranchAgentConversationModal";
 import Button from "@/components/Button/Button";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import LoadingState from "@/components/LoadingState/LoadingState";
@@ -19,6 +21,7 @@ import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
 import type { AgentChatView } from "@/hooks/useAgentChatView/useAgentChatView";
 import type { useChatScroll } from "@/hooks/useChatScroll/useChatScroll";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 import AgentChatTimeline from "./parts/AgentChatTimeline";
 
 /**
@@ -35,10 +38,22 @@ const AgentChatThread: Component<{
 	/** Offered when the chat can't be loaded, eg. a link to a new chat. */
 	missingAction: JSXElement;
 	onEditRoutineConfirmations?: () => void;
+	/** Opens the new branch using its conversation ID. */
+	onBranched: (conversationId: string) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [attached, setAttached] = createSignal(false);
+	const [branchFrom, setBranchFrom] = createSignal<string>();
+	const [branchOpen, setBranchOpen] = createSignal(false);
+
+	// ----------------------------------------
+	// Memos
+	const canBranch = createMemo(() =>
+		getAgentAccess().chat.some(
+			(agent) => agent.key === props.chat.data()?.agentKey,
+		),
+	);
 
 	// ----------------------------------------
 	// Render
@@ -95,6 +110,14 @@ const AgentChatThread: Component<{
 									onSelectTool={props.view.selectTool}
 									onRespond={props.view.respond}
 									canRetry={!props.view.unavailable()}
+									onBranch={
+										canBranch()
+											? (messageId) => {
+													setBranchFrom(messageId);
+													setBranchOpen(true);
+												}
+											: undefined
+									}
 								/>
 							</div>
 						</div>
@@ -185,6 +208,12 @@ const AgentChatThread: Component<{
 					</div>
 				</div>
 			</Show>
+			<BranchAgentConversationModal
+				id={() => props.conversationId}
+				messageId={branchFrom}
+				state={{ open: branchOpen(), setOpen: setBranchOpen }}
+				onBranched={props.onBranched}
+			/>
 		</>
 	);
 };

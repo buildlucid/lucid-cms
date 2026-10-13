@@ -236,6 +236,9 @@ const AgentConversationPage: Component = () => {
 								setFocusConfirmations(true);
 								setRoutineOpen(true);
 							}}
+							onBranched={(conversationId) =>
+								navigate(`/lucid/agent/chats/${conversationId}`)
+							}
 						/>
 					</section>
 					<Show when={sidebarOpen() && conversation()}>

@@ -612,6 +612,17 @@ export const controllerSchemas = {
 		params: idParams,
 		response: z.object({ title: z.string() }),
 	} satisfies ControllerSchema,
+	branchConversation: {
+		body: z.object({
+			messageId: z.uuid().meta({
+				description:
+					"The finished reply to branch from. It and every message before it are copied.",
+			}),
+		}),
+		query: noQuery,
+		params: idParams,
+		response: agentConversationResponseSchema,
+	} satisfies ControllerSchema,
 	deleteConversation: {
 		body: undefined,
 		query: noQuery,

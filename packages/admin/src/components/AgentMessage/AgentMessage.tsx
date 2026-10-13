@@ -4,7 +4,11 @@ import type {
 	AgentMessage as AgentMessageData,
 } from "@types";
 import classnames from "classnames";
-import { TbOutlineCheck, TbOutlineCopy } from "solid-icons/tb";
+import {
+	TbOutlineCheck,
+	TbOutlineCopy,
+	TbOutlineGitBranch,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -67,13 +71,11 @@ export interface AgentMessageProps {
 	working?: boolean;
 	/** Builder changes for the reply ending with this message, displayed after its parts. */
 	builderChanges?: AgentBuilderChangesData[];
+	/** Offers branching from this reply when provided. */
+	onBranch?: () => void;
 }
 
-/**
- * One message in a conversation: the user's text, or the agent's reply with its
- * tools and widgets. A message that ends in text ends in when it was sent and
- * a copy button, which a reply shows once it finishes streaming.
- */
+/** Renders user messages and agent replies with tools, widgets and available copy or branch actions. */
 const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -405,6 +407,19 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 							<TbOutlineCheck size={11} class="text-success" />
 						</Show>
 					</button>
+					<Show when={!user() && props.onBranch}>
+						{(onBranch) => (
+							<button
+								type="button"
+								class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								aria-label={T()("agent.message.branch")}
+								title={T()("agent.message.branch")}
+								onClick={() => onBranch()()}
+							>
+								<TbOutlineGitBranch size={11} />
+							</button>
+						)}
+					</Show>
 				</div>
 			</Show>
 		</div>

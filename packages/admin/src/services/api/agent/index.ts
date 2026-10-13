@@ -1,6 +1,7 @@
 import { submitInput, updateInput } from "./input";
 import streamRun, { runStreamUrls } from "./stream-run";
 import { createUploadReq, createUploadSessionReq } from "./uploads";
+import useBranchConversation from "./useBranchConversation";
 import useCancelRun from "./useCancelRun";
 import useCreateConversation from "./useCreateConversation";
 import useCreateRoutine from "./useCreateRoutine";
@@ -31,6 +32,7 @@ const exportObject = {
 	createUploadReq,
 	streamRun,
 	runStreamUrls,
+	useBranchConversation,
 	useCancelRun,
 	useCreateConversation,
 	useCreateRoutine,

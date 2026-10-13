@@ -27,6 +27,8 @@ const AgentChatTranscript: Component<{
 	onRespond: AgentMessageProps["onRespond"];
 	/** Whether a failed run can be retried from here. */
 	canRetry: boolean;
+	/** Starts a branch from an assistant reply outside the active run. */
+	onBranch?: (messageId: string) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
@@ -95,6 +97,14 @@ const AgentChatTranscript: Component<{
 		compactions().before.has(id) &&
 		!(index === 0 && props.chat.history.hasNextPage);
 	const isLast = (index: number) => index === props.chat.messages.length - 1;
+	const branchFrom = (message: (typeof props.chat.messages)[number]) => {
+		const onBranch = props.onBranch;
+		if (!onBranch || message.role !== "assistant") return undefined;
+		if (message.runId !== null && message.runId === props.chat.activeRunId()) {
+			return undefined;
+		}
+		return () => onBranch(message.id);
+	};
 
 	// ----------------------------------------
 	// Render
@@ -128,6 +138,7 @@ const AgentChatTranscript: Component<{
 								live={props.chat.streaming() && isLast(index())}
 								working={activity() === "row" && isLast(index())}
 								builderChanges={builderChanges().get(message.id)}
+								onBranch={branchFrom(message)}
 							/>
 						</div>
 					</>
