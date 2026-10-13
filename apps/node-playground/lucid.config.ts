@@ -96,7 +96,7 @@ export default defineConfig({
 			mcp: {
 				tools: [mcpTools.all(), echoTool, addTool],
 			},
-			agents: [assistantAgent, seoAgent],
+			// agents: [assistantAgent, seoAgent],
 			// mediaGeneration: {
 			// 	image: { models: { default: "openai/gpt-image" } },
 			// 	audio: false,

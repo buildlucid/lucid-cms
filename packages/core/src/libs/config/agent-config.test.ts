@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import defineAgent from "../agent/define-agent.js";
 import defineRoutine from "../agent/define-routine.js";
+import lucidAgent from "../agent/lucid-agent.js";
 import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import { copy } from "../i18n/copy.js";
@@ -28,12 +29,18 @@ const check = (agents: AgentDefinition[]) => () =>
 		}),
 	);
 
-test("MCP stays off until it is configured, and agents default to none", () => {
+test("MCP stays off until it is configured, and agents default to Lucid's", () => {
 	const config = ConfigSchema.pick({ ai: true });
 	expect(config.parse({}).ai).toMatchObject({
 		mcp: { enabled: false, tools: [], skills: [] },
-		agents: { enabled: true, definitions: [] },
+		agents: { enabled: true, definitions: [lucidAgent] },
 	});
+	expect(config.parse({ ai: { agents: true } }).ai.agents.definitions).toEqual([
+		lucidAgent,
+	]);
+	expect(config.parse({ ai: { agents: [] } }).ai.agents.definitions).toEqual(
+		[],
+	);
 	expect(config.parse({ ai: { mcp: {} } }).ai.mcp.enabled).toBe(true);
 	expect(config.parse({ ai: { mcp: false } }).ai.mcp.enabled).toBe(false);
 	expect(config.parse({ ai: false }).ai.enabled).toBe(false);

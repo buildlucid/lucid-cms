@@ -6,6 +6,7 @@ export { default as defineAdminRoute } from "../libs/admin/define-admin-route.js
 export { default as defineAdminSlot } from "../libs/admin/define-admin-slot.js";
 export { default as defineAgent } from "../libs/agent/define-agent.js";
 export { default as defineRoutine } from "../libs/agent/define-routine.js";
+export { default as lucidAgent } from "../libs/agent/lucid-agent.js";
 export { default as BrickBuilder } from "../libs/collection/builders/brick-builder/index.js";
 export { default as CollectionBuilder } from "../libs/collection/builders/collection-builder/index.js";
 export { default as FieldBuilder } from "../libs/collection/builders/field-builder/index.js";

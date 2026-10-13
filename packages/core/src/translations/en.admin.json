@@ -187,5 +187,19 @@
 	"core.notifications.agent.routine-needs-review.name": "Routine needs review",
 	"core.notifications.agent.routine-needs-review.description": "A routine you look after asks for its work to be checked.",
 	"core.notifications.agent.routine-report.name": "Routine report",
-	"core.notifications.agent.routine-report.description": "A routine you look after finishes with something to report."
+	"core.notifications.agent.routine-report.description": "A routine you look after finishes with something to report.",
+	"core.agents.lucid-agent.name": "Lucid Agent",
+	"core.agents.lucid-agent.description": "A general-purpose agent that can use every Lucid tool.",
+	"core.agents.lucid-agent.suggestions.attention.title": "What needs my attention?",
+	"core.agents.lucid-agent.suggestions.attention.description": "See requests and notifications waiting on you.",
+	"core.agents.lucid-agent.suggestions.attention.message": "Show me what needs my attention: requests waiting for my review and unread notifications. Put the most urgent first.",
+	"core.agents.lucid-agent.suggestions.requests.title": "Review open requests",
+	"core.agents.lucid-agent.suggestions.requests.description": "Get a summary of pending changes.",
+	"core.agents.lucid-agent.suggestions.requests.message": "Summarise the open requests, what each one changes and what is blocking it. Do not comment or make changes.",
+	"core.agents.lucid-agent.suggestions.alt-text.title": "Fill in missing alt text",
+	"core.agents.lucid-agent.suggestions.alt-text.description": "Find images without descriptions.",
+	"core.agents.lucid-agent.suggestions.alt-text.message": "Find library images with missing or weak alt text. Suggest alt text for up to 10 of them and ask me before saving any.",
+	"core.agents.lucid-agent.suggestions.draft.title": "Draft a new page",
+	"core.agents.lucid-agent.suggestions.draft.description": "Start a page from a short brief.",
+	"core.agents.lucid-agent.suggestions.draft.message": "Help me draft a new page. Ask me what it is for, then create it as a request I can review."
 }

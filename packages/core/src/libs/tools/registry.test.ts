@@ -1,6 +1,7 @@
 import { expect, test, vi } from "vitest";
 import z from "zod";
 import defineAgent from "../agent/define-agent.js";
+import lucidAgent from "../agent/lucid-agent.js";
 import checkToolDefinitions from "../config/checks/check-tool-definitions.js";
 import processConfig from "../config/process-config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
@@ -98,8 +99,16 @@ test("ai boolean shorthand keeps the remaining AI defaults", async () => {
 		enabled: false,
 		mediaGeneration: { image: { enabled: true } },
 		mcp: { enabled: false, tools: [], skills: [] },
-		agents: { enabled: true, definitions: [] },
+		agents: { enabled: true, definitions: [lucidAgent] },
 	});
+});
+
+test("Lucid's agent passes config checks when no agents are given", async () => {
+	const config = await processConfig(
+		{ secrets: "a".repeat(64) },
+		{ resolvedDb: adapter },
+	);
+	expect(config.ai.agents.definitions).toEqual([lucidAgent]);
 });
 
 test("names are unique within a placement, which only holds its own target", async () => {

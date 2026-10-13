@@ -1,6 +1,7 @@
 import z from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { adminConfigSchema } from "../admin/schema.js";
+import lucidAgent from "../agent/lucid-agent.js";
 import { isAgentDefinition } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
@@ -173,10 +174,15 @@ const AiConfigSchema = z.strictObject({
 	agents: z
 		.preprocess(
 			(value) => enabledShorthand(definitionsShorthand(value)),
-			z.strictObject({
-				enabled: z.boolean().default(true),
-				definitions: z.array(AgentDefinitionSchema).default([]),
-			}),
+			z
+				.strictObject({
+					enabled: z.boolean().default(true),
+					definitions: z.array(AgentDefinitionSchema).optional(),
+				})
+				.transform(({ enabled, definitions }) => ({
+					enabled,
+					definitions: definitions ?? (enabled ? [lucidAgent] : []),
+				})),
 		)
 		.prefault({}),
 	mcp: z
