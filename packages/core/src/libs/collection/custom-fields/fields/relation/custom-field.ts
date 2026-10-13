@@ -111,7 +111,6 @@ class RelationCustomField extends CustomField<"relation"> {
 						nullable: false,
 					},
 				],
-				foreignKeys: [],
 			},
 			error: undefined,
 		};

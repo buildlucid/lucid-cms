@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, z } from "@lucidcms/core";
 import { prefixGeneratedColName } from "@lucidcms/core/extension";
 import type {
 	LucidBrickTableName,
@@ -15,12 +15,15 @@ import {
 	scopeVersionFilter,
 } from "../utils/route-scope.js";
 
-export type PageFieldsRow = {
-	locale: string | null;
-	_slug: string | null;
-	_fullSlug: string | null;
-	_parentPage: number | null;
-};
+/** A page version's route fields in one locale, as read from the database. */
+export const pageFieldsRowSchema = z.object({
+	locale: z.string().nullable(),
+	_slug: z.string().nullable(),
+	_fullSlug: z.string().nullable(),
+	_parentPage: z.number().nullable(),
+});
+
+export type PageFieldsRow = z.infer<typeof pageFieldsRowSchema>;
 
 export type PageVersionFields = {
 	document_id: number;
@@ -65,6 +68,8 @@ const getPagesFields: ServiceFn<
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
 		const defaultFieldsAlias = "default_fields";
+		//* the alias gives Kysely one table to type instead of a table name union
+		const parentPageAlias = "parent_page";
 		const idColumn =
 			"documentIds" in data
 				? `${versionTable}.document_id`
@@ -74,9 +79,11 @@ const getPagesFields: ServiceFn<
 			parametersPerItem: 1,
 			reservedParameters: scopeParameterCount(data.scope),
 		});
-		const rows: Array<
-			PageFieldsRow & { document_id: number; document_version_id: number }
-		> = [];
+		const rowSchema = pageFieldsRowSchema.extend({
+			document_id: z.number(),
+			document_version_id: z.number(),
+		});
+		const rows: Array<z.infer<typeof rowSchema>> = [];
 		for (let offset = 0; offset < ids.length; offset += batchSize) {
 			const query = context.db.kysely
 				.selectFrom(fieldsTable)
@@ -94,32 +101,31 @@ const getPagesFields: ServiceFn<
 						)
 						.on(`${defaultFieldsAlias}.locale`, "is", null),
 				)
-				.leftJoin(parentPageTable, (join) =>
+				.leftJoin(`${parentPageTable} as ${parentPageAlias}`, (join) =>
 					join
 						.onRef(
-							`${parentPageTable}.parent_id`,
+							`${parentPageAlias}.parent_id`,
 							"=",
 							`${defaultFieldsAlias}.id`,
 						)
-						.on(`${parentPageTable}.locale`, "is", null),
+						.on(`${parentPageAlias}.locale`, "is", null),
 				)
-				// @ts-expect-error
 				.select([
 					`${versionTable}.document_id`,
 					`${fieldsTable}.document_version_id`,
 					`${fieldsTable}.locale`,
 					`${fieldsTable}.${slugColumn} as _slug`,
 					`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
-					`${parentPageTable}.${parentPageColumn} as _parentPage`,
+					`${parentPageAlias}.${parentPageColumn} as _parentPage`,
 				])
 				.where(idColumn, "in", ids.slice(offset, offset + batchSize))
 				.where(scopeVersionFilter(versionTable, data.scope));
 
 			const result = await context.db
 				.query("pages.fields.find", () => query)
-				.many();
+				.many({ schema: rowSchema });
 			if (result.error) return result;
-			rows.push(...(result.data as typeof rows));
+			rows.push(...result.data);
 		}
 
 		const versions = new Map<number, PageVersionFields>();

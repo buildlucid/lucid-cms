@@ -1,31 +1,18 @@
 import type { ResolvedAdminCopy } from "../i18n/types.js";
+import type { agentPermissionActions } from "./agent-permissions.js";
+import type { collectionPermissionActions } from "./collection-permissions.js";
 import type { PermissionGroups, Permissions } from "./definitions.js";
 
 export type StaticPermission = (typeof Permissions)[keyof typeof Permissions];
 
 export type CollectionPermissionAction =
-	| "read"
-	| "create"
-	/** Request new documents, which are only created once their create request is completed. */
-	| "create-request"
-	| "update"
-	| "delete"
-	/** Request deletions, which only move documents to the bin once their delete request is completed. */
-	| "delete-request"
-	/** Request unpublishing, which only removes documents from environments once their unpublish request is completed. */
-	| "unpublish-request"
-	| "restore"
-	| "publish"
-	| "review";
+	(typeof collectionPermissionActions)[number];
 
 export type CollectionPermission<
 	TAction extends CollectionPermissionAction = CollectionPermissionAction,
 > = `documents:${string}:${TAction}`;
 
-export type AgentPermissionAction =
-	| "chat"
-	| "manage-own-routines"
-	| "manage-code-routines";
+export type AgentPermissionAction = (typeof agentPermissionActions)[number];
 
 export type AgentPermission<
 	TAction extends AgentPermissionAction = AgentPermissionAction,

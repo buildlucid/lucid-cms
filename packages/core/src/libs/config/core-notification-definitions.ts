@@ -3,10 +3,9 @@ import type { AnyNotificationDefinition } from "../notifications/types.js";
 
 /** Notification types Lucid registers before the project and plugin definitions. */
 const coreNotificationDefinitions = [
-	notifications.storage,
+	...Object.values(notifications.system),
 	...Object.values(notifications.requests),
 	...Object.values(notifications.workflows),
-	...Object.values(notifications.jobs),
 	...Object.values(notifications.agent),
 ] as const satisfies readonly AnyNotificationDefinition[];
 

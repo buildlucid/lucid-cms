@@ -1,12 +1,12 @@
+import type {
+	AgentImageSettings,
+	AgentImageSettingsData,
+} from "@lucidcms/types";
 import z from "zod";
 import {
 	mediaImageAspectRatioSchema,
 	mediaImageOptionSchema,
 } from "../../../../schemas/ai.js";
-import type {
-	AgentImageSettings,
-	AgentImageSettingsData,
-} from "../../../../types/response.js";
 import { imageGuidanceSchema } from "../../../ai/helpers/image-guidance.js";
 
 /** Images the generation model accepts to edit. */
@@ -44,7 +44,7 @@ export const inputSchema = z
 		}),
 		library: z.boolean().default(false).meta({
 			description:
-				"Save the image to the media library as public media, ready to use in documents, instead of the person's private personal media. Set it when the image is for a document or field.",
+				"Save the image to the media library, where it is public and ready to use in documents, instead of the person's private personal media. Set it when the image is for a document or field.",
 		}),
 		skipReview: z.boolean().default(false).meta({
 			description:

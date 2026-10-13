@@ -1,4 +1,4 @@
-import type { RequestDetail, RequestUser } from "@types";
+import type { RequestDetails } from "@types";
 import classNames from "classnames";
 import {
 	TbOutlineCalendar,
@@ -6,7 +6,7 @@ import {
 	TbOutlineInfoCircle,
 	TbOutlineUserCheck,
 } from "solid-icons/tb";
-import { type Component, createMemo, For, Show } from "solid-js";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import Button from "@/components/Button/Button";
 import DateText from "@/components/DateText/DateText";
@@ -23,23 +23,32 @@ import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getRequestState, requestStates } from "@/utils/requests";
 
-const userName = (user: RequestUser) =>
-	helpers.formatUserName(user, "name") || user.email || T()("common.unknown");
-const toOption = (user: RequestUser) => ({
+type Reviewer = RequestDetails["reviewers"][number];
+
+const userName = (user: Reviewer) =>
+	helpers.formatUserName(user, "name") || T()("common.unknown");
+const toOption = (user: Reviewer) => ({
 	value: user.id,
 	label: userName(user),
 	user,
 });
 
 export const RequestSidebar: Component<{
-	request: RequestDetail;
-	publishing: boolean;
+	request: RequestDetails;
+	completing: boolean;
 	onSchedule: () => void;
 }> = (props) => {
 	// ----------------------------------------
+	// State & Hooks
+	const [reviewerSearch, setReviewerSearch] = createSignal("");
+
+	// ----------------------------------------
 	// Queries & Mutations
 	const eligible = api.requests.useGetReviewers({
-		queryParams: { location: { id: () => props.request.id } },
+		queryParams: {
+			location: { id: () => props.request.id },
+			filters: { name: () => reviewerSearch() || undefined },
+		},
 		enabled: () => props.request.permissions.edit,
 	});
 	const update = api.requests.useUpdateSingle();
@@ -71,12 +80,12 @@ export const RequestSidebar: Component<{
 				<span class="flex items-center gap-2">
 					<StatusIndicator
 						variant={
-							props.publishing
+							props.completing
 								? "blue-subtle"
 								: requestStates[state()].indicator
 						}
 					/>
-					{props.publishing
+					{props.completing
 						? T()("requests.completing")
 						: requestStates[state()].label()}
 				</span>
@@ -141,7 +150,7 @@ export const RequestSidebar: Component<{
 		},
 		{
 			label: T()("requests.sidebar.failure"),
-			value: <span class="text-danger">{props.request.failure}</span>,
+			value: <span class="text-danger">{props.request.failure?.message}</span>,
 			show: state() === "failed",
 			stacked: true,
 			wrap: true,
@@ -246,6 +255,11 @@ export const RequestSidebar: Component<{
 								})
 							}
 							options={options()}
+							search={{
+								value: reviewerSearch(),
+								onChange: setReviewerSearch,
+								loading: eligible.isFetching,
+							}}
 							placeholder={T()("requests.reviewers.add")}
 							disabled={update.action.isPending}
 							variant="list"
@@ -280,7 +294,7 @@ export const RequestSidebar: Component<{
 									: T()("requests.schedule.waiting")}
 							</p>
 						</Show>
-						<Show when={props.request.permissions.request}>
+						<Show when={props.request.permissions.complete}>
 							<Button
 								variant="outline"
 								size="sm"

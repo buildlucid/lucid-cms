@@ -20,6 +20,7 @@ import AgentScreenBadge from "@/components/AgentScreenBadge/AgentScreenBadge";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import useAgentUploads from "@/hooks/useAgentUploads/useAgentUploads";
+import useFileDrop from "@/hooks/useFileDrop/useFileDrop";
 import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
 import useMediaGeneration, {
 	type MediaGenerationTarget,
@@ -131,13 +132,16 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	let container: HTMLDivElement | undefined;
 	let fileInput: HTMLInputElement | undefined;
 	const [submitting, setSubmitting] = createSignal(false);
-	const [dragDepth, setDragDepth] = createSignal(0);
 	const draft = readDraft(props.draftKey);
 	const [references, setReferences] = createSignal(draft.references);
 	const uploads = useAgentUploads({
 		agentKey: () => props.agentKey,
 		onUploaded: (reference) =>
 			setReferences((current) => mergeAgentReferences(current, [reference])),
+	});
+	const fileDrop = useFileDrop({
+		enabled: () => canUpload(),
+		onDrop: uploads.add,
 	});
 	const mediaGeneration = useMediaGeneration();
 	const generationTarget: MediaGenerationTarget = {
@@ -199,30 +203,6 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			text: instance.getMarkdown(),
 			references: references(),
 		});
-
-	const hasFiles = (event: DragEvent) =>
-		canUpload() &&
-		Array.from(event.dataTransfer?.types ?? []).includes("Files");
-	const onDragEnter = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		event.preventDefault();
-		setDragDepth((depth) => depth + 1);
-	};
-	const onDragOver = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		event.preventDefault();
-		if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
-	};
-	const onDragLeave = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		setDragDepth((depth) => Math.max(0, depth - 1));
-	};
-	const onDrop = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		event.preventDefault();
-		setDragDepth(0);
-		uploads.add(Array.from(event.dataTransfer?.files ?? []));
-	};
 
 	const submit = async (mode: "send" | "steer") => {
 		const instance = editor();
@@ -422,14 +402,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: files can also be picked from the add menu
-		<div
-			class={props.class}
-			onDragEnter={onDragEnter}
-			onDragOver={onDragOver}
-			onDragLeave={onDragLeave}
-			onDrop={onDrop}
-		>
+		<div class={props.class} {...fileDrop.handlers}>
 			<input
 				ref={fileInput}
 				type="file"
@@ -471,7 +444,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 					void submit("send");
 				}}
 			>
-				<Show when={dragDepth() > 0}>
+				<Show when={fileDrop.dragging()}>
 					<div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-2xl border-2 border-dashed border-primary bg-card/90 text-sm font-medium text-title">
 						{T()("agent.uploads.drop")}
 					</div>

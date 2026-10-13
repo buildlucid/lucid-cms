@@ -9,7 +9,13 @@ const requestCheckHandler =
 	(options: PluginOptionsInternal): LucidHook<"requests", "check">["handler"] =>
 	async ({ context, data }) => {
 		if (data.request.type === "unpublish") {
-			return checkUnpublishDependents(context, { options, data });
+			const blockersRes = await checkUnpublishDependents(context, {
+				options,
+				documents: data.documents,
+			});
+			if (blockersRes.error) return blockersRes;
+			data.blockers.push(...blockersRes.data);
+			return { error: undefined, data: undefined };
 		}
 
 		for (const collection of options.collections) {

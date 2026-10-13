@@ -1,0 +1,107 @@
+import constants from "../../../constants/constants.js";
+import type { LucidAgentInputs } from "../../../libs/db/tables/agent-inputs.js";
+import type { Select } from "../../../libs/db/types.js";
+import {
+	AgentConversationsRepository,
+	AgentInputsRepository,
+	AgentRunsRepository,
+} from "../../../libs/repositories/index.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import enqueueRun from "./enqueue-run.js";
+import settleSteer from "./settle-steer.js";
+import startInput from "./start-input.js";
+
+/** Recovers interrupted input delivery and advances steered or queued messages when the conversation allows it. */
+const advanceInputs: ServiceFn<
+	[{ conversationId: string; dispatch?: boolean }],
+	{ runId: string | null }
+> = async (context, input) => {
+	const Inputs = new AgentInputsRepository(context.db);
+	const Runs = new AgentRunsRepository(context.db);
+	const Conversations = new AgentConversationsRepository(context.db);
+
+	const released = await Conversations.releaseFinishedClaims({
+		conversationId: input.conversationId,
+		now: new Date().toISOString(),
+		staleBefore: new Date(Date.now() - constants.agent.leaseMs).toISOString(),
+	});
+	if (released.error) return released;
+
+	const selected = await Conversations.selectSingle({
+		select: ["active_run_id", "queue_paused"],
+		where: [{ key: "id", operator: "=", value: input.conversationId }],
+	});
+	if (selected.error) return selected;
+	if (!selected.data) return { error: undefined, data: { runId: null } };
+
+	const conversation = selected.data;
+
+	const pending = await Inputs.selectDeliverable(input.conversationId);
+	if (pending.error) return pending;
+
+	const start = (item: Select<LucidAgentInputs>) =>
+		startInput(context, {
+			conversationId: input.conversationId,
+			input: item,
+			dispatch: input.dispatch !== false,
+		});
+
+	for (const item of pending.data) {
+		if (item.target_run_id) {
+			//* Active runs consume their own steering input.
+			if (item.target_run_id === conversation.active_run_id) continue;
+			const settled = await settleSteer(context, { input: item });
+			if (settled.error) return settled;
+		} else if (item.status === "claimed") {
+			//* Resume a claimed input if its run exists; otherwise claimNext can reclaim it.
+			const run = await Runs.selectSingle({
+				select: ["id"],
+				where: [{ key: "id", operator: "=", value: item.id }],
+			});
+			if (run.error) return run;
+			if (run.data || conversation.active_run_id === item.id) {
+				return start(item);
+			}
+		}
+	}
+
+	if (conversation.queue_paused) {
+		return { error: undefined, data: { runId: null } };
+	}
+
+	if (conversation.active_run_id) {
+		const steered = pending.data.some(
+			(item) => item.target_run_id === conversation.active_run_id,
+		);
+		if (!steered) return { error: undefined, data: { runId: null } };
+
+		const active = await Runs.selectSingle({
+			select: ["status", "user_id"],
+			where: [{ key: "id", operator: "=", value: conversation.active_run_id }],
+		});
+		if (active.error) return active;
+		if (active.data?.status === "waiting") {
+			const queued = await enqueueRun(context, {
+				runId: conversation.active_run_id,
+				userId: active.data.user_id,
+			});
+			if (queued.error) return queued;
+		}
+
+		return { error: undefined, data: { runId: null } };
+	}
+
+	const claimed = await Inputs.claimNext(input.conversationId);
+	if (claimed.error) return claimed;
+	if (!claimed.data) return { error: undefined, data: { runId: null } };
+
+	const started = await start(claimed.data);
+	//* another run claimed the conversation first; the input waits behind it
+	if (started.error?.status === 409) {
+		return { error: undefined, data: { runId: null } };
+	}
+
+	return started;
+};
+
+export default advanceInputs;

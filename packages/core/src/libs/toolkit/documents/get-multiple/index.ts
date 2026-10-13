@@ -24,12 +24,22 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 				"../../../../services/documents/content/get-multiple.js"
 			);
 
-			return getMultipleDocuments(context, {
+			const result = await getMultipleDocuments(context, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: data.preview ?? undefined,
 				query: data.query,
 			});
+			if (result.error) return result;
+
+			return {
+				error: undefined,
+				data: {
+					data: result.data.documents,
+					count: result.data.count,
+					refs: result.data.refs,
+				},
+			};
 		},
 		name: {
 			key: "core.toolkit.documents.get.multiple.error.name",

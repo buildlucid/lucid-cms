@@ -1,19 +1,20 @@
 import type {
-	CmsAiActor,
 	CmsAiGenerateAcceptedData,
 	CmsAiGenerateCompletedData,
 	CmsAiGenerateData,
-} from "./services/generate-cms-ai/type.js";
+} from "./schema/ai.js";
+import type { CmsAiActor } from "./services/generate-cms-ai/type.js";
 
+/** Completed AI requests with token usage rather than web-request usage. */
 export const isCmsAiGenerateCompletedData = (
 	data: CmsAiGenerateData,
-): data is CmsAiGenerateCompletedData => "output" in data && "usage" in data;
+): data is CmsAiGenerateCompletedData =>
+	"usage" in data && !("kind" in data.usage);
 
 export const isCmsAiGenerateAcceptedData = (
 	data: CmsAiGenerateData,
 ): data is CmsAiGenerateAcceptedData =>
-	data.mode === "async" &&
-	(data.status === "queued" || data.status === "processing");
+	data.status === "queued" || data.status === "processing";
 
 /** Returns a user actor when an ID is supplied, otherwise the system actor. */
 export const cmsAiActor = (userId: number | null): CmsAiActor =>

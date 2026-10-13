@@ -9,14 +9,14 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import WebSourceRow from "@/components/AgentToolPanel/parts/WebSourceRow";
+import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
+import WebSourceRow from "@/components/WebSourceRow/WebSourceRow";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 import { aiUsageSessionHref, canViewAiUsage } from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
 import AgentCardDetail from "./AgentCardDetail";
-import AgentCardHeader from "./AgentCardHeader";
 import AgentChatReferences from "./AgentChatReferences";
 
 const shownSources = 3;
@@ -46,16 +46,11 @@ const AgentChatDetailsCard: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<aside
-			aria-labelledby="agent-chat-details-title"
-			class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 animate-fade-in"
+		<AgentSidebarCard
+			label={T()("agent.chat.details.title")}
+			title={props.conversation.title}
+			onClose={props.onClose}
 		>
-			<AgentCardHeader
-				id="agent-chat-details-title"
-				label={T()("agent.chat.details.title")}
-				title={props.conversation.title}
-				onClose={props.onClose}
-			/>
 			<dl class="flex flex-col gap-2 text-xs">
 				<AgentCardDetail label={T()("agent.chat.details.agent")}>
 					{getAgentName(props.conversation.agentKey)}
@@ -143,17 +138,21 @@ const AgentChatDetailsCard: Component<{
 					</Match>
 				</Switch>
 			</section>
-		</aside>
+		</AgentSidebarCard>
 	);
 };
 
-const Timestamp: Component<{ value: string | null }> = (props) => (
-	<time
-		datetime={props.value ?? undefined}
-		title={dateHelpers.formatFullDate(props.value, { includeTime: true })}
-	>
-		{dateHelpers.formatTimestamp(props.value)}
-	</time>
-);
+const Timestamp: Component<{ value: string | null }> = (props) => {
+	// ----------------------------------------
+	// Render
+	return (
+		<time
+			datetime={props.value ?? undefined}
+			title={dateHelpers.formatFullDate(props.value, { includeTime: true })}
+		>
+			{dateHelpers.formatTimestamp(props.value)}
+		</time>
+	);
+};
 
 export default AgentChatDetailsCard;

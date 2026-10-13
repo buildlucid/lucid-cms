@@ -1,6 +1,7 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
+import { requestCommentResolutionSchema } from "../../../schemas/requests.js";
 import { richTextJSONSchema } from "../../../schemas/shared/rich-text.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable, TimestampMutable } from "../types.js";
@@ -17,8 +18,8 @@ const requestEventTypeSchema = z.enum([
 	"reopened",
 	"target_published",
 	"target_unpublished",
-	"target_reviewed",
-	"target_unreviewed",
+	"target_acknowledged",
+	"target_unacknowledged",
 	"document_added",
 	"document_removed",
 	"reviewer_added",
@@ -28,9 +29,6 @@ const requestEventTypeSchema = z.enum([
 	"workflow_updated",
 	"proposal_edited",
 ]);
-
-/** Every comment needs one of these before a request can be approved. */
-export const requestCommentResolutionSchema = z.enum(["resolved", "closed"]);
 
 /** Event details that are not part of the comment body. */
 const requestEventMetadataSchema = z.object({
@@ -67,7 +65,7 @@ export const requestEventsTable = defineTable("lucid_request_events", () => ({
 			type: "integer",
 		},
 		agent_run_id: {
-			schema: z.string().nullable(),
+			schema: z.uuid().nullable(),
 			type: "text",
 		},
 		parent_id: {
@@ -146,8 +144,8 @@ export type RequestEventMetadataByType = {
 	target_unpublished: RequestTargetEventMetadata & {
 		sourceRequestId: number | null;
 	};
-	target_reviewed: RequestTargetEventMetadata;
-	target_unreviewed: RequestTargetEventMetadata;
+	target_acknowledged: RequestTargetEventMetadata;
+	target_unacknowledged: RequestTargetEventMetadata;
 	target_added: RequestTargetEventMetadata;
 	target_removed: RequestTargetEventMetadata;
 	workflow_updated: { requestDocumentId: number; stage: string };

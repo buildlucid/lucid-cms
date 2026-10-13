@@ -1,6 +1,7 @@
 import { copy } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal, RouteScope } from "../../types/types.js";
+import getRouteVersionTypes from "../../utils/get-route-version-types.js";
 import { checkFullSlugUniqueness } from "../checks/index.js";
 import getTargetCollection from "../get-target-collection.js";
 import updateRouteFields from "../update-route-fields.js";
@@ -38,14 +39,7 @@ const beforeDeleteHandler =
 			};
 		}
 
-		const versionTypes = [
-			"latest",
-			...(meta.collection.getData.publishing.environments?.map(
-				(environment) => environment.key,
-			) || []),
-		];
-
-		for (const versionType of versionTypes) {
+		for (const versionType of getRouteVersionTypes(meta.collection)) {
 			const scope: RouteScope = { type: "version", versionType };
 			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
 				documentIds: data.ids,

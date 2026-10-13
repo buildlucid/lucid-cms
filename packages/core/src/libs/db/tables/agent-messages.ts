@@ -3,9 +3,9 @@ import z from "zod";
 import {
 	agentMessagePartSchema,
 	type StoredAgentMessagePart,
-} from "../../../schemas/agent.js";
+} from "../../agent/messages.js";
 import { defineTable } from "../client/table/definition.js";
-import type { TimestampImmutable, TimestampRequired } from "../types.js";
+import type { TimestampDefaulted, TimestampImmutable } from "../types.js";
 
 export const agentMessagesTable = defineTable("lucid_agent_messages", () => ({
 	columns: {
@@ -39,5 +39,5 @@ export interface LucidAgentMessages {
 		StoredAgentMessagePart[]
 	>;
 	created_at: TimestampImmutable;
-	updated_at: TimestampRequired;
+	updated_at: TimestampDefaulted;
 }

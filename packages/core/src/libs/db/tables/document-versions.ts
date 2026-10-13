@@ -42,7 +42,7 @@ export const documentVersionsTable = defineTable(
 				type: "integer",
 			},
 			created_by_run_id: {
-				schema: z.string().nullable(),
+				schema: z.uuid().nullable(),
 				type: "text",
 			},
 			updated_by: {
@@ -50,7 +50,7 @@ export const documentVersionsTable = defineTable(
 				type: "integer",
 			},
 			updated_by_run_id: {
-				schema: z.string().nullable(),
+				schema: z.uuid().nullable(),
 				type: "text",
 			},
 			updated_at: {

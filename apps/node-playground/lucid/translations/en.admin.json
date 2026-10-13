@@ -107,5 +107,7 @@
 	"playground.picker.label": "Page document",
 	"playground.picker.search": "Filter documents",
 	"playground.note.title": "Title",
-	"playground.note.body": "Note"
+	"playground.note.body": "Note",
+	"playground.document-picker.title": "Choose a page document",
+	"playground.note-editor.title": "Review your note"
 }

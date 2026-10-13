@@ -35,7 +35,7 @@ export const deleteDocumentAgentTool = (
 		requiresConfirmation: options.direct
 			? ({ input, config }) => !deleteRequested(config, input)
 			: false,
-		requiredPermissions: ({ collectionKey }) => [
+		inputPermissions: ({ input: { collectionKey } }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],
 		handler: async ({ context, input, execution }) => {

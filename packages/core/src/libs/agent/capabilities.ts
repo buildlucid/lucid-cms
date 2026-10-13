@@ -1,9 +1,13 @@
-import type { AgentCapabilities } from "../../types/response.js";
+import type {
+	AgentCapabilities,
+	MediaGenerationType,
+} from "../../types/response.js";
 import hasPermission, {
 	type PermissionGrant,
 } from "../permission/has-permission.js";
 import type {
 	AgentToolAvailabilityProps,
+	AgentToolCapabilities,
 	AgentToolDefinition,
 } from "../tools/types.js";
 import type { AgentDefinition } from "./types.js";
@@ -26,59 +30,66 @@ export const getAvailableTools = (
  */
 export const getCapabilityProviders = (props: {
 	tools: readonly AgentToolDefinition[];
-}) => ({
-	mediaAnalysis: props.tools.flatMap((tool) =>
-		tool.capabilities?.mediaAnalysis
-			? [
-					{
-						tool: tool.name,
-						mimeTypes: tool.capabilities.mediaAnalysis.mimeTypes,
-					},
-				]
-			: [],
-	),
-	fileRead: props.tools.flatMap((tool) =>
-		tool.capabilities?.fileRead
-			? [{ tool: tool.name, mimeTypes: tool.capabilities.fileRead.mimeTypes }]
-			: [],
-	),
-	webSearch: props.tools.flatMap((tool) =>
-		tool.capabilities?.webSearch ? [tool.name] : [],
-	),
-	webRead: props.tools.flatMap((tool) =>
-		tool.capabilities?.webRead ? [tool.name] : [],
-	),
-	imageGeneration: props.tools.flatMap((tool) =>
-		tool.capabilities?.imageGeneration ? [tool.name] : [],
-	),
-	audioGeneration: props.tools.flatMap((tool) =>
-		tool.capabilities?.audioGeneration ? [tool.name] : [],
-	),
-});
+}) => {
+	const named = (
+		provides: (capabilities: AgentToolCapabilities) => boolean | undefined,
+	) =>
+		props.tools.flatMap((tool) =>
+			tool.capabilities && provides(tool.capabilities) ? [tool.name] : [],
+		);
+	const withMimeTypes = (
+		provides: (
+			capabilities: AgentToolCapabilities,
+		) => { mimeTypes: readonly string[] } | undefined,
+	) =>
+		props.tools.flatMap((tool) => {
+			const capability = tool.capabilities && provides(tool.capabilities);
+			return capability
+				? [{ tool: tool.name, mimeTypes: capability.mimeTypes }]
+				: [];
+		});
 
+	return {
+		media: {
+			analyze: withMimeTypes((capabilities) => capabilities.media?.analyze),
+			readFile: withMimeTypes((capabilities) => capabilities.media?.readFile),
+			generate: {
+				image: named((capabilities) => capabilities.media?.generate?.image),
+				audio: named((capabilities) => capabilities.media?.generate?.audio),
+			} satisfies Record<MediaGenerationType, string[]>,
+		},
+		web: {
+			search: named((capabilities) => capabilities.web?.search),
+			read: named((capabilities) => capabilities.web?.read),
+		},
+	};
+};
+
+const mimeTypes = (
+	providers: readonly { mimeTypes: readonly string[] }[],
+): { mimeTypes: string[] } | null =>
+	providers.length
+		? {
+				mimeTypes: [
+					...new Set(providers.flatMap((provider) => provider.mimeTypes)),
+				],
+			}
+		: null;
+
+/** What the agent can do, as the API reports it. */
 export const summariseCapabilities = (
 	providers: ReturnType<typeof getCapabilityProviders>,
 ): AgentCapabilities => ({
-	mediaAnalysis: providers.mediaAnalysis.length
-		? {
-				mimeTypes: [
-					...new Set(
-						providers.mediaAnalysis.flatMap((provider) => provider.mimeTypes),
-					),
-				],
-			}
-		: null,
-	fileRead: providers.fileRead.length
-		? {
-				mimeTypes: [
-					...new Set(
-						providers.fileRead.flatMap((provider) => provider.mimeTypes),
-					),
-				],
-			}
-		: null,
-	webSearch: providers.webSearch.length > 0,
-	webRead: providers.webRead.length > 0,
-	imageGeneration: providers.imageGeneration.length > 0,
-	audioGeneration: providers.audioGeneration.length > 0,
+	media: {
+		analyze: mimeTypes(providers.media.analyze),
+		readFile: mimeTypes(providers.media.readFile),
+		generate: {
+			image: providers.media.generate.image.length > 0,
+			audio: providers.media.generate.audio.length > 0,
+		},
+	},
+	web: {
+		search: providers.web.search.length > 0,
+		read: providers.web.read.length > 0,
+	},
 });

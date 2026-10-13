@@ -33,7 +33,7 @@ const updateEditorController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateEditor.body),
 	validate("param", controllerSchemas.updateEditor.params),

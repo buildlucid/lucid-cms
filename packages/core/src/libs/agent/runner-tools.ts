@@ -1,15 +1,15 @@
+import type { AgentRunnerToolName } from "@lucidcms/types";
 import z from "zod";
 import constants from "../../constants/constants.js";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
 import { agentReferenceInputSchema } from "../../schemas/agent-references.js";
-import type { AgentRunnerToolName } from "../../types/response.js";
 import { copy } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import type { RunMode } from "./types.js";
 
-export type RunnerToolContext = {
+type RunnerToolContext = {
 	mode: RunMode;
-	/** Whether a user can answer the run, which excludes system runs. */
+	/** Whether a person can answer the run, which excludes system runs. */
 	attended: boolean;
 	hasSkills: boolean;
 	hasHistory: boolean;
@@ -101,7 +101,7 @@ const runnerTools = {
 		name: "lucid_read_history",
 		title: copy("admin:core.tools.lucid_read_history.title"),
 		description:
-			"Recover earlier conversation messages and tool results, including summarized or truncated history. Without messageId, returns a paginated list; with messageId, returns that message in character pages.",
+			"Recover earlier chat messages and tool results, including summarized or truncated history. Without messageId, returns a paginated list; with messageId, returns that message in character pages.",
 		input: z.object({
 			messageId: z.uuid().optional(),
 			after: z.number().int().nonnegative().default(0),

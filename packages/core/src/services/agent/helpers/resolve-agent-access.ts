@@ -7,7 +7,7 @@ import checkFeatureEnabled from "../../ai/checks/check-feature-enabled.js";
 import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
-/** Agent keys for each workflow, from the user's live permissions. Fails when there are none. */
+/** Returns agent keys allowed by the user's live permissions, failing if no agent action is allowed. */
 const resolveAgentAccess: ServiceFn<
 	[{ userId: number; requireConnection?: boolean }],
 	Record<AgentPermissionAction, string[]>

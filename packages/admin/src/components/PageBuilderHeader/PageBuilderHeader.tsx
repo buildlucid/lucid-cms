@@ -42,10 +42,10 @@ import spawnToast from "@/utils/spawn-toast";
 import { AutoSaveStatusPill } from "./parts/AutoSaveStatusPill";
 import { DocumentActions } from "./parts/DocumentActions";
 import {
-	ReleaseTrigger,
-	type ReleaseTriggerAction,
-	type ReleaseTriggerOption,
-} from "./parts/ReleaseTrigger";
+	PublishTrigger,
+	type PublishTriggerAction,
+	type PublishTriggerOption,
+} from "./parts/PublishTrigger";
 import { ViewSelector, type ViewSelectorOption } from "./parts/ViewSelector";
 
 //* ghost buttons are already faint, so disabled ones fade further and ignore hover
@@ -190,7 +190,7 @@ export const PageBuilderHeader: Component<{
 		return [
 			{
 				link: "/lucid",
-				label: T()("common.dashboard"),
+				label: T()("common.home"),
 			},
 			{
 				link: `/lucid/collections/${props.state.collectionKey()}`,
@@ -264,7 +264,7 @@ export const PageBuilderHeader: Component<{
 				environmentKey: environment.key,
 				latestContentId: versionContentId("latest"),
 			});
-			const isPublished = status !== "unreleased";
+			const isPublished = status !== "unpublished";
 
 			options.push({
 				label: helpers.getLocaleValue({ value: environment.label }),
@@ -314,7 +314,7 @@ export const PageBuilderHeader: Component<{
 
 		return options;
 	});
-	const releaseOptions = createMemo<ReleaseTriggerOption[]>(() => {
+	const publishOptions = createMemo<PublishTriggerOption[]>(() => {
 		const collection = props.state.collection();
 		const document = props.state.document();
 		if (
@@ -341,7 +341,7 @@ export const PageBuilderHeader: Component<{
 			]),
 		);
 
-		const options: ReleaseTriggerOption[] = environments.map((environment) => {
+		const options: PublishTriggerOption[] = environments.map((environment) => {
 			const label = environmentLabels.get(environment.key) || environment.key;
 
 			const environmentStatus = getDocumentEnvironmentStatus({
@@ -370,7 +370,7 @@ export const PageBuilderHeader: Component<{
 				) || workflowStage?.targets.includes(environment.key) === true;
 
 			const latestContentId = versionContentId("latest");
-			const unmetReleaseRequirementLabels =
+			const unmetPublishRequirementLabels =
 				latestContentId === undefined
 					? []
 					: (environment.requires ?? [])
@@ -384,27 +384,27 @@ export const PageBuilderHeader: Component<{
 							);
 			//* anything stopping a direct publish sends the document to a request instead, which
 			//* can include the required targets and shows the workflow stage to move on
-			const action: ReleaseTriggerOption["action"] =
+			const action: PublishTriggerOption["action"] =
 				reviewRequired ||
 				!canPublish ||
 				!workflowAllowsTarget ||
-				unmetReleaseRequirementLabels.length > 0
+				unmetPublishRequirementLabels.length > 0
 					? "compose"
 					: "publish";
 			const permission = action === "compose" ? canCompose : canPublish;
 
-			let disabledToast: ReleaseTriggerOption["disabledToast"];
+			let disabledToast: PublishTriggerOption["disabledToast"];
 			if (isPromoted) {
 				disabledToast = {
-					title: T()("toasts.release.current.disabled.title"),
-					message: T()("toasts.release.current.disabled.message", {
+					title: T()("toasts.publish.current.disabled.title"),
+					message: T()("toasts.publish.current.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (!permission) {
 				disabledToast = {
-					title: T()("toasts.release.permission.disabled.title"),
-					message: T()("toasts.release.permission.disabled.message", {
+					title: T()("toasts.publish.permission.disabled.title"),
+					message: T()("toasts.publish.permission.disabled.message", {
 						environment: label,
 					}),
 				};
@@ -413,29 +413,29 @@ export const PageBuilderHeader: Component<{
 				props.state.ui.isAutoSaving?.()
 			) {
 				disabledToast = {
-					title: T()("toasts.release.saving.disabled.title"),
-					message: T()("toasts.release.saving.disabled.message", {
+					title: T()("toasts.publish.saving.disabled.title"),
+					message: T()("toasts.publish.saving.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (props.state.ui.isPublishing?.()) {
 				disabledToast = {
-					title: T()("toasts.release.publishing.disabled.title"),
-					message: T()("toasts.release.publishing.disabled.message", {
+					title: T()("toasts.publish.publishing.disabled.title"),
+					message: T()("toasts.publish.publishing.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (props.state.isDocumentMutated?.()) {
 				disabledToast = {
-					title: T()("toasts.release.unsaved.disabled.title"),
-					message: T()("toasts.release.unsaved.disabled.message", {
+					title: T()("toasts.publish.unsaved.disabled.title"),
+					message: T()("toasts.publish.unsaved.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (props.state.ui.canPublishDocument?.() === false) {
 				disabledToast = {
-					title: T()("toasts.release.error.disabled.title"),
-					message: T()("toasts.release.error.disabled.message", {
+					title: T()("toasts.publish.error.disabled.title"),
+					message: T()("toasts.publish.error.disabled.message", {
 						environment: label,
 					}),
 				};
@@ -453,7 +453,7 @@ export const PageBuilderHeader: Component<{
 				disabled: disabledToast !== undefined,
 				...(disabledToast ? { disabledToast } : {}),
 				status: {
-					isReleased: environmentStatus !== "unreleased",
+					isPublished: environmentStatus !== "unpublished",
 					upToDate: isPromoted,
 				},
 			};
@@ -461,7 +461,7 @@ export const PageBuilderHeader: Component<{
 
 		return options;
 	});
-	const currentEnvironmentReleaseOption = createMemo(() => {
+	const currentEnvironmentPublishOption = createMemo(() => {
 		const version = props.version?.();
 		if (!version || version === "latest") return undefined;
 
@@ -472,20 +472,20 @@ export const PageBuilderHeader: Component<{
 			);
 		if (!isEnvironment) return undefined;
 
-		return releaseOptions().find((option) => option.value === version);
+		return publishOptions().find((option) => option.value === version);
 	});
 	//* the create screen creates by default, or requests when creating isn't available
 	const createDefault = createMemo(() =>
 		props.mode === "create" ? props.state.ui.createActions()[0] : undefined,
 	);
-	const createAlternatives = createMemo((): ReleaseTriggerAction[] =>
+	const createAlternatives = createMemo((): PublishTriggerAction[] =>
 		createDefault() === "create" &&
 		props.state.ui.createActions().includes("request")
 			? [
 					{
 						label: T()("documents.request.instead"),
 						disabled: props.state.ui.isSaving(),
-						onSelect: () => props.state.ui.setRequestCreationOpen(true),
+						onSelect: () => props.state.ui.setDocumentRequestOpen(true),
 					},
 				]
 			: [],
@@ -537,7 +537,7 @@ export const PageBuilderHeader: Component<{
 
 	// ----------------------------------
 	// Functions
-	const openReleaseOption = (option: ReleaseTriggerOption) => {
+	const openPublishOption = (option: PublishTriggerOption) => {
 		if (option.disabledToast) {
 			spawnToast({
 				...option.disabledToast,
@@ -547,9 +547,9 @@ export const PageBuilderHeader: Component<{
 		}
 
 		props.state.autoSave?.debouncedAutoSave.clear();
-		props.state.ui.setReleaseEnvironmentTarget(option.value);
-		props.state.ui.setReleaseEnvironmentAction(option.action ?? "publish");
-		props.state.ui.setReleaseEnvironmentOpen(true);
+		props.state.ui.setPublishTarget(option.value);
+		props.state.ui.setPublishAction(option.action ?? "publish");
+		props.state.ui.setPublishOpen(true);
 	};
 	const copyPreviewUrl = async (mode: PreviewMode) => {
 		const documentId = props.state.documentID();
@@ -801,7 +801,7 @@ export const PageBuilderHeader: Component<{
 							</div>
 						</Show>
 						<div class="flex items-center gap-2.5 w-auto ml-auto">
-							<Show when={currentEnvironmentReleaseOption()}>
+							<Show when={currentEnvironmentPublishOption()}>
 								{(option) => (
 									<Button
 										type="button"
@@ -813,9 +813,9 @@ export const PageBuilderHeader: Component<{
 												option().disabled === true,
 										})}
 										loading={props.state.ui.isPublishing?.()}
-										onClick={() => openReleaseOption(option())}
+										onClick={() => openPublishOption(option())}
 									>
-										{T()("documents.release.update.environment", {
+										{T()("documents.publish.update.environment", {
 											environment: option().label,
 										})}
 									</Button>
@@ -846,13 +846,13 @@ export const PageBuilderHeader: Component<{
 								</Button>
 							</Show>
 							<Show when={props.state.ui.showUpsertButton?.()}>
-								<ReleaseTrigger
-									options={releaseOptions}
-									onSelect={openReleaseOption}
+								<PublishTrigger
+									options={publishOptions}
+									onSelect={openPublishOption}
 									actions={createAlternatives()}
 									onSave={() => {
 										if (createDefault() === "request") {
-											props.state.ui.setRequestCreationOpen(true);
+											props.state.ui.setDocumentRequestOpen(true);
 											return;
 										}
 										props.state.autoSave?.debouncedAutoSave.clear();

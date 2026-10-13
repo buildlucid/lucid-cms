@@ -158,13 +158,12 @@ const callAgent = (
 				permissions: options.permissions ?? [],
 				superAdmin: options.permissions === undefined,
 			},
-			actor: { kind: "user", userId, agentRunId: runId },
+			actor: { type: "user", userId, agentRunId: runId },
 			signal: AbortSignal.timeout(10_000),
 			operationId: `${runId}:${randomUUID()}`,
 			run: {
 				id: runId,
 				conversationId: randomUUID(),
-				userId,
 				agentKey: "test",
 			},
 		},
@@ -184,12 +183,12 @@ const findAs = async (
 const createRequest = async (collectionKey = pages.key) => {
 	const document = await createToolkit(context).documents.createSingle({
 		collectionKey,
-		actor: { kind: "system" },
+		actor: { type: "system" },
 		data: { fields: { title: "Hello" } },
 	});
 	assert(document.data, JSON.stringify(document.error));
 	const request = await createToolkit(context).requests.createSingle({
-		actor: { kind: "user", userId: admin },
+		actor: { type: "user", userId: admin },
 		type: "publish",
 		title: "Launch",
 		documents: [
@@ -395,7 +394,7 @@ test("toolkit reads users with what the actor could see in the admin", async () 
 	const query = { filter: { name: { value: "grace hop" } } };
 
 	const asEditor = await users.getMultiple({
-		actor: { kind: "user", userId: editor },
+		actor: { type: "user", userId: editor },
 		query,
 	});
 	assert(asEditor.data, JSON.stringify(asEditor.error));

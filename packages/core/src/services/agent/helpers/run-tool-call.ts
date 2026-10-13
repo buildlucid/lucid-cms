@@ -5,12 +5,10 @@ import {
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
 import { prepareAgentTool } from "../../../libs/tools/execute-tool.js";
-import type {
-	AgentToolExecution,
-	AgentToolInteraction,
-} from "../../../libs/tools/types.js";
+import type { ResolvedAgentToolInteraction } from "../../../libs/tools/types.js";
 import type { JsonValue } from "../../../utils/helpers/is-json-object.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import getToolExecution from "./get-tool-execution.js";
 import invokeAgentTool from "./invoke-agent-tool.js";
 import type { RunSession } from "./run-session.js";
 import {
@@ -89,37 +87,24 @@ const runToolCall = async (
 	const confirmation = requiresConfirmation
 		? { toolName: tool.name, input: call.input }
 		: undefined;
-	const execution: AgentToolExecution = {
+	const execution = getToolExecution({
+		run,
 		authority: props.authority,
-		actor:
-			props.authority.principal.type === "user"
-				? {
-						kind: "user",
-						userId: props.authority.principal.userId,
-						agentRunId: run.id,
-					}
-				: { kind: "system", agentRunId: run.id },
+		call,
+		checkpoint,
 		signal: session.signal,
-		operationId: `${run.id}:${call.id}`,
-		run: {
-			id: run.id,
-			conversationId: run.conversation_id,
-			userId: run.user_id,
-			agentKey: run.agent_key,
-		},
-		screen: checkpoint.screen,
-		interaction:
-			interactionAnswered && answer
-				? { data: pending.widget.data, response: answer.response }
-				: undefined,
-	};
+	});
 
-	//* Routines skip optional interactions and execute with the tool input.
+	//* Routine and system runs skip optional interactions.
+	const unattended =
+		props.mode === "routine" || props.authority.principal.type === "system";
 	const asks =
 		tool.interaction !== undefined &&
 		!interactionAnswered &&
-		!(tool.interaction.optional && props.mode === "routine");
-	let question: AgentToolInteraction<Record<string, JsonValue>> | undefined;
+		!(tool.interaction.skippable && unattended);
+	let question:
+		| ResolvedAgentToolInteraction<Record<string, JsonValue>>
+		| undefined;
 	if (asks) {
 		const prepared = await prepareAgentTool({
 			context,
@@ -136,7 +121,9 @@ const runToolCall = async (
 		key: string;
 		version?: number;
 		confirmation?: typeof confirmation;
-		interaction: AgentToolInteraction<Record<string, JsonValue>>["interaction"];
+		interaction: ResolvedAgentToolInteraction<
+			Record<string, JsonValue>
+		>["interaction"];
 	}): ToolOutcome => ({
 		kind: "pending",
 		pending: createInteraction({
@@ -162,7 +149,7 @@ const runToolCall = async (
 			key: constants.agent.widgets.confirmation,
 			confirmation,
 			interaction: {
-				title: context.translate(tool.describe(call.input)),
+				title: tool.describe(call.input),
 				placement: "composer",
 				data: {},
 			},
@@ -193,7 +180,13 @@ const runToolCall = async (
 	const outcome = await invokeAgentTool(context, {
 		call,
 		tool,
-		execution,
+		execution:
+			interactionAnswered && answer?.action === "submit"
+				? {
+						...execution,
+						answer: { data: pending.widget.data, response: answer.response },
+					}
+				: execution,
 		messageId: checkpoint.messageId,
 		emit: session.emit,
 	});

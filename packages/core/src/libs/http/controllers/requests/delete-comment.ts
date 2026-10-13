@@ -30,12 +30,12 @@ const deleteCommentController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.deleteComment.params),
 	async (c) => {
-		const { id, eventId } = c.req.valid("param");
+		const { id, commentId } = c.req.valid("param");
 		const context = createServiceContext(c);
 
 		const result = await serviceWrapper(requestServices.deleteComment, {
@@ -47,7 +47,7 @@ const deleteCommentController = factory.createHandlers(
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),
-			eventId: Number.parseInt(eventId, 10),
+			commentId: Number.parseInt(commentId, 10),
 			user: c.get("auth"),
 		});
 		if (result.error) throw new LucidAPIError(result.error);

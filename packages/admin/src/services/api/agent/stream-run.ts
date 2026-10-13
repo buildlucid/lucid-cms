@@ -1,4 +1,4 @@
-import type { AgentStreamEvent } from "@types";
+import type { AgentStreamEvent } from "@lucidcms/types";
 import { EventSourceParserStream } from "eventsource-parser/stream";
 import T from "@/translations";
 import { LucidError } from "@/utils/error-handling";

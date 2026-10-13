@@ -33,7 +33,7 @@ const checkVersionController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.checkVersion.body),
 	validate("param", controllerSchemas.checkVersion.params),

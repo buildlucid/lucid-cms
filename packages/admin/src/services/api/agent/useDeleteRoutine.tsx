@@ -19,7 +19,9 @@ const useDeleteRoutine = (props?: { onSuccess?: () => void }) => {
 		}),
 		invalidates: [
 			queryKeys.agent.routines(),
-			queryKeys.agent.conversations(),
+			queryKeys.agent.conversationLists(),
+			//* chats of the routine fall back from its model
+			queryKeys.agent.models(),
 			queryKeys.notifications.summary(),
 		],
 		onSuccess: (_response, params) => {

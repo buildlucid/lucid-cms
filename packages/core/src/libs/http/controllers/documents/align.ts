@@ -31,7 +31,7 @@ const alignController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.align.params),
 	validate("json", controllerSchemas.align.body),

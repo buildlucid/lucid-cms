@@ -3,7 +3,7 @@ import type {
 	AiUsageRecord,
 	AiUsageSession,
 	AiUsageSessionType,
-	UserRef,
+	UserDisplay,
 } from "../../types/response.js";
 import type { LucidAiGenerations } from "../db/tables/index.js";
 import type { Select } from "../db/types.js";
@@ -100,7 +100,7 @@ const formatRecord = (record: AiUsageRecordPropT): AiUsageRecord => ({
 
 const formatSession = (props: {
 	session: AiUsageSessionPropT;
-	user: UserRef;
+	user: UserDisplay | null;
 	conversation: AiUsageSession["conversation"];
 }): AiUsageSession => ({
 	type: props.session.session_type,

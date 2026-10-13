@@ -1,4 +1,5 @@
 import { sql } from "kysely";
+import constants from "../../constants/constants.js";
 import type { QueryParams } from "../../types/query-params.js";
 import type { AiUsageSessionType } from "../../types/response.js";
 import type { LucidDatabase } from "../db/client/index.js";
@@ -14,55 +15,6 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		super(db, aiGenerationsTable);
 	}
 
-	/** Postgres returns sums and counts as strings. */
-	private selectSessionTotals() {
-		return this.db
-			.selectFrom("lucid_ai_generations")
-			.select((eb) => [
-				"lucid_ai_generations.session_type",
-				"lucid_ai_generations.session_id",
-				eb.fn.max("lucid_ai_generations.user_id").as("user_id"),
-				sql<number | string | null>`sum(lucid_ai_generations.credits)`.as(
-					"credits",
-				),
-				sql<number | string | null>`sum(lucid_ai_generations.input_tokens)`.as(
-					"input_tokens",
-				),
-				sql<number | string | null>`sum(lucid_ai_generations.output_tokens)`.as(
-					"output_tokens",
-				),
-				sql<number | string | null>`sum(lucid_ai_generations.total_tokens)`.as(
-					"total_tokens",
-				),
-				sql<number | string>`count(*)`.as("requests"),
-				sql<
-					number | string
-				>`sum(case when lucid_ai_generations.feature_key = 'web.search' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
-					"web_searches",
-				),
-				sql<
-					number | string
-				>`sum(case when lucid_ai_generations.feature_key = 'web.fetch' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
-					"web_fetches",
-				),
-				sql<
-					number | string
-				>`sum(case when lucid_ai_generations.status = 'failed' then 1 else 0 end)`.as(
-					"failed",
-				),
-				sql<
-					number | string
-				>`sum(case when lucid_ai_generations.status = 'pending' then 1 else 0 end)`.as(
-					"pending",
-				),
-				eb.fn.min("lucid_ai_generations.created_at").as("started_at"),
-				eb.fn.max("lucid_ai_generations.created_at").as("last_activity_at"),
-			])
-			.groupBy([
-				"lucid_ai_generations.session_type",
-				"lucid_ai_generations.session_id",
-			]);
-	}
 	async usageByRuns(runIds: string[]) {
 		if (!runIds.length) return { error: undefined, data: [] };
 
@@ -87,9 +39,55 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 	 * requests, and `requestId` finds the session a request belongs to.
 	 */
 	async selectSessions(props: { queryParams: Partial<QueryParams> }) {
+		//* Postgres returns sums and counts as strings
 		const { main, count } = queryBuilder.main(
 			{
-				main: this.selectSessionTotals(),
+				main: this.db
+					.selectFrom("lucid_ai_generations")
+					.select((eb) => [
+						"lucid_ai_generations.session_type",
+						"lucid_ai_generations.session_id",
+						eb.fn.max("lucid_ai_generations.user_id").as("user_id"),
+						sql<number | string | null>`sum(lucid_ai_generations.credits)`.as(
+							"credits",
+						),
+						sql<
+							number | string | null
+						>`sum(lucid_ai_generations.input_tokens)`.as("input_tokens"),
+						sql<
+							number | string | null
+						>`sum(lucid_ai_generations.output_tokens)`.as("output_tokens"),
+						sql<
+							number | string | null
+						>`sum(lucid_ai_generations.total_tokens)`.as("total_tokens"),
+						sql<number | string>`count(*)`.as("requests"),
+						sql<
+							number | string
+						>`sum(case when lucid_ai_generations.feature_key = 'web.search' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
+							"web_searches",
+						),
+						sql<
+							number | string
+						>`sum(case when lucid_ai_generations.feature_key = 'web.fetch' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
+							"web_fetches",
+						),
+						sql<
+							number | string
+						>`sum(case when lucid_ai_generations.status = 'failed' then 1 else 0 end)`.as(
+							"failed",
+						),
+						sql<
+							number | string
+						>`sum(case when lucid_ai_generations.status = 'pending' then 1 else 0 end)`.as(
+							"pending",
+						),
+						eb.fn.min("lucid_ai_generations.created_at").as("started_at"),
+						eb.fn.max("lucid_ai_generations.created_at").as("last_activity_at"),
+					])
+					.groupBy([
+						"lucid_ai_generations.session_type",
+						"lucid_ai_generations.session_id",
+					]),
 				count: this.db
 					.selectFrom("lucid_ai_generations")
 					.select(
@@ -135,7 +133,53 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		return exec.response;
 	}
 	async selectSession(props: { type: AiUsageSessionType; id: string }) {
-		const query = this.selectSessionTotals()
+		//* Postgres returns sums and counts as strings
+		const query = this.db
+			.selectFrom("lucid_ai_generations")
+			.select((eb) => [
+				"lucid_ai_generations.session_type",
+				"lucid_ai_generations.session_id",
+				eb.fn.max("lucid_ai_generations.user_id").as("user_id"),
+				sql<number | string | null>`sum(lucid_ai_generations.credits)`.as(
+					"credits",
+				),
+				sql<number | string | null>`sum(lucid_ai_generations.input_tokens)`.as(
+					"input_tokens",
+				),
+				sql<number | string | null>`sum(lucid_ai_generations.output_tokens)`.as(
+					"output_tokens",
+				),
+				sql<number | string | null>`sum(lucid_ai_generations.total_tokens)`.as(
+					"total_tokens",
+				),
+				sql<number | string>`count(*)`.as("requests"),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.feature_key = 'web.search' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
+					"web_searches",
+				),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.feature_key = 'web.fetch' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
+					"web_fetches",
+				),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.status = 'failed' then 1 else 0 end)`.as(
+					"failed",
+				),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.status = 'pending' then 1 else 0 end)`.as(
+					"pending",
+				),
+				eb.fn.min("lucid_ai_generations.created_at").as("started_at"),
+				eb.fn.max("lucid_ai_generations.created_at").as("last_activity_at"),
+			])
+			.groupBy([
+				"lucid_ai_generations.session_type",
+				"lucid_ai_generations.session_id",
+			])
 			.where("lucid_ai_generations.session_type", "=", props.type)
 			.where("lucid_ai_generations.session_id", "=", props.id);
 
@@ -380,14 +424,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				"created_at",
 			])
 			.where("session_type", "=", "agent")
-			.where("feature_key", "in", [
-				"agent.chat",
-				"agent.compact",
-				"web.search",
-				"web.fetch",
-				"media.image.generate",
-				"media.audio.generate",
-			])
+			.where("feature_key", "in", constants.agent.usageFeatureKeys)
 			.where("feature_version", "=", "v1")
 			.where("status", "=", "pending")
 			.where("lucid_remote_connection_id", "=", props.connectionId);
@@ -405,6 +442,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
+			enabled: true,
 			mode: "multiple",
 			select: [
 				"request_id",

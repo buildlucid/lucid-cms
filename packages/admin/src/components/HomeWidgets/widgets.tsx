@@ -1,7 +1,9 @@
-import { dashboardSlots } from "virtual:lucid-admin";
-import type { Permission } from "@types";
+import { homeSlots } from "virtual:lucid-admin";
+import type { Collection, Permission } from "@types";
+import type { Component } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
-import { dashboardWidgetSizes } from "@/components/DashboardWidget/constants";
+import { homeWidgetSizes } from "@/components/HomeWidgets/constants";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import { Permissions } from "@/constants/permissions";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
@@ -15,7 +17,27 @@ import CollectionsWidget from "./CollectionsWidget";
 import NotificationsWidget from "./NotificationsWidget";
 import ReviewWidget from "./ReviewWidget";
 import StorageWidget from "./StorageWidget";
-import type { HomeWidget } from "./types";
+
+/** What availability checks can read besides the user's permissions. */
+export type HomeWidgetContext = {
+	/** Undefined until collections load. */
+	collections: Collection[] | undefined;
+};
+
+/** A built-in or plugin widget, ready for the Home overview. */
+export type HomeWidget = {
+	key: string;
+	/** Higher priorities come first in the default layout. */
+	priority: number;
+	label: () => string;
+	description: () => string | undefined;
+	size: HomeWidgetSize;
+	sizes: readonly HomeWidgetSize[];
+	/** Starts hidden until the user adds it. */
+	hidden: boolean;
+	available: (context: HomeWidgetContext) => boolean;
+	component: Component<{ size: HomeWidgetSize }>;
+};
 
 const can = (permission: Permission) =>
 	userStore.get.hasPermission([permission]).all;
@@ -66,7 +88,7 @@ const builtInWidgets: HomeWidget[] = [
 					(collection.mode === "multiple" &&
 						userStore.get.hasPermission([
 							collection.permissions.create,
-							collection.permissions["create-request"],
+							collection.permissions.createRequest,
 						]).some),
 			),
 		component: ReviewWidget,
@@ -77,7 +99,7 @@ const builtInWidgets: HomeWidget[] = [
 		label: () => T()("home.widget.collections.label"),
 		description: () => T()("home.widget.collections.description"),
 		size: "md",
-		sizes: dashboardWidgetSizes,
+		sizes: homeWidgetSizes,
 		hidden: false,
 		available: (context) =>
 			getReadableCollections(context.collections ?? []).length > 0,
@@ -89,7 +111,7 @@ const builtInWidgets: HomeWidget[] = [
 		label: () => T()("home.widget.notifications.label"),
 		description: () => T()("home.widget.notifications.description"),
 		size: "md",
-		sizes: dashboardWidgetSizes,
+		sizes: homeWidgetSizes,
 		hidden: false,
 		available: () => true,
 		component: NotificationsWidget,
@@ -100,14 +122,14 @@ const builtInWidgets: HomeWidget[] = [
 		label: () => T()("home.widget.agent.label"),
 		description: () => T()("home.widget.agent.description"),
 		size: "full",
-		sizes: dashboardWidgetSizes,
+		sizes: homeWidgetSizes,
 		hidden: false,
 		available: () => getAgentAccess().all.length > 0,
 		component: AgentActivityWidget,
 	},
 ];
 
-const extensionWidgets = dashboardSlots.map(
+const extensionWidgets = homeSlots.map(
 	(entry): HomeWidget => ({
 		key: entry.key,
 		priority: entry.priority ?? 0,
@@ -117,14 +139,14 @@ const extensionWidgets = dashboardSlots.map(
 				? helpers.getLocaleValue({ value: entry.card.description })
 				: undefined,
 		size: entry.card.size ?? "md",
-		sizes: entry.card.sizes ?? dashboardWidgetSizes,
+		sizes: entry.card.sizes ?? homeWidgetSizes,
 		hidden: entry.card.hidden ?? false,
 		available: () =>
 			!entry.permission || userStore.get.meetsRequirement(entry.permission),
 		component: (props) => (
 			<AdminExtensionBoundary name={entry.key} placement="content">
 				<entry.component
-					slot="dashboard.widget"
+					slot="home.widget"
 					key={entry.key}
 					size={props.size}
 					options={entry.options}

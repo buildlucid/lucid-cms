@@ -8,7 +8,7 @@ import {
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
-import getMcpActor from "../../../requests/tools/helpers/get-mcp-actor.js";
+import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
 import findUsers from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -21,9 +21,9 @@ export const findUsersMcpTool = (options: CollectionToolOptions = {}) =>
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [ExternalScopes.UsersList],
-		requiredScopes: ({ query }) =>
+		inputScopes: ({ input: { query } }) =>
 			query.canReview === undefined ? [] : [ExternalScopes.RequestsRead],
-		advertisedScopes: () => [ExternalScopes.RequestsRead],
+		possibleScopes: () => [ExternalScopes.RequestsRead],
 		annotations: { readOnlyHint: true },
 		handler: ({ context, input, execution }) =>
 			findUsers(context, {
@@ -47,7 +47,7 @@ export const findUsersAgentTool = (options: CollectionToolOptions = {}) =>
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],
-		requiredPermissions: ({ query }) =>
+		inputPermissions: ({ input: { query } }) =>
 			query.canReview === undefined ? [] : [Permissions.RequestsRead],
 		readOnly: true,
 		parallelSafe: true,

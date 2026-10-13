@@ -218,7 +218,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			type: "integer",
 		},
 		updated_by_run_id: {
-			schema: z.string().nullable(),
+			schema: z.uuid().nullable(),
 			type: "text",
 		},
 		created_by: {

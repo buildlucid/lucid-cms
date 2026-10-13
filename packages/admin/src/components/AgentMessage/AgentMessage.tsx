@@ -1,5 +1,5 @@
+import type { AgentBuilderChangesData } from "@lucidcms/types";
 import type {
-	AgentBuilderChangesData,
 	AgentInteractionAction,
 	AgentMessage as AgentMessageData,
 } from "@types";
@@ -16,14 +16,15 @@ import {
 } from "solid-js";
 import AgentBuilderChanges from "@/components/AgentBuilderChanges/AgentBuilderChanges";
 import AgentGeneratingImage from "@/components/AgentGeneratingImage/AgentGeneratingImage";
-import AgentMediaPreview from "@/components/AgentMediaPreview/AgentMediaPreview";
+import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
+import AgentMediaPreviewV1 from "@/components/AgentMediaPreview/AgentMediaPreviewV1";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
-import AgentReferences from "@/components/AgentReferences/AgentReferences";
+import AgentReferencesV1 from "@/components/AgentReferences/AgentReferencesV1";
 import AgentScreenBadge from "@/components/AgentScreenBadge/AgentScreenBadge";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
-import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
 import { layoutOf } from "@/components/AgentWidget/slots";
 import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
+import AgentWidgetRow from "@/components/AgentWidgetRow/AgentWidgetRow";
 import AudioPill from "@/components/AudioPill/AudioPill";
 import { createCopy } from "@/components/Copy/copyValue";
 import T from "@/translations";
@@ -35,6 +36,7 @@ import {
 import {
 	generatingMediaType,
 	isToolRow,
+	isWidgetSupported,
 	mediaSettingsWidgets,
 	previewMediaWidget,
 	progressTool,
@@ -42,7 +44,6 @@ import {
 	toolGroupAt,
 } from "@/utils/agent-tools";
 import dateHelpers from "@/utils/date-helpers";
-import AgentMarkdown from "./parts/AgentMarkdown";
 import AgentRoutineRequest from "./parts/AgentRoutineRequest";
 import AgentToolGroup from "./parts/AgentToolGroup";
 
@@ -280,11 +281,12 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 															when={
 																part.type === "widget" &&
 																part.key === previewMediaWidget &&
+																isWidgetSupported(part) &&
 																part
 															}
 														>
 															{(widget) => (
-																<AgentMediaPreview
+																<AgentMediaPreviewV1
 																	conversationId={props.message.conversationId}
 																	widget={widget()}
 																/>
@@ -294,11 +296,12 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 															when={
 																part.type === "widget" &&
 																part.key === referencesWidget &&
+																isWidgetSupported(part) &&
 																part
 															}
 														>
 															{(widget) => (
-																<AgentReferences
+																<AgentReferencesV1
 																	conversationId={props.message.conversationId}
 																	widget={widget()}
 																/>

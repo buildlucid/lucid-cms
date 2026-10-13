@@ -1,8 +1,8 @@
 import type { ErrorResponse, ResponseBody } from "@types";
-import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { requestChangeKeys } from "./change-keys";
 
 export interface Params {
 	id: number;
@@ -28,7 +28,7 @@ const useUnapprove = (props?: UseUnapproveProps) => {
 			title: T()("toasts.requests.unapproved.title"),
 			message: T()("toasts.requests.unapproved.message"),
 		}),
-		invalidates: [queryKeys.requests.all()],
+		invalidates: requestChangeKeys(),
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

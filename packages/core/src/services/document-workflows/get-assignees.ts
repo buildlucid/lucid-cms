@@ -1,9 +1,9 @@
-import type { WorkflowUser } from "@lucidcms/types";
 import collections from "../../libs/collection/collections.js";
-import { documentWorkflowsFormatter } from "../../libs/formatters/index.js";
+import { usersFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
+import type { UserDisplay } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getWorkflowConfig } from "./helpers/index.js";
@@ -14,7 +14,7 @@ const getAssignees: ServiceFn<
 			collectionKey: string;
 		},
 	],
-	WorkflowUser[]
+	UserDisplay[]
 > = async (context, data) => {
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
@@ -43,17 +43,18 @@ const getAssignees: ServiceFn<
 	});
 	if (usersRes.error) return usersRes;
 
+	const mediaOptions = {
+		host: getBaseUrl(context),
+		delivery: context.mediaDelivery,
+		defaultLocale: context.config.localization.defaultLocale,
+		locales: context.config.localization.locales,
+	};
+
 	return {
 		error: undefined,
-		data: documentWorkflowsFormatter.formatAssigneeUsers({
-			users: usersRes.data ?? [],
-			mediaOptions: {
-				host: getBaseUrl(context),
-				delivery: context.mediaDelivery,
-				defaultLocale: context.config.localization.defaultLocale,
-				locales: context.config.localization.locales,
-			},
-		}),
+		data: (usersRes.data ?? []).map((user) =>
+			usersFormatter.formatDisplay({ user, mediaOptions }),
+		),
 	};
 };
 

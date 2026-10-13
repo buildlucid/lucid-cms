@@ -32,7 +32,6 @@ export const scheduleRequestAgentTool = (options: CollectionToolOptions = {}) =>
 					execution.authority,
 					options.collections,
 				),
-				runId: execution.run.id,
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});

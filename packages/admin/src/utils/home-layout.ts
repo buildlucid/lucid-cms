@@ -1,16 +1,16 @@
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import type { HomeWidgetPreference } from "@/store/userPreferencesStore/userPreferencesStore";
 
 type LayoutWidget = {
 	key: string;
-	size: DashboardWidgetSize;
-	sizes: readonly DashboardWidgetSize[];
+	size: HomeWidgetSize;
+	sizes: readonly HomeWidgetSize[];
 	hidden: boolean;
 };
 
 export type HomeLayoutItem<Widget extends LayoutWidget> = {
 	widget: Widget;
-	size: DashboardWidgetSize;
+	size: HomeWidgetSize;
 	hidden: boolean;
 };
 

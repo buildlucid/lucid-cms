@@ -1,12 +1,8 @@
-import type {
-	ErrorResponse,
-	RequestDocumentInput,
-	RequestType,
-	ResponseBody,
-} from "@types";
-import { queryKeys } from "@/services/query-keys";
+import type { RequestDocumentInput } from "@lucidcms/types";
+import type { ErrorResponse, RequestType, ResponseBody } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { requestChangeKeys } from "./change-keys";
 
 export interface Params {
 	body: {
@@ -37,7 +33,7 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 		ResponseBody<{ id: number }>
 	>({
 		mutationFn: createSingleReq,
-		invalidates: [queryKeys.requests.all()],
+		invalidates: requestChangeKeys(),
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

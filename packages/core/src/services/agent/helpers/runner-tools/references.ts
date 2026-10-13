@@ -35,7 +35,7 @@ const references: RunnerToolInputHandler<
 							...reference,
 							name: detail.label,
 							...(detail.mimeType ? { mimeType: detail.mimeType } : {}),
-							linkedBy: source.type === "tool" ? source.toolName : "user",
+							linkedBy: source.type === "tool" ? source.toolName : "person",
 						},
 					]
 				: [];

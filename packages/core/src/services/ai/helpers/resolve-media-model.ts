@@ -3,7 +3,7 @@ import type { MediaGenerationType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getMediaModelOptions from "../features/get-media-model-options.js";
 
-/** Returns the chosen or default model, rejecting choices outside the configured catalogue. */
+/** Resolves a configured or default model, rejecting unavailable models and disabled media generation features. */
 const resolveMediaModel: ServiceFn<
 	[{ type: MediaGenerationType; modelId?: string | null }],
 	string

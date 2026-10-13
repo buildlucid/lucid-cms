@@ -75,7 +75,7 @@ export function useDocumentMutations(props: {
 		getCollectionName: props.collectionSingularName,
 	});
 
-	const requestCreationMutation = api.documents.useRequestCreation({
+	const requestDocumentMutation = api.documents.useRequestSingle({
 		onSuccess: (data) => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
@@ -298,8 +298,8 @@ export function useDocumentMutations(props: {
 	};
 
 	/** Requests the new document through a create request instead of creating it. Opens the request once requested. */
-	const requestCreationAction = (title: string) => {
-		requestCreationMutation.action.mutate({
+	const requestDocumentAction = (title: string) => {
+		requestDocumentMutation.action.mutate({
 			collectionKey: props.collectionKey(),
 			body: {
 				title,
@@ -309,14 +309,14 @@ export function useDocumentMutations(props: {
 		});
 	};
 
-	const publishDocumentAction = async (target: DocumentVersionType) => {
+	const publishDocumentAction = async (environment: DocumentVersionType) => {
 		const id = props.documentId();
 		if (id === undefined) return;
 		await publishMutation.action.mutateAsync({
 			collectionKey: props.collectionKey(),
 			id,
 			body: {
-				target,
+				environment,
 				sourceVersionId: props.document?.()?.versions.latest?.id,
 			},
 		});
@@ -369,14 +369,14 @@ export function useDocumentMutations(props: {
 
 	return {
 		createDocumentMutation,
-		requestCreationMutation,
+		requestDocumentMutation,
 		createSingleVersionMutation,
 		updateSingleVersionMutation,
 		checkSingleVersionMutation,
 		publishMutation,
 		updateWorkflowMutation,
 		upsertDocumentAction,
-		requestCreationAction,
+		requestDocumentAction,
 		publishDocumentAction,
 		autoSaveDocument,
 		autoSaveMetadata,

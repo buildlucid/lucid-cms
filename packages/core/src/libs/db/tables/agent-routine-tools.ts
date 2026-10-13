@@ -4,12 +4,17 @@ import type { BooleanInt } from "../types.js";
 
 export const agentRoutineToolsTable = defineTable(
 	"lucid_agent_routine_tools",
-	() => ({
+	(adapter) => ({
 		columns: {
 			routine_id: { schema: z.uuid(), type: "text" },
 			tool_name: { schema: z.string(), type: "text" },
 			requires_confirmation: {
-				schema: z.union([z.boolean(), z.literal(0), z.literal(1)]).nullable(),
+				schema: z
+					.union([
+						z.literal(adapter.config.defaults.boolean.true),
+						z.literal(adapter.config.defaults.boolean.false),
+					])
+					.nullable(),
 				type: "boolean",
 			},
 		},

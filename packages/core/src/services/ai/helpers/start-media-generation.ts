@@ -18,14 +18,12 @@ import storePendingGeneration from "../storage/store-pending-generation.js";
 
 /**
  * Starts and records a generation for polling, reporting even immediate results as processing.
- * @remarks Callers must first check that the media type's AI feature is enabled.
+ * @remarks Callers must first resolve the model with `resolveMediaModel`, which checks the media type's AI feature is enabled.
  */
 const startMediaGeneration: ServiceFn<
 	[
 		{
 			request: MediaImageGenerateV1Request | MediaAudioGenerateV1Request;
-			/** What the generation was for, kept for inspecting a record. */
-			target: Record<string, unknown>;
 			idempotencyKey?: string;
 			userId: number;
 		},
@@ -72,7 +70,6 @@ const startMediaGeneration: ServiceFn<
 			requestId: responseData.requestId,
 			feature: generation.feature,
 			session,
-			target: props.target,
 		});
 		if (storeRes.error) return storeRes;
 
@@ -104,7 +101,6 @@ const startMediaGeneration: ServiceFn<
 		response: responseData,
 		session,
 		requestStartedAt,
-		target: props.target,
 	});
 	if (storeRes.error) return storeRes;
 

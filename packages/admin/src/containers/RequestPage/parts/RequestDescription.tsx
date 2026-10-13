@@ -1,5 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import { TbOutlinePencil } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
@@ -16,7 +16,7 @@ import { RequestRichTextEditor } from "./RequestRichTextEditor";
  * clears it.
  */
 export const RequestDescription: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks

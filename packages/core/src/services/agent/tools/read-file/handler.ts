@@ -1,6 +1,10 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
-import type { AgentToolHandler } from "../../../../libs/tools/types.js";
+import type {
+	AgentToolExecution,
+	AgentToolResult,
+} from "../../../../libs/tools/types.js";
+import type { ServiceFn } from "../../../../utils/services/types.js";
 import readMedia from "../../helpers/read-media.js";
 import register from "../../references/register.js";
 import { MAX_FILE_BYTES, readFileToolName } from "./constants.js";
@@ -14,10 +18,10 @@ import {
 } from "./schema.js";
 
 /** Reads locally and links the file to the chat. Only bounded passages enter the conversation, never the complete stored file. */
-const handler: AgentToolHandler<
-	z.output<typeof inputSchema>,
-	z.output<typeof outputSchema>
-> = async ({ context, input, execution }) => {
+const readFile: ServiceFn<
+	[{ input: z.output<typeof inputSchema>; execution: AgentToolExecution }],
+	AgentToolResult<z.output<typeof outputSchema>>
+> = async (context, { input, execution }) => {
 	const file = await readMedia(context, {
 		mediaId: input.mediaId,
 		execution,
@@ -79,4 +83,4 @@ const handler: AgentToolHandler<
 	};
 };
 
-export default handler;
+export default readFile;

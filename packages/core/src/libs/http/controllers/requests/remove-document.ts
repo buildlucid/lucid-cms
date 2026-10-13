@@ -31,7 +31,7 @@ const removeDocumentController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.removeDocument.params),

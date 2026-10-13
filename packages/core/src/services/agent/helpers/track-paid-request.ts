@@ -1,22 +1,14 @@
 import type z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
 import type { cmsAgentUsageSchema } from "../../../libs/lucid-remote/schema/ai.js";
-import type { AiUsageFeatureKey } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
+import getRequestDurationMs from "../../ai/helpers/get-request-duration-ms.js";
 import reconcileUsage from "../reconcile-usage.js";
 import storePendingUsage from "./store-pending-usage.js";
-import storeUsage from "./store-usage.js";
-
-export type PaidRequestRecord = {
-	requestId: string;
-	featureKey: AiUsageFeatureKey;
-	runId: string;
-	conversationId: string;
-	userId: number | null;
-};
+import storeUsage, { type PaidRequestRecord } from "./store-usage.js";
 
 /**
  * Runs one paid Lucid request for an agent run and keeps its usage
@@ -60,7 +52,7 @@ const trackPaidRequest = async <
 		...props.record,
 		connectionId: response.data.connectionId,
 		usage: response.data.usage,
-		durationMs: Date.now() - startedAt,
+		durationMs: getRequestDurationMs(startedAt),
 	});
 	if (stored.error) {
 		return {

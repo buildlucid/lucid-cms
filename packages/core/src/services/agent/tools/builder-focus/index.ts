@@ -1,15 +1,16 @@
 import constants from "../../../../constants/constants.js";
-import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import {
+	agentBuilderFocusSchema,
 	agentScreenCallSchema,
 	agentScreenResponseSchema,
-} from "../../../../schemas/agent-screen.js";
+} from "../../../../libs/agent/screen.js";
+import { copy } from "../../../../libs/i18n/index.js";
+import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import resolveBuilderScreen from "../../helpers/builder/resolve-builder-screen.js";
 import screenCall from "../../helpers/builder/screen-call.js";
 import screenUnavailableMessage from "../../helpers/builder/screen-unavailable-message.js";
 import { builderFocusToolName } from "./constants.js";
-import { inputSchema, outputSchema } from "./schema.js";
+import { outputSchema } from "./schema.js";
 
 const title = copy("admin:core.tools.lucid_builder_focus.title");
 
@@ -20,7 +21,7 @@ export const builderFocusAgentTool = () =>
 		title,
 		description:
 			"Scroll the person's document builder to a field or brick and highlight it, eg. to show them one you are asking about.",
-		input: inputSchema,
+		input: agentBuilderFocusSchema,
 		output: outputSchema,
 		//* collection read access is checked against the open screen when the call runs
 		permissions: [],
@@ -37,12 +38,12 @@ export const builderFocusAgentTool = () =>
 
 				return {
 					error: undefined,
-					data: screenCall(context, {
+					data: screenCall({
 						title,
 						call: {
 							action: "focus",
 							screen: resolved.data.screen,
-							target: input,
+							focus: input,
 						},
 					}),
 				};

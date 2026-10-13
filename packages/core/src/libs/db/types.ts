@@ -93,6 +93,13 @@ export type TimestampImmutable = ColumnType<
 
 export type TimestampRequired = ColumnType<string | Date, string, string>;
 
+/** A not-null timestamp the database defaults on insert. */
+export type TimestampDefaulted = ColumnType<
+	string | Date,
+	string | undefined,
+	string
+>;
+
 export type BooleanInt = 0 | 1 | boolean;
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;

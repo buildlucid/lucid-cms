@@ -4,6 +4,7 @@ import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import getUsage from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
+/** Lets an agent read Lucid AI usage and credits. */
 export const getAiUsageAgentTool = () =>
 	defineAgentTool({
 		name: "ai_usage_get",
@@ -15,9 +16,10 @@ export const getAiUsageAgentTool = () =>
 		permissions: [Permissions.SettingsRead],
 		readOnly: true,
 		handler: async ({ context, input, execution }) => {
+			const { principal } = execution.authority;
 			const result = await getUsage(context, {
 				input,
-				viewerId: execution.run.userId,
+				viewerId: principal.type === "user" ? principal.userId : null,
 			});
 			if (result.error) return result;
 

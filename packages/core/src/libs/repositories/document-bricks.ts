@@ -73,54 +73,6 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		});
 	}
 
-	/**
-	 * Nullifies references to a deleted document in a single brick table
-	 */
-	async nullifyDocumentReferences(
-		props: {
-			columns: Array<keyof LucidBricksTable>;
-			documentId: number;
-		},
-		dynamicConfig: DynamicConfig<LucidBrickTableName>,
-	) {
-		if (props.columns.length === 0) {
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		}
-
-		const { table, ref } = this.db.dynamic;
-
-		let query = this.db.updateTable(table(dynamicConfig.tableName).as("t"));
-
-		const updateObj: Record<string, null> = {};
-		for (const col of props.columns) {
-			updateObj[col] = null;
-		}
-		query = query.set(updateObj);
-
-		query = query.where((eb) => {
-			const conditions = [];
-
-			for (const column of props.columns) {
-				conditions.push(eb(ref(`t.${String(column)}`), "=", props.documentId));
-			}
-			return eb.or(conditions);
-		});
-
-		const exec = await this.executeQuery(() => query.execute(), {
-			method: "nullifyDocumentReferences",
-			tableName: dynamicConfig.tableName,
-		});
-
-		if (exec.response.error) return exec.response;
-
-		return this.validateResponse(exec, {
-			enabled: false,
-			mode: "single",
-		});
-	}
 	/** Read stored field values in bounded pages during reference schema refreshes. */
 	async selectReferenceValues(
 		props: { afterId: number; limit: number },
@@ -201,15 +153,14 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			);
 		}
 
+		const schema = z.object({
+			document_id: z.number(),
+			document_version_id: z.number(),
+			type: z.string(),
+		});
+
 		const exec = await this.executeQuery(
-			() =>
-				query.execute() as Promise<
-					Array<{
-						document_id: number;
-						document_version_id: number;
-						type: string;
-					}>
-				>,
+			() => query.execute() as Promise<z.infer<typeof schema>[]>,
 			{
 				method: "selectRelationReferenceVersions",
 				tableName: dynamicConfig.tableName,
@@ -217,7 +168,12 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		);
 		if (exec.response.error) return exec.response;
 
-		return this.validateResponse(exec, { mode: "multiple" });
+		return this.validateResponse(exec, {
+			enabled: true,
+			mode: "multiple",
+			selectAll: true,
+			schema,
+		});
 	}
 	/** Remove relation rows and return the documents whose content changed. */
 	async deleteRelationReferences(
@@ -228,28 +184,23 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		},
 		dynamicConfig: DynamicConfig<LucidBrickTableName>,
 	) {
-		let query = this.db
+		const query = this.db
 			.deleteFrom(dynamicConfig.tableName)
 			.where("document_version_id", "in", props.versionIds)
-			.where(
-				prefixGeneratedColName("collection_key"),
-				"=",
-				props.collectionKey,
-			);
-		if (props.documentIds !== undefined) {
-			query = query.where(
-				prefixGeneratedColName("document_id"),
-				"in",
-				props.documentIds,
-			);
-		}
-		const result = await this.executeQuery(
-			() => query.returning(["document_id", "document_version_id"]).execute(),
-			{
-				method: "deleteRelationReferences",
-				tableName: dynamicConfig.tableName,
-			},
-		);
+			.where(prefixGeneratedColName("collection_key"), "=", props.collectionKey)
+			.$if(props.documentIds !== undefined, (query) =>
+				query.where(
+					prefixGeneratedColName("document_id"),
+					"in",
+					props.documentIds ?? [],
+				),
+			)
+			.returning(["document_id", "document_version_id"]);
+
+		const result = await this.executeQuery(() => query.execute(), {
+			method: "deleteRelationReferences",
+			tableName: dynamicConfig.tableName,
+		});
 		if (result.response.error) return result.response;
 		return this.validateResponse(result, {
 			enabled: true,

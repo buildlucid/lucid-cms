@@ -40,7 +40,6 @@ const updateSingle: ServiceFn<
 
 	const lockRes = await lockRequest(context, { id: data.id });
 	if (lockRes.error) return lockRes;
-	await using _lock = lockRes.data;
 
 	const requestRes = await loadRequest(context, data);
 	if (requestRes.error) return requestRes;
@@ -52,7 +51,7 @@ const updateSingle: ServiceFn<
 		data.description !== undefined ||
 		data.reviewerIds !== undefined;
 	const scheduling = data.scheduledAt !== undefined;
-	if ((editing && !access.edit) || (scheduling && !access.request)) {
+	if ((editing && !access.edit) || (scheduling && !access.complete)) {
 		return {
 			error: {
 				type: "basic",
@@ -129,7 +128,6 @@ const updateSingle: ServiceFn<
 
 		const queueRes = await scheduleRequest(context, {
 			id: request.id,
-			skipRequestWriteClaim: true,
 		});
 		if (queueRes.error) return queueRes;
 	}

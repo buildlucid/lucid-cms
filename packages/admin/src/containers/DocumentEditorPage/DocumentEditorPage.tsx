@@ -1,6 +1,6 @@
 import type { PreviewScrollState } from "@lucidcms/preview-protocol";
 import { useNavigate, useParams } from "@solidjs/router";
-import type { RequestDetail, RequestDocument } from "@types";
+import type { RequestDetails, RequestDocument } from "@types";
 import classnames from "classnames";
 import type { Accessor } from "solid-js";
 import {
@@ -64,7 +64,7 @@ const DocumentEditorPage: Component<{
 	version?: "latest" | "revision" | "snapshot" | "proposal";
 	versionId?: Accessor<number | undefined>;
 	/** Set when editing a request proposal, which keeps the editor inside its request. */
-	request?: Accessor<RequestDetail | undefined>;
+	request?: Accessor<RequestDetails | undefined>;
 	requestDocument?: Accessor<RequestDocument | undefined>;
 }> = (props) => {
 	// ----------------------------------
@@ -146,7 +146,7 @@ const DocumentEditorPage: Component<{
 		version: versionType,
 		versionId: versionId,
 		createDocumentMutation: mutations.createDocumentMutation,
-		requestCreationMutation: mutations.requestCreationMutation,
+		requestDocumentMutation: mutations.requestDocumentMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		publishMutation: mutations.publishMutation,
@@ -410,7 +410,6 @@ const DocumentEditorPage: Component<{
 	});
 
 	//* Redirect out of the document view when the document/collection isn't available.
-	//* Multiple collections fall back to their document list, everything else to the dashboard.
 	createEffect(() => {
 		if (docState.collectionAccessError()) {
 			navigate("/lucid", { replace: true });

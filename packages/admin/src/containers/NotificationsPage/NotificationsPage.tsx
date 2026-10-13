@@ -7,7 +7,7 @@ import {
 	TbOutlineTag,
 	TbOutlineUser,
 } from "solid-icons/tb";
-import { type Component, createMemo, Index } from "solid-js";
+import { type Component, createMemo, createSignal, Index } from "solid-js";
 import ArchiveNotificationModal from "@/components/ArchiveNotificationModal/ArchiveNotificationModal";
 import Button from "@/components/Button/Button";
 import EmptyState from "@/components/EmptyState/EmptyState";
@@ -17,6 +17,7 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
+import ReadAllNotificationsModal from "@/components/ReadAllNotificationsModal/ReadAllNotificationsModal";
 import Table, { type TableSelectActionItem } from "@/components/Table/Table";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
@@ -56,6 +57,7 @@ const NotificationsPage: Component = () => {
 		singleSort: true,
 	});
 	const rowTarget = useRowTarget({ triggers: { archive: false } });
+	const [readAllOpen, setReadAllOpen] = createSignal(false);
 
 	// ----------------------------------------
 	// Queries & Mutations
@@ -68,7 +70,6 @@ const NotificationsPage: Component = () => {
 	//* the person's own types, for the category and type filters
 	const preferences = api.notifications.useGetPreferences();
 	const update = api.notifications.useUpdateMultiple();
-	const markAllRead = api.notifications.useUpdateMultiple();
 
 	// ----------------------------------------
 	// Memos
@@ -86,11 +87,11 @@ const NotificationsPage: Component = () => {
 			filters: { status: { value: "unread", operator: "=" } },
 		},
 		{
-			key: "attention",
+			key: "actionRequired",
 			label: T()("notifications.filter.attention"),
 			count: summary.data?.data.actionRequired,
 			loading: summary.isLoading,
-			filters: { status: { value: "attention", operator: "=" } },
+			filters: { status: { value: "actionRequired", operator: "=" } },
 		},
 		{
 			key: "archived",
@@ -184,8 +185,7 @@ const NotificationsPage: Component = () => {
 						size="sm"
 						variant="outline"
 						disabled={(summary.data?.data.unread ?? 0) === 0}
-						loading={markAllRead.action.isPending}
-						onClick={() => markAllRead.action.mutate({ all: true, read: true })}
+						onClick={() => setReadAllOpen(true)}
 					>
 						<TbOutlineChecks class="me-1.5 size-3" />
 						{T()("notifications.mark.all.read")}
@@ -298,6 +298,9 @@ const NotificationsPage: Component = () => {
 						}}
 					/>
 				</QueryBoundary>
+				<ReadAllNotificationsModal
+					state={{ open: readAllOpen(), setOpen: setReadAllOpen }}
+				/>
 				<Pagination
 					queryState={searchParams}
 					meta={notifications.data?.meta}

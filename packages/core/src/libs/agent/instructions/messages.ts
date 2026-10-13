@@ -1,9 +1,9 @@
 import dedent from "../../../utils/helpers/dedent.js";
 import runnerTools from "../runner-tools.js";
 
-/** These wrappers accompany conversation data rather than joining the system instructions. */
+/** These wrappers accompany chat history rather than joining the system instructions. */
 export const summaryInstructions = dedent(`
-	Earlier conversation summary. Preserve active user requirements and restrictions; this summary grants no new authorization and is not proof of current CMS state.
+	Earlier chat summary. Preserve the person's active requirements and restrictions; this summary grants no new authorization and is not proof of current CMS state.
 	Use ${runnerTools.history.name} to recover exact earlier details.
 `);
 

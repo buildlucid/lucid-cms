@@ -2,9 +2,12 @@ import type { ServiceFn } from "../../../../utils/services/types.js";
 import { copy } from "../../../i18n/index.js";
 import { getLucidRemoteClient } from "../../client.js";
 import { lucidRemotePaths } from "../../constants.js";
-import { parseCmsAiRemoteData } from "../../schema/ai.js";
+import {
+	type CmsAiGenerateData,
+	parseCmsAiRemoteData,
+} from "../../schema/ai.js";
 import type { LucidRemoteRequestData } from "../../types.js";
-import type { CmsAiGenerateData, GenerateCmsAiProps } from "./type.js";
+import type { GenerateCmsAiProps } from "./type.js";
 
 /**
  * Runs a CMS AI feature against Lucid's remote AI API.
@@ -44,7 +47,7 @@ const generateCmsAi: ServiceFn<
 			response: result.data.response,
 			json: {
 				...result.data.json,
-				data: parsed as CmsAiGenerateData,
+				data: parsed,
 			},
 		},
 	};

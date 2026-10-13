@@ -3,6 +3,7 @@ import type { Collection } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
+import DocumentPublishModal from "@/components/DocumentPublishModal/DocumentPublishModal";
 import DocumentRequestModal from "@/components/DocumentRequestModal/DocumentRequestModal";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import DocumentUnpublishModal from "@/components/DocumentUnpublishModal/DocumentUnpublishModal";
@@ -11,7 +12,6 @@ import EmbeddedBrickEditDrawer from "@/components/EmbeddedBrickEditDrawer/Embedd
 import LinkSelectModal from "@/components/LinkSelectModal/LinkSelectModal";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import NavigationGuardModal from "@/components/NavigationGuardModal/NavigationGuardModal";
-import ReleaseEnvironmentModal from "@/components/ReleaseEnvironmentModal/ReleaseEnvironmentModal";
 import RestoreRevisionModal from "@/components/RestoreRevisionModal/RestoreRevisionModal";
 import RichTextVariableSelectDrawer from "@/components/RichTextVariableSelectDrawer/RichTextVariableSelectDrawer";
 import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
@@ -95,9 +95,9 @@ export const PageBuilderModals: Component<{
 	// ----------------------------------
 	// Functions
 	const resetRequestState = () => {
-		props.hooks.uiState.setReleaseEnvironmentOpen(false);
-		props.hooks.uiState.setReleaseEnvironmentTarget(null);
-		props.hooks.uiState.setReleaseEnvironmentAction(null);
+		props.hooks.uiState.setPublishOpen(false);
+		props.hooks.uiState.setPublishTarget(null);
+		props.hooks.uiState.setPublishAction(null);
 	};
 
 	// ----------------------------------
@@ -269,15 +269,15 @@ export const PageBuilderModals: Component<{
 				}}
 			/>
 			<DocumentRequestModal
-				open={props.hooks.uiState.getRequestCreationOpen()}
+				open={props.hooks.uiState.getDocumentRequestOpen()}
 				setOpen={(open) => {
-					props.hooks.uiState.setRequestCreationOpen(open);
-					if (!open) props.hooks.mutations.requestCreationMutation.reset();
+					props.hooks.uiState.setDocumentRequestOpen(open);
+					if (!open) props.hooks.mutations.requestDocumentMutation.reset();
 				}}
 				collectionName={props.hooks.state.collectionSingularName()}
-				loading={props.hooks.mutations.requestCreationMutation.action.isPending}
-				error={props.hooks.mutations.requestCreationMutation.errors()?.message}
-				onConfirm={props.hooks.mutations.requestCreationAction}
+				loading={props.hooks.mutations.requestDocumentMutation.action.isPending}
+				error={props.hooks.mutations.requestDocumentMutation.errors()?.message}
+				onConfirm={props.hooks.mutations.requestDocumentAction}
 			/>
 			<Show when={props.hooks.state.documentId()}>
 				{(documentId) => (
@@ -300,17 +300,15 @@ export const PageBuilderModals: Component<{
 								)
 							}
 						/>
-						<ReleaseEnvironmentModal
-							open={props.hooks.uiState.getReleaseEnvironmentOpen()}
+						<DocumentPublishModal
+							open={props.hooks.uiState.getPublishOpen()}
 							setOpen={(open) => {
 								if (open) return;
 								resetRequestState();
 								props.hooks.mutations.publishMutation.reset();
 							}}
-							target={props.hooks.uiState.getReleaseEnvironmentTarget()}
-							action={
-								props.hooks.uiState.getReleaseEnvironmentAction() ?? "compose"
-							}
+							target={props.hooks.uiState.getPublishTarget()}
+							action={props.hooks.uiState.getPublishAction() ?? "compose"}
 							collection={props.hooks.state.collection()}
 							document={{
 								collectionKey: props.hooks.state.collectionKey(),
@@ -321,8 +319,12 @@ export const PageBuilderModals: Component<{
 								loading: props.hooks.mutations.publishMutation.action.isPending,
 								error: props.hooks.mutations.publishMutation.errors()?.message,
 								onConfirm: async (target) => {
-									await props.hooks.mutations.publishDocumentAction(target);
-									resetRequestState();
+									try {
+										await props.hooks.mutations.publishDocumentAction(target);
+										resetRequestState();
+									} catch {
+										//* the modal shows the publish error
+									}
 								},
 							}}
 						/>

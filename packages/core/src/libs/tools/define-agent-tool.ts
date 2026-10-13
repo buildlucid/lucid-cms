@@ -1,6 +1,6 @@
 import { z } from "zod";
 import constants from "../../constants/constants.js";
-import { agentInteractionRequestSchema } from "../../schemas/agent.js";
+import { agentInteractionPlacementSchema } from "../../schemas/agent.js";
 import { agentResourceSchema } from "../../schemas/agent-references.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { isJsonObject } from "../../utils/helpers/is-json-object.js";
@@ -18,15 +18,18 @@ import {
 import type {
 	AgentToolDefinition,
 	AgentToolInteraction,
+	AgentToolInvocation,
 	AgentToolPreparation,
 	AgentToolProceed,
 	AgentToolResult,
 	DefineAgentToolOptions,
 	DefineInteractiveAgentToolOptions,
+	ToolHandler,
 	ToolRunResult,
 } from "./types.js";
 
-const summaryTextSchema = z.string().trim().min(1).max(2000);
+//* summaries and interaction titles are checked once translated
+const copyTextSchema = z.string().trim().min(1).max(2000);
 const changesSchema = z.array(agentResourceSchema).optional();
 
 /**
@@ -40,7 +43,7 @@ function defineAgentTool<
 	Output extends z.ZodObject,
 	Data extends z.ZodType<Record<string, unknown>>,
 	Response extends z.ZodType<Record<string, unknown>>,
-	Optional extends boolean = false,
+	Skippable extends boolean = false,
 >(
 	options: DefineInteractiveAgentToolOptions<
 		Name,
@@ -48,7 +51,7 @@ function defineAgentTool<
 		Output,
 		Data,
 		Response,
-		Optional
+		Skippable
 	>,
 ): AgentToolDefinition<Name>;
 function defineAgentTool<
@@ -87,9 +90,11 @@ function defineAgentTool<
 		describe: (input: Record<string, unknown>) => {
 			if (!describe) return title;
 			const parsed = options.input.safeParse(input);
-			return parsed.success ? normalizeCopy(describe(parsed.data)) : title;
+			return parsed.success
+				? normalizeCopy(describe({ input: parsed.data }))
+				: title;
 		},
-		target: "agent" as const,
+		kind: "agent" as const,
 		permissions: options.permissions,
 		readOnly: options.readOnly ?? false,
 		parallelSafe: options.parallelSafe ?? false,
@@ -125,8 +130,13 @@ function defineAgentTool<
 			};
 		}
 
-		const { data, ...request } = result.interaction;
-		const parsedRequest = agentInteractionRequestSchema.safeParse(request);
+		const { data, title, placement } = result.interaction;
+		const parsedPlacement =
+			agentInteractionPlacementSchema.safeParse(placement);
+		const parsedTitle = adminCopyInputSchema.safeParse(title);
+		const titled =
+			parsedTitle.success &&
+			copyTextSchema.safeParse(context.translate(parsedTitle.data)).success;
 		const parsedData = await options.interaction.data.safeParseAsync(data);
 		//* Screen calls include document content and bypass the widget data size limit.
 		const bounded =
@@ -135,7 +145,9 @@ function defineAgentTool<
 				constants.agent.limits.interactionDataChars;
 		//* malformed interaction payloads violate the tool contract
 		if (
-			!parsedRequest.success ||
+			!parsedPlacement.success ||
+			!parsedTitle.success ||
+			!titled ||
 			!parsedData.success ||
 			!isJsonObject(data) ||
 			!bounded
@@ -144,12 +156,15 @@ function defineAgentTool<
 				event: "tools.interaction.invalid",
 				message: `Tool ${options.name} asked for input with an invalid interaction`,
 				error:
-					parsedRequest.error ??
+					parsedPlacement.error ??
+					parsedTitle.error ??
 					parsedData.error ??
 					new Error(
-						bounded
-							? "Interaction data is not lossless JSON"
-							: "Interaction data is too large",
+						!titled
+							? "Interaction title must be 1 to 2000 characters once translated"
+							: bounded
+								? "Interaction data is not lossless JSON"
+								: "Interaction data is too large",
 					),
 			});
 			return {
@@ -160,7 +175,13 @@ function defineAgentTool<
 
 		return {
 			type: "success",
-			data: { interaction: { ...parsedRequest.data, data } },
+			data: {
+				interaction: {
+					title: normalizeCopy(parsedTitle.data),
+					placement: parsedPlacement.data,
+					data,
+				},
+			},
 		};
 	};
 	const checkResult = async (
@@ -171,7 +192,7 @@ function defineAgentTool<
 		context: ServiceContext,
 	): Promise<ToolRunResult<AgentToolPreparation>> => {
 		if ("proceed" in result) {
-			return "interaction" in options && options.interaction.optional
+			return "interaction" in options && options.interaction.skippable
 				? { type: "success", data: { proceed: true } }
 				: {
 						type: "failed",
@@ -197,7 +218,7 @@ function defineAgentTool<
 		const summary = adminCopyInputSchema.safeParse(result.summary);
 		if (
 			summary.success &&
-			summaryTextSchema.safeParse(context.translate(summary.data)).success
+			copyTextSchema.safeParse(context.translate(summary.data)).success
 		) {
 			return checkOutput(
 				{ ...checked, summary: normalizeCopy(summary.data) },
@@ -221,7 +242,7 @@ function defineAgentTool<
 					prepareToolInput(
 						{
 							...options,
-							requirements: options.requiredPermissions,
+							requirements: options.inputPermissions,
 							checkResult,
 						},
 						input,
@@ -253,7 +274,7 @@ function defineAgentTool<
 		}
 
 		const parsedResponse = await interaction
-			.response(parsedData.data)
+			.response({ data: parsedData.data })
 			.safeParseAsync(response);
 		if (!parsedResponse.success) {
 			return {
@@ -277,7 +298,7 @@ function defineAgentTool<
 		interaction: {
 			key: interaction.key,
 			version: interaction.version,
-			optional: interaction.optional ?? false,
+			skippable: interaction.skippable ?? false,
 		},
 		[toolDefinitionInternal]: {
 			requiresConfirmation: confirms,
@@ -285,23 +306,29 @@ function defineAgentTool<
 				prepareToolInput(
 					{
 						...options,
-						requirements: options.requiredPermissions,
-						handler: async (args) => {
-							if (!args.execution.interaction && interaction.optional) {
+						requirements: options.inputPermissions,
+						handler: async ({
+							execution: { answer, ...execution },
+							...args
+						}: Parameters<
+							ToolHandler<z.output<Input>, unknown, AgentToolInvocation>
+						>[0]) => {
+							if (!answer && interaction.skippable) {
 								return options.handler({
 									...args,
+									execution,
 									data: undefined,
 									response: undefined,
 								});
 							}
 
 							const parsed = await parseInteraction(
-								args.execution.interaction?.data,
-								args.execution.interaction?.response,
+								answer?.data,
+								answer?.response,
 							);
 							if (parsed.error) return parsed;
 
-							return options.handler({ ...args, ...parsed.data });
+							return options.handler({ ...args, execution, ...parsed.data });
 						},
 						checkResult,
 					},
@@ -312,7 +339,7 @@ function defineAgentTool<
 					prepareToolInput(
 						{
 							...options,
-							requirements: options.requiredPermissions,
+							requirements: options.inputPermissions,
 							handler: interaction.prepare,
 							checkResult,
 						},

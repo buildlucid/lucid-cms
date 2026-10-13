@@ -3,8 +3,8 @@ import { formatPerson } from "../../../../libs/tools/person.js";
 import type { CollectionDocumentMeta } from "../../../../types/response.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getAgentActors from "../../../agent/helpers/get-agent-actors.js";
-import getRequestUsers from "../../../requests/helpers/get-request-users.js";
-import type { documentMetaSchema } from "../../helpers/project-document.js";
+import getDisplayUsers from "../../../users/helpers/get-display-users.js";
+import type { documentMetaSchema } from "./project-document.js";
 
 /** Names the people and agents behind a document and its versions, as request tools do. */
 const projectMeta: ServiceFn<
@@ -13,7 +13,7 @@ const projectMeta: ServiceFn<
 > = async (context, data) => {
 	const versions = Object.entries(data.meta.versions);
 	const [usersRes, agentsRes] = await Promise.all([
-		getRequestUsers(context, {
+		getDisplayUsers(context, {
 			ids: [
 				data.meta.createdBy,
 				data.meta.updatedBy,

@@ -1,7 +1,7 @@
 import type { ErrorResponse, ResponseBody } from "@types";
-import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { requestChangeKeys } from "./change-keys";
 
 export interface Params {
 	id: number;
@@ -26,7 +26,7 @@ interface UseUpdateTargetsProps {
 const useUpdateTargets = (props?: UseUpdateTargetsProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: updateTargetsReq,
-		invalidates: [queryKeys.requests.all()],
+		invalidates: requestChangeKeys(),
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

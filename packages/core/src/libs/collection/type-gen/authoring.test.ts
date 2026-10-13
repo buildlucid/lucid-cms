@@ -57,7 +57,7 @@ import "./generated.mjs";
 import type { Toolkit, DocumentEditToken } from "@lucidcms/core/types";
 declare const toolkit: Toolkit;
 declare const token: DocumentEditToken;
-const actor = { kind: "system" } as const;
+const actor = { type: "system" } as const;
 toolkit.documents.createSingle({ collectionKey: "typed_article", actor, data: { fields: { title: { en: "Hello" }, links: [{ fields: { label: "Label" } }] } } });
 toolkit.documents.updateSingle({ collectionKey: "typed_article", id: 1, actor, ifUnchanged: token, data: { fields: { title: { fr: "Bonjour" } } } });
 toolkit.documents.patchSingle({ collectionKey: "typed_article", id: 1, actor, operations: [{ op: "set", path: ["fields", "links", { ref: "item" }, "fields", "label"], value: "Updated" }] });

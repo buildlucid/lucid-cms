@@ -25,7 +25,7 @@ const revokeConnectionController = factory.createHandlers(
 			params: oauthSchemas.connection.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", oauthSchemas.connection.params),
 	async (c) => {

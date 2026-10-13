@@ -1,4 +1,4 @@
-import { defineAgentTool, z } from "@lucidcms/core";
+import { copy, defineAgentTool, z } from "@lucidcms/core";
 
 export const documentPickerData = z.object({
 	documents: z.array(z.object({ id: z.number().int(), label: z.string() })),
@@ -22,7 +22,7 @@ export const selectDocumentTool = defineAgentTool({
 		key: "playground-document-picker",
 		version: 1,
 		data: documentPickerData,
-		response: (data) =>
+		response: ({ data }) =>
 			documentPickerResponse.refine((response) =>
 				data.documents.some((document) => document.id === response.documentId),
 			),
@@ -33,7 +33,7 @@ export const selectDocumentTool = defineAgentTool({
 				query: { perPage: 20 },
 			});
 			if (result.error) return result;
-			if (!result.data.documents.length) {
+			if (!result.data.data.length) {
 				return {
 					error: undefined,
 					data: {
@@ -47,10 +47,10 @@ export const selectDocumentTool = defineAgentTool({
 				error: undefined,
 				data: {
 					interaction: {
-						title: context.translate("server:playground.document-picker.title"),
+						title: copy("admin:playground.document-picker.title"),
 						placement: input.placement,
 						data: {
-							documents: result.data.documents.map((document) => {
+							documents: result.data.data.map((document) => {
 								const field = document.fields.page_title;
 								const titles =
 									typeof field === "string"

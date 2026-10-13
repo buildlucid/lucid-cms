@@ -1,9 +1,8 @@
-import type { DocumentWorkflow, WorkflowUser } from "@lucidcms/types";
+import type { DocumentWorkflow } from "@lucidcms/types";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
 import formatter from "./helpers.js";
-import type { MediaFormatterOptions, MediaPosterPropsT } from "./media.js";
-import mediaFormatter from "./media.js";
+import type { MediaFormatterOptions } from "./media.js";
 
 type DocumentWorkflowFormatInput = {
 	id?: number | null;
@@ -79,31 +78,7 @@ const formatSummary = (props: {
 	};
 };
 
-const formatAssigneeUsers = (props: {
-	users: Array<{
-		id: number;
-		email: string | null;
-		username: string | null;
-		firstName: string | null;
-		lastName: string | null;
-		profile_picture?: MediaPosterPropsT[];
-	}>;
-	mediaOptions: MediaFormatterOptions;
-}): WorkflowUser[] =>
-	props.users.map((user) => ({
-		id: user.id,
-		email: user.email,
-		username: user.username,
-		firstName: user.firstName,
-		lastName: user.lastName,
-		profilePicture: mediaFormatter.formatMediaImagePreview({
-			poster: user.profile_picture?.[0],
-			options: props.mediaOptions,
-		}),
-	}));
-
 export default {
-	formatAssigneeUsers,
 	formatSingle,
 	formatSummary,
 	getEffectiveStage,

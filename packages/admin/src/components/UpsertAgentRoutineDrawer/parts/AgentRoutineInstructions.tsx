@@ -19,10 +19,14 @@ const AgentRoutineInstructions: Component<
 		onChange: (value: string) => void;
 	}
 > = (props) => {
+	// ----------------------------------------
+	// State & Hooks
 	const [editor, setEditor] = createSignal<Editor>();
 	const id = "agent-routine-instructions";
 	let container: HTMLDivElement | undefined;
 
+	// ----------------------------------------
+	// Effects
 	onMount(() => {
 		setEditor(
 			new Editor({
@@ -61,6 +65,8 @@ const AgentRoutineInstructions: Component<
 
 	onCleanup(() => editor()?.destroy());
 
+	// ----------------------------------------
+	// Render
 	return (
 		<Field.Root id={id} required errors={props.errors}>
 			<Field.Label>{T()("agent.routine.task.label")}</Field.Label>

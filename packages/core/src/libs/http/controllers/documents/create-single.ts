@@ -22,6 +22,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Create Document",
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
@@ -32,7 +33,7 @@ const createSingleController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.createSingle.body),
 	validate("param", controllerSchemas.createSingle.params),
@@ -58,7 +59,7 @@ const createSingleController = factory.createHandlers(
 		});
 		if (documentId.error) throw new LucidAPIError(documentId.error);
 
-		c.status(200);
+		c.status(201);
 		return c.json(
 			formatAPIResponse(c, {
 				data: {

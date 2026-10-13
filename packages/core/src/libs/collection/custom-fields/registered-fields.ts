@@ -46,4 +46,19 @@ const registeredFields = {
 
 export const registeredFieldTypes: readonly FieldTypes[] = fieldTypes;
 
+/** Field configs and optional hooks indexed by field type without narrowing individual definitions. */
+export const fieldHooks: Readonly<
+	Record<
+		FieldTypes,
+		Pick<
+			RegisteredFieldDefinition,
+			| "config"
+			| "formatFilterValue"
+			| "extractEmbeddedBrickRefs"
+			| "formatToolValue"
+			| "parseToolValue"
+		>
+	>
+> = registeredFields;
+
 export default registeredFields;

@@ -1,4 +1,4 @@
-import type { AgentFileReadOutput } from "@types";
+import type { AgentFileReadOutput } from "@lucidcms/types";
 import { type Component, createMemo, For, Show } from "solid-js";
 import T from "@/translations";
 

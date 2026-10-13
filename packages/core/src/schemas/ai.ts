@@ -6,9 +6,9 @@ import {
 	cmsAiGenerateAcceptedDataSchema,
 	cmsAiGenerateCompletedDataSchema,
 	cmsAiMediaOutputSchemas,
+	mediaGenerationModelCatalogSchemas,
 } from "../libs/lucid-remote/schema/ai.js";
 import { generatedContentSchema } from "../libs/lucid-remote/schema/generated-content.js";
-import { mediaModelCatalogSchemas } from "../libs/lucid-remote/services/get-media-models.js";
 import type {
 	AiCredits,
 	AiUsageFeatureKey,
@@ -19,7 +19,7 @@ import type {
 	SavedGeneratedMedia,
 } from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaImagePreviewResponseSchema } from "./media.js";
+import { userDisplaySchema } from "./shared/user-display.js";
 
 const aiMaxBase64ImageLength = 8_000_000;
 const aiImageDetailSchema = z.enum(["low", "high", "auto"]).default("low");
@@ -112,9 +112,11 @@ const mediaGenerateCompletionResponseSchema = z.discriminatedUnion("type", [
 	}),
 ]);
 
-const mediaGenerationRequestParamsSchema = z
+const mediaGenerationParamsSchema = z
 	.object({
-		requestId: z.uuid(),
+		id: z.uuid().meta({
+			description: "The requestId returned when the generation started",
+		}),
 	})
 	.strict();
 
@@ -168,17 +170,7 @@ const aiUsageSessionResponseSchema = z
 			})
 			.strict()
 			.nullable(),
-		user: z
-			.object({
-				id: z.number(),
-				username: z.string(),
-				email: z.email(),
-				firstName: z.string().nullable(),
-				lastName: z.string().nullable(),
-				profilePicture: mediaImagePreviewResponseSchema.nullable(),
-			})
-			.strict()
-			.nullable(),
+		user: userDisplaySchema.strict().nullable(),
 		credits: z.number().int().nonnegative(),
 		tokens: aiUsageTokensResponseSchema,
 		requests: z
@@ -511,8 +503,8 @@ export const controllerSchemas = {
 			default: z.string(),
 			models: z.array(
 				z.union([
-					mediaModelCatalogSchemas.image.shape.models.element,
-					mediaModelCatalogSchemas.audio.shape.models.element,
+					mediaGenerationModelCatalogSchemas.image.shape.models.element,
+					mediaGenerationModelCatalogSchemas.audio.shape.models.element,
 				]),
 			),
 		}),
@@ -606,7 +598,7 @@ export const controllerSchemas = {
 			string: undefined,
 			formatted: undefined,
 		},
-		params: mediaGenerationRequestParamsSchema,
+		params: mediaGenerationParamsSchema,
 		response: z.union([
 			mediaGenerateResponseSchema,
 			mediaGenerateCompletionResponseSchema,
@@ -629,7 +621,7 @@ export const controllerSchemas = {
 			string: undefined,
 			formatted: undefined,
 		},
-		params: mediaGenerationRequestParamsSchema,
+		params: mediaGenerationParamsSchema,
 		response: z.object({
 			key: z.string(),
 			fileName: z.string(),

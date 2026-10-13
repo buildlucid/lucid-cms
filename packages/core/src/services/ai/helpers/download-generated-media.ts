@@ -2,6 +2,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import getGeneratedMedia from "../../../libs/lucid-remote/services/get-generated-media/index.js";
 import readBoundedBody from "../../../libs/media-storage/read-bounded-body.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 
 /**
@@ -30,6 +31,7 @@ const downloadGeneratedMedia: ServiceFn<
 		signal: props.signal,
 	});
 	if (media.error) {
+		await handleRemoteError(context, media.error);
 		return {
 			data: undefined,
 			error: {

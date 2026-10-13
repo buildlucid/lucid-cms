@@ -1,6 +1,6 @@
+import type { StoredAgentMessagePart } from "../../../libs/agent/messages.js";
 import { messageUrlKeys, urlKeyDigest } from "../../../libs/agent/url-keys.js";
 import { AgentUrlKeysRepository } from "../../../libs/repositories/index.js";
-import type { StoredAgentMessagePart } from "../../../schemas/agent.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /** Records the URLs a saved message allows the agent to fetch. Call it in the transaction that saves the message. */

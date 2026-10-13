@@ -1,9 +1,9 @@
-import type { StoredAgentMessagePart } from "../../schemas/agent.js";
 import type {
 	AgentReferenceSnapshot,
 	AgentScreen,
 } from "../../types/response.js";
 import { routineRequest } from "./instructions/messages.js";
+import type { StoredAgentMessagePart } from "./messages.js";
 
 /** Keeps attached resources, and the admin screen it was sent from, alongside the message that introduced them. */
 export const inputMessageParts = (input: {

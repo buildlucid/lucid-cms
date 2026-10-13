@@ -1,4 +1,5 @@
 import type { Collection, WorkflowStageColor } from "@types";
+import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
@@ -40,6 +41,19 @@ export const formatStageName = (props: {
 		props.stageKey ||
 		T()("documents.workflow.no.stage")
 	);
+};
+
+/** The status indicator for each workflow stage color. */
+export const workflowStageIndicators: Record<
+	WorkflowStageColor,
+	StatusIndicatorVariant
+> = {
+	grey: "neutral-subtle",
+	red: "danger-subtle",
+	yellow: "yellow-subtle",
+	green: "green-subtle",
+	blue: "blue-subtle",
+	purple: "purple-subtle",
 };
 
 /**

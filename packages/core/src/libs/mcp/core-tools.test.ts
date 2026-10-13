@@ -147,7 +147,7 @@ beforeAll(async () => {
 	]) {
 		const created = await toolkit.documents.createSingle({
 			collectionKey: pages.key,
-			actor: { kind: "system" },
+			actor: { type: "system" },
 			data: {
 				fields: {
 					title: { en: title, fr: `FR ${title}` },
@@ -361,7 +361,6 @@ test("agent content tools share the read services but enforce collection permiss
 		run: {
 			id: "run",
 			conversationId: "conversation",
-			userId: 1,
 			agentKey: "agent",
 		},
 	};

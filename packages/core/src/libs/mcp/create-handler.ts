@@ -8,7 +8,6 @@ import type { z } from "zod";
 import packageJson from "../../../package.json" with { type: "json" };
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type { ServiceContext } from "../../utils/services/types.js";
-import { copy } from "../i18n/index.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import { filterExternalScopes } from "../permission/scopes.js";
 import { executeMcpTool } from "../tools/execute-tool.js";
@@ -59,9 +58,7 @@ const toCallToolResult = (
 			content: [
 				{
 					type: "text",
-					text:
-						context.translate(copy("server:core.mcp.result.too.large")) ??
-						"Tool result is too large",
+					text: context.translate("server:core.mcp.result.too.large"),
 				},
 			],
 		};
@@ -126,9 +123,9 @@ export const createHandler = (args: {
 								type: "text",
 								text:
 									result.type === "not-found"
-										? "Tool is unavailable"
+										? context.translate("server:core.mcp.tool.unavailable")
 										: result.type === "forbidden"
-											? "Tool scope is required"
+											? context.translate("server:core.mcp.tool.scope.required")
 											: result.message,
 							},
 						],

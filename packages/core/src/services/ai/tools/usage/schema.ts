@@ -64,7 +64,8 @@ export const inputSchema = z.object({
 				description: "Inclusive end, YYYY-MM-DD. Defaults to today.",
 			}),
 			metrics: z.array(aiUsageChartMetricSchema).min(1).optional().meta({
-				description: "Metrics to total by day. Defaults to credits.",
+				description:
+					"Metrics to total by day. requests counts AI calls, not content requests. Defaults to credits.",
 			}),
 			featureKey: aiUsageFeatureKeySchema.optional().meta({
 				description: "Only count one feature.",
@@ -91,13 +92,18 @@ const sessionSchema = z.object({
 		output: z.number(),
 		total: z.number(),
 	}),
-	requests: z.object({
-		total: z.number(),
-		webSearches: z.number(),
-		webFetches: z.number(),
-		failed: z.number(),
-		pending: z.number(),
-	}),
+	requests: z
+		.object({
+			total: z.number(),
+			webSearches: z.number(),
+			webFetches: z.number(),
+			failed: z.number(),
+			pending: z.number(),
+		})
+		.meta({
+			description:
+				"AI call counts, not content requests: all model and web calls, web searches, web page reads, failed calls and calls still pending.",
+		}),
 	startedAt: z.string().nullable(),
 	lastActivityAt: z.string().nullable(),
 });

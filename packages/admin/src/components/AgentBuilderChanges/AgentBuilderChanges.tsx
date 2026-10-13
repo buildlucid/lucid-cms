@@ -1,13 +1,13 @@
 import type {
 	AgentBuilderChange,
 	AgentBuilderChangesData,
-	Collection,
-} from "@types";
+} from "@lucidcms/types";
+import type { Collection } from "@types";
 import classnames from "classnames";
 import { TbOutlinePencil } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import {
-	type AgentBuilderFocus,
+	type BuilderFocus,
 	useAgentSession,
 } from "@/hooks/useAgentSession/useAgentSession";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
@@ -36,7 +36,7 @@ type Row = {
 	status?: keyof typeof statusLabels;
 	locales: string[];
 	/** Where the row links to, unless it's gone or the builder can't show it. */
-	target?: AgentBuilderFocus;
+	target?: BuilderFocus;
 };
 
 const brickConfig = (

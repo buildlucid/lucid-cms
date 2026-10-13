@@ -39,12 +39,15 @@ const useUpdateConversation = (props?: { onSuccess?: () => void }) => {
 						title: T()("toasts.agent.conversation.renamed.title"),
 						message: T()("toasts.agent.conversation.renamed.message"),
 					},
-		invalidates: [queryKeys.agent.conversations()],
+		invalidates: [queryKeys.agent.conversationLists()],
 		onSuccess: (response, params) => {
 			queryClient.setQueryData(
 				queryKeys.agent.conversation(params.id),
 				response,
 			);
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.agent.conversationDetails(params.id),
+			});
 			props?.onSuccess?.();
 		},
 	});

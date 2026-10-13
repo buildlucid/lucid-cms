@@ -1,9 +1,11 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -18,16 +20,21 @@ const factory = createFactory();
 const sendMessageController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Sends or queues user input. Idle requests accepting SSE stream the new run; pending input returns 202.",
+			"Sends or queues input. When the conversation is idle and the request accepts text/event-stream, the new run is streamed. Otherwise it returns 202 with the run answering it, or null while the input is queued.",
 		tags: ["agent"],
 		summary: "Send Agent Message",
+		responses: openAPI.responses({
+			stream: true,
+			status: 202,
+			dataSchema: z.toJSONSchema(controllerSchemas.sendMessage.response),
+		}),
 		requestBody: openAPI.requestBody(controllerSchemas.sendMessage.body),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.sendMessage.params,
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	agentAccess(true),
 	validate("param", controllerSchemas.sendMessage.params),
@@ -42,6 +49,11 @@ const sendMessageController = factory.createHandlers(
 
 		const run = await serviceWrapper(agentServices.submitInput, {
 			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
 		})(context, {
 			conversationId: param.id,
 			userId: c.get("auth").id,
@@ -50,7 +62,7 @@ const sendMessageController = factory.createHandlers(
 			references: body.references,
 			screen: body.screen,
 			delivery: body.delivery,
-			requestId: body.requestId,
+			inputId: body.inputId,
 		});
 		if (run.error) throw new LucidAPIError(run.error);
 

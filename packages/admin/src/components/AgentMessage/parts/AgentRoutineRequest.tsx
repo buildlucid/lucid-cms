@@ -8,10 +8,10 @@ import {
 	type JSXElement,
 	Show,
 } from "solid-js";
+import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
-import AgentMarkdown from "./AgentMarkdown";
 
 const AgentRoutineRequest: Component<{
 	name: string;

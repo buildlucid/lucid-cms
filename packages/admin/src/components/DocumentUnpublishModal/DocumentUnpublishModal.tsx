@@ -60,7 +60,7 @@ const DocumentUnpublishModal: Component<{
 			userStore.get.hasPermission([Permissions.RequestsRead]).all &&
 			userStore.get.hasPermission([
 				permissions.update,
-				permissions["unpublish-request"],
+				permissions.unpublishRequest,
 			]).some;
 
 		return (
@@ -85,7 +85,7 @@ const DocumentUnpublishModal: Component<{
 
 	// ----------------------------------------
 	// Functions
-	const confirm = async () => {
+	const confirm = () => {
 		const target = props.target;
 		if (!target) return;
 
@@ -99,13 +99,19 @@ const DocumentUnpublishModal: Component<{
 			});
 			return;
 		}
-		await unpublish.action.mutateAsync({
-			collectionKey: props.document.collectionKey,
-			id: props.document.documentId,
-			body: { target },
-		});
-		props.setOpen(false);
-		props.onSuccess?.();
+		unpublish.action.mutate(
+			{
+				collectionKey: props.document.collectionKey,
+				id: props.document.documentId,
+				body: { environment: target },
+			},
+			{
+				onSuccess: () => {
+					props.setOpen(false);
+					props.onSuccess?.();
+				},
+			},
+		);
 	};
 
 	// ----------------------------------------
@@ -148,7 +154,7 @@ const DocumentUnpublishModal: Component<{
 					? request.errors()?.message
 					: unpublish.errors()?.message
 			}
-			onConfirm={() => void confirm()}
+			onConfirm={confirm}
 			onCancel={() => props.setOpen(false)}
 		>
 			<Show when={mode() === "request"}>

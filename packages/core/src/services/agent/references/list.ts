@@ -1,4 +1,3 @@
-import { canReadReference } from "../../../libs/agent/references.js";
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
@@ -10,10 +9,9 @@ import type {
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveUserAccess from "../../users/resolve-access.js";
-import mediaOwnership from "./media-ownership.js";
-import requestCollections from "./request-collections.js";
+import referenceAccess from "./reference-access.js";
 
-export type AgentReferenceLink = AgentReferenceInput & {
+type AgentReferenceLink = AgentReferenceInput & {
 	id: string;
 	source: AgentReferenceSource;
 	managed: boolean;
@@ -32,11 +30,11 @@ const list: ServiceFn<
 	[{ conversationId: string; userId: number | null }],
 	AgentReferenceLink[]
 > = async (context, input) => {
-	const access =
+	const user =
 		input.userId === null
 			? undefined
 			: await resolveUserAccess(context, { userId: input.userId });
-	if (access?.error) return access;
+	if (user?.error) return user;
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
 	const Requests = new AgentRequestReferencesRepository(context.db);
@@ -88,17 +86,6 @@ const list: ServiceFn<
 	if (documents.error) return documents;
 	if (requests.error) return requests;
 
-	const [ownership, collections] = await Promise.all([
-		mediaOwnership(context, {
-			mediaIds: media.data.map((row) => row.media_id),
-		}),
-		requestCollections(context, {
-			requestIds: requests.data.map((row) => row.request_id),
-		}),
-	]);
-	if (ownership.error) return ownership;
-	if (collections.error) return collections;
-
 	const links: AgentReferenceLink[] = [
 		...media.data.map((row) => ({
 			id: row.id,
@@ -125,24 +112,14 @@ const list: ServiceFn<
 		})),
 	];
 
-	return {
-		error: undefined,
-		data: links.filter((reference) =>
-			canReadReference({
-				reference,
-				ownership:
-					reference.type === "media"
-						? ownership.data.get(reference.mediaId)
-						: undefined,
-				requestCollections:
-					reference.type === "request"
-						? collections.data.get(reference.requestId)
-						: undefined,
-				userId: input.userId,
-				grant: access?.data,
-			}),
-		),
-	};
+	const access = await referenceAccess(context, {
+		references: links,
+		userId: input.userId,
+		grant: user?.data,
+	});
+	if (access.error) return access;
+
+	return { error: undefined, data: links.filter(access.data.canRead) };
 };
 
 export default list;

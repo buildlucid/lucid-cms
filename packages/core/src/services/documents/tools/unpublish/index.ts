@@ -27,7 +27,7 @@ export const unpublishDocumentAgentTool = (
 		requiresConfirmation: options.direct
 			? ({ input, config }) => !unpublishRequested(config, input)
 			: false,
-		requiredPermissions: ({ collectionKey }) => [
+		inputPermissions: ({ input: { collectionKey } }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],
 		handler: async ({ context, input, execution }) => {
@@ -64,7 +64,7 @@ export const unpublishDocumentAgentTool = (
 						{
 							data: {
 								id: output.document.id,
-								target: input.target,
+								target: input.environment,
 								collection:
 									context.translate(labels?.singular) ?? input.collectionKey,
 							},

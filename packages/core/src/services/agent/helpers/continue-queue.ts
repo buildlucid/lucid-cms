@@ -1,9 +1,9 @@
+import type { AgentStreamEvent } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
-import type { AgentStreamEvent } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import advanceInputs from "../advance-inputs.js";
-import getInputsEvent from "../get-inputs-event.js";
+import advanceInputs from "./advance-inputs.js";
+import getInputsEvent from "./get-inputs-event.js";
 
 /**
  * Starts the next queued message once a run lets go of the conversation, and

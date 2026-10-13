@@ -8,6 +8,7 @@ const slugSpaceMessage = "The slug cannot contain spaces.";
 const slugFormatMessage =
 	"The slug may only contain letters, numbers, underscores, and hyphens.";
 
+/** Adds the fullSlug, slug, parent page and route segment fields to a pages collection. */
 const registerFields = (
 	collection: CollectionBuilder,
 	config: CollectionConfig,

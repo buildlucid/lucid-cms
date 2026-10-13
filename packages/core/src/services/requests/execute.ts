@@ -1,23 +1,18 @@
 import constants from "../../constants/constants.js";
-import type {
-	CollectionTableNames,
-	DocumentChangeMetadata,
-} from "../../exports/types.js";
+import type { CollectionTableNames } from "../../exports/types.js";
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
+import type { ToolkitActor } from "../../libs/permission/toolkit-actor.js";
 import {
 	RequestDocumentsRepository,
 	RequestEventsRepository,
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
-import type { ToolkitActor } from "../../libs/toolkit/types.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import deleteMultiple from "../documents/delete-multiple.js";
-import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
-import notifyChange from "../documents/notify-change.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
 import promoteVersion from "../documents-versions/promote-version.js";
 import unpublishVersion from "../documents-versions/unpublish-version.js";
@@ -29,10 +24,12 @@ import deleteVersions from "./helpers/delete-versions.js";
 import RequestExecutionError from "./helpers/execution-error.js";
 import getAllowedTargets from "./helpers/get-allowed-targets.js";
 import getBlockers from "./helpers/get-blockers.js";
+import getHookRequest from "./helpers/get-hook-request.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestParticipants from "./helpers/get-request-participants.js";
 import getRequestState from "./helpers/get-request-state.js";
 import landProposalWorkflow from "./helpers/land-proposal-workflow.js";
+import notifyRequestChanges from "./helpers/notify-request-changes.js";
 import resolveRequestNotifications from "./helpers/resolve-request-notifications.js";
 import { completedNotification } from "./notifications/completed.js";
 import type { RequestDocumentRecord } from "./types.js";
@@ -77,7 +74,7 @@ const execute: ServiceFn<
 			: undefined;
 		const user = userRes?.data;
 		const agentRunId = data.actor?.agentRunId;
-		if (!user || !getRequestAccess(context, { request, user }).request) {
+		if (!user || !getRequestAccess(context, { request, user }).complete) {
 			return {
 				error: {
 					type: "basic",
@@ -289,21 +286,7 @@ const execute: ServiceFn<
 						collectionKey: document.collection_key,
 						userId: user.id,
 						collectionTableNames: tableNames,
-						request: {
-							id: request.id,
-							documents: request.documents.flatMap((document) =>
-								document.source === null || document.source_version_id === null
-									? []
-									: [
-											{
-												collectionKey: document.collection_key,
-												documentId: document.document_id,
-												source: document.source,
-												versionId: document.source_version_id,
-											},
-										],
-							),
-						},
+						request: getHookRequest(request),
 					},
 					data: {
 						documentId: document.document_id,
@@ -317,7 +300,7 @@ const execute: ServiceFn<
 		failureRequestDocumentId = null;
 		failureTarget = null;
 
-		const publishedRes = await executeHooks(
+		const completedHookRes = await executeHooks(
 			context,
 			{ service: "requests", event: "completed", config: context.config },
 			{
@@ -344,57 +327,15 @@ const execute: ServiceFn<
 				},
 			},
 		);
-		if (publishedRes.error) return publishedRes;
+		if (completedHookRes.error) return completedHookRes;
 
-		//* dependants are told once per collection and change, after routes and other hooks have settled
-		type Change = {
-			document: RequestDocumentRecord;
-			change: DocumentChangeMetadata;
-		};
-		const changes = [
-			...promoted.map(
-				(entry): Change => ({
-					document: entry.document,
-					change:
-						entry.target !== "latest"
-							? { type: "published", version: entry.target }
-							: request.type === "create"
-								? { type: "created" }
-								: { type: "updated", version: "latest" },
-				}),
-			),
-			...unpublished.map(
-				(entry): Change => ({
-					document: entry.document,
-					change: { type: "unpublished", version: entry.target },
-				}),
-			),
-			...deleted.map(
-				(document): Change => ({
-					document,
-					change: { type: "deleted", permanent: false },
-				}),
-			),
-		];
-		for (const collectionKey of new Set(
-			changes.map((entry) => entry.document.collection_key),
-		)) {
-			await invalidateContentDocumentCache(context, collectionKey);
-		}
-		for (const entries of Map.groupBy(
-			changes,
-			(entry) =>
-				`${entry.document.collection_key}:${JSON.stringify(entry.change)}`,
-		).values()) {
-			const [first] = entries;
-			if (!first) continue;
-			const changed = await notifyChange(context, {
-				change: first.change,
-				collectionKey: first.document.collection_key,
-				ids: [...new Set(entries.map((entry) => entry.document.document_id))],
-			});
-			if (changed.error) return changed;
-		}
+		const changesRes = await notifyRequestChanges(context, {
+			type: request.type,
+			promoted,
+			unpublished,
+			deleted,
+		});
+		if (changesRes.error) return changesRes;
 
 		const now = new Date().toISOString();
 		const updateRes = await Requests.updateSingle({

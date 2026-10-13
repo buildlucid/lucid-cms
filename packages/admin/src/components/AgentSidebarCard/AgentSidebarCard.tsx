@@ -6,11 +6,15 @@ import {
 	type JSX,
 	on,
 	type ParentComponent,
+	Show,
 } from "solid-js";
 import T from "@/translations";
 
+/** A closable sidebar card for chat details. */
 const AgentSidebarCard: ParentComponent<{
 	title: JSX.Element;
+	/** A label above the title. */
+	label?: string;
 	onClose: () => void;
 	/** Scrolls the card into view when it opens and whenever this changes, such as when another call is selected. */
 	reveal?: string;
@@ -61,9 +65,14 @@ const AgentSidebarCard: ParentComponent<{
 			)}
 		>
 			<div class="flex items-start justify-between gap-2">
-				<h3 id={id} class="wrap-break-words text-sm font-medium text-title">
-					{props.title}
-				</h3>
+				<div class="min-w-0">
+					<Show when={props.label}>
+						<p class="text-[11px] text-muted">{props.label}</p>
+					</Show>
+					<h3 id={id} class="wrap-break-words text-sm font-medium text-title">
+						{props.title}
+					</h3>
+				</div>
 				<button
 					type="button"
 					class="-mt-0.5 -me-1 flex size-6 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"

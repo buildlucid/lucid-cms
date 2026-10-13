@@ -1,6 +1,7 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import { getAgents } from "../agent/registry.js";
 import { aiFeatureFlags, isAiFeatureEnabled } from "../config/ai-features.js";
 import { Permissions } from "../permission/definitions.js";
@@ -25,6 +26,8 @@ interface SettingsPropsT {
 const formatSingle = (props: {
 	settings: SettingsPropsT;
 	config: ResolvedLucidConfig;
+	/** Translates agent names for the person viewing them. */
+	translate: ServiceContext["translate"];
 	includes: SettingsInclude[] | undefined;
 	authUser?: LucidActor;
 }): Settings => {
@@ -39,7 +42,7 @@ const formatSingle = (props: {
 			enabled: props.config.ai.enabled,
 			agents: getAgents(props.config).map((agent) => ({
 				key: agent.key,
-				name: agent.name,
+				name: props.translate(agent.name),
 				sidebar: agent.sidebar,
 			})),
 			features: aiFeatureFlags(props.config.ai),

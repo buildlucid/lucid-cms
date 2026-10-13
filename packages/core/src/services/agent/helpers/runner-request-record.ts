@@ -1,5 +1,5 @@
 import type { SessionRun } from "./run-session.js";
-import type { PaidRequestRecord } from "./track-paid-request.js";
+import type { PaidRequestRecord } from "./store-usage.js";
 
 /** Attributes a request the runner makes itself, such as a model turn, to its run. */
 const runnerRequestRecord = (

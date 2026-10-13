@@ -1,4 +1,4 @@
-/** Keys for the per-person request notifications, so they can be resolved later. */
+/** Request notification keys, with review notifications scoped to each recipient. */
 export const requestNotificationKeys = {
 	review: (requestId: number, userId: number) =>
 		`request:${requestId}:review:${userId}`,

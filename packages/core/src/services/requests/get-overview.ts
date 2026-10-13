@@ -9,7 +9,7 @@ import type {
 import type { ServiceFn } from "../../utils/services/types.js";
 import getListAccess from "./helpers/get-list-access.js";
 
-/** Counts the open requests a user can see for each type, for dashboards and filter presets. */
+/** Counts visible open requests by type for Home and filter presets. */
 const getOverview: ServiceFn<
 	[
 		{

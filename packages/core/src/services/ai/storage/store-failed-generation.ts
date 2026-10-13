@@ -3,7 +3,6 @@ import type { CmsAiGenerateRequestFeature } from "../../../libs/lucid-remote/ser
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { AiUsageSessionType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { parseStoredTimestamp } from "../helpers/date-helpers.js";
 import getRequestDurationMs from "../helpers/get-request-duration-ms.js";
 
 /**
@@ -18,7 +17,6 @@ const storeFailedGeneration: ServiceFn<
 			feature?: CmsAiGenerateRequestFeature;
 			userId?: number;
 			session?: { type: AiUsageSessionType; id?: string };
-			target?: Record<string, unknown>;
 			requestStartedAt?: number;
 			errorMessage?: string | null;
 			/** Authoritative usage from a completed remote response, if one exists. */
@@ -54,15 +52,10 @@ const storeFailedGeneration: ServiceFn<
 			};
 		}
 
-		const createdAt = parseStoredTimestamp(existingRes.data.created_at);
-		const durationMs = Number.isNaN(createdAt.getTime())
-			? null
-			: getRequestDurationMs(createdAt.getTime());
-
 		const updateRes = await AiGenerations.updateSingle({
 			data: {
 				...reported,
-				duration_ms: durationMs,
+				duration_ms: getRequestDurationMs(existingRes.data.created_at),
 				status: "failed",
 				error_message: props.errorMessage ?? null,
 			},
@@ -99,7 +92,6 @@ const storeFailedGeneration: ServiceFn<
 			lucid_remote_connection_id: props.lucidRemoteConnectionId ?? null,
 			session_type: props.session.type,
 			session_id: props.session.id ?? props.requestId,
-			target: props.target ?? null,
 			...reported,
 			duration_ms:
 				props.requestStartedAt === undefined

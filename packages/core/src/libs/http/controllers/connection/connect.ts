@@ -36,7 +36,7 @@ const connectController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.ConnectionUpdate]),
 	async (c) => {

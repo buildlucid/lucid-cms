@@ -1,11 +1,11 @@
 import { isDeepStrictEqual } from "node:util";
-import type { BrickInputSchema } from "../../../../schemas/collection-bricks.js";
-import type { FieldInputSchema } from "../../../../schemas/collection-fields.js";
 import type {
 	AgentBuilderChange,
 	AgentBuilderContentChanges,
 	AgentBuilderFieldChange,
-} from "../../../../types/response.js";
+} from "@lucidcms/types";
+import type { BrickInputSchema } from "../../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../../schemas/collection-fields.js";
 
 type BuilderContent = {
 	fields: FieldInputSchema[];

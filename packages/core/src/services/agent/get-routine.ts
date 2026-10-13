@@ -5,6 +5,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 
+/** Gets a routine the person can access, with its tool settings and last run. */
 const getRoutine: ServiceFn<
 	[{ id: string; userId: number }],
 	AgentRoutine
@@ -24,7 +25,7 @@ const getRoutine: ServiceFn<
 		error: undefined,
 		data: agentFormatter.formatRoutine({
 			routine: routine.data,
-			tools: tools.data[input.id] ?? {},
+			toolSettings: tools.data[input.id] ?? {},
 			lastRun: lastRuns.data[0],
 		}),
 	};

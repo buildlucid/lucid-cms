@@ -1,6 +1,6 @@
 import { Popover } from "@kobalte/core";
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import {
 	type Component,
 	createMemo,
@@ -26,7 +26,7 @@ const mentionFrom = (target: EventTarget | null) =>
  * is, while they can still see the request.
  */
 export const RequestRichTextContent: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	value: RichTextJSON;
 }> = (props) => {
 	// ----------------------------------------
@@ -37,16 +37,28 @@ export const RequestRichTextContent: Component<{
 
 	// ----------------------------------------
 	// Queries
+	const hoveredId = createMemo(() => {
+		const id = Number(anchor()?.dataset.lucidUserId);
+		return Number.isInteger(id) && id > 0 ? id : undefined;
+	});
 	const users = api.requests.useGetMentionableUsers({
-		queryParams: { location: { id: () => props.request.id } },
+		queryParams: {
+			location: { id: () => props.request.id },
+			filters: {
+				id: () => {
+					const id = hoveredId();
+					return id === undefined ? undefined : [id];
+				},
+			},
+		},
+		enabled: () => hoveredId() !== undefined,
 	});
 
 	// ----------------------------------------
 	// Memos
-	const user = createMemo(() => {
-		const id = Number(anchor()?.dataset.lucidUserId);
-		return users.data?.data.find((user) => user.id === id);
-	});
+	const user = createMemo(() =>
+		users.data?.data.find((user) => user.id === hoveredId()),
+	);
 
 	// ----------------------------------------
 	// Functions
@@ -106,11 +118,6 @@ export const RequestRichTextContent: Component<{
 									<Show when={user().username}>
 										<p class="truncate text-xs leading-4 text-body">
 											@{user().username}
-										</p>
-									</Show>
-									<Show when={user().email}>
-										<p class="truncate text-xs leading-4 text-muted">
-											{user().email}
 										</p>
 									</Show>
 								</div>

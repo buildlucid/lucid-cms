@@ -1,3 +1,4 @@
+import type { AgentStreamEvent } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
 import { answerInteraction } from "../../../libs/agent/interactions.js";
 import { isTerminalRunStatus } from "../../../libs/agent/run-status.js";
@@ -11,7 +12,6 @@ import {
 import type {
 	AgentInteractionAction,
 	AgentRunStatus,
-	AgentStreamEvent,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveNotification from "../../notifications/resolve.js";

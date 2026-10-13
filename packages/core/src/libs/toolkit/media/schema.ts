@@ -1,5 +1,6 @@
 import { Readable } from "node:stream";
 import z from "zod";
+import { toolkitActorSchema } from "../../permission/toolkit-actor.js";
 
 /** File sources accepted by the media toolkit. Streams require their exact byte size. */
 export const fileSchema = z.union([
@@ -24,12 +25,8 @@ export const fileSchema = z.union([
 
 export const originSchema = z.enum(["human", "ai_generated", "ai_modified"]);
 
-export const userIdSchema = z
-	.number()
-	.int()
-	.positive()
-	.nullable()
-	.default(null);
+/** Attributes changes to the actor and checks user media permissions, defaulting to the system. */
+export const mediaActorSchema = toolkitActorSchema.default({ type: "system" });
 
 export const translationsSchema = z.array(
 	z.object({
@@ -43,7 +40,7 @@ export const focalPointSchema = z.object({
 	y: z.number().min(0).max(1),
 });
 
-export const fileMetadataSchema = z.object({
+export const fileMetadataSchema = z.strictObject({
 	width: z.number().positive().optional(),
 	height: z.number().positive().optional(),
 	duration: z.number().nonnegative().nullable().optional(),

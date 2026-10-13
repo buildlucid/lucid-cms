@@ -1,6 +1,10 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
+import {
+	requestStatusSchema,
+	requestTypeSchema,
+} from "../../../schemas/requests.js";
 import { richTextJSONSchema } from "../../../schemas/shared/rich-text.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
@@ -9,20 +13,7 @@ import type {
 	TimestampMutable,
 } from "../types.js";
 
-export const requestStatusSchema = z.enum(["open", "completed", "closed"]);
-/**
- * Create requests request one new document. Publish requests move existing
- * documents to environments, unpublish requests remove them from environments
- * and delete requests move whole documents to the bin.
- */
-export const requestTypeSchema = z.enum([
-	"create",
-	"publish",
-	"unpublish",
-	"delete",
-]);
-
-export const requestsTable = defineTable("lucid_requests", () => ({
+export const requestsTable = defineTable("lucid_requests", (adapter) => ({
 	columns: {
 		id: {
 			schema: z.number(),
@@ -65,7 +56,10 @@ export const requestsTable = defineTable("lucid_requests", () => ({
 			type: "integer",
 		},
 		scheduled_by_system: {
-			schema: z.union([z.boolean(), z.literal(0), z.literal(1)]),
+			schema: z.union([
+				z.literal(adapter.config.defaults.boolean.true),
+				z.literal(adapter.config.defaults.boolean.false),
+			]),
 			type: "boolean",
 		},
 		scheduled_by_run_id: {
@@ -92,16 +86,12 @@ export const requestsTable = defineTable("lucid_requests", () => ({
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
 		},
-		lock_token: {
-			schema: z.string().nullable(),
-			type: "text",
-		},
 		created_by: {
 			schema: z.number().nullable(),
 			type: "integer",
 		},
 		created_by_run_id: {
-			schema: z.string().nullable(),
+			schema: z.uuid().nullable(),
 			type: "text",
 		},
 		created_at: {
@@ -160,8 +150,8 @@ export interface LucidRequests {
 		RichTextJSON | null,
 		RichTextJSON | null
 	>;
-	status: RequestStatus;
-	revision: number;
+	status: Generated<RequestStatus>;
+	revision: Generated<number>;
 	/** Set once the current revision has every approval it needs. */
 	approved_revision: number | null;
 	scheduled_at: TimestampMutable;
@@ -176,7 +166,6 @@ export interface LucidRequests {
 	failure_request_document_id: number | null;
 	failure_target: string | null;
 	completed_at: TimestampMutable;
-	lock_token: string | null;
 	created_by: number | null;
 	/** The agent run that created it, acting for `created_by` or the system. */
 	created_by_run_id: string | null;

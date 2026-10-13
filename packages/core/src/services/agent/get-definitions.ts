@@ -4,6 +4,7 @@ import type { AgentCatalog } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAiAccess from "../connection/get-ai-access.js";
 
+/** Lists the configured agents and what each can do, for the admin. */
 const getDefinitions: ServiceFn<
 	[{ authUser: LucidAuth }],
 	AgentCatalog

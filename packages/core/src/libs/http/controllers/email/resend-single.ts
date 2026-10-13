@@ -35,7 +35,7 @@ const resendSingleController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	rateLimiter({
 		mode: "user",

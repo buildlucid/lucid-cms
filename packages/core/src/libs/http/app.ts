@@ -349,9 +349,39 @@ const createApp = async (props: {
 									"AI endpoints for generating CMS content with Lucid AI features.",
 							},
 							{
+								name: "agent",
+								description:
+									"Agent endpoints for chats, their messages and runs, routines, references and uploads. Running agents stream server-sent events.",
+							},
+							{
+								name: "requests",
+								description:
+									"Request endpoints for proposing, approving and completing changes to documents, and commenting on them.",
+							},
+							{
+								name: "review",
+								description:
+									"Review endpoints for counting what is waiting to be published or approved.",
+							},
+							{
+								name: "notifications",
+								description:
+									"Notification endpoints for your inbox, notification types and your email preferences.",
+							},
+							{
 								name: "integrations",
 								description:
 									"Endpoints for managing integration credentials used by external applications.",
+							},
+							{
+								name: "oauth",
+								description:
+									"OAuth endpoints for authorizing external applications to act for you.",
+							},
+							{
+								name: "oauth-connections",
+								description:
+									"Endpoints for managing the external applications you've connected with OAuth.",
 							},
 							{
 								name: "content-documents",
@@ -367,6 +397,16 @@ const createApp = async (props: {
 								name: "content-locales",
 								description:
 									"Content locale endpoints for fetching locale information.",
+							},
+							{
+								name: "content-media",
+								description:
+									"External media endpoints authorized by API keys or OAuth access tokens.",
+							},
+							{
+								name: "content-account",
+								description:
+									"Content account endpoints for the account behind an external user credential.",
 							},
 						],
 						servers: configuredHost

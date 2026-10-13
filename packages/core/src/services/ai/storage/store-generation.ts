@@ -1,10 +1,11 @@
 import type { AiGenerationStatus } from "../../../libs/db/tables/index.js";
-import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
+import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/schema/ai.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { AiUsageSessionType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getRequestDurationMs from "../helpers/get-request-duration-ms.js";
 
+/** Records a completed generation once, keeping its output and usage. */
 const storeGeneration: ServiceFn<
 	[
 		{
@@ -13,8 +14,6 @@ const storeGeneration: ServiceFn<
 			/** Without an id, the request is its own session. */
 			session: { type: AiUsageSessionType; id?: string };
 			response: CmsAiGenerateCompletedData;
-			/** What the generation was for, kept for inspecting a record. */
-			target?: Record<string, unknown>;
 			requestStartedAt: number;
 			status?: AiGenerationStatus;
 			errorMessage?: string | null;
@@ -33,8 +32,7 @@ const storeGeneration: ServiceFn<
 			lucid_remote_connection_id: props.lucidRemoteConnectionId,
 			session_type: props.session.type,
 			session_id: props.session.id ?? props.response.requestId,
-			target: props.target ?? null,
-			output: props.response.output as Record<string, unknown>,
+			output: props.response.output,
 			provider_request_id: props.response.usage.providerRequestId ?? null,
 			usage: props.response.usage,
 			model: props.response.usage.model,

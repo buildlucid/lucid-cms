@@ -6,7 +6,7 @@ import type {
 } from "../../../types/response.js";
 import { addDays, getDateKey, parseStoredTimestamp } from "./date-helpers.js";
 
-export type AiUsageChartRow = Pick<
+type AiUsageChartRow = Pick<
 	Select<LucidAiGenerations>,
 	"created_at" | "session_type" | "session_id" | "credits" | "total_tokens"
 >;

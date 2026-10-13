@@ -1,16 +1,27 @@
 import { copy } from "../../../libs/i18n/index.js";
 import systemActor from "../../../libs/permission/system-actor.js";
-import type { ToolkitActor } from "../../../libs/toolkit/types.js";
-import type { LucidActor } from "../../../types/hono.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
+import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
+import type { LucidActor, LucidUser } from "../../../types/hono.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../../utils/services/types.js";
 import loadActiveUser from "./load-active-user.js";
 
-/** Loads the user an actor acts for with their live permissions, or the system actor. */
-const resolveActorUser: ServiceFn<
-	[{ actor: ToolkitActor }],
-	LucidActor
-> = async (context, input) => {
-	if (input.actor.kind === "system") {
+/** Resolves a user actor to their live user permissions or returns the system actor. */
+function resolveActorUser(
+	context: ServiceContext,
+	input: { actor: Extract<ToolkitActor, { type: "user" }> },
+): ServiceResponse<LucidUser>;
+function resolveActorUser(
+	context: ServiceContext,
+	input: { actor: ToolkitActor },
+): ServiceResponse<LucidActor>;
+async function resolveActorUser(
+	context: ServiceContext,
+	input: { actor: ToolkitActor },
+): ServiceResponse<LucidActor> {
+	if (input.actor.type === "system") {
 		return { error: undefined, data: systemActor };
 	}
 
@@ -20,13 +31,13 @@ const resolveActorUser: ServiceFn<
 		return {
 			error: {
 				status: 403,
-				message: copy("server:core.documents.authoring.actor.access.denied"),
+				message: copy("server:core.users.actor.inactive"),
 			},
 			data: undefined,
 		};
 	}
 
 	return { error: undefined, data: userRes.data };
-};
+}
 
 export default resolveActorUser;

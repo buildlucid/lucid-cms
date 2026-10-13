@@ -94,13 +94,16 @@ export const defaultErrorResponse = {
 } as const;
 
 /**
- * Describes the standard success envelope and default Lucid error response.
+ * Describes success envelopes, default Lucid errors and optional streaming responses.
+ * @remarks Streaming endpoints may also define a JSON response.
  */
 const responses = (config?: {
-	/** OpenAPI schema for the data property. Omission describes a 204 response. */
+	/** OpenAPI data schema, defaulting to a 204 response when omitted on non-streaming endpoints. */
 	dataSchema?: unknown;
-	/** Success status for endpoints that accept asynchronous work. Defaults to 200. */
-	status?: 200 | 202;
+	/** Success status, defaulting to 200, with 201 for creation and 202 for accepted asynchronous work. */
+	status?: 200 | 201 | 202;
+	/** Describes a 200 text/event-stream response of JSON encoded events. */
+	stream?: true;
 	/** OpenAPI schema for the sibling refs registry. */
 	refsSchema?: unknown;
 	/** Include pagination metadata and links. */
@@ -113,6 +116,17 @@ const responses = (config?: {
 		| Omit<OpenAPIV3.ResponseObject, "headers" | "context" | "links">
 		| OpenAPIV3.ReferenceObject
 	> = {};
+
+	if (config?.stream) {
+		response[200] = {
+			description: translate("server:core.openapi.response.stream"),
+			content: {
+				"text/event-stream": {
+					schema: { type: "string" },
+				},
+			},
+		};
+	}
 
 	if (config?.dataSchema) {
 		response[config.status ?? 200] = {
@@ -134,7 +148,7 @@ const responses = (config?: {
 				},
 			},
 		};
-	} else {
+	} else if (!config?.stream) {
 		response[204] = {
 			description: translate("server:core.openapi.response.204"),
 			content: {

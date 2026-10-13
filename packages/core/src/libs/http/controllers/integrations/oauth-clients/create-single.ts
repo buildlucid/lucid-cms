@@ -32,7 +32,7 @@ const createSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(oauthClientSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationCreate]),
 	validate("json", oauthClientSchemas.createSingle.body),

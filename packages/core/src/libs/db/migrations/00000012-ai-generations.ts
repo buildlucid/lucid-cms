@@ -1,4 +1,4 @@
-import type { Kysely } from "kysely";
+import { type Kysely, sql } from "kysely";
 import type DatabaseAdapter from "../adapter-base.js";
 import type { MigrationFn } from "../types.js";
 
@@ -35,7 +35,6 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("session_id", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("target", adapter.getDataType("json"))
 				.addColumn("output", adapter.getDataType("json"))
 				.addColumn("usage", adapter.getDataType("json"))
 				.addColumn("model", adapter.getDataType("text"))
@@ -86,6 +85,13 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_ai_generations_remote_connection")
 				.on("lucid_ai_generations")
 				.column("lucid_remote_connection_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_ai_generations_pending")
+				.on("lucid_ai_generations")
+				.columns(["lucid_remote_connection_id", "created_at"])
+				.where(sql<boolean>`status = 'pending'`)
 				.execute();
 
 			await db.schema

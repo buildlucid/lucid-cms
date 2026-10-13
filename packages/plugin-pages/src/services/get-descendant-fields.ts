@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, z } from "@lucidcms/core";
 import { prefixGeneratedColName } from "@lucidcms/core/extension";
 import type {
 	LucidBrickTableName,
@@ -11,7 +11,10 @@ import getCollectionDefaultLocale from "../utils/get-collection-default-locale.j
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 import resolveInheritedLocaleRows from "../utils/resolve-inherited-locale-rows.js";
 import { scopeMemberFilter } from "../utils/route-scope.js";
-import type { PageVersionFields } from "./get-pages-fields.js";
+import {
+	type PageVersionFields,
+	pageFieldsRowSchema,
+} from "./get-pages-fields.js";
 
 /**
  * Walks down from the given pages through the versions the scope may rewrite,
@@ -53,6 +56,8 @@ const getDescendantFields: ServiceFn<
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
 		const defaultFieldsAlias = "default_fields";
+		//* the alias gives Kysely one table to type instead of a table name union
+		const parentPageAlias = "parent_page";
 
 		const query = context.db.kysely
 			.withRecursive("recursive_cte", (cte) =>
@@ -117,21 +122,20 @@ const getDescendantFields: ServiceFn<
 									)
 									.on(`${defaultFieldsAlias}.locale`, "is", null),
 							)
-							.leftJoin(parentPageTable, (join) =>
+							.leftJoin(`${parentPageTable} as ${parentPageAlias}`, (join) =>
 								join
 									.onRef(
-										`${parentPageTable}.parent_id`,
+										`${parentPageAlias}.parent_id`,
 										"=",
 										`${defaultFieldsAlias}.id`,
 									)
-									.on(`${parentPageTable}.locale`, "is", null),
+									.on(`${parentPageAlias}.locale`, "is", null),
 							)
-							// @ts-expect-error
 							.select([
 								`${fieldsTable}.locale`,
 								`${fieldsTable}.${slugColumn} as _slug`,
 								`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
-								`${parentPageTable}.${parentPageColumn} as _parentPage`,
+								`${parentPageAlias}.${parentPageColumn} as _parentPage`,
 							])
 							.whereRef(
 								`${versionTable}.document_id`,
@@ -146,13 +150,18 @@ const getDescendantFields: ServiceFn<
 
 		const descendantsResult = await context.db
 			.query("pages.descendant-fields.find", () => query)
-			.many();
+			.many({
+				schema: z.object({
+					document_id: z.number(),
+					document_version_id: z.number(),
+					rows: z.array(pageFieldsRowSchema),
+				}),
+			});
 		if (descendantsResult.error) return descendantsResult;
-		const descendants = descendantsResult.data as PageVersionFields[];
 
 		return {
 			error: undefined,
-			data: descendants
+			data: descendantsResult.data
 				.map((d) => ({
 					...d,
 					rows: resolveInheritedLocaleRows(

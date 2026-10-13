@@ -26,24 +26,6 @@ const customFieldSchema = z.object({
 			false: adminCopyInputSchema.optional(),
 		})
 		.optional(),
-	ai: z
-		.object({
-			enabled: z.boolean().optional(),
-			instructions: z.string().optional(),
-			guidance: z
-				.array(
-					z
-						.object({
-							key: z.string().trim().min(1),
-							label: adminCopyInputSchema,
-							instructions: z.string().trim().min(1),
-						})
-						.strict(),
-				)
-				.optional(),
-			context: z.function().optional(),
-		})
-		.optional(),
 	default: z
 		.union([
 			z.boolean(),

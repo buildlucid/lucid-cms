@@ -88,11 +88,11 @@ const HomePage: Component = () => {
 									<div class="flex flex-1 items-center justify-center">
 										<ErrorState
 											icon={<TbOutlineLock />}
-											title={T()("dashboard.no.access.title")}
-											description={T()("dashboard.no.access.description")}
+											title={T()("home.no.access.title")}
+											description={T()("home.no.access.description")}
 											actions={
 												<Link variant="primary" size="sm" href="/lucid/account">
-													{T()("dashboard.no.access.account")}
+													{T()("home.no.access.account")}
 												</Link>
 											}
 										/>

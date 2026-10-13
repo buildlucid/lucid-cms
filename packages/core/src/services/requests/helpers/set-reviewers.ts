@@ -34,6 +34,7 @@ const setReviewers: ServiceFn<
 	const reviewerIds = [...new Set(data.reviewerIds)];
 	const eligibleRes = await getEligibleReviewers(context, {
 		request: data.request,
+		ids: reviewerIds,
 	});
 	if (eligibleRes.error) return eligibleRes;
 

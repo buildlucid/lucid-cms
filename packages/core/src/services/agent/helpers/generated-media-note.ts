@@ -1,4 +1,5 @@
 import type { MediaGenerationType } from "../../../types/response.js";
+import { addMediaToLibraryToolName } from "../../media/tools/add-to-library/constants.js";
 import { builderUpdateToolName } from "../tools/builder-update/constants.js";
 
 const shownNote =
@@ -9,12 +10,13 @@ const generatedMediaNote = (props: {
 	/** What was generated. */
 	noun: MediaGenerationType;
 	library: boolean;
+	/** The agent offers the add-to-library tool and the person can create media. */
 	canAddToLibrary: boolean;
 	onDocument: boolean;
 }) => {
 	if (props.library) {
 		return [
-			`The ${props.noun} is saved in the media library as public media, ready to use in documents.`,
+			`The ${props.noun} is saved in the media library, where it is public and ready to use in documents.`,
 			props.onDocument
 				? `To put it in the open document, set it with ${builderUpdateToolName} now.`
 				: "",
@@ -27,7 +29,7 @@ const generatedMediaNote = (props: {
 	return [
 		`The ${props.noun} is saved as the person's personal media, so only they can see it until it is added to the library.`,
 		props.canAddToLibrary
-			? "Add it to the library with media_add_to_library before using it in documents."
+			? `Add it to the library with ${addMediaToLibraryToolName} before using it in documents.`
 			: "",
 		shownNote,
 	]

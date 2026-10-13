@@ -1,7 +1,7 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
-import type { MediaType, ProfilePicture } from "../media/types.js";
+import type { MediaType } from "../media/types.js";
 import type { RefResource } from "../refs/resource.js";
-import type { RequestUser } from "../requests/types.js";
+import type { UserDisplay } from "../users/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
 export type BrickType = "builder" | "fixed" | "embedded";
@@ -79,8 +79,9 @@ export type DocumentVersionSummary = {
 	createdByRunId: string | null;
 };
 
+/** How an environment's version compares with latest: never published there, behind latest or matching it. */
 export type DocumentEnvironmentStatus =
-	| "unreleased"
+	| "unpublished"
 	| "out-of-sync"
 	| "in-sync";
 
@@ -747,7 +748,7 @@ export interface Collection {
 				key: string;
 				label: ResolvedAdminCopy;
 				color: WorkflowStageColor;
-				/** Request targets available from this stage: environments, and "latest" for create requests. */
+				/** Allowed environments for direct publishing or requests, plus `latest` for create requests and publish requests targeting latest. */
 				targets: string[];
 				/** Stage to move back to when content changes while in this stage. */
 				resetTo: string | null;
@@ -773,11 +774,11 @@ export interface Collection {
 	permissions: {
 		read: CollectionPermission<"read">;
 		create: CollectionPermission<"create">;
-		"create-request": CollectionPermission<"create-request">;
+		createRequest: CollectionPermission<"create-request">;
 		update: CollectionPermission<"update">;
 		delete: CollectionPermission<"delete">;
-		"delete-request": CollectionPermission<"delete-request">;
-		"unpublish-request": CollectionPermission<"unpublish-request">;
+		deleteRequest: CollectionPermission<"delete-request">;
+		unpublishRequest: CollectionPermission<"unpublish-request">;
 		restore: CollectionPermission<"restore">;
 		publish: CollectionPermission<"publish">;
 		review: CollectionPermission<"review">;
@@ -794,16 +795,6 @@ export type DocumentWorkflowAssignee = {
 	userId: number;
 	assignedBy: number | null;
 	assignedAt: string | null;
-};
-
-/** User shape returned by the workflow-assignee options endpoint. */
-export type WorkflowUser = {
-	id: number;
-	email: string | null;
-	username: string | null;
-	firstName: string | null;
-	lastName: string | null;
-	profilePicture: ProfilePicture | null;
 };
 
 export type DocumentWorkflow = {
@@ -909,7 +900,7 @@ export interface DocumentEditors {
 	holding: boolean;
 	/** The tab that holds it, when it isn't this one. */
 	holder: {
-		user: RequestUser;
+		user: UserDisplay;
 		/** Whether it's the same person, in another tab. */
 		self: boolean;
 		/** When that tab took hold of the document. */

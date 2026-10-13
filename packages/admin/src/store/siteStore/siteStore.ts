@@ -20,7 +20,7 @@ const defaultAiSettings = (): AiSettings => ({
 		imageGeneration: true,
 		audioGeneration: true,
 		altGeneration: true,
-		chatRename: true,
+		chatTitles: true,
 		agents: true,
 		mcp: false,
 	},

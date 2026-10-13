@@ -17,7 +17,7 @@ export const updateMediaAgentTool = () =>
 		//* library media needs `media:update`, checked by the handler, so people can update their own uploads without it
 		permissions: [],
 		requiresConfirmation: true,
-		describe: (input) =>
+		describe: ({ input }) =>
 			copy("admin:core.tools.media_update.describe", {
 				data: { id: input.mediaId },
 			}),

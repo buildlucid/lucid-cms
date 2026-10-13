@@ -1,19 +1,15 @@
+import type { AgentLucidToolName } from "@lucidcms/types";
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
-import {
-	resolveWebToolOptions,
-	type WebToolOptions,
-} from "../../helpers/web-tool-options.js";
+import type { WebToolOptions } from "../../helpers/web-tool-options.js";
 import searchWeb from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const webSearchToolName = "web_search" satisfies AgentLucidToolName;
 
-export const webSearchAgentTool = (options: WebToolOptions = {}) => {
-	const { allowedDomains } = resolveWebToolOptions(options);
-
-	return defineAgentTool({
+/** Takes options `defineAgent` has already checked with `resolveWebToolOptions`. */
+export const webSearchAgentTool = ({ allowedDomains }: WebToolOptions = {}) =>
+	defineAgentTool({
 		name: webSearchToolName,
 		title: copy("admin:core.tools.web_search.title"),
 		description:
@@ -23,9 +19,8 @@ export const webSearchAgentTool = (options: WebToolOptions = {}) => {
 		outputVersion: 1,
 		permissions: [],
 		readOnly: true,
-		capabilities: { webSearch: true },
+		capabilities: { web: { search: true } },
 		available: ({ aiAccess }) => aiAccess.includes("web_research"),
 		handler: ({ context, input, execution }) =>
 			searchWeb(context, { input, execution, allowedDomains }),
 	});
-};

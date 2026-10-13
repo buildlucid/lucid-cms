@@ -11,7 +11,7 @@ const deleteExpiredNotifications: ServiceFn<[], undefined> = async (
 	const deleteRes = await Notifications.deleteExpired({
 		before: subDays(
 			new Date(),
-			context.config.retention.notificationDays,
+			context.config.retention.notifications,
 		).toISOString(),
 	});
 	if (deleteRes.error) return deleteRes;

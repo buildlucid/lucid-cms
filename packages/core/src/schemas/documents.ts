@@ -1,6 +1,5 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
-import { agentActorSchema } from "./agent.js";
 import { brickInputSchema, brickResponseSchema } from "./collection-bricks.js";
 import { fieldInputSchema, fieldResponseSchema } from "./collection-fields.js";
 import {
@@ -8,12 +7,10 @@ import {
 	versionTypesSchema,
 } from "./document-versions.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import {
-	mediaImagePreviewResponseSchema,
-	mediaResponseSchema,
-} from "./media.js";
-import { requestUserSchema } from "./requests.js";
+import { mediaResponseSchema } from "./media.js";
+import { agentActorSchema } from "./shared/agent-actor.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
+import { userDisplaySchema } from "./shared/user-display.js";
 
 const previewTokenSchema = z.string().meta({
 	description: "An opaque preview token",
@@ -60,15 +57,6 @@ const documentResponseVersionSchema = z.object({
 		description:
 			"The agent run that acted for createdBy, resolved through refs.agents",
 	}),
-});
-
-const documentWorkflowUserSchema = z.object({
-	id: z.number(),
-	email: z.string().nullable(),
-	username: z.string().nullable(),
-	firstName: z.string().nullable(),
-	lastName: z.string().nullable(),
-	profilePicture: mediaImagePreviewResponseSchema.nullable(),
 });
 
 const documentWorkflowSchema = z.object({
@@ -157,9 +145,8 @@ const documentRefResponseSchema = z.object({
 	fields: z.record(z.string(), z.unknown()).nullable(),
 });
 
-const documentUserRefResponseSchema = documentWorkflowUserSchema.extend({
+const documentUserRefResponseSchema = userDisplaySchema.extend({
 	email: z.email(),
-	username: z.string(),
 });
 
 export const documentRefsResponseSchema = z
@@ -265,7 +252,7 @@ export const controllerSchemas = {
 			}),
 			holder: z
 				.object({
-					user: requestUserSchema,
+					user: userDisplaySchema,
 					self: z.boolean().meta({
 						description: "Whether it's the same person, in another tab",
 					}),
@@ -316,7 +303,7 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
-	requestCreation: {
+	requestSingle: {
 		body: z.object({
 			title: z.string().trim().min(1).max(200).meta({
 				description: "The title of the create request",
@@ -529,7 +516,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	publish: {
 		body: z.object({
-			target: z.string().trim().min(1).meta({
+			environment: z.string().trim().min(1).meta({
 				description: "The environment to publish to",
 				example: "production",
 			}),
@@ -557,7 +544,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	unpublish: {
 		body: z.object({
-			target: z.string().trim().min(1).meta({
+			environment: z.string().trim().min(1).meta({
 				description: "The environment to remove the document from",
 				example: "production",
 			}),
@@ -757,7 +744,7 @@ export const controllerSchemas = {
 				example: "page",
 			}),
 		}),
-		response: z.array(documentWorkflowUserSchema),
+		response: z.array(userDisplaySchema),
 	} satisfies ControllerSchema,
 	getMultipleRevisions: {
 		body: undefined,
@@ -846,7 +833,7 @@ export const controllerSchemas = {
 					}),
 					"filter[envStatus.key]": queryString.schema.filter(false, {
 						description:
-							"Filter by an environment's request status: unreleased, out-of-sync or in-sync",
+							"Filter by how an environment's version compares with latest: unpublished, out-of-sync or in-sync",
 						example: "out-of-sync",
 					}),
 					"filter[_customFieldKey]": queryString.schema.filter(true, {
@@ -983,20 +970,14 @@ export const controllerSchemas = {
 			versionType: z
 				.string()
 				.trim()
-				.refine((val) => val !== "revision", {
-					message:
-						"Cannot promote to revision - use 'latest' or a valid environment key",
+				.refine((val) => val !== "revision" && val !== "latest", {
+					message: "Promote to a configured environment key",
 				})
 				.meta({
 					description:
-						"The version type you want to promote to - either 'latest' or a valid environment key (e.g., 'production', 'qa') from the collection config",
+						"The environment to publish the version to, eg. production or qa from the collection config. Latest and revisions can't be promoted to",
 					example: "production",
 				}),
-			bypassRevision: z.boolean().optional().meta({
-				description:
-					"When true, the promote action will NOT create a revision even if revisions are enabled for the collection.",
-				example: true,
-			}),
 		}),
 		query: {
 			string: undefined,

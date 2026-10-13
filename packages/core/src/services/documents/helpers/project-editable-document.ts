@@ -11,7 +11,7 @@ import {
 	type paginationSchema,
 } from "../../../libs/tools/pagination.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import { selectFields } from "./project-document.js";
+import { selectFields } from "../tools/helpers/project-document.js";
 import projectEditableValue from "./project-editable-value.js";
 
 type EditableBricks = DocumentEditableData["bricks"];

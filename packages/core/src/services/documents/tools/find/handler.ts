@@ -4,13 +4,13 @@ import { getPagination } from "../../../../libs/tools/pagination.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getMultiple from "../../content/get-multiple.js";
 import getEditLink from "../../helpers/get-edit-link.js";
+import resolveContentLocale from "../../helpers/resolve-content-locale.js";
 import {
 	projectFieldMap,
 	projectRefs,
 	projectRoute,
 	selectFields,
-} from "../../helpers/project-document.js";
-import resolveContentLocale from "../../helpers/resolve-content-locale.js";
+} from "../helpers/project-document.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
 /** Finds readable documents using the same nested filters as the toolkit. */

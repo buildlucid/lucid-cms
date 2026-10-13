@@ -1,4 +1,4 @@
-import type { Collection, RequestDetail } from "@types";
+import type { Collection, RequestDetails } from "@types";
 import { type Component, createMemo, For, Show } from "solid-js";
 import T from "@/translations";
 import { getTargetLabel } from "@/utils/requests";
@@ -9,7 +9,7 @@ import { getTargetLabel } from "@/utils/requests";
  * are going to it. The request page refreshes once it finishes.
  */
 export const RequestPublishing: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	collections: Collection[];
 	/** Queued while waiting to start, running once publication has begun. */
 	status: "queued" | "running";

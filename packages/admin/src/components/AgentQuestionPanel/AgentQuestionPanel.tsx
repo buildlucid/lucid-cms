@@ -13,7 +13,7 @@ import {
 	onMount,
 } from "solid-js";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
-import AgentMarkdown from "@/components/AgentMessage/parts/AgentMarkdown";
+import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
 import Button from "@/components/Button/Button";
 import T from "@/translations";
 

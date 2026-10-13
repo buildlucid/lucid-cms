@@ -4,7 +4,7 @@ import { getInvalidExternalScopes, getValidExternalScopes } from "./scopes.js";
 
 const aiConfig = (mcp: boolean) => ({
 	enabled: true,
-	chatRename: true,
+	chatTitles: true,
 	altGeneration: true,
 	mediaGeneration: {
 		image: { enabled: true, models: {} },

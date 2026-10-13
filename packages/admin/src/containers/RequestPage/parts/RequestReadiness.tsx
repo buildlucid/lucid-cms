@@ -1,4 +1,4 @@
-import type { Collection, RequestDetail } from "@types";
+import type { Collection, RequestDetails } from "@types";
 import { type Component, createMemo, For, Show } from "solid-js";
 import DateText from "@/components/DateText/DateText";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
@@ -13,7 +13,7 @@ import { RequestCheckRow } from "./RequestCheckRow";
  * Only shown while the request is open.
  */
 export const RequestReadiness: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	collections: Collection[];
 }> = (props) => {
 	// ----------------------------------------
@@ -34,9 +34,7 @@ export const RequestReadiness: Component<{
 		}).format(
 			props.request.approvals.map(
 				(approval) =>
-					(approval.user &&
-						(helpers.formatUserName(approval.user, "name") ||
-							approval.user.email)) ||
+					(approval.user && helpers.formatUserName(approval.user, "name")) ||
 					T()("common.unknown"),
 			),
 		),

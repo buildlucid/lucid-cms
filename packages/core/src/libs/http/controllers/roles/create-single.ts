@@ -25,6 +25,7 @@ const createSingleController = factory.createHandlers(
 		summary: "Create Role",
 
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
@@ -34,7 +35,7 @@ const createSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RolesCreate]),
 	validate("json", controllerSchemas.createSingle.body),
@@ -68,7 +69,7 @@ const createSingleController = factory.createHandlers(
 		});
 		if (role.error) throw new LucidAPIError(role.error);
 
-		c.status(200);
+		c.status(201);
 		return c.json(
 			formatAPIResponse(c, {
 				data: role.data,

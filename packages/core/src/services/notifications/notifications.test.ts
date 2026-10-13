@@ -79,9 +79,18 @@ const row = async (id: number) =>
 const emailState = (id: number) =>
 	context.db.kysely
 		.selectFrom("lucid_notification_recipients")
-		.select(["user_id", "email_due_at", "email_id"])
+		.select(["user_id", "email_due_at"])
 		.where("notification_id", "=", id)
 		.execute();
+const emailsTo = async (userId: number) =>
+	(
+		await context.db.kysely
+			.selectFrom("lucid_emails")
+			.innerJoin("lucid_users", "lucid_users.email", "lucid_emails.to_address")
+			.select("lucid_emails.id")
+			.where("lucid_users.id", "=", userId)
+			.execute()
+	).length;
 /** Runs the scheduled email job as if `minutesLater` minutes had passed. */
 const sweep = async (minutesLater = 0) => {
 	vi.useFakeTimers({ toFake: ["Date"] });
@@ -147,7 +156,7 @@ test("resolving clears the to-do and a later send reopens it unread", async () =
 	expect(resolved.error).toBeUndefined();
 	expect((await row(first.data.id)).resolved_at).not.toBeNull();
 	expect(
-		(await inbox(reviewer, "attention")).map((entry) => entry.id),
+		(await inbox(reviewer, "actionRequired")).map((entry) => entry.id),
 	).not.toContain(first.data.id);
 
 	const reopened = await sendReview(2, "request:2:review");
@@ -161,7 +170,7 @@ test("resolving clears the to-do and a later send reopens it unread", async () =
 test("an upsert refreshes content quietly and only re-notifies when the fingerprint changes", async () => {
 	const key = "storage";
 	const first = await upsert(context, {
-		definition: notifications.storage,
+		definition: notifications.system.storage,
 		key,
 		fingerprint: "80",
 		data: {
@@ -184,7 +193,7 @@ test("an upsert refreshes content quietly and only re-notifies when the fingerpr
 	).toBeUndefined();
 
 	const same = await upsert(context, {
-		definition: notifications.storage,
+		definition: notifications.system.storage,
 		key,
 		fingerprint: "80",
 		data: {
@@ -203,7 +212,7 @@ test("an upsert refreshes content quietly and only re-notifies when the fingerpr
 	expect(quiet?.readAt).not.toBeNull();
 
 	const climbed = await upsert(context, {
-		definition: notifications.storage,
+		definition: notifications.system.storage,
 		key,
 		fingerprint: "90",
 		data: {
@@ -242,7 +251,7 @@ test("an upsert keeps the audience in step and emails people it adds", async () 
 	const recipients = (id: number) =>
 		context.db.kysely
 			.selectFrom("lucid_notification_recipients")
-			.select(["user_id", "email_id"])
+			.select("user_id")
 			.where("notification_id", "=", id)
 			.execute();
 
@@ -253,6 +262,7 @@ test("an upsert keeps the audience in step and emails people it adds", async () 
 	//* no fingerprint keeps the stored one, so adding someone stays quiet for everyone else
 	expect((await failed([reviewer, bystander])).error).toBeUndefined();
 	expect((await row(id)).fingerprint).toBe("job-1");
+	const before = [await emailsTo(reviewer), await emailsTo(bystander)];
 	const jobs = await emailJobs(id);
 	expect(jobs).toHaveLength(2);
 	for (const job of jobs) {
@@ -264,19 +274,9 @@ test("an upsert keeps the audience in step and emails people it adds", async () 
 	expect(emailed.map((recipient) => recipient.user_id).sort()).toEqual(
 		[reviewer, bystander].sort(),
 	);
-	expect(emailed.every((recipient) => recipient.email_id !== null)).toBe(true);
-	const emails = await context.db.kysely
-		.selectFrom("lucid_emails")
-		.select("id")
-		.where(
-			"id",
-			"in",
-			emailed.flatMap((recipient) =>
-				recipient.email_id === null ? [] : [recipient.email_id],
-			),
-		)
-		.execute();
-	expect(emails).toHaveLength(2);
+	expect([await emailsTo(reviewer), await emailsTo(bystander)]).toEqual(
+		before.map((count) => count + 1),
+	);
 
 	//* people who leave the audience are dropped rather than told again
 	expect((await failed([bystander], "job-2")).error).toBeUndefined();
@@ -295,7 +295,7 @@ test("types missing from the config are refused", async () => {
 	expect(unregistered.error?.status).toBe(404);
 });
 
-test("turning a type off suppresses it, and required types stay on", async () => {
+test("turning a type off suppresses it, and mandatory types stay on", async () => {
 	const off = await updateTypeSettings(context, {
 		type: notifications.requests.commented.key,
 		enabled: false,
@@ -313,7 +313,7 @@ test("turning a type off suppresses it, and required types stay on", async () =>
 	expect(suppressed.data).toEqual({ id: null });
 
 	const forced = await updateTypeSettings(context, {
-		type: notifications.storage.key,
+		type: notifications.system.storage.key,
 		enabled: false,
 		email: true,
 		roleIds: null,
@@ -321,8 +321,8 @@ test("turning a type off suppresses it, and required types stay on", async () =>
 	});
 	expect(forced.error).toBeUndefined();
 	const still = await upsert(context, {
-		definition: notifications.storage,
-		key: "storage-required",
+		definition: notifications.system.storage,
+		key: "storage-mandatory",
 		data: {
 			thresholdPercent: 100,
 			percentUsed: 100,
@@ -335,6 +335,8 @@ test("turning a type off suppresses it, and required types stay on", async () =>
 });
 
 test("delayed emails only reach people who haven't read the notification or opted out", async () => {
+	//* sends whatever earlier tests left due, so only this notification's emails are counted
+	await sweep(reviewDelay + 1);
 	const optOut = await updatePreferences(context, {
 		userId: bystander,
 		preferences: [
@@ -358,6 +360,7 @@ test("delayed emails only reach people who haven't read the notification or opte
 	});
 	assert(sent.data?.id, JSON.stringify(sent.error));
 	const id = sent.data.id;
+	const before = await Promise.all([reviewer, bystander, editor].map(emailsTo));
 	expect(
 		(await updateMultiple(context, { userId: reviewer, ids: [id], read: true }))
 			.error,
@@ -376,13 +379,8 @@ test("delayed emails only reach people who haven't read the notification or opte
 		true,
 	);
 	expect(
-		after.find((recipient) => recipient.user_id === editor)?.email_id,
-	).toEqual(expect.any(Number));
-	expect(
-		after
-			.filter((recipient) => recipient.user_id !== editor)
-			.map((recipient) => recipient.email_id),
-	).toEqual([null, null]);
+		await Promise.all([reviewer, bystander, editor].map(emailsTo)),
+	).toEqual([before[0], before[1], (before[2] ?? 0) + 1]);
 });
 
 test("nobody is emailed about a notification resolved before its email is due", async () => {
@@ -394,6 +392,7 @@ test("nobody is emailed about a notification resolved before its email is due", 
 		data: { requestId: 5, title: "Spring launch" },
 	});
 	assert(sent.data?.id, JSON.stringify(sent.error));
+	const before = await emailsTo(editor);
 	const resolved = await resolve(context, {
 		definition: notifications.requests.reviewRequested,
 		key: "request:5:review",
@@ -402,8 +401,9 @@ test("nobody is emailed about a notification resolved before its email is due", 
 
 	await sweep(reviewDelay + 1);
 	expect(await emailState(sent.data.id)).toEqual([
-		{ user_id: editor, email_due_at: null, email_id: null },
+		{ user_id: editor, email_due_at: null },
 	]);
+	expect(await emailsTo(editor)).toBe(before);
 });
 
 test("a reopened notification is emailed again, unless it goes unsent past the expiry", async () => {
@@ -420,9 +420,9 @@ test("a reopened notification is emailed again, unless it goes unsent past the e
 	const sent = await sendAgain();
 	assert(sent.data?.id, JSON.stringify(sent.error));
 	const id = sent.data.id;
+	const before = await emailsTo(editor);
 	await sweep(reviewDelay + 1);
-	const [emailed] = await emailState(id);
-	expect(emailed?.email_id).toEqual(expect.any(Number));
+	expect(await emailsTo(editor)).toBe(before + 1);
 
 	expect(
 		(
@@ -437,8 +437,9 @@ test("a reopened notification is emailed again, unless it goes unsent past the e
 
 	await sweep(constants.notifications.emailExpiryHours * 60 + reviewDelay + 1);
 	expect(await emailState(id)).toEqual([
-		{ user_id: editor, email_due_at: null, email_id: emailed?.email_id },
+		{ user_id: editor, email_due_at: null },
 	]);
+	expect(await emailsTo(editor)).toBe(before + 1);
 });
 
 test("the summary counts unread and open to-dos, and mark all read clears them", async () => {

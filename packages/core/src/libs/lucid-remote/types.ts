@@ -1,15 +1,17 @@
 import type { ResponseBody } from "../../types/response.js";
 
 export type {
+	CmsAiGenerateAcceptedData,
+	CmsAiGenerateCompletedData,
+	CmsAiGenerateData,
+} from "./schema/ai.js";
+export type {
 	ConnectionGrant,
 	ConnectionRegistration,
 	RemoteConnectionData,
 } from "./schema/connection.js";
 export type {
 	CmsAiActor,
-	CmsAiGenerateAcceptedData,
-	CmsAiGenerateCompletedData,
-	CmsAiGenerateData,
 	CmsAiGenerateRequest,
 	CmsAiGenerateRequestFeature,
 	CmsAiGenerateRequestInput,

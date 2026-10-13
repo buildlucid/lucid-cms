@@ -26,7 +26,7 @@ const updateMeController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateMe.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateMe.body),
 	async (c) => {

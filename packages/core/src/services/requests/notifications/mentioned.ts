@@ -2,7 +2,8 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { requestData, requestHref } from "./shared.js";
+import getRequestPath from "../helpers/get-request-path.js";
+import { requestData } from "./shared.js";
 
 export const mentionedNotification = defineNotification({
 	key: "requests:mentioned",
@@ -21,6 +22,6 @@ export const mentionedNotification = defineNotification({
 			defaultMessage: "You were mentioned in {{title}}",
 		}),
 		body: copy.literal(data.excerpt),
-		href: requestHref(data.requestId),
+		href: getRequestPath(data.requestId),
 	}),
 });

@@ -14,15 +14,13 @@ export const QUEUE_WINDOW_MS = 4 * 60 * 60 * 1000;
  * the request is not ready, already queued or too far away to queue yet.
  * Call inside a transaction.
  */
-const scheduleRequest: ServiceFn<
-	[{ id: number; skipRequestWriteClaim?: boolean }],
-	undefined
-> = async (context, data) => {
-	const lock = data.skipRequestWriteClaim
-		? undefined
-		: await lockRequest(context, data);
-	if (lock?.error) return lock;
-	await using _lock = lock?.data;
+const scheduleRequest: ServiceFn<[{ id: number }], undefined> = async (
+	context,
+	data,
+) => {
+	const lockRes = await lockRequest(context, data);
+	if (lockRes.error) return lockRes;
+
 	const Requests = new RequestsRepository(context.db);
 
 	const requestRes = await Requests.selectSingle({

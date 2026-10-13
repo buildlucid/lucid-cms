@@ -102,9 +102,15 @@ export const useDocumentEditors = (props: {
 
 			let timer: ReturnType<typeof setTimeout> | undefined;
 			let stopped = false;
+			//* send returns errors, so release can await this without a rejection handler.
+			let inFlight: Promise<unknown> = Promise.resolve();
+			const heartbeat = () => {
+				inFlight = send();
+				return inFlight;
+			};
 			//* a failed heartbeat keeps the last answer and tries again next time
 			const beat = async () => {
-				await send();
+				await heartbeat();
 				if (!stopped) timer = setTimeout(beat, heartbeatMs);
 			};
 			const release = () => {
@@ -112,7 +118,7 @@ export const useDocumentEditors = (props: {
 			};
 			//* hidden tabs slow their timers, so a tab coming back checks straight away
 			const visible = () => {
-				if (document.visibilityState === "visible") void send();
+				if (document.visibilityState === "visible") void heartbeat();
 			};
 
 			void beat();
@@ -123,7 +129,8 @@ export const useDocumentEditors = (props: {
 				clearTimeout(timer);
 				window.removeEventListener("pagehide", release);
 				document.removeEventListener("visibilitychange", visible);
-				release();
+				//* a heartbeat landing after the release would hold the document again for 90 seconds
+				void inFlight.then(release);
 			});
 		}),
 	);
@@ -148,5 +155,3 @@ export const useDocumentEditors = (props: {
 		refresh: () => void send(),
 	};
 };
-
-export type UseDocumentEditors = ReturnType<typeof useDocumentEditors>;

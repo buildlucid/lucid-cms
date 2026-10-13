@@ -1,5 +1,5 @@
 import z from "zod";
-import { toolkitActorSchema } from "../schema.js";
+import { toolkitActorSchema } from "../../permission/toolkit-actor.js";
 import { documentEditTokenSchema } from "./authoring-values-schema.js";
 
 export const documentCollectionSchema = z.strictObject({

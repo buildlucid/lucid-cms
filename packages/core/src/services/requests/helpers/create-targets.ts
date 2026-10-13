@@ -13,8 +13,8 @@ const createTargets: ServiceFn<
 		data: data.targets.map((target) => ({
 			request_document_id: data.requestDocumentId,
 			target,
-			reviewed_version_id: null,
-			reviewed_by: null,
+			acknowledged_version_id: null,
+			acknowledged_by: null,
 			approved_version_id: null,
 		})),
 	});

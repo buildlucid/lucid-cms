@@ -69,7 +69,6 @@ const DocumentHistoryPage: Component = () => {
 	});
 
 	//* Redirect out of the history view when the document/collection isn't available.
-	//* Multiple collections fall back to their document list, everything else to the dashboard.
 	createEffect(() => {
 		if (state.collectionAccessError()) {
 			navigate("/lucid", { replace: true });

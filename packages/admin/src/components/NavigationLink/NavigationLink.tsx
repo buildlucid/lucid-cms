@@ -32,7 +32,7 @@ import {
 } from "@/utils/navigation";
 
 const icons = {
-	dashboard: TbOutlineHome,
+	home: TbOutlineHome,
 	agent: TbOutlineWand,
 	chat: TbOutlineMessages,
 	history: TbOutlineHistory,

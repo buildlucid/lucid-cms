@@ -1,6 +1,7 @@
 import { z } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
+import getRouteVersionTypes from "../../utils/get-route-version-types.js";
 import getTargetCollection from "../get-target-collection.js";
 import refreshVersionRoute from "./helpers/refresh-version-route.js";
 
@@ -18,12 +19,7 @@ const afterRestoreHandler =
 			return { error: undefined, data: undefined };
 		}
 
-		const versionTypes = [
-			"latest",
-			...meta.collection.getData.publishing.environments.map(
-				(environment) => environment.key,
-			),
-		];
+		const versionTypes = getRouteVersionTypes(meta.collection);
 		const batchSize = context.config.db.getQueryBatchSize({
 			parametersPerItem: 1,
 			reservedParameters: versionTypes.length,

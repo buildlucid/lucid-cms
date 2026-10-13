@@ -11,16 +11,6 @@ export const getWorkflowConfig = (
 	collection: CollectionBuilder,
 ): PublishingWorkflowConfig | undefined =>
 	collection.getData.publishing.workflow;
-/**
- * Finds a configured workflow stage by key without applying initial-stage fallback.
- */
-export const getWorkflowStage = (props: {
-	collection: CollectionBuilder;
-	stageKey: string;
-}): PublishingWorkflowStageConfig | undefined =>
-	getWorkflowConfig(props.collection)?.stages.find(
-		(stage) => stage.key === props.stageKey,
-	);
 
 /**
  * Resolves the persisted stage key, falling back to the workflow initial stage.

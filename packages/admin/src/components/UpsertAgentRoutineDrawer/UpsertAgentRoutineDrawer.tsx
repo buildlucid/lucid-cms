@@ -1,4 +1,3 @@
-import { useNavigate } from "@solidjs/router";
 import type {
 	AgentRoutine,
 	AgentRoutineConversationMode,
@@ -48,8 +47,7 @@ const UpsertAgentRoutineDrawer: Component<{
 	};
 }> = (props) => {
 	// ----------------------------------------
-	// State
-	const navigate = useNavigate();
+	// State & Hooks
 	const [agentKey, setAgentKey] = createSignal<string>();
 	const [name, setName] = createSignal("");
 	const [conversationMode, setConversationMode] =
@@ -60,28 +58,15 @@ const UpsertAgentRoutineDrawer: Component<{
 	const [schedule, setSchedule] = createSignal<Schedule>(defaultSchedule);
 	const [timezone, setTimezone] = createSignal(getDefaultTimezone());
 	const [enabled, setEnabled] = createSignal(true);
-	const [routineTools, setRoutineTools] = createSignal<AgentRoutine["tools"]>(
-		{},
-	);
+	const [toolSettings, setToolSettings] = createSignal<
+		AgentRoutine["toolSettings"]
+	>({});
 	const [activeTab, setActiveTab] = createSignal("task");
-	//* set by "Create & Run", so the new routine starts once it is saved
-	const [runAfterCreate, setRunAfterCreate] = createSignal(false);
 
 	// ----------------------------------------
-	// Mutations
+	// Queries & Mutations
 	const close = () => props.state.setOpen(false);
-	const runRoutine = api.agent.useRunRoutine({
-		onSuccess: (response) =>
-			navigate(
-				`/lucid/agent/chats/${response.data.conversationId}?runId=${response.data.runId}`,
-			),
-	});
-	const createRoutine = api.agent.useCreateRoutine({
-		onSuccess: (response) => {
-			close();
-			if (runAfterCreate()) runRoutine.action.mutate({ id: response.data.id });
-		},
-	});
+	const createRoutine = api.agent.useCreateRoutine({ onSuccess: close });
 	const updateRoutine = api.agent.useUpdateRoutine({ onSuccess: close });
 	const definitions = api.agent.useGetDefinitions({
 		enabled: () => props.state.open,
@@ -120,7 +105,7 @@ const UpsertAgentRoutineDrawer: Component<{
 				if (!open) return;
 				const routine = untrack(existing);
 				setAgentKey(routine?.agentKey ?? untrack(agents)[0]?.key);
-				setRoutineTools(routine?.tools ?? {});
+				setToolSettings(routine?.toolSettings ?? {});
 				setName(routine?.name ?? "");
 				setInstructions(routine?.instructions ?? "");
 				setConversationMode(routine?.conversationMode ?? "new");
@@ -128,7 +113,6 @@ const UpsertAgentRoutineDrawer: Component<{
 				setSchedule(routine ? parseSchedule(routine.cron) : defaultSchedule);
 				setTimezone(routine?.timezone ?? getDefaultTimezone());
 				setEnabled(routine?.enabled ?? true);
-				setRunAfterCreate(false);
 				setActiveTab(props.focusConfirmations ? "confirmations" : "task");
 			},
 		),
@@ -173,7 +157,7 @@ const UpsertAgentRoutineDrawer: Component<{
 						cron: toCron(schedule()),
 						timezone: timezone(),
 						enabled: enabled(),
-						tools: routineTools(),
+						toolSettings: toolSettings(),
 					};
 					const routine = existing();
 					const key = agentKey();
@@ -205,7 +189,7 @@ const UpsertAgentRoutineDrawer: Component<{
 							{
 								value: "confirmations",
 								label: T()("agent.routine.confirmations.title"),
-								invalid: tabInvalid(["tools"]),
+								invalid: tabInvalid(["toolSettings"]),
 							},
 							{
 								value: "options",
@@ -234,7 +218,7 @@ const UpsertAgentRoutineDrawer: Component<{
 									onChange={(value) => {
 										if (value) {
 											setAgentKey(String(value));
-											setRoutineTools({});
+											setToolSettings({});
 											setModelSelection(null);
 										}
 									}}
@@ -290,8 +274,8 @@ const UpsertAgentRoutineDrawer: Component<{
 					<Show when={activeTab() === "confirmations"}>
 						<AgentRoutineToolConfirmations
 							tools={agentTools()}
-							value={routineTools()}
-							onChange={setRoutineTools}
+							value={toolSettings()}
+							onChange={setToolSettings}
 							disabled={locked()}
 						/>
 					</Show>
@@ -327,9 +311,8 @@ const UpsertAgentRoutineDrawer: Component<{
 						</Button>
 						<Button
 							type="submit"
-							loading={mutation().action.isPending && !runAfterCreate()}
+							loading={mutation().action.isPending}
 							disabled={!locked() && incomplete()}
-							onClick={() => setRunAfterCreate(false)}
 						>
 							{existing() ? T()("common.update") : T()("common.create")}
 						</Button>

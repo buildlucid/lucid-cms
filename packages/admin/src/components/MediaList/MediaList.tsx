@@ -126,7 +126,6 @@ export const MediaList: Component<{
 	const isDeletedFilter = createMemo(() =>
 		props.state.showingDeleted() ? 1 : 0,
 	);
-	//* the ownership filter picks personal or system media, otherwise it's the shared library
 	const ownership = createMemo(() => {
 		const value = props.state.searchParams.getFilter("ownership")?.value;
 		return typeof value === "string" && value !== "" ? value : "library";

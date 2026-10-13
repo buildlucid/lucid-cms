@@ -35,6 +35,7 @@ import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
 import syncOwnedVisibility from "./helpers/sync-owned-visibility.js";
+import { type MediaTextField, mediaTextFields } from "./helpers/text-fields.js";
 import upsertCrop from "./helpers/upsert-crop.js";
 import notifyChange from "./notify-change.js";
 import renameMedia from "./strategies/rename.js";
@@ -239,16 +240,16 @@ const updateSingle: ServiceFn<
 	});
 	if (adoption.error) return adoption;
 
+	const textFields: readonly MediaTextField[] = mediaTextFields[finalType];
 	const translations = prepareMediaTranslations({
 		defaultLocale: context.config.localization.defaultLocale,
-		title: data.title || [],
-		alt: finalType === "image" ? (data.alt ?? []) : [],
-		description:
-			finalType === "video" || finalType === "audio"
-				? (data.description ?? [])
-				: [],
-		summary: finalType === "document" ? (data.summary ?? []) : [],
-		transcript: finalType === "audio" ? (data.transcript ?? []) : [],
+		title: data.title,
+		alt: textFields.includes("alt") ? data.alt : undefined,
+		description: textFields.includes("description")
+			? data.description
+			: undefined,
+		summary: textFields.includes("summary") ? data.summary : undefined,
+		transcript: textFields.includes("transcript") ? data.transcript : undefined,
 		mediaId: mediaRes.data.id,
 	});
 

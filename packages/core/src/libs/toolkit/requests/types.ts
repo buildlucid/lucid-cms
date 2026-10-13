@@ -1,5 +1,7 @@
+import type z from "zod";
 import type { CollectionDocumentKey } from "../../../exports/types.js";
 import type { ToolkitDocumentVersion } from "../documents/index.js";
+import type { inputSchema as acknowledgeSchema } from "./acknowledge/schema.js";
 
 /** A document to add to a request, with versions typed for its collection. */
 export type ToolkitRequestDocument<
@@ -14,8 +16,6 @@ export type ToolkitRequestDocument<
 };
 
 /** One of a request document's targets. */
-export type ToolkitRequestTarget = {
-	collectionKey: string;
-	documentId: number;
-	target: string;
-};
+export type ToolkitRequestTarget = NonNullable<
+	z.infer<typeof acknowledgeSchema>["targets"]
+>[number];

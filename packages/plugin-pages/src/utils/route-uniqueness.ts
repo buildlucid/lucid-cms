@@ -5,6 +5,7 @@ const routeKey = (item: RouteUniquenessItem) => {
 	return `${item.locale}::${item.fullSlug}`;
 };
 
+/** Flattens projected full slugs into one normalised route per document version and locale. */
 export const buildRouteUniquenessItems = (data: {
 	projectedFullSlugs: ProjectedFullSlug[];
 }): RouteUniquenessItem[] => {

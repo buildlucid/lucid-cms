@@ -1,4 +1,4 @@
-import { requestCommentResolutionSchema } from "../../../../db/tables/request-events.js";
+import { requestCommentResolutionSchema } from "../../../../../schemas/requests.js";
 import { requestCommentSchema } from "../../schema.js";
 
 export const inputSchema = requestCommentSchema.extend({

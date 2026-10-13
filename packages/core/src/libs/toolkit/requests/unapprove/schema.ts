@@ -1,4 +1,4 @@
-import { toolkitUserActorSchema } from "../../schema.js";
+import { toolkitUserActorSchema } from "../../../permission/toolkit-actor.js";
 import { requestWriteSchema } from "../schema.js";
 
 export const inputSchema = requestWriteSchema.extend({

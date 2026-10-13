@@ -39,8 +39,6 @@ describe("resolve relation version type", () => {
 	it("hydrates latest documents from latest refs", async () => {
 		const response = await resolveRelationVersionType(buildContext(), {
 			collectionKey: "pages",
-			documentId: 1,
-			versionId: 10,
 			versionType: "latest",
 		});
 
@@ -57,8 +55,6 @@ describe("resolve relation version type", () => {
 	it("hydrates revision documents from latest refs", async () => {
 		const response = await resolveRelationVersionType(buildContext(), {
 			collectionKey: "pages",
-			documentId: 1,
-			versionId: 10,
 			versionType: "revision",
 		});
 
@@ -184,8 +180,6 @@ describe("resolve relation version type", () => {
 	it("falls orphan snapshots back to latest refs", async () => {
 		const response = await resolveRelationVersionType(buildContext(), {
 			collectionKey: "pages",
-			documentId: 1,
-			versionId: 10,
 			versionType: constants.collectionBuilder.publishing.snapshotVersionType,
 		});
 

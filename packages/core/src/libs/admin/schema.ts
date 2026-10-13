@@ -71,14 +71,14 @@ const brickSlotMatch = z.strictObject({
 	kind: z.enum(["fixed", "builder", "embedded"]).optional(),
 });
 
-const dashboardWidgetSize = z.enum(["sm", "md", "lg", "full"]);
+const homeWidgetSize = z.enum(["sm", "md", "lg", "full"]);
 
-const dashboardCard = z
+const homeCard = z
 	.strictObject({
 		label: adminCopyInputSchema,
 		description: adminCopyInputSchema.optional(),
-		size: dashboardWidgetSize.optional(),
-		sizes: z.array(dashboardWidgetSize).min(1).optional(),
+		size: homeWidgetSize.optional(),
+		sizes: z.array(homeWidgetSize).min(1).optional(),
 		hidden: z.boolean().optional(),
 	})
 	.refine(
@@ -90,7 +90,7 @@ const dashboardCard = z
 	);
 
 const navigationIcon = z.enum([
-	"dashboard",
+	"home",
 	"agent",
 	"chat",
 	"history",
@@ -217,12 +217,12 @@ export const adminConfigSchema = z
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
-						slot: z.literal("dashboard.widget"),
+						slot: z.literal("home.widget"),
 						component: componentReference,
 						options,
 						// Registration is checked against the resolved access config in checkAdminSlots.
 						permission: permissionRequirement.optional(),
-						card: dashboardCard,
+						card: homeCard,
 					}),
 				]),
 			)

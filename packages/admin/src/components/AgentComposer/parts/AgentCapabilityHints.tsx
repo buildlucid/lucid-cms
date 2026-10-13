@@ -63,11 +63,11 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 	);
 	const web = createMemo(() => {
 		const capabilities = props.capabilities;
-		if (capabilities?.webSearch && capabilities.webRead) {
+		if (capabilities?.web.search && capabilities.web.read) {
 			return T()("agent.capabilities.web.both");
 		}
-		if (capabilities?.webSearch) return T()("agent.capabilities.web.search");
-		if (capabilities?.webRead) return T()("agent.capabilities.web.read");
+		if (capabilities?.web.search) return T()("agent.capabilities.web.search");
+		if (capabilities?.web.read) return T()("agent.capabilities.web.read");
 		return undefined;
 	});
 
@@ -110,29 +110,29 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 					)}
 				/>
 				<CapabilityHint
-					active={props.capabilities?.imageGeneration === true}
+					active={props.capabilities?.media.generate.image === true}
 					icon={<TbOutlinePhotoAi size={11} />}
 					title={T()(
-						props.capabilities?.imageGeneration
+						props.capabilities?.media.generate.image
 							? "agent.capabilities.image"
 							: "agent.capabilities.image.none",
 					)}
 					description={T()(
-						props.capabilities?.imageGeneration
+						props.capabilities?.media.generate.image
 							? "agent.capabilities.image.description"
 							: "agent.capabilities.image.none.description",
 					)}
 				/>
 				<CapabilityHint
-					active={props.capabilities?.audioGeneration === true}
+					active={props.capabilities?.media.generate.audio === true}
 					icon={<TbOutlineVolume size={11} />}
 					title={T()(
-						props.capabilities?.audioGeneration
+						props.capabilities?.media.generate.audio
 							? "agent.capabilities.audio"
 							: "agent.capabilities.audio.none",
 					)}
 					description={T()(
-						props.capabilities?.audioGeneration
+						props.capabilities?.media.generate.audio
 							? "agent.capabilities.audio.description"
 							: "agent.capabilities.audio.none.description",
 					)}

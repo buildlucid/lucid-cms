@@ -9,9 +9,9 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
-import { markdownPreview } from "@/components/AgentMessage/parts/AgentMarkdown";
 import T from "@/translations";
 import { messageText } from "@/utils/agent-chat";
+import { markdownPreview } from "@/utils/agent-markdown";
 
 const endThreshold = 32;
 

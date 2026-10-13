@@ -37,7 +37,7 @@ const runModelTurn: ServiceFn<
 	checkpoint.calls = [];
 	checkpoint.cursor = 0;
 
-	// Saving the request id first lets a resumed worker replay this turn rather than pay for it twice.
+	//* Saving the request id first lets a resumed worker replay this turn rather than pay for it twice.
 	const reset = await session.save();
 	if (reset.error) return reset;
 
@@ -129,7 +129,7 @@ const runModelTurn: ServiceFn<
 
 	if (response.error) {
 		if (session.signal.aborted) {
-			// The remote request was cancelled with this worker, so the next worker asks again.
+			//* The remote request was cancelled with this worker, so the next worker asks again.
 			checkpoint.requestId = randomUUID();
 
 			return { error: undefined, data: { kind: "aborted" } };

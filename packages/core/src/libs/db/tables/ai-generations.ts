@@ -44,10 +44,6 @@ export const aiGenerationsTable = defineTable("lucid_ai_generations", () => ({
 			schema: z.string(),
 			type: "text",
 		},
-		target: {
-			schema: z.record(z.string(), z.unknown()).nullable(),
-			type: "json",
-		},
 		output: {
 			schema: z.record(z.string(), z.unknown()).nullable(),
 			type: "json",
@@ -120,11 +116,6 @@ export interface LucidAiGenerations {
 	agent_run_id: string | null;
 	session_type: AiUsageSessionType;
 	session_id: string;
-	target: JSONColumnType<
-		Record<string, unknown> | null,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
 	output: JSONColumnType<
 		Record<string, unknown> | null,
 		Record<string, unknown> | null,

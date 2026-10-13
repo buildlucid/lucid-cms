@@ -97,13 +97,13 @@ const TimelineCard: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// Memos
-	const isUnreleasedEnvironment = createMemo(() => {
-		return props.item.type === "environment" && !props.item.isReleased;
+	const isUnpublishedEnvironment = createMemo(() => {
+		return props.item.type === "environment" && !props.item.isPublished;
 	});
 	const isEnvironmentInSyncWithPromoted = createMemo(() => {
 		return (
 			props.item.type === "environment" &&
-			props.item.isReleased &&
+			props.item.isPublished &&
 			props.item.inSyncWithPromotedFrom
 		);
 	});
@@ -148,12 +148,12 @@ const TimelineCard: Component<{
 					class={classNames(
 						"group relative flex w-full text-left overflow-hidden rounded-md border border-border p-3 md:p-4 transition-colors duration-200 outline-none bg-card focus-visible:ring-1 focus-visible:ring-primary",
 						{
-							"hover:bg-card-hover": !isUnreleasedEnvironment(),
-							"opacity-70 cursor-not-allowed": isUnreleasedEnvironment(),
+							"hover:bg-card-hover": !isUnpublishedEnvironment(),
+							"opacity-70 cursor-not-allowed": isUnpublishedEnvironment(),
 						},
 					)}
 					onClick={() => {
-						if (isUnreleasedEnvironment()) return;
+						if (isUnpublishedEnvironment()) return;
 						props.onClick();
 					}}
 				>
@@ -166,10 +166,10 @@ const TimelineCard: Component<{
 									isEnvironmentInSyncWithPromoted(),
 								"from-warning-low-border to-warning-low":
 									props.item.type === "environment" &&
-									!isUnreleasedEnvironment() &&
+									!isUnpublishedEnvironment() &&
 									!isEnvironmentInSyncWithPromoted(),
 								"from-danger-low-border to-danger-low":
-									isUnreleasedEnvironment(),
+									isUnpublishedEnvironment(),
 							},
 						)}
 					/>

@@ -1,9 +1,10 @@
 import constants from "../../../constants/constants.js";
 import { aiModelCatalogSchema } from "../../../libs/agent/model-selection.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
-import getAgentModels from "../../../libs/lucid-remote/services/get-agent-models.js";
+import getAgentModels from "../../../libs/lucid-remote/services/get-agent-models/index.js";
 import type { AiModelCatalog } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 
 /** Reads the hosted catalogue, cached briefly so chats and runs rarely wait on it. */
@@ -18,7 +19,10 @@ const getModelCatalog: ServiceFn<[], AiModelCatalog> = async (context) => {
 	const catalog = await getAgentModels(context, {
 		accessToken: token.data.accessToken,
 	});
-	if (catalog.error) return catalog;
+	if (catalog.error) {
+		await handleRemoteError(context, catalog.error);
+		return catalog;
+	}
 
 	await context.kv.set(context, {
 		key: cacheKeys.ai.agentModels,

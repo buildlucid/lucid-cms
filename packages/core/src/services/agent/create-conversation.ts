@@ -7,6 +7,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import checkAgentAccess from "./helpers/check-agent-access.js";
 import insertConversation from "./helpers/insert-conversation.js";
 
+/** Creates a chat after checking the user's agent chat permission. */
 const createConversation: ServiceFn<
 	[
 		{

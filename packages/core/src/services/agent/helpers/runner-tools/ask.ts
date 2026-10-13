@@ -25,7 +25,7 @@ const ask: RunnerToolInputHandler<typeof runnerTools.ask> = async (
 		pending: createInteraction({
 			callId: call.id,
 			key: constants.agent.widgets.question,
-			title: input.question,
+			title: { type: "lucid.literal", value: input.question },
 			data: input,
 		}),
 	};

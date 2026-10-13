@@ -53,7 +53,7 @@ const RenameAgentConversationModal: Component<{
 	// ----------------------------------------
 	// Memos
 	const generateEnabled = createMemo(() =>
-		siteStore.get.isAiFeatureEnabled("chatRename"),
+		siteStore.get.isAiFeatureEnabled("chatTitles"),
 	);
 	const canGenerate = createMemo(
 		() =>

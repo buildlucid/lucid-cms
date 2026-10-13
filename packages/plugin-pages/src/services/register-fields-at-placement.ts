@@ -104,6 +104,7 @@ const resolvePlacement = (
 	};
 };
 
+/** Registers fields with the given callback, then moves them to the configured placement in the collection. */
 const registerFieldsAtPlacement = (data: {
 	collection: CollectionBuilder;
 	fieldKeys: readonly string[];

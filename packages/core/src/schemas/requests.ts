@@ -1,31 +1,47 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
-import { requestCommentResolutionSchema } from "../libs/db/tables/request-events.js";
-import {
-	requestStatusSchema,
-	requestTypeSchema,
-} from "../libs/db/tables/requests.js";
 import { jobStatusSchema } from "../libs/jobs/payload.js";
-import type { RequestEvent } from "../types/response.js";
-import { agentActorSchema } from "./agent.js";
+import type {
+	RequestCommentResolution,
+	RequestEvent,
+	RequestStatus,
+	RequestType,
+} from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaImagePreviewResponseSchema } from "./media.js";
+import { agentActorSchema } from "./shared/agent-actor.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
+import { userDisplaySchema } from "./shared/user-display.js";
 
-export const requestUserSchema = z.object({
-	id: z.number(),
-	email: z.string().nullable(),
-	username: z.string().nullable(),
-	firstName: z.string().nullable(),
-	lastName: z.string().nullable(),
-	profilePicture: mediaImagePreviewResponseSchema.nullable(),
-});
+export const requestStatusSchema = z.enum([
+	"open",
+	"completed",
+	"closed",
+]) satisfies z.ZodType<RequestStatus>;
+
+/**
+ * Request kinds for creating documents, publishing or unpublishing environment content, and binning whole documents.
+ * @remarks Create requests contain one new document; publish requests can also target latest.
+ */
+export const requestTypeSchema = z.enum([
+	"create",
+	"publish",
+	"unpublish",
+	"delete",
+]) satisfies z.ZodType<RequestType>;
+
+/** Top-level comments must be resolved or closed before request approval. */
+export const requestCommentResolutionSchema = z.enum([
+	"resolved",
+	"closed",
+]) satisfies z.ZodType<RequestCommentResolution>;
 
 const requestEventBaseShape = {
 	id: z.number(),
-	user: requestUserSchema.nullable(),
-	agent: agentActorSchema.nullable().meta({
-		description: "The agent that acted, for user or the system",
+	actor: userDisplaySchema.nullable().meta({
+		description: "The person who acted, or the person an agent acted for",
+	}),
+	actorAgent: agentActorSchema.nullable().meta({
+		description: "The agent that acted, for actor or the system",
 	}),
 	createdAt: z.string().nullable(),
 	updatedAt: z.string().nullable(),
@@ -40,7 +56,7 @@ const requestEventSchema: z.ZodType<RequestEvent> = z.discriminatedUnion(
 			type: z.literal("comment"),
 			body: richTextJSONSchema,
 			resolution: requestCommentResolutionSchema.nullable(),
-			resolvedBy: requestUserSchema.nullable(),
+			resolvedBy: userDisplaySchema.nullable(),
 			resolvedByAgent: agentActorSchema.nullable(),
 			replies: z.array(
 				z.object({ ...requestEventBaseShape, body: richTextJSONSchema }),
@@ -74,8 +90,8 @@ const requestEventSchema: z.ZodType<RequestEvent> = z.discriminatedUnion(
 		z.object({
 			...requestEventBaseShape,
 			type: z.enum([
-				"target_reviewed",
-				"target_unreviewed",
+				"target_acknowledged",
+				"target_unacknowledged",
 				"target_added",
 				"target_removed",
 			]),
@@ -102,7 +118,7 @@ const requestEventSchema: z.ZodType<RequestEvent> = z.discriminatedUnion(
 		z.object({
 			...requestEventBaseShape,
 			type: z.enum(["reviewer_added", "reviewer_removed"]),
-			reviewer: requestUserSchema.nullable(),
+			reviewer: userDisplaySchema.nullable(),
 		}),
 		z.object({
 			...requestEventBaseShape,
@@ -176,9 +192,16 @@ const requestDocumentResponseSchema = z.object({
 			versionId: z.number().nullable(),
 			changed: z.boolean(),
 			changedSinceCreation: z.boolean(),
-			reviewed: z.boolean(),
-			reviewedBy: requestUserSchema.nullable(),
-			reviewedAt: z.string().nullable(),
+			acknowledged: z.boolean().meta({
+				description:
+					"Whether the target's current version has been acknowledged",
+			}),
+			acknowledgedBy: userDisplaySchema.nullable(),
+			acknowledgedByAgent: agentActorSchema.nullable().meta({
+				description:
+					"The agent that acknowledged it, for acknowledgedBy or the system",
+			}),
+			acknowledgedAt: z.string().nullable(),
 		}),
 	),
 	blockers: requestBlockersSchema,
@@ -199,12 +222,12 @@ const requestResponseSchema = z.object({
 	}),
 	revision: z.number(),
 	executionJobId: z.string().nullable(),
-	createdBy: requestUserSchema.nullable(),
+	createdBy: userDisplaySchema.nullable(),
 	createdByAgent: agentActorSchema.nullable(),
 	approvals: z
 		.array(
 			z.object({
-				user: requestUserSchema.nullable(),
+				user: userDisplaySchema.nullable(),
 				approvedAt: z.string().nullable(),
 			}),
 		)
@@ -216,13 +239,21 @@ const requestResponseSchema = z.object({
 	}),
 	scheduledAt: z.string().nullable(),
 	scheduledTimezone: z.string().nullable(),
-	failure: z.string().nullable(),
-	failureRequestDocumentId: z.number().nullable(),
-	failureTarget: z.string().nullable(),
+	failure: z
+		.object({
+			message: z.string(),
+			requestDocumentId: z.number().nullable(),
+			target: z.string().nullable(),
+		})
+		.nullable()
+		.meta({
+			description:
+				"Why the last request attempt failed, and where. Cleared on the next attempt",
+		}),
 	completedAt: z.string().nullable(),
 	createdAt: z.string().nullable(),
 	updatedAt: z.string().nullable(),
-	reviewers: z.array(requestUserSchema),
+	reviewers: z.array(userDisplaySchema),
 	documents: z.array(requestDocumentResponseSchema),
 	events: z.array(requestEventSchema),
 	blockers: requestBlockersSchema,
@@ -231,12 +262,14 @@ const requestResponseSchema = z.object({
 	}),
 	reviewToken: z.string().meta({
 		description:
-			"Fingerprints the revision, content and targets as read. Acknowledgements and approvals made with it are rejected once any of them change",
+			"Fingerprints the revision, content and targets as read. Pass it as ifUnchanged when acknowledging or approving, which is refused once any of them change",
 	}),
 	permissions: z.object({
 		edit: z.boolean(),
 		approve: z.boolean(),
-		request: z.boolean(),
+		complete: z.boolean().meta({
+			description: "Complete now, or set a schedule",
+		}),
 		reopen: z.boolean(),
 	}),
 });
@@ -316,7 +349,7 @@ export const requestDocumentInputSchema = z.object({
 
 const scheduleShape = {
 	scheduledAt: z.iso.datetime().nullable().optional().meta({
-		description: "When to request once approved. Null removes the schedule",
+		description: "When to complete it once approved. Null removes the schedule",
 		example: "2026-10-12T09:00:00.000Z",
 	}),
 	scheduledTimezone: z.string().trim().min(1).nullable().optional().meta({
@@ -337,12 +370,31 @@ const requestDocumentParams = requestParams.extend({
 	}),
 });
 const commentParams = requestParams.extend({
-	eventId: z.string().regex(/^\d+$/).meta({
+	commentId: z.string().regex(/^\d+$/).meta({
 		description: "The comment ID",
 		example: "1",
 	}),
 });
 const noQuery = { string: undefined, formatted: undefined };
+const userSearchQuery = {
+	string: z.object({
+		"filter[name]": z.string().trim().min(1).max(100).optional().meta({
+			description: "Matches the full name or username.",
+			example: "Ada",
+		}),
+		"filter[id]": z
+			.string()
+			.trim()
+			.regex(/^\d+(,\d+)*$/)
+			.optional()
+			.meta({
+				description: "Accepts multiple user IDs separated by commas.",
+				example: "1,2",
+			}),
+		limit: z.coerce.number().int().min(1).max(100).default(20),
+	}),
+	formatted: undefined,
+};
 
 export const controllerSchemas = {
 	getMultiple: {
@@ -456,15 +508,15 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	getReviewers: {
 		body: undefined,
-		query: noQuery,
+		query: userSearchQuery,
 		params: requestParams,
-		response: z.array(requestUserSchema),
+		response: z.array(userDisplaySchema),
 	} satisfies ControllerSchema,
 	getMentionableUsers: {
 		body: undefined,
-		query: noQuery,
+		query: userSearchQuery,
 		params: requestParams,
-		response: z.array(requestUserSchema),
+		response: z.array(userDisplaySchema),
 	} satisfies ControllerSchema,
 	getExecution: {
 		body: undefined,
@@ -531,12 +583,16 @@ export const controllerSchemas = {
 		params: requestDocumentParams,
 		response: undefined,
 	} satisfies ControllerSchema,
-	reviewTarget: {
+	acknowledgeTarget: {
 		body: z.object({
 			target: z.string().min(1),
-			revision: z.number().int().positive(),
-			targetVersionId: z.number().int().positive().nullable(),
-			reviewed: z.boolean(),
+			acknowledged: z.boolean().meta({
+				description: "False withdraws an acknowledgement",
+			}),
+			ifUnchanged: z.string().min(1).meta({
+				description:
+					"The request's reviewToken when you read it. Refused if the revision, content or targets have changed since.",
+			}),
 		}),
 		query: noQuery,
 		params: requestDocumentParams,
@@ -547,7 +603,7 @@ export const controllerSchemas = {
 			body: richTextJSONSchema.optional(),
 			ifUnchanged: z.string().min(1).meta({
 				description:
-					"The request's reviewToken when you reviewed it. Approval is refused if the revision, content or targets have changed since.",
+					"The request's reviewToken when you read it. Refused if the revision, content or targets have changed since.",
 			}),
 		}),
 		query: noQuery,

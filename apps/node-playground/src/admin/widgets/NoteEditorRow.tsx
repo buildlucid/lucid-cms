@@ -1,4 +1,5 @@
 import { AgentTranscriptRow } from "@lucidcms/admin/components";
+import { useTranslation } from "@lucidcms/admin/hooks";
 import type { AgentTranscriptRowSlotProps } from "@lucidcms/admin/types";
 import { createMemo } from "solid-js";
 import type { NoteData } from "../../tools/review-note.js";
@@ -8,7 +9,14 @@ const NoteEditorRow = (
 	props: AgentTranscriptRowSlotProps<undefined, NoteData>,
 ) => {
 	// ----------------------------------------
+	// State & Hooks
+	const { copy } = useTranslation();
+
+	// ----------------------------------------
 	// Memos
+	const title = createMemo(() =>
+		props.interaction ? copy(props.interaction.title) : undefined,
+	);
 	//* the submitted note, or the draft the agent prepared until then
 	const note = createMemo(() => {
 		const interaction = props.interaction;
@@ -20,7 +28,7 @@ const NoteEditorRow = (
 			: props.data;
 	});
 	const label = createMemo(() =>
-		[props.interaction?.title, props.status].filter(Boolean).join(" · "),
+		[title(), props.status].filter(Boolean).join(" · "),
 	);
 
 	// ----------------------------------------
@@ -39,7 +47,7 @@ const NoteEditorRow = (
 				</svg>
 			}
 			label={label()}
-			panelTitle={props.interaction?.title}
+			panelTitle={title()}
 			renderPanel={() => <NoteCard note={note()} />}
 		/>
 	);

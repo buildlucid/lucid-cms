@@ -1,7 +1,7 @@
 import type {
 	Collection,
 	RequestBlocker,
-	RequestDetail,
+	RequestDetails,
 	RequestDocument,
 	RequestEvent,
 	RequestOverview,
@@ -18,10 +18,7 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-/**
- * The open requests people act on, in the order dashboards show them. Each
- * queue is also a Requests page preset, and counts add up every request type.
- */
+/** Open-request queues in Home order, shared with Requests presets and counted across all request types. */
 export const requestQueues = [
 	{
 		key: "assigned",
@@ -136,7 +133,7 @@ export type RequestState =
 	| "pending";
 
 export const getRequestState = (
-	request: RequestDetail | RequestSummary,
+	request: RequestDetails | RequestSummary,
 ): RequestState => {
 	if (request.status === "completed") return "completed";
 	if (request.status === "closed") return "closed";
@@ -145,7 +142,7 @@ export const getRequestState = (
 };
 
 /** Whether the signed in user has approved the request's current revision. */
-export const hasApproved = (request: RequestDetail) =>
+export const hasApproved = (request: RequestDetails) =>
 	request.approvals.some(
 		(approval) => approval.user?.id === userStore.get.user?.id,
 	);
@@ -155,7 +152,7 @@ export const hasApproved = (request: RequestDetail) =>
  * earlier approval counts once, and can approve the request on its own once
  * its collections need fewer.
  */
-export const getApprovalsAfter = (request: RequestDetail) =>
+export const getApprovalsAfter = (request: RequestDetails) =>
 	request.approvals.length + (hasApproved(request) ? 0 : 1);
 
 export const requestStates: Record<
@@ -193,11 +190,9 @@ export const requestStates: Record<
 	},
 };
 
-/**
- * What a request will do to one target, as a short label beside it. Changed destinations require explicit acknowledgement before approval.
- */
+/** Labels a request target's changes and acknowledgement status. */
 export const getTargetStatus = (
-	request: RequestDetail,
+	request: RequestDetails,
 	target: RequestTarget,
 ): {
 	label: string;
@@ -209,10 +204,10 @@ export const getTargetStatus = (
 	if (request.status === "closed") return null;
 	if (target.changedSinceCreation) {
 		return {
-			label: target.reviewed
-				? T()("requests.target.status.reviewed")
-				: T()("requests.target.status.review.required"),
-			tone: target.reviewed ? "success" : "warning",
+			label: target.acknowledged
+				? T()("requests.target.status.acknowledged")
+				: T()("requests.target.status.acknowledge.required"),
+			tone: target.acknowledged ? "success" : "warning",
 		};
 	}
 	if (target.changed) {
@@ -286,7 +281,7 @@ export const getDocumentCreateActions = (
 		userStore.get.hasPermission([Permissions.RequestsRead]).all &&
 		userStore.get.hasPermission([
 			collection.permissions.create,
-			collection.permissions["create-request"],
+			collection.permissions.createRequest,
 		]).some;
 
 	return [
@@ -324,7 +319,7 @@ export const getRequestDocumentLabel = (
 export const getBlockerCopy = (
 	blocker: RequestBlocker,
 	collection: Collection | undefined,
-	type: RequestDetail["type"],
+	type: RequestDetails["type"],
 ): { title: string; description: string } => {
 	const target = blocker.target
 		? getTargetLabel(collection, blocker.target)
@@ -438,9 +433,9 @@ export const requestActivityFilters = [
 		types: ["target_added", "target_removed"],
 	},
 	{
-		key: "reviews",
-		label: "requests.activity.filter.reviews",
-		types: ["target_reviewed", "target_unreviewed"],
+		key: "acknowledgements",
+		label: "requests.activity.filter.acknowledgements",
+		types: ["target_acknowledged", "target_unacknowledged"],
 	},
 	{
 		key: "reviewers",

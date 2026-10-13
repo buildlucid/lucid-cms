@@ -1,20 +1,31 @@
 import { copy } from "@lucidcms/core";
 import { getCollectionTableNames } from "@lucidcms/core/extension";
-import type { RequestCheckHookData, ServiceFn } from "@lucidcms/core/types";
+import type {
+	RequestCheckBlocker,
+	RequestCheckHookData,
+	ServiceFn,
+} from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../types/types.js";
 import findOrphanedChildren from "./find-orphaned-children.js";
 import findSegmentDependents from "./find-segment-dependents.js";
 
-/** Blocks unpublish requests that would leave published pages without required parents or route segments. */
+/** Reports unpublish request documents that would leave published pages without required parents or route segments. */
 const checkUnpublishDependents: ServiceFn<
-	[{ options: PluginOptionsInternal; data: RequestCheckHookData }],
-	undefined
-> = async (context, { options, data }) => {
+	[
+		{
+			options: PluginOptionsInternal;
+			documents: RequestCheckHookData["documents"];
+		},
+	],
+	RequestCheckBlocker[]
+> = async (context, data) => {
+	const blockers: RequestCheckBlocker[] = [];
+
 	for (const [collectionKey, documents] of Map.groupBy(
 		data.documents,
 		(document) => document.collectionKey,
 	)) {
-		const isPages = options.collections.some(
+		const isPages = data.options.collections.some(
 			(collection) => collection.key === collectionKey,
 		);
 		const tablesRes = isPages
@@ -30,7 +41,7 @@ const checkUnpublishDependents: ServiceFn<
 			);
 			const memberIds = members.map((member) => member.documentId);
 			const block = (requestDocumentId: number, key: "children" | "segment") =>
-				data.blockers.push({
+				blockers.push({
 					requestDocumentId,
 					target,
 					message: context.translate(
@@ -46,11 +57,11 @@ const checkUnpublishDependents: ServiceFn<
 
 			for (const member of members) {
 				const segmentRes = await findSegmentDependents(context, {
-					options,
+					options: data.options,
 					collectionKey,
 					target,
 					documentIds: [member.documentId],
-					unpublishingIds: memberIds,
+					excludeDocumentIds: memberIds,
 				});
 				if (segmentRes.error) return segmentRes;
 				if (segmentRes.data.length > 0) {
@@ -78,7 +89,7 @@ const checkUnpublishDependents: ServiceFn<
 		}
 	}
 
-	return { error: undefined, data: undefined };
+	return { error: undefined, data: blockers };
 };
 
 export default checkUnpublishDependents;

@@ -37,7 +37,7 @@ const previewUrl = (media: MediaListItem) => {
 	return media.thumbnail?.url || undefined;
 };
 
-export type AgentReferenceDetails = {
+type AgentReferenceDetails = {
 	label: string;
 	mimeType?: string;
 	previewUrl?: string;

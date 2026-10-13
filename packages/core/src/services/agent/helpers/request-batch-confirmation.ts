@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import { createInteraction } from "../../../libs/agent/interactions.js";
 import type { Checkpoint, ToolCall } from "../../../libs/agent/types.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { preflightAgentTool } from "../../../libs/tools/execute-tool.js";
 import type { AgentToolExecution } from "../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -45,7 +46,7 @@ const requestBatchConfirmation: ServiceFn<
 		confirmations.push({
 			toolCallId: call.id,
 			toolName: tool.name,
-			title: context.translate(tool.describe(call.input)),
+			title: tool.describe(call.input),
 			input: call.input,
 		});
 	}
@@ -58,7 +59,7 @@ const requestBatchConfirmation: ServiceFn<
 	checkpoint.pending = createInteraction({
 		callId: first.toolCallId,
 		key: constants.agent.widgets.confirmationBatch,
-		title: context.translate("server:agent.tool.confirmation.batch", {
+		title: copy("admin:core.tools.confirmation.batch", {
 			data: { count: confirmations.length },
 		}),
 		data: {},

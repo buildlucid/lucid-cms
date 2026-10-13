@@ -3,6 +3,9 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
+import { copy } from "../../../i18n/index.js";
+import { Permissions } from "../../../permission/definitions.js";
+import hasAccess from "../../../permission/has-access.js";
 import { runToolkitService } from "../../utils.js";
 import { inputSchema } from "./schema.js";
 
@@ -16,19 +19,43 @@ const deleteSingle = (
 	runToolkitService({
 		schema: inputSchema,
 		input,
-		handler: async (data) => {
-			const { default: deleteMedia } = data.hard
-				? await import(
-						"../../../../services/media/delete-single-permanently.js"
-					)
-				: await import("../../../../services/media/delete-single.js");
-			const { default: serviceWrapper } = await import(
-				"../../../../utils/services/service-wrapper.js"
-			);
+		handler: async ({ actor, hard, id }) => {
+			const [
+				{ default: resolveActorUser },
+				{ default: serviceWrapper },
+				{ default: deleteMedia },
+			] = await Promise.all([
+				import("../../../../services/users/helpers/resolve-actor-user.js"),
+				import("../../../../utils/services/service-wrapper.js"),
+				hard
+					? import("../../../../services/media/delete-single-permanently.js")
+					: import("../../../../services/media/delete-single.js"),
+			]);
 
-			return serviceWrapper(deleteMedia, {
-				transaction: true,
-			})(context, { id: data.id, actor: { type: "internal" }, userId: null });
+			const userRes = await resolveActorUser(context, { actor });
+			if (userRes.error) return userRes;
+			if (
+				!hasAccess({
+					user: userRes.data,
+					requiredPermissions: [Permissions.MediaDelete],
+				})
+			) {
+				return {
+					error: {
+						status: 403,
+						message: copy("server:core.toolkit.actor.permission.denied"),
+					},
+					data: undefined,
+				};
+			}
+
+			const user = userRes.data;
+
+			return serviceWrapper(deleteMedia, { transaction: true })(context, {
+				id,
+				actor: user.id === null ? { type: "internal" } : { type: "user", user },
+				userId: user.id,
+			});
 		},
 		name: {
 			key: "core.toolkit.media.delete-single.error.name",

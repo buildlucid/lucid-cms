@@ -300,8 +300,8 @@ export const documentFilterPanelFields = (
 			type: "select",
 			options: [
 				{
-					value: "unreleased",
-					label: T()("common.status.unreleased"),
+					value: "unpublished",
+					label: T()("common.status.unpublished"),
 				},
 				{
 					value: "out-of-sync",

@@ -7,7 +7,7 @@ import type {
 	RequestRecord,
 } from "../types.js";
 import getAllowedTargets from "./get-allowed-targets.js";
-import getTargetReview from "./get-target-review.js";
+import getTargetAcknowledgement from "./get-target-acknowledgement.js";
 
 const getDocumentBlockers = (
 	context: ServiceContext,
@@ -51,7 +51,7 @@ const getDocumentBlockers = (
 		}
 
 		const currentVersionId = state.versions.get(target.target)?.id ?? null;
-		const review = getTargetReview({
+		const acknowledgement = getTargetAcknowledgement({
 			target,
 			requestDocumentId: document.id,
 			events: request.events,
@@ -59,7 +59,11 @@ const getDocumentBlockers = (
 		});
 		if (approved && target.approved_version_id !== currentVersionId) {
 			blockers.push({ code: "target_changed", target: target.target });
-		} else if (!approved && review.changedSinceCreation && !review.reviewed) {
+		} else if (
+			!approved &&
+			acknowledgement.changedSinceCreation &&
+			!acknowledgement.acknowledged
+		) {
 			blockers.push({ code: "acknowledge_required", target: target.target });
 		}
 
@@ -82,13 +86,13 @@ const getDocumentBlockers = (
 						(environment) => environment.key === target.target,
 					);
 		for (const required of config?.requires ?? []) {
-			const requestdFirst =
+			const requiredFirst =
 				document.targets.some((other) => other.target === required) &&
 				allowed.indexOf(required) < allowed.indexOf(target.target);
 			const holdsContent =
-				state.request !== null &&
-				state.versions.get(required)?.contentId === state.request.contentId;
-			if (!requestdFirst && !holdsContent) {
+				state.content !== null &&
+				state.versions.get(required)?.contentId === state.content.contentId;
+			if (!requiredFirst && !holdsContent) {
 				blockers.push({
 					code: "prerequisite",
 					target: target.target,

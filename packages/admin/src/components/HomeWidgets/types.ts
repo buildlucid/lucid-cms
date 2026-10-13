@@ -1,24 +1,42 @@
-import type { Collection } from "@types";
+import type { PermissionRequirement, ResolvedAdminCopy } from "@lucidcms/types";
 import type { Component } from "solid-js";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import type { AdminOptions } from "../../extensions/types/config.js";
+import type { homeWidgetSizes, homeWidgetSlotPolicies } from "./constants.js";
 
-/** What availability checks can read besides the user's permissions. */
-export type HomeWidgetContext = {
-	/** Undefined until collections load. */
-	collections: Collection[] | undefined;
+export type HomeWidgetSlot = keyof typeof homeWidgetSlotPolicies;
+
+/** `sm` is a third of a wide row, `md` half, `lg` two thirds and `full` the whole row. */
+export type HomeWidgetSize = (typeof homeWidgetSizes)[number];
+
+export type HomeWidgetPlacement = {
+	/** Adds a Home overview widget users can hide, resize and reorder. */
+	slot: "home.widget";
+	/** Hides the widget from users without access. */
+	permission?: PermissionRequirement;
+	/** How the widget's card is named and sized on the overview grid. */
+	card: {
+		label: string | ResolvedAdminCopy;
+		/** Shown when users choose which widgets to show. */
+		description?: string | ResolvedAdminCopy;
+		/** The starting size. @default "md" */
+		size?: HomeWidgetSize;
+		/** The sizes users can pick. @default every size */
+		sizes?: HomeWidgetSize[];
+		/** Leaves the widget off until a user turns it on. */
+		hidden?: boolean;
+	};
 };
 
-/** A built-in or plugin widget, ready for the Home overview. */
-export type HomeWidget = {
-	key: string;
-	/** Higher priorities come first in the default layout. */
-	priority: number;
-	label: () => string;
-	description: () => string | undefined;
-	size: DashboardWidgetSize;
-	sizes: readonly DashboardWidgetSize[];
-	/** Starts hidden until the user adds it. */
-	hidden: boolean;
-	available: (context: HomeWidgetContext) => boolean;
-	component: Component<{ size: DashboardWidgetSize }>;
+export type HomeWidgetProps<
+	TOptions extends AdminOptions | undefined = undefined,
+> = {
+	readonly slot: "home.widget";
+	readonly key: string;
+	/** The size the user picked, so the widget can show more or less. */
+	readonly size: HomeWidgetSize;
+	readonly options: TOptions;
 };
+
+export type HomeWidgetComponent<
+	TOptions extends AdminOptions | undefined = undefined,
+> = Component<HomeWidgetProps<TOptions>>;

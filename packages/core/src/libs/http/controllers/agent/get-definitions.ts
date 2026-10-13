@@ -5,6 +5,7 @@ import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -27,6 +28,11 @@ const getDefinitionsController = factory.createHandlers(
 
 		const definitions = await serviceWrapper(agentServices.getDefinitions, {
 			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
 		})(context, { authUser: c.get("auth") });
 		if (definitions.error) throw new LucidAPIError(definitions.error);
 

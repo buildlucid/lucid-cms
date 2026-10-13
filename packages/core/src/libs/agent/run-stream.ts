@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
+import type { AgentStreamEvent } from "@lucidcms/types";
 import z from "zod";
 import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
-import type { AgentStreamEvent } from "../../types/response.js";
 
 const integer = z
 	.string()

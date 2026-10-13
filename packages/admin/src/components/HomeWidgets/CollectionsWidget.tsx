@@ -3,9 +3,9 @@ import type { Collection } from "@types";
 import { TbOutlineChevronDown, TbOutlinePlus } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import { getCollectionNavigationHref } from "@/components/CollectionNavLink/CollectionNavLink";
-import DashboardCard from "@/components/DashboardCard/DashboardCard";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
+import HomeCard from "@/components/HomeCard/HomeCard";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -17,7 +17,7 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 
 const collapsedCount = 4;
 
-const CollectionsWidget: Component<{ size: DashboardWidgetSize }> = () => {
+const CollectionsWidget: Component<{ size: HomeWidgetSize }> = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const [expanded, setExpanded] = createSignal(false);
@@ -54,7 +54,7 @@ const CollectionsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<DashboardCard title={T()("home.widget.collections.label")}>
+		<HomeCard title={T()("home.widget.collections.label")}>
 			<ul class="grid grid-cols-1 @2xl:grid-cols-2">
 				<For each={visible()}>
 					{(collection) => (
@@ -120,7 +120,7 @@ const CollectionsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 					/>
 				</button>
 			</Show>
-		</DashboardCard>
+		</HomeCard>
 	);
 };
 

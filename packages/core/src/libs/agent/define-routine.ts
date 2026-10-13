@@ -16,8 +16,8 @@ const defineRoutine = <const Key extends string>(
 	conversationMode: options.conversationMode ?? "new",
 	model: options.model,
 	//* unset settings are dropped so sync compares code and stored settings exactly
-	tools: Object.fromEntries(
-		Object.entries(options.tools ?? {}).map(
+	toolSettings: Object.fromEntries(
+		Object.entries(options.toolSettings ?? {}).map(
 			([name, { requiresConfirmation }]) => [
 				name,
 				requiresConfirmation === undefined ? {} : { requiresConfirmation },

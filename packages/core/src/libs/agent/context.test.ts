@@ -127,7 +127,7 @@ test("a call settled without a summary keeps the one it had while running", () =
 	expect(
 		settleToolCall(checkpoint, call, {
 			status: "failed",
-			output: { error: "The user denied this action." },
+			output: { error: "The person denied this action." },
 		}),
 	).toMatchObject({
 		status: "failed",
@@ -240,8 +240,8 @@ test("replays saved tool calls as calls and results, never as text the assistant
 				name: "publish",
 				input: { id: 7 },
 				status: "failed",
-				summary: copy.literal("The user denied publishing."),
-				output: { error: "The user denied this action." },
+				summary: copy.literal("The person denied publishing."),
+				output: { error: "The person denied this action." },
 			},
 			{
 				type: "tool",
@@ -262,7 +262,7 @@ test("replays saved tool calls as calls and results, never as text the assistant
 				interaction: {
 					id: "question",
 					toolCallId: "ask",
-					title: "Which colour?",
+					title: { type: "lucid.literal", value: "Which colour?" },
 					placement: "composer",
 					status: "answered",
 					response: { answer: "Blue" },
@@ -289,7 +289,7 @@ test("replays saved tool calls as calls and results, never as text the assistant
 			role: "tool",
 			toolCallId: "publish",
 			name: "publish",
-			output: { error: "The user denied this action." },
+			output: { error: "The person denied this action." },
 		},
 		{
 			role: "tool",

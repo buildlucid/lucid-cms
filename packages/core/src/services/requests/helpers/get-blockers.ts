@@ -65,7 +65,7 @@ const getBlockers: ServiceFn<
 						collectionKey: document.collection_key,
 						documentId: document.document_id,
 						source: document.source,
-						versionId: state.request?.id ?? null,
+						versionId: state.content?.id ?? null,
 						targets: document.targets.map((target) => target.target),
 					})),
 					blockers: [],

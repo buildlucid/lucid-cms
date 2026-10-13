@@ -1,5 +1,5 @@
 import z from "zod";
-import { requestTypeSchema } from "../../../libs/db/tables/requests.js";
+import { requestTypeSchema } from "../../../schemas/requests.js";
 
 export const documentIdInput = z.number().int().positive().meta({
 	description: "Document ID, eg. from documents_find or requests_get.",
@@ -17,7 +17,7 @@ export const writeInput = {
 	}),
 	requestId: z.number().int().positive().optional().meta({
 		description:
-			"An open request to make the change in, eg. one returned by an earlier call. Defaults to this chat's open request for the document, or a new request.",
+			"An open request to make the change in, eg. one returned by an earlier call. When the change needs a request and none is given, this chat's open request for the document is used, or a new one is opened.",
 	}),
 	request: z
 		.object({

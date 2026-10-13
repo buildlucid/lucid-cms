@@ -5,7 +5,6 @@ import type {
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
 import { runToolkitService } from "../../utils.js";
-import runRequestService from "../run-request-service.js";
 import { inputSchema } from "./schema.js";
 
 /** An approved request to complete. */
@@ -20,20 +19,31 @@ const complete = (
 		schema: inputSchema,
 		input,
 		handler: async ({ actor, ...data }) => {
-			const { default: complete } = await import(
-				"../../../../services/requests/complete.js"
-			);
+			const [
+				{ default: resolveActorUser },
+				{ default: serviceWrapper },
+				{ default: complete },
+			] = await Promise.all([
+				import("../../../../services/users/helpers/resolve-actor-user.js"),
+				import("../../../../utils/services/service-wrapper.js"),
+				import("../../../../services/requests/complete.js"),
+			]);
 
-			return runRequestService(context, {
-				actor,
-				transaction: true,
-				run: (context, user) =>
-					complete(context, {
+			return serviceWrapper(
+				async (
+					context: ServiceContext,
+				): ServiceResponse<RequestExecutionReceipt> => {
+					const userRes = await resolveActorUser(context, { actor });
+					if (userRes.error) return userRes;
+
+					return complete(context, {
 						...data,
-						user,
+						user: userRes.data,
 						agentRunId: actor.agentRunId,
-					}),
-			});
+					});
+				},
+				{ transaction: true },
+			)(context);
 		},
 		name: { key: "core.toolkit.requests.complete.error.name" },
 		message: { key: "core.toolkit.requests.complete.error.message" },

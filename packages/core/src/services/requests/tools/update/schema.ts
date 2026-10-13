@@ -2,7 +2,7 @@ import z from "zod";
 import {
 	requestStatusSchema,
 	requestTypeSchema,
-} from "../../../../libs/db/tables/requests.js";
+} from "../../../../schemas/requests.js";
 import { htmlInput, requestIdInput, requestLinksSchema } from "../schema.js";
 
 const documentShape = {
@@ -60,7 +60,7 @@ export const inputSchema = z.object({
 	requestId: requestIdInput,
 	changes: z.array(changeSchema).min(1).meta({
 		description:
-			"Only the changes to make, eg. [{type:'title',title:'Spring launch'}]. Create requests keep their one document. Document and target changes withdraw approvals.",
+			"Only the changes to make, eg. [{type:'title',title:'Spring launch'}]. Create requests keep their one document. Document and target changes dismiss approvals.",
 	}),
 });
 

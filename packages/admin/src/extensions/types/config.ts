@@ -3,12 +3,12 @@ import type {
 	BrickSlotMatch,
 	BrickSlotPlacement,
 } from "../../components/BrickSlots/types.js";
-import type { DashboardWidgetPlacement } from "../../components/DashboardWidget/types.js";
 import type { DocumentListSlotPlacement } from "../../components/DocumentSlotCell/types.js";
 import type {
 	FieldSlot,
 	FieldSlotMatch,
 } from "../../components/FieldSlots/types.js";
+import type { HomeWidgetPlacement } from "../../components/HomeWidgets/types.js";
 import type { AdminRoute } from "./route.js";
 
 /** Project-relative path, exported package subpath, absolute path or file URL. */
@@ -40,7 +40,7 @@ export type AdminSlot = {
 	options?: AdminOptions;
 } & (
 	| AgentSlotPlacement
-	| DashboardWidgetPlacement
+	| HomeWidgetPlacement
 	| DocumentListSlotPlacement
 	| (BrickSlotPlacement & { match?: BrickSlotMatch })
 	| { slot: FieldSlot; match?: FieldSlotMatch }

@@ -9,9 +9,9 @@ import { createTranslationStore } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import { Permissions } from "../../../libs/permission/definitions.js";
 import { ExternalScopes } from "../../../libs/permission/external-scopes.js";
+import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
 import { UserRolesRepository } from "../../../libs/repositories/index.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
-import type { ToolkitActor } from "../../../libs/toolkit/types.js";
 import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
 import { agentTools, mcpTools } from "../../../libs/tools/lucid-tools.js";
 import { toolDefinitionInternal } from "../../../libs/tools/tool-definition-internal.js";
@@ -132,8 +132,8 @@ const startRun = async (
 
 	const actor: ToolkitActor =
 		userId === null
-			? { kind: "system", agentRunId: runId }
-			: { kind: "user", userId, agentRunId: runId };
+			? { type: "system", agentRunId: runId }
+			: { type: "user", userId, agentRunId: runId };
 	const execute = (tool: AgentToolDefinition, input: unknown) =>
 		executeAgentTool({
 			context,
@@ -152,7 +152,6 @@ const startRun = async (
 				run: {
 					id: runId,
 					conversationId: conversation.data.id,
-					userId,
 					agentKey,
 				},
 			},
@@ -193,7 +192,7 @@ const readRequest = async (
 const createDocument = async (collectionKey = pages.key) => {
 	const created = await createToolkit(context).documents.createSingle({
 		collectionKey,
-		actor: { kind: "system" },
+		actor: { type: "system" },
 		data: { fields: { title: "Hello" } },
 	});
 	assert(created.data, JSON.stringify(created.error));
@@ -202,7 +201,7 @@ const createDocument = async (collectionKey = pages.key) => {
 
 const createRequest = async (collectionKey = pages.key) => {
 	const created = await createToolkit(context).requests.createSingle({
-		actor: { kind: "user", userId: user.id },
+		actor: { type: "user", userId: user.id },
 		type: "publish",
 		title: "Launch",
 		description: "<p>Ready for review</p>",
@@ -229,7 +228,7 @@ test("finds and reads requests only within the tool's collections", async () => 
 		(
 			await createToolkit(context).requests.close({
 				id: closedRequest,
-				actor: { kind: "system" },
+				actor: { type: "system" },
 			})
 		).error,
 	).toBeUndefined();
@@ -314,8 +313,8 @@ test("the overview counts open requests and environment status within the tool's
 			environments: [
 				expect.objectContaining({
 					key: "production",
-					unreleased:
-						(before.collections[0]?.environments[0]?.unreleased ?? 0) + 1,
+					unpublished:
+						(before.collections[0]?.environments[0]?.unpublished ?? 0) + 1,
 				}),
 			],
 		},
@@ -364,7 +363,7 @@ test("agents comment and reply as their run and only change comments their agent
 	})) as { comment: { id: number } };
 	const person = await createToolkit(context).requests.comments.create({
 		id: requestId,
-		actor: { kind: "user", userId: user.id },
+		actor: { type: "user", userId: user.id },
 		body: "<p>Agreed</p>",
 	});
 	assert(person.data, JSON.stringify(person.error));
@@ -461,7 +460,7 @@ test("an agent's comments stay the agent's, even after its chat is deleted", asy
 			await toolkit.requests.comments.update({
 				id: requestId,
 				commentId: commented.comment.id,
-				actor: { kind: "user", userId: user.id },
+				actor: { type: "user", userId: user.id },
 				body: "<p>Rewritten</p>",
 			})
 		).error?.status,
@@ -471,7 +470,7 @@ test("an agent's comments stay the agent's, even after its chat is deleted", asy
 			await toolkit.requests.comments.resolve({
 				id: requestId,
 				commentId: commented.comment.id,
-				actor: { kind: "user", userId: user.id },
+				actor: { type: "user", userId: user.id },
 				resolution: "resolved",
 			})
 		).error,
@@ -490,8 +489,8 @@ test("an agent's comments stay the agent's, even after its chat is deleted", asy
 	expect(
 		request.data.events.find((event) => event.id === commented.comment.id),
 	).toMatchObject({
-		user: { id: user.id },
-		agent: { key: reviewer.key, name: "Reviewer", conversationId: null },
+		actor: { id: user.id },
+		actorAgent: { key: reviewer.key, name: "Reviewer", conversationId: null },
 		resolvedByAgent: null,
 	});
 	await (await startRun()).call(updateComment, {
@@ -524,13 +523,16 @@ test("the system's agent never takes over comments it wrote for a person who was
 		}),
 	).toContain("wasn't written by you");
 	const [comment] = (await readRequest(system, requestId)).comments;
-	expect(comment).toMatchObject({ author: null, byYou: false });
+	expect(comment).toMatchObject({ actor: null, byYou: false });
 	const request = await createToolkit(context).requests.getSingle({
 		id: requestId,
 	});
 	expect(
 		request.data?.events.find((event) => event.id === commented.comment.id),
-	).toMatchObject({ user: null, agent: { key: reviewer.key, system: false } });
+	).toMatchObject({
+		actor: null,
+		actorAgent: { key: reviewer.key, system: false },
+	});
 });
 
 test("people hear about what an agent does for them, including mentions", async () => {
@@ -569,7 +571,7 @@ test("acknowledges targets someone else published to, as they were read", async 
 			await publish(context, {
 				collectionKey: pages.key,
 				documentId: document.documentId,
-				target: "production",
+				environment: "production",
 				user,
 			})
 		).error,
@@ -646,7 +648,7 @@ test("updates details, documents and status together", async () => {
 	expect(
 		updated.data.events.find((event) => event.type === "document_added"),
 	).toMatchObject({
-		agent: {
+		actorAgent: {
 			key: reviewer.key,
 			name: "Reviewer",
 			conversationId: run.conversationId,
@@ -695,7 +697,7 @@ const approveRequest = async (requestId: number) => {
 	assert(request.data, JSON.stringify(request.error));
 	const approved = await createToolkit(context).requests.approve({
 		id: requestId,
-		actor: { kind: "user", userId: user.id },
+		actor: { type: "user", userId: user.id },
 		ifUnchanged: request.data.reviewToken,
 	});
 	assert(!approved.error, JSON.stringify(approved.error));
@@ -712,7 +714,7 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 	};
 	const { reviewToken } = await read();
 	const actor = {
-		kind: "user",
+		type: "user",
 		userId: user.id,
 		agentRunId: run.runId,
 	} as const;
@@ -731,7 +733,7 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 			await toolkit.requests.approve({
 				id: requestId,
 				// @ts-expect-error approvals belong to people
-				actor: { kind: "system" },
+				actor: { type: "system" },
 				ifUnchanged: reviewToken,
 			})
 		).error,
@@ -748,7 +750,10 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 	expect(afterApproval.approved).toBe(true);
 	expect(
 		afterApproval.events.find((event) => event.type === "approved"),
-	).toMatchObject({ user: { id: user.id }, agent: { key: reviewer.key } });
+	).toMatchObject({
+		actor: { id: user.id },
+		actorAgent: { key: reviewer.key },
+	});
 	//* agents see the agent behind activity, as they do for comments
 	expect(
 		getOutputSchema.parse(
@@ -757,8 +762,8 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 	).toContainEqual(
 		expect.objectContaining({
 			type: "approved",
-			author: { id: user.id, name: "Will" },
-			authorAgent: reviewer.name,
+			actor: { id: user.id, name: "Will" },
+			actorAgent: context.translate(reviewer.name),
 		}),
 	);
 
@@ -768,7 +773,10 @@ test("the toolkit approves as a person, only what they reviewed, and withdraws i
 	expect(afterWithdrawal.approved).toBe(false);
 	expect(
 		afterWithdrawal.events.find((event) => event.type === "approval_withdrawn"),
-	).toMatchObject({ user: { id: user.id }, agent: { key: reviewer.key } });
+	).toMatchObject({
+		actor: { id: user.id },
+		actorAgent: { key: reviewer.key },
+	});
 });
 
 test("agents and the system complete requests", async () => {
@@ -787,7 +795,10 @@ test("agents and the system complete requests", async () => {
 	expect(completed.data.status).toBe("completed");
 	expect(
 		completed.data.events.find((event) => event.type === "completed"),
-	).toMatchObject({ user: { id: user.id }, agent: { key: reviewer.key } });
+	).toMatchObject({
+		actor: { id: user.id },
+		actorAgent: { key: reviewer.key },
+	});
 	const tables = await getTableNames(context, pages.key);
 	assert(tables.data);
 	expect(
@@ -809,7 +820,7 @@ test("agents and the system complete requests", async () => {
 	await approveRequest(bySystem);
 	const queued = await toolkit.requests.complete({
 		id: bySystem,
-		actor: { kind: "system" },
+		actor: { type: "system" },
 	});
 	assert(queued.data, JSON.stringify(queued.error));
 	expect(await jobStatus(queued.data.jobId)).toBe("completed");
@@ -824,14 +835,14 @@ test("toolkit reads and writes use the actor's live permissions", async () => {
 	const toolkit = createToolkit(context);
 
 	const listed = await toolkit.requests.getMultiple({
-		actor: { kind: "user", userId: outsider.id },
+		actor: { type: "user", userId: outsider.id },
 	});
 	expect(listed.data?.count).toBe(0);
 	expect(
 		(
 			await toolkit.requests.getSingle({
 				id: requestId,
-				actor: { kind: "user", userId: outsider.id },
+				actor: { type: "user", userId: outsider.id },
 			})
 		).error?.status,
 	).toBe(404);
@@ -839,7 +850,7 @@ test("toolkit reads and writes use the actor's live permissions", async () => {
 		(
 			await toolkit.requests.comments.create({
 				id: requestId,
-				actor: { kind: "user", userId: outsider.id },
+				actor: { type: "user", userId: outsider.id },
 				body: "<p>Hello</p>",
 			})
 		).error?.status,

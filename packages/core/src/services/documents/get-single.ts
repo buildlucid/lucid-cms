@@ -124,8 +124,6 @@ const getSingle: ServiceFn<
 
 	const relationVersionTypeRes = await resolveRelationVersionType(context, {
 		collectionKey: documentRes.data.collection_key,
-		documentId: data.id,
-		versionId,
 		versionType,
 	});
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;

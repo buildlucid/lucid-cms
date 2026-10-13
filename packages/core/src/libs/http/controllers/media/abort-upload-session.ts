@@ -24,7 +24,7 @@ const abortUploadSessionController = factory.createHandlers(
 			params: controllerSchemas.abortUploadSession.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.abortUploadSession.params),
 	async (c) => {

@@ -23,8 +23,6 @@ export type CollectionLabelFieldOptions = CollectionListFieldOptions & {
 	/** Use this field when displaying a document label. */
 	useAsLabel?: UseAsLabel;
 };
-/** Maps related collection keys to the version to read when resolving references for an environment. */
-export type CollectionEnvironmentVersionMap = Record<string, string>;
 /** A navigation group key, or a key with display copy and sort order. */
 export type CollectionGroupOptions =
 	| string
@@ -181,23 +179,29 @@ export type CollectionPublishingOptions = {
 			label: AdminCopyInput;
 			/** Stage badge color. Defaults to grey. */
 			color?: PublishingWorkflowStageColor;
-			/** Request targets available from this stage (environments or "latest" for create requests); targets absent from every stage bypass workflow gates. */
+			/**
+			 * Publishing targets allowed by this stage.
+			 * @remarks Environment keys allow direct publishing and requests; "latest" allows create and publish requests to latest; targets absent from every stage are ungated.
+			 */
 			targets?: string[];
 			/** Stage to move back to when content changes while in this stage. */
 			resetTo?: string;
 		}>;
 	};
 	/** Named versions that editors may publish to. */
-	environments?: Array<{
-		/** Unique environment key. */
-		key: string;
-		/** Environment label shown to editors. */
-		label: AdminCopyInput;
-		/** Environments that must contain the current content before publishing to this one. */
-		requires?: string[];
-		/** Versions to use when resolving related documents from this environment. */
-		collectionVersions?: CollectionEnvironmentVersionMap;
-	}>;
+	environments?: CollectionEnvironmentOptions[];
+};
+
+/** A named version that editors may publish a collection's documents to. */
+export type CollectionEnvironmentOptions = {
+	/** Unique environment key. */
+	key: string;
+	/** Environment label shown to editors. */
+	label: AdminCopyInput;
+	/** Environments that must contain the current content before publishing to this one. */
+	requires?: string[];
+	/** Versions to read related documents from, keyed by collection, when resolving references from this environment. */
+	collectionVersions?: Record<string, string>;
 };
 
 /** Authoring options for a collection. The key is supplied separately to CollectionBuilder. */
@@ -267,7 +271,7 @@ export type CollectionData = {
 			key: string;
 			label: ResolvedAdminCopy;
 			requires: string[];
-			collectionVersions: CollectionEnvironmentVersionMap;
+			collectionVersions: Record<string, string>;
 		}[];
 	};
 	routing: {

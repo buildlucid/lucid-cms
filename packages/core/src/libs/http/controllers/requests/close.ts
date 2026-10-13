@@ -30,7 +30,7 @@ const closeController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.close.params),

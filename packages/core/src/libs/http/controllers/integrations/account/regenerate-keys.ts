@@ -34,7 +34,7 @@ const regenerateKeysController = factory.createHandlers(
 			params: controllerSchemas.regenerateKeys.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	rateLimiter({
 		mode: "user",

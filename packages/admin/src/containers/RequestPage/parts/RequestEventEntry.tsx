@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import type { Collection, RequestEvent, RequestUser } from "@types";
+import type { Collection, RequestEvent, UserDisplay } from "@types";
 import classNames from "classnames";
 import {
 	TbOutlineAlertCircle,
@@ -36,15 +36,13 @@ export const RequestEventEntry: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const userName = (user: RequestUser | null) =>
+	const userName = (user: UserDisplay | null) =>
 		user
-			? helpers.formatUserName(user, "name") ||
-				user.email ||
-				T()("common.unknown")
+			? helpers.formatUserName(user, "name") || T()("common.unknown")
 			: T()("common.unknown");
 	const name = createMemo(() =>
-		props.event.user || props.event.agent
-			? helpers.formatActorName(props.event.user, props.event.agent) ||
+		props.event.actor || props.event.actorAgent
+			? helpers.formatActorName(props.event.actor, props.event.actorAgent) ||
 				T()("common.unknown")
 			: T()("requests.activity.system"),
 	);
@@ -206,20 +204,20 @@ export const RequestEventEntry: Component<{
 							document: withDocument(T()("requests.activity.proposal")),
 						}),
 					};
-				case "target_reviewed":
+				case "target_acknowledged":
 					return {
 						icon: TbOutlineCheck,
 						tone: "default",
-						text: T()("requests.activity.target.reviewed", {
+						text: T()("requests.activity.target.acknowledged", {
 							name: name(),
 							target: targetLabel(event.target),
 						}),
 					};
-				case "target_unreviewed":
+				case "target_unacknowledged":
 					return {
 						icon: TbOutlineRotateClockwise2,
 						tone: "default",
-						text: T()("requests.activity.target.unreviewed", {
+						text: T()("requests.activity.target.unacknowledged", {
 							name: name(),
 							target: targetLabel(event.target),
 						}),

@@ -36,7 +36,7 @@ const updateLogoUploadSessionController = factory.createHandlers(
 			oauthClientSchemas.createLogoUploadSession.body,
 		),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationUpdate]),
 	validate("param", oauthClientSchemas.getSingle.params),

@@ -1,21 +1,13 @@
+import type { AgentInputAction } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
 	AgentInputsRepository,
 } from "../../libs/repositories/index.js";
-import type { AgentInputAction } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import advanceInputs from "./advance-inputs.js";
+import advanceInputs from "./helpers/advance-inputs.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 import runActsFor from "./helpers/run-acts-for.js";
-
-//* the input moved on, such as its run starting, since the person saw it
-const inputChanged = () =>
-	({
-		type: "basic",
-		status: 409,
-		message: copy("server:agent.input.changed"),
-	}) as const;
 
 /** Cancels or steers pending input, or resumes or clears a paused queue. */
 const updateInput: ServiceFn<
@@ -39,13 +31,30 @@ const updateInput: ServiceFn<
 				id: action.id,
 			});
 			if (cancelled.error) return cancelled;
-			if (!cancelled.data) return { data: undefined, error: inputChanged() };
+			//* the input moved on, such as its run starting, since the person saw it
+			if (!cancelled.data) {
+				return {
+					data: undefined,
+					error: {
+						type: "basic",
+						status: 409,
+						message: copy("server:agent.input.changed"),
+					},
+				};
+			}
 
 			break;
 		}
 		case "steer": {
 			if (owned.data.active_run_id !== action.targetRunId) {
-				return { data: undefined, error: inputChanged() };
+				return {
+					data: undefined,
+					error: {
+						type: "basic",
+						status: 409,
+						message: copy("server:agent.input.changed"),
+					},
+				};
 			}
 
 			const actsFor = await runActsFor(context, {
@@ -71,7 +80,16 @@ const updateInput: ServiceFn<
 				runId: action.targetRunId,
 			});
 			if (steered.error) return steered;
-			if (!steered.data) return { data: undefined, error: inputChanged() };
+			if (!steered.data) {
+				return {
+					data: undefined,
+					error: {
+						type: "basic",
+						status: 409,
+						message: copy("server:agent.input.changed"),
+					},
+				};
+			}
 
 			break;
 		}

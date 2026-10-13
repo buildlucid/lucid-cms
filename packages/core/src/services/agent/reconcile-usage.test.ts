@@ -8,10 +8,10 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { formatDbTimestamp } from "../ai/helpers/date-helpers.js";
 import insertConversation from "./helpers/insert-conversation.js";
+import startRun from "./helpers/start-run.js";
 import storePendingUsage from "./helpers/store-pending-usage.js";
 import storeUsage from "./helpers/store-usage.js";
 import reconcileUsage from "./reconcile-usage.js";
-import startRun from "./start-run.js";
 
 const request = vi.fn();
 let connectionId = 0;
@@ -102,7 +102,7 @@ const pending = async (old = true, featureKey = "agent.chat") => {
 		userId,
 		conversationId: conversation.data.id,
 		text: "Test",
-		requestId: randomUUID(),
+		runId: randomUUID(),
 	});
 	if (run.error) throw new Error(JSON.stringify(run.error));
 	const input = {
@@ -313,11 +313,14 @@ test("keeps a fresh missing request pending because creation may still be racing
 	expect(stored.data?.status).toBe("pending");
 });
 
-vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => ({
-	default: (
-		await import("../../utils/test-helpers/agent-models.js")
-	).mockAgentModels(),
-}));
+vi.mock(
+	"../../libs/lucid-remote/services/get-agent-models/index.js",
+	async () => ({
+		default: (
+			await import("../../utils/test-helpers/agent-models.js")
+		).mockAgentModels(),
+	}),
+);
 
 test("recovers web usage after a lost response without counting a model call", async () => {
 	const input = await pending(true, "web.search");

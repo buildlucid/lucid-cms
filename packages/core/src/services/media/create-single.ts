@@ -8,7 +8,7 @@ import type { MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import checkAwaitingSync from "./checks/check-awaiting-sync.js";
-import cleanupFailedCreate from "./helpers/cleanup-failed-create.js";
+import checkHasMediaStorage from "./checks/check-has-media-storage.js";
 import registerUploadedMedia from "./helpers/register-uploaded-media.js";
 import syncMedia from "./strategies/sync-media.js";
 
@@ -45,6 +45,7 @@ const createSingle: ServiceFn<
 			allowedType?: MediaType;
 			actor: MediaActor;
 			userId: number | null;
+			agentRunId?: string;
 		},
 	],
 	Media
@@ -68,6 +69,7 @@ const createSingle: ServiceFn<
 	});
 	if (syncMediaRes.error) return syncMediaRes;
 
+	//* the transaction rolls back failed database writes, but the stored file has to be deleted
 	let registered = false;
 	try {
 		const result = await registerUploadedMedia(
@@ -79,10 +81,10 @@ const createSingle: ServiceFn<
 		return result;
 	} finally {
 		if (!registered) {
-			await cleanupFailedCreate(context, {
-				key: syncMediaRes.data.key,
-				size: syncMediaRes.data.size,
-			});
+			const storage = await checkHasMediaStorage(context);
+			if (storage.data) {
+				await storage.data.delete(context, { key: syncMediaRes.data.key });
+			}
 		}
 	}
 };

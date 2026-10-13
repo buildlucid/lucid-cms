@@ -1,4 +1,4 @@
-import type { AgentLucidToolName } from "../../../../types/response.js";
+import type { AgentLucidToolName } from "@lucidcms/types";
 
 export const generateAudioToolName =
 	"media_generate_audio" satisfies AgentLucidToolName;

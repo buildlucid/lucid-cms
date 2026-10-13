@@ -1,8 +1,8 @@
 import type { CollectionDocumentKey } from "../../../exports/types.js";
 import type {
-	RequestDetail,
+	RequestDetails,
 	RequestExecutionReceipt,
-	RequestUser,
+	UserDisplay,
 } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -87,7 +87,7 @@ export type ToolkitRequests = {
 	/** Returns a request with its documents, activity, blockers, the actor's permissions and a `reviewToken` for acknowledging or approving. */
 	getSingle: (
 		input: ToolkitRequestsGetSingleInput,
-	) => ServiceResponse<RequestDetail>;
+	) => ServiceResponse<RequestDetails>;
 	/**
 	 * Lists eligible request reviewers, excluding the creator unless the collections allow self-approval.
 	 *
@@ -98,21 +98,21 @@ export type ToolkitRequests = {
 	 *
 	 * await toolkit.requests.updateSingle({
 	 *   id: 1,
-	 *   actor: { kind: "system" },
+	 *   actor: { type: "system" },
 	 *   reviewerIds: reviewers.data.map((user) => user.id),
 	 * });
 	 * ```
 	 */
 	getReviewers: (
 		input: ToolkitRequestsGetReviewersInput,
-	) => ServiceResponse<RequestUser[]>;
+	) => ServiceResponse<UserDisplay[]>;
 	/**
 	 * Opens a publish, unpublish or delete request for people to review.
 	 *
 	 * @example
 	 * ```ts
 	 * await toolkit.requests.createSingle({
-	 *   actor: { kind: "system" },
+	 *   actor: { type: "system" },
 	 *   type: "publish",
 	 *   title: "Spring launch",
 	 *   description: "<p>Ready for review.</p>",
@@ -131,7 +131,7 @@ export type ToolkitRequests = {
 	) => ServiceResponse<undefined>;
 	/** Closes a request without completing it. */
 	close: (input: ToolkitRequestsCloseInput) => ServiceResponse<undefined>;
-	/** Reopens a closed request, withdrawing earlier approvals. */
+	/** Reopens a closed request, dismissing earlier approvals. */
 	reopen: (input: ToolkitRequestsReopenInput) => ServiceResponse<undefined>;
 	/**
 	 * Acknowledges selected changed targets, defaulting to all waiting targets, only while the review token still matches.
@@ -143,7 +143,7 @@ export type ToolkitRequests = {
 	 *
 	 * await toolkit.requests.acknowledge({
 	 *   id: 1,
-	 *   actor: { kind: "system" },
+	 *   actor: { type: "system" },
 	 *   ifUnchanged: request.data.reviewToken,
 	 * });
 	 * ```
@@ -152,7 +152,7 @@ export type ToolkitRequests = {
 		input: ToolkitRequestsAcknowledgeInput,
 	) => ServiceResponse<{ targets: ToolkitRequestTarget[] }>;
 	/**
-	 * Approves the request as a person, only while the review token still matches. Approvals need a user actor.
+	 * Approves a request as a user actor while its review token still matches.
 	 *
 	 * @example
 	 * ```ts
@@ -161,7 +161,7 @@ export type ToolkitRequests = {
 	 *
 	 * await toolkit.requests.approve({
 	 *   id: 1,
-	 *   actor: { kind: "user", userId: 1 },
+	 *   actor: { type: "user", userId: 1 },
 	 *   ifUnchanged: request.data.reviewToken,
 	 *   body: "<p>Checked the links.</p>",
 	 * });
@@ -179,7 +179,7 @@ export type ToolkitRequests = {
 		input: ToolkitRequestsCompleteInput,
 	) => ServiceResponse<RequestExecutionReceipt>;
 	documents: {
-		/** Adds documents to a request, capturing publish content and withdrawing approvals. */
+		/** Adds documents to a request, capturing publish content and dismissing approvals. */
 		add: <K extends CollectionDocumentKey>(
 			input: ToolkitRequestsDocumentsAddInput<K>,
 		) => ServiceResponse<undefined>;
@@ -187,14 +187,14 @@ export type ToolkitRequests = {
 		remove: (
 			input: ToolkitRequestsDocumentsRemoveInput,
 		) => ServiceResponse<undefined>;
-		/** Replaces a request document's targets and withdraws approvals. */
+		/** Replaces a request document's targets and dismisses approvals. */
 		setTargets: <K extends CollectionDocumentKey>(
 			input: ToolkitRequestsDocumentsSetTargetsInput<K>,
 		) => ServiceResponse<undefined>;
 	};
 	comments: {
 		/**
-		 * Adds a comment or a reply with `replyTo`, withdrawing approvals only for top-level comments.
+		 * Adds a comment or a reply with `replyTo`, dismissing approvals only for top-level comments.
 		 *
 		 * @example
 		 * ```ts

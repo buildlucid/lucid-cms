@@ -1,5 +1,5 @@
 import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
-import type { RoutineTools } from "../../libs/agent/types.js";
+import type { RoutineToolSettings } from "../../libs/agent/types.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
@@ -22,7 +22,7 @@ const updateRoutine: ServiceFn<
 			id: string;
 			userId: number;
 			name?: string;
-			tools?: RoutineTools;
+			toolSettings?: RoutineToolSettings;
 			modelSelection?: AiModelSelection | null;
 			conversationMode?: AgentRoutineConversationMode;
 			instructions?: string;
@@ -43,7 +43,7 @@ const updateRoutine: ServiceFn<
 			input.instructions,
 			input.cron,
 			input.timezone,
-			input.tools,
+			input.toolSettings,
 			input.modelSelection,
 			input.conversationMode,
 		].some((value) => value !== undefined)
@@ -58,11 +58,11 @@ const updateRoutine: ServiceFn<
 		};
 	}
 
-	if (input.tools !== undefined) {
+	if (input.toolSettings !== undefined) {
 		const validation = await validateRoutineTools(context, {
 			agentKey: routine.data.agent_key,
 			userId: input.userId,
-			tools: input.tools,
+			tools: input.toolSettings,
 		});
 		if (validation.error) return validation;
 	}
@@ -106,10 +106,10 @@ const updateRoutine: ServiceFn<
 	});
 	if (updated.error) return updated;
 
-	if (input.tools !== undefined) {
+	if (input.toolSettings !== undefined) {
 		const saved = await saveRoutineTools(context, {
 			routineId: input.id,
-			tools: input.tools,
+			tools: input.toolSettings,
 		});
 		if (saved.error) return saved;
 	}

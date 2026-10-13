@@ -1,10 +1,11 @@
+import constants from "../../../constants/constants.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type { UsageRequest } from "./store-usage.js";
+import type { PaidRequestRecord } from "./store-usage.js";
 
 /** Settles a request the Lucid service never charged, keeping why it failed. */
 const storeFailedUsage: ServiceFn<
-	[UsageRequest & { errorMessage: string }],
+	[PaidRequestRecord & { connectionId: number; errorMessage: string }],
 	undefined
 > = async (context, input) => {
 	const AiGenerations = new AiGenerationsRepository(context.db);
@@ -13,7 +14,7 @@ const storeFailedUsage: ServiceFn<
 		data: {
 			request_id: input.requestId,
 			feature_key: input.featureKey,
-			feature_version: "v1",
+			feature_version: constants.agent.usageFeatureVersion,
 			user_id: input.userId,
 			lucid_remote_connection_id: input.connectionId,
 			agent_run_id: input.runId,

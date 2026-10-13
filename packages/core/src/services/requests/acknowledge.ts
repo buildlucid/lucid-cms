@@ -1,11 +1,11 @@
 import { copy } from "../../libs/i18n/index.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import acknowledgeTarget from "./acknowledge-target.js";
 import getDocumentBlockers from "./helpers/get-document-blockers.js";
 import getRequestState from "./helpers/get-request-state.js";
 import getReviewToken from "./helpers/get-review-token.js";
 import loadRequest from "./helpers/load-request.js";
-import reviewTarget from "./review-target.js";
 
 type AcknowledgedTarget = {
 	collectionKey: string;
@@ -13,7 +13,7 @@ type AcknowledgedTarget = {
 	target: string;
 };
 
-/** Acknowledges selected or pending target changes against a review token, rechecking each target before updating it. */
+/** Acknowledges selected or pending target changes, rechecking the review token before each update. */
 const acknowledge: ServiceFn<
 	[
 		{
@@ -85,18 +85,16 @@ const acknowledge: ServiceFn<
 			};
 		}
 
-		const reviewRes = await reviewTarget(context, {
+		const acknowledgedRes = await acknowledgeTarget(context, {
 			id: request.id,
 			requestDocumentId: document.id,
 			target: target.target,
-			revision: request.revision,
-			targetVersionId:
-				state.get(document.id)?.versions.get(target.target)?.id ?? null,
-			reviewed: true,
+			acknowledged: true,
+			ifUnchanged: data.ifUnchanged,
 			user: data.user,
 			agentRunId: data.agentRunId,
 		});
-		if (reviewRes.error) return reviewRes;
+		if (acknowledgedRes.error) return acknowledgedRes;
 	}
 
 	return { error: undefined, data: { targets } };

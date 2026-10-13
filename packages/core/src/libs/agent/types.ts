@@ -2,22 +2,26 @@ import z from "zod";
 import {
 	agentConfirmationModeSchema,
 	type agentContextSchema,
-	agentInteractiveWidgetSchema,
-	agentMessagePartSchema,
 	agentRunOutcomeSchema,
-	routineToolsSchema,
+	routineToolSettingsSchema,
 } from "../../schemas/agent.js";
 import { agentScreenSchema } from "../../schemas/agent-screen.js";
+import type { AiModelConfig } from "../../types/config.js";
 import type {
 	AgentRoutineConversationMode,
-	AiModelConfig,
+	AgentRoutineToolSettings,
 	AiModelSelection,
 	MediaGenerationType,
 } from "../../types/response.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
+import type { JobScheduleTiming } from "../jobs/types.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
 import type { SkillDefinition } from "../skills/types.js";
 import type { AgentToolDefinition } from "../tools/types.js";
+import {
+	agentInteractiveWidgetSchema,
+	agentMessagePartSchema,
+} from "./messages.js";
 import { aiModelSelectionSchema } from "./model-selection.js";
 
 export const toolCallSchema = z.object({
@@ -27,7 +31,7 @@ export const toolCallSchema = z.object({
 });
 
 /** The transcript format exchanged with the remote model service. */
-export const modelMessageSchema = z.discriminatedUnion("role", [
+const modelMessageSchema = z.discriminatedUnion("role", [
 	z.object({ role: z.literal("user"), content: z.string() }),
 	z.object({
 		role: z.literal("assistant"),
@@ -73,7 +77,7 @@ export const checkpointSchema = z.object({
 	/** Captured when the run starts, so changing chat settings never changes a pending decision. */
 	confirmationMode: agentConfirmationModeSchema,
 	/** Routine tool settings captured when this run starts. */
-	routineTools: routineToolsSchema.optional(),
+	routineTools: routineToolSettingsSchema.optional(),
 	/** Input receipts survive compaction and a crash before acknowledgement. */
 	inputIds: z.array(z.uuid()).optional(),
 	/** The admin screen the person's latest message came from, which answers builder tools. */
@@ -159,7 +163,7 @@ export type ModelUsage = Extract<ModelEvent, { type: "finish" }>["usage"];
 export type Checkpoint = z.infer<typeof checkpointSchema>;
 export type ConversationContext = z.infer<typeof agentContextSchema>;
 export type RunMode = Checkpoint["mode"];
-export type RoutineTools = z.infer<typeof routineToolsSchema>;
+export type RoutineToolSettings = z.infer<typeof routineToolSettingsSchema>;
 
 export type DefineRoutineOptions<Key extends string> = {
 	/** Stable key, unique within the agent, using lowercase letters, numbers and single hyphens. */
@@ -172,19 +176,17 @@ export type DefineRoutineOptions<Key extends string> = {
 	/** Routine model selection, such as `{ modelId: "openai/gpt-luna", reasoningEffort: "low" }`, defaulting to the agent's model. */
 	model?: AiModelSelection;
 	/**
-	 * Per-tool overrides keyed by name, such as `{ save_note: { requiresConfirmation: false } }`.
+	 * Per-tool confirmation overrides keyed by tool name, such as `{ save_note: { requiresConfirmation: false } }`.
 	 * @remarks Omitted settings keep tool defaults; system runs refuse confirmation unless overridden with `requiresConfirmation: false`.
 	 */
-	tools?: Readonly<RoutineTools>;
-	schedule: {
-		/** Five-field cron expression with minute precision. */
-		cron: string;
-		/** IANA timezone used to evaluate the expression. Defaults to UTC. */
-		timezone?: string;
-	};
+	toolSettings?: Readonly<Record<string, AgentRoutineToolSettings>>;
+	schedule: JobScheduleTiming;
 };
 
-/** A routine created with `defineRoutine`. It runs unattended and can use every tool on its agent. */
+/**
+ * An unattended system routine created with `defineRoutine`.
+ * @remarks Required interactions are excluded; confirmation requests are refused.
+ */
 export type RoutineDefinition<Key extends string = string> = {
 	readonly type: "routine-definition";
 	readonly key: Key;
@@ -192,7 +194,7 @@ export type RoutineDefinition<Key extends string = string> = {
 	readonly instructions: string;
 	readonly conversationMode: AgentRoutineConversationMode;
 	readonly model?: AiModelSelection;
-	readonly tools: Readonly<RoutineTools>;
+	readonly toolSettings: Readonly<Record<string, AgentRoutineToolSettings>>;
 	readonly schedule: { readonly cron: string; readonly timezone: string };
 };
 
@@ -203,39 +205,38 @@ export type DefineAgentOptions<Key extends string> = {
 	enabled?: boolean;
 	/** Shows the agent in the admin sidebar by default, with `false` hiding it there while keeping its chats available on agent pages. */
 	sidebar?: boolean;
-	name: string;
-	/** Helps people choose the agent. */
-	description: string;
+	/** Agent name translated for each viewer, using the default language in prompts. */
+	name: AdminCopyInput;
+	/** Description translated for each viewer to help them choose an agent. */
+	description: AdminCopyInput;
 	/** Added to the agent's system prompt. Common indentation is removed. */
 	instructions?: string;
 	/** The tools the agent can call, such as `agentTools.read()` or your own `defineAgentTool` tools. Bundles are flattened. */
 	tools?: readonly (AgentToolDefinition | readonly AgentToolDefinition[])[];
 	skills?: readonly SkillDefinition[];
 	/** Built-in features and the tools behind them. Every feature is enabled unless set to false. */
-	features?: {
-		[Key in keyof AgentFeatures]?: Key extends "media"
-			? Partial<Omit<AgentFeatures["media"], "generate">> & {
-					/** Lucid's per-type generation tools, with booleans enabling or disabling all types. */
-					generate?: boolean | Partial<AgentFeatures["media"]["generate"]>;
-				}
-			: Partial<AgentFeatures[Key]>;
-	};
+	features?: AgentFeatureOptions;
 	/** The default model and the models people can choose. Leave out to offer every model the Lucid service provides. */
-	models?: AiModelConfig;
+	models?: AiModelConfig<AiModelSelection>;
 	/** Messages people can select to start a chat. Plain message strings have their common indentation removed. */
 	suggestions?: readonly {
 		title: AdminCopyInput;
 		description: AdminCopyInput;
 		message: AdminCopyInput;
 	}[];
-	/** Scheduled routines that run as the system. People with the agent's manage permission can review them. */
+	/**
+	 * Scheduled system routines that authorized users can pause, resume or run.
+	 * @remarks Requires the agent's manage-code-routines permission.
+	 */
 	routines?: readonly RoutineDefinition[];
 };
 
 export type AgentFeatures = {
 	media: {
-		/** Let people upload personal files in the composer. Also registers the tool that moves those files into the media library. */
+		/** Let people upload personal files in the composer. */
 		upload: boolean;
+		/** Registers the tool that adds personal uploads and generated media to the library. */
+		addToLibrary: boolean;
 		/** Let people select existing media from the library. */
 		attach: boolean;
 		/** Register Lucid's media analysis tool. Disable when providing your own. */
@@ -260,7 +261,7 @@ export type AgentFeatures = {
 	builder: {
 		/** Register lucid_builder_read and lucid_builder_focus. */
 		read: boolean;
-		/** Register lucid_builder_update. Needs `read`. */
+		/** Registers `lucid_builder_update`, requiring `read` and inheriting its default. */
 		edit: boolean;
 	};
 	web: {
@@ -273,20 +274,34 @@ export type AgentFeatures = {
 	};
 };
 
-/** An agent created with `defineAgent`. Each agent registers its own use and manage permissions. */
+/** Lucid's per-type media generation tools: a boolean turns every type on or off, and omitted types stay on. */
+export type AgentMediaGenerateOptions =
+	| boolean
+	| Partial<AgentFeatures["media"]["generate"]>;
+
+/** Configures built-in `defineAgent` features, enabled unless explicitly disabled. */
+export type AgentFeatureOptions = {
+	[Key in keyof AgentFeatures]?: Key extends "media"
+		? Partial<Omit<AgentFeatures["media"], "generate">> & {
+				generate?: AgentMediaGenerateOptions;
+			}
+		: Partial<AgentFeatures[Key]>;
+};
+
+/** An agent created with `defineAgent`, with its own chat and routine permissions. */
 export type AgentDefinition<Key extends string = string> = {
 	readonly type: "agent-definition";
 	readonly key: Key;
 	readonly enabled: boolean;
 	readonly sidebar: boolean;
-	readonly name: string;
-	readonly description: string;
+	readonly name: ResolvedAdminCopy;
+	readonly description: ResolvedAdminCopy;
 	readonly instructions: string;
 	readonly tools: readonly AgentToolDefinition[];
 	readonly skills: readonly SkillDefinition[];
 	/** Normalized built-in features. `tools` includes the tools they enable. */
 	readonly features: AgentFeatures;
-	readonly models?: AiModelConfig;
+	readonly models?: AiModelConfig<AiModelSelection>;
 	readonly suggestions: readonly {
 		readonly title: ResolvedAdminCopy;
 		readonly description: ResolvedAdminCopy;

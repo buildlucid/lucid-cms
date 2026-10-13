@@ -36,20 +36,20 @@ test("combines tool capabilities into what an agent can do", () => {
 			}),
 		),
 	).toEqual({
-		mediaAnalysis: {
-			mimeTypes: expect.arrayContaining(["application/pdf", "audio/mpeg"]),
+		media: {
+			analyze: {
+				mimeTypes: expect.arrayContaining(["application/pdf", "audio/mpeg"]),
+			},
+			readFile: {
+				mimeTypes: expect.arrayContaining([
+					"text/plain",
+					"text/html",
+					"application/json",
+				]),
+			},
+			generate: { image: true, audio: true },
 		},
-		fileRead: {
-			mimeTypes: expect.arrayContaining([
-				"text/plain",
-				"text/html",
-				"application/json",
-			]),
-		},
-		webSearch: true,
-		webRead: true,
-		imageGeneration: true,
-		audioGeneration: true,
+		web: { search: true, read: true },
 	});
 });
 
@@ -61,17 +61,17 @@ test("analysis needs an analysis tool but no library permissions", () => {
 			}),
 		),
 	).toEqual({
-		mediaAnalysis: null,
-		fileRead: null,
-		webSearch: false,
-		webRead: false,
-		imageGeneration: false,
-		audioGeneration: false,
+		media: {
+			analyze: null,
+			readFile: null,
+			generate: { image: false, audio: false },
+		},
+		web: { search: false, read: false },
 	});
 	expect(
 		getCapabilityProviders({
 			tools: getAvailableTools({ tools }, noPermissions, { config, aiAccess }),
-		}).mediaAnalysis,
+		}).media.analyze,
 	).toHaveLength(1);
 });
 
@@ -97,18 +97,21 @@ test("media generation needs its permission and the CMS feature, and is hidden w
 			}),
 		});
 
-	expect(providers(generate).imageGeneration).toEqual([
-		"media_generate_image",
-		"media_edit_image",
-	]);
-	expect(providers(generate).audioGeneration).toEqual(["media_generate_audio"]);
-	expect(providers(noPermissions).imageGeneration).toEqual([]);
-	expect(providers(noPermissions).audioGeneration).toEqual([]);
-	expect(providers(generate, false).imageGeneration).toEqual([]);
-	expect(providers(generate, false).audioGeneration).toEqual([]);
-	expect(summariseCapabilities(providers(generate))).toMatchObject({
-		imageGeneration: true,
-		audioGeneration: true,
+	expect(providers(generate).media.generate).toEqual({
+		image: ["media_generate_image", "media_edit_image"],
+		audio: ["media_generate_audio"],
+	});
+	expect(providers(noPermissions).media.generate).toEqual({
+		image: [],
+		audio: [],
+	});
+	expect(providers(generate, false).media.generate).toEqual({
+		image: [],
+		audio: [],
+	});
+	expect(summariseCapabilities(providers(generate)).media.generate).toEqual({
+		image: true,
+		audio: true,
 	});
 });
 
@@ -138,20 +141,20 @@ test("tools for features the organisation turns off are not offered", () => {
 		);
 
 	expect(capabilities(aiAccess)).toMatchObject({
-		mediaAnalysis: { mimeTypes: expect.any(Array) },
-		webSearch: true,
-		webRead: true,
-		imageGeneration: true,
-		audioGeneration: true,
+		media: {
+			analyze: { mimeTypes: expect.any(Array) },
+			generate: { image: true, audio: true },
+		},
+		web: { search: true, read: true },
 	});
 	//* reading text files runs in the CMS, so the organisation can't turn it off
-	expect(capabilities(["agent"])).toMatchObject({
-		mediaAnalysis: null,
-		fileRead: { mimeTypes: expect.any(Array) },
-		webSearch: false,
-		webRead: false,
-		imageGeneration: false,
-		audioGeneration: false,
+	expect(capabilities(["agent"])).toEqual({
+		media: {
+			analyze: null,
+			readFile: { mimeTypes: expect.any(Array) },
+			generate: { image: false, audio: false },
+		},
+		web: { search: false, read: false },
 	});
 });
 
@@ -164,10 +167,11 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 		permissions: [],
 		readOnly: true,
 		capabilities: {
-			mediaAnalysis: { mimeTypes: ["image/png"] },
-			fileRead: { mimeTypes: ["text/plain"] },
-			webSearch: true,
-			webRead: true,
+			media: {
+				analyze: { mimeTypes: ["image/png"] },
+				readFile: { mimeTypes: ["text/plain"] },
+			},
+			web: { search: true, read: true },
 		},
 		handler: async () => ({
 			error: undefined,
@@ -191,11 +195,11 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 			}),
 		),
 	).toEqual({
-		mediaAnalysis: { mimeTypes: ["image/png"] },
-		fileRead: { mimeTypes: ["text/plain"] },
-		webSearch: true,
-		webRead: true,
-		imageGeneration: false,
-		audioGeneration: false,
+		media: {
+			analyze: { mimeTypes: ["image/png"] },
+			readFile: { mimeTypes: ["text/plain"] },
+			generate: { image: false, audio: false },
+		},
+		web: { search: true, read: true },
 	});
 });

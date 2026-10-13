@@ -3,6 +3,7 @@ import type { MediaOwnership } from "../../../types/response.js";
 import { getMediaOwnership } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
+/** Maps existing media IDs to their ownership. */
 const mediaOwnership: ServiceFn<
 	[{ mediaIds: number[] }],
 	Map<number, MediaOwnership>

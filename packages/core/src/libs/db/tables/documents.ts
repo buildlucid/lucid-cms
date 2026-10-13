@@ -46,7 +46,7 @@ export const documentsTable = defineTable(
 				type: "integer",
 			},
 			deleted_by_run_id: {
-				schema: z.string().nullable(),
+				schema: z.uuid().nullable(),
 				type: "text",
 			},
 			create_request_id: {
@@ -58,7 +58,7 @@ export const documentsTable = defineTable(
 				type: "integer",
 			},
 			created_by_run_id: {
-				schema: z.string().nullable(),
+				schema: z.uuid().nullable(),
 				type: "text",
 			},
 			created_at: {
@@ -70,7 +70,7 @@ export const documentsTable = defineTable(
 				type: "integer",
 			},
 			updated_by_run_id: {
-				schema: z.string().nullable(),
+				schema: z.uuid().nullable(),
 				type: "text",
 			},
 			updated_at: {

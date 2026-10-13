@@ -1,19 +1,20 @@
+import constants from "../../../constants/constants.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type { UsageRequest } from "./store-usage.js";
+import type { PaidRequestRecord } from "./store-usage.js";
 
 /** Persist the request identity before the remote service can incur usage. */
-const storePendingUsage: ServiceFn<[UsageRequest], undefined> = async (
-	context,
-	input,
-) => {
+const storePendingUsage: ServiceFn<
+	[PaidRequestRecord & { connectionId: number }],
+	undefined
+> = async (context, input) => {
 	const AiGenerations = new AiGenerationsRepository(context.db);
 
 	const result = await AiGenerations.createIfRequestAbsent({
 		data: {
 			request_id: input.requestId,
 			feature_key: input.featureKey,
-			feature_version: "v1",
+			feature_version: constants.agent.usageFeatureVersion,
 			user_id: input.userId,
 			lucid_remote_connection_id: input.connectionId,
 			agent_run_id: input.runId,

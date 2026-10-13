@@ -8,10 +8,8 @@ import {
 	type ExternalScope,
 	ExternalScopes,
 } from "../permission/external-scopes.js";
-import {
-	getMcpToolRegistry,
-	toolDefinitionInternal,
-} from "../tools/registry.js";
+import { getMcpToolRegistry } from "../tools/registry.js";
+import { toolDefinitionInternal } from "../tools/tool-definition-internal.js";
 import type { McpToolAuthority } from "../tools/types.js";
 import { createHandler } from "./create-handler.js";
 
@@ -45,7 +43,7 @@ export const handleMcpRequest = async (args: {
 		try {
 			parsedBody = JSON.parse(body.text);
 		} catch {
-			// Leave invalid JSON to the SDK's protocol error handling.
+			//* Leave invalid JSON to the SDK's protocol error handling.
 		}
 
 		const toolCall = toolCallSchema.safeParse(parsedBody);
@@ -61,7 +59,7 @@ export const handleMcpRequest = async (args: {
 			);
 
 			if (tool) {
-				// Parses the raw arguments here only to challenge for input-dependent scopes.
+				//* Parses the raw arguments here only to challenge for input-dependent scopes.
 				const preparation = await tool[toolDefinitionInternal].prepareInput(
 					toolCall.data.params.arguments ?? {},
 				);

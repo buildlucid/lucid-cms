@@ -64,7 +64,7 @@ export const mediaGenerationOf = (featureKey: string) =>
 export const aiFeatureFlags = (
 	ai: ResolvedLucidConfig["ai"],
 ): Record<AiFeature, boolean> => ({
-	chatRename: ai.chatRename,
+	chatTitles: ai.chatTitles,
 	altGeneration: ai.altGeneration,
 	imageGeneration: ai.mediaGeneration.image.enabled,
 	audioGeneration: ai.mediaGeneration.audio.enabled,

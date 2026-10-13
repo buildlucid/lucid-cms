@@ -2,7 +2,7 @@ import z from "zod";
 import { webSourceKey } from "../../../libs/agent/url-keys.js";
 import type { AgentConversationSource } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { webFetchToolName } from "../../web/tools/fetch/index.js";
+import { webReadToolName } from "../../web/tools/read/index.js";
 import { webSearchToolName } from "../../web/tools/search/index.js";
 import scanMessages from "./scan-messages.js";
 
@@ -41,7 +41,7 @@ const getConversationSources: ServiceFn<
 				if (part.name === webSearchToolName) {
 					const output = searchOutputSchema.safeParse(part.output);
 					for (const result of output.data?.results ?? []) add(result, false);
-				} else if (part.name === webFetchToolName) {
+				} else if (part.name === webReadToolName) {
 					const output = sourceSchema.safeParse(part.output);
 					if (output.success) add(output.data, true);
 				}

@@ -24,17 +24,21 @@ const getAgentActors: ServiceFn<
 	return {
 		error: undefined,
 		data: new Map(
-			attributionsRes.data.map((attribution) => [
-				attribution.run_id,
-				{
-					key: attribution.agent_key,
-					system: formatter.formatBoolean(attribution.system),
-					name:
-						definitions.find((agent) => agent.key === attribution.agent_key)
-							?.name ?? attribution.agent_key,
-					conversationId: attribution.conversation_id,
-				},
-			]),
+			attributionsRes.data.map((attribution) => {
+				const agent = definitions.find(
+					(agent) => agent.key === attribution.agent_key,
+				);
+
+				return [
+					attribution.run_id,
+					{
+						key: attribution.agent_key,
+						system: formatter.formatBoolean(attribution.system),
+						name: agent ? context.translate(agent.name) : attribution.agent_key,
+						conversationId: attribution.conversation_id,
+					},
+				];
+			}),
 		),
 	};
 };

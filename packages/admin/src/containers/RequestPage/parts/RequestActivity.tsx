@@ -1,4 +1,4 @@
-import type { Collection, RequestDetail, RequestEvent } from "@types";
+import type { Collection, RequestDetails, RequestEvent } from "@types";
 import { TbOutlineFilter } from "solid-icons/tb";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import Menu from "@/components/Menu/Menu";
@@ -21,7 +21,7 @@ type SystemEvent = Exclude<RequestEvent, { type: "comment" }>;
  * filter menu, which is remembered per user.
  */
 export const RequestActivity: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	collections: Collection[];
 }> = (props) => {
 	// ----------------------------------------

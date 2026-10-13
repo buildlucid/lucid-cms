@@ -1,6 +1,7 @@
 import type { DocumentListSlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
 
+/** Document list cell showing the slug, with the full path below when it differs. */
 const SlugCell: DocumentListSlotComponent = (props) => {
 	// ----------------------------------
 	// Memos

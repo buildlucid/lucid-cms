@@ -28,7 +28,7 @@ const updateTypeSettingsController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateTypeSettings.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.SettingsUpdate]),
 	validate("param", controllerSchemas.updateTypeSettings.params),

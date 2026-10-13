@@ -323,7 +323,7 @@ describe("document environment status filters", async () => {
 	test.each([
 		["in-sync", 1],
 		["out-of-sync", 2],
-		["unreleased", 3],
+		["unpublished", 3],
 	] as const)("matches %s documents", async (status, id) => {
 		await expect(
 			selectByStatus({ environmentKey: "production", status }),
@@ -421,7 +421,7 @@ describe("document environment status counts", async () => {
 
 	afterAll(() => connection.destroy());
 
-	test("counts documents, and each environment's released and in-sync documents", async () => {
+	test("counts documents, and each environment's published and in-sync documents", async () => {
 		const counts = await Documents.selectEnvironmentStatusCounts(
 			{
 				environmentKeys: ["production", "staging", "preview"],
@@ -437,8 +437,8 @@ describe("document environment status counts", async () => {
 				a.environment_key.localeCompare(b.environment_key),
 			),
 		).toEqual([
-			{ environment_key: "production", released: 2, in_sync: 1 },
-			{ environment_key: "staging", released: 1, in_sync: 1 },
+			{ environment_key: "production", published: 2, in_sync: 1 },
+			{ environment_key: "staging", published: 1, in_sync: 1 },
 		]);
 	});
 });

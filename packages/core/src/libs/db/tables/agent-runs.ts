@@ -7,9 +7,9 @@ import {
 import { type Checkpoint, checkpointSchema } from "../../agent/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
+	TimestampDefaulted,
 	TimestampImmutable,
 	TimestampMutable,
-	TimestampRequired,
 } from "../types.js";
 
 export const agentRunsTable = defineTable("lucid_agent_runs", () => ({
@@ -72,7 +72,7 @@ export interface LucidAgentRuns {
 	error_message: string | null;
 	recoveries: Generated<number>;
 	created_at: TimestampImmutable;
-	updated_at: TimestampRequired;
+	updated_at: TimestampDefaulted;
 	started_at: TimestampMutable;
 	finished_at: TimestampMutable;
 	lease_expires_at: TimestampMutable;

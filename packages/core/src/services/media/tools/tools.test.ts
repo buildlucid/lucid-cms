@@ -10,10 +10,11 @@ import {
 	prepareAgentTool,
 } from "../../../libs/tools/execute-tool.js";
 import { agentTools, mcpTools } from "../../../libs/tools/lucid-tools.js";
-import { toolDefinitionInternal } from "../../../libs/tools/registry.js";
+import { toolDefinitionInternal } from "../../../libs/tools/tool-definition-internal.js";
 import type {
 	AgentToolDefinition,
 	AgentToolExecution,
+	AgentToolInvocation,
 } from "../../../libs/tools/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -142,14 +143,13 @@ const startRun = async (
 		},
 		actor:
 			userId === null
-				? { kind: "system", agentRunId: runId }
-				: { kind: "user", userId, agentRunId: runId },
+				? { type: "system", agentRunId: runId }
+				: { type: "user", userId, agentRunId: runId },
 		signal: AbortSignal.timeout(10_000),
 		operationId: `${runId}:${randomUUID()}`,
 		run: {
 			id: runId,
 			conversationId: conversation.data.id,
-			userId,
 			agentKey: agent.key,
 		},
 	};
@@ -161,13 +161,13 @@ const startRun = async (
 		call: (
 			tool: AgentToolDefinition,
 			input: unknown,
-			interaction?: AgentToolExecution["interaction"],
+			answer?: AgentToolInvocation["answer"],
 		) =>
 			executeAgentTool({
 				context,
 				tool,
 				input,
-				execution: { ...execution, interaction },
+				execution: { ...execution, answer },
 			}),
 	};
 };

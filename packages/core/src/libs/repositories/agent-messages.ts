@@ -1,5 +1,5 @@
 import { sql } from "kysely";
-import type { StoredAgentMessagePart } from "../../schemas/agent.js";
+import type { StoredAgentMessagePart } from "../agent/messages.js";
 import type { SavedMessageCursor } from "../agent/run-stream.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import { agentMessagesTable } from "../db/tables/agent-messages.js";
@@ -125,7 +125,18 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 	}) {
 		let query = this.db
 			.selectFrom("lucid_agent_messages")
-			.selectAll()
+			.select([
+				"id",
+				"conversation_id",
+				"run_id",
+				"position",
+				"execution_version",
+				"revision",
+				"role",
+				"parts",
+				"created_at",
+				"updated_at",
+			])
 			.where("conversation_id", "=", props.conversationId)
 			.orderBy("position", "desc")
 			.limit(props.limit);
@@ -173,7 +184,18 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 	}) {
 		const query = this.db
 			.selectFrom("lucid_agent_messages")
-			.selectAll()
+			.select([
+				"id",
+				"conversation_id",
+				"run_id",
+				"position",
+				"execution_version",
+				"revision",
+				"role",
+				"parts",
+				"created_at",
+				"updated_at",
+			])
 			.where("conversation_id", "=", props.conversationId)
 			.where("position", ">", props.after)
 			.orderBy("position", "asc")
@@ -193,7 +215,18 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 		const { cursor } = props;
 		let query = this.db
 			.selectFrom("lucid_agent_messages")
-			.selectAll()
+			.select([
+				"id",
+				"conversation_id",
+				"run_id",
+				"position",
+				"execution_version",
+				"revision",
+				"role",
+				"parts",
+				"created_at",
+				"updated_at",
+			])
 			.where("run_id", "=", props.runId)
 			.orderBy("execution_version", "asc")
 			.orderBy("revision", "asc")

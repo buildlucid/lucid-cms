@@ -2,12 +2,14 @@ import type { LucidAgentConversations } from "../db/tables/agent-conversations.j
 import hasPermission, { type PermissionGrant } from "./has-permission.js";
 import type { AgentPermission, AgentPermissionAction } from "./types.js";
 
+/** Every action a role can be granted on an agent, and the source of `AgentPermissionAction`. */
 export const agentPermissionActions = [
 	"chat",
 	"manage-own-routines",
 	"manage-code-routines",
-] as const satisfies AgentPermissionAction[];
+] as const;
 
+/** Builds an agent permission key, eg. `agents:writer:chat`. */
 export const getAgentPermission = <TAction extends AgentPermissionAction>(
 	agentKey: string,
 	action: TAction,
@@ -19,11 +21,12 @@ const conversationPermissions = {
 	"code-routine": "manage-code-routines",
 } satisfies Record<LucidAgentConversations["kind"], AgentPermissionAction>;
 
-/** A chat keeps its workflow permission even after its routine is deleted. */
+/** Agent action required by a chat's kind, retained after routine deletion. */
 export const getConversationPermission = (
 	kind: LucidAgentConversations["kind"],
 ): AgentPermissionAction => conversationPermissions[kind];
 
+/** Checks one agent action, or any agent action when none is given. */
 export const hasAgentPermission = (
 	grant: PermissionGrant,
 	agentKey: string,

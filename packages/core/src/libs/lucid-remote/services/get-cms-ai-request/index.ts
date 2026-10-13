@@ -2,9 +2,11 @@ import type { ServiceFn } from "../../../../utils/services/types.js";
 import { copy } from "../../../i18n/index.js";
 import { getLucidRemoteClient } from "../../client.js";
 import { lucidRemotePaths } from "../../constants.js";
-import { parseCmsAiRemoteData } from "../../schema/ai.js";
+import {
+	type CmsAiGenerateData,
+	parseCmsAiRemoteData,
+} from "../../schema/ai.js";
 import type { LucidRemoteRequestData } from "../../types.js";
-import type { CmsAiGenerateData } from "../generate-cms-ai/type.js";
 import type { GetCmsAiRequestProps } from "./type.js";
 
 /**
@@ -49,7 +51,7 @@ const getCmsAiRequest: ServiceFn<
 			response: result.data.response,
 			json: {
 				...result.data.json,
-				data: parsed as CmsAiGenerateData,
+				data: parsed,
 			},
 		},
 	};

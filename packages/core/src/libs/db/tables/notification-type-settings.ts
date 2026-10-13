@@ -1,7 +1,7 @@
 import type { JSONColumnType } from "kysely";
 import z from "zod";
 import { defineTable } from "../client/table/definition.js";
-import type { BooleanInt, TimestampRequired } from "../types.js";
+import type { BooleanInt, TimestampDefaulted } from "../types.js";
 
 export const notificationTypeSettingsTable = defineTable(
 	"lucid_notification_type_settings",
@@ -49,5 +49,5 @@ export interface LucidNotificationTypeSettings {
 	/** Roles that receive audience notifications. Null means the definition's default audience. */
 	role_ids: JSONColumnType<number[] | null, number[] | null, number[] | null>;
 	updated_by: number | null;
-	updated_at: TimestampRequired;
+	updated_at: TimestampDefaulted;
 }

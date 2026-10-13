@@ -1,12 +1,10 @@
+import notifyFailure from "../../../services/jobs/helpers/notify-failure.js";
+import resolveFailure from "../../../services/jobs/helpers/resolve-failure.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import { copy, isTranslatableCopy } from "../../i18n/index.js";
 import { JobsRepository } from "../../repositories/index.js";
 import { dispatchPendingJobs } from "../dispatch.js";
-import {
-	notifyJobFailure,
-	resolveJobFailure,
-} from "../failure-notification.js";
 import { runPermanentFailureHook } from "../permanent-failure.js";
 import { getRegisteredJob } from "../registry.js";
 import type { JobConsumptionResult } from "../types.js";
@@ -73,7 +71,7 @@ export const completeJob = async (
 	if (completed.error) return { type: "retry-transport" };
 	if (!completed.data) return finishCancellation(context, job);
 
-	await resolveJobFailure(context, job);
+	await resolveFailure(context, job);
 
 	return { type: "completed" };
 };
@@ -143,7 +141,7 @@ const failJob = async (
 	if (failed.error) return { type: "retry-transport" };
 	if (!failed.data) return finishCancellation(context, job);
 
-	await notifyJobFailure(context, { job, errorMessage: props.message });
+	await notifyFailure(context, { job, errorMessage: props.message });
 	await runPermanentFailureHook(context, {
 		job,
 		errorMessage: props.message,

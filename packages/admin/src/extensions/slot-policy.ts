@@ -1,14 +1,14 @@
 import { agentWidgetSlotPolicies } from "../components/AgentWidget/constants.js";
 import { brickSlotPolicies } from "../components/BrickSlots/constants.js";
-import { dashboardWidgetSlotPolicies } from "../components/DashboardWidget/constants.js";
 import { documentListSlotPolicies } from "../components/DocumentSlotCell/constants.js";
 import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
+import { homeWidgetSlotPolicies } from "../components/HomeWidgets/constants.js";
 
 /** Component-owned policies shared by config diagnostics, compilation and slot selection. */
 export const slotDefinitions = {
 	...agentWidgetSlotPolicies,
 	...brickSlotPolicies,
-	...dashboardWidgetSlotPolicies,
+	...homeWidgetSlotPolicies,
 	...documentListSlotPolicies,
 	...fieldSlotPolicies,
 } as const;

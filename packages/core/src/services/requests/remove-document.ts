@@ -9,6 +9,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import deleteVersions from "./helpers/delete-versions.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
+import getHookRequest from "./helpers/get-hook-request.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 
 /**
@@ -124,23 +125,12 @@ const removeDocument: ServiceFn<
 		{
 			meta: { userId: data.user.id },
 			data: {
-				request: {
+				request: getHookRequest({
 					id: request.id,
-					documents: request.documents.flatMap((member) =>
-						member.id === document.id ||
-						member.source === null ||
-						member.source_version_id === null
-							? []
-							: [
-									{
-										collectionKey: member.collection_key,
-										documentId: member.document_id,
-										source: member.source,
-										versionId: member.source_version_id,
-									},
-								],
+					documents: request.documents.filter(
+						(member) => member.id !== document.id,
 					),
-				},
+				}),
 				collectionKey: document.collection_key,
 				documentId: document.document_id,
 			},

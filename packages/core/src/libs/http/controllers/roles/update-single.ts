@@ -32,7 +32,7 @@ const updateSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RolesUpdate]),
 	validate("param", controllerSchemas.updateSingle.params),

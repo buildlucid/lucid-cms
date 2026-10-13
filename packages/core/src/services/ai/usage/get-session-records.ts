@@ -7,6 +7,7 @@ import type {
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
+/** Lists the individual AI requests in one usage session. */
 const getSessionRecords: ServiceFn<
 	[
 		{

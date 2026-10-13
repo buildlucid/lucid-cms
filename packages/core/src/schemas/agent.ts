@@ -1,3 +1,8 @@
+import type {
+	AgentDelivery,
+	AgentInput,
+	AgentInputAction,
+} from "@lucidcms/types";
 import z from "zod";
 import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../exports/types.js";
@@ -7,14 +12,15 @@ import {
 } from "../libs/agent/model-selection.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type {
+	Agent,
+	AgentCapabilities,
 	AgentConfirmationMode,
-	AgentDelivery,
-	AgentInput,
-	AgentInputAction,
+	AgentConversationKind,
 	AgentInteractionAction,
 	AgentMessagePart,
 	AgentRoutineConversationMode,
 	AgentRoutineSource,
+	AgentRoutineToolSettings,
 	AgentRoutineTrigger,
 	AgentRunOutcome,
 	AgentRunResultPart,
@@ -38,40 +44,18 @@ import {
 	uploadSessionResponseSchema,
 } from "./media.js";
 
-/** A conversation keeps its workflow after its routine is deleted. */
-/** An agent that acted, for the person shown alongside it or for the system. */
-export const agentActorSchema = z.object({
-	key: z.string(),
-	name: z.string(),
-	system: z.boolean().meta({
-		description:
-			"It acted as the system rather than for a person. A missing person with this false was deleted",
-	}),
-	conversationId: z.string().nullable().meta({
-		description: "The chat it acted in. Null once the chat is deleted",
-	}),
-});
-
 export const agentConversationKindSchema = z.enum([
 	"chat",
 	"own-routine",
 	"code-routine",
-]);
+]) satisfies z.ZodType<AgentConversationKind>;
 
-/** Pending and claimed input is still to be delivered; the rest is kept as a receipt. */
-export const agentInputStatusSchema = z.enum([
-	"pending",
-	"claimed",
-	"consumed",
-	"cancelled",
-]);
-
-export const agentDeliverySchema = z.discriminatedUnion("kind", [
+const agentDeliverySchema = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("queue") }).strict(),
 	z.object({ kind: z.literal("steer"), targetRunId: z.uuid() }).strict(),
 ]) satisfies z.ZodType<AgentDelivery>;
 
-export const agentInputSchema = z.object({
+const agentInputSchema = z.object({
 	id: z.uuid(),
 	text: z.string(),
 	references: z.array(agentReferenceInputSchema).default([]),
@@ -80,7 +64,7 @@ export const agentInputSchema = z.object({
 	delivery: agentDeliverySchema,
 }) satisfies z.ZodType<AgentInput>;
 
-export const agentInputActionSchema = z.discriminatedUnion("kind", [
+const agentInputActionSchema = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("cancel"), id: z.uuid() }),
 	z.object({
 		kind: z.literal("steer"),
@@ -91,13 +75,13 @@ export const agentInputActionSchema = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("clear") }),
 ]) satisfies z.ZodType<AgentInputAction>;
 
-/** Code routines are synced from config; database routines are created by users. */
+/** Code routines are synced from config; own routines are created by people. */
 export const agentRoutineSourceSchema = z.enum([
 	"code",
-	"database",
+	"own",
 ]) satisfies z.ZodType<AgentRoutineSource>;
 
-export const agentRoutineTriggerSchema = z.enum([
+const agentRoutineTriggerSchema = z.enum([
 	"schedule",
 	"manual",
 ]) satisfies z.ZodType<AgentRoutineTrigger>;
@@ -129,7 +113,7 @@ export const agentTitleStatusSchema = z.enum([
 	"user_set",
 ]) satisfies z.ZodType<AgentTitleStatus>;
 
-export const agentInteractionActionSchema = z.enum([
+const agentInteractionActionSchema = z.enum([
 	"submit",
 	"cancel",
 ]) satisfies z.ZodType<AgentInteractionAction>;
@@ -140,14 +124,14 @@ export const agentRunOutcomeSchema = z.enum([
 	"needs_review",
 ]) satisfies z.ZodType<AgentRunOutcome>;
 
-/** How a tool asks for input: the prompt and where its widget is shown. */
-export const agentInteractionRequestSchema = z.object({
-	title: z.string().min(1).max(2000),
-	placement: z.enum(["inline", "composer"]),
-});
+/** Where a tool's interaction widget is shown. */
+export const agentInteractionPlacementSchema = z.enum(["inline", "composer"]);
 
-export const agentInteractionSchema = agentInteractionRequestSchema
-	.extend({
+const agentInteractionSchema = z
+	.object({
+		/** What the person is asked, translated for each viewer. */
+		title: resolvedAdminCopySchema,
+		placement: agentInteractionPlacementSchema,
 		id: z.string().min(1),
 		toolCallId: z.string().min(1),
 		answeredByUserId: z.number().optional(),
@@ -162,7 +146,7 @@ export const agentInteractionSchema = agentInteractionRequestSchema
 				z.object({
 					toolCallId: z.string().min(1),
 					toolName: z.string().min(1),
-					title: z.string(),
+					title: resolvedAdminCopySchema,
 					input: z.record(z.string(), z.unknown()),
 				}),
 			)
@@ -192,10 +176,6 @@ export const agentWidgetSchema = z
 	})
 	.strict();
 
-export const agentInteractiveWidgetSchema = agentWidgetSchema.extend({
-	interaction: agentInteractionSchema,
-});
-
 export const agentToolDetailsSchema = z
 	.object({
 		type: z.literal("tool"),
@@ -223,21 +203,21 @@ const agentToolSummarySchema = agentToolDetailsSchema
 		detailsAvailable: z.boolean(),
 	}) satisfies z.ZodType<AgentToolSummary>;
 
-const agentTextPartSchema = z
+export const agentTextPartSchema = z
 	.object({ type: z.literal("text"), text: z.string() })
 	.strict();
-const agentReferencePartSchema = z
+export const agentReferencePartSchema = z
 	.object({
 		type: z.literal("reference"),
 		reference: agentReferenceSnapshotSchema,
 	})
 	.strict();
 
-const agentScreenPartSchema = z
+export const agentScreenPartSchema = z
 	.object({ type: z.literal("screen"), screen: agentScreenSchema })
 	.strict();
 
-const agentRoutinePartSchema = z
+export const agentRoutinePartSchema = z
 	.object({
 		type: z.literal("routine"),
 		name: z.string(),
@@ -255,18 +235,7 @@ const agentRunResultPartSchema = z
 	})
 	.strict() satisfies z.ZodType<AgentRunResultPart>;
 
-/** Stored parts retain full tool values for recovery, audit and model context. */
-export const agentMessagePartSchema = z.discriminatedUnion("type", [
-	agentTextPartSchema,
-	agentReferencePartSchema,
-	agentScreenPartSchema,
-	agentRoutinePartSchema,
-	agentToolDetailsSchema,
-	agentWidgetSchema,
-]);
-
-export type StoredAgentMessagePart = z.output<typeof agentMessagePartSchema>;
-
+/** Client-facing message parts with summarized tool calls, distinct from storage in `libs/agent/messages.ts`. */
 const agentChatPartSchema = z.discriminatedUnion("type", [
 	agentTextPartSchema,
 	agentReferencePartSchema,
@@ -317,8 +286,11 @@ const agentConversationResponseSchema = z.object({
 	id: z.uuid(),
 	agentKey: z.string(),
 	title: z.string(),
-	titleStatus: agentTitleStatusSchema,
-	titleGenerationRequestedAt: z.string().nullable(),
+	titleStatus: z.enum([...agentTitleStatusSchema.options, "generating"]).meta({
+		description:
+			"How the title was set. Generating means an automatic title is on its way, so poll for it",
+	}),
+	kind: agentConversationKindSchema,
 	userId: z.number().nullable(),
 	routineId: z.uuid().nullable(),
 	latestRun: z
@@ -343,25 +315,37 @@ const agentMessageResponseSchema = z.object({
 	createdAt: z.string().nullable(),
 });
 
+const mediaGenerationFlagsSchema = z.object({
+	image: z.boolean(),
+	audio: z.boolean(),
+}) satisfies z.ZodType<Agent["features"]["media"]["generate"]>;
+const mimeTypesSchema = z.object({ mimeTypes: z.array(z.string()) }).nullable();
+
 const agentCatalogResponseSchema = z.object({
 	enabled: z.boolean(),
 	agents: z.array(
 		z.object({
 			key: z.string(),
-			name: z.string(),
-			description: z.string(),
+			name: resolvedAdminCopySchema,
+			description: resolvedAdminCopySchema,
 			features: z.object({
-				media: z.object({ upload: z.boolean(), attach: z.boolean() }),
+				media: z.object({
+					upload: z.boolean(),
+					attach: z.boolean(),
+					generate: mediaGenerationFlagsSchema,
+				}),
 				documents: z.object({ attach: z.boolean() }),
 				requests: z.object({ attach: z.boolean() }),
 				builder: z.object({ read: z.boolean(), edit: z.boolean() }),
-			}),
+			}) satisfies z.ZodType<Agent["features"]>,
 			capabilities: z.object({
-				mediaAnalysis: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
-				fileRead: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
-				webSearch: z.boolean(),
-				webRead: z.boolean(),
-			}),
+				media: z.object({
+					analyze: mimeTypesSchema,
+					readFile: mimeTypesSchema,
+					generate: mediaGenerationFlagsSchema,
+				}),
+				web: z.object({ search: z.boolean(), read: z.boolean() }),
+			}) satisfies z.ZodType<AgentCapabilities>,
 			suggestions: z.array(
 				z.object({
 					title: resolvedAdminCopySchema,
@@ -397,9 +381,11 @@ const agentRunResponseSchema = z.object({
 });
 
 /** Per-tool settings for a routine, keyed by tool name. Missing settings use the tool's defaults. */
-export const routineToolsSchema = z.record(
+export const routineToolSettingsSchema = z.record(
 	z.string().min(1).max(128),
-	z.object({ requiresConfirmation: z.boolean().optional() }).strict(),
+	z
+		.object({ requiresConfirmation: z.boolean().optional() })
+		.strict() satisfies z.ZodType<AgentRoutineToolSettings>,
 );
 
 const agentRoutineResponseSchema = z.object({
@@ -412,7 +398,7 @@ const agentRoutineResponseSchema = z.object({
 	conversationMode: agentRoutineConversationModeSchema,
 	conversationId: z.uuid().nullable(),
 	modelSelection: aiModelSelectionSchema.nullable(),
-	tools: routineToolsSchema,
+	toolSettings: routineToolSettingsSchema,
 	cron: z.string(),
 	timezone: z.string(),
 	enabled: z.boolean(),
@@ -434,7 +420,7 @@ const idParams = z.object({ id: z.uuid() });
 const noQuery = { string: undefined, formatted: undefined };
 const routineBody = z.object({
 	conversationMode: agentRoutineConversationModeSchema.optional(),
-	tools: routineToolsSchema.optional(),
+	toolSettings: routineToolSettingsSchema.optional(),
 	name: z.string().trim().min(1).max(255),
 	instructions: z.string().trim().min(1).max(20_000),
 	/** Null uses the agent's default model. */
@@ -666,14 +652,22 @@ export const controllerSchemas = {
 						"The admin screen the message was sent from. The document builder answers the agent's builder tools.",
 				}),
 				delivery: agentDeliverySchema.default({ kind: "queue" }),
-				requestId: z.uuid(),
+				inputId: z.uuid().meta({
+					description:
+						"A new ID for the input, which becomes its run and message IDs. Resending the same input with it is safe.",
+				}),
 			})
 			.refine((input) => input.text.length > 0 || input.references.length > 0, {
 				path: ["text"],
 			}),
 		query: noQuery,
 		params: idParams,
-		response: undefined,
+		response: z.object({
+			runId: z.uuid().nullable().meta({
+				description:
+					"The run answering the input, or null while it waits in the queue",
+			}),
+		}),
 	} satisfies ControllerSchema,
 	updateInput: {
 		body: agentInputActionSchema,
@@ -682,13 +676,22 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	compactConversation: {
-		body: z.object({ requestId: z.uuid() }),
+		body: z.object({
+			runId: z.uuid().meta({
+				description:
+					"A new ID for the compaction run. Resending with it is safe.",
+			}),
+		}),
 		query: noQuery,
 		params: idParams,
 		response: undefined,
 	} satisfies ControllerSchema,
 	retryConversation: {
-		body: z.object({ requestId: z.uuid() }),
+		body: z.object({
+			runId: z.uuid().meta({
+				description: "A new ID for the retry run. Resending with it is safe.",
+			}),
+		}),
 		query: noQuery,
 		params: idParams,
 		response: undefined,

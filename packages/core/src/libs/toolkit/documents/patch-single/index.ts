@@ -2,8 +2,8 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
-import systemActor from "../../../permission/system-actor.js";
 import { runToolkitService } from "../../utils.js";
+import resolveDocumentVersion from "../helpers/resolve-document-version.js";
 import type { DocumentWriteResult } from "../types.js";
 import { inputSchema } from "./schema.js";
 import type { ToolkitDocumentsPatchSingleInput } from "./types.js";
@@ -18,44 +18,24 @@ const patchSingle = <K extends string>(
 	runToolkitService({
 		schema: inputSchema,
 		input,
-		handler: async (data) => {
-			const [
-				{ default: writeSingle },
-				{ default: resolveDocumentActor },
-				{ default: resolveProposalVersion },
-			] = await Promise.all([
-				import("../../../../services/documents/write-single.js"),
-				import(
-					"../../../../services/documents/helpers/resolve-document-actor.js"
-				),
-				import(
-					"../../../../services/documents/helpers/resolve-proposal-version.js"
-				),
-			]);
+		handler: async ({ actor, requestId, ...data }) => {
+			const { default: writeSingle } = await import(
+				"../../../../services/documents/write-single.js"
+			);
 
-			//* request proposals check edit access to the request when they save
-			const actor = await resolveDocumentActor(context, {
-				...data,
-				action: data.requestId === undefined ? "update" : "read",
+			const versionRes = await resolveDocumentVersion(context, {
+				actor,
+				collectionKey: data.collectionKey,
+				id: data.id,
+				requestId,
+				action: "update",
 			});
-			if (actor.error) return actor;
+			if (versionRes.error) return versionRes;
 
-			const versionRes =
-				data.requestId === undefined
-					? undefined
-					: await resolveProposalVersion(context, {
-							requestId: data.requestId,
-							collectionKey: data.collectionKey,
-							documentId: data.id,
-							user: actor.data.authUser ?? systemActor,
-						});
-			if (versionRes?.error) return versionRes;
-
-			const { actor: _actor, requestId: _requestId, ...values } = data;
 			return writeSingle(context, {
-				...values,
-				...actor.data,
-				versionId: versionRes?.data,
+				...data,
+				...versionRes.data.actor,
+				versionId: versionRes.data.versionId,
 				kind: "patch",
 			});
 		},

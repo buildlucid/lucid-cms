@@ -6,15 +6,14 @@ import type {
 	AgentImageSettingsData,
 	AgentLucidToolName,
 	AgentMediaSelectData,
-	AgentMessage,
-	AgentMessagePart,
 	AgentReferencesData,
 	AgentRunnerToolName,
 	AgentScreenCall,
-	AgentWebFetchOutput,
+	AgentWebReadOutput,
 	AgentWebSearchOutput,
-	AgentWidgetPart,
-} from "@types";
+} from "@lucidcms/types";
+import type { AgentMessage, AgentMessagePart, AgentWidgetPart } from "@types";
+import T, { translateAdminCopy } from "@/translations";
 import { isObjectRecord } from "@/utils/type-guards";
 
 export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
@@ -26,7 +25,6 @@ export const askTool = "lucid_ask_user" satisfies AgentRunnerToolName;
 export const finishTool = "lucid_finish_run" satisfies AgentRunnerToolName;
 export const progressTool =
 	"lucid_share_progress" satisfies AgentRunnerToolName;
-export const skillTool = "lucid_load_skill" satisfies AgentRunnerToolName;
 export const questionWidget = "lucid-question" satisfies AgentCoreWidgetKey;
 export const confirmationWidget =
 	"lucid-tool-confirmation" satisfies AgentCoreWidgetKey;
@@ -42,7 +40,7 @@ export const builderChangesWidget =
 /** Lists the references a tool call linked, where it linked them. */
 export const referencesWidget = "lucid-references" satisfies AgentCoreWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
-export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
+export const webReadTool = "web_read" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
 export const generateImageTool =
@@ -182,9 +180,7 @@ export const isWebSearchOutput = (
 		(result) => isObjectRecord(result) && typeof result.url === "string",
 	);
 
-export const isWebFetchOutput = (
-	value: unknown,
-): value is AgentWebFetchOutput =>
+export const isWebReadOutput = (value: unknown): value is AgentWebReadOutput =>
 	isObjectRecord(value) &&
 	typeof value.url === "string" &&
 	typeof value.content === "string";
@@ -280,3 +276,12 @@ export const isFileReadOutput = (
 			typeof passage.offset === "number" &&
 			typeof passage.text === "string",
 	);
+
+/** The tool's saved result copy, with a state label when the call did not complete. */
+export const toolLabel = (part: AgentToolPart, retried?: boolean) => {
+	const summary = translateAdminCopy(part.summary);
+	const status = toolDisplayStatus(part, retried);
+	return status === "complete"
+		? summary
+		: `${summary} · ${T()(`agent.tool.status.${status}`)}`;
+};

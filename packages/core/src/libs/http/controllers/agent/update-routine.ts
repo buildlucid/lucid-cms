@@ -5,6 +5,7 @@ import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -30,7 +31,7 @@ const updateRoutineController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.updateRoutine.params),
@@ -42,6 +43,11 @@ const updateRoutineController = factory.createHandlers(
 
 		const routine = await serviceWrapper(agentServices.updateRoutine, {
 			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
 		})(context, {
 			id: param.id,
 			userId: c.get("auth").id,
@@ -50,7 +56,7 @@ const updateRoutineController = factory.createHandlers(
 			cron: body.cron,
 			timezone: body.timezone,
 			enabled: body.enabled,
-			tools: body.tools,
+			toolSettings: body.toolSettings,
 			modelSelection: body.modelSelection,
 			conversationMode: body.conversationMode,
 		});

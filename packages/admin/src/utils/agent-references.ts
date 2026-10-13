@@ -183,8 +183,8 @@ const matchesMimeType = (mimeType: string, patterns: readonly string[]) =>
 
 export const readableMimeTypes = (capabilities: AgentCapabilities) => [
 	...new Set([
-		...(capabilities.mediaAnalysis?.mimeTypes ?? []),
-		...(capabilities.fileRead?.mimeTypes ?? []),
+		...(capabilities.media.analyze?.mimeTypes ?? []),
+		...(capabilities.media.readFile?.mimeTypes ?? []),
 	]),
 ];
 

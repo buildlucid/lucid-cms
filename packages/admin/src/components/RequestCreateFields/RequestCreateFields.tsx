@@ -1,14 +1,14 @@
 import type { Collection } from "@types";
-import { type Component, createMemo, For, Show } from "solid-js";
-import Checkbox from "@/components/Checkbox/Checkbox";
+import { type Component, createMemo, Show } from "solid-js";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import Input from "@/components/Input/Input";
 import RequestOverlapNotice from "@/components/RequestOverlapNotice/RequestOverlapNotice";
+import RequestTargetCheckboxes from "@/components/RequestTargetCheckboxes/RequestTargetCheckboxes";
 import Select from "@/components/Select/Select";
 import api from "@/services/api";
 import T from "@/translations";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
-import { getAllowedTargets, getTargetLabel } from "@/utils/requests";
+import { getAllowedTargets } from "@/utils/requests";
 
 const RequestCreateFields: Component<{
 	collection: Collection | undefined;
@@ -80,31 +80,21 @@ const RequestCreateFields: Component<{
 					label={T()("requests.targets")}
 					theme="basic"
 				/>
-				<div class="flex flex-wrap gap-2">
-					<For each={allowed()}>
-						{(target) => (
-							<Checkbox
-								id={`request-target-${target}`}
-								variant="button"
-								label={getTargetLabel(props.collection, target)}
-								value={props.targets.includes(target)}
-								onChange={(checked) =>
-									props.onTargetsChange(
-										checked
-											? allowed().filter(
-													(key) =>
-														key === target || props.targets.includes(key),
-												)
-											: props.targets.filter((key) => key !== target),
-									)
-								}
-							/>
-						)}
-					</For>
-				</div>
+				<RequestTargetCheckboxes
+					id="request-target"
+					options={allowed()}
+					value={props.targets}
+					collection={props.collection}
+					onChange={props.onTargetsChange}
+				/>
 			</div>
-			<Show when={(requests.data?.data.length ?? 0) > 0}>
-				<RequestOverlapNotice requests={requests.data?.data ?? []} />
+			<Show when={requests.data?.meta.total}>
+				{(total) => (
+					<RequestOverlapNotice
+						requests={requests.data?.data ?? []}
+						total={total()}
+					/>
+				)}
 			</Show>
 		</div>
 	);

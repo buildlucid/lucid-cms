@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import { type Component, createMemo, createSignal } from "solid-js";
-import AgentHeader from "@/components/AgentHeader/AgentHeader";
 import AgentRoutineList from "@/components/AgentRoutineList/AgentRoutineList";
 import CreateMenu, {
 	type CreateMenuAction,
@@ -89,7 +88,7 @@ const AgentRoutinesPage: Component = () => {
 	// Render
 	return (
 		<PageLayout.Root>
-			<AgentHeader
+			<PageLayout.Header
 				title={T()("routes.agent.routines")}
 				description={T()("routes.agent.routines.description")}
 				actions={<CreateMenu actions={createActions()} />}
@@ -110,7 +109,7 @@ const AgentRoutinesPage: Component = () => {
 					]}
 					perPage
 				/>
-			</AgentHeader>
+			</PageLayout.Header>
 			<PageLayout.Body>
 				<AgentRoutineList searchParams={searchParams} />
 			</PageLayout.Body>

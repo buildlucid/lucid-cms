@@ -5,12 +5,11 @@ import { type Component, For, Show } from "solid-js";
 import T from "@/translations";
 import { getRequestRoute } from "@/utils/route-helpers";
 
-/**
- * A one-line note that the document is already in other open requests, with
- * a link to each so they can be checked before adding another.
- */
+/** Links to other open requests containing this document. */
 const RequestOverlapNotice: Component<{
 	requests: RequestSummary[];
+	/** Every open request with the document, which can be more than are listed. */
+	total: number;
 }> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -20,7 +19,7 @@ const RequestOverlapNotice: Component<{
 				<TbOutlineInfoCircle size={12} />
 			</span>
 			<span title={T()("requests.overlap.description")}>
-				{T()("requests.overlap.title", { count: props.requests.length })}{" "}
+				{T()("requests.overlap.title", { count: props.total })}{" "}
 				<For each={props.requests}>
 					{(request, index) => (
 						<>

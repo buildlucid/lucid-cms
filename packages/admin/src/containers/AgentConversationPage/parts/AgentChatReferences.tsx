@@ -1,4 +1,5 @@
 import type { AgentReference } from "@types";
+import { TbOutlineLock } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -8,10 +9,9 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import AgentReferenceThumb from "@/components/AgentReferenceFiles/parts/AgentReferenceThumb";
-import AgentReferenceLock from "@/components/AgentReferenceLock/AgentReferenceLock";
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import AgentReferenceRow from "@/components/AgentReferenceRow/AgentReferenceRow";
+import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
@@ -170,12 +170,18 @@ const AgentChatReferences: Component<{
 										<Show
 											when={!reference.managed}
 											fallback={
-												<AgentReferenceLock
-													label={T()("agent.references.managed", {
+												<span
+													role="img"
+													class="absolute flex size-5 items-center justify-center rounded border border-border bg-input text-subtitle opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100 inset-e-1 top-1"
+													aria-label={T()("agent.references.managed", {
 														label: reference.label,
 													})}
-													class="inset-e-1 top-1"
-												/>
+													title={T()("agent.references.managed", {
+														label: reference.label,
+													})}
+												>
+													<TbOutlineLock size={10} />
+												</span>
 											}
 										>
 											<AgentReferenceRemoveButton
@@ -213,12 +219,18 @@ const AgentChatReferences: Component<{
 											<Show
 												when={!reference.managed}
 												fallback={
-													<AgentReferenceLock
-														label={T()("agent.references.managed", {
+													<span
+														role="img"
+														class="absolute flex size-5 items-center justify-center rounded border border-border bg-input text-subtitle opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100 inset-e-0 top-1/2 -translate-y-1/2"
+														aria-label={T()("agent.references.managed", {
 															label: reference.label,
 														})}
-														class="inset-e-0 top-1/2 -translate-y-1/2"
-													/>
+														title={T()("agent.references.managed", {
+															label: reference.label,
+														})}
+													>
+														<TbOutlineLock size={10} />
+													</span>
 												}
 											>
 												<AgentReferenceRemoveButton

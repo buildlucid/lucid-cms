@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/solid-query";
-import type { RequestUser, ResponseBody } from "@types";
+import { keepPreviousData, useQuery } from "@tanstack/solid-query";
+import type { ResponseBody, UserDisplay } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
@@ -10,8 +10,13 @@ interface QueryParams {
 	location: {
 		id: Accessor<number | undefined>;
 	};
+	filters?: {
+		/** Matches full names or usernames. */
+		name?: Accessor<string | undefined>;
+	};
 }
 
+/** Searches the people who can be asked to approve a request, 20 at a time. */
 const useGetReviewers = (params: QueryHook<QueryParams>) => {
 	const queryParams = createMemo(() =>
 		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
@@ -23,12 +28,17 @@ const useGetReviewers = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: [...queryKeys.requests.reviewers(), queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<RequestUser[]>>({
+			request<ResponseBody<UserDisplay[]>>({
 				url: `/lucid/api/v1/requests/${queryParams().location?.id}/reviewers`,
+				query: { filters: queryParams().filters },
 				method: "GET",
 			}),
+		placeholderData: keepPreviousData,
 		get enabled() {
-			return params.enabled ? params.enabled() : true;
+			return (
+				params.queryParams.location.id() !== undefined &&
+				(params.enabled ? params.enabled() : true)
+			);
 		},
 	}));
 };

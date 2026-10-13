@@ -8,7 +8,7 @@ import {
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
-import getMcpActor from "../helpers/get-mcp-actor.js";
+import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
 import findRequests from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 

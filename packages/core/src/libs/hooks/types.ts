@@ -258,7 +258,7 @@ export type DocumentWorkflowAfterUpdateHookData = {
 };
 
 /** The notification being sent. Data is what the sender passed, already validated. */
-export type NotificationHookMeta = {
+type NotificationHookMeta = {
 	type: string;
 	key: string | null;
 	data: Record<string, unknown>;

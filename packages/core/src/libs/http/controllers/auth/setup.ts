@@ -29,7 +29,7 @@ const setupController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.setup.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.sensitive.limit,

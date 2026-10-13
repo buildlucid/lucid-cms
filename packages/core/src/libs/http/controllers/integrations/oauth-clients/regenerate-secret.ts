@@ -32,7 +32,7 @@ const regenerateSecretController = factory.createHandlers(
 			params: oauthClientSchemas.regenerateSecret.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationRegenerate]),
 	validate("param", oauthClientSchemas.regenerateSecret.params),

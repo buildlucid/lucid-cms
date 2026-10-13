@@ -1,10 +1,11 @@
+import { sql } from "kysely";
+import constants from "../../constants/constants.js";
 import type { AgentReferenceInput, AgentScreen } from "../../types/response.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import { agentInputsTable } from "../db/tables/agent-inputs.js";
 import StaticRepository from "./parents/static-repository.js";
 
-//* statuses that are still to be delivered
-const deliverable = ["pending", "claimed"] as const;
+const { deliverableInputStatuses } = constants.agent;
 
 /** Durable input receipts. Claiming makes input immutable until its run acknowledges it. */
 export default class AgentInputsRepository extends StaticRepository<"lucid_agent_inputs"> {
@@ -47,9 +48,20 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 	async selectDeliverable(conversationId: string) {
 		const query = this.db
 			.selectFrom("lucid_agent_inputs")
-			.selectAll()
+			.select([
+				"sequence",
+				"id",
+				"conversation_id",
+				"user_id",
+				"text",
+				"references",
+				"screen",
+				"target_run_id",
+				"status",
+				"created_at",
+			])
 			.where("conversation_id", "=", conversationId)
-			.where("status", "in", deliverable)
+			.where("status", "in", deliverableInputStatuses)
 			.orderBy("sequence", "asc");
 
 		const result = await this.executeQuery(() => query.execute(), {
@@ -107,13 +119,13 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 			.set({ status: "claimed" })
 			.where("conversation_id", "=", conversationId)
 			.where("target_run_id", "is", null)
-			.where("status", "in", deliverable)
+			.where("status", "in", deliverableInputStatuses)
 			.where("sequence", "=", (eb) =>
 				eb
 					.selectFrom("lucid_agent_inputs as first")
 					.select("first.sequence")
 					.where("first.conversation_id", "=", conversationId)
-					.where("first.status", "in", deliverable)
+					.where("first.status", "in", deliverableInputStatuses)
 					.orderBy("first.sequence", "asc")
 					.limit(1),
 			)
@@ -124,10 +136,25 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 						.select("id")
 						.where("id", "=", conversationId)
 						.where("active_run_id", "is", null)
-						.where("queue_paused", "=", false),
+						.where(
+							"queue_paused",
+							"=",
+							this.dbAdapter.getDefault("boolean", "false"),
+						),
 				),
 			)
-			.returningAll();
+			.returning([
+				"sequence",
+				"id",
+				"conversation_id",
+				"user_id",
+				"text",
+				"references",
+				"screen",
+				"target_run_id",
+				"status",
+				"created_at",
+			]);
 
 		const result = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "claimNext",
@@ -141,7 +168,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 			.updateTable("lucid_agent_inputs")
 			.set({ status: "claimed" })
 			.where("target_run_id", "=", runId)
-			.where("status", "in", deliverable)
+			.where("status", "in", deliverableInputStatuses)
 			.where((eb) =>
 				eb.exists(
 					eb
@@ -152,7 +179,18 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 						.where("status", "=", "running"),
 				),
 			)
-			.returningAll();
+			.returning([
+				"sequence",
+				"id",
+				"conversation_id",
+				"user_id",
+				"text",
+				"references",
+				"screen",
+				"target_run_id",
+				"status",
+				"created_at",
+			]);
 
 		const result = await this.executeQuery(() => query.execute(), {
 			method: "claimSteering",
@@ -185,7 +223,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 			.updateTable("lucid_agent_inputs")
 			.set({ target_run_id: null, status: "pending" })
 			.where("id", "=", id)
-			.where("status", "in", deliverable);
+			.where("status", "in", deliverableInputStatuses);
 
 		const result = await this.executeQuery(() => query.execute(), {
 			method: "defer",
@@ -209,7 +247,12 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 			)
 			.select("input.conversation_id")
 			.distinct()
-			.where("input.status", "in", deliverable)
+			//* literals let SQLite match the partial index, which a bound IN list can't
+			.where(
+				"input.status",
+				"in",
+				deliverableInputStatuses.map((status) => sql.lit(status)),
+			)
 			.where((eb) =>
 				eb.or([
 					//* a steer whose run can no longer take it, or is waiting on a person
@@ -219,9 +262,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 							eb("target.id", "is", null),
 							eb("target.status", "in", [
 								"waiting",
-								"completed",
-								"failed",
-								"cancelled",
+								...constants.agent.runStatuses.terminal,
 							]),
 						]),
 					]),
@@ -233,7 +274,11 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 					//* the first queued message of an idle conversation
 					eb.and([
 						eb("conversation.active_run_id", "is", null),
-						eb("conversation.queue_paused", "=", false),
+						eb(
+							"conversation.queue_paused",
+							"=",
+							this.dbAdapter.getDefault("boolean", "false"),
+						),
 						eb.not(
 							eb.exists(
 								eb
@@ -245,7 +290,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 										"input.conversation_id",
 									)
 									.whereRef("earlier.sequence", "<", "input.sequence")
-									.where("earlier.status", "in", deliverable),
+									.where("earlier.status", "in", deliverableInputStatuses),
 							),
 						),
 					]),

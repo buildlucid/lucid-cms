@@ -28,7 +28,7 @@ const restoreMultipleController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.restoreMultiple.params),
 	validate("json", controllerSchemas.restoreMultiple.body),
@@ -51,7 +51,7 @@ const restoreMultipleController = factory.createHandlers(
 		});
 		if (restoreRes.error) throw new LucidAPIError(restoreRes.error);
 
-		c.status(201);
+		c.status(204);
 		return c.body(null);
 	},
 );

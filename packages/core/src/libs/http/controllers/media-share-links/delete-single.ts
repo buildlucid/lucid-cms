@@ -26,7 +26,7 @@ const deleteSingleController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),

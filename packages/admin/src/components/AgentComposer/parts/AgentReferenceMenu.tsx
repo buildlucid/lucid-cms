@@ -9,10 +9,10 @@ import {
 	TbOutlineUpload,
 } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
+import { composerTriggerClasses } from "@/components/ComposerTriggerLabel/classes";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import Menu from "@/components/Menu/Menu";
-import { composerTriggerClasses } from "@/components/ModelPicker/triggerClasses";
 import RequestSelectDrawer from "@/components/RequestSelectDrawer/RequestSelectDrawer";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";

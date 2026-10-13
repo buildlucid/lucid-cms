@@ -28,7 +28,7 @@ const unlinkAuthProviderController = factory.createHandlers(
 			params: controllerSchemas.unlinkAuthProvider.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.unlinkAuthProvider.params),
 	async (c) => {

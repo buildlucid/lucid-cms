@@ -25,6 +25,7 @@ export {
 } from "../libs/i18n/index.js";
 export { default as defineJob } from "../libs/jobs/define-job.js";
 export { default as logger } from "../libs/logger/index.js";
+export { notificationCategories } from "../libs/notifications/categories.js";
 export { default as defineNotification } from "../libs/notifications/define-notification.js";
 export { notifications } from "../libs/notifications/lucid-notifications.js";
 export { ExternalScopes } from "../libs/permission/external-scopes.js";

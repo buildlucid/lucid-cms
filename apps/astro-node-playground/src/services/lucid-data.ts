@@ -131,7 +131,7 @@ const getLucidData = async ({
 			refs: documentResponse.data?.refs,
 		}),
 		blogs: createDocumentViews({
-			documents: blogsResponse.data?.documents ?? [],
+			documents: blogsResponse.data?.data ?? [],
 			locale,
 			preview: activePreview !== null,
 			refs: blogsResponse.data?.refs,

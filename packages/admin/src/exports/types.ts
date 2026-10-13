@@ -16,13 +16,6 @@ export type {
 	BrickSlotProps,
 } from "../components/BrickSlots/types.js";
 export type {
-	DashboardWidgetComponent,
-	DashboardWidgetPlacement,
-	DashboardWidgetProps,
-	DashboardWidgetSize,
-	DashboardWidgetSlot,
-} from "../components/DashboardWidget/types.js";
-export type {
 	DocumentListSlot,
 	DocumentListSlotComponent,
 	DocumentListSlotPlacement,
@@ -34,6 +27,13 @@ export type {
 	FieldSlotMatch,
 	FieldSlotProps,
 } from "../components/FieldSlots/types.js";
+export type {
+	HomeWidgetComponent,
+	HomeWidgetPlacement,
+	HomeWidgetProps,
+	HomeWidgetSize,
+	HomeWidgetSlot,
+} from "../components/HomeWidgets/types.js";
 export type {
 	BrickState,
 	EditorContext,

@@ -1,7 +1,8 @@
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import getEditPath from "./get-edit-path.js";
 
-/** Links to the admin editor route in `packages/admin/src/Router.tsx`, including the version ID for revisions. */
+/** Links to the admin editor, including the version ID for revisions. */
 const getEditLink = (
 	context: ServiceContext,
 	collectionKey: string,
@@ -10,7 +11,7 @@ const getEditLink = (
 	versionId?: number,
 ) =>
 	new URL(
-		`/lucid/collections/${encodeURIComponent(collectionKey)}/${encodeURIComponent(version)}/${id}${versionId === undefined ? "" : `/${versionId}`}`,
+		getEditPath(collectionKey, version, id, versionId),
 		getBaseUrl(context),
 	).href;
 

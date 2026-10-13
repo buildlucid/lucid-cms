@@ -8,7 +8,7 @@ const generateConversationTitle: ServiceFn<
 	[{ id: string; userId: number }],
 	{ title: string }
 > = async (context, input) => {
-	const enabled = await checkFeatureEnabled(context, { feature: "chatRename" });
+	const enabled = await checkFeatureEnabled(context, { feature: "chatTitles" });
 	if (enabled.error) return enabled;
 
 	const conversation = await getAccessibleConversation(context, input);

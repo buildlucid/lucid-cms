@@ -14,7 +14,7 @@ const resolveTypeSettings = (props: {
 		| undefined;
 }) => ({
 	enabled:
-		props.definition.required ||
+		props.definition.mandatory ||
 		(props.row
 			? formatter.formatBoolean(props.row.enabled)
 			: props.definition.defaults.enabled),

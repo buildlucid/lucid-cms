@@ -1,3 +1,4 @@
+import useAcknowledgeTarget from "./useAcknowledgeTarget";
 import useAddDocuments from "./useAddDocuments";
 import useApprove from "./useApprove";
 import useClose from "./useClose";
@@ -13,7 +14,6 @@ import useGetReviewers from "./useGetReviewers";
 import useGetSingle from "./useGetSingle";
 import useRemoveDocument from "./useRemoveDocument";
 import useReopen from "./useReopen";
-import useReviewTarget from "./useReviewTarget";
 import useUnapprove from "./useUnapprove";
 import useUpdateComment from "./useUpdateComment";
 import useUpdateCommentResolution from "./useUpdateCommentResolution";
@@ -23,7 +23,7 @@ import useUpdateTargets from "./useUpdateTargets";
 const exportObject = {
 	useAddDocuments,
 	useRemoveDocument,
-	useReviewTarget,
+	useAcknowledgeTarget,
 	useGetMultiple,
 	useGetOverview,
 	useGetSingle,

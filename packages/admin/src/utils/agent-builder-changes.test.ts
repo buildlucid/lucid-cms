@@ -1,8 +1,5 @@
-import type {
-	AgentBuilderChangesData,
-	AgentMessage,
-	DocumentVersionCheckBrick,
-} from "@types";
+import type { AgentBuilderChangesData } from "@lucidcms/types";
+import type { AgentMessage, DocumentVersionCheckBrick } from "@types";
 import { describe, expect, it } from "vitest";
 import {
 	applyBuilderChanges,

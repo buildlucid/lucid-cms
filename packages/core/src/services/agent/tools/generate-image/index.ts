@@ -6,7 +6,7 @@ import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { builderUpdateToolName } from "../builder-update/constants.js";
 import { generateImageToolName } from "./constants.js";
-import generateImage from "./generate-image.js";
+import generateImage from "./handler.js";
 import prepareImageSettings from "./prepare.js";
 import {
 	inputSchema,
@@ -30,18 +30,17 @@ export const generateImageAgentTool = () =>
 		output: outputSchema,
 		outputVersion: 1,
 		permissions: [Permissions.AiImageGenerate],
-		capabilities: { imageGeneration: true },
+		capabilities: { media: { generate: { image: true } } },
 		available: ({ config, aiAccess }) =>
 			isAiFeatureEnabled(config, "imageGeneration", aiAccess),
-		describe: () => copy("admin:core.tools.media_generate_image.describe"),
 		interaction: {
 			key: constants.agent.widgets.imageSettings,
 			version: 1,
 			data: settingsDataSchema,
 			response: () => settingsResponseSchema,
-			optional: true,
-			prepare: ({ context, input }) =>
-				prepareImageSettings(context, { input, editMediaId: null }),
+			skippable: true,
+			prepare: ({ input }) =>
+				prepareImageSettings({ input, editMediaId: null }),
 		},
 		handler: ({ context, input, execution, response }) =>
 			generateImage(context, {

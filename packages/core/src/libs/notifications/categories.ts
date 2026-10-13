@@ -1,7 +1,7 @@
 import { copy } from "../i18n/copy.js";
 import type { NotificationCategory } from "./types.js";
 
-/** Categories used by Lucid's own notification types. Plugins can reuse them or define their own. */
+/** Built-in categories accepted by `defineNotification`, alongside custom categories. */
 export const notificationCategories = {
 	system: {
 		key: "system",

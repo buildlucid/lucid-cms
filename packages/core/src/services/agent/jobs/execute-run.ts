@@ -21,7 +21,7 @@ const execute: JobHandler<{
 		signal: execution.signal,
 		answer: input.answer && { ...input.answer, action: "submit" },
 	});
-	// A conflict means another worker already owns or finished the run.
+	//* A conflict means another worker already owns or finished the run.
 	if (result.error && result.error.status !== 409) return result;
 
 	return { error: undefined, data: undefined };

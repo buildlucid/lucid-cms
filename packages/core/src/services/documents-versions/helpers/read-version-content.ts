@@ -1,19 +1,11 @@
 import collections from "../../../libs/collection/collections.js";
-import {
-	getBricksTableSchema,
-	getTableNames,
-} from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import { documentBricksFormatter } from "../../../libs/formatters/index.js";
+import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../../libs/i18n/index.js";
-import {
-	DocumentBricksRepository,
-	DocumentVersionsRepository,
-} from "../../../libs/repositories/index.js";
+import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
-import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import prepareDuplicateContent from "../../documents/helpers/prepare-duplicate-content.js";
+import readStoredContent from "./read-stored-content.js";
 
 /**
  * Reads one version's stored content in the document input shape, by version
@@ -36,17 +28,14 @@ const readVersionContent: ServiceFn<
 		content: { bricks: BrickInputSchema[]; fields: FieldInputSchema[] };
 	} | null
 > = async (context, data) => {
-	const [collectionRes, tablesRes, schemaRes] = await Promise.all([
+	const [collectionRes, tablesRes] = await Promise.all([
 		collections.getSingle(context, { key: data.collectionKey }),
 		getTableNames(context, data.collectionKey),
-		getBricksTableSchema(context, data.collectionKey),
 	]);
 	if (collectionRes.error) return collectionRes;
 	if (tablesRes.error) return tablesRes;
-	if (schemaRes.error) return schemaRes;
 
 	const Versions = new DocumentVersionsRepository(context.db);
-	const DocumentBricks = new DocumentBricksRepository(context.db);
 
 	const versionRes = await Versions.selectSingle(
 		{
@@ -63,16 +52,13 @@ const readVersionContent: ServiceFn<
 	if (versionRes.error) return versionRes;
 	if (!versionRes.data) return { error: undefined, data: null };
 
-	const bricksRes = await DocumentBricks.selectMultipleByVersionId(
-		{
-			versionId: versionRes.data.id,
-			documentId: data.documentId,
-			bricksSchema: schemaRes.data,
-		},
-		{ tableName: tablesRes.data.version },
-	);
-	if (bricksRes.error) return bricksRes;
-	if (!bricksRes.data) {
+	const contentRes = await readStoredContent(context, {
+		collection: collectionRes.data,
+		documentId: data.documentId,
+		versionId: versionRes.data.id,
+	});
+	if (contentRes.error) return contentRes;
+	if (!contentRes.data) {
 		return {
 			error: {
 				type: "basic",
@@ -83,25 +69,13 @@ const readVersionContent: ServiceFn<
 		};
 	}
 
-	const props = {
-		bricksQuery: bricksRes.data,
-		bricksSchema: schemaRes.data,
-		collection: collectionRes.data,
-		config: context.config,
-		host: getBaseUrl(context),
-		editable: true,
-	};
-
 	return {
 		error: undefined,
 		data: {
 			id: versionRes.data.id,
 			type: versionRes.data.type,
 			contentId: versionRes.data.content_id,
-			content: prepareDuplicateContent({
-				fields: documentBricksFormatter.formatDocumentFields(props),
-				bricks: documentBricksFormatter.formatMultiple(props),
-			}),
+			content: contentRes.data,
 		},
 	};
 };

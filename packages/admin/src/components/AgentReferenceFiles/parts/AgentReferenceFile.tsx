@@ -1,12 +1,12 @@
 import { TbOutlineEye, TbOutlineEyeOff } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
+import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
 	agentReferenceTilt,
 } from "@/utils/agent-references";
-import AgentReferenceThumb from "./AgentReferenceThumb";
 
 /** One attached resource as a small, slightly tilted file card. */
 const AgentReferenceFile: Component<{

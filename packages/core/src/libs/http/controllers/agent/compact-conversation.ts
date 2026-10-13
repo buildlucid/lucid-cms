@@ -4,6 +4,7 @@ import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -19,6 +20,7 @@ const compactConversationController = factory.createHandlers(
 		description: "Compacts older conversation context and streams progress.",
 		tags: ["agent"],
 		summary: "Compact Agent Conversation",
+		responses: openAPI.responses({ stream: true }),
 		requestBody: openAPI.requestBody(
 			controllerSchemas.compactConversation.body,
 		),
@@ -27,7 +29,7 @@ const compactConversationController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	agentAccess(true),
 	validate("param", controllerSchemas.compactConversation.params),
@@ -38,10 +40,15 @@ const compactConversationController = factory.createHandlers(
 
 		const run = await serviceWrapper(agentServices.compactConversation, {
 			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
 		})(context, {
 			conversationId: c.req.valid("param").id,
 			userId: c.get("auth").id,
-			requestId: body.requestId,
+			runId: body.runId,
 		});
 		if (run.error) throw new LucidAPIError(run.error);
 

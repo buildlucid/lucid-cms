@@ -29,7 +29,7 @@ const resendInvitationController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.UsersCreate]),
 	validate("param", controllerSchemas.resendInvitation.params),

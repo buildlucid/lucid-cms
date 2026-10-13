@@ -1,9 +1,5 @@
 import z from "zod";
 import {
-	requestStatusSchema,
-	requestTypeSchema,
-} from "../../../../libs/db/tables/requests.js";
-import {
 	filterConditionsInput,
 	toQueryFilters,
 } from "../../../../libs/tools/filter-conditions.js";
@@ -12,7 +8,11 @@ import {
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
 import { agentNameSchema } from "../../../../libs/tools/person.js";
-import { controllerSchemas } from "../../../../schemas/requests.js";
+import {
+	controllerSchemas,
+	requestStatusSchema,
+	requestTypeSchema,
+} from "../../../../schemas/requests.js";
 import { requestLinksSchema, requestUserSchema } from "../schema.js";
 
 const querySchema = controllerSchemas.getMultiple.query.formatted.extend({

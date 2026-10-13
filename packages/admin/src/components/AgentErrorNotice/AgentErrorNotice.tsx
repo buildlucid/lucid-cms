@@ -7,9 +7,9 @@ import Button from "@/components/Button/Button";
 import Link from "@/components/Link/Link";
 import constants from "@/constants";
 import { Permissions } from "@/constants/permissions";
-import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { aiUsageHref, canViewAiUsage } from "@/utils/ai-usage";
 
 /** A failed run's error, with links to usage and Lucid, and a retry when the run can be answered again. */
 const AgentErrorNotice: Component<{
@@ -18,11 +18,7 @@ const AgentErrorNotice: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const canViewUsage = createMemo(
-		() =>
-			userStore.get.hasPermission([Permissions.SettingsRead]).all &&
-			siteStore.get.hasAnyAiFeatureEnabled(),
-	);
+	const canViewUsage = createMemo(canViewAiUsage);
 	const canManageConnection = createMemo(
 		() => userStore.get.hasPermission([Permissions.ConnectionUpdate]).all,
 	);
@@ -42,7 +38,7 @@ const AgentErrorNotice: Component<{
 					<p class="mt-0.5 text-sm leading-6 text-body">{props.message}</p>
 					<div class="mt-4 flex flex-wrap gap-2">
 						<Show when={canViewUsage()}>
-							<Link href="/lucid/system/ai-usage" variant="outline" size="sm">
+							<Link href={aiUsageHref} variant="outline" size="sm">
 								{T()("agent.error.usage.action")}
 							</Link>
 						</Show>

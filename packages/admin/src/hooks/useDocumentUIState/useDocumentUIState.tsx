@@ -27,7 +27,7 @@ export function useDocumentUIState(props: {
 	/** Another tab holds the document, so this one only views it. */
 	heldElsewhere?: Accessor<boolean>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
-	requestCreationMutation?: ReturnType<typeof api.documents.useRequestCreation>;
+	requestDocumentMutation?: ReturnType<typeof api.documents.useRequestSingle>;
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
 	>;
@@ -65,13 +65,15 @@ export function useDocumentUIState(props: {
 		defaultValue: false,
 	});
 
-	const [getRequestCreationOpen, setRequestCreationOpen] = createSignal(false);
-	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
-		createSignal(false);
-	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
-		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
-	const [getReleaseEnvironmentAction, setReleaseEnvironmentAction] =
-		createSignal<"publish" | "compose" | null>(null);
+	const [getDocumentRequestOpen, setDocumentRequestOpen] = createSignal(false);
+	const [getPublishOpen, setPublishOpen] = createSignal(false);
+	const [getPublishTarget, setPublishTarget] = createSignal<Exclude<
+		DocumentVersionType,
+		"revision"
+	> | null>(null);
+	const [getPublishAction, setPublishAction] = createSignal<
+		"publish" | "compose" | null
+	>(null);
 
 	const isLoading = createMemo(() => {
 		return props.collectionQuery.isLoading || props.documentQuery.isLoading;
@@ -88,7 +90,7 @@ export function useDocumentUIState(props: {
 		return (
 			props.createSingleVersionMutation?.action.isPending ||
 			props.createDocumentMutation?.action.isPending ||
-			props.requestCreationMutation?.action.isPending
+			props.requestDocumentMutation?.action.isPending
 		);
 	});
 
@@ -105,7 +107,7 @@ export function useDocumentUIState(props: {
 			props.updateSingleVersionMutation?.errors() ||
 			props.createSingleVersionMutation?.errors() ||
 			props.createDocumentMutation?.errors() ||
-			props.requestCreationMutation?.errors()
+			props.requestDocumentMutation?.errors()
 		);
 	});
 
@@ -253,7 +255,7 @@ export function useDocumentUIState(props: {
 			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
 				userStore.get.hasPermission([
 					permissions.update,
-					permissions["unpublish-request"],
+					permissions.unpublishRequest,
 				]).some)
 		);
 	});
@@ -298,7 +300,7 @@ export function useDocumentUIState(props: {
 	});
 
 	const hasPublishPermission = createMemo(() => {
-		const target = getReleaseEnvironmentTarget();
+		const target = getPublishTarget();
 
 		const environmentPermission = props
 			.collection()
@@ -323,7 +325,7 @@ export function useDocumentUIState(props: {
 		return (
 			userStore.get.hasPermission([permissions.delete]).all ||
 			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
-				userStore.get.hasPermission([permissions["delete-request"]]).all)
+				userStore.get.hasPermission([permissions.deleteRequest]).all)
 		);
 	});
 
@@ -386,14 +388,14 @@ export function useDocumentUIState(props: {
 		setRestoreRevisionVersionId,
 		getPreviewOpen,
 		setPreviewOpen,
-		getRequestCreationOpen,
-		setRequestCreationOpen,
-		getReleaseEnvironmentOpen,
-		setReleaseEnvironmentOpen,
-		getReleaseEnvironmentTarget,
-		setReleaseEnvironmentTarget,
-		getReleaseEnvironmentAction,
-		setReleaseEnvironmentAction,
+		getDocumentRequestOpen,
+		setDocumentRequestOpen,
+		getPublishOpen,
+		setPublishOpen,
+		getPublishTarget,
+		setPublishTarget,
+		getPublishAction,
+		setPublishAction,
 		isLoading,
 		isSuccess,
 		isSaving,

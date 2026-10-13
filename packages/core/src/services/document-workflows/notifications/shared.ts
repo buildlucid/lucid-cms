@@ -1,4 +1,6 @@
 import z from "zod";
+import getEditPath from "../../documents/helpers/get-edit-path.js";
+import getRequestPath from "../../requests/helpers/get-request-path.js";
 
 /** Data every workflow notification carries. */
 export const workflowData = z.object({
@@ -13,5 +15,5 @@ export const workflowData = z.object({
 /** Links a workflow notification to the document, inside its request when it has one. */
 export const workflowHref = (data: z.output<typeof workflowData>) =>
 	data.requestId === null
-		? `/lucid/collections/${data.collectionKey}/latest/${data.documentId}`
-		: `/lucid/requests/${data.requestId}/content/${data.collectionKey}/${data.documentId}`;
+		? getEditPath(data.collectionKey, "latest", data.documentId)
+		: getRequestPath(data.requestId, data);

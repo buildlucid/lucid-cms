@@ -1,7 +1,7 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type { RequestType } from "../../../libs/db/tables/requests.js";
 
-/** Lists allowed destinations for the request type and source, excluding targets for delete requests. */
+/** Lists writable targets for a request type and source, returning none for delete requests. */
 const getAllowedTargets = (data: {
 	collection: CollectionBuilder;
 	type: RequestType;

@@ -33,12 +33,12 @@ import generateConversationTitle from "./generate-conversation-title.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import insertConversation from "./helpers/insert-conversation.js";
+import startRun from "./helpers/start-run.js";
 import { generateAgentTitleJob } from "./jobs/generate-title.js";
 import { agentNotificationKeys } from "./notifications/keys.js";
 import { routineFailedNotification } from "./notifications/routine-failed.js";
 import recoverRuns from "./recover-runs.js";
 import runRoutine from "./run-routine.js";
-import startRun from "./start-run.js";
 import updateConversation from "./update-conversation.js";
 import updateRoutine from "./update-routine.js";
 
@@ -175,7 +175,7 @@ test("a title queue failure leaves the first message and provisional title intac
 		const started = await startRun(context, {
 			conversationId: created.data.id,
 			userId,
-			requestId: randomUUID(),
+			runId: randomUUID(),
 			text: "Explain cache validation",
 		});
 		expect(started.error).toBeUndefined();
@@ -196,7 +196,7 @@ test("a title queue failure leaves the first message and provisional title intac
 });
 
 test("turning off chat rename keeps the provisional title and refuses generated ones", async () => {
-	context.config.ai.chatRename = false;
+	context.config.ai.chatTitles = false;
 	const queue = vi.spyOn(jobQueue, "enqueueJob");
 	try {
 		const created = await insertConversation(context, {
@@ -207,7 +207,7 @@ test("turning off chat rename keeps the provisional title and refuses generated 
 		const started = await startRun(context, {
 			conversationId: created.data.id,
 			userId,
-			requestId: randomUUID(),
+			runId: randomUUID(),
 			text: "Plan the launch page",
 		});
 		expect(started.error).toBeUndefined();
@@ -222,7 +222,7 @@ test("turning off chat rename keeps the provisional title and refuses generated 
 		});
 		expect(generated.error?.status).toBe(403);
 	} finally {
-		context.config.ai.chatRename = true;
+		context.config.ai.chatTitles = true;
 		queue.mockRestore();
 	}
 });
@@ -499,7 +499,7 @@ describe("routine chat reuse", () => {
 			conversationId: first.data.conversationId,
 			userId,
 			text: "Follow up",
-			requestId: randomUUID(),
+			runId: randomUUID(),
 		});
 		if (manual.error) throw manual.error;
 		expect(
@@ -549,7 +549,7 @@ describe("code routines", () => {
 				{
 					...auditRoutine,
 					name: "Monday audit",
-					tools: { collections_list: { requiresConfirmation: true } },
+					toolSettings: { collections_list: { requiresConfirmation: true } },
 				},
 			],
 		};
@@ -716,8 +716,11 @@ describe("run recovery", () => {
 	});
 });
 
-vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => ({
-	default: (
-		await import("../../utils/test-helpers/agent-models.js")
-	).mockAgentModels(),
-}));
+vi.mock(
+	"../../libs/lucid-remote/services/get-agent-models/index.js",
+	async () => ({
+		default: (
+			await import("../../utils/test-helpers/agent-models.js")
+		).mockAgentModels(),
+	}),
+);

@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 import type z from "zod";
-import { copy } from "../../../libs/i18n/index.js";
 import type { cmsAgentUsageSchema } from "../../../libs/lucid-remote/schema/ai.js";
 import type { CmsAiActor } from "../../../libs/lucid-remote/types.js";
 import { cmsAiActor } from "../../../libs/lucid-remote/utils.js";
@@ -12,13 +11,11 @@ import type {
 } from "../../../utils/services/types.js";
 import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
+import paidToolError from "./paid-tool-error.js";
 import trackPaidRequest from "./track-paid-request.js";
 
-/** Derives a stable request and usage ID so retries reuse the result without another charge. */
-export const requestIdFor = (
-	featureKey: AiUsageFeatureKey,
-	operationId: string,
-) => {
+//* Reuse the request and usage ID across retries to avoid duplicate charges.
+const requestIdFor = (featureKey: AiUsageFeatureKey, operationId: string) => {
 	const hash = createHash("sha256")
 		.update(`lucid-${featureKey}:${operationId}`)
 		.digest("hex");
@@ -30,8 +27,9 @@ export const requestIdFor = (
 };
 
 /**
- * Runs a paid tool request as the run's principal and records usage against the run.
- * @remarks Paid-request failures use 424, preserving messages or replacing policy, access and feature denials with stop instructions.
+ * Runs a paid tool request under the run's principal and records its usage.
+ * @returns The response and request ID used for usage and saved output.
+ * @remarks Remote failures use `paidToolError` to discourage retries after denials.
  */
 const runPaidToolRequest = async <
 	Data extends { usage: z.infer<typeof cmsAgentUsageSchema> },
@@ -48,7 +46,7 @@ const runPaidToolRequest = async <
 			signal: AbortSignal;
 		}) => ServiceResponse<Data>;
 	},
-): ServiceResponse<Data> => {
+): ServiceResponse<Data & { requestId: string }> => {
 	const { execution } = props;
 	const { principal } = execution.authority;
 	const token = await getAccessToken(context, {});
@@ -61,7 +59,7 @@ const runPaidToolRequest = async <
 			featureKey: props.featureKey,
 			runId: execution.run.id,
 			conversationId: execution.run.conversationId,
-			userId: execution.run.userId,
+			userId: principal.type === "user" ? principal.userId : null,
 		},
 		signal: execution.signal,
 		send: async (start) => {
@@ -83,26 +81,12 @@ const runPaidToolRequest = async <
 				: { error: undefined, data: { ...result.data, connectionId } };
 		},
 	});
-	if (!response.error) return response;
+	if (response.error) {
+		await handleRemoteError(context, response.error);
+		return { data: undefined, error: paidToolError(response.error) };
+	}
 
-	await handleRemoteError(context, response.error);
-
-	return {
-		data: undefined,
-		error: {
-			...response.error,
-			status: 424,
-			...(response.error.key === "ai_content_blocked" && {
-				message: copy("server:agent.tool.content.blocked"),
-			}),
-			...(response.error.key === "ai_access_restricted" && {
-				message: copy("server:agent.tool.access.restricted"),
-			}),
-			...(response.error.key === "ai_feature_disabled" && {
-				message: copy("server:agent.tool.feature.disabled"),
-			}),
-		},
-	};
+	return { error: undefined, data: { ...response.data, requestId } };
 };
 
 export default runPaidToolRequest;

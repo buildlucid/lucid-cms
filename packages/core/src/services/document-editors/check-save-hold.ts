@@ -1,9 +1,8 @@
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
-import { formatPerson } from "../../libs/tools/person.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getRequestUsers from "../requests/helpers/get-request-users.js";
 import claimHold from "./helpers/claim-hold.js";
+import getHolderName from "./helpers/get-holder-name.js";
 
 /** Refreshes or reclaims an admin tab's version hold before saving, refusing the save if another tab holds it. */
 const checkSaveHold: ServiceFn<
@@ -25,10 +24,9 @@ const checkSaveHold: ServiceFn<
 		return { error: undefined, data: undefined };
 	}
 
-	const users = await getRequestUsers(context, { ids: [holder.data.userId] });
-	if (users.error) return users;
+	const name = await getHolderName(context, { userId: holder.data.userId });
+	if (name.error) return name;
 
-	const user = users.data.get(holder.data.userId);
 	return {
 		data: undefined,
 		error: {
@@ -40,11 +38,7 @@ const checkSaveHold: ServiceFn<
 				holder.data.userId === data.userId
 					? "server:core.documents.editors.taken.self.message"
 					: "server:core.documents.editors.taken.message",
-				{
-					data: {
-						name: user ? formatPerson(user).name : `#${holder.data.userId}`,
-					},
-				},
+				{ data: { name: name.data } },
 			),
 		},
 	};

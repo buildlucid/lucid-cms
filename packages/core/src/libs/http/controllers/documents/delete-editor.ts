@@ -30,7 +30,7 @@ const deleteEditorController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.deleteEditor.params),
 	collectionPermissions("read"),
@@ -38,7 +38,7 @@ const deleteEditorController = factory.createHandlers(
 		const { collectionKey, id, tabId } = c.req.valid("param");
 		const context = createServiceContext(c);
 
-		const released = await serviceWrapper(documentEditorServices.release, {
+		const left = await serviceWrapper(documentEditorServices.leave, {
 			transaction: false,
 			defaultError: {
 				type: "basic",
@@ -51,7 +51,7 @@ const deleteEditorController = factory.createHandlers(
 			tabId,
 			userId: c.get("auth").id,
 		});
-		if (released.error) throw new LucidAPIError(released.error);
+		if (left.error) throw new LucidAPIError(left.error);
 
 		c.status(204);
 		return c.body(null);

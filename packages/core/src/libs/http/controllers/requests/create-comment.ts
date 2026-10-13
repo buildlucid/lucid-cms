@@ -31,7 +31,7 @@ const createCommentController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createComment.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.createComment.params),

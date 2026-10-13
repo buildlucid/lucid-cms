@@ -11,16 +11,13 @@ import {
 	createEffect,
 	createMemo,
 	createSignal,
-	For,
-	Match,
 	Show,
-	Switch,
 } from "solid-js";
 import ArchiveNotificationModal from "@/components/ArchiveNotificationModal/ArchiveNotificationModal";
 import Button from "@/components/Button/Button";
 import { getButtonClasses } from "@/components/Button/classes";
-import NotificationRow from "@/components/NotificationRow/NotificationRow";
-import SkeletonListItems from "@/components/SkeletonListItems/SkeletonListItems";
+import NotificationList from "@/components/NotificationList/NotificationList";
+import ReadAllNotificationsModal from "@/components/ReadAllNotificationsModal/ReadAllNotificationsModal";
 import ViewAllLink from "@/components/ViewAllLink/ViewAllLink";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
@@ -37,6 +34,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 	// State & Hooks
 	const location = useLocation();
 	const [open, setOpen] = createSignal(false);
+	const [readAllOpen, setReadAllOpen] = createSignal(false);
 	const rowTarget = useRowTarget({ triggers: { archive: false } });
 
 	// ----------------------------------------
@@ -50,8 +48,6 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 		key: () => getNotificationsListKey(summary.data?.data),
 		enabled: () => open() && summary.data !== undefined,
 	});
-	const update = api.notifications.useUpdateMultiple();
-	const markAllRead = api.notifications.useUpdateMultiple();
 
 	// ----------------------------------------
 	// Memos
@@ -104,43 +100,18 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 					onOpenAutoFocus={(event) => event.preventDefault()}
 				>
 					<div class="max-h-96 min-h-0 overflow-y-auto scrollbar p-1">
-						<Switch
-							fallback={
-								<ul class="flex flex-col">
-									<For each={notifications.data?.data}>
-										{(notification) => (
-											<NotificationRow
-												notification={notification}
-												surface="popover"
-												onUpdate={update.action.mutate}
-												onArchive={(id) => {
-													setOpen(false);
-													rowTarget.setTargetId(id);
-													rowTarget.setTrigger("archive", true);
-												}}
-												onNavigate={() => setOpen(false)}
-											/>
-										)}
-									</For>
-								</ul>
-							}
-						>
-							<Match when={loading()}>
-								<ul>
-									<SkeletonListItems />
-								</ul>
-							</Match>
-							<Match when={error()}>
-								<p class="px-3 py-8 text-center text-sm text-muted">
-									{T()("notifications.error")}
-								</p>
-							</Match>
-							<Match when={(notifications.data?.data.length ?? 0) === 0}>
-								<p class="px-3 py-8 text-center text-sm text-muted">
-									{T()("notifications.empty.title")}
-								</p>
-							</Match>
-						</Switch>
+						<NotificationList
+							notifications={notifications.data?.data}
+							loading={loading()}
+							error={error()}
+							surface="popover"
+							onArchive={(id) => {
+								setOpen(false);
+								rowTarget.setTargetId(id);
+								rowTarget.setTrigger("archive", true);
+							}}
+							onNavigate={() => setOpen(false)}
+						/>
 					</div>
 					<footer class="flex shrink-0 items-center justify-between gap-3 border-t border-border px-3 py-2">
 						<ViewAllLink
@@ -153,10 +124,10 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 									size="xs"
 									shape="square"
 									variant="ghost"
-									loading={markAllRead.action.isPending}
-									onClick={() =>
-										markAllRead.action.mutate({ all: true, read: true })
-									}
+									onClick={() => {
+										setOpen(false);
+										setReadAllOpen(true);
+									}}
 									aria-label={T()("notifications.mark.all.read")}
 									title={T()("notifications.mark.all.read")}
 								>
@@ -185,6 +156,9 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 					open: rowTarget.getTriggers().archive,
 					setOpen: (state) => rowTarget.setTrigger("archive", state),
 				}}
+			/>
+			<ReadAllNotificationsModal
+				state={{ open: readAllOpen(), setOpen: setReadAllOpen }}
 			/>
 		</>
 	);

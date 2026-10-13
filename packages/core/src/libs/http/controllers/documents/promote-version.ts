@@ -30,17 +30,17 @@ const promoteVersionController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.promoteVersion.body),
 	validate("param", controllerSchemas.promoteVersion.params),
 	collectionPermissions("publish"),
 	async (c) => {
-		const { versionType, bypassRevision } = c.req.valid("json");
+		const { versionType } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
 		const context = createServiceContext(c);
 
-		const restoreRevisionRes = await serviceWrapper(publish, {
+		const publishRes = await serviceWrapper(publish, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -54,11 +54,10 @@ const promoteVersionController = factory.createHandlers(
 			user: c.get("auth"),
 			documentId: Number.parseInt(id, 10),
 			collectionKey,
-			target: versionType,
-			createRevision: bypassRevision === true ? false : undefined,
+			environment: versionType,
 		});
-		if (restoreRevisionRes.error) {
-			throw new LucidAPIError(restoreRevisionRes.error);
+		if (publishRes.error) {
+			throw new LucidAPIError(publishRes.error);
 		}
 
 		c.status(204);

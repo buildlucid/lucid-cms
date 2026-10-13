@@ -3,8 +3,8 @@ import type {
 	AgentActor,
 	Notification,
 	NotificationPreference,
-	NotificationType,
-	RequestUser,
+	NotificationTypeSettings,
+	UserDisplay,
 } from "../../types/response.js";
 import type {
 	LucidNotificationPreferences,
@@ -51,7 +51,7 @@ const formatCategory = (props: {
 
 const formatMultiple = (props: {
 	notifications: NotificationRow[];
-	actors: Map<number, RequestUser>;
+	actors: Map<number, UserDisplay>;
 	agents: Map<string, AgentActor>;
 	config: Pick<ResolvedLucidConfig, "notifications">;
 	translate: Translator;
@@ -60,7 +60,7 @@ const formatMultiple = (props: {
 		id: notification.id,
 		type: notification.type,
 		category: formatCategory({
-			definition: props.config.notifications.find(
+			definition: props.config.notifications.definitions.find(
 				(definition) => definition.key === notification.type,
 			),
 			fallbackKey: notification.category,
@@ -96,14 +96,14 @@ const formatTypes = (props: {
 		>
 	>;
 	translate: Translator;
-}): NotificationType[] =>
+}): NotificationTypeSettings[] =>
 	props.definitions.map((definition) => {
 		const settings = resolveTypeSettings({
 			definition,
 			row: props.settings.find((row) => row.type === definition.key),
 		});
 		return {
-			key: definition.key,
+			type: definition.key,
 			name: props.translate(definition.name),
 			description: props.translate(definition.description) ?? null,
 			category: formatCategory({
@@ -113,11 +113,12 @@ const formatTypes = (props: {
 			}),
 			level: definition.level,
 			actionRequired: definition.actionRequired,
-			required: definition.required,
+			mandatory: definition.mandatory,
 			audience:
 				definition.audience === "recipients"
-					? "recipients"
+					? { kind: "recipients" }
 					: {
+							kind: "permission",
 							permission: definition.audience.permission,
 							roleIds: settings.roleIds,
 						},

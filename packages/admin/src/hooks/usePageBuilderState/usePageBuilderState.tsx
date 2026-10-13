@@ -1,4 +1,4 @@
-import type { InternalCollectionDocument, Refs, RequestDetail } from "@types";
+import type { InternalCollectionDocument, Refs, RequestDetails } from "@types";
 import {
 	type Accessor,
 	createContext,
@@ -18,7 +18,7 @@ export type PageBuilderStateContextValue = {
 	version: Accessor<string>;
 	versionId: Accessor<number | undefined>;
 	relationVersionType: Accessor<string | undefined>;
-	request?: Accessor<RequestDetail | undefined>;
+	request?: Accessor<RequestDetails | undefined>;
 	disableWorkflow: Accessor<boolean>;
 	documentState: UseDocumentState;
 	mutations: UseDocumentMutations;

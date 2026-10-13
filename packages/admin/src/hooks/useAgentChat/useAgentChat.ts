@@ -1,10 +1,12 @@
-import { useQueryClient } from "@tanstack/solid-query";
 import type {
-	AgentContext,
-	AgentConversation,
 	AgentDelivery,
 	AgentInput,
 	AgentInputAction,
+} from "@lucidcms/types";
+import { useQueryClient } from "@tanstack/solid-query";
+import type {
+	AgentContextUsage,
+	AgentConversation,
 	AgentInteractionAction,
 	AgentMessage,
 	AgentReferenceInput,
@@ -33,7 +35,6 @@ import {
 	findPendingInteraction,
 	isRunWorking,
 	settlesInteraction,
-	shouldPollTitle,
 } from "@/utils/agent-chat";
 import {
 	type AgentReferenceItem,
@@ -44,17 +45,17 @@ import {
 	referencesWidget,
 	referenceTools,
 	screenWidget,
-	webFetchTool,
+	webReadTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
 
-/** Input the server has not yet accepted, kept so a retry reuses its request ID. */
+/** Input the server has not yet accepted, kept so a retry reuses its input ID. */
 type PendingSubmission = {
 	text: string;
 	references: AgentReferenceInput[];
 	screen?: AgentScreen;
 	delivery: AgentDelivery;
-	requestId: string;
+	inputId: string;
 };
 
 /**
@@ -80,7 +81,7 @@ export const useAgentChat = (
 	const [responding, setResponding] = createSignal(false);
 	const [liveRunId, setLiveRunId] = createSignal<string>();
 	const [error, setError] = createSignal<string>();
-	const [liveContext, setLiveContext] = createSignal<AgentContext>();
+	const [liveContext, setLiveContext] = createSignal<AgentContextUsage>();
 	//* reconciled so streamed updates patch rendered rows instead of remounting them
 	const [inputs, setInputs] = createStore<AgentInput[]>([]);
 	const transcript = createAgentMessages();
@@ -97,7 +98,7 @@ export const useAgentChat = (
 		id: conversationId,
 		poll: (data) => {
 			if (!untrack(streaming) && awaitsDelivery(data)) return 1_000;
-			return shouldPollTitle(data) ? 4_000 : false;
+			return data.titleStatus === "generating" ? 4_000 : false;
 		},
 	});
 	const data = createMemo(() =>
@@ -167,7 +168,7 @@ export const useAgentChat = (
 		if (tool.changes.length > 0 || referenceTools.has(tool.name)) {
 			void refreshReferences(id);
 		}
-		if (tool.name === webSearchTool || tool.name === webFetchTool) {
+		if (tool.name === webSearchTool || tool.name === webReadTool) {
 			void refreshDetails(id);
 		}
 		refreshAgentChanges(queryClient, tool.changes);
@@ -341,11 +342,9 @@ export const useAgentChat = (
 		patchConversation(id, (data) => ({
 			...data,
 			inputs: [
-				...(data.inputs ?? []).filter(
-					(input) => input.id !== pending.requestId,
-				),
+				...(data.inputs ?? []).filter((input) => input.id !== pending.inputId),
 				{
-					id: pending.requestId,
+					id: pending.inputId,
 					text: pending.text,
 					references: pending.references,
 					screen: pending.screen ?? null,
@@ -365,7 +364,7 @@ export const useAgentChat = (
 		} catch (cause) {
 			patchConversation(id, (data) => ({
 				...data,
-				inputs: data.inputs?.filter((input) => input.id !== pending.requestId),
+				inputs: data.inputs?.filter((input) => input.id !== pending.inputId),
 			}));
 			return failed(cause);
 		}
@@ -443,12 +442,12 @@ export const useAgentChat = (
 		compactions: createMemo(() => data()?.compactions ?? []),
 		compact: () =>
 			stream(api.agent.runStreamUrls.compact, {
-				body: { requestId: crypto.randomUUID() },
+				body: { runId: crypto.randomUUID() },
 			}),
 		/** Answers again after the latest run failed, without sending a new message. */
 		retry: () =>
 			stream(api.agent.runStreamUrls.retry, {
-				body: { requestId: crypto.randomUUID() },
+				body: { runId: crypto.randomUUID() },
 			}),
 		history,
 		messages,
@@ -493,7 +492,7 @@ export const useAgentChat = (
 							references,
 							screen,
 							delivery,
-							requestId: crypto.randomUUID(),
+							inputId: crypto.randomUUID(),
 						};
 			retrySubmission = pending;
 
@@ -511,9 +510,9 @@ export const useAgentChat = (
 						prepare: (messages) => [
 							...messages,
 							{
-								id: pending.requestId,
+								id: pending.inputId,
 								conversationId: id,
-								runId: pending.requestId,
+								runId: pending.inputId,
 								role: "user",
 								position: (messages.at(-1)?.position ?? 0) + 1,
 								parts: [
@@ -594,11 +593,14 @@ export const useAgentChat = (
 		/** Cancels the run rather than leaving it to finish in the background. */
 		stop: async () => {
 			const id = liveRunId() ?? latestRun()?.id;
-			try {
-				if (id) await cancelRun.action.mutateAsync({ id });
-			} finally {
-				controller?.abort();
+			const chatId = conversationId();
+			//* a failed cancel shows its own error toast, and the stream still stops
+			if (id && chatId) {
+				await cancelRun.action
+					.mutateAsync({ id, conversationId: chatId })
+					.catch(() => undefined);
 			}
+			controller?.abort();
 		},
 	};
 };

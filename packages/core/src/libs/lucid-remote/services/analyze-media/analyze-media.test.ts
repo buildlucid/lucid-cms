@@ -86,6 +86,7 @@ test("posts inline sources with the billing identity and actor, then parses anal
 });
 
 test("polls an existing analysis instead of resubmitting a paid request", async () => {
+	const requestId = randomUUID();
 	const requests: Request[] = [];
 	vi.stubGlobal("fetch", async (url: URL, init: RequestInit) => {
 		requests.push(new Request(url, init));
@@ -98,10 +99,10 @@ test("polls an existing analysis instead of resubmitting a paid request", async 
 					},
 					{ status: 409 },
 				)
-			: Response.json({ data: result });
+			: Response.json({ data: { ...result, requestId } });
 	});
 	const response = await analyzeMedia(context, {
-		requestId: randomUUID(),
+		requestId,
 		request,
 		accessToken: "test",
 		actor,

@@ -1,7 +1,7 @@
 import z from "zod";
 import {
 	agentRoutineConversationModeSchema,
-	routineToolsSchema,
+	routineToolSettingsSchema,
 } from "../../../schemas/agent.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import {
@@ -18,6 +18,7 @@ const featuresSchema = z
 		media: z
 			.object({
 				upload: z.boolean(),
+				addToLibrary: z.boolean(),
 				attach: z.boolean(),
 				analyze: z.boolean(),
 				readFile: z.boolean(),
@@ -46,6 +47,14 @@ const suggestionSchema = z
 		message: resolvedAdminCopySchema,
 	})
 	.strict();
+const detailsSchema = z.object({
+	name: resolvedAdminCopySchema,
+	description: resolvedAdminCopySchema,
+});
+
+//* translation keys are checked by translation tooling, so only written text can be checked here
+const copyText = (copy: z.output<typeof resolvedAdminCopySchema>) =>
+	copy.type === "lucid.literal" ? copy.value : copy.defaultMessage;
 
 /** Checks agent and routine keys, details and schedules at config time. */
 const checkAgentDefinitions = (config: {
@@ -65,7 +74,12 @@ const checkAgentDefinitions = (config: {
 		}
 		keys.add(agent.key);
 
-		if (!agent.name.trim() || !agent.description.trim()) {
+		const details = detailsSchema.safeParse(agent);
+		if (
+			!details.success ||
+			copyText(details.data.name)?.trim() === "" ||
+			copyText(details.data.description)?.trim() === ""
+		) {
 			throw new Error(`Agent "${agent.key}" needs a name and description.`);
 		}
 
@@ -78,8 +92,7 @@ const checkAgentDefinitions = (config: {
 
 		for (const [index, suggestion] of suggestions.data.entries()) {
 			for (const [field, copy] of Object.entries(suggestion)) {
-				const value =
-					copy.type === "lucid.literal" ? copy.value : copy.defaultMessage;
+				const value = copyText(copy);
 				if (value !== undefined && !value.trim()) {
 					throw new Error(
 						`Agent "${agent.key}" suggestion ${index + 1} needs a ${field}.`,
@@ -97,6 +110,12 @@ const checkAgentDefinitions = (config: {
 		if (!features.success) {
 			throw new Error(
 				`Agent "${agent.key}" has invalid features: ${z.prettifyError(features.error)}`,
+			);
+		}
+
+		if (features.data.builder.edit && !features.data.builder.read) {
+			throw new Error(
+				`Agent "${agent.key}" turns on features.builder.edit without features.builder.read, which editing needs.`,
 			);
 		}
 
@@ -143,16 +162,18 @@ const checkAgentDefinitions = (config: {
 				);
 			}
 
-			const routineTools = routineToolsSchema.safeParse(routine.tools);
+			const toolSettings = routineToolSettingsSchema.safeParse(
+				routine.toolSettings,
+			);
 			const tools = agent.tools;
 			if (
-				!routineTools.success ||
-				Object.keys(routineTools.data).some(
+				!toolSettings.success ||
+				Object.keys(toolSettings.data).some(
 					(name) => !tools.some((tool) => tool.name === name),
 				)
 			) {
 				throw new Error(
-					`Routine "${label}" tools must name tools available to its agent and only set "requiresConfirmation" to a boolean.`,
+					`Routine "${label}" toolSettings must name tools available to its agent and only set "requiresConfirmation" to a boolean.`,
 				);
 			}
 

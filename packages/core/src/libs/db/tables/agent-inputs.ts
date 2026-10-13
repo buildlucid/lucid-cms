@@ -1,6 +1,5 @@
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
-import { agentInputStatusSchema } from "../../../schemas/agent.js";
 import { agentReferenceInputSchema } from "../../../schemas/agent-references.js";
 import { agentScreenSchema } from "../../../schemas/agent-screen.js";
 import type {
@@ -9,6 +8,14 @@ import type {
 } from "../../../types/response.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable } from "../types.js";
+
+/** Pending and claimed input is still to be delivered; the rest is kept as a receipt. */
+const agentInputStatusSchema = z.enum([
+	"pending",
+	"claimed",
+	"consumed",
+	"cancelled",
+]);
 
 export const agentInputsTable = defineTable("lucid_agent_inputs", () => ({
 	columns: {
@@ -35,7 +42,7 @@ export interface LucidAgentInputs {
 	text: string;
 	references: JSONColumnType<
 		AgentReferenceInput[],
-		AgentReferenceInput[],
+		AgentReferenceInput[] | undefined,
 		AgentReferenceInput[]
 	>;
 	/** The admin screen it was sent from, which answers the agent's builder tools. */

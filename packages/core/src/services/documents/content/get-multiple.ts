@@ -149,7 +149,6 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 		getTableNames(context, data.collectionKey),
 		resolveRelationVersionType(context, {
 			collectionKey: data.collectionKey,
-			versionId,
 			versionType,
 		}),
 	]);

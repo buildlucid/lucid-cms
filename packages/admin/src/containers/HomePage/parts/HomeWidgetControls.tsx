@@ -1,7 +1,7 @@
 import classnames from "classnames";
 import { TbOutlineEyeOff, TbOutlineGripVertical } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import T from "@/translations";
 
 const sizeLabels = {
@@ -9,10 +9,7 @@ const sizeLabels = {
 	md: { short: "home.widget.size.md.short", long: "home.widget.size.md" },
 	lg: { short: "home.widget.size.lg.short", long: "home.widget.size.lg" },
 	full: { short: "home.widget.size.full.short", long: "home.widget.size.full" },
-} as const satisfies Record<
-	DashboardWidgetSize,
-	{ short: string; long: string }
->;
+} as const satisfies Record<HomeWidgetSize, { short: string; long: string }>;
 
 const controlClass =
 	"flex h-6 items-center justify-center rounded text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary";
@@ -25,11 +22,11 @@ const controlClass =
 const HomeWidgetControls: Component<{
 	widgetKey: string;
 	label: string;
-	size: DashboardWidgetSize;
-	sizes: readonly DashboardWidgetSize[];
+	size: HomeWidgetSize;
+	sizes: readonly HomeWidgetSize[];
 	dropTarget: boolean;
 	onMove: (offset: -1 | 1) => void;
-	onResize: (size: DashboardWidgetSize) => void;
+	onResize: (size: HomeWidgetSize) => void;
 	onHide: () => void;
 }> = (props) => {
 	// ----------------------------------------

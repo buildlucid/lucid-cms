@@ -5,6 +5,7 @@ import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -35,6 +36,11 @@ const getToolDetailsController = factory.createHandlers(
 
 		const details = await serviceWrapper(agentServices.getToolDetails, {
 			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
 		})(context, {
 			conversationId: param.id,
 			messageId: param.messageId,

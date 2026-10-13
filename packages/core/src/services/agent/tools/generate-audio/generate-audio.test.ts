@@ -10,8 +10,8 @@ import {
 } from "vitest";
 import defineAgent from "../../../../libs/agent/define-agent.js";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
-import generateMedia from "../../../../libs/lucid-remote/services/generate-media/index.js";
 import getGeneratedMedia from "../../../../libs/lucid-remote/services/get-generated-media/index.js";
+import runCmsAiRequest from "../../../../libs/lucid-remote/services/run-cms-ai-request/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import { MediaRepository } from "../../../../libs/repositories/index.js";
 import {
@@ -25,7 +25,6 @@ import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import getMediaModelOptions from "../../../ai/features/get-media-model-options.js";
 import uploadSingle from "../../../media/upload-single.js";
 import insertConversation from "../../helpers/insert-conversation.js";
-import { requestIdFor } from "../../helpers/run-paid-tool-request.js";
 import { generateAudioAgentTool } from "./index.js";
 
 vi.mock("../../../media/upload-single.js", () => ({ default: vi.fn() }));
@@ -33,7 +32,7 @@ vi.mock("../../../ai/features/get-media-model-options.js", () => ({
 	default: vi.fn(),
 }));
 vi.mock(
-	"../../../../libs/lucid-remote/services/generate-media/index.js",
+	"../../../../libs/lucid-remote/services/run-cms-ai-request/index.js",
 	() => ({ default: vi.fn() }),
 );
 vi.mock(
@@ -47,18 +46,22 @@ vi.mock("../../../connection/token-manager.js", () => ({
 	}),
 }));
 //* Paid-request tests cover billing; this mock executes the request directly.
-vi.mock("../../helpers/run-paid-tool-request.js", async (importOriginal) => ({
-	...(await importOriginal<
-		typeof import("../../helpers/run-paid-tool-request.js")
-	>()),
-	default: vi.fn((_context, props) =>
-		props.send({
+vi.mock("../../helpers/run-paid-tool-request.js", () => ({
+	default: vi.fn(async (_context, props) => {
+		const result = await props.send({
 			accessToken: "token",
-			requestId: requestIdFor(props.featureKey, props.execution.operationId),
+			requestId: paidRequestId,
 			signal: new AbortController().signal,
-		}),
-	),
+		});
+		return result.error
+			? result
+			: {
+					error: undefined,
+					data: { ...result.data, requestId: paidRequestId },
+				};
+	}),
 }));
+const paidRequestId = "paid-request";
 
 const fixture = getTestConfig();
 const tool = generateAudioAgentTool();
@@ -113,8 +116,8 @@ beforeEach(() => {
 			],
 		},
 	});
-	vi.mocked(generateMedia).mockReset();
-	vi.mocked(generateMedia).mockResolvedValue({
+	vi.mocked(runCmsAiRequest).mockReset();
+	vi.mocked(runCmsAiRequest).mockResolvedValue({
 		error: undefined,
 		data: {
 			mode: "async",
@@ -200,13 +203,12 @@ const executionFor = async (): Promise<AgentToolExecution> => {
 			superAdmin: false,
 			permissions: [Permissions.AiAudioGenerate],
 		},
-		actor: { kind: "user", userId: 1 },
+		actor: { type: "user", userId: 1 },
 		signal: new AbortController().signal,
 		operationId: randomUUID(),
 		run: {
 			id: randomUUID(),
 			conversationId: chat.data.id,
-			userId: 1,
 			agentKey: agent.key,
 		},
 	};
@@ -227,7 +229,7 @@ test("speaks the script with the default model and voice, leaving out instructio
 	});
 	assert(result.type === "success", JSON.stringify(result));
 
-	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]).toMatchObject({
+	expect(vi.mocked(runCmsAiRequest).mock.calls[0]?.[1]).toMatchObject({
 		request: {
 			feature: { key: "media.audio.generate", version: "v1" },
 			input: [{ type: "text", role: "script", value: input.script }],
@@ -259,7 +261,7 @@ test("a script longer than the model speaks fails before generating", async () =
 		execution: await executionFor(),
 	});
 	expect(result).toMatchObject({ type: "failed" });
-	expect(generateMedia).not.toHaveBeenCalled();
+	expect(runCmsAiRequest).not.toHaveBeenCalled();
 });
 
 test("chats check the settings first, then speak with the person's model, voice and instructions", async () => {
@@ -288,7 +290,7 @@ test("chats check the settings first, then speak with the person's model, voice 
 		input,
 		execution: {
 			...execution,
-			interaction: {
+			answer: {
 				data: prepared.data.interaction.data,
 				response: {
 					...prepared.data.interaction.data,
@@ -299,7 +301,7 @@ test("chats check the settings first, then speak with the person's model, voice 
 		},
 	});
 	assert(result.type === "success", JSON.stringify(result));
-	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]?.request).toMatchObject({
+	expect(vi.mocked(runCmsAiRequest).mock.calls[0]?.[1]?.request).toMatchObject({
 		input: [
 			{ type: "text", role: "script", value: input.script },
 			{ type: "text", role: "user-instruction", value: input.instruction },

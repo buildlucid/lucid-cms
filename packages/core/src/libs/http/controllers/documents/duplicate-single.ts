@@ -32,7 +32,7 @@ const duplicateSingleController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.duplicateSingle.params),
 	collectionPermissions("read"),

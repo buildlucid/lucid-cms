@@ -9,7 +9,7 @@ import {
 	type JSX,
 	Show,
 } from "solid-js";
-import AgentReferenceThumb from "@/components/AgentReferenceFiles/parts/AgentReferenceThumb";
+import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
 import { useAgentTranscript } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
 import AudioPill from "@/components/AudioPill/AudioPill";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";

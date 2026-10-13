@@ -43,7 +43,7 @@ const findRequests: ServiceFn<
 						targets: document.targets,
 					})),
 					scheduledAt: request.scheduledAt,
-					failure: request.failure,
+					failure: request.failure?.message ?? null,
 					updatedAt: request.updatedAt,
 					links: { request: getRequestLink(context, request.id) },
 				})),

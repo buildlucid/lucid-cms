@@ -126,8 +126,6 @@ const resolveRelationVersionType: ServiceFn<
 	[
 		{
 			collectionKey: string;
-			documentId?: number;
-			versionId?: number;
 			versionType: DocumentVersionType;
 		},
 	],

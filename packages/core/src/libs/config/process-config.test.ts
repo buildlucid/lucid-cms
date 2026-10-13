@@ -6,7 +6,9 @@ import { defineTable } from "../db/client/table/definition.js";
 import defineContentApiRoute from "../http/define-content-api-route.js";
 import defineJob from "../jobs/define-job.js";
 import { getJobDefinitionRuntime, getJobRegistry } from "../jobs/registry.js";
+import defineNotification from "../notifications/define-notification.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
+import type { Permission } from "../permission/types.js";
 import defineToolkit from "../toolkit/define-toolkit.js";
 import coreJobDefinitions from "./core-job-definitions.js";
 import processConfig from "./process-config.js";
@@ -169,7 +171,7 @@ test("rejects static content-route scopes that cannot be granted", async () => {
 	);
 });
 
-test("preserves job definitions while merging config", async () => {
+test("preserves job definitions from the array shorthand while merging config", async () => {
 	const job = defineJob({
 		name: "test:config-job",
 		version: 1,
@@ -185,7 +187,7 @@ test("preserves job definitions while merging config", async () => {
 	const processed = await processConfig(
 		{
 			...config,
-			jobs: { definitions: [job] },
+			jobs: [job],
 			plugins: [
 				{
 					key: "job-plugin",
@@ -249,6 +251,30 @@ test("rejects duplicate job definitions after plugin config is merged", async ()
 		),
 	).rejects.toThrow(
 		'Job definition "test:duplicate-job@1" is registered more than once.',
+	);
+});
+
+test("rejects notification audiences with an unknown permission", async () => {
+	const notification = defineNotification({
+		key: "test:unknown-permission",
+		category: { key: "test", label: "Test" },
+		name: "Unknown permission",
+		audience: { permission: "test:missing" as Permission },
+		data: z.object({}),
+		render: () => ({ title: "Unknown permission" }),
+	});
+
+	await expect(
+		processConfig(
+			{
+				...config,
+				secrets: "a".repeat(64),
+				notifications: [notification],
+			},
+			{ resolvedDb: createAdapter("request") },
+		),
+	).rejects.toThrow(
+		'Notification "test:unknown-permission" sends to the unknown permission "test:missing".',
 	);
 });
 

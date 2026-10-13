@@ -31,13 +31,13 @@ const updateCommentController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateComment.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.updateComment.params),
 	validate("json", controllerSchemas.updateComment.body),
 	async (c) => {
-		const { id, eventId } = c.req.valid("param");
+		const { id, commentId } = c.req.valid("param");
 		const body = c.req.valid("json");
 		const context = createServiceContext(c);
 
@@ -50,7 +50,7 @@ const updateCommentController = factory.createHandlers(
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),
-			eventId: Number.parseInt(eventId, 10),
+			commentId: Number.parseInt(commentId, 10),
 			body: body.body,
 			user: c.get("auth"),
 		});

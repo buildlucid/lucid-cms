@@ -5,9 +5,9 @@ import type { LucidActor } from "../../types/hono.js";
 import type { RequestSummary } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAgentActors from "../agent/helpers/get-agent-actors.js";
+import getDisplayUsers from "../users/helpers/get-display-users.js";
 import getListAccess from "./helpers/get-list-access.js";
 import getRequestAccess from "./helpers/get-request-access.js";
-import getRequestUsers from "./helpers/get-request-users.js";
 
 const getMultiple: ServiceFn<
 	[
@@ -31,7 +31,7 @@ const getMultiple: ServiceFn<
 
 	const [requests, count] = requestsRes.data;
 	const [usersRes, agentsRes] = await Promise.all([
-		getRequestUsers(context, {
+		getDisplayUsers(context, {
 			ids: requests.flatMap((request) => [
 				request.created_by,
 				...request.reviewers.map((reviewer) => reviewer.user_id),

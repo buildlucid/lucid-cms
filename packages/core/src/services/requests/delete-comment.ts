@@ -7,7 +7,7 @@ import loadRequest from "./helpers/load-request.js";
 
 /** Deletes the actor's comment and replies, allowing super admins and the system to moderate only without an agent. */
 const deleteComment: ServiceFn<
-	[{ id: number; eventId: number; user: LucidActor; agentRunId?: string }],
+	[{ id: number; commentId: number; user: LucidActor; agentRunId?: string }],
 	undefined
 > = async (context, data) => {
 	const RequestEvents = new RequestEventsRepository(context.db);
@@ -16,7 +16,7 @@ const deleteComment: ServiceFn<
 	if (requestRes.error) return requestRes;
 
 	const comment = requestRes.data.events.find(
-		(event) => event.id === data.eventId && event.type === "comment",
+		(event) => event.id === data.commentId && event.type === "comment",
 	);
 	const authorRes = comment
 		? await isCommentAuthor(context, { ...data, comment })

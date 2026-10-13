@@ -70,7 +70,7 @@ const AgentRoutineTableRow: Component<{
 					type: "button",
 					icon: "trash",
 					variant: "danger",
-					show: props.routine.source === "database",
+					show: props.routine.source === "own",
 					onClick: props.onDelete,
 					excludeFromRowClick: true,
 				},

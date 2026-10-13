@@ -19,7 +19,7 @@ const factory = createFactory();
 const getMentionableUsersController = factory.createHandlers(
 	describeRoute({
 		description:
-			"List the people who can see a request, and so can be mentioned in its comments.",
+			"Search the people who can see a request, and so can be mentioned in its comments, by name or ID. Returns up to limit people.",
 		tags: ["requests"],
 		summary: "Get Request Mentionable Users",
 		responses: openAPI.responses({
@@ -29,13 +29,16 @@ const getMentionableUsersController = factory.createHandlers(
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getMentionableUsers.params,
+			query: controllerSchemas.getMentionableUsers.query.string,
 		}),
 	}),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.getMentionableUsers.params),
+	validate("query", controllerSchemas.getMentionableUsers.query.string),
 	async (c) => {
 		const { id } = c.req.valid("param");
+		const query = c.req.valid("query");
 		const context = createServiceContext(c);
 
 		const result = await serviceWrapper(requestServices.getMentionableUsers, {
@@ -48,6 +51,9 @@ const getMentionableUsersController = factory.createHandlers(
 		})(context, {
 			id: Number.parseInt(id, 10),
 			user: c.get("auth"),
+			name: query["filter[name]"],
+			ids: query["filter[id]"]?.split(",").map(Number),
+			limit: query.limit,
 		});
 		if (result.error) throw new LucidAPIError(result.error);
 

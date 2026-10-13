@@ -13,7 +13,7 @@ const updateComment: ServiceFn<
 	[
 		{
 			id: number;
-			eventId: number;
+			commentId: number;
 			user: LucidActor;
 			agentRunId?: string;
 			body: RichTextJSON;
@@ -38,7 +38,7 @@ const updateComment: ServiceFn<
 	if (requestRes.error) return requestRes;
 
 	const comment = requestRes.data.events.find(
-		(event) => event.id === data.eventId && event.type === "comment",
+		(event) => event.id === data.commentId && event.type === "comment",
 	);
 	const authorRes = comment
 		? await isCommentAuthor(context, { ...data, comment })

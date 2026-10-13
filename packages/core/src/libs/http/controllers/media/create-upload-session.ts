@@ -36,7 +36,7 @@ const createUploadSessionController = factory.createHandlers(
 			controllerSchemas.createUploadSession.body,
 		),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
 	validate("json", controllerSchemas.createUploadSession.body),

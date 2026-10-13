@@ -8,6 +8,7 @@ import type { AgentRun, AgentUsage } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 
+/** Lists a routine's runs with the credits and model calls each used. */
 const getRoutineRuns: ServiceFn<
 	[{ id: string; userId: number; query: GetRoutineRunsQueryParams }],
 	{ data: AgentRun[]; count: number }

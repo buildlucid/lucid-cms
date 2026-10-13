@@ -1,9 +1,9 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { ErrorResponse, ResponseBody } from "@types";
-import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { requestChangeKeys } from "./change-keys";
 
 export interface Params {
 	id: number;
@@ -34,7 +34,7 @@ const useApprove = (props?: UseApproveProps) => {
 			title: T()("toasts.requests.approved.title"),
 			message: T()("toasts.requests.approved.message"),
 		}),
-		invalidates: [queryKeys.requests.all()],
+		invalidates: requestChangeKeys(),
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

@@ -3,7 +3,7 @@ import type {
 	AiUsageChartDimension,
 	AiUsageChartMetric,
 } from "../../../types/response.js";
-import { addDays, getDateKey, parseDateKey } from "./date-helpers.js";
+import { addDays, parseDateKey } from "./date-helpers.js";
 
 const defaultMetric: AiUsageChartMetric = "credits";
 const defaultDimension: AiUsageChartDimension = "day";
@@ -21,7 +21,10 @@ const isSupportedMetric = (value: string): value is AiUsageChartMetric =>
  * service hits the repository.
  */
 const normalizeUsageChartQuery = (query: GetUsageChartQueryParams) => {
-	const defaultEnd = parseDateKey(getDateKey(new Date())) as Date;
+	const now = new Date();
+	const defaultEnd = new Date(
+		Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+	);
 	const defaultStart = addDays(defaultEnd, -13);
 	const end = query.endDate ? parseDateKey(query.endDate) : defaultEnd;
 	const start = query.startDate ? parseDateKey(query.startDate) : defaultStart;

@@ -193,7 +193,7 @@ export const DocumentsList: Component<{
 		return (
 			userStore.get.hasPermission([permissions.delete]).all ||
 			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
-				userStore.get.hasPermission([permissions["delete-request"]]).all)
+				userStore.get.hasPermission([permissions.deleteRequest]).all)
 		);
 	});
 	const canUpdateDocuments = createMemo(() => {

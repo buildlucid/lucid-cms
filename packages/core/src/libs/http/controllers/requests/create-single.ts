@@ -24,6 +24,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["requests"],
 		summary: "Create Request",
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
@@ -33,7 +34,7 @@ const createSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("json", controllerSchemas.createSingle.body),

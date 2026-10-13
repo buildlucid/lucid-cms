@@ -117,14 +117,17 @@ export type Account = {
 	profilePicture: ProfilePicture | null;
 };
 
-export type UserRef = {
+/** User details for actor and permission displays, excluding contact information. */
+export type UserDisplay = {
 	id: number;
 	username: string;
-	email: string;
 	firstName: string | null;
 	lastName: string | null;
 	profilePicture: ProfilePicture | null;
-} | null;
+};
+
+/** A user referenced by a user field, with the email a field can show. */
+export type UserRef = (UserDisplay & { email: string }) | null;
 
 export type AuthProviderType = "oidc" | string;
 

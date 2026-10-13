@@ -1,5 +1,4 @@
-import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
-import type { RegisteredFieldDefinition } from "../../../libs/collection/custom-fields/types.js";
+import { fieldHooks } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { DocumentShape } from "../../../libs/collection/helpers/get-document-shape.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 
@@ -11,10 +10,7 @@ const projectEditableValue = (
 ): unknown => {
 	switch (shape.kind) {
 		case "value": {
-			const { formatToolValue } = registeredFields[shape.field.type] as Pick<
-				RegisteredFieldDefinition,
-				"formatToolValue"
-			>;
+			const { formatToolValue } = fieldHooks[shape.field.type];
 			return formatToolValue ? formatToolValue(value) : value;
 		}
 		case "object": {

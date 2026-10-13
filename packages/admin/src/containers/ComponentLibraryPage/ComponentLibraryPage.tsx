@@ -878,7 +878,7 @@ const ComponentLibraryPage: Component = () => {
 								description="This report has been deleted."
 								actions={
 									<Link variant="primary" size="sm" href="/lucid">
-										Back to dashboard
+										Back to Home
 									</Link>
 								}
 							/>

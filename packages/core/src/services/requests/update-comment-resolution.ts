@@ -14,7 +14,7 @@ const updateCommentResolution: ServiceFn<
 	[
 		{
 			id: number;
-			eventId: number;
+			commentId: number;
 			user: LucidActor;
 			agentRunId?: string;
 			resolution: RequestCommentResolution | null;
@@ -27,7 +27,6 @@ const updateCommentResolution: ServiceFn<
 	//* open comments stop approval, so changes wait for any approval in progress
 	const lockRes = await lockRequest(context, { id: data.id });
 	if (lockRes.error) return lockRes;
-	await using _lock = lockRes.data;
 
 	const requestRes = await loadRequest(context, data);
 	if (requestRes.error) return requestRes;
@@ -35,7 +34,7 @@ const updateCommentResolution: ServiceFn<
 	const request = requestRes.data;
 	const comment = request.events.find(
 		(event) =>
-			event.id === data.eventId &&
+			event.id === data.commentId &&
 			event.type === "comment" &&
 			event.parent_id === null,
 	);

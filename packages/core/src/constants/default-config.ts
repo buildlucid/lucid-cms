@@ -1,6 +1,5 @@
 import { defaultDirectories } from "../libs/resources/defaults.js";
 import type { ResolvedLucidConfig } from "../types/config.js";
-import constants from "./constants.js";
 
 export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	tables: [],
@@ -87,12 +86,10 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	queue: {},
 	jobs: {
 		definitions: [],
-		retention: {
-			completedDays: 7,
-			failedDays: 30,
-		},
 	},
-	notifications: [],
+	notifications: {
+		definitions: [],
+	},
 	hooks: [],
 	collections: [],
 	plugins: [],
@@ -106,8 +103,14 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		name: "Lucid CMS",
 	},
 	retention: {
-		defaultPurgeAfterDays: constants.retention,
-		notificationDays: 90,
+		deletedDocuments: 30,
+		deletedMedia: 30,
+		deletedUsers: 30,
+		removedCollections: 30,
+		removedLocales: 30,
+		completedJobs: 7,
+		failedJobs: 30,
+		notifications: 90,
 	} satisfies ResolvedLucidConfig["retention"],
 };
 

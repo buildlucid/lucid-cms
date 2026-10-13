@@ -11,7 +11,10 @@ const useGetModels = (params: {
 	routineId?: Accessor<string | undefined>;
 }) =>
 	useQuery(() => ({
-		queryKey: queryKeys.agent.models(params.agentKey(), params.routineId?.()),
+		queryKey: queryKeys.agent.modelCatalog(
+			params.agentKey(),
+			params.routineId?.(),
+		),
 		queryFn: () =>
 			request<ResponseBody<AiModelCatalog>>({
 				url: `/lucid/api/v1/agent/models/${encodeURIComponent(params.agentKey() ?? "")}`,

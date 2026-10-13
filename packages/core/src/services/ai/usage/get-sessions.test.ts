@@ -7,8 +7,8 @@ import createServiceContext from "../../../utils/services/create-service-context
 import type { ServiceContext } from "../../../utils/services/types.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import insertConversation from "../../agent/helpers/insert-conversation.js";
+import startRun from "../../agent/helpers/start-run.js";
 import storeUsage from "../../agent/helpers/store-usage.js";
-import startRun from "../../agent/start-run.js";
 import storeGeneration from "../storage/store-generation.js";
 import getSession from "./get-session.js";
 import getSessionRecords from "./get-session-records.js";
@@ -127,7 +127,7 @@ test("groups requests into sessions and links chats only for their owner", async
 		userId: ownerId,
 		conversationId: conversation.data.id,
 		text: "Test",
-		requestId: randomUUID(),
+		runId: randomUUID(),
 	});
 	if (run.error) throw new Error(JSON.stringify(run.error));
 

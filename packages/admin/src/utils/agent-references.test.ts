@@ -1,3 +1,4 @@
+import type { AgentCapabilities } from "@types";
 import { expect, it } from "vitest";
 import {
 	agentChangesHref,
@@ -33,14 +34,19 @@ it("keeps pinned versions when confirming a document selector and drops deselect
 });
 
 it("opens media only when a tool accepts its type, and leaves documents unanswered", () => {
-	const capabilities = {
-		mediaAnalysis: { mimeTypes: ["application/pdf", "image/*"] },
-		fileRead: { mimeTypes: ["text/*", "application/json"] },
-		webSearch: false,
-		webRead: false,
-		imageGeneration: false,
-		audioGeneration: false,
-	};
+	const capabilities = (
+		media: Partial<
+			Pick<AgentCapabilities["media"], "analyze" | "readFile">
+		> = {},
+	): AgentCapabilities => ({
+		media: {
+			analyze: { mimeTypes: ["application/pdf", "image/*"] },
+			readFile: { mimeTypes: ["text/*", "application/json"] },
+			generate: { image: false, audio: false },
+			...media,
+		},
+		web: { search: false, read: false },
+	});
 	const media = (mimeType?: string) => ({
 		type: "media" as const,
 		mediaId: 1,
@@ -48,27 +54,24 @@ it("opens media only when a tool accepts its type, and leaves documents unanswer
 		mimeType,
 	});
 
-	expect(canAgentOpen(media("application/pdf"), capabilities)).toBe(true);
-	expect(canAgentOpen(media("image/webp"), capabilities)).toBe(true);
+	expect(canAgentOpen(media("application/pdf"), capabilities())).toBe(true);
+	expect(canAgentOpen(media("image/webp"), capabilities())).toBe(true);
 	expect(
-		canAgentOpen(media("text/html"), { ...capabilities, mediaAnalysis: null }),
+		canAgentOpen(media("text/html"), capabilities({ analyze: null })),
 	).toBe(true);
-	expect(canAgentOpen(media("application/json"), capabilities)).toBe(true);
+	expect(canAgentOpen(media("application/json"), capabilities())).toBe(true);
 	expect(
-		canAgentOpen(media("text/plain"), { ...capabilities, fileRead: null }),
+		canAgentOpen(media("text/plain"), capabilities({ readFile: null })),
 	).toBe(false);
-	expect(canAgentOpen(media("audio/mpeg"), capabilities)).toBe(false);
-	expect(canAgentOpen(media(), capabilities)).toBe(false);
+	expect(canAgentOpen(media("audio/mpeg"), capabilities())).toBe(false);
+	expect(canAgentOpen(media(), capabilities())).toBe(false);
 	expect(
-		canAgentOpen(media("application/pdf"), {
-			...capabilities,
-			mediaAnalysis: null,
-		}),
+		canAgentOpen(media("application/pdf"), capabilities({ analyze: null })),
 	).toBe(false);
 	expect(
 		canAgentOpen(
 			{ type: "document", collectionKey: "pages", documentId: 1, label: "Doc" },
-			capabilities,
+			capabilities(),
 		),
 	).toBeUndefined();
 });

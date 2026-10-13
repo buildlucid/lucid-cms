@@ -1,8 +1,8 @@
 import type { Collection } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
-import { stageVariants } from "@/components/DocumentSidebar/parts/WorkflowStageOption";
 import StatusSelect from "@/components/StatusSelect/StatusSelect";
 import T from "@/translations";
+import { workflowStageIndicators } from "@/utils/document-sidebar";
 import helpers from "@/utils/helpers";
 
 /**
@@ -24,7 +24,7 @@ const WorkflowStageSelect: Component<{
 			label:
 				helpers.getLocaleValue({ value: stage.label, fallback: stage.key }) ||
 				stage.key,
-			indicator: stageVariants[stage.color ?? "grey"],
+			indicator: workflowStageIndicators[stage.color ?? "grey"],
 		})),
 	);
 

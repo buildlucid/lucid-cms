@@ -1,8 +1,4 @@
 import { copy } from "@lucidcms/core";
-import {
-	getCollectionTableNames,
-	resolveRelatedDocumentVersionType,
-} from "@lucidcms/core/extension";
 import type {
 	DocumentVersionType,
 	ServiceFn,
@@ -15,9 +11,9 @@ import type {
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
 import checkFullSlugUniqueness from "../../checks/fullslug-uniqueness.js";
 import constructChildFullSlug from "../../construct-child-fullslugs.js";
+import findSegmentDependents from "../../find-segment-dependents.js";
 import getDescendantFields from "../../get-descendant-fields.js";
 import getPagesFields from "../../get-pages-fields.js";
-import getRouteSegmentDependents from "../../get-route-segment-dependents.js";
 import resolveStoredRoutePrefixes from "../../resolve-stored-route-prefixes.js";
 import updateRouteFields from "../../update-route-fields.js";
 
@@ -53,151 +49,112 @@ const propagateRouteSegmentUpdates: ServiceFn<
 		"deletedDocumentIds" in data
 			? data.deletedDocumentIds
 			: [data.targetDocumentId];
+	const dependentsRes = await findSegmentDependents(context, {
+		options: data.options,
+		collectionKey: data.targetCollectionKey,
+		documentIds: targetDocumentIds,
+		target: "deletedDocumentIds" in data ? undefined : data.targetVersionType,
+	});
+	if (dependentsRes.error) return dependentsRes;
+
 	const collectionResults = await Promise.all(
-		data.options.collections.map(async (collection) => {
-			const relationKeys = collection.segments
-				.filter((segment) => segment.collection === data.targetCollectionKey)
-				.map((segment) => segment.relation);
-			if (relationKeys.length === 0) {
-				return { error: undefined, data: undefined };
-			}
+		dependentsRes.data.map(
+			async ({ collection, collectionInstance, tables, dependents }) => {
+				const localization = resolvePagesCollectionLocalization({
+					localization: context.config.localization,
+					collection,
+					collectionInstance,
+				});
 
-			const collectionInstance = context.config.collections.find(
-				(instance) => instance.key === collection.key,
-			);
-			if (!collectionInstance) {
-				return { error: undefined, data: undefined };
-			}
-
-			const versionTypes = [
-				"latest",
-				...collectionInstance.getData.publishing.environments.map(
-					(environment) => environment.key,
-				),
-			].filter((versionType) => {
-				return (
-					"deletedDocumentIds" in data ||
-					resolveRelatedDocumentVersionType({
-						collections: context.config.collections,
-						sourceCollectionKey: collection.key,
-						sourceVersionType: versionType,
-						targetCollectionKey: data.targetCollectionKey,
-					}) === data.targetVersionType
-				);
-			});
-			if (versionTypes.length === 0) {
-				return { error: undefined, data: undefined };
-			}
-
-			const tablesRes = await getCollectionTableNames(context, collection.key);
-			if (tablesRes.error) return tablesRes;
-			const dependentsRes = await getRouteSegmentDependents(context, {
-				collectionKey: collection.key,
-				relationKeys,
-				targetCollectionKey: data.targetCollectionKey,
-				targetDocumentIds,
-				versionTypes,
-				tables: tablesRes.data,
-			});
-			if (dependentsRes.error) return dependentsRes;
-
-			const localization = resolvePagesCollectionLocalization({
-				localization: context.config.localization,
-				collection,
-				collectionInstance,
-			});
-
-			const versionResults = await Promise.all(
-				versionTypes.map(async (versionType) => {
-					const directVersionIds = dependentsRes.data.flatMap((dependent) =>
-						dependent.version_type === versionType
-							? [dependent.document_version_id]
-							: [],
-					);
-					if (directVersionIds.length === 0) {
-						return { error: undefined, data: undefined };
-					}
-
-					const scope: RouteScope = { type: "version", versionType };
-					const directRes = await getPagesFields(context, {
-						collectionKey: collection.key,
-						scope,
-						tables: tablesRes.data,
-						versionIds: directVersionIds,
-					});
-					if (directRes.error) return directRes;
-
-					const descendantsRes = await getDescendantFields(context, {
-						ids: directRes.data.map((dependent) => dependent.document_id),
-						scope,
-						collectionKey: collection.key,
-						tables: tablesRes.data,
-					});
-					if (descendantsRes.error) return descendantsRes;
-
-					const affectedVersions = new Map(
-						[...directRes.data, ...descendantsRes.data].map((dependent) => [
-							dependent.document_version_id,
-							dependent,
-						]),
-					);
-					const affected = [...affectedVersions.values()].filter(
-						(dependent) =>
-							deletedTargets?.collectionKey !== collection.key ||
-							!deletedTargets.documentIds.includes(dependent.document_id),
-					);
-					const routePrefixesRes = await resolveStoredRoutePrefixes(context, {
-						collection,
-						collectionInstance,
-						versionType,
-						excludedTargets: deletedTargets,
-						versionIds: affected.map(
+				const versionResults = await Promise.all(
+					[
+						...Map.groupBy(dependents, (dependent) => dependent.version_type),
+					].map(async ([versionType, versionDependents]) => {
+						const directVersionIds = versionDependents.map(
 							(dependent) => dependent.document_version_id,
-						),
-					});
-					if (routePrefixesRes.error) return routePrefixesRes;
+						);
 
-					const fullSlugsRes = constructChildFullSlug({
-						descendants: affected,
-						localization,
-						collection,
-						routePrefixes: routePrefixesRes.data,
-					});
-					if (fullSlugsRes.error) return fullSlugsRes;
+						const scope: RouteScope = { type: "version", versionType };
+						const directRes = await getPagesFields(context, {
+							collectionKey: collection.key,
+							scope,
+							tables,
+							versionIds: directVersionIds,
+						});
+						if (directRes.error) return directRes;
 
-					const uniquenessRes = await checkFullSlugUniqueness(context, {
-						collection,
-						projectedFullSlugs: fullSlugsRes.data,
-						duplicateMessage: deletedTargets
-							? copy("server:plugin.pages.full.slug.duplicate.on.delete")
-							: undefined,
-						scope,
-						tables: tablesRes.data,
-						excludeDocumentIds: fullSlugsRes.data.map(
-							(document) => document.documentId,
-						),
-					});
-					if (uniquenessRes.error) return uniquenessRes;
+						const descendantsRes = await getDescendantFields(context, {
+							ids: directRes.data.map((dependent) => dependent.document_id),
+							scope,
+							collectionKey: collection.key,
+							tables,
+						});
+						if (descendantsRes.error) return descendantsRes;
 
-					return updateRouteFields(context, {
-						toolkit: data.toolkit,
-						collectionKey: collection.key,
-						field: "fullSlug",
-						excludeDocumentIds:
-							collection.key === data.targetCollectionKey
-								? targetDocumentIds
-								: [],
-						values: fullSlugsRes.data,
-						scope,
-						tables: tablesRes.data,
-					});
-				}),
-			);
-			const failedVersion = versionResults.find((result) => result.error);
-			if (failedVersion?.error) return failedVersion;
+						const affectedVersions = new Map(
+							[...directRes.data, ...descendantsRes.data].map((dependent) => [
+								dependent.document_version_id,
+								dependent,
+							]),
+						);
+						const affected = [...affectedVersions.values()].filter(
+							(dependent) =>
+								deletedTargets?.collectionKey !== collection.key ||
+								!deletedTargets.documentIds.includes(dependent.document_id),
+						);
+						const routePrefixesRes = await resolveStoredRoutePrefixes(context, {
+							collection,
+							collectionInstance,
+							versionType,
+							excludedTargets: deletedTargets,
+							versionIds: affected.map(
+								(dependent) => dependent.document_version_id,
+							),
+						});
+						if (routePrefixesRes.error) return routePrefixesRes;
 
-			return { error: undefined, data: undefined };
-		}),
+						const fullSlugsRes = constructChildFullSlug({
+							descendants: affected,
+							localization,
+							collection,
+							routePrefixes: routePrefixesRes.data,
+						});
+						if (fullSlugsRes.error) return fullSlugsRes;
+
+						const uniquenessRes = await checkFullSlugUniqueness(context, {
+							collection,
+							projectedFullSlugs: fullSlugsRes.data,
+							duplicateMessage: deletedTargets
+								? copy("server:plugin.pages.full.slug.duplicate.on.delete")
+								: undefined,
+							scope,
+							tables,
+							excludeDocumentIds: fullSlugsRes.data.map(
+								(document) => document.documentId,
+							),
+						});
+						if (uniquenessRes.error) return uniquenessRes;
+
+						return updateRouteFields(context, {
+							toolkit: data.toolkit,
+							collectionKey: collection.key,
+							field: "fullSlug",
+							excludeDocumentIds:
+								collection.key === data.targetCollectionKey
+									? targetDocumentIds
+									: [],
+							values: fullSlugsRes.data,
+							scope,
+							tables,
+						});
+					}),
+				);
+				const failedVersion = versionResults.find((result) => result.error);
+				if (failedVersion?.error) return failedVersion;
+
+				return { error: undefined, data: undefined };
+			},
+		),
 	);
 	const failedCollection = collectionResults.find((result) => result.error);
 	if (failedCollection?.error) return failedCollection;

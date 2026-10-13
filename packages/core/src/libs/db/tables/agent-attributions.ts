@@ -5,12 +5,15 @@ import type { BooleanInt, TimestampImmutable } from "../types.js";
 
 export const agentAttributionsTable = defineTable(
 	"lucid_agent_attributions",
-	() => ({
+	(adapter) => ({
 		columns: {
 			run_id: { schema: z.uuid(), type: "text" },
 			agent_key: { schema: z.string(), type: "text" },
 			system: {
-				schema: z.union([z.boolean(), z.literal(0), z.literal(1)]),
+				schema: z.union([
+					z.literal(adapter.config.defaults.boolean.true),
+					z.literal(adapter.config.defaults.boolean.false),
+				]),
 				type: "boolean",
 			},
 			conversation_id: { schema: z.uuid().nullable(), type: "text" },

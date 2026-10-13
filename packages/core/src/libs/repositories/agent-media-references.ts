@@ -49,7 +49,11 @@ export default class AgentMediaReferencesRepository extends StaticRepository<"lu
 				if (props.source !== "message") return conflict.doNothing();
 				return target
 					.doUpdateSet({ source: "message", tool_name: null })
-					.where("lucid_agent_media_references.managed", "=", false);
+					.where(
+						"lucid_agent_media_references.managed",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					);
 			});
 
 		const result = await this.executeQuery(() => query.execute(), {

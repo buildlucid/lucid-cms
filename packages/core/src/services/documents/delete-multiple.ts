@@ -10,6 +10,7 @@ import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import executeDeleteHook from "./helpers/execute-delete-hook.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
+import requiresReview from "./helpers/requires-review.js";
 import nullifyDocumentReferences from "./nullify-document-references.js";
 
 const deleteMultiple: ServiceFn<
@@ -62,7 +63,7 @@ const deleteMultiple: ServiceFn<
 
 			if (
 				data.requestId === undefined &&
-				collectionRes.data.getData.publishing.review?.delete
+				requiresReview(collectionRes.data, { type: "delete" })
 			) {
 				return {
 					error: {

@@ -1,5 +1,5 @@
 import type { LucidActor } from "../../types/hono.js";
-import type { Account, User } from "../../types/response.js";
+import type { Account, User, UserDisplay } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
@@ -144,6 +144,23 @@ const formatSingle = (props: {
 	return response;
 };
 
+/** Formats how a person is shown next to their activity, leaving out contact details. */
+const formatDisplay = (props: {
+	user: Pick<UserPropT, "id" | "username" | "first_name" | "last_name"> & {
+		profile_picture?: MediaPosterPropsT[];
+	};
+	mediaOptions: MediaFormatterOptions;
+}): UserDisplay => ({
+	id: props.user.id,
+	username: props.user.username,
+	firstName: props.user.first_name,
+	lastName: props.user.last_name,
+	profilePicture: mediaFormatter.formatMediaImagePreview({
+		poster: props.user.profile_picture?.[0],
+		options: props.mediaOptions,
+	}),
+});
+
 const formatContentAccount = (props: {
 	user: ContentAccountPropT;
 	mediaOptions: MediaFormatterOptions;
@@ -162,5 +179,6 @@ const formatContentAccount = (props: {
 export default {
 	formatMultiple,
 	formatSingle,
+	formatDisplay,
 	formatContentAccount,
 };

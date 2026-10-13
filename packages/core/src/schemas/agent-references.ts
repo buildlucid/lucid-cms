@@ -34,9 +34,6 @@ export const agentReferenceInputSchema = z.discriminatedUnion("type", [
 	agentResourceSchema.options[2],
 ]) satisfies z.ZodType<AgentReferenceInput>;
 
-/** Whether a person attached a resource to a message or a tool linked it. */
-export const agentReferenceSourceTypeSchema = z.enum(["message", "tool"]);
-
 const snapshotDetails = {
 	label: z.string(),
 	mimeType: z.string().optional(),

@@ -19,6 +19,7 @@ import cloneVersion from "../../documents-versions/clone-version.js";
 import canWriteDocument from "./can-write-document.js";
 import checkPublishedTargets from "./check-published-targets.js";
 import createTargets from "./create-targets.js";
+import getHookRequest from "./get-hook-request.js";
 import resolveTargets from "./resolve-targets.js";
 
 /** Adds a document's targets to a request and captures its source content for publish requests. */
@@ -218,21 +219,10 @@ const captureDocument: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.user.id,
 				collectionTableNames: tablesRes.data,
-				request: {
+				request: getHookRequest({
 					id: data.request.id,
-					documents: (membersRes.data ?? []).flatMap((member) =>
-						member.source === null || member.source_version_id === null
-							? []
-							: [
-									{
-										collectionKey: member.collection_key,
-										documentId: member.document_id,
-										source: member.source,
-										versionId: member.source_version_id,
-									},
-								],
-					),
-				},
+					documents: membersRes.data ?? [],
+				}),
 			},
 			data: {
 				documentId: data.documentId,

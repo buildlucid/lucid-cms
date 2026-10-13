@@ -29,7 +29,7 @@ const getPreferences: ServiceFn<
 	return {
 		error: undefined,
 		data: notificationsFormatter.formatPreferences({
-			definitions: context.config.notifications,
+			definitions: context.config.notifications.definitions,
 			settings: settingsRes.data ?? [],
 			preferences: preferencesRes.data ?? [],
 			translate: context.translate,

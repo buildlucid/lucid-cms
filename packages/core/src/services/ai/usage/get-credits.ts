@@ -1,4 +1,4 @@
-import getRemoteCredits from "../../../libs/lucid-remote/services/get-credits.js";
+import getRemoteCredits from "../../../libs/lucid-remote/services/get-credits/index.js";
 import type { AiCredits } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import handleRemoteError from "../../connection/helpers/handle-remote-error.js";

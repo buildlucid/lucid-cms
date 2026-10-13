@@ -29,7 +29,7 @@ const updateSingleController = factory.createHandlers(
 			params: controllerSchemas.updateSingle.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateSingle.body),
 	validate("param", controllerSchemas.updateSingle.params),

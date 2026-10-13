@@ -49,11 +49,8 @@ export interface RichTextProps extends JSX.AriaAttributes {
 	links?: boolean;
 	/** Tiptap extensions to add, or to replace built in ones with the same name. Read once on mount. */
 	extensions?: Extensions;
-	/**
-	 * People who can be mentioned by typing `@`. Whether mentions are on is
-	 * read once on mount, so pass an empty array while they load.
-	 */
-	mentions?: RichTextMentionOption[];
+	/** Searches people for `@` mentions when enabled at mount. */
+	mentions?: (query: string) => Promise<RichTextMentionOption[]>;
 	/** Content added to the end of the toolbar. */
 	toolbarEnd?: JSXElement;
 	labelStart?: JSXElement;
@@ -132,7 +129,9 @@ const RichText: Component<RichTextProps> = (props) => {
 
 	const mentionExtension =
 		props.mentions !== undefined
-			? createMentionExtension(() => props.mentions ?? [])
+			? createMentionExtension(
+					(query) => props.mentions?.(query) ?? Promise.resolve([]),
+				)
 			: undefined;
 
 	const { editor, setContainer } = useEditor({

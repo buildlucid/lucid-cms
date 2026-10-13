@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
-import type { RoutineTools } from "../../libs/agent/types.js";
+import type { RoutineToolSettings } from "../../libs/agent/types.js";
 import { agentFormatter } from "../../libs/formatters/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type {
@@ -20,7 +20,7 @@ const createRoutine: ServiceFn<
 			agentKey: string;
 			userId: number;
 			name: string;
-			tools?: RoutineTools;
+			toolSettings?: RoutineToolSettings;
 			modelSelection?: AiModelSelection | null;
 			conversationMode?: AgentRoutineConversationMode;
 			instructions: string;
@@ -41,11 +41,11 @@ const createRoutine: ServiceFn<
 	const next = nextRoutineOccurrence(input);
 	if (next.error) return next;
 
-	const tools = input.tools ?? {};
+	const toolSettings = input.toolSettings ?? {};
 	const validation = await validateRoutineTools(context, {
 		agentKey: input.agentKey,
 		userId: input.userId,
-		tools,
+		tools: toolSettings,
 	});
 	if (validation.error) return validation;
 
@@ -57,7 +57,7 @@ const createRoutine: ServiceFn<
 			id: randomUUID(),
 			agent_key: input.agentKey,
 			key: null,
-			source: "database",
+			source: "own",
 			name: input.name,
 			instructions: input.instructions,
 			conversation_mode: input.conversationMode ?? "new",
@@ -78,13 +78,16 @@ const createRoutine: ServiceFn<
 
 	const saved = await saveRoutineTools(context, {
 		routineId: created.data.id,
-		tools,
+		tools: toolSettings,
 	});
 	if (saved.error) return saved;
 
 	return {
 		error: undefined,
-		data: agentFormatter.formatRoutine({ routine: created.data, tools }),
+		data: agentFormatter.formatRoutine({
+			routine: created.data,
+			toolSettings,
+		}),
 	};
 };
 

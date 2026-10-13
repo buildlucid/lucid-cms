@@ -12,11 +12,9 @@ import useDuplicateSingle from "./useDuplicateSingle";
 import useGetMultiple from "./useGetMultiple";
 import useGetMultipleRevisions from "./useGetMultipleRevisions";
 import useGetSingle from "./useGetSingle";
-import useGetSingleVersion from "./useGetSingleVersion";
 import useGetWorkflowAssignees from "./useGetWorkflowAssignees";
-import usePromoteSingle from "./usePromoteSingle";
 import usePublishSingle from "./usePublishSingle";
-import useRequestCreation from "./useRequestCreation";
+import useRequestSingle from "./useRequestSingle";
 import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
 import useUnpublishSingle from "./useUnpublishSingle";
@@ -36,12 +34,10 @@ const exportObject = {
 	useCheckSingleVersion,
 	useCreateSingleVersion,
 	useCreateSingle,
-	useRequestCreation,
+	useRequestSingle,
 	usePublishSingle,
 	useUnpublishSingle,
 	useGetSingle,
-	usePromoteSingle,
-	useGetSingleVersion,
 	useGetMultipleRevisions,
 	useRestoreRevision,
 	useUpdateOrder,

@@ -29,7 +29,8 @@ const useUpdateRoutine = (props?: { onSuccess?: () => void }) =>
 						title: T()("toasts.agent.routine.updated.title"),
 						message: T()("toasts.agent.routine.updated.message"),
 					},
-		invalidates: [queryKeys.agent.routines()],
+		//* a routine's model is the default for its chats
+		invalidates: [queryKeys.agent.routines(), queryKeys.agent.models()],
 		onSuccess: props?.onSuccess,
 	});
 

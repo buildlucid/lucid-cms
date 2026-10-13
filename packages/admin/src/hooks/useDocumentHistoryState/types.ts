@@ -18,7 +18,7 @@ export type TimelineItem = {
 	createdByRunId: string | null;
 	promotedFrom: number | null;
 	contentId: string | null;
-	isReleased: boolean;
+	isPublished: boolean;
 	inSyncWithPromotedFrom: boolean;
 	promotedFromLatest: boolean;
 	bricks?: DocumentVersion["bricks"];

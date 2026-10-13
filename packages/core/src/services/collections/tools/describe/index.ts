@@ -23,10 +23,10 @@ export const describeCollectionMcpTool = (
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [],
-		requiredScopes: ({ collectionKey }) => [
+		inputScopes: ({ input: { collectionKey } }) => [
 			ExternalScopes.DocumentRead(collectionKey),
 		],
-		advertisedScopes: (config) =>
+		possibleScopes: ({ config }) =>
 			limitCollections(config.collections, options.collections).map(
 				(collection) => ExternalScopes.DocumentRead(collection.key),
 			),
@@ -55,7 +55,7 @@ export const describeCollectionAgentTool = (
 		permissions: [],
 		readOnly: true,
 		parallelSafe: true,
-		requiredPermissions: ({ collectionKey }) => [
+		inputPermissions: ({ input: { collectionKey } }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],
 		handler: async ({ context, input, execution }) => {

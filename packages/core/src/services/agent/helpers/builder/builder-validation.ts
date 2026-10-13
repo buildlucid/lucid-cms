@@ -1,8 +1,8 @@
 import type z from "zod";
+import type { agentBuilderContentSchema } from "../../../../libs/agent/screen.js";
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import describeErrorDetails from "../../../../libs/tools/describe-error-details.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
-import type { agentBuilderContentSchema } from "../../../../schemas/agent-screen.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import checkValidateBricksFields from "../../../documents-bricks/checks/check-validate-bricks-fields.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
@@ -22,13 +22,11 @@ const builderValidation = async (
 		versionId: number | null;
 	},
 ): Promise<string[]> => {
-	const { run } = props.execution;
+	const { actor } = props.execution;
 	const user =
-		run.userId === null
-			? undefined
-			: await resolveActorUser(context, {
-					actor: { kind: "user", userId: run.userId, agentRunId: run.id },
-				});
+		actor.type === "user"
+			? await resolveActorUser(context, { actor })
+			: undefined;
 
 	const checked = await checkValidateBricksFields(context, {
 		collection: props.collection,

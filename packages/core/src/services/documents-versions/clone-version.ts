@@ -14,7 +14,7 @@ import {
 } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import createProposalWorkflow from "../document-workflows/create-proposal.js";
+import createWorkflow from "../document-workflows/create-single.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 
@@ -178,7 +178,7 @@ const cloneVersion: ServiceFn<
 		data.toVersionType ===
 		constants.collectionBuilder.publishing.proposalVersionType
 	) {
-		const workflowRes = await createProposalWorkflow(context, {
+		const workflowRes = await createWorkflow(context, {
 			collectionKey: data.collectionKey,
 			documentId: data.documentId,
 			versionId: newVersionRes.data.id,

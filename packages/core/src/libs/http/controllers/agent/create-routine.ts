@@ -5,6 +5,7 @@ import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -21,12 +22,13 @@ const createRoutineController = factory.createHandlers(
 		tags: ["agent"],
 		summary: "Create Agent Routine",
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createRoutine.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createRoutine.body),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	agentAccess(),
 	validate("json", controllerSchemas.createRoutine.body),
@@ -36,6 +38,11 @@ const createRoutineController = factory.createHandlers(
 
 		const routine = await serviceWrapper(agentServices.createRoutine, {
 			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
 		})(context, {
 			userId: c.get("auth").id,
 			agentKey: body.agentKey,
@@ -44,7 +51,7 @@ const createRoutineController = factory.createHandlers(
 			cron: body.cron,
 			timezone: body.timezone,
 			enabled: body.enabled,
-			tools: body.tools,
+			toolSettings: body.toolSettings,
 			modelSelection: body.modelSelection,
 			conversationMode: body.conversationMode,
 		});

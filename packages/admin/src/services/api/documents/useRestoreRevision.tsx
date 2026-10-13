@@ -18,13 +18,13 @@ export const restoreRevisionReq = (params: Params) => {
 	});
 };
 
-interface UsePromoteSingleProps {
+interface UseRestoreRevisionProps {
 	onSuccess?: () => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
 	getCollectionName: () => string;
 }
 
-const useRestoreRevision = (props: UsePromoteSingleProps) => {
+const useRestoreRevision = (props: UseRestoreRevisionProps) => {
 	// -----------------------------
 	// Mutation
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({

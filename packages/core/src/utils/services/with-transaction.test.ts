@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, expect, test, vi } from "vitest";
+import { afterAll, beforeAll, expect, test } from "vitest";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import getTestConfig from "../test-helpers/get-test-config.js";
 import createServiceContext from "./create-service-context.js";
@@ -131,29 +131,4 @@ test("an isolated success still rolls back when the caller's transaction fails",
 	});
 	expect(result.error).toBe(failure);
 	expect(await exists("tx_child_success")).toBe(false);
-});
-
-test("uses the supplied context without promising rollback on nontransactional adapters", async () => {
-	const supports = context.config.db.supports.bind(context.config.db);
-	const capability = vi
-		.spyOn(context.config.db, "supports")
-		.mockImplementation((feature) =>
-			feature === "transaction" ? false : supports(feature),
-		);
-	try {
-		const result = await withTransaction(
-			context,
-			async (received) => {
-				expect(received).toBe(context);
-				expect(received.db.isTransaction).toBe(false);
-				await insert(received, "tx_unsupported");
-				return { error: failure, data: undefined };
-			},
-			{ isolate: true },
-		);
-		expect(result.error).toBe(failure);
-		expect(await exists("tx_unsupported")).toBe(true);
-	} finally {
-		capability.mockRestore();
-	}
 });

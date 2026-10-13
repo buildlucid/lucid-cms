@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -16,6 +17,7 @@ const useGenerateConversationTitle = (props?: {
 				url: `/lucid/api/v1/agent/conversations/${params.id}/title/generate`,
 				method: "POST",
 			}),
+		invalidates: [queryKeys.ai.usage(), queryKeys.ai.credits()],
 		onSuccess: props?.onSuccess,
 	});
 

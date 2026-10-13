@@ -43,7 +43,7 @@ import type {
 import type { SeedDefinition } from "../libs/seed/types.js";
 import type { SkillDefinition } from "../libs/skills/types.js";
 import type { McpToolDefinition } from "../libs/tools/types.js";
-import type { MediaGenerationType } from "./response.js";
+import type { AiModelSelection, MediaGenerationType } from "./response.js";
 
 /** Content languages available to editors. Omit localization to keep content unassigned. */
 export type LocalizationConfig = {
@@ -213,12 +213,17 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
-/** Model choices from the connected Lucid service. */
-export type AiModelOptions = {
+/**
+ * Model choices from the connected Lucid service.
+ * @remarks Media generation selects defaults by model family ID; agents use `AiModelSelection`, including optional reasoning effort.
+ */
+export type AiModelConfig<
+	Default extends string | AiModelSelection = string | AiModelSelection,
+> = {
 	/** Model used unless overridden, falling back to configured availability, Lucid's default or the first offered model. */
-	default?: string;
+	default?: Default;
 	/** Allowed model families, such as `openai/gpt-image`, defaulting to the full catalogue when omitted or none remain available. */
-	available?: string[];
+	available?: readonly string[];
 };
 
 /** Generation settings for one media type, with booleans as shorthand for `{ enabled }`. */
@@ -227,7 +232,7 @@ export type MediaGenerationTypeConfig =
 	| {
 			/** Defaults to true. */
 			enabled?: boolean;
-			models?: AiModelOptions;
+			models?: AiModelConfig<string>;
 	  };
 
 /** Generation settings for each media type, with booleans enabling or disabling all types. */
@@ -356,23 +361,29 @@ export interface LucidConfig {
 				 */
 				enabled?: boolean;
 				/** AI-generated chat titles, including manual renames, enabled by default. */
-				chatRename?: boolean;
+				chatTitles?: boolean;
 				/** Media alt text generation, enabled by default. */
 				altGeneration?: boolean;
 				/** Image generation and text to speech for the admin and agents, with all media types enabled by default. */
 				mediaGeneration?: MediaGenerationConfig;
-				/** Agents created with `defineAgent`, requiring a connected Lucid AI account and disabled with `false`. */
+				/**
+				 * Configures `defineAgent` agents requiring a connected Lucid AI account.
+				 * @remarks Arrays mean `{ definitions }`; booleans mean `{ enabled }`.
+				 */
 				agents?:
-					| false
+					| boolean
 					| AgentDefinition[]
 					| {
 							/** Defaults to true. */
 							enabled?: boolean;
 							definitions?: AgentDefinition[];
 					  };
-				/** Serves tools and skills at `/lucid/mcp`, disabled unless configured. */
+				/**
+				 * Serves tools and skills at `/lucid/mcp`, disabled unless configured.
+				 * @remarks Booleans mean `{ enabled }`.
+				 */
 				mcp?:
-					| false
+					| boolean
 					| {
 							/** Defaults to true once `mcp` is set. */
 							enabled?: boolean;
@@ -389,29 +400,23 @@ export interface LucidConfig {
 	 * Internationalisation settings for the admin UI and API messages.
 	 */
 	i18n?: I18nConfig;
-	/**
-	 * Custom database migration settings.
-	 */
-	migrations?: {
-		/**
-		 * Named migration definitions to
-		 * run after Lucid's core migrations, generated collection migrations and
-		 * collection sync. Migrations are created with the `defineMigration` helper
-		 * and names must start with a 13 digit timestamp, eg.
-		 * `1751400000000-example`.
-		 */
-		definitions?: MigrationDefinition[];
-	};
-	/**
-	 * Repeatable data seed settings.
-	 */
-	seeds?: {
-		/**
-		 * Named seed definitions. Plugin seed names should use a namespace such
-		 * as `pages:example` to avoid collisions without imposing one in code.
-		 */
-		definitions?: SeedDefinition[];
-	};
+	/** Configures `defineMigration` migrations, with arrays as shorthand for `{ definitions }`. */
+	migrations?:
+		| MigrationDefinition[]
+		| {
+				/**
+				 * Named migrations run after core migrations, generated collection migrations and collection sync.
+				 * @remarks Names must start with a 13-digit timestamp, such as `1751400000000-example`.
+				 */
+				definitions?: MigrationDefinition[];
+		  };
+	/** Configures repeatable `defineSeed` seeds, with arrays as shorthand for `{ definitions }`. */
+	seeds?:
+		| SeedDefinition[]
+		| {
+				/** Named seed definitions, with namespaced plugin names such as `pages:example` recommended to avoid collisions. */
+				definitions?: SeedDefinition[];
+		  };
 	/**
 	 * Email settings.
 	 */
@@ -538,61 +543,38 @@ export interface LucidConfig {
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
 	};
-	/**
-	 * Durable job definitions and retention settings.
-	 */
-	jobs?: {
-		/** Job definitions registered by the project and its plugins. */
-		definitions?: AnyJobDefinition[];
-		/** How long terminal jobs and their schedule history remain visible. */
-		retention?: {
-			/** Non-negative number of days to retain completed jobs. Defaults to 7. */
-			completedDays?: number;
-			/** Non-negative number of days to retain failed and cancelled jobs. Defaults to 30. */
-			failedDays?: number;
-		};
-	};
-	/**
-	 * Notification types registered by the project and its plugins. Create them with `defineNotification`.
-	 */
-	notifications?: AnyNotificationDefinition[];
-	/**
-	 * Configure the purge behavior for retained deleted data.
-	 */
+	/** Configures durable `defineJob` jobs, with arrays as shorthand for `{ definitions }`. */
+	jobs?:
+		| AnyJobDefinition[]
+		| {
+				/** Job definitions registered by the project and its plugins. */
+				definitions?: AnyJobDefinition[];
+		  };
+	/** Configures `defineNotification` types, with arrays as shorthand for `{ definitions }`. */
+	notifications?:
+		| AnyNotificationDefinition[]
+		| {
+				/** Notification types registered by the project and its plugins. */
+				definitions?: AnyNotificationDefinition[];
+		  };
+	/** Retention periods for deleted data, job history and notifications, in non-negative whole days. */
 	retention?: {
-		/**
-		 * The fallback number of days to retain deleted data before purging. If left blank, this will fallback to 30 days.
-		 */
-		defaultPurgeAfterDays?: number;
-		/**
-		 * Days to keep notifications after their last change. Open to-dos are kept until resolved. Defaults to 90.
-		 */
-		notificationDays?: number;
-		/**
-		 * Override retention for specific data types with a positive whole number of days.
-		 */
-		purgeAfterDays?: {
-			/**
-			 * Days to retain locales that don't exist in your lucid.config
-			 */
-			removedLocales?: number;
-			/**
-			 * Days to retain users
-			 */
-			deletedUsers?: number;
-			/**
-			 * Days to retain media
-			 */
-			deletedMedia?: number;
-			/**
-			 * Days to retain collections that don't exist in your lucid.config
-			 */
-			removedCollections?: number;
-			/**
-			 * Days to retain documents
-			 */
-			deletedDocuments?: number;
-		};
+		/** Deleted documents. Defaults to 30. */
+		deletedDocuments?: number;
+		/** Deleted media. Defaults to 30. */
+		deletedMedia?: number;
+		/** Deleted users. Defaults to 30. */
+		deletedUsers?: number;
+		/** Collections removed from your config. Defaults to 30. */
+		removedCollections?: number;
+		/** Locales removed from your config. Defaults to 30. */
+		removedLocales?: number;
+		/** Completed jobs and their schedule history. Defaults to 7. */
+		completedJobs?: number;
+		/** Failed and cancelled jobs. Defaults to 30. */
+		failedJobs?: number;
+		/** Notification retention after the last change, defaulting to 90 days and preserving unresolved to-dos. */
+		notifications?: number;
 	};
 	/**
 	 * Hooks to register. Allows you to register custom hooks to run before or after certain events.
@@ -689,11 +671,11 @@ export interface ResolvedLucidConfig {
 	};
 	ai: {
 		enabled: boolean;
-		chatRename: boolean;
+		chatTitles: boolean;
 		altGeneration: boolean;
 		mediaGeneration: Record<
 			MediaGenerationType,
-			{ enabled: boolean; models: AiModelOptions }
+			{ enabled: boolean; models: AiModelConfig<string> }
 		>;
 		agents: { enabled: boolean; definitions: AgentDefinition[] };
 		mcp: {
@@ -748,23 +730,11 @@ export interface ResolvedLucidConfig {
 	};
 	jobs: {
 		definitions: AnyJobDefinition[];
-		retention: {
-			completedDays: number;
-			failedDays: number;
-		};
 	};
-	notifications: AnyNotificationDefinition[];
-	retention: {
-		defaultPurgeAfterDays: number;
-		notificationDays: number;
-		purgeAfterDays?: {
-			removedLocales?: number;
-			deletedUsers?: number;
-			deletedMedia?: number;
-			removedCollections?: number;
-			deletedDocuments?: number;
-		};
+	notifications: {
+		definitions: AnyNotificationDefinition[];
 	};
+	retention: Required<NonNullable<LucidConfig["retention"]>>;
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
 	admin: Required<AdminConfig>;

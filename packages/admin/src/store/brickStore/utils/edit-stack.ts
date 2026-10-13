@@ -100,5 +100,3 @@ export const createEditStack = () => {
 		},
 	};
 };
-
-export type EditStack = ReturnType<typeof createEditStack>;

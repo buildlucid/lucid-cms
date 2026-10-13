@@ -14,6 +14,7 @@ import { aiAccessFeatureSchema } from "../../../../libs/lucid-remote/schema/conn
 import {
 	MAX_MEDIA_BYTES,
 	mediaAnalyzeResponseSchema,
+	mediaMimeTypeSchema,
 } from "../../../../libs/lucid-remote/schema/media.js";
 import analyzeMedia from "../../../../libs/lucid-remote/services/analyze-media/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
@@ -25,9 +26,9 @@ import type { ServiceContext } from "../../../../utils/services/types.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import streamMedia from "../../../media/stream.js";
 import insertConversation from "../../helpers/insert-conversation.js";
+import resolveMediaSource from "../../helpers/resolve-media-source.js";
 import resolveRunSetup from "../../helpers/resolve-run-setup.js";
 import { analyzeMediaAgentTool } from "./index.js";
-import resolveSource from "./resolve-source.js";
 
 vi.mock("../../../media/stream.js", () => ({ default: vi.fn() }));
 vi.mock(
@@ -126,13 +127,12 @@ const executionFor = async (): Promise<AgentToolExecution> => {
 			superAdmin: false,
 			permissions: [Permissions.MediaRead],
 		},
-		actor: { kind: "user", userId: 1 },
+		actor: { type: "user", userId: 1 },
 		signal: new AbortController().signal,
 		operationId: randomUUID(),
 		run: {
 			id: randomUUID(),
 			conversationId: chat.data.id,
-			userId: null,
 			agentKey: "assistant",
 		},
 	};
@@ -257,7 +257,13 @@ test.each([
 	const execution = await executionFor();
 	const mediaId = await createMedia(props);
 	expect(
-		(await resolveSource(context, { mediaId, execution })).error?.status,
+		(
+			await resolveMediaSource(context, {
+				mediaId,
+				mimeTypes: mediaMimeTypeSchema,
+				execution,
+			})
+		).error?.status,
 	).toBe(status);
 	expect(streamMedia).not.toHaveBeenCalled();
 	expect(analyzeMedia).not.toHaveBeenCalled();
@@ -268,7 +274,13 @@ test("enforces the actual stream size when stored metadata understates it", asyn
 	const mediaId = await createMedia();
 	mockFile(new Uint8Array(MAX_MEDIA_BYTES + 1));
 	expect(
-		(await resolveSource(context, { mediaId, execution })).error?.status,
+		(
+			await resolveMediaSource(context, {
+				mediaId,
+				mimeTypes: mediaMimeTypeSchema,
+				execution,
+			})
+		).error?.status,
 	).toBe(413);
 	expect(analyzeMedia).not.toHaveBeenCalled();
 });
@@ -286,7 +298,13 @@ test.each([
 	const execution = await executionFor();
 	const mediaId = await createMedia({ mimeType });
 	mockFile(bytes);
-	expect(await resolveSource(context, { mediaId, execution })).toMatchObject({
+	expect(
+		await resolveMediaSource(context, {
+			mediaId,
+			mimeTypes: mediaMimeTypeSchema,
+			execution,
+		}),
+	).toMatchObject({
 		data: {
 			type: "base64",
 			mimeType,
@@ -300,7 +318,13 @@ test("refuses a file whose contents do not match its stored type", async () => {
 	const mediaId = await createMedia();
 	mockFile(new TextEncoder().encode("<html>not a png</html>"));
 	expect(
-		(await resolveSource(context, { mediaId, execution })).error?.status,
+		(
+			await resolveMediaSource(context, {
+				mediaId,
+				mimeTypes: mediaMimeTypeSchema,
+				execution,
+			})
+		).error?.status,
 	).toBe(415);
 });
 

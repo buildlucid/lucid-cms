@@ -955,8 +955,9 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			{
 				ids: number[];
 				isDeleted?: Select<LucidDocumentTable>["is_deleted"];
-				/** False leaves out requested documents, which don't exist until their create request is completed. */
+				/** False excludes documents awaiting completion of their create request. */
 				pending?: boolean;
+				/** Share-locks matched documents until transaction end on adapters supporting shared row locks. */
 				protectTargets?: boolean;
 			}
 		>,
@@ -977,11 +978,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				null,
 			);
 		}
-		if (
-			props.protectTargets &&
-			this.database.isTransaction &&
-			this.dbAdapter.supports("sharedRowLocks")
-		) {
+		if (props.protectTargets && this.dbAdapter.supports("sharedRowLocks")) {
 			query = query.orderBy("id", "asc").forShare();
 		}
 
@@ -1355,10 +1352,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 	/**
-	 * Counts a collection's documents and, for each environment, how many have
-	 * been released there and how many of those match latest. Documents that
-	 * only exist as a create request's proposal are left out. Counts are raw,
-	 * as some databases return them as strings.
+	 * Counts non-pending documents and each environment's published content and matches with latest.
+	 * @remarks Excludes create-request proposals and returns raw counts, which some databases provide as strings.
 	 */
 	async selectEnvironmentStatusCounts(
 		props: {
@@ -1406,7 +1401,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			)
 			.select([
 				sql<string>`${ref("status_environment.type")}`.as("environment_key"),
-				sql<string | number>`count(*)`.as("released"),
+				sql<string | number>`count(*)`.as("published"),
 				sql<
 					string | number
 				>`sum(case when ${ref("status_environment.content_id")} = ${ref("status_latest.content_id")} then 1 else 0 end)`.as(
@@ -1468,7 +1463,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				)
 				.where(ref("status_environment.type"), "=", filter.environmentKey);
 
-			if (filter.status === "unreleased") {
+			if (filter.status === "unpublished") {
 				return eb.not(
 					eb.exists(environmentVersion.select(sql.lit(1).as("exists"))),
 				);

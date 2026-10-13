@@ -1,3 +1,5 @@
+import type { CollectionPermissionAction } from "./types.js";
+
 const externalScopeValues = {
 	AccountRead: "account:read",
 	UsersList: "users:list",
@@ -11,20 +13,8 @@ const externalScopeValues = {
 	McpAccess: "mcp:access",
 } as const;
 
-export type CollectionExternalScopeAction =
-	| "read"
-	| "create"
-	| "create-request"
-	| "update"
-	| "delete"
-	| "delete-request"
-	| "unpublish-request"
-	| "restore"
-	| "publish"
-	| "review";
-
 export type CollectionExternalScope<
-	TAction extends CollectionExternalScopeAction = CollectionExternalScopeAction,
+	TAction extends CollectionPermissionAction = CollectionPermissionAction,
 > = `documents:${string}:${TAction}`;
 
 /** Converts a kebab-case action into PascalCase, eg. create-request to CreateRequest. */
@@ -34,13 +24,14 @@ type PascalAction<TAction extends string> =
 		: Capitalize<TAction>;
 
 type DocumentScopeFactories = {
-	[TAction in CollectionExternalScopeAction as `Document${PascalAction<TAction>}`]: (
+	[TAction in CollectionPermissionAction as `Document${PascalAction<TAction>}`]: (
 		collectionKey: string,
 	) => CollectionExternalScope<TAction>;
 };
 
+/** Builds a collection scope key, eg. `documents:pages:read`. */
 export const getCollectionExternalScope = <
-	const TAction extends CollectionExternalScopeAction,
+	const TAction extends CollectionPermissionAction,
 >(
 	collectionKey: string,
 	action: TAction,

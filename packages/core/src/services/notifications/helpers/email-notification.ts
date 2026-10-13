@@ -151,15 +151,6 @@ const emailNotification: ServiceFn<
 			},
 		});
 		if (sendRes.error) return sendRes;
-
-		const updateRes = await Recipients.updateSingle({
-			data: { email_id: sendRes.data.email.id },
-			where: [
-				{ key: "notification_id", operator: "=", value: notification.id },
-				{ key: "user_id", operator: "=", value: recipient.user_id },
-			],
-		});
-		if (updateRes.error) return updateRes;
 	}
 
 	return { error: undefined, data: undefined };

@@ -3,7 +3,7 @@ import type {
 	Collection,
 	InternalCollectionDocument,
 	Refs,
-	WorkflowUser,
+	UserDisplay,
 } from "@types";
 import { TbOutlineSitemap } from "solid-icons/tb";
 import {
@@ -32,7 +32,7 @@ import WorkflowStageOption from "./WorkflowStageOption";
 type AssigneeOption = {
 	value: number;
 	label: string;
-	user: WorkflowUser;
+	user: UserDisplay;
 };
 type WorkflowUpdateBody = { stage?: string; assigneeIds?: number[] };
 
@@ -120,7 +120,6 @@ export const Workflow: Component<{
 					assigneeOptions().find((option) => option.value === assignee.userId)
 						?.user ?? {
 						id: assignee.userId,
-						email: null,
 						username: `#${assignee.userId}`,
 						firstName: null,
 						lastName: null,

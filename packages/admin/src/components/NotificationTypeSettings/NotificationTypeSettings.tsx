@@ -1,5 +1,5 @@
 import { useIsFetching } from "@tanstack/solid-query";
-import type { NotificationType, Role } from "@types";
+import type { Role, NotificationTypeSettings as TypeSettings } from "@types";
 import classnames from "classnames";
 import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
@@ -13,7 +13,7 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
 export interface NotificationTypeSettingsProps {
-	type: NotificationType;
+	type: TypeSettings;
 	roles: Role[];
 }
 
@@ -40,7 +40,7 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 		() => update.action.isPending || typesFetching() > 0,
 	);
 	const audience = createMemo(() =>
-		props.type.audience === "recipients" ? undefined : props.type.audience,
+		props.type.audience.kind === "permission" ? props.type.audience : undefined,
 	);
 	const roleOptions = createMemo(() =>
 		props.roles.map((role) => ({ value: role.id, label: role.name })),
@@ -61,7 +61,7 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 	// Functions
 	const save = (changes: Partial<Omit<UpdateTypeSettingsParams, "type">>) => {
 		update.action.mutate({
-			type: props.type.key,
+			type: props.type.type,
 			enabled: props.type.enabled,
 			email: props.type.email,
 			roleIds: audience()?.roleIds ?? null,
@@ -82,20 +82,20 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 				</div>
 				<div class="flex shrink-0 items-center gap-2">
 					<Checkbox
-						id={`${props.type.key}-enabled`}
+						id={`${props.type.type}-enabled`}
 						value={props.type.enabled}
 						onChange={(enabled) => save({ enabled })}
 						label={T()("notifications.settings.in.app")}
 						variant="button"
-						disabled={props.type.required || !canUpdate() || saving()}
+						disabled={props.type.mandatory || !canUpdate() || saving()}
 						tooltip={
-							props.type.required
-								? T()("notifications.settings.required")
+							props.type.mandatory
+								? T()("notifications.settings.mandatory")
 								: undefined
 						}
 					/>
 					<Checkbox
-						id={`${props.type.key}-email`}
+						id={`${props.type.type}-email`}
 						value={props.type.email}
 						onChange={(email) => save({ email })}
 						label={T()("notifications.settings.email")}
@@ -128,7 +128,7 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 						</button>
 						<Show when={rolesOpen()}>
 							<SelectMultiple
-								id={`${props.type.key}-roles`}
+								id={`${props.type.type}-roles`}
 								name="roleIds"
 								description={T()("notifications.settings.roles.description", {
 									permission: audience().permission,

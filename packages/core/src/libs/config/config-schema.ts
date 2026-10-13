@@ -96,7 +96,7 @@ const NotificationDefinitionSchema = z.custom<AnyNotificationDefinition>(
 );
 
 const McpToolDefinitionSchema = z.custom<McpToolDefinition>(
-	(value) => isToolDefinition(value) && value.target === "mcp",
+	(value) => isToolDefinition(value) && value.kind === "mcp",
 	{
 		message: "Expected an MCP tool definition created with defineMcpTool",
 	},
@@ -110,7 +110,7 @@ const AgentDefinitionSchema = z.custom<AgentDefinition>(isAgentDefinition, {
 	message: "Expected an agent definition created with defineAgent",
 });
 
-const AiModelOptionsSchema = z
+const AiModelConfigSchema = z
 	.strictObject({
 		default: z.string().min(1).optional(),
 		available: z.array(z.string().min(1)).min(1).optional(),
@@ -126,19 +126,22 @@ const AiModelOptionsSchema = z
 const enabledShorthand = (value: unknown) =>
 	typeof value === "boolean" ? { enabled: value } : value;
 
+const definitionsShorthand = (value: unknown) =>
+	Array.isArray(value) ? { definitions: value } : value;
+
 const MediaGenerationTypeSchema = z
 	.preprocess(
 		enabledShorthand,
 		z.strictObject({
 			enabled: z.boolean().default(true),
-			models: AiModelOptionsSchema.default({}),
+			models: AiModelConfigSchema.default({}),
 		}),
 	)
 	.prefault({});
 
 const AiConfigSchema = z.strictObject({
 	enabled: z.boolean().default(true),
-	chatRename: z.boolean().default(true),
+	chatTitles: z.boolean().default(true),
 	altGeneration: z.boolean().default(true),
 	mediaGeneration: z
 		.preprocess(
@@ -156,8 +159,7 @@ const AiConfigSchema = z.strictObject({
 		.prefault({}),
 	agents: z
 		.preprocess(
-			(value) =>
-				Array.isArray(value) ? { definitions: value } : enabledShorthand(value),
+			(value) => enabledShorthand(definitionsShorthand(value)),
 			z.strictObject({
 				enabled: z.boolean().default(true),
 				definitions: z.array(AgentDefinitionSchema).default([]),
@@ -332,19 +334,25 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		),
 		defaultLocale: z.string(),
 	}),
-	migrations: z.strictObject({
-		definitions: z.array(
-			z.strictObject({
-				name: z.string(),
-				migration: migrationSchema,
-			}),
-		),
-	}),
-	seeds: z.strictObject({
-		definitions: z.array(
-			z.strictObject({ name: z.string(), seed: seedSchema }),
-		),
-	}),
+	migrations: z.preprocess(
+		definitionsShorthand,
+		z.strictObject({
+			definitions: z.array(
+				z.strictObject({
+					name: z.string(),
+					migration: migrationSchema,
+				}),
+			),
+		}),
+	),
+	seeds: z.preprocess(
+		definitionsShorthand,
+		z.strictObject({
+			definitions: z.array(
+				z.strictObject({ name: z.string(), seed: seedSchema }),
+			),
+		}),
+	),
 	email: z.strictObject({
 		from: z
 			.strictObject({
@@ -407,14 +415,18 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 	queue: z.strictObject({
 		adapter: QueueAdapterSchema.optional(),
 	}),
-	jobs: z.strictObject({
-		definitions: z.array(JobDefinitionSchema),
-		retention: z.strictObject({
-			completedDays: z.number().int().nonnegative(),
-			failedDays: z.number().int().nonnegative(),
+	jobs: z.preprocess(
+		definitionsShorthand,
+		z.strictObject({
+			definitions: z.array(JobDefinitionSchema),
 		}),
-	}),
-	notifications: z.array(NotificationDefinitionSchema),
+	),
+	notifications: z.preprocess(
+		definitionsShorthand,
+		z.strictObject({
+			definitions: z.array(NotificationDefinitionSchema),
+		}),
+	),
 	kv: z
 		.strictObject({
 			adapter: KVAdapterSchema.optional(),
@@ -434,17 +446,14 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		}),
 	}),
 	retention: z.strictObject({
-		defaultPurgeAfterDays: z.number().int().positive(),
-		notificationDays: z.number().int().nonnegative(),
-		purgeAfterDays: z
-			.strictObject({
-				removedLocales: z.number().int().positive().optional(),
-				deletedUsers: z.number().int().positive().optional(),
-				deletedMedia: z.number().int().positive().optional(),
-				removedCollections: z.number().int().positive().optional(),
-				deletedDocuments: z.number().int().positive().optional(),
-			})
-			.optional(),
+		deletedDocuments: z.number().int().nonnegative(),
+		deletedMedia: z.number().int().nonnegative(),
+		deletedUsers: z.number().int().nonnegative(),
+		removedCollections: z.number().int().nonnegative(),
+		removedLocales: z.number().int().nonnegative(),
+		completedJobs: z.number().int().nonnegative(),
+		failedJobs: z.number().int().nonnegative(),
+		notifications: z.number().int().nonnegative(),
 	}),
 	brand: z.strictObject({
 		name: z.string(),

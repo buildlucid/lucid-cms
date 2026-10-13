@@ -37,7 +37,7 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 			controllerSchemas.createProfilePictureUploadSession.body,
 		),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.UsersUpdate]),
 	validate("param", controllerSchemas.createProfilePictureUploadSession.params),

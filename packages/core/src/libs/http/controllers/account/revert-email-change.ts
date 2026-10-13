@@ -25,7 +25,7 @@ const revertEmailChangeController = factory.createHandlers(
 			params: controllerSchemas.revertEmailChange.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	validate("param", controllerSchemas.revertEmailChange.params),
 	async (c) => {
 		const { token } = c.req.valid("param");

@@ -1,4 +1,4 @@
-import { defineAgentTool, z } from "@lucidcms/core";
+import { copy, defineAgentTool, z } from "@lucidcms/core";
 
 const noteData = z.object({
 	title: z.string().trim().min(1).max(100),
@@ -21,11 +21,11 @@ export const reviewNoteTool = defineAgentTool({
 		version: 1,
 		data: z.object({ title: z.string(), body: z.string() }),
 		response: () => noteData,
-		prepare: async ({ context, input }) => ({
+		prepare: async ({ input }) => ({
 			error: undefined,
 			data: {
 				interaction: {
-					title: context.translate("server:playground.note-editor.title"),
+					title: copy("admin:playground.note-editor.title"),
 					placement: "composer",
 					data: input,
 				},

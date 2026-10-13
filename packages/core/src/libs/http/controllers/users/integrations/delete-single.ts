@@ -30,7 +30,7 @@ const deleteSingleController = factory.createHandlers(
 			params: userIntegrationItemParamsSchema,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", userIntegrationItemParamsSchema),
 	async (c) => {

@@ -1,17 +1,20 @@
+import type { AgentStreamEvent } from "@lucidcms/types";
 import type {
 	AgentCompaction,
 	AgentConversation,
 	AgentMessage,
 	AgentMessagePart,
+	AgentRunOutcome,
 	AgentRunResultPart,
 	AgentRunStatus,
-	AgentStreamEvent,
 	AgentToolSummary,
 	AgentWidgetPart,
 } from "@types";
 import { batch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import { translateAdminCopy } from "@/translations";
+import type { PillVariant } from "@/components/Pill/Pill";
+import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
+import T, { translateAdminCopy } from "@/translations";
 import {
 	askTool,
 	builderChangesWidget,
@@ -19,18 +22,6 @@ import {
 	progressTool,
 	screenWidget,
 } from "@/utils/agent-tools";
-
-export const shouldPollTitle = (
-	conversation: Pick<
-		AgentConversation,
-		"titleStatus" | "titleGenerationRequestedAt"
-	>,
-) => {
-	const requestedAt = conversation.titleGenerationRequestedAt;
-	if (conversation.titleStatus !== "provisional" || !requestedAt) return false;
-	const age = Date.now() - new Date(requestedAt).getTime();
-	return age >= 0 && age < 60_000;
-};
 
 /**
  * How a part shows in the transcript. Runs of rows sit close together, even
@@ -341,4 +332,68 @@ export const completedTools = (event: AgentStreamEvent) => {
 				]
 			: [],
 	);
+};
+
+/** Returns run status copy and styling, marking waiting, failed and review states with `attention`. */
+export const getAgentRunDisplay = (
+	status: AgentRunStatus,
+	outcome?: AgentRunOutcome | null,
+): {
+	label: string;
+	variant: PillVariant & StatusIndicatorVariant;
+	attention: boolean;
+} => {
+	switch (status) {
+		case "queued":
+		case "running":
+			return {
+				label: T()("agent.status.working"),
+				variant: "info-subtle",
+				attention: false,
+			};
+		case "waiting":
+			return {
+				label: T()("agent.status.waiting"),
+				variant: "warning-subtle",
+				attention: true,
+			};
+		case "interrupted":
+			return {
+				label: T()("agent.status.retrying"),
+				variant: "warning-subtle",
+				attention: false,
+			};
+		case "failed":
+			return {
+				label: T()("agent.status.failed"),
+				variant: "danger-subtle",
+				attention: true,
+			};
+		case "cancelled":
+			return {
+				label: T()("agent.status.stopped"),
+				variant: "neutral",
+				attention: false,
+			};
+		case "completed":
+			if (outcome === "needs_review") {
+				return {
+					label: T()("agent.status.review"),
+					variant: "warning-subtle",
+					attention: true,
+				};
+			}
+			if (outcome === "nothing_to_report") {
+				return {
+					label: T()("agent.status.nothing"),
+					variant: "neutral",
+					attention: false,
+				};
+			}
+			return {
+				label: T()("agent.status.done"),
+				variant: "success-subtle",
+				attention: false,
+			};
+	}
 };

@@ -5,6 +5,7 @@ import { controllerSchemas } from "../../../../schemas/review.js";
 import { reviewServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -30,6 +31,11 @@ const getOverviewController = factory.createHandlers(
 		const context = createServiceContext(c);
 		const overview = await serviceWrapper(reviewServices.getOverview, {
 			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.review.error.name"),
+				message: copy("server:core.routes.review.error.message"),
+			},
 		})(context, {
 			user: c.get("auth"),
 		});

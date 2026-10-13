@@ -1,6 +1,7 @@
 import type { PageVersionFields } from "../services/get-pages-fields.js";
 import formatFullSlug from "./format-fullslug.js";
 
+/** Builds a descendant's route from ancestor slugs and the top-level full slug. */
 const buildFullSlugFromSlugs = (data: {
 	targetLocale: string | null;
 	currentDescendant: PageVersionFields;

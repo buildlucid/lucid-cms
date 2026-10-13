@@ -17,15 +17,19 @@ export const requestTargetsTable = defineTable("lucid_request_targets", () => ({
 			schema: z.string(),
 			type: "text",
 		},
-		reviewed_version_id: {
+		acknowledged_version_id: {
 			schema: z.number().nullable(),
 			type: "integer",
 		},
-		reviewed_by: {
+		acknowledged_by: {
 			schema: z.number().nullable(),
 			type: "integer",
 		},
-		reviewed_at: {
+		acknowledged_by_run_id: {
+			schema: z.uuid().nullable(),
+			type: "text",
+		},
+		acknowledged_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
 		},
@@ -40,10 +44,12 @@ export interface LucidRequestTargets {
 	id: Generated<number>;
 	request_document_id: number;
 	target: string;
-	/** The destination version acknowledged after someone else published to it. */
-	reviewed_version_id: number | null;
-	reviewed_by: number | null;
-	reviewed_at: TimestampMutable;
-	/** Destination identity checked again before publishing approved content. */
+	/** The target version acknowledged after someone else published to it. */
+	acknowledged_version_id: number | null;
+	acknowledged_by: number | null;
+	/** The agent run that acknowledged it, for `acknowledged_by` or the system. */
+	acknowledged_by_run_id: string | null;
+	acknowledged_at: TimestampMutable;
+	/** Target identity checked again before publishing approved content. */
 	approved_version_id: number | null;
 }

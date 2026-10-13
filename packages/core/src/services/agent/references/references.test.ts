@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { AgentRunnerToolName } from "@lucidcms/types";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import defineAgent from "../../../libs/agent/define-agent.js";
@@ -24,10 +25,10 @@ import {
 	UsersRepository,
 } from "../../../libs/repositories/index.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
+import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import { agentReferenceSchema } from "../../../schemas/agent-references.js";
 import type {
 	AgentReferenceInput,
-	AgentRunnerToolName,
 	MediaType,
 } from "../../../types/response.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
@@ -41,6 +42,7 @@ import createDocumentBricks from "../../documents-bricks/create-multiple.js";
 import { deleteExpiredRevisionsJob } from "../../documents-versions/jobs/delete-expired-revisions.js";
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
+import resolveUserAccess from "../../users/resolve-access.js";
 import createUpload from "../create-upload.js";
 import deleteReference from "../delete-reference.js";
 import getMediaPreviews from "../get-media-previews.js";
@@ -818,6 +820,16 @@ const callReferenceTool = async (
 ) => {
 	const handler = runnerToolHandlers.get(name);
 	assert(handler);
+	const user =
+		userId === null ? undefined : await resolveUserAccess(context, { userId });
+	assert(!user?.error);
+	const authority: AgentToolAuthority = user?.data
+		? {
+				principal: { type: "user", userId: user.data.userId },
+				permissions: user.data.permissions,
+				superAdmin: user.data.superAdmin,
+			}
+		: { principal: { type: "system" }, superAdmin: true, permissions: [] };
 	return handler(context, {
 		call: { id: randomUUID(), name, input },
 		run: {
@@ -844,16 +856,13 @@ const callReferenceTool = async (
 			cursor: 0,
 			phase: "tools",
 		},
+		authority,
 		setup: resolveRunSetup(context, {
 			agent,
 			aiAccess: aiAccessFeatureSchema.options,
 			mode: "chat",
 			hasHistory: false,
-			authority: {
-				principal: { type: "system" },
-				superAdmin: true,
-				permissions: [],
-			},
+			authority,
 		}),
 	});
 };

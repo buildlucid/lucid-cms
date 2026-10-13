@@ -8,16 +8,14 @@ import {
 import type { AgentRoutineTrigger } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
-import startRun from "../start-run.js";
 import enqueueRun from "./enqueue-run.js";
 import insertConversation from "./insert-conversation.js";
+import startRun from "./start-run.js";
 
 /**
- * Starts one routine occurrence. Reuse mode continues the routine's saved chat,
- * creating it on the first run. Otherwise each run starts a new chat with the
- * previous run's summary. The run acts for the routine's user, or for the system
- * when it is defined in code. Returns null while the routine, or the chat it
- * reuses, still has an unfinished run.
+ * Starts a routine occurrence in its reused chat or a new chat carrying the previous summary.
+ * @remarks Admin routines act for their user; code routines act as the system.
+ * @returns Null if the routine is missing or it or its reused chat has an unfinished run.
  */
 const startRoutineRun: ServiceFn<
 	[{ routineId: string; trigger: AgentRoutineTrigger }],
@@ -88,7 +86,7 @@ const startRoutineRun: ServiceFn<
 		const run = await startRun(context, {
 			conversationId,
 			userId: routine.data.user_id,
-			requestId: randomUUID(),
+			runId: randomUUID(),
 			routine: {
 				id: routine.data.id,
 				name: routine.data.name,

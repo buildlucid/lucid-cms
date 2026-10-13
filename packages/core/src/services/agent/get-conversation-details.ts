@@ -3,6 +3,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 import getConversationSources from "./helpers/get-conversation-sources.js";
 
+/** Gets the web sources a chat has found and read. */
 const getConversationDetails: ServiceFn<
 	[{ id: string; userId: number }],
 	AgentConversationDetails

@@ -176,7 +176,7 @@ test("agent and routine keys are unique and schedules must be valid", () => {
 	).toThrow('Routine "seo:weekly-audit" has an invalid schedule.');
 });
 
-test("routine tools accept the agent's tools and reject unknown names", () => {
+test("routine tool settings accept the agent's tools and reject unknown names", () => {
 	expect(
 		check([
 			{
@@ -184,7 +184,7 @@ test("routine tools accept the agent's tools and reject unknown names", () => {
 				routines: [
 					{
 						...routine,
-						tools: { collections_list: { requiresConfirmation: true } },
+						toolSettings: { collections_list: { requiresConfirmation: true } },
 					},
 				],
 			},
@@ -197,10 +197,27 @@ test("routine tools accept the agent's tools and reject unknown names", () => {
 				routines: [
 					{
 						...routine,
-						tools: { unknown_tool: { requiresConfirmation: false } },
+						toolSettings: { unknown_tool: { requiresConfirmation: false } },
 					},
 				],
 			},
 		]),
 	).toThrow("must name tools");
+});
+
+test("builder editing needs builder reading", () => {
+	const builder = (features: { read?: boolean; edit?: boolean }) =>
+		check([
+			defineAgent({
+				key: "builder",
+				name: "Builder",
+				description: "Edits pages.",
+				features: { builder: features },
+			}),
+		]);
+
+	expect(builder({ read: false })).not.toThrow();
+	expect(builder({ read: false, edit: true })).toThrow(
+		"features.builder.edit without features.builder.read",
+	);
 });

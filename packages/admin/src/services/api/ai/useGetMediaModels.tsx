@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type {
+	MediaGenerationModelCatalog,
 	MediaGenerationType,
-	MediaModelCatalog,
 	ResponseBody,
 } from "@types";
 import type { Accessor } from "solid-js";
@@ -16,8 +16,8 @@ const useGetMediaModels = <Type extends MediaGenerationType>(params: {
 	useQuery(() => ({
 		queryKey: queryKeys.ai.mediaModels(params.type()),
 		queryFn: () =>
-			request<ResponseBody<MediaModelCatalog<Type>>>({
-				url: `/lucid/api/v1/ai/models/${params.type()}`,
+			request<ResponseBody<MediaGenerationModelCatalog<Type>>>({
+				url: `/lucid/api/v1/ai/media/models/${params.type()}`,
 			}),
 		enabled: params.enabled?.() ?? true,
 		staleTime: 60_000,

@@ -1,9 +1,5 @@
-import type {
-	AgentDelivery,
-	AgentInputAction,
-	AgentReferenceInput,
-	AgentScreen,
-} from "@types";
+import type { AgentDelivery, AgentInputAction } from "@lucidcms/types";
+import type { AgentReferenceInput, AgentScreen } from "@types";
 import request from "@/utils/request";
 import { runStreamUrls } from "./stream-run";
 
@@ -13,7 +9,7 @@ export const submitInput = (props: {
 	text: string;
 	references: AgentReferenceInput[];
 	screen?: AgentScreen;
-	requestId: string;
+	inputId: string;
 	delivery: AgentDelivery;
 }) =>
 	request({
@@ -24,7 +20,7 @@ export const submitInput = (props: {
 			text: props.text,
 			references: props.references,
 			screen: props.screen,
-			requestId: props.requestId,
+			inputId: props.inputId,
 			delivery: props.delivery,
 		},
 	});

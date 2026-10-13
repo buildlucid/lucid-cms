@@ -7,7 +7,7 @@ export const skillInstructions = (
 	skills.length
 		? [
 				"## Skills",
-				`You should load relevant skills via ${runnerTools.skill.name}, either if the user explicitly asks, or based on the available skills and their descriptions, one matches the intent of the conversation.`,
+				`You should load relevant skills via ${runnerTools.skill.name}, either if the person explicitly asks, or based on the available skills and their descriptions, one matches the intent of the chat.`,
 				"Available skills:",
 				...skills.map((skill) => `- ${skill.name}: ${skill.description}`),
 			].join("\n")

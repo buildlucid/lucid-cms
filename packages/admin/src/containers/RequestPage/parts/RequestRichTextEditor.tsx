@@ -1,6 +1,7 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
+import { useQueryClient } from "@tanstack/solid-query";
 import { Extension } from "@tiptap/core";
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import classNames from "classnames";
 import { TbOutlineArrowUp, TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, onMount, Show } from "solid-js";
@@ -8,9 +9,12 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { richTextHasContent } from "@/components/RichText/helpers";
 import RichText from "@/components/RichText/RichText";
-import api from "@/services/api";
+import { getMentionableUsersReq } from "@/services/api/requests/useGetMentionableUsers";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+
+const MENTION_LIMIT = 8;
 
 /**
  * The box for writing a request's description, comments and replies. Typing
@@ -19,7 +23,7 @@ import helpers from "@/utils/helpers";
  * focus leaves it or Escape is pressed so callers can close it.
  */
 export const RequestRichTextEditor: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	id: string;
 	value: RichTextJSON | undefined;
 	onChange: (value: RichTextJSON) => void;
@@ -40,29 +44,38 @@ export const RequestRichTextEditor: Component<{
 	// ----------------------------------------
 	// State & Hooks
 	let form: HTMLFormElement | undefined;
-
-	// ----------------------------------------
-	// Queries
-	const users = api.requests.useGetMentionableUsers({
-		queryParams: { location: { id: () => props.request.id } },
-	});
+	const queryClient = useQueryClient();
 
 	// ----------------------------------------
 	// Memos
-	const mentions = createMemo(() =>
-		(users.data?.data ?? []).map((user) => ({
-			id: user.id,
-			label: helpers.formatUserName(user, "name"),
-			hint: user.username ? `@${user.username}` : null,
-			user,
-		})),
-	);
 	const blocked = createMemo(
 		() => !props.allowEmpty && !richTextHasContent(props.value),
 	);
 
 	// ----------------------------------------
 	// Functions
+	const searchMentions = async (query: string) => {
+		const users = await queryClient.fetchQuery({
+			queryKey: [
+				...queryKeys.requests.mentionableUsers(),
+				props.request.id,
+				query,
+			],
+			queryFn: () =>
+				getMentionableUsersReq({
+					id: props.request.id,
+					name: query,
+					limit: MENTION_LIMIT,
+				}),
+			staleTime: 30_000,
+		});
+		return users.data.map((user) => ({
+			id: user.id,
+			label: helpers.formatUserName(user, "name"),
+			hint: `@${user.username}`,
+			user,
+		}));
+	};
 	const submit = () => {
 		if (blocked() || props.submitting) return;
 		props.onSubmit();
@@ -120,7 +133,7 @@ export const RequestRichTextEditor: Component<{
 				onChange={props.onChange}
 				placeholder={props.placeholder}
 				headings={false}
-				mentions={mentions()}
+				mentions={searchMentions}
 				extensions={[submitShortcut]}
 				class={classNames(
 					"[&_[data-rich-text]]:rounded-none [&_[data-rich-text]]:border-0 [&_[data-rich-text]]:bg-transparent [&_[data-rich-text-control]]:max-h-60 [&_[data-rich-text-control]]:overflow-y-auto",

@@ -23,7 +23,7 @@ const deleteProfilePictureController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);

@@ -24,7 +24,7 @@ const updatePreferencesController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updatePreferences.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updatePreferences.body),
 	async (c) => {

@@ -32,7 +32,7 @@ const requestDownloadController = factory.createHandlers(
 			dataSchema: z.toJSONSchema(controllerSchemas.requestDownload.response),
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaRead]),
 	validate("param", controllerSchemas.requestDownload.params),

@@ -33,7 +33,7 @@ const sendResetPasswordController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.sendResetPassword.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.sensitive.limit,

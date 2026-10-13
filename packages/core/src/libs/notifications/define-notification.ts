@@ -44,7 +44,7 @@ const defineNotification = <const Key extends string, Data extends z.ZodObject>(
 	description: normalizeCopy(options.description),
 	level: options.level ?? "info",
 	actionRequired: options.actionRequired ?? false,
-	required: options.required ?? false,
+	mandatory: options.mandatory ?? false,
 	audience: options.audience,
 	data: options.data,
 	defaults: {

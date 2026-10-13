@@ -2,6 +2,7 @@ import formatter from "../../libs/formatters/helpers.js";
 import { copy } from "../../libs/i18n/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { MediaOrigin } from "../../types/response.js";
+import type { MediaActor } from "../../utils/media/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createSingle from "./create-single.js";
@@ -18,7 +19,10 @@ const uploadSingle: ServiceFn<
 	[
 		{
 			id?: number;
+			/** Whose access is checked, eg. to the media being replaced. */
+			actor: MediaActor;
 			userId: number | null;
+			agentRunId?: string;
 			public?: boolean;
 			/** Marks media another record manages. Only applies to new media. */
 			isSystem?: boolean;
@@ -99,7 +103,6 @@ const uploadSingle: ServiceFn<
 					key,
 					fileName: file.fileName,
 					expectedSize: file.size,
-					actor: { type: "internal" },
 				},
 			);
 			if (result.error) return result;
@@ -116,7 +119,6 @@ const uploadSingle: ServiceFn<
 				fileName: file.fileName,
 				expectedSize: file.size,
 				origin: input.origin ?? "human",
-				actor: { type: "internal" },
 			},
 		);
 		if (result.error) return result;

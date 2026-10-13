@@ -354,7 +354,7 @@ describe("documentFilterPanelFields", () => {
 					label: "Production Status",
 					type: "select",
 					options: [
-						{ value: "unreleased", label: "Unreleased" },
+						{ value: "unpublished", label: "Unpublished" },
 						{ value: "out-of-sync", label: "Out of sync" },
 						{ value: "in-sync", label: "In sync" },
 					],

@@ -1,23 +1,23 @@
 import classnames from "classnames";
-import { type Component, For, Index, Show } from "solid-js";
+import { type Component, For, Match, Show, Switch } from "solid-js";
 import AgentChatThumb from "@/components/AgentChatThumb/AgentChatThumb";
-import { getAgentRunDisplay } from "@/components/AgentRunStatus/AgentRunStatus";
-import DashboardCard from "@/components/DashboardCard/DashboardCard";
-import DashboardCardItem from "@/components/DashboardCardItem/DashboardCardItem";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import HomeCard from "@/components/HomeCard/HomeCard";
+import HomeCardItem from "@/components/HomeCardItem/HomeCardItem";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import Pill from "@/components/Pill/Pill";
+import SkeletonListItems from "@/components/SkeletonListItems/SkeletonListItems";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
-import { isRunWorking } from "@/utils/agent-chat";
+import { getAgentRunDisplay, isRunWorking } from "@/utils/agent-chat";
 import dateHelpers from "@/utils/date-helpers";
 
 /**
  * The user's latest agent chats. Each row leads with a dot for its last run,
  * and only runs waiting on the user get a labelled status.
  */
-const AgentActivityWidget: Component<{ size: DashboardWidgetSize }> = () => {
+const AgentActivityWidget: Component<{ size: HomeWidgetSize }> = () => {
 	// ----------------------------------------
 	// Queries
 	const conversations = api.agent.useGetConversations({
@@ -27,37 +27,13 @@ const AgentActivityWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<DashboardCard
+		<HomeCard
 			title={T()("home.widget.agent.label")}
 			href="/lucid/agent/history"
 		>
-			<Show
-				when={
-					conversations.isLoading || (conversations.data?.data.length ?? 0) > 0
-				}
+			<Switch
 				fallback={
-					<p class="flex min-h-9 items-center px-2 text-sm text-muted">
-						{T()("agent.home.empty.title")}
-					</p>
-				}
-			>
-				<ul class="flex flex-col">
-					<Show
-						when={!conversations.isLoading}
-						fallback={
-							<Index each={[1, 2, 3]}>
-								{() => (
-									<li class="flex items-center gap-3 px-2 py-2">
-										<span class="skeleton block h-9 w-7 shrink-0" />
-										<span class="flex grow flex-col gap-1.5">
-											<span class="skeleton block h-3.5 w-1/2" />
-											<span class="skeleton block h-3 w-1/3" />
-										</span>
-									</li>
-								)}
-							</Index>
-						}
-					>
+					<ul class="flex flex-col">
 						<For each={conversations.data?.data}>
 							{(conversation) => {
 								const display = () =>
@@ -70,7 +46,7 @@ const AgentActivityWidget: Component<{ size: DashboardWidgetSize }> = () => {
 
 								return (
 									<li>
-										<DashboardCardItem
+										<HomeCardItem
 											href={`/lucid/agent/chats/${conversation.id}`}
 											title={conversation.title}
 											description={[
@@ -117,10 +93,26 @@ const AgentActivityWidget: Component<{ size: DashboardWidgetSize }> = () => {
 								);
 							}}
 						</For>
-					</Show>
-				</ul>
-			</Show>
-		</DashboardCard>
+					</ul>
+				}
+			>
+				<Match when={conversations.isLoading}>
+					<ul class="flex flex-col">
+						<SkeletonListItems />
+					</ul>
+				</Match>
+				<Match when={conversations.isError}>
+					<p class="flex min-h-9 items-center px-2 text-sm text-muted">
+						{T()("home.widget.agent.error")}
+					</p>
+				</Match>
+				<Match when={(conversations.data?.data.length ?? 0) === 0}>
+					<p class="flex min-h-9 items-center px-2 text-sm text-muted">
+						{T()("agent.home.empty.title")}
+					</p>
+				</Match>
+			</Switch>
+		</HomeCard>
 	);
 };
 

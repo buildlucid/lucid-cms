@@ -1,7 +1,7 @@
 import type { AgentActor } from "../agent/types.js";
 import type { RichTextJSON } from "../documents/types.js";
 import type { JobStatus } from "../jobs/types.js";
-import type { ProfilePicture } from "../media/types.js";
+import type { UserDisplay } from "../users/types.js";
 
 /** Identifies a durable request attempt accepted by Lucid. */
 export type RequestExecutionReceipt = { jobId: string };
@@ -17,20 +17,17 @@ export type RequestExecution = {
 /** Open requests can still change. Completed and closed requests are read only. */
 export type RequestStatus = "open" | "completed" | "closed";
 
-/**
- * Create requests request one new document, which only exists once completed.
- * Publish requests move existing documents to environments, unpublish requests
- * remove them from environments and delete requests move them to the bin.
- */
+/** Create requests prepare one document; publish and unpublish requests add or remove environment content, while delete requests bin existing documents. */
 export type RequestType = "create" | "publish" | "unpublish" | "delete";
 
-export type RequestUser = {
-	id: number;
-	email: string | null;
-	username: string | null;
-	firstName: string | null;
-	lastName: string | null;
-	profilePicture: ProfilePicture | null;
+/** A document to include in a new or existing request. */
+export type RequestDocumentInput = {
+	collectionKey: string;
+	documentId: number;
+	/** Fixed publish-request source, either latest or a configured environment. */
+	source?: string;
+	/** Publish environments or latest for a latest source, unpublish environments, or no targets for delete requests. */
+	targets?: string[];
 };
 
 export type RequestTarget = {
@@ -40,9 +37,11 @@ export type RequestTarget = {
 	/** Whether someone else changed what the target holds after the request was created. */
 	changedSinceCreation: boolean;
 	/** Whether the target's current version has been acknowledged. */
-	reviewed: boolean;
-	reviewedBy: RequestUser | null;
-	reviewedAt: string | null;
+	acknowledged: boolean;
+	acknowledgedBy: UserDisplay | null;
+	/** The agent that acknowledged it, for acknowledgedBy or the system. */
+	acknowledgedByAgent: AgentActor | null;
+	acknowledgedAt: string | null;
 	/** Whether completing would change what the target holds. */
 	changed: boolean;
 };
@@ -77,9 +76,10 @@ export type RequestBlocker = {
 
 type RequestEventBase = {
 	id: number;
-	user: RequestUser | null;
-	/** The agent that acted, for user or for the system when user is null. */
-	agent: AgentActor | null;
+	/** The person who acted, or the person an agent acted for. */
+	actor: UserDisplay | null;
+	/** The agent that acted, for actor or for the system when actor is null. */
+	actorAgent: AgentActor | null;
 	createdAt: string | null;
 	updatedAt: string | null;
 };
@@ -91,7 +91,7 @@ export type RequestEvent = RequestEventBase &
 				body: RichTextJSON;
 				/** How the comment was dealt with. Null while it is open. */
 				resolution: RequestCommentResolution | null;
-				resolvedBy: RequestUser | null;
+				resolvedBy: UserDisplay | null;
 				resolvedByAgent: AgentActor | null;
 				/** Oldest first. */
 				replies: RequestCommentReply[];
@@ -117,8 +117,8 @@ export type RequestEvent = RequestEventBase &
 		  }
 		| {
 				type:
-					| "target_reviewed"
-					| "target_unreviewed"
+					| "target_acknowledged"
+					| "target_unacknowledged"
 					| "target_added"
 					| "target_removed";
 				requestDocumentId: number;
@@ -134,7 +134,7 @@ export type RequestEvent = RequestEventBase &
 		| {
 				type: "reviewer_added" | "reviewer_removed";
 				/** Null once the user is deleted. */
-				reviewer: RequestUser | null;
+				reviewer: UserDisplay | null;
 		  }
 		| {
 				/** Dismissed means changes reset approval; withdrawn means the approver took theirs back. */
@@ -160,12 +160,12 @@ export type RequestPermissions = {
 	/** Approve, or withdraw an approval. */
 	approve: boolean;
 	/** Complete now, or set a schedule. */
-	request: boolean;
+	complete: boolean;
 	/** Reopen a closed request. */
 	reopen: boolean;
 };
 
-export type RequestDetail = {
+export type RequestDetails = {
 	id: number;
 	type: RequestType;
 	title: string;
@@ -175,7 +175,7 @@ export type RequestDetail = {
 	revision: number;
 	/** The current request attempt, retained until the request plan changes. */
 	executionJobId: string | null;
-	createdBy: RequestUser | null;
+	createdBy: UserDisplay | null;
 	/** The agent that opened it, for createdBy or the system. */
 	createdByAgent: AgentActor | null;
 	/** Approvals of the current revision. */
@@ -185,14 +185,11 @@ export type RequestDetail = {
 	scheduledAt: string | null;
 	scheduledTimezone: string | null;
 	/** Why the last request attempt failed. Cleared on the next attempt. */
-	failure: string | null;
-	/** The RequestDocument.id whose request attempt failed. */
-	failureRequestDocumentId: number | null;
-	failureTarget: string | null;
+	failure: RequestFailure | null;
 	completedAt: string | null;
 	createdAt: string | null;
 	updatedAt: string | null;
-	reviewers: RequestUser[];
+	reviewers: UserDisplay[];
 	documents: RequestDocument[];
 	events: RequestEvent[];
 	blockers: RequestBlocker[];
@@ -203,8 +200,16 @@ export type RequestDetail = {
 	permissions: RequestPermissions;
 };
 
+/** Why a request attempt failed, and where. */
+export type RequestFailure = {
+	message: string;
+	/** The RequestDocument.id whose request attempt failed. */
+	requestDocumentId: number | null;
+	target: string | null;
+};
+
 export type RequestApproval = {
-	user: RequestUser | null;
+	user: UserDisplay | null;
 	approvedAt: string | null;
 };
 
@@ -230,7 +235,7 @@ export type RequestDocument = {
 };
 
 export type RequestSummary = Pick<
-	RequestDetail,
+	RequestDetails,
 	| "id"
 	| "type"
 	| "title"

@@ -505,8 +505,8 @@ const VersionStatusPills: Component<{
 			<Match when={props.item.type === "snapshot"}>
 				<Pill variant="info-subtle">{T()("common.snapshot")}</Pill>
 			</Match>
-			<Match when={props.item.type === "environment" && props.item.isReleased}>
-				<Pill variant="secondary">{T()("common.status.released")}</Pill>
+			<Match when={props.item.type === "environment" && props.item.isPublished}>
+				<Pill variant="secondary">{T()("common.status.published")}</Pill>
 			</Match>
 		</Switch>
 		<Show when={props.item.type === "environment"}>

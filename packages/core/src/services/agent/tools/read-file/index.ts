@@ -6,9 +6,10 @@ import {
 	MAX_FILE_BYTES,
 	readFileToolName,
 } from "./constants.js";
-import handler from "./handler.js";
+import readFile from "./handler.js";
 import { fileMimeTypeSchema, inputSchema, outputSchema } from "./schema.js";
 
+/** Reads or searches a Lucid text file in bounded passages. */
 export const readFileAgentTool = () =>
 	defineAgentTool({
 		name: readFileToolName,
@@ -24,6 +25,9 @@ export const readFileAgentTool = () =>
 		permissions: [],
 		readOnly: true,
 		parallelSafe: true,
-		capabilities: { fileRead: { mimeTypes: fileMimeTypeSchema.options } },
-		handler,
+		capabilities: {
+			media: { readFile: { mimeTypes: fileMimeTypeSchema.options } },
+		},
+		handler: ({ context, input, execution }) =>
+			readFile(context, { input, execution }),
 	});

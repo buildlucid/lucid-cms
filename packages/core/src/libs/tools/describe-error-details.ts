@@ -51,7 +51,7 @@ const brickInputPath = (brick: BrickError) =>
 /**
  * Formats field errors by tool input path across locales, using `brickPath` to address bricks.
  *
- * @example "bricks.seo.socialImage[0] (en, fr): Media 3 isn't in the media library."
+ * @example "bricks.seo.socialImage[0] (en, fr): Media #3 isn't in the media library."
  */
 const describeErrorDetails = (
 	context: ServiceContext,

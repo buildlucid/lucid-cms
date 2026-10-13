@@ -152,7 +152,6 @@ const generateMigrationPlan = (props: {
 					tableName: table.name,
 					tableType: table.type,
 					key: table.key,
-					foreignKeys: table.foreignKeys,
 					priority: tablePrioRes.data,
 					columnOperations: table.columns.map((column) => ({
 						type: "add",
@@ -192,7 +191,6 @@ const generateMigrationPlan = (props: {
 				priority: tablePrioRes.data,
 				tableType: table.type,
 				key: table.key,
-				foreignKeys: table.foreignKeys,
 				columnOperations: table.columns.map((column) => ({
 					type: "add",
 					column: normaliseColumn(column, column.source),

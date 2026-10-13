@@ -5,6 +5,7 @@ import type { AgentConversation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveAgentAccess from "./helpers/resolve-agent-access.js";
 
+/** Lists the chats the person can open. */
 const getConversations: ServiceFn<
 	[{ userId: number; query: GetMultipleConversationsQueryParams }],
 	{ data: AgentConversation[]; count: number }

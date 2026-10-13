@@ -20,7 +20,7 @@ const deleteAllController = factory.createHandlers(
 		summary: "Delete All Media Share Links",
 		responses: openAPI.responses({ noProperties: true }),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaDelete]),
 	async (c) => {

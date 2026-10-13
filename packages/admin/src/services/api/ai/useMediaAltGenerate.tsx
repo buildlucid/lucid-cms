@@ -36,7 +36,7 @@ interface Params {
 
 export const mediaAltGenerateReq = (params: Params) => {
 	return request<ResponseBody<MediaAltGenerateResponse>>({
-		url: "/lucid/api/v1/ai/media-alt",
+		url: "/lucid/api/v1/ai/media/alt",
 		csrf: true,
 		method: "POST",
 		body: params.body,

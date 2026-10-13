@@ -9,6 +9,7 @@ import type {
 	RouteSegmentSelection,
 } from "../types/types.js";
 
+/** Reads stored route segment selections, one per source version and segment. */
 const getStoredRouteSegmentSelections: ServiceFn<
 	[
 		{

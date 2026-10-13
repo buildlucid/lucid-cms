@@ -72,7 +72,6 @@ export type TableMigration = {
 	};
 	columnOperations: ColumnOperation[];
 	indexOperations: IndexOperation[];
-	foreignKeys?: CollectionSchema["tables"][number]["foreignKeys"];
 };
 
 export type MigrationPlan = {

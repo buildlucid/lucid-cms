@@ -4,10 +4,10 @@ import type {
 	CollectionPermissionAction,
 } from "./types.js";
 
-type CollectionPermissions = {
-	[TAction in CollectionPermissionAction]: CollectionPermission<TAction>;
-};
-
+/**
+ * Collection permission actions used to derive `CollectionPermissionAction`.
+ * @remarks The `-request` actions take effect only when their requests complete.
+ */
 export const collectionPermissionActions = [
 	"read",
 	"create",
@@ -19,8 +19,9 @@ export const collectionPermissionActions = [
 	"restore",
 	"publish",
 	"review",
-] as const satisfies CollectionPermissionAction[];
+] as const;
 
+/** Builds a collection permission key, eg. `documents:pages:read`. */
 export const getCollectionPermission = <
 	TAction extends CollectionPermissionAction,
 >(
@@ -28,6 +29,7 @@ export const getCollectionPermission = <
 	action: TAction,
 ): CollectionPermission<TAction> => `documents:${collectionKey}:${action}`;
 
+/** Builds a collection permission key from a collection builder. */
 export const resolveCollectionPermission = <
 	TAction extends CollectionPermissionAction,
 >(params: {
@@ -37,13 +39,21 @@ export const resolveCollectionPermission = <
 	return getCollectionPermission(params.collection.key, params.action);
 };
 
+/** Every permission for a collection, keyed in camelCase as the API returns them. */
 export const resolveCollectionPermissions = (
 	collection: CollectionBuilder,
-): CollectionPermissions => {
-	return Object.fromEntries(
-		collectionPermissionActions.map((action) => [
-			action,
-			getCollectionPermission(collection.key, action),
-		]),
-	) as CollectionPermissions;
-};
+) => ({
+	read: getCollectionPermission(collection.key, "read"),
+	create: getCollectionPermission(collection.key, "create"),
+	createRequest: getCollectionPermission(collection.key, "create-request"),
+	update: getCollectionPermission(collection.key, "update"),
+	delete: getCollectionPermission(collection.key, "delete"),
+	deleteRequest: getCollectionPermission(collection.key, "delete-request"),
+	unpublishRequest: getCollectionPermission(
+		collection.key,
+		"unpublish-request",
+	),
+	restore: getCollectionPermission(collection.key, "restore"),
+	publish: getCollectionPermission(collection.key, "publish"),
+	review: getCollectionPermission(collection.key, "review"),
+});

@@ -6,7 +6,7 @@ import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { builderUpdateToolName } from "../builder-update/constants.js";
 import { generateAudioToolName } from "./constants.js";
-import generateAudio from "./generate-audio.js";
+import generateAudio from "./handler.js";
 import prepareAudioSettings from "./prepare.js";
 import { inputSchema, outputSchema, settingsSchema } from "./schema.js";
 
@@ -26,17 +26,16 @@ export const generateAudioAgentTool = () =>
 		output: outputSchema,
 		outputVersion: 1,
 		permissions: [Permissions.AiAudioGenerate],
-		capabilities: { audioGeneration: true },
+		capabilities: { media: { generate: { audio: true } } },
 		available: ({ config, aiAccess }) =>
 			isAiFeatureEnabled(config, "audioGeneration", aiAccess),
-		describe: () => copy("admin:core.tools.media_generate_audio.describe"),
 		interaction: {
 			key: constants.agent.widgets.audioSettings,
 			version: 1,
 			data: settingsSchema,
 			response: () => settingsSchema,
-			optional: true,
-			prepare: ({ context, input }) => prepareAudioSettings(context, { input }),
+			skippable: true,
+			prepare: ({ input }) => prepareAudioSettings({ input }),
 		},
 		handler: ({ context, input, execution, response }) =>
 			generateAudio(context, { input, settings: response, execution }),

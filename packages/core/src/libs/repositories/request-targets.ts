@@ -14,7 +14,16 @@ export default class RequestTargetsRepository extends StaticRepository<"lucid_re
 				"lucid_request_documents.id",
 				"lucid_request_targets.request_document_id",
 			)
-			.selectAll("lucid_request_targets")
+			.select([
+				"lucid_request_targets.id",
+				"lucid_request_targets.request_document_id",
+				"lucid_request_targets.target",
+				"lucid_request_targets.acknowledged_version_id",
+				"lucid_request_targets.acknowledged_by",
+				"lucid_request_targets.acknowledged_by_run_id",
+				"lucid_request_targets.acknowledged_at",
+				"lucid_request_targets.approved_version_id",
+			])
 			.where("lucid_request_documents.request_id", "=", props.id)
 			.orderBy("lucid_request_targets.id", "asc");
 

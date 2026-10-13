@@ -3,10 +3,12 @@ import logger from "../logger/index.js";
 import hasPermission from "../permission/has-permission.js";
 import { getValidPermissions } from "../permission/registry.js";
 import { filterExternalScopes } from "../permission/scopes.js";
-import { getMcpToolRegistry, toolDefinitionInternal } from "./registry.js";
+import { getMcpToolRegistry } from "./registry.js";
+import { toolDefinitionInternal } from "./tool-definition-internal.js";
 import type {
 	AgentToolDefinition,
 	AgentToolExecution,
+	AgentToolInvocation,
 	McpToolExecution,
 	ToolPreparationResult,
 } from "./types.js";
@@ -117,9 +119,12 @@ const agentPermissionCheck = (args: ExecutionArgs<AgentToolExecution>) => {
 		);
 };
 
-/** Agent tools are resolved from the run's agent, since names are only unique within one agent. */
+/**
+ * Resolves tools within the run's agent, passing saved interaction answers as `execution.answer`.
+ * @remarks Tool names are unique within each agent.
+ */
 export const executeAgentTool = (
-	args: ExecutionArgs<AgentToolExecution> & { tool: AgentToolDefinition },
+	args: ExecutionArgs<AgentToolInvocation> & { tool: AgentToolDefinition },
 ) =>
 	execute(
 		args,

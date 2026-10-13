@@ -2,7 +2,7 @@ export type AiGeneratedContent<T> =
 	| { kind: "value"; value: T }
 	| { kind: "translations"; translations: Record<string, T> };
 
-import type { UserRef } from "../users/types.js";
+import type { UserDisplay } from "../users/types.js";
 
 export type AiGenerateCost = {
 	creditsCharged: string;
@@ -60,7 +60,7 @@ export type MediaGenerationType = "image" | "audio";
 
 /** AI features the CMS config turns on or off. */
 export type AiFeature =
-	| "chatRename"
+	| "chatTitles"
 	| "altGeneration"
 	| `${MediaGenerationType}Generation`
 	| "agents"
@@ -188,7 +188,7 @@ export type MediaGenerationModels = {
 };
 
 /** The models people can pick for a media type, and the one used by default. */
-export type MediaModelCatalog<Type extends MediaGenerationType> = {
+export type MediaGenerationModelCatalog<Type extends MediaGenerationType> = {
 	default: string;
 	models: MediaGenerationModels[Type][];
 };
@@ -256,7 +256,8 @@ export type AiUsageSession = {
 		id: string;
 		title: string;
 	} | null;
-	user: UserRef;
+	/** Null for system sessions, or once the person is deleted. */
+	user: UserDisplay | null;
 	credits: number;
 	tokens: AiUsageTokens;
 	requests: {
@@ -340,11 +341,4 @@ export type AiModel = {
 export type AiModelCatalog = {
 	default: Required<AiModelSelection>;
 	models: AiModel[];
-};
-
-export type AiModelConfig = {
-	/** Used when nothing more specific is chosen. Falls back to an available default when it is not offered. */
-	default?: AiModelSelection;
-	/** Model families to offer, such as `openai/gpt-luna`, defaulting to the full catalogue when omitted or none remain available. */
-	available?: readonly string[];
 };

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { NotificationSummary, ResponseBody } from "@types";
+import type { NotificationCounts, ResponseBody } from "@types";
 import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 
@@ -10,7 +10,7 @@ const useGetSummary = (params?: { enabled?: () => boolean }) => {
 	return useQuery(() => ({
 		queryKey: queryKeys.notifications.summary(),
 		queryFn: ({ signal }) =>
-			request<ResponseBody<NotificationSummary>>({
+			request<ResponseBody<NotificationCounts>>({
 				url: "/lucid/api/v1/notifications/summary",
 				signal,
 				displayErrorToast: false,

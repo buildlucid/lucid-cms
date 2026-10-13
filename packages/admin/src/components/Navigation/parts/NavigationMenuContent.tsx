@@ -14,6 +14,7 @@ import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
+import { aiUsageHref } from "@/utils/ai-usage";
 import helpers from "@/utils/helpers";
 import { getHomeView } from "@/utils/home-view";
 import { isNavigationLinkActive } from "@/utils/navigation";
@@ -117,7 +118,7 @@ export const NavigationMenuContent: Component<{
 					<ul>
 						<NavigationLink
 							href="/lucid"
-							icon="dashboard"
+							icon="home"
 							title={T()("common.home")}
 						/>
 						<NavigationLink
@@ -315,7 +316,7 @@ export const NavigationMenuContent: Component<{
 								permission={permissions().integrations}
 							/>
 							<NavigationLink
-								href="/lucid/system/ai-usage"
+								href={aiUsageHref}
 								icon="usage"
 								title={T()("common.ai.usage")}
 								permission={permissions().aiUsage}

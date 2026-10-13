@@ -84,9 +84,6 @@ const Migration00000010: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("read_at", adapter.getDataType("timestamp"))
 				.addColumn("archived_at", adapter.getDataType("timestamp"))
 				.addColumn("email_due_at", adapter.getDataType("timestamp"))
-				.addColumn("email_id", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_emails.id").onDelete("set null"),
-				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col
 						.notNull()

@@ -34,7 +34,7 @@ export const updateDocumentAgentTool = (
 		requiresConfirmation: options.direct
 			? ({ input }) => input.requestId === undefined
 			: false,
-		requiredPermissions: ({ collectionKey }) => [
+		inputPermissions: ({ input: { collectionKey } }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],
 		handler: async ({ context, input, execution }) => {

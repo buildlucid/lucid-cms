@@ -208,7 +208,7 @@ export default defineConfig({
 				},
 				{
 					key: "playground-launch-checklist",
-					slot: "dashboard.widget",
+					slot: "home.widget",
 					component: "./src/admin/widgets/LaunchChecklist.tsx",
 					card: {
 						label: "Launch checklist",

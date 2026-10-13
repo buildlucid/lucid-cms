@@ -14,25 +14,17 @@ import {
 } from "solid-icons/tb";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
-import T, { translateAdminCopy } from "@/translations";
+import T from "@/translations";
 import { agentChangesHref } from "@/utils/agent-references";
 import {
 	type AgentToolPart,
 	generateAudioTool,
 	imageTools,
 	toolDisplayStatus,
-	webFetchTool,
+	toolLabel,
+	webReadTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
-
-/** The tool's saved result copy, with a state label when the call did not complete. */
-export const toolLabel = (part: AgentToolPart, retried?: boolean) => {
-	const summary = translateAdminCopy(part.summary);
-	const status = toolDisplayStatus(part, retried);
-	return status === "complete"
-		? summary
-		: `${summary} · ${T()(`agent.tool.status.${status}`)}`;
-};
 
 /** Shows a tool call's status, muting failures recovered by later calls. */
 export const AgentToolIcon: Component<{
@@ -63,7 +55,7 @@ export const AgentToolIcon: Component<{
 						<Match when={props.part.name === webSearchTool}>
 							<TbOutlineSearch size={10} />
 						</Match>
-						<Match when={props.part.name === webFetchTool}>
+						<Match when={props.part.name === webReadTool}>
 							<TbOutlineWorld size={10} />
 						</Match>
 						<Match when={imageTools.has(props.part.name)}>

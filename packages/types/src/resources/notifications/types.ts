@@ -1,10 +1,14 @@
 import type { AgentActor } from "../agent/types.js";
-import type { RequestUser } from "../requests/types.js";
+import type { UserDisplay } from "../users/types.js";
 
 export type NotificationLevel = "info" | "success" | "warning" | "error";
 
-/** Which of a person's notifications to list. */
-export type NotificationStatus = "inbox" | "unread" | "attention" | "archived";
+/** Notification list filters, with `actionRequired` selecting notifications still awaiting the person's action. */
+export type NotificationStatus =
+	| "inbox"
+	| "unread"
+	| "actionRequired"
+	| "archived";
 
 export type NotificationCategorySummary = {
 	key: string;
@@ -24,7 +28,7 @@ export type Notification = {
 	href: string | null;
 	data: Record<string, unknown>;
 	/** The person whose action caused it, when there was one. */
-	actor: RequestUser | null;
+	actor: UserDisplay | null;
 	/** The agent that acted, for actor or the system. */
 	actorAgent: AgentActor | null;
 	readAt: string | null;
@@ -34,31 +38,33 @@ export type Notification = {
 	updatedAt: string | null;
 };
 
-export type NotificationSummary = {
+export type NotificationCounts = {
 	unread: number;
 	actionRequired: number;
 	/** When the inbox last changed, so clients can skip refetching the list. */
 	latestUpdatedAt: string | null;
 };
 
+/** Who receives a type: the recipients each notification names, or everyone with a permission. */
 export type NotificationAudienceSummary =
-	| "recipients"
+	| { kind: "recipients" }
 	| {
+			kind: "permission";
 			permission: string;
 			/** Roles chosen instead of the permission. Null means everyone with the permission. */
 			roleIds: number[] | null;
 	  };
 
 /** A registered type with its current settings. */
-export type NotificationType = {
-	key: string;
+export type NotificationTypeSettings = {
+	type: string;
 	name: string;
 	description: string | null;
 	category: NotificationCategorySummary;
 	level: NotificationLevel;
 	actionRequired: boolean;
-	/** Always delivered in-app; only its emails can be turned off. */
-	required: boolean;
+	/** Always delivered in-app, with only email delivery optional. */
+	mandatory: boolean;
 	audience: NotificationAudienceSummary;
 	enabled: boolean;
 	email: boolean;

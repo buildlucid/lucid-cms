@@ -10,7 +10,8 @@ export type ReviewOverview = {
 			key: string;
 			inSync: number;
 			outOfSync: number;
-			unreleased: number;
+			/** Documents never published to the environment. */
+			unpublished: number;
 		}>;
 	}>;
 	requests: RequestOverview;

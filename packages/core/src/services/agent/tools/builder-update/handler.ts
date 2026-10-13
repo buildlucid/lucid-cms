@@ -1,5 +1,7 @@
+import type { AgentBuilderChangesData } from "@lucidcms/types";
 import type z from "zod";
 import constants from "../../../../constants/constants.js";
+import type { agentScreenCallSchema } from "../../../../libs/agent/screen.js";
 import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import type {
@@ -7,8 +9,6 @@ import type {
 	AgentToolInteraction,
 	AgentToolResult,
 } from "../../../../libs/tools/types.js";
-import type { agentScreenCallSchema } from "../../../../schemas/agent-screen.js";
-import type { AgentBuilderChangesData } from "../../../../types/response.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import fromDocumentInput from "../../../documents/helpers/from-document-input.js";
 import patchDocumentData from "../../../documents/helpers/patch-document-data.js";
@@ -262,7 +262,7 @@ const handler: ServiceFn<
 
 	return {
 		error: undefined,
-		data: screenCall(context, {
+		data: screenCall({
 			title: builderUpdateTitle,
 			call: {
 				action: "update",

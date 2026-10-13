@@ -1,3 +1,4 @@
+/** Lowercases route values, preserving null and undefined. */
 const normalizePathValue = (
 	value: string | null | undefined,
 ): string | null | undefined => {

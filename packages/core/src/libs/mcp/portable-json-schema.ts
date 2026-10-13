@@ -36,7 +36,7 @@ export const toPortableJsonSchema = (
 		} else if (key === "additionalProperties" && isEmptySchema(value)) {
 			portable[key] = true;
 		} else if (key === "items" && isEmptySchema(value)) {
-			// An absent `items` allows any item, and bare `true` is not accepted here.
+			//* An absent `items` allows any item, and bare `true` is not accepted here.
 		} else if (schemaMapKeywords.has(key) && isPlainObject(value)) {
 			portable[key] = Object.fromEntries(
 				Object.entries(value).map(([name, child]) => [

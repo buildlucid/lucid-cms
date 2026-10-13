@@ -12,8 +12,6 @@ const withTransaction = async <T>(
 	operation: (context: ServiceContext) => ServiceResponse<T>,
 	options: { isolate?: boolean } = {},
 ): ServiceResponse<T> => {
-	if (!context.config.db.supports("transaction")) return operation(context);
-
 	if (context.db.isTransaction) {
 		if (!options.isolate) return operation(context);
 

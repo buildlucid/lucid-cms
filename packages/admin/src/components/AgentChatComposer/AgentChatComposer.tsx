@@ -1,9 +1,5 @@
-import type {
-	Agent,
-	AgentInput,
-	AgentInteractionAction,
-	AgentRoutine,
-} from "@types";
+import type { AgentInput } from "@lucidcms/types";
+import type { Agent, AgentInteractionAction, AgentRoutine } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -29,7 +25,7 @@ import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import type { AgentReferenceItem } from "@/utils/agent-references";
 
@@ -205,13 +201,13 @@ const AgentChatComposer: Component<{
 						disabled={!models.isSuccess}
 						placeholder={placeholder()}
 						header={
-							<Show when={props.chat.pendingInteraction()}>
-								{(pending) => (
+							<Show when={props.chat.pendingInteraction()?.widget.interaction}>
+								{(interaction) => (
 									<AgentInteractionBar
-										title={pending().widget.interaction?.title}
+										title={translateAdminCopy(interaction().title)}
 										redirecting={true}
 										onRedirect={
-											pending().widget.interaction?.placement === "composer"
+											interaction().placement === "composer"
 												? () => setRedirecting(undefined)
 												: undefined
 										}

@@ -30,7 +30,7 @@ const EnvironmentTable: Component<{
 	const statusHref = (
 		collection: Collection,
 		environment: string,
-		status: "out-of-sync" | "unreleased",
+		status: "out-of-sync" | "unpublished",
 	) => {
 		const params = new URLSearchParams({
 			[`filter[envStatus.${environment}]`]: status,

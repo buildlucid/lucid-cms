@@ -1,6 +1,7 @@
 import type z from "zod";
-import type { NotificationLevel } from "../db/tables/notifications.js";
+import type { NotificationLevel } from "../../types/response.js";
 import type { AdminCopyInput, CopyInput } from "../i18n/types.js";
+import type { Permission } from "../permission/types.js";
 
 /** Groups types in the settings and inbox. Share one object across the types it covers. */
 export type NotificationCategory = {
@@ -12,7 +13,7 @@ export type NotificationCategory = {
  * Who receives a type. `recipients` means the sender names them on every send.
  * A permission sends to everyone holding it, and admins can swap that for a role list.
  */
-export type NotificationAudience = "recipients" | { permission: string };
+export type NotificationAudience = "recipients" | { permission: Permission };
 
 export type NotificationRender = {
 	title: CopyInput;
@@ -29,7 +30,7 @@ export type NotificationEmail<Data> = {
 	/** Template name. Defaults to Lucid's notification template, which renders the title, body and link. */
 	template?: string;
 	/** Extra template data merged with the defaults. */
-	data?: (props: { data: Data }) => Record<string, unknown>;
+	data?(props: { data: Data }): Record<string, unknown>;
 };
 
 export type DefineNotificationOptions<
@@ -45,8 +46,8 @@ export type DefineNotificationOptions<
 	level?: NotificationLevel;
 	/** Stays in people's to-do list until it is resolved. Defaults to false. */
 	actionRequired?: boolean;
-	/** Always delivered in-app. Admins and people can only turn its emails off. Defaults to false. */
-	required?: boolean;
+	/** Requires in-app delivery while allowing users to disable email, defaulting to false. */
+	mandatory?: boolean;
 	audience: NotificationAudience;
 	/** Validates the data passed on send. */
 	data: Data;
@@ -71,19 +72,23 @@ export type NotificationDefinition<
 	description?: AdminCopyInput;
 	level: NotificationLevel;
 	actionRequired: boolean;
-	required: boolean;
+	mandatory: boolean;
 	audience: NotificationAudience;
 	data: Data;
 	defaults: {
 		enabled: boolean;
 		email: boolean;
 	};
-	render: (props: { data: z.output<Data> }) => NotificationRender;
+	//* method syntax keeps every data schema assignable to AnyNotificationDefinition
+	render(props: { data: z.output<Data> }): NotificationRender;
 	email: NotificationEmail<z.output<Data>> & { delayMinutes: number };
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: accepts any data schema
-export type AnyNotificationDefinition = NotificationDefinition<string, any>;
+/** Any notification definition accepted by Lucid config. */
+export type AnyNotificationDefinition = NotificationDefinition<
+	string,
+	z.ZodObject
+>;
 
 /** The data a definition accepts on send. */
 export type NotificationData<Definition extends AnyNotificationDefinition> =

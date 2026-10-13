@@ -1,17 +1,13 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
-import { toolkitActorSchema } from "../../../libs/toolkit/schema.js";
+import { toolkitActorSchema } from "../../../libs/permission/toolkit-actor.js";
 import LucidAPIError from "../../../utils/errors/lucid-api-error.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import execute from "../execute.js";
 import RequestExecutionError from "../helpers/execution-error.js";
 import recordFailure from "../helpers/record-failure.js";
 
-/**
- * Publishes an approved request, now or at its scheduled time. A failed run is
- * recorded on the request instead of retried, so someone can fix it and
- * publish again.
- */
+/** Completes an approved request now or as scheduled, recording failures for manual retry. */
 export const executeRequestJob = defineJob({
 	name: "core:execute-request",
 	version: 1,
@@ -41,7 +37,7 @@ export const executeRequestJob = defineJob({
 			jobId: failure.jobId,
 			revision: failure.input.revision,
 			userId:
-				failure.input.actor?.kind === "user"
+				failure.input.actor?.type === "user"
 					? failure.input.actor.userId
 					: null,
 			agentRunId: failure.input.actor?.agentRunId,

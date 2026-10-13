@@ -2,7 +2,6 @@ import type { MediaGenerateResponse } from "@lucidcms/types";
 import { copy } from "../../../libs/i18n/index.js";
 import type { MediaImageGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import {
 	imageGuidanceInstructions,
 	imageGuidanceSchema,
@@ -29,10 +28,11 @@ const mediaImageGenerate: ServiceFn<
 	],
 	MediaGenerateResponse
 > = async (context, props) => {
-	const featureEnabledRes = await checkFeatureEnabled(context, {
-		feature: "imageGeneration",
+	const model = await resolveMediaModel(context, {
+		type: "image",
+		modelId: props.generation.model,
 	});
-	if (featureEnabledRes.error) return featureEnabledRes;
+	if (model.error) return model;
 
 	const instruction = props.instruction.trim();
 	const guidanceKey = imageGuidanceSchema.safeParse(props.guidance);
@@ -63,12 +63,6 @@ const mediaImageGenerate: ServiceFn<
 			data: undefined,
 		};
 	}
-
-	const model = await resolveMediaModel(context, {
-		type: "image",
-		modelId: props.generation.model,
-	});
-	if (model.error) return model;
 
 	const input: MediaImageGenerateV1Request["input"] = [
 		{ type: "text", role: "user-instruction", value: instruction },
@@ -101,19 +95,6 @@ const mediaImageGenerate: ServiceFn<
 						: undefined,
 			},
 			generation,
-		},
-		target: {
-			generation,
-			guidance: props.guidance ?? null,
-			previousInstructions: props.previousInstructions ?? [],
-			sourceImage: props.image
-				? {
-						type: props.image.type,
-						detail: props.image.detail ?? null,
-						filename: props.image.filename ?? null,
-						mimeType: props.image.mimeType ?? null,
-					}
-				: null,
 		},
 		idempotencyKey: props.idempotencyKey,
 		userId: props.userId,

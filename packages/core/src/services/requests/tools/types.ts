@@ -1,4 +1,4 @@
-import type { ToolkitActor } from "../../../libs/toolkit/types.js";
+import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
 
 export type RequestToolProps = {
 	actor: ToolkitActor;
@@ -7,7 +7,6 @@ export type RequestToolProps = {
 };
 
 export type RequestWriteToolProps = RequestToolProps & {
-	runId: string;
 	conversationId: string;
 	toolName: string;
 };

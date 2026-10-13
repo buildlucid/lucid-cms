@@ -1,8 +1,8 @@
+import type { AgentStreamEvent } from "@lucidcms/types";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { agentServices } from "../../../services/index.js";
 import type { LucidHonoGeneric } from "../../../types/hono.js";
-import type { AgentStreamEvent } from "../../../types/response.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type {
 	ServiceContext,
@@ -41,12 +41,11 @@ const streamEvents = (
 				},
 			});
 			if (result.error && !disconnect.signal.aborted) {
-				await stream.writeSSE({
-					data: JSON.stringify({
-						type: "error",
-						message: context.translate(result.error.message),
-					}),
-				});
+				const event: AgentStreamEvent = {
+					type: "error",
+					message: context.translate(result.error.message) ?? "",
+				};
+				await stream.writeSSE({ data: JSON.stringify(event) });
 			}
 		} finally {
 			clearInterval(ping);

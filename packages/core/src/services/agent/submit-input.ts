@@ -1,4 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
+import type { AgentDelivery } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
@@ -6,14 +7,10 @@ import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
-import type {
-	AgentDelivery,
-	AgentReferenceInput,
-	AgentScreen,
-} from "../../types/response.js";
+import type { AgentReferenceInput, AgentScreen } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveNotification from "../notifications/resolve.js";
-import advanceInputs from "./advance-inputs.js";
+import advanceInputs from "./helpers/advance-inputs.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 import runActsFor from "./helpers/run-acts-for.js";
 import { agentNotificationKeys } from "./notifications/keys.js";
@@ -30,7 +27,8 @@ const submitInput: ServiceFn<
 		{
 			conversationId: string;
 			userId: number;
-			requestId: string;
+			/** A new ID for the input, which becomes its run and message IDs. */
+			inputId: string;
 			text: string;
 			references?: AgentReferenceInput[];
 			/** The admin screen it was sent from, which answers builder tools. */
@@ -66,15 +64,15 @@ const submitInput: ServiceFn<
 	const [existingInput, existingRun, existingMessage] = await Promise.all([
 		Inputs.selectSingle({
 			select: ["id"],
-			where: [{ key: "id", operator: "=", value: input.requestId }],
+			where: [{ key: "id", operator: "=", value: input.inputId }],
 		}),
 		Runs.selectSingle({
 			select: ["id"],
-			where: [{ key: "id", operator: "=", value: input.requestId }],
+			where: [{ key: "id", operator: "=", value: input.inputId }],
 		}),
 		Messages.selectSingle({
 			select: ["id"],
-			where: [{ key: "id", operator: "=", value: input.requestId }],
+			where: [{ key: "id", operator: "=", value: input.inputId }],
 		}),
 	]);
 	if (existingInput.error) return existingInput;
@@ -86,7 +84,7 @@ const submitInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: copy("server:agent.request.already.used"),
+				message: copy("server:agent.id.already.used"),
 			},
 		};
 	}
@@ -106,7 +104,7 @@ const submitInput: ServiceFn<
 	}
 
 	const submitted = await Inputs.submit({
-		id: input.requestId,
+		id: input.inputId,
 		conversationId: input.conversationId,
 		userId: input.userId,
 		text: input.text,
@@ -119,7 +117,7 @@ const submitInput: ServiceFn<
 	//* a retry must repeat the original submission
 	const receipt = await Inputs.selectSingle({
 		select: ["conversation_id", "user_id", "text", "references", "screen"],
-		where: [{ key: "id", operator: "=", value: input.requestId }],
+		where: [{ key: "id", operator: "=", value: input.inputId }],
 	});
 	if (receipt.error) return receipt;
 

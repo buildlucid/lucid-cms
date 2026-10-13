@@ -32,7 +32,7 @@ const addToLibraryController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.addToLibrary.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaCreate]),
 	validate("param", controllerSchemas.addToLibrary.params),

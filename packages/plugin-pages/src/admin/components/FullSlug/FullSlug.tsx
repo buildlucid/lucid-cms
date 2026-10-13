@@ -13,6 +13,7 @@ declare global {
 	}
 }
 
+/** Shows the document's full path below the slug field. */
 const FullSlug: FieldSlotComponent = (props) => {
 	// ----------------------------------
 	// State & Hooks

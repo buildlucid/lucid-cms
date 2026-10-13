@@ -1,12 +1,12 @@
 import z from "zod";
 import {
 	focalPointSchema,
+	mediaActorSchema,
 	originSchema,
 	translationsSchema,
-	userIdSchema,
 } from "../schema.js";
 
-export const inputSchema = z.object({
+export const inputSchema = z.strictObject({
 	id: z.number().int().positive(),
 	fileName: z.string().trim().min(1).optional(),
 	folderId: z.number().int().positive().nullable().optional(),
@@ -27,5 +27,5 @@ export const inputSchema = z.object({
 	base64: z.string().trim().nullable().optional(),
 	isDark: z.boolean().nullable().optional(),
 	isLight: z.boolean().nullable().optional(),
-	userId: userIdSchema,
+	actor: mediaActorSchema,
 });

@@ -28,8 +28,8 @@ const upsert = <Definition extends AnyNotificationDefinition>(
 				key: data.key,
 				fingerprint: data.fingerprint,
 				recipients: data.recipients,
-				actorUserId: data.actorUserId,
-				actorRunId: data.actorRunId,
+				actorUserId: data.actor.type === "user" ? data.actor.userId : null,
+				actorRunId: data.actor.agentRunId,
 			});
 		},
 		name: {

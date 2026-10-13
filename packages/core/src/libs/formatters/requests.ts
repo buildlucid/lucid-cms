@@ -1,58 +1,21 @@
-import canEditDocument from "../../services/requests/helpers/can-edit-document.js";
-import countOpenComments from "../../services/requests/helpers/count-open-comments.js";
-import getReviewToken from "../../services/requests/helpers/get-review-token.js";
-import getTargetReview from "../../services/requests/helpers/get-target-review.js";
 import type {
 	RequestRecord,
 	RequestState,
 } from "../../services/requests/types.js";
-import type { LucidActor } from "../../types/hono.js";
 import type {
 	AgentActor,
 	RequestBlocker,
-	RequestDetail,
+	RequestDetails,
 	RequestDocument,
 	RequestEvent,
 	RequestPermissions,
 	RequestSummary,
-	RequestUser,
+	UserDisplay,
 } from "../../types/response.js";
 import type { LucidRequestEvents } from "../db/tables/index.js";
 import type { Select } from "../db/types.js";
 import type { RequestSummaryQueryResponse } from "../repositories/requests.js";
 import formatter from "./helpers.js";
-import type { MediaFormatterOptions, MediaPosterPropsT } from "./media.js";
-import mediaFormatter from "./media.js";
-
-type UserPropT = {
-	id: number;
-	email: string | null;
-	username: string | null;
-	first_name: string | null;
-	last_name: string | null;
-	profile_picture?: MediaPosterPropsT[];
-};
-
-const formatUsers = (props: {
-	users: UserPropT[];
-	mediaOptions: MediaFormatterOptions;
-}): Map<number, RequestUser> =>
-	new Map(
-		props.users.map((user) => [
-			user.id,
-			{
-				id: user.id,
-				email: user.email,
-				username: user.username,
-				firstName: user.first_name,
-				lastName: user.last_name,
-				profilePicture: mediaFormatter.formatMediaImagePreview({
-					poster: user.profile_picture?.[0],
-					options: props.mediaOptions,
-				}),
-			},
-		]),
-	);
 
 /**
  * Formats one activity entry. Entries missing the details their type needs
@@ -61,7 +24,7 @@ const formatUsers = (props: {
 const formatEvent = (props: {
 	event: Select<LucidRequestEvents>;
 	replies: Select<LucidRequestEvents>[];
-	users: Map<number, RequestUser>;
+	users: Map<number, UserDisplay>;
 	agents: Map<string, AgentActor>;
 }): RequestEvent | null => {
 	const userOrNull = (id: number | null) =>
@@ -70,8 +33,8 @@ const formatEvent = (props: {
 		runId === null ? null : (props.agents.get(runId) ?? null);
 	const base = {
 		id: props.event.id,
-		user: userOrNull(props.event.user_id),
-		agent: agentOrNull(props.event.agent_run_id),
+		actor: userOrNull(props.event.user_id),
+		actorAgent: agentOrNull(props.event.agent_run_id),
 		createdAt: formatter.formatDate(props.event.created_at),
 		updatedAt: formatter.formatDate(props.event.updated_at),
 	};
@@ -92,8 +55,8 @@ const formatEvent = (props: {
 						? [
 								{
 									id: reply.id,
-									user: userOrNull(reply.user_id),
-									agent: agentOrNull(reply.agent_run_id),
+									actor: userOrNull(reply.user_id),
+									actorAgent: agentOrNull(reply.agent_run_id),
 									body: reply.body,
 									createdAt: formatter.formatDate(reply.created_at),
 									updatedAt: formatter.formatDate(reply.updated_at),
@@ -138,8 +101,8 @@ const formatEvent = (props: {
 				sourceRequestId: metadata.sourceRequestId ?? null,
 			};
 		}
-		case "target_reviewed":
-		case "target_unreviewed":
+		case "target_acknowledged":
+		case "target_unacknowledged":
 		case "target_added":
 		case "target_removed": {
 			if (
@@ -210,18 +173,29 @@ const formatEvent = (props: {
 	}
 };
 
+/** Formats request documents and activity with service-provided access, acknowledgements and review tokens. */
 const formatSingle = (props: {
 	request: RequestRecord;
 	state: RequestState;
 	blockers: RequestBlocker[];
 	permissions: RequestPermissions;
 	requiredApprovals: number;
-	user: LucidActor;
-	users: Map<number, RequestUser>;
+	/** Request documents the viewer can edit. */
+	editableDocumentIds: Set<number>;
+	/** Each target's acknowledgement, by request target ID. */
+	acknowledgements: Map<
+		number,
+		{ changedSinceCreation: boolean; acknowledged: boolean }
+	>;
+	openComments: number;
+	reviewToken: string;
+	users: Map<number, UserDisplay>;
 	agents: Map<string, AgentActor>;
-}): RequestDetail => {
+}): RequestDetails => {
 	const userOrNull = (id: number | null) =>
 		id === null ? null : (props.users.get(id) ?? null);
+	const agentOrNull = (runId: string | null) =>
+		runId === null ? null : (props.agents.get(runId) ?? null);
 	const approved = props.request.approved_revision === props.request.revision;
 	const repliesByParent = Map.groupBy(
 		props.request.events.filter((event) => event.parent_id !== null),
@@ -238,10 +212,7 @@ const formatSingle = (props: {
 		revision: props.request.revision,
 		executionJobId: props.request.execution_job_id,
 		createdBy: userOrNull(props.request.created_by),
-		createdByAgent:
-			props.request.created_by_run_id === null
-				? null
-				: (props.agents.get(props.request.created_by_run_id) ?? null),
+		createdByAgent: agentOrNull(props.request.created_by_run_id),
 		approvals: props.request.approvals.map((approval) => ({
 			user: userOrNull(approval.user_id),
 			approvedAt: formatter.formatDate(approval.approved_at),
@@ -249,9 +220,14 @@ const formatSingle = (props: {
 		requiredApprovals: props.requiredApprovals,
 		scheduledAt: formatter.formatDate(props.request.scheduled_at),
 		scheduledTimezone: props.request.scheduled_timezone,
-		failure: props.request.failure,
-		failureRequestDocumentId: props.request.failure_request_document_id,
-		failureTarget: props.request.failure_target,
+		failure:
+			props.request.failure === null
+				? null
+				: {
+						message: props.request.failure,
+						requestDocumentId: props.request.failure_request_document_id,
+						target: props.request.failure_target,
+					},
 		completedAt: formatter.formatDate(props.request.completed_at),
 		createdAt: formatter.formatDate(props.request.created_at),
 		updatedAt: formatter.formatDate(props.request.updated_at),
@@ -274,31 +250,26 @@ const formatSingle = (props: {
 				workflowStage: state?.workflowStage ?? null,
 				targets: document.targets.map((target) => {
 					const current = state?.versions.get(target.target);
+					const acknowledgement = props.acknowledgements.get(target.id);
 					return {
 						target: target.target,
 						versionId: current?.id ?? null,
 						changed:
 							props.request.status === "open" &&
-							state?.request?.contentId !== current?.contentId,
-						...getTargetReview({
-							target,
-							requestDocumentId: document.id,
-							events: props.request.events,
-							currentVersionId: current?.id ?? null,
-						}),
-						reviewedBy: userOrNull(target.reviewed_by),
-						reviewedAt: formatter.formatDate(target.reviewed_at),
+							state?.content?.contentId !== current?.contentId,
+						changedSinceCreation:
+							acknowledgement?.changedSinceCreation ?? false,
+						acknowledged: acknowledgement?.acknowledged ?? false,
+						acknowledgedBy: userOrNull(target.acknowledged_by),
+						acknowledgedByAgent: agentOrNull(target.acknowledged_by_run_id),
+						acknowledgedAt: formatter.formatDate(target.acknowledged_at),
 					};
 				}),
 				blockers: props.blockers.filter(
 					(blocker) => blocker.requestDocumentId === document.id,
 				),
 				permissions: {
-					edit: canEditDocument({
-						request: props.request,
-						collectionKey: document.collection_key,
-						user: props.user,
-					}),
+					edit: props.editableDocumentIds.has(document.id),
 				},
 			};
 		}),
@@ -313,8 +284,8 @@ const formatSingle = (props: {
 			return formatted ? [formatted] : [];
 		}),
 		blockers: props.blockers,
-		openComments: countOpenComments({ events: props.request.events }),
-		reviewToken: getReviewToken(props),
+		openComments: props.openComments,
+		reviewToken: props.reviewToken,
 		permissions: props.permissions,
 	};
 };
@@ -322,7 +293,7 @@ const formatSingle = (props: {
 const formatSummary = (props: {
 	request: RequestSummaryQueryResponse;
 	permissions: RequestPermissions;
-	users: Map<number, RequestUser>;
+	users: Map<number, UserDisplay>;
 	agents: Map<string, AgentActor>;
 }): RequestSummary => ({
 	id: props.request.id,
@@ -344,7 +315,14 @@ const formatSummary = (props: {
 	}),
 	scheduledAt: formatter.formatDate(props.request.scheduled_at),
 	scheduledTimezone: props.request.scheduled_timezone,
-	failure: props.request.failure,
+	failure:
+		props.request.failure === null
+			? null
+			: {
+					message: props.request.failure,
+					requestDocumentId: props.request.failure_request_document_id,
+					target: props.request.failure_target,
+				},
 	completedAt: formatter.formatDate(props.request.completed_at),
 	createdAt: formatter.formatDate(props.request.created_at),
 	updatedAt: formatter.formatDate(props.request.updated_at),
@@ -360,7 +338,6 @@ const formatSummary = (props: {
 });
 
 export default {
-	formatUsers,
 	formatEvent,
 	formatSingle,
 	formatSummary,

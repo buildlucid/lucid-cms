@@ -1,7 +1,8 @@
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { requestData, requestHref } from "./shared.js";
+import getRequestPath from "../helpers/get-request-path.js";
+import { requestData } from "./shared.js";
 
 export const approvalDismissedNotification = defineNotification({
 	key: "requests:approval-dismissed",
@@ -24,6 +25,6 @@ export const approvalDismissedNotification = defineNotification({
 		body: copy("server:core.notifications.requests.approval-dismissed.body", {
 			defaultMessage: "The request changed, so it needs approving again.",
 		}),
-		href: requestHref(data.requestId),
+		href: getRequestPath(data.requestId),
 	}),
 });

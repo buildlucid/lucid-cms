@@ -17,7 +17,7 @@ const systemAuthority: AgentToolAuthority = {
 };
 
 /**
- * Resolves an agent run's principal and checks its workflow permission.
+ * Resolves an agent run's principal and checks its agent permission.
  * @remarks Null users act as the system; omitted actions accept any agent permission.
  * `requireConnection` also checks the AI connection and organisation agent access.
  */

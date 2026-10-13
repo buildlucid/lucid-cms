@@ -2,7 +2,7 @@ import { afterAll, beforeEach, expect, test, vi } from "vitest";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
 import type { MediaDeliveryAdapterInstance } from "../../../../libs/media-delivery/types.js";
 import type { MediaStorageAdapterInstance } from "../../../../libs/media-storage/types.js";
-import { toolDefinitionInternal } from "../../../../libs/tools/registry.js";
+import { toolDefinitionInternal } from "../../../../libs/tools/tool-definition-internal.js";
 import type { Media } from "../../../../types/response.js";
 import createServiceContext from "../../../../utils/services/create-service-context.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";

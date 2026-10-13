@@ -5,6 +5,7 @@ import checkAgentAccess from "./helpers/check-agent-access.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import resolveModel from "./helpers/resolve-model.js";
 
+/** Lists available models and the default selection for an accessible agent or routine. */
 const getModels: ServiceFn<
 	[{ agentKey: string; userId: number; routineId?: string }],
 	AiModelCatalog

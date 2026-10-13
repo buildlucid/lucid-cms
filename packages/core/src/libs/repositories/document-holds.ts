@@ -68,7 +68,7 @@ export default class DocumentHoldsRepository extends StaticRepository<"lucid_doc
 			staleBefore?: string;
 		},
 	) {
-		let query = this.db
+		const query = this.db
 			.updateTable("lucid_document_holds")
 			.set({
 				tab_id: props.tabId,
@@ -78,15 +78,15 @@ export default class DocumentHoldsRepository extends StaticRepository<"lucid_doc
 			})
 			.where("collection_key", "=", props.collectionKey)
 			.where("document_id", "=", props.documentId)
-			.where("target", "=", props.target);
-		if (props.staleBefore !== undefined) {
-			query = query.where("seen_at", "<", props.staleBefore);
-		}
+			.where("target", "=", props.target)
+			.$if(props.staleBefore !== undefined, (query) =>
+				query.where("seen_at", "<", props.staleBefore ?? ""),
+			)
+			.returning("id");
 
-		const exec = await this.executeQuery(
-			() => query.returning("id").executeTakeFirst(),
-			{ method: "claimHeld" },
-		);
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "claimHeld",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };

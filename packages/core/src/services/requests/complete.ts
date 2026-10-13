@@ -27,13 +27,12 @@ const complete: ServiceFn<
 
 	const lockRes = await lockRequest(context, { id: data.id });
 	if (lockRes.error) return lockRes;
-	await using _lock = lockRes.data;
 
 	const requestRes = await loadRequest(context, data);
 	if (requestRes.error) return requestRes;
 
 	const request = requestRes.data;
-	if (!getRequestAccess(context, { request, user: data.user }).request) {
+	if (!getRequestAccess(context, { request, user: data.user }).complete) {
 		return {
 			error: {
 				type: "basic",

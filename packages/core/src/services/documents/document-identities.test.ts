@@ -1,14 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { sql } from "kysely";
-import {
-	afterAll,
-	afterEach,
-	assert,
-	beforeAll,
-	expect,
-	test,
-	vi,
-} from "vitest";
+import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import constants from "../../constants/constants.js";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
 import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
@@ -19,7 +10,6 @@ import {
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import { getJobDefinitionRuntime } from "../../libs/jobs/registry.js";
-import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
@@ -27,7 +17,6 @@ import insertConversation from "../agent/helpers/insert-conversation.js";
 import registerReferences from "../agent/references/register.js";
 import { deleteCollectionJob } from "../collections/jobs/delete-single.js";
 import cloneVersion from "../documents-versions/clone-version.js";
-import { deleteExpiredRevisionsJob } from "../documents-versions/jobs/delete-expired-revisions.js";
 import promoteVersion from "../documents-versions/promote-version.js";
 import syncCollections from "../sync/sync-collections.js";
 import deleteMultiplePermanently from "./delete-multiple-permanently.js";
@@ -122,7 +111,6 @@ beforeAll(async () => {
 	assert(conversation.data);
 	conversationId = conversation.data.id;
 });
-afterEach(() => vi.restoreAllMocks());
 afterAll(() => fixture.destroy());
 
 const create = async (key = collectionKey) => {
@@ -515,16 +503,7 @@ test.each([
 	).rejects.toThrow(/FOREIGN KEY/);
 });
 
-test.each([
-	true,
-	false,
-])("failed document creation leaves no identity or workflow, transactions: %s", async (transactions) => {
-	if (!transactions) {
-		const supports = context.config.db.supports.bind(context.config.db);
-		vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
-			feature === "transaction" ? false : supports(feature),
-		);
-	}
+test("failed document creation leaves no identity or workflow", async () => {
 	const before = await context.db.kysely
 		.selectFrom("lucid_document_identities")
 		.selectAll()
@@ -803,16 +782,7 @@ test("snapshot cloning and promotion create identities and remove replaced versi
 	expect((await versionDependants(promoted.id)).identity).toBe(1);
 });
 
-test.each([
-	true,
-	false,
-])("failed version saves remove new identities and preserve the previous version, transactions: %s", async (transactions) => {
-	if (!transactions) {
-		const supports = context.config.db.supports.bind(context.config.db);
-		vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
-			feature === "transaction" ? false : supports(feature),
-		);
-	}
+test("failed version saves remove new identities and preserve the previous version", async () => {
 	const documentId = await create();
 	const previous = await latestVersion(documentId);
 	await pinVersion(documentId, previous.id);
@@ -891,121 +861,4 @@ test("pinned foreign keys reject a version belonging to another document", async
 			})
 			.execute(),
 	).rejects.toThrow(/FOREIGN KEY/);
-});
-
-test("a failed identity cleanup preserves replacement content and can be retried without the physical version", async () => {
-	const documentId = await create();
-	const previous = await latestVersion(documentId);
-	await pinVersion(documentId, previous.id);
-	const tables = await getTableNames(context, collectionKey);
-	assert(tables.data);
-	const supports = context.config.db.supports.bind(context.config.db);
-	vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
-		feature === "transaction" ? false : supports(feature),
-	);
-	await sql`CREATE TRIGGER fail_old_identity_delete BEFORE DELETE ON lucid_document_version_identities
-		WHEN OLD.collection_key = ${sql.lit(collectionKey)} AND OLD.version_id = ${sql.lit(previous.id)}
-		BEGIN SELECT RAISE(ABORT, 'Identity cleanup failed'); END`.execute(
-		context.db.kysely,
-	);
-	try {
-		const saved = await upsertSingle(context, {
-			collectionKey,
-			documentId,
-			userId: null,
-			fields: [{ key: "title", type: "text", value: "Replacement" }],
-		});
-		expect(saved.error).toBeDefined();
-		const replacement = await latestVersion(documentId);
-		expect(replacement.id).not.toBe(previous.id);
-		expect(
-			await context.db.kysely
-				.selectFrom(tables.data.documentFields)
-				.select("_title")
-				.where("document_version_id", "=", replacement.id)
-				.execute(),
-		).toEqual([{ _title: "Replacement" }]);
-		expect(await versionDependants(previous.id)).toEqual(versionPresent);
-	} finally {
-		await sql`DROP TRIGGER fail_old_identity_delete`.execute(context.db.kysely);
-	}
-
-	const DocumentVersions = new DocumentVersionsRepository(context.db);
-	const retried = await DocumentVersions.deleteVersions(
-		{
-			collectionKey,
-			where: [{ key: "id", operator: "=", value: previous.id }],
-			documentId,
-		},
-		{ tableName: tables.data.version },
-	);
-	expect(retried.error).toBeUndefined();
-	expect(await versionDependants(previous.id)).toEqual(versionRemoved);
-	expect((await latestVersion(documentId)).id).not.toBe(previous.id);
-});
-
-test("revision cleanup retries orphan identities when no physical candidates remain", async () => {
-	const key = "identity_revisions";
-	const documentId = await create(key);
-	const previous = await latestVersion(documentId, key);
-	await pinVersion(documentId, previous.id, key);
-	await saveRelated(documentId, [], key);
-	const current = await latestVersion(documentId, key);
-	const tables = await getTableNames(context, key);
-	assert(tables.data);
-	await context.db.kysely
-		.updateTable(tables.data.version)
-		.set({ created_at: "2000-01-01T00:00:00.000Z" })
-		.where("id", "=", previous.id)
-		.execute();
-	const versions = new DocumentVersionsRepository(context.db);
-	const supports = context.config.db.supports.bind(context.config.db);
-	vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
-		feature === "transaction" ? false : supports(feature),
-	);
-	await sql`CREATE TRIGGER fail_revision_identity_delete BEFORE DELETE ON lucid_document_version_identities
-        WHEN OLD.collection_key = ${sql.lit(key)} AND OLD.version_id = ${sql.lit(previous.id)}
-        BEGIN SELECT RAISE(ABORT, 'identity cleanup failed'); END`.execute(
-		context.db.kysely,
-	);
-	try {
-		const failed = await versions.deleteExpiredRevisions(
-			{
-				collectionKey: key,
-				cutoffDate: "2020-01-01T00:00:00.000Z",
-				documentIds: [documentId],
-			},
-			{ tableName: tables.data.version },
-		);
-		expect(failed.error).toBeDefined();
-		expect(
-			await context.db.kysely
-				.selectFrom(tables.data.version)
-				.select("id")
-				.where("id", "=", previous.id)
-				.execute(),
-		).toEqual([]);
-		expect(await versionDependants(previous.id, key)).toEqual(versionPresent);
-	} finally {
-		await sql`DROP TRIGGER fail_revision_identity_delete`.execute(
-			context.db.kysely,
-		);
-	}
-	const retried = await getJobDefinitionRuntime(
-		deleteExpiredRevisionsJob,
-	).execute(
-		context,
-		{ collectionKey: key, retentionDays: 30 },
-		{
-			jobId: randomUUID(),
-			attempt: 2,
-			maxAttempts: 2,
-			trigger: { type: "enqueue" },
-			signal: new AbortController().signal,
-		},
-	);
-	expect(retried).toEqual({ type: "success" });
-	expect(await versionDependants(previous.id, key)).toEqual(versionRemoved);
-	expect((await latestVersion(documentId, key)).id).toBe(current.id);
-	expect((await versionDependants(current.id, key)).identity).toBe(1);
 });

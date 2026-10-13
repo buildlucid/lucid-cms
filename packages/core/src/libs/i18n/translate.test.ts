@@ -108,7 +108,7 @@ test("translation stores expose admin bundles with English and default-locale fa
 	});
 
 	expect(fallbackStore.admin({ locale: "es" })).toMatchObject({
-		"core.permissions.update.jobs": "Update Job Schedules",
+		"core.permissions.update.jobs": "Update Schedules",
 		"tests.default": "French default",
 		"tests.override": "Spanish target",
 	});

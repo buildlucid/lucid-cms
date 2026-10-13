@@ -1,8 +1,8 @@
-import type { AgentDefinition } from "../types.js";
-
-export const agentInstructions = (
-	agent: Pick<AgentDefinition, "name" | "instructions">,
-) =>
+/** Introduces the agent by its name in the default language. */
+export const agentInstructions = (agent: {
+	name: string;
+	instructions: string;
+}) =>
 	[
 		"## Agent",
 		`You are ${agent.name}, an agent in Lucid CMS.`,

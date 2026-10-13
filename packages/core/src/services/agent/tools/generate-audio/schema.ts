@@ -1,6 +1,6 @@
+import type { AgentAudioSettings } from "@lucidcms/types";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
-import type { AgentAudioSettings } from "../../../../types/response.js";
 
 const scriptSchema = z
 	.string()
@@ -25,7 +25,7 @@ export const inputSchema = z
 		}),
 		library: z.boolean().default(false).meta({
 			description:
-				"Save the audio to the media library as public media, ready to use in documents, instead of the person's private personal media. Set it when the audio is for a document or field.",
+				"Save the audio to the media library, where it is public and ready to use in documents, instead of the person's private personal media. Set it when the audio is for a document or field.",
 		}),
 		skipReview: z.boolean().default(false).meta({
 			description:

@@ -1,5 +1,4 @@
 import z from "zod";
-import { notificationLevelSchema } from "../../../../libs/db/tables/notifications.js";
 import {
 	filterConditionsInput,
 	toQueryFilters,
@@ -12,7 +11,10 @@ import {
 	agentNameSchema,
 	personSchema,
 } from "../../../../libs/tools/person.js";
-import { controllerSchemas } from "../../../../schemas/notifications.js";
+import {
+	controllerSchemas,
+	notificationLevelSchema,
+} from "../../../../schemas/notifications.js";
 
 const querySchema =
 	controllerSchemas.getMultiple.query.formatted.extend(paginationInput);
@@ -34,7 +36,7 @@ export const inputSchema = z.object({
 		.pipe(querySchema)
 		.meta({
 			description:
-				"All query fields are optional. Use {} for the inbox, newest first. filter is a list of conditions combined with AND, eg. {filter:[{key:'status',value:'attention'}]} for to-dos, {filter:[{key:'status',value:'unread'}]} for unread, or {filter:[{key:'category',value:'requests'}]} for one category. status is one of inbox, unread, attention or archived. perPage max 50.",
+				"All query fields are optional. Use {} for the inbox, newest first. filter is a list of conditions combined with AND, eg. {filter:[{key:'status',value:'actionRequired'}]} for to-dos, {filter:[{key:'status',value:'unread'}]} for unread, or {filter:[{key:'category',value:'requests'}]} for one category. status is one of inbox, unread, actionRequired or archived. perPage max 50.",
 		}),
 });
 

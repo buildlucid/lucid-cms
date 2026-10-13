@@ -5,10 +5,12 @@ import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import api from "@/services/api";
 import T from "@/translations";
-import { formatAiCredits } from "@/utils/ai-usage";
+import {
+	aiCreditsWarningPercent,
+	formatAiCredits,
+	getAllowancePercentUsed,
+} from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
-
-const ALLOWANCE_WARNING_PERCENT = 90;
 
 const AiCreditsSummary: Component = () => {
 	// ----------------------------------------
@@ -18,11 +20,9 @@ const AiCreditsSummary: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const data = createMemo(() => credits.data?.data);
-	const allowancePercentUsed = createMemo(() => {
-		const allowance = data()?.allowance;
-		if (!allowance || allowance.total <= 0) return 0;
-		return Math.min(100, Math.floor((allowance.used / allowance.total) * 100));
-	});
+	const allowancePercentUsed = createMemo(() =>
+		getAllowancePercentUsed(data()?.allowance),
+	);
 
 	// ----------------------------------------
 	// Render
@@ -41,8 +41,8 @@ const AiCreditsSummary: Component = () => {
 									class="mb-4"
 									value={allowancePercentUsed()}
 									variant={
-										allowancePercentUsed() > ALLOWANCE_WARNING_PERCENT
-											? "danger"
+										allowancePercentUsed() >= aiCreditsWarningPercent
+											? "warning"
 											: "primary"
 									}
 									labels={{

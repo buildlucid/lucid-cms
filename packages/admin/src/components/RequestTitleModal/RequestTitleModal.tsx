@@ -1,4 +1,4 @@
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import { type Component, createEffect, createSignal, untrack } from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
@@ -11,7 +11,7 @@ import { getBodyError } from "@/utils/error-helpers";
 const RequestTitleModal: Component<{
 	open: boolean;
 	setOpen: (_open: boolean) => void;
-	request: RequestDetail;
+	request: RequestDetails;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks

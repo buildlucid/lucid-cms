@@ -32,7 +32,7 @@ const updateTargetsController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateTargets.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.updateTargets.params),

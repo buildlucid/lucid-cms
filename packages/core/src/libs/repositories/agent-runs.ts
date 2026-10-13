@@ -270,9 +270,13 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		return exec.response;
 	}
-	/** Runs that have waited on their person since before `waitingBefore` without telling them. */
+	/**
+	 * Selects overdue waits that have not notified their user, filtered by screen or non-screen calls.
+	 * @remarks Separate filters prevent either maintenance batch from filling with waits handled by the other.
+	 */
 	async selectUnnotifiedWaiting(props: {
 		waitingBefore: string;
+		screen: boolean;
 		limit: number;
 	}) {
 		const query = this.db
@@ -294,6 +298,18 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 			.where("lucid_agent_runs.user_id", "is not", null)
 			.where("lucid_agent_runs.input_notified_at", "is", null)
 			.where("lucid_agent_runs.updated_at", "<", props.waitingBefore)
+			.where((eb) => {
+				const widgetKey = eb
+					.ref("lucid_agent_runs.checkpoint", "->>")
+					.key("pending")
+					.key("widget")
+					.key("key");
+				const screenKey = constants.agent.widgets.screen;
+
+				return props.screen
+					? eb(widgetKey, "=", screenKey)
+					: eb.or([eb(widgetKey, "is", null), eb(widgetKey, "!=", screenKey)]);
+			})
 			.orderBy("lucid_agent_runs.updated_at", "asc")
 			.limit(props.limit);
 
@@ -302,6 +318,31 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		});
 
 		return exec.response;
+	}
+	/**
+	 * Claims a waiting run's notification for its execution version, returning whether the claim succeeded.
+	 * @remarks The version guard prevents claiming a later wait, and the notification guard prevents duplicate claims.
+	 */
+	async markInputNotified(props: {
+		runId: string;
+		executionVersion: number;
+		now: string;
+	}) {
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({ input_notified_at: props.now })
+			.where("id", "=", props.runId)
+			.where("status", "=", "waiting")
+			.where("execution_version", "=", props.executionVersion)
+			.where("input_notified_at", "is", null)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "markInputNotified",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
 	}
 	/** Moves a run to a new status unless it has already finished. */
 	async transition(props: {

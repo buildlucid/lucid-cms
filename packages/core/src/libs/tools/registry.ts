@@ -1,8 +1,12 @@
+import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { toolDefinitionInternal } from "./tool-definition-internal.js";
 import type { McpToolDefinition, ToolDefinition } from "./types.js";
 
-export { toolDefinitionInternal } from "./tool-definition-internal.js";
+/** The reserved widgets each core tool may show, by tool name. */
+export const coreToolWidgets: ReadonlyMap<string, readonly string[]> = new Map(
+	Object.entries(constants.agent.widgets.tools),
+);
 
 export const isToolDefinition = (value: unknown): value is ToolDefinition =>
 	typeof value === "object" &&

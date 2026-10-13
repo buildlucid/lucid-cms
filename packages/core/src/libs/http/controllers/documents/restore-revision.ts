@@ -29,7 +29,7 @@ const restoreRevisionController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.restoreRevision.params),
 	collectionPermissions("restore"),

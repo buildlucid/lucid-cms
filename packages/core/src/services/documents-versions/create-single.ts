@@ -16,7 +16,6 @@ import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
-import rollbackVersionCreate from "./helpers/rollback-version-create.js";
 
 /**
  * Creates a new latest version. A requested document's content is instead
@@ -54,32 +53,26 @@ const createSingle: ServiceFn<
 			? "latest"
 			: constants.collectionBuilder.publishing.proposalVersionType;
 
-	const currentLatestRes = await DocumentVersions.selectSingle(
-		{
-			select: ["id"],
-			where: [
-				{
-					key: "document_id",
-					operator: "=",
-					value: data.documentId,
-				},
-				{
-					key: "type",
-					operator: "=",
-					value: versionType,
-				},
-			],
-		},
-		{
-			tableName: tableNamesRes.data.version,
-		},
-	);
-	if (currentLatestRes.error) return currentLatestRes;
+	//* New create-request proposals have no previous latest version to replace.
+	const currentLatestRes =
+		data.createRequestId === undefined
+			? await DocumentVersions.selectSingle(
+					{
+						select: ["id"],
+						where: [
+							{ key: "document_id", operator: "=", value: data.documentId },
+							{ key: "type", operator: "=", value: "latest" },
+						],
+					},
+					{ tableName: tableNamesRes.data.version },
+				)
+			: undefined;
+	if (currentLatestRes?.error) return currentLatestRes;
 
-	const previousLatestId = currentLatestRes.data?.id;
+	const previousLatestId = currentLatestRes?.data?.id;
 
 	if (previousLatestId !== undefined) {
-		//* retain the current latest as a rollback point until the new version is complete
+		//* Stage the previous latest as a revision, deleting it after completion if revisions are off.
 		const stagePreviousRes = await DocumentVersions.updateSingle(
 			{
 				where: [
@@ -100,7 +93,6 @@ const createSingle: ServiceFn<
 		if (stagePreviousRes.error) return stagePreviousRes;
 	}
 
-	// Create new latest version
 	const newVersionRes = await DocumentVersions.createVersion(
 		{
 			collection_key: data.collection.key,
@@ -117,16 +109,7 @@ const createSingle: ServiceFn<
 			tableName: tableNamesRes.data.version,
 		},
 	);
-	if (newVersionRes.error) {
-		await rollbackVersionCreate(context, {
-			collectionKey: data.collection.key,
-			documentId: data.documentId,
-			previousLatestId,
-			tableName: tableNamesRes.data.version,
-			versions: DocumentVersions,
-		});
-		return newVersionRes;
-	}
+	if (newVersionRes.error) return newVersionRes;
 
 	//* a requested document is its create request's only document
 	const request: DocumentHookRequest | undefined =
@@ -177,17 +160,7 @@ const createSingle: ServiceFn<
 			},
 		},
 	);
-	if (hookResponse.error) {
-		await rollbackVersionCreate(context, {
-			collectionKey: data.collection.key,
-			documentId: data.documentId,
-			newVersionId: newVersionRes.data.id,
-			previousLatestId,
-			tableName: tableNamesRes.data.version,
-			versions: DocumentVersions,
-		});
-		return hookResponse;
-	}
+	if (hookResponse.error) return hookResponse;
 
 	// Save bricks for the new version
 	const createMultipleBricks = await createDocumentBricks(context, {
@@ -202,17 +175,7 @@ const createSingle: ServiceFn<
 		//* validation; duplication still runs transform hooks before cloning it
 		skipValidation: data.origin?.type === "duplicate",
 	});
-	if (createMultipleBricks.error) {
-		await rollbackVersionCreate(context, {
-			collectionKey: data.collection.key,
-			documentId: data.documentId,
-			newVersionId: newVersionRes.data.id,
-			previousLatestId,
-			tableName: tableNamesRes.data.version,
-			versions: DocumentVersions,
-		});
-		return createMultipleBricks;
-	}
+	if (createMultipleBricks.error) return createMultipleBricks;
 
 	// ----------------------------------------------
 	// Fire afterUpsert hook
@@ -241,17 +204,7 @@ const createSingle: ServiceFn<
 			},
 		},
 	);
-	if (hookAfterRes.error) {
-		await rollbackVersionCreate(context, {
-			collectionKey: data.collection.key,
-			documentId: data.documentId,
-			newVersionId: newVersionRes.data.id,
-			previousLatestId,
-			tableName: tableNamesRes.data.version,
-			versions: DocumentVersions,
-		});
-		return hookAfterRes;
-	}
+	if (hookAfterRes.error) return hookAfterRes;
 
 	if (
 		previousLatestId !== undefined &&
@@ -274,17 +227,7 @@ const createSingle: ServiceFn<
 			},
 		);
 
-		if (finalizePreviousRes.error) {
-			await rollbackVersionCreate(context, {
-				collectionKey: data.collection.key,
-				documentId: data.documentId,
-				newVersionId: newVersionRes.data.id,
-				previousLatestId,
-				tableName: tableNamesRes.data.version,
-				versions: DocumentVersions,
-			});
-			return finalizePreviousRes;
-		}
+		if (finalizePreviousRes.error) return finalizePreviousRes;
 	}
 
 	return {

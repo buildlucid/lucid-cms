@@ -30,7 +30,7 @@ const completeAuthorizationController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(oauthSchemas.completeAuthorization.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", oauthSchemas.completeAuthorization.params),
 	validate("json", oauthSchemas.completeAuthorization.body),

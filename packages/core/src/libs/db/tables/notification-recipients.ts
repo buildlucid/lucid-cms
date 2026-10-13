@@ -26,10 +26,6 @@ export const notificationRecipientsTable = defineTable(
 				schema: z.union([z.string(), z.date()]).nullable(),
 				type: "timestamp",
 			},
-			email_id: {
-				schema: z.number().nullable(),
-				type: "integer",
-			},
 			created_at: {
 				schema: z.union([z.string(), z.date()]),
 				type: "timestamp",
@@ -45,6 +41,5 @@ export interface LucidNotificationRecipients {
 	archived_at: TimestampMutable;
 	/** When this person is due an email. Cleared once the email job handles them. */
 	email_due_at: TimestampMutable;
-	email_id: number | null;
 	created_at: TimestampImmutable;
 }

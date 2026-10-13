@@ -8,23 +8,19 @@ import { generateImageAgentTool } from "../../services/agent/tools/generate-imag
 import { readFileAgentTool } from "../../services/agent/tools/read-file/index.js";
 import { addMediaToLibraryAgentTool } from "../../services/media/tools/add-to-library/index.js";
 import { resolveWebToolOptions } from "../../services/web/helpers/web-tool-options.js";
-import { webFetchAgentTool } from "../../services/web/tools/fetch/index.js";
+import { webReadAgentTool } from "../../services/web/tools/read/index.js";
 import { webSearchAgentTool } from "../../services/web/tools/search/index.js";
 import dedent from "../../utils/helpers/dedent.js";
 import { normalizeCopy } from "../i18n/copy.js";
 import type {
 	AgentDefinition,
 	AgentFeatures,
+	AgentMediaGenerateOptions,
 	DefineAgentOptions,
 } from "./types.js";
 
-type GenerateOption = NonNullable<
-	NonNullable<DefineAgentOptions<string>["features"]>["media"]
->["generate"];
-
-//* true and false turn every media type on or off; omitted types stay on
 const resolveGenerate = (
-	generate: GenerateOption = true,
+	generate: AgentMediaGenerateOptions = true,
 ): AgentFeatures["media"]["generate"] =>
 	typeof generate === "boolean"
 		? { image: generate, audio: generate }
@@ -50,9 +46,11 @@ const resolveGenerate = (
 const defineAgent = <const Key extends string>(
 	options: DefineAgentOptions<Key>,
 ): AgentDefinition<Key> => {
+	const builderRead = options.features?.builder?.read ?? true;
 	const features = {
 		media: {
 			upload: options.features?.media?.upload ?? true,
+			addToLibrary: options.features?.media?.addToLibrary ?? true,
 			attach: options.features?.media?.attach ?? true,
 			analyze: options.features?.media?.analyze ?? true,
 			readFile: options.features?.media?.readFile ?? true,
@@ -61,10 +59,8 @@ const defineAgent = <const Key extends string>(
 		documents: { attach: options.features?.documents?.attach ?? true },
 		requests: { attach: options.features?.requests?.attach ?? true },
 		builder: {
-			read: options.features?.builder?.read ?? true,
-			edit:
-				(options.features?.builder?.read ?? true) &&
-				(options.features?.builder?.edit ?? true),
+			read: builderRead,
+			edit: options.features?.builder?.edit ?? builderRead,
 		},
 		web: {
 			search: options.features?.web?.search ?? true,
@@ -80,8 +76,8 @@ const defineAgent = <const Key extends string>(
 		key: options.key,
 		enabled: options.enabled ?? true,
 		sidebar: options.sidebar ?? true,
-		name: options.name,
-		description: options.description,
+		name: normalizeCopy(options.name),
+		description: normalizeCopy(options.description),
 		instructions: options.instructions ? dedent(options.instructions) : "",
 		tools: [
 			...(features.media.analyze ? [analyzeMediaAgentTool()] : []),
@@ -99,12 +95,12 @@ const defineAgent = <const Key extends string>(
 				: []),
 			...(features.web.read
 				? [
-						webFetchAgentTool({
+						webReadAgentTool({
 							allowedDomains: features.web.allowedDomains,
 						}),
 					]
 				: []),
-			...(features.media.upload ? [addMediaToLibraryAgentTool()] : []),
+			...(features.media.addToLibrary ? [addMediaToLibraryAgentTool()] : []),
 			...(features.builder.read
 				? [builderReadAgentTool(), builderFocusAgentTool()]
 				: []),

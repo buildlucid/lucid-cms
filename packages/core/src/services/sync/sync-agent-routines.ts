@@ -85,7 +85,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 
 			const saved = await saveRoutineTools(context, {
 				routineId: id,
-				tools: routine.tools,
+				tools: routine.toolSettings,
 			});
 			if (saved.error) return saved;
 
@@ -94,12 +94,12 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 
 		const toolsChanged = !isDeepStrictEqual(
 			storedTools.data[current.id] ?? {},
-			routine.tools,
+			routine.toolSettings,
 		);
 		if (toolsChanged) {
 			const saved = await saveRoutineTools(context, {
 				routineId: current.id,
-				tools: routine.tools,
+				tools: routine.toolSettings,
 			});
 			if (saved.error) return saved;
 		}

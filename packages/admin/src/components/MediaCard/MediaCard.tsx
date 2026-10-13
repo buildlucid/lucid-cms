@@ -125,10 +125,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 		const current = ownership();
 		if (current.type === "system") return T()("media.ownership.system");
 		if (current.type !== "user") return undefined;
-		if (isOwn()) return T()("media.ownership.yours");
-		return props.ownerName
-			? T()("media.ownership.owned.by", { name: props.ownerName })
-			: T()("media.ownership.user");
+		if (isOwn() || !props.ownerName) return T()("media.ownership.personal");
+		return T()("media.ownership.owned.by", { name: props.ownerName });
 	});
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);

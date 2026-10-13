@@ -1,4 +1,4 @@
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import { type Component, createEffect, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
@@ -16,7 +16,7 @@ import {
 const RequestScheduleModal: Component<{
 	open: boolean;
 	setOpen: (_open: boolean) => void;
-	request: RequestDetail;
+	request: RequestDetails;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Mutations

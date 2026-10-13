@@ -1,8 +1,8 @@
+import notifyFailure from "../../services/jobs/helpers/notify-failure.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
 import { JobsRepository } from "../repositories/index.js";
 import { flushPendingJobs } from "./dispatch.js";
-import { notifyJobFailure } from "./failure-notification.js";
 import { runPermanentFailureHook } from "./permanent-failure.js";
 
 /** Requeues or fails jobs whose ownership lease has expired. */
@@ -29,7 +29,7 @@ export const recoverExpiredJobs: ServiceFn<
 	if (exhausted.error) return exhausted;
 
 	for (const job of exhausted.data) {
-		await notifyJobFailure(context, { job, errorMessage: finalLeaseError });
+		await notifyFailure(context, { job, errorMessage: finalLeaseError });
 		await runPermanentFailureHook(context, {
 			job,
 			errorMessage: finalLeaseError,

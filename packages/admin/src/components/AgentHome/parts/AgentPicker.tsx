@@ -1,10 +1,10 @@
 import type { Agent } from "@types";
-import classnames from "classnames";
-import { TbOutlineChevronDown, TbOutlineRobot } from "solid-icons/tb";
+import { TbOutlineRobot } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
+import ComposerTriggerLabel from "@/components/ComposerTriggerLabel/ComposerTriggerLabel";
+import { composerLabelTriggerClasses } from "@/components/ComposerTriggerLabel/classes";
 import Menu from "@/components/Menu/Menu";
-import { composerTriggerClasses } from "@/components/ModelPicker/triggerClasses";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 
 const AgentPicker: Component<{
 	agents: Agent[];
@@ -16,26 +16,24 @@ const AgentPicker: Component<{
 	return (
 		<Menu.Root placement="top-start">
 			<Menu.Trigger
-				class={classnames(composerTriggerClasses, "min-w-0 max-w-48 px-2")}
+				class={composerLabelTriggerClasses}
 				aria-label={T()("agent.select.label")}
-				title={props.selected.name}
+				title={translateAdminCopy(props.selected.name)}
 			>
-				<TbOutlineRobot size={11} class="shrink-0" />
-				{/* a narrow chat box keeps the icon, with the name in the title */}
-				<span class="hidden truncate @md/composer:inline">
-					{props.selected.name}
-				</span>
-				<TbOutlineChevronDown size={9} class="shrink-0" />
+				<ComposerTriggerLabel
+					icon={<TbOutlineRobot size={11} class="shrink-0" />}
+					label={translateAdminCopy(props.selected.name)}
+				/>
 			</Menu.Trigger>
 			<Menu.Content>
 				<For each={props.agents}>
 					{(agent) => (
 						<Menu.Item
-							textValue={agent.name}
+							textValue={translateAdminCopy(agent.name)}
 							selected={agent.key === props.selected.key}
 							onSelect={() => props.onSelect(agent)}
 						>
-							{agent.name}
+							{translateAdminCopy(agent.name)}
 						</Menu.Item>
 					)}
 				</For>

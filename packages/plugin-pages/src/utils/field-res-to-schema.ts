@@ -2,6 +2,7 @@ import type { FieldInputSchema, FieldValue } from "@lucidcms/core/types";
 import type { PageFieldsRow } from "../services/get-pages-fields.js";
 import type { ResolvedPagesCollectionLocalization } from "./resolve-pages-collection-localization.js";
 
+/** Converts stored route field rows into field input for the slug, fullSlug or parent page field. */
 const fieldResToSchema = (
 	key: string,
 	fieldLocalized: boolean,

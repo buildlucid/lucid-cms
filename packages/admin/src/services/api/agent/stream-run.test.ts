@@ -1,4 +1,4 @@
-import type { AgentStreamEvent } from "@types";
+import type { AgentStreamEvent } from "@lucidcms/types";
 import { afterEach, expect, test, vi } from "vitest";
 import { LucidError } from "@/utils/error-handling";
 import { sendRequest } from "@/utils/request";
@@ -86,7 +86,7 @@ test("a disconnect before the first event recovers the accepted run from snapsho
 	const events = vi.fn();
 	await streamRun({
 		url: runStreamUrls.send("chat"),
-		body: { requestId: "run" },
+		body: { inputId: "run" },
 		signal: new AbortController().signal,
 		onEvent: events,
 	});

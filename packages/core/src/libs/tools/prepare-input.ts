@@ -8,6 +8,7 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import describeErrorDetails from "./describe-error-details.js";
+import { coreToolWidgets } from "./registry.js";
 import type {
 	AgentToolResult,
 	McpToolResult,
@@ -20,10 +21,6 @@ type ResultCheck<Result, Checked> = (
 	result: Result,
 	context: ServiceContext,
 ) => Promise<ToolRunResult<Checked>>;
-
-const coreToolWidgets: ReadonlyMap<string, readonly string[]> = new Map(
-	Object.entries(constants.agent.widgets.tools),
-);
 
 export const checkToolResult =
 	(tool: { name: string; output: z.ZodObject }) =>
@@ -85,7 +82,9 @@ const prepareToolInput = async <
 	options: {
 		name: string;
 		input: Input;
-		requirements?: (input: z.output<Input>) => readonly Requirement[];
+		requirements?: (props: {
+			input: z.output<Input>;
+		}) => readonly Requirement[];
 		handler: ToolHandler<z.output<Input>, Result, Execution>;
 		checkResult: ResultCheck<Result, Checked>;
 	},
@@ -102,7 +101,7 @@ const prepareToolInput = async <
 	return {
 		type: "ready",
 		data: {
-			requirements: options.requirements?.(parsedInput.data) ?? [],
+			requirements: options.requirements?.({ input: parsedInput.data }) ?? [],
 			run: async ({ context, execution }) => {
 				const result = await options.handler({
 					context,

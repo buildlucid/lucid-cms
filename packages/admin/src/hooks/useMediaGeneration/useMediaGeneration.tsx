@@ -15,12 +15,8 @@ import {
 	spawnAiFeatureAccessToast,
 } from "../../utils/ai-feature-access";
 
-let targetId = 0;
-
-const getTargetId = () => {
-	targetId += 1;
-	return `media-generation-${targetId}`;
-};
+//* unique across reloads, as pending generations stay in session storage under their target's ID
+const getTargetId = () => `media-generation-${crypto.randomUUID()}`;
 
 /** Opens the media generation modal for a target, and describes its trigger's state. */
 const useMediaGeneration = () => {

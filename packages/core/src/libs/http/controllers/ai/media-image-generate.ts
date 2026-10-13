@@ -24,10 +24,11 @@ const factory = createFactory();
 const mediaImageGenerateController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Generate or edit an image with Lucid AI. Poll the request until the image is ready.",
+			"Generate or edit an image with Lucid AI. Poll the generation with the returned requestId until the image is ready.",
 		tags: ["ai"],
 		summary: "Generate Media Image",
 		responses: openAPI.responses({
+			status: 202,
 			dataSchema: z.toJSONSchema(controllerSchemas.mediaImageGenerate.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.mediaImageGenerate.body),
@@ -38,7 +39,7 @@ const mediaImageGenerateController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.AiImageGenerate]),
 	validate("json", controllerSchemas.mediaImageGenerate.body),

@@ -1,5 +1,5 @@
 import type z from "zod";
-import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
+import type { ToolkitActor } from "../../../../libs/permission/toolkit-actor.js";
 import { getPagination } from "../../../../libs/tools/pagination.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";

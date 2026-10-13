@@ -3,6 +3,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import startRoutineRun from "./helpers/start-routine-run.js";
 
+/** Starts a routine run now, unless the routine already has an unfinished run. */
 const runRoutine: ServiceFn<
 	[{ id: string; userId: number }],
 	{ conversationId: string; runId: string }

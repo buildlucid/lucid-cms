@@ -1,11 +1,11 @@
+import type { AgentInput } from "@lucidcms/types";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type {
 	AgentCatalog,
 	AgentCompaction,
-	AgentContext,
+	AgentContextUsage,
 	AgentConversation,
-	AgentInput,
 	AgentMessage,
 	AgentRoutine,
 	AgentRun,
@@ -24,7 +24,10 @@ import {
 } from "../agent/capabilities.js";
 import { contextLimits } from "../agent/context.js";
 import { getAgents } from "../agent/registry.js";
-import type { ConversationContext, RoutineTools } from "../agent/types.js";
+import type {
+	ConversationContext,
+	RoutineToolSettings,
+} from "../agent/types.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
 import type { LucidAgentCompactions } from "../db/tables/agent-compactions.js";
 import type { LucidAgentConversations } from "../db/tables/agent-conversations.js";
@@ -64,8 +67,8 @@ const formatDefinitions = (props: {
 
 			return {
 				key: agent.key,
-				name: agent.name,
-				description: agent.description,
+				name: withDefaultMessage(agent.name),
+				description: withDefaultMessage(agent.description),
 				features: {
 					media: {
 						upload: agent.features.media.upload,
@@ -134,7 +137,7 @@ const emptyUsage: AgentUsage = { credits: 0, modelCalls: 0 };
 const formatContext = (props: {
 	context: ConversationContext | null;
 	active: boolean;
-}): AgentContext | null => {
+}): AgentContextUsage | null => {
 	if (!props.context) return null;
 
 	const percent = Math.min(
@@ -149,6 +152,25 @@ const formatContext = (props: {
 		percent,
 		compactable: status === "ready" && percent >= contextLimits.suggestAt * 100,
 	};
+};
+
+const titleGenerationWindow = 60_000;
+
+/** Reports a provisional title as generating during the title-generation polling window. */
+const formatTitleStatus = (
+	conversation: Pick<
+		ConversationPropT,
+		"title_status" | "title_generation_requested_at"
+	>,
+): AgentConversation["titleStatus"] => {
+	const requestedAt = formatter.formatDate(
+		conversation.title_generation_requested_at,
+	);
+	if (conversation.title_status !== "provisional" || !requestedAt) {
+		return conversation.title_status;
+	}
+	const age = Date.now() - new Date(requestedAt).getTime();
+	return age >= 0 && age < titleGenerationWindow ? "generating" : "provisional";
 };
 
 const formatConversation = (props: {
@@ -175,10 +197,8 @@ const formatConversation = (props: {
 		: {}),
 	agentKey: props.conversation.agent_key,
 	title: props.conversation.title,
-	titleStatus: props.conversation.title_status,
-	titleGenerationRequestedAt: formatter.formatDate(
-		props.conversation.title_generation_requested_at,
-	),
+	titleStatus: formatTitleStatus(props.conversation),
+	kind: props.conversation.kind,
 	userId: props.conversation.user_id,
 	routineId: props.conversation.routine_id,
 	latestRun:
@@ -270,7 +290,7 @@ const formatRun = (props: { run: RunPropT; usage?: AgentUsage }): AgentRun => ({
 
 const formatRoutine = (props: {
 	routine: Select<LucidAgentRoutines>;
-	tools: RoutineTools;
+	toolSettings: RoutineToolSettings;
 	lastRun?: LastRunPropT;
 }): AgentRoutine => ({
 	id: props.routine.id,
@@ -282,7 +302,7 @@ const formatRoutine = (props: {
 	conversationMode: props.routine.conversation_mode,
 	conversationId: props.routine.conversation_id,
 	modelSelection: props.routine.model_selection,
-	tools: props.tools,
+	toolSettings: props.toolSettings,
 	cron: props.routine.cron,
 	timezone: props.routine.timezone,
 	enabled: formatter.formatBoolean(props.routine.enabled),

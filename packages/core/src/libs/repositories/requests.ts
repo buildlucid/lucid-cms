@@ -25,6 +25,8 @@ export interface RequestSummaryQueryResponse
 		| "scheduled_at"
 		| "scheduled_timezone"
 		| "failure"
+		| "failure_request_document_id"
+		| "failure_target"
 		| "completed_at"
 		| "created_by"
 		| "created_by_run_id"
@@ -280,6 +282,8 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 			"lucid_requests.scheduled_at",
 			"lucid_requests.scheduled_timezone",
 			"lucid_requests.failure",
+			"lucid_requests.failure_request_document_id",
+			"lucid_requests.failure_target",
 			"lucid_requests.completed_at",
 			"lucid_requests.created_by",
 			"lucid_requests.created_by_run_id",
@@ -355,6 +359,8 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 				"scheduled_at",
 				"scheduled_timezone",
 				"failure",
+				"failure_request_document_id",
+				"failure_target",
 				"completed_at",
 				"created_by",
 				"created_by_run_id",
@@ -427,13 +433,12 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 			mode: "multiple",
 		});
 	}
-	/** Claims the request for one writer. Returns the number of rows claimed. */
-	async lock(props: { id: number; token: string }) {
+	/** Locks a request until transaction end through a no-op update, returning whether it exists. */
+	async lock(props: { id: number }) {
 		const query = this.db
 			.updateTable("lucid_requests")
-			.set({ lock_token: props.token })
-			.where("id", "=", props.id)
-			.where("lock_token", "is", null);
+			.set((eb) => ({ id: eb.ref("id") }))
+			.where("id", "=", props.id);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "lock",
@@ -442,20 +447,8 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 
 		return {
 			error: undefined,
-			data: Number(exec.response.data?.numUpdatedRows ?? 0),
+			data: Number(exec.response.data.numUpdatedRows) > 0,
 		};
-	}
-	async unlock(props: { id: number; token: string }) {
-		const query = this.db
-			.updateTable("lucid_requests")
-			.set({ lock_token: null })
-			.where("id", "=", props.id)
-			.where("lock_token", "=", props.token);
-
-		const exec = await this.executeQuery(() => query.execute(), {
-			method: "unlock",
-		});
-		return exec.response;
 	}
 	/** Of the given requests, returns the open ones with approvals of their current revision. */
 	async selectIdsWithApprovals(props: { ids: number[] }) {

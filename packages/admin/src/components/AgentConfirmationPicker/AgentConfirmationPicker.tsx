@@ -1,13 +1,9 @@
 import type { AgentConfirmationMode } from "@types";
-import classnames from "classnames";
-import {
-	TbOutlineChevronDown,
-	TbOutlineChevronRight,
-	TbOutlineShieldHalf,
-} from "solid-icons/tb";
+import { TbOutlineShieldHalf } from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
+import ComposerTriggerLabel from "@/components/ComposerTriggerLabel/ComposerTriggerLabel";
+import { composerLabelTriggerClasses } from "@/components/ComposerTriggerLabel/classes";
 import Menu from "@/components/Menu/Menu";
-import { composerTriggerClasses } from "@/components/ModelPicker/triggerClasses";
 import T from "@/translations";
 
 const modes = [
@@ -31,19 +27,15 @@ const AgentConfirmationPicker: Component<{
 			fallback={
 				<Menu.Root placement="top-start">
 					<Menu.Trigger
-						class={classnames(
-							composerTriggerClasses,
-							"min-w-0 max-w-48 px-2 disabled:opacity-50",
-						)}
+						class={composerLabelTriggerClasses}
 						aria-label={T()("agent.confirmation.mode.label")}
 						title={T()("agent.confirmation.mode.hint")}
 						disabled={props.disabled}
 					>
-						<TbOutlineShieldHalf size={11} class="shrink-0" />
-						<span class="hidden truncate @md/composer:inline">
-							{T()(`agent.confirmation.mode.${props.value}`)}
-						</span>
-						<TbOutlineChevronDown size={9} class="shrink-0" />
+						<ComposerTriggerLabel
+							icon={<TbOutlineShieldHalf size={11} class="shrink-0" />}
+							label={T()(`agent.confirmation.mode.${props.value}`)}
+						/>
 					</Menu.Trigger>
 					<Menu.Content>
 						<For each={modes}>
@@ -70,20 +62,18 @@ const AgentConfirmationPicker: Component<{
 			{(routine) => (
 				<button
 					type="button"
-					class={classnames(
-						composerTriggerClasses,
-						"min-w-0 max-w-48 px-2 disabled:opacity-50",
-					)}
+					class={composerLabelTriggerClasses}
 					title={T()("agent.routine.confirmations.open")}
 					aria-label={T()("agent.routine.confirmations.open")}
 					disabled={routine().disabled}
 					onClick={() => routine().onEdit()}
 				>
-					<TbOutlineShieldHalf size={11} class="shrink-0" />
-					<span class="truncate">
-						{T()("agent.confirmation.mode.tool-defaults")}
-					</span>
-					<TbOutlineChevronRight size={9} class="shrink-0" />
+					<ComposerTriggerLabel
+						icon={<TbOutlineShieldHalf size={11} class="shrink-0" />}
+						label={T()("agent.confirmation.mode.tool-defaults")}
+						alwaysShowLabel={true}
+						chevron="right"
+					/>
 				</button>
 			)}
 		</Show>

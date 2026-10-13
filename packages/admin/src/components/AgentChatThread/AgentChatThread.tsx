@@ -52,6 +52,21 @@ const AgentChatThread: Component<{
 						actions={props.missingAction}
 					/>
 				</Match>
+				<Match when={props.chat.history.isError}>
+					<ErrorState
+						class="grow"
+						description={T()("agent.chat.history.error")}
+						actions={
+							<Button
+								size="sm"
+								variant="outline"
+								onClick={() => props.chat.history.refetch()}
+							>
+								{T()("common.try.again")}
+							</Button>
+						}
+					/>
+				</Match>
 				<Match when={props.chat.history.isLoading}>
 					<LoadingState class="grow" />
 				</Match>

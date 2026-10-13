@@ -1,12 +1,17 @@
+import type { AgentReferencesData } from "@lucidcms/types";
+import z from "zod";
 import constants from "../../../constants/constants.js";
 import { referenceKey } from "../../../libs/agent/references.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
-import type {
-	AgentReferencesData,
-	AgentWidgetPart,
-} from "../../../types/response.js";
+import { agentReferenceInputSchema } from "../../../schemas/agent-references.js";
+import type { AgentWidgetPart } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import listAdded from "../references/list-added.js";
+
+const referencesDataSchema = z.object({
+	references: z.array(agentReferenceInputSchema),
+});
+const previewMediaDataSchema = z.object({ mediaIds: z.array(z.number()) });
 
 /** Builds a card for newly linked chat references, excluding those already shown in references widgets or media previews. */
 const addedReferencesWidget: ServiceFn<
@@ -30,11 +35,13 @@ const addedReferencesWidget: ServiceFn<
 		if (part.type !== "widget") continue;
 
 		if (part.key === constants.agent.widgets.references) {
-			for (const reference of (part.data as AgentReferencesData).references) {
+			const data = referencesDataSchema.safeParse(part.data);
+			for (const reference of data.data?.references ?? []) {
 				shown.add(referenceKey(reference));
 			}
 		} else if (part.key === constants.agent.widgets.previewMedia) {
-			for (const mediaId of part.data.mediaIds as number[]) {
+			const data = previewMediaDataSchema.safeParse(part.data);
+			for (const mediaId of data.data?.mediaIds ?? []) {
 				shown.add(referenceKey({ type: "media", mediaId }));
 			}
 		}

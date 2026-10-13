@@ -12,7 +12,7 @@ import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import updateVersion from "../documents-versions/update-single.js";
-import requestCreation from "../requests/request-creation.js";
+import createRequest from "../requests/create-single.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import mergeDocumentData from "./helpers/merge-document-data.js";
 import patchDocumentData from "./helpers/patch-document-data.js";
@@ -33,7 +33,11 @@ const writeSingle: ServiceFn<
 					kind: "create";
 					data: DocumentData;
 					/** Saves the document as the proposal of a new create request instead. */
-					request?: { title: string; description?: RichTextJSON | null };
+					request?: {
+						title: string;
+						description?: RichTextJSON | null;
+						reviewerIds?: number[];
+					};
 			  }
 			| {
 					kind: "update";
@@ -153,19 +157,18 @@ const writeSingle: ServiceFn<
 			let versionId = input.kind === "create" ? undefined : input.versionId;
 			let requestId: number | undefined;
 			if (input.kind === "create" && input.request) {
-				const requested = await requestCreation(context, {
-					collectionKey: input.collectionKey,
-					title: input.request.title,
-					description: input.request.description,
+				const requested = await createRequest(context, {
+					type: "create",
+					...input.request,
+					document: { collectionKey: input.collectionKey, ...payload.data },
 					user: input.authUser ?? systemActor,
 					agentRunId: input.agentRunId,
-					...payload.data,
 				});
 				if (requested.error) return requested;
 
-				id = requested.data.id;
-				versionId = requested.data.versionId;
-				requestId = requested.data.requestId;
+				id = requested.data.document.id;
+				versionId = requested.data.document.versionId;
+				requestId = requested.data.id;
 			} else if (id !== undefined && versionId !== undefined) {
 				const updated = await updateVersion(context, {
 					collectionKey: input.collectionKey,

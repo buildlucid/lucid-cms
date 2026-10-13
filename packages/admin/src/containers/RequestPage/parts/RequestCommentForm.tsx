@@ -1,5 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import classNames from "classnames";
 import { type Component, createSignal, Show } from "solid-js";
 import { richTextHasContent } from "@/components/RichText/helpers";
@@ -15,7 +15,7 @@ import { RequestRichTextEditor } from "./RequestRichTextEditor";
  * discards what was written.
  */
 export const RequestCommentForm: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	parentId?: number;
 	/** `floating` is the card at the bottom of the request, `inline` sits at the end of a thread. */
 	variant: "floating" | "inline";
@@ -28,7 +28,7 @@ export const RequestCommentForm: Component<{
 	const [comment, setComment] = createSignal<RichTextJSON>();
 
 	// ----------------------------------------
-	// Mutations
+	// Queries & Mutations
 	const create = api.requests.useCreateComment({
 		onSuccess: () => {
 			setComment(undefined);
@@ -38,6 +38,10 @@ export const RequestCommentForm: Component<{
 
 	// ----------------------------------------
 	// Functions
+	const openForm = () => {
+		create.reset();
+		setOpen(true);
+	};
 	const closeIfEmpty = () => {
 		if (!richTextHasContent(comment())) setOpen(false);
 	};
@@ -71,7 +75,7 @@ export const RequestCommentForm: Component<{
 								props.variant === "inline",
 						},
 					)}
-					onClick={() => setOpen(true)}
+					onClick={openForm}
 				>
 					<UserDisplay
 						user={userStore.get.user ?? {}}

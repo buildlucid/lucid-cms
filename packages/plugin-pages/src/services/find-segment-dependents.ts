@@ -1,27 +1,42 @@
+import type { CollectionBuilder } from "@lucidcms/core";
 import {
 	getCollectionTableNames,
 	resolveRelatedDocumentVersionType,
 } from "@lucidcms/core/extension";
-import type { ServiceFn } from "@lucidcms/core/types";
-import type { PluginOptionsInternal } from "../types/types.js";
-import getRouteSegmentDependents from "./get-route-segment-dependents.js";
+import type { CollectionTableNames, ServiceFn } from "@lucidcms/core/types";
+import type {
+	CollectionConfig,
+	PluginOptionsInternal,
+} from "../types/types.js";
+import getRouteVersionTypes from "../utils/get-route-version-types.js";
+import getRouteSegmentDependents, {
+	type RouteSegmentDependent,
+} from "./get-route-segment-dependents.js";
 
-/** Finds pages needing the documents' route segments, excluding binned pages and pages being unpublished together in the same collection. */
+type CollectionSegmentDependents = {
+	collection: CollectionConfig;
+	collectionInstance: CollectionBuilder;
+	tables: CollectionTableNames;
+	dependents: RouteSegmentDependent[];
+};
+
+/** Finds non-binned page versions using the documents as route segments, grouped into collections with dependents. */
 const findSegmentDependents: ServiceFn<
 	[
 		{
 			options: PluginOptionsInternal;
 			collectionKey: string;
-			target: string;
 			documentIds: number[];
-			/** Documents unpublished together, which can't depend on each other. Defaults to `documentIds`. */
-			unpublishingIds?: number[];
+			/** Restricts dependents to versions reading this target, or all version types when omitted, such as on delete. */
+			target?: string;
+			/** Segment-collection documents to exclude, such as pages being unpublished together. */
+			excludeDocumentIds?: number[];
 		},
 	],
-	Array<{ collectionKey: string; documentId: number }>
+	CollectionSegmentDependents[]
 > = async (context, data) => {
-	const unpublishing = new Set(data.unpublishingIds ?? data.documentIds);
-	const dependents: Array<{ collectionKey: string; documentId: number }> = [];
+	const excluded = new Set(data.excludeDocumentIds);
+	const results: CollectionSegmentDependents[] = [];
 
 	for (const collection of data.options.collections) {
 		const relationKeys = collection.segments
@@ -32,14 +47,9 @@ const findSegmentDependents: ServiceFn<
 		);
 		if (relationKeys.length === 0 || !collectionInstance) continue;
 
-		//* the page versions that read the segment from the target environment
-		const versionTypes = [
-			"latest",
-			...collectionInstance.getData.publishing.environments.map(
-				(environment) => environment.key,
-			),
-		].filter(
+		const versionTypes = getRouteVersionTypes(collectionInstance).filter(
 			(versionType) =>
+				data.target === undefined ||
 				resolveRelatedDocumentVersionType({
 					collections: context.config.collections,
 					sourceCollectionKey: collection.key,
@@ -62,20 +72,22 @@ const findSegmentDependents: ServiceFn<
 		});
 		if (dependentsRes.error) return dependentsRes;
 
-		for (const documentId of new Set(
-			dependentsRes.data.map((dependent) => dependent.document_id),
-		)) {
-			if (
-				collection.key === data.collectionKey &&
-				unpublishing.has(documentId)
-			) {
-				continue;
-			}
-			dependents.push({ collectionKey: collection.key, documentId });
-		}
+		const dependents = dependentsRes.data.filter(
+			(dependent) =>
+				collection.key !== data.collectionKey ||
+				!excluded.has(dependent.document_id),
+		);
+		if (dependents.length === 0) continue;
+
+		results.push({
+			collection,
+			collectionInstance,
+			tables: tablesRes.data,
+			dependents,
+		});
 	}
 
-	return { error: undefined, data: dependents };
+	return { error: undefined, data: results };
 };
 
 export default findSegmentDependents;

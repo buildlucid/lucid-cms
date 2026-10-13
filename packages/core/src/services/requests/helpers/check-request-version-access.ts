@@ -4,6 +4,7 @@ import { RequestsRepository } from "../../../libs/repositories/index.js";
 import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import canEditDocument from "./can-edit-document.js";
+import getHookRequest from "./get-hook-request.js";
 import getRequestAccess from "./get-request-access.js";
 
 /**
@@ -59,21 +60,7 @@ const checkRequestVersionAccess: ServiceFn<
 		};
 	}
 
-	const request: DocumentHookRequest = {
-		id: owner.id,
-		documents: owner.documents.flatMap((document) =>
-			document.source === null || document.source_version_id === null
-				? []
-				: [
-						{
-							collectionKey: document.collection_key,
-							documentId: document.document_id,
-							source: document.source,
-							versionId: document.source_version_id,
-						},
-					],
-		),
-	};
+	const request = getHookRequest(owner);
 	if (!data.edit) return { error: undefined, data: request };
 
 	if (

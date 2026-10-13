@@ -41,8 +41,8 @@ const storePendingUpload: ServiceFn<
 	});
 	if (key.error) return key;
 
-	const pending = new MediaAwaitingSyncRepository(context.db);
-	const tracked = await pending.createSingle({
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
+	const tracked = await MediaAwaitingSync.createSingle({
 		data: { key: key.data, timestamp: new Date().toISOString() },
 		validation: { enabled: true },
 	});

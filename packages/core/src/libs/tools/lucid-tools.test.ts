@@ -20,7 +20,7 @@ test("built-in features are enabled by default and explicit bundles flatten", ()
 		"media_edit_image",
 		"media_generate_audio",
 		"web_search",
-		"web_fetch",
+		"web_read",
 		"media_add_to_library",
 		"lucid_builder_read",
 		"lucid_builder_focus",
@@ -53,6 +53,7 @@ test("all features can be disabled without registering supporting tools", () => 
 		features: {
 			media: {
 				upload: false,
+				addToLibrary: false,
 				attach: false,
 				analyze: false,
 				readFile: false,
@@ -66,7 +67,7 @@ test("all features can be disabled without registering supporting tools", () => 
 	expect(agent.tools).toEqual([]);
 });
 
-test("builder editing needs builder reading, and the builder tools only appear on a document screen", () => {
+test("builder editing follows builder reading by default, and the builder tools only appear on a document screen", () => {
 	const names = (builder: { read?: boolean; edit?: boolean }) =>
 		defineAgent({ ...options, features: { builder } })
 			.tools.filter((tool) => tool.name.startsWith("lucid_builder_"))
@@ -75,7 +76,7 @@ test("builder editing needs builder reading, and the builder tools only appear o
 		"lucid_builder_read",
 		"lucid_builder_focus",
 	]);
-	expect(names({ read: false, edit: true })).toEqual([]);
+	expect(names({ read: false })).toEqual([]);
 
 	const [read] = defineAgent(options).tools.filter(
 		(tool) => tool.name === "lucid_builder_read",
@@ -90,15 +91,13 @@ test("builder editing needs builder reading, and the builder tools only appear o
 	expect(read?.available?.({ config, aiAccess: [] })).toBe(false);
 });
 
-test("library promotion follows uploads, as personal files only come from them", () => {
-	const promotion = (media: { upload: boolean; attach: boolean }) =>
+test("library promotion is its own feature, so generated media can be promoted without composer uploads", () => {
+	const promotion = (media: { upload?: boolean; addToLibrary?: boolean }) =>
 		defineAgent({ ...options, features: { media } }).tools.find(
 			(tool) => tool.name === "media_add_to_library",
 		);
-	expect(promotion({ upload: true, attach: false })?.requiresConfirmation).toBe(
-		true,
-	);
-	expect(promotion({ upload: false, attach: true })).toBeUndefined();
+	expect(promotion({ upload: false })?.requiresConfirmation).toBe(true);
+	expect(promotion({ addToLibrary: false })).toBeUndefined();
 });
 
 test("web features reject invalid domains when the config loads", () => {

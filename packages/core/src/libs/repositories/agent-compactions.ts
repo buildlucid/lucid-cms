@@ -8,7 +8,7 @@ export default class AgentCompactionsRepository extends StaticRepository<"lucid_
 		super(db, agentCompactionsTable);
 	}
 
-	/** A saved result can be replayed after interruption, including on databases without transactions. */
+	/** Stores a summary under the run's worker lease, treating duplicate IDs as successful retries. */
 	async storeForRun(props: {
 		id: string;
 		conversationId: string;
@@ -72,7 +72,14 @@ export default class AgentCompactionsRepository extends StaticRepository<"lucid_
 	async selectLatest(conversationId: string) {
 		const query = this.db
 			.selectFrom("lucid_agent_compactions")
-			.selectAll()
+			.select([
+				"id",
+				"conversation_id",
+				"run_id",
+				"through_position",
+				"summary",
+				"created_at",
+			])
 			.where("conversation_id", "=", conversationId)
 			.orderBy("through_position", "desc")
 			.orderBy("created_at", "desc")

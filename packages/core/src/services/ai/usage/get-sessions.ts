@@ -5,6 +5,7 @@ import type { AiUsageSession } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import hydrateUsageSessions from "../helpers/hydrate-usage-sessions.js";
 
+/** Lists usage sessions, showing chat details only when the viewer can open the chat. */
 const getSessions: ServiceFn<
 	[{ query: GetUsageSessionsQueryParams; viewerId: number | null }],
 	{ data: AiUsageSession[]; count: number }

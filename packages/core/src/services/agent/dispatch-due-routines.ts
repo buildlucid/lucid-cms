@@ -14,9 +14,9 @@ import startRoutineRun from "./helpers/start-routine-run.js";
  */
 const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 	const now = new Date();
-	const routines = new AgentRoutinesRepository(context.db);
+	const AgentRoutines = new AgentRoutinesRepository(context.db);
 
-	const due = await routines.selectDue({
+	const due = await AgentRoutines.selectDue({
 		now: now.toISOString(),
 		limit: constants.agent.batchSize,
 	});
@@ -39,7 +39,7 @@ const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 		});
 		if (next.error) continue;
 
-		const claim = await routines.claimOccurrence({
+		const claim = await AgentRoutines.claimOccurrence({
 			id: routine.id,
 			expectedNextRunAt: new Date(routine.next_run_at).toISOString(),
 			nextRunAt: next.data,

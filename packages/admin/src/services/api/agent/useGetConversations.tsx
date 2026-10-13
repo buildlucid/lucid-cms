@@ -3,7 +3,7 @@ import type { AgentConversation, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
-import { isRunWorking, shouldPollTitle } from "@/utils/agent-chat";
+import { isRunWorking } from "@/utils/agent-chat";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -52,7 +52,7 @@ const useGetConversations = (
 			query.state.data?.data.some(
 				(conversation) =>
 					isRunWorking(conversation.latestRun?.status) ||
-					shouldPollTitle(conversation),
+					conversation.titleStatus === "generating",
 			)
 				? 5000
 				: (params.idleRefetchInterval ?? false),

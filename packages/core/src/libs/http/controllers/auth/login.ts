@@ -29,7 +29,7 @@ const loginController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.login.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.sensitive.limit,

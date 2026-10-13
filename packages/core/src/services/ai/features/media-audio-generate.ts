@@ -1,7 +1,6 @@
 import type { MediaGenerateResponse } from "@lucidcms/types";
 import type { MediaAudioGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import resolveMediaModel from "../helpers/resolve-media-model.js";
 import startMediaGeneration from "../helpers/start-media-generation.js";
 
@@ -19,11 +18,6 @@ const mediaAudioGenerate: ServiceFn<
 	],
 	MediaGenerateResponse
 > = async (context, props) => {
-	const featureEnabledRes = await checkFeatureEnabled(context, {
-		feature: "audioGeneration",
-	});
-	if (featureEnabledRes.error) return featureEnabledRes;
-
 	const model = await resolveMediaModel(context, {
 		type: "audio",
 		modelId: props.generation.model,
@@ -49,11 +43,6 @@ const mediaAudioGenerate: ServiceFn<
 			sessionId: props.sessionId,
 			input,
 			generation,
-		},
-		target: {
-			generation,
-			characters: props.script.length,
-			instruction: instruction ?? null,
 		},
 		idempotencyKey: props.idempotencyKey,
 		userId: props.userId,

@@ -8,7 +8,7 @@ import {
 	documentMetaSchema,
 	documentRefsSchema,
 	documentRouteSchema,
-} from "../../helpers/project-document.js";
+} from "../helpers/project-document.js";
 import { documentIdInput } from "../schema.js";
 
 export const inputSchema = z.object({

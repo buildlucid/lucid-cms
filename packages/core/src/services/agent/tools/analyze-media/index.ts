@@ -5,9 +5,10 @@ import {
 } from "../../../../libs/lucid-remote/schema/media.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import { analyzeMediaToolName } from "./constants.js";
-import handler from "./handler.js";
+import analyze from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
+/** Answers a question about a Lucid image, audio recording or PDF with a separate analysis model. */
 export const analyzeMediaAgentTool = () =>
 	defineAgentTool({
 		name: analyzeMediaToolName,
@@ -19,7 +20,10 @@ export const analyzeMediaAgentTool = () =>
 		//* media access is checked when resolved, so owners can analyse their own uploads without `media:read`
 		permissions: [],
 		readOnly: true,
-		capabilities: { mediaAnalysis: { mimeTypes: mediaMimeTypeSchema.options } },
+		capabilities: {
+			media: { analyze: { mimeTypes: mediaMimeTypeSchema.options } },
+		},
 		available: ({ aiAccess }) => aiAccess.includes("media_analysis"),
-		handler,
+		handler: ({ context, input, execution }) =>
+			analyze(context, { input, execution }),
 	});

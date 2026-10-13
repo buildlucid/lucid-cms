@@ -6,7 +6,6 @@ import type {
 } from "../../../../../utils/services/types.js";
 import type { ToolkitDocumentVersion } from "../../../documents/index.js";
 import { runToolkitService } from "../../../utils.js";
-import runRequestService from "../../run-request-service.js";
 import { inputSchema } from "./schema.js";
 
 /** A document's new targets in a publish or unpublish request. */
@@ -17,7 +16,7 @@ export type ToolkitRequestsDocumentsSetTargetsInput<
 	targets: ToolkitDocumentVersion<K>[];
 };
 
-/** Replaces a request document's targets and withdraws approvals. */
+/** Replaces a request document's targets and dismisses approvals. */
 const setTargets = <K extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitRequestsDocumentsSetTargetsInput<K>,
@@ -26,21 +25,28 @@ const setTargets = <K extends CollectionDocumentKey>(
 		schema: inputSchema,
 		input,
 		handler: async ({ actor, ...data }) => {
-			const [{ default: updateTargets }, { default: getRequestDocumentId }] =
-				await Promise.all([
-					import("../../../../../services/requests/update-targets.js"),
-					import(
-						"../../../../../services/requests/helpers/get-request-document-id.js"
-					),
-				]);
+			const [
+				{ default: resolveActorUser },
+				{ default: serviceWrapper },
+				{ default: updateTargets },
+				{ default: getRequestDocumentId },
+			] = await Promise.all([
+				import("../../../../../services/users/helpers/resolve-actor-user.js"),
+				import("../../../../../utils/services/service-wrapper.js"),
+				import("../../../../../services/requests/update-targets.js"),
+				import(
+					"../../../../../services/requests/helpers/get-request-document-id.js"
+				),
+			]);
 
-			return runRequestService(context, {
-				actor,
-				transaction: true,
-				run: async (context, user) => {
+			return serviceWrapper(
+				async (context: ServiceContext): ServiceResponse<undefined> => {
+					const userRes = await resolveActorUser(context, { actor });
+					if (userRes.error) return userRes;
+
 					const documentRes = await getRequestDocumentId(context, {
 						...data,
-						user,
+						user: userRes.data,
 					});
 					if (documentRes.error) return documentRes;
 
@@ -48,11 +54,12 @@ const setTargets = <K extends CollectionDocumentKey>(
 						id: data.id,
 						requestDocumentId: documentRes.data,
 						targets: data.targets,
-						user,
+						user: userRes.data,
 						agentRunId: actor.agentRunId,
 					});
 				},
-			});
+				{ transaction: true },
+			)(context);
 		},
 		name: { key: "core.toolkit.requests.documents.set-targets.error.name" },
 		message: {

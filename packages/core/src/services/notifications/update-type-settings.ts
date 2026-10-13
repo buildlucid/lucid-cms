@@ -42,7 +42,7 @@ const updateTypeSettings: ServiceFn<
 	const upsertRes = await TypeSettings.upsertSingle({
 		data: {
 			type: definition.key,
-			enabled: definition.required || data.enabled,
+			enabled: definition.mandatory || data.enabled,
 			email_enabled: data.email,
 			role_ids: roleIds,
 			updated_by: data.userId,

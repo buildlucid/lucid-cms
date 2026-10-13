@@ -1,5 +1,5 @@
 import type z from "zod";
-import type { User } from "../../../../types/response.js";
+import type getMultipleService from "../../../../services/users/get-multiple.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -13,10 +13,9 @@ export type ToolkitUsersGetMultipleQuery = z.input<typeof querySchema>;
 export type ToolkitUsersGetMultipleInput = z.input<typeof inputSchema>;
 
 /** Matching users and the total count before pagination. */
-export type ToolkitUsersGetMultipleResult = {
-	data: User[];
-	count: number;
-};
+export type ToolkitUsersGetMultipleResult = NonNullable<
+	Awaited<ReturnType<typeof getMultipleService>>["data"]
+>;
 
 /** Lists users, including deleted ones unless filtered out, with the details the actor could see in the admin. */
 const getMultiple = (

@@ -11,8 +11,8 @@ import {
 import defineAgent from "../../../../libs/agent/define-agent.js";
 import { copy, createTranslationStore } from "../../../../libs/i18n/index.js";
 import { aiAccessFeatureSchema } from "../../../../libs/lucid-remote/schema/connection.js";
-import generateMedia from "../../../../libs/lucid-remote/services/generate-media/index.js";
 import getGeneratedMedia from "../../../../libs/lucid-remote/services/get-generated-media/index.js";
+import runCmsAiRequest from "../../../../libs/lucid-remote/services/run-cms-ai-request/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import { MediaRepository } from "../../../../libs/repositories/index.js";
 import {
@@ -28,7 +28,6 @@ import streamMedia from "../../../media/stream.js";
 import uploadSingle from "../../../media/upload-single.js";
 import insertConversation from "../../helpers/insert-conversation.js";
 import resolveRunSetup from "../../helpers/resolve-run-setup.js";
-import { requestIdFor } from "../../helpers/run-paid-tool-request.js";
 import listAdded from "../../references/list-added.js";
 import register from "../../references/register.js";
 import { editImageAgentTool } from "../edit-image/index.js";
@@ -40,7 +39,7 @@ vi.mock("../../../ai/features/get-media-model-options.js", () => ({
 	default: vi.fn(),
 }));
 vi.mock(
-	"../../../../libs/lucid-remote/services/generate-media/index.js",
+	"../../../../libs/lucid-remote/services/run-cms-ai-request/index.js",
 	() => ({ default: vi.fn() }),
 );
 vi.mock(
@@ -54,18 +53,22 @@ vi.mock("../../../connection/token-manager.js", () => ({
 	}),
 }));
 //* Paid-request tests cover billing; this mock executes the request directly.
-vi.mock("../../helpers/run-paid-tool-request.js", async (importOriginal) => ({
-	...(await importOriginal<
-		typeof import("../../helpers/run-paid-tool-request.js")
-	>()),
-	default: vi.fn((_context, props) =>
-		props.send({
+vi.mock("../../helpers/run-paid-tool-request.js", () => ({
+	default: vi.fn(async (_context, props) => {
+		const result = await props.send({
 			accessToken: "token",
-			requestId: requestIdFor(props.featureKey, props.execution.operationId),
+			requestId: paidRequestId,
 			signal: new AbortController().signal,
-		}),
-	),
+		});
+		return result.error
+			? result
+			: {
+					error: undefined,
+					data: { ...result.data, requestId: paidRequestId },
+				};
+	}),
 }));
+const paidRequestId = "paid-request";
 
 const fixture = getTestConfig();
 const generateImageTool = generateImageAgentTool();
@@ -75,11 +78,11 @@ const agent = defineAgent({
 	name: "Illustrator",
 	description: "Tests image generation.",
 });
-const withoutUploads = defineAgent({
-	key: "no-uploads",
-	name: "No uploads",
+const withoutLibrary = defineAgent({
+	key: "no-library",
+	name: "No library",
 	description: "Cannot move media into the library.",
-	features: { media: { upload: false } },
+	features: { media: { addToLibrary: false } },
 });
 const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 const imageModel = (
@@ -118,7 +121,7 @@ const imageModels = [
 let context: ServiceContext;
 
 const generated = (output?: Partial<{ mimeType: string; extension: string }>) =>
-	vi.mocked(generateMedia).mockResolvedValue({
+	vi.mocked(runCmsAiRequest).mockResolvedValue({
 		error: undefined,
 		data: {
 			mode: "async",
@@ -170,7 +173,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: { enabled: true, definitions: [agent, withoutUploads] },
+				agents: { enabled: true, definitions: [agent, withoutLibrary] },
 			},
 		},
 		database: await fixture.getDatabase(),
@@ -188,7 +191,7 @@ beforeEach(() => {
 		data: { default: "image/formats", models: imageModels },
 	});
 	vi.mocked(streamMedia).mockReset();
-	vi.mocked(generateMedia).mockReset();
+	vi.mocked(runCmsAiRequest).mockReset();
 	vi.mocked(uploadSingle).mockReset();
 	vi.mocked(getGeneratedMedia).mockReset();
 	vi.mocked(getGeneratedMedia).mockImplementation(async () => ({
@@ -224,14 +227,13 @@ const executionFor = async (
 		},
 		actor:
 			principal.type === "user"
-				? { kind: "user", userId: principal.userId }
-				: { kind: "system" },
+				? { type: "user", userId: principal.userId }
+				: { type: "system" },
 		signal: new AbortController().signal,
 		operationId: randomUUID(),
 		run: {
 			id: randomUUID(),
 			conversationId: chat.data.id,
-			userId: principal.type === "user" ? principal.userId : null,
 			agentKey,
 		},
 	};
@@ -294,7 +296,11 @@ const generate = (
 	});
 
 test("generates an image for the person and saves it as their personal media, shown in the chat", async () => {
-	const execution = await executionFor();
+	const execution = await executionFor(undefined, agent.key, [
+		Permissions.AiImageGenerate,
+		Permissions.MediaRead,
+		Permissions.MediaCreate,
+	]);
 	generated();
 	const result = await generate(execution, {
 		instruction: "A sunrise over rolling hills",
@@ -305,8 +311,8 @@ test("generates an image for the person and saves it as their personal media, sh
 	assert(result.type === "success", JSON.stringify(result));
 	assert("output" in result.data);
 
-	const requestId = requestIdFor("media.image.generate", execution.operationId);
-	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]).toMatchObject({
+	const requestId = paidRequestId;
+	expect(vi.mocked(runCmsAiRequest).mock.calls[0]?.[1]).toMatchObject({
 		requestId,
 		request: {
 			feature: { key: "media.image.generate", version: "v1" },
@@ -328,7 +334,7 @@ test("generates an image for the person and saves it as their personal media, sh
 		},
 	});
 	//* the default model picks its own resolution, so the agent's is left out
-	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]?.request).toMatchObject({
+	expect(vi.mocked(runCmsAiRequest).mock.calls[0]?.[1]?.request).toMatchObject({
 		generation: { resolution: undefined },
 	});
 	expect(vi.mocked(getGeneratedMedia).mock.calls[0]?.[1]).toEqual({
@@ -392,7 +398,7 @@ test("edits a Lucid image the person asked to change, and marks the result as mo
 	assert("output" in result.data);
 
 	expect(
-		vi.mocked(generateMedia).mock.calls[0]?.[1]?.request.input,
+		vi.mocked(runCmsAiRequest).mock.calls[0]?.[1]?.request.input,
 	).toContainEqual({
 		type: "image",
 		role: "source-image",
@@ -437,7 +443,7 @@ test("edits without a chosen model use the first model that takes a source image
 		editImageTool,
 	);
 	assert(result.type === "success", JSON.stringify(result));
-	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]?.request).toMatchObject({
+	expect(vi.mocked(runCmsAiRequest).mock.calls[0]?.[1]?.request).toMatchObject({
 		generation: { model: "image/resolutions" },
 	});
 });
@@ -464,13 +470,13 @@ test("editing fails before generating when no model takes a source image", async
 			"server:agent.media.generate.source.unsupported",
 		),
 	});
-	expect(generateMedia).not.toHaveBeenCalled();
+	expect(runCmsAiRequest).not.toHaveBeenCalled();
 });
 
-test("system runs save straight to the library, and agents without uploads are not told to move it", async () => {
+test("system runs save straight to the library, and agents or people that cannot add to the library are not told to move it", async () => {
 	generated();
 	const system = await generate(
-		await executionFor({ type: "system" }, withoutUploads.key),
+		await executionFor({ type: "system" }, withoutLibrary.key),
 		{ instruction: "A library image" },
 	);
 	assert(system.type === "success", JSON.stringify(system));
@@ -485,13 +491,21 @@ test("system runs save straight to the library, and agents without uploads are n
 
 	generated();
 	const personal = await generate(
-		await executionFor({ type: "user", userId: 1 }, withoutUploads.key),
+		await executionFor({ type: "user", userId: 1 }, withoutLibrary.key),
 		{ instruction: "A personal image" },
 	);
 	assert(personal.type === "success", JSON.stringify(personal));
 	assert("output" in personal.data);
 	expect(personal.data.output.media.personal).toBe(true);
 	expect(personal.data.output.note).not.toContain("media_add_to_library");
+
+	generated();
+	const withoutCreate = await generate(await executionFor(), {
+		instruction: "Another personal image",
+	});
+	assert(withoutCreate.type === "success", JSON.stringify(withoutCreate));
+	assert("output" in withoutCreate.data);
+	expect(withoutCreate.data.output.note).not.toContain("media_add_to_library");
 });
 
 test("library saves media ready for documents, and needs permission to add to the library", async () => {
@@ -586,7 +600,7 @@ test("chats check the settings first unless told to skip, then generate with the
 		input,
 		execution: {
 			...execution,
-			interaction: {
+			answer: {
 				data: prepared.data.interaction.data,
 				response: {
 					instruction: "A sunset",
@@ -603,7 +617,7 @@ test("chats check the settings first unless told to skip, then generate with the
 		},
 	});
 	assert(result.type === "success", JSON.stringify(result));
-	expect(vi.mocked(generateMedia).mock.calls[0]?.[1]?.request).toMatchObject({
+	expect(vi.mocked(runCmsAiRequest).mock.calls[0]?.[1]?.request).toMatchObject({
 		input: [
 			{ type: "text", role: "user-instruction", value: "A sunset" },
 			{ type: "text", role: "guidance" },
@@ -634,7 +648,7 @@ test("editing an image the agent hasn't seen asks it to look first, unless it ca
 	expect(
 		await executeAgentTool({ context, tool: editImageTool, input, execution }),
 	).toMatchObject({ type: "failed" });
-	expect(generateMedia).not.toHaveBeenCalled();
+	expect(runCmsAiRequest).not.toHaveBeenCalled();
 
 	await markAnalysed(execution, unseen);
 	expect(await prepare()).toMatchObject({ type: "success" });
@@ -666,7 +680,7 @@ test("editing an image the agent hasn't seen asks it to look first, unless it ca
 						...context.config.ai,
 						agents: {
 							enabled: true,
-							definitions: [agent, withoutUploads, withoutAnalysis],
+							definitions: [agent, withoutLibrary, withoutAnalysis],
 						},
 					},
 				},
@@ -735,6 +749,7 @@ test("the tool needs its permission and the CMS feature, and is off when the age
 	const setup = (permissions: string[], imageGeneration = true) =>
 		resolveRunSetup(
 			{
+				translate: context.translate,
 				config: {
 					...context.config,
 					ai: {

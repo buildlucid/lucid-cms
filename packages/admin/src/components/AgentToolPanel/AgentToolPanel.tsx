@@ -1,6 +1,5 @@
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
-import AgentMarkdown from "@/components/AgentMessage/parts/AgentMarkdown";
-import { toolLabel } from "@/components/AgentMessage/parts/AgentToolCall";
+import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
 import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
 import AgentToolDetails from "@/components/AgentToolDetails/AgentToolDetails";
 import Button from "@/components/Button/Button";
@@ -13,16 +12,17 @@ import {
 	type AgentToolPart,
 	analyzeMediaTool,
 	isFileReadOutput,
-	isWebFetchOutput,
+	isWebReadOutput,
 	isWebSearchOutput,
 	readFileTool,
 	toolDisplayStatus,
+	toolLabel,
 	toolOutputText,
-	webFetchTool,
+	webReadTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
 import FileReadViewV1 from "./parts/FileReadViewV1";
-import WebFetchViewV1 from "./parts/WebFetchViewV1";
+import WebReadViewV1 from "./parts/WebReadViewV1";
 import WebSearchViewV1 from "./parts/WebSearchViewV1";
 
 const statusVariants = {
@@ -36,7 +36,7 @@ const statusVariants = {
 
 const outputViewTools: ReadonlySet<string> = new Set([
 	webSearchTool,
-	webFetchTool,
+	webReadTool,
 	readFileTool,
 	analyzeMediaTool,
 ]);
@@ -82,7 +82,7 @@ const AgentToolPanel: Component<{
 			: undefined,
 	);
 	const isWeb = createMemo(
-		() => props.part.name === webSearchTool || props.part.name === webFetchTool,
+		() => props.part.name === webSearchTool || props.part.name === webReadTool,
 	);
 	const searchOutput = createMemo(() => {
 		const value = output();
@@ -90,9 +90,9 @@ const AgentToolPanel: Component<{
 			? value
 			: undefined;
 	});
-	const fetchOutput = createMemo(() => {
+	const readOutput = createMemo(() => {
 		const value = output();
-		return props.part.name === webFetchTool && v1() && isWebFetchOutput(value)
+		return props.part.name === webReadTool && v1() && isWebReadOutput(value)
 			? value
 			: undefined;
 	});
@@ -201,10 +201,10 @@ const AgentToolPanel: Component<{
 								</div>
 							)}
 						</Match>
-						<Match when={fetchOutput()}>
+						<Match when={readOutput()}>
 							{(output) => (
 								<div class="-mt-3 flex flex-col gap-3">
-									<WebFetchViewV1 output={output()} />
+									<WebReadViewV1 output={output()} />
 								</div>
 							)}
 						</Match>

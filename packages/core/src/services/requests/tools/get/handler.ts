@@ -42,12 +42,12 @@ const getRequest: ServiceFn<
 	const comments = request.events.flatMap((event) =>
 		event.type === "comment" ? [event] : [],
 	);
-	const userId = props.actor.kind === "user" ? props.actor.userId : null;
-	const byYou = (entry: Pick<RequestEvent, "user" | "agent">) =>
+	const userId = props.actor.type === "user" ? props.actor.userId : null;
+	const byYou = (entry: Pick<RequestEvent, "actor" | "actorAgent">) =>
 		props.agentKey !== undefined &&
-		entry.agent?.key === props.agentKey &&
-		entry.agent.system === (props.actor.kind === "system") &&
-		(entry.user?.id ?? null) === userId;
+		entry.actorAgent?.key === props.agentKey &&
+		entry.actorAgent.system === (props.actor.type === "system") &&
+		(entry.actor?.id ?? null) === userId;
 	const documents = new Map(
 		request.documents.map((document) => [document.id, document]),
 	);
@@ -74,7 +74,7 @@ const getRequest: ServiceFn<
 					createdByAgent: request.createdByAgent?.name ?? null,
 					reviewers: request.reviewers.map(formatPerson),
 					scheduledAt: request.scheduledAt,
-					failure: request.failure,
+					failure: request.failure?.message ?? null,
 					completedAt: request.completedAt,
 					documents: request.documents.map((document) => {
 						const collection = context.config.collections.find(
@@ -91,7 +91,7 @@ const getRequest: ServiceFn<
 								target: target.target,
 								changes: target.changed,
 								changedByOthers: target.changedSinceCreation,
-								acknowledged: target.reviewed,
+								acknowledged: target.acknowledged,
 							})),
 							allowedTargets: collection
 								? getAllowedTargets({
@@ -117,16 +117,16 @@ const getRequest: ServiceFn<
 					}),
 					comments: comments.map((comment) => ({
 						id: comment.id,
-						author: comment.user && formatPerson(comment.user),
-						authorAgent: comment.agent?.name ?? null,
+						actor: comment.actor && formatPerson(comment.actor),
+						actorAgent: comment.actorAgent?.name ?? null,
 						byYou: byYou(comment),
 						body: generateSourceHTML(comment.body),
 						createdAt: comment.createdAt,
 						resolution: comment.resolution,
 						replies: comment.replies.map((reply) => ({
 							id: reply.id,
-							author: reply.user && formatPerson(reply.user),
-							authorAgent: reply.agent?.name ?? null,
+							actor: reply.actor && formatPerson(reply.actor),
+							actorAgent: reply.actorAgent?.name ?? null,
 							byYou: byYou(reply),
 							body: generateSourceHTML(reply.body),
 							createdAt: reply.createdAt,
@@ -138,9 +138,9 @@ const getRequest: ServiceFn<
 
 							const {
 								id: _id,
-								agent,
+								actor,
+								actorAgent,
 								updatedAt: _updatedAt,
-								user,
 								...details
 							} = event;
 							return [
@@ -157,8 +157,8 @@ const getRequest: ServiceFn<
 													details.reviewer && formatPerson(details.reviewer),
 											}
 										: {}),
-									author: user && formatPerson(user),
-									authorAgent: agent?.name ?? null,
+									actor: actor && formatPerson(actor),
+									actorAgent: actorAgent?.name ?? null,
 								},
 							];
 						}),
@@ -166,7 +166,7 @@ const getRequest: ServiceFn<
 					...(props.agentKey && {
 						permissions: {
 							edit: request.permissions.edit,
-							complete: request.permissions.request,
+							complete: request.permissions.complete,
 							reopen: request.permissions.reopen,
 						},
 						reviewToken: request.reviewToken,

@@ -1,7 +1,7 @@
 import type { ResolvedAdminCopy } from "@lucidcms/types";
 
 export type AdminNavigationIcon =
-	| "dashboard"
+	| "home"
 	| "agent"
 	| "chat"
 	| "history"

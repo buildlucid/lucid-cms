@@ -52,14 +52,6 @@ export {
 	default as Copy,
 } from "../components/Copy/Copy.js";
 export {
-	type DashboardCardProps,
-	default as DashboardCard,
-} from "../components/DashboardCard/DashboardCard.js";
-export {
-	type DashboardCardItemProps,
-	default as DashboardCardItem,
-} from "../components/DashboardCardItem/DashboardCardItem.js";
-export {
 	type DateTextProps,
 	default as DateText,
 } from "../components/DateText/DateText.js";
@@ -104,9 +96,13 @@ export {
 	type GridProps,
 } from "../components/Grid/Grid.js";
 export {
-	default as HaloIcon,
-	type HaloIconProps,
-} from "../components/HaloIcon/HaloIcon.js";
+	default as HomeCard,
+	type HomeCardProps,
+} from "../components/HomeCard/HomeCard.js";
+export {
+	default as HomeCardItem,
+	type HomeCardItemProps,
+} from "../components/HomeCardItem/HomeCardItem.js";
 export {
 	default as Image,
 	type ImageFit,

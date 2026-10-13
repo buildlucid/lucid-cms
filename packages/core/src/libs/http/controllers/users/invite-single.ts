@@ -20,6 +20,9 @@ const inviteSingleController = factory.createHandlers(
 		description: "Invite a single user.",
 		tags: ["users"],
 		summary: "Invite User",
+		responses: openAPI.responses({
+			noProperties: true,
+		}),
 		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
@@ -27,7 +30,7 @@ const inviteSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.UsersCreate]),
 	validate("json", controllerSchemas.createSingle.body),
@@ -54,7 +57,7 @@ const inviteSingleController = factory.createHandlers(
 		});
 		if (userId.error) throw new LucidAPIError(userId.error);
 
-		c.status(201);
+		c.status(204);
 		return c.body(null);
 	},
 );

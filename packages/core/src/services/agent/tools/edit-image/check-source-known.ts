@@ -11,10 +11,8 @@ import getAiAccess from "../../../connection/get-ai-access.js";
 import scanMessages from "../../helpers/scan-messages.js";
 import { analyzeMediaToolName } from "../analyze-media/constants.js";
 import { inputSchema as analyzeInputSchema } from "../analyze-media/schema.js";
-import {
-	editImageToolName,
-	generateImageToolName,
-} from "../generate-image/constants.js";
+import { generateImageToolName } from "../generate-image/constants.js";
+import { editImageToolName } from "./constants.js";
 
 /** Requires alt text or prior chat analysis, generation or editing when an image analyzer is available. */
 const checkSourceKnown: ServiceFn<
@@ -32,7 +30,7 @@ const checkSourceKnown: ServiceFn<
 		aiAccess: aiAccess.data,
 		screen: execution.screen?.type,
 	}).find((tool) =>
-		tool.capabilities?.mediaAnalysis?.mimeTypes.some(
+		tool.capabilities?.media?.analyze?.mimeTypes.some(
 			(type) =>
 				type === mimeType ||
 				(type.endsWith("/*") && mimeType.startsWith(type.slice(0, -1))),

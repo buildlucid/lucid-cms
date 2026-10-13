@@ -1,7 +1,7 @@
 import type {
 	Collection,
 	RequestBlocker,
-	RequestDetail,
+	RequestDetails,
 	RequestDocument,
 } from "@types";
 import {
@@ -14,6 +14,7 @@ import {
 import Button from "@/components/Button/Button";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import type { TargetUpdates } from "@/containers/RequestPage/hooks/useTargetUpdates";
 import api from "@/services/api";
 import T from "@/translations";
 import {
@@ -31,22 +32,20 @@ import { RequestCheckRow } from "./RequestCheckRow";
  * retry. Only shown while the request is open.
  */
 export const RequestChecks: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	document: RequestDocument;
 	collection: Collection | undefined;
+	targets: TargetUpdates;
 	onRetry: () => void;
 }> = (props) => {
 	// ----------------------------------------
 	// Queries & Mutations
-	const update = api.requests.useUpdateTargets();
-	const review = api.requests.useReviewTarget();
+	const acknowledge = api.requests.useAcknowledgeTarget();
 
 	// ----------------------------------------
 	// Memos
 	const failed = createMemo(
-		() =>
-			props.request.failure !== null &&
-			props.request.failureRequestDocumentId === props.document.id,
+		() => props.request.failure?.requestDocumentId === props.document.id,
 	);
 	//* blockers about the whole request, shown before the per-environment groups
 	const requestBlockers = createMemo(() =>
@@ -77,7 +76,7 @@ export const RequestChecks: Component<{
 			return {
 				target,
 				label: getTargetLabel(props.collection, target.target),
-				//* workflow and review blockers have their own rows
+				//* workflow and acknowledgement blockers have their own rows
 				blockers: blockers.filter(
 					(blocker) =>
 						blocker.code !== "workflow" &&
@@ -105,19 +104,6 @@ export const RequestChecks: Component<{
 
 	// ----------------------------------------
 	// Functions
-	const addTarget = (target: string) => {
-		const selected = props.document.targets.map((other) => other.target);
-		update.action.mutate({
-			id: props.request.id,
-			requestDocumentId: props.document.id,
-			body: {
-				targets: getAllowedTargets(
-					props.collection,
-					props.document.source,
-				).filter((key) => key === target || selected.includes(key)),
-			},
-		});
-	};
 	//* only proposals open side by side, as snapshots are fixed
 	const compareHref = (target: string) =>
 		props.document.source === "latest"
@@ -137,8 +123,8 @@ export const RequestChecks: Component<{
 				<Button
 					variant="outline"
 					size="sm"
-					loading={update.action.isPending}
-					onClick={() => addTarget(required)}
+					loading={props.targets.update.action.isPending}
+					onClick={() => props.targets.add(required)}
 				>
 					{T()("requests.checks.add.target", {
 						target: getTargetLabel(props.collection, required),
@@ -164,25 +150,26 @@ export const RequestChecks: Component<{
 						<RequestCheckRow
 							tone="danger"
 							title={
-								props.request.failureTarget
+								props.request.failure?.target
 									? T()("requests.checks.failed.target", {
 											target: getTargetLabel(
 												props.collection,
-												props.request.failureTarget,
+												props.request.failure.target,
 											),
 										})
 									: T()("requests.checks.failed")
 							}
 							description={
 								<>
-									{props.request.failure} {T()("requests.failed.rollback")}
+									{props.request.failure?.message}{" "}
+									{T()("requests.failed.rollback")}
 								</>
 							}
 							action={
 								<Show
 									when={
 										props.request.approved &&
-										props.request.permissions.request &&
+										props.request.permissions.complete &&
 										props.request.blockers.length === 0
 									}
 								>
@@ -258,7 +245,7 @@ export const RequestChecks: Component<{
 								</Show>
 								<Show when={group.target.changedSinceCreation}>
 									<RequestCheckRow
-										tone={group.target.reviewed ? "success" : "warning"}
+										tone={group.target.acknowledged ? "success" : "warning"}
 										title={T()("requests.checks.published", {
 											target: group.label,
 										})}
@@ -266,25 +253,24 @@ export const RequestChecks: Component<{
 										href={compareHref(group.target.target)}
 										control={
 											<Checkbox
-												id={`review-target-${props.document.id}-${group.target.target}`}
-												value={group.target.reviewed}
+												id={`acknowledge-target-${props.document.id}-${group.target.target}`}
+												value={group.target.acknowledged}
 												label={T()("requests.checks.published", {
 													target: group.label,
 												})}
 												class="**:data-checkbox-label:sr-only"
 												disabled={
 													!props.document.permissions.edit ||
-													review.action.isPending
+													acknowledge.action.isPending
 												}
-												onChange={(reviewed) =>
-													review.action.mutate({
+												onChange={(acknowledged) =>
+													acknowledge.action.mutate({
 														id: props.request.id,
 														requestDocumentId: props.document.id,
 														body: {
 															target: group.target.target,
-															targetVersionId: group.target.versionId,
-															revision: props.request.revision,
-															reviewed,
+															acknowledged,
+															ifUnchanged: props.request.reviewToken,
 														},
 													})
 												}
@@ -296,7 +282,7 @@ export const RequestChecks: Component<{
 						)}
 					</For>
 				</ul>
-				<ErrorMessage theme="basic" message={review.errors()?.message} />
+				<ErrorMessage theme="basic" message={acknowledge.errors()?.message} />
 			</div>
 		</Show>
 	);

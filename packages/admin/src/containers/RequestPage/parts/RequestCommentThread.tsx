@@ -1,4 +1,4 @@
-import type { RequestDetail, RequestEvent } from "@types";
+import type { RequestDetails, RequestEvent } from "@types";
 import { TbOutlineMessageCircle } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import T from "@/translations";
@@ -12,7 +12,7 @@ import { RequestCommentResolutionSelect } from "./RequestCommentResolution";
  * end of the first comment's header.
  */
 export const RequestCommentThread: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	comment: Extract<RequestEvent, { type: "comment" }>;
 }> = (props) => {
 	// ----------------------------------------

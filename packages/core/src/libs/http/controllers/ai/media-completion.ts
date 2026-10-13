@@ -10,7 +10,6 @@ import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -20,20 +19,16 @@ const factory = createFactory();
 const mediaCompletionController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Check a Lucid AI media generation request, returning the generated file once it is ready.",
+			"Check a Lucid AI media generation, returning the generated file once it is ready. Responds 202 while it is still queued or processing.",
 		tags: ["ai"],
-		summary: "Check Media Generation",
+		summary: "Get Media Generation",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.mediaCompletion.response),
 		}),
 		parameters: openAPI.parameters({
-			headers: {
-				csrf: true,
-			},
 			params: controllerSchemas.mediaCompletion.params,
 		}),
 	}),
-	validateCSRF,
 	authenticate(),
 	permissions({ some: mediaGenerationPermissions }),
 	validate("param", controllerSchemas.mediaCompletion.params),
@@ -49,7 +44,7 @@ const mediaCompletionController = factory.createHandlers(
 				message: copy("server:core.routes.ai.generate.error.message"),
 			},
 		})(context, {
-			requestId: params.requestId,
+			requestId: params.id,
 			user: c.get("auth"),
 		});
 		if (completionRes.error) throw new LucidAPIError(completionRes.error);

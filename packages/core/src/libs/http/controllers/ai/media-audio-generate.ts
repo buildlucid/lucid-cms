@@ -24,10 +24,11 @@ const factory = createFactory();
 const mediaAudioGenerateController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Speak a script with Lucid AI text to speech. Poll the request until the audio is ready.",
+			"Speak a script with Lucid AI text to speech. Poll the generation with the returned requestId until the audio is ready.",
 		tags: ["ai"],
 		summary: "Generate Media Audio",
 		responses: openAPI.responses({
+			status: 202,
 			dataSchema: z.toJSONSchema(controllerSchemas.mediaAudioGenerate.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.mediaAudioGenerate.body),
@@ -38,7 +39,7 @@ const mediaAudioGenerateController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.AiAudioGenerate]),
 	validate("json", controllerSchemas.mediaAudioGenerate.body),

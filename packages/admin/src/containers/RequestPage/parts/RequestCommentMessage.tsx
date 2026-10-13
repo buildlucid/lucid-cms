@@ -1,5 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { RequestCommentReply, RequestDetail } from "@types";
+import type { RequestCommentReply, RequestDetails } from "@types";
 import classNames from "classnames";
 import {
 	type Component,
@@ -21,7 +21,7 @@ import { RequestRichTextEditor } from "./RequestRichTextEditor";
 
 /** Renders a comment or reply with author controls, allowing only super admins to delete agent messages. */
 export const RequestCommentMessage: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	message: RequestCommentReply;
 	variant: "comment" | "reply";
 	/** Replies deleted along with it. */
@@ -48,8 +48,8 @@ export const RequestCommentMessage: Component<{
 	// Memos
 	const own = createMemo(
 		() =>
-			props.message.agent === null &&
-			props.message.user?.id === userStore.get.user?.id,
+			props.message.actorAgent === null &&
+			props.message.actor?.id === userStore.get.user?.id,
 	);
 	const canDelete = createMemo(
 		() => own() || userStore.get.user?.superAdmin === true,
@@ -67,7 +67,7 @@ export const RequestCommentMessage: Component<{
 		if (!value) return;
 		update.action.mutate({
 			id: props.request.id,
-			eventId: props.message.id,
+			commentId: props.message.id,
 			body: { body: value },
 		});
 	};
@@ -85,14 +85,14 @@ export const RequestCommentMessage: Component<{
 		<div class="group/message">
 			<div class="flex items-center gap-2.5">
 				<ActorDisplay
-					user={props.message.user}
-					agent={props.message.agent}
+					user={props.message.actor}
+					agent={props.message.actorAgent}
 					variant="icon"
 				/>
 				<div class="flex min-w-0 grow flex-wrap items-center gap-x-2 gap-y-1">
 					<span class="truncate text-sm font-medium text-title">
-						{props.message.agent?.name ||
-							helpers.formatUserName(props.message.user, "name") ||
+						{props.message.actorAgent?.name ||
+							helpers.formatUserName(props.message.actor, "name") ||
 							T()("common.unknown")}
 					</span>
 					<span class="text-xs text-body">
@@ -187,7 +187,7 @@ export const RequestCommentMessage: Component<{
 				onConfirm={() =>
 					remove.action.mutate({
 						id: props.request.id,
-						eventId: props.message.id,
+						commentId: props.message.id,
 					})
 				}
 			/>

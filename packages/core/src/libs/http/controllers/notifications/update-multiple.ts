@@ -25,7 +25,7 @@ const updateMultipleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateMultiple.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateMultiple.body),
 	async (c) => {

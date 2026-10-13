@@ -28,7 +28,7 @@ const deleteSingleController = factory.createHandlers(
 			params: oauthClientSchemas.deleteSingle.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationDelete]),
 	validate("param", oauthClientSchemas.deleteSingle.params),

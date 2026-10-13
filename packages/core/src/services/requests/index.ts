@@ -1,4 +1,5 @@
 export { default as acknowledge } from "./acknowledge.js";
+export { default as acknowledgeTarget } from "./acknowledge-target.js";
 export { default as addDocuments } from "./add-documents.js";
 export { default as approve } from "./approve.js";
 export { default as close } from "./close.js";
@@ -14,8 +15,6 @@ export { default as getReviewers } from "./get-reviewers.js";
 export { default as getSingle } from "./get-single.js";
 export { default as removeDocument } from "./remove-document.js";
 export { default as reopen } from "./reopen.js";
-export { default as requestCreation } from "./request-creation.js";
-export { default as reviewTarget } from "./review-target.js";
 export { default as unapprove } from "./unapprove.js";
 export { default as updateComment } from "./update-comment.js";
 export { default as updateCommentResolution } from "./update-comment-resolution.js";

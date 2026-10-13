@@ -1,13 +1,18 @@
 import { type Component, createMemo, Show } from "solid-js";
-import DashboardCard from "@/components/DashboardCard/DashboardCard";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import HomeCard from "@/components/HomeCard/HomeCard";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import api from "@/services/api";
 import T from "@/translations";
-import { formatAiCreditAmount } from "@/utils/ai-usage";
+import {
+	aiCreditsWarningPercent,
+	aiUsageHref,
+	formatAiCreditAmount,
+	getAllowancePercentUsed,
+} from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
 
-const AiCreditsWidget: Component<{ size: DashboardWidgetSize }> = () => {
+const AiCreditsWidget: Component<{ size: HomeWidgetSize }> = () => {
 	// ----------------------------------------
 	// Queries
 	//* Home is opened often, so a failed load shows here rather than as a toast
@@ -16,11 +21,7 @@ const AiCreditsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Memos
 	const data = createMemo(() => credits.data?.data);
-	const percent = createMemo(() => {
-		const allowance = data()?.allowance;
-		if (!allowance || allowance.total <= 0) return 0;
-		return Math.min(100, Math.floor((allowance.used / allowance.total) * 100));
-	});
+	const percent = createMemo(() => getAllowancePercentUsed(data()?.allowance));
 	const labels = createMemo(() => {
 		if (credits.isLoading) return undefined;
 		if (credits.isError) return { start: T()("home.widget.ai.credits.error") };
@@ -38,9 +39,9 @@ const AiCreditsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<DashboardCard
+		<HomeCard
 			title={T()("home.widget.ai.credits.label")}
-			href="/lucid/system/ai-usage"
+			href={aiUsageHref}
 			padding="md"
 		>
 			<div class="flex grow flex-col justify-end gap-1.5">
@@ -55,11 +56,11 @@ const AiCreditsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 				<ProgressBar
 					value={percent()}
 					size="sm"
-					variant={percent() >= 90 ? "warning" : "primary"}
+					variant={percent() >= aiCreditsWarningPercent ? "warning" : "primary"}
 					labels={labels()}
 				/>
 			</div>
-		</DashboardCard>
+		</HomeCard>
 	);
 };
 

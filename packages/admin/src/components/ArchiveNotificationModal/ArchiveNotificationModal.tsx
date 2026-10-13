@@ -1,4 +1,4 @@
-import type { Accessor, Component } from "solid-js";
+import { type Accessor, type Component, createEffect, untrack } from "solid-js";
 import Modal from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
@@ -15,9 +15,15 @@ const ArchiveNotificationModal: Component<ArchiveNotificationModalProps> = (
 	props,
 ) => {
 	// ----------------------------------------
-	// Mutations
+	// Queries & Mutations
 	const update = api.notifications.useUpdateMultiple({
 		onSuccess: () => props.state.setOpen(false),
+	});
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		if (props.state.open) untrack(update.reset);
 	});
 
 	// ----------------------------------------
@@ -35,10 +41,6 @@ const ArchiveNotificationModal: Component<ArchiveNotificationModalProps> = (
 				const id = props.id();
 				if (id === undefined) return;
 				update.action.mutate({ ids: [id], archived: true, read: true });
-			}}
-			onCancel={() => {
-				props.state.setOpen(false);
-				update.reset();
 			}}
 		/>
 	);

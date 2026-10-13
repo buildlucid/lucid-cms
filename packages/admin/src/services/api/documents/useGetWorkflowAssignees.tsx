@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody, WorkflowUser } from "@types";
+import type { ResponseBody, UserDisplay } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
@@ -25,7 +25,7 @@ const useGetWorkflowAssignees = (params: QueryHook<QueryParams>) => {
 			params.key?.(),
 		],
 		queryFn: () =>
-			request<ResponseBody<WorkflowUser[]>>({
+			request<ResponseBody<UserDisplay[]>>({
 				url: `/lucid/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/workflow/assignees`,

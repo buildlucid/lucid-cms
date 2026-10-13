@@ -18,7 +18,7 @@ const useDeleteConversation = (props?: { onSuccess?: () => void }) => {
 			message: T()("toasts.agent.conversation.deleted.message"),
 		}),
 		invalidates: [
-			queryKeys.agent.conversations(),
+			queryKeys.agent.conversationLists(),
 			queryKeys.agent.routines(),
 			queryKeys.notifications.summary(),
 		],

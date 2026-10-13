@@ -4,8 +4,7 @@ import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import dedent from "../../../../utils/helpers/dedent.js";
-import { editImageToolName } from "../generate-image/constants.js";
-import generateImage from "../generate-image/generate-image.js";
+import generateImage from "../generate-image/handler.js";
 import prepareImageSettings from "../generate-image/prepare.js";
 import {
 	outputSchema,
@@ -13,6 +12,7 @@ import {
 	settingsResponseSchema,
 } from "../generate-image/schema.js";
 import checkSource from "./check-source.js";
+import { editImageToolName } from "./constants.js";
 import { inputSchema } from "./schema.js";
 
 /** Creates an edited copy of a Lucid image, preserving the original. */
@@ -30,10 +30,10 @@ export const editImageAgentTool = () =>
 		output: outputSchema,
 		outputVersion: 1,
 		permissions: [Permissions.AiImageGenerate],
-		capabilities: { imageGeneration: true },
+		capabilities: { media: { generate: { image: true } } },
 		available: ({ config, aiAccess }) =>
 			isAiFeatureEnabled(config, "imageGeneration", aiAccess),
-		describe: (input) =>
+		describe: ({ input }) =>
 			copy("admin:core.tools.media_edit_image.describe", {
 				data: { id: input.mediaId },
 			}),
@@ -42,7 +42,7 @@ export const editImageAgentTool = () =>
 			version: 1,
 			data: settingsDataSchema,
 			response: () => settingsResponseSchema,
-			optional: true,
+			skippable: true,
 			prepare: async ({ context, input, execution }) => {
 				const source = await checkSource(context, {
 					mediaId: input.mediaId,
@@ -50,7 +50,7 @@ export const editImageAgentTool = () =>
 				});
 				if (source.error) return source;
 
-				return prepareImageSettings(context, {
+				return prepareImageSettings({
 					input,
 					editMediaId: input.mediaId,
 				});

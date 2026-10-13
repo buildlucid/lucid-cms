@@ -36,7 +36,7 @@ export type ToolkitDocumentsGetMultipleInput<
 export type ToolkitDocumentsGetMultipleResult<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
-	documents: CollectionDocument<TCollectionKey>[];
+	data: CollectionDocument<TCollectionKey>[];
 	/** Total matching documents before pagination. */
 	count: number;
 	/** Shared reference registry for resolving document field references. */

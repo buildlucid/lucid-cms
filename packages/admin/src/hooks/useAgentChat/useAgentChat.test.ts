@@ -38,7 +38,7 @@ const conversation: AgentConversation = {
 	agentKey: "test",
 	title: "Test",
 	titleStatus: "generated",
-	titleGenerationRequestedAt: null,
+	kind: "chat",
 	userId: 1,
 	routineId: null,
 	latestRun: {
@@ -63,7 +63,7 @@ const widget = {
 	interaction: {
 		id: "selection",
 		toolCallId: "call",
-		title: "Choose",
+		title: { type: "lucid.literal" as const, value: "Choose" },
 		placement: "composer" as const,
 		status: "pending" as const,
 	},
@@ -191,8 +191,8 @@ test("retrying the same text with different references creates a new submission"
 		const bodies = mocks.stream.mock.calls.map(([request]) => request.body);
 		//* the server gets identities only; labels are for the optimistic message
 		expect(bodies[0]?.references).toEqual([{ type: "media", mediaId: 12 }]);
-		expect(bodies[1]?.requestId).toBe(bodies[0]?.requestId);
-		expect(bodies[2]?.requestId).not.toBe(bodies[0]?.requestId);
+		expect(bodies[1]?.inputId).toBe(bodies[0]?.inputId);
+		expect(bodies[2]?.inputId).not.toBe(bodies[0]?.inputId);
 	} finally {
 		conversation.latestRun = previousRun;
 		dispose();

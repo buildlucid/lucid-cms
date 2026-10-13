@@ -8,7 +8,7 @@ export const imageGuidanceSchema = z.enum([
 	"cinematic",
 ]);
 
-export type ImageGuidance = z.output<typeof imageGuidanceSchema>;
+type ImageGuidance = z.output<typeof imageGuidanceSchema>;
 
 export const imageGuidanceInstructions: Record<ImageGuidance, string> = {
 	natural:

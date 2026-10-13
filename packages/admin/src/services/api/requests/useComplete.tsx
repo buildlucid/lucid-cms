@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
 	ErrorResponse,
-	RequestDetail,
+	RequestDetails,
 	RequestExecution,
 	RequestExecutionReceipt,
 	ResponseBody,
@@ -10,6 +10,7 @@ import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { requestChangeKeys } from "./change-keys";
 
 export interface Params {
 	id: number;
@@ -39,7 +40,7 @@ const useComplete = (props?: UseCompleteProps) => {
 			title: T()("toasts.requests.queued.title"),
 			message: T()("toasts.requests.queued.message"),
 		}),
-		invalidates: [queryKeys.requests.all()],
+		invalidates: requestChangeKeys(),
 		onSuccess: (response, params) => {
 			queryClient.setQueryData<ResponseBody<RequestExecution | null>>(
 				queryKeys.requestExecutions.detail(params.id, response.data.jobId),
@@ -53,7 +54,7 @@ const useComplete = (props?: UseCompleteProps) => {
 					},
 				},
 			);
-			queryClient.setQueriesData<ResponseBody<RequestDetail>>(
+			queryClient.setQueriesData<ResponseBody<RequestDetails>>(
 				{ queryKey: queryKeys.requests.detail() },
 				(cached) =>
 					cached?.data.id === params.id
@@ -70,7 +71,9 @@ const useComplete = (props?: UseCompleteProps) => {
 			props?.onSuccess?.(response);
 		},
 		onError: (errors) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.requests.all() });
+			for (const queryKey of requestChangeKeys()) {
+				queryClient.invalidateQueries({ queryKey });
+			}
 			props?.onError?.(errors);
 		},
 	});

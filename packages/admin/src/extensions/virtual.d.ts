@@ -10,12 +10,12 @@ declare module "virtual:lucid-admin" {
 		AgentWidgetProps,
 		BrickSlot,
 		BrickSlotComponent,
-		DashboardWidgetComponent,
-		DashboardWidgetSlot,
 		DocumentListSlot,
 		DocumentListSlotComponent,
 		FieldSlot,
 		FieldSlotComponent,
+		HomeWidgetComponent,
+		HomeWidgetSlot,
 		RouteComponent,
 	} from "@lucidcms/admin/types";
 
@@ -60,9 +60,9 @@ declare module "virtual:lucid-admin" {
 		>
 	>;
 
-	export const dashboardSlots: Array<
-		Omit<Extract<AdminSlot, { slot: DashboardWidgetSlot }>, "component"> & {
-			component: DashboardWidgetComponent<AdminOptions | undefined>;
+	export const homeSlots: Array<
+		Omit<Extract<AdminSlot, { slot: HomeWidgetSlot }>, "component"> & {
+			component: HomeWidgetComponent<AdminOptions | undefined>;
 		}
 	>;
 

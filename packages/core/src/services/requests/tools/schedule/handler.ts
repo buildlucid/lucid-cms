@@ -1,4 +1,6 @@
 import type z from "zod";
+import formatter from "../../../../libs/formatters/index.js";
+import { RequestsRepository } from "../../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../helpers/get-request-link.js";
 import updateSingle from "../../update-single.js";
@@ -27,6 +29,15 @@ const scheduleRequest: ServiceFn<
 	});
 	if (scheduleRes.error) return scheduleRes;
 
+	//* the stored time is normalised, eg. to the minute
+	const Requests = new RequestsRepository(context.db);
+	const storedRes = await Requests.selectSingle({
+		select: ["scheduled_at"],
+		where: [{ key: "id", operator: "=", value: props.requestId }],
+		validation: { enabled: true },
+	});
+	if (storedRes.error) return storedRes;
+
 	const linkRes = await linkRequest(context, props);
 	if (linkRes.error) return linkRes;
 
@@ -34,7 +45,7 @@ const scheduleRequest: ServiceFn<
 		error: undefined,
 		data: {
 			output: {
-				scheduledAt: props.at,
+				scheduledAt: formatter.formatDate(storedRes.data.scheduled_at),
 				links: { request: getRequestLink(context, props.requestId) },
 			},
 		},

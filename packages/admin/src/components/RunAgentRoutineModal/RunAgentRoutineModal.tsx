@@ -1,4 +1,4 @@
-import type { Accessor, Component } from "solid-js";
+import { type Accessor, type Component, createEffect, untrack } from "solid-js";
 import Modal from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
@@ -13,12 +13,18 @@ const RunAgentRoutineModal: Component<{
 	onRun: (conversationId: string) => void;
 }> = (props) => {
 	// ----------------------------------------
-	// Mutations
+	// Queries & Mutations
 	const runRoutine = api.agent.useRunRoutine({
 		onSuccess: (response) => {
 			props.state.setOpen(false);
 			props.onRun(response.data.conversationId);
 		},
+	});
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		if (props.state.open) untrack(runRoutine.reset);
 	});
 
 	// ----------------------------------------
@@ -38,10 +44,6 @@ const RunAgentRoutineModal: Component<{
 				if (id && !runRoutine.action.isPending && !props.disabled) {
 					runRoutine.action.mutate({ id });
 				}
-			}}
-			onCancel={() => {
-				props.state.setOpen(false);
-				runRoutine.reset();
 			}}
 		/>
 	);

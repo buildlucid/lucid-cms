@@ -1,6 +1,6 @@
+import { subDays } from "date-fns";
 import { enqueueJobs } from "../../../libs/jobs/enqueue.js";
 import { LocalesRepository } from "../../../libs/repositories/index.js";
-import { getRetentionDays } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { deleteLocaleJob } from "../../locales/jobs/delete-single.js";
 
@@ -8,7 +8,10 @@ import { deleteLocaleJob } from "../../locales/jobs/delete-single.js";
 const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 	const Locales = new LocalesRepository(context.db);
 
-	const compDate = getRetentionDays(context.config.retention, "removedLocales");
+	const compDate = subDays(
+		new Date(),
+		context.config.retention.removedLocales,
+	).toISOString();
 
 	const expiredLocalesRes = await Locales.selectMultiple({
 		select: ["code"],

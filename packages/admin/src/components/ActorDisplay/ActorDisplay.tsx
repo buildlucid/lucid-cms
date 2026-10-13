@@ -124,16 +124,20 @@ const ActorDisplay: Component<ActorDisplayProps> = (props) => {
 const AgentAvatar: Component<{
 	variant: UserDisplayVariant;
 	size: UserDisplaySize;
-}> = (props) => (
-	<span
-		class={userAvatarClasses({
-			variant: props.variant,
-			size: props.size,
-			bordered: true,
-		})}
-	>
-		<TbOutlineRobot class="h-3/5 w-3/5" />
-	</span>
-);
+}> = (props) => {
+	// ----------------------------------------
+	// Render
+	return (
+		<span
+			class={userAvatarClasses({
+				variant: props.variant,
+				size: props.size,
+				bordered: true,
+			})}
+		>
+			<TbOutlineRobot class="h-3/5 w-3/5" />
+		</span>
+	);
+};
 
 export default ActorDisplay;

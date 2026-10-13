@@ -217,3 +217,40 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets, e
 	expect(check(picker("test-picker"))).not.toThrow();
 	expect(check(agentTools.media.select())).not.toThrow();
 });
+
+test("only Lucid's own tools can use the lucid_ name prefix", async () => {
+	const base = await processConfig(
+		{ secrets: "a".repeat(64) },
+		{ resolvedDb: adapter },
+	);
+	const check = (name: string) => () =>
+		checkToolDefinitions({
+			...base,
+			ai: {
+				...base.ai,
+				agents: {
+					enabled: true,
+					definitions: [
+						agent("test", [
+							defineAgentTool({
+								name,
+								description: "Saves a note",
+								input: z.object({}),
+								output: z.object({}),
+								permissions: [],
+								handler: async () => ({
+									error: undefined,
+									data: { output: {}, summary: "Saved the note." },
+								}),
+							}),
+						]),
+					],
+				},
+			},
+		});
+
+	expect(check("lucid_notes")).toThrow(
+		'Agent tool name "lucid_notes" is reserved.',
+	);
+	expect(check("notes")).not.toThrow();
+});

@@ -11,7 +11,7 @@ import {
 import {
 	documentRefsSchema,
 	documentRouteSchema,
-} from "../../helpers/project-document.js";
+} from "../helpers/project-document.js";
 
 export const inputSchema = z.object({
 	collectionKey: z.string().min(1),

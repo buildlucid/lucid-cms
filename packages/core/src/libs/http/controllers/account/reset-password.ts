@@ -26,7 +26,7 @@ const resetPasswordController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.resetPassword.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	validate("param", controllerSchemas.resetPassword.params),
 	validate("json", controllerSchemas.resetPassword.body),
 	async (c) => {

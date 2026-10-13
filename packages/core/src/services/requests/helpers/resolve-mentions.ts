@@ -31,6 +31,7 @@ const resolveMentions: ServiceFn<
 
 	const readersRes = await getRequestReaders(context, {
 		request: data.request,
+		ids: userIds.filter((id) => typeof id === "number"),
 	});
 	if (readersRes.error) return readersRes;
 
@@ -53,7 +54,7 @@ const resolveMentions: ServiceFn<
 			const name = [user.firstName, user.lastName].filter(Boolean).join(" ");
 			return {
 				...node,
-				attrs: { ...node.attrs, label: name || user.username || user.email },
+				attrs: { ...node.attrs, label: name || user.username },
 			};
 		}
 		if (!node.content) return node;

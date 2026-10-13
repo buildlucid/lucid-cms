@@ -188,7 +188,7 @@ test("personal routines work independently of chats and code routines", async ()
 			.select(["source", "user_id"])
 			.where("id", "=", created.data.id)
 			.executeTakeFirstOrThrow(),
-	).toEqual({ source: "database", user_id: userId });
+	).toEqual({ source: "own", user_id: userId });
 	expect(
 		await createConversation(context, { agentKey: "seo", userId }),
 	).toMatchObject({ error: { status: 403 } });
@@ -309,7 +309,7 @@ test("revoking personal routine access blocks scheduled and queued runs while pr
 	).toBeUndefined();
 });
 
-test("deleting a personal routine preserves its chat's workflow permission", async () => {
+test("deleting a personal routine keeps its chat behind the routine permission", async () => {
 	const userId = await createUser("routine-history", [
 		"agents:seo:chat",
 		"agents:seo:manage-own-routines",
@@ -364,8 +364,11 @@ vi.mock("../connection/token-manager.js", () => ({
 	}),
 }));
 
-vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => ({
-	default: (
-		await import("../../utils/test-helpers/agent-models.js")
-	).mockAgentModels(),
-}));
+vi.mock(
+	"../../libs/lucid-remote/services/get-agent-models/index.js",
+	async () => ({
+		default: (
+			await import("../../utils/test-helpers/agent-models.js")
+		).mockAgentModels(),
+	}),
+);

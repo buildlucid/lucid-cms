@@ -15,14 +15,18 @@ export const runJobScheduleAgentTool = () =>
 		output: outputSchema,
 		permissions: [Permissions.JobsRun],
 		requiresConfirmation: true,
-		describe: (input) =>
+		describe: ({ input }) =>
 			copy("admin:core.tools.jobs_run_schedule.describe", {
 				data: { schedule: input.scheduleKey },
 			}),
 		handler: async ({ context, input, execution }) => {
+			const { principal } = execution.authority;
 			const result = await serviceWrapper(runSchedule, { transaction: true })(
 				context,
-				{ ...input, userId: execution.run.userId },
+				{
+					...input,
+					userId: principal.type === "user" ? principal.userId : null,
+				},
 			);
 			if (result.error) return result;
 

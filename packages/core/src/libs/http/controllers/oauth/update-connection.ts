@@ -33,7 +33,7 @@ const updateConnectionController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(oauthSchemas.updateConnection.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", oauthSchemas.updateConnection.params),
 	validate("json", oauthSchemas.updateConnection.body),

@@ -9,8 +9,14 @@ import type {
 } from "../../libs/db/tables/index.js";
 import type { Select } from "../../libs/db/types.js";
 
-/** Documents share approval, scheduling and activity within a request. */
-export type RequestRecord = Select<LucidRequests> & {
+/**
+ * Combines request documents with shared approval, scheduling and activity records.
+ * @remarks Scheduling reads `scheduled_by_system` and `scheduled_by_run_id` separately.
+ */
+export type RequestRecord = Omit<
+	Select<LucidRequests>,
+	"scheduled_by_system" | "scheduled_by_run_id"
+> & {
 	documents: RequestDocumentRecord[];
 	reviewers: Select<LucidRequestReviewers>[];
 	/** Approvals of the current revision. */
@@ -36,8 +42,8 @@ export type RequestDocumentState = {
 	versions: Map<string, RequestVersionState>;
 	/** The proposal or snapshot captured when the request was created. */
 	source: RequestVersionState | null;
-	/** The approved snapshot, or captured content before approval. */
-	request: RequestVersionState | null;
+	/** What the request writes: the approved snapshot, or captured content before approval. */
+	content: RequestVersionState | null;
 };
 
 export type RequestState = Map<number, RequestDocumentState>;

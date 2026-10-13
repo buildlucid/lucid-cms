@@ -5,14 +5,14 @@ import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants"
 import T, { translateAdminCopy } from "@/translations";
 
 type Tool = Agent["tools"][number];
-type RoutineTools = AgentRoutine["tools"];
+type ToolSettings = AgentRoutine["toolSettings"];
 type Choice = "default" | "ask" | "run";
 
 /** Chooses a routine's tool confirmations, with "Default" removing overrides so each tool's own policy applies. */
 const AgentRoutineToolConfirmations: Component<{
 	tools: Agent["tools"];
-	value: RoutineTools;
-	onChange: (value: RoutineTools) => void;
+	value: ToolSettings;
+	onChange: (value: ToolSettings) => void;
 	disabled?: boolean;
 }> = (props) => {
 	// ----------------------------------------

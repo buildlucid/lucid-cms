@@ -31,7 +31,7 @@ const unpublishController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.unpublish.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.unpublish.params),
 	validate("json", controllerSchemas.unpublish.body),
@@ -51,7 +51,7 @@ const unpublishController = factory.createHandlers(
 		})(context, {
 			collectionKey,
 			documentId: Number.parseInt(id, 10),
-			target: body.target,
+			environment: body.environment,
 			user: c.get("auth"),
 		});
 		if (result.error) throw new LucidAPIError(result.error);

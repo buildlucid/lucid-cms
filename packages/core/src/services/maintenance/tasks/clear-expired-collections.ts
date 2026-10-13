@@ -1,6 +1,6 @@
+import { subDays } from "date-fns";
 import { enqueueJobs } from "../../../libs/jobs/enqueue.js";
 import { CollectionsRepository } from "../../../libs/repositories/index.js";
-import { getRetentionDays } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { deleteCollectionJob } from "../../collections/jobs/delete-single.js";
 
@@ -8,10 +8,10 @@ import { deleteCollectionJob } from "../../collections/jobs/delete-single.js";
 const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 	const Collections = new CollectionsRepository(context.db);
 
-	const compDate = getRetentionDays(
-		context.config.retention,
-		"removedCollections",
-	);
+	const compDate = subDays(
+		new Date(),
+		context.config.retention.removedCollections,
+	).toISOString();
 
 	const expiredCollectionsRes = await Collections.selectMultiple({
 		select: ["key"],

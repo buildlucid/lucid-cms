@@ -22,6 +22,8 @@ const notifyWaitingRuns: ServiceFn<[], number> = async (context) => {
 		waitingBefore: new Date(
 			Date.now() - constants.agent.inputNotifyDelayMs,
 		).toISOString(),
+		//* Screen calls are answered by the browser or expired by expireScreenCalls.
+		screen: false,
 		limit: constants.agent.batchSize,
 	});
 	if (waiting.error) return waiting;
@@ -30,12 +32,9 @@ const notifyWaitingRuns: ServiceFn<[], number> = async (context) => {
 
 	for (const run of waiting.data) {
 		const checkpoint = checkpointSchema.safeParse(run.checkpoint);
-		const widget = checkpoint.success
-			? checkpoint.data.pending?.widget
+		const interaction = checkpoint.success
+			? checkpoint.data.pending?.widget.interaction
 			: undefined;
-		//* the person's screen answers screen calls, and expireScreenCalls those it doesn't
-		if (widget?.key === constants.agent.widgets.screen) continue;
-		const interaction = widget?.interaction;
 		const userId = run.user_id;
 
 		try {
@@ -43,20 +42,10 @@ const notifyWaitingRuns: ServiceFn<[], number> = async (context) => {
 				const AgentRuns = new AgentRunsRepository(context.db);
 
 				//* marking first means overlapping ticks can't both notify, and a run with nothing to ask isn't picked again
-				//* the execution version pins the wait this tick read, not a later one
-				const marked = await AgentRuns.updateSingle({
-					data: { input_notified_at: new Date().toISOString() },
-					where: [
-						{ key: "id", operator: "=", value: run.id },
-						{ key: "status", operator: "=", value: "waiting" },
-						{
-							key: "execution_version",
-							operator: "=",
-							value: run.execution_version,
-						},
-						{ key: "input_notified_at", operator: "is", value: null },
-					],
-					returning: ["id"],
+				const marked = await AgentRuns.markInputNotified({
+					runId: run.id,
+					executionVersion: run.execution_version,
+					now: new Date().toISOString(),
 				});
 				if (marked.error) return marked;
 				if (!marked.data || !interaction || userId === null) {
@@ -72,7 +61,7 @@ const notifyWaitingRuns: ServiceFn<[], number> = async (context) => {
 					data: {
 						conversationId: run.conversation_id,
 						title: run.title,
-						excerpt: notificationExcerpt(interaction.title),
+						excerpt: notificationExcerpt(context.translate(interaction.title)),
 					},
 				});
 				if (notifyRes.error) return notifyRes;

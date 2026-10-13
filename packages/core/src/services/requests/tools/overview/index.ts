@@ -15,7 +15,7 @@ export const getRequestsOverviewAgentTool = (
 		name: "requests_overview",
 		title: copy("admin:core.tools.requests_overview.title"),
 		description:
-			"Count open requests by type and state, and how many documents in each collection's environments are behind latest or unreleased, as the review_overview screen shows. Use it to see what needs attention or is waiting to go live, then list the requests with requests_find or the documents with documents_find.",
+			"Count open requests by type and state, and how many documents in each collection's environments are behind latest or unpublished, as the review_overview screen shows. Use it to see what needs attention or is waiting to go live, then list the requests with requests_find or the documents with documents_find.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],

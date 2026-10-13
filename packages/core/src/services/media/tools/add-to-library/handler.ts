@@ -1,15 +1,16 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
-import type { AgentToolHandler } from "../../../../libs/tools/types.js";
+import type { AgentToolAuthority } from "../../../../libs/tools/types.js";
+import type { ServiceFn } from "../../../../utils/services/types.js";
 import addToLibrary from "../../add-to-library.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
-/** Adds the acting person's personal media to the shared library, rejecting system runs because they own no personal media. */
-const handler: AgentToolHandler<
-	z.output<typeof inputSchema>,
-	z.output<typeof outputSchema>
-> = async ({ context, input, execution }) => {
-	const { principal } = execution.authority;
+/** Adds the acting user's personal media to the library, rejecting system actors. */
+const addMediaToLibrary: ServiceFn<
+	[{ input: z.output<typeof inputSchema>; authority: AgentToolAuthority }],
+	{ output: z.output<typeof outputSchema> }
+> = async (context, props) => {
+	const { principal } = props.authority;
 	if (principal.type !== "user") {
 		return {
 			error: {
@@ -26,26 +27,20 @@ const handler: AgentToolHandler<
 		value === undefined ? undefined : [{ localeCode: locale, value }];
 
 	const moved = await addToLibrary(context, {
-		id: input.mediaId,
+		id: props.input.mediaId,
 		userId: principal.userId,
-		public: input.public,
-		title: translation(input.title),
-		alt: translation(input.alt),
+		public: props.input.public,
+		title: translation(props.input.title),
+		alt: translation(props.input.alt),
 	});
 	if (moved.error) return moved;
 
 	return {
 		error: undefined,
 		data: {
-			output: { media: { id: moved.data, public: input.public } },
-			summary: copy(
-				input.public
-					? "admin:core.tools.media_add_to_library.public.summary"
-					: "admin:core.tools.media_add_to_library.summary",
-				{ data: { id: moved.data } },
-			),
+			output: { media: { id: moved.data, public: props.input.public } },
 		},
 	};
 };
 
-export default handler;
+export default addMediaToLibrary;

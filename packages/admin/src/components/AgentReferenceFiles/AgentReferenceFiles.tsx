@@ -10,7 +10,7 @@ import {
 import AgentReferenceFile from "./parts/AgentReferenceFile";
 import AgentUploadFile from "./parts/AgentUploadFile";
 
-/** Resources attached to a draft or message, laid out as tilted file cards in one row that scrolls sideways. */
+/** Displays draft or message attachments as horizontally scrolling file cards. */
 const AgentReferenceFiles: Component<{
 	references: AgentReferenceItem[];
 	uploads?: AgentUpload[];

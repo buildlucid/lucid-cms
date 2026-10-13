@@ -47,7 +47,11 @@ export default class AgentRequestReferencesRepository extends StaticRepository<"
 				if (props.source !== "message") return conflict.doNothing();
 				return target
 					.doUpdateSet({ source: "message", tool_name: null })
-					.where("lucid_agent_request_references.managed", "=", false);
+					.where(
+						"lucid_agent_request_references.managed",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					);
 			});
 
 		const result = await this.executeQuery(() => query.execute(), {

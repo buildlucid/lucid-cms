@@ -1,5 +1,5 @@
+import type { StoredAgentMessagePart } from "../../../libs/agent/messages.js";
 import { AgentMessagesRepository } from "../../../libs/repositories/index.js";
-import type { StoredAgentMessagePart } from "../../../schemas/agent.js";
 import type { AgentRoutineTrigger } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 

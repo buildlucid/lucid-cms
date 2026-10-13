@@ -13,7 +13,6 @@ import withTransaction from "./with-transaction.js";
  * Wraps a service with error conversion and optional database transactions.
  * The returned function takes a ServiceContext followed by the service's arguments.
  * Returned errors roll back a transaction opened here; existing transactions are reused.
- * Adapters without transaction support run the service without one.
  *
  * @example
  * ```ts

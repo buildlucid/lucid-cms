@@ -1,8 +1,8 @@
+import type { AgentScreenResponse } from "@lucidcms/types";
 import constants from "../../constants/constants.js";
 import { checkpointSchema } from "../../libs/agent/types.js";
 import logger from "../../libs/logger/index.js";
 import { AgentRunsRepository } from "../../libs/repositories/index.js";
-import type { AgentScreenResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import enqueueRun from "./helpers/enqueue-run.js";
@@ -20,6 +20,7 @@ const expireScreenCalls: ServiceFn<[], number> = async (context) => {
 		waitingBefore: new Date(
 			Date.now() - constants.agent.screenCallTimeoutMs,
 		).toISOString(),
+		screen: true,
 		limit: constants.agent.batchSize,
 	});
 	if (waiting.error) return waiting;
@@ -34,20 +35,11 @@ const expireScreenCalls: ServiceFn<[], number> = async (context) => {
 		const sent = await withTransaction(context, async (context) => {
 			const AgentRuns = new AgentRunsRepository(context.db);
 
-			const marked = await AgentRuns.updateSingle({
-				data: { input_notified_at: new Date().toISOString() },
-				//* a run that moved on to another call since it was selected has a newer execution, so it's left for a later tick
-				where: [
-					{ key: "id", operator: "=", value: run.id },
-					{ key: "status", operator: "=", value: "waiting" },
-					{
-						key: "execution_version",
-						operator: "=",
-						value: run.execution_version,
-					},
-					{ key: "input_notified_at", operator: "is", value: null },
-				],
-				returning: ["id"],
+			//* Skip runs whose execution version changed after selection.
+			const marked = await AgentRuns.markInputNotified({
+				runId: run.id,
+				executionVersion: run.execution_version,
+				now: new Date().toISOString(),
 			});
 			if (marked.error) return marked;
 			if (!marked.data) return { error: undefined, data: false };

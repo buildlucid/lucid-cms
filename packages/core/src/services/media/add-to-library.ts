@@ -5,7 +5,7 @@ import updateSingle from "./update-single.js";
 
 type Translations = { localeCode: string | null; value: string | null }[];
 
-/** Adds personal media to the shared library for its owner, keeping it private unless `public` is set. */
+/** Adds personal media to the media library for its owner, keeping it private unless `public` is set. */
 const addToLibrary: ServiceFn<
 	[
 		{

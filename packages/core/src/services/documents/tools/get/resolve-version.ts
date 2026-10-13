@@ -2,12 +2,12 @@ import constants from "../../../../constants/constants.js";
 import { getTableNames } from "../../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../../../libs/db/tables/index.js";
 import { copy } from "../../../../libs/i18n/index.js";
+import type { ToolkitActor } from "../../../../libs/permission/toolkit-actor.js";
 import { DocumentVersionsRepository } from "../../../../libs/repositories/index.js";
-import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import checkRequestVersionAccess from "../../../requests/helpers/check-request-version-access.js";
-import loadRequest from "../../../requests/helpers/load-request.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
+import resolveProposalVersion from "../../helpers/resolve-proposal-version.js";
 import { parseAgentVersion } from "./schema.js";
 
 /** Resolves `request:ID` or `version:ID` with owning-request access for proposals and snapshots, returning undefined for versions read by type, such as latest. */
@@ -38,19 +38,14 @@ const resolveVersion: ServiceFn<
 	if (userRes.error) return userRes;
 
 	if (pinned.kind === "request") {
-		const requestRes = await loadRequest(context, {
-			id: pinned.id,
+		const versionRes = await resolveProposalVersion(context, {
+			requestId: pinned.id,
+			collectionKey: input.collectionKey,
+			documentId: input.documentId,
 			user: userRes.data,
 		});
-		if (requestRes.error) return requestRes;
-
-		const versionId = requestRes.data.documents.find(
-			(document) =>
-				document.collection_key === input.collectionKey &&
-				document.document_id === input.documentId &&
-				document.source === "latest",
-		)?.source_version_id;
-		if (!versionId) {
+		//* unreadable requests look the same as ones without this document's proposal
+		if (versionRes.error?.status === 404) {
 			return {
 				error: {
 					type: "basic",
@@ -66,12 +61,13 @@ const resolveVersion: ServiceFn<
 				data: undefined,
 			};
 		}
+		if (versionRes.error) return versionRes;
 
 		return {
 			error: undefined,
 			data: {
 				versionType: constants.collectionBuilder.publishing.proposalVersionType,
-				versionId,
+				versionId: versionRes.data,
 				requestId: pinned.id,
 			},
 		};

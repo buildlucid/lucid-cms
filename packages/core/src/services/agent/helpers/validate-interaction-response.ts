@@ -5,11 +5,11 @@ import {
 	type PendingInteraction,
 	questionResponseSchema,
 } from "../../../libs/agent/interactions.js";
+import { agentScreenResponseSchema } from "../../../libs/agent/screen.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
-import { toolDefinitionInternal } from "../../../libs/tools/registry.js";
-import { agentScreenResponseSchema } from "../../../schemas/agent-screen.js";
+import { toolDefinitionInternal } from "../../../libs/tools/tool-definition-internal.js";
 import type { AgentInteractionAction } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getAiAccess from "../../connection/get-ai-access.js";

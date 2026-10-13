@@ -2,7 +2,8 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { requestData, requestHref } from "./shared.js";
+import getRequestPath from "../helpers/get-request-path.js";
+import { requestData } from "./shared.js";
 
 export const readyNotification = defineNotification({
 	key: "requests:ready",
@@ -31,6 +32,6 @@ export const readyNotification = defineNotification({
 					defaultMessage:
 						"Every approval is in. Complete it now or schedule it.",
 				}),
-		href: requestHref(data.requestId),
+		href: getRequestPath(data.requestId),
 	}),
 });

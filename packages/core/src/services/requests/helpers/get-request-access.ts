@@ -57,7 +57,7 @@ const getRequestAccess = (
 		read,
 		edit: open && write,
 		approve: open && can("review") && can(permissions.approve) && selfApproval,
-		request: open && can(permissions.complete),
+		complete: open && can(permissions.complete),
 		reopen: read && data.request.status === "closed" && write,
 	};
 };

@@ -33,7 +33,7 @@ const deleteMultiplePermanentlyController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.UsersDelete]),
 	validate("json", controllerSchemas.deleteMultiplePermanently.body),

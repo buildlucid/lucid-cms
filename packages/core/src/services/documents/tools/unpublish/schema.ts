@@ -4,7 +4,7 @@ import { documentIdInput, writeInput, writeOutputSchema } from "../schema.js";
 export const inputSchema = z.object({
 	collectionKey: writeInput.collectionKey,
 	documentId: documentIdInput,
-	target: z.string().trim().min(1).meta({
+	environment: z.string().trim().min(1).meta({
 		description:
 			"The environment to remove the document from, from collections_describe.",
 	}),

@@ -1,12 +1,15 @@
 import { parseSourceHTML } from "@lucidcms/rich-text/server";
 import z from "zod";
-import { requestDocumentInputSchema } from "../../../schemas/requests.js";
+import {
+	controllerSchemas,
+	requestDocumentInputSchema,
+} from "../../../schemas/requests.js";
 import { richTextJSONSchema } from "../../../schemas/shared/rich-text.js";
-import { toolkitActorSchema } from "../schema.js";
+import { toolkitActorSchema } from "../../permission/toolkit-actor.js";
 
 export const requestReadSchema = z.strictObject({
 	/** Reads as this user, with their live permissions. Defaults to a trusted system read. */
-	actor: toolkitActorSchema.default({ kind: "system" }),
+	actor: toolkitActorSchema.default({ type: "system" }),
 });
 
 export const requestWriteSchema = z.strictObject({
@@ -34,3 +37,13 @@ export const requestBodySchema = z.union([
 		.transform((html) => parseSourceHTML(html)),
 	richTextJSONSchema,
 ]);
+
+const { body: createBody } = controllerSchemas.createSingle;
+
+/** The title, description and reviewers of a new request, shared by `requests.createSingle` and `documents.createSingle`. */
+export const requestDetailsSchema = z.strictObject({
+	title: createBody.shape.title,
+	description: requestBodySchema.optional(),
+	/** People asked to review, who must be able to read the request. */
+	reviewerIds: createBody.shape.reviewerIds,
+});

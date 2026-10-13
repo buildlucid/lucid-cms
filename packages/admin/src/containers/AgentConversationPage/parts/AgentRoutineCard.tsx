@@ -2,6 +2,7 @@ import type { AgentConversation, AgentRoutine } from "@types";
 import { TbOutlineRepeat } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
+import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
 import Button from "@/components/Button/Button";
 import Pill from "@/components/Pill/Pill";
 import api from "@/services/api";
@@ -10,7 +11,6 @@ import { getRoutinePause } from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 import dateHelpers from "@/utils/date-helpers";
 import AgentCardDetail from "./AgentCardDetail";
-import AgentCardHeader from "./AgentCardHeader";
 
 const recentRuns = 5;
 
@@ -41,16 +41,11 @@ const AgentRoutineCard: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<aside
-			aria-labelledby="agent-routine-card-title"
-			class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 animate-fade-in"
+		<AgentSidebarCard
+			label={T()("agent.routine.label")}
+			title={props.routine.name}
+			onClose={props.onClose}
 		>
-			<AgentCardHeader
-				id="agent-routine-card-title"
-				label={T()("agent.routine.label")}
-				title={props.routine.name}
-				onClose={props.onClose}
-			/>
 			<div class="grid grid-cols-2 gap-2">
 				<Button size="sm" variant="secondary" onClick={() => props.onRuns()}>
 					{T()("agent.routine.runs.view")}
@@ -132,7 +127,7 @@ const AgentRoutineCard: Component<{
 					</ul>
 				</section>
 			</Show>
-		</aside>
+		</AgentSidebarCard>
 	);
 };
 

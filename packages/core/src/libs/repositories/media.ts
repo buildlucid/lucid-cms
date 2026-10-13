@@ -808,9 +808,24 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			}
 		>,
 	) {
+		const ownershipConditions: Record<
+			MediaOwnership["type"],
+			RawBuilder<SqlBool>
+		> = {
+			library: sql<SqlBool>`(lucid_media.owner_user_id is null and not lucid_media.is_system)`,
+			user: sql<SqlBool>`lucid_media.owner_user_id is not null`,
+			system: sql<SqlBool>`lucid_media.is_system`,
+		};
+		//* other users' personal media needs `media:read-all`
+		const accessCondition =
+			props.access.type === "all"
+				? undefined
+				: props.access.type === "library"
+					? ownershipConditions.library
+					: sql<SqlBool>`(${ownershipConditions.library} or lucid_media.owner_user_id = ${props.access.userId})`;
 		//* library media unless the ownership filter asks for more
 		const conditions = [
-			this.accessCondition(props.access),
+			accessCondition,
 			props.queryParams.filter?.ownership === undefined
 				? ownershipConditions.library
 				: undefined,
@@ -989,8 +1004,21 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								title: "contains",
 							},
 							customFilters: {
-								ownership: ({ filter }) =>
-									this.ownershipCondition(filter.value),
+								ownership: ({ filter }) => {
+									const types = (
+										Array.isArray(filter.value) ? filter.value : [filter.value]
+									).filter(
+										(type): type is MediaOwnership["type"] =>
+											typeof type === "string" &&
+											Object.hasOwn(ownershipConditions, type),
+									);
+									if (types.length === 0) return ownershipConditions.library;
+
+									return sql<SqlBool>`(${sql.join(
+										types.map((type) => ownershipConditions[type]),
+										sql` or `,
+									)})`;
+								},
 							},
 						},
 					},
@@ -1060,40 +1088,4 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			],
 		});
 	}
-
-	/** Limits a list to the rows its viewer can see. Other users' personal media needs `media:read-all`. */
-	private accessCondition(access: MediaListAccess) {
-		switch (access.type) {
-			case "all":
-				return undefined;
-			case "library":
-				return ownershipConditions.library;
-			case "owner":
-				return sql<SqlBool>`(${ownershipConditions.library} or lucid_media.owner_user_id = ${access.userId})`;
-		}
-	}
-	/** Matches any of the requested ownership types, defaulting to library media. */
-	private ownershipCondition(value: unknown) {
-		const types = (Array.isArray(value) ? value : [value]).filter(
-			isOwnershipType,
-		);
-		if (types.length === 0) return ownershipConditions.library;
-
-		return sql<SqlBool>`(${sql.join(
-			types.map((type) => ownershipConditions[type]),
-			sql` or `,
-		)})`;
-	}
 }
-
-const ownershipConditions: Record<
-	MediaOwnership["type"],
-	RawBuilder<SqlBool>
-> = {
-	library: sql<SqlBool>`(lucid_media.owner_user_id is null and not lucid_media.is_system)`,
-	user: sql<SqlBool>`lucid_media.owner_user_id is not null`,
-	system: sql<SqlBool>`lucid_media.is_system`,
-};
-
-const isOwnershipType = (value: unknown): value is MediaOwnership["type"] =>
-	typeof value === "string" && Object.hasOwn(ownershipConditions, value);

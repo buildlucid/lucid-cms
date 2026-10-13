@@ -1,3 +1,4 @@
+import { debounce } from "@solid-primitives/scheduled";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import {
@@ -18,6 +19,8 @@ import {
 } from "solid-js";
 import Field from "@/components/Field/Field";
 import Menu from "@/components/Menu/Menu";
+import type { SelectSearch } from "@/components/Select/Select";
+import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 
 export type SelectMultipleOption = {
@@ -41,6 +44,8 @@ export interface SelectMultipleProps<
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
+	/** Adds a search input above the options, for options found as people type. */
+	search?: SelectSearch;
 	/** Shows selected options as chips, or as a list of rows. @default "default" */
 	variant?: SelectMultipleVariant;
 	labelStart?: JSXElement;
@@ -94,6 +99,7 @@ function SelectMultiple<
 		"errors",
 		"required",
 		"disabled",
+		"search",
 		"variant",
 		"labelStart",
 		"labelEnd",
@@ -106,6 +112,10 @@ function SelectMultiple<
 
 	// ----------------------------------------
 	// Functions
+	const setSearchQuery = debounce(
+		(value: string) => props.search?.onChange(value),
+		300,
+	);
 	const setValues = (values: Option[]) => {
 		if (props.disabled) {
 			return;
@@ -255,6 +265,32 @@ function SelectMultiple<
 					</div>
 				</Menu.Trigger>
 				<Menu.Content matchTriggerWidth class="max-h-36 overflow-y-auto z-70">
+					<Show when={props.search}>
+						{(search) => (
+							// biome-ignore lint/a11y/noStaticElementInteractions: keeps typing out of the menu's keyboard navigation
+							<div
+								class="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover p-1.5"
+								onKeyDown={(event) => event.stopPropagation()}
+							>
+								<div class="relative">
+									<input
+										type="text"
+										class="bg-input px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-9 focus:outline-hidden focus:border-primary"
+										placeholder={search().placeholder || T()("common.search")}
+										value={search().value}
+										onInput={(event) =>
+											setSearchQuery(event.currentTarget.value)
+										}
+									/>
+									<Show when={search().loading}>
+										<div class="absolute right-2 top-0 bottom-0 flex items-center">
+											<Spinner size="sm" />
+										</div>
+									</Show>
+								</div>
+							</div>
+						)}
+					</Show>
 					<Switch>
 						<Match when={props.options.length > 0}>
 							<For each={props.options}>
@@ -285,6 +321,11 @@ function SelectMultiple<
 									);
 								}}
 							</For>
+						</Match>
+						<Match when={props.options.length === 0 && props.search?.value}>
+							<span class="text-body w-full block px-2 py-1 text-sm">
+								{T()("empty.states.search.no.results")}
+							</span>
 						</Match>
 						<Match when={props.options.length === 0}>
 							<span class="text-body w-full block px-2 py-1 text-sm">

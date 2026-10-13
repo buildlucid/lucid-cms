@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { AgentStreamEvent } from "@lucidcms/types";
 import { Hono } from "hono";
 import {
 	afterAll,
@@ -45,7 +46,6 @@ import type {
 	AgentConfirmationMode,
 	AgentReferenceInput,
 	AgentRunOutcome,
-	AgentStreamEvent,
 } from "../../types/response.js";
 import LucidError from "../../utils/errors/lucid-error.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
@@ -53,26 +53,25 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import isUrlInConversation from "../web/helpers/is-url-in-conversation.js";
 import runWebResearch from "../web/helpers/run-web-research.js";
-import advanceInputs from "./advance-inputs.js";
 import cancelRun from "./cancel-run.js";
 import createRoutine from "./create-routine.js";
 import executeRun from "./execute-run.js";
 import getConversation from "./get-conversation.js";
 import getConversationDetails from "./get-conversation-details.js";
-import getInputs from "./get-inputs.js";
 import getMessages from "./get-messages.js";
 import getRoutine from "./get-routine.js";
+import advanceInputs from "./helpers/advance-inputs.js";
 import enqueueRun from "./helpers/enqueue-run.js";
+import getInputs from "./helpers/get-inputs.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import resolveRunSetup from "./helpers/resolve-run-setup.js";
+import startRun from "./helpers/start-run.js";
 import streamModelTurn from "./helpers/stream-model-turn.js";
 import { inputNeededNotification } from "./notifications/input-needed.js";
 import { agentNotificationKeys } from "./notifications/keys.js";
 import { routineNeedsReviewNotification } from "./notifications/routine-needs-review.js";
 import notifyWaitingRuns from "./notify-waiting-runs.js";
-import recoverInputs from "./recover-inputs.js";
 import retryConversation from "./retry-conversation.js";
-import startRun from "./start-run.js";
 import submitInput from "./submit-input.js";
 import updateConversation from "./update-conversation.js";
 import updateInput from "./update-input.js";
@@ -134,7 +133,7 @@ const restrictedWriteTool = defineAgentTool({
 	input: z.object({}),
 	output: z.object({ done: z.boolean() }),
 	permissions: [],
-	requiredPermissions: () => ["users:create"],
+	inputPermissions: () => ["users:create"],
 	handler: writeHandler,
 });
 const readHandler = vi.fn(async () => ({
@@ -169,7 +168,7 @@ const parallelTool = defineAgentTool({
 	input: z.object({ id: z.string(), payload: z.string().optional() }),
 	output: z.object({ id: z.string(), payload: z.string().optional() }),
 	permissions: [],
-	requiredPermissions: ({ id }) =>
+	inputPermissions: ({ input: { id } }) =>
 		id === "restricted" ? ["users:create"] : [],
 	readOnly: true,
 	parallelSafe: true,
@@ -198,7 +197,7 @@ const selectionOptions = {
 		key: "test-picker",
 		version: 1,
 		data: z.object({ ids: z.array(z.number()) }),
-		response: (data: { ids: number[] }) =>
+		response: ({ data }: { data: { ids: number[] } }) =>
 			z.object({ id: z.number().refine((id) => data.ids.includes(id)) }),
 		prepare: prepareSelection,
 	},
@@ -275,27 +274,27 @@ const stepWriteTool = defineAgentTool({
 	...stepOptions,
 	name: "test_step_write",
 });
-const optionalHandler = vi.fn(
+const skippableHandler = vi.fn(
 	async ({ response }: { response: { value: string } | undefined }) => ({
 		error: undefined,
 		data: {
 			output: { value: response?.value ?? "default" },
-			summary: "Finished the optional step.",
+			summary: "Finished the skippable step.",
 		},
 	}),
 );
-const optionalTool = defineAgentTool({
-	name: "test_optional",
+const skippableTool = defineAgentTool({
+	name: "test_skippable",
 	description: "Asks only when told to",
 	input: z.object({ ask: z.boolean() }),
 	output: z.object({ value: z.string() }),
 	permissions: [],
 	interaction: {
-		key: "test-optional",
+		key: "test-skippable",
 		version: 1,
 		data: z.object({}),
 		response: () => z.object({ value: z.string() }),
-		optional: true,
+		skippable: true,
 		prepare: async ({ input }) => ({
 			error: undefined,
 			data: input.ask
@@ -309,7 +308,7 @@ const optionalTool = defineAgentTool({
 				: { proceed: true as const },
 		}),
 	},
-	handler: ({ response }) => optionalHandler({ response }),
+	handler: ({ response }) => skippableHandler({ response }),
 });
 const screenHandler = vi.fn(async () => ({
 	error: undefined,
@@ -368,7 +367,7 @@ const testAgent = defineAgent({
 		restrictedWriteTool,
 		stepTool,
 		stepWriteTool,
-		optionalTool,
+		skippableTool,
 		screenTool,
 	],
 });
@@ -485,7 +484,7 @@ const prepare = async (props?: {
 	const run = await startRun(context, {
 		userId,
 		conversationId: conversation.data.id,
-		requestId,
+		runId: requestId,
 		...(props?.routineId
 			? {
 					routine: {
@@ -1073,7 +1072,7 @@ describe("independent read batches", () => {
 				await submitInput(context, {
 					conversationId: prepared.conversationId,
 					userId,
-					requestId: randomUUID(),
+					inputId: randomUUID(),
 					text: "Change direction",
 					delivery: { kind: "steer", targetRunId: prepared.runId },
 					dispatch: false,
@@ -1152,14 +1151,15 @@ describe("agent runner", () => {
 			cron: "0 9 * * 1",
 			timezone: "UTC",
 			enabled: false,
-			tools:
+			toolSettings:
 				override === undefined
 					? {}
 					: { [tool.name]: { requiresConfirmation: override } },
 		});
 		if (routine.error) throw routine.error;
 		expect(
-			(await getRoutine(context, { id: routine.data.id, userId })).data?.tools,
+			(await getRoutine(context, { id: routine.data.id, userId })).data
+				?.toolSettings,
 		).toEqual(
 			override === undefined
 				? {}
@@ -1200,7 +1200,7 @@ describe("agent runner", () => {
 			cron: "0 9 * * 1",
 			timezone: "UTC",
 			enabled: false,
-			tools: { [writeTool.name]: { requiresConfirmation: true } },
+			toolSettings: { [writeTool.name]: { requiresConfirmation: true } },
 		});
 		if (routine.error) throw routine.error;
 		const prepared = await prepare({ routineId: routine.data.id });
@@ -1213,7 +1213,7 @@ describe("agent runner", () => {
 				await updateRoutine(context, {
 					id: routine.data.id,
 					userId,
-					tools: {},
+					toolSettings: {},
 				})
 			).error,
 		).toBeUndefined();
@@ -1244,7 +1244,7 @@ describe("agent runner", () => {
 			conversationId: prepared.conversationId,
 			userId,
 			text: "Try again",
-			requestId: randomUUID(),
+			runId: randomUUID(),
 		});
 		if (followup.error) throw followup.error;
 		expect((await selectRun(followup.data.runId))?.checkpoint).toMatchObject({
@@ -1268,7 +1268,7 @@ describe("agent runner", () => {
 			cron: "0 9 * * 1",
 			timezone: "UTC",
 			enabled: false,
-			tools: { [selectionTool.name]: { requiresConfirmation: false } },
+			toolSettings: { [selectionTool.name]: { requiresConfirmation: false } },
 		});
 		if (routine.error) throw routine.error;
 		const prepared = await prepare({ routineId: routine.data.id });
@@ -1300,7 +1300,7 @@ describe("agent runner", () => {
 		expect(
 			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget.interaction
 				.title,
-		).toBe(context.translate(tool.title));
+		).toEqual(tool.title);
 		const id = await interactionId(prepared.conversationId);
 		expect(
 			await executeRun(context, {
@@ -1346,7 +1346,7 @@ describe("agent runner", () => {
 			conversationId: prepared.conversationId,
 			userId,
 			text: "Continue",
-			requestId: randomUUID(),
+			runId: randomUUID(),
 		});
 		if (next.error) throw next.error;
 		expect(
@@ -1458,7 +1458,7 @@ describe("agent runner", () => {
 			userId,
 			conversationId: prepared.conversationId,
 			text: "Hello",
-			requestId: prepared.requestId,
+			runId: prepared.requestId,
 		});
 		expect(replay.error).toBeUndefined();
 		await executeRun(context, { runId: prepared.runId });
@@ -1871,7 +1871,9 @@ describe("agent runner", () => {
 				agentKey: testAgent.key,
 				userId,
 				name: "Automatic write",
-				tools: { [confirmationTool.name]: { requiresConfirmation: false } },
+				toolSettings: {
+					[confirmationTool.name]: { requiresConfirmation: false },
+				},
 				instructions: "Write a note.",
 				cron: "0 9 * * 1",
 				timezone: "UTC",
@@ -1973,7 +1975,7 @@ describe("agent runner", () => {
 			userId,
 			conversationId: prepared.conversationId,
 			text: "Try something else",
-			requestId: randomUUID(),
+			runId: randomUUID(),
 		};
 		expect(await startRun(context, next)).toMatchObject({
 			error: { status: 409 },
@@ -2372,7 +2374,7 @@ describe("agent runner", () => {
 		await submitInput(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: queuedId,
+			inputId: queuedId,
 			text: "Wait for this run",
 			delivery: { kind: "queue" },
 		});
@@ -2680,7 +2682,7 @@ describe("agent runner", () => {
 			userId,
 			conversationId: prepared.conversationId,
 			text: "Read https://example.com/invented",
-			requestId: prepared.requestId,
+			runId: prepared.requestId,
 		});
 		expect(retried.error).toBeUndefined();
 		expect(
@@ -2699,7 +2701,7 @@ describe("conversation compaction", () => {
 	const longReply = `Draft saved. No publishing was requested. ${"Detail. ".repeat(300)}`;
 	const summaryOf = (checkpoint?: Checkpoint | null) =>
 		(JSON.stringify(checkpoint?.messages[0]) ?? "").includes(
-			"Earlier conversation summary",
+			"Earlier chat summary",
 		);
 	const compactAfterReply = async () => {
 		const prepared = await prepare();
@@ -2709,7 +2711,7 @@ describe("conversation compaction", () => {
 		const compact = await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId,
+			runId: requestId,
 			purpose: "compact",
 		});
 		expect(compact.error).toBeUndefined();
@@ -2783,7 +2785,7 @@ describe("conversation compaction", () => {
 		await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: next,
+			runId: next,
 			text: "Continue in French",
 		});
 		reply(`Continuing with the French draft. ${"Détail. ".repeat(300)}`);
@@ -2816,7 +2818,7 @@ describe("conversation compaction", () => {
 		await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: second,
+			runId: second,
 			purpose: "compact",
 		});
 		reply("Updated goal: continue drafting in French, without publishing.");
@@ -2828,7 +2830,7 @@ describe("conversation compaction", () => {
 		await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: afterSecond,
+			runId: afterSecond,
 			text: "Carry on",
 		});
 		reply("Ready.");
@@ -2852,16 +2854,7 @@ describe("conversation compaction", () => {
 		});
 	});
 
-	test.each([
-		true,
-		false,
-	])("recovers when saving the checkpoint fails after the summary (transactions: %s)", async (transactions) => {
-		if (!transactions) {
-			const supports = context.config.db.supports.bind(context.config.db);
-			vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
-				feature === "transaction" ? false : supports(feature),
-			);
-		}
+	test("recovers when saving the checkpoint fails after the summary", async () => {
 		const prepared = await compactAfterReply();
 		const update = AgentRunsRepository.prototype.updateWithToken;
 		let interrupted = false;
@@ -3046,7 +3039,7 @@ describe("conversation compaction", () => {
 		await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: next,
+			runId: next,
 			text: "Check the history",
 		});
 		//* the provider counts this request close to the limit, so compaction is due before the next turn
@@ -3105,7 +3098,7 @@ describe("conversation compaction", () => {
 		await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: next,
+			runId: next,
 			text: "Next",
 		});
 		model.mockImplementationOnce(async (_ctx, input) => {
@@ -3177,7 +3170,7 @@ describe("conversation compaction", () => {
 		await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: next,
+			runId: next,
 			text: "Continue now",
 		});
 		expect(await executeRun(context, { runId: next })).toMatchObject({
@@ -3205,12 +3198,12 @@ describe("queued and steering inputs", () => {
 		conversationId: string,
 		text: string,
 		targetRunId?: string,
-		requestId = randomUUID(),
+		inputId = randomUUID(),
 	) =>
 		submitInput(context, {
 			conversationId,
 			userId,
-			requestId,
+			inputId,
 			text,
 			delivery: targetRunId
 				? { kind: "steer", targetRunId }
@@ -3246,7 +3239,7 @@ describe("queued and steering inputs", () => {
 		const denied = await submitInput(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: randomUUID(),
+			inputId: randomUUID(),
 			text: "",
 			references,
 			delivery: { kind: "queue" },
@@ -3324,7 +3317,7 @@ describe("queued and steering inputs", () => {
 		await startRun(context, {
 			conversationId: chat.data.id,
 			userId: editor.id,
-			requestId: randomUUID(),
+			runId: randomUUID(),
 			text: "Start",
 		});
 		const Media = new MediaRepository(context.db);
@@ -3345,7 +3338,7 @@ describe("queued and steering inputs", () => {
 		const input = {
 			conversationId: chat.data.id,
 			userId: editor.id,
-			requestId: randomUUID(),
+			inputId: randomUUID(),
 			text: "Review",
 			references: [{ type: "media" as const, mediaId: media.data.id }],
 			delivery: { kind: "queue" as const },
@@ -3395,7 +3388,7 @@ describe("queued and steering inputs", () => {
 				await updateInput(context, {
 					conversationId: chat.data.id,
 					userId: editor.id,
-					action: { kind: "cancel", id: input.requestId },
+					action: { kind: "cancel", id: input.inputId },
 				})
 			).error,
 		).toBeUndefined();
@@ -3679,62 +3672,19 @@ describe("queued and steering inputs", () => {
 			expect.objectContaining({ content: "Too late" }),
 		);
 	});
-
-	test("repairs a partially started input without transactions", async () => {
-		const prepared = await prepare();
-		reply("Done");
-		await executeRun(context, { runId: prepared.runId });
-		const supports = context.config.db.supports.bind(context.config.db);
-		vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
-			feature === "transaction" ? false : supports(feature),
-		);
-		const append = vi
-			.spyOn(AgentMessagesRepository.prototype, "appendOnce")
-			.mockResolvedValueOnce({
-				data: undefined,
-				error: {
-					type: "basic",
-					status: 500,
-					message: copy.literal("Lost connection"),
-				},
-			});
-		const id = randomUUID();
-		expect(
-			(await submit(prepared.conversationId, "Recover me", undefined, id))
-				.error,
-		).toBeDefined();
-		append.mockRestore();
-		expect((await selectRun(id))?.status).toBe("queued");
-		expect((await recoverInputs(context)).error).toBeUndefined();
-		expect(await pending(prepared.conversationId)).toEqual([]);
-		reply("Recovered");
-		expect(await executeRun(context, { runId: id })).toMatchObject({
-			data: { status: "completed" },
-		});
-		expect(model.mock.calls.at(-1)?.[1].messages).toContainEqual(
-			expect.objectContaining({ role: "user", content: "Recover me" }),
-		);
-	});
 });
 
-test.each([
-	true,
-	false,
-])("concurrent idle submissions keep both messages with transactions %s", async (transactions) => {
-	const supports = context.config.db.supports.bind(context.config.db);
-	vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
-		feature === "transaction" ? transactions : supports(feature),
-	);
+test("concurrent idle submissions keep both messages", async () => {
 	const prepared = await prepare();
 	reply("Done");
 	await executeRun(context, { runId: prepared.runId });
 	const ids = [randomUUID(), randomUUID()];
 	const results = await Promise.all(
-		ids.map((requestId, index) =>
+		ids.map((inputId, index) =>
 			submitInput(context, {
 				conversationId: prepared.conversationId,
 				userId,
-				requestId,
+				inputId,
 				text: `Message ${index}`,
 				delivery: { kind: "queue" },
 			}),
@@ -3764,7 +3714,7 @@ test("a lost steering acknowledgement does not inject the correction twice", asy
 		await submitInput(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: id,
+			inputId: id,
 			text: "Correction",
 			delivery: { kind: "steer", targetRunId: prepared.runId },
 		});
@@ -3853,7 +3803,7 @@ describe("runs acting as the system", () => {
 			userId: null,
 			conversationId: conversation.data.id,
 			text: "Audit",
-			requestId: randomUUID(),
+			runId: randomUUID(),
 		});
 		if (run.error) throw run.error;
 		return { runId: run.data.runId, conversationId: conversation.data.id };
@@ -3906,9 +3856,24 @@ describe("runs acting as the system", () => {
 			.at(-1)?.[1]
 			.tools.map((tool: { name: string }) => tool.name);
 		expect(offered).toContain(writeTool.name);
-		expect(offered).toContain(optionalTool.name);
+		expect(offered).toContain(skippableTool.name);
 		expect(offered).not.toContain(selectionTool.name);
 		expect(offered).not.toContain("lucid_ask_user");
+	});
+
+	test("skippable questions are skipped outside routines too", async () => {
+		skippableHandler.mockClear();
+		const prepared = await prepareSystem();
+		callTool({
+			id: "system-skippable",
+			name: skippableTool.name,
+			input: { ask: true },
+		});
+		reply("Done");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(skippableHandler).toHaveBeenCalledWith({ response: undefined });
 	});
 
 	test("a steer from someone else becomes a follow-up that acts for them", async () => {
@@ -3917,7 +3882,7 @@ describe("runs acting as the system", () => {
 		await submitInput(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: id,
+			inputId: id,
 			text: "Also check the blog",
 			delivery: { kind: "steer", targetRunId: prepared.runId },
 		});
@@ -3946,28 +3911,31 @@ test("input cannot take the ID of another chat's run", async () => {
 	const submitted = await submitInput(context, {
 		conversationId: second.conversationId,
 		userId,
-		requestId: first.runId,
+		inputId: first.runId,
 		text: "Reused",
 		delivery: { kind: "queue" },
 	});
 	expect(submitted.error?.status).toBe(409);
 });
 
-vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => {
-	const { agentModelCatalog, mockAgentModels } = await import(
-		"../../utils/test-helpers/agent-models.js"
-	);
-	return {
-		default: mockAgentModels(() => ({
-			...agentModelCatalog,
-			models: agentModelCatalog.models.map((model) =>
-				model.id === "test-model"
-					? { ...model, inputTokenLimit, toolLimit }
-					: model,
-			),
-		})),
-	};
-});
+vi.mock(
+	"../../libs/lucid-remote/services/get-agent-models/index.js",
+	async () => {
+		const { agentModelCatalog, mockAgentModels } = await import(
+			"../../utils/test-helpers/agent-models.js"
+		);
+		return {
+			default: mockAgentModels(() => ({
+				...agentModelCatalog,
+				models: agentModelCatalog.models.map((model) =>
+					model.id === "test-model"
+						? { ...model, inputTokenLimit, toolLimit }
+						: model,
+				),
+			})),
+		};
+	},
+);
 
 describe("saved model choices", () => {
 	test("a change applies to the next run while a started run keeps its model", async () => {
@@ -3991,7 +3959,7 @@ describe("saved model choices", () => {
 		const next = await startRun(context, {
 			conversationId: prepared.conversationId,
 			userId,
-			requestId: randomUUID(),
+			runId: randomUUID(),
 			text: "Continue.",
 		});
 		expect(next.error).toBeUndefined();
@@ -4111,13 +4079,13 @@ test("every attempt at one web call reuses its key, so a resumed run never pays 
 					permissions: [],
 					superAdmin: false,
 				},
-				actor: { kind: "user", userId, agentRunId: prepared.runId },
+				actor: { type: "user", userId, agentRunId: prepared.runId },
 				signal: new AbortController().signal,
 				operationId: `${prepared.runId}:${callId}`,
 				run: {
 					id: prepared.runId,
 					conversationId: prepared.conversationId,
-					userId,
+					agentKey: webAgent.key,
 				},
 			},
 			request: {
@@ -4230,17 +4198,17 @@ test("reads only pages whose URL already appeared in the chat", async () => {
 	});
 	callTool({
 		id: "from-message",
-		name: "web_fetch",
+		name: "web_read",
 		input: { url: "https://www.example.com/about/" },
 	});
 	callTool({
 		id: "from-result",
-		name: "web_fetch",
+		name: "web_read",
 		input: { url: "https://example.com/docs" },
 	});
 	callTool({
 		id: "with-data",
-		name: "web_fetch",
+		name: "web_read",
 		input: { url: "https://example.com/about?token=secret" },
 	});
 	reply("Done.");
@@ -4358,7 +4326,7 @@ test("retrying a failed chat answers again without adding a message", async () =
 	const retried = await retryConversation(context, {
 		conversationId: prepared.conversationId,
 		userId,
-		requestId: randomUUID(),
+		runId: randomUUID(),
 	});
 	assert(retried.data, JSON.stringify(retried.error));
 	reply("The homepage covers our services.");
@@ -4382,7 +4350,7 @@ test("retrying a failed chat answers again without adding a message", async () =
 			await retryConversation(context, {
 				conversationId: prepared.conversationId,
 				userId,
-				requestId: randomUUID(),
+				runId: randomUUID(),
 			})
 		).error?.status,
 	).toBe(409);
@@ -4416,7 +4384,10 @@ describe("interactive tools", () => {
 		).toMatchObject({
 			key: stepTool.interaction?.key,
 			data: { step: 2 },
-			interaction: { title: "Second question", toolCallId: "steps" },
+			interaction: {
+				title: { type: "lucid.literal", value: "Second question" },
+				toolCallId: "steps",
+			},
 		});
 
 		const second = await interactionId(prepared.conversationId);
@@ -4561,11 +4532,12 @@ describe("interactive tools", () => {
 		);
 	});
 
-	test("an optional question is skipped when the tool proceeds, and confirmation is still asked", async () => {
+	test("a skippable question is skipped when the tool proceeds, and confirmation is still asked", async () => {
+		skippableHandler.mockClear();
 		const prepared = await prepare({ confirmationMode: "confirm-all" });
 		callTool({
-			id: "optional",
-			name: optionalTool.name,
+			id: "skippable",
+			name: skippableTool.name,
 			input: { ask: false },
 		});
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
@@ -4574,7 +4546,7 @@ describe("interactive tools", () => {
 		expect(
 			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget.key,
 		).toBe(constants.agent.widgets.confirmation);
-		expect(optionalHandler).not.toHaveBeenCalled();
+		expect(skippableHandler).not.toHaveBeenCalled();
 
 		reply("Done");
 		expect(
@@ -4588,15 +4560,15 @@ describe("interactive tools", () => {
 				},
 			}),
 		).toMatchObject({ data: { status: "completed" } });
-		expect(optionalHandler).toHaveBeenCalledWith({ response: undefined });
+		expect(skippableHandler).toHaveBeenCalledWith({ response: undefined });
 	});
 
-	test("routines never stop for an optional question", async () => {
-		optionalHandler.mockClear();
+	test("routines never stop for a skippable question", async () => {
+		skippableHandler.mockClear();
 		const routine = await createRoutine(context, {
 			agentKey: testAgent.key,
 			userId,
-			name: "Optional question",
+			name: "Skippable question",
 			instructions: "Pick a value",
 			cron: "0 9 * * 1",
 			timezone: "UTC",
@@ -4607,12 +4579,16 @@ describe("interactive tools", () => {
 			routineId: routine.data.id,
 			confirmationMode: "automatic",
 		});
-		callTool({ id: "optional", name: optionalTool.name, input: { ask: true } });
+		callTool({
+			id: "skippable",
+			name: skippableTool.name,
+			input: { ask: true },
+		});
 		finishRun({ outcome: "done", summary: "Done" });
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "completed" },
 		});
-		expect(optionalHandler).toHaveBeenCalledWith({ response: undefined });
+		expect(skippableHandler).toHaveBeenCalledWith({ response: undefined });
 	});
 
 	test("a failed run marks its unfinished calls failed instead of leaving them waiting", async () => {

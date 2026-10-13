@@ -13,7 +13,7 @@ interface Params {
 /** Copies a finished generation into media storage, returning a key to create or update media with. */
 export const mediaSaveReq = (params: Params) => {
 	return request<ResponseBody<SavedGeneratedMedia>>({
-		url: `/lucid/api/v1/ai/media/requests/${params.requestId}/save`,
+		url: `/lucid/api/v1/ai/media/generations/${params.requestId}/save`,
 		csrf: true,
 		method: "POST",
 		body: { public: params.public, temporary: params.temporary },

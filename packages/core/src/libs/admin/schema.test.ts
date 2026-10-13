@@ -152,10 +152,10 @@ describe("document list slots", () => {
 	});
 });
 
-describe("dashboard widget slots", () => {
+describe("home widget slots", () => {
 	const widget = {
 		key: "traffic",
-		slot: "dashboard.widget",
+		slot: "home.widget",
 		component: "./Traffic.tsx",
 	};
 

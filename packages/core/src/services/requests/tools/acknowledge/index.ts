@@ -33,7 +33,6 @@ export const acknowledgeRequestAgentTool = (
 					execution.authority,
 					options.collections,
 				),
-				runId: execution.run.id,
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});

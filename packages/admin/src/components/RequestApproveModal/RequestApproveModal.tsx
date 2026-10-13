@@ -1,5 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -23,7 +23,7 @@ import { getApprovalsAfter } from "@/utils/requests";
 const RequestApproveModal: Component<{
 	open: boolean;
 	setOpen: (_open: boolean) => void;
-	request: RequestDetail;
+	request: RequestDetails;
 	requestAfter?: boolean;
 }> = (props) => {
 	// ----------------------------------------

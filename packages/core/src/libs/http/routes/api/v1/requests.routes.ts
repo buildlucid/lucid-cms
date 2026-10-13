@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import acknowledgeTarget from "../../../controllers/requests/acknowledge-target.js";
 import addDocuments from "../../../controllers/requests/add-documents.js";
 import approve from "../../../controllers/requests/approve.js";
 import close from "../../../controllers/requests/close.js";
@@ -15,7 +16,6 @@ import getReviewers from "../../../controllers/requests/get-reviewers.js";
 import getSingle from "../../../controllers/requests/get-single.js";
 import removeDocument from "../../../controllers/requests/remove-document.js";
 import reopen from "../../../controllers/requests/reopen.js";
-import reviewTarget from "../../../controllers/requests/review-target.js";
 import unapprove from "../../../controllers/requests/unapprove.js";
 import updateComment from "../../../controllers/requests/update-comment.js";
 import updateCommentResolution from "../../../controllers/requests/update-comment-resolution.js";
@@ -34,15 +34,18 @@ const requestsRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:id/documents", ...addDocuments)
 	.delete("/:id/documents/:requestDocumentId", ...removeDocument)
 	.patch("/:id/documents/:requestDocumentId/targets", ...updateTargets)
-	.patch("/:id/documents/:requestDocumentId/target-review", ...reviewTarget)
+	.patch(
+		"/:id/documents/:requestDocumentId/targets/acknowledgement",
+		...acknowledgeTarget,
+	)
 	.post("/:id/approve", ...approve)
 	.post("/:id/unapprove", ...unapprove)
 	.post("/:id/complete", ...complete)
 	.post("/:id/close", ...close)
 	.post("/:id/reopen", ...reopen)
 	.post("/:id/comments", ...createComment)
-	.patch("/:id/comments/:eventId", ...updateComment)
-	.patch("/:id/comments/:eventId/resolution", ...updateCommentResolution)
-	.delete("/:id/comments/:eventId", ...deleteComment);
+	.patch("/:id/comments/:commentId", ...updateComment)
+	.patch("/:id/comments/:commentId/resolution", ...updateCommentResolution)
+	.delete("/:id/comments/:commentId", ...deleteComment);
 
 export default requestsRoutes;

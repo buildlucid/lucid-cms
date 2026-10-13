@@ -4,6 +4,7 @@ import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -19,13 +20,14 @@ const updateInputController = factory.createHandlers(
 			"Edits, cancels or steers pending input, or resumes the queue.",
 		tags: ["agent"],
 		summary: "Update Agent Input",
+		responses: openAPI.responses({ noProperties: true }),
 		requestBody: openAPI.requestBody(controllerSchemas.updateInput.body),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.updateInput.params,
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.updateInput.params),
@@ -37,6 +39,11 @@ const updateInputController = factory.createHandlers(
 
 		const result = await serviceWrapper(agentServices.updateInput, {
 			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
 		})(context, {
 			conversationId: param.id,
 			userId: c.get("auth").id,

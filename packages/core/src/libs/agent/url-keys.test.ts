@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import type { StoredAgentMessagePart } from "../../schemas/agent.js";
 import { copy } from "../i18n/index.js";
+import type { StoredAgentMessagePart } from "./messages.js";
 import runnerTools from "./runner-tools.js";
 import {
 	addWebUrlKeys,

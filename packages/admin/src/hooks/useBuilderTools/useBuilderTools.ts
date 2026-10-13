@@ -1,8 +1,10 @@
 import type {
 	AgentBuilderContent,
-	AgentScreen,
 	AgentScreenCall,
 	AgentScreenResponse,
+} from "@lucidcms/types";
+import type {
+	AgentScreen,
 	Collection,
 	DocumentVersionCheckField,
 	InternalDocumentBrick,
@@ -11,7 +13,7 @@ import type {
 import { type Accessor, createMemo, onCleanup, onMount } from "solid-js";
 import { unwrap } from "solid-js/store";
 import {
-	type AgentBuilderFocus,
+	type BuilderFocus,
 	useAgentSession,
 } from "@/hooks/useAgentSession/useAgentSession";
 import brickStore from "@/store/brickStore/brickStore";
@@ -190,7 +192,7 @@ export const useBuilderTools = (props: {
 		lastRead = undefined;
 		return { status: "done" };
 	};
-	const focus = async (target: AgentBuilderFocus) => {
+	const focus = async (target: BuilderFocus) => {
 		const collection = props.collection();
 		if (!collection) return false;
 
@@ -235,9 +237,9 @@ export const useBuilderTools = (props: {
 						return update(call, runId);
 					case "focus": {
 						const shown = await focus({
-							brick: call.target.brick,
-							path: call.target.field ? [call.target.field] : [],
-							contentLocale: call.target.contentLocale,
+							brick: call.focus.brick,
+							path: call.focus.field ? [call.focus.field] : [],
+							contentLocale: call.focus.contentLocale,
 						});
 						return shown
 							? { status: "done" }

@@ -15,13 +15,15 @@ export function useDocumentHistoryUIState(props: {
 		createSignal<number | null>(null);
 	const [getPreviewOpen, setPreviewOpen] = createSignal(false);
 
-	const [getRequestCreationOpen, setRequestCreationOpen] = createSignal(false);
-	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
-		createSignal(false);
-	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
-		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
-	const [getReleaseEnvironmentAction, setReleaseEnvironmentAction] =
-		createSignal<"publish" | "compose" | null>(null);
+	const [getDocumentRequestOpen, setDocumentRequestOpen] = createSignal(false);
+	const [getPublishOpen, setPublishOpen] = createSignal(false);
+	const [getPublishTarget, setPublishTarget] = createSignal<Exclude<
+		DocumentVersionType,
+		"revision"
+	> | null>(null);
+	const [getPublishAction, setPublishAction] = createSignal<
+		"publish" | "compose" | null
+	>(null);
 
 	const isLoading = createMemo(() => {
 		return props.collectionQuery.isLoading;
@@ -101,14 +103,14 @@ export function useDocumentHistoryUIState(props: {
 		setRestoreRevisionVersionId,
 		getPreviewOpen,
 		setPreviewOpen,
-		getRequestCreationOpen,
-		setRequestCreationOpen,
-		getReleaseEnvironmentOpen,
-		setReleaseEnvironmentOpen,
-		getReleaseEnvironmentTarget,
-		setReleaseEnvironmentTarget,
-		getReleaseEnvironmentAction,
-		setReleaseEnvironmentAction,
+		getDocumentRequestOpen,
+		setDocumentRequestOpen,
+		getPublishOpen,
+		setPublishOpen,
+		getPublishTarget,
+		setPublishTarget,
+		getPublishAction,
+		setPublishAction,
 		isLoading,
 		isSuccess,
 		isSaving,

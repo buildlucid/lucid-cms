@@ -14,8 +14,13 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		super(db, agentConversationsTable);
 	}
 
-	private selectWithLatestRun() {
-		return this.db
+	/** Lists chats of each kind the user has the agent action for, keeping personal chats private to their owner. */
+	async selectMultipleFilteredForAccess(props: {
+		userId: number;
+		agentKeys: Record<AgentPermissionAction, string[]>;
+		queryParams: Partial<QueryParams>;
+	}) {
+		const accessible = this.db
 			.selectFrom("lucid_agent_conversations")
 			.leftJoin("lucid_agent_runs", (join) =>
 				join.on((eb) =>
@@ -35,35 +40,28 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 							.limit(1),
 					),
 				),
-			);
-	}
-	/** Lists chats for each granted workflow, keeping personal chats private to their owner. */
-	async selectMultipleFilteredForAccess(props: {
-		userId: number;
-		agentKeys: Record<AgentPermissionAction, string[]>;
-		queryParams: Partial<QueryParams>;
-	}) {
-		const accessible = this.selectWithLatestRun().where((eb) =>
-			eb.and([
-				eb.or([
-					eb("lucid_agent_conversations.user_id", "=", props.userId),
-					eb("lucid_agent_conversations.user_id", "is", null),
+			)
+			.where((eb) =>
+				eb.and([
+					eb.or([
+						eb("lucid_agent_conversations.user_id", "=", props.userId),
+						eb("lucid_agent_conversations.user_id", "is", null),
+					]),
+					eb.or(
+						agentConversationKindSchema.options.flatMap((kind) => {
+							const keys = props.agentKeys[getConversationPermission(kind)];
+							return keys.length
+								? [
+										eb.and([
+											eb("lucid_agent_conversations.kind", "=", kind),
+											eb("lucid_agent_conversations.agent_key", "in", keys),
+										]),
+									]
+								: [];
+						}),
+					),
 				]),
-				eb.or(
-					agentConversationKindSchema.options.flatMap((kind) => {
-						const keys = props.agentKeys[getConversationPermission(kind)];
-						return keys.length
-							? [
-									eb.and([
-										eb("lucid_agent_conversations.kind", "=", kind),
-										eb("lucid_agent_conversations.agent_key", "in", keys),
-									]),
-								]
-							: [];
-					}),
-				),
-			]),
-		);
+			);
 		const { main, count } = queryBuilder.main(
 			{
 				main: accessible.select([
@@ -121,6 +119,7 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 				"active_run_id",
 				"queue_paused",
 				"context",
+				"model_selection",
 				"confirmation_mode",
 				"created_at",
 				"updated_at",
@@ -132,7 +131,27 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		});
 	}
 	async selectSingleWithLatestRun(props: { id: string }) {
-		const query = this.selectWithLatestRun()
+		const query = this.db
+			.selectFrom("lucid_agent_conversations")
+			.leftJoin("lucid_agent_runs", (join) =>
+				join.on((eb) =>
+					eb(
+						"lucid_agent_runs.id",
+						"=",
+						eb
+							.selectFrom("lucid_agent_runs as latest")
+							.select("latest.id")
+							.whereRef(
+								"latest.conversation_id",
+								"=",
+								"lucid_agent_conversations.id",
+							)
+							.orderBy("latest.created_at", "desc")
+							.orderBy("latest.id", "desc")
+							.limit(1),
+					),
+				),
+			)
 			.select([
 				"lucid_agent_conversations.id",
 				"lucid_agent_conversations.agent_key",
@@ -279,7 +298,11 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 			.set({ active_run_id: props.runId, updated_at: props.updatedAt })
 			.where("id", "=", props.conversationId)
 			.$if(props.allowPaused !== true, (q) =>
-				q.where("queue_paused", "=", false),
+				q.where(
+					"queue_paused",
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				),
 			)
 			.where((eb) =>
 				eb.or([
@@ -395,7 +418,7 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 				active_run_id: null,
 				updated_at: props.now,
 				queue_paused: eb.or([
-					eb("queue_paused", "=", true),
+					eb("queue_paused", "=", this.dbAdapter.getDefault("boolean", "true")),
 					eb.exists(
 						eb
 							.selectFrom("lucid_agent_runs")

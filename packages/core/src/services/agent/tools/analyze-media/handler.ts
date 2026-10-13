@@ -1,19 +1,26 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
+import { mediaMimeTypeSchema } from "../../../../libs/lucid-remote/schema/media.js";
 import analyzeMedia from "../../../../libs/lucid-remote/services/analyze-media/index.js";
-import type { AgentToolHandler } from "../../../../libs/tools/types.js";
+import type {
+	AgentToolExecution,
+	AgentToolResult,
+} from "../../../../libs/tools/types.js";
+import type { ServiceFn } from "../../../../utils/services/types.js";
+import resolveMediaSource from "../../helpers/resolve-media-source.js";
 import runPaidToolRequest from "../../helpers/run-paid-tool-request.js";
 import register from "../../references/register.js";
 import { analyzeMediaToolName } from "./constants.js";
-import resolveSource from "./resolve-source.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
-const handler: AgentToolHandler<
-	z.output<typeof inputSchema>,
-	z.output<typeof outputSchema>
-> = async ({ context, input, execution }) => {
-	const source = await resolveSource(context, {
+/** Sends authorised media to Lucid's analysis model with the agent's question, and links the media to the chat. */
+const analyze: ServiceFn<
+	[{ input: z.output<typeof inputSchema>; execution: AgentToolExecution }],
+	AgentToolResult<z.output<typeof outputSchema>>
+> = async (context, { input, execution }) => {
+	const source = await resolveMediaSource(context, {
 		mediaId: input.mediaId,
+		mimeTypes: mediaMimeTypeSchema,
 		execution,
 	});
 	if (source.error) return source;
@@ -53,4 +60,4 @@ const handler: AgentToolHandler<
 	};
 };
 
-export default handler;
+export default analyze;

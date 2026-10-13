@@ -32,7 +32,7 @@ const addDocumentsController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.addDocuments.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.addDocuments.params),

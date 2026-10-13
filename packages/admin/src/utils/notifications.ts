@@ -1,7 +1,7 @@
 import type {
 	Notification,
 	NotificationCategorySummary,
-	NotificationSummary,
+	NotificationCounts,
 } from "@types";
 import type { PillVariant } from "@/components/Pill/Pill";
 import T from "@/translations";
@@ -55,7 +55,7 @@ export const notificationStates: Record<
  * they refetch on new notifications and on reads or archives made elsewhere,
  * such as in another tab. Hold the lists back until the summary has loaded.
  */
-export const getNotificationsListKey = (summary?: NotificationSummary) =>
+export const getNotificationsListKey = (summary?: NotificationCounts) =>
 	summary
 		? [summary.unread, summary.actionRequired, summary.latestUpdatedAt]
 		: undefined;

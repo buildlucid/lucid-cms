@@ -1,10 +1,10 @@
 import constants from "../../../constants/constants.js";
+import resolveFailure from "../../../services/jobs/helpers/resolve-failure.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import { copy } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import { JobsRepository } from "../../repositories/index.js";
-import { resolveJobFailure } from "../failure-notification.js";
 import { getJobDefinitionRuntime, getRegisteredJob } from "../registry.js";
 import type {
 	JobConsumptionResult,
@@ -80,7 +80,7 @@ const executeTransactionalJob = async (
 	);
 	if (result.error) return { type: "retry-transport" };
 
-	await resolveJobFailure(context, job);
+	await resolveFailure(context, job);
 
 	return result.data;
 };

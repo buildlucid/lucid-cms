@@ -6,7 +6,7 @@ import {
 } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import Button from "@/components/Button/Button";
-import type { HomeWidget } from "@/components/HomeWidgets/types";
+import type { HomeWidget } from "@/components/HomeWidgets/widgets";
 import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 

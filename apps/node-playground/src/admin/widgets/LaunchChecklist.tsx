@@ -1,13 +1,13 @@
-import { DashboardCard } from "@lucidcms/admin/components";
-import type { DashboardWidgetProps } from "@lucidcms/admin/types";
+import { HomeCard } from "@lucidcms/admin/components";
+import type { HomeWidgetProps } from "@lucidcms/admin/types";
 import { For } from "solid-js";
 
 /** A sample Home widget: a static checklist passed in through `options`. */
-const LaunchChecklist = (props: DashboardWidgetProps<{ items: string[] }>) => {
+const LaunchChecklist = (props: HomeWidgetProps<{ items: string[] }>) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<DashboardCard title="Launch checklist" padding="md">
+		<HomeCard title="Launch checklist" padding="md">
 			<ul class="flex flex-col gap-2">
 				<For each={props.options.items}>
 					{(item) => (
@@ -18,7 +18,7 @@ const LaunchChecklist = (props: DashboardWidgetProps<{ items: string[] }>) => {
 					)}
 				</For>
 			</ul>
-		</DashboardCard>
+		</HomeCard>
 	);
 };
 

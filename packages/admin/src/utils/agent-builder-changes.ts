@@ -4,9 +4,9 @@ import type {
 	AgentBuilderContent,
 	AgentBuilderContentChanges,
 	AgentBuilderFieldChange,
-	AgentMessage,
-} from "@types";
-import type { AgentBuilderFocus } from "@/hooks/useAgentSession/useAgentSession";
+} from "@lucidcms/types";
+import type { AgentMessage } from "@types";
+import type { BuilderFocus } from "@/hooks/useAgentSession/useAgentSession";
 import type { BrickSnapshot } from "@/store/brickStore/utils/snapshots";
 import {
 	builderChangesWidget,
@@ -122,7 +122,7 @@ export const changeTarget = (
 	change: AgentBuilderChange,
 	field?: AgentBuilderFieldChange,
 	contentLocale?: string,
-): AgentBuilderFocus | undefined => {
+): BuilderFocus | undefined => {
 	const brick = change.brick;
 	if (change.status === "removed" || brick?.type === "embedded") {
 		return undefined;

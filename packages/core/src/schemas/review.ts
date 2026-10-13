@@ -20,7 +20,9 @@ export const controllerSchemas = {
 							key: z.string(),
 							inSync: z.number(),
 							outOfSync: z.number(),
-							unreleased: z.number(),
+							unpublished: z.number().meta({
+								description: "Documents never published to the environment",
+							}),
 						}),
 					),
 				}),

@@ -1,10 +1,6 @@
-import type {
-	AiGeneratedContent,
-	AiGenerateMode,
-	AiGenerateUsage,
-} from "@lucidcms/types";
-
+import type { AiGeneratedContent } from "@lucidcms/types";
 import type { MediaAnalyzeRequest } from "../../schema/media.js";
+import type { WebRequest } from "../../schema/web.js";
 
 /** Request principal used by Lucid to derive a safety identity. */
 export type CmsAiActor = { type: "user"; id: number } | { type: "system" };
@@ -134,7 +130,8 @@ export type CmsAiGenerateRequest =
 	| AgentTitleGenerateV1Request
 	| MediaAltGenerateV1Request
 	| MediaImageGenerateV1Request
-	| MediaAudioGenerateV1Request;
+	| MediaAudioGenerateV1Request
+	| WebRequest;
 
 export type CmsAiGenerateRequestFeature = CmsAiGenerateRequest["feature"];
 
@@ -146,23 +143,3 @@ export type GenerateCmsAiProps = {
 	/** Stops waiting when the caller cancels the request. */
 	signal?: AbortSignal;
 };
-
-export type CmsAiGenerateCompletedData = {
-	mode: AiGenerateMode;
-	status?: "complete";
-	requestId: string;
-	feature: CmsAiGenerateRequest["feature"];
-	output: unknown;
-	usage: AiGenerateUsage;
-};
-
-export type CmsAiGenerateAcceptedData = {
-	mode: "async";
-	requestId: string;
-	feature: CmsAiGenerateRequest["feature"];
-	status: "queued" | "processing";
-};
-
-export type CmsAiGenerateData =
-	| CmsAiGenerateCompletedData
-	| CmsAiGenerateAcceptedData;

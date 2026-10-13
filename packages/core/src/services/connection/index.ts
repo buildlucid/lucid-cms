@@ -1,7 +1,6 @@
 export { default as callback } from "./callback.js";
 export { default as connect } from "./connect.js";
 export { default as disconnect } from "./disconnect.js";
-export { default as handleRemoteError } from "./helpers/handle-remote-error.js";
 export { default as markConnectionRevoked } from "./helpers/mark-revoked.js";
 export { default as reset } from "./reset.js";
 export { default as status } from "./status.js";

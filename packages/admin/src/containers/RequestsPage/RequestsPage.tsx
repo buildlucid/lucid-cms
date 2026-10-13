@@ -18,8 +18,8 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
-import RequestCreateModal from "@/components/RequestCreateModal/RequestCreateModal";
 import RequestDeleteModal from "@/components/RequestDeleteModal/RequestDeleteModal";
+import RequestPublishModal from "@/components/RequestPublishModal/RequestPublishModal";
 import RequestTableRow from "@/components/RequestTableRow/RequestTableRow";
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
 import Table from "@/components/Table/Table";
@@ -386,7 +386,7 @@ const RequestsPage: Component = () => {
 					padding="md"
 				/>
 			</PageLayout.Body>
-			<RequestCreateModal open={createOpen()} setOpen={setCreateOpen} />
+			<RequestPublishModal open={createOpen()} setOpen={setCreateOpen} />
 			<RequestUnpublishModal
 				open={unpublishOpen()}
 				setOpen={setUnpublishOpen}

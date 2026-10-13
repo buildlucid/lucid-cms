@@ -31,7 +31,7 @@ const setScheduleStateController = factory.createHandlers(
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
 		requestBody: openAPI.requestBody(controllerSchemas.setScheduleState.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	rateLimiter({
 		mode: "user",

@@ -1,27 +1,27 @@
 import z from "zod";
 import { isNotificationDefinition } from "../../notifications/registry.js";
 import type { AnyNotificationDefinition } from "../../notifications/types.js";
+import { toolkitActorSchema } from "../../permission/toolkit-actor.js";
 
 const type = z.custom<AnyNotificationDefinition>(
 	isNotificationDefinition,
 	"Provide a notification type created with defineNotification.",
 );
 
-export const sendSchema = z.object({
+export const sendSchema = z.strictObject({
 	type,
 	data: z.record(z.string(), z.unknown()),
 	key: z.string().trim().min(1).optional(),
 	fingerprint: z.string().trim().min(1).optional(),
 	recipients: z.array(z.number().int().positive()).optional(),
-	actorUserId: z.number().int().positive().nullable().optional(),
-	actorRunId: z.uuid().nullable().optional(),
+	actor: toolkitActorSchema.default({ type: "system" }),
 });
 
 export const upsertSchema = sendSchema.extend({
 	key: z.string().trim().min(1),
 });
 
-export const resolveSchema = z.object({
+export const resolveSchema = z.strictObject({
 	type,
 	key: z.string().trim().min(1),
 });

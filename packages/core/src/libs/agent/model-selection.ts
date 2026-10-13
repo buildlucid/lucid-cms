@@ -1,7 +1,7 @@
 import z from "zod";
+import type { AiModelConfig } from "../../types/config.js";
 import type {
 	AiModelCatalog,
-	AiModelConfig,
 	AiModelSelection,
 	AiReasoningEffort,
 } from "../../types/response.js";
@@ -35,7 +35,7 @@ export const aiModelConfigSchema = z
 			!config.available ||
 			config.available.includes(config.default.modelId),
 		{ message: "The default model must be one of the available models." },
-	) satisfies z.ZodType<AiModelConfig>;
+	) satisfies z.ZodType<AiModelConfig<AiModelSelection>>;
 
 export const aiModelCatalogSchema = z.object({
 	default: z.object({
@@ -64,7 +64,7 @@ export const aiModelCatalogSchema = z.object({
  */
 export const resolveModelSelection = (props: {
 	catalog: AiModelCatalog;
-	agent?: AiModelConfig;
+	agent?: AiModelConfig<AiModelSelection>;
 	routine?: AiModelSelection | null;
 	selection?: AiModelSelection | null;
 }) => {

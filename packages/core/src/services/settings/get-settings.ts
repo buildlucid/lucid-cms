@@ -51,6 +51,7 @@ const getSettings: ServiceFn<
 				databaseKey: context.config.db.adapter,
 			},
 			config: context.config,
+			translate: context.translate,
 			includes: data.includes,
 			authUser: data.authUser,
 		}),

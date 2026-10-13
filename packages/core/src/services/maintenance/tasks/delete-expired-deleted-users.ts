@@ -1,6 +1,6 @@
+import { subDays } from "date-fns";
 import { enqueueJobs } from "../../../libs/jobs/enqueue.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
-import { getRetentionDays } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { deleteUserJob } from "../../users/jobs/delete-single.js";
 
@@ -8,7 +8,10 @@ import { deleteUserJob } from "../../users/jobs/delete-single.js";
 const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 	const Users = new UsersRepository(context.db);
 
-	const compDate = getRetentionDays(context.config.retention, "deletedUsers");
+	const compDate = subDays(
+		new Date(),
+		context.config.retention.deletedUsers,
+	).toISOString();
 
 	const softDeletedUsersRes = await Users.selectMultiple({
 		select: ["id"],

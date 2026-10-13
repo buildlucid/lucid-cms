@@ -8,6 +8,7 @@ import {
 	untrack,
 } from "solid-js";
 import Input from "@/components/Input/Input";
+import T from "@/translations";
 
 /** An input that commits its value after a short delay, or on blur or Enter. */
 export const CommitInput: Component<{
@@ -86,8 +87,8 @@ export const CommitInput: Component<{
 					}}
 					role="button"
 					tabIndex={0}
-					title="Open color picker"
-					aria-label="Open color picker"
+					title={T()("fields.color.picker.open")}
+					aria-label={T()("fields.color.picker.open")}
 				/>
 				<input
 					ref={(el) => {

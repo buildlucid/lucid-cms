@@ -1,6 +1,6 @@
 import type {
 	RequestCommentResolution,
-	RequestDetail,
+	RequestDetails,
 	RequestEvent,
 } from "@types";
 import { type Component, createMemo } from "solid-js";
@@ -21,7 +21,7 @@ type ResolutionOption = RequestCommentResolution | "open";
  * approve the request can change it while the request is open.
  */
 export const RequestCommentResolutionSelect: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	comment: Extract<RequestEvent, { type: "comment" }>;
 }> = (props) => {
 	// ----------------------------------------
@@ -53,8 +53,8 @@ export const RequestCommentResolutionSelect: Component<{
 	const editable = createMemo(
 		() =>
 			props.request.status === "open" &&
-			((props.comment.agent === null &&
-				props.comment.user?.id === userStore.get.user?.id) ||
+			((props.comment.actorAgent === null &&
+				props.comment.actor?.id === userStore.get.user?.id) ||
 				props.request.permissions.edit ||
 				props.request.permissions.approve),
 	);
@@ -83,7 +83,7 @@ export const RequestCommentResolutionSelect: Component<{
 			onChange={(option) =>
 				update.action.mutate({
 					id: props.request.id,
-					eventId: props.comment.id,
+					commentId: props.comment.id,
 					body: { resolution: option === "open" ? null : option },
 				})
 			}

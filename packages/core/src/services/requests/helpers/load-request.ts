@@ -13,8 +13,8 @@ import type { RequestRecord } from "../types.js";
 import getRequestAccess from "./get-request-access.js";
 
 /**
- * Loads a request with its document, targets, reviewers, current approvals and activity. When a
- * user is given, requests they cannot read are reported as not found.
+ * Loads a request with its documents, targets, reviewers, current approvals and activity.
+ * @remarks When a user is supplied, unreadable requests return not found.
  */
 const loadRequest: ServiceFn<
 	[{ id: number; user?: LucidActor }],
@@ -47,14 +47,11 @@ const loadRequest: ServiceFn<
 				"scheduled_at",
 				"scheduled_timezone",
 				"scheduled_by",
-				"scheduled_by_system",
-				"scheduled_by_run_id",
 				"execution_job_id",
 				"failure",
 				"failure_request_document_id",
 				"failure_target",
 				"completed_at",
-				"lock_token",
 				"created_by",
 				"created_by_run_id",
 				"created_at",

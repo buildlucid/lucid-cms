@@ -27,7 +27,7 @@ const getProtectedResourceMetadata: ServiceFn<
 					...[...getMcpToolRegistry(context.config).values()].flatMap(
 						(tool) => [
 							...tool.scopes,
-							...(tool.advertisedScopes?.(context.config) ?? []),
+							...(tool.possibleScopes?.({ config: context.config }) ?? []),
 						],
 					),
 				])

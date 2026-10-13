@@ -1,15 +1,9 @@
 import type { ExternalMigration } from "./types.js";
 
 /**
- * A typed helper for authoring external migration files. Migration files
- * registered via `config.migrations.definitions` or the migrations directory
- * must default export the result of this helper.
- *
- * External migrations run after Lucid's core and generated collection
- * migrations, once collection state has been synchronized. `lucid_*` tables
- * are internal and modifying them is unsupported. External tables may point
- * foreign keys at Lucid-owned tables; Lucid-owned schema must not depend on an
- * external table.
+ * Defines an external migration that its migration file must default-export.
+ * @remarks External migrations run after core migrations, generated collection migrations and collection sync.
+ * Modifying internal `lucid_*` tables is unsupported; external tables may reference Lucid tables, but Lucid schema must not depend on external tables.
  *
  * @example
  * export default defineMigration({

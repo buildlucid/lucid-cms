@@ -1,7 +1,7 @@
 import type { ErrorResponse, ResponseBody } from "@types";
-import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { requestChangeKeys } from "./change-keys";
 
 export interface Params {
 	id: number;
@@ -24,7 +24,7 @@ interface UseRemoveDocumentProps {
 const useRemoveDocument = (props?: UseRemoveDocumentProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: removeDocumentReq,
-		invalidates: [queryKeys.requests.all()],
+		invalidates: requestChangeKeys(),
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

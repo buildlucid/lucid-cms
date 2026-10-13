@@ -16,6 +16,7 @@ const beforeUnpublishHandler =
 			collectionKey: meta.collectionKey,
 			target: data.versionType,
 			documentIds: data.ids,
+			excludeDocumentIds: data.ids,
 		});
 		if (segmentRes.error) return segmentRes;
 

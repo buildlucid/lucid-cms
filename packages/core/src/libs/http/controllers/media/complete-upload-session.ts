@@ -33,7 +33,7 @@ const completeUploadSessionController = factory.createHandlers(
 			controllerSchemas.completeUploadSession.body,
 		),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.completeUploadSession.params),
 	validate("json", controllerSchemas.completeUploadSession.body),

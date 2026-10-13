@@ -124,7 +124,7 @@ defineAgentTool({
 		key: "picker",
 		version: 1,
 		data: z.object({ ids: z.array(z.number()) }),
-		response: (data) =>
+		response: ({ data }) =>
 			z.object({ id: z.number().refine((id) => data.ids.includes(id)) }),
 		prepare: async ({ input }) => ({
 			error: undefined,
@@ -159,4 +159,15 @@ defineMcpTool({
 	// @ts-expect-error Confirmation policy is specific to agent tools.
 	requiresConfirmation: true,
 	handler,
+});
+
+// @ts-expect-error Only read-only tools can run in parallel.
+defineAgentTool({
+	...base,
+	permissions: [],
+	parallelSafe: true,
+	handler: async () => ({
+		error: undefined,
+		data: { output: { ok: true }, summary: "Checked the items." },
+	}),
 });

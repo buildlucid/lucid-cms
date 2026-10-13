@@ -14,8 +14,8 @@ import Modal from "@/components/Modal/Modal";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RequestApproveModal from "@/components/RequestApproveModal/RequestApproveModal";
-import RequestCreateModal from "@/components/RequestCreateModal/RequestCreateModal";
 import RequestDeleteModal from "@/components/RequestDeleteModal/RequestDeleteModal";
+import RequestPublishModal from "@/components/RequestPublishModal/RequestPublishModal";
 import RequestScheduleModal from "@/components/RequestScheduleModal/RequestScheduleModal";
 import RequestTitleModal from "@/components/RequestTitleModal/RequestTitleModal";
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
@@ -28,7 +28,7 @@ import T from "@/translations";
 import { screenLabel } from "@/utils/agent-screen";
 import { tabId } from "@/utils/tab-id";
 import { RequestActivity } from "./parts/RequestActivity";
-import { RequestCommentComposer } from "./parts/RequestCommentComposer";
+import { RequestCommentForm } from "./parts/RequestCommentForm";
 import { RequestDescription } from "./parts/RequestDescription";
 import { RequestDocumentCard } from "./parts/RequestDocumentCard";
 import { RequestHeaderActions } from "./parts/RequestHeaderActions";
@@ -43,7 +43,7 @@ const RequestPage: Component = () => {
 	const params = useParams();
 	const [approveOpen, setApproveOpen] = createSignal(false);
 	const [completeAfterApproval, setCompleteAfterApproval] = createSignal(false);
-	const [requestOpen, setRequestOpen] = createSignal(false);
+	const [completeOpen, setCompleteOpen] = createSignal(false);
 	const [scheduleOpen, setScheduleOpen] = createSignal(false);
 	const [renameOpen, setRenameOpen] = createSignal(false);
 	const [addOpen, setAddOpen] = createSignal(false);
@@ -58,8 +58,8 @@ const RequestPage: Component = () => {
 		enabled: () => id() !== undefined,
 	});
 	const collections = api.collections.useGetAll({ queryParams: {} });
-	const publish = api.requests.useComplete({
-		onSuccess: () => setRequestOpen(false),
+	const complete = api.requests.useComplete({
+		onSuccess: () => setCompleteOpen(false),
 	});
 	const remove = api.requests.useRemoveDocument({
 		onSuccess: () => setRemoving(undefined),
@@ -75,8 +75,8 @@ const RequestPage: Component = () => {
 		id,
 		jobId: () => storedRequest()?.executionJobId,
 	});
-	const publishing = createMemo(() => {
-		if (publish.action.isPending) return true;
+	const completing = createMemo(() => {
+		if (complete.action.isPending) return true;
 		const request = storedRequest();
 		if (request?.status !== "open" || !request.executionJobId) {
 			return false;
@@ -100,13 +100,13 @@ const RequestPage: Component = () => {
 	});
 	const request = createMemo(() => {
 		const data = storedRequest();
-		if (!data || !publishing()) return data;
+		if (!data || !completing()) return data;
 		return {
 			...data,
 			permissions: {
 				edit: false,
 				approve: false,
-				request: false,
+				complete: false,
 				reopen: false,
 			},
 			documents: data.documents.map((document) => ({
@@ -147,7 +147,7 @@ const RequestPage: Component = () => {
 									actions={
 										<RequestHeaderActions
 											request={data()}
-											publishing={publishing()}
+											completing={completing()}
 											onApprove={() => {
 												setCompleteAfterApproval(false);
 												setApproveOpen(true);
@@ -156,7 +156,7 @@ const RequestPage: Component = () => {
 												setCompleteAfterApproval(true);
 												setApproveOpen(true);
 											}}
-											onComplete={() => setRequestOpen(true)}
+											onComplete={() => setCompleteOpen(true)}
 											onRename={() => setRenameOpen(true)}
 											onClose={() => setCloseOpen(true)}
 										/>
@@ -165,7 +165,7 @@ const RequestPage: Component = () => {
 								<PageLayout.Body>
 									<div class="flex w-full grow flex-col content-xl:flex-row">
 										<div class="flex min-w-0 grow flex-col gap-10 px-4 pt-4 md:px-6 md:pt-6">
-											<Show when={publishing()}>
+											<Show when={completing()}>
 												<RequestPublishing
 													request={data()}
 													collections={collections.data?.data ?? []}
@@ -196,7 +196,7 @@ const RequestPage: Component = () => {
 																		collection.key === document.collectionKey,
 																)}
 																onRemove={() => setRemoving(document)}
-																onRetry={() => setRequestOpen(true)}
+																onRetry={() => setCompleteOpen(true)}
 															/>
 														)}
 													</For>
@@ -222,18 +222,29 @@ const RequestPage: Component = () => {
 												request={data()}
 												collections={collections.data?.data ?? []}
 											/>
-											<RequestCommentComposer request={data()} />
+											<div class="sticky bottom-0 z-10 mt-auto pt-6 pb-4 md:pb-6">
+												<div
+													aria-hidden="true"
+													class="pointer-events-none absolute inset-x-0 top-0 bottom-0 bg-linear-to-t from-background via-background to-transparent"
+												/>
+												<RequestCommentForm
+													request={data()}
+													variant="floating"
+													placeholder={T()("requests.comment.placeholder")}
+													submitLabel={T()("requests.comment.submit")}
+												/>
+											</div>
 										</div>
 										<RequestSidebar
 											request={data()}
-											publishing={publishing()}
+											completing={completing()}
 											onSchedule={() => setScheduleOpen(true)}
 										/>
 									</div>
 								</PageLayout.Body>
 								<Switch>
 									<Match when={data().type === "publish"}>
-										<RequestCreateModal
+										<RequestPublishModal
 											open={addOpen()}
 											setOpen={setAddOpen}
 											request={data()}
@@ -296,8 +307,8 @@ const RequestPage: Component = () => {
 									request={data()}
 								/>
 								<Modal.Confirm
-									open={requestOpen()}
-									onOpenChange={setRequestOpen}
+									open={completeOpen()}
+									onOpenChange={setCompleteOpen}
 									title={T()("requests.complete.now.title")}
 									description={
 										data().scheduledAt
@@ -306,10 +317,11 @@ const RequestPage: Component = () => {
 									}
 									confirmLabel={T()("requests.complete.now")}
 									confirmVariant="primary"
-									loading={publishing()}
-									error={publish.errors()?.message}
+									loading={completing()}
+									error={complete.errors()?.message}
 									onConfirm={() => {
-										if (!publishing()) publish.action.mutate({ id: data().id });
+										if (!completing())
+											complete.action.mutate({ id: data().id });
 									}}
 								/>
 								<Modal.Confirm

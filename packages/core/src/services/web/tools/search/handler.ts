@@ -11,6 +11,7 @@ import type { inputSchema, outputSchema } from "./schema.js";
 
 const maxResults = 5;
 
+/** Searches the public web for an agent, keeping only results from allowed sources. */
 const searchWeb: ServiceFn<
 	[
 		{
@@ -44,11 +45,11 @@ const searchWeb: ServiceFn<
 		};
 	}
 
+	//* Recheck allowed sources after the remote search filters them.
 	const results = output.results.filter((result) =>
 		isWebSourceAllowed(result.url, allowedDomains),
 	);
 
-	//* the website applies the same policy; checked again so the CMS never trusts it blindly
 	return {
 		error: undefined,
 		data: {

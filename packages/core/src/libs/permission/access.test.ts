@@ -47,7 +47,7 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 	access: groups.map((value) => accessGroupSchema.parse(value)),
 	ai: {
 		enabled: true,
-		chatRename: true,
+		chatTitles: true,
 		altGeneration: true,
 		mediaGeneration: {
 			image: { enabled: true, models: {} },

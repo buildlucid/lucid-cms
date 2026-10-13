@@ -1,4 +1,3 @@
-import { crc32 } from "node:zlib";
 import type { CreateTableBuilder } from "kysely";
 import constants from "../../../constants/constants.js";
 import type { ServiceFn } from "../../../exports/types.js";
@@ -28,27 +27,6 @@ const createTableQuery: ServiceFn<
 				message: `Operation of type 'add' ran on column '${op.column.name}' for table '${data.migration.tableName}'`,
 				scope: constants.logScopes.migrations,
 			});
-		}
-
-		for (const [index, foreignKey] of (
-			data.migration.foreignKeys ?? []
-		).entries()) {
-			query = query.addForeignKeyConstraint(
-				`fk_composite_${crc32(data.migration.tableName).toString(16)}_${index}`,
-				foreignKey.columns,
-				foreignKey.table,
-				foreignKey.references,
-				(constraint) => {
-					let configured = constraint;
-					if (foreignKey.onDelete) {
-						configured = configured.onDelete(foreignKey.onDelete);
-					}
-					if (foreignKey.onUpdate) {
-						configured = configured.onUpdate(foreignKey.onUpdate);
-					}
-					return configured;
-				},
-			);
 		}
 
 		await query.execute();

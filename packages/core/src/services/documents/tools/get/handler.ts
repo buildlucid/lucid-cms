@@ -1,14 +1,14 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
-import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
+import type { ToolkitActor } from "../../../../libs/permission/toolkit-actor.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
 import getSingle from "../../content/get-single.js";
 import getEditLink from "../../helpers/get-edit-link.js";
-import { projectRefs, projectRoute } from "../../helpers/project-document.js";
 import projectEditableDocument from "../../helpers/project-editable-document.js";
 import readDocumentContent from "../../helpers/read-document-content.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
+import { projectRefs, projectRoute } from "../helpers/project-document.js";
 import projectMeta from "../helpers/project-meta.js";
 import resolveVersion from "./resolve-version.js";
 import type { agentInputSchema, outputSchema } from "./schema.js";

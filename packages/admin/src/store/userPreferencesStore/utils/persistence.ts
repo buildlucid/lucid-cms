@@ -1,6 +1,6 @@
 import type { AiModelSelection } from "@types";
-import { dashboardWidgetSizes } from "@/components/DashboardWidget/constants";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import { homeWidgetSizes } from "@/components/HomeWidgets/constants";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import { isObjectRecord } from "@/utils/type-guards";
 
 export const USER_PREFERENCES_STORAGE_KEY = "lucid_user_preferences";
@@ -44,13 +44,13 @@ export type CollectionPreferenceState = {
 	previewOpen?: boolean;
 };
 
-/** Ask opens Home on the agent's chat box, Overview on the widget dashboard. */
+/** Ask opens Home on the agent's chat box, Overview on its widgets. */
 export type HomeView = "ask" | "overview";
 
 /** One widget in a customised Home overview. List order is display order. */
 export type HomeWidgetPreference = {
 	key: string;
-	size?: DashboardWidgetSize;
+	size?: HomeWidgetSize;
 	hidden?: boolean;
 };
 
@@ -176,8 +176,8 @@ const parseModelSelection = (value: unknown): AiModelSelection | undefined => {
 	}
 };
 
-const isDashboardWidgetSize = (value: unknown): value is DashboardWidgetSize =>
-	dashboardWidgetSizes.some((size) => size === value);
+const isHomeWidgetSize = (value: unknown): value is HomeWidgetSize =>
+	homeWidgetSizes.some((size) => size === value);
 
 /** Keeps valid widget entries, dropping repeats and unknown sizes. */
 const parseHomeWidgets = (value: unknown[]): HomeWidgetPreference[] => {
@@ -192,7 +192,7 @@ const parseHomeWidgets = (value: unknown[]): HomeWidgetPreference[] => {
 		}
 		widgets.set(item.key, {
 			key: item.key,
-			size: isDashboardWidgetSize(item.size) ? item.size : undefined,
+			size: isHomeWidgetSize(item.size) ? item.size : undefined,
 			hidden: typeof item.hidden === "boolean" ? item.hidden : undefined,
 		});
 	}

@@ -16,8 +16,7 @@ import {
 	isFractionalOrderKey,
 } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import createInitialDocumentWorkflow from "../../document-workflows/create-initial.js";
-import createProposalWorkflow from "../../document-workflows/create-proposal.js";
+import createWorkflow from "../../document-workflows/create-single.js";
 import resetWorkflowStage from "../../document-workflows/reset-stage.js";
 import createDocumentVersion from "../../documents-versions/create-single.js";
 import invalidateRequests from "../../requests/helpers/invalidate-requests.js";
@@ -25,8 +24,8 @@ import recordTargetChange from "../../requests/helpers/record-target-change.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
 import checkSingleCollectionDocumentCount from "../checks/check-single-collection-document-count.js";
 import notifyChange from "../notify-change.js";
-import cleanupFailedCreate from "./cleanup-failed-create.js";
 import invalidateContentDocumentCache from "./invalidate-content-cache.js";
+import requiresReview from "./requires-review.js";
 
 /**
  * Persists a full payload. Callers own the transaction and any existing-document claim.
@@ -99,7 +98,7 @@ const saveDocument: ServiceFn<
 	if (
 		data.documentId === undefined &&
 		!requested &&
-		collectionRes.data.getData.publishing.review?.create
+		requiresReview(collectionRes.data, { type: "create" })
 	) {
 		return {
 			error: {
@@ -192,14 +191,7 @@ const saveDocument: ServiceFn<
 				document_id: upsertDocRes.data.id,
 			},
 		});
-		if (identity.error) {
-			await cleanupFailedCreate(context, {
-				collectionKey: data.collectionKey,
-				documentId: upsertDocRes.data.id,
-				tableName: tableNamesRes.data.document,
-			});
-			return identity;
-		}
+		if (identity.error) return identity;
 	}
 
 	// ----------------------------------------------
@@ -216,40 +208,16 @@ const saveDocument: ServiceFn<
 		createRequestId,
 	});
 
-	if (createVersionRes.error) {
-		if (data.documentId === undefined) {
-			await cleanupFailedCreate(context, {
-				collectionKey: data.collectionKey,
-				documentId: upsertDocRes.data.id,
-				tableName: tableNamesRes.data.document,
-			});
-		}
-		return createVersionRes;
-	}
-	const workflowRes =
-		data.documentId !== undefined
-			? undefined
-			: requested
-				? await createProposalWorkflow(context, {
-						collectionKey: data.collectionKey,
-						documentId: upsertDocRes.data.id,
-						versionId: createVersionRes.data.versionId,
-						userId: data.userId,
-					})
-				: await createInitialDocumentWorkflow(context, {
-						collectionKey: data.collectionKey,
-						documentId: upsertDocRes.data.id,
-						userId: data.userId,
-					});
-	if (workflowRes?.error) {
-		if (data.documentId === undefined) {
-			await cleanupFailedCreate(context, {
-				collectionKey: data.collectionKey,
-				documentId: upsertDocRes.data.id,
-				tableName: tableNamesRes.data.document,
-			});
-		}
-		return workflowRes;
+	if (createVersionRes.error) return createVersionRes;
+
+	if (data.documentId === undefined) {
+		const workflowRes = await createWorkflow(context, {
+			collectionKey: data.collectionKey,
+			documentId: upsertDocRes.data.id,
+			versionId: requested ? createVersionRes.data.versionId : null,
+			userId: data.userId,
+		});
+		if (workflowRes.error) return workflowRes;
 	}
 
 	if (data.documentId !== undefined) {

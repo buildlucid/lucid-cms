@@ -12,4 +12,5 @@ export const isNotificationDefinition = (
 export const getNotificationDefinition = (
 	config: Pick<ResolvedLucidConfig, "notifications">,
 	key: string,
-) => config.notifications.find((definition) => definition.key === key);
+) =>
+	config.notifications.definitions.find((definition) => definition.key === key);

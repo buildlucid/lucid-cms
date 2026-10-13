@@ -2,7 +2,7 @@ import constants from "../../constants/constants.js";
 import logger from "../../libs/logger/index.js";
 import { AgentInputsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import advanceInputs from "./advance-inputs.js";
+import advanceInputs from "./helpers/advance-inputs.js";
 
 /** Repairs steers left by stopped runs and starts lost between saving input and dispatching its run. */
 const recoverInputs: ServiceFn<[], undefined> = async (context) => {

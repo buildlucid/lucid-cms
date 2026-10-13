@@ -24,6 +24,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Create Integration",
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
@@ -33,7 +34,7 @@ const createSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationCreate]),
 	validate("json", controllerSchemas.createSingle.body),
@@ -61,7 +62,7 @@ const createSingleController = factory.createHandlers(
 		});
 		if (integrationRes.error) throw new LucidAPIError(integrationRes.error);
 
-		c.status(200);
+		c.status(201);
 		return c.json(
 			formatAPIResponse(c, {
 				data: integrationRes.data,

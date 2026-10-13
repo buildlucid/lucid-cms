@@ -32,7 +32,7 @@ const toInputSchema = (input: z.ZodObject) => {
  * @remarks System runs omit tools with required interactions and controls that ask a person.
  */
 const resolveRunSetup = (
-	context: Pick<ServiceContext, "config">,
+	context: Pick<ServiceContext, "config" | "translate">,
 	props: {
 		agent: AgentDefinition;
 		authority: AgentToolAuthority;
@@ -53,7 +53,7 @@ const resolveRunSetup = (
 		config: context.config,
 		aiAccess: props.aiAccess,
 		screen: screen?.type,
-	}).filter((tool) => attended || (tool.interaction?.optional ?? true));
+	}).filter((tool) => attended || (tool.interaction?.skippable ?? true));
 
 	const skills = agent.skills.filter((skill) =>
 		skill.scopes.every((scope) => {
@@ -105,7 +105,13 @@ const resolveRunSetup = (
 			}),
 		),
 		instructions: buildInstructions({
-			agent,
+			//* the prompt stays the same for everyone, so the name uses the default language
+			agent: {
+				name: context.translate.forLocale(context.config.i18n.defaultLocale)(
+					agent.name,
+				),
+				instructions: agent.instructions,
+			},
 			mode: props.mode,
 			attended,
 			skills,

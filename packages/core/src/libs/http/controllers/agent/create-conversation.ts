@@ -5,6 +5,7 @@ import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -22,12 +23,13 @@ const createConversationController = factory.createHandlers(
 		tags: ["agent"],
 		summary: "Create Agent Conversation",
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createConversation.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createConversation.body),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	agentAccess(),
 	validate("json", controllerSchemas.createConversation.body),
@@ -37,7 +39,14 @@ const createConversationController = factory.createHandlers(
 
 		const conversation = await serviceWrapper(
 			agentServices.createConversation,
-			{ transaction: false },
+			{
+				transaction: false,
+				defaultError: {
+					type: "basic",
+					name: copy("server:core.routes.agent.error.name"),
+					message: copy("server:core.routes.agent.error.message"),
+				},
+			},
 		)(context, {
 			id: body.id,
 			userId: c.get("auth").id,

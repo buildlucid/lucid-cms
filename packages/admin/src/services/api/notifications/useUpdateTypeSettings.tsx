@@ -36,7 +36,10 @@ const useUpdateTypeSettings = (props?: UseUpdateTypeSettingsProps) => {
 			title: T()("notifications.settings.update.error.title"),
 			message: T()("notifications.settings.update.error.message"),
 		}),
-		invalidates: [queryKeys.notifications.types()],
+		invalidates: [
+			queryKeys.notifications.types(),
+			queryKeys.notifications.preferences(),
+		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

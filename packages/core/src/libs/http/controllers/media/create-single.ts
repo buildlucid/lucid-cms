@@ -23,6 +23,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["media"],
 		summary: "Create Media",
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
@@ -32,7 +33,7 @@ const createSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaCreate]),
 	validate("json", controllerSchemas.createSingle.body),
@@ -75,7 +76,7 @@ const createSingleController = factory.createHandlers(
 		});
 		if (mediaRes.error) throw new LucidAPIError(mediaRes.error);
 
-		c.status(200);
+		c.status(201);
 		return c.json(
 			formatAPIResponse(c, {
 				data: mediaRes.data,

@@ -1,4 +1,4 @@
-import type { AgentAudioSettings as AudioSettings } from "@types";
+import type { AgentAudioSettings as AudioSettings } from "@lucidcms/types";
 import { createEffect, createMemo, createSignal, on, Show } from "solid-js";
 import type { AgentWidgetComponent } from "@/components/AgentWidget/types";
 import Input from "@/components/Input/Input";

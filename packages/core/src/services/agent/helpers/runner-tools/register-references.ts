@@ -1,18 +1,15 @@
-import { canReadReference } from "../../../../libs/agent/references.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import resolveUserAccess from "../../../users/resolve-access.js";
 import linkRequestedDocuments from "../../references/link-requested-documents.js";
-import mediaOwnership from "../../references/media-ownership.js";
+import referenceAccess from "../../references/reference-access.js";
 import register from "../../references/register.js";
-import requestCollections from "../../references/request-collections.js";
 import { toolErrorFailure, toolFailure, toolResult } from "../tool-outcome.js";
 import type { RunnerToolInputHandler } from "./types.js";
 
 /** Links resources the run's principal can read. Attachment settings only govern user attachments. */
 const registerReferences: RunnerToolInputHandler<
 	typeof runnerTools.registerReferences
-> = async (context, { input, run, call }) => {
+> = async (context, { input, run, call, authority }) => {
 	//* requested documents become their create request first, so the request's access applies
 	const linked = await linkRequestedDocuments(context, {
 		references: input.references,
@@ -26,50 +23,29 @@ const registerReferences: RunnerToolInputHandler<
 	}
 
 	const references = linked.data;
-	const [access, ownership, collections] = await Promise.all([
-		run.user_id === null
-			? undefined
-			: resolveUserAccess(context, { userId: run.user_id }),
-		mediaOwnership(context, {
-			mediaIds: references.flatMap((reference) =>
-				reference.type === "media" ? [reference.mediaId] : [],
-			),
-		}),
-		requestCollections(context, {
-			requestIds: references.flatMap((reference) =>
-				reference.type === "request" ? [reference.requestId] : [],
-			),
-		}),
-	]);
-	const failure = access?.error ?? ownership.error ?? collections.error;
-	if (failure) {
+	const { principal } = authority;
+	const access = await referenceAccess(context, {
+		references,
+		userId: principal.type === "user" ? principal.userId : null,
+		grant: authority,
+	});
+	if (access.error) {
 		return toolErrorFailure(
 			context,
-			failure,
+			access.error,
 			"server:agent.references.unavailable",
 		);
 	}
 
 	const denied = references.find(
-		(reference) =>
-			!canReadReference({
-				reference,
-				ownership:
-					reference.type === "media"
-						? ownership.data?.get(reference.mediaId)
-						: undefined,
-				requestCollections:
-					reference.type === "request"
-						? collections.data?.get(reference.requestId)
-						: undefined,
-				userId: run.user_id,
-				grant: access?.data,
-			}),
+		(reference) => !access.data.canRead(reference),
 	);
 	if (denied) {
 		//* other users' personal and system media reads as missing, so IDs cannot reveal it exists
 		const owner =
-			denied.type === "media" ? ownership.data?.get(denied.mediaId) : undefined;
+			denied.type === "media"
+				? access.data.ownership.get(denied.mediaId)
+				: undefined;
 		const hidden = owner?.type === "user" || owner?.type === "system";
 		return toolFailure(
 			context.translate(

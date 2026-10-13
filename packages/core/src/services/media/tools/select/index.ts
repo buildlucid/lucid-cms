@@ -2,7 +2,6 @@ import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import type { AgentLucidToolName } from "../../../../types/response.js";
 import selectMedia from "./handler.js";
 import prepareSelectMedia from "./prepare.js";
 import {
@@ -12,7 +11,7 @@ import {
 	responseSchema,
 } from "./schema.js";
 
-const name = "media_select" satisfies AgentLucidToolName;
+const name = "media_select";
 
 export const selectMediaAgentTool = () =>
 	defineAgentTool({
@@ -28,7 +27,7 @@ export const selectMediaAgentTool = () =>
 			key: constants.agent.widgets.mediaSelect,
 			version: 1,
 			data: dataSchema,
-			response: responseSchema,
+			response: ({ data }) => responseSchema(data),
 			prepare: ({ context, input, execution }) =>
 				prepareSelectMedia(context, { input, execution }),
 		},

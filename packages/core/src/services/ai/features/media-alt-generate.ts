@@ -18,6 +18,7 @@ import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
 
+/** Generates alt text for an image in the requested locales and records its usage. */
 const mediaAltGenerate: ServiceFn<
 	[
 		{
@@ -112,17 +113,8 @@ const mediaAltGenerate: ServiceFn<
 			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,
 			requestId: responseData.requestId,
-			feature: responseData.feature,
+			feature: request.feature,
 			session: { type: "media-alt", id: props.sessionId },
-			target: {
-				mediaId: props.media.id ?? null,
-				locale: props.locale,
-				image: {
-					detail: props.image.detail,
-					filename: props.image.filename ?? null,
-					mimeType: props.image.mimeType,
-				},
-			},
 			requestStartedAt,
 			errorMessage,
 		});
@@ -164,15 +156,6 @@ const mediaAltGenerate: ServiceFn<
 			errorMessage: context.translate(
 				"server:core.routes.ai.generate.error.message",
 			),
-			target: {
-				mediaId: props.media.id ?? null,
-				locale: props.locale,
-				image: {
-					detail: props.image.detail,
-					filename: props.image.filename ?? null,
-					mimeType: props.image.mimeType,
-				},
-			},
 		});
 		if (storeRes.error) return storeRes;
 
@@ -192,15 +175,6 @@ const mediaAltGenerate: ServiceFn<
 		response: responseData,
 		session: { type: "media-alt", id: props.sessionId },
 		requestStartedAt,
-		target: {
-			mediaId: props.media.id ?? null,
-			locale: props.locale,
-			image: {
-				detail: props.image.detail,
-				filename: props.image.filename ?? null,
-				mimeType: props.image.mimeType,
-			},
-		},
 	});
 	if (storeRes.error) return storeRes;
 

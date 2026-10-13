@@ -3,12 +3,10 @@ import {
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
 import type { Checkpoint, ToolCall } from "../../../libs/agent/types.js";
-import type {
-	AgentToolAuthority,
-	AgentToolExecution,
-} from "../../../libs/tools/types.js";
+import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { ReadCall } from "./get-read-batch.js";
+import getToolExecution from "./get-tool-execution.js";
 import invokeAgentTool from "./invoke-agent-tool.js";
 import recordToolResult from "./record-tool-result.js";
 import requestBatchConfirmation from "./request-batch-confirmation.js";
@@ -33,26 +31,14 @@ const executeReadBatch: ServiceFn<
 	],
 	"completed" | "waiting"
 > = async (context, { run, checkpoint, session, authority, batch }) => {
-	const executionFor = (call: ToolCall): AgentToolExecution => ({
-		authority,
-		actor:
-			authority.principal.type === "user"
-				? {
-						kind: "user",
-						userId: authority.principal.userId,
-						agentRunId: run.id,
-					}
-				: { kind: "system", agentRunId: run.id },
-		signal: session.signal,
-		operationId: `${run.id}:${call.id}`,
-		run: {
-			id: run.id,
-			conversationId: run.conversation_id,
-			userId: run.user_id,
-			agentKey: run.agent_key,
-		},
-		screen: checkpoint.screen,
-	});
+	const executionFor = (call: ToolCall) =>
+		getToolExecution({
+			run,
+			authority,
+			call,
+			checkpoint,
+			signal: session.signal,
+		});
 
 	const attended = authority.principal.type === "user";
 	const first = batch[0];
@@ -138,7 +124,7 @@ const executeReadBatch: ServiceFn<
 			thrown = completed;
 			continue;
 		}
-		// An aborted read has no durable result. Successful siblings still survive recovery.
+		//* Leave failed reads retryable after abort while persisting successful results.
 		if (session.signal.aborted && completed.outcome.failed) continue;
 
 		const saved = await recordToolResult(context, {

@@ -4,17 +4,13 @@ import type {
 	AgentToolInteraction,
 	AgentToolProceed,
 } from "../../../../libs/tools/types.js";
-import type {
-	ServiceContext,
-	ServiceResponse,
-} from "../../../../utils/services/types.js";
+import type { ServiceResponse } from "../../../../utils/services/types.js";
 import type { inputSchema, settingsSchema } from "./schema.js";
 
 /** Requests audio settings review unless `skipReview` is set. */
-const prepareAudioSettings = async (
-	context: ServiceContext,
-	props: { input: z.output<typeof inputSchema> },
-): ServiceResponse<
+const prepareAudioSettings = async (props: {
+	input: z.output<typeof inputSchema>;
+}): ServiceResponse<
 	AgentToolInteraction<z.input<typeof settingsSchema>> | AgentToolProceed
 > => {
 	if (props.input.skipReview) {
@@ -25,9 +21,7 @@ const prepareAudioSettings = async (
 		error: undefined,
 		data: {
 			interaction: {
-				title: context.translate(
-					copy("admin:core.tools.media_generate_audio.review.title"),
-				),
+				title: copy("admin:core.tools.media_generate_audio.review.title"),
 				placement: "composer",
 				data: {
 					script: props.input.script,

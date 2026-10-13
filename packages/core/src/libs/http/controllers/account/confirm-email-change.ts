@@ -25,7 +25,7 @@ const confirmEmailChangeController = factory.createHandlers(
 			params: controllerSchemas.confirmEmailChange.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	validate("param", controllerSchemas.confirmEmailChange.params),
 	async (c) => {
 		const { token } = c.req.valid("param");

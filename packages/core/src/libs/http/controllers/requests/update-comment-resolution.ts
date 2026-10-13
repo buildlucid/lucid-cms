@@ -33,13 +33,13 @@ const updateCommentResolutionController = factory.createHandlers(
 			controllerSchemas.updateCommentResolution.body,
 		),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.updateCommentResolution.params),
 	validate("json", controllerSchemas.updateCommentResolution.body),
 	async (c) => {
-		const { id, eventId } = c.req.valid("param");
+		const { id, commentId } = c.req.valid("param");
 		const body = c.req.valid("json");
 		const context = createServiceContext(c);
 
@@ -55,7 +55,7 @@ const updateCommentResolutionController = factory.createHandlers(
 			},
 		)(context, {
 			id: Number.parseInt(id, 10),
-			eventId: Number.parseInt(eventId, 10),
+			commentId: Number.parseInt(commentId, 10),
 			resolution: body.resolution,
 			user: c.get("auth"),
 		});

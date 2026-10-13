@@ -2,37 +2,21 @@ import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasPermission from "../../../../libs/permission/has-permission.js";
-import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
+import type { ToolkitActor } from "../../../../libs/permission/toolkit-actor.js";
 import type { AgentToolAuthority } from "../../../../libs/tools/types.js";
-import type { MediaType } from "../../../../types/response.js";
 import type { MediaActor } from "../../../../utils/media/index.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import register from "../../../agent/references/register.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
+import {
+	type MediaTextField,
+	mediaTextFields,
+} from "../../helpers/text-fields.js";
 import updateSingle from "../../update-single.js";
 import formatMediaItem from "../helpers/format-item.js";
 import getToolMedia from "../helpers/get-tool-media.js";
 import resolveMediaLocale from "../helpers/resolve-locale.js";
 import type { inputSchema, outputSchema } from "./schema.js";
-
-const textFields = [
-	"title",
-	"alt",
-	"description",
-	"summary",
-	"transcript",
-] as const;
-
-/** Translated fields that only some media types have. Titles apply to every type. */
-const typedFields: {
-	field: "alt" | "description" | "summary" | "transcript";
-	types: readonly MediaType[];
-}[] = [
-	{ field: "alt", types: ["image"] },
-	{ field: "description", types: ["video", "audio"] },
-	{ field: "summary", types: ["document"] },
-	{ field: "transcript", types: ["audio"] },
-];
 
 /** Updates one locale's media metadata, keeping personal media private and outside folders and linking it to the chat in the same transaction. */
 const updateMedia: ServiceFn<
@@ -77,17 +61,17 @@ const updateMedia: ServiceFn<
 	}
 
 	//* clearing a field the type lacks changes nothing, so only text for one is a mistake
-	const unsupported = typedFields.find(
-		({ field, types }) =>
-			input[field] !== undefined && !types.includes(media.type),
-	);
+	const textFields: readonly MediaTextField[] = mediaTextFields[media.type];
+	const unsupported = Object.values(mediaTextFields)
+		.flat()
+		.find((field) => input[field] !== undefined && !textFields.includes(field));
 	if (unsupported) {
 		return {
 			error: {
 				type: "basic",
 				status: 400,
 				message: copy("server:core.tools.media.update.field.unsupported", {
-					data: { field: unsupported.field, type: media.type },
+					data: { field: unsupported, type: media.type },
 				}),
 			},
 			data: undefined,
@@ -95,7 +79,7 @@ const updateMedia: ServiceFn<
 	}
 
 	const cleared = new Set(input.clear);
-	const translation = (field: (typeof textFields)[number]) => {
+	const translation = (field: "title" | MediaTextField) => {
 		const value = input[field] ?? (cleared.has(field) ? null : undefined);
 		return value === undefined
 			? undefined

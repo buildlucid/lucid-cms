@@ -11,8 +11,8 @@ import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-s
 import { createTranslationStore } from "../../../libs/i18n/index.js";
 import { aiAccessFeatureSchema } from "../../../libs/lucid-remote/schema/connection.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
+import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
-import type { ToolkitActor } from "../../../libs/toolkit/types.js";
 import {
 	executeAgentTool,
 	prepareAgentTool,
@@ -20,7 +20,7 @@ import {
 import { agentTools } from "../../../libs/tools/lucid-tools.js";
 import type {
 	AgentToolDefinition,
-	AgentToolExecution,
+	AgentToolInvocation,
 } from "../../../libs/tools/types.js";
 import type { LucidUser } from "../../../types/hono.js";
 import type { AgentScreen } from "../../../types/response.js";
@@ -39,7 +39,7 @@ import { builderUpdateToolName } from "../../agent/tools/builder-update/constant
 import { outputSchema as describeOutputSchema } from "../../collections/tools/describe/schema.js";
 import checkSaveHold from "../../document-editors/check-save-hold.js";
 import heartbeat from "../../document-editors/heartbeat.js";
-import release from "../../document-editors/release.js";
+import leave from "../../document-editors/leave.js";
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
 import syncLocales from "../../sync/sync-locales.js";
@@ -174,8 +174,8 @@ const startRun = async (principal: "user" | "system" = "user") => {
 
 	const actor: ToolkitActor =
 		runUserId === null
-			? { kind: "system", agentRunId: runId }
-			: { kind: "user", userId: runUserId, agentRunId: runId };
+			? { type: "system", agentRunId: runId }
+			: { type: "user", userId: runUserId, agentRunId: runId };
 	const call = async (tool: AgentToolDefinition, input: unknown) => {
 		const result = await executeAgentTool({
 			context,
@@ -196,7 +196,6 @@ const startRun = async (principal: "user" | "system" = "user") => {
 				run: {
 					id: runId,
 					conversationId: conversation.data.id,
-					userId: runUserId,
 					agentKey: agent.key,
 				},
 			},
@@ -226,7 +225,6 @@ const startRun = async (principal: "user" | "system" = "user") => {
 					run: {
 						id: runId,
 						conversationId: conversation.data.id,
-						userId,
 						agentKey: agent.key,
 					},
 				},
@@ -254,7 +252,7 @@ assert(directCreate && directUpdate && directDelete && directUnpublish);
 const createPage = async () => {
 	const created = await createToolkit(context).documents.createSingle({
 		collectionKey: pages.key,
-		actor: { kind: "system" },
+		actor: { type: "system" },
 		data: {
 			fields: {
 				title: { en: "Hello", fr: "Bonjour" },
@@ -347,7 +345,7 @@ test("creates documents as create requests attributed to the run, then edits the
 	).toContain(`Request ${requestId} has no proposal`);
 	expect(proposal.meta).toMatchObject({
 		createdBy: { id: userId },
-		createdByAgent: agent.name,
+		createdByAgent: context.translate(agent.name),
 	});
 	expect(proposal.fields).toMatchObject({
 		title: "Spring launch",
@@ -594,7 +592,7 @@ test("deletes and unpublishes through requests unless direct", async () => {
 	const published = await publish(context, {
 		collectionKey: pages.key,
 		documentId,
-		target: "production",
+		environment: "production",
 		user,
 	});
 	expect(published.error).toBeUndefined();
@@ -611,7 +609,7 @@ test("deletes and unpublishes through requests unless direct", async () => {
 	const unpublished = await run.write(unpublish, {
 		collectionKey: pages.key,
 		documentId: documentId,
-		target: "production",
+		environment: "production",
 	});
 	expect(unpublished).toMatchObject({
 		outcome: "requested",
@@ -621,7 +619,7 @@ test("deletes and unpublishes through requests unless direct", async () => {
 		await run.write(directUnpublish, {
 			collectionKey: pages.key,
 			documentId: documentId,
-			target: "production",
+			environment: "production",
 		}),
 	).toMatchObject({ outcome: "applied", request: null });
 
@@ -778,7 +776,7 @@ test("accepts a fixed brick by ref and a single media ID, and explains media out
 	});
 	expect(message.split("\n")).toEqual([
 		"There was an error validating some fields.",
-		`bricks.seo.image[0]: Media ${personal} isn't in the media library. Personal uploads need moving to the library before they can be used in content.`,
+		`bricks.seo.image[0]: Media #${personal} isn't in the media library. Personal uploads need moving to the library before they can be used in content.`,
 	]);
 
 	await run.write(directUpdate, {
@@ -907,7 +905,7 @@ test("keeps unchanged rich text exactly and checks the key of a fixed brick name
 	};
 	const created = await createToolkit(context).documents.createSingle({
 		collectionKey: pages.key,
-		actor: { kind: "system" },
+		actor: { type: "system" },
 		data: { fields: { title: { en: "Spacing", fr: "Espaces" }, body } },
 	});
 	assert(created.data, JSON.stringify(created.error));
@@ -951,7 +949,7 @@ test("keeps rich text spacing as written, for untouched text and spacing fixes a
 	});
 	const created = await createToolkit(context).documents.createSingle({
 		collectionKey: pages.key,
-		actor: { kind: "system" },
+		actor: { type: "system" },
 		data: {
 			fields: {
 				title: { en: "Spacing", fr: "Espaces" },
@@ -1098,7 +1096,7 @@ test("refuses direct writes to a document someone holds in the editor, until the
 		.execute();
 	expect((await open("third")).data).toMatchObject({ holding: true });
 	expect((await saveFrom("second")).error).toMatchObject({ status: 409 });
-	await release(context, {
+	await leave(context, {
 		collectionKey: pages.key,
 		documentId,
 		tabId: "third",
@@ -1106,7 +1104,7 @@ test("refuses direct writes to a document someone holds in the editor, until the
 	});
 	expect((await saveFrom("second")).error).toBeUndefined();
 
-	await release(context, {
+	await leave(context, {
 		collectionKey: pages.key,
 		documentId,
 		tabId: "second",
@@ -1202,18 +1200,17 @@ test("builder tools read unsaved content from the builder and hand changes back 
 			input,
 			execution: {
 				authority,
-				actor: { kind: "user", userId } as const,
+				actor: { type: "user", userId } as const,
 				signal: new AbortController().signal,
 				operationId: randomUUID(),
 				run: {
 					id: randomUUID(),
 					conversationId: conversation.data.id,
-					userId,
 					agentKey: agent.key,
 				},
 				screen,
-				interaction: answer,
-			} satisfies AgentToolExecution,
+				answer,
+			} satisfies AgentToolInvocation,
 		};
 		return answer ? executeAgentTool(args) : prepareAgentTool(args);
 	};

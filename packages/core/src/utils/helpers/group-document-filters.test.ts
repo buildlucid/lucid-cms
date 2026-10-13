@@ -1137,14 +1137,14 @@ describe("groupDocumentFilters", () => {
 			[
 				{
 					key: "envStatus.production",
-					value: "unreleased",
+					value: "unpublished",
 				},
 			],
 			{ environmentKeys: new Set(["production"]) },
 		);
 
 		expect(result.environmentStatusFilters).toEqual([
-			{ environmentKey: "production", status: "unreleased" },
+			{ environmentKey: "production", status: "unpublished" },
 		]);
 	});
 });

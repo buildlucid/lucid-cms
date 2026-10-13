@@ -1,23 +1,24 @@
 import type z from "zod";
+import constants from "../../../constants/constants.js";
 import type { cmsAgentUsageSchema } from "../../../libs/lucid-remote/schema/ai.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/** Identifies one paid request made for an agent run, and the connection it was charged to. */
-export type UsageRequest = {
+/** Identifies a paid agent request, with its charged connection added during storage. */
+export type PaidRequestRecord = {
 	requestId: string;
 	featureKey: string;
 	/** Null once the run is deleted; its usage still settles. */
 	runId: string | null;
 	conversationId: string;
 	userId: number | null;
-	connectionId: number;
 };
 
 /** Records what a request was charged. A settled request keeps its first usage. */
 const storeUsage: ServiceFn<
 	[
-		UsageRequest & {
+		PaidRequestRecord & {
+			connectionId: number;
 			usage: z.infer<typeof cmsAgentUsageSchema>;
 			durationMs: number | null;
 		},
@@ -30,7 +31,7 @@ const storeUsage: ServiceFn<
 		data: {
 			request_id: input.requestId,
 			feature_key: input.featureKey,
-			feature_version: "v1",
+			feature_version: constants.agent.usageFeatureVersion,
 			user_id: input.userId,
 			lucid_remote_connection_id: input.connectionId,
 			agent_run_id: input.runId,

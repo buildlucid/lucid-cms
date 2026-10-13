@@ -3,10 +3,10 @@ import { getCollectionPermission } from "../../../../libs/permission/collection-
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import requiresReview from "../../helpers/requires-review.js";
 import writeChanges from "../helpers/write-changes.js";
 import type { DocumentWriteToolOptions } from "../types.js";
 import createDocument from "./handler.js";
-import createRequested from "./requested.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 const name = "documents_create";
@@ -25,9 +25,15 @@ export const createDocumentAgentTool = (
 		permissions: [],
 		//* Requests already receive review, so only direct writes need confirmation.
 		requiresConfirmation: options.direct
-			? ({ input, config }) => !createRequested(config, input)
+			? ({ input, config }) =>
+					!requiresReview(
+						config.collections.find(
+							(collection) => collection.key === input.collectionKey,
+						),
+						{ type: "create" },
+					)
 			: false,
-		requiredPermissions: ({ collectionKey }) => [
+		inputPermissions: ({ input: { collectionKey } }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],
 		handler: async ({ context, input, execution }) => {

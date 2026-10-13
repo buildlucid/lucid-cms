@@ -1,9 +1,28 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
-import { notificationLevelSchema } from "../libs/db/tables/notifications.js";
-import { agentActorSchema } from "./agent.js";
+import type {
+	NotificationAudienceSummary,
+	NotificationLevel,
+	NotificationStatus,
+} from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaImagePreviewResponseSchema } from "./media.js";
+import { agentActorSchema } from "./shared/agent-actor.js";
+import { userDisplaySchema } from "./shared/user-display.js";
+
+export const notificationLevelSchema = z.enum([
+	"info",
+	"success",
+	"warning",
+	"error",
+]) satisfies z.ZodType<NotificationLevel>;
+
+/** Notification list filter, with `actionRequired` selecting notifications awaiting the user's action. */
+const notificationStatusSchema = z.enum([
+	"inbox",
+	"unread",
+	"actionRequired",
+	"archived",
+]) satisfies z.ZodType<NotificationStatus>;
 
 const categorySchema = z.object({
 	key: z.string(),
@@ -25,16 +44,9 @@ const notificationResponseSchema = z.object({
 		example: "/lucid/requests/12",
 	}),
 	data: z.record(z.string(), z.unknown()),
-	actor: z
-		.object({
-			id: z.number(),
-			email: z.string().nullable(),
-			username: z.string().nullable(),
-			firstName: z.string().nullable(),
-			lastName: z.string().nullable(),
-			profilePicture: mediaImagePreviewResponseSchema.nullable(),
-		})
-		.nullable(),
+	actor: userDisplaySchema.nullable().meta({
+		description: "The person whose action caused it, when there was one",
+	}),
 	actorAgent: agentActorSchema.nullable().meta({
 		description: "The agent that acted, for actor or the system",
 	}),
@@ -45,23 +57,28 @@ const notificationResponseSchema = z.object({
 	updatedAt: z.string().nullable(),
 });
 
-const audienceSchema = z.union([
-	z.literal("recipients"),
+const audienceSchema = z.discriminatedUnion("kind", [
+	z.object({ kind: z.literal("recipients") }),
 	z.object({
+		kind: z.literal("permission"),
 		permission: z.string(),
-		roleIds: z.array(z.number()).nullable(),
+		roleIds: z.array(z.number()).nullable().meta({
+			description:
+				"Roles chosen instead of the permission. Null means everyone with the permission",
+		}),
 	}),
-]);
+]) satisfies z.ZodType<NotificationAudienceSummary>;
 
 const notificationTypeResponseSchema = z.object({
-	key: z.string(),
+	type: z.string().meta({ example: "requests:review-requested" }),
 	name: z.string(),
 	description: z.string().nullable(),
 	category: categorySchema,
 	level: notificationLevelSchema,
 	actionRequired: z.boolean(),
-	required: z.boolean().meta({
-		description: "Always delivered in-app. Only its emails can be turned off",
+	mandatory: z.boolean().meta({
+		description:
+			"People can't turn it off. Always delivered in-app, and only its emails can be turned off",
 	}),
 	audience: audienceSchema,
 	enabled: z.boolean(),
@@ -73,7 +90,7 @@ const notificationTypeResponseSchema = z.object({
 });
 
 const notificationPreferenceResponseSchema = z.object({
-	type: z.string(),
+	type: z.string().meta({ example: "requests:review-requested" }),
 	name: z.string(),
 	description: z.string().nullable(),
 	category: categorySchema,
@@ -94,7 +111,7 @@ export const controllerSchemas = {
 				.object({
 					"filter[status]": queryString.schema.filter(false, {
 						description:
-							"One of inbox, unread, attention or archived. Defaults to inbox",
+							"One of inbox, unread, actionRequired or archived. Defaults to inbox",
 						example: "unread",
 					}),
 					"filter[category]": queryString.schema.filter(true, {
@@ -111,7 +128,12 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
-						status: queryFormatted.schema.filters.single.optional(),
+						status: z
+							.object({
+								value: notificationStatusSchema,
+								operator: z.literal("=").optional(),
+							})
+							.optional(),
 						category: queryFormatted.schema.filters.union.optional(),
 						type: queryFormatted.schema.filters.union.optional(),
 					})

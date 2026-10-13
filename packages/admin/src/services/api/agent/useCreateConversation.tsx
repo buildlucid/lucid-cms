@@ -27,7 +27,7 @@ const useCreateConversation = (props?: {
 				method: "POST",
 				body,
 			}),
-		invalidates: [queryKeys.agent.conversations()],
+		invalidates: [queryKeys.agent.conversationLists()],
 		onSuccess: props?.onSuccess,
 	});
 

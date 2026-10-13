@@ -22,7 +22,7 @@ export default class AgentRoutinesRepository extends StaticRepository<"lucid_age
 					...(props.agentKeys["manage-own-routines"].length
 						? [
 								eb.and([
-									eb("source", "=", "database"),
+									eb("source", "=", "own"),
 									eb("user_id", "=", props.userId),
 									eb("agent_key", "in", props.agentKeys["manage-own-routines"]),
 								]),
@@ -107,7 +107,24 @@ export default class AgentRoutinesRepository extends StaticRepository<"lucid_age
 	async selectDue(props: { now: string; limit: number }) {
 		const query = this.db
 			.selectFrom("lucid_agent_routines")
-			.selectAll()
+			.select([
+				"id",
+				"agent_key",
+				"key",
+				"source",
+				"name",
+				"instructions",
+				"conversation_mode",
+				"conversation_id",
+				"model_selection",
+				"cron",
+				"timezone",
+				"enabled",
+				"user_id",
+				"next_run_at",
+				"created_at",
+				"updated_at",
+			])
 			.where("enabled", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("next_run_at", "<=", props.now)
 			.orderBy("next_run_at", "asc")

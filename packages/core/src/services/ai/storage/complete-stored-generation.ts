@@ -1,9 +1,9 @@
-import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
+import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/schema/ai.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { parseStoredTimestamp } from "../helpers/date-helpers.js";
 import getRequestDurationMs from "../helpers/get-request-duration-ms.js";
 
+/** Records completed output and usage for a stored generation, ignoring unknown requests. */
 const completeStoredGeneration: ServiceFn<
 	[
 		{
@@ -27,14 +27,9 @@ const completeStoredGeneration: ServiceFn<
 		};
 	}
 
-	const createdAt = parseStoredTimestamp(existingRes.data.created_at);
-	const durationMs = Number.isNaN(createdAt.getTime())
-		? null
-		: getRequestDurationMs(createdAt.getTime());
-
 	const updateRes = await AiGenerations.updateSingle({
 		data: {
-			output: props.response.output as Record<string, unknown>,
+			output: props.response.output,
 			provider_request_id: props.response.usage.providerRequestId ?? null,
 			usage: props.response.usage,
 			model: props.response.usage.model,
@@ -42,7 +37,7 @@ const completeStoredGeneration: ServiceFn<
 			input_tokens: props.response.usage.tokens.input.total,
 			output_tokens: props.response.usage.tokens.output.total,
 			total_tokens: props.response.usage.tokens.total,
-			duration_ms: durationMs,
+			duration_ms: getRequestDurationMs(existingRes.data.created_at),
 			status: "success",
 			error_message: null,
 		},

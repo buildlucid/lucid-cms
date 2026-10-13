@@ -34,7 +34,6 @@ export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
 					execution.authority,
 					options.collections,
 				),
-				runId: execution.run.id,
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});

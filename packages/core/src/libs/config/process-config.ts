@@ -70,7 +70,7 @@ const processConfig = async (
 	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
 	const notificationDefinitions = [
 		...coreNotificationDefinitions,
-		...configRes.notifications,
+		...configRes.notifications.definitions,
 	];
 
 	configRes = produce(configRes, (draft) => {
@@ -90,7 +90,10 @@ const processConfig = async (
 			...configRes.jobs,
 			definitions: jobDefinitions,
 		},
-		notifications: notificationDefinitions,
+		notifications: {
+			...configRes.notifications,
+			definitions: notificationDefinitions,
+		},
 	};
 
 	if (!options?.skipValidation) {
@@ -102,7 +105,6 @@ const processConfig = async (
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);
-		checkNotificationDefinitions(configRes.notifications);
 
 		// plugin toolkit definitions
 		checkToolkitDefinitions(configRes.plugins);
@@ -111,6 +113,7 @@ const processConfig = async (
 		getCapabilityRegistry(configRes);
 		checkToolDefinitions(configRes);
 		checkSkillDefinitions(configRes);
+		checkNotificationDefinitions(configRes);
 
 		// custom content routes
 		checkContentRoutes(configRes);

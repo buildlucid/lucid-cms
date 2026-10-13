@@ -34,7 +34,7 @@ const createSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", userIntegrationParamsSchema),
 	validate("json", controllerSchemas.createSingle.body),

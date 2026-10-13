@@ -12,7 +12,10 @@ const useRunRoutine = (props?: { onSuccess?: (response: Response) => void }) =>
 				url: `/lucid/api/v1/agent/routines/${params.id}/run`,
 				method: "POST",
 			}),
-		invalidates: [queryKeys.agent.all()],
+		invalidates: [
+			queryKeys.agent.routines(),
+			queryKeys.agent.conversationLists(),
+		],
 		onSuccess: props?.onSuccess,
 	});
 

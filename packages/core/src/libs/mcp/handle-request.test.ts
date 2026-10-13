@@ -35,9 +35,9 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 		input: z.object({ resource: z.string().trim() }),
 		output: z.object({ ok: z.boolean() }),
 		scopes: [],
-		requiredScopes: ({ resource }) =>
+		inputScopes: ({ input: { resource } }) =>
 			resource === "media" ? [ExternalScopes.MediaRead] : [],
-		advertisedScopes: () => [ExternalScopes.MediaRead],
+		possibleScopes: () => [ExternalScopes.MediaRead],
 		handler,
 	});
 	const translationStore = createTranslationStore({
@@ -59,8 +59,9 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 	let scopes: ExternalScope[] = [ExternalScopes.McpAccess];
 	const app = new Hono<LucidHonoGeneric>();
 	app.onError((error, c) => {
-		if (error instanceof LucidAPIError && error.error.status === 403)
+		if (error instanceof LucidAPIError && error.error.status === 403) {
 			return c.text(error.message, 403);
+		}
 		throw error;
 	});
 	app.post("/lucid/mcp", (c) => {

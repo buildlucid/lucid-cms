@@ -10,6 +10,7 @@ import getConversation from "./get-conversation.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 import resolveModel from "./helpers/resolve-model.js";
 
+/** Updates chat title, confirmation mode or model, retaining tool-default confirmations for routine chats. */
 const updateConversation: ServiceFn<
 	[
 		{

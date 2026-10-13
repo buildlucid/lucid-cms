@@ -285,7 +285,6 @@ const approve: ServiceFn<
 
 	const scheduleRes = await scheduleRequest(context, {
 		id: request.id,
-		skipRequestWriteClaim: true,
 	});
 	if (scheduleRes.error) return scheduleRes;
 

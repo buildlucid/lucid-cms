@@ -13,7 +13,7 @@ import { Permissions } from "../../libs/permission/definitions.js";
 import systemActor from "../../libs/permission/system-actor.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
-import type { RequestDetail } from "../../types/response.js";
+import type { RequestDetails } from "../../types/response.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
@@ -33,6 +33,7 @@ import readVersionContent from "../documents-versions/helpers/read-version-conte
 import restoreRevision from "../documents-versions/restore-revision.js";
 import updateVersion from "../documents-versions/update-single.js";
 import syncCollections from "../sync/sync-collections.js";
+import acknowledgeTarget from "./acknowledge-target.js";
 import addDocuments from "./add-documents.js";
 import approve from "./approve.js";
 import close from "./close.js";
@@ -50,8 +51,6 @@ import scheduleRequest from "./helpers/schedule-request.js";
 import { executeRequestJob } from "./jobs/execute.js";
 import removeDocument from "./remove-document.js";
 import reopen from "./reopen.js";
-import requestCreation from "./request-creation.js";
-import reviewTarget from "./review-target.js";
 import unapprove from "./unapprove.js";
 import updateCommentResolution from "./update-comment-resolution.js";
 import updateSingle from "./update-single.js";
@@ -277,13 +276,13 @@ const readRequest = async (id: number) => {
 	assert(read.data, JSON.stringify(read.error));
 	return read.data;
 };
-const member = (request: RequestDetail) => {
+const member = (request: RequestDetails) => {
 	const document = request.documents[0];
 	assert(document);
 	return document;
 };
 /** The request's own proposal or snapshot version. */
-const versionOf = (request: RequestDetail) => {
+const versionOf = (request: RequestDetails) => {
 	const versionId = member(request).versionId;
 	assert(versionId);
 	return versionId;
@@ -293,7 +292,7 @@ const createRequest = async (
 	targets: string[] = ["staging"],
 	source = "latest",
 	collectionKey = "request_pages",
-): Promise<RequestDetail> => {
+): Promise<RequestDetails> => {
 	const created = await createSingle(context, {
 		type: "publish",
 		title: "Spring launch",
@@ -303,7 +302,7 @@ const createRequest = async (
 	assert(created.data, JSON.stringify(created.error));
 	return readRequest(created.data.id);
 };
-const reviewInput = (request: RequestDetail) => ({
+const reviewInput = (request: RequestDetails) => ({
 	id: request.id,
 	ifUnchanged: request.reviewToken,
 });
@@ -322,7 +321,7 @@ const completeRequest = async (id: number, user = creator) => {
 	return readRequest(id);
 };
 const editProposal = async (
-	request: RequestDetail,
+	request: RequestDetails,
 	summary: string,
 	title = "Source",
 ) => {
@@ -469,7 +468,7 @@ test("a failure hook can enrich polling's recovery without duplicate activity", 
 		(await getExecution(context, { id: request.id, user: creator })).data
 			?.status,
 	).toBe("failed");
-	expect((await readRequest(request.id)).failureRequestDocumentId).toBeNull();
+	expect((await readRequest(request.id)).failure?.requestDocumentId).toBeNull();
 	const hook = getJobDefinitionRuntime(executeRequestJob).onPermanentFailure;
 	assert(hook);
 	const failure = {
@@ -477,7 +476,7 @@ test("a failure hook can enrich polling's recovery without duplicate activity", 
 		input: {
 			requestId: request.id,
 			revision: approved.revision,
-			actor: { kind: "user", userId: creator.id },
+			actor: { type: "user", userId: creator.id },
 		},
 		attempts: 1,
 		errorMessage: "Production is frozen",
@@ -488,9 +487,9 @@ test("a failure hook can enrich polling's recovery without duplicate activity", 
 	await hook(context, failure);
 	await hook(context, failure);
 	const detail = await readRequest(request.id);
-	expect(detail).toMatchObject({
-		failureRequestDocumentId: member(approved).id,
-		failureTarget: "production",
+	expect(detail.failure).toMatchObject({
+		requestDocumentId: member(approved).id,
+		target: "production",
 	});
 	expect(detail.events.filter((event) => event.type === "failed")).toHaveLength(
 		1,
@@ -619,9 +618,11 @@ test("failed publication rolls back targets and retains diagnostics for retry", 
 	expect(failed).toMatchObject({
 		status: "open",
 		approved: true,
-		failure: "Production is frozen",
-		failureRequestDocumentId: member(approved).id,
-		failureTarget: "production",
+		failure: {
+			message: "Production is frozen",
+			requestDocumentId: member(approved).id,
+			target: "production",
+		},
 	});
 	expect(await fieldOf(documentId, "summary", "staging")).toBeNull();
 	expect(await fieldOf(documentId, "summary", "production")).toBeNull();
@@ -706,34 +707,29 @@ test("requests hold at most 100 documents", async () => {
 	});
 	expect(created.error?.status).toBe(413);
 });
-const completeNow = async (request: RequestDetail) => {
+const completeNow = async (request: RequestDetails) => {
 	await approveRequest(request.id);
 	return completeRequest(request.id);
 };
 const acknowledge = async (
-	request: RequestDetail,
+	request: RequestDetails,
 	target: string,
-	reviewed = true,
+	acknowledged = true,
 ) => {
 	const current = await readRequest(request.id);
-	const destination = member(current).targets.find(
-		(item) => item.target === target,
-	);
-	assert(destination);
-	const result = await reviewTarget(context, {
+	const result = await acknowledgeTarget(context, {
 		id: current.id,
 		requestDocumentId: member(current).id,
-		revision: current.revision,
 		target,
-		targetVersionId: destination.versionId,
-		reviewed,
+		acknowledged,
+		ifUnchanged: current.reviewToken,
 		user: reviewer,
 	});
 	assert(!result.error, JSON.stringify(result.error));
 	return readRequest(request.id);
 };
 const alignContent = async (
-	request: RequestDetail,
+	request: RequestDetails,
 	source: string,
 	/** Defaults to the proposal's current content. */
 	destinationContentId?: string,
@@ -825,7 +821,7 @@ test("proposals can complete into latest, and every latest edit asks for a revie
 	await editProposal(request, "Proposed");
 	await editLatest(id, "Edited");
 	expect(member(await readRequest(request.id)).targets).toMatchObject([
-		{ target: "latest", changedSinceCreation: true, reviewed: false },
+		{ target: "latest", changedSinceCreation: true, acknowledged: false },
 		{ target: "staging", changedSinceCreation: false },
 	]);
 	await acknowledge(request, "latest");
@@ -900,7 +896,7 @@ test("revisions are restored to latest before publishing, and requests' versions
 			await publish(context, {
 				collectionKey: "request_pages",
 				documentId: id,
-				target: "staging",
+				environment: "staging",
 				sourceVersionId: revision.id,
 				user: creator,
 			})
@@ -933,7 +929,7 @@ test("adding latest later asks for a review only when latest changed since the p
 	const before = await createRequest(id);
 	await editLatest(id, "Edited");
 	const after = await createRequest(id);
-	const addLatest = async (request: RequestDetail) => {
+	const addLatest = async (request: RequestDetails) => {
 		const result = await updateTargets(context, {
 			id: request.id,
 			requestDocumentId: member(request).id,
@@ -972,7 +968,7 @@ test("parallel proposals and later latest edits remain independent during public
 	await completeNow(first);
 	const changed = await readRequest(second.id);
 	expect(member(changed).targets).toMatchObject([
-		{ target: "staging", changedSinceCreation: true, reviewed: false },
+		{ target: "staging", changedSinceCreation: true, acknowledged: false },
 	]);
 	expect(changed.blockers).toContainEqual({
 		requestDocumentId: member(changed).id,
@@ -1015,10 +1011,9 @@ test("acknowledgement holds for the target version, survives proposal edits and 
 	const stale = {
 		id: changed.id,
 		requestDocumentId: member(changed).id,
-		revision: changed.revision,
 		target: "staging",
-		targetVersionId: member(changed).targets[0]?.versionId ?? null,
-		reviewed: true,
+		acknowledged: true,
+		ifUnchanged: changed.reviewToken,
 		user: reviewer,
 	};
 	await acknowledge(changed, "staging");
@@ -1030,29 +1025,24 @@ test("acknowledgement holds for the target version, survives proposal edits and 
 		withdrawn.events
 			.filter(
 				(event) =>
-					event.type === "target_reviewed" ||
-					event.type === "target_unreviewed",
+					event.type === "target_acknowledged" ||
+					event.type === "target_unacknowledged",
 			)
 			.map((event) => event.type),
-	).toEqual(["target_reviewed", "target_unreviewed"]);
+	).toEqual(["target_acknowledged", "target_unacknowledged"]);
 	await acknowledge(changed, "staging");
 	const edited = await editProposal(second, "Revised proposal");
-	expect(member(edited).targets[0]).toMatchObject({ reviewed: true });
+	expect(member(edited).targets[0]).toMatchObject({ acknowledged: true });
 	await approveRequest(second.id);
 	const third = await createRequest(id);
 	await editProposal(third, "Third proposal");
 	await completeNow(third);
 	const republished = await readRequest(second.id);
 	expect(republished.approved).toBe(false);
-	expect(member(republished).targets[0]).toMatchObject({ reviewed: false });
-	expect(
-		(
-			await reviewTarget(context, {
-				...stale,
-				revision: republished.revision,
-			})
-		).error?.status,
-	).toBe(409);
+	expect(member(republished).targets[0]).toMatchObject({
+		acknowledged: false,
+	});
+	expect((await acknowledgeTarget(context, stale)).error?.status).toBe(409);
 	expect(
 		(await complete(context, { id: second.id, user: creator })).error?.status,
 	).toBe(409);
@@ -1089,10 +1079,9 @@ test("anyone who can read a request and edit its document can acknowledge a chan
 	const input = {
 		id: changed.id,
 		requestDocumentId: member(changed).id,
-		revision: changed.revision,
 		target: "staging",
-		targetVersionId: member(changed).targets[0]?.versionId ?? null,
-		reviewed: true,
+		acknowledged: true,
+		ifUnchanged: changed.reviewToken,
 	};
 	const readOnly: LucidUser = {
 		...creator,
@@ -1103,7 +1092,8 @@ test("anyone who can read a request and edit its document can acknowledge a chan
 		],
 	};
 	expect(
-		(await reviewTarget(context, { ...input, user: readOnly })).error?.status,
+		(await acknowledgeTarget(context, { ...input, user: readOnly })).error
+			?.status,
 	).toBe(403);
 	const editor: LucidUser = {
 		...readOnly,
@@ -1113,10 +1103,12 @@ test("anyone who can read a request and edit its document can acknowledge a chan
 		],
 	};
 	expect(
-		(await reviewTarget(context, { ...input, user: editor })).error,
+		(await acknowledgeTarget(context, { ...input, user: editor })).error,
 	).toBeUndefined();
 	expect(member(await readRequest(request.id)).targets[0]).toMatchObject({
-		reviewed: true,
+		acknowledged: true,
+		acknowledgedBy: expect.objectContaining({ id: editor.id }),
+		acknowledgedByAgent: null,
 	});
 });
 
@@ -1148,7 +1140,7 @@ test("publishing records activity on other open requests, including targets adde
 	const retargeted = await readRequest(request.id);
 	expect(
 		member(retargeted).targets.find((target) => target.target === "staging"),
-	).toMatchObject({ changedSinceCreation: true, reviewed: false });
+	).toMatchObject({ changedSinceCreation: true, acknowledged: false });
 	expect((await alignContent(retargeted, "staging")).error).toBeUndefined();
 	expect(
 		(await readRequest(request.id)).blockers.some(
@@ -1299,7 +1291,7 @@ test("comments withdraw approval when posted or reopened, and every comment must
 	assert(comment);
 	const resolved = await updateCommentResolution(context, {
 		id: request.id,
-		eventId: comment.id,
+		commentId: comment.id,
 		user: reviewer,
 		resolution: "resolved",
 	});
@@ -1310,7 +1302,7 @@ test("comments withdraw approval when posted or reopened, and every comment must
 	await approveRequest(request.id);
 	const reopened = await updateCommentResolution(context, {
 		id: request.id,
-		eventId: comment.id,
+		commentId: comment.id,
 		user: reviewer,
 		resolution: null,
 	});
@@ -1318,7 +1310,7 @@ test("comments withdraw approval when posted or reopened, and every comment must
 	expect((await readRequest(request.id)).approved).toBe(false);
 	await updateCommentResolution(context, {
 		id: request.id,
-		eventId: comment.id,
+		commentId: comment.id,
 		user: reviewer,
 		resolution: "resolved",
 	});
@@ -1352,7 +1344,7 @@ test("replies leave approval alone, go one level deep and are deleted with their
 	assert(comment);
 	await updateCommentResolution(context, {
 		id: request.id,
-		eventId: comment.id,
+		commentId: comment.id,
 		user: reviewer,
 		resolution: "resolved",
 	});
@@ -1393,7 +1385,7 @@ test("replies leave approval alone, go one level deep and are deleted with their
 		(
 			await updateCommentResolution(context, {
 				id: request.id,
-				eventId: reply.id,
+				commentId: reply.id,
 				user: creator,
 				resolution: "closed",
 			})
@@ -1402,7 +1394,7 @@ test("replies leave approval alone, go one level deep and are deleted with their
 
 	const deleted = await deleteComment(context, {
 		id: request.id,
-		eventId: comment.id,
+		commentId: comment.id,
 		user: creator,
 	});
 	assert(!deleted.error, JSON.stringify(deleted.error));
@@ -1645,7 +1637,7 @@ test("closing preserves proposal and comments, and reopening restores edit acces
 		(
 			await deleteComment(context, {
 				id: request.id,
-				eventId: comment.id,
+				commentId: comment.id,
 				user: {
 					...reviewer,
 					superAdmin: false,
@@ -2359,9 +2351,12 @@ test.each([
 	expect(detail).toMatchObject({
 		status: "open",
 		approved: true,
-		failure: failureMode === "throw" ? expect.any(String) : "Target is frozen",
-		failureRequestDocumentId: failedDocument.id,
-		failureTarget: "staging",
+		failure: {
+			message:
+				failureMode === "throw" ? expect.any(String) : "Target is frozen",
+			requestDocumentId: failedDocument.id,
+			target: "staging",
+		},
 	});
 	for (const document of detail.documents) {
 		expect(
@@ -2378,8 +2373,6 @@ test.each([
 	expect(retried).toMatchObject({
 		status: "completed",
 		failure: null,
-		failureRequestDocumentId: null,
-		failureTarget: null,
 	});
 	for (const document of retried.documents) {
 		expect(
@@ -2428,16 +2421,15 @@ test("drift review is scoped to its member, and edits to either proposal dismiss
 			requestDocumentId: first.id,
 		},
 	]);
-	const reviewed = await reviewTarget(context, {
+	const acknowledged = await acknowledgeTarget(context, {
 		id: changed.id,
 		requestDocumentId: first.id,
 		target: "staging",
-		revision: changed.revision,
-		targetVersionId: first.targets[0]?.versionId ?? null,
-		reviewed: true,
+		acknowledged: true,
+		ifUnchanged: changed.reviewToken,
 		user: reviewer,
 	});
-	assert(!reviewed.error, JSON.stringify(reviewed.error));
+	assert(!acknowledged.error, JSON.stringify(acknowledged.error));
 	await approveRequest(changed.id);
 	assert(second.versionId);
 	expect(
@@ -2565,7 +2557,7 @@ test("one scheduled job publishes mixed proposals and snapshots for the group", 
 	const job = {
 		id: created.data.id,
 		revision,
-		actor: { kind: "user" as const, userId: creator.id },
+		actor: { type: "user" as const, userId: creator.id },
 	};
 	expect(
 		(await execute(context, { ...job, jobId: "stale-job" })).error,
@@ -2588,17 +2580,20 @@ test("one scheduled job publishes mixed proposals and snapshots for the group", 
 });
 
 const requestDocument = async (user: LucidUser, title = "Requested") => {
-	const requested = await requestCreation(context, {
-		collectionKey: "create_request_pages",
+	const requested = await createSingle(context, {
+		type: "create",
 		title: "New page",
-		fields: [
-			{ key: "title", type: "text", value: title },
-			{ key: "summary", type: "text", value: "Draft" },
-		],
+		document: {
+			collectionKey: "create_request_pages",
+			fields: [
+				{ key: "title", type: "text", value: title },
+				{ key: "summary", type: "text", value: "Draft" },
+			],
+		},
 		user,
 	});
 	assert(requested.data, JSON.stringify(requested.error));
-	return requested.data;
+	return { id: requested.data.document.id, requestId: requested.data.id };
 };
 const listRequestPages = async (pending: boolean) => {
 	const listed = await getDocuments(context, {
@@ -2697,22 +2692,25 @@ test("requested documents only exist as their create request's proposal until co
 	const directPublish = await publish(context, {
 		collectionKey: "create_request_pages",
 		documentId: requested.id,
-		target: "staging",
+		environment: "staging",
 		user: creator,
 	});
 	expect(directPublish.error?.status).toBe(404);
 
-	const relating = await requestCreation(context, {
-		collectionKey: "create_request_pages",
+	const relating = await createSingle(context, {
+		type: "create",
 		title: "Related page",
-		fields: [
-			{ key: "title", type: "text", value: "Relating" },
-			{
-				key: "related",
-				type: "relation",
-				value: [{ id: requested.id, collectionKey: "create_request_pages" }],
-			},
-		],
+		document: {
+			collectionKey: "create_request_pages",
+			fields: [
+				{ key: "title", type: "text", value: "Relating" },
+				{
+					key: "related",
+					type: "relation",
+					value: [{ id: requested.id, collectionKey: "create_request_pages" }],
+				},
+			],
+		},
 		user: creator,
 	});
 	expect(relating.error).toMatchObject({
@@ -2770,7 +2768,7 @@ test("create requests are edited, approved and completed with create access, and
 	expect(asRequester.data.permissions).toEqual({
 		edit: true,
 		approve: false,
-		request: false,
+		complete: false,
 		reopen: false,
 	});
 	expect(member(asRequester.data).permissions.edit).toBe(true);
@@ -2864,7 +2862,7 @@ test("create requests are edited, approved and completed with create access, and
 	expect(asUpdater.data.permissions).toMatchObject({
 		edit: false,
 		approve: false,
-		request: false,
+		complete: false,
 	});
 	const asCreator = await getSingle(context, {
 		id: requested.requestId,
@@ -2874,7 +2872,7 @@ test("create requests are edited, approved and completed with create access, and
 	expect(asCreator.data.permissions).toMatchObject({
 		edit: true,
 		approve: true,
-		request: true,
+		complete: true,
 	});
 
 	const approved = await approve(context, {
@@ -3098,14 +3096,17 @@ test("collection request checks only see their own collection's documents", asyn
 });
 
 test("create requests aren't gated by stages unless the collection requires create requests", async () => {
-	const requested = await requestCreation(context, {
-		collectionKey: "workflow_pages",
+	const requested = await createSingle(context, {
+		type: "create",
 		title: "New page",
-		fields: [{ key: "title", type: "text", value: "Requested" }],
+		document: {
+			collectionKey: "workflow_pages",
+			fields: [{ key: "title", type: "text", value: "Requested" }],
+		},
 		user: creator,
 	});
 	assert(requested.data, JSON.stringify(requested.error));
-	const request = await readRequest(requested.data.requestId);
+	const request = await readRequest(requested.data.id);
 	expect(member(request).workflowStage).toBeNull();
 	expect(request.blockers).toEqual([]);
 });
@@ -3197,7 +3198,7 @@ test("unpublish requests remove environments in any order, never latest, and fla
 	expect(await fieldOf(documentId, "summary", "latest")).toBe("Original");
 	expect(member(await readRequest(waiting.id)).targets[0]).toMatchObject({
 		changedSinceCreation: true,
-		reviewed: false,
+		acknowledged: false,
 	});
 
 	const again = await createSingle(context, {
@@ -3218,16 +3219,16 @@ test("direct unpublishing is limited to environments that don't need review", as
 			await publish(context, {
 				collectionKey: "request_pages",
 				documentId,
-				target: "staging",
+				environment: "staging",
 				user: creator,
 			})
 		).error,
 	);
-	const removal = (target: string) =>
+	const removal = (environment: string) =>
 		unpublish(context, {
 			collectionKey: "request_pages",
 			documentId,
-			target,
+			environment,
 			user: creator,
 		});
 
@@ -3345,17 +3346,17 @@ test("delete requests move documents to the bin with delete access, and requeste
 	expect(await access(requester)).toMatchObject({
 		edit: true,
 		approve: false,
-		request: false,
+		complete: false,
 	});
 	expect(await access(updater)).toMatchObject({
 		edit: false,
 		approve: false,
-		request: false,
+		complete: false,
 	});
 	expect(await access(deleter)).toMatchObject({
 		edit: true,
 		approve: true,
-		request: true,
+		complete: true,
 	});
 
 	await approveRequest(request.id, deleter);
@@ -3380,7 +3381,7 @@ test("unpublish requesters can make and edit their own unpublish requests only",
 			await publish(context, {
 				collectionKey: "request_pages",
 				documentId,
-				target: "staging",
+				environment: "staging",
 				user: creator,
 			})
 		).error,
@@ -3406,7 +3407,7 @@ test("unpublish requesters can make and edit their own unpublish requests only",
 	expect(read.data.permissions).toMatchObject({
 		edit: true,
 		approve: false,
-		request: false,
+		complete: false,
 	});
 	const other = await getSingle(context, {
 		id: request.id,

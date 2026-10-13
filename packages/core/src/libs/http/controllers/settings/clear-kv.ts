@@ -17,7 +17,7 @@ const clearKVController = factory.createHandlers(
 		responses: openAPI.responses({ noProperties: true }),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.CacheClear]),
 	async (c) => {

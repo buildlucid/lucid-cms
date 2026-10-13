@@ -16,6 +16,7 @@ export type RouteSegmentDependent = {
 	version_type: Exclude<DocumentVersionType, "revision">;
 };
 
+/** Finds non-binned page versions of the given types whose route segments reference the target documents. */
 const getRouteSegmentDependents: ServiceFn<
 	[
 		{

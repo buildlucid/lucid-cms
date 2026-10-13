@@ -6,9 +6,10 @@ import type {
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
-import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
+import registeredFields, {
+	fieldHooks,
+} from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
-import type { RegisteredFieldDefinition } from "../../../libs/collection/custom-fields/types.js";
 import resolveCollectionLocalization, {
 	isCollectionFieldLocalized,
 	type ResolvedCollectionLocalization,
@@ -93,10 +94,7 @@ const getEmbeddedBrickRefsFromFields = (
 ): Set<string> => {
 	const refs = new Set<string>();
 	const visit = (field: FieldInputSchema) => {
-		const fieldDefinition = registeredFields[field.type] as Pick<
-			RegisteredFieldDefinition,
-			"extractEmbeddedBrickRefs"
-		>;
+		const fieldDefinition = fieldHooks[field.type];
 		const extractEmbeddedBrickRefs = fieldDefinition.extractEmbeddedBrickRefs;
 		if (extractEmbeddedBrickRefs) {
 			for (const ref of extractEmbeddedBrickRefs(field.value)) {

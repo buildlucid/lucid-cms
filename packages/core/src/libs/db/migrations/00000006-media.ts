@@ -104,8 +104,9 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("is_dark", adapter.getDataType("boolean"))
 				.addColumn("is_light", adapter.getDataType("boolean"))
 				.addColumn("custom_meta", adapter.getDataType("text"))
+				//* deleting a user deletes their personal media first, so this only stops it being orphaned
 				.addColumn("owner_user_id", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_users.id"),
+					col.references("lucid_users.id").onDelete("restrict"),
 				)
 				.addColumn("is_system", adapter.getDataType("boolean"), (col) =>
 					col

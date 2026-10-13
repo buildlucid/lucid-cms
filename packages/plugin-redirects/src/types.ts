@@ -1,8 +1,6 @@
-import type { CollectionOptions } from "@lucidcms/core/types";
+import type { CollectionEnvironmentOptions } from "@lucidcms/core/types";
 /** An environment used by redirect documents. */
-export type RedirectEnvironment = NonNullable<
-	NonNullable<CollectionOptions<"redirects">["publishing"]>["environments"]
->[number];
+export type RedirectEnvironment = CollectionEnvironmentOptions;
 
 export interface RedirectsPluginOptions {
 	/** Collections available as redirect destinations. */

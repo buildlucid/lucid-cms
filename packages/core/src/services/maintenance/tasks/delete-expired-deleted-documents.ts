@@ -1,8 +1,8 @@
+import { subDays } from "date-fns";
 import collections from "../../../libs/collection/collections.js";
 import { getDocumentTableSchema } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { enqueueJobs } from "../../../libs/jobs/enqueue.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
-import { getRetentionDays } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { deleteDocumentJob } from "../../documents/jobs/delete-single.js";
 
@@ -29,10 +29,10 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 		.map((table) => table.data)
 		.filter((table) => table !== undefined);
 
-	const compDate = getRetentionDays(
-		context.config.retention,
-		"deletedDocuments",
-	);
+	const compDate = subDays(
+		new Date(),
+		context.config.retention.deletedDocuments,
+	).toISOString();
 
 	const expiredDocLookup = await Promise.all(
 		docTables.map((table) =>

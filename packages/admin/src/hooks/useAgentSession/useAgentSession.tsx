@@ -1,11 +1,13 @@
+import type {
+	AgentBuilderChangesData,
+	AgentScreenCall,
+	AgentScreenResponse,
+} from "@lucidcms/types";
 import { useLocation, useNavigate } from "@solidjs/router";
 import type {
 	Agent,
-	AgentBuilderChangesData,
 	AgentConfirmationMode,
 	AgentScreen,
-	AgentScreenCall,
-	AgentScreenResponse,
 	AiModelSelection,
 } from "@types";
 import {
@@ -55,7 +57,7 @@ type ReturnedMessage = {
 };
 
 /** A field or brick to show in the document builder. */
-export type AgentBuilderFocus = {
+export type BuilderFocus = {
 	/** A builder brick's ref or a fixed brick's key. Omit it for the document's own fields. */
 	brick?: string;
 	/** Field keys interleaved with repeater item refs, such as `["items", "Xy12ab", "title"]`, with an empty path showing the brick. */
@@ -75,7 +77,7 @@ export type AgentScreenRegistration = {
 		runId: string,
 	) => Promise<AgentScreenResponse>;
 	/** Shows a field or brick and reports whether it was found, omitted for screens without a builder. */
-	focus?: (target: AgentBuilderFocus) => Promise<boolean>;
+	focus?: (target: BuilderFocus) => Promise<boolean>;
 };
 
 export type AgentSession = {
@@ -123,7 +125,7 @@ export type AgentSession = {
 		/** Registers this tab's screen context and tool handler, returning a function that unregisters them. */
 		register: (registration: AgentScreenRegistration) => () => void;
 		/** Shows a field or brick in a document's builder, opening the document first when this tab shows something else. */
-		focus: (document: BuilderDocument, target: AgentBuilderFocus) => void;
+		focus: (document: BuilderDocument, target: BuilderFocus) => void;
 	};
 };
 
@@ -167,7 +169,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	//* a field to show once the document opened for it is ready
 	const [pendingFocus, setPendingFocus] = createSignal<{
 		document: BuilderDocument;
-		target: AgentBuilderFocus;
+		target: BuilderFocus;
 	}>();
 
 	// ----------------------------------------

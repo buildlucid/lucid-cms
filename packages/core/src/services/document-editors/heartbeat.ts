@@ -3,7 +3,7 @@ import type { LucidUser } from "../../types/hono.js";
 import type { DocumentEditors } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getUpdateContext from "../documents-versions/helpers/get-update-context.js";
-import getRequestUsers from "../requests/helpers/get-request-users.js";
+import getDisplayUsers from "../users/helpers/get-display-users.js";
 import claimHold from "./helpers/claim-hold.js";
 import holdTarget from "./helpers/hold-target.js";
 import resolveHeldVersion from "./helpers/resolve-held-version.js";
@@ -62,7 +62,7 @@ const heartbeat: ServiceFn<
 		};
 	}
 
-	const users = await getRequestUsers(context, { ids: [holder.data.userId] });
+	const users = await getDisplayUsers(context, { ids: [holder.data.userId] });
 	if (users.error) return users;
 
 	const user = users.data.get(holder.data.userId);

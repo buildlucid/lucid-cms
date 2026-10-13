@@ -2,17 +2,16 @@ import z from "zod";
 import {
 	fileMetadataSchema,
 	fileSchema,
+	mediaActorSchema,
 	originSchema,
 	translationsSchema,
 	uploadValidationSchema,
-	userIdSchema,
 } from "../schema.js";
 
 export const inputSchema = fileMetadataSchema.extend({
 	/** File, bytes or a binary stream to upload. */
 	file: fileSchema,
-	/** CMS user credited with the upload. Defaults to no attribution. */
-	userId: userIdSchema,
+	actor: mediaActorSchema,
 	/** File provenance. Defaults to human. */
 	origin: originSchema.default("human"),
 	/** Allow unauthenticated file access. Defaults to false. */

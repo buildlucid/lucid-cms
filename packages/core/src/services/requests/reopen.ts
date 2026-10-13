@@ -28,7 +28,6 @@ const reopen: ServiceFn<
 
 	const lockRes = await lockRequest(context, { id: data.id });
 	if (lockRes.error) return lockRes;
-	await using _lock = lockRes.data;
 
 	const requestRes = await loadRequest(context, data);
 	if (requestRes.error) return requestRes;

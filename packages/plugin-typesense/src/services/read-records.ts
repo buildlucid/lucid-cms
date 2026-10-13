@@ -56,7 +56,7 @@ const readRecords: ServiceFn<
 
 			return projectDocuments(context, {
 				source: data.source,
-				documents: result.data.documents,
+				documents: result.data.data,
 				refs: result.data.refs ?? {},
 				revision: data.revision,
 				maxRecordsPerItem: data.options.maxRecordsPerItem,

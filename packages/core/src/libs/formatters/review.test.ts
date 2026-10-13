@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import reviewFormatter from "./review.js";
 
-test("review overview splits each environment's counts into in sync, out of sync and unreleased", () => {
+test("review overview splits each environment's counts into in sync, out of sync and unpublished", () => {
 	const counts = {
 		awaitingApproval: 0,
 		approved: 0,
@@ -17,7 +17,7 @@ test("review overview splits each environment's counts into in sync, out of sync
 				counts: {
 					total: "5",
 					environments: [
-						{ environment_key: "staging", released: "4", in_sync: "3" },
+						{ environment_key: "staging", published: "4", in_sync: "3" },
 					],
 				},
 			},
@@ -30,8 +30,8 @@ test("review overview splits each environment's counts into in sync, out of sync
 			collectionKey: "pages",
 			total: 5,
 			environments: [
-				{ key: "staging", inSync: 3, outOfSync: 1, unreleased: 1 },
-				{ key: "production", inSync: 0, outOfSync: 0, unreleased: 5 },
+				{ key: "staging", inSync: 3, outOfSync: 1, unpublished: 1 },
+				{ key: "production", inSync: 0, outOfSync: 0, unpublished: 5 },
 			],
 		},
 	]);

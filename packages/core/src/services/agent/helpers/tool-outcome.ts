@@ -26,6 +26,7 @@ export type ToolOutcome =
 	| { kind: "pending"; pending: PendingInteraction }
 	| { kind: "finish"; finish: NonNullable<Checkpoint["finish"]> };
 
+/** A successful tool result for the transcript. */
 export const toolResult = (result: AgentToolResult<unknown>): ToolResult => ({
 	kind: "result",
 	...result,

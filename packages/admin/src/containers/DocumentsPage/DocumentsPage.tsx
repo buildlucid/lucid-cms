@@ -135,15 +135,15 @@ const DocumentsPage: Component = () => {
 				]
 			: []),
 		//* grouped by status, so each status's environments sit together
-		...(["unreleased", "out-of-sync"] as const).flatMap((status) =>
+		...(["unpublished", "out-of-sync"] as const).flatMap((status) =>
 			(collectionData()?.publishing.environments ?? []).map((environment) => ({
 				key: `${status}.${environment.key}`,
 				label: T()(
-					status === "unreleased"
-						? "documents.filter.unreleased"
+					status === "unpublished"
+						? "documents.filter.unpublished"
 						: "documents.filter.out.of.sync",
 					{
-						target:
+						environment:
 							helpers.getLocaleValue({
 								value: environment.label,
 								fallback: environment.key,

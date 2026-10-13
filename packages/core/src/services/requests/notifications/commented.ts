@@ -2,7 +2,8 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { requestData, requestHref } from "./shared.js";
+import getRequestPath from "../helpers/get-request-path.js";
+import { requestData } from "./shared.js";
 
 export const commentedNotification = defineNotification({
 	key: "requests:commented",
@@ -22,6 +23,6 @@ export const commentedNotification = defineNotification({
 			defaultMessage: "New comment on {{title}}",
 		}),
 		body: copy.literal(data.excerpt),
-		href: requestHref(data.requestId),
+		href: getRequestPath(data.requestId),
 	}),
 });

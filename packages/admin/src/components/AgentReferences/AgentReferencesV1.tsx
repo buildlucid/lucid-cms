@@ -2,6 +2,7 @@ import type { AgentReference, AgentWidgetPart } from "@types";
 import { TbOutlineLink } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import AgentReferenceRow from "@/components/AgentReferenceRow/AgentReferenceRow";
+import SkeletonListItems from "@/components/SkeletonListItems/SkeletonListItems";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
 import T from "@/translations";
@@ -99,20 +100,30 @@ const AgentReferencesV1: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Show when={items().length}>
+		<Show when={references.isLoading || references.isError || items().length}>
 			<section class="rounded-2xl border border-border bg-card">
 				<div class="flex items-center gap-2 px-3.5 py-2">
 					<TbOutlineLink size={11} class="shrink-0 text-muted" />
 					<span class="min-w-0 grow truncate text-xs text-muted">
 						{T()("agent.references.added")}
 					</span>
-					<span class="shrink-0 text-xs text-muted tabular-nums">
-						{items().length === 1
-							? T()("agent.references.count.one")
-							: T()("agent.references.count", { count: items().length })}
-					</span>
+					<Show when={items().length}>
+						<span class="shrink-0 text-xs text-muted tabular-nums">
+							{items().length === 1
+								? T()("agent.references.count.one")
+								: T()("agent.references.count", { count: items().length })}
+						</span>
+					</Show>
 				</div>
 				<ul class="flex flex-col border-t border-border p-1.5">
+					<Show when={references.isLoading}>
+						<SkeletonListItems count={1} />
+					</Show>
+					<Show when={references.isError}>
+						<li class="px-2 py-1.5 text-xs text-muted">
+							{T()("agent.references.error")}
+						</li>
+					</Show>
 					<For each={items()}>
 						{(reference) => (
 							<AgentReferenceRow

@@ -59,7 +59,7 @@ test("only the person a run acts for can answer it", async () => {
 	const pending = createInteraction({
 		callId: "write",
 		key: constants.agent.widgets.confirmation,
-		title: "Confirm write",
+		title: { type: "lucid.literal", value: "Confirm write" },
 		data: {},
 		confirmation: { toolName: "write", input: {} },
 	});

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import type { StoredAgentMessagePart } from "../../schemas/agent.js";
 import { analyzeMediaToolName } from "../../services/agent/tools/analyze-media/constants.js";
+import type { StoredAgentMessagePart } from "./messages.js";
 import runnerTools from "./runner-tools.js";
 
 //* Start at a hostname boundary so long words are scanned once rather than retried at every character.

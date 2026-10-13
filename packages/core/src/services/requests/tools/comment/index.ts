@@ -18,7 +18,7 @@ export const commentOnRequestAgentTool = (
 		name,
 		title: copy("admin:core.tools.requests_comment.title"),
 		description:
-			"Post a new comment on a request. Comments are how to ask for changes: each withdraws approvals and blocks approval until it is resolved or closed. People taking part are notified. To answer an existing comment, use requests_reply.",
+			"Post a new comment on a request. Comments are how to ask for changes: each dismisses approvals and blocks approval until it is resolved or closed. People taking part are notified. To answer an existing comment, use requests_reply.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.RequestsRead],
@@ -33,7 +33,6 @@ export const commentOnRequestAgentTool = (
 					execution.authority,
 					options.collections,
 				),
-				runId: execution.run.id,
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});

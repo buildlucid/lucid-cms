@@ -71,7 +71,7 @@ const deleteDocument: ServiceFn<
 			collectionKey: collection.key,
 			documentId: input.documentId,
 			requestId: undefined,
-			userId: props.actor.kind === "user" ? props.actor.userId : null,
+			userId: props.actor.type === "user" ? props.actor.userId : null,
 		});
 		if (held.error) return held;
 

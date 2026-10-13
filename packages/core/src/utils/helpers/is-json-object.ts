@@ -1,5 +1,6 @@
 import isPlainObject from "./is-plain-object.js";
 
+/** Any value JSON can represent, eg. tool output or widget data. */
 export type JsonValue =
 	| string
 	| number

@@ -3,6 +3,8 @@ import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import getAccessibleRun from "../../../../services/agent/helpers/get-accessible-run.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
@@ -19,13 +21,14 @@ const respondRunController = factory.createHandlers(
 			"Submits or cancels a run's pending input request and streams the rest of its response.",
 		tags: ["agent"],
 		summary: "Respond To Agent Run",
+		responses: openAPI.responses({ stream: true }),
 		requestBody: openAPI.requestBody(controllerSchemas.respondRun.body),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.respondRun.params,
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	agentAccess(true),
 	validate("param", controllerSchemas.respondRun.params),
@@ -34,7 +37,14 @@ const respondRunController = factory.createHandlers(
 		const context = createServiceContext(c);
 		const body = c.req.valid("json");
 
-		const run = await getAccessibleRun(context, {
+		const run = await serviceWrapper(getAccessibleRun, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.agent.error.name"),
+				message: copy("server:core.routes.agent.error.message"),
+			},
+		})(context, {
 			runId: c.req.valid("param").id,
 			userId: c.get("auth").id,
 		});

@@ -72,9 +72,9 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * @remarks
  * Tools are grouped by resource, e.g. `agentTools.documents.find()` creates `documents_find`.
  * Bundles contain distinct tools and can be combined.
- * `defineAgent.features` configures built-in web, media analysis, file reading,
- * image generation, library and builder tools.
- * Document writes open review requests by default; `direct: true` saves changes directly.
+ * `defineAgent.features` configures the built-in web search and reading, media analysis,
+ * file reading, image generation and editing, audio generation, add to library and builder tools.
+ * Document writes open requests by default; `direct: true` saves changes directly.
  * Request tools cannot approve requests and only reach requests whose documents are all in the tool's `collections`.
  * Immediate actions require confirmation unless the chat or routine disables it.
  *

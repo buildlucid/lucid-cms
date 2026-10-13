@@ -13,7 +13,7 @@ export const inputSchema = getDocumentInput.pick({
 });
 
 /** The document a builder tool worked on, as the screen names it. */
-export const builderDocumentSchema = z.object({
+const builderDocumentSchema = z.object({
 	collectionKey: z.string(),
 	documentId: z
 		.number()

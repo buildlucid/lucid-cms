@@ -13,17 +13,9 @@ import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
 import createUsersToolkit from "./users/index.js";
 
 /**
- * Creates server-side helpers bound to a Lucid service context.
- *
- * Use this in server code to read Lucid content, work with media, enqueue jobs
- * and send external emails without calling internal services directly.
- *
- * For client-side data fetching, use the Lucid SDK instead.
- *
- * When Lucid needs to build absolute URLs, it uses `config.host`, then
- * `request.url`, and finally falls back to the local Lucid URL.
- *
- * Each toolkit method returns Lucid's standard `{ error, data }` response shape.
+ * Creates server helpers bound to a Lucid service context.
+ * @remarks Methods return `{ error, data }`; use the Lucid SDK for client-side fetching.
+ * Absolute URLs use `config.host`, then `request.url`, then the local Lucid URL.
  *
  * @example
  * ```ts

@@ -6,7 +6,7 @@ import type { GetMultipleQueryParams } from "../../schemas/notifications.js";
 import type { Notification } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAgentActors from "../agent/helpers/get-agent-actors.js";
-import getRequestUsers from "../requests/helpers/get-request-users.js";
+import getDisplayUsers from "../users/helpers/get-display-users.js";
 
 const getMultiple: ServiceFn<
 	[{ userId: number; query: GetMultipleQueryParams }],
@@ -23,7 +23,7 @@ const getMultiple: ServiceFn<
 
 	const [notifications, count] = notificationsRes.data;
 	const [actorsRes, agentsRes] = await Promise.all([
-		getRequestUsers(context, {
+		getDisplayUsers(context, {
 			ids: notifications.map((notification) => notification.actor_user_id),
 		}),
 		getAgentActors(context, {

@@ -33,7 +33,7 @@ const updateVersionController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateVersion.body),
 	validate("param", controllerSchemas.updateVersion.params),

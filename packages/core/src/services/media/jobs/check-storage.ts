@@ -5,6 +5,7 @@ import type { JobHandler } from "../../../libs/jobs/types.js";
 import resolve from "../../notifications/resolve.js";
 import upsert from "../../notifications/upsert.js";
 import getStorageUsage from "../get-storage-usage.js";
+import { mediaNotificationKeys } from "../notifications/keys.js";
 import { storageNotification } from "../notifications/storage.js";
 
 /**
@@ -22,20 +23,20 @@ const checkStorage: JobHandler = async ({ context }) => {
 	const storageUsed = usageRes.data.total;
 	const percentUsed =
 		storageLimit <= 0 ? 100 : (storageUsed / storageLimit) * 100;
-	const threshold = constants.notifications.storage.thresholds
+	const threshold = constants.notifications.storageThresholds
 		.filter((candidate) => percentUsed >= candidate)
 		.at(-1);
 
 	if (threshold === undefined) {
 		return resolve(context, {
 			definition: storageNotification,
-			key: constants.notifications.storage.key,
+			key: mediaNotificationKeys.storage,
 		});
 	}
 
 	const upsertRes = await upsert(context, {
 		definition: storageNotification,
-		key: constants.notifications.storage.key,
+		key: mediaNotificationKeys.storage,
 		fingerprint: String(threshold),
 		data: {
 			thresholdPercent: threshold,

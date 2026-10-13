@@ -10,6 +10,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
 import executeDeleteHook from "./execute-delete-hook.js";
+import requiresReview from "./requires-review.js";
 
 const beginSingleDeletion: ServiceFn<
 	[
@@ -44,7 +45,7 @@ const beginSingleDeletion: ServiceFn<
 		};
 	}
 
-	const documents = new DocumentsRepository(context.db);
+	const Documents = new DocumentsRepository(context.db);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
@@ -55,7 +56,7 @@ const beginSingleDeletion: ServiceFn<
 	});
 	if (accessRes.error) return accessRes;
 
-	const documentRes = await documents.selectSingle(
+	const documentRes = await Documents.selectSingle(
 		{
 			select: ["id", "is_deleted"],
 			where: [
@@ -96,7 +97,7 @@ const beginSingleDeletion: ServiceFn<
 
 	//* collections that review deletions only delete binned documents directly
 	if (
-		collectionRes.data.getData.publishing.review?.delete &&
+		requiresReview(collectionRes.data, { type: "delete" }) &&
 		!formatter.formatBoolean(documentRes.data.is_deleted)
 	) {
 		return {
@@ -124,7 +125,7 @@ const beginSingleDeletion: ServiceFn<
 		error: undefined,
 		data: {
 			collection: collectionRes.data,
-			documents,
+			documents: Documents,
 			tableNames: tableNamesRes.data,
 		},
 	};

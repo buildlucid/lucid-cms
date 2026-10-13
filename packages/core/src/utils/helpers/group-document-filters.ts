@@ -1,10 +1,7 @@
 import type { DocumentEnvironmentStatus } from "@lucidcms/types";
-import registeredFields from "../../libs/collection/custom-fields/registered-fields.js";
+import { fieldHooks } from "../../libs/collection/custom-fields/registered-fields.js";
 import { getFieldDatabaseConfig } from "../../libs/collection/custom-fields/storage/index.js";
-import type {
-	FieldDatabaseMode,
-	RegisteredFieldDefinition,
-} from "../../libs/collection/custom-fields/types.js";
+import type { FieldDatabaseMode } from "../../libs/collection/custom-fields/types.js";
 import prefixGeneratedColName from "../../libs/collection/helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaColumn,
@@ -32,7 +29,7 @@ const RELATION_TABLE_FILTER_MODE: FieldDatabaseMode = "relation-table";
 const ENVIRONMENT_STATUS_FILTER_PREFIX = "envStatus.";
 
 const environmentStatuses = new Set<DocumentEnvironmentStatus>([
-	"unreleased",
+	"unpublished",
 	"out-of-sync",
 	"in-sync",
 ]);
@@ -249,10 +246,7 @@ const formatFieldFilterValue = (params: {
 	const fieldType = params.schemaColumn?.customField?.type;
 	if (!fieldType || !params.schemaColumn) return params.value;
 
-	const fieldDefinition = registeredFields[fieldType] as Pick<
-		RegisteredFieldDefinition,
-		"formatFilterValue"
-	>;
+	const fieldDefinition = fieldHooks[fieldType];
 	if (!fieldDefinition.formatFilterValue) return params.value;
 
 	//* formatters return null deliberately for invalid input so the filter

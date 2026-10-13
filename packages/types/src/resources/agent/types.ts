@@ -132,7 +132,7 @@ export type AgentReferencesData = {
 };
 
 /** A field or brick in the document builder to scroll to. */
-export type AgentBuilderTarget = {
+export type AgentBuilderFocus = {
 	/** A builder brick's ref or a fixed brick's key. Omit it for the document's own fields. */
 	brick?: string;
 	field?: string;
@@ -161,7 +161,7 @@ export type AgentScreenCall =
 	| {
 			action: "focus";
 			screen: Extract<AgentScreen, { type: "document" }>;
-			target: AgentBuilderTarget;
+			focus: AgentBuilderFocus;
 	  };
 
 /** Why a screen could not answer a tool call. */
@@ -217,25 +217,26 @@ export type AgentReference = {
 	| Extract<AgentReferenceInput, { type: "request" }>
 );
 
-/** What an agent can do for the current user, combined from the tools they can use. */
+/** Capabilities derived from the tools available to the current user. */
 export type AgentCapabilities = {
-	/** MIME types of media the agent can analyse. Null when no analysis provider is available. */
-	mediaAnalysis: { mimeTypes: string[] } | null;
-	/** MIME types of files the agent can read. Null when no file reader is available. */
-	fileRead: { mimeTypes: string[] } | null;
-	/** Whether the agent can search the public web. */
-	webSearch: boolean;
-	/** Whether the agent can read public webpages. */
-	webRead: boolean;
-	/** Whether the agent can generate images with Lucid AI. */
-	imageGeneration: boolean;
-	/** Whether the agent can generate audio with Lucid AI. */
-	audioGeneration: boolean;
+	media: {
+		/** Supported media MIME types, or null when no analysis provider is available. */
+		analyze: { mimeTypes: string[] } | null;
+		/** Supported file MIME types, or null when no file reader is available. */
+		readFile: { mimeTypes: string[] } | null;
+		/** Media types the agent can generate or edit with Lucid AI. */
+		generate: Record<MediaGenerationType, boolean>;
+	};
+	web: {
+		search: boolean;
+		read: boolean;
+	};
 };
 
 /** An agent name used in navigation and saved chat labels. */
 export type AgentSummary = {
 	key: string;
+	/** Translated for the person viewing it. */
 	name: string;
 	/** Whether the agent is offered in the agent sidebar beside admin pages. */
 	sidebar: boolean;
@@ -244,8 +245,8 @@ export type AgentSummary = {
 /** Agent details available to the current admin user. */
 export interface Agent {
 	key: string;
-	name: string;
-	description: string;
+	name: ResolvedAdminCopy;
+	description: ResolvedAdminCopy;
 	/** Configures composer attachments and tools for reading and editing the person's open document builder. */
 	features: {
 		/** Composer media generation creates personal uploads and requires `upload`. */
@@ -282,8 +283,8 @@ export interface AgentCatalog {
 	agents: Agent[];
 }
 
-/** Routines defined in code are synced from config; the rest are created in the admin. */
-export type AgentRoutineSource = "code" | "database";
+/** Routines defined in code are synced from config; own routines are created by people in the admin. */
+export type AgentRoutineSource = "code" | "own";
 
 /** A routine's settings for one tool. Missing settings use the tool's defaults. */
 export type AgentRoutineToolSettings = {
@@ -343,16 +344,16 @@ export type AgentRef = AgentActor & {
 	id: string;
 };
 
-/** Lucid's own agent tools that the admin handles in their own way, eg. with custom views or by refreshing chat references. */
+/** Tools registered through agent `features`, with `lucid_` names reserved for core tools. */
 export type AgentLucidToolName =
 	| "web_search"
-	| "web_fetch"
+	| "web_read"
 	| "media_analyze"
 	| "media_read_file"
-	| "media_select"
 	| "media_generate_image"
 	| "media_edit_image"
 	| "media_generate_audio"
+	| "media_add_to_library"
 	| "lucid_builder_read"
 	| "lucid_builder_update"
 	| "lucid_builder_focus";
@@ -425,6 +426,9 @@ export type AgentRunStatus =
 /** How a routine run described its result when it finished. */
 export type AgentRunOutcome = "done" | "nothing_to_report" | "needs_review";
 
+/** Personal chats or chats for routines owned by users or defined in code. */
+export type AgentConversationKind = "chat" | "own-routine" | "code-routine";
+
 export type AgentRoutineTrigger = "schedule" | "manual";
 
 export type AgentRoutineConversationMode = "new" | "reuse";
@@ -437,7 +441,12 @@ export type AgentRunResultPart = {
 	finishedAt: string;
 };
 
-export type AgentTitleStatus = "provisional" | "generated" | "user_set";
+/** How the title was set, with `generating` indicating clients should poll for an automatic title. */
+export type AgentTitleStatus =
+	| "provisional"
+	| "generating"
+	| "generated"
+	| "user_set";
 
 export type AgentToolStatus =
 	| "pending"
@@ -459,7 +468,8 @@ export type AgentInteraction = {
 	id: string;
 	toolCallId: string;
 	answeredByUserId?: number;
-	title: string;
+	/** The prompt translated by the admin's copy helpers. */
+	title: ResolvedAdminCopy;
 	placement: "inline" | "composer";
 	/** Present when submission also authorises this invocation. */
 	confirmation?: { toolName: string; input: Record<string, unknown> };
@@ -467,7 +477,7 @@ export type AgentInteraction = {
 	confirmations?: {
 		toolCallId: string;
 		toolName: string;
-		title: string;
+		title: ResolvedAdminCopy;
 		input: Record<string, unknown>;
 	}[];
 } & (
@@ -538,7 +548,7 @@ export interface AgentWebSearchOutput {
 	results: Array<AgentWebSource & { excerpts: string[] }>;
 }
 
-export interface AgentWebFetchOutput extends AgentWebSource {
+export interface AgentWebReadOutput extends AgentWebSource {
 	content: string;
 	/** Full page text from the start, or excerpts chosen for an objective. */
 	contentType: "page" | "excerpts";
@@ -593,7 +603,7 @@ export interface AgentConversationDetails {
 }
 
 /** How much of its model's input limit a conversation's next request uses. Separate from billed usage. */
-export interface AgentContext {
+export interface AgentContextUsage {
 	/** The model that last served the conversation. */
 	model: string;
 	tokens: number;
@@ -619,14 +629,14 @@ export interface AgentConversation {
 	/** Only included when fetching a single conversation. */
 	inputs?: AgentInput[];
 	/** Unknown until the conversation's first model request. */
-	context: AgentContext | null;
+	context: AgentContextUsage | null;
 	/** Only included when fetching a single conversation. */
 	compactions?: AgentCompaction[];
 	id: string;
 	agentKey: string;
 	title: string;
 	titleStatus: AgentTitleStatus;
-	titleGenerationRequestedAt: string | null;
+	kind: AgentConversationKind;
 	/** Null for chats started by routines defined in code. */
 	userId: number | null;
 	routineId: string | null;
@@ -677,7 +687,7 @@ export interface AgentRoutine {
 	/** Null uses the agent's default model. */
 	modelSelection: AiModelSelection | null;
 	/** Per-tool settings by tool name. Missing tools and settings use the tool's defaults. */
-	tools: Record<string, AgentRoutineToolSettings>;
+	toolSettings: Record<string, AgentRoutineToolSettings>;
 	cron: string;
 	timezone: string;
 	enabled: boolean;
@@ -692,7 +702,7 @@ export interface AgentRoutine {
 
 /** Server-sent events streamed while a run executes. */
 export type AgentStreamEvent =
-	| { type: "context"; runId: string; context: AgentContext }
+	| { type: "context"; runId: string; context: AgentContextUsage }
 	| { type: "start"; runId: string; messageId: string }
 	| { type: "text-delta"; messageId: string; text: string }
 	| ({ messageId: string } & Extract<AgentMessagePart, { type: "tool" }>)

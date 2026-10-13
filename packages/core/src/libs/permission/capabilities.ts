@@ -5,7 +5,7 @@ import type { AgentDefinition } from "../agent/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
 import { copy, normalizeCopy, translate } from "../i18n/index.js";
-import type { AdminCopyDescriptor, ResolvedAdminCopy } from "../i18n/types.js";
+import type { ResolvedAdminCopy } from "../i18n/types.js";
 import type { AccessPermission } from "./access-config.js";
 import {
 	agentPermissionActions,
@@ -22,7 +22,12 @@ import {
 	ExternalScopes,
 	getCollectionExternalScope,
 } from "./external-scopes.js";
-import type { PermissionDetails, StaticPermission } from "./types.js";
+import type {
+	AgentPermissionAction,
+	CollectionPermissionAction,
+	PermissionDetails,
+	StaticPermission,
+} from "./types.js";
 
 export type ExternalCapability = {
 	scope: string;
@@ -103,7 +108,7 @@ const collectionPermissionDetails = {
 	restore: { name: copy("admin:permissions.documents.restore") },
 	publish: { name: copy("admin:permissions.documents.publish") },
 	review: { name: copy("admin:permissions.documents.review") },
-} as const;
+} satisfies Record<CollectionPermissionAction, PermissionDetails>;
 
 const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 	return Object.values(PermissionGroups).map((group) => {
@@ -226,14 +231,14 @@ const agentPermissionDetails = {
 			"admin:permissions.agents.manage.code.routines.description",
 		),
 	},
-} as const;
+} satisfies Record<AgentPermissionAction, PermissionDetails>;
 
 const getAgentCapabilityGroups = (
 	agents: readonly AgentDefinition[],
 ): CapabilityGroup[] =>
 	agents.map((agent) => ({
 		key: `agents:${agent.key}`,
-		details: { name: normalizeCopy<AdminCopyDescriptor>(agent.name) },
+		details: { name: agent.name },
 		core: true,
 		capabilities: agentPermissionActions.map((action): CapabilityDefinition => {
 			const permission = getAgentPermission(agent.key, action);
@@ -459,6 +464,7 @@ export const getCapabilityRegistry = (
 	return groups;
 };
 
+/** Finds the integration capability for a scope, if the principal type may use it. */
 export const getExternalCapability = (
 	config: AccessConfig,
 	scope: string,

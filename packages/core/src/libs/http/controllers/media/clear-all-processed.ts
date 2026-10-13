@@ -27,7 +27,7 @@ const clearAllProcessedController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaUpdate]),
 	async (c) => {

@@ -6,7 +6,7 @@ import {
 	TbOutlinePlus,
 	TbOutlineX,
 } from "solid-icons/tb";
-import { type Component, For, Show } from "solid-js";
+import { type Component, For, Match, Show, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
 import Menu from "@/components/Menu/Menu";
 import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
@@ -54,7 +54,12 @@ const AgentPanelActions: Component<{
 						each={recent.data?.data ?? []}
 						fallback={
 							<Menu.Item disabled={true}>
-								{T()("agent.panel.recent.empty")}
+								<Switch fallback={T()("agent.panel.recent.empty")}>
+									<Match when={recent.isLoading}>{T()("common.loading")}</Match>
+									<Match when={recent.isError}>
+										{T()("agent.panel.recent.error")}
+									</Match>
+								</Switch>
 							</Menu.Item>
 						}
 					>

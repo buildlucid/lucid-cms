@@ -60,7 +60,7 @@ const DeleteDocumentModal: Component<DeleteDocumentProps> = (props) => {
 			userStore.get.hasPermission([Permissions.RequestsRead]).all &&
 			userStore.get.hasPermission([
 				permissions.delete,
-				permissions["delete-request"],
+				permissions.deleteRequest,
 			]).some;
 
 		return (

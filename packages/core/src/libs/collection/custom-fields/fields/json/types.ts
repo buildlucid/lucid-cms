@@ -5,7 +5,8 @@ import type {
 	SharedFieldConfig,
 } from "../../types.js";
 
-export type JsonValue = Record<string, unknown> | unknown[];
+/** A JSON field value: an object or an array. */
+export type JsonFieldValue = Record<string, unknown> | unknown[];
 
 export interface JsonFieldConfig extends SharedFieldConfig {
 	type: "json";
@@ -21,18 +22,18 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 	/** Store a value per content locale when collection localization is enabled. Defaults to false. */
 	localized?: boolean;
 	/** Initial value for a new field. */
-	default?: JsonValue | null;
+	default?: JsonFieldValue | null;
 	/** Create a database index for this field. */
 	index?: boolean;
 	/** Editor visibility and layout. */
 	ui?: FieldUIConfig;
 	/** Checks applied when saving field values. */
-	validation?: FieldValidation<JsonValue>;
+	validation?: FieldValidation<JsonFieldValue>;
 }
 
 export type JsonFieldProps = Partial<Omit<JsonFieldConfig, "key" | "type">>;
 
-export type JsonResValue = JsonValue | null;
+export type JsonResValue = JsonFieldValue | null;
 
 export type JsonCustomFieldMapItem = {
 	props: JsonFieldProps;

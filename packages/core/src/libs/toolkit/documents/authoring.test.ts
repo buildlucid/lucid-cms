@@ -76,7 +76,7 @@ describe("document authoring toolkit", () => {
 	const fixture = getTestConfig();
 	let context: ServiceContext;
 	let toolkit: ReturnType<typeof createToolkit>;
-	const actor = { kind: "system" } as const;
+	const actor = { type: "system" } as const;
 	const create = (title = "Hello") =>
 		toolkit.documents.createSingle({
 			collectionKey: collection.key,
@@ -221,7 +221,7 @@ describe("document authoring toolkit", () => {
 				query: { filter: { title: { value: "Rolled back subscriber" } } },
 			});
 			assert(read.data);
-			expect(read.data.documents).toHaveLength(0);
+			expect(read.data.data).toHaveLength(0);
 		} finally {
 			context.config.hooks = original;
 		}
@@ -277,7 +277,7 @@ describe("document authoring toolkit", () => {
 		});
 		assert(defaults.data, JSON.stringify(defaults.error));
 		expect(defaults.data.count).toBe(2);
-		for (const document of defaults.data.documents) {
+		for (const document of defaults.data.data) {
 			expect(document.bricks).toBeUndefined();
 		}
 
@@ -288,7 +288,7 @@ describe("document authoring toolkit", () => {
 		});
 		assert(included.data, JSON.stringify(included.error));
 		expect(included.data.count).toBe(2);
-		for (const document of included.data.documents) {
+		for (const document of included.data.data) {
 			const single = await toolkit.documents.getSingle({
 				collectionKey: collection.key,
 				version: "latest",
@@ -796,7 +796,7 @@ describe("document authoring toolkit", () => {
 		const target = { collectionKey: collection.key, id: created.data.id };
 		const denied = await toolkit.documents.updateSingle({
 			...target,
-			actor: { kind: "user", userId: user.data.id },
+			actor: { type: "user", userId: user.data.id },
 			data: { fields: { featured: true } },
 		});
 		expect(denied.error?.status).toBe(403);
@@ -1130,7 +1130,7 @@ describe("document authoring toolkit", () => {
 		assert(user.data);
 		const created = await toolkit.documents.createSingle({
 			collectionKey: collection.key,
-			actor: { kind: "user", userId: user.data.id },
+			actor: { type: "user", userId: user.data.id },
 			data: { fields: { title: { en: "Hello", fr: "Bonjour" } } },
 		});
 		assert(created.data, JSON.stringify(created.error));
@@ -1155,91 +1155,6 @@ describe("document authoring toolkit", () => {
 			.where("id", "=", created.data.version.id)
 			.executeTakeFirstOrThrow();
 		expect(revision).toEqual({ created_by: user.data.id, type: "revision" });
-	});
-
-	test.each([
-		"admin",
-		"toolkit",
-	])("holds %s write claims without transactions and releases them after failure", async (source) => {
-		const created = await create();
-		assert(created.data);
-		const target = { collectionKey: collection.key, id: created.data.id };
-		const content = await readDocumentContent(context, target);
-		assert(content.data);
-		const supports = context.config.db.supports.bind(context.config.db);
-		const capability = vi
-			.spyOn(context.config.db, "supports")
-			.mockImplementation((feature) =>
-				feature === "transaction" ? false : supports(feature),
-			);
-		const hooks = context.config.hooks;
-		const entered = Promise.withResolvers<void>();
-		const resume = Promise.withResolvers<void>();
-		context.config.hooks = [
-			...hooks,
-			{
-				service: "documents",
-				event: "beforeUpsert",
-				handler: async () => {
-					entered.resolve();
-					await resume.promise;
-					return {
-						error: {
-							status: 400,
-							message: copy("server:core.errors.default.message"),
-						},
-						data: undefined,
-					};
-				},
-			},
-		];
-		try {
-			const writing =
-				source === "admin"
-					? upsertSingle(context, {
-							collectionKey: collection.key,
-							documentId: target.id,
-							userId: null,
-							...content.data.stored,
-						})
-					: toolkit.documents.updateSingle({
-							...target,
-							actor,
-							data: { fields: { featured: true } },
-						});
-			await entered.promise;
-			const sameToolkit = await toolkit.documents.updateSingle({
-				...target,
-				actor,
-				data: { fields: { featured: true } },
-			});
-			expect(sameToolkit.error?.status).toBe(409);
-			const other = createToolkit({ ...context });
-			const conflict = await other.documents.updateSingle({
-				...target,
-				actor,
-				data: { fields: { title: { en: "Concurrent" } } },
-			});
-			expect(conflict.error?.status).toBe(409);
-			expect((await other.documents.getEditable(target)).error?.status).toBe(
-				409,
-			);
-			resume.resolve();
-			expect((await writing).error).toBeDefined();
-			const read = await other.documents.getEditable(target);
-			expect(read.data?.editToken).toBe(created.data.editToken);
-			expect(read.data?.data.fields?.featured).toBe(false);
-		} finally {
-			resume.resolve();
-			context.config.hooks = hooks;
-			capability.mockRestore();
-		}
-		const updated = await toolkit.documents.updateSingle({
-			...target,
-			actor,
-			data: { fields: { featured: true } },
-		});
-		expect(updated.error).toBeUndefined();
 	});
 
 	test("rejects a same-document write from a hook without disrupting the outer save", async () => {
@@ -1280,19 +1195,13 @@ describe("document authoring toolkit", () => {
 		}
 	});
 
-	test("releases earlier batch claims when a later document is busy without transactions", async () => {
+	test("releases earlier batch claims when a later document is busy", async () => {
 		const first = await create();
 		const second = await create();
 		assert(first.data && second.data);
 		const firstTarget = { collectionKey: collection.key, id: first.data.id };
 		const secondTarget = { collectionKey: collection.key, id: second.data.id };
-		const supports = context.config.db.supports.bind(context.config.db);
-		const capability = vi
-			.spyOn(context.config.db, "supports")
-			.mockImplementation((feature) =>
-				feature === "transaction" ? false : supports(feature),
-			);
-		try {
+		{
 			const acquired = await acquireDocumentWrites(context, {
 				collectionKey: collection.key,
 				ids: [secondTarget.id],
@@ -1311,8 +1220,6 @@ describe("document authoring toolkit", () => {
 			expect(
 				(await toolkit.documents.getEditable(secondTarget)).error?.status,
 			).toBe(409);
-		} finally {
-			capability.mockRestore();
 		}
 		expect(
 			(await toolkit.documents.getEditable(secondTarget)).data?.editToken,

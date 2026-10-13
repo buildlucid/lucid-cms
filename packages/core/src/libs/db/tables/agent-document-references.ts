@@ -1,12 +1,12 @@
 import type { Generated } from "kysely";
 import z from "zod";
-import { agentReferenceSourceTypeSchema } from "../../../schemas/agent-references.js";
+import { agentReferenceSourceTypeSchema } from "../../agent/references.js";
 import { defineTable } from "../client/table/definition.js";
 import type { BooleanInt, TimestampImmutable } from "../types.js";
 
 export const agentDocumentReferencesTable = defineTable(
 	"lucid_agent_document_references",
-	() => ({
+	(adapter) => ({
 		columns: {
 			id: { schema: z.uuid(), type: "text" },
 			conversation_id: { schema: z.uuid(), type: "text" },
@@ -16,7 +16,10 @@ export const agentDocumentReferencesTable = defineTable(
 			source: { schema: agentReferenceSourceTypeSchema, type: "text" },
 			tool_name: { schema: z.string().nullable(), type: "text" },
 			managed: {
-				schema: z.union([z.boolean(), z.literal(0), z.literal(1)]),
+				schema: z.union([
+					z.literal(adapter.config.defaults.boolean.true),
+					z.literal(adapter.config.defaults.boolean.false),
+				]),
 				type: "boolean",
 			},
 			created_at: {

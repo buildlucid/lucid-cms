@@ -2,7 +2,8 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { requestData, requestHref } from "./shared.js";
+import getRequestPath from "../helpers/get-request-path.js";
+import { requestData } from "./shared.js";
 
 export const closedNotification = defineNotification({
 	key: "requests:closed",
@@ -26,6 +27,6 @@ export const closedNotification = defineNotification({
 					data: { title: data.title },
 					defaultMessage: "{{title}} was closed",
 				}),
-		href: requestHref(data.requestId),
+		href: getRequestPath(data.requestId),
 	}),
 });

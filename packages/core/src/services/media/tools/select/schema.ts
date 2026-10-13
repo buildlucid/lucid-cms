@@ -1,9 +1,9 @@
-import z from "zod";
-import constants from "../../../../constants/constants.js";
 import type {
 	AgentMediaSelectData,
 	AgentMediaSelectResponse,
-} from "../../../../types/response.js";
+} from "@lucidcms/types";
+import z from "zod";
+import constants from "../../../../constants/constants.js";
 import { mediaItemSchema, mediaTypes } from "../helpers/schema.js";
 
 export const inputSchema = z.object({

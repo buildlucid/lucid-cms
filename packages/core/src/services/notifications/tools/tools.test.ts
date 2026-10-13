@@ -64,14 +64,13 @@ const callAgent = (
 			authority: { principal, permissions: [], superAdmin: false },
 			actor:
 				principal.type === "user"
-					? { kind: "user", userId: principal.userId, agentRunId: runId }
-					: { kind: "system", agentRunId: runId },
+					? { type: "user", userId: principal.userId, agentRunId: runId }
+					: { type: "system", agentRunId: runId },
 			signal: AbortSignal.timeout(10_000),
 			operationId: `${runId}:${randomUUID()}`,
 			run: {
 				id: runId,
 				conversationId: randomUUID(),
-				userId: principal.type === "user" ? principal.userId : null,
 				agentKey: "test",
 			},
 		},

@@ -38,6 +38,17 @@ export const formatAiCreditAmount = (value?: number | null) => {
 	return creditsFormatter.format(value);
 };
 
+export const aiUsageHref = "/lucid/system/ai-usage";
+
+/** Returns used allowance as a whole percentage capped at 100; meters warn at `aiCreditsWarningPercent`. */
+export const getAllowancePercentUsed = (
+	allowance: { used: number; total: number } | null | undefined,
+) => {
+	if (!allowance || allowance.total <= 0) return 0;
+	return Math.min(100, Math.floor((allowance.used / allowance.total) * 100));
+};
+export const aiCreditsWarningPercent = 90;
+
 export const formatAiCredits = (value?: number | null) => {
 	const amount = formatAiCreditAmount(value);
 	if (amount === undefined) return undefined;
@@ -91,7 +102,7 @@ export const aiUsageSessionHref = (session: {
 	type: AiUsageSessionType;
 	id: string;
 }) =>
-	`/lucid/system/ai-usage?session=${encodeURIComponent(aiUsageSessionParam(session))}`;
+	`${aiUsageHref}?session=${encodeURIComponent(aiUsageSessionParam(session))}`;
 
 /** Call inside a reactive scope. */
 export const canViewAiUsage = () =>

@@ -13,7 +13,7 @@ import lockRequest from "./helpers/lock-request.js";
 import resolveRequestNotifications from "./helpers/resolve-request-notifications.js";
 import { closedNotification } from "./notifications/closed.js";
 
-/** Closes a request without publishing it. It can be reopened later. */
+/** Closes a request without completing it, allowing it to be reopened later. */
 const close: ServiceFn<
 	[{ id: number; user: LucidActor; agentRunId?: string }],
 	undefined
@@ -23,7 +23,6 @@ const close: ServiceFn<
 
 	const lockRes = await lockRequest(context, { id: data.id });
 	if (lockRes.error) return lockRes;
-	await using _lock = lockRes.data;
 
 	const requestRes = await loadRequest(context, data);
 	if (requestRes.error) return requestRes;

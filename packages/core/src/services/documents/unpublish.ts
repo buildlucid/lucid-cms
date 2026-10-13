@@ -5,6 +5,7 @@ import hasAccess from "../../libs/permission/has-access.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import unpublishVersion from "../documents-versions/unpublish-version.js";
+import requiresReview from "./helpers/requires-review.js";
 
 /** Unpublishes a document directly from an environment when review is not required. */
 const unpublish: ServiceFn<
@@ -12,7 +13,7 @@ const unpublish: ServiceFn<
 		{
 			collectionKey: string;
 			documentId: number;
-			target: string;
+			environment: string;
 			user: LucidActor;
 			agentRunId?: string;
 		},
@@ -44,9 +45,10 @@ const unpublish: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	if (
-		collectionRes.data.getData.publishing.review?.unpublish.includes(
-			data.target,
-		)
+		requiresReview(collectionRes.data, {
+			type: "unpublish",
+			environment: data.environment,
+		})
 	) {
 		return {
 			error: {
@@ -61,7 +63,7 @@ const unpublish: ServiceFn<
 	return unpublishVersion(context, {
 		collectionKey: data.collectionKey,
 		documentIds: [data.documentId],
-		target: data.target,
+		target: data.environment,
 		userId: data.user.id,
 		agentRunId: data.agentRunId,
 	});

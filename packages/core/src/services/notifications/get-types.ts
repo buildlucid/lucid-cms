@@ -1,10 +1,10 @@
 import { notificationsFormatter } from "../../libs/formatters/index.js";
 import { NotificationTypeSettingsRepository } from "../../libs/repositories/index.js";
-import type { NotificationType } from "../../types/response.js";
+import type { NotificationTypeSettings } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /** Every registered type with its current settings, for the settings page. */
-const getTypes: ServiceFn<[], NotificationType[]> = async (context) => {
+const getTypes: ServiceFn<[], NotificationTypeSettings[]> = async (context) => {
 	const TypeSettings = new NotificationTypeSettingsRepository(context.db);
 
 	const settingsRes = await TypeSettings.selectMultiple({
@@ -15,7 +15,7 @@ const getTypes: ServiceFn<[], NotificationType[]> = async (context) => {
 	return {
 		error: undefined,
 		data: notificationsFormatter.formatTypes({
-			definitions: context.config.notifications,
+			definitions: context.config.notifications.definitions,
 			settings: settingsRes.data ?? [],
 			translate: context.translate,
 		}),

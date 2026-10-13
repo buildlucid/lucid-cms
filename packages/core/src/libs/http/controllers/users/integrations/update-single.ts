@@ -34,7 +34,7 @@ const updateSingleController = factory.createHandlers(
 			params: userIntegrationItemParamsSchema,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateSingle.body),
 	validate("param", userIntegrationItemParamsSchema),

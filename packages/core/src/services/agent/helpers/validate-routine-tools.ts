@@ -1,12 +1,13 @@
 import { getAvailableTools } from "../../../libs/agent/capabilities.js";
-import type { RoutineTools } from "../../../libs/agent/types.js";
+import type { RoutineToolSettings } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getAiAccess from "../../connection/get-ai-access.js";
 import checkAgentAccess from "./check-agent-access.js";
 
+/** Checks a routine's tool settings only name tools the agent offers the person. */
 const validateRoutineTools: ServiceFn<
-	[{ agentKey: string; userId: number; tools: Readonly<RoutineTools> }],
+	[{ agentKey: string; userId: number; tools: Readonly<RoutineToolSettings> }],
 	undefined
 > = async (context, input) => {
 	const names = Object.keys(input.tools);

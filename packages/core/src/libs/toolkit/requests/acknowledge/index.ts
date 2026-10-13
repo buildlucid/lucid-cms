@@ -4,7 +4,6 @@ import type {
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
 import { runToolkitService } from "../../utils.js";
-import runRequestService from "../run-request-service.js";
 import type { ToolkitRequestTarget } from "../types.js";
 import { inputSchema } from "./schema.js";
 
@@ -20,20 +19,31 @@ const acknowledge = (
 		schema: inputSchema,
 		input,
 		handler: async ({ actor, ...data }) => {
-			const { default: acknowledge } = await import(
-				"../../../../services/requests/acknowledge.js"
-			);
+			const [
+				{ default: resolveActorUser },
+				{ default: serviceWrapper },
+				{ default: acknowledge },
+			] = await Promise.all([
+				import("../../../../services/users/helpers/resolve-actor-user.js"),
+				import("../../../../utils/services/service-wrapper.js"),
+				import("../../../../services/requests/acknowledge.js"),
+			]);
 
-			return runRequestService(context, {
-				actor,
-				transaction: true,
-				run: (context, user) =>
-					acknowledge(context, {
+			return serviceWrapper(
+				async (
+					context: ServiceContext,
+				): ServiceResponse<{ targets: ToolkitRequestTarget[] }> => {
+					const userRes = await resolveActorUser(context, { actor });
+					if (userRes.error) return userRes;
+
+					return acknowledge(context, {
 						...data,
-						user,
+						user: userRes.data,
 						agentRunId: actor.agentRunId,
-					}),
-			});
+					});
+				},
+				{ transaction: true },
+			)(context);
 		},
 		name: { key: "core.toolkit.requests.acknowledge.error.name" },
 		message: { key: "core.toolkit.requests.acknowledge.error.message" },

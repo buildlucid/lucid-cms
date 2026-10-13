@@ -1,10 +1,11 @@
 import classnames from "classnames";
-import { type Component, createMemo, For, Index, Show } from "solid-js";
-import DashboardCard from "@/components/DashboardCard/DashboardCard";
-import DashboardCardItem from "@/components/DashboardCardItem/DashboardCardItem";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
+import HomeCard from "@/components/HomeCard/HomeCard";
+import HomeCardItem from "@/components/HomeCardItem/HomeCardItem";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import RequestQueues from "@/components/RequestQueues/RequestQueues";
+import SkeletonListItems from "@/components/SkeletonListItems/SkeletonListItems";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import api from "@/services/api";
 import T from "@/translations";
@@ -17,7 +18,7 @@ import { getRequestRoute } from "@/utils/route-helpers";
  * so they can see what needs them and follow their own. The list is left out
  * when there are none.
  */
-const ReviewWidget: Component<{ size: DashboardWidgetSize }> = () => {
+const ReviewWidget: Component<{ size: HomeWidgetSize }> = () => {
 	// ----------------------------------------
 	// Queries
 	const overview = api.requests.useGetOverview({ queryParams: {} });
@@ -34,13 +35,16 @@ const ReviewWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Memos
 	const showRequests = createMemo(
-		() => requests.isLoading || (requests.data?.data.length ?? 0) > 0,
+		() =>
+			requests.isLoading ||
+			requests.isError ||
+			(requests.data?.data.length ?? 0) > 0,
 	);
 
 	// ----------------------------------------
 	// Render
 	return (
-		<DashboardCard title={T()("home.widget.review.label")} href="/lucid/review">
+		<HomeCard title={T()("home.widget.review.label")} href="/lucid/review">
 			<RequestQueues
 				overview={overview.data?.data}
 				loading={overview.isLoading}
@@ -51,53 +55,53 @@ const ReviewWidget: Component<{ size: DashboardWidgetSize }> = () => {
 				<h3 class="mt-4 mb-1 px-2 text-xs text-muted">
 					{T()("home.widget.review.mine")}
 				</h3>
-				<ul class="flex flex-col">
-					<Show
-						when={!requests.isLoading}
-						fallback={
-							<Index each={[1, 2, 3]}>
-								{() => (
-									<li class="flex items-center gap-3 px-2 py-2">
-										<span class="skeleton block h-9 w-7 shrink-0" />
-										<span class="flex grow flex-col gap-1.5">
-											<span class="skeleton block h-3.5 w-1/2" />
-											<span class="skeleton block h-3 w-1/3" />
-										</span>
+				<Switch
+					fallback={
+						<ul class="flex flex-col">
+							<For each={requests.data?.data}>
+								{(request) => (
+									<li>
+										<HomeCardItem
+											href={getRequestRoute({ requestId: request.id })}
+											title={request.title}
+											description={requestTypes[request.type].label()}
+											thumb={
+												<span class="relative flex">
+													<DocumentThumb
+														requested={request.type === "create"}
+													/>
+													<StatusIndicator
+														variant={
+															requestStates[getRequestState(request)].indicator
+														}
+														label={requestStates[
+															getRequestState(request)
+														].label()}
+														class="absolute -right-1 -bottom-0.5 ring-2 ring-card"
+													/>
+												</span>
+											}
+											meta={dateHelpers.formatRelativeDate(request.updatedAt)}
+										/>
 									</li>
 								)}
-							</Index>
-						}
-					>
-						<For each={requests.data?.data}>
-							{(request) => (
-								<li>
-									<DashboardCardItem
-										href={getRequestRoute({ requestId: request.id })}
-										title={request.title}
-										description={requestTypes[request.type].label()}
-										thumb={
-											<span class="relative flex">
-												<DocumentThumb requested={request.type === "create"} />
-												<StatusIndicator
-													variant={
-														requestStates[getRequestState(request)].indicator
-													}
-													label={requestStates[
-														getRequestState(request)
-													].label()}
-													class="absolute -right-1 -bottom-0.5 ring-2 ring-card"
-												/>
-											</span>
-										}
-										meta={dateHelpers.formatRelativeDate(request.updatedAt)}
-									/>
-								</li>
-							)}
-						</For>
-					</Show>
-				</ul>
+							</For>
+						</ul>
+					}
+				>
+					<Match when={requests.isLoading}>
+						<ul class="flex flex-col">
+							<SkeletonListItems />
+						</ul>
+					</Match>
+					<Match when={requests.isError}>
+						<p class="flex min-h-9 items-center px-2 text-sm text-muted">
+							{T()("home.widget.review.error")}
+						</p>
+					</Match>
+				</Switch>
 			</Show>
-		</DashboardCard>
+		</HomeCard>
 	);
 };
 

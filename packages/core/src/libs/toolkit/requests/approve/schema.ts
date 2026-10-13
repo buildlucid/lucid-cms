@@ -1,5 +1,5 @@
 import z from "zod";
-import { toolkitUserActorSchema } from "../../schema.js";
+import { toolkitUserActorSchema } from "../../../permission/toolkit-actor.js";
 import { requestBodySchema, requestWriteSchema } from "../schema.js";
 
 export const inputSchema = requestWriteSchema.extend({

@@ -17,7 +17,7 @@ export const storageNotification = defineNotification({
 	}),
 	level: "warning",
 	actionRequired: true,
-	required: true,
+	mandatory: true,
 	audience: { permission: Permissions.SettingsRead },
 	email: { delayMinutes: 0 },
 	data: z.object({

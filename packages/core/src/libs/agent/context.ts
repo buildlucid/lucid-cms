@@ -1,4 +1,3 @@
-import type { StoredAgentMessagePart } from "../../schemas/agent.js";
 import type {
 	AgentToolDetails,
 	AgentToolStatus,
@@ -6,6 +5,7 @@ import type {
 import { copy } from "../i18n/index.js";
 import { messageText } from "./input.js";
 import { summaryInstructions } from "./instructions/messages.js";
+import type { StoredAgentMessagePart } from "./messages.js";
 import runnerTools from "./runner-tools.js";
 import type {
 	Checkpoint,
@@ -118,7 +118,7 @@ type ToolValuePreview = {
 };
 
 /** Keeps a long tool value out of context, pointing at the saved message the history tool can read. */
-export const toolValuePreview = <Value>(
+const toolValuePreview = <Value>(
 	value: Value,
 	source: { messageId: string; toolCallId: string },
 ): { value: Value | ToolValuePreview; truncated: boolean } => {

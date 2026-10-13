@@ -1,5 +1,5 @@
 import type z from "zod";
-import type { MediaListItem } from "../../../../types/response.js";
+import type getMultipleService from "../../../../services/media/get-multiple.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -13,10 +13,9 @@ export type ToolkitMediaGetMultipleQuery = z.input<typeof querySchema>;
 export type ToolkitMediaGetMultipleInput = z.input<typeof inputSchema>;
 
 /** Matching media, with audio transcripts, and the total count before pagination. */
-export type ToolkitMediaGetMultipleResult = {
-	data: MediaListItem[];
-	count: number;
-};
+export type ToolkitMediaGetMultipleResult = NonNullable<
+	Awaited<ReturnType<typeof getMultipleService>>["data"]
+>;
 
 const getMultiple = async (
 	context: ServiceContext,

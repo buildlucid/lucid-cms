@@ -29,7 +29,7 @@ const getUploadPartUrlsController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.getUploadPartUrls.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.getUploadPartUrls.params),
 	validate("json", controllerSchemas.getUploadPartUrls.body),

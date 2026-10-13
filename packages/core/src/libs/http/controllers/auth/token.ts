@@ -23,7 +23,7 @@ const tokenController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.sensitive.limit,

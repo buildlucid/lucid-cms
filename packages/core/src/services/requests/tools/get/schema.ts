@@ -1,10 +1,10 @@
 import z from "zod";
-import { requestCommentResolutionSchema } from "../../../../libs/db/tables/request-events.js";
+import { agentNameSchema } from "../../../../libs/tools/person.js";
 import {
+	requestCommentResolutionSchema,
 	requestStatusSchema,
 	requestTypeSchema,
-} from "../../../../libs/db/tables/requests.js";
-import { agentNameSchema } from "../../../../libs/tools/person.js";
+} from "../../../../schemas/requests.js";
 import {
 	requestIdInput,
 	requestLinksSchema,
@@ -24,8 +24,8 @@ export const inputSchema = z.object({
 
 const commentShape = {
 	id: z.number(),
-	author: requestUserSchema.nullable(),
-	authorAgent: agentNameSchema,
+	actor: requestUserSchema.nullable(),
+	actorAgent: agentNameSchema,
 	byYou: z.boolean().meta({ description: "Written by you." }),
 	body: z.string().meta({ description: "HTML." }),
 	createdAt: z.string().nullable(),
@@ -113,8 +113,8 @@ export const outputSchema = z.object({
 				z
 					.looseObject({
 						type: z.string(),
-						author: requestUserSchema.nullable(),
-						authorAgent: agentNameSchema,
+						actor: requestUserSchema.nullable(),
+						actorAgent: agentNameSchema,
 						createdAt: z.string().nullable(),
 					})
 					.meta({ description: "Other details depend on the type." }),

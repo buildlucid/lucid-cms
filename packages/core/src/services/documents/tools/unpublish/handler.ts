@@ -69,7 +69,7 @@ const unpublishDocument: ServiceFn<
 		const unpublished = await unpublish(context, {
 			collectionKey: collection.key,
 			documentId: input.documentId,
-			target: input.target,
+			environment: input.environment,
 			user,
 			agentRunId: props.actor.agentRunId,
 		});
@@ -111,7 +111,7 @@ const unpublishDocument: ServiceFn<
 		document: {
 			collectionKey: collection.key,
 			documentId: input.documentId,
-			targets: [input.target],
+			targets: [input.environment],
 		},
 		requestId: input.requestId,
 		conversationId: props.conversationId,
@@ -125,7 +125,7 @@ const unpublishDocument: ServiceFn<
 						context.translate(collection.getData.details.labels.singular) ??
 						collection.key,
 					id: input.documentId,
-					target: input.target,
+					target: input.environment,
 				},
 			}),
 		),

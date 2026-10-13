@@ -34,7 +34,7 @@ export const buildTimeline = (props: {
 			createdByRunId: latest.createdByRunId,
 			promotedFrom: latest.promotedFrom,
 			contentId: latest.contentId,
-			isReleased: true,
+			isPublished: true,
 			promotedFromLatest: true,
 			inSyncWithPromotedFrom: isInSyncWithPromotedFrom(latest),
 		};
@@ -58,7 +58,7 @@ export const buildTimeline = (props: {
 			promotedFrom: revision.promotedFrom,
 			contentId: revision.contentId,
 			bricks: revision.bricks,
-			isReleased: false,
+			isPublished: false,
 			promotedFromLatest:
 				documentData?.versions?.latest?.id === revision.promotedFrom,
 			inSyncWithPromotedFrom: isInSyncWithPromotedFrom(revision),
@@ -68,7 +68,7 @@ export const buildTimeline = (props: {
 	//* collect environment versions
 	const environmentVersions: TimelineItem[] = [];
 	if (documentData?.versions) {
-		let unreleasedEnvCounter = 0;
+		let unpublishedEnvCounter = 0;
 		for (const [key, version] of Object.entries(documentData.versions)) {
 			if (key === "latest") continue;
 
@@ -84,7 +84,7 @@ export const buildTimeline = (props: {
 					createdByRunId: version.createdByRunId,
 					promotedFrom: version.promotedFrom,
 					contentId: version.contentId,
-					isReleased: true,
+					isPublished: true,
 					promotedFromLatest:
 						documentData?.versions?.latest?.id === version.promotedFrom,
 					inSyncWithPromotedFrom: isInSyncWithPromotedFrom(version),
@@ -97,7 +97,7 @@ export const buildTimeline = (props: {
 						latestItem.environmentVersions = [];
 					latestItem.environmentVersions.push({
 						type: "environment",
-						id: -1 * (1000 + unreleasedEnvCounter++),
+						id: -1 * (1000 + unpublishedEnvCounter++),
 						version: key,
 						createdAt: null,
 						updatedAt: null,
@@ -106,7 +106,7 @@ export const buildTimeline = (props: {
 						createdByRunId: null,
 						promotedFrom: null,
 						contentId: null,
-						isReleased: false,
+						isPublished: false,
 						promotedFromLatest: false,
 						inSyncWithPromotedFrom: false,
 					});
@@ -149,18 +149,17 @@ export const buildTimeline = (props: {
 		}
 	}
 
-	//* ensure unreleased env cards are always last within environmentVersions
 	for (const item of allItems) {
 		if (!item.environmentVersions || item.environmentVersions.length === 0)
 			continue;
 
 		const decorated = item.environmentVersions.map((v, idx) => ({ v, idx }));
 		decorated.sort((a, b) => {
-			const aIsUnreleased = a.v.type === "environment" && !a.v.isReleased;
-			const bIsUnreleased = b.v.type === "environment" && !b.v.isReleased;
+			const aIsUnpublished = a.v.type === "environment" && !a.v.isPublished;
+			const bIsUnpublished = b.v.type === "environment" && !b.v.isPublished;
 
-			if (aIsUnreleased !== bIsUnreleased) {
-				return aIsUnreleased ? 1 : -1;
+			if (aIsUnpublished !== bIsUnpublished) {
+				return aIsUnpublished ? 1 : -1;
 			}
 			return a.idx - b.idx;
 		});

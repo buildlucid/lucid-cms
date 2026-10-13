@@ -1,3 +1,4 @@
+import type { AgentStreamEvent } from "@lucidcms/types";
 import constants from "../../constants/constants.js";
 import { isWorkingRunStatus } from "../../libs/agent/run-status.js";
 import {
@@ -13,9 +14,8 @@ import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
-import type { AgentStreamEvent } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getInputs from "./get-inputs.js";
+import getInputs from "./helpers/get-inputs.js";
 
 const wait = (ms: number, signal: AbortSignal) =>
 	new Promise<void>((resolve) => {
@@ -54,7 +54,7 @@ const replayLive = async (props: {
 			}
 		}
 
-		// Events may arrive while a slow viewer writes. Drain those before waiting.
+		//* Events may arrive while a slow viewer writes. Drain those before waiting.
 		const remaining = stream.read(cursor);
 		if (!remaining) return false;
 		if (remaining.length) continue;
@@ -98,7 +98,7 @@ const watchRun: ServiceFn<
 	let lastContext: string | undefined;
 	let lastInputs: string | undefined;
 
-	// Only a live cursor can safely replay deltas. Other workers and buffer gaps use replacing snapshots.
+	//* Replay deltas only from a matching live cursor; otherwise send snapshots.
 	const stream =
 		parsed?.kind === "live"
 			? findRunStream(context.config, input.runId)
@@ -114,7 +114,7 @@ const watchRun: ServiceFn<
 	}
 
 	while (!signal.aborted && Date.now() < deadline) {
-		// Status is read first so the final reply is always sent before finish.
+		//* Status is read first so the final reply is always sent before finish.
 		const run = await AgentRuns.selectSingle({
 			select: ["status", "conversation_id"],
 			where: [{ key: "id", operator: "=", value: input.runId }],
@@ -131,7 +131,7 @@ const watchRun: ServiceFn<
 				(version.data.execution_version === cursor.executionVersion &&
 					version.data.revision > cursor.revision))
 		) {
-			// Fetch against the cursor again: writes may have advanced since the version check.
+			//* Fetch from the cursor again because writes may have advanced since the version check.
 			const messages = await AgentMessages.selectChangedForRun({
 				runId: input.runId,
 				cursor,

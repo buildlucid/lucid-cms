@@ -1,9 +1,11 @@
 import { A } from "@solidjs/router";
-import type { Collection, RequestDetail, RequestDocument } from "@types";
+import type { Collection, RequestDetails, RequestDocument } from "@types";
 import { TbOutlineExternalLink } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
+import Modal from "@/components/Modal/Modal";
+import { useTargetUpdates } from "@/containers/RequestPage/hooks/useTargetUpdates";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getRequestDocumentLabel, getTargetLabel } from "@/utils/requests";
@@ -14,12 +16,20 @@ import { RequestTargets } from "./RequestTargets";
 import { RequestWorkflowStage } from "./RequestWorkflowStage";
 
 export const RequestDocumentCard: Component<{
-	request: RequestDetail;
+	request: RequestDetails;
 	document: RequestDocument;
 	onRemove: () => void;
 	onRetry: () => void;
 	collection: Collection | undefined;
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const targets = useTargetUpdates({
+		request: () => props.request,
+		document: () => props.document,
+		collection: () => props.collection,
+	});
+
 	// ----------------------------------------
 	// Memos
 	const collectionLabel = createMemo(
@@ -159,6 +169,7 @@ export const RequestDocumentCard: Component<{
 							request={props.request}
 							document={props.document}
 							collection={props.collection}
+							targets={targets}
 						/>
 					</RequestOverviewRow>
 				</Show>
@@ -168,11 +179,25 @@ export const RequestDocumentCard: Component<{
 							request={props.request}
 							document={props.document}
 							collection={props.collection}
+							targets={targets}
 							onRetry={props.onRetry}
 						/>
 					</RequestOverviewRow>
 				</Show>
 			</div>
+			<Modal.Confirm
+				open={targets.pending() !== undefined}
+				onOpenChange={(open) => {
+					if (!open) targets.cancel();
+				}}
+				title={T()("requests.targets.change.title")}
+				description={T()("requests.targets.change.description")}
+				confirmLabel={T()("common.save")}
+				confirmVariant="primary"
+				loading={targets.update.action.isPending}
+				error={targets.update.errors()?.message}
+				onConfirm={targets.confirm}
+			/>
 		</section>
 	);
 };

@@ -2,7 +2,8 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { requestData, requestHref } from "./shared.js";
+import getRequestPath from "../helpers/get-request-path.js";
+import { requestData } from "./shared.js";
 
 export const failedNotification = defineNotification({
 	key: "requests:failed",
@@ -24,6 +25,6 @@ export const failedNotification = defineNotification({
 			defaultMessage: "{{title}} failed to complete",
 		}),
 		body: copy.literal(data.message),
-		href: requestHref(data.requestId),
+		href: getRequestPath(data.requestId),
 	}),
 });

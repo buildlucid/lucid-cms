@@ -3,8 +3,8 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess from "./check-agent-access.js";
 
 /**
- * Checks the user has an agent workflow permission and it accepts media uploads. Chat
- * uploads are personal, so they don't need media library permissions.
+ * Checks agent permission and upload support.
+ * @remarks Personal chat uploads do not require media library permissions.
  */
 const checkUploadAccess: ServiceFn<
 	[{ userId: number; agentKey: string }],

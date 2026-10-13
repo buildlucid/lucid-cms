@@ -1,12 +1,14 @@
 import type { AgentRoutine } from "@types";
 import { type Component, createMemo } from "solid-js";
-import AgentMarkdown from "@/components/AgentMessage/parts/AgentMarkdown";
+import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
 import DetailsList from "@/components/DetailsList/DetailsList";
+import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import api from "@/services/api";
 import T from "@/translations";
 import { conversationModeLabels, getAgentName } from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 
+/** A code routine's read-only details, shown in place of the routine form. */
 const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -53,12 +55,12 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 					},
 				]}
 			/>
-			<section class="rounded-md border border-border bg-card p-4">
-				<h3 class="mb-2 text-sm font-medium text-title">
-					{T()("agent.routine.instructions")}
-				</h3>
-				<AgentMarkdown text={props.routine.instructions} size="sm" />
-			</section>
+			<div>
+				<SectionHeading title={T()("agent.routine.instructions")} level={3} />
+				<div class="mb-3 rounded-md border border-border bg-card p-4 last:mb-0">
+					<AgentMarkdown text={props.routine.instructions} size="sm" />
+				</div>
+			</div>
 		</>
 	);
 };

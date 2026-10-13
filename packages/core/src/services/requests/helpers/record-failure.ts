@@ -8,9 +8,8 @@ import { failedNotification } from "../notifications/failed.js";
 import { requestNotificationKeys } from "../notifications/keys.js";
 
 /**
- * Records why a publication attempt failed. Call inside a transaction.
- * Polling can record a failure before the job's failure hook adds its
- * diagnostics, so a later call for the same attempt only adds them.
+ * Records a completion failure, adding later diagnostics to the same attempt.
+ * @remarks Call inside a transaction; polling may record failure before the job hook runs.
  */
 const recordFailure: ServiceFn<
 	[

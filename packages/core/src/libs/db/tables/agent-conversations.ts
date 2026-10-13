@@ -14,14 +14,14 @@ import type { ConversationContext } from "../../agent/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
+	TimestampDefaulted,
 	TimestampImmutable,
 	TimestampMutable,
-	TimestampRequired,
 } from "../types.js";
 
 export const agentConversationsTable = defineTable(
 	"lucid_agent_conversations",
-	() => ({
+	(adapter) => ({
 		columns: {
 			id: { schema: z.uuid(), type: "text" },
 			confirmation_mode: { schema: agentConfirmationModeSchema, type: "text" },
@@ -40,7 +40,10 @@ export const agentConversationsTable = defineTable(
 			user_id: { schema: z.number().nullable(), type: "integer" },
 			routine_id: { schema: z.uuid().nullable(), type: "text" },
 			queue_paused: {
-				schema: z.union([z.boolean(), z.literal(0), z.literal(1)]),
+				schema: z.union([
+					z.literal(adapter.config.defaults.boolean.true),
+					z.literal(adapter.config.defaults.boolean.false),
+				]),
 				type: "boolean",
 			},
 			active_run_id: { schema: z.uuid().nullable(), type: "text" },
@@ -106,5 +109,5 @@ export interface LucidAgentConversations {
 		ConversationContext | null
 	>;
 	created_at: TimestampImmutable;
-	updated_at: TimestampRequired;
+	updated_at: TimestampDefaulted;
 }

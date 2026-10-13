@@ -137,11 +137,6 @@ const getSingle: ContentDocumentsGetSingleService = async <
 	const include = resolveDocumentIncludes(query.include);
 	const relationVersionTypeRes = await resolveRelationVersionType(context, {
 		collectionKey: data.collectionKey,
-		documentId:
-			preview?.mode === "scoped" && preview.target === "entry"
-				? preview.entry.documentId
-				: undefined,
-		versionId,
 		versionType,
 	});
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;

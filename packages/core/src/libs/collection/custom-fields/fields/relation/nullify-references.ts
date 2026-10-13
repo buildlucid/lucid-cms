@@ -159,7 +159,7 @@ const nullifyRelationReferences: ServiceFn<
 	const Versions = new DocumentVersionsRepository(context.db);
 	const affected = new Map<
 		string,
-		Map<number, { documentId: number; target: string }>
+		Map<number, { documentId: number; versionType: string }>
 	>();
 	const tableVersions = new Map<LucidBrickTableName, number[]>();
 	//* reads which versions reference the deleted documents, grouped by collection
@@ -185,7 +185,7 @@ const nullifyRelationReferences: ServiceFn<
 			for (const row of rows) {
 				versions.set(row.document_version_id, {
 					documentId: row.document_id,
-					target: row.type,
+					versionType: row.type,
 				});
 			}
 			affected.set(collectionKey, versions);
@@ -298,16 +298,16 @@ const nullifyRelationReferences: ServiceFn<
 		if (invalidateRes.error) return invalidateRes;
 
 		await invalidateContentDocumentCache(context, collectionKey);
-		for (const target of new Set(
-			[...versions.values()].map((version) => version.target),
+		for (const versionType of new Set(
+			[...versions.values()].map((version) => version.versionType),
 		)) {
 			const notifyRes = await notifyChange(context, {
-				change: { type: "referencesUpdated", version: target },
+				change: { type: "referencesUpdated", version: versionType },
 				collectionKey,
 				ids: [
 					...new Set(
 						[...versions.values()]
-							.filter((version) => version.target === target)
+							.filter((version) => version.versionType === versionType)
 							.map((version) => version.documentId),
 					),
 				],

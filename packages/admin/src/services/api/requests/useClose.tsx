@@ -1,8 +1,8 @@
 import type { ErrorResponse, ResponseBody } from "@types";
-import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
+import { requestChangeKeys } from "./change-keys";
 
 export interface Params {
 	id: number;
@@ -28,7 +28,7 @@ const useClose = (props?: UseCloseProps) => {
 			title: T()("toasts.requests.closed.title"),
 			message: T()("toasts.requests.closed.message"),
 		}),
-		invalidates: [queryKeys.requests.all()],
+		invalidates: requestChangeKeys(),
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

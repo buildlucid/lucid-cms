@@ -13,7 +13,7 @@ export default class NotificationsRepository extends StaticRepository<"lucid_not
 		super(db, notificationsTable);
 	}
 
-	/** One person's notifications with their read state. The status filter picks inbox, unread, attention or archived. */
+	/** Lists a user's notifications and read state, filtered by inbox, unread, actionRequired or archived status. */
 	async selectMultipleForUser<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -78,7 +78,7 @@ export default class NotificationsRepository extends StaticRepository<"lucid_not
 										inbox,
 										eb("lucid_notification_recipients.read_at", "is", null),
 									]);
-								case "attention":
+								case "actionRequired":
 									return eb.and([
 										inbox,
 										eb("lucid_notifications.action_required", "=", trueValue),

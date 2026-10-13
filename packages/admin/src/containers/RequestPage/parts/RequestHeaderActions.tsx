@@ -1,4 +1,4 @@
-import type { RequestDetail } from "@types";
+import type { RequestDetails } from "@types";
 import classNames from "classnames";
 import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
@@ -15,8 +15,8 @@ import { getApprovalsAfter, hasApproved } from "@/utils/requests";
  * actions in its menu. Everything else lives in the more menu beside it.
  */
 export const RequestHeaderActions: Component<{
-	request: RequestDetail;
-	publishing: boolean;
+	request: RequestDetails;
+	completing: boolean;
 	onApprove: () => void;
 	onComplete: () => void;
 	onApproveAndComplete: () => void;
@@ -55,7 +55,7 @@ export const RequestHeaderActions: Component<{
 		if (canApprove()) {
 			return { label: T()("requests.approve"), onClick: props.onApprove };
 		}
-		if (props.request.approved && props.request.permissions.request) {
+		if (props.request.approved && props.request.permissions.complete) {
 			return {
 				label: T()(
 					props.request.failure ? "requests.retry" : "requests.complete.now",
@@ -75,7 +75,7 @@ export const RequestHeaderActions: Component<{
 					open() &&
 					canApprove() &&
 					approvalCompletes() &&
-					props.request.permissions.request,
+					props.request.permissions.complete,
 			},
 			{
 				label: T()("requests.withdraw"),
@@ -90,7 +90,7 @@ export const RequestHeaderActions: Component<{
 	// Render
 	return (
 		<>
-			<Show when={props.publishing}>
+			<Show when={props.completing}>
 				<Button size="sm" variant="secondary" loading={true}>
 					{T()("requests.completing")}
 				</Button>

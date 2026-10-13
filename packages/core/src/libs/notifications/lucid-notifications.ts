@@ -17,9 +17,8 @@ import { readyNotification } from "../../services/requests/notifications/ready.j
 import { reviewRequestedNotification } from "../../services/requests/notifications/review-requested.js";
 
 /**
- * Lucid's own notification types. Pass one as the `type` to
- * `toolkit.notifications.send` to send it from your own code, or to
- * `resolve` to clear it.
+ * Built-in notification definitions accepted by `toolkit.notifications.send` and `resolve`.
+ * @remarks Keys map to properties, such as `system:job-failed` to `notifications.system.jobFailed`.
  *
  * @example
  * ```ts
@@ -31,7 +30,10 @@ import { reviewRequestedNotification } from "../../services/requests/notificatio
  * ```
  */
 export const notifications = {
-	storage: storageNotification,
+	system: {
+		storage: storageNotification,
+		jobFailed: jobFailedNotification,
+	},
 	requests: {
 		reviewRequested: reviewRequestedNotification,
 		mentioned: mentionedNotification,
@@ -46,9 +48,6 @@ export const notifications = {
 	workflows: {
 		assigned: assignedNotification,
 		stageChanged: stageChangedNotification,
-	},
-	jobs: {
-		failed: jobFailedNotification,
 	},
 	agent: {
 		inputNeeded: inputNeededNotification,

@@ -18,7 +18,8 @@ const factory = createFactory();
 
 const getReviewersController = factory.createHandlers(
 	describeRoute({
-		description: "List the people who can be asked to review a request.",
+		description:
+			"Search the people who can be asked to approve a request, by name or ID. Returns up to limit people.",
 		tags: ["requests"],
 		summary: "Get Request Reviewers",
 		responses: openAPI.responses({
@@ -26,13 +27,16 @@ const getReviewersController = factory.createHandlers(
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getReviewers.params,
+			query: controllerSchemas.getReviewers.query.string,
 		}),
 	}),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.getReviewers.params),
+	validate("query", controllerSchemas.getReviewers.query.string),
 	async (c) => {
 		const { id } = c.req.valid("param");
+		const query = c.req.valid("query");
 		const context = createServiceContext(c);
 
 		const result = await serviceWrapper(requestServices.getReviewers, {
@@ -45,6 +49,9 @@ const getReviewersController = factory.createHandlers(
 		})(context, {
 			id: Number.parseInt(id, 10),
 			user: c.get("auth"),
+			name: query["filter[name]"],
+			ids: query["filter[id]"]?.split(",").map(Number),
+			limit: query.limit,
 		});
 		if (result.error) throw new LucidAPIError(result.error);
 

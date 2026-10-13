@@ -31,7 +31,7 @@ const publishController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.publish.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.publish.params),
 	validate("json", controllerSchemas.publish.body),
@@ -51,7 +51,7 @@ const publishController = factory.createHandlers(
 		})(context, {
 			collectionKey,
 			documentId: Number.parseInt(id, 10),
-			target: body.target,
+			environment: body.environment,
 			sourceVersionId: body.sourceVersionId,
 			user: c.get("auth"),
 		});

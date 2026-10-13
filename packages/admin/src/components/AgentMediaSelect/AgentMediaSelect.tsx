@@ -1,8 +1,8 @@
 import type {
 	AgentMediaSelectData,
 	AgentMediaSelectResponse,
-	MediaType,
-} from "@types";
+} from "@lucidcms/types";
+import type { MediaType } from "@types";
 import { TbOutlinePhoto, TbOutlineUpload } from "solid-icons/tb";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
@@ -11,6 +11,7 @@ import Button from "@/components/Button/Button";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import type { AdminOptions } from "@/extensions/types/config";
 import useAgentUploads from "@/hooks/useAgentUploads/useAgentUploads";
+import useFileDrop from "@/hooks/useFileDrop/useFileDrop";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -38,7 +39,6 @@ const AgentMediaSelect: AgentWidgetComponent<AdminOptions | undefined> = (
 	let fileInput: HTMLInputElement | undefined;
 	const [selected, setSelected] = createSignal<AgentReferenceItem[]>([]);
 	const [drawerOpen, setDrawerOpen] = createSignal(false);
-	const [dragDepth, setDragDepth] = createSignal(0);
 	const uploads = useAgentUploads({
 		agentKey: () => data()?.agentKey,
 		onUploaded: (reference) =>
@@ -47,6 +47,10 @@ const AgentMediaSelect: AgentWidgetComponent<AdminOptions | undefined> = (
 					? [reference]
 					: mergeAgentReferences(current, [reference]),
 			),
+	});
+	const fileDrop = useFileDrop({
+		enabled: () => canUpload(),
+		onDrop: uploads.add,
 	});
 
 	// ----------------------------------------
@@ -73,32 +77,6 @@ const AgentMediaSelect: AgentWidgetComponent<AdminOptions | undefined> = (
 	const overLimit = createMemo(() => mediaIds().length > (data()?.max ?? 0));
 
 	// ----------------------------------------
-	// Functions
-	const hasFiles = (event: DragEvent) =>
-		canUpload() &&
-		Array.from(event.dataTransfer?.types ?? []).includes("Files");
-	const onDragEnter = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		event.preventDefault();
-		setDragDepth((depth) => depth + 1);
-	};
-	const onDragOver = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		event.preventDefault();
-		if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
-	};
-	const onDragLeave = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		setDragDepth((depth) => Math.max(0, depth - 1));
-	};
-	const onDrop = (event: DragEvent) => {
-		if (!hasFiles(event)) return;
-		event.preventDefault();
-		setDragDepth(0);
-		uploads.add(Array.from(event.dataTransfer?.files ?? []));
-	};
-
-	// ----------------------------------------
 	// Effects
 	createEffect(() => {
 		const interaction = props.interaction;
@@ -121,14 +99,7 @@ const AgentMediaSelect: AgentWidgetComponent<AdminOptions | undefined> = (
 			}
 		>
 			{(data) => (
-				// biome-ignore lint/a11y/noStaticElementInteractions: files can also be picked with the upload button
-				<div
-					class="relative"
-					onDragEnter={onDragEnter}
-					onDragOver={onDragOver}
-					onDragLeave={onDragLeave}
-					onDrop={onDrop}
-				>
+				<div class="relative" {...fileDrop.handlers}>
 					<input
 						ref={fileInput}
 						type="file"
@@ -142,7 +113,7 @@ const AgentMediaSelect: AgentWidgetComponent<AdminOptions | undefined> = (
 							event.currentTarget.value = "";
 						}}
 					/>
-					<Show when={dragDepth() > 0}>
+					<Show when={fileDrop.dragging()}>
 						<div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-xl border-2 border-dashed border-primary bg-card/90 text-sm font-medium text-title">
 							{T()("agent.media.select.drop")}
 						</div>

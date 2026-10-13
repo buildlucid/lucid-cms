@@ -2,8 +2,8 @@ import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type {
+	MediaGenerationModelCatalog,
 	MediaGenerationType,
-	MediaModelCatalog,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
@@ -16,7 +16,7 @@ import getMediaModelCatalog from "../helpers/get-media-model-catalog.js";
  */
 const getMediaModelOptions: ServiceFn<
 	[{ type: MediaGenerationType }],
-	MediaModelCatalog<MediaGenerationType>
+	MediaGenerationModelCatalog<MediaGenerationType>
 > = async (context, props) => {
 	const featureEnabledRes = await checkFeatureEnabled(context, {
 		feature: `${props.type}Generation`,

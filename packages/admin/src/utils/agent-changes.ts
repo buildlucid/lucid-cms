@@ -1,5 +1,6 @@
 import type { QueryClient, QueryKey } from "@tanstack/solid-query";
 import type { AgentResource } from "@types";
+import { requestChangeKeys } from "@/services/api/requests/change-keys";
 import { queryKeys } from "@/services/query-keys";
 
 /** The cached queries that show a resource, matching what the admin's own edits to it refresh. */
@@ -8,10 +9,10 @@ const changedQueries = (change: AgentResource): QueryKey[] => {
 		case "document":
 			return [
 				queryKeys.documents.collection(change.collectionKey),
-				queryKeys.requests.all(),
+				...requestChangeKeys(),
 			];
 		case "request":
-			return [queryKeys.requests.all()];
+			return requestChangeKeys();
 		case "media":
 			return [
 				queryKeys.media.all(),

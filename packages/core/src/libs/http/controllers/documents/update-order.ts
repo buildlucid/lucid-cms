@@ -31,7 +31,7 @@ const updateOrderController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateOrder.body),
 	validate("param", controllerSchemas.updateOrder.params),

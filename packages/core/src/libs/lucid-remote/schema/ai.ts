@@ -1,5 +1,8 @@
 import z from "zod";
-import type { MediaGenerationType } from "../../../types/response.js";
+import type {
+	MediaGenerationModelCatalog,
+	MediaGenerationType,
+} from "../../../types/response.js";
 
 /** Lucid charges whole credits, so they can be stored and summed as integers. */
 export const aiCreditsChargedSchema = z
@@ -64,7 +67,7 @@ export const cmsAiGenerateCompletedDataSchema = z
 		status: z.literal("complete").optional(),
 		requestId: z.string().min(1),
 		feature: cmsAiFeatureSchema,
-		output: z.unknown(),
+		output: z.record(z.string(), z.unknown()),
 		usage: cmsAiUsageSchema,
 	})
 	.strict();
@@ -104,45 +107,47 @@ export const cmsAiMediaOutputSchemas = {
 		.strict(),
 } satisfies Record<MediaGenerationType, z.ZodType>;
 
-export const cmsAiGenerateDataSchema = z.union([
-	cmsAiGenerateCompletedDataSchema,
-	cmsAiGenerateAcceptedDataSchema,
-]);
+const mediaGenerationModelSchema = z.object({
+	id: z.string().min(1),
+	name: z.string().min(1),
+	description: z.string().default(""),
+});
 
-const cmsAiResponseEnvelopeSchema = z
-	.object({
-		data: cmsAiGenerateDataSchema,
-	})
-	.passthrough();
-
-export type CmsAiRemoteData = z.infer<typeof cmsAiGenerateDataSchema>;
-
-/**
- * Validates Website-owned AI data before it can affect CMS output or billing
- * records, including request/feature correlation for polling responses.
- */
-export const parseCmsAiRemoteData = (
-	value: unknown,
-	expected: {
-		feature: {
-			key: string;
-			version: string;
-		};
-		requestId?: string;
-	},
-): CmsAiRemoteData | null => {
-	const parsed = cmsAiResponseEnvelopeSchema.safeParse(value);
-	if (!parsed.success) return null;
-
-	const data = parsed.data.data;
-	if (
-		data.feature.key !== expected.feature.key ||
-		data.feature.version !== expected.feature.version ||
-		(expected.requestId !== undefined && data.requestId !== expected.requestId)
-	) {
-		return null;
-	}
-	return data;
+/** Media model catalogues with open-string options that accept new values without CMS updates. */
+export const mediaGenerationModelCatalogSchemas = {
+	image: z.object({
+		default: z.string(),
+		models: z.array(
+			mediaGenerationModelSchema.extend({
+				aspectRatios: z.array(z.string()),
+				resolutions: z.array(z.string()),
+				qualities: z.array(z.string()),
+				outputFormats: z.array(z.string()),
+				sourceImage: z.boolean(),
+			}),
+		),
+	}),
+	audio: z.object({
+		default: z.string(),
+		models: z.array(
+			mediaGenerationModelSchema.extend({
+				format: z.string(),
+				voices: z.array(
+					z.object({
+						id: z.string(),
+						name: z.string(),
+						language: z.string().optional(),
+						previewUrl: z.url(),
+					}),
+				),
+				defaultVoice: z.string(),
+				instructions: z.boolean(),
+				maxCharacters: z.number().int().positive(),
+			}),
+		),
+	}),
+} satisfies {
+	[Type in MediaGenerationType]: z.ZodType<MediaGenerationModelCatalog<Type>>;
 };
 
 /** Web usage is read leniently, so the website can add fields without breaking deployed CMS versions. */
@@ -161,3 +166,64 @@ export const cmsAgentUsageSchema = z.union([
 	cmsAiUsageSchema,
 	cmsWebUsageSchema,
 ]);
+
+/**
+ * Completed web requests with operation-specific output and lenient usage parsing.
+ * @remarks Callers parse the output for their operation.
+ */
+const cmsWebCompletedDataSchema = z.object({
+	mode: z.literal("sync"),
+	status: z.literal("complete").optional(),
+	requestId: z.string().min(1),
+	feature: cmsAiFeatureSchema,
+	output: z.record(z.string(), z.unknown()),
+	usage: cmsWebUsageSchema,
+});
+
+export const cmsAiGenerateDataSchema = z.union([
+	cmsAiGenerateCompletedDataSchema,
+	cmsWebCompletedDataSchema,
+	cmsAiGenerateAcceptedDataSchema,
+]);
+
+const cmsAiResponseEnvelopeSchema = z
+	.object({
+		data: cmsAiGenerateDataSchema,
+	})
+	.passthrough();
+
+export type CmsAiGenerateCompletedData = z.infer<
+	typeof cmsAiGenerateCompletedDataSchema
+>;
+export type CmsAiGenerateAcceptedData = z.infer<
+	typeof cmsAiGenerateAcceptedDataSchema
+>;
+export type CmsAiGenerateData = z.infer<typeof cmsAiGenerateDataSchema>;
+
+/**
+ * Validates Website-owned AI data before it can affect CMS output or billing
+ * records, including request/feature correlation for polling responses.
+ */
+export const parseCmsAiRemoteData = (
+	value: unknown,
+	expected: {
+		feature: {
+			key: string;
+			version: string;
+		};
+		requestId?: string;
+	},
+): CmsAiGenerateData | null => {
+	const parsed = cmsAiResponseEnvelopeSchema.safeParse(value);
+	if (!parsed.success) return null;
+
+	const data = parsed.data.data;
+	if (
+		data.feature.key !== expected.feature.key ||
+		data.feature.version !== expected.feature.version ||
+		(expected.requestId !== undefined && data.requestId !== expected.requestId)
+	) {
+		return null;
+	}
+	return data;
+};

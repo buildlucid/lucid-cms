@@ -19,7 +19,7 @@ const enqueueTitle: ServiceFn<
 	],
 	undefined
 > = async (context, input) => {
-	const enabled = await checkFeatureEnabled(context, { feature: "chatRename" });
+	const enabled = await checkFeatureEnabled(context, { feature: "chatTitles" });
 	if (enabled.error) return { error: undefined, data: undefined };
 
 	const requestedAt = new Date().toISOString();
@@ -27,8 +27,10 @@ const enqueueTitle: ServiceFn<
 		const queued = await withTransaction(
 			context,
 			async (writeContext) => {
-				const conversations = new AgentConversationsRepository(writeContext.db);
-				const started = await conversations.beginTitleGeneration({
+				const AgentConversations = new AgentConversationsRepository(
+					writeContext.db,
+				);
+				const started = await AgentConversations.beginTitleGeneration({
 					conversationId: input.conversationId,
 					requestedAt,
 				});

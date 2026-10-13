@@ -67,20 +67,24 @@ const SidebarToggle: Component<{
 	open: boolean;
 	onToggle: () => void;
 	icon: JSXElement;
-}> = (props) => (
-	<div class="hidden lg:flex">
-		<Button
-			size="xs"
-			shape="square"
-			variant={props.open ? "outline" : "ghost"}
-			aria-pressed={props.open}
-			aria-label={props.label}
-			title={props.label}
-			onClick={() => props.onToggle()}
-		>
-			{props.icon}
-		</Button>
-	</div>
-);
+}> = (props) => {
+	// ----------------------------------------
+	// Render
+	return (
+		<div class="hidden lg:flex">
+			<Button
+				size="xs"
+				shape="square"
+				variant={props.open ? "outline" : "ghost"}
+				aria-pressed={props.open}
+				aria-label={props.label}
+				title={props.label}
+				onClick={() => props.onToggle()}
+			>
+				{props.icon}
+			</Button>
+		</div>
+	);
+};
 
 export default AgentChatActions;

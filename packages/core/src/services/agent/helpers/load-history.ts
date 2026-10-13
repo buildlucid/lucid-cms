@@ -12,9 +12,8 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import type { SessionRun } from "./run-session.js";
 
 /**
- * Loads saved messages after the checkpoint's cursor until context is nearly
- * full. Returns true when it stopped early, so older context must be compacted
- * before the rest can load. History is never skipped.
+ * Loads saved messages after `historyAfter` within the context budget, advancing the cursor after each message.
+ * @returns True when compaction is needed before more history can load.
  */
 const loadHistory: ServiceFn<
 	[
@@ -30,9 +29,9 @@ const loadHistory: ServiceFn<
 		return { error: undefined, data: false };
 	}
 
-	const repository = new AgentMessagesRepository(context.db);
+	const AgentMessages = new AgentMessagesRepository(context.db);
 
-	const history = await repository.selectAfter({
+	const history = await AgentMessages.selectAfter({
 		conversationId: run.conversation_id,
 		after: checkpoint.historyAfter,
 		limit: contextLimits.historyBatch,

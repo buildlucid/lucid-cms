@@ -61,7 +61,7 @@ const updateRequestComment: ServiceFn<
 
 	const target = {
 		id: request.id,
-		eventId: comment.id,
+		commentId: comment.id,
 		user,
 		agentRunId: props.actor.agentRunId,
 	};

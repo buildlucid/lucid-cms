@@ -13,7 +13,7 @@ import {
 	executeMcpTool,
 	prepareAgentTool,
 } from "./execute-tool.js";
-import { toolDefinitionInternal } from "./registry.js";
+import { toolDefinitionInternal } from "./tool-definition-internal.js";
 import type { AgentToolAuthority } from "./types.js";
 
 const testConfig = getTestConfig();
@@ -34,7 +34,7 @@ const agentTool = defineAgentTool({
 	input: schema,
 	output,
 	permissions: [Permissions.MediaRead],
-	requiredPermissions: () => [Permissions.MediaUpdate],
+	inputPermissions: () => [Permissions.MediaUpdate],
 	handler: agentHandler,
 });
 const mcpTool = defineMcpTool({
@@ -79,7 +79,7 @@ const runAgent = (authority: AgentToolAuthority) =>
 		input: {},
 		execution: {
 			authority,
-			actor: { kind: "user", userId: 1 },
+			actor: { type: "user", userId: 1 },
 			run,
 			signal: AbortSignal.timeout(1000),
 			operationId: "run:call",
@@ -191,7 +191,7 @@ test.each([
 			input: {},
 			execution: {
 				authority: { principal: user, permissions: [], superAdmin: false },
-				actor: { kind: "user", userId: 1 },
+				actor: { type: "user", userId: 1 },
 				run,
 				signal: AbortSignal.timeout(1000),
 				operationId: "source-summary",
@@ -230,7 +230,7 @@ test.each([
 			input: {},
 			execution: {
 				authority: { principal: user, permissions: [], superAdmin: false },
-				actor: { kind: "user", userId: 1 },
+				actor: { type: "user", userId: 1 },
 				run,
 				signal: AbortSignal.timeout(1000),
 				operationId: "invalid-summary",
@@ -251,7 +251,7 @@ test("describes a call from its input, or by its title when the input is invalid
 		output,
 		permissions: [],
 		readOnly: true,
-		describe: ({ id }) => `Read source ${id}`,
+		describe: ({ input }) => `Read source ${input.id}`,
 		handler: async () => ({
 			error: undefined,
 			data: { output: { source: "agent" }, summary: "Read the source." },
@@ -269,7 +269,7 @@ test("keeps the resources a call changed and drops an invalid list without faili
 			input: {},
 			execution: {
 				authority: { principal: user, permissions: [], superAdmin: true },
-				actor: { kind: "user", userId: 1 },
+				actor: { type: "user", userId: 1 },
 				run,
 				signal: AbortSignal.timeout(1000),
 				operationId: "run:call",
@@ -296,12 +296,12 @@ test("keeps the resources a call changed and drops an invalid list without faili
 		input: schema,
 		output,
 		permissions: [],
+		// @ts-expect-error custom tools can still return unchecked values at runtime
 		handler: async () => ({
 			error: undefined,
 			data: {
 				output: { source: "agent" },
 				summary: "Changed the source.",
-				// @ts-expect-error custom tools can still return unchecked values at runtime
 				changes: [{ type: "request", requestId: "7" }],
 			},
 		}),
@@ -328,7 +328,7 @@ test("interaction schemas preserve raw JSON across validation and apply transfor
 			key: "picker",
 			version: 1,
 			data: z.object({ count: z.number().transform((count) => count + 1) }),
-			response: (data) =>
+			response: ({ data }) =>
 				z.object({
 					count: z.number().transform((count) => count + data.count),
 				}),
@@ -353,7 +353,7 @@ test("interaction schemas preserve raw JSON across validation and apply transfor
 	});
 	const execution = {
 		authority: { principal: user, permissions: [], superAdmin: false },
-		actor: { kind: "user", userId: 1 } as const,
+		actor: { type: "user", userId: 1 } as const,
 		run,
 		signal: AbortSignal.timeout(1000),
 		operationId: "transform",
@@ -378,7 +378,7 @@ test("interaction schemas preserve raw JSON across validation and apply transfor
 		input: {},
 		execution: {
 			...execution,
-			interaction: { data: { count: 1 }, response: { count: 10 } },
+			answer: { data: { count: 1 }, response: { count: 10 } },
 		},
 	});
 	expect(result).toMatchObject({

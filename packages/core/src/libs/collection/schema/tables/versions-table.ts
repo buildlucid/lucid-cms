@@ -181,18 +181,6 @@ const createVersionsTable = (props: {
 						columns: ["document_id", "type", "created_at"],
 						source: "core",
 					}),
-					buildSchemaIndex({
-						db: props.db,
-						tableName,
-						columns: ["created_by_run_id"],
-						source: "core",
-					}),
-					buildSchemaIndex({
-						db: props.db,
-						tableName,
-						columns: ["updated_by_run_id"],
-						source: "core",
-					}),
 				],
 			},
 		},

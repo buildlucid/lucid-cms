@@ -11,7 +11,7 @@ import {
 	AgentMessagesRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getInputsEvent from "../get-inputs-event.js";
+import getInputsEvent from "./get-inputs-event.js";
 import type { RunSession } from "./run-session.js";
 import startNextTurn from "./start-next-turn.js";
 
@@ -36,8 +36,8 @@ const consumeSteering: ServiceFn<
 	if (claimed.error) return claimed;
 	if (!claimed.data.length) return { error: undefined, data: false };
 
-	const inputs = new AgentInputsRepository(context.db);
-	const messages = new AgentMessagesRepository(context.db);
+	const AgentInputs = new AgentInputsRepository(context.db);
+	const AgentMessages = new AgentMessagesRepository(context.db);
 
 	const fresh = claimed.data.filter(
 		(input) => !checkpoint.inputIds?.includes(input.id),
@@ -45,7 +45,7 @@ const consumeSteering: ServiceFn<
 	if (fresh.length) {
 		const output = {
 			skipped: true,
-			reason: "The user redirected this run before the tool started.",
+			reason: "The person redirected this run before the tool started.",
 		};
 
 		for (const call of checkpoint.calls.slice(checkpoint.cursor)) {
@@ -84,7 +84,7 @@ const consumeSteering: ServiceFn<
 		checkpoint.pending = undefined;
 		checkpoint.finish = undefined;
 
-		// Save the old assistant message before appending user messages or rotating its ID.
+		//* Save the old assistant message before appending user messages or rotating its ID.
 		const saved = await session.saveReply();
 		if (saved.error) return saved;
 
@@ -121,13 +121,13 @@ const consumeSteering: ServiceFn<
 		if (persisted.error) return persisted;
 	}
 
-	const acknowledged = await inputs.acknowledge(
+	const acknowledged = await AgentInputs.acknowledge(
 		claimed.data.map((input) => input.id),
 	);
 	if (acknowledged.error) return acknowledged;
 
 	//* the chat shows steered messages in the transcript and drops them from its queue
-	const stored = await messages.selectMultiple({
+	const stored = await AgentMessages.selectMultiple({
 		select: [
 			"id",
 			"conversation_id",

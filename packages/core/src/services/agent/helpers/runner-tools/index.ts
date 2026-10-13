@@ -1,7 +1,7 @@
+import type { AgentRunnerToolName } from "@lucidcms/types";
 import type z from "zod";
 import runnerTools from "../../../../libs/agent/runner-tools.js";
 import { describeInputIssues } from "../../../../libs/tools/prepare-input.js";
-import type { AgentRunnerToolName } from "../../../../types/response.js";
 import { toolFailure } from "../tool-outcome.js";
 import ask from "./ask.js";
 import finish from "./finish.js";

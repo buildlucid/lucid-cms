@@ -1,15 +1,12 @@
-import { setTimeout } from "node:timers/promises";
-import z from "zod";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import { copy } from "../../../i18n/index.js";
-import { getLucidRemoteClient } from "../../client.js";
-import { lucidRemotePaths } from "../../constants.js";
 import {
 	type WebRequest,
 	type WebResponse,
 	webResponseSchema,
 } from "../../schema/web.js";
 import type { CmsAiActor } from "../generate-cms-ai/type.js";
+import runCmsAiRequest from "../run-cms-ai-request/index.js";
 
 /** Runs a paid web operation with a stable identity for safe replay. */
 const researchWeb: ServiceFn<
@@ -24,50 +21,13 @@ const researchWeb: ServiceFn<
 	],
 	WebResponse
 > = async (context, input) => {
-	const client = getLucidRemoteClient(context);
-	const auth = {
-		accessToken: input.accessToken,
-		headers: { "idempotency-key": input.requestId },
-	};
-
-	let response = await client.request<unknown>(lucidRemotePaths.generateCmsAi, {
-		method: "POST",
-		...auth,
-		body: { ...input.request, actor: input.actor },
-		retries: 0,
-		signal: input.signal,
-	});
-
-	// A restarted runner can arrive while the original paid call is still finishing.
-	// Poll the stored request; never start another supplier request to recover it.
-	const deadline = Date.now() + 75_000;
-	while (
-		response.error?.key === "cms_ai_request_in_progress" &&
-		Date.now() < deadline &&
-		!input.signal.aborted
-	) {
-		await setTimeout(1000, undefined, { signal: input.signal }).catch(
-			() => undefined,
-		);
-		response = await client.request<unknown>(
-			`${lucidRemotePaths.getCmsAiRequest}/${input.requestId}`,
-			{
-				method: "GET",
-				...auth,
-				retries: 0,
-				signal: input.signal,
-			},
-		);
-	}
+	const response = await runCmsAiRequest(context, input);
 	if (response.error) return response;
 
-	const parsed = z
-		.object({ data: webResponseSchema })
-		.safeParse(response.data.json);
+	const parsed = webResponseSchema.safeParse(response.data);
 	if (
 		!parsed.success ||
-		parsed.data.data.feature.key !== input.request.feature.key ||
-		parsed.data.data.usage.operation !==
+		parsed.data.usage.operation !==
 			(input.request.feature.key === "web.search" ? "search" : "fetch")
 	) {
 		return {
@@ -80,7 +40,7 @@ const researchWeb: ServiceFn<
 		};
 	}
 
-	return { data: parsed.data.data, error: undefined };
+	return { data: parsed.data, error: undefined };
 };
 
 export default researchWeb;

@@ -42,7 +42,7 @@ const providerInitiateController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.providerInitiate.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	softAuthenticate,
 	rateLimiter({
 		mode: "ip",

@@ -1,4 +1,5 @@
 import type { ErrorResponse, ResponseBody } from "@types";
+import { requestChangeKeys } from "@/services/api/requests/change-keys";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -38,7 +39,7 @@ const useUpdateWorkflow = (props?: UseUpdateWorkflowProps) => {
 					title: T()("toasts.common.workflow.updated.title"),
 					message: T()("toasts.common.workflow.updated.message"),
 				}),
-		invalidates: [queryKeys.documents.all(), queryKeys.requests.all()],
+		invalidates: [queryKeys.documents.all(), ...requestChangeKeys()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

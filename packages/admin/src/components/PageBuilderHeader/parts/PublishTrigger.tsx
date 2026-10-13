@@ -1,0 +1,220 @@
+import type { DocumentVersionType } from "@types";
+import classNames from "classnames";
+import { TbOutlineChevronDown } from "solid-icons/tb";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
+import Menu from "@/components/Menu/Menu";
+import Spinner from "@/components/Spinner/Spinner";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
+
+export interface PublishTriggerOption {
+	label: string;
+	value: Exclude<DocumentVersionType, "revision">;
+	route: string;
+	action?: "publish" | "compose";
+	permission?: boolean;
+	disabled?: boolean;
+	disabledToast?: {
+		title: string;
+		message?: string;
+		status?: "success" | "error" | "warning" | "info";
+		duration?: number;
+	};
+	status?: {
+		isPublished?: boolean;
+		upToDate?: boolean;
+	};
+}
+
+/** An alternative to saving, listed in the menu above the request options. */
+export interface PublishTriggerAction {
+	label: string;
+	onSelect: () => void;
+	disabled?: boolean;
+}
+
+export const PublishTrigger: Component<{
+	options: Accessor<PublishTriggerOption[]>;
+	onSelect: (option: PublishTriggerOption) => void;
+	/** Alternatives to saving, eg. requesting a new document instead of creating it. */
+	actions?: PublishTriggerAction[];
+	onSave?: () => void;
+	/** Defaults to Save. */
+	saveLabel?: string;
+	saveDisabled?: boolean;
+	savePermission?: boolean;
+	disabled?: boolean;
+	permission?: boolean;
+	loading?: boolean;
+}> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const interfaceDirection = useInterfaceDirection();
+
+	// ----------------------------------------
+	// Memos
+	const hasOptions = createMemo(
+		() => props.options().length > 0 || (props.actions?.length ?? 0) > 0,
+	);
+
+	const isDisabled = createMemo(() => {
+		return props.disabled || !hasOptions();
+	});
+
+	// ----------------------------------------
+	// Functions
+	const handleTriggerClick = (event: MouseEvent) => {
+		if (props.permission === false) {
+			spawnToast({
+				title: T()("toasts.common.no.permission.title"),
+				message: T()("toasts.common.no.permission.message"),
+				status: "warning",
+			});
+			event.preventDefault();
+			event.stopPropagation();
+		}
+	};
+	const spawnDisabledToast = (option: PublishTriggerOption) => {
+		if (!option.disabledToast) return;
+
+		spawnToast({
+			...option.disabledToast,
+			status: option.disabledToast.status ?? "warning",
+		});
+	};
+	const handleSaveClick = (event: MouseEvent) => {
+		if (props.savePermission === false) {
+			spawnToast({
+				title: T()("toasts.common.no.permission.title"),
+				message: T()("toasts.common.no.permission.message"),
+				status: "warning",
+			});
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+		props.onSave?.();
+	};
+
+	// ----------------------------------------
+	// Render
+	return (
+		<div class="flex items-center relative">
+			<Show when={props.loading}>
+				<span class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center rounded-md cursor-wait pointer-events-none">
+					<Spinner size="sm" />
+				</span>
+			</Show>
+			<button
+				type="button"
+				onClick={handleSaveClick}
+				disabled={props.saveDisabled}
+				class={classNames(
+					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
+					"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary",
+					"px-4 h-9 text-sm",
+					{
+						"rounded-md": !hasOptions(),
+						"rounded-l-md border-r border-black/10":
+							hasOptions() && interfaceDirection.isLTR(),
+						"rounded-r-md border-l border-black/10":
+							hasOptions() && interfaceDirection.isRTL(),
+						"opacity-80 cursor-not-allowed":
+							props.saveDisabled || props.savePermission === false,
+					},
+				)}
+			>
+				{props.saveLabel ?? T()("common.save")}
+			</button>
+			<Show when={hasOptions()}>
+				<Menu.Root>
+					<Menu.Trigger
+						class={classNames(
+							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
+							"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary",
+							"px-2 w-9 h-9 text-sm",
+							{
+								"rounded-r-md": interfaceDirection.isLTR(),
+								"rounded-l-md": interfaceDirection.isRTL(),
+								"opacity-80 cursor-not-allowed":
+									isDisabled() || props.permission === false,
+							},
+						)}
+						disabled={isDisabled()}
+						onClick={handleTriggerClick}
+					>
+						<TbOutlineChevronDown />
+					</Menu.Trigger>
+					<Menu.Content>
+						<For each={props.actions}>
+							{(action) => (
+								<Menu.Item
+									textValue={action.label}
+									unavailable={action.disabled === true || isDisabled()}
+									onSelect={() => {
+										if (action.disabled === true || isDisabled()) return;
+										action.onSelect();
+									}}
+								>
+									{action.label}
+								</Menu.Item>
+							)}
+						</For>
+						<For each={props.options()}>
+							{(option) => (
+								<Menu.Item
+									textValue={option.label}
+									unavailable={option.disabled === true || isDisabled()}
+									onSelect={() => {
+										if (option.disabled === true) {
+											spawnDisabledToast(option);
+											return;
+										}
+										if (isDisabled()) return;
+										if (option.permission === false) {
+											spawnToast({
+												title: T()("toasts.common.no.permission.title"),
+												message: T()("toasts.common.no.permission.message"),
+												status: "warning",
+											});
+											return;
+										}
+										props.onSelect(option);
+									}}
+									end={
+										<StatusIndicator
+											variant={
+												option.status?.isPublished === false
+													? "danger-subtle"
+													: option.status?.isPublished === true &&
+															option.status?.upToDate === true
+														? "success-subtle"
+														: option.status?.isPublished === true &&
+																option.status?.upToDate === false
+															? "warning-subtle"
+															: "neutral-subtle"
+											}
+											label={
+												option.status?.isPublished === true &&
+												option.status?.upToDate === true
+													? T()("documents.publish.status.up.to.date")
+													: option.status?.isPublished === true &&
+															option.status?.upToDate === false
+														? T()("documents.publish.status.out.of.date")
+														: T()("common.status.unpublished")
+											}
+										/>
+									}
+								>
+									{T()("documents.publish.to")} {option.label}
+								</Menu.Item>
+							)}
+						</For>
+					</Menu.Content>
+				</Menu.Root>
+			</Show>
+		</div>
+	);
+};

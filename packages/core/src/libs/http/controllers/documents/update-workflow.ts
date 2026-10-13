@@ -30,7 +30,7 @@ const updateWorkflowController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateWorkflow.body),
 	validate("param", controllerSchemas.updateWorkflow.params),

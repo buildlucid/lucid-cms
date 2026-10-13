@@ -39,7 +39,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
-				.addPrimaryKeyConstraint("pk_document_identities", [
+				.addPrimaryKeyConstraint("pk_lucid_document_identities", [
 					"collection_key",
 					"document_id",
 				])
@@ -56,17 +56,17 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("version_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
-				.addPrimaryKeyConstraint("pk_document_version_identities", [
+				.addPrimaryKeyConstraint("pk_lucid_document_version_identities", [
 					"collection_key",
 					"version_id",
 				])
-				.addUniqueConstraint("uniq_document_version_identity_owner", [
+				.addUniqueConstraint("uniq_lucid_document_version_identities_owner", [
 					"collection_key",
 					"document_id",
 					"version_id",
 				])
 				.addForeignKeyConstraint(
-					"fk_document_version_identity_document",
+					"fk_lucid_document_version_identities_document",
 					["collection_key", "document_id"],
 					"lucid_document_identities",
 					["collection_key", "document_id"],
@@ -109,7 +109,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addForeignKeyConstraint(
-					"fk_document_reference_owner",
+					"fk_lucid_document_references_owner",
 					["collection_key", "document_id", "version_id"],
 					"lucid_document_version_identities",
 					["collection_key", "document_id", "version_id"],
@@ -209,13 +209,8 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("execution_job_id", adapter.getDataType("text"))
 				.addColumn("failure", adapter.getDataType("text"))
-				.addColumn(
-					"failure_request_document_id",
-					adapter.getDataType("integer"),
-				)
 				.addColumn("failure_target", adapter.getDataType("text"))
 				.addColumn("completed_at", adapter.getDataType("timestamp"))
-				.addColumn("lock_token", adapter.getDataType("text"))
 				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
@@ -271,6 +266,17 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				])
 				.execute();
 
+			//* requests and their documents reference each other, so this column is added once both tables exist
+			await db.schema
+				.alterTable("lucid_requests")
+				.addColumn(
+					"failure_request_document_id",
+					adapter.getDataType("integer"),
+					(col) =>
+						col.references("lucid_request_documents.id").onDelete("set null"),
+				)
+				.execute();
+
 			await db.schema
 				.createTable("lucid_request_targets")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
@@ -288,11 +294,11 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("target", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("reviewed_version_id", adapter.getDataType("integer"))
-				.addColumn("reviewed_by", adapter.getDataType("integer"), (col) =>
+				.addColumn("acknowledged_version_id", adapter.getDataType("integer"))
+				.addColumn("acknowledged_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
-				.addColumn("reviewed_at", adapter.getDataType("timestamp"))
+				.addColumn("acknowledged_at", adapter.getDataType("timestamp"))
 				.addColumn("approved_version_id", adapter.getDataType("integer"))
 				.addUniqueConstraint("uniq_lucid_request_targets_request", [
 					"request_document_id",
@@ -471,14 +477,14 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					),
 				)
 				.addForeignKeyConstraint(
-					"fk_document_workflows_document",
+					"fk_lucid_document_workflows_document",
 					["collection_key", "document_id"],
 					"lucid_document_identities",
 					["collection_key", "document_id"],
 					(constraint) => constraint.onDelete("cascade"),
 				)
 				.addForeignKeyConstraint(
-					"fk_document_workflows_version",
+					"fk_lucid_document_workflows_version",
 					["collection_key", "document_id", "version_id"],
 					"lucid_document_version_identities",
 					["collection_key", "document_id", "version_id"],
@@ -581,7 +587,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addForeignKeyConstraint(
-					"fk_document_holds_document",
+					"fk_lucid_document_holds_document",
 					["collection_key", "document_id"],
 					"lucid_document_identities",
 					["collection_key", "document_id"],

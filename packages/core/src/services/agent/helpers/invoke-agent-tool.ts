@@ -1,12 +1,12 @@
+import type { AgentStreamEvent } from "@lucidcms/types";
 import { createInteraction } from "../../../libs/agent/interactions.js";
 import type { ToolCall } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
 import type {
 	AgentToolDefinition,
-	AgentToolExecution,
+	AgentToolInvocation,
 } from "../../../libs/tools/types.js";
-import type { AgentStreamEvent } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import {
 	failedToolRun,
@@ -21,7 +21,7 @@ const invokeAgentTool = async (
 	props: {
 		call: ToolCall;
 		tool: AgentToolDefinition;
-		execution: AgentToolExecution;
+		execution: AgentToolInvocation;
 		messageId: string;
 		emit: (event: AgentStreamEvent) => Promise<void>;
 	},

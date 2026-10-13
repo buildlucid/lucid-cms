@@ -17,7 +17,7 @@ import getSingle from "../../../controllers/documents/get-single.js";
 import getWorkflowAssignees from "../../../controllers/documents/get-workflow-assignees.js";
 import promoteVersion from "../../../controllers/documents/promote-version.js";
 import publish from "../../../controllers/documents/publish.js";
-import requestCreation from "../../../controllers/documents/request-creation.js";
+import requestSingle from "../../../controllers/documents/request-single.js";
 import restoreMultiple from "../../../controllers/documents/restore-multiple.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
 import unpublish from "../../../controllers/documents/unpublish.js";
@@ -29,7 +29,7 @@ import updateWorkflow from "../../../controllers/documents/update-workflow.js";
 const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey", ...createSingle)
 	.post("/:collectionKey/restore", ...restoreMultiple)
-	.post("/:collectionKey/request", ...requestCreation)
+	.post("/:collectionKey/request", ...requestSingle)
 	.post("/:collectionKey/:id/duplicate", ...duplicateSingle)
 	.post("/:collectionKey/:id/publish", ...publish)
 	.post("/:collectionKey/:id/unpublish", ...unpublish)

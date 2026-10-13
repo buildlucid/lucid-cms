@@ -1,15 +1,15 @@
-import type { RoutineTools } from "../../../libs/agent/types.js";
+import type { RoutineToolSettings } from "../../../libs/agent/types.js";
 import { AgentRoutineToolsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /** Replaces a routine's tool settings. An empty map restores every tool's defaults. Callers own the transaction. */
 const saveRoutineTools: ServiceFn<
-	[{ routineId: string; tools: Readonly<RoutineTools> }],
+	[{ routineId: string; tools: Readonly<RoutineToolSettings> }],
 	undefined
 > = async (context, input) => {
-	const RoutineTools = new AgentRoutineToolsRepository(context.db);
+	const RoutineToolSettings = new AgentRoutineToolsRepository(context.db);
 
-	const removed = await RoutineTools.deleteMultiple({
+	const removed = await RoutineToolSettings.deleteMultiple({
 		where: [{ key: "routine_id", operator: "=", value: input.routineId }],
 	});
 	if (removed.error) return removed;
@@ -20,7 +20,7 @@ const saveRoutineTools: ServiceFn<
 		requires_confirmation: settings.requiresConfirmation ?? null,
 	}));
 	if (data.length) {
-		const created = await RoutineTools.createMultiple({ data });
+		const created = await RoutineToolSettings.createMultiple({ data });
 		if (created.error) return created;
 	}
 

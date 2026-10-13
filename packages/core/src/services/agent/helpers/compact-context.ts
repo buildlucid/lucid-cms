@@ -65,8 +65,8 @@ const summariseContext: ServiceFn<[CompactionProps], boolean> = async (
 		const sourceId = checkpoint.messages[count - 1]?.sourceId;
 		if (!count || !sourceId) return { error: undefined, data: false };
 
-		const messages = new AgentMessagesRepository(context.db);
-		const source = await messages.selectSingle({
+		const AgentMessages = new AgentMessagesRepository(context.db);
+		const source = await AgentMessages.selectSingle({
 			select: ["position"],
 			where: [
 				{ key: "id", operator: "=", value: sourceId },

@@ -1,9 +1,8 @@
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentHoldsRepository } from "../../libs/repositories/index.js";
-import { formatPerson } from "../../libs/tools/person.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getRequestUsers from "../requests/helpers/get-request-users.js";
+import getHolderName from "./helpers/get-holder-name.js";
 import holdTarget from "./helpers/hold-target.js";
 
 /** Rejects agent writes to held document versions to protect unsaved editor changes. */
@@ -48,10 +47,9 @@ const checkNotHeld: ServiceFn<
 		};
 	}
 
-	const users = await getRequestUsers(context, { ids: [holder.user_id] });
-	if (users.error) return users;
+	const name = await getHolderName(context, { userId: holder.user_id });
+	if (name.error) return name;
 
-	const user = users.data.get(holder.user_id);
 	return {
 		data: undefined,
 		error: {
@@ -59,9 +57,7 @@ const checkNotHeld: ServiceFn<
 			status: 409,
 			name: copy("server:core.documents.editors.held.name"),
 			message: copy("server:core.documents.editors.held.message", {
-				data: {
-					name: user ? formatPerson(user).name : `#${holder.user_id}`,
-				},
+				data: { name: name.data },
 			}),
 		},
 	};

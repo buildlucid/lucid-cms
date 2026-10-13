@@ -10,16 +10,11 @@ import { render } from "solid-js/web";
 import MentionMenu from "./parts/MentionMenu";
 import type { RichTextMentionOption } from "./types";
 
-const MENTION_LIMIT = 8;
 const mentionPluginKey = new PluginKey("lucidMentionSuggestion");
 
-/**
- * Adds `@` mentions to an editor. Typing `@` opens a menu of the given people,
- * filtered by what follows it. The options are read on every keystroke, so
- * they can arrive after the editor is created.
- */
+/** Adds `@` mentions with a menu that searches for people as the query changes. */
 export const createMentionExtension = (
-	options: () => RichTextMentionOption[],
+	search: (query: string) => Promise<RichTextMentionOption[]>,
 ) =>
 	LucidMention.extend({
 		addProseMirrorPlugins() {
@@ -28,16 +23,7 @@ export const createMentionExtension = (
 					editor: this.editor,
 					pluginKey: mentionPluginKey,
 					char: "@",
-					items: ({ query }) => {
-						const search = query.toLowerCase();
-						return options()
-							.filter((option) =>
-								[option.label, option.hint].some((value) =>
-									value?.toLowerCase().includes(search),
-								),
-							)
-							.slice(0, MENTION_LIMIT);
-					},
+					items: ({ query }) => search(query),
 					command: ({ editor, range, props }) => {
 						editor
 							.chain()

@@ -49,38 +49,31 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		data: Insertable<LucidVersionTable>,
 		{ tableName }: DynamicConfig<LucidVersionTableName>,
 	) {
-		const result = await this.executeQuery(
-			async () => {
-				const version = await this.db
-					.insertInto(tableName)
-					.values(data)
-					.returning(["id", "collection_key", "document_id"])
-					.executeTakeFirstOrThrow();
+		const versionQuery = this.db
+			.insertInto(tableName)
+			.values(data)
+			.returning(["id", "collection_key", "document_id"]);
 
-				try {
-					await this.db
-						.insertInto("lucid_document_version_identities")
-						.values({
-							collection_key: version.collection_key,
-							document_id: version.document_id,
-							version_id: version.id,
-						})
-						.execute();
-				} catch (error) {
-					if (!this.database.isTransaction) {
-						await this.db
-							.deleteFrom(tableName)
-							.where("id", "=", version.id)
-							.execute();
-					}
-					throw error;
-				}
-				return version;
-			},
+		const version = await this.executeQuery(
+			() => versionQuery.executeTakeFirstOrThrow(),
 			{ method: "createVersion", tableName },
 		);
+		if (version.response.error) return version.response;
 
-		return result.response;
+		const identityQuery = this.db
+			.insertInto("lucid_document_version_identities")
+			.values({
+				collection_key: version.response.data.collection_key,
+				document_id: version.response.data.document_id,
+				version_id: version.response.data.id,
+			});
+
+		const identity = await this.executeQuery(() => identityQuery.execute(), {
+			method: "createVersion",
+		});
+		if (identity.response.error) return identity.response;
+
+		return version.response;
 	}
 	/** Deletes physical versions and their identities; dependent links cascade. Callers own the transaction. */
 	async deleteVersions(
@@ -91,53 +84,52 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		},
 		{ tableName }: DynamicConfig<LucidVersionTableName>,
 	) {
-		const query = queryBuilder.delete(
-			this.db.deleteFrom(tableName).where("document_id", "=", props.documentId),
-			props.where,
-		);
+		const query = queryBuilder
+			.delete(
+				this.db
+					.deleteFrom(tableName)
+					.where("document_id", "=", props.documentId),
+				props.where,
+			)
+			.returning("id");
 
-		const result = await this.executeQuery(
-			async () => {
-				await query.execute();
-				await this.deleteMissingIdentities(
-					props.collectionKey,
-					tableName,
-					props.documentId,
-				);
-			},
-			{ method: "deleteVersions", tableName },
-		);
+		const deleted = await this.executeQuery(() => query.execute(), {
+			method: "deleteVersions",
+			tableName,
+		});
+		if (deleted.response.error) return deleted.response;
 
-		return result.response;
+		return this.deleteIdentities(
+			props.collectionKey,
+			deleted.response.data.map((version) => version.id),
+		);
 	}
-	/** Reconcile against physical rows so retries also remove identities left by a failed nontransactional deletion. */
-	private async deleteMissingIdentities(
-		collectionKey: string,
-		tableName: LucidVersionTableName,
-		documentId?: number,
-	) {
-		let query = this.db
-			.deleteFrom("lucid_document_version_identities")
-			.where("collection_key", "=", collectionKey);
-		if (documentId !== undefined) {
-			query = query.where("document_id", "=", documentId);
+	/** Version identities have no foreign key to their dynamic version table, so they are deleted alongside it. */
+	private async deleteIdentities(collectionKey: string, versionIds: number[]) {
+		const batchSize = this.dbAdapter.getQueryBatchSize({
+			parametersPerItem: 1,
+			reservedParameters: 1,
+			maxItems: 500,
+		});
+
+		for (let offset = 0; offset < versionIds.length; offset += batchSize) {
+			const query = this.db
+				.deleteFrom("lucid_document_version_identities")
+				.where("collection_key", "=", collectionKey)
+				.where(
+					"version_id",
+					"in",
+					versionIds.slice(offset, offset + batchSize),
+				);
+
+			const result = await this.executeQuery(() => query.execute(), {
+				method: "deleteIdentities",
+				tableName: "lucid_document_version_identities",
+			});
+			if (result.response.error) return result.response;
 		}
 
-		await query
-			.where(({ not, exists, selectFrom }) =>
-				not(
-					exists(
-						selectFrom(tableName)
-							.select("id")
-							.whereRef(
-								`${tableName}.id`,
-								"=",
-								"lucid_document_version_identities.version_id",
-							),
-					),
-				),
-			)
-			.execute();
+		return { error: undefined, data: undefined };
 	}
 	/**
 	 * Takes a group of document IDs and their tables, document-field table schema and fetches all document-field rows for that version
@@ -503,14 +495,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 			mode: "multiple-count",
 		});
 	}
-	/**
-	 * Deletes all expired revisions for a collection.
-	 * A revision is considered expired if:
-	 * 1. It is older than the cutoff date
-	 * 2. It is not referenced by any non-revision version's promoted_from field
-	 * Also removes orphan identities left by a failed nontransactional attempt,
-	 * even when no physical revision candidates remain.
-	 */
+	/** Deletes revisions older than the cutoff unless a non-revision version references them through `promoted_from`. */
 	async deleteExpiredRevisions(
 		props: {
 			collectionKey: string;
@@ -521,35 +506,52 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	) {
 		const { table } = this.db.dynamic;
 		const versionTable = dynamicConfig.tableName;
+		const batchSize = this.dbAdapter.getQueryBatchSize({
+			parametersPerItem: 1,
+			reservedParameters: 3,
+			maxItems: 500,
+		});
 
-		const query = this.db
-			.deleteFrom(versionTable)
-			.where(`${versionTable}.type`, "=", "revision")
-			.where(`${versionTable}.document_id`, "in", props.documentIds)
-			.where(`${versionTable}.created_at`, "<", props.cutoffDate)
-			.where(({ not, exists, selectFrom }) =>
-				not(
-					exists(
-						selectFrom(table(versionTable).as("promoted"))
-							.select(sql.lit(1).as("one"))
-							.whereRef("promoted.promoted_from", "=", `${versionTable}.id`)
-							.where("promoted.type", "!=", "revision"),
+		for (
+			let offset = 0;
+			offset < props.documentIds.length;
+			offset += batchSize
+		) {
+			const query = this.db
+				.deleteFrom(versionTable)
+				.where(`${versionTable}.type`, "=", "revision")
+				.where(
+					`${versionTable}.document_id`,
+					"in",
+					props.documentIds.slice(offset, offset + batchSize),
+				)
+				.where(`${versionTable}.created_at`, "<", props.cutoffDate)
+				.where(({ not, exists, selectFrom }) =>
+					not(
+						exists(
+							selectFrom(table(versionTable).as("promoted"))
+								.select(sql.lit(1).as("one"))
+								.whereRef("promoted.promoted_from", "=", `${versionTable}.id`)
+								.where("promoted.type", "!=", "revision"),
+						),
 					),
-				),
-			);
+				)
+				.returning("id");
 
-		const exec = await this.executeQuery(
-			async () => {
-				if (props.documentIds.length) await query.execute();
-				await this.deleteMissingIdentities(props.collectionKey, versionTable);
-			},
-			{
+			const deleted = await this.executeQuery(() => query.execute(), {
 				method: "deleteExpiredRevisions",
 				tableName: versionTable,
-			},
-		);
+			});
+			if (deleted.response.error) return deleted.response;
 
-		return exec.response;
+			const identities = await this.deleteIdentities(
+				props.collectionKey,
+				deleted.response.data.map((version) => version.id),
+			);
+			if (identities.error) return identities;
+		}
+
+		return { error: undefined, data: undefined };
 	}
 	/** Referencing versions whose owner document still exists and is not in the bin. */
 	async selectExistingDocumentVersions(
@@ -566,7 +568,11 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 				this.db
 					.selectFrom(props.documentTable)
 					.select("id")
-					.where("is_deleted", "=", false),
+					.where(
+						"is_deleted",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					),
 			);
 
 		const result = await this.executeQuery(() => query.execute(), {

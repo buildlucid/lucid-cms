@@ -236,21 +236,6 @@ export const createRemoteError = (
 	};
 };
 
-const requestFailed = (
-	error: unknown,
-	status = 500,
-): { error: LucidErrorData; data: undefined } => ({
-	error: {
-		type: "basic",
-		status,
-		message: copy("server:core.lucid.remote.request.failed", {
-			defaultMessage:
-				error instanceof Error ? error.message : "Lucid remote request failed.",
-		}),
-	},
-	data: undefined,
-});
-
 const createLucidRemoteClient = (props: {
 	apiDomain: string;
 	origin: string;
@@ -322,7 +307,19 @@ const createLucidRemoteClient = (props: {
 					try {
 						json = responseBody ? JSON.parse(responseBody) : {};
 					} catch (error) {
-						return requestFailed(error, response.status || 500);
+						return {
+							error: {
+								type: "basic",
+								status: response.status || 500,
+								message: copy("server:core.lucid.remote.request.failed", {
+									defaultMessage:
+										error instanceof Error
+											? error.message
+											: "Lucid remote request failed.",
+								}),
+							},
+							data: undefined,
+						};
 					}
 
 					if (!response.ok) {
@@ -341,11 +338,32 @@ const createLucidRemoteClient = (props: {
 						continue;
 					}
 
-					return requestFailed(error);
+					return {
+						error: {
+							type: "basic",
+							status: 500,
+							message: copy("server:core.lucid.remote.request.failed", {
+								defaultMessage:
+									error instanceof Error
+										? error.message
+										: "Lucid remote request failed.",
+							}),
+						},
+						data: undefined,
+					};
 				}
 			}
 
-			return requestFailed(undefined);
+			return {
+				error: {
+					type: "basic",
+					status: 500,
+					message: copy("server:core.lucid.remote.request.failed", {
+						defaultMessage: "Lucid remote request failed.",
+					}),
+				},
+				data: undefined,
+			};
 		},
 		stream: async (path, requestProps = {}) => {
 			const headers = buildHeaders({
@@ -367,7 +385,19 @@ const createLucidRemoteClient = (props: {
 				const json: unknown = await response.json().catch(() => undefined);
 				return createRemoteError(response, json);
 			} catch (error) {
-				return requestFailed(error);
+				return {
+					error: {
+						type: "basic",
+						status: 500,
+						message: copy("server:core.lucid.remote.request.failed", {
+							defaultMessage:
+								error instanceof Error
+									? error.message
+									: "Lucid remote request failed.",
+						}),
+					},
+					data: undefined,
+				};
 			}
 		},
 	};

@@ -1,7 +1,7 @@
 import z from "zod";
 import { agentReferenceInputSchema } from "../../../../../schemas/agent-references.js";
 
-export const inputSchema = z.object({
+export const inputSchema = z.strictObject({
 	/** The chat to link to, eg. `execution.run.conversationId`. */
 	conversationId: z.uuid(),
 	/** The tool managing the links. People see it as the reason they cannot remove them. */

@@ -1,4 +1,4 @@
-import type { AgentLucidToolName } from "../../../../types/response.js";
+import type { AgentLucidToolName } from "@lucidcms/types";
 
 /** Kept apart from the tool so URL checks can name it without an import cycle. */
 export const analyzeMediaToolName =

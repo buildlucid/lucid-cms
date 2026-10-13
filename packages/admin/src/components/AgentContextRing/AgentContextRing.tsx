@@ -1,5 +1,5 @@
 import { Popover } from "@kobalte/core";
-import type { AgentContext } from "@types";
+import type { AgentContextUsage } from "@types";
 import classnames from "classnames";
 import {
 	type Component,
@@ -12,7 +12,7 @@ import Button from "@/components/Button/Button";
 import T from "@/translations";
 
 export interface AgentContextRingProps {
-	context: AgentContext;
+	context: AgentContextUsage;
 	/** Hides the compact action while the agent is working or waiting on an answer. */
 	busy: boolean;
 	onCompact: () => void;

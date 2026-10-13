@@ -1,5 +1,5 @@
 import type { CollectionToolOptions } from "../../../libs/permission/readable-collections.js";
-import type { ToolkitActor } from "../../../libs/toolkit/types.js";
+import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
 
 export type DocumentWriteToolOptions = CollectionToolOptions & {
 	/**

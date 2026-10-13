@@ -21,7 +21,7 @@ const logoutController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	async (c) => {
 		const [clearRefreshRes, clearAccessRes, clearCSRFRes] = await Promise.all([

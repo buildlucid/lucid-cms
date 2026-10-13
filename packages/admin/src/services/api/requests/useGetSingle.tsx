@@ -1,5 +1,5 @@
 import { queryOptions, useQuery } from "@tanstack/solid-query";
-import type { RequestDetail, ResponseBody } from "@types";
+import type { RequestDetails, ResponseBody } from "@types";
 import type { Accessor } from "solid-js";
 import constants from "@/constants";
 import { queryKeys } from "@/services/query-keys";
@@ -16,7 +16,7 @@ export const requestQueryOptions = (id: number | undefined) =>
 	queryOptions({
 		queryKey: [...queryKeys.requests.detail(), id] as const,
 		queryFn: () =>
-			request<ResponseBody<RequestDetail>>({
+			request<ResponseBody<RequestDetails>>({
 				url: `/lucid/api/v1/requests/${id}`,
 				method: "GET",
 			}),
@@ -25,9 +25,12 @@ export const requestQueryOptions = (id: number | undefined) =>
 	});
 
 const useGetSingle = (params: QueryHook<QueryParams>) =>
-	useQuery(() => ({
-		...requestQueryOptions(params.queryParams.location.id()),
-		...(params.enabled ? { enabled: params.enabled() } : {}),
-	}));
+	useQuery(() => {
+		const options = requestQueryOptions(params.queryParams.location.id());
+		return {
+			...options,
+			enabled: options.enabled && (params.enabled ? params.enabled() : true),
+		};
+	});
 
 export default useGetSingle;

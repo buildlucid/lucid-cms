@@ -12,6 +12,7 @@ import deleteDocumentRecords from "./helpers/delete-document-records.js";
 import emitDocumentChange from "./helpers/emit-change.js";
 import executeDeleteHook from "./helpers/execute-delete-hook.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
+import requiresReview from "./helpers/requires-review.js";
 
 const deleteMultiplePermanently: ServiceFn<
 	[
@@ -102,7 +103,7 @@ const deleteMultiplePermanently: ServiceFn<
 
 			//* collections that review deletions only delete binned documents directly
 			if (
-				collectionRes.data.getData.publishing.review?.delete &&
+				requiresReview(collectionRes.data, { type: "delete" }) &&
 				docsExistRes.data.some(
 					(doc) => !formatter.formatBoolean(doc.is_deleted),
 				)

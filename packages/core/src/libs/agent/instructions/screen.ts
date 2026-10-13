@@ -20,7 +20,7 @@ export const screenInstructions = (screen: ScreenContext) => {
 	if (screen.type !== "document" || !screen.builder.read) return intro;
 
 	const builder = dedent(`
-		A document_builder screen is a document open in the editor, which may have changes the person hasn't saved. Read it with ${builderReadToolName}, not documents_get, to see what they see.
+		A document_builder screen is a document open in the document builder, which may have changes the person hasn't saved. Read it with ${builderReadToolName}, not documents_get, to see what they see.
 		${
 			screen.builder.edit
 				? `To change that document, use ${builderUpdateToolName} rather than the documents tools. Your changes appear in the builder as unsaved edits for them to review and save. The chat lists every field you changed, with links to it, so sum up your changes rather than list them. Fix any validation errors it reports before you finish. Never write to the document they have open through other tools, as that would replace their unsaved changes.`

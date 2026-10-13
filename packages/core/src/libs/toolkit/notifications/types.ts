@@ -2,6 +2,7 @@ import type {
 	AnyNotificationDefinition,
 	NotificationData,
 } from "../../notifications/types.js";
+import type { ToolkitActor } from "../../permission/toolkit-actor.js";
 
 /** A notification to send. Types with a `recipients` audience need `recipients`. */
 export type ToolkitNotificationsSendInput<
@@ -9,15 +10,16 @@ export type ToolkitNotificationsSendInput<
 > = {
 	type: Definition;
 	data: NotificationData<Definition>;
-	/** Identifies the event, so sending it again updates or reopens the existing notification. */
+	/** Event identity used to preserve open matches and reopen resolved matches on repeated sends. */
 	key?: string;
 	/** Change it to tell recipients again, eg. when a threshold climbs. */
 	fingerprint?: string;
 	recipients?: number[];
-	/** The person whose action caused it. They are left out of the recipients, unless an agent acted for them. */
-	actorUserId?: number | null;
-	/** The agent run that acted for the actor, eg. `execution.actor.agentRunId`. People see the agent as the actor, and the person it acted for is told too. */
-	actorRunId?: string | null;
+	/**
+	 * Actor responsible for the event, such as `execution.actor`, defaulting to the system.
+	 * @remarks User actors are excluded from recipients unless an agent acted for them; `agentRunId` displays the agent as actor and includes its user among eligible recipients.
+	 */
+	actor?: ToolkitActor;
 };
 
 export type ToolkitNotificationsUpsertInput<

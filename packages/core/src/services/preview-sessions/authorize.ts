@@ -97,9 +97,7 @@ const authorize: ServiceFn<
 
 		const relationVersionTypeRes = await resolveRelationVersionType(context, {
 			collectionKey: session.entry_collection_key,
-			documentId: session.entry_document_id,
 			versionType: session.entry_version_type,
-			versionId: session.entry_version_id ?? undefined,
 		});
 		if (relationVersionTypeRes.error) return relationVersionTypeRes;
 

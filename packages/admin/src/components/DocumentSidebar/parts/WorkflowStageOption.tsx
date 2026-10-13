@@ -1,18 +1,7 @@
 import type { WorkflowStageColor } from "@types";
 import type { Component } from "solid-js";
-import StatusIndicator, {
-	type StatusIndicatorVariant,
-} from "@/components/StatusIndicator/StatusIndicator";
-
-export const stageVariants: Record<WorkflowStageColor, StatusIndicatorVariant> =
-	{
-		grey: "neutral-subtle",
-		red: "danger-subtle",
-		yellow: "yellow-subtle",
-		green: "green-subtle",
-		blue: "blue-subtle",
-		purple: "purple-subtle",
-	};
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
+import { workflowStageIndicators } from "@/utils/document-sidebar";
 
 const WorkflowStageOption: Component<{
 	label: string;
@@ -22,7 +11,7 @@ const WorkflowStageOption: Component<{
 	// Render
 	return (
 		<span class="flex min-w-0 items-center gap-2">
-			<StatusIndicator variant={stageVariants[props.color]} />
+			<StatusIndicator variant={workflowStageIndicators[props.color]} />
 			<span class="truncate">{props.label}</span>
 		</span>
 	);

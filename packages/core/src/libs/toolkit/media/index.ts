@@ -20,16 +20,17 @@ import stream from "./stream/index.js";
 import updateSingle from "./update-single/index.js";
 import uploadFile from "./upload-file/index.js";
 
+/** Provides media helpers with system writes by default or a user actor's live permissions and personal-media access. */
 export type ToolkitMedia = {
-	/** Updates media details without uploading a file and returns its ID. */
+	/** Updates media details and returns the ID, requiring `media:update` for user actors. */
 	updateSingle: (
 		input: Parameters<typeof updateSingle>[1],
 	) => ReturnType<typeof updateSingle>;
-	/** Uploads a file and creates a media item, returning its ID. */
+	/** Uploads a file and returns the new media ID, requiring `media:create` for user actors. */
 	uploadFile: (
 		input: Parameters<typeof uploadFile>[1],
 	) => ReturnType<typeof uploadFile>;
-	/** Replaces a file while preserving the media ID, text, folder and visibility. */
+	/** Replaces a file while preserving its ID, text, folder and visibility, requiring `media:update` for user actors. */
 	replaceFile: (
 		input: Parameters<typeof replaceFile>[1],
 	) => ReturnType<typeof replaceFile>;
@@ -39,7 +40,7 @@ export type ToolkitMedia = {
 	requestDownload: (
 		input: Parameters<typeof requestDownload>[1],
 	) => ReturnType<typeof requestDownload>;
-	/** Soft-deletes media, or permanently removes it when hard is true. */
+	/** Soft-deletes media or removes it permanently with `hard`, requiring `media:delete` for user actors. */
 	deleteSingle: (
 		input: Parameters<typeof deleteSingle>[1],
 	) => ReturnType<typeof deleteSingle>;

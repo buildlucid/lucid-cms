@@ -1,8 +1,8 @@
-import type { AgentWebSearchOutput } from "@types";
+import type { AgentWebSearchOutput } from "@lucidcms/types";
 import { type Component, For, Show } from "solid-js";
+import WebSourceRow from "@/components/WebSourceRow/WebSourceRow";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
-import WebSourceRow from "./WebSourceRow";
 
 const WebSearchViewV1: Component<{ output: AgentWebSearchOutput }> = (
 	props,

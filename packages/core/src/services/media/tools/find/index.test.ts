@@ -1,7 +1,7 @@
 import { afterAll, expect, test, vi } from "vitest";
 import z from "zod";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
-import { toolDefinitionInternal } from "../../../../libs/tools/registry.js";
+import { toolDefinitionInternal } from "../../../../libs/tools/tool-definition-internal.js";
 import type { Media } from "../../../../types/response.js";
 import createServiceContext from "../../../../utils/services/create-service-context.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";

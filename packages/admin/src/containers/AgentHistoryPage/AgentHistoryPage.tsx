@@ -1,7 +1,6 @@
 import { useLocation } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import { type Component, createMemo, createSignal } from "solid-js";
-import AgentHeader from "@/components/AgentHeader/AgentHeader";
 import AgentHistoryList from "@/components/AgentHistoryList/AgentHistoryList";
 import CreateMenu, {
 	type CreateMenuAction,
@@ -111,7 +110,7 @@ const AgentHistoryPage: Component = () => {
 	// Render
 	return (
 		<PageLayout.Root>
-			<AgentHeader
+			<PageLayout.Header
 				title={T()("routes.agent.history")}
 				description={T()("routes.agent.history.description")}
 				actions={<CreateMenu actions={createActions()} />}
@@ -120,7 +119,7 @@ const AgentHistoryPage: Component = () => {
 					queryState={searchParams}
 					onRefresh={() =>
 						queryClient.invalidateQueries({
-							queryKey: queryKeys.agent.conversations(),
+							queryKey: queryKeys.agent.conversationLists(),
 						})
 					}
 					filterSubject={T()("agent.history.subject")}
@@ -134,7 +133,7 @@ const AgentHistoryPage: Component = () => {
 					]}
 					perPage
 				/>
-			</AgentHeader>
+			</PageLayout.Header>
 			<PageLayout.Body>
 				<AgentHistoryList searchParams={searchParams} />
 			</PageLayout.Body>

@@ -4,10 +4,7 @@ import logger from "../../logger/index.js";
 import { requirementPermissions } from "../../permission/match-permissions.js";
 import { isRegisteredPermission } from "../../permission/registry.js";
 
-/**
- * Warns when equal-priority slots compete for the same exclusive placement,
- * and rejects dashboard widgets that require permissions no role can be granted.
- */
+/** Warns about equal-priority exclusive slots and rejects Home widgets requiring unavailable role permissions. */
 const checkAdminSlots = (config: ResolvedLucidConfig) => {
 	const slots = config.admin.slots ?? [];
 
@@ -20,7 +17,7 @@ const checkAdminSlots = (config: ResolvedLucidConfig) => {
 	}
 
 	for (const slot of slots) {
-		if (slot.slot !== "dashboard.widget" || slot.permission === undefined) {
+		if (slot.slot !== "home.widget" || slot.permission === undefined) {
 			continue;
 		}
 

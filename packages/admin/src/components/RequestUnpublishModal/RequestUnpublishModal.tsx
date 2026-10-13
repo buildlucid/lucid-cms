@@ -1,15 +1,14 @@
 import type {
 	Collection,
 	InternalCollectionDocument,
-	RequestDetail,
+	RequestDetails,
 } from "@types";
-import { type Component, For } from "solid-js";
-import Checkbox from "@/components/Checkbox/Checkbox";
-import RequestDocumentDraft from "@/components/RequestDocumentsModal/parts/RequestDocumentDraft";
+import type { Component } from "solid-js";
+import RequestDocumentDraft from "@/components/RequestDocumentDraft/RequestDocumentDraft";
 import RequestDocumentsModal from "@/components/RequestDocumentsModal/RequestDocumentsModal";
+import RequestTargetCheckboxes from "@/components/RequestTargetCheckboxes/RequestTargetCheckboxes";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getTargetLabel } from "@/utils/requests";
 
 type UnpublishDraft = {
 	collectionKey: string;
@@ -25,74 +24,63 @@ const getPublished = (
 		.filter((environment) => document?.versions[environment.key])
 		.map((environment) => environment.key);
 
+/** Picks documents and the environments to unpublish them from, for a new request or the unpublish `request` passed in. */
 const RequestUnpublishModal: Component<{
 	open: boolean;
 	setOpen: (open: boolean) => void;
-	request?: RequestDetail;
-}> = (props) => (
-	<RequestDocumentsModal<UnpublishDraft>
-		open={props.open}
-		setOpen={props.setOpen}
-		type="unpublish"
-		request={props.request}
-		copy={{
-			title: T()("requests.create.unpublish.title"),
-			description: T()("requests.create.unpublish.description"),
-		}}
-		canPick={(collection) =>
-			collection.publishing.environments.length > 0 &&
-			userStore.get.hasPermission([collection.permissions.read]).all &&
-			userStore.get.hasPermission([
-				collection.permissions.update,
-				collection.permissions["unpublish-request"],
-			]).some
-		}
-		toDraft={(document, collection, ref) => {
-			const published = getPublished(document, collection);
-			return published.length > 0 ? { ...ref, targets: published } : null;
-		}}
-		isReady={(draft) => draft.targets.length > 0}
-		unavailable={T()("requests.documents.unpublished")}
-		renderDraft={(draft) => (
-			<RequestDocumentDraft
-				draft={draft.draft}
-				document={draft.document}
-				collection={draft.collection}
-				onRemove={draft.onRemove}
-			>
-				<div class="flex flex-col gap-2 border-t border-border px-3 py-2.5 sm:flex-row sm:items-start sm:gap-4">
-					<span class="shrink-0 text-xs text-muted sm:w-28 sm:pt-2">
-						{T()("requests.targets.unpublish")}
-					</span>
-					<div class="flex min-w-0 grow flex-wrap gap-2">
-						<For each={getPublished(draft.document, draft.collection)}>
-							{(target) => (
-								<Checkbox
-									id={`request-unpublish-${draft.draft.collectionKey}-${draft.draft.documentId}-${target}`}
-									variant="button"
-									label={getTargetLabel(draft.collection, target)}
-									value={draft.draft.targets.includes(target)}
-									onChange={(checked) =>
-										draft.onChange({
-											...draft.draft,
-											targets: getPublished(
-												draft.document,
-												draft.collection,
-											).filter((key) =>
-												key === target
-													? checked
-													: draft.draft.targets.includes(key),
-											),
-										})
-									}
-								/>
-							)}
-						</For>
+	request?: RequestDetails;
+}> = (props) => {
+	// ----------------------------------------
+	// Render
+	return (
+		<RequestDocumentsModal<UnpublishDraft>
+			open={props.open}
+			setOpen={props.setOpen}
+			type="unpublish"
+			request={props.request}
+			copy={{
+				title: T()("requests.create.unpublish.title"),
+				description: T()("requests.create.unpublish.description"),
+			}}
+			canPick={(collection) =>
+				collection.publishing.environments.length > 0 &&
+				userStore.get.hasPermission([collection.permissions.read]).all &&
+				userStore.get.hasPermission([
+					collection.permissions.update,
+					collection.permissions.unpublishRequest,
+				]).some
+			}
+			toDraft={(document, collection, ref) => {
+				const published = getPublished(document, collection);
+				return published.length > 0 ? { ...ref, targets: published } : null;
+			}}
+			isReady={(draft) => draft.targets.length > 0}
+			unavailable={T()("requests.documents.unpublished")}
+			renderDraft={(draft) => (
+				<RequestDocumentDraft
+					draft={draft.draft}
+					document={draft.document}
+					collection={draft.collection}
+					onRemove={draft.onRemove}
+				>
+					<div class="flex flex-col gap-2 border-t border-border px-3 py-2.5 sm:flex-row sm:items-start sm:gap-4">
+						<span class="shrink-0 text-xs text-muted sm:w-28 sm:pt-2">
+							{T()("requests.targets.unpublish")}
+						</span>
+						<RequestTargetCheckboxes
+							id={`request-unpublish-${draft.draft.collectionKey}-${draft.draft.documentId}`}
+							options={getPublished(draft.document, draft.collection)}
+							value={draft.draft.targets}
+							collection={draft.collection}
+							onChange={(targets) =>
+								draft.onChange({ ...draft.draft, targets })
+							}
+						/>
 					</div>
-				</div>
-			</RequestDocumentDraft>
-		)}
-	/>
-);
+				</RequestDocumentDraft>
+			)}
+		/>
+	);
+};
 
 export default RequestUnpublishModal;

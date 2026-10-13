@@ -58,10 +58,10 @@ const driveRun: ServiceFn<
 		}
 		return session.finish("completed");
 	};
-	// A saved completion request survives recovery without executing more work.
+	//* A saved completion request survives recovery without executing more work.
 	if (checkpoint.finish) return completeRoutineRun();
 
-	// Access is resolved once per slice. Tool execution also checks its required permissions.
+	//* Resolve live access per slice; tools also check their required permissions.
 	const access = await checkAgentAccess(context, {
 		userId: run.user_id,
 		agentKey: run.agent_key,
@@ -194,7 +194,7 @@ const driveRun: ServiceFn<
 
 			if (!checkpoint.calls.length) {
 				if (mode === "chat") return session.finish("completed");
-				// Routine runs keep working until they explicitly finish.
+				//* Nudge routine runs to finish explicitly, up to the configured limit.
 				if (checkpoint.nudges >= limits.routineNudges) {
 					checkpoint.finish = {
 						outcome: "needs_review",

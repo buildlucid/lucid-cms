@@ -28,7 +28,7 @@ const getUploadSessionController = factory.createHandlers(
 			params: controllerSchemas.getUploadSession.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.getUploadSession.params),
 	async (c) => {

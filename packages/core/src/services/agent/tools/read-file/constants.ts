@@ -1,4 +1,4 @@
-import type { AgentLucidToolName } from "../../../../types/response.js";
+import type { AgentLucidToolName } from "@lucidcms/types";
 
 export const readFileToolName = "media_read_file" satisfies AgentLucidToolName;
 export const MAX_FILE_BYTES = 5_000_000;

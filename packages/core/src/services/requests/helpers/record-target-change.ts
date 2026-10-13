@@ -55,8 +55,13 @@ const recordTargetChange: ServiceFn<
 	});
 	if (eventsRes.error) return eventsRes;
 
-	const reviewsRes = await RequestTargets.updateMultiple({
-		data: { reviewed_version_id: null, reviewed_by: null, reviewed_at: null },
+	const acknowledgementsRes = await RequestTargets.updateMultiple({
+		data: {
+			acknowledged_version_id: null,
+			acknowledged_by: null,
+			acknowledged_by_run_id: null,
+			acknowledged_at: null,
+		},
 		where: [
 			{
 				key: "request_document_id",
@@ -66,7 +71,7 @@ const recordTargetChange: ServiceFn<
 			{ key: "target", operator: "=", value: data.target },
 		],
 	});
-	if (reviewsRes.error) return reviewsRes;
+	if (acknowledgementsRes.error) return acknowledgementsRes;
 
 	return { error: undefined, data: undefined };
 };

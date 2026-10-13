@@ -36,7 +36,7 @@ const getAccessibleRoutine: ServiceFn<
 	if (result.error) return result;
 	if (
 		!result.data ||
-		(result.data.source === "database" && result.data.user_id !== input.userId)
+		(result.data.source === "own" && result.data.user_id !== input.userId)
 	) {
 		return {
 			data: undefined,

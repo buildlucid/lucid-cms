@@ -1,6 +1,7 @@
 import { defineAdminSlot } from "@lucidcms/core";
 import { COMPONENTS_MODULE, PLUGIN_KEY } from "../../../constants.js";
 
+/** Shows the slug and full path together in the slug column of document lists. */
 const slugCellConfig = (collection: string) =>
 	defineAdminSlot({
 		key: `${PLUGIN_KEY}:${collection}:slug-column`,

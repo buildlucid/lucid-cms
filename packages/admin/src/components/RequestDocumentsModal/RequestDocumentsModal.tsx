@@ -1,9 +1,9 @@
+import type { RequestDocumentInput } from "@lucidcms/types";
 import { useNavigate } from "@solidjs/router";
 import type {
 	Collection,
 	InternalCollectionDocument,
-	RequestDetail,
-	RequestDocumentInput,
+	RequestDetails,
 	RequestType,
 } from "@types";
 import {
@@ -29,7 +29,7 @@ const RequestDocumentsModal = <TDraft extends RequestDocumentInput>(props: {
 	open: boolean;
 	setOpen: (open: boolean) => void;
 	type: Exclude<RequestType, "create">;
-	request?: RequestDetail;
+	request?: RequestDetails;
 	copy: { title: string; description: string };
 	canPick: (collection: Collection) => boolean;
 	toDraft: (

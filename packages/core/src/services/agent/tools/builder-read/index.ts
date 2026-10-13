@@ -1,10 +1,10 @@
 import constants from "../../../../constants/constants.js";
-import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import {
 	agentScreenCallSchema,
 	agentScreenResponseSchema,
-} from "../../../../schemas/agent-screen.js";
+} from "../../../../libs/agent/screen.js";
+import { copy } from "../../../../libs/i18n/index.js";
+import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import resolveBuilderScreen from "../../helpers/builder/resolve-builder-screen.js";
 import screenCall from "../../helpers/builder/screen-call.js";
 import { builderReadToolName } from "./constants.js";
@@ -37,7 +37,7 @@ export const builderReadAgentTool = () =>
 
 				return {
 					error: undefined,
-					data: screenCall(context, {
+					data: screenCall({
 						title,
 						call: { action: "read", screen: resolved.data.screen },
 					}),

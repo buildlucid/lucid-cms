@@ -1724,7 +1724,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 										onChange={(value) =>
 											createMedia.setOwned(value === "personal")
 										}
-										label={T()("media.ownership.visible.to")}
+										label={T()("media.ownership")}
 										options={[
 											{
 												value: "library",
@@ -1733,7 +1733,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											},
 											{
 												value: "personal",
-												label: T()("media.ownership.only.me"),
+												label: T()("media.ownership.personal"),
 												description: T()("media.ownership.owned.description"),
 											},
 										]}

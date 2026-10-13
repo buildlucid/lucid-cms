@@ -33,9 +33,10 @@ export const generatedContentSchema = <T extends z.ZodType>(
 						targetLocales.every((locale) =>
 							Object.hasOwn(translations, locale),
 						);
-			if (!matches)
+			if (!matches) {
 				context.addIssue({
 					code: "custom",
 					message: "Generated content must match the requested locales.",
 				});
+			}
 		});

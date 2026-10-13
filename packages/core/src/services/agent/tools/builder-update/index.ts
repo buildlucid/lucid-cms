@@ -1,9 +1,9 @@
 import constants from "../../../../constants/constants.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import {
 	agentScreenCallSchema,
 	agentScreenResponseSchema,
-} from "../../../../schemas/agent-screen.js";
+} from "../../../../libs/agent/screen.js";
+import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import resolveBuilderScreen from "../../helpers/builder/resolve-builder-screen.js";
 import screenCall from "../../helpers/builder/screen-call.js";
 import { builderUpdateTitle, builderUpdateToolName } from "./constants.js";
@@ -21,7 +21,7 @@ export const builderUpdateAgentTool = () =>
 		output: outputSchema,
 		//* collection read access is checked against the open screen when the call runs
 		permissions: [],
-		//* Confirm-all mode asks before changing unsaved content; default mode leaves review to the person.
+		//* Record unsaved edits as writes; users review them before saving, so confirmation is optional by default.
 		readOnly: false,
 		available: ({ screen }) => screen === "document",
 		interaction: {
@@ -35,7 +35,7 @@ export const builderUpdateAgentTool = () =>
 
 				return {
 					error: undefined,
-					data: screenCall(context, {
+					data: screenCall({
 						title: builderUpdateTitle,
 						call: { action: "read", screen: resolved.data.screen },
 					}),

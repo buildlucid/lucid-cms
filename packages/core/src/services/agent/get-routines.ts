@@ -9,6 +9,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import resolveAgentAccess from "./helpers/resolve-agent-access.js";
 
+/** Lists the routines the person can access, with their tool settings and last runs. */
 const getRoutines: ServiceFn<
 	[{ userId: number; query: GetMultipleRoutinesQueryParams }],
 	{ data: AgentRoutine[]; count: number }
@@ -44,7 +45,7 @@ const getRoutines: ServiceFn<
 			data: routines.data[0].map((routine) =>
 				agentFormatter.formatRoutine({
 					routine,
-					tools: tools.data[routine.id] ?? {},
+					toolSettings: tools.data[routine.id] ?? {},
 					lastRun: lastRuns.data.find((run) => run.routine_id === routine.id),
 				}),
 			),

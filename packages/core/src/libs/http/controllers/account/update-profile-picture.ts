@@ -28,7 +28,7 @@ const updateProfilePictureController = factory.createHandlers(
 			controllerSchemas.updateProfilePicture.body,
 		),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateProfilePicture.body),
 	async (c) => {

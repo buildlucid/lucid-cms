@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { AgentStreamEvent } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
 import {
 	type ContextSetup,
@@ -7,6 +8,7 @@ import {
 	settleToolCall,
 } from "../../../libs/agent/context.js";
 import { inputMessageParts } from "../../../libs/agent/input.js";
+import type { StoredAgentMessagePart } from "../../../libs/agent/messages.js";
 import { isTerminalRunStatus } from "../../../libs/agent/run-status.js";
 import type {
 	Checkpoint,
@@ -22,12 +24,10 @@ import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../../libs/repositories/index.js";
-import type { StoredAgentMessagePart } from "../../../schemas/agent.js";
 import type {
 	AgentReferenceInput,
 	AgentRunStatus,
 	AgentScreen,
-	AgentStreamEvent,
 } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -292,12 +292,12 @@ const openRunSession = async (
 
 				return saved;
 			},
-			/** Stops execution in a final or paused state. */
+			/** Stops execution in a final or paused state, with cancellation handled by `cancelRun`. */
 			finish: async (
-				status: Exclude<AgentRunStatus, "queued" | "running">,
+				status: Exclude<AgentRunStatus, "queued" | "running" | "cancelled">,
 				errorMessage?: string,
 			): ServiceResponse<{ status: AgentRunStatus }> => {
-				if (status === "failed" || status === "cancelled") {
+				if (status === "failed") {
 					const AgentConversations = new AgentConversationsRepository(
 						context.db,
 					);
@@ -455,8 +455,8 @@ const openRunSession = async (
 				summary: string;
 				throughPosition: number;
 			}): ServiceResponse<undefined> => {
-				const compactions = new AgentCompactionsRepository(context.db);
-				const stored = await compactions.storeForRun({
+				const AgentCompactions = new AgentCompactionsRepository(context.db);
+				const stored = await AgentCompactions.storeForRun({
 					...record,
 					conversationId: run.conversation_id,
 					runId: run.id,

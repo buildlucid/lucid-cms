@@ -15,7 +15,7 @@ export const resendEmailAgentTool = () =>
 		output: outputSchema,
 		permissions: [Permissions.EmailSend],
 		requiresConfirmation: true,
-		describe: (input) =>
+		describe: ({ input }) =>
 			copy("admin:core.tools.emails_resend.describe", {
 				data: { id: input.emailId },
 			}),

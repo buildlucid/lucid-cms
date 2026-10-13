@@ -2,6 +2,7 @@ import { type Component, createMemo, Show } from "solid-js";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RequestQueues from "@/components/RequestQueues/RequestQueues";
+import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
@@ -90,12 +91,12 @@ const ReviewOverviewPage: Component = () => {
 				const current = counts.get(key) ?? {
 					inSync: 0,
 					outOfSync: 0,
-					unreleased: 0,
+					unpublished: 0,
 				};
 				counts.set(key, {
 					inSync: current.inSync + environment.inSync,
 					outOfSync: current.outOfSync + environment.outOfSync,
-					unreleased: current.unreleased + environment.unreleased,
+					unpublished: current.unpublished + environment.unpublished,
 				});
 			}
 		}
@@ -130,21 +131,17 @@ const ReviewOverviewPage: Component = () => {
 				>
 					<div class="flex min-w-0 flex-col gap-8">
 						<section>
-							<div class="mb-3">
-								<h2>{T()("review.requests.title")}</h2>
-								<p class="mt-0.5 text-sm text-body">
-									{T()("review.requests.description")}
-								</p>
-							</div>
+							<SectionHeading
+								title={T()("review.requests.title")}
+								description={T()("review.requests.description")}
+							/>
 							<RequestQueues overview={overview.data?.data.requests} />
 						</section>
 						<section>
-							<div class="mb-3">
-								<h2>{T()("review.environments.title")}</h2>
-								<p class="mt-0.5 text-sm text-body">
-									{T()("review.environments.description")}
-								</p>
-							</div>
+							<SectionHeading
+								title={T()("review.environments.title")}
+								description={T()("review.environments.description")}
+							/>
 							<Show
 								when={rows().length > 0}
 								fallback={

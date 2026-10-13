@@ -31,7 +31,7 @@ const moveFolderController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.moveFolder.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.moveFolder.params),

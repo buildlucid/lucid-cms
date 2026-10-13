@@ -17,10 +17,11 @@ import AgentImageSettings from "@/components/AgentImageSettings/AgentImageSettin
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentMediaSelect from "@/components/AgentMediaSelect/AgentMediaSelect";
 import AgentQuestionPanel from "@/components/AgentQuestionPanel/AgentQuestionPanel";
+import AgentWidgetUnavailable from "@/components/AgentWidgetUnavailable/AgentWidgetUnavailable";
 import Button from "@/components/Button/Button";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import type { AdminOptions } from "@/extensions/types/config";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import {
 	audioSettingsWidget,
 	confirmationBatchWidget,
@@ -30,7 +31,6 @@ import {
 	mediaSelectWidget,
 	questionWidget,
 } from "@/utils/agent-tools";
-import AgentWidgetUnavailable from "./AgentWidgetUnavailable";
 import { resolveAgentSlot } from "./slots";
 import type {
 	AgentWidgetComponent,
@@ -99,6 +99,10 @@ const AgentWidget: Component<{
 				props.widget.key === confirmationBatchWidget),
 	);
 	const currentConfirmation = createMemo(() => batch()?.[confirmationStep()]);
+	const title = createMemo(() => {
+		const copy = currentConfirmation()?.title ?? pending()?.title;
+		return copy ? translateAdminCopy(copy) : undefined;
+	});
 	const confirmation = createMemo(
 		() => currentConfirmation() ?? pending()?.confirmation,
 	);
@@ -256,22 +260,20 @@ const AgentWidget: Component<{
 						})}
 					>
 						<Show when={props.view === "composer" && pending()}>
-							{(state) => (
-								<AgentInteractionBar
-									class="shrink-0"
-									title={currentConfirmation()?.title ?? state().title}
-									onRedirect={props.onRedirect}
-									onStop={props.onStop}
-									details={
-										confirmationOnly()
-											? {
-													open: showInput(),
-													onToggle: () => setShowInput((open) => !open),
-												}
-											: undefined
-									}
-								/>
-							)}
+							<AgentInteractionBar
+								class="shrink-0"
+								title={title()}
+								onRedirect={props.onRedirect}
+								onStop={props.onStop}
+								details={
+									confirmationOnly()
+										? {
+												open: showInput(),
+												onToggle: () => setShowInput((open) => !open),
+											}
+										: undefined
+								}
+							/>
 						</Show>
 						<Show when={!collapsed()}>
 							<div
@@ -352,9 +354,7 @@ const AgentWidget: Component<{
 									<p class="min-w-0 grow text-xs text-muted">{waitingText()}</p>
 								</Show>
 								<Show when={props.view === "inline"}>
-									<p class="min-w-0 grow text-xs text-muted">
-										{currentConfirmation()?.title ?? pending()?.title}
-									</p>
+									<p class="min-w-0 grow text-xs text-muted">{title()}</p>
 									<Show when={confirmationOnly()}>
 										<Button
 											type="button"

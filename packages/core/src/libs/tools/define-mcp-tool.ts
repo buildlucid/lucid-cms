@@ -21,14 +21,14 @@ const defineMcpTool = <
 
 	return {
 		...toolDefinitionBase(options),
-		target: "mcp",
+		kind: "mcp",
 		scopes: options.scopes,
 		annotations: options.annotations,
-		advertisedScopes: options.advertisedScopes,
+		possibleScopes: options.possibleScopes,
 		[toolDefinitionInternal]: {
 			prepareInput: (input) =>
 				prepareToolInput(
-					{ ...options, requirements: options.requiredScopes, checkResult },
+					{ ...options, requirements: options.inputScopes, checkResult },
 					input,
 				),
 		},

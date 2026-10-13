@@ -2,10 +2,10 @@ import classnames from "classnames";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import Button from "@/components/Button/Button";
-import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import DragDrop from "@/components/DragDrop/DragDrop";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import type { HomeWidget } from "@/components/HomeWidgets/types";
+import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
+import type { HomeWidget } from "@/components/HomeWidgets/widgets";
 import { homeWidgets } from "@/components/HomeWidgets/widgets";
 import api from "@/services/api";
 import userPreferencesStore, {
@@ -18,7 +18,7 @@ import HomeWidgetControls from "./HomeWidgetControls";
 
 const dragKey = "home-widgets";
 
-const spans: Record<DashboardWidgetSize, string> = {
+const spans: Record<HomeWidgetSize, string> = {
 	sm: "md:col-span-6 xl:col-span-4",
 	md: "md:col-span-6",
 	lg: "md:col-span-12 xl:col-span-8",

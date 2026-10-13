@@ -12,12 +12,10 @@ import {
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { resolveEffectiveWorkflowStage } from "../../document-workflows/helpers/index.js";
 import getDocumentLabel from "../../documents/helpers/get-document-label.js";
+import requiresReview from "../../documents/helpers/requires-review.js";
 import type { RequestRecord, RequestState } from "../types.js";
 
-/**
- * Reads each document's collection, captured request content and current
- * destinations. Documents are read together, one collection at a time.
- */
+/** Reads collection, captured content and target state for request documents, grouped by collection. */
 const getRequestState: ServiceFn<
 	[{ request: RequestRecord; labels?: boolean }],
 	RequestState
@@ -48,7 +46,7 @@ const getRequestState: ServiceFn<
 					workflowStage: null,
 					versions: new Map(),
 					source: null,
-					request: null,
+					content: null,
 				});
 			}
 			continue;
@@ -72,7 +70,7 @@ const getRequestState: ServiceFn<
 					workflowStage: null,
 					versions: new Map(),
 					source: null,
-					request: null,
+					content: null,
 				});
 			}
 			continue;
@@ -121,7 +119,7 @@ const getRequestState: ServiceFn<
 			const staged =
 				document.source === "latest" &&
 				(data.request.type === "publish" ||
-					collection.getData.publishing.review?.create === true);
+					requiresReview(collection, { type: "create" }));
 			const versions = (versionsRes.data ?? []).filter(
 				(version) => version.document_id === document.document_id,
 			);
@@ -135,7 +133,7 @@ const getRequestState: ServiceFn<
 				(row) => row.id === document.document_id,
 			);
 			const source = byId(document.source_version_id);
-			const request = approved ? byId(document.approved_version_id) : source;
+			const content = approved ? byId(document.approved_version_id) : source;
 			const stageKey = workflowsRes.data?.find(
 				(workflow) => workflow.version_id === document.source_version_id,
 			)?.stage_key;
@@ -143,7 +141,7 @@ const getRequestState: ServiceFn<
 			//* completed proposals are deleted, leaving the approved snapshot, and unpublish and delete requests capture nothing
 			const labelVersionId =
 				source?.id ??
-				request?.id ??
+				content?.id ??
 				versions.find((version) => version.type === "latest")?.id;
 			let label: string | null = null;
 			if (data.labels && labelVersionId !== undefined) {
@@ -190,7 +188,7 @@ const getRequestState: ServiceFn<
 						]),
 				),
 				source,
-				request,
+				content,
 			});
 		}
 	}

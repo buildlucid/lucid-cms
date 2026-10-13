@@ -8,7 +8,7 @@ import type {
 } from "../../../types/query-params.js";
 import type { RefResource, Refs } from "../../../types/response.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
-import type { InferredForeignKey, OnDelete, OnUpdate } from "../../db/types.js";
+import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyInput } from "../../i18n/types.js";
 import type {
 	CollectionSchemaColumn,
@@ -326,7 +326,6 @@ export type ColumnDefinition = {
 
 export type SchemaDefinition = {
 	columns: ColumnDefinition[];
-	foreignKeys?: InferredForeignKey[];
 };
 
 export type GetIndexDefinitionProps = {

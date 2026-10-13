@@ -35,7 +35,7 @@ const mediaSaveController = factory.createHandlers(
 			params: controllerSchemas.mediaSave.params,
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions({ some: mediaGenerationPermissions }),
 	permissions({ some: [Permissions.MediaCreate, Permissions.MediaUpdate] }),
@@ -54,7 +54,7 @@ const mediaSaveController = factory.createHandlers(
 				message: copy("server:core.routes.ai.generate.error.message"),
 			},
 		})(context, {
-			requestId: params.requestId,
+			requestId: params.id,
 			public: body.public,
 			temporary: body.temporary,
 			userId: c.get("auth").id,

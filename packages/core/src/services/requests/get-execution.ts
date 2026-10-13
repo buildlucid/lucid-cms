@@ -10,10 +10,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getListAccess from "./helpers/get-list-access.js";
 import recordFailure from "./helpers/record-failure.js";
 
-/**
- * Gets the current publication attempt for polling, without loading content
- * or activity. Null when there is no attempt or its job history has expired.
- */
+/** Returns the completion attempt for polling, or null if no attempt or retained job history exists. */
 const getExecution: ServiceFn<
 	[{ id: number; user: LucidUser }],
 	RequestExecution | null

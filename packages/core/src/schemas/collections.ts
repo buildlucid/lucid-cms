@@ -195,11 +195,11 @@ const collectionResponseSchema = z.object({
 	permissions: z.object({
 		read: z.string(),
 		create: z.string(),
-		"create-request": z.string(),
+		createRequest: z.string(),
 		update: z.string(),
 		delete: z.string(),
-		"delete-request": z.string(),
-		"unpublish-request": z.string(),
+		deleteRequest: z.string(),
+		unpublishRequest: z.string(),
 		restore: z.string(),
 		publish: z.string(),
 		review: z.string(),
@@ -259,7 +259,7 @@ const collectionResponseSchema = z.object({
 				}),
 				requires: z.array(z.string()).meta({
 					description:
-						"Environment keys that must match latest before requests can be created for this environment",
+						"Environment keys that must already hold the content before it can be published to this environment",
 					example: ["staging"],
 				}),
 				permissions: z.object({
@@ -313,7 +313,7 @@ const collectionResponseSchema = z.object({
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 						targets: z.array(z.string()).meta({
 							description:
-								"Request targets available from this stage: environments, and latest for create requests",
+								"Targets this stage allows: environments, for direct publishing and requests, or latest, for create requests and publish requests to latest",
 						}),
 						resetTo: z.string().nullable().meta({
 							description:

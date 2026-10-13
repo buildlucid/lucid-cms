@@ -13,7 +13,7 @@ export type RoutineBody = Pick<
 	| "cron"
 	| "timezone"
 	| "enabled"
-	| "tools"
+	| "toolSettings"
 >;
 
 const useCreateRoutine = (props?: {

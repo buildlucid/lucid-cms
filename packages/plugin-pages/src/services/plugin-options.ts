@@ -1,5 +1,6 @@
 import type { PluginOptions, PluginOptionsInternal } from "../types/types.js";
 
+/** Fills in defaults for the plugin options given by the user. */
 const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 	return {
 		collections: given.collections.map((c) => {

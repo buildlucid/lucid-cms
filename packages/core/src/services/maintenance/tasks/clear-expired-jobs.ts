@@ -6,11 +6,11 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 const clearExpiredJobs: ServiceFn<[], undefined> = async (context) => {
 	const completedBefore = subDays(
 		new Date(),
-		context.config.jobs.retention.completedDays,
+		context.config.retention.completedJobs,
 	).toISOString();
 	const failedBefore = subDays(
 		new Date(),
-		context.config.jobs.retention.failedDays,
+		context.config.retention.failedJobs,
 	).toISOString();
 
 	const Jobs = new JobsRepository(context.db);

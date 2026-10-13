@@ -7,6 +7,7 @@ import type {
 import type { ServiceFn } from "../../../utils/services/types.js";
 import hydrateUsageSessions from "../helpers/hydrate-usage-sessions.js";
 
+/** Gets one usage session's totals, showing chat details only when the viewer can open the chat. */
 const getSession: ServiceFn<
 	[{ type: AiUsageSessionType; id: string; viewerId: number }],
 	AiUsageSession

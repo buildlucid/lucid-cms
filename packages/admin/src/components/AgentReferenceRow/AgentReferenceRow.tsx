@@ -2,7 +2,7 @@ import { A } from "@solidjs/router";
 import type { AgentReference } from "@types";
 import classnames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
-import AgentReferenceThumb from "@/components/AgentReferenceFiles/parts/AgentReferenceThumb";
+import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
 import { agentReferenceHref } from "@/utils/agent-references";
 
 /** Shows chat references with previews and details, linking documents and requests to their pages and calling `onSelect` for media. */

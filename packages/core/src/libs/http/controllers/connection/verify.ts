@@ -29,7 +29,7 @@ const verifyController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.ConnectionUpdate]),
 	async (c) => {

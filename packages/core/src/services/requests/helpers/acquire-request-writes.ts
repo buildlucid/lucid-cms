@@ -6,7 +6,10 @@ import type { RequestRecord } from "../types.js";
 import loadRequest from "./load-request.js";
 import lockRequest from "./lock-request.js";
 
-/** Claims captured documents and the request in a stable order within a transaction for use with `await using`. */
+/**
+ * Claims captured documents before locking their request in a transaction.
+ * @remarks Dispose the returned claims with `await using`.
+ */
 const acquireRequestWrites: ServiceFn<
 	[
 		{
@@ -56,8 +59,6 @@ const acquireRequestWrites: ServiceFn<
 
 	const lockRes = await lockRequest(context, { id: data.id });
 	if (lockRes.error) return lockRes;
-
-	claims.use(lockRes.data);
 
 	//* reread once claimed, so callers see the revision no one else can now change
 	const requestRes = await loadRequest(context, data);

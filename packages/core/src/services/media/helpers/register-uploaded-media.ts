@@ -21,6 +21,7 @@ import prepareMediaTranslations from "./prepare-media-translations.js";
 import resolveAiGeneration from "./resolve-ai-generation.js";
 import resolvePoster from "./resolve-poster.js";
 import syncOwnedVisibility from "./sync-owned-visibility.js";
+import { type MediaTextField, mediaTextFields } from "./text-fields.js";
 import upsertCrop from "./upsert-crop.js";
 
 /** Registers validated file metadata and runs the media creation hooks. */
@@ -160,6 +161,7 @@ const registerUploadedMedia: ServiceFn<
 			is_system: isSystem,
 			created_by: data.userId,
 			updated_by: data.userId,
+			updated_by_run_id: data.agentRunId ?? null,
 			updated_at: new Date().toISOString(),
 			created_at: new Date().toISOString(),
 		},
@@ -221,16 +223,16 @@ const registerUploadedMedia: ServiceFn<
 	});
 	if (visibilityRes.error) return visibilityRes;
 
+	const textFields: readonly MediaTextField[] = mediaTextFields[uploaded.type];
 	const translations = prepareMediaTranslations({
 		defaultLocale: context.config.localization.defaultLocale,
-		title: data.title || [],
-		alt: isImage ? (data.alt ?? []) : [],
-		description:
-			uploaded.type === "video" || uploaded.type === "audio"
-				? (data.description ?? [])
-				: [],
-		summary: uploaded.type === "document" ? (data.summary ?? []) : [],
-		transcript: uploaded.type === "audio" ? (data.transcript ?? []) : [],
+		title: data.title,
+		alt: textFields.includes("alt") ? data.alt : undefined,
+		description: textFields.includes("description")
+			? data.description
+			: undefined,
+		summary: textFields.includes("summary") ? data.summary : undefined,
+		transcript: textFields.includes("transcript") ? data.transcript : undefined,
 		mediaId: mediaRes.data.id,
 	});
 	if (translations.length > 0) {

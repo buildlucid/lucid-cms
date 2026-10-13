@@ -2,9 +2,10 @@ import { agentFormatter } from "../../libs/formatters/index.js";
 import { AgentCompactionsRepository } from "../../libs/repositories/index.js";
 import type { AgentConversation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getInputs from "./get-inputs.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
+import getInputs from "./helpers/get-inputs.js";
 
+/** Gets a chat the person can open, with its compactions and pending input. */
 const getConversation: ServiceFn<
 	[{ id: string; userId: number }],
 	AgentConversation

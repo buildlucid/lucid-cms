@@ -1,6 +1,7 @@
 import type { ParentPageQueryResponse } from "../services/get-parent-fields.js";
 import formatFullSlug from "./format-fullslug.js";
 
+/** Builds a localized route from the parent's stored full slug, falling back to the prefix when absent. */
 const buildFullSlug = (data: {
 	parentFields: Array<ParentPageQueryResponse>;
 	targetLocale: string | null;

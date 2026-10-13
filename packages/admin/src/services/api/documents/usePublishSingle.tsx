@@ -5,7 +5,7 @@ import serviceHelpers from "@/utils/service-helpers";
 export type Params = {
 	collectionKey: string;
 	id: number;
-	body: { target: string; sourceVersionId?: number };
+	body: { environment: string; sourceVersionId?: number };
 };
 const usePublishSingle = () =>
 	serviceHelpers.useMutationWrapper({

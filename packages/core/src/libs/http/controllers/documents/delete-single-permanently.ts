@@ -30,7 +30,7 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 			},
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.deleteSinglePermanently.params),
 	collectionPermissions("delete"),

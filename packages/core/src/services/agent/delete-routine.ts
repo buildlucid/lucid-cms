@@ -6,7 +6,7 @@ import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import { agentNotificationKeys } from "./notifications/keys.js";
 import { routineFailedNotification } from "./notifications/routine-failed.js";
 
-/** Deletes a routine created in the admin. Its past conversations retain their routine workflow permission. */
+/** Deletes an admin routine while its past chats retain routine access requirements. */
 const deleteRoutine: ServiceFn<
 	[{ id: string; userId: number }],
 	undefined

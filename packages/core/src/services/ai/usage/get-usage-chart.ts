@@ -7,6 +7,7 @@ import buildUsageChartSeries from "../helpers/build-usage-chart-series.js";
 import { formatDbTimestamp, getDateKey } from "../helpers/date-helpers.js";
 import normalizeUsageChartQuery from "../helpers/normalize-usage-chart-query.js";
 
+/** Builds the usage chart series for the requested metrics and date range. */
 const getUsageChart: ServiceFn<
 	[
 		{

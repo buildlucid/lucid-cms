@@ -203,11 +203,11 @@ export const ViewSelector: Component<{
 																: undefined
 															: item.type === "environment"
 																? item.status?.isPublished === false
-																	? T()("common.status.unreleased")
+																	? T()("common.status.unpublished")
 																	: item.status?.upToDate
-																		? T()("documents.release.status.up.to.date")
+																		? T()("documents.publish.status.up.to.date")
 																		: T()(
-																				"documents.release.status.out.of.date",
+																				"documents.publish.status.out.of.date",
 																			)
 																: undefined
 													}

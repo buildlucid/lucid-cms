@@ -3,7 +3,7 @@ import formatter from "./helpers.js";
 
 type CountValue = string | number | undefined;
 
-/** Formats each collection's document counts as in sync, out of sync and unreleased counts per environment. */
+/** Formats each collection's document counts as in sync, out of sync and unpublished counts per environment. */
 const formatOverview = (props: {
 	collections: Array<{
 		key: string;
@@ -12,7 +12,7 @@ const formatOverview = (props: {
 			total: CountValue;
 			environments: Array<{
 				environment_key: string;
-				released: CountValue;
+				published: CountValue;
 				in_sync: CountValue;
 			}>;
 		};
@@ -34,13 +34,13 @@ const formatOverview = (props: {
 				total,
 				environments: collection.environments.map((key) => {
 					const environment = counts.get(key);
-					const released = formatter.parseCount(environment?.released);
+					const published = formatter.parseCount(environment?.published);
 					const inSync = formatter.parseCount(environment?.in_sync);
 					return {
 						key,
 						inSync,
-						outOfSync: released - inSync,
-						unreleased: total - released,
+						outOfSync: published - inSync,
+						unpublished: total - published,
 					};
 				}),
 			};

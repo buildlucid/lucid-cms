@@ -74,7 +74,11 @@ export default class AgentDocumentReferencesRepository extends StaticRepository<
 
 					return target
 						.doUpdateSet({ source: "message", tool_name: null })
-						.where("lucid_agent_document_references.managed", "=", false);
+						.where(
+							"lucid_agent_document_references.managed",
+							"=",
+							this.dbAdapter.getDefault("boolean", "false"),
+						);
 				});
 		});
 

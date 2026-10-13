@@ -3,6 +3,7 @@ import type { RequestExecution, ResponseBody } from "@types";
 import { type Accessor, createEffect } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
+import { requestChangeKeys } from "./change-keys";
 
 /** Polls the current publication attempt, refreshing content once it finishes or changes. */
 const useGetExecution = (params: {
@@ -51,9 +52,12 @@ const useGetExecution = (params: {
 		const attempt = `${id}:${jobId}`;
 		if (refreshed === attempt) return;
 		refreshed = attempt;
-		queryClient.invalidateQueries({ queryKey: queryKeys.requests.all() });
-		queryClient.invalidateQueries({ queryKey: queryKeys.documents.all() });
-		queryClient.invalidateQueries({ queryKey: queryKeys.review.all() });
+		for (const queryKey of [
+			...requestChangeKeys(),
+			queryKeys.documents.all(),
+		]) {
+			queryClient.invalidateQueries({ queryKey });
+		}
 	});
 
 	return query;

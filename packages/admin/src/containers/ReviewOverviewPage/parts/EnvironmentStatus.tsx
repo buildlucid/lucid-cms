@@ -10,7 +10,7 @@ import {
 
 export type EnvironmentCounts = Pick<
 	ReviewOverview["collections"][number]["environments"][number],
-	"inSync" | "outOfSync" | "unreleased"
+	"inSync" | "outOfSync" | "unpublished"
 >;
 
 const linkClass =
@@ -27,10 +27,10 @@ const EnvironmentStatus: Component<{
 	// Memos
 	const total = createMemo(
 		() =>
-			props.counts.inSync + props.counts.outOfSync + props.counts.unreleased,
+			props.counts.inSync + props.counts.outOfSync + props.counts.unpublished,
 	);
 	const singleStatus = createMemo((): DocumentEnvironmentStatus => {
-		if (props.counts.unreleased > 0) return "unreleased";
+		if (props.counts.unpublished > 0) return "unpublished";
 		if (props.counts.outOfSync > 0) return "out-of-sync";
 		return "in-sync";
 	});
@@ -74,7 +74,7 @@ const EnvironmentStatus: Component<{
 					</div>
 					<p class="flex flex-wrap gap-x-2 gap-y-1 text-xs leading-none text-muted">
 						<Show
-							when={props.counts.outOfSync > 0 || props.counts.unreleased > 0}
+							when={props.counts.outOfSync > 0 || props.counts.unpublished > 0}
 							fallback={T()("review.environments.synced")}
 						>
 							<Show when={props.counts.outOfSync > 0}>
@@ -93,17 +93,17 @@ const EnvironmentStatus: Component<{
 									)}
 								</Show>
 							</Show>
-							<Show when={props.counts.unreleased > 0}>
+							<Show when={props.counts.unpublished > 0}>
 								<Show
 									when={props.href}
-									fallback={T()("review.environments.unreleased", {
-										count: props.counts.unreleased,
+									fallback={T()("review.environments.unpublished", {
+										count: props.counts.unpublished,
 									})}
 								>
 									{(href) => (
-										<A href={href()("unreleased")} class={linkClass}>
-											{T()("review.environments.unreleased", {
-												count: props.counts.unreleased,
+										<A href={href()("unpublished")} class={linkClass}>
+											{T()("review.environments.unpublished", {
+												count: props.counts.unpublished,
 											})}
 										</A>
 									)}

@@ -1,21 +1,16 @@
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
+import { notificationLevelSchema } from "../../../schemas/notifications.js";
+import type { NotificationLevel } from "../../../types/response.js";
 import { translatableCopySchema } from "../../i18n/copy.js";
 import type { TranslatableCopy } from "../../i18n/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
+	TimestampDefaulted,
 	TimestampImmutable,
 	TimestampMutable,
-	TimestampRequired,
 } from "../types.js";
-
-export const notificationLevelSchema = z.enum([
-	"info",
-	"success",
-	"warning",
-	"error",
-]);
 
 export const notificationsTable = defineTable(
 	"lucid_notifications",
@@ -111,8 +106,6 @@ export const notificationsTable = defineTable(
 	}),
 );
 
-export type NotificationLevel = z.infer<typeof notificationLevelSchema>;
-
 export interface LucidNotifications {
 	id: Generated<number>;
 	type: string;
@@ -120,7 +113,7 @@ export interface LucidNotifications {
 	key: string | null;
 	category: string;
 	level: NotificationLevel;
-	action_required: BooleanInt;
+	action_required: Generated<BooleanInt>;
 	title: JSONColumnType<TranslatableCopy, TranslatableCopy, TranslatableCopy>;
 	body: JSONColumnType<
 		TranslatableCopy | null,
@@ -140,5 +133,5 @@ export interface LucidNotifications {
 	actor_run_id: string | null;
 	resolved_at: TimestampMutable;
 	created_at: TimestampImmutable;
-	updated_at: TimestampRequired;
+	updated_at: TimestampDefaulted;
 }

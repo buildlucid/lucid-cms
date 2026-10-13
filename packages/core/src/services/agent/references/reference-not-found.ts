@@ -1,6 +1,7 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type { AgentReferenceInput } from "../../../types/response.js";
 
+/** The not-found message for a reference's resource type. */
 const referenceNotFound = (reference: AgentReferenceInput) => {
 	switch (reference.type) {
 		case "media":

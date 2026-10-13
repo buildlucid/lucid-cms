@@ -1,6 +1,6 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
-import type { ToolkitActor } from "../../../../libs/toolkit/types.js";
+import type { ToolkitActor } from "../../../../libs/permission/toolkit-actor.js";
 import { getPagination } from "../../../../libs/tools/pagination.js";
 import { formatPerson } from "../../../../libs/tools/person.js";
 import { getBaseUrl } from "../../../../utils/helpers/index.js";
@@ -14,7 +14,7 @@ const findNotifications: ServiceFn<
 	{ output: z.output<typeof outputSchema> }
 > = async (context, props) => {
 	const { query } = props.input;
-	if (props.actor.kind !== "user") {
+	if (props.actor.type !== "user") {
 		return {
 			error: {
 				type: "basic",

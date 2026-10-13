@@ -98,10 +98,6 @@ const useAgentUploads = (props: {
 			{ id, name: file.name, progress: ai ? null : 0 },
 		]);
 
-		const poster =
-			helpers.getMediaType(file.type) === "video"
-				? uploadPoster(agentKey, file, controller.signal)
-				: undefined;
 		try {
 			let key: string;
 			if (ai) {
@@ -128,11 +124,18 @@ const useAgentUploads = (props: {
 				key = uploaded.data;
 			}
 
+			//* Upload the poster only after its video is stored.
+			const posterId =
+				helpers.getMediaType(file.type) === "video"
+					? await uploadPoster(agentKey, file, controller.signal)
+					: undefined;
+			if (controller.signal.aborted) return;
+
 			const media = await api.agent.createUploadReq({
 				agentKey,
 				key,
 				fileName: file.name,
-				posterId: await poster,
+				posterId,
 				ai,
 				signal: controller.signal,
 			});

@@ -1,5 +1,5 @@
+import type { AgentFileReadOutput } from "@lucidcms/types";
 import z from "zod";
-import type { AgentFileReadOutput } from "../../../../types/response.js";
 
 export const fileMimeTypeSchema = z.enum([
 	"text/plain",

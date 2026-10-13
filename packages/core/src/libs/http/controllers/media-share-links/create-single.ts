@@ -23,6 +23,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["media-share-links"],
 		summary: "Create Media Share Link",
 		responses: openAPI.responses({
+			status: 201,
 			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
@@ -31,7 +32,7 @@ const createSingleController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaCreate]),
 	validate("param", controllerSchemas.createSingle.params),
@@ -60,7 +61,7 @@ const createSingleController = factory.createHandlers(
 		});
 		if (linkRes.error) throw new LucidAPIError(linkRes.error);
 
-		c.status(200);
+		c.status(201);
 		return c.json(
 			formatAPIResponse(c, {
 				data: linkRes.data,

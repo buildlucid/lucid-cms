@@ -32,7 +32,7 @@ const approveController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.approve.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.approve.params),

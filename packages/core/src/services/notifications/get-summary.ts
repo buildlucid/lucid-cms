@@ -1,9 +1,9 @@
 import formatter from "../../libs/formatters/index.js";
 import { NotificationsRepository } from "../../libs/repositories/index.js";
-import type { NotificationSummary } from "../../types/response.js";
+import type { NotificationCounts } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-const getSummary: ServiceFn<[{ userId: number }], NotificationSummary> = async (
+const getSummary: ServiceFn<[{ userId: number }], NotificationCounts> = async (
 	context,
 	data,
 ) => {

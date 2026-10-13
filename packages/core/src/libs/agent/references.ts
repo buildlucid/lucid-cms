@@ -1,5 +1,7 @@
+import z from "zod";
 import type {
 	AgentReferenceInput,
+	AgentReferenceSource,
 	MediaOwnership,
 } from "../../types/response.js";
 import { getCollectionPermission } from "../permission/collection-permissions.js";
@@ -7,6 +9,12 @@ import { Permissions } from "../permission/definitions.js";
 import hasPermission, {
 	type PermissionGrant,
 } from "../permission/has-permission.js";
+
+/** Whether a person attached a resource to a message or a tool linked it, as stored on reference rows. */
+export const agentReferenceSourceTypeSchema = z.enum([
+	"message",
+	"tool",
+]) satisfies z.ZodType<AgentReferenceSource["type"]>;
 
 /** Identifies a linked resource, including a pinned document version. */
 export const referenceKey = (reference: AgentReferenceInput) => {
@@ -21,7 +29,7 @@ export const referenceKey = (reference: AgentReferenceInput) => {
 };
 
 /** Returns read permissions for a reference, including every collection in a request. */
-export const referenceReadPermissions = (
+const referenceReadPermissions = (
 	reference: AgentReferenceInput,
 	requestCollections: readonly string[] = [],
 ) => {

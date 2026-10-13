@@ -13,18 +13,18 @@ import validateVersionContent from "../documents-versions/helpers/validate-versi
 import promoteVersion from "../documents-versions/promote-version.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
+import requiresReview from "./helpers/requires-review.js";
 
-/** Publishes saved content from latest by default or a specified environment, requiring approved requests for targets that need review. */
+/** Publishes content from latest by default or another environment to a target permitting direct publishing. */
 const publish: ServiceFn<
 	[
 		{
 			collectionKey: string;
 			documentId: number;
-			target: string;
+			environment: string;
 			/** Defaults to latest. */
 			sourceVersionId?: number;
 			user: LucidUser;
-			createRevision?: boolean;
 		},
 	],
 	undefined
@@ -58,10 +58,11 @@ const publish: ServiceFn<
 			});
 			if (collectionRes.error) return collectionRes;
 
-			const target = collectionRes.data.getData.publishing.environments.find(
-				(environment) => environment.key === data.target,
-			);
-			if (!target) {
+			const environment =
+				collectionRes.data.getData.publishing.environments.find(
+					(environment) => environment.key === data.environment,
+				);
+			if (!environment) {
 				return {
 					error: {
 						type: "basic",
@@ -73,9 +74,10 @@ const publish: ServiceFn<
 			}
 
 			if (
-				collectionRes.data.getData.publishing.review?.publish.includes(
-					data.target,
-				)
+				requiresReview(collectionRes.data, {
+					type: "publish",
+					environment: data.environment,
+				})
 			) {
 				return {
 					error: {
@@ -166,12 +168,12 @@ const publish: ServiceFn<
 					? await canPublishTarget(context, {
 							collectionKey: data.collectionKey,
 							documentId: data.documentId,
-							target: data.target,
+							target: data.environment,
 						})
 					: { error: undefined, data: undefined };
 			if (workflowRes.error) return workflowRes;
 
-			for (const required of target.requires) {
+			for (const required of environment.requires) {
 				const requiredVersion = versions.find(
 					(version) => version.type === required,
 				);
@@ -180,7 +182,7 @@ const publish: ServiceFn<
 						error: {
 							type: "basic",
 							message: copy("server:core.documents.publish.requires", {
-								data: { target: data.target, required },
+								data: { target: data.environment, required },
 							}),
 							status: 409,
 						},
@@ -202,8 +204,7 @@ const publish: ServiceFn<
 				documentId: data.documentId,
 				userId: data.user.id,
 				fromVersionId: source.id,
-				toVersionType: data.target,
-				createRevision: data.createRevision,
+				toVersionType: data.environment,
 				skipRevisionCheck: true,
 				skipDocumentWriteClaims: true,
 			});

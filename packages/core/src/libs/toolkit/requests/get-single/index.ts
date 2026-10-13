@@ -1,11 +1,10 @@
 import type z from "zod";
-import type { RequestDetail } from "../../../../types/response.js";
+import type { RequestDetails } from "../../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
 import { runToolkitService } from "../../utils.js";
-import runRequestService from "../run-request-service.js";
 import { inputSchema } from "./schema.js";
 
 /** A request to read, optionally as a user. */
@@ -15,20 +14,21 @@ export type ToolkitRequestsGetSingleInput = z.input<typeof inputSchema>;
 const getSingle = (
 	context: ServiceContext,
 	input: ToolkitRequestsGetSingleInput,
-): ServiceResponse<RequestDetail> =>
+): ServiceResponse<RequestDetails> =>
 	runToolkitService({
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: getSingle } = await import(
-				"../../../../services/requests/get-single.js"
-			);
+			const [{ default: resolveActorUser }, { default: getSingle }] =
+				await Promise.all([
+					import("../../../../services/users/helpers/resolve-actor-user.js"),
+					import("../../../../services/requests/get-single.js"),
+				]);
 
-			return runRequestService(context, {
-				actor: data.actor,
-				transaction: false,
-				run: (context, user) => getSingle(context, { id: data.id, user }),
-			});
+			const userRes = await resolveActorUser(context, { actor: data.actor });
+			if (userRes.error) return userRes;
+
+			return getSingle(context, { id: data.id, user: userRes.data });
 		},
 		name: { key: "core.toolkit.requests.get-single.error.name" },
 		message: { key: "core.toolkit.requests.get-single.error.message" },

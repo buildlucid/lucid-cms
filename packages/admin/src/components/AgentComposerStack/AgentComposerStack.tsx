@@ -1,4 +1,4 @@
-import type { AgentInput } from "@types";
+import type { AgentInput } from "@lucidcms/types";
 import {
 	TbOutlineBolt,
 	TbOutlineClock,
@@ -17,9 +17,9 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { markdownPreview } from "@/components/AgentMessage/parts/AgentMarkdown";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
+import { markdownPreview } from "@/utils/agent-markdown";
 
 export interface AgentComposerStackProps {
 	inputs: AgentInput[];

@@ -1,11 +1,17 @@
 import { z } from "zod";
 import constants from "../../../constants/constants.js";
+import { builderFocusToolName } from "../../../services/agent/tools/builder-focus/constants.js";
+import { builderReadToolName } from "../../../services/agent/tools/builder-read/constants.js";
+import { builderUpdateToolName } from "../../../services/agent/tools/builder-update/constants.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import { runnerToolNames } from "../../agent/runner-tools.js";
 import { getExternalCapability } from "../../permission/capabilities.js";
 import { getValidPermissions } from "../../permission/registry.js";
-import { isToolDefinition } from "../../tools/registry.js";
-import type { ToolDefinition } from "../../tools/types.js";
+import { coreToolWidgets, isToolDefinition } from "../../tools/registry.js";
+import type {
+	AgentToolCapabilities,
+	ToolDefinition,
+} from "../../tools/types.js";
 
 const mimeCapabilitySchema = z
 	.object({
@@ -14,19 +20,33 @@ const mimeCapabilitySchema = z
 	.strict();
 const agentToolCapabilitiesSchema = z
 	.object({
-		mediaAnalysis: mimeCapabilitySchema.optional(),
-		fileRead: mimeCapabilitySchema.optional(),
-		webSearch: z.boolean().optional(),
-		webRead: z.boolean().optional(),
-		imageGeneration: z.boolean().optional(),
-		audioGeneration: z.boolean().optional(),
+		media: z
+			.object({
+				analyze: mimeCapabilitySchema.optional(),
+				readFile: mimeCapabilitySchema.optional(),
+				generate: z
+					.object({
+						image: z.boolean().optional(),
+						audio: z.boolean().optional(),
+					})
+					.strict()
+					.optional(),
+			})
+			.strict()
+			.optional(),
+		web: z
+			.object({ search: z.boolean().optional(), read: z.boolean().optional() })
+			.strict()
+			.optional(),
 	})
 	.strict()
-	.optional();
+	.optional() satisfies z.ZodType<AgentToolCapabilities | undefined>;
 
-const coreToolWidgets: ReadonlyMap<string, readonly string[]> = new Map(
-	Object.entries(constants.agent.widgets.tools),
-);
+const reservedToolNames: ReadonlySet<string> = new Set([
+	builderReadToolName,
+	builderFocusToolName,
+	builderUpdateToolName,
+]);
 
 /** Checks a tool's name, schemas and access requirements. */
 const checkTool = (
@@ -52,10 +72,10 @@ const checkTool = (
 		throw new Error(`Tool "${tool.name}" needs a description.`);
 	}
 
-	if (tool.target === "mcp") {
+	if (tool.kind === "mcp") {
 		for (const scope of [
 			...tool.scopes,
-			...(tool.advertisedScopes?.(config) ?? []),
+			...(tool.possibleScopes?.({ config }) ?? []),
 		]) {
 			if (!getExternalCapability(config, scope)) {
 				throw new Error(`Tool "${tool.name}" uses unknown scope "${scope}".`);
@@ -72,8 +92,14 @@ const checkTool = (
 			);
 		}
 
-		if (runnerToolNames.has(tool.name)) {
-			throw new Error(`Agent tool name "${tool.name}" is reserved.`);
+		if (
+			runnerToolNames.has(tool.name) ||
+			(tool.name.startsWith(constants.agent.reservedToolPrefix) &&
+				!reservedToolNames.has(tool.name))
+		) {
+			throw new Error(
+				`Agent tool name "${tool.name}" is reserved. Names starting with "${constants.agent.reservedToolPrefix}" are for Lucid's own tools.`,
+			);
 		}
 
 		if (
@@ -119,18 +145,18 @@ const checkTool = (
 	}
 };
 
-/** Checks that a placement only holds tools for its target, with unique names. */
+/** Checks that a placement only holds tools of its kind, with unique names. */
 const checkPlacement = (
 	label: string,
-	target: ToolDefinition["target"],
+	kind: ToolDefinition["kind"],
 	tools: readonly unknown[],
 ) => {
 	const names = new Set<string>();
 
 	for (const tool of tools) {
-		if (!isToolDefinition(tool) || tool.target !== target) {
+		if (!isToolDefinition(tool) || tool.kind !== kind) {
 			throw new Error(
-				`${label} tools must be created with ${target === "mcp" ? "defineMcpTool" : "defineAgentTool"}.`,
+				`${label} tools must be created with ${kind === "mcp" ? "defineMcpTool" : "defineAgentTool"}.`,
 			);
 		}
 

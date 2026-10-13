@@ -31,7 +31,7 @@ const triggerScheduleController = factory.createHandlers(
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
 		requestBody: openAPI.requestBody(controllerSchemas.triggerSchedule.body),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	rateLimiter({
 		mode: "user",

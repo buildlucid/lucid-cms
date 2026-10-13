@@ -33,13 +33,13 @@ export type ToolkitDocumentVersion<
  */
 export type ToolkitDocuments = {
 	/**
-	 * Creates unpublished latest content with collection defaults, or a hidden create request proposal identified by `requestId`.
+	 * Creates unpublished latest content with collection defaults, or a hidden proposal when `request` is supplied.
 	 *
 	 * @example
 	 * ```ts
 	 * await toolkit.documents.createSingle({
 	 *   collectionKey: "article",
-	 *   actor: { kind: "system" },
+	 *   actor: { type: "system" },
 	 *   data: {
 	 *     fields: {
 	 *       title: { en: "Hello" },
@@ -60,7 +60,7 @@ export type ToolkitDocuments = {
 	 * await toolkit.documents.updateSingle({
 	 *   collectionKey: "article",
 	 *   id: 1,
-	 *   actor: { kind: "system" },
+	 *   actor: { type: "system" },
 	 *   data: {
 	 *     fields: {
 	 *       title: { en: "New title" },
@@ -86,7 +86,7 @@ export type ToolkitDocuments = {
 	 * await toolkit.documents.updateSingle({
 	 *   collectionKey: "article",
 	 *   id: editable.data.id,
-	 *   actor: { kind: "system" },
+	 *   actor: { type: "system" },
 	 *   ifUnchanged: editable.data.editToken,
 	 *   data: {
 	 *     fields: {
@@ -107,7 +107,7 @@ export type ToolkitDocuments = {
 	 * await toolkit.documents.patchSingle({
 	 *   collectionKey: "article",
 	 *   id: 1,
-	 *   actor: { kind: "system" },
+	 *   actor: { type: "system" },
 	 *   operations: [
 	 *     {
 	 *       op: "set",

@@ -1,5 +1,6 @@
 import normalizePathValue from "./normalize-path-value.js";
 
+/** Joins normalized path parts with a leading slash, preserving `/` and returning null for empty input. */
 const formatFullSlug = (
 	...parts: Array<string | null | undefined>
 ): string | null => {

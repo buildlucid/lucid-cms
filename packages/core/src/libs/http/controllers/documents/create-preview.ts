@@ -31,7 +31,7 @@ const createPreviewController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 	}),
-	validateCSRF,
+	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.createPreview.body),
 	validate("param", controllerSchemas.createPreview.params),

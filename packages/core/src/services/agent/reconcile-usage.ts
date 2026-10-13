@@ -1,7 +1,4 @@
-import z from "zod";
-import { getLucidRemoteClient } from "../../libs/lucid-remote/client.js";
-import { lucidRemotePaths } from "../../libs/lucid-remote/constants.js";
-import { cmsAgentUsageSchema } from "../../libs/lucid-remote/schema/ai.js";
+import getAgentRequest from "../../libs/lucid-remote/services/get-agent-request/index.js";
 import { AiGenerationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -12,14 +9,6 @@ import handleRemoteError from "../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../connection/token-manager.js";
 import storeFailedUsage from "./helpers/store-failed-usage.js";
 import storeUsage from "./helpers/store-usage.js";
-
-const remoteStatusSchema = z.object({
-	data: z.object({
-		requestId: z.string(),
-		status: z.enum(["processing", "complete", "failed", "cancelled"]),
-		usage: cmsAgentUsageSchema.optional(),
-	}),
-});
 
 const batchSize = 50;
 const minimumAgeMs = 2 * 60_000;
@@ -43,9 +32,9 @@ const reconcileUsage: ServiceFn<
 		return token;
 	}
 
-	const repository = new AiGenerationsRepository(context.db);
+	const AiGenerations = new AiGenerationsRepository(context.db);
 
-	const pending = await repository.pendingAgentUsage({
+	const pending = await AiGenerations.pendingAgentUsage({
 		connectionId: token.data.lucidRemoteConnectionId,
 		before: input?.requestId
 			? undefined
@@ -55,22 +44,17 @@ const reconcileUsage: ServiceFn<
 	});
 	if (pending.error) return pending;
 
-	const client = getLucidRemoteClient(context);
 	let settled = 0;
 
 	for (const row of pending.data ?? []) {
 		//* settle usage for deleted runs to avoid starving later rows
 		if (row.lucid_remote_connection_id === null) continue;
 
-		const response = await client.request<unknown>(
-			`${lucidRemotePaths.agent}/${encodeURIComponent(row.request_id)}`,
-			{
-				method: "GET",
-				accessToken: token.data.accessToken,
-				retries: 0,
-				signal: AbortSignal.timeout(10_000),
-			},
-		);
+		const response = await getAgentRequest(context, {
+			accessToken: token.data.accessToken,
+			requestId: row.request_id,
+			signal: AbortSignal.timeout(10_000),
+		});
 		if (response.error) await handleRemoteError(context, response.error);
 		if (response.error && response.error.status !== 404) return response;
 
@@ -78,14 +62,9 @@ const reconcileUsage: ServiceFn<
 
 		if (response.error?.status === 404 && ageMs < missingRequestAgeMs) continue;
 
-		const status = response.error
-			? undefined
-			: remoteStatusSchema.safeParse(response.data.json);
-
-		if (status && !status.success) continue;
-		if (status?.success && status.data.data.requestId !== row.request_id) {
-			continue;
-		}
+		//* unreadable responses are left for a later scan
+		const remote = response.data;
+		if (remote === null) continue;
 
 		const request = {
 			requestId: row.request_id,
@@ -95,7 +74,7 @@ const reconcileUsage: ServiceFn<
 			userId: row.user_id,
 			connectionId: row.lucid_remote_connection_id,
 		};
-		const usage = status?.success ? status.data.data.usage : undefined;
+		const usage = remote?.usage;
 
 		if (usage) {
 			const stored = await storeUsage(context, {
@@ -110,9 +89,7 @@ const reconcileUsage: ServiceFn<
 		}
 		//* failed and cancelled turns were never charged
 		const uncharged =
-			status?.success &&
-			(status.data.data.status === "failed" ||
-				status.data.data.status === "cancelled");
+			remote?.status === "failed" || remote?.status === "cancelled";
 		if (response.error?.status !== 404 && !uncharged) continue;
 
 		const failed = await storeFailedUsage(context, {

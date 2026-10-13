@@ -13,10 +13,10 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import { composerTriggerClasses } from "@/components/ComposerTriggerLabel/classes";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
-import { composerTriggerClasses } from "./triggerClasses";
 
 type ModelPickerOption = {
 	id: string;

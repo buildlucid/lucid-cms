@@ -12,7 +12,7 @@ export const documentEnvironmentStatusVariants: Record<
 > = {
 	"in-sync": "success-subtle",
 	"out-of-sync": "warning-subtle",
-	unreleased: "danger-subtle",
+	unpublished: "danger-subtle",
 };
 
 /** Resolves whether an environment contains the latest saved document content. */
@@ -22,7 +22,7 @@ export const getDocumentEnvironmentStatus = (props: {
 	latestContentId?: string;
 }): DocumentEnvironmentStatus => {
 	const environmentVersion = props.versions?.[props.environmentKey];
-	if (!environmentVersion) return "unreleased";
+	if (!environmentVersion) return "unpublished";
 
 	const latestContentId =
 		props.latestContentId ?? props.versions?.latest?.contentId;
@@ -44,7 +44,7 @@ export const getDocumentEnvironmentStatusLabel = (
 			return T()("common.status.in.sync");
 		case "out-of-sync":
 			return T()("common.status.out.of.sync");
-		case "unreleased":
-			return T()("common.status.unreleased");
+		case "unpublished":
+			return T()("common.status.unpublished");
 	}
 };

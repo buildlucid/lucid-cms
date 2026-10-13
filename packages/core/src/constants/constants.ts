@@ -1,9 +1,6 @@
+import type { AgentCoreWidgetKey, AgentLucidToolName } from "@lucidcms/types";
 import type { PublicErrorData } from "../types/errors.js";
-import type {
-	AgentCoreWidgetKey,
-	AgentLucidToolName,
-	MediaType,
-} from "../types/response.js";
+import type { AiUsageFeatureKey, MediaType } from "../types/response.js";
 import emailConstants from "./emails.js";
 
 export default Object.freeze({
@@ -101,10 +98,7 @@ export default Object.freeze({
 		emailDelayMinutes: 10,
 		emailBatchSize: 100,
 		emailExpiryHours: 24,
-		storage: {
-			key: "storage",
-			thresholds: [80, 90, 100],
-		},
+		storageThresholds: [80, 90, 100],
 	},
 	requests: {
 		maxDocuments: 100,
@@ -187,7 +181,6 @@ export default Object.freeze({
 		authProvider: "auth-provider",
 		ai: "ai",
 	} as const,
-	retention: 30,
 	jobSchedulerCron: "* * * * *",
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds
@@ -261,14 +254,31 @@ export default Object.freeze({
 				lucid_builder_read: ["lucid-screen"],
 				lucid_builder_update: ["lucid-screen", "lucid-builder-changes"],
 				lucid_builder_focus: ["lucid-screen"],
-			} satisfies Partial<Record<AgentLucidToolName, AgentCoreWidgetKey[]>>,
+			} satisfies Partial<
+				Record<AgentLucidToolName | "media_select", AgentCoreWidgetKey[]>
+			>,
 		},
+		/** Agent tool names starting with this are reserved for Lucid's own tools. */
+		reservedToolPrefix: "lucid_",
 		runStatuses: {
 			active: ["queued", "running", "waiting", "interrupted"],
 			/** Active runs that are not waiting on a person. */
 			working: ["queued", "running", "interrupted"],
 			terminal: ["completed", "failed", "cancelled"],
 		},
+		/** Input statuses still to be delivered to a run. */
+		deliverableInputStatuses: ["pending", "claimed"],
+		/** Features whose agent usage is settled against the remote request. */
+		usageFeatureKeys: [
+			"agent.chat",
+			"agent.compact",
+			"web.search",
+			"web.fetch",
+			"media.image.generate",
+			"media.audio.generate",
+		] satisfies AiUsageFeatureKey[],
+		/** Feature version used for agent usage, fixed to each feature's first version. */
+		usageFeatureVersion: "v1",
 		limits: {
 			routineNudges: 2,
 			recoveries: 3,

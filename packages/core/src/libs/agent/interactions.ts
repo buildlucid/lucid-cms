@@ -4,6 +4,7 @@ import z from "zod";
 import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AgentInteraction } from "../../types/response.js";
+import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { toolDefinitionInternal } from "../tools/tool-definition-internal.js";
 import type { AgentToolDefinition } from "../tools/types.js";
 import type { Checkpoint, ToolCall } from "./types.js";
@@ -85,7 +86,7 @@ export const createInteraction = (props: {
 	confirmations?: AgentInteraction["confirmations"];
 	key: string;
 	version?: number;
-	title: string;
+	title: ResolvedAdminCopy;
 	placement?: AgentInteraction["placement"];
 	data: Record<string, unknown>;
 }): PendingInteraction => ({

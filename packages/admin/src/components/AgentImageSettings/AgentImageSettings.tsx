@@ -1,4 +1,4 @@
-import type { AgentImageSettings as ImageSettings } from "@types";
+import type { AgentImageSettings as ImageSettings } from "@lucidcms/types";
 import {
 	createEffect,
 	createMemo,
