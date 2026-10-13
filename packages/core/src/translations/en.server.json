@@ -338,6 +338,8 @@
 	"core.routes.user.auth.provider.unlink.error.message": "An error occurred while unlinking the user's auth provider.",
 	"core.routes.user.me.update.error.name": "User Update Error",
 	"core.routes.user.me.update.error.message": "An error occurred while updating your account.",
+	"core.routes.user.preferences.update.error.name": "Preferences Update Error",
+	"core.routes.user.preferences.update.error.message": "An error occurred while saving your preferences.",
 	"core.routes.account.auth.provider.unlink.error.name": "Auth Provider Unlink Error",
 	"core.routes.account.auth.provider.unlink.error.message": "An error occurred while unlinking your auth provider.",
 	"core.routes.reset.password.error.name": "Reset Password Error",

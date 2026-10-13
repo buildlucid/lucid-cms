@@ -11,6 +11,7 @@ import revokeRefreshTokensController from "../../../controllers/account/revoke-r
 import sendResetPasswordController from "../../../controllers/account/send-reset-password.js";
 import unlinkAuthProviderController from "../../../controllers/account/unlink-auth-provider.js";
 import updateMeController from "../../../controllers/account/update-me.js";
+import updatePreferencesController from "../../../controllers/account/update-preferences.js";
 import updateProfilePictureController from "../../../controllers/account/update-profile-picture.js";
 import verifyEmailChangeConfirmController from "../../../controllers/account/verify-email-change-confirm.js";
 import verifyEmailChangeRevertController from "../../../controllers/account/verify-email-change-revert.js";
@@ -29,6 +30,7 @@ import updateOAuthConnectionController from "../../../controllers/oauth/update-c
 const accountRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMeController)
 	.patch("/", ...updateMeController)
+	.patch("/preferences", ...updatePreferencesController)
 	.get("/oauth-connections", ...getAccountConnectionsController)
 	.patch("/oauth-connections/:id", ...updateOAuthConnectionController)
 	.delete("/oauth-connections/:id", ...revokeOAuthConnectionController)

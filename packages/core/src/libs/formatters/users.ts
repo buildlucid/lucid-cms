@@ -1,5 +1,10 @@
 import type { LucidActor } from "../../types/hono.js";
-import type { Account, User, UserDisplay } from "../../types/response.js";
+import type {
+	Account,
+	User,
+	UserDisplay,
+	UserPreferences,
+} from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
@@ -69,6 +74,7 @@ const formatSingle = (props: {
 		requestedAt: Date | string | null;
 		expiresAt: Date | string | null;
 	} | null;
+	preferences?: UserPreferences;
 }): User => {
 	const { roles, permissions } = userPermissionsFormatter.formatMultiple({
 		roles: props.user.roles || [],
@@ -139,6 +145,10 @@ const formatSingle = (props: {
 					expiresAt: formatter.formatDate(props.pendingEmailChange.expiresAt),
 				}
 			: null;
+	}
+
+	if (props.preferences !== undefined) {
+		response.preferences = props.preferences;
 	}
 
 	return response;

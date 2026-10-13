@@ -1,6 +1,8 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import { aiModelSelectionSchema } from "../libs/agent/model-selection.js";
 import { translate } from "../libs/i18n/index.js";
+import type { HomeWidgetSize, UserPreferences } from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import {
 	mediaCropInputSchema,
@@ -134,6 +136,64 @@ const userResponseRoleSchema = z.object({
 	}),
 });
 
+const homeWidgetSizeSchema = z.enum([
+	"sm",
+	"md",
+	"lg",
+	"full",
+]) satisfies z.ZodType<HomeWidgetSize>;
+
+/** Validates synced admin preferences, dropping unknown keys. */
+export const userPreferencesSchema = z.object({
+	aiHidden: z.boolean().optional().meta({
+		description: "Hides AI features in the admin",
+		example: false,
+	}),
+	interfaceLocale: z.string().max(20).optional().meta({
+		description: "The admin interface locale",
+		example: "en",
+	}),
+	agentKey: z.string().max(200).optional().meta({
+		description: "The agent new chats start with",
+		example: "editor",
+	}),
+	agentModels: z
+		.record(z.string().max(200), aiModelSelectionSchema)
+		.optional()
+		.meta({
+			description: "The last model and effort chosen for each agent",
+		}),
+	autoSaveEnabled: z.boolean().optional().meta({
+		description: "Whether documents auto-save",
+		example: true,
+	}),
+	home: z
+		.object({
+			view: z.enum(["ask", "overview"]).optional(),
+			widgets: z
+				.array(
+					z.object({
+						key: z.string().max(200),
+						size: homeWidgetSizeSchema.optional(),
+						hidden: z.boolean().optional(),
+					}),
+				)
+				.max(100)
+				.optional(),
+		})
+		.optional()
+		.meta({ description: "The Home view and overview layout" }),
+	tables: z
+		.record(z.string().max(200), z.array(z.string().max(200)).max(100))
+		.optional()
+		.meta({ description: "Hidden columns, keyed by table key" }),
+	requestActivityFilters: z
+		.array(z.string().max(100))
+		.max(50)
+		.optional()
+		.meta({ description: "Optional request activity shown, by filter key" }),
+}) satisfies z.ZodType<UserPreferences>;
+
 export const userResponseSchema = z.object({
 	id: z.number().meta({
 		description: "The user's ID",
@@ -266,6 +326,9 @@ export const userResponseSchema = z.object({
 			}),
 		)
 		.meta({ description: "Actively linked auth providers for the user" })
+		.optional(),
+	preferences: userPreferencesSchema
+		.meta({ description: "Only returned for the authenticated user" })
 		.optional(),
 });
 

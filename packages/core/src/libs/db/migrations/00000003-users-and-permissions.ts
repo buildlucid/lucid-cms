@@ -519,6 +519,25 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.on("lucid_security_audit_logs")
 				.column("created_at")
 				.execute();
+
+			await db.schema
+				.createTable("lucid_user_preferences")
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_users.id").onDelete("cascade"),
+				)
+				.addColumn("preferences", adapter.getDataType("json"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addPrimaryKeyConstraint("pk_lucid_user_preferences", ["user_id"])
+				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},
 	};

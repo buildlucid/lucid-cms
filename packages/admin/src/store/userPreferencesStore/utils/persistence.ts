@@ -1,6 +1,3 @@
-import type { AiModelSelection } from "@types";
-import { homeWidgetSizes } from "@/components/HomeWidgets/constants";
-import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import { isObjectRecord } from "@/utils/type-guards";
 
 export const USER_PREFERENCES_STORAGE_KEY = "lucid_user_preferences";
@@ -44,35 +41,13 @@ export type CollectionPreferenceState = {
 	previewOpen?: boolean;
 };
 
-/** Ask opens Home on the agent's chat box, Overview on its widgets. */
-export type HomeView = "ask" | "overview";
-
-/** One widget in a customised Home overview. List order is display order. */
-export type HomeWidgetPreference = {
-	key: string;
-	size?: HomeWidgetSize;
-	hidden?: boolean;
-};
-
-export type HomePreferenceState = {
-	view?: HomeView;
-	/** Unset until the user customises the overview, so it follows the defaults. */
-	widgets?: HomeWidgetPreference[];
-};
-
+/** Device-local UI state, with synced choices stored separately in `UserPreferences`. */
 export type UserPreferenceState = {
 	preferences: {
-		agentKey?: string;
-		agentModels: Record<string, AiModelSelection>;
-		autoSaveEnabled?: boolean;
 		collections: Record<string, CollectionPreferenceState>;
-		home: HomePreferenceState;
 		/** Open state of navigation groups, keyed by group key. Unset means open. */
 		navigationGroups: Record<string, boolean>;
-		/** Optional request activity shown, by filter key. Unset shows none. */
-		requestActivityFilters?: string[];
 		sections: Partial<Record<SectionPreferenceKey, boolean>>;
-		tables: Record<string, string[]>;
 	};
 	workspace: {
 		collections: Record<string, BuilderCollectionState>;
@@ -93,12 +68,9 @@ export type BuilderPreferenceScope = {
 
 export const createEmptyPreferenceState = (): UserPreferenceState => ({
 	preferences: {
-		agentModels: {},
 		collections: {},
-		home: {},
 		navigationGroups: {},
 		sections: {},
-		tables: {},
 	},
 	workspace: {
 		collections: {},
@@ -148,57 +120,6 @@ export const ensureCollectionPreferenceState = (
 
 const sectionPreferenceKeys = new Set<string>(SECTION_PREFERENCE_KEYS);
 
-const isStringArray = (value: unknown): value is string[] =>
-	Array.isArray(value) && value.every((item) => typeof item === "string");
-
-/** Reads a model preference from storage; availability is checked against the catalogue. */
-const parseModelSelection = (value: unknown): AiModelSelection | undefined => {
-	if (
-		!isObjectRecord(value) ||
-		typeof value.modelId !== "string" ||
-		value.modelId.length === 0 ||
-		value.modelId.length > 200
-	) {
-		return undefined;
-	}
-
-	switch (value.reasoningEffort) {
-		case undefined:
-		case null:
-		case "minimal":
-		case "low":
-		case "medium":
-		case "high":
-		case "xhigh":
-			return { modelId: value.modelId, reasoningEffort: value.reasoningEffort };
-		default:
-			return undefined;
-	}
-};
-
-const isHomeWidgetSize = (value: unknown): value is HomeWidgetSize =>
-	homeWidgetSizes.some((size) => size === value);
-
-/** Keeps valid widget entries, dropping repeats and unknown sizes. */
-const parseHomeWidgets = (value: unknown[]): HomeWidgetPreference[] => {
-	const widgets = new Map<string, HomeWidgetPreference>();
-	for (const item of value) {
-		if (
-			!isObjectRecord(item) ||
-			typeof item.key !== "string" ||
-			widgets.has(item.key)
-		) {
-			continue;
-		}
-		widgets.set(item.key, {
-			key: item.key,
-			size: isHomeWidgetSize(item.size) ? item.size : undefined,
-			hidden: typeof item.hidden === "boolean" ? item.hidden : undefined,
-		});
-	}
-	return Array.from(widgets.values());
-};
-
 const isBuilderStateItem = (value: unknown): value is BuilderStateItem => {
 	if (!isObjectRecord(value) || typeof value.lastUpdated !== "number") {
 		return false;
@@ -224,31 +145,6 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 
 	const preferences = value.preferences;
 	if (isObjectRecord(preferences)) {
-		if (typeof preferences.autoSaveEnabled === "boolean") {
-			normalized.preferences.autoSaveEnabled = preferences.autoSaveEnabled;
-		}
-
-		if (typeof preferences.agentKey === "string") {
-			normalized.preferences.agentKey = preferences.agentKey;
-		}
-
-		if (isObjectRecord(preferences.agentModels)) {
-			for (const [agentKey, value] of Object.entries(preferences.agentModels)) {
-				const selection = parseModelSelection(value);
-				if (selection) normalized.preferences.agentModels[agentKey] = selection;
-			}
-		}
-
-		if (isObjectRecord(preferences.home)) {
-			const { view, widgets } = preferences.home;
-			if (view === "ask" || view === "overview") {
-				normalized.preferences.home.view = view;
-			}
-			if (Array.isArray(widgets)) {
-				normalized.preferences.home.widgets = parseHomeWidgets(widgets);
-			}
-		}
-
 		if (isObjectRecord(preferences.sections)) {
 			for (const [key, open] of Object.entries(preferences.sections)) {
 				if (typeof open !== "boolean" || !sectionPreferenceKeys.has(key)) {
@@ -264,21 +160,6 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 			)) {
 				if (typeof open === "boolean") {
 					normalized.preferences.navigationGroups[groupKey] = open;
-				}
-			}
-		}
-
-		if (isStringArray(preferences.requestActivityFilters)) {
-			normalized.preferences.requestActivityFilters =
-				preferences.requestActivityFilters;
-		}
-
-		if (isObjectRecord(preferences.tables)) {
-			for (const [tableKey, hiddenColumns] of Object.entries(
-				preferences.tables,
-			)) {
-				if (isStringArray(hiddenColumns)) {
-					normalized.preferences.tables[tableKey] = hiddenColumns;
 				}
 			}
 		}

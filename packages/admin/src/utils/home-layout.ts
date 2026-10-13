@@ -1,5 +1,5 @@
+import type { HomeWidgetPreference } from "@types";
 import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
-import type { HomeWidgetPreference } from "@/store/userPreferencesStore/userPreferencesStore";
 
 type LayoutWidget = {
 	key: string;

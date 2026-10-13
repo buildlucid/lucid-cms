@@ -1,6 +1,11 @@
-import type { AiModelSelection } from "@types";
+import type {
+	AiModelSelection,
+	HomeWidgetPreference,
+	UserPreferences,
+} from "@types";
 import { untrack } from "solid-js";
-import { createStore, reconcile, unwrap } from "solid-js/store";
+import { createStore, produce, reconcile, unwrap } from "solid-js/store";
+import { updatePreferencesReq } from "@/services/api/account/preferences";
 import {
 	BUILDER_STATE_MAX_AGE,
 	type BuilderDocumentState,
@@ -9,8 +14,6 @@ import {
 	createEmptyStoredState,
 	ensureBuilderDocumentState,
 	ensureCollectionPreferenceState,
-	type HomeView,
-	type HomeWidgetPreference,
 	parseStoredState,
 	type SectionPreferenceKey,
 	type StoredUserPreferences,
@@ -18,18 +21,23 @@ import {
 	type UserPreferenceState,
 } from "./utils/persistence";
 
-export type {
-	BuilderPreferenceScope,
-	HomeView,
-	HomeWidgetPreference,
-	SectionPreferenceKey,
-};
+/** Ask opens Home on the agent's chat box, Overview on its widgets. */
+export type HomeView = NonNullable<
+	NonNullable<UserPreferences["home"]>["view"]
+>;
+
+export type { BuilderPreferenceScope, SectionPreferenceKey };
 export { USER_PREFERENCES_STORAGE_KEY };
+
+/** Debounce delay in milliseconds for batching account preference updates. */
+export const SYNCED_SAVE_DELAY = 500;
 
 type UserPreferencesStoreOptions = {
 	storage?: Storage;
+	save?: (preferences: UserPreferences) => Promise<unknown>;
 };
 
+/** Creates a preferences store with account-synced choices and device-local UI state. */
 export const createUserPreferencesStore = (
 	options: UserPreferencesStoreOptions,
 ) => {
@@ -43,7 +51,10 @@ export const createUserPreferencesStore = (
 		}
 	})();
 	const [state, setState] = createStore<StoredUserPreferences>(initialState);
+	const [synced, setSynced] = createStore<UserPreferences>({});
 	let builderEntriesCleaned = false;
+	let pendingSynced: UserPreferences = {};
+	let saveTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	const commit = (next: StoredUserPreferences) => {
 		setState(reconcile(next));
@@ -65,6 +76,29 @@ export const createUserPreferencesStore = (
 		);
 		update(next);
 		commit(next);
+	};
+
+	const saveSynced = () => {
+		const preferences = pendingSynced;
+		pendingSynced = {};
+		options.save?.(preferences).catch(() => {
+			// The default API helper reports errors; failed saves keep the local value.
+		});
+	};
+
+	/** Applies preference changes immediately and queues a debounced account save. */
+	const updateSynced = <K extends keyof UserPreferences>(
+		key: K,
+		value: UserPreferences[K],
+	) => {
+		setSynced(
+			produce((preferences) => {
+				preferences[key] = value;
+			}),
+		);
+		pendingSynced[key] = value;
+		clearTimeout(saveTimeout);
+		saveTimeout = setTimeout(saveSynced, SYNCED_SAVE_DELAY);
 	};
 
 	const getBuilderDocumentState = (
@@ -146,16 +180,20 @@ export const createUserPreferencesStore = (
 		},
 
 		getAgentKey() {
-			return state.preferences.agentKey;
+			return synced.agentKey;
 		},
 
 		/** Returns the last model and effort explicitly chosen for an agent. */
 		getAgentModelSelection(agentKey: string) {
-			return state.preferences.agentModels[agentKey];
+			return synced.agentModels?.[agentKey];
+		},
+
+		getAiHidden() {
+			return synced.aiHidden ?? false;
 		},
 
 		getAutoSaveEnabled() {
-			return state.preferences.autoSaveEnabled;
+			return synced.autoSaveEnabled;
 		},
 
 		getBuilderActiveTab(scope: BuilderPreferenceScope) {
@@ -177,16 +215,20 @@ export const createUserPreferencesStore = (
 		},
 
 		getHomeView() {
-			return state.preferences.home.view;
+			return synced.home?.view;
 		},
 
 		/** The customised overview layout, or undefined to use the defaults. */
 		getHomeWidgets() {
-			return state.preferences.home.widgets;
+			return synced.home?.widgets;
 		},
 
 		getHiddenTableColumns(tableKey: string) {
-			return state.preferences.tables[tableKey];
+			return synced.tables?.[tableKey];
+		},
+
+		getInterfaceLocale() {
+			return synced.interfaceLocale;
 		},
 
 		getNavigationGroupOpen(groupKey: string) {
@@ -194,11 +236,16 @@ export const createUserPreferencesStore = (
 		},
 
 		getRequestActivityFilters() {
-			return state.preferences.requestActivityFilters;
+			return synced.requestActivityFilters;
 		},
 
 		getSectionOpen(section: SectionPreferenceKey) {
 			return state.preferences.sections[section];
+		},
+
+		/** Hydrates account preferences while preserving unsent local changes. */
+		hydrate(preferences: UserPreferences) {
+			setSynced(reconcile({ ...preferences, ...pendingSynced }));
 		},
 
 		reload() {
@@ -217,31 +264,33 @@ export const createUserPreferencesStore = (
 		},
 
 		setAgentKey(agentKey: string) {
-			if (state.preferences.agentKey === agentKey) return;
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.agentKey = agentKey;
-			});
+			if (synced.agentKey === agentKey) return;
+			updateSynced("agentKey", agentKey);
 		},
 
 		/** Remembers a model choice for new chats with this agent. */
 		setAgentModelSelection(agentKey: string, selection: AiModelSelection) {
-			const current = state.preferences.agentModels[agentKey];
+			const current = synced.agentModels?.[agentKey];
 			if (
 				current?.modelId === selection.modelId &&
 				current.reasoningEffort === selection.reasoningEffort
 			) {
 				return;
 			}
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.agentModels[agentKey] = selection;
+			updateSynced("agentModels", {
+				...unwrap(synced).agentModels,
+				[agentKey]: selection,
 			});
 		},
 
+		setAiHidden(hidden: boolean) {
+			if (synced.aiHidden === hidden) return;
+			updateSynced("aiHidden", hidden);
+		},
+
 		setAutoSaveEnabled(enabled: boolean) {
-			if (state.preferences.autoSaveEnabled === enabled) return;
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.autoSaveEnabled = enabled;
-			});
+			if (synced.autoSaveEnabled === enabled) return;
+			updateSynced("autoSaveEnabled", enabled);
 		},
 
 		setBuilderActiveTab(scope: BuilderPreferenceScope, activeTab: string) {
@@ -298,30 +347,32 @@ export const createUserPreferencesStore = (
 		},
 
 		setHomeView(view: HomeView) {
-			if (state.preferences.home.view === view) return;
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.home.view = view;
-			});
+			if (synced.home?.view === view) return;
+			updateSynced("home", { ...unwrap(synced).home, view });
 		},
 
 		/** Saves the overview layout. Undefined goes back to the defaults. */
 		setHomeWidgets(widgets: HomeWidgetPreference[] | undefined) {
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.home.widgets = widgets;
-			});
+			updateSynced("home", { ...unwrap(synced).home, widgets });
 		},
 
 		setHiddenTableColumns(tableKey: string, hiddenColumns: string[]) {
-			const current = state.preferences.tables[tableKey];
+			const current = synced.tables?.[tableKey];
 			if (
 				current?.length === hiddenColumns.length &&
 				current.every((column, index) => column === hiddenColumns[index])
 			) {
 				return;
 			}
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.tables[tableKey] = hiddenColumns;
+			updateSynced("tables", {
+				...unwrap(synced).tables,
+				[tableKey]: hiddenColumns,
 			});
+		},
+
+		setInterfaceLocale(locale: string) {
+			if (synced.interfaceLocale === locale) return;
+			updateSynced("interfaceLocale", locale);
 		},
 
 		setNavigationGroupOpen(groupKey: string, open: boolean) {
@@ -332,9 +383,7 @@ export const createUserPreferencesStore = (
 		},
 
 		setRequestActivityFilters(filters: string[]) {
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.requestActivityFilters = filters;
-			});
+			updateSynced("requestActivityFilters", filters);
 		},
 
 		setSectionOpen(section: SectionPreferenceKey, open: boolean) {
@@ -346,16 +395,14 @@ export const createUserPreferencesStore = (
 
 		/** Toggles document auto-save, treating an unset preference as enabled. */
 		toggleAutoSaveEnabled() {
-			const enabled = state.preferences.autoSaveEnabled ?? true;
-			updatePreferences((preferenceState) => {
-				preferenceState.preferences.autoSaveEnabled = !enabled;
-			});
+			updateSynced("autoSaveEnabled", !(synced.autoSaveEnabled ?? true));
 		},
 	};
 };
 
 const userPreferencesStore = createUserPreferencesStore({
 	storage: typeof localStorage === "undefined" ? undefined : localStorage,
+	save: updatePreferencesReq,
 });
 
 if (typeof window !== "undefined") {

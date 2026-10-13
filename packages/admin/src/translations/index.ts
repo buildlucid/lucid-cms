@@ -201,11 +201,12 @@ export const loadAdminTranslations = async (
 	}
 };
 
-export const initAdminTranslations = async () => {
+/** Loads translations if not ready, preferring the supplied locale over local storage. */
+export const initAdminTranslations = async (locale?: string) => {
 	if (getReady()) return true;
-	const storedLocale = getStoredLocale();
-	return loadAdminTranslations(storedLocale ?? undefined, {
-		persist: storedLocale !== null,
+	const preferredLocale = locale ?? getStoredLocale();
+	return loadAdminTranslations(preferredLocale ?? undefined, {
+		persist: preferredLocale !== null,
 	});
 };
 

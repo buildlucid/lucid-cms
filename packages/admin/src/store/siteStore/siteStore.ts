@@ -1,6 +1,7 @@
 import { aiFeatureAccess } from "@ai-feature-access";
 import type { ConnectionStatus, Settings } from "@types";
 import { createStore } from "solid-js/store";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 
 type AiSettings = NonNullable<Settings["ai"]>;
 
@@ -41,10 +42,12 @@ const [get, set] = createStore<SiteStoreT>({
 		return (
 			this.ai.enabled &&
 			this.ai.features[feature] &&
+			!userPreferencesStore.getAiHidden() &&
 			(accessFeature === null || !access || access.includes(accessFeature))
 		);
 	},
 	//* only features billed through Lucid count, so MCP alone does not show AI usage
+	//* site-wide AI usage remains visible when features are hidden
 	hasAnyAiFeatureEnabled() {
 		const { features } = this.ai;
 		return (

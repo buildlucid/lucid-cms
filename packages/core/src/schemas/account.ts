@@ -6,7 +6,11 @@ import {
 	mediaOriginSchema,
 	uploadSessionResponseSchema,
 } from "./media.js";
-import { contentAccountResponseSchema, userResponseSchema } from "./users.js";
+import {
+	contentAccountResponseSchema,
+	userPreferencesSchema,
+	userResponseSchema,
+} from "./users.js";
 
 const profilePictureTranslationSchema = z.object({
 	localeCode: z.string().trim().nullable().meta({
@@ -240,6 +244,15 @@ export const controllerSchemas = {
 				})
 				.optional(),
 		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	updatePreferences: {
+		body: userPreferencesSchema,
 		query: {
 			string: undefined,
 			formatted: undefined,

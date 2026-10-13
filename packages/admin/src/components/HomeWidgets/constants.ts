@@ -1,3 +1,5 @@
+import type { HomeWidgetSize } from "@lucidcms/types";
+
 /** Slots that plugins can use to add widgets to the Home overview. */
 export const homeWidgetSlotPolicies = {
 	"home.widget": {
@@ -8,4 +10,9 @@ export const homeWidgetSlotPolicies = {
 } as const;
 
 /** Widths in ascending order across the 12-column grid on wide screens. */
-export const homeWidgetSizes = ["sm", "md", "lg", "full"] as const;
+export const homeWidgetSizes = [
+	"sm",
+	"md",
+	"lg",
+	"full",
+] as const satisfies readonly HomeWidgetSize[];

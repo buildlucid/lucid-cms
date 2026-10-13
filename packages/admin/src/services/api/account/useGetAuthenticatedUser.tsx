@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, User } from "@types";
 import { createEffect } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import type { QueryHook } from "@/types/utils";
 import getLoginRedirectURL from "@/utils/login-route";
@@ -42,6 +43,7 @@ const useGetAuthenticatedUser = (
 	createEffect(() => {
 		if (query.isSuccess) {
 			userStore.set("user", query.data.data);
+			userPreferencesStore.hydrate(query.data.data.preferences ?? {});
 		}
 		if (query.isError) {
 			if (options?.authLayout) {

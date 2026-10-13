@@ -11,6 +11,7 @@ export { default as revertEmailChange } from "./revert-email-change.js";
 export { default as revokeAllRefreshTokens } from "./revoke-all-refresh-tokens.js";
 export { default as sendResetPassword } from "./send-reset-password.js";
 export { default as updateMe } from "./update-me.js";
+export { default as updatePreferences } from "./update-preferences.js";
 export { default as updateProfilePicture } from "./update-profile-picture.js";
 export { default as verifyEmailChangeConfirm } from "./verify-email-change-confirm.js";
 export { default as verifyEmailChangeRevert } from "./verify-email-change-revert.js";

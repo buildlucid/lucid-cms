@@ -1248,6 +1248,8 @@
 	"errors.auth.refresh.token.fetch.failed": "There was an error refreshing your session.",
 	"account.preferences.title": "Preferences",
 	"account.preferences.description": "Configure your account preferences",
+	"account.preferences.ai.title": "Show AI features",
+	"account.preferences.ai.description": "Turn off to hide agents, AI generation and other AI tools from your admin. This only changes what you see.",
 	"errors.auth.unauthorized": "Unauthorised",
 	"fields.validation.other.locales.errors": "This field has errors in other locales",
 	"empty.states.emails.title": "No Emails Found",

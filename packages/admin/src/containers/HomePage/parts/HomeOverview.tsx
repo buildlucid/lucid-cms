@@ -1,3 +1,4 @@
+import type { HomeWidgetPreference } from "@types";
 import classnames from "classnames";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
@@ -8,9 +9,7 @@ import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
 import type { HomeWidget } from "@/components/HomeWidgets/widgets";
 import { homeWidgets } from "@/components/HomeWidgets/widgets";
 import api from "@/services/api";
-import userPreferencesStore, {
-	type HomeWidgetPreference,
-} from "@/store/userPreferencesStore/userPreferencesStore";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 import { type HomeLayoutItem, resolveHomeLayout } from "@/utils/home-layout";
 import HomeCustomizeBar from "./HomeCustomizeBar";

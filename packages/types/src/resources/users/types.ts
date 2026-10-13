@@ -1,3 +1,4 @@
+import type { AiModelSelection } from "../ai/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { ProfilePicture } from "../media/types.js";
 
@@ -106,6 +107,40 @@ export type User = {
 		providerUserId: string;
 		linkedAt: string | null;
 	}>;
+	/** Only returned for the authenticated user. */
+	preferences?: UserPreferences;
+};
+
+/** `sm` is a third of a wide row, `md` half, `lg` two thirds and `full` the whole row. */
+export type HomeWidgetSize = "sm" | "md" | "lg" | "full";
+
+/** A Home overview widget whose list position controls display order. */
+export type HomeWidgetPreference = {
+	key: string;
+	size?: HomeWidgetSize;
+	hidden?: boolean;
+};
+
+/** UI preferences synced across devices, with omitted keys using admin defaults. */
+export type UserPreferences = {
+	/** Hides AI features in the admin. */
+	aiHidden?: boolean;
+	interfaceLocale?: string;
+	/** The agent new chats start with. */
+	agentKey?: string;
+	/** The last model and effort chosen for each agent, keyed by agent key. */
+	agentModels?: Record<string, AiModelSelection>;
+	autoSaveEnabled?: boolean;
+	home?: {
+		/** Ask opens Home on the agent's chat box, Overview on its widgets. */
+		view?: "ask" | "overview";
+		/** Unset until the user customises the overview, so it follows the defaults. */
+		widgets?: HomeWidgetPreference[];
+	};
+	/** Hidden columns, keyed by table key. */
+	tables?: Record<string, string[]>;
+	/** Optional activity filter keys, showing no extra request activity when unset. */
+	requestActivityFilters?: string[];
 };
 
 export type Account = {

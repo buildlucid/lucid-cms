@@ -3,11 +3,18 @@ import {
 	createSignal,
 	type ParentComponent,
 	Show,
+	untrack,
 } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
 import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
 import api from "@/services/api";
-import { getReady, initAdminTranslations } from "@/translations";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
+import {
+	getLocale,
+	getReady,
+	initAdminTranslations,
+	setLocale,
+} from "@/translations";
 
 /** Checks the session before mounting protected layouts and route components. */
 const AuthenticatedRoutes: ParentComponent = (props) => {
@@ -33,10 +40,15 @@ const AuthenticatedRoutes: ParentComponent = (props) => {
 			authenticatedUser.data.data.triggerPasswordReset === true,
 		);
 		if (!translationsInitialized()) {
-			void initAdminTranslations().finally(() =>
-				setTranslationsInitialized(true),
-			);
+			void initAdminTranslations(
+				untrack(userPreferencesStore.getInterfaceLocale),
+			).finally(() => setTranslationsInitialized(true));
 		}
+	});
+	createEffect(() => {
+		const locale = userPreferencesStore.getInterfaceLocale();
+		if (!locale || !translationsInitialized()) return;
+		if (locale !== untrack(getLocale)) setLocale(locale);
 	});
 
 	// ----------------------------------

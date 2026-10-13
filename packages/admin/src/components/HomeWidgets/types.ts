@@ -1,12 +1,15 @@
-import type { PermissionRequirement, ResolvedAdminCopy } from "@lucidcms/types";
+import type {
+	HomeWidgetSize,
+	PermissionRequirement,
+	ResolvedAdminCopy,
+} from "@lucidcms/types";
 import type { Component } from "solid-js";
 import type { AdminOptions } from "../../extensions/types/config.js";
-import type { homeWidgetSizes, homeWidgetSlotPolicies } from "./constants.js";
+import type { homeWidgetSlotPolicies } from "./constants.js";
 
 export type HomeWidgetSlot = keyof typeof homeWidgetSlotPolicies;
 
-/** `sm` is a third of a wide row, `md` half, `lg` two thirds and `full` the whole row. */
-export type HomeWidgetSize = (typeof homeWidgetSizes)[number];
+export type { HomeWidgetSize };
 
 export type HomeWidgetPlacement = {
 	/** Adds a Home overview widget users can hide, resize and reorder. */

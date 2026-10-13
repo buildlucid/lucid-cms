@@ -5,12 +5,19 @@ import type {
 	AgentSummary,
 } from "@types";
 import siteStore from "@/store/siteStore/siteStore";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T, { type TranslationKeys } from "@/translations";
 
-/** Agents available for each workflow. Reactive inside a memo or effect. */
+/**
+ * Returns workflow access for available agents, excluding them when AI features are hidden.
+ * @remarks Read inside a memo or effect to track changes.
+ */
 export const getAgentAccess = () => {
-	const agents = siteStore.get.ai.enabled ? siteStore.get.ai.agents : [];
+	const agents =
+		siteStore.get.ai.enabled && !userPreferencesStore.getAiHidden()
+			? siteStore.get.ai.agents
+			: [];
 	const can = (agent: AgentSummary, action: AgentPermissionAction) =>
 		userStore.get.hasPermission([`agents:${agent.key}:${action}`]).all;
 

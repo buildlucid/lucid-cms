@@ -3,11 +3,13 @@ import { usersFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
+	UserPreferencesRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import parseUserPreferences from "./helpers/parse-user-preferences.js";
 
 const getAuthenticatedUser: ServiceFn<
 	[
@@ -20,8 +22,9 @@ const getAuthenticatedUser: ServiceFn<
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db);
 	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
+	const Preferences = new UserPreferencesRepository(context.db);
 
-	const [userRes, pendingEmailChangeRes] = await Promise.all([
+	const [userRes, pendingEmailChangeRes, preferencesRes] = await Promise.all([
 		Users.selectSinglePreset({
 			where: [
 				{
@@ -46,9 +49,14 @@ const getAuthenticatedUser: ServiceFn<
 		EmailChangeRequests.selectActivePendingForUser({
 			userId: data.userId,
 		}),
+		Preferences.selectSingle({
+			select: ["preferences"],
+			where: [{ key: "user_id", operator: "=", value: data.userId }],
+		}),
 	]);
 	if (userRes.error) return userRes;
 	if (pendingEmailChangeRes.error) return pendingEmailChangeRes;
+	if (preferencesRes.error) return preferencesRes;
 
 	return {
 		error: undefined,
@@ -68,6 +76,7 @@ const getAuthenticatedUser: ServiceFn<
 						expiresAt: pendingEmailChangeRes.data.expires_at,
 					}
 				: null,
+			preferences: parseUserPreferences(preferencesRes.data?.preferences),
 		}),
 	};
 };

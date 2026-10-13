@@ -20,11 +20,14 @@ import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthCon
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
 import Select from "@/components/Select/Select";
+import Switch from "@/components/Switch/Switch";
 import UpdateAccountDetailsModal from "@/components/UpdateAccountDetailsModal/UpdateAccountDetailsModal";
 import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
 import constants from "@/constants";
 import api from "@/services/api";
+import siteStore from "@/store/siteStore/siteStore";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T, { getLocale, localesConfig, setLocale } from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
@@ -441,11 +444,28 @@ export const AccountContent: Component = () => {
 							value: locale.code,
 						}))}
 						onChange={(value) => {
-							if (typeof value === "string") setLocale(value);
+							if (typeof value !== "string") return;
+							setLocale(value);
+							userPreferencesStore.setInterfaceLocale(value);
 						}}
 						name={"cms-locale"}
 					/>
 				</InfoRow.Content>
+				<Show when={siteStore.get.ai.enabled}>
+					<InfoRow.Content
+						title={T()("account.preferences.ai.title")}
+						description={T()("account.preferences.ai.description")}
+					>
+						<Switch
+							id="ai-features"
+							name="aiFeatures"
+							value={!userPreferencesStore.getAiHidden()}
+							onChange={(shown) => userPreferencesStore.setAiHidden(!shown)}
+							trueLabel={T()("common.yes")}
+							falseLabel={T()("common.no")}
+						/>
+					</InfoRow.Content>
+				</Show>
 				<InfoRow.Content
 					title={T()("account.notifications.email.title")}
 					description={T()("account.notifications.email.description")}
