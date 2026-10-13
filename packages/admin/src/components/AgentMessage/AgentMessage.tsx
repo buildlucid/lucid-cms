@@ -42,12 +42,15 @@ import {
 	isToolRow,
 	isWidgetSupported,
 	mediaSettingsWidgets,
+	partGroupAt,
 	previewMediaWidget,
 	progressTool,
 	referencesWidget,
-	toolGroupAt,
 } from "@/utils/agent-tools";
 import dateHelpers from "@/utils/date-helpers";
+import AgentConfirmationGroup, {
+	isConfirmationRow,
+} from "./parts/AgentConfirmationGroup";
 import AgentRoutineRequest from "./parts/AgentRoutineRequest";
 import AgentToolGroup from "./parts/AgentToolGroup";
 
@@ -158,13 +161,16 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 			? widget.interaction.response
 			: undefined;
 	};
+	const groupAt = (index: number) =>
+		partGroupAt(props.message.parts, index, isToolRow) ??
+		partGroupAt(props.message.parts, index, isConfirmationRow);
 	const visible = (index: number) => {
 		const part = props.message.parts[index];
 		return (
 			part !== undefined &&
 			layoutOf(part) !== "hidden" &&
-			(!isToolRow(part) ||
-				toolGroupAt(props.message.parts, index) !== undefined)
+			(!(isToolRow(part) || isConfirmationRow(part)) ||
+				groupAt(index) !== undefined)
 		);
 	};
 	const shimmers = (index: number) => {
@@ -173,7 +179,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 		const last = parts.findLastIndex((part) => layoutOf(part) !== "hidden");
 		const part = parts[last];
 		if (!part || layoutOf(part) !== "row") return false;
-		return (toolGroupAt(parts, index)?.lastIndex ?? index) === last;
+		return (groupAt(index)?.lastIndex ?? index) === last;
 	};
 
 	// ----------------------------------------
@@ -213,7 +219,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 					</div>
 				</Match>
 				<Match when={true}>
-					<div class="flex w-full flex-col gap-6 [&>[data-layout=row]+[data-layout=row]]:-mt-5">
+					<div class="flex w-full flex-col gap-6 [&>[data-layout=row]+[data-layout=row]]:-mt-5 [&>[data-references]+[data-references]]:-mt-3">
 						<For each={props.message.parts}>
 							{(part, index) => {
 								//* read once, so only parts that mount mid-stream animate in
@@ -227,6 +233,12 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 										<Show when={visible(index())}>
 											<div
 												data-layout={layoutOf(part)}
+												data-references={
+													part.type === "widget" &&
+													part.key === referencesWidget
+														? ""
+														: undefined
+												}
 												class={classnames("flex flex-col", {
 													"motion-safe:animate-rise-in": entering(),
 												})}
@@ -267,7 +279,11 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 															)}
 														</Match>
 														<Match
-															when={toolGroupAt(props.message.parts, index())}
+															when={partGroupAt(
+																props.message.parts,
+																index(),
+																isToolRow,
+															)}
 														>
 															{(group) => (
 																<AgentToolGroup
@@ -307,6 +323,17 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 																	conversationId={props.message.conversationId}
 																	widget={widget()}
 																/>
+															)}
+														</Match>
+														<Match
+															when={partGroupAt(
+																props.message.parts,
+																index(),
+																isConfirmationRow,
+															)}
+														>
+															{(group) => (
+																<AgentConfirmationGroup group={group()} />
 															)}
 														</Match>
 														<Match when={part.type === "widget" && part}>

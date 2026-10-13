@@ -312,6 +312,21 @@ describe("undo and redo", () => {
 		expect(store.get.agentEdited).toBe(true);
 	});
 
+	test("redoing the agent's step after it was saved keeps autosave on", () => {
+		const store = createStore();
+		store.get.applyContent({
+			content: { fields: [], bricks: [] },
+			refs: {},
+			runId: "run-1",
+		});
+		store.get.captureInitialSnapshot();
+		store.set("agentEdited", false);
+		store.edits.undo();
+
+		store.edits.redo();
+		expect(store.get.agentEdited).toBe(false);
+	});
+
 	test("saved content syncing back keeps the steps, while loading a document or locking the pane leaves nothing to undo", () => {
 		const store = createStore();
 		setTitle(store, "Changed");

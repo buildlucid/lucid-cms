@@ -37,7 +37,7 @@ const AgentToolGroup: Component<{
 			running: 0,
 			pending: 0,
 		};
-		for (const call of props.group.calls) {
+		for (const call of props.group.parts) {
 			const status = toolDisplayStatus(call, props.retriedIds?.has(call.id));
 			if (status !== "complete") totals[status]++;
 		}
@@ -45,8 +45,8 @@ const AgentToolGroup: Component<{
 	});
 	const latest = createMemo(
 		() =>
-			props.group.calls.findLast((call) => call.status === "running") ??
-			props.group.calls.findLast((call) => call.status === "pending") ??
+			props.group.parts.findLast((call) => call.status === "running") ??
+			props.group.parts.findLast((call) => call.status === "pending") ??
 			props.group.latest,
 	);
 	const summary = createMemo(() => translateAdminCopy(latest().summary));
@@ -59,7 +59,7 @@ const AgentToolGroup: Component<{
 	// Render
 	return (
 		<Show
-			when={props.group.calls.length > 1}
+			when={props.group.parts.length > 1}
 			fallback={
 				<div
 					class={classnames({
@@ -91,7 +91,7 @@ const AgentToolGroup: Component<{
 						{summary()}
 					</span>
 					<span class="shrink-0 tabular-nums">
-						{T()("agent.tool.group.calls", { count: props.group.calls.length })}
+						{T()("agent.tool.group.calls", { count: props.group.parts.length })}
 					</span>
 					<Show when={counts().failed}>
 						<span class="shrink-0 rounded bg-danger/10 px-1 text-danger tabular-nums">
@@ -127,7 +127,7 @@ const AgentToolGroup: Component<{
 						id={detailsId}
 						class="my-1 ms-1.5 flex max-w-full flex-col border-s border-border ps-4"
 					>
-						<For each={props.group.calls}>
+						<For each={props.group.parts}>
 							{(call) => (
 								<AgentToolCall
 									part={call}

@@ -265,6 +265,8 @@ export const createBrickStore = (idPrefix = "") => {
 		captureInitialSnapshot(snapshot) {
 			const nextSnapshot = snapshot ?? createBricksSnapshot(get.bricks);
 			cacheInitialSnapshots(nextSnapshot);
+			//* supplied snapshots may predate current edits, so leave step save status unchanged
+			if (!snapshot) editStack.markSaved();
 			batch(() => {
 				set("initialSnapshot", nextSnapshot);
 				set("snapshotRevision", (previous) => previous + 1);
@@ -1274,8 +1276,12 @@ export const createBrickStore = (idPrefix = "") => {
 
 		batch(() => {
 			applyEdit(entry, direction);
-			//* the agent's changes are back, so autosave waits for the person to review them again
-			if (direction === "redo" && entry.source.type === "agent") {
+			//* redoing unsaved agent edits requires review before autosave resumes
+			if (
+				direction === "redo" &&
+				entry.source.type === "agent" &&
+				!entry.saved
+			) {
 				set("agentEdited", true);
 			}
 			set("editRevision", (previous) => previous + 1);

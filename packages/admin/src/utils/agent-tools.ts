@@ -126,34 +126,38 @@ export const retriedToolIds = (
 	return retried;
 };
 
-export type AgentToolGroup = {
-	calls: AgentToolPart[];
-	latest: AgentToolPart;
+/** Consecutive parts of one kind, shown as a single row. */
+export type AgentPartGroup<Part extends AgentMessagePart> = {
+	parts: Part[];
+	latest: Part;
 	lastIndex: number;
 };
 
-/** Only a group's first part produces a row. Calls retain their transcript order. */
-export const toolGroupAt = (
+export type AgentToolGroup = AgentPartGroup<AgentToolPart>;
+
+/** Returns a consecutive `belongs` group in transcript order only at its first index. */
+export const partGroupAt = <Part extends AgentMessagePart>(
 	parts: AgentMessagePart[],
 	index: number,
-): AgentToolGroup | undefined => {
+	belongs: (part: AgentMessagePart) => part is Part,
+): AgentPartGroup<Part> | undefined => {
 	const first = parts[index];
 	const previous = parts[index - 1];
-	if (!first || !isToolRow(first) || (previous && isToolRow(previous))) {
+	if (!first || !belongs(first) || (previous && belongs(previous))) {
 		return undefined;
 	}
 
-	const calls = [first];
+	const group = [first];
 	let latest = first;
 	let lastIndex = index;
 	for (let next = index + 1; next < parts.length; next++) {
-		const call = parts[next];
-		if (!isToolRow(call)) break;
-		calls.push(call);
-		latest = call;
+		const part = parts[next];
+		if (!part || !belongs(part)) break;
+		group.push(part);
+		latest = part;
 		lastIndex = next;
 	}
-	return { calls, latest, lastIndex };
+	return { parts: group, latest, lastIndex };
 };
 
 /** A string field from a tool's output, such as its `error` or an analysis. */

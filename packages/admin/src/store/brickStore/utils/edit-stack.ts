@@ -42,6 +42,8 @@ export type EditEntry =
 			after: InternalDocumentField["value"];
 			source: EditSource;
 			at: number;
+			/** True when a save included the step, allowing agent redo without another review. */
+			saved?: boolean;
 	  }
 	| {
 			kind: "bricks";
@@ -49,6 +51,7 @@ export type EditEntry =
 			after: BricksEditState;
 			source: EditSource;
 			at: number;
+			saved?: boolean;
 	  };
 
 /** Creates document undo and redo history that merges continued typing in one field and drops redo steps on new edits, leaving notifications to the store. */
@@ -91,6 +94,10 @@ export const createEditStack = () => {
 			const entry = undone.pop();
 			if (entry) done.push(entry);
 			return entry;
+		},
+		/** Marks applied history steps as included in the saved content. */
+		markSaved: () => {
+			for (const entry of done) entry.saved = true;
 		},
 		peekUndo: () => done.at(-1),
 		peekRedo: () => undone.at(-1),

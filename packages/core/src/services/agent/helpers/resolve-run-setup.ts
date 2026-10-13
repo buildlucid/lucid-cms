@@ -12,6 +12,7 @@ import type {
 } from "../../../libs/agent/types.js";
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
 import hasPermission from "../../../libs/permission/has-permission.js";
+import allowOptionalNulls from "../../../libs/tools/allow-optional-nulls.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { AgentScreen, AiAccessFeature } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -22,7 +23,7 @@ const toInputSchema = (input: z.ZodObject) => {
 	const existing = inputSchemas.get(input);
 	if (existing) return existing;
 
-	const schema = z.toJSONSchema(input, { io: "input" });
+	const schema = allowOptionalNulls(z.toJSONSchema(input, { io: "input" }));
 	inputSchemas.set(input, schema);
 	return schema;
 };

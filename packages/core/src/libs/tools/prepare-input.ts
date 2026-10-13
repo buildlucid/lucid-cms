@@ -4,6 +4,7 @@ import {
 	isJsonObject,
 	type JsonValue,
 } from "../../utils/helpers/is-json-object.js";
+import isPlainObject from "../../utils/helpers/is-plain-object.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
@@ -71,6 +72,33 @@ export const describeInputIssues = (error: z.ZodError) =>
 		.map((issue) => `${issue.path.join(".") || "input"}: ${issue.message}`)
 		.join("; ");
 
+/** Parses tool input, retrying without rejected null properties while preserving the original input. */
+const parseToolInput = async <Input extends z.ZodObject>(
+	schema: Input,
+	input: unknown,
+) => {
+	const parsed = await schema.safeParseAsync(input);
+	if (parsed.success) return parsed;
+
+	const cleaned = structuredClone(input);
+	let dropped = false;
+	for (const { path } of parsed.error.issues) {
+		const key = path.at(-1);
+		const parent = path.slice(0, -1).reduce<unknown>((value, segment) => {
+			if (Array.isArray(value) && typeof segment === "number") {
+				return value[segment];
+			}
+			return isPlainObject(value) ? value[segment] : undefined;
+		}, cleaned);
+		if (isPlainObject(parent) && key !== undefined && parent[key] === null) {
+			delete parent[key];
+			dropped = true;
+		}
+	}
+
+	return dropped ? schema.safeParseAsync(cleaned) : parsed;
+};
+
 /** Validates input, then runs the handler and checks its result, retaining the target's execution and result types. */
 const prepareToolInput = async <
 	Input extends z.ZodObject,
@@ -90,7 +118,7 @@ const prepareToolInput = async <
 	},
 	input: unknown,
 ): Promise<ToolPreparationResult<Execution, Checked, Requirement>> => {
-	const parsedInput = await options.input.safeParseAsync(input);
+	const parsedInput = await parseToolInput(options.input, input);
 	if (!parsedInput.success) {
 		return {
 			type: "invalid-input",

@@ -5,6 +5,7 @@ import {
 	generatingMediaType,
 	imageAspectRatio,
 	isToolRow,
+	partGroupAt,
 	retriedToolIds,
 } from "./agent-tools";
 
@@ -77,4 +78,21 @@ it("reads the tile's shape from the requested aspect ratio", () => {
 	expect(imageAspectRatio({ aspectRatio: "9:16" })).toBeCloseTo(9 / 16);
 	expect(imageAspectRatio({ aspectRatio: "auto" })).toBe(1);
 	expect(imageAspectRatio(undefined)).toBe(1);
+});
+
+it("groups consecutive matching parts from the first one only", () => {
+	const parts = [
+		tool("a", "media_update", "complete"),
+		tool("b", "media_update", "failed"),
+		{ type: "text" as const, text: "Done" },
+		tool("c", "media_update", "complete"),
+	];
+
+	expect(partGroupAt(parts, 0, isToolRow)).toEqual({
+		parts: [parts[0], parts[1]],
+		latest: parts[1],
+		lastIndex: 1,
+	});
+	expect(partGroupAt(parts, 1, isToolRow)).toBeUndefined();
+	expect(partGroupAt(parts, 3, isToolRow)?.parts).toEqual([parts[3]]);
 });
