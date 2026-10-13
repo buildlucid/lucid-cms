@@ -10,6 +10,7 @@ import type {
 } from "../../../db/tables/index.js";
 import type { CollectionBuilderHooks } from "../../../hooks/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
+import type { AiInstructionsConfig } from "../../ai-instructions.js";
 import type { FieldConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 
@@ -219,6 +220,8 @@ export type CollectionOptions<
 		/** Explain what content belongs in this collection. */
 		description?: AdminCopyInput;
 	};
+	/** Guidance for agents writing this collection's documents. */
+	ai?: AiInstructionsConfig;
 	/** Prevent document changes, including saves and deletions. Defaults to false. */
 	locked?: boolean;
 	/** Enable content localization or choose a subset of configured locales. Defaults to false. */

@@ -45,6 +45,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			},
 			fields: [],
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"repeater">;
 	}
 	getSchemaDefinition(

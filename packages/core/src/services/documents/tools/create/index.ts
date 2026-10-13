@@ -18,8 +18,8 @@ export const createDocumentAgentTool = (
 		name,
 		title: copy("admin:core.tools.documents_create.title"),
 		description: options.direct
-			? "Create a document in a collection. Use collections_describe first for its fields and bricks. It is saved straight away, unless the collection requires review, when it opens a create request for people to approve. To change a requested document before approval, call documents_update with the returned requestId."
-			: "Create a document in a collection. Use collections_describe first for its fields and bricks. It opens a create request, and the document stays hidden until people approve it. To change it before then, call documents_update with the returned requestId.",
+			? "Create a document in a collection. Use collections_describe first for its fields, bricks and writing instructions. It is saved straight away, unless the collection requires review, when it opens a create request for people to approve. To change a requested document before approval, call documents_update with the returned requestId."
+			: "Create a document in a collection. Use collections_describe first for its fields, bricks and writing instructions. It opens a create request, and the document stays hidden until people approve it. To change it before then, call documents_update with the returned requestId.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

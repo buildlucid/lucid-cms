@@ -44,6 +44,7 @@ class JsonCustomField extends CustomField<"json"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"json">;
 	}
 	getSchemaDefinition(

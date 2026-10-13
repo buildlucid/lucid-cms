@@ -41,6 +41,7 @@ export type {
 	OIDCAdapter,
 	OIDCAuthConfig,
 } from "../libs/auth-providers/types.js";
+export type { AiInstructionsConfig } from "../libs/collection/ai-instructions.js";
 export type {
 	BrickConfig,
 	BrickOptions,
@@ -641,6 +642,7 @@ export type {
 } from "../libs/tools/types.js";
 export type { DocumentWriteToolOptions } from "../services/documents/tools/types.js";
 export type {
+	AiContextEntry,
 	AiModelConfig,
 	HttpConfig,
 	HttpSecurityConfig,

@@ -21,6 +21,7 @@ class BrickBuilder extends FieldBuilder {
 					}),
 				description: normalizeCopy(options.details?.description),
 			},
+			ai: options.ai,
 			thumbnail: options.thumbnail,
 		};
 	}

@@ -10,6 +10,11 @@ export const inputSchema = z.object({
 	...paginationInput,
 });
 
+const instructionsSchema = z.string().optional().meta({
+	description:
+		"Site guidance for writing this content, such as format, length and tone. Follow it when creating or updating values.",
+});
+
 export const fieldOwnerSchema = z.enum([
 	"document",
 	"fixed",
@@ -35,6 +40,7 @@ const fieldEntrySchema = z.object({
 		.string()
 		.meta({ description: "Editor label in the current interface language." }),
 	description: z.string().nullable().meta({ description: "Editor help text." }),
+	instructions: instructionsSchema,
 	localized: z
 		.boolean()
 		.meta({ description: "Whether this field stores per-language values." }),
@@ -77,6 +83,7 @@ export const entrySchema = z.discriminatedUnion("kind", [
 			.string()
 			.nullable()
 			.meta({ description: "Editor help text." }),
+		instructions: instructionsSchema,
 	}),
 	z.object({
 		kind: z.literal("option"),
@@ -129,6 +136,7 @@ export const outputSchema = z.object({
 						.string()
 						.nullable()
 						.meta({ description: "Editor help text." }),
+					instructions: instructionsSchema,
 					routing: z
 						.object({ field: z.string(), valueMeaning: z.string() })
 						.nullable()

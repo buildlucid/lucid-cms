@@ -1,4 +1,5 @@
 import type z from "zod";
+import type FieldBuilder from "../../../../libs/collection/builders/field-builder/index.js";
 import collections from "../../../../libs/collection/collections.js";
 import { collectionsFormatter } from "../../../../libs/formatters/index.js";
 import { copy } from "../../../../libs/i18n/index.js";
@@ -13,6 +14,14 @@ import type {
 } from "./schema.js";
 
 type Entry = z.output<typeof entrySchema>;
+
+/** Maps field guidance by keys unique within a collection or brick. */
+const getFieldInstructions = (builder: FieldBuilder) =>
+	new Map(
+		builder.flatFields.flatMap((field) =>
+			"ai" in field && field.ai ? [[field.key, field.ai.instructions]] : [],
+		),
+	);
 
 /** Describes one readable collection, with large field trees split across pages. */
 const describeCollection: ServiceFn<
@@ -63,6 +72,7 @@ const describeCollection: ServiceFn<
 		fields: unknown[],
 		owner: z.output<typeof fieldOwnerSchema>,
 		brickKey: string | null,
+		instructions: ReadonlyMap<string, string>,
 		parentPath: string[] = [],
 	) => {
 		for (const field of fieldConfigSchema.array().parse(fields)) {
@@ -71,11 +81,12 @@ const describeCollection: ServiceFn<
 				Array.isArray(field.fields) &&
 				(field.type === "tab" || field.output === "inline")
 			) {
-				addFields(field.fields, owner, brickKey, parentPath);
+				addFields(field.fields, owner, brickKey, instructions, parentPath);
 				continue;
 			}
 
 			const path = [...parentPath, field.key];
+			const fieldInstructions = instructions.get(field.key);
 			const relationCollections = [field.collection ?? []]
 				.flat()
 				.filter(canRead);
@@ -88,6 +99,7 @@ const describeCollection: ServiceFn<
 				type: field.type,
 				label: context.translate(field.details.label) ?? field.key,
 				description: context.translate(field.details.description) ?? null,
+				...(fieldInstructions && { instructions: fieldInstructions }),
 				localized: field.localized === true,
 				// Omit unset constraints; undefined values are not valid tool output.
 				constraints: {
@@ -126,26 +138,37 @@ const describeCollection: ServiceFn<
 				});
 			}
 			if (Array.isArray(field.fields)) {
-				addFields(field.fields, owner, brickKey, path);
+				addFields(field.fields, owner, brickKey, instructions, path);
 			}
 		}
 	};
 
-	addFields(formatted.fields, "document", null);
+	addFields(formatted.fields, "document", null, getFieldInstructions(selected));
+	const brickBuilders = new Map(
+		selected.brickInstances.map((brick) => [brick.key, brick]),
+	);
 	for (const [brickType, bricks] of [
 		["fixed", formatted.fixedBricks],
 		["builder", formatted.builderBricks],
 		["embedded", formatted.embeddedBricks],
 	] as const) {
 		for (const brick of bricks) {
+			const builder = brickBuilders.get(brick.key);
+			const brickInstructions = builder?.config.ai?.instructions;
 			entries.push({
 				kind: "brick",
 				type: brickType,
 				key: brick.key,
 				label: context.translate(brick.details.label) ?? brick.key,
 				description: context.translate(brick.details.description) ?? null,
+				...(brickInstructions && { instructions: brickInstructions }),
 			});
-			addFields(brick.fields, brickType, brick.key);
+			addFields(
+				brick.fields,
+				brickType,
+				brick.key,
+				builder ? getFieldInstructions(builder) : new Map(),
+			);
 		}
 	}
 
@@ -164,6 +187,9 @@ const describeCollection: ServiceFn<
 						description:
 							context.translate(formatted.details.description ?? undefined) ??
 							null,
+						...(selected.config.ai && {
+							instructions: selected.config.ai.instructions,
+						}),
 						routing: formatted.routing
 							? {
 									field: formatted.routing.field,

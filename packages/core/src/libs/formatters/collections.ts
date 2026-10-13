@@ -5,6 +5,7 @@ import type CollectionBuilder from "../collection/builders/collection-builder/in
 import type {
 	FieldConfig,
 	FieldTypes,
+	SharedFieldConfig,
 } from "../collection/custom-fields/types.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
 import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
@@ -199,8 +200,13 @@ const formatField = (
 	const nestedFields =
 		"fields" in field && Array.isArray(field.fields) ? field.fields : undefined;
 
+	//* agent guidance stays out of the admin; collections_describe reads it from the builders
+	const {
+		ai: _ai,
+		...config
+	}: Pick<SharedFieldConfig, "ai"> & FieldConfig<FieldTypes> = field;
 	const formattedField = {
-		...field,
+		...config,
 	} as Collection["fields"][number] & {
 		fields?: Collection["fields"];
 	};

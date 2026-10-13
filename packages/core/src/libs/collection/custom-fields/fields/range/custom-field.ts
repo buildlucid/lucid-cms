@@ -65,6 +65,7 @@ class RangeCustomField extends CustomField<"range"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"range">;
 	}
 	override normalizeInputValue(value: unknown) {

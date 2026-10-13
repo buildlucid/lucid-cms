@@ -16,7 +16,7 @@ export const builderUpdateAgentTool = () =>
 		name: builderUpdateToolName,
 		title: builderUpdateTitle,
 		description:
-			"Change the document the person has open in the document builder, sending only what changes, in the shape documents_update takes. Read it with lucid_builder_read first and reuse its refs. Changes show in the builder as unsaved edits for them to review and save, so nothing is saved for them. Returns any validation errors the changed content has, so fix those before finishing. It is refused when they edited the same fields or bricks while it applied, so read it again and retry.",
+			"Change the document the person has open in the document builder, sending only what changes, in the shape documents_update takes. Read it with lucid_builder_read first and reuse its refs. Before writing new copy, check collections_describe for the collection's writing instructions. Changes show in the builder as unsaved edits for them to review and save, so nothing is saved for them. Returns any validation errors the changed content has, so fix those before finishing. It is refused when they edited the same fields or bricks while it applied, so read it again and retry.",
 		input: inputSchema,
 		output: outputSchema,
 		//* collection read access is checked against the open screen when the call runs

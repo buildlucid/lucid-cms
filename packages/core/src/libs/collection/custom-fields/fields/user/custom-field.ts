@@ -54,6 +54,7 @@ class UserCustomField extends CustomField<"user"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"user">;
 	}
 	override normalizeInputValue(value: unknown) {

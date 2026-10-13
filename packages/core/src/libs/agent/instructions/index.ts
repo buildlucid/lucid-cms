@@ -1,3 +1,4 @@
+import type { AiContextEntry } from "../../../types/config.js";
 import type { SkillDefinition } from "../../skills/types.js";
 import type { getCapabilityProviders } from "../capabilities.js";
 import type { RunMode } from "../types.js";
@@ -8,6 +9,7 @@ import { historyInstructions } from "./history.js";
 import { referenceInstructions } from "./references.js";
 import { routineInstructions } from "./routine.js";
 import { type ScreenContext, screenInstructions } from "./screen.js";
+import { siteContextInstructions } from "./site-context.js";
 import { skillInstructions } from "./skills.js";
 import { terminologyInstructions } from "./terminology.js";
 
@@ -17,6 +19,7 @@ export const instructionVersion = 1;
 /** CMS-owned sections, in reading order. The API prepends its shared base once per request. */
 const buildInstructions = (props: {
 	agent: Parameters<typeof agentInstructions>[0];
+	siteContext: readonly AiContextEntry[];
 	mode: RunMode;
 	/** Whether a person can answer the run's questions. */
 	attended: boolean;
@@ -28,6 +31,7 @@ const buildInstructions = (props: {
 	[
 		agentInstructions(props.agent),
 		terminologyInstructions,
+		siteContextInstructions(props.siteContext),
 		props.mode === "chat"
 			? chatInstructions
 			: routineInstructions(props.attended),

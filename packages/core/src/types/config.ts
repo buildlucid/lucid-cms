@@ -245,6 +245,14 @@ export type MediaGenerationConfig =
 			audio?: MediaGenerationTypeConfig;
 	  };
 
+/** Site context keyed so config and plugins can manage their entries independently. */
+export type AiContextEntry = {
+	/** Unique key, such as `brand` or a plugin key. */
+	key: string;
+	/** Plain text or Markdown written for the model. */
+	content: string;
+};
+
 /** Separate secrets for encryption and signing. Keep these stable between deployments. */
 export type SecretConfig = {
 	/**
@@ -366,6 +374,11 @@ export interface LucidConfig {
 				altGeneration?: boolean;
 				/** Image generation and text to speech for the admin and agents, with all media types enabled by default. */
 				mediaGeneration?: MediaGenerationConfig;
+				/**
+				 * Site context shared with agent and MCP server instructions.
+				 * @remarks Sent with every agent request, so keep it short. Plugins can add entries from `configure`.
+				 */
+				context?: AiContextEntry[];
 				/**
 				 * Configures `defineAgent` agents requiring a connected Lucid AI account.
 				 * @remarks Arrays mean `{ definitions }`; booleans mean `{ enabled }`.
@@ -677,6 +690,7 @@ export interface ResolvedLucidConfig {
 			MediaGenerationType,
 			{ enabled: boolean; models: AiModelConfig<string> }
 		>;
+		context: AiContextEntry[];
 		agents: { enabled: boolean; definitions: AgentDefinition[] };
 		mcp: {
 			enabled: boolean;

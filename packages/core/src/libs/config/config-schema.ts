@@ -157,6 +157,19 @@ const AiConfigSchema = z.strictObject({
 			}),
 		)
 		.prefault({}),
+	context: z
+		.array(
+			z.strictObject({
+				key: z.string().trim().min(1),
+				content: z.string().trim().min(1),
+			}),
+		)
+		.default([])
+		.refine(
+			(entries) =>
+				new Set(entries.map((entry) => entry.key)).size === entries.length,
+			{ message: "AI context keys must be unique." },
+		),
 	agents: z
 		.preprocess(
 			(value) => enabledShorthand(definitionsShorthand(value)),

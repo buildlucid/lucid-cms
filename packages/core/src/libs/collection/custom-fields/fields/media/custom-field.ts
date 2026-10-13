@@ -54,6 +54,7 @@ class MediaCustomField extends CustomField<"media"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"media">;
 	}
 	override normalizeInputValue(value: unknown) {

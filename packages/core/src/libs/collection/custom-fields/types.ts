@@ -10,6 +10,7 @@ import type { RefResource, Refs } from "../../../types/response.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyInput } from "../../i18n/types.js";
+import type { AiInstructionsConfig } from "../ai-instructions.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaIndex,
@@ -111,6 +112,8 @@ export type SharedFieldConfig = {
 		label?: AdminCopyInput;
 		description?: AdminCopyInput;
 	};
+	/** Guidance for agents writing this field's value. */
+	ai?: AiInstructionsConfig;
 };
 
 export const fieldWidths = [12, 8, 6, 4, 3] as const;

@@ -6,7 +6,8 @@ import type {
 	SharedFieldConfig,
 } from "../../types.js";
 
-export interface TabFieldConfig extends SharedFieldConfig {
+/** Tabs arrange the editor layout and do not accept `ai` configuration. */
+export interface TabFieldConfig extends Omit<SharedFieldConfig, "ai"> {
 	type: "tab";
 	/** Copy shown beside the input in the admin. */
 	details: {

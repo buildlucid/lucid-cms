@@ -8,6 +8,7 @@ import type { z } from "zod";
 import packageJson from "../../../package.json" with { type: "json" };
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import { siteContextInstructions } from "../agent/instructions/site-context.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import { filterExternalScopes } from "../permission/scopes.js";
 import { executeMcpTool } from "../tools/execute-tool.js";
@@ -88,8 +89,12 @@ export const createHandler = (args: {
 			{ name: "lucid-cms", version: packageJson.version },
 			{
 				capabilities: { tools: { listChanged: false } },
-				instructions:
+				instructions: [
 					"Use this server for tasks involving live content and resources in the connected Lucid CMS instance. Lucid is a configurable CMS; discover its content model and supported operations through the available tools. Use collection and field definitions to guide content queries rather than assuming a particular content structure.",
+					siteContextInstructions(context.config.ai.context),
+				]
+					.filter(Boolean)
+					.join("\n\n"),
 			},
 		);
 

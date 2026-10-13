@@ -9,6 +9,12 @@ import {
 	structuredDataSchema,
 } from "../shared/validation.js";
 
+const copyInstructions =
+	"Use only facts supported by the page's content. Be specific to this page, concise and natural. Avoid keyword stuffing, clickbait, repeated branding and invented claims, prices, offers or statistics. Plain text, without HTML or surrounding quotation marks. Length suggestions are editorial guidance, not ranking requirements.";
+
+const altInstructions =
+	"Describe the selected image for people who can't see it, in one short sentence. Set it whenever an image is chosen, and leave it empty otherwise.";
+
 /** Creates an independent fixed brick using Lucid's native inputs and validation. */
 const createSeoBrick = ({
 	brickKey,
@@ -43,6 +49,10 @@ const createSeoBrick = ({
 				label: copy("admin:plugin.seo.brick.label"),
 				description: copy("admin:plugin.seo.brick.description"),
 			},
+			ai: {
+				instructions:
+					"Search and share metadata for the page. Write the title and description from the page's own content. Social and X fields fall back to the search values, so leave them empty unless they need different wording or a different image.",
+			},
 		})
 			// Search
 			.addTab("search", {
@@ -55,11 +65,17 @@ const createSeoBrick = ({
 				details: {
 					label: copy("admin:plugin.seo.field.title"),
 				},
+				ai: {
+					instructions: `A descriptive title for search results, ideally 60 characters or fewer. ${copyInstructions}`,
+				},
 			})
 			.addTextarea(fields.description, {
 				...descriptionOptions,
 				details: {
 					label: copy("admin:plugin.seo.field.description"),
+				},
+				ai: {
+					instructions: `Summarize the page's actual content and why it is useful to the reader, ideally 160 characters or fewer. ${copyInstructions}`,
 				},
 			})
 			// Social
@@ -73,11 +89,17 @@ const createSeoBrick = ({
 				details: {
 					label: copy("admin:plugin.seo.field.socialTitle"),
 				},
+				ai: {
+					instructions: `Optional title for social shares. Empty uses the SEO title. ${copyInstructions}`,
+				},
 			})
 			.addTextarea(fields.socialDescription, {
 				...descriptionOptions,
 				details: {
 					label: copy("admin:plugin.seo.field.socialDescription"),
+				},
+				ai: {
+					instructions: `Optional description for social shares. Empty uses the meta description. ${copyInstructions}`,
 				},
 			})
 			.addMedia(fields.socialImage, {
@@ -92,6 +114,7 @@ const createSeoBrick = ({
 				details: {
 					label: copy("admin:plugin.seo.field.socialImageAlt"),
 				},
+				ai: { instructions: altInstructions },
 			})
 			.addSelect(fields.ogType, {
 				localized,
@@ -142,11 +165,17 @@ const createSeoBrick = ({
 				details: {
 					label: copy("admin:plugin.seo.field.xTitle"),
 				},
+				ai: {
+					instructions: `Optional title for X. Empty uses the social title, then the SEO title. ${copyInstructions}`,
+				},
 			})
 			.addTextarea(fields.xDescription, {
 				...descriptionOptions,
 				details: {
 					label: copy("admin:plugin.seo.field.xDescription"),
+				},
+				ai: {
+					instructions: `Optional description for X. Empty uses the social description, then the meta description. ${copyInstructions}`,
 				},
 			})
 			.addMedia(fields.xImage, {
@@ -161,6 +190,7 @@ const createSeoBrick = ({
 				details: {
 					label: copy("admin:plugin.seo.field.xImageAlt"),
 				},
+				ai: { instructions: altInstructions },
 			})
 			.endCollapsible()
 			// Indexing
@@ -174,6 +204,10 @@ const createSeoBrick = ({
 				details: {
 					label: copy("admin:plugin.seo.field.canonicalUrl"),
 					description: copy("admin:plugin.seo.help.canonicalUrl"),
+				},
+				ai: {
+					instructions:
+						"Leave empty unless the person asks for a specific canonical URL.",
 				},
 				validation: { zod: canonicalUrlSchema },
 			})

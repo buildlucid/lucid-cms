@@ -1,5 +1,6 @@
 import type constants from "../../../../constants/constants.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
+import type { AiInstructionsConfig } from "../../ai-instructions.js";
 
 /** Display options for a reusable brick. */
 export interface BrickOptions {
@@ -10,6 +11,8 @@ export interface BrickOptions {
 		/** Short explanation of when to use this brick. */
 		description?: AdminCopyInput;
 	};
+	/** Guidance for agents writing this brick's content. */
+	ai?: AiInstructionsConfig;
 	/** Image URL shown in the brick picker. */
 	thumbnail?: string;
 }
@@ -21,6 +24,8 @@ export interface BrickConfig {
 		/** Short explanation of when to use this brick. */
 		description?: ResolvedAdminCopy;
 	};
+	/** Guidance for agents writing this brick's content. */
+	ai?: AiInstructionsConfig;
 	/** Image URL shown in the brick picker. */
 	thumbnail?: string;
 }

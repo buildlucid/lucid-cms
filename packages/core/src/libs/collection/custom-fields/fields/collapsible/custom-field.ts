@@ -44,6 +44,7 @@ class CollapsibleCustomField extends CustomField<"collapsible"> {
 				width: this.props?.ui?.width,
 			},
 			fields: [],
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"collapsible">;
 	}
 	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {

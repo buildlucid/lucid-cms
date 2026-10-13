@@ -54,6 +54,7 @@ class CodeCustomField extends CustomField<"code"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"code">;
 	}
 	getSchemaDefinition(

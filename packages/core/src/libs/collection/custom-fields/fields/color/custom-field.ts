@@ -44,6 +44,7 @@ class ColorCustomField extends CustomField<"color"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"color">;
 	}
 	getSchemaDefinition(

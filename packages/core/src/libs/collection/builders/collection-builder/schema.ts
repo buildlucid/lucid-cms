@@ -2,6 +2,7 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { hookSchema } from "../../../config/definition-schemas.js";
 import { adminCopyInputSchema } from "../../../i18n/index.js";
+import { aiInstructionsSchema } from "../../ai-instructions.js";
 
 const environmentKeySchema = z
 	.string()
@@ -90,6 +91,7 @@ const CollectionConfigSchema = z
 			}),
 			description: adminCopyInputSchema.optional(),
 		}),
+		ai: aiInstructionsSchema.optional(),
 		locked: z.boolean().default(constants.collectionBuilder.locked).optional(),
 		localized: collectionLocalizationSchema
 			.default(constants.collectionBuilder.localized)

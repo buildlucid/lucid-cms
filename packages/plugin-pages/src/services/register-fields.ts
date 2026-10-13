@@ -37,6 +37,10 @@ const registerFields = (
 						hidden: true,
 						disabled: true,
 					},
+					ai: {
+						instructions:
+							"Generated from the slug and parent pages. Read it for a page's full path, but set the slug and parent page to change it.",
+					},
 					showInList: false,
 				})
 				.addText(constants.fields.slug.key, {
@@ -50,6 +54,10 @@ const registerFields = (
 						hidden: false,
 						disabled: false,
 						width: config.ui.widths.slug,
+					},
+					ai: {
+						instructions:
+							'This page\'s own URL segment; parent pages supply the rest of the path. Use a few lowercase words joined by hyphens that clearly describe the page, such as "pricing" or "careers-london". Prefer the words people search for, and leave out filler words and dates that will age. Only a homepage without a parent page uses "/". Any other slug must not contain "/". Avoid changing an existing slug unless asked, as it changes the page\'s URL.',
 					},
 					validation: {
 						required: true,

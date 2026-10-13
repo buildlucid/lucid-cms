@@ -75,13 +75,19 @@ const required = new CollectionBuilder("agent_required_pages", {
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Required page", plural: "Required pages" } },
+	ai: { instructions: "Landing pages for campaigns." },
 	bricks: {
 		builder: [
-			new BrickBuilder("banner").addTab("content_tab").addText("title", {
-				localized: true,
-				details: { description: "The banner's heading" },
-				validation: { required: true },
-			}),
+			new BrickBuilder("banner", {
+				ai: { instructions: "One banner per page." },
+			})
+				.addTab("content_tab")
+				.addText("title", {
+					localized: true,
+					details: { description: "The banner's heading" },
+					ai: { instructions: "Five words or fewer." },
+					validation: { required: true },
+				}),
 		],
 	},
 }).addText("title", {
@@ -711,16 +717,30 @@ test("routines defined in code open requests as the system", async () => {
 	expect(request).toEqual({ created_by: null, created_by_run_id: run.runId });
 });
 
-test("describes tab fields by their stored paths, explains invalid fields and accepts every language at once", async () => {
+test("describes tab fields by their stored paths with their instructions, explains invalid fields and accepts every language at once", async () => {
 	const run = await startRun();
-	const described = await run.call(agentTools.collections.describe(), {
-		collectionKey: required.key,
-	});
-	const fields = describeOutputSchema
-		.parse(described)
-		.data.flatMap((entry) => (entry.kind === "field" ? [entry] : []));
+	const described = describeOutputSchema.parse(
+		await run.call(agentTools.collections.describe(), {
+			collectionKey: required.key,
+		}),
+	);
+	const fields = described.data.flatMap((entry) =>
+		entry.kind === "field" ? [entry] : [],
+	);
 	expect(fields.map((field) => field.path)).toEqual([["title"], ["title"]]);
 	expect(fields[1]?.description).toBe("The banner's heading");
+	//* keys may repeat across owners, so guidance must use the owning builder
+	expect(fields.map((field) => field.instructions)).toEqual([
+		undefined,
+		"Five words or fewer.",
+	]);
+	expect(described.data.find((entry) => entry.kind === "brick")).toMatchObject({
+		key: "banner",
+		instructions: "One banner per page.",
+	});
+	expect(described.meta.collection.instructions).toBe(
+		"Landing pages for campaigns.",
+	);
 
 	const message = await run.fail(create, {
 		collectionKey: required.key,

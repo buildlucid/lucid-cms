@@ -48,6 +48,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"checkbox">;
 	}
 	get errors() {

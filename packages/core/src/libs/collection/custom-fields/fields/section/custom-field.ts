@@ -43,6 +43,7 @@ class SectionCustomField extends CustomField<"section"> {
 				width: this.props?.ui?.width,
 			},
 			fields: [],
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"section">;
 	}
 	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {

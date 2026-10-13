@@ -19,7 +19,7 @@ export const describeCollectionMcpTool = (
 		name: "collections_describe",
 		title: copy("admin:core.tools.collections_describe.title"),
 		description:
-			"Describe a collection's fields, bricks, routing, content languages, and publishing options. Returns paginated details.",
+			"Describe a collection's fields, bricks, routing, content languages, publishing options, and instructions for writing its content. Returns paginated details.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [],
@@ -49,7 +49,7 @@ export const describeCollectionAgentTool = (
 		name: "collections_describe",
 		title: copy("admin:core.tools.collections_describe.title"),
 		description:
-			"Describe a collection's fields, bricks, routing, content languages, and publishing options. Returns paginated details.",
+			"Describe a collection's fields, bricks, routing, content languages, publishing options, and instructions for writing its content. Returns paginated details.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

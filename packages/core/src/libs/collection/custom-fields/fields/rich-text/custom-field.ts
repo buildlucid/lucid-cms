@@ -73,6 +73,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
+			ai: this.props?.ai,
 		} satisfies FieldConfig<"rich-text">;
 	}
 	override get errors(): {

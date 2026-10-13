@@ -1,6 +1,7 @@
 import z from "zod";
 import constants from "../../../constants/constants.js";
 import { adminCopyInputSchema } from "../../i18n/index.js";
+import { aiInstructionsSchema } from "../ai-instructions.js";
 import { fieldConditionSchema } from "./conditions/schema.js";
 import { validateRangeConfig } from "./fields/range/schema.js";
 import { richTextUserVariableFields } from "./fields/rich-text/types.js";
@@ -26,6 +27,7 @@ const customFieldSchema = z.object({
 			false: adminCopyInputSchema.optional(),
 		})
 		.optional(),
+	ai: aiInstructionsSchema.optional(),
 	default: z
 		.union([
 			z.boolean(),
