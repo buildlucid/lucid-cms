@@ -3,7 +3,7 @@ import {
 	useBeforeLeave,
 	useLocation,
 } from "@solidjs/router";
-import { type Accessor, createSignal } from "solid-js";
+import { type Accessor, createSignal, onCleanup } from "solid-js";
 
 export interface NavigationGuardState {
 	isOpen: Accessor<boolean>;
@@ -11,6 +11,7 @@ export interface NavigationGuardState {
 	proceed: () => void;
 }
 
+/** Requests confirmation via the app modal or browser unload prompt when `shouldBlock` is true. */
 export function useNavigationGuard(
 	shouldBlock: Accessor<boolean>,
 ): NavigationGuardState {
@@ -37,6 +38,12 @@ export function useNavigationGuard(
 		setPendingNavigation(e);
 		setIsOpen(true);
 	});
+
+	const preventUnload = (event: BeforeUnloadEvent) => {
+		if (shouldBlock()) event.preventDefault();
+	};
+	window.addEventListener("beforeunload", preventUnload);
+	onCleanup(() => window.removeEventListener("beforeunload", preventUnload));
 
 	const cancel = () => {
 		setIsOpen(false);

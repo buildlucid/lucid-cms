@@ -101,7 +101,8 @@ export function useDocumentState(props: {
 		if (props.version() !== "latest" && props.version() !== "proposal") {
 			return false;
 		}
-		return isDocumentMutated();
+		//* leaving also discards redo history, even when the document matches its saved state
+		return isDocumentMutated() || brickStore.edits.canRedo();
 	});
 
 	// ------------------------------------------
