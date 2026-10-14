@@ -94,6 +94,7 @@ const consumeSteering: ServiceFn<
 				text: input.text,
 				references: input.references,
 				screen: input.screen,
+				timezone: input.timezone,
 				createdAt: new Date(input.created_at).toISOString(),
 			});
 			if (appended.error) return appended;

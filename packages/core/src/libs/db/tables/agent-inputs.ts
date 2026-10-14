@@ -26,6 +26,7 @@ export const agentInputsTable = defineTable("lucid_agent_inputs", () => ({
 		text: { schema: z.string(), type: "text" },
 		references: { schema: z.array(agentReferenceInputSchema), type: "json" },
 		screen: { schema: agentScreenSchema.nullable(), type: "json" },
+		timezone: { schema: z.string().nullable(), type: "text" },
 		target_run_id: { schema: z.uuid().nullable(), type: "text" },
 		status: { schema: agentInputStatusSchema, type: "text" },
 		created_at: { schema: z.union([z.string(), z.date()]), type: "timestamp" },
@@ -51,6 +52,8 @@ export interface LucidAgentInputs {
 		AgentScreen | null,
 		AgentScreen | null
 	>;
+	/** Sender's timezone, such as `Europe/London`, used to format local message time. */
+	timezone: string | null;
 	target_run_id: string | null;
 	status: Generated<z.infer<typeof agentInputStatusSchema>>;
 	created_at: TimestampImmutable;

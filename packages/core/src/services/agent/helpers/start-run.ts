@@ -26,6 +26,7 @@ import registerReferences from "../references/register.js";
 import type { ClaimedRoutineEvent } from "./claim-routine-events.js";
 import enqueueTitle from "./enqueue-title.js";
 import getRoutineTools from "./get-routine-tools.js";
+import messageContext from "./message-context.js";
 import registerUrlKeys from "./register-url-keys.js";
 import routineRequestParts from "./routine-request-parts.js";
 import titleFromMessage from "./title-from-message.js";
@@ -45,6 +46,8 @@ const startRun: ServiceFn<
 			references?: AgentReferenceInput[];
 			/** Extra model context that is not shown as part of the message. */
 			context?: string;
+			/** Timezone used for local message timestamps, defaulting to UTC. */
+			timezone?: string | null;
 		} & (
 			| {
 					purpose: "compact" | "retry";
@@ -130,12 +133,22 @@ const startRun: ServiceFn<
 		const messageParts = async (): ServiceResponse<
 			StoredAgentMessagePart[]
 		> => {
+			const sent = await messageContext(context, {
+				userId: input.userId,
+				timezone: input.timezone,
+				sentAt: now,
+			});
+			if (sent.error) return sent;
+
 			if (input.routine) {
-				return routineRequestParts(context, {
+				const request = await routineRequestParts(context, {
 					conversationId: input.conversationId,
 					after: latest.data?.through_position ?? 0,
 					routine: input.routine,
 				});
+				if (request.error) return request;
+
+				return { error: undefined, data: [...request.data, sent.data] };
 			}
 
 			const references = await registerReferences(context, {
@@ -148,11 +161,14 @@ const startRun: ServiceFn<
 
 			return {
 				error: undefined,
-				data: inputMessageParts({
-					text: input.text ?? "",
-					references: references.data,
-					screen: input.screen,
-				}),
+				data: [
+					...inputMessageParts({
+						text: input.text ?? "",
+						references: references.data,
+						screen: input.screen,
+					}),
+					sent.data,
+				],
 			};
 		};
 

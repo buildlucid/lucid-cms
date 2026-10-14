@@ -225,6 +225,19 @@ export const agentScreenPartSchema = z
 	.object({ type: z.literal("screen"), screen: agentScreenSchema })
 	.strict();
 
+/** Model-only message timing and acting-user context, omitted from API message parts. */
+export const agentMessageContextPartSchema = z
+	.object({
+		type: z.literal("context"),
+		/** Message timestamp in UTC. */
+		sentAt: z.string(),
+		/** Timezone used to format local message time. */
+		timezone: z.string(),
+		/** The person the run acts for, or null for the system. */
+		actingFor: z.object({ userId: z.number(), name: z.string() }).nullable(),
+	})
+	.strict();
+
 export const agentRoutinePartSchema = z
 	.object({
 		type: z.literal("routine"),
@@ -441,6 +454,20 @@ const agentRoutineResponseSchema = z.object({
 	createdAt: z.string().nullable(),
 	updatedAt: z.string().nullable(),
 });
+
+//* match the timezone support of local message formatting
+const timezoneSchema = z
+	.string()
+	.trim()
+	.max(64)
+	.refine((timezone) => {
+		try {
+			new Intl.DateTimeFormat("en-GB", { timeZone: timezone });
+			return true;
+		} catch {
+			return false;
+		}
+	});
 
 const idParams = z.object({ id: z.uuid() });
 const noQuery = { string: undefined, formatted: undefined };
@@ -688,6 +715,11 @@ export const controllerSchemas = {
 				screen: agentScreenSchema.optional().meta({
 					description:
 						"The admin screen the message was sent from. The document builder answers the agent's builder tools.",
+				}),
+				timezone: timezoneSchema.optional().meta({
+					description:
+						"The sender's IANA timezone, so the agent knows their local time.",
+					example: "Europe/London",
 				}),
 				delivery: agentDeliverySchema.default({ kind: "queue" }),
 				inputId: z.uuid().meta({

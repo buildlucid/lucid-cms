@@ -114,6 +114,7 @@ const resolveRunSetup = (
 				instructions: agent.instructions,
 			},
 			siteContext: context.config.ai.context,
+			localization: context.config.localization,
 			mode: props.mode,
 			attended,
 			skills,

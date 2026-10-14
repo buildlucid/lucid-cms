@@ -522,11 +522,21 @@ const callTool = (call: {
 		await input.emit({ type: "tool-call", ...call });
 		return { error: undefined, data: { usage, connectionId } };
 	});
+//* context metadata has separate coverage; omit it from these assertions
 const partsOf = async (conversationId: string) => {
 	const Messages = new AgentMessagesRepository(context.db);
 	const result = await Messages.selectLatest({ conversationId, limit: 20 });
-	return result.data?.flatMap((message) => message.parts);
+	return result.data?.flatMap((message) =>
+		message.parts.filter((part) => part.type !== "context"),
+	);
 };
+/** Matches message text followed by model-only context. */
+const sentAs = (text: string) =>
+	expect.stringMatching(
+		new RegExp(
+			`^${text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\n\\n<message_context `,
+		),
+	);
 const resultsOf = async (conversationId: string) => {
 	const messages = await getMessages(context, {
 		conversationId,
@@ -1522,7 +1532,11 @@ describe("agent runner", () => {
 			limit: 10,
 		});
 		expect(
-			saved.data?.toReversed().map((message) => message.parts),
+			saved.data
+				?.toReversed()
+				.map((message) =>
+					message.parts.filter((part) => part.type !== "context"),
+				),
 		).toMatchObject([
 			[{ type: "text", text: "Hello" }],
 			[
@@ -2767,7 +2781,8 @@ describe("conversation compaction", () => {
 	});
 
 	test("manual compaction keeps history and continues from only the newest summary", async () => {
-		inputTokenLimit = 6_000;
+		//* reserve context budget for metadata, the newest summary and a follow-up
+		inputTokenLimit = 6_800;
 		const prepared = await compactAfterReply();
 		reply(
 			"Current goal: draft content. Constraint: never publish without approval.",
@@ -2820,11 +2835,11 @@ describe("conversation compaction", () => {
 		});
 		expect(continued?.messages).not.toContainEqual({
 			role: "user",
-			content: "Hello",
+			content: sentAs("Hello"),
 		});
 		expect(continued?.messages.at(-1)).toEqual({
 			role: "user",
-			content: "Continue in French",
+			content: sentAs("Continue in French"),
 		});
 		//* history is only offered once context has been summarised
 		const toolNames = (index: number) =>
@@ -2873,7 +2888,7 @@ describe("conversation compaction", () => {
 		expect(conversation.data?.compactions).toHaveLength(2);
 		expect(conversation.data?.context).toMatchObject({
 			model: "test-model",
-			tokenLimit: 6_000,
+			tokenLimit: 6_800,
 			status: "ready",
 		});
 	});
@@ -2905,7 +2920,9 @@ describe("conversation compaction", () => {
 		});
 		const saved = await selectRun(prepared.compactId);
 		expect(saved?.checkpoint?.compaction).toBeDefined();
-		expect(saved?.checkpoint?.messages[0]).toMatchObject({ content: "Hello" });
+		expect(saved?.checkpoint?.messages[0]).toMatchObject({
+			content: sentAs("Hello"),
+		});
 		reply("Goal: continue drafting.");
 		expect(
 			await executeRun(context, { runId: prepared.compactId }),
@@ -2995,7 +3012,7 @@ describe("conversation compaction", () => {
 		const interrupted = await selectRun(prepared.compactId);
 		expect(interrupted?.status).toBe("interrupted");
 		expect(interrupted?.checkpoint?.messages[0]).toMatchObject({
-			content: "Hello",
+			content: sentAs("Hello"),
 		});
 		const remoteId = model.mock.calls[1]?.[1].requestId;
 		reply("Goal: continue drafting.");
@@ -3040,7 +3057,7 @@ describe("conversation compaction", () => {
 		});
 		expect(
 			(await selectRun(prepared.compactId))?.checkpoint?.messages[0],
-		).toMatchObject({ content: "Hello" });
+		).toMatchObject({ content: sentAs("Hello") });
 		const records = await context.db.kysely
 			.selectFrom("lucid_agent_compactions")
 			.select("id")
@@ -3157,7 +3174,10 @@ describe("conversation compaction", () => {
 		expect(
 			summaryOf(await selectRun(next).then((run) => run?.checkpoint)),
 		).toBe(true);
-		expect(retried?.messages.at(-1)).toEqual({ role: "user", content: "Next" });
+		expect(retried?.messages.at(-1)).toEqual({
+			role: "user",
+			content: sentAs("Next"),
+		});
 	});
 
 	test("loads old conversations in batches and compacts before answering", async () => {
@@ -3206,7 +3226,7 @@ describe("conversation compaction", () => {
 		).toBeGreaterThan(1);
 		expect(model.mock.calls.at(-1)?.[1].messages.at(-1)).toEqual({
 			role: "user",
-			content: "Continue now",
+			content: sentAs("Continue now"),
 		});
 		const supplied = JSON.stringify(
 			model.mock.calls.map(([, input]) => input.messages),
@@ -3612,7 +3632,10 @@ describe("queued and steering inputs", () => {
 					toolCallId: "write",
 					output: expect.objectContaining({ skipped: true }),
 				}),
-				expect.objectContaining({ role: "user", content: "Just explain it" }),
+				expect.objectContaining({
+					role: "user",
+					content: sentAs("Just explain it"),
+				}),
 			]),
 		);
 		expect(await pending(prepared.conversationId)).toEqual([]);
@@ -3774,7 +3797,9 @@ test("a lost steering acknowledgement does not inject the correction twice", asy
 			.at(-1)?.[1]
 			.messages.filter(
 				(message) =>
-					message.role === "user" && message.content === "Correction",
+					message.role === "user" &&
+					typeof message.content === "string" &&
+					message.content.startsWith("Correction\n\n"),
 			),
 	).toHaveLength(1);
 	expect(
@@ -3812,7 +3837,10 @@ test("steering accepted as the run finishes falls back to the queue", async () =
 	reply("Follow up");
 	await executeRun(context, { runId: id });
 	expect(model.mock.calls.at(-1)?.[1].messages).toContainEqual(
-		expect.objectContaining({ role: "user", content: "Late correction" }),
+		expect.objectContaining({
+			role: "user",
+			content: sentAs("Late correction"),
+		}),
 	);
 });
 
@@ -4359,7 +4387,7 @@ test("retrying a failed chat answers again without adding a message", async () =
 	).toMatchObject({ data: { status: "completed" } });
 	expect(model.mock.calls.at(-1)?.[1].messages.at(-1)).toEqual({
 		role: "user",
-		content: "Summarise the homepage",
+		content: sentAs("Summarise the homepage"),
 	});
 	const after = await Messages.selectLatest({
 		conversationId: prepared.conversationId,

@@ -1,10 +1,14 @@
-import type { AiContextEntry } from "../../../types/config.js";
+import type {
+	AiContextEntry,
+	LocalizationConfig,
+} from "../../../types/config.js";
 import type { SkillDefinition } from "../../skills/types.js";
 import type { getCapabilityProviders } from "../capabilities.js";
 import type { RunMode } from "../types.js";
 import { agentInstructions } from "./agent.js";
 import { capabilityInstructions } from "./capabilities.js";
 import { chatInstructions } from "./chat.js";
+import { environmentInstructions } from "./environment.js";
 import { historyInstructions } from "./history.js";
 import { referenceInstructions } from "./references.js";
 import { routineInstructions } from "./routine.js";
@@ -20,6 +24,7 @@ export const instructionVersion = 1;
 const buildInstructions = (props: {
 	agent: Parameters<typeof agentInstructions>[0];
 	siteContext: readonly AiContextEntry[];
+	localization: LocalizationConfig;
 	mode: RunMode;
 	/** Whether a person can answer the run's questions. */
 	attended: boolean;
@@ -32,6 +37,7 @@ const buildInstructions = (props: {
 		agentInstructions(props.agent),
 		terminologyInstructions,
 		siteContextInstructions(props.siteContext),
+		environmentInstructions(props.localization),
 		props.mode === "chat"
 			? chatInstructions
 			: routineInstructions(props.attended),

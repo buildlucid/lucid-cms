@@ -9,6 +9,7 @@ export const submitInput = (props: {
 	text: string;
 	references: AgentReferenceInput[];
 	screen?: AgentScreen;
+	timezone: string;
 	inputId: string;
 	delivery: AgentDelivery;
 }) =>
@@ -20,6 +21,7 @@ export const submitInput = (props: {
 			text: props.text,
 			references: props.references,
 			screen: props.screen,
+			timezone: props.timezone,
 			inputId: props.inputId,
 			delivery: props.delivery,
 		},

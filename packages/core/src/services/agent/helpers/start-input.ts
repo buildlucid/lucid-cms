@@ -12,7 +12,7 @@ const startInput: ServiceFn<
 			conversationId: string;
 			input: Pick<
 				Select<LucidAgentInputs>,
-				"id" | "user_id" | "text" | "references" | "screen"
+				"id" | "user_id" | "text" | "references" | "screen" | "timezone"
 			>;
 			dispatch: boolean;
 		},
@@ -26,6 +26,7 @@ const startInput: ServiceFn<
 		text: props.input.text,
 		references: props.input.references,
 		screen: props.input.screen ?? undefined,
+		timezone: props.input.timezone,
 	});
 	if (started.error) return started;
 

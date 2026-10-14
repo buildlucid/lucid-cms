@@ -13,6 +13,7 @@ import createRoutine from "./create-routine.js";
 import dispatchEventRoutines from "./dispatch-event-routines.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import recordRoutineEvent from "./helpers/record-routine-event.js";
+import startRun from "./helpers/start-run.js";
 
 const testConfig = getTestConfig();
 let context: ServiceContext;
@@ -218,6 +219,9 @@ test("content changes queue for matching routines and start one run once they se
 		where: [{ key: "id", operator: "=", value: run.id }],
 	});
 	expect(
+		request.data?.parts.find((part) => part.type === "context"),
+	).toMatchObject({ timezone: "UTC", actingFor: { userId, name: "events" } });
+	expect(
 		request.data?.parts.find((part) => part.type === "routine"),
 	).toMatchObject({
 		trigger: "event",
@@ -300,6 +304,37 @@ test("repeated changes keep what earlier ones touched", async () => {
 		.where("routine_id", "=", routine.data.id)
 		.executeTakeFirstOrThrow();
 	expect(row.fields).toEqual(["file"]);
+});
+
+test("chat messages keep the sender's timezone for the agent", async () => {
+	const userId = await createUser("timezone", ["agents:seo:chat"]);
+	const conversation = await insertConversation(context, {
+		agentKey: "seo",
+		userId,
+	});
+	if (conversation.error) throw new Error(JSON.stringify(conversation.error));
+
+	const runId = randomUUID();
+	const started = await startRun(context, {
+		conversationId: conversation.data.id,
+		userId,
+		runId,
+		text: "What changed this week?",
+		timezone: "Europe/London",
+	});
+	expect(started.error).toBeUndefined();
+
+	const AgentMessages = new AgentMessagesRepository(context.db);
+	const message = await AgentMessages.selectSingle({
+		select: ["parts"],
+		where: [{ key: "id", operator: "=", value: runId }],
+	});
+	expect(
+		message.data?.parts.find((part) => part.type === "context"),
+	).toMatchObject({
+		timezone: "Europe/London",
+		actingFor: { userId, name: "timezone" },
+	});
 });
 
 vi.mock("./helpers/enqueue-run.js", () => ({

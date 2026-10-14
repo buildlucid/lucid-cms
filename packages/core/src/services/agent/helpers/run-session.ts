@@ -38,6 +38,7 @@ import registerReferences from "../references/register.js";
 import enqueueRun from "./enqueue-run.js";
 import enqueueTitle from "./enqueue-title.js";
 import executeRunFinishedHooks from "./execute-run-finished-hooks.js";
+import messageContext from "./message-context.js";
 import notifyRoutineRun from "./notify-routine-run.js";
 import registerUrlKeys from "./register-url-keys.js";
 
@@ -207,6 +208,7 @@ const openRunSession = async (
 				text: string;
 				references: AgentReferenceInput[];
 				screen: AgentScreen | null;
+				timezone: string | null;
 				createdAt: string;
 			}) =>
 				withTransaction<StoredAgentMessagePart[]>(context, async (context) => {
@@ -218,11 +220,22 @@ const openRunSession = async (
 					});
 					if (references.error) return references;
 
-					const parts = inputMessageParts({
-						text: input.text,
-						references: references.data,
-						screen: input.screen,
+					//* only the person a run acts for can steer it
+					const sent = await messageContext(context, {
+						userId: run.user_id,
+						timezone: input.timezone,
+						sentAt: input.createdAt,
 					});
+					if (sent.error) return sent;
+
+					const parts = [
+						...inputMessageParts({
+							text: input.text,
+							references: references.data,
+							screen: input.screen,
+						}),
+						sent.data,
+					];
 
 					const AgentMessages = new AgentMessagesRepository(context.db);
 

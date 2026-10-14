@@ -33,6 +33,8 @@ const submitInput: ServiceFn<
 			references?: AgentReferenceInput[];
 			/** The admin screen it was sent from, which answers builder tools. */
 			screen?: AgentScreen;
+			/** The sender's timezone, such as `Europe/London`. */
+			timezone?: string;
 			delivery: AgentDelivery;
 			dispatch?: boolean;
 		},
@@ -110,6 +112,7 @@ const submitInput: ServiceFn<
 		text: input.text,
 		references,
 		screen: input.screen,
+		timezone: input.timezone,
 		targetRunId,
 	});
 	if (submitted.error) return submitted;

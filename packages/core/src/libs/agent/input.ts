@@ -62,6 +62,19 @@ const contextTag = (
 		)
 		.join(" ")} />`;
 
+/** Formats local date and time, such as "Wednesday, 14 October 2026 at 10:12". */
+const localTime = (sentAt: string, timezone: string) => {
+	try {
+		return new Intl.DateTimeFormat("en-GB", {
+			timeZone: timezone,
+			dateStyle: "full",
+			timeStyle: "short",
+		}).format(new Date(sentAt));
+	} catch {
+		return undefined;
+	}
+};
+
 export const textFromParts = (parts: StoredAgentMessagePart[]) =>
 	parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
 
@@ -145,6 +158,17 @@ export const messageText = (parts: StoredAgentMessagePart[]) => {
 	const screen = parts.find((part) => part.type === "screen");
 	if (screen) {
 		text = `${text}\n\n${contextTag("current_screen", screenAttributes(screen.screen))}`;
+	}
+
+	const sent = parts.find((part) => part.type === "context");
+	if (sent) {
+		text = `${text}\n\n${contextTag("message_context", {
+			sent_at: sent.sentAt,
+			local_time: localTime(sent.sentAt, sent.timezone),
+			timezone: sent.timezone,
+			acting_for: sent.actingFor?.name ?? "system",
+			acting_for_user_id: sent.actingFor?.userId,
+		})}`;
 	}
 
 	return text.trim();

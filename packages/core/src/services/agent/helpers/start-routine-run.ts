@@ -35,6 +35,7 @@ const startRoutineRun: ServiceFn<
 				"user_id",
 				"conversation_mode",
 				"conversation_id",
+				"timezone",
 			],
 			where: [{ key: "id", operator: "=", value: input.routineId }],
 		});
@@ -106,6 +107,8 @@ const startRoutineRun: ServiceFn<
 				events: events.data,
 			},
 			context: summary,
+			//* event-only routines have no schedule timezone, so context defaults to UTC
+			timezone: routine.data.timezone,
 		});
 		if (run.error) return run;
 

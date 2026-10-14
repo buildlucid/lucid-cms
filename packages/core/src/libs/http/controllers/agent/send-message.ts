@@ -61,6 +61,7 @@ const sendMessageController = factory.createHandlers(
 			text: body.text,
 			references: body.references,
 			screen: body.screen,
+			timezone: body.timezone,
 			delivery: body.delivery,
 			inputId: body.inputId,
 		});

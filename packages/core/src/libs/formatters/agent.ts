@@ -266,8 +266,11 @@ const formatMessage = (props: {
 	position: props.message.position,
 	role: props.message.role,
 	parts: [
-		...props.message.parts.map((part) =>
-			part.type === "tool" ? formatTool({ part }) : part,
+		//* message context is only for the model
+		...props.message.parts.flatMap((part) =>
+			part.type === "context"
+				? []
+				: [part.type === "tool" ? formatTool({ part }) : part],
 		),
 		...(props.result ? [props.result] : []),
 	],

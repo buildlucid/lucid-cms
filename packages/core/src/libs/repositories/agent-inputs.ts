@@ -21,6 +21,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 		text: string;
 		references?: AgentReferenceInput[];
 		screen?: AgentScreen;
+		timezone?: string;
 		targetRunId: string | null;
 	}) {
 		const query = this.db
@@ -32,6 +33,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				text: input.text,
 				references: input.references ?? [],
 				screen: input.screen ?? null,
+				timezone: input.timezone ?? null,
 				target_run_id: input.targetRunId,
 				status: "pending",
 				created_at: new Date().toISOString(),
@@ -56,6 +58,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				"text",
 				"references",
 				"screen",
+				"timezone",
 				"target_run_id",
 				"status",
 				"created_at",
@@ -151,6 +154,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				"text",
 				"references",
 				"screen",
+				"timezone",
 				"target_run_id",
 				"status",
 				"created_at",
@@ -187,6 +191,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				"text",
 				"references",
 				"screen",
+				"timezone",
 				"target_run_id",
 				"status",
 				"created_at",

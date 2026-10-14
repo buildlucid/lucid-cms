@@ -48,12 +48,15 @@ import {
 	webReadTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
+import { getDefaultTimezone } from "@/utils/request-schedule";
 
 /** Input the server has not yet accepted, kept so a retry reuses its input ID. */
 type PendingSubmission = {
 	text: string;
 	references: AgentReferenceInput[];
 	screen?: AgentScreen;
+	/** Browser timezone used for local message timestamps. */
+	timezone: string;
 	delivery: AgentDelivery;
 	inputId: string;
 };
@@ -491,6 +494,7 @@ export const useAgentChat = (
 							text,
 							references,
 							screen,
+							timezone: getDefaultTimezone(),
 							delivery,
 							inputId: crypto.randomUUID(),
 						};
