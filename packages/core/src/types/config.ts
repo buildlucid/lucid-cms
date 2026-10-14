@@ -43,7 +43,11 @@ import type {
 import type { SeedDefinition } from "../libs/seed/types.js";
 import type { SkillDefinition } from "../libs/skills/types.js";
 import type { McpToolDefinition } from "../libs/tools/types.js";
-import type { AiModelSelection, MediaGenerationType } from "./response.js";
+import type {
+	AgentMemoryScope,
+	AiModelSelection,
+	MediaGenerationType,
+} from "./response.js";
 
 /** Content languages available to editors. Omit localization to keep content unassigned. */
 export type LocalizationConfig = {
@@ -245,6 +249,16 @@ export type MediaGenerationConfig =
 			audio?: MediaGenerationTypeConfig;
 	  };
 
+/** Settings for one memory scope, with booleans as shorthand for `{ enabled }`. */
+export type AgentMemoryScopeConfig =
+	| boolean
+	| {
+			/** Defaults to true. */
+			enabled?: boolean;
+			/** Maximum memories per scope, capped at 100 to bound agent context. */
+			limit?: number;
+	  };
+
 /** Site context keyed so config and plugins can manage their entries independently. */
 export type AiContextEntry = {
 	/** Unique key, such as `brand` or a plugin key. */
@@ -379,6 +393,18 @@ export interface LucidConfig {
 				 * @remarks Sent with every agent request, so keep it short. Plugins can add entries from `configure`.
 				 */
 				context?: AiContextEntry[];
+				/**
+				 * Configures saved agent memories, with booleans enabling or disabling both scopes.
+				 * @remarks Applicable memories accompany every request unless the agent opts out with `features.memory`.
+				 */
+				memory?:
+					| boolean
+					| {
+							/** Each person's own preferences. Defaults to a limit of 30. */
+							personal?: AgentMemoryScopeConfig;
+							/** Guidance agents follow for everyone on the site. Defaults to a limit of 50. */
+							shared?: AgentMemoryScopeConfig;
+					  };
 				/**
 				 * Configures `defineAgent` agents requiring a connected Lucid AI account.
 				 * @remarks Arrays mean `{ definitions }`; booleans mean `{ enabled }`.
@@ -691,6 +717,7 @@ export interface ResolvedLucidConfig {
 			{ enabled: boolean; models: AiModelConfig<string> }
 		>;
 		context: AiContextEntry[];
+		memory: Record<AgentMemoryScope, { enabled: boolean; limit: number }>;
 		agents: { enabled: boolean; definitions: AgentDefinition[] };
 		mcp: {
 			enabled: boolean;

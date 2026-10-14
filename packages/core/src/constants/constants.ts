@@ -228,12 +228,21 @@ export default Object.freeze({
 		previewMediaTypes: ["image", "video", "audio"] satisfies MediaType[],
 		/** The most media a person can pick for one media_select call. */
 		selectMediaLimit: 10,
+		memory: {
+			/** Maximum memory length in characters; longer guidance belongs in site context or a skill. */
+			contentChars: 300,
+			/** Maximum memories replaced or deleted in one tool call. */
+			changeLimit: 10,
+			/** Maximum per-scope limit to bound memory context in agent requests. */
+			maxLimit: 100,
+		},
 		/** Lucid's widgets, with reserved interaction keys available only to the core tools listed in `tools`. */
 		widgets: {
 			previewMedia: "lucid-media-preview" satisfies AgentCoreWidgetKey,
 			mediaSelect: "lucid-media-select" satisfies AgentCoreWidgetKey,
 			imageSettings: "lucid-image-settings" satisfies AgentCoreWidgetKey,
 			audioSettings: "lucid-audio-settings" satisfies AgentCoreWidgetKey,
+			memoryReview: "lucid-memory-review" satisfies AgentCoreWidgetKey,
 			question: "lucid-question" satisfies AgentCoreWidgetKey,
 			/** Asks the open admin screen to answer a builder tool without showing a widget. */
 			screen: "lucid-screen" satisfies AgentCoreWidgetKey,
@@ -254,6 +263,8 @@ export default Object.freeze({
 				lucid_builder_read: ["lucid-screen"],
 				lucid_builder_update: ["lucid-screen", "lucid-builder-changes"],
 				lucid_builder_focus: ["lucid-screen"],
+				lucid_memory_save: ["lucid-memory-review"],
+				lucid_memory_delete: ["lucid-memory-review"],
 			} satisfies Partial<
 				Record<AgentLucidToolName | "media_select", AgentCoreWidgetKey[]>
 			>,

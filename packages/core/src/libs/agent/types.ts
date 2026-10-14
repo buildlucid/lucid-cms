@@ -282,6 +282,13 @@ export type AgentFeatures = {
 		/** Registers `lucid_builder_update`, requiring `read` and inheriting its default. */
 		edit: boolean;
 	};
+	/** Controls reading and proposing changes to memories configured in `ai.memory`. */
+	memory: {
+		/** Adds enabled shared memories and the acting user's personal memories to instructions. */
+		read: boolean;
+		/** Registers reviewed `lucid_memory_save` and `lucid_memory_delete` tools for chats, requiring `read` and inheriting its default. */
+		save: boolean;
+	};
 	web: {
 		/** Register Lucid's web search tool. Disable when providing your own. */
 		search: boolean;

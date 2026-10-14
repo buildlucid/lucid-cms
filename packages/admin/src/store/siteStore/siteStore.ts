@@ -25,6 +25,7 @@ const defaultAiSettings = (): AiSettings => ({
 		agents: true,
 		mcp: false,
 	},
+	memory: { personal: true, shared: true },
 	agents: [],
 });
 

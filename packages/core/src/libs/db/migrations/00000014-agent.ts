@@ -757,6 +757,54 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.on("lucid_agent_compactions")
 			.column("run_id")
 			.execute();
+
+		await db.schema
+			.createTable("lucid_agent_memories")
+			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			//* null for shared memories
+			.addColumn("owner_user_id", adapter.getDataType("integer"), (col) =>
+				col.references("lucid_users.id").onDelete("cascade"),
+			)
+			.addColumn("content", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+				col.references("lucid_users.id").onDelete("set null"),
+			)
+			.addColumn("created_by_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
+			)
+			.addColumn("updated_by", adapter.getDataType("integer"), (col) =>
+				col.references("lucid_users.id").onDelete("set null"),
+			)
+			.addColumn("updated_by_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
+			)
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col
+					.notNull()
+					.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+			)
+			.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+				col
+					.notNull()
+					.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("idx_lucid_agent_memories_owner")
+			.on("lucid_agent_memories")
+			.column("owner_user_id")
+			.execute();
 	},
 	async down(_db: Kysely<unknown>) {},
 });

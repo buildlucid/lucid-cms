@@ -4,6 +4,7 @@ import {
 	getCapabilityProviders,
 } from "../../../libs/agent/capabilities.js";
 import buildInstructions from "../../../libs/agent/instructions/index.js";
+import type { MemoryContext } from "../../../libs/agent/instructions/memories.js";
 import { getRunnerTools } from "../../../libs/agent/runner-tools.js";
 import type {
 	AgentDefinition,
@@ -11,11 +12,20 @@ import type {
 	RunMode,
 } from "../../../libs/agent/types.js";
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
+import { Permissions } from "../../../libs/permission/definitions.js";
 import hasPermission from "../../../libs/permission/has-permission.js";
 import allowOptionalNulls from "../../../libs/tools/allow-optional-nulls.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { AgentScreen, AiAccessFeature } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import { deleteMemoryToolName } from "../tools/memory-delete/constants.js";
+import { saveMemoryToolName } from "../tools/memory-save/constants.js";
+import getMemoryScopes from "./get-memory-scopes.js";
+
+const memoryToolNames: ReadonlySet<string> = new Set([
+	saveMemoryToolName,
+	deleteMemoryToolName,
+]);
 
 //* definitions are immutable, so each input schema only needs converting once
 const inputSchemas = new WeakMap<z.ZodObject, Record<string, unknown>>();
@@ -43,6 +53,8 @@ const resolveRunSetup = (
 		hasHistory: boolean;
 		/** The admin screen the person's latest message came from. */
 		screen?: AgentScreen;
+		/** Memories the run follows, when the agent reads them. */
+		memories?: Omit<MemoryContext, "save">;
 	},
 ) => {
 	const { agent, authority } = props;
@@ -50,11 +62,21 @@ const resolveRunSetup = (
 		? { type: props.screen.type, builder: agent.features.builder }
 		: undefined;
 	const attended = authority.principal.type === "user";
+	const memoryScopes = getMemoryScopes(
+		context.config,
+		hasPermission(authority, Permissions.AiMemoriesManage),
+	);
 	const tools = getAvailableTools(agent, authority, {
 		config: context.config,
 		aiAccess: props.aiAccess,
 		screen: screen?.type,
-	}).filter((tool) => attended || (tool.interaction?.skippable ?? true));
+		mode: props.mode,
+	})
+		.filter((tool) => attended || (tool.interaction?.skippable ?? true))
+		//* Hide memory tools when the user has no enabled, writable scope.
+		.filter(
+			(tool) => memoryScopes.length > 0 || !memoryToolNames.has(tool.name),
+		);
 
 	const skills = agent.skills.filter((skill) =>
 		skill.scopes.every((scope) => {
@@ -121,6 +143,12 @@ const resolveRunSetup = (
 			capabilities: getCapabilityProviders({ tools }),
 			hasHistory: props.hasHistory,
 			screen,
+			memory: props.memories && {
+				...props.memories,
+				save: tools.some((tool) => tool.name === saveMemoryToolName)
+					? { scopes: memoryScopes }
+					: undefined,
+			},
 		}),
 	};
 };

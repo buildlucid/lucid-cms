@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { adminConfigSchema } from "../admin/schema.js";
 import lucidAgent from "../agent/lucid-agent.js";
@@ -140,6 +141,22 @@ const MediaGenerationTypeSchema = z
 	)
 	.prefault({});
 
+const memoryScopeSchema = (limit: number) =>
+	z
+		.preprocess(
+			enabledShorthand,
+			z.strictObject({
+				enabled: z.boolean().default(true),
+				limit: z
+					.number()
+					.int()
+					.positive()
+					.max(constants.agent.memory.maxLimit)
+					.default(limit),
+			}),
+		)
+		.prefault({});
+
 const AiConfigSchema = z.strictObject({
 	enabled: z.boolean().default(true),
 	chatTitles: z.boolean().default(true),
@@ -171,6 +188,16 @@ const AiConfigSchema = z.strictObject({
 				new Set(entries.map((entry) => entry.key)).size === entries.length,
 			{ message: "AI context keys must be unique." },
 		),
+	memory: z
+		.preprocess(
+			(value) =>
+				typeof value === "boolean" ? { personal: value, shared: value } : value,
+			z.strictObject({
+				personal: memoryScopeSchema(30),
+				shared: memoryScopeSchema(50),
+			}),
+		)
+		.prefault({}),
 	agents: z
 		.preprocess(
 			(value) => enabledShorthand(definitionsShorthand(value)),

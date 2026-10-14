@@ -171,6 +171,16 @@ export const NavigationMenuContent: Component<{
 								icon="routines"
 								title={T()("routes.agent.routines")}
 							/>
+							<NavigationLink
+								href="/lucid/agent/memories"
+								permission={
+									getAgentAccess().chat.length > 0 &&
+									(siteStore.get.ai.memory.personal ||
+										siteStore.get.ai.memory.shared)
+								}
+								icon="memories"
+								title={T()("routes.agent.memories")}
+							/>
 						</NavigationSection>
 					</Show>
 

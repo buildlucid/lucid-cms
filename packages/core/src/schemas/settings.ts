@@ -46,6 +46,18 @@ const settingsResponseSchema = z.object({
 					}),
 				})
 				.strict(),
+			memory: z
+				.object({
+					personal: z.boolean().meta({
+						description: "Whether people can keep personal agent memories",
+						example: true,
+					}),
+					shared: z.boolean().meta({
+						description: "Whether agents follow shared memories",
+						example: true,
+					}),
+				})
+				.strict(),
 		})
 		.strict()
 		.optional(),

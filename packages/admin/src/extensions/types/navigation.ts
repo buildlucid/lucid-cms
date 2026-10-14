@@ -6,6 +6,7 @@ export type AdminNavigationIcon =
 	| "chat"
 	| "history"
 	| "routines"
+	| "memories"
 	| "collection-multiple"
 	| "collection-single"
 	| "media"

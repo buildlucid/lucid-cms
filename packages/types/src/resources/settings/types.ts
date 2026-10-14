@@ -1,4 +1,4 @@
-import type { AgentSummary } from "../agent/types.js";
+import type { AgentMemoryScope, AgentSummary } from "../agent/types.js";
 import type { AiAccessFeature, AiFeature } from "../ai/types.js";
 
 export type SettingsInclude =
@@ -14,6 +14,8 @@ export interface Settings {
 		enabled: boolean;
 		agents: AgentSummary[];
 		features: Record<AiFeature, boolean>;
+		/** Whether each memory scope is turned on. */
+		memory: Record<AgentMemoryScope, boolean>;
 	};
 	email?: {
 		simulated: boolean;

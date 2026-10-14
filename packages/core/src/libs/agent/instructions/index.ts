@@ -10,6 +10,7 @@ import { capabilityInstructions } from "./capabilities.js";
 import { chatInstructions } from "./chat.js";
 import { environmentInstructions } from "./environment.js";
 import { historyInstructions } from "./history.js";
+import { type MemoryContext, memoryInstructions } from "./memories.js";
 import { referenceInstructions } from "./references.js";
 import { routineInstructions } from "./routine.js";
 import { type ScreenContext, screenInstructions } from "./screen.js";
@@ -32,6 +33,7 @@ const buildInstructions = (props: {
 	capabilities: ReturnType<typeof getCapabilityProviders>;
 	hasHistory: boolean;
 	screen?: ScreenContext;
+	memory?: MemoryContext;
 }) =>
 	[
 		agentInstructions(props.agent),
@@ -45,6 +47,8 @@ const buildInstructions = (props: {
 		props.screen ? screenInstructions(props.screen) : "",
 		capabilityInstructions(props.capabilities),
 		skillInstructions(props.skills),
+		//* keep memory changes near the end to preserve the cached prompt prefix
+		props.memory ? memoryInstructions(props.memory) : "",
 		props.hasHistory ? historyInstructions : "",
 	]
 		.filter(Boolean)

@@ -16,7 +16,6 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import { queryKeys } from "@/services/query-keys";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 

@@ -359,6 +359,7 @@ const testAgent = defineAgent({
 	features: {
 		media: { analyze: false, readFile: false },
 		web: { search: false, read: false },
+		memory: { read: false },
 	},
 	tools: [
 		agentTools.read(),
@@ -375,7 +376,7 @@ const testAgent = defineAgent({
 		screenTool,
 	],
 });
-//* its own agent, so web and analysis tool descriptions leave the compaction tests' token budgets alone
+//* Keep optional tool descriptions out of compaction test token budgets.
 const webAgent = defineAgent({
 	key: "test-web",
 	name: "Web Agent",
@@ -4035,6 +4036,45 @@ describe("saved model choices", () => {
 		});
 		expect(rejected.error?.status).toBe(400);
 	});
+});
+
+test("chats follow shared and personal memories, and see changes from the next request", async () => {
+	await context.db.kysely
+		.insertInto("lucid_agent_memories")
+		.values([
+			{
+				id: randomUUID(),
+				owner_user_id: null,
+				content: "Use British spelling.",
+			},
+			{ id: randomUUID(), owner_user_id: userId, content: "Reply briefly." },
+		])
+		.execute();
+	const prepared = await prepare({ agentKey: webAgent.key });
+	model.mockImplementationOnce(async (_ctx, input) => {
+		await input.emit(start());
+		await input.emit({
+			type: "tool-call",
+			id: "progress",
+			name: "lucid_share_progress",
+			input: { message: "Working on it." },
+		});
+		await context.db.kysely
+			.deleteFrom("lucid_agent_memories")
+			.where("content", "=", "Reply briefly.")
+			.execute();
+		return { error: undefined, data: { usage, connectionId } };
+	});
+	reply("Done.");
+	await executeRun(context, { runId: prepared.runId });
+	await context.db.kysely.deleteFrom("lucid_agent_memories").execute();
+
+	const [first, second] = model.mock.calls.map(([, input]) => input);
+	expect(first?.instructions).toContain("Use British spelling.");
+	expect(first?.instructions).toContain("Reply briefly.");
+	expect(first?.tools.map((tool) => tool.name)).toContain("lucid_memory_save");
+	expect(second?.instructions).toContain("Use British spelling.");
+	expect(second?.instructions).not.toContain("Reply briefly.");
 });
 
 test("web tools use normal transcript rows and persist non-model usage", async () => {

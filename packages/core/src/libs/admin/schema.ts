@@ -95,6 +95,7 @@ const navigationIcon = z.enum([
 	"chat",
 	"history",
 	"routines",
+	"memories",
 	"collection-multiple",
 	"collection-single",
 	"media",

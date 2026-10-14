@@ -3,6 +3,8 @@ import constants from "../../../constants/constants.js";
 import { builderFocusToolName } from "../../../services/agent/tools/builder-focus/constants.js";
 import { builderReadToolName } from "../../../services/agent/tools/builder-read/constants.js";
 import { builderUpdateToolName } from "../../../services/agent/tools/builder-update/constants.js";
+import { deleteMemoryToolName } from "../../../services/agent/tools/memory-delete/constants.js";
+import { saveMemoryToolName } from "../../../services/agent/tools/memory-save/constants.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import { runnerToolNames } from "../../agent/runner-tools.js";
 import { getExternalCapability } from "../../permission/capabilities.js";
@@ -46,6 +48,8 @@ const reservedToolNames: ReadonlySet<string> = new Set([
 	builderReadToolName,
 	builderFocusToolName,
 	builderUpdateToolName,
+	saveMemoryToolName,
+	deleteMemoryToolName,
 ]);
 
 /** Checks a tool's name, schemas and access requirements. */

@@ -25,6 +25,8 @@ test("built-in features are enabled by default and explicit bundles flatten", ()
 		"lucid_builder_read",
 		"lucid_builder_focus",
 		"lucid_builder_update",
+		"lucid_memory_save",
+		"lucid_memory_delete",
 		...agentTools.read().map((tool) => tool.name),
 	]);
 	expect(mcpTools.all().map((tool) => tool.name)).toContain("media_preview");
@@ -61,6 +63,7 @@ test("all features can be disabled without registering supporting tools", () => 
 			},
 			documents: { attach: false },
 			builder: { read: false },
+			memory: { read: false },
 			web: { search: false, read: false },
 		},
 	});

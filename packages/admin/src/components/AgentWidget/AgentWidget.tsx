@@ -16,6 +16,7 @@ import AgentAudioSettings from "@/components/AgentAudioSettings/AgentAudioSettin
 import AgentImageSettings from "@/components/AgentImageSettings/AgentImageSettings";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentMediaSelect from "@/components/AgentMediaSelect/AgentMediaSelect";
+import AgentMemoryReview from "@/components/AgentMemoryReview/AgentMemoryReview";
 import AgentQuestionPanel from "@/components/AgentQuestionPanel/AgentQuestionPanel";
 import AgentWidgetUnavailable from "@/components/AgentWidgetUnavailable/AgentWidgetUnavailable";
 import Button from "@/components/Button/Button";
@@ -29,6 +30,7 @@ import {
 	imageSettingsWidget,
 	isWidgetSupported,
 	mediaSelectWidget,
+	memoryReviewWidget,
 	questionWidget,
 } from "@/utils/agent-tools";
 import { resolveAgentSlot } from "./slots";
@@ -49,6 +51,7 @@ const coreEntries: ReadonlyMap<
 	[mediaSelectWidget, { component: AgentMediaSelect, options: undefined }],
 	[imageSettingsWidget, { component: AgentImageSettings, options: undefined }],
 	[audioSettingsWidget, { component: AgentAudioSettings, options: undefined }],
+	[memoryReviewWidget, { component: AgentMemoryReview, options: undefined }],
 ]);
 
 const AgentWidget: Component<{

@@ -5,6 +5,8 @@ import { builderUpdateAgentTool } from "../../services/agent/tools/builder-updat
 import { editImageAgentTool } from "../../services/agent/tools/edit-image/index.js";
 import { generateAudioAgentTool } from "../../services/agent/tools/generate-audio/index.js";
 import { generateImageAgentTool } from "../../services/agent/tools/generate-image/index.js";
+import { deleteMemoryAgentTool } from "../../services/agent/tools/memory-delete/index.js";
+import { saveMemoryAgentTool } from "../../services/agent/tools/memory-save/index.js";
 import { readFileAgentTool } from "../../services/agent/tools/read-file/index.js";
 import { addMediaToLibraryAgentTool } from "../../services/media/tools/add-to-library/index.js";
 import { resolveWebToolOptions } from "../../services/web/helpers/web-tool-options.js";
@@ -47,6 +49,7 @@ const defineAgent = <const Key extends string>(
 	options: DefineAgentOptions<Key>,
 ): AgentDefinition<Key> => {
 	const builderRead = options.features?.builder?.read ?? true;
+	const memoryRead = options.features?.memory?.read ?? true;
 	const features = {
 		media: {
 			upload: options.features?.media?.upload ?? true,
@@ -61,6 +64,10 @@ const defineAgent = <const Key extends string>(
 		builder: {
 			read: builderRead,
 			edit: options.features?.builder?.edit ?? builderRead,
+		},
+		memory: {
+			read: memoryRead,
+			save: memoryRead && (options.features?.memory?.save ?? true),
 		},
 		web: {
 			search: options.features?.web?.search ?? true,
@@ -105,6 +112,9 @@ const defineAgent = <const Key extends string>(
 				? [builderReadAgentTool(), builderFocusAgentTool()]
 				: []),
 			...(features.builder.edit ? [builderUpdateAgentTool()] : []),
+			...(features.memory.save
+				? [saveMemoryAgentTool(), deleteMemoryAgentTool()]
+				: []),
 			...(options.tools?.flat() ?? []),
 		],
 		skills: options.skills ?? [],

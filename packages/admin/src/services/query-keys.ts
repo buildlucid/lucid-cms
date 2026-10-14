@@ -63,6 +63,7 @@ export const queryKeys = {
 			["lucid", "agent", "routines", id] as const,
 		routineRuns: (id: string | undefined) =>
 			["lucid", "agent", "routines", id, "runs"] as const,
+		memories: () => ["lucid", "agent", "memories"] as const,
 	},
 	account: {
 		verifyEmailChangeConfirm: () =>

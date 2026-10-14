@@ -337,6 +337,7 @@ const DocumentsPage: Component = () => {
 			<PageLayout.Header
 				title={collectionName()}
 				description={collectionSummary()}
+				loading={collection.isLoading}
 				actions={
 					<>
 						<Show when={(contentLocales()?.length ?? 0) > 1}>

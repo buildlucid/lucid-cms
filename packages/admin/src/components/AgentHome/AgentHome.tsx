@@ -172,6 +172,33 @@ const AgentHome: Component<{
 		<QueryBoundary
 			class="w-full grow"
 			loading={definitions.isLoading}
+			loadingFallback={
+				//* match the greeting line heights to avoid a layout shift
+				<section
+					aria-busy="true"
+					class={classnames(
+						"flex w-full flex-col",
+						panel()
+							? "my-auto gap-6 px-5 py-10"
+							: "mx-auto max-w-3xl gap-8 self-start pt-[18vh] pb-10",
+					)}
+				>
+					<div class="flex flex-col items-center gap-1.5">
+						<div class={panel() ? "text-base" : "text-2xl"}>
+							<span class="skeleton block w-48">&nbsp;</span>
+						</div>
+						<p class={panel() ? "text-sm" : "text-base"}>
+							<span class="skeleton block w-72 max-w-full">&nbsp;</span>
+						</p>
+					</div>
+					<span
+						class={classnames(
+							"skeleton block w-full rounded-2xl",
+							panel() ? "h-24" : "h-32",
+						)}
+					/>
+				</section>
+			}
 			error={definitions.isError}
 			empty={!definitions.data?.data.enabled || agents().length === 0}
 		>

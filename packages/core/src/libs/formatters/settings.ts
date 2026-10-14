@@ -46,6 +46,10 @@ const formatSingle = (props: {
 				sidebar: agent.sidebar,
 			})),
 			features: aiFeatureFlags(props.config.ai),
+			memory: {
+				personal: props.config.ai.memory.personal.enabled,
+				shared: props.config.ai.memory.shared.enabled,
+			},
 		};
 	}
 

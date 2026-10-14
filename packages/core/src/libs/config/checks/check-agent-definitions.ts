@@ -29,6 +29,7 @@ const featuresSchema = z
 		documents: z.object({ attach: z.boolean() }).strict(),
 		requests: z.object({ attach: z.boolean() }).strict(),
 		builder: z.object({ read: z.boolean(), edit: z.boolean() }).strict(),
+		memory: z.object({ read: z.boolean(), save: z.boolean() }).strict(),
 		web: z
 			.object({
 				search: z.boolean(),

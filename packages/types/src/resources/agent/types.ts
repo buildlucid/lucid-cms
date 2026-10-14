@@ -357,7 +357,9 @@ export type AgentLucidToolName =
 	| "media_add_to_library"
 	| "lucid_builder_read"
 	| "lucid_builder_update"
-	| "lucid_builder_focus";
+	| "lucid_builder_focus"
+	| "lucid_memory_save"
+	| "lucid_memory_delete";
 
 /** Widgets supplied by Lucid's runner and core tools. */
 export type AgentCoreWidgetKey =
@@ -370,7 +372,35 @@ export type AgentCoreWidgetKey =
 	| "lucid-builder-changes"
 	| "lucid-references"
 	| "lucid-image-settings"
-	| "lucid-audio-settings";
+	| "lucid-audio-settings"
+	| "lucid-memory-review";
+
+/** A memory the person checks before an agent saves or forgets it. */
+export type AgentMemoryReviewItem = Pick<
+	AgentMemory,
+	"id" | "scope" | "content"
+>;
+
+/** Saved `lucid-memory-review` data, with saves returning `AgentMemoryReviewResponse` and deletes an empty object. */
+export type AgentMemoryReviewData =
+	| {
+			action: "save";
+			content: string;
+			scope: AgentMemoryScope;
+			/** Enabled scopes the user can save to, with shared requiring management permission. */
+			scopes: AgentMemoryScope[];
+			/** The longest the memory can be, in characters. */
+			contentChars: number;
+			/** Memories to merge, retaining the first ID and deleting the rest on save. */
+			replaces: AgentMemoryReviewItem[];
+	  }
+	| { action: "delete"; memories: AgentMemoryReviewItem[] };
+
+/** The memory as the person approved it. */
+export type AgentMemoryReviewResponse = {
+	content: string;
+	scope: AgentMemoryScope;
+};
 
 /** Image settings reviewed before generation. */
 export type AgentImageSettings = {
@@ -730,6 +760,37 @@ export interface AgentRun {
 
 /** Routine access level, with oversight limited to pausing, resuming and deleting. */
 export type AgentRoutineAccess = "owner" | "manager" | "oversight";
+
+/** Personal memories belong to one user; shared memories guide agents for all users. */
+export type AgentMemoryScope = "personal" | "shared";
+
+/** A short note people saved for agents to follow in future chats and routines. */
+export interface AgentMemory {
+	id: string;
+	scope: AgentMemoryScope;
+	content: string;
+	createdBy: UserDisplay | null;
+	/** The agent that saved it on behalf of `createdBy`. */
+	createdByAgent: AgentActor | null;
+	updatedBy: UserDisplay | null;
+	/** The agent that last changed it on behalf of `updatedBy`. */
+	updatedByAgent: AgentActor | null;
+	createdAt: string | null;
+	updatedAt: string | null;
+}
+
+/** A scope's enabled state, memory limit and saved memories. */
+export type AgentMemoryList = {
+	enabled: boolean;
+	limit: number;
+	memories: AgentMemory[];
+};
+
+/** The person's own memories and the site's shared memories. */
+export type AgentMemories = Record<AgentMemoryScope, AgentMemoryList> & {
+	/** The longest a memory can be, in characters. */
+	contentChars: number;
+};
 
 export interface AgentRoutine {
 	id: string;

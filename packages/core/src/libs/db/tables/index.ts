@@ -4,6 +4,7 @@ import { agentConversationsTable } from "./agent-conversations.js";
 import { agentDocumentReferencesTable } from "./agent-document-references.js";
 import { agentInputsTable } from "./agent-inputs.js";
 import { agentMediaReferencesTable } from "./agent-media-references.js";
+import { agentMemoriesTable } from "./agent-memories.js";
 import { agentMessagesTable } from "./agent-messages.js";
 import { agentRequestReferencesTable } from "./agent-request-references.js";
 import { agentRoutinePendingTable } from "./agent-routine-pending.js";
@@ -77,6 +78,7 @@ export * from "./agent-conversations.js";
 export * from "./agent-document-references.js";
 export * from "./agent-inputs.js";
 export * from "./agent-media-references.js";
+export * from "./agent-memories.js";
 export * from "./agent-messages.js";
 export * from "./agent-request-references.js";
 export * from "./agent-routine-pending.js";
@@ -154,6 +156,7 @@ export const coreTableDefinitions = [
 	agentCompactionsTable,
 	agentInputsTable,
 	agentConversationsTable,
+	agentMemoriesTable,
 	agentMessagesTable,
 	agentRoutinesTable,
 	agentRoutinePendingTable,

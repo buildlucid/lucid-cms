@@ -70,12 +70,15 @@ export interface TableRootProps {
 }
 
 const tableScrollPositions = new Map<string, number>();
+//* only one table can own the shared selection bar
+const [selectionOwner, setSelectionOwner] = createSignal<symbol>();
 
 /** The table, which holds its columns, rows and shared state. */
 const TableRoot: Component<TableRootProps> = (props) => {
 	let overflowRef: HTMLDivElement | undefined;
 
 	const [selected, setSelected] = createSignal<boolean[]>([]);
+	const selectionKey = Symbol(props.id);
 	const [dragIndex, setDragIndex] = createSignal<number | null>(null);
 	const [dropTargetIndex, setDropTargetIndex] = createSignal<number | null>(
 		null,
@@ -284,6 +287,18 @@ const TableRoot: Component<TableRootProps> = (props) => {
 		setSelected((prev) =>
 			prev.some((selected) => selected) ? prev.map(() => false) : prev,
 		);
+	});
+	createEffect(() => {
+		if (selectedCount() > 0) setSelectionOwner(selectionKey);
+	});
+	createEffect(() => {
+		if (selectionOwner() === selectionKey) return;
+		setSelected((prev) =>
+			prev.some((selected) => selected) ? prev.map(() => false) : prev,
+		);
+	});
+	onCleanup(() => {
+		if (selectionOwner() === selectionKey) setSelectionOwner(undefined);
 	});
 
 	// ----------------------------------------

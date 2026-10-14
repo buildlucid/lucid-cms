@@ -46,7 +46,7 @@ const SectionHeading: Component<SectionHeadingProps> = (props) => {
 					component={`h${props.level ?? 2}`}
 					class={
 						(props.level ?? 2) === 2
-							? "text-base"
+							? "text-sm font-medium"
 							: "text-sm font-medium text-subtitle"
 					}
 				>

@@ -12,10 +12,10 @@ import {
 } from "solid-js";
 import AgentChatComposer from "@/components/AgentChatComposer/AgentChatComposer";
 import AgentChatTranscript from "@/components/AgentChatTranscript/AgentChatTranscript";
+import AgentTranscriptSkeleton from "@/components/AgentTranscriptSkeleton/AgentTranscriptSkeleton";
 import BranchAgentConversationModal from "@/components/BranchAgentConversationModal/BranchAgentConversationModal";
 import Button from "@/components/Button/Button";
 import ErrorState from "@/components/ErrorState/ErrorState";
-import LoadingState from "@/components/LoadingState/LoadingState";
 import Spinner from "@/components/Spinner/Spinner";
 import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
 import type { AgentChatView } from "@/hooks/useAgentChatView/useAgentChatView";
@@ -83,7 +83,19 @@ const AgentChatThread: Component<{
 					/>
 				</Match>
 				<Match when={props.chat.history.isLoading}>
-					<LoadingState class="grow" />
+					{/* Match the transcript padding to avoid a layout shift. */}
+					<div class="min-h-0 grow overflow-hidden">
+						<div
+							class={classnames(
+								"w-full px-4 pb-10",
+								props.variant === "page"
+									? "mx-auto max-w-3xl pt-8 md:px-6"
+									: "pt-6",
+							)}
+						>
+							<AgentTranscriptSkeleton />
+						</div>
+					</div>
 				</Match>
 				<Match when={true}>
 					<div class="@container relative flex min-h-0 grow flex-col">

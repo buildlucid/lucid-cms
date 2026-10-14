@@ -10,6 +10,8 @@ export interface PageLayoutRootProps {
 export interface PageLayoutHeaderProps {
 	title?: string;
 	description?: string;
+	/** Shows title and description skeletons while loading. */
+	loading?: boolean;
 	actions?: JSXElement;
 	/** Shown under the title, such as tabs or a toolbar. */
 	children?: JSXElement;
@@ -85,12 +87,27 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 					},
 				)}
 			>
-				<div class="w-full min-w-0 md:grow">
-					<Show when={props.title}>
-						<h1 class="text-base">{props.title}</h1>
-					</Show>
-					<Show when={props.description}>
-						<p class="mt-1 max-w-3xl text-sm">{props.description}</p>
+				<div class="w-full min-w-0 md:grow" aria-busy={props.loading}>
+					<Show
+						when={!props.loading}
+						fallback={
+							//* match the text line heights to avoid a layout shift
+							<>
+								<div class="text-base" aria-hidden="true">
+									<span class="skeleton block w-40">&nbsp;</span>
+								</div>
+								<p class="mt-1 max-w-3xl text-sm" aria-hidden="true">
+									<span class="skeleton block w-full max-w-80">&nbsp;</span>
+								</p>
+							</>
+						}
+					>
+						<Show when={props.title}>
+							<h1 class="text-base">{props.title}</h1>
+						</Show>
+						<Show when={props.description}>
+							<p class="mt-1 max-w-3xl text-sm">{props.description}</p>
+						</Show>
 					</Show>
 				</div>
 				<Show when={props.actions}>

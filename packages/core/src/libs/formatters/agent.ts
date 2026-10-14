@@ -2,10 +2,12 @@ import type { AgentInput } from "@lucidcms/types";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type {
+	AgentActor,
 	AgentCatalog,
 	AgentCompaction,
 	AgentContextUsage,
 	AgentConversation,
+	AgentMemory,
 	AgentMessage,
 	AgentRoutine,
 	AgentRoutineAccess,
@@ -34,6 +36,7 @@ import { isAiFeatureEnabled } from "../config/ai-features.js";
 import type { LucidAgentCompactions } from "../db/tables/agent-compactions.js";
 import type { LucidAgentConversations } from "../db/tables/agent-conversations.js";
 import type { LucidAgentInputs } from "../db/tables/agent-inputs.js";
+import type { LucidAgentMemories } from "../db/tables/agent-memories.js";
 import type { LucidAgentMessages } from "../db/tables/agent-messages.js";
 import type { LucidAgentRoutines } from "../db/tables/agent-routines.js";
 import type { LucidAgentRuns } from "../db/tables/agent-runs.js";
@@ -332,6 +335,29 @@ const formatRoutine = (props: {
 	updatedAt: formatter.formatDate(props.routine.updated_at),
 });
 
+const formatMemory = (props: {
+	memory: Select<LucidAgentMemories>;
+	users: Map<number, UserDisplay>;
+	agents: Map<string, AgentActor>;
+}): AgentMemory => {
+	const userOrNull = (id: number | null) =>
+		id === null ? null : (props.users.get(id) ?? null);
+	const agentOrNull = (runId: string | null) =>
+		runId === null ? null : (props.agents.get(runId) ?? null);
+
+	return {
+		id: props.memory.id,
+		scope: props.memory.owner_user_id === null ? "shared" : "personal",
+		content: props.memory.content,
+		createdBy: userOrNull(props.memory.created_by),
+		createdByAgent: agentOrNull(props.memory.created_by_run_id),
+		updatedBy: userOrNull(props.memory.updated_by),
+		updatedByAgent: agentOrNull(props.memory.updated_by_run_id),
+		createdAt: formatter.formatDate(props.memory.created_at),
+		updatedAt: formatter.formatDate(props.memory.updated_at),
+	};
+};
+
 export default {
 	formatDefinitions,
 	formatContext,
@@ -342,4 +368,5 @@ export default {
 	formatTool,
 	formatRun,
 	formatRoutine,
+	formatMemory,
 };

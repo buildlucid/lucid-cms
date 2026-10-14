@@ -151,6 +151,8 @@ export type AgentToolAvailabilityProps = {
 	aiAccess: readonly AiAccessFeature[];
 	/** The originating screen type, when the run has a screen. */
 	screen?: AgentScreen["type"];
+	/** The run's mode. Tool lists outside a run, such as the agent catalogue, leave it out. */
+	mode?: RunMode;
 };
 
 type ToolOptions<

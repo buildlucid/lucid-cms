@@ -4,10 +4,12 @@ import branchConversation from "../../../controllers/agent/branch-conversation.j
 import cancelRun from "../../../controllers/agent/cancel-run.js";
 import compactConversation from "../../../controllers/agent/compact-conversation.js";
 import createConversation from "../../../controllers/agent/create-conversation.js";
+import createMemory from "../../../controllers/agent/create-memory.js";
 import createRoutine from "../../../controllers/agent/create-routine.js";
 import createUpload from "../../../controllers/agent/create-upload.js";
 import createUploadSession from "../../../controllers/agent/create-upload-session.js";
 import deleteConversation from "../../../controllers/agent/delete-conversation.js";
+import deleteMemories from "../../../controllers/agent/delete-memories.js";
 import deleteReference from "../../../controllers/agent/delete-reference.js";
 import deleteRoutine from "../../../controllers/agent/delete-routine.js";
 import generateConversationTitle from "../../../controllers/agent/generate-conversation-title.js";
@@ -16,6 +18,7 @@ import getConversationDetails from "../../../controllers/agent/get-conversation-
 import getConversations from "../../../controllers/agent/get-conversations.js";
 import getDefinitions from "../../../controllers/agent/get-definitions.js";
 import getMediaPreviews from "../../../controllers/agent/get-media-previews.js";
+import getMemories from "../../../controllers/agent/get-memories.js";
 import getMessages from "../../../controllers/agent/get-messages.js";
 import getModels from "../../../controllers/agent/get-models.js";
 import getReferences from "../../../controllers/agent/get-references.js";
@@ -29,6 +32,7 @@ import runRoutine from "../../../controllers/agent/run-routine.js";
 import sendMessage from "../../../controllers/agent/send-message.js";
 import updateConversation from "../../../controllers/agent/update-conversation.js";
 import updateInput from "../../../controllers/agent/update-input.js";
+import updateMemory from "../../../controllers/agent/update-memory.js";
 import updateRoutine from "../../../controllers/agent/update-routine.js";
 import watchRun from "../../../controllers/agent/watch-run.js";
 
@@ -66,6 +70,10 @@ const agentRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/routines/:id", ...updateRoutine)
 	.delete("/routines/:id", ...deleteRoutine)
 	.post("/routines/:id/run", ...runRoutine)
-	.get("/routines/:id/runs", ...getRoutineRuns);
+	.get("/routines/:id/runs", ...getRoutineRuns)
+	.get("/memories", ...getMemories)
+	.post("/memories", ...createMemory)
+	.patch("/memories/:id", ...updateMemory)
+	.delete("/memories", ...deleteMemories);
 
 export default agentRoutes;

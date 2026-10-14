@@ -39,6 +39,7 @@ export const Permissions = {
 	AiAudioGenerate: "ai:audio-generate",
 	AiAltGenerate: "ai:alt-generate",
 	AiRoutinesManageAll: "ai:routines-manage-all",
+	AiMemoriesManage: "ai:memories-manage",
 
 	// Integration permissions
 	IntegrationRead: "integrations:read",
@@ -259,6 +260,22 @@ export const PermissionGroups = Object.freeze({
 						{
 							defaultMessage:
 								"See everyone's routines and pause or delete them. Their chats stay private.",
+						},
+					),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.AiMemoriesManage,
+				details: {
+					name: copy("admin:core.permissions.memories.manage", {
+						defaultMessage: "Manage Shared Memories",
+					}),
+					description: copy(
+						"admin:core.permissions.memories.manage.description",
+						{
+							defaultMessage:
+								"Add, edit and delete the memories agents follow for everyone.",
 						},
 					),
 				},

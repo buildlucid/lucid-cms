@@ -61,6 +61,9 @@ const AgentConversationRoute = lazyPage(
 const AgentRoutinesRoute = lazyPage(
 	() => import("@/containers/AgentRoutinesPage/AgentRoutinesPage"),
 );
+const AgentMemoriesRoute = lazyPage(
+	() => import("@/containers/AgentMemoriesPage/AgentMemoriesPage"),
+);
 const MediaListRoute = lazyPage(
 	() => import("@/containers/MediaPage/MediaPage"),
 );
@@ -205,6 +208,11 @@ const AppRouter: Component = () => {
 						path="/agent/routines"
 						preload={preloadRoutes(AgentRoutinesRoute)}
 						component={agentGuard(AgentRoutinesRoute, { routines: true })}
+					/>
+					<Route
+						path="/agent/memories"
+						preload={preloadRoutes(AgentMemoriesRoute)}
+						component={agentGuard(AgentMemoriesRoute, { chat: true })}
 					/>
 					<Route path="/components" component={ComponentsRoute} />
 					<Route path="/account" component={AccountRoute} />

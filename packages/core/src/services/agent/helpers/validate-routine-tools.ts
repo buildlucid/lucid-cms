@@ -25,6 +25,7 @@ const validateRoutineTools: ServiceFn<
 	const tools = getAvailableTools(access.data.agent, access.data.authority, {
 		config: context.config,
 		aiAccess: aiAccess.data,
+		mode: "routine",
 	});
 	if (names.some((name) => !tools.some((tool) => tool.name === name))) {
 		return {

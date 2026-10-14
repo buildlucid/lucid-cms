@@ -6,6 +6,8 @@ import type {
 	AgentImageSettingsData,
 	AgentLucidToolName,
 	AgentMediaSelectData,
+	AgentMemoryReviewData,
+	AgentMemoryReviewItem,
 	AgentReferencesData,
 	AgentRunnerToolName,
 	AgentScreenCall,
@@ -62,6 +64,13 @@ export const mediaSettingsWidgets: ReadonlySet<string> = new Set([
 	imageSettingsWidget,
 	audioSettingsWidget,
 ]);
+export const memoryReviewWidget =
+	"lucid-memory-review" satisfies AgentCoreWidgetKey;
+/** Tools whose results change the memories list. */
+export const memoryTools: ReadonlySet<string> = new Set([
+	"lucid_memory_save",
+	"lucid_memory_delete",
+] satisfies AgentLucidToolName[]);
 /** Tools that change chat references without a references widget: previews show their media in a gallery instead, and removals show nothing. */
 export const referenceTools: ReadonlySet<string> = new Set([
 	"lucid_preview_media",
@@ -243,6 +252,35 @@ export const isAudioSettingsData = (
 	isNullableString(value.instruction) &&
 	isNullableString(value.model) &&
 	isNullableString(value.voice);
+
+const isMemoryReviewItem = (value: unknown): value is AgentMemoryReviewItem =>
+	isObjectRecord(value) &&
+	typeof value.id === "string" &&
+	(value.scope === "personal" || value.scope === "shared") &&
+	typeof value.content === "string";
+
+export const isMemoryReviewData = (
+	value: unknown,
+): value is AgentMemoryReviewData => {
+	if (!isObjectRecord(value)) return false;
+	if (value.action === "delete") {
+		return (
+			Array.isArray(value.memories) && value.memories.every(isMemoryReviewItem)
+		);
+	}
+
+	return (
+		value.action === "save" &&
+		typeof value.content === "string" &&
+		(value.scope === "personal" || value.scope === "shared") &&
+		Array.isArray(value.scopes) &&
+		value.scopes.length > 0 &&
+		value.scopes.every((scope) => scope === "personal" || scope === "shared") &&
+		typeof value.contentChars === "number" &&
+		Array.isArray(value.replaces) &&
+		value.replaces.every(isMemoryReviewItem)
+	);
+};
 
 /** Screen calls come from the server, so only the parts the session routes on are checked. */
 export const isScreenCallData = (value: unknown): value is AgentScreenCall =>

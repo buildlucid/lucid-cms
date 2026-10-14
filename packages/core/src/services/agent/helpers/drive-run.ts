@@ -23,6 +23,7 @@ import consumeSteering from "./consume-steering.js";
 import executeReadBatch from "./execute-read-batch.js";
 import executeToolStep from "./execute-tool-step.js";
 import getReadBatch from "./get-read-batch.js";
+import getRunMemories from "./get-run-memories.js";
 import loadHistory from "./load-history.js";
 import resolveModel from "./resolve-model.js";
 import resolveRunSetup from "./resolve-run-setup.js";
@@ -80,6 +81,13 @@ const driveRun: ServiceFn<
 	}
 	const aiAccess = await getAiAccess(context, {});
 	if (aiAccess.error) return aiAccess;
+	//* Reload before each model turn so requests use current memories.
+	const loadMemories = () =>
+		access.data.agent.features.memory.read
+			? getRunMemories(context, { userId: run.user_id })
+			: Promise.resolve({ error: undefined, data: undefined });
+	let memories = await loadMemories();
+	if (memories.error) return memories;
 
 	if (!checkpoint.selection || !checkpoint.model) {
 		const model = await resolveModel(context, {
@@ -115,6 +123,7 @@ const driveRun: ServiceFn<
 			mode,
 			hasHistory: checkpoint.trimmed === true,
 			screen: checkpoint.screen,
+			memories: memories.data,
 		});
 
 	if (checkpoint.inFlightWrite) {
@@ -133,6 +142,8 @@ const driveRun: ServiceFn<
 		}
 
 		if (checkpoint.phase === "model") {
+			memories = await loadMemories();
+			if (memories.error) return memories;
 			setup = resolve();
 
 			const history = checkpoint.compaction

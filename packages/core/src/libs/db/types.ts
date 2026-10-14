@@ -10,6 +10,7 @@ import type {
 	LucidAgentDocumentReferences,
 	LucidAgentInputs,
 	LucidAgentMediaReferences,
+	LucidAgentMemories,
 	LucidAgentMessages,
 	LucidAgentRequestReferences,
 	LucidAgentRoutinePending,
@@ -355,6 +356,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_agent_conversations: LucidAgentConversations;
 	lucid_agent_compactions: LucidAgentCompactions;
 	lucid_agent_inputs: LucidAgentInputs;
+	lucid_agent_memories: LucidAgentMemories;
 	lucid_agent_messages: LucidAgentMessages;
 	lucid_agent_routines: LucidAgentRoutines;
 	lucid_agent_routine_pending: LucidAgentRoutinePending;
