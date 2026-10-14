@@ -27,6 +27,7 @@ const SystemOverviewPage: Component = () => {
 			include: {
 				email: true,
 				mcp: true,
+				agents: true,
 				media: true,
 				system: true,
 			},
@@ -70,6 +71,7 @@ const SystemOverviewPage: Component = () => {
 	});
 	const emailTemplates = createMemo(() => emailInfo()?.templates ?? []);
 	const mcpTools = createMemo(() => mcpInfo()?.tools ?? []);
+	const agentsInfo = createMemo(() => settingsData.data?.data?.agents);
 
 	// ----------------------------------------
 	// Render
@@ -200,6 +202,65 @@ const SystemOverviewPage: Component = () => {
 									</div>
 								</Show>
 							</InfoRow.Content>
+						</InfoRow.Root>
+					</Show>
+					<Show when={agentsInfo()?.enabled}>
+						<InfoRow.Root
+							title={T()("system.agents.info.title")}
+							description={T()("system.agents.info.description")}
+						>
+							<For
+								each={agentsInfo()?.agents}
+								fallback={
+									<InfoRow.Content>
+										<p class="text-sm text-muted">
+											{T()("system.agents.empty")}
+										</p>
+									</InfoRow.Content>
+								}
+							>
+								{(agent) => (
+									<InfoRow.Content
+										title={agent.name}
+										description={agent.description}
+									>
+										<DetailsList
+											layout="columns"
+											variant="plain"
+											items={[
+												{ label: T()("common.key"), value: agent.key },
+												{
+													label: T()("system.agents.sidebar"),
+													value: agent.sidebar
+														? T()("common.yes")
+														: T()("common.no"),
+												},
+												{
+													label: T()("system.agents.routines"),
+													value:
+														agent.routines
+															.map((routine) => routine.name)
+															.join(", ") || "-",
+												},
+											]}
+										/>
+										<Show when={agent.tools.length > 0}>
+											<p class="mt-4 mb-2 text-sm text-subtitle">
+												{T()("system.agents.tools")}
+											</p>
+											<div class="flex flex-wrap gap-2">
+												<For each={agent.tools}>
+													{(tool) => (
+														<Pill variant="outline" tooltip={tool.title}>
+															{tool.name}
+														</Pill>
+													)}
+												</For>
+											</div>
+										</Show>
+									</InfoRow.Content>
+								)}
+							</For>
 						</InfoRow.Root>
 					</Show>
 					<InfoRow.Root

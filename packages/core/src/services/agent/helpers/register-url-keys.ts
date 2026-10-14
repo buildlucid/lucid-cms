@@ -3,18 +3,27 @@ import { messageUrlKeys, urlKeyDigest } from "../../../libs/agent/url-keys.js";
 import { AgentUrlKeysRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/** Records the URLs a saved message allows the agent to fetch. Call it in the transaction that saves the message. */
+/**
+ * Registers URLs that saved messages allow the agent to fetch.
+ * @remarks Call in the transaction that saves the messages.
+ */
 const registerUrlKeys: ServiceFn<
 	[
 		{
 			conversationId: string;
-			role: "user" | "assistant";
-			parts: readonly StoredAgentMessagePart[];
+			messages: readonly {
+				role: "user" | "assistant";
+				parts: readonly StoredAgentMessagePart[];
+			}[];
 		},
 	],
 	undefined
 > = async (context, props) => {
-	const keys = [...messageUrlKeys(props)].map(urlKeyDigest);
+	const keys = [
+		...new Set(
+			props.messages.flatMap((message) => [...messageUrlKeys(message)]),
+		),
+	].map(urlKeyDigest);
 	const batchSize = context.config.db.getQueryBatchSize({
 		parametersPerItem: 2,
 		maxItems: 500,

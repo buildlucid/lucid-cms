@@ -6,11 +6,13 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import deleteVersions from "./helpers/delete-versions.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
 import getHookRequest from "./helpers/get-hook-request.js";
 import getRequestAccess from "./helpers/get-request-access.js";
+import getRequestEventFacts from "./helpers/get-request-event-facts.js";
 
 /**
  * Removes a document and its private versions, then tells documentRemoved
@@ -118,6 +120,14 @@ const removeDocument: ServiceFn<
 		],
 	});
 	if (eventsRes.error) return eventsRes;
+
+	const recordedRes = await recordRoutineEvent(context, {
+		event: "requests:updated",
+		subjects: [{ type: "request", requestId: request.id }],
+		facts: () => getRequestEventFacts(context, { requestId: request.id }),
+		agentRunId: data.agentRunId,
+	});
+	if (recordedRes.error) return recordedRes;
 
 	return executeHooks(
 		context,

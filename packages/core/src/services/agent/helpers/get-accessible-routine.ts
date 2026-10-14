@@ -25,6 +25,7 @@ const getAccessibleRoutine: ServiceFn<
 			"conversation_id",
 			"cron",
 			"timezone",
+			"events",
 			"enabled",
 			"user_id",
 			"next_run_at",

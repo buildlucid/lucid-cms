@@ -1,3 +1,4 @@
+import type { ErrorResultObj } from "@types";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import Input from "@/components/Input/Input";
 import Select from "@/components/Select/Select";
@@ -10,6 +11,7 @@ import {
 	toCron,
 	weekdayName,
 } from "@/utils/agent-schedule";
+import { getErrorObject } from "@/utils/error-helpers";
 
 /** Picks when a routine runs, from simple presets or a cron expression. */
 const AgentScheduleField: Component<{
@@ -17,6 +19,8 @@ const AgentScheduleField: Component<{
 	setSchedule: (_schedule: Schedule) => void;
 	timezone: string;
 	setTimezone: (_timezone: string) => void;
+	/** Validation errors for the schedule, keyed by its fields. */
+	errors?: ErrorResultObj;
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
@@ -78,7 +82,7 @@ const AgentScheduleField: Component<{
 							value={props.schedule.cron}
 							onChange={(cron) => update({ cron })}
 							label={T()("agent.schedule.cron")}
-							description={T()("agent.schedule.cron.description")}
+							errors={getErrorObject(props.errors?.cron)}
 						/>
 					</Match>
 					<Match when={true}>

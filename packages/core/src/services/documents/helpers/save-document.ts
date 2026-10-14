@@ -16,6 +16,7 @@ import {
 	isFractionalOrderKey,
 } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import recordRoutineEvent from "../../agent/helpers/record-routine-event.js";
 import createWorkflow from "../../document-workflows/create-single.js";
 import resetWorkflowStage from "../../document-workflows/reset-stage.js";
 import createDocumentVersion from "../../documents-versions/create-single.js";
@@ -278,6 +279,21 @@ const saveDocument: ServiceFn<
 		ids: [upsertDocRes.data.id],
 	});
 	if (changed.error) return changed;
+
+	const recorded = await recordRoutineEvent(context, {
+		event:
+			data.documentId === undefined ? "documents:created" : "documents:updated",
+		subjects: [
+			{
+				type: "document",
+				collectionKey: data.collectionKey,
+				documentId: upsertDocRes.data.id,
+			},
+		],
+		facts: { collections: [data.collectionKey] },
+		agentRunId: data.agentRunId,
+	});
+	if (recorded.error) return recorded;
 
 	return {
 		error: undefined,

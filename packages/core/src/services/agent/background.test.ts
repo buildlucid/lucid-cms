@@ -234,8 +234,8 @@ const dueRoutine = async (conversationMode: "new" | "reuse" = "new") => {
 		userId,
 		name: "Daily review",
 		instructions: "Review today's changes.",
-		cron: "0 9 * * *",
-		timezone: "UTC",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
 		enabled: true,
 	});
 	if (routine.error) throw new Error(JSON.stringify(routine.error));

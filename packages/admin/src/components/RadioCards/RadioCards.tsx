@@ -100,7 +100,7 @@ const RadioCards = <T extends string>(props: RadioCardsProps<T>) => {
 						<RadioGroup.Item
 							as="label"
 							value={option.value}
-							class="group/card relative flex cursor-pointer items-start gap-3 rounded-md border border-border bg-input p-3 transition-colors duration-200 hover:bg-card-hover has-[input:focus-visible]:border-primary data-checked:border-primary data-checked:ring-1 data-checked:ring-primary-low-border data-disabled:cursor-not-allowed data-disabled:opacity-60 data-invalid:border-danger-low-border"
+							class="group/card relative flex cursor-pointer items-start gap-3 rounded-md border border-border bg-input p-3 transition-colors duration-200 hover:bg-card-hover has-[input:focus-visible]:border-primary data-checked:border-primary-medium data-checked:ring-1 data-checked:ring-primary-low-border data-disabled:cursor-not-allowed data-disabled:opacity-60 data-invalid:border-danger-low-border"
 						>
 							<RadioGroup.ItemInput />
 							<RadioGroup.ItemControl class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-border bg-input group-data-checked/card:border-primary">

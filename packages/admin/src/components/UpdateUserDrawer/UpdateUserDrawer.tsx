@@ -16,9 +16,9 @@ import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
+import RadioCards from "@/components/RadioCards/RadioCards";
 import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
 import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
-import Switch from "@/components/Switch/Switch";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -238,24 +238,46 @@ const UpdateUserDrawer: Component<{
 								errors={getBodyError("roleIds", updateUser.errors)}
 							/>
 							<Show when={userStore.get.user?.superAdmin}>
-								<Switch
+								<RadioCards
 									id="superAdmin"
-									value={getIsSuperAdmin()}
-									onChange={setIsSuperAdmin}
-									name={"superAdmin"}
-									trueLabel={T()("common.yes")}
-									falseLabel={T()("common.no")}
-									label={T()("users.super.admin.label")}
+									name="superAdmin"
+									label={T()("users.type")}
+									columns={2}
+									value={getIsSuperAdmin() ? "super-admin" : "standard"}
+									onChange={(value) => setIsSuperAdmin(value === "super-admin")}
+									options={[
+										{
+											value: "standard",
+											label: T()("common.standard"),
+											description: T()("users.type.standard.description"),
+										},
+										{
+											value: "super-admin",
+											label: T()("users.super.admin.title"),
+											description: T()("users.type.super.admin.description"),
+										},
+									]}
 									errors={getBodyError("superAdmin", updateUser.errors)}
 								/>
-								<Switch
+								<RadioCards
 									id="isLocked"
-									value={getIsLocked()}
-									onChange={setIsLocked}
-									name={"isLocked"}
-									trueLabel={T()("common.status.locked")}
-									falseLabel={T()("common.status.unlocked")}
-									label={T()("users.status.locked.label")}
+									name="isLocked"
+									label={T()("users.status.label")}
+									columns={2}
+									value={getIsLocked() ? "locked" : "unlocked"}
+									onChange={(value) => setIsLocked(value === "locked")}
+									options={[
+										{
+											value: "unlocked",
+											label: T()("common.status.unlocked"),
+											description: T()("users.status.unlocked.description"),
+										},
+										{
+											value: "locked",
+											label: T()("common.status.locked"),
+											description: T()("users.status.locked.description"),
+										},
+									]}
 									errors={getBodyError("isLocked", updateUser.errors)}
 								/>
 							</Show>

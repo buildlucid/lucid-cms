@@ -864,6 +864,7 @@
 	"agent.title.context.empty": "This chat does not have enough text to generate a title.",
 	"agent.title.generate.failed": "The chat title could not be generated.",
 	"agent.routine.schedule.invalid": "Invalid cron expression or timezone.",
+	"agent.routine.trigger.required": "Give the routine a schedule or at least one event to run on.",
 	"agent.access.denied": "You do not have permission to use this agent.",
 	"agent.run.cannot.continue": "This run cannot be continued.",
 	"agent.run.answer.required": "Respond to the agent's question or confirmation to continue.",

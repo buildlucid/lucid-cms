@@ -6,7 +6,7 @@ import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import api from "@/services/api";
 import T from "@/translations";
 import { conversationModeLabels, getAgentName } from "@/utils/agent-access";
-import { describeSchedule } from "@/utils/agent-schedule";
+import { describeTriggers } from "@/utils/agent-routine-events";
 
 /** A code routine's read-only details, shown in place of the routine form. */
 const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
@@ -49,8 +49,8 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 						value: T()(conversationModeLabels[props.routine.conversationMode]),
 					},
 					{
-						label: T()("common.schedule"),
-						value: `${describeSchedule(props.routine.cron)} · ${props.routine.timezone}`,
+						label: T()("agent.routine.triggers"),
+						value: describeTriggers(props.routine),
 						wrap: true,
 					},
 				]}
@@ -58,7 +58,11 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 			<div>
 				<SectionHeading title={T()("agent.routine.instructions")} level={3} />
 				<div class="mb-3 rounded-md border border-border bg-card p-4 last:mb-0">
-					<AgentMarkdown text={props.routine.instructions} size="sm" />
+					{/* matches the instructions editor, so code and admin routines read the same */}
+					<AgentMarkdown
+						text={props.routine.instructions}
+						class="agent-markdown-compact"
+					/>
 				</div>
 			</div>
 		</>

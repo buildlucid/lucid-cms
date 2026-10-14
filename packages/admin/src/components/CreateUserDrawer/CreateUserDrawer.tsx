@@ -1,10 +1,10 @@
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
-import Checkbox from "@/components/Checkbox/Checkbox";
 import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Input from "@/components/Input/Input";
 import InputGrid from "@/components/InputGrid/InputGrid";
+import RadioCards from "@/components/RadioCards/RadioCards";
 import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
 import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
 import api from "@/services/api";
@@ -163,12 +163,25 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 						errors={getBodyError("roleIds", createUser.errors)}
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
-						<Checkbox
+						<RadioCards
 							id="superAdmin"
-							value={getIsSuperAdmin()}
-							onChange={(value) => setIsSuperAdmin(value)}
-							name={"superAdmin"}
-							label={T()("users.super.admin.label")}
+							name="superAdmin"
+							label={T()("users.type")}
+							columns={2}
+							value={getIsSuperAdmin() ? "super-admin" : "standard"}
+							onChange={(value) => setIsSuperAdmin(value === "super-admin")}
+							options={[
+								{
+									value: "standard",
+									label: T()("common.standard"),
+									description: T()("users.type.standard.description"),
+								},
+								{
+									value: "super-admin",
+									label: T()("users.super.admin.title"),
+									description: T()("users.type.super.admin.description"),
+								},
+							]}
 							errors={getBodyError("superAdmin", createUser.errors)}
 						/>
 					</Show>

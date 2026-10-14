@@ -23,6 +23,7 @@ import type {
 } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import registerReferences from "../references/register.js";
+import type { ClaimedRoutineEvent } from "./claim-routine-events.js";
 import enqueueTitle from "./enqueue-title.js";
 import getRoutineTools from "./get-routine-tools.js";
 import registerUrlKeys from "./register-url-keys.js";
@@ -67,6 +68,8 @@ const startRun: ServiceFn<
 						name: string;
 						instructions: string;
 						trigger: AgentRoutineTrigger;
+						/** Content changes the run should handle, linked to the chat with its request. */
+						events?: ClaimedRoutineEvent[];
 					};
 			  }
 		),
@@ -171,8 +174,7 @@ const startRun: ServiceFn<
 
 			return registerUrlKeys(context, {
 				conversationId: input.conversationId,
-				role: "user",
-				parts: parts.data,
+				messages: [{ role: "user", parts: parts.data }],
 			});
 		};
 

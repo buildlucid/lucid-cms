@@ -309,6 +309,16 @@ export default Object.freeze({
 		screenCallTimeoutMs: 30_000,
 		batchSize: 50,
 		modelCatalogTtlSeconds: 300,
+		routineEvents: {
+			/** Quiet period in milliseconds used to batch changes into one run. */
+			quietMs: 60_000,
+			/** Maximum batching wait in milliseconds before a routine becomes eligible to start. */
+			maxWaitMs: 600_000,
+			/** Maximum changed resources per run, leaving the rest queued. */
+			subjectsPerRun: 25,
+			/** Queued-event lifetime in milliseconds, including when an agent is unavailable. */
+			expiryMs: 86_400_000,
+		},
 	} as const,
 	documentEditors: {
 		/** Heartbeat expiry, allowing 30-second admin heartbeats to slow to a minute in hidden tabs. */

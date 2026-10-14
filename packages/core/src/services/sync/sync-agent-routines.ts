@@ -2,8 +2,12 @@ import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import constants from "../../constants/constants.js";
 import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
+import { agentRoutineEventsSchema } from "../../libs/agent/routine-events.js";
 import logger from "../../libs/logger/index.js";
-import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
+import {
+	AgentRoutinePendingRepository,
+	AgentRoutinesRepository,
+} from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutineTools from "../agent/helpers/get-routine-tools.js";
 import resolveRoutineConversation from "../agent/helpers/resolve-routine-conversation.js";
@@ -16,6 +20,7 @@ import saveRoutineTools from "../agent/helpers/save-routine-tools.js";
  */
 const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
+	const AgentRoutinePending = new AgentRoutinePendingRepository(context.db);
 
 	const existing = await AgentRoutines.selectMultiple({
 		select: [
@@ -29,6 +34,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			"conversation_id",
 			"cron",
 			"timezone",
+			"events",
 			"enabled",
 		],
 		where: [{ key: "source", operator: "=", value: "code" }],
@@ -51,8 +57,13 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 		const current = existing.data.find(
 			(row) => row.agent_key === agentKey && row.key === routine.key,
 		);
-		const next = nextRoutineOccurrence(routine.schedule);
+		const next = routine.schedule
+			? nextRoutineOccurrence(routine.schedule)
+			: { error: undefined, data: null };
 		if (next.error) return next;
+		//* Normalize validated config events to match parsed database events before comparison.
+		const parsedEvents = agentRoutineEventsSchema.parse(routine.events);
+		const events = parsedEvents.length ? parsedEvents : null;
 
 		if (!current) {
 			logger.debug({
@@ -72,11 +83,12 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 					conversation_mode: routine.conversationMode,
 					conversation_id: null,
 					model_selection: routine.model ?? null,
-					cron: routine.schedule.cron,
-					timezone: routine.schedule.timezone,
+					cron: routine.schedule?.cron ?? null,
+					timezone: routine.schedule?.timezone ?? null,
+					events,
 					enabled: true,
 					user_id: null,
-					next_run_at: next.data,
+					...(next.data ? { next_run_at: next.data } : {}),
 					created_at: now,
 					updated_at: now,
 				},
@@ -105,10 +117,12 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 		}
 
 		const rescheduled =
-			current.cron !== routine.schedule.cron ||
-			current.timezone !== routine.schedule.timezone;
+			current.cron !== (routine.schedule?.cron ?? null) ||
+			current.timezone !== (routine.schedule?.timezone ?? null);
+		const eventsChanged = !isDeepStrictEqual(current.events, events);
 		if (
 			!rescheduled &&
+			!eventsChanged &&
 			!toolsChanged &&
 			current.conversation_mode === routine.conversationMode &&
 			current.name === routine.name &&
@@ -133,13 +147,22 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 				name: routine.name,
 				instructions: routine.instructions,
 				model_selection: routine.model ?? null,
-				cron: routine.schedule.cron,
-				timezone: routine.schedule.timezone,
+				cron: routine.schedule?.cron ?? null,
+				timezone: routine.schedule?.timezone ?? null,
+				events,
 				...(rescheduled && current.enabled ? { next_run_at: next.data } : {}),
 				updated_at: now,
 			},
 		});
 		if (updated.error) return updated;
+
+		//* waiting changes belong to the events they were queued under
+		if (eventsChanged) {
+			const cleared = await AgentRoutinePending.deleteMultiple({
+				where: [{ key: "routine_id", operator: "=", value: current.id }],
+			});
+			if (cleared.error) return cleared;
+		}
 	}
 
 	const removed = existing.data.filter(

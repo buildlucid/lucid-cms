@@ -8,6 +8,7 @@ import {
 import type { AgentRoutineTrigger } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
+import claimRoutineEvents from "./claim-routine-events.js";
 import enqueueRun from "./enqueue-run.js";
 import insertConversation from "./insert-conversation.js";
 import startRun from "./start-run.js";
@@ -15,7 +16,7 @@ import startRun from "./start-run.js";
 /**
  * Starts a routine occurrence in its reused chat or a new chat carrying the previous summary.
  * @remarks Admin routines act for their user; code routines act as the system.
- * @returns Null if the routine is missing or it or its reused chat has an unfinished run.
+ * @returns Null if the routine is missing, it or its reused chat has an unfinished run, or an event run has no remaining changes.
  */
 const startRoutineRun: ServiceFn<
 	[{ routineId: string; trigger: AgentRoutineTrigger }],
@@ -51,6 +52,16 @@ const startRoutineRun: ServiceFn<
 		});
 		if (active.error) return active;
 		if (active.data) return { error: undefined, data: null };
+
+		//* All triggers consume waiting changes, but event runs require at least one.
+		const events = await claimRoutineEvents(context, {
+			routineId: routine.data.id,
+			userId: routine.data.user_id,
+		});
+		if (events.error) return events;
+		if (input.trigger === "event" && events.data.length === 0) {
+			return { error: undefined, data: null };
+		}
 
 		let conversationId = reusedId;
 		let summary: string | undefined;
@@ -92,6 +103,7 @@ const startRoutineRun: ServiceFn<
 				name: routine.data.name,
 				instructions: routine.data.instructions,
 				trigger: input.trigger,
+				events: events.data,
 			},
 			context: summary,
 		});

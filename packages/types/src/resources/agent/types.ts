@@ -7,6 +7,7 @@ import type {
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType } from "../media/types.js";
 import type { Refs } from "../refs/types.js";
+import type { RequestType } from "../requests/types.js";
 import type { Permission } from "../users/types.js";
 
 /** A media item, document or request in Lucid. */
@@ -429,7 +430,60 @@ export type AgentRunOutcome = "done" | "nothing_to_report" | "needs_review";
 /** Personal chats or chats for routines owned by users or defined in code. */
 export type AgentConversationKind = "chat" | "own-routine" | "code-routine";
 
-export type AgentRoutineTrigger = "schedule" | "manual";
+/** What started a routine run: its schedule, a person, or content changes it listens for. */
+export type AgentRoutineTrigger = "schedule" | "manual" | "event";
+
+/** When a scheduled routine runs, as a five-field cron expression in a timezone. */
+export interface AgentRoutineSchedule {
+	cron: string;
+	timezone: string;
+}
+
+/** Optional routine-event filters, with omitted filters matching all values. */
+export interface AgentRoutineEventFilter {
+	/** Collection keys, matching requests that contain any document in those collections. */
+	collections?: string[];
+	requestTypes?: RequestType[];
+	mediaTypes?: MediaType[];
+	/** Only matches updates that changed one of these parts of the media. */
+	fields?: "file"[];
+}
+
+/**
+ * A content event and filters that can trigger a routine.
+ * @remarks Add events and filters without removing existing ones so saved routines remain valid.
+ */
+export type AgentRoutineEvent =
+	| {
+			event: "documents:created" | "documents:updated" | "documents:published";
+			filter?: Pick<AgentRoutineEventFilter, "collections">;
+	  }
+	| {
+			event:
+				| "requests:created"
+				| "requests:updated"
+				| "requests:approved"
+				| "requests:completed";
+			filter?: Pick<AgentRoutineEventFilter, "collections" | "requestTypes">;
+	  }
+	| {
+			event: "media:created";
+			filter?: Pick<AgentRoutineEventFilter, "mediaTypes">;
+	  }
+	| {
+			event: "media:updated";
+			filter?: Pick<AgentRoutineEventFilter, "mediaTypes" | "fields">;
+	  };
+
+export type AgentRoutineEventName = AgentRoutineEvent["event"];
+
+/** A changed resource supplied to a routine run, with its matching events. */
+export interface AgentRoutineEventSubject {
+	reference: AgentReferenceSnapshot;
+	events: AgentRoutineEventName[];
+	/** What the changes touched, such as `["file"]`, when known. */
+	fields?: string[];
+}
 
 export type AgentRoutineConversationMode = "new" | "reuse";
 
@@ -527,6 +581,8 @@ export type AgentMessagePart =
 			name: string;
 			instructions: string;
 			trigger: AgentRoutineTrigger;
+			/** The content changes this run was given, whatever started it. */
+			events?: AgentRoutineEventSubject[];
 	  }
 	| AgentRunResultPart
 	| AgentToolSummary
@@ -688,8 +744,9 @@ export interface AgentRoutine {
 	modelSelection: AiModelSelection | null;
 	/** Per-tool settings by tool name. Missing tools and settings use the tool's defaults. */
 	toolSettings: Record<string, AgentRoutineToolSettings>;
-	cron: string;
-	timezone: string;
+	/** Null when the routine only runs on events. */
+	schedule: AgentRoutineSchedule | null;
+	events: AgentRoutineEvent[];
 	enabled: boolean;
 	nextRunAt: string | null;
 	lastRun: Pick<

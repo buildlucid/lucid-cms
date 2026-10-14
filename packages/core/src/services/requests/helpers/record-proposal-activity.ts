@@ -3,8 +3,13 @@ import {
 	RequestEventsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import recordRoutineEvent from "../../agent/helpers/record-routine-event.js";
+import getRequestEventFacts from "./get-request-event-facts.js";
 
-/** Records proposal activity, combining consecutive content edits from the same user and agent run. */
+/**
+ * Records proposal activity and notifies routines of request changes.
+ * @remarks Consecutive content edits coalesce only for the same document, user and agent run.
+ */
 const recordProposalActivity: ServiceFn<
 	[
 		{
@@ -32,6 +37,16 @@ const recordProposalActivity: ServiceFn<
 
 	const document = documentRes.data;
 	if (!document) return { error: undefined, data: undefined };
+
+	//* Record every edit before coalescing activity so each one resets the event quiet window.
+	const recordedRes = await recordRoutineEvent(context, {
+		event: "requests:updated",
+		subjects: [{ type: "request", requestId: document.request_id }],
+		facts: () =>
+			getRequestEventFacts(context, { requestId: document.request_id }),
+		agentRunId: data.agentRunId,
+	});
+	if (recordedRes.error) return recordedRes;
 
 	if (data.type === "proposal_edited") {
 		const latestRes = await RequestEvents.selectMultiple({

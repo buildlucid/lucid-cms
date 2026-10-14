@@ -224,7 +224,7 @@ function Select<Option extends SelectOption = SelectOption>(
 					id={props.id}
 					{...ariaProps}
 					class={classNames(
-						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input border border-border flex items-center rounded-md focus:border-primary duration-200 transition-colors",
+						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input border border-border flex items-center rounded-md focus:border-primary duration-200 transition-colors",
 						{
 							"h-10": props.size !== "sm",
 							"h-9": props.size === "sm",

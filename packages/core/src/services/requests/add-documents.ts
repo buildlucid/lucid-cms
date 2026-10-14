@@ -3,11 +3,13 @@ import { RequestEventsRepository } from "../../libs/repositories/index.js";
 import type { RequestDocumentInput } from "../../schemas/requests.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import captureDocument from "./helpers/capture-document.js";
 import checkRequestSize from "./helpers/check-request-size.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
 import getRequestAccess from "./helpers/get-request-access.js";
+import getRequestEventFacts from "./helpers/get-request-event-facts.js";
 
 /** Adds documents to a request and resets its approvals, capturing source content for publish requests. */
 const addDocuments: ServiceFn<
@@ -111,6 +113,14 @@ const addDocuments: ServiceFn<
 		})),
 	});
 	if (eventsRes.error) return eventsRes;
+
+	const recordedRes = await recordRoutineEvent(context, {
+		event: "requests:updated",
+		subjects: [{ type: "request", requestId: request.id }],
+		facts: () => getRequestEventFacts(context, { requestId: request.id }),
+		agentRunId: data.agentRunId,
+	});
+	if (recordedRes.error) return recordedRes;
 
 	return { error: undefined, data: undefined };
 };

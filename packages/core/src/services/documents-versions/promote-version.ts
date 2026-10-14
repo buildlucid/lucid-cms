@@ -16,6 +16,7 @@ import {
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import resetStage from "../document-workflows/reset-stage.js";
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
@@ -407,6 +408,23 @@ const promoteVersion: ServiceFn<
 			if (publishedRes.error) return publishedRes;
 
 			if (!data.deferEffects) {
+				const recorded = await recordRoutineEvent(context, {
+					event:
+						data.toVersionType === "latest"
+							? "documents:updated"
+							: "documents:published",
+					subjects: [
+						{
+							type: "document",
+							collectionKey: data.collectionKey,
+							documentId: data.documentId,
+						},
+					],
+					facts: { collections: [data.collectionKey] },
+					agentRunId: data.agentRunId,
+				});
+				if (recorded.error) return recorded;
+
 				await invalidateContentDocumentCache(context, data.collectionKey);
 
 				const changed = await notifyChange(context, {

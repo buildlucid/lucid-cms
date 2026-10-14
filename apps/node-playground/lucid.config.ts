@@ -1,7 +1,7 @@
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { defineConfig, mcpTools, z } from "@lucidcms/core";
+import { defineConfig, lucidAgent, mcpTools, z } from "@lucidcms/core";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
@@ -96,7 +96,7 @@ export default defineConfig({
 			mcp: {
 				tools: [mcpTools.all(), echoTool, addTool],
 			},
-			// agents: [assistantAgent, seoAgent],
+			agents: [lucidAgent, assistantAgent, seoAgent],
 			// mediaGeneration: {
 			// 	image: { models: { default: "openai/gpt-image" } },
 			// 	audio: false,

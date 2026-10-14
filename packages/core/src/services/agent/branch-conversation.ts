@@ -11,6 +11,7 @@ import {
 import type { AgentConversation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkAgentAccess from "./helpers/check-agent-access.js";
+import enqueueTitle from "./helpers/enqueue-title.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import registerUrlKeys from "./helpers/register-url-keys.js";
@@ -81,6 +82,15 @@ const branchConversation: ServiceFn<
 	});
 	if (branch.error) return branch;
 
+	//* Generate the branch title separately while the source title is provisional.
+	if (source.data.title_status === "provisional") {
+		await enqueueTitle(context, {
+			conversationId: branch.data.id,
+			userId: input.userId,
+			scope: "conversation",
+		});
+	}
+
 	const through = message.data.position;
 	//* use the reply's update time as the reference cutoff
 	const linkedBy = formatter.formatDate(message.data.updated_at);
@@ -129,14 +139,11 @@ const branchConversation: ServiceFn<
 		const inserted = await AgentMessages.createMultiple({ data: messages });
 		if (inserted.error) return inserted;
 
-		for (const saved of messages) {
-			const registered = await registerUrlKeys(context, {
-				conversationId: branch.data.id,
-				role: saved.role,
-				parts: saved.parts,
-			});
-			if (registered.error) return registered;
-		}
+		const registered = await registerUrlKeys(context, {
+			conversationId: branch.data.id,
+			messages,
+		});
+		if (registered.error) return registered;
 
 		const last = page.data.at(-1);
 		if (!last || last.position >= through || page.data.length < batchSize) {
@@ -161,7 +168,7 @@ const branchConversation: ServiceFn<
 			validation: { enabled: true },
 		}),
 		AgentMediaReferences.selectMultiple({
-			select: ["media_id", "source", "tool_name", "managed", "created_at"],
+			select: ["media_id", "source", "tool_name", "created_at"],
 			where: [
 				{ key: "conversation_id", operator: "=", value: input.conversationId },
 				{ key: "created_at", operator: "<=", value: linkedBy },
@@ -175,7 +182,6 @@ const branchConversation: ServiceFn<
 				"version_id",
 				"source",
 				"tool_name",
-				"managed",
 				"created_at",
 			],
 			where: [
@@ -209,6 +215,8 @@ const branchConversation: ServiceFn<
 				...row,
 				id: randomUUID(),
 				conversation_id: branch.data.id,
+				//* Allow users to unlink copied references in the branch.
+				managed: context.config.db.getDefault("boolean", "false"),
 				created_at: formatter.formatDate(row.created_at),
 			})),
 		});
@@ -221,6 +229,8 @@ const branchConversation: ServiceFn<
 				...row,
 				id: randomUUID(),
 				conversation_id: branch.data.id,
+				//* Allow users to unlink copied references in the branch.
+				managed: context.config.db.getDefault("boolean", "false"),
 				created_at: formatter.formatDate(row.created_at),
 			})),
 		});

@@ -17,12 +17,18 @@ import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Input from "@/components/Input/Input";
+import RadioCards from "@/components/RadioCards/RadioCards";
+import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import Select from "@/components/Select/Select";
-import Switch from "@/components/Switch/Switch";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
+import {
+	type RoutineEventDraft,
+	toRoutineEvent,
+	toRoutineEventDraft,
+} from "@/utils/agent-routine-events";
 import {
 	defaultSchedule,
 	parseSchedule,
@@ -32,6 +38,7 @@ import {
 import { getBodyError } from "@/utils/error-helpers";
 import { getDefaultTimezone } from "@/utils/request-schedule";
 import AgentRoutineDetails from "./parts/AgentRoutineDetails";
+import AgentRoutineEventsField from "./parts/AgentRoutineEventsField";
 import AgentRoutineInstructions from "./parts/AgentRoutineInstructions";
 import AgentRoutineModelField from "./parts/AgentRoutineModelField";
 import AgentRoutineToolConfirmations from "./parts/AgentRoutineToolConfirmations";
@@ -55,7 +62,9 @@ const UpsertAgentRoutineDrawer: Component<{
 	const [instructions, setInstructions] = createSignal("");
 	const [modelSelection, setModelSelection] =
 		createSignal<AiModelSelection | null>(null);
+	const [scheduled, setScheduled] = createSignal(true);
 	const [schedule, setSchedule] = createSignal<Schedule>(defaultSchedule);
+	const [events, setEvents] = createSignal<RoutineEventDraft[]>([]);
 	const [timezone, setTimezone] = createSignal(getDefaultTimezone());
 	const [enabled, setEnabled] = createSignal(true);
 	const [toolSettings, setToolSettings] = createSignal<
@@ -81,7 +90,12 @@ const UpsertAgentRoutineDrawer: Component<{
 		existing() ? updateRoutine : createRoutine,
 	);
 	const errors = createMemo(() => mutation().errors());
-	const incomplete = createMemo(() => !name().trim() || !instructions().trim());
+	const incomplete = createMemo(
+		() =>
+			!name().trim() ||
+			!instructions().trim() ||
+			(!scheduled() && events().length === 0),
+	);
 	const tabInvalid = (fields: string[]) =>
 		fields.some((field) => getBodyError(field, errors) !== undefined);
 	const agentTools = createMemo(() => {
@@ -110,8 +124,14 @@ const UpsertAgentRoutineDrawer: Component<{
 				setInstructions(routine?.instructions ?? "");
 				setConversationMode(routine?.conversationMode ?? "new");
 				setModelSelection(routine?.modelSelection ?? null);
-				setSchedule(routine ? parseSchedule(routine.cron) : defaultSchedule);
-				setTimezone(routine?.timezone ?? getDefaultTimezone());
+				setScheduled(routine ? routine.schedule !== null : true);
+				setSchedule(
+					routine?.schedule
+						? parseSchedule(routine.schedule.cron)
+						: defaultSchedule,
+				);
+				setTimezone(routine?.schedule?.timezone ?? getDefaultTimezone());
+				setEvents(routine?.events.map(toRoutineEventDraft) ?? []);
 				setEnabled(routine?.enabled ?? true);
 				setActiveTab(props.focusConfirmations ? "confirmations" : "task");
 			},
@@ -154,8 +174,10 @@ const UpsertAgentRoutineDrawer: Component<{
 						instructions: instructions(),
 						conversationMode: conversationMode(),
 						modelSelection: modelSelection(),
-						cron: toCron(schedule()),
-						timezone: timezone(),
+						schedule: scheduled()
+							? { cron: toCron(schedule()), timezone: timezone() }
+							: null,
+						events: events().map(toRoutineEvent),
 						enabled: enabled(),
 						toolSettings: toolSettings(),
 					};
@@ -182,9 +204,9 @@ const UpsertAgentRoutineDrawer: Component<{
 								invalid: tabInvalid(["agentKey", "name", "instructions"]),
 							},
 							{
-								value: "schedule",
-								label: T()("common.schedule"),
-								invalid: tabInvalid(["cron", "timezone", "enabled"]),
+								value: "triggers",
+								label: T()("agent.routine.triggers"),
+								invalid: tabInvalid(["schedule", "events", "enabled"]),
 							},
 							{
 								value: "confirmations",
@@ -248,27 +270,78 @@ const UpsertAgentRoutineDrawer: Component<{
 							/>
 						</Show>
 					</Show>
-					<Show when={activeTab() === "schedule"}>
-						<Show when={!locked()}>
-							<AgentScheduleField
-								schedule={schedule()}
-								setSchedule={setSchedule}
-								timezone={timezone()}
-								setTimezone={setTimezone}
-							/>
-						</Show>
-						{/* new routines start on their schedule; pausing is for existing ones, including code routines */}
+					<Show when={activeTab() === "triggers"}>
+						{/* new routines start active; pausing an existing routine stops schedules and events */}
 						<Show when={existing()}>
-							<Switch
+							<RadioCards
 								id="agent-routine-enabled"
 								name="enabled"
-								value={enabled()}
-								onChange={setEnabled}
-								trueLabel={T()("common.yes")}
-								falseLabel={T()("common.no")}
-								label={T()("agent.routine.enabled")}
-								description={T()("agent.routine.enabled.description")}
+								label={T()("common.status")}
+								columns={2}
+								value={enabled() ? "active" : "paused"}
+								onChange={(value) => setEnabled(value === "active")}
+								options={[
+									{
+										value: "active",
+										label: T()("agent.routine.active"),
+										description: T()("agent.routine.active.description"),
+									},
+									{
+										value: "paused",
+										label: T()("agent.routine.paused"),
+										description: T()("agent.routine.paused.description"),
+									},
+								]}
+								errors={getBodyError("enabled", errors)}
 							/>
+						</Show>
+						<Show when={!locked()}>
+							<section>
+								<SectionHeading title={T()("common.schedule")} level={3} />
+								<RadioCards
+									id="agent-routine-scheduled"
+									name="scheduled"
+									columns={2}
+									value={scheduled() ? "scheduled" : "none"}
+									onChange={(value) => setScheduled(value === "scheduled")}
+									options={[
+										{
+											value: "scheduled",
+											label: T()("agent.routine.schedule.enabled"),
+											description: T()(
+												"agent.routine.schedule.enabled.description",
+											),
+										},
+										{
+											value: "none",
+											label: T()("agent.routine.schedule.none"),
+											description: T()(
+												"agent.routine.schedule.none.description",
+											),
+										},
+									]}
+								/>
+							</section>
+							<Show when={scheduled()}>
+								<AgentScheduleField
+									schedule={schedule()}
+									setSchedule={setSchedule}
+									timezone={timezone()}
+									setTimezone={setTimezone}
+									errors={getBodyError("schedule", errors)}
+								/>
+							</Show>
+							<AgentRoutineEventsField
+								value={events()}
+								onChange={setEvents}
+								errors={getBodyError("events", errors)?.children}
+							/>
+							{/* a routine requires a schedule or an event */}
+							<Show when={!scheduled() && events().length === 0}>
+								<p class="text-sm text-muted">
+									{T()("agent.routine.trigger.required")}
+								</p>
+							</Show>
 						</Show>
 					</Show>
 					<Show when={activeTab() === "confirmations"}>
@@ -286,19 +359,28 @@ const UpsertAgentRoutineDrawer: Component<{
 							onChange={setModelSelection}
 							errors={getBodyError("modelSelection", errors)}
 						/>
-						<Switch
+						<RadioCards
 							id="agent-routine-conversation-mode"
 							name="conversationMode"
-							value={conversationMode() === "reuse"}
-							onChange={(reuse) => setConversationMode(reuse ? "reuse" : "new")}
-							trueLabel={T()("common.yes")}
-							falseLabel={T()("common.no")}
-							label={T()("agent.routine.conversation.reuse.label")}
-							description={T()(
-								conversationMode() === "reuse"
-									? "agent.routine.conversation.reuse.description"
-									: "agent.routine.conversation.new.description",
-							)}
+							label={T()("agent.routine.conversation.label")}
+							value={conversationMode()}
+							onChange={setConversationMode}
+							options={[
+								{
+									value: "new",
+									label: T()("agent.routine.conversation.new"),
+									description: T()(
+										"agent.routine.conversation.new.description",
+									),
+								},
+								{
+									value: "reuse",
+									label: T()("agent.routine.conversation.reuse"),
+									description: T()(
+										"agent.routine.conversation.reuse.description",
+									),
+								},
+							]}
 							errors={getBodyError("conversationMode", errors)}
 						/>
 					</Show>

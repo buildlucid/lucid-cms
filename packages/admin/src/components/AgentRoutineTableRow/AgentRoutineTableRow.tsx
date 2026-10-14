@@ -8,7 +8,7 @@ import {
 	getAgentUnavailableReason,
 	getRoutinePause,
 } from "@/utils/agent-access";
-import { describeSchedule } from "@/utils/agent-schedule";
+import { describeTriggers } from "@/utils/agent-routine-events";
 
 const AgentRoutineTableRow: Component<{
 	index: number;
@@ -104,8 +104,8 @@ const AgentRoutineTableRow: Component<{
 				maxLines={1}
 			/>
 			<Table.Text
-				column="schedule"
-				text={`${describeSchedule(props.routine.cron)} · ${props.routine.timezone}`}
+				column="triggers"
+				text={describeTriggers(props.routine)}
 				minWidth={240}
 				maxLines={1}
 			/>

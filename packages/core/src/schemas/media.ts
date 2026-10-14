@@ -1,5 +1,6 @@
 import * as z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import type { MediaType } from "../types/response.js";
 import mediaAdapterDataSchema from "../utils/media/adapter-data.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
@@ -29,6 +30,14 @@ export const mediaOriginSchema = z.enum([
 ]);
 
 export const mediaStatusSchema = z.enum(["processing", "ready", "failed"]);
+export const mediaTypeSchema = z.enum([
+	"image",
+	"video",
+	"audio",
+	"document",
+	"archive",
+	"unknown",
+]) satisfies z.ZodType<MediaType>;
 
 const mediaFileMetaResponseSchema = z.object({
 	mimeType: z

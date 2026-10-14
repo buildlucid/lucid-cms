@@ -10,6 +10,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import captureDocument from "./helpers/capture-document.js";
 import captureNewDocument from "./helpers/capture-new-document.js";
 import checkRequestSize from "./helpers/check-request-size.js";
@@ -171,6 +172,17 @@ async function createSingle(
 		});
 		if (mentionsRes.error) return mentionsRes;
 	}
+
+	const recordedRes = await recordRoutineEvent(context, {
+		event: "requests:created",
+		subjects: [{ type: "request", requestId: requestRes.data.id }],
+		facts: {
+			requestType: data.type,
+			collections: documents.map((document) => document.collection_key),
+		},
+		agentRunId: data.agentRunId,
+	});
+	if (recordedRes.error) return recordedRes;
 
 	return {
 		error: undefined,

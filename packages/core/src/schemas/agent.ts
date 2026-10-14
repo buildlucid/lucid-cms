@@ -10,6 +10,11 @@ import {
 	aiModelCatalogSchema,
 	aiModelSelectionSchema,
 } from "../libs/agent/model-selection.js";
+import {
+	agentRoutineEventNameSchema,
+	agentRoutineEventSchema,
+	agentRoutineEventsSchema,
+} from "../libs/agent/routine-events.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type {
 	Agent,
@@ -19,6 +24,8 @@ import type {
 	AgentInteractionAction,
 	AgentMessagePart,
 	AgentRoutineConversationMode,
+	AgentRoutineEventSubject,
+	AgentRoutineSchedule,
 	AgentRoutineSource,
 	AgentRoutineToolSettings,
 	AgentRoutineTrigger,
@@ -84,6 +91,7 @@ export const agentRoutineSourceSchema = z.enum([
 const agentRoutineTriggerSchema = z.enum([
 	"schedule",
 	"manual",
+	"event",
 ]) satisfies z.ZodType<AgentRoutineTrigger>;
 
 export const agentRoutineConversationModeSchema = z.enum([
@@ -223,6 +231,17 @@ export const agentRoutinePartSchema = z
 		name: z.string(),
 		instructions: z.string(),
 		trigger: agentRoutineTriggerSchema,
+		events: z
+			.array(
+				z
+					.object({
+						reference: agentReferenceSnapshotSchema,
+						events: z.array(agentRoutineEventNameSchema),
+						fields: z.array(z.string()).optional(),
+					})
+					.strict() satisfies z.ZodType<AgentRoutineEventSubject>,
+			)
+			.optional(),
 	})
 	.strict();
 
@@ -380,6 +399,13 @@ const agentRunResponseSchema = z.object({
 	finishedAt: z.string().nullable(),
 });
 
+const agentRoutineScheduleSchema = z
+	.object({
+		cron: z.string().trim().min(1),
+		timezone: z.string().trim().min(1),
+	})
+	.strict() satisfies z.ZodType<AgentRoutineSchedule>;
+
 /** Per-tool settings for a routine, keyed by tool name. Missing settings use the tool's defaults. */
 export const routineToolSettingsSchema = z.record(
 	z.string().min(1).max(128),
@@ -399,8 +425,8 @@ const agentRoutineResponseSchema = z.object({
 	conversationId: z.uuid().nullable(),
 	modelSelection: aiModelSelectionSchema.nullable(),
 	toolSettings: routineToolSettingsSchema,
-	cron: z.string(),
-	timezone: z.string(),
+	schedule: agentRoutineScheduleSchema.nullable(),
+	events: z.array(agentRoutineEventSchema),
 	enabled: z.boolean(),
 	nextRunAt: z.string().nullable(),
 	lastRun: agentRunResponseSchema
@@ -425,8 +451,9 @@ const routineBody = z.object({
 	instructions: z.string().trim().min(1).max(20_000),
 	/** Null uses the agent's default model. */
 	modelSelection: aiModelSelectionSchema.nullable().optional(),
-	cron: z.string().trim().min(1),
-	timezone: z.string().trim().min(1),
+	/** Null when the routine only runs on events. */
+	schedule: agentRoutineScheduleSchema.nullable(),
+	events: agentRoutineEventsSchema,
 	enabled: z.boolean(),
 });
 

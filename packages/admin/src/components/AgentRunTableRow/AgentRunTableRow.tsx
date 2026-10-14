@@ -3,6 +3,7 @@ import type { Component } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
+import { markdownPreview } from "@/utils/agent-markdown";
 import {
 	aiUsageSessionHref,
 	canViewAiUsage,
@@ -47,8 +48,8 @@ const AgentRunTableRow: Component<{
 			<Table.Text
 				column="summary"
 				text={
-					props.run.summary ??
-					props.run.errorMessage ??
+					(props.run.summary && markdownPreview(props.run.summary)) ||
+					props.run.errorMessage ||
 					T()("agent.routine.run.no.summary")
 				}
 				minWidth={420}

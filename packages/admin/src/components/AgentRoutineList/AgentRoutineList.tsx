@@ -106,8 +106,8 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 							minWidth: 160,
 						},
 						{
-							label: T()("common.schedule"),
-							key: "schedule",
+							label: T()("agent.routine.triggers"),
+							key: "triggers",
 							icon: <TbOutlineClock />,
 							minWidth: 240,
 						},

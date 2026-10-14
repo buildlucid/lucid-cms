@@ -139,7 +139,7 @@ describe("replyBuilderChanges", () => {
 	});
 	const message = (
 		id: string,
-		runId: string,
+		runId: string | null,
 		data?: AgentBuilderChangesData,
 	): AgentMessage => ({
 		id,
@@ -164,6 +164,19 @@ describe("replyBuilderChanges", () => {
 		const shown = replyBuilderChanges(messages, "working");
 		expect([...shown.keys()]).toEqual(["3"]);
 		expect(shown.get("3")?.[0]?.changes).toHaveLength(2);
+	});
+	it("groups a branch's copied turns by reply, as they have no run", () => {
+		const shown = replyBuilderChanges(
+			[
+				message("1", null, update("a")),
+				message("2", null, update("b")),
+				{ ...message("3", null), role: "user" },
+				message("4", null, update("c")),
+			],
+			undefined,
+		);
+		expect([...shown.keys()]).toEqual(["2", "4"]);
+		expect(shown.get("2")?.[0]?.changes).toHaveLength(2);
 	});
 });
 

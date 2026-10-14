@@ -10,6 +10,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import cloneVersion from "../documents-versions/clone-version.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
 import resolveNotification from "../notifications/resolve.js";
@@ -287,6 +288,17 @@ const approve: ServiceFn<
 		id: request.id,
 	});
 	if (scheduleRes.error) return scheduleRes;
+
+	const recordedRes = await recordRoutineEvent(context, {
+		event: "requests:approved",
+		subjects: [{ type: "request", requestId: request.id }],
+		facts: {
+			requestType: request.type,
+			collections: request.documents.map((document) => document.collection_key),
+		},
+		agentRunId: data.agentRunId,
+	});
+	if (recordedRes.error) return recordedRes;
 
 	const failedRes = await resolveNotification(context, {
 		definition: failedNotification,

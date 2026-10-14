@@ -24,6 +24,7 @@ import {
 	type MediaActor,
 } from "../../utils/media/media-access.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearProcessedImage from "../processed-images/clear-single.js";
 import checkAwaitingSync from "./checks/check-awaiting-sync.js";
@@ -612,6 +613,23 @@ const updateSingle: ServiceFn<
 					: { type: "restored" },
 	});
 	if (changed.error) return changed;
+
+	//* Entering the library counts as creation; only undeleted library media queues routine events.
+	const deletedNow =
+		data.isDeleted ?? formatter.formatBoolean(mediaRes.data.is_deleted);
+	if (ownership.type === "library" && !deletedNow) {
+		const added = currentOwnership.type !== "library";
+		const recorded = await recordRoutineEvent(context, {
+			event: added ? "media:created" : "media:updated",
+			subjects: [{ type: "media", mediaId: data.id }],
+			facts: {
+				mediaType: finalType,
+				fields: updateObjectRes ? ["file"] : [],
+			},
+			agentRunId: data.agentRunId,
+		});
+		if (recorded.error) return recorded;
+	}
 
 	return {
 		error: undefined,

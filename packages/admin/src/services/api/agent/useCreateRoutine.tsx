@@ -10,8 +10,8 @@ export type RoutineBody = Pick<
 	| "instructions"
 	| "conversationMode"
 	| "modelSelection"
-	| "cron"
-	| "timezone"
+	| "schedule"
+	| "events"
 	| "enabled"
 	| "toolSettings"
 >;

@@ -252,8 +252,7 @@ const openRunSession = async (
 
 					const registered = await registerUrlKeys(context, {
 						conversationId: run.conversation_id,
-						role: "user",
-						parts,
+						messages: [{ role: "user", parts }],
 					});
 					if (registered.error) return registered;
 
@@ -282,8 +281,7 @@ const openRunSession = async (
 
 					return registerUrlKeys(context, {
 						conversationId: run.conversation_id,
-						role: "assistant",
-						parts: settled,
+						messages: [{ role: "assistant", parts: settled }],
 					});
 				});
 				if (saved.error) return saved;

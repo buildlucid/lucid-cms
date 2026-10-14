@@ -2,6 +2,7 @@ import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
 import { getAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import {
+	AgentMessagesRepository,
 	AgentRoutinesRepository,
 	UsersRepository,
 } from "../../../libs/repositories/index.js";
@@ -18,11 +19,9 @@ import { routineReportNotification } from "../notifications/routine-report.js";
 import notificationExcerpt from "./notification-excerpt.js";
 
 /**
- * Tells the people who look after a routine how its run ended: the owner of
- * a user routine, or everyone who manages the agent's code routines. A
- * failure stays open until a later run completes. Call in the transaction
- * that finishes the run. Notifications that can't be written are logged and
- * rolled back on their own, so they never stop the run finishing.
+ * Notifies a user routine's owner or managers of the agent's code routines about the run outcome.
+ * @remarks Call in the transaction that finishes the run; notification failures roll back separately and only log.
+ * Failure notices stay open until a run completes; event runs only notify on failure or review.
  */
 const notifyRoutineRun: ServiceFn<
 	[
@@ -54,6 +53,22 @@ const notifyRoutineRun: ServiceFn<
 					if (resolveRes.error) return resolveRes;
 					if (result.outcome === "nothing_to_report") {
 						return { error: undefined, data: undefined };
+					}
+
+					//* Event runs keep routine reports in the chat to avoid frequent notifications.
+					if (result.outcome === "done") {
+						const Messages = new AgentMessagesRepository(context.db);
+
+						const request = await Messages.selectSingle({
+							select: ["parts"],
+							where: [{ key: "id", operator: "=", value: data.runId }],
+						});
+						if (request.error) return request;
+
+						const startedByEvents = request.data?.parts.some(
+							(part) => part.type === "routine" && part.trigger === "event",
+						);
+						if (startedByEvents) return { error: undefined, data: undefined };
 					}
 				}
 

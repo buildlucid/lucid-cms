@@ -4,8 +4,12 @@ import {
 	agentRoutineConversationModeSchema,
 	agentRoutineSourceSchema,
 } from "../../../schemas/agent.js";
-import type { AiModelSelection } from "../../../types/response.js";
+import type {
+	AgentRoutineEvent,
+	AiModelSelection,
+} from "../../../types/response.js";
 import { aiModelSelectionSchema } from "../../agent/model-selection.js";
+import { agentRoutineEventsSchema } from "../../agent/routine-events.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
@@ -33,8 +37,9 @@ export const agentRoutinesTable = defineTable(
 				schema: aiModelSelectionSchema.nullable(),
 				type: "json",
 			},
-			cron: { schema: z.string(), type: "text" },
-			timezone: { schema: z.string(), type: "text" },
+			cron: { schema: z.string().nullable(), type: "text" },
+			timezone: { schema: z.string().nullable(), type: "text" },
+			events: { schema: agentRoutineEventsSchema.nullable(), type: "json" },
 			enabled: {
 				schema: z.union([
 					z.literal(adapter.config.defaults.boolean.true),
@@ -83,8 +88,15 @@ export interface LucidAgentRoutines {
 		AiModelSelection | null | undefined,
 		AiModelSelection | null
 	>;
-	cron: string;
-	timezone: string;
+	/** Null when the routine only runs on events. */
+	cron: string | null;
+	timezone: string | null;
+	/** Matching content events, or null when none are configured. */
+	events: JSONColumnType<
+		AgentRoutineEvent[] | null,
+		AgentRoutineEvent[] | null | undefined,
+		AgentRoutineEvent[] | null
+	>;
 	enabled: Generated<BooleanInt>;
 	user_id: number | null;
 	next_run_at: TimestampMutable;

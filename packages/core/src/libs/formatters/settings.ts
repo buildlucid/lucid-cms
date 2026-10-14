@@ -26,7 +26,7 @@ interface SettingsPropsT {
 const formatSingle = (props: {
 	settings: SettingsPropsT;
 	config: ResolvedLucidConfig;
-	/** Translates agent names for the person viewing them. */
+	/** Translates agent and tool copy for the current viewer. */
 	translate: ServiceContext["translate"];
 	includes: SettingsInclude[] | undefined;
 	authUser?: LucidActor;
@@ -100,6 +100,26 @@ const formatSingle = (props: {
 			tools: Array.from(getMcpToolRegistry(props.config).values(), (tool) => ({
 				name: tool.name,
 				description: tool.description,
+			})),
+		};
+	}
+
+	if (includeSet.has("agents") && canReadSystem) {
+		response.agents = {
+			enabled: isAiFeatureEnabled(props.config, "agents"),
+			agents: getAgents(props.config).map((agent) => ({
+				key: agent.key,
+				name: props.translate(agent.name),
+				description: props.translate(agent.description),
+				sidebar: agent.sidebar,
+				tools: agent.tools.map((tool) => ({
+					name: tool.name,
+					title: props.translate(tool.title),
+				})),
+				routines: agent.routines.map((routine) => ({
+					key: routine.key,
+					name: routine.name,
+				})),
 			})),
 		};
 	}

@@ -192,6 +192,24 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		return exec.response;
 	}
+	/** Reads the run's conversation kind to distinguish routine and personal chats. */
+	async selectConversationKind(runId: string) {
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.innerJoin(
+				"lucid_agent_conversations",
+				"lucid_agent_conversations.id",
+				"lucid_agent_runs.conversation_id",
+			)
+			.select(["lucid_agent_conversations.kind"])
+			.where("lucid_agent_runs.id", "=", runId);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectConversationKind",
+		});
+
+		return exec.response;
+	}
 	/** The last summary a routine left for its next run. */
 	async selectLatestSummary(routineId: string) {
 		const query = this.db

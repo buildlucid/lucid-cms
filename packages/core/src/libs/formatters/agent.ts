@@ -303,8 +303,11 @@ const formatRoutine = (props: {
 	conversationId: props.routine.conversation_id,
 	modelSelection: props.routine.model_selection,
 	toolSettings: props.toolSettings,
-	cron: props.routine.cron,
-	timezone: props.routine.timezone,
+	schedule:
+		props.routine.cron && props.routine.timezone
+			? { cron: props.routine.cron, timezone: props.routine.timezone }
+			: null,
+	events: props.routine.events ?? [],
 	enabled: formatter.formatBoolean(props.routine.enabled),
 	nextRunAt: formatter.formatDate(props.routine.next_run_at),
 	lastRun: props.lastRun

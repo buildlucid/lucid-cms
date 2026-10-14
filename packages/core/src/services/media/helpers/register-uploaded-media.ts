@@ -14,6 +14,7 @@ import { getBaseUrl } from "../../../utils/helpers/index.js";
 import getKeyVisibility from "../../../utils/media/get-key-visibility.js";
 import { getMediaOwnership } from "../../../utils/media/media-access.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import recordRoutineEvent from "../../agent/helpers/record-routine-event.js";
 import type createSingle from "../create-single.js";
 import notifyChange from "../notify-change.js";
 import type syncMedia from "../strategies/sync-media.js";
@@ -313,6 +314,17 @@ const registerUploadedMedia: ServiceFn<
 		ids: [mediaFetchRes.data.id],
 	});
 	if (changed.error) return changed;
+
+	//* Routine events cover library uploads, excluding personal and system media.
+	if (ownerUserId === null && !isSystem) {
+		const recorded = await recordRoutineEvent(context, {
+			event: "media:created",
+			subjects: [{ type: "media", mediaId: mediaFetchRes.data.id }],
+			facts: { mediaType: uploaded.type },
+			agentRunId: data.agentRunId,
+		});
+		if (recorded.error) return recorded;
+	}
 
 	return {
 		error: undefined,

@@ -20,10 +20,10 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 				col.notNull().defaultTo("new"),
 			)
 			.addColumn("model_selection", adapter.getDataType("json"))
-			.addColumn("cron", adapter.getDataType("text"), (col) => col.notNull())
-			.addColumn("timezone", adapter.getDataType("text"), (col) =>
-				col.notNull(),
-			)
+			//* null for routines that only run on events
+			.addColumn("cron", adapter.getDataType("text"))
+			.addColumn("timezone", adapter.getDataType("text"))
+			.addColumn("events", adapter.getDataType("json"))
 			.addColumn("enabled", adapter.getDataType("boolean"), (col) =>
 				col
 					.notNull()
@@ -92,6 +92,42 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 				"routine_id",
 				"tool_name",
 			])
+			.execute();
+
+		//* one pending row per routine, event and subject
+		await db.schema
+			.createTable("lucid_agent_routine_pending")
+			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			.addColumn("routine_id", adapter.getDataType("text"), (col) =>
+				col.notNull().references("lucid_agent_routines.id").onDelete("cascade"),
+			)
+			.addColumn("event", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("subject_type", adapter.getDataType("text"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("subject_id", adapter.getDataType("integer"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("collection_key", adapter.getDataType("text"))
+			//* include collection identity because document IDs repeat across collections
+			.addColumn("subject_key", adapter.getDataType("text"), (col) =>
+				col.notNull(),
+			)
+			//* what the changes touched, such as ["file"], merged across repeats
+			.addColumn("fields", adapter.getDataType("json"), (col) => col.notNull())
+			.addColumn("first_at", adapter.getDataType("timestamp"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("last_at", adapter.getDataType("timestamp"), (col) =>
+				col.notNull(),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("uniq_lucid_agent_routine_pending_subject")
+			.unique()
+			.on("lucid_agent_routine_pending")
+			.columns(["routine_id", "event", "subject_key"])
 			.execute();
 
 		await db.schema

@@ -1,4 +1,8 @@
-import type { AgentRoutineTrigger, AgentRunResultPart } from "@types";
+import type {
+	AgentRoutineEventSubject,
+	AgentRoutineTrigger,
+	AgentRunResultPart,
+} from "@types";
 import classnames from "classnames";
 import { TbOutlineChevronRight, TbOutlineRepeat } from "solid-icons/tb";
 import {
@@ -9,14 +13,24 @@ import {
 	Show,
 } from "solid-js";
 import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
+import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import T from "@/translations";
+import {
+	type AgentReferenceItem,
+	agentReferenceKey,
+} from "@/utils/agent-references";
+import { routineTriggerLabel } from "@/utils/agent-routine-events";
 import dateHelpers from "@/utils/date-helpers";
 
 const AgentRoutineRequest: Component<{
 	name: string;
 	instructions: string;
 	trigger: AgentRoutineTrigger;
+	/** The content changes the run was given. */
+	events?: AgentRoutineEventSubject[];
+	/** Live resource details keyed by `agentReferenceKey` for preview rendering. */
+	referenceDetails?: Readonly<Record<string, AgentReferenceItem>>;
 	createdAt: string | null;
 	result?: AgentRunResultPart;
 }> = (props) => {
@@ -49,11 +63,7 @@ const AgentRoutineRequest: Component<{
 						{props.name}
 						<span class="text-muted">
 							{" · "}
-							{T()(
-								props.trigger === "schedule"
-									? "agent.routine.trigger.schedule"
-									: "agent.routine.trigger.manual",
-							)}
+							{routineTriggerLabel(props.trigger)}
 						</span>
 					</span>
 					<Show when={props.result}>
@@ -93,9 +103,11 @@ const AgentRoutineRequest: Component<{
 										{T()("agent.routine.run.summary")}
 									</p>
 									<FadedScroll>
-										<p class="whitespace-pre-wrap wrap-break-word text-xs leading-5 text-subtitle">
-											{result().summary}
-										</p>
+										<AgentMarkdown
+											text={result().summary}
+											size="sm"
+											class="text-subtitle"
+										/>
 									</FadedScroll>
 								</div>
 							)}
@@ -103,6 +115,15 @@ const AgentRoutineRequest: Component<{
 					</Show>
 				</div>
 			</section>
+			<AgentReferenceFiles
+				references={(props.events ?? []).map((change) => ({
+					...change.reference,
+					previewUrl:
+						props.referenceDetails?.[agentReferenceKey(change.reference)]
+							?.previewUrl,
+				}))}
+				class="-ms-4 w-[calc(100%+1rem)]"
+			/>
 			<Show when={props.createdAt}>
 				{(createdAt) => (
 					<div class="mt-3 flex h-6 items-center self-start text-xs text-muted">

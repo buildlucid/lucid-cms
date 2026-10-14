@@ -1,7 +1,13 @@
 import type { AgentSummary } from "../agent/types.js";
 import type { AiAccessFeature, AiFeature } from "../ai/types.js";
 
-export type SettingsInclude = "email" | "media" | "system" | "ai" | "mcp";
+export type SettingsInclude =
+	| "email"
+	| "media"
+	| "system"
+	| "ai"
+	| "mcp"
+	| "agents";
 
 export interface Settings {
 	ai?: {
@@ -35,6 +41,24 @@ export interface Settings {
 		tools: {
 			name: string;
 			description: string;
+		}[];
+	};
+	/** The agents in use, as defined in code. */
+	agents?: {
+		enabled: boolean;
+		agents: {
+			key: string;
+			name: string;
+			description: string;
+			sidebar: boolean;
+			tools: {
+				name: string;
+				title: string;
+			}[];
+			routines: {
+				key: string;
+				name: string;
+			}[];
 		}[];
 	};
 	system?: {

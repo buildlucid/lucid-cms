@@ -4,14 +4,15 @@ import type {
 } from "@lucidcms/types";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
-import { mediaItemSchema, mediaTypes } from "../helpers/schema.js";
+import { mediaTypeSchema } from "../../../../schemas/media.js";
+import { mediaItemSchema } from "../helpers/schema.js";
 
 export const inputSchema = z.object({
 	message: z.string().trim().min(1).max(500).meta({
 		description:
 			"What the person should pick and why, eg. 'Choose a hero image for the About page'.",
 	}),
-	types: z.array(z.enum(mediaTypes)).min(1).optional().meta({
+	types: z.array(mediaTypeSchema).min(1).optional().meta({
 		description: "Media types the person can pick; any type when left out.",
 	}),
 	max: z
@@ -29,7 +30,7 @@ export const inputSchema = z.object({
 
 /** Saved with the interaction, so the admin and the response check use the same limits. */
 export const dataSchema = z.object({
-	types: z.array(z.enum(mediaTypes)).nullable(),
+	types: z.array(mediaTypeSchema).nullable(),
 	max: z.number().int().min(1).max(constants.agent.selectMediaLimit),
 	agentKey: z.string(),
 	includePersonal: z.boolean(),

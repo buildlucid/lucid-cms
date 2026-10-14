@@ -168,7 +168,7 @@ function SelectMultiple<
 					data-select-multiple-trigger
 					id={props.id}
 					class={classnames(
-						"focus:outline-hidden overflow-hidden text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input border border-border flex min-h-10 rounded-md focus:border-primary duration-200 transition-colors",
+						"focus:outline-hidden overflow-hidden text-sm text-subtitle w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input border border-border flex min-h-10 rounded-md focus:border-primary duration-200 transition-colors",
 						{
 							"items-center px-2": !stacked(),
 							"gap-2 p-2": stacked(),

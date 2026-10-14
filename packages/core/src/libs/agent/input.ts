@@ -2,7 +2,7 @@ import type {
 	AgentReferenceSnapshot,
 	AgentScreen,
 } from "../../types/response.js";
-import { routineRequest } from "./instructions/messages.js";
+import { routineEventsIntro, routineRequest } from "./instructions/messages.js";
 import type { StoredAgentMessagePart } from "./messages.js";
 
 /** Keeps attached resources, and the admin screen it was sent from, alongside the message that introduced them. */
@@ -123,6 +123,16 @@ export const messageText = (parts: StoredAgentMessagePart[]) => {
 	//* A routine run only repeats its instructions when they changed, see routineRequestParts
 	if (routine) {
 		text = routineRequest(routine.name, text);
+	}
+	if (routine?.events?.length) {
+		const changes = routine.events.map((change) =>
+			contextTag("change", {
+				events: change.events.join(" "),
+				changed: change.fields?.join(" "),
+				...attachmentAttributes(change.reference),
+			}),
+		);
+		text = `${text}\n\n${routineEventsIntro}\n<routine_events>\n${changes.join("\n")}\n</routine_events>`;
 	}
 
 	const references = parts.flatMap((part) =>

@@ -12,6 +12,7 @@ import {
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import deleteMultiple from "../documents/delete-multiple.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
 import promoteVersion from "../documents-versions/promote-version.js";
@@ -334,6 +335,7 @@ const execute: ServiceFn<
 			promoted,
 			unpublished,
 			deleted,
+			agentRunId,
 		});
 		if (changesRes.error) return changesRes;
 
@@ -396,6 +398,19 @@ const execute: ServiceFn<
 			],
 		});
 		if (eventsRes.error) return eventsRes;
+
+		const recordedRes = await recordRoutineEvent(context, {
+			event: "requests:completed",
+			subjects: [{ type: "request", requestId: request.id }],
+			facts: {
+				requestType: request.type,
+				collections: request.documents.map(
+					(document) => document.collection_key,
+				),
+			},
+			agentRunId,
+		});
+		if (recordedRes.error) return recordedRes;
 
 		const completedRes = await sendNotification(context, {
 			definition: completedNotification,

@@ -8,6 +8,8 @@ import Pill from "@/components/Pill/Pill";
 import api from "@/services/api";
 import T from "@/translations";
 import { getRoutinePause } from "@/utils/agent-access";
+import { markdownPreview } from "@/utils/agent-markdown";
+import { routineEventLabels } from "@/utils/agent-routine-events";
 import { describeSchedule } from "@/utils/agent-schedule";
 import dateHelpers from "@/utils/date-helpers";
 import AgentCardDetail from "./AgentCardDetail";
@@ -36,6 +38,9 @@ const AgentRoutineCard: Component<{
 	// ----------------------------------------
 	// Memos
 	const pause = createMemo(() => getRoutinePause(props.routine));
+	const events = createMemo(() =>
+		routineEventLabels(props.routine.events).join(", "),
+	);
 	const chatRuns = createMemo(() => (runs.isSuccess ? runs.data.data : []));
 
 	// ----------------------------------------
@@ -57,30 +62,50 @@ const AgentRoutineCard: Component<{
 				</Button>
 			</div>
 			<dl class="flex flex-col gap-2.5 border-t border-border pt-4 text-xs">
-				<AgentCardDetail label={T()("common.schedule")}>
-					{describeSchedule(props.routine.cron)}
-				</AgentCardDetail>
-				<AgentCardDetail label={T()("agent.routine.next.run")}>
-					<Show
-						when={!pause().paused && props.routine.nextRunAt}
-						fallback={
-							<Pill size="xs" variant="warning-subtle" tooltip={pause().reason}>
-								{T()("agent.routine.paused")}
-							</Pill>
-						}
-					>
-						{(next) => (
-							<time
-								datetime={next()}
-								title={dateHelpers.formatFullDate(next(), {
-									includeTime: true,
-								})}
-							>
-								{dateHelpers.formatTimestamp(next())}
-							</time>
-						)}
-					</Show>
-				</AgentCardDetail>
+				<Show when={props.routine.schedule}>
+					{(schedule) => (
+						<AgentCardDetail label={T()("common.schedule")}>
+							{describeSchedule(schedule().cron)}
+						</AgentCardDetail>
+					)}
+				</Show>
+				<Show when={events()}>
+					{(labels) => (
+						<AgentCardDetail label={T()("agent.routine.events.title")}>
+							<span class="truncate" title={labels()}>
+								{labels()}
+							</span>
+						</AgentCardDetail>
+					)}
+				</Show>
+				{/* show paused status even without a schedule */}
+				<Show when={pause().paused || props.routine.schedule}>
+					<AgentCardDetail label={T()("agent.routine.next.run")}>
+						<Show
+							when={!pause().paused && props.routine.nextRunAt}
+							fallback={
+								<Pill
+									size="xs"
+									variant="warning-subtle"
+									tooltip={pause().reason}
+								>
+									{T()("agent.routine.paused")}
+								</Pill>
+							}
+						>
+							{(next) => (
+								<time
+									datetime={next()}
+									title={dateHelpers.formatFullDate(next(), {
+										includeTime: true,
+									})}
+								>
+									{dateHelpers.formatTimestamp(next())}
+								</time>
+							)}
+						</Show>
+					</AgentCardDetail>
+				</Show>
 			</dl>
 			<Show when={chatRuns().length}>
 				<section
@@ -116,7 +141,8 @@ const AgentRoutineCard: Component<{
 												{dateHelpers.formatTimestamp(run.createdAt)}
 											</time>
 											<span class="block truncate text-[11px] text-muted">
-												{run.summary ?? T()("agent.routine.run.no.summary")}
+												{(run.summary && markdownPreview(run.summary)) ||
+													T()("agent.routine.run.no.summary")}
 											</span>
 										</span>
 										<AgentRunStatus status={run.status} outcome={run.outcome} />

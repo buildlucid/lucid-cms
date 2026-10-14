@@ -10,6 +10,7 @@ import {
 } from "../../agent/model-selection.js";
 import nextRoutineOccurrence from "../../agent/next-routine-occurrence.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
+import { agentRoutineEventsSchema } from "../../agent/routine-events.js";
 import type { AgentFeatures } from "../../agent/types.js";
 import { resolvedAdminCopySchema } from "../../i18n/copy.js";
 
@@ -200,8 +201,20 @@ const checkAgentDefinitions = (config: {
 				);
 			}
 
-			if (nextRoutineOccurrence(routine.schedule).error) {
+			if (routine.schedule && nextRoutineOccurrence(routine.schedule).error) {
 				throw new Error(`Routine "${label}" has an invalid schedule.`);
+			}
+
+			const events = agentRoutineEventsSchema.safeParse(routine.events);
+			if (!events.success) {
+				throw new Error(
+					`Routine "${label}" has invalid events: ${z.prettifyError(events.error)}`,
+				);
+			}
+			if (!routine.schedule && events.data.length === 0) {
+				throw new Error(
+					`Routine "${label}" needs a schedule or at least one event.`,
+				);
 			}
 		}
 	}

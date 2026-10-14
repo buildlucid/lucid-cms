@@ -12,6 +12,7 @@ import {
 	builderChangesWidget,
 	isBuilderChangesData,
 	isWidgetSupported,
+	replyKeys,
 } from "@/utils/agent-tools";
 
 /** The builder's content as the person sees it, to tell which parts changed between a read and an update. */
@@ -214,7 +215,7 @@ export const mergeBuilderChanges = (
 	);
 };
 
-/** Groups model turns by run and keys each completed reply's merged builder changes by its last message, hiding the active run's changes. */
+/** Keys merged builder changes by each reply's last message, excluding the active run. */
 export const replyBuilderChanges = (
 	messages: AgentMessage[],
 	workingRunId: string | undefined,
@@ -223,9 +224,10 @@ export const replyBuilderChanges = (
 		string,
 		{ lastMessageId: string; updates: AgentBuilderChangesData[] }
 	>();
+	const keys = replyKeys(messages);
 	for (const message of messages) {
 		if (message.role !== "assistant") continue;
-		const runId = message.runId ?? message.id;
+		const runId = keys.get(message.id) ?? message.id;
 		const reply = replies.get(runId) ?? {
 			lastMessageId: message.id,
 			updates: [],

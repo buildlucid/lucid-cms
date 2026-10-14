@@ -42,8 +42,7 @@ test("long URL keys stay bounded in the index and preserve exact query matching"
 
 	await registerUrlKeys(context, {
 		conversationId,
-		role: "user",
-		parts: [{ type: "text", text: url }],
+		messages: [{ role: "user", parts: [{ type: "text", text: url }] }],
 	});
 
 	expect(await isKnown(conversationId, url)).toBe(true);
@@ -67,14 +66,16 @@ test("registration deduplicates keys and ignores assistant text", async () => {
 		},
 	];
 
-	await registerUrlKeys(context, { conversationId, role: "assistant", parts });
+	await registerUrlKeys(context, {
+		conversationId,
+		messages: [{ role: "assistant", parts }],
+	});
 	expect(await isKnown(conversationId, "https://example.com/a")).toBe(false);
 
 	for (let count = 0; count < 2; count++) {
 		const registered = await registerUrlKeys(context, {
 			conversationId,
-			role: "user",
-			parts,
+			messages: [{ role: "user", parts }],
 		});
 		expect(registered.error).toBeUndefined();
 	}

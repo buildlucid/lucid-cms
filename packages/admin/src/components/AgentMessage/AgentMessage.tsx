@@ -193,6 +193,8 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 							name={routine().name}
 							instructions={routine().instructions}
 							trigger={routine().trigger}
+							events={routine().events}
+							referenceDetails={props.referenceDetails}
 							createdAt={props.message.createdAt}
 							result={result()}
 						/>

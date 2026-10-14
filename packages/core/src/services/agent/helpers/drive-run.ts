@@ -7,7 +7,10 @@ import {
 	tokenLimit,
 } from "../../../libs/agent/context.js";
 import { textFromParts } from "../../../libs/agent/input.js";
-import { routineContinuation } from "../../../libs/agent/instructions/messages.js";
+import {
+	routineContinuation,
+	routineFinishReminder,
+} from "../../../libs/agent/instructions/messages.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
@@ -195,13 +198,17 @@ const driveRun: ServiceFn<
 			if (!checkpoint.calls.length) {
 				if (mode === "chat") return session.finish("completed");
 				//* Nudge routine runs to finish explicitly, up to the configured limit.
+				//* Keep the last reply when later routine nudges return no text.
+				const reply =
+					textFromParts(checkpoint.parts).trim() || checkpoint.reply;
+				checkpoint.reply = reply;
 				if (checkpoint.nudges >= limits.routineNudges) {
-					checkpoint.finish = {
-						outcome: "needs_review",
-						summary:
-							textFromParts(checkpoint.parts).trim() ||
-							context.translate("server:agent.run.summary.missing"),
-					};
+					checkpoint.finish = reply
+						? { outcome: "done", summary: reply }
+						: {
+								outcome: "needs_review",
+								summary: context.translate("server:agent.run.summary.missing"),
+							};
 
 					return session.finish("completed");
 				}
@@ -209,7 +216,7 @@ const driveRun: ServiceFn<
 				checkpoint.nudges++;
 				checkpoint.messages.push({
 					role: "user",
-					content: routineContinuation,
+					content: reply ? routineFinishReminder : routineContinuation,
 				});
 				startNextTurn(checkpoint);
 				continue;

@@ -12,6 +12,7 @@ import type { LucidActor } from "../../types/hono.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import checkSaveHold from "../document-editors/check-save-hold.js";
 import resetStage from "../document-workflows/reset-stage.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
@@ -254,6 +255,20 @@ const updateSingle: ServiceFn<
 					agentRunId: data.agentRunId,
 				});
 				if (publishedRes.error) return publishedRes;
+
+				const recordedRes = await recordRoutineEvent(context, {
+					event: "documents:updated",
+					subjects: [
+						{
+							type: "document",
+							collectionKey: data.collectionKey,
+							documentId: data.documentId,
+						},
+					],
+					facts: { collections: [data.collectionKey] },
+					agentRunId: data.agentRunId,
+				});
+				if (recordedRes.error) return recordedRes;
 			} else {
 				const activityRes = await recordProposalActivity(context, {
 					type: "proposal_edited",

@@ -16,6 +16,10 @@ import z from "zod";
 import constants from "../../constants/constants.js";
 import defineAgent from "../../libs/agent/define-agent.js";
 import {
+	routineContinuation,
+	routineFinishReminder,
+} from "../../libs/agent/instructions/messages.js";
+import {
 	findRunStream,
 	savedStreamCursor,
 	startRunStream,
@@ -540,8 +544,8 @@ const prepareRoutine = async () => {
 		userId,
 		name: "Check",
 		instructions: "Check things.",
-		cron: "0 9 * * 1",
-		timezone: "UTC",
+		schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+		events: [],
 		enabled: false,
 	});
 	if (routine.error) throw routine.error;
@@ -1148,8 +1152,8 @@ describe("agent runner", () => {
 			userId,
 			name: "Confirmation policy",
 			instructions: "Write a note",
-			cron: "0 9 * * 1",
-			timezone: "UTC",
+			schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+			events: [],
 			enabled: false,
 			toolSettings:
 				override === undefined
@@ -1197,8 +1201,8 @@ describe("agent runner", () => {
 			userId,
 			name: "Snapshot policy",
 			instructions: "Write",
-			cron: "0 9 * * 1",
-			timezone: "UTC",
+			schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+			events: [],
 			enabled: false,
 			toolSettings: { [writeTool.name]: { requiresConfirmation: true } },
 		});
@@ -1265,8 +1269,8 @@ describe("agent runner", () => {
 			userId,
 			name: "Interactive policy",
 			instructions: "Select",
-			cron: "0 9 * * 1",
-			timezone: "UTC",
+			schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+			events: [],
 			enabled: false,
 			toolSettings: { [selectionTool.name]: { requiresConfirmation: false } },
 		});
@@ -1875,8 +1879,8 @@ describe("agent runner", () => {
 					[confirmationTool.name]: { requiresConfirmation: false },
 				},
 				instructions: "Write a note.",
-				cron: "0 9 * * 1",
-				timezone: "UTC",
+				schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+				events: [],
 				enabled: false,
 			});
 			if (routine.error) throw routine.error;
@@ -2192,26 +2196,46 @@ describe("agent runner", () => {
 		]);
 	});
 
-	test("a routine that exhausts its nudges needs review instead of claiming success", async () => {
+	test("a routine that replies but never finishes is done once its nudges run out", async () => {
 		const prepared = await prepareRoutine();
-		reply("Starting.");
-		reply("Still looking.");
-		reply("I have not completed the check.");
+		reply("3 + 4 = 7.");
+		reply("The sum is 7.");
+		reply("The sum is 7.");
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "completed" },
 		});
 		expect(model).toHaveBeenCalledTimes(3);
-		expect(await resultsOf(prepared.conversationId)).toEqual([
-			{
-				type: "run-result",
-				outcome: "needs_review",
-				summary: "I have not completed the check.",
-				finishedAt: expect.any(String),
-			},
-		]);
+		expect(model.mock.calls[1]?.[1].messages).toContainEqual(
+			expect.objectContaining({ role: "user", content: routineFinishReminder }),
+		);
+		expect(await selectRun(prepared.runId)).toMatchObject({
+			outcome: "done",
+			summary: "The sum is 7.",
+		});
+		expect(
+			await notificationOf(
+				routineNeedsReviewNotification,
+				agentNotificationKeys.review(prepared.conversationId),
+			),
+		).toBeUndefined();
+	});
+
+	test("a routine that never replies needs review once its nudges run out", async () => {
+		const prepared = await prepareRoutine();
+		for (let turn = 0; turn < 3; turn++) {
+			model.mockImplementationOnce(async (_ctx, input) => {
+				await input.emit(start());
+				return { error: undefined, data: { usage, connectionId } };
+			});
+		}
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(model.mock.calls[1]?.[1].messages).toContainEqual(
+			expect.objectContaining({ role: "user", content: routineContinuation }),
+		);
 		expect(await selectRun(prepared.runId)).toMatchObject({
 			outcome: "needs_review",
-			summary: "I have not completed the check.",
 		});
 		expect(
 			await notificationOf(
@@ -2254,7 +2278,7 @@ describe("agent runner", () => {
 		);
 		expect(await selectRun(prepared.runId)).toMatchObject({
 			status: "completed",
-			outcome: "needs_review",
+			outcome: "done",
 		});
 		expect(
 			await notificationOf(
@@ -2305,7 +2329,7 @@ describe("agent runner", () => {
 					agentKey: testAgent.key,
 					routineId: expect.any(String),
 					status: "completed",
-					result: { outcome: "needs_review", summary: expect.any(String) },
+					result: { outcome: "done", summary: expect.any(String) },
 					errorMessage: null,
 				},
 			},
@@ -4570,8 +4594,8 @@ describe("interactive tools", () => {
 			userId,
 			name: "Skippable question",
 			instructions: "Pick a value",
-			cron: "0 9 * * 1",
-			timezone: "UTC",
+			schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+			events: [],
 			enabled: false,
 		});
 		if (routine.error) throw routine.error;

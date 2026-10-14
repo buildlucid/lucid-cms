@@ -150,8 +150,8 @@ test.each([
 		agentKey: "seo",
 		name,
 		instructions: "Review the site.",
-		cron: "0 9 * * *",
-		timezone: "UTC",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
 		enabled: true,
 	});
 	expect(result).toMatchObject({ error: { status: 403 } });
@@ -176,8 +176,8 @@ test("personal routines work independently of chats and code routines", async ()
 		agentKey: "seo",
 		name: "My audit",
 		instructions: "Review the site.",
-		cron: "0 9 * * *",
-		timezone: "UTC",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
 		enabled: true,
 	});
 	expect(created.error).toBeUndefined();
@@ -264,8 +264,8 @@ test("revoking personal routine access blocks scheduled and queued runs while pr
 		agentKey: "seo",
 		name: "Scheduled audit",
 		instructions: "Review the site.",
-		cron: "0 9 * * *",
-		timezone: "UTC",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
 		enabled: true,
 	});
 	if (routine.error) throw new Error(JSON.stringify(routine.error));
@@ -319,8 +319,8 @@ test("deleting a personal routine keeps its chat behind the routine permission",
 		agentKey: "seo",
 		name: "History audit",
 		instructions: "Review the site.",
-		cron: "0 9 * * *",
-		timezone: "UTC",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
 		enabled: false,
 	});
 	if (routine.error) throw new Error(JSON.stringify(routine.error));

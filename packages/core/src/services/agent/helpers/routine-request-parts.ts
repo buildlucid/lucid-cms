@@ -1,12 +1,14 @@
 import type { StoredAgentMessagePart } from "../../../libs/agent/messages.js";
+import { referenceKey } from "../../../libs/agent/references.js";
 import { AgentMessagesRepository } from "../../../libs/repositories/index.js";
 import type { AgentRoutineTrigger } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import registerReferences from "../references/register.js";
+import type { ClaimedRoutineEvent } from "./claim-routine-events.js";
 
 /**
- * A routine run's request. The instructions are always kept for display, but
- * only repeated as text when the chat has no current copy since its last
- * compaction, so a reused chat does not collect a copy for every run.
+ * Builds a routine request with display instructions and linked content-change references.
+ * @remarks Instruction text repeats only after compaction or an instruction change.
  */
 const routineRequestParts: ServiceFn<
 	[
@@ -18,11 +20,37 @@ const routineRequestParts: ServiceFn<
 				name: string;
 				instructions: string;
 				trigger: AgentRoutineTrigger;
+				events?: ClaimedRoutineEvent[];
 			};
 		},
 	],
 	StoredAgentMessagePart[]
 > = async (context, input) => {
+	const claimed = input.routine.events ?? [];
+	//* Register event subjects as attachments so chats and tools can reference them.
+	const snapshots = await registerReferences(context, {
+		conversationId: input.conversationId,
+		references: claimed.map((event) => event.reference),
+		source: { type: "message" },
+		skipMissing: true,
+	});
+	if (snapshots.error) return snapshots;
+
+	const events = claimed.flatMap((event) => {
+		const reference = snapshots.data.find(
+			(snapshot) => referenceKey(snapshot) === referenceKey(event.reference),
+		);
+		return reference
+			? [
+					{
+						reference,
+						events: event.events,
+						...(event.fields.length ? { fields: event.fields } : {}),
+					},
+				]
+			: [];
+	});
+
 	const AgentMessages = new AgentMessagesRepository(context.db);
 
 	const requests = await AgentMessages.selectRoutineRequests({
@@ -44,6 +72,7 @@ const routineRequestParts: ServiceFn<
 				name: input.routine.name,
 				instructions: input.routine.instructions,
 				trigger: input.routine.trigger,
+				...(events.length ? { events } : {}),
 			},
 			...(sent?.text === input.routine.instructions
 				? []

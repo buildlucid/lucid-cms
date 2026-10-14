@@ -95,6 +95,7 @@ test("reads every section by default and only the sections asked for", async () 
 	assert(everything.type === "success", JSON.stringify(everything));
 	const settings = outputSchema.parse(everything.data.output).data;
 	expect(Object.keys(settings).toSorted()).toEqual([
+		"agents",
 		"ai",
 		"email",
 		"mcp",

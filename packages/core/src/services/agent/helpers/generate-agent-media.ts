@@ -89,6 +89,8 @@ const generateAgentMedia: ServiceFn<
 		public: ownerUserId === null,
 		origin: props.origin,
 		aiGenerationRequestId: generated.data.requestId,
+		//* Attribute uploads so event recording can suppress changes from routine conversations.
+		agentRunId: execution.run.id,
 		title: translation(props.title),
 		alt: translation(props.alt),
 		file: { fileName, mimeType: file.data.mimeType, body: bytes.data },

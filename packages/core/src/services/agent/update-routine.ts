@@ -1,11 +1,17 @@
+import { isDeepStrictEqual } from "node:util";
 import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
 import type { RoutineToolSettings } from "../../libs/agent/types.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
+import {
+	AgentRoutinePendingRepository,
+	AgentRoutinesRepository,
+} from "../../libs/repositories/index.js";
 import type {
 	AgentRoutine,
 	AgentRoutineConversationMode,
+	AgentRoutineEvent,
+	AgentRoutineSchedule,
 	AiModelSelection,
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -26,8 +32,9 @@ const updateRoutine: ServiceFn<
 			modelSelection?: AiModelSelection | null;
 			conversationMode?: AgentRoutineConversationMode;
 			instructions?: string;
-			cron?: string;
-			timezone?: string;
+			/** Null removes the schedule, leaving the routine to run on events. */
+			schedule?: AgentRoutineSchedule | null;
+			events?: AgentRoutineEvent[];
 			enabled?: boolean;
 		},
 	],
@@ -41,8 +48,8 @@ const updateRoutine: ServiceFn<
 		[
 			input.name,
 			input.instructions,
-			input.cron,
-			input.timezone,
+			input.schedule,
+			input.events,
 			input.toolSettings,
 			input.modelSelection,
 			input.conversationMode,
@@ -67,18 +74,38 @@ const updateRoutine: ServiceFn<
 		if (validation.error) return validation;
 	}
 
-	const cron = input.cron ?? routine.data.cron;
-	const timezone = input.timezone ?? routine.data.timezone;
+	const schedule =
+		input.schedule !== undefined
+			? input.schedule
+			: routine.data.cron && routine.data.timezone
+				? { cron: routine.data.cron, timezone: routine.data.timezone }
+				: null;
+	const events = input.events ?? routine.data.events ?? [];
+	if (!schedule && events.length === 0) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:agent.routine.trigger.required"),
+			},
+		};
+	}
+
 	const enabled =
 		input.enabled ?? formatter.formatBoolean(routine.data.enabled);
-	const next = nextRoutineOccurrence({ cron, timezone });
-
+	const next = schedule
+		? nextRoutineOccurrence(schedule)
+		: { error: undefined, data: null };
 	if (next.error) return next;
 
 	const scheduleChanged =
-		input.cron !== undefined ||
-		input.timezone !== undefined ||
-		input.enabled !== undefined;
+		input.schedule !== undefined || input.enabled !== undefined;
+	//* Discard pending changes when disabling the routine or changing its event subscriptions.
+	const clearPending =
+		!enabled ||
+		(input.events !== undefined &&
+			!isDeepStrictEqual(input.events, routine.data.events ?? []));
 
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
 
@@ -97,14 +124,23 @@ const updateRoutine: ServiceFn<
 			name: input.name,
 			instructions: input.instructions,
 			model_selection: input.modelSelection,
-			cron,
-			timezone,
+			cron: schedule?.cron ?? null,
+			timezone: schedule?.timezone ?? null,
+			events: events.length ? events : null,
 			enabled,
 			...(scheduleChanged ? { next_run_at: enabled ? next.data : null } : {}),
 			updated_at: new Date().toISOString(),
 		},
 	});
 	if (updated.error) return updated;
+
+	if (clearPending) {
+		const AgentRoutinePending = new AgentRoutinePendingRepository(context.db);
+		const cleared = await AgentRoutinePending.deleteMultiple({
+			where: [{ key: "routine_id", operator: "=", value: input.id }],
+		});
+		if (cleared.error) return cleared;
+	}
 
 	if (input.toolSettings !== undefined) {
 		const saved = await saveRoutineTools(context, {

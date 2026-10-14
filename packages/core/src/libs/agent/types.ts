@@ -9,6 +9,8 @@ import { agentScreenSchema } from "../../schemas/agent-screen.js";
 import type { AiModelConfig } from "../../types/config.js";
 import type {
 	AgentRoutineConversationMode,
+	AgentRoutineEvent,
+	AgentRoutineSchedule,
 	AgentRoutineToolSettings,
 	AiModelSelection,
 	MediaGenerationType,
@@ -120,8 +122,10 @@ export const checkpointSchema = z.object({
 		})
 		.optional(),
 	nudges: z.number().int().nonnegative(),
-	/** Whether an earlier turn of this run replied with text. A routine run only finishes after replying. */
+	/** Whether an earlier turn of this run produced a text reply. */
 	replied: z.boolean().optional(),
+	/** Last routine reply without tool calls, used as the fallback summary. */
+	reply: z.string().optional(),
 	requestId: z.uuid(),
 	messageId: z.uuid(),
 	parts: z.array(agentMessagePartSchema),
@@ -180,8 +184,20 @@ export type DefineRoutineOptions<Key extends string> = {
 	 * @remarks Omitted settings keep tool defaults; system runs refuse confirmation unless overridden with `requiresConfirmation: false`.
 	 */
 	toolSettings?: Readonly<Record<string, AgentRoutineToolSettings>>;
-	schedule: JobScheduleTiming;
-};
+} & (
+	| {
+			schedule: JobScheduleTiming;
+			/**
+			 * Content changes that also start a run, such as `{ event: "media:created", filter: { mediaTypes: ["image"] } }`.
+			 * @remarks Changes from routine chats are ignored, and nearby changes share a run.
+			 */
+			events?: readonly AgentRoutineEvent[];
+	  }
+	| {
+			schedule?: JobScheduleTiming;
+			events: readonly [AgentRoutineEvent, ...AgentRoutineEvent[]];
+	  }
+);
 
 /**
  * An unattended system routine created with `defineRoutine`.
@@ -195,7 +211,9 @@ export type RoutineDefinition<Key extends string = string> = {
 	readonly conversationMode: AgentRoutineConversationMode;
 	readonly model?: AiModelSelection;
 	readonly toolSettings: Readonly<Record<string, AgentRoutineToolSettings>>;
-	readonly schedule: { readonly cron: string; readonly timezone: string };
+	/** Null when the routine only runs on events. */
+	readonly schedule: Readonly<AgentRoutineSchedule> | null;
+	readonly events: readonly AgentRoutineEvent[];
 };
 
 export type DefineAgentOptions<Key extends string> = {
@@ -225,7 +243,7 @@ export type DefineAgentOptions<Key extends string> = {
 		message: AdminCopyInput;
 	}[];
 	/**
-	 * Scheduled system routines that authorized users can pause, resume or run.
+	 * System routines triggered by schedules or content events that authorized users can pause, resume or run.
 	 * @remarks Requires the agent's manage-code-routines permission.
 	 */
 	routines?: readonly RoutineDefinition[];

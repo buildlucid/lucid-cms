@@ -30,7 +30,7 @@ const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 	let started = 0;
 
 	for (const routine of due.data) {
-		if (!routine.next_run_at) continue;
+		if (!routine.next_run_at || !routine.cron || !routine.timezone) continue;
 
 		const next = nextRoutineOccurrence({
 			cron: routine.cron,

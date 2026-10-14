@@ -97,6 +97,60 @@ const settingsResponseSchema = z.object({
 				}),
 		})
 		.optional(),
+	agents: z
+		.object({
+			enabled: z.boolean().meta({
+				description: "Whether agents are enabled",
+				example: true,
+			}),
+			agents: z
+				.array(
+					z.object({
+						key: z.string().meta({
+							description: "The agent's key",
+							example: "seo",
+						}),
+						name: z.string().meta({
+							description: "The agent's name",
+							example: "SEO Agent",
+						}),
+						description: z.string().meta({
+							description: "What the agent is for",
+							example: "Reviews page metadata.",
+						}),
+						sidebar: z.boolean().meta({
+							description: "Whether the agent is offered beside admin pages",
+							example: true,
+						}),
+						tools: z.array(
+							z.object({
+								name: z.string().meta({
+									description: "The tool name",
+									example: "documents_get",
+								}),
+								title: z.string().meta({
+									description: "The tool's title",
+									example: "Read document",
+								}),
+							}),
+						),
+						routines: z.array(
+							z.object({
+								key: z.string().meta({
+									description: "The routine's key",
+									example: "weekly-audit",
+								}),
+								name: z.string().meta({
+									description: "The routine's name",
+									example: "Weekly SEO audit",
+								}),
+							}),
+						),
+					}),
+				)
+				.meta({ description: "The enabled agents defined in code" }),
+		})
+		.optional(),
 	media: z
 		.object({
 			enabled: z.boolean().meta({
@@ -176,12 +230,14 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					include: queryString.schema.include("email,media,system,ai,mcp"),
+					include: queryString.schema.include(
+						"email,media,system,ai,mcp,agents",
+					),
 				})
 				.meta(queryString.meta),
 			formatted: z.object({
 				include: z
-					.array(z.enum(["email", "media", "system", "ai", "mcp"]))
+					.array(z.enum(["email", "media", "system", "ai", "mcp", "agents"]))
 					.optional(),
 			}),
 		},

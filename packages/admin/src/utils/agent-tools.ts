@@ -108,14 +108,29 @@ export const toolDisplayStatus = (
 ): AgentToolDisplayStatus =>
 	part.status === "failed" && retried ? "retried" : part.status;
 
-/** Identifies failed calls followed by a successful call to the same tool in the same run. */
+/**
+ * Keys messages by run ID or by reply when no run is recorded.
+ * @remarks Messages without run IDs, such as branch copies, share the first reply message ID after each user message.
+ */
+export const replyKeys = (messages: AgentMessage[]) => {
+	const keys = new Map<string, string>();
+	let first: string | undefined;
+	for (const message of messages) {
+		first = message.role === "user" ? undefined : (first ?? message.id);
+		keys.set(message.id, message.runId ?? first ?? message.id);
+	}
+	return keys;
+};
+
+/** Identifies failed calls followed by a successful call to the same tool in the same reply. */
 export const retriedToolIds = (
 	messages: AgentMessage[],
 ): ReadonlySet<string> => {
 	const completed = new Set<string>();
 	const retried = new Set<string>();
+	const replies = replyKeys(messages);
 	for (const message of messages.toReversed()) {
-		const run = message.runId ?? message.id;
+		const run = replies.get(message.id) ?? message.id;
 		for (const part of message.parts.toReversed()) {
 			if (!isToolRow(part)) continue;
 			const key = `${run}:${part.name}`;

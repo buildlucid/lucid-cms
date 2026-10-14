@@ -2,10 +2,13 @@ import { randomUUID } from "node:crypto";
 import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
 import type { RoutineToolSettings } from "../../libs/agent/types.js";
 import { agentFormatter } from "../../libs/formatters/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type {
 	AgentRoutine,
 	AgentRoutineConversationMode,
+	AgentRoutineEvent,
+	AgentRoutineSchedule,
 	AiModelSelection,
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -13,7 +16,7 @@ import checkAgentAccess from "./helpers/check-agent-access.js";
 import saveRoutineTools from "./helpers/save-routine-tools.js";
 import validateRoutineTools from "./helpers/validate-routine-tools.js";
 
-/** Creates a routine that is private to the user and runs with their permissions. */
+/** Creates a private routine that runs with the user's permissions on schedules, content events or both. */
 const createRoutine: ServiceFn<
 	[
 		{
@@ -24,8 +27,9 @@ const createRoutine: ServiceFn<
 			modelSelection?: AiModelSelection | null;
 			conversationMode?: AgentRoutineConversationMode;
 			instructions: string;
-			cron: string;
-			timezone: string;
+			/** Null when the routine only runs on events. */
+			schedule: AgentRoutineSchedule | null;
+			events: AgentRoutineEvent[];
 			enabled: boolean;
 		},
 	],
@@ -38,7 +42,20 @@ const createRoutine: ServiceFn<
 	});
 	if (access.error) return access;
 
-	const next = nextRoutineOccurrence(input);
+	if (!input.schedule && input.events.length === 0) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:agent.routine.trigger.required"),
+			},
+		};
+	}
+
+	const next = input.schedule
+		? nextRoutineOccurrence(input.schedule)
+		: { error: undefined, data: null };
 	if (next.error) return next;
 
 	const toolSettings = input.toolSettings ?? {};
@@ -63,11 +80,12 @@ const createRoutine: ServiceFn<
 			conversation_mode: input.conversationMode ?? "new",
 			conversation_id: null,
 			model_selection: input.modelSelection ?? null,
-			cron: input.cron,
-			timezone: input.timezone,
+			cron: input.schedule?.cron ?? null,
+			timezone: input.schedule?.timezone ?? null,
+			events: input.events.length ? input.events : null,
 			enabled: input.enabled,
 			user_id: input.userId,
-			...(input.enabled ? { next_run_at: next.data } : {}),
+			...(input.enabled && next.data ? { next_run_at: next.data } : {}),
 			created_at: now,
 			updated_at: now,
 		},

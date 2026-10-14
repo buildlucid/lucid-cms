@@ -5,13 +5,14 @@ import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
 import logger from "../../../libs/logger/index.js";
 import dispatchDueRoutines from "../dispatch-due-routines.js";
+import dispatchEventRoutines from "../dispatch-event-routines.js";
 import expireScreenCalls from "../expire-screen-calls.js";
 import notifyWaitingRuns from "../notify-waiting-runs.js";
 import reconcileUsage from "../reconcile-usage.js";
 import recoverInputs from "../recover-inputs.js";
 import recoverRuns from "../recover-runs.js";
 
-/** Recovers agent work, starts due routines, expires unanswered screen calls, notifies waiting users and settles usage. */
+/** Recovers agent work, dispatches routines, expires screen calls, notifies waiting users and reconciles usage. */
 const tick: JobHandler = async ({ context }) => {
 	if (getAgents(context.config).length === 0) {
 		return { error: undefined, data: undefined };
@@ -22,6 +23,7 @@ const tick: JobHandler = async ({ context }) => {
 		recoverInputs,
 		recoverRuns,
 		dispatchDueRoutines,
+		dispatchEventRoutines,
 		expireScreenCalls,
 		notifyWaitingRuns,
 		reconcileUsage,

@@ -183,6 +183,20 @@ test("agent and routine keys are unique and schedules must be valid", () => {
 	).toThrow('Routine "seo:weekly-audit" has an invalid schedule.');
 });
 
+test("routines can run on events alone, but need a schedule or an event", () => {
+	const onEvents = defineRoutine({
+		key: "alt-text",
+		name: "Alt text",
+		instructions: "Write alt text.",
+		events: [{ event: "media:created", filter: { mediaTypes: ["image"] } }],
+	});
+	expect(onEvents.schedule).toBeNull();
+	expect(check([{ ...agent, routines: [onEvents] }])).not.toThrow();
+	expect(
+		check([{ ...agent, routines: [{ ...onEvents, events: [] }] }]),
+	).toThrow('Routine "seo:alt-text" needs a schedule or at least one event.');
+});
+
 test("routine tool settings accept the agent's tools and reject unknown names", () => {
 	expect(
 		check([

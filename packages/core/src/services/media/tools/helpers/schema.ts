@@ -1,20 +1,13 @@
 import z from "zod";
-import { mediaStatusSchema } from "../../../../schemas/media.js";
-import type { MediaType } from "../../../../types/response.js";
-
-export const mediaTypes = [
-	"image",
-	"video",
-	"audio",
-	"document",
-	"archive",
-	"unknown",
-] as const satisfies readonly MediaType[];
+import {
+	mediaStatusSchema,
+	mediaTypeSchema,
+} from "../../../../schemas/media.js";
 
 /** A media record in one content locale, as the media tools return it. */
 export const mediaItemSchema = z.object({
 	id: z.number().meta({ description: "Media ID." }),
-	type: z.enum(mediaTypes).meta({ description: "Media kind." }),
+	type: mediaTypeSchema.meta({ description: "Media kind." }),
 	status: mediaStatusSchema.meta({
 		description: "Media processing status.",
 	}),
