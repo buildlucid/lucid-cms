@@ -1,5 +1,5 @@
 import type { AgentRun } from "@types";
-import type { Component } from "solid-js";
+import { type Component, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
@@ -13,6 +13,8 @@ import {
 const AgentRunTableRow: Component<{
 	index: number;
 	run: AgentRun;
+	/** Hides the summary and chat link for oversight access. */
+	overseeing?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -24,6 +26,7 @@ const AgentRunTableRow: Component<{
 					label: T()("agent.routine.run.open"),
 					type: "link",
 					icon: "eye",
+					show: !props.overseeing,
 					href: `/lucid/agent/chats/${props.run.conversationId}?runId=${props.run.id}`,
 				},
 				{
@@ -45,16 +48,18 @@ const AgentRunTableRow: Component<{
 					size="sm"
 				/>
 			</Table.Cell>
-			<Table.Text
-				column="summary"
-				text={
-					(props.run.summary && markdownPreview(props.run.summary)) ||
-					props.run.errorMessage ||
-					T()("agent.routine.run.no.summary")
-				}
-				minWidth={420}
-				maxLines={1}
-			/>
+			<Show when={!props.overseeing}>
+				<Table.Text
+					column="summary"
+					text={
+						(props.run.summary && markdownPreview(props.run.summary)) ||
+						props.run.errorMessage ||
+						T()("agent.routine.run.no.summary")
+					}
+					minWidth={420}
+					maxLines={1}
+				/>
+			</Show>
 			<Table.Text
 				column="credits"
 				text={formatAiCredits(props.run.usage.credits)}

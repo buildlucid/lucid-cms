@@ -13,12 +13,15 @@ export default class AgentRoutinesRepository extends StaticRepository<"lucid_age
 	async selectMultipleFilteredForAccess(props: {
 		userId: number;
 		agentKeys: Record<AgentPermissionAction, string[]>;
+		/** Includes all user-created routines regardless of per-agent ownership access. */
+		manageAll: boolean;
 		queryParams: Partial<QueryParams>;
 	}) {
 		const accessible = this.db
 			.selectFrom("lucid_agent_routines")
 			.where((eb) =>
 				eb.or([
+					...(props.manageAll ? [eb("source", "=", "own")] : []),
 					...(props.agentKeys["manage-own-routines"].length
 						? [
 								eb.and([

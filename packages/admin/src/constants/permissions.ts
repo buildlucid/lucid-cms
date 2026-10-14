@@ -25,6 +25,7 @@ export const Permissions = {
 	AiImageGenerate: "ai:image-generate",
 	AiAudioGenerate: "ai:audio-generate",
 	AiAltGenerate: "ai:alt-generate",
+	AiRoutinesManageAll: "ai:routines-manage-all",
 	IntegrationsRead: "integrations:read",
 	IntegrationsCreate: "integrations:create",
 	IntegrationsUpdate: "integrations:update",

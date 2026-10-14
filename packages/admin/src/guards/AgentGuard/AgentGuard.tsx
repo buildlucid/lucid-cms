@@ -2,13 +2,18 @@ import type { Component } from "solid-js";
 import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
 import { getAgentAccess } from "@/utils/agent-access";
 
-const agentGuard = (Page: Component) => () => (
-	<ConditionGuard
-		condition={() => getAgentAccess().all.length > 0}
-		redirect="/lucid"
-	>
-		<Page />
-	</ConditionGuard>
-);
+/** Requires agent access, accepting global routine oversight when `routines` is enabled. */
+const agentGuard =
+	(Page: Component, options?: { routines?: boolean }) => () => (
+		<ConditionGuard
+			condition={() =>
+				getAgentAccess().all.length > 0 ||
+				(options?.routines === true && getAgentAccess().manageAllRoutines)
+			}
+			redirect="/lucid"
+		>
+			<Page />
+		</ConditionGuard>
+	);
 
 export default agentGuard;

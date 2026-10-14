@@ -10,6 +10,17 @@ const runRoutine: ServiceFn<
 > = async (context, input) => {
 	const routine = await getAccessibleRoutine(context, input);
 	if (routine.error) return routine;
+	//* running routines requires owner access or permission to manage code routines
+	if (routine.data.access === "oversight") {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 403,
+				message: copy("server:agent.routine.oversight.locked"),
+			},
+		};
+	}
 
 	const run = await startRoutineRun(context, {
 		routineId: routine.data.id,

@@ -1,13 +1,15 @@
 import { getAgents } from "../../../libs/agent/registry.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { hasAgentPermission } from "../../../libs/permission/agent-permissions.js";
+import { Permissions } from "../../../libs/permission/definitions.js";
+import hasPermission from "../../../libs/permission/has-permission.js";
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkFeatureEnabled from "../../ai/checks/check-feature-enabled.js";
 import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
-/** Returns agent keys allowed by the user's live permissions, failing if no agent action is allowed. */
+/** Returns per-agent access, rejecting users without agent permissions or global routine oversight. */
 const resolveAgentAccess: ServiceFn<
 	[{ userId: number; requireConnection?: boolean }],
 	Record<AgentPermissionAction, string[]>
@@ -37,7 +39,10 @@ const resolveAgentAccess: ServiceFn<
 		"manage-own-routines": keys("manage-own-routines"),
 		"manage-code-routines": keys("manage-code-routines"),
 	};
-	if (Object.values(access).every((keys) => keys.length === 0)) {
+	if (
+		Object.values(access).every((keys) => keys.length === 0) &&
+		!hasPermission(user.data, Permissions.AiRoutinesManageAll)
+	) {
 		return {
 			data: undefined,
 			error: {

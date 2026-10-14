@@ -174,7 +174,8 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const canChat = createMemo(() => getAgentAccess().chat.length > 0);
+	//* routine chats need only routine access, and the server checks each chat
+	const canOpenChats = createMemo(() => getAgentAccess().all.length > 0);
 	const onAgentPage = createMemo(
 		() =>
 			isNavigationLinkActive(location.pathname, "/lucid/agent") ||
@@ -193,11 +194,11 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	// ----------------------------------------
 	// Queries & Mutations
 	const createConversation = api.agent.useCreateConversation();
-	const definitions = api.agent.useGetDefinitions({ enabled: canChat });
+	const definitions = api.agent.useGetDefinitions({ enabled: canOpenChats });
 	const chat = useAgentChat(
 		() => {
 			const id = conversationId();
-			return id !== creating() && canChat() ? id : undefined;
+			return id !== creating() && canOpenChats() ? id : undefined;
 		},
 		{
 			onChanges: (changes) => {

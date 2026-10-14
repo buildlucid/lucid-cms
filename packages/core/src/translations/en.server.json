@@ -857,6 +857,7 @@
 	"agent.disabled": "No agents are available in Lucid config.",
 	"agent.unavailable": "This agent is no longer available.",
 	"agent.routine.code.locked": "Routines defined in code can only be paused, resumed or run.",
+	"agent.routine.oversight.locked": "Only the owner can change or run this routine. You can pause, resume or delete it.",
 	"agent.input.steer.denied": "Only the person a run acts for can correct it. Send your message as a follow-up instead.",
 	"agent.conversation.not.found": "Chat not found.",
 	"agent.message.not.found": "Message not found.",

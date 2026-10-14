@@ -204,7 +204,7 @@ const AppRouter: Component = () => {
 					<Route
 						path="/agent/routines"
 						preload={preloadRoutes(AgentRoutinesRoute)}
-						component={agentGuard(AgentRoutinesRoute)}
+						component={agentGuard(AgentRoutinesRoute, { routines: true })}
 					/>
 					<Route path="/components" component={ComponentsRoute} />
 					<Route path="/account" component={AccountRoute} />

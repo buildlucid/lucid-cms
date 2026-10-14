@@ -11,10 +11,12 @@ import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/Upse
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
+	numberFilter,
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import { queryKeys } from "@/services/query-keys";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 
@@ -32,6 +34,7 @@ const AgentRoutinesPage: Component = () => {
 			filters: {
 				name: textFilter(),
 				agentKey: textFilter(),
+				ownerId: numberFilter(),
 			},
 			sorts: {
 				name: sort({ defaultValue: "asc" }),
@@ -57,10 +60,17 @@ const AgentRoutinesPage: Component = () => {
 			: [],
 	);
 	const filterFields = createMemo(() => {
-		const agents = getAgentAccess().all;
+		const agents = getAgentAccess().routines;
 		const fields: FilterField[] = [
 			{ label: T()("common.name"), key: "name", type: "text" },
 		];
+		if (getAgentAccess().manageAllRoutines) {
+			fields.push({
+				label: T()("agent.routine.owner"),
+				key: "ownerId",
+				type: "user",
+			});
+		}
 		if (agents.length > 1) {
 			fields.push({
 				label: T()("agent.select.label"),

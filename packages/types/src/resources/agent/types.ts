@@ -8,7 +8,7 @@ import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType } from "../media/types.js";
 import type { Refs } from "../refs/types.js";
 import type { RequestType } from "../requests/types.js";
-import type { Permission } from "../users/types.js";
+import type { Permission, UserDisplay } from "../users/types.js";
 
 /** A media item, document or request in Lucid. */
 export type AgentResource =
@@ -728,9 +728,15 @@ export interface AgentRun {
 	finishedAt: string | null;
 }
 
+/** Routine access level, with oversight limited to pausing, resuming and deleting. */
+export type AgentRoutineAccess = "owner" | "manager" | "oversight";
+
 export interface AgentRoutine {
 	id: string;
 	agentKey: string;
+	access: AgentRoutineAccess;
+	/** The routine owner, or null for routines defined in code. */
+	owner: UserDisplay | null;
 	/** Only set for routines defined in code. */
 	key: string | null;
 	/** Routines defined in code can only be paused, resumed or run early. */

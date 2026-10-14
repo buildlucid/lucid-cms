@@ -15,13 +15,15 @@ import type {
 	AiModelSelection,
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import sendNotification from "../notifications/send.js";
 import getRoutine from "./get-routine.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import resolveRoutineConversation from "./helpers/resolve-routine-conversation.js";
 import saveRoutineTools from "./helpers/save-routine-tools.js";
 import validateRoutineTools from "./helpers/validate-routine-tools.js";
+import { routineManagedNotification } from "./notifications/routine-managed.js";
 
-/** Updates a routine. Routines defined in code can only be paused or resumed. */
+/** Updates routine settings for owners, limiting other access modes to pausing or resuming. */
 const updateRoutine: ServiceFn<
 	[
 		{
@@ -44,7 +46,7 @@ const updateRoutine: ServiceFn<
 	if (routine.error) return routine;
 
 	if (
-		routine.data.source === "code" &&
+		routine.data.access !== "owner" &&
 		[
 			input.name,
 			input.instructions,
@@ -60,7 +62,11 @@ const updateRoutine: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: copy("server:agent.routine.code.locked"),
+				message: copy(
+					routine.data.access === "manager"
+						? "server:agent.routine.code.locked"
+						: "server:agent.routine.oversight.locked",
+				),
 			},
 		};
 	}
@@ -148,6 +154,21 @@ const updateRoutine: ServiceFn<
 			tools: input.toolSettings,
 		});
 		if (saved.error) return saved;
+	}
+
+	if (
+		routine.data.access === "oversight" &&
+		routine.data.user_id !== null &&
+		routine.data.user_id !== input.userId &&
+		enabled !== formatter.formatBoolean(routine.data.enabled)
+	) {
+		const notified = await sendNotification(context, {
+			definition: routineManagedNotification,
+			recipients: [routine.data.user_id],
+			actorUserId: input.userId,
+			data: { name: routine.data.name, action: enabled ? "resumed" : "paused" },
+		});
+		if (notified.error) return notified;
 	}
 
 	return getRoutine(context, input);

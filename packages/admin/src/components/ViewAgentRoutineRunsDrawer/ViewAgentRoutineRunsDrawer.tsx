@@ -34,6 +34,8 @@ import { runStatusFilters } from "@/utils/agent-chat";
 
 interface ViewAgentRoutineRunsDrawerProps {
 	id: Accessor<string | undefined>;
+	/** Hides run summaries and chat links for oversight access. */
+	overseeing?: boolean;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -168,12 +170,16 @@ const ViewAgentRoutineRunsContent: Component<
 								key: "status",
 								icon: <TbOutlineCircleCheck />,
 							},
-							{
-								label: T()("agent.routine.run.summary"),
-								key: "summary",
-								icon: <TbOutlineLetterT />,
-								minWidth: 420,
-							},
+							...(props.overseeing
+								? []
+								: [
+										{
+											label: T()("agent.routine.run.summary"),
+											key: "summary",
+											icon: <TbOutlineLetterT />,
+											minWidth: 420,
+										},
+									]),
 							{
 								label: T()("agent.routine.run.credits.label"),
 								key: "credits",
@@ -197,7 +203,13 @@ const ViewAgentRoutineRunsContent: Component<
 						variant="secondary"
 					>
 						<Index each={runs.data?.data ?? []}>
-							{(run, index) => <AgentRunTableRow index={index} run={run()} />}
+							{(run, index) => (
+								<AgentRunTableRow
+									index={index}
+									run={run()}
+									overseeing={props.overseeing}
+								/>
+							)}
 						</Index>
 					</Table.Root>
 				</QueryBoundary>

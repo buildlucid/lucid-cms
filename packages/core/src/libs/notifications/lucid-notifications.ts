@@ -1,5 +1,6 @@
 import { inputNeededNotification } from "../../services/agent/notifications/input-needed.js";
 import { routineFailedNotification } from "../../services/agent/notifications/routine-failed.js";
+import { routineManagedNotification } from "../../services/agent/notifications/routine-managed.js";
 import { routineNeedsReviewNotification } from "../../services/agent/notifications/routine-needs-review.js";
 import { routineReportNotification } from "../../services/agent/notifications/routine-report.js";
 import { assignedNotification } from "../../services/document-workflows/notifications/assigned.js";
@@ -54,5 +55,6 @@ export const notifications = {
 		routineFailed: routineFailedNotification,
 		routineNeedsReview: routineNeedsReviewNotification,
 		routineReport: routineReportNotification,
+		routineManaged: routineManagedNotification,
 	},
 } as const;

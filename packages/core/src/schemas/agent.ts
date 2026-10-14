@@ -50,6 +50,7 @@ import {
 	mediaResponseSchema,
 	uploadSessionResponseSchema,
 } from "./media.js";
+import { userDisplaySchema } from "./shared/user-display.js";
 
 export const agentConversationKindSchema = z.enum([
 	"chat",
@@ -430,6 +431,8 @@ export const routineToolSettingsSchema = z.record(
 const agentRoutineResponseSchema = z.object({
 	id: z.uuid(),
 	agentKey: z.string(),
+	access: z.enum(["owner", "manager", "oversight"]),
+	owner: userDisplaySchema.nullable(),
 	key: z.string().nullable(),
 	source: agentRoutineSourceSchema,
 	name: z.string(),
@@ -801,6 +804,7 @@ export const controllerSchemas = {
 				.object({
 					"filter[name]": queryString.schema.filter(false),
 					"filter[agentKey]": queryString.schema.filter(false),
+					"filter[ownerId]": queryString.schema.filter(true),
 					sort: queryString.schema.sort("name,createdAt,updatedAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -811,6 +815,7 @@ export const controllerSchemas = {
 					.object({
 						name: queryFormatted.schema.filters.single.optional(),
 						agentKey: queryFormatted.schema.filters.single.optional(),
+						ownerId: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

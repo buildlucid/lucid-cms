@@ -38,6 +38,7 @@ export const Permissions = {
 	AiImageGenerate: "ai:image-generate",
 	AiAudioGenerate: "ai:audio-generate",
 	AiAltGenerate: "ai:alt-generate",
+	AiRoutinesManageAll: "ai:routines-manage-all",
 
 	// Integration permissions
 	IntegrationRead: "integrations:read",
@@ -244,6 +245,22 @@ export const PermissionGroups = Object.freeze({
 					name: copy("admin:core.permissions.alt.generate", {
 						defaultMessage: "Generate Alt Text",
 					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.AiRoutinesManageAll,
+				details: {
+					name: copy("admin:core.permissions.routines.manage.all", {
+						defaultMessage: "Manage All Routines",
+					}),
+					description: copy(
+						"admin:core.permissions.routines.manage.all.description",
+						{
+							defaultMessage:
+								"See everyone's routines and pause or delete them. Their chats stay private.",
+						},
+					),
 				},
 				core: true,
 			},

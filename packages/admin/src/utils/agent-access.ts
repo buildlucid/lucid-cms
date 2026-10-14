@@ -4,6 +4,7 @@ import type {
 	AgentRoutineConversationMode,
 	AgentSummary,
 } from "@types";
+import { Permissions } from "@/constants/permissions";
 import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
@@ -20,6 +21,9 @@ export const getAgentAccess = () => {
 			: [];
 	const can = (agent: AgentSummary, action: AgentPermissionAction) =>
 		userStore.get.hasPermission([`agents:${agent.key}:${action}`]).all;
+	const manageAllRoutines =
+		agents.length > 0 &&
+		userStore.get.hasPermission([Permissions.AiRoutinesManageAll]).all;
 
 	return {
 		all: agents.filter(
@@ -33,6 +37,16 @@ export const getAgentAccess = () => {
 		sidebar: agents.filter((agent) => agent.sidebar && can(agent, "chat")),
 		ownRoutines: agents.filter((agent) => can(agent, "manage-own-routines")),
 		codeRoutines: agents.filter((agent) => can(agent, "manage-code-routines")),
+		/** Allows oversight of user-created routines without per-agent permissions. */
+		manageAllRoutines,
+		/** Agents whose routines the person can see. */
+		routines: manageAllRoutines
+			? agents
+			: agents.filter(
+					(agent) =>
+						can(agent, "manage-own-routines") ||
+						can(agent, "manage-code-routines"),
+				),
 	};
 };
 

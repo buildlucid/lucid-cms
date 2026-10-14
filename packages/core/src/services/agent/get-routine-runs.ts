@@ -8,7 +8,7 @@ import type { AgentRun, AgentUsage } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 
-/** Lists a routine's runs with the credits and model calls each used. */
+/** Lists runs and usage, omitting summaries for oversight access. */
 const getRoutineRuns: ServiceFn<
 	[{ id: string; userId: number; query: GetRoutineRunsQueryParams }],
 	{ data: AgentRun[]; count: number }
@@ -45,7 +45,13 @@ const getRoutineRuns: ServiceFn<
 		error: undefined,
 		data: {
 			data: runs.data[0].map((run) =>
-				agentFormatter.formatRun({ run, usage: totals.get(run.id) }),
+				agentFormatter.formatRun({
+					run:
+						routine.data.access === "oversight"
+							? { ...run, summary: null }
+							: run,
+					usage: totals.get(run.id),
+				}),
 			),
 			count: formatter.parseCount(runs.data[1]?.count),
 		},

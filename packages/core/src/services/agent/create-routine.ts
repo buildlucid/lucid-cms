@@ -104,6 +104,7 @@ const createRoutine: ServiceFn<
 		error: undefined,
 		data: agentFormatter.formatRoutine({
 			routine: created.data,
+			access: "owner",
 			toolSettings,
 		}),
 	};

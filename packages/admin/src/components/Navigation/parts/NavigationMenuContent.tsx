@@ -65,7 +65,8 @@ export const NavigationMenuContent: Component<{
 			integrations:
 				can(Permissions.IntegrationsRead) || can(Permissions.ConnectionUpdate),
 			aiUsage: settings && siteStore.get.hasAnyAiFeatureEnabled(),
-			agent: getAgentAccess().all.length > 0,
+			agent:
+				getAgentAccess().all.length > 0 || getAgentAccess().manageAllRoutines,
 			requests: can(Permissions.RequestsRead),
 		};
 	});
@@ -158,12 +159,14 @@ export const NavigationMenuContent: Component<{
 								href="/lucid/agent/history"
 								icon="history"
 								title={T()("routes.agent.history")}
+								permission={getAgentAccess().all.length > 0}
 							/>
 							<NavigationLink
 								href="/lucid/agent/routines"
 								permission={
 									getAgentAccess().ownRoutines.length > 0 ||
-									getAgentAccess().codeRoutines.length > 0
+									getAgentAccess().codeRoutines.length > 0 ||
+									getAgentAccess().manageAllRoutines
 								}
 								icon="routines"
 								title={T()("routes.agent.routines")}

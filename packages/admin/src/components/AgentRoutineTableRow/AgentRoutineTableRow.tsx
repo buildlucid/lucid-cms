@@ -1,5 +1,6 @@
 import type { AgentRoutine } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
+import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
@@ -13,6 +14,9 @@ import { describeTriggers } from "@/utils/agent-routine-events";
 const AgentRoutineTableRow: Component<{
 	index: number;
 	routine: AgentRoutine;
+	showOwner: boolean;
+	/** Limits routine changes to pausing, resuming and deleting. */
+	overseeing: boolean;
 	runPending: boolean;
 	onOpen: () => void;
 	onRuns: () => void;
@@ -32,11 +36,14 @@ const AgentRoutineTableRow: Component<{
 			actions={[
 				{
 					label:
-						props.routine.source === "code"
+						props.routine.source === "code" || props.overseeing
 							? T()("common.details")
 							: T()("common.edit"),
 					type: "button",
-					icon: props.routine.source === "code" ? "info" : "pen",
+					icon:
+						props.routine.source === "code" || props.overseeing
+							? "info"
+							: "pen",
 					onClick: props.onOpen,
 				},
 				{
@@ -50,6 +57,7 @@ const AgentRoutineTableRow: Component<{
 					type: "button",
 					icon: "rotate",
 					variant: "primary",
+					show: !props.overseeing,
 					disabled:
 						props.runPending || getAgentUnavailableReason() !== undefined,
 					onClick: props.onRun,
@@ -82,6 +90,16 @@ const AgentRoutineTableRow: Component<{
 				minWidth={260}
 				maxLines={1}
 			/>
+			<Show when={props.showOwner}>
+				<Table.Cell column="owner" minWidth={180}>
+					<Show
+						when={props.routine.owner}
+						fallback={<span class="text-sm text-muted">-</span>}
+					>
+						{(owner) => <ActorDisplay user={owner()} />}
+					</Show>
+				</Table.Cell>
+			</Show>
 			<Table.Pill
 				column="enabled"
 				text={

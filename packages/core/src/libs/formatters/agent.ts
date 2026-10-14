@@ -8,6 +8,7 @@ import type {
 	AgentConversation,
 	AgentMessage,
 	AgentRoutine,
+	AgentRoutineAccess,
 	AgentRun,
 	AgentRunOutcome,
 	AgentRunResultPart,
@@ -16,6 +17,7 @@ import type {
 	AgentToolSummary,
 	AgentUsage,
 	AiAccessFeature,
+	UserDisplay,
 } from "../../types/response.js";
 import {
 	getAvailableTools,
@@ -293,11 +295,15 @@ const formatRun = (props: { run: RunPropT; usage?: AgentUsage }): AgentRun => ({
 
 const formatRoutine = (props: {
 	routine: Select<LucidAgentRoutines>;
+	access: AgentRoutineAccess;
 	toolSettings: RoutineToolSettings;
 	lastRun?: LastRunPropT;
+	owner?: UserDisplay;
 }): AgentRoutine => ({
 	id: props.routine.id,
 	agentKey: props.routine.agent_key,
+	access: props.access,
+	owner: props.owner ?? null,
 	key: props.routine.key,
 	source: props.routine.source,
 	name: props.routine.name,

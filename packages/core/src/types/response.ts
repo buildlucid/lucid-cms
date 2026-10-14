@@ -26,6 +26,7 @@ export type {
 	AgentReferenceSource,
 	AgentResource,
 	AgentRoutine,
+	AgentRoutineAccess,
 	AgentRoutineConversationMode,
 	AgentRoutineEvent,
 	AgentRoutineEventFilter,

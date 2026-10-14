@@ -3,6 +3,7 @@ import defineAgent from "../../libs/agent/define-agent.js";
 import defineRoutine from "../../libs/agent/define-routine.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import { getAgentPermission } from "../../libs/permission/agent-permissions.js";
+import { Permissions } from "../../libs/permission/definitions.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
@@ -16,6 +17,7 @@ import getConversation from "./get-conversation.js";
 import getConversations from "./get-conversations.js";
 import getModels from "./get-models.js";
 import getRoutine from "./get-routine.js";
+import getRoutineRuns from "./get-routine-runs.js";
 import getRoutines from "./get-routines.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import runRoutine from "./run-routine.js";
@@ -351,6 +353,178 @@ test("deleting a personal routine keeps its chat behind the routine permission",
 			})
 		).data?.data,
 	).toEqual([]);
+});
+
+test("people who manage all routines can see, pause and delete others' routines, but not change, run or read them", async () => {
+	const owner = await createUser("routine-owner", [
+		"agents:seo:chat",
+		"agents:seo:manage-own-routines",
+	]);
+	const overseer = await createUser("routine-overseer", [
+		"agents:seo:chat",
+		Permissions.AiRoutinesManageAll,
+	]);
+	const colleague = await createUser("routine-colleague", [
+		"agents:seo:chat",
+		"agents:seo:manage-own-routines",
+	]);
+	const routine = await createRoutine(context, {
+		userId: owner,
+		agentKey: "seo",
+		name: "Owner's audit",
+		instructions: "Review the site.",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
+		enabled: true,
+	});
+	if (routine.error) throw new Error(JSON.stringify(routine.error));
+	const id = routine.data.id;
+
+	const listed = async (userId: number) =>
+		(
+			await getRoutines(context, { userId, query: { page: 1, perPage: 50 } })
+		).data?.data.find((item) => item.id === id);
+	expect(await listed(overseer)).toMatchObject({
+		owner: { id: owner },
+		access: "oversight",
+	});
+	expect(await listed(owner)).toMatchObject({ access: "owner" });
+	expect(await listed(colleague)).toBeUndefined();
+
+	const conversation = await insertConversation(context, {
+		agentKey: "seo",
+		userId: owner,
+		routineId: id,
+	});
+	if (conversation.error) throw new Error(JSON.stringify(conversation.error));
+	await context.db.kysely
+		.insertInto("lucid_agent_runs")
+		.values({
+			id: crypto.randomUUID(),
+			conversation_id: conversation.data.id,
+			routine_id: id,
+			user_id: owner,
+			status: "completed",
+			outcome: "done",
+			summary: "Private result",
+		})
+		.execute();
+	const runs = await getRoutineRuns(context, {
+		id,
+		userId: overseer,
+		query: { page: 1, perPage: 10 },
+	});
+	expect(runs.data?.data).toEqual([
+		expect.objectContaining({ status: "completed", summary: null }),
+	]);
+	expect(
+		(
+			await getConversation(context, {
+				id: conversation.data.id,
+				userId: overseer,
+			})
+		).error?.status,
+	).toBe(404);
+
+	expect(
+		(await updateRoutine(context, { id, userId: overseer, name: "Renamed" }))
+			.error?.status,
+	).toBe(400);
+	expect(
+		(await runRoutine(context, { id, userId: overseer })).error?.status,
+	).toBe(403);
+	expect(
+		(await updateRoutine(context, { id, userId: overseer, enabled: false }))
+			.data,
+	).toMatchObject({ enabled: false });
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_notifications")
+			.innerJoin(
+				"lucid_notification_recipients",
+				"lucid_notification_recipients.notification_id",
+				"lucid_notifications.id",
+			)
+			.select(["lucid_notification_recipients.user_id"])
+			.where("lucid_notifications.type", "=", "agent:routine-managed")
+			.execute(),
+	).toEqual([{ user_id: owner }]);
+
+	expect(
+		(await deleteRoutine(context, { id, userId: overseer })).error,
+	).toBeUndefined();
+
+	const globalOnly = await createUser("routine-global", [
+		Permissions.AiRoutinesManageAll,
+	]);
+	const kept = await createRoutine(context, {
+		userId: colleague,
+		agentKey: "seo",
+		name: "Colleague's audit",
+		instructions: "Review the site.",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
+		enabled: true,
+	});
+	if (kept.error) throw new Error(JSON.stringify(kept.error));
+	expect(
+		(
+			await getRoutines(context, {
+				userId: globalOnly,
+				query: { page: 1, perPage: 50 },
+			})
+		).data?.data.map((item) => item.id),
+	).toContain(kept.data.id);
+	expect(
+		(
+			await updateRoutine(context, {
+				id: kept.data.id,
+				userId: globalOnly,
+				enabled: false,
+			})
+		).data,
+	).toMatchObject({ enabled: false });
+});
+
+test("people who manage all routines can still pause and delete their own after losing their agent permission", async () => {
+	const owner = await createUser("lapsed-owner", [
+		"agents:seo:manage-own-routines",
+		Permissions.AiRoutinesManageAll,
+	]);
+	const routine = await createRoutine(context, {
+		userId: owner,
+		agentKey: "seo",
+		name: "Lapsed audit",
+		instructions: "Review the site.",
+		schedule: { cron: "0 9 * * *", timezone: "UTC" },
+		events: [],
+		enabled: true,
+	});
+	if (routine.error) throw new Error(JSON.stringify(routine.error));
+	await context.db.kysely
+		.deleteFrom("lucid_role_permissions")
+		.where("permission", "=", "agents:seo:manage-own-routines")
+		.execute();
+
+	const id = routine.data.id;
+	expect(
+		(
+			await getRoutines(context, {
+				userId: owner,
+				query: { page: 1, perPage: 50 },
+			})
+		).data?.data.find((item) => item.id === id),
+	).toMatchObject({ access: "oversight" });
+	expect(
+		(await updateRoutine(context, { id, userId: owner, name: "Renamed" })).error
+			?.status,
+	).toBe(400);
+	expect(
+		(await updateRoutine(context, { id, userId: owner, enabled: false })).data,
+	).toMatchObject({ enabled: false });
+	expect(
+		(await deleteRoutine(context, { id, userId: owner })).error,
+	).toBeUndefined();
 });
 
 vi.mock("./helpers/enqueue-run.js", () => ({

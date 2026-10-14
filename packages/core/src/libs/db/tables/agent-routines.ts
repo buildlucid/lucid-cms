@@ -62,7 +62,7 @@ export const agentRoutinesTable = defineTable(
 			},
 		},
 		query: {
-			filters: { name: "name", agentKey: "agent_key" },
+			filters: { name: "name", agentKey: "agent_key", ownerId: "user_id" },
 			sorts: { name: "name", createdAt: "created_at", updatedAt: "updated_at" },
 			operators: { name: "contains" },
 		},

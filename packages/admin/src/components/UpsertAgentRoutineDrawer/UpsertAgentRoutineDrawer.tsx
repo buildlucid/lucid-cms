@@ -84,7 +84,11 @@ const UpsertAgentRoutineDrawer: Component<{
 	// ----------------------------------------
 	// Memos
 	const existing = createMemo(() => props.routine?.());
-	const locked = createMemo(() => existing()?.source === "code");
+	const overseeing = createMemo(() => existing()?.access === "oversight");
+	//* settings require owner access; other modes allow pausing or resuming
+	const locked = createMemo(
+		() => existing() !== undefined && existing()?.access !== "owner",
+	);
 	const agents = createMemo(() => getAgentAccess().ownRoutines);
 	const mutation = createMemo(() =>
 		existing() ? updateRoutine : createRoutine,
@@ -162,9 +166,11 @@ const UpsertAgentRoutineDrawer: Component<{
 							: T()("panels.agent.routine.create.title")}
 				</Drawer.Title>
 				<Drawer.Description>
-					{locked()
-						? T()("panels.agent.routine.code.description")
-						: T()("panels.agent.routine.description")}
+					{overseeing()
+						? T()("panels.agent.routine.oversight.description")
+						: locked()
+							? T()("panels.agent.routine.code.description")
+							: T()("panels.agent.routine.description")}
 				</Drawer.Description>
 			</Drawer.Header>
 			<Drawer.Form

@@ -6,6 +6,7 @@ import {
 	TbOutlineCode,
 	TbOutlineLetterT,
 	TbOutlineRobot,
+	TbOutlineUser,
 } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Index } from "solid-js";
 import AgentRoutineTableRow from "@/components/AgentRoutineTableRow/AgentRoutineTableRow";
@@ -16,8 +17,10 @@ import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import Table from "@/components/Table/Table";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
 import ViewAgentRoutineRunsDrawer from "@/components/ViewAgentRoutineRunsDrawer/ViewAgentRoutineRunsDrawer";
+import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
 const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
@@ -51,6 +54,9 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 	//* read from the list, so the drawer shows the latest copy after an update
 	const selected = createMemo(() =>
 		routines.data?.data.find((routine) => routine.id === selectedId()),
+	);
+	const canManageAll = createMemo(
+		() => userStore.get.hasPermission([Permissions.AiRoutinesManageAll]).all,
 	);
 
 	// ----------------------------------------
@@ -89,6 +95,16 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 							sortable: true,
 							minWidth: 260,
 						},
+						...(canManageAll()
+							? [
+									{
+										label: T()("agent.routine.owner"),
+										key: "owner",
+										icon: <TbOutlineUser />,
+										minWidth: 180,
+									},
+								]
+							: []),
 						{
 							label: T()("common.status"),
 							key: "enabled",
@@ -129,6 +145,8 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 							<AgentRoutineTableRow
 								index={index}
 								routine={routine()}
+								showOwner={canManageAll()}
+								overseeing={routine().access === "oversight"}
 								runPending={
 									runRoutine.action.isPending &&
 									runRoutine.action.variables?.id === routine().id
@@ -159,6 +177,7 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 			/>
 			<ViewAgentRoutineRunsDrawer
 				id={selectedId}
+				overseeing={selected()?.access === "oversight"}
 				state={{ open: runsOpen(), setOpen: setRunsOpen }}
 			/>
 			<DeleteAgentRoutineModal

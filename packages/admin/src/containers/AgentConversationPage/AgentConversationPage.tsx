@@ -28,6 +28,7 @@ import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 import { getNewChatHref } from "@/utils/home-view";
 import { isModifiedClick, isNavigationLinkActive } from "@/utils/navigation";
 import AgentChatActions from "./parts/AgentChatActions";
@@ -228,9 +229,11 @@ const AgentConversationPage: Component = () => {
 							variant="page"
 							routine={routine()}
 							missingAction={
-								<Link variant="primary" size="sm" href={getNewChatHref()}>
-									{T()("agent.chat.new")}
-								</Link>
+								<Show when={getAgentAccess().chat.length > 0}>
+									<Link variant="primary" size="sm" href={getNewChatHref()}>
+										{T()("agent.chat.new")}
+									</Link>
+								</Show>
 							}
 							onEditRoutineConfirmations={() => {
 								setFocusConfirmations(true);

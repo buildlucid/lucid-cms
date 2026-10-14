@@ -7,8 +7,9 @@ import api from "@/services/api";
 import T from "@/translations";
 import { conversationModeLabels, getAgentName } from "@/utils/agent-access";
 import { describeTriggers } from "@/utils/agent-routine-events";
+import helpers from "@/utils/helpers";
 
-/** A code routine's read-only details, shown in place of the routine form. */
+/** Read-only routine settings shown in place of the editable form. */
 const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -36,6 +37,13 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 				layout="columns"
 				items={[
 					{ label: T()("common.name"), value: props.routine.name },
+					{
+						label: T()("agent.routine.owner"),
+						value: props.routine.owner
+							? helpers.formatUserName(props.routine.owner, "name")
+							: "",
+						show: props.routine.owner !== null,
+					},
 					{
 						label: T()("agent.select.label"),
 						value: getAgentName(props.routine.agentKey),
