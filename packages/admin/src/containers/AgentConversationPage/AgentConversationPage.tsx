@@ -87,8 +87,11 @@ const AgentConversationPage: Component = () => {
 	const detailsOpen = createMemo(
 		() => userPreferencesStore.getSectionOpen("agent.chat.details") ?? false,
 	);
+	//* a chat that can't load has no sidebar, so its error centres across the full width without animating
 	const sidebarOpen = createMemo(
-		() => routineCard() !== undefined || detailsOpen() || !!view.selectedId(),
+		() =>
+			!chat.conversation.isError &&
+			(routineCard() !== undefined || detailsOpen() || !!view.selectedId()),
 	);
 
 	// ----------------------------------------
@@ -216,10 +219,11 @@ const AgentConversationPage: Component = () => {
 				/>
 				<div class="relative flex min-h-0 grow">
 					<section
-						class={classnames(
-							"flex min-w-0 grow flex-col transition-[margin] duration-300 ease-out",
-							{ "lg:me-96": sidebarOpen() },
-						)}
+						class={classnames("flex min-w-0 grow flex-col", {
+							"lg:me-96": sidebarOpen(),
+							"transition-[margin] duration-300 ease-out":
+								!chat.conversation.isError,
+						})}
 					>
 						<AgentChatThread
 							chat={chat}

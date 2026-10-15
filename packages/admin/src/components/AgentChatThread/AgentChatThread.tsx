@@ -62,6 +62,7 @@ const AgentChatThread: Component<{
 			<Switch>
 				<Match when={props.chat.conversation.isError}>
 					<ErrorState
+						class="grow"
 						title={T()("agent.chat.missing.title")}
 						description={T()("agent.chat.missing.description")}
 						actions={props.missingAction}
