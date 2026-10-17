@@ -153,7 +153,7 @@ const preloadRequestRoute =
 
 const extensionRoute = (route: (typeof extensionRoutes)[number]) => (
 	<Route
-		path={route.path.slice("/lucid".length)}
+		path={route.path.slice("/admin".length)}
 		component={() => {
 			const page = (
 				<AdminExtensionBoundary name={route.key} placement="page">
@@ -174,7 +174,7 @@ const AppRouter: Component = () => {
 		<Router preload>
 			{/* Authenticated */}
 			<Route component={AuthenticatedRoutes}>
-				<Route path="/lucid" component={NavigationShell}>
+				<Route path="/admin" component={NavigationShell}>
 					<Route path="/" component={HomeRoute} />
 					{/* Agent */}
 					<Route
@@ -385,8 +385,8 @@ const AppRouter: Component = () => {
 								condition={() => siteStore.get.hasAnyAiFeatureEnabled()}
 								redirect={() =>
 									userStore.get.hasPermission([Permissions.SettingsRead]).all
-										? "/lucid/system/overview"
-										: "/lucid"
+										? "/admin/system/overview"
+										: "/admin"
 								}
 							>
 								<PermissionGuard permission={Permissions.SettingsRead}>
@@ -429,14 +429,14 @@ const AppRouter: Component = () => {
 					/>
 				</Route>
 				{/* Authenticated OAuth */}
-				<Route path="/lucid" component={OAuthRoutes}>
+				<Route path="/admin" component={OAuthRoutes}>
 					<Route
 						path="/oauth/consent/:requestId"
 						preload={preloadRoutes(OAuthConsentRoute)}
 						component={OAuthConsentRoute}
 					/>
 				</Route>
-				<Route path="/lucid" component={BareShell}>
+				<Route path="/admin" component={BareShell}>
 					{extensionRoutes
 						.filter(
 							(route) =>
@@ -446,7 +446,7 @@ const AppRouter: Component = () => {
 				</Route>
 			</Route>
 			{/* Public extensions work both with and without a session. */}
-			<Route path="/lucid" component={BareShell}>
+			<Route path="/admin" component={BareShell}>
 				{extensionRoutes
 					.filter(
 						(route) => route.shell === "none" && route.access === "public",
@@ -454,14 +454,14 @@ const AppRouter: Component = () => {
 					.map(extensionRoute)}
 			</Route>
 			{/* Non authenticated */}
-			<Route path="/lucid" component={AuthRoutes}>
+			<Route path="/admin" component={AuthRoutes}>
 				<Route path="/login" component={LoginRoute} />
 				<Route path="/setup" component={SetupRoute} />
 				<Route path="/forgot-password" component={ForgotPasswordRoute} />
 				<Route path="/reset-password" component={ResetPasswordRoute} />
 				<Route path="/accept-invitation" component={AcceptInvitationRoute} />
 			</Route>
-			<Route path="/lucid" component={PublicRoutes}>
+			<Route path="/admin" component={PublicRoutes}>
 				<Route
 					path="/email-change/confirm"
 					component={EmailChangeConfirmRoute}

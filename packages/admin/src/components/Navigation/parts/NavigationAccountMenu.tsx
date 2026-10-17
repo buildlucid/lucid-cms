@@ -85,7 +85,7 @@ const NavigationAccountMenu: Component<{
 
 			<Menu.Content matchTriggerWidth class="min-w-52 shadow-lg">
 				<Menu.Item
-					href="/lucid/account"
+					href="/admin/account"
 					icon={<TbOutlineUser class="size-3.5 shrink-0" />}
 					onSelect={props.onNavigate}
 				>

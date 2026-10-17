@@ -59,7 +59,7 @@ const adaptConfig: RuntimeAdaptConfig = (
 
 					if (meta?.admin === "development") return;
 
-					app.get("/lucid/*", (c, next) => {
+					app.get("/admin/*", (c, next) => {
 						if (!shouldServeAdminShell(c.req.path, c.req.method)) return next();
 						return c.html(readFileSync(paths.spaDistHtml, "utf-8"));
 					});

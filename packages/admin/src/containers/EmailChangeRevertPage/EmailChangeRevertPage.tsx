@@ -65,7 +65,7 @@ const EmailChangeRevertPage: Component = () => {
 					title={T()("auth.email.change.token.invalid.title")}
 					description={T()("auth.email.change.token.invalid.description")}
 					actions={
-						<Link variant="primary" size="sm" href="/lucid/login">
+						<Link variant="primary" size="sm" href="/admin/login">
 							{T()("common.back.to.login")}
 						</Link>
 					}
@@ -76,7 +76,7 @@ const EmailChangeRevertPage: Component = () => {
 					<ThemeLogoIcon class="h-8 mx-auto mb-6" />
 					<h1 class="mb-1">{T()("routes.auth.email.change.reverted.title")}</h1>
 					<p>{T()("routes.auth.email.change.reverted.description")}</p>
-					<Link variant="primary" size="md" href="/lucid/login" class="mt-8">
+					<Link variant="primary" size="md" href="/admin/login" class="mt-8">
 						{T()("common.back.to.login")}
 					</Link>
 				</div>

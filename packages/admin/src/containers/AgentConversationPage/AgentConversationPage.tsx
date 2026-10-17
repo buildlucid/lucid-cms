@@ -106,8 +106,8 @@ const AgentConversationPage: Component = () => {
 			event.target instanceof Element ? event.target.closest("a") : null;
 		const href = link?.getAttribute("href");
 		if (
-			!href?.startsWith("/lucid/") ||
-			isNavigationLinkActive(href, "/lucid/agent") ||
+			!href?.startsWith("/admin/") ||
+			isNavigationLinkActive(href, "/admin/agent") ||
 			link?.target === "_blank"
 		) {
 			return;
@@ -244,7 +244,7 @@ const AgentConversationPage: Component = () => {
 								setRoutineOpen(true);
 							}}
 							onBranched={(conversationId) =>
-								navigate(`/lucid/agent/chats/${conversationId}`)
+								navigate(`/admin/agent/chats/${conversationId}`)
 							}
 						/>
 					</section>
@@ -292,7 +292,7 @@ const AgentConversationPage: Component = () => {
 						if (conversationId === params.conversationId) {
 							scroll.scrollToEnd("smooth");
 						} else {
-							navigate(`/lucid/agent/chats/${conversationId}`);
+							navigate(`/admin/agent/chats/${conversationId}`);
 						}
 					}}
 				/>

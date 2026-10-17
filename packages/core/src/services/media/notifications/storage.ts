@@ -42,6 +42,6 @@ export const storageNotification = defineNotification({
 			defaultMessage:
 				"{{used}} of {{limit}} used, with {{remaining}} remaining. Delete unused media or raise the limit.",
 		}),
-		href: "/lucid/system/overview",
+		href: "/admin/system/overview",
 	}),
 });

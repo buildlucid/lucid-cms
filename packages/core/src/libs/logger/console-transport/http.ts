@@ -21,7 +21,7 @@ const isSuccessfulAdminAsset = (entry: LogEntry) => {
 
 	return (
 		typeof path === "string" &&
-		path.startsWith("/lucid/assets/") &&
+		path.startsWith("/admin/assets/") &&
 		typeof status === "number" &&
 		status < 400
 	);

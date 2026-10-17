@@ -6,8 +6,8 @@ describe("noIndex", () => {
 	const app = new Hono().use(noIndex).get("*", () => new Response("ok"));
 
 	test.each([
-		["/lucid", "noindex, nofollow"],
-		["/lucid/agent/chats/1", "noindex, nofollow"],
+		["/admin", "noindex, nofollow"],
+		["/admin/agent/chats/1", "noindex, nofollow"],
 		["/lucid/api/v1/documents", "noindex, nofollow"],
 		["/lucid/cdn/image.png", null],
 		["/lucidity", null],

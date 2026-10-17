@@ -19,7 +19,7 @@ export interface ViewAllLinkProps {
  * ```tsx
  * import { ViewAllLink } from "@lucidcms/admin/components";
  *
- * return <ViewAllLink href="/lucid/requests" />;
+ * return <ViewAllLink href="/admin/requests" />;
  * ```
  */
 const ViewAllLink: Component<ViewAllLinkProps> = (props) => {

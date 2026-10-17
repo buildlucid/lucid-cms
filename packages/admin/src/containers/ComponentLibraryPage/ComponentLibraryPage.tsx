@@ -877,7 +877,7 @@ const ComponentLibraryPage: Component = () => {
 								title="Report unavailable"
 								description="This report has been deleted."
 								actions={
-									<Link variant="primary" size="sm" href="/lucid">
+									<Link variant="primary" size="sm" href="/admin">
 										Back to Home
 									</Link>
 								}
@@ -1337,7 +1337,7 @@ const ComponentLibraryPage: Component = () => {
 												queryState={queryState}
 												meta={{
 													links: [],
-													path: "/lucid/components",
+													path: "/admin/components",
 													currentPage: 2,
 													perPage: 10,
 													total: 48,

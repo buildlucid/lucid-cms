@@ -40,7 +40,7 @@ export const logServerReady = (url: string) => {
 };
 
 export const logAdminUrl = (url: string) =>
-	cliLogger.log("🔐 Admin panel      ", cliLogger.color.blue(`${url}/lucid`), {
+	cliLogger.log("🔐 Admin panel      ", cliLogger.color.blue(`${url}/admin`), {
 		symbol: "line",
 	});
 

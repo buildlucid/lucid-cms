@@ -38,7 +38,7 @@ export const formatAiCreditAmount = (value?: number | null) => {
 	return creditsFormatter.format(value);
 };
 
-export const aiUsageHref = "/lucid/system/ai-usage";
+export const aiUsageHref = "/admin/system/ai-usage";
 
 /** Returns used allowance as a whole percentage capped at 100; meters warn at `aiCreditsWarningPercent`. */
 export const getAllowancePercentUsed = (

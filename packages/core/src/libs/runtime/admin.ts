@@ -1,15 +1,10 @@
-const mountPath = "/lucid";
+import constants from "../../constants/constants.js";
 
-const serverPrefixes = ["api", "cdn", "documentation", "openapi"].map(
-	(segment) => `${mountPath}/${segment}`,
-);
+const mountPath = `/${constants.directories.admin}`;
 
-/** Keeps server endpoints outside the admin application's fallback. */
+/** Matches the admin app's paths. Server endpoints live under `/lucid` instead. */
 export const isAdminPath = (pathname: string) =>
-	(pathname === mountPath || pathname.startsWith(`${mountPath}/`)) &&
-	!serverPrefixes.some(
-		(prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-	);
+	pathname === mountPath || pathname.startsWith(`${mountPath}/`);
 
 /** Only navigation requests may fall back to the SPA; missing assets stay missing. */
 export const shouldServeAdminShell = (pathname: string, method: string) =>

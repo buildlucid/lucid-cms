@@ -54,7 +54,7 @@ const useResetPassword = (props?: UseResetPasswordProps) => {
 			queryKeys.roles.detail(),
 		],
 		onSuccess: () => {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 			props?.onSuccess?.();
 		},
 		onError: () => {

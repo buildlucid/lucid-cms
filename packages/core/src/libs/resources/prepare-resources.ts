@@ -36,8 +36,9 @@ const getPublicOutput = (
 		name.includes("\\") ||
 		name === ".." ||
 		name === "." ||
-		name === "lucid" ||
-		name.startsWith("lucid/") ||
+		[constants.directories.base, constants.directories.admin].some(
+			(reserved) => name === reserved || name.startsWith(`${reserved}/`),
+		) ||
 		(!fromPlugin &&
 			(name === constants.directories.pluginPublic ||
 				name.startsWith(`${constants.directories.pluginPublic}/`)))

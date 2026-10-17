@@ -189,11 +189,11 @@ export const PageBuilderHeader: Component<{
 
 		return [
 			{
-				link: "/lucid",
+				link: "/admin",
 				label: T()("common.home"),
 			},
 			{
-				link: `/lucid/collections/${props.state.collectionKey()}`,
+				link: `/admin/collections/${props.state.collectionKey()}`,
 				label: props.state.collectionName(),
 			},
 			{
@@ -307,7 +307,7 @@ export const PageBuilderHeader: Component<{
 				icon: "history",
 				location:
 					props.state.documentID() !== undefined
-						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/history`
+						? `/admin/collections/${props.state.collectionKey()}/${props.state.documentID()}/history`
 						: "#",
 			});
 		}

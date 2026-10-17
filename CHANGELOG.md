@@ -8,6 +8,7 @@
 
 ### Breaking Changes:
 
+- Moved the admin from `/lucid` to `/admin`, including login, share links and the OAuth consent page. Server endpoints stay under `/lucid`, such as `/lucid/api`, `/lucid/mcp` and `/lucid/cdn`, and `admin` is now a reserved public folder.
 - Document and version links now use shared identity tables with automatic cleanup on deletion.
 - Removed system alerts in favour of the new notification system.
 

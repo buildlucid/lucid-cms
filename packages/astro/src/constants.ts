@@ -1,11 +1,11 @@
-const mountPath = "/lucid";
-
 const constants = {
 	integrationName: "@lucidcms/astro",
 	toolkitModuleId: "@lucidcms/astro/toolkit",
 	generatedDirectory: ".lucid/astro",
 	assetDirectory: "public",
-	mountPath,
+	/** Lucid's server endpoints and the admin app, both handled by Lucid. */
+	mountPaths: ["/lucid", "/admin"],
+	adminDirectory: "admin",
 	files: {
 		middleware: "middleware.ts",
 		route: "route.ts",

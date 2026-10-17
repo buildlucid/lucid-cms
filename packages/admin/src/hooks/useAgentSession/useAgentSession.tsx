@@ -178,8 +178,8 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 	const canOpenChats = createMemo(() => getAgentAccess().all.length > 0);
 	const onAgentPage = createMemo(
 		() =>
-			isNavigationLinkActive(location.pathname, "/lucid/agent") ||
-			(isNavigationLinkActive(location.pathname, "/lucid") &&
+			isNavigationLinkActive(location.pathname, "/admin/agent") ||
+			(isNavigationLinkActive(location.pathname, "/admin") &&
 				getHomeView() === "ask"),
 	);
 	const panelAvailable = createMemo(

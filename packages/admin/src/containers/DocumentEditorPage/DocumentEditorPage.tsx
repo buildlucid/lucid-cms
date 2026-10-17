@@ -412,17 +412,17 @@ const DocumentEditorPage: Component<{
 	//* Redirect out of the document view when the document/collection isn't available.
 	createEffect(() => {
 		if (docState.collectionAccessError()) {
-			navigate("/lucid", { replace: true });
+			navigate("/admin", { replace: true });
 			return;
 		}
 		if (docState.documentAccessError()) {
 			if (docState.collection()?.mode === "multiple") {
-				navigate(`/lucid/collections/${docState.collectionKey()}`, {
+				navigate(`/admin/collections/${docState.collectionKey()}`, {
 					replace: true,
 				});
 				return;
 			}
-			navigate("/lucid", { replace: true });
+			navigate("/admin", { replace: true });
 		}
 	});
 
@@ -545,8 +545,8 @@ const DocumentEditorPage: Component<{
 		}
 		navigate(
 			docState.collection()?.mode === "multiple"
-				? `/lucid/collections/${docState.collectionKey()}`
-				: "/lucid",
+				? `/admin/collections/${docState.collectionKey()}`
+				: "/admin",
 		);
 	};
 	/** Drops unsaved edits for the saved content that changed under them. */

@@ -126,10 +126,10 @@ it("links a tool call's changes to the request holding them, or else the documen
 	} as const;
 
 	expect(agentChangesHref([document, { type: "request", requestId: 9 }])).toBe(
-		"/lucid/requests/9",
+		"/admin/requests/9",
 	);
 	expect(agentChangesHref([document])).toBe(
-		"/lucid/collections/pages/latest/4",
+		"/admin/collections/pages/latest/4",
 	);
 	expect(agentChangesHref([{ type: "media", mediaId: 2 }])).toBeUndefined();
 });

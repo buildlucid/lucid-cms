@@ -27,7 +27,7 @@ export const getOAuthUrls = (context: ServiceContext) => {
 		tokenEndpoint: `${origin}/lucid/oauth/token`,
 		revocationEndpoint: `${origin}/lucid/oauth/revoke`,
 		authorizationServerMetadata: `${origin}/.well-known/oauth-authorization-server/lucid`,
-		consentPage: `${origin}/lucid/oauth/consent`,
+		consentPage: `${origin}/admin/oauth/consent`,
 	};
 };
 

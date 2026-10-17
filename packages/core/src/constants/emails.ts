@@ -1,14 +1,14 @@
 const emailConstants = Object.freeze({
 	renderedOutput: "email-templates.json",
 	assets: {
-		logo: "/lucid/assets/email-logo.png",
+		logo: "/admin/assets/email-logo.png",
 	},
 	locations: {
-		resetPassword: "/lucid/reset-password",
-		acceptInvitation: "/lucid/accept-invitation",
-		emailChangeConfirm: "/lucid/email-change/confirm",
-		emailChangeRevert: "/lucid/email-change/revert",
-		account: "/lucid/account",
+		resetPassword: "/admin/reset-password",
+		acceptInvitation: "/admin/accept-invitation",
+		emailChangeConfirm: "/admin/email-change/confirm",
+		emailChangeRevert: "/admin/email-change/revert",
+		account: "/admin/account",
 	},
 	storage: {
 		defaultPreviewFallback: "[REDACTED]",

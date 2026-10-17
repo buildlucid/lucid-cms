@@ -19,6 +19,6 @@ export const deployFinishedNotification = defineNotification({
 			? `${data.site} deployed`
 			: `${data.site} failed to deploy`,
 		body: `The deploy took ${data.durationSeconds} seconds.`,
-		href: "/lucid/system/overview",
+		href: "/admin/system/overview",
 	}),
 });

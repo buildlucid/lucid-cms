@@ -11,7 +11,7 @@ const StandaloneRoute: RouteComponent = () => {
 				title="Standalone playground"
 				description="This route requires a session and owns its full-page layout, so it renders without the admin sidebar or header."
 				actions={
-					<Link href="/lucid/e/playground" size="sm">
+					<Link href="/admin/e/playground" size="sm">
 						Back to the admin playground
 					</Link>
 				}

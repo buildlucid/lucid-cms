@@ -52,7 +52,7 @@ export interface LinkProps extends Omit<AnchorProps, "href" | "shape"> {
  * const { t } = useTranslation();
  *
  * return (
- * 	<Link href="/lucid/media" permission={Permissions.MediaRead}>
+ * 	<Link href="/admin/media" permission={Permissions.MediaRead}>
  * 		{t("routes.media.title")}
  * 	</Link>
  * );

@@ -47,7 +47,7 @@ const ActorDisplay: Component<ActorDisplayProps> = (props) => {
 		const conversationId = props.agent?.conversationId;
 		const viewer = userStore.get.user?.id;
 		return conversationId && viewer !== undefined && props.user?.id === viewer
-			? `/lucid/agent/chats/${conversationId}`
+			? `/admin/agent/chats/${conversationId}`
 			: undefined;
 	});
 

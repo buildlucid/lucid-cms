@@ -20,7 +20,7 @@ export const isNavigationLinkActive = (
 	const currentPath = normalizeNavigationPath(pathname);
 	const linkPath = normalizeNavigationPath(href);
 
-	if (exact || linkPath === "/lucid") return currentPath === linkPath;
+	if (exact || linkPath === "/admin") return currentPath === linkPath;
 
 	return currentPath === linkPath || currentPath.startsWith(`${linkPath}/`);
 };

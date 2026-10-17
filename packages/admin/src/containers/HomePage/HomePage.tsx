@@ -91,7 +91,7 @@ const HomePage: Component = () => {
 											title={T()("home.no.access.title")}
 											description={T()("home.no.access.description")}
 											actions={
-												<Link variant="primary" size="sm" href="/lucid/account">
+												<Link variant="primary" size="sm" href="/admin/account">
 													{T()("home.no.access.account")}
 												</Link>
 											}

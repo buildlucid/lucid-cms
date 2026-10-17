@@ -4,7 +4,7 @@ const getRequestPath = (
 	document?: { collectionKey: string; documentId: number },
 ) =>
 	document
-		? `/lucid/requests/${requestId}/content/${encodeURIComponent(document.collectionKey)}/${document.documentId}`
-		: `/lucid/requests/${requestId}`;
+		? `/admin/requests/${requestId}/content/${encodeURIComponent(document.collectionKey)}/${document.documentId}`
+		: `/admin/requests/${requestId}`;
 
 export default getRequestPath;

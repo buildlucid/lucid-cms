@@ -137,7 +137,7 @@ const AgentHome: Component<{
 		//* the panel shows the new chat in place
 		if (panel()) return true;
 
-		const href = `/lucid/agent/chats/${id}`;
+		const href = `/admin/agent/chats/${id}`;
 		//* the chat route skips fetching a chat that arrives unsaved
 		startViewTransition(() => navigate(href, { state: { unsaved: true } }), {
 			ready: "[data-agent-chat] .agent-composer-morph",

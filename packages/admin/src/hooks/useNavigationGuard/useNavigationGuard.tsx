@@ -21,7 +21,7 @@ export function useNavigationGuard(
 		createSignal<BeforeLeaveEventArgs | null>(null);
 
 	useBeforeLeave((e) => {
-		if (e.to === "/lucid/login") return;
+		if (e.to === "/admin/login") return;
 		if (typeof e.to === "string") {
 			const current = new URL(
 				`${location.pathname}${location.search}`,

@@ -19,7 +19,7 @@ const PublicRoute: RouteComponent = () => {
 				title="Public playground"
 				description="This route works both with and without a session."
 				actions={
-					<Link href="/lucid/e/playground" size="sm">
+					<Link href="/admin/e/playground" size="sm">
 						Open the admin playground
 					</Link>
 				}

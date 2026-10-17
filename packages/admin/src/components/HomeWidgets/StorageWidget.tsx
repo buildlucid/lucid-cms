@@ -36,7 +36,7 @@ const StorageWidget: Component<{ size: HomeWidgetSize }> = () => {
 	return (
 		<HomeCard
 			title={T()("home.widget.storage.label")}
-			href="/lucid/system/overview"
+			href="/admin/system/overview"
 			padding="md"
 		>
 			<div class="flex grow flex-col justify-end gap-1.5">

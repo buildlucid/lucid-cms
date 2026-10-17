@@ -36,7 +36,7 @@ const AgentUnavailableNotice: Component<{ children: JSXElement }> = (props) => {
 						</p>
 					</div>
 					<Show when={canManageConnection()}>
-						<Link href="/lucid/system/operations" variant="outline" size="sm">
+						<Link href="/admin/system/operations" variant="outline" size="sm">
 							{T()("agent.unavailable.action")}
 						</Link>
 					</Show>

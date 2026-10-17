@@ -52,7 +52,7 @@ const NotificationsWidget: Component<{ size: HomeWidgetSize }> = () => {
 		<HomeCard
 			title={T()("notifications.title")}
 			count={summary.data?.data.unread}
-			href="/lucid/notifications"
+			href="/admin/notifications"
 		>
 			<NotificationList
 				notifications={notifications()}

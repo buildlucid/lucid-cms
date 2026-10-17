@@ -5,7 +5,7 @@ import type { AdminRouteNavigation } from "./navigation.js";
 
 export type AdminRoute = {
 	key: string;
-	/** Static path relative to /lucid/e, for example pages/reports. */
+	/** Static path relative to /admin/e, for example pages/reports. */
 	path: string;
 	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
 	component: AdminComponentReference;

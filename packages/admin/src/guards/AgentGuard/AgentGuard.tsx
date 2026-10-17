@@ -15,7 +15,7 @@ const agentGuard =
 					: getAgentAccess().all.length > 0 ||
 						(options?.routines === true && getAgentAccess().manageAllRoutines)
 			}
-			redirect="/lucid"
+			redirect="/admin"
 		>
 			<Page />
 		</ConditionGuard>

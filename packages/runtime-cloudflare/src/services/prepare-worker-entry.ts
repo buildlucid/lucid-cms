@@ -120,10 +120,10 @@ const host = await getOrCreateRuntimeHost(
                     name: "runtime-cloudflare:spa-shell",
                     phase: "afterSetup",
                     register: async (app) => {
-                        app.get("/lucid/*", async (c, next) => {
+                        app.get("/admin/*", async (c, next) => {
                             if (!shouldServeAdminShell(c.req.path, c.req.method)) return next();
                             const url = new URL(c.req.url);
-                            const indexRequest = new Request(url.origin + "/lucid/index.html");
+                            const indexRequest = new Request(url.origin + "/admin/index.html");
                             const indexAsset = await c.env.ASSETS.fetch(indexRequest);
                             return new Response(indexAsset.body, {
                                 status: indexAsset.status,

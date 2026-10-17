@@ -36,7 +36,7 @@ const useRevokeRefreshTokens = (props?: UseRevokeRefreshTokensProps) => {
 			userStore.get.reset();
 			siteStore.get.reset();
 			clearCsrfSession();
-			navigate("/lucid/login");
+			navigate("/admin/login");
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

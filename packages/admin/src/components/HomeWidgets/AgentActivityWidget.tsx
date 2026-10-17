@@ -29,7 +29,7 @@ const AgentActivityWidget: Component<{ size: HomeWidgetSize }> = () => {
 	return (
 		<HomeCard
 			title={T()("home.widget.agent.label")}
-			href="/lucid/agent/history"
+			href="/admin/agent/history"
 		>
 			<Switch
 				fallback={
@@ -47,7 +47,7 @@ const AgentActivityWidget: Component<{ size: HomeWidgetSize }> = () => {
 								return (
 									<li>
 										<HomeCardItem
-											href={`/lucid/agent/chats/${conversation.id}`}
+											href={`/admin/agent/chats/${conversation.id}`}
 											title={conversation.title}
 											description={[
 												getAgentName(conversation.agentKey),

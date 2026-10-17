@@ -33,7 +33,7 @@ const AgentWaitingChats: Component<{
 	const historyHref = createMemo(() => {
 		const params = new URLSearchParams({ "filter[status]": "waiting" });
 		if (props.agentKey) params.set("filter[agentKey]", props.agentKey);
-		return `/lucid/agent/history?${params}`;
+		return `/admin/agent/history?${params}`;
 	});
 
 	// ----------------------------------------
@@ -73,7 +73,7 @@ const AgentWaitingChats: Component<{
 						{(conversation) => (
 							<li>
 								<A
-									href={`/lucid/agent/chats/${conversation.id}`}
+									href={`/admin/agent/chats/${conversation.id}`}
 									onClick={(event) => {
 										if (!props.onOpen || isModifiedClick(event)) return;
 										event.preventDefault();

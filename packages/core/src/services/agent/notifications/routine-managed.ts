@@ -35,7 +35,7 @@ export const routineManagedNotification = defineNotification({
 							defaultMessage: "{{name}} was paused",
 						},
 					),
-					href: "/lucid/agent/routines",
+					href: "/admin/agent/routines",
 				};
 			case "resumed":
 				return {
@@ -46,7 +46,7 @@ export const routineManagedNotification = defineNotification({
 							defaultMessage: "{{name}} was resumed",
 						},
 					),
-					href: "/lucid/agent/routines",
+					href: "/admin/agent/routines",
 				};
 			case "deleted":
 				return {

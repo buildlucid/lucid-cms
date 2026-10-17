@@ -6,7 +6,7 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const getCollectionNavigationHref = (collection: Collection) => {
 	if (collection.mode === "multiple") {
-		return `/lucid/collections/${collection.key}`;
+		return `/admin/collections/${collection.key}`;
 	}
 
 	return collection.documentId

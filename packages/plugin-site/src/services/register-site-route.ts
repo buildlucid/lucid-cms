@@ -22,8 +22,11 @@ import respondToRenderError from "./respond-to-render-error.js";
 const normalizePath = (path: string) =>
 	path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
 
+/** Lucid's server endpoints and the admin app, which the site never renders. */
 const isLucidPath = (path: string) =>
-	path === "/lucid" || path.startsWith("/lucid/");
+	["/lucid", "/admin"].some(
+		(prefix) => path === prefix || path.startsWith(`${prefix}/`),
+	);
 
 const canStorePages = (context: ServiceContext) => {
 	if (context.kv.key !== "passthrough") return true;

@@ -41,7 +41,7 @@ const notificationResponseSchema = z.object({
 	body: z.string().nullable(),
 	href: z.string().nullable().meta({
 		description: "Admin path the notification opens",
-		example: "/lucid/requests/12",
+		example: "/admin/requests/12",
 	}),
 	data: z.record(z.string(), z.unknown()),
 	actor: userDisplaySchema.nullable().meta({

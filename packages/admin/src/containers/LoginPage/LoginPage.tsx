@@ -58,7 +58,7 @@ const LoginPage: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (setupRequired.isSuccess && setupRequired.data.data.setupRequired) {
-			navigate("/lucid/setup");
+			navigate("/admin/setup");
 		}
 	});
 

@@ -237,7 +237,7 @@ describe.sequential("Lucid remote connection", () => {
 		const completedUrl = new URL(
 			completed.error ? callbackUrl : completed.data.location,
 		);
-		expect(completedUrl.pathname).toBe("/lucid/system/operations");
+		expect(completedUrl.pathname).toBe("/admin/system/operations");
 		expect(completedUrl.searchParams.get("result")).toBe("connected");
 
 		const stored = await resolveEffectiveConnection(context);

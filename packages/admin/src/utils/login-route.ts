@@ -7,10 +7,10 @@ const MAINTAIN_PARAMS = [
 
 const isSafeReturnPath = (value: string) => {
 	try {
-		const url = new URL(value, "https://lucid.local");
+		const url = new URL(value, "https://admin.local");
 		return (
-			url.origin === "https://lucid.local" &&
-			(url.pathname === "/lucid" || url.pathname.startsWith("/lucid/"))
+			url.origin === "https://admin.local" &&
+			(url.pathname === "/admin" || url.pathname.startsWith("/admin/"))
 		);
 	} catch {
 		return false;
@@ -19,13 +19,13 @@ const isSafeReturnPath = (value: string) => {
 
 export const getLoginReturnPath = (search: string) => {
 	const redirect = new URLSearchParams(search).get("redirect");
-	return redirect && isSafeReturnPath(redirect) ? redirect : "/lucid";
+	return redirect && isSafeReturnPath(redirect) ? redirect : "/admin";
 };
 
 const getLoginRedirectURL = (target: string) => {
 	const current = new URL(
-		target.startsWith("/") ? target : `/lucid${target}`,
-		"https://lucid.local",
+		target.startsWith("/") ? target : `/admin${target}`,
+		"https://admin.local",
 	);
 	const loginParams = new URLSearchParams();
 	for (const key of MAINTAIN_PARAMS) {
@@ -34,11 +34,11 @@ const getLoginRedirectURL = (target: string) => {
 	}
 
 	const returnPath = `${current.pathname}${current.search}${current.hash}`;
-	if (current.pathname !== "/lucid/login" && isSafeReturnPath(returnPath)) {
+	if (current.pathname !== "/admin/login" && isSafeReturnPath(returnPath)) {
 		loginParams.set("redirect", returnPath);
 	}
 
-	return `/lucid/login${loginParams.size > 0 ? `?${loginParams.toString()}` : ""}`;
+	return `/admin/login${loginParams.size > 0 ? `?${loginParams.toString()}` : ""}`;
 };
 
 export default getLoginRedirectURL;

@@ -48,12 +48,12 @@ const useLogout = (props?: UseLogoutProps) => {
 			queryClient.clear();
 			userStore.get.reset();
 			siteStore.get.reset();
-			navigate("/lucid/login");
+			navigate("/admin/login");
 			clearCsrfSession();
 			props?.onSuccess?.();
 		},
 		onError: () => {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 			props?.onError?.();
 		},
 	});

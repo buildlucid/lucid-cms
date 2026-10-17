@@ -224,7 +224,7 @@ export const PageBuilderModals: Component<{
 				callbacks={{
 					onSuccess: () => {
 						navigate(
-							`/lucid/collections/${props.hooks.state.collectionQuery.data?.data.key}`,
+							`/admin/collections/${props.hooks.state.collectionQuery.data?.data.key}`,
 						);
 					},
 				}}

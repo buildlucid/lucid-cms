@@ -125,14 +125,16 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 						entrypoint: generated.middlewarePath,
 						order: "pre",
 					});
-					injectRoute({
-						pattern: constants.mountPath,
-						entrypoint: generated.routePath,
-					});
-					injectRoute({
-						pattern: `${constants.mountPath}/[...path]`,
-						entrypoint: generated.routePath,
-					});
+					for (const mountPath of constants.mountPaths) {
+						injectRoute({
+							pattern: mountPath,
+							entrypoint: generated.routePath,
+						});
+						injectRoute({
+							pattern: `${mountPath}/[...path]`,
+							entrypoint: generated.routePath,
+						});
+					}
 					updateConfig({
 						vite: {
 							server: {
@@ -254,7 +256,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 			"astro:build:start": async () => {
 				if (!project) return;
 				try {
-					const outDir = path.join(assetRoot, "lucid");
+					const outDir = path.join(assetRoot, constants.adminDirectory);
 					await buildAdmin({
 						configPath: project.configPath,
 						projectRoot: project.loaded.projectRoot,

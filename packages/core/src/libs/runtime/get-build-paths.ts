@@ -1,4 +1,5 @@
 import { join, resolve } from "node:path";
+import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 
 /** Resolves generated public assets without importing build tooling. */
@@ -7,7 +8,7 @@ const getBuildPaths = (
 	cwd = process.cwd(),
 ) => {
 	const publicDist = resolve(cwd, config.build.outDir, "public");
-	const spaOutput = join(publicDist, "lucid");
+	const spaOutput = join(publicDist, constants.directories.admin);
 
 	return {
 		publicDist,

@@ -5,6 +5,6 @@ const getEditPath = (
 	id: number,
 	versionId?: number,
 ) =>
-	`/lucid/collections/${encodeURIComponent(collectionKey)}/${encodeURIComponent(version)}/${id}${versionId === undefined ? "" : `/${versionId}`}`;
+	`/admin/collections/${encodeURIComponent(collectionKey)}/${encodeURIComponent(version)}/${id}${versionId === undefined ? "" : `/${versionId}`}`;
 
 export default getEditPath;

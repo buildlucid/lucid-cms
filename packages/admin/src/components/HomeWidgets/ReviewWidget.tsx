@@ -44,7 +44,7 @@ const ReviewWidget: Component<{ size: HomeWidgetSize }> = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<HomeCard title={T()("home.widget.review.label")} href="/lucid/review">
+		<HomeCard title={T()("home.widget.review.label")} href="/admin/review">
 			<RequestQueues
 				overview={overview.data?.data}
 				loading={overview.isLoading}

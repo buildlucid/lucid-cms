@@ -31,7 +31,7 @@ const useAcceptInvitation = (props?: UseAcceptInvitationProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
 		mutationFn: acceptInvitationReq,
 		onSuccess: () => {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

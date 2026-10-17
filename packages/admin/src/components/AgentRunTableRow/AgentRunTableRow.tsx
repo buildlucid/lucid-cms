@@ -27,7 +27,7 @@ const AgentRunTableRow: Component<{
 					type: "link",
 					icon: "eye",
 					show: !props.overseeing,
-					href: `/lucid/agent/chats/${props.run.conversationId}?runId=${props.run.id}`,
+					href: `/admin/agent/chats/${props.run.conversationId}?runId=${props.run.id}`,
 				},
 				{
 					label: T()("ai.usage.view"),

@@ -94,7 +94,7 @@ const AiUsageSessionDrawer: Component<AiUsageSessionDrawerProps> = (props) => {
 					<Show when={data()?.conversation}>
 						{(conversation) => (
 							<Link
-								href={`/lucid/agent/chats/${conversation().id}`}
+								href={`/admin/agent/chats/${conversation().id}`}
 								variant="secondary"
 								size="md"
 							>

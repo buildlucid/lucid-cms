@@ -20,4 +20,4 @@ export const getHomeView = (): HomeView =>
 
 /** Where a new chat starts. Home replaces the agent page while it shows the chat box. */
 export const getNewChatHref = () =>
-	getHomeView() === "ask" ? "/lucid" : "/lucid/agent";
+	getHomeView() === "ask" ? "/admin" : "/admin/agent";

@@ -122,7 +122,10 @@ export default Object.freeze({
 	directories: {
 		public: "public",
 		lucid: ".lucid",
+		/** The URL prefix for Lucid's server endpoints, such as the API, MCP and CDN. */
 		base: "lucid",
+		/** The admin app's URL path and its folder in the public build output. */
+		admin: "admin",
 		plugins: "plugins",
 		pluginPublic: "_lucid",
 	},
@@ -407,8 +410,8 @@ export default Object.freeze({
 			authLink: "authenticated-link",
 			login: "login",
 		} as const,
-		defaultRedirectPath: "/lucid",
-		defaultErrorRedirectPath: "/lucid/login",
+		defaultRedirectPath: "/admin",
+		defaultErrorRedirectPath: "/admin/login",
 		ttl: 600000,
 	},
 });

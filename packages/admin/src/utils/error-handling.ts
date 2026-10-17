@@ -10,7 +10,7 @@ import spawnToast from "@/utils/spawn-toast";
  * import { LucidError } from "@lucidcms/admin/services";
  *
  * if (error instanceof LucidError && error.errorRes.status === 404) {
- * 	navigate("/lucid/redirects");
+ * 	navigate("/admin/redirects");
  * }
  * ```
  */

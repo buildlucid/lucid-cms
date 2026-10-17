@@ -40,7 +40,7 @@ const useSetup = (props?: UseSetupProps) => {
 		}),
 		invalidates: [queryKeys.auth.setupRequired()],
 		onSuccess: () => {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

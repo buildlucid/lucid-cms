@@ -28,7 +28,7 @@ const ResetPasswordPage: Component = () => {
 	const token = urlParams.get("token");
 
 	if (!token) {
-		navigate("/lucid/login");
+		navigate("/admin/login");
 	}
 
 	// ----------------------------------------
@@ -56,7 +56,7 @@ const ResetPasswordPage: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (providers.isSuccess && providers.data?.data.disablePassword === true) {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 		}
 	});
 
@@ -75,7 +75,7 @@ const ResetPasswordPage: Component = () => {
 					title={T()("auth.tokens.invalid.title")}
 					description={T()("auth.tokens.invalid.description")}
 					actions={
-						<Link variant="primary" size="sm" href="/lucid/login">
+						<Link variant="primary" size="sm" href="/admin/login">
 							{T()("common.back.to.login")}
 						</Link>
 					}

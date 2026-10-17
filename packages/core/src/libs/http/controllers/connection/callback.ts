@@ -55,7 +55,7 @@ const callbackController = factory.createHandlers(
 
 		if (result.error) {
 			const fallback = new URL(
-				"/lucid/system/integrations",
+				"/admin/system/integrations",
 				getBaseUrl(context),
 			);
 			fallback.searchParams.set("result", "failed");

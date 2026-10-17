@@ -23,7 +23,7 @@ const AgentConversationTableRow: Component<{
 					label: T()("common.open"),
 					type: "link",
 					icon: "eye",
-					href: `/lucid/agent/chats/${props.conversation.id}`,
+					href: `/admin/agent/chats/${props.conversation.id}`,
 				},
 				{
 					label: T()("ai.usage.view"),
@@ -55,7 +55,7 @@ const AgentConversationTableRow: Component<{
 			<Table.Text
 				column="title"
 				text={props.conversation.title}
-				href={`/lucid/agent/chats/${props.conversation.id}`}
+				href={`/admin/agent/chats/${props.conversation.id}`}
 				minWidth={320}
 				maxLines={1}
 			/>

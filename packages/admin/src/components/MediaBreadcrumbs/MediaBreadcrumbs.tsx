@@ -18,7 +18,7 @@ export const MediaBreadcrumbs: Component<{
 			aria-label={T()("common.breadcrumbs")}
 		>
 			<li>
-				<A href={"/lucid"} class="hover:text-title text-sm">
+				<A href={"/admin"} class="hover:text-title text-sm">
 					<TbOutlineHome />
 				</A>
 			</li>
@@ -29,7 +29,7 @@ export const MediaBreadcrumbs: Component<{
 				<Switch>
 					<Match when={props.state.parentFolderId() !== ""}>
 						<A
-							href={"/lucid/media"}
+							href={"/admin/media"}
 							class="hover:text-title text-sm"
 							noScroll={true}
 						>
@@ -53,7 +53,7 @@ export const MediaBreadcrumbs: Component<{
 							<Switch>
 								<Match when={i() !== props.state.breadcrumbs.length - 1}>
 									<A
-										href={`/lucid/media/${breadcrumb.id}`}
+										href={`/admin/media/${breadcrumb.id}`}
 										class="hover:text-title text-sm"
 										noScroll={true}
 									>

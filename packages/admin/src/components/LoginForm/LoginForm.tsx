@@ -74,7 +74,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				<A
 					class="block text-sm mt-1 hover:text-primary-hover duration-200 transition-colors"
 					type="button"
-					href="/lucid/forgot-password"
+					href="/admin/forgot-password"
 				>
 					{T()("auth.forgot.password.action")}
 				</A>

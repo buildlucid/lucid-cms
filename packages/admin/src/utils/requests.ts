@@ -81,7 +81,7 @@ export const countRequestQueue = (
 	);
 
 export const getRequestQueueRoute = (queue: RequestQueue) =>
-	`/lucid/requests?${Object.entries(queue.filters)
+	`/admin/requests?${Object.entries(queue.filters)
 		.map(
 			([key, filter]) =>
 				`filter[${key}]=${typeof filter.value === "boolean" ? Number(filter.value) : filter.value}`,

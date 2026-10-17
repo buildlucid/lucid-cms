@@ -54,7 +54,7 @@ export const createAdminDevServer = async (
 		middleware,
 		renderHtml: async (url: string) => {
 			const html = await readFile(path.join(adminRoot, "index.html"), "utf8");
-			return vite.transformIndexHtml("/lucid/index.html", html, url);
+			return vite.transformIndexHtml("/admin/index.html", html, url);
 		},
 		close: () => vite.close(),
 	};

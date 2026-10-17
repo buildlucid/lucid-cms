@@ -108,7 +108,7 @@ export const NavigationMenuContent: Component<{
 		}),
 	);
 	//* an open chat belongs to Chat, not History
-	const chatActive = createMemo(() => isActive("/lucid/agent/chats"));
+	const chatActive = createMemo(() => isActive("/admin/agent/chats"));
 
 	// ----------------------------------
 	// Render
@@ -118,18 +118,18 @@ export const NavigationMenuContent: Component<{
 				<nav class="min-h-0 flex-1 overflow-y-auto scrollbar px-4 pt-4 pb-6">
 					<ul>
 						<NavigationLink
-							href="/lucid"
+							href="/admin"
 							icon="home"
 							title={T()("common.home")}
 						/>
 						<NavigationLink
-							href="/lucid/media"
+							href="/admin/media"
 							icon="media"
 							title={T()("media.library.title")}
 							permission={permissions().media}
 						/>
 						<NavigationLink
-							href="/lucid/emails"
+							href="/admin/emails"
 							icon="email"
 							title={T()("email.activity")}
 							permission={permissions().emails}
@@ -140,7 +140,7 @@ export const NavigationMenuContent: Component<{
 						<NavigationSection
 							id="lucid:agent"
 							title={T()("routes.agent.title")}
-							active={isActive("/lucid/agent")}
+							active={isActive("/admin/agent")}
 						>
 							<Show
 								when={
@@ -148,7 +148,7 @@ export const NavigationMenuContent: Component<{
 								}
 							>
 								<NavigationLink
-									href="/lucid/agent"
+									href="/admin/agent"
 									exact={true}
 									active={chatActive()}
 									icon="chat"
@@ -156,13 +156,13 @@ export const NavigationMenuContent: Component<{
 								/>
 							</Show>
 							<NavigationLink
-								href="/lucid/agent/history"
+								href="/admin/agent/history"
 								icon="history"
 								title={T()("routes.agent.history")}
 								permission={getAgentAccess().all.length > 0}
 							/>
 							<NavigationLink
-								href="/lucid/agent/routines"
+								href="/admin/agent/routines"
 								permission={
 									getAgentAccess().ownRoutines.length > 0 ||
 									getAgentAccess().codeRoutines.length > 0 ||
@@ -172,7 +172,7 @@ export const NavigationMenuContent: Component<{
 								title={T()("routes.agent.routines")}
 							/>
 							<NavigationLink
-								href="/lucid/agent/memories"
+								href="/admin/agent/memories"
 								permission={
 									getAgentAccess().chat.length > 0 &&
 									(siteStore.get.ai.memory.personal ||
@@ -188,16 +188,16 @@ export const NavigationMenuContent: Component<{
 						<NavigationSection
 							id="lucid:review"
 							title={T()("routes.review.title")}
-							active={isActive("/lucid/review") || isActive("/lucid/requests")}
+							active={isActive("/admin/review") || isActive("/admin/requests")}
 						>
 							<NavigationLink
-								href="/lucid/review"
+								href="/admin/review"
 								exact={true}
 								icon="publishing"
 								title={T()("common.overview")}
 							/>
 							<NavigationLink
-								href="/lucid/requests"
+								href="/admin/requests"
 								icon="requests"
 								title={T()("requests.title")}
 							/>
@@ -274,16 +274,16 @@ export const NavigationMenuContent: Component<{
 						<NavigationSection
 							id="lucid:access"
 							title={T()("permissions.groups.access.and")}
-							active={isActive("/lucid/users") || isActive("/lucid/roles")}
+							active={isActive("/admin/users") || isActive("/admin/roles")}
 						>
 							<NavigationLink
-								href="/lucid/users"
+								href="/admin/users"
 								icon="users"
 								title={T()("users.accounts")}
 								permission={permissions().users}
 							/>
 							<NavigationLink
-								href="/lucid/roles"
+								href="/admin/roles"
 								icon="roles"
 								title={T()("roles.management")}
 								permission={permissions().roles}
@@ -302,28 +302,28 @@ export const NavigationMenuContent: Component<{
 						<NavigationSection
 							id="lucid:system"
 							title={T()("common.system")}
-							active={isActive("/lucid/system")}
+							active={isActive("/admin/system")}
 						>
 							<NavigationLink
-								href="/lucid/system/overview"
+								href="/admin/system/overview"
 								icon="overview"
 								title={T()("common.overview")}
 								permission={permissions().systemOverview}
 							/>
 							<NavigationLink
-								href="/lucid/system/operations"
+								href="/admin/system/operations"
 								icon="settings"
 								title={T()("common.operations")}
 								permission={permissions().systemOverview}
 							/>
 							<NavigationLink
-								href="/lucid/system/notifications"
+								href="/admin/system/notifications"
 								icon="notifications"
 								title={T()("notifications.title")}
 								permission={permissions().systemOverview}
 							/>
 							<NavigationLink
-								href="/lucid/system/integrations"
+								href="/admin/system/integrations"
 								icon="integrations"
 								title={T()("routes.system.integrations.title")}
 								permission={permissions().integrations}
@@ -335,7 +335,7 @@ export const NavigationMenuContent: Component<{
 								permission={permissions().aiUsage}
 							/>
 							<NavigationLink
-								href="/lucid/system/jobs"
+								href="/admin/system/jobs"
 								icon="queue"
 								title={T()("routes.system.jobs.title")}
 								permission={permissions().jobs}

@@ -212,7 +212,7 @@ const buildCommand = async (options?: {
 		cliLogger.info(
 			"Admin application built:",
 			cliLogger.color.green(
-				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.base}`,
+				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.admin}`,
 			),
 			{
 				silent,

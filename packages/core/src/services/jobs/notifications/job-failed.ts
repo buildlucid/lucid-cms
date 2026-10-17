@@ -32,6 +32,6 @@ export const jobFailedNotification = defineNotification({
 			defaultMessage: "{{name}} failed",
 		}),
 		body: copy.literal(data.errorMessage),
-		href: `/lucid/system/jobs?${new URLSearchParams({ "filter[jobId]": data.jobId })}`,
+		href: `/admin/system/jobs?${new URLSearchParams({ "filter[jobId]": data.jobId })}`,
 	}),
 });

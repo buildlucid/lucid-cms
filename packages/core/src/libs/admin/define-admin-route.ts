@@ -1,7 +1,7 @@
 import type { AdminRoute } from "@lucidcms/admin/types";
 
 /**
- * Defines an admin route rendered at `/lucid/e/<path>`. Add it to `config.admin.routes`.
+ * Defines an admin route rendered at `/admin/e/<path>`. Add it to `config.admin.routes`.
  * Relative component paths resolve from lucid.config.
  *
  * @example

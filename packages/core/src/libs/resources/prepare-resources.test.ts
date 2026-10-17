@@ -158,6 +158,7 @@ test("rejects public outputs that overwrite Lucid assets or escape the output di
 	await write("assets/index.html", "content");
 	for (const output of [
 		"lucid",
+		"admin/index.html",
 		"../outside",
 		"/absolute",
 		"brand/../../outside",

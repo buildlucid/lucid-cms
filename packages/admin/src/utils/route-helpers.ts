@@ -10,18 +10,18 @@ export const getDocumentRoute = (
 	},
 ) => {
 	if (mode === "create") {
-		return `/lucid/collections/${data.collectionKey}/latest/create`;
+		return `/admin/collections/${data.collectionKey}/latest/create`;
 	}
 
 	if (data.version === "revision") {
-		return `/lucid/collections/${data.collectionKey}/revision/${data.documentId}/${data.versionId}`;
+		return `/admin/collections/${data.collectionKey}/revision/${data.documentId}/${data.versionId}`;
 	}
 
 	if (data.version === "snapshot") {
-		return `/lucid/collections/${data.collectionKey}/snapshot/${data.documentId}/${data.versionId}`;
+		return `/admin/collections/${data.collectionKey}/snapshot/${data.documentId}/${data.versionId}`;
 	}
 
-	return `/lucid/collections/${data.collectionKey}/${data.version ?? "latest"}/${data.documentId}`;
+	return `/admin/collections/${data.collectionKey}/${data.version ?? "latest"}/${data.documentId}`;
 };
 
 /** A request's page, or the proposal or snapshot it owns for one document. */
@@ -30,5 +30,5 @@ export const getRequestRoute = (data: {
 	content?: { collectionKey: string; documentId: number };
 }) =>
 	data.content
-		? `/lucid/requests/${data.requestId}/content/${data.content.collectionKey}/${data.content.documentId}`
-		: `/lucid/requests/${data.requestId}`;
+		? `/admin/requests/${data.requestId}/content/${data.content.collectionKey}/${data.content.documentId}`
+		: `/admin/requests/${data.requestId}`;

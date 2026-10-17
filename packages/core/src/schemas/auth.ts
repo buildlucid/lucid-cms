@@ -249,10 +249,10 @@ export const controllerSchemas = {
 				.string()
 				.trim()
 				.max(2048)
-				.regex(/^\/lucid(?:\/|$)/)
+				.regex(/^\/admin(?:\/|$)/)
 				.meta({
 					description: "The redirect path on a successful callback",
-					example: "/lucid",
+					example: "/admin",
 				})
 				.optional(),
 		}),

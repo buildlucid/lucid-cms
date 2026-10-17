@@ -51,7 +51,7 @@ export const MediaFolderCard: Component<{
 		return mediaStore.get.selectedFolders.includes(props.folder.id);
 	});
 	const getPath = createMemo(() => {
-		return `/lucid/media/${props.folder.id}?${location.search}`;
+		return `/admin/media/${props.folder.id}?${location.search}`;
 	});
 
 	// ----------------------------------

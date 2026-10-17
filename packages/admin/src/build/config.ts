@@ -57,7 +57,7 @@ export const createAdminConfig = ({
 	clearScreen: false,
 	envDir: false,
 	root: adminRoot,
-	base: "/lucid/",
+	base: "/admin/",
 	publicDir: false,
 	cacheDir: path.join(projectRoot, ".lucid/vite/admin"),
 	plugins: [

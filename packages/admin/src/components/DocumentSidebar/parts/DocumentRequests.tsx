@@ -57,7 +57,7 @@ export const DocumentRequests: Component<{
 				<Show when={(requests.data?.data.length ?? 0) > 0}>
 					<ViewAllLink
 						class="mt-2 -ms-1 w-fit"
-						href={`/lucid/requests?filter[document]=${encodeURIComponent(documentRef() ?? "")}`}
+						href={`/admin/requests?filter[document]=${encodeURIComponent(documentRef() ?? "")}`}
 					/>
 				</Show>
 			</DocumentSidebarSection>

@@ -18,7 +18,7 @@ export type NotificationAudience = "recipients" | { permission: Permission };
 export type NotificationRender = {
 	title: CopyInput;
 	body?: CopyInput;
-	/** Admin path the notification opens, eg. `/lucid/requests/12`. */
+	/** Admin path the notification opens, eg. `/admin/requests/12`. */
 	href?: string;
 	/** Overrides the type's level for this send. */
 	level?: NotificationLevel;

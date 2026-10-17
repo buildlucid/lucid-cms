@@ -88,7 +88,7 @@ const AgentPanelActions: Component<{
 					<Menu.Separator />
 					<Menu.Item
 						icon={<TbOutlineList size={12} />}
-						href="/lucid/agent/history"
+						href="/admin/agent/history"
 					>
 						{T()("agent.panel.recent.all")}
 					</Menu.Item>
@@ -113,7 +113,7 @@ const AgentPanelActions: Component<{
 							</Menu.Item>
 							<Menu.Item
 								icon={<TbOutlineArrowsDiagonal size={12} />}
-								href={`/lucid/agent/chats/${id}`}
+								href={`/admin/agent/chats/${id}`}
 							>
 								{T()("agent.panel.expand")}
 							</Menu.Item>

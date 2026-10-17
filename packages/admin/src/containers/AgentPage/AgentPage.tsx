@@ -18,7 +18,7 @@ const AgentPage: Component = () => {
 			<PageLayout.Body padding="md" class="blur-background">
 				<Show
 					when={getAgentAccess().chat.length > 0}
-					fallback={<Navigate href="/lucid/agent/routines" />}
+					fallback={<Navigate href="/admin/agent/routines" />}
 				>
 					<AgentHome />
 				</Show>

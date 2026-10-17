@@ -17,7 +17,7 @@ export interface TabsNavProps {
 }
 
 //* hrefs include the admin's mount path, but the router's pathname does not
-const normalisePath = (path: string) => path.replace(/^\/lucid(?=\/|$)/, "");
+const normalisePath = (path: string) => path.replace(/^\/admin(?=\/|$)/, "");
 
 /** Tabs that link between pages, highlighting the current one. */
 export const TabsNav: Component<TabsNavProps> = (props) => {

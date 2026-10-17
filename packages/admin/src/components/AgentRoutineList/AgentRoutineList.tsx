@@ -45,7 +45,7 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 	const runRoutine = api.agent.useRunRoutine({
 		onSuccess: (response) =>
 			navigate(
-				`/lucid/agent/chats/${response.data.conversationId}?runId=${response.data.runId}`,
+				`/admin/agent/chats/${response.data.conversationId}?runId=${response.data.runId}`,
 			),
 	});
 

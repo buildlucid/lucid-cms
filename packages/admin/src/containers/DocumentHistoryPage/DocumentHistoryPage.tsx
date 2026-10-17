@@ -71,17 +71,17 @@ const DocumentHistoryPage: Component = () => {
 	//* Redirect out of the history view when the document/collection isn't available.
 	createEffect(() => {
 		if (state.collectionAccessError()) {
-			navigate("/lucid", { replace: true });
+			navigate("/admin", { replace: true });
 			return;
 		}
 		if (state.documentAccessError()) {
 			if (state.collection()?.mode === "multiple") {
-				navigate(`/lucid/collections/${state.collectionKey()}`, {
+				navigate(`/admin/collections/${state.collectionKey()}`, {
 					replace: true,
 				});
 				return;
 			}
-			navigate("/lucid", { replace: true });
+			navigate("/admin", { replace: true });
 		}
 	});
 

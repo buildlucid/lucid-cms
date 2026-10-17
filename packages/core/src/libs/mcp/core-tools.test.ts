@@ -261,7 +261,7 @@ test("MCP document reads use real custom-field, brick and repeater filters", asy
 		'"settings":{"en":"keep-en","fr":"keep-fr"}',
 	);
 	expect(JSON.stringify(document.structuredContent)).toContain(
-		`https://cms.example.test/lucid/collections/${pages.key}/latest/${aboutId}`,
+		`https://cms.example.test/admin/collections/${pages.key}/latest/${aboutId}`,
 	);
 	const denied = await call("documents_get", {
 		collectionKey: restricted.key,

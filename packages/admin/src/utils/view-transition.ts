@@ -28,7 +28,7 @@ const rendered = (selector: string, timeout: number) =>
  *
  * @example
  * ```ts
- * startViewTransition(() => navigate(`/lucid/agent/chats/${id}`), {
+ * startViewTransition(() => navigate(`/admin/agent/chats/${id}`), {
  * 	ready: "[data-agent-chat] .agent-composer-morph",
  * });
  * ```

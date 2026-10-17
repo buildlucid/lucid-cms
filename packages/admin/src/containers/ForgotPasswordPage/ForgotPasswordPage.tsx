@@ -37,7 +37,7 @@ const ForgotPasswordPage: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (providers.isSuccess && providers.data?.data.disablePassword === true) {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 		}
 	});
 

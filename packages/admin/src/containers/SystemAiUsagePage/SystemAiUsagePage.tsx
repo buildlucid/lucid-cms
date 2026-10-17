@@ -88,7 +88,7 @@ const SystemAiUsagePage: Component = () => {
 							</div>
 							<div class="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
 								<Link
-									href="/lucid/system/operations"
+									href="/admin/system/operations"
 									variant="outline"
 									size="sm"
 								>

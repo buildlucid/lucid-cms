@@ -49,7 +49,7 @@ export const generateRegistry = async (
 				...metadata
 			}) =>
 				componentEntry(
-					{ ...metadata, path: `/lucid/e/${path}`, shell, access },
+					{ ...metadata, path: `/admin/e/${path}`, shell, access },
 					component,
 					`route "${metadata.key}"`,
 					resolve,

@@ -1,4 +1,4 @@
-import { lucidMountPath } from "./constants.js";
+import { adminMountPath } from "./constants.js";
 
 /** Normalizes the public Lucid host to an HTTP(S) origin. */
 const normalizeToolbarHost = (host: string | URL): URL => {
@@ -22,10 +22,10 @@ export const resolveToolbarHost = (
 
 /** Builds the root Lucid admin URL for a host. */
 export const getToolbarAdminUrl = (host: URL): URL =>
-	new URL(lucidMountPath, host);
+	new URL(adminMountPath, host);
 
 /** Builds the root Lucid admin href for a configured host. */
 export const getToolbarAdminHref = (host?: string | URL): string =>
 	host === undefined
-		? lucidMountPath
-		: `${normalizeToolbarHost(host).origin}${lucidMountPath}`;
+		? adminMountPath
+		: `${normalizeToolbarHost(host).origin}${adminMountPath}`;

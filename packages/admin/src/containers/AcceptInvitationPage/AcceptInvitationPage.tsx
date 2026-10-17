@@ -76,7 +76,7 @@ const AcceptInvitationPage: Component = () => {
 		const urlParams = new URLSearchParams(location.search);
 
 		if (!token()) {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 		}
 
 		const errorName = urlParams.get(constants.errorQueryParams.errorName);
@@ -121,7 +121,7 @@ const AcceptInvitationPage: Component = () => {
 					title={T()("auth.invitations.token.invalid.title")}
 					description={T()("auth.invitations.token.invalid.description")}
 					actions={
-						<Link variant="primary" size="sm" href="/lucid/login">
+						<Link variant="primary" size="sm" href="/admin/login">
 							{T()("common.back.to.login")}
 						</Link>
 					}

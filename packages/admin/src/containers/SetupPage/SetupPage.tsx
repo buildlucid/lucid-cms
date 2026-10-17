@@ -26,7 +26,7 @@ const SetupPage: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (setupRequired.isSuccess && !setupRequired.data.data.setupRequired) {
-			navigate("/lucid/login");
+			navigate("/admin/login");
 		}
 	});
 
@@ -45,7 +45,7 @@ const SetupPage: Component = () => {
 					title={T()("errors.generic.title")}
 					description={T()("errors.generic.message")}
 					actions={
-						<Link variant="primary" size="sm" href="/lucid/login">
+						<Link variant="primary" size="sm" href="/admin/login">
 							{T()("common.back.to.login")}
 						</Link>
 					}

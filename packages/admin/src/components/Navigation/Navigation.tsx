@@ -98,7 +98,7 @@ export const Navigation: Component = () => {
 		<>
 			<header class="md:hidden z-32 px-4">
 				<div class="px-2 py-4 bg-sidebar flex items-center justify-between gap-2">
-					<A href="/lucid" class="flex items-center min-w-0">
+					<A href="/admin" class="flex items-center min-w-0">
 						<NavigationLogo />
 					</A>
 					<div class="flex items-center gap-1">

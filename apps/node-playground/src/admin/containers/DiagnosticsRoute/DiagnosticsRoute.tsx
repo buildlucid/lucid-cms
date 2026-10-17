@@ -215,21 +215,21 @@ const DiagnosticsRoute: RouteComponent = () => {
 						<InfoRow.Content>
 							<div class="flex flex-wrap gap-2">
 								<Link
-									href="/lucid/collections/page/latest/create"
+									href="/admin/collections/page/latest/create"
 									variant="outline"
 									size="sm"
 								>
 									Open page editor
 								</Link>
 								<Link
-									href="/lucid/e/standalone-playground"
+									href="/admin/e/standalone-playground"
 									variant="outline"
 									size="sm"
 								>
 									Standalone route
 								</Link>
 								<Link
-									href="/lucid/e/public-playground"
+									href="/admin/e/public-playground"
 									variant="outline"
 									size="sm"
 								>

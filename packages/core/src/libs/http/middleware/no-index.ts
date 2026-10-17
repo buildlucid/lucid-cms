@@ -3,6 +3,7 @@ import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 
 const basePath = `/${constants.directories.base}`;
+const adminPath = `/${constants.directories.admin}`;
 const cdnPath = `${basePath}/cdn`;
 
 const isWithin = (path: string, prefix: string) =>
@@ -12,7 +13,9 @@ const isWithin = (path: string, prefix: string) =>
 const noIndex = createMiddleware(async (c: LucidHonoContext, next) => {
 	await next();
 
-	if (!isWithin(c.req.path, basePath) || isWithin(c.req.path, cdnPath)) return;
+	const path = c.req.path;
+	const isLucidPath = isWithin(path, basePath) || isWithin(path, adminPath);
+	if (!isLucidPath || isWithin(path, cdnPath)) return;
 	c.header("X-Robots-Tag", "noindex, nofollow");
 });
 

@@ -1861,7 +1861,7 @@ test("completing a proposal into latest gives latest the proposal's workflow", a
 		.where("href", "like", `%/${id}`)
 		.executeTakeFirstOrThrow();
 	expect(todo).toEqual({
-		href: `/lucid/collections/${key}/latest/${id}`,
+		href: `/admin/collections/${key}/latest/${id}`,
 		resolved_at: null,
 	});
 });

@@ -27,7 +27,7 @@ import type {
  * 	render: ({ data }) => ({
  * 		title: `Order #${data.orderId} failed`,
  * 		body: data.reason,
- * 		href: `/lucid/shop/orders/${data.orderId}`,
+ * 		href: `/admin/shop/orders/${data.orderId}`,
  * 	}),
  * });
  */

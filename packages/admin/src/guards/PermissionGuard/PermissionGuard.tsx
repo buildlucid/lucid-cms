@@ -16,7 +16,7 @@ const PermissionGuard: Component<PermissionGuardProps> = (props) => {
 
 	if (hasPermission()) return props.children;
 
-	return props.fallback ?? <Navigate href="/lucid" />;
+	return props.fallback ?? <Navigate href="/admin" />;
 };
 
 export default PermissionGuard;

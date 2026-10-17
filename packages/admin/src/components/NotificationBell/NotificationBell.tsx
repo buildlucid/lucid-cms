@@ -115,7 +115,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 					</div>
 					<footer class="flex shrink-0 items-center justify-between gap-3 border-t border-border px-3 py-2">
 						<ViewAllLink
-							href="/lucid/notifications"
+							href="/admin/notifications"
 							label={T()("notifications.view.all")}
 						/>
 						<div class="flex items-center gap-0.5">
@@ -135,7 +135,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 								</Button>
 							</Show>
 							<A
-								href="/lucid/account"
+								href="/admin/account"
 								class={getButtonClasses({
 									variant: "ghost",
 									size: "xs",
