@@ -8,7 +8,6 @@ import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import beginSingleDeletion from "./helpers/begin-single-deletion.js";
 import checkEditToken from "./helpers/check-edit-token.js";
 import executeDeleteHook from "./helpers/execute-delete-hook.js";
-import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 import notifyChange from "./notify-change.js";
 import nullifyDocumentReferences from "./nullify-document-references.js";
 
@@ -109,8 +108,6 @@ const deleteSingle: ServiceFn<
 				hardDelete: false,
 			});
 			if (hookAfterRes.error) return hookAfterRes;
-
-			await invalidateContentDocumentCache(context, data.collectionKey);
 
 			const changed = await notifyChange(context, {
 				change: { type: "deleted", permanent: false },

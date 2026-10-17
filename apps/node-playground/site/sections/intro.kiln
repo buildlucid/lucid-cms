@@ -1,0 +1,5 @@
+{% props brick: Brick %}
+
+<section class="intro">
+	<h2 {{ editable(brick, "title") }}>{{ brick.fields.title }}</h2>
+</section>

@@ -1,0 +1,21 @@
+{
+	"root": ".",
+	"strict": true,
+	"functions": [
+		"document",
+		"documents",
+		"editable",
+		"footer",
+		"head",
+		"notFound",
+		"redirect"
+	],
+	"filters": [],
+	"tests": [],
+	"globals": [],
+	"types": [
+		"Brick",
+		"Document"
+	],
+	"htmlChecks": true
+}

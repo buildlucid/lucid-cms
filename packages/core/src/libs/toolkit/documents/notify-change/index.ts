@@ -6,7 +6,6 @@ import { inputSchema } from "./schema.js";
 
 export type ToolkitDocumentsNotifyChangeInput = z.input<typeof inputSchema>;
 
-/** Reports changed IDs after direct writes, without running authoring hooks. */
 const notify: ServiceFn<[ToolkitDocumentsNotifyChangeInput], undefined> = (
 	context,
 	input,

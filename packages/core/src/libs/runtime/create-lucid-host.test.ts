@@ -314,6 +314,50 @@ describe("createLucidHost database ownership", () => {
 		await host.destroy();
 	});
 
+	test("registers fallback extensions after every other phase", async () => {
+		const fixture = createFixture();
+		const host = await createLucidHost({
+			definition: fixture.definition,
+			runtimeContext,
+			databaseScope: "invocation",
+			http: {
+				extensions: [
+					{
+						name: "fallback-test",
+						phase: "fallback",
+						register: (app) => {
+							app.get("/*", (context) => context.text("fallback"));
+						},
+					},
+					{
+						name: "after-setup-test",
+						phase: "afterSetup",
+						register: (app) => {
+							app.use("/*", async (context, next) => {
+								if (context.req.path === "/static.txt") {
+									return context.text("static");
+								}
+								await next();
+							});
+						},
+					},
+				],
+			},
+		});
+		const invocation = host.createInvocation();
+
+		const [staticResponse, fallbackResponse] = await Promise.all([
+			invocation.handle({
+				request: new Request("http://localhost/static.txt"),
+			}),
+			invocation.handle({ request: new Request("http://localhost/about") }),
+		]);
+
+		expect(await staticResponse.text()).toBe("static");
+		expect(await fallbackResponse.text()).toBe("fallback");
+		await host.destroy();
+	});
+
 	test("reports healthy when the database is reachable", async () => {
 		const fixture = createFixture();
 		const host = await createLucidHost({

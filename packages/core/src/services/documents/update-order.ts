@@ -8,7 +8,6 @@ import {
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
-import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 import notifyChange from "./notify-change.js";
 
 /** Moves a document between two manual-order neighbours. */
@@ -138,8 +137,6 @@ const updateOrder: ServiceFn<
 		},
 	);
 	if (updateRes.error) return updateRes;
-
-	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	const changed = await notifyChange(context, {
 		change: { type: "updated" },

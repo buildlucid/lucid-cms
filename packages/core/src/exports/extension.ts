@@ -22,6 +22,8 @@ export {
 export { consumeJob } from "../libs/jobs/consume/index.js";
 export { drainJobs } from "../libs/jobs/drain.js";
 export { DEFAULT_KV_NAMESPACE } from "../libs/kv/constants.js";
+export { default as contentCacheTags } from "../libs/kv/content-cache-tags.js";
+export { getHttpCacheNamespaceTokens as getCacheTagTokens } from "../libs/kv/http-cache.js";
 export {
 	getNamespacePrefix as getKVNamespacePrefix,
 	resolveKey as resolveKVKey,
@@ -31,6 +33,7 @@ export {
 	createSignedMediaUrl,
 	validateSignedMediaUrl,
 } from "../libs/media-storage/signed-url.js";
+export { default as pluginPublicPath } from "../libs/plugins/plugin-public-path.js";
 export { resolveRelatedDocumentVersionType } from "../services/documents/helpers/resolve-relation-version-type.js";
 export { ensureLucidDirectoryExists } from "../utils/helpers/lucid-directory.js";
 export {

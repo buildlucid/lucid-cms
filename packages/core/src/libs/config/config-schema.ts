@@ -55,7 +55,7 @@ const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
 
 const HttpExtensionSchema = z.strictObject({
 	name: z.string().trim().min(1),
-	phase: z.enum(["beforeMiddleware", "afterRoutes", "afterSetup"]),
+	phase: z.enum(["beforeMiddleware", "afterRoutes", "afterSetup", "fallback"]),
 	register: HttpExtensionRegisterSchema,
 }) satisfies z.ZodType<HttpExtension>;
 

@@ -66,6 +66,9 @@ const PageCollection = new CollectionBuilder("page", {
 	bricks: {
 		builder: [BannerBrick, IntroBrick, TestingBrick, AllFieldsBrick],
 	},
+	preview: {
+		enabled: true,
+	},
 	publishing: {
 		environments: [
 			{

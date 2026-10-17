@@ -124,6 +124,7 @@ export default Object.freeze({
 		lucid: ".lucid",
 		base: "lucid",
 		plugins: "plugins",
+		pluginPublic: "_lucid",
 	},
 	typeGeneration: {
 		file: "types.d.ts",

@@ -25,7 +25,6 @@ import recordTargetChange from "../../requests/helpers/record-target-change.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
 import checkSingleCollectionDocumentCount from "../checks/check-single-collection-document-count.js";
 import notifyChange from "../notify-change.js";
-import invalidateContentDocumentCache from "./invalidate-content-cache.js";
 import requiresReview from "./requires-review.js";
 
 /**
@@ -267,8 +266,6 @@ const saveDocument: ServiceFn<
 	if (requested) {
 		return { error: undefined, data: upsertDocRes.data.id };
 	}
-
-	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	const changed = await notifyChange(context, {
 		change:

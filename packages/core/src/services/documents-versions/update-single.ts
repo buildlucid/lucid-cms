@@ -16,7 +16,6 @@ import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import checkSaveHold from "../document-editors/check-save-hold.js";
 import resetStage from "../document-workflows/reset-stage.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
-import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import notifyChange from "../documents/notify-change.js";
 import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-order.js";
 import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
@@ -290,8 +289,6 @@ const updateSingle: ServiceFn<
 				userId: data.userId,
 			});
 			if (resetRes.error) return resetRes;
-
-			await invalidateContentDocumentCache(context, data.collectionKey);
 
 			const changed = await notifyChange(context, {
 				change: { type: "updated", version: updateContextRes.data.versionType },

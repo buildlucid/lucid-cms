@@ -1,0 +1,1 @@
+import "@lucidcms/client/bootstrap";

@@ -1,7 +1,10 @@
 import { definePlugin } from "@lucidcms/core";
+import { pluginPublicPath } from "@lucidcms/core/extension";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
+
+const ICON_PATH = pluginPublicPath(PLUGIN_KEY, "icon.svg");
 
 /** Adds Microsoft sign-in. An existing provider with the microsoft key takes precedence. */
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -14,7 +17,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			public: [
 				{
 					input: new URL("../assets/microsoft-icon.svg", import.meta.url),
-					output: "lucid-plugins/microsoft-auth/icon.svg",
+					output: ICON_PATH,
 				},
 			],
 		},
@@ -27,7 +30,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.auth.providers.push({
 				key: PLUGIN_IDENTIFIER,
 				name: "Microsoft",
-				icon: "/lucid-plugins/microsoft-auth/icon.svg",
+				icon: `/${ICON_PATH}`,
 				enabled: pluginOptions.enabled ?? true,
 				type: "oidc" as const,
 				config: {

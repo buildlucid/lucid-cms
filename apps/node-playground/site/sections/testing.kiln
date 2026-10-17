@@ -1,0 +1,5 @@
+{% props brick: Brick %}
+
+<section class="testing">
+	<p>{{ brick.fields["text-key"] }}</p>
+</section>

@@ -3,7 +3,6 @@ import type { DocumentChangeMetadata } from "../../../libs/hooks/types.js";
 import type { AgentRoutineEventName } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import recordRoutineEvent from "../../agent/helpers/record-routine-event.js";
-import invalidateContentDocumentCache from "../../documents/helpers/invalidate-content-cache.js";
 import notifyChange from "../../documents/notify-change.js";
 import type { RequestDocumentRecord } from "../types.js";
 
@@ -60,11 +59,6 @@ const notifyRequestChanges: ServiceFn<
 		})),
 	];
 
-	for (const collectionKey of new Set(
-		changes.map((entry) => entry.document.collection_key),
-	)) {
-		await invalidateContentDocumentCache(context, collectionKey);
-	}
 	for (const entries of Map.groupBy(
 		changes,
 		(entry) =>

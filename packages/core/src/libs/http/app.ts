@@ -444,6 +444,16 @@ const createApp = async (props: {
 				...(props.http?.extensions ?? []),
 			],
 		});
+
+		await runHttpExtensions({
+			app,
+			config: props.config,
+			phase: "fallback",
+			extensions: [
+				...props.config.http.extensions,
+				...(props.http?.extensions ?? []),
+			],
+		});
 	} catch (error) {
 		await destroyLogger();
 		throw error;

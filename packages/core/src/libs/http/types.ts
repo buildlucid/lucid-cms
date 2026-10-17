@@ -17,17 +17,17 @@ export type HttpExtensionRegister = (
 	config: ResolvedLucidConfig,
 ) => void | Promise<void>;
 
-/** Registration timing: before core middleware, after routes, or after the full HTTP app setup. */
+/** HTTP extension registration order, with fallback running after all other phases. */
 export type HttpExtensionPhase =
 	| "beforeMiddleware"
 	| "afterRoutes"
-	| "afterSetup";
+	| "afterSetup"
+	| "fallback";
 
 /** An app registration callback with an explicit lifecycle phase. */
 export type HttpExtension = {
 	/** Name used to identify the extension. */
 	name: string;
-	/** Register before middleware, after routes, or after HTTP setup is complete. */
 	phase: HttpExtensionPhase;
 	/** Add middleware or routes at the selected phase. */
 	register: HttpExtensionRegister;

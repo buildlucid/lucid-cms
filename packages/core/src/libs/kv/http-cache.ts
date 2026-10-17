@@ -10,7 +10,7 @@ const HTTP_NAMESPACE_PREFIX = "http-cache:";
 const toHttpNamespace = (tag: string) => `${HTTP_NAMESPACE_PREFIX}${tag}`;
 
 /**
- * Resolve the namespace token for each HTTP cache tag.
+ * Resolves the namespace token for each cache tag.
  */
 export const getHttpCacheNamespaceTokens = async (
 	context: ServiceContext,

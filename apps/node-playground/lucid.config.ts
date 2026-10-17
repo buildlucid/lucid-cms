@@ -14,9 +14,11 @@ import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { seoPlugin } from "@lucidcms/plugin-seo";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
+import { sitePlugin } from "@lucidcms/plugin-site";
 import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
+import siteRoutes from "./site/routes.js";
 import diagnosticsRoute from "./src/admin/containers/DiagnosticsRoute/config.js";
 import publicRoute from "./src/admin/containers/PublicRoute/config.js";
 import standaloneRoute from "./src/admin/containers/StandaloneRoute/config.js";
@@ -347,6 +349,11 @@ export default defineConfig({
 			}),
 			nodemailerPlugin({
 				transporter: transporter,
+			}),
+			sitePlugin({
+				mode: "static",
+				environment: "production",
+				routes: siteRoutes,
 			}),
 			// redisPlugin({
 			// 	connection: env.REDIS_CONNECTION,

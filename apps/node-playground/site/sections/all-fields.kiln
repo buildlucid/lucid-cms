@@ -1,0 +1,3 @@
+{% props brick: Brick %}
+
+<section class="all-fields"></section>

@@ -1,0 +1,10 @@
+{% extends "layouts/base" %}
+
+{% block title %}
+	Not found | Playground
+{% endblock %}
+
+{% block content %}
+	<h1>Page not found</h1>
+	<p>Nothing lives at {{ route.path }}.</p>
+{% endblock %}

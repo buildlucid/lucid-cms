@@ -7,7 +7,7 @@
 	"scripts": {
 		"dev": "lucidcms dev",
 		"serve": "lucidcms serve",
-		"build": "lucidcms build",
+		"build": "lucidcms build && lucidcms site:build",
 		"typegen": "lucidcms typegen",
 		"start": "lucidcms build && node dist/server.js",
 		"sync": "lucidcms sync",
@@ -43,6 +43,7 @@
 		"@lucidcms/plugin-resend": "*",
 		"@lucidcms/plugin-s3": "*",
 		"@lucidcms/plugin-sharp": "*",
+		"@lucidcms/plugin-site": "*",
 		"@lucidcms/db-postgres": "*",
 		"@lucidcms/db-sqlite": "*",
 		"@lucidcms/plugin-worker-queues": "*",

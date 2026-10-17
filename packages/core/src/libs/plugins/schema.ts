@@ -32,6 +32,17 @@ export const PluginDefinitionSchema: z.ZodType<LucidPluginDefinition> =
 					typeof value.create === "function",
 			)
 			.optional(),
+		commands: z
+			.array(
+				z.strictObject({
+					name: z.string().trim().min(1),
+					description: z.string(),
+					run: callback<
+						NonNullable<LucidPluginDefinition["commands"]>[number]["run"]
+					>(),
+				}),
+			)
+			.optional(),
 		hooks: z
 			.strictObject({
 				init: callback<

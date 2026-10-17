@@ -39,7 +39,7 @@
 		"crons": ["* * * * *"]
 	},
 	"build": {
-		"watch_dir": "./src",
+		"watch_dir": ["./src", "./site"],
 		"command": "lucidcms build --silent",
 		"cwd": "./"
 	}

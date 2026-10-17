@@ -1,0 +1,9 @@
+{% props locale %}
+
+{% set pages = documents("page", locale: locale, perPage: 3) %}
+
+<ul class="latest-pages">
+	{% for item in pages %}
+		<li><a href="{{ item.url }}">{{ item.fields.page_title ?? "Untitled" }}</a></li>
+	{% endfor %}
+</ul>

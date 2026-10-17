@@ -1,0 +1,21 @@
+{% extends "layouts/base" %}
+
+{% set page = document("page", filter: { _fullSlug: route.path }) ?? notFound() %}
+{% set lang = page.locale %}
+
+{% block title %}{{ page.fields.page_title }} | Playground{% endblock %}
+
+{% block content %}
+	{% component "components/card" with { title: page.fields.page_title, editable: editable(page, "page_title") } %}
+		{% fill "meta" %}<a href="{{ page.url }}">{{ page.url }}</a>{% endfill %}
+		<p>Document {{ page.id }}, rendered in {{ page.locale }}.</p>
+	{% endcomponent %}
+
+	{% for brick in page.bricks %}
+		{% include "sections/" ~ brick.key with { brick: brick } %}
+	{% endfor %}
+
+	{% island "islands/latest-pages" with { locale: page.locale } %}
+		<p>Loading the latest pages…</p>
+	{% endisland %}
+{% endblock %}

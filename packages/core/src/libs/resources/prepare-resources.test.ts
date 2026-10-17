@@ -171,6 +171,43 @@ test("rejects public outputs that overwrite Lucid assets or escape the output di
 		).rejects.toThrow("invalid or reserved");
 });
 
+test("keeps the _lucid public folder for plugins", async () => {
+	await write("assets/icon.svg", "icon");
+	await expect(
+		prepareResources(
+			{
+				sources: {
+					public: [{ input: "./assets/icon.svg", output: "_lucid/icon.svg" }],
+				},
+			},
+			root,
+		),
+	).rejects.toThrow("invalid or reserved");
+
+	const result = await prepareResources(
+		{
+			plugins: [
+				{
+					key: "plugin-example",
+					lucid: "*",
+					sources: {
+						public: [
+							{
+								input: path.join(root, "assets/icon.svg"),
+								output: "_lucid/plugin-example/icon.svg",
+							},
+						],
+					},
+				},
+			],
+		},
+		root,
+	);
+	expect(result.files.public.map((file) => file.name)).toContain(
+		"_lucid/plugin-example/icon.svg",
+	);
+});
+
 test("maps a single public file to its exact output filename", async () => {
 	await write("assets/icon.svg", "icon");
 	const result = await prepareResources(

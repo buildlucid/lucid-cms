@@ -444,6 +444,8 @@ export type {
 } from "../libs/permission/types.js";
 export type {
 	LucidPlugin,
+	LucidPluginCommand,
+	LucidPluginCommandLogger,
 	LucidPluginDefinition,
 	LucidPluginHookInit,
 	LucidPluginHookRuntime,

@@ -1,7 +1,10 @@
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
-import type { ServiceResponse } from "../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
 import type { Translator } from "../i18n/types.js";
-import type { ResourceSources } from "../resources/types.js";
+import type { ResourceFile, ResourceSources } from "../resources/types.js";
 import type {
 	AdapterRuntimeContext,
 	ConfigTransform,
@@ -11,7 +14,7 @@ import type {
 	RuntimeBuildArtifactCompile,
 	RuntimeBuildArtifactFile,
 } from "../runtime/types.js";
-import type { ToolkitDefinition } from "../toolkit/types.js";
+import type { Toolkit, ToolkitDefinition } from "../toolkit/types.js";
 
 export type LucidPluginRuntimeHookResult = {
 	artifacts?: Array<
@@ -58,6 +61,28 @@ export type LucidPluginHooks = {
 	runtime?: LucidPluginHookRuntime;
 };
 
+/** Writes a plugin command's output to the terminal. */
+export type LucidPluginCommandLogger = {
+	info: (message: string) => void;
+	warn: (message: string) => void;
+	error: (error: unknown, heading: string) => void;
+};
+
+/** Runs plugin CLI commands with a database connection, KV and toolkit; run `lucidcms migrate` first when needed and throw to fail. */
+export type LucidPluginCommand = {
+	/** Plugin command name, such as `site:build`, which cannot replace a built-in command. */
+	name: string;
+	description: string;
+	run: (props: {
+		config: ResolvedLucidConfig;
+		context: ServiceContext;
+		toolkit: Toolkit;
+		/** Public directory and `sources.public` files, with `path` naming each file on disk and `name` its public path. */
+		publicFiles: ResourceFile[];
+		logger: LucidPluginCommandLogger;
+	}) => void | Promise<void>;
+};
+
 /** A callback that mutates the resolved configuration draft. */
 export type PluginConfigure = ConfigTransform;
 
@@ -80,6 +105,10 @@ export type LucidPluginDefinition = {
 	 * The hooks that the plugin can register.
 	 */
 	hooks?: LucidPluginHooks;
+	/**
+	 * CLI commands the plugin adds, such as `site:build`.
+	 */
+	commands?: LucidPluginCommand[];
 	/**
 	 * Can be used to check if the plugin is compatible with the current runtime context and state of the config.
 	 *

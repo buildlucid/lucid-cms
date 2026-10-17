@@ -1,7 +1,10 @@
 import { definePlugin } from "@lucidcms/core";
+import { pluginPublicPath } from "@lucidcms/core/extension";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
+
+const ICON_PATH = pluginPublicPath(PLUGIN_KEY, "icon.svg");
 
 /** Adds Google sign-in. An existing provider with the google key takes precedence. */
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -12,7 +15,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			public: [
 				{
 					input: new URL("../assets/google-icon.svg", import.meta.url),
-					output: "lucid-plugins/google-auth/icon.svg",
+					output: ICON_PATH,
 				},
 			],
 		},
@@ -25,7 +28,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.auth.providers.push({
 				key: PLUGIN_IDENTIFIER,
 				name: "Google",
-				icon: "/lucid-plugins/google-auth/icon.svg",
+				icon: `/${ICON_PATH}`,
 				enabled: pluginOptions.enabled ?? true,
 				type: "oidc" as const,
 				config: {

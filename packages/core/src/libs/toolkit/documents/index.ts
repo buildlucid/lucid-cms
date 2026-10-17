@@ -173,7 +173,7 @@ export type ToolkitDocuments = {
 	getSingle: <TCollectionKey extends CollectionDocumentKey>(
 		input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
 	) => ServiceResponse<ToolkitDocumentsGetSingleResult<TCollectionKey>>;
-	/** Reports changed IDs after direct writes. Does not save content or run authoring hooks. */
+	/** Invalidates cached content after direct writes; skips saves and authoring hooks. */
 	notifyChange: (
 		input: Parameters<typeof notifyChange>[1],
 	) => ReturnType<typeof notifyChange>;

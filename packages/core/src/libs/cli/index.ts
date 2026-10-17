@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import packageJson from "../../../package.json" with { type: "json" };
+import loadConfigFile from "../config/load-config-file.js";
 import buildCommand from "./commands/build.js";
 import devCommand from "./commands/dev.js";
 import jobSchedulerCommand from "./commands/job-scheduler.js";
@@ -10,11 +11,13 @@ import migrateNewCommand from "./commands/migrate-new.js";
 import migrateResetCommand from "./commands/migrate-reset.js";
 import migrateRollbackCommand from "./commands/migrate-rollback.js";
 import migrateStatusCommand from "./commands/migrate-status.js";
+import { registerPluginCommands } from "./commands/plugin-command.js";
 import seedCommand, { seedListCommand } from "./commands/seed.js";
 import seedNewCommand from "./commands/seed-new.js";
 import serveCommand from "./commands/serve.js";
 import syncCommand from "./commands/sync.js";
 import typegenCommand from "./commands/typegen.js";
+import cliLogger from "./logger.js";
 
 // TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
 const program = new Command();
@@ -138,5 +141,18 @@ program
 	.description("Run a registered job schedule")
 	.option("--remote", remoteOptionDescription)
 	.action(jobSchedulerCommand);
+
+try {
+	await registerPluginCommands(program, () =>
+		loadConfigFile({ prepareRuntime: true }),
+	);
+} catch (error) {
+	if (error instanceof Error) {
+		cliLogger.errorInstance(error, "Failed to load plugin commands");
+	} else {
+		cliLogger.error("Failed to load plugin commands", "Unknown error");
+	}
+	process.exit(1);
+}
 
 program.parse();

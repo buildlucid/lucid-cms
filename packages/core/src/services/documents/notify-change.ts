@@ -3,12 +3,17 @@ import type { ToolkitDocumentsNotifyChangeInput } from "../../libs/toolkit/docum
 import type { ServiceFn } from "../../utils/services/types.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import emitDocumentChange from "./helpers/emit-change.js";
+import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
-/** Reports persisted changes. Reference maintenance belongs to the write services. */
+/** Call after persistence; write services must maintain references. */
 const notifyChange: ServiceFn<
 	[ToolkitDocumentsNotifyChangeInput],
 	undefined
 > = async (context, data) => {
+	if (data.ids.length > 0) {
+		await invalidateContentDocumentCache(context, data.collectionKey);
+	}
+
 	const emitted = await emitDocumentChange(context, data);
 	if (emitted.error || data.ids.length === 0) return emitted;
 

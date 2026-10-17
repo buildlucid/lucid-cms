@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="{{ lang ?? "en" }}">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{% block title %}Playground{% endblock %}</title>
+		{% outlet "head" %}
+		{{ head() }}
+	</head>
+	{% flush %}
+	<body>
+		<header><a href="/">Playground</a></header>
+		<main>{% block content %}{% endblock %}</main>
+		{{ footer() }}
+	</body>
+</html>

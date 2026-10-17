@@ -1,0 +1,9 @@
+{% props title, editable = "" %}
+
+<article class="card">
+	<h1 {{ editable }}>{{ title }}</h1>
+	{% if slots.meta %}
+		<p class="card__meta">{% slot "meta" %}{% endslot %}</p>
+	{% endif %}
+	{% slot %}{% endslot %}
+</article>
