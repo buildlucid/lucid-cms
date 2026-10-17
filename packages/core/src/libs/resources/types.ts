@@ -2,7 +2,7 @@ export const resourceKinds = [
 	"migrations",
 	"seeds",
 	"translations",
-	"templates",
+	"emails",
 	"public",
 ] as const;
 

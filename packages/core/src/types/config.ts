@@ -291,7 +291,7 @@ export type SecretConfig = {
 export interface LucidConfig {
 	/** Custom permission and integration scope groups. */
 	access?: AccessGroup[];
-	/** Resource directories relative to lucid.config. Defaults to ./lucid/<resource>, except public uses ./public. Set false to disable one. */
+	/** Resource directories relative to lucid.config. Defaults to ./database/migrations, ./database/seeds, ./translations, ./emails and ./public. Set false to disable one. */
 	directories?: ResourceDirectories;
 	/** Additional resource files, directories, package exports or file URLs. These remain enabled when a project directory is disabled. */
 	sources?: ResourceSources;

@@ -23,7 +23,7 @@ test("loads project, package and namespaced inline seed sources", async () => {
 		"seeds",
 	);
 	const packageSeeds = path.join(packageRoot, "seeds");
-	const projectSeeds = path.join(projectRoot, "lucid/seeds");
+	const projectSeeds = path.join(projectRoot, "database/seeds");
 
 	await Promise.all([
 		mkdir(packageSeeds, { recursive: true }),

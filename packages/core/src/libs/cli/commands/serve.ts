@@ -146,7 +146,7 @@ const serveCommand = async () => {
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 			prepareEmailTemplates({
 				config: configRes.config,
-				files: configRes.resources.files.templates,
+				files: configRes.resources.files.emails,
 				silent: false,
 				verbose: false,
 			}),

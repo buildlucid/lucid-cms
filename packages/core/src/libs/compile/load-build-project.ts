@@ -71,7 +71,7 @@ const loadBuildProject = async (props?: {
 			? import("../email/templates/load-email-templates.js").then(
 					({ default: loadEmailTemplates }) =>
 						loadEmailTemplates({
-							files: preparedLoaded.resources.files.templates,
+							files: preparedLoaded.resources.files.emails,
 							silent: props?.silent,
 						}),
 				)

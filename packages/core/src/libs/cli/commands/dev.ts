@@ -173,7 +173,7 @@ const devCommand = async (options?: {
 			const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 				prepareEmailTemplates({
 					config: configResult.config,
-					files: configResult.resources.files.templates,
+					files: configResult.resources.files.emails,
 					silent: false,
 					verbose: false,
 				}),

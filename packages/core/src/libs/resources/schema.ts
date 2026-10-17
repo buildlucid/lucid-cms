@@ -15,7 +15,7 @@ export const ResourceSourcesSchema = z
 		migrations: z.array(source).optional(),
 		seeds: z.array(source).optional(),
 		translations: z.array(source).optional(),
-		templates: z.array(source).optional(),
+		emails: z.array(source).optional(),
 		public: z
 			.array(
 				z.union([

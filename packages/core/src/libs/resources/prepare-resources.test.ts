@@ -32,7 +32,7 @@ afterEach(async () => {
 test("collects nested modules without importing them and ignores tests, declarations and unsupported extensions", async () => {
 	for (const extension of ["ts", "mts", "js", "mjs"])
 		await write(
-			`lucid/seeds/nested/${extension}.${extension}`,
+			`database/seeds/nested/${extension}.${extension}`,
 			'throw new Error("Command only");',
 		);
 	for (const file of [
@@ -42,8 +42,8 @@ test("collects nested modules without importing them and ignores tests, declarat
 		"__tests__/bad.ts",
 		"bad.cjs",
 	])
-		await write(`lucid/seeds/${file}`, "");
-	await write("lucid/migrations/1751400000000-example.ts", "");
+		await write(`database/seeds/${file}`, "");
+	await write("database/migrations/1751400000000-example.ts", "");
 	const result = await prepareResources({}, root);
 	expect(result.files.seeds.map((file) => file.name)).toEqual([
 		"nested/js.js",
@@ -52,12 +52,12 @@ test("collects nested modules without importing them and ignores tests, declarat
 		"nested/ts.ts",
 	]);
 	expect(result.files.migrations).toHaveLength(1);
-	expect(result.watch).toContain(path.join(root, "lucid/templates"));
+	expect(result.watch).toContain(path.join(root, "emails"));
 });
 
 test("disabling a project directory preserves plugin sources", async () => {
 	const pluginFile = await write("plugin/en.admin.json", "{}");
-	await write("lucid/translations/en.admin.json", "{}");
+	await write("translations/en.admin.json", "{}");
 	const result = await prepareResources(
 		{
 			directories: { translations: false },
@@ -79,21 +79,21 @@ test("disabling a project directory preserves plugin sources", async () => {
 
 test("replaces a default directory and rejects missing configured directories", async () => {
 	const custom = await write("custom/welcome.mustache", "custom");
-	await write("lucid/templates/default.mustache", "default");
+	await write("emails/default.mustache", "default");
 	const result = await prepareResources(
-		{ directories: { templates: "./custom" } },
+		{ directories: { emails: "./custom" } },
 		root,
 	);
-	expect(result.files.templates.map((file) => file.path)).toEqual([custom]);
+	expect(result.files.emails.map((file) => file.path)).toEqual([custom]);
 	await expect(
-		prepareResources({ directories: { templates: "./missing" } }, root),
+		prepareResources({ directories: { emails: "./missing" } }, root),
 	).rejects.toThrow("could not be read");
 });
 
 test("preserves source precedence and nested names for data and public resources", async () => {
-	await write("plugin/templates/account/welcome.mustache", "plugin");
-	await write("project/templates/account/welcome.mustache", "project source");
-	await write("lucid/templates/account/welcome.mustache", "project directory");
+	await write("plugin/emails/account/welcome.mustache", "plugin");
+	await write("project/emails/account/welcome.mustache", "project source");
+	await write("emails/account/welcome.mustache", "project directory");
 	await write("assets/icons/logo.svg", "logo");
 	const result = await prepareResources(
 		{
@@ -101,18 +101,18 @@ test("preserves source precedence and nested names for data and public resources
 				{
 					key: "example",
 					lucid: "*",
-					sources: { templates: ["./plugin/templates"] },
+					sources: { emails: ["./plugin/emails"] },
 					configure: () => {},
 				},
 			],
 			sources: {
-				templates: ["./project/templates"],
+				emails: ["./project/emails"],
 				public: [{ input: "./assets", output: "brand" }],
 			},
 		},
 		root,
 	);
-	expect(result.files.templates.map((file) => file.name)).toEqual(
+	expect(result.files.emails.map((file) => file.name)).toEqual(
 		Array(3).fill("account/welcome.mustache"),
 	);
 	expect(result.files.public[0]?.name).toBe("brand/icons/logo.svg");
@@ -120,14 +120,13 @@ test("preserves source precedence and nested names for data and public resources
 
 test("deduplicates linked sources and terminates symlink loops", async () => {
 	const file = await write("shared/welcome.mustache", "shared");
-	await mkdir(path.join(root, "lucid"), { recursive: true });
-	await symlink(path.join(root, "shared"), path.join(root, "lucid/templates"));
+	await symlink(path.join(root, "shared"), path.join(root, "emails"));
 	await symlink(path.join(root, "shared"), path.join(root, "shared/loop"));
 	const result = await prepareResources(
-		{ sources: { templates: [pathToFileURL(file)] } },
+		{ sources: { emails: [pathToFileURL(file)] } },
 		root,
 	);
-	expect(result.files.templates.map((entry) => entry.path)).toEqual([file]);
+	expect(result.files.emails.map((entry) => entry.path)).toEqual([file]);
 });
 
 test("resolves exported package directories from the owning project and refuses private paths", async () => {

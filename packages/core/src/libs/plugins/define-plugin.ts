@@ -14,7 +14,7 @@ import type { LucidPluginDefinition } from "./types.js";
  *     brand: { name: "Example Studio" },
  *   },
  *   sources: {
- *     templates: [new URL("./templates/", import.meta.url)],
+ *     emails: [new URL("./emails/", import.meta.url)],
  *   },
  * });
  * ```
