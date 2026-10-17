@@ -19,7 +19,7 @@ export interface CreatePreviewParams {
 
 export const createPreviewReq = (params: CreatePreviewParams) => {
 	return request<ResponseBody<PreviewSessionURLResponse>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/preview`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}/preview`,
 		csrf: true,
 		method: "POST",
 		body: {

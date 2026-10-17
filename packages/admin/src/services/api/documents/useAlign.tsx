@@ -22,7 +22,7 @@ const useAlign = (props?: {
 	serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: (params) =>
 			request({
-				url: `/lucid/api/v1/documents/${encodeURIComponent(params.collectionKey)}/${params.documentId}/${params.versionId}/align`,
+				url: `/api/v1/documents/${encodeURIComponent(params.collectionKey)}/${params.documentId}/${params.versionId}/align`,
 				method: "POST",
 				csrf: true,
 				body: params.body,

@@ -1,4 +1,4 @@
-import { lucidMountPath } from "./constants.js";
+import { apiMountPath } from "./constants.js";
 import type { ToolbarAuthentication } from "./types.js";
 
 const authenticationCacheTtlMs = 30_000;
@@ -32,7 +32,7 @@ const checkToolbarAuthentication = async (
 	host: URL,
 ): Promise<boolean> => {
 	const response = await targetWindow.fetch(
-		new URL(`${lucidMountPath}/api/v1/auth/status`, host),
+		new URL(`${apiMountPath}/v1/auth/status`, host),
 		{
 			credentials: "include",
 			headers: { Accept: "application/json" },

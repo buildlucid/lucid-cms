@@ -177,8 +177,8 @@ export const loadAdminTranslations = async (
 
 	try {
 		const target = locale
-			? `/lucid/api/v1/i18n/admin/${encodeURIComponent(locale)}`
-			: "/lucid/api/v1/i18n/admin";
+			? `/api/v1/i18n/admin/${encodeURIComponent(locale)}`
+			: "/api/v1/i18n/admin";
 		const response = await fetch(target, {
 			method: "GET",
 			credentials: "include",

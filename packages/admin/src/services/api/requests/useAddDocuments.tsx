@@ -11,7 +11,7 @@ export interface Params {
 
 export const addDocumentsReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/documents`,
+		url: `/api/v1/requests/${params.id}/documents`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

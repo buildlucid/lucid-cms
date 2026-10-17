@@ -74,7 +74,7 @@ describe("create upload session", () => {
 					createUploadSession: adapterCreateUploadSession,
 				},
 				request: {
-					url: "https://example.com/lucid/api/v1/media/upload-session",
+					url: "https://example.com/api/v1/media/upload-session",
 				},
 				config: {
 					host: "https://example.com",
@@ -138,7 +138,7 @@ describe("create upload session", () => {
 					completeUploadSession: vi.fn(),
 				},
 				request: {
-					url: "https://example.com/lucid/api/v1/media/upload-session",
+					url: "https://example.com/api/v1/media/upload-session",
 				},
 				config: {
 					host: "https://example.com",
@@ -198,7 +198,7 @@ describe("create upload session", () => {
 					createUploadSession: adapterCreateUploadSession,
 				},
 				request: {
-					url: "https://example.com/lucid/api/v1/media/upload-session",
+					url: "https://example.com/api/v1/media/upload-session",
 				},
 				config: {
 					host: "https://example.com",

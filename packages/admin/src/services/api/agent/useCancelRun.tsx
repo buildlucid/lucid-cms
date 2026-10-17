@@ -12,7 +12,7 @@ const useCancelRun = () => {
 	>({
 		mutationFn: (params) =>
 			request({
-				url: `/lucid/api/v1/agent/runs/${params.id}/cancel`,
+				url: `/api/v1/agent/runs/${params.id}/cancel`,
 				method: "POST",
 			}),
 		invalidates: [

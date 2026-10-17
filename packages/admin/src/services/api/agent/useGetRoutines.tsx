@@ -21,7 +21,7 @@ const useGetRoutines = (params?: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.agent.routines(), queryKey(), params?.key?.()],
 		queryFn: () =>
 			request<ResponseBody<AgentRoutine[]>>({
-				url: "/lucid/api/v1/agent/routines",
+				url: "/api/v1/agent/routines",
 				query: queryParams().queryString
 					? queryParams()
 					: { perPage: -1, sort: { name: "asc" } },

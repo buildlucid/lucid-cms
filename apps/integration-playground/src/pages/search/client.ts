@@ -49,8 +49,8 @@ export const searchContent = async (options: {
 }) => {
 	const url = new URL(
 		options.query.source === "media"
-			? "/lucid/api/v1/content/search/media"
-			: "/lucid/api/v1/content/search",
+			? "/api/v1/content/search/media"
+			: "/api/v1/content/search",
 		options.origin,
 	);
 	url.search = new URLSearchParams({

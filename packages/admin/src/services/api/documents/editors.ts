@@ -8,7 +8,7 @@ type EditorLocation = {
 };
 
 const editorUrl = (location: EditorLocation) =>
-	`/lucid/api/v1/documents/${location.collectionKey}/${location.documentId}/editors/${encodeURIComponent(location.tabId)}`;
+	`/api/v1/documents/${location.collectionKey}/${location.documentId}/editors/${encodeURIComponent(location.tabId)}`;
 
 /** Tells the server this tab still has the document open, and learns who holds it. */
 export const updateEditorReq = (

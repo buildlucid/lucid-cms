@@ -25,7 +25,7 @@ const useGetHierarchy = (params?: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<MediaFolder[]>>({
-				url: "/lucid/api/v1/media/folders/hierarchy",
+				url: "/api/v1/media/folders/hierarchy",
 				query: queryParams(),
 				method: "GET",
 			}),

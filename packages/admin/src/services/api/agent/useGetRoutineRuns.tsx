@@ -27,7 +27,7 @@ const useGetRoutineRuns = (
 		queryKey: [...queryKeys.agent.routineRuns(params.id()), queryKey()],
 		queryFn: () =>
 			request<ResponseBody<AgentRun[]>>({
-				url: `/lucid/api/v1/agent/routines/${params.id()}/runs`,
+				url: `/api/v1/agent/routines/${params.id()}/runs`,
 				query: queryParams(),
 			}),
 		placeholderData: keepPreviousData,

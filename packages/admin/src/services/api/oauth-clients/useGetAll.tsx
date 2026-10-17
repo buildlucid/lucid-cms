@@ -11,7 +11,7 @@ const useGetAll = (params: QueryHook<Record<string, never>>) => {
 		queryKey: [...queryKeys.oauthClients.list(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<OAuthClient[]>>({
-				url: "/lucid/api/v1/integrations/oauth-clients",
+				url: "/api/v1/integrations/oauth-clients",
 				method: "GET",
 			}),
 		get enabled() {

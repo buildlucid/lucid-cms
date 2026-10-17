@@ -8,7 +8,7 @@ type Params = Record<string, never>;
 
 export const cancelEmailChangeReq = (_params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: "/lucid/api/v1/account/email-change",
+		url: "/api/v1/account/email-change",
 		csrf: true,
 		method: "DELETE",
 	});

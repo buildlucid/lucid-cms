@@ -19,7 +19,7 @@ interface Params {
 
 export const updateSingleReq = (userId: number, params: Params) => {
 	return request<ResponseBody<Integration>>({
-		url: `/lucid/api/v1/users/${userId}/integrations/${params.id}`,
+		url: `/api/v1/users/${userId}/integrations/${params.id}`,
 		csrf: true,
 		method: "PATCH",
 		body: params.body,

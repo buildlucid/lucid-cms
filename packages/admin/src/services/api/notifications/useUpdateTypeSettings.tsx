@@ -13,7 +13,7 @@ export interface Params {
 
 export const updateTypeSettingsReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/notifications/types/${encodeURIComponent(params.type)}`,
+		url: `/api/v1/notifications/types/${encodeURIComponent(params.type)}`,
 		csrf: true,
 		method: "PATCH",
 		body: {

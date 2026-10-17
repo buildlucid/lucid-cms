@@ -30,7 +30,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.mediaShareLinks.list(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MediaShareLink[]>>({
-				url: `/lucid/api/v1/media/${queryParams().location?.mediaId}/share-links`,
+				url: `/api/v1/media/${queryParams().location?.mediaId}/share-links`,
 				query: queryParams(),
 				method: "GET",
 			}),

@@ -26,7 +26,7 @@ const useGetSchedules = (params: Partial<QueryHook<QueryParams>> = {}) => {
 		queryKey: [...queryKeys.jobs.schedules(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<JobScheduleSummary[]>>({
-				url: "/lucid/api/v1/jobs/schedules",
+				url: "/api/v1/jobs/schedules",
 				query: queryParams(),
 				method: "GET",
 			}),

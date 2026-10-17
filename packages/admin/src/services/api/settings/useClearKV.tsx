@@ -5,7 +5,7 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export const clearKVReq = () => {
 	return request<ResponseBody<null>>({
-		url: "/lucid/api/v1/settings/kv",
+		url: "/api/v1/settings/kv",
 		csrf: true,
 		method: "DELETE",
 	});

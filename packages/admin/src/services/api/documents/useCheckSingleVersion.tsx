@@ -21,7 +21,7 @@ export interface Params {
 
 export const checkSingleVersionReq = (params: Params) => {
 	return request<ResponseBody<DocumentVersionCheckResponse>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}/check`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}/check`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

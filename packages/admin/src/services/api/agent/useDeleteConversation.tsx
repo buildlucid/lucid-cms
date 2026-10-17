@@ -10,7 +10,7 @@ const useDeleteConversation = (props?: { onSuccess?: () => void }) => {
 	return serviceHelpers.useMutationWrapper<{ id: string }, unknown>({
 		mutationFn: (params) =>
 			request({
-				url: `/lucid/api/v1/agent/conversations/${params.id}`,
+				url: `/api/v1/agent/conversations/${params.id}`,
 				method: "DELETE",
 			}),
 		getSuccessToast: () => ({

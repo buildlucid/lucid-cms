@@ -167,7 +167,7 @@ describe("media key helpers", () => {
 				},
 			}),
 		).toBe(
-			"https://example.com/lucid/cdn/public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10.webp?preset=thumbnail-small&format=webp",
+			"https://example.com/cdn/public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10.webp?preset=thumbnail-small&format=webp",
 		);
 	});
 

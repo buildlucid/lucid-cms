@@ -10,7 +10,7 @@ const useGetMemories = (params?: { enabled?: Accessor<boolean> }) =>
 		queryKey: queryKeys.agent.memories(),
 		queryFn: () =>
 			request<ResponseBody<AgentMemories>>({
-				url: "/lucid/api/v1/agent/memories",
+				url: "/api/v1/agent/memories",
 			}),
 		enabled: params?.enabled?.() ?? true,
 	}));

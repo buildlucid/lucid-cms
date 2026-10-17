@@ -7,7 +7,7 @@ import request from "@/utils/request";
 
 export const getUploadSessionReq = (sessionId: string) => {
 	return request<ResponseBody<UploadSessionStateResponse>>({
-		url: `/lucid/api/v1/media/upload-session/${sessionId}`,
+		url: `/api/v1/media/upload-session/${sessionId}`,
 		csrf: true,
 		method: "GET",
 	});
@@ -26,7 +26,7 @@ export const getUploadPartUrlsReq = (params: {
 			}>;
 		}>
 	>({
-		url: `/lucid/api/v1/media/upload-session/${params.sessionId}/parts`,
+		url: `/api/v1/media/upload-session/${params.sessionId}/parts`,
 		csrf: true,
 		method: "POST",
 		body: {
@@ -40,7 +40,7 @@ export const completeUploadSessionReq = (params: {
 	parts?: UploadSessionPart[];
 }) => {
 	return request<ResponseBody<{ key: string }>>({
-		url: `/lucid/api/v1/media/upload-session/${params.sessionId}/complete`,
+		url: `/api/v1/media/upload-session/${params.sessionId}/complete`,
 		csrf: true,
 		method: "POST",
 		body: {
@@ -51,7 +51,7 @@ export const completeUploadSessionReq = (params: {
 
 export const abortUploadSessionReq = (sessionId: string) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/media/upload-session/${sessionId}`,
+		url: `/api/v1/media/upload-session/${sessionId}`,
 		csrf: true,
 		method: "DELETE",
 	});

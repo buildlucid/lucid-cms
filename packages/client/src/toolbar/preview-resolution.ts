@@ -1,5 +1,5 @@
 import type { PreviewResolution, PreviewRuntimeState } from "@lucidcms/types";
-import { lucidMountPath } from "./constants.js";
+import { apiMountPath } from "./constants.js";
 import { detectBrowserPreview } from "./context.js";
 
 type PreviewResolutionResponse = {
@@ -35,7 +35,7 @@ const fetchPreview = async (
 	signal: AbortSignal,
 ): Promise<Extract<PreviewRuntimeState, { kind: "preview" }>> => {
 	const response = await targetWindow.fetch(
-		new URL(`${lucidMountPath}/api/v1/content/preview`, host),
+		new URL(`${apiMountPath}/v1/content/preview`, host),
 		{
 			method: "POST",
 			credentials: "omit",

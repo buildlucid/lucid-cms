@@ -7,7 +7,7 @@ const useDeleteMemories = (props?: { onSuccess?: () => void }) =>
 	serviceHelpers.useMutationWrapper<{ ids: string[] }, unknown>({
 		mutationFn: (body) =>
 			request({
-				url: "/lucid/api/v1/agent/memories",
+				url: "/api/v1/agent/memories",
 				method: "DELETE",
 				body,
 			}),

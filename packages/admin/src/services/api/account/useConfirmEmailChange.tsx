@@ -10,7 +10,7 @@ interface Params {
 
 export const confirmEmailChangeReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/account/email-change/confirm/${params.token}`,
+		url: `/api/v1/account/email-change/confirm/${params.token}`,
 		csrf: true,
 		method: "PATCH",
 	});

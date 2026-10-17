@@ -10,7 +10,7 @@ interface Params {
 
 export const resendInvitationReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: `/lucid/api/v1/users/${params.userId}/resend-invitation`,
+		url: `/api/v1/users/${params.userId}/resend-invitation`,
 		csrf: true,
 		method: "POST",
 	});

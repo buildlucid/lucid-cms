@@ -45,7 +45,7 @@ describe("setupToolbar", () => {
 		expect(window.location.search).toBe("");
 		expect(fetch).toHaveBeenCalledOnce();
 		expect(fetch).toHaveBeenCalledWith(
-			new URL("/lucid/api/v1/content/preview", window.location.origin),
+			new URL("/api/v1/content/preview", window.location.origin),
 			expect.objectContaining({
 				method: "POST",
 				body: JSON.stringify({ token: firstToken }),

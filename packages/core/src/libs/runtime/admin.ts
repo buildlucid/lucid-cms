@@ -1,8 +1,8 @@
 import constants from "../../constants/constants.js";
 
-const mountPath = `/${constants.directories.admin}`;
+const mountPath = constants.paths.admin;
 
-/** Matches the admin app's paths. Server endpoints live under `/lucid` instead. */
+/** Matches the admin app's paths. */
 export const isAdminPath = (pathname: string) =>
 	pathname === mountPath || pathname.startsWith(`${mountPath}/`);
 

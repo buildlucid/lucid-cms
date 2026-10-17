@@ -23,7 +23,7 @@ type Response = ResponseBody<{ id: number; requestId: number }>;
 
 export const requestSingleReq = (params: Params) => {
 	return request<Response>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/request`,
+		url: `/api/v1/documents/${params.collectionKey}/request`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

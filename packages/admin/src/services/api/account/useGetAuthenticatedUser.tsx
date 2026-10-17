@@ -16,7 +16,7 @@ export const getAuthenticatedUserReq = (
 	options: Pick<RequestParams, "signal" | "displayErrorToast"> = {},
 ) =>
 	request<ResponseBody<User>>({
-		url: "/lucid/api/v1/account",
+		url: "/api/v1/account",
 		...options,
 	});
 

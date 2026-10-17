@@ -17,7 +17,7 @@ const useGetModels = (params: {
 		),
 		queryFn: () =>
 			request<ResponseBody<AiModelCatalog>>({
-				url: `/lucid/api/v1/agent/models/${encodeURIComponent(params.agentKey() ?? "")}`,
+				url: `/api/v1/agent/models/${encodeURIComponent(params.agentKey() ?? "")}`,
 				query: {
 					queryString: params.routineId?.()
 						? `routineId=${params.routineId()}`

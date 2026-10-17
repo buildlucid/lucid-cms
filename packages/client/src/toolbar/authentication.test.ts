@@ -23,7 +23,7 @@ describe("toolbar authentication", () => {
 		expect(second).toBe(true);
 		expect(fetch).toHaveBeenCalledOnce();
 		expect(fetch).toHaveBeenCalledWith(
-			new URL("/lucid/api/v1/auth/status", host),
+			new URL("/api/v1/auth/status", host),
 			expect.objectContaining({ credentials: "include" }),
 		);
 	});

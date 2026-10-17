@@ -19,7 +19,7 @@ const useGetToolDetails = (params: {
 		),
 		queryFn: ({ signal }) =>
 			request<ResponseBody<AgentToolDetails>>({
-				url: `/lucid/api/v1/agent/conversations/${params.conversationId()}/messages/${params.messageId()}/tools/${encodeURIComponent(params.tool().id)}`,
+				url: `/api/v1/agent/conversations/${params.conversationId()}/messages/${params.messageId()}/tools/${encodeURIComponent(params.tool().id)}`,
 				signal,
 				displayErrorToast: false,
 			}),

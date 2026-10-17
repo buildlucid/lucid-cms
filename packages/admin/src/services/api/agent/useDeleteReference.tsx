@@ -13,7 +13,7 @@ const useDeleteReference = () => {
 	>({
 		mutationFn: (params) =>
 			request({
-				url: `/lucid/api/v1/agent/conversations/${params.conversationId}/references/${params.referenceId}`,
+				url: `/api/v1/agent/conversations/${params.conversationId}/references/${params.referenceId}`,
 				method: "DELETE",
 			}),
 		onSuccess: (_response, params) => {

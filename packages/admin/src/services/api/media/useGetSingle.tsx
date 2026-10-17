@@ -20,7 +20,7 @@ export const getSingleReq = ({
 	id: number | undefined;
 }) =>
 	request<ResponseBody<Media>>({
-		url: `/lucid/api/v1/media/${id}`,
+		url: `/api/v1/media/${id}`,
 		...options,
 	});
 

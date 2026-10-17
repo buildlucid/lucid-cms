@@ -38,7 +38,7 @@ interface Params {
 
 export const updateProfilePictureReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/users/${params.userId}/profile-picture`,
+		url: `/api/v1/users/${params.userId}/profile-picture`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

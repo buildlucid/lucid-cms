@@ -12,7 +12,7 @@ export interface Params {
 
 export const createCommentReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/comments`,
+		url: `/api/v1/requests/${params.id}/comments`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

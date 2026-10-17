@@ -37,7 +37,7 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<OAuthClient>>({
 		mutationFn: (params) =>
 			request<ResponseBody<OAuthClient>>({
-				url: `/lucid/api/v1/integrations/oauth-clients/${params.id}`,
+				url: `/api/v1/integrations/oauth-clients/${params.id}`,
 				csrf: true,
 				method: "PATCH",
 				body: params.body,

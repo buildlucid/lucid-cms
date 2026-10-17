@@ -13,7 +13,7 @@ interface Params {
 
 export const initiateProviderReq = (params: Params) => {
 	return request<ResponseBody<InitiateAuth>>({
-		url: `/lucid/api/v1/auth/providers/${params.providerKey}/initiate`,
+		url: `/api/v1/auth/providers/${params.providerKey}/initiate`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

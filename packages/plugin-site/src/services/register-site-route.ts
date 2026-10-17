@@ -22,9 +22,9 @@ import respondToRenderError from "./respond-to-render-error.js";
 const normalizePath = (path: string) =>
 	path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
 
-/** Lucid's server endpoints and the admin app, which the site never renders. */
+/** The admin app, Lucid's server endpoints and plugin files, which the site never renders. */
 const isLucidPath = (path: string) =>
-	["/lucid", "/admin"].some(
+	["/admin", "/api", "/mcp", "/cdn", "/_plugins"].some(
 		(prefix) => path === prefix || path.startsWith(`${prefix}/`),
 	);
 

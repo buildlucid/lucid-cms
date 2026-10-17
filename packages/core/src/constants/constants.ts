@@ -5,7 +5,14 @@ import emailConstants from "./emails.js";
 
 export default Object.freeze({
 	locales: ["en"] as const,
-	openAPIDocsRoute: "/lucid/documentation",
+	/** URL paths reserved for Lucid, unavailable to sites and public files. */
+	paths: {
+		admin: "/admin",
+		api: "/api",
+		mcp: "/mcp",
+		cdn: "/cdn",
+	},
+	openAPIDocsRoute: "/api/documentation",
 	urls: {
 		localhost: "http://localhost:6543",
 	},
@@ -122,12 +129,10 @@ export default Object.freeze({
 	directories: {
 		public: "public",
 		lucid: ".lucid",
-		/** The URL prefix for Lucid's server endpoints, such as the API, MCP and CDN. */
-		base: "lucid",
-		/** The admin app's URL path and its folder in the public build output. */
+		/** The admin app's folder in the public build output, served at `paths.admin`. */
 		admin: "admin",
 		plugins: "plugins",
-		pluginPublic: "_lucid",
+		pluginPublic: "_plugins",
 	},
 	typeGeneration: {
 		file: "types.d.ts",

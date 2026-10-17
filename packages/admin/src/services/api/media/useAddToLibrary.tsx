@@ -14,7 +14,7 @@ interface Params {
 
 export const addToLibraryReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/media/${params.id}/add-to-library`,
+		url: `/api/v1/media/${params.id}/add-to-library`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

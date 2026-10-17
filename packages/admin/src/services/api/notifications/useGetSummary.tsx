@@ -11,7 +11,7 @@ const useGetSummary = (params?: { enabled?: () => boolean }) => {
 		queryKey: queryKeys.notifications.summary(),
 		queryFn: ({ signal }) =>
 			request<ResponseBody<NotificationCounts>>({
-				url: "/lucid/api/v1/notifications/summary",
+				url: "/api/v1/notifications/summary",
 				signal,
 				displayErrorToast: false,
 				method: "GET",

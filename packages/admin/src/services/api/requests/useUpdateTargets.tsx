@@ -11,7 +11,7 @@ export interface Params {
 
 export const updateTargetsReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/documents/${params.requestDocumentId}/targets`,
+		url: `/api/v1/requests/${params.id}/documents/${params.requestDocumentId}/targets`,
 		csrf: true,
 		method: "PATCH",
 		body: params.body,

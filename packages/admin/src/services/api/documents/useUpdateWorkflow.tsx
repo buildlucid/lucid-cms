@@ -17,7 +17,7 @@ export interface Params {
 
 export const updateWorkflowReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/workflow`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.id}/workflow`,
 		csrf: true,
 		method: "PATCH",
 		body: params.body,

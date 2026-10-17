@@ -113,7 +113,7 @@ describe("Cloudflare R2 plugin", () => {
 		expect(result.data?.protocol).toBe("http");
 		if (result.data?.protocol !== "http") return;
 		expect(result.data.request.url).toContain(
-			"/lucid/api/v1/media/r2/storage/upload?",
+			"/api/v1/media/r2/storage/upload?",
 		);
 		expect(result.data.request.url).toContain("extension=png");
 	});

@@ -32,7 +32,7 @@ const useVerifyResetToken = (params: QueryHook<QueryParams>) => {
 					message: string;
 				}>
 			>({
-				url: `/lucid/api/v1/account/reset-password/${queryParams().location?.token}`,
+				url: `/api/v1/account/reset-password/${queryParams().location?.token}`,
 				method: "GET",
 			}),
 		retry: 0,

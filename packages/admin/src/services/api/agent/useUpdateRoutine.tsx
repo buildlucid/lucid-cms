@@ -11,7 +11,7 @@ const useUpdateRoutine = (props?: { onSuccess?: () => void }) =>
 	serviceHelpers.useMutationWrapper<Params, ResponseBody<AgentRoutine>>({
 		mutationFn: (params) =>
 			request<ResponseBody<AgentRoutine>>({
-				url: `/lucid/api/v1/agent/routines/${params.id}`,
+				url: `/api/v1/agent/routines/${params.id}`,
 				method: "PATCH",
 				body: params.body,
 			}),

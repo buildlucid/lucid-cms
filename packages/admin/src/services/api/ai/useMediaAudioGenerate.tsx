@@ -24,7 +24,7 @@ interface Params {
 
 export const mediaAudioGenerateReq = (params: Params) => {
 	return request<ResponseBody<MediaGenerateResponse>>({
-		url: "/lucid/api/v1/ai/media/audio",
+		url: "/api/v1/ai/media/audio",
 		csrf: true,
 		method: "POST",
 		body: params.body,

@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import { isAiFeatureEnabled } from "../../../libs/config/ai-features.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -16,18 +17,18 @@ export const getOAuthUrls = (context: ServiceContext) => {
 	});
 
 	const resources = {
-		content: resource("/lucid/api/v1/content"),
-		mcp: resource("/lucid/mcp"),
+		content: resource(`${constants.paths.api}/v1/content`),
+		mcp: resource(constants.paths.mcp),
 	} satisfies Record<OAuthResource, ReturnType<typeof resource>>;
 
 	return {
-		issuer: `${origin}/lucid`,
+		issuer: origin,
 		resources,
-		authorizationEndpoint: `${origin}/lucid/oauth/authorize`,
-		tokenEndpoint: `${origin}/lucid/oauth/token`,
-		revocationEndpoint: `${origin}/lucid/oauth/revoke`,
-		authorizationServerMetadata: `${origin}/.well-known/oauth-authorization-server/lucid`,
-		consentPage: `${origin}/admin/oauth/consent`,
+		authorizationEndpoint: `${origin}${constants.paths.api}/oauth/authorize`,
+		tokenEndpoint: `${origin}${constants.paths.api}/oauth/token`,
+		revocationEndpoint: `${origin}${constants.paths.api}/oauth/revoke`,
+		authorizationServerMetadata: `${origin}/.well-known/oauth-authorization-server`,
+		consentPage: `${origin}${constants.paths.admin}/oauth/consent`,
 	};
 };
 

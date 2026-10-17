@@ -15,7 +15,7 @@ export interface Params {
 
 export const updateCommentResolutionReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/comments/${params.commentId}/resolution`,
+		url: `/api/v1/requests/${params.id}/comments/${params.commentId}/resolution`,
 		csrf: true,
 		method: "PATCH",
 		body: params.body,

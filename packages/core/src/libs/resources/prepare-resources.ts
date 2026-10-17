@@ -16,8 +16,11 @@ import {
 } from "./types.js";
 
 const moduleKinds = new Set<ResourceKind>(["migrations", "seeds"]);
+const reservedOutputs = Object.values(constants.paths).map((path) =>
+	path.slice(1),
+);
 
-/** Restricts public output paths; only plugins may write under `_lucid`. */
+/** Restricts public output paths; only plugins may write under `_plugins`. */
 const getPublicOutput = (
 	file: ResourceFile,
 	output: string | undefined,
@@ -36,7 +39,7 @@ const getPublicOutput = (
 		name.includes("\\") ||
 		name === ".." ||
 		name === "." ||
-		[constants.directories.base, constants.directories.admin].some(
+		reservedOutputs.some(
 			(reserved) => name === reserved || name.startsWith(`${reserved}/`),
 		) ||
 		(!fromPlugin &&

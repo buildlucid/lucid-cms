@@ -12,7 +12,7 @@ import type { PluginOptions } from "../types/types.js";
 const routes = (pluginOptions: PluginOptions) => [
 	defineRoute({
 		method: "post",
-		path: "/lucid/api/v1/resend/webhook",
+		path: "/api/v1/resend/webhook",
 		openAPI: {
 			description: "Webhook for receiving delivery status updates.",
 			tags: ["resend-plugin"],

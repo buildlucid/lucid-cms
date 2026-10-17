@@ -10,7 +10,7 @@ export interface Params {
 
 export const reopenReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/reopen`,
+		url: `/api/v1/requests/${params.id}/reopen`,
 		csrf: true,
 		method: "POST",
 	});

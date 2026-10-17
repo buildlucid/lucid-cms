@@ -15,7 +15,7 @@ export interface Params {
 
 export const approveReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/approve`,
+		url: `/api/v1/requests/${params.id}/approve`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

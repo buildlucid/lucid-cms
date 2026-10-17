@@ -13,7 +13,7 @@ interface Params {
 
 export const acceptInvitationReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: `/lucid/api/v1/auth/invitation/accept/${params.token}`,
+		url: `/api/v1/auth/invitation/accept/${params.token}`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

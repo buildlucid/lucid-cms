@@ -12,7 +12,7 @@ interface Params {
 
 export const deleteMultiplePermanentlyReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: "/lucid/api/v1/media/permanent",
+		url: "/api/v1/media/permanent",
 		csrf: true,
 		method: "DELETE",
 		body: params.body,

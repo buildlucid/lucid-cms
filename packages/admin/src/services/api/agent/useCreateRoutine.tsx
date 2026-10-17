@@ -25,7 +25,7 @@ const useCreateRoutine = (props?: {
 	>({
 		mutationFn: (body) =>
 			request<ResponseBody<AgentRoutine>>({
-				url: "/lucid/api/v1/agent/routines",
+				url: "/api/v1/agent/routines",
 				method: "POST",
 				body,
 			}),

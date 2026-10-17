@@ -32,7 +32,7 @@ const bindUseGetAll =
 			],
 			queryFn: () =>
 				request<ResponseBody<Integration[]>>({
-					url: `/lucid/api/v1/users/${userId()}/integrations`,
+					url: `/api/v1/users/${userId()}/integrations`,
 					query: queryParams(),
 					method: "GET",
 				}),

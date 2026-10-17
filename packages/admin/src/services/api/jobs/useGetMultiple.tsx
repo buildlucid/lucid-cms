@@ -30,7 +30,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.jobs.list(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<Job[]>>({
-				url: "/lucid/api/v1/jobs",
+				url: "/api/v1/jobs",
 				query: queryParams(),
 				method: "GET",
 			}),

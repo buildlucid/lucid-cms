@@ -44,7 +44,7 @@ interface Params {
 
 export const mediaImageGenerateReq = (params: Params) => {
 	return request<ResponseBody<MediaGenerateResponse>>({
-		url: "/lucid/api/v1/ai/media/image",
+		url: "/api/v1/ai/media/image",
 		csrf: true,
 		method: "POST",
 		body: params.body,

@@ -15,7 +15,7 @@ const useGetExecution = (params: {
 		queryKey: queryKeys.requestExecutions.detail(params.id(), params.jobId()),
 		queryFn: ({ signal }) =>
 			request<ResponseBody<RequestExecution | null>>({
-				url: `/lucid/api/v1/requests/${params.id()}/execution`,
+				url: `/api/v1/requests/${params.id()}/execution`,
 				signal,
 				displayErrorToast: false,
 			}),

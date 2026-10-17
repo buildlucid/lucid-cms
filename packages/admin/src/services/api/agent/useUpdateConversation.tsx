@@ -28,7 +28,7 @@ const useUpdateConversation = (props?: { onSuccess?: () => void }) => {
 	>({
 		mutationFn: (params) =>
 			request<ResponseBody<AgentConversation>>({
-				url: `/lucid/api/v1/agent/conversations/${params.id}`,
+				url: `/api/v1/agent/conversations/${params.id}`,
 				method: "PATCH",
 				body: params.body,
 			}),

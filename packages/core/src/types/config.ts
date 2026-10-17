@@ -418,7 +418,7 @@ export interface LucidConfig {
 							definitions?: AgentDefinition[];
 					  };
 				/**
-				 * Serves tools and skills at `/lucid/mcp`, disabled unless configured.
+				 * Serves tools and skills at `/mcp`, disabled unless configured.
 				 * @remarks Booleans mean `{ enabled }`.
 				 */
 				mcp?:

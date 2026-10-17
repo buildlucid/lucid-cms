@@ -20,7 +20,7 @@ export const getSingleReq = ({
 	collectionKey: string | undefined;
 }) =>
 	request<ResponseBody<Collection>>({
-		url: `/lucid/api/v1/collections/${encodeURIComponent(String(collectionKey))}`,
+		url: `/api/v1/collections/${encodeURIComponent(String(collectionKey))}`,
 		...options,
 	});
 

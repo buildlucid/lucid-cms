@@ -25,7 +25,7 @@ const isEvent = (value: unknown): value is AgentStreamEvent =>
 	typeof value.type === "string" &&
 	Object.hasOwn(eventTypes, value.type);
 
-const base = "/lucid/api/v1/agent";
+const base = "/api/v1/agent";
 
 /** The server accepted the run but its stream stopped early, so recovery can watch it instead. */
 class StreamInterruptedError extends Error {

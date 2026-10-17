@@ -23,7 +23,7 @@ const useGetTransactions = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.email.transactions(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<EmailTransaction[]>>({
-				url: `/lucid/api/v1/emails/${queryParams().location?.emailId}/transactions`,
+				url: `/api/v1/emails/${queryParams().location?.emailId}/transactions`,
 				query: queryParams(),
 				method: "GET",
 			}),

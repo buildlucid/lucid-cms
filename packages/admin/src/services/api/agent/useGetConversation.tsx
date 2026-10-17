@@ -10,7 +10,7 @@ export const conversationQueryOptions = (id: string | undefined) =>
 		queryKey: queryKeys.agent.conversation(id),
 		queryFn: () =>
 			request<ResponseBody<AgentConversation>>({
-				url: `/lucid/api/v1/agent/conversations/${id}`,
+				url: `/api/v1/agent/conversations/${id}`,
 			}),
 		enabled: id !== undefined,
 		staleTime: constants.preloadStaleTime,

@@ -22,7 +22,7 @@ const useGetStatus = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.connection.status(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<ConnectionStatus>>({
-				url: "/lucid/api/v1/connection/status",
+				url: "/api/v1/connection/status",
 				query: queryParams(),
 				method: "GET",
 			}),

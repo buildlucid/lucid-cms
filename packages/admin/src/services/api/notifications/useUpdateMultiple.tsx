@@ -13,7 +13,7 @@ export interface Params {
 
 export const updateMultipleReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: "/lucid/api/v1/notifications",
+		url: "/api/v1/notifications",
 		csrf: true,
 		method: "PATCH",
 		body: params,

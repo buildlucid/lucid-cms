@@ -10,7 +10,7 @@ interface Params {
 
 export const deleteSingleReq = (params: Params) => {
 	return request<undefined>({
-		url: `/lucid/api/v1/media/${params.mediaId}/share-links/${params.linkId}`,
+		url: `/api/v1/media/${params.mediaId}/share-links/${params.linkId}`,
 		csrf: true,
 		method: "DELETE",
 	});

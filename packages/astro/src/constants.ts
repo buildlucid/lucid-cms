@@ -3,8 +3,15 @@ const constants = {
 	toolkitModuleId: "@lucidcms/astro/toolkit",
 	generatedDirectory: ".lucid/astro",
 	assetDirectory: "public",
-	/** Lucid's server endpoints and the admin app, both handled by Lucid. */
-	mountPaths: ["/lucid", "/admin"],
+	/** The admin app, Lucid's server endpoints and its OAuth metadata, all handled by Lucid. */
+	mountPaths: [
+		"/admin",
+		"/api",
+		"/mcp",
+		"/cdn",
+		"/.well-known/oauth-authorization-server",
+		"/.well-known/oauth-protected-resource",
+	],
 	adminDirectory: "admin",
 	files: {
 		middleware: "middleware.ts",

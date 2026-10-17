@@ -47,7 +47,7 @@ const restricted = defineMcpTool({
 });
 
 const post = (method: string, params: Record<string, unknown>, modern = true) =>
-	new Request("http://localhost:8080/lucid/mcp", {
+	new Request("http://localhost:8080/mcp", {
 		method: "POST",
 		headers: {
 			"content-type": "application/json",

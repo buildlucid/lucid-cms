@@ -10,7 +10,7 @@ export interface Params {
 
 export const removeDocumentReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/documents/${params.requestDocumentId}`,
+		url: `/api/v1/requests/${params.id}/documents/${params.requestDocumentId}`,
 		csrf: true,
 		method: "DELETE",
 	});

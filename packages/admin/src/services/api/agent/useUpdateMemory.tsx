@@ -12,7 +12,7 @@ const useUpdateMemory = (props?: { onSuccess?: () => void }) =>
 	>({
 		mutationFn: (params) =>
 			request<ResponseBody<AgentMemory>>({
-				url: `/lucid/api/v1/agent/memories/${params.id}`,
+				url: `/api/v1/agent/memories/${params.id}`,
 				method: "PATCH",
 				body: params.body,
 			}),

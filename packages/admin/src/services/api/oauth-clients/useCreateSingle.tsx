@@ -39,7 +39,7 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 	>({
 		mutationFn: (body) =>
 			request<ResponseBody<OAuthClientCreateResponse>>({
-				url: "/lucid/api/v1/integrations/oauth-clients",
+				url: "/api/v1/integrations/oauth-clients",
 				csrf: true,
 				method: "POST",
 				body,

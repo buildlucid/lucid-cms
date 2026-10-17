@@ -17,7 +17,7 @@ const useGetMediaModels = <Type extends MediaGenerationType>(params: {
 		queryKey: queryKeys.ai.mediaModels(params.type()),
 		queryFn: () =>
 			request<ResponseBody<MediaGenerationModelCatalog<Type>>>({
-				url: `/lucid/api/v1/ai/media/models/${params.type()}`,
+				url: `/api/v1/ai/media/models/${params.type()}`,
 			}),
 		enabled: params.enabled?.() ?? true,
 		staleTime: 60_000,

@@ -17,7 +17,7 @@ interface Params {
 
 export const createSingleReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: "/lucid/api/v1/users",
+		url: "/api/v1/users",
 		csrf: true,
 		method: "POST",
 		body: params.body,

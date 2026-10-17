@@ -32,7 +32,7 @@ export const updateInput = (props: {
 	action: AgentInputAction;
 }) =>
 	request({
-		url: `/lucid/api/v1/agent/conversations/${props.conversationId}/inputs`,
+		url: `/api/v1/agent/conversations/${props.conversationId}/inputs`,
 		method: "PATCH",
 		body: props.action,
 	});

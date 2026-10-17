@@ -10,7 +10,7 @@ const useDeleteRoutine = (props?: { onSuccess?: () => void }) => {
 	return serviceHelpers.useMutationWrapper<{ id: string }, unknown>({
 		mutationFn: (params) =>
 			request({
-				url: `/lucid/api/v1/agent/routines/${params.id}`,
+				url: `/api/v1/agent/routines/${params.id}`,
 				method: "DELETE",
 			}),
 		getSuccessToast: () => ({

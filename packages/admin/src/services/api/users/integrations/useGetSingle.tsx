@@ -33,7 +33,7 @@ const bindUseGetSingle =
 			],
 			queryFn: () =>
 				request<ResponseBody<Integration>>({
-					url: `/lucid/api/v1/users/${userId()}/integrations/${queryParams().location?.id}`,
+					url: `/api/v1/users/${userId()}/integrations/${queryParams().location?.id}`,
 					method: "GET",
 				}),
 			get enabled() {

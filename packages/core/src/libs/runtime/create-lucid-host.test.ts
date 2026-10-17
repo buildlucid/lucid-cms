@@ -368,7 +368,7 @@ describe("createLucidHost database ownership", () => {
 		const invocation = host.createInvocation();
 
 		const response = await invocation.handle({
-			request: new Request("http://localhost/lucid/health"),
+			request: new Request("http://localhost/api/health"),
 		});
 
 		expect(response.status).toBe(200);
@@ -392,7 +392,7 @@ describe("createLucidHost database ownership", () => {
 		const invocation = host.createInvocation();
 
 		const response = await invocation.handle({
-			request: new Request("http://localhost/lucid/health"),
+			request: new Request("http://localhost/api/health"),
 		});
 
 		expect(response.status).toBe(503);

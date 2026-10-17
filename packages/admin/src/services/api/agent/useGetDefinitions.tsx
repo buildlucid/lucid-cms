@@ -9,7 +9,7 @@ const useGetDefinitions = (params?: { enabled?: Accessor<boolean> }) =>
 		queryKey: queryKeys.agent.definitions(),
 		queryFn: () =>
 			request<ResponseBody<AgentCatalog>>({
-				url: "/lucid/api/v1/agent/definitions",
+				url: "/api/v1/agent/definitions",
 			}),
 		enabled: params?.enabled?.() ?? true,
 	}));

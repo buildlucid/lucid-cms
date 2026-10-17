@@ -11,7 +11,7 @@ interface Params {
 
 export const deleteSinglePermanentlyReq = (params: Params) => {
 	return request<ResponseBody<Role>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/permanent`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.id}/permanent`,
 		csrf: true,
 		method: "DELETE",
 	});

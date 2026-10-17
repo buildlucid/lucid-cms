@@ -42,7 +42,7 @@ export const getSingleReq = ({
 	version: string | number | undefined;
 }) =>
 	request<ResponseBody<InternalCollectionDocument, Refs>>({
-		url: `/lucid/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${documentId}/${encodeURIComponent(String(version))}`,
+		url: `/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${documentId}/${encodeURIComponent(String(version))}`,
 		...options,
 	});
 

@@ -85,7 +85,7 @@ export const createSignedMediaUrl = (
 		: params.host;
 	const path = params.path.startsWith("/") ? params.path : `/${params.path}`;
 
-	return `${host}/lucid/api/v1${path}?${search.toString()}`;
+	return `${host}/api/v1${path}?${search.toString()}`;
 };
 
 /**

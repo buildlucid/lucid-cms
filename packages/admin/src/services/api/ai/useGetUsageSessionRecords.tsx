@@ -28,7 +28,7 @@ const useGetUsageSessionRecords = (
 		],
 		queryFn: () =>
 			request<ResponseBody<AiUsageRecord[]>>({
-				url: `/lucid/api/v1/ai/usage/sessions/${params.type()}/${encodeURIComponent(params.id() ?? "")}/records`,
+				url: `/api/v1/ai/usage/sessions/${params.type()}/${encodeURIComponent(params.id() ?? "")}/records`,
 				query: queryParams(),
 			}),
 		placeholderData: keepPreviousData,

@@ -57,7 +57,7 @@ const authorizeStreamController = factory.createHandlers(
 			httpOnly: true,
 			secure: isRequestSecure(c),
 			sameSite: "strict",
-			path: `/${constants.directories.base}`,
+			path: `${constants.paths.api}/v1/share`,
 		});
 
 		return c.json({ success: true }, 200);

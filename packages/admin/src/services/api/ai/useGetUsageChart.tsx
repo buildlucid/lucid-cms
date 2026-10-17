@@ -47,7 +47,7 @@ const useGetUsageChart = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.ai.usageChart(), queryString(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<AiUsageChart>>({
-				url: "/lucid/api/v1/ai/usage/chart",
+				url: "/api/v1/ai/usage/chart",
 				query: {
 					queryString: queryString(),
 				},

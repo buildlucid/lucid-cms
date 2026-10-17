@@ -10,7 +10,7 @@ export interface Params {
 
 export const updatePreferencesReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: "/lucid/api/v1/notifications/preferences",
+		url: "/api/v1/notifications/preferences",
 		csrf: true,
 		method: "PATCH",
 		body: params,

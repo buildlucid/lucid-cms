@@ -26,7 +26,7 @@ const useValidateInvitation = (params: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<ValidateInvitation>>({
-				url: `/lucid/api/v1/auth/invitation/validate/${queryParams().location?.token}`,
+				url: `/api/v1/auth/invitation/validate/${queryParams().location?.token}`,
 				method: "GET",
 			}),
 		retry: 0,

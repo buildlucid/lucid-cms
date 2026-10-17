@@ -575,7 +575,7 @@ export const initializeOAuth = () => {
 			target = new URL(ui.requestPath.value, baseUrl);
 			if (
 				target.origin !== baseUrl ||
-				!target.pathname.startsWith("/lucid/api/v1/content")
+				!target.pathname.startsWith("/api/v1/content")
 			) {
 				throw new Error(
 					"The request console only sends credentials to this Lucid instance’s external API.",

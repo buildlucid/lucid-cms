@@ -14,7 +14,7 @@ interface Params {
 
 export const loginReq = (params: Params) => {
 	return request<ResponseBody<User>>({
-		url: "/lucid/api/v1/auth/login",
+		url: "/api/v1/auth/login",
 		csrf: true,
 		method: "POST",
 		body: params,

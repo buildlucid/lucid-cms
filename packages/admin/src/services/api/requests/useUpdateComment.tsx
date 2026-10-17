@@ -12,7 +12,7 @@ export interface Params {
 
 export const updateCommentReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/comments/${params.commentId}`,
+		url: `/api/v1/requests/${params.id}/comments/${params.commentId}`,
 		csrf: true,
 		method: "PATCH",
 		body: params.body,

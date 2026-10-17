@@ -10,7 +10,7 @@ const useGetPreferences = (params?: { enabled?: () => boolean }) => {
 		queryKey: queryKeys.notifications.preferences(),
 		queryFn: () =>
 			request<ResponseBody<NotificationPreference[]>>({
-				url: "/lucid/api/v1/notifications/preferences",
+				url: "/api/v1/notifications/preferences",
 				method: "GET",
 			}),
 		get enabled() {

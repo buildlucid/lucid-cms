@@ -20,7 +20,7 @@ const useRegenerateSecret = (props?: UseRegenerateSecretProps) => {
 	>({
 		mutationFn: (params) =>
 			request<ResponseBody<OAuthClientRegenerateSecretResponse>>({
-				url: `/lucid/api/v1/integrations/oauth-clients/${params.id}/regenerate-secret`,
+				url: `/api/v1/integrations/oauth-clients/${params.id}/regenerate-secret`,
 				csrf: true,
 				method: "POST",
 			}),

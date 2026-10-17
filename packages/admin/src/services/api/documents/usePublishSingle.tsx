@@ -11,7 +11,7 @@ const usePublishSingle = () =>
 	serviceHelpers.useMutationWrapper({
 		mutationFn: (params: Params) =>
 			request<undefined>({
-				url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/publish`,
+				url: `/api/v1/documents/${params.collectionKey}/${params.id}/publish`,
 				method: "POST",
 				csrf: true,
 				body: params.body,

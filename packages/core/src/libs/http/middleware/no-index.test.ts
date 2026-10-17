@@ -8,8 +8,8 @@ describe("noIndex", () => {
 	test.each([
 		["/admin", "noindex, nofollow"],
 		["/admin/agent/chats/1", "noindex, nofollow"],
-		["/lucid/api/v1/documents", "noindex, nofollow"],
-		["/lucid/cdn/image.png", null],
+		["/api/v1/documents", "noindex, nofollow"],
+		["/cdn/image.png", null],
 		["/lucidity", null],
 		["/about", null],
 	])("%s", async (path, expected) => {

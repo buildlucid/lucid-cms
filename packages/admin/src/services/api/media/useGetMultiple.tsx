@@ -32,7 +32,7 @@ export const getMultipleReq = (
 	options: Pick<RequestParams, "signal" | "displayErrorToast" | "query"> = {},
 ) =>
 	request<ResponseBody<Media[]>>({
-		url: "/lucid/api/v1/media",
+		url: "/api/v1/media",
 		...options,
 	});
 

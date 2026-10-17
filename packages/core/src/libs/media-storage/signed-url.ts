@@ -74,7 +74,7 @@ export const createSignedMediaUrl = (
 
 	const basePath = urlAddPath(
 		params.host,
-		`${constants.directories.base}/api/v1/${params.path}`,
+		`${constants.paths.api}/v1/${params.path}`,
 	);
 
 	return `${basePath}?${query.toString()}`;

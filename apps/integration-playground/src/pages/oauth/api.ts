@@ -73,10 +73,10 @@ export const discoverOAuth = async (baseUrl: string): Promise<Discovery> => {
 	const origin = new URL(baseUrl).origin;
 	const [server, resource] = await Promise.all([
 		fetchJson<AuthorizationServerMetadata>(
-			`${origin}/.well-known/oauth-authorization-server/lucid`,
+			`${origin}/.well-known/oauth-authorization-server`,
 		),
 		fetchJson<ProtectedResourceMetadata>(
-			`${origin}/.well-known/oauth-protected-resource/lucid/api/v1/content`,
+			`${origin}/.well-known/oauth-protected-resource/api/v1/content`,
 		),
 	]);
 

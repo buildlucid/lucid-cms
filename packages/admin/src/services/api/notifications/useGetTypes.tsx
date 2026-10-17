@@ -10,7 +10,7 @@ const useGetTypes = (params?: { enabled?: () => boolean }) => {
 		queryKey: queryKeys.notifications.types(),
 		queryFn: () =>
 			request<ResponseBody<NotificationTypeSettings[]>>({
-				url: "/lucid/api/v1/notifications/types",
+				url: "/api/v1/notifications/types",
 				method: "GET",
 			}),
 		get enabled() {

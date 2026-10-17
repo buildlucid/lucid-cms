@@ -16,7 +16,7 @@ export interface Params {
 
 export const updateOrderReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/order`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.id}/order`,
 		csrf: true,
 		method: "PATCH",
 		body: params.body,

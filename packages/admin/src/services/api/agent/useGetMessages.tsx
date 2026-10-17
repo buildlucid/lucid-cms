@@ -22,12 +22,10 @@ const getPage = (
 	signal?: AbortSignal,
 ) =>
 	request<ResponseBody<AgentMessage[]>>({
-		url: `/lucid/api/v1/agent/conversations/${id}/messages?${new URLSearchParams(
-			{
-				limit: String(pageSize),
-				...(before ? { before: String(before) } : {}),
-			},
-		)}`,
+		url: `/api/v1/agent/conversations/${id}/messages?${new URLSearchParams({
+			limit: String(pageSize),
+			...(before ? { before: String(before) } : {}),
+		})}`,
 		signal,
 	});
 

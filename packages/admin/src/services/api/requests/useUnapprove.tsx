@@ -10,7 +10,7 @@ export interface Params {
 
 export const unapproveReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/unapprove`,
+		url: `/api/v1/requests/${params.id}/unapprove`,
 		csrf: true,
 		method: "POST",
 	});

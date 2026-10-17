@@ -24,7 +24,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.jobs.detail(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<JobDetails>>({
-				url: `/lucid/api/v1/jobs/${queryParams().location?.jobId}`,
+				url: `/api/v1/jobs/${queryParams().location?.jobId}`,
 				method: "GET",
 			}),
 		get enabled() {

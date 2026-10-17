@@ -112,7 +112,7 @@ const buildSite = async (options: SitePluginOptions, props: BuildProps) => {
 
 	await Promise.all(
 		props.publicFiles
-			.filter((file) => !file.name.startsWith("_lucid/"))
+			.filter((file) => !file.name.startsWith("_plugins/"))
 			.map(async (file) => {
 				const target = path.join(outDir, file.name);
 				await mkdir(path.dirname(target), { recursive: true });

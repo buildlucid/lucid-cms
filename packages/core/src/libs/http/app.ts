@@ -218,7 +218,7 @@ const createApp = async (props: {
 
 			c.status(404);
 
-			const apiPath = `/${constants.directories.base}/api`;
+			const apiPath = constants.paths.api;
 
 			if (c.req.path === apiPath || c.req.path.startsWith(`${apiPath}/`)) {
 				return c.json({
@@ -247,7 +247,7 @@ const createApp = async (props: {
 
 		if (props.config.http.openAPI?.enabled) {
 			app.get(
-				`/${constants.directories.base}/openapi`,
+				`${constants.paths.api}/openapi`,
 				openAPIRouteHandler(app, {
 					documentation: {
 						openapi: "3.0.0",
@@ -425,7 +425,7 @@ const createApp = async (props: {
 			app.get(
 				constants.openAPIDocsRoute,
 				Scalar({
-					url: `/${constants.directories.base}/openapi`,
+					url: `${constants.paths.api}/openapi`,
 					theme: "saturn",
 					defaultHttpClient: {
 						targetKey: "node",

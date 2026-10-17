@@ -10,7 +10,7 @@ export interface Params {
 
 export const closeReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/requests/${params.id}/close`,
+		url: `/api/v1/requests/${params.id}/close`,
 		csrf: true,
 		method: "POST",
 	});

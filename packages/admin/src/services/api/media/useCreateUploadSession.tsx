@@ -14,7 +14,7 @@ interface Params {
 
 export const createUploadSessionReq = (params: Params) => {
 	return request<ResponseBody<UploadSessionResponse>>({
-		url: "/lucid/api/v1/media/upload-session",
+		url: "/api/v1/media/upload-session",
 		csrf: true,
 		method: "POST",
 		body: params.body,

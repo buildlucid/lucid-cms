@@ -13,7 +13,7 @@ interface Params {
 
 export const deleteBatchReq = (params: Params) => {
 	return request<undefined>({
-		url: "/lucid/api/v1/media/batch",
+		url: "/api/v1/media/batch",
 		csrf: true,
 		method: "DELETE",
 		body: params.body,

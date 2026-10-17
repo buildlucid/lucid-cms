@@ -23,7 +23,7 @@ const useCreateConversation = (props?: {
 	>({
 		mutationFn: (body) =>
 			request<ResponseBody<AgentConversation>>({
-				url: "/lucid/api/v1/agent/conversations",
+				url: "/api/v1/agent/conversations",
 				method: "POST",
 				body,
 			}),

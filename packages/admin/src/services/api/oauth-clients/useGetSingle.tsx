@@ -20,7 +20,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<OAuthClient>>({
-				url: `/lucid/api/v1/integrations/oauth-clients/${params.queryParams.id()}`,
+				url: `/api/v1/integrations/oauth-clients/${params.queryParams.id()}`,
 				method: "GET",
 			}),
 		get enabled() {

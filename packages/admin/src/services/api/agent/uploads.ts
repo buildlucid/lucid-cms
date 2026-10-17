@@ -9,7 +9,7 @@ export const createUploadSessionReq = (props: {
 	size: number;
 }) =>
 	request<ResponseBody<UploadSessionResponse>>({
-		url: "/lucid/api/v1/agent/uploads/session",
+		url: "/api/v1/agent/uploads/session",
 		method: "POST",
 		body: props,
 	});
@@ -25,7 +25,7 @@ export const createUploadReq = (props: {
 	signal?: AbortSignal;
 }) =>
 	request<ResponseBody<Media>>({
-		url: "/lucid/api/v1/agent/uploads",
+		url: "/api/v1/agent/uploads",
 		method: "POST",
 		signal: props.signal,
 		body: {

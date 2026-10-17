@@ -8,7 +8,7 @@ type Params = Record<never, never>;
 
 export const deleteProfilePictureReq = (_params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: "/lucid/api/v1/account/profile-picture",
+		url: "/api/v1/account/profile-picture",
 		csrf: true,
 		method: "DELETE",
 	});

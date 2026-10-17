@@ -8,7 +8,7 @@ type Params = Record<string, never>;
 
 export const verifyReq = (_params: Params) =>
 	request<ResponseBody<ConnectionStatus>>({
-		url: "/lucid/api/v1/connection/verify",
+		url: "/api/v1/connection/verify",
 		csrf: true,
 		method: "POST",
 	});

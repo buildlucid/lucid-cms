@@ -13,7 +13,7 @@ const useGetUsageSession = (params: {
 		queryKey: queryKeys.ai.usageSession(params.type(), params.id()),
 		queryFn: () =>
 			request<ResponseBody<AiUsageSession>>({
-				url: `/lucid/api/v1/ai/usage/sessions/${params.type()}/${encodeURIComponent(params.id() ?? "")}`,
+				url: `/api/v1/ai/usage/sessions/${params.type()}/${encodeURIComponent(params.id() ?? "")}`,
 			}),
 		enabled:
 			params.type() !== undefined &&

@@ -9,7 +9,7 @@ const useGetOverview = (params: QueryHook<Record<string, never>>) =>
 		queryKey: [...queryKeys.review.overview(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<ReviewOverview>>({
-				url: "/lucid/api/v1/review/overview",
+				url: "/api/v1/review/overview",
 				method: "GET",
 			}),
 		get enabled() {

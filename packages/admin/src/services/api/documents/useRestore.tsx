@@ -13,7 +13,7 @@ interface Params {
 
 export const restoreReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/restore`,
+		url: `/api/v1/documents/${params.collectionKey}/restore`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

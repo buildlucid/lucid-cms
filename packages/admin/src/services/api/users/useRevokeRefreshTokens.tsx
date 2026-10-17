@@ -10,7 +10,7 @@ interface Params {
 
 export const revokeRefreshTokensReq = (params: Params) => {
 	return request<ResponseBody<{ message: string }>>({
-		url: `/lucid/api/v1/users/${params.id}/revoke-refresh-tokens`,
+		url: `/api/v1/users/${params.id}/revoke-refresh-tokens`,
 		csrf: true,
 		method: "POST",
 	});

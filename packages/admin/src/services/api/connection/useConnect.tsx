@@ -9,7 +9,7 @@ type ConnectResponse = {
 
 export const connectReq = (_params: Params) =>
 	request<ResponseBody<ConnectResponse>>({
-		url: "/lucid/api/v1/connection/connect",
+		url: "/api/v1/connection/connect",
 		csrf: true,
 		method: "POST",
 	});

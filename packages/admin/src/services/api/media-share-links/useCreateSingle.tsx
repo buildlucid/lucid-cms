@@ -20,7 +20,7 @@ interface Response {
 
 export const createSingleReq = (params: Params) => {
 	return request<ResponseBody<Response>>({
-		url: `/lucid/api/v1/media/${params.mediaId}/share-links`,
+		url: `/api/v1/media/${params.mediaId}/share-links`,
 		csrf: true,
 		method: "POST",
 		body: params.body,

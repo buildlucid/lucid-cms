@@ -17,7 +17,7 @@ export const requestQueryOptions = (id: number | undefined) =>
 		queryKey: [...queryKeys.requests.detail(), id] as const,
 		queryFn: () =>
 			request<ResponseBody<RequestDetails>>({
-				url: `/lucid/api/v1/requests/${id}`,
+				url: `/api/v1/requests/${id}`,
 				method: "GET",
 			}),
 		enabled: id !== undefined,

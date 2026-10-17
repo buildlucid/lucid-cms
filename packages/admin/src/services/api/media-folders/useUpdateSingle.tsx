@@ -14,7 +14,7 @@ interface Params {
 
 export const updateSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/media/folders/${params.id}`,
+		url: `/api/v1/media/folders/${params.id}`,
 		csrf: true,
 		method: "PATCH",
 		body: params.body,

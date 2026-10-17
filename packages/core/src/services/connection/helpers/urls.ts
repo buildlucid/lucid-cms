@@ -32,7 +32,7 @@ export const getConnectionUrls = (context: ServiceContext) => {
 	return {
 		...getLucidConnectionUrls(context),
 		cmsOrigin,
-		callbackUrl: `${cmsOrigin}/lucid/api/v1/connection/callback`,
+		callbackUrl: `${cmsOrigin}/api/v1/connection/callback`,
 		connectionPageUrl: `${cmsOrigin}/admin/system/operations`,
 	};
 };

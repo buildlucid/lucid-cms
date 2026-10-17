@@ -12,7 +12,7 @@ export const refreshTokenReq = (): Promise<boolean> => {
 		const csrfToken = await csrfReq();
 		const locale = getRequestInterfaceLocale();
 
-		const response = await fetch("/lucid/api/v1/auth/token", {
+		const response = await fetch("/api/v1/auth/token", {
 			method: "POST",
 			credentials: "include",
 			headers: {

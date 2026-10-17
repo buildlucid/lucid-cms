@@ -15,7 +15,7 @@ export const logoutReq = () => {
 			message: string;
 		}>
 	>({
-		url: "/lucid/api/v1/auth/logout",
+		url: "/api/v1/auth/logout",
 		csrf: true,
 		method: "POST",
 	});

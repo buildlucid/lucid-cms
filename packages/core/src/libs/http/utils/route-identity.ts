@@ -3,7 +3,7 @@ import constants from "../../../constants/constants.js";
 import { isContentRouteDefinition } from "../define-content-api-route.js";
 import type { LucidCustomRouteDefinition } from "../types.js";
 
-const contentRoutePrefix = `/${constants.directories.base}/api/v1/content`;
+const contentRoutePrefix = `${constants.paths.api}/v1/content`;
 
 /** Ignores parameter names while preserving regex constraints and optionality. */
 export const getRouteKey = (route: { method: string; path: string }) =>

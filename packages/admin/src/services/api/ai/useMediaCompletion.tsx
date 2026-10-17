@@ -9,7 +9,7 @@ interface Params {
 /** Checks on a media generation, returning its file once Lucid finishes it. */
 export const mediaCompletionReq = (params: Params) => {
 	return request<ResponseBody<MediaGenerateCompletionPollResponse>>({
-		url: `/lucid/api/v1/ai/media/generations/${params.requestId}`,
+		url: `/api/v1/ai/media/generations/${params.requestId}`,
 		method: "GET",
 		signal: params.signal,
 	});

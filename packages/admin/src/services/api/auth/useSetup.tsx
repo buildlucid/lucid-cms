@@ -15,7 +15,7 @@ interface Params {
 
 export const setupReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: "/lucid/api/v1/auth/setup",
+		url: "/api/v1/auth/setup",
 		csrf: true,
 		method: "POST",
 		body: params,

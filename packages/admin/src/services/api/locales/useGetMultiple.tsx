@@ -22,7 +22,7 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.locales.list(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<Locale[]>>({
-				url: "/lucid/api/v1/locales",
+				url: "/api/v1/locales",
 				method: "GET",
 			}),
 		get enabled() {

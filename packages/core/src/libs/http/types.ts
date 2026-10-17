@@ -143,7 +143,7 @@ export type LucidContentRouteAccess =
 export type LucidContentRouteDefinitionInput<
 	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
 > = Omit<LucidRouteDefinitionInput<TSchema>, "path"> & {
-	/** Path relative to `/lucid/api/v1/content`. */
+	/** Path relative to `/api/v1/content`. */
 	path: `/${string}`;
 	/** External access required before the route handler can run. */
 	access: LucidContentRouteAccess;

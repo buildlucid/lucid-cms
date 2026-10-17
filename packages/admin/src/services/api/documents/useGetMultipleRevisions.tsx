@@ -30,7 +30,7 @@ export const getMultipleRevisionsReq = ({
 	documentId: number | undefined;
 }) =>
 	request<ResponseBody<DocumentVersion[]>>({
-		url: `/lucid/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${documentId}/revisions`,
+		url: `/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${documentId}/revisions`,
 		...options,
 	});
 

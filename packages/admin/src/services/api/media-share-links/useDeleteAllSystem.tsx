@@ -5,7 +5,7 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export const deleteAllSystemReq = () => {
 	return request<undefined>({
-		url: "/lucid/api/v1/media/share-links",
+		url: "/api/v1/media/share-links",
 		csrf: true,
 		method: "DELETE",
 	});

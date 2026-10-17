@@ -27,7 +27,7 @@ export const createSingleVersionReq = (params: Params) => {
 			id: number;
 		}>
 	>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}`,
 		csrf: true,
 		method: "POST",
 		//* a tab that no longer holds the document is refused, eg. once someone took over

@@ -9,7 +9,7 @@ export const csrfReq = async () => {
 	}
 
 	// This bootstrap request must never trigger a session refresh itself.
-	const response = await fetch("/lucid/api/v1/auth/csrf", {
+	const response = await fetch("/api/v1/auth/csrf", {
 		credentials: "include",
 	});
 	if (!response.ok) throw new Error("Unable to load the CSRF token.");

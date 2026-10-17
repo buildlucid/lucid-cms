@@ -9,7 +9,7 @@ import { clearCsrfSession } from "../auth/useCsrf";
 
 export const revokeRefreshTokensReq = () => {
 	return request<ResponseBody<{ message: string }>>({
-		url: "/lucid/api/v1/account/revoke-refresh-tokens",
+		url: "/api/v1/account/revoke-refresh-tokens",
 		csrf: true,
 		method: "POST",
 	});

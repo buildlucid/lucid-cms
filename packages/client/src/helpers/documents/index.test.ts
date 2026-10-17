@@ -292,7 +292,7 @@ describe("@lucidcms/client document helpers", () => {
 		const links = { first: null, last: null, next: null, prev: null };
 		const meta = {
 			links: [],
-			path: "/lucid/api/v1/content/documents/page",
+			path: "/api/v1/content/documents/page",
 			currentPage: 1,
 			lastPage: 1,
 			perPage: 10,

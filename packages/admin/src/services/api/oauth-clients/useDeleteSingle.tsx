@@ -19,7 +19,7 @@ const useDeleteSingle = (props?: UseDeleteSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: (params) =>
 			request<ResponseBody<null>>({
-				url: `/lucid/api/v1/integrations/oauth-clients/${params.id}`,
+				url: `/api/v1/integrations/oauth-clients/${params.id}`,
 				csrf: true,
 				method: "DELETE",
 			}),

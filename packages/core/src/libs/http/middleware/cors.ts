@@ -31,7 +31,7 @@ const createCorsMiddleware = (config: ResolvedLucidConfig) => {
 	const policy = (headers: string[]) =>
 		cors({
 			origin: (origin, c) => {
-				if (c.req.path === "/lucid/oauth/authorize") return null;
+				if (c.req.path === "/api/oauth/authorize") return null;
 				return allowedOrigins.includes(origin) ? origin : null;
 			},
 			allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -49,7 +49,7 @@ const createCorsMiddleware = (config: ResolvedLucidConfig) => {
 	return createMiddleware((c: LucidHonoContext, next) => {
 		if (
 			c.req.method === "OPTIONS" &&
-			(c.req.path === "/lucid/mcp" || c.req.path.startsWith("/lucid/mcp/"))
+			(c.req.path === "/mcp" || c.req.path.startsWith("/mcp/"))
 		) {
 			const parameterHeaders =
 				c.req

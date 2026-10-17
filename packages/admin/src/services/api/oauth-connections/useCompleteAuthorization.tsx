@@ -19,7 +19,7 @@ const useCompleteAuthorization = () =>
 	>({
 		mutationFn: (params) =>
 			request<ResponseBody<{ redirectUrl: string }>>({
-				url: `/lucid/api/v1/integrations/oauth/authorization/${params.requestId}`,
+				url: `/api/v1/integrations/oauth/authorization/${params.requestId}`,
 				csrf: true,
 				method: "POST",
 				body: params.body,

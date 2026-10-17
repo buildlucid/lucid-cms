@@ -51,7 +51,7 @@ export interface UseQueryStateConfig extends QueryStateOptions {
  *
  * const redirects = useQuery(() => ({
  * 	queryKey: ["redirects", queryState.queryString()],
- * 	queryFn: () => request({ url: `/lucid/api/v1/redirects?${queryState.queryString()}` }),
+ * 	queryFn: () => request({ url: `/api/v1/redirects?${queryState.queryString()}` }),
  * }));
  * ```
  */

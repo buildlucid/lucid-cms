@@ -15,7 +15,7 @@ interface ResponseBodyVal {
 
 export const regenerateKeyReq = (userId: number, params: Params) => {
 	return request<ResponseBody<ResponseBodyVal>>({
-		url: `/lucid/api/v1/users/${userId}/integrations/${params.id}/regenerate-keys`,
+		url: `/api/v1/users/${userId}/integrations/${params.id}/regenerate-keys`,
 		csrf: true,
 		method: "POST",
 	});

@@ -14,7 +14,7 @@ const useGenerateConversationTitle = (props?: {
 	serviceHelpers.useMutationWrapper<Params, ResponseBody<{ title: string }>>({
 		mutationFn: (params) =>
 			request<ResponseBody<{ title: string }>>({
-				url: `/lucid/api/v1/agent/conversations/${params.id}/title/generate`,
+				url: `/api/v1/agent/conversations/${params.id}/title/generate`,
 				method: "POST",
 			}),
 		invalidates: [queryKeys.ai.usage(), queryKeys.ai.credits()],

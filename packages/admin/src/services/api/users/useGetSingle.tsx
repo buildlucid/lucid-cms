@@ -24,7 +24,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.users.detail(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<User>>({
-				url: `/lucid/api/v1/users/${queryParams().location?.userId}`,
+				url: `/api/v1/users/${queryParams().location?.userId}`,
 				method: "GET",
 			}),
 		get enabled() {

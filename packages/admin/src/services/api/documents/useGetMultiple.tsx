@@ -46,7 +46,7 @@ export const getMultipleReq = ({
 	versionType: string;
 }) =>
 	request<ResponseBody<InternalCollectionDocument[], Refs>>({
-		url: `/lucid/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${encodeURIComponent(versionType)}`,
+		url: `/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${encodeURIComponent(versionType)}`,
 		...options,
 	});
 

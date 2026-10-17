@@ -19,7 +19,7 @@ export const getAllReq = (
 	options: Pick<RequestParams, "signal" | "displayErrorToast" | "query"> = {},
 ) =>
 	request<ResponseBody<Collection[]>>({
-		url: "/lucid/api/v1/collections",
+		url: "/api/v1/collections",
 		...options,
 	});
 

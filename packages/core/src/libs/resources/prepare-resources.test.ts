@@ -156,12 +156,13 @@ test("resolves exported package directories from the owning project and refuses 
 test("rejects public outputs that overwrite Lucid assets or escape the output directory", async () => {
 	await write("assets/index.html", "content");
 	for (const output of [
-		"lucid",
+		"api",
+		"cdn/image.png",
 		"admin/index.html",
 		"../outside",
 		"/absolute",
 		"brand/../../outside",
-		"brand/../lucid",
+		"brand/../mcp",
 	])
 		await expect(
 			prepareResources(
@@ -177,7 +178,7 @@ test("keeps the _lucid public folder for plugins", async () => {
 		prepareResources(
 			{
 				sources: {
-					public: [{ input: "./assets/icon.svg", output: "_lucid/icon.svg" }],
+					public: [{ input: "./assets/icon.svg", output: "_plugins/icon.svg" }],
 				},
 			},
 			root,
@@ -194,7 +195,7 @@ test("keeps the _lucid public folder for plugins", async () => {
 						public: [
 							{
 								input: path.join(root, "assets/icon.svg"),
-								output: "_lucid/plugin-example/icon.svg",
+								output: "_plugins/plugin-example/icon.svg",
 							},
 						],
 					},
@@ -204,7 +205,7 @@ test("keeps the _lucid public folder for plugins", async () => {
 		root,
 	);
 	expect(result.files.public.map((file) => file.name)).toContain(
-		"_lucid/plugin-example/icon.svg",
+		"_plugins/plugin-example/icon.svg",
 	);
 });
 
@@ -225,7 +226,7 @@ test("checks normalized destinations for mapped public files", async () => {
 	await write("assets/icon.svg", "icon");
 	for (const output of [
 		"brand/../../outside.svg",
-		"brand/../lucid/index.html",
+		"brand/../admin/index.html",
 	]) {
 		await expect(
 			prepareResources(

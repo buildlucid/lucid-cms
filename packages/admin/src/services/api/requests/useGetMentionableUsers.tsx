@@ -14,7 +14,7 @@ export const getMentionableUsersReq = (params: {
 	limit?: number;
 }) =>
 	request<ResponseBody<UserDisplay[]>>({
-		url: `/lucid/api/v1/requests/${params.id}/mentionable-users`,
+		url: `/api/v1/requests/${params.id}/mentionable-users`,
 		query: {
 			filters: { name: params.name || undefined },
 			queryString:
@@ -49,7 +49,7 @@ const useGetMentionableUsers = (params: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<UserDisplay[]>>({
-				url: `/lucid/api/v1/requests/${queryParams().location?.id}/mentionable-users`,
+				url: `/api/v1/requests/${queryParams().location?.id}/mentionable-users`,
 				query: { filters: queryParams().filters },
 				method: "GET",
 			}),

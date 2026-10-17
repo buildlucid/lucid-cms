@@ -16,7 +16,7 @@ const useGetConversationDetails = (params: {
 		queryKey: queryKeys.agent.conversationDetails(params.id()),
 		queryFn: () =>
 			request<ResponseBody<AgentConversationDetails>>({
-				url: `/lucid/api/v1/agent/conversations/${params.id()}/details`,
+				url: `/api/v1/agent/conversations/${params.id()}/details`,
 			}),
 		enabled: params.id() !== undefined && (params.enabled?.() ?? true),
 	}));

@@ -9,7 +9,7 @@ const useGetRoutine = (params: { id: Accessor<string | undefined> }) =>
 		queryKey: queryKeys.agent.routine(params.id()),
 		queryFn: () =>
 			request<ResponseBody<AgentRoutine>>({
-				url: `/lucid/api/v1/agent/routines/${params.id()}`,
+				url: `/api/v1/agent/routines/${params.id()}`,
 			}),
 		enabled: params.id() !== undefined,
 	}));

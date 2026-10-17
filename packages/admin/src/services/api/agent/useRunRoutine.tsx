@@ -9,7 +9,7 @@ const useRunRoutine = (props?: { onSuccess?: (response: Response) => void }) =>
 	serviceHelpers.useMutationWrapper<{ id: string }, Response>({
 		mutationFn: (params) =>
 			request<Response>({
-				url: `/lucid/api/v1/agent/routines/${params.id}/run`,
+				url: `/api/v1/agent/routines/${params.id}/run`,
 				method: "POST",
 			}),
 		invalidates: [

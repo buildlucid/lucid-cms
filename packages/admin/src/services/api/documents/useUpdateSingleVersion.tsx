@@ -25,7 +25,7 @@ export interface Params {
 
 export const updateSingleVersionReq = (params: Params) => {
 	return request<ResponseBody<DocumentVersionUpdateResponse>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}`,
 		csrf: true,
 		method: "PATCH",
 		//* a tab that no longer holds the document is refused, eg. once someone took over

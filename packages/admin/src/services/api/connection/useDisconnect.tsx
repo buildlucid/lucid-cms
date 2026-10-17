@@ -7,7 +7,7 @@ type Params = Record<string, never>;
 
 export const disconnectReq = (_params: Params) =>
 	request<undefined>({
-		url: "/lucid/api/v1/connection",
+		url: "/api/v1/connection",
 		csrf: true,
 		method: "DELETE",
 	});

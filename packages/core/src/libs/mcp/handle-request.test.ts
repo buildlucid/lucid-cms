@@ -64,7 +64,7 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 		}
 		throw error;
 	});
-	app.post("/lucid/mcp", (c) => {
+	app.post("/mcp", (c) => {
 		const authority = { principal: { type: "system" as const }, scopes };
 		c.set("externalAuth", {
 			...authority,
@@ -87,7 +87,7 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 		});
 	});
 	const call = () =>
-		app.request("http://localhost/lucid/mcp", {
+		app.request("http://localhost/mcp", {
 			method: "POST",
 			headers: {
 				"content-type": "application/json",

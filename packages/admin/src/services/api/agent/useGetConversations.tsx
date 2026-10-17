@@ -39,7 +39,7 @@ const useGetConversations = (
 		],
 		queryFn: ({ signal }) =>
 			request<ResponseBody<AgentConversation[]>>({
-				url: "/lucid/api/v1/agent/conversations",
+				url: "/api/v1/agent/conversations",
 				signal,
 				displayErrorToast: false,
 				//* a query string brings its own sort

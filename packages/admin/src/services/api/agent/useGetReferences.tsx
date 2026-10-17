@@ -10,7 +10,7 @@ const useGetReferences = (params: { id: Accessor<string | undefined> }) =>
 		queryKey: queryKeys.agent.references(params.id()),
 		queryFn: () =>
 			request<ResponseBody<AgentReference[]>>({
-				url: `/lucid/api/v1/agent/conversations/${params.id()}/references`,
+				url: `/api/v1/agent/conversations/${params.id()}/references`,
 			}),
 		enabled: params.id() !== undefined,
 	}));

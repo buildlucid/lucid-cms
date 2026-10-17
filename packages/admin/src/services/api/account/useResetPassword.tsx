@@ -17,7 +17,7 @@ export const resetPasswordReq = async (params: Params) => {
 			message: string;
 		}>
 	>({
-		url: `/lucid/api/v1/account/reset-password/${params.token}`,
+		url: `/api/v1/account/reset-password/${params.token}`,
 		csrf: true,
 		method: "PATCH",
 		body: {

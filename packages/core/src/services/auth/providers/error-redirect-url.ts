@@ -84,7 +84,7 @@ const authRedirectUrl: ServiceFn<
 			data: {
 				redirectUrl: urlAddPath(
 					baseUrl,
-					`/${constants.directories.admin}/accept-invitation?token=${authStateRes.data.invitation_token}`,
+					`${constants.paths.admin}/accept-invitation?token=${authStateRes.data.invitation_token}`,
 				),
 			},
 		};

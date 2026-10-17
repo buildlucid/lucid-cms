@@ -165,7 +165,7 @@ const request = async <ResponseBody = unknown, Data = unknown>(
  * import { request } from "@lucidcms/admin/services";
  *
  * await request({
- * 	url: "/lucid/api/v1/redirects",
+ * 	url: "/api/v1/redirects",
  * 	method: "POST",
  * 	body: { from: "/old", to: "/new" },
  * });

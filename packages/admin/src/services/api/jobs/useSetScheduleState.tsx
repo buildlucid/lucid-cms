@@ -13,7 +13,7 @@ const useSetScheduleState = () =>
 	serviceHelpers.useMutationWrapper<Params, ResponseBody<Params>>({
 		mutationFn: (params) =>
 			request<ResponseBody<Params>, Params>({
-				url: "/lucid/api/v1/jobs/schedules/state",
+				url: "/api/v1/jobs/schedules/state",
 				csrf: true,
 				method: "PATCH",
 				body: params,

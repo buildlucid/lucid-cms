@@ -8,7 +8,7 @@ const useGetAuthorizationRequest = (params: { requestId: () => string }) =>
 		queryKey: [...queryKeys.oauthAuthorization.request(), params.requestId()],
 		queryFn: () =>
 			request<ResponseBody<OAuthAuthorizationRequest>>({
-				url: `/lucid/api/v1/integrations/oauth/authorization/${params.requestId()}`,
+				url: `/api/v1/integrations/oauth/authorization/${params.requestId()}`,
 				method: "GET",
 				displayErrorToast: false,
 			}),

@@ -22,7 +22,7 @@ const useGetAccess = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.share.access(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<ShareLinkAccess>>({
-				url: `/lucid/api/v1/share/${queryParams().location?.token}`,
+				url: `/api/v1/share/${queryParams().location?.token}`,
 				method: "GET",
 			}),
 		retry: 0,

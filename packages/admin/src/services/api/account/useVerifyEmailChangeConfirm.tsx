@@ -26,7 +26,7 @@ const useVerifyEmailChangeConfirm = (params: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<undefined>>({
-				url: `/lucid/api/v1/account/email-change/confirm/${queryParams().location?.token}`,
+				url: `/api/v1/account/email-change/confirm/${queryParams().location?.token}`,
 				method: "GET",
 			}),
 		retry: 0,

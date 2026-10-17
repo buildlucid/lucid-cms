@@ -36,7 +36,7 @@ import getAccessToken from "./token-manager.js";
 
 const issuer = "https://api.lucid.test";
 const resource = `${issuer}/v1/cms`;
-const callbackUrl = "https://cms.example.test/lucid/api/v1/connection/callback";
+const callbackUrl = "https://cms.example.test/api/v1/connection/callback";
 const browserBinding = "browser-binding".repeat(4);
 const now = () => Math.floor(Date.now() / 1000);
 
@@ -109,7 +109,7 @@ const makeContext = (): ServiceContext =>
 			LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: issuer,
 		},
 		request: {
-			url: "https://cms.example.test/lucid/api/v1/connection/status",
+			url: "https://cms.example.test/api/v1/connection/status",
 			locale: "en",
 		},
 	}) as ServiceContext;

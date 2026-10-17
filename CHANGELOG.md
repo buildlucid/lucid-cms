@@ -4,11 +4,11 @@
 
 ### Features:
 
-- Added an MCP server at `/lucid/mcp`, with `defineMcpTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
+- Added an MCP server at `/mcp`, with `defineMcpTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
 
 ### Breaking Changes:
 
-- Moved the admin from `/lucid` to `/admin`, including login, share links and the OAuth consent page. Server endpoints stay under `/lucid`, such as `/lucid/api`, `/lucid/mcp` and `/lucid/cdn`, and `admin` is now a reserved public folder.
+- Removed the `/lucid` URL prefix. The admin is at `/admin`, including login, share links and the OAuth consent page. The API is at `/api/v1`, with `/api/oauth`, `/api/openapi`, `/api/documentation` and `/api/health` beside it. MCP is at `/mcp`, media at `/cdn`, and plugin public files under `/_plugins/<plugin key>`. The OAuth issuer is now the site origin, so its metadata is at `/.well-known/oauth-authorization-server`. `admin`, `api`, `mcp` and `cdn` are reserved public folders.
 - Replaced the `./lucid/<resource>` folder defaults with `./database/migrations`, `./database/seeds`, `./translations` and `./emails`. The `templates` resource is now `emails` in `directories` and `sources`.
 - Document and version links now use shared identity tables with automatic cleanup on deletion.
 - Removed system alerts in favour of the new notification system.

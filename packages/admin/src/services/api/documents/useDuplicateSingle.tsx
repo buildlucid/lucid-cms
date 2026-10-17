@@ -15,7 +15,7 @@ export const duplicateSingleReq = (params: Params) => {
 			id: number;
 		}>
 	>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/duplicate`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.id}/duplicate`,
 		csrf: true,
 		method: "POST",
 	});

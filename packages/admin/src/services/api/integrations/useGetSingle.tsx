@@ -29,7 +29,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<Integration>>({
-				url: `/lucid/api/v1/integrations/${queryParams().location?.id}`,
+				url: `/api/v1/integrations/${queryParams().location?.id}`,
 				method: "GET",
 			}),
 		get enabled() {

@@ -10,7 +10,7 @@ interface Params {
 
 export const revertEmailChangeReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/account/email-change/revert/${params.token}`,
+		url: `/api/v1/account/email-change/revert/${params.token}`,
 		csrf: true,
 		method: "PATCH",
 	});

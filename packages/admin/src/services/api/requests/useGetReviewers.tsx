@@ -29,7 +29,7 @@ const useGetReviewers = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.requests.reviewers(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<UserDisplay[]>>({
-				url: `/lucid/api/v1/requests/${queryParams().location?.id}/reviewers`,
+				url: `/api/v1/requests/${queryParams().location?.id}/reviewers`,
 				query: { filters: queryParams().filters },
 				method: "GET",
 			}),

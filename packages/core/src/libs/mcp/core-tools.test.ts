@@ -63,7 +63,7 @@ const authority: McpToolAuthority = {
 };
 
 const post = (method: string, params: Record<string, unknown>) =>
-	new Request("https://cms.example.test/lucid/mcp", {
+	new Request("https://cms.example.test/mcp", {
 		method: "POST",
 		headers: {
 			"content-type": "application/json",

@@ -46,7 +46,7 @@ const callbackController = factory.createHandlers(
 		});
 
 		deleteCookie(c, flowCookieName, {
-			path: "/lucid/api/v1/connection/callback",
+			path: "/api/v1/connection/callback",
 		});
 
 		c.header("Cache-Control", "private, no-store");

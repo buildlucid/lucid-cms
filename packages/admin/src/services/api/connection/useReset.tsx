@@ -7,7 +7,7 @@ type Params = Record<string, never>;
 
 export const resetReq = (_params: Params) =>
 	request<undefined>({
-		url: "/lucid/api/v1/connection/reset",
+		url: "/api/v1/connection/reset",
 		csrf: true,
 		method: "POST",
 	});

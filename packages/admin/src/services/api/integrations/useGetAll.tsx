@@ -28,7 +28,7 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<Integration[]>>({
-				url: "/lucid/api/v1/integrations",
+				url: "/api/v1/integrations",
 				query: queryParams(),
 				method: "GET",
 			}),

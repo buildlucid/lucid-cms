@@ -18,7 +18,7 @@ export interface Params {
 
 export const completeReq = (params: Params) => {
 	return request<ResponseBody<RequestExecutionReceipt>>({
-		url: `/lucid/api/v1/requests/${params.id}/complete`,
+		url: `/api/v1/requests/${params.id}/complete`,
 		csrf: true,
 		method: "POST",
 	});

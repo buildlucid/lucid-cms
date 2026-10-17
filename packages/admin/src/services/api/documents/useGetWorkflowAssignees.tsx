@@ -26,7 +26,7 @@ const useGetWorkflowAssignees = (params: QueryHook<QueryParams>) => {
 		],
 		queryFn: () =>
 			request<ResponseBody<UserDisplay[]>>({
-				url: `/lucid/api/v1/documents/${
+				url: `/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/workflow/assignees`,
 				query: queryParams(),

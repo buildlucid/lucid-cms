@@ -10,35 +10,33 @@ import cdnRoutes from "./cdn/index.js";
 import mcpRoutes from "./mcp/index.js";
 import oauthRoutes from "./oauth/index.js";
 
+const { api, mcp, cdn } = constants.paths;
+
 const routes = new Hono<LucidHonoGeneric>()
 	.get(
-		"/.well-known/oauth-authorization-server/lucid",
+		"/.well-known/oauth-authorization-server",
 		...authorizationServerMetadataController,
 	)
 	.get(
-		"/lucid/.well-known/oauth-authorization-server",
-		...authorizationServerMetadataController,
-	)
-	.get(
-		"/.well-known/oauth-protected-resource/lucid/api/v1/content",
+		`/.well-known/oauth-protected-resource${api}/v1/content`,
 		...contentProtectedResourceMetadataController,
 	)
 	.get(
-		"/lucid/api/v1/content/.well-known/oauth-protected-resource",
+		`${api}/v1/content/.well-known/oauth-protected-resource`,
 		...contentProtectedResourceMetadataController,
 	)
 	.get(
-		"/.well-known/oauth-protected-resource/lucid/mcp",
+		`/.well-known/oauth-protected-resource${mcp}`,
 		...mcpProtectedResourceMetadataController,
 	)
 	.get(
-		"/lucid/mcp/.well-known/oauth-protected-resource",
+		`${mcp}/.well-known/oauth-protected-resource`,
 		...mcpProtectedResourceMetadataController,
 	)
-	.route("/lucid/oauth", oauthRoutes)
-	.route("/lucid/mcp", mcpRoutes)
-	.get(`/${constants.directories.base}/health`, ...healthController)
-	.route(`/${constants.directories.base}/api/v1`, apiRoutes)
-	.route(`/${constants.directories.base}/cdn`, cdnRoutes);
+	.route(`${api}/oauth`, oauthRoutes)
+	.route(mcp, mcpRoutes)
+	.get(`${api}/health`, ...healthController)
+	.route(`${api}/v1`, apiRoutes)
+	.route(cdn, cdnRoutes);
 
 export default routes;

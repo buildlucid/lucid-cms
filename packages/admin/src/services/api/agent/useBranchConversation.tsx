@@ -12,7 +12,7 @@ const useBranchConversation = (props?: {
 	>({
 		mutationFn: ({ id, messageId }) =>
 			request<ResponseBody<AgentConversation>>({
-				url: `/lucid/api/v1/agent/conversations/${id}/branch`,
+				url: `/api/v1/agent/conversations/${id}/branch`,
 				method: "POST",
 				body: { messageId },
 			}),

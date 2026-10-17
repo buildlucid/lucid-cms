@@ -24,7 +24,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.email.detail(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<Email>>({
-				url: `/lucid/api/v1/emails/${queryParams().location?.emailId}`,
+				url: `/api/v1/emails/${queryParams().location?.emailId}`,
 				method: "GET",
 			}),
 		get enabled() {

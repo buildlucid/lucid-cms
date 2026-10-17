@@ -13,7 +13,7 @@ interface Params {
 
 export const deleteMultipleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}`,
+		url: `/api/v1/documents/${params.collectionKey}`,
 		csrf: true,
 		method: "DELETE",
 		body: params.body,

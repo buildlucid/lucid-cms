@@ -9,7 +9,7 @@ const useGetScopes = (params: QueryHook<Record<string, never>>) => {
 		queryKey: [...queryKeys.integrations.scopes(), "system", params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<ExternalScopeGroup[]>>({
-				url: "/lucid/api/v1/integrations/scopes",
+				url: "/api/v1/integrations/scopes",
 				method: "GET",
 			}),
 		get enabled() {

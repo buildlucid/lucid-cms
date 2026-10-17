@@ -10,7 +10,7 @@ const useGetMediaPreviews = (params: { id: Accessor<string> }) =>
 		queryKey: queryKeys.agent.mediaPreviews(params.id()),
 		queryFn: ({ signal }) =>
 			request<ResponseBody<Media[]>>({
-				url: `/lucid/api/v1/agent/conversations/${params.id()}/media-previews`,
+				url: `/api/v1/agent/conversations/${params.id()}/media-previews`,
 				signal,
 				displayErrorToast: false,
 			}),

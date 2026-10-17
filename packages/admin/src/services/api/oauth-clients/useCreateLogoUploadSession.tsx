@@ -22,8 +22,8 @@ const useCreateLogoUploadSession = () => {
 			request<ResponseBody<UploadSessionResponse>>({
 				url:
 					params.id === undefined
-						? "/lucid/api/v1/integrations/oauth-clients/logo/upload-session"
-						: `/lucid/api/v1/integrations/oauth-clients/${params.id}/logo/upload-session`,
+						? "/api/v1/integrations/oauth-clients/logo/upload-session"
+						: `/api/v1/integrations/oauth-clients/${params.id}/logo/upload-session`,
 				csrf: true,
 				method: "POST",
 				body: params.body,

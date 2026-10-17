@@ -28,7 +28,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.notifications.list(), queryKey(), params.key?.()],
 		queryFn: ({ signal }) =>
 			request<ResponseBody<Notification[]>>({
-				url: "/lucid/api/v1/notifications",
+				url: "/api/v1/notifications",
 				signal,
 				displayErrorToast: false,
 				//* a query string brings its own sort

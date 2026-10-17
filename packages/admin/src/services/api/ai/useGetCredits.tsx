@@ -15,7 +15,7 @@ const useGetCredits = (
 		queryKey: queryKeys.ai.credits(),
 		queryFn: () =>
 			request<ResponseBody<AiCredits>>({
-				url: "/lucid/api/v1/ai/credits",
+				url: "/api/v1/ai/credits",
 				displayErrorToast: params.displayErrorToast,
 			}),
 		staleTime: 60_000,

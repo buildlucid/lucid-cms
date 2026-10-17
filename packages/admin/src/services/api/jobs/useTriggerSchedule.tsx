@@ -10,7 +10,7 @@ const useTriggerSchedule = () =>
 	serviceHelpers.useMutationWrapper<Params, ResponseBody<JobReceipt>>({
 		mutationFn: (params) =>
 			request<ResponseBody<JobReceipt>>({
-				url: "/lucid/api/v1/jobs/schedules/trigger",
+				url: "/api/v1/jobs/schedules/trigger",
 				csrf: true,
 				method: "POST",
 				body: params,

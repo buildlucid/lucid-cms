@@ -1,6 +1,6 @@
 import type { LucidRetryConfig } from "./types/transport.js";
 
-export const CONTENT_BASE_PATH = "/lucid/api/v1/content";
+export const CONTENT_BASE_PATH = "/api/v1/content";
 
 export const ACCEPT_HEADER = "accept";
 export const AUTHORIZATION_HEADER = "authorization";

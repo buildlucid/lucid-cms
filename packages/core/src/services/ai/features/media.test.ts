@@ -157,7 +157,7 @@ test("a finished generation reports its type and links to the CMS, which streams
 		type: "audio",
 		output: {
 			voice: "sarah",
-			url: `/lucid/api/v1/ai/media/files/${encodeURIComponent(storageKey)}`,
+			url: `/api/v1/ai/media/files/${encodeURIComponent(storageKey)}`,
 		},
 	});
 

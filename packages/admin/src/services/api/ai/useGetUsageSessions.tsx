@@ -22,7 +22,7 @@ const useGetUsageSessions = (params: QueryHook<QueryParams>) => {
 		queryKey: [...queryKeys.ai.usageSessions(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<AiUsageSession[]>>({
-				url: "/lucid/api/v1/ai/usage/sessions",
+				url: "/api/v1/ai/usage/sessions",
 				query: queryParams(),
 				method: "GET",
 			}),

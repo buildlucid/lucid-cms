@@ -19,7 +19,7 @@ interface Params {
 
 export const createSingleReq = (userId: number, params: Params) => {
 	return request<ResponseBody<IntegrationCreateResponse>>({
-		url: `/lucid/api/v1/users/${userId}/integrations`,
+		url: `/api/v1/users/${userId}/integrations`,
 		csrf: true,
 		method: "POST",
 		body: {

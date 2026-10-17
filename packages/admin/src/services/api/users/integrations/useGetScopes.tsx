@@ -16,7 +16,7 @@ const bindUseGetScopes =
 			],
 			queryFn: () =>
 				request<ResponseBody<ExternalScopeGroup[]>>({
-					url: `/lucid/api/v1/users/${userId()}/integrations/scopes`,
+					url: `/api/v1/users/${userId()}/integrations/scopes`,
 					method: "GET",
 				}),
 			get enabled() {

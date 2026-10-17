@@ -135,7 +135,7 @@ test("returns a resource link for a public image on the CMS domain", async () =>
 	const publicImage = {
 		...image,
 		public: true,
-		url: "https://cms.example.com/lucid/cdn/public/preview-image.png",
+		url: "https://cms.example.com/cdn/public/preview-image.png",
 	} satisfies Media;
 	const { result, stream } = await run(publicImage);
 	expect(result.type).toBe("success");
@@ -156,7 +156,7 @@ test("inlines a public image when requested", async () => {
 		{
 			...image,
 			public: true,
-			url: "https://cms.example.com/lucid/cdn/public/preview-image.png",
+			url: "https://cms.example.com/cdn/public/preview-image.png",
 		},
 		true,
 	);

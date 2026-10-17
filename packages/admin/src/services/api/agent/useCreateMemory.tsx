@@ -10,7 +10,7 @@ const useCreateMemory = (props?: { onSuccess?: () => void }) =>
 	serviceHelpers.useMutationWrapper<MemoryBody, ResponseBody<AgentMemory>>({
 		mutationFn: (body) =>
 			request<ResponseBody<AgentMemory>>({
-				url: "/lucid/api/v1/agent/memories",
+				url: "/api/v1/agent/memories",
 				method: "POST",
 				body,
 			}),
