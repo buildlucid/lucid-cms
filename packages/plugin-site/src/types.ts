@@ -189,6 +189,8 @@ export type SitePluginOptions = {
 	environment?: string;
 	/** Defaults to ssr. */
 	mode?: SiteMode;
+	/** Default `Cache-Control` for SSR and ISR pages, overridable per page; prefer `s-maxage` over browser caching that cannot be purged and bypass CDN caches for the `lucid_preview` cookie. */
+	cacheControl?: string;
 	static?: {
 		/** Static output directory relative to the project root, defaulting to `dist-site` and emptied by each `site:build`. */
 		outDir?: string;
@@ -236,6 +238,8 @@ export type SitePage = {
 	mode: "ssr" | "isr";
 	/** The page's `revalidate` export: an ISR TTL in seconds for external data, since content changes invalidate sooner. */
 	revalidate?: number;
+	/** The page's `cacheControl` export, or the site's default, sent as-is outside previews and development. */
+	cacheControl?: string;
 	/** Whether the page has a `paths` export, which static builds evaluate for dynamic pages. */
 	paths: boolean;
 };

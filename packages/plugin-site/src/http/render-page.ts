@@ -28,6 +28,7 @@ const renderPage = async (props: {
 	site: Site;
 	match: MatchedRoute<SitePage>;
 	state: SiteState;
+	cacheControl: string | undefined;
 }) => {
 	const kiln = props.state.preview ? props.site.freshKiln : props.site.kiln;
 	const stream = await kiln.renderStream(
@@ -46,7 +47,10 @@ const renderPage = async (props: {
 			? insertBeforeBodyEnd(stream, () => missedFooter(props.state))
 			: stream,
 		200,
-		{ "content-type": props.match.data.contentType },
+		{
+			"content-type": props.match.data.contentType,
+			...(props.cacheControl ? { "cache-control": props.cacheControl } : {}),
+		},
 	);
 };
 

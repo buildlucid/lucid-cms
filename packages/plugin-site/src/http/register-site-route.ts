@@ -89,9 +89,14 @@ const registerSiteRoute =
 					footerWritten: false,
 				});
 
+				const development = context.runtimeContext?.compiled === false;
 				try {
 					const match = findRoute(site.router, "GET", pathname);
 					if (!match) throw new SiteNotFoundError();
+
+					// Previews keep the no-store header the toolkit set, and development skips caching so edits show.
+					const cacheControl =
+						preview || development ? undefined : match.data.cacheControl;
 
 					if (!preview && match.data.mode === "isr" && canStorePages(context)) {
 						const stored =
@@ -108,17 +113,18 @@ const registerSiteRoute =
 							}));
 						return hono.body(stored.body, 200, {
 							"content-type": stored.contentType,
+							...(cacheControl ? { "cache-control": cacheControl } : {}),
 						});
 					}
 
-					return await renderPage({ hono, site, match, state });
+					return await renderPage({ hono, site, match, state, cacheControl });
 				} catch (error) {
 					const response = await respondToRenderError({
 						hono,
 						site,
 						state,
 						error,
-						development: context.runtimeContext?.compiled === false,
+						development,
 					});
 					if (response) return response;
 					await next();

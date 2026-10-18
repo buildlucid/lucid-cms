@@ -2,10 +2,11 @@ import { LucidError, logger } from "@lucidcms/core";
 import { PLUGIN_KEY } from "../constants.js";
 import type { SiteKiln } from "../site/create-site-kiln.js";
 
-/** Page export settings, with `mode` and `revalidate` read as literals without executing the template. */
+/** Page export settings, with `mode`, `revalidate` and `cacheControl` read as literals without executing the template. */
 export type PageExports = {
 	mode?: "ssr" | "isr";
 	revalidate?: number;
+	cacheControl?: string;
 	paths: boolean;
 };
 
@@ -37,12 +38,21 @@ const readPageExports = async (
 				}
 				settings.revalidate = entry.value;
 				break;
+			case "cacheControl":
+				if (typeof entry.value !== "string" || entry.value.trim() === "") {
+					throw new LucidError({
+						scope: PLUGIN_KEY,
+						message: `'${template}' must export cacheControl as a literal Cache-Control header, such as "public, s-maxage=60".`,
+					});
+				}
+				settings.cacheControl = entry.value;
+				break;
 			default:
 				logger.warn({
 					scope: PLUGIN_KEY,
 					event: "plugin-site.page.unknown-export",
 					dedupeKey: `${PLUGIN_KEY}:unknown-export:${template}:${entry.name}`,
-					message: `'${template}' exports '${entry.name}', which the site plugin doesn't use. Pages can export paths, mode and revalidate.`,
+					message: `'${template}' exports '${entry.name}', which the site plugin doesn't use. Pages can export paths, mode, revalidate and cacheControl.`,
 				});
 		}
 	}

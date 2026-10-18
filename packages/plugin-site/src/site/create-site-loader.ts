@@ -94,6 +94,7 @@ const loadSite = async (props: {
 	);
 	const { router, pages } = createPageRouter(templates, {
 		mode: props.options.mode,
+		cacheControl: props.options.cacheControl,
 		exports,
 	});
 	if (props.options.mode === "static" && data?.kind === "dev") {

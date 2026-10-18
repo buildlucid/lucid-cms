@@ -37,6 +37,8 @@ const respondToRenderError = async (props: {
 		message: `Failed to render ${state.path}`,
 		error,
 	});
+	// Keeps CDNs from holding on to a failed render.
+	hono.header("cache-control", "no-store");
 
 	const page = await renderErrorPage({
 		hono,

@@ -34,6 +34,12 @@ const assertExportsFit = (
 			message: `'${page.template}' exports a mode, but a static site renders every page at build.`,
 		});
 	}
+	if (siteMode === "static" && exported.cacheControl !== undefined) {
+		throw new LucidError({
+			scope: PLUGIN_KEY,
+			message: `'${page.template}' exports cacheControl, but a static site's headers are set by whatever serves its files.`,
+		});
+	}
 	if (page.revalidate !== undefined && page.mode !== "isr") {
 		throw new LucidError({
 			scope: PLUGIN_KEY,
@@ -42,15 +48,24 @@ const assertExportsFit = (
 	}
 };
 
-/** Routes the templates in `pages/`, with each page's `mode`, `revalidate` and `paths` exports keyed by template. */
+/** Routes the templates in `pages/`, with each page's `mode`, `revalidate`, `cacheControl` and `paths` exports keyed by template. */
 const createPageRouter = (
 	templateNames: Iterable<string>,
 	options: {
 		mode?: SiteMode;
+		/** The site's default `Cache-Control`, which page exports override. */
+		cacheControl?: string;
 		exports?: ReadonlyMap<string, PageExports>;
 	} = {},
 ) => {
 	const siteMode = options.mode ?? "ssr";
+	if (siteMode === "static" && options.cacheControl !== undefined) {
+		throw new LucidError({
+			scope: PLUGIN_KEY,
+			message:
+				"The site plugin's cacheControl doesn't apply to static sites, whose headers are set by whatever serves their files.",
+		});
+	}
 	const templates = [...templateNames].filter(isPageTemplate);
 	const tree = buildTree(templates, {
 		roots: [`${PAGES_DIRECTORY}/`],
@@ -82,6 +97,7 @@ const createPageRouter = (
 			contentType: getContentType(item.path),
 			mode: exported.mode ?? (siteMode === "isr" ? "isr" : "ssr"),
 			revalidate: exported.revalidate,
+			cacheControl: exported.cacheControl ?? options.cacheControl,
 			paths: exported.paths,
 		};
 		assertExportsFit(page, exported, siteMode);

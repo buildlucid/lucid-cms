@@ -105,6 +105,24 @@ describe("createPageRouter", () => {
 		]);
 	});
 
+	test("gives pages the site's cacheControl unless they export their own", () => {
+		const { pages } = createPageRouter(
+			["pages/index.kiln", "pages/search.kiln"],
+			{
+				cacheControl: "public, s-maxage=60",
+				exports: new Map([
+					["pages/search.kiln", { cacheControl: "no-store", paths: false }],
+				]),
+			},
+		);
+		expect(
+			pages.map(({ name, cacheControl }) => ({ name, cacheControl })),
+		).toEqual([
+			{ name: "index", cacheControl: "public, s-maxage=60" },
+			{ name: "search", cacheControl: "no-store" },
+		]);
+	});
+
 	test("rejects exports that don't fit the site's mode", () => {
 		expect(() =>
 			createPageRouter(["pages/index.kiln"], {
@@ -119,5 +137,19 @@ describe("createPageRouter", () => {
 				]),
 			}),
 		).toThrow(/only applies to pages rendered with ISR/);
+		expect(() =>
+			createPageRouter(["pages/index.kiln"], {
+				mode: "static",
+				exports: new Map([
+					["pages/index.kiln", { cacheControl: "no-store", paths: false }],
+				]),
+			}),
+		).toThrow(/exports cacheControl/);
+		expect(() =>
+			createPageRouter(["pages/index.kiln"], {
+				mode: "static",
+				cacheControl: "public, s-maxage=60",
+			}),
+		).toThrow(/doesn't apply to static sites/);
 	});
 });
