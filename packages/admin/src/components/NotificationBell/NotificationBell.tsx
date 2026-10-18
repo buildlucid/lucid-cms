@@ -1,6 +1,5 @@
 import { Popover } from "@kobalte/core";
 import { A, useLocation } from "@solidjs/router";
-import classnames from "classnames";
 import {
 	TbOutlineBell,
 	TbOutlineChecks,
@@ -22,11 +21,17 @@ import ViewAllLink from "@/components/ViewAllLink/ViewAllLink";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
 import T from "@/translations";
+import {
+	getNavigationActionClasses,
+	type NavigationActionVariant,
+} from "@/utils/navigation";
 import { getNotificationsListKey } from "@/utils/notifications";
 
 export interface NotificationBellProps {
 	/** @default "sm" */
 	size?: "sm" | "md";
+	/** @default "icon" */
+	variant?: NavigationActionVariant;
 }
 
 const NotificationBell: Component<NotificationBellProps> = (props) => {
@@ -80,16 +85,13 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 				gutter={8}
 			>
 				<Popover.Trigger
-					class={classnames(
-						"relative flex shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:bg-background-hover hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary data-expanded:bg-background-hover data-expanded:text-icon-hover",
-						props.size === "md" ? "size-9" : "size-8",
-					)}
+					class={getNavigationActionClasses(props)}
 					aria-label={label()}
 					title={label()}
 				>
 					<TbOutlineBell class="size-3.5" />
 					<Show when={unread() > 0}>
-						<span class="absolute -top-0.5 -end-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium leading-none tabular-nums text-primary-foreground ring-2 ring-sidebar">
+						<span class="absolute -top-0.5 -inset-e-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium leading-none tabular-nums text-primary-foreground ring-2 ring-sidebar">
 							{unread() > 99 ? "99+" : unread()}
 						</span>
 					</Show>

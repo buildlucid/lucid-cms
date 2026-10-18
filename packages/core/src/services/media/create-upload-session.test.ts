@@ -77,7 +77,7 @@ describe("create upload session", () => {
 					url: "https://example.com/api/v1/media/upload-session",
 				},
 				config: {
-					host: "https://example.com",
+					urls: { cms: "https://example.com" },
 					db: {},
 					secrets: {
 						cookie: "secret",
@@ -141,7 +141,7 @@ describe("create upload session", () => {
 					url: "https://example.com/api/v1/media/upload-session",
 				},
 				config: {
-					host: "https://example.com",
+					urls: { cms: "https://example.com" },
 					db: {},
 					secrets: {
 						cookie: "secret",
@@ -201,7 +201,7 @@ describe("create upload session", () => {
 					url: "https://example.com/api/v1/media/upload-session",
 				},
 				config: {
-					host: "https://example.com",
+					urls: { cms: "https://example.com" },
 					db: {},
 					secrets: { cookie: "secret" },
 					media: { limits: { uploadBytes: 100 } },

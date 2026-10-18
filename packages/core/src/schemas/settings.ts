@@ -3,6 +3,15 @@ import type { ControllerSchema } from "../exports/types.js";
 import { queryString } from "./helpers/querystring.js";
 
 const settingsResponseSchema = z.object({
+	site: z
+		.object({
+			url: z.url().nullable().meta({
+				description:
+					"The website's absolute URL, or null when none is configured",
+				example: "https://example.com/",
+			}),
+		})
+		.optional(),
 	ai: z
 		.object({
 			agents: z.array(
@@ -243,13 +252,15 @@ export const controllerSchemas = {
 			string: z
 				.object({
 					include: queryString.schema.include(
-						"email,media,system,ai,mcp,agents",
+						"email,media,system,ai,mcp,agents,site",
 					),
 				})
 				.meta(queryString.meta),
 			formatted: z.object({
 				include: z
-					.array(z.enum(["email", "media", "system", "ai", "mcp", "agents"]))
+					.array(
+						z.enum(["email", "media", "system", "ai", "mcp", "agents", "site"]),
+					)
 					.optional(),
 			}),
 		},

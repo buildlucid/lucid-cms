@@ -8,6 +8,7 @@ const plugin = (options: SitePluginOptions = {}): LucidPluginDefinition =>
 	definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		defaults: { urls: { site: "/" } },
 		sources: {
 			public: [
 				{

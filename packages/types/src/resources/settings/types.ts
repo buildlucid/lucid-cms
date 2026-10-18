@@ -7,9 +7,14 @@ export type SettingsInclude =
 	| "system"
 	| "ai"
 	| "mcp"
-	| "agents";
+	| "agents"
+	| "site";
 
 export interface Settings {
+	site?: {
+		/** The website's absolute URL, or null when none is configured. */
+		url: string | null;
+	};
 	ai?: {
 		enabled: boolean;
 		agents: AgentSummary[];

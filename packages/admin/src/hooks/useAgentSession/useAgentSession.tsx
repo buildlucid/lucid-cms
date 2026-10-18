@@ -109,7 +109,9 @@ export type AgentSession = {
 	attached: Accessor<AgentReferenceItem[] | undefined>;
 	takeAttached: () => void;
 	panel: {
-		/** Allows the panel when the reader can chat with a sidebar agent and the current page does not already show an agent chat. */
+		/** Whether the reader can chat with a sidebar agent, on any page. */
+		allowed: Accessor<boolean>;
+		/** Allows the panel when it is allowed and the current page does not already show an agent chat. */
 		available: Accessor<boolean>;
 		/** Whether the reader keeps the panel open, remembered between visits. */
 		open: Accessor<boolean>;
@@ -182,9 +184,8 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 			(isNavigationLinkActive(location.pathname, "/admin") &&
 				getHomeView() === "ask"),
 	);
-	const panelAvailable = createMemo(
-		() => getAgentAccess().sidebar.length > 0 && !onAgentPage(),
-	);
+	const panelAllowed = createMemo(() => getAgentAccess().sidebar.length > 0);
+	const panelAvailable = createMemo(() => panelAllowed() && !onAgentPage());
 	const panelOpen = createMemo(
 		() => userPreferencesStore.getSectionOpen("agent.panel") ?? false,
 	);
@@ -366,6 +367,7 @@ export const AgentSessionProvider: ParentComponent = (props) => {
 				attached,
 				takeAttached: () => setAttached(undefined),
 				panel: {
+					allowed: panelAllowed,
 					available: panelAvailable,
 					open: panelOpen,
 					setOpen: (open) =>

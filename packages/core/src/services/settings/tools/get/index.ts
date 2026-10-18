@@ -9,7 +9,7 @@ export const getSettingsAgentTool = () =>
 		name: "settings_get",
 		title: copy("admin:core.tools.settings_get.title"),
 		description:
-			"Read how this CMS is set up: the runtime, database, queue, KV, email and media adapters, media storage used and remaining, whether emails are simulated, the email templates, the AI features and agents that are on, and the MCP tools served.",
+			"Read how this CMS is set up: the runtime, database, queue, KV, email and media adapters, media storage used and remaining, whether emails are simulated, the email templates, the AI features and agents that are on, the MCP tools served, and the website's URL.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.SettingsRead],

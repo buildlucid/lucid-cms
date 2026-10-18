@@ -38,6 +38,7 @@ const NavigationShell: Component<{
 		queryParams: {
 			include: {
 				ai: true,
+				site: true,
 			},
 		},
 	});
@@ -62,6 +63,7 @@ const NavigationShell: Component<{
 
 		if (settings.isSuccess) {
 			siteStore.setAi(settings.data.data.ai);
+			siteStore.setSiteUrl(settings.data.data.site?.url);
 		}
 
 		if (connection.isSuccess && settings.isSuccess) setSynced(true);

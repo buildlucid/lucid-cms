@@ -55,7 +55,16 @@ const resolveAdapter = async () => {
 };
 
 const createHost = (adapter, state) => createLucidHost({
-	definition: { runtime: adapter, db, config: configFactory, configure },
+	definition: {
+		runtime: adapter,
+		db,
+		config: configFactory,
+		// Astro renders the website on the CMS's own domain unless the project says otherwise.
+		configure: (draft) => {
+			draft.urls.site ??= "/";
+			configure?.(draft);
+		},
+	},
 	envSchema,
 	env: state.env,
 	runtimeContext: state.runtimeContext,

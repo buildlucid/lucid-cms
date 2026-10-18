@@ -100,6 +100,7 @@ test("reads every section by default and only the sections asked for", async () 
 		"email",
 		"mcp",
 		"media",
+		"site",
 		"system",
 	]);
 	//* the test context has no runtime adapter, so the runtime is unknown

@@ -99,6 +99,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 			ignore: [],
 		},
 	},
+	urls: {},
 	brand: {
 		name: "Lucid CMS",
 	},

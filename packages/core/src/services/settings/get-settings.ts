@@ -3,6 +3,7 @@ import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { settingsFormatter } from "../../libs/formatters/index.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
+import { getSiteUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getMediaStorageUsage from "../media/get-storage-usage.js";
 import getProcessedImageCount from "../processed-images/get-count.js";
@@ -49,6 +50,7 @@ const getSettings: ServiceFn<
 				queueKey: context.queue.key,
 				kvKey: context.kv.key,
 				databaseKey: context.config.db.adapter,
+				siteUrl: getSiteUrl(context),
 			},
 			config: context.config,
 			translate: context.translate,

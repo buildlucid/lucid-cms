@@ -7,10 +7,11 @@ export {
 	isFractionalOrderKey,
 } from "./fractional-order.js";
 export { default as generateSecret } from "./generate-secret.js";
-export { default as getBaseUrl, normalizeHost } from "./get-base-url.js";
+export { default as getBaseUrl } from "./get-base-url.js";
 export { default as getDirName } from "./get-dir-name.js";
 export { default as getEmailFrom } from "./get-email-from.js";
 export { default as getFilterValues } from "./get-filter-values.js";
+export { default as getSiteUrl } from "./get-site-url.js";
 export { getNumber, getObject } from "./get-typed-value.js";
 export {
 	default as groupDocumentFilters,

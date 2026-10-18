@@ -315,10 +315,14 @@ export interface LucidConfig {
 	 */
 	http?: HttpConfig;
 	/**
-	 * The public host of the Lucid instance. If not provided, the request URL will be used.
-	 * Values without a protocol are treated as HTTPS.
+	 * Public URLs for the CMS and the website that renders your content.
 	 */
-	host?: string;
+	urls?: {
+		/** The CMS's public URL, such as `https://cms.example.com`, falling back to the request origin when omitted. */
+		cms?: string;
+		/** The website URL, such as `https://example.com`, or a path such as `/` on the CMS domain. */
+		site?: string;
+	};
 	/**
 	 * A single `64 character` root secret, or separate `64 character` secrets
 	 * to encrypt and sign data.
@@ -659,7 +663,10 @@ export interface LucidConfig {
 /** Runtime configuration after defaults, plugin contributions and configure callbacks have been applied. */
 export interface ResolvedLucidConfig {
 	access: AccessGroup[];
-	host?: string;
+	urls: {
+		cms?: string;
+		site?: string;
+	};
 	logger: {
 		level: LogLevel;
 		transport?: LogTransport;

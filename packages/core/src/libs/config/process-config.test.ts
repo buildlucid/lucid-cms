@@ -381,6 +381,21 @@ test("plugin defaults preserve project values and arrays replace defaults", asyn
 	expect(processed.build.watch.ignore).toEqual([]);
 });
 
+test("site URLs must be http(s) URLs or root paths", async () => {
+	const processSite = (url: string) =>
+		processConfig(
+			{ ...config, urls: { site: url } },
+			{ resolvedDb: createAdapter("test"), skipValidation: true },
+		);
+
+	await expect(processSite("/")).resolves.toMatchObject({
+		urls: { site: "/" },
+	});
+	await expect(processSite("https://example.com")).resolves.toBeDefined();
+	await expect(processSite("//elsewhere.example")).rejects.toThrow();
+	await expect(processSite("javascript:alert(1)")).rejects.toThrow();
+});
+
 test("project configure has the final choice after ordered plugin transforms", async () => {
 	const processed = await processConfig(
 		{

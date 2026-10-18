@@ -21,6 +21,7 @@ interface SettingsPropsT {
 	queueKey: string;
 	kvKey: string;
 	databaseKey: string;
+	siteUrl: string | null;
 }
 
 const formatSingle = (props: {
@@ -36,6 +37,10 @@ const formatSingle = (props: {
 
 	const includeSet = new Set(includes);
 	const response: Settings = {};
+
+	if (includeSet.has("site")) {
+		response.site = { url: props.settings.siteUrl };
+	}
 
 	if (includeSet.has("ai")) {
 		response.ai = {

@@ -9,6 +9,8 @@ export type AiFeature = keyof AiSettings["features"];
 
 type SiteStoreT = {
 	connection: ConnectionStatus | null;
+	/** The website's absolute URL, or null when none is configured. */
+	siteUrl: string | null;
 	ai: AiSettings;
 	reset: () => void;
 	isAiFeatureEnabled: (_feature: AiFeature) => boolean;
@@ -31,9 +33,11 @@ const defaultAiSettings = (): AiSettings => ({
 
 const [get, set] = createStore<SiteStoreT>({
 	connection: null,
+	siteUrl: null,
 	ai: defaultAiSettings(),
 	reset() {
 		set("connection", null);
+		set("siteUrl", null);
 		set("ai", defaultAiSettings());
 	},
 	//* When organisation access is unknown, use configuration alone; Lucid still checks remote requests.
@@ -66,6 +70,9 @@ const siteStore = {
 	set,
 	setConnection(connection: ConnectionStatus | null) {
 		set("connection", connection);
+	},
+	setSiteUrl(url: string | null | undefined) {
+		set("siteUrl", url ?? null);
 	},
 	setAi(ai: Settings["ai"] | undefined) {
 		set("ai", ai ?? defaultAiSettings());

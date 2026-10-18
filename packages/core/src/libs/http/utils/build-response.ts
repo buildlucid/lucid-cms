@@ -1,6 +1,6 @@
 import type { Context } from "hono";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
 import type { ResponseBody } from "../../../types/response.js";
-import { normalizeHost } from "../../../utils/helpers/index.js";
 
 // --------------------------------------------------
 // Types
@@ -23,14 +23,13 @@ type FormattedAPIResponse<Data, Refs> = Omit<ResponseBody<Data>, "refs"> & {
 
 const constructBaseUrl = (c: Context): URL => {
 	const requestUrl = new URL(c.req.url);
-	const config = c.get("config") as { host?: string } | undefined;
+	const config = c.get("config") as
+		| Pick<ResolvedLucidConfig, "urls">
+		| undefined;
 
-	if (!config?.host?.trim()) return requestUrl;
+	if (!config?.urls.cms) return requestUrl;
 
-	return new URL(
-		`${requestUrl.pathname}${requestUrl.search}`,
-		normalizeHost(config.host),
-	);
+	return new URL(`${requestUrl.pathname}${requestUrl.search}`, config.urls.cms);
 };
 
 const getPath = (c: Context) => {

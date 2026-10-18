@@ -309,7 +309,19 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		...value,
 	})),
 	sources: ResourceSourcesSchema,
-	host: z.string().trim().min(1).optional(),
+	urls: z.strictObject({
+		//* trailing slashes are dropped so paths can be appended directly
+		cms: z
+			.url({ protocol: /^https?$/ })
+			.transform((value) => value.replace(/\/+$/, ""))
+			.optional(),
+		site: z
+			.union([
+				z.url({ protocol: /^https?$/ }),
+				z.string().regex(/^\/(?![/\\])/, "Use a path that starts with /."),
+			])
+			.optional(),
+	}),
 	http: z.strictObject({
 		security: z.strictObject({
 			trustProxyHeaders: z.boolean(),

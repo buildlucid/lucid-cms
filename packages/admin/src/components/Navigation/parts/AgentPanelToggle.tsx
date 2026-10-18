@@ -4,10 +4,15 @@ import { type Component, createMemo, Show } from "solid-js";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import T from "@/translations";
+import {
+	getNavigationActionClasses,
+	type NavigationActionVariant,
+} from "@/utils/navigation";
 
-/** Opens and closes the agent panel, marking a busy or waiting chat while it is closed. Hidden where the panel can't show. */
+/** Toggles the agent panel, shows busy or waiting status when closed, and stays disabled on pages already showing an agent chat. */
 export const AgentPanelToggle: Component<{
 	size?: "sm" | "md";
+	variant?: NavigationActionVariant;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -15,12 +20,15 @@ export const AgentPanelToggle: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const open = createMemo(() => session.panel.open());
-	const label = createMemo(() =>
-		T()(open() ? "agent.panel.close" : "agent.panel.open"),
+	const open = createMemo(
+		() => session.panel.available() && session.panel.open(),
 	);
+	const label = createMemo(() => {
+		if (!session.panel.available()) return T()("agent.panel.here");
+		return T()(open() ? "agent.panel.close" : "agent.panel.open");
+	});
 	const status = createMemo(() => {
-		if (open()) return undefined;
+		if (open() || !session.panel.available()) return undefined;
 		if (session.chat.waiting()) return "waiting";
 		return session.chat.working() ? "working" : undefined;
 	});
@@ -28,17 +36,18 @@ export const AgentPanelToggle: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Show when={session.panel.available()}>
+		<Show when={session.panel.allowed()}>
 			<button
 				type="button"
-				class={classnames(
-					"relative flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-background-hover hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
-					props.size === "md" ? "size-9" : "size-8",
-					open() ? "bg-background-hover text-icon-hover" : "text-icon",
-				)}
+				class={getNavigationActionClasses(props)}
+				disabled={!session.panel.available()}
 				aria-pressed={open()}
 				aria-label={label()}
-				title={`${label()} (${shortcutText.toggleAgentPanel})`}
+				title={
+					session.panel.available()
+						? `${label()} (${shortcutText.toggleAgentPanel})`
+						: label()
+				}
 				onClick={() => session.panel.setOpen(!open())}
 			>
 				<TbOutlineRobot class="size-3.5" />
@@ -46,7 +55,7 @@ export const AgentPanelToggle: Component<{
 					{(current) => (
 						<span
 							class={classnames(
-								"absolute top-1 end-1 size-1.5 rounded-full ring-2 ring-sidebar",
+								"absolute top-1 inset-e-1 size-1.5 rounded-full ring-2 ring-sidebar",
 								current() === "waiting"
 									? "bg-warning"
 									: "bg-primary motion-safe:animate-pulse",

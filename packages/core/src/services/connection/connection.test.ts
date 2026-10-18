@@ -90,7 +90,7 @@ const makeConfig = (): ResolvedLucidConfig =>
 	({
 		db: adapter,
 		tables: [],
-		host: "https://cms.example.test",
+		urls: { cms: "https://cms.example.test" },
 		secrets: {
 			encryption: testingConstants.key,
 			cookie: testingConstants.key,

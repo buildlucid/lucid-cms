@@ -39,7 +39,9 @@ const createServiceContext = (
 		}),
 		request: {
 			url:
-				options.request?.url ?? options.config.host ?? constants.urls.localhost,
+				options.request?.url ??
+				options.config.urls.cms ??
+				constants.urls.localhost,
 			ipAddress: options.request?.ipAddress ?? null,
 			locale,
 		},

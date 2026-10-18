@@ -11,7 +11,7 @@ import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { PreviewSessionsRepository } from "../../libs/repositories/index.js";
 import {
-	getBaseUrl,
+	getSiteUrl,
 	hashPreviewToken,
 	normalizePreviewUrl,
 	resolveDefaultPreviewUrl,
@@ -148,6 +148,7 @@ const create: ServiceFn<
 				: (routePath?.[locale] ?? null);
 	const token = randomBytes(32).toString("base64url");
 
+	const siteUrl = getSiteUrl(context);
 	let resolvedUrl: string | URL | null;
 	try {
 		resolvedUrl = preview.url
@@ -157,7 +158,9 @@ const create: ServiceFn<
 					locale,
 					path,
 				})
-			: resolveDefaultPreviewUrl(getBaseUrl(context), path);
+			: siteUrl
+				? resolveDefaultPreviewUrl(siteUrl, path)
+				: null;
 	} catch {
 		return {
 			error: {

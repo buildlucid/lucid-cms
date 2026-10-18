@@ -9,7 +9,7 @@ import registerCustomRoutes from "./register-custom-routes.js";
 
 vi.mock("./create-service-context.js", () => ({
 	default: () => ({
-		config: { plugins: [] },
+		config: { plugins: [], urls: {} },
 		request: { url: "http://localhost:6543" },
 	}),
 }));

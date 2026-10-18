@@ -4,7 +4,7 @@ import normalizePreviewUrl, {
 } from "./normalize-preview-url.js";
 
 describe("resolveDefaultPreviewUrl", () => {
-	it("resolves route paths on the configured CMS origin", () => {
+	it("resolves route paths on the site origin", () => {
 		expect(
 			resolveDefaultPreviewUrl(
 				"https://example.com/lucid",

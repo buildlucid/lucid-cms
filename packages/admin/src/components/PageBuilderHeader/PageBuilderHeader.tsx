@@ -10,6 +10,7 @@ import {
 	TbOutlineArrowForwardUp,
 	TbOutlineCalendarPlus,
 	TbOutlineClock,
+	TbOutlineExternalLink,
 	TbOutlineEye,
 	TbOutlineEyeOff,
 	TbOutlineLanguage,
@@ -20,6 +21,7 @@ import type { Accessor } from "solid-js";
 import { type Component, createMemo, onCleanup, onMount, Show } from "solid-js";
 import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Breadcrumbs/Breadcrumbs";
 import Button from "@/components/Button/Button";
+import { getButtonClasses } from "@/components/Button/classes";
 import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
 import DateText from "@/components/DateText/DateText";
 import { Permissions } from "@/constants/permissions";
@@ -30,12 +32,14 @@ import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocum
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
 import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import api from "@/services/api";
+import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getDocumentEnvironmentStatus } from "@/utils/document-environment-status";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import helpers from "@/utils/helpers";
+import { getLiveDocumentUrl } from "@/utils/live-document-url";
 import { getDocumentProposals } from "@/utils/requests";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
@@ -522,6 +526,18 @@ export const PageBuilderHeader: Component<{
 			props.state.collection()?.capabilities.preview === true
 		);
 	});
+	const liveDocumentUrl = createMemo(() => {
+		const collection = props.state.collection();
+		const document = props.state.document();
+		if (props.mode !== "edit" || !collection || !document) return null;
+
+		return getLiveDocumentUrl({
+			siteUrl: siteStore.get.siteUrl,
+			environments: collection.publishing.environments,
+			document,
+			locale: documentLocalization.contentLocale() || null,
+		});
+	});
 	const scopedPreviewOnly = createMemo(() => {
 		const version = props.version?.() ?? "latest";
 		return (
@@ -819,6 +835,24 @@ export const PageBuilderHeader: Component<{
 											environment: option().label,
 										})}
 									</Button>
+								)}
+							</Show>
+							<Show when={liveDocumentUrl()}>
+								{(url) => (
+									<a
+										href={url()}
+										target="_blank"
+										rel="noreferrer"
+										class={getButtonClasses({
+											variant: "outline",
+											size: "sm",
+											shape: "square",
+										})}
+										title={T()("documents.live.view")}
+										aria-label={T()("documents.live.view")}
+									>
+										<TbOutlineExternalLink />
+									</a>
 								)}
 							</Show>
 							<Show when={props.state.showPreview?.()}>

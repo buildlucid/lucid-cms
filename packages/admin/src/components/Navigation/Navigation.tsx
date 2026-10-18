@@ -12,7 +12,9 @@ import {
 	Show,
 } from "solid-js";
 import NotificationBell from "@/components/NotificationBell/NotificationBell";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
+import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
 import {
 	isNavigationLinkActive,
@@ -20,6 +22,7 @@ import {
 } from "@/utils/navigation";
 import { AgentPanelToggle } from "./parts/AgentPanelToggle";
 import { NavigationMenuContent } from "./parts/NavigationMenuContent";
+import { SiteLink } from "./parts/SiteLink";
 
 const NavigationLogo: Component = () => (
 	<>
@@ -33,12 +36,18 @@ export const Navigation: Component = () => {
 	// State & Hooks
 	const location = useLocation();
 	const interfaceDirection = useInterfaceDirection();
+	const session = useAgentSession();
 	const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
 
 	// ----------------------------------------
 	// Memos
 	const menuButtonLabel = createMemo(() =>
 		mobileMenuOpen() ? T()("common.close") : T()("navigation.menu.open"),
+	);
+	//* the bell always shows; once others join, the sidebar moves them all into a row below the logo
+	//* the agent toggle counts wherever it is allowed, so the row keeps its shape on agent pages
+	const showActionRow = createMemo(
+		() => session.panel.allowed() || siteStore.get.siteUrl !== null,
 	);
 
 	// ----------------------------------
@@ -102,6 +111,7 @@ export const Navigation: Component = () => {
 						<NavigationLogo />
 					</A>
 					<div class="flex items-center gap-1">
+						<SiteLink size="md" />
 						<AgentPanelToggle size="md" />
 						<NotificationBell size="md" />
 						<button
@@ -125,12 +135,20 @@ export const Navigation: Component = () => {
 
 			{/* Desktop Navigation */}
 			<aside class="hidden md:flex w-sidebar flex-col bg-sidebar max-h-screen sticky top-0 z-40">
-				<div class="pt-6 pb-3 ps-6 pe-4 flex items-center justify-between gap-2">
-					<NavigationLogo />
-					<div class="flex items-center gap-0.5">
-						<AgentPanelToggle />
-						<NotificationBell />
+				<div class="pt-6 pb-3">
+					<div class="ps-6 pe-4 flex min-h-8 items-center justify-between gap-2">
+						<NavigationLogo />
+						<Show when={!showActionRow()}>
+							<NotificationBell />
+						</Show>
 					</div>
+					<Show when={showActionRow()}>
+						<div class="px-4 mt-4 grid grid-flow-col auto-cols-fr gap-1.5">
+							<SiteLink variant="tile" />
+							<AgentPanelToggle variant="tile" />
+							<NotificationBell variant="tile" />
+						</div>
+					</Show>
 				</div>
 				<NavigationMenuContent />
 			</aside>

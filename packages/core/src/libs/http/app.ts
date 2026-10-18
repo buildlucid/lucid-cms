@@ -21,7 +21,6 @@ import {
 	LucidError,
 	translateErrorData,
 } from "../../utils/errors/index.js";
-import { normalizeHost } from "../../utils/helpers/index.js";
 import type LucidDatabase from "../db/client/lucid-database.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
@@ -84,9 +83,7 @@ const createApp = async (props: {
 	};
 }) => {
 	const app = new Hono<LucidHonoGeneric>();
-	const configuredHost = props.config.host?.trim()
-		? normalizeHost(props.config.host)
-		: undefined;
+	const cmsUrl = props.config.urls.cms;
 	app
 		.use(
 			requestId({
@@ -409,12 +406,12 @@ const createApp = async (props: {
 									"Content account endpoints for the account behind an external user credential.",
 							},
 						],
-						servers: configuredHost
+						servers: cmsUrl
 							? [
 									{
-										url: configuredHost.includes("[::1]")
-											? configuredHost.replace("[::1]", "localhost")
-											: configuredHost,
+										url: cmsUrl.includes("[::1]")
+											? cmsUrl.replace("[::1]", "localhost")
+											: cmsUrl,
 										description: "Development server",
 									},
 								]

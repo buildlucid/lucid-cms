@@ -112,7 +112,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			host: "https://cms.example.test",
+			urls: { cms: "https://cms.example.test" },
 			collections: [pages, restricted],
 			ai: {
 				...config.ai,

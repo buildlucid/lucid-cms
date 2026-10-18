@@ -3,11 +3,10 @@ import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import { normalizeHost } from "../../../utils/helpers/index.js";
 
 /** Browser origins permitted by both CORS and the MCP endpoint. */
 export const getAllowedCorsOrigins = (config: ResolvedLucidConfig) => [
-	...(config.host?.trim() ? [new URL(normalizeHost(config.host)).origin] : []),
+	...(config.urls.cms ? [new URL(config.urls.cms).origin] : []),
 	...(config.http.security.cors?.origin ?? []),
 ];
 

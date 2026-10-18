@@ -37,10 +37,7 @@ export type CreateServiceContextOptions = {
 	mediaDelivery?: MediaDeliveryAdapterInstance;
 	/** Optional initialized email adapter instance available to services. */
 	email?: EmailAdapterInstance;
-	/**
-	 * Request metadata used by services. If URL is omitted, Lucid uses
-	 * `config.host`, then falls back to the local Lucid URL.
-	 */
+	/** Request metadata, with omitted URLs falling back to `config.urls.cms` or the local Lucid URL. */
 	request?: {
 		url?: string;
 		ipAddress?: string | null;
@@ -60,7 +57,7 @@ export type ServiceContext = {
 	email: EmailAdapterInstance;
 	translate: Translator;
 	request: {
-		/** The request URL. Used to derive the base URL if config.host is not set. */
+		/** The request URL, used to derive the base URL when `config.urls.cms` is unset. */
 		url: string;
 		/** The connecting client IP address when the service runs in an HTTP request context. */
 		ipAddress?: string | null;
