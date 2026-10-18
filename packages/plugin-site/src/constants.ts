@@ -21,6 +21,8 @@ export const errorPages = {
 	serverError: "pages/_500.kiln",
 } as const;
 
+export const HTML_CONTENT_TYPE = "text/html; charset=utf-8";
+/** Content types for page files ending in another extension, such as `pages/feed.xml.kiln`. */
 export const contentTypes: Record<string, string> = {
 	xml: "application/xml; charset=utf-8",
 	rss: "application/rss+xml; charset=utf-8",

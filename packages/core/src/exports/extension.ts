@@ -42,3 +42,7 @@ export {
 } from "../utils/media/index.js";
 
 export const logScopes = constants.logScopes;
+/** URL paths Lucid serves, such as `/admin` and `/api`, which sites and public files can't use. */
+export const reservedPaths = constants.paths;
+/** The public folder plugin files are served from, as `pluginPublicPath()` writes them. */
+export const pluginPublicDirectory = constants.directories.pluginPublic;

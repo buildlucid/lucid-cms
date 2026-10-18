@@ -14,44 +14,55 @@ const allowsEmpty = (constraint: string | undefined, modifier: string) => {
 	}
 };
 
-/** Fills a page pattern from a `paths` entry, rejecting missing required values, values other than strings or numbers, `/` in single segments and unknown parameters. */
+const isEmpty = (value: unknown) =>
+	value === undefined || value === null || value === "";
+
+/** Fills page patterns from `paths` entries, rejecting missing required values, values other than strings or numbers, `/` in single segments and unknown parameters with errors following the page's name, eg. "gives no value for 'slug'". */
 const fillPagePattern = (
 	pattern: string,
 	values: Record<string, unknown>,
-): string => {
+): { error: string; data: undefined } | { error: undefined; data: string } => {
 	const names = new Set<string>();
-	const filled = pattern.replace(
+	for (const [, name = "", constraint, modifier = ""] of pattern.matchAll(
 		PARAMETER,
-		(_, name: string, constraint: string | undefined, modifier: string) => {
-			names.add(name);
-			const value = values[name];
-			if (value === undefined || value === null || value === "") {
-				if (allowsEmpty(constraint, modifier)) return "";
-				throw new Error(`gives no value for '${name}'`);
-			}
-			if (typeof value !== "string" && typeof value !== "number") {
-				throw new Error(
-					`gives '${name}' as a ${typeof value}, not a string or number`,
-				);
-			}
-			const text = String(value);
-			if (modifier !== "*" && modifier !== "+" && text.includes("/")) {
-				throw new Error(
-					`puts a '/' in '${name}', which is one segment of the path`,
-				);
-			}
-			return text;
-		},
-	);
+	)) {
+		names.add(name);
+		const value = values[name];
+		if (isEmpty(value)) {
+			if (allowsEmpty(constraint, modifier)) continue;
+			return { error: `gives no value for '${name}'`, data: undefined };
+		}
+		if (typeof value !== "string" && typeof value !== "number") {
+			return {
+				error: `gives '${name}' as a ${typeof value}, not a string or number`,
+				data: undefined,
+			};
+		}
+		if (modifier !== "*" && modifier !== "+" && String(value).includes("/")) {
+			return {
+				error: `puts a '/' in '${name}', which is one segment of the path`,
+				data: undefined,
+			};
+		}
+	}
 
 	const unknown = Object.keys(values).filter((name) => !names.has(name));
 	if (unknown.length > 0) {
-		throw new Error(
-			`gives ${unknown.map((name) => `'${name}'`).join(", ")}, which the file name has no parameter for`,
-		);
+		return {
+			error: `gives ${unknown.map((name) => `'${name}'`).join(", ")}, which the file name has no parameter for`,
+			data: undefined,
+		};
 	}
+
+	const filled = pattern.replace(PARAMETER, (_, name: string) => {
+		const value = values[name];
+		return isEmpty(value) ? "" : String(value);
+	});
 	// Empty optional and catch-all values leave doubled or trailing slashes.
-	return normalizePath(filled.replace(/\/{2,}/g, "/"));
+	return {
+		error: undefined,
+		data: normalizePath(filled.replace(/\/{2,}/g, "/")),
+	};
 };
 
 export default fillPagePattern;

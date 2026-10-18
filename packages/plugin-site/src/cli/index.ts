@@ -1,19 +1,16 @@
 import path from "node:path";
 import type { LucidPluginCliFactory } from "@lucidcms/core/types";
 import { ASSETS_BASE, CLOUDFLARE_RUNTIME } from "../constants.js";
-import type { SitePluginOptions } from "../types.js";
-import buildSite from "./build-site.js";
+import type { SitePluginOptionsInternal } from "../types.js";
 import buildSiteData from "./build-site-data.js";
-import createViteDev from "./create-vite-dev.js";
-import writeAssetHeaders from "./write-asset-headers.js";
-
-export type SiteCliOptions = SitePluginOptions & {
-	/** The site's folder relative to the project root, which is also Vite's root. */
-	directory: string;
-};
+import buildSite from "./static/build-site.js";
+import createViteDev from "./vite/create-vite-dev.js";
+import writeAssetHeaders from "./vite/write-asset-headers.js";
 
 /** The site plugin's CLI module, loaded only by `lucidcms` commands. */
-const siteCli: LucidPluginCliFactory<SiteCliOptions> = (options) => ({
+const siteCli: LucidPluginCliFactory<SitePluginOptionsInternal> = (
+	options,
+) => ({
 	dev: (props) =>
 		createViteDev({
 			...props,

@@ -1,18 +1,15 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
-import type { SiteCliOptions } from "./cli/index.js";
-import {
-	CLIENT_SCRIPT_PATH,
-	DEFAULT_SITE_DIRECTORY,
-	LUCID_VERSION,
-	PLUGIN_KEY,
-} from "./constants.js";
-import registerAssetHeaders from "./services/register-asset-headers.js";
-import registerSiteRoute from "./services/register-site-route.js";
+import { CLIENT_SCRIPT_PATH, LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import registerAssetHeaders from "./http/register-asset-headers.js";
+import registerSiteRoute from "./http/register-site-route.js";
+import resolvePluginOptions from "./site/resolve-plugin-options.js";
 import type { SitePluginOptions } from "./types.js";
 
-const plugin = (options: SitePluginOptions = {}): LucidPluginDefinition =>
-	definePlugin({
+const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
+	const options = resolvePluginOptions(given);
+
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		defaults: { urls: { site: "/" } },
@@ -27,10 +24,7 @@ const plugin = (options: SitePluginOptions = {}): LucidPluginDefinition =>
 		},
 		cli: {
 			module: "@lucidcms/plugin-site/cli",
-			options: {
-				...options,
-				directory: options.directory ?? DEFAULT_SITE_DIRECTORY,
-			} satisfies SiteCliOptions,
+			options,
 		},
 		sources: {
 			public: [
@@ -53,5 +47,6 @@ const plugin = (options: SitePluginOptions = {}): LucidPluginDefinition =>
 			});
 		},
 	});
+};
 
 export default plugin;

@@ -6,10 +6,10 @@ import {
 	PLUGIN_KEY,
 	TEMPLATE_EXTENSION,
 } from "../constants.js";
-import type { PageExports } from "../engine/read-page-exports.js";
 import type { SiteMode, SitePage } from "../types.js";
 import getContentType from "./get-content-type.js";
 import isPageTemplate from "./is-page-template.js";
+import type { PageExports } from "./read-page-exports.js";
 
 const specificity = (path: string) => {
 	if (path.includes("*")) return 2;

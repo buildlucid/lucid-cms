@@ -4,30 +4,30 @@ import type {
 	Toolkit,
 } from "@lucidcms/core/types";
 import type { KilnOptions, RenderAware, RenderInfo } from "@lucidkiln/core";
-import type { DocumentReadOptions } from "./engine/functions/document.js";
-import type { DocumentListOptions } from "./engine/functions/document-list.js";
-import type editable from "./engine/functions/editable.js";
-import type footer from "./engine/functions/footer.js";
-import type head from "./engine/functions/head.js";
-import type locales from "./engine/functions/locales.js";
-import type createMediaFunction from "./engine/functions/media.js";
-import type { MediaReadOptions } from "./engine/functions/media.js";
-import type createMediaListFunction from "./engine/functions/media-list.js";
-import type { MediaListOptions } from "./engine/functions/media-list.js";
-import type mediaUrl from "./engine/functions/media-url.js";
-import type { MediaUrlOptions } from "./engine/functions/media-url.js";
-import type notFound from "./engine/functions/not-found.js";
-import type redirect from "./engine/functions/redirect.js";
-import type richText from "./engine/functions/rich-text.js";
-import type createViteFunction from "./engine/functions/vite.js";
-import type createViteAssetFunction from "./engine/functions/vite-asset.js";
 import type {
 	TemplateBrick,
 	TemplateDocument,
-} from "./engine/to-template-document.js";
-import type { TemplateList } from "./engine/to-template-list.js";
-import type { TemplateMedia } from "./engine/to-template-media.js";
-import type { TemplateRichTextNode } from "./engine/to-template-rich-text.js";
+} from "./content/to-template-document.js";
+import type { TemplateList } from "./content/to-template-list.js";
+import type { TemplateMedia } from "./content/to-template-media.js";
+import type { TemplateRichTextNode } from "./content/to-template-rich-text.js";
+import type { DocumentReadOptions } from "./functions/document.js";
+import type { DocumentListOptions } from "./functions/document-list.js";
+import type editable from "./functions/editable.js";
+import type footer from "./functions/footer.js";
+import type head from "./functions/head.js";
+import type locales from "./functions/locales.js";
+import type createMediaFunction from "./functions/media.js";
+import type { MediaReadOptions } from "./functions/media.js";
+import type createMediaListFunction from "./functions/media-list.js";
+import type { MediaListOptions } from "./functions/media-list.js";
+import type mediaUrl from "./functions/media-url.js";
+import type { MediaUrlOptions } from "./functions/media-url.js";
+import type notFound from "./functions/not-found.js";
+import type redirect from "./functions/redirect.js";
+import type richText from "./functions/rich-text.js";
+import type createViteFunction from "./functions/vite.js";
+import type createViteAssetFunction from "./functions/vite-asset.js";
 
 /** Template function and prop types for Kiln's editor extensions. */
 declare module "@lucidkiln/core" {
@@ -102,14 +102,14 @@ export type ViteManifestChunk = {
 /** What the plugin's CLI hands its runtime code: the site directory in development, otherwise the built site. */
 export type SiteCliData =
 	| {
-			mode: "dev";
+			kind: "dev";
 			/** Absolute path of the site directory, resolved from the project root. */
 			directory: string;
 			/** Whether Vite is installed and serving the site's files. */
 			vite: boolean;
 	  }
 	| {
-			mode: "build";
+			kind: "build";
 			/** New for every build, so stored pages and fragments from the last deploy are never served. */
 			buildId: string;
 			/** Template sources keyed by path, e.g. `pages/index.kiln`, so builds need no files at runtime. */
@@ -194,6 +194,16 @@ export type SitePluginOptions = {
 		outDir?: string;
 	};
 	kiln?: SiteKilnOptions;
+};
+
+/** Site plugin options with their defaults filled in. */
+export type SitePluginOptionsInternal = Omit<
+	SitePluginOptions,
+	"directory" | "mode" | "static"
+> & {
+	directory: string;
+	mode: SiteMode;
+	static: { outDir: string };
 };
 
 type SiteCallables = KilnOptions<SiteState>["functions"];
