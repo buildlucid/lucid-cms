@@ -1,18 +1,33 @@
-import type { CollectionDocumentKey, Toolkit } from "@lucidcms/core/types";
+import type {
+	CollectionDocumentKey,
+	Locale,
+	Toolkit,
+} from "@lucidcms/core/types";
 import type { KilnOptions, RenderAware, RenderInfo } from "@lucidkiln/core";
 import type { DocumentReadOptions } from "./engine/functions/document.js";
-import type { DocumentsOptions } from "./engine/functions/documents.js";
+import type { DocumentListOptions } from "./engine/functions/document-list.js";
 import type editable from "./engine/functions/editable.js";
 import type footer from "./engine/functions/footer.js";
 import type head from "./engine/functions/head.js";
+import type locales from "./engine/functions/locales.js";
+import type createMediaFunction from "./engine/functions/media.js";
+import type { MediaReadOptions } from "./engine/functions/media.js";
+import type createMediaListFunction from "./engine/functions/media-list.js";
+import type { MediaListOptions } from "./engine/functions/media-list.js";
+import type mediaUrl from "./engine/functions/media-url.js";
+import type { MediaUrlOptions } from "./engine/functions/media-url.js";
 import type notFound from "./engine/functions/not-found.js";
 import type redirect from "./engine/functions/redirect.js";
+import type richText from "./engine/functions/rich-text.js";
 import type createViteFunction from "./engine/functions/vite.js";
 import type createViteAssetFunction from "./engine/functions/vite-asset.js";
 import type {
 	TemplateBrick,
 	TemplateDocument,
 } from "./engine/to-template-document.js";
+import type { TemplateList } from "./engine/to-template-list.js";
+import type { TemplateMedia } from "./engine/to-template-media.js";
+import type { TemplateRichTextNode } from "./engine/to-template-rich-text.js";
 
 /** Template function and prop types for Kiln's editor extensions. */
 declare module "@lucidkiln/core" {
@@ -26,13 +41,13 @@ declare module "@lucidkiln/core" {
 				options?: DocumentReadOptions,
 			) => Promise<TemplateDocument<Key> | null>
 		>;
-		/** Lists documents; scoped previews fall back to published content. */
-		documents: RenderAware<
+		/** Lists documents as `{ items, pagination }`; scoped previews fall back to published content. */
+		documentList: RenderAware<
 			<Key extends CollectionDocumentKey>(
 				render: RenderInfo<SiteState>,
 				collection: Key,
-				options?: DocumentsOptions,
-			) => Promise<TemplateDocument<Key>[]>
+				options?: DocumentListOptions,
+			) => Promise<TemplateList<TemplateDocument<Key>>>
 		>;
 		/** A collection's document URLs in every locale, such as for `{% export paths = documentPaths("page") %}`. */
 		documentPaths: RenderAware<
@@ -41,6 +56,16 @@ declare module "@lucidkiln/core" {
 				collection: CollectionDocumentKey,
 			) => Promise<string[]>
 		>;
+		/** Reads one library media item by ID, or null. */
+		media: ReturnType<typeof createMediaFunction>;
+		/** Lists library media as `{ items, pagination }`. */
+		mediaList: ReturnType<typeof createMediaListFunction>;
+		/** A media item's URL, such as `mediaUrl(image, { preset: "card", format: "webp" })`. */
+		mediaUrl: typeof mediaUrl;
+		/** The enabled content locales. */
+		locales: typeof locales;
+		/** Renders a rich text field or node as HTML; embedded bricks and document nodes are yours to render. */
+		richText: typeof richText;
 		/** Preview attributes for `<h1{{ editable(page, "title") }}>`, empty outside previews. */
 		editable: typeof editable;
 		/** Preview referrer policy for `<head>`, empty outside previews. */
@@ -60,6 +85,8 @@ declare module "@lucidkiln/core" {
 	interface KilnTypes {
 		Document: TemplateDocument;
 		Brick: TemplateBrick;
+		Media: TemplateMedia;
+		RichText: TemplateRichTextNode;
 	}
 }
 
@@ -132,12 +159,24 @@ export type SiteFunctionContext = {
 			collection: Key,
 			options?: DocumentReadOptions,
 		) => Promise<TemplateDocument<Key> | null>;
-		documents: <Key extends CollectionDocumentKey>(
+		documentList: <Key extends CollectionDocumentKey>(
 			collection: Key,
-			options?: DocumentsOptions,
-		) => Promise<TemplateDocument<Key>[]>;
+			options?: DocumentListOptions,
+		) => Promise<TemplateList<TemplateDocument<Key>>>;
 		/** A collection's document URLs in every locale, the shape a page's `paths` export accepts. */
 		documentPaths: (collection: CollectionDocumentKey) => Promise<string[]>;
+		media: (
+			id: number,
+			options?: MediaReadOptions,
+		) => Promise<TemplateMedia | null>;
+		mediaList: (
+			options?: MediaListOptions,
+		) => Promise<TemplateList<TemplateMedia>>;
+		mediaUrl: (
+			media: { key: string } | string,
+			options?: MediaUrlOptions,
+		) => Promise<string | null>;
+		locales: () => Promise<Locale[]>;
 	};
 	/** Kiln's render info, such as its locale, time zone and abort signal. */
 	render: RenderInfo<SiteState>;

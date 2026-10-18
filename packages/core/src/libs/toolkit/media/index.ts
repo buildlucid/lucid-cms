@@ -44,13 +44,13 @@ export type ToolkitMedia = {
 	deleteSingle: (
 		input: Parameters<typeof deleteSingle>[1],
 	) => ReturnType<typeof deleteSingle>;
-	/** Returns multiple media items and a total count. */
+	/** Returns multiple media items and a total count; `libraryOnly` matches the content API. */
 	getMultiple: (
 		input?: ToolkitMediaGetMultipleInput,
 	) => ServiceResponse<ToolkitMediaGetMultipleResult>;
-	/** Returns a single media item by ID. */
+	/** Returns a single media item by ID; `libraryOnly` matches the content API. */
 	getSingle: (input: ToolkitMediaGetSingleInput) => ServiceResponse<Media>;
-	/** Resolves a media URL, with optional image transformations. */
+	/** Resolves a media URL, with optional image transformations; `libraryOnly` matches the content API. */
 	resolveUrl: (input: ToolkitMediaResolveUrlInput) => ServiceResponse<MediaUrl>;
 	/** Reports changed IDs after direct writes. Does not save content or run authoring hooks. */
 	notifyChange: (

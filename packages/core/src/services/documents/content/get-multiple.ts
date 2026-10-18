@@ -233,7 +233,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 		}),
 		allowedDocumentCollectionKeys: data.allowedCollectionKeys,
 		host: baseUrl,
-		flattenRelationRefFields: true,
+		content: true,
 	});
 	if (refsRes.error) return refsRes;
 

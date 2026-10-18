@@ -47,7 +47,8 @@ const resolveDocumentRefs: ServiceFn<
 			/** Built-in document refs contributed outside custom field storage. */
 			refTargets?: Iterable<RefTarget>;
 			allowedDocumentCollectionKeys?: string[];
-			flattenRelationRefFields?: boolean;
+			/** Content API responses flatten relation ref fields and leave out user emails. */
+			content?: boolean;
 			host: string;
 		},
 	],
@@ -87,7 +88,7 @@ const resolveDocumentRefs: ServiceFn<
 					config: context.config,
 					host: data.host,
 					bricksTableSchema: data.brickSchema,
-					flattenDocumentFields: data.flattenRelationRefFields,
+					flattenDocumentFields: data.content,
 				},
 			}),
 		media: (targets) =>
@@ -98,7 +99,7 @@ const resolveDocumentRefs: ServiceFn<
 		users: (targets) =>
 			registeredRefResources.users.resolve(context, {
 				targets,
-				format: mediaFormat,
+				format: { ...mediaFormat, email: data.content !== true },
 			}),
 		agents: (targets) =>
 			registeredRefResources.agents.resolve(context, { targets }),

@@ -15,7 +15,12 @@ const config = {
 		defaultLocale: "en",
 	},
 	collections: [
-		{ key: "page", getData: { publishing: { environments: [] } } },
+		{
+			key: "page",
+			getData: { publishing: { environments: [] } },
+			flatFields: [],
+			brickInstances: [],
+		},
 		{
 			key: "blog",
 			getData: {
@@ -23,6 +28,8 @@ const config = {
 					environments: [{ key: "staging", requires: [] }],
 				},
 			},
+			flatFields: [],
+			brickInstances: [],
 		},
 	],
 } as unknown as ResolvedLucidConfig;
@@ -55,7 +62,47 @@ const getMultiple = vi.fn(async ({ preview }) =>
 		? { error: { status: 403, code: "preview_scope" }, data: undefined }
 		: { error: undefined, data: { data: [page], count: 1 } },
 );
-const toolkit = { documents: { getSingle, getMultiple } } as unknown as Toolkit;
+const image = {
+	id: 5,
+	type: "image",
+	key: "public/5",
+	url: "/cdn/public/5",
+	title: { en: "Cat", fr: "Chat" },
+	alt: { en: "A cat" },
+};
+const video = {
+	id: 7,
+	type: "video",
+	key: "public/7",
+	url: "/cdn/public/7",
+	title: { en: "Clip" },
+	poster: { id: 8, type: "image", key: "public/8", url: "/cdn/public/8" },
+};
+const media = {
+	getSingle: vi.fn(async ({ id }) => {
+		if (id === 5) return { error: undefined, data: image };
+		if (id === 7) return { error: undefined, data: video };
+		return { error: { status: 404 }, data: undefined };
+	}),
+	getMultiple: vi.fn(async () => ({
+		error: undefined,
+		data: { data: [image], count: 21 },
+	})),
+	resolveUrl: vi.fn(async ({ key, preset }) => ({
+		error: undefined,
+		data: { url: `/cdn/${key}?preset=${preset}` },
+	})),
+};
+const toolkit = {
+	documents: { getSingle, getMultiple },
+	media,
+	locales: {
+		getAll: async () => ({
+			error: undefined,
+			data: [{ code: "en" }, { code: "fr" }],
+		}),
+	},
+} as unknown as Toolkit;
 const preview = { kind: "preview", token: "token" } as SitePreview;
 
 const context = createSiteFunctionsContext(config, "production");
@@ -64,8 +111,14 @@ const kiln = createSiteKiln({
 	options: {},
 	data: null,
 	loader: memoryLoader({
-		"page.kiln": `{% set page = document("page", filter: { _fullSlug: path }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
-		"list.kiln": `{{ documents("page")|length }}{{ documents("blog")|length }}`,
+		"page.kiln": `{% set page = document("page", { filter: { _fullSlug: path }, include: ["bricks"] }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
+		"list.kiln": `{{ documentList("page").items|length }}{{ documentList("blog").items|length }}`,
+		"pages.kiln": `{% set list = documentList("page", { page: 2, perPage: 1 }) %}{% set p = list.pagination %}{{ list.items|length }}:{{ p.currentPage }},{{ p.perPage }},{{ p.total }},{{ p.lastPage }}`,
+		"media.kiln": `{% set item = media(5, { locale: "fr" }) %}{{ item.title }}|{{ media(6) ?? "none" }}|{{ mediaUrl(item, { preset: "card" }) }}`,
+		"media-list.kiln": `{% set list = mediaList({ filter: { type: "image" }, perPage: 20 }) %}{{ list.items[0].alt }}|{{ list.pagination.lastPage }}`,
+		"locales.kiln": `{% for locale in locales() %}{{ locale.code }}{% endfor %}`,
+		"island.kiln": `{% set page = document("page", { filter: { _fullSlug: path } }) %}{% island "islands/typed" with { image: media(5), page: page, brick: page.bricks[0] } %}{% endisland %}`,
+		"islands/typed.kiln": `{% props image: Media, page: Document, brick: Brick %}{{ image.title }}:{{ page.id }}:{{ brick.key }}`,
 		"paths.kiln": `{{ documentPaths("page")|join(",") }}|{{ documentPaths("blog")|length }}`,
 		"editable.kiln": `{% set page = document("page", filter: { _fullSlug: path }) %}<h1{{ editable(page, "title") }}></h1>{% for link in page.bricks[0].fields.links %}<a{{ editable(link, "label") }}></a>{% endfor %}`,
 		"moved.kiln": `{{ redirect("/new", 301) }}`,
@@ -100,7 +153,7 @@ const editTargets = (html: string) =>
 	);
 
 describe("site template functions", () => {
-	test("document() reads through the toolkit in the locale its route matched", async () => {
+	test("document() reads through the toolkit in the locale its route matched, with the includes it's given", async () => {
 		await expect(render("page.kiln", "/fr")).resolves.toBe("Accueil (fr)");
 		expect(getSingle).toHaveBeenLastCalledWith({
 			collectionKey: "page",
@@ -108,9 +161,72 @@ describe("site template functions", () => {
 			preview: null,
 			query: {
 				filter: { _fullSlug: { value: "/fr" } },
-				include: ["bricks", "meta"],
+				include: ["bricks"],
 			},
 		});
+	});
+
+	test("documentList() returns items with the content API's pagination", async () => {
+		await expect(render("pages.kiln", "/")).resolves.toBe("1:2,1,1,1");
+		expect(getMultiple).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				query: expect.objectContaining({ page: 2, perPage: 1 }),
+			}),
+		);
+	});
+
+	test("media(), mediaList() and mediaUrl() read library media only, with text in the locale", async () => {
+		await expect(render("media.kiln", "/")).resolves.toBe(
+			"Chat|none|/cdn/public/5?preset=card",
+		);
+		await expect(render("media-list.kiln", "/")).resolves.toBe("A cat|2");
+		expect(media.getSingle).toHaveBeenCalledWith({ id: 5, libraryOnly: true });
+		expect(media.getMultiple).toHaveBeenCalledWith({
+			query: {
+				filter: { type: { value: "image" } },
+				page: 1,
+				perPage: 20,
+			},
+			libraryOnly: true,
+		});
+		expect(media.resolveUrl).toHaveBeenCalledWith(
+			expect.objectContaining({ key: "public/5", libraryOnly: true }),
+		);
+	});
+
+	test("typed props accept the copies islands receive", async () => {
+		await expect(render("island.kiln", "/en")).resolves.toBe("Cat:2:banner");
+	});
+
+	test("media() tags its section with every media change, as media includes crops and posters", async () => {
+		const set = vi.fn();
+		await createSiteKiln({
+			context,
+			options: {},
+			data: null,
+			cache: { get: () => null, set },
+			loader: memoryLoader({
+				"video.kiln": `{% cache "video" %}{{ media(7).title }}{% endcache %}`,
+			}),
+		}).render(
+			"video.kiln",
+			{},
+			{
+				state: {
+					toolkit,
+					path: "/",
+					preview: null,
+					version: context.getVersion,
+				},
+			},
+		);
+		expect(set).toHaveBeenCalledWith(
+			expect.objectContaining({ tags: ["content-media"] }),
+		);
+	});
+
+	test("locales() lists the content locales", async () => {
+		await expect(render("locales.kiln", "/")).resolves.toBe("enfr");
 	});
 
 	test("notFound() stops the render when document() finds nothing", async () => {
@@ -189,7 +305,7 @@ describe("site template functions", () => {
 		]);
 	});
 
-	test("document() and documents() tag the cached section they run in with their collection", async () => {
+	test("document() and documentList() tag the cached section they run in with their collection", async () => {
 		const set = vi.fn();
 		const cached = createSiteKiln({
 			context,
@@ -197,7 +313,7 @@ describe("site template functions", () => {
 			data: null,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
-				"cached.kiln": `{% cache "list" %}{{ documents("page")|length }}{{ documents("blog")|length }}{% endcache %}`,
+				"cached.kiln": `{% cache "list" %}{{ documentList("page").items|length }}{{ documentList("blog").items|length }}{% endcache %}`,
 			}),
 		});
 
@@ -249,7 +365,7 @@ describe("site kiln options", () => {
 		const set = vi.fn();
 		const pageCount = defineSiteFunction(
 			async ({ functions, preview: token }, suffix: string) =>
-				`${(await functions.documents("page")).length}${suffix}:${token}`,
+				`${(await functions.documentList("page")).items.length}${suffix}:${token}`,
 		);
 		const site = createSiteKiln({
 			context,

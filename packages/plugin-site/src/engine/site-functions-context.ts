@@ -1,6 +1,9 @@
 import { LucidError, logger } from "@lucidcms/core";
 import type { ResolvedLucidConfig } from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../constants.js";
+import createFieldTypes, {
+	type FieldTypesLookup,
+} from "./create-field-types.js";
 import getCollectionVersion from "./get-collection-version.js";
 
 export type SiteFunctionsContext = {
@@ -10,6 +13,8 @@ export type SiteFunctionsContext = {
 	getVersion: (collectionKey: string, requested?: string) => string | null;
 	/** The collection's site version without the warning, for checks across every collection. */
 	siteVersion: (collectionKey: string) => string | null;
+	/** Field types for a collection, or one of its bricks, so reads can resolve references. */
+	fieldTypes: FieldTypesLookup;
 };
 
 const createSiteFunctionsContext = (
@@ -34,6 +39,7 @@ const createSiteFunctionsContext = (
 		locales: new Set(codes),
 		defaultLocale: config.localization.defaultLocale ?? codes[0] ?? "en",
 		siteVersion,
+		fieldTypes: createFieldTypes(config),
 		getVersion: (collectionKey, requested) => {
 			const version = siteVersion(collectionKey);
 			if (requested !== undefined) return requested;

@@ -11,5 +11,5 @@ export default {
 	validateInput: validateMediaInputData,
 	formatFilterValue: formatIntegerFilterValue,
 	parseToolValue: parseListToolValue,
-	contentTypeGen: createValueFieldTypeGenerator("number[]"),
+	contentTypeGen: createValueFieldTypeGenerator("MediaFieldValue"),
 };

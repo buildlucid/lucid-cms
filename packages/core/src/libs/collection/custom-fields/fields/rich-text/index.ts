@@ -16,9 +16,7 @@ export default {
 	config: richTextFieldConfig,
 	class: RichTextCustomField,
 	validateInput: validateRichTextInputData,
-	contentTypeGen: createValueFieldTypeGenerator(
-		"Record<string, unknown> | null",
-	),
+	contentTypeGen: createValueFieldTypeGenerator("RichTextFieldValue | null"),
 	extractEmbeddedBrickRefs: (value: unknown) =>
 		extractEmbeddedBrickRefs(value as RichTextJSON | null),
 	//* tools read and write HTML, which models write more reliably than editor JSON

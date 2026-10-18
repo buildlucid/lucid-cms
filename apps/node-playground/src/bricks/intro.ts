@@ -14,8 +14,19 @@ const IntroBrick = new BrickBuilder("intro", {
 		localized: true,
 	})
 	.addRichText("intro", {
+		editor: {
+			media: true,
+		},
 		validation: {
 			required: true,
+		},
+	})
+	.addMedia("intro_audio", {
+		details: {
+			label: "Audio",
+		},
+		validation: {
+			type: "audio",
 		},
 	})
 	.addTab("advanced_tab", {

@@ -31,7 +31,7 @@ const getMultiple = async (
 
 			return getMultipleMedia(context, {
 				query: data.query,
-				actor: { type: "internal" },
+				actor: data.libraryOnly ? { type: "content" } : { type: "internal" },
 				transcripts: true,
 			});
 		},

@@ -146,7 +146,9 @@ const documentRefResponseSchema = z.object({
 });
 
 const documentUserRefResponseSchema = userDisplaySchema.extend({
-	email: z.email(),
+	email: z.email().optional().meta({
+		description: "Only in admin responses; the content API leaves it out",
+	}),
 });
 
 export const documentRefsResponseSchema = z

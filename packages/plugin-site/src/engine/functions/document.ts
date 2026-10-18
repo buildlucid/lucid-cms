@@ -3,14 +3,22 @@ import { contentCacheTags } from "@lucidcms/core/extension";
 import type { CollectionDocumentKey } from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
 import type { SiteState } from "../../types.js";
-import normalizeDocumentFilter from "../normalize-document-filter.js";
+import normalizeFilter from "../normalize-filter.js";
 import type { SiteFunctionsContext } from "../site-functions-context.js";
 import toTemplateDocument, {
 	type TemplateDocument,
 } from "../to-template-document.js";
 
+type ReadQuery = NonNullable<
+	Parameters<SiteState["toolkit"]["documents"]["getSingle"]>[0]["query"]
+>;
+
+export type DocumentFilter = NonNullable<ReadQuery["filter"]>;
+
 export type DocumentReadOptions = {
-	/** Toolkit filters, with plain values as shorthand for equality. */
+	/** What to read alongside fields, such as `["bricks", "refs.media"]`; included refs fill in their fields. */
+	include?: ReadQuery["include"];
+	/** Toolkit filters, with plain values as shorthand for equality; a list of filters matches any of them. */
 	filter?: unknown;
 	/** Defaults to the matching route locale for document(), otherwise the default locale. */
 	locale?: string;
@@ -36,14 +44,15 @@ const createDocumentFunction = (context: SiteFunctionsContext) =>
 				version,
 				preview: render.state.preview?.token ?? null,
 				query: {
-					filter: normalizeDocumentFilter(options.filter),
-					include: ["bricks", "meta"],
+					filter: normalizeFilter<DocumentFilter>(options.filter),
+					include: options.include,
 				},
 			});
 			if (response.error?.status === 404) return null;
 			if (response.error) throw new LucidAPIError(response.error);
 
-			const { document } = response.data;
+			const { document, refs = {} } = response.data;
+			if (refs.media?.length) render.tagCache(contentCacheTags.media);
 			const routePath = document.route?.path;
 			const routeLocale =
 				typeof routePath === "object" && routePath !== null
@@ -52,11 +61,12 @@ const createDocumentFunction = (context: SiteFunctionsContext) =>
 						)
 					: undefined;
 
-			return toTemplateDocument<Key>(
+			return toTemplateDocument<Key>({
 				document,
-				options.locale ?? routeLocale ?? context.defaultLocale,
-				context.locales,
-			);
+				refs,
+				locale: options.locale ?? routeLocale ?? context.defaultLocale,
+				context,
+			});
 		},
 	);
 

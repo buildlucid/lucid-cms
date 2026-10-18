@@ -11,5 +11,5 @@ export default {
 	validateInput: validateUserInputData,
 	formatFilterValue: formatIntegerFilterValue,
 	parseToolValue: parseListToolValue,
-	contentTypeGen: createValueFieldTypeGenerator("number[]"),
+	contentTypeGen: createValueFieldTypeGenerator("UserFieldValue"),
 };

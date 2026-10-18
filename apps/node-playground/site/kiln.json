@@ -3,14 +3,19 @@
 	"strict": true,
 	"functions": [
 		"document",
+		"documentList",
 		"documentPaths",
-		"documents",
 		"editable",
 		"footer",
 		"head",
+		"locales",
+		"media",
+		"mediaList",
+		"mediaUrl",
 		"notFound",
 		"pageGreeting",
 		"redirect",
+		"richText",
 		"vite",
 		"viteAsset"
 	],
@@ -19,7 +24,9 @@
 	"globals": [],
 	"types": [
 		"Brick",
-		"Document"
+		"Document",
+		"Media",
+		"RichText"
 	],
 	"htmlChecks": true
 }

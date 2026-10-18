@@ -1,0 +1,6 @@
+{% props brick: Brick %}
+
+<aside class="rich-text__callout{% if brick.fields.emphasised %} rich-text__callout--emphasised{% endif %}">
+	<strong {{ editable(brick, "heading") }}>{{ brick.fields.heading }}</strong>
+	<p {{ editable(brick, "body") }}>{{ brick.fields.body }}</p>
+</aside>

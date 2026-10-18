@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest";
-import normalizeDocumentFilter from "./normalize-document-filter.js";
+import normalizeFilter from "./normalize-filter.js";
 
-describe("normalizeDocumentFilter", () => {
+describe("normalizeFilter", () => {
 	test("treats a plain value as equals and keeps the toolkit's own shape", () => {
 		expect(
-			normalizeDocumentFilter({
+			normalizeFilter({
 				_fullSlug: "/en/about",
 				_views: { value: 10, operator: ">" },
 			}),
@@ -16,7 +16,7 @@ describe("normalizeDocumentFilter", () => {
 
 	test("normalizes nested groups and lists of groups joined with OR", () => {
 		expect(
-			normalizeDocumentFilter([{ banner: { _title: "Hi" } }, { _slug: "a" }]),
+			normalizeFilter([{ banner: { _title: "Hi" } }, { _slug: "a" }]),
 		).toEqual([
 			{ banner: { _title: { value: "Hi" } } },
 			{ _slug: { value: "a" } },
@@ -24,7 +24,7 @@ describe("normalizeDocumentFilter", () => {
 	});
 
 	test("leaves out a filter that isn't a hash or list", () => {
-		expect(normalizeDocumentFilter(undefined)).toBeUndefined();
-		expect(normalizeDocumentFilter("about")).toBeUndefined();
+		expect(normalizeFilter(undefined)).toBeUndefined();
+		expect(normalizeFilter("about")).toBeUndefined();
 	});
 });

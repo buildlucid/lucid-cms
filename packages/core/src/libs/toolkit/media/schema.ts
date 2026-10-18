@@ -28,6 +28,9 @@ export const originSchema = z.enum(["human", "ai_generated", "ai_modified"]);
 /** Attributes changes to the actor and checks user media permissions, defaulting to the system. */
 export const mediaActorSchema = toolkitActorSchema.default({ type: "system" });
 
+/** Limits reads to library media, as the content API does, leaving out personal and system media. */
+export const libraryOnlySchema = z.boolean().default(false);
+
 export const translationsSchema = z.array(
 	z.object({
 		localeCode: z.string().trim().min(1).nullable(),

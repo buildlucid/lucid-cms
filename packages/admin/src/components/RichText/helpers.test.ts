@@ -26,14 +26,14 @@ describe("getReadableRichTextVariableCollectionKeys", () => {
 describe("getReadableRichTextUserVariableFields", () => {
 	test("removes configured fields without users read permission", () => {
 		expect(
-			getReadableRichTextUserVariableFields(["username", "email"], false),
+			getReadableRichTextUserVariableFields(["username", "firstName"], false),
 		).toEqual([]);
 	});
 
 	test("keeps configured fields with users read permission", () => {
 		expect(
-			getReadableRichTextUserVariableFields(["username", "email"], true),
-		).toEqual(["username", "email"]);
+			getReadableRichTextUserVariableFields(["username", "firstName"], true),
+		).toEqual(["username", "firstName"]);
 	});
 });
 

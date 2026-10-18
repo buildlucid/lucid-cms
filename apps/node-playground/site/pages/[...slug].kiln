@@ -2,7 +2,11 @@
 
 {% export paths = documentPaths("page") %}
 
-{% set page = document("page", filter: { _fullSlug: route.path }) ?? notFound() %}
+{% set page = document("page", {
+	filter: { _fullSlug: route.path },
+	include: ["bricks", "refs.media", "refs.documents"],
+}) ?? notFound() %}
+{% set media = mediaList({ filter: { type: 'image' } }) %}
 {% set lang = page.locale %}
 
 {% block title %}{{ page.fields.page_title }} | Playground{% endblock %}
@@ -21,4 +25,11 @@
 	{% island "islands/latest-pages" with { locale: page.locale } %}
 		<p>Loading the latest pages…</p>
 	{% endisland %}
+
+	{% for item in media.items %}
+		<figure class="media-figure">
+			<img {{ attrs({ src: item.url, alt: item.alt, width: item?.width, height: item?.height, loading: "lazy" }) }}>
+			{% if item.title %}<figcaption>{{ item.title }}</figcaption>{% endif %}
+		</figure>
+	{% endfor %}
 {% endblock %}

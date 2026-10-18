@@ -163,8 +163,8 @@ export type UserDisplay = {
 	profilePicture: ProfilePicture | null;
 };
 
-/** A user referenced by a user field, with the email a field can show. */
-export type UserRef = (UserDisplay & { email: string }) | null;
+/** A user referenced by a user field; only admin responses include their email, for the field to show. */
+export type UserRef = (UserDisplay & { email?: string }) | null;
 
 export type AuthProviderType = "oidc" | string;
 

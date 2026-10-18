@@ -466,8 +466,6 @@ const getUserFieldLabel = (fieldKey: RichTextUserVariableField): string => {
 			return T()("common.last.name");
 		case "username":
 			return T()("common.username");
-		case "email":
-			return T()("common.email");
 	}
 };
 

@@ -204,7 +204,7 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 		includeBricks: include.bricks,
 		refResources: include.refs,
-		flattenRelationRefFields: true,
+		content: true,
 		allowedDocumentCollectionKeys: data.allowedCollectionKeys,
 		refTargets: collectDocumentRefTargets({
 			documents: [documentRes.data],

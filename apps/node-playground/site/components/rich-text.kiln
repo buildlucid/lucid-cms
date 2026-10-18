@@ -1,0 +1,20 @@
+{# Loops over a rich text field's nodes: embedded bricks, media and documents use templates, everything else gets richText()'s HTML. #}
+{% props node: RichText | null %}
+
+{% for child in node.content ?? [] %}
+	{% if child.type == "lucidEmbeddedBrick" %}
+		{% if child.brick %}
+			{% include "rich-text/" ~ child.brick.key with { brick: child.brick } %}
+		{% endif %}
+	{% elseif child.type == "lucidMedia" %}
+		{% if child.attrs.media %}
+			{% include "rich-text/media" with { media: child.attrs.media } %}
+		{% endif %}
+	{% elseif child.type == "lucidDocument" %}
+		{% if child.document %}
+			<a class="rich-text__document" href="{{ child.document.url }}">{{ child.document.fields.page_title ?? child.document.url }}</a>
+		{% endif %}
+	{% else %}
+		{{ richText(child) }}
+	{% endif %}
+{% endfor %}

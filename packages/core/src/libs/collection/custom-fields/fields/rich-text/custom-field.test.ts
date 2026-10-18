@@ -522,7 +522,7 @@ test("rejects user variable fields that are not explicitly allowed", () => {
 						attrs: {
 							source: "user",
 							userId: 55,
-							fieldKey: "email",
+							fieldKey: "firstName",
 						},
 					},
 				],
@@ -543,7 +543,7 @@ test("rejects user variable fields that are not explicitly allowed", () => {
 					type: "rich-text-variable",
 					source: "user",
 					userId: 55,
-					fieldKey: "email",
+					fieldKey: "firstName",
 				},
 			},
 		},

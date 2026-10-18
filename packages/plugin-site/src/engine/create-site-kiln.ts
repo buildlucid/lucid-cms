@@ -15,13 +15,18 @@ import bindSiteFunction, {
 	type SiteReadFunctions,
 } from "./bind-site-function.js";
 import createDocumentFunction from "./functions/document.js";
+import createDocumentListFunction from "./functions/document-list.js";
 import createDocumentPathsFunction from "./functions/document-paths.js";
-import createDocumentsFunction from "./functions/documents.js";
 import editable from "./functions/editable.js";
 import footer from "./functions/footer.js";
 import head from "./functions/head.js";
+import locales from "./functions/locales.js";
+import createMediaFunction from "./functions/media.js";
+import createMediaListFunction from "./functions/media-list.js";
+import mediaUrl from "./functions/media-url.js";
 import notFound from "./functions/not-found.js";
 import redirect from "./functions/redirect.js";
+import richText from "./functions/rich-text.js";
 import createViteFunction from "./functions/vite.js";
 import createViteAssetFunction from "./functions/vite-asset.js";
 import mergeKilnEntries, { type KilnEntryKind } from "./merge-kiln-entries.js";
@@ -51,11 +56,16 @@ const createSiteKiln = (props: {
 }) => {
 	const reads: SiteReadFunctions = {
 		document: createDocumentFunction(props.context),
-		documents: createDocumentsFunction(props.context),
+		documentList: createDocumentListFunction(props.context),
 		documentPaths: createDocumentPathsFunction(props.context),
+		media: createMediaFunction(props.context),
+		mediaList: createMediaListFunction(props.context),
+		mediaUrl,
+		locales,
 	};
 	const functions = {
 		...reads,
+		richText,
 		editable,
 		head,
 		footer,

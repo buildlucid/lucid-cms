@@ -23,7 +23,7 @@ const getSingle = async (
 
 			return getSingleMedia(context, {
 				id: data.id,
-				actor: { type: "internal" },
+				actor: data.libraryOnly ? { type: "content" } : { type: "internal" },
 			});
 		},
 		name: {

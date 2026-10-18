@@ -11,5 +11,7 @@ export type UserRefResolveInput = {
 		defaultLocale: string | null;
 		locales: { code: string }[];
 		mediaDelivery: MediaDeliveryAdapterInstance;
+		/** Whether refs carry the user's email, which only the admin shows. */
+		email: boolean;
 	};
 };

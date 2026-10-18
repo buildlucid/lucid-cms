@@ -55,6 +55,24 @@ export type RelationFieldValue<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
 };
 
+/** Type-only key marking generated field values whose JSON looks like other fields', such as media IDs. */
+export declare const fieldValueKind: unique symbol;
+
+/** The media IDs in a media field. */
+export type MediaFieldValue = number[] & {
+	readonly [fieldValueKind]?: "media";
+};
+
+/** The user IDs in a user field. */
+export type UserFieldValue = number[] & {
+	readonly [fieldValueKind]?: "user";
+};
+
+/** The editor JSON in a rich text field. */
+export type RichTextFieldValue = RichTextJSON & {
+	readonly [fieldValueKind]?: "rich-text";
+};
+
 export type DocumentFieldValueResponse =
 	| boolean
 	| number
@@ -587,11 +605,7 @@ export interface CollapsibleFieldConfig
 	fields: CollectionNonTabFieldConfig[];
 }
 
-export type RichTextUserVariableField =
-	| "firstName"
-	| "lastName"
-	| "username"
-	| "email";
+export type RichTextUserVariableField = "firstName" | "lastName" | "username";
 
 export interface RichTextFieldConfig
 	extends SharedCollectionFieldConfig<"rich-text">,

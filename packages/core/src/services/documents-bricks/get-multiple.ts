@@ -33,8 +33,8 @@ const getMultiple: ServiceFn<
 			includeBricks?: boolean;
 			/** Response ref resources to expose. Defaults to all resources. */
 			refResources?: RefResourceSelection;
-			/** Content responses flatten nested relation ref fields; internal responses keep field wrappers. */
-			flattenRelationRefFields?: boolean;
+			/** Content API responses flatten nested relation ref fields and leave out user emails; internal responses keep both. */
+			content?: boolean;
 			/** Restricts hydrated document relation refs for external integrations. */
 			allowedDocumentCollectionKeys?: string[];
 			/** Built-in document refs contributed outside custom field storage. */
@@ -108,7 +108,7 @@ const getMultiple: ServiceFn<
 		refTargets: data.refTargets,
 		allowedDocumentCollectionKeys: data.allowedDocumentCollectionKeys,
 		host: baseUrl,
-		flattenRelationRefFields: data.flattenRelationRefFields,
+		content: data.content,
 	});
 	if (refsRes.error) return refsRes;
 

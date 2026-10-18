@@ -1,6 +1,6 @@
 {% props locale %}
 
-{% set pages = documents("page", locale: locale, perPage: 3) %}
+{% set pages = documentList("page", { locale: locale, perPage: 3 }).items %}
 
 <ul class="latest-pages">
 	{% for item in pages %}

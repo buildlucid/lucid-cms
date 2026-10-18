@@ -17,7 +17,6 @@ export const richTextUserVariableFields = [
 	"firstName",
 	"lastName",
 	"username",
-	"email",
 ] as const satisfies readonly RichTextUserVariableField[];
 
 export interface RichTextFieldConfig extends SharedFieldConfig {

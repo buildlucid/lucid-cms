@@ -87,10 +87,7 @@ export const getRichTextUserFieldText = (
 export const isRichTextUserVariableField = (
 	value: unknown,
 ): value is RichTextUserVariableField =>
-	value === "firstName" ||
-	value === "lastName" ||
-	value === "username" ||
-	value === "email";
+	value === "firstName" || value === "lastName" || value === "username";
 
 /** Builds persisted variable identity attributes plus its immediate UI value. */
 export const getRichTextVariableAttrs = (

@@ -28,7 +28,7 @@ const resolveUrl = async (
 					preset: data.preset,
 					format: data.format,
 				},
-				actor: { type: "internal" },
+				actor: data.libraryOnly ? { type: "content" } : { type: "internal" },
 			});
 		},
 		name: {

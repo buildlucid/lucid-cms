@@ -1,16 +1,24 @@
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ToolkitMediaNotifyChangeInput } from "../../libs/toolkit/media/notify-change/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import notifyDependants from "../document-references/notify-dependants.js";
+import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
-/** Runs change subscribers in the caller's context. IDs need not still exist. */
+/** Clears content API media caches before running change subscribers in the caller's context, even when IDs no longer exist. */
 const notifyChange: ServiceFn<
 	[ToolkitMediaNotifyChangeInput],
 	undefined
 > = async (context, data) => {
 	const ids = [...new Set(data.ids)];
 	if (ids.length === 0) return { error: undefined, data: undefined };
+
+	await Promise.all([
+		...ids.map((id) => clearContentMediaSingleCache(context, id)),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]),
+	]);
 
 	const emitted = await executeHooks(
 		context,

@@ -6,9 +6,11 @@ import { storeKeys } from "../constants.js";
 type Fragment = { value: string; tokens: Record<string, string> };
 
 const createFragmentCache = (context: ServiceContext): KilnCache => {
-	const anyDocument = contentCacheTags.documents;
 	// Tokens at cache misses prevent saving fragments rendered across a content change.
+	const guards = [contentCacheTags.documents, contentCacheTags.media];
 	const missed = new Map<string, string>();
+	const guardToken = (tokens: Record<string, string>) =>
+		guards.map((tag) => tokens[tag] ?? "").join("|");
 
 	return {
 		get: async ({ key }) => {
@@ -17,7 +19,7 @@ const createFragmentCache = (context: ServiceContext): KilnCache => {
 				hash: true,
 			});
 			const tags = Object.keys(fragment?.tokens ?? {});
-			const tokens = await getCacheTagTokens(context, [anyDocument, ...tags]);
+			const tokens = await getCacheTagTokens(context, [...guards, ...tags]);
 			if (
 				fragment &&
 				tags.every((tag) => tokens[tag] === fragment.tokens[tag])
@@ -25,15 +27,15 @@ const createFragmentCache = (context: ServiceContext): KilnCache => {
 				return fragment.value;
 			}
 
-			missed.set(key, tokens[anyDocument] ?? "");
+			missed.set(key, guardToken(tokens));
 			return null;
 		},
 		set: async ({ key, value, seconds, tags }) => {
 			const seen = missed.get(key);
 			missed.delete(key);
 
-			const tokens = await getCacheTagTokens(context, [anyDocument, ...tags]);
-			if (seen === undefined || tokens[anyDocument] !== seen) return;
+			const tokens = await getCacheTagTokens(context, [...guards, ...tags]);
+			if (seen === undefined || guardToken(tokens) !== seen) return;
 
 			await context.kv.set<Fragment>(context, {
 				key: storeKeys.fragment(key),

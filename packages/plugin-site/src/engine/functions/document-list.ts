@@ -3,31 +3,40 @@ import { contentCacheTags } from "@lucidcms/core/extension";
 import type { CollectionDocumentKey, Toolkit } from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
 import type { SiteState } from "../../types.js";
-import normalizeDocumentFilter from "../normalize-document-filter.js";
+import normalizeFilter from "../normalize-filter.js";
 import type { SiteFunctionsContext } from "../site-functions-context.js";
 import toTemplateDocument, {
 	type TemplateDocument,
 } from "../to-template-document.js";
-import type { DocumentReadOptions } from "./document.js";
+import toTemplateList, {
+	listDefaults,
+	type TemplateList,
+} from "../to-template-list.js";
+import type { DocumentFilter, DocumentReadOptions } from "./document.js";
 
 type ListInput = Parameters<Toolkit["documents"]["getMultiple"]>[0];
 
-export type DocumentsOptions = DocumentReadOptions & {
+export type DocumentListOptions = DocumentReadOptions & {
 	sort?: NonNullable<ListInput["query"]>["sort"];
+	/** Defaults to 1. */
 	page?: number;
-	/** Use -1 to return every match. */
+	/** Defaults to 10; use -1 to return every match. */
 	perPage?: number;
 };
 
-const createDocumentsFunction = (context: SiteFunctionsContext) =>
+const createDocumentListFunction = (context: SiteFunctionsContext) =>
 	withRender(
 		async <Key extends CollectionDocumentKey>(
 			render: RenderInfo<SiteState>,
 			collectionKey: Key,
-			options: DocumentsOptions = {},
-		): Promise<TemplateDocument<Key>[]> => {
+			options: DocumentListOptions = {},
+		): Promise<TemplateList<TemplateDocument<Key>>> => {
+			const page = options.page ?? listDefaults.page;
+			const perPage = options.perPage ?? listDefaults.perPage;
 			const version = context.getVersion(collectionKey, options.version);
-			if (version === null) return [];
+			if (version === null) {
+				return toTemplateList([], { total: 0, page, perPage });
+			}
 			render.tagCache(contentCacheTags.collection(collectionKey));
 
 			const input: ListInput = {
@@ -35,11 +44,11 @@ const createDocumentsFunction = (context: SiteFunctionsContext) =>
 				version,
 				preview: render.state.preview?.token ?? null,
 				query: {
-					filter: normalizeDocumentFilter(options.filter),
+					filter: normalizeFilter<DocumentFilter>(options.filter),
 					sort: options.sort,
-					page: options.page,
-					perPage: options.perPage,
-					include: ["bricks", "meta"],
+					page,
+					perPage,
+					include: options.include,
 				},
 			};
 			let response = await render.state.toolkit.documents.getMultiple(input);
@@ -51,11 +60,21 @@ const createDocumentsFunction = (context: SiteFunctionsContext) =>
 			}
 			if (response.error) throw new LucidAPIError(response.error);
 
+			const { data, count, refs = {} } = response.data;
+			if (refs.media?.length) render.tagCache(contentCacheTags.media);
 			const locale = options.locale ?? context.defaultLocale;
-			return response.data.data.map((document) =>
-				toTemplateDocument<Key>(document, locale, context.locales),
+			return toTemplateList(
+				data.map((document) =>
+					toTemplateDocument<Key>({
+						document,
+						refs,
+						locale,
+						context,
+					}),
+				),
+				{ total: count, page, perPage },
 			);
 		},
 	);
 
-export default createDocumentsFunction;
+export default createDocumentListFunction;
