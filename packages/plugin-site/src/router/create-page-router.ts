@@ -6,13 +6,10 @@ import {
 	PLUGIN_KEY,
 	TEMPLATE_EXTENSION,
 } from "../constants.js";
-import type { SiteMode, SitePage, SiteRoutes } from "../types.js";
+import type { PageExports } from "../engine/read-page-exports.js";
+import type { SiteMode, SitePage } from "../types.js";
 import getContentType from "./get-content-type.js";
-
-const isPageTemplate = (name: string) =>
-	name.startsWith(`${PAGES_DIRECTORY}/`) &&
-	name.endsWith(TEMPLATE_EXTENSION) &&
-	!name.split("/").some((segment) => segment.startsWith("_"));
+import isPageTemplate from "./is-page-template.js";
 
 const specificity = (path: string) => {
 	if (path.includes("*")) return 2;
@@ -26,27 +23,34 @@ const getPageName = (template: string) =>
 		template.length - TEMPLATE_EXTENSION.length,
 	);
 
-const assertRouteFits = (page: SitePage, siteMode: SiteMode) => {
-	if (siteMode === "static" && page.route.mode !== undefined) {
+const assertExportsFit = (
+	page: SitePage,
+	exported: PageExports,
+	siteMode: SiteMode,
+) => {
+	if (siteMode === "static" && exported.mode !== undefined) {
 		throw new LucidError({
 			scope: PLUGIN_KEY,
-			message: `The '${page.name}' route sets a mode, but a static site renders every page at build.`,
+			message: `'${page.template}' exports a mode, but a static site renders every page at build.`,
 		});
 	}
-	if (page.route.revalidate !== undefined && page.mode !== "isr") {
+	if (page.revalidate !== undefined && page.mode !== "isr") {
 		throw new LucidError({
 			scope: PLUGIN_KEY,
-			message: `The '${page.name}' route sets revalidate, which only applies to pages rendered with ISR.`,
+			message: `'${page.template}' exports revalidate, which only applies to pages rendered with ISR.`,
 		});
 	}
 };
 
+/** Routes the templates in `pages/`, with each page's `mode`, `revalidate` and `paths` exports keyed by template. */
 const createPageRouter = (
 	templateNames: Iterable<string>,
-	options: { mode?: SiteMode; routes?: SiteRoutes } = {},
+	options: {
+		mode?: SiteMode;
+		exports?: ReadonlyMap<string, PageExports>;
+	} = {},
 ) => {
 	const siteMode = options.mode ?? "ssr";
-	const routes = options.routes ?? {};
 	const templates = [...templateNames].filter(isPageTemplate);
 	const tree = buildTree(templates, {
 		roots: [`${PAGES_DIRECTORY}/`],
@@ -70,29 +74,19 @@ const createPageRouter = (
 		}
 		claimed.set(item.path, item.file);
 
-		const name = getPageName(item.file);
-		const route = routes[name] ?? {};
+		const exported = options.exports?.get(item.file) ?? { paths: false };
 		const page: SitePage = {
 			template: item.file,
-			name,
+			name: getPageName(item.file),
 			pattern: item.path,
 			contentType: getContentType(item.path),
-			mode: route.mode ?? (siteMode === "isr" ? "isr" : "ssr"),
-			route,
+			mode: exported.mode ?? (siteMode === "isr" ? "isr" : "ssr"),
+			revalidate: exported.revalidate,
+			paths: exported.paths,
 		};
-		assertRouteFits(page, siteMode);
+		assertExportsFit(page, exported, siteMode);
 		addRoute(router, "GET", item.path, page);
 		pages.push(page);
-	}
-
-	const unknown = Object.keys(routes).filter(
-		(name) => !pages.some((page) => page.name === name),
-	);
-	if (unknown.length > 0) {
-		throw new LucidError({
-			scope: PLUGIN_KEY,
-			message: `These routes name no page in '${PAGES_DIRECTORY}/': ${unknown.join(", ")}. Use the page's file without '${TEMPLATE_EXTENSION}', such as 'blog/[slug]'.`,
-		});
 	}
 
 	return { router, pages };

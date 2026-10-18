@@ -1,7 +1,7 @@
 import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { LucidAPIError, LucidError } from "@lucidcms/core";
-import type { LucidPluginCommand, Toolkit } from "@lucidcms/core/types";
+import { LucidError } from "@lucidcms/core";
+import type { LucidPluginCommand } from "@lucidcms/core/types";
 import { KilnRenderError } from "@lucidkiln/core";
 import { findRoute } from "rou3";
 import {
@@ -11,69 +11,20 @@ import {
 	PLUGIN_KEY,
 } from "../constants.js";
 import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
-import createSiteLoader, { type Site } from "../services/create-site-loader.js";
+import createSiteLoader from "../services/create-site-loader.js";
 import type { SiteState } from "../types.js";
 import escapeHtml from "../utils/escape-html.js";
 import getRouteParams from "../utils/get-route-params.js";
+import normalizePath from "../utils/normalize-path.js";
 import buildSiteData from "./build-site-data.js";
+import collectPagePaths from "./collect-page-paths.js";
+import findPageLinks from "./find-page-links.js";
 import type { SiteCliOptions } from "./index.js";
+import warnUnbuiltPages from "./warn-unbuilt-pages.js";
 
 type BuildProps = Parameters<LucidPluginCommand["run"]>[0];
 
 const CONCURRENCY = 8;
-
-const listDocumentPaths = async (
-	site: Site,
-	toolkit: Toolkit,
-	collectionKey: string,
-) => {
-	const version = site.functions.getVersion(collectionKey);
-	if (version === null) return [];
-
-	const response = await toolkit.documents.getMultiple({
-		collectionKey,
-		version,
-		query: { perPage: -1 },
-	});
-	if (response.error) throw new LucidAPIError(response.error);
-
-	return response.data.data.flatMap((document) => {
-		const routePath = document.route?.path;
-		if (typeof routePath === "string") return [routePath];
-		if (typeof routePath === "object" && routePath !== null) {
-			return Object.values(routePath).filter(
-				(value): value is string => typeof value === "string",
-			);
-		}
-		return [];
-	});
-};
-
-const collectPaths = async (site: Site, toolkit: Toolkit) => {
-	const missing = site.pages.filter(
-		(page) => /[:*]/.test(page.pattern) && !page.route.paths,
-	);
-	if (missing.length > 0) {
-		throw new LucidError({
-			scope: PLUGIN_KEY,
-			message: `These dynamic pages need 'paths' in their route to build: ${missing.map((page) => page.name).join(", ")}.`,
-		});
-	}
-
-	const paths = await Promise.all(
-		site.pages.map(async (page) => {
-			if (!/[:*]/.test(page.pattern)) return [page.pattern];
-			return (
-				(await page.route.paths?.({
-					toolkit,
-					documentPaths: (collectionKey) =>
-						listDocumentPaths(site, toolkit, collectionKey),
-				})) ?? []
-			);
-		}),
-	);
-	return [...new Set(paths.flat())];
-};
 
 /** Refuses folders whose emptying would delete the project or its sources. */
 const assertOutputFolder = (props: {
@@ -178,16 +129,22 @@ const buildSite = async (options: SiteCliOptions, props: BuildProps) => {
 		context,
 		data,
 	});
-	const paths = await collectPaths(site, toolkit);
 	const state = (routePath: string): SiteState => ({
 		toolkit,
 		path: routePath,
 		preview: null,
 		version: site.functions.getVersion,
 	});
+	// Exports run before any page renders, so there is no request path.
+	const paths = await collectPagePaths({
+		site,
+		state: state(""),
+		warn: (message) => logger.warn(message),
+	});
 
 	const failures: Array<{ path: string; error: unknown }> = [];
-	let built = 0;
+	const built = new Set<string>();
+	const links = new Map<string, string>();
 	await eachLimited(paths, async (routePath) => {
 		const match = findRoute(site.router, "GET", routePath);
 		if (!match) {
@@ -206,7 +163,12 @@ const buildSite = async (options: SiteCliOptions, props: BuildProps) => {
 				toFile(outDir, routePath, match.data.contentType),
 				body,
 			);
-			built++;
+			built.add(routePath);
+			if (match.data.contentType.startsWith("text/html")) {
+				for (const link of findPageLinks(body)) {
+					if (!links.has(link)) links.set(link, routePath);
+				}
+			}
 		} catch (error) {
 			const cause = error instanceof KilnRenderError ? error.cause : error;
 			if (cause instanceof SiteNotFoundError) {
@@ -220,7 +182,7 @@ const buildSite = async (options: SiteCliOptions, props: BuildProps) => {
 					toFile(outDir, routePath, "text/html"),
 					`<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=${location}"><link rel="canonical" href="${location}"><a href="${location}">${location}</a>`,
 				);
-				built++;
+				built.add(routePath);
 				return;
 			}
 			failures.push({ path: routePath, error });
@@ -246,8 +208,20 @@ const buildSite = async (options: SiteCliOptions, props: BuildProps) => {
 		});
 	}
 
+	await warnUnbuiltPages({
+		site,
+		toolkit,
+		collections: config.collections.map((collection) => collection.key),
+		built,
+		links,
+		publicPaths: new Set(
+			props.publicFiles.map((file) => normalizePath(`/${file.name}`)),
+		),
+		warn: (message) => logger.warn(message),
+	});
+
 	logger.info(
-		`Built ${built} pages to ${path.relative(process.cwd(), outDir) || "."}`,
+		`Built ${built.size} pages to ${path.relative(process.cwd(), outDir) || "."}`,
 	);
 };
 

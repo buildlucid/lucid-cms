@@ -3,6 +3,7 @@
 	"strict": true,
 	"functions": [
 		"document",
+		"documentPaths",
 		"documents",
 		"editable",
 		"footer",

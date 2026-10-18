@@ -19,7 +19,6 @@ import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
 import { functions as siteFunctions } from "./site/functions/index.js";
-import siteRoutes from "./site/routes.js";
 import diagnosticsRoute from "./src/admin/containers/DiagnosticsRoute/config.js";
 import publicRoute from "./src/admin/containers/PublicRoute/config.js";
 import standaloneRoute from "./src/admin/containers/StandaloneRoute/config.js";
@@ -354,7 +353,6 @@ export default defineConfig({
 			sitePlugin({
 				mode: "static",
 				environment: "production",
-				routes: siteRoutes,
 				kiln: {
 					timeZone: "Europe/London",
 					functions: siteFunctions,

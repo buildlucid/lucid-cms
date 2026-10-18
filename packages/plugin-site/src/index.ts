@@ -1,6 +1,5 @@
 import plugin from "./plugin.js";
 
-export { default as defineRoutes } from "./define-routes.js";
 export { default as defineSiteFunction } from "./define-site-function.js";
 export type {
 	TemplateBrick,
@@ -12,11 +11,9 @@ export type {
 	SiteFunctionContext,
 	SiteKilnOptions,
 	SiteMode,
-	SitePathsProps,
+	SitePagePaths,
 	SitePluginOptions,
 	SitePreview,
-	SiteRoute,
-	SiteRoutes,
 	SiteState,
 } from "./types.js";
 

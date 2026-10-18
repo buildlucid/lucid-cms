@@ -6,7 +6,10 @@ import getCollectionVersion from "./get-collection-version.js";
 export type SiteFunctionsContext = {
 	locales: ReadonlySet<string>;
 	defaultLocale: string;
+	/** The version templates read, warning once when the collection isn't on the site. */
 	getVersion: (collectionKey: string, requested?: string) => string | null;
+	/** The collection's site version without the warning, for checks across every collection. */
+	siteVersion: (collectionKey: string) => string | null;
 };
 
 const createSiteFunctionsContext = (
@@ -14,23 +17,26 @@ const createSiteFunctionsContext = (
 	siteEnvironment: string | null,
 ): SiteFunctionsContext => {
 	const codes = config.localization.locales.map((locale) => locale.code);
+	const siteVersion = (collectionKey: string) => {
+		const collection = config.collections.find(
+			(item) => item.key === collectionKey,
+		);
+		if (!collection) {
+			throw new LucidError({
+				scope: PLUGIN_KEY,
+				message: `There is no '${collectionKey}' collection.`,
+			});
+		}
+		return getCollectionVersion(collection, siteEnvironment);
+	};
 
 	return {
 		locales: new Set(codes),
 		defaultLocale: config.localization.defaultLocale ?? codes[0] ?? "en",
+		siteVersion,
 		getVersion: (collectionKey, requested) => {
-			const collection = config.collections.find(
-				(item) => item.key === collectionKey,
-			);
-			if (!collection) {
-				throw new LucidError({
-					scope: PLUGIN_KEY,
-					message: `There is no '${collectionKey}' collection.`,
-				});
-			}
+			const version = siteVersion(collectionKey);
 			if (requested !== undefined) return requested;
-
-			const version = getCollectionVersion(collection, siteEnvironment);
 			if (version === null) {
 				logger.warn({
 					scope: PLUGIN_KEY,

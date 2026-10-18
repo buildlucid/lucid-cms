@@ -33,7 +33,7 @@ const renderStoredPage = async (props: {
 		key: storeKeys.page(props.site.version, props.state.path),
 		page: stored,
 		islands: islands.manifest,
-		revalidate: props.page.route.revalidate,
+		revalidate: props.page.revalidate,
 	});
 	return stored;
 };

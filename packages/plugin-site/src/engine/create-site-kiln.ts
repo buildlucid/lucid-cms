@@ -15,6 +15,7 @@ import bindSiteFunction, {
 	type SiteReadFunctions,
 } from "./bind-site-function.js";
 import createDocumentFunction from "./functions/document.js";
+import createDocumentPathsFunction from "./functions/document-paths.js";
 import createDocumentsFunction from "./functions/documents.js";
 import editable from "./functions/editable.js";
 import footer from "./functions/footer.js";
@@ -51,6 +52,7 @@ const createSiteKiln = (props: {
 	const reads: SiteReadFunctions = {
 		document: createDocumentFunction(props.context),
 		documents: createDocumentsFunction(props.context),
+		documentPaths: createDocumentPathsFunction(props.context),
 	};
 	const functions = {
 		...reads,

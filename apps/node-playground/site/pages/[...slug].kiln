@@ -1,5 +1,7 @@
 {% extends "layouts/base" %}
 
+{% export paths = documentPaths("page") %}
+
 {% set page = document("page", filter: { _fullSlug: route.path }) ?? notFound() %}
 {% set lang = page.locale %}
 

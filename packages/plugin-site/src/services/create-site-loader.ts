@@ -1,16 +1,20 @@
+import { logger } from "@lucidcms/core";
 import type { ResolvedLucidConfig, ServiceContext } from "@lucidcms/core/types";
 import { type Loader, memoryLoader } from "@lucidkiln/core";
 import type { RouterContext } from "rou3";
-import { DEFAULT_SITE_DIRECTORY } from "../constants.js";
+import { DEFAULT_SITE_DIRECTORY, PLUGIN_KEY } from "../constants.js";
 import createFragmentCache from "../engine/create-fragment-cache.js";
 import createSiteKiln, { type SiteKiln } from "../engine/create-site-kiln.js";
 import hashTemplates from "../engine/hash-templates.js";
 import readCliData from "../engine/read-cli-data.js";
+import readPageExports from "../engine/read-page-exports.js";
 import resolveSiteEnvironment from "../engine/resolve-site-environment.js";
 import createSiteFunctionsContext, {
 	type SiteFunctionsContext,
 } from "../engine/site-functions-context.js";
 import createPageRouter from "../router/create-page-router.js";
+import isDynamicPattern from "../router/is-dynamic-pattern.js";
+import isPageTemplate from "../router/is-page-template.js";
 import type { SiteCliData, SitePage, SitePluginOptions } from "../types.js";
 import writeKilnManifest from "./write-kiln-manifest.js";
 
@@ -41,6 +45,19 @@ const createLoader = async (
 const resolveDirectory = (option: string, data: SiteCliData | null) =>
 	data?.mode === "dev" ? data.directory : option;
 
+/** Warns while developing a static site, so a missing `paths` export doesn't first surface in `site:build`. */
+const warnMissingPaths = (pages: SitePage[]) => {
+	for (const page of pages) {
+		if (!isDynamicPattern(page.pattern) || page.paths) continue;
+		logger.warn({
+			scope: PLUGIN_KEY,
+			event: "plugin-site.page.missing-paths",
+			dedupeKey: `${PLUGIN_KEY}:missing-paths:${page.template}`,
+			message: `'${page.template}' has no paths export, so site:build can't tell which of its pages to make. Add one, such as {% export paths = documentPaths("page") %}.`,
+		});
+	}
+};
+
 const loadSite = async (props: {
 	directory: string;
 	data: SiteCliData | null;
@@ -56,16 +73,29 @@ const loadSite = async (props: {
 		data?.mode === "build"
 			? data.buildId
 			: await hashTemplates(loader, templates);
-	const { router, pages } = createPageRouter(templates, {
-		mode: props.options.mode,
-		routes: props.options.routes,
-	});
 	const kilnProps = {
 		loader,
 		context: props.functions,
 		options: props.options,
 		data,
 	};
+	const freshKiln = createSiteKiln(kilnProps);
+	const pageTemplates = [...templates].filter(isPageTemplate);
+	const exports = new Map(
+		await Promise.all(
+			pageTemplates.map(
+				async (template) =>
+					[template, await readPageExports(freshKiln, template)] as const,
+			),
+		),
+	);
+	const { router, pages } = createPageRouter(templates, {
+		mode: props.options.mode,
+		exports,
+	});
+	if (props.options.mode === "static" && data?.mode === "dev") {
+		warnMissingPaths(pages);
+	}
 
 	return {
 		kiln: createSiteKiln({
@@ -73,7 +103,7 @@ const loadSite = async (props: {
 			cache: createFragmentCache(props.context),
 			cacheNamespace: version,
 		}),
-		freshKiln: createSiteKiln(kilnProps),
+		freshKiln,
 		router,
 		pages,
 		data,

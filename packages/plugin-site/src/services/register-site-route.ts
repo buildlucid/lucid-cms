@@ -4,17 +4,14 @@ import type {
 	ServiceContext,
 } from "@lucidcms/core/types";
 import { findRoute } from "rou3";
-import {
-	ASSETS_BASE,
-	ISLANDS_URL,
-	PLUGIN_KEY,
-	storeKeys,
-} from "../constants.js";
+import { ISLANDS_URL, PLUGIN_KEY, storeKeys } from "../constants.js";
 import { pageMarkup } from "../engine/page-markup.js";
 import { SiteNotFoundError } from "../errors.js";
 import type { SitePluginOptions, SiteState } from "../types.js";
 import decode from "../utils/decode.js";
 import getRouteParams from "../utils/get-route-params.js";
+import isLucidPath from "../utils/is-lucid-path.js";
+import normalizePath from "../utils/normalize-path.js";
 import createSiteLoader from "./create-site-loader.js";
 import createSiteMarkup from "./create-site-markup.js";
 import readPreview from "./read-preview.js";
@@ -23,20 +20,6 @@ import renderIsland from "./render-island.js";
 import renderPage from "./render-page.js";
 import renderStoredPage from "./render-stored-page.js";
 import respondToRenderError from "./respond-to-render-error.js";
-
-const normalizePath = (path: string) =>
-	path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
-
-/** The admin app, Lucid's server endpoints, plugin files and built assets, which the site never renders. */
-const isLucidPath = (path: string) =>
-	[
-		"/admin",
-		"/api",
-		"/mcp",
-		"/cdn",
-		"/_plugins",
-		ASSETS_BASE.slice(0, -1),
-	].some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 
 const canStorePages = (context: ServiceContext) => {
 	if (context.kv.key !== "passthrough") return true;

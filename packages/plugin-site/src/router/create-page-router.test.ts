@@ -80,36 +80,43 @@ describe("createPageRouter", () => {
 		).toThrow(/both route to '\/about'/);
 	});
 
-	test("gives pages the site's mode unless their route overrides it", () => {
+	test("gives pages the site's mode unless they export their own", () => {
 		const { pages } = createPageRouter(
 			["pages/index.kiln", "pages/search.kiln", "pages/blog/[slug].kiln"],
 			{
 				mode: "isr",
-				routes: { search: { mode: "ssr" }, "blog/[slug]": { revalidate: 60 } },
+				exports: new Map([
+					["pages/search.kiln", { mode: "ssr", paths: false }],
+					["pages/blog/[slug].kiln", { revalidate: 60, paths: true }],
+				]),
 			},
 		);
 		expect(
-			pages.map(({ name, pattern, mode }) => ({ name, pattern, mode })),
+			pages.map(({ name, mode, revalidate, paths }) => ({
+				name,
+				mode,
+				revalidate,
+				paths,
+			})),
 		).toEqual([
-			{ name: "index", pattern: "/", mode: "isr" },
-			{ name: "search", pattern: "/search", mode: "ssr" },
-			{ name: "blog/[slug]", pattern: "/blog/:slug", mode: "isr" },
+			{ name: "index", mode: "isr", revalidate: undefined, paths: false },
+			{ name: "search", mode: "ssr", revalidate: undefined, paths: false },
+			{ name: "blog/[slug]", mode: "isr", revalidate: 60, paths: true },
 		]);
 	});
 
-	test("rejects route settings that name no page or don't fit the mode", () => {
-		expect(() =>
-			createPageRouter(["pages/index.kiln"], { routes: { about: {} } }),
-		).toThrow(/name no page/);
+	test("rejects exports that don't fit the site's mode", () => {
 		expect(() =>
 			createPageRouter(["pages/index.kiln"], {
 				mode: "static",
-				routes: { index: { mode: "isr" } },
+				exports: new Map([["pages/index.kiln", { mode: "isr", paths: false }]]),
 			}),
 		).toThrow(/static site/);
 		expect(() =>
 			createPageRouter(["pages/index.kiln"], {
-				routes: { index: { revalidate: 60 } },
+				exports: new Map([
+					["pages/index.kiln", { revalidate: 60, paths: false }],
+				]),
 			}),
 		).toThrow(/only applies to pages rendered with ISR/);
 	});

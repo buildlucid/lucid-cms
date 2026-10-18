@@ -66,6 +66,7 @@ const kiln = createSiteKiln({
 	loader: memoryLoader({
 		"page.kiln": `{% set page = document("page", filter: { _fullSlug: path }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
 		"list.kiln": `{{ documents("page")|length }}{{ documents("blog")|length }}`,
+		"paths.kiln": `{{ documentPaths("page")|join(",") }}|{{ documentPaths("blog")|length }}`,
 		"editable.kiln": `{% set page = document("page", filter: { _fullSlug: path }) %}<h1{{ editable(page, "title") }}></h1>{% for link in page.bricks[0].fields.links %}<a{{ editable(link, "label") }}></a>{% endfor %}`,
 		"moved.kiln": `{{ redirect("/new", 301) }}`,
 		"layout.kiln": `{{ head() }}|{{ footer() }}|{{ footer() }}`,
@@ -128,6 +129,10 @@ describe("site template functions", () => {
 		expect((error as KilnRenderError).cause).toEqual(
 			expect.objectContaining({ location: "/new", status: 301 }),
 		);
+	});
+
+	test("documentPaths() lists a collection's URLs in every locale, and none from a collection off the site", async () => {
+		await expect(render("paths.kiln", "/")).resolves.toBe("/en,/fr|0");
 	});
 
 	test("shows nothing from a collection without the site's environment", async () => {

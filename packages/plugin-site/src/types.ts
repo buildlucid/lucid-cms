@@ -34,6 +34,13 @@ declare module "@lucidkiln/core" {
 				options?: DocumentsOptions,
 			) => Promise<TemplateDocument<Key>[]>
 		>;
+		/** A collection's document URLs in every locale, such as for `{% export paths = documentPaths("page") %}`. */
+		documentPaths: RenderAware<
+			(
+				render: RenderInfo<SiteState>,
+				collection: CollectionDocumentKey,
+			) => Promise<string[]>
+		>;
 		/** Preview attributes for `<h1{{ editable(page, "title") }}>`, empty outside previews. */
 		editable: typeof editable;
 		/** Preview referrer policy for `<head>`, empty outside previews. */
@@ -87,23 +94,8 @@ export type SiteCliData =
 /** ssr streams requests, isr caches until content changes, and static builds files while using SSR for development and previews. */
 export type SiteMode = "ssr" | "isr" | "static";
 
-export type SitePathsProps = {
-	toolkit: Toolkit;
-	/** All document paths across locales in the site's content version. */
-	documentPaths: (collectionKey: string) => Promise<string[]>;
-};
-
-export type SiteRoute = {
-	/** Overrides the server mode for non-static sites. */
-	mode?: "ssr" | "isr";
-	/** ISR TTL in seconds for external data; content changes invalidate pages sooner. */
-	revalidate?: number;
-	/** Build paths for dynamic pages, e.g. `/blog/hello`. */
-	paths?: (props: SitePathsProps) => string[] | Promise<string[]>;
-};
-
-/** Route settings keyed by paths within `pages/`, without `.kiln`. */
-export type SiteRoutes = Record<string, SiteRoute>;
+/** What a page's `paths` export lists for a static build: URLs, or values for its file name's parameters. */
+export type SitePagePaths = Array<string | Record<string, string | number>>;
 
 export type SitePreview = Extract<
 	NonNullable<Awaited<ReturnType<Toolkit["previews"]["state"]>>["data"]>,
@@ -144,6 +136,8 @@ export type SiteFunctionContext = {
 			collection: Key,
 			options?: DocumentsOptions,
 		) => Promise<TemplateDocument<Key>[]>;
+		/** A collection's document URLs in every locale, the shape a page's `paths` export accepts. */
+		documentPaths: (collection: CollectionDocumentKey) => Promise<string[]>;
 	};
 	/** Kiln's render info, such as its locale, time zone and abort signal. */
 	render: RenderInfo<SiteState>;
@@ -160,7 +154,6 @@ export type SitePluginOptions = {
 		/** Static output directory relative to the project root, defaulting to `dist-site` and emptied by each `site:build`. */
 		outDir?: string;
 	};
-	routes?: SiteRoutes;
 	kiln?: SiteKilnOptions;
 };
 
@@ -190,6 +183,10 @@ export type SitePage = {
 	/** Router pattern, e.g. `/blog/:slug`. */
 	pattern: string;
 	contentType: string;
+	/** The site's mode, or the page's `mode` export. */
 	mode: "ssr" | "isr";
-	route: SiteRoute;
+	/** The page's `revalidate` export: an ISR TTL in seconds for external data, since content changes invalidate sooner. */
+	revalidate?: number;
+	/** Whether the page has a `paths` export, which static builds evaluate for dynamic pages. */
+	paths: boolean;
 };
