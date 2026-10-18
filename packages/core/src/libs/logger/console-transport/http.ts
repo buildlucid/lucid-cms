@@ -21,7 +21,7 @@ const isSuccessfulAdminAsset = (entry: LogEntry) => {
 
 	return (
 		typeof path === "string" &&
-		path.startsWith("/admin/assets/") &&
+		path.startsWith("/admin/_assets/") &&
 		typeof status === "number" &&
 		status < 400
 	);

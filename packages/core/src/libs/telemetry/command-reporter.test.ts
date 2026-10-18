@@ -10,6 +10,7 @@ vi.mock("./report.js", () => ({
 
 const runtimeContext = {
 	runtime: "node",
+	host: "lucid",
 	compiled: false,
 	configEntryPoint: null,
 	getConnectionInfo: () => ({}),

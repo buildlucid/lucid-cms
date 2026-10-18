@@ -7,14 +7,14 @@ describe("viteAsset()", () => {
 			createViteAssetFunction({ mode: "dev", directory: "/site", vite: true })(
 				"./images/logo.svg",
 			),
-		).toBe("/assets/images/logo.svg");
+		).toBe("/_assets/images/logo.svg");
 		expect(
 			createViteAssetFunction({
 				mode: "build",
 				templates: {},
 				manifest: { "images/logo.svg": { file: "logo-a1.svg" } },
 			})("images/logo.svg"),
-		).toBe("/assets/logo-a1.svg");
+		).toBe("/_assets/logo-a1.svg");
 	});
 
 	test("fails for files the build doesn't have", () => {

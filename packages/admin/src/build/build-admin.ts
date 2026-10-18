@@ -27,6 +27,8 @@ export const buildAdmin = async (options: AdminBuildOptions) => {
 			build: {
 				outDir,
 				emptyOutDir: true,
+				// Built files live in `_assets`, like the site's. Public files are copied in afterwards, as this empties the folder.
+				assetsDir: "_assets",
 				chunkSizeWarningLimit: Infinity,
 			},
 		});

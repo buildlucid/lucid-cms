@@ -1,4 +1,4 @@
-import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { LucidAPIError, LucidError } from "@lucidcms/core";
 import type { LucidPluginCommand, Toolkit } from "@lucidcms/core/types";
@@ -6,15 +6,17 @@ import { KilnRenderError } from "@lucidkiln/core";
 import { findRoute } from "rou3";
 import {
 	ASSETS_BASE,
+	DEFAULT_STATIC_OUTPUT_DIRECTORY,
 	errorPages,
 	PLUGIN_KEY,
-	STATIC_OUTPUT_DIRECTORY,
 } from "../constants.js";
 import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
-import type { SitePluginOptions, SiteState } from "../types.js";
+import createSiteLoader, { type Site } from "../services/create-site-loader.js";
+import type { SiteState } from "../types.js";
 import escapeHtml from "../utils/escape-html.js";
 import getRouteParams from "../utils/get-route-params.js";
-import createSiteLoader, { type Site } from "./create-site-loader.js";
+import buildSiteData from "./build-site-data.js";
+import type { SiteCliOptions } from "./index.js";
 
 type BuildProps = Parameters<LucidPluginCommand["run"]>[0];
 
@@ -73,24 +75,33 @@ const collectPaths = async (site: Site, toolkit: Toolkit) => {
 	return [...new Set(paths.flat())];
 };
 
-/** Copies the files `lucidcms build` built for `vite()` from the public folder into the static site. */
-const copyAssets = async (site: Site, buildDir: string, outDir: string) => {
-	if (site.data?.mode !== "build" || !site.data.manifest) return;
+/** Refuses folders whose emptying would delete the project or its sources. */
+const assertOutputFolder = (props: {
+	outDir: string;
+	projectRoot: string;
+	siteRoot: string;
+	publicFiles: BuildProps["publicFiles"];
+}) => {
+	const inside = (parent: string, child: string) => {
+		const relative = path.relative(parent, child);
+		return !relative.startsWith("..") && !path.isAbsolute(relative);
+	};
+	// The site folder is a source wherever the output sits relative to it; public files only when the output holds them.
+	const touchesSources =
+		inside(props.outDir, props.siteRoot) ||
+		inside(props.siteRoot, props.outDir) ||
+		props.publicFiles.some((file) => inside(props.outDir, file.path));
 
-	const files = new Set(
-		Object.values(site.data.manifest).flatMap((chunk) => [
-			chunk.file,
-			...(chunk.css ?? []),
-			...(chunk.assets ?? []),
-		]),
-	);
-	await Promise.all(
-		[...files].map(async (file) => {
-			const target = path.join(outDir, ASSETS_BASE, file);
-			await mkdir(path.dirname(target), { recursive: true });
-			await copyFile(path.join(buildDir, "public", ASSETS_BASE, file), target);
-		}),
-	);
+	if (
+		props.outDir === props.projectRoot ||
+		!inside(props.projectRoot, props.outDir) ||
+		touchesSources
+	) {
+		throw new LucidError({
+			scope: PLUGIN_KEY,
+			message: `site:build empties '${props.outDir}' first, so it must be its own folder inside the project, apart from the site and public files.`,
+		});
+	}
 };
 
 const toFile = (outDir: string, routePath: string, contentType: string) =>
@@ -120,8 +131,9 @@ const eachLimited = async <T>(items: T[], task: (item: T) => Promise<void>) => {
 	);
 };
 
-const buildSite = async (options: SitePluginOptions, props: BuildProps) => {
-	const { config, context, toolkit, logger } = props;
+/** Builds templates, Vite files and static pages into a separate folder without requiring `lucidcms build` first. */
+const buildSite = async (options: SiteCliOptions, props: BuildProps) => {
+	const { config, context, toolkit, logger, projectRoot } = props;
 	if (options.mode !== "static") {
 		throw new LucidError({
 			scope: PLUGIN_KEY,
@@ -129,7 +141,18 @@ const buildSite = async (options: SitePluginOptions, props: BuildProps) => {
 				"site:build only builds static sites. Set the site plugin's mode to 'static'.",
 		});
 	}
-	const outDir = path.resolve(config.build.outDir, STATIC_OUTPUT_DIRECTORY);
+	const outDir = path.resolve(
+		projectRoot,
+		options.static?.outDir ?? DEFAULT_STATIC_OUTPUT_DIRECTORY,
+	);
+	const siteRoot = path.resolve(projectRoot, options.directory);
+	assertOutputFolder({
+		outDir,
+		projectRoot,
+		siteRoot,
+		publicFiles: props.publicFiles,
+	});
+	await rm(outDir, { recursive: true, force: true });
 
 	await Promise.all(
 		props.publicFiles
@@ -141,14 +164,20 @@ const buildSite = async (options: SitePluginOptions, props: BuildProps) => {
 			}),
 	);
 
+	const data = await buildSiteData({
+		root: siteRoot,
+		projectRoot,
+		publicFiles: props.publicFiles,
+		assetsDir: path.join(outDir, ASSETS_BASE),
+	});
 	const site = await createSiteLoader(
 		options,
 		config,
 	)({
 		reload: false,
 		context,
+		data,
 	});
-	await copyAssets(site, path.resolve(config.build.outDir), outDir);
 	const paths = await collectPaths(site, toolkit);
 	const state = (routePath: string): SiteState => ({
 		toolkit,

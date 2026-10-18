@@ -1,11 +1,11 @@
 import type { ResolvedLucidConfig, ServiceContext } from "@lucidcms/core/types";
 import { type Loader, memoryLoader } from "@lucidkiln/core";
 import type { RouterContext } from "rou3";
-import { DEFAULT_SITE_DIRECTORY, PLUGIN_KEY } from "../constants.js";
+import { DEFAULT_SITE_DIRECTORY } from "../constants.js";
 import createFragmentCache from "../engine/create-fragment-cache.js";
 import createSiteKiln, { type SiteKiln } from "../engine/create-site-kiln.js";
 import hashTemplates from "../engine/hash-templates.js";
-import isSiteCliData from "../engine/is-site-cli-data.js";
+import readCliData from "../engine/read-cli-data.js";
 import resolveSiteEnvironment from "../engine/resolve-site-environment.js";
 import createSiteFunctionsContext, {
 	type SiteFunctionsContext,
@@ -26,11 +26,6 @@ export type Site = {
 	templates: ReadonlySet<string>;
 	version: string;
 	functions: SiteFunctionsContext;
-};
-
-const readCliData = (context: ServiceContext) => {
-	const data = context.runtimeContext?.pluginData?.[PLUGIN_KEY];
-	return isSiteCliData(data) ? data : null;
 };
 
 /** Built sites read the templates bundled at build time; development reads the directory. */
@@ -107,8 +102,10 @@ const createSiteLoader = (
 	return (props: {
 		reload: boolean;
 		context: ServiceContext;
+		/** Replaces what the CLI handed the runtime, such as for `site:build`, which builds its own. */
+		data?: SiteCliData;
 	}): Promise<Site> => {
-		const data = readCliData(props.context);
+		const data = props.data ?? readCliData(props.context.runtimeContext);
 		// Built templates can't change, so only the directory reloads.
 		const reloads = props.reload && data?.mode !== "build";
 		if (site && !reloads) return site;

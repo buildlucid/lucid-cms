@@ -23,7 +23,10 @@ const resolveRemoteAddress = (request: Request) => {
 const nodeAstroBridge = {
 	name: "@lucidcms/runtime-node/astro",
 	async resolveRuntime(props: { adapter: RuntimeAdapter; compiled: boolean }) {
-		const runtimeContext = getRuntimeContext({ compiled: props.compiled });
+		const runtimeContext = getRuntimeContext({
+			compiled: props.compiled,
+			host: "astro",
+		});
 
 		return {
 			cacheKey: "node",

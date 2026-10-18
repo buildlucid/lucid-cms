@@ -13,7 +13,7 @@ export const shouldServeAdminShell = (pathname: string, method: string) =>
 	!pathname.split("/").some((segment) => segment.startsWith("@")) &&
 	!pathname.startsWith(`${mountPath}/src/`) &&
 	!pathname.startsWith(`${mountPath}/node_modules/`) &&
-	!pathname.startsWith(`${mountPath}/assets/`) &&
+	!pathname.startsWith(`${mountPath}/_assets/`) &&
 	!pathname.split("/").at(-1)?.includes(".");
 
 /** Creates the uncached HTML response used by standalone and hosted runtimes. */

@@ -6,7 +6,7 @@ import importVite from "./import-vite.js";
 
 type DevProps = Parameters<NonNullable<LucidPluginCli["dev"]>>[0];
 
-/** Tells the runtime where the site directory is, and when Vite is installed serves its files under `/assets/` with HMR, reloading pages when templates change. */
+/** Locates the site for the runtime and, when Vite is installed, serves `/_assets/` with HMR and reloads pages on template changes. */
 const createViteDev = async (
 	props: DevProps & { root: string },
 ): Promise<LucidPluginCliDev> => {

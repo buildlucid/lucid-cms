@@ -112,6 +112,16 @@ const buildCommand = async (options?: {
 			outputPath: configRes.config.build.outDir,
 		});
 
+		// The admin build empties its folder, so it runs before public files are copied into it.
+		currentStage = "admin_build";
+		progress.update("Building admin application…");
+		await buildApp({
+			config: configRes.config,
+			projectRoot: configRes.projectRoot,
+			configPath,
+			silent,
+		});
+
 		currentStage = "email_templates";
 		progress.update("Preparing email templates and public assets…");
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
@@ -173,20 +183,13 @@ const buildCommand = async (options?: {
 			customArtifactTypes: adapterRuntime.config?.customBuildArtifacts,
 		});
 
-		currentStage = "admin_build";
-		progress.update("Building admin application…");
-		await buildApp({
-			config: configRes.config,
-			projectRoot: configRes.projectRoot,
-			configPath,
-			silent,
-		});
-
 		currentStage = "artifacts";
 		progress.update("Building plugin files…");
 		const pluginData = await runPluginBuilds({
 			config: configRes.config,
 			projectRoot: configRes.projectRoot,
+			runtime: configRes.adapter.key,
+			publicFiles: configRes.resources.files.public,
 		});
 		await writeFile(
 			path.resolve(configRes.config.build.outDir, constants.plugins.dataOutput),

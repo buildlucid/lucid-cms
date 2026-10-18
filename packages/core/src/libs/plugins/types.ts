@@ -76,6 +76,8 @@ export type LucidPluginCommand = {
 	description: string;
 	run: (props: {
 		config: ResolvedLucidConfig;
+		/** The folder holding lucid.config. */
+		projectRoot: string;
 		context: ServiceContext;
 		toolkit: Toolkit;
 		/** Public directory and `sources.public` files, with `path` naming each file on disk and `name` its public path. */
@@ -111,9 +113,15 @@ export type LucidPluginCli = {
 	build?: (props: {
 		config: ResolvedLucidConfig;
 		projectRoot: string;
+		/** The runtime adapter's key, such as `node` or `cloudflare`. */
+		runtime: string;
+		/** Public directory and `sources.public` files, with `path` naming each file on disk and `name` its public path. */
+		publicFiles: ResourceFile[];
 		/** Absolute output directory; files under `public` are served from the site root. */
 		outDir: string;
 	}) => Promise<{ data?: unknown } | undefined>;
+	/** Commands the plugin adds to `lucidcms`, such as `site:build`. */
+	commands?: LucidPluginCommand[];
 };
 
 /** The default export of a plugin's CLI module, given the options the plugin passes in `cli.options`. */
@@ -143,10 +151,6 @@ export type LucidPluginDefinition = {
 	 * The hooks that the plugin can register.
 	 */
 	hooks?: LucidPluginHooks;
-	/**
-	 * CLI commands the plugin adds, such as `site:build`.
-	 */
-	commands?: LucidPluginCommand[];
 	/**
 	 * CLI-only code, such as dev servers and asset builds. `module` is a package subpath or path whose default export is a `LucidPluginCliFactory`, called with `options`.
 	 */

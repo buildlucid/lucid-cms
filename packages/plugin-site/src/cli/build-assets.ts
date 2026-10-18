@@ -14,12 +14,27 @@ const MANIFEST = ".vite/manifest.json";
 // Vite needs an entry, so a build of only `viteAsset()` files gets an empty one, removed afterwards.
 const EMPTY_ENTRY = "__lucid-empty__.js";
 
-/** Builds what templates pass to `vite()` and `viteAsset()` into `public/assets`, and returns Vite's manifest, or null when there is nothing. */
+/** Builds `vite()` and `viteAsset()` files into `assetsDir`, returning Vite's manifest or null when none exist. */
 const buildAssets = async (
-	props: BuildProps & { root: string; templates: Record<string, string> },
+	props: Pick<BuildProps, "projectRoot" | "publicFiles"> & {
+		root: string;
+		templates: Record<string, string>;
+		/** The folder served at `/_assets/`. */
+		assetsDir: string;
+	},
 ): Promise<Record<string, ViteManifestChunk> | null> => {
 	const { entries, files } = await findVitePaths(props.templates);
 	if (entries.length === 0 && files.length === 0) return null;
+
+	const clash = props.publicFiles.find((file) =>
+		file.name.startsWith(ASSETS_BASE.slice(1)),
+	);
+	if (clash) {
+		throw new LucidError({
+			scope: PLUGIN_KEY,
+			message: `The public file "${clash.path}" is served from ${ASSETS_BASE}, which belongs to the site's built assets. Move it to another folder.`,
+		});
+	}
 
 	const vite = await importVite();
 	if (!vite) {
@@ -30,14 +45,13 @@ const buildAssets = async (
 		});
 	}
 
-	const outDir = path.join(props.outDir, "public", ASSETS_BASE);
 	const emptyEntry = path.resolve(props.root, EMPTY_ENTRY);
 	await vite.build({
 		...createViteOptions({ root: props.root, projectRoot: props.projectRoot }),
 		mode: "production",
 		logLevel: "warn",
 		build: {
-			outDir,
+			outDir: props.assetsDir,
 			// The output folder holds the project's public files too, and `lucidcms build` empties it anyway.
 			emptyOutDir: false,
 			assetsDir: "",
@@ -45,6 +59,12 @@ const buildAssets = async (
 			// vite() links the CSS the manifest attaches to each entry, which one combined stylesheet would bypass.
 			cssCodeSplit: true,
 			rolldownOptions: {
+				// Built files are cached for a year, so every name carries a content hash whatever the project's config says.
+				output: {
+					entryFileNames: "[name]-[hash].js",
+					chunkFileNames: "[name]-[hash].js",
+					assetFileNames: "[name]-[hash][extname]",
+				},
 				input:
 					entries.length > 0
 						? entries.map((entry) => path.resolve(props.root, entry))
@@ -71,7 +91,7 @@ const buildAssets = async (
 		],
 	});
 
-	const manifestFile = path.join(outDir, MANIFEST);
+	const manifestFile = path.join(props.assetsDir, MANIFEST);
 	const manifest: Record<string, ViteManifestChunk> = JSON.parse(
 		await readFile(manifestFile, "utf8"),
 	);
@@ -79,7 +99,7 @@ const buildAssets = async (
 
 	const empty = manifest[EMPTY_ENTRY];
 	if (empty) {
-		await rm(path.join(outDir, empty.file), { force: true });
+		await rm(path.join(props.assetsDir, empty.file), { force: true });
 		delete manifest[EMPTY_ENTRY];
 	}
 

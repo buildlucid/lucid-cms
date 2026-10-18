@@ -127,6 +127,10 @@ export type SitePluginOptions = {
 	environment?: string;
 	/** Defaults to ssr. */
 	mode?: SiteMode;
+	static?: {
+		/** Static output directory relative to the project root, defaulting to `dist-site` and emptied by each `site:build`. */
+		outDir?: string;
+	};
 	routes?: SiteRoutes;
 } & Pick<KilnOptions<SiteState>, "globals" | "functions" | "filters" | "tests">;
 

@@ -1,16 +1,18 @@
 import path from "node:path";
 import type { LucidPluginCliFactory } from "@lucidcms/core/types";
-import type { SiteCliData } from "../types.js";
-import buildAssets from "./build-assets.js";
+import { ASSETS_BASE, CLOUDFLARE_RUNTIME } from "../constants.js";
+import type { SitePluginOptions } from "../types.js";
+import buildSite from "./build-site.js";
+import buildSiteData from "./build-site-data.js";
 import createViteDev from "./create-vite-dev.js";
-import readTemplates from "./read-templates.js";
+import writeAssetHeaders from "./write-asset-headers.js";
 
-export type SiteCliOptions = {
+export type SiteCliOptions = SitePluginOptions & {
 	/** The site's folder relative to the project root, which is also Vite's root. */
 	directory: string;
 };
 
-/** The site plugin's CLI module, loaded only by `lucidcms dev`, `build` and `serve`. */
+/** The site plugin's CLI module, loaded only by `lucidcms` commands. */
 const siteCli: LucidPluginCliFactory<SiteCliOptions> = (options) => ({
 	dev: (props) =>
 		createViteDev({
@@ -18,15 +20,24 @@ const siteCli: LucidPluginCliFactory<SiteCliOptions> = (options) => ({
 			root: path.resolve(props.projectRoot, options.directory),
 		}),
 	build: async (props) => {
-		const root = path.resolve(props.projectRoot, options.directory);
-		const templates = await readTemplates(root);
-		const data: SiteCliData = {
-			mode: "build",
-			templates,
-			manifest: await buildAssets({ ...props, root, templates }),
-		};
+		const data = await buildSiteData({
+			root: path.resolve(props.projectRoot, options.directory),
+			projectRoot: props.projectRoot,
+			publicFiles: props.publicFiles,
+			assetsDir: path.join(props.outDir, "public", ASSETS_BASE),
+		});
+		if (data.manifest && props.runtime === CLOUDFLARE_RUNTIME) {
+			await writeAssetHeaders(props.outDir);
+		}
 		return { data };
 	},
+	commands: [
+		{
+			name: "site:build",
+			description: "Build a static site into its own output folder",
+			run: (props) => buildSite(options, props),
+		},
+	],
 });
 
 export default siteCli;

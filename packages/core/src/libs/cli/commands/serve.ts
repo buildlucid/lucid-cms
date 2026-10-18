@@ -192,6 +192,8 @@ const serveCommand = async () => {
 		const pluginData = await runPluginBuilds({
 			config: configRes.config,
 			projectRoot: configRes.projectRoot,
+			runtime: configRes.adapter.key,
+			publicFiles: configRes.resources.files.public,
 		});
 
 		currentStage = "runtime_initialization";

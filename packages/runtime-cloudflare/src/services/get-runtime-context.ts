@@ -7,10 +7,13 @@ import getNodeConnInfo from "../utils/node-conn-info.js";
 const getRuntimeContext = (params: {
 	server: "node" | "cloudflare";
 	compiled: boolean;
+	/** Defaults to `lucid`, Lucid's own server. */
+	host?: string;
 	pluginData?: Record<string, unknown>;
 }) =>
 	({
 		runtime: ADAPTER_KEY,
+		host: params.host ?? "lucid",
 		compiled: params.compiled,
 		getConnectionInfo:
 			params.server === "node" ? getNodeConnInfo : getCloudflareConnInfo,

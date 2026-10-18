@@ -9,14 +9,12 @@ import constants from "../constants.js";
 import { collectFiles, ensureDirectory, pathExists } from "./filesystem.js";
 import type { ResolvedLucidProject } from "./project.js";
 
-/** Prepares Lucid public resources that Astro does not already serve. */
-export const prepareAssets = async (
+/** Copies Lucid public resources that Astro does not already serve into `assetRoot`. */
+export const copyPublicAssets = async (
 	project: ResolvedLucidProject,
 	assetRoot: string,
 	astroPublicDirectory: string,
 ) => {
-	await fs.rm(assetRoot, { recursive: true, force: true });
-	await ensureDirectory(assetRoot);
 	const translate = createTranslator({
 		store: project.loaded.translationStore,
 		locale: "en",
@@ -38,6 +36,17 @@ export const prepareAssets = async (
 				"Lucid could not prepare its Astro public assets.",
 		});
 	}
+};
+
+/** Prepares Lucid public resources that Astro does not already serve. */
+export const prepareAssets = async (
+	project: ResolvedLucidProject,
+	assetRoot: string,
+	astroPublicDirectory: string,
+) => {
+	await fs.rm(assetRoot, { recursive: true, force: true });
+	await ensureDirectory(assetRoot);
+	await copyPublicAssets(project, assetRoot, astroPublicDirectory);
 };
 
 /** Serves generated Lucid assets through Astro's development server. */

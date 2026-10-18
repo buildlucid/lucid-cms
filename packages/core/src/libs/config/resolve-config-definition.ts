@@ -133,6 +133,7 @@ export const resolveConfigDefinition = async (props: {
 		};
 		const runtimeContext = {
 			runtime: adapter.key,
+			host: "lucid",
 			compiled: false,
 			getConnectionInfo: () => ({}),
 			configEntryPoint: null,

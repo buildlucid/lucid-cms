@@ -5,6 +5,7 @@ import { getTelemetryContext, getTelemetryCountBucket } from "./context.js";
 
 const runtimeContext = {
 	runtime: "node",
+	host: "lucid",
 	compiled: false,
 	configEntryPoint: null,
 	getConnectionInfo: () => ({}),

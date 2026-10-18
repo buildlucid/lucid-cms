@@ -113,6 +113,7 @@ const cloudflareAstroBridge = {
 			runtimeContext: getRuntimeContext({
 				server,
 				compiled: props.compiled,
+				host: "astro",
 			}),
 			http: {
 				extensions: [platformContextExtension],

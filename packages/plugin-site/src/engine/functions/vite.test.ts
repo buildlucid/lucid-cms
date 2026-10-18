@@ -21,7 +21,7 @@ describe("vite()", () => {
 				'{{ vite("styles/site.css", "scripts/site.ts", "./scripts/site.ts") }}',
 			),
 		).resolves.toBe(
-			'<script type="module" src="/assets/@vite/client"></script><link rel="stylesheet" href="/assets/styles/site.css"><script type="module" src="/assets/scripts/site.ts"></script>',
+			'<script type="module" src="/_assets/@vite/client"></script><link rel="stylesheet" href="/_assets/styles/site.css"><script type="module" src="/_assets/scripts/site.ts"></script>',
 		);
 	});
 
@@ -41,7 +41,7 @@ describe("vite()", () => {
 
 		await kiln.render("a.kiln", {}, { state });
 		await expect(kiln.render("b.kiln", {}, { state })).resolves.toContain(
-			"/assets/scripts/widget.ts",
+			"/_assets/scripts/widget.ts",
 		);
 	});
 
@@ -63,7 +63,7 @@ describe("vite()", () => {
 		await expect(
 			render(data, '{{ vite("styles/site.css", "scripts/site.ts") }}'),
 		).resolves.toBe(
-			'<link rel="stylesheet" href="/assets/site-a1.css"><link rel="stylesheet" href="/assets/shared-d4.css"><script type="module" src="/assets/site-b2.js"></script><link rel="modulepreload" href="/assets/shared-c3.js">',
+			'<link rel="stylesheet" href="/_assets/site-a1.css"><link rel="stylesheet" href="/_assets/shared-d4.css"><script type="module" src="/_assets/site-b2.js"></script><link rel="modulepreload" href="/_assets/shared-c3.js">',
 		);
 	});
 
@@ -74,7 +74,7 @@ describe("vite()", () => {
 				'{{ vite("scripts/site.ts", attrs: { nonce: "abc", async: true, defer: false }) }}',
 			),
 		).resolves.toBe(
-			'<script type="module" src="/assets/@vite/client" nonce="abc" async></script><script type="module" src="/assets/scripts/site.ts" nonce="abc" async></script>',
+			'<script type="module" src="/_assets/@vite/client" nonce="abc" async></script><script type="module" src="/_assets/scripts/site.ts" nonce="abc" async></script>',
 		);
 	});
 
@@ -88,7 +88,7 @@ describe("vite()", () => {
 				},
 				'{{ vite("./styles/site.css", "/styles/site.css") }}',
 			),
-		).resolves.toBe('<link rel="stylesheet" href="/assets/site-a1.css">');
+		).resolves.toBe('<link rel="stylesheet" href="/_assets/site-a1.css">');
 	});
 
 	test("fails for entries the build doesn't have", async () => {

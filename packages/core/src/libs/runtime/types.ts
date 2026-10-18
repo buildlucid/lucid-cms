@@ -145,6 +145,8 @@ export type RuntimeSupport = {
 export type AdapterRuntimeContext = {
 	/** The runtime key of the adapter */
 	runtime: string;
+	/** The server handling requests, `lucid` for Lucid's server or a framework key such as `astro`. */
+	host: string;
 	/** True when running from built/compiled bundle, false when running from source in development */
 	compiled: boolean;
 	/** The function to get the connection information from the Hono context */
@@ -153,7 +155,7 @@ export type AdapterRuntimeContext = {
 	support?: RuntimeSupport;
 	/** If the adapter bundles the config and server entry point separately, the path to the config file relative to the output directory */
 	configEntryPoint: string | null;
-	/** Data from plugins' CLI modules, keyed by plugin key: from `dev` in development, otherwise from `build`. */
+	/** Plugin CLI data keyed by plugin, from `dev` during development or builds otherwise, omitted for plugin commands. */
 	pluginData?: Record<string, unknown>;
 };
 

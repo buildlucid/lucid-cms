@@ -4,7 +4,12 @@ import type {
 	ServiceContext,
 } from "@lucidcms/core/types";
 import { findRoute } from "rou3";
-import { ISLANDS_URL, PLUGIN_KEY, storeKeys } from "../constants.js";
+import {
+	ASSETS_BASE,
+	ISLANDS_URL,
+	PLUGIN_KEY,
+	storeKeys,
+} from "../constants.js";
 import { pageMarkup } from "../engine/page-markup.js";
 import { SiteNotFoundError } from "../errors.js";
 import type { SitePluginOptions, SiteState } from "../types.js";
@@ -22,11 +27,16 @@ import respondToRenderError from "./respond-to-render-error.js";
 const normalizePath = (path: string) =>
 	path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
 
-/** The admin app, Lucid's server endpoints and plugin files, which the site never renders. */
+/** The admin app, Lucid's server endpoints, plugin files and built assets, which the site never renders. */
 const isLucidPath = (path: string) =>
-	["/admin", "/api", "/mcp", "/cdn", "/_plugins"].some(
-		(prefix) => path === prefix || path.startsWith(`${prefix}/`),
-	);
+	[
+		"/admin",
+		"/api",
+		"/mcp",
+		"/cdn",
+		"/_plugins",
+		ASSETS_BASE.slice(0, -1),
+	].some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 
 const canStorePages = (context: ServiceContext) => {
 	if (context.kv.key !== "passthrough") return true;

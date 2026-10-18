@@ -8,10 +8,13 @@ import { ADAPTER_KEY } from "../constants.js";
 /** Describes the runtime capabilities and request connection information. Set compiled to match whether source or built code is running. */
 const getRuntimeContext = (params: {
 	compiled: boolean;
+	/** Defaults to `lucid`, Lucid's own server. */
+	host?: string;
 	pluginData?: Record<string, unknown>;
 }) =>
 	({
 		runtime: ADAPTER_KEY,
+		host: params.host ?? "lucid",
 		compiled: params.compiled,
 		getConnectionInfo: (c: LucidHonoContext) => getConnInfo(c).remote,
 		support: {

@@ -1,7 +1,7 @@
 const emailConstants = Object.freeze({
 	renderedOutput: "email-templates.json",
 	assets: {
-		logo: "/admin/assets/email-logo.png",
+		logo: "/admin/_assets/email-logo.png",
 	},
 	locations: {
 		resetPassword: "/admin/reset-password",

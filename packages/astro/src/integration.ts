@@ -11,6 +11,7 @@ import constants from "./constants.js";
 import { createDevAdminPlugin } from "./integration/admin.js";
 import {
 	copyAssets,
+	copyPublicAssets,
 	createDevAssetPlugin,
 	prepareAssets,
 } from "./integration/assets.js";
@@ -42,6 +43,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 	let project: ResolvedLucidProject | undefined;
 	let generatedDirectory = "";
 	let assetRoot = "";
+	let publicDirectory = "";
 	let assetsCopied = false;
 	let devBootstrap: Promise<void> | undefined;
 	let devLifecycle: DevServerLifecycle | undefined;
@@ -82,11 +84,8 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					assetRoot = path.join(generatedDirectory, constants.assetDirectory);
 					assetsCopied = false;
 					await fs.rm(generatedDirectory, { recursive: true, force: true });
-					await prepareAssets(
-						nextProject,
-						assetRoot,
-						fileURLToPath(config.publicDir),
-					);
+					publicDirectory = fileURLToPath(config.publicDir);
+					await prepareAssets(nextProject, assetRoot, publicDirectory);
 
 					const buildContextId = `${nextProject.hostId}:${command}`;
 					registerBuildContext(buildContextId, nextProject.loaded.rawEnv);
@@ -264,6 +263,8 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 						admin: project.loaded.config.admin,
 						clientConfig: createAdminClientConfig(project.loaded.config),
 					});
+					// The admin build empties its folder, so Lucid's public files go back in afterwards.
+					await copyPublicAssets(project, assetRoot, publicDirectory);
 					await writeSpaModule(
 						generatedDirectory,
 						await fs.readFile(path.join(outDir, "index.html"), "utf8"),

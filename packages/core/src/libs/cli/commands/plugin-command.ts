@@ -19,7 +19,7 @@ import type {
 } from "../../plugins/types.js";
 import createToolkit from "../../toolkit/create-toolkit.js";
 import cliLogger from "../logger.js";
-import readPluginData from "../services/read-plugin-data.js";
+import loadPluginClis from "../services/load-plugin-clis.js";
 
 const logger: LucidPluginCommandLogger = {
 	info: (message) => cliLogger.info(message),
@@ -33,28 +33,20 @@ const logger: LucidPluginCommandLogger = {
 /** Runs a plugin's command with a database connection, KV and toolkit. */
 const pluginCommand =
 	(command: LucidPluginCommand, loaded: LoadConfigResult) => async () => {
-		const { config, env } = loaded;
+		const { config, env, runtimeContext } = loaded;
 		let database: DatabaseConnection | undefined;
 		let kv: KVAdapterInstance | undefined;
 
 		const cleanupAdapters = async () => {
 			await Promise.allSettled([
 				database?.destroy(),
-				destroyKVAdapter(kv, {
-					config,
-					env,
-					runtimeContext: loaded.runtimeContext,
-				}),
+				destroyKVAdapter(kv, { config, env, runtimeContext }),
 			]);
 		};
 
 		try {
 			startLoggerBuffering();
 			const startTime = cliLogger.startTimer();
-			const runtimeContext = {
-				...loaded.runtimeContext,
-				pluginData: await readPluginData(config),
-			};
 			const { translationStore } = await prepareTranslations({
 				config,
 				files: loaded.resources.files.translations,
@@ -72,6 +64,7 @@ const pluginCommand =
 
 			await command.run({
 				config,
+				projectRoot: loaded.projectRoot,
 				context,
 				toolkit: createToolkit(context),
 				publicFiles: loaded.resources.files.public,
@@ -112,11 +105,14 @@ export const registerPluginCommands = async (
 	if (known.has(requested)) return;
 
 	const loaded = await loadConfig();
-	for (const plugin of loaded.config.plugins) {
-		for (const command of plugin.commands ?? []) {
+	for (const { key, cli } of await loadPluginClis(
+		loaded.config,
+		loaded.projectRoot,
+	)) {
+		for (const command of cli.commands ?? []) {
 			if (known.has(command.name)) {
 				throw new LucidError({
-					message: `The "${plugin.key}" plugin's "${command.name}" command has the same name as a built-in or another plugin's command.`,
+					message: `The "${key}" plugin's "${command.name}" command has the same name as a built-in or another plugin's command.`,
 				});
 			}
 			known.add(command.name);
