@@ -11,6 +11,7 @@ import registerAssetHeaders from "./register-asset-headers.js";
 
 const data: SiteCliData = {
 	mode: "build",
+	buildId: "build",
 	templates: {},
 	manifest: { "styles/site.css": { file: "site-a1.css" } },
 };

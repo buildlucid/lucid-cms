@@ -11,6 +11,7 @@ describe("viteAsset()", () => {
 		expect(
 			createViteAssetFunction({
 				mode: "build",
+				buildId: "build",
 				templates: {},
 				manifest: { "images/logo.svg": { file: "logo-a1.svg" } },
 			})("images/logo.svg"),
@@ -19,9 +20,12 @@ describe("viteAsset()", () => {
 
 	test("fails for files the build doesn't have", () => {
 		expect(() =>
-			createViteAssetFunction({ mode: "build", templates: {}, manifest: null })(
-				"images/logo.svg",
-			),
+			createViteAssetFunction({
+				mode: "build",
+				buildId: "build",
+				templates: {},
+				manifest: null,
+			})("images/logo.svg"),
 		).toThrow(/isn't in the site's Vite build/);
 	});
 });

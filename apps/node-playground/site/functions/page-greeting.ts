@@ -1,0 +1,11 @@
+import { defineSiteFunction } from "@lucidcms/plugin-site";
+
+const pageGreeting = defineSiteFunction(
+	async ({ functions, path, preview }, name: string) => {
+		const pages = await functions.documents("page", { perPage: -1 });
+		const mode = preview ? "previewing" : "viewing";
+		return `Hello ${name}, you're ${mode} ${path}, one of ${pages.length} pages.`;
+	},
+);
+
+export default pageGreeting;

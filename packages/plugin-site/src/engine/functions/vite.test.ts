@@ -48,6 +48,7 @@ describe("vite()", () => {
 	test("writes built files from the manifest, with imported chunks' stylesheets and preloads", async () => {
 		const data: SiteCliData = {
 			mode: "build",
+			buildId: "build",
 			templates: {},
 			manifest: {
 				"styles/site.css": { file: "site-a1.css", isEntry: true },
@@ -83,6 +84,7 @@ describe("vite()", () => {
 			render(
 				{
 					mode: "build",
+					buildId: "build",
 					templates: {},
 					manifest: { "styles/site.css": { file: "site-a1.css" } },
 				},
@@ -94,7 +96,7 @@ describe("vite()", () => {
 	test("fails for entries the build doesn't have", async () => {
 		await expect(
 			render(
-				{ mode: "build", templates: {}, manifest: null },
+				{ mode: "build", buildId: "build", templates: {}, manifest: null },
 				'{{ vite("scripts/site.ts") }}',
 			),
 		).rejects.toThrow(/isn't in the site's Vite build/);

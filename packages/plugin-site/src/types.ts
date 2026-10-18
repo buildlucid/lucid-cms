@@ -76,6 +76,8 @@ export type SiteCliData =
 	  }
 	| {
 			mode: "build";
+			/** New for every build, so stored pages and fragments from the last deploy are never served. */
+			buildId: string;
 			/** Template sources keyed by path, e.g. `pages/index.kiln`, so builds need no files at runtime. */
 			templates: Record<string, string>;
 			/** Vite's manifest, or null when no template calls `vite()`. */
@@ -120,6 +122,33 @@ export type SiteState = {
 	version: (collectionKey: string) => string | null;
 };
 
+/** What a `defineSiteFunction` function receives before its template arguments. */
+export type SiteFunctionContext = {
+	/** Document reads are tracked for page cache invalidation. */
+	toolkit: Toolkit;
+	/** The preview token, or null, matching the toolkit's `preview` input. */
+	preview: string | null;
+	/** Returns the collection's site version, or null if excluded. */
+	version: (collectionKey: string) => string | null;
+	/** Decoded request path, without a trailing slash. */
+	path: string;
+	/** Tags the cached section this call runs in, for reads the built-in functions don't make. */
+	tagCache: (...tags: string[]) => void;
+	/** The built-in template functions, handling the site version, previews and cache tags. */
+	functions: {
+		document: <Key extends CollectionDocumentKey>(
+			collection: Key,
+			options?: DocumentReadOptions,
+		) => Promise<TemplateDocument<Key> | null>;
+		documents: <Key extends CollectionDocumentKey>(
+			collection: Key,
+			options?: DocumentsOptions,
+		) => Promise<TemplateDocument<Key>[]>;
+	};
+	/** Kiln's render info, such as its locale, time zone and abort signal. */
+	render: RenderInfo<SiteState>;
+};
+
 export type SitePluginOptions = {
 	/** The site's folder relative to the project root, defaulting to `site`. Builds bundle its templates, so production reads no files. */
 	directory?: string;
@@ -132,7 +161,27 @@ export type SitePluginOptions = {
 		outDir?: string;
 	};
 	routes?: SiteRoutes;
-} & Pick<KilnOptions<SiteState>, "globals" | "functions" | "filters" | "tests">;
+	kiln?: SiteKilnOptions;
+};
+
+type SiteCallables = KilnOptions<SiteState>["functions"];
+
+/** Template functions, filters, tests, globals and type checks registered together, such as by a plugin. */
+export type SiteExtension = {
+	/** Names the extension in errors when two register the same thing. */
+	name: string;
+	functions?: SiteCallables;
+	filters?: SiteCallables;
+	tests?: SiteCallables;
+	globals?: Record<string, unknown>;
+	/** Type checks for `{% props item: Product %}`, keyed by type name. */
+	types?: Record<string, (value: unknown) => boolean>;
+};
+
+/** Kiln settings with site overrides, rejecting extensions that replace built-ins or each other's entries. */
+export type SiteKilnOptions = Omit<SiteExtension, "name"> & {
+	extensions?: SiteExtension[];
+} & Pick<KilnOptions<SiteState>, "timeZone">;
 
 export type SitePage = {
 	template: string;

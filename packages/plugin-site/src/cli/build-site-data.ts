@@ -9,6 +9,7 @@ const buildSiteData = async (
 	const templates = await readTemplates(props.root);
 	return {
 		mode: "build",
+		buildId: crypto.randomUUID().slice(0, 16),
 		templates,
 		manifest: await buildAssets({ ...props, templates }),
 	};

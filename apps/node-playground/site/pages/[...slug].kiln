@@ -9,6 +9,7 @@
 	{% component "components/card" with { title: page.fields.page_title, editable: editable(page, "page_title") } %}
 		{% fill "meta" %}<a href="{{ page.url }}">{{ page.url }}</a>{% endfill %}
 		<p>Document {{ page.id }}, rendered in {{ page.locale }}.</p>
+		<p>{{ pageGreeting("Will") }}</p>
 	{% endcomponent %}
 
 	{% for brick in page.bricks %}

@@ -12,7 +12,6 @@ import createSiteFunctionsContext, {
 } from "../engine/site-functions-context.js";
 import createPageRouter from "../router/create-page-router.js";
 import type { SiteCliData, SitePage, SitePluginOptions } from "../types.js";
-import sha256 from "../utils/sha256.js";
 import writeKilnManifest from "./write-kiln-manifest.js";
 
 export type Site = {
@@ -52,15 +51,11 @@ const loadSite = async (props: {
 	const { data } = props;
 	const loader = await createLoader(props.directory, data);
 	const templates = new Set(await loader.list?.());
-	const templatesHash = await hashTemplates(loader, templates);
-	// Stored pages link to hashed asset files, so a new build must not serve pages from the last one.
+	// Each build uses a new cache namespace because code and assets can change without template changes.
 	const version =
-		data?.mode === "build" && data.manifest
-			? (await sha256(templatesHash + JSON.stringify(data.manifest))).slice(
-					0,
-					16,
-				)
-			: templatesHash;
+		data?.mode === "build"
+			? data.buildId
+			: await hashTemplates(loader, templates);
 	const { router, pages } = createPageRouter(templates, {
 		mode: props.options.mode,
 		routes: props.options.routes,

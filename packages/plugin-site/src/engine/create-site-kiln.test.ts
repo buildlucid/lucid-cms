@@ -2,8 +2,9 @@ import type { ResolvedLucidConfig, Toolkit } from "@lucidcms/core/types";
 import { decodePreviewFieldTarget } from "@lucidcms/preview-protocol";
 import { KilnRenderError, memoryLoader } from "@lucidkiln/core";
 import { describe, expect, test, vi } from "vitest";
+import defineSiteFunction from "../define-site-function.js";
 import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
-import type { SitePreview, SiteState } from "../types.js";
+import type { SitePluginOptions, SitePreview, SiteState } from "../types.js";
 import createSiteKiln from "./create-site-kiln.js";
 import { pageMarkup } from "./page-markup.js";
 import createSiteFunctionsContext from "./site-functions-context.js";
@@ -228,5 +229,93 @@ describe("site template functions", () => {
 				},
 			),
 		).rejects.toThrow(/Brick/);
+	});
+});
+
+describe("site kiln options", () => {
+	const state: SiteState = {
+		toolkit,
+		path: "/",
+		preview,
+		version: context.getVersion,
+	};
+
+	test("site functions get the preview token and built-in reads that tag the cached section", async () => {
+		const set = vi.fn();
+		const pageCount = defineSiteFunction(
+			async ({ functions, preview: token }, suffix: string) =>
+				`${(await functions.documents("page")).length}${suffix}:${token}`,
+		);
+		const site = createSiteKiln({
+			context,
+			options: { kiln: { functions: { pageCount } } },
+			data: null,
+			cache: { get: () => null, set },
+			loader: memoryLoader({
+				"count.kiln": `{% cache "count" %}{{ pageCount("!") }}{% endcache %}`,
+			}),
+		});
+
+		await expect(
+			site.render("count.kiln", {}, { state: { ...state, preview: null } }),
+		).resolves.toBe("1!:null");
+		expect(set).toHaveBeenCalledWith(
+			expect.objectContaining({ tags: ["content-documents:page"] }),
+		);
+		await expect(site.render("count.kiln", {}, { state })).resolves.toBe(
+			"1!:token",
+		);
+	});
+
+	test("extensions can't register a built-in or each other's names, while the site's own entries replace anything", async () => {
+		const create = (kilnOptions: SitePluginOptions["kiln"]) =>
+			createSiteKiln({
+				context,
+				options: { kiln: kilnOptions },
+				data: null,
+				loader: memoryLoader({
+					"notice.kiln": `{{ notFound() }}`,
+					"shout.kiln": `{{ "hi"|upper }}`,
+				}),
+			});
+
+		expect(() =>
+			create({
+				extensions: [{ name: "pages", functions: { document: () => null } }],
+			}),
+		).toThrow(
+			/'pages' extension registers the 'document' function, which the site plugin/,
+		);
+		expect(() =>
+			create({
+				extensions: [
+					{ name: "text", filters: { upper: (value: string) => value } },
+				],
+			}),
+		).toThrow(/'text' extension registers the 'upper' filter, which Kiln/);
+		expect(() =>
+			create({
+				extensions: [
+					{ name: "first", filters: { money: (value: number) => value } },
+					{ name: "second", filters: { money: (value: number) => value } },
+				],
+			}),
+		).toThrow(
+			/'second' extension registers the 'money' filter, which the 'first' extension/,
+		);
+		await expect(
+			create({ functions: { notFound: () => "replaced" } }).render(
+				"notice.kiln",
+				{},
+				{ state },
+			),
+		).resolves.toBe("replaced");
+		await expect(
+			create({ filters: { upper: () => "replaced" } }).render(
+				"shout.kiln",
+				{},
+				{ state },
+			),
+		).resolves.toBe("replaced");
 	});
 });
