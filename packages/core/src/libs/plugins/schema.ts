@@ -43,6 +43,12 @@ export const PluginDefinitionSchema: z.ZodType<LucidPluginDefinition> =
 				}),
 			)
 			.optional(),
+		cli: z
+			.strictObject({
+				module: z.string().trim().min(1),
+				options: z.unknown().optional(),
+			})
+			.optional(),
 		hooks: z
 			.strictObject({
 				init: callback<

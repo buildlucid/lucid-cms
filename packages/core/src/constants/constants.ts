@@ -100,6 +100,10 @@ export default Object.freeze({
 	i18n: {
 		renderedOutput: "i18n-translations.json",
 	},
+	plugins: {
+		/** Plugin CLI build data, imported by server entries. */
+		dataOutput: "plugin-data.json",
+	},
 	notifications: {
 		emailJob: { name: "core:send-notification-emails", version: 1 },
 		emailDelayMinutes: 10,

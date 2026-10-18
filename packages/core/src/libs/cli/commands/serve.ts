@@ -18,6 +18,7 @@ import generateTypes from "../../type-generation/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import { startProgress } from "../services/progress.js";
+import runPluginBuilds from "../services/run-plugin-builds.js";
 import { getServerUrl, logServerReady } from "../services/server-logger.js";
 import updateAvailable from "../services/update-available.js";
 import migrateCommand from "./migrate.js";
@@ -186,10 +187,18 @@ const serveCommand = async () => {
 			cliLogger.color.green("successfully"),
 		);
 
+		currentStage = "artifacts";
+		progress.update("Building plugin files…");
+		const pluginData = await runPluginBuilds({
+			config: configRes.config,
+			projectRoot: configRes.projectRoot,
+		});
+
 		currentStage = "runtime_initialization";
 		progress.update("Starting server…");
 		const serverRes = await adapterCLI.serve({
 			mode: "static",
+			pluginData,
 			configPath,
 			projectRoot: configRes.projectRoot,
 			env: configRes.env,

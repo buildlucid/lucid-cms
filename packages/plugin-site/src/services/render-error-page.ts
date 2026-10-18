@@ -1,4 +1,5 @@
 import type { LucidHonoContext } from "@lucidcms/core/types";
+import { pageMarkup } from "../engine/page-markup.js";
 import type { SiteState } from "../types.js";
 import type { Site } from "./create-site-loader.js";
 
@@ -11,11 +12,16 @@ const renderErrorPage = async (props: {
 }) => {
 	if (!props.site.templates.has(props.template)) return undefined;
 
-	const kiln = props.state.preview ? props.site.freshKiln : props.site.kiln;
+	// The failed render's output is discarded, so the error page must write footer() again.
+	const state: SiteState = { ...props.state };
+	const markup = pageMarkup.get(props.state);
+	if (markup) pageMarkup.set(state, { ...markup, footerWritten: false });
+
+	const kiln = state.preview ? props.site.freshKiln : props.site.kiln;
 	const html = await kiln.render(
 		props.template,
-		{ route: { path: props.state.path, params: {} } },
-		{ state: props.state },
+		{ route: { path: state.path, params: {} } },
+		{ state },
 	);
 	return props.hono.html(html, props.status);
 };

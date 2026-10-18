@@ -1,4 +1,4 @@
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
 import buildApp from "../../admin/build-app.js";
@@ -22,6 +22,7 @@ import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import { startProgress } from "../services/progress.js";
+import runPluginBuilds from "../services/run-plugin-builds.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -180,6 +181,17 @@ const buildCommand = async (options?: {
 			configPath,
 			silent,
 		});
+
+		currentStage = "artifacts";
+		progress.update("Building plugin files…");
+		const pluginData = await runPluginBuilds({
+			config: configRes.config,
+			projectRoot: configRes.projectRoot,
+		});
+		await writeFile(
+			path.resolve(configRes.config.build.outDir, constants.plugins.dataOutput),
+			JSON.stringify(pluginData),
+		);
 
 		currentStage = "runtime_build";
 		progress.update("Building server…");

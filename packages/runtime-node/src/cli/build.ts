@@ -56,6 +56,7 @@ import { env as envSchema } from "${configArtifactImports.env}";
 import db from "${configArtifactImports.db}";
 import runtime from "${configArtifactImports.runtime}";
 import i18nTranslations from "./i18n-translations.json" with { type: "json" };
+import pluginData from "./plugin-data.json" with { type: "json" };
 import { createLucidHost, logger, withResponseCleanup } from "@lucidcms/core/runtime";
 import { serve } from "@hono/node-server";
 import { createNodeJobScheduler, getRuntimeContext } from "@lucidcms/runtime-node/runtime";
@@ -85,6 +86,7 @@ const startServer = async () => {
 		};
 		const runtimeContext = getRuntimeContext({
 			compiled: true,
+			pluginData,
 		});
 		const host = await createLucidHost({
 			definition,

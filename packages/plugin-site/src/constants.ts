@@ -4,9 +4,13 @@ export const PLUGIN_KEY = "plugin-site";
 export const LUCID_VERSION = "0.x.x";
 
 export const TEMPLATE_EXTENSION = ".kiln";
-export const DEFAULT_TEMPLATE_DIRECTORY = "site";
+export const DEFAULT_SITE_DIRECTORY = "site";
 export const PAGES_DIRECTORY = "pages";
 export const STATIC_OUTPUT_DIRECTORY = "site";
+
+/** URL prefix for the site's Vite files, served by Vite in development and from `public/assets` once built. */
+export const ASSETS_BASE = "/assets/";
+export const VITE_CACHE_DIRECTORY = ".lucid/vite/site";
 
 export const errorPages = {
 	notFound: "pages/_404.kiln",

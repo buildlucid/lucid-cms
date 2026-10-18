@@ -6,7 +6,10 @@ import type {
 import { ADAPTER_KEY } from "../constants.js";
 
 /** Describes the runtime capabilities and request connection information. Set compiled to match whether source or built code is running. */
-const getRuntimeContext = (params: { compiled: boolean }) =>
+const getRuntimeContext = (params: {
+	compiled: boolean;
+	pluginData?: Record<string, unknown>;
+}) =>
 	({
 		runtime: ADAPTER_KEY,
 		compiled: params.compiled,
@@ -23,6 +26,7 @@ const getRuntimeContext = (params: { compiled: boolean }) =>
 			},
 		},
 		configEntryPoint: "lucid/config.js",
+		pluginData: params.pluginData,
 	}) satisfies AdapterRuntimeContext;
 
 export default getRuntimeContext;

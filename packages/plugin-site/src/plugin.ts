@@ -1,6 +1,12 @@
 import { definePlugin } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
-import { CLIENT_SCRIPT_PATH, LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import type { SiteCliOptions } from "./cli/index.js";
+import {
+	CLIENT_SCRIPT_PATH,
+	DEFAULT_SITE_DIRECTORY,
+	LUCID_VERSION,
+	PLUGIN_KEY,
+} from "./constants.js";
 import registerSiteRoute from "./services/register-site-route.js";
 import type { SitePluginOptions } from "./types.js";
 
@@ -9,6 +15,12 @@ const plugin = (options: SitePluginOptions = {}): LucidPluginDefinition =>
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		defaults: { urls: { site: "/" } },
+		cli: {
+			module: "@lucidcms/plugin-site/cli",
+			options: {
+				directory: options.directory ?? DEFAULT_SITE_DIRECTORY,
+			} satisfies SiteCliOptions,
+		},
 		sources: {
 			public: [
 				{

@@ -57,6 +57,10 @@ const prepareMainWorkerEntry = (
 			default: "i18nTranslations",
 		},
 		{
+			path: "./plugin-data.json",
+			default: "pluginData",
+		},
+		{
 			path: "@lucidcms/runtime-cloudflare/runtime",
 			exports: [
 				"getOrCreateRuntimeHost",
@@ -74,6 +78,7 @@ const prepareMainWorkerEntry = (
 			content: /** ts */ `const runtimeContext = getRuntimeContext({
     server: "cloudflare",
     compiled: true,
+    pluginData,
 });
 const host = await getOrCreateRuntimeHost(
     runtimeHostKeys.http,
@@ -154,6 +159,7 @@ try {
     const runtimeContext = getRuntimeContext({
         server: "cloudflare",
         compiled: true,
+        pluginData,
     });
     const host = await getOrCreateRuntimeHost(
         runtimeHostKeys.background,

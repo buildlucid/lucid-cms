@@ -443,7 +443,11 @@ export type {
 	StaticPermission,
 } from "../libs/permission/types.js";
 export type {
+	LucidDevMiddleware,
 	LucidPlugin,
+	LucidPluginCli,
+	LucidPluginCliDev,
+	LucidPluginCliFactory,
 	LucidPluginCommand,
 	LucidPluginCommandLogger,
 	LucidPluginDefinition,

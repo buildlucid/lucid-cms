@@ -19,6 +19,7 @@ import type {
 } from "../../plugins/types.js";
 import createToolkit from "../../toolkit/create-toolkit.js";
 import cliLogger from "../logger.js";
+import readPluginData from "../services/read-plugin-data.js";
 
 const logger: LucidPluginCommandLogger = {
 	info: (message) => cliLogger.info(message),
@@ -32,20 +33,28 @@ const logger: LucidPluginCommandLogger = {
 /** Runs a plugin's command with a database connection, KV and toolkit. */
 const pluginCommand =
 	(command: LucidPluginCommand, loaded: LoadConfigResult) => async () => {
-		const { config, env, runtimeContext } = loaded;
+		const { config, env } = loaded;
 		let database: DatabaseConnection | undefined;
 		let kv: KVAdapterInstance | undefined;
 
 		const cleanupAdapters = async () => {
 			await Promise.allSettled([
 				database?.destroy(),
-				destroyKVAdapter(kv, { config, env, runtimeContext }),
+				destroyKVAdapter(kv, {
+					config,
+					env,
+					runtimeContext: loaded.runtimeContext,
+				}),
 			]);
 		};
 
 		try {
 			startLoggerBuffering();
 			const startTime = cliLogger.startTimer();
+			const runtimeContext = {
+				...loaded.runtimeContext,
+				pluginData: await readPluginData(config),
+			};
 			const { translationStore } = await prepareTranslations({
 				config,
 				files: loaded.resources.files.translations,

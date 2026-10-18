@@ -7,6 +7,7 @@ import getNodeConnInfo from "../utils/node-conn-info.js";
 const getRuntimeContext = (params: {
 	server: "node" | "cloudflare";
 	compiled: boolean;
+	pluginData?: Record<string, unknown>;
 }) =>
 	({
 		runtime: ADAPTER_KEY,
@@ -55,6 +56,7 @@ const getRuntimeContext = (params: {
 			},
 		},
 		configEntryPoint: null,
+		pluginData: params.pluginData,
 	}) satisfies AdapterRuntimeContext;
 
 export default getRuntimeContext;

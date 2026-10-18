@@ -5,6 +5,7 @@ import type { LucidPluginCommand, Toolkit } from "@lucidcms/core/types";
 import { KilnRenderError } from "@lucidkiln/core";
 import { findRoute } from "rou3";
 import {
+	ASSETS_BASE,
 	errorPages,
 	PLUGIN_KEY,
 	STATIC_OUTPUT_DIRECTORY,
@@ -72,6 +73,26 @@ const collectPaths = async (site: Site, toolkit: Toolkit) => {
 	return [...new Set(paths.flat())];
 };
 
+/** Copies the files `lucidcms build` built for `vite()` from the public folder into the static site. */
+const copyAssets = async (site: Site, buildDir: string, outDir: string) => {
+	if (site.data?.mode !== "build" || !site.data.manifest) return;
+
+	const files = new Set(
+		Object.values(site.data.manifest).flatMap((chunk) => [
+			chunk.file,
+			...(chunk.css ?? []),
+			...(chunk.assets ?? []),
+		]),
+	);
+	await Promise.all(
+		[...files].map(async (file) => {
+			const target = path.join(outDir, ASSETS_BASE, file);
+			await mkdir(path.dirname(target), { recursive: true });
+			await copyFile(path.join(buildDir, "public", ASSETS_BASE, file), target);
+		}),
+	);
+};
+
 const toFile = (outDir: string, routePath: string, contentType: string) =>
 	contentType.startsWith("text/html")
 		? path.join(outDir, routePath, "index.html")
@@ -127,6 +148,7 @@ const buildSite = async (options: SitePluginOptions, props: BuildProps) => {
 		reload: false,
 		context,
 	});
+	await copyAssets(site, path.resolve(config.build.outDir), outDir);
 	const paths = await collectPaths(site, toolkit);
 	const state = (routePath: string): SiteState => ({
 		toolkit,

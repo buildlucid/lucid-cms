@@ -4,7 +4,7 @@ import {
 	type KilnFunctions,
 	type Loader,
 } from "@lucidkiln/core";
-import type { SitePluginOptions, SiteState } from "../types.js";
+import type { SiteCliData, SitePluginOptions, SiteState } from "../types.js";
 import createDocumentFunction from "./functions/document.js";
 import createDocumentsFunction from "./functions/documents.js";
 import editable from "./functions/editable.js";
@@ -12,6 +12,8 @@ import footer from "./functions/footer.js";
 import head from "./functions/head.js";
 import notFound from "./functions/not-found.js";
 import redirect from "./functions/redirect.js";
+import createViteFunction from "./functions/vite.js";
+import createViteAssetFunction from "./functions/vite-asset.js";
 import type { SiteFunctionsContext } from "./site-functions-context.js";
 import templateTypes from "./template-types.js";
 
@@ -19,6 +21,7 @@ const createSiteKiln = (props: {
 	loader: Loader;
 	context: SiteFunctionsContext;
 	options: SitePluginOptions;
+	data: SiteCliData | null;
 	cache?: KilnCache;
 	cacheNamespace?: string;
 }) => {
@@ -30,6 +33,8 @@ const createSiteKiln = (props: {
 		footer,
 		notFound,
 		redirect,
+		vite: createViteFunction(props.data),
+		viteAsset: createViteAssetFunction(props.data),
 	} satisfies KilnFunctions;
 
 	return createKiln<SiteState>({

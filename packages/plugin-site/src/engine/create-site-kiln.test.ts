@@ -61,6 +61,7 @@ const context = createSiteFunctionsContext(config, "production");
 const kiln = createSiteKiln({
 	context,
 	options: {},
+	data: null,
 	loader: memoryLoader({
 		"page.kiln": `{% set page = document("page", filter: { _fullSlug: path }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
 		"list.kiln": `{{ documents("page")|length }}{{ documents("blog")|length }}`,
@@ -187,6 +188,7 @@ describe("site template functions", () => {
 		const cached = createSiteKiln({
 			context,
 			options: {},
+			data: null,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
 				"cached.kiln": `{% cache "list" %}{{ documents("page")|length }}{{ documents("blog")|length }}{% endcache %}`,

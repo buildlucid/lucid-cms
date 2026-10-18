@@ -1,3 +1,4 @@
+import type { IncomingMessage, Server, ServerResponse } from "node:http";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import type {
 	ServiceContext,
@@ -83,6 +84,43 @@ export type LucidPluginCommand = {
 	}) => void | Promise<void>;
 };
 
+/** Connect-style middleware for the development HTTP server. Call `next` for requests it doesn't handle. */
+export type LucidDevMiddleware = (
+	request: IncomingMessage,
+	response: ServerResponse,
+	next: (error?: unknown) => void,
+) => void;
+
+/** Development services a plugin starts, such as a Vite server. */
+export type LucidPluginCliDev = {
+	middleware?: LucidDevMiddleware;
+	close?: () => Promise<void>;
+	/** Passed to the plugin's runtime code as `runtimeContext.pluginData[key]`. */
+	data?: unknown;
+};
+
+/** CLI-only plugin code, kept out of server bundles because core loads it by module path. */
+export type LucidPluginCli = {
+	/** Runs each time `lucidcms dev` starts the server. */
+	dev?: (props: {
+		server: Server;
+		config: ResolvedLucidConfig;
+		projectRoot: string;
+	}) => Promise<LucidPluginCliDev>;
+	/** Runs during `lucidcms build` and `lucidcms serve`. Returned `data` is bundled with the server for the plugin's runtime code. */
+	build?: (props: {
+		config: ResolvedLucidConfig;
+		projectRoot: string;
+		/** Absolute output directory; files under `public` are served from the site root. */
+		outDir: string;
+	}) => Promise<{ data?: unknown } | undefined>;
+};
+
+/** The default export of a plugin's CLI module, given the options the plugin passes in `cli.options`. */
+export type LucidPluginCliFactory<Options = undefined> = (
+	options: Options,
+) => LucidPluginCli;
+
 /** A callback that mutates the resolved configuration draft. */
 export type PluginConfigure = ConfigTransform;
 
@@ -109,6 +147,13 @@ export type LucidPluginDefinition = {
 	 * CLI commands the plugin adds, such as `site:build`.
 	 */
 	commands?: LucidPluginCommand[];
+	/**
+	 * CLI-only code, such as dev servers and asset builds. `module` is a package subpath or path whose default export is a `LucidPluginCliFactory`, called with `options`.
+	 */
+	cli?: {
+		module: string;
+		options?: unknown;
+	};
 	/**
 	 * Can be used to check if the plugin is compatible with the current runtime context and state of the config.
 	 *

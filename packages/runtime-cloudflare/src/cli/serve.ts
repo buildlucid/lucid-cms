@@ -3,11 +3,7 @@ import { createServer } from "node:http";
 import { relative } from "node:path";
 import { getRequestListener } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import {
-	createAdminClientConfig,
-	createCliAdmin,
-	getBuildPaths,
-} from "@lucidcms/core/build";
+import { createCliDev, getBuildPaths } from "@lucidcms/core/build";
 import {
 	createLucidHost,
 	shouldServeAdminShell,
@@ -30,6 +26,7 @@ const serveCommand =
 		logger,
 		onListening,
 		mode,
+		pluginData,
 		projectRoot,
 		configPath,
 	}) => {
@@ -44,9 +41,16 @@ const serveCommand =
 			silent: logger.silent,
 		});
 
+		const server = createServer();
+		const dev =
+			mode === "development"
+				? await createCliDev({ server, projectRoot, configPath, config })
+				: undefined;
+
 		const runtimeContext = getRuntimeContext({
 			server: "cloudflare",
 			compiled: false,
+			pluginData: dev?.pluginData ?? pluginData,
 		});
 
 		const host = await createLucidHost({
@@ -121,7 +125,7 @@ const serveCommand =
 				],
 			},
 		}).catch(async (error) => {
-			await Promise.allSettled([platformProxy?.dispose()]);
+			await Promise.allSettled([platformProxy?.dispose(), dev?.close()]);
 			throw error;
 		});
 
@@ -153,15 +157,12 @@ const serveCommand =
 			return destroyRuntimePromise;
 		};
 
-		const server = createServer();
-
-		let admin: Awaited<ReturnType<typeof createCliAdmin>> | undefined;
 		let destroyPromise: Promise<void> | undefined;
 
 		const destroy = () => {
 			destroyPromise ??= (async () => {
 				try {
-					await admin?.close();
+					await dev?.close();
 				} finally {
 					try {
 						if (server.listening) await server[Symbol.asyncDispose]();
@@ -174,16 +175,6 @@ const serveCommand =
 		};
 
 		try {
-			if (mode === "development") {
-				admin = await createCliAdmin({
-					server,
-					projectRoot,
-					configPath,
-					admin: config.admin,
-					clientConfig: createAdminClientConfig(config),
-				});
-			}
-
 			const listener = getRequestListener(async (request, requestBindings) => {
 				const invocation = host.createInvocation();
 
@@ -196,15 +187,15 @@ const serveCommand =
 					const result = await withResponseCleanup(response, () =>
 						invocation.destroy(),
 					);
-					return admin ? await admin.handleResponse(request, result) : result;
+					return dev ? await dev.handleResponse(request, result) : result;
 				} catch (error) {
 					await invocation.destroy();
 					throw error;
 				}
 			});
 			server.on("request", (request, response) => {
-				if (!admin) return void listener(request, response);
-				admin.middleware(request, response, () => {
+				if (!dev) return void listener(request, response);
+				dev.middleware(request, response, () => {
 					void listener(request, response);
 				});
 			});

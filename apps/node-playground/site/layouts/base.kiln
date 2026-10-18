@@ -5,11 +5,17 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>{% block title %}Playground{% endblock %}</title>
 		{% outlet "head" %}
+		{{ vite("styles/site.css", "scripts/site.ts") }}
 		{{ head() }}
 	</head>
 	{% flush %}
 	<body>
-		<header><a href="/">Playground</a></header>
+		<header>
+			<a href="/">
+				<img src="{{ viteAsset("images/logo.svg") }}" alt="" width="24" height="24">
+				Playground
+			</a>
+		</header>
 		<main>{% block content %}{% endblock %}</main>
 		{{ footer() }}
 	</body>

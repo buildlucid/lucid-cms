@@ -201,6 +201,7 @@ const devCommand = async (options?: {
 			currentStage = "runtime_initialization";
 			const serverRes = await adapterCLI.serve({
 				mode: "development",
+				pluginData: {},
 				configPath,
 				projectRoot: configResult.projectRoot,
 				env: configResult.env,

@@ -14,7 +14,6 @@ export type {
 	SiteRoute,
 	SiteRoutes,
 	SiteState,
-	SiteTemplates,
 } from "./types.js";
 
 export default plugin;

@@ -52,6 +52,8 @@ export type RuntimePrepareArtifacts = {
 
 export type ServeHandler = (props: {
 	mode: "development" | "static";
+	/** Plugin build data for static mode. In development, `createCliDev` returns it. */
+	pluginData: Record<string, unknown>;
 	projectRoot: string;
 	configPath: string;
 	config: ResolvedLucidConfig;
@@ -151,6 +153,8 @@ export type AdapterRuntimeContext = {
 	support?: RuntimeSupport;
 	/** If the adapter bundles the config and server entry point separately, the path to the config file relative to the output directory */
 	configEntryPoint: string | null;
+	/** Data from plugins' CLI modules, keyed by plugin key: from `dev` in development, otherwise from `build`. */
+	pluginData?: Record<string, unknown>;
 };
 
 export interface EnvironmentVariables extends Record<string, unknown> {}

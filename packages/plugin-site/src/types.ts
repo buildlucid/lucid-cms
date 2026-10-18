@@ -7,6 +7,8 @@ import type footer from "./engine/functions/footer.js";
 import type head from "./engine/functions/head.js";
 import type notFound from "./engine/functions/not-found.js";
 import type redirect from "./engine/functions/redirect.js";
+import type createViteFunction from "./engine/functions/vite.js";
+import type createViteAssetFunction from "./engine/functions/vite-asset.js";
 import type {
 	TemplateBrick,
 	TemplateDocument,
@@ -42,6 +44,10 @@ declare module "@lucidkiln/core" {
 		notFound: typeof notFound;
 		/** Stops rendering with a redirect, defaulting to 302. */
 		redirect: typeof redirect;
+		/** Stylesheet, script and preload tags for Vite entries, such as `vite("styles/site.css")`. Paths must be written out; `attrs` adds attributes to every tag. */
+		vite: ReturnType<typeof createViteFunction>;
+		/** The URL of one file Vite builds, such as `viteAsset("images/logo.svg")`. Paths must be written out. */
+		viteAsset: ReturnType<typeof createViteAssetFunction>;
 	}
 
 	interface KilnTypes {
@@ -50,8 +56,31 @@ declare module "@lucidkiln/core" {
 	}
 }
 
-/** Template sources keyed by path, e.g. `pages/index.kiln`. */
-export type SiteTemplates = Record<string, string>;
+/** A chunk in Vite's build manifest, keyed by its source path relative to the site directory. */
+export type ViteManifestChunk = {
+	file: string;
+	isEntry?: boolean;
+	imports?: string[];
+	css?: string[];
+	assets?: string[];
+};
+
+/** What the plugin's CLI hands its runtime code: the site directory in development, otherwise the built site. */
+export type SiteCliData =
+	| {
+			mode: "dev";
+			/** Absolute path of the site directory, resolved from the project root. */
+			directory: string;
+			/** Whether Vite is installed and serving the site's files. */
+			vite: boolean;
+	  }
+	| {
+			mode: "build";
+			/** Template sources keyed by path, e.g. `pages/index.kiln`, so builds need no files at runtime. */
+			templates: Record<string, string>;
+			/** Vite's manifest, or null when no template calls `vite()`. */
+			manifest: Record<string, ViteManifestChunk> | null;
+	  };
 
 /** ssr streams requests, isr caches until content changes, and static builds files while using SSR for development and previews. */
 export type SiteMode = "ssr" | "isr" | "static";
@@ -92,8 +121,8 @@ export type SiteState = {
 };
 
 export type SitePluginOptions = {
-	/** Template directory relative to cwd, defaulting to `site`, or sources keyed by path, which Workers require. */
-	templates?: string | SiteTemplates;
+	/** The site's folder relative to the project root, defaulting to `site`. Builds bundle its templates, so production reads no files. */
+	directory?: string;
 	/** Defaults to the shared final environment, or latest when all collections lack environments; excludes collections missing it and uses latest for those without environments. */
 	environment?: string;
 	/** Defaults to ssr. */
