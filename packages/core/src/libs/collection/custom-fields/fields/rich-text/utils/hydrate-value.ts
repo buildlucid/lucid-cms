@@ -42,8 +42,7 @@ const isUserRef = (value: unknown): value is HydratableUserRef => {
 	return (
 		reference !== null &&
 		typeof reference.id === "number" &&
-		typeof reference.username === "string" &&
-		typeof reference.email === "string"
+		typeof reference.username === "string"
 	);
 };
 

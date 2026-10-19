@@ -102,7 +102,6 @@ const context = {
 			{
 				id: 9,
 				username: "william",
-				email: "william@example.com",
 				firstName: "William",
 				lastName: "Yallop",
 				profilePicture: null,
@@ -168,6 +167,33 @@ describe("rich-text response hydration", () => {
 				documentId: 7,
 			},
 		});
+	});
+
+	test("hydrates user variables from refs without emails", () => {
+		const hydrated = hydrateRichTextValue(
+			{
+				type: "lucidVariable",
+				attrs: { source: "user", userId: 9, fieldKey: "username" },
+			},
+			{
+				locale: "en",
+				refs: {
+					documents: [],
+					media: [],
+					users: [
+						{
+							id: 9,
+							username: "william",
+							firstName: null,
+							lastName: null,
+							profilePicture: null,
+						},
+					],
+				},
+			},
+		);
+
+		expect(hydrated.attrs?.value).toBe("william");
 	});
 
 	test("sets missing references to null", () => {
