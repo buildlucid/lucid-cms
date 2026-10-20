@@ -21,6 +21,7 @@ export type {
 	SitePluginOptions,
 	SitePreview,
 	SiteState,
+	SiteTranslationKey,
 } from "./types.js";
 
 export default plugin;

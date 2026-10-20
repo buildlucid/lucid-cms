@@ -11,15 +11,6 @@ import type {
 } from "./types.js";
 
 /**
- * Creates a complete, empty locale bundle so merge operations can safely add
- * admin and server keys independently.
- */
-const emptyBundle = (): TranslationBundle => ({
-	admin: {},
-	server: {},
-});
-
-/**
  * Built-in Lucid English translations.
  *
  * Most application code should use `copy`, `translate`, or
@@ -33,7 +24,8 @@ export const coreTranslations: TranslationBundles = {
 };
 
 /**
- * Ensures a partial locale bundle always has both admin and server scopes.
+ * Ensures a partial locale bundle always has admin and server scopes, keeping
+ * any other scopes it has.
  *
  * @example
  * ```ts
@@ -44,14 +36,17 @@ export const coreTranslations: TranslationBundles = {
  */
 export const normalizeTranslationBundle = (
 	bundle: Partial<TranslationBundle> | undefined,
-): TranslationBundle => ({
-	admin: { ...(bundle?.admin ?? {}) },
-	server: { ...(bundle?.server ?? {}) },
-});
+): TranslationBundle => {
+	const normalized: TranslationBundle = { admin: {}, server: {} };
+	for (const [scope, keys] of Object.entries(bundle ?? {})) {
+		normalized[scope] = { ...keys };
+	}
+	return normalized;
+};
 
 /**
  * Normalizes all locale bundles so every locale contains admin and server
- * scopes.
+ * scopes alongside any others.
  *
  * @example
  * ```ts
@@ -91,15 +86,11 @@ export const mergeTranslationBundles = (
 
 	for (const source of sources) {
 		for (const [locale, bundle] of Object.entries(source ?? {})) {
-			merged[locale] = merged[locale] ?? emptyBundle();
-			merged[locale].admin = {
-				...merged[locale].admin,
-				...(bundle.admin ?? {}),
-			};
-			merged[locale].server = {
-				...merged[locale].server,
-				...(bundle.server ?? {}),
-			};
+			const target = merged[locale] ?? normalizeTranslationBundle(undefined);
+			for (const [scope, keys] of Object.entries(bundle)) {
+				target[scope] = { ...target[scope], ...keys };
+			}
+			merged[locale] = target;
 		}
 	}
 

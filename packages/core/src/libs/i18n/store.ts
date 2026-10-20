@@ -16,6 +16,26 @@ import type {
 } from "./types.js";
 
 /**
+ * Reads one locale's translation, checking own properties so keys such as
+ * `constructor` aren't read from the prototype.
+ */
+const findTranslation = (props: {
+	bundles: TranslationBundles;
+	locale: string;
+	scope: string;
+	key: string;
+}) => {
+	const bundle = Object.hasOwn(props.bundles, props.locale)
+		? props.bundles[props.locale]
+		: undefined;
+	const keys =
+		bundle && Object.hasOwn(bundle, props.scope)
+			? bundle[props.scope]
+			: undefined;
+	return keys && Object.hasOwn(keys, props.key) ? keys[props.key] : undefined;
+};
+
+/**
  * Resolves one key from the requested locale, then configured default locale,
  * then English, before falling back to `defaultMessage` or the key itself.
  */
@@ -27,11 +47,17 @@ const resolveTranslation = (props: {
 	locale?: string;
 	options?: BoundTranslateOptions;
 }) => {
-	const targetLocale = props.locale ?? props.defaultLocale;
+	const find = (locale: string) =>
+		findTranslation({
+			bundles: props.bundles,
+			locale,
+			scope: props.scope,
+			key: props.key,
+		});
 	const translation =
-		props.bundles[targetLocale]?.[props.scope][props.key] ??
-		props.bundles[props.defaultLocale]?.[props.scope][props.key] ??
-		props.bundles.en?.[props.scope][props.key] ??
+		find(props.locale ?? props.defaultLocale) ??
+		find(props.defaultLocale) ??
+		find("en") ??
 		props.options?.defaultMessage ??
 		props.key;
 
@@ -117,6 +143,19 @@ export const createTranslationStore = (props: {
 				locale,
 				options,
 			}),
+		lookup: ({ scope, key, locale, data }) => {
+			const translation = findTranslation({ bundles, locale, scope, key });
+			return translation === undefined
+				? undefined
+				: formatTranslation(translation, data);
+		},
+		scopeBundles: (scope) =>
+			Object.fromEntries(
+				Object.entries(bundles).map(([locale, bundle]) => [
+					locale,
+					Object.hasOwn(bundle, scope) ? (bundle[scope] ?? {}) : {},
+				]),
+			),
 		copy: (value, copyProps) =>
 			translateCopy(value, {
 				bundles,

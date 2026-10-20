@@ -1,0 +1,4 @@
+{
+	"notFound.title": "Page not found",
+	"notFound.body": "Nothing lives at {{path}}."
+}

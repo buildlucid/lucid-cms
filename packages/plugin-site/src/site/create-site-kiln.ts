@@ -1,3 +1,4 @@
+import type { Translator } from "@lucidcms/core/types";
 import {
 	createKiln,
 	type KilnCache,
@@ -17,6 +18,7 @@ import notFound from "../functions/not-found.js";
 import redirect from "../functions/redirect.js";
 import richText from "../functions/rich-text.js";
 import { getSiteFunctionSource } from "../functions/site-function-source.js";
+import createTranslateFunction from "../functions/translate.js";
 import createViteFunction from "../functions/vite.js";
 import createViteAssetFunction from "../functions/vite-asset.js";
 import type {
@@ -45,6 +47,8 @@ const createSiteKiln = (props: {
 	config: SiteConfig;
 	options: SitePluginOptions;
 	data: SiteCliData | null;
+	/** Reads the `site` translation scope. */
+	lookupTranslation: Translator["lookup"];
 	cache?: KilnCache;
 	cacheNamespace?: string;
 }) => {
@@ -52,6 +56,11 @@ const createSiteKiln = (props: {
 	const functions = {
 		...reads,
 		richText,
+		translate: createTranslateFunction({
+			config: props.config,
+			lookup: props.lookupTranslation,
+			development: props.data?.kind === "dev",
+		}),
 		editable,
 		head,
 		footer,

@@ -8,10 +8,7 @@ export type LocaleDirection = "ltr" | "rtl";
  */
 export type InterfaceDirection = LocaleDirection;
 
-/**
- * Translation namespace. Admin copy is used by the CMS UI; server copy is used
- * by API responses, services, jobs, and plugins.
- */
+/** Namespaces for `copy` descriptors, with `admin` for CMS UI and `server` for backend copy; custom file scopes such as `en.site.json` use `Translator.lookup`. */
 export type TranslationScope = "admin" | "server";
 
 /**
@@ -25,11 +22,8 @@ declare global {
 	 * types.
 	 */
 	namespace LucidCMS {
-		/**
-		 * Translation keys available to `copy`. Lucid augments this during
-		 * typegen from the project's `translations/` directory.
-		 */
-		interface CopyTranslationKeys {}
+		/** Translation keys as `scope:key`, generated from project and plugin translation files. */
+		interface TranslationKeys {}
 	}
 }
 
@@ -37,7 +31,7 @@ declare global {
  * Generated project translation keys that can be passed to `copy`.
  */
 export type RegisteredCopyTranslationKey = Extract<
-	keyof LucidCMS.CopyTranslationKeys,
+	keyof LucidCMS.TranslationKeys,
 	`admin:${string}` | `server:${string}`
 >;
 
@@ -99,13 +93,12 @@ export type AdminCopyInput = string | AdminCopyDescriptor | LiteralCopy;
  */
 export type ResolvedAdminCopy = AdminCopyDescriptor | LiteralCopy;
 
-/**
- * Translation keys for each scope within one locale.
- */
+/** Translation keys for one locale, always including `admin` and `server` alongside custom scopes such as `en.site.json`. */
 export type TranslationBundle = Record<
 	TranslationScope,
 	Record<string, string>
->;
+> &
+	Record<string, Record<string, string>>;
 
 /**
  * Translation bundles keyed by locale code.
@@ -161,6 +154,15 @@ export type TranslateCopy = {
 };
 
 /**
+ * A key to find in one scope, with values for its `{{placeholder}}` tokens.
+ */
+export type TranslationLookup = {
+	scope: string;
+	key: string;
+	data?: TranslationValues;
+};
+
+/**
  * Runtime owner for resolved translation bundles.
  */
 export type TranslationStore = {
@@ -172,6 +174,8 @@ export type TranslationStore = {
 		locale?: string;
 		options?: BoundTranslateOptions;
 	}) => string;
+	lookup: (props: TranslationLookup & { locale: string }) => string | undefined;
+	scopeBundles: (scope: string) => Record<string, Record<string, string>>;
 	copy: (
 		value: string | TranslatableCopy | undefined,
 		props?: {
@@ -194,6 +198,15 @@ export type Translator = TranslateCopy & {
 	 * Creates a translator for another locale using the same translation store.
 	 */
 	forLocale: (locale: string) => Translator;
+	/** Finds a key in any scope, such as `site`, using the bound or supplied locale, returning undefined when missing so callers control fallback. */
+	lookup: (
+		props: TranslationLookup & { locale?: string },
+	) => string | undefined;
+	/**
+	 * Returns one scope's keys in every locale, such as for a plugin to hash
+	 * the translations its cached output depends on.
+	 */
+	scopeBundles: (scope: string) => Record<string, Record<string, string>>;
 	/**
 	 * Returns the full admin translation bundle for the bound locale.
 	 */

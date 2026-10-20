@@ -24,6 +24,9 @@ const store = createTranslationStore({
 			server: {
 				"tests.message": "French server {{value}}",
 			},
+			site: {
+				"nav.greeting": "Bonjour {{name}}",
+			},
 		},
 	},
 });
@@ -85,6 +88,12 @@ test("bound translators resolve project copy, core copy, and descriptor data", (
 			},
 		}),
 	).toBe("French server override");
+	expect(
+		translator("server:constructor", {
+			data: { value: "copy" },
+			defaultMessage: "Fallback {{value}}",
+		}),
+	).toBe("Fallback copy");
 });
 
 test("translation stores expose admin bundles with English and default-locale fallbacks", () => {
@@ -111,5 +120,34 @@ test("translation stores expose admin bundles with English and default-locale fa
 		"core.permissions.update.jobs": "Update Schedules",
 		"tests.default": "French default",
 		"tests.override": "Spanish target",
+	});
+});
+
+test("other scopes are looked up in one locale without falling back, and listed by locale", () => {
+	const translator = createTranslator({ store, locale: "fr" });
+
+	expect(
+		translator.lookup({
+			scope: "site",
+			key: "nav.greeting",
+			data: { name: "Ada" },
+		}),
+	).toBe("Bonjour Ada");
+	expect(
+		translator.lookup({ scope: "site", key: "nav.greeting", locale: "en" }),
+	).toBeUndefined();
+	expect(
+		translator.lookup({ scope: "server", key: "core.config.duplicate.keys" }),
+	).toBeUndefined();
+	expect(
+		translator.lookup({
+			scope: "site",
+			key: "toString",
+			data: { name: "Ada" },
+		}),
+	).toBeUndefined();
+	expect(translator.scopeBundles("site")).toEqual({
+		en: {},
+		fr: { "nav.greeting": "Bonjour {{name}}" },
 	});
 });

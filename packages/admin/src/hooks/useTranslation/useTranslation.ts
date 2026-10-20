@@ -5,7 +5,7 @@ import type coreCopy from "@/translations/en.json";
 type StripScope<Key> = Key extends `admin:${infer Name}` ? Name : never;
 export type TranslationKey =
 	| keyof typeof coreCopy
-	| StripScope<keyof LucidCMS.CopyTranslationKeys>;
+	| StripScope<keyof LucidCMS.TranslationKeys>;
 export type TranslationValues = Record<string, string | number | undefined>;
 
 /**

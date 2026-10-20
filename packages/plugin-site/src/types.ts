@@ -25,6 +25,7 @@ import type { MediaUrlOptions } from "./functions/media-url.js";
 import type notFound from "./functions/not-found.js";
 import type redirect from "./functions/redirect.js";
 import type richText from "./functions/rich-text.js";
+import type { TranslateOptions } from "./functions/translate.js";
 import type createViteFunction from "./functions/vite.js";
 import type createViteAssetFunction from "./functions/vite-asset.js";
 
@@ -63,6 +64,14 @@ declare module "@lucidkiln/core" {
 		mediaUrl: typeof mediaUrl;
 		/** The site's content locales, such as for language links. */
 		locales: ReturnType<typeof createLocalesFunction>;
+		/** Text from `<locale>.site.json` files in the render's locale, such as `translate("nav.home", { fallback: "Home" })`. */
+		translate: RenderAware<
+			(
+				render: RenderInfo<SiteState>,
+				key: SiteTranslationKey,
+				options?: TranslateOptions,
+			) => string
+		>;
 		/** Renders a rich text field or node as HTML; embedded bricks and document nodes are yours to render. */
 		richText: typeof richText;
 		/** Preview attributes for `<h1{{ editable(page, "title") }}>`, empty outside previews. */
@@ -93,6 +102,14 @@ declare module "@lucidkiln/core" {
 		RichText: RichTextJSON;
 	}
 }
+
+type SiteKey<Key> = Key extends `site:${infer Name}` ? Name : never;
+type GeneratedSiteTranslationKey = SiteKey<keyof LucidCMS.TranslationKeys>;
+
+/** Keys from the project's and plugins' `<locale>.site.json` files, or any string until there are some. */
+export type SiteTranslationKey = [GeneratedSiteTranslationKey] extends [never]
+	? string
+	: GeneratedSiteTranslationKey;
 
 /** A chunk in Vite's build manifest, keyed by its source path relative to the site directory. */
 export type ViteManifestChunk = {

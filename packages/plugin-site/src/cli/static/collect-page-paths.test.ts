@@ -28,6 +28,7 @@ const createSite = async (templates: Record<string, string>) => {
 		config: siteConfig,
 		options: {},
 		data: null,
+		lookupTranslation: () => undefined,
 		loader: memoryLoader(templates),
 	});
 	const names = Object.keys(templates);

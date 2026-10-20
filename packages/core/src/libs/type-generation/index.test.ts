@@ -89,6 +89,12 @@ test("generates collection-aware client document types that lean on the public L
 			"custom.shared.key": "Cle partagee",
 		}),
 	);
+	await writeFile(
+		path.join(translationsDir, "fr.site.json"),
+		JSON.stringify({
+			"nav.home": "Accueil",
+		}),
+	);
 
 	const BannerBrick = new BrickBuilder("banner")
 		.addTab("content_tab")
@@ -211,8 +217,11 @@ test("generates collection-aware client document types that lean on the public L
 		expect(typesContent).toMatch(
 			/`server:\$\{Extract<keyof typeof translationSource1, string>\}`/,
 		);
+		expect(typesContent).toMatch(
+			/`site:\$\{Extract<keyof typeof translationSource3, string>\}`/,
+		);
 		expect(typesContent).toContain(
-			"interface CopyTranslationKeys extends Record<GeneratedCopyTranslationKey, true> {}",
+			"interface TranslationKeys extends Record<GeneratedTranslationKey, true> {}",
 		);
 		expect(typesContent).not.toContain('"admin:custom.admin.title": true;');
 		expect(typesContent).not.toContain('"server:custom.server.error": true;');

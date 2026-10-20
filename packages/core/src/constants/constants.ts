@@ -101,6 +101,8 @@ export default Object.freeze({
 	email: emailConstants,
 	i18n: {
 		renderedOutput: "i18n-translations.json",
+		/** Translation file names, `<locale>.<scope>.json`, such as `en.admin.json`. */
+		fileName: /^([^.]+)\.([a-z][a-z0-9-]*)\.json$/,
 	},
 	plugins: {
 		/** Plugin CLI build data, imported by server entries. */

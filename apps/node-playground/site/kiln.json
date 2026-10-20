@@ -16,6 +16,7 @@
 		"pageGreeting",
 		"redirect",
 		"richText",
+		"translate",
 		"vite",
 		"viteAsset"
 	],

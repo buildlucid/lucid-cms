@@ -4,6 +4,7 @@ import type {
 	TranslatableCopy,
 	TranslateCopy,
 	TranslateCopyOptions,
+	TranslationLookup,
 	TranslationStore,
 	Translator,
 } from "./types.js";
@@ -144,6 +145,9 @@ export const createTranslator = (props: {
 				store: props.store,
 				locale,
 			}),
+		lookup: ({ locale, ...lookup }: TranslationLookup & { locale?: string }) =>
+			props.store.lookup({ ...lookup, locale: locale ?? props.locale }),
+		scopeBundles: (scope: string) => props.store.scopeBundles(scope),
 		adminBundle: () => props.store.admin({ locale: props.locale }),
 		english: englishTranslate,
 	});

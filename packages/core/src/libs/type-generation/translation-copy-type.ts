@@ -4,11 +4,9 @@ import constants from "../../constants/constants.js";
 import type { ResourceFile } from "../resources/types.js";
 import type { TypeGenerationContribution } from "./types.js";
 
-const translationFilePattern = /^(.+)\.(admin|server)\.json$/;
-
 type TranslationTypeSource = {
 	identifier: string;
-	scope: "admin" | "server";
+	scope: string;
 	importPath: string;
 };
 
@@ -20,48 +18,25 @@ const toImportPath = (fromDir: string, filePath: string) => {
 	return relativePath.startsWith(".") ? relativePath : `./${relativePath}`;
 };
 
-const renderCopyKeyType = (
-	typeName: string,
-	prefix: "admin" | "server",
-	identifiers: string[],
-) => {
-	if (identifiers.length === 0) return `type ${typeName} = never;`;
-
-	const values = identifiers
+const renderTranslationKeyRegistry = (sources: TranslationTypeSource[]) => {
+	const values = sources
 		.map(
-			(identifier) =>
-				`\t| \`${prefix}:\${Extract<keyof typeof ${identifier}, string>}\``,
+			(source) =>
+				`\t| \`${source.scope}:\${Extract<keyof typeof ${source.identifier}, string>}\``,
 		)
 		.join("\n");
 
-	return `type ${typeName} =\n${values};`;
-};
-
-const renderCopyKeyRegistry = (sources: TranslationTypeSource[]) => {
-	const adminIdentifiers = sources
-		.filter((source) => source.scope === "admin")
-		.map((source) => source.identifier);
-	const serverIdentifiers = sources
-		.filter((source) => source.scope === "server")
-		.map((source) => source.identifier);
-
-	return `${renderCopyKeyType("GeneratedAdminCopyKey", "admin", adminIdentifiers)}
-
-${renderCopyKeyType("GeneratedServerCopyKey", "server", serverIdentifiers)}
-
-type GeneratedCopyTranslationKey = GeneratedAdminCopyKey | GeneratedServerCopyKey;
+	return `type GeneratedTranslationKey =
+${values};
 
 declare global {
 \tnamespace LucidCMS {
-\t\tinterface CopyTranslationKeys extends Record<GeneratedCopyTranslationKey, true> {}
+\t\tinterface TranslationKeys extends Record<GeneratedTranslationKey, true> {}
 \t}
 }`;
 };
 
-/**
- * Generates copy keys from the same resolved project and plugin files as the runtime.
- * Direct callers may omit files to use the project's default translations directory.
- */
+/** Generates `scope:key` types from the runtime's project and plugin files, defaulting to the project's translations directory when direct callers omit files. */
 const generateTranslationCopyTypes = async (props: {
 	projectRoot?: string;
 	files?: ResourceFile[];
@@ -85,9 +60,10 @@ const generateTranslationCopyTypes = async (props: {
 	const sources = [...new Map(files.map((file) => [file.path, file])).values()]
 		.sort((a, b) => a.path.localeCompare(b.path))
 		.flatMap((file, index): TranslationTypeSource[] => {
-			const match = path.basename(file.name).match(translationFilePattern);
-			const scope = match?.[2];
-			if (scope !== "admin" && scope !== "server") return [];
+			const scope = path
+				.basename(file.name)
+				.match(constants.i18n.fileName)?.[2];
+			if (!scope) return [];
 			return [
 				{
 					identifier: `translationSource${index}`,
@@ -104,7 +80,7 @@ const generateTranslationCopyTypes = async (props: {
 			(source) =>
 				`import type ${source.identifier} from "${source.importPath}";`,
 		),
-		declarations: [renderCopyKeyRegistry(sources)],
+		declarations: [renderTranslationKeyRegistry(sources)],
 		moduleAugmentations: [],
 	};
 };

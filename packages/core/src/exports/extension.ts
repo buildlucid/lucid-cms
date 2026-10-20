@@ -16,6 +16,7 @@ export {
 export { codecs } from "../libs/db/client/index.js";
 export { default as formatDocumentRoute } from "../libs/formatters/document-route.js";
 export {
+	formatTranslation,
 	hydrateAdminCopyDefaults,
 	isTranslatableCopy,
 } from "../libs/i18n/index.js";

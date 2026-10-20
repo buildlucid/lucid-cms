@@ -75,12 +75,17 @@ const loadSite = async (props: {
 	const cacheNamespace =
 		data?.kind === "build"
 			? data.buildId
-			: await hashTemplates(loader, templates);
+			: await hashTemplates(
+					loader,
+					templates,
+					props.context.translate.scopeBundles("site"),
+				);
 	const kilnProps = {
 		loader,
 		config: props.config,
 		options: props.options,
 		data,
+		lookupTranslation: props.context.translate.lookup,
 	};
 	const freshKiln = createSiteKiln(kilnProps);
 	const pageTemplates = [...templates].filter(isPageTemplate);

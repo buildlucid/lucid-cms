@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import z from "zod";
+import constants from "../../constants/constants.js";
 import LucidError from "../../utils/errors/lucid-error.js";
 import {
 	mergeTranslationBundles,
@@ -9,21 +10,20 @@ import {
 import type { TranslationBundles } from "./types.js";
 
 const translationFileSchema = z.record(z.string(), z.string());
-const translationFileNameRegex = /^(.+)\.(admin|server)\.json$/;
 
 const readTranslationFile = async (
 	filePath: string,
 ): Promise<TranslationBundles> => {
 	const entryName = path.basename(filePath);
-	const match = entryName.match(translationFileNameRegex);
+	const match = entryName.match(constants.i18n.fileName);
 	if (!match) {
 		throw new LucidError({
-			message: `Invalid translation file name "${entryName}". Expected "<locale>.admin.json" or "<locale>.server.json".`,
+			message: `Invalid translation file name "${entryName}". Expected "<locale>.<scope>.json", such as "en.admin.json" or "en.site.json".`,
 			data: { filePath },
 		});
 	}
 
-	const [, locale, scope] = match as [string, string, "admin" | "server"];
+	const [, locale, scope] = match as [string, string, string];
 	let parsed: Record<string, string>;
 	try {
 		parsed = translationFileSchema.parse(
@@ -39,12 +39,7 @@ const readTranslationFile = async (
 		});
 	}
 
-	return {
-		[locale]: {
-			admin: scope === "admin" ? parsed : {},
-			server: scope === "server" ? parsed : {},
-		},
-	};
+	return { [locale]: { admin: {}, server: {}, [scope]: parsed } };
 };
 
 /** Reads resolved translation files in their configured override order. */

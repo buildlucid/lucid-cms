@@ -1,3 +1,4 @@
+import { formatTranslation } from "@lucidcms/core/extension";
 import type { ResolvedLucidConfig, Toolkit } from "@lucidcms/core/types";
 import { decodePreviewFieldTarget } from "@lucidcms/preview-protocol";
 import { KilnRenderError, memoryLoader } from "@lucidkiln/core";
@@ -155,10 +156,20 @@ const siteConfig = createSiteConfig(
 	{ locales: ["en", "fr"] },
 	"production",
 );
+const siteTranslations: Record<string, Record<string, string>> = {
+	en: { "nav.home": "Home", "nav.blog": "Blog" },
+	fr: { "nav.home": "Accueil {{name}}" },
+};
 const kiln = createSiteKiln({
 	config: siteConfig,
 	options: {},
 	data: null,
+	lookupTranslation: ({ key, locale, data }) => {
+		const translation = siteTranslations[locale ?? "en"]?.[key];
+		return translation === undefined
+			? undefined
+			: formatTranslation(translation, data);
+	},
 	loader: memoryLoader({
 		"page.kiln": `{% set page = document("page", { filter: { _fullSlug: path }, include: ["bricks"] }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
 		"list.kiln": `{{ documentList("page").items|length }}{{ documentList("blog").items|length }}`,
@@ -168,6 +179,7 @@ const kiln = createSiteKiln({
 		"locales.kiln": `{% for locale in locales() %}{{ locale.code }}{% endfor %}`,
 		"locale.kiln": `{{ locale }}|{% include "locale-part" %}|{{ document("page", { filter: { _fullSlug: path }, locale: "en" }).fields.title }}`,
 		"locale-part.kiln": `{{ locale }}`,
+		"translate.kiln": `{{ translate("nav.home", { data: { name: "Ada" } }) }}|{{ translate("nav.blog") }}|{{ translate("nav.home", { locale: "en" }) }}|{{ translate("nav.missing", { fallback: "Hi {{name}}", data: { name: "Ada" } }) }}|{{ translate("nav.missing") }}`,
 		"wrong-locale.kiln": `{{ media(5, { locale: "de" }) }}`,
 		"island.kiln": `{% set page = document("page", { filter: { _fullSlug: path } }) %}{% island "islands/typed" with { image: media(5), page: page, brick: page.bricks[0] } %}{% endisland %}`,
 		"islands/typed.kiln": `{% props image: Media, page: Document, brick: Brick %}{{ image.title }}:{{ page.id }}:{{ brick.key }}`,
@@ -252,6 +264,12 @@ describe("site template functions", () => {
 		);
 	});
 
+	test("translate() reads the locale, then the site's default locale, then the fallback, then the key", async () => {
+		await expect(
+			render("translate.kiln", "/fr", { locale: "fr" }),
+		).resolves.toBe("Accueil Ada|Blog|Home|Hi Ada|nav.missing");
+	});
+
 	test("the locale global is the render's locale everywhere, and reads can ask for another of the site's", async () => {
 		await expect(render("locale.kiln", "/fr", { locale: "fr" })).resolves.toBe(
 			"fr|fr|Home",
@@ -271,6 +289,7 @@ describe("site template functions", () => {
 			config: siteConfig,
 			options: {},
 			data: null,
+			lookupTranslation: () => undefined,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
 				"video.kiln": `{% cache "video" %}{{ media(7).title }}{% endcache %}`,
@@ -368,6 +387,7 @@ describe("site template functions", () => {
 			config: siteConfig,
 			options: {},
 			data: null,
+			lookupTranslation: () => undefined,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
 				"cached.kiln": `{% cache "list" %}{{ documentList("page").items|length }}{{ documentList("blog").items|length }}{% endcache %}`,
@@ -413,6 +433,7 @@ describe("site kiln options", () => {
 			config: siteConfig,
 			options: { kiln: { functions: { pageCount } } },
 			data: null,
+			lookupTranslation: () => undefined,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
 				"count.kiln": `{% cache "count" %}{{ pageCount("!") }}{% endcache %}`,
@@ -438,6 +459,7 @@ describe("site kiln options", () => {
 				config: siteConfig,
 				options: { kiln: kilnOptions },
 				data: null,
+				lookupTranslation: () => undefined,
 				loader: memoryLoader({
 					"notice.kiln": `{{ notFound() }}`,
 					"shout.kiln": `{{ "hi"|upper }}`,

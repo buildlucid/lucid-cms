@@ -1,0 +1,4 @@
+{
+	"notFound.title": "Page introuvable",
+	"notFound.body": "Rien ne se trouve à {{path}}."
+}

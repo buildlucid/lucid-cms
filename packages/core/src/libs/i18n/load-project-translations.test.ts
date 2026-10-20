@@ -94,6 +94,26 @@ test("loads a single translation file source", async () => {
 	expect(bundles.es.server["test.file"]).toBe("Single file");
 });
 
+test("loads scopes beyond admin and server, and rejects other file names", async () => {
+	const source = path.join(projectRoot, "translations");
+	await mkdir(source);
+	await writeFile(
+		path.join(source, "en-GB.site.json"),
+		JSON.stringify({ "nav.home": "Home" }),
+	);
+
+	const bundles = await loadTranslationSources({
+		files: await collectResourceFiles(source),
+	});
+	expect(bundles["en-GB"].site["nav.home"]).toBe("Home");
+	expect(bundles["en-GB"].admin).toEqual({});
+
+	await writeFile(path.join(source, "en.json"), "{}");
+	await expect(
+		loadTranslationSources({ files: await collectResourceFiles(source) }),
+	).rejects.toThrow('Invalid translation file name "en.json"');
+});
+
 test("loads package sources from the project node_modules tree", async () => {
 	const packageRoot = path.join(
 		projectRoot,

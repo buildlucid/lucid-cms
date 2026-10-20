@@ -9,6 +9,8 @@ const translate = createTranslator({
 		defaultLocale: "en",
 		bundles: {},
 		resolve: ({ key }) => key,
+		lookup: () => undefined,
+		scopeBundles: () => ({}),
 		copy: (value) => {
 			if (value === undefined || typeof value === "string") return value;
 			return value.type === "lucid.literal" ? value.value : value.key;
