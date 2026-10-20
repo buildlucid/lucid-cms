@@ -20,14 +20,13 @@ const prepareEmailTemplates = async (props: {
 	try {
 		const renderedTemplates = await loadEmailTemplates(props);
 
-		await mkdir(props.config.build.outDir, { recursive: true });
-
-		const outputPath = path.join(
+		const directory = path.join(
 			props.config.build.outDir,
-			constants.email.renderedOutput,
+			constants.build.directory,
 		);
+		await mkdir(directory, { recursive: true });
 		await writeFileIfChanged(
-			outputPath,
+			path.join(directory, constants.build.dataFiles.emailTemplates),
 			JSON.stringify(renderedTemplates, null, 2),
 		);
 

@@ -182,7 +182,11 @@ test("prepares a translation store and writes the build artifact", async () => {
 
 	const artifact = JSON.parse(
 		await readFile(
-			path.join(outputPath, constants.i18n.renderedOutput),
+			path.join(
+				outputPath,
+				constants.build.directory,
+				constants.build.dataFiles.translations,
+			),
 			"utf-8",
 		),
 	);

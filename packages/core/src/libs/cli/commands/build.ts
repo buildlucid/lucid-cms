@@ -198,7 +198,11 @@ const buildCommand = async (options?: {
 			publicFiles: configRes.resources.files.public,
 		});
 		await writeFile(
-			path.resolve(configRes.config.build.outDir, constants.plugins.dataOutput),
+			path.resolve(
+				configRes.config.build.outDir,
+				constants.build.directory,
+				constants.build.dataFiles.pluginData,
+			),
 			JSON.stringify(pluginData),
 		);
 

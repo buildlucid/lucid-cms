@@ -1,4 +1,4 @@
-export const PLUGIN_KEY = "plugin-filesystem";
+export const PLUGIN_KEY = "@lucidcms/plugin-filesystem";
 export const LUCID_VERSION = "0.x.x";
 export const DEFAULT_UPLOAD_DIRECTORY = "uploads";
 export const FILE_SYSTEM_UPLOAD_PATH = "fs/upload";

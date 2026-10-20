@@ -1,3 +1,4 @@
+import { getBuildDataImportPaths } from "@lucidcms/core/build";
 import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
 import constants from "../constants.js";
 import type {
@@ -21,6 +22,7 @@ const prepareMainWorkerEntry = (
 	imports: CloudflareWorkerImport[];
 	exports: CloudflareWorkerExport[];
 } => {
+	const buildDataImports = getBuildDataImportPaths(".");
 	const imports: CloudflareWorkerImport[] = [
 		{
 			path: configArtifacts.config,
@@ -49,15 +51,15 @@ const prepareMainWorkerEntry = (
 			],
 		},
 		{
-			path: "./email-templates.json",
+			path: buildDataImports.emailTemplates,
 			default: "emailTemplates",
 		},
 		{
-			path: "./i18n-translations.json",
+			path: buildDataImports.translations,
 			default: "i18nTranslations",
 		},
 		{
-			path: "./plugin-data.json",
+			path: buildDataImports.pluginData,
 			default: "pluginData",
 		},
 		{

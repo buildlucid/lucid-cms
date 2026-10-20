@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
@@ -58,8 +58,13 @@ describe("renderMustacheTemplate", () => {
 test("loads the template artifact from build.outDir when templates are not injected", async () => {
 	const outDir = await mkdtemp(path.join(tmpdir(), "lucid-render-template-"));
 	try {
+		await mkdir(path.join(outDir, constants.build.directory));
 		await writeFile(
-			path.join(outDir, constants.email.renderedOutput),
+			path.join(
+				outDir,
+				constants.build.directory,
+				constants.build.dataFiles.emailTemplates,
+			),
 			JSON.stringify({
 				welcome: {
 					html: "Hello {{name}}",

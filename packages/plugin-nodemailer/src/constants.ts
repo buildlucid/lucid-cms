@@ -1,4 +1,4 @@
-export const PLUGIN_KEY = "plugin-nodemailer";
+export const PLUGIN_KEY = "@lucidcms/plugin-nodemailer";
 export const LUCID_VERSION = "0.x.x";
 export const PLUGIN_IDENTIFIER = "nodemailer";
 export const priorityHeaders = {

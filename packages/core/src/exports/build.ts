@@ -5,6 +5,7 @@ export { default as createCliDev } from "../libs/cli/services/create-cli-dev.js"
 export { default as processBuildArtifacts } from "../libs/cli/services/process-build-artifacts.js";
 export {
 	configArtifactEntries,
+	getBuildDataImportPaths,
 	getConfigArtifactImportPaths,
 } from "../libs/compile/config-artifacts.js";
 export { default as loadBuildProject } from "../libs/compile/load-build-project.js";

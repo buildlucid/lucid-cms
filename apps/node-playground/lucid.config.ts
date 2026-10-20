@@ -18,6 +18,7 @@ import { sitePlugin } from "@lucidcms/plugin-site";
 import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
+import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
 import { functions as siteFunctions } from "./site/functions/index.js";
 import diagnosticsRoute from "./src/admin/containers/DiagnosticsRoute/config.js";
 import publicRoute from "./src/admin/containers/PublicRoute/config.js";
@@ -228,6 +229,7 @@ export default defineConfig({
 			stylesheets: ["./src/admin/styles.css"],
 		},
 		plugins: [
+			sqliteKVPlugin(),
 			seoPlugin({ collections: [{ key: "page" }, { key: "settings" }] }),
 			workerQueuePlugin(),
 			typesensePlugin({

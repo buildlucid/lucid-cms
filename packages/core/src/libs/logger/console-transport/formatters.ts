@@ -142,6 +142,9 @@ export const formatStructuredValue = (value: unknown) => {
 	}
 };
 
+/** Shortens package-name owners and scopes, such as `@lucidcms/plugin-site`, to their last part. */
+const shortName = (value: string) => value.slice(value.lastIndexOf("/") + 1);
+
 /**
  * Builds a compact prefix shared by standard and HTTP console entries.
  */
@@ -159,14 +162,18 @@ export const createPrefix = (props: {
 		parts.push(colorize(props.timestamp, consoleColors.dim, props.colors));
 	}
 
-	parts.push(colorize(`[${props.owner}]`, consoleColors.info, props.colors));
+	parts.push(
+		colorize(`[${shortName(props.owner)}]`, consoleColors.info, props.colors),
+	);
 
 	if (props.label) {
 		parts.push(colorize(props.label, props.color ?? "", props.colors));
 	}
 
 	if (props.scope) {
-		parts.push(colorize(props.scope, consoleColors.dim, props.colors));
+		parts.push(
+			colorize(shortName(props.scope), consoleColors.dim, props.colors),
+		);
 	}
 
 	return parts.join(" ");

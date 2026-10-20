@@ -1,6 +1,7 @@
 import { unlink, writeFile } from "node:fs/promises";
 import {
 	configArtifactEntries,
+	getBuildDataImportPaths,
 	getConfigArtifactImportPaths,
 	prepareConfigArtifacts,
 } from "@lucidcms/core/build";
@@ -37,6 +38,7 @@ const buildCommand: BuildHandler = async ({
 			...buildArtifacts.compile,
 		};
 		const configArtifactImports = getConfigArtifactImportPaths(".");
+		const buildDataImports = getBuildDataImportPaths(".");
 
 		await build({
 			input: buildInput,
@@ -55,8 +57,8 @@ import configFactory, { configure } from "${configArtifactImports.config}";
 import { env as envSchema } from "${configArtifactImports.env}";
 import db from "${configArtifactImports.db}";
 import runtime from "${configArtifactImports.runtime}";
-import i18nTranslations from "./i18n-translations.json" with { type: "json" };
-import pluginData from "./plugin-data.json" with { type: "json" };
+import i18nTranslations from "${buildDataImports.translations}" with { type: "json" };
+import pluginData from "${buildDataImports.pluginData}" with { type: "json" };
 import { createLucidHost, logger, withResponseCleanup } from "@lucidcms/core/runtime";
 import { serve } from "@hono/node-server";
 import { createNodeJobScheduler, getRuntimeContext } from "@lucidcms/runtime-node/runtime";

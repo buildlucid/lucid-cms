@@ -153,7 +153,7 @@ export type LucidPluginDefinition = {
 	/** Additional resources supplied by this plugin. Use exported package subpaths or file URLs. */
 	sources?: ResourceSources;
 	/**
-	 * The unique key of the plugin.
+	 * Unique key using the package name for published plugins, such as `@acme/lucid-seo`, to avoid clashes, or a short project key such as `site-brand`.
 	 */
 	key: string;
 	/**

@@ -45,7 +45,8 @@ const renderMustacheTemplate: ServiceFn<
 		const templatesPath = path.resolve(
 			process.cwd(),
 			context.config.build.outDir,
-			constants.email.renderedOutput,
+			constants.build.directory,
+			constants.build.dataFiles.emailTemplates,
 		);
 		const renderedTemplates = JSON.parse(
 			await readFile(templatesPath, "utf-8"),

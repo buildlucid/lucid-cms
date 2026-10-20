@@ -1,4 +1,8 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
+import {
+	getBuildDataImportPaths,
+	getConfigArtifactImportPaths,
+} from "@lucidcms/core/extension";
 import type {
 	LucidPluginDefinition,
 	RuntimeBuildArtifactCustom,
@@ -47,21 +51,23 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 					};
 				}
 
+				const configImports = getConfigArtifactImportPaths(".");
+				const buildDataImports = getBuildDataImportPaths(".");
 				const imports: CloudflareWorkerImport[] = [
 					{
-						path: "./lucid/config.js",
+						path: configImports.config,
 						default: "configFactory",
 					},
 					{
-						path: "./lucid/env.js",
+						path: configImports.env,
 						exports: [{ name: "env", as: "envSchema" }],
 					},
 					{
-						path: "./lucid/db.js",
+						path: configImports.db,
 						default: "db",
 					},
 					{
-						path: "./lucid/runtime.js",
+						path: configImports.runtime,
 						default: "runtime",
 					},
 					{
@@ -81,11 +87,11 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 						],
 					},
 					{
-						path: "./email-templates.json",
+						path: buildDataImports.emailTemplates,
 						default: "emailTemplates",
 					},
 					{
-						path: "./i18n-translations.json",
+						path: buildDataImports.translations,
 						default: "i18nTranslations",
 					},
 				];

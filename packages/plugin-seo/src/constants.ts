@@ -1,4 +1,4 @@
-export const PLUGIN_KEY = "plugin-seo";
+export const PLUGIN_KEY = "@lucidcms/plugin-seo";
 export const LUCID_VERSION = "0.x.x";
 export const COMPONENTS_MODULE = "@lucidcms/plugin-seo/components";
 export const fields = {

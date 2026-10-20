@@ -100,13 +100,19 @@ export default Object.freeze({
 	},
 	email: emailConstants,
 	i18n: {
-		renderedOutput: "i18n-translations.json",
 		/** Translation file names, `<locale>.<scope>.json`, such as `en.admin.json`. */
 		fileName: /^([^.]+)\.([a-z][a-z0-9-]*)\.json$/,
 	},
-	plugins: {
-		/** Plugin CLI build data, imported by server entries. */
-		dataOutput: "plugin-data.json",
+	build: {
+		/** Folder in the build output, beside the server entry, for Lucid's generated config modules and data files. */
+		directory: "lucid",
+		/** JSON files written into `build.directory` for compiled runtimes to import. */
+		dataFiles: {
+			emailTemplates: "email-templates.json",
+			translations: "translations.json",
+			/** Plugin CLI build data, keyed by plugin key. */
+			pluginData: "plugin-data.json",
+		},
 	},
 	notifications: {
 		emailJob: { name: "core:send-notification-emails", version: 1 },
@@ -139,6 +145,7 @@ export default Object.freeze({
 		lucid: ".lucid",
 		/** The admin app's folder in the public build output, served at `paths.admin`. */
 		admin: "admin",
+		/** Plugins' own folders inside `.lucid`, as `pluginDirectory()` returns them. */
 		plugins: "plugins",
 		pluginPublic: "_plugins",
 	},

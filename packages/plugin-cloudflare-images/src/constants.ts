@@ -1,4 +1,4 @@
-export const PLUGIN_KEY = "cloudflare-images";
+export const PLUGIN_KEY = "@lucidcms/plugin-cloudflare-images";
 export const PROCESSOR_KEY = "cloudflare-images";
 export const LUCID_VERSION = "0.x.x";
 export const SUPPORTED_RUNTIME_ADAPTER_KEY = "cloudflare";

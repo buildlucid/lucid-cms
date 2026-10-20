@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import ts from "typescript";
+import constants from "../../constants/constants.js";
 import { LucidError } from "../../utils/errors/index.js";
 import {
 	type ConfigArtifactKey,
@@ -538,7 +539,9 @@ const prepareConfigArtifacts = async (props: {
 		]),
 	) as PreparedConfigArtifacts;
 
-	await mkdir(path.join(props.outputPath, "lucid"), { recursive: true });
+	await mkdir(path.join(props.outputPath, constants.build.directory), {
+		recursive: true,
+	});
 
 	await Promise.all(
 		Object.entries(artifacts).map(async ([key, filePath]) => {

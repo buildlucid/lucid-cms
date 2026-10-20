@@ -1,4 +1,4 @@
-export const PLUGIN_KEY = "cloudflare-queues";
+export const PLUGIN_KEY = "@lucidcms/plugin-cloudflare-queues";
 export const LUCID_VERSION = "0.x.x";
 export const ADAPTER_KEY = "cloudflare-queues";
 export const SUPPORTED_RUNTIME_ADAPTER_KEY = "cloudflare";

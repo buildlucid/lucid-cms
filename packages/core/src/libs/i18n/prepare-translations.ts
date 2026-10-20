@@ -21,9 +21,10 @@ export const writeTranslationArtifact = async (props: {
 	outputPath: string;
 }) => {
 	try {
-		await mkdir(props.outputPath, { recursive: true });
+		const directory = path.join(props.outputPath, constants.build.directory);
+		await mkdir(directory, { recursive: true });
 		await writeFileIfChanged(
-			path.join(props.outputPath, constants.i18n.renderedOutput),
+			path.join(directory, constants.build.dataFiles.translations),
 			JSON.stringify(props.translationStore.bundles, null, 2),
 		);
 	} catch (error) {

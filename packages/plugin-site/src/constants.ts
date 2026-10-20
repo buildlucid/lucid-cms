@@ -1,6 +1,6 @@
 import { pluginPublicPath } from "@lucidcms/core/extension";
 
-export const PLUGIN_KEY = "plugin-site";
+export const PLUGIN_KEY = "@lucidcms/plugin-site";
 export const LUCID_VERSION = "0.x.x";
 
 export const TEMPLATE_EXTENSION = ".kiln";
@@ -11,7 +11,6 @@ export const DEFAULT_STATIC_OUTPUT_DIRECTORY = "dist-site";
 
 /** Vite URL prefix reserved for site builds, like `/_plugins`, served by Vite in development and from `public/_assets` once built. */
 export const ASSETS_BASE = "/_assets/";
-export const VITE_CACHE_DIRECTORY = ".lucid/vite/site";
 /** Built asset names hold a content hash, so browsers and CDNs may keep them for a year. */
 export const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 export const CLOUDFLARE_RUNTIME = "cloudflare";

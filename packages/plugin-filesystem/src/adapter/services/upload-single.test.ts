@@ -59,9 +59,7 @@ describe("file-system upload metadata", () => {
 				extension: "svg",
 			},
 		});
-		await expect(
-			access(path.join(uploadDir, ".lucid", "file-system-meta.json")),
-		).rejects.toThrow();
+		await expect(access(path.join(uploadDir, ".lucid"))).rejects.toThrow();
 
 		const streamRes = await stream(options)({} as never, {
 			key: "public/uuid",

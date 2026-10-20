@@ -2,6 +2,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parentPort, workerData } from "node:worker_threads";
 import {
+	getBuildDataImportPaths,
 	getConfigPath,
 	loadBuildProject,
 	resolveConfigDefinition,
@@ -92,7 +93,10 @@ const getConfig = async (): Promise<{
 		});
 		const translationsModule = await import(
 			pathToFileURL(
-				path.join(path.dirname(configDir), "i18n-translations.json"),
+				path.resolve(
+					path.dirname(configDir),
+					getBuildDataImportPaths().translations,
+				),
 			).href,
 			{ with: { type: "json" } }
 		);

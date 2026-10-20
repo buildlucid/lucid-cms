@@ -1,7 +1,8 @@
 import { constants } from "node:fs";
-import { access, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { ensureLucidDirectoryExists } from "@lucidcms/core/extension";
+import { pluginDirectory } from "@lucidcms/core/extension";
+import { PLUGIN_KEY } from "../constants.js";
 
 type StoredFileMetadata = {
 	mimeType?: string | null;
@@ -10,10 +11,13 @@ type StoredFileMetadata = {
 
 type StoredMetadataIndex = Record<string, StoredFileMetadata>;
 
-const METADATA_FILE_NAME = "file-system-meta.json";
+const METADATA_FILE_NAME = "metadata.json";
 
-const getMetadataFilePath = async () =>
-	path.join(await ensureLucidDirectoryExists(), METADATA_FILE_NAME);
+const getMetadataFilePath = async () => {
+	const directory = pluginDirectory(PLUGIN_KEY);
+	await mkdir(directory, { recursive: true });
+	return path.join(directory, METADATA_FILE_NAME);
+};
 
 const readStoredMetadataIndex = async (
 	_uploadDir: string,

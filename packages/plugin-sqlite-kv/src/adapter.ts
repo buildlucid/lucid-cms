@@ -1,8 +1,9 @@
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import {
 	DEFAULT_KV_NAMESPACE,
-	ensureLucidDirectoryExists,
 	getKVNamespacePrefix,
+	pluginDirectory,
 	resolveKVKey,
 } from "@lucidcms/core/extension";
 import type {
@@ -20,6 +21,7 @@ import type {
 	ServiceContext,
 } from "@lucidcms/core/types";
 import Database from "better-sqlite3";
+import { PLUGIN_KEY } from "./constants.js";
 
 const MILLISECONDS_PER_SECOND = 1000;
 const CLEANUP_INTERVAL_MS = 5 * 60 * MILLISECONDS_PER_SECOND;
@@ -129,8 +131,9 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 			init: async () => {
 				if (database?.open) return;
 
-				const lucidDirectory = await ensureLucidDirectoryExists();
-				const databasePath = path.join(lucidDirectory, DATABASE_FILENAME);
+				const directory = pluginDirectory(PLUGIN_KEY);
+				await mkdir(directory, { recursive: true });
+				const databasePath = path.join(directory, DATABASE_FILENAME);
 				const nextDatabase = new Database(databasePath, {});
 
 				nextDatabase.pragma("journal_mode = WAL");

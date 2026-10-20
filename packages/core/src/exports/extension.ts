@@ -8,6 +8,10 @@ export {
 	isCollectionFieldLocalized,
 } from "../libs/collection/helpers/resolve-collection-localization.js";
 export { getTableNames as getCollectionTableNames } from "../libs/collection/schema/runtime/runtime-schema-selectors.js";
+export {
+	getBuildDataImportPaths,
+	getConfigArtifactImportPaths,
+} from "../libs/compile/config-artifacts.js";
 export { default as DatabaseAdapter } from "../libs/db/adapter-base.js";
 export {
 	createDatabaseAdapterCreator,
@@ -34,9 +38,9 @@ export {
 	createSignedMediaUrl,
 	validateSignedMediaUrl,
 } from "../libs/media-storage/signed-url.js";
+export { default as pluginDirectory } from "../libs/plugins/plugin-directory.js";
 export { default as pluginPublicPath } from "../libs/plugins/plugin-public-path.js";
 export { resolveRelatedDocumentVersionType } from "../services/documents/helpers/resolve-relation-version-type.js";
-export { ensureLucidDirectoryExists } from "../utils/helpers/lucid-directory.js";
 export {
 	buildDownloadContentDisposition,
 	getFileMetadata,

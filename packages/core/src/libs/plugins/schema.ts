@@ -7,7 +7,14 @@ const callback = <Callback>() =>
 
 export const PluginDefinitionSchema: z.ZodType<LucidPluginDefinition> =
 	z.strictObject({
-		key: z.string().trim().min(1),
+		// Keys appear in folder and URL paths, such as `.lucid/plugins/<key>`.
+		key: z
+			.string()
+			.trim()
+			.regex(
+				/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/,
+				'Use the package name, such as "@acme/lucid-seo", or lowercase letters, numbers, ".", "_" and "-".',
+			),
 		lucid: z.string().trim().min(1),
 		sources: ResourceSourcesSchema.optional(),
 		defaults: z

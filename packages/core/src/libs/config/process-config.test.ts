@@ -538,3 +538,16 @@ test("sender defaults preserve each explicit override", async () => {
 		name: "Our team",
 	});
 });
+
+test("rejects plugin keys that aren't package names or simple keys", async () => {
+	await expect(
+		processConfig(
+			{
+				...config,
+				secrets: "a".repeat(64),
+				plugins: [{ key: "../escape", lucid: "*" }],
+			},
+			{ resolvedDb: createAdapter("request") },
+		),
+	).rejects.toThrow("Use the package name");
+});
