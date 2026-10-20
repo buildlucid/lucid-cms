@@ -1,40 +1,105 @@
-import { KilnRenderError, KilnSyntaxError } from "@lucidkiln/core";
+import {
+	KilnRenderError,
+	KilnSyntaxError,
+	type TemplateLocation,
+} from "@lucidkiln/core";
+import { ASSETS_BASE } from "../constants.js";
+import type { SiteCliData } from "../types.js";
 import escapeHtml from "../utils/escape-html.js";
+import createErrorDocument from "./create-error-document.js";
 
-const describeError = (error: unknown): string[] => {
-	if (error instanceof KilnRenderError) {
-		return [
-			error.message,
-			error.cause instanceof Error ? (error.cause.stack ?? "") : "",
-		];
-	}
-	if (error instanceof KilnSyntaxError) {
-		return [error.message];
-	}
-	return [
-		error instanceof Error ? (error.stack ?? error.message) : String(error),
-	];
+type ErrorReport = {
+	label: string;
+	title: string;
+	/** Where the error happened, then each template that included the one before it. */
+	locations: string[];
+	frame?: string;
+	stack?: string;
 };
 
-/** Includes source code and stack traces; use only in development. */
-const createDevErrorPage = (error: unknown) => {
-	const sections = describeError(error)
-		.filter((section) => section !== "")
-		.map((section) => `<pre>${escapeHtml(section)}</pre>`)
+const formatLocation = (location: TemplateLocation) =>
+	location.line > 0
+		? `${location.template}:${location.line}:${location.column}`
+		: location.template;
+
+const describeError = (error: unknown): ErrorReport => {
+	if (error instanceof KilnRenderError) {
+		return {
+			label: "Render error",
+			title: error.detail,
+			locations: [
+				formatLocation(error),
+				...error.templateStack.slice(0, -1).toReversed().map(formatLocation),
+			],
+			frame: error.frame,
+			stack: error.cause instanceof Error ? error.cause.stack : undefined,
+		};
+	}
+	if (error instanceof KilnSyntaxError) {
+		const [first] = error.diagnostics;
+		// Kiln's message is a summary line, then the first problem's code frame and a count of the rest.
+		const [, ...frame] = error.message.split("\n\n");
+		return {
+			label: "Syntax error",
+			title: first?.message ?? error.message,
+			locations: first
+				? [formatLocation({ template: first.template, ...first.start })]
+				: [],
+			frame: frame.join("\n\n"),
+		};
+	}
+	if (error instanceof Error) {
+		return {
+			label: "Error",
+			title: error.message,
+			locations: [],
+			stack: error.stack,
+		};
+	}
+	return { label: "Error", title: String(error), locations: [] };
+};
+
+/** Brightens the frame's marked line and its carets. */
+const highlightFrame = (frame: string) =>
+	frame
+		.split("\n")
+		.map((line) => {
+			const html = escapeHtml(line);
+			if (line.startsWith(">")) return `<span class="hit">${html}</span>`;
+			if (/^\s*\|\s*\^/.test(line)) return `<span class="caret">${html}</span>`;
+			return html;
+		})
 		.join("\n");
 
-	return `<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Render error</title>
-		<style>body{font:14px/1.5 system-ui,sans-serif;margin:2rem;color:#1c1c1c}pre{background:#f4f4f2;padding:1rem;overflow:auto;white-space:pre-wrap}</style>
-	</head>
-	<body>
-		<h1>The page failed to render</h1>
-		${sections}
-	</body>
-</html>`;
+/** Displays source code and stack traces for development use only, with automatic reloads when Vite's dev server runs. */
+const createDevErrorPage = (props: {
+	error: unknown;
+	data: SiteCliData | null;
+}) => {
+	const report = describeError(props.error);
+	const hmr = props.data?.kind === "dev" && props.data.vite;
+	const locations = report.locations
+		.map((location) => `<code>${escapeHtml(location)}</code>`)
+		.join(" via ");
+
+	return createErrorDocument({
+		title: report.label,
+		head: hmr
+			? `<script type="module" src="${ASSETS_BASE}@vite/client"></script>`
+			: "",
+		body: [
+			`<p class="label">500 · ${report.label}</p>`,
+			`<h1>${escapeHtml(report.title)}</h1>`,
+			locations ? `<p>${locations}</p>` : "",
+			report.frame ? `<pre>${highlightFrame(report.frame)}</pre>` : "",
+			report.stack
+				? `<details${report.frame ? "" : " open"}><summary>Stack trace</summary><pre>${escapeHtml(report.stack)}</pre></details>`
+				: "",
+			hmr ? "<footer>This page reloads when you save a change.</footer>" : "",
+		]
+			.filter((section) => section !== "")
+			.join("\n"),
+	});
 };
 
 export default createDevErrorPage;

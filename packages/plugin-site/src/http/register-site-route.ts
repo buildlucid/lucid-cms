@@ -12,11 +12,13 @@ import createSiteMarkup from "../preview/create-site-markup.js";
 import { pageMarkup } from "../preview/page-markup.js";
 import readPreview from "../preview/read-preview.js";
 import getRouteParams from "../router/get-route-params.js";
-import createSiteLoader from "../site/create-site-loader.js";
+import createSiteLoader, { type Site } from "../site/create-site-loader.js";
+import readCliData from "../site/read-cli-data.js";
 import type { SitePluginOptionsInternal, SiteState } from "../types.js";
 import decode from "../utils/decode.js";
 import isLucidPath from "../utils/is-lucid-path.js";
 import normalizePath from "../utils/normalize-path.js";
+import createDevErrorPage from "./create-dev-error-page.js";
 import readRequestLocale from "./read-request-locale.js";
 import renderIsland from "./render-island.js";
 import renderPage from "./render-page.js";
@@ -78,7 +80,22 @@ const registerSiteRoute =
 				if ("response" in previewResult) return previewResult.response;
 				const { preview } = previewResult;
 
-				const site = await getSite({ context });
+				const development = context.runtimeContext?.compiled === false;
+				let site: Site;
+				try {
+					site = await getSite({ context });
+				} catch (error) {
+					// Show site-loading failures, including invalid page exports, as development error pages.
+					if (!development) throw error;
+					logger.error({
+						scope: PLUGIN_KEY,
+						event: "plugin-site.load.failed",
+						message: "Failed to load the site",
+						error,
+					});
+					const data = readCliData(context.runtimeContext);
+					return hono.html(createDevErrorPage({ error, data }), 500);
+				}
 				const { locale, vary } = readRequestLocale(hono, site, path);
 				// Caches must keep a copy per value of whatever chose the locale.
 				if (vary.length > 0)
@@ -95,7 +112,6 @@ const registerSiteRoute =
 					footerWritten: false,
 				});
 
-				const development = context.runtimeContext?.compiled === false;
 				try {
 					const match = findRoute(site.router, "GET", pathname);
 					if (!match) throw new SiteNotFoundError();

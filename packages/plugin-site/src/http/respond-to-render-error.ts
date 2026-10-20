@@ -48,7 +48,8 @@ const respondToRenderError = async (props: {
 		status: 500,
 	});
 	if (page) return page;
-	if (props.development) return hono.html(createDevErrorPage(error), 500);
+	if (props.development)
+		return hono.html(createDevErrorPage({ error, data: site.data }), 500);
 	throw error;
 };
 
