@@ -1,15 +1,10 @@
 import type {
-	CollectionDocument as CoreCollectionDocument,
 	CollectionDocumentTranslations as CoreCollectionDocumentTranslations,
 	DocumentBrick as CoreDocumentBrick,
 	RelationFieldValue as CoreRelationFieldValue,
 } from "@lucidcms/core/types";
 import { expectTypeOf, test } from "vitest";
-import {
-	createClient,
-	createDocumentView,
-	createDocumentViews,
-} from "./index.js";
+import { createClient } from "./index.js";
 import { createDocumentsClient } from "./resources/documents.js";
 import type {
 	CollectionDocument,
@@ -20,6 +15,8 @@ import type {
 	CollectionDocumentTranslations,
 	CollectionDocumentVersion,
 	CollectionDocumentVersionKey,
+	ContentDocument,
+	ContentRelatedDocument,
 	DocumentBrick,
 	DocumentMultipleInclude,
 	DocumentSingleInclude,
@@ -30,7 +27,6 @@ import type {
 	FilterObject,
 	FilterOperator,
 	LucidClient,
-	Refs,
 	RelationFieldValue,
 } from "./types.js";
 
@@ -213,67 +209,39 @@ test("collection documents narrow to generated plain field and brick types", () 
 						createdAt: string | null;
 						updatedAt: string | null;
 						createdBy: number | null;
+						createdByRunId: string | null;
 					} | null
 				>;
 				createdAt: string | null;
 				updatedAt: string | null;
 				createdBy: number | null;
 				updatedBy: number | null;
+				createdByRunId: string | null;
+				updatedByRunId: string | null;
 		  }
 		| undefined
 	>();
 });
 
-test("document helpers accept toolkit collection documents without widening fields", () => {
-	expectTypeOf<
-		CoreCollectionDocument<"page">["collectionKey"]
-	>().toEqualTypeOf<"page">();
+test("content documents fill in references by field type and read in one locale", () => {
+	type Page = ContentDocument<"page", true>;
 
-	const wrapDocument = (document: CoreCollectionDocument<"page">) =>
-		createDocumentView({ document });
-
-	expectTypeOf<ReturnType<typeof wrapDocument>>().toMatchTypeOf<{
-		collectionKey: "page";
-		field: (key: "page_title") => {
-			value: () => CoreCollectionDocumentTranslations<string | null>;
-		};
+	expectTypeOf<Page["fields"]["page_title"]>().toEqualTypeOf<string | null>();
+	expectTypeOf<Page["fields"]["related_page"]>().toEqualTypeOf<
+		ContentRelatedDocument<"page", true>[]
+	>();
+	expectTypeOf<Page["fields"]["sections"]>().toEqualTypeOf<
+		Array<{ heading: string | null }>
+	>();
+	expectTypeOf<NonNullable<Page["bricks"]>[number]["fields"]>().toEqualTypeOf<{
+		title: string | null;
 	}>();
-});
-
-test("createDocumentView accepts optional toolkit documents for direct response wrapping", () => {
-	const page = createDocumentView({
-		document: undefined as CoreCollectionDocument<"page"> | undefined,
-		locale: "en",
-	});
-
-	expectTypeOf(page).toMatchTypeOf<
-		| {
-				collectionKey: "page";
-				field: (key: "page_title") => {
-					value: () => string | null | undefined;
-				};
-		  }
-		| undefined
-	>();
-	expectTypeOf(page?.field("page_title").value()).toEqualTypeOf<
-		string | null | undefined
-	>();
-});
-
-test("createDocumentViews preserves toolkit document and locale types", () => {
-	const pages = createDocumentViews({
-		documents: [] as Array<CoreCollectionDocument<"page">>,
-		locale: "en",
-	});
-
-	expectTypeOf(pages).toMatchTypeOf<
-		Array<{
-			collectionKey: "page";
-			field: (key: "page_title") => {
-				value: () => string | null | undefined;
-			};
-		}>
-	>();
+	expectTypeOf<
+		NonNullable<NonNullable<Page["fixed"]>["seo"]>["fields"]
+	>().toEqualTypeOf<{ canonical_url: string | null }>();
+	expectTypeOf<
+		ContentDocument<"page">["fields"]["page_title"]["fr"]
+	>().toEqualTypeOf<string | null>();
 });
 
 test("document client methods infer the collection key through the response type", () => {
@@ -298,7 +266,7 @@ test("document client methods infer the collection key through the response type
 	>();
 });
 
-test("document results expose typed data and shared refs directly", () => {
+test("document results expose typed data directly", () => {
 	type SingleSuccess = Extract<
 		DocumentsGetSingleResponse<"page">,
 		{ error: undefined }
@@ -308,28 +276,27 @@ test("document results expose typed data and shared refs directly", () => {
 		{ error: undefined }
 	>;
 	expectTypeOf<SingleSuccess["data"]>().toEqualTypeOf<
-		CollectionDocument<"page">
+		ContentDocument<"page">
 	>();
 	expectTypeOf<MultipleSuccess["data"]>().toEqualTypeOf<
-		Array<CollectionDocument<"page">>
+		Array<ContentDocument<"page">>
 	>();
-	expectTypeOf<SingleSuccess["refs"]>().toEqualTypeOf<Refs | undefined>();
 	expectTypeOf<SingleSuccess["response"]>().toEqualTypeOf<Response>();
+});
 
-	const wrapResult = (result: DocumentsGetSingleResponse<"page">) =>
-		createDocumentView({
-			document: result.data,
-			refs: result.refs,
-			locale: "en",
-		});
-	expectTypeOf<ReturnType<typeof wrapResult>>().toMatchTypeOf<
-		| {
-				collectionKey: "page";
-				field: (key: "page_title") => {
-					value: () => string | null | undefined;
-				};
-		  }
-		| undefined
+test("document reads with a locale return localized documents", () => {
+	const client = createDocumentsClient({
+		request: async () => ({}) as never,
+	});
+	const response = client.getSingle({
+		collectionKey: "page",
+		version: "latest",
+		locale: "fr",
+	});
+	type Success = Extract<Awaited<typeof response>, { error: undefined }>;
+
+	expectTypeOf<Success["data"]>().toEqualTypeOf<
+		ContentDocument<"page", true>
 	>();
 });
 
@@ -437,4 +404,21 @@ test("document client methods narrow version from the collection key", () => {
 			query: { include: ["bricks"] },
 		}),
 	).toEqualTypeOf<Promise<DocumentsGetMultipleResponse<"page">>>();
+});
+
+test("document reads with a locale that may be undefined may return either shape", () => {
+	const client = createDocumentsClient({
+		request: async () => ({}) as never,
+	});
+	const locale = undefined as string | undefined;
+	const response = client.getSingle({
+		collectionKey: "page",
+		version: "latest",
+		locale,
+	});
+	type Success = Extract<Awaited<typeof response>, { error: undefined }>;
+
+	expectTypeOf<Success["data"]>().toEqualTypeOf<
+		ContentDocument<"page", boolean>
+	>();
 });

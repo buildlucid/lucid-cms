@@ -76,11 +76,6 @@ export type CollectionDocumentLocaleCode<
 	? Extract<CollectionDocumentLocaleCodesByCollection[TCollectionKey], string>
 	: string;
 
-export type CollectionDocumentTranslations<
-	TValue,
-	TCollectionKey extends string = string,
-> = Record<CollectionDocumentLocaleCode<TCollectionKey>, TValue>;
-
 type ResolveCollectionDocumentFields<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentFieldKey
 		? CollectionDocumentFieldsByCollection[TCollectionKey]
@@ -111,6 +106,10 @@ export type CollectionDocumentMeta<
 	updatedAt: string | null;
 	createdBy: number | null;
 	updatedBy: number | null;
+	/** The agent run that acted for createdBy. */
+	createdByRunId: string | null;
+	/** The agent run that acted for updatedBy. */
+	updatedByRunId: string | null;
 };
 
 export interface CollectionDocument<
@@ -128,14 +127,22 @@ export interface CollectionDocument<
 }
 
 export type {
-	DocumentBrickFilter,
-	DocumentBrickView,
-	DocumentFieldGroupView,
-	DocumentFieldView,
-	DocumentView,
-	DocumentViewOptions,
-	PreviewFieldAttributes,
-} from "./helpers/documents/types.js";
+	CollectionDocumentTranslations,
+	ContentBrick,
+	ContentDocument,
+	ContentDocumentMeta,
+	ContentFields,
+	ContentLocaleInput,
+	ContentMedia,
+	ContentRelatedDocument,
+	ContentRoute,
+	ContentUser,
+	IsLocalized,
+	LocalizedDocumentRoute,
+	LocalizedMedia,
+	LocalizedUser,
+	MediaListItem,
+} from "@lucidcms/types";
 
 export type {
 	AccountGetInput,
@@ -183,8 +190,8 @@ export type {
 	CollectionDocumentVersionKey,
 	CollectionDocumentVersionKeysByCollection,
 	CollectionDocumentVersionsByCollection,
+	ContentDocumentInclude,
 	DocumentMultipleInclude,
-	DocumentRefInclude,
 	DocumentSingleInclude,
 	DocumentsGetMultipleQuery,
 	DocumentsGetSingleQuery,

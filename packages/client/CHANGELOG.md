@@ -1,5 +1,12 @@
 # @lucidcms/client
 
+## v0.6.0 (unreleased)
+
+- Document responses now come with their references filled in, instead of `refs`.
+- Added `locale`, `fallbackLocale` and `depth` options to reads.
+- Added `include: ["transcripts"]` to `media.getMultiple` for audio transcripts.
+- Removed `createDocumentView`, `createDocumentViews` and `toolbarFromToolkit`.
+
 ## v0.5.0
 
 - Document responses now expose shared refs at the response level, and `asDocument` and `asDocuments` now accept one object containing the document data and refs.

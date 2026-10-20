@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { createToolbarAttributes } from "./attributes.js";
-import { toolbarFromToolkit } from "./toolkit.js";
 
 const activePreview = {
 	kind: "preview",
@@ -50,57 +49,6 @@ describe("createToolbarAttributes", () => {
 			"preview-token": activePreview.token,
 			"preview-expires-at": activePreview.expiresAt,
 			"preview-exit-href": "/published",
-		});
-	});
-});
-
-describe("toolbarFromToolkit", () => {
-	it("adapts response bags without leaking them into the generic API", () => {
-		expect(
-			toolbarFromToolkit({
-				authentication: { data: { authenticated: false } },
-				document: {},
-				preview: { data: activePreview },
-			}),
-		).toMatchObject({
-			"auth-status": "unauthenticated",
-			preview: "perspective",
-			"preview-token": activePreview.token,
-		});
-	});
-
-	it("reads the document from the toolkit response payload", () => {
-		expect(
-			toolbarFromToolkit({
-				authentication: { data: { authenticated: true } },
-				document: {
-					data: {
-						document: {
-							collectionKey: "page",
-							id: 42,
-							version: "published",
-						},
-					},
-				},
-				preview: { data: { kind: "published" } },
-			}),
-		).toMatchObject({
-			"edit-collection": "page",
-			"edit-document-id": 42,
-			"edit-version": "published",
-		});
-	});
-
-	it("falls back to browser resolution for unavailable responses", () => {
-		expect(
-			toolbarFromToolkit({
-				authentication: {},
-				document: {},
-				preview: {},
-			}),
-		).toEqual({
-			"auth-status": "auto",
-			preview: "auto",
 		});
 	});
 });

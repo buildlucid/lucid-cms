@@ -59,6 +59,7 @@ describe("@lucidcms/client", () => {
 			collectionKey: "page",
 			version: "latest",
 			preview: "a".repeat(43),
+			depth: 2,
 			query: {
 				filter: {
 					_fullSlug: {
@@ -89,7 +90,7 @@ describe("@lucidcms/client", () => {
 						},
 					},
 				},
-				include: ["bricks", "refs.documents", "meta"],
+				include: ["bricks", "meta"],
 			},
 		});
 
@@ -102,12 +103,13 @@ describe("@lucidcms/client", () => {
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page?filter%5B_fullSlug%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&filter%5B_author._first_name%5D=Will&filter%5B_author.people._surname%3Astarts-with%5D=Yal&include=bricks%2Crefs.documents%2Cmeta",
+			"/document/page?filter%5B_fullSlug%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&filter%5B_author._first_name%5D=Will&filter%5B_author.people._surname%3Astarts-with%5D=Yal&include=bricks%2Cmeta",
 		);
 		expect(new URL(String(url)).searchParams.get("preview")).toBe(
 			"a".repeat(43),
 		);
 		expect(new URL(String(url)).searchParams.get("version")).toBe("latest");
+		expect(new URL(String(url)).searchParams.get("depth")).toBe("2");
 		expect(new URL(String(url)).searchParams.has("versionId")).toBe(false);
 		expect(new Headers(init?.headers).get("authorization")).toBe(
 			"ApiKey client-key",
@@ -225,7 +227,7 @@ describe("@lucidcms/client", () => {
 			collectionKey: "page",
 			version: "latest",
 			query: {
-				include: ["refs.documents", "meta"],
+				include: ["meta"],
 				sort: [
 					{ key: "updatedAt", direction: "asc" },
 					{ key: "_pageTitle", direction: "desc" },
@@ -259,15 +261,11 @@ describe("@lucidcms/client", () => {
 		const secondRequestUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
 		expect(firstRequestUrl.pathname).toBe("/api/v1/content/documents/page");
 		expect(firstRequestUrl.searchParams.get("version")).toBe("latest");
-		expect(firstRequestUrl.searchParams.get("include")).toBe(
-			"refs.documents,meta",
-		);
+		expect(firstRequestUrl.searchParams.get("include")).toBe("meta");
 		expect(firstRequestUrl.searchParams.get("sort")).toBe(
 			"updatedAt,-_pageTitle",
 		);
-		expect(secondRequestUrl.searchParams.get("include")).toBe(
-			"refs.documents,meta",
-		);
+		expect(secondRequestUrl.searchParams.get("include")).toBe("meta");
 		expect(secondRequestUrl.searchParams.get("sort")).toBe(
 			"updatedAt,-_pageTitle",
 		);

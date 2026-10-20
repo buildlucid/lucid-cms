@@ -1,5 +1,5 @@
 ---
-import { toolbarFromToolkit } from "@lucidcms/client/toolbar";
+import { createToolbarAttributes } from "@lucidcms/client/toolbar";
 import "../index.css";
 import getLucidData, { resolvePageLocale } from "../services/lucid-data";
 
@@ -13,46 +13,40 @@ if (!locale) {
 	return Astro.redirect(`${redirectPath}${Astro.url.search}`);
 }
 
-const result = await getLucidData({
-	fullSlug: requestedFullSlug,
-	locale,
-	astro: Astro,
-});
+const { page, blogs, preview, authenticated, isPreviewError, isBlogError } =
+	await getLucidData({ fullSlug: requestedFullSlug, locale, astro: Astro });
 
-const titleField = result.document?.field("title");
-const summaryField = result.document?.field("summary");
-const fullSlugField = result.document?.field("fullSlug");
-const slugField = result.document?.field("slug");
-const contentBrick = result.document?.brick("content");
-const brickHeadingField = contentBrick?.field("heading");
-const sectionHeadingField = contentBrick
-	?.field("sections")
-	.groups()[0]
-	?.field("sectionHeading");
+const contentBrick = page?.bricks?.find((brick) => brick.key === "content");
+const updatedAt = page?.meta?.updatedAt;
 
-const pageFullSlug = fullSlugField?.value();
 const alternateLocale = locale === "en" ? "fr" : "en";
-const alternateFullSlug = fullSlugField?.value({ locale: alternateLocale });
-const alternateLocaleHref = alternateFullSlug || `/${alternateLocale}`;
+const alternateLocaleHref =
+	page?.route?.alternates[alternateLocale] || `/${alternateLocale}`;
 const alternateLocaleLabel = alternateLocale === "en" ? "English" : "Français";
 const localeRoot = `/${locale}`;
 
-const blogCards = result.blogs.map((blog) => {
-	const title = blog.field("title");
-	const image = blog.field("image").ref("media");
+const documentRows = [
+	["Title", page?.fields.title],
+	["Summary", page?.fields.summary],
+	["Slug", page?.fields.slug],
+	["Full slug", page?.route?.path],
+	["Brick heading", contentBrick?.fields.heading],
+	["Repeater heading", contentBrick?.fields.sections[0]?.sectionHeading],
+	[
+		"Updated",
+		updatedAt
+			? new Date(updatedAt).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", {
+					dateStyle: "medium",
+					timeStyle: "short",
+				})
+			: undefined,
+	],
+];
 
-	return {
-		id: blog.id,
-		title: title.value() || "Untitled blog",
-		titleAttributes: title.preview(),
-		imageUrl: image?.file.url,
-	};
-});
-
-const toolbarAttributes = toolbarFromToolkit({
-	authentication: result.raw.authentication,
-	document: result.raw.document,
-	preview: result.raw.preview,
+const toolbarAttributes = createToolbarAttributes({
+	document: page,
+	authentication: authenticated ?? "auto",
+	preview: preview ?? "auto",
 });
 ---
 
@@ -66,13 +60,11 @@ const toolbarAttributes = toolbarFromToolkit({
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
-		{(result.raw.preview.data?.kind === "preview" || result.isPreviewError) && (
+		{(preview?.kind === "preview" || isPreviewError) && (
 			<meta name="referrer" content="no-referrer" />
 		)}
 		<title>
-			{titleField?.value()
-				? `${titleField.value()} | Lucid CMS`
-				: "Lucid CMS"}
+			{page?.fields.title ? `${page.fields.title} | Lucid CMS` : "Lucid CMS"}
 		</title>
 	</head>
 	<body>
@@ -115,19 +107,19 @@ const toolbarAttributes = toolbarFromToolkit({
 					<section class="welcome-card">
 						<p class="eyebrow">Astro + Cloudflare</p>
 						<h1 class="welcome-title">
-							{result.isPreviewError
+							{isPreviewError
 								? "This preview link is unavailable."
-								: result.document
+								: page
 									? "Your Lucid page is live."
 									: "Create your first Lucid page."}
 						</h1>
 						<p class="welcome-copy">
-							{result.isPreviewError ? (
+							{isPreviewError ? (
 								<>The preview link is invalid or has expired. Create a new one in Lucid.</>
-							) : result.document ? (
+							) : page ? (
 								<>
 									This route is rendering your <code>page</code> document from
-									<code>{pageFullSlug || "/"}</code>. Update it in Lucid and refresh
+									<code>{page?.route?.path || "/"}</code>. Update it in Lucid and refresh
 									to see the latest content here.
 								</>
 							) : (
@@ -150,71 +142,15 @@ const toolbarAttributes = toolbarFromToolkit({
 						</div>
 					</section>
 
-					{result.document && (
+					{page && (
 						<section class="content-card">
 							<div class="document-panel">
-								<div class="document-row">
-									<span class="document-label">Title</span>
-									<p class="document-value" {...(titleField?.preview() ?? {})}>
-										{titleField?.value() || "Not set"}
-									</p>
-								</div>
-
-								<div class="document-row">
-									<span class="document-label">Summary</span>
-									<p class="document-value" {...(summaryField?.preview() ?? {})}>
-										{summaryField?.value() || "Not set"}
-									</p>
-								</div>
-
-								<div class="document-row">
-									<span class="document-label">Slug</span>
-									<p class="document-value">
-										{slugField?.value() || "Not set"}
-									</p>
-								</div>
-
-								<div class="document-row">
-									<span class="document-label">Full slug</span>
-									<p class="document-value">
-										{pageFullSlug || "Not set"}
-									</p>
-								</div>
-
-								<div class="document-row">
-									<span class="document-label">Brick heading</span>
-									<p
-										class="document-value"
-										{...(brickHeadingField?.preview() ?? {})}
-									>
-										{brickHeadingField?.value() || "Not set"}
-									</p>
-								</div>
-
-								<div class="document-row">
-									<span class="document-label">Repeater heading</span>
-									<p
-										class="document-value"
-										{...(sectionHeadingField?.preview() ?? {})}
-									>
-										{sectionHeadingField?.value() || "Not set"}
-									</p>
-								</div>
-
-								<div class="document-row">
-									<span class="document-label">Created</span>
-									<p class="document-value">
-										{result.document.raw.createdAt
-											? new Date(result.document.raw.createdAt).toLocaleString(
-													locale === "fr" ? "fr-FR" : "en-GB",
-													{
-														dateStyle: "medium",
-														timeStyle: "short",
-													},
-												)
-											: "Not available"}
-									</p>
-								</div>
+								{documentRows.map(([label, value]) => (
+									<div class="document-row">
+										<span class="document-label">{label}</span>
+										<p class="document-value">{value || "Not set"}</p>
+									</div>
+								))}
 							</div>
 						</section>
 					)}
@@ -225,19 +161,19 @@ const toolbarAttributes = toolbarFromToolkit({
 							<h2 id="blogs-heading">Latest blogs</h2>
 						</div>
 
-						{result.isBlogError ? (
+						{isBlogError ? (
 							<p class="blogs-empty">The blogs could not be loaded.</p>
-						) : blogCards.length > 0 ? (
+						) : blogs.length > 0 ? (
 							<div class="blogs-grid">
-								{blogCards.map((blog) => (
+								{blogs.map((blog) => (
 									<article class="blog-card" data-document-id={blog.id}>
-										{blog.imageUrl ? (
-											<img src={blog.imageUrl} alt="" loading="lazy" />
+										{blog.fields.image[0] ? (
+											<img src={blog.fields.image[0].file.url} alt="" loading="lazy" />
 										) : (
 											<div class="blog-card-placeholder" aria-hidden="true" />
 										)}
 										<div class="blog-card-overlay">
-											<h3 {...blog.titleAttributes}>{blog.title}</h3>
+											<h3>{blog.fields.title || "Untitled blog"}</h3>
 										</div>
 									</article>
 								))}

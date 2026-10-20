@@ -1,5 +1,3 @@
-import type { RefResource } from "@lucidcms/types";
-
 export type FilterValue =
 	| string
 	| string[]
@@ -105,9 +103,10 @@ export type CollectionDocumentVersionKey<
 	? CollectionDocumentVersionKeysByCollection[TCollectionKey]
 	: DefaultCollectionDocumentVersionKey;
 
-export type DocumentRefInclude = "refs" | `refs.${RefResource}`;
-export type DocumentSingleInclude = "bricks" | "meta" | DocumentRefInclude;
-export type DocumentMultipleInclude = "bricks" | "meta" | DocumentRefInclude;
+/** Optional document sections returned by content reads. */
+export type ContentDocumentInclude = "bricks" | "meta";
+export type DocumentSingleInclude = ContentDocumentInclude;
+export type DocumentMultipleInclude = ContentDocumentInclude;
 
 export type DocumentsGetSingleQuery<TCollectionKey extends string = string> = {
 	filter?: CollectionDocumentFilters<TCollectionKey>;
@@ -153,6 +152,8 @@ export type MediaGetMultipleQuery = {
 			| "isDeletedAt";
 		direction: SortDirection;
 	}>;
+	/** Audio transcripts, which lists otherwise leave out. */
+	include?: "transcripts"[];
 	page?: number;
 	perPage?: number;
 };

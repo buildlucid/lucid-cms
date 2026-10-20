@@ -1,5 +1,4 @@
 import getToolkit from "@lucidcms/astro/toolkit";
-import { createDocumentView, createDocumentViews } from "@lucidcms/client";
 import type { AstroGlobal } from "astro";
 
 const previewCookieName = "lucid_preview";
@@ -82,19 +81,20 @@ const getLucidData = async ({
 					collectionKey: "page",
 					version: "production",
 					preview: activePreview?.token,
+					locale,
 					query: {
 						filter: scopedPageEntry
 							? { id: { value: scopedPageEntry.documentId } }
 							: { _fullSlug: { value: fullSlug } },
-						include: ["bricks"],
+						include: ["bricks", "meta"],
 					},
 				}),
 				toolkit.documents.getMultiple({
 					collectionKey: "blog",
 					version: "production",
 					preview: activePreview?.token,
+					locale,
 					query: {
-						include: ["refs.media"],
 						page: 1,
 						perPage: 3,
 						sort: [{ key: "createdAt", direction: "desc" }],
@@ -108,38 +108,18 @@ const getLucidData = async ({
 		astro.response.status = documentResponse.error.status ?? 404;
 	}
 
-	const isDocumentError =
-		preview.error === undefined && documentResponse.error !== undefined;
-	const isBlogError =
-		preview.error === undefined && blogsResponse.error !== undefined;
-
-	const isPreviewError = preview.error
-		? true
-		: activePreview !== null && isDocumentError;
+	const isPreviewError =
+		preview.error !== undefined ||
+		(activePreview !== null && documentResponse.error !== undefined);
 
 	return {
-		raw: {
-			document: documentResponse,
-			blogs: blogsResponse,
-			preview,
-			authentication,
-		},
-		document: createDocumentView({
-			document: documentResponse.data?.document,
-			locale,
-			preview: activePreview !== null,
-			refs: documentResponse.data?.refs,
-		}),
-		blogs: createDocumentViews({
-			documents: blogsResponse.data?.data ?? [],
-			locale,
-			preview: activePreview !== null,
-			refs: blogsResponse.data?.refs,
-		}),
+		page: documentResponse.data,
+		blogs: blogsResponse.data?.items ?? [],
+		preview: preview.data,
+		authenticated: authentication.data?.authenticated,
 		isPreviewError,
-		isDocumentError,
-		isBlogError,
-		isAuthenticationError: authentication.error !== undefined,
+		isBlogError:
+			preview.error === undefined && blogsResponse.error !== undefined,
 	};
 };
 

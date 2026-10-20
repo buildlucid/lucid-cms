@@ -14,11 +14,9 @@ describe("createPageMarkup", () => {
 	it("adds the referrer policy, toolbar and script during a preview", () => {
 		const markup = createPageMarkup({
 			scriptSrc: "/client.js",
-			authentication: { data: { authenticated: false } },
-			document: {
-				data: { document: { collectionKey: "page", id: 2, version: "latest" } },
-			},
-			preview: { data: preview },
+			authentication: false,
+			document: { collectionKey: "page", id: 2, version: "latest" },
+			preview,
 		});
 
 		expect(markup.head).toBe('<meta name="referrer" content="no-referrer">');
@@ -35,10 +33,9 @@ describe("createPageMarkup", () => {
 		expect(
 			createPageMarkup({
 				scriptSrc: "/client.js",
-				authentication: { data: { authenticated: false } },
-				document: {},
+				authentication: false,
 				// @ts-expect-error
-				preview: { data: { kind: "published", source: null } },
+				preview: { kind: "published", source: null },
 			}),
 		).toEqual({ head: "", footer: "" });
 	});

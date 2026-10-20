@@ -1,4 +1,12 @@
-import type { Media, MediaResolveUrlOptions, MediaUrl } from "@lucidcms/types";
+import type {
+	ContentLocaleInput,
+	ContentMedia,
+	IsLocalized,
+	Media,
+	MediaListItem,
+	MediaResolveUrlOptions,
+	MediaUrl,
+} from "@lucidcms/types";
 import type { MediaGetMultipleQuery } from "../types/contracts.js";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
@@ -10,19 +18,32 @@ import {
 	encodePathSegment,
 } from "../utils/url.js";
 
-export type MediaGetSingleInput = {
+export type MediaGetSingleInput<
+	TLocale extends string | undefined = undefined,
+> = {
 	id: number;
+	/** The locale empty text falls back to, such as the default locale. */
+	fallbackLocale?: string;
 	request?: LucidRequestOptions;
-};
+} & ContentLocaleInput<TLocale>;
 
-export type MediaGetMultipleInput = {
+export type MediaGetMultipleInput<
+	TLocale extends string | undefined = undefined,
+> = {
 	query?: MediaGetMultipleQuery;
+	/** The locale empty text falls back to, such as the default locale. */
+	fallbackLocale?: string;
 	request?: LucidRequestOptions;
-};
+} & ContentLocaleInput<TLocale>;
 
-export type MediaGetSingleResponse = LucidClientResponse<Media>;
+export type MediaGetSingleResponse<
+	TLocale extends string | undefined = undefined,
+> = LucidClientResponse<ContentMedia<Media, IsLocalized<TLocale>>>;
 
-export type MediaGetMultipleResponse = LucidClientResponse<Media[]>;
+/** List items leave out audio transcripts unless the query includes `transcripts`. */
+export type MediaGetMultipleResponse<
+	TLocale extends string | undefined = undefined,
+> = LucidClientResponse<ContentMedia<MediaListItem, IsLocalized<TLocale>>[]>;
 
 export type MediaResolveUrlInput = MediaResolveUrlOptions & {
 	key: string;
@@ -33,10 +54,14 @@ export type MediaResolveUrlResponse = LucidClientResponse<MediaUrl>;
 
 export interface LucidMediaClient {
 	/** Fetches one media item by id. */
-	getSingle(input: MediaGetSingleInput): Promise<MediaGetSingleResponse>;
+	getSingle<TLocale extends string | undefined = undefined>(
+		input: MediaGetSingleInput<TLocale>,
+	): Promise<MediaGetSingleResponse<TLocale>>;
 
 	/** Fetches a paginated list of media items. */
-	getMultiple(input?: MediaGetMultipleInput): Promise<MediaGetMultipleResponse>;
+	getMultiple<TLocale extends string | undefined = undefined>(
+		input?: MediaGetMultipleInput<TLocale>,
+	): Promise<MediaGetMultipleResponse<TLocale>>;
 
 	/** Resolves a media key to a URL with optional image transformations. */
 	resolveUrl(input: MediaResolveUrlInput): Promise<MediaResolveUrlResponse>;
@@ -46,19 +71,30 @@ export interface LucidMediaClient {
 export const createMediaClient = (
 	transport: LucidTransport,
 ): LucidMediaClient => ({
-	getSingle: async (input) =>
-		await transport.request<Media>({
+	getSingle: async <TLocale extends string | undefined = undefined>(
+		input: MediaGetSingleInput<TLocale>,
+	) =>
+		await transport.request<ContentMedia<Media, IsLocalized<TLocale>>>({
 			operation: "media.getSingle",
 			method: "GET",
 			path: `/media/${encodePathSegment(String(input.id))}`,
+			query: { locale: input.locale, fallbackLocale: input.fallbackLocale },
 			request: input.request,
 		}),
-	getMultiple: async (input = {}) =>
-		await transport.request<Media[]>({
+	getMultiple: async <TLocale extends string | undefined = undefined>(
+		input: MediaGetMultipleInput<TLocale> = {},
+	) =>
+		await transport.request<
+			ContentMedia<MediaListItem, IsLocalized<TLocale>>[]
+		>({
 			operation: "media.getMultiple",
 			method: "GET",
 			path: "/media",
-			query: input.query,
+			query: {
+				...input.query,
+				locale: input.locale,
+				fallbackLocale: input.fallbackLocale,
+			},
 			request: input.request,
 		}),
 	resolveUrl: async (input) =>
