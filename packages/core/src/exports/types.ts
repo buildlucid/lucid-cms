@@ -448,6 +448,7 @@ export type {
 	LucidPluginCli,
 	LucidPluginCliDev,
 	LucidPluginCliFactory,
+	LucidPluginCliPrepareCommand,
 	LucidPluginCommand,
 	LucidPluginCommandLogger,
 	LucidPluginDefinition,

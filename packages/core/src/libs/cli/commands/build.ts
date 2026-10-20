@@ -23,6 +23,7 @@ import calculateOutDirSize from "../services/calculate-outdir-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import { startProgress } from "../services/progress.js";
 import runPluginBuilds from "../services/run-plugin-builds.js";
+import runPluginPrepares from "../services/run-plugin-prepares.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -53,6 +54,11 @@ const buildCommand = async (options?: {
 			projectRoot: configRes.projectRoot,
 			command: "build",
 			startedAt: commandStartedAt,
+		});
+		await runPluginPrepares({
+			command: "build",
+			config: configRes.config,
+			projectRoot: configRes.projectRoot,
 		});
 		const translate = createTranslator({
 			store: configRes.translationStore,

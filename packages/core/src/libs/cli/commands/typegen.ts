@@ -5,6 +5,7 @@ import {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import cliLogger from "../logger.js";
+import runPluginPrepares from "../services/run-plugin-prepares.js";
 
 /**
  * The CLI typegen command. Resolves the Lucid project and writes the generated type files only.
@@ -19,6 +20,11 @@ const typegenCommand = async () => {
 			generateTypes: true,
 			loadEmailTemplates: false,
 			prepareRuntime: true,
+		});
+		await runPluginPrepares({
+			command: "typegen",
+			config: buildProject.loaded.config,
+			projectRoot: buildProject.loaded.projectRoot,
 		});
 
 		const relativeConfigPath = path.relative(

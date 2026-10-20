@@ -6,11 +6,18 @@ import buildSiteData from "./build-site-data.js";
 import buildSite from "./static/build-site.js";
 import createViteDev from "./vite/create-vite-dev.js";
 import writeAssetHeaders from "./vite/write-asset-headers.js";
+import writeKilnManifest from "./write-kiln-manifest.js";
 
 /** The site plugin's CLI module, loaded only by `lucidcms` commands. */
 const siteCli: LucidPluginCliFactory<SitePluginOptionsInternal> = (
 	options,
 ) => ({
+	prepare: (props) =>
+		writeKilnManifest({
+			root: path.resolve(props.projectRoot, options.directory),
+			config: props.config,
+			options,
+		}),
 	dev: (props) =>
 		createViteDev({
 			...props,

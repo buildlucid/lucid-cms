@@ -18,7 +18,6 @@ import createSiteKiln, { type SiteKiln } from "./create-site-kiln.js";
 import hashTemplates from "./hash-templates.js";
 import readCliData from "./read-cli-data.js";
 import resolveSiteEnvironment from "./resolve-site-environment.js";
-import writeKilnManifest from "./write-kiln-manifest.js";
 
 export type Site = {
 	kiln: SiteKiln;
@@ -145,22 +144,16 @@ const createSiteLoader = (
 			data?.kind !== "build";
 		if (site && !reloads) return site;
 
-		const siteDirectory = resolveDirectory(options.directory, data);
 		const loading = loadSite({
-			directory: siteDirectory,
+			directory: resolveDirectory(options.directory, data),
 			data,
 			config: siteConfig,
 			options,
 			context: props.context,
 		});
-		loading.then(
-			(loaded) => {
-				if (reloads) return writeKilnManifest(siteDirectory, loaded.kiln);
-			},
-			() => {
-				if (site === loading) site = undefined;
-			},
-		);
+		loading.catch(() => {
+			if (site === loading) site = undefined;
+		});
 		site = loading;
 
 		return loading;

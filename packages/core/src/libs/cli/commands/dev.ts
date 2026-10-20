@@ -19,6 +19,7 @@ import type { TelemetryStage } from "../../telemetry/types.js";
 import generateTypes from "../../type-generation/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
+import runPluginPrepares from "../services/run-plugin-prepares.js";
 import {
 	clearDevScreen,
 	getServerUrl,
@@ -145,6 +146,11 @@ const devCommand = async (options?: {
 				access: configResult.config.access,
 				collections: configResult.config.collections,
 				localization: configResult.config.localization,
+			});
+			await runPluginPrepares({
+				command: "dev",
+				config: configResult.config,
+				projectRoot: configResult.projectRoot,
 			});
 
 			const localizationKey = JSON.stringify(configResult.config.localization);

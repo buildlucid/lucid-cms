@@ -19,6 +19,7 @@ import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import { startProgress } from "../services/progress.js";
 import runPluginBuilds from "../services/run-plugin-builds.js";
+import runPluginPrepares from "../services/run-plugin-prepares.js";
 import { getServerUrl, logServerReady } from "../services/server-logger.js";
 import updateAvailable from "../services/update-available.js";
 import migrateCommand from "./migrate.js";
@@ -114,6 +115,11 @@ const serveCommand = async () => {
 			access: configRes.config.access,
 			collections: configRes.config.collections,
 			localization: configRes.config.localization,
+		});
+		await runPluginPrepares({
+			command: "serve",
+			config: configRes.config,
+			projectRoot: configRes.projectRoot,
 		});
 
 		currentStage = "migration";

@@ -101,8 +101,21 @@ export type LucidPluginCliDev = {
 	data?: unknown;
 };
 
+/** The `lucidcms` commands that run plugins' `prepare` hooks. */
+export type LucidPluginCliPrepareCommand =
+	| "dev"
+	| "serve"
+	| "build"
+	| "typegen";
+
 /** CLI-only plugin code, kept out of server bundles because core loads it by module path. */
 export type LucidPluginCli = {
+	/** Runs setup such as writing editor files alongside type generation for `dev`, including restarts, `serve`, `build` and `typegen`. */
+	prepare?: (props: {
+		command: LucidPluginCliPrepareCommand;
+		config: ResolvedLucidConfig;
+		projectRoot: string;
+	}) => void | Promise<void>;
 	/** Runs each time `lucidcms dev` starts the server. */
 	dev?: (props: {
 		server: Server;
