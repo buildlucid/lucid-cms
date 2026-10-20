@@ -5,6 +5,7 @@ import fillPagePattern from "../../router/fill-page-pattern.js";
 import getRouteParams from "../../router/get-route-params.js";
 import isDynamicPattern from "../../router/is-dynamic-pattern.js";
 import type { Site } from "../../site/create-site-loader.js";
+import renderOptions from "../../site/render-options.js";
 import type { SitePage, SiteState } from "../../types.js";
 import isRecord from "../../utils/is-record.js";
 import normalizePath from "../../utils/normalize-path.js";
@@ -80,9 +81,11 @@ const collectPagePaths = async (props: {
 	const problems: string[] = [];
 	const listed = await Promise.all(
 		dynamic.map(async (page) => {
-			const entries = await site.freshKiln.evaluate(page.template, "paths", {
-				state: props.state,
-			});
+			const entries = await site.freshKiln.evaluate(
+				page.template,
+				"paths",
+				renderOptions(props.state),
+			);
 			if (!Array.isArray(entries)) {
 				problems.push(
 					`'${page.template}' exports paths as something other than a list`,

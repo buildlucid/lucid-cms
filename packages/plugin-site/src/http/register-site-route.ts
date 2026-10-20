@@ -17,6 +17,7 @@ import type { SitePluginOptionsInternal, SiteState } from "../types.js";
 import decode from "../utils/decode.js";
 import isLucidPath from "../utils/is-lucid-path.js";
 import normalizePath from "../utils/normalize-path.js";
+import readRequestLocale from "./read-request-locale.js";
 import renderIsland from "./render-island.js";
 import renderPage from "./render-page.js";
 import respondToRenderError from "./respond-to-render-error.js";
@@ -78,9 +79,14 @@ const registerSiteRoute =
 				const { preview } = previewResult;
 
 				const site = await getSite({ context });
+				const { locale, vary } = readRequestLocale(hono, site, path);
+				// Caches must keep a copy per value of whatever chose the locale.
+				if (vary.length > 0)
+					hono.header("Vary", vary.join(", "), { append: true });
 				const state: SiteState = {
 					toolkit,
 					path,
+					locale,
 					preview,
 					version: site.config.getVersion,
 				};
@@ -102,7 +108,7 @@ const registerSiteRoute =
 						const stored =
 							(await readStoredPage(
 								context,
-								storeKeys.page(site.cacheNamespace, path),
+								storeKeys.page(site.cacheNamespace, locale, path),
 							)) ??
 							(await renderStoredPage({
 								context,

@@ -1,18 +1,18 @@
 import { LucidAPIError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
-import type { CollectionDocumentKey, Toolkit } from "@lucidcms/core/types";
+import type {
+	CollectionDocumentKey,
+	ContentDocument,
+	ContentList,
+	Toolkit,
+} from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
-import toTemplateDocument, {
-	type TemplateDocument,
-} from "../content/to-template-document.js";
-import toTemplateList, {
-	listDefaults,
-	type TemplateList,
-} from "../content/to-template-list.js";
+import recordFieldTargets from "../preview/field-targets.js";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
 import type { DocumentFilter, DocumentReadOptions } from "./document.js";
 import normalizeFilter from "./normalize-filter.js";
+import readLocale from "./read-locale.js";
 
 type ListInput = Parameters<Toolkit["documents"]["getMultiple"]>[0];
 
@@ -30,50 +30,57 @@ const createDocumentListFunction = (config: SiteConfig) =>
 			render: RenderInfo<SiteState>,
 			collectionKey: Key,
 			options: DocumentListOptions = {},
-		): Promise<TemplateList<TemplateDocument<Key>>> => {
-			const page = options.page ?? listDefaults.page;
-			const perPage = options.perPage ?? listDefaults.perPage;
+		): Promise<ContentList<ContentDocument<Key, true>>> => {
 			const version = config.getVersion(collectionKey, options.version);
 			if (version === null) {
-				return toTemplateList([], { total: 0, page, perPage });
+				// The toolkit's own page defaults, as there's no read to report them.
+				const perPage = options.perPage ?? 10;
+				return {
+					items: [],
+					pagination: {
+						currentPage: options.page ?? 1,
+						perPage,
+						total: 0,
+						lastPage: 0,
+					},
+				};
 			}
 			render.tagCache(contentCacheTags.collection(collectionKey));
 
-			const input: ListInput = {
+			const input = {
 				collectionKey,
 				version,
 				preview: render.state.preview?.token ?? null,
+				locale: readLocale(config, render, options.locale),
+				fallbackLocale: options.fallbackLocale,
+				depth: options.depth,
 				query: {
 					filter: normalizeFilter(options.filter) as DocumentFilter | undefined,
 					sort: options.sort,
-					page,
-					perPage,
+					page: options.page,
+					perPage: options.perPage,
 					include: options.include,
 				},
-			};
-			let response = await render.state.toolkit.documents.getMultiple(input);
+			} satisfies ListInput;
+			const { documents } = render.state.toolkit;
+			let response = await documents.getMultiple(input);
 			if (response.error?.code === "preview_scope") {
-				response = await render.state.toolkit.documents.getMultiple({
+				response = await documents.getMultiple({
 					...input,
 					preview: null,
 				});
 			}
 			if (response.error) throw new LucidAPIError(response.error);
 
-			const { data, count, refs = {} } = response.data;
-			if (refs.media?.length) render.tagCache(contentCacheTags.media);
-			const locale = options.locale ?? config.defaultLocale;
-			return toTemplateList(
-				data.map((document) =>
-					toTemplateDocument<Key>({
-						document,
-						refs,
-						locale,
-						config,
-					}),
-				),
-				{ total: count, page, perPage },
-			);
+			// Documents include their media, so any media change can affect them.
+			render.tagCache(contentCacheTags.media);
+			if (render.state.preview) {
+				for (const document of response.data.items) {
+					recordFieldTargets(document, config.collections);
+				}
+			}
+			// The key was widened for the read; the documents are the ones asked for.
+			return response.data as ContentList<ContentDocument<Key, true>>;
 		},
 	);
 

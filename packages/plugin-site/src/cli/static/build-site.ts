@@ -5,6 +5,7 @@ import { pluginPublicDirectory } from "@lucidcms/core/extension";
 import type { LucidPluginCommand } from "@lucidcms/core/types";
 import { ASSETS_BASE, errorPages, PLUGIN_KEY } from "../../constants.js";
 import createSiteLoader from "../../site/create-site-loader.js";
+import renderOptions from "../../site/render-options.js";
 import type { SitePluginOptionsInternal, SiteState } from "../../types.js";
 import eachLimited from "../../utils/each-limited.js";
 import normalizePath from "../../utils/normalize-path.js";
@@ -59,9 +60,16 @@ const buildSite = async (
 		assetsDir: path.join(outDir, ASSETS_BASE),
 	});
 	const site = await createSiteLoader(options, config)({ context, data });
+	// Static builds have no request, so the locale option only sees the path.
 	const state = (routePath: string): SiteState => ({
 		toolkit,
 		path: routePath,
+		locale: site.config.resolveLocale({
+			path: routePath,
+			url: null,
+			header: () => null,
+			cookie: () => undefined,
+		}),
 		preview: null,
 		version: site.config.getVersion,
 	});
@@ -97,7 +105,7 @@ const buildSite = async (
 		const body = await site.freshKiln.render(
 			errorPages.notFound,
 			{ route: { path: "/404", params: {} } },
-			{ state: state("/404") },
+			renderOptions(state("/404")),
 		);
 		await writeStaticFile(outDir, "404.html", body);
 	}

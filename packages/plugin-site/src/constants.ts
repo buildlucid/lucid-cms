@@ -37,8 +37,8 @@ export const CLIENT_SCRIPT_PATH = pluginPublicPath(PLUGIN_KEY, "lucid.js");
 export const ISLANDS_URL = `/${pluginPublicPath(PLUGIN_KEY, "islands")}/`;
 
 export const storeKeys = {
-	page: (version: string, path: string) =>
-		`${PLUGIN_KEY}:page:${version}:${path}`,
+	page: (version: string, locale: string, path: string) =>
+		`${PLUGIN_KEY}:page:${version}:${locale}:${path}`,
 	island: (id: string) => `${PLUGIN_KEY}:island:${id}`,
 	fragment: (key: string) => `${PLUGIN_KEY}:fragment:${key}`,
 } as const;

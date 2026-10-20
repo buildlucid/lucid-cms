@@ -20,17 +20,13 @@ const createSiteMarkup = async (props: {
 
 	return createPageMarkup({
 		scriptSrc: `/${CLIENT_SCRIPT_PATH}`,
-		authentication,
-		preview: { data: preview },
+		authentication: authentication.data?.authenticated ?? "auto",
+		preview,
 		document: {
-			data: {
-				document: {
-					collectionKey: preview.entry.collectionKey,
-					id: preview.entry.documentId,
-					version: preview.entry.version,
-					meta: { versionId: preview.entry.versionId },
-				},
-			},
+			collectionKey: preview.entry.collectionKey,
+			id: preview.entry.documentId,
+			version: preview.entry.version,
+			meta: { versionId: preview.entry.versionId },
 		},
 	});
 };

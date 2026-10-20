@@ -1,12 +1,12 @@
 import { LucidAPIError } from "@lucidcms/core";
 import type { Toolkit } from "@lucidcms/core/types";
-import getRouteUrls from "./get-route-urls.js";
 
-/** Every route path of a collection's documents in one version, across locales. */
+/** Lists a collection's document paths for one version and the given locales, including shared paths once. */
 const listDocumentPaths = async (
 	toolkit: Toolkit,
 	collectionKey: string,
 	version: string,
+	locales: ReadonlySet<string>,
 ): Promise<string[]> => {
 	const response = await toolkit.documents.getMultiple({
 		collectionKey,
@@ -15,10 +15,14 @@ const listDocumentPaths = async (
 	});
 	if (response.error) throw new LucidAPIError(response.error);
 
-	return response.data.data.flatMap((document) =>
-		// The locale only keys a path every locale shares, which is listed once either way.
-		Object.values(getRouteUrls(document.route, "")),
-	);
+	return response.data.items.flatMap((document) => {
+		const path = document.route?.path;
+		if (typeof path === "string") return [path];
+
+		return Object.entries(path ?? {}).flatMap(([locale, value]) =>
+			value && locales.has(locale) ? [value] : [],
+		);
+	});
 };
 
 export default listDocumentPaths;

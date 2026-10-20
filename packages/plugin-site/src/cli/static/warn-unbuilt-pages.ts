@@ -38,7 +38,12 @@ const warnUnbuiltPages = async (props: {
 		// A check must never fail a build whose pages are already written, such as when a collection the site never reads errors.
 		let paths: string[];
 		try {
-			paths = await listDocumentPaths(props.toolkit, collectionKey, version);
+			paths = await listDocumentPaths(
+				props.toolkit,
+				collectionKey,
+				version,
+				props.site.config.locales,
+			);
 		} catch (error) {
 			props.warn(
 				`Couldn't check the URLs of '${collectionKey}' documents: ${error instanceof Error ? error.message : String(error)}`,

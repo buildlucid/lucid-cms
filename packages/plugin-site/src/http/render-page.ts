@@ -6,6 +6,7 @@ import { HTML_CONTENT_TYPE, PLUGIN_KEY } from "../constants.js";
 import { pageMarkup } from "../preview/page-markup.js";
 import getRouteParams from "../router/get-route-params.js";
 import type { Site } from "../site/create-site-loader.js";
+import renderOptions from "../site/render-options.js";
 import type { SitePage, SiteState } from "../types.js";
 import insertBeforeBodyEnd from "./insert-before-body-end.js";
 
@@ -35,7 +36,7 @@ const renderPage = async (props: {
 		props.match.data.template,
 		{ route: { path: props.state.path, params: getRouteParams(props.match) } },
 		{
-			state: props.state,
+			...renderOptions(props.state),
 			islands: streamIslands(),
 			signal: props.hono.req.raw.signal,
 		},

@@ -1,36 +1,34 @@
-import isRecord from "../utils/is-record.js";
 import type {
-	TemplateBrick,
-	TemplateDocument,
-} from "./to-template-document.js";
-import type { TemplateMedia } from "./to-template-media.js";
-import type { TemplateRichTextNode } from "./to-template-rich-text.js";
+	ContentBrick,
+	ContentDocument,
+	LocalizedMedia,
+} from "@lucidcms/core/types";
+import type { RichTextJSON } from "@lucidcms/rich-text";
+import isRecord from "../utils/is-record.js";
 
 /** Checks prop shapes because islands receive copies without their original identity. */
 const propTypes = {
-	Document: (value: unknown): value is TemplateDocument =>
+	Document: (value: unknown): value is ContentDocument<string, true> =>
 		isRecord(value) &&
 		typeof value.id === "number" &&
 		typeof value.collectionKey === "string" &&
-		isRecord(value.fields) &&
-		Array.isArray(value.bricks),
-	Brick: (value: unknown): value is TemplateBrick =>
+		isRecord(value.fields),
+	Brick: (value: unknown): value is ContentBrick =>
 		isRecord(value) &&
 		typeof value.id === "number" &&
 		typeof value.key === "string" &&
 		isRecord(value.fields) &&
 		!("collectionKey" in value),
-	Media: (value: unknown): value is TemplateMedia =>
+	Media: (value: unknown): value is LocalizedMedia =>
 		isRecord(value) &&
 		typeof value.id === "number" &&
 		typeof value.type === "string" &&
 		typeof value.key === "string" &&
 		typeof value.url === "string",
-	RichText: (value: unknown): value is TemplateRichTextNode =>
+	RichText: (value: unknown): value is RichTextJSON =>
 		isRecord(value) &&
 		typeof value.type === "string" &&
-		isRecord(value.attrs) &&
-		Array.isArray(value.content),
+		(value.content === undefined || Array.isArray(value.content)),
 };
 
 export default propTypes;

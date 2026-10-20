@@ -1,9 +1,9 @@
-import type { CollectionDocument } from "@lucidcms/core/types";
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import { describe, expect, test } from "vitest";
-import toTemplateRichText from "../content/to-template-rich-text.js";
 import richText from "./rich-text.js";
 
-const json = {
+/** A rich text field as content reads give it, with its embedded brick filled in. */
+const node: RichTextJSON = {
 	type: "doc",
 	content: [
 		{
@@ -13,15 +13,15 @@ const json = {
 				{ type: "text", text: "world", marks: [{ type: "bold" }] },
 			],
 		},
-		{ type: "lucidEmbeddedBrick", attrs: { ref: "e1" } },
+		{
+			type: "lucidEmbeddedBrick",
+			attrs: {
+				ref: "e1",
+				brick: { id: 3, key: "callout", order: 0, fields: {} },
+			},
+		},
 	],
 };
-
-const node = toTemplateRichText(
-	json,
-	{ document: { bricks: [] } as unknown as CollectionDocument, refs: {} },
-	{ brick: () => null, document: () => null },
-);
 
 describe("richText", () => {
 	test("renders a field as HTML, leaving embedded bricks to templates", () => {
@@ -29,7 +29,7 @@ describe("richText", () => {
 	});
 
 	test("renders a single node, such as one a template loop doesn't handle itself", () => {
-		expect(String(richText(node?.content[0]))).toBe(
+		expect(String(richText(node.content?.[0]))).toBe(
 			"<p>Hello <strong>world</strong></p>",
 		);
 	});

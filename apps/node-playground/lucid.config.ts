@@ -353,6 +353,8 @@ export default defineConfig({
 			sitePlugin({
 				mode: "static",
 				environment: "production",
+				locales: ["en", "fr"],
+				locale: ({ path }) => (path.split("/")[1] === "fr" ? "fr" : "en"),
 				kiln: {
 					timeZone: "Europe/London",
 					functions: siteFunctions,

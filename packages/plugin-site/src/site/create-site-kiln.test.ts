@@ -8,6 +8,7 @@ import { pageMarkup } from "../preview/page-markup.js";
 import type { SitePluginOptions, SitePreview, SiteState } from "../types.js";
 import createSiteConfig from "./create-site-config.js";
 import createSiteKiln from "./create-site-kiln.js";
+import renderOptions from "./render-options.js";
 
 const config = {
 	localization: {
@@ -19,7 +20,22 @@ const config = {
 			key: "page",
 			getData: { publishing: { environments: [] } },
 			flatFields: [],
-			brickInstances: [],
+			contentFieldTree: [{ type: "text", key: "title" }],
+			brickInstances: [
+				{
+					key: "banner",
+					contentFieldTree: [
+						{
+							type: "repeater",
+							key: "links",
+							fields: [
+								{ type: "text", key: "type" },
+								{ type: "text", key: "label" },
+							],
+						},
+					],
+				},
+			],
 		},
 		{
 			key: "blog",
@@ -34,59 +50,88 @@ const config = {
 	],
 } as unknown as ResolvedLucidConfig;
 
-const page = {
+/** The page as content reads return it in `locale`, or with every translation without one. */
+const page = (locale?: "en" | "fr") => ({
 	id: 2,
 	collectionKey: "page",
 	version: null,
-	route: { path: { en: "/en", fr: "/fr" }, label: "Home" },
-	fields: { title: { en: "Home", fr: "Accueil" } },
+	...(locale === undefined
+		? { route: { path: { en: "/en", fr: "/fr" }, label: "Home" } }
+		: {
+				locale,
+				route: {
+					path: `/${locale}`,
+					label: "Home",
+					alternates: { en: "/en", fr: "/fr" },
+				},
+			}),
+	fields: { title: locale === "fr" ? "Accueil" : "Home" },
 	bricks: [
 		{
-			ref: "b1",
 			id: 9,
 			key: "banner",
 			order: 0,
-			type: "builder",
-			fields: { links: [{ label: { en: "Hi", fr: "Salut" } }] },
+			// A field named `type` doesn't make the group look like media or rich text.
+			fields: {
+				links: [{ type: "primary", label: locale === "fr" ? "Salut" : "Hi" }],
+			},
 		},
 	],
-};
+	fixed: {},
+});
 
-const getSingle = vi.fn(async ({ query }) =>
+const getSingle = vi.fn(async ({ query, locale }) =>
 	query.filter._fullSlug.value === "/missing"
 		? { error: { status: 404, message: "Not found" }, data: undefined }
-		: { error: undefined, data: { document: page } },
+		: { error: undefined, data: page(locale) },
 );
-const getMultiple = vi.fn(async ({ preview }) =>
+/** Pagination as the toolkit reports it for `total` matches. */
+const pagination = (
+	total: number,
+	query: { page?: number; perPage?: number } = {},
+) => {
+	const perPage = query.perPage ?? 10;
+	return {
+		currentPage: query.page ?? 1,
+		perPage,
+		total,
+		lastPage: Math.ceil(total / perPage),
+	};
+};
+
+const getMultiple = vi.fn(async ({ preview, locale, query }) =>
 	preview
 		? { error: { status: 403, code: "preview_scope" }, data: undefined }
-		: { error: undefined, data: { data: [page], count: 1 } },
+		: {
+				error: undefined,
+				data: { items: [page(locale)], pagination: pagination(1, query) },
+			},
 );
-const image = {
+const image = (locale: string) => ({
 	id: 5,
 	type: "image",
 	key: "public/5",
 	url: "/cdn/public/5",
-	title: { en: "Cat", fr: "Chat" },
-	alt: { en: "A cat" },
-};
+	title: locale === "fr" ? "Chat" : "Cat",
+	alt: locale === "fr" ? null : "A cat",
+});
 const video = {
 	id: 7,
 	type: "video",
 	key: "public/7",
 	url: "/cdn/public/7",
-	title: { en: "Clip" },
+	title: "Clip",
 	poster: { id: 8, type: "image", key: "public/8", url: "/cdn/public/8" },
 };
 const media = {
-	getSingle: vi.fn(async ({ id }) => {
-		if (id === 5) return { error: undefined, data: image };
+	getSingle: vi.fn(async ({ id, locale }) => {
+		if (id === 5) return { error: undefined, data: image(locale) };
 		if (id === 7) return { error: undefined, data: video };
 		return { error: { status: 404 }, data: undefined };
 	}),
-	getMultiple: vi.fn(async () => ({
+	getMultiple: vi.fn(async ({ locale, query }) => ({
 		error: undefined,
-		data: { data: [image], count: 21 },
+		data: { items: [image(locale)], pagination: pagination(21, query) },
 	})),
 	resolveUrl: vi.fn(async ({ key, preset }) => ({
 		error: undefined,
@@ -99,13 +144,17 @@ const toolkit = {
 	locales: {
 		getAll: async () => ({
 			error: undefined,
-			data: [{ code: "en" }, { code: "fr" }],
+			data: [{ code: "en" }, { code: "fr" }, { code: "de" }],
 		}),
 	},
 } as unknown as Toolkit;
 const preview = { kind: "preview", token: "token" } as SitePreview;
 
-const siteConfig = createSiteConfig(config, "production");
+const siteConfig = createSiteConfig(
+	config,
+	{ locales: ["en", "fr"] },
+	"production",
+);
 const kiln = createSiteKiln({
 	config: siteConfig,
 	options: {},
@@ -113,10 +162,13 @@ const kiln = createSiteKiln({
 	loader: memoryLoader({
 		"page.kiln": `{% set page = document("page", { filter: { _fullSlug: path }, include: ["bricks"] }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
 		"list.kiln": `{{ documentList("page").items|length }}{{ documentList("blog").items|length }}`,
-		"pages.kiln": `{% set list = documentList("page", { page: 2, perPage: 1 }) %}{% set p = list.pagination %}{{ list.items|length }}:{{ p.currentPage }},{{ p.perPage }},{{ p.total }},{{ p.lastPage }}`,
+		"pages.kiln": `{% set list = documentList("page", { page: 2, perPage: 1, depth: 2, fallbackLocale: "en" }) %}{% set p = list.pagination %}{{ list.items|length }}:{{ p.currentPage }},{{ p.perPage }},{{ p.total }},{{ p.lastPage }}`,
 		"media.kiln": `{% set item = media(5, { locale: "fr" }) %}{{ item.title }}|{{ media(6) ?? "none" }}|{{ mediaUrl(item, { preset: "card" }) }}`,
 		"media-list.kiln": `{% set list = mediaList({ filter: { type: "image" }, perPage: 20 }) %}{{ list.items[0].alt }}|{{ list.pagination.lastPage }}`,
 		"locales.kiln": `{% for locale in locales() %}{{ locale.code }}{% endfor %}`,
+		"locale.kiln": `{{ locale }}|{% include "locale-part" %}|{{ document("page", { filter: { _fullSlug: path }, locale: "en" }).fields.title }}`,
+		"locale-part.kiln": `{{ locale }}`,
+		"wrong-locale.kiln": `{{ media(5, { locale: "de" }) }}`,
 		"island.kiln": `{% set page = document("page", { filter: { _fullSlug: path } }) %}{% island "islands/typed" with { image: media(5), page: page, brick: page.bricks[0] } %}{% endisland %}`,
 		"islands/typed.kiln": `{% props image: Media, page: Document, brick: Brick %}{{ image.title }}:{{ page.id }}:{{ brick.key }}`,
 		"paths.kiln": `{{ documentPaths("page")|join(",") }}|{{ documentPaths("blog")|length }}`,
@@ -128,24 +180,21 @@ const kiln = createSiteKiln({
 	}),
 });
 
+const siteState = (state: Partial<SiteState> = {}): SiteState => ({
+	toolkit,
+	path: "/",
+	locale: "en",
+	preview: null,
+	version: siteConfig.getVersion,
+	...state,
+});
+
 const render = (
 	template: string,
 	path: string,
 	state: Partial<SiteState> = {},
 ) =>
-	kiln.render(
-		template,
-		{ path },
-		{
-			state: {
-				toolkit,
-				path,
-				preview: null,
-				version: siteConfig.getVersion,
-				...state,
-			},
-		},
-	);
+	kiln.render(template, { path }, renderOptions(siteState({ path, ...state })));
 
 const editTargets = (html: string) =>
 	[...html.matchAll(/data-lucid-preview-field="([^"]+)"/g)].map((match) =>
@@ -153,12 +202,15 @@ const editTargets = (html: string) =>
 	);
 
 describe("site template functions", () => {
-	test("document() reads through the toolkit in the locale its route matched, with the includes it's given", async () => {
-		await expect(render("page.kiln", "/fr")).resolves.toBe("Accueil (fr)");
+	test("document() reads in the render's locale, with the includes it's given", async () => {
+		await expect(render("page.kiln", "/fr", { locale: "fr" })).resolves.toBe(
+			"Accueil (fr)",
+		);
 		expect(getSingle).toHaveBeenLastCalledWith({
 			collectionKey: "page",
 			version: "latest",
 			preview: null,
+			locale: "fr",
 			query: {
 				filter: { _fullSlug: { value: "/fr" } },
 				include: ["bricks"],
@@ -166,31 +218,46 @@ describe("site template functions", () => {
 		});
 	});
 
-	test("documentList() returns items with the content API's pagination", async () => {
+	test("documentList() passes its read options and returns items with the content API's pagination", async () => {
 		await expect(render("pages.kiln", "/")).resolves.toBe("1:2,1,1,1");
 		expect(getMultiple).toHaveBeenLastCalledWith(
 			expect.objectContaining({
+				depth: 2,
+				fallbackLocale: "en",
 				query: expect.objectContaining({ page: 2, perPage: 1 }),
 			}),
 		);
 	});
 
-	test("media(), mediaList() and mediaUrl() read library media only, with text in the locale", async () => {
+	test("media(), mediaList() and mediaUrl() read library media, with text in the locale", async () => {
 		await expect(render("media.kiln", "/")).resolves.toBe(
 			"Chat|none|/cdn/public/5?preset=card",
 		);
 		await expect(render("media-list.kiln", "/")).resolves.toBe("A cat|2");
-		expect(media.getSingle).toHaveBeenCalledWith({ id: 5, libraryOnly: true });
-		expect(media.getMultiple).toHaveBeenCalledWith({
-			query: {
-				filter: { type: { value: "image" } },
-				page: 1,
-				perPage: 20,
-			},
-			libraryOnly: true,
-		});
+		expect(media.getSingle).toHaveBeenCalledWith(
+			expect.objectContaining({ id: 5, locale: "fr", libraryOnly: true }),
+		);
+		expect(media.getMultiple).toHaveBeenCalledWith(
+			expect.objectContaining({
+				query: expect.objectContaining({
+					filter: { type: { value: "image" } },
+					perPage: 20,
+				}),
+				locale: "en",
+				libraryOnly: true,
+			}),
+		);
 		expect(media.resolveUrl).toHaveBeenCalledWith(
 			expect.objectContaining({ key: "public/5", libraryOnly: true }),
+		);
+	});
+
+	test("the locale global is the render's locale everywhere, and reads can ask for another of the site's", async () => {
+		await expect(render("locale.kiln", "/fr", { locale: "fr" })).resolves.toBe(
+			"fr|fr|Home",
+		);
+		await expect(render("wrong-locale.kiln", "/")).rejects.toThrow(
+			/'de' isn't one of the site's locales/,
 		);
 	});
 
@@ -212,12 +279,7 @@ describe("site template functions", () => {
 			"video.kiln",
 			{},
 			{
-				state: {
-					toolkit,
-					path: "/",
-					preview: null,
-					version: siteConfig.getVersion,
-				},
+				...renderOptions(siteState()),
 			},
 		);
 		expect(set).toHaveBeenCalledWith(
@@ -225,7 +287,7 @@ describe("site template functions", () => {
 		);
 	});
 
-	test("locales() lists the content locales", async () => {
+	test("locales() lists the site's locales", async () => {
 		await expect(render("locales.kiln", "/")).resolves.toBe("enfr");
 	});
 
@@ -247,7 +309,7 @@ describe("site template functions", () => {
 		);
 	});
 
-	test("documentPaths() lists a collection's URLs in every locale, and none from a collection off the site", async () => {
+	test("documentPaths() lists a collection's URLs in the site's locales, and none from a collection off the site", async () => {
 		await expect(render("paths.kiln", "/")).resolves.toBe("/en,/fr|0");
 	});
 
@@ -268,12 +330,7 @@ describe("site template functions", () => {
 	});
 
 	test("head() and footer() write the page's Lucid markup, the footer only once", async () => {
-		const state: SiteState = {
-			toolkit,
-			path: "/",
-			preview,
-			version: siteConfig.getVersion,
-		};
+		const state = siteState({ preview });
 		pageMarkup.set(state, {
 			head: "<meta>",
 			footer: "<lucid-toolbar></lucid-toolbar>",
@@ -281,7 +338,7 @@ describe("site template functions", () => {
 		});
 
 		await expect(
-			kiln.render("layout.kiln", { path: "/" }, { state }),
+			kiln.render("layout.kiln", { path: "/" }, renderOptions(state)),
 		).resolves.toBe("<meta>|<lucid-toolbar></lucid-toolbar>|");
 		expect(pageMarkup.get(state)?.footerWritten).toBe(true);
 		await expect(render("layout.kiln", "/")).resolves.toBe("||");
@@ -321,16 +378,13 @@ describe("site template functions", () => {
 			"cached.kiln",
 			{},
 			{
-				state: {
-					toolkit,
-					path: "/",
-					preview: null,
-					version: siteConfig.getVersion,
-				},
+				...renderOptions(siteState()),
 			},
 		);
 		expect(set).toHaveBeenCalledWith(
-			expect.objectContaining({ tags: ["content-documents:page"] }),
+			expect.objectContaining({
+				tags: ["content-documents:page", "content-media"],
+			}),
 		);
 	});
 
@@ -340,26 +394,14 @@ describe("site template functions", () => {
 			kiln.render(
 				"typed.kiln",
 				{ path: "/en", brick: { key: "banner", fields: {} } },
-				{
-					state: {
-						toolkit,
-						path: "/en",
-						preview: null,
-						version: siteConfig.getVersion,
-					},
-				},
+				renderOptions(siteState({ path: "/en" })),
 			),
 		).rejects.toThrow(/Brick/);
 	});
 });
 
 describe("site kiln options", () => {
-	const state: SiteState = {
-		toolkit,
-		path: "/",
-		preview,
-		version: siteConfig.getVersion,
-	};
+	const state = siteState({ preview });
 
 	test("site functions get the preview token and built-in reads that tag the cached section", async () => {
 		const set = vi.fn();
@@ -378,14 +420,16 @@ describe("site kiln options", () => {
 		});
 
 		await expect(
-			site.render("count.kiln", {}, { state: { ...state, preview: null } }),
+			site.render("count.kiln", {}, renderOptions({ ...state, preview: null })),
 		).resolves.toBe("1!:null");
 		expect(set).toHaveBeenCalledWith(
-			expect.objectContaining({ tags: ["content-documents:page"] }),
+			expect.objectContaining({
+				tags: ["content-documents:page", "content-media"],
+			}),
 		);
-		await expect(site.render("count.kiln", {}, { state })).resolves.toBe(
-			"1!:token",
-		);
+		await expect(
+			site.render("count.kiln", {}, renderOptions(state)),
+		).resolves.toBe("1!:token");
 	});
 
 	test("extensions can't register a built-in or each other's names, while the site's own entries replace anything", async () => {
@@ -428,14 +472,14 @@ describe("site kiln options", () => {
 			create({ functions: { notFound: () => "replaced" } }).render(
 				"notice.kiln",
 				{},
-				{ state },
+				renderOptions(state),
 			),
 		).resolves.toBe("replaced");
 		await expect(
 			create({ filters: { upper: () => "replaced" } }).render(
 				"shout.kiln",
 				{},
-				{ state },
+				renderOptions(state),
 			),
 		).resolves.toBe("replaced");
 	});

@@ -2,7 +2,7 @@ import type { SiteConfig } from "../site/create-site-config.js";
 import createDocumentFunction from "./document.js";
 import createDocumentListFunction from "./document-list.js";
 import createDocumentPathsFunction from "./document-paths.js";
-import locales from "./locales.js";
+import createLocalesFunction from "./locales.js";
 import createMediaFunction from "./media.js";
 import createMediaListFunction from "./media-list.js";
 import mediaUrl from "./media-url.js";
@@ -15,7 +15,7 @@ const createReadFunctions = (config: SiteConfig) => ({
 	media: createMediaFunction(config),
 	mediaList: createMediaListFunction(config),
 	mediaUrl,
-	locales,
+	locales: createLocalesFunction(config),
 });
 
 export type SiteReadFunctions = ReturnType<typeof createReadFunctions>;

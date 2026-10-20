@@ -15,6 +15,7 @@ const bindSiteFunction = (
 				preview: render.state.preview?.token ?? null,
 				version: render.state.version,
 				path: render.state.path,
+				locale: render.state.locale,
 				tagCache: (...tags) => render.tagCache(...tags),
 				functions: {
 					document: (collection, options) =>

@@ -6,6 +6,7 @@ import type {
 import type { IslandEntry } from "@lucidkiln/core";
 import { storeKeys } from "../constants.js";
 import type { Site } from "../site/create-site-loader.js";
+import renderOptions from "../site/render-options.js";
 import type { SiteState } from "../types.js";
 
 const renderIsland = async (props: {
@@ -25,11 +26,16 @@ const renderIsland = async (props: {
 	const state: SiteState = {
 		toolkit: props.toolkit,
 		path: new URL(hono.req.url).pathname,
+		// The page that deferred the island read this locale; one the site no longer has falls back.
+		locale: props.site.config.locales.has(entry.locale)
+			? entry.locale
+			: props.site.config.defaultLocale,
 		preview: null,
 		version: props.site.config.getVersion,
 	};
 	const html = await props.site.kiln.render(entry.template, entry.props, {
-		state,
+		...renderOptions(state),
+		timeZone: entry.timeZone,
 	});
 	return hono.html(html, 200, {
 		"cache-control": "no-store",

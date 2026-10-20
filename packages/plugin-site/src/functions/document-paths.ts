@@ -5,7 +5,7 @@ import listDocumentPaths from "../content/list-document-paths.js";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
 
-/** Lists a collection's document URLs in every locale, such as for `{% export paths = documentPaths("page") %}`. */
+/** Lists a collection's document URLs in the site's locales, such as for `{% export paths = documentPaths("page") %}`. */
 const createDocumentPathsFunction = (config: SiteConfig) =>
 	withRender(
 		async (
@@ -15,7 +15,12 @@ const createDocumentPathsFunction = (config: SiteConfig) =>
 			const version = config.getVersion(collectionKey);
 			if (version === null) return [];
 			render.tagCache(contentCacheTags.collection(collectionKey));
-			return listDocumentPaths(render.state.toolkit, collectionKey, version);
+			return listDocumentPaths(
+				render.state.toolkit,
+				collectionKey,
+				version,
+				config.locales,
+			);
 		},
 	);
 

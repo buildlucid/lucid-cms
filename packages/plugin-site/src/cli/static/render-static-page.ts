@@ -5,6 +5,7 @@ import { HTML_CONTENT_TYPE } from "../../constants.js";
 import { SiteNotFoundError, SiteRedirectError } from "../../errors.js";
 import getRouteParams from "../../router/get-route-params.js";
 import type { Site } from "../../site/create-site-loader.js";
+import renderOptions from "../../site/render-options.js";
 import type { SiteState } from "../../types.js";
 import escapeHtml from "../../utils/escape-html.js";
 import findPageLinks from "./find-page-links.js";
@@ -40,7 +41,7 @@ const renderStaticPage = async (props: {
 		const body = await props.site.freshKiln.render(
 			match.data.template,
 			{ route: { path: routePath, params: getRouteParams(match) } },
-			{ state: props.state },
+			renderOptions(props.state),
 		);
 		await writeStaticFile(
 			props.outDir,

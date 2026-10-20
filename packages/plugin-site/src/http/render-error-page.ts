@@ -1,6 +1,7 @@
 import type { LucidHonoContext } from "@lucidcms/core/types";
 import { pageMarkup } from "../preview/page-markup.js";
 import type { Site } from "../site/create-site-loader.js";
+import renderOptions from "../site/render-options.js";
 import type { SiteState } from "../types.js";
 
 const renderErrorPage = async (props: {
@@ -21,7 +22,7 @@ const renderErrorPage = async (props: {
 	const html = await kiln.render(
 		props.template,
 		{ route: { path: state.path, params: {} } },
-		{ state },
+		renderOptions(state),
 	);
 	return props.hono.html(html, props.status);
 };

@@ -27,8 +27,7 @@ const toolkit = {
 			return {
 				error: undefined,
 				data: {
-					data: [{ route: { path: { en: "/en", fr: "/fr/" } } }],
-					count: 1,
+					items: [{ route: { path: { en: "/en", fr: "/fr/" } } }],
 				},
 			};
 		},
@@ -40,7 +39,7 @@ describe("warnUnbuiltPages", () => {
 		const warn = vi.fn();
 		await warnUnbuiltPages({
 			site: {
-				config: createSiteConfig(config, "production"),
+				config: createSiteConfig(config, {}, "production"),
 			} as Site,
 			toolkit,
 			collections: ["page", "blog"],
@@ -66,7 +65,7 @@ describe("warnUnbuiltPages", () => {
 		const warn = vi.fn();
 		await warnUnbuiltPages({
 			site: {
-				config: createSiteConfig(config, "production"),
+				config: createSiteConfig(config, {}, "production"),
 			} as Site,
 			toolkit,
 			collections: ["news", "page"],
@@ -78,5 +77,21 @@ describe("warnUnbuiltPages", () => {
 		expect(warn.mock.calls).toEqual([
 			["Couldn't check the URLs of 'news' documents: afterFetch failed"],
 		]);
+	});
+
+	test("only checks URLs in the site's locales", async () => {
+		const warn = vi.fn();
+		await warnUnbuiltPages({
+			site: {
+				config: createSiteConfig(config, { locales: ["en"] }, "production"),
+			} as Site,
+			toolkit,
+			collections: ["page"],
+			built: new Set(["/en"]),
+			links: new Map(),
+			publicPaths: new Set(),
+			warn,
+		});
+		expect(warn).not.toHaveBeenCalled();
 	});
 });

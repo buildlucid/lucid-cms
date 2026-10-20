@@ -12,12 +12,12 @@ const config = {
 	localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	collections: [{ key: "page", getData: { publishing: { environments: [] } } }],
 } as unknown as ResolvedLucidConfig;
-const siteConfig = createSiteConfig(config, null);
+const siteConfig = createSiteConfig(config, {}, null);
 const toolkit = {
 	documents: {
 		getMultiple: async () => ({
 			error: undefined,
-			data: { data: [{ route: { path: { en: "/en/about" } } }], count: 1 },
+			data: { items: [{ route: { path: { en: "/en/about" } } }] },
 		}),
 	},
 } as unknown as Toolkit;
@@ -47,7 +47,13 @@ const createSite = async (templates: Record<string, string>) => {
 const collect = async (templates: Record<string, string>, warn = vi.fn()) =>
 	collectPagePaths({
 		site: await createSite(templates),
-		state: { toolkit, path: "", preview: null, version: siteConfig.getVersion },
+		state: {
+			toolkit,
+			path: "",
+			locale: "en",
+			preview: null,
+			version: siteConfig.getVersion,
+		},
 		warn,
 	});
 

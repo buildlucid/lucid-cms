@@ -1,18 +1,17 @@
 import { LucidAPIError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
-import type { Toolkit } from "@lucidcms/core/types";
+import type {
+	ContentList,
+	LocalizedMedia,
+	MediaListItem,
+	Toolkit,
+} from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
-import toTemplateList, {
-	listDefaults,
-	type TemplateList,
-} from "../content/to-template-list.js";
-import toTemplateMedia, {
-	type TemplateMedia,
-} from "../content/to-template-media.js";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
 import type { MediaReadOptions } from "./media.js";
 import normalizeFilter from "./normalize-filter.js";
+import readLocale from "./read-locale.js";
 
 type ListQuery = NonNullable<
 	NonNullable<Parameters<Toolkit["media"]["getMultiple"]>[0]>["query"]
@@ -28,33 +27,29 @@ export type MediaListOptions = MediaReadOptions & {
 	perPage?: number;
 };
 
-/** Lists library media, as the content API does. */
+/** Lists library media, as the content API does, without audio transcripts. */
 const createMediaListFunction = (config: SiteConfig) =>
 	withRender(
 		async (
 			render: RenderInfo<SiteState>,
 			options: MediaListOptions = {},
-		): Promise<TemplateList<TemplateMedia>> => {
-			const page = options.page ?? listDefaults.page;
-			const perPage = options.perPage ?? listDefaults.perPage;
+		): Promise<ContentList<LocalizedMedia<MediaListItem>>> => {
 			render.tagCache(contentCacheTags.media);
 
 			const response = await render.state.toolkit.media.getMultiple({
+				libraryOnly: true,
 				query: {
 					filter: normalizeFilter(options.filter) as ListQuery["filter"],
 					sort: options.sort,
-					page,
-					perPage,
+					page: options.page,
+					perPage: options.perPage,
 				},
-				libraryOnly: true,
+				locale: readLocale(config, render, options.locale),
+				fallbackLocale: options.fallbackLocale,
 			});
 			if (response.error) throw new LucidAPIError(response.error);
 
-			const locale = options.locale ?? config.defaultLocale;
-			return toTemplateList(
-				response.data.data.map((media) => toTemplateMedia(media, locale)),
-				{ total: response.data.count, page, perPage },
-			);
+			return response.data;
 		},
 	);
 

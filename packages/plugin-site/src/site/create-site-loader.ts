@@ -123,6 +123,7 @@ const createSiteLoader = (
 ) => {
 	const siteConfig = createSiteConfig(
 		config,
+		options,
 		resolveSiteEnvironment(config, options.environment),
 	);
 	let site: Promise<Site> | undefined;

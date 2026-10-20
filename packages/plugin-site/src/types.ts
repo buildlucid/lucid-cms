@@ -1,22 +1,21 @@
 import type {
 	CollectionDocumentKey,
+	ContentBrick,
+	ContentDocument,
+	ContentList,
 	Locale,
+	LocalizedMedia,
+	MediaListItem,
 	Toolkit,
 } from "@lucidcms/core/types";
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { KilnOptions, RenderAware, RenderInfo } from "@lucidkiln/core";
-import type {
-	TemplateBrick,
-	TemplateDocument,
-} from "./content/to-template-document.js";
-import type { TemplateList } from "./content/to-template-list.js";
-import type { TemplateMedia } from "./content/to-template-media.js";
-import type { TemplateRichTextNode } from "./content/to-template-rich-text.js";
 import type { DocumentReadOptions } from "./functions/document.js";
 import type { DocumentListOptions } from "./functions/document-list.js";
 import type editable from "./functions/editable.js";
 import type footer from "./functions/footer.js";
 import type head from "./functions/head.js";
-import type locales from "./functions/locales.js";
+import type createLocalesFunction from "./functions/locales.js";
 import type createMediaFunction from "./functions/media.js";
 import type { MediaReadOptions } from "./functions/media.js";
 import type createMediaListFunction from "./functions/media-list.js";
@@ -39,7 +38,7 @@ declare module "@lucidkiln/core" {
 				render: RenderInfo<SiteState>,
 				collection: Key,
 				options?: DocumentReadOptions,
-			) => Promise<TemplateDocument<Key> | null>
+			) => Promise<ContentDocument<Key, true> | null>
 		>;
 		/** Lists documents as `{ items, pagination }`; scoped previews fall back to published content. */
 		documentList: RenderAware<
@@ -47,9 +46,9 @@ declare module "@lucidkiln/core" {
 				render: RenderInfo<SiteState>,
 				collection: Key,
 				options?: DocumentListOptions,
-			) => Promise<TemplateList<TemplateDocument<Key>>>
+			) => Promise<ContentList<ContentDocument<Key, true>>>
 		>;
-		/** A collection's document URLs in every locale, such as for `{% export paths = documentPaths("page") %}`. */
+		/** A collection's document URLs in the site's locales, such as for `{% export paths = documentPaths("page") %}`. */
 		documentPaths: RenderAware<
 			(
 				render: RenderInfo<SiteState>,
@@ -62,8 +61,8 @@ declare module "@lucidkiln/core" {
 		mediaList: ReturnType<typeof createMediaListFunction>;
 		/** A media item's URL, such as `mediaUrl(image, { preset: "card", format: "webp" })`. */
 		mediaUrl: typeof mediaUrl;
-		/** The enabled content locales. */
-		locales: typeof locales;
+		/** The site's content locales, such as for language links. */
+		locales: ReturnType<typeof createLocalesFunction>;
 		/** Renders a rich text field or node as HTML; embedded bricks and document nodes are yours to render. */
 		richText: typeof richText;
 		/** Preview attributes for `<h1{{ editable(page, "title") }}>`, empty outside previews. */
@@ -82,11 +81,16 @@ declare module "@lucidkiln/core" {
 		viteAsset: ReturnType<typeof createViteAssetFunction>;
 	}
 
+	interface KilnGlobals {
+		/** The content locale this render reads, such as for `<html lang="{{ locale }}">`. */
+		locale: string;
+	}
+
 	interface KilnTypes {
-		Document: TemplateDocument;
-		Brick: TemplateBrick;
-		Media: TemplateMedia;
-		RichText: TemplateRichTextNode;
+		Document: ContentDocument<string, true>;
+		Brick: ContentBrick;
+		Media: LocalizedMedia;
+		RichText: RichTextJSON;
 	}
 }
 
@@ -129,12 +133,26 @@ export type SitePreview = Extract<
 	{ kind: "preview" }
 >;
 
+/** Inputs to the site's `locale` option, with only the path available during static builds. */
+export type SiteLocaleContext = {
+	/** Decoded request path, without a trailing slash. */
+	path: string;
+	/** The request URL, or null in static builds. */
+	url: URL | null;
+	/** Reads a request header and adds it to the response's `Vary`; null in static builds. */
+	header: (name: string) => string | null;
+	/** Reads a request cookie and adds `Cookie` to the response's `Vary`; undefined in static builds. */
+	cookie: (name: string) => string | undefined;
+};
+
 /** Render state available to custom functions through `withRender`. */
 export type SiteState = {
 	/** Document reads are tracked for page cache invalidation. */
 	toolkit: Toolkit;
 	/** Decoded request path, without a trailing slash. */
 	path: string;
+	/** The content locale reads use unless given another, also the `locale` global. */
+	locale: string;
 	/** Pass preview.token to toolkit reads to use preview content. */
 	preview: SitePreview | null;
 	/** Returns the collection's site version, or null if excluded. */
@@ -151,6 +169,8 @@ export type SiteFunctionContext = {
 	version: (collectionKey: string) => string | null;
 	/** Decoded request path, without a trailing slash. */
 	path: string;
+	/** The content locale this render reads. */
+	locale: string;
 	/** Tags the cached section this call runs in, for reads the built-in functions don't make. */
 	tagCache: (...tags: string[]) => void;
 	/** The built-in template functions, handling the site version, previews and cache tags. */
@@ -158,20 +178,20 @@ export type SiteFunctionContext = {
 		document: <Key extends CollectionDocumentKey>(
 			collection: Key,
 			options?: DocumentReadOptions,
-		) => Promise<TemplateDocument<Key> | null>;
+		) => Promise<ContentDocument<Key, true> | null>;
 		documentList: <Key extends CollectionDocumentKey>(
 			collection: Key,
 			options?: DocumentListOptions,
-		) => Promise<TemplateList<TemplateDocument<Key>>>;
-		/** A collection's document URLs in every locale, the shape a page's `paths` export accepts. */
+		) => Promise<ContentList<ContentDocument<Key, true>>>;
+		/** A collection's document URLs in the site's locales, the shape a page's `paths` export accepts. */
 		documentPaths: (collection: CollectionDocumentKey) => Promise<string[]>;
 		media: (
 			id: number,
 			options?: MediaReadOptions,
-		) => Promise<TemplateMedia | null>;
+		) => Promise<LocalizedMedia | null>;
 		mediaList: (
 			options?: MediaListOptions,
-		) => Promise<TemplateList<TemplateMedia>>;
+		) => Promise<ContentList<LocalizedMedia<MediaListItem>>>;
 		mediaUrl: (
 			media: { key: string } | string,
 			options?: MediaUrlOptions,
@@ -189,6 +209,10 @@ export type SitePluginOptions = {
 	environment?: string;
 	/** Defaults to ssr. */
 	mode?: SiteMode;
+	/** Content locales the site renders, defaulting to every CMS locale. */
+	locales?: string[];
+	/** Chooses a render's locale from the site's locales, such as by path prefix, domain or cookie, or uses the default locale when omitted. */
+	locale?: (context: SiteLocaleContext) => string;
 	/** Default `Cache-Control` for SSR and ISR pages, overridable per page; prefer `s-maxage` over browser caching that cannot be purged and bypass CDN caches for the `lucid_preview` cookie. */
 	cacheControl?: string;
 	static?: {

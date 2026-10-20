@@ -4,16 +4,15 @@
 
 {% set page = document("page", {
 	filter: { _fullSlug: route.path },
-	include: ["bricks", "refs.media", "refs.documents"],
+	include: ["bricks"],
 }) ?? notFound() %}
 {% set media = mediaList({ filter: { type: 'image' } }) %}
-{% set lang = page.locale %}
 
 {% block title %}{{ page.fields.page_title }} | Playground{% endblock %}
 
 {% block content %}
 	{% component "components/card" with { title: page.fields.page_title, editable: editable(page, "page_title") } %}
-		{% fill "meta" %}<a href="{{ page.url }}">{{ page.url }}</a>{% endfill %}
+		{% fill "meta" %}<a href="{{ page.route?.path }}">{{ page.route?.path }}</a>{% endfill %}
 		<p>Document {{ page.id }}, rendered in {{ page.locale }}.</p>
 		<p>{{ pageGreeting("Will") }}</p>
 	{% endcomponent %}
@@ -22,7 +21,7 @@
 		{% include "sections/" ~ brick.key with { brick: brick } %}
 	{% endfor %}
 
-	{% island "islands/latest-pages" with { locale: page.locale } %}
+	{% island "islands/latest-pages" %}
 		<p>Loading the latest pages…</p>
 	{% endisland %}
 

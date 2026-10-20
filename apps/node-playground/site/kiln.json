@@ -21,12 +21,7 @@
 	],
 	"filters": [],
 	"tests": [],
-	"globals": [],
-	"types": [
-		"Brick",
-		"Document",
-		"Media",
-		"RichText"
-	],
+	"globals": ["locale"],
+	"types": ["Brick", "Document", "Media", "RichText"],
 	"htmlChecks": true
 }

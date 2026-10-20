@@ -84,7 +84,10 @@ const createSiteKiln = (props: {
 		timeZone: kiln.timeZone,
 		// Enables dump() while developing.
 		debug: props.data?.kind === "dev",
-		globals: merge("global", (source) => source.globals),
+		// Each render sets `locale` to its own; the default here lets checks and types know it.
+		globals: merge("global", (source) => source.globals, {
+			locale: props.config.defaultLocale,
+		}),
 		functions: bindSiteFunctions(
 			merge("function", (source) => source.functions, functions),
 			reads,
