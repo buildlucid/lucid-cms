@@ -29,6 +29,11 @@ export const LucidDocument = Node.create({
 						? { "data-lucid-document-id": String(attributes.documentId) }
 						: {},
 			},
+			/** The linked document, as content API responses fill it in. */
+			document: {
+				default: null,
+				renderHTML: () => ({}),
+			},
 		};
 	},
 	parseHTML() {

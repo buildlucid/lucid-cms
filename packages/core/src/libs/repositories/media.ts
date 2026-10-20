@@ -9,6 +9,15 @@ import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
+const ownershipConditions: Record<
+	MediaOwnership["type"],
+	RawBuilder<SqlBool>
+> = {
+	library: sql<SqlBool>`(lucid_media.owner_user_id is null and not lucid_media.is_system)`,
+	user: sql<SqlBool>`lucid_media.owner_user_id is not null`,
+	system: sql<SqlBool>`lucid_media.is_system`,
+};
+
 export default class MediaRepository extends StaticRepository<"lucid_media"> {
 	constructor(db: LucidDatabase) {
 		super(db, mediaTable);
@@ -447,10 +456,15 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			V,
 			{
 				ids: number[];
+				/** Leaves out media this access level can't read. */
+				access?: MediaListAccess;
 			}
 		>,
 	) {
-		const query = this.db
+		const accessCondition = props.access
+			? this.#accessCondition(props.access)
+			: undefined;
+		const selected = this.db
 			.selectFrom("lucid_media")
 			.select((eb) => [
 				"id",
@@ -671,6 +685,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.where("id", "in", props.ids)
 			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
 			.where("parent_media_id", "is", null);
+		const query = accessCondition ? selected.where(accessCondition) : selected;
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleByIds",
@@ -803,29 +818,12 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			{
 				queryParams: GetMultipleQueryParams;
 				access: MediaListAccess;
-				/** Loads audio transcripts, which lists otherwise leave out. */
-				transcripts?: boolean;
 			}
 		>,
 	) {
-		const ownershipConditions: Record<
-			MediaOwnership["type"],
-			RawBuilder<SqlBool>
-		> = {
-			library: sql<SqlBool>`(lucid_media.owner_user_id is null and not lucid_media.is_system)`,
-			user: sql<SqlBool>`lucid_media.owner_user_id is not null`,
-			system: sql<SqlBool>`lucid_media.is_system`,
-		};
-		//* other users' personal media needs `media:read-all`
-		const accessCondition =
-			props.access.type === "all"
-				? undefined
-				: props.access.type === "library"
-					? ownershipConditions.library
-					: sql<SqlBool>`(${ownershipConditions.library} or lucid_media.owner_user_id = ${props.access.userId})`;
 		//* library media unless the ownership filter asks for more
 		const conditions = [
-			accessCondition,
+			this.#accessCondition(props.access),
 			props.queryParams.filter?.ownership === undefined
 				? ownershipConditions.library
 				: undefined,
@@ -892,8 +890,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 										"lucid_media_translations.summary",
 										"lucid_media_translations.locale_code",
 									])
-									.$if(props.transcripts === true, (qb) =>
-										qb.select("lucid_media_translations.transcript"),
+									.$if(
+										props.queryParams.include?.includes("transcripts") === true,
+										(qb) => qb.select("lucid_media_translations.transcript"),
 									)
 									.whereRef(
 										"lucid_media_translations.media_id",
@@ -1087,5 +1086,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"crop",
 			],
 		});
+	}
+	/** The media an access level can read; other users' personal media needs `media:read-all`. */
+	#accessCondition(access: MediaListAccess): RawBuilder<SqlBool> | undefined {
+		if (access.type === "all") return undefined;
+		if (access.type === "library") return ownershipConditions.library;
+		return sql<SqlBool>`(${ownershipConditions.library} or lucid_media.owner_user_id = ${access.userId})`;
 	}
 }

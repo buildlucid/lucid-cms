@@ -2,7 +2,7 @@ import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
 import { getPagination } from "../../../../libs/tools/pagination.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
-import getMultiple from "../../content/get-multiple.js";
+import getMultipleWithRefs from "../../content/get-multiple-with-refs.js";
 import getEditLink from "../../helpers/get-edit-link.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
 import {
@@ -42,7 +42,7 @@ const findDocuments: ServiceFn<
 	if (localeRes.error) return localeRes;
 	const contentLocale = localeRes.data;
 
-	const documentsRes = await getMultiple(context, {
+	const documentsRes = await getMultipleWithRefs(context, {
 		collectionKey: props.input.collectionKey,
 		versionType: props.input.version,
 		query: props.input.query,

@@ -3,7 +3,7 @@ import { copy } from "../../../../libs/i18n/index.js";
 import type { ToolkitActor } from "../../../../libs/permission/toolkit-actor.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
-import getSingle from "../../content/get-single.js";
+import getSingleWithRefs from "../../content/get-single-with-refs.js";
 import getEditLink from "../../helpers/get-edit-link.js";
 import projectEditableDocument from "../../helpers/project-editable-document.js";
 import readDocumentContent from "../../helpers/read-document-content.js";
@@ -66,7 +66,7 @@ const getDocument: ServiceFn<
 	const requestId = pinned?.requestId ?? null;
 
 	//* bricks come from the editable content below; the content read still includes them for their refs
-	const documentRes = await getSingle(context, {
+	const documentRes = await getSingleWithRefs(context, {
 		collectionKey: input.collectionKey,
 		versionType: pinned?.versionType ?? input.version,
 		versionId: pinned?.versionId ?? undefined,

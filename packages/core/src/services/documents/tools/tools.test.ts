@@ -43,6 +43,7 @@ import leave from "../../document-editors/leave.js";
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
 import syncLocales from "../../sync/sync-locales.js";
+import getContentDocument from "../content/get-single-with-refs.js";
 import readDocumentContent from "../helpers/read-document-content.js";
 import resolveContentRefs from "../helpers/resolve-content-refs.js";
 import publish from "../publish.js";
@@ -571,9 +572,10 @@ test("direct updates write one locale and merge bricks and items by ref", async 
 		updated_by_run_id: run.runId,
 	});
 
-	const attributed = await createToolkit(context).documents.getSingle({
+	// Content API reads leave out agent runs, so read before they're filled in.
+	const attributed = await getContentDocument(context, {
 		collectionKey: pages.key,
-		version: "latest",
+		versionType: "latest",
 		query: {
 			filter: { id: { value: documentId } },
 			include: ["meta", "refs.agents"],

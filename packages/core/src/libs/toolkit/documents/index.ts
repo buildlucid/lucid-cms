@@ -2,24 +2,13 @@ import type {
 	CollectionDocumentKey,
 	CollectionDocumentVersionKey,
 } from "../../../exports/types.js";
-import type {
-	ServiceContext,
-	ServiceResponse,
-} from "../../../utils/services/types.js";
+import type { ServiceContext } from "../../../utils/services/types.js";
 import createSingle from "./create-single/index.js";
 import deleteMultiple from "./delete-multiple/index.js";
 import deleteSingle from "./delete-single/index.js";
 import getEditable from "./get-editable/index.js";
-import type {
-	ToolkitDocumentsGetMultipleInput,
-	ToolkitDocumentsGetMultipleResult,
-} from "./get-multiple/index.js";
-import getMultiple from "./get-multiple/index.js";
-import type {
-	ToolkitDocumentsGetSingleInput,
-	ToolkitDocumentsGetSingleResult,
-} from "./get-single/index.js";
-import getSingle from "./get-single/index.js";
+import createGetMultiple from "./get-multiple/index.js";
+import createGetSingle from "./get-single/index.js";
 import notifyChange from "./notify-change/index.js";
 import patchSingle from "./patch-single/index.js";
 import updateSingle from "./update-single/index.js";
@@ -130,10 +119,7 @@ export type ToolkitDocuments = {
 		input: Parameters<typeof deleteMultiple>[1],
 	) => ReturnType<typeof deleteMultiple>;
 	/**
-	 * Returns multiple documents from a collection.
-	 *
-	 * The response includes the matching documents and a total count.
-	 * Pass an array to `query.filter` when each object should be an OR branch.
+	 * Returns document `items` with `pagination`, resolving media, users and relations through `depth`, selecting `locale` when supplied and treating `query.filter` arrays as OR branches.
 	 *
 	 * @example
 	 * ```ts
@@ -146,33 +132,28 @@ export type ToolkitDocuments = {
 	 * });
 	 * ```
 	 */
-	getMultiple: <TCollectionKey extends CollectionDocumentKey>(
-		input: ToolkitDocumentsGetMultipleInput<TCollectionKey>,
-	) => ServiceResponse<ToolkitDocumentsGetMultipleResult<TCollectionKey>>;
+	getMultiple: ReturnType<typeof createGetMultiple>;
 	/**
-	 * Returns a single document from a collection.
-	 *
-	 * Useful when you expect one matching document for a slug, ID, or other filter.
-	 * Pass an array to `query.filter` when each object should be an OR branch.
+	 * Returns one document with hydrated media and users, relations through `depth`, ordered builder bricks, keyed fixed bricks, optional `locale` selection and OR branches from `query.filter` arrays.
 	 *
 	 * @example
 	 * ```ts
 	 * await toolkit.documents.getSingle({
 	 *   collectionKey: "page",
 	 *   version: "published",
+	 *   locale: "en",
 	 *   query: {
 	 *     filter: {
 	 *       _fullSlug: {
 	 *         value: "/about",
 	 *       },
 	 *     },
+	 *     include: ["bricks"],
 	 *   },
 	 * });
 	 * ```
 	 */
-	getSingle: <TCollectionKey extends CollectionDocumentKey>(
-		input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
-	) => ServiceResponse<ToolkitDocumentsGetSingleResult<TCollectionKey>>;
+	getSingle: ReturnType<typeof createGetSingle>;
 	/** Invalidates cached content after direct writes; skips saves and authoring hooks. */
 	notifyChange: (
 		input: Parameters<typeof notifyChange>[1],
@@ -189,8 +170,8 @@ export const createDocumentsToolkit = (
 	patchSingle: (input) => patchSingle(context, input),
 	deleteSingle: (input) => deleteSingle(context, input),
 	deleteMultiple: (input) => deleteMultiple(context, input),
-	getMultiple: (input) => getMultiple(context, input),
-	getSingle: (input) => getSingle(context, input),
+	getMultiple: createGetMultiple(context),
+	getSingle: createGetSingle(context),
 	notifyChange: (input) => notifyChange(context, input),
 });
 

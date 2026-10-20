@@ -14,7 +14,7 @@ import getSingle, {
 /** Reads users as the system or as a user, who only sees what the admin would show them. */
 export type ToolkitUsers = {
 	/**
-	 * Lists users and their total count before pagination, including deleted users unless filtered out.
+	 * Lists users a page at a time as `items` with its `pagination`, including deleted users unless filtered out.
 	 *
 	 * @example
 	 * ```ts

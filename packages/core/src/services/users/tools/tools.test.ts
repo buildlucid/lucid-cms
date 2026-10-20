@@ -398,12 +398,12 @@ test("toolkit reads users with what the actor could see in the admin", async () 
 		query,
 	});
 	assert(asEditor.data, JSON.stringify(asEditor.error));
-	expect(asEditor.data.count).toBe(1);
-	expect(asEditor.data.data[0]).not.toHaveProperty("invitationAccepted");
+	expect(asEditor.data.pagination.total).toBe(1);
+	expect(asEditor.data.items[0]).not.toHaveProperty("invitationAccepted");
 
 	const asSystem = await users.getMultiple({ query });
 	assert(asSystem.data, JSON.stringify(asSystem.error));
-	expect(asSystem.data.data[0]).toMatchObject({
+	expect(asSystem.data.items[0]).toMatchObject({
 		id: grace,
 		invitationAccepted: true,
 	});

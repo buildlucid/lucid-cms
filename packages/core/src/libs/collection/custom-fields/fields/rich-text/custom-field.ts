@@ -5,10 +5,12 @@ import {
 import z from "zod";
 import type { ServiceResponse } from "../../../../../exports/types.js";
 import { getObject } from "../../../../../utils/helpers/get-typed-value.js";
+import isPlainObject from "../../../../../utils/helpers/is-plain-object.js";
 import richTextHasContent from "../../../../../utils/helpers/rich-text-has-content.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
+	CustomFieldContentFormatContext,
 	CustomFieldErrorItem,
 	CustomFieldResponseFormatContext,
 	CustomFieldValidationError,
@@ -120,6 +122,15 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 		if (!responseValue || !context) return responseValue;
 
 		return hydrateRichTextValue(responseValue, context);
+	}
+	/** Hydrates rich text again for content API reads, in the read's locale with its fallback, and fills in linked documents and embedded bricks. */
+	override formatContentValue(
+		value: unknown,
+		context: CustomFieldContentFormatContext,
+	) {
+		return isPlainObject(value)
+			? hydrateRichTextValue(value as RichTextJSON, context)
+			: value;
 	}
 	override normalizeInputValue(value: unknown) {
 		if (!value || typeof value !== "object" || Array.isArray(value)) {

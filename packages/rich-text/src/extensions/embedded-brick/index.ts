@@ -18,6 +18,11 @@ export const LucidEmbeddedBrick = Node.create({
 						? { "data-lucid-brick-ref": attributes.ref }
 						: {},
 			},
+			/** The embedded brick, as content API responses fill it in. */
+			brick: {
+				default: null,
+				renderHTML: () => ({}),
+			},
 		};
 	},
 	parseHTML() {

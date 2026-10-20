@@ -4,6 +4,7 @@ import { copy } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
+	CustomFieldContentFormatContext,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
 	FieldConfig,
@@ -108,6 +109,15 @@ class MediaCustomField extends CustomField<"media"> {
 			value,
 			this.config.multiple,
 		) satisfies FieldResponse<"media">["value"];
+	}
+	/** Gives content API reads the media the IDs point to, leaving out any the read can't reach. */
+	override formatContentValue(
+		value: unknown,
+		context: CustomFieldContentFormatContext,
+	) {
+		return Array.isArray(value)
+			? value.flatMap((id) => context.media(id) ?? [])
+			: value;
 	}
 	override get relationValueColumn() {
 		return "media_id";

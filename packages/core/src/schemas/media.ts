@@ -3,6 +3,10 @@ import type { ControllerSchema } from "../exports/types.js";
 import type { MediaType } from "../types/response.js";
 import mediaAdapterDataSchema from "../utils/media/adapter-data.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
+import {
+	contentFallbackLocaleSchema,
+	contentLocaleSchema,
+} from "./shared/content.js";
 
 const mediaTranslationsResponseSchema = z
 	.union([z.string(), z.record(z.string(), z.string().nullable())])
@@ -478,10 +482,16 @@ export const mediaResponseSchema = z.union([
 	}),
 ]);
 
-/** List responses omit audio transcripts, which single-media responses include. */
+/** List responses include audio transcripts only when requested with `transcripts`, while single-media responses always include them. */
 export const mediaListItemResponseSchema = z.union([
 	...mediaTypeResponseSchemas,
-	z.object(mediaAudioResponseShape),
+	z.object({
+		...mediaAudioResponseShape,
+		transcript: mediaTranslationsResponseSchema.optional().meta({
+			description:
+				"The words spoken, as a text alternative to the audio, when the list includes transcripts",
+		}),
+	}),
 ]);
 
 const mediaGetMultipleQueryStringSchema = z
@@ -539,6 +549,7 @@ const mediaGetMultipleQueryStringSchema = z
 		sort: queryString.schema.sort(
 			"createdAt,updatedAt,title,mimeType,extension",
 		),
+		include: queryString.schema.include("transcripts"),
 		page: queryString.schema.page,
 		perPage: queryString.schema.perPage,
 	})
@@ -598,6 +609,8 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 			}),
 		)
 		.optional(),
+	/** Audio transcripts, which lists otherwise leave out. */
+	include: z.array(z.enum(["transcripts"])).optional(),
 	page: queryFormatted.schema.page,
 	perPage: queryFormatted.schema.perPage,
 });
@@ -1317,7 +1330,10 @@ export const controllerSchemas = {
 		getSingle: {
 			body: undefined,
 			query: {
-				string: undefined,
+				string: z.object({
+					locale: contentLocaleSchema.optional(),
+					fallbackLocale: contentFallbackLocaleSchema.optional(),
+				}),
 				formatted: undefined,
 			},
 			params: z.object({
@@ -1330,7 +1346,10 @@ export const controllerSchemas = {
 		} satisfies ControllerSchema,
 		getMultiple: {
 			query: {
-				string: mediaGetMultipleQueryStringSchema,
+				string: mediaGetMultipleQueryStringSchema.extend({
+					locale: contentLocaleSchema.optional(),
+					fallbackLocale: contentFallbackLocaleSchema.optional(),
+				}),
 				formatted: mediaGetMultipleQueryFormattedSchema,
 			},
 			params: undefined,

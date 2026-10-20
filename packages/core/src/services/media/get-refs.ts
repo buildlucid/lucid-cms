@@ -1,10 +1,15 @@
 import type { MediaRefData } from "../../libs/refs/media/types.js";
 import type { RefResourceTargets } from "../../libs/refs/types.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
+import {
+	getMediaListAccess,
+	type MediaActor,
+} from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+/** Fetches referenced media, leaving out any the actor can't read. */
 const getMediaRefs: ServiceFn<
-	[{ targets: RefResourceTargets }],
+	[{ targets: RefResourceTargets; actor: MediaActor }],
 	MediaRefData
 > = async (context, data) => {
 	const ids = Array.from(
@@ -21,6 +26,7 @@ const getMediaRefs: ServiceFn<
 	const Media = new MediaRepository(context.db);
 	const mediaRes = await Media.selectMultipleByIds({
 		ids,
+		access: getMediaListAccess(data.actor),
 		validation: {
 			enabled: true,
 		},

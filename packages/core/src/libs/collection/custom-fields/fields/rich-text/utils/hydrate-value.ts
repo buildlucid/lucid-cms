@@ -8,8 +8,16 @@ import type {
 	UserRef,
 } from "../../../../../../types/response.js";
 import { getObject } from "../../../../../../utils/helpers/get-typed-value.js";
-import type { CustomFieldResponseFormatContext } from "../../../types.js";
-import { getLocalizedString, getMediaRenderData } from "./media-render-data.js";
+import formatter from "../../../../../formatters/helpers.js";
+import type {
+	CustomFieldContentFormatContext,
+	CustomFieldResponseFormatContext,
+} from "../../../types.js";
+import {
+	getLocalizedString,
+	getMediaRenderData,
+	type RichTextTextLocale,
+} from "./media-render-data.js";
 import { isRichTextUserVariableField } from "./reference-validation.js";
 
 type HydratableDocumentRef = DocumentRef<
@@ -46,13 +54,24 @@ const isUserRef = (value: unknown): value is HydratableUserRef => {
 	);
 };
 
+/** A translation in the read's locale, or its fallback when empty. */
+const pickTranslation = (
+	translations: Record<string, unknown>,
+	read: RichTextTextLocale & { locale: string },
+) =>
+	formatter.pickTranslation(translations, {
+		locale: read.locale,
+		fallbackLocale: read.fallbackLocale ?? null,
+	});
+
 const getDocumentFieldValue = (
 	reference: HydratableDocumentRef,
 	fieldKey: string,
-	locale: string | null,
+	read: RichTextTextLocale,
 ): string | number | boolean | null => {
 	const field = reference.fields?.[fieldKey];
 	const fieldRecord = getObject(field);
+	const { locale } = read;
 	let value: unknown = field;
 
 	if (
@@ -60,14 +79,16 @@ const getDocumentFieldValue = (
 		("value" in fieldRecord || "translations" in fieldRecord)
 	) {
 		const translations = getObject(fieldRecord.translations);
-		value = translations
-			? ((locale === null ? undefined : translations[locale]) ??
-				fieldRecord.value)
-			: fieldRecord.value;
+		value =
+			translations && locale !== null
+				? (pickTranslation(translations, { ...read, locale }) ??
+					fieldRecord.value)
+				: fieldRecord.value;
 	} else if (fieldRecord) {
 		value =
-			(locale === null ? undefined : fieldRecord[locale]) ??
-			Object.values(fieldRecord).find((item) => item !== undefined);
+			locale === null
+				? Object.values(fieldRecord).find((item) => item !== undefined)
+				: pickTranslation(fieldRecord, { ...read, locale });
 	}
 
 	return typeof value === "string" ||
@@ -82,10 +103,16 @@ const getUserFieldValue = (
 	fieldKey: RichTextUserVariableField,
 ): string | null => reference[fieldKey];
 
-/** Adds response-only render values while preserving each reference identity. */
+/** Adds response-only render values while preserving reference identity and hydrating supplied `document` and `brick` targets for content API reads. */
 const hydrateRichTextValue = (
 	value: RichTextJSON,
-	context: CustomFieldResponseFormatContext,
+	context: CustomFieldResponseFormatContext &
+		Partial<
+			Pick<
+				CustomFieldContentFormatContext,
+				"document" | "brick" | "documentLocale"
+			>
+		>,
 ): RichTextJSON => {
 	const documents = (context.refs?.documents ?? []).filter(isDocumentRef);
 	const media = (context.refs?.media ?? []).filter(isMediaRef);
@@ -107,9 +134,15 @@ const hydrateRichTextValue = (
 				typeof attrs.mediaId === "number"
 					? mediaMap.get(attrs.mediaId)
 					: undefined;
-			attrs.media = reference
-				? getMediaRenderData(reference, context.locale)
-				: null;
+			attrs.media = reference ? getMediaRenderData(reference, context) : null;
+		}
+
+		if (node.type === "lucidEmbeddedBrick" && context.brick) {
+			attrs.brick = context.brick(attrs.ref);
+		}
+
+		if (node.type === "lucidDocument" && context.document) {
+			attrs.document = context.document(attrs.collectionKey, attrs.documentId);
 		}
 
 		if (node.type === "lucidVariable") {
@@ -121,7 +154,11 @@ const hydrateRichTextValue = (
 						: undefined;
 				attrs.value =
 					reference && typeof attrs.fieldKey === "string"
-						? getDocumentFieldValue(reference, attrs.fieldKey, context.locale)
+						? getDocumentFieldValue(
+								reference,
+								attrs.fieldKey,
+								context.documentLocale?.(reference.collectionKey) ?? context,
+							)
 						: null;
 			} else if (
 				attrs.source === "user" &&
@@ -160,7 +197,11 @@ const hydrateRichTextValue = (
 							markAttrs.href =
 								typeof path === "string"
 									? path
-									: getLocalizedString(path, context.locale) || null;
+									: getLocalizedString(
+											path,
+											context.documentLocale?.(markAttrs.collectionKey) ??
+												context,
+										) || null;
 							return { ...mark, attrs: markAttrs };
 						}),
 					}

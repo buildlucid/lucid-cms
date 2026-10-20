@@ -1,5 +1,11 @@
 import type { BooleanInt } from "../db/types.js";
 
+/** The locale a content read picks translations in, and the one it falls back to when a translation is empty. */
+export type ContentReadLocale = {
+	locale: string;
+	fallbackLocale: string | null;
+};
+
 /** SQLite CURRENT_TIMESTAMP output, eg. `2026-10-06 00:35:14`. UTC, but carries no zone. */
 const SQLITE_TIMESTAMP = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$/;
 
@@ -69,6 +75,23 @@ function formatBoolean(bool: BooleanInt | null | undefined): boolean | null {
 	return bool === 1;
 }
 
+/** Treats missing values and empty strings as empty text eligible for locale fallback. */
+const isEmptyText = (value: unknown) =>
+	value === null || value === undefined || value === "";
+
+/** Picks the requested translation or its fallback using the field's emptiness check. */
+const pickTranslation = (
+	translations: Record<string, unknown>,
+	read: ContentReadLocale,
+	isEmpty: (value: unknown) => boolean = isEmptyText,
+): unknown => {
+	const value = translations[read.locale];
+	if (!isEmpty(value) || read.fallbackLocale === null) {
+		return value ?? null;
+	}
+	return translations[read.fallbackLocale] ?? value ?? null;
+};
+
 export default {
 	formatDate,
 	parseJSON,
@@ -76,4 +99,5 @@ export default {
 	parseCount,
 	normalizeDate,
 	formatBoolean,
+	pickTranslation,
 };

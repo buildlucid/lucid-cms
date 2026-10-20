@@ -8,8 +8,10 @@ import type {
 	QueryFilters,
 	QueryParamFilters,
 } from "../../types/query-params.js";
+import type { ContentPagination } from "../../types/response.js";
 import decodeError from "../../utils/errors/decode-error.js";
 import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
+import getLastPage from "../../utils/helpers/get-last-page.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import { copy, type ServerCopyDescriptor } from "../i18n/index.js";
 
@@ -187,3 +189,14 @@ export const runToolkitService = async <T, TInput = never>(
 		} satisfies ResolvedServiceResponse<T>;
 	}
 };
+
+/** Where a page of `total` matches is, as the content API's response `meta` reports it. */
+export const toPagination = (
+	total: number,
+	query: { page: number; perPage: number },
+): ContentPagination => ({
+	currentPage: query.page,
+	perPage: query.perPage,
+	total,
+	lastPage: getLastPage(total, query.perPage),
+});

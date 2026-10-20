@@ -182,12 +182,15 @@ const createRenderMappings = <
 
 	nodeMapping[richTextNodeNames.document] = ({ node, children }) => {
 		const nodeJSON = node.toJSON() as RichTextJSON;
-		const document = resolveDocumentNodeTarget(
-			sourceDocument,
-			refs,
-			node.attrs.collectionKey,
-			node.attrs.documentId,
-		);
+		// Content API responses fill the document in; otherwise it comes from the source document's refs.
+		const document =
+			(node.attrs.document as RichTextRenderDocument<TDocument> | null) ??
+			resolveDocumentNodeTarget(
+				sourceDocument,
+				refs,
+				node.attrs.collectionKey,
+				node.attrs.documentId,
+			);
 		return renderWithCallback({
 			renderer: renderers?.document,
 			fallback: renderers?.fallback,
@@ -233,8 +236,10 @@ const createRenderMappings = <
 	nodeMapping[richTextNodeNames.embeddedBrick] = ({ node, children }) => {
 		const nodeJSON = node.toJSON() as RichTextJSON;
 		const ref = node.attrs.ref;
+		// Content API responses fill the brick in; otherwise it comes from the source document's bricks.
 		const brick =
-			typeof ref === "string" ? (embeddedBricks.get(ref) ?? null) : null;
+			(node.attrs.brick as RichTextRenderBrick<TDocument> | null) ??
+			(typeof ref === "string" ? (embeddedBricks.get(ref) ?? null) : null);
 		return renderWithCallback({
 			renderer: renderers?.brick,
 			fallback: renderers?.fallback,

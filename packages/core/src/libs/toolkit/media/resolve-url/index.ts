@@ -5,6 +5,7 @@ import type {
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
 import { runToolkitService } from "../../utils.js";
+import resolveReadActor from "../resolve-read-actor.js";
 import { inputSchema } from "./schema.js";
 
 /** Storage key and optional named preset or format for media URL resolution. */
@@ -22,13 +23,16 @@ const resolveUrl = async (
 				"../../../../services/media/resolve-url.js"
 			);
 
+			const actorRes = await resolveReadActor(context, data);
+			if (actorRes.error) return actorRes;
+
 			return resolveMediaUrl(context, {
 				key: data.key,
 				options: {
 					preset: data.preset,
 					format: data.format,
 				},
-				actor: data.libraryOnly ? { type: "content" } : { type: "internal" },
+				actor: actorRes.data,
 			});
 		},
 		name: {

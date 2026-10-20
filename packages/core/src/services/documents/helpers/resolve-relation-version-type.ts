@@ -71,13 +71,19 @@ const resolveMappedDocumentVersionType = (props: {
 	return targetEnvironment ? props.sourceVersionType : undefined;
 };
 
+/** Maps a source document's version to its related document's version, treating pinned sources as latest. */
 export const resolveRelatedDocumentVersionType = (props: {
 	collections: CollectionBuilder[];
 	sourceCollectionKey: string;
-	sourceVersionType: RelationVersionType;
+	sourceVersionType: DocumentVersionType;
 	targetCollectionKey?: string;
 }) => {
-	return resolveMappedDocumentVersionType(props) ?? latestRelationVersionType;
+	return (
+		resolveMappedDocumentVersionType({
+			...props,
+			sourceVersionType: toRelationSourceVersionType(props.sourceVersionType),
+		}) ?? latestRelationVersionType
+	);
 };
 
 /**
@@ -93,6 +99,16 @@ export const resolvePreviewCollectionVersionType = (props: {
 }): DocumentVersionType => {
 	return resolveMappedDocumentVersionType(props) ?? props.fallbackVersionType;
 };
+
+/** The version a document's relations are read against: revisions, snapshots and request proposals read latest. */
+const toRelationSourceVersionType = (
+	versionType: DocumentVersionType,
+): RelationVersionType =>
+	versionType === "revision" ||
+	versionType === snapshotVersionType ||
+	versionType === constants.collectionBuilder.publishing.proposalVersionType
+		? latestRelationVersionType
+		: versionType;
 
 const createRelationVersionTypeResolver = (props: {
 	collections: CollectionBuilder[];
@@ -134,13 +150,7 @@ const resolveRelationVersionType: ServiceFn<
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
 
-	const versionType =
-		data.versionType === "revision" ||
-		data.versionType === snapshotVersionType ||
-		data.versionType ===
-			constants.collectionBuilder.publishing.proposalVersionType
-			? latestRelationVersionType
-			: data.versionType;
+	const versionType = toRelationSourceVersionType(data.versionType);
 
 	return {
 		error: undefined,

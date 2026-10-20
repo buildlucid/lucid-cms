@@ -24,7 +24,7 @@ const resolveContentLocale = (
 			error: {
 				type: "basic",
 				status: 400,
-				message: copy("server:core.tools.content.locale.unknown"),
+				message: copy("server:core.content.locale.unknown"),
 			},
 			data: undefined,
 		};

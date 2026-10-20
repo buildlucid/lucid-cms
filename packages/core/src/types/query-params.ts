@@ -163,6 +163,22 @@ export type CollectionDocumentMultipleInclude =
 	| "meta"
 	| CollectionDocumentRefInclude;
 
+/** What content API document reads can include. */
+export type ContentDocumentInclude = "bricks" | "meta";
+
+/** A content API read of one document: filters and what to include. */
+export type ContentDocumentSingleQuery<TCollectionKey extends string = string> =
+	Omit<CollectionDocumentSingleQuery<TCollectionKey>, "include"> & {
+		include?: ContentDocumentInclude[];
+	};
+
+/** A content API read of a document list: filters, sorting, pagination and what to include. */
+export type ContentDocumentMultipleQuery<
+	TCollectionKey extends string = string,
+> = Omit<CollectionDocumentMultipleQuery<TCollectionKey>, "include"> & {
+	include?: ContentDocumentInclude[];
+};
+
 /** Filters and optional content to include when reading one document. */
 export type CollectionDocumentSingleQuery<
 	TCollectionKey extends string = string,

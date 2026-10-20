@@ -33,7 +33,7 @@ export const selectDocumentTool = defineAgentTool({
 				query: { perPage: 20 },
 			});
 			if (result.error) return result;
-			if (!result.data.data.length) {
+			if (!result.data.items.length) {
 				return {
 					error: undefined,
 					data: {
@@ -50,7 +50,7 @@ export const selectDocumentTool = defineAgentTool({
 						title: copy("admin:playground.document-picker.title"),
 						placement: input.placement,
 						data: {
-							documents: result.data.data.map((document) => {
+							documents: result.data.items.map((document) => {
 								const field = document.fields.page_title;
 								const titles =
 									typeof field === "string"
@@ -88,8 +88,8 @@ export const selectDocumentTool = defineAgentTool({
 		return {
 			error: undefined,
 			data: {
-				output: { documentId: result.data.document.id },
-				summary: `Selected document ${result.data.document.id}`,
+				output: { documentId: result.data.id },
+				summary: `Selected document ${result.data.id}`,
 			},
 		};
 	},

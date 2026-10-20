@@ -837,7 +837,7 @@ test("toolkit reads and writes use the actor's live permissions", async () => {
 	const listed = await toolkit.requests.getMultiple({
 		actor: { type: "user", userId: outsider.id },
 	});
-	expect(listed.data?.count).toBe(0);
+	expect(listed.data?.pagination.total).toBe(0);
 	expect(
 		(
 			await toolkit.requests.getSingle({

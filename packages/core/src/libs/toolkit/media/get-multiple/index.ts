@@ -1,26 +1,35 @@
 import type z from "zod";
-import type getMultipleService from "../../../../services/media/get-multiple.js";
+import type {
+	ContentList,
+	ContentLocaleInput,
+	ContentMedia,
+	IsLocalized,
+	MediaListItem,
+} from "../../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
-import { runToolkitService } from "../../utils.js";
+import { runToolkitService, toPagination } from "../../utils.js";
+import resolveReadActor from "../resolve-read-actor.js";
 import { inputSchema, type querySchema } from "./schema.js";
 
 export type ToolkitMediaGetMultipleQuery = z.input<typeof querySchema>;
 
-/** Optional filters and pagination for server-side media lookup. */
-export type ToolkitMediaGetMultipleInput = z.input<typeof inputSchema>;
+/** Optional filters, pagination, the actor or library-only access to read with, and a locale and fallback locale for media text. */
+export type ToolkitMediaGetMultipleInput<
+	TLocale extends string | undefined = undefined,
+> = Omit<z.input<typeof inputSchema>, "locale"> & ContentLocaleInput<TLocale>;
 
-/** Matching media, with audio transcripts, and the total count before pagination. */
-export type ToolkitMediaGetMultipleResult = NonNullable<
-	Awaited<ReturnType<typeof getMultipleService>>["data"]
->;
+/** A page of media, without audio transcripts unless included, and where the page is. */
+export type ToolkitMediaGetMultipleResult<
+	TLocale extends string | undefined = undefined,
+> = ContentList<ContentMedia<MediaListItem, IsLocalized<TLocale>>>;
 
-const getMultiple = async (
+const getMultiple = async <TLocale extends string | undefined = undefined>(
 	context: ServiceContext,
-	input: ToolkitMediaGetMultipleInput = {},
-): ServiceResponse<ToolkitMediaGetMultipleResult> =>
+	input: ToolkitMediaGetMultipleInput<TLocale> = {},
+): ServiceResponse<ToolkitMediaGetMultipleResult<TLocale>> =>
 	runToolkitService({
 		schema: inputSchema,
 		input,
@@ -29,11 +38,26 @@ const getMultiple = async (
 				"../../../../services/media/get-multiple.js"
 			);
 
-			return getMultipleMedia(context, {
+			const actorRes = await resolveReadActor(context, data);
+			if (actorRes.error) return actorRes;
+
+			const result = await getMultipleMedia<
+				ContentMedia<MediaListItem, IsLocalized<TLocale>>
+			>(context, {
 				query: data.query,
-				actor: data.libraryOnly ? { type: "content" } : { type: "internal" },
-				transcripts: true,
+				actor: actorRes.data,
+				locale: data.locale,
+				fallbackLocale: data.fallbackLocale,
 			});
+			if (result.error) return result;
+
+			return {
+				error: undefined,
+				data: {
+					items: result.data.data,
+					pagination: toPagination(result.data.count, data.query),
+				},
+			};
 		},
 		name: {
 			key: "core.toolkit.media.get.multiple.error.name",

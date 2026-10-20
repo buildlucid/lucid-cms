@@ -82,7 +82,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 	}
 	formatResponseValue(value?: BooleanInt | null) {
 		return formatter.formatBoolean(
-			Boolean(value) ?? this.config.default,
+			value ?? this.config.default,
 		) satisfies FieldResponse<"checkbox">["value"];
 	}
 	override formatEditableValue(value: unknown) {

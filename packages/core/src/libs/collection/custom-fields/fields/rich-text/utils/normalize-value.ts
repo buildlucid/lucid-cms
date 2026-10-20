@@ -7,6 +7,8 @@ const normalizeRichTextValue = (node: RichTextJSON): RichTextJSON => {
 	if (node.type === "lucidDocument") delete attrs.document;
 	if (node.type === "lucidMedia") delete attrs.media;
 	if (node.type === "lucidVariable") delete attrs.value;
+	if (node.type === "lucidDocument") delete attrs.document;
+	if (node.type === "lucidEmbeddedBrick") delete attrs.brick;
 
 	return {
 		...node,

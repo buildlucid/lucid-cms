@@ -1,9 +1,9 @@
 import z from "zod";
-import { querySchema } from "../../../../libs/toolkit/documents/get-single/schema.js";
 import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
+import { documentReadIncludeSchema } from "../../../../schemas/documents.js";
 import {
 	documentMetaSchema,
 	documentRefsSchema,
@@ -26,7 +26,7 @@ export const inputSchema = z.object({
 	}),
 	bricksPage: paginationInput.page,
 	bricksPerPage: paginationInput.perPage,
-	include: querySchema.shape.include.default(["bricks", "meta"]).meta({
+	include: documentReadIncludeSchema.default(["bricks", "meta"]).meta({
 		description:
 			"What to return besides fields: bricks, meta (versions and authors), and refs to the documents, media and users the content links to.",
 	}),

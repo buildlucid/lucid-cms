@@ -134,6 +134,20 @@ test("fail to validate field - checkbox", async () => {
 });
 
 // -----------------------------------------------
+// Response formatting
+test("formats checkbox response values", () => {
+	const field = new CheckboxCustomField("field");
+	expect(field.formatResponseValue(null)).toBe(false);
+	expect(field.formatResponseValue(1)).toBe(true);
+	expect(field.formatResponseValue(0)).toBe(false);
+
+	const fieldWithDefault = new CheckboxCustomField("field", { default: true });
+	expect(fieldWithDefault.formatResponseValue(undefined)).toBe(true);
+	expect(fieldWithDefault.formatResponseValue(null)).toBe(true);
+	expect(fieldWithDefault.formatResponseValue(false)).toBe(false);
+});
+
+// -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new CheckboxCustomField("field", {

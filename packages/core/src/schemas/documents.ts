@@ -9,6 +9,11 @@ import {
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaResponseSchema } from "./media.js";
 import { agentActorSchema } from "./shared/agent-actor.js";
+import {
+	contentDepthSchema,
+	contentFallbackLocaleSchema,
+	contentLocaleSchema,
+} from "./shared/content.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
 import { userDisplaySchema } from "./shared/user-display.js";
 
@@ -81,6 +86,23 @@ const documentRouteSchema = z
 	})
 	.nullable();
 
+/** Routes in content responses, read in one locale when the request has a `locale`. */
+const contentDocumentRouteSchema = z.union([
+	documentRouteSchema,
+	z.object({
+		path: z.string().nullable(),
+		label: z.string().nullable(),
+		alternates: z.record(z.string(), z.string().nullable()).meta({
+			description: "Route paths keyed by locale, such as for language links",
+		}),
+	}),
+]);
+
+const contentDocumentLocaleSchema = z.string().nullable().optional().meta({
+	description:
+		"With a locale, the one fields were read in: the requested locale, or the collection's default when it doesn't have it",
+});
+
 const documentResponseBaseSchema = z.object({
 	id: z.number().meta({
 		description: "The document ID",
@@ -140,7 +162,8 @@ const documentRefResponseSchema = z.object({
 	id: z.number(),
 	versionId: z.number().optional(),
 	collectionKey: z.string(),
-	route: documentRouteSchema,
+	locale: contentDocumentLocaleSchema,
+	route: contentDocumentRouteSchema,
 	/** Admin responses retain field wrappers; content responses flatten them. */
 	fields: z.record(z.string(), z.unknown()).nullable(),
 });
@@ -163,37 +186,49 @@ export const documentRefsResponseSchema = z
 	})
 	.strict();
 
+const contentBrickResponseSchema = z.object({
+	id: z.number(),
+	key: z.string(),
+	order: z.number(),
+	fields: z.record(z.string(), z.unknown()),
+});
+
 const documentContentResponseSchema = z.object({
 	id: z.number(),
 	collectionKey: z.string(),
 	version: z.string().nullable(),
-	route: documentRouteSchema,
-	fields: z.record(z.string(), z.unknown()),
-	bricks: z
-		.array(
-			z.object({
-				id: z.number(),
-				ref: z.string(),
-				key: z.string(),
-				type: z.enum(["builder", "fixed", "embedded"]),
-				order: z.number(),
-				fields: z.record(z.string(), z.unknown()),
-			}),
-		)
-		.optional(),
+	locale: contentDocumentLocaleSchema,
+	route: contentDocumentRouteSchema,
+	fields: z.record(z.string(), z.unknown()).meta({
+		description:
+			"Media and users are filled in, relations are related documents with their route and fields to the read's depth, and rich text has its embedded bricks and linked documents in node attrs",
+	}),
+	bricks: z.array(contentBrickResponseSchema).optional().meta({
+		description: "Builder bricks in order, when the read includes bricks",
+	}),
+	fixed: z.record(z.string(), contentBrickResponseSchema).optional().meta({
+		description: "Fixed bricks by key, when the read includes bricks",
+	}),
 	meta: z
 		.object({
 			versionId: z.number().nullable(),
-			versions: z.record(z.string(), documentResponseVersionSchema.nullable()),
+			versions: z.record(
+				z.string(),
+				documentResponseVersionSchema
+					.omit({ createdBy: true, createdByRunId: true })
+					.extend({ createdBy: userDisplaySchema.nullable() })
+					.nullable(),
+			),
 			createdAt: z.string().nullable(),
 			updatedAt: z.string().nullable(),
-			createdBy: z.number().nullable(),
-			updatedBy: z.number().nullable(),
-			createdByRunId: z.string().nullable(),
-			updatedByRunId: z.string().nullable(),
+			createdBy: userDisplaySchema.nullable(),
+			updatedBy: userDisplaySchema.nullable(),
 		})
 		.optional(),
 });
+
+/** What content API document reads can include. */
+const contentDocumentIncludeSchema = z.enum(["bricks", "meta"]);
 
 const documentRefsIncludeSchema = z.union([
 	z.literal("refs"),
@@ -1063,6 +1098,9 @@ export const controllerSchemas = {
 					.object({
 						preview: previewTokenSchema.optional(),
 						version: contentDocumentVersionSchema,
+						locale: contentLocaleSchema.optional(),
+						fallbackLocale: contentFallbackLocaleSchema.optional(),
+						depth: contentDepthSchema.optional(),
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),
@@ -1109,9 +1147,7 @@ export const controllerSchemas = {
 								description:
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
-						include: queryString.schema.include(
-							"bricks,refs,refs.documents,refs.media,refs.users,refs.agents,meta",
-						),
+						include: queryString.schema.include("bricks,meta"),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
 					})
@@ -1137,15 +1173,7 @@ export const controllerSchemas = {
 						])
 						.optional(),
 					filterOr: queryFormatted.schema.filterOr,
-					include: z
-						.array(
-							z.union([
-								z.literal("bricks"),
-								z.literal("meta"),
-								documentRefsIncludeSchema,
-							]),
-						)
-						.optional(),
+					include: z.array(contentDocumentIncludeSchema).optional(),
 				}),
 			},
 			params: z.object({
@@ -1163,6 +1191,9 @@ export const controllerSchemas = {
 					.object({
 						preview: previewTokenSchema.optional(),
 						version: contentDocumentVersionSchema,
+						locale: contentLocaleSchema.optional(),
+						fallbackLocale: contentFallbackLocaleSchema.optional(),
+						depth: contentDepthSchema.optional(),
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),
@@ -1209,9 +1240,7 @@ export const controllerSchemas = {
 								description:
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
-						include: queryString.schema.include(
-							"bricks,refs,refs.documents,refs.media,refs.users,refs.agents,meta",
-						),
+						include: queryString.schema.include("bricks,meta"),
 						sort: queryString.schema.sort(
 							"createdAt,updatedAt,order,_customFieldKey",
 						),
@@ -1256,15 +1285,7 @@ export const controllerSchemas = {
 						.optional(),
 					filterOr: queryFormatted.schema.filterOr,
 					sort: documentSortSchema,
-					include: z
-						.array(
-							z.union([
-								z.literal("bricks"),
-								z.literal("meta"),
-								documentRefsIncludeSchema,
-							]),
-						)
-						.optional(),
+					include: z.array(contentDocumentIncludeSchema).optional(),
 					page: queryFormatted.schema.page,
 					perPage: queryFormatted.schema.perPage,
 				}),
@@ -1287,10 +1308,30 @@ export type GetMultipleQueryParams = z.infer<
 export type GetSingleQueryParams = z.infer<
 	typeof controllerSchemas.getSingle.query.formatted
 >;
-export type ContentGetSingleQueryParams = z.infer<
+/** What content document reads include before their references are filled in: the shared refs the document tools read. */
+export const documentReadIncludeSchema = z
+	.array(
+		z.union([
+			z.literal("bricks"),
+			z.literal("meta"),
+			documentRefsIncludeSchema,
+		]),
+	)
+	.optional();
+
+type DocumentReadQuery<TQuery> = Omit<TQuery, "include"> & {
+	include?: z.infer<typeof documentReadIncludeSchema>;
+};
+export type ContentGetSingleQueryParams = DocumentReadQuery<
+	z.infer<typeof controllerSchemas.content.getSingle.query.formatted>
+>;
+export type ContentGetMultipleQueryParams = DocumentReadQuery<
+	z.infer<typeof controllerSchemas.content.getMultiple.query.formatted>
+>;
+export type ContentReadSingleQueryParams = z.infer<
 	typeof controllerSchemas.content.getSingle.query.formatted
 >;
-export type ContentGetMultipleQueryParams = z.infer<
+export type ContentReadMultipleQueryParams = z.infer<
 	typeof controllerSchemas.content.getMultiple.query.formatted
 >;
 export type GetMultipleRevisionsQueryParams = z.infer<

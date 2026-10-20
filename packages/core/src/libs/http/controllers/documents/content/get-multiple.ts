@@ -2,10 +2,7 @@ import { hoursToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import {
-	controllerSchemas,
-	documentRefsResponseSchema,
-} from "../../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../../schemas/documents.js";
 import { documentServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
@@ -34,7 +31,6 @@ const getMultipleController = factory.createHandlers(
 			dataSchema: z.toJSONSchema(
 				controllerSchemas.content.getMultiple.response,
 			),
-			refsSchema: z.toJSONSchema(documentRefsResponseSchema),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({
@@ -84,7 +80,8 @@ const getMultipleController = factory.createHandlers(
 	}),
 	async (c) => {
 		const { collectionKey } = c.req.valid("param");
-		const { preview, version } = c.req.valid("query");
+		const { preview, version, locale, fallbackLocale, depth } =
+			c.req.valid("query");
 
 		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
@@ -106,6 +103,9 @@ const getMultipleController = factory.createHandlers(
 			collectionKey,
 			versionType: version,
 			preview,
+			locale,
+			fallbackLocale,
+			depth,
 			query: formattedQuery,
 			allowedCollectionKeys: getScopedCollectionKeys(
 				context.config,
@@ -124,7 +124,6 @@ const getMultipleController = factory.createHandlers(
 		return c.json(
 			formatAPIResponse(c, {
 				data: documents.data.documents,
-				refs: documents.data.refs,
 				pagination: {
 					count: documents.data.count,
 					page: formattedQuery.page,

@@ -1,4 +1,5 @@
 import type {
+	LocalizedMedia,
 	Media,
 	MediaAdapterData,
 	MediaCropState,
@@ -16,6 +17,7 @@ import type {
 	MediaVideoSource,
 	MediaVideoThumbnail,
 } from "../../types/response.js";
+import isPlainObject from "../../utils/helpers/is-plain-object.js";
 import {
 	getMediaOwnership,
 	mediaAdapterDataSchema,
@@ -26,7 +28,7 @@ import type {
 	MediaDeliveryAdapterInstance,
 	MediaDeliveryFile,
 } from "../media-delivery/types.js";
-import formatter from "./helpers.js";
+import formatter, { type ContentReadLocale } from "./helpers.js";
 
 type MediaTranslationProps = {
 	title?: string | null;
@@ -397,7 +399,7 @@ const formatVideoFile = (
 	};
 };
 
-const formatSingle = (props: {
+const formatMedia = (props: {
 	media: MediaPropsT;
 	options: MediaFormatterOptions;
 }): Media => {
@@ -525,22 +527,86 @@ const formatSingle = (props: {
 	}
 };
 
-/** Formats media for lists, leaving audio transcripts out unless `transcripts` is set and the query loaded them. */
-const formatMultiple = (props: {
+/** Formats media, with its text in one locale when given a read locale, or every translation without one. */
+function formatSingle(props: {
+	media: MediaPropsT;
+	options: MediaFormatterOptions;
+	read?: null;
+}): Media;
+function formatSingle(props: {
+	media: MediaPropsT;
+	options: MediaFormatterOptions;
+	read?: ContentReadLocale | null;
+}): Media | LocalizedMedia<Media>;
+function formatSingle(props: {
+	media: MediaPropsT;
+	options: MediaFormatterOptions;
+	read?: ContentReadLocale | null;
+}): Media | LocalizedMedia<Media> {
+	const media = formatMedia(props);
+	return props.read ? localizeMedia(media, props.read) : media;
+}
+
+/** Formats media for lists, leaving audio transcripts out unless the list includes them, with text in one locale when given a read locale. */
+function formatMultiple(props: {
 	media: MediaPropsT[];
 	options: MediaFormatterOptions;
-	transcripts?: boolean;
-}): MediaListItem[] =>
-	props.media.map((media) => {
-		const item = formatSingle({
-			media,
-			options: props.options,
-		});
-		if (item.type !== "audio" || props.transcripts) return item;
-
-		const { transcript: _transcript, ...listed } = item;
-		return listed;
+	include: { transcripts: boolean };
+	read?: null;
+}): MediaListItem[];
+function formatMultiple(props: {
+	media: MediaPropsT[];
+	options: MediaFormatterOptions;
+	include: { transcripts: boolean };
+	read?: ContentReadLocale | null;
+}): Array<MediaListItem | LocalizedMedia<MediaListItem>>;
+function formatMultiple(props: {
+	media: MediaPropsT[];
+	options: MediaFormatterOptions;
+	include: { transcripts: boolean };
+	read?: ContentReadLocale | null;
+}): Array<MediaListItem | LocalizedMedia<MediaListItem>> {
+	const { read } = props;
+	return props.media.map((media) => {
+		const item: MediaListItem = formatMedia({ media, options: props.options });
+		if (item.type === "audio" && !props.include.transcripts) {
+			const { transcript: _transcript, ...listed } = item;
+			return read ? localizeMedia(listed, read) : listed;
+		}
+		return read ? localizeMedia(item, read) : item;
 	});
+}
+
+const localizedTextKeys = new Set([
+	"title",
+	"alt",
+	"description",
+	"summary",
+	"transcript",
+]);
+
+const localizeText = (media: object, read: ContentReadLocale): object =>
+	Object.fromEntries(
+		Object.entries(media).map(([key, value]) => {
+			if (localizedTextKeys.has(key) && isPlainObject(value)) {
+				return [key, formatter.pickTranslation(value, read)];
+			}
+			if (key === "poster" && isPlainObject(value)) {
+				return [key, localizeText(value, read)];
+			}
+			return [key, value];
+		}),
+	);
+
+/** Gives media, or an image preview such as a profile picture, its text in the read's locale, including a video poster's. */
+const localizeMedia = <
+	TMedia extends Media | MediaListItem | MediaImagePreview,
+>(
+	media: TMedia,
+	read: ContentReadLocale,
+): LocalizedMedia<TMedia> =>
+	// The runtime shape follows `LocalizedMedia`, which describes what `localizeText` maps.
+	localizeText(media, read) as LocalizedMedia<TMedia>;
 
 export default {
 	formatMultiple,
@@ -548,4 +614,5 @@ export default {
 	formatMediaImagePreview,
 	formatPoster,
 	formatFocalPoint,
+	localizeMedia,
 };

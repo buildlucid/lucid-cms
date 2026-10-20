@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import type { ResponseBody } from "../../../types/response.js";
+import getLastPage from "../../../utils/helpers/get-last-page.js";
 
 // --------------------------------------------------
 // Types
@@ -133,17 +134,9 @@ const formatAPIResponse = <Data, Refs = never>(
 	c: Context,
 	params: BuildResponseParams<Data, Refs>,
 ): FormattedAPIResponse<Data, Refs> => {
-	let lastPage = null;
-
-	if (params.pagination) {
-		if (params.pagination.perPage === -1) {
-			lastPage = params.pagination.count > 0 ? 1 : 0;
-		} else {
-			lastPage = Math.ceil(
-				params.pagination.count / Number(params.pagination.perPage),
-			);
-		}
-	}
+	const lastPage = params.pagination
+		? getLastPage(params.pagination.count, Number(params.pagination.perPage))
+		: null;
 	const meta: ResponseBody["meta"] = {
 		path: getPath(c),
 		links: buildMetaLinks(c, params),

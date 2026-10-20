@@ -4,6 +4,7 @@ import { copy } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
+	CustomFieldContentFormatContext,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
 	FieldConfig,
@@ -108,6 +109,15 @@ class UserCustomField extends CustomField<"user"> {
 			value,
 			this.config.multiple,
 		) satisfies FieldResponse<"user">["value"];
+	}
+	/** Gives content API reads the users the IDs point to, leaving out any the read can't reach. */
+	override formatContentValue(
+		value: unknown,
+		context: CustomFieldContentFormatContext,
+	) {
+		return Array.isArray(value)
+			? value.flatMap((id) => context.user(id) ?? [])
+			: value;
 	}
 	override get relationValueColumn() {
 		return "user_id";

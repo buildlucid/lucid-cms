@@ -221,7 +221,7 @@ describe("document authoring toolkit", () => {
 				query: { filter: { title: { value: "Rolled back subscriber" } } },
 			});
 			assert(read.data);
-			expect(read.data.data).toHaveLength(0);
+			expect(read.data.items).toHaveLength(0);
 		} finally {
 			context.config.hooks = original;
 		}
@@ -276,8 +276,8 @@ describe("document authoring toolkit", () => {
 			query: { filter },
 		});
 		assert(defaults.data, JSON.stringify(defaults.error));
-		expect(defaults.data.count).toBe(2);
-		for (const document of defaults.data.data) {
+		expect(defaults.data.pagination.total).toBe(2);
+		for (const document of defaults.data.items) {
 			expect(document.bricks).toBeUndefined();
 		}
 
@@ -287,8 +287,8 @@ describe("document authoring toolkit", () => {
 			query: { filter, include: ["bricks"] },
 		});
 		assert(included.data, JSON.stringify(included.error));
-		expect(included.data.count).toBe(2);
-		for (const document of included.data.data) {
+		expect(included.data.pagination.total).toBe(2);
+		for (const document of included.data.items) {
 			const single = await toolkit.documents.getSingle({
 				collectionKey: collection.key,
 				version: "latest",
@@ -298,7 +298,7 @@ describe("document authoring toolkit", () => {
 				},
 			});
 			assert(single.data, JSON.stringify(single.error));
-			expect(document.bricks).toEqual(single.data.document.bricks);
+			expect(document.bricks).toEqual(single.data.bricks);
 			expect(document.bricks).toEqual(
 				expect.arrayContaining([
 					expect.objectContaining({

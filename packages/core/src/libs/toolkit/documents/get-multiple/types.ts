@@ -1,44 +1,32 @@
 import type {
-	CollectionDocument,
 	CollectionDocumentKey,
-	CollectionDocumentMultipleQuery,
-	Refs,
+	ContentDocument,
+	ContentDocumentMultipleQuery,
+	ContentList,
+	IsLocalized,
 } from "../../../../exports/types.js";
-import type { ToolkitDocumentVersion } from "../index.js";
+import type { ToolkitDocumentsGetSingleInput } from "../get-single/types.js";
 
 export type ToolkitDocumentsGetMultipleQuery<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = Omit<
-	CollectionDocumentMultipleQuery<TCollectionKey>,
-	"page" | "perPage"
-> & {
+> = Omit<ContentDocumentMultipleQuery<TCollectionKey>, "page" | "perPage"> & {
 	/** One-based page number. */
 	page?: number;
 	/** Maximum documents per page. Use -1 to request all matching documents. */
 	perPage?: number;
 };
 
-/** Collection, required content version and optional query for a server-side document lookup. */
+/** A content API documents read: collection, version, optional preview, locale and query. */
 export type ToolkitDocumentsGetMultipleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = {
-	/** Key of the registered collection to read. */
-	collectionKey: TCollectionKey;
-	/** Content version to read, such as published or latest. */
-	version: ToolkitDocumentVersion<TCollectionKey>;
-	/** Optional preview context that may override the requested version. */
-	preview?: string | null;
-	/** Filters, includes and other query options. */
+	TLocale extends string | undefined = undefined,
+> = Omit<ToolkitDocumentsGetSingleInput<TCollectionKey, TLocale>, "query"> & {
+	/** Filters, sorting, pagination and what to include. */
 	query?: ToolkitDocumentsGetMultipleQuery<TCollectionKey>;
 };
 
-/** Document content and shared references returned inside the service result's data property. */
+/** A page of documents as the content API returns them, and where the page is. */
 export type ToolkitDocumentsGetMultipleResult<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = {
-	data: CollectionDocument<TCollectionKey>[];
-	/** Total matching documents before pagination. */
-	count: number;
-	/** Shared reference registry for resolving document field references. */
-	refs?: Refs;
-};
+	TLocale extends string | undefined = undefined,
+> = ContentList<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>;

@@ -11,6 +11,7 @@ export { default as getBaseUrl } from "./get-base-url.js";
 export { default as getDirName } from "./get-dir-name.js";
 export { default as getEmailFrom } from "./get-email-from.js";
 export { default as getFilterValues } from "./get-filter-values.js";
+export { default as getLastPage } from "./get-last-page.js";
 export { default as getSiteUrl } from "./get-site-url.js";
 export { getNumber, getObject } from "./get-typed-value.js";
 export {

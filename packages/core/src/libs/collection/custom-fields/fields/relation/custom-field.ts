@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../exports/types.js";
+import isPlainObject from "../../../../../utils/helpers/is-plain-object.js";
 import type { LucidBricksTable } from "../../../../db/tables/index.js";
 import type { Select } from "../../../../db/types.js";
 import { copy } from "../../../../i18n/index.js";
@@ -9,6 +10,7 @@ import buildTableName from "../../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
+	CustomFieldContentFormatContext,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
 	FieldConfig,
@@ -138,6 +140,19 @@ class RelationCustomField extends CustomField<"relation"> {
 			value,
 			this.config.multiple,
 		) satisfies FieldResponse<"relation">["value"];
+	}
+	/** Resolves related documents through the read's depth, retaining ID stubs beyond it and omitting unreadable targets within it. */
+	override formatContentValue(
+		value: unknown,
+		context: CustomFieldContentFormatContext,
+	) {
+		return Array.isArray(value)
+			? value.flatMap((item) =>
+					isPlainObject(item)
+						? (context.document(item.collectionKey, item.id) ?? [])
+						: [],
+				)
+			: value;
 	}
 	override serializeRelationFieldValue(
 		value: unknown,

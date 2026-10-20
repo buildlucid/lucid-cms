@@ -8,6 +8,7 @@ const mediaRefResource = {
 	resolve: async (context, data) => {
 		const refsRes = await getMediaRefs(context, {
 			targets: data.targets,
+			actor: data.actor,
 		});
 		if (refsRes.error) return refsRes;
 

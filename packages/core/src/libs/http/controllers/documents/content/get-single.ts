@@ -2,10 +2,7 @@ import { hoursToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import {
-	controllerSchemas,
-	documentRefsResponseSchema,
-} from "../../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../../schemas/documents.js";
 import { documentServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
@@ -31,7 +28,6 @@ const getSingleController = factory.createHandlers(
 		summary: "Get Document",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.content.getSingle.response),
-			refsSchema: z.toJSONSchema(documentRefsResponseSchema),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.content.getSingle.params,
@@ -80,7 +76,8 @@ const getSingleController = factory.createHandlers(
 	}),
 	async (c) => {
 		const { collectionKey } = c.req.valid("param");
-		const { preview, version } = c.req.valid("query");
+		const { preview, version, locale, fallbackLocale, depth } =
+			c.req.valid("query");
 
 		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
@@ -99,6 +96,9 @@ const getSingleController = factory.createHandlers(
 			collectionKey,
 			versionType: version,
 			preview,
+			locale,
+			fallbackLocale,
+			depth,
 			query: formattedQuery,
 			allowedCollectionKeys: getScopedCollectionKeys(
 				context.config,
@@ -116,8 +116,7 @@ const getSingleController = factory.createHandlers(
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: document.data.document,
-				refs: document.data.refs,
+				data: document.data,
 			}),
 		);
 	},

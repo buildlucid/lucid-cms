@@ -95,6 +95,8 @@ export default Object.freeze({
 	query: {
 		page: 1,
 		perPage: 10,
+		/** How many levels of related documents content reads fill in, by default and at most. */
+		depth: { default: 1, max: 3 },
 	},
 	email: emailConstants,
 	i18n: {

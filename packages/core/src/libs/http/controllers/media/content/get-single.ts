@@ -30,6 +30,7 @@ const getSingleController = factory.createHandlers(
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.content.getSingle.params,
+			query: controllerSchemas.content.getSingle.query.string,
 			headers: {
 				authorization: true,
 			},
@@ -38,9 +39,10 @@ const getSingleController = factory.createHandlers(
 	externalAuthentication(),
 	externalScopes([ExternalScopes.MediaRead]),
 	validate("param", controllerSchemas.content.getSingle.params),
+	validate("query", controllerSchemas.content.getSingle.query.string),
 	cache({
 		ttlSeconds: minutesToSeconds(5),
-		mode: "path-only",
+		mode: "include-query",
 		tags: (c) => [
 			cacheKeys.http.tags.contentMedia,
 			cacheKeys.http.tags.contentMediaSingle(c.req.param("id") ?? ""),
@@ -49,6 +51,7 @@ const getSingleController = factory.createHandlers(
 	}),
 	async (c) => {
 		const { id } = c.req.valid("param");
+		const { locale, fallbackLocale } = c.req.valid("query");
 		const context = createServiceContext(c);
 
 		const media = await serviceWrapper(mediaServices.getSingle, {
@@ -61,6 +64,8 @@ const getSingleController = factory.createHandlers(
 		})(context, {
 			id: Number.parseInt(id, 10),
 			actor: { type: "content" },
+			locale,
+			fallbackLocale,
 		});
 		if (media.error) throw new LucidAPIError(media.error);
 

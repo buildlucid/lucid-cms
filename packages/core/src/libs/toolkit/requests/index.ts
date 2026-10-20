@@ -67,7 +67,7 @@ export type * from "./types.js";
 /** Provides request operations as a user with current permissions or as the system, using `execution.actor` to retain agent attribution. */
 export type ToolkitRequests = {
 	/**
-	 * Lists requests the actor can read.
+	 * Lists requests the actor can read, a page at a time as `items` with its `pagination`.
 	 *
 	 * @example
 	 * ```ts

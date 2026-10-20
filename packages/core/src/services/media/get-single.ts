@@ -8,17 +8,28 @@ import {
 	getMediaOwnership,
 	type MediaActor,
 } from "../../utils/media/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
+import { checkContentLocale } from "../locales/checks/index.js";
 
-const getSingle: ServiceFn<
-	[
-		{
-			id: number;
-			actor: MediaActor;
-		},
-	],
-	Media
-> = async (context, data) => {
+/**
+ * Reads one media item the actor can reach, with its text in `locale` when given, falling back to `fallbackLocale`
+ * for empty text. Callers type the localized shape, as the toolkit does by locale.
+ */
+const getSingle = async <TMedia = Media>(
+	context: ServiceContext,
+	data: {
+		id: number;
+		actor: MediaActor;
+		locale?: string;
+		fallbackLocale?: string;
+	},
+): ServiceResponse<TMedia> => {
+	const localeRes = await checkContentLocale(context, data);
+	if (localeRes.error) return localeRes;
+
 	const Media = new MediaRepository(context.db);
 
 	const mediaRes = await Media.selectSingleById({
@@ -60,7 +71,10 @@ const getSingle: ServiceFn<
 				defaultLocale: context.config.localization.defaultLocale,
 				locales: context.config.localization.locales,
 			},
-		}),
+			read: data.locale
+				? { locale: data.locale, fallbackLocale: data.fallbackLocale ?? null }
+				: null,
+		}) as TMedia,
 	};
 };
 

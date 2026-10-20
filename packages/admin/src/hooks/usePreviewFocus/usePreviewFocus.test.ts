@@ -165,6 +165,30 @@ describe("preview focus target resolution", () => {
 		});
 	});
 
+	test("steps through the container keys content responses nest fields under", () => {
+		const result = resolvePreviewFieldTarget({
+			target: {
+				collectionKey: "page",
+				documentId: 1,
+				path: ["content-section", "sections", 1, "heading"],
+			},
+			collection,
+			bricks,
+		});
+
+		expect(result?.fieldId).toBe(
+			getPreviewFieldId({ brickIndex: 0, path: ["sections", 1, "heading"] }),
+		);
+		expect(result?.structureIds).toContain(
+			getPreviewStructureId({
+				brickIndex: 0,
+				type: "collapsible",
+				key: "content-section",
+				pathPrefix: [],
+			}),
+		);
+	});
+
 	test("finds a builder brick by its public key and order", () => {
 		const result = resolvePreviewFieldTarget({
 			target: {

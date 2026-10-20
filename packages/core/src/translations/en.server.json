@@ -829,7 +829,7 @@
 	"core.mcp.result.too.large": "This result is too large. Request a smaller page, fewer fields or fewer bricks, then try again.",
 	"core.mcp.tool.unavailable": "This tool is unavailable.",
 	"core.mcp.tool.scope.required": "This tool needs a scope this connection was not granted.",
-	"core.tools.content.locale.unknown": "This content locale is not available.",
+	"core.content.locale.unknown": "This content locale is not available.",
 	"core.tools.documents.request.create": "New {{collection}}",
 	"core.tools.documents.request.update": "Update {{collection}} #{{id}}",
 	"core.tools.documents.request.delete": "Delete {{collection}} #{{id}}",

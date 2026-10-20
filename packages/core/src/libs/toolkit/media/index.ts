@@ -1,4 +1,9 @@
-import type { Media, MediaUrl } from "../../../types/response.js";
+import type {
+	ContentMedia,
+	IsLocalized,
+	Media,
+	MediaUrl,
+} from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -44,13 +49,15 @@ export type ToolkitMedia = {
 	deleteSingle: (
 		input: Parameters<typeof deleteSingle>[1],
 	) => ReturnType<typeof deleteSingle>;
-	/** Returns multiple media items and a total count; `libraryOnly` matches the content API. */
-	getMultiple: (
-		input?: ToolkitMediaGetMultipleInput,
-	) => ServiceResponse<ToolkitMediaGetMultipleResult>;
-	/** Returns a single media item by ID; `libraryOnly` matches the content API. */
-	getSingle: (input: ToolkitMediaGetSingleInput) => ServiceResponse<Media>;
-	/** Resolves a media URL, with optional image transformations; `libraryOnly` matches the content API. */
+	/** Returns media `items` and `pagination` using admin ownership filters for system reads, user visibility or `libraryOnly` access, with localized text via `locale` and transcripts via `query.include: ["transcripts"]`. */
+	getMultiple: <TLocale extends string | undefined = undefined>(
+		input?: ToolkitMediaGetMultipleInput<TLocale>,
+	) => ServiceResponse<ToolkitMediaGetMultipleResult<TLocale>>;
+	/** Returns media the actor can read by ID, restricted to library media with `libraryOnly` and localized when `locale` is supplied. */
+	getSingle: <TLocale extends string | undefined = undefined>(
+		input: ToolkitMediaGetSingleInput<TLocale>,
+	) => ServiceResponse<ContentMedia<Media, IsLocalized<TLocale>>>;
+	/** Resolves a media URL, with optional image transformations; `libraryOnly` limits it to library media, as `POST /api/v1/content/media/resolve/:key` does. */
 	resolveUrl: (input: ToolkitMediaResolveUrlInput) => ServiceResponse<MediaUrl>;
 	/** Reports changed IDs after direct writes. Does not save content or run authoring hooks. */
 	notifyChange: (
@@ -66,8 +73,12 @@ export const createMediaToolkit = (context: ServiceContext): ToolkitMedia => ({
 	stream: (input) => stream(context, input),
 	requestDownload: (input) => requestDownload(context, input),
 	deleteSingle: (input) => deleteSingle(context, input),
-	getMultiple: (input) => getMultiple(context, input),
-	getSingle: (input) => getSingle(context, input),
+	getMultiple: <TLocale extends string | undefined = undefined>(
+		input?: ToolkitMediaGetMultipleInput<TLocale>,
+	) => getMultiple<TLocale>(context, input),
+	getSingle: <TLocale extends string | undefined = undefined>(
+		input: ToolkitMediaGetSingleInput<TLocale>,
+	) => getSingle<TLocale>(context, input),
 	resolveUrl: (input) => resolveUrl(context, input),
 	notifyChange: (input) => notifyChange(context, input),
 });

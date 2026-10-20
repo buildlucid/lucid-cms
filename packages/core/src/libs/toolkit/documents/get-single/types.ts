@@ -1,18 +1,18 @@
 import type {
-	CollectionDocument,
 	CollectionDocumentKey,
-	CollectionDocumentSingleQuery,
-	Refs,
+	ContentDocumentSingleQuery,
+	ContentLocaleInput,
 } from "../../../../exports/types.js";
 import type { ToolkitDocumentVersion } from "../index.js";
 
 export type ToolkitDocumentsGetSingleQuery<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = Omit<CollectionDocumentSingleQuery<TCollectionKey>, never>;
+> = ContentDocumentSingleQuery<TCollectionKey>;
 
-/** Collection, required content version and optional query for a server-side document lookup. */
+/** A content API document read: collection, version, optional preview, locale and query. */
 export type ToolkitDocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+	TLocale extends string | undefined = undefined,
 > = {
 	/** Key of the registered collection to read. */
 	collectionKey: TCollectionKey;
@@ -20,15 +20,10 @@ export type ToolkitDocumentsGetSingleInput<
 	version: ToolkitDocumentVersion<TCollectionKey>;
 	/** Optional preview context that may override the requested version. */
 	preview?: string | null;
-	/** Filters, includes and other query options. */
+	/** Reads this locale's value where the `locale` translation is empty. */
+	fallbackLocale?: string;
+	/** Levels of related documents to resolve into routes and fields, defaulting to 1. */
+	depth?: number;
+	/** Filters and what to include, such as `["bricks"]`. */
 	query?: ToolkitDocumentsGetSingleQuery<TCollectionKey>;
-};
-
-/** Document content and shared references returned inside the service result's data property. */
-export type ToolkitDocumentsGetSingleResult<
-	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = {
-	document: CollectionDocument<TCollectionKey>;
-	/** Shared reference registry for resolving document field references. */
-	refs?: Refs;
-};
+} & ContentLocaleInput<TLocale>;

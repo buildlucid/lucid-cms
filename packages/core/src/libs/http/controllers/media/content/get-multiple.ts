@@ -56,6 +56,7 @@ const getMultipleController = factory.createHandlers(
 				nullableFields: ["folderId"],
 			},
 		);
+		const { locale, fallbackLocale } = c.req.valid("query");
 		const context = createServiceContext(c);
 
 		const media = await serviceWrapper(mediaServices.getMultiple, {
@@ -68,6 +69,8 @@ const getMultipleController = factory.createHandlers(
 		})(context, {
 			query: formattedQuery,
 			actor: { type: "content" },
+			locale,
+			fallbackLocale,
 		});
 		if (media.error) throw new LucidAPIError(media.error);
 

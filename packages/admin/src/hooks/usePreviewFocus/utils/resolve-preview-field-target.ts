@@ -67,7 +67,55 @@ const findDataFieldConfig = (props: {
 	return null;
 };
 
-/** Resolves a public preview path into builder DOM targets. */
+type ContainerConfig = Extract<
+	CollectionFieldConfig,
+	{ type: "section" | "collapsible" }
+>;
+
+/** Finds a section or collapsible by key, recording the tabs and collapsibles around it and the collapsible itself. */
+const findContainerConfig = (props: {
+	configs: CollectionFieldConfig[];
+	key: string;
+	pathPrefix: Array<string | number>;
+	structures: PreviewFocusStructuralTarget[];
+}): {
+	config: ContainerConfig;
+	structures: PreviewFocusStructuralTarget[];
+} | null => {
+	for (const config of props.configs) {
+		if (
+			config.type !== "tab" &&
+			config.type !== "section" &&
+			config.type !== "collapsible"
+		) {
+			continue;
+		}
+
+		const structures =
+			config.type === "section"
+				? props.structures
+				: [
+						...props.structures,
+						{
+							type: config.type,
+							key: config.key,
+							pathPrefix: props.pathPrefix,
+						},
+					];
+		if (config.type !== "tab" && config.key === props.key) {
+			return { config, structures };
+		}
+		const nested = findContainerConfig({
+			...props,
+			configs: config.fields,
+			structures,
+		});
+		if (nested) return nested;
+	}
+	return null;
+};
+
+/** Resolves preview paths from content responses into builder DOM targets, omitting section and collapsible keys from stored field paths. */
 export const resolvePreviewFieldTarget = (props: {
 	target: PreviewFieldTarget;
 	collection: Collection;
@@ -99,6 +147,7 @@ export const resolvePreviewFieldTarget = (props: {
 			: (brickConfig?.fields ?? []);
 	let pathOffset = 0;
 	let pathPrefix: Array<string | number> = [];
+	const storedPath: Array<string | number> = [];
 	const structureIds =
 		targetBrick?.type === "builder"
 			? [getPreviewStructureId({ brickIndex, type: "brick" })]
@@ -107,6 +156,23 @@ export const resolvePreviewFieldTarget = (props: {
 	while (pathOffset < props.target.path.length) {
 		const key = props.target.path[pathOffset];
 		if (typeof key !== "string") return null;
+
+		const container = findContainerConfig({
+			configs,
+			key,
+			pathPrefix,
+			structures: [],
+		});
+		if (container) {
+			structureIds.push(
+				...container.structures.map((structure) =>
+					getPreviewStructureId({ brickIndex, ...structure }),
+				),
+			);
+			configs = container.config.fields;
+			pathOffset += 1;
+			continue;
+		}
 
 		const match = findDataFieldConfig({
 			configs,
@@ -121,12 +187,13 @@ export const resolvePreviewFieldTarget = (props: {
 			),
 		);
 
+		storedPath.push(key);
 		if (pathOffset === props.target.path.length - 1) {
 			return {
 				structureIds,
 				fieldId: getPreviewFieldId({
 					brickIndex,
-					path: props.target.path,
+					path: storedPath,
 				}),
 			};
 		}
@@ -136,6 +203,7 @@ export const resolvePreviewFieldTarget = (props: {
 			return null;
 		}
 
+		storedPath.push(groupIndex);
 		const groupPath = [...pathPrefix, key, groupIndex];
 		structureIds.push(
 			getPreviewStructureId({

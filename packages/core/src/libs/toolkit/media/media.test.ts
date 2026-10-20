@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, expect, test, vi } from "vitest";
+import { afterAll, assert, beforeAll, expect, test, vi } from "vitest";
 import syncLocales from "../../../services/sync/sync-locales.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -108,24 +108,69 @@ test("media writes check a user actor's permissions and record their agent run",
 	).toEqual({ updated_by: admin, updated_by_run_id: runId });
 });
 
-test("libraryOnly reads leave out personal media, as the content API does", async () => {
+test("reads reach every media item for the system, and library media with libraryOnly", async () => {
 	const library = await insertMedia();
 	const personal = await insertMedia(await insertUser(false));
 	const toolkit = createToolkit(context);
+	const ids = { id: { value: [library.id, personal.id] } };
+	const listed = async (libraryOnly: boolean) =>
+		(
+			await toolkit.media.getMultiple({
+				libraryOnly,
+				query: {
+					filter: { ...ids, ownership: { value: ["library", "user"] } },
+				},
+			})
+		).data?.items.map((item) => item.id);
 
-	expect(
-		(await toolkit.media.getSingle({ id: personal.id })).error,
-	).toBeUndefined();
+	expect((await toolkit.media.getSingle({ id: personal.id })).data?.id).toBe(
+		personal.id,
+	);
 	expect(
 		(await toolkit.media.getSingle({ id: personal.id, libraryOnly: true }))
 			.error?.status,
 	).toBe(404);
+	expect(await listed(false)).toEqual(
+		expect.arrayContaining([library.id, personal.id]),
+	);
+	expect(await listed(true)).toEqual([library.id]);
+});
 
-	const listed = await toolkit.media.getMultiple({
-		query: { filter: { id: { value: [library.id, personal.id] } } },
-		libraryOnly: true,
+test("lists include audio transcripts only when asked", async () => {
+	const audio = await context.db.kysely
+		.insertInto("lucid_media")
+		.values({
+			key: randomUUID(),
+			storage_adapter_key: "test",
+			origin: "human",
+			type: "audio",
+			mime_type: "audio/mpeg",
+			file_extension: "mp3",
+			file_name: "welcome.mp3",
+			file_size: 1,
+		})
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	await context.db.kysely
+		.insertInto("lucid_media_translations")
+		.values({
+			media_id: audio.id,
+			locale_code: "en",
+			transcript: "Hello and welcome.",
+		})
+		.execute();
+	const list = async (include?: "transcripts"[]) => {
+		const res = await createToolkit(context).media.getMultiple({
+			query: { filter: { id: { value: audio.id } }, include },
+		});
+		assert(res.data, JSON.stringify(res.error));
+		return res.data.items[0];
+	};
+
+	expect(await list()).not.toHaveProperty("transcript");
+	expect(await list(["transcripts"])).toMatchObject({
+		transcript: { en: "Hello and welcome." },
 	});
-	expect(listed.data?.data.map((item) => item.id)).toEqual([library.id]);
 });
 
 test("notifyChange clears the content API's media caches after direct writes", async () => {

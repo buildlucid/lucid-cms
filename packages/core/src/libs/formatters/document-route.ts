@@ -1,6 +1,7 @@
 import type {
 	DocumentRoute,
 	InternalDocumentField,
+	LocalizedDocumentRoute,
 } from "../../exports/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import {
@@ -8,6 +9,7 @@ import {
 	getDocumentFallbackLabel,
 	getDocumentLabelField,
 } from "../collection/helpers/document-label.js";
+import formatter, { type ContentReadLocale } from "./helpers.js";
 
 const normalizeValue = (value: unknown): string | null => {
 	if (typeof value === "string") {
@@ -83,6 +85,35 @@ const formatDocumentRoute = (props: {
 	return {
 		path,
 		label,
+	};
+};
+
+/** Reads a localized route with all locale paths in `alternates`, listing shared paths under every locale. */
+export const localizeDocumentRoute = (
+	route: DocumentRoute | null,
+	read: ContentReadLocale | null,
+	locales: string[],
+): LocalizedDocumentRoute | null => {
+	if (!route) return null;
+
+	const { path, label } = route;
+	return {
+		path:
+			typeof path === "string"
+				? path
+				: read
+					? (formatter.pickTranslation(path, read) as string | null)
+					: null,
+		label:
+			typeof label === "string"
+				? label
+				: read
+					? (formatter.pickTranslation(label, read) as string | null)
+					: null,
+		alternates:
+			typeof path === "string"
+				? Object.fromEntries(locales.map((code) => [code, path]))
+				: path,
 	};
 };
 

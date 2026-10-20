@@ -7,6 +7,7 @@ import type { RefTarget } from "../../refs/types.js";
 import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
+	CustomFieldContentFormatContext,
 	CustomFieldErrorItem,
 	CustomFieldResponseFormatContext,
 	CustomFieldValidateResponse,
@@ -153,6 +154,17 @@ abstract class CustomField<T extends FieldTypes> {
 		value: unknown,
 		context?: CustomFieldResponseFormatContext,
 	): FieldResponse<T>["value"];
+	/** Checks emptiness for required validation and content reads that fill empty translations from the fallback locale. */
+	public isEmpty(value: unknown): boolean {
+		return this.errors.required.condition?.(value) === true;
+	}
+	/** Fills formatted values with references for content API reads, returning the value unchanged by default. */
+	public formatContentValue(
+		value: unknown,
+		_context: CustomFieldContentFormatContext,
+	): unknown {
+		return value;
+	}
 	/** Decodes stored authoring values without relation hydration or default substitution for null. */
 	public formatEditableValue(value: unknown): FieldValue {
 		if (value == null) return null;

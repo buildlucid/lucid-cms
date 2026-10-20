@@ -17,7 +17,7 @@ import {
 	resolveDefaultPreviewUrl,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getContentDocument from "../documents/content/get-single.js";
+import getContentDocument from "../documents/content/get-single-with-refs.js";
 import validateContentVersionTarget from "../documents/helpers/validate-content-version-target.js";
 import checkRequestVersionAccess from "../requests/helpers/check-request-version-access.js";
 import resolvePreviewMode, {

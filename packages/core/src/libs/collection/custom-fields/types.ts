@@ -238,8 +238,30 @@ export type FieldValue =
 
 export type CustomFieldResponseFormatContext = {
 	locale: string | null;
+	/** The locale empty translations of referenced text, such as a linked document's path, are read in. */
+	fallbackLocale?: string | null;
 	refs: Refs | null;
 };
+
+/** What a content API read gives a field to fill in its value: the references it links to, as the read returns them. */
+export type CustomFieldContentFormatContext =
+	CustomFieldResponseFormatContext & {
+		media: (id: number) => unknown;
+		user: (id: number) => unknown;
+		/** A related document resolved through the read's depth, its ID and collection beyond it, or null for unreadable targets within depth. */
+		document: (collectionKey: unknown, id: unknown) => unknown;
+		/** The read document's hydrated embedded brick or null, unavailable for related documents. */
+		brick: ((ref: unknown) => unknown) | null;
+		/** The locale for linked text is the value's locale or collection default, or null for shared values when returning all translations. */
+		documentLocale:
+			| ((
+					collectionKey: unknown,
+			  ) => Pick<
+					CustomFieldResponseFormatContext,
+					"locale" | "fallbackLocale"
+			  >)
+			| null;
+	};
 
 export type ContentFieldTypeGenerationContext<
 	T extends FieldTypes = FieldTypes,

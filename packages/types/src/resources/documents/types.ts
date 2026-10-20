@@ -55,7 +55,7 @@ export type RelationFieldValue<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
 };
 
-/** Type-only key marking generated field values whose JSON looks like other fields', such as media IDs. */
+/** Type-only key marking generated field values whose JSON looks like other fields', such as media IDs or translations. */
 export declare const fieldValueKind: unique symbol;
 
 /** The media IDs in a media field. */
@@ -150,10 +150,13 @@ export type CollectionDocumentLocaleCode<
 	? Extract<CollectionDocumentLocaleCodesByCollection[TCollectionKey], string>
 	: string;
 
+/** A translated field's values keyed by locale, marked so `ContentFields` can tell it apart from object values. */
 export type CollectionDocumentTranslations<
 	TValue,
 	TCollectionKey extends string = string,
-> = Record<CollectionDocumentLocaleCode<TCollectionKey>, TValue>;
+> = Record<CollectionDocumentLocaleCode<TCollectionKey>, TValue> & {
+	readonly [fieldValueKind]?: "translations";
+};
 
 export type DocumentRoute<TCollectionKey extends string = string> = {
 	path: string | CollectionDocumentTranslations<string | null, TCollectionKey>;

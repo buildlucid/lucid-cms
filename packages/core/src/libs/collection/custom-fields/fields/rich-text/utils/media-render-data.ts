@@ -4,16 +4,30 @@ import type {
 } from "@lucidcms/rich-text";
 import type { Media, MediaPoster } from "../../../../../../types/response.js";
 import { getObject } from "../../../../../../utils/helpers/get-typed-value.js";
+import formatter from "../../../../../formatters/helpers.js";
+import type { CustomFieldResponseFormatContext } from "../../../types.js";
 
+/** The locale rich text reads referenced text in, and the one empty translations fall back to. */
+export type RichTextTextLocale = Pick<
+	CustomFieldResponseFormatContext,
+	"locale" | "fallbackLocale"
+>;
+
+/** Reads text using the locale and fallback, or the first translation without a locale, returning `""` when no string exists. */
 export const getLocalizedString = (
 	value: unknown,
-	locale: string | null,
+	read: RichTextTextLocale,
 ): string => {
 	if (typeof value === "string") return value;
 	const translations = getObject(value);
 	if (!translations) return "";
-	if (locale !== null && typeof translations[locale] === "string")
-		return translations[locale];
+	if (read.locale !== null) {
+		const translation = formatter.pickTranslation(translations, {
+			locale: read.locale,
+			fallbackLocale: read.fallbackLocale ?? null,
+		});
+		return typeof translation === "string" ? translation : "";
+	}
 	return (
 		Object.values(translations).find(
 			(item): item is string => typeof item === "string",
@@ -23,16 +37,16 @@ export const getLocalizedString = (
 
 const getImageRenderData = (
 	reference: Extract<Media, { type: "image" }> | MediaPoster,
-	locale: string | null,
+	read: RichTextTextLocale,
 ): RichTextHydratedImage => {
 	const title =
-		("title" in reference ? getLocalizedString(reference.title, locale) : "") ||
+		("title" in reference ? getLocalizedString(reference.title, read) : "") ||
 		reference.fileName ||
 		reference.key;
 
 	return {
 		src: reference.url,
-		alt: getLocalizedString(reference.alt, locale) || title,
+		alt: getLocalizedString(reference.alt, read) || title,
 		title,
 		mimeType: reference.meta.mimeType,
 		width: reference.meta.width,
@@ -45,17 +59,17 @@ const getImageRenderData = (
 /** Builds the compact, response-only media payload consumed by HTML rendering. */
 export const getMediaRenderData = (
 	reference: Media,
-	locale: string | null,
+	read: RichTextTextLocale,
 ): RichTextHydratedMedia => {
 	const title =
-		getLocalizedString(reference.title, locale) ||
+		getLocalizedString(reference.title, read) ||
 		reference.fileName ||
 		reference.key;
 
 	if (reference.type === "image") {
 		return {
 			type: "image",
-			...getImageRenderData(reference, locale),
+			...getImageRenderData(reference, read),
 		};
 	}
 	if (reference.type === "video") {
@@ -65,7 +79,7 @@ export const getMediaRenderData = (
 			title,
 			mimeType: reference.meta.mimeType,
 			poster: reference.poster
-				? getImageRenderData(reference.poster, locale)
+				? getImageRenderData(reference.poster, read)
 				: null,
 		};
 	}

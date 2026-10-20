@@ -466,9 +466,9 @@ describe("generateSourceHTML", () => {
 			{ type: "lucidMedia", attrs: { mediaId: 4, media: null } },
 			{
 				type: "lucidDocument",
-				attrs: { collectionKey: "pages", documentId: 7 },
+				attrs: { collectionKey: "pages", documentId: 7, document: null },
 			},
-			{ type: "lucidEmbeddedBrick", attrs: { ref: "brick-1" } },
+			{ type: "lucidEmbeddedBrick", attrs: { ref: "brick-1", brick: null } },
 		]);
 	});
 });

@@ -5,6 +5,10 @@
 ### Features:
 
 - Added an MCP server at `/mcp`, with `defineMcpTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
+- Added a `locale` option to content API and toolkit document and media reads, which returns translations in one locale.
+- Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
+- Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.
+- Added an `actor` option to `toolkit.media` reads, and an `ownership` filter to its lists.
 
 ### Breaking Changes:
 
@@ -12,11 +16,17 @@
 - Replaced the `./lucid/<resource>` folder defaults with `./database/migrations`, `./database/seeds`, `./translations` and `./emails`. The `templates` resource is now `emails` in `directories` and `sources`.
 - Document and version links now use shared identity tables with automatic cleanup on deletion.
 - Removed system alerts in favour of the new notification system.
+- Content API document responses now fill in their references instead of returning `refs`, with bricks split into `bricks` and `fixed`.
+- `toolkit.documents` reads now match the content API.
+- `toolkit.media` lists need `include: ["transcripts"]` for audio transcripts.
+- Toolkit list reads (`documents`, `media`, `requests` and `users`) now return `items` with their `pagination` instead of `data` and `count`.
 
 ### Bug Fixes:
 
 - Fixed API dates being read in the server or browser's local timezone. Dates are now always returned as UTC ISO strings, and Postgres timestamps use `timestamptz`.
 - Fixed migrations failing after removing a plugin that had its own migrations. They are now skipped with a warning, and their tables are left in place.
+- Fixed checkbox fields ignoring their `default` when a value is missing.
+- Fixed content API responses including personal and system media referenced by document fields. They are now left out by the media query itself.
 
 ## v0.19.0-alpha.0
 
