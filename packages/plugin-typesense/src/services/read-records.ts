@@ -4,7 +4,6 @@ import batches from "../utils/batches.js";
 import projectDocuments from "./project-documents.js";
 import projectMedia from "./project-media.js";
 
-/** Reads small groups through the toolkit, retaining each group's document references. */
 const readRecords: ServiceFn<
 	[
 		{
@@ -28,8 +27,10 @@ const readRecords: ServiceFn<
 		[...batches(data.ids, batchSize)].map(async (ids) => {
 			if (data.source.kind === "media") {
 				const result = await data.toolkit.media.getMultiple({
+					libraryOnly: true,
 					query: {
 						filter: { id: { value: ids, operator: "in" } },
+						include: ["transcripts"],
 						perPage: ids.length,
 					},
 				});
@@ -37,7 +38,7 @@ const readRecords: ServiceFn<
 
 				return projectMedia(context, {
 					source: data.source,
-					media: result.data.data,
+					media: result.data.items,
 					revision: data.revision,
 					maxRecordsPerItem: data.options.maxRecordsPerItem,
 				});
@@ -46,6 +47,7 @@ const readRecords: ServiceFn<
 			const result = await data.toolkit.documents.getMultiple({
 				collectionKey: data.source.collection,
 				version: data.source.version,
+				depth: data.source.depth,
 				query: {
 					filter: { id: { value: ids, operator: "in" } },
 					include: [...(data.source.include ?? [])],
@@ -56,8 +58,7 @@ const readRecords: ServiceFn<
 
 			return projectDocuments(context, {
 				source: data.source,
-				documents: result.data.data,
-				refs: result.data.refs ?? {},
+				documents: result.data.items,
 				revision: data.revision,
 				maxRecordsPerItem: data.options.maxRecordsPerItem,
 			});

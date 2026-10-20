@@ -2,6 +2,7 @@ import { runToolkitService } from "@lucidcms/core/toolkit";
 import type {
 	CollectionDocumentFilters,
 	CollectionDocumentKey,
+	ContentLocaleInput,
 	CoreToolkit,
 	ToolkitDocumentsGetSingleInput,
 	ToolkitDocumentsGetSingleQuery,
@@ -10,16 +11,24 @@ import type {
 /** Collection, version and full path to look up. Additional query options control included content. */
 export type PagesGetByFullSlugInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = Omit<ToolkitDocumentsGetSingleInput<TCollectionKey>, "query"> & {
-	/** The complete page path, including any locale or collection prefix. */
-	fullSlug: string;
-	query?: Omit<ToolkitDocumentsGetSingleQuery<TCollectionKey>, "filter">;
-};
+	TLocale extends string | undefined = undefined,
+> = Omit<
+	ToolkitDocumentsGetSingleInput<TCollectionKey, TLocale>,
+	"query" | "locale"
+> &
+	ContentLocaleInput<TLocale> & {
+		/** The complete page path, including any locale or collection prefix. */
+		fullSlug: string;
+		query?: Omit<ToolkitDocumentsGetSingleQuery<TCollectionKey>, "filter">;
+	};
 
-/** Finds a document in a pages collection by its full slug, including requested refs. */
-const getByFullSlug = <TCollectionKey extends CollectionDocumentKey>(
+/** Finds a document in a pages collection by its full slug, as the content API returns it. */
+const getByFullSlug = <
+	TCollectionKey extends CollectionDocumentKey,
+	TLocale extends string | undefined = undefined,
+>(
 	core: CoreToolkit,
-	input: PagesGetByFullSlugInput<TCollectionKey>,
+	input: PagesGetByFullSlugInput<TCollectionKey, TLocale>,
 ) =>
 	runToolkitService({
 		handler: () => {

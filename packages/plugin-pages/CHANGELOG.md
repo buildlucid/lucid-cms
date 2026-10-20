@@ -1,5 +1,9 @@
 # @lucidcms/plugin-pages
 
+## v0.9.0 (unreleased)
+
+- `toolkit.pages.getByFullSlug()` now returns the document as the content API does, and accepts `locale`, `fallbackLocale` and `depth`.
+
 ## v0.8.0
 
 - Added relation-derived route segments and automatic collection routing through `fullSlug`.

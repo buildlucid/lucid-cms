@@ -63,13 +63,13 @@ Use a publishing target configured on your collection, or `latest` to include dr
 | `client` | Use your own Typesense SDK client instead of `host` and `apiKey`. |
 | `indexes` | The search indexes and their content sources. Query an index using its `alias`. |
 | `sources[].fields` | Map search fields to Lucid fields, or use a function to calculate a value. |
-| `sources[].condition` | Choose whether to index a resource. Receives the document or media, locale, and available references. Returning `false` removes its search records. |
+| `sources[].condition` | Choose whether to index a resource. Receives the document or media and the locale. Returning `false` removes its search records. |
 | `sources[].locales` | Optionally index each listed locale separately. |
 | `sources[].project` | Supply a function instead of `fields` when you need more control. Return `null` to exclude an item. |
 
-Use `kind: "media"` for a media source, with fields such as `{ title: "title", url: "url" }`. Media sources include public, ready files and use their current crop and delivery URL. Set `visibility: "all"` only for an index with suitable access controls.
+Use `kind: "media"` for a media source, with fields such as `{ title: "title", url: "url" }`. Media sources include public, ready library files and use their current crop and delivery URL. Set `visibility: "all"` only for an index with suitable access controls.
 
-For collection sources, add `include: ["bricks", "refs.documents", "refs.media"]` when your field functions use bricks or related content. These references are resolved when indexing and refreshed when their content changes.
+Collection sources read documents as the content API returns them, with media, users and related documents filled into their fields. Add `include: ["bricks"]` when your field functions use bricks, and set `depth` to fill in related documents more or fewer levels deep. These are refreshed when their content changes.
 
 For example, add `condition: ({ document }) => document.fields.searchable === true` to index only documents marked as searchable. Conditions run during indexing, so searches still read only Typesense.
 

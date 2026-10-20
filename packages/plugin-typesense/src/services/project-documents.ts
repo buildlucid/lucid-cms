@@ -3,7 +3,7 @@ import {
 	isCollectionFieldLocalized,
 	resolveCollectionLocalization,
 } from "@lucidcms/core/extension";
-import type { CollectionDocument, Refs, ServiceFn } from "@lucidcms/core/types";
+import type { ContentDocument, ServiceFn } from "@lucidcms/core/types";
 import type { CollectionSource, IndexRecord } from "../types.js";
 import normalizeRecords from "../utils/normalize-records.js";
 
@@ -12,8 +12,7 @@ const projectDocuments: ServiceFn<
 	[
 		{
 			source: CollectionSource;
-			documents: CollectionDocument<string>[];
-			refs: Refs;
+			documents: ContentDocument<string, false>[];
 			revision: string;
 			maxRecordsPerItem: number;
 		},
@@ -55,7 +54,7 @@ const projectDocuments: ServiceFn<
 	try {
 		for (const document of data.documents) {
 			for (const locale of data.source.locales ?? [null]) {
-				const input = { document, locale, refs: data.refs };
+				const input = { document, locale };
 				if (data.source.condition && !data.source.condition(input)) continue;
 				let projected: unknown;
 				if (data.source.project) {

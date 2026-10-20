@@ -5,9 +5,12 @@ import getByFullSlug, {
 } from "./get-by-full-slug/index.js";
 
 const createPagesToolkit = (core: CoreToolkit) => ({
-	/** Finds a document in a pages collection by its full slug, including requested refs. */
-	getByFullSlug: <TCollectionKey extends CollectionDocumentKey>(
-		input: PagesGetByFullSlugInput<TCollectionKey>,
+	/** Finds a document in a pages collection by its full slug, as the content API returns it. */
+	getByFullSlug: <
+		TCollectionKey extends CollectionDocumentKey,
+		TLocale extends string | undefined = undefined,
+	>(
+		input: PagesGetByFullSlugInput<TCollectionKey, TLocale>,
 	) => getByFullSlug(core, input),
 });
 

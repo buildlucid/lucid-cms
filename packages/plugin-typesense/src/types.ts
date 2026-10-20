@@ -1,9 +1,8 @@
 import type {
-	CollectionDocument,
-	CollectionDocumentMultipleInclude,
+	ContentDocument,
+	ContentDocumentInclude,
 	Media,
 	MediaListItem,
-	Refs,
 } from "@lucidcms/core/types";
 import type { Client } from "typesense";
 import type { CollectionCreateSchema } from "typesense/lib/Typesense/Collections.js";
@@ -24,11 +23,10 @@ export type IndexRecord = {
 };
 
 export type ProjectionContext = {
-	/** Values formatted by Lucid's custom fields, including nested content. */
-	readonly document: CollectionDocument<string>;
+	/** The document as the content API returns it, with every translation, and media, users and related documents filled in. */
+	readonly document: ContentDocument<string, false>;
 	/** The configured locale, or null when indexing all translations together. */
 	readonly locale: string | null;
-	readonly refs: Refs;
 };
 
 /** Input values are validated as JSON before being sent to Typesense. */
@@ -65,10 +63,9 @@ export type CollectionSource = {
 	readonly version: string;
 	/** One record set per locale. Omit to project all translations together. */
 	readonly locales?: readonly string[];
-	readonly include?: readonly Exclude<
-		CollectionDocumentMultipleInclude,
-		"refs"
-	>[];
+	readonly include?: readonly ContentDocumentInclude[];
+	/** Depth of related documents to fill in, from 0 to 3, defaulting to 1. */
+	readonly depth?: number;
 	/** Extra dependencies read by project. Included references are tracked automatically. */
 	readonly dependencies?: {
 		readonly collections?: readonly string[];
