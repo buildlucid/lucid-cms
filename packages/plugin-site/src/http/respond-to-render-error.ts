@@ -14,6 +14,8 @@ const respondToRenderError = async (props: {
 	state: SiteState;
 	error: unknown;
 	development: boolean;
+	/** Sent with 404 pages, which bots crawling random URLs would otherwise render every time; 500s are never cached. */
+	cacheControl: string | undefined;
 }) => {
 	const { hono, site, state, error } = props;
 	const cause = error instanceof KilnRenderError ? error.cause : error;
@@ -28,6 +30,7 @@ const respondToRenderError = async (props: {
 			state,
 			template: errorPages.notFound,
 			status: 404,
+			cacheControl: props.cacheControl,
 		});
 	}
 

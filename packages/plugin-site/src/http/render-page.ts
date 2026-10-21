@@ -8,6 +8,7 @@ import getRouteParams from "../router/get-route-params.js";
 import type { Site } from "../site/create-site-loader.js";
 import renderOptions from "../site/render-options.js";
 import type { SitePage, SiteState } from "../types.js";
+import guardRenderStream from "./guard-render-stream.js";
 import insertBeforeBodyEnd from "./insert-before-body-end.js";
 
 const missedFooter = (state: SiteState) => {
@@ -23,22 +24,34 @@ const missedFooter = (state: SiteState) => {
 	return markup.footer;
 };
 
-/** Early render failures reject before response headers are sent. */
+/** Early render failures reject before response headers are sent; later ones are logged by the stream guard. */
 const renderPage = async (props: {
 	hono: LucidHonoContext;
 	site: Site;
 	match: MatchedRoute<SitePage>;
 	state: SiteState;
 	cacheControl: string | undefined;
+	development: boolean;
 }) => {
 	const kiln = props.state.preview ? props.site.freshKiln : props.site.kiln;
-	const stream = await kiln.renderStream(
-		props.match.data.template,
-		{ route: { path: props.state.path, params: getRouteParams(props.match) } },
+	const signal = props.hono.req.raw.signal;
+	const stream = guardRenderStream(
+		await kiln.renderStream(
+			props.match.data.template,
+			{
+				route: { path: props.state.path, params: getRouteParams(props.match) },
+			},
+			{
+				...renderOptions(props.state),
+				islands: streamIslands(),
+				signal,
+			},
+		),
 		{
-			...renderOptions(props.state),
-			islands: streamIslands(),
-			signal: props.hono.req.raw.signal,
+			path: props.state.path,
+			development: props.development,
+			data: props.site.data,
+			signal,
 		},
 	);
 

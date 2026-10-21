@@ -2,9 +2,14 @@ import { contentCacheTags, getCacheTagTokens } from "@lucidcms/core/extension";
 import type { ServiceContext } from "@lucidcms/core/types";
 import type { KilnCache } from "@lucidkiln/core";
 import { storeKeys } from "../constants.js";
+import storeLifetime from "./store-lifetime.js";
 
 type Fragment = { value: string; tokens: Record<string, string> };
 
+/**
+ * Kiln's fragment store, shared by every request the site serves. Kiln's cache contract passes no request, so tokens are
+ * read afresh per get and set rather than memoised per request as stored pages' are.
+ */
 const createFragmentCache = (context: ServiceContext): KilnCache => {
 	// Tokens at cache misses prevent saving fragments rendered across a content change.
 	const guards = [contentCacheTags.documents, contentCacheTags.media];
@@ -46,7 +51,7 @@ const createFragmentCache = (context: ServiceContext): KilnCache => {
 					),
 				},
 				hash: true,
-				ttlSeconds: seconds ?? undefined,
+				ttlSeconds: storeLifetime(seconds),
 			});
 		},
 	};

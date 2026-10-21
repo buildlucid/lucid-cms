@@ -148,6 +148,9 @@ export type SiteCliData =
 /** ssr streams requests, isr caches until content changes, and static builds files while using SSR for development and previews. */
 export type SiteMode = "ssr" | "isr" | "static";
 
+/** Whether HTML page URLs end in a slash: the other form redirects to it. */
+export type SiteTrailingSlash = "never" | "always";
+
 /** What a page's `paths` export lists for a static build: URLs, or values for its file name's parameters. */
 export type SitePagePaths = Array<string | Record<string, string | number>>;
 
@@ -236,8 +239,13 @@ export type SitePluginOptions = {
 	locales?: string[];
 	/** Chooses a render's locale from the site's locales, such as by path prefix, domain or cookie, or uses the default locale when omitted. */
 	locale?: (context: SiteLocaleContext) => string;
-	/** Default `Cache-Control` for SSR and ISR pages, overridable per page; prefer `s-maxage` over browser caching that cannot be purged and bypass CDN caches for the `lucid_preview` cookie. */
+	/** Default `Cache-Control` for SSR and ISR pages, overridable per page, and for 404 pages; prefer `s-maxage` over browser caching that cannot be purged and bypass CDN caches for the `lucid_preview` cookie. */
 	cacheControl?: string;
+	/**
+	 * Which form of an HTML page's URL is canonical, defaulting to `never`: `/about/` redirects to `/about` with a 301, or the other way round with `always`.
+	 * The root and pages with another content type, such as `robots.txt`, serve both forms. Only served pages are affected; static builds write `index.html` folders, so whatever serves them decides.
+	 */
+	trailingSlash?: SiteTrailingSlash;
 	static?: {
 		/** Static output directory relative to the project root, defaulting to `dist-site` and emptied by each `site:build`. */
 		outDir?: string;
@@ -253,10 +261,11 @@ export type SitePluginOptions = {
 /** Site plugin options with their defaults filled in. */
 export type SitePluginOptionsInternal = Omit<
 	SitePluginOptions,
-	"directory" | "mode" | "static"
+	"directory" | "mode" | "trailingSlash" | "static"
 > & {
 	directory: string;
 	mode: SiteMode;
+	trailingSlash: SiteTrailingSlash;
 	static: { outDir: string };
 };
 

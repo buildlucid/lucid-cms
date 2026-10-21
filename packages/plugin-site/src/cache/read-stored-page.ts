@@ -1,5 +1,5 @@
-import { getCacheTagTokens } from "@lucidcms/core/extension";
 import type { ServiceContext } from "@lucidcms/core/types";
+import readCacheTagTokens from "./read-cache-tag-tokens.js";
 
 export type StoredPage = {
 	body: string;
@@ -17,7 +17,7 @@ const readStoredPage = async (
 	const tags = Object.keys(page.tokens);
 	if (tags.length === 0) return page;
 
-	const current = await getCacheTagTokens(context, tags);
+	const current = await readCacheTagTokens(context, tags);
 	return tags.every((tag) => current[tag] === page.tokens[tag]) ? page : null;
 };
 

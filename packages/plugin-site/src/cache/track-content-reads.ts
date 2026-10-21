@@ -1,23 +1,15 @@
-import { contentCacheTags, getCacheTagTokens } from "@lucidcms/core/extension";
+import { contentCacheTags } from "@lucidcms/core/extension";
 import type { ServiceContext, Toolkit } from "@lucidcms/core/types";
+import readCacheTagTokens from "./read-cache-tag-tokens.js";
 
-/** Captures tokens before content reads so concurrent changes invalidate stored pages. */
+/** Captures tokens before content reads so concurrent changes invalidate stored pages; the request's memo keeps the first token each tag resolved to. */
 const trackContentReads = (toolkit: Toolkit, context: ServiceContext) => {
-	const tokens = new Map<string, Promise<string>>();
+	const tracked = new Set<string>();
 
-	const track = (...tags: string[]) =>
-		Promise.all(
-			tags.map((tag) => {
-				const existing = tokens.get(tag);
-				if (existing) return existing;
-
-				const token = getCacheTagTokens(context, [tag]).then(
-					(result) => result[tag] ?? "",
-				);
-				tokens.set(tag, token);
-				return token;
-			}),
-		);
+	const track = async (...tags: string[]) => {
+		for (const tag of tags) tracked.add(tag);
+		await readCacheTagTokens(context, tags);
+	};
 
 	// Document reads include their media, which media changes don't rotate the collection's token for.
 	const documents: Toolkit["documents"] = {
@@ -56,12 +48,8 @@ const trackContentReads = (toolkit: Toolkit, context: ServiceContext) => {
 
 	return {
 		toolkit: { ...toolkit, documents, media },
-		tokens: async (): Promise<Record<string, string>> =>
-			Object.fromEntries(
-				await Promise.all(
-					[...tokens].map(async ([tag, token]) => [tag, await token] as const),
-				),
-			),
+		/** The tokens of every tag the page read, as they were before its first read of each. */
+		tokens: () => readCacheTagTokens(context, [...tracked]),
 	};
 };
 

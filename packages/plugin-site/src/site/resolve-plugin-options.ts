@@ -11,6 +11,7 @@ const resolvePluginOptions = (
 	...given,
 	directory: given.directory ?? DEFAULT_SITE_DIRECTORY,
 	mode: given.mode ?? "ssr",
+	trailingSlash: given.trailingSlash ?? "never",
 	static: {
 		outDir: given.static?.outDir ?? DEFAULT_STATIC_OUTPUT_DIRECTORY,
 	},

@@ -1,4 +1,4 @@
-import { logger } from "@lucidcms/core";
+import { LucidError, logger } from "@lucidcms/core";
 import type { ResolvedLucidConfig, ServiceContext } from "@lucidcms/core/types";
 import { type Loader, memoryLoader } from "@lucidkiln/core";
 import type { RouterContext } from "rou3";
@@ -60,6 +60,34 @@ const addUi = (loader: Loader, data: SiteCliData | null, module: unknown) => {
 /** The CLI resolves the directory from the project root; without it, it's relative to the working directory. */
 const resolveDirectory = (option: string, data: SiteCliData | null) =>
 	data?.kind === "dev" ? data.directory : option;
+
+/**
+ * Fingerprints the site directory cheaply enough to check on every development request: each file's name, size and
+ * modified time, with the site's translations since the cache namespace holds them too. UI component files are included
+ * so editing one still starts a new namespace, as hashing their source did.
+ */
+const readDevSignature = async (
+	directory: string,
+	translations: Record<string, Record<string, string>>,
+) => {
+	const [{ fileLoader }, { stat }] = await Promise.all([
+		import("@lucidkiln/core/node"),
+		import("node:fs/promises"),
+	]);
+	const names = await fileLoader({ root: directory }).list();
+	const files = await Promise.all(
+		names.map(async (name) => {
+			try {
+				const file = await stat(`${directory}/${name}`);
+				return `${name}:${file.size}:${file.mtimeMs}`;
+			} catch {
+				// Removed between listing and stat, which the next request's listing settles.
+				return `${name}:missing`;
+			}
+		}),
+	);
+	return [...files, JSON.stringify(translations)].join("\n");
+};
 
 /** Warns while developing a static site, so a missing `paths` export doesn't first surface in `site:build`. */
 const warnMissingPaths = (pages: SitePage[]) => {
@@ -151,8 +179,10 @@ const createSiteLoader = (
 		resolveSiteEnvironment(config, options.environment),
 	);
 	let site: Promise<Site> | undefined;
+	/** The directory's fingerprint the current site was loaded from, in development. */
+	let signature: string | undefined;
 
-	return (props: {
+	return async (props: {
 		context: ServiceContext;
 		/** Replaces what the CLI handed the runtime, such as for `site:build`, which builds its own. */
 		data?: SiteCliData;
@@ -163,20 +193,38 @@ const createSiteLoader = (
 		const module = props.data
 			? props.module
 			: props.context.runtimeContext?.pluginModules?.[PLUGIN_KEY];
-		// Development reloads the directory on every request so edits need no restart; built templates can't change.
-		const reloads =
-			props.context.runtimeContext?.compiled === false &&
-			data?.kind !== "build";
+		const compiled = props.context.runtimeContext?.compiled;
+		// A built server has no site directory to fall back to, which would only fail later on Cloudflare.
+		if (compiled === true && data?.kind !== "build") {
+			throw new LucidError({
+				scope: PLUGIN_KEY,
+				message:
+					"The site wasn't built with the server, so it has no templates to render. Run lucidcms build.",
+			});
+		}
+		// Development checks the directory on every request and reloads the site when a file changed, so edits need no restart; built templates can't change.
+		const reloads = compiled === false && data?.kind !== "build";
 		if (site && !reloads) return site;
 
+		const directory = resolveDirectory(options.directory, data);
+		if (reloads) {
+			const current = await readDevSignature(
+				directory,
+				props.context.translate.scopeBundles("site"),
+			);
+			if (site && current === signature) return site;
+			signature = current;
+		}
+
 		const loading = loadSite({
-			directory: resolveDirectory(options.directory, data),
+			directory,
 			data,
 			module,
 			config: siteConfig,
 			options,
 			context: props.context,
 		});
+		// A failed load retries on the next request.
 		loading.catch(() => {
 			if (site === loading) site = undefined;
 		});

@@ -92,14 +92,18 @@ class ClientComponent extends HTMLElement {
 			const src = this.getAttribute("src");
 			if (!src) return;
 			const render = this.getAttribute("client") === "only";
-			void import(/* @vite-ignore */ src).then((module: HydrateModule) =>
-				module.default(
-					this,
-					JSON.parse(this.getAttribute("props") ?? "{}"),
-					render ? takeTemplateSlots(this) : slotsOf(this),
-					{ id: this.getAttribute("prefix") ?? "", render },
-				),
-			);
+			import(/* @vite-ignore */ src)
+				.then((module: HydrateModule) =>
+					module.default(
+						this,
+						JSON.parse(this.getAttribute("props") ?? "{}"),
+						render ? takeTemplateSlots(this) : slotsOf(this),
+						{ id: this.getAttribute("prefix") ?? "", render },
+					),
+				)
+				.catch((error: unknown) => {
+					console.error(`Failed to hydrate ${src}`, error);
+				});
 		});
 	}
 }

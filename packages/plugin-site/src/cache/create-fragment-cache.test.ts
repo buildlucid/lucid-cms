@@ -1,5 +1,6 @@
 import type { ServiceContext } from "@lucidcms/core/types";
 import { describe, expect, test, vi } from "vitest";
+import { DEFAULT_STORE_LIFETIME_SECONDS } from "../constants.js";
 import createFragmentCache from "./create-fragment-cache.js";
 
 const tokens: Record<string, string> = {};
@@ -11,15 +12,21 @@ vi.mock(import("@lucidcms/core/extension"), async (importOriginal) => ({
 }));
 
 const store = new Map<string, unknown>();
+const lifetimes = new Map<string, number | undefined>();
 const context = {
 	kv: {
 		get: async (_context: unknown, { key }: { key: string }) =>
 			store.get(key) ?? null,
 		set: async (
 			_context: unknown,
-			{ key, value }: { key: string; value: unknown },
+			{
+				key,
+				value,
+				ttlSeconds,
+			}: { key: string; value: unknown; ttlSeconds?: number },
 		) => {
 			store.set(key, value);
+			lifetimes.set(key, ttlSeconds);
 		},
 	},
 } as unknown as ServiceContext;
@@ -53,5 +60,16 @@ describe("createFragmentCache", () => {
 			tags: [],
 		});
 		await expect(cache.get({ key: "footer" })).resolves.toBeNull();
+	});
+
+	test("bounds how long a section stays stored, keeping a shorter `for`", async () => {
+		await save("hero", "<h1></h1>", []);
+		await cache.get({ key: "promo" });
+		await cache.set({ key: "promo", value: "<p></p>", seconds: 300, tags: [] });
+
+		expect(lifetimes.get("@lucidcms/plugin-site:fragment:hero")).toBe(
+			DEFAULT_STORE_LIFETIME_SECONDS,
+		);
+		expect(lifetimes.get("@lucidcms/plugin-site:fragment:promo")).toBe(300);
 	});
 });

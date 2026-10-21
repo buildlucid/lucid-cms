@@ -10,6 +10,8 @@ const renderErrorPage = async (props: {
 	template: string;
 	status: 404 | 500;
 	state: SiteState;
+	/** Sent with the page when given, such as the site's default for 404s. */
+	cacheControl?: string;
 }) => {
 	if (!props.site.templates.has(props.template)) return undefined;
 
@@ -24,7 +26,11 @@ const renderErrorPage = async (props: {
 		{ route: { path: state.path, params: {} } },
 		renderOptions(state),
 	);
-	return props.hono.html(html, props.status);
+	return props.hono.html(
+		html,
+		props.status,
+		props.cacheControl ? { "cache-control": props.cacheControl } : undefined,
+	);
 };
 
 export default renderErrorPage;

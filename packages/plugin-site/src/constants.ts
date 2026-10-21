@@ -37,6 +37,12 @@ export const CLIENT_SCRIPT_PATH = pluginPublicPath(PLUGIN_KEY, "lucid.js");
 export const HEAD_OUTLET = "head";
 export const ISLANDS_URL = `/${pluginPublicPath(PLUGIN_KEY, "islands")}/`;
 
+/**
+ * How long stored pages, their island entries and fragments stay in KV when no shorter TTL is given.
+ * Token checks already catch stale entries, so this only bounds storage: each build uses a new cache namespace, which orphans the last build's entries.
+ */
+export const DEFAULT_STORE_LIFETIME_SECONDS = 30 * 24 * 60 * 60;
+
 export const storeKeys = {
 	page: (version: string, locale: string, path: string) =>
 		`${PLUGIN_KEY}:page:${version}:${locale}:${path}`,

@@ -4,6 +4,7 @@ import type {
 	ServiceContext,
 } from "@lucidcms/core/types";
 import { findRoute } from "rou3";
+import coalesceRenders from "../cache/coalesce-renders.js";
 import readStoredPage from "../cache/read-stored-page.js";
 import renderStoredPage from "../cache/render-stored-page.js";
 import { ISLANDS_URL, PLUGIN_KEY, storeKeys } from "../constants.js";
@@ -19,6 +20,7 @@ import decode from "../utils/decode.js";
 import isLucidPath from "../utils/is-lucid-path.js";
 import normalizePath from "../utils/normalize-path.js";
 import createDevErrorPage from "./create-dev-error-page.js";
+import findCanonicalPath from "./find-canonical-path.js";
 import readRequestLocale from "./read-request-locale.js";
 import renderIsland from "./render-island.js";
 import renderPage from "./render-page.js";
@@ -69,16 +71,12 @@ const registerSiteRoute =
 		app.get(
 			"/*",
 			defineMiddleware(async ({ hono, toolkit, context, next }) => {
-				const { pathname } = new URL(hono.req.url);
+				const { pathname, search } = new URL(hono.req.url);
 				const path = normalizePath(decode(pathname));
 				if (isLucidPath(path)) {
 					await next();
 					return;
 				}
-
-				const previewResult = await readPreview({ hono, toolkit });
-				if ("response" in previewResult) return previewResult.response;
-				const { preview } = previewResult;
 
 				const development = context.runtimeContext?.compiled === false;
 				let site: Site;
@@ -96,6 +94,19 @@ const registerSiteRoute =
 					const data = readCliData(context.runtimeContext);
 					return hono.html(createDevErrorPage({ error, data }), 500);
 				}
+
+				// The query string, such as a preview token, must survive the redirect.
+				const canonical = findCanonicalPath({
+					pathname,
+					router: site.router,
+					trailingSlash: options.trailingSlash,
+				});
+				if (canonical) return hono.redirect(`${canonical}${search}`, 301);
+
+				const previewResult = await readPreview({ hono, toolkit });
+				if ("response" in previewResult) return previewResult.response;
+				const { preview } = previewResult;
+
 				const { locale, vary } = readRequestLocale(hono, site, path);
 				// Caches must keep a copy per value of whatever chose the locale.
 				if (vary.length > 0)
@@ -111,35 +122,42 @@ const registerSiteRoute =
 					...(await createSiteMarkup({ hono, toolkit, preview })),
 					footerWritten: false,
 				});
+				// Previews keep the no-store header the toolkit set, and development skips caching so edits show.
+				const cacheable = !preview && !development;
 
 				try {
 					const match = findRoute(site.router, "GET", pathname);
 					if (!match) throw new SiteNotFoundError();
 
-					// Previews keep the no-store header the toolkit set, and development skips caching so edits show.
-					const cacheControl =
-						preview || development ? undefined : match.data.cacheControl;
+					const cacheControl = cacheable ? match.data.cacheControl : undefined;
 
 					if (!preview && match.data.mode === "isr" && canStorePages(context)) {
+						const key = storeKeys.page(site.cacheNamespace, locale, path);
 						const stored =
-							(await readStoredPage(
-								context,
-								storeKeys.page(site.cacheNamespace, locale, path),
-							)) ??
-							(await renderStoredPage({
-								context,
-								site,
-								page: match.data,
-								params: getRouteParams(match),
-								state,
-							}));
+							(await readStoredPage(context, key)) ??
+							(await coalesceRenders(key, () =>
+								renderStoredPage({
+									context,
+									site,
+									page: match.data,
+									params: getRouteParams(match),
+									state,
+								}),
+							));
 						return hono.body(stored.body, 200, {
 							"content-type": stored.contentType,
 							...(cacheControl ? { "cache-control": cacheControl } : {}),
 						});
 					}
 
-					return await renderPage({ hono, site, match, state, cacheControl });
+					return await renderPage({
+						hono,
+						site,
+						match,
+						state,
+						cacheControl,
+						development,
+					});
 				} catch (error) {
 					const response = await respondToRenderError({
 						hono,
@@ -147,6 +165,7 @@ const registerSiteRoute =
 						state,
 						error,
 						development,
+						cacheControl: cacheable ? options.cacheControl : undefined,
 					});
 					if (response) return response;
 					await next();
