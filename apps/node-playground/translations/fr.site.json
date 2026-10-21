@@ -1,4 +1,22 @@
 {
+	"nav.label": "Principale",
+	"nav.blog": "Blog",
+	"nav.search": "Recherche",
+	"nav.lab": "Labo",
+	"locales.label": "Langue",
+	"blog.title": "Blog",
+	"blog.intro": "Actualités et notes du terrain de jeu.",
+	"blog.empty": "Aucun article pour le moment.",
+	"blog.back": "Tous les articles",
+	"search.title": "Recherche",
+	"search.field": "Rechercher des pages",
+	"search.submit": "Rechercher",
+	"search.searching": "Recherche…",
+	"search.empty": "Aucune page ne correspond à votre recherche.",
+	"search.failed": "La recherche n'est pas disponible pour le moment.",
 	"notFound.title": "Page introuvable",
-	"notFound.body": "Rien ne se trouve à {{path}}."
+	"notFound.body": "Rien ne se trouve à {{path}}.",
+	"notFound.home": "Aller à la page d'accueil",
+	"error.title": "Une erreur s'est produite",
+	"error.body": "Cette page n'a pas pu être affichée. Réessayez dans un instant."
 }

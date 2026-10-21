@@ -1,0 +1,25 @@
+{% extends "layouts/localized" %}
+
+{% export paths = documentPaths("blog") %}
+
+{% set post = document("blog", {
+	filter: { _fullSlug: route.path },
+	include: ["bricks", "meta"],
+}) ?? notFound() %}
+{% set alternates = post.route?.alternates %}
+
+{% block title %}{{ post.fields.page_title }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<article class="post">
+		<p class="post__back"><a href="/{{ locale }}/blog">← {{ translate("blog.back") }}</a></p>
+		<h1 {{ editable(post, "page_title") }}>{{ post.fields.page_title }}</h1>
+		<p class="post__meta">
+			{{ post.meta?.createdAt|formatDate(dateStyle: "long") }}
+			{% set author = post.fields.author|first %}
+			{% if author %}· {{ [author.firstName, author.lastName]|filter(part => part)|join(" ") ?: author.username }}{% endif %}
+		</p>
+		{% if post.fields.page_excerpt %}<p class="lead">{{ post.fields.page_excerpt }}</p>{% endif %}
+		{% include "components/rich-text" with { node: post.fields.content } %}
+	</article>
+{% endblock %}

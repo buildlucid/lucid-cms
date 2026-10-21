@@ -1,0 +1,14 @@
+{% props count: number %}
+
+{% set posts = documentList("blog", { sort: [{ key: "createdAt", direction: "desc" }], perPage: count }).items %}
+
+<div class="card">
+	<h3 class="card__title">{{ count|plural(one: "Latest post", other: "Latest # posts") }}</h3>
+	<ul>
+		{% for post in posts %}
+			<li><a href="{{ post.route?.path }}">{{ post.fields.page_title }}</a></li>
+		{% else %}
+			<li>{{ translate("blog.empty") }}</li>
+		{% endfor %}
+	</ul>
+</div>

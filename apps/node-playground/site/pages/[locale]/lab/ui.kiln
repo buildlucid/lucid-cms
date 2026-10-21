@@ -1,0 +1,58 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% block title %}UI components | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>UI components</h1>
+	<p class="lead">Each library renders on the server, then hydrates as its <code>client</code> mode says.</p>
+
+	<section class="section">
+		<h2>React</h2>
+		<p>No <code>client</code>, so this counter stays static HTML.</p>
+		{% include "ui/react/Counter.tsx" with { start: 2 } %}
+		<p><code>client: "load"</code>, with Kiln children and a named slot.</p>
+		{% component "ui/react/Counter.tsx" with { start: 5, client: "load" } %}
+			<p>Children from Kiln, in {{ locale }}.</p>
+			{% fill "footer" %}<small>A footer slot</small>{% endfill %}
+		{% endcomponent %}
+		<p><code>client: "idle"</code>, <code>client: "only"</code> with a fallback, and <code>client: { media }</code> for wide screens.</p>
+		{% include "ui/react/Greeting.tsx" with { name: "Will", client: "idle" } %}
+		{% component "ui/react/Greeting.tsx" with { name: "browser", client: "only" } %}
+			{% fill "fallback" %}<p>Loading the greeting…</p>{% endfill %}
+		{% endcomponent %}
+		{% include "ui/react/Greeting.tsx" with { name: "wide screens", client: { media: "(min-width: 48rem)" } } %}
+	</section>
+
+	<section class="section">
+		<h2>Nested in a server-only component</h2>
+		{% component "ui/react/Panel.tsx" with { title: "Rendered on the server" } %}
+			{% component "ui/react/Counter.tsx" with { start: 10, client: "load" } %}
+				<p>A hydrated counter inside a server-only panel.</p>
+			{% endcomponent %}
+		{% endcomponent %}
+	</section>
+
+	<section class="section">
+		<h2>Vue</h2>
+		{% component "ui/vue/TodoList.vue" with { items: ["Write the post", "Check the preview"], client: "visible" } %}
+			<p>Hydrates when scrolled into view.</p>
+			{% fill "footer" %}<small>A Vue footer slot</small>{% endfill %}
+		{% endcomponent %}
+	</section>
+
+	<section class="section">
+		<h2>Svelte</h2>
+		{% component "ui/svelte/Stopwatch.svelte" with { client: "load" } %}
+			<p>Svelte children from Kiln.</p>
+		{% endcomponent %}
+	</section>
+
+	<section class="section">
+		<h2>Solid</h2>
+		{% component "ui/solid/Disclosure.tsx" with { label: "Show the Kiln children", client: "visible" } %}
+			<p>Rendered by Kiln and revealed by Solid.</p>
+		{% endcomponent %}
+	</section>
+{% endblock %}

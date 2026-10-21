@@ -5,19 +5,12 @@
 		"moduleResolution": "Bundler",
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
-		"types": [
-			"vite/client"
-		],
+		"types": ["vite/client"],
 		"strict": true,
 		"skipLibCheck": true,
 		"noEmit": true,
 		"resolveJsonModule": true
 	},
-	"include": [
-		"**/*",
-		"../.lucid/types.d.ts"
-	],
-	"exclude": [
-		"components/solid"
-	]
+	"include": ["**/*", "../.lucid/types.d.ts"],
+	"exclude": ["ui/solid"]
 }

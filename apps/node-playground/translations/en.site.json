@@ -1,4 +1,22 @@
 {
+	"nav.label": "Main",
+	"nav.blog": "Blog",
+	"nav.search": "Search",
+	"nav.lab": "Lab",
+	"locales.label": "Language",
+	"blog.title": "Blog",
+	"blog.intro": "News and notes from the playground.",
+	"blog.empty": "No posts yet.",
+	"blog.back": "All posts",
+	"search.title": "Search",
+	"search.field": "Search pages",
+	"search.submit": "Search",
+	"search.searching": "Searching…",
+	"search.empty": "No pages match your search.",
+	"search.failed": "Search isn't available right now.",
 	"notFound.title": "Page not found",
-	"notFound.body": "Nothing lives at {{path}}."
+	"notFound.body": "Nothing lives at {{path}}.",
+	"notFound.home": "Go to the home page",
+	"error.title": "Something went wrong",
+	"error.body": "This page couldn't be shown. Try again in a moment."
 }

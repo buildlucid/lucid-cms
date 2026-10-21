@@ -1,0 +1,52 @@
+{# The site's navigation: the header menu, the site's own sections, the lab, and language links. #}
+{% props title: string, logo: string | null, path: string, alternates = null %}
+
+{% set menu = documentList("main-menu", { filter: { _location: "header" }, perPage: 1 }).items|first %}
+{% set base = "/" ~ locale %}
+{% set sections = [
+	{ label: translate("nav.blog"), href: base ~ "/blog" },
+	{ label: translate("nav.search"), href: base ~ "/search" },
+] %}
+{% set lab = [
+	{ label: "Overview", href: base ~ "/lab" },
+	{ label: "UI components", href: base ~ "/lab/ui" },
+	{ label: "Content functions", href: base ~ "/lab/content" },
+	{ label: "Islands", href: base ~ "/lab/islands" },
+	{ label: "Integrations", href: base ~ "/lab/integrations" },
+] %}
+
+{% macro link(item, path) %}
+	<li><a{{ attrs({ href: item.href, "aria-current": item.href == path ? "page" }) }}>{{ item.label }}</a></li>
+{% endmacro %}
+
+<aside class="sidebar">
+	<a class="sidebar__brand" href="{{ base }}">
+		<img src="{{ logo ?? viteAsset("images/logo.svg") }}" alt="" width="28" height="28">
+		{{ title }}
+	</a>
+
+	<nav aria-label="{{ translate("nav.label") }}">
+		<ul class="sidebar__list">
+			{% for item in menu?.fields?.items ?? [] %}
+				{% set href = item.linkType == "document" ? (item.document|first)?.route?.path : item.link?.url %}
+				{% if item.available and href %}{{ link({ label: item.label, href: href }, path) }}{% endif %}
+			{% endfor %}
+			{% for item in sections %}{{ link(item, path) }}{% endfor %}
+		</ul>
+
+		<p class="sidebar__heading">{{ translate("nav.lab") }}</p>
+		<ul class="sidebar__list">
+			{% for item in lab %}{{ link(item, path) }}{% endfor %}
+		</ul>
+	</nav>
+
+	<ul class="sidebar__locales" aria-label="{{ translate("locales.label") }}">
+		{% for item in locales() %}
+			{# Without alternates, swap the path's locale prefix. #}
+			{% set href = alternates ? alternates[item.code] ?? null : (path starts with base ? "/" ~ item.code ~ path|slice(base|length) : null) %}
+			{% if href %}
+				<li><a{{ attrs({ href: href, hreflang: item.code, lang: item.code, "aria-current": item.code == locale ? "page" }) }}>{{ item.name }}</a></li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+</aside>

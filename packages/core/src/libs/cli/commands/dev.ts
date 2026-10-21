@@ -23,9 +23,9 @@ import runPluginPrepares from "../services/run-plugin-prepares.js";
 import {
 	clearDevScreen,
 	getServerUrl,
-	logAdminUrl,
 	logRestart,
 	logServerReady,
+	logServerUrls,
 } from "../services/server-logger.js";
 import updateAvailable from "../services/update-available.js";
 import migrateCommand from "./migrate.js";
@@ -245,7 +245,7 @@ const devCommand = async (options?: {
 			ready = true;
 
 			if (!lastServerUrl) {
-				logServerReady(serverUrl);
+				logServerReady(serverUrl, configResult.config.urls.site);
 				void coreUpdateAvailable
 					.then((update) => {
 						if (ready && !closing) update?.renderUpdateBox();
@@ -255,7 +255,8 @@ const devCommand = async (options?: {
 				logRestart(
 					`Server restarted in ${cliLogger.formatMilliseconds(elapsed())}`,
 				);
-				if (serverUrl !== lastServerUrl) logAdminUrl(serverUrl);
+				if (serverUrl !== lastServerUrl)
+					logServerUrls(serverUrl, configResult.config.urls.site);
 			}
 			lastServerUrl = serverUrl;
 

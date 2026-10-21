@@ -1,0 +1,27 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% set posts = documentList("blog", {
+	sort: [{ key: "createdAt", direction: "desc" }],
+	include: ["meta"],
+	perPage: -1,
+}).items %}
+
+{% block title %}{{ translate("blog.title") }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>{{ translate("blog.title") }}</h1>
+	<p class="lead">{{ translate("blog.intro") }}</p>
+
+	<div class="cards">
+		{% for post in posts %}
+			{% component "components/card" with { title: post.fields.page_title ?: post.route?.label, href: post.route?.path ?? "#" } %}
+				{% fill "meta" %}{{ post.meta?.createdAt|formatDate(dateStyle: "long") }}{% endfill %}
+				{% if post.fields.page_excerpt %}<p>{{ post.fields.page_excerpt }}</p>{% endif %}
+			{% endcomponent %}
+		{% else %}
+			<p>{{ translate("blog.empty") }}</p>
+		{% endfor %}
+	</div>
+{% endblock %}

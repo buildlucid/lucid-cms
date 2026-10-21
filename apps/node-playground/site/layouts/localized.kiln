@@ -1,0 +1,4 @@
+{# For pages under `pages/[locale]/`: a 404 unless the path's locale is the one the site chose. #}
+{% extends "layouts/base" %}
+
+{% set knownLocale = route.params.locale == locale ?: notFound() %}

@@ -8,6 +8,7 @@
 		"editable",
 		"footer",
 		"head",
+		"localePaths",
 		"locales",
 		"media",
 		"mediaList",
@@ -18,12 +19,14 @@
 		"richText",
 		"translate",
 		"vite",
-		"viteAsset"
+		"viteAsset",
+		"wait"
 	],
 	"filters": [],
 	"tests": [],
 	"globals": [
-		"locale"
+		"locale",
+		"siteUrl"
 	],
 	"types": [
 		"Brick",
@@ -39,7 +42,7 @@
 				".tsx"
 			],
 			"exclude": [
-				"components/solid/**"
+				"ui/solid/**"
 			],
 			"props": "(import(\"react\").ComponentProps<typeof import($file).default>) & { client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
 		},
@@ -49,7 +52,7 @@
 				".tsx"
 			],
 			"include": [
-				"components/solid/**"
+				"ui/solid/**"
 			],
 			"props": "(Parameters<typeof import($file).default>[0]) & { client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
 		},

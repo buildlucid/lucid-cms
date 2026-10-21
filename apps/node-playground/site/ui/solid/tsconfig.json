@@ -1,0 +1,9 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js"
+	},
+	"include": ["**/*", "../../../.lucid/types.d.ts"],
+	"exclude": []
+}

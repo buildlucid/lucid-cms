@@ -1,0 +1,19 @@
+.counter {
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	margin-block: 1rem;
+	padding: 1rem;
+}
+
+.counter__controls {
+	align-items: center;
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+
+	output {
+		font: 600 1.25rem / 1 var(--mono);
+		min-width: 3ch;
+		text-align: center;
+	}
+}

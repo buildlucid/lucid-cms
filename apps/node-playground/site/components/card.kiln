@@ -1,7 +1,8 @@
-{% props title, editable = "" %}
+{# A linked card for listings, with an optional `meta` slot above the description. #}
+{% props title: string, href: string, editable = "" %}
 
 <article class="card">
-	<h1 {{ editable }}>{{ title }}</h1>
+	<h2 class="card__title"><a href="{{ href }}" {{ editable }}>{{ title }}</a></h2>
 	{% if slots.meta %}
 		<p class="card__meta">{% slot "meta" %}{% endslot %}</p>
 	{% endif %}

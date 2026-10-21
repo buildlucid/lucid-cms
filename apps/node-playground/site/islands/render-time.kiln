@@ -1,0 +1,1 @@
+<p>The island rendered at <strong>{{ date()|formatDate(timeStyle: "medium") }}</strong>.</p>

@@ -224,7 +224,7 @@ const serveCommand = async () => {
 				startupAdapterKeys = props.adapterKeys;
 				maybeReportStartup();
 
-				logServerReady(getServerUrl(props.address));
+				logServerReady(getServerUrl(props.address), configRes.config.urls.site);
 				void coreUpdateAvailable
 					.then((update) => {
 						if (!shutdownPromise) update?.renderUpdateBox();

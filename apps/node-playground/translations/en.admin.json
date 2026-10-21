@@ -58,6 +58,7 @@
 	"bricks.testing.fields.textarea-key.summary": "Testing textarea",
 	"bricks.testing.tabs.advanced_tab.label": "Advanced",
 	"bricks.testing.tabs.content_tab.label": "Content",
+	"collections.blog.environments.production.name": "Production",
 	"collections.blog.environments.staging.name": "Staging",
 	"collections.blog.name": "Blogs",
 	"collections.blog.singularName": "Blog",

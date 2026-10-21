@@ -6,29 +6,14 @@
 	filter: { _fullSlug: route.path },
 	include: ["bricks"],
 }) ?? notFound() %}
-{% set media = mediaList({ filter: { type: 'image' } }) %}
+{% set alternates = page.route?.alternates %}
 
-{% block title %}{{ page.fields.page_title }} | Playground{% endblock %}
+{% block title %}{{ page.fields.page_title }} | {{ parent() }}{% endblock %}
 
 {% block content %}
-	{% component "components/card" with { title: page.fields.page_title, editable: editable(page, "page_title") } %}
-		{% fill "meta" %}<a href="{{ page.route?.path }}">{{ page.route?.path }}</a>{% endfill %}
-		<p>Document {{ page.id }}, rendered in {{ page.locale }}.</p>
-		<p>{{ pageGreeting("Will") }}</p>
-	{% endcomponent %}
+	<h1 {{ editable(page, "page_title") }}>{{ page.fields.page_title }}</h1>
 
 	{% for brick in page.bricks %}
-		{% include "sections/" ~ brick.key with { brick: brick } %}
-	{% endfor %}
-
-	{% island "islands/latest-pages" %}
-		<p>Loading the latest pages…</p>
-	{% endisland %}
-
-	{% for item in media.items %}
-		<figure class="media-figure">
-			<img {{ attrs({ src: item.url, alt: item.alt, width: item?.width, height: item?.height, loading: "lazy" }) }}>
-			{% if item.title %}<figcaption>{{ item.title }}</figcaption>{% endif %}
-		</figure>
+		{% include "bricks/" ~ brick.key with { brick: brick } %}
 	{% endfor %}
 {% endblock %}

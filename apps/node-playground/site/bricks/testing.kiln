@@ -1,0 +1,6 @@
+{% props brick: Brick %}
+
+<section class="section">
+	{% if brick.fields["text-key"] %}<h2 {{ editable(brick, "text-key") }}>{{ brick.fields["text-key"] }}</h2>{% endif %}
+	{% include "components/rich-text" with { node: brick.fields["rich-text-key"] } %}
+</section>

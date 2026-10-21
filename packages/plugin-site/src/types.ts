@@ -96,6 +96,8 @@ declare module "@lucidkiln/core" {
 	interface KilnGlobals {
 		/** The content locale this render reads, such as for `<html lang="{{ locale }}">`. */
 		locale: string;
+		/** Types page render data for Kiln, exposing path and parameters such as `route.params.slug` for `pages/blog/[slug].kiln` to pages and includes, without making `route` global to components or islands. */
+		route: SiteRoute;
 	}
 
 	interface KilnTypes {
@@ -151,6 +153,14 @@ export type SiteMode = "ssr" | "isr" | "static";
 
 /** Whether HTML page URLs end in a slash: the other form redirects to it. */
 export type SiteTrailingSlash = "never" | "always";
+
+/** The `route` every page renders with. */
+export type SiteRoute = {
+	/** Decoded request path, without a trailing slash. */
+	path: string;
+	/** Decoded values for the page file name's parameters, empty for error pages. */
+	params: Record<string, string>;
+};
 
 /** What a page's `paths` export lists for a static build: URLs, or values for its file name's parameters. */
 export type SitePagePaths = Array<string | Record<string, string | number>>;

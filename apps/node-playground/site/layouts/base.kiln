@@ -1,22 +1,29 @@
+{# Pages can set `alternates` from locale codes to paths, such as `route.alternates`, for language links. #}
+{% set settings = document("settings") %}
+{% set siteTitle = settings?.fields?.site_title ?: "Playground" %}
 <!doctype html>
 <html lang="{{ locale }}">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>{% block title %}Playground{% endblock %}</title>
+		<title>{% block title %}{{ siteTitle }}{% endblock %}</title>
 		{% outlet "head" %}
 		{{ vite("styles/site.css", "scripts/site.ts") }}
 		{{ head() }}
 	</head>
 	{% flush %}
 	<body>
-		<header>
-			<a href="/">
-				<img src="{{ viteAsset("images/logo.svg") }}" alt="" width="24" height="24">
-				Playground
-			</a>
-		</header>
-		<main>{% block content %}{% endblock %}</main>
+		<div class="site">
+			{% include "components/sidebar" with {
+				title: siteTitle,
+				logo: (settings?.fields?.site_logo|first)?.url,
+				path: route.path,
+				alternates: alternates ?? null,
+			} %}
+			<main class="site__main">
+				{% block content %}{% endblock %}
+			</main>
+		</div>
 		{{ footer() }}
 	</body>
 </html>

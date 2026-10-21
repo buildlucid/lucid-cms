@@ -1,0 +1,57 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% set home = document("page", { filter: { _fullSlug: "/" ~ locale } }) %}
+{% set images = mediaList({ filter: { type: "image", public: true }, perPage: 6 }) %}
+
+{% block title %}Content functions | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>Content functions</h1>
+
+	<section class="section">
+		<h2>translate()</h2>
+		<p>{{ translate("notFound.title") }}: {{ translate("notFound.body", { data: { path: route.path } }) }}</p>
+	</section>
+
+	<section class="section">
+		<h2>Site functions</h2>
+		<p>{{ pageGreeting("Will") }}</p>
+	</section>
+
+	<section class="section">
+		<h2>Cached section</h2>
+		{% cache ["latest-pages", locale] for 300 %}
+			<p>Rendered at {{ date()|formatDate(timeStyle: "medium") }}, then reused until a page changes or five minutes pass.</p>
+			<ul>
+				{% for item in documentList("page", { perPage: 5 }).items %}
+					<li><a href="{{ item.route?.path }}">{{ item.fields.page_title ?? "Untitled" }}</a></li>
+				{% endfor %}
+			</ul>
+		{% endcache %}
+	</section>
+
+	<section class="section">
+		<h2>editable()</h2>
+		{% if home %}
+			<p>Open this page in a preview to see the title marked as editable.</p>
+			<p class="lead" {{ editable(home, "page_title") }}>{{ home.fields.page_title }}</p>
+		{% else %}
+			<p>Publish a home page at /{{ locale }} to try this.</p>
+		{% endif %}
+	</section>
+
+	<section class="section">
+		<h2>mediaList()</h2>
+		<p>{{ images.pagination.total }} images in the library.</p>
+		<div class="media-grid">
+			{% for item in images.items %}
+				<figure>
+					<img {{ attrs({ src: item.url, alt: item.alt, width: item.meta?.width, height: item.meta?.height, loading: "lazy" }) }}>
+					{% if item.title %}<figcaption>{{ item.title }}</figcaption>{% endif %}
+				</figure>
+			{% endfor %}
+		</div>
+	</section>
+{% endblock %}

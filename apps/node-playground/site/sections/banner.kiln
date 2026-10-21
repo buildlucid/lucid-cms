@@ -1,5 +1,0 @@
-{% props brick: Brick %}
-
-<section class="banner">
-	<h2 {{ editable(brick, "title") }}>{{ brick.fields.title }}</h2>
-</section>

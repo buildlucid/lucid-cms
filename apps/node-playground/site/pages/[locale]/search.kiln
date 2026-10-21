@@ -1,0 +1,20 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% block title %}{{ translate("search.title") }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>{{ translate("search.title") }}</h1>
+	{% include "ui/solid/Search.tsx" with {
+		locale: locale,
+		labels: {
+			field: translate("search.field"),
+			submit: translate("search.submit"),
+			searching: translate("search.searching"),
+			empty: translate("search.empty"),
+			failed: translate("search.failed"),
+		},
+		client: "load",
+	} %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% set base = "/" ~ locale ~ "/lab" %}
+
+{% block title %}Lab | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>Lab</h1>
+	<p class="lead">Test pages for the site plugin and integrations.</p>
+
+	<div class="cards">
+		{% component "components/card" with { title: "UI components", href: base ~ "/ui" } %}
+			<p>React, Solid, Vue and Svelte components with every <code>client</code> mode, slots and nested server-only components.</p>
+		{% endcomponent %}
+		{% component "components/card" with { title: "Content functions", href: base ~ "/content" } %}
+			<p>Translations, site functions, cached sections, media lists and preview attributes.</p>
+		{% endcomponent %}
+		{% component "components/card" with { title: "Islands", href: base ~ "/islands" } %}
+			<p>Parts of a page that render on their own, with props, fallbacks and live data.</p>
+		{% endcomponent %}
+		{% component "components/card" with { title: "Integrations", href: base ~ "/integrations" } %}
+			<p>OAuth discovery, PKCE authorisation, token refresh and revocation, and a request console for the content API.</p>
+		{% endcomponent %}
+	</div>
+{% endblock %}

@@ -7,7 +7,8 @@
 	"scripts": {
 		"dev": "lucidcms dev",
 		"serve": "lucidcms serve",
-		"build": "lucidcms build && lucidcms site:build",
+		"build": "lucidcms build",
+		"build:static": "SITE_MODE=static lucidcms site:build",
 		"typegen": "lucidcms typegen",
 		"start": "lucidcms build && node dist/server.js",
 		"sync": "lucidcms sync",

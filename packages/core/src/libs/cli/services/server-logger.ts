@@ -20,14 +20,14 @@ export const getServerUrl = (address: AddressInfo | string | null) => {
 	return `http://${hostname}:${address.port}`;
 };
 
-/** Prints the full introduction once per CLI session. */
-export const logServerReady = (url: string) => {
+/** Prints the full introduction once per CLI session, with the website when `urls.site` is set. */
+export const logServerReady = (url: string, site?: string) => {
 	cliLogger.log(
 		cliLogger.createBadge("LUCID CMS"),
 		"Development server ready",
 		{ spaceBefore: true, spaceAfter: true },
 	);
-	logAdminUrl(url);
+	logServerUrls(url, site);
 	cliLogger.log(
 		"📖 Documentation    ",
 		cliLogger.color.blue(constants.documentation),
@@ -39,10 +39,19 @@ export const logServerReady = (url: string) => {
 	});
 };
 
-export const logAdminUrl = (url: string) =>
+/** Logs the admin panel and, when `urls.site` is set, the website resolved against the server URL. */
+export const logServerUrls = (url: string, site?: string) => {
 	cliLogger.log("🔐 Admin panel      ", cliLogger.color.blue(`${url}/admin`), {
 		symbol: "line",
 	});
+	if (site) {
+		cliLogger.log(
+			"🌐 Website          ",
+			cliLogger.color.blue(new URL(site, url).toString()),
+			{ symbol: "line" },
+		);
+	}
+};
 
 export const logRestart = (message: string) => {
 	cliLogger.log(

@@ -1,0 +1,15 @@
+{% props brick: Brick %}
+
+<section{{ attrs({ class: ["section", "banner", brick.fields.full_width ? "banner--wide"] }) }}>
+	<h2 {{ editable(brick, "title") }}>{{ brick.fields.title }}</h2>
+	{% include "components/rich-text" with { node: brick.fields.intro } %}
+	{% if brick.fields.call_to_actions %}
+		<ul class="banner__actions">
+			{% for action in brick.fields.call_to_actions %}
+				{% if action.link?.url %}
+					<li><a class="button" href="{{ action.link.url }}"{{ attrs({ target: action.link.target }) }}>{{ action.link.label ?: action.call_to_action_title }}</a></li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	{% endif %}
+</section>

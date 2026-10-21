@@ -15,15 +15,11 @@ import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { seoPlugin } from "@lucidcms/plugin-seo";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { sitePlugin } from "@lucidcms/plugin-site";
-import { react } from "@lucidcms/site-react";
-import { solid } from "@lucidcms/site-solid";
-import { svelte } from "@lucidcms/site-svelte";
-import { vue } from "@lucidcms/site-vue";
+import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
 import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
-import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
-import { functions as siteFunctions } from "./site/functions/index.js";
+import siteConfig from "./site/site.config.js";
 import diagnosticsRoute from "./src/admin/containers/DiagnosticsRoute/config.js";
 import publicRoute from "./src/admin/containers/PublicRoute/config.js";
 import standaloneRoute from "./src/admin/containers/StandaloneRoute/config.js";
@@ -43,6 +39,7 @@ import searchRoute from "./src/routes/search.js";
 import searchMediaRoute from "./src/routes/search-media.js";
 import sendTestEmailRoute from "./src/routes/send-test-email.js";
 import sendTestNotificationRoute from "./src/routes/send-test-notification.js";
+import siteSearchRoute from "./src/routes/site-search.js";
 import testOrganisationsTable from "./src/tables/test-organisations.js";
 import { addTool } from "./src/tools/add.js";
 import { echoTool } from "./src/tools/echo.js";
@@ -66,6 +63,8 @@ export const env = z.object({
 	// REDIS_CONNECTION: z.string(),
 	TYPESENSE_HOST: z.string().min(1),
 	TYPESENSE_API_KEY: z.string().min(1),
+	SITE_URL: z.url().default("http://localhost:6543"),
+	SITE_MODE: z.enum(["ssr", "isr", "static"]).default("isr"),
 });
 
 export default defineConfig({
@@ -168,14 +167,10 @@ export default defineConfig({
 				searchRoute,
 				sendTestEmailRoute,
 				sendTestNotificationRoute,
+				siteSearchRoute,
 			],
 			openAPI: {
 				enabled: true,
-			},
-			security: {
-				cors: {
-					origin: ["http://localhost:5173"],
-				},
 			},
 		},
 		// media: {
@@ -334,7 +329,10 @@ export default defineConfig({
 					{
 						key: "blog",
 						localized: true,
-						prefix: "/blog",
+						prefix: {
+							en: "en/blog",
+							fr: "fr/blog",
+						},
 					},
 					{
 						key: "route-page",
@@ -356,22 +354,7 @@ export default defineConfig({
 			nodemailerPlugin({
 				transporter: transporter,
 			}),
-			sitePlugin({
-				mode: "static",
-				environment: "production",
-				locales: ["en", "fr"],
-				locale: ({ path }) => (path.split("/")[1] === "fr" ? "fr" : "en"),
-				kiln: {
-					timeZone: "Europe/London",
-					functions: siteFunctions,
-				},
-				ui: [
-					react(),
-					solid({ include: ["components/solid/**"] }),
-					vue(),
-					svelte(),
-				],
-			}),
+			sitePlugin(siteConfig(env)),
 			// redisPlugin({
 			// 	connection: env.REDIS_CONNECTION,
 			// }),

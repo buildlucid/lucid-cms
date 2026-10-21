@@ -1,0 +1,17 @@
+{# Kept free of content reads, so it still renders when the failure came from one. #}
+<!doctype html>
+<html lang="{{ locale }}">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{ translate("error.title") }}</title>
+		{{ vite("styles/site.css") }}
+	</head>
+	<body>
+		<main class="site__main">
+			<h1>{{ translate("error.title") }}</h1>
+			<p>{{ translate("error.body") }}</p>
+			<p><a href="/{{ locale }}">{{ translate("notFound.home") }}</a></p>
+		</main>
+	</body>
+</html>

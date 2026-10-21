@@ -1,8 +1,0 @@
-{% props media %}
-
-{% if media.type == "image" %}
-	<figure class="rich-text__media">
-		<img {{ attrs({ src: media.src, alt: media.alt, width: media.width, height: media.height, loading: "lazy" }) }}>
-		{% if media.title %}<figcaption>{{ media.title }}</figcaption>{% endif %}
-	</figure>
-{% endif %}

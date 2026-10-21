@@ -1,0 +1,83 @@
+.integrations {
+	display: grid;
+	gap: 1.5rem;
+
+	fieldset {
+		border: 0;
+		margin: 0 0 1rem;
+		padding: 0;
+	}
+
+	legend {
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+	}
+}
+
+.integrations__details {
+	display: grid;
+	gap: 0.75rem;
+	margin: 0 0 1rem;
+
+	dt {
+		color: var(--muted);
+		font-size: 0.875rem;
+	}
+
+	dd {
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+}
+
+.integrations__scopes {
+	display: grid;
+	gap: 0.25rem 1rem;
+	grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+	margin-top: 0.75rem;
+}
+
+.integrations__actions,
+.integrations__auth {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1rem;
+}
+
+.integrations__request {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: 8rem 1fr;
+}
+
+.integrations__error,
+.integrations__response[data-ok="false"] strong {
+	color: var(--accent);
+}
+
+.integrations__activity {
+	display: grid;
+	gap: 0.5rem;
+	list-style: none;
+	margin: 0 0 1rem;
+	padding: 0;
+
+	li {
+		border-left: 3px solid var(--border);
+		display: grid;
+		padding-left: 0.75rem;
+	}
+
+	li[data-kind="success"] {
+		border-color: var(--success);
+	}
+
+	li[data-kind="error"] {
+		border-color: var(--accent);
+	}
+
+	time {
+		color: var(--muted);
+		font-size: 0.875rem;
+	}
+}

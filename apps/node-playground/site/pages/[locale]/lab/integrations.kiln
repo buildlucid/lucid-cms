@@ -1,0 +1,15 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% block title %}Integrations | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>Integrations</h1>
+	<p class="lead">Connect over OAuth or paste an integration key, then call the content API.</p>
+	{% include "ui/solid/integrations/Integrations.tsx" with {
+		clientId: siteUrl ~ "/oauth-client.json",
+		redirectUri: siteUrl ~ "/" ~ locale ~ "/lab/integrations",
+		client: "load",
+	} %}
+{% endblock %}

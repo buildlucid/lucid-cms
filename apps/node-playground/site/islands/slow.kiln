@@ -1,0 +1,4 @@
+{% props milliseconds: number %}
+
+{{ wait(milliseconds) }}
+<p>Loaded after {{ milliseconds / 1000 }} seconds.</p>

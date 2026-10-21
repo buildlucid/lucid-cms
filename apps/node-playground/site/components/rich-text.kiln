@@ -1,21 +1,23 @@
 {# Loops over a rich text field's nodes: embedded bricks, media and documents use templates, everything else gets richText()'s HTML. #}
 {% props node: RichText | null %}
 
-{% for child in node.content ?? [] %}
-	{% if child.type == "lucidEmbeddedBrick" %}
-		{% if child.attrs.brick %}
-			{% include "rich-text/" ~ child.attrs.brick.key with { brick: child.attrs.brick } %}
+<div class="prose">
+	{% for child in node?.content ?? [] %}
+		{% if child.type == "lucidEmbeddedBrick" %}
+			{% if child.attrs.brick %}
+				{% include "components/rich-text/" ~ child.attrs.brick.key with { brick: child.attrs.brick } %}
+			{% endif %}
+		{% elseif child.type == "lucidMedia" %}
+			{% if child.attrs.media %}
+				{% include "components/rich-text/media" with { media: child.attrs.media } %}
+			{% endif %}
+		{% elseif child.type == "lucidDocument" %}
+			{% set linked = child.attrs.document %}
+			{% if linked?.route?.path %}
+				<p><a class="prose__document" href="{{ linked.route.path }}">{{ linked.fields?.page_title ?? linked.route.path }}</a></p>
+			{% endif %}
+		{% else %}
+			{{ richText(child) }}
 		{% endif %}
-	{% elseif child.type == "lucidMedia" %}
-		{% if child.attrs.media %}
-			{% include "rich-text/media" with { media: child.attrs.media } %}
-		{% endif %}
-	{% elseif child.type == "lucidDocument" %}
-		{% set linked = child.attrs.document %}
-		{% if linked %}
-			<a class="rich-text__document" href="{{ linked.route?.path }}">{{ linked.fields?.page_title ?? linked.route?.path }}</a>
-		{% endif %}
-	{% else %}
-		{{ richText(child) }}
-	{% endif %}
-{% endfor %}
+	{% endfor %}
+</div>

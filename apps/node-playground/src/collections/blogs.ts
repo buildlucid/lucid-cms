@@ -23,6 +23,10 @@ const BlogCollection = new CollectionBuilder("blog", {
 				key: "staging",
 				label: copy("admin:collections.blog.environments.staging.name"),
 			},
+			{
+				key: "production",
+				label: copy("admin:collections.blog.environments.production.name"),
+			},
 		],
 		scheduling: true,
 	},

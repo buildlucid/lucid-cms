@@ -1,0 +1,6 @@
+{% props brick: Brick %}
+
+<aside{{ attrs({ class: ["callout", brick.fields.emphasised ? "callout--emphasised"] }) }}>
+	{% if brick.fields.heading %}<strong {{ editable(brick, "heading") }}>{{ brick.fields.heading }}</strong>{% endif %}
+	<p {{ editable(brick, "body") }}>{{ brick.fields.body }}</p>
+</aside>

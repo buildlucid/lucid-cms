@@ -1,7 +1,0 @@
-{% set pages = documentList("page", { perPage: 3 }).items %}
-
-<ul class="latest-pages">
-	{% for item in pages %}
-		<li><a href="{{ item.route?.path }}">{{ item.fields.page_title ?? "Untitled" }}</a></li>
-	{% endfor %}
-</ul>

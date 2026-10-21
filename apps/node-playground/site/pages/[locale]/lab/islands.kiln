@@ -1,0 +1,43 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% block title %}Islands | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>Islands</h1>
+	<p class="lead">
+		Islands render on their own. Stored ISR pages load them after the page, SSR pages and previews stream them into
+		the same response, and static builds render them in place.
+	</p>
+
+	<section class="section">
+		<h2>Render times</h2>
+		<p>This page rendered at <strong>{{ date()|formatDate(timeStyle: "medium") }}</strong>.</p>
+		{% island "islands/render-time" %}
+			<p>Loading the island's render time…</p>
+		{% endisland %}
+		<p>Reload a stored ISR page: the page's time stays the same, the island's changes.</p>
+	</section>
+
+	<section class="section">
+		<h2>Props and content</h2>
+		<p>The same island with different props, each with its own ID. Publishing a blog post updates them.</p>
+		<div class="cards">
+			{% island "islands/latest-posts" with { count: 1 } %}
+				<p>Loading the latest post…</p>
+			{% endisland %}
+			{% island "islands/latest-posts" with { count: 3 } %}
+				<p>Loading the latest posts…</p>
+			{% endisland %}
+		</div>
+	</section>
+
+	<section class="section">
+		<h2>A slow island</h2>
+		<p>Waits two seconds, so its fallback shows while it loads or streams.</p>
+		{% island "islands/slow" with { milliseconds: 2000 } %}
+			<p class="island-fallback">Waiting for the slow island…</p>
+		{% endisland %}
+	</section>
+{% endblock %}

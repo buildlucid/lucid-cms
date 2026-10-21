@@ -1,0 +1,11 @@
+{# Shows every field's value, since this brick exists to test the editor. #}
+{% props brick: Brick %}
+
+<section class="section">
+	{% if brick.fields.shared_text %}<h2 {{ editable(brick, "shared_text") }}>{{ brick.fields.shared_text }}</h2>{% endif %}
+	{% include "components/rich-text" with { node: brick.fields.rich_text } %}
+	<details>
+		<summary>All fields</summary>
+		<pre><code>{{ brick.fields|json(2) }}</code></pre>
+	</details>
+</section>
