@@ -6,6 +6,7 @@ import type {
 	Locale,
 	LocalizedMedia,
 	MediaListItem,
+	ServiceContext,
 	Toolkit,
 } from "@lucidcms/core/types";
 import type { RichTextJSON } from "@lucidcms/rich-text";
@@ -175,6 +176,8 @@ export type SiteLocaleContext = {
 export type SiteState = {
 	/** Document reads are tracked for page cache invalidation. */
 	toolkit: Toolkit;
+	/** The request's service context, which the fragment store reads KV with; read content through `toolkit`. */
+	context: ServiceContext;
 	/** Decoded request path, without a trailing slash. */
 	path: string;
 	/** The content locale reads use unless given another, also the `locale` global. */

@@ -154,7 +154,7 @@ const loadSite = async (props: {
 	return {
 		kiln: createSiteKiln({
 			...kilnProps,
-			cache: createFragmentCache(props.context),
+			cache: createFragmentCache(),
 			cacheNamespace,
 		}),
 		freshKiln,

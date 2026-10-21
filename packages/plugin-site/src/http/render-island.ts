@@ -25,6 +25,7 @@ const renderIsland = async (props: {
 
 	const state: SiteState = {
 		toolkit: props.toolkit,
+		context,
 		path: new URL(hono.req.url).pathname,
 		// The page that deferred the island read this locale; one the site no longer has falls back.
 		locale: props.site.config.locales.has(entry.locale)

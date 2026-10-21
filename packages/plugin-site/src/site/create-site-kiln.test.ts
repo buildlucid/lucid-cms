@@ -1,5 +1,9 @@
 import { formatTranslation } from "@lucidcms/core/extension";
-import type { ResolvedLucidConfig, Toolkit } from "@lucidcms/core/types";
+import type {
+	ResolvedLucidConfig,
+	ServiceContext,
+	Toolkit,
+} from "@lucidcms/core/types";
 import { decodePreviewFieldTarget } from "@lucidcms/preview-protocol";
 import { KilnRenderError, memoryLoader } from "@lucidkiln/core";
 import { describe, expect, test, vi } from "vitest";
@@ -194,6 +198,7 @@ const kiln = createSiteKiln({
 
 const siteState = (state: Partial<SiteState> = {}): SiteState => ({
 	toolkit,
+	context: {} as ServiceContext,
 	path: "/",
 	locale: "en",
 	preview: null,

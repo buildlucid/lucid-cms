@@ -49,7 +49,7 @@ const createSiteKiln = (props: {
 	data: SiteCliData | null;
 	/** Reads the `site` translation scope. */
 	lookupTranslation: Translator["lookup"];
-	cache?: KilnCache;
+	cache?: KilnCache<SiteState>;
 	cacheNamespace?: string;
 }) => {
 	const reads = createReadFunctions(props.config);

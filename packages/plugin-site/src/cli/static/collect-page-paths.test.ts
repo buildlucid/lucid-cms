@@ -1,4 +1,8 @@
-import type { ResolvedLucidConfig, Toolkit } from "@lucidcms/core/types";
+import type {
+	ResolvedLucidConfig,
+	ServiceContext,
+	Toolkit,
+} from "@lucidcms/core/types";
 import { memoryLoader } from "@lucidkiln/core";
 import { describe, expect, test, vi } from "vitest";
 import createPageRouter from "../../router/create-page-router.js";
@@ -50,6 +54,7 @@ const collect = async (templates: Record<string, string>, warn = vi.fn()) =>
 		site: await createSite(templates),
 		state: {
 			toolkit,
+			context: {} as ServiceContext,
 			path: "",
 			locale: "en",
 			preview: null,

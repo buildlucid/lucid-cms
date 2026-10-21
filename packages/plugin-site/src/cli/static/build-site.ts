@@ -79,6 +79,7 @@ const buildSite = async (
 	// Static builds have no request, so the locale option only sees the path.
 	const state = (routePath: string): SiteState => ({
 		toolkit,
+		context,
 		path: routePath,
 		locale: site.config.resolveLocale({
 			path: routePath,

@@ -113,6 +113,7 @@ const registerSiteRoute =
 					hono.header("Vary", vary.join(", "), { append: true });
 				const state: SiteState = {
 					toolkit,
+					context,
 					path,
 					locale,
 					preview,
