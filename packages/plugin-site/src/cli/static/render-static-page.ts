@@ -38,11 +38,13 @@ const renderStaticPage = async (props: {
 	}
 
 	try {
-		const body = await props.site.freshKiln.render(
+		const isHtml = match.data.contentType === HTML_CONTENT_TYPE;
+		const rendered = await props.site.freshKiln.render(
 			match.data.template,
 			{ route: { path: routePath, params: getRouteParams(match) } },
 			renderOptions(props.state),
 		);
+		const body = isHtml ? props.site.finishPage(rendered) : rendered;
 		await writeStaticFile(
 			props.outDir,
 			toFile(routePath, match.data.contentType),
@@ -50,8 +52,7 @@ const renderStaticPage = async (props: {
 		);
 		return {
 			written: true,
-			links:
-				match.data.contentType === HTML_CONTENT_TYPE ? findPageLinks(body) : [],
+			links: isHtml ? findPageLinks(body) : [],
 		};
 	} catch (error) {
 		const cause = error instanceof KilnRenderError ? error.cause : error;

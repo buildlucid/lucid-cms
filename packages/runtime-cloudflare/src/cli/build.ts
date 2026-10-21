@@ -15,6 +15,7 @@ import writeWorkerEntries from "../services/write-worker-entries.js";
 import writeWranglerConfig from "../services/write-wrangler-config.js";
 import type { AdapterOptions } from "../types.js";
 import toDisplayPath from "../utils/path-to-display.js";
+import replaceImportMetaUrl from "../utils/replace-import-meta-url.js";
 
 const buildCommand =
 	(
@@ -77,8 +78,8 @@ const buildCommand =
 				Object.entries({
 					[constants.ENTRY_FILE]: entryFilepath,
 					...buildArtifacts.compile,
-				}).map(([key, inputPath]) =>
-					build({
+				}).map(async ([key, inputPath]) => {
+					const result = await build({
 						input: { [key]: inputPath },
 						output: {
 							dir: outputPath,
@@ -94,17 +95,29 @@ const buildCommand =
 						},
 						plugins: [
 							{
+								// Workers lack `import.meta.url`, so replace expressions introduced by Rolldown while preserving string literals.
 								name: "import-meta-polyfill",
-								renderChunk(code: string) {
-									return code.replace(
-										/import\.meta\.url/g,
+								renderChunk(code) {
+									if (!code.includes("import.meta.url")) return null;
+									return replaceImportMetaUrl(
+										code,
+										this.parse(code),
 										'"file:///server.js"',
 									);
 								},
 							},
 						],
-					}),
-				),
+					});
+					// The minifier writes nothing for code it can't parse, rather than failing.
+					const empty = result.output.find(
+						(chunk) => chunk.type === "chunk" && chunk.code.length === 0,
+					);
+					if (empty) {
+						throw new Error(
+							`The Cloudflare build wrote an empty ${empty.fileName}.`,
+						);
+					}
+				}),
 			);
 
 			//* cleanup temp files

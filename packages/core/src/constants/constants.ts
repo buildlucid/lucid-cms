@@ -106,12 +106,14 @@ export default Object.freeze({
 	build: {
 		/** Folder in the build output, beside the server entry, for Lucid's generated config modules and data files. */
 		directory: "lucid",
-		/** JSON files written into `build.directory` for compiled runtimes to import. */
+		/** Files written into `build.directory` for compiled runtimes to import. */
 		dataFiles: {
 			emailTemplates: "email-templates.json",
 			translations: "translations.json",
 			/** Plugin CLI build data, keyed by plugin key. */
 			pluginData: "plugin-data.json",
+			/** A module whose default export holds each plugin build module's exports, keyed by plugin key. */
+			pluginModules: "plugin-modules.js",
 		},
 	},
 	notifications: {

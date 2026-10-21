@@ -15,6 +15,10 @@ import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { seoPlugin } from "@lucidcms/plugin-seo";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { sitePlugin } from "@lucidcms/plugin-site";
+import { react } from "@lucidcms/site-react";
+import { solid } from "@lucidcms/site-solid";
+import { svelte } from "@lucidcms/site-svelte";
+import { vue } from "@lucidcms/site-vue";
 import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
@@ -361,6 +365,12 @@ export default defineConfig({
 					timeZone: "Europe/London",
 					functions: siteFunctions,
 				},
+				ui: [
+					react(),
+					solid({ include: ["components/solid/**"] }),
+					vue(),
+					svelte(),
+				],
 			}),
 			// redisPlugin({
 			// 	connection: env.REDIS_CONNECTION,

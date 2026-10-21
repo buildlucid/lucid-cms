@@ -13,6 +13,9 @@ import type {
 	SitePage,
 	SitePluginOptionsInternal,
 } from "../types.js";
+import { moveUiAssets } from "../ui/page-assets.js";
+import { createBuiltUi } from "../ui/site-ui.js";
+import withUi from "../ui/with-ui.js";
 import createSiteConfig, { type SiteConfig } from "./create-site-config.js";
 import createSiteKiln, { type SiteKiln } from "./create-site-kiln.js";
 import hashTemplates from "./hash-templates.js";
@@ -31,16 +34,27 @@ export type Site = {
 	/** Namespaces stored pages and fragments: a hash of the templates in development, or the build ID once built. */
 	cacheNamespace: string;
 	config: SiteConfig;
+	/** Finishes an HTML page rendered in one go, rather than streamed: UI components' links move into its head. */
+	finishPage: (html: string) => string;
 };
 
 /** Built sites read the templates bundled at build time; development reads the directory. */
-const createLoader = async (
+const createTemplateLoader = async (
 	directory: string,
 	data: SiteCliData | null,
 ): Promise<Loader> => {
 	if (data?.kind === "build") return memoryLoader(data.templates);
 	const { fileLoader } = await import("@lucidkiln/core/node");
 	return fileLoader({ root: directory });
+};
+
+/** Wraps the template loader to return UI components for their names, when the site has any. */
+const addUi = (loader: Loader, data: SiteCliData | null, module: unknown) => {
+	const ui =
+		data?.kind === "build"
+			? data.ui && createBuiltUi(data.ui, module)
+			: data?.ui;
+	return ui ? withUi(loader, ui) : loader;
 };
 
 /** The CLI resolves the directory from the project root; without it, it's relative to the working directory. */
@@ -63,19 +77,23 @@ const warnMissingPaths = (pages: SitePage[]) => {
 const loadSite = async (props: {
 	directory: string;
 	data: SiteCliData | null;
+	/** The server module the build wrote, holding the site's UI components. */
+	module: unknown;
 	config: SiteConfig;
 	options: SitePluginOptionsInternal;
 	context: ServiceContext;
 }): Promise<Site> => {
 	const { data } = props;
-	const loader = await createLoader(props.directory, data);
-	const templates = new Set(await loader.list?.());
+	const files = await createTemplateLoader(props.directory, data);
+	const loader = addUi(files, data, props.module);
+	const templates = new Set(await files.list?.());
 	// Each build uses a new cache namespace because code and assets can change without template changes.
 	const cacheNamespace =
 		data?.kind === "build"
 			? data.buildId
-			: await hashTemplates(
-					loader,
+			: // The files' own source, so editing a UI component starts a new namespace too.
+				await hashTemplates(
+					files,
 					templates,
 					props.context.translate.scopeBundles("site"),
 				);
@@ -118,6 +136,8 @@ const loadSite = async (props: {
 		templates,
 		cacheNamespace,
 		config: props.config,
+		finishPage: (html) =>
+			moveUiAssets(html, data?.kind === "build" ? (data.ui?.styles ?? {}) : {}),
 	};
 };
 
@@ -136,8 +156,13 @@ const createSiteLoader = (
 		context: ServiceContext;
 		/** Replaces what the CLI handed the runtime, such as for `site:build`, which builds its own. */
 		data?: SiteCliData;
+		/** Replaces the server module the build wrote, with `data`. */
+		module?: unknown;
 	}): Promise<Site> => {
 		const data = props.data ?? readCliData(props.context.runtimeContext);
+		const module = props.data
+			? props.module
+			: props.context.runtimeContext?.pluginModules?.[PLUGIN_KEY];
 		// Development reloads the directory on every request so edits need no restart; built templates can't change.
 		const reloads =
 			props.context.runtimeContext?.compiled === false &&
@@ -147,6 +172,7 @@ const createSiteLoader = (
 		const loading = loadSite({
 			directory: resolveDirectory(options.directory, data),
 			data,
+			module,
 			config: siteConfig,
 			options,
 			context: props.context,

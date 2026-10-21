@@ -54,6 +54,8 @@ export type ServeHandler = (props: {
 	mode: "development" | "static";
 	/** Plugin build data for static mode. In development, `createCliDev` returns it. */
 	pluginData: Record<string, unknown>;
+	/** Plugin build module exports keyed by plugin for static mode, empty in development. */
+	pluginModules: Record<string, unknown>;
 	projectRoot: string;
 	configPath: string;
 	config: ResolvedLucidConfig;
@@ -157,6 +159,8 @@ export type AdapterRuntimeContext = {
 	configEntryPoint: string | null;
 	/** Plugin CLI data keyed by plugin, from `dev` during development or builds otherwise, omitted for plugin commands. */
 	pluginData?: Record<string, unknown>;
+	/** Plugin CLI build module exports keyed by plugin, empty during development. */
+	pluginModules?: Record<string, unknown>;
 };
 
 export interface EnvironmentVariables extends Record<string, unknown> {}

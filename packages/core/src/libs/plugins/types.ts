@@ -108,21 +108,26 @@ export type LucidPluginCliPrepareCommand =
 	| "build"
 	| "typegen";
 
-/** CLI-only plugin code, kept out of server bundles because core loads it by module path. */
-export type LucidPluginCli = {
-	/** Runs setup such as writing editor files alongside type generation for `dev`, including restarts, `serve`, `build` and `typegen`. */
+/** What `lucidcms` calls at points in its own commands, as opposed to the commands a plugin adds. */
+export type LucidPluginCliHooks = {
+	/** Runs during `lucidcms dev` (each restart too), `serve`, `build` and `typegen`, for setup such as writing editor files. */
 	prepare?: (props: {
 		command: LucidPluginCliPrepareCommand;
 		config: ResolvedLucidConfig;
 		projectRoot: string;
 	}) => void | Promise<void>;
-	/** Runs each time `lucidcms dev` starts the server. */
+	/** Runs during `lucidcms dev`, each time it starts the server, for development services such as a Vite server. */
 	dev?: (props: {
 		server: Server;
 		config: ResolvedLucidConfig;
 		projectRoot: string;
 	}) => Promise<LucidPluginCliDev>;
-	/** Runs during `lucidcms build` and `lucidcms serve`. Returned `data` is bundled with the server for the plugin's runtime code. */
+	/**
+	 * Runs during `lucidcms build` and `lucidcms serve`, for the plugin's own build, such as its assets. Not the plugin's
+	 * `hooks.runtime`, whose `build` phase gives the runtime adapter artifacts. Returned `data` reaches runtime code as
+	 * `runtimeContext.pluginData[key]`, and the exports of an absolute ES `module` written under `outDir`, such as bundled
+	 * components, as `runtimeContext.pluginModules[key]`.
+	 */
 	build?: (props: {
 		config: ResolvedLucidConfig;
 		projectRoot: string;
@@ -132,7 +137,13 @@ export type LucidPluginCli = {
 		publicFiles: ResourceFile[];
 		/** Absolute output directory; files under `public` are served from the site root. */
 		outDir: string;
-	}) => Promise<{ data?: unknown } | undefined>;
+	}) => Promise<{ data?: unknown; module?: string } | undefined>;
+};
+
+/** CLI-only plugin code, kept out of server bundles because core loads it by module path. */
+export type LucidPluginCli = {
+	/** What `lucidcms` calls during its own commands. */
+	hooks?: LucidPluginCliHooks;
 	/** Commands the plugin adds to `lucidcms`, such as `site:build`. */
 	commands?: LucidPluginCommand[];
 };

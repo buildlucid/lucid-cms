@@ -11,7 +11,11 @@ const hashTemplates = async (
 		[...names].sort().map(async (name) => {
 			const template = await loader.load(name);
 			const source =
-				typeof template === "string" ? template : (template?.source ?? "");
+				typeof template === "string"
+					? template
+					: template && "source" in template
+						? template.source
+						: "";
 			return `${name}\n${source}`;
 		}),
 	);

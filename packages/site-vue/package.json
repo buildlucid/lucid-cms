@@ -1,0 +1,68 @@
+{
+	"name": "@lucidcms/site-vue",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Renders Vue components from the Lucid CMS site plugin's Kiln templates.",
+	"type": "module",
+	"types": "./dist/index.d.mts",
+	"module": "dist/index.mjs",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		},
+		"./server": "./dist/server.mjs",
+		"./client": "./dist/client.mjs",
+		"./vite": "./dist/vite.mjs"
+	},
+	"scripts": {
+		"build": "tsc && tsdown",
+		"dev": "tsdown --watch",
+		"format": "biome format ./src",
+		"format:fix": "biome format --write ./src",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
+	},
+	"files": [
+		"dist"
+	],
+	"author": "Build Lucid Ltd",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/buildlucid/lucid-cms.git",
+		"directory": "packages/site-vue"
+	},
+	"keywords": [
+		"CMS",
+		"Lucid CMS",
+		"Lucid",
+		"Site",
+		"Kiln",
+		"Vue"
+	],
+	"dependencies": {
+		"@vitejs/plugin-vue": "^6.0.10"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.1",
+		"@lucidcms/plugin-site": "*",
+		"@types/node": "^24.13.2",
+		"tsdown": "^0.22.3",
+		"typescript": "^6.0.3",
+		"vite": "^8.1.0",
+		"vue": "^3.5.44"
+	},
+	"peerDependencies": {
+		"@lucidcms/plugin-site": "*",
+		"vue": "^3.5.0"
+	},
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
+	"license": "MIT"
+}

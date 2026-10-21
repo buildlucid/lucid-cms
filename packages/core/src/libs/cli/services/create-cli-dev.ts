@@ -63,7 +63,7 @@ const createCliDev = async (props: {
 			props.config,
 			props.projectRoot,
 		)) {
-			const dev = await cli.dev?.({
+			const dev = await cli.hooks?.dev?.({
 				server: props.server,
 				config: props.config,
 				projectRoot: props.projectRoot,

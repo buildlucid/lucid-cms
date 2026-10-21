@@ -4,15 +4,19 @@ import createViteAssetFunction from "./vite-asset.js";
 describe("viteAsset()", () => {
 	test("returns the source URL in development and the built file's URL once built", () => {
 		expect(
-			createViteAssetFunction({ kind: "dev", directory: "/site", vite: true })(
-				"./images/logo.svg",
-			),
+			createViteAssetFunction({
+				kind: "dev",
+				directory: "/site",
+				vite: true,
+				ui: null,
+			})("./images/logo.svg"),
 		).toBe("/_assets/images/logo.svg");
 		expect(
 			createViteAssetFunction({
 				kind: "build",
 				buildId: "build",
 				templates: {},
+				ui: null,
 				manifest: { "images/logo.svg": { file: "logo-a1.svg" } },
 			})("images/logo.svg"),
 		).toBe("/_assets/logo-a1.svg");
@@ -24,6 +28,7 @@ describe("viteAsset()", () => {
 				kind: "build",
 				buildId: "build",
 				templates: {},
+				ui: null,
 				manifest: null,
 			})("images/logo.svg"),
 		).toThrow(/isn't in the site's Vite build/);

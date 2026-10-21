@@ -1,6 +1,6 @@
 import type { ServiceContext } from "@lucidcms/core/types";
 import { deferIslands } from "@lucidkiln/core";
-import { ISLANDS_URL, storeKeys } from "../constants.js";
+import { HTML_CONTENT_TYPE, ISLANDS_URL, storeKeys } from "../constants.js";
 import type { Site } from "../site/create-site-loader.js";
 import renderOptions from "../site/render-options.js";
 import type { SitePage, SiteState } from "../types.js";
@@ -18,7 +18,7 @@ const renderStoredPage = async (props: {
 	const tracked = trackContentReads(props.state.toolkit, props.context);
 	const islands = deferIslands({ url: ISLANDS_URL });
 
-	const body = await props.site.freshKiln.render(
+	const rendered = await props.site.freshKiln.render(
 		props.page.template,
 		{ route: { path: props.state.path, params: props.params } },
 		{
@@ -27,7 +27,10 @@ const renderStoredPage = async (props: {
 		},
 	);
 	const stored: StoredPage = {
-		body,
+		body:
+			props.page.contentType === HTML_CONTENT_TYPE
+				? props.site.finishPage(rendered)
+				: rendered,
 		contentType: props.page.contentType,
 		tokens: await tracked.tokens(),
 	};

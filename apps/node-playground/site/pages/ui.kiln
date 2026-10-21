@@ -1,0 +1,41 @@
+{% extends "layouts/base" %}
+
+{% set page = document("page", { filter: { _fullSlug: '/en' } }) ?? notFound() %}
+
+{% block title %}UI components | Playground{% endblock %}
+
+{% block content %}
+	<h1>UI components</h1>
+
+	{% include "components/react/Counter.tsx" with { start: 2 } %}
+
+	{% component "components/react/Counter.tsx" with { start: 5, client: "load" } %}
+		<p>Children from Kiln, in {{ locale }}.</p>
+		{% fill "footer" %}<small>A footer slot</small>{% endfill %}
+	{% endcomponent %}
+
+	{% include "components/react/Greeting.tsx" with { name: "Will", client: "idle" } %}
+
+	{% component "components/react/Panel.tsx" with { title: "Rendered on the server" ~ page.fields.slug } %}
+		{% component "components/react/Counter.tsx" with { start: 10, client: "load" } %}
+			<p>Nested inside a server-only component for {{ page.fields.fullSlug }}</p>
+		{% endcomponent %}
+	{% endcomponent %}
+
+	{% component "components/vue/Counter.vue" with { start: 1, client: "visible" } %}
+		<p>Vue children from Kiln.</p>
+		{% fill "footer" %}<small>A Vue footer slot</small>{% endfill %}
+	{% endcomponent %}
+
+	{% component "components/svelte/Counter.svelte" with { start: 3, client: "load" } %}
+		<p>Svelte children from Kiln.</p>
+	{% endcomponent %}
+
+	{% component "components/react/Greeting.tsx" with { name: "browser", client: "only" } %}
+		{% fill "fallback" %}<p>Loading the greeting…</p>{% endfill %}
+	{% endcomponent %}
+
+	{% component "components/solid/Toggle.tsx" with { label: "Solid toggle", client: "visible" } %}
+		<p>Solid children from Kiln.</p>
+	{% endcomponent %}
+{% endblock %}

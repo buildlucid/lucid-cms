@@ -16,6 +16,7 @@ const serveCommand =
 		onListening,
 		mode,
 		pluginData,
+		pluginModules,
 		projectRoot,
 		configPath,
 	}) => {
@@ -39,6 +40,7 @@ const serveCommand =
 		const runtimeContext = getRuntimeContext({
 			compiled: false,
 			pluginData: dev?.pluginData ?? pluginData,
+			pluginModules,
 		});
 
 		const host = await createLucidHost({

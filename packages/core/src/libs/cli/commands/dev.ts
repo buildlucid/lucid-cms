@@ -208,6 +208,7 @@ const devCommand = async (options?: {
 			const serverRes = await adapterCLI.serve({
 				mode: "development",
 				pluginData: {},
+				pluginModules: {},
 				configPath,
 				projectRoot: configResult.projectRoot,
 				env: configResult.env,

@@ -28,6 +28,8 @@ import type richText from "./functions/rich-text.js";
 import type { TranslateOptions } from "./functions/translate.js";
 import type createViteFunction from "./functions/vite.js";
 import type createViteAssetFunction from "./functions/vite-asset.js";
+import type { BuiltUi, SiteUi } from "./ui/site-ui.js";
+import type { UiIntegration } from "./ui/types.js";
 
 /** Template function and prop types for Kiln's editor extensions. */
 declare module "@lucidkiln/core" {
@@ -128,6 +130,8 @@ export type SiteCliData =
 			directory: string;
 			/** Whether Vite is installed and serving the site's files. */
 			vite: boolean;
+			/** Loads UI components through Vite, or null when the site has no `ui` integrations. */
+			ui: SiteUi | null;
 	  }
 	| {
 			kind: "build";
@@ -137,6 +141,8 @@ export type SiteCliData =
 			templates: Record<string, string>;
 			/** Vite's manifest, or null when no template calls `vite()`. */
 			manifest: Record<string, ViteManifestChunk> | null;
+			/** The UI components templates name, or null when there are none. */
+			ui: BuiltUi | null;
 	  };
 
 /** ssr streams requests, isr caches until content changes, and static builds files while using SSR for development and previews. */
@@ -237,6 +243,11 @@ export type SitePluginOptions = {
 		outDir?: string;
 	};
 	kiln?: SiteKilnOptions;
+	/**
+	 * UI libraries whose components templates can render, such as `ui: [react()]` from `@lucidcms/site-react`.
+	 * Templates name components by file, such as `{% component "components/Counter.tsx" with { client: "visible" } %}`.
+	 */
+	ui?: UiIntegration[];
 };
 
 /** Site plugin options with their defaults filled in. */

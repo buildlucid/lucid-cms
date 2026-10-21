@@ -27,6 +27,7 @@ const serveCommand =
 		onListening,
 		mode,
 		pluginData,
+		pluginModules,
 		projectRoot,
 		configPath,
 	}) => {
@@ -51,6 +52,7 @@ const serveCommand =
 			server: "cloudflare",
 			compiled: false,
 			pluginData: dev?.pluginData ?? pluginData,
+			pluginModules,
 		});
 
 		const host = await createLucidHost({

@@ -24,6 +24,7 @@ import copyPublicAssets from "../services/copy-public-assets.js";
 import { startProgress } from "../services/progress.js";
 import runPluginBuilds from "../services/run-plugin-builds.js";
 import runPluginPrepares from "../services/run-plugin-prepares.js";
+import writePluginModules from "../services/write-plugin-modules.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -191,19 +192,23 @@ const buildCommand = async (options?: {
 
 		currentStage = "artifacts";
 		progress.update("Building plugin files…");
-		const pluginData = await runPluginBuilds({
+		const pluginBuilds = await runPluginBuilds({
 			config: configRes.config,
 			projectRoot: configRes.projectRoot,
 			runtime: configRes.adapter.key,
 			publicFiles: configRes.resources.files.public,
 		});
+		const buildDataDirectory = path.resolve(
+			configRes.config.build.outDir,
+			constants.build.directory,
+		);
 		await writeFile(
-			path.resolve(
-				configRes.config.build.outDir,
-				constants.build.directory,
-				constants.build.dataFiles.pluginData,
-			),
-			JSON.stringify(pluginData),
+			path.join(buildDataDirectory, constants.build.dataFiles.pluginData),
+			JSON.stringify(pluginBuilds.data),
+		);
+		await writePluginModules(
+			path.join(buildDataDirectory, constants.build.dataFiles.pluginModules),
+			pluginBuilds.modules,
 		);
 
 		currentStage = "runtime_build";

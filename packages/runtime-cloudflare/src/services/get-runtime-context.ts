@@ -10,6 +10,7 @@ const getRuntimeContext = (params: {
 	/** Defaults to `lucid`, Lucid's own server. */
 	host?: string;
 	pluginData?: Record<string, unknown>;
+	pluginModules?: Record<string, unknown>;
 }) =>
 	({
 		runtime: ADAPTER_KEY,
@@ -60,6 +61,7 @@ const getRuntimeContext = (params: {
 		},
 		configEntryPoint: null,
 		pluginData: params.pluginData,
+		pluginModules: params.pluginModules,
 	}) satisfies AdapterRuntimeContext;
 
 export default getRuntimeContext;

@@ -10,13 +10,13 @@ describe("createDevErrorPage", () => {
 		expect(
 			createDevErrorPage({
 				error,
-				data: { kind: "dev", directory: "/site", vite: true },
+				data: { kind: "dev", directory: "/site", vite: true, ui: null },
 			}),
 		).toContain(VITE_CLIENT);
 		expect(
 			createDevErrorPage({
 				error,
-				data: { kind: "dev", directory: "/site", vite: false },
+				data: { kind: "dev", directory: "/site", vite: false, ui: null },
 			}),
 		).not.toContain(VITE_CLIENT);
 	});

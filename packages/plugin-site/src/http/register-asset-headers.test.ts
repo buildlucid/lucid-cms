@@ -13,6 +13,7 @@ const data: SiteCliData = {
 	kind: "build",
 	buildId: "build",
 	templates: {},
+	ui: null,
 	manifest: { "styles/site.css": { file: "site-a1.css" } },
 };
 

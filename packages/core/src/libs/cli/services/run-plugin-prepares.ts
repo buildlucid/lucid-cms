@@ -9,7 +9,7 @@ const runPluginPrepares = async (props: {
 	projectRoot: string;
 }) => {
 	for (const { cli } of await loadPluginClis(props.config, props.projectRoot)) {
-		await cli.prepare?.(props);
+		await cli.hooks?.prepare?.(props);
 	}
 };
 

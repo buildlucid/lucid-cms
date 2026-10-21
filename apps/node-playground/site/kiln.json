@@ -31,5 +31,39 @@
 		"Media",
 		"RichText"
 	],
-	"htmlChecks": true
+	"htmlChecks": true,
+	"components": [
+		{
+			"extensions": [
+				".jsx",
+				".tsx"
+			],
+			"exclude": [
+				"components/solid/**"
+			],
+			"props": "(import(\"react\").ComponentProps<typeof import($file).default>) & { client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
+		},
+		{
+			"extensions": [
+				".jsx",
+				".tsx"
+			],
+			"include": [
+				"components/solid/**"
+			],
+			"props": "(Parameters<typeof import($file).default>[0]) & { client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
+		},
+		{
+			"extensions": [
+				".vue"
+			],
+			"props": "{ client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
+		},
+		{
+			"extensions": [
+				".svelte"
+			],
+			"props": "{ client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
+		}
+	]
 }

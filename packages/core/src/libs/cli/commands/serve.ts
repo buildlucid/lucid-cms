@@ -17,6 +17,7 @@ import type { TelemetryStage } from "../../telemetry/types.js";
 import generateTypes from "../../type-generation/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
+import importPluginModules from "../services/import-plugin-modules.js";
 import { startProgress } from "../services/progress.js";
 import runPluginBuilds from "../services/run-plugin-builds.js";
 import runPluginPrepares from "../services/run-plugin-prepares.js";
@@ -195,7 +196,7 @@ const serveCommand = async () => {
 
 		currentStage = "artifacts";
 		progress.update("Building plugin files…");
-		const pluginData = await runPluginBuilds({
+		const pluginBuilds = await runPluginBuilds({
 			config: configRes.config,
 			projectRoot: configRes.projectRoot,
 			runtime: configRes.adapter.key,
@@ -206,7 +207,8 @@ const serveCommand = async () => {
 		progress.update("Starting server…");
 		const serverRes = await adapterCLI.serve({
 			mode: "static",
-			pluginData,
+			pluginData: pluginBuilds.data,
+			pluginModules: await importPluginModules(pluginBuilds.modules),
 			configPath,
 			projectRoot: configRes.projectRoot,
 			env: configRes.env,

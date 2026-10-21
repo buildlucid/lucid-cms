@@ -1,7 +1,11 @@
 import { copyFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { LucidError } from "@lucidcms/core";
-import { pluginPublicDirectory } from "@lucidcms/core/extension";
+import {
+	pluginDirectory,
+	pluginPublicDirectory,
+} from "@lucidcms/core/extension";
 import type { LucidPluginCommand } from "@lucidcms/core/types";
 import { ASSETS_BASE, errorPages, PLUGIN_KEY } from "../../constants.js";
 import createSiteLoader from "../../site/create-site-loader.js";
@@ -10,6 +14,7 @@ import type { SitePluginOptionsInternal, SiteState } from "../../types.js";
 import eachLimited from "../../utils/each-limited.js";
 import normalizePath from "../../utils/normalize-path.js";
 import buildSiteData from "../build-site-data.js";
+import type { ResolvedIntegrations } from "../ui/resolve-integrations.js";
 import assertOutputFolder from "./assert-output-folder.js";
 import collectPagePaths from "./collect-page-paths.js";
 import renderStaticPage from "./render-static-page.js";
@@ -23,6 +28,7 @@ const CONCURRENCY = 8;
 /** Builds templates, Vite files and static pages into a separate folder without requiring `lucidcms build` first. */
 const buildSite = async (
 	options: SitePluginOptionsInternal,
+	ui: ResolvedIntegrations | null,
 	props: BuildProps,
 ) => {
 	const { config, context, toolkit, logger, projectRoot } = props;
@@ -53,13 +59,23 @@ const buildSite = async (
 			}),
 	);
 
-	const data = await buildSiteData({
+	const { data, module } = await buildSiteData({
 		root: siteRoot,
 		projectRoot,
 		publicFiles: props.publicFiles,
 		assetsDir: path.join(outDir, ASSETS_BASE),
+		ui,
+		// Server code stays out of the static site.
+		serverDir: path.join(pluginDirectory(PLUGIN_KEY, projectRoot), "ui-server"),
 	});
-	const site = await createSiteLoader(options, config)({ context, data });
+	const site = await createSiteLoader(
+		options,
+		config,
+	)({
+		context,
+		data,
+		module: module ? await import(pathToFileURL(module).href) : undefined,
+	});
 	// Static builds have no request, so the locale option only sees the path.
 	const state = (routePath: string): SiteState => ({
 		toolkit,
@@ -107,7 +123,7 @@ const buildSite = async (
 			{ route: { path: "/404", params: {} } },
 			renderOptions(state("/404")),
 		);
-		await writeStaticFile(outDir, "404.html", body);
+		await writeStaticFile(outDir, "404.html", site.finishPage(body));
 	}
 
 	for (const failure of failures) {

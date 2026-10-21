@@ -63,6 +63,10 @@ const prepareMainWorkerEntry = (
 			default: "pluginData",
 		},
 		{
+			path: buildDataImports.pluginModules,
+			default: "pluginModules",
+		},
+		{
 			path: "@lucidcms/runtime-cloudflare/runtime",
 			exports: [
 				"getOrCreateRuntimeHost",
@@ -81,6 +85,7 @@ const prepareMainWorkerEntry = (
     server: "cloudflare",
     compiled: true,
     pluginData,
+    pluginModules,
 });
 const host = await getOrCreateRuntimeHost(
     runtimeHostKeys.http,
@@ -162,6 +167,7 @@ try {
         server: "cloudflare",
         compiled: true,
         pluginData,
+        pluginModules,
     });
     const host = await getOrCreateRuntimeHost(
         runtimeHostKeys.background,

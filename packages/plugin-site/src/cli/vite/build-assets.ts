@@ -1,30 +1,75 @@
 import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { LucidError } from "@lucidcms/core";
-import type { LucidPluginCli } from "@lucidcms/core/types";
+import type { LucidPluginCliHooks } from "@lucidcms/core/types";
+import type { PluginOption, Rolldown } from "vite";
 import { ASSETS_BASE, PLUGIN_KEY } from "../../constants.js";
 import type { ViteManifestChunk } from "../../types.js";
+import type { BuiltUi, UiAssets } from "../../ui/site-ui.js";
+import {
+	hydrationId,
+	hydrationName,
+	readElementScript,
+} from "../ui/hydration-modules.js";
 import createViteOptions from "./create-vite-options.js";
 import findVitePaths from "./find-vite-paths.js";
 import importVite from "./import-vite.js";
 
-type BuildProps = Parameters<NonNullable<LucidPluginCli["build"]>>[0];
+type BuildProps = Parameters<NonNullable<LucidPluginCliHooks["build"]>>[0];
 
 const MANIFEST = ".vite/manifest.json";
+/** Inlines component stylesheets up to this string length to avoid an extra request. */
+const INLINE_STYLES_LIMIT = 4096;
 // Vite needs an entry, so a build of only `viteAsset()` files gets an empty one, removed afterwards.
 const EMPTY_ENTRY = "__lucid-empty__.js";
 
-/** Builds `vite()` and `viteAsset()` files into `assetsDir`, returning Vite's manifest or null when none exist. */
+/** A hydration chunk's browser files: the chunks it imports, directly or not, and their stylesheets. */
+const assetsOf = (
+	bundle: Rolldown.OutputBundle,
+	chunk: Rolldown.OutputChunk,
+): UiAssets => {
+	const css = new Set<string>();
+	const seen = new Set<string>();
+	const visit = (file: string) => {
+		const output = bundle[file];
+		if (seen.has(file) || output?.type !== "chunk") return;
+		seen.add(file);
+		for (const sheet of output.viteMetadata?.importedCss ?? []) {
+			css.add(ASSETS_BASE + sheet);
+		}
+		for (const imported of output.imports) visit(imported);
+	};
+	visit(chunk.fileName);
+	seen.delete(chunk.fileName);
+	return {
+		src: ASSETS_BASE + chunk.fileName,
+		preload: [...seen].map((file) => ASSETS_BASE + file),
+		css: [...css],
+	};
+};
+
+/** Builds template and UI browser assets into `assetsDir`, returning the Vite manifest and component files or nulls when no `vite()`, `viteAsset()` or UI entries exist. */
 const buildAssets = async (
 	props: Pick<BuildProps, "projectRoot" | "publicFiles"> & {
 		root: string;
 		templates: Record<string, string>;
 		/** The folder served at `/_assets/`. */
 		assetsDir: string;
+		/** The integration rendering each UI component templates name, by name, and the Vite plugins that compile them. */
+		ui: { components: Map<string, string>; plugins: PluginOption[] } | null;
 	},
-): Promise<Record<string, ViteManifestChunk> | null> => {
+): Promise<{
+	manifest: Record<string, ViteManifestChunk> | null;
+	/** The UI components' browser files, when there are any. */
+	ui: BuiltUi | null;
+}> => {
 	const { entries, files } = await findVitePaths(props.templates);
-	if (entries.length === 0 && files.length === 0) return null;
+	const components = props.ui?.components ?? new Map<string, string>();
+	const ui: BuiltUi = { script: "", components: {}, styles: {} };
+	let element: string | undefined;
+	if (entries.length === 0 && files.length === 0 && components.size === 0) {
+		return { manifest: null, ui: null };
+	}
 
 	const clash = props.publicFiles.find((file) =>
 		file.name.startsWith(ASSETS_BASE.slice(1)),
@@ -72,6 +117,7 @@ const buildAssets = async (
 			},
 		},
 		plugins: [
+			...(props.ui?.plugins ?? []),
 			{
 				name: "lucid:site-files",
 				resolveId: (id) => (id === emptyEntry ? id : undefined),
@@ -85,6 +131,57 @@ const buildAssets = async (
 							originalFileName: file,
 							source: await readFile(path.resolve(props.root, file)),
 						});
+					}
+					// The browser imports hydration modules itself, so they keep their exports, and the component's name.
+					for (const name of components.keys()) {
+						this.emitFile({
+							type: "chunk",
+							id: hydrationId(name),
+							name: path.posix.parse(name).name,
+							preserveSignature: "exports-only",
+						});
+					}
+					// The element's script is built already, so it is copied as is with a hashed name. As a chunk, Vite would
+					// wrap its import() in a preload helper twice its size.
+					if (components.size > 0) {
+						element = this.emitFile({
+							type: "asset",
+							name: "client-component.js",
+							source: await readElementScript(),
+						});
+					}
+				},
+				generateBundle(_options, bundle) {
+					if (element) ui.script = ASSETS_BASE + this.getFileName(element);
+					for (const output of Object.values(bundle)) {
+						if (output.type !== "chunk") continue;
+						const name = hydrationName(output.facadeModuleId);
+						const integration =
+							name === null ? undefined : components.get(name);
+						if (name !== null && integration !== undefined) {
+							ui.components[name] = {
+								...assetsOf(bundle, output),
+								integration,
+							};
+						}
+					}
+					for (const href of Object.values(ui.components).flatMap(
+						(c) => c.css,
+					)) {
+						const sheet = bundle[href.slice(ASSETS_BASE.length)];
+						const text =
+							sheet?.type !== "asset"
+								? undefined
+								: typeof sheet.source === "string"
+									? sheet.source
+									: new TextDecoder().decode(sheet.source);
+						if (
+							text !== undefined &&
+							text.length <= INLINE_STYLES_LIMIT &&
+							!text.includes("</style")
+						) {
+							ui.styles[href] = text;
+						}
 					}
 				},
 			},
@@ -103,7 +200,7 @@ const buildAssets = async (
 		delete manifest[EMPTY_ENTRY];
 	}
 
-	return manifest;
+	return { manifest, ui: components.size > 0 ? ui : null };
 };
 
 export default buildAssets;
