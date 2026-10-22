@@ -22,19 +22,19 @@ const redirectPage = (location: string) => {
 	return `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=${url}"><link rel="canonical" href="${url}"><a href="${url}">${url}</a>`;
 };
 
-/** Renders a path into the build folder, returning whether it wrote a file and its root-relative HTML links; `redirect()` writes meta refresh, `notFound()` writes nothing, and other failures throw. */
+/** Renders a path to disk, returning root-relative links or a skip reason; `redirect()` writes meta refresh, `notFound()` writes nothing, and other failures throw. */
 const renderStaticPage = async (props: {
 	site: Site;
 	outDir: string;
 	routePath: string;
 	state: SiteState;
-	warn: (message: string) => void;
-}): Promise<{ written: boolean; links: string[] }> => {
+}): Promise<
+	{ written: true; links: string[] } | { written: false; reason: string }
+> => {
 	const { routePath } = props;
 	const match = findRoute(props.site.router, "GET", routePath);
 	if (!match) {
-		props.warn(`Skipped ${routePath}, which no page routes to`);
-		return { written: false, links: [] };
+		return { written: false, reason: "no page routes to it" };
 	}
 
 	try {
@@ -57,8 +57,7 @@ const renderStaticPage = async (props: {
 	} catch (error) {
 		const cause = error instanceof KilnRenderError ? error.cause : error;
 		if (cause instanceof SiteNotFoundError) {
-			props.warn(`Skipped ${routePath}, which called notFound()`);
-			return { written: false, links: [] };
+			return { written: false, reason: "called notFound()" };
 		}
 		if (cause instanceof SiteRedirectError) {
 			await writeStaticFile(

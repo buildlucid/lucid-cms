@@ -23,7 +23,12 @@ import loadPluginClis from "../services/load-plugin-clis.js";
 
 const logger: LucidPluginCommandLogger = {
 	info: (message) => cliLogger.info(message),
-	warn: (message) => cliLogger.warn(message),
+	warn: (message, details = []) => {
+		cliLogger.warn(message);
+		for (const detail of details) {
+			cliLogger.log(detail, { indent: 2, symbol: "child" });
+		}
+	},
 	error: (error, heading) => {
 		if (error instanceof Error) cliLogger.errorInstance(error, heading);
 		else cliLogger.error(heading, String(error));

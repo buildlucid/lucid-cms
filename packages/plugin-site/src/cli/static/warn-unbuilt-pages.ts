@@ -3,11 +3,7 @@ import listDocumentPaths from "../../content/list-document-paths.js";
 import type { Site } from "../../site/create-site-loader.js";
 import isLucidPath from "../../utils/is-lucid-path.js";
 import normalizePath from "../../utils/normalize-path.js";
-
-const MAX_LISTED = 10;
-
-const list = (items: string[]) =>
-	`${items.slice(0, MAX_LISTED).join(", ")}${items.length > MAX_LISTED ? ` and ${items.length - MAX_LISTED} more` : ""}`;
+import limitDetails from "./limit-details.js";
 
 /** Warns when built links or document URLs point to unbuilt pages, without adding pages. */
 const warnUnbuiltPages = async (props: {
@@ -18,7 +14,7 @@ const warnUnbuiltPages = async (props: {
 	/** Each link target, with the first built page that links to it. */
 	links: ReadonlyMap<string, string>;
 	publicPaths: ReadonlySet<string>;
-	warn: (message: string) => void;
+	warn: (message: string, details?: string[]) => void;
 }) => {
 	const broken = [...props.links]
 		.filter(
@@ -27,9 +23,10 @@ const warnUnbuiltPages = async (props: {
 				!props.publicPaths.has(target) &&
 				!isLucidPath(target),
 		)
-		.map(([target, from]) => `${target} (on ${from})`);
+		.map(([target, from]) => `${target} (on ${from})`)
+		.sort();
 	if (broken.length > 0) {
-		props.warn(`Links to pages the build didn't make: ${list(broken)}`);
+		props.warn("Links to pages the build didn't make", limitDetails(broken));
 	}
 
 	for (const collectionKey of props.collections) {
@@ -55,7 +52,8 @@ const warnUnbuiltPages = async (props: {
 			.filter((routePath) => !props.built.has(routePath));
 		if (missing.length > 0) {
 			props.warn(
-				`${missing.length} '${collectionKey}' documents have URLs the build didn't make, so their live page links will 404: ${list(missing)}`,
+				`${missing.length} '${collectionKey}' documents have URLs the build didn't make, so their live page links will 404`,
+				limitDetails(missing),
 			);
 		}
 	}

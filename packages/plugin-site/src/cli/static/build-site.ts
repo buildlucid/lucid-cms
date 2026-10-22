@@ -17,6 +17,7 @@ import buildSiteData from "../build-site-data.js";
 import type { ResolvedIntegrations } from "../ui/resolve-integrations.js";
 import assertOutputFolder from "./assert-output-folder.js";
 import collectPagePaths from "./collect-page-paths.js";
+import limitDetails from "./limit-details.js";
 import renderStaticPage from "./render-static-page.js";
 import warnUnbuiltPages from "./warn-unbuilt-pages.js";
 import writeStaticFile from "./write-static-file.js";
@@ -99,6 +100,7 @@ const buildSite = async (
 
 	const failures: Array<{ path: string; error: unknown }> = [];
 	const built = new Set<string>();
+	const skipped: string[] = [];
 	const links = new Map<string, string>();
 	await eachLimited(paths, CONCURRENCY, async (routePath) => {
 		try {
@@ -107,9 +109,12 @@ const buildSite = async (
 				outDir,
 				routePath,
 				state: state(routePath),
-				warn: (message) => logger.warn(message),
 			});
-			if (page.written) built.add(routePath);
+			if (!page.written) {
+				skipped.push(`${routePath} (${page.reason})`);
+				return;
+			}
+			built.add(routePath);
 			for (const link of page.links) {
 				if (!links.has(link)) links.set(link, routePath);
 			}
@@ -137,6 +142,12 @@ const buildSite = async (
 		});
 	}
 
+	logger.info(
+		`Built ${built.size} pages to ${path.relative(process.cwd(), outDir) || "."}`,
+	);
+	if (skipped.length > 0) {
+		logger.warn("Skipped these pages", limitDetails(skipped.sort()));
+	}
 	await warnUnbuiltPages({
 		site,
 		toolkit,
@@ -146,12 +157,8 @@ const buildSite = async (
 		publicPaths: new Set(
 			props.publicFiles.map((file) => normalizePath(`/${file.name}`)),
 		),
-		warn: (message) => logger.warn(message),
+		warn: logger.warn,
 	});
-
-	logger.info(
-		`Built ${built.size} pages to ${path.relative(process.cwd(), outDir) || "."}`,
-	);
 };
 
 export default buildSite;

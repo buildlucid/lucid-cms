@@ -54,9 +54,10 @@ describe("warnUnbuiltPages", () => {
 			warn,
 		});
 		expect(warn.mock.calls).toEqual([
-			["Links to pages the build didn't make: /missing (on /en)"],
+			["Links to pages the build didn't make", ["/missing (on /en)"]],
 			[
-				"1 'page' documents have URLs the build didn't make, so their live page links will 404: /fr",
+				"1 'page' documents have URLs the build didn't make, so their live page links will 404",
+				["/fr"],
 			],
 		]);
 	});

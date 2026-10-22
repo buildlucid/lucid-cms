@@ -65,7 +65,8 @@ export type LucidPluginHooks = {
 /** Writes a plugin command's output to the terminal. */
 export type LucidPluginCommandLogger = {
 	info: (message: string) => void;
-	warn: (message: string) => void;
+	/** Prints `details` as indented lines under the warning, such as the items it's about. */
+	warn: (message: string, details?: string[]) => void;
 	error: (error: unknown, heading: string) => void;
 };
 
