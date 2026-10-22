@@ -46,6 +46,29 @@ describe("createSiteLoader", () => {
 		await expect(getSite({ context })).resolves.toBe(second);
 	});
 
+	test("starts a new cache namespace when a global's value changes", async () => {
+		const namespaceFor = async (siteUrl: string) => {
+			const getSite = createSiteLoader(
+				{
+					directory,
+					mode: "ssr",
+					trailingSlash: "never",
+					static: { outDir: "dist-site" },
+					kiln: { globals: { siteUrl } },
+				},
+				config,
+			);
+			return (await getSite({ context: contextFor(false) })).cacheNamespace;
+		};
+
+		expect(await namespaceFor("https://a.test")).toBe(
+			await namespaceFor("https://a.test"),
+		);
+		expect(await namespaceFor("https://b.test")).not.toBe(
+			await namespaceFor("https://a.test"),
+		);
+	});
+
 	test("refuses to serve a built server that has no built site", async () => {
 		const getSite = createSiteLoader(
 			{

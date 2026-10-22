@@ -16,6 +16,7 @@ import type {
 import { moveUiAssets } from "../ui/page-assets.js";
 import { createBuiltUi } from "../ui/site-ui.js";
 import withUi from "../ui/with-ui.js";
+import sha256 from "../utils/sha256.js";
 import createSiteConfig, { type SiteConfig } from "./create-site-config.js";
 import createSiteKiln, { type SiteKiln } from "./create-site-kiln.js";
 import hashTemplates from "./hash-templates.js";
@@ -31,7 +32,7 @@ export type Site = {
 	/** Vite's dev server or the built site, or null when Vite isn't installed and nothing was built. */
 	data: SiteCliData | null;
 	templates: ReadonlySet<string>;
-	/** Namespaces stored pages and fragments: a hash of the templates in development, or the build ID once built. */
+	/** Combines a globals hash with the development template hash or build ID to namespace stored pages and fragments. */
 	cacheNamespace: string;
 	config: SiteConfig;
 	/** Finishes an HTML page rendered in one go, rather than streamed: UI components' links move into its head. */
@@ -116,7 +117,7 @@ const loadSite = async (props: {
 	const loader = addUi(files, data, props.module);
 	const templates = new Set(await files.list?.());
 	// Each build uses a new cache namespace because code and assets can change without template changes.
-	const cacheNamespace =
+	const sourceNamespace =
 		data?.kind === "build"
 			? data.buildId
 			: // The files' own source, so editing a UI component starts a new namespace too.
@@ -125,6 +126,13 @@ const loadSite = async (props: {
 					templates,
 					props.context.translate.scopeBundles("site"),
 				);
+	// Hash globals to catch environment changes without a rebuild, excluding callables that JSON cannot serialise.
+	const kiln = props.options.kiln ?? {};
+	const globals = JSON.stringify([
+		kiln.globals,
+		...(kiln.extensions ?? []).map((extension) => extension.globals),
+	]);
+	const cacheNamespace = `${sourceNamespace}-${(await sha256(globals)).slice(0, 8)}`;
 	const kilnProps = {
 		loader,
 		config: props.config,
