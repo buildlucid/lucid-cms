@@ -55,10 +55,10 @@
 		"nodemailer": "^9.0.1"
 	},
 	"volta": {
-		"node": "24.11.1"
+		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0"
+		"node": "^24.0.0 || ^26.0.0"
 	},
 	"license": "MIT",
 	"publishConfig": {

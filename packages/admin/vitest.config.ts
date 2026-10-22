@@ -10,6 +10,8 @@ export default defineConfig({
 	test: {
 		name: "@lucidcms/admin",
 		environment: "happy-dom",
+		// Node 25+ defines its own global localStorage, which hides happy-dom's.
+		execArgv: ["--no-experimental-webstorage"],
 		server: {
 			deps: {
 				inline: [
