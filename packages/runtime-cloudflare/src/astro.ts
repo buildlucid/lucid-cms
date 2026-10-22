@@ -1,17 +1,16 @@
 import { LucidError, setupJobScheduler } from "@lucidcms/core/runtime";
 import type {
 	EnvironmentVariables,
-	HttpExtension,
-	LucidHonoContext,
 	LucidInvocation,
 	RuntimeAdapter,
 } from "@lucidcms/core/types";
 import getRuntimeContext from "./services/get-runtime-context.js";
-
-type CloudflareExecutionContext = {
-	waitUntil(promise: Promise<unknown>): void;
-	passThroughOnException?: () => void;
-};
+import platformContextExtension from "./services/platform-context-extension.js";
+import wrapWorkerHandlers from "./services/wrap-worker-handlers.js";
+import type {
+	CloudflareExecutionContext,
+	CloudflareWorkerHandler,
+} from "./types.js";
 
 type CloudflareRuntime = {
 	env?: EnvironmentVariables;
@@ -26,50 +25,6 @@ type AstroRequestContext = {
 	runtime?: CloudflareRuntime;
 };
 
-/** Hono throws when executionCtx is read outside a Worker request. */
-const getExecutionContext = (
-	context: LucidHonoContext,
-): CloudflareExecutionContext | null => {
-	try {
-		return context.executionCtx as CloudflareExecutionContext;
-	} catch {
-		return null;
-	}
-};
-
-const platformContextExtension: HttpExtension = {
-	name: "runtime-cloudflare:astro-context",
-	phase: "beforeMiddleware",
-	register: (app) => {
-		app.use("*", async (context, next) => {
-			context.set(
-				"cf",
-				(context.req.raw as Request & { cf?: unknown }).cf ?? null,
-			);
-			context.set("caches", globalThis.caches ?? null);
-
-			const executionContext = getExecutionContext(context);
-			context.set(
-				"ctx",
-				executionContext
-					? {
-							waitUntil: executionContext.waitUntil.bind(executionContext),
-							...(executionContext.passThroughOnException
-								? {
-										passThroughOnException:
-											executionContext.passThroughOnException.bind(
-												executionContext,
-											),
-									}
-								: {}),
-						}
-					: null,
-			);
-			await next();
-		});
-	},
-};
-
 /** Reads deployed Worker bindings without making them mandatory during prerender. */
 const readWorkersEnv = async (): Promise<EnvironmentVariables | undefined> => {
 	try {
@@ -80,7 +35,7 @@ const readWorkersEnv = async (): Promise<EnvironmentVariables | undefined> => {
 	}
 };
 
-/** Astro request and scheduled-event bridge for the Cloudflare runtime. */
+/** Astro request bridge for the Cloudflare runtime. */
 const cloudflareAstroBridge = {
 	name: "@lucidcms/runtime-cloudflare/astro",
 	async resolveRuntime(props: {
@@ -133,19 +88,50 @@ const cloudflareAstroBridge = {
 			executionContext: props.state.executionContext,
 		});
 	},
-	async scheduled(props: {
-		invocation: LucidInvocation;
-		controller: { cron: string; scheduledTime: number };
-		state: {
-			env: EnvironmentVariables;
-			runtimeContext: ReturnType<typeof getRuntimeContext>;
-		};
-	}) {
-		const scheduler = setupJobScheduler();
-		await scheduler.run(await props.invocation.getServiceContext(), {
-			scheduledAt: new Date(props.controller.scheduledTime),
-		});
-	},
 };
+
+/** Creates the Worker exported by generated Astro entries, combining Astro's `fetch` with Lucid's `scheduled` and plugin handlers. */
+export const createAstroWorker = (
+	options: {
+		fetch: (
+			request: Request,
+			env: EnvironmentVariables,
+			ctx: CloudflareExecutionContext,
+		) => Promise<Response>;
+		/** The generated Lucid runtime module's invocation factory. */
+		createLucidInvocation: (context: {
+			runtime: CloudflareRuntime;
+		}) => Promise<{ invocation: LucidInvocation }>;
+	},
+	handlers: Record<string, CloudflareWorkerHandler> = {},
+) => ({
+	...wrapWorkerHandlers(handlers, async (env, ctx) => {
+		const { invocation } = await options.createLucidInvocation({
+			runtime: { env, ctx },
+		});
+		return invocation;
+	}),
+	fetch: options.fetch,
+	scheduled: async (
+		controller: { scheduledTime: number },
+		env: EnvironmentVariables,
+		ctx: CloudflareExecutionContext,
+	) => {
+		const runJobScheduler = async () => {
+			const { invocation } = await options.createLucidInvocation({
+				runtime: { env, ctx },
+			});
+			try {
+				await setupJobScheduler().run(await invocation.getServiceContext(), {
+					scheduledAt: new Date(controller.scheduledTime),
+				});
+			} finally {
+				await invocation.destroy();
+			}
+		};
+
+		ctx.waitUntil(runJobScheduler());
+	},
+});
 
 export default cloudflareAstroBridge;

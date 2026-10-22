@@ -13,7 +13,7 @@ import withResponseCleanup from "./with-response-cleanup.js";
 const runtimeContext = {
 	runtime: "test",
 	compiled: false,
-	configEntryPoint: null,
+	buildModule: null,
 	getConnectionInfo: () => ({}),
 };
 

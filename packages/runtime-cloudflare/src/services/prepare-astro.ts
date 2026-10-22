@@ -87,7 +87,7 @@ const prepareAstro = async (options: PrepareAstroOptions) => {
 		outputRelativeConfigPath: toPosix(
 			path.relative(options.generatedDirectory, options.configPath),
 		),
-		customArtifactTypes: [constants.WORKER_EXPORT_ARTIFACT_TYPE],
+		customArtifactTypes: [constants.WORKER_HANDLER_ARTIFACT_TYPE],
 	});
 	const workerPath = path.join(options.generatedDirectory, "worker.ts");
 	await writeFileIfChanged(

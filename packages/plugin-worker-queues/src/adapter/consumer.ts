@@ -2,7 +2,6 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parentPort, workerData } from "node:worker_threads";
 import {
-	getBuildDataImportPaths,
 	getConfigPath,
 	loadBuildProject,
 	resolveConfigDefinition,
@@ -21,6 +20,7 @@ import type {
 	EnvironmentVariables,
 	LogLevel,
 	LucidAdapters,
+	LucidBuild,
 	QueueAdapterInstance,
 	ResolvedLucidConfig,
 	TranslationStore,
@@ -37,7 +37,7 @@ const DEFAULT_BATCH_SIZE = 10;
 
 const options = workerData.options as WorkerQueueAdapterOptions;
 const runtime = workerData.runtime as {
-	configEntryPath: string;
+	buildModulePath: string;
 	env: EnvironmentVariables | undefined;
 };
 
@@ -68,41 +68,26 @@ const getConfig = async (): Promise<{
 			runtimeContext: result.loaded.runtimeContext,
 		};
 	} catch {
-		const configPath = path.resolve(process.cwd(), runtime.configEntryPath);
-		const configDir = path.dirname(configPath);
-
-		const [configModule, envModule, dbModule, runtimeModule] =
-			await Promise.all([
-				import(pathToFileURL(configPath).href),
-				import(pathToFileURL(path.join(configDir, "env.js")).href),
-				import(pathToFileURL(path.join(configDir, "db.js")).href),
-				import(pathToFileURL(path.join(configDir, "runtime.js")).href),
-			]);
+		const buildModulePath = path.resolve(
+			process.cwd(),
+			runtime.buildModulePath,
+		);
+		const { default: build }: { default: LucidBuild } = await import(
+			pathToFileURL(buildModulePath).href
+		);
 
 		const resolved = await resolveConfigDefinition({
-			definition: {
-				runtime: runtimeModule.default,
-				db: dbModule.default,
-				config: configModule.default,
-			},
-			envSchema: envModule.env,
+			definition: build.host.definition,
+			envSchema: build.host.envSchema,
 			env: runtime.env,
+			meta: build.host.meta,
 			processConfigOptions: {
 				skipValidation: true,
 			},
 		});
-		const translationsModule = await import(
-			pathToFileURL(
-				path.resolve(
-					path.dirname(configDir),
-					getBuildDataImportPaths().translations,
-				),
-			).href,
-			{ with: { type: "json" } }
-		);
 		const translations = await prepareTranslations({
 			config: resolved.config,
-			bundles: translationsModule.default,
+			bundles: build.host.translationBundles,
 		});
 
 		return {

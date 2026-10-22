@@ -1,6 +1,5 @@
 import { fileURLToPath, URL } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
-import devtools from "solid-devtools/vite";
 import solidPlugin from "vite-plugin-solid";
 import { defineConfig } from "vitest/config";
 import { adminClientConfigPlugin } from "./src/build/client-config.js";
@@ -39,9 +38,6 @@ export default defineConfig({
 			),
 		}),
 		tailwindcss(),
-		devtools({
-			autoname: true,
-		}),
 		solidPlugin(),
 	],
 	resolve: {

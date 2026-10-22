@@ -53,12 +53,6 @@ export type LucidAstroBridge = {
 		};
 		state: LucidAstroRuntimeState;
 	}): Response | Promise<Response>;
-	/** Handles an optional platform scheduled event. */
-	scheduled?(props: {
-		invocation: LucidInvocation;
-		controller: { cron: string; scheduledTime: number };
-		state: LucidAstroRuntimeState;
-	}): void | Promise<void>;
 };
 
 export type LucidAstroViteOptions = {

@@ -17,7 +17,7 @@ vi.mock("./create-service-context.js", () => ({
 const runtimeContext = {
 	runtime: "test",
 	compiled: false,
-	configEntryPoint: null,
+	buildModule: null,
 	getConnectionInfo: () => ({}),
 };
 

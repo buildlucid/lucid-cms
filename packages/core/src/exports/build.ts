@@ -1,3 +1,5 @@
+import constants from "../constants/constants.js";
+
 export { buildAdmin, createAdminDevServer } from "@lucidcms/admin/build";
 export { default as createAdminClientConfig } from "../libs/admin/create-client-config.js";
 export { default as migrateCommand } from "../libs/cli/commands/migrate.js";
@@ -5,7 +7,6 @@ export { default as createCliDev } from "../libs/cli/services/create-cli-dev.js"
 export { default as processBuildArtifacts } from "../libs/cli/services/process-build-artifacts.js";
 export {
 	configArtifactEntries,
-	getBuildDataImportPaths,
 	getConfigArtifactImportPaths,
 } from "../libs/compile/config-artifacts.js";
 export { default as loadBuildProject } from "../libs/compile/load-build-project.js";
@@ -19,3 +20,6 @@ export { default as prepareTranslations } from "../libs/i18n/prepare-translation
 export { default as checkAllPluginsCompatibility } from "../libs/plugins/check-all-plugins-compatibility.js";
 export { default as handlePluginRuntimeHooks } from "../libs/plugins/hooks/handle-runtime.js";
 export { default as getBuildPaths } from "../libs/runtime/get-build-paths.js";
+
+/** The module ID runtime entries import the built project, a `LucidBuild`, from. */
+export const buildModuleId = constants.build.moduleId;

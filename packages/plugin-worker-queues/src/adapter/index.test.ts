@@ -67,7 +67,7 @@ describe("worker queue adapter lifecycle", () => {
 				},
 			},
 			runtimeContext: {
-				configEntryPoint: "config.js",
+				buildModule: "lucid/build.js",
 			},
 		} as unknown as AdapterLifecycleContext;
 		await adapter.lifecycle?.init?.(context);

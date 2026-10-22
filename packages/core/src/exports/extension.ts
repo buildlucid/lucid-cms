@@ -8,10 +8,6 @@ export {
 	isCollectionFieldLocalized,
 } from "../libs/collection/helpers/resolve-collection-localization.js";
 export { getTableNames as getCollectionTableNames } from "../libs/collection/schema/runtime/runtime-schema-selectors.js";
-export {
-	getBuildDataImportPaths,
-	getConfigArtifactImportPaths,
-} from "../libs/compile/config-artifacts.js";
 export { default as DatabaseAdapter } from "../libs/db/adapter-base.js";
 export {
 	createDatabaseAdapterCreator,

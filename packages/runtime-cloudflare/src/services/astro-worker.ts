@@ -1,104 +1,18 @@
-import constants from "../constants.js";
-import type {
-	CloudflareWorkerExport,
-	CloudflareWorkerExportArtifact,
-	CloudflareWorkerImport,
-} from "../types.js";
-
-const renderImports = (imports: CloudflareWorkerImport[]) => {
-	const modules = new Map<
-		string,
-		{ default?: string; exports: Map<string, string | undefined> }
-	>();
-
-	for (const item of imports) {
-		const current: {
-			default?: string;
-			exports: Map<string, string | undefined>;
-		} = modules.get(item.path) ?? { exports: new Map() };
-		if (item.default) current.default = item.default;
-		for (const named of item.exports ?? []) {
-			if (typeof named === "string") current.exports.set(named, undefined);
-			else current.exports.set(named.name, named.as);
-		}
-		modules.set(item.path, current);
-	}
-
-	return Array.from(modules, ([modulePath, item]) => {
-		const specifiers = [
-			...(item.default ? [item.default] : []),
-			...(item.exports.size
-				? [
-						`{ ${Array.from(item.exports, ([name, alias]) =>
-							alias ? `${name} as ${alias}` : name,
-						).join(", ")} }`,
-					]
-				: []),
-		];
-		return specifiers.length
-			? `import ${specifiers.join(", ")} from ${JSON.stringify(modulePath)};`
-			: `import ${JSON.stringify(modulePath)};`;
-	});
-};
-
-const renderHandler = (handler: CloudflareWorkerExport) =>
-	`${handler.async ? "async " : ""}${handler.name}(${handler.params?.join(", ") ?? ""}) { ${handler.content} }`;
+import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
+import renderWorkerHandlers from "./render-worker-handlers.js";
 
 /** Creates the Worker entrypoint shared by Astro, Lucid and plugin handlers. */
 export const createAstroWorkerSource = (props: {
 	runtimeModulePath: string;
-	artifacts: Array<{ type: string; custom: unknown }>;
+	artifacts: RuntimeBuildArtifactCustom[];
 }) => {
-	const imports: CloudflareWorkerImport[] = [
-		{
-			path: "@astrojs/cloudflare/handler",
-			exports: [{ name: "handle", as: "astroFetch" }],
-		},
-		{
-			path: "@lucidcms/runtime-cloudflare/astro",
-			default: "lucidBridge",
-		},
-		{
-			path: props.runtimeModulePath,
-			exports: ["createLucidInvocation"],
-		},
-	];
-	const handlers: CloudflareWorkerExport[] = [
-		{
-			name: "fetch",
-			async: true,
-			params: ["request", "env", "ctx"],
-			content: "return astroFetch(request, env, ctx);",
-		},
-		{
-			name: "scheduled",
-			async: true,
-			params: ["controller", "env", "ctx"],
-			content: `const task = (async () => {
-	const { invocation, state } = await createLucidInvocation({ runtime: { env, ctx } });
-	try {
-		await lucidBridge.scheduled({ invocation, controller, state });
-	} finally {
-		await invocation.destroy();
-	}
-})();
-ctx.waitUntil(task);`,
-		},
-	];
+	const workerHandlers = renderWorkerHandlers(props.artifacts);
 
-	for (const artifact of props.artifacts) {
-		if (artifact.type !== constants.WORKER_EXPORT_ARTIFACT_TYPE) continue;
-		const custom = artifact.custom as CloudflareWorkerExportArtifact;
-		imports.push(...custom.imports);
-		handlers.push(...custom.exports);
-	}
+	return `import { handle } from "@astrojs/cloudflare/handler";
+import { createAstroWorker } from "@lucidcms/runtime-cloudflare/astro";
+import { createLucidInvocation } from ${JSON.stringify(props.runtimeModulePath)};
+${workerHandlers.imports}
 
-	return `${renderImports(imports).join("\n")}
-
-const worker = {
-	${handlers.map(renderHandler).join(",\n\t")}
-};
-
-export default worker;
+export default createAstroWorker({ fetch: handle, createLucidInvocation }, ${workerHandlers.handlers});
 `;
 };

@@ -2,6 +2,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
 import buildApp from "../../admin/build-app.js";
+import bundleServer from "../../compile/bundle-server.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
@@ -19,7 +20,7 @@ import createCommandTelemetryReporter, {
 } from "../../telemetry/command-reporter.js";
 import type { TelemetryStage } from "../../telemetry/types.js";
 import cliLogger from "../logger.js";
-import calculateOutDirSize from "../services/calculate-outdir-size.js";
+import calculateDirectorySize from "../services/calculate-directory-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import { startProgress } from "../services/progress.js";
 import runPluginBuilds from "../services/run-plugin-builds.js";
@@ -213,36 +214,39 @@ const buildCommand = async (options?: {
 
 		currentStage = "runtime_build";
 		progress.update("Building server…");
-		const runtimeBuildRes = await adapterCLI.build({
+		const runtimeBuild = await adapterCLI.build({
 			config: configRes.config,
-			translationStore,
-			definition: configRes.definition,
 			configPath,
 			outputPath: configRes.config.build.outDir,
-			outputRelativeConfigPath: normalisedOutputRelativePath,
 			buildArtifacts: processedArtifacts,
 			logger: {
 				instance: cliLogger,
 				silent,
 			},
 		});
+		const serverBundle = await bundleServer({
+			configPath,
+			outputPath: configRes.config.build.outDir,
+			runtimeEntrypoint: adapterRuntime.runtimeEntrypoint,
+			build: runtimeBuild,
+		});
 
 		currentStage = undefined;
 		await checkAllPluginsCompatibility({
-			runtimeContext: runtimeBuildRes.runtimeContext,
+			runtimeContext: runtimeBuild.runtimeContext,
 			config: configRes.config,
 			translate,
 		});
 
-		const relativeBuildPath = path.relative(
-			process.cwd(),
-			configRes.config.build.outDir,
+		const publicPath = path.join(
+			path.relative(process.cwd(), configRes.config.build.outDir),
+			constants.directories.public,
 		);
 
 		cliLogger.info(
 			"Admin application built:",
 			cliLogger.color.green(
-				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.admin}`,
+				`./${path.join(publicPath, constants.directories.admin)}`,
 			),
 			{
 				silent,
@@ -283,10 +287,14 @@ const buildCommand = async (options?: {
 
 		currentStage = "finalize";
 		progress.update("Finishing build…");
-		await runtimeBuildRes?.onComplete?.();
+		await runtimeBuild.onComplete?.();
 		const endTime = startTime();
-
-		const distSize = await calculateOutDirSize(configRes.config.build.outDir);
+		const publicSize = await calculateDirectorySize(publicPath);
+		// Runtimes that keep packages external ship far less, so say why.
+		const externalPackagesNote =
+			runtimeBuild.bundle?.packages === "external"
+				? ", packages load from node_modules"
+				: "";
 		progress.stop();
 
 		cliLogger.log(
@@ -295,10 +303,31 @@ const buildCommand = async (options?: {
 			"successfully",
 			"in",
 			cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-			cliLogger.color.green(`(${cliLogger.formatBytes(distSize)})`),
 			{
-				spaceAfter: true,
 				spaceBefore: true,
+				silent,
+			},
+		);
+		cliLogger.log(
+			"Server",
+			cliLogger.color.yellow(cliLogger.formatBytes(serverBundle.size)),
+			cliLogger.color.gray(
+				`(${cliLogger.formatBytes(serverBundle.gzipSize)} gzipped${externalPackagesNote})`,
+			),
+			{
+				indent: 2,
+				symbol: "child",
+				silent,
+			},
+		);
+		cliLogger.log(
+			"Assets",
+			cliLogger.color.yellow(cliLogger.formatBytes(publicSize)),
+			cliLogger.color.gray(`(admin and public files in ./${publicPath})`),
+			{
+				indent: 2,
+				symbol: "child",
+				spaceAfter: true,
 				silent,
 			},
 		);

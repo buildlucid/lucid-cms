@@ -471,6 +471,47 @@ describe("generateSourceHTML", () => {
 			{ type: "lucidEmbeddedBrick", attrs: { ref: "brick-1", brick: null } },
 		]);
 	});
+
+	test("escapes attribute values so links round-trip exactly", () => {
+		const href = 'https://example.com/?a=1&amp;b="2"&copy=<3>';
+		const value = {
+			type: "doc",
+			content: [
+				{
+					type: "paragraph",
+					content: [
+						{
+							type: "text",
+							text: "a < b & c",
+							marks: [{ type: "link", attrs: { href } }],
+						},
+					],
+				},
+			],
+		};
+
+		const html = generateSourceHTML(value);
+
+		expect(html).toContain(
+			'href="https://example.com/?a=1&amp;amp;b=&quot;2&quot;&amp;copy=&lt;3&gt;"',
+		);
+		expect(html).toContain("a &lt; b &amp; c");
+		expect(generateJSON(html).content?.[0]?.content?.[0]).toMatchObject({
+			text: "a < b & c",
+			marks: [{ type: "link", attrs: { href } }],
+		});
+	});
+
+	test("keeps non-breaking spaces through a round trip", () => {
+		const value = {
+			type: "doc",
+			content: [
+				{ type: "paragraph", content: [{ type: "text", text: "10\u00a0km" }] },
+			],
+		};
+
+		expect(parseSourceHTML(generateSourceHTML(value))).toEqual(value);
+	});
 });
 
 describe("parseSourceHTML", () => {
@@ -513,5 +554,60 @@ describe("parseSourceHTML", () => {
 				],
 			},
 		]);
+	});
+});
+
+describe("generateJSON", () => {
+	test("parses unclosed and overlapping tags as browsers do", () => {
+		expect(
+			generateJSON(
+				"<p>One<p><strong>bold <em>both</strong> em</em><ul><li>x<li>y</ul><pre><code>a &amp;&nbsp;b</code></pre>",
+			).content,
+		).toEqual([
+			{ type: "paragraph", content: [{ type: "text", text: "One" }] },
+			{
+				type: "paragraph",
+				content: [
+					{ type: "text", marks: [{ type: "bold" }], text: "bold " },
+					{
+						type: "text",
+						marks: [{ type: "bold" }, { type: "italic" }],
+						text: "both",
+					},
+					{ type: "text", text: " em" },
+				],
+			},
+			{
+				type: "bulletList",
+				content: ["x", "y"].map((text) => ({
+					type: "listItem",
+					content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+				})),
+			},
+			{
+				type: "codeBlock",
+				attrs: { language: null },
+				content: [{ type: "text", text: "a &\u00a0b" }],
+			},
+		]);
+	});
+
+	test("reads inline styles as browsers do, ignoring !important and case", () => {
+		const marks = (style: string) =>
+			generateJSON(`<p><span style="${style}">Hello</span></p>`).content?.[0]
+				?.content?.[0]?.marks;
+
+		expect(marks("font-weight:700!important")).toEqual([{ type: "bold" }]);
+		expect(marks("FONT-WEIGHT: BOLD !important")).toEqual([{ type: "bold" }]);
+		expect(marks("font-style: ITALIC")).toEqual([{ type: "italic" }]);
+		expect(marks("color: red; font-weight: 400")).toBeUndefined();
+	});
+
+	test("leaves the class empty on links without one", () => {
+		const [link] =
+			generateJSON('<p><a href="https://example.com">Link</a></p>').content?.[0]
+				?.content?.[0]?.marks ?? [];
+
+		expect(link?.attrs?.class).toBeNull();
 	});
 });

@@ -136,7 +136,7 @@ export const resolveConfigDefinition = async (props: {
 			host: "lucid",
 			compiled: false,
 			getConnectionInfo: () => ({}),
-			configEntryPoint: null,
+			buildModule: null,
 		} satisfies AdapterRuntimeContext;
 
 		// Hosted integrations can supply their own adaptConfig wrapper so the

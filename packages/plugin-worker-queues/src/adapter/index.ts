@@ -31,10 +31,10 @@ const workerQueueAdapter = (
 		support: { delayedDelivery: true, maxDelayMs: null },
 		lifecycle: {
 			init: async (params) => {
-				if (!params.runtimeContext?.configEntryPoint) {
+				if (!params.runtimeContext?.buildModule) {
 					throw new LucidError({
 						message:
-							"The worker queue needs a runtime with a config entry point.",
+							"The worker queue needs a runtime that emits its build module.",
 					});
 				}
 
@@ -43,9 +43,9 @@ const workerQueueAdapter = (
 				const workerData = {
 					options,
 					runtime: {
-						configEntryPath: join(
+						buildModulePath: join(
 							params.config.build.outDir,
-							params.runtimeContext.configEntryPoint,
+							params.runtimeContext.buildModule,
 						),
 						env: params.env,
 					},

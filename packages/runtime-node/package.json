@@ -15,6 +15,10 @@
 			"types": "./dist/runtime.d.mts",
 			"default": "./dist/runtime.mjs"
 		},
+		"./entry": {
+			"types": "./dist/entry.d.mts",
+			"default": "./dist/entry.mjs"
+		},
 		"./astro": {
 			"types": "./dist/astro.d.mts",
 			"default": "./dist/astro.mjs"
@@ -65,8 +69,6 @@
 		"@hono/node-server": "^2.0.6",
 		"@types/node-cron": "^3.0.11",
 		"dotenv": "^17.4.2",
-		"rolldown": "^1.1.2",
-		"rollup-plugin-node-externals": "^9.0.1",
 		"node-cron": "^4.5.0"
 	},
 	"peerDependencies": {

@@ -1,17 +1,9 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
-import {
-	getBuildDataImportPaths,
-	getConfigArtifactImportPaths,
-} from "@lucidcms/core/extension";
 import type {
 	LucidPluginDefinition,
 	RuntimeBuildArtifactCustom,
 } from "@lucidcms/core/types";
-import type {
-	CloudflareWorkerExport,
-	CloudflareWorkerExportArtifact,
-	CloudflareWorkerImport,
-} from "@lucidcms/runtime-cloudflare/types";
+import type { CloudflareWorkerHandlerArtifact } from "@lucidcms/runtime-cloudflare/types";
 import cloudflareQueuesAdapter from "./adapter.js";
 import {
 	LUCID_VERSION,
@@ -51,137 +43,17 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 					};
 				}
 
-				const configImports = getConfigArtifactImportPaths(".");
-				const buildDataImports = getBuildDataImportPaths(".");
-				const imports: CloudflareWorkerImport[] = [
-					{
-						path: configImports.config,
-						default: "configFactory",
-					},
-					{
-						path: configImports.env,
-						exports: [{ name: "env", as: "envSchema" }],
-					},
-					{
-						path: configImports.db,
-						default: "db",
-					},
-					{
-						path: configImports.runtime,
-						default: "runtime",
-					},
-					{
-						path: "@lucidcms/core/extension",
-						exports: ["consumeJob", "logScopes"],
-					},
-					{
-						path: "@lucidcms/core/runtime",
-						exports: ["createLucidHost", "logger"],
-					},
-					{
-						path: "@lucidcms/runtime-cloudflare/runtime",
-						exports: [
-							"getOrCreateRuntimeHost",
-							"getRuntimeContext",
-							"runtimeHostKeys",
-						],
-					},
-					{
-						path: buildDataImports.emailTemplates,
-						default: "emailTemplates",
-					},
-					{
-						path: buildDataImports.translations,
-						default: "i18nTranslations",
-					},
-				];
-				const exports: CloudflareWorkerExport[] = [
-					{
-						name: "queue",
-						async: true,
-						params: ["batch", "env", "ctx"],
-						content: /** ts */ `const runtimeContext = getRuntimeContext({
-    server: "cloudflare",
-    compiled: true,
-});
-const host = await getOrCreateRuntimeHost(
-    runtimeHostKeys.background,
-    () => createLucidHost({
-        definition: { runtime, db, config: configFactory },
-        envSchema,
-        env,
-        runtimeContext,
-        translationBundles: i18nTranslations,
-        meta: { emailTemplates },
-        databaseScope: "invocation",
-    }),
-    (promise) => ctx.waitUntil(promise),
-);
-const invocation = host.createInvocation({ env });
-try {
-    const serviceContext = await invocation.getServiceContext();
-
-    for (const message of batch.messages) {
-        try {
-			const body = message.body;
-			if (!body || body.version !== 1 || typeof body.jobId !== "string") {
-				logger.error({
-					message: "Ignoring an invalid Cloudflare queue message",
-					owner: "${PLUGIN_KEY}",
-					scope: logScopes.queueAdapter,
-				});
-				message.ack();
-				continue;
-			}
-			const { jobId } = body;
-
-            logger.debug({
-                message: "Processing Cloudflare queue message",
-				owner: "${PLUGIN_KEY}",
-                scope: logScopes.queueAdapter,
-				data: { jobId },
-            });
-
-			const result = await consumeJob(serviceContext, { jobId });
-			if (result.type === "retry-transport") {
-				message.retry(
-					result.delayMs === undefined
-						? undefined
-						: { delaySeconds: Math.ceil(result.delayMs / 1000) },
-				);
-				continue;
-			}
-			message.ack();
-        } catch (error) {
-            logger.error({
-                message: "Error processing queue message",
-				owner: "${PLUGIN_KEY}",
-                scope: logScopes.queueAdapter,
-                data: {
-                    error: error instanceof Error ? error.message : String(error),
-                    stack: error instanceof Error ? error.stack : undefined,
-                },
-            });
-            message.retry();
-        }
-    }
-} finally {
-    await invocation.destroy();
-}`,
-					},
-				];
-
 				return {
 					error: undefined,
 					data: {
 						artifacts: [
 							{
-								type: "cloudflare:worker-export",
+								type: "cloudflare:worker-handler",
 								custom: {
-									imports,
-									exports,
+									event: "queue",
+									module: "@lucidcms/plugin-cloudflare-queues/worker",
 								},
-							} satisfies RuntimeBuildArtifactCustom<CloudflareWorkerExportArtifact>,
+							} satisfies RuntimeBuildArtifactCustom<CloudflareWorkerHandlerArtifact>,
 						],
 					},
 				};

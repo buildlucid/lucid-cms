@@ -1,22 +1,31 @@
-import { unlink } from "node:fs/promises";
-import {
-	getConfigArtifactImportPaths,
-	prepareConfigArtifacts,
-} from "@lucidcms/core/build";
+import { buildModuleId } from "@lucidcms/core/build";
 import type {
 	BuildHandler,
+	BundlerPlugin,
 	RuntimePrepareArtifacts,
 } from "@lucidcms/core/types";
-import { build } from "rolldown";
 import constants from "../constants.js";
 import getRuntimeContext from "../services/get-runtime-context.js";
-import prepareMainWorkerEntry from "../services/prepare-worker-entry.js";
-import writeWorkerEntries from "../services/write-worker-entries.js";
+import renderWorkerHandlers from "../services/render-worker-handlers.js";
 import writeWranglerConfig from "../services/write-wrangler-config.js";
 import type { AdapterOptions } from "../types.js";
 import toDisplayPath from "../utils/path-to-display.js";
 import replaceImportMetaUrl from "../utils/replace-import-meta-url.js";
 
+/** Workers lack `import.meta.url`, so replace expressions introduced by the bundler while preserving string literals. */
+const importMetaUrlPolyfill: BundlerPlugin = {
+	name: "runtime-cloudflare:import-meta-url",
+	renderChunk(code) {
+		if (!code.includes("import.meta.url")) return null;
+		return replaceImportMetaUrl(
+			code,
+			this.parse(code),
+			`"file:///${constants.ENTRY}.js"`,
+		);
+	},
+};
+
+/** Writes the build's Wrangler config and describes the Worker for Lucid to bundle into a single module. */
 const buildCommand =
 	(
 		options: AdapterOptions | undefined,
@@ -31,121 +40,50 @@ const buildCommand =
 			},
 		);
 
-		try {
-			const wranglerConfig = await writeWranglerConfig({
-				configPath,
-				outputPath,
-				options,
-				prepareArtifacts,
-				target: "build",
-			});
-			if (wranglerConfig.generatedConfigPath) {
-				logger.instance.info(
-					"Wrangler config generated:",
-					logger.instance.color.green(
-						toDisplayPath(wranglerConfig.generatedConfigPath),
-					),
-					{
-						silent: logger.silent,
-					},
-				);
-			}
-
-			const configArtifacts = await prepareConfigArtifacts({
-				configPath,
-				outputPath,
-			});
-			const configArtifactImports = getConfigArtifactImportPaths(".");
-			const configIsTs = configPath.endsWith(".ts");
-			const extension = configIsTs ? "ts" : "js";
-
-			const mainWorkerEntry = prepareMainWorkerEntry(
-				configArtifactImports,
-				buildArtifacts.custom,
-			);
-
-			const entryFilepath = `${outputPath}/temp-entry.${extension}`;
-
-			const tempFiles = await writeWorkerEntries([
-				{
-					filepath: entryFilepath,
-					...mainWorkerEntry,
-				},
-			]);
-
-			//* build files
-			await Promise.all(
-				Object.entries({
-					[constants.ENTRY_FILE]: entryFilepath,
-					...buildArtifacts.compile,
-				}).map(async ([key, inputPath]) => {
-					const result = await build({
-						input: { [key]: inputPath },
-						output: {
-							dir: outputPath,
-							format: "esm",
-							minify: true,
-							codeSplitting: false,
-						},
-						platform: "node",
-						resolve: {
-							alias: {
-								"cross-fetch": "cross-fetch/dist/browser-ponyfill.js",
-							},
-						},
-						plugins: [
-							{
-								// Workers lack `import.meta.url`, so replace expressions introduced by Rolldown while preserving string literals.
-								name: "import-meta-polyfill",
-								renderChunk(code) {
-									if (!code.includes("import.meta.url")) return null;
-									return replaceImportMetaUrl(
-										code,
-										this.parse(code),
-										'"file:///server.js"',
-									);
-								},
-							},
-						],
-					});
-					// The minifier writes nothing for code it can't parse, rather than failing.
-					const empty = result.output.find(
-						(chunk) => chunk.type === "chunk" && chunk.code.length === 0,
-					);
-					if (empty) {
-						throw new Error(
-							`The Cloudflare build wrote an empty ${empty.fileName}.`,
-						);
-					}
-				}),
-			);
-
-			//* cleanup temp files
-			await Promise.all(
-				[
-					...tempFiles,
-					...Object.values(configArtifacts),
-					...Object.values(buildArtifacts.compile),
-				].map((file) => unlink(file)),
-			);
-
-			return {
-				runtimeContext: getRuntimeContext({
-					server: "cloudflare",
-					compiled: true,
-				}),
-			};
-		} catch (error) {
-			logger.instance.error(
-				error instanceof Error
-					? error.message
-					: "An error occurred building via the Cloudflare Worker Adapter",
+		const wranglerConfig = await writeWranglerConfig({
+			configPath,
+			outputPath,
+			options,
+			prepareArtifacts,
+			target: "build",
+		});
+		if (wranglerConfig.generatedConfigPath) {
+			logger.instance.info(
+				"Wrangler config generated:",
+				logger.instance.color.green(
+					toDisplayPath(wranglerConfig.generatedConfigPath),
+				),
 				{
 					silent: logger.silent,
 				},
 			);
-			throw error;
 		}
+
+		const workerHandlers = renderWorkerHandlers(buildArtifacts.custom);
+
+		return {
+			entries: {
+				[constants.ENTRY]: `import build from "${buildModuleId}";
+import { createWorker } from "@lucidcms/runtime-cloudflare/entry";
+${workerHandlers.imports}
+
+export default createWorker(build, ${workerHandlers.handlers});
+`,
+			},
+			bundle: {
+				// Resolve packages' Worker builds, as Wrangler does, rather than their Node builds.
+				conditions: ["workerd", "worker", "import", "default"],
+				splitting: false,
+				alias: {
+					"cross-fetch": "cross-fetch/dist/browser-ponyfill.js",
+				},
+				plugins: [importMetaUrlPolyfill],
+			},
+			runtimeContext: getRuntimeContext({
+				server: "cloudflare",
+				compiled: true,
+			}),
+		};
 	};
 
 export default buildCommand;

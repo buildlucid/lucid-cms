@@ -2,9 +2,7 @@ import path from "node:path";
 import type { PrepareHandler } from "@lucidcms/core/types";
 import writeWranglerConfig from "../services/write-wrangler-config.js";
 import type { AdapterOptions, PreparedWranglerConfig } from "../types.js";
-
-const toDisplayPath = (filePath: string) =>
-	`/${path.relative(process.cwd(), filePath).split(path.sep).join("/")}`;
+import toDisplayPath from "../utils/path-to-display.js";
 
 const prepareCommand =
 	(

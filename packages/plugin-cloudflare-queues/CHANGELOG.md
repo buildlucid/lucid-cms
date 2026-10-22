@@ -1,5 +1,9 @@
 # @lucidcms/plugin-cloudflare-queues
 
+## v1.3.0 (unreleased)
+
+- Moved the queue consumer into a typed Worker handler module, which now applies `configure` and plugin data.
+
 ## v1.2.0
 
 - Updated Cloudflare Queue messages to carry durable job IDs while core owns payloads, retries, cancellation and job state.

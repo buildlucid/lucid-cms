@@ -29,6 +29,7 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
+		runtimeEntrypoint: "@lucidcms/runtime-node/runtime",
 		hosts: {
 			astro: {
 				entrypoint: "@lucidcms/runtime-node/astro",

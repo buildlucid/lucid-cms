@@ -7,6 +7,12 @@ export const LucidLink = Link.extend({
 	addAttributes() {
 		return {
 			...this.parent?.(),
+			class: {
+				default: this.options.HTMLAttributes.class,
+				// Server DOMs such as linkedom return "" for a missing class, so check it exists first.
+				parseHTML: (element) =>
+					element.hasAttribute("class") ? element.getAttribute("class") : null,
+			},
 			kind: {
 				default: "external",
 				parseHTML: (element) =>

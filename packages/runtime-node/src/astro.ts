@@ -33,7 +33,7 @@ const nodeAstroBridge = {
 			databaseScope: "runtime" as const,
 			runtimeContext: {
 				...runtimeContext,
-				configEntryPoint: null,
+				buildModule: null,
 				getConnectionInfo: (context: LucidHonoContext) => {
 					const address = resolveRemoteAddress(context.req.raw);
 					return {

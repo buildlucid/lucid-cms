@@ -74,7 +74,7 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 		c.set("runtimeContext", {
 			runtime: "test",
 			compiled: false,
-			configEntryPoint: null,
+			buildModule: null,
 			getConnectionInfo: () => ({}),
 		});
 		c.set("translationStore", translationStore);

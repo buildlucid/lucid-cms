@@ -9,9 +9,9 @@ export const DEFAULT_IMAGES_BINDING = "LUCID_IMAGES";
 export const DEFAULT_COMPATIBILITY_DATE = "2026-06-30";
 
 export default {
-	CONFIG_FILE: "lucid.config.js",
-	ENTRY_FILE: "server",
-	WORKER_EXPORT_ARTIFACT_TYPE: "cloudflare:worker-export",
+	/** Output path of the Worker entry, without an extension. */
+	ENTRY: "server",
+	WORKER_HANDLER_ARTIFACT_TYPE: "cloudflare:worker-handler",
 	WRANGLER_CONFIG_ARTIFACT_TYPE: "cloudflare:wrangler",
 	WRANGLER_DEV_CONFIG_FILE: "wrangler.lucid.jsonc",
 	WRANGLER_BUILD_CONFIG_FILE: "wrangler.jsonc",

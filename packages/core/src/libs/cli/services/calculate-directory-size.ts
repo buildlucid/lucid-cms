@@ -1,7 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const calculateOutDirSize = async (dirPath: string): Promise<number> => {
+/** Sums the size of every file in a directory, in bytes. */
+const calculateDirectorySize = async (dirPath: string): Promise<number> => {
 	let totalSize = 0;
 
 	const calculateSize = async (currentPath: string): Promise<void> => {
@@ -21,4 +22,4 @@ const calculateOutDirSize = async (dirPath: string): Promise<number> => {
 	return totalSize;
 };
 
-export default calculateOutDirSize;
+export default calculateDirectorySize;

@@ -17,6 +17,8 @@ const RuntimeAdapterSchema = z.object({
 			customPrepareArtifacts: z.array(z.string()).optional(),
 		})
 		.optional(),
+	/** Module exporting the runtime without CLI tooling, such as `@lucidcms/runtime-node/runtime`, which replaces the package's main entry in built output. */
+	runtimeEntrypoint: z.string().optional(),
 	lucid: z.string(),
 });
 

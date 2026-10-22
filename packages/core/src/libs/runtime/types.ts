@@ -1,4 +1,5 @@
 import type { AddressInfo } from "node:net";
+import type { Plugin as RolldownPlugin } from "rolldown";
 import type z from "zod";
 import type { LucidHonoContext } from "../../exports/types.js";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
@@ -6,17 +7,11 @@ import type { CLILogger } from "../cli/logger.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { DatabaseAdapterFactory } from "../db/adapter-factory.js";
 import type { RenderedTemplates } from "../email/types.js";
-import type { TranslationStore } from "../i18n/types.js";
+import type { TranslationBundles, TranslationStore } from "../i18n/types.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
 export type RuntimeBuildArtifactFile = {
 	type: "file";
-	path: string;
-	content: string;
-};
-
-export type RuntimeBuildArtifactCompile = {
-	type: "compile";
 	path: string;
 	content: string;
 };
@@ -34,7 +29,6 @@ export type RuntimeArtifactCustom<T = unknown> = {
 
 export type RuntimeBuildArtifact =
 	| RuntimeBuildArtifactFile
-	| RuntimeBuildArtifactCompile
 	| RuntimeBuildArtifactCustom;
 
 export type RuntimeArtifactProvider =
@@ -79,32 +73,69 @@ export type ServeHandler = (props: {
 
 export type RuntimeBuildArtifacts = {
 	/**
-	 * Artifacts that plugins have marked as to be compiled. The key being the output, and the value being the input path.
-	 */
-	compile: Record<string, string>;
-	/**
 	 * Custom artifacts that are specific to the runtime adapter.
 	 */
 	custom: Array<RuntimeBuildArtifactCustom>;
 };
 
+/** A Rollup-compatible plugin for the server bundle. */
+export type BundlerPlugin = RolldownPlugin;
+
+/** Options for Lucid to bundle runtime server entries with its own bundler and defaults. */
+export type RuntimeBundleOptions = {
+	/** Target platform, defaulting to `node`. */
+	platform?: "node" | "browser" | "neutral";
+	/** Package export conditions replacing the platform's defaults, such as `workerd`. */
+	conditions?: string[];
+	/** Package imports use `bundle` by default or load from `node_modules` at runtime with `external`. */
+	packages?: "bundle" | "external";
+	/** Build data such as translations and plugin build modules defaults to `bundle`, inlining and removing originals, while `external` loads it from build output at runtime. */
+	buildData?: "bundle" | "external";
+	/** Controls shared chunks, defaulting to `true`; `false` bundles each entry separately for platforms that run a single module. */
+	splitting?: boolean;
+	/** Module specifiers to replace, such as a browser build of a Node-only package. */
+	alias?: Record<string, string>;
+	/** Plugins for transforms these options don't cover. */
+	plugins?: BundlerPlugin[];
+};
+
+/** Server entries that Lucid bundles into the build output. */
+export type RuntimeBuild = {
+	/** Entry module sources keyed by extensionless output paths such as `server`, importing the built `LucidBuild` project from `lucid:build`. */
+	entries: Record<string, string>;
+	bundle?: RuntimeBundleOptions;
+	/** This should match the runtime context that the runtime adapter sets for the built output. */
+	runtimeContext: AdapterRuntimeContext;
+	/** Runs once the build has finished. */
+	onComplete?: () => Promise<void> | void;
+};
+
+/** The built project, which runtime entries import from `lucid:build`. */
+export type LucidBuild = {
+	/** Spread into `createLucidHost` alongside the runtime's own options. */
+	host: {
+		definition: LucidConfigDefinition;
+		envSchema?: z.ZodType;
+		translationBundles: TranslationBundles;
+		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates">;
+	};
+	/** Plugin CLI build data, keyed by plugin key. */
+	pluginData: Record<string, unknown>;
+	/** Plugin build module exports, keyed by plugin key. */
+	pluginModules: Record<string, unknown>;
+};
+
+/** Describes server entries for Lucid to bundle and writes supporting runtime files, such as platform configuration. */
 export type BuildHandler = (props: {
 	config: ResolvedLucidConfig;
-	translationStore: TranslationStore;
-	definition: LucidConfigDefinition;
 	configPath: string;
 	outputPath: string;
-	outputRelativeConfigPath: string;
 	buildArtifacts: RuntimeBuildArtifacts;
 	logger: {
 		instance: CLILogger;
 		silent: boolean;
 	};
-}) => Promise<{
-	onComplete?: () => Promise<void> | void;
-	/** This should match the runtime context that the runtime adpater would set for the built output when running your Lucid CMS instance */
-	runtimeContext: AdapterRuntimeContext;
-}>;
+}) => Promise<RuntimeBuild>;
 
 export type PrepareHandler = (props: {
 	configPath: string;
@@ -155,8 +186,8 @@ export type AdapterRuntimeContext = {
 	getConnectionInfo: (c: LucidHonoContext) => NetAddrInfo;
 	/** The support information for the runtime adapter */
 	support?: RuntimeSupport;
-	/** If the adapter bundles the config and server entry point separately, the path to the config file relative to the output directory */
-	configEntryPoint: string | null;
+	/** Path to an emitted `lucid:build` module relative to the build output, or null, for loading the project in another thread. */
+	buildModule: string | null;
 	/** Plugin CLI data keyed by plugin, from `dev` during development or builds otherwise, omitted for plugin commands. */
 	pluginData?: Record<string, unknown>;
 	/** Plugin CLI build module exports keyed by plugin, empty during development. */

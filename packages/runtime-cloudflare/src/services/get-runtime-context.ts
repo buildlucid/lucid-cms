@@ -59,7 +59,7 @@ const getRuntimeContext = (params: {
 				],
 			},
 		},
-		configEntryPoint: null,
+		buildModule: null,
 		pluginData: params.pluginData,
 		pluginModules: params.pluginModules,
 	}) satisfies AdapterRuntimeContext;

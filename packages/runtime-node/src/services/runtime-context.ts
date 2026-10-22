@@ -3,7 +3,7 @@ import type {
 	AdapterRuntimeContext,
 	LucidHonoContext,
 } from "@lucidcms/core/types";
-import { ADAPTER_KEY } from "../constants.js";
+import constants, { ADAPTER_KEY } from "../constants.js";
 
 /** Describes the runtime capabilities and request connection information. Set compiled to match whether source or built code is running. */
 const getRuntimeContext = (params: {
@@ -29,7 +29,7 @@ const getRuntimeContext = (params: {
 				],
 			},
 		},
-		configEntryPoint: "lucid/config.js",
+		buildModule: `${constants.BUILD_MODULE}.js`,
 		pluginData: params.pluginData,
 		pluginModules: params.pluginModules,
 	}) satisfies AdapterRuntimeContext;

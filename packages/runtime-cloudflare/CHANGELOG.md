@@ -1,5 +1,10 @@
 # @lucidcms/runtime-cloudflare
 
+## v1.4.0 (unreleased)
+
+- Builds are now bundled by Lucid, resolving packages' Worker builds for a smaller Worker.
+- Plugins add Worker event handlers as modules with `cloudflare:worker-handler` artifacts.
+
 ## v1.3.1
 
 - Stopped removing Wrangler and Miniflare process listeners outside their supported disposal lifecycles, preventing shared `signal-exit` state from becoming inconsistent.

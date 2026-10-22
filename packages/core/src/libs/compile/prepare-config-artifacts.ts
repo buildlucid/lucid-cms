@@ -9,10 +9,11 @@ import {
 	type PreparedConfigArtifacts,
 } from "./config-artifacts.js";
 
-const runtimeSafeImportPaths = new Map([
-	["@lucidcms/runtime-node", "@lucidcms/runtime-node/runtime"],
-	["@lucidcms/runtime-cloudflare", "@lucidcms/runtime-cloudflare/runtime"],
-]);
+/** Swaps the runtime package's main entry, which carries CLI tooling, for its runtime entrypoint. */
+type RuntimeImport = {
+	from: string;
+	to: string;
+};
 
 const artifactProperties = {
 	config: "config",
@@ -316,6 +317,13 @@ const renderImportSpecifier = (
 	return specifier.isTypeOnly ? `type ${importedName}` : importedName;
 };
 
+/** Reads the package name from a bare specifier, such as `@scope/name` from `@scope/name/runtime`. */
+const getPackageName = (specifier: string) =>
+	specifier
+		.split("/")
+		.slice(0, specifier.startsWith("@") ? 2 : 1)
+		.join("/");
+
 const ensureRelativeImportPath = (importPath: string) =>
 	importPath.startsWith(".") ? importPath : `./${importPath}`;
 
@@ -347,13 +355,22 @@ const rewriteRelativeImportPath = (props: {
 /**
  * Renders an import with only the specifiers required by a generated artifact.
  */
-const renderImport = (
-	sourceFile: ts.SourceFile,
-	statement: ts.ImportDeclaration,
-	neededIdentifiers: Set<string>,
-	target: ConfigArtifactKey,
-	outputPath: string,
-) => {
+const renderImport = (props: {
+	sourceFile: ts.SourceFile;
+	statement: ts.ImportDeclaration;
+	neededIdentifiers: Set<string>;
+	target: ConfigArtifactKey;
+	outputPath: string;
+	runtimeImport: RuntimeImport | undefined;
+}) => {
+	const {
+		sourceFile,
+		statement,
+		neededIdentifiers,
+		target,
+		outputPath,
+		runtimeImport,
+	} = props;
 	const importClause = statement.importClause;
 
 	if (!importClause) {
@@ -394,8 +411,8 @@ const renderImport = (
 		? statement.moduleSpecifier.text
 		: statement.moduleSpecifier.getText(sourceFile);
 	const runtimeSafeModulePath =
-		target === "runtime"
-			? (runtimeSafeImportPaths.get(modulePath) ?? modulePath)
+		target === "runtime" && modulePath === runtimeImport?.from
+			? runtimeImport.to
 			: modulePath;
 	const rewrittenModulePath = rewriteRelativeImportPath({
 		modulePath: runtimeSafeModulePath,
@@ -432,6 +449,7 @@ const renderArtifactSource = (props: {
 	sourceFile: ts.SourceFile;
 	target: ConfigArtifactKey;
 	outputPath: string;
+	runtimeImport: RuntimeImport | undefined;
 	expression?: ts.Expression | ts.MethodDeclaration;
 	configure?: ts.Expression | ts.MethodDeclaration;
 }) => {
@@ -454,13 +472,14 @@ const renderArtifactSource = (props: {
 	for (const statement of props.sourceFile.statements) {
 		if (!ts.isImportDeclaration(statement)) continue;
 
-		const rendered = renderImport(
-			props.sourceFile,
+		const rendered = renderImport({
+			sourceFile: props.sourceFile,
 			statement,
 			neededIdentifiers,
-			props.target,
-			props.outputPath,
-		);
+			target: props.target,
+			outputPath: props.outputPath,
+			runtimeImport: props.runtimeImport,
+		});
 
 		if (rendered) {
 			sections.push(rendered);
@@ -506,12 +525,11 @@ const renderArtifactSource = (props: {
 	return `${sections.join("\n\n")}\n`;
 };
 
-/**
- * Splits a defineConfig file into runtime, db, env and config modules.
- */
+/** Splits `defineConfig` into runtime, db, env and config modules, using `runtimeEntrypoint` when supplied to exclude runtime CLI tooling. */
 const prepareConfigArtifacts = async (props: {
 	configPath: string;
 	outputPath: string;
+	runtimeEntrypoint?: string;
 }): Promise<PreparedConfigArtifacts> => {
 	const source = await readFile(props.configPath, "utf-8");
 	const sourceFile = ts.createSourceFile(
@@ -532,6 +550,12 @@ const prepareConfigArtifacts = async (props: {
 		),
 		env: getExportedEnvExpression(sourceFile),
 	};
+	const runtimeImport = props.runtimeEntrypoint
+		? {
+				from: getPackageName(props.runtimeEntrypoint),
+				to: props.runtimeEntrypoint,
+			}
+		: undefined;
 	const artifacts = Object.fromEntries(
 		Object.entries(configArtifactEntries).map(([key, entry]) => [
 			key,
@@ -552,6 +576,7 @@ const prepareConfigArtifacts = async (props: {
 					sourceFile,
 					target,
 					outputPath: props.outputPath,
+					runtimeImport,
 					expression: expressions[target],
 					configure,
 				}),

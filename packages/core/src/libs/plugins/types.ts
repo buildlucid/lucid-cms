@@ -12,17 +12,12 @@ import type {
 	EnvironmentVariables,
 	LucidConfigDefinition,
 	RuntimeArtifactCustom,
-	RuntimeBuildArtifactCompile,
 	RuntimeBuildArtifactFile,
 } from "../runtime/types.js";
 import type { Toolkit, ToolkitDefinition } from "../toolkit/types.js";
 
 export type LucidPluginRuntimeHookResult = {
-	artifacts?: Array<
-		| RuntimeBuildArtifactFile
-		| RuntimeBuildArtifactCompile
-		| RuntimeArtifactCustom
-	>;
+	artifacts?: Array<RuntimeBuildArtifactFile | RuntimeArtifactCustom>;
 };
 
 export type LucidPluginHookInit = () => ServiceResponse<undefined>;

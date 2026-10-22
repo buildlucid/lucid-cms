@@ -461,7 +461,7 @@ const resolveConfig = async (props: {
 		"nodejs_compat",
 	]);
 	if (props.target === "build") {
-		config.main = `${constants.ENTRY_FILE}.js`;
+		config.main = `${constants.ENTRY}.js`;
 		config.assets = {
 			...(isObject(config.assets) ? config.assets : {}),
 			directory: "./public",

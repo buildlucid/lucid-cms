@@ -4,6 +4,7 @@ export default defineConfig({
 	entry: [
 		"src/index.ts",
 		"src/runtime.ts",
+		"src/entry.ts",
 		"src/astro.ts",
 		"src/astro-integration.ts",
 		"src/types.ts",

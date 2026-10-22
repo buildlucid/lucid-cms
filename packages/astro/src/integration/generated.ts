@@ -188,6 +188,7 @@ export const writeGeneratedModules = async (props: {
 	const configArtifacts = await prepareConfigArtifacts({
 		configPath: props.project.configPath,
 		outputPath: props.directory,
+		runtimeEntrypoint: props.project.loaded.adapter.runtimeEntrypoint,
 	});
 
 	const emailTemplatesSource = moduleSource(

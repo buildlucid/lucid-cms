@@ -1,35 +1,31 @@
 import type {
 	EnvironmentVariables,
+	LucidInvocation,
 	RuntimeAdapter,
 	RuntimePrepareArtifacts,
 } from "@lucidcms/core/types";
 import type { PlatformProxy } from "wrangler";
 
-/** Import to include in a generated Worker module. */
-export type CloudflareWorkerImport = {
-	path: string;
-	default?: string;
-	exports?: Array<
-		| string
-		| {
-				name: string;
-				as?: string;
-		  }
-	>;
+/** The Worker execution context passed to event handlers. */
+export type CloudflareExecutionContext = {
+	waitUntil(promise: Promise<unknown>): void;
+	passThroughOnException?: () => void;
 };
 
-/** Named Worker handler to generate from source text. */
-export type CloudflareWorkerExport = {
-	name: string;
-	content: string;
-	async?: boolean;
-	params?: string[];
-};
+/** Handles a Worker event, such as `queue`, with a Lucid invocation that lasts for the event. */
+export type CloudflareWorkerHandler<Event = unknown> = (props: {
+	event: Event;
+	env: EnvironmentVariables;
+	ctx: CloudflareExecutionContext;
+	invocation: LucidInvocation;
+}) => Promise<void>;
 
-/** Imports and handlers contributed by a plugin runtime hook. */
-export type CloudflareWorkerExportArtifact = {
-	imports: CloudflareWorkerImport[];
-	exports: CloudflareWorkerExport[];
+/** A Worker event handler contributed by a plugin runtime hook. */
+export type CloudflareWorkerHandlerArtifact = {
+	/** The Worker event, such as `queue`. Lucid handles `fetch` and `scheduled`. */
+	event: string;
+	/** Module whose default export is a `CloudflareWorkerHandler`. */
+	module: string;
 };
 
 export type CloudflareWranglerConfigArtifact = {

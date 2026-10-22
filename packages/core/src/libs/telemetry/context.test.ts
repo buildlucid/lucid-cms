@@ -7,7 +7,7 @@ const runtimeContext = {
 	runtime: "node",
 	host: "lucid",
 	compiled: false,
-	configEntryPoint: null,
+	buildModule: null,
 	getConnectionInfo: () => ({}),
 } satisfies AdapterRuntimeContext;
 

@@ -1,5 +1,10 @@
 # @lucidcms/runtime-node
 
+## v1.3.0 (unreleased)
+
+- Builds are now bundled by Lucid, with packages and build data loaded from disk.
+- Fixed scheduled jobs ignoring `urls.cms`.
+
 ## v1.2.2
 
 - Added minutely job scheduling to production Astro builds running on Node.

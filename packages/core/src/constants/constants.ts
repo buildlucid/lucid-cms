@@ -106,6 +106,14 @@ export default Object.freeze({
 	build: {
 		/** Folder in the build output, beside the server entry, for Lucid's generated config modules and data files. */
 		directory: "lucid",
+		/** The module runtime entries import the built project from. */
+		moduleId: "lucid:build",
+		/** Prefix for the virtual modules that hold each runtime entry's source while bundling. */
+		entryModulePrefix: "\0lucid:entry:",
+		/** Prefix `lucid:build` imports data files with, so the bundler can inline them or load them from the build output. */
+		dataModulePrefix: "lucid:build-data/",
+		/** Folder in `build.directory` for chunks shared between server entries. */
+		chunksDirectory: "chunks",
 		/** Files written into `build.directory` for compiled runtimes to import. */
 		dataFiles: {
 			emailTemplates: "email-templates.json",

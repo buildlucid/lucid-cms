@@ -20,6 +20,9 @@
 - `toolkit.documents` reads now match the content API.
 - `toolkit.media` lists need `include: ["transcripts"]` for audio transcripts.
 - Toolkit list reads (`documents`, `media`, `requests` and `users`) now return `items` with their `pagination` instead of `data` and `count`.
+- Runtime adapters' `cli.build` now returns entries and `bundle` settings for Lucid to bundle, instead of running their own bundler.
+- Removed `compile` build artifacts.
+- Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module.
 
 ### Bug Fixes:
 

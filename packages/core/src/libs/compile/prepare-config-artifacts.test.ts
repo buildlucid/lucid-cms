@@ -45,6 +45,7 @@ export default defineConfig({ runtime, db, config });
 		const artifacts = await prepareConfigArtifacts({
 			configPath,
 			outputPath,
+			runtimeEntrypoint: "@lucidcms/runtime-node/runtime",
 		});
 		const [config, db, runtime, envArtifact] = await Promise.all([
 			readFile(artifacts.config, "utf-8"),
