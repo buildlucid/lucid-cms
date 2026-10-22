@@ -1,10 +1,9 @@
 {# OAuth client metadata whose URL is the lab's client ID. #}
-{# Avoid content reads because the authorisation request fetching this document would wait on itself. #}
 {{ {
 	client_id: siteUrl ~ "/oauth-client.json",
 	client_name: "Lucid Playground",
 	...(siteUrl starts with "https:" ? { client_uri: siteUrl } : {}),
-	redirect_uris: ["en", "fr"]|map(code => siteUrl ~ "/" ~ code ~ "/lab/integrations"),
+	redirect_uris: locales()|map(item => siteUrl ~ "/" ~ item.code ~ "/lab/integrations"),
 	grant_types: ["authorization_code", "refresh_token"],
 	response_types: ["code"],
 	token_endpoint_auth_method: "none",

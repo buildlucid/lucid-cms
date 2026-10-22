@@ -66,8 +66,9 @@ const authorizeController = factory.createHandlers(
 			return c.json(oauthFormatter.formatError(error, context.translate));
 		}
 
+		// Avoid holding a connection during metadata fetches back to this server, since the service only writes one row.
 		const result = await serviceWrapper(oauthServices.startAuthorization, {
-			transaction: true,
+			transaction: false,
 			defaultError: { type: "basic" },
 		})(context, {
 			clientId: parsed.data.client_id,
