@@ -1,8 +1,5 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
-import type {
-	LucidPluginDefinition,
-	RuntimeBuildArtifactCustom,
-} from "@lucidcms/core/types";
+import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import type { CloudflareWorkerHandlerArtifact } from "@lucidcms/runtime-cloudflare/types";
 import cloudflareQueuesAdapter from "./adapter.js";
 import {
@@ -11,7 +8,7 @@ import {
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 import type { PluginOptions } from "./types.js";
-import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
+import { createBindingsArtifact } from "./utils/bindings-artifact.js";
 
 const validateOptions = (options: PluginOptions) => {
 	for (const [name, value] of [
@@ -38,7 +35,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 					return {
 						error: undefined,
 						data: {
-							artifacts: [createWranglerArtifact(resolvedOptions)],
+							artifacts: [createBindingsArtifact(resolvedOptions)],
 						},
 					};
 				}
@@ -53,7 +50,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 									event: "queue",
 									module: "@lucidcms/plugin-cloudflare-queues/worker",
 								},
-							} satisfies RuntimeBuildArtifactCustom<CloudflareWorkerHandlerArtifact>,
+							} satisfies CloudflareWorkerHandlerArtifact,
 						],
 					},
 				};

@@ -76,6 +76,10 @@ export default abstract class DatabaseAdapter {
 	abstract connect(
 		env?: EnvironmentVariables,
 	): DatabaseConnection | Promise<DatabaseConnection>;
+	/** Returns absolute local database paths, such as SQLite files, so development serving blocks them and `-wal`/`-shm` sidecars, or none for remote databases. */
+	async localFiles(_env?: EnvironmentVariables): Promise<string[]> {
+		return [];
+	}
 	/**
 	 * Return your Kysely DB's adapters jsonArrayFrom helper that aggregates a subquery into a JSON array
 	 */

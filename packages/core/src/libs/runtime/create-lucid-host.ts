@@ -15,9 +15,11 @@ import type { HttpExtension } from "../http/types.js";
 import prepareTranslations from "../i18n/prepare-translations.js";
 import type { TranslationBundles, TranslationStore } from "../i18n/types.js";
 import logger from "../logger/index.js";
+import type { LoggerOverride } from "../logger/types.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import type { Toolkit } from "../toolkit/types.js";
 import createLucidAdapters, {
+	type LucidAdapterInstances,
 	type LucidAdapterOverrides,
 } from "./create-lucid-adapters.js";
 import parseEnv from "./parse-env.js";
@@ -73,6 +75,8 @@ type CreateLucidHostSharedOptions = {
 	};
 	/** Determines who owns live database connections created by this host. */
 	databaseScope: DatabaseConnectionScope;
+	/** Replaces the config's logger when this host resolves its config. */
+	logger?: LoggerOverride;
 };
 
 /** Options used to create a Lucid instance within another framework or host. */
@@ -118,6 +122,8 @@ export type LucidHost = {
 	env?: EnvironmentVariables;
 	runtimeContext: AdapterRuntimeContext;
 	adapterKeys: AdapterKeys;
+	/** The host's initialized adapters, which it destroys with itself. */
+	adapters: LucidAdapterInstances;
 	translationStore: TranslationStore;
 	issues: Awaited<ReturnType<typeof createApp>>["issues"];
 	createInvocation(options?: {
@@ -144,22 +150,28 @@ const createLucidHost = async (
 					meta: options.meta,
 					processConfigOptions: {
 						skipValidation: true,
+						logger: options.logger,
 					},
 				});
+
 	const invocationEnvs = new WeakMap<
 		Record<string, unknown>,
 		EnvironmentVariables
 	>();
+
 	if (resolved.env) {
 		invocationEnvs.set(resolved.env, resolved.env);
 		if (resolved.rawEnv) invocationEnvs.set(resolved.rawEnv, resolved.env);
 	}
+
 	const resolveInvocationEnv = (
 		rawEnv: Record<string, unknown> | undefined,
 	) => {
 		if (!rawEnv) return resolved.env;
+
 		const cached = invocationEnvs.get(rawEnv);
 		if (cached) return cached;
+
 		const env =
 			parseEnv(
 				rawEnv,
@@ -169,6 +181,7 @@ const createLucidHost = async (
 		invocationEnvs.set(env, env);
 		return env;
 	};
+
 	const translationStore =
 		"translationStore" in options
 			? options.translationStore
@@ -219,6 +232,7 @@ const createLucidHost = async (
 				throw error;
 			});
 		}
+
 		return runtimeDatabasePromise;
 	};
 
@@ -238,6 +252,7 @@ const createLucidHost = async (
 					throw error;
 				});
 		}
+
 		return runtimeLucidDatabasePromise;
 	};
 
@@ -253,6 +268,7 @@ const createLucidHost = async (
 			email: adapters.instances.email.key,
 			database: resolved.config.db.adapter,
 		},
+		adapters: adapters.instances,
 		translationStore,
 		issues: app.issues,
 		createInvocation: (invocationOptions?: {
@@ -263,6 +279,7 @@ const createLucidHost = async (
 					message: "Cannot use a Lucid host after it has been destroyed.",
 				});
 			}
+
 			const env = resolveInvocationEnv(invocationOptions?.env);
 			let invocationDatabasePromise: Promise<DatabaseConnection> | undefined;
 			let invocationLucidDatabasePromise: Promise<LucidDatabase> | undefined;
@@ -279,9 +296,11 @@ const createLucidHost = async (
 							: "Cannot use a Lucid invocation after it has been destroyed.",
 					});
 				}
+
 				if (options.databaseScope === "runtime") {
 					return getRuntimeDatabase();
 				}
+
 				if (!invocationDatabasePromise) {
 					invocationDatabasePromise = Promise.resolve(
 						createDatabase(env),
@@ -290,6 +309,7 @@ const createLucidHost = async (
 						throw error;
 					});
 				}
+
 				return invocationDatabasePromise;
 			};
 
@@ -297,6 +317,7 @@ const createLucidHost = async (
 				if (options.databaseScope === "runtime") {
 					return getRuntimeLucidDatabase();
 				}
+
 				if (!invocationLucidDatabasePromise) {
 					invocationLucidDatabasePromise = getDatabase()
 						.then((database) =>
@@ -312,6 +333,7 @@ const createLucidHost = async (
 							throw error;
 						});
 				}
+
 				return invocationLucidDatabasePromise;
 			};
 
@@ -322,6 +344,7 @@ const createLucidHost = async (
 					getDatabase(),
 					getLucidDatabase(),
 				]);
+
 				return createServiceContext({
 					config: resolved.config,
 					database,
@@ -399,7 +422,9 @@ const createLucidHost = async (
 							while (backgroundTasks.size > 0) {
 								await Promise.all(backgroundTasks);
 							}
+
 							invocationDestroyed = true;
+
 							if (
 								options.databaseScope === "invocation" &&
 								invocationDatabasePromise
@@ -416,6 +441,7 @@ const createLucidHost = async (
 							activeInvocations.delete(invocation);
 						}
 					})();
+
 					return invocationDestroyPromise;
 				},
 			};
@@ -426,9 +452,11 @@ const createLucidHost = async (
 		destroy: async () => {
 			destroyPromise ??= (async () => {
 				destroyed = true;
+
 				await Promise.allSettled(
 					Array.from(activeInvocations, (invocation) => invocation.destroy()),
 				);
+
 				const [databaseResult] = await Promise.allSettled([
 					runtimeDatabasePromise,
 				]);
@@ -436,12 +464,14 @@ const createLucidHost = async (
 					databaseResult.status === "fulfilled"
 						? databaseResult.value
 						: undefined;
+
 				await Promise.allSettled([
 					app.destroy(),
 					adapters.destroy(),
 					database?.destroy(),
 				]);
 			})();
+
 			return destroyPromise;
 		},
 	} satisfies LucidHost;

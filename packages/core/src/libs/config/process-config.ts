@@ -8,6 +8,7 @@ import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { getJobRegistry } from "../jobs/registry.js";
 import { initializeLogger } from "../logger/index.js";
+import type { LoggerOverride } from "../logger/types.js";
 import { getCapabilityRegistry } from "../permission/capabilities.js";
 import type { ConfigTransform } from "../runtime/types.js";
 import checkAdminRoutes from "./checks/check-admin-routes.js";
@@ -47,6 +48,7 @@ const processConfig = async (
 		mode?: "runtime" | "build";
 		resolvedDb?: DatabaseAdapter;
 		configure?: ConfigTransform;
+		logger?: LoggerOverride;
 	},
 ): Promise<ResolvedLucidConfig> => {
 	if (Object.hasOwn(config, "db")) {
@@ -55,6 +57,7 @@ const processConfig = async (
 				"Lucid config must not define `config.db`. Move your database adapter to the top-level `db` property passed to defineConfig().",
 		});
 	}
+
 	if (!options?.resolvedDb) {
 		throw new LucidError({
 			message:
@@ -195,8 +198,8 @@ const processConfig = async (
 	}
 
 	await initializeLogger({
-		transport: configRes.logger.transport,
-		level: configRes.logger.level,
+		transport: options?.logger?.transport ?? configRes.logger.transport,
+		level: options?.logger?.level ?? configRes.logger.level,
 	});
 
 	return configRes;

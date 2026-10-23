@@ -1,148 +1,63 @@
-import path from "node:path";
-import { createTranslator, LucidError } from "@lucidcms/core";
+import { LucidError } from "@lucidcms/core/runtime";
 import {
-	checkAllPluginsCompatibility,
-	loadBuildProject,
-	migrateCommand,
-} from "@lucidcms/core/build";
-import type {
-	LucidAstroBridge,
-	LucidAstroIntegrationBridge,
-} from "../types.js";
+	findLucidViteApi,
+	importDefaultExport,
+	type LucidViteProject,
+} from "@lucidcms/core/vite";
+import type { PluginOption } from "vite";
+import type { LucidAstroIntegrationBridge } from "../types.js";
 
-type BuildProject = Awaited<ReturnType<typeof loadBuildProject>>;
-
-/** Fully resolved Lucid project state used by the Astro integration hooks. */
-export type ResolvedLucidProject = BuildProject & {
-	bridge: LucidAstroBridge;
+/** The Lucid project Astro serves, with the runtime adapter's Astro bridges. */
+export type ResolvedLucidProject = {
+	/** The project Lucid's Vite plugin loaded. */
+	lucid: LucidViteProject;
+	/** The runtime's Astro integration, which adds platform Vite settings and checks Astro's adapter. */
 	integrationBridge: LucidAstroIntegrationBridge;
+	/** The runtime's request bridge, which Lucid's runtime module serves Astro requests through. */
 	bridgeEntrypoint: string;
+	/** Identifies the project's hosts across reloads. */
 	hostId: string;
 };
 
-const loadBridge = async (entrypoint: string): Promise<LucidAstroBridge> => {
-	const module = (await import(
-		/* @vite-ignore */
-		entrypoint
-	)) as {
-		default?: LucidAstroBridge;
-	};
-	const bridge = module.default;
+const isIntegrationBridge = (
+	value: unknown,
+): value is LucidAstroIntegrationBridge =>
+	typeof value === "object" &&
+	value !== null &&
+	"validateAdapter" in value &&
+	typeof value.validateAdapter === "function";
 
-	if (
-		!bridge ||
-		typeof bridge.resolveRuntime !== "function" ||
-		typeof bridge.handle !== "function"
-	) {
-		throw new LucidError({
-			message: `The runtime Astro bridge at ${entrypoint} is invalid.`,
-		});
-	}
-
-	return bridge;
-};
-
-/** Loads the Lucid project and the configured runtime's Astro bridges. */
-export const loadProject = async (
-	configPath: string,
+/** Reads the project from the plugins `lucid()` returned and loads the runtime's Astro integration. */
+const loadProject = async (
+	plugins: PluginOption[],
 ): Promise<ResolvedLucidProject> => {
-	const project = await loadBuildProject({
-		configPath,
-		silent: true,
-		collectConfigDependencies: true,
-		validateEnv: true,
-		prepareRuntime: true,
-		loadEmailTemplates: true,
+	const { project } = findLucidViteApi(plugins);
+	const { adapter } = project;
+	const bridgeEntrypoint = adapter.hosts?.astro?.entrypoint;
+	const integrationEntrypoint = adapter.hosts?.astro?.integrationEntrypoint;
+	if (!bridgeEntrypoint || !integrationEntrypoint) {
+		throw new LucidError({
+			message: `The ${adapter.key} runtime does not support Astro.`,
+		});
+	}
+
+	// Resolved from the project, which depends on the runtime, rather than from this package.
+	const integrationBridge = await importDefaultExport(integrationEntrypoint, {
+		projectRoot: project.projectRoot,
+		label: `The Astro integration of the ${adapter.key} runtime`,
 	});
-	const bridgeEntrypoint = project.loaded.adapter.hosts?.astro?.entrypoint;
-	const integrationEntrypoint =
-		project.loaded.adapter.hosts?.astro?.integrationEntrypoint;
-
-	if (!bridgeEntrypoint) {
+	if (!isIntegrationBridge(integrationBridge)) {
 		throw new LucidError({
-			message: `The ${project.loaded.adapter.key} runtime does not expose an Astro bridge.`,
-		});
-	}
-
-	if (!project.emailTemplates) {
-		throw new LucidError({
-			message: "Lucid could not prepare the Astro email templates.",
-		});
-	}
-
-	const bridge = await loadBridge(bridgeEntrypoint);
-	const integrationModule = integrationEntrypoint
-		? ((await import(
-				/* @vite-ignore */
-				integrationEntrypoint
-			)) as {
-				default?: LucidAstroIntegrationBridge;
-			})
-		: undefined;
-	const integrationBridge =
-		integrationModule?.default ??
-		(bridge as unknown as LucidAstroIntegrationBridge);
-
-	if (typeof integrationBridge.validateAdapter !== "function") {
-		throw new LucidError({
-			message: `The runtime Astro integration bridge for ${project.loaded.adapter.key} is invalid.`,
+			message: `The Astro integration of the ${adapter.key} runtime is invalid.`,
 		});
 	}
 
 	return {
-		...project,
-		bridge,
+		lucid: project,
 		integrationBridge,
 		bridgeEntrypoint,
-		hostId: `${path.resolve(configPath)}:${project.loaded.adapter.key}`,
-	} satisfies ResolvedLucidProject;
+		hostId: `${project.configPath}:${adapter.key}`,
+	};
 };
 
-/** Checks Lucid plugin compatibility against the hosted runtime context. */
-export const checkProjectCompatibility = async (
-	project: ResolvedLucidProject,
-	compiled: boolean,
-) => {
-	const state = await project.bridge.resolveRuntime({
-		adapter: project.loaded.adapter,
-		fallbackEnv: project.loaded.rawEnv,
-		compiled,
-	});
-	await checkAllPluginsCompatibility({
-		config: project.loaded.config,
-		translate: createTranslator({
-			store: project.loaded.translationStore,
-			locale: "en",
-		}),
-		runtimeContext: state.runtimeContext,
-	});
-};
-
-/** Runs Lucid migrations and sync tasks before the Astro development server starts. */
-export const bootstrapDevProject = async (
-	project: ResolvedLucidProject,
-	options?: Pick<NonNullable<Parameters<typeof migrateCommand>[0]>, "onPrompt">,
-) => {
-	const state = await project.bridge.resolveRuntime({
-		adapter: project.loaded.adapter,
-		fallbackEnv: project.loaded.rawEnv,
-		compiled: false,
-	});
-	const result = await migrateCommand({
-		config: project.loaded.config,
-		migrationFiles: project.loaded.resources.files.migrations,
-		env: project.loaded.env,
-		runtimeContext: state.runtimeContext,
-		translationStore: project.loaded.translationStore,
-		mode: "return",
-		onPrompt: options?.onPrompt,
-	})({
-		skipSyncSteps: false,
-	});
-
-	if (!result) {
-		throw new LucidError({
-			message: "Lucid could not prepare the schema for Astro dev.",
-		});
-	}
-};
+export default loadProject;

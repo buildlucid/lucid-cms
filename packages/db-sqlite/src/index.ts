@@ -1,3 +1,4 @@
+import path from "node:path";
 import {
 	createDatabaseAdapterCreator,
 	DatabaseAdapter,
@@ -28,7 +29,9 @@ import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
-import normalizeSQLiteConfig from "./utils/normalize-config.js";
+import normalizeSQLiteConfig, {
+	DEFAULT_SQLITE_DATABASE,
+} from "./utils/normalize-config.js";
 
 /** Database adapter for SQLite. Prefer the sqlite factory in project config. */
 export class SQLiteAdapter extends DatabaseAdapter {
@@ -65,6 +68,18 @@ export class SQLiteAdapter extends DatabaseAdapter {
 			client,
 			destroy: () => client.destroy(),
 		};
+	}
+	/** The database file, resolved from the working directory as SQLite opens it, unless it's in memory or temporary. */
+	async localFiles(env: EnvironmentVariables = {}): Promise<string[]> {
+		const options =
+			typeof this.#options === "function"
+				? await this.#options(env)
+				: this.#options;
+		const database = options.database ?? DEFAULT_SQLITE_DATABASE;
+		if (typeof database !== "string") return [];
+		if (database === "" || database === ":memory:") return [];
+
+		return [path.resolve(database)];
 	}
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
@@ -265,12 +280,14 @@ export class SQLiteAdapter extends DatabaseAdapter {
 					foreignKeyMap.set(key, foreignKey);
 					table.foreignKeys = [...(table.foreignKeys ?? []), foreignKey];
 				}
+
 				foreignKey.columns[row.fk_seq] = row.name;
 				foreignKey.references[row.fk_seq] = row.fk_column;
 			}
 		}
 
 		const indexMap = new Map<string, InferredIndex>();
+
 		for (const row of indexRes.rows) {
 			const table = tableMap.get(row.table_name);
 			if (!table) continue;

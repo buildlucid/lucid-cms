@@ -10,7 +10,6 @@ const getRuntimeContext = (params: {
 	compiled: boolean;
 	/** Defaults to `lucid`, Lucid's own server. */
 	host?: string;
-	pluginData?: Record<string, unknown>;
 	pluginModules?: Record<string, unknown>;
 }) =>
 	({
@@ -30,7 +29,6 @@ const getRuntimeContext = (params: {
 			},
 		},
 		buildModule: `${constants.BUILD_MODULE}.js`,
-		pluginData: params.pluginData,
 		pluginModules: params.pluginModules,
 	}) satisfies AdapterRuntimeContext;
 

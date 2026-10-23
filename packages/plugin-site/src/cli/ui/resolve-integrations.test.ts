@@ -27,15 +27,4 @@ describe("resolveIntegrations", () => {
 			/The react and solid UI integrations both handle .jsx, .tsx files/,
 		);
 	});
-
-	test("lists the packages holding the renderers, skipping paths", () => {
-		const local = {
-			...jsx("lit"),
-			extensions: [".ts"],
-			server: "./lit/server.js",
-		};
-		expect(resolveIntegrations([jsx("react"), local]).packages).toEqual([
-			"@acme/site-react",
-		]);
-	});
 });

@@ -25,6 +25,7 @@ const withConfigLoader = async <T>(
 	const files = new Set<string>();
 	nativeLoads.set(loader, files);
 	const revision = randomUUID();
+
 	// Jiti delegates .mjs and ESM .js to Node, whose cache is separate from require.cache.
 	const hooks = registerHooks({
 		resolve(specifier, context, nextResolve) {
@@ -36,8 +37,10 @@ const withConfigLoader = async <T>(
 					specifier.startsWith("file:") ||
 					path.isAbsolute(specifier)
 				)
-			)
+			) {
 				return resolved;
+			}
+
 			const url = new URL(resolved.url);
 			const filename = fileURLToPath(url);
 			const parentIsLocal =
@@ -50,21 +53,29 @@ const withConfigLoader = async <T>(
 				!relative.startsWith(`..${path.sep}`) &&
 				!path.isAbsolute(relative);
 			if (!parentIsLocal && !inProject) return resolved;
+
 			files.add(filename);
 			url.searchParams.set("lucid-reload", revision);
 			return { ...resolved, url: url.href };
 		},
 	});
+
 	try {
 		return await run(loader);
 	} finally {
 		hooks.deregister();
 		nativeLoads.delete(loader);
+
 		// Native imports can still depend on CommonJS cache entries after config loading.
 		// Reload project files while retaining installed dependencies and their shared exports.
-		for (const file of Object.keys(loader.cache))
-			if (!previous.has(file) && !file.split(path.sep).includes("node_modules"))
+		for (const file of Object.keys(loader.cache)) {
+			if (
+				!previous.has(file) &&
+				!file.split(path.sep).includes("node_modules")
+			) {
 				delete loader.cache[file];
+			}
+		}
 	}
 };
 

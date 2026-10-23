@@ -3,8 +3,9 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
 	entry: [
 		"src/index.ts",
-		"src/runtime.ts",
 		"src/entry.ts",
+		"src/handler.ts",
+		"src/vite.ts",
 		"src/astro.ts",
 		"src/astro-integration.ts",
 		"src/types.ts",
@@ -15,4 +16,8 @@ export default defineConfig({
 	sourcemap: true,
 	clean: true,
 	metafile: true,
+	deps: {
+		// The Astro bridges only check their types against Lucid's Astro integration, which is what loads them.
+		neverBundle: [/^@lucidcms\/astro\//],
+	},
 });

@@ -9,9 +9,9 @@ import {
 } from "./constants.js";
 import routes from "./routes/index.js";
 import type { PluginOptions } from "./types.js";
-import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
+import { createBindingsArtifact } from "./utils/bindings-artifact.js";
 
-/** Stores media in Cloudflare R2 and contributes bucket bindings to generated Wrangler config. */
+/** Stores media in Cloudflare R2 and adds the bucket binding to the Worker. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	const resolvedOptions = pluginOptions ?? {};
 
@@ -24,7 +24,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 				data: {
 					artifacts:
 						phase === "prepare"
-							? [createWranglerArtifact(resolvedOptions)]
+							? [createBindingsArtifact(resolvedOptions)]
 							: [],
 				},
 			}),

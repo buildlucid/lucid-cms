@@ -10,18 +10,23 @@ const getEnvVars = async ({
 }): Promise<EnvironmentVariables> => {
 	try {
 		const { config } = await import("dotenv");
+		const loaded = new Set(Object.keys(process.env));
 		const result = config({
 			quiet: true,
 		});
 
 		if (result.parsed) {
+			// Lucid loads the env more than once per process, such as for a command and its dev server, so it reports the
+			// file only when it adds variables.
+			const added = Object.keys(result.parsed).some((key) => !loaded.has(key));
 			const envFile = process.env.DOTENV_CONFIG_PATH || ".env";
+
 			logger.instance.info(
 				"Loading environment variables from",
 				logger.instance.color.blue(envFile),
 				"file",
 				{
-					silent: logger.silent,
+					silent: logger.silent || !added,
 				},
 			);
 		} else if (result.error) {

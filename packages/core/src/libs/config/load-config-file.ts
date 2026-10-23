@@ -2,8 +2,9 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { ZodType } from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
-import { LucidError } from "../../utils/errors/index.js";
 import cliLogger from "../cli/logger.js";
+import loadEmailTemplates from "../email/templates/load-email-templates.js";
+import type { RenderedTemplates } from "../email/types.js";
 import {
 	emptyPreparedResources,
 	prepareResources,
@@ -14,8 +15,6 @@ import type {
 	EnvironmentVariables,
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
-	RuntimeAdaptConfig,
-	RuntimeAdaptConfigModule,
 	RuntimeAdapter,
 } from "../runtime/types.js";
 import getConfigPath from "./get-config-path.js";
@@ -37,19 +36,22 @@ export type LoadConfigResult = {
 	/** Original values for integrations that create another runtime host. */
 	rawEnv: Record<string, unknown> | undefined;
 	definition: LucidConfigDefinition;
+	/** The project's email templates, which the resolved config renders emails with. */
+	emailTemplates: RenderedTemplates;
 };
 
-export const loadConfigFile = async (props?: {
+const loadConfigFile = async (props?: {
 	path?: string;
 	silent?: boolean;
-	adaptConfigPath?: string;
 	meta?: LucidConfigDefinitionMeta;
 	/** Collects local config imports for development watchers. */
 	collectConfigDependencies?: boolean;
-	prepareRuntime?: boolean;
+	/** False keeps env values the schema rejects raw, rather than failing, for reading the config in Node. */
 	validateEnvSchema?: boolean;
 	/** Overrides the named env export before raw environment values are parsed. */
 	envSchema?: ZodType;
+	/** Loads environment values once the adapter resolves, instead of the adapter's own `getEnvVars`. */
+	loadEnv?: Parameters<typeof resolveConfigDefinition>[0]["loadEnv"];
 	processConfigOptions?: Parameters<
 		typeof resolveConfigDefinition
 	>[0]["processConfigOptions"];
@@ -71,41 +73,25 @@ export const loadConfigFile = async (props?: {
 				specifier: importPath,
 				dependencyEntryPath: collectConfigDependencies ? configPath : undefined,
 			});
+
 		const hasNamedEnvExport = Object.hasOwn(configModule, "env");
-		let adaptConfig: RuntimeAdaptConfig | undefined;
-
-		if (props?.adaptConfigPath) {
-			// Use Jiti here so host wrappers stay outside consumer bundler graphs.
-			const { module: adaptConfigModule } = await loadConfigModule<
-				Partial<RuntimeAdaptConfigModule> & {
-					default?: RuntimeAdaptConfig;
-				}
-			>({
-				loader: jiti,
-				specifier: props.adaptConfigPath,
-			});
-			adaptConfig = adaptConfigModule.adaptConfig ?? adaptConfigModule.default;
-
-			if (typeof adaptConfig !== "function") {
-				throw new LucidError({
-					message: `Lucid could not load the adaptConfig() export from "${props.adaptConfigPath}".`,
-				});
-			}
-		}
-
 		let resources = emptyPreparedResources();
+
+		// Runtimes apply `meta.emailTemplates` while processing the config, after the raw config reveals its resources.
+		const meta: LucidConfigDefinitionMeta = { ...props?.meta };
 		const resolved = await resolveConfigDefinition({
 			onRawConfig: async (config) => {
 				resources = await prepareResources(config, projectRoot);
+				meta.emailTemplates ??= await loadEmailTemplates({
+					files: resources.files.emails,
+					silent: true,
+				});
 			},
 			definition: configModule.default,
 			envSchema:
 				props?.envSchema ?? (hasNamedEnvExport ? configModule.env : undefined),
-			adaptConfig,
-			meta: props?.meta,
-			configPath,
-			projectRoot,
-			prepareRuntime: props?.prepareRuntime,
+			loadEnv: props?.loadEnv,
+			meta,
 			validateEnvSchema: props?.validateEnvSchema,
 			logger: {
 				instance: cliLogger,
@@ -126,6 +112,7 @@ export const loadConfigFile = async (props?: {
 			env: resolved.env,
 			rawEnv: resolved.rawEnv,
 			definition: resolved.definition,
+			emailTemplates: meta.emailTemplates ?? {},
 		};
 	}, projectRoot);
 };

@@ -4,10 +4,8 @@ db.sqlite-wal
 /uploads/
 /.env.keys
 /.lucid
-/.dev.vars
 /dist
 /dist-site
-/.wrangler
 .DS_Store
 ._*
 .idea/

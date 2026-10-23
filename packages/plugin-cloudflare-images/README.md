@@ -16,11 +16,11 @@ npm install @lucidcms/plugin-cloudflare-images
 import { defineConfig } from "@lucidcms/core";
 import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
-import { d1 } from "@lucidcms/db-d1";
+import { libsql } from "@lucidcms/db-libsql";
 
 export default defineConfig({
   runtime: cloudflare,
-  db: d1,
+  db: libsql,
   config: () => ({
     media: {
       images: {
@@ -41,17 +41,7 @@ export default defineConfig({
 });
 ```
 
-Generated Wrangler configs automatically include:
-
-```json
-{
-  "images": {
-    "binding": "LUCID_IMAGES"
-  }
-}
-```
-
-Use `cloudflareImagesPlugin({ binding: "CUSTOM_IMAGES" })` to select another binding name. When `runtime: cloudflare({ wrangler: "./wrangler.jsonc" })` uses a manual config, add the matching `images` entry yourself; Lucid does not modify user-owned Wrangler files.
+The plugin adds an Images binding named `LUCID_IMAGES` to the Worker. Use `cloudflareImagesPlugin({ binding: "CUSTOM_IMAGES" })` to select another binding name.
 
 ## Supported processing
 

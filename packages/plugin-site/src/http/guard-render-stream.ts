@@ -2,13 +2,13 @@ import { logger } from "@lucidcms/core";
 import { KilnRenderError } from "@lucidkiln/core";
 import { PLUGIN_KEY } from "../constants.js";
 import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
-import type { SiteCliData } from "../types.js";
+import type { SiteData } from "../types.js";
 import createDevErrorPage from "./create-dev-error-page.js";
 
 type StreamProps = {
 	path: string;
 	development: boolean;
-	data: SiteCliData | null;
+	data: SiteData;
 	/** The request's signal: a failure after the client went away isn't worth logging. */
 	signal: AbortSignal;
 };

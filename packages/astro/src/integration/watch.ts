@@ -5,9 +5,9 @@ import type { ResolvedLucidProject } from "./project.js";
 /** Collects the resource files and directories known when Astro loads its config. */
 const collectWatchFiles = (project: ResolvedLucidProject) =>
 	new Set([
-		project.configPath,
-		...project.loaded.configDependencies,
-		...project.loaded.resources.watch,
+		project.lucid.configPath,
+		...project.lucid.configDependencies,
+		...project.lucid.resources.watch,
 	]);
 
 /** Routes new resource files through Astro's config restart lifecycle. */
@@ -40,7 +40,7 @@ export const createResourceWatchPlugin = (
 				server.watcher.off("add", onAdd);
 			};
 		},
-		closeBundle() {
+		closeServer() {
 			detach();
 		},
 	};

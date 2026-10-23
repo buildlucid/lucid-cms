@@ -23,14 +23,16 @@ const writeKilnManifest = async (props: {
 	ui: ResolvedIntegrations | null;
 }) => {
 	try {
-		// The manifest only lists names, so this Kiln never loads templates or reads content.
+		// The manifest only lists names, so this Kiln never loads templates, reads content or resolves assets, and its data
+		// is a placeholder.
 		const kiln = createSiteKiln({
 			loader: memoryLoader({}),
 			config: createSiteConfig(props.config, props.options, null),
 			options: props.options,
-			data: null,
+			data: { kind: "dev", prefix: "", revision: "" },
 			lookupTranslation: () => undefined,
 		});
+
 		const file = path.join(props.root, "kiln.json");
 		const manifest = generateManifest(kiln, {
 			root: ".",
@@ -43,6 +45,7 @@ const writeKilnManifest = async (props: {
 				}),
 			),
 		});
+
 		const current = await readFile(file, "utf8").catch(() => null);
 		if (current !== manifest) await writeFile(file, manifest);
 	} catch (error) {

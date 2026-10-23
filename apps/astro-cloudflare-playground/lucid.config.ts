@@ -1,3 +1,4 @@
+import { astroHost } from "@lucidcms/astro/host";
 import { defineConfig, z } from "@lucidcms/core";
 import { postgres } from "@lucidcms/db-postgres";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
@@ -21,9 +22,8 @@ export const env = z.object({
 });
 
 export default defineConfig({
-	runtime: cloudflare({
-		wrangler: "./wrangler.jsonc",
-	}),
+	runtime: cloudflare,
+	host: astroHost,
 	db: postgres((env) => ({
 		url: env.BUILDLUCID_CMS_DB?.connectionString ?? env.DATABASE_URL,
 	})),

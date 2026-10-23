@@ -1,15 +1,9 @@
+import { getToolkit as getRuntimeToolkit } from "virtual:lucid/astro-runtime";
 import type { Toolkit } from "@lucidcms/core/types";
 import type { LucidAstroContext } from "./types.js";
 
-/**
- * Returns the toolkit associated with the current Astro runtime.
- *
- * This placeholder is replaced with a generated project module by the integration.
- */
-const getToolkit = async (_context: LucidAstroContext): Promise<Toolkit> => {
-	throw new Error(
-		"@lucidcms/astro/toolkit is only available in an Astro project using the Lucid integration.",
-	);
-};
+/** Returns the Lucid toolkit for the current Astro request, in an Astro project using the Lucid integration. */
+const getToolkit = (context: LucidAstroContext): Promise<Toolkit> =>
+	getRuntimeToolkit(context);
 
 export default getToolkit;

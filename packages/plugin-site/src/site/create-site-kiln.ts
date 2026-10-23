@@ -22,7 +22,7 @@ import createTranslateFunction from "../functions/translate.js";
 import createViteFunction from "../functions/vite.js";
 import createViteAssetFunction from "../functions/vite-asset.js";
 import type {
-	SiteCliData,
+	SiteData,
 	SiteExtension,
 	SitePluginOptions,
 	SiteState,
@@ -46,7 +46,7 @@ const createSiteKiln = (props: {
 	loader: Loader;
 	config: SiteConfig;
 	options: SitePluginOptions;
-	data: SiteCliData | null;
+	data: SiteData;
 	/** Reads the `site` translation scope. */
 	lookupTranslation: Translator["lookup"];
 	cache?: KilnCache<SiteState>;
@@ -59,7 +59,7 @@ const createSiteKiln = (props: {
 		translate: createTranslateFunction({
 			config: props.config,
 			lookup: props.lookupTranslation,
-			development: props.data?.kind === "dev",
+			development: props.data.kind === "dev",
 		}),
 		editable,
 		head,

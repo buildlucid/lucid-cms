@@ -1,5 +1,10 @@
 # @lucidcms/plugin-cloudflare-kv
 
+## v1.1.0 (unreleased)
+
+- Removed the `previewId` option, which Cloudflare's `cf` CLI has no equivalent for.
+- The binding now reaches the Cloudflare runtime as a `cloudflare:bindings` artifact.
+
 ## v1.0.6
 
 - Updated imports to use the reorganised `@lucidcms/core` entry points.

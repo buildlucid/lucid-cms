@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import type { SqliteDialectConfig } from "kysely";
 import type { SQLiteAdapterOptions } from "../types.js";
 
-const DEFAULT_SQLITE_DATABASE = "./db.sqlite";
+export const DEFAULT_SQLITE_DATABASE = "./db.sqlite";
 
 const normalizeSQLiteConfig = (
 	config: SQLiteAdapterOptions = {},

@@ -336,7 +336,11 @@ export class PostgresAdapter extends DatabaseAdapter {
 		if (type === "text" && typeof value === "string") {
 			return sql.raw(`'${value}'`);
 		}
-		if (type === "timestamp" && typeof value === "string") {
+		// Core migrations pass the generic type, while collection columns pass the column's own `timestamptz`.
+		if (
+			(type === "timestamp" || type === "timestamptz") &&
+			typeof value === "string"
+		) {
 			const normalizedValue = value.trim();
 			if (normalizedValue.length === 0) return null;
 			if (/^(now\(\)|current_timestamp(?:\(\d+\))?)$/i.test(normalizedValue)) {

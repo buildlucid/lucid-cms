@@ -1,25 +1,8 @@
-import type {
-	EnvironmentVariables,
-	ResolvedLucidConfig,
-} from "../../../exports/types.js";
-import createServiceContext from "../../../utils/services/create-service-context.js";
-import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
-import type {
-	MigrationAssessment,
-	MigrationRisk,
-} from "../../collection/migration/types.js";
-import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
-import loadConfigFile from "../../config/load-config-file.js";
-import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
-import type { DatabaseConnection } from "../../db/types.js";
-import prepareTranslations from "../../i18n/prepare-translations.js";
-import {
-	startLoggerBuffering,
-	stopLoggerBuffering,
-} from "../../logger/index.js";
-import type { AdapterRuntimeContext } from "../../runtime/types.js";
+import type { MigrationRisk } from "../../collection/migration/types.js";
+import { describeMigrationRiskReason } from "../../runtime/tasks/migration-report.js";
 import cliLogger from "../logger.js";
-import { describeMigrationRiskReason } from "../services/migration-report.js";
+import runTaskCommand from "../services/run-task-command.js";
+import type { TaskServerOptions } from "../services/start-task-server.js";
 
 /**
  * A read-only preflight that reports what `migrate` would do and whether the
@@ -28,183 +11,108 @@ import { describeMigrationRiskReason } from "../services/migration-report.js";
  * registered set, so it can gate CI and deploy pipelines. Retired plugin
  * migrations only warn.
  */
-const migrateStatusCommand = async (options?: {
-	check?: boolean;
-	remote?: boolean;
-}) => {
-	let config: ResolvedLucidConfig | undefined;
-	let env: EnvironmentVariables | undefined;
-	let runtimeContext: AdapterRuntimeContext | undefined;
-	let database: DatabaseConnection | undefined;
+const migrateStatusCommand = (
+	options?: { check?: boolean } & TaskServerOptions,
+) =>
+	runTaskCommand(
+		"Migration status failed",
+		async (run, elapsed) => {
+			cliLogger.info("Checking the migration status");
+			const status = await run("migrate:status", {});
 
-	try {
-		startLoggerBuffering();
-		const startTime = cliLogger.startTimer();
+			cliLogger.info(`Found ${status.executed} applied migration(s)`);
 
-		const res = await loadConfigFile({
-			prepareRuntime: true,
-		});
-		config = res.config;
-		env = res.env;
-		runtimeContext = res.runtimeContext;
-		const { translationStore } = await prepareTranslations({
-			config,
-			files: res.resources.files.translations,
-		});
-
-		cliLogger.info("Checking the migration status");
-
-		await prepareExternalMigrations({
-			config,
-			files: res.resources.files.migrations,
-		});
-		database = await config.db.connect(env);
-
-		//* database migration status
-		const migrationStatus = await config.db.getMigrationStatus(database.client);
-		const pendingMigrations = [
-			...migrationStatus.pendingCore,
-			...migrationStatus.pendingExternal,
-		];
-
-		//* collection migration status
-		const serviceContext = createServiceContext({
-			config,
-			database,
-			translationStore,
-			env,
-			runtimeContext,
-		});
-		const collectionResult = await planCollectionMigrations(serviceContext);
-
-		let pendingCollections: Array<{
-			collectionKey: string;
-			assessment: MigrationAssessment;
-		}> = [];
-		let collectionCheckError: string | undefined;
-		if (collectionResult.error) {
-			collectionCheckError =
-				serviceContext.translate.english(collectionResult.error.message) ||
-				"Unknown error";
-		} else {
-			pendingCollections = collectionResult.data.collections
-				.map(({ migrationPlan }) => ({
-					collectionKey: migrationPlan.collectionKey,
-					assessment: assessMigrationPlans([migrationPlan]),
-				}))
-				.filter(({ assessment }) => assessment.reasons.length > 0);
-		}
-
-		//* report
-		cliLogger.info(
-			`Found ${migrationStatus.executed.length} applied migration(s)`,
-		);
-
-		if (pendingMigrations.length === 0) {
-			cliLogger.success("No database schema migrations are pending");
-		} else {
-			cliLogger.warn(
-				`${pendingMigrations.length} database schema migration(s) are pending`,
-			);
-			for (const name of pendingMigrations) {
-				cliLogger.log(cliLogger.color.yellow(name), { indent: 2 });
-			}
-		}
-
-		if (collectionCheckError) {
-			cliLogger.warn(
-				`Could not check collection migration status: ${collectionCheckError}`,
-			);
-		} else if (pendingCollections.length === 0) {
-			cliLogger.success("No collection/brick table migrations are needed");
-		} else {
-			cliLogger.warn(
-				`${pendingCollections.length} collection(s) need table migrations`,
-			);
-			for (const risk of [
-				"safe",
-				"warning",
-				"destructive",
-			] satisfies MigrationRisk[]) {
-				const grouped = pendingCollections.filter(
-					(item) => item.assessment.risk === risk,
+			if (status.pending.length === 0) {
+				cliLogger.success("No database schema migrations are pending");
+			} else {
+				cliLogger.warn(
+					`${status.pending.length} database schema migration(s) are pending`,
 				);
-				if (grouped.length === 0) continue;
-				cliLogger.log(`${risk.toUpperCase()} (${grouped.length})`, {
-					indent: 2,
-				});
-				for (const item of grouped) {
-					cliLogger.log(cliLogger.color.yellow(item.collectionKey), {
-						indent: 4,
+				for (const name of status.pending) {
+					cliLogger.log(cliLogger.color.yellow(name), { indent: 2 });
+				}
+			}
+
+			const { collections } = status;
+			if ("error" in collections) {
+				cliLogger.warn(
+					`Could not check collection migration status: ${collections.error}`,
+				);
+			} else if (collections.pending.length === 0) {
+				cliLogger.success("No collection/brick table migrations are needed");
+			} else {
+				cliLogger.warn(
+					`${collections.pending.length} collection(s) need table migrations`,
+				);
+				for (const risk of [
+					"safe",
+					"warning",
+					"destructive",
+				] satisfies MigrationRisk[]) {
+					const grouped = collections.pending.filter(
+						(item) => item.assessment.risk === risk,
+					);
+					if (grouped.length === 0) continue;
+
+					cliLogger.log(`${risk.toUpperCase()} (${grouped.length})`, {
+						indent: 2,
 					});
-					for (const reason of item.assessment.reasons) {
-						cliLogger.log(describeMigrationRiskReason(reason), { indent: 6 });
+					for (const item of grouped) {
+						cliLogger.log(cliLogger.color.yellow(item.collectionKey), {
+							indent: 4,
+						});
+						for (const reason of item.assessment.reasons) {
+							cliLogger.log(describeMigrationRiskReason(reason), { indent: 6 });
+						}
 					}
 				}
 			}
-		}
 
-		if (migrationStatus.missing.length > 0) {
-			cliLogger.error(
-				`${migrationStatus.missing.length} previously executed Lucid migration(s) are no longer registered`,
-			);
-			for (const name of migrationStatus.missing) {
-				cliLogger.log(cliLogger.color.red(name), { indent: 2 });
+			if (status.missing.length > 0) {
+				cliLogger.error(
+					`${status.missing.length} previously executed Lucid migration(s) are no longer registered`,
+				);
+				for (const name of status.missing) {
+					cliLogger.log(cliLogger.color.red(name), { indent: 2 });
+				}
+				cliLogger.info(
+					"Check the installed @lucidcms/core version matches the database.",
+				);
 			}
-			cliLogger.info(
-				"Check the installed @lucidcms/core version matches the database.",
-			);
-		}
-		if (migrationStatus.retired.length > 0) {
-			cliLogger.warn(
-				`${migrationStatus.retired.length} previously executed migration(s) are no longer registered and are skipped`,
-			);
-			for (const name of migrationStatus.retired) {
-				cliLogger.log(cliLogger.color.yellow(name), { indent: 2 });
+
+			if (status.retired.length > 0) {
+				cliLogger.warn(
+					`${status.retired.length} previously executed migration(s) are no longer registered and are skipped`,
+				);
+				for (const name of status.retired) {
+					cliLogger.log(cliLogger.color.yellow(name), { indent: 2 });
+				}
+				cliLogger.info(
+					"These came from a removed plugin or migration file. Any tables they created are left in place.",
+				);
 			}
-			cliLogger.info(
-				"These came from a removed plugin or migration file. Any tables they created are left in place.",
+
+			const outstanding =
+				status.pending.length > 0 ||
+				"error" in collections ||
+				collections.pending.length > 0 ||
+				status.missing.length > 0;
+
+			cliLogger.log(
+				cliLogger.createBadge("LUCID CMS"),
+				outstanding
+					? "Migration status checked with"
+					: "Migration status checked",
+				outstanding
+					? cliLogger.color.yellow("outstanding work")
+					: cliLogger.color.green("successfully"),
+				"in",
+				cliLogger.color.green(cliLogger.formatMilliseconds(elapsed())),
+				{ spaceAfter: true, spaceBefore: true },
 			);
-		}
-
-		const hasPendingWork =
-			pendingMigrations.length > 0 ||
-			pendingCollections.length > 0 ||
-			collectionCheckError !== undefined;
-		const unhealthy = migrationStatus.missing.length > 0;
-
-		const endTime = startTime();
-		cliLogger.log(
-			cliLogger.createBadge("LUCID CMS"),
-			hasPendingWork || unhealthy
-				? "Migration status checked with"
-				: "Migration status checked",
-			hasPendingWork || unhealthy
-				? cliLogger.color.yellow("outstanding work")
-				: cliLogger.color.green("successfully"),
-			"in",
-			cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-			{
-				spaceAfter: true,
-				spaceBefore: true,
-			},
-		);
-
-		await database.destroy();
-		database = undefined;
-
-		await stopLoggerBuffering();
-		process.exit(options?.check && (hasPendingWork || unhealthy) ? 1 : 0);
-	} catch (error) {
-		await database?.destroy();
-		if (error instanceof Error) {
-			cliLogger.errorInstance(error, "Migration status failed");
-		} else {
-			cliLogger.error("Migration status failed", "Unknown error");
-		}
-		await stopLoggerBuffering();
-		process.exit(1);
-	}
-};
+			return options?.check && outstanding ? 1 : 0;
+		},
+		options,
+	);
 
 export default migrateStatusCommand;

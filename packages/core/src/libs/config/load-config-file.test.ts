@@ -3,7 +3,6 @@ import os from "node:os";
 import path from "node:path";
 import { expect, test } from "vitest";
 import z from "zod";
-import loadBuildProject from "../compile/load-build-project.js";
 import loadConfigFile from "./load-config-file.js";
 
 test("should return lucid config object", async () => {
@@ -82,47 +81,38 @@ test("CLI config loading parses raw env once before config and database factorie
 
 test("validated build loading supplies parsed env to factories and honours schema overrides", async () => {
 	await withEnvironmentConfig("6543", async (configPath) => {
-		const result = await loadBuildProject({
-			configPath,
-			validateEnv: true,
-			generateTypes: false,
+		const result = await loadConfigFile({
+			path: configPath,
 			silent: true,
+			processConfigOptions: { mode: "build" },
 		});
-		expect(result.loaded.config.brand.name).toBe("number:6543:1");
-		expect(result.loaded.env?.PORT).toBe(6543);
+		expect(result.config.brand.name).toBe("number:6543:1");
+		expect(result.env?.PORT).toBe(6543);
 
-		const override = await loadBuildProject({
-			configPath,
-			validateEnv: true,
-			generateTypes: false,
+		const override = await loadConfigFile({
+			path: configPath,
 			silent: true,
+			processConfigOptions: { mode: "build" },
 			envSchema: z.object({
 				PORT: z.string().transform((value) => Number(value) + 1),
 			}),
 		});
-		expect(override.loaded.config.brand.name).toBe("number:6544:0");
-		expect(override.loaded.config.db.adapter).toBe("number:6544:0");
+		expect(override.config.brand.name).toBe("number:6544:0");
+		expect(override.config.db.adapter).toBe("number:6544:0");
 	});
 });
 
 test("build loading skips runtime env requirements unless validation is requested", async () => {
 	await withEnvironmentConfig(undefined, async (configPath) => {
-		const result = await loadBuildProject({
-			configPath,
-			generateTypes: false,
+		const result = await loadConfigFile({
+			path: configPath,
 			silent: true,
+			validateEnvSchema: false,
+			processConfigOptions: { mode: "build" },
 		});
-		expect(result.loaded.config.brand.name).toBe("undefined::0");
+		expect(result.config.brand.name).toBe("undefined::0");
 		await expect(
 			loadConfigFile({ path: configPath, silent: true }),
-		).rejects.toThrow();
-		await expect(
-			loadBuildProject({
-				configPath,
-				validateEnv: true,
-				generateTypes: false,
-				silent: true,
-			}),
 		).rejects.toThrow();
 	});
 });

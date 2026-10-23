@@ -1,8 +1,7 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import type { ResolvedLucidConfig, ServiceContext } from "@lucidcms/core/types";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
+import { PLUGIN_KEY } from "../constants.js";
+import type { SiteModule, SitePluginOptionsInternal } from "../types.js";
 import createSiteLoader from "./create-site-loader.js";
 
 const config = {
@@ -10,55 +9,60 @@ const config = {
 	collections: [],
 } as unknown as ResolvedLucidConfig;
 
-const contextFor = (compiled: boolean) =>
+const options: SitePluginOptionsInternal = {
+	directory: "site",
+	mode: "ssr",
+	trailingSlash: "never",
+	static: { outDir: "dist-site" },
+};
+
+/** A development site module whose index template reads `source.index`. */
+const devModule = (source: { index: string }, revision = "1"): SiteModule => ({
+	data: { kind: "dev", prefix: "site/", revision },
+	templates: { "pages/index.kiln": async () => source.index },
+	components: {},
+	renderers: {},
+});
+
+const contextFor = (module: SiteModule | undefined) =>
 	({
-		runtimeContext: { compiled },
+		runtimeContext: {
+			compiled: false,
+			pluginModules: module ? { [PLUGIN_KEY]: module } : {},
+		},
 		translate: { scopeBundles: () => ({}), lookup: () => undefined },
 	}) as unknown as ServiceContext;
 
-let directory: string;
-beforeAll(async () => {
-	directory = await mkdtemp(path.join(tmpdir(), "plugin-site-"));
-	await writeFile(path.join(directory, "index.kiln"), "Home");
-});
-afterAll(() => rm(directory, { recursive: true, force: true }));
-
 describe("createSiteLoader", () => {
-	test("keeps the development site until a file's size or time changes", async () => {
-		const getSite = createSiteLoader(
-			{
-				directory,
-				mode: "ssr",
-				trailingSlash: "never",
-				static: { outDir: "dist-site" },
-			},
-			config,
-		);
-		const context = contextFor(false);
+	test("keeps the development site until a template or the revision changes", async () => {
+		const getSite = createSiteLoader(options, config);
+		const source = { index: "Home" };
+		const context = contextFor(devModule(source));
 
 		const first = await getSite({ context });
 		await expect(getSite({ context })).resolves.toBe(first);
 
-		await writeFile(path.join(directory, "index.kiln"), "Home!");
+		source.index = "Home!";
 		const second = await getSite({ context });
 		expect(second).not.toBe(first);
 		expect(second.cacheNamespace).not.toBe(first.cacheNamespace);
 		await expect(getSite({ context })).resolves.toBe(second);
+
+		const third = await getSite({
+			context: contextFor(devModule(source, "2")),
+		});
+		expect(third.cacheNamespace).not.toBe(second.cacheNamespace);
 	});
 
 	test("starts a new cache namespace when a global's value changes", async () => {
 		const namespaceFor = async (siteUrl: string) => {
 			const getSite = createSiteLoader(
-				{
-					directory,
-					mode: "ssr",
-					trailingSlash: "never",
-					static: { outDir: "dist-site" },
-					kiln: { globals: { siteUrl } },
-				},
+				{ ...options, kiln: { globals: { siteUrl } } },
 				config,
 			);
-			return (await getSite({ context: contextFor(false) })).cacheNamespace;
+			return (
+				await getSite({ context: contextFor(devModule({ index: "Home" })) })
+			).cacheNamespace;
 		};
 
 		expect(await namespaceFor("https://a.test")).toBe(
@@ -69,19 +73,11 @@ describe("createSiteLoader", () => {
 		);
 	});
 
-	test("refuses to serve a built server that has no built site", async () => {
-		const getSite = createSiteLoader(
-			{
-				directory,
-				mode: "ssr",
-				trailingSlash: "never",
-				static: { outDir: "dist-site" },
-			},
-			config,
-		);
+	test("fails without the site's server module", async () => {
+		const getSite = createSiteLoader(options, config);
 
-		await expect(getSite({ context: contextFor(true) })).rejects.toThrow(
-			/Run lucidcms build/,
+		await expect(getSite({ context: contextFor(undefined) })).rejects.toThrow(
+			/server module is missing/,
 		);
 	});
 });

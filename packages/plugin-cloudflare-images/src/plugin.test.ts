@@ -72,14 +72,14 @@ describe("Cloudflare Images plugin", () => {
 
 		expect(defaultResult?.data?.artifacts).toEqual([
 			{
-				type: "cloudflare:wrangler",
-				custom: { bindings: { images: true } },
+				type: "cloudflare:bindings",
+				custom: { bindings: { images: {} } },
 			},
 		]);
 		expect(customResult?.data?.artifacts).toEqual([
 			{
-				type: "cloudflare:wrangler",
-				custom: { bindings: { images: "CUSTOM_IMAGES" } },
+				type: "cloudflare:bindings",
+				custom: { bindings: { images: { binding: "CUSTOM_IMAGES" } } },
 			},
 		]);
 	});

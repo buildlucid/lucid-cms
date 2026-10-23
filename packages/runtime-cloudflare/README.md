@@ -9,7 +9,7 @@ Using this runtime is by far the simplest way to deploy Lucid CMS.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/buildlucid/lucid-cms/tree/master/templates/cloudflare-deploy)
 
-Use the Cloudflare deploy template to deploy a Lucid CMS Worker with D1, KV, R2, and the Pages plugin.
+Use the Cloudflare deploy template to deploy a Lucid CMS Worker with Postgres through Hyperdrive, KV, R2, and the Pages plugin.
 
 ## Installation
 
@@ -41,16 +41,13 @@ The `cloudflare` function accepts a single parameter, `options`, which is either
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `environment` | `string` | Wrangler environment used when Lucid loads local Cloudflare bindings and env |
 | `dev` | `{ port?: number; hostname?: string }` | Local Lucid dev server listen options |
-| `wrangler` | `string` | Path to a user-owned Wrangler config. Omit this to let Lucid generate `wrangler.lucid.jsonc` |
 | `bindings` | `object` | Explicit Cloudflare bindings to generate or override. Passing `true` for a binding uses Lucid's default binding name |
-| `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[] }` | Worker config that Lucid writes into the generated Wrangler config. The compatibility date defaults to Lucid's tested `2026-06-30`; update it explicitly after testing newer runtime behavior |
+| `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[] }` | The Worker's name, compatibility date and flags. The name defaults to the package name and the compatibility date to Lucid's tested `2026-06-30`. With a `cloudflare.config.ts`, its own name and compatibility date are used instead |
 
 ```typescript
 export default defineConfig({
   runtime: cloudflare((env) => ({
-    environment: "staging",
     dev: {
       port: Number(env.PORT ?? 6543),
     },
@@ -62,71 +59,117 @@ export default defineConfig({
 });
 ```
 
-## Wrangler Configuration
+## Development, Builds and Deploys
 
-The Cloudflare runtime generates Wrangler config by default. During local prepare steps, Lucid writes:
+Lucid runs on Vite. The runtime's Vite integration uses the [Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/), so `lucidcms dev` runs Lucid's Worker in workerd with local bindings. Local state, such as KV and R2 data, lives in `.cloudflare/state`.
 
-```text
-wrangler.lucid.jsonc
-```
-
-This file is generated, should be added to `.gitignore`, and is overwritten by Lucid when the Cloudflare runtime prepares. It lives at the project root so Wrangler, Astro's Cloudflare adapter, and other Cloudflare tools keep their normal root `.dev.vars` and `.env` lookup behavior.
-
-During `lucidcms build`, Lucid writes a deploy-ready Wrangler config to your build output directory:
-
-```text
-dist/wrangler.jsonc
-```
-
-Lucid also writes Cloudflare's generated-config redirect:
-
-```text
-.wrangler/deploy/config.json
-```
-
-After building, you can deploy with:
+`lucidcms build` writes the Worker and the admin to `.cloudflare/output`. Deploy that output with Cloudflare's [`cf` CLI](https://developers.cloudflare.com/cf/):
 
 ```bash
-wrangler deploy
+lucidcms build && cf deploy --prebuilt
 ```
 
-For CLI commands that need to use remote Cloudflare resources, pass `--remote`:
+Use `lucidcms dev` and `lucidcms build` rather than `cf dev` and `cf build`. `cf` doesn't recognise Lucid projects, so it would run Vite without Lucid.
 
-```bash
-lucidcms migrate --yes --remote
-```
+Lucid passes its Worker, bindings, cron trigger and the variables from your `env` schema to the plugin. Add a `cloudflare.config.ts` only for settings Lucid doesn't manage, such as a Hyperdrive binding.
 
-`--yes` accepts warning-level work such as core or plugin migrations. Destructive collection changes still fail unless you deliberately rerun with `--allow-destructive`, which also implies `--yes`.
+## Database
 
-The `--remote` flag tells the Cloudflare runtime to load remote bindings through Wrangler's platform proxy while that command runs.
-
-If you already own a Wrangler config, pass its path to `wrangler`. Lucid will use that config for local Cloudflare env/binding loading and will not generate `wrangler.lucid.jsonc` or merge binding artifacts into your file:
+Lucid needs a database with transactions. On Workers, use Postgres through [Hyperdrive](https://developers.cloudflare.com/hyperdrive/), declared in `cloudflare.config.ts`:
 
 ```typescript
+// cloudflare.config.ts
+import { bindings, defineConfig } from "cf/config";
+
 export default defineConfig({
-  runtime: cloudflare({
-    wrangler: "./wrangler.jsonc",
-  }),
-  db: libsql,
+  worker: {
+    name: "my-lucid-site",
+    env: {
+      LUCID_DB: bindings.hyperdrive({
+        id: "HYPERDRIVE_ID",
+        dev: { connectionString: "postgres://postgres:postgres@localhost:5432/lucid" },
+      }),
+    },
+  },
+});
+```
+
+```typescript
+// lucid.config.ts
+import { defineConfig, z } from "@lucidcms/core";
+import { postgres } from "@lucidcms/db-postgres";
+import { cloudflare } from "@lucidcms/runtime-cloudflare";
+
+export const env = z.object({
+  LUCID_DB: z.object({ connectionString: z.string() }),
+});
+
+export default defineConfig({
+  runtime: cloudflare,
+  db: postgres((env) => ({ url: env.LUCID_DB.connectionString })),
   config: () => ({
     // ...other config
   }),
 });
 ```
 
-Manual Wrangler mode means you own the bindings and deploy config. Lucid removes its old `wrangler.lucid.jsonc` only when the file is marked as Lucid-generated.
+Commands connect through the binding's local connection string. To migrate another database, such as production, set `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_LUCID_DB` for that command:
 
-Cloudflare-aware Lucid packages can ask the runtime to generate their Wrangler bindings. For example, `db: d1`, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, `cloudflareQueuesPlugin()`, and `cloudflareImagesPlugin()` generate the matching D1, KV, R2, Queue, and Images bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
+```bash
+CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_LUCID_DB="postgres://..." lucidcms migrate --yes
+```
+
+`--yes` accepts warning-level work such as core or plugin migrations. Destructive collection changes still fail unless you deliberately rerun with `--allow-destructive`, which also implies `--yes`.
+
+## Commands
+
+Commands such as `migrate`, `migrate:status`, `sync`, `seed`, `jobs:schedule` and plugin commands such as `site:build` run inside the Worker, through a short-lived dev server. They use the same bindings and local state as `lucidcms dev`, and can run while it does.
+
+To use the deployed resources behind Lucid's bindings, such as KV and R2, pass `--remote` to `lucidcms dev` or a command:
+
+```bash
+lucidcms seed --all --remote
+```
+
+The database isn't one of Lucid's bindings, so `--remote` doesn't change which database a command uses. See [Database](#database) for running migrations against production.
+
+In Astro projects, commands run through Astro's Vite config instead, so they use Astro's Cloudflare adapter and the bindings in `cloudflare.config.ts`, the same as `astro dev`. `--remote` isn't supported there. Set `dev: { remote: true }` on bindings in `cloudflare.config.ts` instead.
+
+## Astro
+
+Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. Wrap the Worker in `withLucid`, which adds Lucid's Worker entry, its cron and queue triggers, and the bindings and secrets Lucid's adapters and plugins declare:
+
+```typescript
+// cloudflare.config.ts
+import { withLucid } from "@lucidcms/runtime-cloudflare/config";
+import { bindings, defineConfig } from "cf/config";
+
+export default defineConfig({
+  worker: withLucid({
+    name: "my-site",
+    compatibilityDate: "2026-06-30",
+    env: {
+      LUCID_DB: bindings.hyperdrive({ id: "HYPERDRIVE_ID" }),
+    },
+  }),
+});
+```
+
+Lucid's Worker entry runs Astro's request handler alongside Lucid's job scheduler and plugins' event handlers, such as the queue consumer. The Worker's own settings and bindings come first. Deploy with `cf deploy`, which builds the project with `astro build`.
+
+## Bindings
+
+Cloudflare-aware Lucid packages can ask the runtime to generate their bindings. For example, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, `cloudflareQueuesPlugin()`, and `cloudflareImagesPlugin()` generate the matching KV, R2, Queue, and Images bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { d1 } from "@lucidcms/db-d1";
+import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
 export default defineConfig({
   runtime: cloudflare,
-  db: d1({ databaseName: "lucid-db" }),
+  db: libsql,
   config: () => ({
     plugins: [
       cloudflareR2Plugin({

@@ -1,5 +1,3 @@
-import type { AddressInfo } from "node:net";
-import type { Plugin as RolldownPlugin } from "rolldown";
 import type z from "zod";
 import type { LucidHonoContext } from "../../exports/types.js";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
@@ -7,29 +5,16 @@ import type { CLILogger } from "../cli/logger.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { DatabaseAdapterFactory } from "../db/adapter-factory.js";
 import type { RenderedTemplates } from "../email/types.js";
-import type { TranslationBundles, TranslationStore } from "../i18n/types.js";
+import type { TranslationBundles } from "../i18n/types.js";
+import type { LoggerOverride } from "../logger/types.js";
+import type { LucidAdapterOverrides } from "./create-lucid-adapters.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
-export type RuntimeBuildArtifactFile = {
-	type: "file";
-	path: string;
-	content: string;
-};
-
-// biome-ignore lint/suspicious/noExplicitAny: explanation
-export type RuntimeBuildArtifactCustom<T = any> = {
-	type: string;
-	custom: T;
-};
-
+/** A runtime-specific artifact from a database adapter or plugin, such as a Cloudflare binding or Worker handler. */
 export type RuntimeArtifactCustom<T = unknown> = {
 	type: string;
 	custom: T;
 };
-
-export type RuntimeBuildArtifact =
-	| RuntimeBuildArtifactFile
-	| RuntimeBuildArtifactCustom;
 
 export type RuntimeArtifactProvider =
 	| Array<RuntimeArtifactCustom>
@@ -37,115 +22,42 @@ export type RuntimeArtifactProvider =
 			env: EnvironmentVariables,
 	  ) => Array<RuntimeArtifactCustom> | Promise<Array<RuntimeArtifactCustom>>);
 
-export type RuntimePrepareArtifacts = {
-	/**
-	 * Custom artifacts that are specific to the runtime adapter.
-	 */
-	custom: Array<RuntimeArtifactCustom>;
-};
-
-export type ServeHandler = (props: {
-	mode: "development" | "static";
-	/** Plugin build data for static mode. In development, `createCliDev` returns it. */
-	pluginData: Record<string, unknown>;
-	/** Plugin build module exports keyed by plugin for static mode, empty in development. */
-	pluginModules: Record<string, unknown>;
-	projectRoot: string;
-	configPath: string;
-	config: ResolvedLucidConfig;
-	/** Parsed environment values and platform bindings from config loading. */
-	env: EnvironmentVariables | undefined;
-	translationStore: TranslationStore;
-	logger: {
-		instance: CLILogger;
-		silent: boolean;
-	};
-	onListening: (props: {
-		address: AddressInfo | string | null;
-		adapterKeys: AdapterKeys;
-	}) => Promise<void>;
-}) => Promise<{
-	destroy: () => Promise<void>;
-	onComplete?: () => Promise<void> | void;
-	runtimeContext: AdapterRuntimeContext;
-	adapterKeys: AdapterKeys;
-}>;
-
-export type RuntimeBuildArtifacts = {
-	/**
-	 * Custom artifacts that are specific to the runtime adapter.
-	 */
-	custom: Array<RuntimeBuildArtifactCustom>;
-};
-
-/** A Rollup-compatible plugin for the server bundle. */
-export type BundlerPlugin = RolldownPlugin;
-
-/** Options for Lucid to bundle runtime server entries with its own bundler and defaults. */
-export type RuntimeBundleOptions = {
-	/** Target platform, defaulting to `node`. */
-	platform?: "node" | "browser" | "neutral";
-	/** Package export conditions replacing the platform's defaults, such as `workerd`. */
-	conditions?: string[];
-	/** Package imports use `bundle` by default or load from `node_modules` at runtime with `external`. */
-	packages?: "bundle" | "external";
-	/** Build data such as translations and plugin build modules defaults to `bundle`, inlining and removing originals, while `external` loads it from build output at runtime. */
-	buildData?: "bundle" | "external";
-	/** Controls shared chunks, defaulting to `true`; `false` bundles each entry separately for platforms that run a single module. */
-	splitting?: boolean;
-	/** Module specifiers to replace, such as a browser build of a Node-only package. */
-	alias?: Record<string, string>;
-	/** Plugins for transforms these options don't cover. */
-	plugins?: BundlerPlugin[];
-};
-
-/** Server entries that Lucid bundles into the build output. */
-export type RuntimeBuild = {
-	/** Entry module sources keyed by extensionless output paths such as `server`, importing the built `LucidBuild` project from `lucid:build`. */
-	entries: Record<string, string>;
-	bundle?: RuntimeBundleOptions;
-	/** This should match the runtime context that the runtime adapter sets for the built output. */
-	runtimeContext: AdapterRuntimeContext;
-	/** Runs once the build has finished. */
-	onComplete?: () => Promise<void> | void;
-};
-
-/** The built project, which runtime entries import from `lucid:build`. */
+/** The built project, which server entries import from `lucid:build`. */
 export type LucidBuild = {
 	/** Spread into `createLucidHost` alongside the runtime's own options. */
 	host: {
 		definition: LucidConfigDefinition;
 		envSchema?: z.ZodType;
 		translationBundles: TranslationBundles;
-		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates">;
+		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates" | "admin">;
+		/** During development, sends runtime logs to Lucid's Vite plugin to print. */
+		logger?: LoggerOverride;
+		/** In commands' task servers, an inline queue, so the configured queue's consumer doesn't process pending jobs. */
+		adapterOverrides?: LucidAdapterOverrides;
 	};
-	/** Plugin CLI build data, keyed by plugin key. */
-	pluginData: Record<string, unknown>;
-	/** Plugin build module exports, keyed by plugin key. */
+	/** The exports of each plugin's Vite `module`, keyed by plugin. */
 	pluginModules: Record<string, unknown>;
+	/** Admin HTML for admin navigations no route handles, omitted when static assets serve it. */
+	admin?: { html: string };
+	/** Runtime tasks supplied by the Vite plugin during development and omitted from builds. */
+	dev?: LucidDevBuild;
 };
 
-/** Describes server entries for Lucid to bundle and writes supporting runtime files, such as platform configuration. */
-export type BuildHandler = (props: {
-	config: ResolvedLucidConfig;
-	configPath: string;
-	outputPath: string;
-	buildArtifacts: RuntimeBuildArtifacts;
-	logger: {
-		instance: CLILogger;
-		silent: boolean;
-	};
-}) => Promise<RuntimeBuild>;
+/** What the Vite plugin gives server entries during development to run tasks, such as migrations, inside the runtime. */
+export type LucidDevBuild = {
+	/** Authenticates the plugin's task requests. */
+	token: string;
+	/** Project migration files, imported through the server environment so they run where the database is. */
+	migrations: LucidDevModule[];
+	/** Project seed files, imported the same way for the seed commands. */
+	seeds: LucidDevModule[];
+};
 
-export type PrepareHandler = (props: {
-	configPath: string;
-	projectRoot: string;
-	prepareArtifacts: RuntimePrepareArtifacts;
-	logger: {
-		instance: CLILogger;
-		silent: boolean;
-	};
-}) => Promise<void>;
+/** A project file the server environment imports on demand. */
+export type LucidDevModule = {
+	path: string;
+	load: () => Promise<{ default?: unknown }>;
+};
 
 export type AdapterKeys = {
 	queue: string;
@@ -188,9 +100,7 @@ export type AdapterRuntimeContext = {
 	support?: RuntimeSupport;
 	/** Path to an emitted `lucid:build` module relative to the build output, or null, for loading the project in another thread. */
 	buildModule: string | null;
-	/** Plugin CLI data keyed by plugin, from `dev` during development or builds otherwise, omitted for plugin commands. */
-	pluginData?: Record<string, unknown>;
-	/** Plugin CLI build module exports keyed by plugin, empty during development. */
+	/** The exports of each plugin's Vite `module`, keyed by plugin. */
 	pluginModules?: Record<string, unknown>;
 };
 
@@ -224,14 +134,6 @@ export type RuntimeAdapterOptionsResolver = (
 	env: EnvironmentVariables,
 ) => void | Promise<void>;
 
-export type RuntimeAdapterCLI = {
-	/** Releases resources allocated while loading CLI configuration. Must be idempotent. */
-	dispose?: () => Promise<void>;
-	prepare?: PrepareHandler;
-	serve: ServeHandler;
-	build: BuildHandler;
-};
-
 /** Receives parsed environment values and returns project settings synchronously. */
 export type LucidConfigFactory = (env: EnvironmentVariables) => LucidConfig;
 /** Mutates the resolved config draft synchronously. Returning a replacement config is unsupported. */
@@ -256,10 +158,20 @@ export type DatabaseAdapterValue =
 	| DatabaseAdapterFactory
 	| Promise<DatabaseAdapterFactory>;
 
+/** A framework that serves Lucid instead of Lucid's own server, declared with `defineConfig({ host })`. */
+export type HostAdapter = {
+	/** The host's key, which the runtime adapter's `hosts` must support, such as `astro`. */
+	key: string;
+	/** Module whose default export is the host's `HostCliIntegration`, resolved from the project, for Lucid's CLI. */
+	cli: string;
+};
+
 /** Runtime, database and project configuration passed to defineConfig. */
 export type LucidConfigDefinition = {
 	/** Runtime adapter or factory for the deployment platform. */
 	runtime: RuntimeAdapterValue;
+	/** The framework serving Lucid, when it isn't Lucid's own server. */
+	host?: HostAdapter;
 	/** Database adapter or environment-aware factory. */
 	db: DatabaseAdapterValue;
 	/** Return project settings using the parsed environment. */
@@ -290,13 +202,7 @@ export type RuntimeAdapter = Omit<
 	hosts?: Record<string, RuntimeHostDefinition>;
 	getEnvVars?: RuntimeAdapterEnvLoader;
 	resolveOptions?: RuntimeAdapterOptionsResolver;
-	cli?: RuntimeAdapterCLI;
 	adaptConfig?: RuntimeAdaptConfig;
-};
-
-export type RuntimeAdaptConfigModule = {
-	adaptConfig: RuntimeAdaptConfig;
-	default?: RuntimeAdaptConfig;
 };
 
 // ------------------------------------------------------------

@@ -3,6 +3,9 @@
 	"entry": [
 		"packages/*/src/index.{ts,tsx,mts,cts}",
 		"packages/core/src/{build,plugin,runtime,toolkit,types}.{ts,mts,cts}",
+		// Package exports whose tsdown entries aren't an index at the package root.
+		"packages/admin/src/exports/*.ts",
+		"packages/plugin-site/src/{cli,ui}/index.ts",
 		// These are loaded by path in configuration tests, rather than imported.
 		"packages/core/src/libs/config/mock-config/*.ts",
 		"packages/core/src/utils/test-helpers/config/lucid.config.ts"

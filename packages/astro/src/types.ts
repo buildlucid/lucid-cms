@@ -3,15 +3,13 @@ import type {
 	DatabaseConnectionScope,
 	EnvironmentVariables,
 	HttpExtension,
-	LucidConfigDefinition,
 	LucidInvocation,
-	ResolvedLucidConfig,
-	RuntimeAdapter,
-	TranslationStore,
 } from "@lucidcms/core/types";
+import type { LucidViteProject } from "@lucidcms/core/vite";
 import type { AstroConfig } from "astro";
 
 type SsrEnvironment = NonNullable<AstroConfig["vite"]["environments"]>[string];
+type VitePluginOption = NonNullable<AstroConfig["vite"]["plugins"]>[number];
 
 /** Runtime-specific state resolved for an Astro execution context. */
 export type LucidAstroRuntimeState = {
@@ -21,7 +19,7 @@ export type LucidAstroRuntimeState = {
 	databaseScope: DatabaseConnectionScope;
 	/** Platform execution context forwarded to the runtime bridge. */
 	executionContext?: unknown;
-	/** Separates runtime hosts when one generated module serves multiple environments. */
+	/** Separates runtime hosts when one runtime module serves multiple environments. */
 	cacheKey?: string | object;
 	http?: {
 		extensions?: HttpExtension[];
@@ -40,9 +38,7 @@ export type LucidAstroBridge = {
 	name: string;
 	/** Resolves the platform state needed to create or reuse a Lucid host. */
 	resolveRuntime(props: {
-		adapter: RuntimeAdapter;
 		context?: unknown;
-		fallbackEnv?: EnvironmentVariables;
 		compiled: boolean;
 	}): LucidAstroRuntimeState | Promise<LucidAstroRuntimeState>;
 	/** Passes an Astro request through the hosted Lucid application. */
@@ -55,47 +51,26 @@ export type LucidAstroBridge = {
 	}): Response | Promise<Response>;
 };
 
+/** Vite settings a runtime's Astro integration adds to Astro's config. */
 export type LucidAstroViteOptions = {
+	/** Plugins serving platform modules, such as a Worker entry that imports Lucid's runtime module. */
+	plugins?: VitePluginOption[];
 	aliases?: Record<string, string>;
-	ssrExternal?: string[];
 	/** Platform settings for Astro's server environment. */
 	ssrEnvironment?: Pick<SsrEnvironment, "optimizeDeps" | "build">;
 };
 
-export type LucidAstroPrepareResult = {
-	/** Generated files that should not trigger another Vite restart. */
-	ignoredWatchFiles?: string[];
-	/** Runtime-specific Vite options resolved after preparing generated files. */
-	vite?: Pick<LucidAstroViteOptions, "aliases">;
-};
-
-/** Build-time contract for platform-specific Astro preparation. */
+/** Build-time contract for platform-specific Astro support. */
 export type LucidAstroIntegrationBridge = {
-	vite?: LucidAstroViteOptions;
 	/** Ensures the configured Astro adapter matches the Lucid runtime. */
 	validateAdapter(adapter: { name: string } | undefined): void;
-	/** Prepares platform artifacts after Lucid generates its runtime modules. */
-	prepare?(props: {
+	/** Vite settings for Astro's config, given the project and the ID of Lucid's runtime module. */
+	vite?(props: {
 		command: "dev" | "build" | "sync";
-		adapter: RuntimeAdapter;
-		configPath: string;
-		projectRoot: string;
-		generatedDirectory: string;
-		runtimeModulePath: string;
-		config: ResolvedLucidConfig;
-		translationStore: TranslationStore;
-		definition: LucidConfigDefinition;
-	}):
-		| undefined
-		| LucidAstroPrepareResult
-		| Promise<LucidAstroPrepareResult | undefined>;
-	/** Applies platform-specific changes to the completed Astro build. */
-	buildDone?(props: { directory: string }): void | Promise<void>;
-	/** Releases resources created by the runtime-specific Astro integration. */
-	teardown?(props: {
-		adapter: RuntimeAdapter;
-		command: "dev" | "build" | "sync";
-	}): void | Promise<void>;
+		/** The project Lucid's Vite plugin loaded. */
+		project: LucidViteProject;
+		runtimeModuleId: string;
+	}): LucidAstroViteOptions;
 };
 
 /** Options accepted by the Lucid Astro integration. */

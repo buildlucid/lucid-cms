@@ -11,6 +11,13 @@ export default Object.freeze({
 		api: "/api",
 		mcp: "/mcp",
 		cdn: "/cdn",
+		/** Client build files, under `builtAssets.directory`. */
+		assets: "/_assets",
+	},
+	/** Client build files, which Vite names by content hash, so browsers may keep them for good. */
+	builtAssets: {
+		directory: "_assets",
+		cacheControl: "public, max-age=31536000, immutable",
 	},
 	openAPIDocsRoute: "/api/documentation",
 	urls: {
@@ -104,25 +111,20 @@ export default Object.freeze({
 		fileName: /^([^.]+)\.([a-z][a-z0-9-]*)\.json$/,
 	},
 	build: {
-		/** Folder in the build output, beside the server entry, for Lucid's generated config modules and data files. */
-		directory: "lucid",
-		/** The module runtime entries import the built project from. */
+		/** The module server entries import the built project, a `LucidBuild`, from. */
 		moduleId: "lucid:build",
-		/** Prefix for the virtual modules that hold each runtime entry's source while bundling. */
-		entryModulePrefix: "\0lucid:entry:",
-		/** Prefix `lucid:build` imports data files with, so the bundler can inline them or load them from the build output. */
-		dataModulePrefix: "lucid:build-data/",
-		/** Folder in `build.directory` for chunks shared between server entries. */
-		chunksDirectory: "chunks",
-		/** Files written into `build.directory` for compiled runtimes to import. */
-		dataFiles: {
-			emailTemplates: "email-templates.json",
-			translations: "translations.json",
-			/** Plugin CLI build data, keyed by plugin key. */
-			pluginData: "plugin-data.json",
-			/** A module whose default export holds each plugin build module's exports, keyed by plugin key. */
-			pluginModules: "plugin-modules.js",
-		},
+	},
+	dev: {
+		/** Path prefix for tasks the Vite plugin runs inside the server environment, such as migrations. */
+		taskPath: "/__lucid/tasks/",
+		/** Header carrying the development server's task token. */
+		taskTokenHeader: "x-lucid-task-token",
+		/** Hot channel event that carries runtime log entries to Lucid's Vite plugin. */
+		logEvent: "lucid:log",
+		/** A plugin naming the Vite servers Lucid's commands start to run their tasks. */
+		taskServerPlugin: "lucid:task-server",
+		/** The dev and preview servers' port when the runtime adapter's options don't set one. */
+		defaultPort: 6543,
 	},
 	notifications: {
 		emailJob: { name: "core:send-notification-emails", version: 1 },
@@ -386,7 +388,6 @@ export default Object.freeze({
 		filename: "lucid.config",
 		extensions: [".ts", ".js", ".mjs", ".mts"],
 	},
-	defaultUploadDirectory: "uploads",
 	queue: {
 		maxAttempts: 3,
 		maxConcurrentJobs: 5,

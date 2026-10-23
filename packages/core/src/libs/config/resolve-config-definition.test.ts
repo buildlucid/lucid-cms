@@ -1,11 +1,7 @@
 import { expect, test, vi } from "vitest";
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import {
-	createDatabaseAdapterCreator,
-	createDatabaseAdapterFactory,
-} from "../db/adapter-factory.js";
-import type { LucidPluginHookRuntime } from "../plugins/types.js";
+import { createDatabaseAdapterCreator } from "../db/adapter-factory.js";
 import defineConfig from "../runtime/define-config.js";
 import resolveConfigDefinition from "./resolve-config-definition.js";
 
@@ -16,33 +12,6 @@ const createAdapter = (adapter = "test") =>
 		inferSchema: vi.fn(),
 		dropAllTables: vi.fn(),
 	}) as unknown as DatabaseAdapter;
-
-test("releases CLI resources when configuration fails after loading the environment", async () => {
-	const dispose = vi.fn(async () => undefined);
-	const getEnvVars = vi.fn(async () => ({}));
-	const definition = defineConfig({
-		runtime: {
-			key: "test",
-			lucid: "0.0.0",
-			getEnvVars,
-			cli: {
-				dispose,
-				serve: vi.fn(),
-				build: vi.fn(),
-			},
-		},
-		db: createAdapter(),
-		config: () => {
-			throw new Error("Invalid project configuration");
-		},
-	});
-
-	await expect(resolveConfigDefinition({ definition })).rejects.toThrow(
-		"Invalid project configuration",
-	);
-	expect(getEnvVars).toHaveBeenCalledOnce();
-	expect(dispose).toHaveBeenCalledOnce();
-});
 
 test("resolves no-call runtime and database adapter creators", async () => {
 	const adapter = createAdapter("creator");
@@ -179,130 +148,6 @@ test("skips env schema validation and fills missing secrets during build resolut
 	).toBe(true);
 });
 
-test("passes supported prepare artifacts from db factories and plugins to the runtime", async () => {
-	const adapter = createAdapter("prepare");
-	const db = createDatabaseAdapterFactory({
-		adapter: "prepare",
-		resolve: () => adapter,
-		hooks: {
-			runtime: [
-				{
-					type: "test:prepare",
-					custom: {
-						source: "db",
-					},
-				},
-			],
-		},
-	});
-	const prepare = vi.fn(async () => undefined);
-	const getEnvVars = vi.fn(async () => ({
-		SECRET: "a".repeat(64),
-	}));
-	const runtimeHook = vi.fn(
-		async ({ phase }: Parameters<LucidPluginHookRuntime>[0]) => ({
-			error: undefined,
-			data: {
-				artifacts:
-					phase === "prepare"
-						? [
-								{
-									type: "test:prepare",
-									custom: {
-										source: "plugin",
-									},
-								},
-								{
-									type: "ignored:prepare",
-									custom: {
-										source: "plugin",
-									},
-								},
-							]
-						: [],
-			},
-		}),
-	);
-
-	await resolveConfigDefinition({
-		definition: defineConfig({
-			runtime: {
-				key: "test",
-				lucid: "0.0.0",
-				config: {
-					customPrepareArtifacts: ["test:prepare"],
-				},
-				getEnvVars,
-				cli: {
-					prepare,
-					serve: vi.fn(),
-					build: vi.fn(),
-				},
-			} as never,
-			db,
-			config: (env) => ({
-				secrets: {
-					encryption: env.SECRET as string,
-					cookie: env.SECRET as string,
-					refreshToken: env.SECRET as string,
-					accessToken: env.SECRET as string,
-				},
-				collections: [],
-				plugins: [
-					{
-						key: "prepare-plugin",
-						lucid: "0.0.0",
-						hooks: {
-							runtime: runtimeHook,
-						},
-						configure: () => undefined,
-					},
-				],
-			}),
-		}),
-		configPath: "/tmp/lucid.config.ts",
-		projectRoot: "/tmp",
-		prepareRuntime: true,
-		processConfigOptions: {
-			skipValidation: true,
-		},
-	});
-
-	expect(prepare).toHaveBeenCalledTimes(2);
-	// @ts-expect-error
-	expect(prepare.mock.calls[0]?.[0].prepareArtifacts).toEqual({
-		custom: [],
-	});
-	// @ts-expect-error
-	expect(prepare.mock.calls[1]?.[0].prepareArtifacts.custom).toEqual([
-		{
-			type: "test:prepare",
-			custom: {
-				source: "db",
-			},
-		},
-		{
-			type: "test:prepare",
-			custom: {
-				source: "plugin",
-			},
-		},
-	]);
-	expect(runtimeHook).toHaveBeenCalledWith(
-		expect.objectContaining({
-			phase: "prepare",
-			env: {
-				SECRET: "a".repeat(64),
-			},
-			paths: {
-				configPath: "/tmp/lucid.config.ts",
-				projectRoot: "/tmp",
-			},
-		}),
-	);
-	expect(getEnvVars).toHaveBeenCalledTimes(2);
-});
-
 test("parsed env output reaches every consumer while runtime bindings survive", async () => {
 	const binding = { get: vi.fn() };
 	const transform = vi.fn((value: string) => `${value}:parsed`);
@@ -339,4 +184,17 @@ test("parsed env output reaches every consumer while runtime bindings survive", 
 	expect(result.env?.BINDING).toBe(binding);
 	expect(resolveOptions).toHaveBeenCalledWith(result.env);
 	expect(resolveDatabase).toHaveBeenCalledWith(result.env);
+});
+
+test("rejects a declared host the runtime doesn't support", async () => {
+	await expect(
+		resolveConfigDefinition({
+			definition: defineConfig({
+				runtime: { key: "node", lucid: "0.0.0" },
+				host: { key: "astro", cli: "@lucidcms/astro/cli" },
+				db: createAdapter(),
+				config: () => ({ secrets: "a".repeat(64) }),
+			}),
+		}),
+	).rejects.toThrow('The "node" runtime doesn\'t support the "astro" host.');
 });

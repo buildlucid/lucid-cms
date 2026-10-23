@@ -1,14 +1,8 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import Mustache from "mustache";
-import constants from "../../../constants/constants.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
-import type { RenderedTemplates } from "../types.js";
 
-/**
- * Dynamically renders a mustache template with the given data.
- */
+/** Renders Mustache templates with data from `config.email.templates`, which runtimes populate from project email files. */
 const renderMustacheTemplate: ServiceFn<
 	[
 		{
@@ -18,71 +12,21 @@ const renderMustacheTemplate: ServiceFn<
 	],
 	string
 > = async (context, data) => {
-	const renderedTemplates = context.config.email.templates;
-
-	//* use pre-rendered templates if available
-	if (renderedTemplates) {
-		const preRenderedTemplate = renderedTemplates[data.template];
-		if (preRenderedTemplate === undefined) {
-			return {
-				error: {
-					message: copy("server:core.email.templates.not.found.message"),
-					status: 404,
-				},
-				data: undefined,
-			};
-		}
-
-		const renderedTemplate = Mustache.render(preRenderedTemplate, data.data);
-
-		return {
-			error: undefined,
-			data: renderedTemplate,
-		};
-	}
-
-	try {
-		const templatesPath = path.resolve(
-			process.cwd(),
-			context.config.build.outDir,
-			constants.build.directory,
-			constants.build.dataFiles.emailTemplates,
-		);
-		const renderedTemplates = JSON.parse(
-			await readFile(templatesPath, "utf-8"),
-		) as RenderedTemplates;
-
-		const templateData = renderedTemplates[data.template];
-		if (!templateData) {
-			return {
-				error: {
-					message: copy("server:core.email.templates.not.found.message"),
-					status: 404,
-				},
-				data: undefined,
-			};
-		}
-
-		const renderedTemplate = Mustache.render(templateData.html, data.data);
-
-		return {
-			error: undefined,
-			data: renderedTemplate,
-		};
-	} catch (error) {
+	const template = context.config.email.templates?.[data.template];
+	if (template === undefined) {
 		return {
 			error: {
-				message: copy(
-					"server:core.email.templates.not.found.message",
-					error instanceof Error
-						? { defaultMessage: error.message }
-						: undefined,
-				),
+				message: copy("server:core.email.templates.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
 		};
 	}
+
+	return {
+		error: undefined,
+		data: Mustache.render(template, data.data),
+	};
 };
 
 export default renderMustacheTemplate;

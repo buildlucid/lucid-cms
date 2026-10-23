@@ -1,6 +1,10 @@
 node_modules
 .lucid
+.env
+.env.*
+!.env.example
 .dev.vars
+.cloudflare
 .wrangler
 dist
 db.sqlite

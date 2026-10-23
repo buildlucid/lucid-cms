@@ -1,89 +1,58 @@
 import { confirm } from "@inquirer/prompts";
-import {
-	startLoggerBuffering,
-	stopLoggerBuffering,
-} from "../../logger/index.js";
+import runMigrateTask from "../../vite/run-migrate-task.js";
 import cliLogger from "../logger.js";
-import migrateCommand from "./migrate.js";
-import migrateResetCommand from "./migrate-reset.js";
+import runPrompt from "../services/run-prompt.js";
+import runTaskCommand from "../services/run-task-command.js";
+import type { TaskServerOptions } from "../services/start-task-server.js";
 
-const migrateFreshCommand = async (options?: {
-	force?: boolean;
-	remote?: boolean;
-}) => {
-	try {
-		startLoggerBuffering();
-		const startTime = cliLogger.startTimer();
-		const force = options?.force ?? false;
+/** Drops every database table and runs all migrations again in the runtime, after confirming unless forced. */
+const migrateFreshCommand = (
+	options?: { force?: boolean } & TaskServerOptions,
+) =>
+	runTaskCommand(
+		"Fresh migration failed",
+		async (run, elapsed) => {
+			cliLogger.warn(
+				"This will drop all database tables and re-run all migrations",
+			);
 
-		cliLogger.warn(
-			"This will drop all database tables and re-run all migrations",
-		);
-
-		if (!force) {
-			let shouldProceed: boolean;
-			try {
-				shouldProceed = await confirm({
-					message:
-						"Are you sure you want to fresh migrate the database? This will drop ALL tables and re-run migrations. This action cannot be undone.",
-					default: false,
-				});
-			} catch (error) {
-				if (error instanceof Error && error.name === "ExitPromptError") {
-					await stopLoggerBuffering();
-					process.exit(0);
-				}
-				throw error;
-			}
-
-			if (!shouldProceed) {
+			const proceed =
+				options?.force ||
+				(await runPrompt((output) =>
+					confirm(
+						{
+							message:
+								"Are you sure you want to fresh migrate the database? This will drop ALL tables and re-run migrations. This action cannot be undone.",
+							default: false,
+						},
+						{ output },
+					),
+				));
+			if (!proceed) {
 				cliLogger.info("Fresh migration cancelled");
-				await stopLoggerBuffering();
-				process.exit(0);
+				return 0;
 			}
-		}
 
-		const resetResult = await migrateResetCommand({ mode: "return" })({
-			force: true,
-		});
-		if (!resetResult) {
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
+			cliLogger.info("Dropping all database tables...");
+			await run("migrate:reset", {});
 
-		const migrateResult = await migrateCommand({ mode: "return" })({
-			skipSyncSteps: false,
-			allowDestructive: true,
-		});
-		if (!migrateResult) {
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
+			const result = await runMigrateTask(run, {
+				skipSyncSteps: false,
+				allowDestructive: true,
+			});
+			if (result.status !== "complete") return 1;
 
-		const endTime = startTime();
-		cliLogger.log(
-			cliLogger.createBadge("LUCID CMS"),
-			"Fresh migration completed",
-			cliLogger.color.green("successfully"),
-			"in",
-			cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-			{
-				spaceAfter: true,
-				spaceBefore: true,
-			},
-		);
-
-		await stopLoggerBuffering();
-		process.exit(0);
-	} catch (error) {
-		if (error instanceof Error) {
-			cliLogger.errorInstance(error, "Fresh migration failed");
-		} else {
-			cliLogger.error("Fresh migration failed", "Unknown error");
-		}
-		await stopLoggerBuffering();
-		process.exit(1);
-	}
-};
+			cliLogger.log(
+				cliLogger.createBadge("LUCID CMS"),
+				"Fresh migration completed",
+				cliLogger.color.green("successfully"),
+				"in",
+				cliLogger.color.green(cliLogger.formatMilliseconds(elapsed())),
+				{ spaceAfter: true, spaceBefore: true },
+			);
+			return 0;
+		},
+		options,
+	);
 
 export default migrateFreshCommand;

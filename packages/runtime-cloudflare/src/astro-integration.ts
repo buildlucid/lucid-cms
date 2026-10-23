@@ -1,40 +1,19 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import type { LucidAstroIntegrationBridge } from "@lucidcms/astro/types";
 import { LucidError } from "@lucidcms/core/runtime";
-import type { RuntimeAdapter } from "@lucidcms/core/types";
-import prepareAstro from "./services/prepare-astro.js";
-import type { CloudflareRuntimeAdapter } from "./types.js";
+import type { Plugin } from "vite";
+import constants from "./constants.js";
+import assetHeadersPlugin from "./services/asset-headers-plugin.js";
+import inspectorPortLogsPlugin from "./services/inspector-port-logs-plugin.js";
+import listOptimizeEntries from "./services/list-optimize-entries.js";
+import renderWorkerHandlers from "./services/render-worker-handlers.js";
 
-type AstroAdapter = {
-	name: string;
-};
+const resolvedWorkerEntry = `\0${constants.ASTRO_WORKER_ENTRY}`;
 
 /** Build-time Astro bridge for the Cloudflare runtime. */
 const cloudflareAstroIntegration = {
-	vite: {
-		ssrEnvironment: {
-			// Late optimization restarts the Worker while its initial modules are loading.
-			optimizeDeps: {
-				include: [
-					"astro/assets/services/noop",
-					"astro/logger/console",
-					"kysely/migration",
-				],
-			},
-			build: {
-				rolldownOptions: {
-					output: {
-						codeSplitting: {
-							// Zod's cyclic modules must initialize together in the Worker.
-							groups: [{ name: "zod", test: /[/\\]node_modules[/\\]zod[/\\]/ }],
-						},
-					},
-				},
-			},
-		},
-		aliases: {
-			"cross-fetch": "cross-fetch/dist/browser-ponyfill.js",
-		},
-	},
-	validateAdapter(adapter: AstroAdapter | undefined) {
+	validateAdapter(adapter) {
 		if (!adapter?.name.toLowerCase().includes("cloudflare")) {
 			throw new LucidError({
 				message:
@@ -42,13 +21,66 @@ const cloudflareAstroIntegration = {
 			});
 		}
 	},
-	prepare: prepareAstro,
-	async teardown({ adapter }: { adapter: RuntimeAdapter }) {
-		const runtime = adapter as CloudflareRuntimeAdapter;
-		const platformProxy = runtime.getPlatformProxy();
-		runtime.setPlatformProxy(undefined);
-		await platformProxy?.dispose?.();
+	/** Supplies Astro Vite settings that serve `withLucid`'s Worker entry from `cloudflare.config.ts` for Astro's Cloudflare adapter, adding Lucid's scheduler, plugin handlers and asset caching through `_headers`. */
+	vite(props) {
+		if (
+			!existsSync(path.join(props.project.projectRoot, constants.CONFIG_FILE))
+		) {
+			throw new LucidError({
+				message:
+					"Astro's Cloudflare adapter reads the Worker from `cloudflare.config.ts`. Add one that wraps its Worker in `withLucid` from @lucidcms/runtime-cloudflare/config.",
+			});
+		}
+
+		const handlers = renderWorkerHandlers(props.project.artifacts.build);
+		const workerEntry: Plugin = {
+			name: "lucid:astro-cloudflare-worker",
+			resolveId: {
+				filter: { id: /^virtual:lucid\/astro-worker$/ },
+				handler: () => resolvedWorkerEntry,
+			},
+			load: {
+				filter: { id: /^\0virtual:lucid\/astro-worker$/ },
+				handler: () => `import { handle } from "@astrojs/cloudflare/handler";
+import { createAstroWorker } from "@lucidcms/runtime-cloudflare/astro";
+import { createLucidInvocation } from ${JSON.stringify(props.runtimeModuleId)};
+${handlers.imports}
+
+export default createAstroWorker({ fetch: handle, createLucidInvocation }, ${handlers.handlers});
+`,
+			},
+		};
+
+		return {
+			plugins: [workerEntry, assetHeadersPlugin(), inspectorPortLogsPlugin()],
+			aliases: {
+				"cross-fetch": "cross-fetch/dist/browser-ponyfill.js",
+			},
+			ssrEnvironment: {
+				optimizeDeps: {
+					entries: listOptimizeEntries(props.project, [
+						"@astrojs/cloudflare/handler",
+						"@lucidcms/runtime-cloudflare/astro",
+						...handlers.modules,
+					]),
+					// Late optimization restarts the Worker while its initial modules are loading.
+					include: ["kysely/migration"],
+				},
+				build: {
+					rolldownOptions: {
+						output: {
+							codeSplitting: {
+								// Zod's cyclic modules must initialize together in the Worker.
+								groups: [
+									{ name: "zod", test: /[/\\]node_modules[/\\]zod[/\\]/ },
+								],
+							},
+						},
+					},
+				},
+			},
+		};
 	},
-};
+} satisfies LucidAstroIntegrationBridge;
 
 export default cloudflareAstroIntegration;

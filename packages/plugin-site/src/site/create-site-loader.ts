@@ -1,6 +1,6 @@
 import { LucidError, logger } from "@lucidcms/core";
 import type { ResolvedLucidConfig, ServiceContext } from "@lucidcms/core/types";
-import { type Loader, memoryLoader } from "@lucidkiln/core";
+import type { Loader } from "@lucidkiln/core";
 import type { RouterContext } from "rou3";
 import createFragmentCache from "../cache/create-fragment-cache.js";
 import { PLUGIN_KEY } from "../constants.js";
@@ -9,18 +9,19 @@ import isDynamicPattern from "../router/is-dynamic-pattern.js";
 import isPageTemplate from "../router/is-page-template.js";
 import readPageExports from "../router/read-page-exports.js";
 import type {
-	SiteCliData,
+	SiteData,
+	SiteModule,
 	SitePage,
 	SitePluginOptionsInternal,
 } from "../types.js";
 import { moveUiAssets } from "../ui/page-assets.js";
-import { createBuiltUi } from "../ui/site-ui.js";
+import createSiteUi from "../ui/site-ui.js";
 import withUi from "../ui/with-ui.js";
 import sha256 from "../utils/sha256.js";
 import createSiteConfig, { type SiteConfig } from "./create-site-config.js";
 import createSiteKiln, { type SiteKiln } from "./create-site-kiln.js";
 import hashTemplates from "./hash-templates.js";
-import readCliData from "./read-cli-data.js";
+import readSiteModule from "./read-site-module.js";
 import resolveSiteEnvironment from "./resolve-site-environment.js";
 
 export type Site = {
@@ -29,8 +30,8 @@ export type Site = {
 	freshKiln: SiteKiln;
 	router: RouterContext<SitePage>;
 	pages: SitePage[];
-	/** Vite's dev server or the built site, or null when Vite isn't installed and nothing was built. */
-	data: SiteCliData | null;
+	/** How the site's browser files are served: Vite's dev server or the client build. */
+	data: SiteData;
 	templates: ReadonlySet<string>;
 	/** Combines a globals hash with the development template hash or build ID to namespace stored pages and fragments. */
 	cacheNamespace: string;
@@ -39,55 +40,16 @@ export type Site = {
 	finishPage: (html: string) => string;
 };
 
-/** Built sites read the templates bundled at build time; development reads the directory. */
-const createTemplateLoader = async (
-	directory: string,
-	data: SiteCliData | null,
-): Promise<Loader> => {
-	if (data?.kind === "build") return memoryLoader(data.templates);
-	const { fileLoader } = await import("@lucidkiln/core/node");
-	return fileLoader({ root: directory });
-};
+/** A Kiln loader over the site module's templates, which load through the server environment. */
+const moduleLoader = (templates: SiteModule["templates"]): Loader => ({
+	list: () => Object.keys(templates),
+	load: (name) => templates[name]?.() ?? null,
+});
 
 /** Wraps the template loader to return UI components for their names, when the site has any. */
-const addUi = (loader: Loader, data: SiteCliData | null, module: unknown) => {
-	const ui =
-		data?.kind === "build"
-			? data.ui && createBuiltUi(data.ui, module)
-			: data?.ui;
+const addUi = (loader: Loader, module: SiteModule, data: SiteData) => {
+	const ui = createSiteUi(module, data);
 	return ui ? withUi(loader, ui) : loader;
-};
-
-/** The CLI resolves the directory from the project root; without it, it's relative to the working directory. */
-const resolveDirectory = (option: string, data: SiteCliData | null) =>
-	data?.kind === "dev" ? data.directory : option;
-
-/**
- * Fingerprints the site directory cheaply enough to check on every development request: each file's name, size and
- * modified time, with the site's translations since the cache namespace holds them too. UI component files are included
- * so editing one still starts a new namespace, as hashing their source did.
- */
-const readDevSignature = async (
-	directory: string,
-	translations: Record<string, Record<string, string>>,
-) => {
-	const [{ fileLoader }, { stat }] = await Promise.all([
-		import("@lucidkiln/core/node"),
-		import("node:fs/promises"),
-	]);
-	const names = await fileLoader({ root: directory }).list();
-	const files = await Promise.all(
-		names.map(async (name) => {
-			try {
-				const file = await stat(`${directory}/${name}`);
-				return `${name}:${file.size}:${file.mtimeMs}`;
-			} catch {
-				// Removed between listing and stat, which the next request's listing settles.
-				return `${name}:missing`;
-			}
-		}),
-	);
-	return [...files, JSON.stringify(translations)].join("\n");
 };
 
 /** Warns while developing a static site, so a missing `paths` export doesn't first surface in `site:build`. */
@@ -104,28 +66,23 @@ const warnMissingPaths = (pages: SitePage[]) => {
 };
 
 const loadSite = async (props: {
-	directory: string;
-	data: SiteCliData | null;
-	/** The server module the build wrote, holding the site's UI components. */
-	module: unknown;
+	module: SiteModule;
+	data: SiteData;
+	/** The hash of the templates and translations, for development's cache namespace. */
+	templateHash: string | null;
 	config: SiteConfig;
 	options: SitePluginOptionsInternal;
 	context: ServiceContext;
 }): Promise<Site> => {
 	const { data } = props;
-	const files = await createTemplateLoader(props.directory, data);
-	const loader = addUi(files, data, props.module);
-	const templates = new Set(await files.list?.());
+	const files = moduleLoader(props.module.templates);
+	const loader = addUi(files, props.module, data);
+	const templates = new Set(Object.keys(props.module.templates));
+
 	// Each build uses a new cache namespace because code and assets can change without template changes.
 	const sourceNamespace =
-		data?.kind === "build"
-			? data.buildId
-			: // The files' own source, so editing a UI component starts a new namespace too.
-				await hashTemplates(
-					files,
-					templates,
-					props.context.translate.scopeBundles("site"),
-				);
+		data.kind === "build" ? data.buildId : (props.templateHash ?? "");
+
 	// Hash globals to catch environment changes without a rebuild, excluding callables that JSON cannot serialise.
 	const kiln = props.options.kiln ?? {};
 	const globals = JSON.stringify([
@@ -133,6 +90,7 @@ const loadSite = async (props: {
 		...(kiln.extensions ?? []).map((extension) => extension.globals),
 	]);
 	const cacheNamespace = `${sourceNamespace}-${(await sha256(globals)).slice(0, 8)}`;
+
 	const kilnProps = {
 		loader,
 		config: props.config,
@@ -141,6 +99,7 @@ const loadSite = async (props: {
 		lookupTranslation: props.context.translate.lookup,
 	};
 	const freshKiln = createSiteKiln(kilnProps);
+
 	const pageTemplates = [...templates].filter(isPageTemplate);
 	const exports = new Map(
 		await Promise.all(
@@ -150,12 +109,14 @@ const loadSite = async (props: {
 			),
 		),
 	);
+
 	const { router, pages } = createPageRouter(templates, {
 		mode: props.options.mode,
 		cacheControl: props.options.cacheControl,
 		exports,
 	});
-	if (props.options.mode === "static" && data?.kind === "dev") {
+
+	if (props.options.mode === "static" && data.kind === "dev") {
 		warnMissingPaths(pages);
 	}
 
@@ -173,7 +134,7 @@ const loadSite = async (props: {
 		cacheNamespace,
 		config: props.config,
 		finishPage: (html) =>
-			moveUiAssets(html, data?.kind === "build" ? (data.ui?.styles ?? {}) : {}),
+			moveUiAssets(html, data.kind === "build" ? (data.ui?.styles ?? {}) : {}),
 	};
 };
 
@@ -187,47 +148,50 @@ const createSiteLoader = (
 		resolveSiteEnvironment(config, options.environment),
 	);
 	let site: Promise<Site> | undefined;
-	/** The directory's fingerprint the current site was loaded from, in development. */
-	let signature: string | undefined;
+	/** What the current site was loaded from: its data and, in development, its template hash. */
+	let loadedFrom: { data: SiteData; templateHash: string | null } | undefined;
 
 	return async (props: {
 		context: ServiceContext;
-		/** Replaces what the CLI handed the runtime, such as for `site:build`, which builds its own. */
-		data?: SiteCliData;
-		/** Replaces the server module the build wrote, with `data`. */
-		module?: unknown;
+		/** Replaces how browser files are served, such as for `site:build`, which builds its own. */
+		data?: SiteData;
 	}): Promise<Site> => {
-		const data = props.data ?? readCliData(props.context.runtimeContext);
-		const module = props.data
-			? props.module
-			: props.context.runtimeContext?.pluginModules?.[PLUGIN_KEY];
-		const compiled = props.context.runtimeContext?.compiled;
-		// A built server has no site directory to fall back to, which would only fail later on Cloudflare.
-		if (compiled === true && data?.kind !== "build") {
+		const module = readSiteModule(props.context.runtimeContext);
+		if (!module) {
 			throw new LucidError({
 				scope: PLUGIN_KEY,
 				message:
-					"The site wasn't built with the server, so it has no templates to render. Run lucidcms build.",
+					"The site's server module is missing. Run Lucid through its Vite plugin, with lucidcms dev or lucidcms build.",
 			});
 		}
-		// Development checks the directory on every request and reloads the site when a file changed, so edits need no restart; built templates can't change.
-		const reloads = compiled === false && data?.kind !== "build";
-		if (site && !reloads) return site;
 
-		const directory = resolveDirectory(options.directory, data);
-		if (reloads) {
-			const current = await readDevSignature(
-				directory,
-				props.context.translate.scopeBundles("site"),
-			);
-			if (site && current === signature) return site;
-			signature = current;
+		const data = props.data ?? module.data;
+
+		// Development hashes the templates on every request and reloads the site when one changed, so edits need no
+		// restart. Templates load through Vite, which hands back each file's latest source.
+		const templateHash =
+			data.kind === "dev"
+				? `${await hashTemplates(
+						moduleLoader(module.templates),
+						Object.keys(module.templates),
+						props.context.translate.scopeBundles("site"),
+					)}-${data.revision}`
+				: null;
+
+		if (
+			site &&
+			loadedFrom?.data === data &&
+			loadedFrom.templateHash === templateHash
+		) {
+			return site;
 		}
 
+		loadedFrom = { data, templateHash };
+
 		const loading = loadSite({
-			directory,
-			data,
 			module,
+			data,
+			templateHash,
 			config: siteConfig,
 			options,
 			context: props.context,

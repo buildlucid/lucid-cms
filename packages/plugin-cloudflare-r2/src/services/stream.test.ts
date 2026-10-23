@@ -13,7 +13,11 @@ describe("stream", () => {
 		}));
 
 		const binding = {
+			head: vi.fn(),
 			get,
+			put: vi.fn(),
+			delete: vi.fn(),
+			list: vi.fn(),
 		} as unknown as R2Bucket;
 		const service = stream({ binding: "R2" });
 

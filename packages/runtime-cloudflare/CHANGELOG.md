@@ -2,8 +2,9 @@
 
 ## v1.4.0 (unreleased)
 
-- Builds are now bundled by Lucid, resolving packages' Worker builds for a smaller Worker.
 - Plugins add Worker event handlers as modules with `cloudflare:worker-handler` artifacts.
+- Runs on Vite with `@cloudflare/vite-plugin` 2 and deploys with `cf deploy --prebuilt`, replacing Wrangler. Astro projects use `@astrojs/cloudflare` 15 with `withLucid` from `@lucidcms/runtime-cloudflare/config`.
+- Removed the `d1` binding, the `wrangler` and `environment` options, and the KV and R2 preview options.
 
 ## v1.3.1
 

@@ -1,16 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import tailwindcss from "@tailwindcss/vite";
-import { type InlineConfig, searchForWorkspaceRoot } from "vite";
-import solid from "vite-plugin-solid";
 import packageJson from "../../package.json" with { type: "json" };
-import type { AdminConfig } from "../extensions/types/config.js";
-import type { AdminClientConfig } from "../types/client-config.js";
-import { adminClientConfigPlugin } from "./client-config.js";
-import {
-	adminExtensionsPlugin,
-	hasAdminExtensions,
-} from "./extensions/plugin.js";
 
 // Resolve the owning package independently of the compiler output's directory depth.
 export const adminRoot = path.dirname(
@@ -37,77 +27,40 @@ const browserEntrypoints: Record<string, string[]> = {
 	"@codemirror/legacy-modes": ["@codemirror/legacy-modes/mode/shell"],
 };
 
-export type AdminConfigOptions = {
-	projectRoot: string;
-	/** Absolute path returned by the host's config loader. */
-	configPath: string;
-	admin?: AdminConfig;
-	clientConfig: AdminClientConfig;
+/** Import aliases the admin's source uses, which only apply to the admin's own modules. */
+export const adminAliases: Record<string, string> = {
+	"@": path.join(adminRoot, "src"),
+	"@assets": path.join(adminRoot, "src/assets"),
+	"@field-conditions": path.join(adminRoot, "dist/shared/conditions.js"),
+	"@field-capabilities": path.join(adminRoot, "dist/shared/capabilities.js"),
+	"@match-permissions": path.join(
+		adminRoot,
+		"dist/shared/match-permissions.js",
+	),
+	"@ai-feature-access": path.join(
+		adminRoot,
+		"dist/shared/ai-feature-access.js",
+	),
+	"@lucidcms/preview-protocol": path.join(adminRoot, "dist/shared/preview.js"),
 };
 
-/** The installed admin package owns its compiler configuration and input paths. */
-export const createAdminConfig = ({
-	projectRoot,
-	configPath,
-	admin,
-	clientConfig,
-}: AdminConfigOptions): InlineConfig => ({
-	configFile: false,
-	// The CLI or Astro host owns terminal clearing; admin HMR only appends updates.
-	clearScreen: false,
-	envDir: false,
-	root: adminRoot,
-	base: "/admin/",
-	publicDir: false,
-	cacheDir: path.join(projectRoot, ".lucid/vite/admin"),
-	plugins: [
-		adminClientConfigPlugin(clientConfig),
-		adminExtensionsPlugin({
-			configPath,
-			admin,
-			stylesheetPath: path.join(adminRoot, "src/index.css"),
-		}),
-		tailwindcss(),
-		solid(),
+/** Packages Vite should pre-bundle for the admin, and Solid source packages it must leave for the Solid plugin. */
+export const adminOptimizeDeps = {
+	exclude: Object.entries(browserEntrypoints)
+		.filter(([, entries]) => entries.length === 0)
+		.map(([name]) => name),
+	include: [
+		...Object.keys(packageJson.dependencies)
+			.filter((name) => !compilerDependencies.has(name))
+			.flatMap((name) => browserEntrypoints[name] ?? [name]),
+		"solid-js/web",
+		"solid-js/store",
 	],
-	server: { fs: { allow: [searchForWorkspaceRoot(projectRoot), adminRoot] } },
-	resolve: {
-		dedupe: ["solid-js", "@solidjs/router", "@tanstack/solid-query"],
-		alias: {
-			"@": path.join(adminRoot, "src"),
-			"@assets": path.join(adminRoot, "src/assets"),
-			"@field-conditions": path.join(adminRoot, "dist/shared/conditions.js"),
-			"@field-capabilities": path.join(
-				adminRoot,
-				"dist/shared/capabilities.js",
-			),
-			"@match-permissions": path.join(
-				adminRoot,
-				"dist/shared/match-permissions.js",
-			),
-			"@ai-feature-access": path.join(
-				adminRoot,
-				"dist/shared/ai-feature-access.js",
-			),
-			"@lucidcms/preview-protocol": path.join(
-				adminRoot,
-				"dist/shared/preview.js",
-			),
-		},
-	},
-	optimizeDeps: {
-		// The installed source lives in node_modules. Explicit entries prevent Vite
-		// from treating our source aliases as dependencies or missing CommonJS imports.
-		noDiscovery: !hasAdminExtensions(admin),
-		exclude: Object.entries(browserEntrypoints)
-			.filter(([, entries]) => entries.length === 0)
-			.map(([name]) => name),
-		include: [
-			...Object.keys(packageJson.dependencies)
-				.filter((name) => !compilerDependencies.has(name))
-				.flatMap((name) => browserEntrypoints[name] ?? [name]),
-			"solid-js/web",
-			"solid-js/store",
-		],
-	},
-});
+};
+
+/** Packages that must load once, so admin and extension code share their state. */
+export const adminDedupe = [
+	"solid-js",
+	"@solidjs/router",
+	"@tanstack/solid-query",
+];

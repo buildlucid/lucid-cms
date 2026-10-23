@@ -106,7 +106,7 @@ test("compiles project and installed plugin themes together and watches their so
 			build: {
 				write: false,
 				cssMinify: false,
-				rollupOptions: { input: path.join(root, "main.js") },
+				rolldownOptions: { input: path.join(root, "main.js") },
 			},
 		});
 		if (Array.isArray(result) || !("output" in result))

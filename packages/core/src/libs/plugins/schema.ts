@@ -39,6 +39,20 @@ export const PluginDefinitionSchema: z.ZodType<LucidPluginDefinition> =
 					typeof value.create === "function",
 			)
 			.optional(),
+		tasks: z
+			.record(
+				z.string(),
+				z.custom<NonNullable<LucidPluginDefinition["tasks"]>[string]>(
+					(value) =>
+						!!value &&
+						typeof value === "object" &&
+						"input" in value &&
+						value.input instanceof z.ZodType &&
+						"run" in value &&
+						typeof value.run === "function",
+				),
+			)
+			.optional(),
 		cli: z
 			.strictObject({
 				module: z.string().trim().min(1),

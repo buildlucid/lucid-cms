@@ -12,7 +12,7 @@ test("asks Astro to reload when a new resource is added and removes its listener
 	);
 	if (
 		typeof plugin.configureServer !== "function" ||
-		typeof plugin.closeBundle !== "function"
+		typeof plugin.closeServer !== "function"
 	)
 		throw new Error("Missing watcher lifecycle hooks");
 	plugin.configureServer.call({} as never, { watcher } as never);
@@ -22,7 +22,7 @@ test("asks Astro to reload when a new resource is added and removes its listener
 	watcher.emit("add", "/project/emails/known.mustache");
 	watcher.emit("add", "/project/emails-other/unrelated.mustache");
 	expect(changes).not.toHaveBeenCalled();
-	plugin.closeBundle.call({} as never);
+	plugin.closeServer.call({} as never, { reason: "restart" });
 	watcher.emit("add", "/project/emails/another.mustache");
 	expect(changes).not.toHaveBeenCalled();
 });

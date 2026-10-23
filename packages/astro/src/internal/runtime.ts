@@ -1,18 +1,19 @@
-import type { EnvironmentVariables } from "@lucidcms/core/types";
-
-const buildContextsSymbol = Symbol.for("@lucidcms/astro:build-contexts");
 const runtimeHostsSymbol = Symbol.for("@lucidcms/astro:hosts");
 const invocationsSymbol = Symbol.for("@lucidcms/astro:invocations");
+
 type RuntimeHost = {
 	destroy(): void | Promise<void>;
 };
+
 type RuntimeInvocation = {
 	destroy(): void | Promise<void>;
 };
+
 type HostCreation = {
 	startedAt: number;
 	error?: unknown;
 };
+
 type RuntimeHostState = {
 	revision: string;
 	hosts: Map<unknown, RuntimeHost>;
@@ -21,21 +22,19 @@ type RuntimeHostState = {
 	ready: Promise<void>;
 	destroyed?: Promise<void>;
 };
+
 type InvocationState = {
 	invocations: Map<unknown, Promise<RuntimeInvocation>>;
 };
+
 type InvocationLocals = {
 	[invocationsSymbol]?: Map<string, InvocationState>;
 };
+
 const globalState = globalThis as typeof globalThis & {
-	[buildContextsSymbol]?: Map<string, EnvironmentVariables | undefined>;
 	[runtimeHostsSymbol]?: Map<string, RuntimeHostState>;
 };
-let buildContexts = globalState[buildContextsSymbol];
-if (!buildContexts) {
-	buildContexts = new Map();
-	globalState[buildContextsSymbol] = buildContexts;
-}
+
 let runtimeHosts = globalState[runtimeHostsSymbol];
 if (!runtimeHosts) {
 	runtimeHosts = new Map();
@@ -45,27 +44,18 @@ if (!runtimeHosts) {
 /** Destroys every host held by a runtime revision. */
 const destroyRuntimeHostState = (state: RuntimeHostState) => {
 	if (state.destroyed) return state.destroyed;
+
 	state.invalidated = true;
 	const hosts = Array.from(state.hosts.values());
 	state.hosts.clear();
 	state.destroyed = Promise.allSettled(
 		hosts.map((host) => host.destroy()),
 	).then(() => undefined);
+
 	return state.destroyed;
 };
 
-/** Registers environment values for generated modules used during the current build. */
-export const registerBuildContext = (
-	id: string,
-	env: EnvironmentVariables | undefined,
-) => {
-	buildContexts.set(id, env);
-};
-
-/** Returns environment values registered during Astro configuration. */
-export const getBuildContext = (id: string) => buildContexts.get(id);
-
-/** Returns the shared host cache for a generated project revision. */
+/** Returns the shared host cache for a project revision. */
 export const getRuntimeHostState = (hostKey: string, revision: string) => {
 	const previous = runtimeHosts.get(hostKey);
 	if (previous?.revision === revision && !previous.invalidated) return previous;
@@ -100,6 +90,7 @@ export const getOrCreateRuntimeHost = async <Host extends RuntimeHost>(
 		creation = { startedAt: Date.now() };
 		state.creations.set(key, creation);
 		const currentCreation = creation;
+
 		const task = Promise.resolve()
 			.then(create)
 			.then(async (host) => {
@@ -109,11 +100,13 @@ export const getOrCreateRuntimeHost = async <Host extends RuntimeHost>(
 						"Lucid runtime host was invalidated during initialization.",
 					);
 				}
+
 				const initialized = state.hosts.get(key);
 				if (initialized) {
 					await host.destroy();
 					return initialized as Host;
 				}
+
 				state.hosts.set(key, host);
 				state.creations.delete(key);
 				return host;
@@ -123,6 +116,7 @@ export const getOrCreateRuntimeHost = async <Host extends RuntimeHost>(
 				if (state.creations.get(key) === currentCreation) {
 					state.creations.delete(key);
 				}
+
 				throw error;
 			});
 
@@ -132,20 +126,24 @@ export const getOrCreateRuntimeHost = async <Host extends RuntimeHost>(
 			// The creating request still owns and awaits the task when anchoring is
 			// unavailable, such as during local Node development.
 		}
+
 		return task;
 	}
 
 	const deadline = creation.startedAt + 30_000;
 	let pollDelay = 1;
+
 	while (Date.now() < deadline) {
 		const initialized = state.hosts.get(key);
 		if (initialized) return initialized as Host;
+
 		if (creation.error !== undefined) {
 			if (state.creations.get(key) === creation) {
 				state.creations.delete(key);
 			}
 			throw creation.error;
 		}
+
 		await new Promise((resolve) => setTimeout(resolve, pollDelay));
 		pollDelay = Math.min(pollDelay * 2, 25);
 	}
@@ -153,6 +151,7 @@ export const getOrCreateRuntimeHost = async <Host extends RuntimeHost>(
 	if (state.creations.get(key) === creation) {
 		state.creations.delete(key);
 	}
+
 	return getOrCreateRuntimeHost(state, key, create, anchor);
 };
 
@@ -197,6 +196,7 @@ export const getOrCreateInvocation = async <
 	let invocationPromise = invocations.get(key) as
 		| Promise<Invocation>
 		| undefined;
+
 	if (!invocationPromise) {
 		invocationPromise = Promise.resolve()
 			.then(create)
@@ -206,6 +206,7 @@ export const getOrCreateInvocation = async <
 			});
 		invocations.set(key, invocationPromise);
 	}
+
 	return invocationPromise;
 };
 
@@ -219,6 +220,7 @@ export const hasInvocationScopes = (locals: object) => {
 export const destroyInvocationScopes = async (locals: object) => {
 	const projectStates = (locals as InvocationLocals)[invocationsSymbol];
 	if (!projectStates) return;
+
 	const invocations = Array.from(projectStates.values()).flatMap((state) =>
 		Array.from(state.invocations.values()),
 	);
@@ -228,7 +230,7 @@ export const destroyInvocationScopes = async (locals: object) => {
 	);
 };
 
-/** Destroys one generated host state without invalidating a replacement. */
+/** Destroys one revision's host state without invalidating a replacement. */
 export const destroyRuntimeHostRevision = async (
 	hostKey: string,
 	state: RuntimeHostState,
@@ -237,7 +239,7 @@ export const destroyRuntimeHostRevision = async (
 	await destroyRuntimeHostState(state);
 };
 
-/** Destroys all hosts owned by a generated Lucid project. */
+/** Destroys all hosts owned by a Lucid project. */
 export const destroyRuntimeHosts = async (hostKey: string) => {
 	const state = runtimeHosts.get(hostKey);
 	if (!state) return;

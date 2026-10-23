@@ -71,14 +71,11 @@ const featureSupportChecks = (
 		const message =
 			issue.message || `${issue.key} is not supported on this runtime`;
 
+		const dedupeKey = `runtime-support:${issue.type}:${issue.key}`;
 		if (issue.level === "unsupported") {
-			logger.error({
-				message: `[${issue.type}] ${message}`,
-			});
+			logger.error({ dedupeKey, message: `[${issue.type}] ${message}` });
 		} else {
-			logger.warn({
-				message: `[${issue.type}] ${message}`,
-			});
+			logger.warn({ dedupeKey, message: `[${issue.type}] ${message}` });
 		}
 	}
 

@@ -11,13 +11,17 @@
 			"types": "./dist/index.d.mts",
 			"default": "./dist/index.mjs"
 		},
-		"./runtime": {
-			"types": "./dist/runtime.d.mts",
-			"default": "./dist/runtime.mjs"
-		},
 		"./entry": {
 			"types": "./dist/entry.d.mts",
 			"default": "./dist/entry.mjs"
+		},
+		"./handler": {
+			"types": "./dist/handler.d.mts",
+			"default": "./dist/handler.mjs"
+		},
+		"./vite": {
+			"types": "./dist/vite.d.mts",
+			"default": "./dist/vite.mjs"
 		},
 		"./astro": {
 			"types": "./dist/astro.d.mts",
@@ -60,10 +64,12 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.1",
+		"@lucidcms/astro": "0.3.2",
 		"@lucidcms/core": "0.19.0-alpha.0",
 		"@types/node": "^24.13.2",
 		"tsdown": "^0.22.3",
-		"typescript": "^6.0.3"
+		"typescript": "^6.0.3",
+		"vite": "^8.3.5"
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.0.6",
@@ -74,7 +80,8 @@
 	"peerDependencies": {
 		"@lucidcms/core": "^0.19.0-alpha.0",
 		"hono": "^4.12.27",
-		"hono-openapi": "^1.3.0"
+		"hono-openapi": "^1.3.0",
+		"vite": "^8.3.5"
 	},
 	"volta": {
 		"node": "26.12.1"

@@ -222,8 +222,9 @@ export const stopLoggerBuffering = async () => {
 	const bufferedEntries = logBuffer;
 	logBuffer = [];
 
+	// A destroyed transport is replaced, but the process keeps the level it last configured for the buffered entries.
 	if (loggerState.destroyed) {
-		loggerState = createDefaultState();
+		loggerState = { ...createDefaultState(), level: loggerState.level };
 		logger = createLogger(loggerState);
 	}
 
@@ -251,7 +252,7 @@ export const destroyLogger = async () => {
 /**
  * Returns the active process logger used by the stable public proxy.
  */
-export const getLogger = (): LucidLogger => logger;
+const getLogger = (): LucidLogger => logger;
 
 /** Shared Lucid logger. Uses the configured level and transport and adds the active request ID when available. */
 const loggerProxy: LucidLogger = {

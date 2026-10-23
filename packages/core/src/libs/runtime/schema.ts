@@ -17,9 +17,12 @@ const RuntimeAdapterSchema = z.object({
 			customPrepareArtifacts: z.array(z.string()).optional(),
 		})
 		.optional(),
-	/** Module exporting the runtime without CLI tooling, such as `@lucidcms/runtime-node/runtime`, which replaces the package's main entry in built output. */
-	runtimeEntrypoint: z.string().optional(),
+	/** Module whose default export is the runtime's `RuntimeViteIntegration`, loaded by `@lucidcms/core/vite`. */
+	vite: z.string().optional(),
 	lucid: z.string(),
 });
+
+/** The shape of `defineConfig({ host })`. */
+export const HostAdapterSchema = z.object({ key: z.string(), cli: z.string() });
 
 export default RuntimeAdapterSchema;

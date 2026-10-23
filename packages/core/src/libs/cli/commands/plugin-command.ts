@@ -1,25 +1,18 @@
 import type { Command } from "commander";
+import type z from "zod";
 import { LucidError } from "../../../utils/errors/index.js";
-import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { LoadConfigResult } from "../../config/load-config-file.js";
-import type { DatabaseConnection } from "../../db/types.js";
-import prepareTranslations from "../../i18n/prepare-translations.js";
-import {
-	destroyKVAdapter,
-	getInitializedKVAdapter,
-} from "../../kv/lifecycle.js";
-import type { KVAdapterInstance } from "../../kv/types.js";
-import {
-	startLoggerBuffering,
-	stopLoggerBuffering,
-} from "../../logger/index.js";
+import loadPluginClis from "../../plugins/load-plugin-clis.js";
 import type {
 	LucidPluginCommand,
 	LucidPluginCommandLogger,
+	LucidPluginTask,
+	LucidPluginTaskResult,
 } from "../../plugins/types.js";
-import createToolkit from "../../toolkit/create-toolkit.js";
+import loadProject from "../../vite/load-project.js";
 import cliLogger from "../logger.js";
-import loadPluginClis from "../services/load-plugin-clis.js";
+import createViteConfig from "../services/create-vite-config.js";
+import runTaskCommand from "../services/run-task-command.js";
 
 const logger: LucidPluginCommandLogger = {
 	info: (message) => cliLogger.info(message),
@@ -35,72 +28,51 @@ const logger: LucidPluginCommandLogger = {
 	},
 };
 
-/** Runs a plugin's command with a database connection, KV and toolkit. */
+/** Runs a plugin's command, which reaches the runtime through the plugin's tasks. */
 const pluginCommand =
-	(command: LucidPluginCommand, loaded: LoadConfigResult) => async () => {
-		const { config, env, runtimeContext } = loaded;
-		let database: DatabaseConnection | undefined;
-		let kv: KVAdapterInstance | undefined;
-
-		const cleanupAdapters = async () => {
-			await Promise.allSettled([
-				database?.destroy(),
-				destroyKVAdapter(kv, { config, env, runtimeContext }),
-			]);
-		};
-
-		try {
-			startLoggerBuffering();
-			const startTime = cliLogger.startTimer();
-			const { translationStore } = await prepareTranslations({
-				config,
-				files: loaded.resources.files.translations,
-			});
-			database = await config.db.connect(env);
-			kv = await getInitializedKVAdapter(config, { env, runtimeContext });
-			const context = createServiceContext({
-				config,
-				database,
-				translationStore,
-				env,
-				runtimeContext,
-				kv,
-			});
-
+	(command: LucidPluginCommand, key: string, loaded: LoadConfigResult) => () =>
+		runTaskCommand(`"${command.name}" failed`, async (run, elapsed) => {
 			await command.run({
-				config,
+				config: loaded.config,
 				projectRoot: loaded.projectRoot,
-				context,
-				toolkit: createToolkit(context),
 				publicFiles: loaded.resources.files.public,
+				// Commands report their own progress, so Vite only reports warnings and errors.
+				viteConfig: loaded.definition.host
+					? null
+					: createViteConfig({
+							configPath: loaded.configPath,
+							mode: "production",
+							logLevel: "warn",
+							prepare: false,
+							// Commands build their own entries, such as a static site's, which the admin isn't part of.
+							admin: false,
+						}),
+				// The runtime runs this version of the plugin's tasks, so their JSON is the result the command asked for.
+				runTask: async <Task extends LucidPluginTask>(
+					name: string,
+					input: z.input<Task["input"]>,
+				) =>
+					(await run("plugin", {
+						key,
+						name,
+						input,
+					})) as LucidPluginTaskResult<Task>,
 				logger,
 			});
 
-			const endTime = startTime();
-			await cleanupAdapters();
 			cliLogger.log(
 				cliLogger.createBadge("LUCID CMS"),
 				`"${command.name}" completed`,
 				cliLogger.color.green("successfully"),
 				"in",
-				cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
+				cliLogger.color.green(cliLogger.formatMilliseconds(elapsed())),
 				{ spaceAfter: true, spaceBefore: true },
 			);
-			await stopLoggerBuffering();
-			process.exit(0);
-		} catch (error) {
-			await cleanupAdapters();
-			logger.error(error, `"${command.name}" failed`);
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
-	};
+			return 0;
+		});
 
-/** Loads config to register plugin commands only for unknown CLI commands, leaving them out of `lucidcms --help`. */
-export const registerPluginCommands = async (
-	program: Command,
-	loadConfig: () => Promise<LoadConfigResult>,
-) => {
+/** Registers plugin commands after loading the project as `lucid()` does, only for unknown commands so they stay out of `lucidcms --help`. */
+export const registerPluginCommands = async (program: Command) => {
 	const requested = process.argv[2];
 	if (!requested || requested.startsWith("-") || requested === "help") return;
 
@@ -109,7 +81,8 @@ export const registerPluginCommands = async (
 	);
 	if (known.has(requested)) return;
 
-	const loaded = await loadConfig();
+	const { project: loaded } = await loadProject();
+
 	for (const { key, cli } of await loadPluginClis(
 		loaded.config,
 		loaded.projectRoot,
@@ -120,11 +93,12 @@ export const registerPluginCommands = async (
 					message: `The "${key}" plugin's "${command.name}" command has the same name as a built-in or another plugin's command.`,
 				});
 			}
+
 			known.add(command.name);
 			program
 				.command(command.name)
 				.description(command.description)
-				.action(pluginCommand(command, loaded));
+				.action(pluginCommand(command, key, loaded));
 		}
 	}
 };

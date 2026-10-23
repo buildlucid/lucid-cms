@@ -1,7 +1,7 @@
 /** Runtime and service adapter keys maintained by Lucid. */
 export const firstPartyRuntimeAdapterKeys = {
 	runtime: ["node", "cloudflare"],
-	database: ["sqlite", "postgres", "libsql", "d1"],
+	database: ["sqlite", "postgres", "libsql"],
 	mediaStorage: ["file-system", "s3", "cloudflare-r2"],
 	mediaDelivery: ["passthrough", "sharp", "cloudflare-images"],
 	queue: ["inline", "worker", "cloudflare-queues"],

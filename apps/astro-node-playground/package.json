@@ -19,16 +19,16 @@
 		"migrate:fresh": "lucidcms migrate:fresh"
 	},
 	"dependencies": {
-		"astro": "^7.3.1",
 		"@astrojs/node": "^11.1.5",
 		"@lucidcms/astro": "*",
 		"@lucidcms/client": "*",
 		"@lucidcms/core": "*",
-		"@lucidcms/runtime-node": "*",
-		"@lucidcms/plugin-filesystem": "*",
 		"@lucidcms/db-sqlite": "*",
+		"@lucidcms/plugin-filesystem": "*",
+		"@lucidcms/plugin-pages": "*",
 		"@lucidcms/plugin-sqlite-kv": "*",
-		"@lucidcms/plugin-pages": "*"
+		"@lucidcms/runtime-node": "*",
+		"astro": "^7.4.2"
 	},
 	"author": "Build Lucid Ltd",
 	"license": "MIT",

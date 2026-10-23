@@ -10,10 +10,24 @@ import { describe, expect, test, vi } from "vitest";
 import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
 import defineSiteFunction from "../functions/define-site-function.js";
 import { pageMarkup } from "../preview/page-markup.js";
-import type { SitePluginOptions, SitePreview, SiteState } from "../types.js";
+import type {
+	SiteData,
+	SitePluginOptions,
+	SitePreview,
+	SiteState,
+} from "../types.js";
 import createSiteConfig from "./create-site-config.js";
 import createSiteKiln from "./create-site-kiln.js";
 import renderOptions from "./render-options.js";
+
+/** A built site's data, so templates render as they would deployed. */
+const built: SiteData = {
+	kind: "build",
+	buildId: "test",
+	prefix: "",
+	manifest: {},
+	ui: null,
+};
 
 const config = {
 	localization: {
@@ -167,7 +181,7 @@ const siteTranslations: Record<string, Record<string, string>> = {
 const kiln = createSiteKiln({
 	config: siteConfig,
 	options: {},
-	data: null,
+	data: built,
 	lookupTranslation: ({ key, locale, data }) => {
 		const translation = siteTranslations[locale ?? "en"]?.[key];
 		return translation === undefined
@@ -293,7 +307,7 @@ describe("site template functions", () => {
 		await createSiteKiln({
 			config: siteConfig,
 			options: {},
-			data: null,
+			data: built,
 			lookupTranslation: () => undefined,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
@@ -391,7 +405,7 @@ describe("site template functions", () => {
 		const cached = createSiteKiln({
 			config: siteConfig,
 			options: {},
-			data: null,
+			data: built,
 			lookupTranslation: () => undefined,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
@@ -437,7 +451,7 @@ describe("site kiln options", () => {
 		const site = createSiteKiln({
 			config: siteConfig,
 			options: { kiln: { functions: { pageCount } } },
-			data: null,
+			data: built,
 			lookupTranslation: () => undefined,
 			cache: { get: () => null, set },
 			loader: memoryLoader({
@@ -463,7 +477,7 @@ describe("site kiln options", () => {
 			createSiteKiln({
 				config: siteConfig,
 				options: { kiln: kilnOptions },
-				data: null,
+				data: built,
 				lookupTranslation: () => undefined,
 				loader: memoryLoader({
 					"notice.kiln": `{{ notFound() }}`,

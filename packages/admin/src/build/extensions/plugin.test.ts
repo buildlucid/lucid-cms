@@ -12,7 +12,7 @@ import {
 import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 import { build, createServer } from "vite";
 import solid from "vite-plugin-solid";
 import { expect, test } from "vitest";
@@ -125,44 +125,46 @@ test("bundles project and browser package entries without executing them, includ
 		} finally {
 			await server.close();
 		}
+		const extensions = adminExtensionsPlugin({
+			configPath: path.join(root, "lucid.config.js"),
+			stylesheetPath: path.join(root, "main.css"),
+			admin: {
+				routes: [{ key: "test", path: "reports", component: "./Page.jsx" }],
+				slots: [
+					{
+						key: "field-panel",
+						slot: "field.after",
+						match: { brick: "seo", field: "title" },
+						component: {
+							module: "test-plugin/panel",
+							export: "NamedPanel",
+						},
+					},
+					{
+						key: "panel",
+						slot: "brick.afterFields",
+						match: { brick: "seo" },
+						component: "test-plugin/panel",
+					},
+				],
+				scripts: ["./startup.js", "https://example.com/challenge.js"],
+				stylesheets: ["./style.css", "https://example.com/theme.css"],
+			},
+		});
 		await build({
 			configFile: false,
 			root,
 			logLevel: "silent",
-			plugins: [
-				adminExtensionsPlugin({
-					configPath: path.join(root, "lucid.config.js"),
-					stylesheetPath: path.join(root, "main.css"),
-					admin: {
-						routes: [{ key: "test", path: "reports", component: "./Page.jsx" }],
-						slots: [
-							{
-								key: "field-panel",
-								slot: "field.after",
-								match: { brick: "seo", field: "title" },
-								component: {
-									module: "test-plugin/panel",
-									export: "NamedPanel",
-								},
-							},
-							{
-								key: "panel",
-								slot: "brick.afterFields",
-								match: { brick: "seo" },
-								component: "test-plugin/panel",
-							},
-						],
-						scripts: ["./startup.js", "https://example.com/challenge.js"],
-						stylesheets: ["./style.css", "https://example.com/theme.css"],
-					},
-				}),
-				solid(),
-			],
+			plugins: [extensions, solid()],
 			build: { minify: false, manifest: true },
 		});
-		const html = await readFile(path.join(root, "dist/index.html"), "utf8");
-		expect(html).toContain('src="https://example.com/challenge.js"');
-		expect(html).toContain('href="https://example.com/theme.css"');
+		const attributes = extensions.api.tags().map((tag) => tag.attrs);
+		expect(attributes).toContainEqual(
+			expect.objectContaining({ src: "https://example.com/challenge.js" }),
+		);
+		expect(attributes).toContainEqual(
+			expect.objectContaining({ href: "https://example.com/theme.css" }),
+		);
 		const manifestText = await readFile(
 			path.join(root, "dist/.vite/manifest.json"),
 			"utf8",
@@ -172,35 +174,6 @@ test("bundles project and browser package entries without executing them, includ
 		expect(manifestText).not.toContain("wrong.js");
 	} finally {
 		await rm(root, { recursive: true, force: true });
-	}
-});
-
-test("includes remote assets on the first development HTML response", async () => {
-	const server = await createServer({
-		configFile: false,
-		plugins: [
-			adminExtensionsPlugin({
-				configPath: fileURLToPath(import.meta.url),
-				stylesheetPath: fileURLToPath(
-					new URL("../../index.css", import.meta.url),
-				),
-				admin: {
-					scripts: ["https://example.com/challenge.js"],
-					stylesheets: ["https://example.com/theme.css"],
-				},
-			}),
-		],
-		server: { middlewareMode: true },
-	});
-	try {
-		const html = await server.transformIndexHtml(
-			"/index.html",
-			"<html><head></head><body></body></html>",
-		);
-		expect(html).toContain("https://example.com/challenge.js");
-		expect(html).toContain("https://example.com/theme.css");
-	} finally {
-		await server.close();
 	}
 });
 

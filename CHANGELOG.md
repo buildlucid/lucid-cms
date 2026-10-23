@@ -9,6 +9,8 @@
 - Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
 - Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.
 - Added an `actor` option to `toolkit.media` reads, and an `ownership` filter to its lists.
+- Lucid now runs on Vite. `lucidcms dev`, `build` and `serve` use `lucid()` from `@lucidcms/core/vite`, which frameworks such as Astro add to their own config, and commands such as `migrate` and `seed` run inside the runtime with its bindings.
+- Plugins can add to the project's Vite app with a `vite` hook, and run work inside the runtime with typed `tasks` from `definePluginTask`.
 
 ### Breaking Changes:
 
@@ -20,8 +22,8 @@
 - `toolkit.documents` reads now match the content API.
 - `toolkit.media` lists need `include: ["transcripts"]` for audio transcripts.
 - Toolkit list reads (`documents`, `media`, `requests` and `users`) now return `items` with their `pagination` instead of `data` and `count`.
-- Runtime adapters' `cli.build` now returns entries and `bundle` settings for Lucid to bundle, instead of running their own bundler.
-- Removed `compile` build artifacts.
+- Replaced Lucid's own bundler, development server and runtime adapters' CLI handlers with Vite, so projects have no `vite.config.ts`. Plugin CLI `dev` and `build` hooks are replaced by `vite`.
+- Removed the D1 database adapter. Database adapters must now support transactions.
 - Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module.
 
 ### Bug Fixes:

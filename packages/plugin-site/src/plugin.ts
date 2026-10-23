@@ -1,9 +1,9 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import { CLIENT_SCRIPT_PATH, LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
-import registerAssetHeaders from "./http/register-asset-headers.js";
 import registerSiteRoute from "./http/register-site-route.js";
 import resolvePluginOptions from "./site/resolve-plugin-options.js";
+import renderSite from "./tasks/static-build/render-site.js";
 import type { SitePluginOptions } from "./types.js";
 
 const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
@@ -26,6 +26,7 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 			module: "@lucidcms/plugin-site/cli",
 			options,
 		},
+		tasks: { build: renderSite(options) },
 		sources: {
 			public: [
 				{
@@ -35,11 +36,6 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 			],
 		},
 		configure: (draft) => {
-			draft.http.extensions.push({
-				name: `${PLUGIN_KEY}:asset-headers`,
-				phase: "beforeMiddleware",
-				register: registerAssetHeaders,
-			});
 			draft.http.extensions.push({
 				name: `${PLUGIN_KEY}:pages`,
 				phase: "fallback",

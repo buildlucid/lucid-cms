@@ -7,9 +7,9 @@ import {
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 import type { PluginOptions } from "./types.js";
-import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
+import { createBindingsArtifact } from "./utils/bindings-artifact.js";
 
-/** Provides KV storage through a Cloudflare binding and contributes its Wrangler configuration. */
+/** Provides KV storage through a Cloudflare binding and adds the KV binding to the Worker. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	const resolvedOptions = pluginOptions ?? {};
 
@@ -22,7 +22,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 				data: {
 					artifacts:
 						phase === "prepare"
-							? [createWranglerArtifact(resolvedOptions)]
+							? [createBindingsArtifact(resolvedOptions)]
 							: [],
 				},
 			}),

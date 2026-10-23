@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import packageJson from "../../../package.json" with { type: "json" };
-import loadConfigFile from "../config/load-config-file.js";
 import buildCommand from "./commands/build.js";
 import devCommand from "./commands/dev.js";
 import jobSchedulerCommand from "./commands/job-scheduler.js";
@@ -21,7 +20,8 @@ import cliLogger from "./logger.js";
 
 // TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
 const program = new Command();
-const remoteOptionDescription = "Use remote runtime resources when supported";
+const remoteOptionDescription =
+	"Connect to the runtime's deployed resources where supported, such as Cloudflare bindings";
 
 program
 	.name("lucidcms")
@@ -33,29 +33,26 @@ program
 	.description("Start development server")
 	.option("--no-clear-screen", "Preserve terminal output when restarting")
 	.option(
-		"-w, --watch [path]",
-		"Watch for file changes (optionally specify path to watch)",
+		"-w, --watch <path>",
+		"Also restart the server when files under this path change",
 	)
 	.option("--remote", remoteOptionDescription)
 	.action(devCommand);
 
 program
 	.command("serve")
-	.description("Serve the application")
-	.option("--remote", remoteOptionDescription)
+	.description("Build the application and serve the build")
 	.action(serveCommand);
 
 program
 	.command("build")
 	.description("Build for production")
 	.option("--silent", "Suppress all logging output")
-	.option("--remote", remoteOptionDescription)
 	.action(buildCommand);
 
 program
 	.command("typegen")
 	.description("Generate Lucid type files")
-	.option("--remote", remoteOptionDescription)
 	.action(typegenCommand);
 
 program
@@ -67,10 +64,7 @@ program
 		"Run destructive collection migrations without prompting. Existing data may be permanently lost.",
 	)
 	.option("--remote", remoteOptionDescription)
-	.action(
-		// @ts-expect-error
-		migrateCommand({ mode: "process" }),
-	);
+	.action(migrateCommand);
 
 program
 	.command("sync")
@@ -101,10 +95,7 @@ program
 	.description("Drop all database tables")
 	.option("-f, --force", "Skip confirmation prompt")
 	.option("--remote", remoteOptionDescription)
-	.action(
-		// @ts-expect-error
-		migrateResetCommand({ mode: "process" }),
-	);
+	.action(migrateResetCommand);
 
 program
 	.command("migrate:new <name>")
@@ -143,9 +134,7 @@ program
 	.action(jobSchedulerCommand);
 
 try {
-	await registerPluginCommands(program, () =>
-		loadConfigFile({ prepareRuntime: true }),
-	);
+	await registerPluginCommands(program);
 } catch (error) {
 	if (error instanceof Error) {
 		cliLogger.errorInstance(error, "Failed to load plugin commands");

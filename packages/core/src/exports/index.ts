@@ -31,6 +31,7 @@ export { default as defineNotification } from "../libs/notifications/define-noti
 export { notifications } from "../libs/notifications/lucid-notifications.js";
 export { ExternalScopes } from "../libs/permission/external-scopes.js";
 export { default as definePlugin } from "../libs/plugins/define-plugin.js";
+export { default as definePluginTask } from "../libs/plugins/define-plugin-task.js";
 export { default as defineConfig } from "../libs/runtime/define-config.js";
 export { default as defineSeed } from "../libs/seed/define-seed.js";
 export { default as defineSkill } from "../libs/skills/define-skill.js";

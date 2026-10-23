@@ -1,12 +1,13 @@
-import path from "node:path";
 import { LucidError } from "@lucidcms/core";
 import type { LucidPluginCommand } from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../../constants.js";
+import isInside from "../../utils/is-inside.js";
 
-const inside = (parent: string, child: string) => {
-	const relative = path.relative(parent, child);
-	return !relative.startsWith("..") && !path.isAbsolute(relative);
-};
+/** macOS and Windows disks usually ignore case, so `Site` and `site` name the same folder there. */
+const foldCase = (value: string) =>
+	process.platform === "darwin" || process.platform === "win32"
+		? value.toLowerCase()
+		: value;
 
 /** Refuses folders whose emptying would delete the project or its sources. */
 const assertOutputFolder = (props: {
@@ -15,15 +16,18 @@ const assertOutputFolder = (props: {
 	siteRoot: string;
 	publicFiles: Parameters<LucidPluginCommand["run"]>[0]["publicFiles"];
 }) => {
+	const outDir = foldCase(props.outDir);
+	const projectRoot = foldCase(props.projectRoot);
+	const siteRoot = foldCase(props.siteRoot);
 	// The site folder is a source wherever the output sits relative to it; public files only when the output holds them.
 	const touchesSources =
-		inside(props.outDir, props.siteRoot) ||
-		inside(props.siteRoot, props.outDir) ||
-		props.publicFiles.some((file) => inside(props.outDir, file.path));
+		isInside(outDir, siteRoot) ||
+		isInside(siteRoot, outDir) ||
+		props.publicFiles.some((file) => isInside(outDir, foldCase(file.path)));
 
 	if (
-		props.outDir === props.projectRoot ||
-		!inside(props.projectRoot, props.outDir) ||
+		outDir === projectRoot ||
+		!isInside(projectRoot, outDir) ||
 		touchesSources
 	) {
 		throw new LucidError({

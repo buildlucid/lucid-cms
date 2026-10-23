@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { getBuildPaths, shouldServeAdminShell } from "@lucidcms/core/runtime";
+import {
+	builtAssets,
+	getBuildPaths,
+	shouldServeAdminShell,
+} from "@lucidcms/core/runtime";
 import type {
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
@@ -27,8 +31,10 @@ const adaptConfig: RuntimeAdaptConfig = (
 					),
 				};
 			}
-			// Astro owns and serves the hosted public asset pipeline.
-			if (meta?.host === "astro") {
+
+			// Astro serves its own public files, and during development Vite serves them from source, so only builds
+			// served by Lucid read them from the build output.
+			if (meta?.host === "astro" || meta?.admin === "development") {
 				definition.configure?.(draft);
 				return;
 			}
@@ -46,25 +52,21 @@ const adaptConfig: RuntimeAdaptConfig = (
 							);
 							return `${relativeClientDist}${path}`;
 						},
+						onFound: (_path, c) => {
+							if (c.req.path.startsWith(builtAssets.path)) {
+								c.header("Cache-Control", builtAssets.cacheControl);
+							}
+						},
 					});
 
-					app.use("/*", (c, next) => {
-						if (
-							meta?.admin === "development" &&
-							shouldServeAdminShell(c.req.path, c.req.method)
-						)
-							return next();
-						return servePublicAssets(c, next);
-					});
-
-					if (meta?.admin === "development") return;
-
+					app.use("/*", servePublicAssets);
 					app.get("/admin/*", (c, next) => {
 						if (!shouldServeAdminShell(c.req.path, c.req.method)) return next();
 						return c.html(readFileSync(paths.spaDistHtml, "utf-8"));
 					});
 				},
 			});
+
 			definition.configure?.(draft);
 		},
 	};

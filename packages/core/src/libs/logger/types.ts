@@ -40,6 +40,12 @@ export type LogEntry = Readonly<
 	}
 >;
 
+/** Replaces the config's log transport or level, such as during development, where Lucid's CLI prints runtime logs. */
+export type LoggerOverride = {
+	transport?: LogTransport;
+	level?: LogLevel;
+};
+
 /**
  * A process-level destination for Lucid logs.
  *

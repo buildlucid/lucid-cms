@@ -41,8 +41,7 @@ export default defineConfig({
 | Property | Type | Description |
 |----------|------|-------------|
 | `binding` | `string` | Cloudflare R2 binding name. Defaults to `LUCID_MEDIA_BUCKET` |
-| `bucketName` | `string` | Wrangler R2 bucket name. Defaults to a generated name based on the Worker and binding |
-| `previewBucketName` | `string` | Wrangler R2 preview bucket name |
+| `bucketName` | `string` | R2 bucket name. Defaults to a generated name based on the Worker and binding |
 | `http` | `object` | Optional S3-compatible HTTP fallback for direct browser uploads/downloads |
 | `upload` | `object` | Optional default R2 HTTP metadata, custom metadata, and storage class |
 

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { normalizePath, type Plugin } from "vite";
+import { type HtmlTagDescriptor, normalizePath, type Plugin } from "vite";
 import type {
 	AdminConfig,
 	AdminModulePath,
@@ -8,19 +8,23 @@ import type {
 import { generateAssets, generateRegistry } from "./generate-modules.js";
 
 const registryId = "virtual:lucid-admin";
-const assetsId = "virtual:lucid-admin-assets";
 
-export const hasAdminExtensions = (admin: AdminConfig = {}) =>
-	[admin.routes, admin.slots, admin.scripts, admin.stylesheets].some(
-		(entries) => entries && entries.length > 0,
-	);
+type AdminExtensionsApi = {
+	/** Remote script and stylesheet tags, resolved at build start. */
+	tags: () => HtmlTagDescriptor[];
+};
+
+/** The extensions plugin, with an `api` for the admin's document renderers. */
+export type AdminExtensionsPlugin = Plugin<AdminExtensionsApi> & {
+	api: AdminExtensionsApi;
+};
 
 /** Resolves extension paths from the loaded config using Vite's browser conditions. */
 export const adminExtensionsPlugin = (options: {
 	configPath: string;
 	stylesheetPath: string;
 	admin?: AdminConfig;
-}): Plugin => {
+}): AdminExtensionsPlugin => {
 	const { configPath, admin = {} } = options;
 	const configDirectory = path.dirname(configPath);
 	const stylesheetPath = normalizePath(options.stylesheetPath);
@@ -37,6 +41,7 @@ export const adminExtensionsPlugin = (options: {
 		enforce: "pre",
 		async buildStart() {
 			componentDirectories.clear();
+
 			const resolve = async (reference: AdminModulePath, label: string) => {
 				const source =
 					typeof reference === "string" ? reference : fileURLToPath(reference);
@@ -61,42 +66,52 @@ export const adminExtensionsPlugin = (options: {
 			registry = await generateRegistry(admin, async (reference, label) => {
 				const id = await resolve(reference, label);
 				const file = id.split("?", 1)[0];
+
 				// Tailwind scans directories, not the component's import graph. Keep
 				// each source local to its component rather than widening to a common root.
-				if (path.isAbsolute(file))
+				if (path.isAbsolute(file)) {
 					componentDirectories.add(normalizePath(path.dirname(file)));
+				}
+
 				return id;
 			});
+
 			assets = await generateAssets(admin, resolve);
 		},
-		resolveId(id) {
-			if (id === registryId || id === assetsId) return `\0${id}`;
+		resolveId: {
+			filter: { id: /^virtual:lucid-admin(-assets)?$/ },
+			handler: (id) => `\0${id}`,
 		},
-		load(id) {
-			if (id === `\0${registryId}`) return registry;
-			if (id === `\0${assetsId}`) return assets.code;
+		load: {
+			filter: { id: /^\0virtual:lucid-admin(-assets)?$/ },
+			handler: (id) => (id === `\0${registryId}` ? registry : assets.code),
 		},
 		// Extend the real CSS entry before Tailwind runs. Imported files retain their
 		// own base paths for @source, nested imports, assets and Vite's watcher.
-		transform(source, id) {
-			if (
-				id.split("?", 1)[0] !== stylesheetPath ||
-				(assets.stylesheets.length === 0 && componentDirectories.size === 0)
-			)
-				return;
-			return {
-				code: [
-					source,
-					...assets.stylesheets.map(
-						(file) => `@import ${JSON.stringify(normalizePath(file))};`,
-					),
-					...Array.from(componentDirectories)
-						.sort()
-						.map((directory) => `@source ${JSON.stringify(directory)};`),
-				].join("\n"),
-				map: null,
-			};
+		transform: {
+			filter: { id: new RegExp(`^${RegExp.escape(stylesheetPath)}(\\?|$)`) },
+			handler(source) {
+				if (
+					assets.stylesheets.length === 0 &&
+					componentDirectories.size === 0
+				) {
+					return;
+				}
+
+				return {
+					code: [
+						source,
+						...assets.stylesheets.map(
+							(file) => `@import ${JSON.stringify(normalizePath(file))};`,
+						),
+						...Array.from(componentDirectories)
+							.sort()
+							.map((directory) => `@source ${JSON.stringify(directory)};`),
+					].join("\n"),
+					map: null,
+				};
+			},
 		},
-		transformIndexHtml: { order: "pre", handler: () => assets.tags },
+		api: { tags: () => assets.tags },
 	};
 };

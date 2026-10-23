@@ -2,7 +2,7 @@
 
 ## v1.3.0 (unreleased)
 
-- Builds are now bundled by Lucid, with packages and build data loaded from disk.
+- Runs on Vite through `@lucidcms/core/vite`, with builds writing a Node server whose packages load from `node_modules`. Removed the `./runtime` export.
 - Fixed scheduled jobs ignoring `urls.cms`.
 
 ## v1.2.2

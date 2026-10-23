@@ -3,8 +3,8 @@ import {
 	KilnSyntaxError,
 	type TemplateLocation,
 } from "@lucidkiln/core";
-import { ASSETS_BASE } from "../constants.js";
-import type { SiteCliData } from "../types.js";
+import { VITE_CLIENT } from "../constants.js";
+import type { SiteData } from "../types.js";
 import escapeHtml from "../utils/escape-html.js";
 import createErrorDocument from "./create-error-document.js";
 
@@ -74,19 +74,17 @@ const highlightFrame = (frame: string) =>
 /** Displays source code and stack traces for development use only, with automatic reloads when Vite's dev server runs. */
 const createDevErrorPage = (props: {
 	error: unknown;
-	data: SiteCliData | null;
+	data: SiteData | null;
 }) => {
 	const report = describeError(props.error);
-	const hmr = props.data?.kind === "dev" && props.data.vite;
+	const hmr = props.data?.kind === "dev";
 	const locations = report.locations
 		.map((location) => `<code>${escapeHtml(location)}</code>`)
 		.join(" via ");
 
 	return createErrorDocument({
 		title: report.label,
-		head: hmr
-			? `<script type="module" src="${ASSETS_BASE}@vite/client"></script>`
-			: "",
+		head: hmr ? `<script type="module" src="${VITE_CLIENT}"></script>` : "",
 		body: [
 			`<p class="label">500 · ${report.label}</p>`,
 			`<h1>${escapeHtml(report.title)}</h1>`,

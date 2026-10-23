@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 import { parentPort, workerData } from "node:worker_threads";
 import {
 	getConfigPath,
-	loadBuildProject,
+	loadConfigFile,
 	resolveConfigDefinition,
 } from "@lucidcms/core/build";
 import { drainJobs, logScopes } from "@lucidcms/core/extension";
@@ -53,19 +53,21 @@ const getConfig = async (): Promise<{
 	runtimeContext: AdapterRuntimeContext | undefined;
 }> => {
 	try {
-		const configPath = getConfigPath(process.cwd());
-		const result = await loadBuildProject({
-			configPath,
+		const loaded = await loadConfigFile({
+			path: getConfigPath(process.cwd()),
 			silent: true,
-			generateTypes: false,
-			validateEnv: true,
-			loadEmailTemplates: false,
+			processConfigOptions: { mode: "build" },
 		});
+		const translations = await prepareTranslations({
+			config: loaded.config,
+			files: loaded.resources.files.translations,
+		});
+
 		return {
-			config: result.loaded.config,
-			translationStore: result.loaded.translationStore,
-			env: result.loaded.env,
-			runtimeContext: result.loaded.runtimeContext,
+			config: loaded.config,
+			translationStore: translations.translationStore,
+			env: loaded.env,
+			runtimeContext: loaded.runtimeContext,
 		};
 	} catch {
 		const buildModulePath = path.resolve(

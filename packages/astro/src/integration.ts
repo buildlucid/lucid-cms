@@ -6,48 +6,35 @@ import {
 	createAdminClientConfig,
 	getConfigPath,
 } from "@lucidcms/core/build";
+import { builtAssets } from "@lucidcms/core/runtime";
+import { findLucidViteApi, lucid } from "@lucidcms/core/vite";
 import type { AstroIntegration } from "astro";
 import constants from "./constants.js";
-import { createDevAdminPlugin } from "./integration/admin.js";
-import {
-	copyAssets,
-	copyPublicAssets,
-	createDevAssetPlugin,
-	prepareAssets,
-} from "./integration/assets.js";
-import {
-	writeGeneratedModules,
-	writeSpaModule,
-} from "./integration/generated.js";
-import {
-	type DevServerLifecycle,
-	getDevServerLifecycle,
-	teardownDevProject,
-	teardownProject,
-} from "./integration/lifecycle.js";
-import { pauseMigrationWaitLog } from "./integration/logging.js";
-import {
-	bootstrapDevProject,
-	checkProjectCompatibility,
-	loadProject,
+import { astroHost } from "./host.js";
+import loadProject, {
 	type ResolvedLucidProject,
 } from "./integration/project.js";
+import runtimeModulePlugin from "./integration/runtime-module-plugin.js";
 import collectWatchFiles, {
 	createResourceWatchPlugin,
 } from "./integration/watch.js";
-import { registerBuildContext } from "./internal/runtime.js";
+import { destroyRuntimeHosts } from "./internal/runtime.js";
 import type { LucidAstroOptions } from "./types.js";
 
-/** Creates the Lucid CMS integration for Astro. */
+/** Integrates Lucid's Vite project loading, type updates and development migrations with Astro routes and runtime modules, copying a separate admin build into Astro output and awaiting migration completion before server readiness. */
 const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 	let project: ResolvedLucidProject | undefined;
-	let generatedDirectory = "";
-	let assetRoot = "";
-	let publicDirectory = "";
-	let assetsCopied = false;
-	let devBootstrap: Promise<void> | undefined;
-	let devLifecycle: DevServerLifecycle | undefined;
-	let projectCommand: "dev" | "build" | "sync" | undefined;
+	/** Settles once the dev server's start-up migrations finish, with whether they completed. */
+	let ready: Promise<boolean> | undefined;
+	let adminBuildDirectory = "";
+	let adminDocument: string | undefined;
+	let adminCopied = false;
+
+	/** Copies the admin's build, its document under `admin/` and its assets under Lucid's built assets folder, into Astro's output. */
+	const copyAdmin = async (directory: string) => {
+		await fs.cp(adminBuildDirectory, directory, { recursive: true });
+		adminCopied = true;
+	};
 
 	return {
 		name: constants.integrationName,
@@ -56,238 +43,130 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				addMiddleware,
 				addWatchFile,
 				command,
-				config,
 				injectRoute,
-				isRestart,
-				logger,
 				updateConfig,
 			}) => {
 				if (command === "preview") return;
 
-				const configPath = options.configPath ?? getConfigPath(process.cwd());
-				if (command === "dev") {
-					devLifecycle = getDevServerLifecycle(configPath, logger);
-					devLifecycle.register();
-					if (isRestart) devBootstrap = undefined;
-				}
+				const plugins = await lucid({
+					configPath: options.configPath ?? getConfigPath(process.cwd()),
+					host: astroHost.key,
+					mode: command === "build" ? "production" : "development",
+					adminDocument: () => adminDocument,
+				});
+				const nextProject = await loadProject(plugins);
+				ready = findLucidViteApi(plugins).ready;
 
-				let nextProject: ResolvedLucidProject | undefined;
-				try {
-					nextProject = await loadProject(configPath);
-					if (command === "dev") devLifecycle?.trackProject(nextProject);
-					await checkProjectCompatibility(nextProject, command === "build");
-					const projectRoot = nextProject.loaded.projectRoot;
-					generatedDirectory = path.join(
-						projectRoot,
-						constants.generatedDirectory,
-					);
-					assetRoot = path.join(generatedDirectory, constants.assetDirectory);
-					assetsCopied = false;
-					await fs.rm(generatedDirectory, { recursive: true, force: true });
-					publicDirectory = fileURLToPath(config.publicDir);
-					await prepareAssets(nextProject, assetRoot, publicDirectory);
-
-					const buildContextId = `${nextProject.hostId}:${command}`;
-					registerBuildContext(buildContextId, nextProject.loaded.rawEnv);
-					const generated = await writeGeneratedModules({
-						project: nextProject,
-						directory: generatedDirectory,
-						buildContextId,
-						compiled: command === "build",
-					});
-					const prepared = await nextProject.integrationBridge.prepare?.({
+				const { lucid: lucidProject, integrationBridge } = nextProject;
+				adminBuildDirectory = path.join(
+					lucidProject.projectRoot,
+					constants.adminBuildDirectory,
+				);
+				const platform =
+					integrationBridge.vite?.({
 						command,
-						adapter: nextProject.loaded.adapter,
-						configPath: nextProject.configPath,
-						projectRoot: nextProject.loaded.projectRoot,
-						generatedDirectory,
-						runtimeModulePath: generated.runtimePath,
-						config: nextProject.loaded.config,
-						translationStore: nextProject.loaded.translationStore,
-						definition: nextProject.loaded.definition,
-					});
-					const ignoredWatchFiles = [
-						`${generatedDirectory.split(path.sep).join("/")}/**`,
-						`${path.join(projectRoot, ".lucid/vite").split(path.sep).join("/")}/**`,
-						`${path.join(projectRoot, ".lucid/cache").split(path.sep).join("/")}/**`,
-						...(prepared?.ignoredWatchFiles ?? []).map((filePath) =>
-							path.resolve(projectRoot, filePath).split(path.sep).join("/"),
-						),
-					];
+						project: lucidProject,
+						runtimeModuleId: constants.runtimeModuleId,
+					}) ?? {};
 
-					const resourceWatchFiles = collectWatchFiles(nextProject);
-					for (const filePath of resourceWatchFiles) {
-						addWatchFile(filePath);
-					}
+				const watchFiles = collectWatchFiles(nextProject);
+				for (const filePath of watchFiles) addWatchFile(filePath);
 
-					addMiddleware({
-						entrypoint: generated.middlewarePath,
-						order: "pre",
+				addMiddleware({
+					entrypoint: constants.middlewareEntrypoint,
+					order: "pre",
+				});
+
+				const mountPaths = [
+					...constants.mountPaths,
+					// Lucid's Vite plugin runs development tasks, such as migrations, through Astro's server.
+					...(command === "dev" ? [constants.taskPath] : []),
+				];
+
+				for (const mountPath of mountPaths) {
+					injectRoute({
+						pattern: mountPath,
+						entrypoint: constants.routeEntrypoint,
 					});
-					for (const mountPath of constants.mountPaths) {
-						injectRoute({
-							pattern: mountPath,
-							entrypoint: generated.routePath,
-						});
-						injectRoute({
-							pattern: `${mountPath}/[...path]`,
-							entrypoint: generated.routePath,
-						});
-					}
-					updateConfig({
-						vite: {
-							server: {
-								watch: {
-									ignored: ignoredWatchFiles,
-								},
-							},
-							...(nextProject.integrationBridge.vite?.ssrExternal
-								? {
-										ssr: {
-											external: nextProject.integrationBridge.vite.ssrExternal,
-										},
-									}
-								: {}),
-							...(nextProject.integrationBridge.vite?.ssrEnvironment
-								? {
-										environments: {
-											ssr: nextProject.integrationBridge.vite.ssrEnvironment,
-										},
-									}
-								: {}),
-							resolve: {
-								alias: {
-									...(nextProject.integrationBridge.vite?.aliases ?? {}),
-									...(prepared?.vite?.aliases ?? {}),
-									[constants.toolkitModuleId]: generated.runtimePath,
-								},
-							},
-							plugins: [
-								createDevAssetPlugin(assetRoot),
-								createDevAdminPlugin({
-									projectRoot,
-									configPath: nextProject.configPath,
-									admin: nextProject.loaded.config.admin,
-									clientConfig: createAdminClientConfig(
-										nextProject.loaded.config,
-									),
-								}),
-								createResourceWatchPlugin(
-									nextProject.configPath,
-									resourceWatchFiles,
-								),
-							],
+					injectRoute({
+						pattern: `${mountPath}/[...path]`,
+						entrypoint: constants.routeEntrypoint,
+					});
+				}
+
+				const serverEnvironment = {
+					...platform.ssrEnvironment,
+					optimizeDeps: {
+						...platform.ssrEnvironment?.optimizeDeps,
+						// Its modules import Lucid's runtime module, which only the project's Vite app can serve.
+						exclude: [
+							...(platform.ssrEnvironment?.optimizeDeps?.exclude ?? []),
+							constants.integrationName,
+						],
+					},
+				};
+
+				updateConfig({
+					vite: {
+						environments: {
+							ssr: serverEnvironment,
+							// Builds prerender pages in their own environment, which may bundle Lucid too.
+							...(command === "build" && { prerender: serverEnvironment }),
 						},
-					});
+						resolve: { alias: platform.aliases ?? {} },
+						// Its modules import Lucid's runtime module, so Vite must bundle them rather than leave them to Node.
+						ssr: { noExternal: [constants.integrationName] },
+						plugins: [
+							...plugins,
+							runtimeModulePlugin(nextProject),
+							...(platform.plugins ?? []),
+							createResourceWatchPlugin(lucidProject.configPath, watchFiles),
+						],
+					},
+				});
 
-					if (command === "dev" && isRestart) {
-						devBootstrap = bootstrapDevProject(nextProject, {
-							onPrompt: () =>
-								pauseMigrationWaitLog(logger, "astro:config:setup"),
-						});
-						await devBootstrap;
-					}
-					project = nextProject;
-					projectCommand = command;
-				} catch (error) {
-					if (nextProject) {
-						if (command === "dev") {
-							await devLifecycle?.releaseProject(nextProject).catch(() => {});
-						} else {
-							await teardownProject(nextProject, command).catch(() => {});
-						}
-					}
-					if (command === "dev" && !devLifecycle?.hasActiveProject()) {
-						await devLifecycle?.shutdown().catch(() => {});
-					}
-					throw error;
+				project = nextProject;
+			},
+			// Astro prints that its server is ready after this hook, so migrations run first, with any prompts they need.
+			"astro:server:start": async ({ logger }) => {
+				if (ready && !(await ready)) {
+					logger.warn(
+						"Lucid answers requests with an error until its migrations complete. Fix the problem above, then save a file to retry.",
+					);
 				}
 			},
-			"astro:config:done": async ({ config }) => {
-				const currentProject = project;
-				const currentCommand = projectCommand;
-				if (!currentProject || !currentCommand) return;
-				try {
-					currentProject.integrationBridge.validateAdapter(config.adapter);
-					if (currentCommand === "dev") {
-						await devLifecycle?.activateProject(currentProject);
-					} else if (currentCommand === "sync") {
-						await teardownProject(currentProject, "sync");
-						project = undefined;
-						projectCommand = undefined;
-					}
-				} catch (error) {
-					if (currentCommand === "dev") {
-						await devLifecycle?.releaseProject(currentProject).catch(() => {});
-						if (!devLifecycle?.hasActiveProject()) {
-							await devLifecycle?.shutdown().catch(() => {});
-						}
-					} else {
-						await teardownProject(currentProject, currentCommand).catch(
-							() => {},
-						);
-					}
-					project = undefined;
-					projectCommand = undefined;
-					throw error;
-				}
-			},
-			"astro:server:setup": async ({ server, logger }) => {
-				if (!project) return;
-				devLifecycle?.setServer(server);
-				try {
-					devBootstrap ??= bootstrapDevProject(project, {
-						onPrompt: () => pauseMigrationWaitLog(logger, "astro:server:setup"),
-					});
-					await devBootstrap;
-				} catch (error) {
-					await devLifecycle?.shutdown().catch(() => {});
-					throw error;
-				}
+			"astro:config:done": ({ config }) => {
+				project?.integrationBridge.validateAdapter(config.adapter);
 			},
 			"astro:server:done": async () => {
-				if (devLifecycle) {
-					await devLifecycle.shutdown();
-				} else if (project) {
-					await teardownDevProject(project);
-				}
+				if (project) await destroyRuntimeHosts(project.hostId);
 			},
 			"astro:build:start": async () => {
 				if (!project) return;
-				try {
-					const outDir = path.join(assetRoot, constants.adminDirectory);
-					await buildAdmin({
-						configPath: project.configPath,
-						projectRoot: project.loaded.projectRoot,
-						outDir,
-						admin: project.loaded.config.admin,
-						clientConfig: createAdminClientConfig(project.loaded.config),
-					});
-					// The admin build empties its folder, so Lucid's public files go back in afterwards.
-					await copyPublicAssets(project, assetRoot, publicDirectory);
-					await writeSpaModule(
-						generatedDirectory,
-						await fs.readFile(path.join(outDir, "index.html"), "utf8"),
-					);
-				} catch (error) {
-					await teardownProject(project, "build");
-					throw error;
-				}
+
+				const { lucid: lucidProject } = project;
+				await buildAdmin({
+					configPath: lucidProject.configPath,
+					projectRoot: lucidProject.projectRoot,
+					outDir: adminBuildDirectory,
+					assetsDir: builtAssets.directory,
+					admin: lucidProject.config.admin,
+					clientConfig: createAdminClientConfig(lucidProject.config),
+				});
+
+				// The server serves the admin's document for its client-side routes.
+				adminDocument = await fs.readFile(
+					path.join(adminBuildDirectory, "admin/index.html"),
+					"utf8",
+				);
+				adminCopied = false;
 			},
 			"astro:build:generated": async ({ dir }) => {
-				await copyAssets(assetRoot, fileURLToPath(dir));
-				assetsCopied = true;
+				if (project) await copyAdmin(fileURLToPath(dir));
 			},
 			"astro:build:done": async ({ dir }) => {
-				if (!project) return;
-				const directory = fileURLToPath(dir);
-				try {
-					// Astro skips build:generated when no routes are prerendered.
-					if (!assetsCopied) await copyAssets(assetRoot, directory);
-					await project.integrationBridge.buildDone?.({ directory });
-				} finally {
-					await teardownProject(project, "build");
-				}
+				// Astro skips build:generated when no routes are prerendered.
+				if (project && !adminCopied) await copyAdmin(fileURLToPath(dir));
 			},
 		},
 	};

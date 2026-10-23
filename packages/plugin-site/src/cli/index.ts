@@ -1,19 +1,19 @@
 import path from "node:path";
 import type { LucidPluginCliFactory } from "@lucidcms/core/types";
-import { ASSETS_BASE, CLOUDFLARE_RUNTIME, PLUGIN_KEY } from "../constants.js";
 import type { SitePluginOptionsInternal } from "../types.js";
-import buildSiteData from "./build-site-data.js";
 import buildSite from "./static/build-site.js";
 import resolveIntegrations from "./ui/resolve-integrations.js";
-import createViteDev from "./vite/create-vite-dev.js";
-import writeAssetHeaders from "./vite/write-asset-headers.js";
+import uiVitePlugins from "./ui/ui-vite-plugins.js";
+import { SITE_MODULE_ID } from "./vite/site-module-plugin.js";
+import siteVitePlugins from "./vite/site-vite-plugins.js";
 import writeKilnManifest from "./write-kiln-manifest.js";
 
-/** The site plugin's CLI module, loaded only by `lucidcms` commands. */
+/** The site plugin's CLI module, loaded only by `lucidcms` commands and Lucid's Vite plugin. */
 const siteCli: LucidPluginCliFactory<SitePluginOptionsInternal> = (options) => {
 	const ui = options.ui?.length ? resolveIntegrations(options.ui) : null;
 	const root = (projectRoot: string) =>
 		path.resolve(projectRoot, options.directory);
+
 	return {
 		hooks: {
 			prepare: (props) =>
@@ -23,31 +23,29 @@ const siteCli: LucidPluginCliFactory<SitePluginOptionsInternal> = (options) => {
 					options,
 					ui,
 				}),
-			dev: (props) =>
-				createViteDev({ ...props, root: root(props.projectRoot), ui }),
-			build: async (props) => {
-				const { data, module } = await buildSiteData({
-					root: root(props.projectRoot),
-					projectRoot: props.projectRoot,
-					publicFiles: props.publicFiles,
-					assetsDir: path.join(props.outDir, "public", ASSETS_BASE),
-					ui,
-					serverDir: path.join(props.outDir, "plugins", PLUGIN_KEY),
-				});
-				if (
-					(data.manifest || data.ui) &&
-					props.runtime === CLOUDFLARE_RUNTIME
-				) {
-					await writeAssetHeaders(props.outDir);
-				}
-				return { data, module: module ?? undefined };
-			},
+			vite: async (props) => ({
+				plugins: [
+					...siteVitePlugins({
+						root: root(props.projectRoot),
+						ui,
+						runtime: props.runtime,
+					}),
+					...(ui
+						? await uiVitePlugins({
+								root: root(props.projectRoot),
+								projectRoot: props.projectRoot,
+								integrations: ui,
+							})
+						: []),
+				],
+				module: SITE_MODULE_ID,
+			}),
 		},
 		commands: [
 			{
 				name: "site:build",
 				description: "Build a static site into its own output folder",
-				run: (props) => buildSite(options, ui, props),
+				run: (props) => buildSite(options, props),
 			},
 		],
 	};

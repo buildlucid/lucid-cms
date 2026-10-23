@@ -1,8 +1,5 @@
-import type {
-	LucidHonoContext,
-	LucidInvocation,
-	RuntimeAdapter,
-} from "@lucidcms/core/types";
+import type { LucidAstroBridge } from "@lucidcms/astro/types";
+import type { LucidHonoContext, LucidInvocation } from "@lucidcms/core/types";
 import getRuntimeContext from "./services/runtime-context.js";
 
 type AstroRequestContext = {
@@ -22,7 +19,7 @@ const resolveRemoteAddress = (request: Request) => {
 /** Astro request bridge for the Node runtime. */
 const nodeAstroBridge = {
 	name: "@lucidcms/runtime-node/astro",
-	async resolveRuntime(props: { adapter: RuntimeAdapter; compiled: boolean }) {
+	async resolveRuntime(props: { compiled: boolean }) {
 		const runtimeContext = getRuntimeContext({
 			compiled: props.compiled,
 			host: "astro",
@@ -47,6 +44,6 @@ const nodeAstroBridge = {
 	handle(props: { invocation: LucidInvocation; context: AstroRequestContext }) {
 		return props.invocation.handle({ request: props.context.request });
 	},
-};
+} satisfies LucidAstroBridge;
 
 export default nodeAstroBridge;

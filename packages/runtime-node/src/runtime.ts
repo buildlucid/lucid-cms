@@ -7,7 +7,7 @@ import type {
 	NodeRuntimeAdapter,
 } from "./types.js";
 
-/** Creates the Node runtime without CLI tooling, for embedded hosts and compiled applications. */
+/** Creates the Node runtime for `defineConfig` with options from environment values, using `@lucidcms/runtime-node/vite` to run and build it. */
 export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	let resolvedOptions: NodeAdapterOptions | undefined =
 		typeof options === "function" ? undefined : options;
@@ -29,7 +29,7 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		runtimeEntrypoint: "@lucidcms/runtime-node/runtime",
+		vite: "@lucidcms/runtime-node/vite",
 		hosts: {
 			astro: {
 				entrypoint: "@lucidcms/runtime-node/astro",
@@ -54,4 +54,3 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 };
 
 export { default as createNodeJobScheduler } from "./services/create-node-job-scheduler.js";
-export { default as getRuntimeContext } from "./services/runtime-context.js";

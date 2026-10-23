@@ -4,9 +4,9 @@
 export type PluginOptions = {
 	/** Cloudflare Queue binding name. Defaults to LUCID_QUEUE. */
 	binding?: string;
-	/** Wrangler Queue name. Defaults to a name derived from the worker and binding. */
+	/** Queue name. Defaults to a name derived from the worker and binding. */
 	queueName?: string;
-	/** Wrangler Queue consumer options. */
+	/** Queue consumer options. */
 	consumer?: {
 		/** Maximum messages Cloudflare delivers in one batch. */
 		maxBatchSize?: number;

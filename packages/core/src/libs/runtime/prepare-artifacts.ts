@@ -10,8 +10,6 @@ import type {
 	LucidConfigDefinition,
 	RuntimeArtifactCustom,
 	RuntimeArtifactProvider,
-	RuntimeBuildArtifact,
-	RuntimePrepareArtifacts,
 } from "./types.js";
 
 const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
@@ -42,11 +40,6 @@ const isDatabaseAdapterFactory = (
 	);
 };
 
-/** Creates the empty artifact payload passed into runtime prepare handlers. */
-export const createRuntimePrepareArtifacts = (): RuntimePrepareArtifacts => ({
-	custom: [],
-});
-
 /** Resolves static or env-aware artifact providers used by database adapters. */
 const resolvePrepareArtifacts = async (
 	provider: RuntimeArtifactProvider | undefined,
@@ -56,14 +49,10 @@ const resolvePrepareArtifacts = async (
 	return typeof provider === "function" ? provider(env) : provider;
 };
 
-const isCustomArtifact = (
-	artifact: RuntimeBuildArtifact | RuntimeArtifactCustom,
-): artifact is RuntimeArtifactCustom => "custom" in artifact;
-
 /** Adds only custom artifacts that the active runtime explicitly supports. */
 const addSupportedArtifacts = (props: {
-	target: RuntimePrepareArtifacts;
-	artifacts: Array<RuntimeBuildArtifact | RuntimeArtifactCustom>;
+	target: Array<RuntimeArtifactCustom>;
+	artifacts: Array<RuntimeArtifactCustom>;
 	customArtifactTypes?: string[];
 }) => {
 	if (!props.customArtifactTypes?.length) {
@@ -71,11 +60,8 @@ const addSupportedArtifacts = (props: {
 	}
 
 	for (const artifact of props.artifacts) {
-		if (
-			isCustomArtifact(artifact) &&
-			props.customArtifactTypes.includes(artifact.type)
-		) {
-			props.target.custom.push(artifact);
+		if (props.customArtifactTypes.includes(artifact.type)) {
+			props.target.push(artifact);
 		}
 	}
 };
@@ -83,7 +69,7 @@ const addSupportedArtifacts = (props: {
 const collectDatabasePrepareArtifacts = async (props: {
 	db: DatabaseAdapterValue;
 	env: EnvironmentVariables;
-	target: RuntimePrepareArtifacts;
+	target: Array<RuntimeArtifactCustom>;
 	customArtifactTypes?: string[];
 }) => {
 	const resolvedValue = isPromiseLike(props.db) ? await props.db : props.db;
@@ -109,7 +95,7 @@ const collectPluginPrepareArtifacts = async (props: {
 		configPath: string;
 		projectRoot: string;
 	};
-	target: RuntimePrepareArtifacts;
+	target: Array<RuntimeArtifactCustom>;
 	customArtifactTypes?: string[];
 }) => {
 	for (const plugin of props.plugins) {
@@ -152,8 +138,8 @@ export const collectRuntimePrepareArtifacts = async (props: {
 		projectRoot: string;
 	};
 	customArtifactTypes?: string[];
-}): Promise<RuntimePrepareArtifacts> => {
-	const result = createRuntimePrepareArtifacts();
+}): Promise<Array<RuntimeArtifactCustom>> => {
+	const result: Array<RuntimeArtifactCustom> = [];
 
 	if (!props.customArtifactTypes?.length) {
 		return result;

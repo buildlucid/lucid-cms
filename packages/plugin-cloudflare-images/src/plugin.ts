@@ -7,9 +7,9 @@ import {
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 import type { CloudflareImagesPluginOptions } from "./types.js";
-import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
+import { createBindingsArtifact } from "./utils/bindings-artifact.js";
 
-/** Provides Cloudflare Images transformations and adds the Images binding to generated Wrangler config. Requires the Cloudflare runtime. */
+/** Provides Cloudflare Images transformations and a Worker Images binding, requiring the Cloudflare runtime. */
 const plugin = (
 	pluginOptions: CloudflareImagesPluginOptions = {},
 ): LucidPluginDefinition =>
@@ -21,7 +21,7 @@ const plugin = (
 				error: undefined,
 				data: {
 					artifacts:
-						phase === "prepare" ? [createWranglerArtifact(pluginOptions)] : [],
+						phase === "prepare" ? [createBindingsArtifact(pluginOptions)] : [],
 				},
 			}),
 		},

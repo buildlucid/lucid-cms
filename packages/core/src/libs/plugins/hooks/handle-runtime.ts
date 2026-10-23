@@ -1,12 +1,12 @@
 import type { ServiceResponse } from "../../../exports/types.js";
-import type {
-	LucidConfigDefinition,
-	RuntimeBuildArtifact,
-} from "../../../libs/runtime/types.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import cliLogger from "../../cli/logger.js";
 import { copy, createTranslator } from "../../i18n/index.js";
 import type { TranslationStore } from "../../i18n/types.js";
+import type {
+	LucidConfigDefinition,
+	RuntimeArtifactCustom,
+} from "../../runtime/types.js";
 
 /**
  * Responsible for running the plugin runtime hooks and collecting artifacts.
@@ -17,11 +17,9 @@ const handlePluginRuntimeHooks = async (props: {
 	definition: LucidConfigDefinition;
 	silent?: boolean;
 	configPath: string;
-	outputPath: string;
-	outputRelativeConfigPath: string;
-}): ServiceResponse<RuntimeBuildArtifact[]> => {
+}): ServiceResponse<RuntimeArtifactCustom[]> => {
 	try {
-		const pluginArtifacts: Array<RuntimeBuildArtifact> = [];
+		const pluginArtifacts: Array<RuntimeArtifactCustom> = [];
 		const silent = props.silent ?? false;
 		const translate = createTranslator({
 			store: props.translationStore,
@@ -33,14 +31,11 @@ const handlePluginRuntimeHooks = async (props: {
 				if (!plugin.hooks?.runtime) {
 					return;
 				}
+
 				const res = await plugin.hooks.runtime({
 					phase: "build",
 					definition: props.definition,
-					paths: {
-						configPath: props.configPath,
-						outputPath: props.outputPath,
-						outputRelativeConfigPath: props.outputRelativeConfigPath,
-					},
+					paths: { configPath: props.configPath },
 				});
 				if (res.error) {
 					cliLogger.error(
@@ -51,6 +46,7 @@ const handlePluginRuntimeHooks = async (props: {
 						},
 					);
 				}
+
 				if (res.data?.artifacts) {
 					pluginArtifacts.push(...res.data.artifacts);
 				}

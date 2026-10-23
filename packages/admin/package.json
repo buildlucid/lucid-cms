@@ -8,8 +8,7 @@
 		"dist",
 		"src",
 		"!src/build",
-		"!src/**/*.test.*",
-		"index.html"
+		"!src/**/*.test.*"
 	],
 	"exports": {
 		"./build": {

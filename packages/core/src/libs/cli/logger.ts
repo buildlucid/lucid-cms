@@ -1,5 +1,7 @@
 import picocolors from "picocolors";
 import { ZodError } from "zod";
+import LucidError from "../../utils/errors/lucid-error.js";
+import cliSpinner from "./spinner.js";
 
 const symbols = {
 	tick: { icon: "✓", color: picocolors.green },
@@ -148,11 +150,13 @@ const startTimer = () => {
 	};
 };
 
+/** Creates result badges such as `LUCID CMS`, ending the CLI spinner when printed. */
 const createBadge = (
 	text: string,
 	backgroundColor?: (str: string) => string,
 	foregroundColor?: (str: string) => string,
 ): string => {
+	cliSpinner.stop();
 	const bg = backgroundColor ?? picocolors.bgGreenBright;
 	const fg = foregroundColor ?? picocolors.black;
 
@@ -216,7 +220,8 @@ const errorInstance = (error: Error, heading?: string) => {
 	logger.error(heading ?? error.name);
 	printErrorDetail(error.message);
 
-	if (!error.stack) return;
+	// Lucid's own errors explain themselves, so only unexpected errors show where they came from.
+	if (error instanceof LucidError || !error.stack) return;
 
 	const stackLines = error.stack.split("\n").slice(1, 3);
 	for (const line of stackLines) {

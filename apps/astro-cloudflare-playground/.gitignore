@@ -24,9 +24,9 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# wrangler
+# cloudflare
+.cloudflare/
 .wrangler/
-wrangler.lucid.jsonc
 
 # lucid cms
 ./uploads

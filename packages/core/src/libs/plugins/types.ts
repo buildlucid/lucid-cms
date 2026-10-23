@@ -1,4 +1,5 @@
-import type { IncomingMessage, Server, ServerResponse } from "node:http";
+import type { InlineConfig, PluginOption } from "vite";
+import type z from "zod";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import type {
 	ServiceContext,
@@ -12,12 +13,11 @@ import type {
 	EnvironmentVariables,
 	LucidConfigDefinition,
 	RuntimeArtifactCustom,
-	RuntimeBuildArtifactFile,
 } from "../runtime/types.js";
 import type { Toolkit, ToolkitDefinition } from "../toolkit/types.js";
 
 export type LucidPluginRuntimeHookResult = {
-	artifacts?: Array<RuntimeBuildArtifactFile | RuntimeArtifactCustom>;
+	artifacts?: Array<RuntimeArtifactCustom>;
 };
 
 export type LucidPluginHookInit = () => ServiceResponse<undefined>;
@@ -36,8 +36,6 @@ export type LucidPluginRuntimeHookContext =
 			definition: LucidConfigDefinition;
 			paths: {
 				configPath: string;
-				outputPath: string;
-				outputRelativeConfigPath: string;
 			};
 	  };
 export type LucidPluginRuntimeHookPhase =
@@ -51,9 +49,7 @@ export type LucidPluginHooks = {
 	 * Runs while loading configuration. Return a service result; an error stops initialization.
 	 */
 	init?: LucidPluginHookInit;
-	/**
-	 * Supplies files or runtime-specific artifacts for preparation and builds. Check `phase` to choose which artifacts to return.
-	 */
+	/** Supplies runtime artifacts for preparation or builds according to `phase`. */
 	runtime?: LucidPluginHookRuntime;
 };
 
@@ -65,7 +61,26 @@ export type LucidPluginCommandLogger = {
 	error: (error: unknown, heading: string) => void;
 };
 
-/** Runs plugin CLI commands with a database connection, KV and toolkit; run `lucidcms migrate` first when needed and throw to fail. */
+/** Defines a plugin command's runtime work through `definePluginTask`, parsing JSON with `input` and returning JSON through the development task route with runtime bindings and services. */
+export type LucidPluginTask<
+	Input extends z.ZodType = z.ZodType,
+	Result = unknown,
+> = {
+	input: Input;
+	// A method, so tasks with their own input and result still fit `tasks`' record of any task.
+	run(props: {
+		context: ServiceContext;
+		toolkit: Toolkit;
+		input: z.output<Input>;
+	}): Promise<Result>;
+};
+
+/** What a plugin task hands back to its command. */
+export type LucidPluginTaskResult<Task extends LucidPluginTask> = Awaited<
+	ReturnType<Task["run"]>
+>;
+
+/** Defines a Node `lucidcms` command with filesystem access and runtime `tasks`; run `lucidcms migrate` first when needed and throw to fail. */
 export type LucidPluginCommand = {
 	/** Plugin command name, such as `site:build`, which cannot replace a built-in command. */
 	name: string;
@@ -74,66 +89,45 @@ export type LucidPluginCommand = {
 		config: ResolvedLucidConfig;
 		/** The folder holding lucid.config. */
 		projectRoot: string;
-		context: ServiceContext;
-		toolkit: Toolkit;
 		/** Public directory and `sources.public` files, with `path` naming each file on disk and `name` its public path. */
 		publicFiles: ResourceFile[];
+		/** Project Vite config used by building commands with warnings/errors only, or null when the project's host owns the build. */
+		viteConfig: InlineConfig | null;
+		/** Runs a plugin task in the runtime and returns its result, typed with the task definition as in `runTask<typeof buildTask>("build", input)`. */
+		runTask: <Task extends LucidPluginTask = LucidPluginTask>(
+			name: string,
+			input: z.input<Task["input"]>,
+		) => Promise<LucidPluginTaskResult<Task>>;
 		logger: LucidPluginCommandLogger;
 	}) => void | Promise<void>;
 };
 
-/** Connect-style middleware for the development HTTP server. Call `next` for requests it doesn't handle. */
-export type LucidDevMiddleware = (
-	request: IncomingMessage,
-	response: ServerResponse,
-	next: (error?: unknown) => void,
-) => void;
+/** Commands that run plugin `prepare` hooks, with hosts such as Astro using `dev` and `build`. */
+export type LucidPluginCliPrepareCommand = "dev" | "build" | "typegen";
 
-/** Development services a plugin starts, such as a Vite server. */
-export type LucidPluginCliDev = {
-	middleware?: LucidDevMiddleware;
-	close?: () => Promise<void>;
-	/** Passed to the plugin's runtime code as `runtimeContext.pluginData[key]`. */
-	data?: unknown;
+/** What a plugin adds to the project's Vite app. */
+export type LucidPluginVite = {
+	/** Vite plugins for the project's Vite config. */
+	plugins?: PluginOption[];
+	/** Server module, including virtual modules supplied by `plugins`, whose exports reach `runtimeContext.pluginModules[key]` after the client builds so they can include its output. */
+	module?: string;
 };
-
-/** The `lucidcms` commands that run plugins' `prepare` hooks. */
-export type LucidPluginCliPrepareCommand =
-	| "dev"
-	| "serve"
-	| "build"
-	| "typegen";
 
 /** What `lucidcms` calls at points in its own commands, as opposed to the commands a plugin adds. */
 export type LucidPluginCliHooks = {
-	/** Runs during `lucidcms dev` (each restart too), `serve`, `build` and `typegen`, for setup such as writing editor files. */
+	/** Runs when `lucidcms dev` starts or restarts, and during `build` and `typegen`, for setup such as writing editor files. */
 	prepare?: (props: {
 		command: LucidPluginCliPrepareCommand;
 		config: ResolvedLucidConfig;
 		projectRoot: string;
 	}) => void | Promise<void>;
-	/** Runs during `lucidcms dev`, each time it starts the server, for development services such as a Vite server. */
-	dev?: (props: {
-		server: Server;
-		config: ResolvedLucidConfig;
-		projectRoot: string;
-	}) => Promise<LucidPluginCliDev>;
-	/**
-	 * Runs during `lucidcms build` and `lucidcms serve`, for the plugin's own build, such as its assets. Not the plugin's
-	 * `hooks.runtime`, whose `build` phase gives the runtime adapter artifacts. Returned `data` reaches runtime code as
-	 * `runtimeContext.pluginData[key]`, and the exports of an absolute ES `module` written under `outDir`, such as bundled
-	 * components, as `runtimeContext.pluginModules[key]`.
-	 */
-	build?: (props: {
+	/** Adds the plugin to the project's Vite app, which `lucid()` runs during development, builds and previews. */
+	vite?: (props: {
 		config: ResolvedLucidConfig;
 		projectRoot: string;
 		/** The runtime adapter's key, such as `node` or `cloudflare`. */
 		runtime: string;
-		/** Public directory and `sources.public` files, with `path` naming each file on disk and `name` its public path. */
-		publicFiles: ResourceFile[];
-		/** Absolute output directory; files under `public` are served from the site root. */
-		outDir: string;
-	}) => Promise<{ data?: unknown; module?: string } | undefined>;
+	}) => LucidPluginVite | Promise<LucidPluginVite>;
 };
 
 /** CLI-only plugin code, kept out of server bundles because core loads it by module path. */
@@ -171,9 +165,7 @@ export type LucidPluginDefinition = {
 	 * The hooks that the plugin can register.
 	 */
 	hooks?: LucidPluginHooks;
-	/**
-	 * CLI-only code, such as dev servers and asset builds. `module` is a package subpath or path whose default export is a `LucidPluginCliFactory`, called with `options`.
-	 */
+	/** CLI-only Vite plugins and commands loaded from `module`, a package subpath or path exporting a `LucidPluginCliFactory` invoked with `options`. */
 	cli?: {
 		module: string;
 		options?: unknown;
@@ -192,6 +184,8 @@ export type LucidPluginDefinition = {
 	 * A plugin-owned service to add to Lucid's server toolkit.
 	 */
 	toolkit?: ToolkitDefinition;
+	/** Work the plugin's commands run inside the runtime, by name. */
+	tasks?: Record<string, LucidPluginTask>;
 	/**
 	 * Mutate the resolved config draft after plugin defaults and project settings are applied. The project configure callback runs last.
 	 */

@@ -33,15 +33,8 @@ export type PluginOptions = {
 	 * Cloudflare R2 binding name. Defaults to "LUCID_MEDIA_BUCKET".
 	 */
 	binding?: string;
-	/**
-	 * Wrangler R2 bucket name. Defaults to a generated name based on the worker
-	 * and binding.
-	 */
+	/** R2 bucket name, defaulting to one generated from the worker and binding. */
 	bucketName?: string;
-	/**
-	 * Wrangler R2 preview bucket name.
-	 */
-	previewBucketName?: string;
 	/** HTTP credentials for operations that need signed S3 requests. */
 	http?: HttpOptions;
 	/** Metadata and storage class applied to uploaded objects. */

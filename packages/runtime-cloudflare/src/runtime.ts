@@ -5,18 +5,15 @@ import type {
 	AdapterOptions,
 	CloudflareAdapterOptionsValue,
 	CloudflareRuntimeAdapter,
-	PreparedWranglerConfig,
 } from "./types.js";
 
-/** Creates the Cloudflare runtime without CLI tooling, for embedded hosts and compiled applications. */
+/** Creates the Cloudflare runtime for `defineConfig` with options from environment values, using `@lucidcms/runtime-cloudflare/vite` to run, build and execute Lucid commands in the Worker. */
 export const cloudflare = (
 	options?: CloudflareAdapterOptionsValue,
 ): CloudflareRuntimeAdapter => {
 	let resolvedOptions: AdapterOptions | undefined =
 		typeof options === "function" ? undefined : options;
 	let optionsResolved = typeof options !== "function";
-	let platformProxy: ReturnType<CloudflareRuntimeAdapter["getPlatformProxy"]>;
-	let preparedWranglerConfig: PreparedWranglerConfig | undefined;
 
 	const resolveOptions = async (env: EnvironmentVariables) => {
 		if (optionsResolved) {
@@ -34,7 +31,7 @@ export const cloudflare = (
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		runtimeEntrypoint: "@lucidcms/runtime-cloudflare/runtime",
+		vite: "@lucidcms/runtime-cloudflare/vite",
 		hosts: {
 			astro: {
 				entrypoint: "@lucidcms/runtime-cloudflare/astro",
@@ -43,24 +40,10 @@ export const cloudflare = (
 		},
 		config: {
 			customBuildArtifacts: [constants.WORKER_HANDLER_ARTIFACT_TYPE],
-			customPrepareArtifacts: [constants.WRANGLER_CONFIG_ARTIFACT_TYPE],
+			customPrepareArtifacts: [constants.BINDINGS_ARTIFACT_TYPE],
 		},
 		adaptConfig,
 		getOptions: () => resolvedOptions,
 		resolveOptions,
-		getPlatformProxy: () => platformProxy,
-		setPlatformProxy: (nextPlatformProxy) => {
-			platformProxy = nextPlatformProxy;
-		},
-		getPreparedWranglerConfig: () => preparedWranglerConfig,
-		setPreparedWranglerConfig: (nextConfig) => {
-			preparedWranglerConfig = nextConfig;
-		},
 	};
 };
-
-export { default as getRuntimeContext } from "./services/get-runtime-context.js";
-export {
-	default as getOrCreateRuntimeHost,
-	runtimeHostKeys,
-} from "./services/runtime-host.js";

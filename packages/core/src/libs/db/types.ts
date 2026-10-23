@@ -181,9 +181,9 @@ export type DatabaseConfig = {
 		 */
 		alterColumn: boolean;
 		/**
-		 * Whether the database supports transactions.
+		 * Lucid runs its work in transactions and relies on rollback, so every database adapter must support them.
 		 */
-		transaction: boolean;
+		transaction: true;
 		/** Whether SELECT FOR SHARE can protect referenced rows until transaction commit. */
 		sharedRowLocks: boolean;
 		/**

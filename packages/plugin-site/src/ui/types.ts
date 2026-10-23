@@ -28,6 +28,10 @@ export type UiIntegration = UiFilter & {
 /** Defines the `vite` module's default export, requiring supplied absolute globs to reach its plugins so libraries such as React and Solid can share extensions. */
 export type UiVite<Plugin = unknown> = (
 	filter: UiFilter,
+	context: {
+		/** The project's root, which is Vite's root, for plugins that look for their own config files. */
+		projectRoot: string;
+	},
 ) => Plugin[] | Promise<Plugin[]>;
 
 /** What a renderer gets alongside the component and its props. */

@@ -9,10 +9,8 @@ export const PAGES_DIRECTORY = "pages";
 /** Where `site:build` writes the static site, relative to the project root. */
 export const DEFAULT_STATIC_OUTPUT_DIRECTORY = "dist-site";
 
-/** Vite URL prefix reserved for site builds, like `/_plugins`, served by Vite in development and from `public/_assets` once built. */
-export const ASSETS_BASE = "/_assets/";
-/** Built asset names hold a content hash, so browsers and CDNs may keep them for a year. */
-export const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+/** The script that connects a development page to Vite's dev server, for reloads and hot updates. */
+export const VITE_CLIENT = "/@vite/client";
 export const CLOUDFLARE_RUNTIME = "cloudflare";
 
 export const errorPages = {

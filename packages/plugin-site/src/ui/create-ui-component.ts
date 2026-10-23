@@ -72,12 +72,13 @@ const createUiComponent = (name: string, ui: SiteUiComponent, script: string) =>
 				const { fallback = "", ...rest } = slots;
 				html = fallback + templateSlots(rest);
 			} else {
-				const { component, renderer } = await ui.load({ hydrate });
+				const { component, renderer } = await ui.load();
 				const { placeholders, fill } = slotPlaceholders(id, slots);
 				const rendered = await renderer.render(component, props, placeholders, {
 					id,
 					hydrate,
 				});
+
 				const result =
 					typeof rendered === "string" ? { html: rendered } : rendered;
 				html = fill(result.html, hydrate);
@@ -96,6 +97,7 @@ const createUiComponent = (name: string, ui: SiteUiComponent, script: string) =>
 							.map((href) => assetLink("modulepreload", href))
 							.join("")
 					: "";
+
 			return safe(
 				`${links}${preloads}<client-component ${clientAttributes(client)} src="${escapeHtml(assets.src)}" props="${escapeHtml(propsJson(name, props))}" prefix="${id}" style="display:contents">${html}</client-component>${assetScript(script)}`,
 			);

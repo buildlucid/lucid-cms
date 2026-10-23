@@ -1,272 +1,107 @@
 import { confirm } from "@inquirer/prompts";
-import constants from "../../../constants/constants.js";
-import type {
-	EnvironmentVariables,
-	ResolvedLucidConfig,
-} from "../../../exports/types.js";
-import createServiceContext from "../../../utils/services/create-service-context.js";
-import loadConfigFile from "../../config/load-config-file.js";
-import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
-import type { DatabaseConnection } from "../../db/types.js";
-import prepareTranslations from "../../i18n/prepare-translations.js";
-import type { TranslationStore } from "../../i18n/types.js";
-import {
-	destroyKVAdapter,
-	getInitializedKVAdapter,
-} from "../../kv/lifecycle.js";
-import type { KVAdapterInstance } from "../../kv/types.js";
-import logger, {
-	startLoggerBuffering,
-	stopLoggerBuffering,
-} from "../../logger/index.js";
-import type { AdapterRuntimeContext } from "../../runtime/types.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import cliLogger from "../logger.js";
+import runPrompt from "../services/run-prompt.js";
+import runTaskCommand from "../services/run-task-command.js";
+import type { TaskServerOptions } from "../services/start-task-server.js";
 
-const migrateRollbackCommand = async (options?: {
-	force?: boolean;
-	remote?: boolean;
-	steps?: number;
-}) => {
-	let kvInstance: KVAdapterInstance | undefined;
-	let config: ResolvedLucidConfig | undefined;
-	let env: EnvironmentVariables | undefined;
-	let runtimeContext: AdapterRuntimeContext | undefined;
-	let translationStore: TranslationStore | undefined;
-	let database: DatabaseConnection | undefined;
-
-	const cleanup = async () => {
-		if (!config) return;
-		await Promise.allSettled([
-			database?.destroy(),
-			destroyKVAdapter(kvInstance, { config, env, runtimeContext }),
-		]);
-		database = undefined;
-		kvInstance = undefined;
-	};
-	try {
-		startLoggerBuffering();
-		const startTime = cliLogger.startTimer();
-		const steps = options?.steps ?? 1;
-		const force = options?.force ?? false;
-
-		const res = await loadConfigFile({
-			prepareRuntime: true,
-		});
-		config = res.config;
-		env = res.env;
-		runtimeContext = res.runtimeContext;
-		translationStore = (
-			await prepareTranslations({
-				config,
-				files: res.resources.files.translations,
-			})
-		).translationStore;
-
-		cliLogger.info("Checking rollback status");
-
-		await prepareExternalMigrations({
-			config,
-			files: res.resources.files.migrations,
-		});
-		database = await config.db.connect(env);
-
-		//* missing Lucid migrations would fail the rollback midway, so surface them upfront
-		const migrationStatus = await config.db.getMigrationStatus(database.client);
-		if (migrationStatus.missing.length > 0) {
-			cliLogger.error(
-				`Cannot rollback: previously executed Lucid migration(s) are no longer registered: ${migrationStatus.missing.join(", ")}`,
-			);
-			cliLogger.info(
-				"Check the installed @lucidcms/core version matches the database.",
-			);
-			await cleanup();
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
-		if (migrationStatus.executed.length === 0) {
-			cliLogger.info("No migrations to rollback");
-			await cleanup();
-			await stopLoggerBuffering();
-			process.exit(0);
-		}
-
-		const migrations = await (
-			await config.db.createMigrator(database)
-		).getMigrations();
-
-		//* rollbacks happen in execution order, which can diverge from name order with external migrations
-		const executedMigrations = migrations
-			.filter((m) => m.executedAt !== undefined)
-			.sort((a, b) => {
-				const aTime = a.executedAt?.getTime() ?? 0;
-				const bTime = b.executedAt?.getTime() ?? 0;
-				if (aTime === bTime) return a.name.localeCompare(b.name);
-				return aTime - bTime;
-			});
-
-		const protectedMigrations = config.db.protectedMigrations;
-		const migrationsToRollback: string[] = [];
-
-		for (
-			let i = executedMigrations.length - 1;
-			i >= 0 && migrationsToRollback.length < steps;
-			i--
-		) {
-			const migration = executedMigrations[i];
-			if (!migration) continue;
-
-			if (protectedMigrations.includes(migration.name)) {
-				cliLogger.error(
-					`Cannot rollback protected migration: "${migration.name}"`,
-				);
-				cliLogger.info(
-					"Protected migrations are essential for the CMS to function and cannot be rolled back.",
-				);
-				cliLogger.info(
-					"If you need to reset the database, use",
-					cliLogger.color.cyan("migrate:reset"),
-					"or",
-					cliLogger.color.cyan("migrate:fresh"),
-				);
-				await cleanup();
-				await stopLoggerBuffering();
-				process.exit(1);
-			}
-
-			//* retired migrations have nothing to undo, and removing them would rerun them if their plugin comes back
-			if (migrationStatus.retired.includes(migration.name)) {
-				cliLogger.error(
-					`Cannot rollback migration "${migration.name}" as it is no longer registered`,
-				);
-				cliLogger.info(
-					"Restore the plugin or migration file that registered it to roll it back.",
-				);
-				await cleanup();
-				await stopLoggerBuffering();
-				process.exit(1);
-			}
-
-			migrationsToRollback.push(migration.name);
-		}
-
-		cliLogger.info(`Found ${executedMigrations.length} executed migration(s)`);
-		cliLogger.warn(
-			`Preparing to rollback ${migrationsToRollback.length} migration(s)`,
-		);
-
-		if (!force) {
-			let shouldProceed: boolean;
-			try {
-				shouldProceed = await confirm({
-					message: `Are you sure you want to rollback ${migrationsToRollback.length} migration(s)? This action cannot be undone.`,
-					default: false,
+/** Rolls back the most recently executed migrations in the runtime, after confirming the plan unless forced. */
+const migrateRollbackCommand = (
+	options?: { force?: boolean; steps?: string } & TaskServerOptions,
+) =>
+	runTaskCommand(
+		"Rollback failed",
+		async (run, elapsed) => {
+			const steps = Number(options?.steps ?? 1);
+			if (!Number.isInteger(steps) || steps < 1) {
+				throw new LucidError({
+					message: "--steps must be a whole number of at least 1.",
 				});
-			} catch (error) {
-				if (error instanceof Error && error.name === "ExitPromptError") {
-					await cleanup();
-					await stopLoggerBuffering();
-					process.exit(0);
-				}
-				throw error;
 			}
 
-			if (!shouldProceed) {
-				cliLogger.info("Rollback cancelled");
-				await cleanup();
-				await stopLoggerBuffering();
-				process.exit(0);
-			}
-		}
+			cliLogger.info("Checking rollback status");
+			let migrations: string[] | undefined;
 
-		kvInstance = await getInitializedKVAdapter(config, {
-			env,
-			runtimeContext,
-		});
-		const serviceContext = createServiceContext({
-			config,
-			database,
-			translationStore,
-			env,
-			runtimeContext,
-			kv: kvInstance,
-		});
-		const migrator = await config.db.createMigrator(database, serviceContext);
+			while (true) {
+				const result = await run("migrate:rollback", { steps, migrations });
+				switch (result.status) {
+					case "missing": {
+						cliLogger.error(
+							`Cannot rollback: previously executed Lucid migration(s) are no longer registered: ${result.migrations.join(", ")}`,
+						);
+						cliLogger.info(
+							"Check the installed @lucidcms/core version matches the database.",
+						);
+						return 1;
+					}
+					case "none": {
+						cliLogger.info("No migrations to rollback");
+						return 0;
+					}
+					case "protected": {
+						cliLogger.error(
+							`Cannot rollback protected migration: "${result.migration}"`,
+						);
+						cliLogger.info(
+							"Protected migrations are essential for the CMS to function and cannot be rolled back.",
+						);
+						cliLogger.info(
+							"If you need to reset the database, use",
+							cliLogger.color.cyan("migrate:reset"),
+							"or",
+							cliLogger.color.cyan("migrate:fresh"),
+						);
+						return 1;
+					}
+					case "retired": {
+						cliLogger.error(
+							`Cannot rollback migration "${result.migration}" as it is no longer registered`,
+						);
+						cliLogger.info(
+							"Restore the plugin or migration file that registered it to roll it back.",
+						);
+						return 1;
+					}
+					case "confirm": {
+						cliLogger.info(`Found ${result.executed} executed migration(s)`);
+						cliLogger.warn(
+							`Preparing to rollback ${result.migrations.length} migration(s)`,
+						);
 
-		cliLogger.info(
-			`Rolling back ${migrationsToRollback.length} migration(s)...`,
-		);
+						const proceed =
+							options?.force ||
+							(await runPrompt((output) =>
+								confirm(
+									{
+										message: `Are you sure you want to rollback ${result.migrations.length} migration(s)? This action cannot be undone.`,
+										default: false,
+									},
+									{ output },
+								),
+							));
+						if (!proceed) {
+							cliLogger.info("Rollback cancelled");
+							return 0;
+						}
 
-		let rolledBackCount = 0;
-		for (let i = 0; i < migrationsToRollback.length; i++) {
-			const { error, results } = await migrator.migrateDown();
-
-			if (results) {
-				for (const result of results) {
-					if (result.status === "Success") {
-						logger.debug({
-							message: `Rolled back "${result.migrationName}" successfully`,
-							scope: constants.logScopes.migrations,
-						});
-						rolledBackCount++;
-					} else if (result.status === "Error") {
-						logger.error({
-							message: `Failed to rollback migration "${result.migrationName}"`,
-							scope: constants.logScopes.migrations,
-						});
+						migrations = result.migrations;
+						break;
+					}
+					case "complete": {
+						cliLogger.log(
+							cliLogger.createBadge("LUCID CMS"),
+							"Rollback completed",
+							cliLogger.color.green("successfully"),
+							"in",
+							cliLogger.color.green(cliLogger.formatMilliseconds(elapsed())),
+							{ spaceAfter: true, spaceBefore: true },
+						);
+						return 0;
 					}
 				}
 			}
-
-			if (error) {
-				if (error instanceof Error) {
-					cliLogger.errorInstance(error, "Rollback failed");
-				} else {
-					cliLogger.error("Rollback failed", "Unknown error");
-				}
-				await cleanup();
-				await stopLoggerBuffering();
-				process.exit(1);
-			}
-		}
-
-		if (rolledBackCount === 0) {
-			cliLogger.warn("No migrations were rolled back");
-		} else {
-			cliLogger.success(
-				`Rolled back ${rolledBackCount} migration(s)`,
-				cliLogger.color.green("successfully"),
-			);
-		}
-
-		cliLogger.info("Clearing KV cache...");
-		await kvInstance.clear(serviceContext);
-		await cleanup();
-
-		const endTime = startTime();
-		cliLogger.log(
-			cliLogger.createBadge("LUCID CMS"),
-			"Rollback completed",
-			cliLogger.color.green("successfully"),
-			"in",
-			cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-			{
-				spaceAfter: true,
-				spaceBefore: true,
-			},
-		);
-
-		await stopLoggerBuffering();
-		process.exit(0);
-	} catch (error) {
-		await cleanup();
-		if (error instanceof Error) {
-			cliLogger.errorInstance(error, "Rollback failed");
-		} else {
-			cliLogger.error("Rollback failed", "Unknown error");
-		}
-		await stopLoggerBuffering();
-		process.exit(1);
-	}
-};
+		},
+		options,
+	);
 
 export default migrateRollbackCommand;

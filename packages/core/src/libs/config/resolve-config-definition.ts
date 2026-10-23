@@ -2,20 +2,17 @@ import type z from "zod";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import parseEnv from "../runtime/parse-env.js";
-import {
-	collectRuntimePrepareArtifacts,
-	createRuntimePrepareArtifacts,
-} from "../runtime/prepare-artifacts.js";
 import { resolveDatabaseAdapter } from "../runtime/resolve-database-adapter.js";
+import { HostAdapterSchema } from "../runtime/schema.js";
 import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 	GetEnvVarsLogger,
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
-	RuntimeAdaptConfig,
 	RuntimeAdapter,
 } from "../runtime/types.js";
+import parseAvailableEnv from "./parse-available-env.js";
 import processConfig from "./process-config.js";
 
 const defaultLoggerInstance = {
@@ -30,8 +27,9 @@ const defaultLoggerInstance = {
 	},
 } as unknown as GetEnvVarsLogger["instance"];
 
-export const invalidConfigDefinitionMessage =
+const invalidConfigDefinitionMessage =
 	"Lucid config must default export defineConfig({ runtime, db, config }).";
+const supportedKeys = new Set(["runtime", "host", "db", "config", "configure"]);
 
 export type ResolveConfigDefinitionResult = {
 	config: ResolvedLucidConfig;
@@ -69,23 +67,32 @@ const isConfigDefinition = (value: unknown): value is LucidConfigDefinition => {
  * Config modules should stay declarative. This guard keeps the failure focused
  * on the public config shape before Lucid attempts any adapter resolution.
  */
-export const assertConfigDefinition = (
-	value: unknown,
-): LucidConfigDefinition => {
+const assertConfigDefinition = (value: unknown): LucidConfigDefinition => {
 	if (!isConfigDefinition(value)) {
 		throw new LucidError({
 			message: invalidConfigDefinitionMessage,
 		});
 	}
 
-	const supportedKeys = new Set(["runtime", "db", "config", "configure"]);
 	const unknownKeys = Object.keys(value).filter(
 		(key) => !supportedKeys.has(key),
 	);
-	if (unknownKeys.length)
+	if (unknownKeys.length) {
 		throw new LucidError({
-			message: `Unknown config definition keys: ${unknownKeys.join(", ")}. Use runtime, db, config and configure.`,
+			message: `Unknown config definition keys: ${unknownKeys.join(", ")}. Use runtime, host, db, config and configure.`,
 		});
+	}
+
+	if (
+		value.host !== undefined &&
+		!HostAdapterSchema.safeParse(value.host).success
+	) {
+		throw new LucidError({
+			message:
+				"The config's `host` must be a host adapter, such as the one a framework's Lucid integration exports.",
+		});
+	}
+
 	return value;
 };
 
@@ -116,141 +123,84 @@ export const resolveConfigDefinition = async (props: {
 	envSchema?: z.ZodType;
 	meta?: LucidConfigDefinitionMeta;
 	env?: Record<string, unknown>;
-	adaptConfig?: RuntimeAdaptConfig;
-	configPath?: string;
-	projectRoot?: string;
-	prepareRuntime?: boolean;
+	/** Loads environment values once the adapter resolves, instead of the adapter's own `getEnvVars`. */
+	loadEnv?: (
+		adapter: RuntimeAdapter,
+	) => Promise<Record<string, unknown> | undefined>;
 	validateEnvSchema?: boolean;
 	logger?: GetEnvVarsLogger;
 	processConfigOptions?: Parameters<typeof processConfig>[1];
 }): Promise<ResolveConfigDefinitionResult> => {
 	const definition = assertConfigDefinition(props.definition);
 	const adapter = await resolveRuntimeAdapter(definition.runtime);
-	try {
-		const logger = props.logger ?? {
-			instance: defaultLoggerInstance,
-			silent: true,
-		};
-		const runtimeContext = {
-			runtime: adapter.key,
-			host: "lucid",
-			compiled: false,
-			getConnectionInfo: () => ({}),
-			buildModule: null,
-		} satisfies AdapterRuntimeContext;
-
-		// Hosted integrations can supply their own adaptConfig wrapper so the
-		// runtime adapter identity stays separate from host-specific config shaping.
-		const adaptConfig =
-			props.adaptConfig ?? adapter.adaptConfig ?? ((value) => value);
-
-		const wrappedDefinition = adaptConfig(
-			{
-				...definition,
-				runtime: adapter,
-			},
-			props.meta,
-		);
-
-		const prepareRuntimeContext =
-			props.prepareRuntime &&
-			adapter.cli?.prepare &&
-			props.configPath &&
-			props.projectRoot
-				? {
-						prepare: adapter.cli.prepare,
-						configPath: props.configPath,
-						projectRoot: props.projectRoot,
-					}
-				: undefined;
-
-		if (prepareRuntimeContext) {
-			await prepareRuntimeContext.prepare({
-				configPath: prepareRuntimeContext.configPath,
-				projectRoot: prepareRuntimeContext.projectRoot,
-				prepareArtifacts: createRuntimePrepareArtifacts(),
-				logger,
-			});
-		}
-		// Env loading is optional because some hosts, like Astro Cloudflare, already
-		// own request-time env loading and can pass it in directly.
-		let rawEnv =
-			props.env ??
-			(adapter.getEnvVars
-				? await adapter.getEnvVars({
-						logger,
-					})
-				: undefined);
-
-		const envSchema = props.envSchema;
-
-		// Builds do not need runtime env validation; runtime commands validate env
-		// before using it.
-		const shouldValidateEnvSchema = props.validateEnvSchema ?? true;
-		let env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
-
-		await adapter.resolveOptions?.(env ?? {});
-
-		let rawConfig = wrappedDefinition.config(env || {});
-		const prepareArtifacts = prepareRuntimeContext
-			? await collectRuntimePrepareArtifacts({
-					db: wrappedDefinition.db,
-					plugins: rawConfig.plugins ?? [],
-					env: env ?? {},
-					definition: wrappedDefinition,
-					paths: {
-						configPath: prepareRuntimeContext.configPath,
-						projectRoot: prepareRuntimeContext.projectRoot,
-					},
-					customArtifactTypes: adapter.config?.customPrepareArtifacts,
-				})
-			: createRuntimePrepareArtifacts();
-
-		if (prepareRuntimeContext && prepareArtifacts.custom.length > 0) {
-			await prepareRuntimeContext.prepare({
-				configPath: prepareRuntimeContext.configPath,
-				projectRoot: prepareRuntimeContext.projectRoot,
-				prepareArtifacts,
-				logger,
-			});
-
-			if (!props.env && adapter.getEnvVars) {
-				rawEnv = await adapter.getEnvVars({
-					logger,
-				});
-
-				env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
-
-				await adapter.resolveOptions?.(env ?? {});
-				rawConfig = wrappedDefinition.config(env || {});
-			}
-		}
-
-		await props.onRawConfig?.(rawConfig);
-
-		const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
-
-		// processConfig remains the shared source of truth for plugin init, merging
-		// and validation once the adapter/env/bootstrap layer has been resolved.
-		const config = await processConfig(rawConfig, {
-			...(props.processConfigOptions ?? {}),
-			configure: wrappedDefinition.configure,
-			resolvedDb: db,
+	if (definition.host && !adapter.hosts?.[definition.host.key]) {
+		throw new LucidError({
+			message: `The "${adapter.key}" runtime doesn't support the "${definition.host.key}" host.`,
 		});
-
-		return {
-			config,
-			adapter,
-			runtimeContext,
-			envSchema,
-			env,
-			rawEnv,
-			definition: wrappedDefinition,
-		};
-	} catch (error) {
-		await adapter.cli?.dispose?.();
-		throw error;
 	}
+
+	const logger = props.logger ?? {
+		instance: defaultLoggerInstance,
+		silent: true,
+	};
+	const runtimeContext = {
+		runtime: adapter.key,
+		host: "lucid",
+		compiled: false,
+		getConnectionInfo: () => ({}),
+		buildModule: null,
+	} satisfies AdapterRuntimeContext;
+
+	const adaptConfig = adapter.adaptConfig ?? ((value) => value);
+
+	const wrappedDefinition = adaptConfig(
+		{
+			...definition,
+			runtime: adapter,
+		},
+		props.meta,
+	);
+
+	// Env loading is optional because some hosts, like Astro Cloudflare, already
+	// own request-time env loading and can pass it in directly.
+	const rawEnv =
+		props.env ??
+		(await props.loadEnv?.(adapter)) ??
+		(adapter.getEnvVars ? await adapter.getEnvVars({ logger }) : undefined);
+
+	const envSchema = props.envSchema;
+
+	// Reading the config in Node doesn't need every value, such as secrets only the deployed runtime has, so values the
+	// schema rejects stay raw there. The runtime validates the env before using it.
+	const shouldValidateEnvSchema = props.validateEnvSchema ?? true;
+	const env = shouldValidateEnvSchema
+		? parseEnv(rawEnv, envSchema)
+		: parseAvailableEnv(rawEnv, envSchema);
+
+	await adapter.resolveOptions?.(env ?? {});
+
+	const rawConfig = wrappedDefinition.config(env || {});
+	await props.onRawConfig?.(rawConfig);
+
+	const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
+
+	// processConfig remains the shared source of truth for plugin init, merging
+	// and validation once the adapter/env/bootstrap layer has been resolved.
+	const config = await processConfig(rawConfig, {
+		...(props.processConfigOptions ?? {}),
+		configure: wrappedDefinition.configure,
+		resolvedDb: db,
+	});
+
+	return {
+		config,
+		adapter,
+		runtimeContext,
+		envSchema,
+		env,
+		rawEnv,
+		definition: wrappedDefinition,
+	};
 };
 
 export default resolveConfigDefinition;

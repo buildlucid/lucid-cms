@@ -1,5 +1,10 @@
 # @lucidcms/astro
 
+## v0.3.3 (unreleased)
+
+- Rebuilt on `lucid()` from `@lucidcms/core/vite`, so Lucid runs in Astro's server environment, including workerd on Cloudflare, and projects no longer get generated files in `.lucid/astro`.
+- Runtime bridges return Vite settings from `vite`, replacing `prepare` and `teardown`.
+
 ## v0.3.2
 
 - Fixed Astro dev servers hanging after `Ctrl+C` with Cloudflare runtimes by explicitly awaiting Lucid and Vite teardown for `SIGINT` and `SIGTERM`.

@@ -1,2 +1,5 @@
 export { buildAdmin } from "../build/build-admin.js";
-export { createAdminDevServer } from "../build/create-dev-server.js";
+export {
+	type AdminViteOptions,
+	default as createAdminVite,
+} from "../build/vite/create-admin-vite.js";

@@ -1,39 +1,36 @@
 import path from "node:path";
-import loadBuildProject from "../../compile/load-build-project.js";
+import getConfigPath from "../../config/get-config-path.js";
 import {
 	startLoggerBuffering,
 	stopLoggerBuffering,
 } from "../../logger/index.js";
+import loadPluginClis from "../../plugins/load-plugin-clis.js";
+import runPluginPrepares from "../../plugins/run-plugin-prepares.js";
+import generateProjectTypes from "../../vite/generate-project-types.js";
+import loadProject from "../../vite/load-project.js";
 import cliLogger from "../logger.js";
-import runPluginPrepares from "../services/run-plugin-prepares.js";
 
-/**
- * The CLI typegen command. Resolves the Lucid project and writes the generated type files only.
- */
+/** Loads the project as Lucid's Vite plugin does and writes only generated types. */
 const typegenCommand = async () => {
 	startLoggerBuffering();
 	const startTime = cliLogger.startTimer();
 
 	try {
-		const buildProject = await loadBuildProject({
-			silent: false,
-			generateTypes: true,
-			loadEmailTemplates: false,
-			prepareRuntime: true,
-		});
-		await runPluginPrepares({
-			command: "typegen",
-			config: buildProject.loaded.config,
-			projectRoot: buildProject.loaded.projectRoot,
-		});
+		const configPath = getConfigPath(process.cwd());
+		const { project } = await loadProject(configPath);
+		await Promise.all([
+			generateProjectTypes(project),
+			runPluginPrepares({
+				command: "typegen",
+				config: project.config,
+				projectRoot: project.projectRoot,
+				clis: await loadPluginClis(project.config, project.projectRoot),
+			}),
+		]);
 
-		const relativeConfigPath = path.relative(
-			process.cwd(),
-			buildProject.configPath,
-		);
 		cliLogger.info(
 			"Loaded config from:",
-			cliLogger.color.green(`./${relativeConfigPath}`),
+			cliLogger.color.green(`./${path.relative(process.cwd(), configPath)}`),
 		);
 
 		const endTime = startTime();
@@ -57,6 +54,7 @@ const typegenCommand = async () => {
 		} else {
 			cliLogger.error("Failed to generate types", "Unknown error");
 		}
+
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

@@ -1,5 +1,4 @@
 import {
-	DEFAULT_D1_BINDING,
 	DEFAULT_IMAGES_BINDING,
 	DEFAULT_KV_BINDING,
 	DEFAULT_QUEUE_BINDING,
@@ -7,7 +6,6 @@ import {
 } from "../constants.js";
 import type {
 	CloudflareBindingsOptions,
-	CloudflareD1DatabaseBindingOptions,
 	CloudflareImagesBindingOptions,
 	CloudflareKVNamespaceBindingOptions,
 	CloudflareQueueBindingOptions,
@@ -19,11 +17,10 @@ type NormalizedBinding<T extends { binding?: string }> = Omit<T, "binding"> & {
 };
 type BindingOption<T extends { binding?: string }> = true | string | T;
 
-/** Converts boolean/string shorthand into the expanded Wrangler binding shape. */
+/** Converts boolean or string shorthand into the expanded binding options. */
 const normalizeBinding = <
 	T extends
 		| CloudflareKVNamespaceBindingOptions
-		| CloudflareD1DatabaseBindingOptions
 		| CloudflareImagesBindingOptions
 		| CloudflareR2BucketBindingOptions
 		| CloudflareQueueBindingOptions,
@@ -32,9 +29,11 @@ const normalizeBinding = <
 	defaultBinding: string,
 ): NormalizedBinding<T> | undefined => {
 	if (!value) return undefined;
+
 	if (value === true) {
 		return { binding: defaultBinding } as NormalizedBinding<T>;
 	}
+
 	if (typeof value === "string") {
 		return { binding: value } as NormalizedBinding<T>;
 	}
@@ -45,7 +44,7 @@ const normalizeBinding = <
 	};
 };
 
-/** Normalizes Cloudflare binding shorthands into Wrangler binding objects. */
+/** Normalizes Cloudflare binding shorthands into expanded binding options. */
 export const normalizeCloudflareBindings = (
 	bindings: CloudflareBindingsOptions | undefined,
 ) => ({
@@ -60,10 +59,6 @@ export const normalizeCloudflareBindings = (
 	queues: normalizeBinding<CloudflareQueueBindingOptions>(
 		bindings?.queues,
 		DEFAULT_QUEUE_BINDING,
-	),
-	d1: normalizeBinding<CloudflareD1DatabaseBindingOptions>(
-		bindings?.d1,
-		DEFAULT_D1_BINDING,
 	),
 	images: normalizeBinding<CloudflareImagesBindingOptions>(
 		bindings?.images,
@@ -104,7 +99,6 @@ export const mergeCloudflareBindings = (
 		merged.kv = mergeBinding(merged.kv, bindings?.kv);
 		merged.r2 = mergeBinding(merged.r2, bindings?.r2);
 		merged.queues = mergeBinding(merged.queues, bindings?.queues);
-		merged.d1 = mergeBinding(merged.d1, bindings?.d1);
 		merged.images = mergeBinding(merged.images, bindings?.images);
 	}
 

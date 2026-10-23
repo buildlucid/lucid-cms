@@ -23,7 +23,7 @@ Developers get a code-first collection system, typed APIs for consuming content,
 - **Organize teams:** roles, granular permissions, and integrations.
 - **Handle media and email properly:** folders, private media, shareable links, image processing, cropping, email logs, previews, and redaction policies.
 - **Extend it for your project:** plugins, service hooks, toolkit, and custom routes let you add content behavior, integrations, and side effects.
-- **Choose your infrastructure:** Node.js or Cloudflare Workers, PostgreSQL, LibSQL, SQLite, D1, queues, KV, email, storage.
+- **Choose your infrastructure:** Node.js or Cloudflare Workers, PostgreSQL, LibSQL, SQLite, queues, KV, email, storage.
 - **Use AI where it helps:** generate and edit images, generate alt text, and track AI usage.
 
 AI features require a subscription with Lucid. This is planned to become publicly available with the beta release.
@@ -31,14 +31,13 @@ AI features require a subscription with Lucid. This is planned to become publicl
 ## ⚙️ Runtime Adapters
 
 - [Node.js](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-node) for traditional servers, VPS deployments, local development, and full Node runtime access.
-- [Cloudflare Workers](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-cloudflare) for edge deployments with generated Wrangler configuration, bindings, scheduled handlers, and queue handlers.
+- [Cloudflare Workers](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-cloudflare) for edge deployments through Cloudflare's Vite plugin and `cf` CLI, with generated bindings, scheduled handlers, and queue handlers.
 
 ## 💾 Database Adapters
 
 - [PostgreSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-postgres)
 - [LibSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-libsql)
 - [SQLite](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-sqlite)
-- [Cloudflare D1](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-d1) (beta)
 
 ## 🔌 First-Party Plugins
 

@@ -1,9 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import { describe, expect, test } from "vitest";
-import constants from "../../../constants/constants.js";
-import defaultConfig from "../../../constants/default-config.js";
 import type {
 	ResolvedLucidConfig,
 	ServiceContext,
@@ -42,7 +37,7 @@ describe("renderMustacheTemplate", () => {
 		});
 	});
 
-	test("does not fall back to the filesystem when injected templates are missing a key", async () => {
+	test("returns not found for a missing template", async () => {
 		const result = await renderMustacheTemplate(createServiceContext({}), {
 			template: "missing",
 			data: null,
@@ -53,34 +48,4 @@ describe("renderMustacheTemplate", () => {
 			status: 404,
 		});
 	});
-});
-
-test("loads the template artifact from build.outDir when templates are not injected", async () => {
-	const outDir = await mkdtemp(path.join(tmpdir(), "lucid-render-template-"));
-	try {
-		await mkdir(path.join(outDir, constants.build.directory));
-		await writeFile(
-			path.join(
-				outDir,
-				constants.build.directory,
-				constants.build.dataFiles.emailTemplates,
-			),
-			JSON.stringify({
-				welcome: {
-					html: "Hello {{name}}",
-					lastModified: "2026-09-05T00:00:00.000Z",
-				},
-			}),
-		);
-		const context = createServiceContext({});
-		context.config.email = { ...defaultConfig.email };
-		context.config.build = { ...defaultConfig.build, outDir };
-		const result = await renderMustacheTemplate(context, {
-			template: "welcome",
-			data: { name: "Ada" },
-		});
-		expect(result).toEqual({ error: undefined, data: "Hello Ada" });
-	} finally {
-		await rm(outDir, { recursive: true, force: true });
-	}
 });

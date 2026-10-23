@@ -2,7 +2,7 @@ import type { ServiceContext } from "@lucidcms/core/types";
 import { DEFAULT_QUEUE_BINDING } from "../constants.js";
 import type { PluginOptions } from "../types.js";
 
-/** Resolves the binding name convention used by Lucid's Wrangler generation. */
+/** Resolves the binding name, using Lucid's convention by default. */
 const resolveBindingName = (options: PluginOptions) =>
 	options.binding ?? DEFAULT_QUEUE_BINDING;
 

@@ -1,270 +1,115 @@
-import buildApp from "../../admin/build-app.js";
+import path from "node:path";
+import { type PreviewServer, preview } from "vite";
 import getConfigPath from "../../config/get-config-path.js";
-import loadConfigFile from "../../config/load-config-file.js";
-import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
-import { createTranslator } from "../../i18n/index.js";
-import prepareTranslations from "../../i18n/prepare-translations.js";
-import {
-	startLoggerBuffering,
-	stopLoggerBuffering,
-} from "../../logger/index.js";
-import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
-import type { AdapterKeys } from "../../runtime/types.js";
+import readConfigHost from "../../config/read-config-host.js";
 import createCommandTelemetryReporter, {
 	type CommandTelemetryReporter,
 } from "../../telemetry/command-reporter.js";
 import type { TelemetryStage } from "../../telemetry/types.js";
-import generateTypes from "../../type-generation/index.js";
+import assertNoHost from "../../vite/assert-no-host.js";
+import runMigrateTask from "../../vite/run-migrate-task.js";
 import cliLogger from "../logger.js";
-import copyPublicAssets from "../services/copy-public-assets.js";
-import importPluginModules from "../services/import-plugin-modules.js";
-import { startProgress } from "../services/progress.js";
-import runPluginBuilds from "../services/run-plugin-builds.js";
-import runPluginPrepares from "../services/run-plugin-prepares.js";
+import buildProject from "../services/build-project.js";
+import createViteConfig from "../services/create-vite-config.js";
 import { getServerUrl, logServerReady } from "../services/server-logger.js";
+import startTaskServer from "../services/start-task-server.js";
 import updateAvailable from "../services/update-available.js";
-import migrateCommand from "./migrate.js";
+import cliSpinner from "../spinner.js";
 
-/**
- * Builds the admin application and serves it alongside the runtime
- */
+/** Runs migrations before building and previewing the deployed app through the runtime adapter, keeping migration servers outside the build's `NODE_ENV`. */
 const serveCommand = async () => {
-	startLoggerBuffering();
-	const configPath = getConfigPath(process.cwd());
 	const commandStartedAt = Date.now();
-	let destroy: (() => Promise<void>) | undefined;
-	let telemetryReporter: CommandTelemetryReporter | undefined;
-	let currentStage: TelemetryStage | undefined;
-	let startupListening = false;
-	let startupCompleted = false;
-	let startupAdapterKeys: AdapterKeys | undefined;
 	const coreUpdateAvailable = updateAvailable().catch(() => undefined);
-	const progress = startProgress("Preparing server…");
-
-	const maybeReportStartup = () => {
-		if (!startupListening || !startupCompleted || !startupAdapterKeys) return;
-
-		void telemetryReporter?.report({
-			outcome: "succeeded",
-			stage: "server_listen",
-			adapterKeys: startupAdapterKeys,
-		});
-	};
-
-	let shutdownPromise: Promise<void> | undefined;
-	const shutdown = () => {
-		progress.stop();
-		shutdownPromise ??= (async () => {
-			try {
-				await destroy?.();
-			} catch (error) {
-				if (error instanceof Error) {
-					cliLogger.errorInstance(error, "Error during shutdown");
-				} else {
-					cliLogger.error("Error during shutdown", "Unknown error");
-				}
-			}
-			await stopLoggerBuffering();
-			process.exit(0);
-		})();
-		return shutdownPromise;
-	};
+	let server: PreviewServer | undefined;
+	let telemetryReporter: CommandTelemetryReporter | undefined;
+	let stage: TelemetryStage = "migration";
 
 	try {
-		const configRes = await loadConfigFile({
-			path: configPath,
-			prepareRuntime: true,
-		});
-		destroy = configRes.adapter.cli?.dispose;
-		telemetryReporter = createCommandTelemetryReporter({
-			config: configRes.config,
-			env: configRes.env,
-			runtimeContext: configRes.runtimeContext,
-			projectRoot: configRes.projectRoot,
-			command: "serve",
-			startedAt: commandStartedAt,
-		});
-		const translations = await prepareTranslations({
-			config: configRes.config,
-			files: configRes.resources.files.translations,
-			outputPath: configRes.config.build.outDir,
-		});
-		const translationStore = translations.translationStore;
-		const translate = createTranslator({
-			store: translationStore,
-			locale: "en",
-		});
-		const adapterCLI = configRes.adapter.cli;
+		const configPath = getConfigPath(process.cwd());
 
-		if (!adapterCLI) {
-			cliLogger.error(
-				`Lucid could not load CLI handlers from the "${configRes.adapter.key}" runtime adapter.`,
-			);
-			await stopLoggerBuffering();
-			await telemetryReporter.report({
-				outcome: "failed",
-				stage: "runtime_initialization",
-			});
-			process.exit(1);
-		}
-
-		generateTypes({
-			envSchema: configRes.envSchema,
-			configPath: configPath,
-			projectRoot: configRes.projectRoot,
-			translationFiles: configRes.resources.files.translations,
-			access: configRes.config.access,
-			collections: configRes.config.collections,
-			localization: configRes.config.localization,
-		});
-		await runPluginPrepares({
-			command: "serve",
-			config: configRes.config,
-			projectRoot: configRes.projectRoot,
-		});
-
-		currentStage = "migration";
-		progress.update("Preparing database…");
-		const migrateResult = await migrateCommand({
-			config: configRes.config,
-			migrationFiles: configRes.resources.files.migrations,
-			env: configRes.env,
-			runtimeContext: configRes.runtimeContext,
-			translationStore,
-			mode: "return",
-			onPrompt: progress.pause,
-		})({
-			skipSyncSteps: false,
-		});
-		if (!migrateResult) {
-			await stopLoggerBuffering();
-			process.exit(2);
-		}
-
-		currentStage = "admin_build";
-		progress.update("Building admin application…");
-		await buildApp({
-			config: configRes.config,
-			projectRoot: configRes.projectRoot,
-			configPath,
-		});
-
-		currentStage = "email_templates";
-		progress.update("Preparing email templates and public assets…");
-		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
-			prepareEmailTemplates({
-				config: configRes.config,
-				files: configRes.resources.files.emails,
-				silent: false,
-				verbose: false,
-			}),
-			copyPublicAssets({
-				config: configRes.config,
-				files: configRes.resources.files.public,
-				silent: false,
-				verbose: false,
-			}),
-		]);
-		if (emailTemplatesRes.error) {
-			cliLogger.error(
-				translate.english(emailTemplatesRes.error.message) ??
-					"Failed to prepare email templates",
-			);
-			await stopLoggerBuffering();
-			await telemetryReporter.report({
-				outcome: "failed",
-				stage: "email_templates",
-			});
-			process.exit(1);
-		}
-		if (publicAssetsRes.error) {
-			cliLogger.error(
-				translate.english(publicAssetsRes.error.message) ??
-					"Failed to copy public assets",
-			);
-			await stopLoggerBuffering();
-			await telemetryReporter.report({
-				outcome: "failed",
-				stage: "public_assets",
-			});
-			process.exit(1);
-		}
-		cliLogger.success(
-			"Email templates and public assets prepared",
-			cliLogger.color.green("successfully"),
+		// A host serves the project instead, so it fails before running migrations.
+		await assertNoHost(
+			await readConfigHost(configPath),
+			path.dirname(configPath),
 		);
 
-		currentStage = "artifacts";
-		progress.update("Building plugin files…");
-		const pluginBuilds = await runPluginBuilds({
-			config: configRes.config,
-			projectRoot: configRes.projectRoot,
-			runtime: configRes.adapter.key,
-			publicFiles: configRes.resources.files.public,
-		});
+		// Migrations load the env the build does, so they reach the database the preview uses.
+		const tasks = await startTaskServer({ mode: "production" });
+		cliSpinner.start("Running migrations");
+		const migration = await runMigrateTask(tasks.run, { quiet: true }).finally(
+			tasks.close,
+		);
+		// Exits as `lucidcms migrate` does: refusing a destructive migration or a failure is an error, declining isn't.
+		if (migration.status !== "complete") {
+			cliSpinner.stop();
+			process.exit(
+				migration.status === "declined" &&
+					migration.gate !== "reject-destructive"
+					? 0
+					: 1,
+			);
+		}
 
-		currentStage = "runtime_initialization";
-		progress.update("Starting server…");
-		const serverRes = await adapterCLI.serve({
-			mode: "static",
-			pluginData: pluginBuilds.data,
-			pluginModules: await importPluginModules(pluginBuilds.modules),
+		stage = "runtime_build";
+		const project = await buildProject({
 			configPath,
-			projectRoot: configRes.projectRoot,
-			env: configRes.env,
-			config: configRes.config,
-			translationStore,
-			logger: {
-				instance: cliLogger,
-				silent: false,
-			},
-			onListening: async (props) => {
-				progress.stop();
-				startupListening = true;
-				startupAdapterKeys = props.adapterKeys;
-				maybeReportStartup();
-
-				logServerReady(getServerUrl(props.address), configRes.config.urls.site);
-				void coreUpdateAvailable
-					.then((update) => {
-						if (!shutdownPromise) update?.renderUpdateBox();
-					})
-					.catch(() => {});
-
-				await stopLoggerBuffering();
+			silent: false,
+			step: true,
+			preview: true,
+			onProject: (loaded) => {
+				telemetryReporter = createCommandTelemetryReporter({
+					config: loaded.config,
+					env: loaded.env,
+					runtimeContext: loaded.runtimeContext,
+					projectRoot: loaded.projectRoot,
+					command: "serve",
+					startedAt: commandStartedAt,
+				});
 			},
 		});
-		destroy = serverRes?.destroy;
 
-		currentStage = undefined;
-		await checkAllPluginsCompatibility({
-			runtimeContext: serverRes.runtimeContext,
-			config: configRes.config,
-			translate,
+		stage = "server_listen";
+		cliSpinner.start("Starting the server");
+		// The build just prepared the project.
+		server = await preview(
+			createViteConfig({
+				configPath,
+				mode: "production",
+				logLevel: "warn",
+				prepare: false,
+			}),
+		);
+
+		logServerReady({
+			url: getServerUrl(server.resolvedUrls, server.httpServer.address()),
+			site: project.config.urls.site,
+			apiDocs: project.config.http.openAPI.enabled,
+			heading: "Serving the build",
 		});
 
-		currentStage = "finalize";
-		await serverRes?.onComplete?.();
-		startupCompleted = true;
-		startupAdapterKeys = serverRes.adapterKeys;
-		maybeReportStartup();
+		void telemetryReporter?.report({ outcome: "succeeded", stage });
+		void coreUpdateAvailable.then((update) => update?.renderUpdateBox());
 	} catch (error) {
-		progress.stop();
-		await destroy?.();
+		cliSpinner.stop();
+		await server?.close();
+
 		if (error instanceof Error) {
-			cliLogger.errorInstance(error, "Failed to start the server");
+			cliLogger.errorInstance(error, "Failed to serve the application");
 		} else {
-			cliLogger.error("Failed to start the server", "Unknown error");
+			cliLogger.error("Failed to serve the application", "Unknown error");
 		}
-		await stopLoggerBuffering();
-		if (currentStage) {
-			await telemetryReporter?.report({
-				outcome: "failed",
-				stage: currentStage,
-			});
-		}
+
+		await telemetryReporter?.report({ outcome: "failed", stage });
 		process.exit(1);
 	}
+
+	let closing = false;
+	const shutdown = async () => {
+		if (closing) return;
+		closing = true;
+		await server?.close();
+		process.exit(0);
+	};
 
 	process.on("SIGINT", shutdown);
 	process.on("SIGTERM", shutdown);

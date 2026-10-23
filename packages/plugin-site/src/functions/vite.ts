@@ -1,24 +1,25 @@
 import { safe } from "@lucidkiln/core";
-import { ASSETS_BASE } from "../constants.js";
-import type { SiteCliData, ViteManifestChunk } from "../types.js";
+import { VITE_CLIENT } from "../constants.js";
+import type { SiteData, ViteManifestChunk } from "../types.js";
 import escapeHtml from "../utils/escape-html.js";
 import formatAttributes, {
 	type AttributeValue,
 } from "../utils/format-attributes.js";
 import normalizeVitePath from "../utils/normalize-vite-path.js";
-import { getBuiltChunk, requireVite } from "./vite-build.js";
+import { getBuiltChunk } from "./vite-build.js";
 
 export type ViteOptions = {
 	/** Added to every tag, such as `{ nonce: cspNonce }`. */
 	attrs?: Record<string, AttributeValue>;
 };
 
-type Tag = { kind: "stylesheet" | "script" | "preload"; file: string };
+/** A tag for a file, by its URL path. */
+type Tag = { kind: "stylesheet" | "script" | "preload"; url: string };
 
 const STYLESHEET = /\.(css|less|sass|scss|styl|stylus|pcss|postcss|sss)$/;
 
 const writeTag = (tag: Tag, attributes: string) => {
-	const url = escapeHtml(ASSETS_BASE + tag.file);
+	const url = escapeHtml(tag.url);
 	switch (tag.kind) {
 		case "stylesheet":
 			return `<link rel="stylesheet" href="${url}"${attributes}>`;
@@ -31,7 +32,7 @@ const writeTag = (tag: Tag, attributes: string) => {
 
 /** An entry's tags in Vite's order: its and its imports' stylesheets, its script, then preloads for its imports. */
 const buildTags = (
-	manifest: Record<string, ViteManifestChunk> | null,
+	manifest: Record<string, ViteManifestChunk>,
 	entry: string,
 ): Tag[] => {
 	const chunk = getBuiltChunk(manifest, entry);
@@ -39,7 +40,7 @@ const buildTags = (
 	const css = new Set(chunk.css);
 	const imports = new Set<string>();
 	const visit = (key: string) => {
-		const imported = manifest?.[key];
+		const imported = manifest[key];
 		if (!imported || imports.has(imported.file)) return;
 		imports.add(imported.file);
 		for (const file of imported.css ?? []) css.add(file);
@@ -49,17 +50,26 @@ const buildTags = (
 
 	const isStylesheet = STYLESHEET.test(chunk.file);
 	if (isStylesheet) css.add(chunk.file);
+
 	return [
-		...[...css].map((file) => ({ kind: "stylesheet" as const, file })),
-		...(isStylesheet ? [] : [{ kind: "script" as const, file: chunk.file }]),
-		...[...imports].map((file) => ({ kind: "preload" as const, file })),
+		...[...css].map((file) => ({
+			kind: "stylesheet" as const,
+			url: `/${file}`,
+		})),
+		...(isStylesheet
+			? []
+			: [{ kind: "script" as const, url: `/${chunk.file}` }]),
+		...[...imports].map((file) => ({
+			kind: "preload" as const,
+			url: `/${file}`,
+		})),
 	];
 };
 
-/** In development, Vite's client and the source files Vite serves. */
-const buildDevTags = (entry: string): Tag[] => [
-	{ kind: "script", file: "@vite/client" },
-	{ kind: STYLESHEET.test(entry) ? "stylesheet" : "script", file: entry },
+/** In development, Vite's client and the source file, which Vite serves from its path in the Vite root. */
+const buildDevTags = (path: string): Tag[] => [
+	{ kind: "script", url: VITE_CLIENT },
+	{ kind: STYLESHEET.test(path) ? "stylesheet" : "script", url: `/${path}` },
 ];
 
 /**
@@ -70,9 +80,8 @@ const buildDevTags = (entry: string): Tag[] => [
  * Each call writes a shared file once. Calls don't skip files earlier calls wrote, because a `cache` section must keep its own tags. Browsers fetch each file and run each module once, however often a page links it.
  */
 const createViteFunction =
-	(data: SiteCliData | null) =>
+	(data: SiteData) =>
 	(...args: string[] | [...string[], ViteOptions]) => {
-		const vite = requireVite(data, "vite");
 		const last = args.at(-1);
 		const attributes = formatAttributes(
 			typeof last === "object" ? (last.attrs ?? {}) : {},
@@ -81,16 +90,17 @@ const createViteFunction =
 
 		const tags = args.flatMap((entry) => {
 			if (typeof entry !== "string") return [];
-			const path = normalizeVitePath(entry);
-			return vite.kind === "dev"
+			const path = data.prefix + normalizeVitePath(entry);
+			return data.kind === "dev"
 				? buildDevTags(path)
-				: buildTags(vite.manifest, path);
+				: buildTags(data.manifest, path);
 		});
+
 		return safe(
 			tags
 				.flatMap((tag) => {
-					if (seen.has(tag.file)) return [];
-					seen.add(tag.file);
+					if (seen.has(tag.url)) return [];
+					seen.add(tag.url);
 					return [writeTag(tag, attributes)];
 				})
 				.join(""),

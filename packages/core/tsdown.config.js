@@ -9,6 +9,7 @@ export default defineConfig({
 		"src/exports/extension.ts",
 		"src/exports/runtime.ts",
 		"src/exports/toolkit.ts",
+		"src/exports/vite.ts",
 		"src/libs/cli/index.ts",
 	],
 	deps: {

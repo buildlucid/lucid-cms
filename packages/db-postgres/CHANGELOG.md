@@ -3,6 +3,7 @@
 ## v1.2.3 (unreleased)
 
 - Database schema checks now correctly recognise foreign keys that use multiple columns.
+- Fixed `NOW()` defaults on collection `timestamptz` columns being stored as a fixed date, which made every migration report changed defaults.
 
 ## v1.2.2
 

@@ -1,10 +1,11 @@
 import { serve } from "@hono/node-server";
 import {
 	createLucidHost,
+	handleHostRequest,
 	logger,
-	withResponseCleanup,
 } from "@lucidcms/core/runtime";
 import type { LucidBuild } from "@lucidcms/core/types";
+import constants from "./constants.js";
 import createNodeJobScheduler from "./services/create-node-job-scheduler.js";
 import getRuntimeContext from "./services/runtime-context.js";
 import type { NodeRuntimeAdapter } from "./types.js";
@@ -15,6 +16,7 @@ export const startServer = async (build: LucidBuild) => {
 
 	try {
 		const { runtime } = build.host.definition;
+
 		// Resolved once so the host and the server options share an instance. Node entries only run node() builds.
 		const adapter = (await (typeof runtime === "function"
 			? runtime()
@@ -24,12 +26,12 @@ export const startServer = async (build: LucidBuild) => {
 			definition: { ...build.host.definition, runtime: adapter },
 			runtimeContext: getRuntimeContext({
 				compiled: true,
-				pluginData: build.pluginData,
 				pluginModules: build.pluginModules,
 			}),
 			databaseScope: "runtime",
 		});
 		const env = host.env;
+
 		let jobScheduler: ReturnType<typeof createNodeJobScheduler> | undefined;
 		let destroyPromise: Promise<void> | undefined;
 		destroyRuntime = () => {
@@ -42,27 +44,20 @@ export const startServer = async (build: LucidBuild) => {
 
 		const options = adapter.getOptions();
 		const port =
-			options?.server?.port ?? Number.parseInt(process.env.PORT || "6543", 10);
+			options?.server?.port ??
+			(process.env.PORT
+				? Number.parseInt(process.env.PORT, 10)
+				: constants.DEFAULT_PORT);
 		const hostname =
 			options?.server?.hostname ?? process.env.HOST ?? process.env.HOSTNAME;
 
 		const server = serve({
-			fetch: async (request, requestBindings) => {
-				const invocation = host.createInvocation({ env });
-				try {
-					const response = await invocation.handle({
-						request,
-						requestBindings,
-					});
-					return withResponseCleanup(response, () => invocation.destroy());
-				} catch (error) {
-					await invocation.destroy();
-					throw error;
-				}
-			},
+			fetch: (request, requestBindings) =>
+				handleHostRequest(host, { request, requestBindings, env }),
 			port,
 			hostname,
 		});
+
 		jobScheduler = createNodeJobScheduler({
 			createInvocation: () => host.createInvocation({ env }),
 			request: {
@@ -77,6 +72,7 @@ export const startServer = async (build: LucidBuild) => {
 				console.log(address);
 				return;
 			}
+
 			console.log(
 				address.address === "::"
 					? `http://localhost:${address.port}`
@@ -91,6 +87,7 @@ export const startServer = async (build: LucidBuild) => {
 		const shutdown = () => {
 			shutdownPromise ??= (async () => {
 				let exitCode = 0;
+
 				if (server.listening) {
 					await new Promise<void>((resolve) => {
 						server.close((error) => {
@@ -98,10 +95,12 @@ export const startServer = async (build: LucidBuild) => {
 								console.error(error);
 								exitCode = 1;
 							}
+
 							resolve();
 						});
 					});
 				}
+
 				await destroyRuntime();
 				process.exit(exitCode);
 			})();

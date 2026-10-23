@@ -1,5 +1,10 @@
 # @lucidcms/plugin-cloudflare-r2
 
+## v1.2.0 (unreleased)
+
+- Removed the `previewBucketName` option, which Cloudflare's `cf` CLI has no equivalent for.
+- The binding now reaches the Cloudflare runtime as a `cloudflare:bindings` artifact.
+
 ## v1.1.0
 
 - Migrated to the media storage adapter contract with explicit ready status plus HTTP and multipart-parts upload-session support.

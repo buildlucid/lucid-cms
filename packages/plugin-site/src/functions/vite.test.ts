@@ -1,17 +1,21 @@
 import { createKiln, memoryCache, memoryLoader } from "@lucidkiln/core";
 import { describe, expect, test } from "vitest";
 import propTypes from "../content/prop-types.js";
-import type { SiteCliData, SiteState } from "../types.js";
+import type { BuiltSiteData, SiteData, SiteState } from "../types.js";
 import createViteFunction from "./vite.js";
 
-const dev: SiteCliData = {
-	kind: "dev",
-	directory: "/site",
-	vite: true,
-	ui: null,
-};
+const dev: SiteData = { kind: "dev", prefix: "site/", revision: "1" };
 
-const render = (data: SiteCliData | null, source: string) =>
+const build = (manifest: BuiltSiteData["manifest"]) =>
+	({
+		kind: "build",
+		buildId: "build",
+		prefix: "site/",
+		ui: null,
+		manifest,
+	}) satisfies SiteData;
+
+const render = (data: SiteData, source: string) =>
 	createKiln<SiteState>({
 		loader: memoryLoader({ "page.kiln": source }),
 		functions: { vite: createViteFunction(data) },
@@ -26,7 +30,7 @@ describe("vite()", () => {
 				'{{ vite("styles/site.css", "scripts/site.ts", "./scripts/site.ts") }}',
 			),
 		).resolves.toBe(
-			'<script type="module" src="/_assets/@vite/client"></script><link rel="stylesheet" href="/_assets/styles/site.css"><script type="module" src="/_assets/scripts/site.ts"></script>',
+			'<script type="module" src="/@vite/client"></script><link rel="stylesheet" href="/site/styles/site.css"><script type="module" src="/site/scripts/site.ts"></script>',
 		);
 	});
 
@@ -46,26 +50,23 @@ describe("vite()", () => {
 
 		await kiln.render("a.kiln", {}, { state });
 		await expect(kiln.render("b.kiln", {}, { state })).resolves.toContain(
-			"/_assets/scripts/widget.ts",
+			"/site/scripts/widget.ts",
 		);
 	});
 
 	test("writes built files from the manifest, with imported chunks' stylesheets and preloads", async () => {
-		const data: SiteCliData = {
-			kind: "build",
-			buildId: "build",
-			templates: {},
-			ui: null,
-			manifest: {
-				"styles/site.css": { file: "site-a1.css", isEntry: true },
-				"scripts/site.ts": {
-					file: "site-b2.js",
-					isEntry: true,
-					imports: ["_shared.js"],
-				},
-				"_shared.js": { file: "shared-c3.js", css: ["shared-d4.css"] },
+		const data = build({
+			"site/styles/site.css": { file: "_assets/site-a1.css", isEntry: true },
+			"site/scripts/site.ts": {
+				file: "_assets/site-b2.js",
+				isEntry: true,
+				imports: ["_shared.js"],
 			},
-		};
+			"_shared.js": {
+				file: "_assets/shared-c3.js",
+				css: ["_assets/shared-d4.css"],
+			},
+		});
 
 		await expect(
 			render(data, '{{ vite("styles/site.css", "scripts/site.ts") }}'),
@@ -81,20 +82,14 @@ describe("vite()", () => {
 				'{{ vite("scripts/site.ts", attrs: { nonce: "abc", async: true, defer: false }) }}',
 			),
 		).resolves.toBe(
-			'<script type="module" src="/_assets/@vite/client" nonce="abc" async></script><script type="module" src="/_assets/scripts/site.ts" nonce="abc" async></script>',
+			'<script type="module" src="/@vite/client" nonce="abc" async></script><script type="module" src="/site/scripts/site.ts" nonce="abc" async></script>',
 		);
 	});
 
 	test("finds entries written as relative or root paths in the build", async () => {
 		await expect(
 			render(
-				{
-					kind: "build",
-					buildId: "build",
-					templates: {},
-					ui: null,
-					manifest: { "styles/site.css": { file: "site-a1.css" } },
-				},
+				build({ "site/styles/site.css": { file: "_assets/site-a1.css" } }),
 				'{{ vite("./styles/site.css", "/styles/site.css") }}',
 			),
 		).resolves.toBe('<link rel="stylesheet" href="/_assets/site-a1.css">');
@@ -102,16 +97,7 @@ describe("vite()", () => {
 
 	test("fails for entries the build doesn't have", async () => {
 		await expect(
-			render(
-				{
-					kind: "build",
-					buildId: "build",
-					templates: {},
-					ui: null,
-					manifest: null,
-				},
-				'{{ vite("scripts/site.ts") }}',
-			),
+			render(build({}), '{{ vite("scripts/site.ts") }}'),
 		).rejects.toThrow(/isn't in the site's Vite build/);
 	});
 });

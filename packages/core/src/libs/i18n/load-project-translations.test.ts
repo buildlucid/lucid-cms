@@ -1,9 +1,8 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, beforeEach, expect, test } from "vitest";
-import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { collectResourceFiles } from "../resources/collect-files.js";
 import { prepareResources } from "../resources/prepare-resources.js";
@@ -151,9 +150,8 @@ test("loads package sources from the project node_modules tree", async () => {
 	expect(bundles.en.server["test.project-package"]).toBe("Project package");
 });
 
-test("prepares a translation store and writes the build artifact", async () => {
+test("prepares a translation store from project and core translations", async () => {
 	const source = path.join(projectRoot, "translations");
-	const outputPath = path.join(projectRoot, ".lucid");
 
 	await mkdir(source);
 	await writeFile(
@@ -170,7 +168,6 @@ test("prepares a translation store and writes the build artifact", async () => {
 			},
 		} as ResolvedLucidConfig,
 		files: await collectResourceFiles(source),
-		outputPath,
 	});
 
 	expect(
@@ -180,18 +177,10 @@ test("prepares a translation store and writes the build artifact", async () => {
 		}),
 	).toBe("Artifact copy");
 
-	const artifact = JSON.parse(
-		await readFile(
-			path.join(
-				outputPath,
-				constants.build.directory,
-				constants.build.dataFiles.translations,
-			),
-			"utf-8",
-		),
-	);
-	expect(artifact.en.server["test.artifact"]).toBe("Artifact copy");
-	expect(artifact.en.server["core.config.duplicate.keys"]).toBe(
-		"Duplicate keys found for {{builder}} builder.",
-	);
+	expect(
+		result.translationStore.resolve({
+			scope: "server",
+			key: "core.config.duplicate.keys",
+		}),
+	).toBe("Duplicate keys found for {{builder}} builder.");
 });

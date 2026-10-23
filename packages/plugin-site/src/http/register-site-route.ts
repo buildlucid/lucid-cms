@@ -14,7 +14,7 @@ import { pageMarkup } from "../preview/page-markup.js";
 import readPreview from "../preview/read-preview.js";
 import getRouteParams from "../router/get-route-params.js";
 import createSiteLoader, { type Site } from "../site/create-site-loader.js";
-import readCliData from "../site/read-cli-data.js";
+import readSiteModule from "../site/read-site-module.js";
 import type { SitePluginOptionsInternal, SiteState } from "../types.js";
 import decode from "../utils/decode.js";
 import isLucidPath from "../utils/is-lucid-path.js";
@@ -91,7 +91,7 @@ const registerSiteRoute =
 						message: "Failed to load the site",
 						error,
 					});
-					const data = readCliData(context.runtimeContext);
+					const data = readSiteModule(context.runtimeContext)?.data ?? null;
 					return hono.html(createDevErrorPage({ error, data }), 500);
 				}
 

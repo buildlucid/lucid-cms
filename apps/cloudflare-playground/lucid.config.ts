@@ -1,5 +1,5 @@
 import { defineConfig, z } from "@lucidcms/core";
-import { d1 } from "@lucidcms/db-d1";
+import { postgres } from "@lucidcms/db-postgres";
 import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
@@ -9,6 +9,7 @@ import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import PageCollection from "./src/collections/pages.js";
 
 export const env = z.object({
+	LUCID_DB: z.object({ connectionString: z.string() }),
 	ENCRYPTION_SECRET: z.string(),
 	COOKIE_SECRET: z.string(),
 	REFRESH_TOKEN_SECRET: z.string(),
@@ -17,7 +18,7 @@ export const env = z.object({
 
 export default defineConfig({
 	runtime: cloudflare,
-	db: d1,
+	db: postgres((env) => ({ url: env.LUCID_DB.connectionString })),
 	config: (env) => ({
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,

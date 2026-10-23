@@ -1,5 +1,9 @@
 # @lucidcms/plugin-cloudflare-images
 
+## v1.1.1 (unreleased)
+
+- The binding now reaches the Cloudflare runtime as a `cloudflare:bindings` artifact.
+
 ## v1.1.0
 
 - Migrated Cloudflare Images transformation to the media delivery adapter contract.

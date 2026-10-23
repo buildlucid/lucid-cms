@@ -29,8 +29,8 @@ import type richText from "./functions/rich-text.js";
 import type { TranslateOptions } from "./functions/translate.js";
 import type createViteFunction from "./functions/vite.js";
 import type createViteAssetFunction from "./functions/vite-asset.js";
-import type { BuiltUi, SiteUi } from "./ui/site-ui.js";
-import type { UiIntegration } from "./ui/types.js";
+import type { BuiltUi } from "./ui/site-ui.js";
+import type { UiIntegration, UiRenderer } from "./ui/types.js";
 
 /** Template function and prop types for Kiln's editor extensions. */
 declare module "@lucidkiln/core" {
@@ -116,37 +116,53 @@ export type SiteTranslationKey = [GeneratedSiteTranslationKey] extends [never]
 	? string
 	: GeneratedSiteTranslationKey;
 
-/** A chunk in Vite's build manifest, keyed by its source path relative to the site directory. */
+/** A chunk in Vite's build manifest, keyed by its source path from the Vite root. */
 export type ViteManifestChunk = {
 	file: string;
 	isEntry?: boolean;
 	imports?: string[];
+	dynamicImports?: string[];
 	css?: string[];
 	assets?: string[];
 };
 
-/** What the plugin's CLI hands its runtime code: the site directory in development, otherwise the built site. */
-export type SiteCliData =
+/** How the site's browser files are served: by Vite's dev server during development, otherwise from the client build. */
+export type SiteData =
 	| {
 			kind: "dev";
-			/** Absolute path of the site directory, resolved from the project root. */
-			directory: string;
-			/** Whether Vite is installed and serving the site's files. */
-			vite: boolean;
-			/** Loads UI components through Vite, or null when the site has no `ui` integrations. */
-			ui: SiteUi | null;
+			/** The site directory's path from the Vite root, such as `site/`, which Vite serves its files under. */
+			prefix: string;
+			/** Changes when a site file other than a template changes, such as a UI component, so cached pages are left behind. */
+			revision: string;
 	  }
 	| {
 			kind: "build";
 			/** New for every build, so stored pages and fragments from the last deploy are never served. */
 			buildId: string;
-			/** Template sources keyed by path, e.g. `pages/index.kiln`, so builds need no files at runtime. */
-			templates: Record<string, string>;
-			/** Vite's manifest, or null when no template calls `vite()`. */
-			manifest: Record<string, ViteManifestChunk> | null;
+			/** The site directory's path from the Vite root, which Vite's manifest keys start with. */
+			prefix: string;
+			/** Vite's client build manifest, keyed by source path from the Vite root. */
+			manifest: Record<string, ViteManifestChunk>;
 			/** The UI components templates name, or null when there are none. */
 			ui: BuiltUi | null;
 	  };
+
+/** A client build's site data, which builds and `site:build` read. */
+export type BuiltSiteData = Extract<SiteData, { kind: "build" }>;
+
+/** Server-module exports provided by the CLI's Vite plugin as `runtimeContext.pluginModules`, loading templates and components through the server environment for live development edits and bundled builds. */
+export type SiteModule = {
+	data: SiteData;
+	/** Template sources by name, such as `pages/index.kiln`. */
+	templates: Record<string, () => Promise<string>>;
+	/** UI components by name, with the integration that renders each. */
+	components: Record<
+		string,
+		{ integration: string; load: () => Promise<{ default: unknown }> }
+	>;
+	/** UI integrations' server renderers by integration name. */
+	renderers: Record<string, () => Promise<{ default: UiRenderer }>>;
+};
 
 /** ssr streams requests, isr caches until content changes, and static builds files while using SSR for development and previews. */
 export type SiteMode = "ssr" | "isr" | "static";

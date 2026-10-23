@@ -15,10 +15,7 @@ export {
 } from "./copy.js";
 export { hydrateAdminCopyDefaults } from "./hydrate-admin-copy-defaults.js";
 export { loadTranslationSources } from "./load-project-translations.js";
-export {
-	default as prepareTranslations,
-	writeTranslationArtifact,
-} from "./prepare-translations.js";
+export { default as prepareTranslations } from "./prepare-translations.js";
 export { createTranslationStore } from "./store.js";
 export {
 	createTranslator,
