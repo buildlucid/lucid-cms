@@ -8,6 +8,7 @@
 		"check": "node scripts/build.ts --check"
 	},
 	"devDependencies": {
+		"@lucidkiln/core": "^1.7.1",
 		"@types/mjml": "^5.0.0",
 		"@types/node": "^26.1.0",
 		"mjml": "5.4.0"

@@ -2,6 +2,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
+import type { EmailTemplateName } from "../../email/types.js";
 import type {
 	ToolkitEmailSendInput,
 	ToolkitEmailSendResult,
@@ -10,8 +11,8 @@ import send from "./send/index.js";
 
 export type ToolkitEmail = {
 	/** Queues an external email send. */
-	send: (
-		input: ToolkitEmailSendInput,
+	send: <Name extends EmailTemplateName>(
+		input: ToolkitEmailSendInput<Name>,
 	) => ServiceResponse<ToolkitEmailSendResult>;
 };
 

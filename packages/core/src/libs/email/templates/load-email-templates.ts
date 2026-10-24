@@ -6,7 +6,7 @@ import type { ResourceFile } from "../../resources/types.js";
 import type { RenderedTemplates } from "../types.js";
 
 const currentDir = getDirName(import.meta.url);
-const templateExtensions = new Set([".html", ".mustache"]);
+const templateExtensions = new Set([".kiln"]);
 
 const pathExists = async (targetPath: string): Promise<boolean> => {
 	try {

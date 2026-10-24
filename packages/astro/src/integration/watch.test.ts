@@ -8,7 +8,7 @@ test("asks Astro to reload when a new resource is added and removes its listener
 	watcher.on("change", changes);
 	const plugin = createResourceWatchPlugin(
 		"/project/lucid.config.ts",
-		new Set(["/project/emails", "/project/emails/known.mustache"]),
+		new Set(["/project/emails", "/project/emails/known.kiln"]),
 	);
 	if (
 		typeof plugin.configureServer !== "function" ||
@@ -16,13 +16,13 @@ test("asks Astro to reload when a new resource is added and removes its listener
 	)
 		throw new Error("Missing watcher lifecycle hooks");
 	plugin.configureServer.call({} as never, { watcher } as never);
-	watcher.emit("add", "/project/emails/nested/new.mustache");
+	watcher.emit("add", "/project/emails/nested/new.kiln");
 	expect(changes).toHaveBeenCalledWith("/project/lucid.config.ts");
 	changes.mockClear();
-	watcher.emit("add", "/project/emails/known.mustache");
-	watcher.emit("add", "/project/emails-other/unrelated.mustache");
+	watcher.emit("add", "/project/emails/known.kiln");
+	watcher.emit("add", "/project/emails-other/unrelated.kiln");
 	expect(changes).not.toHaveBeenCalled();
 	plugin.closeServer.call({} as never, { reason: "restart" });
-	watcher.emit("add", "/project/emails/another.mustache");
+	watcher.emit("add", "/project/emails/another.kiln");
 	expect(changes).not.toHaveBeenCalled();
 });

@@ -78,8 +78,8 @@ test("disabling a project directory preserves plugin sources", async () => {
 });
 
 test("replaces a default directory and rejects missing configured directories", async () => {
-	const custom = await write("custom/welcome.mustache", "custom");
-	await write("emails/default.mustache", "default");
+	const custom = await write("custom/welcome.kiln", "custom");
+	await write("emails/default.kiln", "default");
 	const result = await prepareResources(
 		{ directories: { emails: "./custom" } },
 		root,
@@ -91,9 +91,9 @@ test("replaces a default directory and rejects missing configured directories", 
 });
 
 test("preserves source precedence and nested names for data and public resources", async () => {
-	await write("plugin/emails/account/welcome.mustache", "plugin");
-	await write("project/emails/account/welcome.mustache", "project source");
-	await write("emails/account/welcome.mustache", "project directory");
+	await write("plugin/emails/account/welcome.kiln", "plugin");
+	await write("project/emails/account/welcome.kiln", "project source");
+	await write("emails/account/welcome.kiln", "project directory");
 	await write("assets/icons/logo.svg", "logo");
 	const result = await prepareResources(
 		{
@@ -113,13 +113,13 @@ test("preserves source precedence and nested names for data and public resources
 		root,
 	);
 	expect(result.files.emails.map((file) => file.name)).toEqual(
-		Array(3).fill("account/welcome.mustache"),
+		Array(3).fill("account/welcome.kiln"),
 	);
 	expect(result.files.public[0]?.name).toBe("brand/icons/logo.svg");
 });
 
 test("deduplicates linked sources and terminates symlink loops", async () => {
-	const file = await write("shared/welcome.mustache", "shared");
+	const file = await write("shared/welcome.kiln", "shared");
 	await symlink(path.join(root, "shared"), path.join(root, "emails"));
 	await symlink(path.join(root, "shared"), path.join(root, "shared/loop"));
 	const result = await prepareResources(

@@ -24,7 +24,7 @@ type DocumentOrder = Assert<Equal<DocumentRow["order"], string | null>>;
 type VersionContent = Assert<Equal<VersionRow["content_id"], string>>;
 type VersionSource = Assert<Equal<VersionRow["promoted_from"], number | null>>;
 type BrickPosition = Assert<Equal<BrickRow["position"], number>>;
-type FieldsLocale = Assert<Equal<FieldsRow["locale"], string>>;
+type FieldsLocale = Assert<Equal<FieldsRow["locale"], string | null>>;
 type RepeaterParent = Assert<
 	Equal<RepeaterRow["parent_id"], number | null | undefined>
 >;

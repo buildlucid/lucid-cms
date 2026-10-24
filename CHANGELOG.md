@@ -25,6 +25,7 @@
 - Replaced Lucid's own bundler, development server and runtime adapters' CLI handlers with Vite, so projects have no `vite.config.ts`. Plugin CLI `dev` and `build` hooks are replaced by `vite`.
 - Removed the D1 database adapter. Database adapters must now support transactions.
 - Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module.
+- Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails.
 
 ### Bug Fixes:
 

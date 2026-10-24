@@ -9,6 +9,8 @@ export type TypeGenerationModuleAugmentation = {
 };
 
 export type TypeGenerationContribution = {
+	/** Extra files written beside the core types file, which its imports can read. */
+	files?: TypeGenerationFile[];
 	imports?: string[];
 	declarations?: string[];
 	moduleAugmentations: TypeGenerationModuleAugmentation[];

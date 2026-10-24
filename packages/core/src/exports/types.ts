@@ -214,7 +214,11 @@ export type {
 	EmailStrategyResponse,
 	EmailSubject,
 	EmailTemplateData,
+	EmailTemplateInput,
+	EmailTemplateName,
+	EmailTemplates,
 	EmailType,
+	KilnMarkup,
 	RenderedTemplates,
 } from "../libs/email/types.js";
 export type {
@@ -408,6 +412,8 @@ export type {
 	NotificationData,
 	NotificationDefinition,
 	NotificationEmail,
+	NotificationEmailData,
+	NotificationEmailTemplateName,
 	NotificationReceipt,
 	NotificationRender,
 } from "../libs/notifications/types.js";

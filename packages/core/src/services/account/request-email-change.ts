@@ -1,5 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
@@ -185,7 +186,7 @@ const requestEmailChange: ServiceFn<
 		data: {
 			...commonData,
 			confirmLink: `${constants.email.locations.emailChangeConfirm}?token=${confirmTokenRes.data.token}`,
-		},
+		} satisfies BuiltInEmailTemplates["email-change-confirm"],
 		storage: constants.email.templates.emailChangeConfirm.storage,
 	});
 	if (confirmEmailRes.error) return confirmEmailRes;
@@ -202,7 +203,7 @@ const requestEmailChange: ServiceFn<
 		data: {
 			...commonData,
 			revertLink: `${constants.email.locations.emailChangeRevert}?token=${revertTokenRes.data.token}`,
-		},
+		} satisfies BuiltInEmailTemplates["email-change-revert"],
 		storage: constants.email.templates.emailChangeRevert.storage,
 	});
 	if (revertEmailRes.error) return revertEmailRes;

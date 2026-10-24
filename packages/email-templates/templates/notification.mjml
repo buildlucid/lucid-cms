@@ -1,3 +1,4 @@
+{% props title: string, body: string = "", actor: string = "", link: string = "", manageLink: string, ...data %}
 <mjml>
   <mj-head>
     <mj-attributes>
@@ -21,39 +22,38 @@
     <mj-section padding="20px 0"></mj-section>
     <mj-section background-color="#0F0F0F" border-radius="12px" padding="40px 30px">
       <mj-column width="100%">
-        <mj-image src="{{context.host}}{{context.brand.logoPath}}" alt="Lucid CMS" width="120px" align="center" padding-bottom="24px" />
+        <mj-image src="{{ context.host }}{{ context.brand.logoPath }}" alt="Lucid CMS" width="120px" align="center" padding-bottom="24px" />
         <mj-text color="#F1F1F1" font-size="24px" font-weight="600" align="center" padding-bottom="8px">
-          {{title}}
+          {{ title }}
         </mj-text>
-        <mj-raw>{{#context.brand.name}}</mj-raw>
+        <mj-raw>{% if context.brand.name %}</mj-raw>
         <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
-          from {{context.brand.name}}'s Lucid CMS
+          from {{ context.brand.name }}'s Lucid CMS
         </mj-text>
-        <mj-raw>{{/context.brand.name}}</mj-raw>
-        <mj-raw>{{^context.brand.name}}</mj-raw>
+        <mj-raw>{% else %}</mj-raw>
         <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
           from Lucid CMS
         </mj-text>
-        <mj-raw>{{/context.brand.name}}</mj-raw>
+        <mj-raw>{% endif %}</mj-raw>
         <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 32px 0" />
-        <mj-raw>{{#body}}</mj-raw>
+        <mj-raw>{% if body %}</mj-raw>
         <mj-text padding-bottom="24px">
-          {{body}}
+          {{ body }}
         </mj-text>
-        <mj-raw>{{/body}}</mj-raw>
-        <mj-raw>{{#actor}}</mj-raw>
+        <mj-raw>{% endif %}</mj-raw>
+        <mj-raw>{% if actor %}</mj-raw>
         <mj-text font-size="14px" padding-bottom="24px">
-          By {{actor}}
+          By {{ actor }}
         </mj-text>
-        <mj-raw>{{/actor}}</mj-raw>
-        <mj-raw>{{#link}}</mj-raw>
-        <mj-button href="{{link}}" background-color="#E5E5E5" color="#171717" font-size="14px" font-weight="500" border-radius="8px" padding="0 0 32px 0" inner-padding="12px 24px">
+        <mj-raw>{% endif %}</mj-raw>
+        <mj-raw>{% if link %}</mj-raw>
+        <mj-button href="{{ link }}" background-color="#E5E5E5" color="#171717" font-size="14px" font-weight="500" border-radius="8px" padding="0 0 32px 0" inner-padding="12px 24px">
           Open in Lucid
         </mj-button>
-        <mj-raw>{{/link}}</mj-raw>
+        <mj-raw>{% endif %}</mj-raw>
         <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 24px 0" />
         <mj-text font-size="13px" color="#6b6b6b" align="center">
-          You can choose which notifications email you in your <a href="{{manageLink}}" class="footer-link">account settings</a>.
+          You can choose which notifications email you in your <a href="{{ manageLink }}" class="footer-link">account settings</a>.
         </mj-text>
       </mj-column>
     </mj-section>

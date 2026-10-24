@@ -41,5 +41,11 @@
 		"node": "^24.0.0 || ^26.0.0"
 	},
 	"author": "Build Lucid Ltd",
-	"license": "MIT"
+	"license": "MIT",
+	"allowScripts": {
+		"better-sqlite3": true,
+		"workerd": true,
+		"sharp": true,
+		"fsevents": false
+	}
 }

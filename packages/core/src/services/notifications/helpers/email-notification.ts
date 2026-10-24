@@ -1,7 +1,9 @@
 import constants from "../../../constants/constants.js";
+import type { BuiltInEmailTemplates } from "../../../libs/email/types.js";
 import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getNotificationDefinition } from "../../../libs/notifications/registry.js";
+import type { NotificationEmailData } from "../../../libs/notifications/types.js";
 import {
 	NotificationRecipientsRepository,
 	NotificationsRepository,
@@ -148,7 +150,7 @@ const emailNotification: ServiceFn<
 				link: notification.href ? `${baseUrl}${notification.href}` : null,
 				manageLink: `${baseUrl}${constants.email.locations.account}`,
 				...definition.email.data?.({ data: notification.data }),
-			},
+			} satisfies NotificationEmailData & BuiltInEmailTemplates["notification"],
 		});
 		if (sendRes.error) return sendRes;
 	}

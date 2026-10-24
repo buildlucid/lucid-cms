@@ -1,5 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
@@ -130,7 +131,7 @@ const inviteSingle: ServiceFn<
 			lastName: data.lastName,
 			email: email,
 			inviteLink: `${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
-		},
+		} satisfies BuiltInEmailTemplates["user-invite"],
 		storage: constants.email.templates.userInvite.storage,
 	});
 	if (sendEmailRes.error) return sendEmailRes;

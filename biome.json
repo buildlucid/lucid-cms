@@ -1,7 +1,11 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
 	"files": {
-		"includes": ["**", "!packages/client/src/generated"]
+		"includes": [
+			"**",
+			"!packages/client/src/generated",
+			"!packages/core/src/libs/email/templates/built-in-schema.ts"
+		]
 	},
 	"css": {
 		"parser": {

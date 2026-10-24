@@ -1,5 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
+import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	UsersRepository,
@@ -177,7 +178,7 @@ const resetPassword: ServiceFn<
 		data: {
 			firstName: updatedUserRes.data.first_name,
 			lastName: updatedUserRes.data.last_name,
-		},
+		} satisfies BuiltInEmailTemplates["password-reset-success"],
 	});
 	if (sendEmailRes.error) return sendEmailRes;
 

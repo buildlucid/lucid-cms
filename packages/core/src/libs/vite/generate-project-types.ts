@@ -8,6 +8,7 @@ const generateProjectTypes = (project: LucidViteProject) =>
 		configPath: project.configPath,
 		projectRoot: project.projectRoot,
 		translationFiles: project.resources.files.translations,
+		emailTemplates: project.emailTemplates,
 		access: project.config.access,
 		collections: project.config.collections,
 		localization: project.config.localization,

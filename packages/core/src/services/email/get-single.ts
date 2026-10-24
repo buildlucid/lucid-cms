@@ -1,5 +1,5 @@
 import { resolveEmailData } from "../../libs/email/storage/index.js";
-import renderMustacheTemplate from "../../libs/email/templates/render-mustache-template.js";
+import renderEmailTemplate from "../../libs/email/templates/render-email-template.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
@@ -52,9 +52,10 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const html = await renderMustacheTemplate(context, {
+	const html = await renderEmailTemplate(context, {
 		template: emailRes.data.template,
 		data: previewDataRes.data,
+		preview: true,
 	});
 	if (html.error) return html;
 

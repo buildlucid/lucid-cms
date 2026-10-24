@@ -1,3 +1,4 @@
+{% props firstName: string = "", oldEmail: string, newEmail: string, revertLink: string, ...data %}
 <!doctype html>
 <html lang="und" dir="auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   <head>
@@ -139,7 +140,7 @@
             <td  style="width:120px;">
               
       <img
-         alt="Lucid CMS" src="{{context.host}}{{context.brand.logoPath}}" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="120" height="auto"
+         alt="Lucid CMS" src="{{ context.host }}{{ context.brand.logoPath }}" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="120" height="auto"
       />
     
             </td>
@@ -157,11 +158,11 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:24px;font-weight:600;line-height:24px;text-align:center;color:#F1F1F1;"
-      >Confirm your new email address</div>
+      >Email change requested</div>
     
                 </td>
               </tr>
-            {{#context.brand.name}}
+            {% if context.brand.name %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0;padding-bottom:32px;word-break:break-word;"
@@ -169,11 +170,11 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >for {{context.brand.name}}'s Lucid CMS</div>
+      >for {{ context.brand.name }}'s Lucid CMS</div>
     
                 </td>
               </tr>
-            {{/context.brand.name}}{{^context.brand.name}}
+            {% else %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0;padding-bottom:32px;word-break:break-word;"
@@ -185,7 +186,7 @@
     
                 </td>
               </tr>
-            {{/context.brand.name}}
+            {% endif %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0 0 32px 0;word-break:break-word;"
@@ -210,7 +211,7 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >Hi{{#firstName}} {{firstName}}{{/firstName}},</div>
+      >Hi{% if firstName %} {{ firstName }}{% endif %},</div>
     
                 </td>
               </tr>
@@ -222,7 +223,7 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >We received a request to change your account email address from {{oldEmail}} to {{newEmail}}.</div>
+      >Someone requested to change your account email address from {{ oldEmail }} to {{ newEmail }}.</div>
     
                 </td>
               </tr>
@@ -234,7 +235,7 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >Click the button below to confirm this new email address. Your current email will stay active until you confirm.</div>
+      >If this was you, no action is needed here. If this was not you, click the button below to cancel the request or revert the change.</div>
     
                 </td>
               </tr>
@@ -253,9 +254,9 @@
                align="center" bgcolor="#E5E5E5" role="presentation" style="border:none;border-radius:8px;cursor:auto;mso-padding-alt:12px 24px;background:#E5E5E5;" valign="middle"
             >
               <a
-                 href="{{context.host}}{{confirmLink}}" style="display:inline-block;background:#E5E5E5;color:#171717;font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;font-weight:500;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:12px 24px;mso-padding-alt:0px;border-radius:8px;" target="_blank"
+                 href="{{ context.host }}{{ revertLink }}" style="display:inline-block;background:#E5E5E5;color:#171717;font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;font-weight:500;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:12px 24px;mso-padding-alt:0px;border-radius:8px;" target="_blank"
               >
-                Confirm email address
+                Cancel or revert change
               </a>
             </td>
           </tr>
@@ -289,7 +290,7 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:13px;line-height:24px;text-align:center;color:#6b6b6b;"
-      >If you did not request this change, you can ignore this email. The original address has also been sent a cancellation link.</div>
+      >This link remains valid for the same period as the confirmation link.</div>
     
                 </td>
               </tr>

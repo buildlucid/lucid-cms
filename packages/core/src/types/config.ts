@@ -493,7 +493,7 @@ export interface LucidConfig {
 		 */
 		resendWindowDays?: number;
 		/**
-		 * Mustache template contents keyed by template name, available without reading files at runtime.
+		 * Kiln template contents keyed by template name, available without reading files at runtime.
 		 */
 		templates?: Record<string, string>;
 	};

@@ -1,5 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
+import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
@@ -251,7 +252,7 @@ const updateSingle: ServiceFn<
 				),
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
-			},
+			} satisfies BuiltInEmailTemplates["email-changed"],
 		});
 		if (sendEmailRes.error) return sendEmailRes;
 	}

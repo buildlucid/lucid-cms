@@ -18,18 +18,11 @@ describe("loadEmailTemplates", () => {
 		await rm(templateDirectory, { recursive: true, force: true });
 	});
 
-	test("loads supported HTML and Mustache template files", async () => {
+	test("loads Kiln template files", async () => {
 		await Promise.all([
-			writeFile(path.join(templateDirectory, "welcome.html"), "<p>Welcome</p>"),
-			writeFile(
-				path.join(templateDirectory, "receipt.mustache"),
-				"<p>Receipt</p>",
-			),
-			writeFile(path.join(templateDirectory, "ignored.hbs"), "<p>Ignored</p>"),
-			writeFile(
-				path.join(templateDirectory, "ignored.handlebars"),
-				"<p>Ignored</p>",
-			),
+			writeFile(path.join(templateDirectory, "welcome.kiln"), "<p>Welcome</p>"),
+			writeFile(path.join(templateDirectory, "receipt.kiln"), "<p>Receipt</p>"),
+			writeFile(path.join(templateDirectory, "ignored.html"), "<p>Ignored</p>"),
 			writeFile(path.join(templateDirectory, "ignored.txt"), "<p>Ignored</p>"),
 		]);
 
@@ -46,7 +39,7 @@ describe("loadEmailTemplates", () => {
 
 	test("uses project templates before packaged defaults", async () => {
 		await writeFile(
-			path.join(templateDirectory, "reset-password.mustache"),
+			path.join(templateDirectory, "reset-password.kiln"),
 			"<p>Project reset password</p>",
 		);
 

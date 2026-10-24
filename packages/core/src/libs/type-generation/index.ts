@@ -6,9 +6,11 @@ import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.
 import writeFileIfChanged from "../../utils/helpers/write-file-if-changed.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import generateCollectionClientTypes from "../collection/type-gen/index.js";
+import type { RenderedTemplates } from "../email/types.js";
 import logger from "../logger/index.js";
 import type { ResourceFile } from "../resources/types.js";
 import generateAccessTypes from "./access-type.js";
+import generateEmailTemplateTypes from "./email-template-type.js";
 import generateEnvTypes from "./env-type.js";
 import generateTranslationCopyTypes from "./translation-copy-type.js";
 import type {
@@ -103,6 +105,7 @@ const generateTypes = async (props: {
 	configPath: string;
 	projectRoot?: string;
 	translationFiles?: ResourceFile[];
+	emailTemplates?: RenderedTemplates;
 	collections: CollectionBuilder[];
 	access: ResolvedLucidConfig["access"];
 	localization: ResolvedLucidConfig["localization"];
@@ -121,6 +124,7 @@ const generateTypes = async (props: {
 				projectRoot: props.projectRoot,
 				files: props.translationFiles,
 			}),
+			generateEmailTemplateTypes(props.emailTemplates ?? {}),
 		])
 	).filter((result): result is TypeGenerationContribution => Boolean(result));
 
@@ -132,6 +136,7 @@ const generateTypes = async (props: {
 			collections: props.collections,
 			localization: props.localization,
 		}),
+		...contributions.flatMap((contribution) => contribution.files ?? []),
 	];
 
 	await Promise.all(

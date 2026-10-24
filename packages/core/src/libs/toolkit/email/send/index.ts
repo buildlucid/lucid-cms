@@ -2,15 +2,16 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
+import type { EmailTemplateName } from "../../../email/types.js";
 import { runToolkitService } from "../../utils.js";
 import { inputSchema } from "./schema.js";
 import type { ToolkitEmailSendInput, ToolkitEmailSendResult } from "./types.js";
 
 export type * from "./types.js";
 
-const send = async (
+const send = async <Name extends EmailTemplateName>(
 	context: ServiceContext,
-	input: ToolkitEmailSendInput,
+	input: ToolkitEmailSendInput<Name>,
 ): ServiceResponse<ToolkitEmailSendResult> => {
 	return runToolkitService({
 		schema: inputSchema,

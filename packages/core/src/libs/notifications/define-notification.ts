@@ -4,6 +4,7 @@ import { normalizeCopy } from "../i18n/copy.js";
 import type {
 	DefineNotificationOptions,
 	NotificationDefinition,
+	NotificationEmailTemplateName,
 } from "./types.js";
 
 /**
@@ -31,8 +32,12 @@ import type {
  * 	}),
  * });
  */
-const defineNotification = <const Key extends string, Data extends z.ZodObject>(
-	options: DefineNotificationOptions<Key, Data>,
+const defineNotification = <
+	const Key extends string,
+	Data extends z.ZodObject,
+	const Template extends NotificationEmailTemplateName = never,
+>(
+	options: DefineNotificationOptions<Key, Data, Template>,
 ): NotificationDefinition<Key, Data> => ({
 	type: "notification-definition",
 	key: options.key,

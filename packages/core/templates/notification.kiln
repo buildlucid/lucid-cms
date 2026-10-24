@@ -1,3 +1,4 @@
+{% props title: string, body: string = "", actor: string = "", link: string = "", manageLink: string, ...data %}
 <!doctype html>
 <html lang="und" dir="auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   <head>
@@ -139,7 +140,7 @@
             <td  style="width:120px;">
               
       <img
-         alt="Lucid CMS" src="{{context.host}}{{context.brand.logoPath}}" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="120" height="auto"
+         alt="Lucid CMS" src="{{ context.host }}{{ context.brand.logoPath }}" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="120" height="auto"
       />
     
             </td>
@@ -157,11 +158,11 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:24px;font-weight:600;line-height:24px;text-align:center;color:#F1F1F1;"
-      >You've been invited</div>
+      >{{ title }}</div>
     
                 </td>
               </tr>
-            {{#context.brand.name}}
+            {% if context.brand.name %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0;padding-bottom:32px;word-break:break-word;"
@@ -169,11 +170,11 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >to join {{context.brand.name}}'s Lucid CMS</div>
+      >from {{ context.brand.name }}'s Lucid CMS</div>
     
                 </td>
               </tr>
-            {{/context.brand.name}}{{^context.brand.name}}
+            {% else %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0;padding-bottom:32px;word-break:break-word;"
@@ -181,11 +182,11 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >to join Lucid CMS</div>
+      >from Lucid CMS</div>
     
                 </td>
               </tr>
-            {{/context.brand.name}}
+            {% endif %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0 0 32px 0;word-break:break-word;"
@@ -202,31 +203,31 @@
     
                 </td>
               </tr>
-            
+            {% if body %}
               <tr>
                 <td
-                   align="center" style="font-size:0px;padding:0;padding-bottom:12px;word-break:break-word;"
+                   align="center" style="font-size:0px;padding:0;padding-bottom:24px;word-break:break-word;"
                 >
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >Hi{{#firstName}} {{firstName}}{{/firstName}},</div>
+      >{{ body }}</div>
     
                 </td>
               </tr>
-            
+            {% endif %}{% if actor %}
               <tr>
                 <td
-                   align="center" style="font-size:0px;padding:0;padding-bottom:32px;word-break:break-word;"
+                   align="center" style="font-size:0px;padding:0;padding-bottom:24px;word-break:break-word;"
                 >
                   
       <div
-         style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#a1a1a1;"
-      >An account has been created for you. Click the button below to accept your invitation and get started.</div>
+         style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;line-height:24px;text-align:center;color:#a1a1a1;"
+      >By {{ actor }}</div>
     
                 </td>
               </tr>
-            
+            {% endif %}{% if link %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0 0 32px 0;word-break:break-word;"
@@ -241,9 +242,9 @@
                align="center" bgcolor="#E5E5E5" role="presentation" style="border:none;border-radius:8px;cursor:auto;mso-padding-alt:12px 24px;background:#E5E5E5;" valign="middle"
             >
               <a
-                 href="{{context.host}}{{inviteLink}}" style="display:inline-block;background:#E5E5E5;color:#171717;font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;font-weight:500;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:12px 24px;mso-padding-alt:0px;border-radius:8px;" target="_blank"
+                 href="{{ link }}" style="display:inline-block;background:#E5E5E5;color:#171717;font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;font-weight:500;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:12px 24px;mso-padding-alt:0px;border-radius:8px;" target="_blank"
               >
-                Accept invitation
+                Open in Lucid
               </a>
             </td>
           </tr>
@@ -252,7 +253,7 @@
     
                 </td>
               </tr>
-            
+            {% endif %}
               <tr>
                 <td
                    align="center" style="font-size:0px;padding:0 0 24px 0;word-break:break-word;"
@@ -277,7 +278,7 @@
                   
       <div
          style="font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:13px;line-height:24px;text-align:center;color:#6b6b6b;"
-      >If you didn't expect this invitation, you can safely ignore this email.</div>
+      >You can choose which notifications email you in your <a href="{{ manageLink }}" class="footer-link">account settings</a>.</div>
     
                 </td>
               </tr>

@@ -7,7 +7,7 @@ import {
 	resolveEmailData,
 	stripNeverStoreEmailData,
 } from "../../../libs/email/storage/index.js";
-import renderMustacheTemplate from "../../../libs/email/templates/render-mustache-template.js";
+import renderEmailTemplate from "../../../libs/email/templates/render-email-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import defineJob from "../../../libs/jobs/define-job.js";
@@ -80,7 +80,7 @@ const sendEmail: JobHandler<z.infer<typeof input>> = async ({
 		sendData = sendDataRes.error ? null : sendDataRes.data;
 		hasNeverStore = hasNeverStoreRes.error ? false : hasNeverStoreRes.data;
 
-		const html = await renderMustacheTemplate(context, {
+		const html = await renderEmailTemplate(context, {
 			template: emailRes.data.template,
 			data: sendData,
 		});

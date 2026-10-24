@@ -1,5 +1,6 @@
 import type z from "zod";
 import type { NotificationLevel } from "../../types/response.js";
+import type { EmailTemplateInput, EmailTemplateName } from "../email/types.js";
 import type { AdminCopyInput, CopyInput } from "../i18n/types.js";
 import type { Permission } from "../permission/types.js";
 
@@ -24,18 +25,64 @@ export type NotificationRender = {
 	level?: NotificationLevel;
 };
 
-export type NotificationEmail<Data> = {
+/** Default notification email data, extended by `email.data`. */
+export type NotificationEmailData = {
+	title: string;
+	body: string | null;
+	actor: string | null;
+	level: NotificationLevel;
+	link: string | null;
+	manageLink: string;
+};
+
+/** Project templates that accept `NotificationEmailData`, by declaring it in their `props` or with a rest prop. */
+export type NotificationEmailTemplateName = {
+	[Name in EmailTemplateName]: NotificationEmailData extends {
+		[Key in keyof NotificationEmailData]: Key extends keyof EmailTemplateInput<Name>
+			? EmailTemplateInput<Name>[Key]
+			: never;
+	}
+		? Name
+		: never;
+}[EmailTemplateName];
+
+/** Removes Lucid's default data from template props while preserving rest prop index signatures through key remapping. */
+type NotificationEmailExtraData<Template extends string> = {
+	[Key in keyof EmailTemplateInput<Template> as Key extends keyof NotificationEmailData
+		? never
+		: Key]: EmailTemplateInput<Template>[Key];
+};
+
+/** Accepts any extra data for Lucid's template, requiring `data` for project props Lucid doesn't supply. */
+type NotificationEmailDataOption<Data, Template extends string> = [
+	Template,
+] extends [never]
+	? {
+			/** Extra template data merged with the defaults. */
+			data?(props: { data: Data }): Record<string, unknown>;
+		}
+	: Record<string, never> extends NotificationEmailExtraData<Template>
+		? {
+				/** Extra template data merged with the defaults. */
+				data?(props: { data: Data }): NotificationEmailExtraData<Template>;
+			}
+		: {
+				/** The template's props that Lucid doesn't send. */
+				data(props: { data: Data }): NotificationEmailExtraData<Template>;
+			};
+
+/** Notification email options with `Template` inferred from `template` to determine the data type. */
+export type NotificationEmail<Data, Template extends string = never> = {
 	/** Minutes to wait before emailing. Nobody is emailed about a notification they read or archive in the meantime, or once it is resolved. Defaults to 10. Use 0 for anything people must hear about straight away. */
 	delayMinutes?: number;
-	/** Template name. Defaults to Lucid's notification template, which renders the title, body and link. */
-	template?: string;
-	/** Extra template data merged with the defaults. */
-	data?(props: { data: Data }): Record<string, unknown>;
-};
+	/** A project template accepting `NotificationEmailData`, defaulting to Lucid's template for the title, body and link. */
+	template?: Template;
+} & NotificationEmailDataOption<Data, Template>;
 
 export type DefineNotificationOptions<
 	Key extends string,
 	Data extends z.ZodObject,
+	Template extends NotificationEmailTemplateName = never,
 > = {
 	/** Unique `namespace:name` key, eg. `shop:order-failed`. */
 	key: Key;
@@ -58,7 +105,7 @@ export type DefineNotificationOptions<
 	};
 	/** Builds the stored title, body and link from the data. Runs when the notification is sent. */
 	render: (props: { data: z.output<Data> }) => NotificationRender;
-	email?: NotificationEmail<z.output<Data>>;
+	email?: NotificationEmail<z.output<Data>, Template>;
 };
 
 export type NotificationDefinition<
@@ -81,7 +128,11 @@ export type NotificationDefinition<
 	};
 	//* method syntax keeps every data schema assignable to AnyNotificationDefinition
 	render(props: { data: z.output<Data> }): NotificationRender;
-	email: NotificationEmail<z.output<Data>> & { delayMinutes: number };
+	email: {
+		delayMinutes: number;
+		template?: string;
+		data?(props: { data: z.output<Data> }): Record<string, unknown>;
+	};
 };
 
 /** Any notification definition accepted by Lucid config. */

@@ -1,5 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ErrorCopy } from "../../types/errors.js";
@@ -80,7 +81,7 @@ const sendResetPassword: ServiceFn<
 			lastName: userExistsRes.data.last_name,
 			email: userExistsRes.data.email,
 			resetLink: `${constants.email.locations.resetPassword}?token=${userToken.data.token}`,
-		},
+		} satisfies BuiltInEmailTemplates["reset-password"],
 		storage: constants.email.templates.resetPassword.storage,
 	});
 	if (sendEmailRes.error) return sendEmailRes;
