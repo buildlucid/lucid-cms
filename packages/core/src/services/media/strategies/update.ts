@@ -1,5 +1,4 @@
 import { copy } from "../../../libs/i18n/index.js";
-import type { ErrorCopy, LucidErrorData } from "../../../types/errors.js";
 import type {
 	MediaAdapterData,
 	MediaStatus,
@@ -54,15 +53,6 @@ const update: ServiceFn<
 		});
 	};
 
-	const revertStorageDelta = async (delta: number) => {
-		if (delta === 0) return;
-
-		await adjustStorageUsage(context, {
-			delta: delta * -1,
-			min: 0,
-		});
-	};
-
 	// Fetch meta data from new file
 	const mediaMetaRes = await mediaStorageRes.data.getMeta(context, {
 		key: data.updatedKey,
@@ -107,10 +97,9 @@ const update: ServiceFn<
 		return fileMetaData;
 	}
 
-	const delta = mediaMetaRes.data.size - data.previousSize;
 	const storageLimit = context.config.media.limits.storageBytes;
 	const storageRes = await adjustStorageUsage(context, {
-		delta: delta,
+		delta: mediaMetaRes.data.size - data.previousSize,
 		max: storageLimit === false ? undefined : storageLimit,
 		min: 0,
 	});
@@ -188,36 +177,28 @@ const update: ServiceFn<
 		};
 	};
 
-	const failUpdate = async (
-		message: ErrorCopy,
-	): Promise<{ error: LucidErrorData; data: undefined }> => {
-		await revertStorageDelta(delta);
-
-		return {
-			error: {
-				type: "basic",
-				message,
-				status: 500,
-				errors: {
-					file: {
-						code: "media_error",
-						message,
-					},
-				},
-			},
-			data: undefined,
-		};
-	};
-
 	if (data.targetKey === data.previousKey) {
 		const updatedStreamRes = await mediaStorageRes.data.stream(context, {
 			key: data.updatedKey,
 		});
 		if (updatedStreamRes.error) {
 			await cleanupUpdatedKey();
-			return await failUpdate(
-				updatedStreamRes.error.message ?? copy("server:core.errors.unknown"),
-			);
+			const message =
+				updatedStreamRes.error.message ?? copy("server:core.errors.unknown");
+			return {
+				error: {
+					type: "basic",
+					message,
+					status: 500,
+					errors: {
+						file: {
+							code: "media_error",
+							message,
+						},
+					},
+				},
+				data: undefined,
+			};
 		}
 
 		const uploadRes = await mediaStorageRes.data.upload(context, {
@@ -242,9 +223,22 @@ const update: ServiceFn<
 		if (!targetMeta) {
 			await cleanupUpdatedKey();
 
-			return await failUpdate(
-				uploadRes.error?.message ?? copy("server:core.errors.unknown"),
-			);
+			const message =
+				uploadRes.error?.message ?? copy("server:core.errors.unknown");
+			return {
+				error: {
+					type: "basic",
+					message,
+					status: 500,
+					errors: {
+						file: {
+							code: "media_error",
+							message,
+						},
+					},
+				},
+				data: undefined,
+			};
 		}
 
 		let sourceDeleted = true;
@@ -283,9 +277,22 @@ const update: ServiceFn<
 	if (promoteRes.error) {
 		const targetVerified = await getVerifiedTargetMeta();
 		if (!targetVerified) {
-			return await failUpdate(
-				promoteRes.error.message ?? copy("server:core.errors.unknown"),
-			);
+			const message =
+				promoteRes.error.message ?? copy("server:core.errors.unknown");
+			return {
+				error: {
+					type: "basic",
+					message,
+					status: 500,
+					errors: {
+						file: {
+							code: "media_error",
+							message,
+						},
+					},
+				},
+				data: undefined,
+			};
 		}
 
 		const deleteUpdatedRes = await mediaStorageRes.data.delete(context, {
@@ -300,7 +307,6 @@ const update: ServiceFn<
 			await mediaStorageRes.data.delete(context, {
 				key: data.targetKey,
 			});
-			await revertStorageDelta(delta);
 
 			return {
 				error: {
@@ -341,7 +347,21 @@ const update: ServiceFn<
 
 	const targetMeta = await getVerifiedTargetMeta();
 	if (!targetMeta) {
-		return await failUpdate(copy("server:core.errors.unknown"));
+		const message = copy("server:core.errors.unknown");
+		return {
+			error: {
+				type: "basic",
+				message,
+				status: 500,
+				errors: {
+					file: {
+						code: "media_error",
+						message,
+					},
+				},
+			},
+			data: undefined,
+		};
 	}
 
 	const deleteOldRes = await mediaStorageRes.data.delete(context, {
@@ -351,7 +371,6 @@ const update: ServiceFn<
 		await mediaStorageRes.data.delete(context, {
 			key: data.targetKey,
 		});
-		await revertStorageDelta(delta);
 
 		return {
 			error: {

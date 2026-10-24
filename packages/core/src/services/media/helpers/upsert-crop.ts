@@ -14,7 +14,7 @@ import type {
 import type { ServiceFn } from "../../../utils/services/types.js";
 import clearProcessedImage from "../../processed-images/clear-single.js";
 import checkAwaitingSync from "../checks/check-awaiting-sync.js";
-import deleteMediaObject from "../strategies/delete.js";
+import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 import syncMedia from "../strategies/sync-media.js";
 import updateMedia from "../strategies/update.js";
 
@@ -188,12 +188,12 @@ const upsertCrop: ServiceFn<
 				validation: { enabled: true },
 			});
 	if (cropRes.error) {
+		//* the transaction rolls back failed database writes, but a newly stored file has to be deleted
 		if (!existingCropRes.data) {
-			await deleteMediaObject(context, {
-				key: file.key,
-				size: file.size,
-				processedSize: 0,
-			});
+			const storage = await checkHasMediaStorage(context);
+			if (storage.data) {
+				await storage.data.delete(context, { key: file.key });
+			}
 		}
 		return cropRes;
 	}
