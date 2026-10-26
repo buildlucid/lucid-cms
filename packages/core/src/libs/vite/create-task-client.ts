@@ -20,7 +20,12 @@ const taskErrorSchema = z.object({
 
 /** Creates a client for the runtime tasks of the Lucid dev server at `origin`, authenticated with its plugin's token. */
 const createTaskClient =
-	(props: { origin: string; token: string }): RuntimeTaskClient =>
+	(props: {
+		origin: string;
+		token: string;
+		/** Stops waiting on tasks, such as when the server closes. */
+		signal?: AbortSignal;
+	}): RuntimeTaskClient =>
 	async <Name extends RuntimeTaskName>(
 		name: Name,
 		input: RuntimeTaskInput<Name>,
@@ -34,6 +39,7 @@ const createTaskClient =
 					[constants.dev.taskTokenHeader]: props.token,
 				},
 				body: JSON.stringify(input),
+				signal: props.signal,
 			},
 		);
 		if (!response.ok) {

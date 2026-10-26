@@ -1,4 +1,3 @@
-import { astroHost } from "@lucidcms/astro/host";
 import { defineConfig, z } from "@lucidcms/core";
 import { sqlite } from "@lucidcms/db-sqlite";
 import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
@@ -17,7 +16,6 @@ export const env = z.object({
 
 export default defineConfig({
 	runtime: node,
-	host: astroHost,
 	db: sqlite,
 	config: (env) => ({
 		secrets: {

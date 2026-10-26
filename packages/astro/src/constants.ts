@@ -1,5 +1,7 @@
 const constants = {
 	integrationName: "@lucidcms/astro",
+	/** How Astro identifies itself to Lucid as the framework serving it. */
+	hostKey: "astro",
 	/** Lucid's route and middleware, which reach Lucid through `lucid:hosted`. */
 	routeEntrypoint: "@lucidcms/astro/internal/route",
 	middlewareEntrypoint: "@lucidcms/astro/internal/middleware",

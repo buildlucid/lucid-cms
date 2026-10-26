@@ -39,14 +39,7 @@ const buildSite = async (
 	options: SitePluginOptionsInternal,
 	props: BuildProps,
 ) => {
-	const { projectRoot, logger, viteConfig } = props;
-	if (!viteConfig) {
-		throw new LucidError({
-			scope: PLUGIN_KEY,
-			message:
-				"site:build doesn't run in Astro projects, where Astro builds the site.",
-		});
-	}
+	const { projectRoot, logger } = props;
 
 	if (options.mode !== "static") {
 		throw new LucidError({
@@ -63,6 +56,18 @@ const buildSite = async (
 		siteRoot: path.resolve(projectRoot, options.directory),
 		publicFiles: props.publicFiles,
 	});
+
+	const clientDir = path.join(
+		pluginDirectory(PLUGIN_KEY, projectRoot),
+		"static-client",
+	);
+	// Created before the output folder is emptied, so a project Lucid can't build, such as one a framework serves, keeps it.
+	const viteConfig = await props.viteConfig();
+	const builder = await createBuilder({
+		...viteConfig,
+		plugins: [...(viteConfig.plugins ?? []), clientOutDir(clientDir)],
+	});
+
 	await rm(outDir, { recursive: true, force: true });
 
 	const sitePublicFiles = props.publicFiles.filter(
@@ -75,15 +80,6 @@ const buildSite = async (
 			await copyFile(file.path, target);
 		}),
 	);
-
-	const clientDir = path.join(
-		pluginDirectory(PLUGIN_KEY, projectRoot),
-		"static-client",
-	);
-	const builder = await createBuilder({
-		...viteConfig,
-		plugins: [...(viteConfig.plugins ?? []), clientOutDir(clientDir)],
-	});
 
 	const { client } = builder.environments;
 	if (!client) {

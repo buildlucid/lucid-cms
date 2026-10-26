@@ -13,7 +13,4 @@ const RuntimeAdapterSchema = z.object({
 	lucid: z.string(),
 });
 
-/** The shape of `defineConfig({ host })`. */
-export const HostAdapterSchema = z.object({ key: z.string(), cli: z.string() });
-
 export default RuntimeAdapterSchema;

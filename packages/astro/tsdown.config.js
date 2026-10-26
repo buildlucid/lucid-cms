@@ -3,7 +3,6 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
 	entry: [
 		"src/index.ts",
-		"src/host.ts",
 		"src/cli.ts",
 		"src/internal/route.ts",
 		"src/internal/middleware.ts",

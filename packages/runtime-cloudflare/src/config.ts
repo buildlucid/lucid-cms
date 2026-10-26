@@ -1,7 +1,7 @@
 import type { WorkerConfig } from "@cloudflare/config";
 
 /**
- * Wraps the host's Worker `entrypoint` from `cloudflare.config.ts` with Lucid's scheduler, plugin handlers and agent run Durable Object, adding cron and queue triggers, bindings and secrets while preserving existing Worker settings and bindings.
+ * Wraps the host's Worker, or a custom `entrypoint`, with Lucid's scheduler, plugin handlers and agent run Durable Object, adding cron and queue triggers, bindings and secrets while preserving existing `cloudflare.config.ts` settings and bindings.
  *
  * @example
  * ```ts
@@ -13,8 +13,6 @@ import type { WorkerConfig } from "@cloudflare/config";
  *   worker: withLucid({
  *     name: "my-site",
  *     compatibilityDate: "2026-06-30",
- *     // The host's Worker, such as Astro's.
- *     entrypoint: "@astrojs/cloudflare/entrypoints/server",
  *     env: {
  *       LUCID_DB: bindings.hyperdrive({ id: "HYPERDRIVE_ID" }),
  *     },

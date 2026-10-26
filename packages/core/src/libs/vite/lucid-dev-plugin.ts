@@ -23,7 +23,7 @@ const getOrigin = (server: ViteDevServer) => {
 	return `${protocol}://${isIPv6(host) ? `[${host}]` : host}:${address.port}`;
 };
 
-/** Runs development migrations quietly when unchanged before serving requests, reports completion through `onReady`, then flushes runtime logs after host startup output, leaving middleware hosts to migrate themselves. */
+/** Runs migrations quietly when unchanged before serving requests, reports `onReady`, flushes logs after startup output and cancels migration waits and prompts on close, leaving middleware hosts to migrate themselves. */
 const lucidDevPlugin = (
 	props: LucidPluginProps & { onReady: (ready: boolean) => void },
 ): Plugin => ({
@@ -65,6 +65,13 @@ const lucidDevPlugin = (
 			setTimeout(() => void stopLoggerBuffering());
 		});
 
+		// Keep startup cancellation per server because Vite configures replacements before closing old servers, so a shared hook would cancel the replacement.
+		const startup = new AbortController();
+		httpServer.once("close", () => {
+			startup.abort();
+			markReady(false);
+		});
+
 		httpServer.once("listening", () => {
 			const origin = getOrigin(server);
 			if (!origin) {
@@ -72,11 +79,20 @@ const lucidDevPlugin = (
 				return;
 			}
 
-			runMigrateTask(createTaskClient({ origin, token: props.token }), {
-				quiet: true,
-			})
+			runMigrateTask(
+				createTaskClient({
+					origin,
+					token: props.token,
+					signal: startup.signal,
+				}),
+				{ quiet: true },
+				startup.signal,
+			)
 				.then((result) => result.status === "complete")
 				.catch((error: unknown) => {
+					// Server shutdown intentionally cancels migration requests and prompts.
+					if (startup.signal.aborted) return false;
+
 					cliLogger.errorInstance(
 						error instanceof Error ? error : new Error(String(error)),
 						"Migrations failed",

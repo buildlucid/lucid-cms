@@ -14,7 +14,6 @@ import {
 } from "@lucidcms/core/vite";
 import type { AstroIntegration } from "astro";
 import constants from "./constants.js";
-import { astroHost } from "./host.js";
 import collectWatchFiles, {
 	createResourceWatchPlugin,
 } from "./integration/watch.js";
@@ -49,11 +48,13 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 
 				const plugins = await lucid({
 					configPath: options.configPath ?? getConfigPath(process.cwd()),
-					host: astroHost.key,
+					host: constants.hostKey,
 					mode: command === "build" ? "production" : "development",
 					adminDocument: () => adminDocument,
 					// Astro's adapter builds its server module as the `ssr` environment's `index` input.
 					serverEntry: { environment: "ssr", input: "index" },
+					// Astro's Cloudflare adapter runs this Worker unless the project names its own.
+					workerEntry: "@astrojs/cloudflare/entrypoints/server",
 				});
 				const api = findLucidViteApi(plugins);
 				ready = api.ready;

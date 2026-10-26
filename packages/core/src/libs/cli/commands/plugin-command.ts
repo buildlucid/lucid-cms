@@ -9,6 +9,7 @@ import type {
 	LucidPluginTask,
 	LucidPluginTaskResult,
 } from "../../plugins/types.js";
+import assertNoHost from "../../vite/assert-no-host.js";
 import loadProject from "../../vite/load-project.js";
 import cliLogger from "../logger.js";
 import createViteConfig from "../services/create-vite-config.js";
@@ -36,17 +37,19 @@ const pluginCommand =
 				config: loaded.config,
 				projectRoot: loaded.projectRoot,
 				publicFiles: loaded.resources.files.public,
-				// Commands report their own progress, so Vite only reports warnings and errors.
-				viteConfig: loaded.definition.host
-					? null
-					: createViteConfig({
-							configPath: loaded.configPath,
-							mode: "production",
-							logLevel: "warn",
-							prepare: false,
-							// Commands build their own entries, such as a static site's, which the admin isn't part of.
-							admin: false,
-						}),
+				// Load build config only when requested, rejecting projects whose framework owns the build.
+				viteConfig: async () => {
+					await assertNoHost(loaded.projectRoot);
+					// Commands report their own progress, so Vite only reports warnings and errors.
+					return createViteConfig({
+						configPath: loaded.configPath,
+						mode: "production",
+						logLevel: "warn",
+						prepare: false,
+						// Commands build their own entries, such as a static site's, which the admin isn't part of.
+						admin: false,
+					});
+				},
 				// The runtime runs this version of the plugin's tasks, so their JSON is the result the command asked for.
 				runTask: async <Task extends LucidPluginTask>(
 					name: string,

@@ -1,7 +1,6 @@
 import path from "node:path";
 import { type PreviewServer, preview } from "vite";
 import getConfigPath from "../../config/get-config-path.js";
-import readConfigHost from "../../config/read-config-host.js";
 import createCommandTelemetryReporter, {
 	type CommandTelemetryReporter,
 } from "../../telemetry/command-reporter.js";
@@ -27,11 +26,8 @@ const serveCommand = async () => {
 	try {
 		const configPath = getConfigPath(process.cwd());
 
-		// A host serves the project instead, so it fails before running migrations.
-		await assertNoHost(
-			await readConfigHost(configPath),
-			path.dirname(configPath),
-		);
+		// A framework serves the project instead, so it fails before running migrations.
+		await assertNoHost(path.dirname(configPath));
 
 		// Migrations load the env the build does, so they reach the database the preview uses.
 		const tasks = await startTaskServer({ mode: "production" });

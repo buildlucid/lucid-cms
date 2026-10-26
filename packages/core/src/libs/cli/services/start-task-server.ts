@@ -3,12 +3,11 @@ import path from "node:path";
 import { createServer } from "vite";
 import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
-import readConfigHost from "../../config/read-config-host.js";
 import createTaskClient, {
 	type RuntimeTaskClient,
 } from "../../vite/create-task-client.js";
+import findHostCli from "../../vite/find-host-cli.js";
 import findLucidViteApi from "../../vite/find-lucid-vite-api.js";
-import loadHostCli from "../../vite/load-host-cli.js";
 import cliSpinner from "../spinner.js";
 import createViteConfig from "./create-vite-config.js";
 import createViteLogger from "./create-vite-logger.js";
@@ -26,7 +25,7 @@ export type TaskServer = {
 	close: () => Promise<void>;
 };
 
-/** Starts tasks through Lucid's Vite config, or the declared host's, with runtime bindings, isolated cache, a free local port and no watcher or HMR socket, restoring `NODE_ENV` on close. */
+/** Starts tasks through Lucid's Vite config, or that of the framework serving the project, with runtime bindings, isolated cache, a free local port and no watcher or HMR socket, restoring `NODE_ENV` on close. */
 const startTaskServer = async (
 	options?: TaskServerOptions,
 ): Promise<TaskServer> => {
@@ -41,8 +40,8 @@ const startTaskServer = async (
 
 	// Callers stop the spinner once they've run their tasks.
 	cliSpinner.start("Loading project");
-	const host = await readConfigHost(configPath);
-	const hostCli = host && (await loadHostCli(host, path.dirname(configPath)));
+	// A framework serving the project configures the runtime, such as its local state, so tasks run through its config.
+	const hostCli = await findHostCli(path.dirname(configPath));
 	const config = hostCli
 		? {
 				...(await hostCli.viteConfig({ configPath, remote: options?.remote })),

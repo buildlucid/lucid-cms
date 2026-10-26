@@ -16,6 +16,8 @@ export type LucidViteOptions = {
 	adminDocument?: () => string | undefined;
 	/** Host server build input identified by environment and input name, which runtimes can wrap with background work such as Lucid's job scheduler. */
 	serverEntry?: { environment: string; input: string };
+	/** Default host Worker module exporting a request handler, wrapped with Lucid's events unless the project supplies one through options such as `withLucid`'s `entrypoint`. */
+	workerEntry?: string;
 	/** Connects the runtime's bindings to their deployed resources, where the runtime supports it, for `--remote`. */
 	remote?: boolean;
 	/** Builds only for previewing locally, as `lucidcms serve` does, so runtimes may add settings deploys must not have. */
@@ -61,7 +63,7 @@ export type LucidPluginProps = Omit<LucidViteApi, "ready" | "startMessage"> & {
 	host?: string;
 };
 
-/** What a framework serving Lucid gives Lucid's CLI, from the module its `HostAdapter.cli` names. */
+/** What a framework serving Lucid gives Lucid's CLI, from the module its package's `package.json` names under `lucid.host`. */
 export type HostCliIntegration = {
 	/** The framework's name in messages, such as `Astro`. */
 	name: string;
@@ -103,7 +105,7 @@ export type RuntimeViteIntegration<
 		/** Plugins that add Lucid's background work, such as its job scheduler, around the host's server. */
 		plugins: (
 			project: LucidViteProject<Adapter>,
-			options: Pick<LucidViteOptions, "serverEntry">,
+			options: Pick<LucidViteOptions, "serverEntry" | "workerEntry">,
 		) => PluginOption[] | Promise<PluginOption[]>;
 	};
 };

@@ -3,9 +3,10 @@ import cliLogger from "../cli/logger.js";
 import runPrompt from "../cli/services/run-prompt.js";
 import type { MigrationApprovalGate } from "../runtime/tasks/run-migrations.js";
 
-/** Requests interactive migration approval, declining without a terminal and reporting how to review migrations or resolve non-interactive policy errors. */
+/** Requests interactive migration approval, declining without a terminal or once `signal` aborts, and reporting how to review migrations or resolve non-interactive policy errors. */
 const requestMigrationApproval = async (
 	gate: MigrationApprovalGate,
+	signal?: AbortSignal,
 ): Promise<boolean> => {
 	if (gate === "reject-destructive") {
 		cliLogger.error(
@@ -32,11 +33,14 @@ const requestMigrationApproval = async (
 						: "These migrations require review. Do you want to continue?",
 					default: false,
 				},
-				{ output },
+				{ output, signal },
 			),
 		);
 	} catch (error) {
-		if (error instanceof Error && error.name === "ExitPromptError") {
+		if (
+			error instanceof Error &&
+			(error.name === "ExitPromptError" || error.name === "AbortPromptError")
+		) {
 			return false;
 		}
 

@@ -133,11 +133,11 @@ lucidcms seed --all --remote
 
 The database isn't one of Lucid's bindings, so `--remote` doesn't change which database a command uses. See [Database](#database) for running migrations against production.
 
-In Astro projects, commands run through Astro's Vite config instead, so they use Astro's Cloudflare adapter and the bindings in `cloudflare.config.ts`, the same as `astro dev`. `--remote` isn't supported there. Set `dev: { remote: true }` on bindings in `cloudflare.config.ts` instead.
+In Astro projects, commands run through Astro's Vite config instead, so they use Astro's Cloudflare adapter, its options, such as `persistState`, and the bindings in `cloudflare.config.ts`, the same as `astro dev`. `--remote` isn't supported there. Set `dev: { remote: true }` on bindings in `cloudflare.config.ts` instead.
 
 ## Astro
 
-Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. Name Astro's Worker in `entrypoint` and wrap the Worker in `withLucid`, which adds Lucid's Worker entry around it, its cron and queue triggers, the [agent run Durable Object](#agent-runs), and the bindings and secrets Lucid's adapters and plugins declare:
+Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. Wrap the Worker in `withLucid`, which adds Lucid's Worker entry around Astro's, its cron and queue triggers, the [agent run Durable Object](#agent-runs), and the bindings and secrets Lucid's adapters and plugins declare:
 
 ```typescript
 // cloudflare.config.ts
@@ -148,7 +148,6 @@ export default defineConfig({
   worker: withLucid({
     name: "my-site",
     compatibilityDate: "2026-06-30",
-    entrypoint: "@astrojs/cloudflare/entrypoints/server",
     env: {
       LUCID_DB: bindings.hyperdrive({ id: "HYPERDRIVE_ID" }),
     },
@@ -156,7 +155,7 @@ export default defineConfig({
 });
 ```
 
-Lucid's Worker entry runs Astro's Worker alongside Lucid's job scheduler and plugins' event handlers, such as the queue consumer, and exports the agent run Durable Object. The Worker's own settings and bindings come first. Deploy with `cf deploy`, which builds the project with `astro build`.
+Lucid's Worker entry runs Astro's Worker alongside Lucid's job scheduler and plugins' event handlers, such as the queue consumer, and exports the agent run Durable Object. The Worker's own settings and bindings come first. If you use a custom Worker, such as one adding its own `queue` handler, name its module in `entrypoint` and Lucid wraps that instead. Deploy with `cf deploy`, which builds the project with `astro build`.
 
 ## Bindings
 

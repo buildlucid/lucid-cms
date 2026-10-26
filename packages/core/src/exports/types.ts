@@ -506,7 +506,6 @@ export type {
 	DatabaseConnectionScope,
 	EnvironmentVariables,
 	GetEnvVarsLogger,
-	HostAdapter,
 	HostedLucid,
 	LucidBuild,
 	LucidConfigDefinition,

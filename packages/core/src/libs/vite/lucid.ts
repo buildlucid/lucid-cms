@@ -32,16 +32,8 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 		options?.configPath ?? getConfigPath(process.cwd()),
 	);
 	const { project, integration } = await loadProject(configPath, options?.mode);
-
-	// The project declares the host that serves it, so Lucid's commands don't run a hosted project and hosts don't run
-	// one that isn't theirs.
-	if (!options?.host) {
-		await assertNoHost(project.definition.host, project.projectRoot);
-	} else if (project.definition.host?.key !== options.host) {
-		throw new LucidError({
-			message: `lucid({ host: "${options.host}" }) needs lucid.config.* to declare the same host with \`defineConfig({ host })\`.`,
-		});
-	}
+	// A framework serving the project calls `lucid({ host })` itself, so Lucid's own commands don't run it.
+	if (!options?.host) await assertNoHost(project.projectRoot);
 
 	const clis = await loadPluginClis(project.config, project.projectRoot);
 	const pluginVite = await loadPluginVite({ project, clis });
@@ -100,6 +92,7 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 					lucidHostedPlugin({ project, module: integration.hosted.module }),
 					integration.hosted.plugins(project, {
 						serverEntry: options?.serverEntry,
+						workerEntry: options?.workerEntry,
 					}),
 				]
 			: [

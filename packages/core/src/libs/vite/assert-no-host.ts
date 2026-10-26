@@ -1,14 +1,11 @@
 import { LucidError } from "../../utils/errors/index.js";
-import type { HostAdapter } from "../runtime/types.js";
-import loadHostCli from "./load-host-cli.js";
+import findHostCli from "./find-host-cli.js";
 
-/** Throws when the project declares a host, which serves Lucid instead of Lucid's server commands, naming its commands. */
-const assertNoHost = async (
-	host: HostAdapter | undefined,
-	projectRoot: string,
-) => {
-	if (!host) return;
-	const cli = await loadHostCli(host, projectRoot);
+/** Throws when a framework serves the project instead of Lucid's server commands, naming the framework's commands. */
+const assertNoHost = async (projectRoot: string) => {
+	const cli = await findHostCli(projectRoot);
+	if (!cli) return;
+
 	throw new LucidError({
 		message: `${cli.name} serves Lucid in this project. Use \`${cli.commands.dev}\`, \`${cli.commands.build}\` and \`${cli.commands.preview}\` instead.`,
 	});

@@ -19,10 +19,10 @@ import type { CloudflareRuntimeAdapter } from "./types.js";
 
 const workerEntryId = "virtual:lucid/cloudflare-worker";
 const hostedWorkerPattern = new RegExp(
-	`^${RegExp.escape(constants.HOSTED_WORKER_ENTRY)}\\?`,
+	`^${RegExp.escape(constants.HOSTED_WORKER_ENTRY)}(\\?|$)`,
 );
 const resolvedHostedWorkerPattern = new RegExp(
-	`^\\0${RegExp.escape(constants.HOSTED_WORKER_ENTRY)}\\?`,
+	`^\\0${RegExp.escape(constants.HOSTED_WORKER_ENTRY)}(\\?|$)`,
 );
 
 /** Runs Lucid's Worker with local bindings in Vite's workerd server environment and builds for `cf deploy`, supplying Worker settings so `cloudflare.config.ts` is needed only for unmanaged options. */
@@ -110,7 +110,7 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 	hosted: {
 		module: "@lucidcms/runtime-cloudflare/hosted",
 		/** Serves `withLucid`'s Worker entry, which wraps the host's Worker with Lucid's scheduler, plugin handlers and agent run Durable Object, and caches built assets through `_headers`. */
-		plugins: (project) => {
+		plugins: (project, { workerEntry }) => {
 			if (!existsSync(path.join(project.projectRoot, constants.CONFIG_FILE))) {
 				throw new LucidError({
 					message: `The host's Cloudflare adapter reads the Worker from \`${constants.CONFIG_FILE}\`. Add one that wraps its Worker in \`withLucid\` from @lucidcms/runtime-cloudflare/config.`,
@@ -159,8 +159,16 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 					load: {
 						filter: { id: resolvedHostedWorkerPattern },
 						handler: (id) => {
-							const entry = new URLSearchParams(id.split("?")[1]).get("entry");
-							if (!entry) return;
+							// A custom Worker named in `withLucid`'s `entrypoint`, or else the host's own.
+							const entry =
+								new URLSearchParams(id.split("?")[1]).get("entry") ??
+								workerEntry;
+							if (!entry) {
+								throw new LucidError({
+									message:
+										"The host doesn't name its Worker for Lucid to wrap. Name it in `withLucid`'s `entrypoint`.",
+								});
+							}
 
 							return `import lucid from "${hostedModuleId}";
 import hostWorker from ${JSON.stringify(entry)};

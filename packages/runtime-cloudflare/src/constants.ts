@@ -27,6 +27,6 @@ export default {
 	CONFIG_FILE: "cloudflare.config.ts",
 	ASSETS_BINDING: "ASSETS",
 	JOB_SCHEDULER_CRON: "* * * * *",
-	/** The Worker entry `withLucid` names, with the host's Worker in its `entry` query, which the hosted plugins serve. */
+	/** The Worker entry `withLucid` names, which the hosted plugins serve around the host's Worker, or a custom one in its `entry` query. */
 	HOSTED_WORKER_ENTRY: "virtual:lucid/hosted-worker",
 } as const;

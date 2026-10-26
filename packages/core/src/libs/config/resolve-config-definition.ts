@@ -3,7 +3,6 @@ import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import parseEnv from "../runtime/parse-env.js";
 import { resolveDatabaseAdapter } from "../runtime/resolve-database-adapter.js";
-import { HostAdapterSchema } from "../runtime/schema.js";
 import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
@@ -29,7 +28,7 @@ const defaultLoggerInstance = {
 
 const invalidConfigDefinitionMessage =
 	"Lucid config must default export defineConfig({ runtime, db, config }).";
-const supportedKeys = new Set(["runtime", "host", "db", "config", "configure"]);
+const supportedKeys = new Set(["runtime", "db", "config", "configure"]);
 
 export type ResolveConfigDefinitionResult = {
 	config: ResolvedLucidConfig;
@@ -79,17 +78,7 @@ const assertConfigDefinition = (value: unknown): LucidConfigDefinition => {
 	);
 	if (unknownKeys.length) {
 		throw new LucidError({
-			message: `Unknown config definition keys: ${unknownKeys.join(", ")}. Use runtime, host, db, config and configure.`,
-		});
-	}
-
-	if (
-		value.host !== undefined &&
-		!HostAdapterSchema.safeParse(value.host).success
-	) {
-		throw new LucidError({
-			message:
-				"The config's `host` must be a host adapter, such as the one a framework's Lucid integration exports.",
+			message: `Unknown config definition keys: ${unknownKeys.join(", ")}. Use runtime, db, config and configure.`,
 		});
 	}
 

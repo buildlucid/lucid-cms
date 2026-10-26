@@ -3,7 +3,7 @@ import { LucidError } from "@lucidcms/core/runtime";
 import type { HostCliIntegration } from "@lucidcms/core/vite";
 import { getViteConfig } from "astro/config";
 
-/** What Lucid's CLI needs from Astro: its commands, and its Vite config for the servers Lucid's commands run tasks through. */
+/** Provides Astro commands and task-server Vite config to Lucid's CLI through the package's `lucid.host` entry. */
 const astroCli: HostCliIntegration = {
 	name: "Astro",
 	commands: {

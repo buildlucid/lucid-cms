@@ -91,8 +91,8 @@ export type LucidPluginCommand = {
 		projectRoot: string;
 		/** Public directory and `sources.public` files, with `path` naming each file on disk and `name` its public path. */
 		publicFiles: ResourceFile[];
-		/** Project Vite config used by building commands with warnings/errors only, or null when the project's host owns the build. */
-		viteConfig: InlineConfig | null;
+		/** Creates Vite config for builds with warnings/errors only, loading the project on demand and rejecting projects served by a framework. */
+		viteConfig: () => Promise<InlineConfig>;
 		/** Runs a plugin task in the runtime and returns its result, typed with the task definition as in `runTask<typeof buildTask>("build", input)`. */
 		runTask: <Task extends LucidPluginTask = LucidPluginTask>(
 			name: string,

@@ -172,20 +172,10 @@ export type DatabaseAdapterValue =
 	| DatabaseAdapterFactory
 	| Promise<DatabaseAdapterFactory>;
 
-/** A framework that serves Lucid instead of Lucid's own server, declared with `defineConfig({ host })`. */
-export type HostAdapter = {
-	/** Framework host key, such as `astro`, requiring `hosted` support from the runtime's Vite integration. */
-	key: string;
-	/** Module whose default export is the host's `HostCliIntegration`, resolved from the project, for Lucid's CLI. */
-	cli: string;
-};
-
 /** Runtime, database and project configuration passed to defineConfig. */
 export type LucidConfigDefinition = {
 	/** Runtime adapter or factory for the deployment platform. */
 	runtime: RuntimeAdapterValue;
-	/** The framework serving Lucid, when it isn't Lucid's own server. */
-	host?: HostAdapter;
 	/** Database adapter or environment-aware factory. */
 	db: DatabaseAdapterValue;
 	/** Return project settings using the parsed environment. */

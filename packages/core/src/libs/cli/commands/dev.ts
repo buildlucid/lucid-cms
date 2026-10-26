@@ -202,6 +202,10 @@ const devCommand = async (options?: {
 		await server.listen();
 		cliSpinner.start("Running migrations");
 		const migrated = await ready;
+		// Closing settles `ready` early, so skip shutdown output and wait for any replacement, which reports its own migration result.
+		if (closing) return;
+		const restartedDuringStartup = restarting !== undefined;
+		await restarting;
 
 		logServerReady({
 			url: getServerUrl(server.resolvedUrls, server.httpServer?.address()),
@@ -212,7 +216,7 @@ const devCommand = async (options?: {
 		});
 
 		await stopLoggerBuffering();
-		if (!migrated) warnMigrationsIncomplete();
+		if (!migrated && !restartedDuringStartup) warnMigrationsIncomplete();
 
 		void telemetryReporter.report({
 			outcome: "succeeded",

@@ -19,15 +19,20 @@ const resolveLucidWorker = async (
 		});
 	}
 
-	if (typeof worker.entrypoint !== "string") {
+	if (
+		worker.entrypoint !== undefined &&
+		typeof worker.entrypoint !== "string"
+	) {
 		throw new LucidError({
 			message:
-				"`withLucid` wraps the host's Worker, so name its module in `entrypoint`, as the host's Cloudflare adapter documents.",
+				"`withLucid`'s `entrypoint` names the module of a custom Worker for Lucid to wrap.",
 		});
 	}
 
-	// Lucid's entry imports the host's Worker, named in its query, and adds Lucid's events around it.
-	const entrypoint = `${constants.HOSTED_WORKER_ENTRY}?${new URLSearchParams({ entry: worker.entrypoint })}`;
+	// Lucid's entry adds Lucid's events around the host's Worker, or a custom one named in its query.
+	const entrypoint = worker.entrypoint
+		? `${constants.HOSTED_WORKER_ENTRY}?${new URLSearchParams({ entry: worker.entrypoint })}`
+		: constants.HOSTED_WORKER_ENTRY;
 	const lucid = createWorkerConfig({
 		name: worker.name,
 		compatibilityDate: worker.compatibilityDate,
