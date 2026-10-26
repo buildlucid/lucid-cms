@@ -3,6 +3,7 @@ import type {
 	DatabaseConnectionScope,
 	EnvironmentVariables,
 	HttpExtension,
+	LucidAdapterDefaults,
 	LucidInvocation,
 } from "@lucidcms/core/types";
 import type { LucidViteProject } from "@lucidcms/core/vite";
@@ -17,6 +18,8 @@ export type LucidAstroRuntimeState = {
 	runtimeContext: AdapterRuntimeContext;
 	/** Controls whether the live database connection belongs to the runtime or invocation. */
 	databaseScope: DatabaseConnectionScope;
+	/** Adapter instances the runtime supplies, such as its agent runner. */
+	adapterDefaults?: LucidAdapterDefaults;
 	/** Platform execution context forwarded to the runtime bridge. */
 	executionContext?: unknown;
 	/** Separates runtime hosts when one runtime module serves multiple environments. */

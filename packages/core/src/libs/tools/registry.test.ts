@@ -8,7 +8,7 @@ import type DatabaseAdapter from "../db/adapter-base.js";
 import defineAgentTool from "./define-agent-tool.js";
 import defineMcpTool from "./define-mcp-tool.js";
 import { agentTools, mcpTools } from "./lucid-tools.js";
-import { getMcpToolRegistry } from "./registry.js";
+import { getMcpToolRegistry, isToolDefinition } from "./registry.js";
 import type { AgentToolDefinition } from "./types.js";
 
 const adapter = {
@@ -262,4 +262,20 @@ test("only Lucid's own tools can use the lucid_ name prefix", async () => {
 		'Agent tool name "lucid_notes" is reserved.',
 	);
 	expect(check("notes")).not.toThrow();
+});
+
+test("recognises tools from another copy of core, such as one a config loader evaluates", async () => {
+	vi.resetModules();
+	const { default: defineOtherTool } = await import("./define-mcp-tool.js");
+
+	const tool = defineOtherTool({
+		name: "test_other_copy",
+		description: "Defined by another copy of core",
+		input: z.object({}),
+		output: z.object({}),
+		scopes: [],
+		handler: async () => ({ error: undefined, data: { output: {} } }),
+	});
+
+	expect(isToolDefinition(tool)).toBe(true);
 });

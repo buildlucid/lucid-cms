@@ -8,6 +8,7 @@ import {
 	type SavedMessageCursor,
 	savedStreamCursor,
 } from "../../libs/agent/run-stream.js";
+import type { AgentRunWatch } from "../../libs/agent/types.js";
 import { agentFormatter } from "../../libs/formatters/index.js";
 import {
 	AgentConversationsRepository,
@@ -70,17 +71,10 @@ const replayLive = async (props: {
  * Streams a run's saved replies while a background worker executes it. Ends once
  * the run stops working, or after one slice so the client reconnects.
  */
-const watchRun: ServiceFn<
-	[
-		{
-			runId: string;
-			cursor?: string;
-			signal: AbortSignal;
-			emit: (event: AgentStreamEvent, id?: string) => Promise<void>;
-		},
-	],
-	undefined
-> = async (context, input) => {
+const watchRun: ServiceFn<[AgentRunWatch], undefined> = async (
+	context,
+	input,
+) => {
 	const emit = input.emit;
 	const AgentRuns = new AgentRunsRepository(context.db);
 	const AgentMessages = new AgentMessagesRepository(context.db);

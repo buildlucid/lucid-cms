@@ -5,7 +5,7 @@ import type { LucidViteProject } from "./types.js";
 
 const importPath = (file: string) => JSON.stringify(normalizePath(file));
 
-/** Renders `lucid:build` from project config and optional admin HTML, adding development tasks, runtime logs honoring `logLevel`, inline command queues and plugin module HMR without server restarts. */
+/** Renders `lucid:build` from project config and optional admin HTML, adding development tasks, runtime logs honoring `logLevel`, inline command queues and agent runs, and plugin module HMR without server restarts. */
 const renderBuildModule = (props: {
 	project: LucidViteProject;
 	/** Plugins' server modules, which reach their runtime code as `pluginModules`. */
@@ -33,7 +33,7 @@ const renderBuildModule = (props: {
 				]
 			: []),
 		...(dev?.taskServer
-			? ["adapterOverrides: { queue: inlineQueueAdapter() }"]
+			? ["adapterOverrides: { queue: inlineQueueAdapter(), agentRunner: null }"]
 			: []),
 	];
 

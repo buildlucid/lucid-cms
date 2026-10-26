@@ -1,13 +1,16 @@
+import type { AgentStreamEvent } from "@lucidcms/types";
 import z from "zod";
 import {
 	agentConfirmationModeSchema,
 	type agentContextSchema,
+	agentInteractionActionSchema,
 	agentRunOutcomeSchema,
 	routineToolSettingsSchema,
 } from "../../schemas/agent.js";
 import { agentScreenSchema } from "../../schemas/agent-screen.js";
 import type { AiModelConfig } from "../../types/config.js";
 import type {
+	AgentInteractionAction,
 	AgentRoutineConversationMode,
 	AgentRoutineEvent,
 	AgentRoutineSchedule,
@@ -15,6 +18,7 @@ import type {
 	AiModelSelection,
 	MediaGenerationType,
 } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import type { JobScheduleTiming } from "../jobs/types.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
@@ -147,6 +151,14 @@ export const checkpointSchema = z.object({
 				.optional(),
 		})
 		.optional(),
+	/** The latest interaction the run saved an answer for, so a retry that resubmits it carries on rather than answering again. */
+	answered: z
+		.object({
+			interactionId: z.string(),
+			userId: z.number().int(),
+			action: agentInteractionActionSchema,
+		})
+		.optional(),
 	inFlightWrite: z.string().optional(),
 	finish: z
 		.object({ outcome: agentRunOutcomeSchema, summary: z.string() })
@@ -168,6 +180,38 @@ export type Checkpoint = z.infer<typeof checkpointSchema>;
 export type ConversationContext = z.infer<typeof agentContextSchema>;
 export type RunMode = Checkpoint["mode"];
 export type RoutineToolSettings = z.infer<typeof routineToolSettingsSchema>;
+
+/** A person's answer to the interaction a run waits on. */
+export type AgentRunAnswer = {
+	interactionId: string;
+	response: Record<string, unknown>;
+	action: AgentInteractionAction;
+	userId: number;
+};
+
+/** Starts or continues a run, answering its pending interaction when given. */
+export type AgentRunStart = {
+	runId: string;
+	answer?: AgentRunAnswer;
+};
+
+/** Follows a run's events for one viewer, resuming from a stream cursor when given. */
+export type AgentRunWatch = {
+	runId: string;
+	cursor?: string;
+	signal: AbortSignal;
+	emit: (event: AgentStreamEvent, id?: string) => Promise<void>;
+};
+
+/** Executes and streams agent runs beyond their initiating request or job, such as in a Cloudflare Durable Object, with inline execution when the runtime supplies no runner. */
+export type AgentRunnerInstance = {
+	type: "agent-runner";
+	key: string;
+	/** Starts or continues a run and returns a live cursor that follows it from the first event. */
+	start: ServiceFn<[AgentRunStart], { cursor: string }>;
+	/** Streams a run's events to a viewer. */
+	watch: ServiceFn<[AgentRunWatch], undefined>;
+};
 
 export type DefineRoutineOptions<Key extends string> = {
 	/** Stable key, unique within the agent, using lowercase letters, numbers and single hyphens. */

@@ -2,6 +2,7 @@ import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { describe, expect, test, vi } from "vitest";
 import z from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
+import type { AgentRunnerInstance } from "../agent/types.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
 import type { DatabaseConnection } from "../db/types.js";
@@ -235,6 +236,36 @@ describe("createLucidHost database ownership", () => {
 
 		await host.destroy();
 		expect(queue.lifecycle?.destroy).toHaveBeenCalledOnce();
+	});
+
+	test.each([
+		{ overridden: false, expected: "runtime" },
+		{ overridden: true, expected: null },
+	])("uses the runtime's agent runner unless an override replaces it (overridden: $overridden)", async ({
+		overridden,
+		expected,
+	}) => {
+		const fixture = createFixture();
+		const agentRunner: AgentRunnerInstance = {
+			type: "agent-runner",
+			key: "runtime",
+			start: vi.fn(),
+			watch: vi.fn(),
+		};
+		const host = await createLucidHost({
+			definition: fixture.definition,
+			runtimeContext,
+			databaseScope: "runtime",
+			adapterDefaults: { agentRunner },
+			//* commands' task servers run agent runs in place
+			adapterOverrides: overridden ? { agentRunner: null } : undefined,
+		});
+
+		const context = await host.createInvocation().getServiceContext();
+
+		expect(context.agentRunner?.key ?? null).toBe(expected);
+
+		await host.destroy();
 	});
 
 	test("uses the host environment for a runtime-scoped connection", async () => {

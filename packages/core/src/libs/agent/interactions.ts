@@ -115,6 +115,11 @@ export const answerInteraction = (
 	if (!checkpoint.pending) return;
 	const { widget } = checkpoint.pending;
 	checkpoint.pending.answer = answer;
+	checkpoint.answered = {
+		interactionId: widget.interaction.id,
+		userId,
+		action: answer.action,
+	};
 	widget.interaction.answeredByUserId = userId;
 	widget.interaction =
 		answer.action === "cancel"

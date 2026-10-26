@@ -24,11 +24,16 @@ import {
 	savedStreamCursor,
 	startRunStream,
 } from "../../libs/agent/run-stream.js";
-import type { Checkpoint, ModelUsage } from "../../libs/agent/types.js";
+import type {
+	AgentRunnerInstance,
+	Checkpoint,
+	ModelUsage,
+} from "../../libs/agent/types.js";
 import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
 import { streamRun } from "../../libs/http/utils/agent-stream-events.js";
 import * as httpServiceContext from "../../libs/http/utils/create-service-context.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
+import { getJobDefinitionRuntime } from "../../libs/jobs/registry.js";
 import logger from "../../libs/logger/index.js";
 import { aiAccessFeatureSchema } from "../../libs/lucid-remote/schema/connection.js";
 import type { AnyNotificationDefinition } from "../../libs/notifications/types.js";
@@ -66,15 +71,18 @@ import getMessages from "./get-messages.js";
 import getRoutine from "./get-routine.js";
 import advanceInputs from "./helpers/advance-inputs.js";
 import enqueueRun from "./helpers/enqueue-run.js";
+import executeHostedRun from "./helpers/execute-hosted-run.js";
 import getInputs from "./helpers/get-inputs.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import resolveRunSetup from "./helpers/resolve-run-setup.js";
 import startRun from "./helpers/start-run.js";
 import streamModelTurn from "./helpers/stream-model-turn.js";
+import { executeAgentRunJob } from "./jobs/execute-run.js";
 import { inputNeededNotification } from "./notifications/input-needed.js";
 import { agentNotificationKeys } from "./notifications/keys.js";
 import { routineNeedsReviewNotification } from "./notifications/routine-needs-review.js";
 import notifyWaitingRuns from "./notify-waiting-runs.js";
+import recoverRuns from "./recover-runs.js";
 import retryConversation from "./retry-conversation.js";
 import submitInput from "./submit-input.js";
 import updateConversation from "./update-conversation.js";
@@ -507,6 +515,12 @@ const prepare = async (props?: {
 		requestId,
 	};
 };
+const withRunner = (
+	runner: Pick<AgentRunnerInstance, "start" | "watch">,
+): ServiceContext => ({
+	...context,
+	agentRunner: { type: "agent-runner", key: "test", ...runner },
+});
 const reply = (text: string) =>
 	model.mockImplementationOnce(async (_ctx, input) => {
 		await input.emit(start());
@@ -2564,6 +2578,282 @@ describe("agent runner", () => {
 		expect(tasks).toHaveLength(1);
 	});
 
+	test("an agent runner executes a streamed run and serves its viewer the runner's events", async () => {
+		const prepared = await prepare();
+		const hostStart = vi.fn<AgentRunnerInstance["start"]>(async () => ({
+			error: undefined,
+			data: { cursor: "live:hosted:0" },
+		}));
+		const hostWatch = vi.fn<AgentRunnerInstance["watch"]>(
+			async (_context, input) => {
+				await input.emit(
+					{ type: "finish", runId: input.runId, status: "completed" },
+					"live:hosted:1",
+				);
+				return { error: undefined, data: undefined };
+			},
+		);
+		const hosted = withRunner({ start: hostStart, watch: hostWatch });
+		vi.spyOn(httpServiceContext, "default").mockReturnValue(hosted);
+		const tasks: Promise<unknown>[] = [];
+		const app = new Hono<LucidHonoGeneric>();
+		app.post("/run", (c) => {
+			c.set("ctx", {
+				waitUntil: (task) => {
+					tasks.push(task);
+				},
+			});
+			return streamRun(c, hosted, { runId: prepared.runId });
+		});
+
+		const response = await app.request("/run", { method: "POST" });
+		expect(response.headers.get("X-Lucid-Agent-Run-ID")).toBe(prepared.runId);
+		expect(await response.text()).toContain("id: live:hosted:1");
+		expect(hostStart).toHaveBeenCalledWith(hosted, { runId: prepared.runId });
+		expect(hostWatch).toHaveBeenCalledWith(
+			hosted,
+			expect.objectContaining({
+				runId: prepared.runId,
+				cursor: "live:hosted:0",
+			}),
+		);
+		expect(model).not.toHaveBeenCalled();
+		expect(tasks).toHaveLength(0);
+	});
+
+	test.each([
+		{ status: 503, terminal: false },
+		{ status: 404, terminal: true },
+	])("a viewer's watch that fails with $status ends with an error event: $terminal", async ({
+		status,
+		terminal,
+	}) => {
+		const prepared = await prepare();
+		const hosted = withRunner({
+			start: async () => ({
+				error: undefined,
+				data: { cursor: "live:hosted:0" },
+			}),
+			watch: async () => ({
+				data: undefined,
+				error: {
+					type: "basic",
+					status,
+					message: copy.literal("Unavailable"),
+				},
+			}),
+		});
+		vi.spyOn(httpServiceContext, "default").mockReturnValue(hosted);
+		const app = new Hono<LucidHonoGeneric>();
+		app.post("/run", (c) => streamRun(c, hosted, { runId: prepared.runId }));
+
+		const response = await app.request("/run", { method: "POST" });
+
+		//* without an error event, the client reconnects to a run that may still recover
+		expect((await response.text()).includes('"type":"error"')).toBe(terminal);
+	});
+
+	test("recovery returns a run stopped before its question was answered to waiting, so the answer can continue it", async () => {
+		const prepared = await prepare();
+		callTool({ id: "unanswered", name: confirmationTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		//* an answer's slice claimed the run, then stopped before saving the answer
+		await new AgentRunsRepository(context.db).transition({
+			runId: prepared.runId,
+			from: ["waiting"],
+			status: "interrupted",
+			now: new Date().toISOString(),
+		});
+
+		await recoverRuns(context);
+
+		expect((await selectRun(prepared.runId))?.status).toBe("waiting");
+		expect(
+			vi
+				.mocked(enqueueRun)
+				.mock.calls.some(([, input]) => input.runId === prepared.runId),
+		).toBe(false);
+
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: {},
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+	});
+
+	test.each([
+		{ response: { value: "one" }, handed: true },
+		{ response: { value: 1 }, handed: false },
+	])("an agent runner is only handed an answer the run accepts, so a rejected one can't replace another (handed: $handed)", async ({
+		response,
+		handed,
+	}) => {
+		const prepared = await prepare();
+		callTool({ id: "step-write", name: stepWriteTool.name, input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		const hostStart = vi.fn<AgentRunnerInstance["start"]>(async () => ({
+			error: undefined,
+			data: { cursor: "live:hosted:0" },
+		}));
+		const hosted = withRunner({
+			start: hostStart,
+			watch: async () => ({ error: undefined, data: undefined }),
+		});
+		vi.spyOn(httpServiceContext, "default").mockReturnValue(hosted);
+		const answer = {
+			interactionId: await interactionId(prepared.conversationId),
+			action: "submit" as const,
+			response,
+			userId,
+		};
+		const app = new Hono<LucidHonoGeneric>();
+		app.post("/run", (c) =>
+			streamRun(c, hosted, { runId: prepared.runId, answer }),
+		);
+
+		const sent = await app.request("/run", { method: "POST" });
+
+		expect(sent.ok).toBe(handed);
+		expect(hostStart).toHaveBeenCalledTimes(handed ? 1 : 0);
+	});
+
+	test("the run job hands its run to the agent runner, answering as a submission", async () => {
+		const prepared = await prepare();
+		const runId = prepared.runId;
+		callTool({ id: "step-write", name: stepWriteTool.name, input: {} });
+		await executeRun(context, { runId });
+		model.mockClear();
+		const hostStart = vi.fn<AgentRunnerInstance["start"]>(async () => ({
+			error: undefined,
+			data: { cursor: "live:hosted:0" },
+		}));
+		const hosted = withRunner({
+			start: hostStart,
+			watch: async () => ({ error: undefined, data: undefined }),
+		});
+		const answer = {
+			interactionId: await interactionId(prepared.conversationId),
+			response: { value: "one" },
+			userId,
+		};
+
+		const result = await getJobDefinitionRuntime(executeAgentRunJob).execute(
+			hosted,
+			{ runId, answer },
+			{
+				jobId: randomUUID(),
+				attempt: 1,
+				maxAttempts: 1,
+				trigger: { type: "enqueue" },
+				signal: new AbortController().signal,
+			},
+		);
+		expect(result).toMatchObject({ type: "success" });
+		expect(hostStart).toHaveBeenCalledWith(hosted, {
+			runId,
+			answer: { ...answer, action: "submit" },
+		});
+		expect(model).not.toHaveBeenCalled();
+	});
+
+	test("a hosted slice publishes to the stream its host opened, so its starter follows it from the first event", async () => {
+		const prepared = await prepare();
+		reply("Hosted reply.");
+		const opened = startRunStream(context.config, prepared.runId);
+
+		await executeHostedRun(context, { runId: prepared.runId });
+		expect((await selectRun(prepared.runId))?.status).toBe("completed");
+		expect(findRunStream(context.config, prepared.runId)).toBe(opened);
+		expect(
+			opened.read(opened.initialCursor)?.map((entry) => entry.event),
+		).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					type: "text-delta",
+					text: "Hosted reply.",
+				}),
+				expect.objectContaining({ type: "finish", status: "completed" }),
+			]),
+		);
+	});
+
+	test.each([
+		{
+			stop: "a server failure",
+			retried: true,
+			arrange: async () => {
+				vi.spyOn(
+					AgentRunsRepository.prototype,
+					"selectForExecution",
+				).mockResolvedValueOnce({
+					data: undefined,
+					error: {
+						type: "basic",
+						status: 500,
+						message: copy.literal("Database unavailable"),
+					},
+				});
+			},
+		},
+		{
+			stop: "another worker's lease",
+			retried: true,
+			arrange: async (runId: string) => {
+				const Runs = new AgentRunsRepository(context.db);
+				const run = await Runs.selectSingle({
+					select: ["execution_version"],
+					where: [{ key: "id", operator: "=", value: runId }],
+				});
+				await Runs.claimExecution({
+					runId,
+					token: randomUUID(),
+					expectedVersion: run.data?.execution_version ?? 0,
+					now: new Date().toISOString(),
+					leaseExpiresAt: new Date(Date.now() + 60_000).toISOString(),
+				});
+			},
+		},
+		{
+			stop: "a missing answer",
+			retried: false,
+			arrange: async (runId: string) => {
+				callTool({ id: "unanswered", name: confirmationTool.name, input: {} });
+				await executeRun(context, { runId });
+			},
+		},
+	])("a hosted slice stopped by $stop rejects for its host to retry: $retried", async ({
+		retried,
+		arrange,
+	}) => {
+		const prepared = await prepare();
+		await arrange(prepared.runId);
+		const opened = startRunStream(context.config, prepared.runId);
+
+		const hosted = executeHostedRun(context, { runId: prepared.runId });
+
+		if (retried) {
+			await expect(hosted).rejects.toThrow();
+		} else {
+			await hosted;
+		}
+		//* a retried slice leaves its viewers following the run, rather than ending their stream with an error
+		expect(
+			opened
+				.read(opened.initialCursor)
+				?.some((entry) => entry.event.type === "error"),
+		).toBe(!retried);
+		expect(opened.active).toBe(false);
+	});
+
 	test("a saved cursor resumes updates to earlier messages even when timestamps match", async () => {
 		const prepared = await prepare();
 		const Messages = new AgentMessagesRepository(context.db);
@@ -4582,6 +4872,43 @@ describe("interactive tools", () => {
 				status: "complete",
 			}),
 		);
+	});
+
+	test.each([
+		{ stop: "before its tool runs", event: "widget", ran: false },
+		{ stop: "after its tool runs", event: "start", ran: true },
+	])("a retry that resubmits a saved answer carries on without answering again, when the slice stopped $stop", async ({
+		event: stopAt,
+		ran,
+	}) => {
+		const prepared = await prepare();
+		callTool({ id: "saved-answer", name: confirmationTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		const answer = {
+			interactionId: await interactionId(prepared.conversationId),
+			action: "submit" as const,
+			response: {},
+			userId,
+		};
+
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer,
+				emit: async (event) => {
+					if (event.type === stopAt) throw new Error("Stopped");
+				},
+			}),
+		).toMatchObject({ data: { status: "interrupted" } });
+		expect(writeHandler).toHaveBeenCalledTimes(ran ? 1 : 0);
+
+		reply("Done");
+		expect(
+			await executeRun(context, { runId: prepared.runId, answer }),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(writeHandler).toHaveBeenCalledOnce();
 	});
 
 	test("a write that asks again isn't treated as interrupted when the person answers", async () => {

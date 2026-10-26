@@ -3,7 +3,10 @@ import path from "node:path";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { buildModuleId } from "@lucidcms/core/build";
 import type { RuntimeViteIntegration } from "@lucidcms/core/vite";
-import constants, { DEFAULT_COMPATIBILITY_DATE } from "./constants.js";
+import constants, {
+	AGENT_RUNS_EXPORT,
+	DEFAULT_COMPATIBILITY_DATE,
+} from "./constants.js";
 import assetHeadersPlugin from "./services/asset-headers-plugin.js";
 import createWorkerConfig from "./services/create-worker-config.js";
 import getWorkerSecrets from "./services/get-worker-secrets.js";
@@ -31,10 +34,11 @@ const cloudflareVite: RuntimeViteIntegration<CloudflareRuntimeAdapter> = {
 		// for `lucidcms serve` are only previewed locally.
 		let deploy = false;
 		const entrySource = `import build from "${buildModuleId}";
-import { createWorker } from "@lucidcms/runtime-cloudflare/entry";
+import { createAgentRuns, createWorker } from "@lucidcms/runtime-cloudflare/entry";
 ${handlers.imports}
 
 export default createWorker(build, ${handlers.handlers});
+export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 `;
 
 		return [

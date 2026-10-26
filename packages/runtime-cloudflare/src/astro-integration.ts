@@ -3,7 +3,7 @@ import path from "node:path";
 import type { LucidAstroIntegrationBridge } from "@lucidcms/astro/types";
 import { LucidError } from "@lucidcms/core/runtime";
 import type { Plugin } from "vite";
-import constants from "./constants.js";
+import constants, { AGENT_RUNS_EXPORT } from "./constants.js";
 import assetHeadersPlugin from "./services/asset-headers-plugin.js";
 import inspectorPortLogsPlugin from "./services/inspector-port-logs-plugin.js";
 import listOptimizeEntries from "./services/list-optimize-entries.js";
@@ -21,7 +21,7 @@ const cloudflareAstroIntegration = {
 			});
 		}
 	},
-	/** Supplies Astro Vite settings that serve `withLucid`'s Worker entry from `cloudflare.config.ts` for Astro's Cloudflare adapter, adding Lucid's scheduler, plugin handlers and asset caching through `_headers`. */
+	/** Supplies Astro Vite settings that serve `withLucid`'s Worker entry from `cloudflare.config.ts` for Astro's Cloudflare adapter, adding Lucid's scheduler, plugin handlers, agent run Durable Object and asset caching through `_headers`. */
 	vite(props) {
 		if (
 			!existsSync(path.join(props.project.projectRoot, constants.CONFIG_FILE))
@@ -43,10 +43,12 @@ const cloudflareAstroIntegration = {
 				filter: { id: /^\0virtual:lucid\/astro-worker$/ },
 				handler: () => `import { handle } from "@astrojs/cloudflare/handler";
 import { createAstroWorker } from "@lucidcms/runtime-cloudflare/astro";
+import { createAstroAgentRuns } from "@lucidcms/runtime-cloudflare/entry";
 import { createLucidInvocation } from ${JSON.stringify(props.runtimeModuleId)};
 ${handlers.imports}
 
 export default createAstroWorker({ fetch: handle, createLucidInvocation }, ${handlers.handlers});
+export const ${AGENT_RUNS_EXPORT} = createAstroAgentRuns({ createLucidInvocation });
 `,
 			},
 		};
@@ -61,6 +63,7 @@ export default createAstroWorker({ fetch: handle, createLucidInvocation }, ${han
 					entries: listOptimizeEntries(props.project, [
 						"@astrojs/cloudflare/handler",
 						"@lucidcms/runtime-cloudflare/astro",
+						"@lucidcms/runtime-cloudflare/entry",
 						...handlers.modules,
 					]),
 					// Late optimization restarts the Worker while its initial modules are loading.

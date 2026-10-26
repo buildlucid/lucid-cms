@@ -133,6 +133,7 @@ const createApp = async (props: {
 			c.set("mediaStorage", props.adapters.mediaStorage);
 			c.set("mediaDelivery", props.adapters.mediaDelivery);
 			c.set("email", props.adapters.email);
+			c.set("agentRunner", props.adapters.agentRunner);
 			c.set("env", invocation.env ?? null);
 			c.set("cf", c.get("cf") ?? null);
 			c.set("caches", c.get("caches") ?? null);

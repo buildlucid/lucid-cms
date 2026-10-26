@@ -2,7 +2,8 @@ import type { z } from "zod";
 import { normalizeCopy } from "../i18n/index.js";
 import type { AdminCopyInput } from "../i18n/types.js";
 
-export const toolDefinitionInternal = Symbol(
+/** Registered symbol recognizing tool definitions across core copies, including copies evaluated by config loaders. */
+export const toolDefinitionInternal = Symbol.for(
 	"@lucidcms/core/tool-definition-internal",
 );
 

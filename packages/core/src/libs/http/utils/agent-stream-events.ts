@@ -1,20 +1,20 @@
 import type { AgentStreamEvent } from "@lucidcms/types";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
+import resolveSliceStart from "../../../services/agent/helpers/resolve-slice-start.js";
 import { agentServices } from "../../../services/index.js";
 import type { LucidHonoGeneric } from "../../../types/hono.js";
+import { LucidAPIError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import { startRunStream } from "../../agent/run-stream.js";
+import type { AgentRunStart } from "../../agent/types.js";
 import createServiceContext from "./create-service-context.js";
 
-/**
- * Streams agent events as server-sent events. The signal aborts when the client
- * disconnects. It controls the viewer, independently of the executing run.
- */
+/** Streams agent SSE with a disconnect signal scoped to the viewer, ending with an error event only for failures the client cannot recover from. */
 const streamEvents = (
 	c: Context<LucidHonoGeneric>,
 	run: (props: {
@@ -40,7 +40,13 @@ const streamEvents = (
 					await stream.writeSSE({ data, id }).catch(() => disconnect.abort());
 				},
 			});
-			if (result.error && !disconnect.signal.aborted) {
+			//* a server failure, such as a lost database connection, ends the stream without an error so the client
+			//* reconnects, since the run itself may still recover
+			if (
+				result.error &&
+				(result.error.status ?? 500) < 500 &&
+				!disconnect.signal.aborted
+			) {
 				const event: AgentStreamEvent = {
 					type: "error",
 					message: context.translate(result.error.message) ?? "",
@@ -57,15 +63,35 @@ const streamEvents = (
 	return response;
 };
 
-/** Owns execution for this invocation; viewers can leave and reconnect without cancelling it. */
-export const streamRun = (
+/** Starts and streams a run through the runtime's agent runner or this invocation, keeping execution independent of viewers leaving and reconnecting. */
+export const streamRun = async (
 	c: Context<LucidHonoGeneric>,
 	context: ServiceContext,
-	input: Omit<
-		Parameters<typeof agentServices.executeRun>[1],
-		"signal" | "emit" | "stream"
-	>,
+	input: AgentRunStart,
 ) => {
+	const runner = context.agentRunner;
+	if (runner) {
+		//* the runner holds an answer until its slice runs, so it's checked first, as running in place would
+		if (input.answer) {
+			const checked = await resolveSliceStart(context, input);
+			if (checked.error) throw new LucidAPIError(checked.error);
+		}
+
+		const started = await runner.start(context, input);
+		if (started.error) throw new LucidAPIError(started.error);
+		c.header("X-Lucid-Agent-Run-ID", input.runId);
+
+		return streamEvents(c, (viewer) =>
+			serviceWrapper(runner.watch, {
+				transaction: false,
+			})(context, {
+				runId: input.runId,
+				cursor: started.data.cursor,
+				...viewer,
+			}),
+		);
+	}
+
 	const stream = startRunStream(context.config, input.runId);
 
 	const execution = serviceWrapper(agentServices.executeRun, {

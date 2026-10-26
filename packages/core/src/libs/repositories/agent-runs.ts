@@ -269,7 +269,14 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 	async selectRecoverable(props: { staleBefore: string; limit: number }) {
 		const query = this.db
 			.selectFrom("lucid_agent_runs")
-			.select(["id", "conversation_id", "routine_id", "user_id", "recoveries"])
+			.select([
+				"id",
+				"conversation_id",
+				"routine_id",
+				"user_id",
+				"recoveries",
+				"checkpoint",
+			])
 			.where((eb) =>
 				eb.or([
 					eb("status", "=", "interrupted"),

@@ -1,7 +1,7 @@
 import type { WorkerConfig } from "@cloudflare/config";
 
 /**
- * Adds Lucid's entry, scheduler, plugin handlers, cron and queue triggers, bindings and secrets to the Worker read exclusively from `cloudflare.config.ts` by Astro's Cloudflare adapter, preserving existing settings and bindings.
+ * Adds Lucid's entry, scheduler, plugin handlers, agent run Durable Object, cron and queue triggers, bindings and secrets to the Worker read exclusively from `cloudflare.config.ts` by Astro's Cloudflare adapter, preserving existing settings and bindings.
  *
  * @example
  * ```ts

@@ -39,6 +39,7 @@ const resolveLucidWorker = async (
 			...(worker.compatibilityFlags ?? []),
 		],
 		env: { ...lucid.env, ...worker.env },
+		exports: { ...lucid.exports, ...worker.exports },
 		triggers: [...(lucid.triggers ?? []), ...(worker.triggers ?? [])],
 	};
 };

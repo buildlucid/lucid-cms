@@ -122,7 +122,7 @@ export const agentTitleStatusSchema = z.enum([
 	"user_set",
 ]) satisfies z.ZodType<AgentTitleStatus>;
 
-const agentInteractionActionSchema = z.enum([
+export const agentInteractionActionSchema = z.enum([
 	"submit",
 	"cancel",
 ]) satisfies z.ZodType<AgentInteractionAction>;

@@ -1,6 +1,5 @@
 import {
 	createAdminDocumentExtension,
-	createLucidHost,
 	handleDevTask,
 	handleHostRequest,
 	shouldServeAdminShell,
@@ -10,13 +9,13 @@ import type {
 	HttpExtension,
 	LucidBuild,
 } from "@lucidcms/core/types";
+import type { createAstroWorker } from "./astro.js";
 import constants from "./constants.js";
+import createAgentRunObject from "./services/create-agent-run-object.js";
+import createHostGetter from "./services/create-host-getter.js";
 import createScheduledHandler from "./services/create-scheduled-handler.js";
-import getRuntimeContext from "./services/get-runtime-context.js";
 import platformContextExtension from "./services/platform-context-extension.js";
-import getOrCreateRuntimeHost, {
-	runtimeHostKeys,
-} from "./services/runtime-host.js";
+import { runtimeHostKeys } from "./services/runtime-host.js";
 import wrapWorkerHandlers from "./services/wrap-worker-handlers.js";
 import type {
 	CloudflareExecutionContext,
@@ -57,10 +56,7 @@ export const createWorker = (
 	build: LucidBuild,
 	handlers: Record<string, CloudflareWorkerHandler> = {},
 ) => {
-	const runtimeContext = getRuntimeContext({
-		compiled: build.dev === undefined,
-		pluginModules: build.pluginModules,
-	});
+	const getHost = createHostGetter(build);
 
 	const httpExtensions = [
 		platformContextExtension,
@@ -68,25 +64,6 @@ export const createWorker = (
 			? createAdminDocumentExtension(build.admin.html)
 			: adminShellExtension,
 	];
-
-	const getHost = (
-		key: string,
-		env: EnvironmentVariables,
-		ctx: CloudflareExecutionContext,
-		extensions?: HttpExtension[],
-	) =>
-		getOrCreateRuntimeHost(
-			key,
-			() =>
-				createLucidHost({
-					...build.host,
-					env,
-					runtimeContext,
-					databaseScope: "invocation",
-					http: extensions ? { extensions } : undefined,
-				}),
-			(promise) => ctx.waitUntil(promise),
-		);
 
 	const createBackgroundInvocation = async (
 		env: EnvironmentVariables,
@@ -129,3 +106,26 @@ export const createWorker = (
 		scheduled: createScheduledHandler(createBackgroundInvocation),
 	};
 };
+
+/** Creates the generated project Worker's agent run Durable Object class, which shares the Worker's Lucid host. */
+export const createAgentRuns = (build: LucidBuild) => {
+	const getHost = createHostGetter(build);
+
+	return createAgentRunObject(async (env, ctx) => {
+		const host = await getHost(runtimeHostKeys.background, env, ctx);
+		return host.createInvocation({ env });
+	});
+};
+
+/** Creates the agent run Durable Object class for Lucid's Astro Worker entry, which shares Lucid's Astro host. */
+export const createAstroAgentRuns = (options: {
+	createLucidInvocation: Parameters<
+		typeof createAstroWorker
+	>[0]["createLucidInvocation"];
+}) =>
+	createAgentRunObject(async (env, ctx) => {
+		const { invocation } = await options.createLucidInvocation({
+			runtime: { env, ctx },
+		});
+		return invocation;
+	});

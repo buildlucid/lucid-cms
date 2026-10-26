@@ -1,7 +1,10 @@
 import type { WorkerConfig } from "@cloudflare/config";
 import type { PluginConfig } from "@cloudflare/vite-plugin";
 import type { RuntimeArtifactCustom } from "@lucidcms/core/types";
-import constants from "../constants.js";
+import constants, {
+	AGENT_RUNS_BINDING,
+	AGENT_RUNS_EXPORT,
+} from "../constants.js";
 import type { AdapterOptions } from "../types.js";
 import {
 	mergeCloudflareBindings,
@@ -16,13 +19,18 @@ export type EntryWorkerConfig = Exclude<
 	(...args: never[]) => unknown
 >;
 type WorkerEnv = NonNullable<EntryWorkerConfig["env"]>;
+/** The Durable Object exports Lucid declares, which suit both the Vite plugin's config and `cloudflare.config.ts`. */
+type LucidExports = Record<
+	string,
+	{ type: "durable-object"; storage: "sqlite" }
+>;
 type WorkerTriggers = NonNullable<EntryWorkerConfig["triggers"]>;
 type LucidTrigger = Extract<
 	WorkerTriggers[number],
 	{ type: "scheduled" | "queue" }
 >;
 
-/** Adds Lucid's Worker entry, Node.js compatibility, admin assets, scheduler, queue consumers, bindings and secrets (`.dev.vars` or `.env` locally), preserving declared bindings, flags, triggers and queue names while `--remote` connects declared Lucid resources. */
+/** Adds Lucid's Worker entry, Node.js compatibility, admin assets, scheduler, queue consumers, agent run Durable Object, bindings and secrets (`.dev.vars` or `.env` locally), preserving declared bindings, exports, flags, triggers and queue names while `--remote` connects declared Lucid resources. */
 const createWorkerConfig = (props: {
 	name: string;
 	compatibilityDate: string;
@@ -32,10 +40,12 @@ const createWorkerConfig = (props: {
 	/** Env variable names to declare as secrets, which Cloudflare requires at deploy. */
 	secrets: string[];
 	/** The Worker's own settings, from `cloudflare.config.ts` or the Cloudflare plugin's defaults. */
-	worker?: Pick<WorkerConfig, "env" | "compatibilityFlags" | "triggers">;
+	worker?: Pick<WorkerConfig, "env" | "compatibilityFlags" | "triggers"> & {
+		exports?: Record<string, unknown>;
+	};
 	/** Connects Lucid's bindings to their deployed resources during development, for `--remote`. */
 	remote?: boolean;
-}): EntryWorkerConfig => {
+}): Omit<EntryWorkerConfig, "exports"> & { exports: LucidExports } => {
 	const dev = props.remote ? { dev: { remote: true } } : {};
 	const bindings = normalizeCloudflareBindings(
 		mergeCloudflareBindings(
@@ -80,6 +90,17 @@ const createWorkerConfig = (props: {
 	addTrigger({ type: "scheduled", schedule: constants.JOB_SCHEDULER_CRON });
 	for (const name of props.secrets) addBinding(name, { type: "secret" });
 	addBinding(constants.ASSETS_BINDING, { type: "assets" });
+
+	//* Always declare the agent run Durable Object so removing agents never requires a deleted export.
+	const exports: LucidExports = {};
+	addBinding(AGENT_RUNS_BINDING, {
+		type: "durable-object",
+		worker: props.name,
+		exportName: AGENT_RUNS_EXPORT,
+	});
+	if (!props.worker?.exports?.[AGENT_RUNS_EXPORT]) {
+		exports[AGENT_RUNS_EXPORT] = { type: "durable-object", storage: "sqlite" };
+	}
 
 	if (bindings.kv) {
 		addBinding(bindings.kv.binding, {
@@ -138,6 +159,7 @@ const createWorkerConfig = (props: {
 		).filter((flag) => !props.worker?.compatibilityFlags?.includes(flag)),
 		entrypoint: props.entrypoint,
 		env,
+		exports,
 		triggers,
 	};
 };

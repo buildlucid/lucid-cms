@@ -33,6 +33,7 @@
 - Fixed migrations failing after removing a plugin that had its own migrations. They are now skipped with a warning, and their tables are left in place.
 - Fixed checkbox fields ignoring their `default` when a value is missing.
 - Fixed content API responses including personal and system media referenced by document fields. They are now left out by the media query itself.
+- Fixed wrapped service errors dropping their `key`.
 
 ## v0.19.0-alpha.0
 

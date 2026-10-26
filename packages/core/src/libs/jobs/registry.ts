@@ -1,8 +1,8 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AnyJobDefinition } from "./types.js";
 
-/** Marks a job definition and keeps its runtime handlers out of public fields. */
-export const jobDefinitionInternal = Symbol(
+/** Registered symbol that identifies job definitions across core copies, including copies evaluated by config loaders, while keeping runtime handlers out of public fields. */
+export const jobDefinitionInternal = Symbol.for(
 	"@lucidcms/core/job-definition-internal",
 );
 

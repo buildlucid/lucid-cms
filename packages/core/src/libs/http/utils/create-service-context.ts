@@ -34,6 +34,7 @@ const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 		mediaStorage: c.get("mediaStorage"),
 		mediaDelivery: c.get("mediaDelivery"),
 		email: c.get("email"),
+		agentRunner: c.get("agentRunner"),
 		translate: createTranslator({ store: c.get("translationStore"), locale }),
 		request,
 	};

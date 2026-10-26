@@ -23,6 +23,10 @@ export type {
 	AgentFeatureOptions,
 	AgentFeatures,
 	AgentMediaGenerateOptions,
+	AgentRunAnswer,
+	AgentRunnerInstance,
+	AgentRunStart,
+	AgentRunWatch,
 	DefineAgentOptions,
 	DefineRoutineOptions,
 	RoutineDefinition,
@@ -483,6 +487,7 @@ export type {
 } from "../libs/resources/types.js";
 export type {
 	CreateLucidAdaptersOptions,
+	LucidAdapterDefaults,
 	LucidAdapterInstances,
 	LucidAdapterOverrides,
 	LucidAdapters,

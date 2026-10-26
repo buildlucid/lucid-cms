@@ -1,3 +1,4 @@
+import type { AgentRunnerInstance } from "../../libs/agent/types.js";
 import type LucidDatabase from "../../libs/db/client/lucid-database.js";
 import type { DatabaseConnection } from "../../libs/db/types.js";
 import type { EmailAdapterInstance } from "../../libs/email/types.js";
@@ -37,6 +38,8 @@ export type CreateServiceContextOptions = {
 	mediaDelivery?: MediaDeliveryAdapterInstance;
 	/** Optional initialized email adapter instance available to services. */
 	email?: EmailAdapterInstance;
+	/** Runtime-supplied agent runner, with omitted or `null` values selecting inline execution. */
+	agentRunner?: AgentRunnerInstance | null;
 	/** Request metadata, with omitted URLs falling back to `config.urls.cms` or the local Lucid URL. */
 	request?: {
 		url?: string;
@@ -55,6 +58,8 @@ export type ServiceContext = {
 	mediaStorage: MediaStorageAdapterInstance | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
+	/** Executes agent runs beyond the initiating request or job, with `null` selecting inline execution. */
+	agentRunner: AgentRunnerInstance | null;
 	translate: Translator;
 	request: {
 		/** The request URL, used to derive the base URL when `config.urls.cms` is unset. */

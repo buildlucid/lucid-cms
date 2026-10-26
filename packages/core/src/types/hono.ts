@@ -5,6 +5,7 @@ import type {
 	ResolvedLucidConfig,
 	UserPermission,
 } from "../exports/types.js";
+import type { AgentRunnerInstance } from "../libs/agent/types.js";
 import type LucidDatabase from "../libs/db/client/lucid-database.js";
 import type { EmailAdapterInstance } from "../libs/email/types.js";
 import type { TranslationStore } from "../libs/i18n/types.js";
@@ -102,6 +103,7 @@ export type LucidHonoVariables = {
 	mediaStorage: MediaStorageAdapterInstance | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
+	agentRunner: AgentRunnerInstance | null;
 	requestId: string;
 	auth: LucidAuth;
 	externalAuth: LucidExternalAuth;

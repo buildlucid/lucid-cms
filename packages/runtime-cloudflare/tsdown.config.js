@@ -17,7 +17,8 @@ export default defineConfig({
 	clean: true,
 	metafile: true,
 	deps: {
-		// The Astro bridges only check their types against Lucid's Astro integration, which is what loads them.
-		neverBundle: [/^@lucidcms\/astro\//],
+		// The Astro bridges only check their types against Lucid's Astro integration, which is what loads them. Workers
+		// provide `cloudflare:workers` at runtime.
+		neverBundle: [/^@lucidcms\/astro\//, "cloudflare:workers"],
 	},
 });

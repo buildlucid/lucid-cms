@@ -9,6 +9,12 @@ export const DEFAULT_KV_BINDING = "LUCID_KV";
 export const DEFAULT_R2_BINDING = "LUCID_MEDIA_BUCKET";
 export const DEFAULT_QUEUE_BINDING = "LUCID_QUEUE";
 export const DEFAULT_IMAGES_BINDING = "LUCID_IMAGES";
+/** The agent runner the Cloudflare runtime supplies, which executes each run in a Durable Object. */
+export const AGENT_RUNNER_KEY = "cloudflare-durable-object";
+/** The Durable Object binding that executes agent runs, one object per run. */
+export const AGENT_RUNS_BINDING = "LUCID_AGENT_RUNS";
+/** The Worker entry's export name for the agent run Durable Object class. */
+export const AGENT_RUNS_EXPORT = "LucidAgentRuns";
 /** Latest Cloudflare compatibility date validated against this runtime. */
 export const DEFAULT_COMPATIBILITY_DATE = "2026-06-30";
 

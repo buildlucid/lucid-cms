@@ -47,8 +47,11 @@ const watchRunController = factory.createHandlers(
 		if (run.error) throw new LucidAPIError(run.error);
 		c.header("X-Lucid-Agent-Run-ID", run.data.id);
 
+		//* An agent runner executes runs, so it also holds their live events
+		const watch = context.agentRunner?.watch ?? agentServices.watchRun;
+
 		return streamEvents(c, (stream) =>
-			serviceWrapper(agentServices.watchRun, {
+			serviceWrapper(watch, {
 				transaction: false,
 				defaultError: {
 					type: "basic",

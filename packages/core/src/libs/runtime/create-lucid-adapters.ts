@@ -1,5 +1,6 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
+import type { AgentRunnerInstance } from "../agent/types.js";
 import {
 	destroyEmailAdapter,
 	getInitializedEmailAdapter,
@@ -31,10 +32,17 @@ export type LucidAdapterInstances = {
 	mediaStorage: MediaStorageAdapterInstance | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
+	/** Runtime-supplied runner, with `null` selecting inline execution. */
+	agentRunner: AgentRunnerInstance | null;
 };
 
 /** Adapter instances to use instead of their configured equivalents. */
 export type LucidAdapterOverrides = Partial<LucidAdapterInstances>;
+
+/** Adapter instances a runtime supplies where config has no option for them, which overrides still replace. */
+export type LucidAdapterDefaults = Partial<
+	Pick<LucidAdapterInstances, "agentRunner">
+>;
 
 /** Options for initializing Lucid's configured adapters. */
 export type CreateLucidAdaptersOptions = {
@@ -42,6 +50,7 @@ export type CreateLucidAdaptersOptions = {
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
 	overrides?: LucidAdapterOverrides;
+	defaults?: LucidAdapterDefaults;
 };
 
 /** Initialized adapter instances with their shared lifecycle. */
@@ -134,6 +143,9 @@ const createLucidAdapters = async (
 			mediaStorage: mediaStorage ?? null,
 			mediaDelivery,
 			email,
+			agentRunner: Object.hasOwn(options.overrides ?? {}, "agentRunner")
+				? (options.overrides?.agentRunner ?? null)
+				: (options.defaults?.agentRunner ?? null),
 		},
 		destroy: () => {
 			destroyPromise ??= destroyInstances().then(() => undefined);

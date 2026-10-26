@@ -83,6 +83,7 @@ const createAstroRuntime = (props: {
 						pluginModules: build.pluginModules,
 					},
 					databaseScope: state.databaseScope,
+					adapterDefaults: state.adapterDefaults,
 					http: {
 						extensions: [
 							...(state.http?.extensions ?? []),

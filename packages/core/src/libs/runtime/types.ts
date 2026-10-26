@@ -32,7 +32,7 @@ export type LucidBuild = {
 		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates" | "admin">;
 		/** During development, sends runtime logs to Lucid's Vite plugin to print. */
 		logger?: LoggerOverride;
-		/** In commands' task servers, an inline queue, so the configured queue's consumer doesn't process pending jobs. */
+		/** In commands' task servers, an inline queue and no agent runner, so pending jobs and agent runs finish inside the command. */
 		adapterOverrides?: LucidAdapterOverrides;
 	};
 	/** The exports of each plugin's Vite `module`, keyed by plugin. */

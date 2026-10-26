@@ -16,6 +16,7 @@ import withResponseCleanup from "../libs/runtime/with-response-cleanup.js";
 import { LucidError } from "../utils/errors/index.js";
 import createServiceContext from "../utils/services/create-service-context.js";
 
+export { startRunStream as startAgentRunStream } from "../libs/agent/run-stream.js";
 export { initializeLogger } from "../libs/logger/index.js";
 export {
 	createAdminShellResponse,
@@ -23,6 +24,8 @@ export {
 	shouldServeAdminShell,
 } from "../libs/runtime/admin.js";
 export { default as getBuildPaths } from "../libs/runtime/get-build-paths.js";
+export { default as executeHostedAgentRun } from "../services/agent/helpers/execute-hosted-run.js";
+export { default as watchAgentRun } from "../services/agent/watch-run.js";
 export {
 	createAdminDocumentExtension,
 	createHotLogTransport,

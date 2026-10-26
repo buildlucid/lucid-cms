@@ -1,5 +1,8 @@
 import type {
+	AgentRunStart,
+	AgentRunWatch,
 	EnvironmentVariables,
+	LucidErrorData,
 	LucidInvocation,
 	RuntimeAdapter,
 	RuntimeArtifactCustom,
@@ -18,6 +21,27 @@ export type CloudflareWorkerHandler<Event = unknown> = (props: {
 	ctx: CloudflareExecutionContext;
 	invocation: LucidInvocation;
 }) => Promise<void>;
+
+/** The RPC methods of the Durable Object that executes an agent run, which the Worker's agent runner calls. */
+export type AgentRunObjectStub = {
+	/** Opens the run's live stream, schedules execution through an alarm and returns its initial cursor. */
+	start(input: AgentRunStart): Promise<string>;
+	/** Streams the run's events as newline-delimited `AgentRunWatchLine` JSON. */
+	watch(
+		input: Pick<AgentRunWatch, "runId" | "cursor">,
+	): Promise<ReadableStream<Uint8Array>>;
+};
+
+/** The Durable Object namespace bound as `LUCID_AGENT_RUNS`. */
+export type AgentRunNamespace = {
+	idFromName(name: string): unknown;
+	get(id: unknown): AgentRunObjectStub;
+};
+
+/** One line of a watched run: an event with its stream cursor, or the error that ended the watch. */
+export type AgentRunWatchLine =
+	| { event: Parameters<AgentRunWatch["emit"]>[0]; id?: string }
+	| { error: LucidErrorData };
 
 /** The build artifact plugins add a Worker event handler with. */
 export type CloudflareWorkerHandlerArtifact = RuntimeArtifactCustom<{

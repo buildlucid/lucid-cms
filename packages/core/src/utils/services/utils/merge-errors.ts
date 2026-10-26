@@ -23,6 +23,7 @@ const mergeServiceError = (
 			copy("server:core.services.errors.unknown.message"),
 		status: error.status ?? defaultError?.status ?? 500,
 		code: error.code ?? defaultError?.code ?? undefined,
+		key: error.key ?? defaultError?.key ?? undefined,
 		zod: error.zod ?? undefined,
 		errors: error.errors ?? undefined,
 		cause: error.cause ?? defaultError?.cause ?? undefined,

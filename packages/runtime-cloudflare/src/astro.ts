@@ -5,6 +5,7 @@ import type {
 	LucidInvocation,
 } from "@lucidcms/core/types";
 import createScheduledHandler from "./services/create-scheduled-handler.js";
+import durableObjectAgentRunner from "./services/durable-object-agent-runner.js";
 import getRuntimeContext from "./services/get-runtime-context.js";
 import platformContextExtension from "./services/platform-context-extension.js";
 import wrapWorkerHandlers from "./services/wrap-worker-handlers.js";
@@ -56,6 +57,7 @@ const cloudflareAstroBridge = {
 		return {
 			cacheKey: "cloudflare",
 			databaseScope: "invocation" as const,
+			adapterDefaults: { agentRunner: durableObjectAgentRunner },
 			env,
 			executionContext: runtime?.ctx ?? props.context?.locals?.cfContext,
 			runtimeContext: getRuntimeContext({

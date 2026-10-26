@@ -19,6 +19,7 @@ import type { LoggerOverride } from "../logger/types.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import type { Toolkit } from "../toolkit/types.js";
 import createLucidAdapters, {
+	type LucidAdapterDefaults,
 	type LucidAdapterInstances,
 	type LucidAdapterOverrides,
 } from "./create-lucid-adapters.js";
@@ -70,6 +71,8 @@ type CreateLucidHostSharedOptions = {
 	runtimeContext: AdapterRuntimeContext;
 	/** Adapter instances to use instead of their configured equivalents. */
 	adapterOverrides?: LucidAdapterOverrides;
+	/** Adapter instances the runtime supplies, such as its agent runner, which `adapterOverrides` still replace. */
+	adapterDefaults?: LucidAdapterDefaults;
 	http?: {
 		extensions?: HttpExtension[];
 	};
@@ -197,6 +200,7 @@ const createLucidHost = async (
 		env: resolved.env,
 		runtimeContext: options.runtimeContext,
 		overrides: options.adapterOverrides,
+		defaults: options.adapterDefaults,
 	});
 	let app: Awaited<ReturnType<typeof createApp>>;
 
@@ -357,6 +361,7 @@ const createLucidHost = async (
 					mediaStorage: adapters.instances.mediaStorage,
 					mediaDelivery: adapters.instances.mediaDelivery,
 					email: adapters.instances.email,
+					agentRunner: adapters.instances.agentRunner,
 					request,
 				});
 			};

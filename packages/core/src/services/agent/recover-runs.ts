@@ -1,7 +1,9 @@
 import constants from "../../constants/constants.js";
+import { checkpointSchema } from "../../libs/agent/types.js";
 import logger from "../../libs/logger/index.js";
 import {
 	AgentConversationsRepository,
+	AgentInputsRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -10,14 +12,12 @@ import enqueueRun from "./helpers/enqueue-run.js";
 import executeRunFinishedHooks from "./helpers/execute-run-finished-hooks.js";
 import notifyRoutineRun from "./helpers/notify-routine-run.js";
 
-/**
- * Picks up runs whose worker stopped: crashed, interrupted or never started.
- * Each run is retried a few times before it fails.
- */
+/** Retries runs whose workers crashed, stopped or never started up to the recovery limit, returning runs with unanswered questions to waiting unless a steer replaces the answer. */
 const recoverRuns: ServiceFn<[], number> = async (context) => {
 	const now = new Date().toISOString();
 	const runs = new AgentRunsRepository(context.db);
 	const conversations = new AgentConversationsRepository(context.db);
+	const Inputs = new AgentInputsRepository(context.db);
 
 	const expired = await runs.interruptExpired({ now });
 	if (expired.error) return expired;
@@ -39,6 +39,37 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 	let recovered = 0;
 
 	for (const run of stalled.data) {
+		//* a run stopped while its question was unanswered can only continue with that answer, which an agent runner may
+		//* still hold for a retry, so it waits again unless a steer replaces the answer
+		const checkpoint = checkpointSchema.safeParse(run.checkpoint);
+		if (checkpoint.data?.pending && !checkpoint.data.pending.answer) {
+			const inputs = await Inputs.selectDeliverable(run.conversation_id);
+			if (inputs.error) {
+				logger.error({
+					message: `Agent run ${run.id} could not check for a steer: ${context.translate(inputs.error.message)}`,
+					scope: constants.logScopes.ai,
+				});
+				continue;
+			}
+
+			if (!inputs.data.some((input) => input.target_run_id === run.id)) {
+				const waiting = await runs.transition({
+					runId: run.id,
+					from: ["queued", "interrupted"],
+					status: "waiting",
+					now,
+				});
+				if (waiting.error) {
+					logger.error({
+						message: `Agent run ${run.id} could not wait for its answer again: ${context.translate(waiting.error.message)}`,
+						scope: constants.logScopes.ai,
+					});
+				}
+
+				continue;
+			}
+		}
+
 		if (run.recoveries >= constants.agent.limits.recoveries) {
 			const failed = await withTransaction(context, async (context) => {
 				const AgentRuns = new AgentRunsRepository(context.db);

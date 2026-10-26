@@ -98,6 +98,7 @@ const openRunSession = async (
 			error: {
 				type: "basic" as const,
 				status: 409,
+				key: "agent_run_superseded",
 				message: copy("server:agent.run.superseded"),
 			},
 		};
@@ -153,6 +154,7 @@ const openRunSession = async (
 				error: {
 					type: "basic",
 					status: 409,
+					key: "agent_run_superseded",
 					message: copy("server:agent.run.superseded"),
 				},
 			};
@@ -185,6 +187,7 @@ const openRunSession = async (
 				error: {
 					type: "basic",
 					status: 409,
+					key: "agent_run_superseded",
 					message: copy("server:agent.run.superseded"),
 				},
 			};
@@ -258,6 +261,7 @@ const openRunSession = async (
 							error: {
 								type: "basic",
 								status: 409,
+								key: "agent_run_superseded",
 								message: copy("server:agent.run.superseded"),
 							},
 						};
@@ -325,6 +329,7 @@ const openRunSession = async (
 							error: {
 								type: "basic",
 								status: 409,
+								key: "agent_run_superseded",
 								message: copy("server:agent.run.superseded"),
 							},
 						};
@@ -481,6 +486,7 @@ const openRunSession = async (
 						error: {
 							type: "basic",
 							status: 409,
+							key: "agent_run_superseded",
 							message: copy("server:agent.run.superseded"),
 						},
 					};
@@ -496,6 +502,7 @@ const openRunSession = async (
 						error: {
 							type: "basic",
 							status: 409,
+							key: "agent_run_superseded",
 							message: copy("server:agent.run.superseded"),
 						},
 					};

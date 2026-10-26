@@ -71,7 +71,7 @@ lucidcms build && cf deploy --prebuilt
 
 Use `lucidcms dev` and `lucidcms build` rather than `cf dev` and `cf build`. `cf` doesn't recognise Lucid projects, so it would run Vite without Lucid.
 
-Lucid passes its Worker, bindings, cron trigger and the variables from your `env` schema to the plugin. Add a `cloudflare.config.ts` only for settings Lucid doesn't manage, such as a Hyperdrive binding.
+Lucid passes its Worker, bindings, [agent run Durable Object](#agent-runs), cron trigger and the variables from your `env` schema to the plugin. Add a `cloudflare.config.ts` only for settings Lucid doesn't manage, such as a Hyperdrive binding.
 
 ## Database
 
@@ -137,7 +137,7 @@ In Astro projects, commands run through Astro's Vite config instead, so they use
 
 ## Astro
 
-Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. Wrap the Worker in `withLucid`, which adds Lucid's Worker entry, its cron and queue triggers, and the bindings and secrets Lucid's adapters and plugins declare:
+Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. Wrap the Worker in `withLucid`, which adds Lucid's Worker entry, its cron and queue triggers, the [agent run Durable Object](#agent-runs), and the bindings and secrets Lucid's adapters and plugins declare:
 
 ```typescript
 // cloudflare.config.ts
@@ -155,7 +155,7 @@ export default defineConfig({
 });
 ```
 
-Lucid's Worker entry runs Astro's request handler alongside Lucid's job scheduler and plugins' event handlers, such as the queue consumer. The Worker's own settings and bindings come first. Deploy with `cf deploy`, which builds the project with `astro build`.
+Lucid's Worker entry runs Astro's request handler alongside Lucid's job scheduler and plugins' event handlers, such as the queue consumer, and exports the agent run Durable Object. The Worker's own settings and bindings come first. Deploy with `cf deploy`, which builds the project with `astro build`.
 
 ## Bindings
 
@@ -200,6 +200,12 @@ export default defineConfig({
   }),
 });
 ```
+
+## Agent Runs
+
+Agent runs execute in a Durable Object, one per run, rather than in the request or job that starts them. A run keeps going when the person who started it closes the chat, and everyone watching it streams its live events from the object. An alarm runs each part of a long run, and Cloudflare retries it if it fails.
+
+Lucid exports the object from its Worker entry as `LucidAgentRuns`, with SQLite storage, and binds it as `LUCID_AGENT_RUNS`. It's declared even when you have no agents, so removing them later never needs a `deleted` export. If `cloudflare.config.ts` declares the binding or the export itself, Lucid leaves that one as it is.
 
 ## Media Storage
 
