@@ -53,17 +53,16 @@ const PageLayoutRoot: Component<PageLayoutRootProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		//* the 15px leaves room for the shell's bottom padding. Sticky content uses --page-layout-sticky-top to sit under the corners
 		<div
 			data-page-layout-root
 			class={classnames(
-				"flex flex-col min-h-[calc(100vh-15px)] border-t md:border-t-0 border-x border-border rounded-t-xl [--page-layout-sticky-top:0px] md:[--page-layout-sticky-top:calc(--spacing(4)+1px)]",
+				"flex flex-col min-h-[calc(100vh-15px)] md:min-h-[calc(100vh-(--spacing(8)))] md:mb-4 border-t md:border-t-0 border-x border-border rounded-t-xl [--page-layout-sticky-top:0px] [--page-layout-sticky-bottom:0px] md:[--page-layout-sticky-top:calc(--spacing(4)+1px)] md:[--page-layout-sticky-bottom:calc(--spacing(4)+1px)]",
 				props.class,
 			)}
 		>
-			<PageLayoutCorners />
-			{/* clipping, unlike hidden, keeps sticky content working. It sits inside the border so the corners can cover it */}
+			<PageLayoutCorners position="top" />
 			<div class="flex grow flex-col overflow-x-clip">{props.children}</div>
+			<PageLayoutCorners position="bottom" />
 		</div>
 	);
 };
@@ -91,7 +90,6 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 					<Show
 						when={!props.loading}
 						fallback={
-							//* match the text line heights to avoid a layout shift
 							<>
 								<div class="text-base" aria-hidden="true">
 									<span class="skeleton block w-40">&nbsp;</span>

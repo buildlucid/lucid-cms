@@ -222,7 +222,7 @@ const RequestPage: Component = () => {
 												request={data()}
 												collections={collections.data?.data ?? []}
 											/>
-											<div class="sticky bottom-0 z-10 mt-auto pt-6 pb-4 md:pb-6">
+											<div class="sticky bottom-(--page-layout-sticky-bottom) z-10 mt-auto pt-6 pb-4 md:pb-6">
 												<div
 													aria-hidden="true"
 													class="pointer-events-none absolute inset-x-0 top-0 bottom-0 bg-linear-to-t from-background via-background to-transparent"
