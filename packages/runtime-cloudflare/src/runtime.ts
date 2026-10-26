@@ -32,12 +32,6 @@ export const cloudflare = (
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		vite: "@lucidcms/runtime-cloudflare/vite",
-		hosts: {
-			astro: {
-				entrypoint: "@lucidcms/runtime-cloudflare/astro",
-				integrationEntrypoint: "@lucidcms/runtime-cloudflare/astro-integration",
-			},
-		},
 		config: {
 			customBuildArtifacts: [constants.WORKER_HANDLER_ARTIFACT_TYPE],
 			customPrepareArtifacts: [constants.BINDINGS_ARTIFACT_TYPE],

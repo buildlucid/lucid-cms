@@ -1,7 +1,8 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { cloudflare } from "@cloudflare/vite-plugin";
-import { buildModuleId } from "@lucidcms/core/build";
+import { buildModuleId, hostedModuleId } from "@lucidcms/core/build";
+import { LucidError } from "@lucidcms/core/runtime";
 import type { RuntimeViteIntegration } from "@lucidcms/core/vite";
 import constants, {
 	AGENT_RUNS_EXPORT,
@@ -17,6 +18,12 @@ import renderWorkerHandlers from "./services/render-worker-handlers.js";
 import type { CloudflareRuntimeAdapter } from "./types.js";
 
 const workerEntryId = "virtual:lucid/cloudflare-worker";
+const hostedWorkerPattern = new RegExp(
+	`^${RegExp.escape(constants.HOSTED_WORKER_ENTRY)}\\?`,
+);
+const resolvedHostedWorkerPattern = new RegExp(
+	`^\\0${RegExp.escape(constants.HOSTED_WORKER_ENTRY)}\\?`,
+);
 
 /** Runs Lucid's Worker with local bindings in Vite's workerd server environment and builds for `cf deploy`, supplying Worker settings so `cloudflare.config.ts` is needed only for unmanaged options. */
 const cloudflareVite: RuntimeViteIntegration<CloudflareRuntimeAdapter> = {
@@ -99,6 +106,77 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 					}),
 			}),
 		];
+	},
+	hosted: {
+		module: "@lucidcms/runtime-cloudflare/hosted",
+		/** Serves `withLucid`'s Worker entry, which wraps the host's Worker with Lucid's scheduler, plugin handlers and agent run Durable Object, and caches built assets through `_headers`. */
+		plugins: (project) => {
+			if (!existsSync(path.join(project.projectRoot, constants.CONFIG_FILE))) {
+				throw new LucidError({
+					message: `The host's Cloudflare adapter reads the Worker from \`${constants.CONFIG_FILE}\`. Add one that wraps its Worker in \`withLucid\` from @lucidcms/runtime-cloudflare/config.`,
+				});
+			}
+
+			const handlers = renderWorkerHandlers(project.artifacts.build);
+			const serverEnvironment = {
+				optimizeDeps: {
+					entries: listOptimizeEntries(project, [
+						"@lucidcms/runtime-cloudflare/entry",
+						"@lucidcms/runtime-cloudflare/hosted",
+						...handlers.modules,
+					]),
+					// Late optimization restarts the Worker while its initial modules are loading.
+					include: ["kysely/migration"],
+				},
+				build: {
+					rolldownOptions: {
+						output: {
+							codeSplitting: {
+								// Zod's cyclic modules must initialize together in the Worker.
+								groups: [
+									{ name: "zod", test: /[/\\]node_modules[/\\]zod[/\\]/ },
+								],
+							},
+						},
+					},
+				},
+			};
+
+			return [
+				{
+					name: "lucid:runtime-cloudflare-hosted",
+					config: () => ({
+						resolve: {
+							alias: { "cross-fetch": "cross-fetch/dist/browser-ponyfill.js" },
+						},
+					}),
+					configEnvironment: (name) =>
+						name === "client" ? undefined : serverEnvironment,
+					resolveId: {
+						filter: { id: hostedWorkerPattern },
+						handler: (source) => `\0${source}`,
+					},
+					load: {
+						filter: { id: resolvedHostedWorkerPattern },
+						handler: (id) => {
+							const entry = new URLSearchParams(id.split("?")[1]).get("entry");
+							if (!entry) return;
+
+							return `import lucid from "${hostedModuleId}";
+import hostWorker from ${JSON.stringify(entry)};
+import { createHostedAgentRuns, createHostedWorker } from "@lucidcms/runtime-cloudflare/entry";
+${handlers.imports}
+
+export default createHostedWorker(lucid, hostWorker, ${handlers.handlers});
+export const ${AGENT_RUNS_EXPORT} = createHostedAgentRuns(lucid);
+`;
+						},
+					},
+				},
+				assetHeadersPlugin(),
+				inspectorPortLogsPlugin(),
+			];
+		},
 	},
 };
 

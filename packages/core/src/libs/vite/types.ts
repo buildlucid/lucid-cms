@@ -14,6 +14,8 @@ export type LucidViteOptions = {
 	host?: string;
 	/** Built admin HTML for hosts that build it themselves, read during the server build. */
 	adminDocument?: () => string | undefined;
+	/** Host server build input identified by environment and input name, which runtimes can wrap with background work such as Lucid's job scheduler. */
+	serverEntry?: { environment: string; input: string };
 	/** Connects the runtime's bindings to their deployed resources, where the runtime supports it, for `--remote`. */
 	remote?: boolean;
 	/** Builds only for previewing locally, as `lucidcms serve` does, so runtimes may add settings deploys must not have. */
@@ -94,4 +96,14 @@ export type RuntimeViteIntegration<
 		project: LucidViteProject<Adapter>,
 		options: Pick<LucidViteOptions, "remote" | "preview">,
 	) => PluginOption[] | Promise<PluginOption[]>;
+	/** Support for running inside a framework's server, declared with `defineConfig({ host })`. */
+	hosted?: {
+		/** Module exporting `createHostedLucid(build)`, which returns the runtime's `HostedLucid`. */
+		module: string;
+		/** Plugins that add Lucid's background work, such as its job scheduler, around the host's server. */
+		plugins: (
+			project: LucidViteProject<Adapter>,
+			options: Pick<LucidViteOptions, "serverEntry">,
+		) => PluginOption[] | Promise<PluginOption[]>;
+	};
 };

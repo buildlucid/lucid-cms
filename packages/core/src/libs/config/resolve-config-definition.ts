@@ -133,12 +133,6 @@ export const resolveConfigDefinition = async (props: {
 }): Promise<ResolveConfigDefinitionResult> => {
 	const definition = assertConfigDefinition(props.definition);
 	const adapter = await resolveRuntimeAdapter(definition.runtime);
-	if (definition.host && !adapter.hosts?.[definition.host.key]) {
-		throw new LucidError({
-			message: `The "${adapter.key}" runtime doesn't support the "${definition.host.key}" host.`,
-		});
-	}
-
 	const logger = props.logger ?? {
 		instance: defaultLoggerInstance,
 		silent: true,
@@ -161,7 +155,7 @@ export const resolveConfigDefinition = async (props: {
 		props.meta,
 	);
 
-	// Env loading is optional because some hosts, like Astro Cloudflare, already
+	// Env loading is optional because some runtimes, such as Workers, already
 	// own request-time env loading and can pass it in directly.
 	const rawEnv =
 		props.env ??
@@ -188,7 +182,13 @@ export const resolveConfigDefinition = async (props: {
 	// and validation once the adapter/env/bootstrap layer has been resolved.
 	const config = await processConfig(rawConfig, {
 		...(props.processConfigOptions ?? {}),
-		configure: wrappedDefinition.configure,
+		configure: props.meta?.host
+			? (draft) => {
+					// A host renders the website on the CMS's own domain unless the project says otherwise.
+					draft.urls.site ??= "/";
+					wrappedDefinition.configure?.(draft);
+				}
+			: wrappedDefinition.configure,
 		resolvedDb: db,
 	});
 

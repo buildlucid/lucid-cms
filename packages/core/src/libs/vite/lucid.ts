@@ -12,6 +12,7 @@ import loadProject from "./load-project.js";
 import lucidBuildPlugin from "./lucid-build-plugin.js";
 import lucidConfigPlugin from "./lucid-config-plugin.js";
 import lucidDevPlugin from "./lucid-dev-plugin.js";
+import lucidHostedPlugin from "./lucid-hosted-plugin.js";
 import lucidPreparePlugin from "./lucid-prepare-plugin.js";
 import publicAssetsPlugin from "./public-assets-plugin.js";
 import type { LucidViteOptions } from "./types.js";
@@ -55,6 +56,11 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 	});
 
 	const host = options?.host;
+	if (host && !integration.hosted) {
+		throw new LucidError({
+			message: `The "${project.adapter.key}" runtime can't run inside the "${host}" host.`,
+		});
+	}
 	const props = { project, token, host };
 	const ready = Promise.withResolvers<boolean>();
 
@@ -88,9 +94,14 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 				: admin.plugins),
 		...pluginVite.flatMap(({ plugins }) => plugins ?? []),
 		// Vite awaits and flattens plugin promises, so integrations may set themselves up asynchronously. A host owns the
-		// server, so the runtime's server plugins are left out.
-		...(host
-			? []
+		// server, so the runtime adds its hosted plugins around the host's server instead of its own.
+		...(host && integration.hosted
+			? [
+					lucidHostedPlugin({ project, module: integration.hosted.module }),
+					integration.hosted.plugins(project, {
+						serverEntry: options?.serverEntry,
+					}),
+				]
 			: [
 					integration.plugins(project, {
 						remote: options?.remote,

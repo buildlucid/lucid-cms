@@ -37,6 +37,7 @@ const lucidBuildPlugin = (
 
 			return renderBuildModule({
 				project: props.project,
+				host: props.host,
 				pluginModules: props.pluginModules,
 				adminHtml: dev
 					? props.renderAdminDocument(this.environment.config)

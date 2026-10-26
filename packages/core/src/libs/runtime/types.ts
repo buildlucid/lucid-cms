@@ -8,6 +8,7 @@ import type { RenderedTemplates } from "../email/types.js";
 import type { TranslationBundles } from "../i18n/types.js";
 import type { LoggerOverride } from "../logger/types.js";
 import type { LucidAdapterOverrides } from "./create-lucid-adapters.js";
+import type { LucidInvocation } from "./create-lucid-host.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
 /** A runtime-specific artifact from a database adapter or plugin, such as a Cloudflare binding or Worker handler. */
@@ -29,7 +30,7 @@ export type LucidBuild = {
 		definition: LucidConfigDefinition;
 		envSchema?: z.ZodType;
 		translationBundles: TranslationBundles;
-		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates" | "admin">;
+		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates" | "admin" | "host">;
 		/** During development, sends runtime logs to Lucid's Vite plugin to print. */
 		logger?: LoggerOverride;
 		/** In commands' task servers, an inline queue and no agent runner, so pending jobs and agent runs finish inside the command. */
@@ -57,6 +58,19 @@ export type LucidDevBuild = {
 export type LucidDevModule = {
 	path: string;
 	load: () => Promise<{ default?: unknown }>;
+};
+
+/**
+ * Lucid running inside a framework's server, which the runtime's hosted module creates from `lucid:build` and the
+ * framework reaches through `lucid:hosted`.
+ */
+export type HostedLucid = {
+	/** Serves a request for one of Lucid's paths, running development tasks first. */
+	handle(request: Request): Promise<Response>;
+	/** Creates an invocation the caller destroys, such as one per framework request for the toolkit. */
+	createInvocation(): Promise<LucidInvocation>;
+	/** Destroys the hosts this instance created. */
+	destroy(): Promise<void>;
 };
 
 export type AdapterKeys = {
@@ -143,7 +157,7 @@ export type LucidConfigDefinitionMeta = {
 	/** Development hosts render the admin through Vite. */
 	admin?: "development" | "static";
 	emailTemplates?: RenderedTemplates;
-	/** Identifies the framework or host resolving this definition. */
+	/** The key of the framework serving Lucid, when it isn't Lucid's own server. */
 	host?: string;
 };
 
@@ -160,7 +174,7 @@ export type DatabaseAdapterValue =
 
 /** A framework that serves Lucid instead of Lucid's own server, declared with `defineConfig({ host })`. */
 export type HostAdapter = {
-	/** The host's key, which the runtime adapter's `hosts` must support, such as `astro`. */
+	/** Framework host key, such as `astro`, requiring `hosted` support from the runtime's Vite integration. */
 	key: string;
 	/** Module whose default export is the host's `HostCliIntegration`, resolved from the project, for Lucid's CLI. */
 	cli: string;
@@ -185,21 +199,8 @@ export type RuntimeAdaptConfig = (
 	meta?: LucidConfigDefinitionMeta,
 ) => LucidConfigDefinition;
 
-/** Module entrypoints exposed by a runtime for a supported host. */
-export type RuntimeHostDefinition = {
-	/** Request-time module used by the host to resolve and handle the runtime. */
-	entrypoint: string;
-	/** Optional build-time module for host-specific setup. */
-	integrationEntrypoint?: string;
-};
-
-/** Deployment platform adapter with optional CLI and host integration support. */
-export type RuntimeAdapter = Omit<
-	z.infer<typeof RuntimeAdapterSchema>,
-	"hosts"
-> & {
-	/** Host integrations supported by this runtime, keyed by host name. */
-	hosts?: Record<string, RuntimeHostDefinition>;
+/** Deployment platform adapter with optional CLI support. */
+export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema> & {
 	getEnvVars?: RuntimeAdapterEnvLoader;
 	resolveOptions?: RuntimeAdapterOptionsResolver;
 	adaptConfig?: RuntimeAdaptConfig;

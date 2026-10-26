@@ -32,9 +32,9 @@ const adaptConfig: RuntimeAdaptConfig = (
 				};
 			}
 
-			// Astro serves its own public files, and during development Vite serves them from source, so only builds
+			// A host serves its own public files, and during development Vite serves them from source, so only builds
 			// served by Lucid read them from the build output.
-			if (meta?.host === "astro" || meta?.admin === "development") {
+			if (meta?.host || meta?.admin === "development") {
 				definition.configure?.(draft);
 				return;
 			}

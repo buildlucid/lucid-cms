@@ -7,23 +7,22 @@ import {
 	getConfigPath,
 } from "@lucidcms/core/build";
 import { builtAssets } from "@lucidcms/core/runtime";
-import { findLucidViteApi, lucid } from "@lucidcms/core/vite";
+import {
+	findLucidViteApi,
+	type LucidViteProject,
+	lucid,
+} from "@lucidcms/core/vite";
 import type { AstroIntegration } from "astro";
 import constants from "./constants.js";
 import { astroHost } from "./host.js";
-import loadProject, {
-	type ResolvedLucidProject,
-} from "./integration/project.js";
-import runtimeModulePlugin from "./integration/runtime-module-plugin.js";
 import collectWatchFiles, {
 	createResourceWatchPlugin,
 } from "./integration/watch.js";
-import { destroyRuntimeHosts } from "./internal/runtime.js";
 import type { LucidAstroOptions } from "./types.js";
 
-/** Integrates Lucid's Vite project loading, type updates and development migrations with Astro routes and runtime modules, copying a separate admin build into Astro output and awaiting migration completion before server readiness. */
+/** Adds Lucid's routes, type updates and admin output to Astro, using runtime server wrapping and waiting for development migrations before reporting readiness. */
 const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
-	let project: ResolvedLucidProject | undefined;
+	let project: LucidViteProject | undefined;
 	/** Settles once the dev server's start-up migrations finish, with whether they completed. */
 	let ready: Promise<boolean> | undefined;
 	let adminBuildDirectory = "";
@@ -53,23 +52,17 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					host: astroHost.key,
 					mode: command === "build" ? "production" : "development",
 					adminDocument: () => adminDocument,
+					// Astro's adapter builds its server module as the `ssr` environment's `index` input.
+					serverEntry: { environment: "ssr", input: "index" },
 				});
-				const nextProject = await loadProject(plugins);
-				ready = findLucidViteApi(plugins).ready;
-
-				const { lucid: lucidProject, integrationBridge } = nextProject;
+				const api = findLucidViteApi(plugins);
+				ready = api.ready;
 				adminBuildDirectory = path.join(
-					lucidProject.projectRoot,
+					api.project.projectRoot,
 					constants.adminBuildDirectory,
 				);
-				const platform =
-					integrationBridge.vite?.({
-						command,
-						project: lucidProject,
-						runtimeModuleId: constants.runtimeModuleId,
-					}) ?? {};
 
-				const watchFiles = collectWatchFiles(nextProject);
+				const watchFiles = collectWatchFiles(api.project);
 				for (const filePath of watchFiles) addWatchFile(filePath);
 
 				addMiddleware({
@@ -94,16 +87,9 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					});
 				}
 
+				// Its modules import `lucid:hosted`, which only the project's Vite app can serve.
 				const serverEnvironment = {
-					...platform.ssrEnvironment,
-					optimizeDeps: {
-						...platform.ssrEnvironment?.optimizeDeps,
-						// Its modules import Lucid's runtime module, which only the project's Vite app can serve.
-						exclude: [
-							...(platform.ssrEnvironment?.optimizeDeps?.exclude ?? []),
-							constants.integrationName,
-						],
-					},
+					optimizeDeps: { exclude: [constants.integrationName] },
 				};
 
 				updateConfig({
@@ -113,19 +99,16 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 							// Builds prerender pages in their own environment, which may bundle Lucid too.
 							...(command === "build" && { prerender: serverEnvironment }),
 						},
-						resolve: { alias: platform.aliases ?? {} },
-						// Its modules import Lucid's runtime module, so Vite must bundle them rather than leave them to Node.
+						// Its modules import `lucid:hosted`, so Vite must bundle them rather than leave them to Node.
 						ssr: { noExternal: [constants.integrationName] },
 						plugins: [
 							...plugins,
-							runtimeModulePlugin(nextProject),
-							...(platform.plugins ?? []),
-							createResourceWatchPlugin(lucidProject.configPath, watchFiles),
+							createResourceWatchPlugin(api.project.configPath, watchFiles),
 						],
 					},
 				});
 
-				project = nextProject;
+				project = api.project;
 			},
 			// Astro prints that its server is ready after this hook, so migrations run first, with any prompts they need.
 			"astro:server:start": async ({ logger }) => {
@@ -135,23 +118,16 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					);
 				}
 			},
-			"astro:config:done": ({ config }) => {
-				project?.integrationBridge.validateAdapter(config.adapter);
-			},
-			"astro:server:done": async () => {
-				if (project) await destroyRuntimeHosts(project.hostId);
-			},
 			"astro:build:start": async () => {
 				if (!project) return;
 
-				const { lucid: lucidProject } = project;
 				await buildAdmin({
-					configPath: lucidProject.configPath,
-					projectRoot: lucidProject.projectRoot,
+					configPath: project.configPath,
+					projectRoot: project.projectRoot,
 					outDir: adminBuildDirectory,
 					assetsDir: builtAssets.directory,
-					admin: lucidProject.config.admin,
-					clientConfig: createAdminClientConfig(lucidProject.config),
+					admin: project.config.admin,
+					clientConfig: createAdminClientConfig(project.config),
 				});
 
 				// The server serves the admin's document for its client-side routes.

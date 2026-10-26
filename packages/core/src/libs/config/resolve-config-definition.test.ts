@@ -185,16 +185,3 @@ test("parsed env output reaches every consumer while runtime bindings survive", 
 	expect(resolveOptions).toHaveBeenCalledWith(result.env);
 	expect(resolveDatabase).toHaveBeenCalledWith(result.env);
 });
-
-test("rejects a declared host the runtime doesn't support", async () => {
-	await expect(
-		resolveConfigDefinition({
-			definition: defineConfig({
-				runtime: { key: "node", lucid: "0.0.0" },
-				host: { key: "astro", cli: "@lucidcms/astro/cli" },
-				db: createAdapter(),
-				config: () => ({ secrets: "a".repeat(64) }),
-			}),
-		}),
-	).rejects.toThrow('The "node" runtime doesn\'t support the "astro" host.');
-});

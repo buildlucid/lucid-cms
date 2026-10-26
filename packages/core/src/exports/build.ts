@@ -8,3 +8,5 @@ export { default as resolveConfigDefinition } from "../libs/config/resolve-confi
 
 /** The module ID runtime entries import the built project, a `LucidBuild`, from. */
 export const buildModuleId = constants.build.moduleId;
+/** The module a host's server imports the runtime's `HostedLucid` from. */
+export const hostedModuleId = constants.build.hostedModuleId;

@@ -2,7 +2,8 @@ import { rm } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { getRequestListener } from "@hono/node-server";
-import { buildModuleId } from "@lucidcms/core/build";
+import { buildModuleId, hostedModuleId } from "@lucidcms/core/build";
+import { LucidError } from "@lucidcms/core/runtime";
 import type { LucidBuild } from "@lucidcms/core/types";
 import type { RuntimeViteIntegration } from "@lucidcms/core/vite";
 import { type Connect, isRunnableDevEnvironment } from "vite";
@@ -12,6 +13,7 @@ import type { NodeRuntimeAdapter } from "./types.js";
 
 const serverEntryId = "virtual:lucid/node-server";
 const devEntryId = "virtual:lucid/node-dev";
+const hostedServerId = "virtual:lucid/node-hosted-server";
 
 const entrySources: Record<string, string> = {
 	[serverEntryId]: `import build from "${buildModuleId}";
@@ -35,7 +37,10 @@ const createMiddleware = (
 	getHandler: () => Promise<NodeRequestHandler>,
 ): Connect.NextHandleFunction => {
 	const listener = getRequestListener(async (request, requestBindings) => {
-		const response = await (await getHandler()).fetch(request, requestBindings);
+		const response = await (await getHandler()).handle(
+			request,
+			requestBindings,
+		);
 		// Vite's preview compression holds `writeHead` back, so Hono flushing a streamed body's headers would send 200.
 		requestBindings.outgoing.statusCode = response.status;
 		return response;
@@ -157,6 +162,72 @@ const nodeVite: RuntimeViteIntegration<NodeRuntimeAdapter> = {
 				},
 			},
 		];
+	},
+	hosted: {
+		module: "@lucidcms/runtime-node/hosted",
+		/** Wraps the host's server build input so Lucid's job scheduler starts beside it, as the host owns the process. */
+		plugins: (_project, { serverEntry }) => {
+			if (!serverEntry) {
+				throw new LucidError({
+					message:
+						"The Node runtime starts Lucid's job scheduler beside the host's server build, which the host doesn't name.",
+				});
+			}
+
+			return [
+				{
+					name: "lucid:runtime-node-hosted",
+					apply: "build",
+					// Runs after the host's config sets its server input.
+					configEnvironment: {
+						order: "post",
+						handler(name, config) {
+							if (name !== serverEntry.environment) return;
+
+							const input = config.build?.rolldownOptions?.input;
+							const entry =
+								typeof input === "object" && !Array.isArray(input)
+									? input[serverEntry.input]
+									: undefined;
+							if (
+								typeof input !== "object" ||
+								Array.isArray(input) ||
+								entry === undefined
+							) {
+								throw new LucidError({
+									message: `The Node runtime couldn't find the host's server build input "${serverEntry.input}". Check its adapter builds a server.`,
+								});
+							}
+
+							input[serverEntry.input] =
+								`${hostedServerId}?${new URLSearchParams({ entry })}`;
+						},
+					},
+					resolveId: {
+						filter: { id: new RegExp(`^${RegExp.escape(hostedServerId)}\\?`) },
+						handler: (source) => `\0${source}`,
+					},
+					load: {
+						filter: {
+							id: new RegExp(`^\\0${RegExp.escape(hostedServerId)}\\?`),
+						},
+						handler: (id) => {
+							const entry = new URLSearchParams(id.split("?")[1]).get("entry");
+							if (!entry) return;
+
+							// Node servers start from their named exports, such as `startServer`, which the wrapper keeps.
+							return `import lucid from "${hostedModuleId}";
+import { createNodeJobScheduler } from "@lucidcms/runtime-node";
+
+export * from ${JSON.stringify(entry)};
+
+createNodeJobScheduler({ createInvocation: () => lucid.createInvocation() }).start();
+`;
+						},
+					},
+				},
+			];
+		},
 	},
 };
 

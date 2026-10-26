@@ -23,10 +23,10 @@ export default {
 		"cloudflare:worker-handler" satisfies CloudflareWorkerHandlerArtifact["type"],
 	BINDINGS_ARTIFACT_TYPE:
 		"cloudflare:bindings" satisfies CloudflareBindingsArtifact["type"],
-	/** The project's Worker config, which the Cloudflare Vite plugin and Astro's adapter read. */
+	/** The project's Worker config, which the Cloudflare Vite plugin, and a host's Cloudflare adapter, read. */
 	CONFIG_FILE: "cloudflare.config.ts",
 	ASSETS_BINDING: "ASSETS",
 	JOB_SCHEDULER_CRON: "* * * * *",
-	/** The Worker entry `withLucid` names, which Lucid's Astro integration serves. */
-	ASTRO_WORKER_ENTRY: "virtual:lucid/astro-worker",
+	/** The Worker entry `withLucid` names, with the host's Worker in its `entry` query, which the hosted plugins serve. */
+	HOSTED_WORKER_ENTRY: "virtual:lucid/hosted-worker",
 } as const;

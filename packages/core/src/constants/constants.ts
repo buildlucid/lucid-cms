@@ -113,6 +113,8 @@ export default Object.freeze({
 	build: {
 		/** The module server entries import the built project, a `LucidBuild`, from. */
 		moduleId: "lucid:build",
+		/** The module a framework serving Lucid imports the runtime's `HostedLucid` from. */
+		hostedModuleId: "lucid:hosted",
 	},
 	dev: {
 		/** Path prefix for tasks the Vite plugin runs inside the server environment, such as migrations. */

@@ -23,10 +23,6 @@
 			"types": "./dist/toolkit.d.mts",
 			"default": "./dist/toolkit.mjs"
 		},
-		"./internal/create-astro-runtime": {
-			"types": "./dist/internal/create-astro-runtime.d.mts",
-			"default": "./dist/internal/create-astro-runtime.mjs"
-		},
 		"./internal/route": {
 			"types": "./dist/internal/route.d.mts",
 			"default": "./dist/internal/route.mjs"
@@ -34,10 +30,6 @@
 		"./internal/middleware": {
 			"types": "./dist/internal/middleware.d.mts",
 			"default": "./dist/internal/middleware.mjs"
-		},
-		"./types": {
-			"types": "./dist/types.d.mts",
-			"default": "./dist/types.mjs"
 		},
 		"./package.json": "./package.json"
 	},

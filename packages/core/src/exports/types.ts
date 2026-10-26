@@ -507,6 +507,7 @@ export type {
 	EnvironmentVariables,
 	GetEnvVarsLogger,
 	HostAdapter,
+	HostedLucid,
 	LucidBuild,
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
@@ -519,7 +520,6 @@ export type {
 	RuntimeAdapterValue,
 	RuntimeArtifactCustom,
 	RuntimeArtifactProvider,
-	RuntimeHostDefinition,
 	RuntimeSupport,
 } from "../libs/runtime/types.js";
 export type {

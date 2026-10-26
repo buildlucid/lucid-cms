@@ -137,7 +137,7 @@ In Astro projects, commands run through Astro's Vite config instead, so they use
 
 ## Astro
 
-Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. Wrap the Worker in `withLucid`, which adds Lucid's Worker entry, its cron and queue triggers, the [agent run Durable Object](#agent-runs), and the bindings and secrets Lucid's adapters and plugins declare:
+Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. Name Astro's Worker in `entrypoint` and wrap the Worker in `withLucid`, which adds Lucid's Worker entry around it, its cron and queue triggers, the [agent run Durable Object](#agent-runs), and the bindings and secrets Lucid's adapters and plugins declare:
 
 ```typescript
 // cloudflare.config.ts
@@ -148,6 +148,7 @@ export default defineConfig({
   worker: withLucid({
     name: "my-site",
     compatibilityDate: "2026-06-30",
+    entrypoint: "@astrojs/cloudflare/entrypoints/server",
     env: {
       LUCID_DB: bindings.hyperdrive({ id: "HYPERDRIVE_ID" }),
     },
@@ -155,7 +156,7 @@ export default defineConfig({
 });
 ```
 
-Lucid's Worker entry runs Astro's request handler alongside Lucid's job scheduler and plugins' event handlers, such as the queue consumer, and exports the agent run Durable Object. The Worker's own settings and bindings come first. Deploy with `cf deploy`, which builds the project with `astro build`.
+Lucid's Worker entry runs Astro's Worker alongside Lucid's job scheduler and plugins' event handlers, such as the queue consumer, and exports the agent run Durable Object. The Worker's own settings and bindings come first. Deploy with `cf deploy`, which builds the project with `astro build`.
 
 ## Bindings
 

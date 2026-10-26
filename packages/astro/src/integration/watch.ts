@@ -1,13 +1,13 @@
 import path from "node:path";
+import type { LucidViteProject } from "@lucidcms/core/vite";
 import type { Plugin } from "vite";
-import type { ResolvedLucidProject } from "./project.js";
 
 /** Collects the resource files and directories known when Astro loads its config. */
-const collectWatchFiles = (project: ResolvedLucidProject) =>
+const collectWatchFiles = (project: LucidViteProject) =>
 	new Set([
-		project.lucid.configPath,
-		...project.lucid.configDependencies,
-		...project.lucid.resources.watch,
+		project.configPath,
+		...project.configDependencies,
+		...project.resources.watch,
 	]);
 
 /** Routes new resource files through Astro's config restart lifecycle. */

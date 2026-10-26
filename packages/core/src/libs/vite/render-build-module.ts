@@ -8,6 +8,8 @@ const importPath = (file: string) => JSON.stringify(normalizePath(file));
 /** Renders `lucid:build` from project config and optional admin HTML, adding development tasks, runtime logs honoring `logLevel`, inline command queues and agent runs, and plugin module HMR without server restarts. */
 const renderBuildModule = (props: {
 	project: LucidViteProject;
+	/** The key of the framework serving Lucid, when it isn't Lucid's own server. */
+	host?: string;
 	/** Plugins' server modules, which reach their runtime code as `pluginModules`. */
 	pluginModules: Array<{ key: string; module: string }>;
 	/** The admin's HTML document, for servers that serve it themselves rather than as a static file. */
@@ -21,6 +23,7 @@ const renderBuildModule = (props: {
 	const meta = [
 		`emailTemplates: ${json(project.emailTemplates)}`,
 		...(dev ? ['admin: "development"'] : []),
+		...(props.host ? [`host: ${json(props.host)}`] : []),
 	];
 	const host = [
 		"definition",

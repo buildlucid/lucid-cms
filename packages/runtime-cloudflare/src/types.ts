@@ -2,6 +2,7 @@ import type {
 	AgentRunStart,
 	AgentRunWatch,
 	EnvironmentVariables,
+	HostedLucid,
 	LucidErrorData,
 	LucidInvocation,
 	RuntimeAdapter,
@@ -12,6 +13,20 @@ import type {
 export type CloudflareExecutionContext = {
 	waitUntil(promise: Promise<unknown>): void;
 	passThroughOnException?: () => void;
+};
+
+/** The Worker event Lucid runs in: its bindings and, outside prerenders, its execution context. */
+export type CloudflarePlatform = {
+	env: EnvironmentVariables;
+	ctx?: CloudflareExecutionContext;
+};
+
+/** Lucid inside a host's Worker, which also runs the Worker's own events with the event's bindings. */
+export type CloudflareHostedLucid = Omit<HostedLucid, "createInvocation"> & {
+	/** Creates an invocation for a Worker event, or for the host's current request when no event is given. */
+	createInvocation(platform?: CloudflarePlatform): Promise<LucidInvocation>;
+	/** Runs the host's handling of a request with its Worker event, which Lucid reads when the host passes a request on. */
+	withPlatform<Result>(platform: CloudflarePlatform, run: () => Result): Result;
 };
 
 /** Handles a Worker event, such as `queue`, with a Lucid invocation that lasts for the event. */

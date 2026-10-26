@@ -10,6 +10,7 @@ import createLucidHost from "../libs/runtime/create-lucid-host.js";
 import handleDevTask from "../libs/runtime/handle-dev-task.js";
 import handleHostRequest from "../libs/runtime/handle-host-request.js";
 import isDevTaskRequest from "../libs/runtime/is-dev-task-request.js";
+import registerHostedLucid from "../libs/runtime/register-hosted-lucid.js";
 import { resolveDatabaseAdapter } from "../libs/runtime/resolve-database-adapter.js";
 import setupJobScheduler from "../libs/runtime/setup-job-scheduler.js";
 import withResponseCleanup from "../libs/runtime/with-response-cleanup.js";
@@ -40,6 +41,7 @@ export {
 	logger,
 	prepareTranslations,
 	processConfig,
+	registerHostedLucid,
 	resolveDatabaseAdapter,
 	setupJobScheduler,
 	withResponseCleanup,
