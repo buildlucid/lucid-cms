@@ -21,13 +21,17 @@ export function useDocumentPreview(props: {
 			: "perspective",
 	);
 	const locale = createMemo(() => props.locale() ?? undefined);
+	//* Use the latest save so the autosave refetch doesn't refresh the preview twice.
 	const saveStamp = createMemo(() => {
-		const autoSaveMetadata = props.autoSaveMetadata();
-		return [
-			props.document()?.updatedAt ?? "",
-			autoSaveMetadata?.updatedAt ?? "",
-			autoSaveMetadata?.contentId ?? "",
-		].join(":");
+		const document = props.document();
+		const autoSave = props.autoSaveMetadata();
+		const savedAt = (value: string | null | undefined) =>
+			Date.parse(value ?? "") || 0;
+		const saved =
+			autoSave && savedAt(autoSave.updatedAt) >= savedAt(document?.updatedAt)
+				? autoSave
+				: document;
+		return `${saved?.updatedAt ?? ""}:${saved?.contentId ?? ""}`;
 	});
 
 	return {

@@ -7,19 +7,23 @@ import {
 import { getPreviewPageKey } from "./context.js";
 import { installPreviewFieldInteraction } from "./field-target.js";
 
+/** Restores a scroll position once the page has loaded, retrying while late content grows the page. */
 const installScrollRestoration = (targetWindow: Window) => {
 	let frameId: number | undefined;
 	let pendingLoad: (() => void) | undefined;
+	let target: PreviewScrollState | null = null;
 
 	const cancel = () => {
 		if (frameId !== undefined) targetWindow.cancelAnimationFrame(frameId);
 		if (pendingLoad) targetWindow.removeEventListener("load", pendingLoad);
 		frameId = undefined;
 		pendingLoad = undefined;
+		target = null;
 	};
 
 	const restore = (state: PreviewScrollState) => {
 		cancel();
+		target = state;
 		const start = () => {
 			pendingLoad = undefined;
 			let attempts = 0;
@@ -34,6 +38,7 @@ const installScrollRestoration = (targetWindow: Window) => {
 					frameId = targetWindow.requestAnimationFrame(apply);
 				} else {
 					frameId = undefined;
+					target = null;
 				}
 			};
 			frameId = targetWindow.requestAnimationFrame(apply);
@@ -47,7 +52,12 @@ const installScrollRestoration = (targetWindow: Window) => {
 		}
 	};
 
-	return { cancel, restore };
+	return {
+		cancel,
+		restore,
+		/** The position still being restored, so a capture mid-restore doesn't report the top of the page. */
+		pending: () => target,
+	};
 };
 
 /** Installs the child side of Lucid's builder preview bridge. */
@@ -71,10 +81,11 @@ export const installPreviewBridge = (targetWindow: Window): (() => void) => {
 		if (event.origin !== parentOrigin) return;
 
 		if (event.data.type === previewProtocol.messages.captureScroll) {
+			const pending = scrollRestoration.pending();
 			const state: PreviewScrollState = {
 				pageKey: getPreviewPageKey(targetWindow),
-				x: targetWindow.scrollX,
-				y: targetWindow.scrollY,
+				x: pending?.x ?? targetWindow.scrollX,
+				y: pending?.y ?? targetWindow.scrollY,
 			};
 			targetWindow.parent.postMessage(
 				createPreviewMessage({

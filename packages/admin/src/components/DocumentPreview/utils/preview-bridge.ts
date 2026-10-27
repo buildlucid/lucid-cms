@@ -132,6 +132,9 @@ export const createPreviewBridge = (options?: {
 		},
 		/** Requests the current scroll position from the preview iframe. */
 		captureScroll: (): Promise<PreviewScrollState | null> => {
+			//* Reuse the pending position during overlapping refreshes to avoid capturing a partially loaded page.
+			if (pendingRestore) return Promise.resolve(pendingRestore);
+
 			const frameOrigin = getFrameOrigin();
 			const frameWindow = frame?.contentWindow;
 			if (!frameOrigin || !frameWindow) return Promise.resolve(null);

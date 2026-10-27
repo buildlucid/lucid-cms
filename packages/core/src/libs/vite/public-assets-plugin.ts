@@ -61,7 +61,9 @@ const publicAssetsPlugin = (files: ResourceFile[]): Plugin => {
 
 						response.setHeader(
 							"Content-Type",
-							mime.contentType(file) || "application/octet-stream",
+							// A full path would be returned as-is, since mime-types reads anything with a slash as a content type.
+							mime.contentType(path.extname(file)) ||
+								"application/octet-stream",
 						);
 						response.setHeader("Cache-Control", "no-cache");
 						if (request.method === "HEAD") return response.end();

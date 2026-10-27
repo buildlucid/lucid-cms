@@ -41,14 +41,19 @@ test("serves public files mapped to new paths from Vite's public directory, leav
 			const response = await fetch(
 				`http://127.0.0.1:${address.port}${pathname}`,
 			);
-			return { status: response.status, body: await response.text() };
+			return {
+				status: response.status,
+				type: response.headers.get("content-type"),
+				body: await response.text(),
+			};
 		};
 
 		await expect(get("/branding/logo.svg")).resolves.toEqual({
 			status: 200,
+			type: "image/svg+xml",
 			body: "<svg></svg>",
 		});
-		await expect(get("/logo.svg")).resolves.toEqual({
+		await expect(get("/logo.svg")).resolves.toMatchObject({
 			status: 200,
 			body: "<svg></svg>",
 		});
