@@ -53,6 +53,9 @@ const resolveRelatedDocuments: ServiceFn<
 	const users = new Map(
 		(data.source.refs.users ?? []).map((item) => [item.id, item]),
 	);
+	const emails = new Map(
+		(data.source.refs.emails ?? []).map((item) => [item.id, item]),
+	);
 	const documents = new Map(
 		versionedRefs(context, data.source).map((item) => [
 			documentKey(item),
@@ -99,7 +102,12 @@ const resolveRelatedDocuments: ServiceFn<
 						filter: { id: { value: group.ids, operator: "in" } },
 						page: 1,
 						perPage: -1,
-						include: ["refs.media", "refs.users", "refs.documents"],
+						include: [
+							"refs.media",
+							"refs.users",
+							"refs.emails",
+							"refs.documents",
+						],
 					},
 				}).then((res) => ({ group, res })),
 			),
@@ -116,6 +124,7 @@ const resolveRelatedDocuments: ServiceFn<
 
 			for (const item of source.refs.media ?? []) media.set(item.id, item);
 			for (const item of source.refs.users ?? []) users.set(item.id, item);
+			for (const item of source.refs.emails ?? []) emails.set(item.id, item);
 			//* Their own document refs only fill gaps, as the next level reads them in full.
 			for (const item of versionedRefs(context, source)) {
 				if (!documents.has(documentKey(item))) {
@@ -142,6 +151,7 @@ const resolveRelatedDocuments: ServiceFn<
 			...data.source.refs,
 			media: Array.from(media.values()),
 			users: Array.from(users.values()),
+			emails: Array.from(emails.values()),
 			documents: Array.from(documents.values()),
 		},
 	};

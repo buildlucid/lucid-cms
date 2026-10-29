@@ -517,18 +517,15 @@ const DocumentSortableItem: Component<{
 					"-" +
 					props.document.value.id,
 			}}
-			class={classNames(
-				"group ring-inset ring-primary transition-colors duration-200 transform-gpu",
-				{
-					"ring-1 ring-inset ring-danger": props.hasError,
-					"opacity-60": props.dragDrop.getDragging()?.ref === props.dragId,
-					"ring-1 ring-primary":
-						props.dragDrop.getDraggingTarget()?.ref === props.dragId &&
-						props.dragDrop.getDragging()?.ref !== props.dragId &&
-						!props.hasError,
-					"cursor-grab active:cursor-grabbing": props.disabled !== true,
-				},
-			)}
+			class={classNames("group transition-colors duration-200 transform-gpu", {
+				"ring-1 ring-inset ring-danger": props.hasError,
+				"opacity-60": props.dragDrop.getDragging()?.ref === props.dragId,
+				"ring-1 ring-inset ring-primary":
+					props.dragDrop.getDraggingTarget()?.ref === props.dragId &&
+					props.dragDrop.getDragging()?.ref !== props.dragId &&
+					!props.hasError,
+				"cursor-grab active:cursor-grabbing": props.disabled !== true,
+			})}
 			title={props.documentLabel}
 			subtitle={props.documentSubtitle}
 			fields={props.document.document ? props.previewFields : []}

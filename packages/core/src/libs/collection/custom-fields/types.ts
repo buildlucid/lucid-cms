@@ -26,6 +26,8 @@ import { colorFieldConfig } from "./fields/color/config.js";
 import type { ColorCustomFieldMapItem } from "./fields/color/types.js";
 import { datetimeFieldConfig } from "./fields/datetime/config.js";
 import type { DatetimeCustomFieldMapItem } from "./fields/datetime/types.js";
+import { emailFieldConfig } from "./fields/email/config.js";
+import type { EmailCustomFieldMapItem } from "./fields/email/types.js";
 import { jsonFieldConfig } from "./fields/json/config.js";
 import type { JsonCustomFieldMapItem } from "./fields/json/types.js";
 import { linkFieldConfig } from "./fields/link/config.js";
@@ -61,6 +63,7 @@ export type * from "./fields/code/types.js";
 export type * from "./fields/collapsible/types.js";
 export type * from "./fields/color/types.js";
 export type * from "./fields/datetime/types.js";
+export type * from "./fields/email/types.js";
 export type * from "./fields/json/types.js";
 export type * from "./fields/link/types.js";
 export type * from "./fields/media/types.js";
@@ -85,6 +88,7 @@ export const fieldTypes = [
 	collapsibleFieldConfig.type,
 	colorFieldConfig.type,
 	datetimeFieldConfig.type,
+	emailFieldConfig.type,
 	relationFieldConfig.type,
 	jsonFieldConfig.type,
 	linkFieldConfig.type,
@@ -218,6 +222,7 @@ export type CustomFieldMap = {
 	code: CodeCustomFieldMapItem;
 	color: ColorCustomFieldMapItem;
 	datetime: DatetimeCustomFieldMapItem;
+	email: EmailCustomFieldMapItem;
 	link: LinkCustomFieldMapItem;
 	user: UserCustomFieldMapItem;
 };
@@ -248,6 +253,7 @@ export type CustomFieldContentFormatContext =
 	CustomFieldResponseFormatContext & {
 		media: (id: number) => unknown;
 		user: (id: number) => unknown;
+		email: (id: number) => unknown;
 		/** A related document resolved through the read's depth, its ID and collection beyond it, or null for unreadable targets within depth. */
 		document: (collectionKey: unknown, id: unknown) => unknown;
 		/** The read document's hydrated embedded brick or null, unavailable for related documents. */

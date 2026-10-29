@@ -61,3 +61,19 @@ export interface Email {
 	createdAt: string | null;
 	updatedAt?: string | null;
 }
+
+/** Referenced sent email without template data or HTML, with recipients and delivery status omitted from content API reads. */
+export interface EmailRef {
+	id: number;
+	subject: string;
+	template: string;
+	from: {
+		address: string;
+		name: string;
+	};
+	to?: string;
+	cc?: string | null;
+	bcc?: string | null;
+	currentStatus?: EmailDeliveryStatus;
+	createdAt: string | null;
+}

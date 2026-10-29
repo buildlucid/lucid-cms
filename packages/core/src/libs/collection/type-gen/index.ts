@@ -868,6 +868,7 @@ const generateCollectionClientTypes = (props: {
 \tCollectionDocumentTranslations,
 \tCollectionDocumentVersionKey as CoreCollectionDocumentVersionKey,
 \tDocumentBrick,
+\tEmailFieldValue,
 \tFilterObject,
 \tMediaFieldValue,
 \tRelationFieldValue,

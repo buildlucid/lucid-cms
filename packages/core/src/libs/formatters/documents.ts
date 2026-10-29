@@ -334,6 +334,7 @@ type FillContext = {
 	read: ContentRead;
 	media: Map<number, unknown>;
 	users: Map<number, unknown>;
+	emails: Map<number, unknown>;
 	documents: Map<string, ContentRelatedRef>;
 };
 
@@ -432,6 +433,7 @@ const fillFields = (
 		refs,
 		media: (id) => context.media.get(id),
 		user: (id) => context.users.get(id),
+		email: (id) => context.emails.get(id),
 		document: (collectionKey, id) =>
 			relatedDocument(collectionKey, id, level, context, source),
 		brick: embedded
@@ -589,6 +591,9 @@ const formatContentRead = (props: {
 			]),
 		),
 		users: new Map(users.map((user) => [user.id, user])),
+		emails: new Map(
+			(props.refs.emails ?? []).map((email) => [email.id, email]),
+		),
 		documents: new Map(
 			(props.refs.documents ?? []).map((item) => [
 				documentKey(item.collectionKey, item.id, item.version),

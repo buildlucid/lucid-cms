@@ -1,10 +1,10 @@
-import type { Email, EmailDeliveryStatus } from "@types";
+import type { Email } from "@types";
 import type { Component } from "solid-js";
-import type { PillProps } from "@/components/Pill/Pill";
 import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import T from "@/translations";
+import { emailStatusPills } from "@/utils/emails";
 
 interface EmailRowProps {
 	index: number;
@@ -15,29 +15,6 @@ interface EmailRowProps {
 }
 
 const EmailTableRow: Component<EmailRowProps> = (props) => {
-	// ----------------------------------
-	// Helpers
-	const getPillVariant = (
-		deliveryStatus: EmailDeliveryStatus,
-	): PillProps["variant"] => {
-		if (
-			deliveryStatus === "sent" ||
-			deliveryStatus === "delivered" ||
-			deliveryStatus === "opened" ||
-			deliveryStatus === "clicked"
-		) {
-			return "success-subtle";
-		}
-		if (
-			deliveryStatus === "failed" ||
-			deliveryStatus === "bounced" ||
-			deliveryStatus === "complained"
-		) {
-			return "danger-subtle";
-		}
-		return "outline";
-	};
-
 	// ----------------------------------
 	// Render
 	return (
@@ -103,7 +80,7 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 			<Table.Pill
 				column="currentStatus"
 				text={props.email.currentStatus}
-				variant={getPillVariant(props.email.currentStatus)}
+				variant={emailStatusPills[props.email.currentStatus]}
 			/>
 			<Table.Text
 				column="subject"

@@ -15,6 +15,7 @@ interface QueryParams {
 		type?: Accessor<string[]>;
 		template?: Accessor<string>;
 		priority?: Accessor<string[]>;
+		isSystem?: Accessor<1 | 0> | 1 | 0;
 	};
 	perPage?: number;
 }

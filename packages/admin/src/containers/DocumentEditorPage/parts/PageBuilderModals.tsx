@@ -8,6 +8,7 @@ import DocumentRequestModal from "@/components/DocumentRequestModal/DocumentRequ
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import DocumentUnpublishModal from "@/components/DocumentUnpublishModal/DocumentUnpublishModal";
 import DuplicateDocumentModal from "@/components/DuplicateDocumentModal/DuplicateDocumentModal";
+import EmailSelectDrawer from "@/components/EmailSelectDrawer/EmailSelectDrawer";
 import EmbeddedBrickEditDrawer from "@/components/EmbeddedBrickEditDrawer/EmbeddedBrickEditDrawer";
 import LinkSelectModal from "@/components/LinkSelectModal/LinkSelectModal";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
@@ -87,6 +88,9 @@ export const PageBuilderModals: Component<{
 	});
 	const userSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("userSelect"),
+	);
+	const emailSelectModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("emailSelect"),
 	);
 	const linkSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("linkSelect"),
@@ -188,6 +192,22 @@ export const PageBuilderModals: Component<{
 				callbacks={{
 					onSelect: (selection) =>
 						pageBuilderModalsStore.triggerAndClose("userSelect", selection),
+				}}
+			/>
+			<EmailSelectDrawer
+				state={{
+					open: emailSelectModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close("emailSelect"),
+					zIndex: nestedPanelZIndex(),
+					multiple: emailSelectModal()?.data.multiple,
+					maxItems: emailSelectModal()?.data.maxItems,
+					allowInternal: emailSelectModal()?.data.allowInternal,
+					selected: emailSelectModal()?.data.selected,
+					selectedRefs: emailSelectModal()?.data.selectedRefs,
+				}}
+				callbacks={{
+					onSelect: (selection) =>
+						pageBuilderModalsStore.triggerAndClose("emailSelect", selection),
 				}}
 			/>
 			<LinkSelectModal

@@ -1,5 +1,6 @@
 import type {
 	DocumentRef,
+	EmailRef,
 	LinkResValue,
 	Media,
 	MediaFieldConfig,
@@ -91,6 +92,19 @@ export type ModalRegistry = {
 		result: {
 			value: number[];
 			refs: Array<NonNullable<UserRef>>;
+		};
+	};
+	emailSelect: {
+		data: {
+			multiple?: boolean;
+			maxItems?: number;
+			allowInternal?: boolean;
+			selected?: number[];
+			selectedRefs?: EmailRef[];
+		};
+		result: {
+			value: number[];
+			refs: EmailRef[];
 		};
 	};
 	linkSelect: {

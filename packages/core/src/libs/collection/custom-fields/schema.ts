@@ -9,7 +9,7 @@ import { richTextUserVariableFields } from "./fields/rich-text/types.js";
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const customFieldSchema = z.object({
 	type: z.string(),
-	resource: z.enum(["documents", "media", "users"]).optional(),
+	resource: z.enum(["documents", "media", "users", "emails"]).optional(),
 	key: z
 		.string()
 		.refine((val) => !val.includes(constants.db.nameSeparator), {
@@ -19,6 +19,7 @@ const customFieldSchema = z.object({
 			message: `Field key cannot start with a '${constants.db.generatedColumnPrefix}' prefix`,
 		}),
 	collection: z.union([z.string(), z.array(z.string())]).optional(),
+	allowInternal: z.boolean().optional(),
 	details: z
 		.object({
 			label: adminCopyInputSchema.optional(),

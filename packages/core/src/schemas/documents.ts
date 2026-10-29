@@ -6,6 +6,7 @@ import {
 	documentVersionResponseSchema,
 	versionTypesSchema,
 } from "./document-versions.js";
+import { emailDeliveryStatusSchema } from "./email.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaResponseSchema } from "./media.js";
 import { agentActorSchema } from "./shared/agent-actor.js";
@@ -174,11 +175,35 @@ const documentUserRefResponseSchema = userDisplaySchema.extend({
 	}),
 });
 
+const documentEmailRefResponseSchema = z.object({
+	id: z.number(),
+	subject: z.string(),
+	template: z.string(),
+	from: z.object({
+		address: z.string(),
+		name: z.string(),
+	}),
+	to: z.string().optional().meta({
+		description: "Only in admin responses; the content API leaves it out",
+	}),
+	cc: z.string().nullable().optional().meta({
+		description: "Only in admin responses; the content API leaves it out",
+	}),
+	bcc: z.string().nullable().optional().meta({
+		description: "Only in admin responses; the content API leaves it out",
+	}),
+	currentStatus: emailDeliveryStatusSchema.optional().meta({
+		description: "Only in admin responses; the content API leaves it out",
+	}),
+	createdAt: z.string().nullable(),
+});
+
 export const documentRefsResponseSchema = z
 	.object({
 		documents: z.array(documentRefResponseSchema).optional(),
 		media: z.array(mediaResponseSchema).optional(),
 		users: z.array(documentUserRefResponseSchema).optional(),
+		emails: z.array(documentEmailRefResponseSchema).optional(),
 		agents: z
 			.array(agentActorSchema.extend({ id: z.string() }))
 			.optional()
@@ -232,7 +257,13 @@ const contentDocumentIncludeSchema = z.enum(["bricks", "meta"]);
 
 const documentRefsIncludeSchema = z.union([
 	z.literal("refs"),
-	z.enum(["refs.documents", "refs.media", "refs.users", "refs.agents"]),
+	z.enum([
+		"refs.documents",
+		"refs.media",
+		"refs.users",
+		"refs.emails",
+		"refs.agents",
+	]),
 ]);
 
 //* underscore-prefixed top-level field sorts are resolved later
@@ -899,7 +930,7 @@ export const controllerSchemas = {
 								"Target a repeater field by adding a repeater key after the brick key",
 						}),
 					include: queryString.schema.include(
-						"refs,refs.documents,refs.media,refs.users,refs.agents",
+						"refs,refs.documents,refs.media,refs.users,refs.emails,refs.agents",
 					),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,order,_customFieldKey",
@@ -971,7 +1002,7 @@ export const controllerSchemas = {
 		query: {
 			string: z.object({
 				include: queryString.schema.include(
-					"bricks,refs,refs.documents,refs.media,refs.users,refs.agents",
+					"bricks,refs,refs.documents,refs.media,refs.users,refs.emails,refs.agents",
 				),
 			}),
 			formatted: z.object({

@@ -892,6 +892,17 @@ export const createBrickStore = (idPrefix = "") => {
 				return;
 			}
 
+			if (input.resource === "emails") {
+				set(
+					"refs",
+					"emails",
+					upsertRefs(get.refs.emails, input.ref, (existing, next) => {
+						return existing.id === next.id;
+					}),
+				);
+				return;
+			}
+
 			set(
 				"refs",
 				"users",
@@ -908,6 +919,7 @@ export const createBrickStore = (idPrefix = "") => {
 				}
 				if (refs.media) get.addRef({ resource: "media", ref: refs.media });
 				if (refs.users) get.addRef({ resource: "users", ref: refs.users });
+				if (refs.emails) get.addRef({ resource: "emails", ref: refs.emails });
 			});
 		},
 		/** Merges draft-check field data into existing bricks so validation feedback does not reset editor UI state. */

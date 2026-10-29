@@ -47,7 +47,7 @@ const resolveDocumentRefs: ServiceFn<
 			/** Built-in document refs contributed outside custom field storage. */
 			refTargets?: Iterable<RefTarget>;
 			allowedDocumentCollectionKeys?: string[];
-			/** Content API responses flatten relation ref fields, leave out user emails and only include library media. */
+			/** Content API responses flatten relation ref fields, leave out user emails and email recipients, and only include library media. */
 			content?: boolean;
 			host: string;
 		},
@@ -102,6 +102,11 @@ const resolveDocumentRefs: ServiceFn<
 			registeredRefResources.users.resolve(context, {
 				targets,
 				format: { ...mediaFormat, email: data.content !== true },
+			}),
+		emails: (targets) =>
+			registeredRefResources.emails.resolve(context, {
+				targets,
+				format: { delivery: data.content !== true },
 			}),
 		agents: (targets) =>
 			registeredRefResources.agents.resolve(context, { targets }),

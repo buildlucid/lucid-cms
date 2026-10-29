@@ -5,6 +5,7 @@ import { codeFieldConfig } from "./fields/code/config.js";
 import { collapsibleFieldConfig } from "./fields/collapsible/config.js";
 import { colorFieldConfig } from "./fields/color/config.js";
 import { datetimeFieldConfig } from "./fields/datetime/config.js";
+import { emailFieldConfig } from "./fields/email/config.js";
 import { jsonFieldConfig } from "./fields/json/config.js";
 import { linkFieldConfig } from "./fields/link/config.js";
 import { mediaFieldConfig } from "./fields/media/config.js";
@@ -29,6 +30,7 @@ export const fieldTypeCapabilities = {
 	[collapsibleFieldConfig.type]: collapsibleFieldConfig.capabilities,
 	[colorFieldConfig.type]: colorFieldConfig.capabilities,
 	[datetimeFieldConfig.type]: datetimeFieldConfig.capabilities,
+	[emailFieldConfig.type]: emailFieldConfig.capabilities,
 	[jsonFieldConfig.type]: jsonFieldConfig.capabilities,
 	[linkFieldConfig.type]: linkFieldConfig.capabilities,
 	[mediaFieldConfig.type]: mediaFieldConfig.capabilities,

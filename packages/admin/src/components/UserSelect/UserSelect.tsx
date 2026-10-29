@@ -288,13 +288,13 @@ const UserSortableItem: Component<{
 				"view-transition-name": `user-select-item-${props.user.id}`,
 			}}
 			class={classNames(
-				"group flex items-center justify-between gap-3 rounded-md border bg-input px-3 py-2 ring-inset ring-primary transition-colors duration-200 transform-gpu",
+				"group flex items-center justify-between gap-3 rounded-md border bg-input px-3 py-2 transition-colors duration-200 transform-gpu",
 				{
 					"border-border": !props.hasError,
 					"border-danger ring-1 ring-inset ring-danger": props.hasError,
 					"opacity-60":
 						props.dragDrop.getDragging()?.ref === `${props.user.id}`,
-					"ring-1 ring-primary":
+					"ring-1 ring-inset ring-primary":
 						props.dragDrop.getDraggingTarget()?.ref === `${props.user.id}` &&
 						props.dragDrop.getDragging()?.ref !== `${props.user.id}` &&
 						!props.hasError,

@@ -9,6 +9,7 @@ import CodeCustomField from "../../custom-fields/fields/code/custom-field.js";
 import CollapsibleCustomField from "../../custom-fields/fields/collapsible/custom-field.js";
 import ColorCustomField from "../../custom-fields/fields/color/custom-field.js";
 import DateTimeCF from "../../custom-fields/fields/datetime/custom-field.js";
+import EmailCustomField from "../../custom-fields/fields/email/custom-field.js";
 import JSONCF from "../../custom-fields/fields/json/custom-field.js";
 import LinkCustomField from "../../custom-fields/fields/link/custom-field.js";
 import MediaCustomField from "../../custom-fields/fields/media/custom-field.js";
@@ -384,6 +385,10 @@ class FieldBuilder {
 	/** Adds a user picker. Values are user ID arrays, even for single selection. */
 	public addUser(key: string, props?: FieldOptions<"user">) {
 		return this.registerField(key, new UserCustomField(key, props));
+	}
+	/** Adds a picker for sent emails, external by default, storing email ID arrays even for single selection. */
+	public addEmail(key: string, props?: FieldOptions<"email">) {
+		return this.registerField(key, new EmailCustomField(key, props));
 	}
 	/** Closes the current repeater and any sections or collapsibles still open inside it. */
 	public endRepeater() {

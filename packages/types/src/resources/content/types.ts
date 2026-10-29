@@ -8,6 +8,7 @@ import type {
 	fieldValueKind,
 	RelationFieldValue,
 } from "../documents/types.js";
+import type { EmailRef } from "../emails/types.js";
 import type { Media, MediaListItem } from "../media/types.js";
 import type { UserDisplay } from "../users/types.js";
 
@@ -67,6 +68,12 @@ export type ContentMedia<
 export type ContentUser<TLocalized extends boolean = false> =
 	TLocalized extends true ? LocalizedUser : UserDisplay;
 
+/** An email an email field points to, as the content API fills them in, without recipients or delivery status. */
+export type ContentEmail = Omit<
+	EmailRef,
+	"to" | "cc" | "bcc" | "currentStatus"
+>;
+
 /** A route, read in one locale with a `locale`. */
 export type ContentRoute<
 	TCollectionKey extends string = string,
@@ -79,6 +86,7 @@ export type ContentRoute<
 type ContentKindValues<TLocalized extends boolean> = {
 	media: ContentMedia<Media, TLocalized>[];
 	user: ContentUser<TLocalized>[];
+	email: ContentEmail[];
 };
 
 /** A single field value with its media and users filled in and relations as related documents. */

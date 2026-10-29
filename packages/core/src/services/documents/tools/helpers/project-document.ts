@@ -63,8 +63,8 @@ export const documentRefsSchema = z.object({
 	users: z.array(userSchema).optional(),
 });
 
-/** Keeps referenced users to what tools need, as users_find returns them. */
-export const projectRefs = ({ users, ...refs }: Refs) => ({
+/** Keeps referenced users to what tools need, as users_find returns them, and leaves out emails, which emails_get reads with its own scope. */
+export const projectRefs = ({ users, emails: _emails, ...refs }: Refs) => ({
 	...refs,
 	...(users && { users: users.map(formatUser) }),
 });

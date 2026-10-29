@@ -1,4 +1,3 @@
-import DOMPurify from "dompurify";
 import {
 	TbOutlineAlertTriangle,
 	TbOutlineFile,
@@ -22,55 +21,9 @@ import Pill from "@/components/Pill/Pill";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
+import { buildSafeEmailHtml } from "@/utils/emails";
 
 const JSONPreview = lazy(() => import("@/components/JSONPreview/JSONPreview"));
-
-const PREVIEW_DISABLE_LINKS_STYLE =
-	"<style>a,area{pointer-events:none!important;cursor:default!important;}</style>";
-
-const stripPreviewScripts = (html: string) =>
-	html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
-
-const disablePreviewLinkInteractions = (html: string) => {
-	if (!html) return html;
-
-	if (/<\/head>/i.test(html)) {
-		return html.replace(/<\/head>/i, `${PREVIEW_DISABLE_LINKS_STYLE}</head>`);
-	}
-
-	return `${PREVIEW_DISABLE_LINKS_STYLE}${html}`;
-};
-
-const buildSafePreviewHtml = (unsafeHtml: string) => {
-	if (typeof window === "undefined") return "";
-
-	try {
-		const sanitized = DOMPurify.sanitize(
-			stripPreviewScripts(unsafeHtml || ""),
-			{
-				WHOLE_DOCUMENT: true,
-				FORBID_TAGS: [
-					"script",
-					"noscript",
-					"iframe",
-					"frame",
-					"frameset",
-					"object",
-					"embed",
-					"base",
-					"meta",
-				],
-				FORBID_ATTR: ["srcdoc", "sandbox"],
-			},
-		);
-
-		return disablePreviewLinkInteractions(sanitized);
-	} catch {
-		return disablePreviewLinkInteractions(
-			stripPreviewScripts(unsafeHtml || ""),
-		);
-	}
-};
 
 interface PreviewEmailPanelProps {
 	id: Accessor<number | undefined>;
@@ -96,7 +49,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 		enabled: () => !!props.id(),
 	});
 	const previewHtml = createMemo(() =>
-		buildSafePreviewHtml(email.data?.data.html || ""),
+		buildSafeEmailHtml(email.data?.data.html || ""),
 	);
 	const attachments = createMemo(() => email.data?.data.attachments || []);
 	const hasInlineAttachments = createMemo(() =>

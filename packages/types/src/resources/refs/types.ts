@@ -4,6 +4,7 @@ import type {
 	DocumentFieldValueMap,
 	DocumentRef,
 } from "../documents/types.js";
+import type { EmailRef } from "../emails/types.js";
 import type { MediaRef } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 import type { RefResource } from "./resource.js";
@@ -17,6 +18,7 @@ export interface RefResourceMap {
 	>;
 	media: NonNullable<MediaRef>;
 	users: NonNullable<UserRef>;
+	emails: EmailRef;
 	agents: AgentRef;
 }
 

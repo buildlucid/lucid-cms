@@ -15,7 +15,7 @@ export const documentReferencesTable = defineTable(
 			locale: { schema: z.string(), type: "text" },
 			kind: { schema: z.enum(["direct", "embedded"]), type: "text" },
 			target_resource: {
-				schema: z.enum(["documents", "media", "users"]),
+				schema: z.enum(["documents", "media", "users", "emails"]),
 				type: "text",
 			},
 			target_table: { schema: z.string(), type: "text" },

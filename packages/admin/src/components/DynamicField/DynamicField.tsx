@@ -13,6 +13,7 @@ import { CheckboxField } from "@/components/CheckboxField/CheckboxField";
 import { CodeField } from "@/components/CodeField/CodeField";
 import { CollapsibleField } from "@/components/CollapsibleField/CollapsibleField";
 import { ColorField } from "@/components/ColorField/ColorField";
+import { EmailField } from "@/components/EmailField/EmailField";
 import FieldSlots from "@/components/FieldSlots/FieldSlots";
 import { InputField } from "@/components/InputField/InputField";
 import { JSONField } from "@/components/JSONField/JSONField";
@@ -329,6 +330,22 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								state={{
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"user">,
+									fieldData: fieldData(),
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
+									fieldError: fieldError(),
+									fieldErrors: fieldErrors(),
+									altLocaleError: altLocaleError(),
+									localised: isLocalised(),
+									fieldColumnIsMissing: fieldColumnIsMissing(),
+								}}
+							/>
+						</Match>
+						<Match when={fieldConfig().type === "email"}>
+							<EmailField
+								state={{
+									fieldConfig:
+										fieldConfig() as CollectionFieldConfigByType<"email">,
 									fieldData: fieldData(),
 									groupRef: props.groupRef,
 									repeaterKey: props.repeaterKey,

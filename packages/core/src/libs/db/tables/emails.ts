@@ -147,6 +147,7 @@ export const emailsTable = defineTable("lucid_emails", (adapter) => ({
 			type: "type",
 			template: "template",
 			priority: "priority",
+			isSystem: "is_system",
 			currentStatus: "current_status",
 			attemptCount: "attempt_count",
 			lastAttemptedAt: "last_attempted_at",

@@ -17,6 +17,7 @@ export const fieldInputSchema = z.object({
 		z.literal("code"),
 		z.literal("color"),
 		z.literal("datetime"),
+		z.literal("email"),
 		z.literal("link"),
 		z.literal("repeater"),
 		z.literal("user"),
@@ -52,7 +53,7 @@ export const fieldConfigSchema = z.object({
 		example: "text",
 	}),
 	resource: z
-		.enum(["documents", "media", "users"])
+		.enum(["documents", "media", "users", "emails"])
 		.meta({
 			description:
 				"Response ref resource used to hydrate this field's stored identifiers",
@@ -148,6 +149,14 @@ export const fieldConfigSchema = z.object({
 			example: true,
 		})
 		.nullable()
+		.optional(),
+	allowInternal: z
+		.boolean()
+		.meta({
+			description:
+				"Whether email fields can select Lucid's internal emails as well as emails the project sends",
+			example: false,
+		})
 		.optional(),
 	thumbs: z
 		.union([z.literal(1), z.literal(2)])
@@ -402,7 +411,7 @@ export const fieldResponseBaseSchema = z.object({
 		description: "The type of field (e.g., text, number, media)",
 		example: "text",
 	}),
-	resource: z.enum(["documents", "media", "users"]).optional(),
+	resource: z.enum(["documents", "media", "users", "emails"]).optional(),
 	groupRef: z
 		.string()
 		.meta({

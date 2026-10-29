@@ -176,6 +176,9 @@ export const controllerSchemas = {
 					"filter[priority]": queryString.schema.filter(true, {
 						example: "high",
 					}),
+					"filter[isSystem]": queryString.schema.filter(false, {
+						example: "false",
+					}),
 					"filter[attemptCount]": queryString.schema.filter(false, {
 						example: "2",
 					}),
@@ -205,6 +208,7 @@ export const controllerSchemas = {
 						type: queryFormatted.schema.filters.union.optional(), // internal | external
 						template: queryFormatted.schema.filters.single.optional(),
 						priority: queryFormatted.schema.filters.union.optional(),
+						isSystem: queryFormatted.schema.filters.single.optional(),
 						attemptCount: queryFormatted.schema.filters.single.optional(),
 						lastAttemptedAt: queryFormatted.schema.filters.single.optional(),
 						createdAt: queryFormatted.schema.filters.single.optional(),

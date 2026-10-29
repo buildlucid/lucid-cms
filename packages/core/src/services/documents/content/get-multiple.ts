@@ -42,6 +42,7 @@ const getMultiple = async <TDocument = ContentDocument<string, boolean>>(
 					...(data.query.include ?? []),
 					"refs.media",
 					"refs.users",
+					"refs.emails",
 					"refs.documents",
 				],
 			},

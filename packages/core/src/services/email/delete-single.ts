@@ -2,8 +2,9 @@ import { copy } from "../../libs/i18n/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import removeTarget from "../document-references/remove-target.js";
 
-/** Deletes one email, including system emails only for super admins. */
+/** Deletes one email, including system emails only for super admins, and notifies documents that referenced it. */
 const deleteSingle: ServiceFn<
 	[
 		{
@@ -45,6 +46,13 @@ const deleteSingle: ServiceFn<
 		},
 	});
 	if (deleteEmailRes.error) return deleteEmailRes;
+
+	const references = await removeTarget(context, {
+		resource: "emails",
+		table: "lucid_emails",
+		ids: [data.id],
+	});
+	if (references.error) return references;
 
 	return {
 		error: undefined,

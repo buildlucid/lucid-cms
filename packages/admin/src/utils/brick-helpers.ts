@@ -3,6 +3,7 @@ import type {
 	Collection,
 	DocumentField,
 	DocumentRef,
+	EmailRef,
 	FieldError,
 	InternalCollectionDocument,
 	InternalDocumentField,
@@ -264,7 +265,10 @@ type FieldRefsInput = { refs: Refs; collection?: string } & (
 			resource: "documents";
 			fieldValue: RelationFieldValue[] | null | undefined;
 	  }
-	| { resource: "media" | "users"; fieldValue: number[] | null | undefined }
+	| {
+			resource: "media" | "users" | "emails";
+			fieldValue: number[] | null | undefined;
+	  }
 );
 
 function getFieldRefs(props: {
@@ -280,6 +284,12 @@ function getFieldRefs(props: {
 	refs: Refs;
 }): Array<NonNullable<UserRef>>;
 function getFieldRefs(props: {
+	resource: "emails";
+	fieldValue: number[] | null | undefined;
+	collection?: string;
+	refs: Refs;
+}): EmailRef[];
+function getFieldRefs(props: {
 	resource: "documents";
 	fieldValue: RelationFieldValue[] | null | undefined;
 	collection?: string;
@@ -290,7 +300,11 @@ function getFieldRefs(props: {
  */
 function getFieldRefs(
 	props: FieldRefsInput,
-): Array<NonNullable<MediaRef>> | Array<NonNullable<UserRef>> | DocumentRef[] {
+):
+	| Array<NonNullable<MediaRef>>
+	| Array<NonNullable<UserRef>>
+	| EmailRef[]
+	| DocumentRef[] {
 	if (props.resource === "documents") {
 		const refs = props.refs.documents?.filter(isDocumentRef) ?? [];
 		const relationValues = props.fieldValue ?? [];
@@ -320,6 +334,16 @@ function getFieldRefs(
 			},
 			[],
 		);
+	}
+
+	if (props.resource === "emails") {
+		const refs = props.refs.emails ?? [];
+		return relationIds.reduce<EmailRef[]>((acc, relationId) => {
+			const match = refs.find((ref) => ref.id === relationId);
+
+			if (match) acc.push(match);
+			return acc;
+		}, []);
 	}
 
 	const refs = props.refs.users ?? [];

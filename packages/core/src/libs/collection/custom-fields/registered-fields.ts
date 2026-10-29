@@ -3,6 +3,7 @@ import code from "./fields/code/index.js";
 import collapsible from "./fields/collapsible/index.js";
 import color from "./fields/color/index.js";
 import datetime from "./fields/datetime/index.js";
+import email from "./fields/email/index.js";
 import json from "./fields/json/index.js";
 import link from "./fields/link/index.js";
 import media from "./fields/media/index.js";
@@ -26,6 +27,7 @@ const registeredFields = {
 	collapsible: collapsible,
 	color: color,
 	datetime: datetime,
+	email: email,
 	json: json,
 	link: link,
 	media: media,

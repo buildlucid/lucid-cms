@@ -12,6 +12,7 @@ export type FieldType =
 	| "collapsible"
 	| "color"
 	| "datetime"
+	| "email"
 	| "json"
 	| "link"
 	| "media"
@@ -61,6 +62,11 @@ export declare const fieldValueKind: unique symbol;
 /** The media IDs in a media field. */
 export type MediaFieldValue = number[] & {
 	readonly [fieldValueKind]?: "media";
+};
+
+/** The email IDs in an email field. */
+export type EmailFieldValue = number[] & {
+	readonly [fieldValueKind]?: "email";
 };
 
 /** The user IDs in a user field. */
@@ -520,6 +526,19 @@ export interface DatetimeFieldConfig
 	validation?: RequiredValidation;
 }
 
+export interface EmailFieldConfig
+	extends SharedCollectionFieldConfig<"email">,
+		FieldConfigOptions<never> {
+	resource: "emails";
+	details: RelationFieldDetails;
+	multiple?: boolean;
+	allowInternal?: boolean;
+	validation?: RequiredValidation & {
+		minItems?: number;
+		maxItems?: number;
+	};
+}
+
 export interface RelationFieldConfig
 	extends SharedCollectionFieldConfig<"relation">,
 		FieldConfigOptions<RelationFieldValue[]> {
@@ -672,6 +691,7 @@ export type CollectionLeafFieldConfig =
 	| CodeFieldConfig
 	| ColorFieldConfig
 	| DatetimeFieldConfig
+	| EmailFieldConfig
 	| JsonFieldConfig
 	| LinkFieldConfig
 	| MediaFieldConfig

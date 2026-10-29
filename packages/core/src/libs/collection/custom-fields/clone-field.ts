@@ -5,6 +5,7 @@ import CodeCustomField from "./fields/code/custom-field.js";
 import CollapsibleCustomField from "./fields/collapsible/custom-field.js";
 import ColorCustomField from "./fields/color/custom-field.js";
 import DateTimeCF from "./fields/datetime/custom-field.js";
+import EmailCustomField from "./fields/email/custom-field.js";
 import JSONCF from "./fields/json/custom-field.js";
 import LinkCustomField from "./fields/link/custom-field.js";
 import MediaCustomField from "./fields/media/custom-field.js";
@@ -37,6 +38,8 @@ const cloneField = (
 				return new ColorCustomField(field.key, { ...config });
 			case "datetime":
 				return new DateTimeCF(field.key, { ...config });
+			case "email":
+				return new EmailCustomField(field.key, { ...config });
 			case "json":
 				return new JSONCF(field.key, { ...config });
 			case "link":

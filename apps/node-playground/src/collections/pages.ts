@@ -134,6 +134,19 @@ const PageCollection = new CollectionBuilder("page", {
 		details: {
 			label: "Settings",
 		},
+	})
+	.addEmail("confirmation_email", {
+		details: {
+			label: "Confirmation Email",
+		},
+		allowInternal: true,
+	})
+	.addEmail("sent_emails", {
+		multiple: true,
+		details: {
+			label: "Sent Emails",
+		},
+		allowInternal: true,
 	});
 
 export default PageCollection;

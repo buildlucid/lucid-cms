@@ -6,7 +6,11 @@ import fieldConfigs from "../../../libs/collection/custom-fields/field-configs.j
 import { normalizeStoredRelationCustomFieldValues } from "../../../libs/collection/custom-fields/fields/relation/utils/relation-field-values.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import { getBricksTableSchema } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import { mediaTable, usersTable } from "../../../libs/db/tables/index.js";
+import {
+	emailsTable,
+	mediaTable,
+	usersTable,
+} from "../../../libs/db/tables/index.js";
 import type { FieldRefResource, RefTarget } from "../../../libs/refs/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
@@ -15,7 +19,11 @@ import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveDocumentRefs from "./resolve-document-refs.js";
 
-const idTables = { media: mediaTable.name, users: usersTable.name };
+const idTables = {
+	media: mediaTable.name,
+	users: usersTable.name,
+	emails: emailsTable.name,
+};
 
 const ids = (value: unknown) =>
 	Array.isArray(value)
@@ -49,7 +57,7 @@ const linkedTargets = (
 	);
 };
 
-/** Extracts media, user and document refs from field values using field config and custom extraction for values such as rich text. */
+/** Extracts media, user, email and document refs from field values using field config and custom extraction for values such as rich text. */
 const fieldTargets = (
 	owner: CollectionBuilder | BrickBuilder,
 	field: FieldInputSchema,

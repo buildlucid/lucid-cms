@@ -1,5 +1,7 @@
 import type {
 	DocumentRef,
+	Email,
+	EmailRef,
 	InternalCollectionDocument,
 	Media,
 	MediaRef,
@@ -12,6 +14,18 @@ export type MediaRelationRef = NonNullable<MediaRef>;
 export type UserRelationRef = NonNullable<UserRef>;
 
 export const mediaResponseToRef = (media: Media): MediaRelationRef => media;
+
+export const emailResponseToRef = (email: Email): EmailRef => ({
+	id: email.id,
+	subject: email.mailDetails.subject,
+	template: email.mailDetails.template,
+	from: email.mailDetails.from,
+	to: email.mailDetails.to,
+	cc: email.mailDetails.cc,
+	bcc: email.mailDetails.bcc,
+	currentStatus: email.currentStatus,
+	createdAt: email.createdAt,
+});
 
 export const userResponseToRef = (user: User): UserRelationRef => ({
 	id: user.id,
