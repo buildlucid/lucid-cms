@@ -20,6 +20,9 @@ import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import type { CustomFieldContentFormatContext } from "../collection/custom-fields/types.js";
+import filterReadableContent from "../collection/field-access/filter-readable-content.js";
+import getContentAccess from "../collection/field-access/get-content-access.js";
+import type { FieldAccessActor } from "../collection/field-access/types.js";
 import mapContentFields from "../collection/helpers/map-content-fields.js";
 import resolveCollectionLocale from "../collection/helpers/resolve-collection-locale.js";
 import resolveCollectionLocalization, {
@@ -52,6 +55,8 @@ const formatMultiple = (props: {
 	hydratedRefs: Refs;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	workflows?: DocumentWorkflowDetailedQueryResponse[];
+	/** Leaves out the fields and bricks this reader can't see. */
+	reader?: FieldAccessActor;
 }) => {
 	const workflowMap =
 		props.workflows !== undefined
@@ -101,6 +106,7 @@ const formatMultiple = (props: {
 					: undefined,
 			host: props.host,
 			mediaOptions: props.mediaOptions,
+			reader: props.reader,
 		});
 	});
 };
@@ -114,11 +120,22 @@ const formatSingle = (props: {
 	config: ResolvedLucidConfig;
 	host: string;
 	mediaOptions: MediaFormatterOptions;
+	/** Leaves out the fields and bricks this reader can't see. */
+	reader?: FieldAccessActor;
 }): InternalCollectionDocument => {
 	const localization = resolveCollectionLocalization({
 		localization: props.config.localization,
 		collection: props.collection,
 	});
+	const access = props.reader
+		? getContentAccess(props.collection, props.reader)
+		: undefined;
+	const content = access?.restricted
+		? filterReadableContent(access, {
+				fields: props.fields,
+				bricks: props.bricks,
+			})
+		: { fields: props.fields, bricks: props.bricks };
 
 	const inlineWorkflow =
 		props.document.workflow_assignees !== undefined
@@ -148,15 +165,15 @@ const formatSingle = (props: {
 		route: formatDocumentRoute({
 			collection: props.collection,
 			documentId: props.document.id,
-			fields: props.fields,
+			fields: content.fields,
 			locales: localization.locales,
 		}),
 		versions: formatVersions({
 			document: props.document,
 			collection: props.collection,
 		}),
-		bricks: props.bricks ?? null,
-		fields: props.fields ?? null,
+		bricks: content.bricks ?? null,
+		fields: content.fields ?? null,
 		workflow:
 			props.document.version_type !== "latest" &&
 			props.document.version_type !==

@@ -448,12 +448,16 @@ export type {
 	CollectionPermissionAction,
 	CorePermission,
 	CustomPermissions,
+	FieldPermission,
+	FieldPermissionAction,
+	FieldPermissions,
 	Permission,
 	PermissionDefinition,
 	PermissionDetails,
 	PermissionGroup,
 	PermissionGroupKey,
 	PermissionRequirement,
+	PermissionSubgroup,
 	StaticPermission,
 } from "../libs/permission/types.js";
 export type {

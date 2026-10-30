@@ -203,6 +203,15 @@ const groupConditions = (
 	return Array.from(grouped.values());
 };
 
+/** Relation-field filter paths such as `_author` or `hero._featured`, ordered longest first. */
+export const relationFilterPaths = (
+	collection: CollectionBuilder,
+	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
+): string[] =>
+	relationFilterDescriptors(collection, bricksTableSchema).map(
+		(descriptor) => descriptor.path,
+	);
+
 /** Groups traversal conditions that must match the same related document. */
 export const groupRelationDocumentFilterConditions = (props: {
 	collection: CollectionBuilder;

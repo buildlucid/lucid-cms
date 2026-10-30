@@ -44,6 +44,8 @@ interface EmailSelectProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	/** Whether the user can browse sent emails, with selected emails still removable when `false`. */
+	canBrowse?: boolean;
 }
 
 const EMAIL_SELECT_DRAG_DROP_KEY = "email-select-zone";
@@ -169,16 +171,27 @@ export const EmailSelect: Component<EmailSelectProps> = (props) => {
 									},
 								)}
 							>
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={openEmailSelectModal}
-									disabled={props.disabled || hasReachedMaxItems()}
-									class="capitalize"
+								<Show
+									when={props.canBrowse !== false}
+									fallback={
+										<Show when={selectedEmails().length === 0}>
+											<p class="text-sm text-muted">
+												{T()("fields.select.no.permission")}
+											</p>
+										</Show>
+									}
 								>
-									{T()("emails.select.action")}
-								</Button>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onClick={openEmailSelectModal}
+										disabled={props.disabled || hasReachedMaxItems()}
+										class="capitalize"
+									>
+										{T()("emails.select.action")}
+									</Button>
+								</Show>
 								<Show when={selectedEmails().length > 0}>
 									<p class="text-sm text-muted">
 										<RelationCount
@@ -200,22 +213,33 @@ export const EmailSelect: Component<EmailSelectProps> = (props) => {
 							<EmailPreviewCard
 								email={email()}
 								disabled={props.disabled}
-								onChange={openEmailSelectModal}
+								onChange={
+									props.canBrowse !== false ? openEmailSelectModal : undefined
+								}
 								onClear={clearSelection}
 							/>
 						)}
 					</Match>
 					<Match when={selectedEmailIds().length === 0}>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={openEmailSelectModal}
-							disabled={props.disabled}
-							class="capitalize"
+						<Show
+							when={props.canBrowse !== false}
+							fallback={
+								<p class="text-sm text-muted">
+									{T()("fields.select.no.permission")}
+								</p>
+							}
 						>
-							{T()("emails.select.action")}
-						</Button>
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={openEmailSelectModal}
+								disabled={props.disabled}
+								class="capitalize"
+							>
+								{T()("emails.select.action")}
+							</Button>
+						</Show>
 					</Match>
 				</Switch>
 			</div>

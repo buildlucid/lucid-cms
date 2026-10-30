@@ -1,4 +1,6 @@
 import type { RefResourceMap } from "../../../exports/types.js";
+import filterReadableContent from "../../collection/field-access/filter-readable-content.js";
+import getContentAccess from "../../collection/field-access/get-content-access.js";
 import resolveCollectionLocalization from "../../collection/helpers/resolve-collection-localization.js";
 import documentBricksFormatter from "../../formatters/document-bricks.js";
 import documentFieldsFormatter from "../../formatters/document-fields.js";
@@ -38,12 +40,18 @@ const formatDocumentRefs = (
 			config: context.config,
 			host: context.host,
 		});
+		const readableFields =
+			context.reader === undefined
+				? formattedFields
+				: (filterReadableContent(getContentAccess(collection, context.reader), {
+						fields: formattedFields,
+					}).fields ?? []);
 		const documentFields = context.flattenDocumentFields
 			? documentFieldsFormatter.flattenFields(
-					formattedFields,
+					readableFields,
 					collection.contentFieldTree,
 				)
-			: documentFieldsFormatter.objectifyFields(formattedFields);
+			: documentFieldsFormatter.objectifyFields(readableFields);
 		const localization = resolveCollectionLocalization({
 			localization: context.config.localization,
 			collection,

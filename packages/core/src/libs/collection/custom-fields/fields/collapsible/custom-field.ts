@@ -39,6 +39,7 @@ class CollapsibleCustomField extends CustomField<"collapsible"> {
 			},
 			output: this.props?.output ?? "nested",
 			defaultOpen: this.props?.defaultOpen ?? false,
+			permissions: this.props?.permissions,
 			ui: {
 				condition: this.props?.ui?.condition,
 				width: this.props?.ui?.width,

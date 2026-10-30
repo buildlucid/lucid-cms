@@ -761,6 +761,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"type",
 				"owner_user_id",
 				"is_system",
+				"created_by",
 			])
 			.where("id", "in", props.ids)
 			.where("parent_media_id", "is", null);
@@ -781,6 +782,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"type",
 				"owner_user_id",
 				"is_system",
+				"created_by",
 			],
 		});
 	}
@@ -1087,10 +1089,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			],
 		});
 	}
-	/** The media an access level can read; other users' personal media needs `media:read-all`. */
+	/** The media an access level can read; library media needs `media:read` and other users' personal media `media:read-all`. */
 	#accessCondition(access: MediaListAccess): RawBuilder<SqlBool> | undefined {
 		if (access.type === "all") return undefined;
 		if (access.type === "library") return ownershipConditions.library;
+		if (!access.library) {
+			return sql<SqlBool>`lucid_media.owner_user_id = ${access.userId}`;
+		}
 		return sql<SqlBool>`(${ownershipConditions.library} or lucid_media.owner_user_id = ${access.userId})`;
 	}
 }

@@ -37,6 +37,7 @@ class TabCustomField extends CustomField<"tab"> {
 					}),
 				description: this.props?.details?.description,
 			},
+			permissions: this.props?.permissions,
 			ui: {
 				condition: this.props?.ui?.condition,
 			},

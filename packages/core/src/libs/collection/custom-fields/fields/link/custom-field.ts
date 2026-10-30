@@ -46,6 +46,7 @@ class LinkCustomField extends CustomField<"link"> {
 				target: null,
 			},
 			index: this.props?.index,
+			permissions: this.props?.permissions,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,

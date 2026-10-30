@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import type { CollectionDocument, Refs } from "../../../exports/types.js";
 import collections from "../../../libs/collection/collections.js";
+import type { FieldAccessActor } from "../../../libs/collection/field-access/types.js";
 import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
@@ -26,6 +27,7 @@ import type {
 } from "../../../utils/services/types.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
+import checkFilterAccess from "../checks/check-filter-access.js";
 import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveDocumentRefs from "../helpers/resolve-document-refs.js";
@@ -40,6 +42,8 @@ export type ContentDocumentsGetMultipleWithRefsInput<
 	collectionKey: TCollectionKey;
 	query: ContentGetMultipleQueryParams;
 	allowedCollectionKeys?: string[];
+	/** Whose field permissions apply to fields, filters, sorts and refs; omitted for Content API and integration reads. */
+	reader?: FieldAccessActor;
 } & ContentDocumentVersionInput<TCollectionKey>;
 
 type ContentDocumentsGetMultipleWithRefsResult<
@@ -142,6 +146,17 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
 
+	const filterAccessRes = checkFilterAccess({
+		collection: collectionRes.data,
+		collections: collectionsRes.data,
+		bricksTableSchema: bricksTableSchemaRes.data,
+		reader: data.reader,
+		filter: data.query.filter,
+		filterOr: data.query.filterOr,
+		sortKeys: data.query.sort?.map((sort) => sort.key),
+	});
+	if (filterAccessRes.error) return filterAccessRes;
+
 	const query: ContentGetMultipleQueryParams = {
 		...data.query,
 		filter: applyDefaultQueryFilters(data.query.filter, {
@@ -240,6 +255,7 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 		allowedDocumentCollectionKeys: data.allowedCollectionKeys,
 		host: baseUrl,
 		content: true,
+		reader: data.reader,
 	});
 	if (refsRes.error) return refsRes;
 
@@ -258,6 +274,7 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 		hasFields: true,
 		hasBricks: include.bricks,
 		bricksTableSchema: collectionFieldsTableSchemas,
+		reader: data.reader,
 	});
 
 	const afterFetchRes = await executeHooks(

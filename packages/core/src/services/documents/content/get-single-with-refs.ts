@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import type { CollectionDocument, Refs } from "../../../exports/types.js";
 import collections from "../../../libs/collection/collections.js";
+import type { FieldAccessActor } from "../../../libs/collection/field-access/types.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -37,6 +38,8 @@ export type ContentDocumentsGetSingleWithRefsInput<
 	collectionKey: TCollectionKey;
 	query: ContentGetSingleQueryParams;
 	allowedCollectionKeys?: string[];
+	/** Whose field permissions apply to refs; omitted for Content API and integration reads. */
+	reader?: FieldAccessActor;
 } & ContentDocumentVersionInput<TCollectionKey>;
 
 type ContentDocumentsGetSingleWithRefsService = <TCollectionKey extends string>(
@@ -212,6 +215,7 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 			documents: [documentRes.data],
 			includeMeta: include.meta,
 		}),
+		reader: data.reader,
 	});
 	if (bricksRes.error) return bricksRes;
 

@@ -70,6 +70,14 @@ export type PermissionGroup = {
 	details: PermissionDetails;
 	core: boolean;
 	permissions: PermissionDefinition[];
+	/** Labelled sets of permissions shown below the group's own, such as a collection's generated field permissions. */
+	subgroups?: PermissionSubgroup[];
+};
+
+export type PermissionSubgroup = {
+	key: string;
+	details: PermissionDetails;
+	permissions: PermissionDefinition[];
 };
 
 export type UserPermission = {
@@ -86,7 +94,8 @@ export type User = {
 	firstName: string | null;
 	lastName: string | null;
 	isDeleted: boolean;
-	email: string;
+	/** Visible with `users:read` or on your own account. */
+	email?: string;
 	pendingEmailChange?: {
 		email: string;
 		requestedAt: string | null;

@@ -29,6 +29,7 @@ import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
+import resolveFieldAccess from "@/utils/resolve-field-access";
 import { countFieldErrors } from "@/utils/structural-field-helpers";
 
 interface BuilderBricksProps {
@@ -64,6 +65,12 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 	const isDisabled = createMemo(() => {
 		return brickStore.get.locked;
 	});
+	//* bricks the user can't change can be moved, but not added or removed
+	const addableBrickConfig = createMemo(() =>
+		props.brickConfig.filter(
+			(brick) => resolveFieldAccess(brick.permissions) === "editable",
+		),
+	);
 
 	// ----------------------------------
 	// Render
@@ -82,7 +89,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 						onClick={() => {
 							setSelectBrickOpen(true);
 						}}
-						disabled={isDisabled()}
+						disabled={isDisabled() || addableBrickConfig().length === 0}
 					>
 						{T()("builder.bricks.add")}
 					</Button>
@@ -131,7 +138,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 
 			<AddBrickModal
 				state={{ open: getSelectBrickOpen(), setOpen: setSelectBrickOpen }}
-				data={{ brickConfig: props.brickConfig }}
+				data={{ brickConfig: addableBrickConfig() }}
 			/>
 		</Show>
 	);
@@ -301,7 +308,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						callback={() => {
 							brickStore.get.removeBrick(brickIndex());
 						}}
-						disabled={isDisabled()}
+						disabled={
+							isDisabled() ||
+							resolveFieldAccess(config()?.permissions) !== "editable"
+						}
 					/>
 					<span
 						aria-hidden="true"

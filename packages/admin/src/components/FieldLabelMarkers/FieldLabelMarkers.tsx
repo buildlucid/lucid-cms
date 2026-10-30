@@ -1,6 +1,11 @@
 import classnames from "classnames";
-import { TbOutlineDatabase, TbOutlineWorld } from "solid-icons/tb";
+import {
+	TbOutlineDatabase,
+	TbOutlineLock,
+	TbOutlineWorld,
+} from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
+import { useFieldAccess } from "@/hooks/useFieldAccess/useFieldAccess";
 import T from "@/translations";
 
 export interface FieldLabelMarkersProps {
@@ -12,12 +17,20 @@ export interface FieldLabelMarkersProps {
 	fieldColumnIsMissing?: boolean;
 }
 
-/** The icons a document field shows beside its label. */
 export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const access = useFieldAccess();
+
 	// ----------------------------------------
 	// Render
 	return (
 		<>
+			<Show when={access() === "locked"}>
+				<span class="inline" title={T()("fields.permission.locked")}>
+					<TbOutlineLock size={12} />
+				</span>
+			</Show>
 			<Show when={props.fieldColumnIsMissing}>
 				<span class="text-danger inline" title={T()("fields.database.missing")}>
 					<TbOutlineDatabase size={12} />

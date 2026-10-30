@@ -11,11 +11,19 @@ export interface CheckboxGroupRowItem {
 	disabled?: boolean;
 }
 
+/** A labelled set of items shown below the row's own, which the row's checkbox and summary include. */
+export interface CheckboxGroupRowSubgroup {
+	key: string;
+	label: string;
+	items: CheckboxGroupRowItem[];
+}
+
 export interface CheckboxGroupRowProps {
 	id: string;
 	name: string;
 	description?: string;
 	items: CheckboxGroupRowItem[];
+	subgroups?: CheckboxGroupRowSubgroup[];
 	value: string[];
 	onChange: (_value: string[]) => void;
 	forceOpen?: boolean;
@@ -30,7 +38,10 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const selectable = createMemo(() =>
-		props.items.filter((item) => !item.disabled),
+		[
+			...props.items,
+			...(props.subgroups ?? []).flatMap((subgroup) => subgroup.items),
+		].filter((item) => !item.disabled),
 	);
 	const selectedCount = createMemo(
 		() => selectable().filter((item) => props.value.includes(item.key)).length,
@@ -65,6 +76,16 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 				: [...props.value, key],
 		);
 	};
+	const itemCheckbox = (item: CheckboxGroupRowItem) => (
+		<Checkbox
+			id={`${props.id}-${item.key}`}
+			value={props.value.includes(item.key)}
+			onChange={() => toggleItem(item.key)}
+			label={item.label}
+			tooltip={item.tooltip}
+			disabled={props.disabled || item.disabled}
+		/>
+	);
 
 	// ----------------------------------------
 	// Render
@@ -105,20 +126,30 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 							<p class="mb-3 text-xs text-subtitle">{description()}</p>
 						)}
 					</Show>
-					<div class="grid gap-x-4 gap-y-2.5 sm:grid-cols-2">
-						<For each={props.items}>
-							{(item) => (
-								<Checkbox
-									id={`${props.id}-${item.key}`}
-									value={props.value.includes(item.key)}
-									onChange={() => toggleItem(item.key)}
-									label={item.label}
-									tooltip={item.tooltip}
-									disabled={props.disabled || item.disabled}
-								/>
-							)}
-						</For>
-					</div>
+					<Show when={props.items.length > 0}>
+						<div class="grid gap-x-4 gap-y-2.5 sm:grid-cols-2">
+							<For each={props.items}>{itemCheckbox}</For>
+						</div>
+					</Show>
+					<For each={props.subgroups}>
+						{(subgroup, index) => (
+							<fieldset
+								class={classnames("min-w-0", {
+									"mt-4": props.items.length > 0 || index() > 0,
+								})}
+							>
+								<legend class="mb-2.5 flex w-full items-center gap-3">
+									<span class="shrink-0 text-xs font-medium text-subtitle">
+										{subgroup.label}
+									</span>
+									<span aria-hidden="true" class="h-px grow bg-border" />
+								</legend>
+								<div class="grid gap-x-4 gap-y-2.5 sm:grid-cols-2">
+									<For each={subgroup.items}>{itemCheckbox}</For>
+								</div>
+							</fieldset>
+						)}
+					</For>
 				</div>
 			</Show>
 		</li>

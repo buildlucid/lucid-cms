@@ -68,6 +68,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			},
 			index: this.props?.index,
 			editor: this.props?.editor,
+			permissions: this.props?.permissions,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,

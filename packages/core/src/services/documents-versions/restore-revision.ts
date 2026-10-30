@@ -1,4 +1,5 @@
 import collections from "../../libs/collection/collections.js";
+import getContentAccess from "../../libs/collection/field-access/get-content-access.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -6,17 +7,21 @@ import {
 	DocumentsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
+import upsertSingle from "../documents/upsert-single.js";
+import readStoredContent from "./helpers/read-stored-content.js";
 import promoteVersion from "./promote-version.js";
 
-/** Restores a document's own revision to latest, excluding request proposals and snapshots. */
+/** Restores a document's own revision to latest, excluding proposals and snapshots and preserving latest content in fields and bricks the user can't change. */
 const restoreRevision: ServiceFn<
 	[
 		{
 			documentId: number;
 			versionId: number;
 			userId: number | null;
+			authUser?: LucidActor;
 			collectionKey: string;
 		},
 	],
@@ -108,6 +113,27 @@ const restoreRevision: ServiceFn<
 		},
 	);
 	if (versionRes.error) return versionRes;
+
+	if (getContentAccess(collectionRes.data, data.authUser).restricted) {
+		const revisionRes = await readStoredContent(context, {
+			collection: collectionRes.data,
+			documentId: data.documentId,
+			versionId: data.versionId,
+		});
+		if (revisionRes.error) return revisionRes;
+
+		const savedRes = await upsertSingle(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			userId: data.userId,
+			authUser: data.authUser,
+			bricks: revisionRes.data?.bricks ?? [],
+			fields: revisionRes.data?.fields ?? [],
+		});
+		if (savedRes.error) return savedRes;
+
+		return { error: undefined, data: undefined };
+	}
 
 	const response = await promoteVersion(context, {
 		documentId: data.documentId,

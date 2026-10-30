@@ -39,8 +39,28 @@ export const Permissions = {
 } as const;
 
 export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
-export type DocumentPermission =
-	`documents:${string}:${"read" | "create" | "create-request" | "update" | "delete" | "delete-request" | "unpublish-request" | "restore" | "publish" | "review"}`;
+export type DocumentPermissionAction =
+	| "read"
+	| "create"
+	| "create-request"
+	| "update"
+	| "delete"
+	| "delete-request"
+	| "unpublish-request"
+	| "restore"
+	| "publish"
+	| "review";
+export type DocumentPermission<
+	TAction extends DocumentPermissionAction = DocumentPermissionAction,
+> = `documents:${string}:${TAction}`;
+
+/** Builds a collection permission key, eg. `documents:pages:read`, as core's `getCollectionPermission` does. */
+export const getCollectionPermission = <
+	TAction extends DocumentPermissionAction,
+>(
+	collectionKey: string,
+	action: TAction,
+): DocumentPermission<TAction> => `documents:${collectionKey}:${action}`;
 export type AgentPermission =
 	`agents:${string}:${"chat" | "manage-own-routines" | "manage-code-routines"}`;
 

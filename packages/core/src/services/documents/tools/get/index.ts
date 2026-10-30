@@ -63,6 +63,7 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 					options.collections,
 				),
 				actor: execution.actor,
+				reader: execution.authority,
 			});
 			if (result.error) return result;
 

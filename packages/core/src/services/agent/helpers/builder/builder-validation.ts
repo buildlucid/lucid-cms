@@ -4,6 +4,7 @@ import type CollectionBuilder from "../../../../libs/collection/builders/collect
 import describeErrorDetails from "../../../../libs/tools/describe-error-details.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
+import keepRestrictedContent from "../../../documents/helpers/keep-restricted-content.js";
 import checkValidateBricksFields from "../../../documents-bricks/checks/check-validate-bricks-fields.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 
@@ -28,10 +29,26 @@ const builderValidation = async (
 			? await resolveActorUser(context, { actor })
 			: undefined;
 
+	//* the editor never holds what the user can't see, so validate it as a save would store it
+	const content =
+		props.documentId === null
+			? undefined
+			: await keepRestrictedContent(context, {
+					collection: props.collection,
+					actor: user?.data,
+					documentId: props.documentId,
+					versionId: props.versionId ?? undefined,
+					bricks: props.content.bricks,
+					fields: props.content.fields,
+				});
+	if (content?.error) {
+		return [context.translate(content.error.message) ?? ""].filter(Boolean);
+	}
+
 	const checked = await checkValidateBricksFields(context, {
 		collection: props.collection,
-		bricks: props.content.bricks,
-		fields: props.content.fields,
+		bricks: content?.data.bricks ?? props.content.bricks,
+		fields: content?.data.fields ?? props.content.fields,
 		authUser: user?.data,
 		existingVersion:
 			props.documentId !== null && props.versionId !== null

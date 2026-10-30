@@ -29,6 +29,7 @@ const BannerBrick = new BrickBuilder("banner", {
 		validation: {
 			maxGroups: 3,
 		},
+		permissions: { update: true },
 	})
 	.addText("call_to_action_title", {
 		details: {
@@ -48,6 +49,7 @@ const BannerBrick = new BrickBuilder("banner", {
 		details: {
 			label: copy("admin:bricks.banner.tabs.config_tab.label"),
 		},
+		permissions: { update: true },
 	})
 	.addCheckbox("full_width", {
 		details: {

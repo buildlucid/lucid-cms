@@ -48,6 +48,7 @@ class UserCustomField extends CustomField<"user"> {
 			default: this.props?.default ?? [],
 			index: this.props?.index,
 			multiple: this.props?.multiple,
+			permissions: this.props?.permissions,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,

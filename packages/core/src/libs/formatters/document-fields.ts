@@ -14,6 +14,7 @@ import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import fieldConfigs from "../collection/custom-fields/field-configs.js";
+import { fieldHooks } from "../collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
@@ -417,16 +418,10 @@ const flattenFieldValue = (
 	return null;
 };
 
-const isStructuralFieldConfig = (
-	config: FieldConfig<FieldTypes>,
-): config is FieldConfig<"section"> | FieldConfig<"collapsible"> => {
-	return config.type === "section" || config.type === "collapsible";
-};
-
 /**
  * Walks a content field tree level and collects flattened values into `target`.
- * Tabs are transparent, sections/collapsibles shape their children based on
- * their `output` config and repeater groups recurse with their child configs.
+ * Containers place their children inline or nested as their `contentChildren`
+ * hook says, and repeater groups recurse with their child configs.
  */
 const collectContentFieldValues = (
 	target: DocumentFieldValueMap,
@@ -434,17 +429,13 @@ const collectContentFieldValues = (
 	configs: FieldConfig<FieldTypes>[],
 ): void => {
 	for (const config of configs) {
-		if (config.type === "tab") {
-			collectContentFieldValues(target, fieldMap, config.fields);
-			continue;
-		}
-
-		if (isStructuralFieldConfig(config)) {
-			if (config.output === "inline") {
-				collectContentFieldValues(target, fieldMap, config.fields);
+		const children = fieldHooks[config.type].contentChildren?.(config);
+		if (children) {
+			if (children.output === "inline") {
+				collectContentFieldValues(target, fieldMap, children.fields);
 			} else {
 				const nested: DocumentFieldValueMap = {};
-				collectContentFieldValues(nested, fieldMap, config.fields);
+				collectContentFieldValues(nested, fieldMap, children.fields);
 				target[config.key] = nested;
 			}
 			continue;

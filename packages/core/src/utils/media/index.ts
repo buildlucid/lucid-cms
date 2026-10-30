@@ -21,6 +21,7 @@ export type {
 } from "./media-access.js";
 export {
 	canAccessMedia,
+	canBrowseMedia,
 	getMediaListAccess,
 	getMediaOwnership,
 } from "./media-access.js";

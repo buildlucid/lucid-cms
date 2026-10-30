@@ -7,8 +7,10 @@ import {
 	createSignal,
 } from "solid-js";
 import { MediaSelect } from "@/components/MediaSelect/MediaSelect";
+import { Permissions } from "@/constants/permissions";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
+import userStore from "@/store/userStore/userStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
@@ -71,6 +73,12 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	// Render
 	return (
 		<MediaSelect
+			canBrowse={
+				userStore.get.hasPermission([
+					Permissions.MediaRead,
+					Permissions.MediaReadAll,
+				]).some
+			}
 			id={brickHelpers.customFieldId({
 				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,

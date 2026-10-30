@@ -7,6 +7,7 @@ import {
 	createSignal,
 	Index,
 	type JSXElement,
+	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
@@ -20,6 +21,7 @@ import QuerySort from "@/components/QuerySort/QuerySort";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import Table from "@/components/Table/Table";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
+import { Permissions } from "@/constants/permissions";
 import useQueryState, {
 	booleanFilter,
 	numberFilter,
@@ -28,6 +30,7 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import type { UserRelationRef } from "@/utils/relation-field-helpers";
 import { userResponseToRef } from "@/utils/relation-field-helpers";
@@ -133,6 +136,10 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	});
 
 	const isLoading = createMemo(() => users.isLoading);
+	//* email addresses, and filtering or sorting by them, need users:read
+	const canReadEmails = createMemo(
+		() => userStore.get.hasPermission([Permissions.UsersRead]).all,
+	);
 	const roleOptions = createMemo(() =>
 		(roles.data?.data ?? []).map((role) => ({
 			value: String(role.id),
@@ -196,10 +203,9 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 								label: T()("common.last.name"),
 								key: "lastName",
 							},
-							{
-								label: T()("common.email"),
-								key: "email",
-							},
+							...(canReadEmails()
+								? [{ label: T()("common.email"), key: "email" }]
+								: []),
 							{
 								label: T()("users.status.locked.label"),
 								key: "isLocked",
@@ -236,11 +242,15 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						key: "lastName",
 						type: "text",
 					},
-					{
-						label: T()("common.email"),
-						key: "email",
-						type: "text",
-					},
+					...(canReadEmails()
+						? [
+								{
+									label: T()("common.email"),
+									key: "email",
+									type: "text" as const,
+								},
+							]
+						: []),
 					{
 						label: T()("common.role"),
 						key: "roleIds",
@@ -299,11 +309,15 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 							key: "lastName",
 							icon: <TbOutlineLetterT />,
 						},
-						{
-							label: T()("common.email"),
-							key: "email",
-							icon: <TbOutlineMail />,
-						},
+						...(canReadEmails()
+							? [
+									{
+										label: T()("common.email"),
+										key: "email",
+										icon: <TbOutlineMail />,
+									},
+								]
+							: []),
 					]}
 					loading={isLoading()}
 					padding="sm"
@@ -333,7 +347,9 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 								</Table.Cell>
 								<Table.Text column="firstName" text={user().firstName} />
 								<Table.Text column="lastName" text={user().lastName} />
-								<Table.Text column="email" text={user().email} />
+								<Show when={canReadEmails()}>
+									<Table.Text column="email" text={user().email} />
+								</Show>
 							</Table.Row>
 						)}
 					</Index>

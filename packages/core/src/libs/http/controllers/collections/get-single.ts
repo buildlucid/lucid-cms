@@ -43,6 +43,7 @@ const getSingleController = factory.createHandlers(
 			},
 		})(context, {
 			key,
+			user: c.get("auth"),
 		});
 		if (collectionRes.error) throw new LucidAPIError(collectionRes.error);
 

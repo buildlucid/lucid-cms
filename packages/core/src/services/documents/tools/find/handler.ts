@@ -1,4 +1,5 @@
 import type z from "zod";
+import type { FieldAccessActor } from "../../../../libs/collection/field-access/types.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { getPagination } from "../../../../libs/tools/pagination.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
@@ -13,9 +14,16 @@ import {
 } from "../helpers/project-document.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
-/** Finds readable documents using the same nested filters as the toolkit. */
+/** Finds readable documents with toolkit nested filters, excluding hidden fields from results, filters and sorts. */
 const findDocuments: ServiceFn<
-	[{ input: z.output<typeof inputSchema>; allowedCollectionKeys: string[] }],
+	[
+		{
+			input: z.output<typeof inputSchema>;
+			allowedCollectionKeys: string[];
+			/** Whose field permissions apply, with external integrations reading every field their scopes allow. */
+			reader?: FieldAccessActor;
+		},
+	],
 	{ output: z.output<typeof outputSchema> }
 > = async (context, props) => {
 	const collection = context.config.collections.find(
@@ -47,6 +55,7 @@ const findDocuments: ServiceFn<
 		versionType: props.input.version,
 		query: props.input.query,
 		allowedCollectionKeys: props.allowedCollectionKeys,
+		reader: props.reader,
 	});
 	if (documentsRes.error) return documentsRes;
 

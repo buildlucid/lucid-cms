@@ -13,6 +13,8 @@ interface LabelProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	/** Renders lock and locale markers unless disabled because `startSlot` already supplies them. */
+	markers?: boolean;
 	/** Before the label text, after any field markers. */
 	startSlot?: JSXElement;
 	rightSlot?: JSXElement;
@@ -41,11 +43,13 @@ export const FormLabel: Component<LabelProps> = (props) => {
 							},
 						)}
 					>
-						<FieldLabelMarkers
-							localised={props.localised}
-							altLocaleError={props.altLocaleError}
-							fieldColumnIsMissing={props.fieldColumnIsMissing}
-						/>
+						<Show when={props.markers !== false}>
+							<FieldLabelMarkers
+								localised={props.localised}
+								altLocaleError={props.altLocaleError}
+								fieldColumnIsMissing={props.fieldColumnIsMissing}
+							/>
+						</Show>
 						{props.startSlot}
 						{props?.label}
 						<Show when={props.required}>

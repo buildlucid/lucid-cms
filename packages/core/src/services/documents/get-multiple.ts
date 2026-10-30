@@ -26,6 +26,7 @@ import {
 	groupDocumentFilters,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkFilterAccess from "./checks/check-filter-access.js";
 import collectDocumentRefTargets from "./helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveDocumentRefs from "./helpers/resolve-document-refs.js";
@@ -104,6 +105,17 @@ const getMultiple: ServiceFn<
 		data.collectionKey,
 	);
 	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
+
+	const filterAccessRes = checkFilterAccess({
+		collection: collectionRes.data,
+		collections: collectionsRes.data,
+		bricksTableSchema: bricksTableSchemaRes.data,
+		reader: data.user,
+		filter: data.query.filter,
+		filterOr: data.query.filterOr,
+		sortKeys: data.query.sort?.map((sort) => sort.key),
+	});
+	if (filterAccessRes.error) return filterAccessRes;
 
 	const documentFieldsTableSchemaRes = await getDocumentFieldsTableSchema(
 		context,
@@ -219,6 +231,7 @@ const getMultiple: ServiceFn<
 			includeMeta: true,
 		}),
 		host: baseUrl,
+		reader: data.user,
 	});
 	if (refsRes.error) return refsRes;
 
@@ -237,6 +250,7 @@ const getMultiple: ServiceFn<
 		hasFields: true,
 		hasBricks: false,
 		bricksTableSchema: bricksTableSchemaRes.data,
+		reader: data.user,
 	});
 
 	const afterFetchRes = await executeHooks(

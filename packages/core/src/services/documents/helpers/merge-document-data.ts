@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import {
 	type ContentContext,
 	type DocumentObjectShape,
@@ -65,7 +66,7 @@ const mergeObject = (
 	return { error: undefined, data };
 };
 
-/** Sets array membership and order, merging items by ref and brick key and assigning defaults and refs to new items. */
+/** Merges arrays by ref and brick key, assigns new defaults and refs, preserves locked repeater membership and order, and allows locked bricks to move without addition or removal. */
 export const mergeItems = (
 	shape: Extract<DocumentShape, { kind: "items" | "bricks" }>,
 	input: unknown,
@@ -180,6 +181,23 @@ export const mergeItems = (
 		);
 		if (merged.error) return merged;
 
+		if (
+			shape.kind === "bricks" &&
+			typeof key === "string" &&
+			shape.locked?.has(key) &&
+			previous === undefined
+		) {
+			return {
+				error: {
+					status: 403,
+					message: copy("server:core.documents.authoring.brick.locked", {
+						data: { key, path },
+					}),
+				},
+				data: undefined,
+			};
+		}
+
 		data.push({
 			ref,
 			...(typeof key === "string" ? { key } : {}),
@@ -187,10 +205,54 @@ export const mergeItems = (
 		});
 	}
 
+	const currentItems = Array.isArray(current)
+		? current.filter((item: unknown) => isPlainObject(item))
+		: [];
+	if (
+		shape.kind === "items" &&
+		shape.locked &&
+		!isDeepStrictEqual(
+			data.map((item) => item.ref),
+			currentItems.map((item) => item.ref),
+		)
+	) {
+		return {
+			error: {
+				status: 403,
+				message: copy("server:core.documents.authoring.items.locked", {
+					data: { path },
+				}),
+			},
+			data: undefined,
+		};
+	}
+
+	//* locked builder bricks can move but not be removed; embedded bricks follow their rich text
+	const removed =
+		shape.kind === "bricks" && !shape.embedded
+			? currentItems.find(
+					(item) =>
+						typeof item.key === "string" &&
+						shape.locked?.has(item.key) &&
+						!refs.has(String(item.ref)),
+				)
+			: undefined;
+	if (removed) {
+		return {
+			error: {
+				status: 403,
+				message: copy("server:core.documents.authoring.brick.locked", {
+					data: { key: String(removed.key), path },
+				}),
+			},
+			data: undefined,
+		};
+	}
+
 	return { error: undefined, data };
 };
 
-/** Merges schema objects by key and array items by ref, replacing whole field values. */
+/** Merges schema objects by key and arrays by ref, replacing whole field values while accepting locked values only when resent unchanged. */
 export const mergeValue = (
 	shape: DocumentShape,
 	input: unknown,
@@ -199,13 +261,25 @@ export const mergeValue = (
 ): Awaited<ServiceResponse<unknown>> => {
 	switch (shape.kind) {
 		case "value": {
-			const data =
-				input === undefined
-					? current === undefined
-						? structuredClone(shape.defaultValue)
-						: current
-					: input;
-			return { error: undefined, data };
+			const previous =
+				current === undefined ? structuredClone(shape.defaultValue) : current;
+			if (
+				shape.locked &&
+				input !== undefined &&
+				!isDeepStrictEqual(input, previous)
+			) {
+				return {
+					error: {
+						status: 403,
+						message: copy("server:core.documents.authoring.field.locked", {
+							data: { path },
+						}),
+					},
+					data: undefined,
+				};
+			}
+
+			return { error: undefined, data: input === undefined ? previous : input };
 		}
 		case "object":
 			return mergeObject(shape, input, current, path);

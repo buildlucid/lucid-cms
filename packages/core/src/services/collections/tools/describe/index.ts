@@ -66,6 +66,7 @@ export const describeCollectionAgentTool = (
 					execution.authority,
 					options.collections,
 				),
+				reader: execution.authority,
 			});
 			if (result.error) return result;
 

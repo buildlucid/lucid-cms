@@ -146,6 +146,7 @@ const getSingle: ServiceFn<
 				includeMeta: true,
 				workflows: [workflowRes.data],
 			}),
+			reader: data.authUser,
 		});
 		if (bricksRes.error) return bricksRes;
 
@@ -163,6 +164,7 @@ const getSingle: ServiceFn<
 				locales: context.config.localization.locales,
 			},
 			workflow: workflowRes.data,
+			reader: data.authUser,
 		});
 		refs = include.refs !== null ? (bricksRes.data.refs ?? {}) : undefined;
 	} else {
@@ -180,6 +182,7 @@ const getSingle: ServiceFn<
 				locales: context.config.localization.locales,
 			},
 			workflow: workflowRes.data,
+			reader: data.authUser,
 		});
 	}
 	if (!include.bricks && include.refs === null) {

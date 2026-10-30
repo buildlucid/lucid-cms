@@ -4,6 +4,7 @@ import type { LucidUser } from "../../types/hono.js";
 import type { MediaOwnership } from "../../types/response.js";
 import {
 	canAccessMedia,
+	canBrowseMedia,
 	getMediaListAccess,
 	type MediaAction,
 } from "./media-access.js";
@@ -66,9 +67,50 @@ describe("media access", () => {
 		expect(getMediaListAccess({ type: "user", user: other })).toEqual({
 			type: "owner",
 			userId: other.id,
+			library: true,
 		});
 		expect(getMediaListAccess({ type: "user", user: auditor })).toEqual({
 			type: "all",
 		});
+	});
+
+	test("browsing library media needs media:read or read-all, while personal uploads stay with their owner", () => {
+		const library: MediaOwnership = { type: "library" };
+
+		expect(getMediaListAccess({ type: "user", user: owner })).toEqual({
+			type: "owner",
+			userId: owner.id,
+			library: false,
+		});
+		expect(
+			canBrowseMedia({
+				actor: { type: "user", user: owner },
+				ownership: library,
+			}),
+		).toBe(false);
+		expect(
+			canBrowseMedia({
+				actor: { type: "user", user: other },
+				ownership: library,
+			}),
+		).toBe(true);
+		expect(
+			canBrowseMedia({
+				actor: { type: "user", user: owner },
+				ownership: upload,
+			}),
+		).toBe(true);
+	});
+
+	test("read-all browses the library in listings and details alike", () => {
+		expect(getMediaListAccess({ type: "user", user: auditor })).toEqual({
+			type: "all",
+		});
+		expect(
+			canBrowseMedia({
+				actor: { type: "user", user: auditor },
+				ownership: { type: "library" },
+			}),
+		).toBe(true);
 	});
 });

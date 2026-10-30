@@ -1,10 +1,13 @@
 import type { Refs } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
+import type { FieldAccessActor } from "../../../libs/collection/field-access/types.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
 } from "../../../libs/db/tables/index.js";
+import { Permissions } from "../../../libs/permission/definitions.js";
 import type { DocumentRefVersionTypeResolver } from "../../../libs/refs/documents/types.js";
 import {
 	addRefTarget,
@@ -22,6 +25,7 @@ import type { BrickQueryResponse } from "../../../libs/repositories/document-bri
 import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import collectRefTargets from "../../documents-bricks/helpers/collect-ref-targets.js";
+import filterReadableRefs from "./filter-readable-refs.js";
 
 type ResolveDocumentRefsResult = {
 	/** All hydrated refs needed while formatting this response. */
@@ -47,15 +51,18 @@ const resolveDocumentRefs: ServiceFn<
 			/** Built-in document refs contributed outside custom field storage. */
 			refTargets?: Iterable<RefTarget>;
 			allowedDocumentCollectionKeys?: string[];
-			/** Content API responses flatten relation ref fields, leave out user emails and email recipients, and only include library media. */
+			/** Content API mode flattens relation fields, omits user emails and email recipients, and limits media to the library; admin readers need the matching `users:read` or `email:read` permission for those details. */
 			content?: boolean;
 			host: string;
+			/** Excludes refs linked only by hidden content and related documents' hidden fields; omitted for trusted and external reads. */
+			reader?: FieldAccessActor;
 		},
 	],
 	ResolveDocumentRefsResult
 > = async (context, data) => {
 	const publicResources =
 		data.refResources === "all" ? undefined : (data.refResources ?? []);
+	const refTargets = Array.from(data.refTargets ?? []);
 	const targetsRes = await collectRefTargets(context, {
 		collection: data.collection,
 		brickSchema: data.brickSchema,
@@ -64,10 +71,16 @@ const resolveDocumentRefs: ServiceFn<
 	});
 	if (targetsRes.error) return targetsRes;
 
-	for (const target of data.refTargets ?? []) {
+	for (const target of refTargets) {
 		if (!shouldIncludeRefResource(target.resource, publicResources)) continue;
 		addRefTarget(targetsRes.data, target);
 	}
+
+	//* readers see user emails and email recipients only with the matching read permission; trusted callers pass no reader
+	const readerCan = (permission: string) =>
+		data.reader === undefined ||
+		data.reader.superAdmin ||
+		data.reader.permissions?.includes(permission) === true;
 
 	const mediaFormat = {
 		host: data.host,
@@ -89,6 +102,7 @@ const resolveDocumentRefs: ServiceFn<
 					host: data.host,
 					bricksTableSchema: data.brickSchema,
 					flattenDocumentFields: data.content,
+					reader: data.reader,
 				},
 			}),
 		media: (targets) =>
@@ -101,12 +115,17 @@ const resolveDocumentRefs: ServiceFn<
 		users: (targets) =>
 			registeredRefResources.users.resolve(context, {
 				targets,
-				format: { ...mediaFormat, email: data.content !== true },
+				format: {
+					...mediaFormat,
+					email: data.content !== true && readerCan(Permissions.UsersRead),
+				},
 			}),
 		emails: (targets) =>
 			registeredRefResources.emails.resolve(context, {
 				targets,
-				format: { delivery: data.content !== true },
+				format: {
+					delivery: data.content !== true && readerCan(Permissions.EmailRead),
+				},
 			}),
 		agents: (targets) =>
 			registeredRefResources.agents.resolve(context, { targets }),
@@ -117,11 +136,30 @@ const resolveDocumentRefs: ServiceFn<
 	});
 	if (refsRes.error) return refsRes;
 
+	const access =
+		data.reader === undefined
+			? undefined
+			: getContentAccess(data.collection, data.reader);
+
 	return {
 		error: undefined,
 		data: {
 			hydratedRefs: refsRes.data,
-			refs: selectRefs(refsRes.data, data.refResources),
+			refs: selectRefs(
+				access?.restricted
+					? filterReadableRefs({
+							access,
+							collection: data.collection,
+							brickSchema: data.brickSchema,
+							responses: data.responses,
+							config: context.config,
+							host: data.host,
+							refTargets,
+							refs: refsRes.data,
+						})
+					: refsRes.data,
+				data.refResources,
+			),
 		},
 	};
 };

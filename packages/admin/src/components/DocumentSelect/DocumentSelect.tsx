@@ -60,6 +60,8 @@ interface DocumentSelectProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	/** Whether the user can read any selectable collection, with existing selections still removable when `false`. */
+	canBrowse?: boolean;
 }
 
 const DOCUMENT_SELECT_DRAG_DROP_KEY = "document-select-zone";
@@ -323,16 +325,27 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									},
 								)}
 							>
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={openDocuSelectModal}
-									disabled={props.disabled || !canAddMore()}
-									class="capitalize"
+								<Show
+									when={props.canBrowse !== false}
+									fallback={
+										<Show when={selectedDocumentItems().length === 0}>
+											<p class="text-sm text-muted">
+												{T()("fields.select.no.permission")}
+											</p>
+										</Show>
+									}
 								>
-									{T()("documents.select.action")}
-								</Button>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onClick={openDocuSelectModal}
+										disabled={props.disabled || !canAddMore()}
+										class="capitalize"
+									>
+										{T()("documents.select.action")}
+									</Button>
+								</Show>
 								<Show when={selectedDocumentItems().length > 0}>
 									<p class="text-sm text-muted">
 										<RelationCount
@@ -378,17 +391,19 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							}
 							actions={
 								<div class="flex items-center gap-0.5 opacity-100 transition-opacity duration-200 md:opacity-0 group-hover:opacity-100">
-									<Button
-										type="button"
-										variant="ghost"
-										size="xs"
-										shape="square"
-										onClick={openDocuSelectModal}
-										disabled={props.disabled}
-										aria-label={T()("common.edit")}
-									>
-										<TbOutlinePencil size={12} />
-									</Button>
+									<Show when={props.canBrowse !== false}>
+										<Button
+											type="button"
+											variant="ghost"
+											size="xs"
+											shape="square"
+											onClick={openDocuSelectModal}
+											disabled={props.disabled}
+											aria-label={T()("common.edit")}
+										>
+											<TbOutlinePencil size={12} />
+										</Button>
+									</Show>
 									<Button
 										type="button"
 										variant="danger-ghost"
@@ -416,16 +431,25 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 						/>
 					</Match>
 					<Match when={typeof selectedDocumentValue()?.id !== "number"}>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={openDocuSelectModal}
-							disabled={props.disabled || !canAddMore()}
-							class="capitalize"
+						<Show
+							when={props.canBrowse !== false}
+							fallback={
+								<p class="text-sm text-muted">
+									{T()("fields.select.no.permission")}
+								</p>
+							}
 						>
-							{T()("documents.select.action")}
-						</Button>
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={openDocuSelectModal}
+								disabled={props.disabled || !canAddMore()}
+								class="capitalize"
+							>
+								{T()("documents.select.action")}
+							</Button>
+						</Show>
 					</Match>
 				</Switch>
 			</div>

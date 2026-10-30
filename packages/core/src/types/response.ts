@@ -118,6 +118,7 @@ export type {
 	EmailRef,
 	EmailTransaction,
 	ErrorResponse,
+	FieldPermissionKeys,
 	fieldValueKind,
 	GroupDocumentField,
 	HomeWidgetPreference,

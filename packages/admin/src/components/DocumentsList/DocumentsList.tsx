@@ -560,7 +560,7 @@ export const DocumentsList: Component<{
 								reorderable={rowsAreReorderable()}
 								actions={[
 									{
-										label: getActionLabel(T()("preview.copy.group")),
+										label: T()("preview.copy.group"),
 										type: "group",
 										icon: "link",
 										excludeFromRowClick: true,
@@ -575,7 +575,7 @@ export const DocumentsList: Component<{
 											props.state.collection?.capabilities.preview === true,
 										actions: [
 											{
-												label: getActionLabel(T()("preview.copy.scoped")),
+												label: T()("preview.copy.scoped"),
 												type: "button",
 												icon: "lock",
 												onClick: () => void copyPreviewUrl(doc().id, "scoped"),
@@ -588,7 +588,7 @@ export const DocumentsList: Component<{
 												sortOrder: 0,
 											},
 											{
-												label: getActionLabel(T()("preview.copy.navigable")),
+												label: T()("preview.copy.navigable"),
 												type: "button",
 												icon: "share",
 												onClick: () =>

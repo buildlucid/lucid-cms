@@ -1,4 +1,6 @@
-import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
+import registeredFields, {
+	fieldHooks,
+} from "../../../libs/collection/custom-fields/registered-fields.js";
 import { storageModes } from "../../../libs/collection/custom-fields/storage/index.js";
 import type {
 	ContentContext,
@@ -21,14 +23,10 @@ const fromDocumentInput = (
 	): Record<string, unknown> => {
 		const result: Record<string, unknown> = {};
 		for (const field of tree) {
-			if (
-				field.type === "tab" ||
-				field.type === "section" ||
-				field.type === "collapsible"
-			) {
-				const child = fieldValues(field.fields, values);
-				if (field.type === "tab" || field.output === "inline")
-					Object.assign(result, child);
+			const children = fieldHooks[field.type].contentChildren?.(field);
+			if (children) {
+				const child = fieldValues(children.fields, values);
+				if (children.output === "inline") Object.assign(result, child);
 				else result[field.key] = child;
 				continue;
 			}

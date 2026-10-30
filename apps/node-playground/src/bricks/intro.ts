@@ -28,6 +28,7 @@ const IntroBrick = new BrickBuilder("intro", {
 		validation: {
 			type: "audio",
 		},
+		permissions: { read: true },
 	})
 	.addTab("advanced_tab", {
 		details: {

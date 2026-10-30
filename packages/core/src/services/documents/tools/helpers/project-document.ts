@@ -4,6 +4,7 @@ import type {
 	FieldConfig,
 	FieldTypes,
 } from "../../../../libs/collection/custom-fields/types.js";
+import mapContentFields from "../../../../libs/collection/helpers/map-content-fields.js";
 import {
 	agentNameSchema,
 	formatUser,
@@ -103,46 +104,19 @@ export const projectFieldMap = (
 	fields: Record<string, unknown>,
 	locale: string | null,
 	fieldTree: FieldConfig<FieldTypes>[],
-): Record<string, unknown> => {
-	const result = { ...fields };
-	for (const field of fieldTree) {
-		const value = result[field.key];
-		if (
-			field.type === "tab" ||
-			field.type === "section" ||
-			field.type === "collapsible"
-		) {
-			if (field.type === "tab" || field.output === "inline") {
-				Object.assign(result, projectFieldMap(result, locale, field.fields));
-			} else if (isPlainObject(value)) {
-				result[field.key] = projectFieldMap(value, locale, field.fields);
-			}
-			continue;
-		}
-
-		if (field.type === "repeater") {
-			if (Array.isArray(value)) {
-				result[field.key] = value.map((group: unknown) =>
-					isPlainObject(group)
-						? projectFieldMap(group, locale, field.fields)
-						: group,
-				);
-			}
-			continue;
-		}
-
-		if (value === undefined) continue;
-		const localized =
-			locale !== null &&
-			"localized" in field &&
-			field.localized === true &&
-			isPlainObject(value)
-				? (value[locale] ?? null)
-				: value;
-		const { formatToolValue } = fieldHooks[field.type];
-		result[field.key] = formatToolValue
-			? formatToolValue(localized)
-			: localized;
-	}
-	return result;
-};
+): Record<string, unknown> =>
+	mapContentFields(fields, fieldTree, {
+		//* translations are picked per value below, so the walk hands over the whole map
+		translated: () => false,
+		map: (value, field) => {
+			const localized =
+				locale !== null &&
+				"localized" in field &&
+				field.localized === true &&
+				isPlainObject(value)
+					? (value[locale] ?? null)
+					: value;
+			const { formatToolValue } = fieldHooks[field.type];
+			return formatToolValue ? formatToolValue(localized) : localized;
+		},
+	});

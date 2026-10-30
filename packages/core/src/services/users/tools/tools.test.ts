@@ -14,11 +14,13 @@ import {
 } from "../../../libs/tools/execute-tool.js";
 import { agentTools, mcpTools } from "../../../libs/tools/lucid-tools.js";
 import type { AgentToolDefinition } from "../../../libs/tools/types.js";
+import type { LucidUser } from "../../../types/hono.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import syncCollections from "../../sync/sync-collections.js";
 import syncLocales from "../../sync/sync-locales.js";
+import getUsers from "../get-multiple.js";
 import { outputSchema } from "./find/schema.js";
 
 const fixture = getTestConfig();
@@ -411,4 +413,41 @@ test("toolkit reads users with what the actor could see in the admin", async () 
 	expect(await users.getSingle({ id: deleted })).toMatchObject({
 		data: { id: deleted, isDeleted: true },
 	});
+});
+
+test("the user directory leaves out emails, and ignores email filters, without users:read", async () => {
+	const { email } = await context.db.kysely
+		.selectFrom("lucid_users")
+		.select("email")
+		.where("id", "=", grace)
+		.executeTakeFirstOrThrow();
+	const list = (authUser: LucidUser) =>
+		getUsers(context, {
+			query: { filter: { email: { value: email } }, page: 1, perPage: -1 },
+			authUser,
+		});
+	const actor = (id: number, superAdmin: boolean): LucidUser => ({
+		id,
+		username: "actor",
+		email: "actor@example.test",
+		superAdmin,
+		permissions: [],
+	});
+
+	const asEditor = await list(actor(editor, false));
+	assert(asEditor.data, JSON.stringify(asEditor.error));
+	expect(asEditor.data.data.length).toBeGreaterThan(1);
+	expect(
+		asEditor.data.data
+			.filter((user) => user.id !== editor)
+			.every((user) => user.email === undefined),
+	).toBe(true);
+	expect(
+		asEditor.data.data.find((user) => user.id === editor)?.email,
+	).toBeDefined();
+
+	const asAdmin = await list(actor(admin, true));
+	assert(asAdmin.data, JSON.stringify(asAdmin.error));
+	expect(asAdmin.data.data.map((user) => user.id)).toEqual([grace]);
+	expect(asAdmin.data.data[0]?.email).toBe(email);
 });

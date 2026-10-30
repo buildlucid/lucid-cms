@@ -3,7 +3,9 @@ import type { TypeGenerationFile } from "../../type-generation/types.js";
 import type BrickBuilder from "../builders/brick-builder/index.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../builders/field-builder/index.js";
-import registeredFields from "../custom-fields/registered-fields.js";
+import registeredFields, {
+	fieldHooks,
+} from "../custom-fields/registered-fields.js";
 import { storageModes } from "../custom-fields/storage/index.js";
 import type {
 	ContentFieldTypeGenerationResult,
@@ -165,9 +167,9 @@ const renderFilterTree = (tree: FilterTreeNode): string => {
 };
 
 /**
- * Collects the rendered properties for one content field list. Tabs are
- * transparent, sections/collapsibles nest or inline their children based on
- * their `output` config to match the content response shape.
+ * Collects the rendered properties for one content field list. Containers
+ * nest or inline their children as their `contentChildren` hook says, to
+ * match the content response shape.
  */
 const collectFieldMapProperties = (
 	fields: FieldConfig<FieldTypes>[],
@@ -176,26 +178,17 @@ const collectFieldMapProperties = (
 	declarations: string[],
 ): void => {
 	for (const field of fields) {
-		if (field.type === "tab") {
-			collectFieldMapProperties(
-				field.fields,
-				context,
-				properties,
-				declarations,
-			);
-			continue;
-		}
-
-		if (field.type === "section" || field.type === "collapsible") {
-			if (field.output === "inline") {
+		const children = fieldHooks[field.type].contentChildren?.(field);
+		if (children) {
+			if (children.output === "inline") {
 				collectFieldMapProperties(
-					field.fields,
+					children.fields,
 					context,
 					properties,
 					declarations,
 				);
 			} else {
-				const nested = renderFieldMap(field.fields, context);
+				const nested = renderFieldMap(children.fields, context);
 				declarations.push(...nested.declarations);
 				properties.push(`${stringLiteral(field.key)}: ${nested.typeText};`);
 			}

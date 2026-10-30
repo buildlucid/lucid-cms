@@ -22,6 +22,12 @@ import type {
 	FieldTypes,
 	FieldUIConfig,
 } from "../../../libs/collection/custom-fields/types.js";
+import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
+import getEmbeddedBrickAccess from "../../../libs/collection/field-access/get-embedded-brick-access.js";
+import type {
+	ContentAccess,
+	FieldAccess,
+} from "../../../libs/collection/field-access/types.js";
 import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
@@ -32,6 +38,7 @@ import fetchValidationData, {
 	type ValidationData,
 } from "../helpers/fetch-validation-data.js";
 import { filterReachableEmbeddedBricks } from "../helpers/prepare-bricks-and-fields.js";
+import restrictValidationData from "../helpers/restrict-validation-data.js";
 import checkDuplicateRefs from "./check-duplicate-refs.js";
 
 const isRequiredFieldConfig = (
@@ -300,10 +307,39 @@ const checkValidateBricksFields: ServiceFn<
 	});
 	if (refDataRes.error) return refDataRes;
 
+	//* content the actor can see may only add links they can read; hidden content keeps its stored links
+	const access = data.authUser
+		? getContentAccess(data.collection, data.authUser)
+		: undefined;
+	const restrictedRes =
+		data.authUser && access
+			? await restrictValidationData(context, {
+					validationData: refDataRes.data,
+					authUser: data.authUser,
+					access,
+					collection: data.collection,
+					existingVersion: data.existingVersion,
+				})
+			: undefined;
+	if (restrictedRes?.error) return restrictedRes;
+	const restricted =
+		access && restrictedRes
+			? {
+					validationData: restrictedRes.data,
+					access,
+					//* embedded bricks take the narrowest access of the fields holding them
+					embedded: getEmbeddedBrickAccess(access, {
+						fields: data.fields,
+						bricks,
+					}),
+				}
+			: undefined;
+
 	const brickErrors = validateBricks({
 		bricks,
 		collection: data.collection,
 		validationData: refDataRes.data,
+		restricted,
 		defaultLocale: localization.defaultLocale,
 		locales: localization.locales,
 	});
@@ -311,6 +347,10 @@ const checkValidateBricksFields: ServiceFn<
 		fields: data.fields,
 		instance: data.collection,
 		validationData: refDataRes.data,
+		restricted: restricted && {
+			validationData: restricted.validationData,
+			access: restricted.access.fields,
+		},
 		meta: {
 			localized: localization.enabled,
 			defaultLocale: localization.defaultLocale,
@@ -347,6 +387,11 @@ const validateBricks = (props: {
 	bricks: Array<BrickInputSchema>;
 	collection: CollectionBuilder;
 	validationData: ValidationData;
+	restricted?: {
+		validationData: ValidationData;
+		access: ContentAccess;
+		embedded: ReadonlyMap<string, FieldAccess>;
+	};
 	defaultLocale: string | null;
 	locales: string[];
 }): Array<BrickError> => {
@@ -405,6 +450,20 @@ const validateBricks = (props: {
 			fields: brick.fields || [],
 			instance: instance,
 			validationData: props.validationData,
+			//* hidden bricks keep their stored links, including embedded bricks hidden by the field holding them
+			restricted:
+				props.restricted &&
+				!(
+					brick.type === "embedded" &&
+					props.restricted.embedded.get(brick.ref) === "hidden"
+				)
+					? {
+							validationData: props.restricted.validationData,
+							access:
+								props.restricted.access.bricks.get(brick.key)?.fields ??
+								new Map(),
+						}
+					: undefined,
 			meta: {
 				localized: props.collection.getData.localized,
 				defaultLocale: props.defaultLocale,
@@ -431,6 +490,11 @@ export const recursiveFieldValidate = (props: {
 	fields: Array<FieldInputSchema>;
 	instance: CollectionBuilder | BrickBuilder;
 	validationData: ValidationData;
+	/** Validation data for content the actor can see, where only links they can read may be added; hidden fields keep `validationData`. */
+	restricted?: {
+		validationData: ValidationData;
+		access: ReadonlyMap<string, FieldAccess>;
+	};
 	parentTreeFieldKey?: string;
 	parentScopes?: ConditionScopeLevel[];
 	structuralConditions?: Map<string, FieldConditionConfig[]>;
@@ -518,6 +582,7 @@ export const recursiveFieldValidate = (props: {
 					fields: group.fields,
 					instance: props.instance,
 					validationData: props.validationData,
+					restricted: props.restricted,
 					parentTreeFieldKey: field.key,
 					parentScopes: scopes,
 					structuralConditions,
@@ -551,7 +616,10 @@ export const recursiveFieldValidate = (props: {
 		const fieldErrors = validateField({
 			field: field,
 			instance: fieldInstance,
-			validationData: props.validationData,
+			validationData:
+				props.restricted && props.restricted.access.get(field.key) !== "hidden"
+					? props.restricted.validationData
+					: props.validationData,
 			meta: props.meta,
 			isLocaleVisible: (localeCode) =>
 				fieldVisibleForLocale(

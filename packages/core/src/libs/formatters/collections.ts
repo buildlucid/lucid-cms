@@ -7,6 +7,12 @@ import type {
 	FieldTypes,
 	SharedFieldConfig,
 } from "../collection/custom-fields/types.js";
+import getContentAccess from "../collection/field-access/get-content-access.js";
+import type {
+	BrickAccess,
+	FieldAccess,
+	FieldAccessActor,
+} from "../collection/field-access/types.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
 import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
 import { hydrateAdminCopyDefaults } from "../i18n/hydrate-admin-copy-defaults.js";
@@ -14,6 +20,21 @@ import {
 	resolveCollectionPermission,
 	resolveCollectionPermissions,
 } from "../permission/collection-permissions.js";
+import { resolveFieldPermissions } from "../permission/field-permissions.js";
+
+/** The collection, and brick when there is one, that generated field permissions belong to. */
+type PermissionOwner = { collection: string; brick?: string };
+
+type ConditionExpression =
+	| { field: string }
+	| { all?: ConditionExpression[]; any?: ConditionExpression[] };
+
+const conditionFields = (expression: ConditionExpression): string[] =>
+	"field" in expression
+		? [expression.field]
+		: [...(expression.all ?? []), ...(expression.any ?? [])].flatMap(
+				conditionFields,
+			);
 
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
@@ -30,6 +51,8 @@ const formatMultiple = (props: {
 		id: number;
 		collection_key: string;
 	}>;
+	/** Leaves out the fields and bricks this reader can't see. */
+	reader?: FieldAccessActor;
 }) => {
 	const documentTargetCollectionKeys = getDocumentTargetCollectionKeys({
 		collections: props.allCollections,
@@ -44,6 +67,7 @@ const formatMultiple = (props: {
 			localization: props.localization,
 			include: props.include,
 			documents: props.documents,
+			reader: props.reader,
 		}),
 	);
 };
@@ -65,10 +89,30 @@ const formatSingle = (props: {
 		id?: number;
 		collection_key: string;
 	}>;
+	/** Leaves out the fields and bricks this reader can't see, and conditions that depend on them. */
+	reader?: FieldAccessActor;
 }): Collection => {
 	const collectionData = props.collection.getData;
 	const key = props.collection.key;
 	const resolvedPermissions = resolveCollectionPermissions(props.collection);
+	const access = props.reader
+		? getContentAccess(props.collection, props.reader)
+		: undefined;
+
+	const formatBricks = (bricks: BrickBuilder[] | undefined) =>
+		(bricks ?? []).flatMap((brick) => {
+			const brickAccess = access?.bricks.get(brick.key);
+			if (brickAccess?.access === "hidden") return [];
+
+			return [
+				formatBrick({
+					brick,
+					collectionKey: props.collection.key,
+					documentTargetCollectionKeys,
+					access: brickAccess,
+				}),
+			];
+		});
 
 	const localization = resolveCollectionLocalization({
 		localization: props.localization,
@@ -104,7 +148,9 @@ const formatSingle = (props: {
 			: false,
 		revisions: collectionData.revisions,
 		locked: collectionData.locked,
-		listing: props.collection.listing,
+		listing: props.collection.listing.filter(
+			(fieldKey) => access?.fields.get(fieldKey) !== "hidden",
+		),
 		labelFields: collectionData.labelFields,
 		autoSave: collectionData.autoSave,
 		orderable: collectionData.orderable,
@@ -118,31 +164,21 @@ const formatSingle = (props: {
 		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,
 		fixedBricks: props.include?.bricks
-			? (props.collection.config.bricks?.fixed?.map((brick) =>
-					formatBrick({
-						brick,
-						documentTargetCollectionKeys,
-					}),
-				) ?? [])
+			? formatBricks(props.collection.config.bricks?.fixed)
 			: [],
 		builderBricks: props.include?.bricks
-			? (props.collection.config.bricks?.builder?.map((brick) =>
-					formatBrick({
-						brick,
-						documentTargetCollectionKeys,
-					}),
-				) ?? [])
+			? formatBricks(props.collection.config.bricks?.builder)
 			: [],
 		embeddedBricks: props.include?.bricks
-			? (props.collection.config.bricks?.embedded?.map((brick) =>
-					formatBrick({
-						brick,
-						documentTargetCollectionKeys,
-					}),
-				) ?? [])
+			? formatBricks(props.collection.config.bricks?.embedded)
 			: [],
 		fields: props.include?.fields
-			? formatFields(props.collection.fieldTree, documentTargetCollectionKeys)
+			? formatFields(
+					props.collection.fieldTree,
+					documentTargetCollectionKeys,
+					{ collection: props.collection.key },
+					access?.fields,
+				)
 			: [],
 		publishing: {
 			environments: collectionData.publishing.environments.map(
@@ -173,29 +209,49 @@ const formatSingle = (props: {
 
 const formatBrick = (props: {
 	brick: BrickBuilder;
+	collectionKey: string;
 	documentTargetCollectionKeys: Set<string>;
-}): Collection["fixedBricks"][number] => ({
-	key: props.brick.key,
-	details: props.brick.config.details,
-	thumbnail: props.brick.config.thumbnail,
-	fields: formatFields(
-		props.brick.fieldTree,
-		props.documentTargetCollectionKeys,
-	),
-});
+	access?: BrickAccess;
+}): Collection["fixedBricks"][number] => {
+	const owner = { collection: props.collectionKey, brick: props.brick.key };
+	const permissions = resolveFieldPermissions(
+		owner,
+		props.brick.config.permissions,
+	);
 
+	return {
+		key: props.brick.key,
+		details: props.brick.config.details,
+		thumbnail: props.brick.config.thumbnail,
+		...(permissions && { permissions }),
+		fields: formatFields(
+			props.brick.fieldTree,
+			props.documentTargetCollectionKeys,
+			owner,
+			props.access?.fields,
+		),
+	};
+};
+
+/** Formats a field list, leaving out fields the reader can't see. */
 const formatFields = (
 	fields: FieldConfig<FieldTypes>[],
 	documentTargetCollectionKeys: Set<string>,
+	owner: PermissionOwner,
+	access: ReadonlyMap<string, FieldAccess> | undefined,
 ): Collection["fields"] => {
-	return fields.map((field) =>
-		formatField(field, documentTargetCollectionKeys),
+	return fields.flatMap((field) =>
+		access?.get(field.key) === "hidden"
+			? []
+			: [formatField(field, documentTargetCollectionKeys, owner, access)],
 	);
 };
 
 const formatField = (
 	field: FieldConfig<FieldTypes>,
 	documentTargetCollectionKeys: Set<string>,
+	owner: PermissionOwner,
+	access: ReadonlyMap<string, FieldAccess> | undefined,
 ): Collection["fields"][number] => {
 	const nestedFields =
 		"fields" in field && Array.isArray(field.fields) ? field.fields : undefined;
@@ -203,10 +259,17 @@ const formatField = (
 	//* agent guidance stays out of the admin; collections_describe reads it from the builders
 	const {
 		ai: _ai,
+		permissions: _permissions,
 		...config
-	}: Pick<SharedFieldConfig, "ai"> & FieldConfig<FieldTypes> = field;
+	}: Pick<SharedFieldConfig, "ai" | "permissions"> &
+		FieldConfig<FieldTypes> = field;
+	const permissions = resolveFieldPermissions(
+		{ ...owner, field: field.key },
+		field.permissions,
+	);
 	const formattedField = {
 		...config,
+		...(permissions && { permissions }),
 	} as Collection["fields"][number] & {
 		fields?: Collection["fields"];
 	};
@@ -239,7 +302,20 @@ const formatField = (
 		formattedField.fields = formatFields(
 			nestedFields,
 			documentTargetCollectionKeys,
+			owner,
+			access,
 		);
+	}
+
+	//* a hidden field mustn't control what shows; server validation keeps the condition
+	const condition = formattedField.ui?.condition;
+	if (
+		formattedField.ui &&
+		condition &&
+		conditionFields(condition).some((key) => access?.get(key) === "hidden")
+	) {
+		const { condition: _condition, ...ui } = formattedField.ui;
+		formattedField.ui = ui;
 	}
 
 	return formattedField;

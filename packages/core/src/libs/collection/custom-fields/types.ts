@@ -10,6 +10,8 @@ import type { RefResource, Refs } from "../../../types/response.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyInput } from "../../i18n/types.js";
+import type { FieldPermissions } from "../../permission/types.js";
+import type { RefTarget } from "../../refs/types.js";
 import type { AiInstructionsConfig } from "../ai-instructions.js";
 import type {
 	CollectionSchemaColumn,
@@ -118,6 +120,8 @@ export type SharedFieldConfig = {
 	};
 	/** Guidance for agents writing this field's value. */
 	ai?: AiInstructionsConfig;
+	/** Permissions enforced by the server for seeing and changing this field and every field inside it. */
+	permissions?: FieldPermissions;
 };
 
 export const fieldWidths = [12, 8, 6, 4, 3] as const;
@@ -128,7 +132,7 @@ export type FieldWidth = (typeof fieldWidths)[number];
 /** Controls how structural fields shape their children in content responses. */
 export type StructuralFieldOutput = "nested" | "inline";
 
-/** Admin presentation. Hidden or disabled fields are not an access-control boundary. */
+/** Admin presentation settings whose hidden or disabled states do not enforce access; use `permissions` for server restrictions. */
 export type FieldUIConfig = {
 	/** Hide the input from editors. */
 	hidden?: boolean;
@@ -307,11 +311,27 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	formatToolValue?: CustomFieldToolValueConverter;
 	/** Parses document tool inputs into stored values, defaulting to the supplied value. */
 	parseToolValue?: CustomFieldToolValueConverter;
+	/** The fields a container holds in content values and where they go, left out by fields that hold a value. */
+	contentChildren?(config: FieldConfig<T>): ContentChildren;
+	/** Leaves out the targets in `validateInput`'s data that `canLink` refuses, so they validate as missing. */
+	restrictValidationData?(data: unknown, canLink: CanLinkTarget): unknown;
 };
 
 export type CustomFieldToolValueConverter = (value: unknown) => unknown;
 
+/** The fields a container holds in content and authoring values: inline beside it, or nested under its key. */
+export type ContentChildren = {
+	fields: FieldConfig<FieldTypes>[];
+	output: StructuralFieldOutput;
+};
+
 export type FieldRelationValidationInput = Record<string, number[]>;
+
+/** A target that validation data links to. `createdBy` is set when the target records who created it. */
+export type LinkTarget = RefTarget & { createdBy?: number | null };
+
+/** Whether a save may link a target. */
+export type CanLinkTarget = (target: LinkTarget) => boolean;
 
 // -----------------------------------------------
 // Validation/Errors

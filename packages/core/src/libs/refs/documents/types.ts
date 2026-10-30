@@ -1,5 +1,6 @@
 import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import type { FieldAccessActor } from "../../collection/field-access/types.js";
 import type { CollectionSchemaTable } from "../../collection/schema/types.js";
 import type {
 	DocumentVersionType,
@@ -28,6 +29,8 @@ export type DocumentRefFormatContext = {
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	flattenDocumentFields?: boolean;
+	/** Leaves out the related documents' fields this reader can't see. */
+	reader?: FieldAccessActor;
 };
 
 export type DocumentRefResolveInput = {

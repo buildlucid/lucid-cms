@@ -170,7 +170,8 @@ const patchDocumentData = (
 		}
 	}
 
-	return mergeDocumentData(context, data);
+	//* merging against current lets locked values, items and bricks reject changes
+	return mergeDocumentData(context, data, current);
 };
 
 export default patchDocumentData;

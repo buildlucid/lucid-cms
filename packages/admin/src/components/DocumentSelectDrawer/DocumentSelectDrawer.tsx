@@ -6,6 +6,7 @@ import type {
 } from "@types";
 import {
 	TbOutlineCalendar,
+	TbOutlineLock,
 	TbOutlineProgress,
 	TbOutlineUser,
 	TbOutlineUserCheck,
@@ -24,6 +25,7 @@ import DocumentSelectSingle from "@/components/DocumentSelectSingle/DocumentSele
 import DocumentTableRow from "@/components/DocumentTableRow/DocumentTableRow";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import FilterPanel from "@/components/FilterPanel/FilterPanel";
 import FilterToggle from "@/components/FilterToggle/FilterToggle";
 import Pagination from "@/components/Pagination/Pagination";
@@ -32,6 +34,7 @@ import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QuerySort from "@/components/QuerySort/QuerySort";
 import Select from "@/components/Select/Select";
 import Table from "@/components/Table/Table";
+import { getCollectionPermission } from "@/constants/permissions";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import useQueryState, {
 	numberFilter,
@@ -40,6 +43,7 @@ import useQueryState, {
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import {
 	buildDocumentFilterSchema,
@@ -166,6 +170,13 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	// Memos
 	const allowedCollectionKeys = createMemo(() => props.collectionKeys ?? []);
 	const collectionKey = createMemo(() => activeCollectionKey());
+	const canReadCollection = (key: string) =>
+		userStore.get.hasPermission([getCollectionPermission(key, "read")]).all;
+	//* collections the user can't read stay selectable so the drawer can say why they're empty
+	const activeReadable = createMemo(() => {
+		const key = collectionKey();
+		return key !== undefined && canReadCollection(key);
+	});
 	const excludedDocumentId = createMemo(() => {
 		const excludeDocument = props.excludeDocument;
 		if (
@@ -201,7 +212,10 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				collectionKey: collectionKey,
 			},
 		},
-		enabled: () => pageBuilderCollections() === undefined && !!collectionKey(),
+		enabled: () =>
+			pageBuilderCollections() === undefined &&
+			!!collectionKey() &&
+			activeReadable(),
 	});
 
 	// ----------------------------------------
@@ -412,9 +426,11 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				props.selected?.[0]?.collectionKey;
 
 			setActiveCollectionKey(
-				selectedCollectionKey && allowed.includes(selectedCollectionKey)
+				selectedCollectionKey &&
+					allowed.includes(selectedCollectionKey) &&
+					canReadCollection(selectedCollectionKey)
 					? selectedCollectionKey
-					: allowed[0],
+					: (allowed.find(canReadCollection) ?? allowed[0]),
 			);
 		}
 	});
@@ -520,13 +536,17 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						onOpenChange={setFilterPanelOpen}
 						queryState={searchParams}
 						active={!isSingleCollection() && searchParams.hasFiltersApplied()}
-						disabled={isSingleCollection() || getFilterFields().length === 0}
+						disabled={
+							isSingleCollection() ||
+							!activeReadable() ||
+							getFilterFields().length === 0
+						}
 						onReset={searchParams.clearFilters}
 					/>
 					<QuerySort
 						sorts={documentSortOptions()}
 						queryState={searchParams}
-						disabled={isSingleCollection()}
+						disabled={isSingleCollection() || !activeReadable()}
 					/>
 					{props.topbarSlot}
 					<Show when={allowedCollectionKeys().length > 1}>
@@ -549,11 +569,11 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				<PerPageSelect
 					options={[10, 20, 40]}
 					queryState={searchParams}
-					disabled={isSingleCollection()}
+					disabled={isSingleCollection() || !activeReadable()}
 				/>
 			</div>
 
-			<Show when={!isSingleCollection()}>
+			<Show when={!isSingleCollection() && activeReadable()}>
 				<FilterPanel
 					open={filterSectionOpen()}
 					onOpenChange={setFilterPanelOpen}
@@ -566,121 +586,135 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			</Show>
 
 			<Show
-				when={isSingleCollection() && activeCollection()}
+				when={activeReadable()}
 				fallback={
-					<>
-						<QueryBoundary
-							error={documents.isError || collectionIsError()}
-							empty={documents.data?.data.length === 0}
-							queryState={searchParams}
-							onResetFilters={searchParams.clearFilters}
-							emptyFallback={
-								<EmptyState
-									title={T()("empty.states.documents.title", {
-										collectionMultiple: collectionName(),
-									})}
-									description={T()(
-										"empty.states.documents.select.description",
-										{
-											collectionMultiple: collectionName().toLowerCase(),
-											collectionSingle: collectionSingularName().toLowerCase(),
-										},
-									)}
-								/>
-							}
-							class={"flex-1 h-full bg-card border border-border rounded-md"}
-						>
-							<Table.Root
-								id={`documents.list.${activeCollection()?.key ?? ""}`}
-								rowCount={documents.data?.data.length || 0}
-								queryState={searchParams}
-								columns={[
-									{
-										label: "",
-										key: "select",
-									},
-									...getTableHeadColumns(),
-									...workflowHeadColumn(),
-									{
-										label: T()("common.created.by"),
-										key: "createdBy",
-										icon: <TbOutlineUser />,
-										minWidth: 180,
-									},
-									{
-										label: T()("common.updated.by"),
-										key: "updatedBy",
-										icon: <TbOutlineUser />,
-										minWidth: 180,
-									},
-									{
-										label: T()("common.updated.at"),
-										key: "updatedAt",
-										icon: <TbOutlineCalendar />,
-									},
-								]}
-								loading={documents.isFetching || collectionIsLoading()}
-								padding="sm"
-								variant="secondary"
-							>
-								<Index each={documents.data?.data || []}>
-									{(doc, i) => (
-										<DocumentTableRow
-											index={i}
-											document={doc()}
-											refs={documents.data?.refs}
-											fieldInclude={getCollectionFieldIncludes()}
-											collection={activeCollection() as Collection}
-											collectionsByKey={relationCollectionsByKey()}
-											contentLocale={contentLocale()}
-											onClick={() => toggleSelectedDocument(doc())}
-											current={false}
-											selection={{
-												selected: selectedDocuments().some(
-													(selectedDocument) =>
-														selectedDocument.id === doc().id &&
-														selectedDocument.collectionKey ===
-															doc().collectionKey,
-												),
-												onChange: () => toggleSelectedDocument(doc()),
-												disabled: props.disabledDocuments?.some(
-													(disabled) =>
-														disabled.id === doc().id &&
-														disabled.collectionKey === doc().collectionKey,
-												),
-											}}
-										/>
-									)}
-								</Index>
-							</Table.Root>
-						</QueryBoundary>
-						<Pagination
-							queryState={searchParams}
-							meta={documents.data?.meta}
-							variant="inline"
+					<div class="flex flex-1 items-center justify-center rounded-md border border-border bg-card">
+						<ErrorState
+							icon={<TbOutlineLock />}
+							title={T()("permissions.denied.title")}
+							description={T()("permissions.denied.description")}
 						/>
-					</>
+					</div>
 				}
 			>
-				{(activeCollection) => (
-					<DocumentSelectSingle
-						collection={activeCollection()}
-						document={singleDocument.data?.data}
-						contentLocale={contentLocale()}
-						isLoading={
-							collectionIsLoading() ||
-							(typeof activeCollection().documentId === "number" &&
-								singleDocument.isLoading)
-						}
-						isError={collectionIsError() || singleDocument.isError}
-						isExcluded={singleDocumentExcluded()}
-						selected={singleDocumentSelected()}
-						onSelect={() => {
-							const document = singleDocument.data?.data;
-							if (document) toggleSelectedDocument(document);
-						}}
-					/>
-				)}
+				<Show
+					when={isSingleCollection() && activeCollection()}
+					fallback={
+						<>
+							<QueryBoundary
+								error={documents.isError || collectionIsError()}
+								empty={documents.data?.data.length === 0}
+								queryState={searchParams}
+								onResetFilters={searchParams.clearFilters}
+								emptyFallback={
+									<EmptyState
+										title={T()("empty.states.documents.title", {
+											collectionMultiple: collectionName(),
+										})}
+										description={T()(
+											"empty.states.documents.select.description",
+											{
+												collectionMultiple: collectionName().toLowerCase(),
+												collectionSingle:
+													collectionSingularName().toLowerCase(),
+											},
+										)}
+									/>
+								}
+								class={"flex-1 h-full bg-card border border-border rounded-md"}
+							>
+								<Table.Root
+									id={`documents.list.${activeCollection()?.key ?? ""}`}
+									rowCount={documents.data?.data.length || 0}
+									queryState={searchParams}
+									columns={[
+										{
+											label: "",
+											key: "select",
+										},
+										...getTableHeadColumns(),
+										...workflowHeadColumn(),
+										{
+											label: T()("common.created.by"),
+											key: "createdBy",
+											icon: <TbOutlineUser />,
+											minWidth: 180,
+										},
+										{
+											label: T()("common.updated.by"),
+											key: "updatedBy",
+											icon: <TbOutlineUser />,
+											minWidth: 180,
+										},
+										{
+											label: T()("common.updated.at"),
+											key: "updatedAt",
+											icon: <TbOutlineCalendar />,
+										},
+									]}
+									loading={documents.isFetching || collectionIsLoading()}
+									padding="sm"
+									variant="secondary"
+								>
+									<Index each={documents.data?.data || []}>
+										{(doc, i) => (
+											<DocumentTableRow
+												index={i}
+												document={doc()}
+												refs={documents.data?.refs}
+												fieldInclude={getCollectionFieldIncludes()}
+												collection={activeCollection() as Collection}
+												collectionsByKey={relationCollectionsByKey()}
+												contentLocale={contentLocale()}
+												onClick={() => toggleSelectedDocument(doc())}
+												current={false}
+												selection={{
+													selected: selectedDocuments().some(
+														(selectedDocument) =>
+															selectedDocument.id === doc().id &&
+															selectedDocument.collectionKey ===
+																doc().collectionKey,
+													),
+													onChange: () => toggleSelectedDocument(doc()),
+													disabled: props.disabledDocuments?.some(
+														(disabled) =>
+															disabled.id === doc().id &&
+															disabled.collectionKey === doc().collectionKey,
+													),
+												}}
+											/>
+										)}
+									</Index>
+								</Table.Root>
+							</QueryBoundary>
+							<Pagination
+								queryState={searchParams}
+								meta={documents.data?.meta}
+								variant="inline"
+							/>
+						</>
+					}
+				>
+					{(activeCollection) => (
+						<DocumentSelectSingle
+							collection={activeCollection()}
+							document={singleDocument.data?.data}
+							contentLocale={contentLocale()}
+							isLoading={
+								collectionIsLoading() ||
+								(typeof activeCollection().documentId === "number" &&
+									singleDocument.isLoading)
+							}
+							isError={collectionIsError() || singleDocument.isError}
+							isExcluded={singleDocumentExcluded()}
+							selected={singleDocumentSelected()}
+							onSelect={() => {
+								const document = singleDocument.data?.data;
+								if (document) toggleSelectedDocument(document);
+							}}
+						/>
+					)}
+				</Show>
 			</Show>
 			<Drawer.Footer class="-mx-4 md:-mx-6">
 				<div class="flex flex-wrap items-center gap-3">

@@ -6,18 +6,32 @@ import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants"
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
+interface Grant {
+	key: string;
+	details: PermissionDetails;
+}
+
 export interface GrantGroup {
 	key: string;
 	details: PermissionDetails;
-	grants: Array<{
+	grants: Grant[];
+	/** Labelled sets of grants shown below the group's own, such as a collection's field permissions. */
+	subgroups?: Array<{
 		key: string;
 		details: PermissionDetails;
+		grants: Grant[];
 	}>;
 }
 
 type GrantSection = "collections" | "agents" | "general";
 
 const sectionOrder: GrantSection[] = ["collections", "agents", "general"];
+
+/** Every grant in a group, including its subgroups'. */
+const groupGrants = (group: GrantGroup) => [
+	...group.grants,
+	...(group.subgroups ?? []).flatMap((subgroup) => subgroup.grants),
+];
 
 //* collection and agent groups are keyed by core as `documents:{key}` and `agents:{key}`
 const getSection = (key: string): GrantSection => {
@@ -56,7 +70,18 @@ const GrantPicker: Component<{
 		return props.groups.flatMap((group) => {
 			if (matches(group.details)) return [group];
 			const grants = group.grants.filter((grant) => matches(grant.details));
-			return grants.length > 0 ? [{ ...group, grants }] : [];
+			const subgroups = (group.subgroups ?? []).flatMap((subgroup) => {
+				if (matches(subgroup.details)) return [subgroup];
+				const subgroupGrants = subgroup.grants.filter((grant) =>
+					matches(grant.details),
+				);
+				return subgroupGrants.length > 0
+					? [{ ...subgroup, grants: subgroupGrants }]
+					: [];
+			});
+			return grants.length > 0 || subgroups.length > 0
+				? [{ ...group, grants, subgroups }]
+				: [];
 		});
 	});
 	const sections = createMemo(() =>
@@ -73,7 +98,7 @@ const GrantPicker: Component<{
 		props.value.filter(
 			(key) =>
 				!props.groups.some((group) =>
-					group.grants.some((grant) => grant.key === key),
+					groupGrants(group).some((grant) => grant.key === key),
 				),
 		),
 	);
@@ -85,9 +110,20 @@ const GrantPicker: Component<{
 		if (section === "agents") return T()("common.agents");
 		return T()("common.general");
 	};
+	const grantItem = (grant: Grant) => ({
+		key: grant.key,
+		label: helpers.getLocaleValue({
+			value: grant.details.name,
+			fallback: grant.key,
+		}),
+		tooltip:
+			helpers.getLocaleValue({
+				value: grant.details.description,
+			}) || undefined,
+	});
 	//* a group only changes its own keys, so the rest of the value is kept as is
 	const changeGroup = (group: GrantGroup, keys: string[]) => {
-		const groupKeys = group.grants.map((grant) => grant.key);
+		const groupKeys = groupGrants(group).map((grant) => grant.key);
 		props.onChange([
 			...props.value.filter((key) => !groupKeys.includes(key)),
 			...keys,
@@ -135,19 +171,17 @@ const GrantPicker: Component<{
 												value: group.details.description,
 											}) || undefined
 										}
-										items={group.grants.map((grant) => ({
-											key: grant.key,
+										items={group.grants.map(grantItem)}
+										subgroups={group.subgroups?.map((subgroup) => ({
+											key: subgroup.key,
 											label: helpers.getLocaleValue({
-												value: grant.details.name,
-												fallback: grant.key,
+												value: subgroup.details.name,
+												fallback: subgroup.key,
 											}),
-											tooltip:
-												helpers.getLocaleValue({
-													value: grant.details.description,
-												}) || undefined,
+											items: subgroup.grants.map(grantItem),
 										}))}
 										value={props.value.filter((key) =>
-											group.grants.some((grant) => grant.key === key),
+											groupGrants(group).some((grant) => grant.key === key),
 										)}
 										onChange={(keys) => changeGroup(group, keys)}
 										forceOpen={query().length > 0}

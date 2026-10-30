@@ -63,6 +63,8 @@ export type MediaValidationData = {
 	width: number | null;
 	height: number | null;
 	type: string;
+	/** Who uploaded the media, who can link it without permission to browse the library. */
+	created_by: number | null;
 };
 
 export type MediaCustomFieldMapItem = {

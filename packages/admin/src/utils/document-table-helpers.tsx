@@ -145,6 +145,7 @@ const documentListingRefResources = [
 	"documents",
 	"media",
 	"users",
+	"emails",
 	"agents",
 ] as const satisfies RefResource[];
 export type DocumentListingRefInclude = `refs.${RefResource}`;

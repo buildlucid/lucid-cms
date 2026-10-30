@@ -24,6 +24,7 @@ export const FieldLabel: Component<FieldLabelProps> = (props) => {
 			focused={focused()}
 			required={required()}
 			theme="basic"
+			markers={false}
 			startSlot={props.start}
 			rightSlot={props.end}
 			class={props.class}

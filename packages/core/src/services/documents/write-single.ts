@@ -1,6 +1,8 @@
 import { isDeepStrictEqual } from "node:util";
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import collections from "../../libs/collection/collections.js";
+import filterReadableData from "../../libs/collection/field-access/filter-readable-data.js";
+import getContentAccess from "../../libs/collection/field-access/get-content-access.js";
 import { copy } from "../../libs/i18n/index.js";
 import systemActor from "../../libs/permission/system-actor.js";
 import type {
@@ -13,6 +15,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import updateVersion from "../documents-versions/update-single.js";
 import createRequest from "../requests/create-single.js";
+import checkEmbeddedBrickChanges from "./checks/check-embedded-brick-changes.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import mergeDocumentData from "./helpers/merge-document-data.js";
 import patchDocumentData from "./helpers/patch-document-data.js";
@@ -20,7 +23,7 @@ import readDocumentContent from "./helpers/read-document-content.js";
 import saveDocument from "./helpers/save-document.js";
 import toDocumentInput from "./helpers/to-document-input.js";
 
-/** Validates and saves authoring values or patches to latest or a new or existing request proposal. */
+/** Validates and saves authoring values or patches to latest or request proposals, treating hidden content as unknown, rejecting locked changes and preserving stored restricted content. */
 const writeSingle: ServiceFn<
 	[
 		{
@@ -93,13 +96,16 @@ const writeSingle: ServiceFn<
 				};
 			}
 
+			const access = getContentAccess(collection.data, input.authUser);
 			const contentContext = {
 				collection: collection.data,
 				localization: context.config.localization,
+				access,
 			};
 			let current:
 				| NonNullable<Awaited<ReturnType<typeof readDocumentContent>>["data"]>
 				| undefined;
+			let readable: ReturnType<typeof filterReadableData> | undefined;
 			let merged: ReturnType<typeof mergeDocumentData>;
 			if (input.kind === "create") {
 				merged = mergeDocumentData(contentContext, input.data);
@@ -126,15 +132,21 @@ const writeSingle: ServiceFn<
 					};
 				}
 
+				readable = filterReadableData(
+					collection.data,
+					access,
+					current.data,
+					current.stored,
+				);
 				merged =
 					input.kind === "patch"
-						? patchDocumentData(contentContext, current.data, input.operations)
-						: mergeDocumentData(contentContext, input.data, current.data);
+						? patchDocumentData(contentContext, readable, input.operations)
+						: mergeDocumentData(contentContext, input.data, readable);
 			}
 
 			if (merged.error) return merged;
 
-			if (current && isDeepStrictEqual(merged.data, current.data)) {
+			if (current && isDeepStrictEqual(merged.data, readable)) {
 				return {
 					error: undefined,
 					data: {
@@ -152,6 +164,15 @@ const writeSingle: ServiceFn<
 				current?.stored,
 			);
 			if (payload.error) return payload;
+
+			const embeddedRes = checkEmbeddedBrickChanges({
+				access,
+				stored: current?.stored,
+				before: readable,
+				after: merged.data,
+				payload: payload.data,
+			});
+			if (embeddedRes.error) return embeddedRes;
 
 			let id = input.kind === "create" ? undefined : input.id;
 			let versionId = input.kind === "create" ? undefined : input.versionId;

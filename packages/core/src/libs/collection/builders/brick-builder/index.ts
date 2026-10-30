@@ -23,6 +23,7 @@ class BrickBuilder extends FieldBuilder {
 			},
 			ai: options.ai,
 			thumbnail: options.thumbnail,
+			permissions: options.permissions,
 		};
 	}
 	/** Returns a brick with independent config and field instances. */

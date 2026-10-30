@@ -1,4 +1,5 @@
 import collections from "../../libs/collection/collections.js";
+import type { FieldAccessActor } from "../../libs/collection/field-access/types.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -39,6 +40,8 @@ const getMultiple: ServiceFn<
 			allowedDocumentCollectionKeys?: string[];
 			/** Built-in document refs contributed outside custom field storage. */
 			refTargets?: Iterable<RefTarget>;
+			/** Leaves out refs only hidden fields point at and related documents' hidden fields. */
+			reader?: FieldAccessActor;
 		},
 	],
 	{
@@ -109,6 +112,7 @@ const getMultiple: ServiceFn<
 		allowedDocumentCollectionKeys: data.allowedDocumentCollectionKeys,
 		host: baseUrl,
 		content: data.content,
+		reader: data.reader,
 	});
 	if (refsRes.error) return refsRes;
 

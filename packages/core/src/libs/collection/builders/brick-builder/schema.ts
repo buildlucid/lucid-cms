@@ -1,6 +1,7 @@
 import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { adminCopyInputSchema } from "../../../i18n/index.js";
+import { fieldPermissionsSchema } from "../../../permission/schema.js";
 import { aiInstructionsSchema } from "../../ai-instructions.js";
 import { collectionTableParts } from "../../helpers/table-parts.js";
 
@@ -27,6 +28,7 @@ const BrickConfigSchema = z.strictObject({
 		.optional(),
 	ai: aiInstructionsSchema.optional(),
 	thumbnail: z.string().optional(),
+	permissions: fieldPermissionsSchema.optional(),
 });
 
 export default BrickConfigSchema;

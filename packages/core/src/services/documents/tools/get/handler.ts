@@ -1,4 +1,7 @@
 import type z from "zod";
+import filterReadableData from "../../../../libs/collection/field-access/filter-readable-data.js";
+import getContentAccess from "../../../../libs/collection/field-access/get-content-access.js";
+import type { FieldAccessActor } from "../../../../libs/collection/field-access/types.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import type { ToolkitActor } from "../../../../libs/permission/toolkit-actor.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
@@ -21,6 +24,8 @@ const getDocument: ServiceFn<
 			allowedCollectionKeys: string[];
 			/** The reader for pinned versions, available only to agent tools. */
 			actor?: ToolkitActor;
+			/** Whose field permissions hide unreadable content, with external integrations reading every field their scopes allow. */
+			reader?: FieldAccessActor;
 		},
 	],
 	{ output: z.output<typeof outputSchema> }
@@ -76,6 +81,7 @@ const getDocument: ServiceFn<
 			filter: { id: { value: input.documentId } },
 		},
 		allowedCollectionKeys: props.allowedCollectionKeys,
+		reader: props.reader,
 	});
 	if (documentRes.error) return documentRes;
 
@@ -90,7 +96,12 @@ const getDocument: ServiceFn<
 	const projected = projectEditableDocument(
 		{ collection, localization: context.config.localization },
 		{
-			data: contentRes.data.data,
+			data: filterReadableData(
+				collection,
+				getContentAccess(collection, props.reader),
+				contentRes.data.data,
+				contentRes.data.stored,
+			),
 			contentLocale,
 			fieldKeys: input.fieldKeys,
 			includeBricks: input.include?.includes("bricks") === true,

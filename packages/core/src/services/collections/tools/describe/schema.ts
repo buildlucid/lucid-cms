@@ -44,6 +44,10 @@ const fieldEntrySchema = z.object({
 	localized: z
 		.boolean()
 		.meta({ description: "Whether this field stores per-language values." }),
+	readOnly: z.literal(true).optional().meta({
+		description:
+			"Set when you can't change this field. Writes that change it are rejected.",
+	}),
 	constraints: z
 		.object({
 			required: z.boolean().optional(),
@@ -84,6 +88,10 @@ export const entrySchema = z.discriminatedUnion("kind", [
 			.nullable()
 			.meta({ description: "Editor help text." }),
 		instructions: instructionsSchema,
+		readOnly: z.literal(true).optional().meta({
+			description:
+				"Set when you can't add, change or remove these bricks. You can still move them.",
+		}),
 	}),
 	z.object({
 		kind: z.literal("option"),

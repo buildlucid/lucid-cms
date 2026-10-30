@@ -3,6 +3,7 @@ import primeRuntimeSchemas from "../../libs/collection/schema/runtime/prime-runt
 import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
+import type { LucidUser } from "../../types/hono.js";
 import type { Collection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -12,6 +13,8 @@ const getAll: ServiceFn<
 			includeDocumentId?: boolean;
 			includeBricks?: boolean;
 			includeFields?: boolean;
+			/** Leaves out the fields and bricks this user can't see. */
+			user?: LucidUser;
 		},
 	],
 	Collection[]
@@ -68,6 +71,7 @@ const getAll: ServiceFn<
 					documentId: true,
 				},
 				documents: documentsRes.data,
+				reader: data.user,
 			}),
 		};
 	}
@@ -85,6 +89,7 @@ const getAll: ServiceFn<
 				fields: data.includeFields === true,
 				documentId: false,
 			},
+			reader: data.user,
 		}),
 	};
 };

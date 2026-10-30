@@ -1,7 +1,10 @@
 import z from "zod";
 import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
-import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
+import registeredFields, {
+	fieldHooks,
+} from "../../../libs/collection/custom-fields/registered-fields.js";
 import { storageModes } from "../../../libs/collection/custom-fields/storage/index.js";
+import isContainerField from "../../../libs/collection/custom-fields/utils/is-container-field.js";
 import type {
 	ContentContext,
 	FieldTree,
@@ -17,7 +20,7 @@ import type { ServiceResponse } from "../../../utils/services/types.js";
 import readDocumentObject from "./read-document-object.js";
 
 /**
- * Converts authoring values to the full payload used by admin document saves.
+ * Converts authoring values to admin save payloads, omitting hidden fields and bricks under `access` for restoration from storage.
  * @remarks Omit unset `open` values to keep builder screen payloads valid JSON.
  */
 const toDocumentInput = (
@@ -34,22 +37,27 @@ const toDocumentInput = (
 		values: Record<string, unknown>,
 		prior: FieldInputSchema[] = [],
 	): Awaited<ServiceResponse<FieldInputSchema[]>> => {
+		const access =
+			owner === context.collection
+				? context.access?.fields
+				: context.access?.bricks.get(owner.key)?.fields;
 		const fields: FieldInputSchema[] = [];
 		for (const field of tree) {
-			if (
-				field.type === "tab" ||
-				field.type === "section" ||
-				field.type === "collapsible"
-			) {
+			if (access?.get(field.key) === "hidden") continue;
+			if (isContainerField(field)) {
+				const contentChildren = fieldHooks[field.type].contentChildren?.(field);
 				const nested = readDocumentObject(
-					field.type === "tab" || field.output === "inline"
-						? values
-						: values[field.key],
+					contentChildren?.output === "inline" ? values : values[field.key],
 					field.key,
 				);
 				if (nested.error) return nested;
 
-				const children = fieldsInput(field.fields, owner, nested.data, prior);
+				const children = fieldsInput(
+					contentChildren?.fields ?? [],
+					owner,
+					nested.data,
+					prior,
+				);
 				if (children.error) return children;
 
 				fields.push(...children.data);
@@ -122,6 +130,8 @@ const toDocumentInput = (
 
 	const bricks: BrickInputSchema[] = [];
 	for (const brick of context.collection.config.bricks?.fixed ?? []) {
+		if (context.access?.bricks.get(brick.key)?.access === "hidden") continue;
+
 		const prior = previous?.bricks.find(
 			(item) => item.type === "fixed" && item.key === brick.key,
 		);

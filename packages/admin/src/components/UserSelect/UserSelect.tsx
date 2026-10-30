@@ -211,9 +211,11 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										<span class="text-sm font-medium text-subtitle truncate block">
 											{userName() || "-"}
 										</span>
-										<p class="text-xs text-muted truncate">
-											{selectedUser()?.email || "-"}
-										</p>
+										<Show when={selectedUser()?.email}>
+											{(email) => (
+												<p class="text-xs text-muted truncate">{email()}</p>
+											)}
+										</Show>
 									</div>
 								</div>
 								<div class="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -327,7 +329,9 @@ const UserSortableItem: Component<{
 					<p class="truncate text-sm font-medium text-subtitle">
 						{helpers.formatUserName(props.user, "username-and-name") || "-"}
 					</p>
-					<p class="truncate text-xs text-muted">{props.user.email || "-"}</p>
+					<Show when={props.user.email}>
+						{(email) => <p class="truncate text-xs text-muted">{email()}</p>}
+					</Show>
 				</div>
 			</div>
 			<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">

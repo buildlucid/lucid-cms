@@ -17,7 +17,8 @@ export type MediaAction = "read" | "update" | "delete";
 
 export type MediaListAccess =
 	| { type: "all" }
-	| { type: "owner"; userId: number }
+	/** The user's own personal media, and library media when they hold `media:read`. */
+	| { type: "owner"; userId: number; library: boolean }
 	| { type: "library" };
 
 type MediaOwnershipRow = {
@@ -35,6 +36,13 @@ export const getMediaOwnership = (media: MediaOwnershipRow): MediaOwnership => {
 
 const canReadAll = (user: LucidUser) =>
 	hasAccess({ user, requiredPermissions: [Permissions.MediaReadAll] });
+
+//* read-all covers the library too, so listings and media details agree
+const canReadLibrary = (user: LucidUser) =>
+	hasAccess({
+		user,
+		optionalPermissions: [Permissions.MediaRead, Permissions.MediaReadAll],
+	});
 
 /**
  * Whether an actor can act on media given who it belongs to. Route permissions
@@ -63,6 +71,18 @@ export const canAccessMedia = ({
 	);
 };
 
+/** Checks access to media listings and details, requiring admin users to hold `media:read` or `media:read-all` for library media while files remain reachable through content. */
+export const canBrowseMedia = ({
+	actor,
+	ownership,
+}: {
+	actor: MediaActor;
+	ownership: MediaOwnership;
+}): boolean =>
+	actor.type !== "user" ||
+	ownership.type !== "library" ||
+	canReadLibrary(actor.user);
+
 export const getMediaListAccess = (actor: MediaActor): MediaListAccess => {
 	switch (actor.type) {
 		case "internal":
@@ -72,6 +92,10 @@ export const getMediaListAccess = (actor: MediaActor): MediaListAccess => {
 		case "user":
 			return canReadAll(actor.user)
 				? { type: "all" }
-				: { type: "owner", userId: actor.user.id };
+				: {
+						type: "owner",
+						userId: actor.user.id,
+						library: canReadLibrary(actor.user),
+					};
 	}
 };

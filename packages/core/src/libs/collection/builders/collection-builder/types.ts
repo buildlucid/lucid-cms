@@ -294,6 +294,7 @@ export interface CollectionBrickConfig {
 	key: BrickBuilder["key"];
 	details: BrickBuilder["config"]["details"];
 	thumbnail: BrickBuilder["config"]["thumbnail"];
+	permissions: BrickBuilder["config"]["permissions"];
 	fields: FieldConfig<FieldTypes>[];
 }
 

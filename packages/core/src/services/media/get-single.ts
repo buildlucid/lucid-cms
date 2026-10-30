@@ -5,6 +5,7 @@ import type { Media } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import {
 	canAccessMedia,
+	canBrowseMedia,
 	getMediaOwnership,
 	type MediaActor,
 } from "../../utils/media/index.js";
@@ -44,12 +45,10 @@ const getSingle = async <TMedia = Media>(
 	});
 	if (mediaRes.error) return mediaRes;
 
+	const ownership = getMediaOwnership(mediaRes.data);
 	if (
-		!canAccessMedia({
-			actor: data.actor,
-			ownership: getMediaOwnership(mediaRes.data),
-			action: "read",
-		})
+		!canAccessMedia({ actor: data.actor, ownership, action: "read" }) ||
+		!canBrowseMedia({ actor: data.actor, ownership })
 	) {
 		return {
 			error: {

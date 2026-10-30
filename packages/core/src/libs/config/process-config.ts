@@ -22,6 +22,7 @@ import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js"
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkField from "./checks/check-field.js";
 import checkFieldConditions from "./checks/check-field-conditions.js";
+import checkFieldPermissions from "./checks/check-field-permissions.js";
 import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkNotificationDefinitions from "./checks/check-notification-definitions.js";
@@ -156,6 +157,7 @@ const processConfig = async (
 			);
 
 			checkFieldConditions("collection", collection.key, collection);
+			checkFieldPermissions(collection);
 
 			checkRepeaterDepth(
 				"collection",

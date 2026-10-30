@@ -11,8 +11,10 @@ import {
 	createSignal,
 } from "solid-js";
 import { DocumentSelect } from "@/components/DocumentSelect/DocumentSelect";
+import { getCollectionPermission } from "@/constants/permissions";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
+import userStore from "@/store/userStore/userStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
@@ -72,6 +74,12 @@ export const RelationField: Component<RelationFieldProps> = (props) => {
 	const disabled = createMemo(
 		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
+	const canBrowse = createMemo(() =>
+		allowedCollectionKeys().some(
+			(key) =>
+				userStore.get.hasPermission([getCollectionPermission(key, "read")]).all,
+		),
+	);
 
 	// -------------------------------
 	// Effects
@@ -90,6 +98,7 @@ export const RelationField: Component<RelationFieldProps> = (props) => {
 				groupRef: props.state.groupRef,
 			})}
 			collectionKeys={allowedCollectionKeys()}
+			canBrowse={canBrowse()}
 			value={getValue()}
 			refs={fieldRef}
 			multiple={isMultiple()}

@@ -30,6 +30,7 @@ import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 import { documentResponseToRef } from "@/utils/relation-field-helpers";
+import resolveFieldAccess from "@/utils/resolve-field-access";
 import { countFieldErrors } from "@/utils/structural-field-helpers";
 
 const RICH_TEXT_PICKER_Z_INDEX = 80;
@@ -149,6 +150,12 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		}
 		return [];
 	});
+	//* existing nodes still need every config for their labels
+	const insertableBrickConfigs = createMemo(() =>
+		embeddedBrickConfigs().filter(
+			(config) => resolveFieldAccess(config.permissions) === "editable",
+		),
+	);
 
 	// -------------------------------
 	// Functions
@@ -231,7 +238,8 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					? editorConfig()?.links?.internal
 					: false,
 		},
-		bricks: embeddedBrickConfigs().length > 0 ? editorConfig()?.bricks : false,
+		bricks:
+			insertableBrickConfigs().length > 0 ? editorConfig()?.bricks : false,
 		variables: variableOptions(),
 		documents:
 			documentNodeCollectionKeys().length > 0
@@ -448,10 +456,10 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 						: undefined
 				}
 			/>
-			<Show when={embeddedBrickConfigs().length > 0}>
+			<Show when={insertableBrickConfigs().length > 0}>
 				<AddBrickModal
 					state={{ open: brickSelectOpen(), setOpen: setBrickSelectOpen }}
-					data={{ brickConfig: embeddedBrickConfigs() }}
+					data={{ brickConfig: insertableBrickConfigs() }}
 					callbacks={{
 						onSelect: (brickConfig) => {
 							const ref = brickStore.get.addEmbeddedBrick({

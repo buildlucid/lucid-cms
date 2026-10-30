@@ -37,6 +37,7 @@ class ColorCustomField extends CustomField<"color"> {
 			localized: this.props?.localized ?? false,
 			default: this.props?.default ?? "",
 			index: this.props?.index,
+			permissions: this.props?.permissions,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,

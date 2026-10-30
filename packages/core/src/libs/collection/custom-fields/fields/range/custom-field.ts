@@ -58,6 +58,7 @@ class RangeCustomField extends CustomField<"range"> {
 			default: normalizeStoredRangeValues(defaultValue, thumbs),
 			index: this.props?.index,
 			thumbs,
+			permissions: this.props?.permissions,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,

@@ -2,12 +2,22 @@ import { agentPermissionActions } from "./agent-permissions.js";
 import { type AccessConfig, getCapabilityRegistry } from "./capabilities.js";
 import { collectionPermissionActions } from "./collection-permissions.js";
 import { Permissions } from "./definitions.js";
-import type { CorePermission, Permission, PermissionGroup } from "./types.js";
+import { fieldPermissionActions } from "./field-permissions.js";
+import type {
+	CorePermission,
+	Permission,
+	PermissionDefinition,
+	PermissionGroup,
+	PermissionSubgroup,
+} from "./types.js";
 
 const corePermissionKeys = Object.values(Permissions);
 
 const collectionPermissionRegex = new RegExp(
 	`^documents:[a-z0-9-_]+:(${collectionPermissionActions.join("|")})$`,
+);
+const fieldPermissionRegex = new RegExp(
+	`^documents:[a-z0-9-_]+:(fields:[A-Za-z0-9-_]+|bricks:[A-Za-z0-9-_]+(:fields:[A-Za-z0-9-_]+)?):(${fieldPermissionActions.join("|")})$`,
 );
 const agentPermissionRegex = new RegExp(
 	`^agents:[a-z0-9-]+:(${agentPermissionActions.join("|")})$`,
@@ -20,34 +30,53 @@ export const isCorePermission = (
 	return (
 		corePermissionKeys.some((key) => key === permission) ||
 		collectionPermissionRegex.test(permission) ||
+		fieldPermissionRegex.test(permission) ||
 		agentPermissionRegex.test(permission)
 	);
 };
 
-/** Builds the core, collection and custom permission catalogue. */
+/** Builds the core, collection and custom permission catalogue, listing subgroup permissions under their subgroups in declaration order. */
 export const getPermissionRegistry = (
 	config: AccessConfig,
 ): PermissionGroup[] => {
 	return getCapabilityRegistry(config)
-		.map(
-			(group): PermissionGroup => ({
+		.map((group): PermissionGroup => {
+			const permissions: PermissionDefinition[] = [];
+			const subgroups = new Map<string, PermissionSubgroup>();
+
+			for (const capability of group.capabilities) {
+				if (capability.permission === undefined) continue;
+
+				const permission = {
+					key: capability.permission,
+					details: capability.details,
+					core: capability.core,
+				};
+				if (!capability.subgroup) {
+					permissions.push(permission);
+					continue;
+				}
+
+				const subgroup = subgroups.get(capability.subgroup.key) ?? {
+					key: capability.subgroup.key,
+					details: capability.subgroup.details,
+					permissions: [],
+				};
+				subgroup.permissions.push(permission);
+				subgroups.set(subgroup.key, subgroup);
+			}
+
+			return {
 				key: group.key,
 				details: group.details,
 				core: group.core,
-				permissions: group.capabilities.flatMap((capability) =>
-					capability.permission === undefined
-						? []
-						: [
-								{
-									key: capability.permission,
-									details: capability.details,
-									core: capability.core,
-								},
-							],
-				),
-			}),
-		)
-		.filter((group) => group.permissions.length > 0);
+				permissions,
+				...(subgroups.size > 0 && { subgroups: [...subgroups.values()] }),
+			};
+		})
+		.filter(
+			(group) => group.permissions.length > 0 || group.subgroups !== undefined,
+		);
 };
 
 const permissionGroupOrder = new Map(
@@ -88,7 +117,7 @@ const permissionActionOrder = new Map(
 	].map((key, index) => [key, index]),
 );
 
-/** Orders role grants by content, agents and administration, with destructive actions last. */
+/** Orders role grants by content, agents and administration, placing destructive actions last while preserving subgroup declaration order. */
 export const getGrantablePermissionRegistry = (config: AccessConfig) => {
 	const groupOrder = (key: string) =>
 		permissionGroupOrder.get(key.split(":")[0] ?? key) ??
@@ -112,7 +141,10 @@ export const getGrantablePermissionRegistry = (config: AccessConfig) => {
 /** Flattens the permission registry into keys for role validation and sync. */
 export const getValidPermissions = (config: AccessConfig): string[] => {
 	return getPermissionRegistry(config).flatMap((group) =>
-		group.permissions.map((permission) => permission.key),
+		[
+			...group.permissions,
+			...(group.subgroups ?? []).flatMap((subgroup) => subgroup.permissions),
+		].map((permission) => permission.key),
 	);
 };
 

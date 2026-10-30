@@ -22,7 +22,14 @@ import type {
 import { analyzeEmbeddedBrickGraph } from "./prepare-bricks-and-fields.js";
 import resolveRichTextVariableAccess from "./resolve-rich-text-variable-access.js";
 
-export type ValidationData = Partial<Record<FieldTypes, unknown>>;
+/** The data each field type's `validateInput` fetches, keyed by field type. */
+export type ValidationData = {
+	[TType in FieldTypes]?: (typeof registeredFields)[TType]["validateInput"] extends (
+		...args: never[]
+	) => Promise<infer TData>
+		? TData
+		: never;
+};
 
 type ValidationBuckets = Partial<
 	Record<FieldTypes, Record<string, Set<number>>>
@@ -245,29 +252,28 @@ const buildValidationData = async (
 	context: ServiceContext,
 	buckets: ValidationBuckets,
 ): Promise<ValidationData> => {
-	const validationData: ValidationData = {};
-	const promises: Promise<void>[] = [];
+	const entries = await Promise.all(
+		registeredFieldTypes.flatMap((fieldType) => {
+			const fieldDefinition = registeredFields[fieldType];
+			if (fieldDefinition.validateInput === null) return [];
 
-	for (const fieldType of registeredFieldTypes) {
-		const fieldDefinition = registeredFields[fieldType];
-		if (fieldDefinition.validateInput === null) continue;
+			const input = Object.entries(
+				buckets[fieldType] ?? {},
+			).reduce<FieldRelationValidationInput>((acc, [groupKey, ids]) => {
+				acc[groupKey] = Array.from(ids);
+				return acc;
+			}, {});
 
-		const input = Object.entries(
-			buckets[fieldType] ?? {},
-		).reduce<FieldRelationValidationInput>((acc, [groupKey, ids]) => {
-			acc[groupKey] = Array.from(ids);
-			return acc;
-		}, {});
+			return [
+				fieldDefinition
+					.validateInput(context, input)
+					.then((result) => [fieldType, result] as const),
+			];
+		}),
+	);
 
-		promises.push(
-			fieldDefinition.validateInput(context, input).then((result) => {
-				validationData[fieldType] = result;
-			}),
-		);
-	}
-
-	await Promise.all(promises);
-	return validationData;
+	//* each entry pairs a field type with its own validator's result, which the map can't express
+	return Object.fromEntries(entries) as ValidationData;
 };
 
 export default fetchValidationData;

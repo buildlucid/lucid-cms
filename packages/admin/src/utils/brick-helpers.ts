@@ -260,13 +260,16 @@ const getFirstRelationFieldValue = (
 	return fieldValue[0];
 };
 
-type FieldRefsInput = { refs: Refs; collection?: string } & (
+type FieldRefsInput<TResource extends string = "media" | "users" | "emails"> = {
+	refs: Refs;
+	collection?: string;
+} & (
 	| {
 			resource: "documents";
 			fieldValue: RelationFieldValue[] | null | undefined;
 	  }
 	| {
-			resource: "media" | "users" | "emails";
+			resource: TResource;
 			fieldValue: number[] | null | undefined;
 	  }
 );
@@ -374,7 +377,7 @@ function getFieldRef(props: {
 	refs: Refs;
 }): DocumentRef | undefined;
 function getFieldRef(
-	props: FieldRefsInput,
+	props: FieldRefsInput<"media" | "users">,
 ): MediaRef | UserRef | DocumentRef | undefined {
 	if (props.resource === "documents") {
 		return getFieldRefs({

@@ -6,13 +6,16 @@ import runnerTools from "../../../libs/agent/runner-tools.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import filterReadableContent from "../../../libs/collection/field-access/filter-readable-content.js";
+import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import { createTranslationStore } from "../../../libs/i18n/index.js";
+import { copy, createTranslationStore } from "../../../libs/i18n/index.js";
 import { aiAccessFeatureSchema } from "../../../libs/lucid-remote/schema/connection.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
+import type { DocumentPatch } from "../../../libs/toolkit/documents/types.js";
 import {
 	executeAgentTool,
 	prepareAgentTool,
@@ -36,6 +39,7 @@ import register from "../../agent/references/register.js";
 import { builderFocusToolName } from "../../agent/tools/builder-focus/constants.js";
 import { builderReadToolName } from "../../agent/tools/builder-read/constants.js";
 import { builderUpdateToolName } from "../../agent/tools/builder-update/constants.js";
+import builderUpdate from "../../agent/tools/builder-update/handler.js";
 import { outputSchema as describeOutputSchema } from "../../collections/tools/describe/schema.js";
 import checkSaveHold from "../../document-editors/check-save-hold.js";
 import heartbeat from "../../document-editors/heartbeat.js";
@@ -47,6 +51,8 @@ import getContentDocument from "../content/get-single-with-refs.js";
 import readDocumentContent from "../helpers/read-document-content.js";
 import resolveContentRefs from "../helpers/resolve-content-refs.js";
 import publish from "../publish.js";
+import upsertSingle from "../upsert-single.js";
+import writeSingle from "../write-single.js";
 import { outputSchema as readOutputSchema } from "./get/schema.js";
 import { writeOutputSchema } from "./schema.js";
 
@@ -96,6 +102,38 @@ const required = new CollectionBuilder("agent_required_pages", {
 	useAsLabel: true,
 	validation: { required: true },
 });
+const secrets = new CollectionBuilder("agent_secret_pages", {
+	mode: "multiple",
+	details: { labels: { singular: "Secret page", plural: "Secret pages" } },
+	bricks: {
+		embedded: [
+			new BrickBuilder("note")
+				.addText("caption")
+				.addRelation("doc", { collection: "agent_secret_pages" })
+				.addRelation("page", { collection: "agent_pages" }),
+		],
+	},
+})
+	.addText("title", { useAsLabel: true })
+	.addText("secret", { permissions: { read: true } })
+	.addText("status", { permissions: { update: true } })
+	.addRichText("open", { editor: { bricks: true } })
+	.addRichText("intro", {
+		editor: { bricks: true },
+		permissions: { update: true },
+	})
+	.addRichText("private", {
+		editor: { bricks: true },
+		permissions: { read: true },
+	})
+	.addRepeater("rows")
+	.addText("label")
+	.addRichText("rowNote", {
+		editor: { bricks: true },
+		permissions: { read: true },
+	})
+	.endRepeater()
+	.addRelation("related", { collection: "agent_secret_pages" });
 const agent = defineAgent({
 	key: "editor",
 	name: "Editor",
@@ -111,7 +149,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			collections: [pages, reviewed, required],
+			collections: [pages, reviewed, required, secrets],
 			localization: {
 				defaultLocale: "en",
 				locales: [
@@ -1425,4 +1463,404 @@ test("resolves refs for content the builder takes back, by each field's own conf
 	});
 	expect(refs.error).toBeUndefined();
 	expect(refs.data?.media).toEqual([expect.objectContaining({ id: media.id })]);
+});
+
+test("read tools leave out fields the reader can't see, in documents, filters and related documents", async () => {
+	const toolkit = createToolkit(context);
+	const target = await toolkit.documents.createSingle({
+		collectionKey: secrets.key,
+		actor: { type: "system" },
+		data: { fields: { title: "Target", secret: "target secret" } },
+	});
+	assert(target.data, JSON.stringify(target.error));
+	const source = await toolkit.documents.createSingle({
+		collectionKey: secrets.key,
+		actor: { type: "system" },
+		data: {
+			fields: {
+				title: "Source",
+				secret: "source secret",
+				related: [{ collectionKey: secrets.key, id: target.data.id }],
+			},
+		},
+	});
+	assert(source.data, JSON.stringify(source.error));
+
+	const { runId, conversationId } = await startRun();
+	const run = (tool: AgentToolDefinition, input: unknown) =>
+		executeAgentTool({
+			context,
+			tool,
+			input,
+			execution: {
+				authority: {
+					principal: { type: "user", userId },
+					permissions: [getCollectionPermission(secrets.key, "read")],
+					superAdmin: false,
+				},
+				actor: { type: "user", userId, agentRunId: runId },
+				signal: AbortSignal.timeout(10_000),
+				operationId: `${runId}:${randomUUID()}`,
+				run: { id: runId, conversationId, agentKey: agent.key },
+			},
+		});
+	const output = async (tool: AgentToolDefinition, input: unknown) => {
+		const result = await run(tool, input);
+		assert(result.type === "success", JSON.stringify(result));
+		return JSON.stringify(result.data.output);
+	};
+
+	const found = await output(agentTools.documents.find(), {
+		collectionKey: secrets.key,
+		fieldKeys: ["title", "secret", "related"],
+		query: { include: ["refs.documents"] },
+	});
+	const read = await output(agentTools.documents.get(), {
+		collectionKey: secrets.key,
+		documentId: source.data.id,
+		include: ["refs.documents"],
+	});
+	for (const text of [found, read]) {
+		expect(text).toContain("Target");
+		expect(text).not.toContain("source secret");
+		expect(text).not.toContain("target secret");
+	}
+
+	for (const filter of [
+		{ filterOr: [[{ key: "_secret", value: "source secret" }]] },
+		{ filter: [{ key: "_related._secret", value: "target secret" }] },
+	]) {
+		const result = await run(agentTools.documents.find(), {
+			collectionKey: secrets.key,
+			query: filter,
+		});
+		assert(result.type === "failed", JSON.stringify(result));
+		expect(result.message).toContain("filter or sort by");
+	}
+});
+
+test("builder updates reject changes to locked fields instead of sending them to the editor", async () => {
+	const created = await createToolkit(context).documents.createSingle({
+		collectionKey: secrets.key,
+		actor: { type: "system" },
+		data: { fields: { title: "Builder", status: "draft" } },
+	});
+	assert(created.data, JSON.stringify(created.error));
+	const stored = await readDocumentContent(context, {
+		collectionKey: secrets.key,
+		id: created.data.id,
+	});
+	assert(stored.data, JSON.stringify(stored.error));
+
+	const screen: AgentScreen = {
+		type: "document",
+		tabId: "tab",
+		label: "Builder",
+		collectionKey: secrets.key,
+		documentId: created.data.id,
+		requestId: null,
+	};
+	const update = (fields: Record<string, unknown>) =>
+		builderUpdate(context, {
+			input: { fields },
+			execution: {
+				authority: {
+					principal: { type: "user", userId },
+					permissions: [getCollectionPermission(secrets.key, "read")],
+					superAdmin: false,
+				},
+				actor: { type: "user", userId },
+				signal: AbortSignal.timeout(10_000),
+				operationId: randomUUID(),
+				run: { id: randomUUID(), conversationId: 1, agentKey: agent.key },
+				screen,
+			},
+			call: { action: "read", screen },
+			response: {
+				status: "done",
+				document: {
+					revision: 1,
+					versionId: null,
+					content: stored.data.stored,
+					contentLocale: null,
+					unsaved: false,
+					editable: true,
+				},
+			},
+		});
+
+	const locked = await update({ status: "live" });
+	expect(locked.error?.message).toEqual(
+		copy("server:core.documents.authoring.field.locked", {
+			data: { path: "patch.status" },
+		}),
+	);
+	expect((await update({ title: "Renamed" })).error).toBeUndefined();
+});
+
+test("embedded bricks follow the field holding them, for writes and refs", async () => {
+	const toolkit = createToolkit(context);
+	const linked = await toolkit.documents.createSingle({
+		collectionKey: secrets.key,
+		actor: { type: "system" },
+		data: { fields: { title: "Only linked privately" } },
+	});
+	assert(linked.data, JSON.stringify(linked.error));
+	const embedding = (ref: string) => ({
+		type: "doc",
+		content: [{ type: "lucidEmbeddedBrick", attrs: { ref } }],
+	});
+	const created = await toolkit.documents.createSingle({
+		collectionKey: secrets.key,
+		actor: { type: "system" },
+		data: {
+			fields: {
+				title: "Embeds",
+				intro: embedding("locked-note"),
+				private: embedding("hidden-note"),
+			},
+			bricks: {
+				embedded: [
+					{ key: "note", ref: "locked-note", fields: { caption: "Locked" } },
+					{
+						key: "note",
+						ref: "hidden-note",
+						fields: {
+							caption: "Hidden",
+							doc: [{ collectionKey: secrets.key, id: linked.data.id }],
+						},
+					},
+				],
+			},
+		},
+	});
+	assert(created.data, JSON.stringify(created.error));
+	const id = created.data.id;
+
+	const authUser: LucidUser = {
+		...user,
+		superAdmin: false,
+		permissions: [
+			getCollectionPermission(secrets.key, "read"),
+			getCollectionPermission(secrets.key, "update"),
+		],
+	};
+	const patch = (operations: DocumentPatch[]) =>
+		writeSingle(context, {
+			kind: "patch",
+			collectionKey: secrets.key,
+			id,
+			userId,
+			authUser,
+			operations,
+		});
+	const setOpen = (ref: string): DocumentPatch => ({
+		op: "set",
+		path: ["fields", "open"],
+		value: embedding(ref),
+	});
+	const caption = (ref: string): DocumentPatch => ({
+		op: "set",
+		path: ["bricks", "embedded", { ref, key: "note" }, "fields", "caption"],
+		value: "Changed",
+	});
+
+	//* referencing a hidden brick from an open field would expose it
+	expect((await patch([setOpen("hidden-note")])).error?.status).toBe(400);
+	//* a locked brick referenced from an open field as well stays locked
+	expect((await patch([setOpen("locked-note")])).error).toBeUndefined();
+	expect((await patch([caption("locked-note")])).error?.status).toBe(403);
+	expect((await patch([caption("hidden-note")])).error?.status).toBe(400);
+	expect(
+		(
+			await patch([
+				{
+					op: "remove",
+					path: ["bricks", "embedded", { ref: "locked-note", key: "note" }],
+				},
+			])
+		).error?.status,
+	).toBe(403);
+
+	//* full-payload saves keep the stored content of both
+	const stored = await readDocumentContent(context, {
+		collectionKey: secrets.key,
+		id,
+	});
+	assert(stored.data, JSON.stringify(stored.error));
+	const saved = await upsertSingle(context, {
+		collectionKey: secrets.key,
+		documentId: id,
+		userId,
+		authUser,
+		fields: stored.data.stored.fields,
+		bricks: stored.data.stored.bricks.map((brick) => ({
+			...brick,
+			fields: brick.fields?.map((field) =>
+				field.key === "caption" ? { ...field, value: "Changed" } : field,
+			),
+		})),
+	});
+	assert(saved.data, JSON.stringify(saved.error));
+	const after = await readDocumentContent(context, {
+		collectionKey: secrets.key,
+		id,
+	});
+	assert(after.data, JSON.stringify(after.error));
+	expect(
+		after.data.data.bricks.embedded.map((brick) => brick.fields.caption),
+	).toEqual(["Locked", "Hidden"]);
+
+	const { runId, conversationId } = await startRun();
+	const read = await executeAgentTool({
+		context,
+		tool: agentTools.documents.get(),
+		input: {
+			collectionKey: secrets.key,
+			documentId: id,
+			include: ["bricks", "refs"],
+		},
+		execution: {
+			authority: {
+				principal: { type: "user", userId },
+				permissions: [getCollectionPermission(secrets.key, "read")],
+				superAdmin: false,
+			},
+			actor: { type: "user", userId, agentRunId: runId },
+			signal: AbortSignal.timeout(10_000),
+			operationId: `${runId}:${randomUUID()}`,
+			run: { id: runId, conversationId, agentKey: agent.key },
+		},
+	});
+	assert(read.type === "success", JSON.stringify(read));
+	const text = JSON.stringify(read.data.output);
+	expect(text).not.toContain("Hidden");
+	expect(text).not.toContain("Only linked privately");
+});
+
+test("admin saves can't expose a hidden embedded brick by removing its holder and referencing it elsewhere", async () => {
+	const embedding = (ref: string) => ({
+		type: "doc",
+		content: [{ type: "lucidEmbeddedBrick", attrs: { ref } }],
+	});
+	const created = await createToolkit(context).documents.createSingle({
+		collectionKey: secrets.key,
+		actor: { type: "system" },
+		data: {
+			fields: {
+				title: "Rows",
+				rows: [{ fields: { label: "Row", rowNote: embedding("row-note") } }],
+			},
+			bricks: {
+				embedded: [
+					{ key: "note", ref: "row-note", fields: { caption: "Row secret" } },
+				],
+			},
+		},
+	});
+	assert(created.data, JSON.stringify(created.error));
+	const id = created.data.id;
+
+	const authUser: LucidUser = {
+		...user,
+		superAdmin: false,
+		permissions: [
+			getCollectionPermission(secrets.key, "read"),
+			getCollectionPermission(secrets.key, "update"),
+		],
+	};
+	const stored = await readDocumentContent(context, {
+		collectionKey: secrets.key,
+		id,
+	});
+	assert(stored.data, JSON.stringify(stored.error));
+	//* what the editor received, without the hidden row note and its brick
+	const readable = filterReadableContent(
+		getContentAccess(secrets, authUser),
+		stored.data.stored,
+	);
+
+	const saved = await upsertSingle(context, {
+		collectionKey: secrets.key,
+		documentId: id,
+		userId,
+		authUser,
+		bricks: readable.bricks ?? [],
+		fields: [
+			...(readable.fields ?? []).filter(
+				(field) => field.key !== "rows" && field.key !== "open",
+			),
+			{ key: "rows", type: "repeater", groups: [] },
+			{ key: "open", type: "rich-text", value: embedding("row-note") },
+		],
+	});
+	expect(saved.error?.status).toBe(400);
+
+	const after = await readDocumentContent(context, {
+		collectionKey: secrets.key,
+		id,
+	});
+	assert(after.data, JSON.stringify(after.error));
+	expect(after.data.data.fields.rows).toHaveLength(1);
+});
+
+test("saves keep links in embedded bricks hidden by the field holding them", async () => {
+	const pageId = await createPage();
+	const created = await createToolkit(context).documents.createSingle({
+		collectionKey: secrets.key,
+		actor: { type: "system" },
+		data: {
+			fields: {
+				title: "Hidden note",
+				private: {
+					type: "doc",
+					content: [
+						{ type: "lucidEmbeddedBrick", attrs: { ref: "hidden-note" } },
+					],
+				},
+			},
+			bricks: {
+				embedded: [
+					{
+						key: "note",
+						ref: "hidden-note",
+						fields: { page: [{ collectionKey: pages.key, id: pageId }] },
+					},
+				],
+			},
+		},
+	});
+	assert(created.data, JSON.stringify(created.error));
+	const id = created.data.id;
+
+	//* can edit secret pages but can't read the page the hidden note links to
+	const authUser: LucidUser = {
+		...user,
+		superAdmin: false,
+		permissions: [
+			getCollectionPermission(secrets.key, "read"),
+			getCollectionPermission(secrets.key, "update"),
+		],
+	};
+	const stored = await readDocumentContent(context, {
+		collectionKey: secrets.key,
+		id,
+	});
+	assert(stored.data, JSON.stringify(stored.error));
+	const readable = filterReadableContent(
+		getContentAccess(secrets, authUser),
+		stored.data.stored,
+	);
+
+	const saved = await upsertSingle(context, {
+		collectionKey: secrets.key,
+		documentId: id,
+		userId,
+		authUser,
+		bricks: readable.bricks ?? [],
+		fields: (readable.fields ?? []).map((field) =>
+			field.key === "title" ? { ...field, value: "Renamed" } : field,
+		),
+	});
+	expect(saved.error).toBeUndefined();
 });

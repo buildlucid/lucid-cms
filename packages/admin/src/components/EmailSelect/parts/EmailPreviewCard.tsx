@@ -28,7 +28,8 @@ const PREVIEW_HEIGHT = 240;
 export const EmailPreviewCard: Component<{
 	email: EmailRef;
 	disabled?: boolean;
-	onChange: () => void;
+	/** Opens the picker to choose another email, leaving the button out when omitted. */
+	onChange?: () => void;
 	onClear: () => void;
 }> = (props) => {
 	// ----------------------------------------
@@ -190,17 +191,21 @@ export const EmailPreviewCard: Component<{
 							<TbOutlineEye size={14} />
 						</Button>
 					</Show>
-					<Button
-						type="button"
-						variant="ghost"
-						size="xs"
-						shape="square"
-						onClick={props.onChange}
-						disabled={props.disabled}
-						aria-label={T()("common.edit")}
-					>
-						<TbOutlinePencil size={12} />
-					</Button>
+					<Show when={props.onChange}>
+						{(onChange) => (
+							<Button
+								type="button"
+								variant="ghost"
+								size="xs"
+								shape="square"
+								onClick={onChange()}
+								disabled={props.disabled}
+								aria-label={T()("common.edit")}
+							>
+								<TbOutlinePencil size={12} />
+							</Button>
+						)}
+					</Show>
 					<Button
 						type="button"
 						variant="danger-ghost"

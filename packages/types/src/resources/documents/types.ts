@@ -1,7 +1,7 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType } from "../media/types.js";
 import type { RefResource } from "../refs/resource.js";
-import type { UserDisplay } from "../users/types.js";
+import type { Permission, UserDisplay } from "../users/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
 export type BrickType = "builder" | "fixed" | "embedded";
@@ -415,6 +415,7 @@ export interface CollectionBrickConfig {
 		description?: ResolvedAdminCopy;
 	};
 	thumbnail: string | undefined;
+	permissions?: FieldPermissionKeys;
 	fields: CollectionFieldConfig[];
 }
 
@@ -489,10 +490,19 @@ type RequiredValidation = {
 	required?: boolean;
 };
 
+/** Generated permissions a field, container or brick requires, with restrictions inherited through containers. */
+export type FieldPermissionKeys = {
+	/** Required to see the item, which the admin hides otherwise. */
+	read?: Permission;
+	/** Required to change the item, which the admin shows as read-only otherwise. */
+	update?: Permission;
+};
+
 type SharedCollectionFieldConfig<TType extends FieldType> = {
 	key: string;
 	type: TType;
 	details: FieldDetails;
+	permissions?: FieldPermissionKeys;
 };
 
 export interface CheckboxFieldConfig

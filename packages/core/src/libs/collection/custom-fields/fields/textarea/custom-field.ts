@@ -37,6 +37,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 			localized: this.props?.localized ?? true,
 			default: this.props?.default ?? "",
 			index: this.props?.index,
+			permissions: this.props?.permissions,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,

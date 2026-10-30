@@ -94,7 +94,7 @@ const formatSingle = (props: {
 
 	const response: User = {
 		id: props.user.id,
-		email: props.user.email,
+		...(canViewDetails && { email: props.user.email }),
 		username: props.user.username,
 		firstName: props.user.first_name,
 		lastName: props.user.last_name,

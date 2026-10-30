@@ -25,6 +25,15 @@ const permissionDefinitionResponseSchema = z.object({
 	}),
 });
 
+const permissionSubgroupResponseSchema = z.object({
+	key: z.string().meta({
+		description: "The subgroup's key within its group",
+		example: "fields",
+	}),
+	details: permissionDetailsResponseSchema,
+	permissions: z.array(permissionDefinitionResponseSchema),
+});
+
 const permissionResponseSchema = z.object({
 	key: z.string().meta({
 		description: "The permission's group key",
@@ -37,6 +46,10 @@ const permissionResponseSchema = z.object({
 	}),
 	permissions: z.array(permissionDefinitionResponseSchema).meta({
 		description: "The permissions for this permission group.",
+	}),
+	subgroups: z.array(permissionSubgroupResponseSchema).optional().meta({
+		description:
+			"Labelled sets of permissions shown below the group's own, such as a collection's field permissions.",
 	}),
 });
 

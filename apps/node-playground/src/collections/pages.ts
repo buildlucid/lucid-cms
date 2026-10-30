@@ -128,18 +128,21 @@ const PageCollection = new CollectionBuilder("page", {
 	.addUser("author", {
 		showInList: true,
 		multiple: true,
+		permissions: { update: true },
 	})
 	.addRelation("settings", {
 		collection: "settings",
 		details: {
 			label: "Settings",
 		},
+		permissions: { read: true },
 	})
 	.addEmail("confirmation_email", {
 		details: {
 			label: "Confirmation Email",
 		},
 		allowInternal: true,
+		permissions: { read: true },
 	})
 	.addEmail("sent_emails", {
 		multiple: true,
@@ -147,6 +150,7 @@ const PageCollection = new CollectionBuilder("page", {
 			label: "Sent Emails",
 		},
 		allowInternal: true,
+		permissions: { read: true },
 	});
 
 export default PageCollection;

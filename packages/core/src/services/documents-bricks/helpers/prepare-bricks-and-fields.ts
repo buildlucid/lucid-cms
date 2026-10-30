@@ -88,12 +88,27 @@ const processFields = (props: {
 	});
 };
 
+/** Field values that can reference embedded bricks, from stored input or document responses. */
+type EmbeddedRefField = {
+	type: FieldTypes;
+	value?: unknown;
+	translations?: Record<string, unknown>;
+	groups?: Array<{ fields: EmbeddedRefField[] }>;
+};
+
+/** A brick whose fields can reference embedded bricks. */
+type EmbeddedRefBrick = {
+	ref: string;
+	type: string;
+	fields?: EmbeddedRefField[];
+};
+
 /** Finds embedded-brick refs recursively in custom-field values and nested groups. */
 const getEmbeddedBrickRefsFromFields = (
-	fields: Array<FieldInputSchema>,
+	fields: EmbeddedRefField[],
 ): Set<string> => {
 	const refs = new Set<string>();
-	const visit = (field: FieldInputSchema) => {
+	const visit = (field: EmbeddedRefField) => {
 		const fieldDefinition = fieldHooks[field.type];
 		const extractEmbeddedBrickRefs = fieldDefinition.extractEmbeddedBrickRefs;
 		if (extractEmbeddedBrickRefs) {
@@ -118,8 +133,8 @@ const getEmbeddedBrickRefsFromFields = (
 
 /** Resolves reachable embedded bricks and refs involved in a reference cycle. */
 export const analyzeEmbeddedBrickGraph = (props: {
-	fields: Array<FieldInputSchema>;
-	bricks: Array<BrickInputSchema>;
+	fields: EmbeddedRefField[];
+	bricks: EmbeddedRefBrick[];
 }) => {
 	const embeddedByRef = new Map(
 		props.bricks
@@ -166,11 +181,13 @@ export const analyzeEmbeddedBrickGraph = (props: {
 	return { reachable, cyclic };
 };
 
-/** Keeps only embedded bricks reachable from submitted document content. */
-export const filterReachableEmbeddedBricks = (props: {
-	fields: Array<FieldInputSchema>;
-	bricks: Array<BrickInputSchema>;
-}): Array<BrickInputSchema> => {
+/** Keeps only embedded bricks reachable from document content. */
+export const filterReachableEmbeddedBricks = <
+	TBrick extends EmbeddedRefBrick,
+>(props: {
+	fields: EmbeddedRefField[];
+	bricks: TBrick[];
+}): TBrick[] => {
 	const { reachable } = analyzeEmbeddedBrickGraph(props);
 
 	return props.bricks.filter(

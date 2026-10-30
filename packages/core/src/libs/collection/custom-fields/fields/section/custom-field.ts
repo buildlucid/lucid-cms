@@ -38,6 +38,7 @@ class SectionCustomField extends CustomField<"section"> {
 				description: this.props?.details?.description,
 			},
 			output: this.props?.output ?? "nested",
+			permissions: this.props?.permissions,
 			ui: {
 				condition: this.props?.ui?.condition,
 				width: this.props?.ui?.width,

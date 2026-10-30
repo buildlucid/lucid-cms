@@ -2,6 +2,8 @@ import type { AgentBuilderChangesData } from "@lucidcms/types";
 import type z from "zod";
 import constants from "../../../../constants/constants.js";
 import type { agentScreenCallSchema } from "../../../../libs/agent/screen.js";
+import filterReadableData from "../../../../libs/collection/field-access/filter-readable-data.js";
+import getContentAccess from "../../../../libs/collection/field-access/get-content-access.js";
 import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import type {
@@ -10,6 +12,7 @@ import type {
 	AgentToolResult,
 } from "../../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
+import checkEmbeddedBrickChanges from "../../../documents/checks/check-embedded-brick-changes.js";
 import fromDocumentInput from "../../../documents/helpers/from-document-input.js";
 import patchDocumentData from "../../../documents/helpers/patch-document-data.js";
 import resolveContentLocale from "../../../documents/helpers/resolve-content-locale.js";
@@ -139,9 +142,19 @@ const handler: ServiceFn<
 		};
 	}
 
+	//* the user's field access applies, so hidden fields read as unknown and locked ones can't change
+	const access = getContentAccess(collection, execution.authority);
+	const accessContext = { ...contentContext, access };
+	const readable = filterReadableData(
+		collection,
+		access,
+		current.data,
+		response.document.content,
+	);
+
 	const operations = buildOperations({
-		shape: getDocumentShape(contentContext),
-		current: current.data,
+		shape: getDocumentShape(accessContext),
+		current: readable,
 		fields: input.fields,
 		bricks: input.bricks,
 		locale: locale.data,
@@ -159,11 +172,7 @@ const handler: ServiceFn<
 		};
 	}
 
-	const patched = patchDocumentData(
-		contentContext,
-		current.data,
-		operations.data,
-	);
+	const patched = patchDocumentData(accessContext, readable, operations.data);
 	if (patched.error) {
 		return {
 			data: undefined,
@@ -177,8 +186,8 @@ const handler: ServiceFn<
 	}
 
 	const before = toDocumentInput(
-		contentContext,
-		current.data,
+		accessContext,
+		readable,
 		response.document.content,
 	);
 	if (before.error) {
@@ -194,7 +203,7 @@ const handler: ServiceFn<
 	}
 
 	const after = toDocumentInput(
-		contentContext,
+		accessContext,
 		patched.data,
 		response.document.content,
 	);
@@ -206,6 +215,26 @@ const handler: ServiceFn<
 				status: 400,
 				message:
 					after.error.message ?? copy("server:agent.screen.response.invalid"),
+			},
+		};
+	}
+
+	const embeddedRes = checkEmbeddedBrickChanges({
+		access,
+		stored: response.document.content,
+		before: readable,
+		after: patched.data,
+		payload: after.data,
+	});
+	if (embeddedRes.error) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: embeddedRes.error.status ?? 400,
+				message:
+					embeddedRes.error.message ??
+					copy("server:agent.screen.response.invalid"),
 			},
 		};
 	}
@@ -239,6 +268,7 @@ const handler: ServiceFn<
 	const refs = await resolveContentRefs(context, {
 		collection,
 		content: { fields: content.fields, bricks: content.bricks },
+		reader: execution.authority,
 	});
 	if (refs.error) {
 		return {

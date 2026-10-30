@@ -59,6 +59,8 @@ export const fieldHooks: Readonly<
 			| "extractEmbeddedBrickRefs"
 			| "formatToolValue"
 			| "parseToolValue"
+			| "contentChildren"
+			| "restrictValidationData"
 		>
 	>
 > = registeredFields;

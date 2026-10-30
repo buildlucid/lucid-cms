@@ -1,4 +1,6 @@
 import type z from "zod";
+import filterReadableData from "../../../../libs/collection/field-access/filter-readable-data.js";
+import getContentAccess from "../../../../libs/collection/field-access/get-content-access.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import type {
 	AgentToolExecution,
@@ -84,7 +86,12 @@ const handler: ServiceFn<
 	}
 
 	const projected = projectEditableDocument(contentContext, {
-		data: data.data,
+		data: filterReadableData(
+			collection,
+			getContentAccess(collection, execution.authority),
+			data.data,
+			response.document.content,
+		),
 		contentLocale: locale.data,
 		fieldKeys: input.fieldKeys,
 		includeBricks: true,

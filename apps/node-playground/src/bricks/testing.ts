@@ -3,6 +3,7 @@ import { BrickBuilder, copy } from "@lucidcms/core";
 const TestingBrick = new BrickBuilder("testing", {
 	thumbnail:
 		"https://usersnap.com/blog/wp-content/uploads/2021/03/7-Common-Types-of-Software-Testing@1x-1280x720.png",
+	permissions: { update: true },
 })
 	.addTab("content_tab", {
 		details: {

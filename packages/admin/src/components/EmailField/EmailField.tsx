@@ -7,8 +7,10 @@ import {
 	createSignal,
 } from "solid-js";
 import { EmailSelect } from "@/components/EmailSelect/EmailSelect";
+import { Permissions } from "@/constants/permissions";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
+import userStore from "@/store/userStore/userStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
@@ -73,6 +75,7 @@ export const EmailField: Component<EmailFieldProps> = (props) => {
 	// Render
 	return (
 		<EmailSelect
+			canBrowse={userStore.get.hasPermission([Permissions.EmailRead]).all}
 			id={brickHelpers.customFieldId({
 				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,

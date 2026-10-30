@@ -10,12 +10,14 @@ import isPlainObject from "../../../../../utils/helpers/is-plain-object.js";
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import { richTextFieldConfig } from "./config.js";
 import RichTextCustomField from "./custom-field.js";
+import restrictRichTextValidationData from "./restrict-validation-data.js";
 import validateRichTextInputData from "./validate-input.js";
 
 export default {
 	config: richTextFieldConfig,
 	class: RichTextCustomField,
 	validateInput: validateRichTextInputData,
+	restrictValidationData: restrictRichTextValidationData,
 	contentTypeGen: createValueFieldTypeGenerator("RichTextFieldValue | null"),
 	extractEmbeddedBrickRefs: (value: unknown) =>
 		extractEmbeddedBrickRefs(value as RichTextJSON | null),

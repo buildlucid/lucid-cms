@@ -6,6 +6,7 @@ const AllFieldsBrick = new BrickBuilder("all-fields", {
 		description:
 			"Exercises every built-in field and structural field in the builder.",
 	},
+	permissions: { read: true },
 })
 	.addTab("content", {
 		details: {

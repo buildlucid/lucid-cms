@@ -62,6 +62,7 @@ export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
 					execution.authority,
 					options.collections,
 				),
+				reader: execution.authority,
 			});
 			if (result.error) return result;
 

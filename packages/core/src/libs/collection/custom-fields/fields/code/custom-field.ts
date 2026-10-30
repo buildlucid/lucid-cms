@@ -47,6 +47,7 @@ class CodeCustomField extends CustomField<"code"> {
 				...constants.customFields.code.languages,
 			],
 			index: this.props?.index,
+			permissions: this.props?.permissions,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,

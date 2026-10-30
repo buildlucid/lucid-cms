@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
+import { fieldPermissionKeysSchema } from "../libs/permission/schema.js";
 import {
 	fieldConfigSchema,
 	fieldContentResponseSchema,
@@ -54,6 +55,7 @@ export const brickConfigSchema = z.object({
 		.string()
 		.optional()
 		.meta({ description: "Thumbnail URL shown when choosing a brick" }),
+	permissions: fieldPermissionKeysSchema.optional(),
 	get fields() {
 		return z.array(fieldConfigSchema);
 	},

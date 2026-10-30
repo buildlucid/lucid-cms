@@ -52,6 +52,8 @@ interface MediaSelectProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	/** Whether the user can browse the media library, with removal and uploads still available when `false`. */
+	canBrowse?: boolean;
 }
 
 const MEDIA_SELECT_DRAG_DROP_KEY = "media-select-zone";
@@ -244,18 +246,20 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								"mt-3": isMultiple(),
 							})}
 						>
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								onClick={openMediaSelectModal}
-								disabled={props.disabled || !canAddMore()}
-								class="capitalize"
-							>
-								{T()("media.select.action", {
-									type: props.type || "media",
-								})}
-							</Button>
+							<Show when={props.canBrowse !== false}>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={openMediaSelectModal}
+									disabled={props.disabled || !canAddMore()}
+									class="capitalize"
+								>
+									{T()("media.select.action", {
+										type: props.type || "media",
+									})}
+								</Button>
+							</Show>
 							<Button
 								type="button"
 								variant="ghost"
@@ -352,19 +356,21 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									</div>
 								</div>
 								<div class="flex items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-									<Button
-										type="button"
-										variant="ghost"
-										size="xs"
-										shape="square"
-										onClick={openMediaSelectModal}
-										disabled={props.disabled}
-										aria-label={T()("media.select.new", {
-											type: props.type || "media",
-										})}
-									>
-										<TbOutlinePencil size={12} />
-									</Button>
+									<Show when={props.canBrowse !== false}>
+										<Button
+											type="button"
+											variant="ghost"
+											size="xs"
+											shape="square"
+											onClick={openMediaSelectModal}
+											disabled={props.disabled}
+											aria-label={T()("media.select.new", {
+												type: props.type || "media",
+											})}
+										>
+											<TbOutlinePencil size={12} />
+										</Button>
+									</Show>
 									<Button
 										type="button"
 										variant="danger-ghost"
@@ -416,22 +422,24 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											</For>
 											<Show when={selectedMediaRefs().length > 0}>
 												<div class="relative hidden h-full items-center justify-center lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2">
-													<Button
-														type="button"
-														variant="outline"
-														shape="circle"
-														size="xs"
-														onClick={openMediaSelectModal}
-														disabled={props.disabled || !canAddMore()}
-														aria-label={T()("media.select.action", {
-															type: props.type || "media",
-														})}
-														title={T()("media.select.action", {
-															type: props.type || "media",
-														})}
-													>
-														<TbOutlinePlus size={12} />
-													</Button>
+													<Show when={props.canBrowse !== false}>
+														<Button
+															type="button"
+															variant="outline"
+															shape="circle"
+															size="xs"
+															onClick={openMediaSelectModal}
+															disabled={props.disabled || !canAddMore()}
+															aria-label={T()("media.select.action", {
+																type: props.type || "media",
+															})}
+															title={T()("media.select.action", {
+																type: props.type || "media",
+															})}
+														>
+															<TbOutlinePlus size={12} />
+														</Button>
+													</Show>
 												</div>
 											</Show>
 										</div>
@@ -441,18 +449,20 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						</div>
 						<div class="flex flex-wrap items-center justify-between gap-3 mt-3">
 							<div class="flex flex-wrap items-center gap-2">
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={openMediaSelectModal}
-									disabled={props.disabled || !canAddMore()}
-									class="capitalize"
-								>
-									{T()("media.select.action", {
-										type: props.type || "media",
-									})}
-								</Button>
+								<Show when={props.canBrowse !== false}>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onClick={openMediaSelectModal}
+										disabled={props.disabled || !canAddMore()}
+										class="capitalize"
+									>
+										{T()("media.select.action", {
+											type: props.type || "media",
+										})}
+									</Button>
+								</Show>
 								<Button
 									type="button"
 									variant="ghost"

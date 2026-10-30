@@ -15,6 +15,7 @@ import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+import keepRestrictedContent from "../documents/helpers/keep-restricted-content.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
 
 /**
@@ -70,6 +71,16 @@ const createSingle: ServiceFn<
 	if (currentLatestRes?.error) return currentLatestRes;
 
 	const previousLatestId = currentLatestRes?.data?.id;
+
+	const contentRes = await keepRestrictedContent(context, {
+		collection: data.collection,
+		actor: data.authUser,
+		documentId: data.documentId,
+		versionId: previousLatestId,
+		bricks: data.bricks,
+		fields: data.fields,
+	});
+	if (contentRes.error) return contentRes;
 
 	if (previousLatestId !== undefined) {
 		//* Stage the previous latest as a revision, deleting it after completion if revisions are off.
@@ -155,8 +166,8 @@ const createSingle: ServiceFn<
 				documentId: data.documentId,
 				versionId: newVersionRes.data.id,
 				versionType: versionType,
-				bricks: data.bricks,
-				fields: data.fields,
+				bricks: contentRes.data.bricks,
+				fields: contentRes.data.fields,
 			},
 		},
 	);

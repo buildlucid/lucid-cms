@@ -1,4 +1,6 @@
 import type z from "zod";
+import filterReadableData from "../../../../libs/collection/field-access/filter-readable-data.js";
+import getContentAccess from "../../../../libs/collection/field-access/get-content-access.js";
 import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
@@ -118,12 +120,19 @@ const updateDocument: ServiceFn<
 	});
 	if (currentRes.error) return currentRes;
 
+	const access = getContentAccess(collection, user);
 	const operationsRes = buildOperations({
 		shape: getDocumentShape({
 			collection,
 			localization: context.config.localization,
+			access,
 		}),
-		current: currentRes.data.data,
+		current: filterReadableData(
+			collection,
+			access,
+			currentRes.data.data,
+			currentRes.data.stored,
+		),
 		fields: input.fields,
 		bricks: input.bricks,
 		locale: localeRes.data,

@@ -1,9 +1,12 @@
 import type BrickBuilder from "../builders/brick-builder/index.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../builders/field-builder/index.js";
-import registeredFields from "../custom-fields/registered-fields.js";
+import registeredFields, {
+	fieldHooks,
+} from "../custom-fields/registered-fields.js";
 import { storageModes } from "../custom-fields/storage/index.js";
 import type { FieldConfig, FieldTypes } from "../custom-fields/types.js";
+import type { ContentAccess, FieldAccess } from "../field-access/types.js";
 import resolveCollectionLocalization from "./resolve-collection-localization.js";
 
 export type Owner = CollectionBuilder | BrickBuilder;
@@ -22,12 +25,21 @@ export type DocumentShape =
 			relation: boolean;
 			field: FieldConfig<FieldTypes>;
 			owner: Owner;
+			/** Set when the actor can't change the value. */
+			locked?: true;
 	  }
-	| { kind: "items"; fields: DocumentObjectShape }
+	| {
+			kind: "items";
+			fields: DocumentObjectShape;
+			/** Set when the actor can't add, remove or reorder items. */
+			locked?: true;
+	  }
 	| {
 			kind: "bricks";
 			fields: Map<string, DocumentObjectShape>;
 			embedded: boolean;
+			/** Brick keys the actor can't add, change or remove. */
+			locked?: ReadonlySet<string>;
 	  };
 
 export type ContentContext = {
@@ -35,14 +47,11 @@ export type ContentContext = {
 	localization: Parameters<
 		typeof resolveCollectionLocalization
 	>[0]["localization"];
+	/** Writer access that omits hidden fields and bricks from the shape and marks locked nodes. */
+	access?: ContentAccess;
 };
 
-/**
- * Describes the authoring structure shared by document merges, patches and generated types.
- * Objects represent fields, structural groups and locale maps. Items represent repeaters;
- * bricks describe the allowed brick variants. Value nodes keep compound fields indivisible.
- * This describes the collection, rather than storing a particular document's values.
- */
+/** Models collection structure for merges, patches and generated types with objects for fields, groups and locales, repeater items, brick variants and indivisible compound values, omitting unreadable nodes and marking locks when `access` is supplied. */
 export const getDocumentShape = (
 	context: ContentContext,
 ): DocumentObjectShape => {
@@ -50,16 +59,22 @@ export const getDocumentShape = (
 	const fieldsDocumentShape = (
 		fields: FieldTree,
 		owner: Owner,
+		access: ReadonlyMap<string, FieldAccess> | undefined,
 	): DocumentObjectShape => {
 		const children = new Map<string, DocumentShape>();
 		for (const field of fields) {
-			if (
-				field.type === "tab" ||
-				field.type === "section" ||
-				field.type === "collapsible"
-			) {
-				const nested = fieldsDocumentShape(field.fields, owner);
-				if (field.type === "tab" || field.output === "inline") {
+			const level = access?.get(field.key) ?? "editable";
+			if (level === "hidden") continue;
+			const locked = level === "locked" ? { locked: true as const } : {};
+
+			const contentChildren = fieldHooks[field.type].contentChildren?.(field);
+			if (contentChildren) {
+				const nested = fieldsDocumentShape(
+					contentChildren.fields,
+					owner,
+					access,
+				);
+				if (contentChildren.output === "inline") {
 					for (const [key, value] of nested.children) children.set(key, value);
 				} else children.set(field.key, nested);
 				continue;
@@ -73,7 +88,9 @@ export const getDocumentShape = (
 					fields: fieldsDocumentShape(
 						storage.getChildFieldConfigs(field) ?? [],
 						owner,
+						access,
 					),
+					...locked,
 				});
 				continue;
 			}
@@ -87,6 +104,7 @@ export const getDocumentShape = (
 				relation:
 					storage.mode === "relation-table" &&
 					"resource" in registeredFields[field.type].config,
+				...locked,
 			};
 			children.set(
 				field.key,
@@ -105,13 +123,33 @@ export const getDocumentShape = (
 		return { kind: "object", children };
 	};
 
+	const bricks = (type: "builder" | "fixed" | "embedded") =>
+		(context.collection.config.bricks?.[type] ?? []).filter(
+			(brick) =>
+				type === "embedded" ||
+				context.access?.bricks.get(brick.key)?.access !== "hidden",
+		);
 	const brickFields = (type: "builder" | "fixed" | "embedded") =>
 		new Map(
-			(context.collection.config.bricks?.[type] ?? []).map((brick) => [
+			bricks(type).map((brick) => [
 				brick.key,
-				fieldsDocumentShape(brick.contentFieldTree, brick),
+				fieldsDocumentShape(
+					brick.contentFieldTree,
+					brick,
+					context.access?.bricks.get(brick.key)?.fields,
+				),
 			]),
 		);
+	const lockedBricks = (type: "builder" | "embedded") => {
+		const keys = bricks(type)
+			.filter(
+				(brick) =>
+					(context.access?.bricks.get(brick.key)?.access ?? "editable") !==
+					"editable",
+			)
+			.map((brick) => brick.key);
+		return keys.length > 0 ? { locked: new Set(keys) } : {};
+	};
 
 	return {
 		kind: "object",
@@ -121,6 +159,7 @@ export const getDocumentShape = (
 				fieldsDocumentShape(
 					context.collection.contentFieldTree,
 					context.collection,
+					context.access?.fields,
 				),
 			],
 			[
@@ -135,6 +174,7 @@ export const getDocumentShape = (
 								kind: "bricks",
 								fields: brickFields("builder"),
 								embedded: false,
+								...lockedBricks("builder"),
 							},
 						],
 						[
@@ -143,6 +183,7 @@ export const getDocumentShape = (
 								kind: "bricks",
 								fields: brickFields("embedded"),
 								embedded: true,
+								...lockedBricks("embedded"),
 							},
 						],
 					]),

@@ -3,16 +3,18 @@ import getMigrationStatus from "../../libs/collection/get-collection-migration-s
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
+import type { LucidUser } from "../../types/hono.js";
 import type { Collection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
- * Gets a single collection
+ * Gets a single collection, leaving out the fields and bricks the user can't see.
  */
 const getSingle: ServiceFn<
 	[
 		{
 			key: string;
+			user?: LucidUser;
 		},
 	],
 	Collection
@@ -77,6 +79,7 @@ const getSingle: ServiceFn<
 							},
 						]
 					: undefined,
+				reader: data.user,
 			}),
 		};
 	}
@@ -95,6 +98,7 @@ const getSingle: ServiceFn<
 				fields: true,
 				documentId: true,
 			},
+			reader: data.user,
 		}),
 	};
 };

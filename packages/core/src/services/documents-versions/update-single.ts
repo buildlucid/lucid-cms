@@ -16,6 +16,7 @@ import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import checkSaveHold from "../document-editors/check-save-hold.js";
 import resetStage from "../document-workflows/reset-stage.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
+import keepRestrictedContent from "../documents/helpers/keep-restricted-content.js";
 import notifyChange from "../documents/notify-change.js";
 import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-order.js";
 import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
@@ -101,6 +102,16 @@ const updateSingle: ServiceFn<
 				if (held.error) return held;
 			}
 
+			const contentRes = await keepRestrictedContent(context, {
+				collection: updateContextRes.data.collection,
+				actor: data.authUser,
+				documentId: data.documentId,
+				versionId: data.versionId,
+				bricks: data.bricks,
+				fields: data.fields,
+			});
+			if (contentRes.error) return contentRes;
+
 			// Fire beforeUpsert transform hooks
 			const hookResponse = await executeHooks(
 				context,
@@ -128,8 +139,8 @@ const updateSingle: ServiceFn<
 						documentId: data.documentId,
 						versionId: data.versionId,
 						versionType: updateContextRes.data.versionType,
-						bricks: data.bricks,
-						fields: data.fields,
+						bricks: contentRes.data.bricks,
+						fields: contentRes.data.fields,
 					},
 				},
 			);

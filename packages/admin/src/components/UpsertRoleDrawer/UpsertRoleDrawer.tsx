@@ -113,6 +113,11 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 			key: group.key,
 			details: group.details,
 			grants: group.permissions,
+			subgroups: group.subgroups?.map((subgroup) => ({
+				key: subgroup.key,
+				details: subgroup.details,
+				grants: subgroup.permissions,
+			})),
 		})),
 	);
 	const tabInvalid = (fields: string[]) =>

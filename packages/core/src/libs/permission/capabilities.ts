@@ -3,9 +3,12 @@ import LucidError from "../../utils/errors/lucid-error.js";
 import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type FieldBuilder from "../collection/builders/field-builder/index.js";
+import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
+import keyToTitle from "../collection/custom-fields/utils/key-to-title.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
 import { copy, normalizeCopy, translate } from "../i18n/index.js";
-import type { ResolvedAdminCopy } from "../i18n/types.js";
+import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import type { AccessPermission } from "./access-config.js";
 import {
 	agentPermissionActions,
@@ -22,9 +25,16 @@ import {
 	ExternalScopes,
 	getCollectionExternalScope,
 } from "./external-scopes.js";
+import {
+	type FieldPermissionTarget,
+	fieldPermissionActions,
+	getFieldPermission,
+} from "./field-permissions.js";
 import type {
 	AgentPermissionAction,
 	CollectionPermissionAction,
+	FieldPermissionAction,
+	FieldPermissions,
 	PermissionDetails,
 	StaticPermission,
 } from "./types.js";
@@ -43,6 +53,8 @@ export type CapabilityDefinition = {
 	permission?: string;
 	external?: ExternalCapability;
 	availableToIntegrations?: boolean;
+	/** Lists the permission under a labelled subgroup of its group, such as a collection's generated field permissions. */
+	subgroup?: { key: string; details: PermissionDetails };
 };
 
 export type CapabilityGroup = {
@@ -182,6 +194,99 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 	});
 };
 
+const fieldPermissionNames = {
+	field: {
+		read: (field: string) =>
+			copy("admin:permissions.documents.fields.read", { data: { field } }),
+		update: (field: string) =>
+			copy("admin:permissions.documents.fields.update", { data: { field } }),
+	},
+	brick: {
+		read: copy("admin:permissions.documents.bricks.read"),
+		update: copy("admin:permissions.documents.bricks.update"),
+	},
+};
+
+const fieldPermissionDescriptions = {
+	read: copy("admin:permissions.documents.fields.read.description"),
+	update: copy("admin:permissions.documents.fields.update.description"),
+} satisfies Record<FieldPermissionAction, ResolvedAdminCopy>;
+
+/** Resolves labels for generated permission names as literal copy, default messages or keys converted to titles, providing plain strings for interpolation. */
+const labelText = (label: AdminCopyInput | undefined, key: string): string => {
+	const normalized = normalizeCopy(label);
+	if (normalized?.type === "lucid.literal") return normalized.value;
+	return normalized?.defaultMessage ?? keyToTitle(key);
+};
+
+type CapabilitySubgroup = NonNullable<CapabilityDefinition["subgroup"]>;
+
+const fieldsSubgroup: CapabilitySubgroup = {
+	key: "fields",
+	details: { name: copy("admin:permissions.documents.fields.subgroup") },
+};
+
+/** Builds a collection's generated permissions for the fields and bricks that opt in, in a Fields subgroup and one subgroup per brick, in declaration order. */
+const getFieldCapabilities = (
+	collection: CollectionBuilder,
+): CapabilityDefinition[] => {
+	const capabilities: CapabilityDefinition[] = [];
+	const add = (
+		target: FieldPermissionTarget,
+		permissions: FieldPermissions | undefined,
+		subgroup: CapabilitySubgroup,
+		name: (action: FieldPermissionAction) => ResolvedAdminCopy,
+	) => {
+		for (const action of fieldPermissionActions) {
+			if (permissions?.[action] !== true) continue;
+
+			const permission = getFieldPermission(target, action);
+			capabilities.push({
+				key: permission,
+				details: {
+					name: name(action),
+					description: fieldPermissionDescriptions[action],
+				},
+				core: true,
+				permission,
+				subgroup,
+			});
+		}
+	};
+	const addFields = (
+		builder: FieldBuilder,
+		owner: { collection: string; brick?: string },
+		subgroup: CapabilitySubgroup,
+	) => {
+		for (const [key, field] of getFieldBuilderState(builder).fields) {
+			const label = labelText(field.config.details.label, key);
+			add(
+				{ ...owner, field: key },
+				field.config.permissions,
+				subgroup,
+				(action) => fieldPermissionNames.field[action](label),
+			);
+		}
+	};
+
+	addFields(collection, { collection: collection.key }, fieldsSubgroup);
+	for (const brick of collection.brickInstances) {
+		const owner = { collection: collection.key, brick: brick.key };
+		const subgroup = {
+			key: `bricks:${brick.key}`,
+			details: { name: brick.config.details.label },
+		};
+		add(
+			owner,
+			brick.config.permissions,
+			subgroup,
+			(action) => fieldPermissionNames.brick[action],
+		);
+		addFields(brick, owner, subgroup);
+	}
+	return capabilities;
+};
+
 const getCollectionCapabilityGroups = (
 	collections: CollectionBuilder[] = [],
 ): CapabilityGroup[] => {
@@ -191,8 +296,8 @@ const getCollectionCapabilityGroups = (
 			name: collection.getData.details.labels.plural,
 		},
 		core: true,
-		capabilities: collectionPermissionActions.map(
-			(action): CapabilityDefinition => {
+		capabilities: [
+			...collectionPermissionActions.map((action): CapabilityDefinition => {
 				const permission = getCollectionPermission(collection.key, action);
 
 				return {
@@ -209,8 +314,9 @@ const getCollectionCapabilityGroups = (
 					},
 					availableToIntegrations: action === "read",
 				};
-			},
-		),
+			}),
+			...getFieldCapabilities(collection),
+		],
 	}));
 };
 

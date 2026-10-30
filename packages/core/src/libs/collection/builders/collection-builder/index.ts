@@ -341,6 +341,7 @@ class CollectionBuilder<
 				key: brick.key,
 				details: deepMerge({}, brick.config.details),
 				thumbnail: brick.config.thumbnail,
+				permissions: brick.config.permissions,
 				fields: brick.fieldTree,
 			})) ?? []
 		);
@@ -351,6 +352,7 @@ class CollectionBuilder<
 				key: brick.key,
 				details: deepMerge({}, brick.config.details),
 				thumbnail: brick.config.thumbnail,
+				permissions: brick.config.permissions,
 				fields: brick.fieldTree,
 			})) ?? []
 		);
@@ -361,6 +363,7 @@ class CollectionBuilder<
 				key: brick.key,
 				details: deepMerge({}, brick.config.details),
 				thumbnail: brick.config.thumbnail,
+				permissions: brick.config.permissions,
 				fields: brick.fieldTree,
 			})) ?? []
 		);

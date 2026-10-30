@@ -38,6 +38,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 					}),
 				description: this.props?.details?.description,
 			},
+			permissions: this.props?.permissions,
 			ui: {
 				disabled: this.props?.ui?.disabled,
 				condition: this.props?.ui?.condition,

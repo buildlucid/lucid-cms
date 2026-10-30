@@ -1,6 +1,7 @@
 import * as z from "zod";
 import { fieldConditionSchema } from "../libs/collection/custom-fields/conditions/schema.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
+import { fieldPermissionKeysSchema } from "../libs/permission/schema.js";
 
 export const fieldInputSchema = z.object({
 	key: z.string(),
@@ -223,6 +224,7 @@ export const fieldConfigSchema = z.object({
 		})
 		.nullable()
 		.optional(),
+	permissions: fieldPermissionKeysSchema.optional(),
 	ui: z
 		.object({
 			hidden: z

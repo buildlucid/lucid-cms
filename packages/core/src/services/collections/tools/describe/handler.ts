@@ -1,6 +1,11 @@
 import type z from "zod";
 import type FieldBuilder from "../../../../libs/collection/builders/field-builder/index.js";
 import collections from "../../../../libs/collection/collections.js";
+import getContentAccess from "../../../../libs/collection/field-access/get-content-access.js";
+import type {
+	FieldAccess,
+	FieldAccessActor,
+} from "../../../../libs/collection/field-access/types.js";
 import { collectionsFormatter } from "../../../../libs/formatters/index.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { paginate } from "../../../../libs/tools/pagination.js";
@@ -23,9 +28,16 @@ const getFieldInstructions = (builder: FieldBuilder) =>
 		),
 	);
 
-/** Describes one readable collection, with large field trees split across pages. */
+/** Describes one readable collection with paginated field trees, excluding fields and bricks the reader can't see. */
 const describeCollection: ServiceFn<
-	[{ input: z.output<typeof inputSchema>; allowedCollectionKeys: string[] }],
+	[
+		{
+			input: z.output<typeof inputSchema>;
+			allowedCollectionKeys: string[];
+			/** Whose field permissions apply, with external integrations seeing every field their scopes allow. */
+			reader?: FieldAccessActor;
+		},
+	],
 	{ output: z.output<typeof outputSchema> }
 > = async (context, props) => {
 	const collectionsRes = await collections.getAll(context, {});
@@ -57,7 +69,10 @@ const describeCollection: ServiceFn<
 		adminTranslations: context.translate.adminBundle(),
 		localization: context.config.localization,
 		include: { bricks: true, fields: true },
+		reader: props.reader,
 	});
+
+	const access = getContentAccess(selected, props.reader);
 
 	const entries: Entry[] = formatted.publishing.environments.map(
 		(environment) => ({
@@ -73,15 +88,25 @@ const describeCollection: ServiceFn<
 		owner: z.output<typeof fieldOwnerSchema>,
 		brickKey: string | null,
 		instructions: ReadonlyMap<string, string>,
+		fieldAccess: ReadonlyMap<string, FieldAccess>,
 		parentPath: string[] = [],
 	) => {
 		for (const field of fieldConfigSchema.array().parse(fields)) {
+			const level = fieldAccess.get(field.key) ?? "editable";
+
 			//* tabs and inline groups only arrange the editor, so paths match the values documents_get returns
 			if (
 				Array.isArray(field.fields) &&
 				(field.type === "tab" || field.output === "inline")
 			) {
-				addFields(field.fields, owner, brickKey, instructions, parentPath);
+				addFields(
+					field.fields,
+					owner,
+					brickKey,
+					instructions,
+					fieldAccess,
+					parentPath,
+				);
 				continue;
 			}
 
@@ -101,6 +126,7 @@ const describeCollection: ServiceFn<
 				description: context.translate(field.details.description) ?? null,
 				...(fieldInstructions && { instructions: fieldInstructions }),
 				localized: field.localized === true,
+				...(level === "locked" && { readOnly: true as const }),
 				// Omit unset constraints; undefined values are not valid tool output.
 				constraints: {
 					...(field.validation?.required != null && {
@@ -138,12 +164,25 @@ const describeCollection: ServiceFn<
 				});
 			}
 			if (Array.isArray(field.fields)) {
-				addFields(field.fields, owner, brickKey, instructions, path);
+				addFields(
+					field.fields,
+					owner,
+					brickKey,
+					instructions,
+					fieldAccess,
+					path,
+				);
 			}
 		}
 	};
 
-	addFields(formatted.fields, "document", null, getFieldInstructions(selected));
+	addFields(
+		formatted.fields,
+		"document",
+		null,
+		getFieldInstructions(selected),
+		access.fields,
+	);
 	const brickBuilders = new Map(
 		selected.brickInstances.map((brick) => [brick.key, brick]),
 	);
@@ -153,6 +192,8 @@ const describeCollection: ServiceFn<
 		["embedded", formatted.embeddedBricks],
 	] as const) {
 		for (const brick of bricks) {
+			const brickAccess = access.bricks.get(brick.key);
+
 			const builder = brickBuilders.get(brick.key);
 			const brickInstructions = builder?.config.ai?.instructions;
 			entries.push({
@@ -162,12 +203,14 @@ const describeCollection: ServiceFn<
 				label: context.translate(brick.details.label) ?? brick.key,
 				description: context.translate(brick.details.description) ?? null,
 				...(brickInstructions && { instructions: brickInstructions }),
+				...(brickAccess?.access === "locked" && { readOnly: true as const }),
 			});
 			addFields(
 				brick.fields,
 				brickType,
 				brick.key,
 				builder ? getFieldInstructions(builder) : new Map(),
+				brickAccess?.fields ?? new Map(),
 			);
 		}
 	}
