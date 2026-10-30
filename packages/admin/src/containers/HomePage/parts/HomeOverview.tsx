@@ -72,13 +72,11 @@ const HomeOverview: Component<{
 	// ----------------------------------------
 	// Functions
 	const toPreferences = (layoutItems: HomeLayoutItem<HomeWidget>[]) =>
-		layoutItems.map(
-			(item): HomeWidgetPreference => ({
-				key: item.widget.key,
-				size: item.size,
-				hidden: item.hidden,
-			}),
-		);
+		layoutItems.map((item): HomeWidgetPreference => ({
+			key: item.widget.key,
+			size: item.size,
+			hidden: item.hidden,
+		}));
 	const change = (
 		update: (widgets: HomeWidgetPreference[]) => HomeWidgetPreference[],
 	) => {
@@ -177,7 +175,6 @@ const HomeOverview: Component<{
 								{(key) => (
 									<Show when={items().get(key)}>
 										{(item) => (
-											// biome-ignore lint/a11y/noStaticElementInteractions: the grip button is the keyboard control
 											<div
 												data-dragkey={dragKey}
 												data-dragref={key}

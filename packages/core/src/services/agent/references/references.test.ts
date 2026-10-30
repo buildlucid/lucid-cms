@@ -35,11 +35,11 @@ import createServiceContext from "../../../utils/services/create-service-context
 import type { ServiceContext } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
+import createDocumentBricks from "../../documents-bricks/create-multiple.js";
+import { deleteExpiredRevisionsJob } from "../../documents-versions/jobs/delete-expired-revisions.js";
 import deleteMultiplePermanently from "../../documents/delete-multiple-permanently.js";
 import deleteSinglePermanently from "../../documents/delete-single-permanently.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
-import createDocumentBricks from "../../documents-bricks/create-multiple.js";
-import { deleteExpiredRevisionsJob } from "../../documents-versions/jobs/delete-expired-revisions.js";
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
 import resolveUserAccess from "../../users/resolve-access.js";

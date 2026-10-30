@@ -74,7 +74,6 @@ export const CommitInput: Component<{
 			{/* mirrors the colour custom field - swatch opens the picker, the text
 			input holds the committed hex value */}
 			<div class="relative w-full">
-				{/** biome-ignore lint/a11y/useSemanticElements: mirrors Form/Color.tsx swatch trigger */}
 				<div
 					class="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded border border-border cursor-pointer"
 					style={{ "background-color": local() || undefined }}

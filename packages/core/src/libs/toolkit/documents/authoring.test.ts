@@ -7,12 +7,12 @@ import {
 	test,
 	vi,
 } from "vitest";
+import updateVersion from "../../../services/documents-versions/update-single.js";
 import deleteMultiple from "../../../services/documents/delete-multiple.js";
 import acquireDocumentWrites from "../../../services/documents/helpers/acquire-document-writes.js";
 import readDocumentContent from "../../../services/documents/helpers/read-document-content.js";
 import restoreMultiple from "../../../services/documents/restore-multiple.js";
 import upsertSingle from "../../../services/documents/upsert-single.js";
-import updateVersion from "../../../services/documents-versions/update-single.js";
 import syncCollections from "../../../services/sync/sync-collections.js";
 import syncLocales from "../../../services/sync/sync-locales.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";

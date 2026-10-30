@@ -1,11 +1,11 @@
 import type { SiteConfig } from "../site/create-site-config.js";
-import createDocumentFunction from "./document.js";
 import createDocumentListFunction from "./document-list.js";
 import createDocumentPathsFunction from "./document-paths.js";
+import createDocumentFunction from "./document.js";
 import createLocalesFunction from "./locales.js";
-import createMediaFunction from "./media.js";
 import createMediaListFunction from "./media-list.js";
 import mediaUrl from "./media-url.js";
+import createMediaFunction from "./media.js";
 
 /** The built-in content reads, which site functions also receive under `functions`. */
 const createReadFunctions = (config: SiteConfig) => ({

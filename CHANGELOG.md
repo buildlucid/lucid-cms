@@ -297,7 +297,6 @@
 - Fixed configuration caching issue in dev mode. The dev command now runs in a single process instead of spawning child processes, resulting in faster and more reliable hot-reloading. ([f68756e](https://github.com/buildlucid/lucid-cms/commit/f68756e7d605e896306f723dd35964ce2941fc51))
 - Fixed an issue with processed images where you could process already processed images. Now if you attempt to process an already processed image, we will just serve the processed image directly.
 
-
 ## v0.12.0-alpha.1
 
 ### Features:

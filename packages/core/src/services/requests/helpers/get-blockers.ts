@@ -75,14 +75,12 @@ const getBlockers: ServiceFn<
 		if (hookRes.error) return hookRes;
 
 		blockers.push(
-			...hookRes.data.blockers.map(
-				(blocker): RequestBlocker => ({
-					code: "check",
-					requestDocumentId: blocker.requestDocumentId,
-					target: blocker.target,
-					message: blocker.message,
-				}),
-			),
+			...hookRes.data.blockers.map((blocker): RequestBlocker => ({
+				code: "check",
+				requestDocumentId: blocker.requestDocumentId,
+				target: blocker.target,
+				message: blocker.message,
+			})),
 		);
 	}
 

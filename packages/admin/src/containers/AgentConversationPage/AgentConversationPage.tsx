@@ -178,8 +178,7 @@ const AgentConversationPage: Component = () => {
 				mediaAttachments: view.mediaAttachments,
 			}}
 		>
-			{/* biome-ignore lint/a11y/noStaticElementInteractions: only watches clicks on the links inside */}
-			{/* biome-ignore lint/a11y/useKeyWithClickEvents: links fire click events from the keyboard too */}
+			{/* oxlint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- only watches clicks on the links inside, which fire from the keyboard too */}
 			<div
 				data-agent-chat
 				onClick={dockOnLeave}

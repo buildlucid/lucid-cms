@@ -30,9 +30,8 @@ const createGetMultiple =
 			schema: inputSchema,
 			input,
 			handler: async (data) => {
-				const { default: getMultiple } = await import(
-					"../../../../services/documents/content/get-multiple.js"
-				);
+				const { default: getMultiple } =
+					await import("../../../../services/documents/content/get-multiple.js");
 
 				const result = await getMultiple<
 					ContentDocument<TCollectionKey, IsLocalized<TLocale>>

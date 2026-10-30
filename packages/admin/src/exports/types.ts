@@ -55,10 +55,7 @@ export type {
 	AdminNavigationIcon,
 	AdminRouteNavigation,
 } from "../extensions/types/navigation.js";
-export type {
-	AdminRoute,
-	RouteComponent,
-} from "../extensions/types/route.js";
+export type { AdminRoute, RouteComponent } from "../extensions/types/route.js";
 export type {
 	TranslationKey,
 	TranslationRegistry,

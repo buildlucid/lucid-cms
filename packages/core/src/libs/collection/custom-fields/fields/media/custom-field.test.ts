@@ -83,7 +83,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("standard_media")!,
 		validationData: {
 			media: [
@@ -113,7 +113,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [
@@ -143,7 +143,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("min_width_media")!,
 		validationData: {
 			media: [
@@ -173,7 +173,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("max_width_media")!,
 		validationData: {
 			media: [
@@ -203,7 +203,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("min_height_media")!,
 		validationData: {
 			media: [
@@ -233,7 +233,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("max_height_media")!,
 		validationData: {
 			media: [
@@ -262,7 +262,7 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(MediaCollection).fields.get("type_media")!,
 		validationData: {
 			media: [
@@ -292,7 +292,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("extension_media")!,
 		validationData: {
 			media: [
@@ -324,7 +324,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [],
@@ -355,7 +355,7 @@ test("fail to validate field - media", async () => {
 			value: [],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [],
@@ -383,7 +383,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("min_width_media")!,
 		validationData: {
 			media: [
@@ -424,7 +424,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("max_width_media")!,
 		validationData: {
 			media: [
@@ -465,7 +465,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("min_height_media")!,
 		validationData: {
 			media: [
@@ -506,7 +506,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("max_height_media")!,
 		validationData: {
 			media: [
@@ -546,7 +546,7 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(MediaCollection).fields.get("type_media")!,
 		validationData: {
 			media: [
@@ -587,7 +587,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(MediaCollection).fields.get("extension_media")!,
 		validationData: {
 			media: [
@@ -628,7 +628,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
@@ -654,7 +654,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			type: "media",
 			value: [1, 2, 3, 4],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
@@ -701,7 +701,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			type: "media",
 			value: [1, 99, 100],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [

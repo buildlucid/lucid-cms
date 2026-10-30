@@ -1,9 +1,5 @@
-import coreEnAdmin from "../../translations/en.admin.json" with {
-	type: "json",
-};
-import coreEnServer from "../../translations/en.server.json" with {
-	type: "json",
-};
+import coreEnAdmin from "../../translations/en.admin.json" with { type: "json" };
+import coreEnServer from "../../translations/en.server.json" with { type: "json" };
 import type {
 	TranslationBundle,
 	TranslationBundles,

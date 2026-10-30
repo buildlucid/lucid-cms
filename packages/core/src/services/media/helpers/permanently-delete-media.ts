@@ -6,11 +6,9 @@ import {
 	ProcessedImagesRepository,
 	UsersRepository,
 } from "../../../libs/repositories/index.js";
-
 import type { ServiceFn } from "../../../utils/services/types.js";
 import notifyDependants from "../../document-references/notify-dependants.js";
 import removeTarget from "../../document-references/remove-target.js";
-
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 import notifyChange from "../notify-change.js";
 import deleteMediaObject from "../strategies/delete.js";

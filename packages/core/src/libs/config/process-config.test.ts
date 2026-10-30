@@ -431,9 +431,8 @@ test("project configure has the final choice after ordered plugin transforms", a
 });
 
 test("exclusive plugin providers report both conflicting plugin keys", async () => {
-	const { default: passthrough } = await import(
-		"../kv/adapters/passthrough.js"
-	);
+	const { default: passthrough } =
+		await import("../kv/adapters/passthrough.js");
 	await expect(
 		processConfig(
 			{
@@ -459,9 +458,8 @@ test("exclusive plugin providers report both conflicting plugin keys", async () 
 });
 
 test("each resolution owns collection mutations made by plugins", async () => {
-	const { default: CollectionBuilder } = await import(
-		"../collection/builders/collection-builder/index.js"
-	);
+	const { default: CollectionBuilder } =
+		await import("../collection/builders/collection-builder/index.js");
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
@@ -514,9 +512,8 @@ test("unknown Lucid config keys report their section", async () => {
 });
 
 test("sender defaults preserve each explicit override", async () => {
-	const { default: getEmailFrom } = await import(
-		"../../utils/helpers/get-email-from.js"
-	);
+	const { default: getEmailFrom } =
+		await import("../../utils/helpers/get-email-from.js");
 	const emailOnly = await processConfig(
 		{ ...config, email: { from: { email: "team@example.org" } } },
 		{ resolvedDb: createAdapter("test"), skipValidation: true },

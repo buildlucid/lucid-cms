@@ -36,7 +36,7 @@ export const useSession = () => {
 				: query.isSuccess
 					? ("authenticated" as const)
 					: query.error instanceof LucidError &&
-							query.error.errorRes.status === 401
+						  query.error.errorRes.status === 401
 						? ("anonymous" as const)
 						: ("error" as const),
 		error: () => query.error,

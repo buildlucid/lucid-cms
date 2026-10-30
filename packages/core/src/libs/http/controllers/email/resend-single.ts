@@ -1,5 +1,5 @@
-import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/email.js";
@@ -11,8 +11,8 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
-import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";

@@ -69,7 +69,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			},
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TranslatedCollection).fields.get(
 				"translatable_field",
 			)!,
@@ -95,7 +95,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			value: 123, //* causes fail
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TranslatedCollection).fields.get(
 				"translatable_field",
 			)!,
@@ -121,7 +121,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			value: 123, //* causes fail
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TranslatedCollection).fields.get(
 				"translatable_field",
 			)!,
@@ -146,7 +146,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(NonTranslatedCollection).fields.get(
 			"text_field",
 		)!,
@@ -171,7 +171,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TranslatedCollection).fields.get(
 			"non_translatable_field",
 		)!,
@@ -200,7 +200,7 @@ test("rejects translation keys outside the collection locale subset", () => {
 			},
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: the fixture always registers this field
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- the fixture always registers this field
 			getFieldBuilderState(TranslatedCollection).fields.get(
 				"translatable_field",
 			)!,
@@ -238,7 +238,7 @@ test("required localized fields validate every configured locale", async () => {
 				en: "English title",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TranslatedCollection).fields.get(
 			"required_translatable_field",
 		)!,
@@ -263,7 +263,7 @@ test("required localized fields validate every configured locale", async () => {
 			type: "text",
 			value: "English title",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TranslatedCollection).fields.get(
 			"required_translatable_field",
 		)!,

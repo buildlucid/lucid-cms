@@ -44,7 +44,7 @@ test("successfully validate field - textarea", async () => {
 			value: "Standard textarea",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TextareaCollection).fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
@@ -66,7 +66,7 @@ test("successfully validate field - textarea", async () => {
 			value: "Required textarea",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TextareaCollection).fields.get("required_textarea")!,
 		validationData: {
 			media: [],
@@ -87,7 +87,7 @@ test("successfully validate field - textarea", async () => {
 			type: "textarea",
 			value: "Min length textarea",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TextareaCollection).fields.get(
 			"min_length_textarea",
 		)!,
@@ -113,7 +113,7 @@ test("fail to validate field - textarea", async () => {
 			value: 100,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TextareaCollection).fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
@@ -141,7 +141,7 @@ test("fail to validate field - textarea", async () => {
 			value: undefined,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TextareaCollection).fields.get("required_textarea")!,
 		validationData: {
 			media: [],
@@ -168,7 +168,7 @@ test("fail to validate field - textarea", async () => {
 			type: "textarea",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TextareaCollection).fields.get(
 			"min_length_textarea",
 		)!,

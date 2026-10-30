@@ -1,6 +1,6 @@
 import { CollectionBuilder, copy, z } from "@lucidcms/core";
-import SimpleBrick from "../bricks/simple.js";
 import SimpleFixedBrick from "../bricks/simple-fixed.js";
+import SimpleBrick from "../bricks/simple.js";
 
 const SimpleCollection = new CollectionBuilder("simple", {
 	mode: "multiple",

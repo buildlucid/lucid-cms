@@ -18,11 +18,11 @@ To use the client, create it with your site base URL and either a Lucid integrat
 import { createClient } from "@lucidcms/client";
 
 const client = createClient({
-    baseUrl: "https://example.com",
-    auth: {
-        type: "apiKey",
-        apiKey: "<your-integration-key>",
-    },
+  baseUrl: "https://example.com",
+  auth: {
+    type: "apiKey",
+    apiKey: "<your-integration-key>",
+  },
 });
 ```
 
@@ -30,11 +30,11 @@ For OAuth connections, provide an access token or a function that resolves the c
 
 ```typescript
 const client = createClient({
-    baseUrl: "https://example.com",
-    auth: {
-        type: "oauth",
-        accessToken: () => tokenStore.getValidAccessToken(),
-    },
+  baseUrl: "https://example.com",
+  auth: {
+    type: "oauth",
+    accessToken: () => tokenStore.getValidAccessToken(),
+  },
 });
 ```
 
@@ -44,15 +44,15 @@ The access-token function runs for every request attempt so it can return a refr
 
 The `createClient` function accepts the following options:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `baseUrl` | `string` | Your site or app base URL. The client appends Lucid's public content endpoint path internally |
-| `auth` | `LucidClientAuth` | An integration key or OAuth access token configuration |
-| `fetch` | `typeof fetch` | A custom fetch implementation |
-| `headers` | `HeadersInit \| () => HeadersInit \| Promise<HeadersInit>` | Additional headers to send with every request |
-| `timeoutMs` | `number` | A default request timeout in milliseconds |
-| `retry` | `false \| Partial<LucidRetryConfig>` | Retry configuration for requests |
-| `middleware` | `LucidMiddleware[]` | Request, response, and error middleware |
+| Property     | Type                                                       | Description                                                                                   |
+| ------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `baseUrl`    | `string`                                                   | Your site or app base URL. The client appends Lucid's public content endpoint path internally |
+| `auth`       | `LucidClientAuth`                                          | An integration key or OAuth access token configuration                                        |
+| `fetch`      | `typeof fetch`                                             | A custom fetch implementation                                                                 |
+| `headers`    | `HeadersInit \| () => HeadersInit \| Promise<HeadersInit>` | Additional headers to send with every request                                                 |
+| `timeoutMs`  | `number`                                                   | A default request timeout in milliseconds                                                     |
+| `retry`      | `false \| Partial<LucidRetryConfig>`                       | Retry configuration for requests                                                              |
+| `middleware` | `LucidMiddleware[]`                                        | Request, response, and error middleware                                                       |
 
 ## Account
 
@@ -68,24 +68,24 @@ Use the documents client to fetch a single document or a paginated list of docum
 
 ```typescript
 const page = await client.documents.getSingle({
-    collectionKey: "page",
-    version: "published",
-    query: {
-        filter: {
-            _fullSlug: {
-                value: "/about",
-            },
-        },
+  collectionKey: "page",
+  version: "published",
+  query: {
+    filter: {
+      _fullSlug: {
+        value: "/about",
+      },
     },
+  },
 });
 
 const pages = await client.documents.getMultiple({
-    collectionKey: "page",
-    version: "published",
-    query: {
-        page: 1,
-        perPage: 10,
-    },
+  collectionKey: "page",
+  version: "published",
+  query: {
+    page: 1,
+    perPage: 10,
+  },
 });
 ```
 
@@ -95,19 +95,19 @@ Use the media client to fetch media items or resolve transformed media URLs.
 
 ```typescript
 const media = await client.media.getMultiple({
-    query: {
-        filter: {
-            title: {
-                value: "Hero",
-            },
-        },
+  query: {
+    filter: {
+      title: {
+        value: "Hero",
+      },
     },
+  },
 });
 
 const resolved = await client.media.resolveUrl({
-    key: "public/hero.jpg",
-    preset: "thumbnail-small",
-    format: "webp",
+  key: "public/hero.jpg",
+  preset: "thumbnail-small",
+  format: "webp",
 });
 ```
 
@@ -127,33 +127,33 @@ Document responses are ready to render. Media and users are filled in, relations
 import { createClient } from "@lucidcms/client";
 
 const client = createClient({
-    baseUrl: "https://example.com",
-    auth: {
-        type: "apiKey",
-        apiKey: "<your-integration-key>",
-    },
+  baseUrl: "https://example.com",
+  auth: {
+    type: "apiKey",
+    apiKey: "<your-integration-key>",
+  },
 });
 
 const response = await client.documents.getSingle({
-    collectionKey: "page",
-    version: "published",
-    locale: "fr",
-    fallbackLocale: "en",
-    query: {
-        include: ["bricks"],
-    },
+  collectionKey: "page",
+  version: "published",
+  locale: "fr",
+  fallbackLocale: "en",
+  query: {
+    include: ["bricks"],
+  },
 });
 
 if (!response.error) {
-    const page = response.data;
+  const page = response.data;
 
-    console.log(page.fields.page_title, page.route?.path);
-    console.log(page.fields.hero[0]?.alt, page.fields.related_page[0]?.route);
-    console.log(page.fixed?.seo?.fields.canonical_url);
+  console.log(page.fields.page_title, page.route?.path);
+  console.log(page.fields.hero[0]?.alt, page.fields.related_page[0]?.route);
+  console.log(page.fixed?.seo?.fields.canonical_url);
 
-    for (const brick of page.bricks ?? []) {
-        console.log(brick.key, brick.fields);
-    }
+  for (const brick of page.bricks ?? []) {
+    console.log(brick.key, brick.fields);
+  }
 }
 ```
 
@@ -163,11 +163,11 @@ A separate type-only entrypoint is also available:
 
 ```typescript
 import type {
-    CollectionDocument,
-    ContentDocument,
-    DocumentRef,
-    MediaRef,
-    UserRef,
+  CollectionDocument,
+  ContentDocument,
+  DocumentRef,
+  MediaRef,
+  UserRef,
 } from "@lucidcms/client/types";
 ```
 
@@ -177,14 +177,14 @@ The client never throws request or response errors. Instead, every method resolv
 
 ```typescript
 const response = await client.documents.getSingle({
-    collectionKey: "page",
-    version: "published",
+  collectionKey: "page",
+  version: "published",
 });
 
 if (response.error) {
-    console.error(response.error.message);
+  console.error(response.error.message);
 } else {
-    console.log(response.data);
+  console.log(response.data);
 }
 ```
 
@@ -197,12 +197,12 @@ const token = "PREVIEW_TOKEN";
 const preview = await client.previews.resolve({ token });
 
 const page = await client.documents.getSingle({
-    collectionKey: "page",
-    version: "published",
-    preview: token,
-    query: {
-        filter: { _fullSlug: { value: "/about" } },
-    },
+  collectionKey: "page",
+  version: "published",
+  preview: token,
+  query: {
+    filter: { _fullSlug: { value: "/about" } },
+  },
 });
 ```
 
@@ -212,17 +212,17 @@ The `@lucidcms/client/toolbar` browser entry exports an isolated `<lucid-toolbar
 
 ```html
 <script type="module">
-    import { LucidToolbarElement } from "@lucidcms/client/toolbar";
+  import { LucidToolbarElement } from "@lucidcms/client/toolbar";
 
-    if (!customElements.get(LucidToolbarElement.tagName)) {
-        customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
-    }
+  if (!customElements.get(LucidToolbarElement.tagName)) {
+    customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
+  }
 </script>
 
 <lucid-toolbar
-    edit-collection="page"
-    edit-document-id="42"
-    edit-version="latest"
+  edit-collection="page"
+  edit-document-id="42"
+  edit-version="latest"
 ></lucid-toolbar>
 ```
 
@@ -232,11 +232,11 @@ For JavaScript-controlled integrations, `setupToolbar()` returns a controller fo
 import { setupToolbar } from "@lucidcms/client/toolbar";
 
 const toolbar = setupToolbar({
-    document: {
-        collectionKey: "page",
-        id: 42,
-        version: "latest",
-    },
+  document: {
+    collectionKey: "page",
+    id: 42,
+    version: "latest",
+  },
 });
 
 window.addEventListener("pagehide", toolbar.cleanup, { once: true });
@@ -264,14 +264,14 @@ Server-rendered frontends can create `<lucid-toolbar>` attributes with `createTo
 import { createToolbarAttributes } from "@lucidcms/client/toolbar";
 
 const [authentication, preview] = await Promise.all([
-    toolkit.auth.status(authOptions),
-    toolkit.previews.state(previewOptions),
+  toolkit.auth.status(authOptions),
+  toolkit.previews.state(previewOptions),
 ]);
 
 const toolbarAttributes = createToolbarAttributes({
-    host: "https://cms.example.com",
-    document: { collectionKey: "page", id: page.id, version: page.version },
-    authentication: authentication.data?.authenticated ?? "auto",
-    preview: preview.data ?? "auto",
+  host: "https://cms.example.com",
+  document: { collectionKey: "page", id: page.id, version: page.version },
+  authentication: authentication.data?.authenticated ?? "auto",
+  preview: preview.data ?? "auto",
 });
 ```

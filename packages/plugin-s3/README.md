@@ -16,9 +16,9 @@ To use the S3 plugin, you need to add it to your Lucid CMS config file. You'll n
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
-import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { s3Plugin } from "@lucidcms/plugin-s3";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -43,10 +43,10 @@ export default defineConfig({
 
 This plugin offers the following configuration options to control S3 storage behavior.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `endpoint` | `string` | The S3 endpoint URL |
-| `bucket` | `string` | The name of your S3 bucket |
+| Property        | Type     | Description                     |
+| --------------- | -------- | ------------------------------- |
+| `endpoint`      | `string` | The S3 endpoint URL             |
+| `bucket`        | `string` | The name of your S3 bucket      |
 | `clientOptions` | `object` | S3 client configuration options |
 
 ### endpoint
@@ -61,11 +61,11 @@ The name of your S3 bucket where media files will be stored.
 
 Configuration options for the S3 client connection.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `region` | `string` | The AWS region (use "auto" for Cloudflare R2) |
-| `accessKeyId` | `string` | Your S3 access key ID |
-| `secretAccessKey` | `string` | Your S3 secret access key |
+| Property          | Type     | Description                                   |
+| ----------------- | -------- | --------------------------------------------- |
+| `region`          | `string` | The AWS region (use "auto" for Cloudflare R2) |
+| `accessKeyId`     | `string` | Your S3 access key ID                         |
+| `secretAccessKey` | `string` | Your S3 secret access key                     |
 
 ## Bucket Configuration
 
@@ -76,22 +76,11 @@ Expose the `ETag` response header if possible so the admin UI can complete multi
 
 ```json
 [
-    {
-        "AllowedOrigins": [
-            "YOUR_CMS_ORIGIN_URL"
-        ],
-        "AllowedMethods": [
-            "GET",
-            "PUT"
-        ],
-        "AllowedHeaders": [
-            "Origin",
-            "Content-Type",
-            "x-amz-meta-*"
-        ],
-        "ExposeHeaders": [
-            "ETag"
-        ]
-    }
+  {
+    "AllowedOrigins": ["YOUR_CMS_ORIGIN_URL"],
+    "AllowedMethods": ["GET", "PUT"],
+    "AllowedHeaders": ["Origin", "Content-Type", "x-amz-meta-*"],
+    "ExposeHeaders": ["ETag"]
+  }
 ]
 ```

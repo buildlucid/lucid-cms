@@ -115,7 +115,9 @@ const pending = async (old = true, featureKey = "agent.chat") => {
 	};
 	expect((await storePendingUsage(context, input)).error).toBeUndefined();
 	if (old) {
-		await (await testConfig.getDatabase()).client
+		await (
+			await testConfig.getDatabase()
+		).client
 			.updateTable("lucid_ai_generations")
 			.set({
 				created_at: formatDbTimestamp(new Date(Date.now() - 25 * 60_000)),
@@ -156,7 +158,9 @@ test("reconciles a paid turn once and leaves its first usage immutable", async (
 
 test("settles usage whose run was deleted", async () => {
 	const input = await pending();
-	await (await testConfig.getDatabase()).client
+	await (
+		await testConfig.getDatabase()
+	).client
 		.deleteFrom("lucid_agent_runs")
 		.where("id", "=", input.runId)
 		.execute();

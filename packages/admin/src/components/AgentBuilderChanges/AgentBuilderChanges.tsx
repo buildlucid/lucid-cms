@@ -98,18 +98,16 @@ const AgentBuilderChanges: Component<{
 		return props.data.changes.flatMap((change): Row[] => {
 			const brick = change.brick;
 			const config = brick ? brickConfig(collection, brick) : undefined;
-			const fields = change.fields.map(
-				(field): Row => ({
-					id: `${brick?.ref ?? ""}:${field.path.join("/")}`,
-					label: fieldLabel(
-						(brick ? config?.fields : collection?.fields) ?? [],
-						field.path,
-					),
-					nested: brick !== null,
-					locales: field.locales,
-					target: changeTarget(change, field, contentLocale),
-				}),
-			);
+			const fields = change.fields.map((field): Row => ({
+				id: `${brick?.ref ?? ""}:${field.path.join("/")}`,
+				label: fieldLabel(
+					(brick ? config?.fields : collection?.fields) ?? [],
+					field.path,
+				),
+				nested: brick !== null,
+				locales: field.locales,
+				target: changeTarget(change, field, contentLocale),
+			}));
 			if (!brick) return fields;
 
 			return [

@@ -1,5 +1,5 @@
-import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import { createFactory } from "hono/factory";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";

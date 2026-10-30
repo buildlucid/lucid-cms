@@ -42,7 +42,9 @@ export type LocalizedUser<TUser extends UserDisplay = UserDisplay> = Omit<
 };
 
 /** Uses a union to preserve possibly undefined locale inputs in result inference, which optional generic properties would narrow. */
-export type ContentLocaleInput<TLocale extends string | undefined = undefined> =
+export type ContentLocaleInput<
+	TLocale extends string | undefined = undefined,
+> =
 	| {
 			/** Reads translations in this locale, or each collection's default when it doesn't have it. */
 			locale: TLocale;
@@ -122,10 +124,9 @@ type ContentValue<TValue, TLocalized extends boolean> = TValue extends unknown
 					> | null
 				: [TLocalized] extends [false]
 					? {
-							[TLocale in Exclude<
-								keyof TValue,
-								typeof fieldValueKind
-							>]: ContentLeafValue<TValue[TLocale], TLocalized>;
+							[
+								TLocale in Exclude<keyof TValue, typeof fieldValueKind>
+							]: ContentLeafValue<TValue[TLocale], TLocalized>;
 						}
 					: unknown
 			: ContentLeafValue<TValue, TLocalized>
@@ -235,10 +236,12 @@ export type ContentDocument<
 	>;
 	/** Fixed bricks by key, with `include: ["bricks"]`. */
 	fixed?: {
-		[TBrick in BricksOfType<
-			CollectionBrick<TCollectionKey>,
-			"fixed"
-		> as TBrick["key"]]?: ContentBrick<TBrick, TLocalized>;
+		[
+			TBrick in BricksOfType<
+				CollectionBrick<TCollectionKey>,
+				"fixed"
+			> as TBrick["key"]
+		]?: ContentBrick<TBrick, TLocalized>;
 	};
 	meta?: ContentDocumentMeta<TCollectionKey, TLocalized>;
 };

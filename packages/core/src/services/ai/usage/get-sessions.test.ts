@@ -10,8 +10,8 @@ import insertConversation from "../../agent/helpers/insert-conversation.js";
 import startRun from "../../agent/helpers/start-run.js";
 import storeUsage from "../../agent/helpers/store-usage.js";
 import storeGeneration from "../storage/store-generation.js";
-import getSession from "./get-session.js";
 import getSessionRecords from "./get-session-records.js";
+import getSession from "./get-session.js";
 import getSessions from "./get-sessions.js";
 
 const testConfig = getTestConfig();

@@ -18,7 +18,7 @@ export const hasMultipartUploadSessions = (
 ): adapter is MultipartUploadSessionAdapter => {
 	return Boolean(
 		adapter.getUploadPartUrls &&
-			adapter.listUploadParts &&
-			adapter.completeUploadSession,
+		adapter.listUploadParts &&
+		adapter.completeUploadSession,
 	);
 };

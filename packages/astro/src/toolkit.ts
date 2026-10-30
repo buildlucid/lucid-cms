@@ -1,5 +1,5 @@
-import lucid from "lucid:hosted";
 import type { Toolkit } from "@lucidcms/core/types";
+import lucid from "lucid:hosted";
 import { getRequestInvocation } from "./internal/request-invocation.js";
 import type { LucidAstroContext } from "./types.js";
 

@@ -1,4 +1,3 @@
-import { DurableObject } from "cloudflare:workers";
 import {
 	executeHostedAgentRun,
 	startAgentRunStream,
@@ -10,6 +9,7 @@ import type {
 	EnvironmentVariables,
 	LucidInvocation,
 } from "@lucidcms/core/types";
+import { DurableObject } from "cloudflare:workers";
 import type {
 	AgentRunObjectStub,
 	AgentRunWatchLine,
@@ -27,9 +27,7 @@ const createAgentRunObject = (
 		env: EnvironmentVariables,
 		ctx: CloudflareExecutionContext,
 	) => Promise<LucidInvocation>,
-): (new (
-	...args: never[]
-) => AgentRunObjectStub) =>
+): new (...args: never[]) => AgentRunObjectStub =>
 	class LucidAgentRuns
 		extends DurableObject<EnvironmentVariables>
 		implements AgentRunObjectStub

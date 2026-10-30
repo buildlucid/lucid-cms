@@ -236,7 +236,7 @@ const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
 				context.parentTableMode === "tree-table"
 					? context.params.parentIdRef
 					: context.params.type === "brick" ||
-							context.params.type === "document-fields"
+						  context.params.type === "document-fields"
 						? context.brickIdRefByLocale
 						: context.params.brickIdByLocale;
 			if (!parentId) return [];
@@ -345,7 +345,7 @@ const constructBrickTable = (
 
 		let tableName: LucidBrickTableName;
 		if (params.brickKeyTableNameMap.has(mapKey)) {
-			// biome-ignore lint/style/noNonNullAssertion: explanation
+			// oxlint-disable-next-line typescript/no-non-null-assertion
 			tableName = params.brickKeyTableNameMap.get(mapKey)!;
 		} else {
 			const brickTableNameRes = buildTableName<LucidBrickTableName>(
@@ -390,7 +390,7 @@ const constructBrickTable = (
 
 	let tableName: LucidBrickTableName;
 	if (params.brickKeyTableNameMap.has(mapKey)) {
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		tableName = params.brickKeyTableNameMap.get(mapKey)!;
 	} else {
 		const brickTableNameRes = buildTableName<LucidBrickTableName>(

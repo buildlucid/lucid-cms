@@ -34,9 +34,7 @@ const setTargets = <K extends CollectionDocumentKey>(
 				import("../../../../../services/users/helpers/resolve-actor-user.js"),
 				import("../../../../../utils/services/service-wrapper.js"),
 				import("../../../../../services/requests/update-targets.js"),
-				import(
-					"../../../../../services/requests/helpers/get-request-document-id.js"
-				),
+				import("../../../../../services/requests/helpers/get-request-document-id.js"),
 			]);
 
 			return serviceWrapper(

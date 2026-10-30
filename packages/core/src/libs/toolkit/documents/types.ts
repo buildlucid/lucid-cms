@@ -16,11 +16,11 @@ export type DocumentEditableData = z.infer<typeof documentEditableDataSchema>;
 /** Operations run in order and validate the resulting document together. */
 export type DocumentPatch = z.infer<typeof documentPatchSchema>;
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated collection types extend this map
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated collection types extend this map
 export interface CollectionDocumentDataByCollection {}
-// biome-ignore lint/suspicious/noEmptyInterface: generated collection types extend this map
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated collection types extend this map
 export interface CollectionDocumentEditableByCollection {}
-// biome-ignore lint/suspicious/noEmptyInterface: generated collection types extend this map
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated collection types extend this map
 export interface CollectionDocumentPatchByCollection {}
 
 export type CollectionDocumentData<K extends string = string> =

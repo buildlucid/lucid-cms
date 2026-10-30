@@ -35,8 +35,10 @@ export interface ErrorResultObj {
 
 export type ErrorResult = Record<string, ErrorResultValue>;
 
-export interface FieldError
-	extends Omit<PublicFieldError, "message" | "groupErrors"> {
+export interface FieldError extends Omit<
+	PublicFieldError,
+	"message" | "groupErrors"
+> {
 	message: ErrorCopy;
 	groupErrors?: Array<GroupError>;
 }
@@ -50,8 +52,10 @@ export interface BrickError extends Omit<PublicBrickError, "fields"> {
 }
 
 /** Structured failure returned by services or passed to LucidAPIError. Use copy() or copy.literal() for name and message. */
-export interface LucidErrorData
-	extends Omit<PublicErrorData, "name" | "message" | "errors"> {
+export interface LucidErrorData extends Omit<
+	PublicErrorData,
+	"name" | "message" | "errors"
+> {
 	name?: ErrorCopy;
 	message?: ErrorCopy;
 	errors?: ErrorResult;

@@ -4,8 +4,8 @@ import type CollectionBuilder from "../../../../libs/collection/builders/collect
 import describeErrorDetails from "../../../../libs/tools/describe-error-details.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
-import keepRestrictedContent from "../../../documents/helpers/keep-restricted-content.js";
 import checkValidateBricksFields from "../../../documents-bricks/checks/check-validate-bricks-fields.js";
+import keepRestrictedContent from "../../../documents/helpers/keep-restricted-content.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 
 /**

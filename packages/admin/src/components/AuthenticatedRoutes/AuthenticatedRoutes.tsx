@@ -20,9 +20,8 @@ import {
 const AuthenticatedRoutes: ParentComponent = (props) => {
 	// ----------------------------------
 	// State & Hooks
-	const [translationsInitialized, setTranslationsInitialized] = createSignal(
-		getReady(),
-	);
+	const [translationsInitialized, setTranslationsInitialized] =
+		createSignal(getReady());
 	const [forcedPasswordModalOpen, setForcedPasswordModalOpen] =
 		createSignal(false);
 

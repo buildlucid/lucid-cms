@@ -17,9 +17,8 @@ const status = async (
 		schema: inputSchema,
 		input,
 		handler: async (data): ServiceResponse<ToolkitAuthStatus> => {
-			const { default: getAuthStatus } = await import(
-				"../../../../services/auth/get-status.js"
-			);
+			const { default: getAuthStatus } =
+				await import("../../../../services/auth/get-status.js");
 
 			if (data.headers) {
 				await Promise.all([

@@ -60,7 +60,7 @@ export class LibsqlDialect implements Dialect {
 	createDriver(): Driver {
 		return new LibsqlDriver(this.client, this.#closeClient);
 	}
-	// biome-ignore lint/suspicious/noExplicitAny: explanation
+	// oxlint-disable-next-line typescript/no-explicit-any
 	createIntrospector(db: Kysely<any>): DatabaseIntrospector {
 		return new SqliteIntrospector(db);
 	}
@@ -153,7 +153,7 @@ class LibsqlConnection implements DatabaseConnection {
 		this.#transaction = undefined;
 	}
 
-	// biome-ignore lint/correctness/useYield: explanation
+	// oxlint-disable-next-line require-yield
 	async *streamQuery<R>(
 		_compiledQuery: CompiledQuery,
 		_chunkSize: number,

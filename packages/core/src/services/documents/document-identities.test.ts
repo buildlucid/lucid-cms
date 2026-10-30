@@ -20,8 +20,8 @@ import cloneVersion from "../documents-versions/clone-version.js";
 import promoteVersion from "../documents-versions/promote-version.js";
 import syncCollections from "../sync/sync-collections.js";
 import deleteMultiplePermanently from "./delete-multiple-permanently.js";
-import deleteSingle from "./delete-single.js";
 import deleteSinglePermanently from "./delete-single-permanently.js";
+import deleteSingle from "./delete-single.js";
 import restoreMultiple from "./restore-multiple.js";
 import upsertSingle from "./upsert-single.js";
 

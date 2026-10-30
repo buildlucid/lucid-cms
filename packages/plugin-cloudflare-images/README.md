@@ -14,9 +14,9 @@ npm install @lucidcms/plugin-cloudflare-images
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
+import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
-import { libsql } from "@lucidcms/db-libsql";
 
 export default defineConfig({
   runtime: cloudflare,

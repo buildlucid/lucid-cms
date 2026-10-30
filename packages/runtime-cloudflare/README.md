@@ -1,4 +1,5 @@
 # Lucid CMS - Cloudflare Runtime
+
 > The official Cloudflare runtime for Lucid CMS
 
 The Lucid CMS Cloudflare Workers runtime allows you to deploy your CMS to Cloudflare's edge computing platform. This is ideal for globally distributed applications that need low latency and high performance.
@@ -23,8 +24,8 @@ Use the Cloudflare runtime in your `lucid.config.ts` file.
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { libsql } from "@lucidcms/db-libsql";
+import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
 export default defineConfig({
   runtime: cloudflare,
@@ -39,11 +40,11 @@ export default defineConfig({
 
 The `cloudflare` function accepts a single parameter, `options`, which is either an optional object or a callback that receives Lucid's resolved env object.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `dev` | `{ port?: number; hostname?: string }` | Local Lucid dev server listen options |
-| `bindings` | `object` | Explicit Cloudflare bindings to generate or override. Passing `true` for a binding uses Lucid's default binding name |
-| `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[] }` | The Worker's name, compatibility date and flags. The name defaults to the package name and the compatibility date to Lucid's tested `2026-06-30`. With a `cloudflare.config.ts`, its own name and compatibility date are used instead |
+| Property   | Type                                                                           | Description                                                                                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dev`      | `{ port?: number; hostname?: string }`                                         | Local Lucid dev server listen options                                                                                                                                                                                                 |
+| `bindings` | `object`                                                                       | Explicit Cloudflare bindings to generate or override. Passing `true` for a binding uses Lucid's default binding name                                                                                                                  |
+| `worker`   | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[] }` | The Worker's name, compatibility date and flags. The name defaults to the package name and the compatibility date to Lucid's tested `2026-06-30`. With a `cloudflare.config.ts`, its own name and compatibility date are used instead |
 
 ```typescript
 export default defineConfig({
@@ -87,7 +88,9 @@ export default defineConfig({
     env: {
       LUCID_DB: bindings.hyperdrive({
         id: "HYPERDRIVE_ID",
-        dev: { connectionString: "postgres://postgres:postgres@localhost:5432/lucid" },
+        dev: {
+          connectionString: "postgres://postgres:postgres@localhost:5432/lucid",
+        },
       }),
     },
   },

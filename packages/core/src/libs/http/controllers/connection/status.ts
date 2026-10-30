@@ -1,5 +1,5 @@
-import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/connection.js";
 import { connectionServices } from "../../../../services/index.js";

@@ -1,13 +1,13 @@
 import type z from "zod";
 import jobsListTask from "./jobs-list.js";
 import jobsScheduleTask from "./jobs-schedule.js";
-import migrateTask from "./migrate.js";
 import migrateResetTask from "./migrate-reset.js";
 import migrateRollbackTask from "./migrate-rollback.js";
 import migrateStatusTask from "./migrate-status.js";
+import migrateTask from "./migrate.js";
 import pluginTask from "./plugin.js";
-import seedTask from "./seed.js";
 import seedListTask from "./seed-list.js";
+import seedTask from "./seed.js";
 import syncTask from "./sync.js";
 
 /** Lucid's runtime tasks, keyed by the name their route ends with: `/__lucid/tasks/<name>`. */

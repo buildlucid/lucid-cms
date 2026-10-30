@@ -1,4 +1,3 @@
-import { documentListSlots } from "virtual:lucid-admin";
 import { useNavigate, useParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
@@ -17,6 +16,7 @@ import {
 	TbOutlineUserCheck,
 } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
+import { documentListSlots } from "virtual:lucid-admin";
 import Button from "@/components/Button/Button";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
 import DeleteDocumentPermanentlyModal from "@/components/DeleteDocumentPermanentlyModal/DeleteDocumentPermanentlyModal";
@@ -340,22 +340,21 @@ export const DocumentsList: Component<{
 	// Functions
 	const addSelectedToChat = async (selected: boolean[]) =>
 		session.attach(
-			(documents.data?.data ?? []).flatMap(
-				(row, index): AgentReferenceItem[] =>
-					selected[index]
-						? [
-								{
-									type: "document",
-									collectionKey: collectionKey(),
-									documentId: row.id,
-									label: getDocumentPreviewLabel({
-										collection: props.state.collection,
-										document: row,
-										contentLocale: contentLocale(),
-									}),
-								},
-							]
-						: [],
+			(documents.data?.data ?? []).flatMap((row, index): AgentReferenceItem[] =>
+				selected[index]
+					? [
+							{
+								type: "document",
+								collectionKey: collectionKey(),
+								documentId: row.id,
+								label: getDocumentPreviewLabel({
+									collection: props.state.collection,
+									document: row,
+									contentLocale: contentLocale(),
+								}),
+							},
+						]
+					: [],
 			),
 		);
 	const reorderRows = (dragIndex: number, targetIndex: number) => {

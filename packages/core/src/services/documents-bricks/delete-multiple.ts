@@ -3,7 +3,6 @@ import {
 	DocumentBricksRepository,
 	DocumentReferencesRepository,
 } from "../../libs/repositories/index.js";
-
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteMultiple: ServiceFn<

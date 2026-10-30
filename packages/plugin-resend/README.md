@@ -16,9 +16,9 @@ To use the Resend plugin, you need to add it to your Lucid CMS config file. You'
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
-import { resendPlugin } from "@lucidcms/plugin-resend";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { resendPlugin } from "@lucidcms/plugin-resend";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -37,9 +37,9 @@ export default defineConfig({
 
 This plugin offers the following configuration options to control email sending behavior.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `apiKey` | `string` | Your Resend API key |
+| Property  | Type     | Description                  |
+| --------- | -------- | ---------------------------- |
+| `apiKey`  | `string` | Your Resend API key          |
 | `webhook` | `object` | Configure the Resend webhook |
 
 ### apiKey
@@ -50,10 +50,10 @@ Your Resend API key, which you can obtain from your Resend dashboard. It's recom
 
 The `webhook` object contains the options needed to enable the webhook endpoint. This is used so that Resend can send delivery status updates back to Lucid CMS allowing you to see it on the emails page instead of having to navigate to Resends own dashboard.
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property  | Type      | Description                                                 |
+| --------- | --------- | ----------------------------------------------------------- |
 | `enabled` | `boolean` | Determines if the webhook route should be registered or not |
-| `secret` | `string` | Your webhooks signing secret |
+| `secret`  | `string`  | Your webhooks signing secret                                |
 
 This listens to the following event types:
 

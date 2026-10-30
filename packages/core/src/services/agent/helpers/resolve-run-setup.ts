@@ -114,19 +114,17 @@ const resolveRunSetup = (
 				},
 			]),
 		),
-		definitions: orderedTools.map(
-			(tool): ModelToolDefinition => ({
-				name: tool.name,
-				description:
-					typeof tool.description === "function"
-						? tool.description({
-								mode: props.mode,
-								screen: screen?.builder.read ? screen.type : undefined,
-							})
-						: tool.description,
-				inputSchema: toInputSchema(tool.input),
-			}),
-		),
+		definitions: orderedTools.map((tool): ModelToolDefinition => ({
+			name: tool.name,
+			description:
+				typeof tool.description === "function"
+					? tool.description({
+							mode: props.mode,
+							screen: screen?.builder.read ? screen.type : undefined,
+						})
+					: tool.description,
+			inputSchema: toInputSchema(tool.input),
+		})),
 		instructions: buildInstructions({
 			//* the prompt stays the same for everyone, so the name uses the default language
 			agent: {

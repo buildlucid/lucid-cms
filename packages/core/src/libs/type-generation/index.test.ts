@@ -226,18 +226,16 @@ test("generates collection-aware client document types that lean on the public L
 		expect(typesContent).not.toContain('"admin:custom.admin.title": true;');
 		expect(typesContent).not.toContain('"server:custom.server.error": true;');
 		expect(clientContent).toContain(`from "@lucidcms/core/types";`);
-		expect(
-			clientContent,
-		).toContain(`export interface GeneratedCollectionDocumentLocaleCodesByCollection {
+		expect(clientContent)
+			.toContain(`export interface GeneratedCollectionDocumentLocaleCodesByCollection {
 	"page": "en" | "fr";
 	"article": "de";
 }`);
 		expect(clientContent).toContain(
 			`export type CollectionDocumentLocaleCode<TCollectionKey extends string = string> = TCollectionKey extends keyof GeneratedCollectionDocumentLocaleCodesByCollection ? Extract<GeneratedCollectionDocumentLocaleCodesByCollection[TCollectionKey], string> : string;`,
 		);
-		expect(
-			clientContent,
-		).toContain(`export type PageCollectionDocumentFields = {
+		expect(clientContent)
+			.toContain(`export type PageCollectionDocumentFields = {
 	"_page_title": CollectionDocumentTranslations<string | null, "page">;
 	"_related_page": Array<RelationFieldValue<"page">>;
 	"_related_content": Array<RelationFieldValue<"page" | "blog">>;
@@ -245,9 +243,8 @@ test("generates collection-aware client document types that lean on the public L
 		"_section_title": string | null;
 	}>;
 }`);
-		expect(
-			clientContent,
-		).toContain(`export type PageCollectionDocumentFilters = {
+		expect(clientContent)
+			.toContain(`export type PageCollectionDocumentFilters = {
 	"id"?: FilterObject;
 	"createdBy"?: FilterObject;
 	"updatedBy"?: FilterObject;
@@ -347,9 +344,8 @@ test("generates collection-aware client document types that lean on the public L
 		expect(clientContent).toContain(
 			`export type CollectionDocumentKey = GeneratedCollectionDocumentKey | (string & {});`,
 		);
-		expect(
-			clientContent,
-		).toContain(`export type PageBannerBuilderBrickFields = {
+		expect(clientContent)
+			.toContain(`export type PageBannerBuilderBrickFields = {
 	"title": CollectionDocumentTranslations<string | null, "page">;
 	"call_to_actions": Array<{
 		"label": string | null;

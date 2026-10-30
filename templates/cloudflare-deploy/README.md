@@ -6,18 +6,18 @@ Lucid CMS starter for Cloudflare Workers, Postgres through Hyperdrive, KV, R2, I
 
 ## Commands
 
-| Command | Action |
-| :------ | :----- |
-| `npm run dev` | Start Lucid development mode |
-| `npm run serve` | Serve the built Lucid worker locally |
-| `npm run build` | Build the Lucid worker |
-| `npm run deploy` | Build the Lucid worker and deploy it with `cf` |
-| `npm run typegen` | Generate Lucid type files |
-| `npm run sync` | Sync Lucid config changes |
-| `npm run migrate` | Run pending database migrations |
-| `npm run migrate:rollback` | Roll back the last migration batch |
-| `npm run migrate:reset` | Roll back all migrations |
-| `npm run migrate:fresh` | Reset the database and run all migrations again |
+| Command                    | Action                                          |
+| :------------------------- | :---------------------------------------------- |
+| `npm run dev`              | Start Lucid development mode                    |
+| `npm run serve`            | Serve the built Lucid worker locally            |
+| `npm run build`            | Build the Lucid worker                          |
+| `npm run deploy`           | Build the Lucid worker and deploy it with `cf`  |
+| `npm run typegen`          | Generate Lucid type files                       |
+| `npm run sync`             | Sync Lucid config changes                       |
+| `npm run migrate`          | Run pending database migrations                 |
+| `npm run migrate:rollback` | Roll back the last migration batch              |
+| `npm run migrate:reset`    | Roll back all migrations                        |
+| `npm run migrate:fresh`    | Reset the database and run all migrations again |
 
 ## Database
 

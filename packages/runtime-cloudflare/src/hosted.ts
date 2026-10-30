@@ -1,4 +1,3 @@
-import { env as workerEnv } from "cloudflare:workers";
 import { AsyncLocalStorage } from "node:async_hooks";
 import {
 	createAdminDocumentExtension,
@@ -6,6 +5,7 @@ import {
 	handleHostRequest,
 } from "@lucidcms/core/runtime";
 import type { LucidBuild } from "@lucidcms/core/types";
+import { env as workerEnv } from "cloudflare:workers";
 import adminShellExtension from "./services/admin-shell-extension.js";
 import createHostCache, {
 	runtimeHostKeys,

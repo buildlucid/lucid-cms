@@ -28,7 +28,7 @@ const buildUsageChartSeries = (props: {
 	end: Date;
 }): Pick<AiUsageChart, "series" | "totals"> => {
 	const dates: string[] = [];
-	for (let cursor = props.start; cursor <= props.end; ) {
+	for (let cursor = props.start; cursor <= props.end;) {
 		dates.push(getDateKey(cursor));
 		cursor = addDays(cursor, 1);
 	}

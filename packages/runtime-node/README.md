@@ -1,4 +1,5 @@
 # Lucid CMS - Node Runtime
+
 > The official Node runtime for Lucid CMS
 
 The Lucid CMS Node runtime allows you to run your CMS on any Node.js environment. This is ideal for traditional server deployments, VPS hosting, and development environments where you have full control over the runtime.
@@ -17,8 +18,8 @@ Use the Node runtime in your `lucid.config.ts` file.
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -33,8 +34,8 @@ export default defineConfig({
 
 The `node` function accepts a single parameter, `options`, which is either an optional object or a callback that receives Lucid's resolved env object.
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property | Type                                   | Description                                                                                                |
+| -------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `server` | `{ port?: number; hostname?: string }` | The server options. The `lucidcms dev` and `lucidcms serve` scripts use these when serving the Node server |
 
 ```typescript

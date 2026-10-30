@@ -26,9 +26,9 @@ To use the Pages plugin, you need to add it to your Lucid CMS config file. You w
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
-import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -36,14 +36,16 @@ export default defineConfig({
   config: () => ({
     plugins: [
       pagesPlugin({
-        collections: [{
-          key: "page",
-          localized: true,
-          prefix: {
-            en: "en",
-            fr: "fr",
+        collections: [
+          {
+            key: "page",
+            localized: true,
+            prefix: {
+              en: "en",
+              fr: "fr",
+            },
           },
-        }],
+        ],
       }),
     ],
   }),
@@ -54,15 +56,15 @@ export default defineConfig({
 
 This plugin offers several configuration options to control its behavior. Aside from `key`, all of these options are optional and have default values.
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `key` | `string` | - | The key of the collection that you wish to enable the plugin on |
-| `localized` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
-| `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
-| `segments` | `Array<{ relation: string; collection: string; field: string }>` | `[]` | Related document values inserted between the prefix and page hierarchy |
+| Property       | Type                                                                                | Default         | Description                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------- |
+| `key`          | `string`                                                                            | -               | The key of the collection that you wish to enable the plugin on                                   |
+| `localized`    | `boolean`                                                                           | `false`         | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields        |
+| `prefix`       | `string \| Record<string, string>`                                                  | -               | Optional prefix prepended to the start of the computed `fullSlug` for the collection              |
+| `segments`     | `Array<{ relation: string; collection: string; field: string }>`                    | `[]`            | Related document values inserted between the prefix and page hierarchy                            |
 | `ui.placement` | `{ at: "start" \| "end"; tab?: string } \| { before: string } \| { after: string }` | `{ at: "end" }` | Places the plugin fields at the collection root, in an existing tab, or relative to another field |
-| `ui.widths` | `Partial<Record<"slug" \| "parentPage" \| "segments", FieldWidth>>` | - | Overrides the admin grid width of individual plugin fields |
-| `unique` | `boolean` | `true` | Controls route uniqueness validation for computed `fullSlug` values |
+| `ui.widths`    | `Partial<Record<"slug" \| "parentPage" \| "segments", FieldWidth>>`                 | -               | Overrides the admin grid width of individual plugin fields                                        |
+| `unique`       | `boolean`                                                                           | `true`          | Controls route uniqueness validation for computed `fullSlug` values                               |
 
 ### localized
 
@@ -107,14 +109,16 @@ Segments let a page route include values owned by other collections. The plugin 
 
 ```typescript
 pagesPlugin({
-  collections: [{
-    key: "documentation",
-    prefix: "/docs",
-    segments: [
-      { relation: "product", collection: "products", field: "key" },
-      { relation: "release", collection: "releases", field: "key" },
-    ],
-  }],
+  collections: [
+    {
+      key: "documentation",
+      prefix: "/docs",
+      segments: [
+        { relation: "product", collection: "products", field: "key" },
+        { relation: "release", collection: "releases", field: "key" },
+      ],
+    },
+  ],
 });
 ```
 

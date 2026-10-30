@@ -16,9 +16,9 @@ To use the Nodemailer plugin, you need to add it to your Lucid CMS config file. 
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
-import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -37,10 +37,10 @@ export default defineConfig({
 
 This plugin offers the following configuration options to control email sending behavior.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `transporter` | `Transporter` | A configured Nodemailer transporter instance |
-| `remoteAttachments` | `{ maxBytes?: number; timeoutMs?: number }` | Optional remote attachment handling config |
+| Property            | Type                                        | Description                                  |
+| ------------------- | ------------------------------------------- | -------------------------------------------- |
+| `transporter`       | `Transporter`                               | A configured Nodemailer transporter instance |
+| `remoteAttachments` | `{ maxBytes?: number; timeoutMs?: number }` | Optional remote attachment handling config   |
 
 ### transporter
 
@@ -54,11 +54,11 @@ You can configure the maximum remote attachment size and request timeout:
 
 ```typescript
 nodemailerPlugin({
-    transporter,
-    remoteAttachments: {
-        maxBytes: 10 * 1024 * 1024,
-        timeoutMs: 15_000,
-    },
+  transporter,
+  remoteAttachments: {
+    maxBytes: 10 * 1024 * 1024,
+    timeoutMs: 15_000,
+  },
 });
 ```
 

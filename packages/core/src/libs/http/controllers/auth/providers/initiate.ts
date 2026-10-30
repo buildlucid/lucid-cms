@@ -1,6 +1,6 @@
+import { describeRoute } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
-import { describeRoute } from "hono-openapi";
 import { z } from "zod";
 import constants from "../../../../../constants/constants.js";
 import buildCallbackRedirectUrl from "../../../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
@@ -16,8 +16,8 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import softAuthenticate from "../../../middleware/soft-authenticate.js";
-import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
+import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";

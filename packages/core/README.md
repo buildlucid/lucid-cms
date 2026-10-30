@@ -1,4 +1,3 @@
-
 ![Lucid CMS](https://github.com/buildlucid/lucid-cms/blob/master/banner.png?raw=true)
 
 [![Tests](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml/badge.svg)](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml)

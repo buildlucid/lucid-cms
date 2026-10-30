@@ -5,7 +5,9 @@ import fieldConfigs from "../custom-fields/field-configs.js";
 import type { FieldConfig, FieldTypes } from "../custom-fields/types.js";
 
 type SupportedLabelFieldType = {
-	[T in FieldTypes]: (typeof fieldConfigs)[T]["capabilities"]["canBeLabel"] extends true
+	[
+		T in FieldTypes
+	]: (typeof fieldConfigs)[T]["capabilities"]["canBeLabel"] extends true
 		? T
 		: never;
 }[FieldTypes];

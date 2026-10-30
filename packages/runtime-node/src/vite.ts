@@ -37,10 +37,9 @@ const createMiddleware = (
 	getHandler: () => Promise<NodeRequestHandler>,
 ): Connect.NextHandleFunction => {
 	const listener = getRequestListener(async (request, requestBindings) => {
-		const response = await (await getHandler()).handle(
-			request,
-			requestBindings,
-		);
+		const response = await (
+			await getHandler()
+		).handle(request, requestBindings);
 		// Vite's preview compression holds `writeHead` back, so Hono flushing a streamed body's headers would send 200.
 		requestBindings.outgoing.statusCode = response.status;
 		return response;

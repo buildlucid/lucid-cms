@@ -16,12 +16,12 @@ Add the plugin to your Lucid config and provide the collections editors can sele
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
+import { sqlite } from "@lucidcms/db-sqlite";
 import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { node } from "@lucidcms/runtime-node";
-import { sqlite } from "@lucidcms/db-sqlite";
 
 export default defineConfig({
-	runtime: node,
+  runtime: node,
   db: sqlite,
   config: () => ({
     collections: [PageCollection, PostCollection],

@@ -64,7 +64,7 @@ test("successfully validate field - select", async () => {
 			value: "option-1",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
 		validationData: {
 			media: [],
@@ -86,7 +86,7 @@ test("successfully validate field - select", async () => {
 			value: "",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
 		validationData: {
 			media: [],
@@ -108,7 +108,7 @@ test("successfully validate field - select", async () => {
 			value: "option-1",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(SelectCollection).fields.get("required_select")!,
 		validationData: {
 			media: [],
@@ -133,7 +133,7 @@ test("fail to validate field - select", async () => {
 				value: "option-10",
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
 			validationData: {
 				media: [],
@@ -152,7 +152,7 @@ test("fail to validate field - select", async () => {
 				value: 1,
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
 			validationData: {
 				media: [],
@@ -192,7 +192,7 @@ test("fail to validate field - select", async () => {
 			value: undefined,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(SelectCollection).fields.get("required_select")!,
 		validationData: {
 			media: [],

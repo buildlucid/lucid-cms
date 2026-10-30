@@ -15,9 +15,8 @@ const resolve = <Definition extends AnyNotificationDefinition>(
 		schema: resolveSchema,
 		input,
 		handler: async (data) => {
-			const { default: resolveNotification } = await import(
-				"../../../../services/notifications/resolve.js"
-			);
+			const { default: resolveNotification } =
+				await import("../../../../services/notifications/resolve.js");
 
 			return resolveNotification(context, {
 				definition: data.type,

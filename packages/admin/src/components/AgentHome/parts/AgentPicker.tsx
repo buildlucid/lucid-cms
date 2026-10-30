@@ -1,8 +1,8 @@
 import type { Agent } from "@types";
 import { TbOutlineRobot } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
-import ComposerTriggerLabel from "@/components/ComposerTriggerLabel/ComposerTriggerLabel";
 import { composerLabelTriggerClasses } from "@/components/ComposerTriggerLabel/classes";
+import ComposerTriggerLabel from "@/components/ComposerTriggerLabel/ComposerTriggerLabel";
 import Menu from "@/components/Menu/Menu";
 import T, { translateAdminCopy } from "@/translations";
 

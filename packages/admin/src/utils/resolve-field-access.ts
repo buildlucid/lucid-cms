@@ -16,7 +16,7 @@ const resolveFieldAccess = (
 		!userStore.get.meetsRequirement(permissions.read)
 			? "hidden"
 			: permissions?.update !== undefined &&
-					!userStore.get.meetsRequirement(permissions.update)
+				  !userStore.get.meetsRequirement(permissions.update)
 				? "locked"
 				: "editable";
 

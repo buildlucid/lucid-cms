@@ -25,9 +25,8 @@ const createGetSingle =
 			schema: inputSchema,
 			input,
 			handler: async (data) => {
-				const { default: getSingle } = await import(
-					"../../../../services/documents/content/get-single.js"
-				);
+				const { default: getSingle } =
+					await import("../../../../services/documents/content/get-single.js");
 
 				return getSingle<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>(
 					context,

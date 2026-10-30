@@ -1,4 +1,10 @@
 import type {
+	CollectionDocumentKey,
+	ContentDocument,
+	ContentLocaleInput,
+	IsLocalized,
+} from "../types.js";
+import type {
 	CollectionDocumentVersionKey,
 	DocumentsGetMultipleQuery,
 	DocumentsGetSingleQuery,
@@ -8,12 +14,6 @@ import type {
 	LucidRequestOptions,
 	LucidTransport,
 } from "../types/transport.js";
-import type {
-	CollectionDocumentKey,
-	ContentDocument,
-	ContentLocaleInput,
-	IsLocalized,
-} from "../types.js";
 import { encodePathSegment } from "../utils/url.js";
 
 /** Input for fetching one document from a collection. */

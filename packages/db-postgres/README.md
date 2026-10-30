@@ -1,4 +1,5 @@
 # Lucid CMS - Postgres Database Adapter
+
 > The official Postgres database adapter for Lucid CMS
 
 The Lucid CMS Postgres database adapter allows you to use PostgreSQL as your database. This registers a postgres dialect for [Kysely](https://kysely.dev/) under the hood and makes use of the [Postgres](https://github.com/porsager/postgres) library.
@@ -15,8 +16,8 @@ To use the Postgres database adapter, you need to add it to your Lucid CMS confi
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
 import { postgres } from "@lucidcms/db-postgres";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,

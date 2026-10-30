@@ -13,9 +13,9 @@ import {
 import type { RequestDocumentInput } from "../../../schemas/requests.js";
 import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import cloneVersion from "../../documents-versions/clone-version.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
-import cloneVersion from "../../documents-versions/clone-version.js";
 import canWriteDocument from "./can-write-document.js";
 import checkPublishedTargets from "./check-published-targets.js";
 import createTargets from "./create-targets.js";

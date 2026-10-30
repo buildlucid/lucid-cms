@@ -21,9 +21,7 @@ const createSingle = <K extends string>(
 			const [{ default: writeSingle }, { default: resolveDocumentActor }] =
 				await Promise.all([
 					import("../../../../services/documents/write-single.js"),
-					import(
-						"../../../../services/documents/helpers/resolve-document-actor.js"
-					),
+					import("../../../../services/documents/helpers/resolve-document-actor.js"),
 				]);
 
 			//* create requests check create or create-request access themselves

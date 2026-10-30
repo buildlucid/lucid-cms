@@ -192,12 +192,10 @@ const formatConversation = (props: {
 	}),
 	...(props.compactions
 		? {
-				compactions: props.compactions.map(
-					(compaction): AgentCompaction => ({
-						id: compaction.id,
-						createdAt: formatter.formatDate(compaction.created_at),
-					}),
-				),
+				compactions: props.compactions.map((compaction): AgentCompaction => ({
+					id: compaction.id,
+					createdAt: formatter.formatDate(compaction.created_at),
+				})),
 			}
 		: {}),
 	agentKey: props.conversation.agent_key,

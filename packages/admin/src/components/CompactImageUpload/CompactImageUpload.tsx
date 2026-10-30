@@ -142,7 +142,6 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 					event.currentTarget.value = "";
 				}}
 			/>
-			{/** biome-ignore lint/a11y/noStaticElementInteractions: drag and drop supplements the labelled file input and buttons */}
 			<div
 				class={classNames(
 					"relative flex flex-col gap-3 overflow-hidden rounded-md border border-border bg-input/35 p-3 transition-colors sm:flex-row sm:items-center",

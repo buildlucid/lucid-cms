@@ -456,13 +456,13 @@
 		background:
 			linear-gradient(var(--lucid-card), var(--lucid-card)) padding-box,
 			conic-gradient(
-				from var(--ai-border-angle),
-				transparent 0deg,
-				transparent 245deg,
-				var(--lucid-ai-blue) 285deg,
-				var(--lucid-primary) 360deg
-			)
-			border-box;
+					from var(--ai-border-angle),
+					transparent 0deg,
+					transparent 245deg,
+					var(--lucid-ai-blue) 285deg,
+					var(--lucid-primary) 360deg
+				)
+				border-box;
 		animation: ai-border-spin 900ms linear infinite;
 	}
 

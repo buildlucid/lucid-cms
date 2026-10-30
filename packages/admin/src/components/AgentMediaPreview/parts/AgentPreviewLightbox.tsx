@@ -87,7 +87,7 @@ const AgentPreviewLightbox: Component<{
 												/>
 											</Match>
 											<Match when={item.type === "video"}>
-												{/* biome-ignore lint/a11y/useMediaCaption: plays the original media, which has no generated captions */}
+												{/* oxlint-disable-next-line jsx-a11y/media-has-caption -- plays the original media, which has no generated captions */}
 												<video
 													controls
 													autoplay

@@ -79,7 +79,7 @@ const ReadonlyMediaPreview: Component<{
 						<Match when={props.media.type === "video"}>
 							<div class="w-full h-full relative z-10 bg-input rectangle-background">
 								<Show when={renderNativeMedia()}>
-									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+									{/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
 									<video
 										src={props.media.url}
 										class="w-full h-full object-contain z-10 relative"

@@ -1,6 +1,6 @@
+import { describeRoute } from "hono-openapi";
 import { deleteCookie, getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
-import { describeRoute } from "hono-openapi";
 import { parseConnectionCallbackParameters } from "../../../../services/connection/helpers/callback-parameters.js";
 import { getConnectionFlowCookieName } from "../../../../services/connection/helpers/flow-security.js";
 import { connectionServices } from "../../../../services/index.js";

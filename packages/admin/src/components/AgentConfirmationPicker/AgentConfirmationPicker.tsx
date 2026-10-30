@@ -1,8 +1,8 @@
 import type { AgentConfirmationMode } from "@types";
 import { TbOutlineShieldHalf } from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
-import ComposerTriggerLabel from "@/components/ComposerTriggerLabel/ComposerTriggerLabel";
 import { composerLabelTriggerClasses } from "@/components/ComposerTriggerLabel/classes";
+import ComposerTriggerLabel from "@/components/ComposerTriggerLabel/ComposerTriggerLabel";
 import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 

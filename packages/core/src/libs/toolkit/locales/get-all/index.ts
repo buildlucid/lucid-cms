@@ -8,9 +8,8 @@ import { runToolkitService } from "../../utils.js";
 const getAll = async (context: ServiceContext): ServiceResponse<Locale[]> =>
 	runToolkitService({
 		handler: async () => {
-			const { default: getAllLocales } = await import(
-				"../../../../services/locales/get-all.js"
-			);
+			const { default: getAllLocales } =
+				await import("../../../../services/locales/get-all.js");
 
 			return getAllLocales(context);
 		},

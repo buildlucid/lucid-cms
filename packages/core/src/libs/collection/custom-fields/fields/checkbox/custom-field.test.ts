@@ -38,7 +38,7 @@ test("successfully validate field - checkbox", async () => {
 			value: 0,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(CheckboxCollection).fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
@@ -60,7 +60,7 @@ test("successfully validate field - checkbox", async () => {
 			value: 1,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(CheckboxCollection).fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
@@ -84,7 +84,7 @@ test("fail to validate field - checkbox", async () => {
 			value: "1",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(CheckboxCollection).fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
@@ -112,7 +112,7 @@ test("fail to validate field - checkbox", async () => {
 			value: 0,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(CheckboxCollection).fields.get("required_chekbox")!,
 		validationData: {
 			media: [],

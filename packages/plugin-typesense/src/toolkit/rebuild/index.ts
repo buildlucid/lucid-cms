@@ -1,9 +1,7 @@
 import { copy } from "@lucidcms/core";
 import { runToolkitService } from "@lucidcms/core/toolkit";
 import type { CoreToolkit, ServiceFn } from "@lucidcms/core/types";
-import translations from "../../../translations/en.server.json" with {
-	type: "json",
-};
+import translations from "../../../translations/en.server.json" with { type: "json" };
 import { LEASE_MS } from "../../constants.js";
 import type { SyncJob } from "../../jobs/types.js";
 import IndexesRepository from "../../repositories/indexes.js";

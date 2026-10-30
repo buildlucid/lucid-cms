@@ -14,9 +14,9 @@ npm install @lucidcms/plugin-filesystem
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
-import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -33,7 +33,7 @@ export default defineConfig({
 
 ## Configuration
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `uploadDir` | `string` | Directory used to store uploaded files. Defaults to `uploads`. |
+| Property    | Type     | Description                                                                         |
+| ----------- | -------- | ----------------------------------------------------------------------------------- |
+| `uploadDir` | `string` | Directory used to store uploaded files. Defaults to `uploads`.                      |
 | `secretKey` | `string` | Secret used to sign filesystem media URLs. Defaults to the Lucid encryption secret. |

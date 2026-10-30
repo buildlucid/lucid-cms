@@ -414,7 +414,9 @@ test("agents comment and reply as their run and only change comments their agent
 		commentId: person.data.id,
 		action: { type: "resolve" },
 	});
-	await (await startRun(editor.key)).fail(updateComment, {
+	await (
+		await startRun(editor.key)
+	).fail(updateComment, {
 		requestId,
 		commentId: commented.comment.id,
 		action: { type: "remove" },
@@ -493,7 +495,9 @@ test("an agent's comments stay the agent's, even after its chat is deleted", asy
 		actorAgent: { key: reviewer.key, name: "Reviewer", conversationId: null },
 		resolvedByAgent: null,
 	});
-	await (await startRun()).call(updateComment, {
+	await (
+		await startRun()
+	).call(updateComment, {
 		requestId,
 		commentId: commented.comment.id,
 		action: { type: "reopen" },

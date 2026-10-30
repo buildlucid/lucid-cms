@@ -51,7 +51,7 @@ export type CoreToolkit = {
  * Plugins extend this interface through module augmentation to describe their
  * services. A service is only available when its plugin is configured.
  */
-// biome-ignore lint/suspicious/noEmptyInterface: plugins merge their services into this interface
+// oxlint-disable-next-line typescript/no-empty-object-type -- plugins merge their services into this interface
 export interface ToolkitServices {}
 
 /** Core helpers and any configured plugin services bound to a service context. */

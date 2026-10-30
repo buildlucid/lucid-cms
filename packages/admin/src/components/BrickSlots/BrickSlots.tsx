@@ -1,4 +1,3 @@
-import { brickSlots } from "virtual:lucid-admin";
 import type { FieldError } from "@types";
 import classNames from "classnames";
 import {
@@ -9,6 +8,7 @@ import {
 	type JSX,
 	Show,
 } from "solid-js";
+import { brickSlots } from "virtual:lucid-admin";
 import { createFieldStates } from "@/extensions/editor/field-state";
 import { resolveSlots } from "@/extensions/slot-policy";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";

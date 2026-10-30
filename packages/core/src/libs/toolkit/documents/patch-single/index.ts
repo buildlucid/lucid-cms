@@ -19,9 +19,8 @@ const patchSingle = <K extends string>(
 		schema: inputSchema,
 		input,
 		handler: async ({ actor, requestId, ...data }) => {
-			const { default: writeSingle } = await import(
-				"../../../../services/documents/write-single.js"
-			);
+			const { default: writeSingle } =
+				await import("../../../../services/documents/write-single.js");
 
 			const versionRes = await resolveDocumentVersion(context, {
 				actor,

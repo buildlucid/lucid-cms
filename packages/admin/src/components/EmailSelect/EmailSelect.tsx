@@ -266,7 +266,6 @@ const EmailSortableItem: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
 		<div
 			data-dragkey={EMAIL_SELECT_DRAG_DROP_KEY}
 			data-dragref={`${props.email.id}`}

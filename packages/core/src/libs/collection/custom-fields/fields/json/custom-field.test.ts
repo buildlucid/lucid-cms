@@ -48,7 +48,7 @@ test("successfully validate field - json", async () => {
 				key: "value",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
@@ -68,7 +68,7 @@ test("successfully validate field - json", async () => {
 			type: "json",
 			value: "",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
@@ -91,7 +91,7 @@ test("successfully validate field - json", async () => {
 				key: "value",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(JSONCollection).fields.get("required_json")!,
 		validationData: {
 			media: [],
@@ -115,7 +115,7 @@ test("successfully validate field - json", async () => {
 				value: "value",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(JSONCollection).fields.get("zod_json")!,
 		validationData: {
 			media: [],
@@ -138,7 +138,7 @@ test("fail to validate field - json", async () => {
 			type: "json",
 			value: "invalid json",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
@@ -165,7 +165,7 @@ test("fail to validate field - json", async () => {
 			type: "json",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(JSONCollection).fields.get("required_json")!,
 		validationData: {
 			media: [],
@@ -195,7 +195,7 @@ test("fail to validate field - json", async () => {
 				value: true, // not a string
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(JSONCollection).fields.get("zod_json")!,
 		validationData: {
 			media: [],

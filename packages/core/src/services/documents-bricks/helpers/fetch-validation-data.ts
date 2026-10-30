@@ -24,7 +24,9 @@ import resolveRichTextVariableAccess from "./resolve-rich-text-variable-access.j
 
 /** The data each field type's `validateInput` fetches, keyed by field type. */
 export type ValidationData = {
-	[TType in FieldTypes]?: (typeof registeredFields)[TType]["validateInput"] extends (
+	[
+		TType in FieldTypes
+	]?: (typeof registeredFields)[TType]["validateInput"] extends (
 		...args: never[]
 	) => Promise<infer TData>
 		? TData

@@ -3,8 +3,8 @@ import { generateAgentTitleJob } from "../../services/agent/jobs/generate-title.
 import { agentTickJob } from "../../services/agent/jobs/tick.js";
 import { deleteCollectionJob } from "../../services/collections/jobs/delete-single.js";
 import { verifyConnectionsJob } from "../../services/connection/jobs/verify-connections.js";
-import { deleteDocumentJob } from "../../services/documents/jobs/delete-single.js";
 import { deleteExpiredRevisionsJob } from "../../services/documents-versions/jobs/delete-expired-revisions.js";
+import { deleteDocumentJob } from "../../services/documents/jobs/delete-single.js";
 import { sendEmailJob } from "../../services/email/jobs/send-email.js";
 import { deleteLocaleJob } from "../../services/locales/jobs/delete-single.js";
 import { deleteExpiredDataJob } from "../../services/maintenance/jobs/delete-expired-data.js";

@@ -1,6 +1,6 @@
-import { homeSlots } from "virtual:lucid-admin";
 import type { Collection, Permission } from "@types";
 import type { Component } from "solid-js";
+import { homeSlots } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import { homeWidgetSizes } from "@/components/HomeWidgets/constants";
 import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
@@ -129,32 +129,30 @@ const builtInWidgets: HomeWidget[] = [
 	},
 ];
 
-const extensionWidgets = homeSlots.map(
-	(entry): HomeWidget => ({
-		key: entry.key,
-		priority: entry.priority ?? 0,
-		label: () => helpers.getLocaleValue({ value: entry.card.label }),
-		description: () =>
-			entry.card.description
-				? helpers.getLocaleValue({ value: entry.card.description })
-				: undefined,
-		size: entry.card.size ?? "md",
-		sizes: entry.card.sizes ?? homeWidgetSizes,
-		hidden: entry.card.hidden ?? false,
-		available: () =>
-			!entry.permission || userStore.get.meetsRequirement(entry.permission),
-		component: (props) => (
-			<AdminExtensionBoundary name={entry.key} placement="content">
-				<entry.component
-					slot="home.widget"
-					key={entry.key}
-					size={props.size}
-					options={entry.options}
-				/>
-			</AdminExtensionBoundary>
-		),
-	}),
-);
+const extensionWidgets = homeSlots.map((entry): HomeWidget => ({
+	key: entry.key,
+	priority: entry.priority ?? 0,
+	label: () => helpers.getLocaleValue({ value: entry.card.label }),
+	description: () =>
+		entry.card.description
+			? helpers.getLocaleValue({ value: entry.card.description })
+			: undefined,
+	size: entry.card.size ?? "md",
+	sizes: entry.card.sizes ?? homeWidgetSizes,
+	hidden: entry.card.hidden ?? false,
+	available: () =>
+		!entry.permission || userStore.get.meetsRequirement(entry.permission),
+	component: (props) => (
+		<AdminExtensionBoundary name={entry.key} placement="content">
+			<entry.component
+				slot="home.widget"
+				key={entry.key}
+				size={props.size}
+				options={entry.options}
+			/>
+		</AdminExtensionBoundary>
+	),
+}));
 
 /** Every widget in default order. Higher priorities come first and ties keep registration order. */
 export const homeWidgets = [...builtInWidgets, ...extensionWidgets].toSorted(

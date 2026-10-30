@@ -44,7 +44,7 @@ test("successfully validate field - number", async () => {
 			value: 1,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(NumberCollection).fields.get("standard_number")!,
 		validationData: {
 			media: [],
@@ -66,7 +66,7 @@ test("successfully validate field - number", async () => {
 			value: 1,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(NumberCollection).fields.get("required_number")!,
 		validationData: {
 			media: [],
@@ -87,7 +87,7 @@ test("successfully validate field - number", async () => {
 			type: "number",
 			value: 5,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(NumberCollection).fields.get("min_number")!,
 		validationData: {
 			media: [],
@@ -111,7 +111,7 @@ test("fail to validate field - number", async () => {
 			value: "1",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(NumberCollection).fields.get("standard_number")!,
 		validationData: {
 			media: [],
@@ -139,7 +139,7 @@ test("fail to validate field - number", async () => {
 			value: undefined,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(NumberCollection).fields.get("required_number")!,
 		validationData: {
 			media: [],
@@ -166,7 +166,7 @@ test("fail to validate field - number", async () => {
 			type: "number",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(NumberCollection).fields.get("min_number")!,
 		validationData: {
 			media: [],

@@ -284,10 +284,12 @@ export interface InferredTable {
 // ------------------------------------------------------------------------------
 // Database
 type DynamicCollectionTables = {
-	[Table in
-		| LucidDocumentTableName
-		| LucidVersionTableName
-		| LucidBrickTableName]: Table extends LucidVersionTableName
+	[
+		Table in
+			| LucidDocumentTableName
+			| LucidVersionTableName
+			| LucidBrickTableName
+	]: Table extends LucidVersionTableName
 		? LucidVersionTable
 		: Table extends LucidBrickTableName
 			? LucidBricksTable

@@ -1,9 +1,7 @@
 import { copy } from "@lucidcms/core";
 import { runToolkitService } from "@lucidcms/core/toolkit";
 import type { ServiceFn } from "@lucidcms/core/types";
-import translations from "../../../translations/en.server.json" with {
-	type: "json",
-};
+import translations from "../../../translations/en.server.json" with { type: "json" };
 import IndexesRepository from "../../repositories/indexes.js";
 import WorkRepository from "../../repositories/work.js";
 import type { ResolvedOptions } from "../../types.js";
@@ -93,7 +91,7 @@ const getStatus: ServiceFn<
 						state.data.lock_token === null
 							? "idle"
 							: state.data.lock_until !== null &&
-									state.data.lock_until > new Date().toISOString()
+								  state.data.lock_until > new Date().toISOString()
 								? "running"
 								: "expired",
 					lastError: state.data.last_error,

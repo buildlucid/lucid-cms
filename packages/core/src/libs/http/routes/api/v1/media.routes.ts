@@ -1,25 +1,5 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
-import abortUploadSession from "../../../controllers/media/abort-upload-session.js";
-import addToLibrary from "../../../controllers/media/add-to-library.js";
-import clearAllProcessed from "../../../controllers/media/clear-all-processed.js";
-import clearSingleProcessed from "../../../controllers/media/clear-single-processed.js";
-import completeUploadSession from "../../../controllers/media/complete-upload-session.js";
-import createSingle from "../../../controllers/media/create-single.js";
-import createUploadSession from "../../../controllers/media/create-upload-session.js";
-import deleteBatch from "../../../controllers/media/delete-batch.js";
-import deleteMultiplePermanently from "../../../controllers/media/delete-multiple-permanently.js";
-import deleteSingle from "../../../controllers/media/delete-single.js";
-import deleteSinglePermanently from "../../../controllers/media/delete-single-permanently.js";
-import getMultiple from "../../../controllers/media/get-multiple.js";
-import getSingle from "../../../controllers/media/get-single.js";
-import getUploadPartUrls from "../../../controllers/media/get-upload-part-urls.js";
-import getUploadSession from "../../../controllers/media/get-upload-session.js";
-import moveFolder from "../../../controllers/media/move-folder.js";
-import requestDownload from "../../../controllers/media/request-download.js";
-import restoreMultiple from "../../../controllers/media/restore-multiple.js";
-import updateSingle from "../../../controllers/media/update-single.js";
-
 import createSingleFolder from "../../../controllers/media-folders/create-single.js";
 import deleteSingleFolder from "../../../controllers/media-folders/delete-single.js";
 import getAllFoldersHierarchy from "../../../controllers/media-folders/get-hierarchy.js";
@@ -32,6 +12,25 @@ import deleteMediaShareLink from "../../../controllers/media-share-links/delete-
 import getMediaShareLinks from "../../../controllers/media-share-links/get-multiple.js";
 import getSingleMediaShareLink from "../../../controllers/media-share-links/get-single.js";
 import updateMediaShareLink from "../../../controllers/media-share-links/update-single.js";
+import abortUploadSession from "../../../controllers/media/abort-upload-session.js";
+import addToLibrary from "../../../controllers/media/add-to-library.js";
+import clearAllProcessed from "../../../controllers/media/clear-all-processed.js";
+import clearSingleProcessed from "../../../controllers/media/clear-single-processed.js";
+import completeUploadSession from "../../../controllers/media/complete-upload-session.js";
+import createSingle from "../../../controllers/media/create-single.js";
+import createUploadSession from "../../../controllers/media/create-upload-session.js";
+import deleteBatch from "../../../controllers/media/delete-batch.js";
+import deleteMultiplePermanently from "../../../controllers/media/delete-multiple-permanently.js";
+import deleteSinglePermanently from "../../../controllers/media/delete-single-permanently.js";
+import deleteSingle from "../../../controllers/media/delete-single.js";
+import getMultiple from "../../../controllers/media/get-multiple.js";
+import getSingle from "../../../controllers/media/get-single.js";
+import getUploadPartUrls from "../../../controllers/media/get-upload-part-urls.js";
+import getUploadSession from "../../../controllers/media/get-upload-session.js";
+import moveFolder from "../../../controllers/media/move-folder.js";
+import requestDownload from "../../../controllers/media/request-download.js";
+import restoreMultiple from "../../../controllers/media/restore-multiple.js";
+import updateSingle from "../../../controllers/media/update-single.js";
 
 const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)

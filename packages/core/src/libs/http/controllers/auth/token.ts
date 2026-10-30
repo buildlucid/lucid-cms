@@ -1,5 +1,5 @@
-import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { authServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";

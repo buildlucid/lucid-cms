@@ -123,10 +123,8 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				"bg-linear-to-b from-danger-low to-transparent to-30%":
 					errorCount() > 0,
 			})}
-			aria-invalid={errorCount() > 0}
 		>
 			{/* Header */}
-			{/* biome-ignore lint/a11y/useSemanticElements: Header slots can contain buttons, which cannot be nested inside a native button. */}
 			<div
 				role="button"
 				tabIndex={0}

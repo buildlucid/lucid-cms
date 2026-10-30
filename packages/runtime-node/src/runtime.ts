@@ -32,9 +32,8 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 		vite: "@lucidcms/runtime-node/vite",
 		adaptConfig,
 		getEnvVars: async ({ logger }) => {
-			const { default: getEnvVars } = await import(
-				"./services/get-env-vars.js"
-			);
+			const { default: getEnvVars } =
+				await import("./services/get-env-vars.js");
 			const env = await getEnvVars({
 				logger,
 			});

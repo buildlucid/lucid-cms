@@ -21,9 +21,8 @@ const requestMediaDownload = (
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: requestDownload } = await import(
-				"../../../../services/media/request-download.js"
-			);
+			const { default: requestDownload } =
+				await import("../../../../services/media/request-download.js");
 
 			return requestDownload(context, {
 				target: { type: "id", id: data.id, actor: { type: "internal" } },

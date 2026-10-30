@@ -57,8 +57,8 @@ import {
 import { getRequestsOverviewAgentTool } from "../../services/requests/tools/overview/index.js";
 import { replyToRequestAgentTool } from "../../services/requests/tools/reply/index.js";
 import { scheduleRequestAgentTool } from "../../services/requests/tools/schedule/index.js";
-import { updateRequestAgentTool } from "../../services/requests/tools/update/index.js";
 import { updateRequestCommentAgentTool } from "../../services/requests/tools/update-comment/index.js";
+import { updateRequestAgentTool } from "../../services/requests/tools/update/index.js";
 import { getSettingsAgentTool } from "../../services/settings/tools/get/index.js";
 import {
 	findUsersAgentTool,

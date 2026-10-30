@@ -65,8 +65,8 @@ import runWebResearch from "../web/helpers/run-web-research.js";
 import cancelRun from "./cancel-run.js";
 import createRoutine from "./create-routine.js";
 import executeRun from "./execute-run.js";
-import getConversation from "./get-conversation.js";
 import getConversationDetails from "./get-conversation-details.js";
+import getConversation from "./get-conversation.js";
 import getMessages from "./get-messages.js";
 import getRoutine from "./get-routine.js";
 import advanceInputs from "./helpers/advance-inputs.js";
@@ -4276,9 +4276,8 @@ test("input cannot take the ID of another chat's run", async () => {
 vi.mock(
 	"../../libs/lucid-remote/services/get-agent-models/index.js",
 	async () => {
-		const { agentModelCatalog, mockAgentModels } = await import(
-			"../../utils/test-helpers/agent-models.js"
-		);
+		const { agentModelCatalog, mockAgentModels } =
+			await import("../../utils/test-helpers/agent-models.js");
 		return {
 			default: mockAgentModels(() => ({
 				...agentModelCatalog,

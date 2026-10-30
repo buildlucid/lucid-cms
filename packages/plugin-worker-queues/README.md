@@ -14,9 +14,9 @@ npm install @lucidcms/plugin-worker-queues
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
-import { workerQueuesPlugin } from "@lucidcms/plugin-worker-queues";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { workerQueuesPlugin } from "@lucidcms/plugin-worker-queues";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -34,7 +34,7 @@ export default defineConfig({
 
 ## Configuration
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property            | Type     | Description                                                 |
+| ------------------- | -------- | ----------------------------------------------------------- |
 | `maxConcurrentJobs` | `number` | Maximum number of jobs the worker can process concurrently. |
-| `batchSize` | `number` | Number of jobs the worker can claim per batch. |
+| `batchSize`         | `number` | Number of jobs the worker can claim per batch.              |

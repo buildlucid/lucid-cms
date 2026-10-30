@@ -63,7 +63,7 @@ const getRoutines: ServiceFn<
 						routine.source === "code"
 							? "manager"
 							: routine.user_id === input.userId &&
-									access.data["manage-own-routines"].includes(routine.agent_key)
+								  access.data["manage-own-routines"].includes(routine.agent_key)
 								? "owner"
 								: "oversight",
 					toolSettings: tools.data[routine.id] ?? {},

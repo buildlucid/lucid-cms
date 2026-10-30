@@ -22,8 +22,8 @@ import createSingle from "../requests/create-single.js";
 import getSingle from "../requests/get-single.js";
 import syncCollections from "../sync/sync-collections.js";
 import deleteMultiple from "./delete-multiple.js";
-import deleteSingle from "./delete-single.js";
 import deleteSinglePermanently from "./delete-single-permanently.js";
+import deleteSingle from "./delete-single.js";
 import upsertSingle from "./upsert-single.js";
 
 const fixture = getTestConfig();

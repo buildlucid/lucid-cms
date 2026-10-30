@@ -30,29 +30,27 @@ export const getExternalScopeGroups = (
 	} = {},
 ): ExternalScopeGroup[] => {
 	return getCapabilityRegistry(config)
-		.map(
-			(group): ExternalScopeGroup => ({
-				key: group.key,
-				details: group.externalDetails ?? group.details,
-				scopes: group.capabilities.flatMap((capability) => {
-					const external = capability.external;
-					if (
-						!capability.availableToIntegrations ||
-						!external ||
-						(options.principalType !== undefined &&
-							external.principalTypes !== undefined &&
-							!external.principalTypes.includes(options.principalType))
-					)
-						return [];
-					return [
-						{
-							key: external.scope,
-							details: external.details ?? capability.details,
-						},
-					];
-				}),
+		.map((group): ExternalScopeGroup => ({
+			key: group.key,
+			details: group.externalDetails ?? group.details,
+			scopes: group.capabilities.flatMap((capability) => {
+				const external = capability.external;
+				if (
+					!capability.availableToIntegrations ||
+					!external ||
+					(options.principalType !== undefined &&
+						external.principalTypes !== undefined &&
+						!external.principalTypes.includes(options.principalType))
+				)
+					return [];
+				return [
+					{
+						key: external.scope,
+						details: external.details ?? capability.details,
+					},
+				];
 			}),
-		)
+		}))
 		.filter((group) => group.scopes.length > 0);
 };
 

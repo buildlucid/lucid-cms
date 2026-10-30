@@ -40,7 +40,7 @@ export const createDatabaseAdapterFactory = <
 });
 
 export const createDatabaseAdapterCreator = <
-	// biome-ignore lint/suspicious/noExplicitAny: preserves overloaded adapter creator signatures
+	// oxlint-disable-next-line typescript/no-explicit-any -- preserves overloaded adapter creator signatures
 	TCreator extends (...args: any[]) => unknown,
 	TAdapter extends DatabaseAdapter = DatabaseAdapter,
 >(

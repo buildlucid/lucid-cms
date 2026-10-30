@@ -1,8 +1,6 @@
 import { LucidError } from "@lucidcms/core";
 import { Client } from "typesense";
-import translations from "../../translations/en.server.json" with {
-	type: "json",
-};
+import translations from "../../translations/en.server.json" with { type: "json" };
 import { PLUGIN_KEY } from "../constants.js";
 import type { PluginOptions, ResolvedOptions } from "../types.js";
 

@@ -1,5 +1,6 @@
 import type { AgentStreamEvent } from "@lucidcms/types";
 import z from "zod";
+import { agentScreenSchema } from "../../schemas/agent-screen.js";
 import {
 	agentConfirmationModeSchema,
 	type agentContextSchema,
@@ -7,7 +8,6 @@ import {
 	agentRunOutcomeSchema,
 	routineToolSettingsSchema,
 } from "../../schemas/agent.js";
-import { agentScreenSchema } from "../../schemas/agent-screen.js";
 import type { AiModelConfig } from "../../types/config.js";
 import type {
 	AgentInteractionAction,

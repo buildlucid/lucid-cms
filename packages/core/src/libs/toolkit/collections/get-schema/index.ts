@@ -22,9 +22,8 @@ const getCollectionSchema = (
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: getSchema } = await import(
-				"../../../../services/collections/get-schema.js"
-			);
+			const { default: getSchema } =
+				await import("../../../../services/collections/get-schema.js");
 			return getSchema(context, data);
 		},
 		name: {

@@ -231,10 +231,8 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				})
 			}
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
-			aria-invalid={errorCount() > 0}
 		>
 			{/* Header */}
-			{/* biome-ignore lint/a11y/useSemanticElements: Drag, delete and slot buttons cannot be nested inside a native button. */}
 			<div
 				role="button"
 				tabIndex={0}

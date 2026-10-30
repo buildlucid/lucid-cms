@@ -18,9 +18,8 @@ const upsert = <Definition extends AnyNotificationDefinition>(
 		schema: upsertSchema,
 		input,
 		handler: async (data) => {
-			const { default: upsertNotification } = await import(
-				"../../../../services/notifications/upsert.js"
-			);
+			const { default: upsertNotification } =
+				await import("../../../../services/notifications/upsert.js");
 
 			return upsertNotification(context, {
 				definition: data.type,

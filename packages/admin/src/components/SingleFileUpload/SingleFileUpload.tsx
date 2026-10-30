@@ -230,7 +230,6 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					}
 				}}
 			/>
-			{/** biome-ignore lint/a11y/noStaticElementInteractions: explanation */}
 			<div
 				class={classNames(
 					"w-full border-border border h-80 rounded-md relative overflow-hidden",
@@ -597,7 +596,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 								)}
 							>
 								<Show when={renderNativeMedia()}>
-									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+									{/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
 									<video
 										src={props.data.url}
 										class="w-full h-full object-contain z-10 relative"

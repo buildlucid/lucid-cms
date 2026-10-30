@@ -28,9 +28,7 @@ const deleteSingle = (
 			const [{ default: deleteSingle }, { default: resolveDocumentActor }] =
 				await Promise.all([
 					import("../../../../services/documents/delete-single.js"),
-					import(
-						"../../../../services/documents/helpers/resolve-document-actor.js"
-					),
+					import("../../../../services/documents/helpers/resolve-document-actor.js"),
 				]);
 
 			const actor = await resolveDocumentActor(context, {

@@ -4,7 +4,7 @@ import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 
-// biome-ignore lint/suspicious/noEmptyInterface: explanation
+// oxlint-disable-next-line typescript/no-empty-object-type
 interface QueryParams {}
 
 const useGetProviders = (params: QueryHook<QueryParams>) => {

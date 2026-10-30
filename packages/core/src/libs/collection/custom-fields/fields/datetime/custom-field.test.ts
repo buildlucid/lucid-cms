@@ -40,7 +40,7 @@ test("successfully validate field - datetime", async () => {
 			value: "2024-06-15T14:14:21.704Z",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -62,7 +62,7 @@ test("successfully validate field - datetime", async () => {
 			value: 1676103221704,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -84,7 +84,7 @@ test("successfully validate field - datetime", async () => {
 			value: new Date("2024-06-15T14:14:21.704Z"),
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -106,7 +106,7 @@ test("successfully validate field - datetime", async () => {
 			value: "",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -128,7 +128,7 @@ test("successfully validate field - datetime", async () => {
 			value: "2024-06-15T14:14:21.704Z",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("required_datetime")!,
 		validationData: {
 			media: [],
@@ -152,7 +152,7 @@ test("fail to validate field - datetime", async () => {
 			value: true,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -180,7 +180,7 @@ test("fail to validate field - datetime", async () => {
 			value: "string",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -208,7 +208,7 @@ test("fail to validate field - datetime", async () => {
 			value: "20024-06-15T14:14:21.704",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -236,7 +236,7 @@ test("fail to validate field - datetime", async () => {
 			value: "",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DateTimeCollection).fields.get("required_datetime")!,
 		validationData: {
 			media: [],

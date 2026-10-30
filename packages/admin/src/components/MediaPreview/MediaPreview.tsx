@@ -141,7 +141,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 								</Match>
 								<Match when={props.richPreview}>
 									<Show when={renderNativeMedia()}>
-										{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+										{/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
 										<video
 											class="w-full h-full object-contain z-10 relative"
 											controls

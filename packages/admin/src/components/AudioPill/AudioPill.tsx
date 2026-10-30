@@ -139,7 +139,7 @@ const AudioPill: Component<
 			>
 				{(src) => (
 					<>
-						{/* biome-ignore lint/a11y/useMediaCaption: the element only drives the custom controls, and a media item's transcript sits with its details */}
+						{/* oxlint-disable-next-line jsx-a11y/media-has-caption -- the element only drives the custom controls, and a media item's transcript sits with its details */}
 						<audio
 							ref={(element) => {
 								audio = element;

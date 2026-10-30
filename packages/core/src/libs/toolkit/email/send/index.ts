@@ -17,9 +17,8 @@ const send = async <Name extends EmailTemplateName>(
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: sendExternalEmail } = await import(
-				"../../../../services/email/send-external.js"
-			);
+			const { default: sendExternalEmail } =
+				await import("../../../../services/email/send-external.js");
 
 			return sendExternalEmail(context, {
 				to: data.to,

@@ -118,7 +118,7 @@ const useEditor = (config: {
 	);
 
 	const editor = createTiptapEditor(() => {
-		// biome-ignore lint/style/noNonNullAssertion: Solid assigns the element ref before Tiptap's effect runs.
+		// oxlint-disable-next-line typescript/no-non-null-assertion -- Solid assigns the element ref before Tiptap's effect runs.
 		const element = container()!;
 		const options = editorOptions();
 

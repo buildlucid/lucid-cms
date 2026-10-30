@@ -12,8 +12,8 @@ import {
 import type { LucidUser } from "../../types/hono.js";
 import { sameNumericSet } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import getUpdateContext from "../documents-versions/helpers/get-update-context.js";
+import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import recordProposalActivity from "../requests/helpers/record-proposal-activity.js";
 import {

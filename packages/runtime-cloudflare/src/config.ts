@@ -25,8 +25,7 @@ export const withLucid =
 	async (): Promise<WorkerConfig> => {
 		// Cloudflare's config loader denies Vite access to the files this module imports as it loads, which would include
 		// Lucid modules the Worker shares, so they load when the Worker's config resolves instead.
-		const { default: resolveLucidWorker } = await import(
-			"./services/resolve-lucid-worker.js"
-		);
+		const { default: resolveLucidWorker } =
+			await import("./services/resolve-lucid-worker.js");
 		return resolveLucidWorker(worker, options);
 	};

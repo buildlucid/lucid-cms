@@ -28,8 +28,5 @@ export type {
 	TableQueryDefinition,
 	TableResultDefinition,
 } from "./table/definition.js";
-export {
-	defineRuntimeTable,
-	defineTable,
-} from "./table/definition.js";
+export { defineRuntimeTable, defineTable } from "./table/definition.js";
 export { default as TableRegistry } from "./table/registry.js";

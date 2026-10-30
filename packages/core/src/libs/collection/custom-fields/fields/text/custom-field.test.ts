@@ -43,7 +43,7 @@ test("successfully validate field - text", async () => {
 			type: "text",
 			value: "Standard text",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TextCollection).fields.get("standard_text")!,
 		validationData: {
 			media: [],
@@ -64,7 +64,7 @@ test("successfully validate field - text", async () => {
 			type: "text",
 			value: "Required text",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TextCollection).fields.get("required_text")!,
 		validationData: {
 			media: [],
@@ -86,7 +86,7 @@ test("successfully validate field - text", async () => {
 			value: "Min length text",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TextCollection).fields.get("min_length_text")!,
 		validationData: {
 			media: [],
@@ -109,7 +109,7 @@ test("fail to validate field - text", async () => {
 			type: "text",
 			value: 100,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(TextCollection).fields.get("standard_text")!,
 		validationData: {
 			media: [],
@@ -138,7 +138,7 @@ test("fail to validate field - text", async () => {
 				value: undefined,
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
@@ -157,7 +157,7 @@ test("fail to validate field - text", async () => {
 				value: null,
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
@@ -176,7 +176,7 @@ test("fail to validate field - text", async () => {
 				value: "",
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
@@ -221,7 +221,7 @@ test("fail to validate field - text", async () => {
 			value: "1",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(TextCollection).fields.get("min_length_text")!,
 		validationData: {
 			media: [],

@@ -34,9 +34,8 @@ const getMultiple = async <TLocale extends string | undefined = undefined>(
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: getMultipleMedia } = await import(
-				"../../../../services/media/get-multiple.js"
-			);
+			const { default: getMultipleMedia } =
+				await import("../../../../services/media/get-multiple.js");
 
 			const actorRes = await resolveReadActor(context, data);
 			if (actorRes.error) return actorRes;

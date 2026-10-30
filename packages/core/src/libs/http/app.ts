@@ -1,11 +1,11 @@
 import type { PublicErrorData } from "@lucidcms/types";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
+import { openAPIRouteHandler } from "hono-openapi";
 import { contextStorage } from "hono/context-storage";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import type { StatusCode } from "hono/utils/http-status";
-import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import type {

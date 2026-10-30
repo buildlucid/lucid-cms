@@ -1,6 +1,4 @@
-type FixedLengthStreamConstructor = new (
-	length: number | bigint,
-) => {
+type FixedLengthStreamConstructor = new (length: number | bigint) => {
 	readable: ReadableStream<Uint8Array>;
 	writable: WritableStream<Uint8Array>;
 };

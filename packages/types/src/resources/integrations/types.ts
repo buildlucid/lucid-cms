@@ -25,7 +25,7 @@ export type CoreExternalScope =
 	| "mcp:access";
 
 /** Project scopes added by Lucid type generation or a plugin. */
-// biome-ignore lint/suspicious/noEmptyInterface: generated types and plugins augment this interface
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types and plugins augment this interface
 export interface CustomExternalScopes {}
 
 export type ExternalScope =

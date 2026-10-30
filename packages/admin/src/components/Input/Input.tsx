@@ -26,11 +26,10 @@ export type InputType =
 	| "datetime-local"
 	| "time";
 
-export interface InputProps
-	extends Omit<
-		JSX.InputHTMLAttributes<HTMLInputElement>,
-		"id" | "name" | "type" | "value" | "onChange" | "onInput" | "class"
-	> {
+export interface InputProps extends Omit<
+	JSX.InputHTMLAttributes<HTMLInputElement>,
+	"id" | "name" | "type" | "value" | "onChange" | "onInput" | "class"
+> {
 	id: string;
 	name: string;
 	type: InputType;

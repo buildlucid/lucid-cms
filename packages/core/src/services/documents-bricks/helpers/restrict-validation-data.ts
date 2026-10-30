@@ -16,8 +16,8 @@ import hasAccess from "../../../libs/permission/has-access.js";
 import type { Permission } from "../../../libs/permission/types.js";
 import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import collectContentRefTargets from "../../documents/helpers/collect-content-ref-targets.js";
 import readStoredContent from "../../documents-versions/helpers/read-stored-content.js";
+import collectContentRefTargets from "../../documents/helpers/collect-content-ref-targets.js";
 import type { ValidationData } from "./fetch-validation-data.js";
 
 /**

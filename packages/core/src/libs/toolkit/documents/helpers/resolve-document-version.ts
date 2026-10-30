@@ -30,9 +30,7 @@ const resolveDocumentVersion: ServiceFn<
 		{ default: resolveProposalVersion },
 	] = await Promise.all([
 		import("../../../../services/documents/helpers/resolve-document-actor.js"),
-		import(
-			"../../../../services/documents/helpers/resolve-proposal-version.js"
-		),
+		import("../../../../services/documents/helpers/resolve-proposal-version.js"),
 	]);
 
 	const actor = await resolveDocumentActor(context, {

@@ -101,31 +101,27 @@ const RequestsPage: Component = () => {
 	const presets = createMemo(() => {
 		const overviewData = overview.data?.data;
 		const items: FilterPreset[] = [
-			...requestQueues.map(
-				(queue): FilterPreset => ({
-					key: queue.key,
-					label: queue.label(),
-					count: overviewData
-						? countRequestQueue(overviewData, queue)
-						: undefined,
-					loading: overview.isFetching,
-					filters: queue.filters,
-				}),
-			),
-			...requestTypeKeys.map(
-				(type): FilterPreset => ({
-					key: type,
-					label: requestTypes[type].filter(),
-					count: overviewData
-						? overviewData[type].awaitingApproval + overviewData[type].approved
-						: undefined,
-					loading: overview.isFetching,
-					filters: {
-						status: { value: "open", operator: "=" },
-						type: { value: type, operator: "=" },
-					},
-				}),
-			),
+			...requestQueues.map((queue): FilterPreset => ({
+				key: queue.key,
+				label: queue.label(),
+				count: overviewData
+					? countRequestQueue(overviewData, queue)
+					: undefined,
+				loading: overview.isFetching,
+				filters: queue.filters,
+			})),
+			...requestTypeKeys.map((type): FilterPreset => ({
+				key: type,
+				label: requestTypes[type].filter(),
+				count: overviewData
+					? overviewData[type].awaitingApproval + overviewData[type].approved
+					: undefined,
+				loading: overview.isFetching,
+				filters: {
+					status: { value: "open", operator: "=" },
+					type: { value: type, operator: "=" },
+				},
+			})),
 		];
 		return items;
 	});

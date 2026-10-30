@@ -32,7 +32,7 @@ export type BuiltInEmailTemplates = {
 };
 
 /** Templates `toolkit.email.send` can use and the data each accepts, added by Lucid type generation from their Kiln `props`. */
-// biome-ignore lint/suspicious/noEmptyInterface: generated types augment this interface
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types augment this interface
 export interface EmailTemplates {}
 
 /** A sendable template name: any string until type generation lists the project's templates. */

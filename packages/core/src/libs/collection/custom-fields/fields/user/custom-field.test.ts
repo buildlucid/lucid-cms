@@ -44,7 +44,7 @@ test("successfully validate field - user", async () => {
 			type: "user",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(UserCollection).fields.get("standard_user")!,
 		validationData: {
 			media: [],
@@ -73,7 +73,7 @@ test("successfully validate field - user", async () => {
 			type: "user",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(UserCollection).fields.get("required_user")!,
 		validationData: {
 			media: [],
@@ -106,7 +106,7 @@ test("fail to validate field - user", async () => {
 				value: [1],
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(UserCollection).fields.get("required_user")!,
 			validationData: {
 				media: [],
@@ -125,7 +125,7 @@ test("fail to validate field - user", async () => {
 				value: [],
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(UserCollection).fields.get("required_user")!,
 			validationData: {
 				media: [],
@@ -164,7 +164,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			type: "user",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
@@ -182,7 +182,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			type: "user",
 			value: [1, 2, 3, 4],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
@@ -200,7 +200,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			type: "user",
 			value: [1, 99, 100],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],

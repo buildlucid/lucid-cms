@@ -2,7 +2,6 @@
 
 The official Astro integration for Lucid CMS.
 
-
 ## Setup
 
 Add the integration to `astro.config.*`, with the Astro adapter for your Lucid runtime:

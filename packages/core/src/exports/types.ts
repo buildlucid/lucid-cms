@@ -528,10 +528,7 @@ export type {
 	RuntimeArtifactProvider,
 	RuntimeSupport,
 } from "../libs/runtime/types.js";
-export type {
-	Seed,
-	SeedDefinition,
-} from "../libs/seed/types.js";
+export type { Seed, SeedDefinition } from "../libs/seed/types.js";
 export type {
 	DefineSkillOptions,
 	SkillDefinition,

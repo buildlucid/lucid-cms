@@ -9,9 +9,8 @@ const resolveWorkerConsumerUrl = (): URL => {
 
 	try {
 		const require = createRequire(import.meta.url);
-		const packageJsonPath = require.resolve(
-			"@lucidcms/plugin-worker-queues/package.json",
-		);
+		const packageJsonPath =
+			require.resolve("@lucidcms/plugin-worker-queues/package.json");
 		return pathToFileURL(
 			join(dirname(packageJsonPath), "dist", "adapter", "consumer.mjs"),
 		);

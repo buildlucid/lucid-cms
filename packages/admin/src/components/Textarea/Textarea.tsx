@@ -9,11 +9,10 @@ import {
 } from "solid-js";
 import Field from "@/components/Field/Field";
 
-export interface TextareaProps
-	extends Omit<
-		JSX.TextareaHTMLAttributes<HTMLTextAreaElement>,
-		"id" | "name" | "value" | "onChange" | "onInput" | "class"
-	> {
+export interface TextareaProps extends Omit<
+	JSX.TextareaHTMLAttributes<HTMLTextAreaElement>,
+	"id" | "name" | "value" | "onChange" | "onInput" | "class"
+> {
 	id: string;
 	name: string;
 	value: string;

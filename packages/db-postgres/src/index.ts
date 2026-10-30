@@ -17,8 +17,8 @@ import type {
 	OnUpdate,
 } from "@lucidcms/core/types";
 import { type ColumnDataType, Kysely, sql } from "kysely";
-import { jsonArrayFrom } from "kysely/helpers/postgres";
 import { PostgresJSDialect } from "kysely-postgres-js";
+import { jsonArrayFrom } from "kysely/helpers/postgres";
 import postgresClient from "postgres";
 import type {
 	PostgresAdapterCreator,

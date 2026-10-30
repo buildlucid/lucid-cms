@@ -111,19 +111,19 @@ export type DocumentEnvironmentStatus =
 
 export type DocumentFieldMap = Record<string, DocumentField>;
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentFieldsByCollection {}
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentBricksByCollection {}
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentLocaleCodesByCollection {}
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentVersionsByCollection {}
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentVersionKeysByCollection {}
 
 type CollectionDocumentBrickKey = Extract<
@@ -178,10 +178,8 @@ export type DocumentFieldValueMap = Record<string, DocumentFieldPlainValue>;
 
 export interface DocumentRef<
 	TCollectionKey extends string = string,
-	TFields extends
-		| DocumentFieldMap
-		| DocumentFieldValueMap
-		| null = DocumentFieldMap | null,
+	TFields extends DocumentFieldMap | DocumentFieldValueMap | null =
+		DocumentFieldMap | null,
 > {
 	id: number;
 	versionId?: number;
@@ -506,8 +504,7 @@ type SharedCollectionFieldConfig<TType extends FieldType> = {
 };
 
 export interface CheckboxFieldConfig
-	extends SharedCollectionFieldConfig<"checkbox">,
-		FieldConfigOptions<boolean> {
+	extends SharedCollectionFieldConfig<"checkbox">, FieldConfigOptions<boolean> {
 	details: FieldDetails & {
 		true?: ResolvedAdminCopy;
 		false?: ResolvedAdminCopy;
@@ -516,29 +513,25 @@ export interface CheckboxFieldConfig
 }
 
 export interface ColorFieldConfig
-	extends SharedCollectionFieldConfig<"color">,
-		FieldConfigOptions<string> {
+	extends SharedCollectionFieldConfig<"color">, FieldConfigOptions<string> {
 	presets: string[];
 	validation?: RequiredValidation;
 }
 
 export interface CodeFieldConfig
-	extends SharedCollectionFieldConfig<"code">,
-		FieldConfigOptions<CodeValue> {
+	extends SharedCollectionFieldConfig<"code">, FieldConfigOptions<CodeValue> {
 	languages: string[];
 	validation?: RequiredValidation;
 }
 
 export interface DatetimeFieldConfig
-	extends SharedCollectionFieldConfig<"datetime">,
-		FieldConfigOptions<string> {
+	extends SharedCollectionFieldConfig<"datetime">, FieldConfigOptions<string> {
 	time?: boolean;
 	validation?: RequiredValidation;
 }
 
 export interface EmailFieldConfig
-	extends SharedCollectionFieldConfig<"email">,
-		FieldConfigOptions<never> {
+	extends SharedCollectionFieldConfig<"email">, FieldConfigOptions<never> {
 	resource: "emails";
 	details: RelationFieldDetails;
 	multiple?: boolean;
@@ -550,7 +543,8 @@ export interface EmailFieldConfig
 }
 
 export interface RelationFieldConfig
-	extends SharedCollectionFieldConfig<"relation">,
+	extends
+		SharedCollectionFieldConfig<"relation">,
 		FieldConfigOptions<RelationFieldValue[]> {
 	resource: "documents";
 	collection: string | string[];
@@ -563,20 +557,19 @@ export interface RelationFieldConfig
 }
 
 export interface JsonFieldConfig
-	extends SharedCollectionFieldConfig<"json">,
+	extends
+		SharedCollectionFieldConfig<"json">,
 		FieldConfigOptions<Record<string, unknown> | unknown[] | null> {
 	validation?: RequiredValidation;
 }
 
 export interface LinkFieldConfig
-	extends SharedCollectionFieldConfig<"link">,
-		FieldConfigOptions<LinkValue> {
+	extends SharedCollectionFieldConfig<"link">, FieldConfigOptions<LinkValue> {
 	validation?: RequiredValidation;
 }
 
 export interface MediaFieldConfig
-	extends SharedCollectionFieldConfig<"media">,
-		FieldConfigOptions<number[]> {
+	extends SharedCollectionFieldConfig<"media">, FieldConfigOptions<number[]> {
 	resource: "media";
 	details: RelationFieldDetails;
 	multiple?: boolean;
@@ -597,14 +590,14 @@ export interface MediaFieldConfig
 }
 
 export interface NumberFieldConfig
-	extends SharedCollectionFieldConfig<"number">,
+	extends
+		SharedCollectionFieldConfig<"number">,
 		FieldConfigOptions<number | null> {
 	validation?: RequiredValidation;
 }
 
 export interface RangeFieldConfig
-	extends SharedCollectionFieldConfig<"range">,
-		FieldConfigOptions<number[]> {
+	extends SharedCollectionFieldConfig<"range">, FieldConfigOptions<number[]> {
 	min: number;
 	max: number;
 	step: number;
@@ -612,8 +605,7 @@ export interface RangeFieldConfig
 	validation?: RequiredValidation;
 }
 
-export interface RepeaterFieldConfig
-	extends SharedCollectionFieldConfig<"repeater"> {
+export interface RepeaterFieldConfig extends SharedCollectionFieldConfig<"repeater"> {
 	fields: CollectionNonTabFieldConfig[];
 	ui?: Pick<FieldUIConfig, "disabled" | "condition" | "width">;
 	validation?: {
@@ -622,15 +614,13 @@ export interface RepeaterFieldConfig
 	};
 }
 
-export interface SectionFieldConfig
-	extends SharedCollectionFieldConfig<"section"> {
+export interface SectionFieldConfig extends SharedCollectionFieldConfig<"section"> {
 	output: StructuralFieldOutput;
 	ui?: Pick<FieldUIConfig, "condition" | "width">;
 	fields: CollectionNonTabFieldConfig[];
 }
 
-export interface CollapsibleFieldConfig
-	extends SharedCollectionFieldConfig<"collapsible"> {
+export interface CollapsibleFieldConfig extends SharedCollectionFieldConfig<"collapsible"> {
 	output: StructuralFieldOutput;
 	defaultOpen: boolean;
 	ui?: Pick<FieldUIConfig, "condition" | "width">;
@@ -640,7 +630,8 @@ export interface CollapsibleFieldConfig
 export type RichTextUserVariableField = "firstName" | "lastName" | "username";
 
 export interface RichTextFieldConfig
-	extends SharedCollectionFieldConfig<"rich-text">,
+	extends
+		SharedCollectionFieldConfig<"rich-text">,
 		FieldConfigOptions<Record<string, unknown>> {
 	editor?: {
 		links?: {
@@ -661,8 +652,7 @@ export interface RichTextFieldConfig
 }
 
 export interface SelectFieldConfig
-	extends SharedCollectionFieldConfig<"select">,
-		FieldConfigOptions<string> {
+	extends SharedCollectionFieldConfig<"select">, FieldConfigOptions<string> {
 	options: Array<{ label: ResolvedAdminCopy; value: string }>;
 	validation?: RequiredValidation;
 }
@@ -673,20 +663,17 @@ export interface TabFieldConfig extends SharedCollectionFieldConfig<"tab"> {
 }
 
 export interface TextFieldConfig
-	extends SharedCollectionFieldConfig<"text">,
-		FieldConfigOptions<string> {
+	extends SharedCollectionFieldConfig<"text">, FieldConfigOptions<string> {
 	validation?: RequiredValidation;
 }
 
 export interface TextareaFieldConfig
-	extends SharedCollectionFieldConfig<"textarea">,
-		FieldConfigOptions<string> {
+	extends SharedCollectionFieldConfig<"textarea">, FieldConfigOptions<string> {
 	validation?: RequiredValidation;
 }
 
 export interface UserFieldConfig
-	extends SharedCollectionFieldConfig<"user">,
-		FieldConfigOptions<number[]> {
+	extends SharedCollectionFieldConfig<"user">, FieldConfigOptions<number[]> {
 	resource: "users";
 	details: RelationFieldDetails;
 	multiple?: boolean;

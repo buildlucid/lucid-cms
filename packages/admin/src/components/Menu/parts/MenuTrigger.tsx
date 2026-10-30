@@ -2,8 +2,7 @@ import { DropdownMenu as KobalteMenu } from "@kobalte/core";
 import classNames from "classnames";
 import { type Component, type JSX, splitProps } from "solid-js";
 
-export interface MenuTriggerProps
-	extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface MenuTriggerProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
 	class?: string;
 }
 

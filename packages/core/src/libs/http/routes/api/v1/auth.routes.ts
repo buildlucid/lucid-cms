@@ -6,13 +6,11 @@ import acceptInvitationController from "../../../controllers/auth/invitation/acc
 import validateInvitationController from "../../../controllers/auth/invitation/validate-invitation.js";
 import loginController from "../../../controllers/auth/login.js";
 import logoutController from "../../../controllers/auth/logout.js";
-
 import providerCallbackController from "../../../controllers/auth/providers/callback.js";
 import getProvidersController from "../../../controllers/auth/providers/get-providers.js";
 import initiateProviderontroller from "../../../controllers/auth/providers/initiate.js";
-
-import setupController from "../../../controllers/auth/setup.js";
 import setupRequiredController from "../../../controllers/auth/setup-required.js";
+import setupController from "../../../controllers/auth/setup.js";
 import tokenController from "../../../controllers/auth/token.js";
 
 const authRoutes = new Hono<LucidHonoGeneric>()

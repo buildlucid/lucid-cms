@@ -25,9 +25,9 @@ export type Hook<
 	},
 	P extends string,
 	Target extends keyof ValidationTargets = keyof ValidationTargets,
-	// biome-ignore lint/complexity/noBannedTypes: explanation
+	// oxlint-disable-next-line typescript/no-empty-object-type
 	O = {},
-	// biome-ignore lint/suspicious/noExplicitAny: explanation
+	// oxlint-disable-next-line typescript/no-explicit-any
 	_Schema extends ZodType = any,
 > = (
 	result: (
@@ -41,7 +41,6 @@ export type Hook<
 	| Response
 	| void
 	| TypedResponse<O>
-	// biome-ignore lint/suspicious/noConfusingVoidType: explanation
 	| Promise<Response | void | TypedResponse<O>>;
 
 type HasUndefined<T> = undefined extends T ? true : false;
@@ -74,13 +73,13 @@ export const zValidator = <
 >(
 	target: Target,
 	schema: T,
-	// biome-ignore lint/complexity/noBannedTypes: explanation
+	// oxlint-disable-next-line typescript/no-empty-object-type
 	hook?: Hook<InferredValue, E, P, Target, {}, T>,
 	options?: {
 		validationFunction: (
 			schema: T,
 			value: ValidationTargets[Target],
-			// biome-ignore lint/suspicious/noExplicitAny: explanation
+			// oxlint-disable-next-line typescript/no-explicit-any
 		) => ZodSafeParseResult<any> | Promise<ZodSafeParseResult<any>>;
 	},
 ): MiddlewareHandler<E, P, V> =>

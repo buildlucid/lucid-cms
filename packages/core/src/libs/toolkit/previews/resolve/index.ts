@@ -17,9 +17,8 @@ const resolve = async (
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: resolvePreviewSession } = await import(
-				"../../../../services/preview-sessions/resolve.js"
-			);
+			const { default: resolvePreviewSession } =
+				await import("../../../../services/preview-sessions/resolve.js");
 
 			return resolvePreviewSession(context, { token: data.token });
 		},

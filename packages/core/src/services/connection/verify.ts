@@ -44,8 +44,8 @@ const verify: ServiceFn<
 		const errorKey = revoked
 			? "connection_revoked"
 			: accessToken.error.key === "connection_not_connected" ||
-					accessToken.error.key === "connection_not_configured" ||
-					accessToken.error.key === "connection_storage_failed"
+				  accessToken.error.key === "connection_not_configured" ||
+				  accessToken.error.key === "connection_storage_failed"
 				? accessToken.error.key
 				: "connection_refresh_failed";
 		if (!revoked) {

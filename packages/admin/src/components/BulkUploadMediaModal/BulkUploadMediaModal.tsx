@@ -360,7 +360,6 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 					}}
 				/>
 
-				{/* biome-ignore lint/a11y/noStaticElementInteractions: drag/drop region */}
 				<div
 					ref={scrollRef}
 					class={classNames(

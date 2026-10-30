@@ -14,9 +14,9 @@ npm install @lucidcms/plugin-cloudflare-r2
 
 ```ts
 import { defineConfig, z } from "@lucidcms/core";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
+import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
 export const env = z.object({
   LIBSQL_URL: z.string(),
@@ -38,12 +38,12 @@ export default defineConfig({
 
 ## Configuration
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `binding` | `string` | Cloudflare R2 binding name. Defaults to `LUCID_MEDIA_BUCKET` |
+| Property     | Type     | Description                                                                  |
+| ------------ | -------- | ---------------------------------------------------------------------------- |
+| `binding`    | `string` | Cloudflare R2 binding name. Defaults to `LUCID_MEDIA_BUCKET`                 |
 | `bucketName` | `string` | R2 bucket name. Defaults to a generated name based on the Worker and binding |
-| `http` | `object` | Optional S3-compatible HTTP fallback for direct browser uploads/downloads |
-| `upload` | `object` | Optional default R2 HTTP metadata, custom metadata, and storage class |
+| `http`       | `object` | Optional S3-compatible HTTP fallback for direct browser uploads/downloads    |
+| `upload`     | `object` | Optional default R2 HTTP metadata, custom metadata, and storage class        |
 
 ## Bucket Configuration
 

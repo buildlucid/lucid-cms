@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import constants from "../../../constants/constants.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-
 import resolveRelationVersionType from "./resolve-relation-version-type.js";
 
 const buildContext = (collections: CollectionBuilder[] = []) =>

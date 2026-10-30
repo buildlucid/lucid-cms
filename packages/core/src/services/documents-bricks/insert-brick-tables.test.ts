@@ -10,9 +10,9 @@ import createServiceContext from "../../utils/services/create-service-context.js
 import type { ServiceContext } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
-import upsertSingle from "../documents/upsert-single.js";
 import cloneVersion from "../documents-versions/clone-version.js";
 import readVersionContent from "../documents-versions/helpers/read-version-content.js";
+import upsertSingle from "../documents/upsert-single.js";
 import syncCollections from "../sync/sync-collections.js";
 import syncLocales from "../sync/sync-locales.js";
 
@@ -79,61 +79,58 @@ const content = {
 	fields: [
 		{ key: "title", type: "text", translations: { en: "Page", fr: "Page FR" } },
 	],
-	bricks: Array.from(
-		{ length: 100 },
-		(_, index): BrickInputSchema => ({
-			key: brick.key,
-			type: "builder",
-			ref: `brick-${index}`,
-			order: index,
-			open: index % 2 === 0,
-			fields: [
-				{
-					key: "heading",
-					type: "text",
-					value: `${index}:${"x".repeat(4_096)}`,
-				},
-				{
-					key: "items",
-					type: "repeater",
-					groups: Array.from({ length: 5 }, (_, group) => ({
-						ref: `item-${index}-${group}`,
-						order: group,
-						open: group % 2 === 0,
-						fields: [
-							{
-								key: "title",
-								type: "text",
-								translations: {
-									en: `${index}-${group}`,
-									fr: `FR-${index}-${group}`,
-								},
+	bricks: Array.from({ length: 100 }, (_, index): BrickInputSchema => ({
+		key: brick.key,
+		type: "builder",
+		ref: `brick-${index}`,
+		order: index,
+		open: index % 2 === 0,
+		fields: [
+			{
+				key: "heading",
+				type: "text",
+				value: `${index}:${"x".repeat(4_096)}`,
+			},
+			{
+				key: "items",
+				type: "repeater",
+				groups: Array.from({ length: 5 }, (_, group) => ({
+					ref: `item-${index}-${group}`,
+					order: group,
+					open: group % 2 === 0,
+					fields: [
+						{
+							key: "title",
+							type: "text",
+							translations: {
+								en: `${index}-${group}`,
+								fr: `FR-${index}-${group}`,
 							},
-							{
-								key: "children",
-								type: "repeater",
-								groups: Array.from({ length: 3 }, (_, child) => ({
-									ref: `child-${index}-${group}-${child}`,
-									order: child,
-									open: child % 2 === 0,
-									fields: [
-										{
-											key: "childTitle",
-											type: "text",
-											translations: {
-												en: `${index}-${group}-${child}`,
-												fr: `FR-${index}-${group}-${child}`,
-											},
+						},
+						{
+							key: "children",
+							type: "repeater",
+							groups: Array.from({ length: 3 }, (_, child) => ({
+								ref: `child-${index}-${group}-${child}`,
+								order: child,
+								open: child % 2 === 0,
+								fields: [
+									{
+										key: "childTitle",
+										type: "text",
+										translations: {
+											en: `${index}-${group}-${child}`,
+											fr: `FR-${index}-${group}-${child}`,
 										},
-									],
-								})),
-							},
-						],
-					})),
-				},
-			],
-		}),
-	),
+									},
+								],
+							})),
+						},
+					],
+				})),
+			},
+		],
+	})),
 } satisfies { bricks: BrickInputSchema[]; fields: FieldInputSchema[] };
 
 test("large localized content survives parameter-bounded inserts and version copies", async () => {

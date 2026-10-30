@@ -2,8 +2,10 @@ import classNames from "classnames";
 import { type Component, For, type JSX, Show, splitProps } from "solid-js";
 import type { DocumentListingPreviewField } from "@/utils/document-table-helpers";
 
-interface DocumentReferencePreviewCardProps
-	extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "title"> {
+interface DocumentReferencePreviewCardProps extends Omit<
+	JSX.HTMLAttributes<HTMLDivElement>,
+	"title"
+> {
 	title: string;
 	subtitle?: string;
 	fields?: DocumentListingPreviewField[];

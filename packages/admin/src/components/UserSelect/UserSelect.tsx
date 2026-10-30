@@ -282,7 +282,6 @@ const UserSortableItem: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
 		<div
 			data-dragkey={USER_SELECT_DRAG_DROP_KEY}
 			data-dragref={`${props.user.id}`}

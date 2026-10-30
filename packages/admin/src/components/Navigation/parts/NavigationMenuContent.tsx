@@ -1,9 +1,9 @@
-import { routes as extensionRoutes } from "virtual:lucid-admin";
 import packageJson from "@lucidcms/admin/package.json" with { type: "json" };
 import { useLocation } from "@solidjs/router";
 import type { Permission } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
+import { routes as extensionRoutes } from "virtual:lucid-admin";
 import CollectionNavLink, {
 	getCollectionNavigationHref,
 } from "@/components/CollectionNavLink/CollectionNavLink";

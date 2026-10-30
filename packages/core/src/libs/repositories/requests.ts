@@ -13,26 +13,25 @@ import type { LucidDB, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
-export interface RequestSummaryQueryResponse
-	extends Pick<
-		Select<LucidRequests>,
-		| "id"
-		| "type"
-		| "title"
-		| "status"
-		| "revision"
-		| "approved_revision"
-		| "scheduled_at"
-		| "scheduled_timezone"
-		| "failure"
-		| "failure_request_document_id"
-		| "failure_target"
-		| "completed_at"
-		| "created_by"
-		| "created_by_run_id"
-		| "created_at"
-		| "updated_at"
-	> {
+export interface RequestSummaryQueryResponse extends Pick<
+	Select<LucidRequests>,
+	| "id"
+	| "type"
+	| "title"
+	| "status"
+	| "revision"
+	| "approved_revision"
+	| "scheduled_at"
+	| "scheduled_timezone"
+	| "failure"
+	| "failure_request_document_id"
+	| "failure_target"
+	| "completed_at"
+	| "created_by"
+	| "created_by_run_id"
+	| "created_at"
+	| "updated_at"
+> {
 	documents: Array<
 		Pick<
 			Select<LucidRequestDocuments>,

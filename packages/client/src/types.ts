@@ -48,13 +48,13 @@ import type {
 	CollectionDocumentVersionKey,
 } from "./types/contracts.js";
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentFieldsByCollection {}
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentBricksByCollection {}
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentLocaleCodesByCollection {}
 
 type CollectionDocumentBrickKey = Extract<

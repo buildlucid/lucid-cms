@@ -55,9 +55,10 @@ class TaggedExpression<T> implements AliasableExpression<T> {
 	}
 }
 
-class TaggedAliasedExpression<T, A extends string>
-	implements AliasedExpression<T, A>
-{
+class TaggedAliasedExpression<T, A extends string> implements AliasedExpression<
+	T,
+	A
+> {
 	readonly #expression: Expression<T>;
 	readonly #alias: A | Expression<unknown>;
 	readonly #tag: TaggedResult;

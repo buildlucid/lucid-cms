@@ -32,7 +32,7 @@ export const MediaFolderCard: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// Hooks
-	// biome-ignore lint/correctness/noUnusedVariables: it is being used
+	// oxlint-disable-next-line no-unused-vars -- it is being used
 	const draggable = createDraggable(`folder:${props.folder.id}`);
 	const droppable = createDroppable(`folder:${props.folder.id}`);
 

@@ -8,8 +8,7 @@ import type { Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
-export interface DocumentWorkflowDetailedQueryResponse
-	extends Select<LucidDocumentWorkflows> {
+export interface DocumentWorkflowDetailedQueryResponse extends Select<LucidDocumentWorkflows> {
 	assignees: Array<Select<LucidDocumentWorkflowAssignees>>;
 }
 

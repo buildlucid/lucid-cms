@@ -61,17 +61,15 @@ const toInternalField = (
 
 const toInternalContent = (content: AgentBuilderContent) => ({
 	fields: content.fields.map((field) => toInternalField(field)),
-	bricks: content.bricks.map(
-		(brick): InternalDocumentBrick => ({
-			id: brick.id ?? -1,
-			ref: brick.ref,
-			key: brick.key,
-			order: brick.order,
-			type: brick.type,
-			open: brick.open ?? false,
-			fields: (brick.fields ?? []).map((field) => toInternalField(field)),
-		}),
-	),
+	bricks: content.bricks.map((brick): InternalDocumentBrick => ({
+		id: brick.id ?? -1,
+		ref: brick.ref,
+		key: brick.key,
+		order: brick.order,
+		type: brick.type,
+		open: brick.open ?? false,
+		fields: (brick.fields ?? []).map((field) => toInternalField(field)),
+	})),
 });
 
 /** The builder's content in the shape the admin saves. */

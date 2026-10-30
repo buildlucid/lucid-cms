@@ -1,5 +1,5 @@
-import { agentSlots } from "virtual:lucid-admin";
 import type { AgentMessagePart, AgentWidgetPart } from "@types";
+import { agentSlots } from "virtual:lucid-admin";
 import { resolveSlots } from "@/extensions/slot-policy";
 import { partLayout } from "@/utils/agent-chat";
 

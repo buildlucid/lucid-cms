@@ -1,6 +1,6 @@
+import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
-import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";

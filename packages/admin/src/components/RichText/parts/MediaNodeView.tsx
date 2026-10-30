@@ -223,7 +223,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 										/>
 									</Match>
 									<Match when={reference().type === "video"}>
-										{/* biome-ignore lint/a11y/useMediaCaption: referenced CMS video may not have a caption track */}
+										{/* oxlint-disable-next-line jsx-a11y/media-has-caption -- referenced CMS video may not have a caption track */}
 										<video
 											src={reference().url}
 											poster={videoPoster()}

@@ -50,7 +50,7 @@ test("successfully validate field - rich text", async () => {
 			},
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(RichTextCollection).fields.get(
 				"standard_rich_text",
 			)!,
@@ -82,7 +82,7 @@ test("successfully validate field - rich text", async () => {
 			},
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(RichTextCollection).fields.get(
 				"required_rich_text",
 			)!,
@@ -114,7 +114,7 @@ test("successfully validate field - rich text", async () => {
 				},
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: test collection always registers this field
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- test collection always registers this field
 				getFieldBuilderState(RichTextCollection).fields.get(
 					"required_rich_text",
 				)!,
@@ -141,7 +141,7 @@ test("successfully validate field - rich text", async () => {
 				content: [{ type: "paragraph" }],
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(RichTextCollection).fields.get(
 			"min_length_rich_text",
 		)!,
@@ -167,7 +167,7 @@ test("fail to validate field - rich text", async () => {
 			value: 100,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(RichTextCollection).fields.get(
 				"standard_rich_text",
 			)!,
@@ -201,7 +201,7 @@ test("fail to validate field - rich text", async () => {
 				},
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(RichTextCollection).fields.get(
 					"required_rich_text",
 				)!,
@@ -235,7 +235,7 @@ test("fail to validate field - rich text", async () => {
 				},
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(RichTextCollection).fields.get(
 					"required_rich_text",
 				)!,
@@ -256,7 +256,7 @@ test("fail to validate field - rich text", async () => {
 				value: undefined,
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(RichTextCollection).fields.get(
 					"required_rich_text",
 				)!,
@@ -277,7 +277,7 @@ test("fail to validate field - rich text", async () => {
 				value: null,
 			},
 			instance:
-				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 				getFieldBuilderState(RichTextCollection).fields.get(
 					"required_rich_text",
 				)!,
@@ -333,7 +333,7 @@ test("fail to validate field - rich text", async () => {
 				content: [{ type: "paragraph" }],
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(RichTextCollection).fields.get(
 			"min_length_rich_text",
 		)!,

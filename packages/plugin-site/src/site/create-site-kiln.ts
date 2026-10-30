@@ -19,8 +19,8 @@ import redirect from "../functions/redirect.js";
 import richText from "../functions/rich-text.js";
 import { getSiteFunctionSource } from "../functions/site-function-source.js";
 import createTranslateFunction from "../functions/translate.js";
-import createViteFunction from "../functions/vite.js";
 import createViteAssetFunction from "../functions/vite-asset.js";
+import createViteFunction from "../functions/vite.js";
 import type {
 	SiteData,
 	SiteExtension,

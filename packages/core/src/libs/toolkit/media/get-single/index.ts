@@ -26,9 +26,8 @@ const getSingle = async <TLocale extends string | undefined = undefined>(
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: getSingleMedia } = await import(
-				"../../../../services/media/get-single.js"
-			);
+			const { default: getSingleMedia } =
+				await import("../../../../services/media/get-single.js");
 
 			const actorRes = await resolveReadActor(context, data);
 			if (actorRes.error) return actorRes;

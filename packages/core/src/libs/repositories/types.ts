@@ -29,8 +29,9 @@ export type ValidationConfig<V extends boolean = false> = {
 	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
 };
 
-export interface ValidationConfigExtend<V extends boolean = false>
-	extends ValidationConfig<V> {
+export interface ValidationConfigExtend<
+	V extends boolean = false,
+> extends ValidationConfig<V> {
 	mode: "single" | "multiple" | "multiple-count" | "count";
 	select?: string[];
 	selectAll?: boolean;

@@ -4,8 +4,8 @@ import externalAuthentication from "./middleware/external-authenticate.js";
 import externalScopes from "./middleware/external-scopes.js";
 import permissions from "./middleware/permissions.js";
 import rateLimiter from "./middleware/rate-limiter.js";
-import validate from "./middleware/validate.js";
 import validateCSRF from "./middleware/validate-csrf.js";
+import validate from "./middleware/validate.js";
 
 /**
  * Provides middleware factories for custom routes and plugins.

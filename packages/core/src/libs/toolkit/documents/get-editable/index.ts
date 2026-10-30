@@ -19,9 +19,8 @@ const getEditable = <K extends string>(
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: getEditable } = await import(
-				"../../../../services/documents/get-editable.js"
-			);
+			const { default: getEditable } =
+				await import("../../../../services/documents/get-editable.js");
 
 			const versionRes = await resolveDocumentVersion(context, {
 				...data,

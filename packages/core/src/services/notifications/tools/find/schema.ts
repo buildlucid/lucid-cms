@@ -26,13 +26,11 @@ export const inputSchema = z.object({
 			filter: filterConditionsInput(querySchema.shape.filter.unwrap().keyof()),
 		})
 		.prefault({})
-		.transform(
-			({ filter, sort, ...query }): z.input<typeof querySchema> => ({
-				...query,
-				filter: toQueryFilters(filter).filter,
-				sort: sort?.length ? sort : [{ key: "updatedAt", direction: "desc" }],
-			}),
-		)
+		.transform(({ filter, sort, ...query }): z.input<typeof querySchema> => ({
+			...query,
+			filter: toQueryFilters(filter).filter,
+			sort: sort?.length ? sort : [{ key: "updatedAt", direction: "desc" }],
+		}))
 		.pipe(querySchema)
 		.meta({
 			description:

@@ -9,14 +9,12 @@ import type {
 	DocumentHookRequest,
 } from "../../libs/hooks/types.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
-
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-
-import keepRestrictedContent from "../documents/helpers/keep-restricted-content.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
+import keepRestrictedContent from "../documents/helpers/keep-restricted-content.js";
 
 /**
  * Creates a new latest version. A requested document's content is instead

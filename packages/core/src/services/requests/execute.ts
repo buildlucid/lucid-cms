@@ -13,10 +13,10 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
-import deleteMultiple from "../documents/delete-multiple.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
 import promoteVersion from "../documents-versions/promote-version.js";
 import unpublishVersion from "../documents-versions/unpublish-version.js";
+import deleteMultiple from "../documents/delete-multiple.js";
 import sendNotification from "../notifications/send.js";
 import resolveActorUser from "../users/helpers/resolve-actor-user.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";

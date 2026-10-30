@@ -14,17 +14,15 @@ npm install @lucidcms/plugin-sqlite-kv
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
-import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
-    plugins: [
-      sqliteKVPlugin(),
-    ],
+    plugins: [sqliteKVPlugin()],
   }),
 });
 ```

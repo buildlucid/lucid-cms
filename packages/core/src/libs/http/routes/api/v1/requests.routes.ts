@@ -17,8 +17,8 @@ import getSingle from "../../../controllers/requests/get-single.js";
 import removeDocument from "../../../controllers/requests/remove-document.js";
 import reopen from "../../../controllers/requests/reopen.js";
 import unapprove from "../../../controllers/requests/unapprove.js";
-import updateComment from "../../../controllers/requests/update-comment.js";
 import updateCommentResolution from "../../../controllers/requests/update-comment-resolution.js";
+import updateComment from "../../../controllers/requests/update-comment.js";
 import updateSingle from "../../../controllers/requests/update-single.js";
 import updateTargets from "../../../controllers/requests/update-targets.js";
 

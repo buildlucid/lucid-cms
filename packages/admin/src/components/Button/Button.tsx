@@ -28,8 +28,7 @@ export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 export type ButtonShape = "standard" | "square" | "circle";
 
-export interface ButtonProps
-	extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
 	/** @default "primary" */
 	variant?: ButtonVariant;
 	/** @default "md" */

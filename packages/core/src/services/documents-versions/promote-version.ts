@@ -18,11 +18,11 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import resetStage from "../document-workflows/reset-stage.js";
+import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
+import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import notifyChange from "../documents/notify-change.js";
-import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
-import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import recordTargetChange from "../requests/helpers/record-target-change.js";
 

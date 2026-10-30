@@ -59,7 +59,7 @@ test("successfully validate field - relation", async () => {
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DocumentCollection).fields.get("standard_doc")!,
 		validationData: {
 			media: [],
@@ -86,7 +86,7 @@ test("successfully validate field - relation", async () => {
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
@@ -115,7 +115,7 @@ test("fail to validate field - relation", async () => {
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
@@ -144,7 +144,7 @@ test("fail to validate field - relation", async () => {
 			value: [],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
@@ -172,7 +172,7 @@ test("fail to validate field - relation", async () => {
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(DocumentCollection).fields.get("wrong_collection")!,
 		validationData: {
 			media: [],
@@ -206,7 +206,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
@@ -229,7 +229,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 				{ id: 4, collectionKey: "page" },
 			],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
@@ -256,7 +256,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 				{ id: 100, collectionKey: "blog" },
 			],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
@@ -317,7 +317,7 @@ test("relation field validates multiple target collections", async () => {
 				{ id: 2, collectionKey: "blog" },
 			],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(DocumentCollection).fields.get(
 			"multi_collection_doc",
 		)!,
@@ -340,7 +340,7 @@ test("relation field validates multiple target collections", async () => {
 			type: "relation",
 			value: [{ id: 1, collectionKey: "author" }],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(DocumentCollection).fields.get(
 			"multi_collection_doc",
 		)!,

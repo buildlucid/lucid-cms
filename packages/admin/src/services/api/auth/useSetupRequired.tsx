@@ -6,7 +6,7 @@ import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
-// biome-ignore lint/suspicious/noEmptyInterface: explanation
+// oxlint-disable-next-line typescript/no-empty-object-type
 interface QueryParams {}
 
 interface SetupRequiredResponse {

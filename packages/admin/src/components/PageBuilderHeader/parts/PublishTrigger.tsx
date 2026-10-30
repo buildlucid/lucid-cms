@@ -189,10 +189,10 @@ export const PublishTrigger: Component<{
 												option.status?.isPublished === false
 													? "danger-subtle"
 													: option.status?.isPublished === true &&
-															option.status?.upToDate === true
+														  option.status?.upToDate === true
 														? "success-subtle"
 														: option.status?.isPublished === true &&
-																option.status?.upToDate === false
+															  option.status?.upToDate === false
 															? "warning-subtle"
 															: "neutral-subtle"
 											}
@@ -201,7 +201,7 @@ export const PublishTrigger: Component<{
 												option.status?.upToDate === true
 													? T()("documents.publish.status.up.to.date")
 													: option.status?.isPublished === true &&
-															option.status?.upToDate === false
+														  option.status?.upToDate === false
 														? T()("documents.publish.status.out.of.date")
 														: T()("common.status.unpublished")
 											}

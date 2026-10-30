@@ -5,7 +5,6 @@ import {
 	type ParentComponent,
 	useContext,
 } from "solid-js";
-
 import type { UseDocumentAutoSave } from "../useDocumentAutoSave/useDocumentAutoSave";
 import { DocumentLocalizationProvider } from "../useDocumentLocalization/useDocumentLocalization";
 import type { UseDocumentMutations } from "../useDocumentMutations/useDocumentMutations";

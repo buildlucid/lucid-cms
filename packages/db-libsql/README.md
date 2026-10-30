@@ -1,4 +1,5 @@
 # Lucid CMS - LibSQL Database Adapter
+
 > The official LibSQL database adapter for Lucid CMS
 
 The Lucid CMS LibSQL database adapter allows you to use LibSQL as your database. This registers a slightly modified version of the [LibSQL dialect](https://github.com/tursodatabase/kysely-libsql) for [Kysely](https://kysely.dev/).
@@ -15,8 +16,8 @@ To use the LibSQL database adapter, you must add it to your Lucid CMS configurat
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
 import { libsql } from "@lucidcms/db-libsql";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -31,7 +32,7 @@ export default defineConfig({
 
 The no-call `db: libsql` form reads `LIBSQL_URL` and optional `LIBSQL_AUTH_TOKEN` from Lucid's resolved env. You can also pass a configuration object or env callback via `libsql()` with the following options:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `url` * | `string` | The LibSQL database URL (e.g., `libsql://your-database.turso.io`) |
-| `authToken` | `string` | Authentication token for accessing the database |
+| Property    | Type     | Description                                                       |
+| ----------- | -------- | ----------------------------------------------------------------- |
+| `url` *     | `string` | The LibSQL database URL (e.g., `libsql://your-database.turso.io`) |
+| `authToken` | `string` | Authentication token for accessing the database                   |

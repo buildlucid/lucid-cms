@@ -564,8 +564,8 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 	const hasPosterErrors = createMemo(() => {
 		return Boolean(
 			getBodyError("posterId", mutateErrors()) ||
-				getBodyError("file", mutateErrors()) ||
-				getBodyError("alt", updatePosterAlt.errors()),
+			getBodyError("file", mutateErrors()) ||
+			getBodyError("alt", updatePosterAlt.errors()),
 		);
 	});
 	const showAccessTab = createMemo(() => {

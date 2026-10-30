@@ -32,7 +32,8 @@ export type SelectMultipleVariant = "default" | "list";
 
 export interface SelectMultipleProps<
 	Option extends SelectMultipleOption = SelectMultipleOption,
-> extends JSX.AriaAttributes {
+>
+	extends JSX.AriaAttributes {
 	id: string;
 	name: string;
 	values: Option[];
@@ -217,7 +218,6 @@ function SelectMultiple<
 															},
 														)}
 													>
-														{/* biome-ignore lint/a11y/useSemanticElements: a remove button cannot be nested inside the trigger button, which the HTML parser pulls apart. */}
 														<span
 															role="button"
 															tabIndex={0}
@@ -267,7 +267,7 @@ function SelectMultiple<
 				<Menu.Content matchTriggerWidth class="max-h-36 overflow-y-auto z-70">
 					<Show when={props.search}>
 						{(search) => (
-							// biome-ignore lint/a11y/noStaticElementInteractions: keeps typing out of the menu's keyboard navigation
+							// oxlint-disable-next-line jsx-a11y/no-static-element-interactions -- keeps typing out of the menu's keyboard navigation
 							<div
 								class="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover p-1.5"
 								onKeyDown={(event) => event.stopPropagation()}

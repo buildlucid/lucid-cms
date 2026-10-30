@@ -9,7 +9,7 @@ import type { QueryHook } from "@/types/utils";
 import getLoginRedirectURL from "@/utils/login-route";
 import request, { type RequestParams } from "@/utils/request";
 
-// biome-ignore lint/suspicious/noEmptyInterface: explanation
+// oxlint-disable-next-line typescript/no-empty-object-type
 interface QueryParams {}
 
 export const getAuthenticatedUserReq = (

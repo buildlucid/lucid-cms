@@ -38,7 +38,9 @@ export type NotificationEmailData = {
 /** Project templates that accept `NotificationEmailData`, by declaring it in their `props` or with a rest prop. */
 export type NotificationEmailTemplateName = {
 	[Name in EmailTemplateName]: NotificationEmailData extends {
-		[Key in keyof NotificationEmailData]: Key extends keyof EmailTemplateInput<Name>
+		[
+			Key in keyof NotificationEmailData
+		]: Key extends keyof EmailTemplateInput<Name>
 			? EmailTemplateInput<Name>[Key]
 			: never;
 	}
@@ -48,9 +50,11 @@ export type NotificationEmailTemplateName = {
 
 /** Removes Lucid's default data from template props while preserving rest prop index signatures through key remapping. */
 type NotificationEmailExtraData<Template extends string> = {
-	[Key in keyof EmailTemplateInput<Template> as Key extends keyof NotificationEmailData
-		? never
-		: Key]: EmailTemplateInput<Template>[Key];
+	[
+		Key in keyof EmailTemplateInput<Template> as Key extends keyof NotificationEmailData
+			? never
+			: Key
+	]: EmailTemplateInput<Template>[Key];
 };
 
 /** Accepts any extra data for Lucid's template, requiring `data` for project props Lucid doesn't supply. */

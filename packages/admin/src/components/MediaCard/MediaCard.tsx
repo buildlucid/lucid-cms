@@ -68,7 +68,7 @@ export const MediaCardLoading: Component = () => {
 const MediaCard: Component<MediaCardProps> = (props) => {
 	// ----------------------------------
 	// Hooks
-	// biome-ignore lint/correctness/noUnusedVariables: it is being used
+	// oxlint-disable-next-line no-unused-vars -- it is being used
 	const draggable = createDraggable(`media:${props.media.id}`);
 
 	// ----------------------------------
@@ -358,8 +358,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			{/* Image */}
 			<div class="relative">
 				<Show when={canSelect()}>
-					{/** biome-ignore lint/a11y/useKeyWithClickEvents: the checkbox inside handles the keyboard */}
-					{/** biome-ignore lint/a11y/noStaticElementInteractions: stops the card opening when the checkbox is clicked */}
+					{/* oxlint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- stops the card opening when the checkbox is clicked; the checkbox inside handles the keyboard */}
 					<div
 						class={classNames(
 							"absolute top-3 left-3 z-30 flex size-7 items-center justify-center rounded-md border border-border bg-card shadow-sm transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100",

@@ -264,9 +264,8 @@ describe("field placement", () => {
 
 test("collection identity and field state survive separate loads of core", async () => {
 	vi.resetModules();
-	const { default: OtherCollectionBuilder } = await import(
-		"../collection-builder/index.js"
-	);
+	const { default: OtherCollectionBuilder } =
+		await import("../collection-builder/index.js");
 	const foreign = new OtherCollectionBuilder(
 		"articles",
 		collectionOptions,

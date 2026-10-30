@@ -19,11 +19,7 @@ export { default as defineRoute } from "../libs/http/define-route.js";
 export { middleware } from "../libs/http/lucid-middleware.js";
 export { default as openAPI } from "../libs/http/openapi/index.js";
 export { default as formatAPIResponse } from "../libs/http/utils/build-response.js";
-export {
-	copy,
-	createTranslator,
-	translate,
-} from "../libs/i18n/index.js";
+export { copy, createTranslator, translate } from "../libs/i18n/index.js";
 export { default as defineJob } from "../libs/jobs/define-job.js";
 export { default as logger } from "../libs/logger/index.js";
 export { notificationCategories } from "../libs/notifications/categories.js";

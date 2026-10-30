@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
+import { describeRoute } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
-import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/connection.js";
 import {

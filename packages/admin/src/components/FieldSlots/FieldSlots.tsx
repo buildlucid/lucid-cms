@@ -1,7 +1,7 @@
-import { fieldSlots } from "virtual:lucid-admin";
 import type { InternalDocumentField } from "@lucidcms/types";
 import type { FieldError } from "@types";
 import { type Component, children, createMemo, For, Show } from "solid-js";
+import { fieldSlots } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import {
 	createFieldState,

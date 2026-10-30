@@ -178,7 +178,6 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: explanation
 		<div
 			id={props.id}
 			class={classNames(

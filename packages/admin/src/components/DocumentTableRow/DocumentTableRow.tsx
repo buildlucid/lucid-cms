@@ -1,6 +1,6 @@
-import { documentListSlots } from "virtual:lucid-admin";
 import type { Collection, InternalCollectionDocument, Refs } from "@types";
 import { type Component, createMemo, For, Show } from "solid-js";
+import { documentListSlots } from "virtual:lucid-admin";
 import type { ActionMenuProps } from "@/components/ActionMenu/ActionMenu";
 import DocumentSlotCell from "@/components/DocumentSlotCell/DocumentSlotCell";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";

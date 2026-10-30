@@ -1,5 +1,5 @@
-import LogoDark from "@assets/svgs/logo-icon.svg?url";
 import LogoLight from "@assets/svgs/logo-icon-light.svg?url";
+import LogoDark from "@assets/svgs/logo-icon.svg?url";
 import classNames from "classnames";
 import type { Component } from "solid-js";
 

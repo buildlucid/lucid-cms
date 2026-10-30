@@ -38,7 +38,7 @@ test("successfully validate field - color", async () => {
 			value: "#000000",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(ColorCollection).fields.get("standard_color")!,
 		validationData: {
 			media: [],
@@ -60,7 +60,7 @@ test("successfully validate field - color", async () => {
 			value: "#000000",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
@@ -84,7 +84,7 @@ test("fail to validate field - color", async () => {
 			value: 0,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(ColorCollection).fields.get("standard_color")!,
 		validationData: {
 			media: [],
@@ -112,7 +112,7 @@ test("fail to validate field - color", async () => {
 			value: "",
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
@@ -140,7 +140,7 @@ test("fail to validate field - color", async () => {
 			value: null,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
@@ -168,7 +168,7 @@ test("fail to validate field - color", async () => {
 			value: undefined,
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],

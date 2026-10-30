@@ -39,8 +39,8 @@ import { extensions, type RichTextJSON } from "@lucidcms/rich-text";
 Use browser-safe conversion helpers from `@lucidcms/rich-text/browser`.
 
 ```typescript
-import { generateHTML, generateJSON } from "@lucidcms/rich-text/browser";
 import type { RichTextJSON } from "@lucidcms/rich-text";
+import { generateHTML, generateJSON } from "@lucidcms/rich-text/browser";
 import Heading from "@tiptap/extension-heading";
 
 const json: RichTextJSON = {

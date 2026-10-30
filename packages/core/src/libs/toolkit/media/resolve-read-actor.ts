@@ -15,9 +15,8 @@ const resolveReadActor = async (
 ): ServiceResponse<MediaActor> => {
 	if (data.libraryOnly) return { error: undefined, data: { type: "content" } };
 
-	const { default: resolveActorUser } = await import(
-		"../../../services/users/helpers/resolve-actor-user.js"
-	);
+	const { default: resolveActorUser } =
+		await import("../../../services/users/helpers/resolve-actor-user.js");
 	const userRes = await resolveActorUser(context, { actor: data.actor });
 	if (userRes.error) return userRes;
 

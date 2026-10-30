@@ -16,9 +16,9 @@ Add the plugin to your Lucid config and choose which collections should have SEO
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
 import { seoPlugin } from "@lucidcms/plugin-seo";
+import { node } from "@lucidcms/runtime-node";
 
 export default defineConfig({
   runtime: node,
@@ -38,9 +38,9 @@ The plugin registers its admin components and translations automatically.
 
 ## Configuration
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `collections` | `Array<{ key: string; localized?: boolean; brickKey?: string }>` | Collections to add SEO fields to. |
-| `collections[].key` | `string` | The key of an existing collection. |
-| `collections[].localized` | `boolean` | Whether SEO fields are localized. Defaults to the collection's setting. |
-| `collections[].brickKey` | `string` | The fixed brick key. Defaults to `seo`. |
+| Property                  | Type                                                             | Description                                                             |
+| ------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `collections`             | `Array<{ key: string; localized?: boolean; brickKey?: string }>` | Collections to add SEO fields to.                                       |
+| `collections[].key`       | `string`                                                         | The key of an existing collection.                                      |
+| `collections[].localized` | `boolean`                                                        | Whether SEO fields are localized. Defaults to the collection's setting. |
+| `collections[].brickKey`  | `string`                                                         | The fixed brick key. Defaults to `seo`.                                 |

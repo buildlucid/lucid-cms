@@ -32,7 +32,6 @@ import type { AgentReferenceItem } from "@/utils/agent-references";
 import { getGreeting } from "@/utils/greeting";
 import { getNewChatHref } from "@/utils/home-view";
 import { startViewTransition } from "@/utils/view-transition";
-
 import AgentPicker from "./parts/AgentPicker";
 import AgentSuggestionButton from "./parts/AgentSuggestionButton";
 import AgentWaitingChats from "./parts/AgentWaitingChats";

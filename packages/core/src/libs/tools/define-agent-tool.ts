@@ -1,7 +1,7 @@
 import { z } from "zod";
 import constants from "../../constants/constants.js";
-import { agentInteractionPlacementSchema } from "../../schemas/agent.js";
 import { agentResourceSchema } from "../../schemas/agent-references.js";
+import { agentInteractionPlacementSchema } from "../../schemas/agent.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { isJsonObject } from "../../utils/helpers/is-json-object.js";
 import type {

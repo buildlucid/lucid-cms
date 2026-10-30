@@ -37,9 +37,8 @@ const state = async (
 		schema: inputSchema,
 		input,
 		handler: async (data): ServiceResponse<ToolkitPreviewState> => {
-			const { default: resolvePreviewSession } = await import(
-				"../../../../services/preview-sessions/resolve.js"
-			);
+			const { default: resolvePreviewSession } =
+				await import("../../../../services/preview-sessions/resolve.js");
 
 			const url = new URL(data.url);
 			const hasQueryValue = url.searchParams.has(previewQueryParam);

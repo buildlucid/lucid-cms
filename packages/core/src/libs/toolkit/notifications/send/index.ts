@@ -18,9 +18,8 @@ const send = <Definition extends AnyNotificationDefinition>(
 		schema: sendSchema,
 		input,
 		handler: async (data) => {
-			const { default: sendNotification } = await import(
-				"../../../../services/notifications/send.js"
-			);
+			const { default: sendNotification } =
+				await import("../../../../services/notifications/send.js");
 
 			return sendNotification(context, {
 				definition: data.type,

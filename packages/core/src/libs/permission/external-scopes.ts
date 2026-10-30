@@ -24,9 +24,9 @@ type PascalAction<TAction extends string> =
 		: Capitalize<TAction>;
 
 type DocumentScopeFactories = {
-	[TAction in CollectionPermissionAction as `Document${PascalAction<TAction>}`]: (
-		collectionKey: string,
-	) => CollectionExternalScope<TAction>;
+	[
+		TAction in CollectionPermissionAction as `Document${PascalAction<TAction>}`
+	]: (collectionKey: string) => CollectionExternalScope<TAction>;
 };
 
 /** Builds a collection scope key, eg. `documents:pages:read`. */
@@ -86,7 +86,7 @@ export type CoreExternalScope =
 export type ExternalPrincipalType = "system" | "user";
 
 /** Project scopes added by Lucid type generation or a plugin. */
-// biome-ignore lint/suspicious/noEmptyInterface: generated types and plugins augment this interface
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types and plugins augment this interface
 export interface CustomExternalScopes {}
 
 export type ExternalScope =

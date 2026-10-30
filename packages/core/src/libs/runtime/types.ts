@@ -227,6 +227,6 @@ type NetAddrInfo = {
 			 */
 			addressType: AddressType;
 	  }
-	// biome-ignore lint/complexity/noBannedTypes: explanation
+	// oxlint-disable-next-line typescript/no-empty-object-type
 	| {}
 );

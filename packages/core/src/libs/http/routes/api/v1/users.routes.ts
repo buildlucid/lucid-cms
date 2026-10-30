@@ -7,8 +7,8 @@ import getMultipleLogins from "../../../controllers/user-logins/get-multiple.js"
 import createProfilePictureUploadSession from "../../../controllers/users/create-profile-picture-upload-session.js";
 import deleteMultiplePermanently from "../../../controllers/users/delete-multiple-permanently.js";
 import deleteProfilePicture from "../../../controllers/users/delete-profile-picture.js";
-import deleteSingle from "../../../controllers/users/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/users/delete-single-permanently.js";
+import deleteSingle from "../../../controllers/users/delete-single.js";
 import getMultiple from "../../../controllers/users/get-multiple.js";
 import getSingle from "../../../controllers/users/get-single.js";
 import createUserIntegration from "../../../controllers/users/integrations/create-single.js";

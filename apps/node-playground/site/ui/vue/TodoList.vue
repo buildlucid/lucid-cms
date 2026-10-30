@@ -7,7 +7,9 @@ const todos = ref(
 	(props.items ?? []).map((text, index) => ({ id: index, text, done: false })),
 );
 const draft = ref("");
-const remaining = computed(() => todos.value.filter((todo) => !todo.done).length);
+const remaining = computed(
+	() => todos.value.filter((todo) => !todo.done).length,
+);
 const inputId = useId();
 
 const add = () => {
@@ -28,7 +30,9 @@ const add = () => {
 		</form>
 		<ul>
 			<li v-for="todo in todos" :key="todo.id">
-				<label><input v-model="todo.done" type="checkbox" /> {{ todo.text }}</label>
+				<label
+					><input v-model="todo.done" type="checkbox" /> {{ todo.text }}</label
+				>
 			</li>
 		</ul>
 		<p>{{ remaining }} left</p>

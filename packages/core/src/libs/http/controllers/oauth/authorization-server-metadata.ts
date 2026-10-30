@@ -1,6 +1,6 @@
+import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import type { StatusCode } from "hono/utils/http-status";
-import { describeRoute } from "hono-openapi";
 import {
 	oauthAuthorizationServerMetadataResponseSchema,
 	oauthErrorResponseSchema,

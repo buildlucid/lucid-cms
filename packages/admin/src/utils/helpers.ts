@@ -4,7 +4,7 @@ import T, { translateAdminCopy } from "@/translations";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 import { getTranslation } from "./translation-helpers";
 
-// biome-ignore lint/suspicious/noExplicitAny: explanation
+// oxlint-disable-next-line typescript/no-explicit-any
 type GenericObject = Record<string, any>;
 
 const deepMerge = (obj1: GenericObject, obj2: GenericObject): GenericObject => {
@@ -82,7 +82,7 @@ const updateData = <T extends GenericObject>(obj1: T, obj2: T) => {
 // ---------------------------------------------
 // Resolve signals and return the value
 const resolveValue = <T>(value: Accessor<T> | T): T =>
-	// biome-ignore lint/suspicious/noExplicitAny: explanation
+	// oxlint-disable-next-line typescript/no-explicit-any
 	typeof value === "function" ? (value as any)() : value;
 
 // ---------------------------------------------

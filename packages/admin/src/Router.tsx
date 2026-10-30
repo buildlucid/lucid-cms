@@ -1,7 +1,7 @@
-import { routes as extensionRoutes } from "virtual:lucid-admin";
 import { Route, type RoutePreloadFuncArgs, Router } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
+import { routes as extensionRoutes } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import AuthenticatedRoutes from "@/components/AuthenticatedRoutes/AuthenticatedRoutes";
 import AuthRoutes from "@/components/AuthRoutes/AuthRoutes";

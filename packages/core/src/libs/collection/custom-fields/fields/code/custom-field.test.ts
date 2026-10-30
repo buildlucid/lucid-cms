@@ -55,7 +55,7 @@ test("successfully validate field - code", async () => {
 				value: "const a: number = 1;",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
@@ -69,7 +69,7 @@ test("successfully validate field - code", async () => {
 			type: "code",
 			value: "",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
@@ -86,7 +86,7 @@ test("successfully validate field - code", async () => {
 				value: "hello world",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
@@ -104,7 +104,7 @@ test("successfully validate field - code", async () => {
 			},
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(CodeCollection).fields.get("restricted_code")!,
 		validationData,
 		meta: validationMeta,
@@ -120,7 +120,7 @@ test("fail to validate field - code", async () => {
 			type: "code",
 			value: "invalid code value",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
@@ -142,7 +142,7 @@ test("fail to validate field - code", async () => {
 				language: "typescript",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
@@ -164,7 +164,7 @@ test("fail to validate field - code", async () => {
 			type: "code",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
@@ -187,7 +187,7 @@ test("fail to validate field - code", async () => {
 				value: "   ",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
@@ -211,7 +211,7 @@ test("fail to validate field - code", async () => {
 			},
 		},
 		instance:
-			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
 			getFieldBuilderState(CodeCollection).fields.get("restricted_code")!,
 		validationData,
 		meta: validationMeta,

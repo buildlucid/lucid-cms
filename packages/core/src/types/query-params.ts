@@ -41,7 +41,7 @@ export type QueryFilters = {
 	[key: string]: FilterObject | QueryFilters | undefined;
 };
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentFiltersByCollection {}
 
 type CollectionDocumentFilterCollectionKey = Extract<
@@ -75,7 +75,7 @@ export type DefaultCollectionDocumentSortKey =
 	| "order"
 	| `_${string}`;
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentSortsByCollection {}
 
 type CollectionDocumentSortCollectionKey = Extract<
@@ -99,10 +99,10 @@ export type CollectionDocumentSorts<TCollectionKey extends string = string> =
 export type DefaultCollectionDocumentVersion = DocumentVersionType;
 export type DefaultCollectionDocumentVersionKey = string;
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentVersionsByCollection {}
 
-// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 export interface CollectionDocumentVersionKeysByCollection {}
 
 type CollectionDocumentVersionCollectionKey = Extract<

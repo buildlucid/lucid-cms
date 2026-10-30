@@ -30,23 +30,27 @@ export default defineConfig({
       typesensePlugin({
         host: env.TYPESENSE_HOST,
         apiKey: env.TYPESENSE_API_KEY,
-        indexes: [{
-          key: "pages",
-          alias: "website_pages",
-          schema: {
-            fields: [
-              { name: "title", type: "string" },
-              { name: "path", type: "string" },
+        indexes: [
+          {
+            key: "pages",
+            alias: "website_pages",
+            schema: {
+              fields: [
+                { name: "title", type: "string" },
+                { name: "path", type: "string" },
+              ],
+            },
+            sources: [
+              {
+                kind: "collection",
+                key: "pages",
+                collection: "page",
+                version: "published",
+                fields: { title: "title", path: "fullSlug" },
+              },
             ],
           },
-          sources: [{
-            kind: "collection",
-            key: "pages",
-            collection: "page",
-            version: "published",
-            fields: { title: "title", path: "fullSlug" },
-          }],
-        }],
+        ],
       }),
     ],
   }),
@@ -57,15 +61,15 @@ Use a publishing target configured on your collection, or `latest` to include dr
 
 ## Configuration
 
-| Property | Description |
-|----------|-------------|
-| `host` and `apiKey` | Connect to your Typesense server. Include the protocol and port for local servers, such as `http://localhost:8108`. |
-| `client` | Use your own Typesense SDK client instead of `host` and `apiKey`. |
-| `indexes` | The search indexes and their content sources. Query an index using its `alias`. |
-| `sources[].fields` | Map search fields to Lucid fields, or use a function to calculate a value. |
+| Property              | Description                                                                                                                      |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `host` and `apiKey`   | Connect to your Typesense server. Include the protocol and port for local servers, such as `http://localhost:8108`.              |
+| `client`              | Use your own Typesense SDK client instead of `host` and `apiKey`.                                                                |
+| `indexes`             | The search indexes and their content sources. Query an index using its `alias`.                                                  |
+| `sources[].fields`    | Map search fields to Lucid fields, or use a function to calculate a value.                                                       |
 | `sources[].condition` | Choose whether to index a resource. Receives the document or media and the locale. Returning `false` removes its search records. |
-| `sources[].locales` | Optionally index each listed locale separately. |
-| `sources[].project` | Supply a function instead of `fields` when you need more control. Return `null` to exclude an item. |
+| `sources[].locales`   | Optionally index each listed locale separately.                                                                                  |
+| `sources[].project`   | Supply a function instead of `fields` when you need more control. Return `null` to exclude an item.                              |
 
 Use `kind: "media"` for a media source, with fields such as `{ title: "title", url: "url" }`. Media sources include public, ready library files and use their current crop and delivery URL. Set `visibility: "all"` only for an index with suitable access controls.
 

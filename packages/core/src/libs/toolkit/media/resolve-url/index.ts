@@ -19,9 +19,8 @@ const resolveUrl = async (
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: resolveMediaUrl } = await import(
-				"../../../../services/media/resolve-url.js"
-			);
+			const { default: resolveMediaUrl } =
+				await import("../../../../services/media/resolve-url.js");
 
 			const actorRes = await resolveReadActor(context, data);
 			if (actorRes.error) return actorRes;

@@ -23,9 +23,8 @@ const stream = (
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: streamMedia } = await import(
-				"../../../../services/media/stream.js"
-			);
+			const { default: streamMedia } =
+				await import("../../../../services/media/stream.js");
 
 			return streamMedia(context, data);
 		},

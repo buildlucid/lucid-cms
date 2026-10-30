@@ -27,12 +27,8 @@ const deleteMultiple = (
 				{ default: deleteMultipleWithResults },
 				{ default: resolveDocumentActor },
 			] = await Promise.all([
-				import(
-					"../../../../services/documents/delete-multiple-with-results.js"
-				),
-				import(
-					"../../../../services/documents/helpers/resolve-document-actor.js"
-				),
+				import("../../../../services/documents/delete-multiple-with-results.js"),
+				import("../../../../services/documents/helpers/resolve-document-actor.js"),
 			]);
 
 			const actor = await resolveDocumentActor(context, {

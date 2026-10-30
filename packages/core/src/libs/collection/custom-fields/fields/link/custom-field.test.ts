@@ -48,7 +48,7 @@ test("successfully validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -73,7 +73,7 @@ test("successfully validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
@@ -104,7 +104,7 @@ test("successfully validate field - link", async () => {
 				},
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get(
 			"required_localized_link",
 		)!,
@@ -134,7 +134,7 @@ test("fail to validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -167,7 +167,7 @@ test("fail to validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -202,7 +202,7 @@ test("fail to validate field - link", async () => {
 				label: false, // invalid
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -231,7 +231,7 @@ test("fail to validate field - link", async () => {
 			type: "link",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
@@ -261,7 +261,7 @@ test("fail to validate field - link", async () => {
 				label: "  ",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
@@ -293,7 +293,7 @@ test("fail to validate field - link", async () => {
 				},
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
+		// oxlint-disable-next-line typescript/no-non-null-assertion
 		instance: getFieldBuilderState(LinkCollection).fields.get(
 			"required_localized_link",
 		)!,

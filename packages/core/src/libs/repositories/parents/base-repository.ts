@@ -102,7 +102,7 @@ abstract class BaseRepository<
 		}
 	}
 
-	// biome-ignore lint/suspicious/noExplicitAny: repository schemas are heterogeneous
+	// oxlint-disable-next-line typescript/no-explicit-any -- repository schemas are heterogeneous
 	protected mergeSchema(schema?: ZodObject<any>) {
 		if (!schema) return this.config.schema;
 		return this.config.schema.extend(schema.shape);

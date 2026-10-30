@@ -163,7 +163,7 @@ const MediaSharePage: Component = () => {
 														<Show
 															when={posterShareUrl() && !showVideoPreview()}
 															fallback={
-																// biome-ignore lint/a11y/useMediaCaption: explanation
+																// oxlint-disable-next-line jsx-a11y/media-has-caption
 																<video
 																	ref={videoPreviewRef}
 																	src={shareUrl()}

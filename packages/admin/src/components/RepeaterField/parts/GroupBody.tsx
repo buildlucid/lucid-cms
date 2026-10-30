@@ -118,7 +118,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 
 		const value = brickHelpers.getFieldValue<string>({
 			fieldData: data,
-			// biome-ignore lint/suspicious/noExplicitAny: shared helper expects a compatible fieldConfig
+			// oxlint-disable-next-line typescript/no-explicit-any -- shared helper expects a compatible fieldConfig
 			fieldConfig: firstTextConfig as any,
 			contentLocale: fieldRenderState.contentLocale(),
 		});
@@ -152,7 +152,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: explanation
 		<div
 			style={{
 				"view-transition-name": `group-item-${ref()}`,
@@ -177,7 +176,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			{/* Group Header */}
-			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
 			<div
 				id={previewTriggerId()}
 				data-preview-focus-open={groupOpen()}
@@ -198,7 +196,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				}}
 				aria-expanded={groupOpen()}
 				aria-controls={`accordion-content-${ref()}`}
-				aria-invalid={errorCount() > 0}
 				role="button"
 				tabIndex="0"
 			>
