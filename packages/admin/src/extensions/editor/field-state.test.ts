@@ -116,7 +116,7 @@ describe("extension editor state", () => {
 			readOnly: true,
 		});
 		const repeater = view[1];
-		if (repeater?.type !== "repeater") throw Error("Expected a repeater");
+		if (repeater?.type !== "repeater") throw new Error("Expected a repeater");
 		expect(repeater.groups.map((group) => group.ref)).toEqual(["one", "two"]);
 		expect(repeater.groups[0]?.fields[0]?.value).toBe("Premier");
 		expect(repeater.groups[0]?.fields[0]?.errors).toEqual([]);

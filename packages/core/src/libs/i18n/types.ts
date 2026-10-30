@@ -23,6 +23,7 @@ declare global {
 	 */
 	namespace LucidCMS {
 		/** Translation keys as `scope:key`, generated from project and plugin translation files. */
+		// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
 		interface TranslationKeys {}
 	}
 }

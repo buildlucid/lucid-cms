@@ -252,11 +252,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			primaryLabel: documentLabel,
 		});
 	const documentSubtitle = (document: RelationFieldValue) =>
-		getSingularName(document) +
-		" · " +
-		T()("common.document") +
-		" #" +
-		document.id;
+		`${getSingularName(document)} · ${T()("common.document")} #${document.id}`;
 	const relationVersionLabel = createMemo(() => {
 		const relationVersionType = pageBuilderState.relationVersionType?.();
 
@@ -535,11 +531,9 @@ const DocumentSortableItem: Component<{
 			data-dragkey={DOCUMENT_SELECT_DRAG_DROP_KEY}
 			data-dragref={props.dragId}
 			style={{
-				"view-transition-name":
-					"document-select-item-" +
-					props.document.value.collectionKey +
-					"-" +
-					props.document.value.id,
+				"view-transition-name": `document-select-item-${
+					props.document.value.collectionKey
+				}-${props.document.value.id}`,
 			}}
 			class={classNames("group transition-colors duration-200 transform-gpu", {
 				"ring-1 ring-inset ring-danger": props.hasError,

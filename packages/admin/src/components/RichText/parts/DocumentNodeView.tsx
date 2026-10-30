@@ -62,11 +62,9 @@ const DocumentNodeView: Component<DocumentNodeViewProps> = (props) => {
 	);
 	const documentReferenceLabel = createMemo(
 		() =>
-			collectionLabel() +
-			" · " +
-			T()("common.document") +
-			" #" +
-			String(props.documentId ?? "?"),
+			`${collectionLabel()} · ${T()("common.document")} #${String(
+				props.documentId ?? "?",
+			)}`,
 	);
 	const previewFields = createMemo(() =>
 		getDocumentReferencePreviewFields({

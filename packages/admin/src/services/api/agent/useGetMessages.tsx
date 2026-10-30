@@ -85,6 +85,7 @@ const useGetMessages = (params: { id: Accessor<string | undefined> }) => {
 
 		//* a background run may have added more than a page while the chat was closed
 		let first = rows[0]?.position;
+		// oxlint-disable-next-line oxc/no-accumulating-spread -- only prepends the few pages a background run added
 		while (
 			previous !== undefined &&
 			first !== undefined &&

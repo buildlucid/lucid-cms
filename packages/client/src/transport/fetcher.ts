@@ -94,6 +94,7 @@ export const createTransport = (
 					signal: descriptor.request?.signal,
 				};
 
+				// oxlint-disable-next-line oxc/no-accumulating-spread -- copies keep each middleware's init unchanged
 				for (const current of middleware) {
 					if (!current.onRequest) continue;
 

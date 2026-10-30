@@ -31,11 +31,9 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 	);
 	const documentTitle = createMemo(
 		() =>
-			collectionLabel() +
-			" · " +
-			T()("common.document") +
-			" #" +
-			(props.document?.id ?? "?"),
+			`${collectionLabel()} · ${T()("common.document")} #${
+				props.document?.id ?? "?"
+			}`,
 	);
 	const previewFields = createMemo(() =>
 		getDocumentReferencePreviewFields({

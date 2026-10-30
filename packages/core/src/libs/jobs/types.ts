@@ -12,7 +12,7 @@ import type {
 	jobScheduleOverlapSchema,
 	jobStatusSchema,
 } from "./payload.js";
-import { jobDefinitionInternal } from "./registry.js";
+import type { jobDefinitionInternal } from "./registry.js";
 
 /** A value that can be stored in a durable job payload. */
 export type JobValue =

@@ -2,10 +2,10 @@ import { describe, expect, test } from "vitest";
 import { clientSlot, slotPlaceholders } from "./client-slot.js";
 
 describe("slotPlaceholders", () => {
-	const inner =
-		'<client-component client="load">' +
-		clientSlot("default", "<b>inner</b>") +
-		"</client-component>";
+	const inner = `<client-component client="load">${clientSlot(
+		"default",
+		"<b>inner</b>",
+	)}</client-component>`;
 	const { placeholders, fill } = slotPlaceholders("a1", { default: inner });
 	const rendered = `<div>${clientSlot("default", placeholders.default ?? "")}</div>`;
 

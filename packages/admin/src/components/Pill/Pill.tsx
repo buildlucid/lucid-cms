@@ -162,6 +162,7 @@ const Pill: Component<PillProps> = (props) => {
 			<button
 				{...buttonProps}
 				data-pill
+				// oxlint-disable-next-line react/button-has-type -- falls back to "button" when no type is passed
 				type={buttonProps.type ?? "button"}
 				class={classes()}
 				title={local.tooltip}

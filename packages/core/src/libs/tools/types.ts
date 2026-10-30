@@ -19,7 +19,7 @@ import type { ExternalScope } from "../permission/external-scopes.js";
 import type { ToolkitActor } from "../permission/toolkit-actor.js";
 import type { Permission } from "../permission/types.js";
 import type { Toolkit } from "../toolkit/types.js";
-import { toolDefinitionInternal } from "./tool-definition-internal.js";
+import type { toolDefinitionInternal } from "./tool-definition-internal.js";
 
 export type McpToolAuthority = Pick<LucidExternalAuth, "principal" | "scopes">;
 

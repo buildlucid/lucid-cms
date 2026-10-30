@@ -121,6 +121,7 @@ const Button: Component<ButtonProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
+		// oxlint-disable-next-line react/button-has-type -- type defaults to "button" through mergeProps
 		<button
 			{...rest}
 			data-button

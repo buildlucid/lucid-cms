@@ -113,7 +113,7 @@ test("preserves source precedence and nested names for data and public resources
 		root,
 	);
 	expect(result.files.emails.map((file) => file.name)).toEqual(
-		Array(3).fill("account/welcome.kiln"),
+		new Array(3).fill("account/welcome.kiln"),
 	);
 	expect(result.files.public[0]?.name).toBe("brand/icons/logo.svg");
 });

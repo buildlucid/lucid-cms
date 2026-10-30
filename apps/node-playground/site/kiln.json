@@ -24,48 +24,26 @@
 	],
 	"filters": [],
 	"tests": [],
-	"globals": [
-		"locale",
-		"siteUrl"
-	],
-	"types": [
-		"Brick",
-		"Document",
-		"Media",
-		"RichText"
-	],
+	"globals": ["locale", "siteUrl"],
+	"types": ["Brick", "Document", "Media", "RichText"],
 	"htmlChecks": true,
 	"components": [
 		{
-			"extensions": [
-				".jsx",
-				".tsx"
-			],
-			"exclude": [
-				"ui/solid/**"
-			],
+			"extensions": [".jsx", ".tsx"],
+			"exclude": ["ui/solid/**"],
 			"props": "(import(\"react\").ComponentProps<typeof import($file).default>) & { client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
 		},
 		{
-			"extensions": [
-				".jsx",
-				".tsx"
-			],
-			"include": [
-				"ui/solid/**"
-			],
+			"extensions": [".jsx", ".tsx"],
+			"include": ["ui/solid/**"],
 			"props": "(Parameters<typeof import($file).default>[0]) & { client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
 		},
 		{
-			"extensions": [
-				".vue"
-			],
+			"extensions": [".vue"],
 			"props": "{ client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
 		},
 		{
-			"extensions": [
-				".svelte"
-			],
+			"extensions": [".svelte"],
 			"props": "{ client?: \"load\" | \"idle\" | \"visible\" | \"only\" | { media: string } }"
 		}
 	]

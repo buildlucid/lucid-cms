@@ -39,7 +39,7 @@ describe("public request", () => {
 					!("id" in data) ||
 					typeof data.id !== "number"
 				)
-					throw Error("Invalid response");
+					throw new Error("Invalid response");
 				return data.id;
 			},
 		});

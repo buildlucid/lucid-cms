@@ -1,4 +1,4 @@
-import constants from "../../../constants/constants.js";
+import type constants from "../../../constants/constants.js";
 
 export type EmailStorageRuleBase = {
 	/** Value displayed in previews when the original is hidden. */

@@ -148,7 +148,6 @@ const streamSingleController = factory.createHandlers(
 		const range = parseRangeHeader(c.req.header("range"));
 		const ifNoneMatch = c.req.header("if-none-match");
 		const cacheControl = "public, max-age=0, must-revalidate";
-		let etag: string | undefined;
 
 		const response = await serviceWrapper(cdnServices.streamMedia, {
 			transaction: false,
@@ -177,7 +176,7 @@ const streamSingleController = factory.createHandlers(
 			return c.redirect(streamFallbackMedia.data.redirectUrl, 302);
 		}
 
-		etag = response.data.etag ?? undefined;
+		const etag = response.data.etag ?? undefined;
 
 		if (response.data.notModified) {
 			applyRangeHeaders(c, { cacheControl });
