@@ -37,6 +37,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import fetchValidationData, {
 	type ValidationData,
 } from "../helpers/fetch-validation-data.js";
+import getEmbeddedBrickLocales from "../helpers/get-embedded-brick-locales.js";
 import { filterReachableEmbeddedBricks } from "../helpers/prepare-bricks-and-fields.js";
 import restrictValidationData from "../helpers/restrict-validation-data.js";
 import checkDuplicateRefs from "./check-duplicate-refs.js";
@@ -66,6 +67,8 @@ type ValidationMeta = {
 	localized: boolean;
 	defaultLocale: string | null;
 	locales?: string[];
+	/** Skips every other locale, for embedded bricks that only exist in one locale. */
+	onlyLocale?: string;
 };
 
 const getFieldCondition = (
@@ -340,6 +343,12 @@ const checkValidateBricksFields: ServiceFn<
 		collection: data.collection,
 		validationData: refDataRes.data,
 		restricted,
+		embeddedLocales: getEmbeddedBrickLocales({
+			fields: data.fields,
+			bricks,
+			collection: data.collection,
+			localized: localization.enabled,
+		}),
 		defaultLocale: localization.defaultLocale,
 		locales: localization.locales,
 	});
@@ -392,6 +401,8 @@ const validateBricks = (props: {
 		access: ContentAccess;
 		embedded: ReadonlyMap<string, FieldAccess>;
 	};
+	/** The locale each embedded brick belongs to, or `null` when every locale shares it. */
+	embeddedLocales: ReadonlyMap<string, string | null>;
 	defaultLocale: string | null;
 	locales: string[];
 }): Array<BrickError> => {
@@ -446,6 +457,12 @@ const validateBricks = (props: {
 			continue;
 		}
 
+		//* bricks held by one locale of a localized field are only validated in that locale
+		const onlyLocale =
+			brick.type === "embedded"
+				? (props.embeddedLocales.get(brick.ref) ?? undefined)
+				: undefined;
+
 		const fieldErrors = recursiveFieldValidate({
 			fields: brick.fields || [],
 			instance: instance,
@@ -466,8 +483,9 @@ const validateBricks = (props: {
 					: undefined,
 			meta: {
 				localized: props.collection.getData.localized,
-				defaultLocale: props.defaultLocale,
+				defaultLocale: onlyLocale ?? props.defaultLocale,
 				locales: props.locales,
+				onlyLocale,
 			},
 		});
 		if (fieldErrors.length === 0) continue;
@@ -513,6 +531,7 @@ export const recursiveFieldValidate = (props: {
 		fieldInstance: CustomField<FieldTypes>,
 		locale: string | null,
 	) =>
+		(props.meta.onlyLocale === undefined || locale === props.meta.onlyLocale) &&
 		isFieldVisible({
 			fieldKey,
 			fieldInstance,

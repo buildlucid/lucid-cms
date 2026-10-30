@@ -45,6 +45,8 @@ interface BrickProps {
 	collectionKey?: string;
 	documentId?: number;
 	contentLocale?: Accessor<string | undefined>;
+	/** Narrows the locales fields can be translated into. Defaults to the document's locales. */
+	contentLocales?: Accessor<string[]>;
 	options: {
 		padding?: "16" | "24";
 		bleedTop?: boolean;
@@ -207,7 +209,9 @@ export const BrickBody: Component<BrickProps> = (props) => {
 							documentId={documentId}
 							contentLocale={contentLocale}
 							defaultLocale={documentLocalization.defaultLocale}
-							contentLocales={documentLocalization.localeCodes}
+							contentLocales={
+								props.contentLocales ?? documentLocalization.localeCodes
+							}
 							missingFieldColumns={missingFieldColumns}
 							brickRef={brickRef}
 						>

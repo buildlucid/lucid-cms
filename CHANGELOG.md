@@ -36,6 +36,7 @@
 - Fixed password, API key and OAuth client secret hashing blocking the server. Hashing now runs off the main thread, and existing hashes still verify.
 - Fixed job and routine schedules that are empty or can never run, such as 31 February, passing config checks.
 - Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once.
+- Fixed embedded bricks in localized rich text requiring values in every locale.
 
 ## v0.19.0-alpha.0
 

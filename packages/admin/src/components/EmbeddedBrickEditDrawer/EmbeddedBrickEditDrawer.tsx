@@ -11,7 +11,9 @@ import { BrickBody } from "@/components/BrickBody/BrickBody";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import T from "@/translations";
+import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 const EmbeddedBrickEditDrawer: Component<{
@@ -19,6 +21,8 @@ const EmbeddedBrickEditDrawer: Component<{
 		open: boolean;
 		setOpen: (open: boolean) => void;
 		brickRef?: string;
+		/** Locks the drawer to this locale. Unset lets it switch between the document's locales. */
+		locale?: string;
 		zIndex?: number;
 	};
 	collection?: Collection;
@@ -27,6 +31,7 @@ const EmbeddedBrickEditDrawer: Component<{
 	// ----------------------------------------
 	// State
 	const brickStore = useBrickStore();
+	const documentLocalization = useDocumentLocalization();
 	let fieldSnapshot: InternalDocumentField[] | undefined;
 	let capturedBrickRef: string | undefined;
 
@@ -52,6 +57,14 @@ const EmbeddedBrickEditDrawer: Component<{
 					error.ref === props.state.brickRef && error.key === brick()?.key,
 			)?.fields ?? [],
 	);
+	const locales = createMemo(() =>
+		props.state.locale === undefined
+			? documentLocalization.locales()
+			: documentLocalization
+					.locales()
+					.filter((locale) => locale.code === props.state.locale),
+	);
+	const localeCodes = createMemo(() => locales().map((locale) => locale.code));
 	const missingFieldColumns = createMemo(
 		() =>
 			props.collection?.migrationStatus?.missingColumns[brick()?.key ?? ""] ??
@@ -122,12 +135,20 @@ const EmbeddedBrickEditDrawer: Component<{
 				if (!open) cancel();
 			}}
 			zIndex={props.state.zIndex}
+			locales={locales()}
 		>
 			{(contentLocale) => (
 				<>
 					<Drawer.Header>
 						<Drawer.Title>{title()}</Drawer.Title>
 						<Drawer.Description>{summary()}</Drawer.Description>
+						<Drawer.LocaleSelect
+							invalid={brickHelpers.hasErrorsOnOtherLocale({
+								currentLocale: contentLocale() ?? "",
+								fieldErrors: fieldErrors(),
+								brickErrors: [],
+							})}
+						/>
 					</Drawer.Header>
 					<Drawer.Form onSubmit={save}>
 						<Drawer.Body>
@@ -151,6 +172,7 @@ const EmbeddedBrickEditDrawer: Component<{
 										collectionKey={props.collection?.key}
 										documentId={props.documentId}
 										contentLocale={contentLocale}
+										contentLocales={localeCodes}
 										options={{}}
 									/>
 								)}

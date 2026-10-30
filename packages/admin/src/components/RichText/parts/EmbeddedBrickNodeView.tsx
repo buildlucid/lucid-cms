@@ -60,7 +60,7 @@ const EmbeddedBrickNodeView: Component<EmbeddedBrickNodeViewProps> = (
 		<div
 			contentEditable={false}
 			class={classNames(
-				"group my-3 flex w-full select-none items-center gap-3 rounded-xl border bg-card p-3 text-left transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary-low-border [&.ProseMirror-selectednode]:border-primary [&.ProseMirror-selectednode]:ring-2 [&.ProseMirror-selectednode]:ring-primary-low-border",
+				"group my-3 flex w-full select-none items-center gap-3 rounded-xl border bg-card p-3 text-left transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary-low-border [.ProseMirror-focused_&.ProseMirror-selectednode]:border-primary [.ProseMirror-focused_&.ProseMirror-selectednode]:ring-2 [.ProseMirror-focused_&.ProseMirror-selectednode]:ring-primary-low-border",
 				{
 					"border-border": props.available && !hasErrors(),
 					"border-danger-low-border bg-linear-to-b from-danger-low to-card to-30%":

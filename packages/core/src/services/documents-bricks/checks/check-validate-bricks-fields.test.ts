@@ -314,3 +314,36 @@ test("embedded brick fields follow collection localization independently", () =>
 		},
 	]);
 });
+
+test("embedded bricks limited to one locale skip the other locales", () => {
+	const embeddedBrick = new BrickBuilder("callout").addText("heading", {
+		localized: true,
+		validation: { required: true },
+	});
+
+	const errors = recursiveFieldValidate({
+		fields: [
+			{
+				key: "heading",
+				type: "text",
+				translations: { en: "", fr: "", de: "" },
+			},
+		],
+		instance: embeddedBrick,
+		validationData: { media: [], user: [], relation: [] },
+		meta: {
+			localized: true,
+			defaultLocale: "fr",
+			locales: ["en", "fr", "de"],
+			onlyLocale: "fr",
+		},
+	});
+
+	expect(errors).toEqual([
+		{
+			key: "heading",
+			localeCode: "fr",
+			message: copy("server:core.fields.validation.required"),
+		},
+	]);
+});

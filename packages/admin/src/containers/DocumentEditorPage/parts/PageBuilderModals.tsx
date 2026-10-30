@@ -175,6 +175,7 @@ export const PageBuilderModals: Component<{
 					open: embeddedBrickEditModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close("embeddedBrickEdit"),
 					brickRef: embeddedBrickEditModal()?.data.brickRef,
+					locale: embeddedBrickEditModal()?.data.locale,
 					zIndex: embeddedBrickEditModal()?.data.zIndex ?? nestedPanelZIndex(),
 				}}
 				collection={props.hooks.state.collection()}

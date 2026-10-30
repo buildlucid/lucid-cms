@@ -368,6 +368,12 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				pageBuilderModalsStore.open("embeddedBrickEdit", {
 					data: {
 						brickRef: ref,
+						//* each locale of a localized rich text holds its own bricks, and bricks inside a locked one stay locked
+						locale:
+							props.state.localised ||
+							fieldRenderState.contentLocales().length === 1
+								? fieldRenderState.contentLocale()
+								: undefined,
 						zIndex: RICH_TEXT_PICKER_Z_INDEX,
 					},
 					onCallback: () => undefined,

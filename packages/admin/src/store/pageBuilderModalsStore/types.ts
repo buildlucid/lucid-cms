@@ -79,6 +79,8 @@ export type ModalRegistry = {
 	embeddedBrickEdit: {
 		data: {
 			brickRef: string;
+			/** Locks the drawer to this locale, for bricks held by one locale of a localized field. Unset lets the drawer switch locales. */
+			locale?: string;
 			zIndex?: number;
 		};
 		result: undefined;
