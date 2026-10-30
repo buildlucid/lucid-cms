@@ -7,7 +7,8 @@
 	"ignorePatterns": [
 		"packages/client/src/generated",
 		"packages/core/src/libs/email/templates/built-in-schema.ts",
-		"**/*.mjml"
+		"**/*.mjml",
+		"**/kiln.json"
 	],
 	"overrides": [
 		{
