@@ -25,7 +25,7 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<>
+		<span class="mr-1 inline-flex items-center gap-1 empty:hidden">
 			<Show when={access() === "locked"}>
 				<span class="inline" title={T()("fields.permission.locked")}>
 					<TbOutlineLock size={12} />
@@ -50,6 +50,6 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 					<TbOutlineWorld size={12} />
 				</span>
 			</Show>
-		</>
+		</span>
 	);
 };
