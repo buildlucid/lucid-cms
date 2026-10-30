@@ -1,4 +1,3 @@
-import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import type { StatusCode } from "hono/utils/http-status";
 import { describeRoute } from "hono-openapi";
@@ -64,7 +63,7 @@ const revokeController = factory.createHandlers(
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,
 		scope: "oauth-revoke",
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 	}),
 	async (c: LucidHonoContext) => {
 		const context = createServiceContext(c);

@@ -1,4 +1,4 @@
-import { confirm } from "@inquirer/prompts";
+import confirm from "@inquirer/confirm";
 import cliLogger from "../cli/logger.js";
 import runPrompt from "../cli/services/run-prompt.js";
 import type { MigrationApprovalGate } from "../runtime/tasks/run-migrations.js";

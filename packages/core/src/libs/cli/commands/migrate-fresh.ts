@@ -1,4 +1,4 @@
-import { confirm } from "@inquirer/prompts";
+import confirm from "@inquirer/confirm";
 import runMigrateTask from "../../vite/run-migrate-task.js";
 import cliLogger from "../logger.js";
 import runPrompt from "../services/run-prompt.js";

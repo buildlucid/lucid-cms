@@ -1,4 +1,4 @@
-import { CronExpressionParser } from "cron-parser";
+import { Cron } from "croner";
 import { copy } from "../i18n/index.js";
 
 /** Parses schedule input at the API boundary and returns the next UTC occurrence. */
@@ -18,18 +18,16 @@ const nextRoutineOccurrence = (input: {
 		};
 	}
 
+	let next: Date | null;
 	try {
-		return {
-			error: undefined,
-			data: CronExpressionParser.parse(input.cron, {
-				tz: input.timezone,
-				currentDate: input.from,
-			})
-				.next()
-				.toDate()
-				.toISOString(),
-		};
+		next = new Cron(input.cron, { timezone: input.timezone }).nextRun(
+			input.from,
+		);
 	} catch {
+		next = null;
+	}
+	//* a schedule that never matches, such as 31 February, has no next run
+	if (!next) {
 		return {
 			error: {
 				type: "basic" as const,
@@ -39,5 +37,7 @@ const nextRoutineOccurrence = (input: {
 			data: undefined,
 		};
 	}
+
+	return { error: undefined, data: next.toISOString() };
 };
 export default nextRoutineOccurrence;

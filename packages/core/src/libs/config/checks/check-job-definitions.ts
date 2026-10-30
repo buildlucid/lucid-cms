@@ -1,4 +1,4 @@
-import { CronExpressionParser } from "cron-parser";
+import { Cron } from "croner";
 import { isJsonObject } from "../../../utils/helpers/is-json-object.js";
 import { translate } from "../../i18n/index.js";
 import {
@@ -88,11 +88,16 @@ const checkJobDefinitions = async (
 					}),
 				);
 			}
+			let nextRun: Date | null;
 			try {
-				CronExpressionParser.parse(schedule.cron, {
-					tz: schedule.timezone,
-				}).next();
+				nextRun = new Cron(schedule.cron, {
+					timezone: schedule.timezone,
+				}).nextRun();
 			} catch {
+				nextRun = null;
+			}
+			//* a schedule that never matches, such as 31 February, has no next run
+			if (!nextRun) {
 				throw new Error(
 					translate("server:core.config.job.schedule.invalid", {
 						data: { schedule: scheduleKey },

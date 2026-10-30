@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import boxen from "boxen";
+import { stripVTControlCharacters } from "node:util";
 import picocolors from "picocolors";
 import semver from "semver";
 import packageJson from "../../../../package.json" with { type: "json" };
@@ -116,16 +116,25 @@ const renderUpdateBox = (
 		),
 	];
 
-	const box = boxen(lines.join("\n"), {
-		padding: 1,
-		margin: 1,
-		borderStyle: "round",
-		borderColor: "yellow",
-		title: "Update Available",
-		titleAlignment: "left",
-	});
+	const title = " Update Available ";
+	const width = Math.max(
+		title.length + 2,
+		...lines.map((line) => stripVTControlCharacters(line).length),
+	);
+	const row = (line: string) =>
+		`${picocolors.yellow("│")}  ${line}${" ".repeat(width - stripVTControlCharacters(line).length)}  ${picocolors.yellow("│")}`;
 
-	console.log(box);
+	console.log(
+		[
+			"",
+			picocolors.yellow(`╭─${title}${"─".repeat(width + 3 - title.length)}╮`),
+			row(""),
+			...lines.map(row),
+			row(""),
+			picocolors.yellow(`╰${"─".repeat(width + 4)}╯`),
+			"",
+		].join("\n"),
+	);
 };
 
 /**

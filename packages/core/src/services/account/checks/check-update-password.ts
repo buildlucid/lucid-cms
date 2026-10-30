@@ -1,8 +1,7 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
-import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
+import hashSecret from "../../../utils/helpers/hash-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkPassed = (value: string | undefined) => {
@@ -101,9 +100,10 @@ const checkUpdatePassword: ServiceFn<
 	}
 
 	const decryptedSecret = decrypt(data.encryptedSecret, data.encryptionKey);
-	const currentPasswordHash = Buffer.from(
-		scrypt(data.currentPassword as string, decryptedSecret, constants.scrypt),
-	).toString("base64");
+	const currentPasswordHash = await hashSecret(
+		data.currentPassword as string,
+		decryptedSecret,
+	);
 
 	const passwordValid = currentPasswordHash === data.password;
 
@@ -126,9 +126,7 @@ const checkUpdatePassword: ServiceFn<
 
 	const { secret, encryptSecret } = generateSecret(data.encryptionKey);
 
-	newPassword = Buffer.from(
-		scrypt(data.newPassword as string, secret, constants.scrypt),
-	).toString("base64");
+	newPassword = await hashSecret(data.newPassword as string, secret);
 
 	triggerPasswordReset = false as const;
 

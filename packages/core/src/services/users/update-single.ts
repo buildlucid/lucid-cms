@@ -1,4 +1,3 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -7,6 +6,7 @@ import {
 	UsersRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
+import hashSecret from "../../utils/helpers/hash-secret.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -158,9 +158,7 @@ const updateSingle: ServiceFn<
 	if (data.password) {
 		const genSecret = generateSecret(context.config.secrets.encryption);
 		// Hash password using scrypt
-		hashedPassword = Buffer.from(
-			scrypt(data.password, genSecret.secret, constants.scrypt),
-		).toString("base64");
+		hashedPassword = await hashSecret(data.password, genSecret.secret);
 		encryptSecret = genSecret.encryptSecret;
 	}
 

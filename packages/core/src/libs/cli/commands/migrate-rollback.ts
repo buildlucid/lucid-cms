@@ -1,4 +1,4 @@
-import { confirm } from "@inquirer/prompts";
+import confirm from "@inquirer/confirm";
 import { LucidError } from "../../../utils/errors/index.js";
 import cliLogger from "../logger.js";
 import runPrompt from "../services/run-prompt.js";

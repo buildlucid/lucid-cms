@@ -1,8 +1,6 @@
-import { timingSafeEqual } from "node:crypto";
-import { scrypt } from "@noble/hashes/scrypt.js";
-import { randomBytes } from "@noble/hashes/utils.js";
-import constants from "../../../constants/constants.js";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
+import hashSecret from "../../../utils/helpers/hash-secret.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
@@ -10,16 +8,12 @@ export const oauthClientIdPrefix = "lucid_oauth_";
 export const oauthClientSecretPrefix = "lucid_oauth_secret_";
 
 export const createOAuthClientId = () =>
-	`${oauthClientIdPrefix}${Buffer.from(randomBytes(12)).toString("base64url")}`;
+	`${oauthClientIdPrefix}${randomBytes(12).toString("base64url")}`;
 
-export const createOAuthClientSecret = (encryptionKey: string) => {
-	const clientSecret = `${oauthClientSecretPrefix}${Buffer.from(
-		randomBytes(32),
-	).toString("base64url")}`;
+export const createOAuthClientSecret = async (encryptionKey: string) => {
+	const clientSecret = `${oauthClientSecretPrefix}${randomBytes(32).toString("base64url")}`;
 	const { secret, encryptSecret } = generateSecret(encryptionKey);
-	const clientSecretHash = Buffer.from(
-		scrypt(clientSecret, secret, constants.scrypt),
-	).toString("base64");
+	const clientSecretHash = await hashSecret(clientSecret, secret);
 
 	return {
 		clientSecret,
@@ -36,9 +30,7 @@ export const verifyOAuthClientSecret = async (
 ): ServiceResponse<true> => {
 	try {
 		const salt = decrypt(encryptedSalt, encryptionKey);
-		const candidateHash = Buffer.from(
-			scrypt(clientSecret, salt, constants.scrypt),
-		).toString("base64");
+		const candidateHash = await hashSecret(clientSecret, salt);
 		const candidate = Buffer.from(candidateHash, "utf8");
 		const stored = Buffer.from(clientSecretHash, "utf8");
 

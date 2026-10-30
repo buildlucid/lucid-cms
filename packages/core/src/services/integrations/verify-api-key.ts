@@ -1,12 +1,11 @@
 import { timingSafeEqual } from "node:crypto";
-import { scrypt } from "@noble/hashes/scrypt.js";
-import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { filterExternalScopes } from "../../libs/permission/scopes.js";
 import { IntegrationsRepository } from "../../libs/repositories/index.js";
 import type { LucidApiKeyExternalAuth } from "../../types/hono.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import hashSecret from "../../utils/helpers/hash-secret.js";
 import { decodeApiKey } from "../../utils/integrations/encode-api-key.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveUserAuthority from "./resolve-user-authority.js";
@@ -77,9 +76,7 @@ const verifyApiKey: ServiceFn<
 		context.config.secrets.encryption,
 	);
 
-	const inputApiKeyHash = Buffer.from(
-		scrypt(decodedApiKey, secret, constants.scrypt),
-	).toString("base64");
+	const inputApiKeyHash = await hashSecret(decodedApiKey, secret);
 
 	const inputHashBuffer = Buffer.from(inputApiKeyHash, "utf8");
 	const storedHashBuffer = Buffer.from(integrationRes.data.api_key, "utf8");

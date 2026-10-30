@@ -1,16 +1,13 @@
-import { subDays } from "date-fns";
 import { JobsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /** Removes terminal job history after its configured observability window. */
 const clearExpiredJobs: ServiceFn<[], undefined> = async (context) => {
-	const completedBefore = subDays(
-		new Date(),
-		context.config.retention.completedJobs,
+	const completedBefore = new Date(
+		Date.now() - context.config.retention.completedJobs * 24 * 60 * 60 * 1000,
 	).toISOString();
-	const failedBefore = subDays(
-		new Date(),
-		context.config.retention.failedJobs,
+	const failedBefore = new Date(
+		Date.now() - context.config.retention.failedJobs * 24 * 60 * 60 * 1000,
 	).toISOString();
 
 	const Jobs = new JobsRepository(context.db);

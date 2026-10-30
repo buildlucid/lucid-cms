@@ -1,4 +1,3 @@
-import { isPast } from "date-fns";
 import formatter, {
 	mediaShareLinksFormatter,
 } from "../../libs/formatters/index.js";
@@ -35,7 +34,10 @@ const getShareAccess: ServiceFn<
 		};
 	}
 
-	if (linkRes.data.expires_at && isPast(linkRes.data.expires_at)) {
+	if (
+		linkRes.data.expires_at &&
+		new Date(linkRes.data.expires_at).getTime() < Date.now()
+	) {
 		return {
 			error: {
 				type: "basic",

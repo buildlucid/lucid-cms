@@ -1,10 +1,9 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
-import constants from "../../constants/constants.js";
 import formatter, {
 	mediaShareLinksFormatter,
 } from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { MediaShareLink } from "../../types/response.js";
+import hashSecret from "../../utils/helpers/hash-secret.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import generateShareToken from "../../utils/share-link/generate-token.js";
@@ -33,13 +32,7 @@ const createSingle: ServiceFn<
 	const token = generateShareToken();
 
 	const hashedPassword = data.password
-		? Buffer.from(
-				scrypt(
-					data.password,
-					context.config.secrets.encryption,
-					constants.scrypt,
-				),
-			).toString("base64")
+		? await hashSecret(data.password, context.config.secrets.encryption)
 		: null;
 
 	const linkRes = await MediaShareLinks.createSingle({

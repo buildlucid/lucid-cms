@@ -1,7 +1,6 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
-import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
+import hashSecret from "../../utils/helpers/hash-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import generateShareToken from "../../utils/share-link/generate-token.js";
 import assertMediaAccess from "./helpers/assert-media-access.js";
@@ -32,13 +31,10 @@ const updateSingle: ServiceFn<
 	if (data.password === null) {
 		password = null;
 	} else if (typeof data.password === "string") {
-		password = Buffer.from(
-			scrypt(
-				data.password,
-				context.config.secrets.encryption,
-				constants.scrypt,
-			),
-		).toString("base64");
+		password = await hashSecret(
+			data.password,
+			context.config.secrets.encryption,
+		);
 		tokenRefresh = generateShareToken();
 	}
 

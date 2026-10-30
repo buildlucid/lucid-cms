@@ -1,4 +1,3 @@
-import { hoursToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -36,7 +35,7 @@ const getAllController = factory.createHandlers(
 	externalAuthentication(),
 	externalScopes([ExternalScopes.LocalesRead]),
 	cache({
-		ttlSeconds: hoursToSeconds(24),
+		ttlSeconds: 24 * 60 * 60,
 		mode: "static",
 		staticKey: cacheKeys.http.static.contentLocales,
 	}),

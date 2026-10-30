@@ -1,4 +1,3 @@
-import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -132,9 +131,9 @@ const requestEmailChange: ServiceFn<
 		if (supersedeTokensRes?.error) return supersedeTokensRes;
 	}
 
-	const expiresAt = add(new Date(), {
-		minutes: constants.emailChangeTokenExpirationMinutes,
-	}).toISOString();
+	const expiresAt = new Date(
+		Date.now() + constants.emailChangeTokenExpirationMinutes * 60_000,
+	).toISOString();
 	const [confirmTokenRes, revertTokenRes] = await Promise.all([
 		createUserToken(context, {
 			userId: data.auth.id,

@@ -32,7 +32,9 @@ const regenerateSecret: ServiceFn<
 		};
 	}
 
-	const credential = createOAuthClientSecret(context.config.secrets.encryption);
+	const credential = await createOAuthClientSecret(
+		context.config.secrets.encryption,
+	);
 	const updateRes = await OAuthClients.updateSingle({
 		data: {
 			client_secret_hash: credential.clientSecretHash,

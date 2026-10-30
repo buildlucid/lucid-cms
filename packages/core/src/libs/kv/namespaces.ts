@@ -1,11 +1,11 @@
-import { bytesToHex, randomBytes } from "@noble/hashes/utils.js";
+import { randomBytes } from "node:crypto";
 import type { ServiceContext } from "../../utils/services/types.js";
 import cacheKeys from "./cache-keys.js";
 
 const DEFAULT_NAMESPACE_TOKEN = "0";
 
 const createNamespaceToken = () => {
-	return `${Date.now()}:${bytesToHex(randomBytes(16))}`;
+	return `${Date.now()}:${randomBytes(16).toString("hex")}`;
 };
 
 /**

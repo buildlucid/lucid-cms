@@ -1,4 +1,3 @@
-import { addDays, addYears } from "date-fns";
 import type { IntegrationExpiry } from "../../schemas/integrations.js";
 
 /**
@@ -10,11 +9,14 @@ const getExpiryDate = (
 ): string | null => {
 	switch (expiry) {
 		case "30-days":
-			return addDays(now, 30).toISOString();
+			return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
 		case "90-days":
-			return addDays(now, 90).toISOString();
-		case "1-year":
-			return addYears(now, 1).toISOString();
+			return new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString();
+		case "1-year": {
+			const expiresAt = new Date(now);
+			expiresAt.setUTCFullYear(expiresAt.getUTCFullYear() + 1);
+			return expiresAt.toISOString();
+		}
 		case "never":
 			return null;
 	}

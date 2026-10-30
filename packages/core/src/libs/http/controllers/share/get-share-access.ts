@@ -1,4 +1,3 @@
-import { minutesToMilliseconds } from "date-fns";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
@@ -34,7 +33,7 @@ const getShareAccessController = factory.createHandlers(
 		mode: "ip",
 		scope: constants.rateLimit.scopes.low.scopeKey,
 		limit: constants.rateLimit.scopes.low.limit,
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 	}),
 	validate("param", controllerSchemas.getShareAccess.params),
 	async (c) => {

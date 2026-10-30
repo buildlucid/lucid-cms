@@ -1,4 +1,3 @@
-import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import type { StatusCode } from "hono/utils/http-status";
 import { describeRoute } from "hono-openapi";
@@ -46,7 +45,7 @@ const authorizeController = factory.createHandlers(
 		mode: "ip",
 		limit: constants.rateLimit.scopes.low.limit,
 		scope: "oauth-authorize",
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 	}),
 	async (c: LucidHonoContext) => {
 		const context = createServiceContext(c);

@@ -1,9 +1,8 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
-import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
+import hashSecret from "../../utils/helpers/hash-secret.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -39,9 +38,7 @@ const createInitialAdmin: ServiceFn<
 	const { secret, encryptSecret } = generateSecret(
 		context.config.secrets.encryption,
 	);
-	const hashedPassword = Buffer.from(
-		scrypt(data.password, secret, constants.scrypt),
-	).toString("base64");
+	const hashedPassword = await hashSecret(data.password, secret);
 
 	const newUserRes = await Users.createSingle({
 		data: {

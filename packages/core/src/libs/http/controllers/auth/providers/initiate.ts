@@ -1,4 +1,3 @@
-import { minutesToMilliseconds } from "date-fns";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
@@ -48,7 +47,7 @@ const providerInitiateController = factory.createHandlers(
 		mode: "ip",
 		limit: constants.rateLimit.scopes.sensitive.limit,
 		scope: constants.rateLimit.scopes.sensitive.scopeKey,
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 	}),
 	validate("param", controllerSchemas.providerInitiate.params),
 	validate("json", controllerSchemas.providerInitiate.body),

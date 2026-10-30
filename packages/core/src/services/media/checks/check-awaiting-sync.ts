@@ -1,4 +1,3 @@
-import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { MediaAwaitingSyncRepository } from "../../../libs/repositories/index.js";
@@ -30,9 +29,8 @@ const checkAwaitingSync: ServiceFn<
 			{
 				key: "timestamp",
 				operator: ">",
-				value: addMilliseconds(
-					new Date(),
-					constants.mediaAwaitingSyncInterval * -1,
+				value: new Date(
+					Date.now() - constants.mediaAwaitingSyncInterval,
 				).toISOString(),
 			},
 		],

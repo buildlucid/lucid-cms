@@ -1,6 +1,5 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
-import { randomBytes } from "@noble/hashes/utils.js";
-import constants from "../../constants/constants.js";
+import { randomBytes } from "node:crypto";
+import hashSecret from "../helpers/hash-secret.js";
 import { generateSecret } from "../helpers/index.js";
 
 /**
@@ -14,15 +13,13 @@ const generateKeys = async (
 	apiKeyHash: string;
 	secret: string;
 }> => {
-	const apiKey = Buffer.from(randomBytes(32)).toString("hex");
+	const apiKey = randomBytes(32).toString("hex");
 	const { secret, encryptSecret } = generateSecret(encryptionKey);
 
-	const apiKeyHash = Buffer.from(
-		scrypt(apiKey, secret, constants.scrypt),
-	).toString("base64");
+	const apiKeyHash = await hashSecret(apiKey, secret);
 
 	return {
-		key: Buffer.from(randomBytes(3)).toString("hex"),
+		key: randomBytes(3).toString("hex"),
 		apiKey: apiKey,
 		apiKeyHash: apiKeyHash,
 		secret: encryptSecret,

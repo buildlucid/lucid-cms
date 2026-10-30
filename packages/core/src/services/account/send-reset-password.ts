@@ -1,4 +1,3 @@
-import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -56,9 +55,9 @@ const sendResetPassword: ServiceFn<
 		};
 	}
 
-	const expiryDate = add(new Date(), {
-		minutes: constants.passwordResetTokenExpirationMinutes,
-	}).toISOString();
+	const expiryDate = new Date(
+		Date.now() + constants.passwordResetTokenExpirationMinutes * 60_000,
+	).toISOString();
 
 	const userToken = await createUserToken(context, {
 		userId: userExistsRes.data.id,

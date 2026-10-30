@@ -1,9 +1,7 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
-import { isPast } from "date-fns";
-import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
+import hashSecret from "../../utils/helpers/hash-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -42,7 +40,10 @@ const authorizeShare: ServiceFn<
 	}
 
 	//* check if expired
-	if (linkRes.data.expires_at && isPast(linkRes.data.expires_at)) {
+	if (
+		linkRes.data.expires_at &&
+		new Date(linkRes.data.expires_at).getTime() < Date.now()
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -93,13 +94,10 @@ const authorizeShare: ServiceFn<
 			};
 		}
 
-		const hashed = Buffer.from(
-			scrypt(
-				data.providedPassword,
-				context.config.secrets.encryption,
-				constants.scrypt,
-			),
-		).toString("base64");
+		const hashed = await hashSecret(
+			data.providedPassword,
+			context.config.secrets.encryption,
+		);
 
 		if (hashed !== linkRes.data.password) {
 			return {

@@ -1,4 +1,3 @@
-import { subDays } from "date-fns";
 import { NotificationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -9,9 +8,8 @@ const deleteExpiredNotifications: ServiceFn<[], undefined> = async (
 	const Notifications = new NotificationsRepository(context.db);
 
 	const deleteRes = await Notifications.deleteExpired({
-		before: subDays(
-			new Date(),
-			context.config.retention.notifications,
+		before: new Date(
+			Date.now() - context.config.retention.notifications * 24 * 60 * 60 * 1000,
 		).toISOString(),
 	});
 	if (deleteRes.error) return deleteRes;

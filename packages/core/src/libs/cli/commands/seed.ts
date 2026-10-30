@@ -1,4 +1,4 @@
-import { select } from "@inquirer/prompts";
+import select from "@inquirer/select";
 import { LucidError } from "../../../utils/errors/index.js";
 import cliLogger from "../logger.js";
 import runPrompt from "../services/run-prompt.js";

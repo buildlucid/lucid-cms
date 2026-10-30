@@ -1,4 +1,3 @@
-import { isValid } from "date-fns";
 import z from "zod";
 import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
@@ -86,7 +85,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 		if (!valueValidate.valid) return valueValidate;
 
 		const date = new Date(value as string | number | Date);
-		if (!isValid(date)) {
+		if (Number.isNaN(date.getTime())) {
 			return {
 				valid: false,
 				message: copy("server:core.fields.date.validation.invalid"),

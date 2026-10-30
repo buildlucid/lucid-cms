@@ -1,4 +1,4 @@
-import { confirm } from "@inquirer/prompts";
+import confirm from "@inquirer/confirm";
 import cliLogger from "../logger.js";
 import runPrompt from "../services/run-prompt.js";
 import runTaskCommand from "../services/run-task-command.js";

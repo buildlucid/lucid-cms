@@ -17,7 +17,7 @@ describe("OAuth client credentials", () => {
 	});
 
 	test("stores a confidential client secret as a salted hash", async () => {
-		const credential = createOAuthClientSecret(testingConstants.key);
+		const credential = await createOAuthClientSecret(testingConstants.key);
 
 		expect(credential.clientSecret).toMatch(
 			/^lucid_oauth_secret_[A-Za-z0-9_-]{43}$/,

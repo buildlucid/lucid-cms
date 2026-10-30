@@ -1,4 +1,3 @@
-import { minutesToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -41,7 +40,7 @@ const getSingleController = factory.createHandlers(
 	validate("param", controllerSchemas.content.getSingle.params),
 	validate("query", controllerSchemas.content.getSingle.query.string),
 	cache({
-		ttlSeconds: minutesToSeconds(5),
+		ttlSeconds: 5 * 60,
 		mode: "include-query",
 		tags: (c) => [
 			cacheKeys.http.tags.contentMedia,

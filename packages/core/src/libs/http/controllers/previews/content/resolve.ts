@@ -1,4 +1,3 @@
-import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -34,7 +33,7 @@ const resolvePreviewController = factory.createHandlers(
 		mode: "ip",
 		scope: "preview-resolve",
 		limit: constants.rateLimit.scopes.standard.limit,
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 		skip: (c) => Boolean(c.get("externalAuth")),
 	}),
 	validate("json", controllerSchemas.resolve.body),

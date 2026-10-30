@@ -1,4 +1,3 @@
-import { minutesToMilliseconds } from "date-fns";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
@@ -24,7 +23,7 @@ const getStatusController = factory.createHandlers(
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,
 		scope: "auth-status",
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 	}),
 	async (c: LucidHonoContext) => {
 		const statusRes = await authServices.getStatus(createServiceContext(c), {

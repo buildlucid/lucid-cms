@@ -1,5 +1,4 @@
-import { sha256 } from "@noble/hashes/sha2.js";
-import { utf8ToBytes } from "@noble/hashes/utils.js";
+import { createHash } from "node:crypto";
 import type {
 	KVAdapterInstance,
 	KVIncrementCapability,
@@ -32,28 +31,11 @@ export const getNamespacePrefix = (namespace?: KVNamespace): string => {
 	return `${namespace}:`;
 };
 
-const toBase64Url = (bytes: Uint8Array): string => {
-	let binary = "";
-	const chunkSize = 0x8000;
-
-	for (let i = 0; i < bytes.length; i += chunkSize) {
-		const chunk = bytes.subarray(i, i + chunkSize);
-		binary += String.fromCharCode(...chunk);
-	}
-
-	const base64 =
-		typeof btoa === "function"
-			? btoa(binary)
-			: Buffer.from(bytes).toString("base64");
-
-	return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-};
-
 /**
  * Deterministically hash a key
  */
 export const hashKey = (key: string): string =>
-	`${HASH_PREFIX}${toBase64Url(sha256(utf8ToBytes(key)))}`;
+	`${HASH_PREFIX}${createHash("sha256").update(key).digest("base64url")}`;
 
 const utf8ByteLength = (value: string): number => {
 	if (typeof Buffer !== "undefined") return Buffer.byteLength(value, "utf8");

@@ -49,7 +49,7 @@ const createSingle: ServiceFn<
 	const clientId = createOAuthClientId();
 	const credential =
 		data.authMethod === "client_secret_basic"
-			? createOAuthClientSecret(context.config.secrets.encryption)
+			? await createOAuthClientSecret(context.config.secrets.encryption)
 			: undefined;
 
 	let logoMediaId: number | undefined;

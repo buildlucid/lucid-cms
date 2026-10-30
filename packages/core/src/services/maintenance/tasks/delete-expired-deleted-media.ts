@@ -1,4 +1,3 @@
-import { subDays } from "date-fns";
 import { enqueueJobs } from "../../../libs/jobs/enqueue.js";
 import { MediaRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -8,9 +7,8 @@ import { hardDeleteSingleMediaJob } from "../../media/jobs/hard-delete-single.js
 const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 	const Media = new MediaRepository(context.db);
 
-	const compDate = subDays(
-		new Date(),
-		context.config.retention.deletedMedia,
+	const compDate = new Date(
+		Date.now() - context.config.retention.deletedMedia * 24 * 60 * 60 * 1000,
 	).toISOString();
 
 	const softDeletedMediaRes = await Media.selectMultiple({

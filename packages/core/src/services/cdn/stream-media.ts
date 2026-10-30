@@ -1,4 +1,4 @@
-import mime from "mime-types";
+import mime from "mime";
 import { copy } from "../../libs/i18n/index.js";
 import type { MediaStorageAdapterStreamBody } from "../../libs/media-storage/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
@@ -99,7 +99,7 @@ const streamMedia: ServiceFn<
 			key: normalizedKey,
 		});
 		if (metaRes.error) return metaRes;
-		sourceExtension = mime.extension(metaRes.data.mimeType || "") || null;
+		sourceExtension = mime.getExtension(metaRes.data.mimeType || "");
 	}
 
 	const processKey = generateProcessKey({

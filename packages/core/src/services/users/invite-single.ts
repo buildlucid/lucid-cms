@@ -1,4 +1,3 @@
-import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -106,9 +105,9 @@ const inviteSingle: ServiceFn<
 	if (newUserRes.error) return newUserRes;
 
 	// Email Invite
-	const expiryDate = add(new Date(), {
-		minutes: constants.userInviteTokenExpirationMinutes,
-	}).toISOString();
+	const expiryDate = new Date(
+		Date.now() + constants.userInviteTokenExpirationMinutes * 60_000,
+	).toISOString();
 
 	const userTokenRes = await createUserToken(context, {
 		userId: newUserRes.data.id,

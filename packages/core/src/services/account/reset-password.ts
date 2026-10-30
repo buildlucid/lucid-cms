@@ -1,4 +1,3 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -6,6 +5,7 @@ import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
+import hashSecret from "../../utils/helpers/hash-secret.js";
 import {
 	formatEmailSubject,
 	generateSecret,
@@ -129,9 +129,7 @@ const resetPassword: ServiceFn<
 		context.config.secrets.encryption,
 	);
 
-	const hashedPassword = Buffer.from(
-		scrypt(data.password, secret, constants.scrypt),
-	).toString("base64");
+	const hashedPassword = await hashSecret(data.password, secret);
 
 	const [updatedUserRes, auditRes] = await Promise.all([
 		Users.updateSingle({

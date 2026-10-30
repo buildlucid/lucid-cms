@@ -1,5 +1,4 @@
 import { Readable } from "node:stream";
-import { minutesToMilliseconds } from "date-fns";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
@@ -39,7 +38,7 @@ const streamMediaController = factory.createHandlers(
 		mode: "ip",
 		scope: constants.rateLimit.scopes.stream.scopeKey,
 		limit: constants.rateLimit.scopes.stream.limit,
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 	}),
 	validate("param", controllerSchemas.streamShareMedia.params),
 	validate("query", controllerSchemas.streamShareMedia.query.string),

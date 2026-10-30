@@ -1,4 +1,3 @@
-import { subDays } from "date-fns";
 import collections from "../../../libs/collection/collections.js";
 import { getDocumentTableSchema } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { enqueueJobs } from "../../../libs/jobs/enqueue.js";
@@ -29,9 +28,9 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 		.map((table) => table.data)
 		.filter((table) => table !== undefined);
 
-	const compDate = subDays(
-		new Date(),
-		context.config.retention.deletedDocuments,
+	const compDate = new Date(
+		Date.now() -
+			context.config.retention.deletedDocuments * 24 * 60 * 60 * 1000,
 	).toISOString();
 
 	const expiredDocLookup = await Promise.all(

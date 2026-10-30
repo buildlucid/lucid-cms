@@ -1,6 +1,5 @@
 import type { UploadSessionResponse } from "@lucidcms/types";
-import { addMilliseconds } from "date-fns";
-import mime from "mime-types";
+import mime from "mime";
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
@@ -42,7 +41,7 @@ const createUploadSession: ServiceFn<
 	});
 	if (sizeRes.error) return sizeRes;
 
-	const extension = mime.extension(data.mimeType);
+	const extension = mime.getExtension(data.mimeType);
 
 	const keyRes = generateKey({
 		name: data.fileName,
@@ -83,10 +82,7 @@ const createUploadSession: ServiceFn<
 	const now = new Date().toISOString();
 	const expiresAt =
 		("expiresAt" in sessionRes.data ? sessionRes.data.expiresAt : undefined) ??
-		addMilliseconds(
-			new Date(),
-			constants.uploadSessionExpiration,
-		).toISOString();
+		new Date(Date.now() + constants.uploadSessionExpiration).toISOString();
 
 	const adapterUploadId =
 		sessionRes.data.protocol === "multipart-parts"

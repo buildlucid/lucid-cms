@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
 import type { InitiateAuth } from "../../../exports/types.js";
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
@@ -151,10 +150,7 @@ const initiate: ServiceFn<
 					: undefined,
 			action_type: data.actionType,
 			authenticated_user_id: data.authenticatedUserId,
-			expiry_date: addMilliseconds(
-				new Date(),
-				constants.authState.ttl,
-			).toISOString(),
+			expiry_date: new Date(Date.now() + constants.authState.ttl).toISOString(),
 			redirect_path: data.redirectPath,
 		},
 	});

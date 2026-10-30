@@ -33,6 +33,8 @@
 - Fixed migrations failing after removing a plugin that had its own migrations. They are now skipped with a warning, and their tables are left in place.
 - Fixed checkbox fields ignoring their `default` when a value is missing.
 - Fixed wrapped service errors dropping their `key`.
+- Fixed password, API key and OAuth client secret hashing blocking the server. Hashing now runs off the main thread, and existing hashes still verify.
+- Fixed job and routine schedules that are empty or can never run, such as 31 February, passing config checks.
 - Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once.
 
 ## v0.19.0-alpha.0

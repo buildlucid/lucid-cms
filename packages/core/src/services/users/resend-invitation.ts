@@ -1,4 +1,3 @@
-import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
 import formatter from "../../libs/formatters/index.js";
@@ -85,9 +84,9 @@ const resendInvitation: ServiceFn<
 	});
 	if (revokeExistingRes.error) return revokeExistingRes;
 
-	const expiryDate = add(new Date(), {
-		minutes: constants.userInviteTokenExpirationMinutes,
-	}).toISOString();
+	const expiryDate = new Date(
+		Date.now() + constants.userInviteTokenExpirationMinutes * 60_000,
+	).toISOString();
 
 	const userTokenRes = await createUserToken(context, {
 		userId: userRes.data.id,

@@ -1,6 +1,6 @@
 import { copy } from "@lucidcms/core";
 import type { MediaDeliveryAdapterInstance } from "@lucidcms/core/types";
-import mime from "mime-types";
+import mime from "mime";
 import sharp from "sharp";
 import rotateFocalPoint from "./rotate-focal-point.js";
 
@@ -106,7 +106,7 @@ const sharpMediaDeliveryAdapter = (): MediaDeliveryAdapterInstance => ({
 			}
 
 			const outputBuffer = await transform.toBuffer();
-			const mimeType = mime.lookup(options.format || "jpg") || "image/jpeg";
+			const mimeType = mime.getType(options.format || "jpg") || "image/jpeg";
 
 			return {
 				error: undefined,
@@ -115,7 +115,7 @@ const sharpMediaDeliveryAdapter = (): MediaDeliveryAdapterInstance => ({
 					buffer: outputBuffer,
 					mimeType: mimeType,
 					size: outputBuffer.length,
-					extension: mime.extension(mimeType) || "jpg",
+					extension: mime.getExtension(mimeType) || "jpg",
 					shouldStore: true,
 				},
 			};

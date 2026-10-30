@@ -1,7 +1,7 @@
 import { createReadStream } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import mime from "mime-types";
+import mime from "mime";
 import { normalizePath, type Plugin } from "vite";
 import type { ResourceFile } from "../resources/types.js";
 import listPublicAssets from "./list-public-assets.js";
@@ -59,11 +59,12 @@ const publicAssetsPlugin = (files: ResourceFile[]): Plugin => {
 						const file = assets.get(pathname);
 						if (!file) return next();
 
+						const type = mime.getType(file) ?? "application/octet-stream";
 						response.setHeader(
 							"Content-Type",
-							// A full path would be returned as-is, since mime-types reads anything with a slash as a content type.
-							mime.contentType(path.extname(file)) ||
-								"application/octet-stream",
+							type.startsWith("text/") || type.endsWith("json")
+								? `${type}; charset=utf-8`
+								: type,
 						);
 						response.setHeader("Cache-Control", "no-cache");
 						if (request.method === "HEAD") return response.end();

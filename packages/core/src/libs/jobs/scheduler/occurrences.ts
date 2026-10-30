@@ -1,4 +1,4 @@
-import { CronExpressionParser } from "cron-parser";
+import { Cron } from "croner";
 import type { JobSchedule } from "../types.js";
 import { floorToMinute } from "./cursor.js";
 
@@ -13,14 +13,14 @@ export const getDueScheduleOccurrence = (props: {
 	scheduledAt: Date;
 }): Date | undefined => {
 	const scheduledAt = floorToMinute(props.scheduledAt);
-	const occurrence = CronExpressionParser.parse(props.schedule.cron, {
-		currentDate: new Date(scheduledAt.getTime() + 1),
-		tz: props.schedule.timezone,
-	})
-		.prev()
-		.toDate();
+	//* croner reads references to the whole second, so looking back from one second later includes scheduledAt
+	const [occurrence] = new Cron(props.schedule.cron, {
+		timezone: props.schedule.timezone,
+	}).previousRuns(1, new Date(scheduledAt.getTime() + 1000));
 
-	if (occurrence.getTime() > scheduledAt.getTime()) return undefined;
+	if (!occurrence || occurrence.getTime() > scheduledAt.getTime()) {
+		return undefined;
+	}
 
 	if (props.schedule.missed === "skip") {
 		return occurrence.getTime() === scheduledAt.getTime()
@@ -31,14 +31,16 @@ export const getDueScheduleOccurrence = (props: {
 	return occurrence.getTime() > props.cursor.getTime() ? occurrence : undefined;
 };
 
-/** Returns the next occurrence after the supplied date. */
+/** Returns the next occurrence after the supplied date. Config checks reject schedules that never run. */
 export const getNextScheduleOccurrence = (
 	schedule: JobSchedule,
 	after = new Date(),
-) =>
-	CronExpressionParser.parse(schedule.cron, {
-		currentDate: after,
-		tz: schedule.timezone,
-	})
-		.next()
-		.toDate();
+) => {
+	const next = new Cron(schedule.cron, {
+		timezone: schedule.timezone,
+	}).nextRun(after);
+	if (!next) {
+		throw new Error(`Schedule "${schedule.cron}" never runs.`);
+	}
+	return next;
+};

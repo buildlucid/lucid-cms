@@ -1,4 +1,3 @@
-import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
 import { enqueueJobs } from "../../../libs/jobs/enqueue.js";
 import {
@@ -23,9 +22,8 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 				{
 					key: "timestamp",
 					operator: "<",
-					value: addMilliseconds(
-						new Date(),
-						constants.mediaAwaitingSyncInterval * -1,
+					value: new Date(
+						Date.now() - constants.mediaAwaitingSyncInterval,
 					).toISOString(),
 				},
 			],

@@ -1,4 +1,3 @@
-import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -37,7 +36,7 @@ const setScheduleStateController = factory.createHandlers(
 		mode: "user",
 		limit: constants.rateLimit.scopes.sensitive.limit,
 		scope: constants.rateLimit.scopes.sensitive.scopeKey,
-		windowMs: minutesToMilliseconds(1),
+		windowMs: 60_000,
 	}),
 	permissions([Permissions.JobsUpdate]),
 	validate("json", controllerSchemas.setScheduleState.body),
