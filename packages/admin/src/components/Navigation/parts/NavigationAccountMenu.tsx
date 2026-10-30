@@ -5,12 +5,14 @@ import {
 	TbOutlineChevronDown,
 	TbOutlineCircleHalf2,
 	TbOutlineExternalLink,
+	TbOutlineKeyboard,
 	TbOutlineLanguage,
 	TbOutlineLogout,
 	TbOutlineUser,
 } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For } from "solid-js";
 import Menu from "@/components/Menu/Menu";
+import { openShortcutsModal } from "@/components/ShortcutsModal/ShortcutsModal";
 import Spinner from "@/components/Spinner/Spinner";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import constants from "@/constants";
@@ -18,6 +20,7 @@ import themeStore, {
 	type ThemePreference,
 } from "@/store/themeStore/themeStore";
 import T, { getLocale, localesConfig, setLocale } from "@/translations";
+import { shortcuts } from "@/utils/shortcuts";
 
 const NavigationAccountMenu: Component<{
 	user: Pick<User, "username" | "firstName" | "lastName" | "profilePicture">;
@@ -99,6 +102,20 @@ const NavigationAccountMenu: Component<{
 					end={<TbOutlineExternalLink class="size-2.5 shrink-0" />}
 				>
 					{T()("common.documentation")}
+				</Menu.Item>
+				<Menu.Item
+					icon={<TbOutlineKeyboard class="size-3.5 shrink-0" />}
+					end={
+						<kbd class="font-sans text-xs text-muted">
+							{shortcuts.showShortcuts.hotkey}
+						</kbd>
+					}
+					onSelect={() => {
+						props.onNavigate?.();
+						openShortcutsModal();
+					}}
+				>
+					{T()("shortcuts.title")}
 				</Menu.Item>
 				<Menu.Sub
 					label={T()("settings.interface.cms.appearance.title")}

@@ -13,6 +13,8 @@ import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaA
 import MediaGenerationModal from "@/components/MediaGenerationModal/MediaGenerationModal";
 import { Navigation } from "@/components/Navigation/Navigation";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import ShortcutFeedback from "@/components/ShortcutFeedback/ShortcutFeedback";
+import ShortcutsModal from "@/components/ShortcutsModal/ShortcutsModal";
 import { AgentSessionProvider } from "@/hooks/useAgentSession/useAgentSession";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import api from "@/services/api";
@@ -110,6 +112,8 @@ const NavigationShell: Component<{
 						{/* Keep one shared instance of each AI modal for pages and the composer. */}
 						<MediaAltGenerationModal />
 						<MediaGenerationModal />
+						<ShortcutsModal />
+						<ShortcutFeedback />
 					</Show>
 				</div>
 			</AgentSessionProvider>

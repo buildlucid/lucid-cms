@@ -25,7 +25,6 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
-import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useMediaGeneration from "@/hooks/useMediaGeneration/useMediaGeneration";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
@@ -338,15 +337,6 @@ const MediaPage: Component = () => {
 		});
 
 		return actions;
-	});
-
-	// ----------------------------------------
-	// Shortcuts
-	useKeyboardShortcuts({
-		newEntry: {
-			permission: () => createActions().length > 0,
-			callback: () => setOpenCreateMediaFolderModal(true),
-		},
 	});
 
 	// ----------------------------------------

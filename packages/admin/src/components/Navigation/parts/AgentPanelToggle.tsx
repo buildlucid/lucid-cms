@@ -1,13 +1,14 @@
+import { formatForDisplay } from "@tanstack/solid-hotkeys";
 import classnames from "classnames";
 import { TbOutlineRobot } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
-import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import T from "@/translations";
 import {
 	getNavigationActionClasses,
 	type NavigationActionVariant,
 } from "@/utils/navigation";
+import { shortcuts } from "@/utils/shortcuts";
 
 /** Toggles the agent panel, shows busy or waiting status when closed, and stays disabled on pages already showing an agent chat. */
 export const AgentPanelToggle: Component<{
@@ -45,7 +46,7 @@ export const AgentPanelToggle: Component<{
 				aria-label={label()}
 				title={
 					session.panel.available()
-						? `${label()} (${shortcutText.toggleAgentPanel})`
+						? `${label()} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`
 						: label()
 				}
 				onClick={() => session.panel.setOpen(!open())}

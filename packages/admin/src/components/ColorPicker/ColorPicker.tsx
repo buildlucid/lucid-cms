@@ -128,7 +128,6 @@ const ColorPicker: Component<ColorPickerProps> = (props) => {
 						props.description ? `${props.id}-description` : undefined
 					}
 					onInput={(event) => props.onChange(event.currentTarget.value)}
-					onKeyDown={(event) => event.stopPropagation()}
 				/>
 			</div>
 			<Show when={(props.presets?.length ?? 0) > 0}>

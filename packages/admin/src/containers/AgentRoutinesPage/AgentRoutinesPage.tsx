@@ -8,7 +8,6 @@ import type { FilterField } from "@/components/FilterPanel/FilterPanel";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
-import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	numberFilter,
@@ -82,15 +81,6 @@ const AgentRoutinesPage: Component = () => {
 			});
 		}
 		return fields;
-	});
-
-	// ----------------------------------------
-	// Hooks
-	useKeyboardShortcuts({
-		newEntry: {
-			permission: () => canCreate(),
-			callback: () => setCreateOpen(true),
-		},
 	});
 
 	// ----------------------------------------

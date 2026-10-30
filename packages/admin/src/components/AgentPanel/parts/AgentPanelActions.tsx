@@ -1,3 +1,4 @@
+import { formatForDisplay } from "@tanstack/solid-hotkeys";
 import {
 	TbOutlineArrowsDiagonal,
 	TbOutlineDots,
@@ -9,11 +10,11 @@ import {
 import { type Component, For, Match, Show, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
 import Menu from "@/components/Menu/Menu";
-import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import dateHelpers from "@/utils/date-helpers";
+import { shortcuts } from "@/utils/shortcuts";
 
 const recentChats = 5;
 const triggerClasses =
@@ -126,7 +127,7 @@ const AgentPanelActions: Component<{
 				shape="square"
 				variant="ghost"
 				aria-label={T()("agent.panel.close")}
-				title={`${T()("agent.panel.close")} (${shortcutText.toggleAgentPanel})`}
+				title={`${T()("agent.panel.close")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`}
 				onClick={() => props.onClose()}
 			>
 				<TbOutlineX size={12} />

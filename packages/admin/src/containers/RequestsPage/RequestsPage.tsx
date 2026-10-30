@@ -26,7 +26,6 @@ import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnp
 import Table from "@/components/Table/Table";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
-import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
@@ -161,12 +160,6 @@ const RequestsPage: Component = () => {
 		label: T()("requests.title"),
 		filter: findActiveFilterPreset(presets(), searchParams)?.label ?? null,
 	}));
-	useKeyboardShortcuts({
-		newEntry: {
-			permission: () => true,
-			callback: () => setCreateOpen(true),
-		},
-	});
 
 	// ----------------------------------------
 	// Render

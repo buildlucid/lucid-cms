@@ -92,6 +92,7 @@
 		"@solid-primitives/scheduled": "^1.5.3",
 		"@solidjs/router": "^1.0.1",
 		"@tailwindcss/vite": "^4.3.3",
+		"@tanstack/solid-hotkeys": "^0.18.0",
 		"@tanstack/solid-query": "^5.105.0",
 		"@thisbeyond/solid-dnd": "^0.7.5",
 		"@tiptap/core": "^3.32.2",

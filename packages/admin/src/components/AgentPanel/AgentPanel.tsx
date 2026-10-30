@@ -1,6 +1,7 @@
+import { createHotkey } from "@tanstack/solid-hotkeys";
 import { type Component, createEffect, onCleanup, Show } from "solid-js";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
-import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
+import { shortcuts } from "@/utils/shortcuts";
 import AgentPanelContent from "./parts/AgentPanelContent";
 
 /**
@@ -16,12 +17,13 @@ const AgentPanel: Component = () => {
 
 	// ----------------------------------------
 	// Effects
-	useKeyboardShortcuts({
-		toggleAgentPanel: {
-			permission: session.panel.available,
-			callback: () => session.panel.setOpen(!session.panel.open()),
-		},
-	});
+	createHotkey(
+		shortcuts.toggleAgentPanel.hotkey,
+		() => session.panel.setOpen(!session.panel.open()),
+		() => ({
+			enabled: session.panel.available(),
+		}),
+	);
 	//* the content-* variants and the panel's spacing token read this
 	createEffect(() =>
 		document.documentElement.toggleAttribute(

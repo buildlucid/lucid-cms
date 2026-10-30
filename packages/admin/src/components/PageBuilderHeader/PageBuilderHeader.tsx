@@ -1,3 +1,4 @@
+import { createHotkey, formatForDisplay } from "@tanstack/solid-hotkeys";
 import type {
 	Collection,
 	DocumentVersionUpdateResponse,
@@ -30,7 +31,6 @@ import type { UseDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumen
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
-import { shortcutText } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
@@ -42,6 +42,7 @@ import helpers from "@/utils/helpers";
 import { getLiveDocumentUrl } from "@/utils/live-document-url";
 import { getDocumentProposals } from "@/utils/requests";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
+import { shortcuts } from "@/utils/shortcuts";
 import spawnToast from "@/utils/spawn-toast";
 import { AutoSaveStatusPill } from "./parts/AutoSaveStatusPill";
 import { DocumentActions } from "./parts/DocumentActions";
@@ -479,6 +480,12 @@ export const PageBuilderHeader: Component<{
 		return publishOptions().find((option) => option.value === version);
 	});
 	//* the create screen creates by default, or requests when creating isn't available
+	const isBusy = createMemo(
+		() =>
+			props.state.ui.isSaving() ||
+			props.state.ui.isAutoSaving() ||
+			props.state.ui.isPublishing(),
+	);
 	const createDefault = createMemo(() =>
 		props.mode === "create" ? props.state.ui.createActions()[0] : undefined,
 	);
@@ -553,6 +560,27 @@ export const PageBuilderHeader: Component<{
 
 	// ----------------------------------
 	// Functions
+	const save = () => {
+		if (createDefault() === "request") {
+			props.state.ui.setDocumentRequestOpen(true);
+			return;
+		}
+		props.state.autoSave?.debouncedAutoSave.clear();
+		props.actions?.upsertDocumentAction?.();
+	};
+	//* mirrors the save button, which explains a missing permission and is disabled while there's nothing to save
+	const saveFromShortcut = () => {
+		if (!props.state.ui.hasSavePermission()) {
+			spawnToast({
+				title: T()("toasts.common.no.permission.title"),
+				message: T()("toasts.common.no.permission.message"),
+				status: "warning",
+			});
+			return;
+		}
+		if (props.state.ui.saveDisabled() || isBusy()) return;
+		save();
+	};
 	const openPublishOption = (option: PublishTriggerOption) => {
 		if (option.disabledToast) {
 			spawnToast({
@@ -609,6 +637,16 @@ export const PageBuilderHeader: Component<{
 
 	// ----------------------------------
 	// Effects
+	createHotkey(shortcuts.save.hotkey, saveFromShortcut, () => ({
+		enabled: props.state.ui.showUpsertButton(),
+		//* the browser's save page dialog never helps here, even while saving can't run
+		preventDefault: "always",
+	}));
+	createHotkey(
+		shortcuts.togglePreview.hotkey,
+		() => props.actions.togglePreview?.(),
+		() => ({ enabled: props.state.showPreview?.() === true }),
+	);
 	onMount(() => {
 		if (!stickyBarRef) return;
 
@@ -762,7 +800,7 @@ export const PageBuilderHeader: Component<{
 												variant="ghost"
 												size="sm"
 												shape="square"
-												title={`${T()("builder.undo")} (${shortcutText.undo})`}
+												title={`${T()("builder.undo")} (${formatForDisplay(shortcuts.undo.hotkey)})`}
 												aria-label={T()("builder.undo")}
 												disabled={!edits().canUndo()}
 												class={editButtonClass}
@@ -775,7 +813,7 @@ export const PageBuilderHeader: Component<{
 												variant="ghost"
 												size="sm"
 												shape="square"
-												title={`${T()("builder.redo")} (${shortcutText.redo})`}
+												title={`${T()("builder.redo")} (${formatForDisplay(shortcuts.redo.hotkey)})`}
 												aria-label={T()("builder.redo")}
 												disabled={!edits().canRedo()}
 												class={editButtonClass}
@@ -861,7 +899,7 @@ export const PageBuilderHeader: Component<{
 									variant={props.state.previewOpen?.() ? "primary" : "outline"}
 									size="sm"
 									shape="square"
-									title={T()("common.preview")}
+									title={`${T()("common.preview")} (${formatForDisplay(shortcuts.togglePreview.hotkey)})`}
 									aria-label={T()("common.preview")}
 									aria-pressed={props.state.previewOpen?.()}
 									class={
@@ -884,14 +922,7 @@ export const PageBuilderHeader: Component<{
 									options={publishOptions}
 									onSelect={openPublishOption}
 									actions={createAlternatives()}
-									onSave={() => {
-										if (createDefault() === "request") {
-											props.state.ui.setDocumentRequestOpen(true);
-											return;
-										}
-										props.state.autoSave?.debouncedAutoSave.clear();
-										props.actions?.upsertDocumentAction?.();
-									}}
+									onSave={save}
 									saveLabel={
 										createDefault() === "request"
 											? T()("documents.request.action")
@@ -901,11 +932,7 @@ export const PageBuilderHeader: Component<{
 									}
 									saveDisabled={props.state.ui.saveDisabled?.()}
 									savePermission={props.state.ui.hasSavePermission?.()}
-									loading={
-										props.state.ui.isSaving?.() ||
-										props.state.ui.isAutoSaving?.() ||
-										props.state.ui.isPublishing?.()
-									}
+									loading={isBusy()}
 								/>
 							</Show>
 							<Show when={props.state.ui.showRestoreRevisionButton?.()}>

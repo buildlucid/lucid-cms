@@ -98,7 +98,6 @@ const Textarea: Component<TextareaProps> = (props) => {
 					local.description ? `${local.id}-description` : undefined
 				}
 				onInput={(event) => local.onChange(event.currentTarget.value)}
-				onKeyDown={(event) => event.stopPropagation()}
 			/>
 			<Field.Error />
 			<Show when={local.description}>

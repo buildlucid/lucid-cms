@@ -1,8 +1,6 @@
 import type { Collection } from "@types";
 import { type Accessor, onCleanup, onMount } from "solid-js";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import { inModal } from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
-import getEditShortcut from "@/hooks/useKeyboardShortcuts/utils/edit-shortcut";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import type {
 	BricksEditState,
@@ -16,6 +14,8 @@ import {
 	getChangedFieldPaths,
 	highlightBuilderFields,
 } from "@/utils/builder-reveal";
+import getEditShortcut from "@/utils/edit-shortcut";
+import { inModal } from "@/utils/shortcuts";
 
 /** Editors with their own undo history, eg. rich text and code, mark themselves so they get the shortcut first while focused. */
 const ownsUndoSelector = "[data-owns-undo]";

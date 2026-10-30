@@ -1,6 +1,15 @@
+import { useNavigate } from "@solidjs/router";
+import { createHotkey } from "@tanstack/solid-hotkeys";
 import classNames from "classnames";
 import { TbOutlineChevronRight, TbOutlinePlus } from "solid-icons/tb";
-import { type Component, createMemo, For, Match, Switch } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	For,
+	Match,
+	Switch,
+} from "solid-js";
 import ActionIcon, {
 	type ActionIconName,
 } from "@/components/ActionIcon/ActionIcon";
@@ -8,6 +17,7 @@ import Button from "@/components/Button/Button";
 import Link from "@/components/Link/Link";
 import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
+import { inModal, shortcuts } from "@/utils/shortcuts";
 import spawnToast from "@/utils/spawn-toast";
 
 export type CreateMenuAction =
@@ -33,11 +43,17 @@ export type CreateMenuAction =
 
 /**
  * A page's create control. One thing to create renders a button, more than one
- * renders a menu behind the same plus trigger.
+ * renders a menu behind the same plus trigger. The new entry shortcut runs the
+ * single action or opens the menu.
  */
 const CreateMenu: Component<{
 	actions: CreateMenuAction[];
 }> = (props) => {
+	// ----------------------------------
+	// State & Hooks
+	const navigate = useNavigate();
+	const [menuOpen, setMenuOpen] = createSignal(false);
+
 	// ----------------------------------
 	// Memos
 	const visibleActions = createMemo(() => props.actions);
@@ -63,6 +79,27 @@ const CreateMenu: Component<{
 
 		action.onClick();
 	};
+	const runShortcut = () => {
+		//* a drawer or modal opened from the page has its own work in progress
+		if (inModal()) return;
+		if (visibleActions().length > 1) {
+			setMenuOpen(true);
+			return;
+		}
+
+		const action = singleAction();
+		if (!action) return;
+		if (action.type === "button") handleButtonAction(action);
+		else navigate(action.href);
+	};
+
+	// ----------------------------------
+	// Effects
+	createHotkey(shortcuts.newEntry.hotkey, runShortcut, () => ({
+		enabled: visibleActions().length > 0,
+		//* pages swap their menus as they change, so the newest one answers
+		conflictBehavior: "replace",
+	}));
 
 	// ----------------------------------
 	// Render
@@ -110,7 +147,7 @@ const CreateMenu: Component<{
 		<Switch>
 			<Match when={visibleActions().length === 1}>{renderSingleAction()}</Match>
 			<Match when={visibleActions().length > 1}>
-				<Menu.Root>
+				<Menu.Root open={menuOpen()} onOpenChange={setMenuOpen}>
 					<Menu.Trigger
 						class="w-9 min-w-9 h-9 bg-primary hover:bg-primary-hover text-primary-foreground border border-transparent outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors"
 						onClick={(e) => e.stopPropagation()}

@@ -20,7 +20,6 @@ import {
 } from "solid-js";
 import Field from "@/components/Field/Field";
 import Menu from "@/components/Menu/Menu";
-import getEditShortcut from "@/hooks/useKeyboardShortcuts/utils/edit-shortcut";
 import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
 import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
@@ -264,9 +263,9 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 					});
 				}
 			},
-			//* keys stay in the editor so page shortcuts don't fire while typing, except undo and redo, which reach the document when the editor has nothing to undo
+			//* plain keys such as Escape and Tab stay with the editor, while Cmd/Ctrl shortcuts reach the page, including undo and redo when the editor has nothing to undo
 			keydown(e) {
-				if (!getEditShortcut(e)) e.stopPropagation();
+				if (!e.metaKey && !e.ctrlKey) e.stopPropagation();
 			},
 		}),
 	);

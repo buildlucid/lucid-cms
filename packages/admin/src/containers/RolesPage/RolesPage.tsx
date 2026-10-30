@@ -8,7 +8,6 @@ import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { RolesList } from "@/components/RolesList/RolesList";
 import UpsertRoleDrawer from "@/components/UpsertRoleDrawer/UpsertRoleDrawer";
 import { Permissions } from "@/constants/permissions";
-import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
@@ -59,15 +58,6 @@ const RolesPage: Component = () => {
 				]
 			: [],
 	);
-
-	// ----------------------------------
-	// Hooks
-	useKeyboardShortcuts({
-		newEntry: {
-			permission: () => canCreate(),
-			callback: () => setOpenCreateRolePanel(true),
-		},
-	});
 
 	// ----------------------------------
 	// Render

@@ -10,7 +10,6 @@ import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import UpsertAgentMemoryModal from "@/components/UpsertAgentMemoryModal/UpsertAgentMemoryModal";
 import { Permissions } from "@/constants/permissions";
-import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
@@ -82,15 +81,6 @@ const AgentMemoriesPage: Component = () => {
 			count: list.memories.length,
 			limit: list.limit,
 		});
-
-	// ----------------------------------------
-	// Hooks
-	useKeyboardShortcuts({
-		newEntry: {
-			permission: () => scopes().length > 0,
-			callback: () => openUpsert(undefined),
-		},
-	});
 
 	// ----------------------------------------
 	// Render

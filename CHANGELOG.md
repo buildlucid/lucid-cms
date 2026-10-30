@@ -12,6 +12,7 @@
 - Lucid now runs on Vite. `lucidcms dev`, `build` and `serve` use `lucid()` from `@lucidcms/core/vite`, which frameworks such as Astro add to their own config, and commands such as `migrate` and `seed` run inside the runtime with its bindings.
 - Plugins can add to the project's Vite app with a `vite` hook, and run work inside the runtime with typed `tasks` from `definePluginTask`.
 - Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them.
+- Added admin keyboard shortcuts for saving, previewing, creating and switching locales, with a shortcuts list on `?` and in the account menu.
 
 ### Breaking Changes:
 
