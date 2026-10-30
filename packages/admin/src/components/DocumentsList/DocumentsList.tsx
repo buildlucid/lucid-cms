@@ -15,7 +15,14 @@ import {
 	TbOutlineUser,
 	TbOutlineUserCheck,
 } from "solid-icons/tb";
-import { type Accessor, type Component, createMemo, Index } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createEffect,
+	createMemo,
+	Index,
+	on,
+} from "solid-js";
 import { documentListSlots } from "virtual:lucid-admin";
 import Button from "@/components/Button/Button";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
@@ -32,6 +39,7 @@ import { resolveSlots } from "@/extensions/slot-policy";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
+import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
@@ -68,6 +76,7 @@ export const DocumentsList: Component<{
 	const navigate = useNavigate();
 	const params = useParams<{ collectionKey: string }>();
 	const queryClient = useQueryClient();
+	const selection = useTableSelection<InternalCollectionDocument>();
 	const session = useAgentSession();
 	const rowTarget = useRowTarget({
 		triggers: {
@@ -338,24 +347,18 @@ export const DocumentsList: Component<{
 
 	// ----------------------------------
 	// Functions
-	const addSelectedToChat = async (selected: boolean[]) =>
+	const addSelectedToChat = async (rows: InternalCollectionDocument[]) =>
 		session.attach(
-			(documents.data?.data ?? []).flatMap((row, index): AgentReferenceItem[] =>
-				selected[index]
-					? [
-							{
-								type: "document",
-								collectionKey: collectionKey(),
-								documentId: row.id,
-								label: getDocumentPreviewLabel({
-									collection: props.state.collection,
-									document: row,
-									contentLocale: contentLocale(),
-								}),
-							},
-						]
-					: [],
-			),
+			rows.map((row): AgentReferenceItem => ({
+				type: "document",
+				collectionKey: collectionKey(),
+				documentId: row.id,
+				label: getDocumentPreviewLabel({
+					collection: props.state.collection,
+					document: row,
+					contentLocale: contentLocale(),
+				}),
+			})),
 		);
 	const reorderRows = (dragIndex: number, targetIndex: number) => {
 		const rows = documents.data?.data ?? [];
@@ -419,6 +422,15 @@ export const DocumentsList: Component<{
 	};
 
 	// ----------------------------------------
+	// Effects
+	//* the selection survives paging and filters, but deleted rows take different actions
+	createEffect(
+		on([collectionKey, props.state.showingDeleted], () => selection.clear(), {
+			defer: true,
+		}),
+	);
+
+	// ----------------------------------------
 	// Render
 	return (
 		<>
@@ -448,6 +460,8 @@ export const DocumentsList: Component<{
 				<Table.Root
 					id={`documents.list.${props.state.collection?.key}`}
 					rowCount={documents.data?.data.length || 0}
+					data={documents.data?.data}
+					selection={selection}
 					queryState={props.state.searchParams}
 					columns={[
 						...getTableHeadColumns(),
@@ -501,45 +515,27 @@ export const DocumentsList: Component<{
 					}
 					reorderable={rowsAreReorderable()}
 					onReorder={reorderRows}
-					onDeleteRows={async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && documents.data?.data[i].id) {
-								ids.push(documents.data?.data[i].id);
-							}
-						}
+					onDeleteRows={async (rows) => {
 						await deleteMultiple.action.mutateAsync({
 							collectionKey: collectionKey(),
 							body: {
-								ids: ids,
+								ids: rows.map((row) => row.id),
 							},
 						});
 					}}
-					onRestoreRows={async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && documents.data?.data[i].id) {
-								ids.push(documents.data?.data[i].id);
-							}
-						}
+					onRestoreRows={async (rows) => {
 						await restoreDocuments.action.mutateAsync({
 							collectionKey: collectionKey(),
 							body: {
-								ids: ids,
+								ids: rows.map((row) => row.id),
 							},
 						});
 					}}
-					onDeletePermanentlyRows={async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && documents.data?.data[i].id) {
-								ids.push(documents.data?.data[i].id);
-							}
-						}
+					onDeletePermanentlyRows={async (rows) => {
 						await deleteMultiplePermanently.action.mutateAsync({
 							collectionKey: collectionKey(),
 							body: {
-								ids: ids,
+								ids: rows.map((row) => row.id),
 							},
 						});
 					}}

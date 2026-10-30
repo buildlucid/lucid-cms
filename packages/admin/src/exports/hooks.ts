@@ -6,6 +6,11 @@ export * from "../hooks/useQueryState/useQueryState.js";
 export { default as useQueryState } from "../hooks/useQueryState/useQueryState.js";
 export { useSession } from "../hooks/useSession/useSession.js";
 export {
+	type TableRowId,
+	type TableSelection,
+	useTableSelection,
+} from "../hooks/useTableSelection/useTableSelection.js";
+export {
 	type TranslationKey,
 	type TranslationRegistry,
 	useTranslation,

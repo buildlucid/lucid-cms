@@ -7,6 +7,7 @@ import {
 import { type Component, createMemo, Index } from "solid-js";
 import AgentMemoryTableRow from "@/components/AgentMemoryTableRow/AgentMemoryTableRow";
 import Table, { type TableSelectActionItem } from "@/components/Table/Table";
+import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -20,12 +21,16 @@ const AgentMemoryTable: Component<{
 	onDelete: (_memory: AgentMemory) => void;
 }> = (props) => {
 	// ----------------------------------------
+	// State & Hooks
+	const selection = useTableSelection<AgentMemory>();
+
+	// ----------------------------------------
 	// Mutations
 	const deleteMemories = api.agent.useDeleteMemories();
 
 	// ----------------------------------------
 	// Memos
-	const selectActions = createMemo<TableSelectActionItem[]>(() =>
+	const selectActions = createMemo<TableSelectActionItem<AgentMemory>[]>(() =>
 		props.editable
 			? [
 					{
@@ -37,11 +42,11 @@ const AgentMemoryTable: Component<{
 							description: T()("modals.agent.memories.delete.description"),
 							confirmVariant: "danger",
 						},
-						onClick: async (selected) => {
-							const ids = props.memories
-								.filter((_, index) => selected[index])
-								.map((memory) => memory.id);
-							if (ids.length) await deleteMemories.action.mutateAsync({ ids });
+						onClick: async (rows) => {
+							if (rows.length === 0) return;
+							await deleteMemories.action.mutateAsync({
+								ids: rows.map((memory) => memory.id),
+							});
 						},
 					},
 				]
@@ -55,6 +60,8 @@ const AgentMemoryTable: Component<{
 			<Table.Root
 				id={props.id}
 				rowCount={props.memories.length}
+				data={props.memories}
+				selection={selection}
 				loading={props.loading}
 				loadingRows={3}
 				selectActions={selectActions()}

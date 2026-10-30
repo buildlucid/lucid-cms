@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/solid-query";
+import type { RequestSummary } from "@types";
 import {
 	TbOutlineCalendar,
 	TbOutlineCircleCheck,
@@ -34,6 +35,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
@@ -53,6 +55,7 @@ const RequestsPage: Component = () => {
 	usePageTitle(() => T()("requests.title"));
 	const queryClient = useQueryClient();
 	const session = useAgentSession();
+	const selection = useTableSelection<RequestSummary>();
 	const [createOpen, setCreateOpen] = createSignal(false);
 	const [unpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
@@ -141,14 +144,13 @@ const RequestsPage: Component = () => {
 
 	// ----------------------------------------
 	// Functions
-	const addSelectedToChat = async (selected: boolean[]) =>
+	const addSelectedToChat = async (rows: RequestSummary[]) =>
 		session.attach(
-			(requests.data?.data ?? []).flatMap(
-				(request, index): AgentReferenceItem[] =>
-					selected[index]
-						? [{ type: "request", requestId: request.id, label: request.title }]
-						: [],
-			),
+			rows.map((request): AgentReferenceItem => ({
+				type: "request",
+				requestId: request.id,
+				label: request.title,
+			})),
 		);
 
 	// ----------------------------------------
@@ -310,6 +312,8 @@ const RequestsPage: Component = () => {
 					<Table.Root
 						id="requests.list"
 						rowCount={requests.data?.data.length ?? 0}
+						data={requests.data?.data}
+						selection={selection}
 						queryState={searchParams}
 						selectActions={
 							session.panel.available() &&

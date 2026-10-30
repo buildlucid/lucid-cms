@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/solid-query";
+import type { Notification } from "@types";
 import {
 	TbOutlineBell,
 	TbOutlineCalendar,
@@ -7,7 +8,14 @@ import {
 	TbOutlineTag,
 	TbOutlineUser,
 } from "solid-icons/tb";
-import { type Component, createMemo, createSignal, Index } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Index,
+	on,
+} from "solid-js";
 import ArchiveNotificationModal from "@/components/ArchiveNotificationModal/ArchiveNotificationModal";
 import Button from "@/components/Button/Button";
 import EmptyState from "@/components/EmptyState/EmptyState";
@@ -26,6 +34,7 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
+import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 import api from "@/services/api";
 import type { Params as UpdateNotificationsParams } from "@/services/api/notifications/useUpdateMultiple";
 import { queryKeys } from "@/services/query-keys";
@@ -57,6 +66,7 @@ const NotificationsPage: Component = () => {
 		singleSort: true,
 	});
 	const rowTarget = useRowTarget({ triggers: { archive: false } });
+	const selection = useTableSelection<Notification>();
 	const [readAllOpen, setReadAllOpen] = createSignal(false);
 
 	// ----------------------------------------
@@ -114,64 +124,73 @@ const NotificationsPage: Component = () => {
 	const showingArchived = createMemo(
 		() => searchParams.filters().get("status") === "archived",
 	);
-	const selectActions = createMemo<TableSelectActionItem[]>(() => [
-		showingArchived()
-			? {
-					label: T()("notifications.unarchive"),
-					icon: "restore",
-					variant: "primary",
-					confirm: {
-						title: T()("modals.notifications.unarchive.items.title"),
-						description: T()(
-							"modals.notifications.unarchive.items.description",
-						),
+	const selectActions = createMemo<TableSelectActionItem<Notification>[]>(
+		() => [
+			showingArchived()
+				? {
+						label: T()("notifications.unarchive"),
+						icon: "restore",
+						variant: "primary",
+						confirm: {
+							title: T()("modals.notifications.unarchive.items.title"),
+							description: T()(
+								"modals.notifications.unarchive.items.description",
+							),
+						},
+						onClick: (rows) => updateSelected(rows, { archived: false }),
+					}
+				: {
+						label: T()("notifications.archive"),
+						icon: "archive",
+						variant: "danger",
+						confirm: {
+							title: T()("modals.notifications.archive.items.title"),
+							description: T()(
+								"modals.notifications.archive.items.description",
+							),
+							confirmVariant: "danger",
+						},
+						onClick: (rows) =>
+							updateSelected(rows, { archived: true, read: true }),
 					},
-					onClick: (selected) => updateSelected(selected, { archived: false }),
-				}
-			: {
-					label: T()("notifications.archive"),
-					icon: "archive",
-					variant: "danger",
-					confirm: {
-						title: T()("modals.notifications.archive.items.title"),
-						description: T()("modals.notifications.archive.items.description"),
-						confirmVariant: "danger",
-					},
-					onClick: (selected) =>
-						updateSelected(selected, { archived: true, read: true }),
+			{
+				label: T()("notifications.mark.read"),
+				icon: "check",
+				confirm: {
+					title: T()("modals.notifications.read.items.title"),
+					description: T()("modals.notifications.read.items.description"),
 				},
-		{
-			label: T()("notifications.mark.read"),
-			icon: "check",
-			confirm: {
-				title: T()("modals.notifications.read.items.title"),
-				description: T()("modals.notifications.read.items.description"),
+				onClick: (rows) => updateSelected(rows, { read: true }),
 			},
-			onClick: (selected) => updateSelected(selected, { read: true }),
-		},
-		{
-			label: T()("notifications.mark.unread"),
-			icon: "email",
-			confirm: {
-				title: T()("modals.notifications.unread.items.title"),
-				description: T()("modals.notifications.unread.items.description"),
+			{
+				label: T()("notifications.mark.unread"),
+				icon: "email",
+				confirm: {
+					title: T()("modals.notifications.unread.items.title"),
+					description: T()("modals.notifications.unread.items.description"),
+				},
+				onClick: (rows) => updateSelected(rows, { read: false }),
 			},
-			onClick: (selected) => updateSelected(selected, { read: false }),
-		},
-	]);
+		],
+	);
 
 	// ----------------------------------------
 	// Functions
 	const updateSelected = async (
-		selected: boolean[],
+		rows: Notification[],
 		changes: Pick<UpdateNotificationsParams, "read" | "archived">,
 	) => {
-		const ids = (notifications.data?.data ?? [])
-			.filter((_, index) => selected[index])
-			.map((notification) => notification.id);
-		if (ids.length === 0) return;
-		await update.action.mutateAsync({ ids, ...changes });
+		if (rows.length === 0) return;
+		await update.action.mutateAsync({
+			ids: rows.map((notification) => notification.id),
+			...changes,
+		});
 	};
+
+	// ----------------------------------------
+	// Effects
+	//* the selection survives paging and filters, but archived rows take different actions
+	createEffect(on(showingArchived, () => selection.clear(), { defer: true }));
 
 	// ----------------------------------------
 	// Render
@@ -239,6 +258,7 @@ const NotificationsPage: Component = () => {
 						id="notifications.list"
 						rowCount={notifications.data?.data.length ?? 0}
 						data={notifications.data?.data}
+						selection={selection}
 						queryState={searchParams}
 						loading={summary.isLoading || notifications.isLoading}
 						selectActions={selectActions()}

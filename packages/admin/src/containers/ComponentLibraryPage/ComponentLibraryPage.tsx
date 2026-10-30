@@ -100,6 +100,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 
 /**
  * Keys of a record over each exported union, so adding or removing a value
@@ -345,6 +346,7 @@ const ComponentLibraryPage: Component = () => {
 	// ----------------------------------------
 	// State
 	usePageTitle(() => "Component Library");
+	const tableSelection = useTableSelection<(typeof demoRows)[number]>();
 	const [inputValue, setInputValue] = createSignal("Sample text");
 	const [textareaValue, setTextareaValue] = createSignal(
 		"This is a sample textarea.\n\nIt supports multiple lines.",
@@ -1820,6 +1822,8 @@ const ComponentLibraryPage: Component = () => {
 							<Table.Root
 								id="components.table.selectable"
 								rowCount={demoRows.length}
+								data={demoRows}
+								selection={tableSelection}
 								allowDelete={true}
 								onDeleteRows={async () => {}}
 								columns={[

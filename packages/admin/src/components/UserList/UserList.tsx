@@ -1,3 +1,4 @@
+import type { User } from "@types";
 import {
 	TbOutlineCalendar,
 	TbOutlineId,
@@ -33,6 +34,7 @@ import ViewUserLoginsDrawer from "@/components/ViewUserLoginsDrawer/ViewUserLogi
 import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
+import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -60,6 +62,7 @@ export const UserList: Component<{
 			resendInvitation: false,
 		},
 	});
+	const selection = useTableSelection<User>();
 	const [apiKey, setAPIKey] = createSignal<string>();
 	const [copyAPIKeyOpen, setCopyAPIKeyOpen] = createSignal(false);
 
@@ -152,6 +155,8 @@ export const UserList: Component<{
 				<Table.Root
 					id="users.list"
 					rowCount={users.data?.data.length || 0}
+					data={users.data?.data}
+					selection={selection}
 					queryState={props.state.searchParams}
 					columns={[
 						{
@@ -198,29 +203,17 @@ export const UserList: Component<{
 					allowDeletePermanently={
 						props.state.showingDeleted() && canDeleteUsersPermanently()
 					}
-					onDeletePermanentlyRows={async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && users.data?.data[i].id) {
-								ids.push(users.data?.data[i].id);
-							}
-						}
+					onDeletePermanentlyRows={async (rows) => {
 						await deleteUsersPermanently.action.mutateAsync({
 							body: {
-								ids: ids,
+								ids: rows.map((row) => row.id),
 							},
 						});
 					}}
-					onRestoreRows={async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && users.data?.data[i].id) {
-								ids.push(users.data?.data[i].id);
-							}
-						}
+					onRestoreRows={async (rows) => {
 						await restoreUsers.action.mutateAsync({
 							body: {
-								ids: ids,
+								ids: rows.map((row) => row.id),
 							},
 						});
 					}}

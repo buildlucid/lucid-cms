@@ -1,9 +1,8 @@
 import {
 	type Accessor,
-	type Component,
 	createMemo,
 	createSignal,
-	type Setter,
+	type JSXElement,
 	Show,
 } from "solid-js";
 import type { ActionIconName } from "@/components/ActionIcon/ActionIcon";
@@ -14,7 +13,7 @@ import SelectionBar, {
 } from "@/components/SelectionBar/SelectionBar";
 import T from "@/translations";
 
-export interface TableSelectActionItem {
+export interface TableSelectActionItem<TRow> {
 	label: string;
 	/** Shown beside it in the actions menu. */
 	icon: ActionIconName;
@@ -26,25 +25,28 @@ export interface TableSelectActionItem {
 		/** @default "primary" */
 		confirmVariant?: ButtonVariant;
 	};
-	onClick: (_selected: boolean[]) => Promise<void>;
+	/** Receives the selected rows, including ones on other pages. */
+	onClick: (_rows: TRow[]) => Promise<void>;
 }
 
-interface TableSelectActionProps {
+interface TableSelectActionProps<TRow> {
 	selectedCount: Accessor<number>;
-	selected: Accessor<boolean[]>;
-	setSelected: Setter<boolean[]>;
+	rows: Accessor<TRow[]>;
+	clear: () => void;
 	callbacks: {
-		delete: ((_selected: boolean[]) => Promise<void>) | undefined;
-		restore: ((_selected: boolean[]) => Promise<void>) | undefined;
-		deletePermanently: ((_selected: boolean[]) => Promise<void>) | undefined;
+		delete: ((_rows: TRow[]) => Promise<void>) | undefined;
+		restore: ((_rows: TRow[]) => Promise<void>) | undefined;
+		deletePermanently: ((_rows: TRow[]) => Promise<void>) | undefined;
 	};
 	allowRestore: boolean;
 	allowDelete: boolean;
 	allowDeletePermanently: boolean;
-	actions: TableSelectActionItem[];
+	actions: TableSelectActionItem<TRow>[];
 }
 
-const TableSelectAction: Component<TableSelectActionProps> = (props) => {
+const TableSelectAction = <TRow,>(
+	props: TableSelectActionProps<TRow>,
+): JSXElement => {
 	// ----------------------------------------
 	// State
 	const [deleteModalOpen, setDeleteModalOpen] = createSignal(false);
@@ -55,7 +57,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 	const [isRestoring, setIsRestoring] = createSignal(false);
 	const [isDeletingPermanently, setIsDeletingPermanently] = createSignal(false);
 	const [pendingAction, setPendingAction] =
-		createSignal<TableSelectActionItem>();
+		createSignal<TableSelectActionItem<TRow>>();
 	const [isRunningAction, setIsRunningAction] = createSignal(false);
 
 	// ----------------------------------------
@@ -116,13 +118,12 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 
 	// ----------------------------------------
 	// Handlers
-	const resetHandler = () => props.setSelected((prev) => prev.map(() => false));
 	const deleteHandler = async () => {
 		if (props.callbacks?.delete) {
 			setIsDeleting(true);
 			try {
-				await props.callbacks.delete(props.selected());
-				props.setSelected((prev) => prev.map(() => false));
+				await props.callbacks.delete(props.rows());
+				props.clear();
 				setDeleteModalOpen(false);
 			} finally {
 				setIsDeleting(false);
@@ -133,19 +134,19 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 		if (props.callbacks?.restore) {
 			setIsRestoring(true);
 			try {
-				await props.callbacks.restore(props.selected());
-				props.setSelected((prev) => prev.map(() => false));
+				await props.callbacks.restore(props.rows());
+				props.clear();
 				setRestoreModalOpen(false);
 			} finally {
 				setIsRestoring(false);
 			}
 		}
 	};
-	const runAction = async (action: TableSelectActionItem) => {
+	const runAction = async (action: TableSelectActionItem<TRow>) => {
 		setIsRunningAction(true);
 		try {
-			await action.onClick(props.selected());
-			props.setSelected((prev) => prev.map(() => false));
+			await action.onClick(props.rows());
+			props.clear();
 			setPendingAction(undefined);
 		} finally {
 			setIsRunningAction(false);
@@ -155,8 +156,8 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 		if (props.callbacks?.deletePermanently) {
 			setIsDeletingPermanently(true);
 			try {
-				await props.callbacks.deletePermanently(props.selected());
-				props.setSelected((prev) => prev.map(() => false));
+				await props.callbacks.deletePermanently(props.rows());
+				props.clear();
 				setDeletePermanentlyModalOpen(false);
 			} finally {
 				setIsDeletingPermanently(false);
@@ -177,7 +178,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 					}
 					actions={items()}
 					loading={isRunningAction()}
-					onClear={resetHandler}
+					onClear={props.clear}
 				/>
 			</Show>
 			<Show when={pendingAction()?.confirm && pendingAction()}>

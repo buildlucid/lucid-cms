@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import {
-	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
@@ -26,14 +25,19 @@ import {
 	type TableVariant,
 } from "@/components/Table/TableContext";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
+import type {
+	TableRowId,
+	TableSelection,
+} from "@/hooks/useTableSelection/useTableSelection";
 import useUserPreference from "@/hooks/useUserPreference/useUserPreference";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 
-export interface TableRootProps {
+export interface TableRootProps<TRow extends { id: TableRowId }> {
 	/** Unique ID used to remember hidden columns and scroll position. */
 	id: string;
 	rowCount: number;
-	data?: readonly unknown[];
+	/** The rows, in render order. Required for selection. */
+	data?: readonly TRow[];
 	columns: TableColumn[];
 	/** Required for sortable columns. */
 	queryState?: QueryStateResponse;
@@ -41,9 +45,11 @@ export interface TableRootProps {
 	/** Number of placeholder rows shown while loading. @default 10 */
 	loadingRows?: number;
 	caption?: string;
-	/** Set to false to turn selection off, eg. while reordering. Rows only get checkboxes when an action can take them. */
+	/** Turns on row checkboxes when an action can take the selected rows. Requires `data`. */
+	selection?: TableSelection<TRow>;
+	/** Set to false to turn selection off, eg. while reordering. */
 	selectable?: boolean;
-	selectActions?: TableSelectActionItem[];
+	selectActions?: TableSelectActionItem<TRow>[];
 	/** @default "md" */
 	padding?: TablePadding;
 	/** @default "primary" */
@@ -54,10 +60,10 @@ export interface TableRootProps {
 	allowDelete?: boolean;
 	/** Shows a permanent delete action for selected rows. Requires `onDeletePermanentlyRows`. */
 	allowDeletePermanently?: boolean;
-	/** Receives the selection state of each row, in row order. */
-	onDeleteRows?: (_selected: boolean[]) => Promise<void>;
-	onRestoreRows?: (_selected: boolean[]) => Promise<void>;
-	onDeletePermanentlyRows?: (_selected: boolean[]) => Promise<void>;
+	/** Receives the selected rows, including ones on other pages. */
+	onDeleteRows?: (_rows: TRow[]) => Promise<void>;
+	onRestoreRows?: (_rows: TRow[]) => Promise<void>;
+	onDeletePermanentlyRows?: (_rows: TRow[]) => Promise<void>;
 	/** Adds drag handles for reordering rows. Requires `onReorder`. */
 	reorderable?: boolean;
 	onReorder?: (
@@ -74,10 +80,11 @@ const tableScrollPositions = new Map<string, number>();
 const [selectionOwner, setSelectionOwner] = createSignal<symbol>();
 
 /** The table, which holds its columns, rows and shared state. */
-const TableRoot: Component<TableRootProps> = (props) => {
+const TableRoot = <TRow extends { id: TableRowId }>(
+	props: TableRootProps<TRow>,
+): JSXElement => {
 	let overflowRef: HTMLDivElement | undefined;
 
-	const [selected, setSelected] = createSignal<boolean[]>([]);
 	const selectionKey = Symbol(props.id);
 	const [dragIndex, setDragIndex] = createSignal<number | null>(null);
 	const [dropTargetIndex, setDropTargetIndex] = createSignal<number | null>(
@@ -110,13 +117,6 @@ const TableRoot: Component<TableRootProps> = (props) => {
 		else nextHidden.add(columnKey);
 		setHiddenColumns(Array.from(nextHidden));
 	};
-	const setSelectedIndex = (index: number) => {
-		setSelected((prev) => {
-			const newSelected = [...prev];
-			newSelected[index] = !newSelected[index];
-			return newSelected;
-		});
-	};
 	const setOverflowState = () => {
 		if (overflowRef && overflowRef.scrollWidth > overflowRef.clientWidth) {
 			overflowRef.setAttribute("data-overflowing", "true");
@@ -138,18 +138,10 @@ const TableRoot: Component<TableRootProps> = (props) => {
 
 	// ----------------------------------------
 	// Callbacks
+	//* the header checkbox only covers the current page
 	const onSelectChange = () => {
 		if (props.loading) return;
-
-		if (allSelected()) {
-			setSelected((prev) => {
-				return prev.map(() => false);
-			});
-		} else {
-			setSelected((prev) => {
-				return prev.map(() => true);
-			});
-		}
+		props.selection?.set(props.data ?? [], !allSelected());
 	};
 
 	// ----------------------------------------
@@ -224,6 +216,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 	const isSelectable = createMemo(
 		() =>
 			props.selectable !== false &&
+			props.selection !== undefined &&
 			((props.allowRestore === true && props.onRestoreRows !== undefined) ||
 				(props.allowDelete === true && props.onDeleteRows !== undefined) ||
 				(props.allowDeletePermanently === true &&
@@ -232,13 +225,11 @@ const TableRoot: Component<TableRootProps> = (props) => {
 	);
 	const padding = createMemo<TablePadding>(() => props.padding ?? "md");
 	const allSelected = createMemo(() => {
-		if (!selected()) return false;
-		if (selected().length === 0) return false;
-		return selected().every((s) => s);
+		const selection = props.selection;
+		if (!selection || !props.data?.length) return false;
+		return props.data.every((row) => selection.isSelected(row));
 	});
-	const selectedCount = createMemo(() => {
-		return selected().filter((s) => s).length;
-	});
+	const selectedCount = createMemo(() => props.selection?.count() ?? 0);
 	const includeRows = createMemo(() => {
 		return props.columns.map((h, i) => {
 			return {
@@ -258,8 +249,14 @@ const TableRoot: Component<TableRootProps> = (props) => {
 			if (key === undefined) return true;
 			return !hiddenColumnKeys().has(key);
 		},
-		isRowSelected: (index) => selected()[index] ?? false,
-		toggleRowSelected: setSelectedIndex,
+		isRowSelected: (index) => {
+			const row = props.data?.[index];
+			return row !== undefined && (props.selection?.isSelected(row) ?? false);
+		},
+		toggleRowSelected: (index) => {
+			const row = props.data?.[index];
+			if (row) props.selection?.toggle(row);
+		},
 		rowReorder,
 	};
 
@@ -269,10 +266,10 @@ const TableRoot: Component<TableRootProps> = (props) => {
 		window.addEventListener("resize", setOverflowState);
 		onCleanup(() => window.removeEventListener("resize", setOverflowState));
 	});
-	//* new rows clear the selection and may change whether the table overflows
+	//* new rows may change whether the table overflows
 	createEffect(() => {
 		props.data;
-		setSelected(Array.from({ length: props.rowCount }, () => false));
+		props.rowCount;
 		setOverflowState();
 	});
 	createEffect(() => {
@@ -284,18 +281,14 @@ const TableRoot: Component<TableRootProps> = (props) => {
 	});
 	createEffect(() => {
 		if (isSelectable()) return;
-		setSelected((prev) =>
-			prev.some((selected) => selected) ? prev.map(() => false) : prev,
-		);
+		props.selection?.clear();
 	});
 	createEffect(() => {
 		if (selectedCount() > 0) setSelectionOwner(selectionKey);
 	});
 	createEffect(() => {
 		if (selectionOwner() === selectionKey) return;
-		setSelected((prev) =>
-			prev.some((selected) => selected) ? prev.map(() => false) : prev,
-		);
+		props.selection?.clear();
 	});
 	onCleanup(() => {
 		if (selectionOwner() === selectionKey) setSelectionOwner(undefined);
@@ -385,9 +378,9 @@ const TableRoot: Component<TableRootProps> = (props) => {
 			</div>
 			{/* Select Action */}
 			<TableSelectAction
-				selected={selected}
+				rows={() => props.selection?.rows() ?? []}
 				selectedCount={selectedCount}
-				setSelected={setSelected}
+				clear={() => props.selection?.clear()}
 				allowRestore={props.allowRestore ?? false}
 				allowDelete={props.allowDelete ?? false}
 				allowDeletePermanently={props.allowDeletePermanently ?? false}
