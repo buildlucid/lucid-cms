@@ -488,14 +488,16 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 								}
 							: undefined
 					}
-				/>
+				>
+					{/* Keep the fade sticky and ordered after TipTap's appended editor. */}
+					<div
+						aria-hidden="true"
+						class="pointer-events-none sticky bottom-0 z-1 order-last -mt-2.5 h-2.5 shrink-0 bg-linear-to-t from-card to-transparent"
+					/>
+				</div>
 				<Show when={editor()}>
 					{(instance) => <AgentMarkdownPill editor={instance()} />}
 				</Show>
-				<div
-					aria-hidden="true"
-					class="pointer-events-none relative -mt-2.5 h-2.5 bg-linear-to-t from-card to-transparent"
-				/>
 				<div class="flex min-w-0 items-center gap-0.5 px-3 pb-3">
 					{props.start}
 					<AgentReferenceMenu

@@ -53,6 +53,7 @@ import AgentConfirmationGroup, {
 } from "./parts/AgentConfirmationGroup";
 import AgentRoutineRequest from "./parts/AgentRoutineRequest";
 import AgentToolGroup from "./parts/AgentToolGroup";
+import AgentUserBubble from "./parts/AgentUserBubble";
 
 export interface AgentMessageProps {
 	message: AgentMessageData;
@@ -208,7 +209,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 							class="-me-4 w-[calc(85%+1rem)]"
 						/>
 						<Show when={hasText()}>
-							<div class="max-w-[85%] rounded-2xl rounded-ee-md bg-input px-4 py-2.5">
+							<AgentUserBubble>
 								<For each={props.message.parts}>
 									{(part) =>
 										part.type === "text" ? (
@@ -216,7 +217,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 										) : null
 									}
 								</For>
-							</div>
+							</AgentUserBubble>
 						</Show>
 					</div>
 				</Match>

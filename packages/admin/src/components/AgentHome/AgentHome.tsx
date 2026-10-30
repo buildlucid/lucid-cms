@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import type { Agent, AgentConfirmationMode } from "@types";
 import classnames from "classnames";
 import {
+	type Accessor,
 	type Component,
 	createEffect,
 	createMemo,
@@ -37,15 +38,9 @@ import AgentSuggestionButton from "./parts/AgentSuggestionButton";
 import AgentWaitingChats from "./parts/AgentWaitingChats";
 
 const grownHeight = 96;
-//* the panel's box holds the current page pill too, so it keeps some room while suggestions show
-const panelSuggestionsHeight = 32;
+//* room for about three lines, so a long placeholder never runs out of the narrow panel's box
+const panelGrow = 80;
 
-/**
- * The agent's home: a greeting, a chat box that starts a new chat, suggestions
- * and the chats waiting on the reader. Sending opens the chat straight away
- * while it saves, so there is no wait here. Shown on the agent page, on Home's
- * Ask view and, more compactly, in the agent panel, where chats open in place.
- */
 const AgentHome: Component<{
 	/** @default "page" */
 	variant?: "page" | "panel";
@@ -105,9 +100,8 @@ const AgentHome: Component<{
 	});
 	const panel = createMemo(() => props.variant === "panel");
 	const greeting = createMemo(getGreeting);
-	//* the panel only lists its agents' chats, as other agents are kept out of the sidebar
 	const waitingAgentKey = createMemo(() =>
-		agents().length > 1 || panel() ? agent()?.key : undefined,
+		agents().length > 1 ? agent()?.key : undefined,
 	);
 
 	// ----------------------------------------
@@ -151,6 +145,100 @@ const AgentHome: Component<{
 		return true;
 	};
 
+	const renderGreeting = () => (
+		<div class="flex flex-col items-center gap-1.5 text-center">
+			<h2
+				class={classnames(
+					"font-medium text-title",
+					panel() ? "text-base" : "text-2xl",
+				)}
+			>
+				{greeting()}
+			</h2>
+			<p class={classnames("text-body", panel() ? "text-sm" : "text-base")}>
+				{T()("agent.home.title")}
+			</p>
+		</div>
+	);
+	//* takes an accessor, so switching agents updates the box rather than rebuilding it
+	const renderComposer = (current: Accessor<Agent>) => (
+		<AgentComposer
+			ref={setComposer}
+			class="agent-composer-morph"
+			size={panel() ? "md" : "lg"}
+			grow={panel() ? panelGrow : showSuggestions() ? 0 : grownHeight}
+			autofocus={true}
+			onBlankChange={setComposerBlank}
+			disabled={!models.isSuccess}
+			placeholder={T()(
+				models.isError
+					? "agent.composer.placeholder.unreachable"
+					: "agent.composer.placeholder",
+			)}
+			draftKey="new"
+			screen={session.screen.current()}
+			agentKey={current().key}
+			features={current().features}
+			capabilities={current().capabilities}
+			capabilityHints={!panel()}
+			onSubmit={start}
+			controls={
+				<AgentConfirmationPicker
+					value={confirmationMode()}
+					onChange={setConfirmationMode}
+				/>
+			}
+			start={
+				<Show when={agents().length > 1}>
+					<AgentPicker
+						agents={agents()}
+						selected={current()}
+						onSelect={(agent) => userPreferencesStore.setAgentKey(agent.key)}
+					/>
+				</Show>
+			}
+			end={
+				<AgentModelPicker
+					agentKey={current().key}
+					value={modelSelection()}
+					onChange={(selection) =>
+						userPreferencesStore.setAgentModelSelection(
+							current().key,
+							selection,
+						)
+					}
+				/>
+			}
+		/>
+	);
+	const renderSuggestions = () => (
+		<div class="flex flex-col gap-2.5">
+			<Show when={!panel()}>
+				<p class="px-1 text-xs text-muted">{T()("agent.home.suggestions")}</p>
+			</Show>
+			<ul
+				class={
+					panel()
+						? "flex flex-col divide-y divide-border overflow-hidden rounded-xl border border-border bg-card/50"
+						: "grid gap-2.5 sm:grid-cols-2"
+				}
+			>
+				<For each={shownSuggestions()}>
+					{(suggestion) => (
+						<AgentSuggestionButton
+							suggestion={suggestion}
+							disabled={!models.isSuccess}
+							compact={panel()}
+							onSelect={() => {
+								void start(translateAdminCopy(suggestion.message));
+							}}
+						/>
+					)}
+				</For>
+			</ul>
+		</div>
+	);
+
 	// ----------------------------------------
 	// Effects
 	onMount(() => {
@@ -170,168 +258,96 @@ const AgentHome: Component<{
 	// Render
 	return (
 		<QueryBoundary
-			class="w-full grow"
+			class={classnames("w-full grow", { "min-h-0": panel() })}
 			loading={definitions.isLoading}
 			loadingFallback={
-				//* match the greeting line heights to avoid a layout shift
-				<section
-					aria-busy="true"
-					class={classnames(
-						"flex w-full flex-col",
-						panel()
-							? "my-auto gap-6 px-5 py-10"
-							: "mx-auto max-w-3xl gap-8 self-start pt-[18vh] pb-10",
-					)}
+				//* match the greeting line heights and chat box to avoid a layout shift
+				<Show
+					when={panel()}
+					fallback={
+						<section
+							aria-busy="true"
+							class="mx-auto flex w-full max-w-3xl flex-col gap-8 self-start pt-[18vh] pb-10"
+						>
+							<div class="flex flex-col items-center gap-1.5">
+								<div class="text-2xl">
+									<span class="skeleton block w-48">&nbsp;</span>
+								</div>
+								<p class="text-base">
+									<span class="skeleton block w-72 max-w-full">&nbsp;</span>
+								</p>
+							</div>
+							<span class="skeleton block h-32 w-full rounded-2xl" />
+						</section>
+					}
 				>
-					<div class="flex flex-col items-center gap-1.5">
-						<div class={panel() ? "text-base" : "text-2xl"}>
-							<span class="skeleton block w-48">&nbsp;</span>
+					<section aria-busy="true" class="flex w-full grow flex-col">
+						<div class="my-auto flex flex-col items-center gap-1.5 px-5 py-6">
+							<div class="text-base">
+								<span class="skeleton block w-48">&nbsp;</span>
+							</div>
+							<p class="text-sm">
+								<span class="skeleton block w-72 max-w-full">&nbsp;</span>
+							</p>
 						</div>
-						<p class={panel() ? "text-sm" : "text-base"}>
-							<span class="skeleton block w-72 max-w-full">&nbsp;</span>
-						</p>
-					</div>
-					<span
-						class={classnames(
-							"skeleton block w-full rounded-2xl",
-							panel() ? "h-24" : "h-32",
-						)}
-					/>
-				</section>
+						<div class="px-3 pb-3">
+							<span class="skeleton block h-36 w-full rounded-2xl" />
+						</div>
+					</section>
+				</Show>
 			}
 			error={definitions.isError}
 			empty={!definitions.data?.data.enabled || agents().length === 0}
 		>
 			<Show when={agent()}>
 				{(current) => (
-					<section
-						class={classnames(
-							"flex w-full flex-col",
-							panel()
-								? "my-auto gap-6 px-5 py-10"
-								: "mx-auto max-w-3xl gap-8 pt-[18vh] pb-10",
-						)}
-					>
-						<div class="flex flex-col items-center gap-1.5 text-center">
-							<h2
-								class={classnames(
-									"font-medium text-title",
-									panel() ? "text-base" : "text-2xl",
-								)}
-							>
-								{greeting()}
-							</h2>
-							<p
-								class={classnames(
-									"text-body",
-									panel() ? "text-sm" : "text-base",
-								)}
-							>
-								{T()("agent.home.title")}
-							</p>
-						</div>
-						<AgentUnavailableNotice>
-							<div class="flex flex-col">
-								<AgentComposer
-									ref={setComposer}
-									class="agent-composer-morph"
-									size={panel() ? "md" : "lg"}
-									grow={
-										showSuggestions()
-											? panel()
-												? panelSuggestionsHeight
-												: 0
-											: grownHeight
-									}
-									autofocus={true}
-									onBlankChange={setComposerBlank}
-									disabled={!models.isSuccess}
-									placeholder={T()(
-										models.isError
-											? "agent.composer.placeholder.unreachable"
-											: "agent.composer.placeholder",
-									)}
-									draftKey="new"
-									screen={session.screen.current()}
-									agentKey={current().key}
-									features={current().features}
-									capabilities={current().capabilities}
-									capabilityHints={!panel()}
-									onSubmit={start}
-									controls={
-										<AgentConfirmationPicker
-											value={confirmationMode()}
-											onChange={setConfirmationMode}
-										/>
-									}
-									start={
-										<Show when={agents().length > 1}>
-											<AgentPicker
-												agents={agents()}
-												selected={current()}
-												onSelect={(agent) =>
-													userPreferencesStore.setAgentKey(agent.key)
-												}
-											/>
-										</Show>
-									}
-									end={
-										<AgentModelPicker
-											agentKey={current().key}
-											value={modelSelection()}
-											onChange={(selection) =>
-												userPreferencesStore.setAgentModelSelection(
-													current().key,
-													selection,
-												)
-											}
-										/>
-									}
-								/>
-								<div
-									class={classnames("grid", {
-										"transition-[grid-template-rows,opacity] duration-300 ease-emphasized motion-reduce:transition-none":
-											painted(),
-										"grid-rows-[1fr]": showSuggestions(),
-										"grid-rows-[0fr] opacity-0": !showSuggestions(),
-									})}
-									inert={!showSuggestions()}
-								>
-									<div class="min-h-0 overflow-hidden">
-										<div class="flex flex-col gap-2.5 pt-6">
-											<p class="px-1 text-xs text-muted">
-												{T()("agent.home.suggestions")}
-											</p>
-											<ul
-												class={classnames("grid gap-2.5", {
-													"sm:grid-cols-2": !panel(),
-												})}
-											>
-												<For each={shownSuggestions()}>
-													{(suggestion) => (
-														<AgentSuggestionButton
-															suggestion={suggestion}
-															disabled={!models.isSuccess}
-															onSelect={() => {
-																void start(
-																	translateAdminCopy(suggestion.message),
-																);
-															}}
-														/>
-													)}
-												</For>
-											</ul>
+					<Show
+						when={panel()}
+						fallback={
+							<section class="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-[18vh] pb-10">
+								{renderGreeting()}
+								<AgentUnavailableNotice>
+									<div class="flex flex-col">
+										{renderComposer(current)}
+										<div
+											class={classnames("grid", {
+												"transition-[grid-template-rows,opacity] duration-300 ease-emphasized motion-reduce:transition-none":
+													painted(),
+												"grid-rows-[1fr]": showSuggestions(),
+												"grid-rows-[0fr] opacity-0": !showSuggestions(),
+											})}
+											inert={!showSuggestions()}
+										>
+											<div class="min-h-0 overflow-hidden">
+												<div class="pt-6">{renderSuggestions()}</div>
+											</div>
 										</div>
+										<AgentWaitingChats
+											agentKey={waitingAgentKey()}
+											class="pt-6"
+										/>
 									</div>
+								</AgentUnavailableNotice>
+							</section>
+						}
+					>
+						<section class="flex min-h-0 w-full grow flex-col">
+							{/* centred in the space above the chat box, scrolling when it runs out */}
+							<div class="flex min-h-0 grow flex-col overflow-y-auto scrollbar px-5 py-6">
+								<div class="my-auto flex flex-col gap-6">
+									{renderGreeting()}
+									<Show when={hasSuggestions() && !unavailable()}>
+										{renderSuggestions()}
+									</Show>
 								</div>
-								<AgentWaitingChats
-									agentKey={waitingAgentKey()}
-									class="pt-6"
-									onOpen={panel() ? session.open : undefined}
-								/>
 							</div>
-						</AgentUnavailableNotice>
-					</section>
+							<div class="shrink-0 px-3 pb-3">
+								<AgentUnavailableNotice>
+									{renderComposer(current)}
+								</AgentUnavailableNotice>
+							</div>
+						</section>
+					</Show>
 				)}
 			</Show>
 		</QueryBoundary>

@@ -5,14 +5,11 @@ import { type Component, createMemo, For, Show } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
-import { isModifiedClick } from "@/utils/navigation";
 
 /** The reader's chats that are waiting for an answer, newest first. */
 const AgentWaitingChats: Component<{
 	/** Narrows the list to one agent when the reader can use several. */
 	agentKey?: string;
-	/** Opens a chat in place, eg. in the agent panel. Links still open in a new tab. */
-	onOpen?: (conversationId: string) => void;
 	class?: string;
 }> = (props) => {
 	// ----------------------------------------
@@ -74,11 +71,6 @@ const AgentWaitingChats: Component<{
 							<li>
 								<A
 									href={`/admin/agent/chats/${conversation.id}`}
-									onClick={(event) => {
-										if (!props.onOpen || isModifiedClick(event)) return;
-										event.preventDefault();
-										props.onOpen(conversation.id);
-									}}
 									class="group -mx-1 flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 								>
 									<span

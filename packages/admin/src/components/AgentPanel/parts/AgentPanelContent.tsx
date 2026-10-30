@@ -64,9 +64,9 @@ const AgentPanelContent: Component = () => {
 				<aside
 					aria-label={T()("agent.panel.label")}
 					style={{ "z-index": panelLayer }}
-					class="fixed inset-0 flex md:inset-y-2 md:start-auto md:end-2 md:w-96 xl:sticky xl:top-0 xl:h-dvh xl:w-agent-panel xl:pt-4 xl:pe-2"
+					class="fixed inset-0 flex md:inset-y-2 md:start-auto md:end-2 md:w-96 xl:sticky xl:top-0 xl:h-dvh xl:w-agent-panel xl:py-4 xl:pe-2"
 				>
-					<div class="relative flex min-w-0 grow flex-col overflow-hidden bg-background bg-clip-padding motion-safe:animate-from-right md:rounded-xl md:border md:border-border md:shadow-lg xl:rounded-b-none xl:border-b-0 xl:shadow-none">
+					<div class="relative flex min-w-0 grow flex-col overflow-hidden bg-background bg-clip-padding motion-safe:animate-from-right md:rounded-xl md:border md:border-border md:shadow-lg xl:shadow-none">
 						<AgentChatHeader
 							variant="panel"
 							conversation={conversationId() ? chat.data() : undefined}
@@ -84,7 +84,7 @@ const AgentPanelContent: Component = () => {
 							when={conversationId()}
 							keyed
 							fallback={
-								<div class="blur-background flex min-h-0 grow flex-col overflow-y-auto scrollbar">
+								<div class="flex min-h-0 grow flex-col">
 									<AgentHome variant="panel" />
 								</div>
 							}
