@@ -31,7 +31,7 @@
 	"author": "Build Lucid Ltd",
 	"license": "MIT",
 	"devDependencies": {
-		"cf": "^1.0.0-beta.20",
+		"cf": "^1.0.0-beta.26",
 		"typescript": "^6.0.3"
 	},
 	"volta": {

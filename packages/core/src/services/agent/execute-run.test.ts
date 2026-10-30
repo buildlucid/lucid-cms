@@ -1138,87 +1138,88 @@ describe("independent read batches", () => {
 });
 
 describe("agent runner", () => {
-	test.each([
-		"chat",
-		"routine",
-	] as const)("tool descriptions receive %s context", (mode) => {
-		const setup = resolveRunSetup(context, {
-			agent: testAgent,
-			aiAccess: aiAccessFeatureSchema.options,
-			authority: {
-				principal: { type: "user", userId },
-				permissions: livePermissions,
-				superAdmin: false,
-			},
-			mode,
-			hasHistory: false,
-		});
-		expect(
-			setup.definitions.find((tool) => tool.name === readTool.name)
-				?.description,
-		).toBe(`Read in ${mode} mode`);
-		expect(
-			setup.definitions.some((tool) => tool.name === "lucid_share_progress"),
-		).toBe(true);
-	});
+	test.each(["chat", "routine"] as const)(
+		"tool descriptions receive %s context",
+		(mode) => {
+			const setup = resolveRunSetup(context, {
+				agent: testAgent,
+				aiAccess: aiAccessFeatureSchema.options,
+				authority: {
+					principal: { type: "user", userId },
+					permissions: livePermissions,
+					superAdmin: false,
+				},
+				mode,
+				hasHistory: false,
+			});
+			expect(
+				setup.definitions.find((tool) => tool.name === readTool.name)
+					?.description,
+			).toBe(`Read in ${mode} mode`);
+			expect(
+				setup.definitions.some((tool) => tool.name === "lucid_share_progress"),
+			).toBe(true);
+		},
+	);
 
 	test.each([
 		{ tool: confirmationTool, override: undefined, waits: true },
 		{ tool: confirmationTool, override: false, waits: false },
 		{ tool: writeTool, override: true, waits: true },
 		{ tool: writeTool, override: undefined, waits: false },
-	])("routine confirmation for $tool.name with override $override", async ({
-		tool,
-		override,
-		waits,
-	}) => {
-		const routine = await createRoutine(context, {
-			agentKey: testAgent.key,
-			userId,
-			name: "Confirmation policy",
-			instructions: "Write a note",
-			schedule: { cron: "0 9 * * 1", timezone: "UTC" },
-			events: [],
-			enabled: false,
-			toolSettings:
+	])(
+		"routine confirmation for $tool.name with override $override",
+		async ({ tool, override, waits }) => {
+			const routine = await createRoutine(context, {
+				agentKey: testAgent.key,
+				userId,
+				name: "Confirmation policy",
+				instructions: "Write a note",
+				schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+				events: [],
+				enabled: false,
+				toolSettings:
+					override === undefined
+						? {}
+						: { [tool.name]: { requiresConfirmation: override } },
+			});
+			if (routine.error) throw routine.error;
+			expect(
+				(await getRoutine(context, { id: routine.data.id, userId })).data
+					?.toolSettings,
+			).toEqual(
 				override === undefined
 					? {}
 					: { [tool.name]: { requiresConfirmation: override } },
-		});
-		if (routine.error) throw routine.error;
-		expect(
-			(await getRoutine(context, { id: routine.data.id, userId })).data
-				?.toolSettings,
-		).toEqual(
-			override === undefined
-				? {}
-				: { [tool.name]: { requiresConfirmation: override } },
-		);
-		const prepared = await prepare({
-			routineId: routine.data.id,
-			confirmationMode: "automatic",
-		});
-		callTool({ id: "routine-policy", name: tool.name, input: {} });
-		finishRun({ outcome: "done", summary: "Written" });
-		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: waits ? "waiting" : "completed" },
-		});
-		if (waits) {
-			expect(writeHandler).not.toHaveBeenCalled();
+			);
+			const prepared = await prepare({
+				routineId: routine.data.id,
+				confirmationMode: "automatic",
+			});
+			callTool({ id: "routine-policy", name: tool.name, input: {} });
+			finishRun({ outcome: "done", summary: "Written" });
 			expect(
-				await executeRun(context, {
-					runId: prepared.runId,
-					answer: {
-						interactionId: await interactionId(prepared.conversationId),
-						action: "submit",
-						response: {},
-						userId,
-					},
-				}),
-			).toMatchObject({ data: { status: "completed" } });
-		}
-		expect(writeHandler).toHaveBeenCalledOnce();
-	});
+				await executeRun(context, { runId: prepared.runId }),
+			).toMatchObject({
+				data: { status: waits ? "waiting" : "completed" },
+			});
+			if (waits) {
+				expect(writeHandler).not.toHaveBeenCalled();
+				expect(
+					await executeRun(context, {
+						runId: prepared.runId,
+						answer: {
+							interactionId: await interactionId(prepared.conversationId),
+							action: "submit",
+							response: {},
+							userId,
+						},
+					}),
+				).toMatchObject({ data: { status: "completed" } });
+			}
+			expect(writeHandler).toHaveBeenCalledOnce();
+		},
+	);
 
 	test("routine settings apply to follow-ups and edits leave a pending confirmation intact", async () => {
 		const routine = await createRoutine(context, {
@@ -1716,30 +1717,30 @@ describe("agent runner", () => {
 		).toHaveLength(1);
 	});
 
-	test.each([
-		"test_select",
-		"test_select_write",
-	])("cancelling %s does not require valid form input or execute its handler", async (name) => {
-		selectedHandler.mockClear();
-		const prepared = await prepare();
-		callTool({ id: "cancelled", name, input: {} });
-		await executeRun(context, { runId: prepared.runId });
-		const id = await interactionId(prepared.conversationId);
-		reply("Cancelled");
-		expect(
-			await executeRun(context, {
-				runId: prepared.runId,
-				answer: { interactionId: id, action: "cancel", response: {}, userId },
-			}),
-		).toMatchObject({ data: { status: "completed" } });
-		expect(selectedHandler).not.toHaveBeenCalled();
-		expect(await partsOf(prepared.conversationId)).toContainEqual(
-			expect.objectContaining({
-				type: "widget",
-				interaction: expect.objectContaining({ id, status: "cancelled" }),
-			}),
-		);
-	});
+	test.each(["test_select", "test_select_write"])(
+		"cancelling %s does not require valid form input or execute its handler",
+		async (name) => {
+			selectedHandler.mockClear();
+			const prepared = await prepare();
+			callTool({ id: "cancelled", name, input: {} });
+			await executeRun(context, { runId: prepared.runId });
+			const id = await interactionId(prepared.conversationId);
+			reply("Cancelled");
+			expect(
+				await executeRun(context, {
+					runId: prepared.runId,
+					answer: { interactionId: id, action: "cancel", response: {}, userId },
+				}),
+			).toMatchObject({ data: { status: "completed" } });
+			expect(selectedHandler).not.toHaveBeenCalled();
+			expect(await partsOf(prepared.conversationId)).toContainEqual(
+				expect.objectContaining({
+					type: "widget",
+					interaction: expect.objectContaining({ id, status: "cancelled" }),
+				}),
+			);
+		},
+	);
 
 	test("an accepted response survives interruption before the handler starts", async () => {
 		prepareSelection.mockClear();
@@ -1894,62 +1895,64 @@ describe("agent runner", () => {
 		).not.toBeNull();
 	});
 
-	test.each([
-		"chat",
-		"routine",
-	])("a write runs once as its user in a %s without requesting input", async (mode) => {
-		let routineId: string | undefined;
-		if (mode === "routine") {
-			const routine = await createRoutine(context, {
-				agentKey: testAgent.key,
-				userId,
-				name: "Automatic write",
-				toolSettings: {
-					[confirmationTool.name]: { requiresConfirmation: false },
-				},
-				instructions: "Write a note.",
-				schedule: { cron: "0 9 * * 1", timezone: "UTC" },
-				events: [],
-				enabled: false,
+	test.each(["chat", "routine"])(
+		"a write runs once as its user in a %s without requesting input",
+		async (mode) => {
+			let routineId: string | undefined;
+			if (mode === "routine") {
+				const routine = await createRoutine(context, {
+					agentKey: testAgent.key,
+					userId,
+					name: "Automatic write",
+					toolSettings: {
+						[confirmationTool.name]: { requiresConfirmation: false },
+					},
+					instructions: "Write a note.",
+					schedule: { cron: "0 9 * * 1", timezone: "UTC" },
+					events: [],
+					enabled: false,
+				});
+				if (routine.error) throw routine.error;
+				routineId = routine.data.id;
+			}
+			const prepared = await prepare({
+				routineId,
+				confirmationMode: mode === "routine" ? "confirm-all" : "automatic",
 			});
-			if (routine.error) throw routine.error;
-			routineId = routine.data.id;
-		}
-		const prepared = await prepare({
-			routineId,
-			confirmationMode: mode === "routine" ? "confirm-all" : "automatic",
-		});
-		callTool({
-			id: "automatic",
-			name: mode === "routine" ? confirmationTool.name : writeTool.name,
-			input: {},
-		});
-		if (mode === "routine") {
-			finishRun({ outcome: "done", summary: "Written" });
-		} else {
-			reply("Written");
-		}
-		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: "completed" },
-		});
-		await executeRun(context, { runId: prepared.runId });
-		expect(writeHandler).toHaveBeenCalledOnce();
-		expect(writeHandler).toHaveBeenCalledWith(
-			expect.objectContaining({
-				execution: expect.objectContaining({
-					authority: expect.objectContaining({
-						principal: { type: "user", userId },
+			callTool({
+				id: "automatic",
+				name: mode === "routine" ? confirmationTool.name : writeTool.name,
+				input: {},
+			});
+			if (mode === "routine") {
+				finishRun({ outcome: "done", summary: "Written" });
+			} else {
+				reply("Written");
+			}
+			expect(
+				await executeRun(context, { runId: prepared.runId }),
+			).toMatchObject({
+				data: { status: "completed" },
+			});
+			await executeRun(context, { runId: prepared.runId });
+			expect(writeHandler).toHaveBeenCalledOnce();
+			expect(writeHandler).toHaveBeenCalledWith(
+				expect.objectContaining({
+					execution: expect.objectContaining({
+						authority: expect.objectContaining({
+							principal: { type: "user", userId },
+						}),
+						operationId: `${prepared.runId}:automatic`,
 					}),
-					operationId: `${prepared.runId}:automatic`,
 				}),
-			}),
-		);
-		expect(
-			(await partsOf(prepared.conversationId))?.some(
-				(part) => part.type === "widget",
-			),
-		).toBe(false);
-	});
+			);
+			expect(
+				(await partsOf(prepared.conversationId))?.some(
+					(part) => part.type === "widget",
+				),
+			).toBe(false);
+		},
+	);
 
 	test("writes enforce input-dependent permissions", async () => {
 		const prepared = await prepare();
@@ -2416,61 +2419,70 @@ describe("agent runner", () => {
 			expectedRunStatus: "interrupted",
 			expectedUsageStatus: "pending",
 		},
-	])("settles a model failure reported remotely as $remoteStatus with usage $expectedUsageStatus", async ({
-		remoteStatus,
-		remoteUsage,
-		expectedRunStatus,
-		expectedUsageStatus,
-	}) => {
-		const prepared = await prepare();
-		const queuedId = randomUUID();
-		await submitInput(context, {
-			conversationId: prepared.conversationId,
-			userId,
-			inputId: queuedId,
-			text: "Wait for this run",
-			delivery: { kind: "queue" },
-		});
-		model.mockImplementationOnce(async (_context, input) => {
-			await input.onRequest?.(connectionId);
-			return {
-				data: undefined,
-				error: {
-					type: "basic",
-					status: 502,
-					key: "agent_model_failed",
-					message: copy.literal("Provider failed"),
-				},
-			};
-		});
-		remoteRequest.mockImplementation(async (path: string) => ({
-			error: undefined,
-			data: {
-				json: {
-					data: {
-						requestId: path.split("/").at(-1),
-						status: remoteStatus,
-						...(remoteUsage ? { usage: remoteUsage } : {}),
+	])(
+		"settles a model failure reported remotely as $remoteStatus with usage $expectedUsageStatus",
+		async ({
+			remoteStatus,
+			remoteUsage,
+			expectedRunStatus,
+			expectedUsageStatus,
+		}) => {
+			const prepared = await prepare();
+			const queuedId = randomUUID();
+			await submitInput(context, {
+				conversationId: prepared.conversationId,
+				userId,
+				inputId: queuedId,
+				text: "Wait for this run",
+				delivery: { kind: "queue" },
+			});
+			model.mockImplementationOnce(async (_context, input) => {
+				await input.onRequest?.(connectionId);
+				return {
+					data: undefined,
+					error: {
+						type: "basic",
+						status: 502,
+						key: "agent_model_failed",
+						message: copy.literal("Provider failed"),
+					},
+				};
+			});
+			remoteRequest.mockImplementation(async (path: string) => ({
+				error: undefined,
+				data: {
+					json: {
+						data: {
+							requestId: path.split("/").at(-1),
+							status: remoteStatus,
+							...(remoteUsage ? { usage: remoteUsage } : {}),
+						},
 					},
 				},
-			},
-		}));
-		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: expectedRunStatus },
-		});
-		expect(await selectRun(queuedId)).toBeUndefined();
-		expect(
-			(await getConversation(context, { id: prepared.conversationId, userId }))
-				.data?.queuePaused,
-		).toBe(expectedRunStatus === "failed");
-		const AiGenerations = new AiGenerationsRepository(context.db);
-		const record = await AiGenerations.selectSingleByRequestId({
-			requestId: model.mock.calls[0]?.[1].requestId ?? "",
-			select: ["status", "credits"],
-		});
-		expect(record.data?.status).toBe(expectedUsageStatus);
-		expect(record.data?.credits).toBe(remoteUsage ? 1 : null);
-	});
+			}));
+			expect(
+				await executeRun(context, { runId: prepared.runId }),
+			).toMatchObject({
+				data: { status: expectedRunStatus },
+			});
+			expect(await selectRun(queuedId)).toBeUndefined();
+			expect(
+				(
+					await getConversation(context, {
+						id: prepared.conversationId,
+						userId,
+					})
+				).data?.queuePaused,
+			).toBe(expectedRunStatus === "failed");
+			const AiGenerations = new AiGenerationsRepository(context.db);
+			const record = await AiGenerations.selectSingleByRequestId({
+				requestId: model.mock.calls[0]?.[1].requestId ?? "",
+				select: ["status", "credits"],
+			});
+			expect(record.data?.status).toBe(expectedUsageStatus);
+			expect(record.data?.credits).toBe(remoteUsage ? 1 : null);
+		},
+	);
 
 	test("watching a run sends its saved reply, then finishes", async () => {
 		const prepared = await prepare();
@@ -2624,34 +2636,34 @@ describe("agent runner", () => {
 	test.each([
 		{ status: 503, terminal: false },
 		{ status: 404, terminal: true },
-	])("a viewer's watch that fails with $status ends with an error event: $terminal", async ({
-		status,
-		terminal,
-	}) => {
-		const prepared = await prepare();
-		const hosted = withRunner({
-			start: async () => ({
-				error: undefined,
-				data: { cursor: "live:hosted:0" },
-			}),
-			watch: async () => ({
-				data: undefined,
-				error: {
-					type: "basic",
-					status,
-					message: copy.literal("Unavailable"),
-				},
-			}),
-		});
-		vi.spyOn(httpServiceContext, "default").mockReturnValue(hosted);
-		const app = new Hono<LucidHonoGeneric>();
-		app.post("/run", (c) => streamRun(c, hosted, { runId: prepared.runId }));
+	])(
+		"a viewer's watch that fails with $status ends with an error event: $terminal",
+		async ({ status, terminal }) => {
+			const prepared = await prepare();
+			const hosted = withRunner({
+				start: async () => ({
+					error: undefined,
+					data: { cursor: "live:hosted:0" },
+				}),
+				watch: async () => ({
+					data: undefined,
+					error: {
+						type: "basic",
+						status,
+						message: copy.literal("Unavailable"),
+					},
+				}),
+			});
+			vi.spyOn(httpServiceContext, "default").mockReturnValue(hosted);
+			const app = new Hono<LucidHonoGeneric>();
+			app.post("/run", (c) => streamRun(c, hosted, { runId: prepared.runId }));
 
-		const response = await app.request("/run", { method: "POST" });
+			const response = await app.request("/run", { method: "POST" });
 
-		//* without an error event, the client reconnects to a run that may still recover
-		expect((await response.text()).includes('"type":"error"')).toBe(terminal);
-	});
+			//* without an error event, the client reconnects to a run that may still recover
+			expect((await response.text()).includes('"type":"error"')).toBe(terminal);
+		},
+	);
 
 	test("recovery returns a run stopped before its question was answered to waiting, so the answer can continue it", async () => {
 		const prepared = await prepare();
@@ -2693,38 +2705,38 @@ describe("agent runner", () => {
 	test.each([
 		{ response: { value: "one" }, handed: true },
 		{ response: { value: 1 }, handed: false },
-	])("an agent runner is only handed an answer the run accepts, so a rejected one can't replace another (handed: $handed)", async ({
-		response,
-		handed,
-	}) => {
-		const prepared = await prepare();
-		callTool({ id: "step-write", name: stepWriteTool.name, input: {} });
-		await executeRun(context, { runId: prepared.runId });
-		const hostStart = vi.fn<AgentRunnerInstance["start"]>(async () => ({
-			error: undefined,
-			data: { cursor: "live:hosted:0" },
-		}));
-		const hosted = withRunner({
-			start: hostStart,
-			watch: async () => ({ error: undefined, data: undefined }),
-		});
-		vi.spyOn(httpServiceContext, "default").mockReturnValue(hosted);
-		const answer = {
-			interactionId: await interactionId(prepared.conversationId),
-			action: "submit" as const,
-			response,
-			userId,
-		};
-		const app = new Hono<LucidHonoGeneric>();
-		app.post("/run", (c) =>
-			streamRun(c, hosted, { runId: prepared.runId, answer }),
-		);
+	])(
+		"an agent runner is only handed an answer the run accepts, so a rejected one can't replace another (handed: $handed)",
+		async ({ response, handed }) => {
+			const prepared = await prepare();
+			callTool({ id: "step-write", name: stepWriteTool.name, input: {} });
+			await executeRun(context, { runId: prepared.runId });
+			const hostStart = vi.fn<AgentRunnerInstance["start"]>(async () => ({
+				error: undefined,
+				data: { cursor: "live:hosted:0" },
+			}));
+			const hosted = withRunner({
+				start: hostStart,
+				watch: async () => ({ error: undefined, data: undefined }),
+			});
+			vi.spyOn(httpServiceContext, "default").mockReturnValue(hosted);
+			const answer = {
+				interactionId: await interactionId(prepared.conversationId),
+				action: "submit" as const,
+				response,
+				userId,
+			};
+			const app = new Hono<LucidHonoGeneric>();
+			app.post("/run", (c) =>
+				streamRun(c, hosted, { runId: prepared.runId, answer }),
+			);
 
-		const sent = await app.request("/run", { method: "POST" });
+			const sent = await app.request("/run", { method: "POST" });
 
-		expect(sent.ok).toBe(handed);
-		expect(hostStart).toHaveBeenCalledTimes(handed ? 1 : 0);
-	});
+			expect(sent.ok).toBe(handed);
+			expect(hostStart).toHaveBeenCalledTimes(handed ? 1 : 0);
+		},
+	);
 
 	test("the run job hands its run to the agent runner, answering as a submission", async () => {
 		const prepared = await prepare();
@@ -2830,29 +2842,29 @@ describe("agent runner", () => {
 				await executeRun(context, { runId });
 			},
 		},
-	])("a hosted slice stopped by $stop rejects for its host to retry: $retried", async ({
-		retried,
-		arrange,
-	}) => {
-		const prepared = await prepare();
-		await arrange(prepared.runId);
-		const opened = startRunStream(context.config, prepared.runId);
+	])(
+		"a hosted slice stopped by $stop rejects for its host to retry: $retried",
+		async ({ retried, arrange }) => {
+			const prepared = await prepare();
+			await arrange(prepared.runId);
+			const opened = startRunStream(context.config, prepared.runId);
 
-		const hosted = executeHostedRun(context, { runId: prepared.runId });
+			const hosted = executeHostedRun(context, { runId: prepared.runId });
 
-		if (retried) {
-			await expect(hosted).rejects.toThrow();
-		} else {
-			await hosted;
-		}
-		//* a retried slice leaves its viewers following the run, rather than ending their stream with an error
-		expect(
-			opened
-				.read(opened.initialCursor)
-				?.some((entry) => entry.event.type === "error"),
-		).toBe(!retried);
-		expect(opened.active).toBe(false);
-	});
+			if (retried) {
+				await expect(hosted).rejects.toThrow();
+			} else {
+				await hosted;
+			}
+			//* a retried slice leaves its viewers following the run, rather than ending their stream with an error
+			expect(
+				opened
+					.read(opened.initialCursor)
+					?.some((entry) => entry.event.type === "error"),
+			).toBe(!retried);
+			expect(opened.active).toBe(false);
+		},
+	);
 
 	test("a saved cursor resumes updates to earlier messages even when timestamps match", async () => {
 		const prepared = await prepare();
@@ -3547,90 +3559,90 @@ describe("queued and steering inputs", () => {
 	const pending = async (conversationId: string) =>
 		(await getInputs(context, { conversationId })).data ?? [];
 
-	test.each([
-		"queue",
-		"steer",
-	] as const)("keeps %s references pending until delivery and replays them to the model", async (delivery) => {
-		const prepared = await prepare();
-		const Media = new MediaRepository(context.db);
-		const media = await Media.createSingle({
-			data: {
-				key: randomUUID(),
-				storage_adapter_key: "test",
-				origin: "human",
-				type: "image",
-				mime_type: "image/png",
-				file_extension: "png",
-				file_size: 1,
-			},
-			returning: ["id"],
-			validation: { enabled: true },
-		});
-		expect(media.error).toBeUndefined();
-		if (!media.data) throw new Error("Expected the media fixture");
-		const references: AgentReferenceInput[] = [
-			{ type: "media", mediaId: media.data.id },
-		];
-		const denied = await submitInput(context, {
-			conversationId: prepared.conversationId,
-			userId,
-			inputId: randomUUID(),
-			text: "",
-			references,
-			delivery: { kind: "queue" },
-		});
-		expect(denied.error?.status).toBe(403);
-		const requestId = randomUUID();
-		const AgentInputs = new AgentInputsRepository(context.db);
-		const submitted = await AgentInputs.submit({
-			id: requestId,
-			conversationId: prepared.conversationId,
-			userId,
-			text: "",
-			references,
-			targetRunId: delivery === "steer" ? prepared.runId : null,
-		});
-		expect(submitted.error).toBeUndefined();
-		expect(await pending(prepared.conversationId)).toEqual([
-			expect.objectContaining({ id: requestId, text: "", references }),
-		]);
-		const linked = () =>
-			context.db.kysely
-				.selectFrom("lucid_agent_media_references")
-				.selectAll()
-				.where("conversation_id", "=", prepared.conversationId)
-				.execute();
-		expect(await linked()).toEqual([]);
-		reply("First done");
-		await executeRun(context, { runId: prepared.runId });
-		expect(await linked()).toEqual([
-			expect.objectContaining({ media_id: media.data.id }),
-		]);
-		expect(await partsOf(prepared.conversationId)).toContainEqual({
-			type: "reference",
-			reference: expect.objectContaining({
-				...references[0],
-				label: expect.any(String),
-				mimeType: "image/png",
-			}),
-		});
-		if (delivery === "queue") {
-			reply("Image linked");
-			await executeRun(context, { runId: requestId });
-		}
-		const checkpoint = (
-			await selectRun(delivery === "queue" ? requestId : prepared.runId)
-		)?.checkpoint;
-		expect(checkpoint?.messages).toContainEqual(
-			expect.objectContaining({
-				role: "user",
-				sourceId: requestId,
-				content: expect.stringContaining(
-					`<attachment type="media" media_id="${media.data.id}"`,
-				),
-			}),
-		);
-	});
+	test.each(["queue", "steer"] as const)(
+		"keeps %s references pending until delivery and replays them to the model",
+		async (delivery) => {
+			const prepared = await prepare();
+			const Media = new MediaRepository(context.db);
+			const media = await Media.createSingle({
+				data: {
+					key: randomUUID(),
+					storage_adapter_key: "test",
+					origin: "human",
+					type: "image",
+					mime_type: "image/png",
+					file_extension: "png",
+					file_size: 1,
+				},
+				returning: ["id"],
+				validation: { enabled: true },
+			});
+			expect(media.error).toBeUndefined();
+			if (!media.data) throw new Error("Expected the media fixture");
+			const references: AgentReferenceInput[] = [
+				{ type: "media", mediaId: media.data.id },
+			];
+			const denied = await submitInput(context, {
+				conversationId: prepared.conversationId,
+				userId,
+				inputId: randomUUID(),
+				text: "",
+				references,
+				delivery: { kind: "queue" },
+			});
+			expect(denied.error?.status).toBe(403);
+			const requestId = randomUUID();
+			const AgentInputs = new AgentInputsRepository(context.db);
+			const submitted = await AgentInputs.submit({
+				id: requestId,
+				conversationId: prepared.conversationId,
+				userId,
+				text: "",
+				references,
+				targetRunId: delivery === "steer" ? prepared.runId : null,
+			});
+			expect(submitted.error).toBeUndefined();
+			expect(await pending(prepared.conversationId)).toEqual([
+				expect.objectContaining({ id: requestId, text: "", references }),
+			]);
+			const linked = () =>
+				context.db.kysely
+					.selectFrom("lucid_agent_media_references")
+					.selectAll()
+					.where("conversation_id", "=", prepared.conversationId)
+					.execute();
+			expect(await linked()).toEqual([]);
+			reply("First done");
+			await executeRun(context, { runId: prepared.runId });
+			expect(await linked()).toEqual([
+				expect.objectContaining({ media_id: media.data.id }),
+			]);
+			expect(await partsOf(prepared.conversationId)).toContainEqual({
+				type: "reference",
+				reference: expect.objectContaining({
+					...references[0],
+					label: expect.any(String),
+					mimeType: "image/png",
+				}),
+			});
+			if (delivery === "queue") {
+				reply("Image linked");
+				await executeRun(context, { runId: requestId });
+			}
+			const checkpoint = (
+				await selectRun(delivery === "queue" ? requestId : prepared.runId)
+			)?.checkpoint;
+			expect(checkpoint?.messages).toContainEqual(
+				expect.objectContaining({
+					role: "user",
+					sourceId: requestId,
+					content: expect.stringContaining(
+						`<attachment type="media" media_id="${media.data.id}"`,
+					),
+				}),
+			);
+		},
+	);
 
 	test("retries preserve attachments and cancellation never registers queued resources", async () => {
 		const client = (await testConfig.getDatabase()).client;
@@ -4877,39 +4889,41 @@ describe("interactive tools", () => {
 	test.each([
 		{ stop: "before its tool runs", event: "widget", ran: false },
 		{ stop: "after its tool runs", event: "start", ran: true },
-	])("a retry that resubmits a saved answer carries on without answering again, when the slice stopped $stop", async ({
-		event: stopAt,
-		ran,
-	}) => {
-		const prepared = await prepare();
-		callTool({ id: "saved-answer", name: confirmationTool.name, input: {} });
-		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: "waiting" },
-		});
-		const answer = {
-			interactionId: await interactionId(prepared.conversationId),
-			action: "submit" as const,
-			response: {},
-			userId,
-		};
+	])(
+		"a retry that resubmits a saved answer carries on without answering again, when the slice stopped $stop",
+		async ({ event: stopAt, ran }) => {
+			const prepared = await prepare();
+			callTool({ id: "saved-answer", name: confirmationTool.name, input: {} });
+			expect(
+				await executeRun(context, { runId: prepared.runId }),
+			).toMatchObject({
+				data: { status: "waiting" },
+			});
+			const answer = {
+				interactionId: await interactionId(prepared.conversationId),
+				action: "submit" as const,
+				response: {},
+				userId,
+			};
 
-		expect(
-			await executeRun(context, {
-				runId: prepared.runId,
-				answer,
-				emit: async (event) => {
-					if (event.type === stopAt) throw new Error("Stopped");
-				},
-			}),
-		).toMatchObject({ data: { status: "interrupted" } });
-		expect(writeHandler).toHaveBeenCalledTimes(ran ? 1 : 0);
+			expect(
+				await executeRun(context, {
+					runId: prepared.runId,
+					answer,
+					emit: async (event) => {
+						if (event.type === stopAt) throw new Error("Stopped");
+					},
+				}),
+			).toMatchObject({ data: { status: "interrupted" } });
+			expect(writeHandler).toHaveBeenCalledTimes(ran ? 1 : 0);
 
-		reply("Done");
-		expect(
-			await executeRun(context, { runId: prepared.runId, answer }),
-		).toMatchObject({ data: { status: "completed" } });
-		expect(writeHandler).toHaveBeenCalledOnce();
-	});
+			reply("Done");
+			expect(
+				await executeRun(context, { runId: prepared.runId, answer }),
+			).toMatchObject({ data: { status: "completed" } });
+			expect(writeHandler).toHaveBeenCalledOnce();
+		},
+	);
 
 	test("a write that asks again isn't treated as interrupted when the person answers", async () => {
 		const prepared = await prepare();

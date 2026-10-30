@@ -437,48 +437,48 @@ describe("@lucidcms/client", () => {
 		expect(response.data).toBeUndefined();
 	});
 
-	test.each([
-		undefined,
-		1000,
-	])("accepts an AbortSignal with timeout %s and returns abort errors as values", async (timeoutMs) => {
-		const fetchMock = vi.fn<typeof fetch>(
-			async (_input, init) =>
-				await new Promise<Response>((_resolve, reject) => {
-					if (init?.signal?.aborted) {
-						reject(new DOMException("Aborted", "AbortError"));
-						return;
-					}
+	test.each([undefined, 1000])(
+		"accepts an AbortSignal with timeout %s and returns abort errors as values",
+		async (timeoutMs) => {
+			const fetchMock = vi.fn<typeof fetch>(
+				async (_input, init) =>
+					await new Promise<Response>((_resolve, reject) => {
+						if (init?.signal?.aborted) {
+							reject(new DOMException("Aborted", "AbortError"));
+							return;
+						}
 
-					init?.signal?.addEventListener("abort", () => {
-						reject(new DOMException("Aborted", "AbortError"));
-					});
-				}),
-		);
+						init?.signal?.addEventListener("abort", () => {
+							reject(new DOMException("Aborted", "AbortError"));
+						});
+					}),
+			);
 
-		const client = createClient({
-			baseUrl: "https://example.com",
-			auth: {
-				type: "apiKey",
-				apiKey: "client-key",
-			},
-			fetch: fetchMock,
-		});
+			const client = createClient({
+				baseUrl: "https://example.com",
+				auth: {
+					type: "apiKey",
+					apiKey: "client-key",
+				},
+				fetch: fetchMock,
+			});
 
-		const abortController = new AbortController();
-		const responsePromise = client.locales.getAll({
-			request: {
-				signal: abortController.signal,
-				timeoutMs,
-			},
-		});
+			const abortController = new AbortController();
+			const responsePromise = client.locales.getAll({
+				request: {
+					signal: abortController.signal,
+					timeoutMs,
+				},
+			});
 
-		abortController.abort();
+			abortController.abort();
 
-		const response = await responsePromise;
+			const response = await responsePromise;
 
-		expect(response.error?.kind).toBe("abort");
-		expect(response.data).toBeUndefined();
-	});
+			expect(response.error?.kind).toBe("abort");
+			expect(response.data).toBeUndefined();
+		},
+	);
 
 	test("accepts a full content endpoint base URL without duplicating the content path", async () => {
 		const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(

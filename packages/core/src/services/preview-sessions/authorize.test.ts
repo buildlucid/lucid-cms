@@ -103,77 +103,83 @@ describe("preview session resolution and authorization", () => {
 		["latest", "article", "latest"],
 		["staging", "page", "staging"],
 		["staging", "article", "review"],
-	] as const)("resolves the %s perspective for %s as %s", async (entryVersionType, collectionKey, expectedVersionType) => {
-		mocks.selectPreview.mockResolvedValue({
-			error: undefined,
-			data: buildPreview({
-				entry_version_type: entryVersionType,
+	] as const)(
+		"resolves the %s perspective for %s as %s",
+		async (entryVersionType, collectionKey, expectedVersionType) => {
+			mocks.selectPreview.mockResolvedValue({
+				error: undefined,
+				data: buildPreview({
+					entry_version_type: entryVersionType,
+					mode: "perspective",
+					entry_version_id: null,
+				}),
+			});
+
+			const response = await authorize(buildContext(), {
+				token,
+				collectionKey,
+				versionType: "production",
+			});
+
+			expect(response.data).toMatchObject({
 				mode: "perspective",
-				entry_version_id: null,
-			}),
-		});
-
-		const response = await authorize(buildContext(), {
-			token,
-			collectionKey,
-			versionType: "production",
-		});
-
-		expect(response.data).toMatchObject({
-			mode: "perspective",
-			versionType: expectedVersionType,
-		});
-	});
+				versionType: expectedVersionType,
+			});
+		},
+	);
 
 	it.each([
 		["revision", 73, "production"],
 		["snapshot", 91, "latest"],
 		["latest", null, "latest"],
 		["staging", null, "review"],
-	] as const)("locks a scoped %s preview to its entry document while resolving auxiliary collections to %s", async (entryVersionType, entryVersionId, auxiliaryVersionType) => {
-		mocks.selectPreview.mockResolvedValue({
-			error: undefined,
-			data: buildPreview({
-				entry_version_type: entryVersionType,
-				mode: "scoped",
-				entry_version_id: entryVersionId,
-			}),
-		});
+	] as const)(
+		"locks a scoped %s preview to its entry document while resolving auxiliary collections to %s",
+		async (entryVersionType, entryVersionId, auxiliaryVersionType) => {
+			mocks.selectPreview.mockResolvedValue({
+				error: undefined,
+				data: buildPreview({
+					entry_version_type: entryVersionType,
+					mode: "scoped",
+					entry_version_id: entryVersionId,
+				}),
+			});
 
-		const entry = await authorize(buildContext(), {
-			token,
-			collectionKey: "page",
-			versionType: "production",
-		});
-		const related = await authorize(buildContext(), {
-			token,
-			collectionKey: "article",
-			versionType: "production",
-		});
-
-		expect(entry.data).toMatchObject({
-			mode: "scoped",
-			target: "entry",
-			entry: {
+			const entry = await authorize(buildContext(), {
+				token,
 				collectionKey: "page",
-				documentId: 42,
-				versionType: entryVersionType,
-				versionId: entryVersionId ?? undefined,
-			},
-		});
-		expect(related).toEqual({
-			error: undefined,
-			data: {
+				versionType: "production",
+			});
+			const related = await authorize(buildContext(), {
+				token,
+				collectionKey: "article",
+				versionType: "production",
+			});
+
+			expect(entry.data).toMatchObject({
 				mode: "scoped",
-				target: "auxiliary",
+				target: "entry",
 				entry: {
 					collectionKey: "page",
 					documentId: 42,
+					versionType: entryVersionType,
+					versionId: entryVersionId ?? undefined,
 				},
-				versionType: auxiliaryVersionType,
-			},
-		});
-	});
+			});
+			expect(related).toEqual({
+				error: undefined,
+				data: {
+					mode: "scoped",
+					target: "auxiliary",
+					entry: {
+						collectionKey: "page",
+						documentId: 42,
+					},
+					versionType: auxiliaryVersionType,
+				},
+			});
+		},
+	);
 
 	it.each([
 		["scoped", "latest", 73],
@@ -182,23 +188,26 @@ describe("preview session resolution and authorization", () => {
 		["perspective", "revision", 73],
 		["perspective", "revision", null],
 		["perspective", "snapshot", null],
-	] as const)("rejects an invalid persisted %s %s session with version ID %s", async (mode, entryVersionType, entryVersionId) => {
-		mocks.selectPreview.mockResolvedValue({
-			error: undefined,
-			data: buildPreview({
-				mode,
-				entry_version_type: entryVersionType,
-				entry_version_id: entryVersionId,
-			}),
-		});
+	] as const)(
+		"rejects an invalid persisted %s %s session with version ID %s",
+		async (mode, entryVersionType, entryVersionId) => {
+			mocks.selectPreview.mockResolvedValue({
+				error: undefined,
+				data: buildPreview({
+					mode,
+					entry_version_type: entryVersionType,
+					entry_version_id: entryVersionId,
+				}),
+			});
 
-		const response = await resolve(buildContext(), { token });
+			const response = await resolve(buildContext(), { token });
 
-		expect(response.error).toMatchObject({
-			status: 401,
-			code: "preview_invalid",
-		});
-	});
+			expect(response.error).toMatchObject({
+				status: 401,
+				code: "preview_invalid",
+			});
+		},
+	);
 
 	it("leaves collection authorization to the request lifecycle", async () => {
 		mocks.selectPreview.mockResolvedValue({
@@ -272,25 +281,25 @@ describe("preview session resolution and authorization", () => {
 		});
 	});
 
-	it.each([
-		"bad-token",
-		"b".repeat(43),
-	])("returns a typed invalid error for %s", async (candidate) => {
-		if (candidate.length === 43) {
-			mocks.selectPreview.mockResolvedValue({
-				error: undefined,
-				data: undefined,
+	it.each(["bad-token", "b".repeat(43)])(
+		"returns a typed invalid error for %s",
+		async (candidate) => {
+			if (candidate.length === 43) {
+				mocks.selectPreview.mockResolvedValue({
+					error: undefined,
+					data: undefined,
+				});
+			}
+
+			const response = await resolve(buildContext(), { token: candidate });
+
+			expect(response.error).toMatchObject({
+				status: 401,
+				code: "preview_invalid",
 			});
-		}
-
-		const response = await resolve(buildContext(), { token: candidate });
-
-		expect(response.error).toMatchObject({
-			status: 401,
-			code: "preview_invalid",
-		});
-		if (candidate === "bad-token") {
-			expect(mocks.selectPreview).not.toHaveBeenCalled();
-		}
-	});
+			if (candidate === "bad-token") {
+				expect(mocks.selectPreview).not.toHaveBeenCalled();
+			}
+		},
+	);
 });

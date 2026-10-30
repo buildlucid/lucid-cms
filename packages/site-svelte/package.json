@@ -46,11 +46,11 @@
 		"@sveltejs/vite-plugin-svelte": "^7.3.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.1",
+		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/plugin-site": "*",
-		"@types/node": "^24.13.2",
-		"svelte": "^5.57.2",
-		"tsdown": "^0.22.3",
+		"@types/node": "^24.19.2",
+		"svelte": "^5.57.3",
+		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {

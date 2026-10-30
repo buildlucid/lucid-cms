@@ -15,5 +15,7 @@ export default defineConfig({
 	clean: true,
 	metafile: true,
 	// Lucid's Vite plugin serves `lucid:hosted` to the project's Vite app.
-	external: [/^lucid:/],
+	deps: {
+		neverBundle: [/^lucid:/],
+	},
 });

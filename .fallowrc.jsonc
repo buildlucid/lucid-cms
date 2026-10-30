@@ -10,9 +10,8 @@
 		"packages/core/src/libs/config/mock-config/*.ts",
 		"packages/core/src/utils/test-helpers/config/lucid.config.ts"
 	],
+	"ignorePatterns": ["!packages/admin/src/build/**"],
 	"ignoreDependencies": [
-		// hono-openapi imports this peer at runtime.
-		"@hono/standard-validator",
 		// The Node runtime emits this import into its generated server entry.
 		"node-cron"
 	],

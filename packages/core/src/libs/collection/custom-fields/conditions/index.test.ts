@@ -104,7 +104,10 @@ describe("field condition expressions", () => {
 		{ all: [{ field: "title", operator: "equals" }] },
 		{ all: [{ field: "title", operator: "isEmpty", value: "ignored" }] },
 		{ all: [{ any: [], action: "hide" }] },
-	])("invalid expression shapes fail at the config boundary: %j", (condition) => {
-		expect(fieldConditionSchema.safeParse(condition).success).toBe(false);
-	});
+	])(
+		"invalid expression shapes fail at the config boundary: %j",
+		(condition) => {
+			expect(fieldConditionSchema.safeParse(condition).success).toBe(false);
+		},
+	);
 });

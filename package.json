@@ -20,16 +20,14 @@
 		"prepare": "husky"
 	},
 	"devDependencies": {
-		"fallow": "^3.10.0",
+		"fallow": "^3.37.0",
 		"husky": "^9.1.7",
-		"turbo": "^2.9.18",
-		"vitest": "^4.1.9"
-	},
-	"optionalDependencies": {
-		"@rollup/rollup-linux-x64-gnu": "4.62.2"
+		"turbo": "^2.11.10",
+		"typescript": "^6.0.3",
+		"vitest": "^5.0.5"
 	},
 	"name": "lucid",
-	"packageManager": "npm@10.2.4",
+	"packageManager": "npm@11.20.0",
 	"workspaces": [
 		"apps/*",
 		"packages/*"
@@ -47,5 +45,10 @@
 		"workerd": true,
 		"sharp": true,
 		"fsevents": false
+	},
+	"overrides": {
+		"kysely-postgres-js": {
+			"postgres": "^4.0.0"
+		}
 	}
 }

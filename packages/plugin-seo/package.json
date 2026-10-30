@@ -49,15 +49,15 @@
 		"Plugin"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.1",
+		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/admin": "0.19.0-alpha.0",
 		"@lucidcms/core": "0.19.0-alpha.0",
-		"@tanstack/solid-query": "^5.101.1",
-		"@types/node": "^24.13.2",
-		"solid-js": "^1.9.13",
-		"tsdown": "^0.22.3",
+		"@tanstack/solid-query": "^5.105.0",
+		"@types/node": "^24.19.2",
+		"solid-js": "^1.9.18",
+		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3",
-		"zod": "^4.4.3"
+		"zod": "^4.6.6"
 	},
 	"peerDependencies": {
 		"@lucidcms/admin": "^0.19.0-alpha.0",

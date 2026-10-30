@@ -1,6 +1,6 @@
 import normalizePath from "../utils/normalize-path.js";
 
-/** Matches parameter names, regex constraints and modifiers, with `?` optional, `*` zero or more segments, `+` one or more, and `file-:slug(.*)` from an optional parameter sharing text. */
+/** Matches parameter names, regex constraints and modifiers, with `?` optional, `*` zero or more segments, `+` one or more, and `file-:slug([^\x2f]*)` from an optional parameter sharing text. */
 const PARAMETER = /:(\w+)(\((?:[^()]|\([^()]*\))*\))?([?*+]?)/g;
 
 /** Whether a parameter may be left empty: optional and zero-or-more ones, and constraints that match nothing. */

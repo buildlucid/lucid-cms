@@ -344,45 +344,45 @@ test("media hard deletion cascades through references in every chat", async () =
 	}
 });
 
-test.each([
-	"single",
-	"multiple",
-] as const)("%s document hard deletion removes pinned and unpinned links only for its targets", async (mode) => {
-	const conversationId = await createChat();
-	const first = await createDocument();
-	const second = await createDocument();
-	const retained = await createDocument();
-	expect(
-		(
-			await link(
-				conversationId,
-				[first, second, retained].flatMap(documentReferences),
-			)
-		).error,
-	).toBeUndefined();
-	const result =
-		mode === "single"
-			? await deleteSinglePermanently(context, {
-					id: first.id,
-					collectionKey: collection.key,
-					userId: null,
-				})
-			: await deleteMultiplePermanently(context, {
-					ids: [first.id, second.id],
-					collectionKey: collection.key,
-					userId: null,
-				});
-	expect(result.error).toBeUndefined();
-	const remaining = await documentLinks(conversationId);
-	expect(remaining).toHaveLength(mode === "single" ? 6 : 3);
-	expect(
-		remaining.every(
-			(link) =>
-				link.document_id !== first.id &&
-				(mode === "single" || link.document_id !== second.id),
-		),
-	).toBe(true);
-});
+test.each(["single", "multiple"] as const)(
+	"%s document hard deletion removes pinned and unpinned links only for its targets",
+	async (mode) => {
+		const conversationId = await createChat();
+		const first = await createDocument();
+		const second = await createDocument();
+		const retained = await createDocument();
+		expect(
+			(
+				await link(
+					conversationId,
+					[first, second, retained].flatMap(documentReferences),
+				)
+			).error,
+		).toBeUndefined();
+		const result =
+			mode === "single"
+				? await deleteSinglePermanently(context, {
+						id: first.id,
+						collectionKey: collection.key,
+						userId: null,
+					})
+				: await deleteMultiplePermanently(context, {
+						ids: [first.id, second.id],
+						collectionKey: collection.key,
+						userId: null,
+					});
+		expect(result.error).toBeUndefined();
+		const remaining = await documentLinks(conversationId);
+		expect(remaining).toHaveLength(mode === "single" ? 6 : 3);
+		expect(
+			remaining.every(
+				(link) =>
+					link.document_id !== first.id &&
+					(mode === "single" || link.document_id !== second.id),
+			),
+		).toBe(true);
+	},
+);
 
 test("revision retention removes expired pinned links while preserving live and unpinned references", async () => {
 	const conversationId = await createChat();
@@ -1241,26 +1241,29 @@ test.each([
 	type: MediaType;
 	mime_type: string;
 	file_extension: string;
-}[])("media previews reject $mime_type before linking any items in a mixed gallery", async (file) => {
-	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
-	const chatId = await createChat(ownerId);
-	const imageId = await createMedia({ owner_user_id: ownerId });
-	const fileId = await createMedia({ ...file, owner_user_id: ownerId });
-	const outcome = await callReferenceTool(
-		chatId,
-		runnerTools.previewMedia.name,
-		{ mediaIds: [imageId, fileId] },
-		ownerId,
-	);
-	expect(outcome).toMatchObject({
-		failed: true,
-		output: {
-			error: context.translate("server:agent.media.preview.unsupported"),
-		},
-	});
-	expect(outcome).not.toHaveProperty("widgets");
-	expect(await mediaLinks(chatId)).toEqual([]);
-});
+}[])(
+	"media previews reject $mime_type before linking any items in a mixed gallery",
+	async (file) => {
+		const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
+		const chatId = await createChat(ownerId);
+		const imageId = await createMedia({ owner_user_id: ownerId });
+		const fileId = await createMedia({ ...file, owner_user_id: ownerId });
+		const outcome = await callReferenceTool(
+			chatId,
+			runnerTools.previewMedia.name,
+			{ mediaIds: [imageId, fileId] },
+			ownerId,
+		);
+		expect(outcome).toMatchObject({
+			failed: true,
+			output: {
+				error: context.translate("server:agent.media.preview.unsupported"),
+			},
+		});
+		expect(outcome).not.toHaveProperty("widgets");
+		expect(await mediaLinks(chatId)).toEqual([]);
+	},
+);
 
 test("media previews enforce ownership, viewer access and current deletion state", async () => {
 	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);

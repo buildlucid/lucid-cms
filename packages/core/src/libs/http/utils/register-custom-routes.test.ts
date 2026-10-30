@@ -128,29 +128,32 @@ describe("registerCustomRoutes", () => {
 	test.each([
 		["/documents/:collectionKey", "/documents/:slug"],
 		["/documents/:collectionKey{[a-z]+}", "/documents/:slug{[a-z]+}"],
-	] as const)("rejects equivalent parameterised routes: %s", (existing, custom) => {
-		const app = new Hono<LucidHonoGeneric>();
-		app.get(`/api/v1/content${existing}`, (hono) => hono.text("core"));
-		const originalRouteCount = app.routes.length;
+	] as const)(
+		"rejects equivalent parameterised routes: %s",
+		(existing, custom) => {
+			const app = new Hono<LucidHonoGeneric>();
+			app.get(`/api/v1/content${existing}`, (hono) => hono.text("core"));
+			const originalRouteCount = app.routes.length;
 
-		expect(() =>
-			registerCustomRoutes(app, [
-				defineContentApiRoute({
-					method: "get",
-					path: "/new-route",
-					access: { type: "public" },
-					handler: ({ hono }) => hono.text("new"),
-				}),
-				defineContentApiRoute({
-					method: "get",
-					path: custom,
-					access: { type: "public" },
-					handler: ({ hono }) => hono.text("custom"),
-				}),
-			]),
-		).toThrow("is already registered");
-		expect(app.routes).toHaveLength(originalRouteCount);
-	});
+			expect(() =>
+				registerCustomRoutes(app, [
+					defineContentApiRoute({
+						method: "get",
+						path: "/new-route",
+						access: { type: "public" },
+						handler: ({ hono }) => hono.text("new"),
+					}),
+					defineContentApiRoute({
+						method: "get",
+						path: custom,
+						access: { type: "public" },
+						handler: ({ hono }) => hono.text("custom"),
+					}),
+				]),
+			).toThrow("is already registered");
+			expect(app.routes).toHaveLength(originalRouteCount);
+		},
+	);
 
 	test("preserves distinct parameter constraints when checking collisions", async () => {
 		const app = new Hono<LucidHonoGeneric>();

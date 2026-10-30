@@ -158,22 +158,25 @@ test.each([
 	["application/json", '{"name":"Will","total":12}'],
 	["application/xml", "<notes><name>Will</name></notes>"],
 	["text/xml", "<notes />"],
-])("reads %s as text without sending it to another model", async (mimeType, text) => {
-	const execution = await executionFor();
-	const mediaId = await createFile({ mimeType });
-	mockFile(new TextEncoder().encode(text));
-	const result = await read(mediaId, execution);
-	assert(result.type === "success", JSON.stringify(result));
-	expect(outputSchema.parse(result.data.output)).toMatchObject({
-		mediaId,
-		mimeType,
-		contentType: "text",
-		mode: "read",
-		passages: [{ offset: 0, text: text.replace(/^\ufeff/, "") }],
-		nextOffset: null,
-		truncated: false,
-	});
-});
+])(
+	"reads %s as text without sending it to another model",
+	async (mimeType, text) => {
+		const execution = await executionFor();
+		const mediaId = await createFile({ mimeType });
+		mockFile(new TextEncoder().encode(text));
+		const result = await read(mediaId, execution);
+		assert(result.type === "success", JSON.stringify(result));
+		expect(outputSchema.parse(result.data.output)).toMatchObject({
+			mediaId,
+			mimeType,
+			contentType: "text",
+			mode: "read",
+			passages: [{ offset: 0, text: text.replace(/^\ufeff/, "") }],
+			nextOffset: null,
+			truncated: false,
+		});
+	},
+);
 
 test("extracts HTML structure, links, alt text and table rows without scripts, styles, image sources or network access", async () => {
 	const execution = await executionFor();
@@ -273,16 +276,15 @@ test("reading links the file to the chat, and a failed read does not", async () 
 	expect(await linked()).toEqual([mediaId]);
 });
 
-test.each([
-	"application/pdf",
-	"image/png",
-	"application/zip",
-])("rejects %s before reading storage", async (mimeType) => {
-	const execution = await executionFor();
-	const mediaId = await createFile({ mimeType });
-	expect((await read(mediaId, execution)).type).toBe("failed");
-	expect(streamMedia).not.toHaveBeenCalled();
-});
+test.each(["application/pdf", "image/png", "application/zip"])(
+	"rejects %s before reading storage",
+	async (mimeType) => {
+		const execution = await executionFor();
+		const mediaId = await createFile({ mimeType });
+		expect((await read(mediaId, execution)).type).toBe("failed");
+		expect(streamMedia).not.toHaveBeenCalled();
+	},
+);
 
 test("enforces recorded and actual byte limits", async () => {
 	const execution = await executionFor();

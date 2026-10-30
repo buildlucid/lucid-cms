@@ -19,7 +19,7 @@
 		"migrate:fresh": "lucidcms migrate:fresh"
 	},
 	"dependencies": {
-		"@astrojs/node": "^11.1.5",
+		"@astrojs/node": "^11.1.9",
 		"@lucidcms/astro": "*",
 		"@lucidcms/client": "*",
 		"@lucidcms/core": "*",
@@ -28,7 +28,7 @@
 		"@lucidcms/plugin-pages": "*",
 		"@lucidcms/plugin-sqlite-kv": "*",
 		"@lucidcms/runtime-node": "*",
-		"astro": "^7.4.2"
+		"astro": "^7.4.4"
 	},
 	"author": "Build Lucid Ltd",
 	"license": "MIT",

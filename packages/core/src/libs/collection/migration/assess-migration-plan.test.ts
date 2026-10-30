@@ -169,30 +169,30 @@ describe("assessMigrationPlans", () => {
 		});
 	});
 
-	test.each([
-		"add",
-		"remove",
-	] as const)("treats %s unique index as warning", (type) => {
-		const index = {
-			name: "lucid_idx__slug",
-			columns: ["_slug"],
-			unique: true,
-		};
-		const assessment = assessMigrationPlans(
-			modificationPlan({
-				indexes: [
-					type === "add"
-						? { type, index: { ...index, source: "field" } }
-						: { type, index },
-				],
-			}),
-		);
+	test.each(["add", "remove"] as const)(
+		"treats %s unique index as warning",
+		(type) => {
+			const index = {
+				name: "lucid_idx__slug",
+				columns: ["_slug"],
+				unique: true,
+			};
+			const assessment = assessMigrationPlans(
+				modificationPlan({
+					indexes: [
+						type === "add"
+							? { type, index: { ...index, source: "field" } }
+							: { type, index },
+					],
+				}),
+			);
 
-		expect(assessment.risk).toBe("warning");
-		expect(assessment.reasons[0]?.code).toBe(
-			type === "add" ? "add_unique_index" : "remove_unique_index",
-		);
-	});
+			expect(assessment.risk).toBe("warning");
+			expect(assessment.reasons[0]?.code).toBe(
+				type === "add" ? "add_unique_index" : "remove_unique_index",
+			);
+		},
+	);
 
 	test("treats tightened nullability as warning", () => {
 		const assessment = assessMigrationPlans(

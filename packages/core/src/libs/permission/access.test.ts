@@ -137,24 +137,24 @@ describe("custom access", () => {
 		expect(isCoreExternalScope(resolved, "media:read")).toBe(true);
 	});
 
-	test.each([
-		"system",
-		"user",
-	] as const)("filters unknown, removed and incompatible scopes for %s credentials", (principalType) => {
-		const granted = [
-			"reports:read",
-			"reports:user",
-			"reports:system",
-			"reports:unknown",
-		];
-		expect(filterExternalScopes(config(), granted, principalType)).toEqual([
-			"reports:read",
-			`reports:${principalType}`,
-		]);
-		expect(filterExternalScopes(config([]), granted, principalType)).toEqual(
-			[],
-		);
-	});
+	test.each(["system", "user"] as const)(
+		"filters unknown, removed and incompatible scopes for %s credentials",
+		(principalType) => {
+			const granted = [
+				"reports:read",
+				"reports:user",
+				"reports:system",
+				"reports:unknown",
+			];
+			expect(filterExternalScopes(config(), granted, principalType)).toEqual([
+				"reports:read",
+				`reports:${principalType}`,
+			]);
+			expect(filterExternalScopes(config([]), granted, principalType)).toEqual(
+				[],
+			);
+		},
+	);
 
 	test("resolves forward permission references and scope label overrides", () => {
 		const resolved = config([
@@ -204,9 +204,12 @@ describe("custom access", () => {
 				scopes: { "reports:read": { userPermission: null } },
 			},
 		],
-	] satisfies AccessGroup[][])("rejects conflicting or incomplete definitions", (...groups) => {
-		expect(() => getCapabilityRegistry(config(groups))).toThrow(LucidError);
-	});
+	] satisfies AccessGroup[][])(
+		"rejects conflicting or incomplete definitions",
+		(...groups) => {
+			expect(() => getCapabilityRegistry(config(groups))).toThrow(LucidError);
+		},
+	);
 
 	test("includes scope and permission keys in translated configuration errors", () => {
 		expect(() =>

@@ -100,7 +100,7 @@ export default abstract class DatabaseAdapter {
 	/**
 	 * Handles formatting of certain values based on the columns data type
 	 * - booleans are returned as either a boolean or 1/0 depending on adapter support
-	 * - json is stringified
+	 * - json is stringified. Adapters whose driver serializes JSON parameters itself should return the value as is.
 	 */
 	formatInsertValue<T>(type: ColumnDataType, value: unknown): T {
 		if (value === null || value === undefined) return value as T;
@@ -114,14 +114,7 @@ export default abstract class DatabaseAdapter {
 			return (value ? 1 : 0) as T;
 		}
 		if (type === "jsonb" || type === "json") {
-			try {
-				if (typeof value === "object" && value !== null) {
-					return JSON.stringify(value) as T;
-				}
-				return null as T;
-			} catch (_) {
-				return null as T;
-			}
+			return JSON.stringify(value) as T;
 		}
 
 		return value as T;

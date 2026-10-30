@@ -21,7 +21,6 @@
 - Removed system alerts in favour of the new notification system.
 - Content API document responses now fill in their references instead of returning `refs`, with bricks split into `bricks` and `fixed`.
 - `toolkit.documents` reads now match the content API.
-- `toolkit.media` lists need `include: ["transcripts"]` for audio transcripts.
 - Toolkit list reads (`documents`, `media`, `requests` and `users`) now return `items` with their `pagination` instead of `data` and `count`.
 - Replaced Lucid's own bundler, development server and runtime adapters' CLI handlers with Vite, so projects have no `vite.config.ts`. Plugin CLI `dev` and `build` hooks are replaced by `vite`.
 - Removed the D1 database adapter. Database adapters must now support transactions.
@@ -33,8 +32,8 @@
 - Fixed API dates being read in the server or browser's local timezone. Dates are now always returned as UTC ISO strings, and Postgres timestamps use `timestamptz`.
 - Fixed migrations failing after removing a plugin that had its own migrations. They are now skipped with a warning, and their tables are left in place.
 - Fixed checkbox fields ignoring their `default` when a value is missing.
-- Fixed content API responses including personal and system media referenced by document fields. They are now left out by the media query itself.
 - Fixed wrapped service errors dropping their `key`.
+- Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once.
 
 ## v0.19.0-alpha.0
 
@@ -275,7 +274,7 @@
 - Added support for a new migration:fresh command that resets and re-runs all of the migrations.
 - Added a new CLI command to trigger specific CRONs to run.
 - New CLI command to run sync tasks.
-- Updated the CDN fallback to no longer stream and instead just redirect to help server load, and added support for setting a fallback for images and video now based on the given Sec-Fetch-Dest header instead of only supporting a fallback for images. 
+- Updated the CDN fallback to no longer stream and instead just redirect to help server load, and added support for setting a fallback for images and video now based on the given Sec-Fetch-Dest header instead of only supporting a fallback for images.
 
 ### Breaking Changes:
 
@@ -292,7 +291,7 @@
 - Fixed a bug with the dev CLI command and the SQLite DB adapter where the DB files weren't being ignored by the watcher. ([4492d0b](https://github.com/buildlucid/lucid-cms/commit/4492d0bf3edac7b53809287b8c4b868f2be0b72c))
 - Fixed a bug with the cron implementation where it didnt have the full ServiceContext being passed to it. This meant it couldn't connect to the database or push to the queue. Fixed for both runtime adapters. ([a8f2057](https://github.com/buildlucid/lucid-cms/commit/a8f20571c76a9b3dd23e10daaf94cdef35136a84))
 - Fixed SPA request response handler bug where we expected a response body from 201 responses. ([cf73786](https://github.com/buildlucid/lucid-cms/commit/cf7378636d564df3759fbc2f66311a5b0649af6d))
-- Fixed CSRF endpoint issue where the the status was incorrect. ([b2dda99](https://github.com/buildlucid/lucid-cms/commit/b2dda9999aff8c4e533e01b51bd69c647eb6a9c4)) 
+- Fixed CSRF endpoint issue where the the status was incorrect. ([b2dda99](https://github.com/buildlucid/lucid-cms/commit/b2dda9999aff8c4e533e01b51bd69c647eb6a9c4))
 - Fixed configuration caching issue in dev mode. The dev command now runs in a single process instead of spawning child processes, resulting in faster and more reliable hot-reloading. ([f68756e](https://github.com/buildlucid/lucid-cms/commit/f68756e7d605e896306f723dd35964ce2941fc51))
 - Fixed an issue with processed images where you could process already processed images. Now if you attempt to process an already processed image, we will just serve the processed image directly.
 
@@ -347,6 +346,7 @@
 ## v0.11.0-alpha.0
 
 ### Features:
+
 - Repeaters have a new minGroups validation option along with actual validation on min/max groups on the create/update document endpoint. ([4d27e99](https://github.com/buildlucid/lucid-cms/commit/4d27e9937738b112607da4ca07a94cdf48841ba1%5D))
 - Jiti is now used for loading the lucid.config.ts/js file. ([2683e8c](https://github.com/buildlucid/lucid-cms/commit/2683e8c4ab25175a95a4e7b55be3ea4e8f0542fa))
 - UUID dependency removed from core. ([b88aaa2](https://github.com/buildlucid/lucid-cms/commit/b88aaa2d1345dd9c6e2ddf11257ce909bcbad2d8))
@@ -358,12 +358,14 @@
 - Improved @‌lucidcms/admin UI and UX by simplifying and adding keyboard shortcuts for common actions along with a number of bug fixes.
 
 ### Breaking Changes:
+
 - Supported Node version has been increased to the latest LTS 22 and package engines have been defined to be stricter on this. ([71333db](https://github.com/buildlucid/lucid-cms/commit/71333dbcb37075d07a7b479b8ff8677372f1d3fb))
 - SQLite, LibSQL and PostgreSQL DB adapters have been moved out of core and are now independently publish packages. ([ff2daf2](https://github.com/buildlucid/lucid-cms/commit/ff2daf2bec04fbaa5b6c3c291fa91d3ef6575aed))
 - Complete rework on how collections store their documents, versions, fields and bricks.
 - Removed the collection.column option on collection custom fields in favour of a displayInListing prop since it is the only remaining option. ([703f39e](https://github.com/buildlucid/lucid-cms/commit/703f39e0b9038bb630146105f41a3fb7a5c42f48))
 
 ### Bug Fixes:
+
 - Fixed issue with locale sync where deleted locales had their deleted at timestamp refreshed on start. ([0bafcd1](https://github.com/buildlucid/lucid-cms/commit/0bafcd1fbe6ed833f4ef2d5a2d370f30494d0c01))
 - Fixed bug on SPA brick store where fields had their translation values overridden on creation on each locale iteration. ([59ecab2](https://github.com/buildlucid/lucid-cms/commit/59ecab2d35b302611345933ab732d40a5a98e3c5))
 - WYSIWYG field bug where values weren't reactive both ways. ([6d25490](https://github.com/buildlucid/lucid-cms/commit/6d254901c6672c9e59466ed65cf4a21c31990b7b))
@@ -371,16 +373,19 @@
 ## v0.10.2-alpha.0
 
 ### Bug Fixes:
+
 - Fixed cookie functionality broken when explicitly awaiting frontend plugin registration in Fastify. ([21b530f](https://github.com/buildlucid/lucid-cms/commit/21b530f2689ecbc962fda56042033e091e829df7))
 
 ## v0.10.1-alpha.0
 
 ### Features:
+
 - Admin SPA is now built programatically on start instead of serving the pre-built SPA as we did before. This means down the line we can support plugins registering custom components and routes and have them built into the client bundle.
 
 ## v0.10.0-alpha.0
 
 ### Features:
+
 - Support for revisions, drafts and published document versions. Document data is now never lost, and past revisions can be restored.
 - New publish content permission added to control who can publish documents. There is now fine grained control for creating, updating drafts, publishing documents and restoring revisions. ([26956a6](https://github.com/buildlucid/lucid-cms/commit/26956a6c4478457b13cc9b5f9f05c89037363fcf))
 - Pages plugin has been updated to support new document versioning system. ([2943e91](https://github.com/buildlucid/lucid-cms/commit/2943e91574f7596fbb2a17cc12e540a806fe09a5?w=1&diff=unified))
@@ -390,6 +395,7 @@
 - WebP is now prioritised over AVIF for the on-request image optimisation when the Accept header is being used. ([b7ee0ff](https://github.com/buildlucid/lucid-cms/commit/b7ee0fff18e189210376e9cc3daefc8ae5d3bcba))
 
 ### Breaking Changes:
+
 - Collections migration edits to support new versions and revisions tables. You’ll need to delete any existing DB. ([a107840](https://github.com/buildlucid/lucid-cms/commit/a107840507285bd3d7ca051ad40f0b98e67bb346))
 - The route to upsert documents has now been split up for creating a document, updating a draft and updating the published version. ([26956a6](https://github.com/buildlucid/lucid-cms/commit/26956a6c4478457b13cc9b5f9f05c89037363fcf))
 - The translations and locked config keys on the collection builder have been renamed for clarity and consistency. ([1642943](https://github.com/buildlucid/lucid-cms/commit/1642943c649db476cc8a3e5296782fd0fae6a97f))
@@ -399,11 +405,13 @@
 - Field config updated to be more consistent and descriptive. ([529ee7c](https://github.com/buildlucid/lucid-cms/commit/529ee7c24094acc86caff1aba503f6c5bf07b366))
 
 ### Bug Fixes:
+
 - Removed redundant Buffer creation in image stream processing. ([09796bf](https://github.com/buildlucid/lucid-cms/commit/09796bfa4ed116cab19abbed26722da8e25ea90f#diff-9c90be207b7363dffe5a3e438304460af906725b8add431d9eb89db36e182b1cR67))
 
 ## v0.9.0-alpha.0
 
 ### Features:
+
 - CMS UI rework. Looks better, no longer requires JS to work out content height in main layout and panels, better loading, error, no data state handling and color changes.
 - Lucid start function now has optional config for the port and host. ([b1bf97e](https://github.com/buildlucid/lucid-cms/commit/b1bf97e86121d3e11070440bcc8edbde45ef0fce#diff-0b810c38f3c138a3d5e44854edefd5eb966617ca84e62f06511f60acc40546c7L94))
 - @‌lucidcms/core/api import now has export for serviceWrapper and route helper, giving more options to plugin developers and extending your instance. ([16c0c58](https://github.com/buildlucid/lucid-cms/commit/16c0c58e44b93abcb617a17915b659cd7de04683))
@@ -411,12 +419,14 @@
 - Repeater groups and bricks in the document page builder now have a nice animation when being drag and dropped to change their order. ([d4764e0](https://github.com/buildlucid/lucid-cms/commit/d4764e03ca38c39d27280e0b7e842eed1e84ed2b))
 
 ### Breaking Changes:
+
 - dotenv package is no longer imported and called within core and so if you want to use environment variables within your project that is on you to configure. ([b1bf97e](https://github.com/buildlucid/lucid-cms/commit/b1bf97e86121d3e11070440bcc8edbde45ef0fce#diff-0b810c38f3c138a3d5e44854edefd5eb966617ca84e62f06511f60acc40546c7L94))
 - Media strategies now require a service to create a signed URL for the client to upload to. ([58c846c](https://github.com/buildlucid/lucid-cms/commit/58c846c59bfc6db5ed4cfc07696eae80583d0011))
 - Media strategies now require a service to fetch metadata on given key. ([2e869a8](https://github.com/buildlucid/lucid-cms/commit/2e869a887076f05bf2781a4acf17d7bc163f9b7b))
 - Media strategy no longer requires the updateSingle service. ([67cc279](https://github.com/buildlucid/lucid-cms/commit/67cc2795ea8db05583551f5432a94f5b4e1bd3ae))
 
 ### Bug Fixes:
+
 - Fixed link custom field issue to do with the default value being a string instead of link object. This meant in the CMS when a new link field was added, the value was set wrong causing it to error on save. ([e775ab9](https://github.com/buildlucid/lucid-cms/commit/e775ab9978d4133bfc098fe5fb088b6c275cad1d))
 
 ## v0.8.0-alpha.0

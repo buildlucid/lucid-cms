@@ -177,7 +177,7 @@ const installOAuthFetch = () => {
 	return fetchMock;
 };
 
-describe.sequential("Lucid remote connection", () => {
+describe("Lucid remote connection", () => {
 	beforeEach(async () => {
 		await database.client.deleteFrom("lucid_ai_generations").execute();
 		await database.client.deleteFrom("lucid_remote_connections").execute();

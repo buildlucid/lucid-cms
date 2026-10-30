@@ -9,9 +9,9 @@
 	},
 	"devDependencies": {
 		"@lucidkiln/core": "^1.7.1",
-		"@types/mjml": "^5.0.0",
-		"@types/node": "^26.1.0",
-		"mjml": "5.4.0"
+		"@types/mjml": "^5.4.2",
+		"@types/node": "^24.19.2",
+		"mjml": "5.4.1"
 	},
 	"volta": {
 		"node": "26.12.1"

@@ -2282,110 +2282,110 @@ test("membership changes dismiss group approval, clean up private versions and r
 	).not.toBe(article.versionId);
 });
 
-test.each([
-	"response",
-	"throw",
-] as const)("a %s failure on a later document rolls back the group and can be retried", async (failureMode) => {
-	const pageId = await createDocument();
-	const articleId = await createDocument("request_articles");
-	const created = await createSingle(context, {
-		type: "publish",
-		title: "Atomic launch",
-		user: creator,
-		documents: [
-			{
-				collectionKey: "request_pages",
-				documentId: pageId,
-				source: "latest",
-				targets: ["staging"],
-			},
-			{
-				collectionKey: "request_articles",
-				documentId: articleId,
-				source: "latest",
-				targets: ["staging"],
-			},
-		],
-	});
-	assert(created.data, JSON.stringify(created.error));
-	const approved = await approveRequest(created.data.id);
-	const failedDocument = approved.documents.at(-1);
-	assert(failedDocument);
-	const failingContext: ServiceContext = {
-		...context,
-		config: {
-			...context.config,
-			hooks: [
-				...context.config.hooks,
+test.each(["response", "throw"] as const)(
+	"a %s failure on a later document rolls back the group and can be retried",
+	async (failureMode) => {
+		const pageId = await createDocument();
+		const articleId = await createDocument("request_articles");
+		const created = await createSingle(context, {
+			type: "publish",
+			title: "Atomic launch",
+			user: creator,
+			documents: [
 				{
-					service: "documents",
-					event: "versionPromote",
-					handler: async ({ meta }) => {
-						if (meta.collectionKey !== failedDocument.collectionKey) {
-							return { error: undefined, data: undefined };
-						}
-						if (failureMode === "throw") {
-							throw new Error("Unexpected hook failure");
-						}
-						return {
-							error: {
-								status: 409,
-								message: {
-									type: "lucid.literal",
-									value: "Target is frozen",
-								},
-							},
-							data: undefined,
-						};
-					},
+					collectionKey: "request_pages",
+					documentId: pageId,
+					source: "latest",
+					targets: ["staging"],
+				},
+				{
+					collectionKey: "request_articles",
+					documentId: articleId,
+					source: "latest",
+					targets: ["staging"],
 				},
 			],
-		},
-	};
-	const queued = await complete(context, { id: approved.id, user: creator });
-	assert(queued.data, JSON.stringify(queued.error));
-	expect(await consumeJob(failingContext, queued.data)).toEqual({
-		type: "failed",
-	});
-	const detail = await readRequest(approved.id);
-	expect(detail).toMatchObject({
-		status: "open",
-		approved: true,
-		failure: {
-			message:
-				failureMode === "throw" ? expect.any(String) : "Target is frozen",
-			requestDocumentId: failedDocument.id,
-			target: "staging",
-		},
-	});
-	for (const document of detail.documents) {
-		expect(
-			await fieldOf(
-				document.documentId,
-				"summary",
-				"staging",
-				undefined,
-				document.collectionKey,
-			),
-		).toBeNull();
-	}
-	const retried = await completeRequest(approved.id);
-	expect(retried).toMatchObject({
-		status: "completed",
-		failure: null,
-	});
-	for (const document of retried.documents) {
-		expect(
-			await fieldOf(
-				document.documentId,
-				"summary",
-				"staging",
-				undefined,
-				document.collectionKey,
-			),
-		).toBe("Original");
-	}
-});
+		});
+		assert(created.data, JSON.stringify(created.error));
+		const approved = await approveRequest(created.data.id);
+		const failedDocument = approved.documents.at(-1);
+		assert(failedDocument);
+		const failingContext: ServiceContext = {
+			...context,
+			config: {
+				...context.config,
+				hooks: [
+					...context.config.hooks,
+					{
+						service: "documents",
+						event: "versionPromote",
+						handler: async ({ meta }) => {
+							if (meta.collectionKey !== failedDocument.collectionKey) {
+								return { error: undefined, data: undefined };
+							}
+							if (failureMode === "throw") {
+								throw new Error("Unexpected hook failure");
+							}
+							return {
+								error: {
+									status: 409,
+									message: {
+										type: "lucid.literal",
+										value: "Target is frozen",
+									},
+								},
+								data: undefined,
+							};
+						},
+					},
+				],
+			},
+		};
+		const queued = await complete(context, { id: approved.id, user: creator });
+		assert(queued.data, JSON.stringify(queued.error));
+		expect(await consumeJob(failingContext, queued.data)).toEqual({
+			type: "failed",
+		});
+		const detail = await readRequest(approved.id);
+		expect(detail).toMatchObject({
+			status: "open",
+			approved: true,
+			failure: {
+				message:
+					failureMode === "throw" ? expect.any(String) : "Target is frozen",
+				requestDocumentId: failedDocument.id,
+				target: "staging",
+			},
+		});
+		for (const document of detail.documents) {
+			expect(
+				await fieldOf(
+					document.documentId,
+					"summary",
+					"staging",
+					undefined,
+					document.collectionKey,
+				),
+			).toBeNull();
+		}
+		const retried = await completeRequest(approved.id);
+		expect(retried).toMatchObject({
+			status: "completed",
+			failure: null,
+		});
+		for (const document of retried.documents) {
+			expect(
+				await fieldOf(
+					document.documentId,
+					"summary",
+					"staging",
+					undefined,
+					document.collectionKey,
+				),
+			).toBe("Original");
+		}
+	},
+);
 
 test("drift review is scoped to its member, and edits to either proposal dismiss approval", async () => {
 	const firstId = await createDocument();

@@ -11,18 +11,16 @@
 		"types": ["vite/client"],
 		"noEmit": true,
 		"isolatedModules": true,
-		"baseUrl": ".",
-		"ignoreDeprecations": "6.0",
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"paths": {
-			"@lucidcms/admin/types": ["src/exports/types.ts"],
-			"@lucidcms/admin/config": ["src/exports/config.ts"],
+			"@lucidcms/admin/types": ["./src/exports/types.ts"],
+			"@lucidcms/admin/config": ["./src/exports/config.ts"],
 			"@match-permissions": [
 				"../core/src/libs/permission/match-permissions.ts"
 			],
 			"@ai-feature-access": ["../core/src/libs/config/ai-feature-access.ts"],
-			"@/*": ["src/*"],
+			"@/*": ["./src/*"],
 			"@types": ["../core/src/exports/types.ts"],
 			"@field-conditions": [
 				"../core/src/libs/collection/custom-fields/conditions/index.ts"
@@ -30,10 +28,10 @@
 			"@field-capabilities": [
 				"../core/src/libs/collection/custom-fields/capabilities.ts"
 			],
-			"@assets/*": ["src/assets/*"],
-			"@lucidcms/admin/hooks": ["src/exports/hooks.ts"],
-			"@lucidcms/admin/services": ["src/exports/services.ts"],
-			"@lucidcms/admin/utils": ["src/exports/utils.ts"]
+			"@assets/*": ["./src/assets/*"],
+			"@lucidcms/admin/hooks": ["./src/exports/hooks.ts"],
+			"@lucidcms/admin/services": ["./src/exports/services.ts"],
+			"@lucidcms/admin/utils": ["./src/exports/utils.ts"]
 		}
 	}
 }

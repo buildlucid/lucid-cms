@@ -37,10 +37,11 @@ const jsonCodec: DatabaseCodec = {
 	name: "json",
 	encodes: true,
 	decodes: true,
-	encode: (value) => {
-		if (value === null || value === undefined) return value;
-		return JSON.stringify(value);
-	},
+	encode: (value, context) =>
+		context.adapter.formatInsertValue(
+			context.columnType ?? context.adapter.getDataType("json"),
+			value,
+		),
 	decode: (value, context) =>
 		context.adapter.formatResultValue(
 			context.columnType ?? context.adapter.getDataType("json"),

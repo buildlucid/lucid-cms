@@ -125,20 +125,19 @@ describe("cloudflareImagesDeliveryAdapter", () => {
 		expect(mock.input).not.toHaveBeenCalled();
 	});
 
-	it.each([
-		"image/jpeg",
-		"image/png",
-		"image/webp",
-	])("accepts %s source images", async (format) => {
-		const mock = createMockBinding({
-			info: { format, fileSize: 3, width: 100, height: 50 },
-			contentType: format,
-		});
-		const result = await processImage({ binding: mock.binding });
+	it.each(["image/jpeg", "image/png", "image/webp"])(
+		"accepts %s source images",
+		async (format) => {
+			const mock = createMockBinding({
+				info: { format, fileSize: 3, width: 100, height: 50 },
+				contentType: format,
+			});
+			const result = await processImage({ binding: mock.binding });
 
-		expect(result.error).toBeUndefined();
-		expect(result.data?.processed).toBe(true);
-	});
+			expect(result.error).toBeUndefined();
+			expect(result.data?.processed).toBe(true);
+		},
+	);
 
 	it.each([
 		"image/gif",
@@ -373,16 +372,19 @@ describe("cloudflareImagesDeliveryAdapter", () => {
 		],
 		[{ quality: 0 }, "plugin.cloudflare.images.errors.quality.invalid"],
 		[{ quality: 10.5 }, "plugin.cloudflare.images.errors.quality.invalid"],
-	] as const)("rejects invalid direct processor options", async (options, key) => {
-		const mock = createMockBinding();
-		const result = await processImage({
-			binding: mock.binding,
-			options: options as MediaTransformationOptions,
-		});
+	] as const)(
+		"rejects invalid direct processor options",
+		async (options, key) => {
+			const mock = createMockBinding();
+			const result = await processImage({
+				binding: mock.binding,
+				options: options as MediaTransformationOptions,
+			});
 
-		expectErrorKey(result, key);
-		expect(mock.info).not.toHaveBeenCalled();
-	});
+			expectErrorKey(result, key);
+			expect(mock.info).not.toHaveBeenCalled();
+		},
+	);
 
 	it.each([
 		[9413, "plugin.cloudflare.images.errors.cloudflare.validation"],

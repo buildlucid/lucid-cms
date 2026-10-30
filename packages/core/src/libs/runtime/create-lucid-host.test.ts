@@ -241,32 +241,32 @@ describe("createLucidHost database ownership", () => {
 	test.each([
 		{ overridden: false, expected: "runtime" },
 		{ overridden: true, expected: null },
-	])("uses the runtime's agent runner unless an override replaces it (overridden: $overridden)", async ({
-		overridden,
-		expected,
-	}) => {
-		const fixture = createFixture();
-		const agentRunner: AgentRunnerInstance = {
-			type: "agent-runner",
-			key: "runtime",
-			start: vi.fn(),
-			watch: vi.fn(),
-		};
-		const host = await createLucidHost({
-			definition: fixture.definition,
-			runtimeContext,
-			databaseScope: "runtime",
-			adapterDefaults: { agentRunner },
-			//* commands' task servers run agent runs in place
-			adapterOverrides: overridden ? { agentRunner: null } : undefined,
-		});
+	])(
+		"uses the runtime's agent runner unless an override replaces it (overridden: $overridden)",
+		async ({ overridden, expected }) => {
+			const fixture = createFixture();
+			const agentRunner: AgentRunnerInstance = {
+				type: "agent-runner",
+				key: "runtime",
+				start: vi.fn(),
+				watch: vi.fn(),
+			};
+			const host = await createLucidHost({
+				definition: fixture.definition,
+				runtimeContext,
+				databaseScope: "runtime",
+				adapterDefaults: { agentRunner },
+				//* commands' task servers run agent runs in place
+				adapterOverrides: overridden ? { agentRunner: null } : undefined,
+			});
 
-		const context = await host.createInvocation().getServiceContext();
+			const context = await host.createInvocation().getServiceContext();
 
-		expect(context.agentRunner?.key ?? null).toBe(expected);
+			expect(context.agentRunner?.key ?? null).toBe(expected);
 
-		await host.destroy();
-	});
+			await host.destroy();
+		},
+	);
 
 	test("uses the host environment for a runtime-scoped connection", async () => {
 		const fixture = createFixture();

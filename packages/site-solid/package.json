@@ -43,15 +43,15 @@
 		"Solid"
 	],
 	"dependencies": {
-		"vite-plugin-solid": "^2.11.14"
+		"vite-plugin-solid": "^2.11.15"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.1",
+		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/plugin-site": "*",
-		"@types/node": "^24.13.2",
-		"tsdown": "^0.22.3",
+		"@types/node": "^24.19.2",
+		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3",
-		"solid-js": "^1.9.17"
+		"solid-js": "^1.9.18"
 	},
 	"peerDependencies": {
 		"@lucidcms/plugin-site": "*",

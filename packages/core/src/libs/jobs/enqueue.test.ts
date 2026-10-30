@@ -241,62 +241,68 @@ describe("enqueueing durable jobs", () => {
 		expect(publish).toHaveBeenCalledOnce();
 	});
 
-	test.each([
-		false,
-		true,
-	])("keeps jobs enqueued by hook toolkits in their transaction (rollback: %s)", async (rollback) => {
-		const job = defineJob({
-			name: "test:hook-transaction",
-			version: 1,
-			input: z.object({ id: z.number() }),
-			handler: async () => ({ error: undefined, data: undefined }),
-		});
-		const publish = vi.fn(async () => ({ error: undefined, data: undefined }));
-		const context = await createJobsContext(testConfig, {
-			jobs: [job],
-			adapter: createTestQueueAdapter(publish),
-		});
-		let jobId: string | undefined;
-		context.config.hooks = [
-			{
-				service: "media",
-				event: "afterRestore",
-				handler: async ({ context: hookContext, toolkit, data }) => {
-					expect(hookContext.db.isTransaction).toBe(true);
-					const enqueued = await toolkit.jobs.enqueueJob({
-						job,
-						payload: { id: data.ids[0] ?? 0 },
-					});
-					if (enqueued.error) return enqueued;
+	test.each([false, true])(
+		"keeps jobs enqueued by hook toolkits in their transaction (rollback: %s)",
+		async (rollback) => {
+			const job = defineJob({
+				name: "test:hook-transaction",
+				version: 1,
+				input: z.object({ id: z.number() }),
+				handler: async () => ({ error: undefined, data: undefined }),
+			});
+			const publish = vi.fn(async () => ({
+				error: undefined,
+				data: undefined,
+			}));
+			const context = await createJobsContext(testConfig, {
+				jobs: [job],
+				adapter: createTestQueueAdapter(publish),
+			});
+			let jobId: string | undefined;
+			context.config.hooks = [
+				{
+					service: "media",
+					event: "afterRestore",
+					handler: async ({ context: hookContext, toolkit, data }) => {
+						expect(hookContext.db.isTransaction).toBe(true);
+						const enqueued = await toolkit.jobs.enqueueJob({
+							job,
+							payload: { id: data.ids[0] ?? 0 },
+						});
+						if (enqueued.error) return enqueued;
 
-					jobId = enqueued.data.jobId;
-					expect(publish).not.toHaveBeenCalled();
-					return rollback
-						? { error: { message: copy.literal("Roll back") }, data: undefined }
-						: { error: undefined, data: undefined };
+						jobId = enqueued.data.jobId;
+						expect(publish).not.toHaveBeenCalled();
+						return rollback
+							? {
+									error: { message: copy.literal("Roll back") },
+									data: undefined,
+								}
+							: { error: undefined, data: undefined };
+					},
 				},
-			},
-		];
-		const restore: ServiceFn<[], undefined> = (context) =>
-			executeHooks(
+			];
+			const restore: ServiceFn<[], undefined> = (context) =>
+				executeHooks(
+					context,
+					{ service: "media", event: "afterRestore", config: context.config },
+					{ meta: {}, data: { ids: [1] } },
+				);
+			const result = await serviceWrapper(restore, { transaction: true })(
 				context,
-				{ service: "media", event: "afterRestore", config: context.config },
-				{ meta: {}, data: { ids: [1] } },
 			);
-		const result = await serviceWrapper(restore, { transaction: true })(
-			context,
-		);
 
-		expect(Boolean(result.error)).toBe(rollback);
-		expect(jobId).toBeDefined();
-		expect(publish).toHaveBeenCalledTimes(rollback ? 0 : 1);
-		const stored = await context.db.kysely
-			.selectFrom("lucid_jobs")
-			.select("job_id")
-			.where("job_id", "=", jobId ?? "")
-			.executeTakeFirst();
-		expect(stored?.job_id).toBe(rollback ? undefined : jobId);
-	});
+			expect(Boolean(result.error)).toBe(rollback);
+			expect(jobId).toBeDefined();
+			expect(publish).toHaveBeenCalledTimes(rollback ? 0 : 1);
+			const stored = await context.db.kysely
+				.selectFrom("lucid_jobs")
+				.select("job_id")
+				.where("job_id", "=", jobId ?? "")
+				.executeTakeFirst();
+			expect(stored?.job_id).toBe(rollback ? undefined : jobId);
+		},
+	);
 
 	test("keeps jobs pending when transport delivery fails", async () => {
 		const job = defineJob({

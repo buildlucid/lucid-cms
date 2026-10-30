@@ -46,7 +46,7 @@
 		"@lucidcms/db-postgres": "*",
 		"@lucidcms/db-sqlite": "*",
 		"@lucidcms/plugin-worker-queues": "*",
-		"nodemailer": "^9.0.1",
+		"nodemailer": "^10.3.1",
 		"@lucidcms/plugin-typesense": "*",
 		"@lucidcms/plugin-seo": "*",
 		"@lucidcms/site-react": "*",
@@ -56,17 +56,17 @@
 		"@lucidcms/site-vue": "*",
 		"@lucidcms/site-svelte": "*",
 		"vue": "^3.5.44",
-		"svelte": "^5.57.2"
+		"svelte": "^5.57.3"
 	},
 	"author": "Build Lucid Ltd",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.13",
+		"@types/better-sqlite3": "^9.6.0",
 		"typescript": "^6.0.3",
 		"@lucidcms/admin": "*",
-		"solid-js": "^1.9.13",
-		"tailwindcss": "^4.3.1",
-		"@tanstack/solid-query": "^5.101.1"
+		"solid-js": "^1.9.18",
+		"tailwindcss": "^4.3.3",
+		"@tanstack/solid-query": "^5.105.0"
 	},
 	"volta": {
 		"node": "26.12.1"

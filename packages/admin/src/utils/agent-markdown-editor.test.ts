@@ -46,16 +46,15 @@ describe("live agent Markdown formatting", () => {
 		{ typed: "~~Removed~~", selector: "s", markdown: "~~Removed~~" },
 		{ typed: "`code`", selector: "code", markdown: "`code`" },
 		{ typed: "---", selector: "hr", markdown: "---\n\n" },
-	])("formats $typed as it is typed and saves Markdown", ({
-		typed,
-		selector,
-		markdown,
-	}) => {
-		const editor = createEditor();
-		typeText(editor, typed);
-		expect(editor.view.dom.querySelector(selector)).not.toBeNull();
-		expect(editor.getMarkdown()).toBe(markdown);
-	});
+	])(
+		"formats $typed as it is typed and saves Markdown",
+		({ typed, selector, markdown }) => {
+			const editor = createEditor();
+			typeText(editor, typed);
+			expect(editor.view.dom.querySelector(selector)).not.toBeNull();
+			expect(editor.getMarkdown()).toBe(markdown);
+		},
+	);
 
 	it("opens saved instructions with headings, links, nested lists and fenced code", () => {
 		const editor = createEditor();

@@ -84,37 +84,37 @@ test("reuses the caller's transaction unless isolation is requested", async () =
 	expect(await exists("tx_reused")).toBe(true);
 });
 
-test.each([
-	"returned",
-	"thrown",
-])("isolates a %s failure while the caller commits its own work", async (mode) => {
-	const key = `tx_isolated_${mode}`;
-	const error = new Error("Unexpected savepoint failure.");
-	const result = await withTransaction(context, async (parent) => {
-		await insert(parent, `${key}_before`);
-		const child = withTransaction(
-			parent,
-			async (transaction) => {
-				await insert(transaction, key);
-				if (mode === "thrown") throw error;
+test.each(["returned", "thrown"])(
+	"isolates a %s failure while the caller commits its own work",
+	async (mode) => {
+		const key = `tx_isolated_${mode}`;
+		const error = new Error("Unexpected savepoint failure.");
+		const result = await withTransaction(context, async (parent) => {
+			await insert(parent, `${key}_before`);
+			const child = withTransaction(
+				parent,
+				async (transaction) => {
+					await insert(transaction, key);
+					if (mode === "thrown") throw error;
 
-				return { error: failure, data: undefined };
-			},
-			{ isolate: true },
-		);
-		if (mode === "thrown") {
-			await expect(child).rejects.toBe(error);
-		} else {
-			expect((await child).error).toBe(failure);
-		}
-		await insert(parent, `${key}_after`);
-		return { error: undefined, data: undefined };
-	});
-	expect(result.error).toBeUndefined();
-	expect(await exists(key)).toBe(false);
-	expect(await exists(`${key}_before`)).toBe(true);
-	expect(await exists(`${key}_after`)).toBe(true);
-});
+					return { error: failure, data: undefined };
+				},
+				{ isolate: true },
+			);
+			if (mode === "thrown") {
+				await expect(child).rejects.toBe(error);
+			} else {
+				expect((await child).error).toBe(failure);
+			}
+			await insert(parent, `${key}_after`);
+			return { error: undefined, data: undefined };
+		});
+		expect(result.error).toBeUndefined();
+		expect(await exists(key)).toBe(false);
+		expect(await exists(`${key}_before`)).toBe(true);
+		expect(await exists(`${key}_after`)).toBe(true);
+	},
+);
 
 test("an isolated success still rolls back when the caller's transaction fails", async () => {
 	const result = await withTransaction(context, async (parent) => {

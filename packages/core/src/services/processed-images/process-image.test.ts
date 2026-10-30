@@ -126,87 +126,86 @@ describe("processImage", () => {
 			contentType: "image/png",
 			source: "original-png-bytes",
 		},
-	])("returns the original $contentType response when processing is a no-op", async ({
-		key,
-		contentType,
-		source,
-	}) => {
-		mocks.selectSingle.mockResolvedValueOnce({
-			error: undefined,
-			data: { focal_x: null, focal_y: null },
-		});
-		const sourceBytes = new TextEncoder().encode(source);
-		const sourceBody = new ReadableStream<Uint8Array>({
-			start(controller) {
-				controller.enqueue(sourceBytes);
-				controller.close();
-			},
-		});
+	])(
+		"returns the original $contentType response when processing is a no-op",
+		async ({ key, contentType, source }) => {
+			mocks.selectSingle.mockResolvedValueOnce({
+				error: undefined,
+				data: { focal_x: null, focal_y: null },
+			});
+			const sourceBytes = new TextEncoder().encode(source);
+			const sourceBody = new ReadableStream<Uint8Array>({
+				start(controller) {
+					controller.enqueue(sourceBytes);
+					controller.close();
+				},
+			});
 
-		mocks.checkHasMediaStorage.mockResolvedValueOnce({
-			error: undefined,
-			data: {
-				stream: vi.fn().mockResolvedValue({
-					error: undefined,
-					data: {
-						contentLength: sourceBytes.length,
-						contentType,
-						body: sourceBody,
-						etag: "source-etag",
-					},
-				}),
-				upload: vi.fn(),
-			},
-		});
+			mocks.checkHasMediaStorage.mockResolvedValueOnce({
+				error: undefined,
+				data: {
+					stream: vi.fn().mockResolvedValue({
+						error: undefined,
+						data: {
+							contentLength: sourceBytes.length,
+							contentType,
+							body: sourceBody,
+							etag: "source-etag",
+						},
+					}),
+					upload: vi.fn(),
+				},
+			});
 
-		mocks.optimizeImage.mockResolvedValueOnce({
-			error: undefined,
-			data: {
-				processed: false,
-			},
-		});
+			mocks.optimizeImage.mockResolvedValueOnce({
+				error: undefined,
+				data: {
+					processed: false,
+				},
+			});
 
-		mocks.getSingleCount.mockResolvedValueOnce({
-			error: undefined,
-			data: 0,
-		});
+			mocks.getSingleCount.mockResolvedValueOnce({
+				error: undefined,
+				data: 0,
+			});
 
-		const response = await processImage(
-			{
-				db: {},
-				config: {
+			const response = await processImage(
+				{
 					db: {},
-					media: {
-						limits: {},
-						images: {
-							cache: {
-								enabled: false,
-								maxVariantsPerFile: 10,
+					config: {
+						db: {},
+						media: {
+							limits: {},
+							images: {
+								cache: {
+									enabled: false,
+									maxVariantsPerFile: 10,
+								},
 							},
 						},
 					},
+				} as never,
+				{
+					key,
+					processKey: "media/processed.webp",
+					options: {
+						format: "webp",
+					},
 				},
-			} as never,
-			{
-				key,
-				processKey: "media/processed.webp",
-				options: {
-					format: "webp",
-				},
-			},
-		);
+			);
 
-		expect(response.error).toBeUndefined();
-		expect(response.data).toMatchObject({
-			key,
-			contentLength: sourceBytes.length,
-			contentType,
-			etag: "source-etag",
-		});
-		expect(
-			await readStream(response.data?.body as ReadableStream<Uint8Array>),
-		).toBe(source);
-	});
+			expect(response.error).toBeUndefined();
+			expect(response.data).toMatchObject({
+				key,
+				contentLength: sourceBytes.length,
+				contentType,
+				etag: "source-etag",
+			});
+			expect(
+				await readStream(response.data?.body as ReadableStream<Uint8Array>),
+			).toBe(source);
+		},
+	);
 
 	test("returns a stable etag for generated processed images and short-circuits matching revalidation requests", async () => {
 		mocks.selectSingle.mockResolvedValueOnce({

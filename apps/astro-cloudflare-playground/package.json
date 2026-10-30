@@ -20,7 +20,7 @@
 		"migrate:fresh": "lucidcms migrate:fresh"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^15.0.0-beta.3",
+		"@astrojs/cloudflare": "^15.0.0-beta.4",
 		"@lucidcms/astro": "*",
 		"@lucidcms/client": "*",
 		"@lucidcms/core": "*",
@@ -29,7 +29,7 @@
 		"@lucidcms/plugin-cloudflare-r2": "*",
 		"@lucidcms/plugin-pages": "*",
 		"@lucidcms/runtime-cloudflare": "*",
-		"astro": "^7.4.2"
+		"astro": "^7.4.4"
 	},
 	"author": "Build Lucid Ltd",
 	"license": "MIT",
@@ -40,6 +40,6 @@
 		"node": ">=24.11.1"
 	},
 	"devDependencies": {
-		"cf": "^1.0.0-beta.20"
+		"cf": "^1.0.0-beta.26"
 	}
 }

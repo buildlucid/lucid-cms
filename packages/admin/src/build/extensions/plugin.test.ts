@@ -177,168 +177,172 @@ test("bundles project and browser package entries without executing them, includ
 	}
 });
 
-test.each([
-	"lucid.config.js",
-	"lucid.config.ts",
-])("resolves %s extensions from a nested workspace in dev and build", async (configName) => {
-	const workspace = await realpath(
-		await mkdtemp(path.join(os.tmpdir(), "lucid-workspace-")),
-	);
-	const projectRoot = path.join(workspace, "apps/cms");
-	const adminRoot = path.join(workspace, "packages/admin");
-	const configPath = path.join(projectRoot, configName);
-	const require = createRequire(import.meta.url);
-	try {
-		await mkdir(projectRoot, { recursive: true });
-		await mkdir(adminRoot, { recursive: true });
-		await mkdir(path.join(workspace, "node_modules"), { recursive: true });
-		await symlink(
-			path.dirname(require.resolve("solid-js/package.json")),
-			path.join(workspace, "node_modules/solid-js"),
-			"dir",
+test.each(["lucid.config.js", "lucid.config.ts"])(
+	"resolves %s extensions from a nested workspace in dev and build",
+	async (configName) => {
+		const workspace = await realpath(
+			await mkdtemp(path.join(os.tmpdir(), "lucid-workspace-")),
 		);
-		await writeFile(
-			configPath,
-			'throw new Error("the plugin must not execute the config");',
-		);
-		await writeFile(
-			path.join(projectRoot, "Panel.jsx"),
-			"export default () => <p>config-relative-panel</p>;",
-		);
-		await writeFile(
-			path.join(projectRoot, "startup.js"),
-			'document.documentElement.dataset.nested = "nested-startup";',
-		);
-		await writeFile(
-			path.join(projectRoot, "style.css"),
-			".nested-theme { color: blue; }",
-		);
-
-		// The nearest package wins; a separate package is available only at workspace level.
-		for (const [directory, marker] of [
-			[
-				path.join(projectRoot, "node_modules/local-plugin"),
-				"nearest-package-panel",
-			],
-			[
-				path.join(workspace, "node_modules/local-plugin"),
-				"wrong-workspace-package",
-			],
-			[
-				path.join(workspace, "packages/shared-plugin"),
-				"linked-workspace-panel",
-			],
-		]) {
-			await mkdir(directory, { recursive: true });
-			await writeFile(
-				path.join(directory, "package.json"),
-				JSON.stringify({
-					type: "module",
-					exports: {
-						"./panel": { browser: "./Panel.jsx", node: "./wrong.js" },
-					},
-				}),
-			);
-			await writeFile(
-				path.join(directory, "Panel.jsx"),
-				`export default () => <p>${marker}</p>;`,
-			);
-			await writeFile(
-				path.join(directory, "wrong.js"),
-				'throw new Error("wrong-node-condition");',
-			);
-		}
-		await symlink(
-			path.join(workspace, "packages/shared-plugin"),
-			path.join(workspace, "node_modules/shared-plugin"),
-			"dir",
-		);
-		await writeFile(
-			path.join(adminRoot, "index.html"),
-			'<div id="root"></div><script type="module" src="/main.js"></script>',
-		);
-		await writeFile(
-			path.join(adminRoot, "main.js"),
-			'import "./main.css"; import { routes, brickSlots, fieldSlots, documentListSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots, documentListSlots };',
-		);
-		await writeFile(path.join(adminRoot, "main.css"), "");
-		const plugin = () =>
-			adminExtensionsPlugin({
-				configPath,
-				stylesheetPath: path.join(adminRoot, "main.css"),
-				admin: {
-					routes: [
-						{
-							key: "relative",
-							path: "relative",
-							component: "./Panel.jsx",
-							navigation: {
-								label: "Workspace reports",
-								group: "content",
-								order: 2,
-								icon: "overview",
-							},
-						},
-						{
-							key: "url",
-							path: "url",
-							component: pathToFileURL(path.join(projectRoot, "Panel.jsx")),
-						},
-						{ key: "local", path: "local", component: "local-plugin/panel" },
-						{ key: "shared", path: "shared", component: "shared-plugin/panel" },
-					],
-					scripts: ["./startup.js"],
-					stylesheets: ["./style.css"],
-				},
-			});
-		const server = await createServer({
-			configFile: false,
-			root: adminRoot,
-			logLevel: "silent",
-			plugins: [plugin(), solid()],
-			optimizeDeps: { noDiscovery: true, include: [] },
-			server: { middlewareMode: true, fs: { allow: [workspace] } },
-		});
+		const projectRoot = path.join(workspace, "apps/cms");
+		const adminRoot = path.join(workspace, "packages/admin");
+		const configPath = path.join(projectRoot, configName);
+		const require = createRequire(import.meta.url);
 		try {
-			const registry = await server.transformRequest("\0virtual:lucid-admin");
-			expect(registry?.code).toContain("apps/cms/Panel.jsx");
-			expect(registry?.code).toContain("Workspace reports");
-			expect(registry?.code).toContain(
-				"apps/cms/node_modules/local-plugin/Panel.jsx",
+			await mkdir(projectRoot, { recursive: true });
+			await mkdir(adminRoot, { recursive: true });
+			await mkdir(path.join(workspace, "node_modules"), { recursive: true });
+			await symlink(
+				path.dirname(require.resolve("solid-js/package.json")),
+				path.join(workspace, "node_modules/solid-js"),
+				"dir",
 			);
-			expect(registry?.code).toContain("packages/shared-plugin/Panel.jsx");
-			const assets = await server.transformRequest(
-				"\0virtual:lucid-admin-assets",
+			await writeFile(
+				configPath,
+				'throw new Error("the plugin must not execute the config");',
 			);
-			expect(assets?.code).toContain("apps/cms/startup.js");
-			const stylesheet = await server.transformRequest("/main.css");
-			expect(stylesheet?.code).toContain(".nested-theme");
+			await writeFile(
+				path.join(projectRoot, "Panel.jsx"),
+				"export default () => <p>config-relative-panel</p>;",
+			);
+			await writeFile(
+				path.join(projectRoot, "startup.js"),
+				'document.documentElement.dataset.nested = "nested-startup";',
+			);
+			await writeFile(
+				path.join(projectRoot, "style.css"),
+				".nested-theme { color: blue; }",
+			);
+
+			// The nearest package wins; a separate package is available only at workspace level.
+			for (const [directory, marker] of [
+				[
+					path.join(projectRoot, "node_modules/local-plugin"),
+					"nearest-package-panel",
+				],
+				[
+					path.join(workspace, "node_modules/local-plugin"),
+					"wrong-workspace-package",
+				],
+				[
+					path.join(workspace, "packages/shared-plugin"),
+					"linked-workspace-panel",
+				],
+			]) {
+				await mkdir(directory, { recursive: true });
+				await writeFile(
+					path.join(directory, "package.json"),
+					JSON.stringify({
+						type: "module",
+						exports: {
+							"./panel": { browser: "./Panel.jsx", node: "./wrong.js" },
+						},
+					}),
+				);
+				await writeFile(
+					path.join(directory, "Panel.jsx"),
+					`export default () => <p>${marker}</p>;`,
+				);
+				await writeFile(
+					path.join(directory, "wrong.js"),
+					'throw new Error("wrong-node-condition");',
+				);
+			}
+			await symlink(
+				path.join(workspace, "packages/shared-plugin"),
+				path.join(workspace, "node_modules/shared-plugin"),
+				"dir",
+			);
+			await writeFile(
+				path.join(adminRoot, "index.html"),
+				'<div id="root"></div><script type="module" src="/main.js"></script>',
+			);
+			await writeFile(
+				path.join(adminRoot, "main.js"),
+				'import "./main.css"; import { routes, brickSlots, fieldSlots, documentListSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots, documentListSlots };',
+			);
+			await writeFile(path.join(adminRoot, "main.css"), "");
+			const plugin = () =>
+				adminExtensionsPlugin({
+					configPath,
+					stylesheetPath: path.join(adminRoot, "main.css"),
+					admin: {
+						routes: [
+							{
+								key: "relative",
+								path: "relative",
+								component: "./Panel.jsx",
+								navigation: {
+									label: "Workspace reports",
+									group: "content",
+									order: 2,
+									icon: "overview",
+								},
+							},
+							{
+								key: "url",
+								path: "url",
+								component: pathToFileURL(path.join(projectRoot, "Panel.jsx")),
+							},
+							{ key: "local", path: "local", component: "local-plugin/panel" },
+							{
+								key: "shared",
+								path: "shared",
+								component: "shared-plugin/panel",
+							},
+						],
+						scripts: ["./startup.js"],
+						stylesheets: ["./style.css"],
+					},
+				});
+			const server = await createServer({
+				configFile: false,
+				root: adminRoot,
+				logLevel: "silent",
+				plugins: [plugin(), solid()],
+				optimizeDeps: { noDiscovery: true, include: [] },
+				server: { middlewareMode: true, fs: { allow: [workspace] } },
+			});
+			try {
+				const registry = await server.transformRequest("\0virtual:lucid-admin");
+				expect(registry?.code).toContain("apps/cms/Panel.jsx");
+				expect(registry?.code).toContain("Workspace reports");
+				expect(registry?.code).toContain(
+					"apps/cms/node_modules/local-plugin/Panel.jsx",
+				);
+				expect(registry?.code).toContain("packages/shared-plugin/Panel.jsx");
+				const assets = await server.transformRequest(
+					"\0virtual:lucid-admin-assets",
+				);
+				expect(assets?.code).toContain("apps/cms/startup.js");
+				const stylesheet = await server.transformRequest("/main.css");
+				expect(stylesheet?.code).toContain(".nested-theme");
+			} finally {
+				await server.close();
+			}
+			const result = await build({
+				configFile: false,
+				root: adminRoot,
+				logLevel: "silent",
+				plugins: [plugin(), solid()],
+				build: { write: false, minify: false },
+			});
+			if (Array.isArray(result) || !("output" in result))
+				throw new Error("Expected one application build");
+			const code = result.output
+				.map((entry) =>
+					entry.type === "chunk" ? entry.code : String(entry.source),
+				)
+				.join("\n");
+			expect(code).toContain("config-relative-panel");
+			expect(code).toContain("Workspace reports");
+			expect(code).toContain("nearest-package-panel");
+			expect(code).toContain("linked-workspace-panel");
+			expect(code).toContain("nested-startup");
+			expect(code).toContain(".nested-theme");
+			expect(code).not.toContain("wrong-workspace-package");
+			expect(code).not.toContain("wrong-node-condition");
 		} finally {
-			await server.close();
+			await rm(workspace, { recursive: true, force: true });
 		}
-		const result = await build({
-			configFile: false,
-			root: adminRoot,
-			logLevel: "silent",
-			plugins: [plugin(), solid()],
-			build: { write: false, minify: false },
-		});
-		if (Array.isArray(result) || !("output" in result))
-			throw new Error("Expected one application build");
-		const code = result.output
-			.map((entry) =>
-				entry.type === "chunk" ? entry.code : String(entry.source),
-			)
-			.join("\n");
-		expect(code).toContain("config-relative-panel");
-		expect(code).toContain("Workspace reports");
-		expect(code).toContain("nearest-package-panel");
-		expect(code).toContain("linked-workspace-panel");
-		expect(code).toContain("nested-startup");
-		expect(code).toContain(".nested-theme");
-		expect(code).not.toContain("wrong-workspace-package");
-		expect(code).not.toContain("wrong-node-condition");
-	} finally {
-		await rm(workspace, { recursive: true, force: true });
-	}
-});
+	},
+);

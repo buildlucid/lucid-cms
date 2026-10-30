@@ -105,42 +105,42 @@ test("an open stream does not dismiss a form whose response the server rejects",
 	}
 });
 
-test.each([
-	"widget",
-	"snapshot",
-])("a saved response received as a %s releases the form before the remaining model stream finishes", async (delivery) => {
-	const ended = Promise.withResolvers<void>();
-	mocks.stream.mockReset().mockReturnValue(ended.promise);
-	const { chat, dispose } = createRoot((dispose) => ({
-		chat: useAgentChat(() => "conversation"),
-		dispose,
-	}));
-	try {
-		const result = chat.respond({ runId: "run", id: "selection" }, { id: 1 });
-		const stream = mocks.stream.mock.calls[0]?.[0];
-		if (!stream) return expect.fail("Missing response stream");
-		stream.onAccepted?.();
-		const answered = {
-			...widget,
-			interaction: {
-				...widget.interaction,
-				status: "answered" as const,
-				response: { id: 1 },
-			},
-		};
-		stream.onEvent(
-			delivery === "widget"
-				? { ...answered, messageId: "message" }
-				: { type: "message", message: { ...message, parts: [answered] } },
-		);
-		expect(await result).toEqual({ error: undefined });
-		expect(chat.pendingInteraction()).toBeUndefined();
-		expect(chat.streaming()).toBe(true);
-	} finally {
-		ended.resolve();
-		dispose();
-	}
-});
+test.each(["widget", "snapshot"])(
+	"a saved response received as a %s releases the form before the remaining model stream finishes",
+	async (delivery) => {
+		const ended = Promise.withResolvers<void>();
+		mocks.stream.mockReset().mockReturnValue(ended.promise);
+		const { chat, dispose } = createRoot((dispose) => ({
+			chat: useAgentChat(() => "conversation"),
+			dispose,
+		}));
+		try {
+			const result = chat.respond({ runId: "run", id: "selection" }, { id: 1 });
+			const stream = mocks.stream.mock.calls[0]?.[0];
+			if (!stream) return expect.fail("Missing response stream");
+			stream.onAccepted?.();
+			const answered = {
+				...widget,
+				interaction: {
+					...widget.interaction,
+					status: "answered" as const,
+					response: { id: 1 },
+				},
+			};
+			stream.onEvent(
+				delivery === "widget"
+					? { ...answered, messageId: "message" }
+					: { type: "message", message: { ...message, parts: [answered] } },
+			);
+			expect(await result).toEqual({ error: undefined });
+			expect(chat.pendingInteraction()).toBeUndefined();
+			expect(chat.streaming()).toBe(true);
+		} finally {
+			ended.resolve();
+			dispose();
+		}
+	},
+);
 
 test("switching chats leaves the old chat's stream behind straight away", async () => {
 	const ended = Promise.withResolvers<void>();

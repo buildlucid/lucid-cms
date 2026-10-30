@@ -40,19 +40,19 @@
 		"Plugin"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.1",
+		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/core": "0.19.0-alpha.0",
-		"@types/node": "^24.13.2",
-		"@types/nodemailer": "^8.0.1",
-		"tsdown": "^0.22.3",
+		"@types/node": "^24.19.2",
+		"nodemailer": "^10.3.1",
+		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.19.0-alpha.0"
+		"@lucidcms/core": "^0.19.0-alpha.0",
+		"nodemailer": "^10.0.0"
 	},
 	"dependencies": {
-		"ipaddr.js": "^2.4.0",
-		"nodemailer": "^9.0.1"
+		"ipaddr.js": "^2.5.0"
 	},
 	"volta": {
 		"node": "26.12.1"

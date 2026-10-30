@@ -171,76 +171,85 @@ test.each([
 		source: "agent",
 		count: 3,
 	}),
-])("preserves summary descriptors and interpolation values", async (summary) => {
-	const tool = defineAgentTool({
-		name: "source_summary",
-		description: "Reads sources",
-		input: schema,
-		output,
-		permissions: [],
-		readOnly: true,
-		handler: async () => ({
-			error: undefined,
+])(
+	"preserves summary descriptors and interpolation values",
+	async (summary) => {
+		const tool = defineAgentTool({
+			name: "source_summary",
+			description: "Reads sources",
+			input: schema,
+			output,
+			permissions: [],
+			readOnly: true,
+			handler: async () => ({
+				error: undefined,
+				data: { output: { source: "agent" }, summary },
+			}),
+		});
+		expect(
+			await executeAgentTool({
+				context,
+				tool,
+				input: {},
+				execution: {
+					authority: { principal: user, permissions: [], superAdmin: false },
+					actor: { type: "user", userId: 1 },
+					run,
+					signal: AbortSignal.timeout(1000),
+					operationId: "source-summary",
+				},
+			}),
+		).toEqual({
+			type: "success",
 			data: { output: { source: "agent" }, summary },
-		}),
-	});
-	expect(
-		await executeAgentTool({
-			context,
-			tool,
-			input: {},
-			execution: {
-				authority: { principal: user, permissions: [], superAdmin: false },
-				actor: { type: "user", userId: 1 },
-				run,
-				signal: AbortSignal.timeout(1000),
-				operationId: "source-summary",
-			},
-		}),
-	).toEqual({
-		type: "success",
-		data: { output: { source: "agent" }, summary },
-	});
-});
+		});
+	},
+);
 
 test.each([
 	["a server-scoped summary", copy("server:test.source.read")],
 	["an empty summary", ""],
 	["a blank summary", "   "],
 	["an oversized summary", "x".repeat(2001)],
-])("falls back to the title for %s instead of failing the call", async (_, summary) => {
-	const tool = defineAgentTool({
-		name: "invalid_summary",
-		title: "Read source",
-		description: "Returns a valid output with invalid transcript copy",
-		input: schema,
-		output,
-		permissions: [],
-		readOnly: true,
-		// @ts-expect-error Agent summaries only accept admin copy.
-		handler: async () => ({
-			error: undefined,
-			data: { output: { source: "agent" }, summary },
-		}),
-	});
-	expect(
-		await executeAgentTool({
-			context,
-			tool,
-			input: {},
-			execution: {
-				authority: { principal: user, permissions: [], superAdmin: false },
-				actor: { type: "user", userId: 1 },
-				run,
-				signal: AbortSignal.timeout(1000),
-				operationId: "invalid-summary",
+])(
+	"falls back to the title for %s instead of failing the call",
+	async (_, summary) => {
+		const tool = defineAgentTool({
+			name: "invalid_summary",
+			title: "Read source",
+			description: "Returns a valid output with invalid transcript copy",
+			input: schema,
+			output,
+			permissions: [],
+			readOnly: true,
+			// @ts-expect-error Agent summaries only accept admin copy.
+			handler: async () => ({
+				error: undefined,
+				data: { output: { source: "agent" }, summary },
+			}),
+		});
+		expect(
+			await executeAgentTool({
+				context,
+				tool,
+				input: {},
+				execution: {
+					authority: { principal: user, permissions: [], superAdmin: false },
+					actor: { type: "user", userId: 1 },
+					run,
+					signal: AbortSignal.timeout(1000),
+					operationId: "invalid-summary",
+				},
+			}),
+		).toEqual({
+			type: "success",
+			data: {
+				output: { source: "agent" },
+				summary: copy.literal("Read source"),
 			},
-		}),
-	).toEqual({
-		type: "success",
-		data: { output: { source: "agent" }, summary: copy.literal("Read source") },
-	});
-});
+		});
+	},
+);
 
 test("describes a call from its input, or by its title when the input is invalid", () => {
 	const tool = defineAgentTool({

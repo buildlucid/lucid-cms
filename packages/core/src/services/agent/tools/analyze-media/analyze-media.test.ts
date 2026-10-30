@@ -250,24 +250,24 @@ test.each([
 	{ mimeType: "application/json", fileSize: 4, status: 415 },
 	{ mimeType: "application/zip", fileSize: 4, status: 415 },
 	{ mimeType: "image/png", fileSize: MAX_MEDIA_BYTES + 1, status: 413 },
-])("rejects metadata with $mimeType and $fileSize bytes before reading storage", async ({
-	status,
-	...props
-}) => {
-	const execution = await executionFor();
-	const mediaId = await createMedia(props);
-	expect(
-		(
-			await resolveMediaSource(context, {
-				mediaId,
-				mimeTypes: mediaMimeTypeSchema,
-				execution,
-			})
-		).error?.status,
-	).toBe(status);
-	expect(streamMedia).not.toHaveBeenCalled();
-	expect(analyzeMedia).not.toHaveBeenCalled();
-});
+])(
+	"rejects metadata with $mimeType and $fileSize bytes before reading storage",
+	async ({ status, ...props }) => {
+		const execution = await executionFor();
+		const mediaId = await createMedia(props);
+		expect(
+			(
+				await resolveMediaSource(context, {
+					mediaId,
+					mimeTypes: mediaMimeTypeSchema,
+					execution,
+				})
+			).error?.status,
+		).toBe(status);
+		expect(streamMedia).not.toHaveBeenCalled();
+		expect(analyzeMedia).not.toHaveBeenCalled();
+	},
+);
 
 test("enforces the actual stream size when stored metadata understates it", async () => {
 	const execution = await executionFor();
@@ -291,27 +291,27 @@ test.each([
 		bytes: new TextEncoder().encode("%PDF-1.7\n"),
 	},
 	{ mimeType: "audio/mpeg", bytes: new TextEncoder().encode("ID3") },
-])("sends unreferenced $mimeType whose contents match its type", async ({
-	mimeType,
-	bytes,
-}) => {
-	const execution = await executionFor();
-	const mediaId = await createMedia({ mimeType });
-	mockFile(bytes);
-	expect(
-		await resolveMediaSource(context, {
-			mediaId,
-			mimeTypes: mediaMimeTypeSchema,
-			execution,
-		}),
-	).toMatchObject({
-		data: {
-			type: "base64",
-			mimeType,
-			data: Buffer.from(bytes).toString("base64"),
-		},
-	});
-});
+])(
+	"sends unreferenced $mimeType whose contents match its type",
+	async ({ mimeType, bytes }) => {
+		const execution = await executionFor();
+		const mediaId = await createMedia({ mimeType });
+		mockFile(bytes);
+		expect(
+			await resolveMediaSource(context, {
+				mediaId,
+				mimeTypes: mediaMimeTypeSchema,
+				execution,
+			}),
+		).toMatchObject({
+			data: {
+				type: "base64",
+				mimeType,
+				data: Buffer.from(bytes).toString("base64"),
+			},
+		});
+	},
+);
 
 test("refuses a file whose contents do not match its stored type", async () => {
 	const execution = await executionFor();

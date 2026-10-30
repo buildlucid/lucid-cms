@@ -332,6 +332,11 @@ export class PostgresAdapter extends DatabaseAdapter {
 			);
 		}
 	}
+	/** postgres.js serializes jsonb parameters itself, so JSON values pass through instead of being stringified twice. */
+	formatInsertValue<T>(type: ColumnDataType, value: unknown): T {
+		if (type === "json" || type === "jsonb") return value as T;
+		return super.formatInsertValue<T>(type, value);
+	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
 		if (type === "text" && typeof value === "string") {
 			return sql.raw(`'${value}'`);

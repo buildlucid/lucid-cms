@@ -970,61 +970,62 @@ describe("document authoring toolkit", () => {
 		).toBe(404);
 	});
 
-	test.each([
-		"returned",
-		"thrown",
-	])("isolates a %s hook failure inside an existing transaction", async (failure) => {
-		const created = await create();
-		assert(created.data);
-		const target = { collectionKey: collection.key, id: created.data.id };
-		const hooks = context.config.hooks;
-		context.config.hooks = [
-			...hooks,
-			{
-				service: "documents",
-				event: "afterUpsert",
-				handler: async () => {
-					if (failure === "thrown") throw new Error("Unexpected hook failure.");
+	test.each(["returned", "thrown"])(
+		"isolates a %s hook failure inside an existing transaction",
+		async (failure) => {
+			const created = await create();
+			assert(created.data);
+			const target = { collectionKey: collection.key, id: created.data.id };
+			const hooks = context.config.hooks;
+			context.config.hooks = [
+				...hooks,
+				{
+					service: "documents",
+					event: "afterUpsert",
+					handler: async () => {
+						if (failure === "thrown")
+							throw new Error("Unexpected hook failure.");
 
-					return {
-						error: {
-							status: 400,
-							message: copy("server:core.errors.default.message"),
-						},
-						data: undefined,
-					};
+						return {
+							error: {
+								status: 400,
+								message: copy("server:core.errors.default.message"),
+							},
+							data: undefined,
+						};
+					},
 				},
-			},
-		];
-		try {
-			const outer = await serviceWrapper(
-				async (context) => {
-					const toolkit = createToolkit(context);
-					const failed = await toolkit.documents.updateSingle({
-						...target,
-						actor,
-						data: { fields: { featured: true } },
-					});
-					expect(failed.error).toBeDefined();
-					if (failure === "thrown") {
-						expect(context.translate(failed.error?.message)).toBe(
-							"Lucid toolkit could not update the document.",
-						);
-					}
+			];
+			try {
+				const outer = await serviceWrapper(
+					async (context) => {
+						const toolkit = createToolkit(context);
+						const failed = await toolkit.documents.updateSingle({
+							...target,
+							actor,
+							data: { fields: { featured: true } },
+						});
+						expect(failed.error).toBeDefined();
+						if (failure === "thrown") {
+							expect(context.translate(failed.error?.message)).toBe(
+								"Lucid toolkit could not update the document.",
+							);
+						}
 
-					// The caller deliberately handles the error and commits its own transaction.
-					return { error: undefined, data: undefined };
-				},
-				{ transaction: true },
-			)(context);
-			expect(outer.error).toBeUndefined();
-		} finally {
-			context.config.hooks = hooks;
-		}
-		const read = await toolkit.documents.getEditable(target);
-		expect(read.data?.editToken).toBe(created.data.editToken);
-		expect(read.data?.data.fields?.featured).toBe(false);
-	});
+						// The caller deliberately handles the error and commits its own transaction.
+						return { error: undefined, data: undefined };
+					},
+					{ transaction: true },
+				)(context);
+				expect(outer.error).toBeUndefined();
+			} finally {
+				context.config.hooks = hooks;
+			}
+			const read = await toolkit.documents.getEditable(target);
+			expect(read.data?.editToken).toBe(created.data.editToken);
+			expect(read.data?.data.fields?.featured).toBe(false);
+		},
+	);
 
 	test("round-trips fixed, structural and embedded content without running display hooks", async () => {
 		const created = await create();

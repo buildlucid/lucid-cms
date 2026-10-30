@@ -1,17 +1,7 @@
 import { useTranslation } from "@lucidcms/admin/hooks";
-import type {
-	FieldSlotComponent,
-	TranslationRegistry,
-} from "@lucidcms/admin/types";
+import type { FieldSlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
-import type messages from "../../../../translations/en.admin.json";
-
-type PagesTranslations = TranslationRegistry<typeof messages>;
-declare global {
-	namespace LucidCMS {
-		interface TranslationKeys extends PagesTranslations {}
-	}
-}
+import type {} from "../../translations.js";
 
 /** Shows the document's full path below the slug field. */
 const FullSlug: FieldSlotComponent = (props) => {

@@ -33,17 +33,17 @@
 		"directory": "packages/plugin-resend"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.1",
+		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/core": "0.19.0-alpha.0",
-		"@types/node": "^24.13.2",
-		"tsdown": "^0.22.3",
+		"@types/node": "^24.19.2",
+		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {
 		"@lucidcms/core": "^0.19.0-alpha.0"
 	},
 	"dependencies": {
-		"svix": "^1.96.0"
+		"svix": "^2.9.1"
 	},
 	"volta": {
 		"node": "26.12.1"

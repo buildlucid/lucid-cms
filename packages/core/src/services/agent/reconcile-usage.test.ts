@@ -226,28 +226,28 @@ test("settles a fresh billed failure even while the remote request is processing
 	});
 });
 
-test.each([
-	"failed",
-	"cancelled",
-])("closes a fresh confirmed unbilled %s request", async (status) => {
-	const input = await pending(false);
-	request.mockResolvedValue({
-		error: undefined,
-		data: { json: { data: { requestId: input.requestId, status } } },
-	});
-	expect(
-		(await reconcileUsage(context, { requestId: input.requestId })).data,
-	).toBe(1);
-	const AiGenerations = new AiGenerationsRepository(context.db);
-	const stored = await AiGenerations.selectSingleByRequestId({
-		requestId: input.requestId,
-		select: ["status", "credits"],
-	});
-	expect(stored.data).toMatchObject({
-		status: "failed",
-		credits: null,
-	});
-});
+test.each(["failed", "cancelled"])(
+	"closes a fresh confirmed unbilled %s request",
+	async (status) => {
+		const input = await pending(false);
+		request.mockResolvedValue({
+			error: undefined,
+			data: { json: { data: { requestId: input.requestId, status } } },
+		});
+		expect(
+			(await reconcileUsage(context, { requestId: input.requestId })).data,
+		).toBe(1);
+		const AiGenerations = new AiGenerationsRepository(context.db);
+		const stored = await AiGenerations.selectSingleByRequestId({
+			requestId: input.requestId,
+			select: ["status", "credits"],
+		});
+		expect(stored.data).toMatchObject({
+			status: "failed",
+			credits: null,
+		});
+	},
+);
 
 test("keeps the caller's failure reason when an unbilled request settles", async () => {
 	const input = await pending(false);
@@ -272,29 +272,29 @@ test("keeps the caller's failure reason when an unbilled request settles", async
 	});
 });
 
-test.each([
-	"processing",
-	"complete",
-])("keeps a fresh %s request without usage pending", async (status) => {
-	const input = await pending(false);
-	request.mockResolvedValue({
-		error: undefined,
-		data: { json: { data: { requestId: input.requestId, status } } },
-	});
+test.each(["processing", "complete"])(
+	"keeps a fresh %s request without usage pending",
+	async (status) => {
+		const input = await pending(false);
+		request.mockResolvedValue({
+			error: undefined,
+			data: { json: { data: { requestId: input.requestId, status } } },
+		});
 
-	expect(
-		(await reconcileUsage(context, { requestId: input.requestId })).data,
-	).toBe(0);
-	const AiGenerations = new AiGenerationsRepository(context.db);
-	const stored = await AiGenerations.selectSingleByRequestId({
-		requestId: input.requestId,
-		select: ["status", "credits"],
-	});
-	expect(stored.data).toMatchObject({
-		status: "pending",
-		credits: null,
-	});
-});
+		expect(
+			(await reconcileUsage(context, { requestId: input.requestId })).data,
+		).toBe(0);
+		const AiGenerations = new AiGenerationsRepository(context.db);
+		const stored = await AiGenerations.selectSingleByRequestId({
+			requestId: input.requestId,
+			select: ["status", "credits"],
+		});
+		expect(stored.data).toMatchObject({
+			status: "pending",
+			credits: null,
+		});
+	},
+);
 
 test("keeps a fresh missing request pending because creation may still be racing", async () => {
 	const input = await pending(false);

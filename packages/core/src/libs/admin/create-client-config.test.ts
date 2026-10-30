@@ -29,10 +29,13 @@ test.each([
 	{},
 	{ agentHomescreen: true },
 	{ agentHomescreen: false },
-])("resolves the agent home screen setting through to the client config: %j", (admin) => {
-	const client = createAdminClientConfig({
-		brand: { name: "My site" },
-		admin: adminConfigSchema.parse(admin),
-	});
-	expect(client.agentHomescreen).toBe(admin?.agentHomescreen ?? true);
-});
+])(
+	"resolves the agent home screen setting through to the client config: %j",
+	(admin) => {
+		const client = createAdminClientConfig({
+			brand: { name: "My site" },
+			admin: adminConfigSchema.parse(admin),
+		});
+		expect(client.agentHomescreen).toBe(admin?.agentHomescreen ?? true);
+	},
+);

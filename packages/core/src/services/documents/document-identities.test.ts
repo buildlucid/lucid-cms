@@ -375,133 +375,133 @@ test("creates one identity and retains it through updates, soft deletion and res
 	]);
 });
 
-test.each([
-	"single",
-	"multiple",
-] as const)("%s permanent deletion cascades dependants and retains publish history", async (mode) => {
-	const ids = [await create(), await create()];
-	const first = ids[0];
-	assert(first);
-	const workflows = await Promise.all(ids.map((id) => dependants(id)));
-	const retained = await create();
-	const retainedWorkflow = await dependants(retained);
-	const ownerKey = "identity_revisions";
-	const owner = await create(ownerKey);
-	await saveRelated(
-		owner,
-		[
-			{ id: first, collectionKey },
-			{ id: retained, collectionKey },
-		],
-		ownerKey,
-	);
-	await saveRelated(
-		owner,
-		[
-			{ id: first, collectionKey },
-			{ id: retained, collectionKey },
-		],
-		ownerKey,
-	);
-	const table = await relationTable(ownerKey);
-	changes.length = 0;
-
-	const deleted =
-		mode === "single"
-			? await deleteSinglePermanently(context, {
-					collectionKey,
-					id: first,
-					userId: null,
-				})
-			: await deleteMultiplePermanently(context, {
-					collectionKey,
-					ids,
-					userId: null,
-				});
-	expect(deleted.error).toBeUndefined();
-	const tables = await getTableNames(context, ownerKey);
-	assert(tables.data);
-	const rows = await context.db.kysely
-		.selectFrom(table)
-		.innerJoin(
-			tables.data.version,
-			`${tables.data.version}.id`,
-			`${table}.document_version_id`,
-		)
-		.select([`${table}._document_id`, `${tables.data.version}.type`])
-		.where(`${table}.document_id`, "=", owner)
-		.execute();
-	expect(rows.length).toBeGreaterThan(1);
-	expect(
-		rows
-			.filter((row) => row.type === "latest")
-			.every((row) => row._document_id === retained),
-	).toBe(true);
-	expect(rows).toContainEqual({ _document_id: first, type: "revision" });
-	expect(
-		changes.filter(
-			(change) =>
-				change.collectionKey === ownerKey &&
-				change.type === "referencesUpdated",
-		),
-	).toEqual([
-		{ collectionKey: ownerKey, ids: [owner], type: "referencesUpdated" },
-	]);
-	expect(
-		await context.db.kysely
-			.selectFrom("lucid_document_references")
-			.select("target_id")
-			.where("collection_key", "=", ownerKey)
-			.where("document_id", "=", owner)
-			.where("target_id", "=", first)
-			.execute(),
-	).toEqual([]);
-	for (const [index, id] of ids.entries()) {
-		const workflowId = workflows[index];
-		assert(workflowId);
-		expect(await remaining(id, workflowId)).toEqual(
-			mode === "single" && index === 1 ? allPresent : allRemoved,
+test.each(["single", "multiple"] as const)(
+	"%s permanent deletion cascades dependants and retains publish history",
+	async (mode) => {
+		const ids = [await create(), await create()];
+		const first = ids[0];
+		assert(first);
+		const workflows = await Promise.all(ids.map((id) => dependants(id)));
+		const retained = await create();
+		const retainedWorkflow = await dependants(retained);
+		const ownerKey = "identity_revisions";
+		const owner = await create(ownerKey);
+		await saveRelated(
+			owner,
+			[
+				{ id: first, collectionKey },
+				{ id: retained, collectionKey },
+			],
+			ownerKey,
 		);
-	}
-	expect(await remaining(retained, retainedWorkflow)).toEqual(allPresent);
-	await expect(
-		context.db.kysely
-			.insertInto("lucid_document_workflows")
-			.values({
-				collection_key: collectionKey,
-				document_id: first,
-				stage_key: "draft",
-				version_id: -1,
-			})
-			.execute(),
-	).rejects.toThrow(/FOREIGN KEY/);
-	await expect(
-		context.db.kysely
-			.insertInto("lucid_preview_sessions")
-			.values({
-				token_hash: randomUUID(),
-				entry_collection_key: collectionKey,
-				entry_document_id: first,
-				entry_version_type: "latest",
-				mode: "perspective",
-				expires_at: "2099-01-01T00:00:00.000Z",
-			})
-			.execute(),
-	).rejects.toThrow(/FOREIGN KEY/);
-	await expect(
-		context.db.kysely
-			.insertInto("lucid_agent_document_references")
-			.values({
-				id: randomUUID(),
-				conversation_id: conversationId,
-				collection_key: collectionKey,
-				document_id: first,
-				source: "message",
-				created_at: new Date().toISOString(),
-			})
-			.execute(),
-	).rejects.toThrow(/FOREIGN KEY/);
-});
+		await saveRelated(
+			owner,
+			[
+				{ id: first, collectionKey },
+				{ id: retained, collectionKey },
+			],
+			ownerKey,
+		);
+		const table = await relationTable(ownerKey);
+		changes.length = 0;
+
+		const deleted =
+			mode === "single"
+				? await deleteSinglePermanently(context, {
+						collectionKey,
+						id: first,
+						userId: null,
+					})
+				: await deleteMultiplePermanently(context, {
+						collectionKey,
+						ids,
+						userId: null,
+					});
+		expect(deleted.error).toBeUndefined();
+		const tables = await getTableNames(context, ownerKey);
+		assert(tables.data);
+		const rows = await context.db.kysely
+			.selectFrom(table)
+			.innerJoin(
+				tables.data.version,
+				`${tables.data.version}.id`,
+				`${table}.document_version_id`,
+			)
+			.select([`${table}._document_id`, `${tables.data.version}.type`])
+			.where(`${table}.document_id`, "=", owner)
+			.execute();
+		expect(rows.length).toBeGreaterThan(1);
+		expect(
+			rows
+				.filter((row) => row.type === "latest")
+				.every((row) => row._document_id === retained),
+		).toBe(true);
+		expect(rows).toContainEqual({ _document_id: first, type: "revision" });
+		expect(
+			changes.filter(
+				(change) =>
+					change.collectionKey === ownerKey &&
+					change.type === "referencesUpdated",
+			),
+		).toEqual([
+			{ collectionKey: ownerKey, ids: [owner], type: "referencesUpdated" },
+		]);
+		expect(
+			await context.db.kysely
+				.selectFrom("lucid_document_references")
+				.select("target_id")
+				.where("collection_key", "=", ownerKey)
+				.where("document_id", "=", owner)
+				.where("target_id", "=", first)
+				.execute(),
+		).toEqual([]);
+		for (const [index, id] of ids.entries()) {
+			const workflowId = workflows[index];
+			assert(workflowId);
+			expect(await remaining(id, workflowId)).toEqual(
+				mode === "single" && index === 1 ? allPresent : allRemoved,
+			);
+		}
+		expect(await remaining(retained, retainedWorkflow)).toEqual(allPresent);
+		await expect(
+			context.db.kysely
+				.insertInto("lucid_document_workflows")
+				.values({
+					collection_key: collectionKey,
+					document_id: first,
+					stage_key: "draft",
+					version_id: -1,
+				})
+				.execute(),
+		).rejects.toThrow(/FOREIGN KEY/);
+		await expect(
+			context.db.kysely
+				.insertInto("lucid_preview_sessions")
+				.values({
+					token_hash: randomUUID(),
+					entry_collection_key: collectionKey,
+					entry_document_id: first,
+					entry_version_type: "latest",
+					mode: "perspective",
+					expires_at: "2099-01-01T00:00:00.000Z",
+				})
+				.execute(),
+		).rejects.toThrow(/FOREIGN KEY/);
+		await expect(
+			context.db.kysely
+				.insertInto("lucid_agent_document_references")
+				.values({
+					id: randomUUID(),
+					conversation_id: conversationId,
+					collection_key: collectionKey,
+					document_id: first,
+					source: "message",
+					created_at: new Date().toISOString(),
+				})
+				.execute(),
+		).rejects.toThrow(/FOREIGN KEY/);
+	},
+);
 
 test("failed document creation leaves no identity or workflow", async () => {
 	const before = await context.db.kysely

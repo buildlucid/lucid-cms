@@ -47,9 +47,10 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 						eb.val(props.conversationId).as("conversation_id"),
 						eb.val(props.runId).as("run_id"),
 						eb.val(props.role ?? "assistant").as("role"),
-						sql<StoredAgentMessagePart[]>`${JSON.stringify(props.parts)}`.as(
-							"parts",
-						),
+						sql<StoredAgentMessagePart[]>`${this.dbAdapter.formatInsertValue(
+							this.dbAdapter.getDataType("json"),
+							props.parts,
+						)}`.as("parts"),
 						eb.val(props.now).as("created_at"),
 						eb.val(props.now).as("updated_at"),
 						this.nextPosition(props.conversationId).as("position"),

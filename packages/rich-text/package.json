@@ -47,18 +47,18 @@
 		"Tiptap"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.1",
+		"@biomejs/biome": "^2.6.4",
 		"linkedom": "^0.18.14",
-		"tsdown": "^0.22.3",
+		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3"
 	},
 	"dependencies": {
 		"@lucidcms/types": "^0.6.0",
-		"@tiptap/core": "^3.27.1",
-		"@tiptap/extension-link": "^3.27.1",
-		"@tiptap/pm": "^3.27.1",
-		"@tiptap/starter-kit": "^3.27.1",
-		"@tiptap/static-renderer": "^3.27.1"
+		"@tiptap/core": "^3.32.2",
+		"@tiptap/extension-link": "^3.32.2",
+		"@tiptap/pm": "^3.32.2",
+		"@tiptap/starter-kit": "^3.32.2",
+		"@tiptap/static-renderer": "^3.32.2"
 	},
 	"volta": {
 		"node": "26.12.1"
