@@ -28,12 +28,7 @@
 			"dependsOn": ["^build", "@lucidcms/email-templates#build"],
 			"outputs": []
 		},
-		"lint": {},
-		"lint:fix": {},
-		"format": {},
-		"format:fix": {},
 		"check": {},
-		"check:fix": {},
 		"dev": {
 			"cache": false,
 			"persistent": true

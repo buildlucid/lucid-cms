@@ -15,20 +15,13 @@
 	"scripts": {
 		"build": "tsc && tsdown",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run --root ../.. packages/preview-protocol/src",
-		"format": "biome format ./src",
-		"format:fix": "biome format --write ./src",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"check": "biome check ./src",
-		"check:fix": "biome check --write ./src"
+		"test": "vitest run --root ../.. packages/preview-protocol/src"
 	},
 	"files": [
 		"dist"
 	],
 	"sideEffects": false,
 	"devDependencies": {
-		"@biomejs/biome": "^2.6.4",
 		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3"
 	}

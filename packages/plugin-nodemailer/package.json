@@ -14,13 +14,7 @@
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
-		"dev": "tsdown --watch",
-		"format": "biome format ./src",
-		"format:fix": "biome format --write ./src",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"check": "biome check ./src",
-		"check:fix": "biome check --write ./src"
+		"dev": "tsdown --watch"
 	},
 	"files": [
 		"dist",
@@ -40,7 +34,6 @@
 		"Plugin"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/core": "0.19.0-alpha.0",
 		"@types/node": "^24.19.2",
 		"nodemailer": "^10.3.1",

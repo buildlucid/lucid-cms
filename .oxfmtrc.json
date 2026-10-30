@@ -1,0 +1,23 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"tabWidth": 2,
+	"printWidth": 80,
+	"sortPackageJson": false,
+	"ignorePatterns": [
+		"packages/client/src/generated",
+		"packages/core/src/libs/email/templates/built-in-schema.ts",
+		"**/*.mjml"
+	],
+	"overrides": [
+		{
+			"files": ["**/*.md"],
+			"options": {
+				"useTabs": false
+			}
+		}
+	],
+	"sortImports": {
+		"newlinesBetween": false
+	}
+}

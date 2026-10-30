@@ -43,13 +43,7 @@
 	},
 	"scripts": {
 		"build": "NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit && tsdown",
-		"dev": "tsdown --watch",
-		"format": "biome format ./src",
-		"format:fix": "biome format --write ./src",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"check": "biome check ./src",
-		"check:fix": "biome check --write ./src"
+		"dev": "tsdown --watch"
 	},
 	"author": "Build Lucid Ltd",
 	"repository": {
@@ -67,7 +61,6 @@
 	],
 	"license": "MIT",
 	"devDependencies": {
-		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/preview-protocol": "*",
 		"@types/classnames": "^2.3.4",
 		"@types/node": "^24.19.2",

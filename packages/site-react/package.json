@@ -17,13 +17,7 @@
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
-		"dev": "tsdown --watch",
-		"format": "biome format ./src",
-		"format:fix": "biome format --write ./src",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"check": "biome check ./src",
-		"check:fix": "biome check --write ./src"
+		"dev": "tsdown --watch"
 	},
 	"files": [
 		"dist"
@@ -46,7 +40,6 @@
 		"@vitejs/plugin-react": "^6.1.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.6.4",
 		"@lucidcms/plugin-site": "*",
 		"@types/node": "^24.19.2",
 		"@types/react": "^19.3.0",

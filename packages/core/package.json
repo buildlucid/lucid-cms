@@ -42,13 +42,7 @@
 	},
 	"scripts": {
 		"build": "NODE_OPTIONS=--max-old-space-size=4096 tsc && tsdown",
-		"dev": "tsdown --watch --no-clean",
-		"format": "biome format ./src",
-		"format:fix": "biome format --write ./src",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"check": "biome check ./src",
-		"check:fix": "biome check --write ./src"
+		"dev": "tsdown --watch --no-clean"
 	},
 	"files": [
 		"dist",
@@ -74,7 +68,6 @@
 		"Lucid"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.6.4",
 		"@types/html-to-text": "^9.0.4",
 		"@types/node": "^24.19.2",
 		"@types/semver": "^7.8.0",
