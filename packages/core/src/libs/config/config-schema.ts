@@ -375,19 +375,28 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		transport: LogTransportSchema.optional(),
 	}),
 	auth: z.strictObject({
-		password: z.strictObject({
-			enabled: z.boolean(),
-		}),
-		magicLink: z.strictObject({
-			enabled: z.boolean(),
-		}),
-		twoFactor: z.strictObject({
-			enabled: z.boolean(),
-			required: z.union([z.boolean(), z.literal("super-admins")]),
-		}),
-		passkeys: z.strictObject({
-			enabled: z.boolean(),
-		}),
+		password: z.preprocess(
+			enabledShorthand,
+			z.strictObject({ enabled: z.boolean() }),
+		),
+		magicLink: z.preprocess(
+			enabledShorthand,
+			z.strictObject({ enabled: z.boolean() }),
+		),
+		twoFactor: z.preprocess(
+			enabledShorthand,
+			z.strictObject({
+				enabled: z.boolean(),
+				//* the boolean shorthand replaces the merged default object
+				required: z
+					.union([z.boolean(), z.literal("super-admins")])
+					.default(false),
+			}),
+		),
+		passkeys: z.preprocess(
+			enabledShorthand,
+			z.strictObject({ enabled: z.boolean() }),
+		),
 		providers: z.array(AuthProviderSchema),
 	}),
 	ai: z

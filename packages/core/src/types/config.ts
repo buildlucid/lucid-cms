@@ -362,56 +362,46 @@ export interface LucidConfig {
 		 */
 		transport?: LogTransport;
 	};
-	/**
-	 * The authentication configuration
-	 */
+	/** Authentication methods accept a boolean shorthand for `enabled`. */
 	auth?: {
-		/**
-		 * Password authentication configuration
-		 */
-		password?: {
-			/**
-			 * Allow sign-in with a password. Defaults to true.
-			 */
-			enabled?: boolean;
-		};
-		/**
-		 * Magic link authentication configuration. Users get an email with a
-		 * login link and a code they can enter instead. Needs an email adapter.
-		 */
-		magicLink?: {
-			/**
-			 * Allow sign-in with a magic link. Defaults to false.
-			 */
-			enabled?: boolean;
-		};
+		password?:
+			| boolean
+			| {
+					/** Allow password login. Defaults to true. */
+					enabled?: boolean;
+			  };
+		/** Emails a login link and code. Requires an email adapter. */
+		magicLink?:
+			| boolean
+			| {
+					/** Allow magic link login. Defaults to false. */
+					enabled?: boolean;
+			  };
 		/**
 		 * Authenticator-based two-factor authentication for password and magic link logins. Providers
 		 * handle their own checks.
 		 */
-		twoFactor?: {
-			/**
-			 * Let users turn on two-factor authentication from their account. Defaults to true.
-			 */
-			enabled?: boolean;
-			/**
-			 * Requires setup at next login and prevents disabling: `true` for everyone,
-			 * `"super-admins"` for super admins. Roles can also require it. A passkey meets it too.
-			 * Needs `enabled`. Defaults to false.
-			 */
-			required?: boolean | "super-admins";
-		};
+		twoFactor?:
+			| boolean
+			| {
+					/** Allow authenticator setup. Defaults to true. */
+					enabled?: boolean;
+					/**
+					 * Requires setup and prevents disabling for everyone with `true`, or super admins with
+					 * `"super-admins"`. Roles can also require it. Needs `enabled`. Defaults to false.
+					 */
+					required?: boolean | "super-admins";
+			  };
 		/**
-		 * Passkeys support login, invitation acceptance and two-factor challenges. A passkey login
-		 * skips the two-factor step and meets `twoFactor.required`. Changing the CMS domain requires
-		 * registering new passkeys.
+		 * Passkeys support login, invitations and two-factor challenges, meeting `twoFactor.required`.
+		 * Changing the CMS domain requires registering new passkeys.
 		 */
-		passkeys?: {
-			/**
-			 * Let users add passkeys and sign in with them. Defaults to true.
-			 */
-			enabled?: boolean;
-		};
+		passkeys?:
+			| boolean
+			| {
+					/** Allow passkey registration and login. Defaults to true. */
+					enabled?: boolean;
+			  };
 		/**
 		 * The authentication providers to use.
 		 */

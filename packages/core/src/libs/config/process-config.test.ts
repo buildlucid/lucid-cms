@@ -548,3 +548,25 @@ test("rejects plugin keys that aren't package names or simple keys", async () =>
 		),
 	).rejects.toThrow("Use the package name");
 });
+
+test("auth methods accept boolean shorthands", async () => {
+	const processed = await processConfig(
+		{
+			...config,
+			auth: {
+				password: false,
+				magicLink: false,
+				twoFactor: true,
+				passkeys: false,
+			},
+		},
+		{ resolvedDb: createAdapter("test"), skipValidation: true },
+	);
+
+	expect(processed.auth).toMatchObject({
+		password: { enabled: false },
+		magicLink: { enabled: false },
+		twoFactor: { enabled: true, required: false },
+		passkeys: { enabled: false },
+	});
+});
