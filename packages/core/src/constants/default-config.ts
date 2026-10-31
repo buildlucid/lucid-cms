@@ -29,6 +29,9 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		password: {
 			enabled: true,
 		},
+		magicLink: {
+			enabled: false,
+		},
 		providers: [],
 	},
 	email: {

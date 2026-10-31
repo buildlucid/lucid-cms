@@ -11,10 +11,10 @@ import {
 	Switch,
 } from "solid-js";
 import AcceptInvitationForm from "@/components/AcceptInvitationForm/AcceptInvitationForm";
+import AuthSkeleton from "@/components/AuthSkeleton/AuthSkeleton";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import ProviderButton from "@/components/ProviderButton/ProviderButton";
-import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import constants from "@/constants";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
@@ -53,12 +53,17 @@ const AcceptInvitationPage: Component = () => {
 		queryParams: {},
 		enabled: () => token() !== null,
 	});
+	//* pages with captcha forms wait for its settings, so the widget's space is there from the first paint
+	const captchaSettings = api.captcha.useGetSettings();
 	const initiateProvider = api.auth.useInitiateProvider();
 
 	// ---------------------------------------
 	// Derived state
 	const isLoading = createMemo(
-		() => validateInvitation.isLoading || providers.isLoading,
+		() =>
+			validateInvitation.isLoading ||
+			providers.isLoading ||
+			captchaSettings.isPending,
 	);
 	const isInvalid = createMemo(
 		() =>
@@ -68,6 +73,13 @@ const AcceptInvitationPage: Component = () => {
 	);
 	const isReady = createMemo(
 		() => validateInvitation.isSuccess && providers.isSuccess,
+	);
+	const passwordEnabled = createMemo(
+		() => providers.data?.data.disablePassword === false,
+	);
+	//* without password login, magic link users accept with a single button
+	const passwordless = createMemo(
+		() => !passwordEnabled() && providers.data?.data.magicLink === true,
 	);
 
 	// ----------------------------------------
@@ -111,9 +123,7 @@ const AcceptInvitationPage: Component = () => {
 	return (
 		<Switch>
 			<Match when={isLoading()}>
-				<div class="flex items-center justify-center h-full">
-					<Spinner size="sm" />
-				</div>
+				<AuthSkeleton fields={2} />
 			</Match>
 			<Match when={isInvalid()}>
 				<ErrorState
@@ -133,12 +143,17 @@ const AcceptInvitationPage: Component = () => {
 					{T()("routes.auth.accept.invitation.title")}
 				</h1>
 				<p class="text-center max-w-sm mx-auto">
-					{T()("routes.auth.accept.invitation.description")}
+					{passwordless()
+						? T()("routes.auth.accept.invitation.passwordless.description")
+						: T()("routes.auth.accept.invitation.description")}
 				</p>
 
-				<Show when={providers.data?.data.disablePassword === false}>
+				<Show when={passwordEnabled() || passwordless()}>
 					<div class="my-10">
-						<AcceptInvitationForm token={token() as string} />
+						<AcceptInvitationForm
+							token={token() as string}
+							passwordless={passwordless()}
+						/>
 					</div>
 				</Show>
 
@@ -149,7 +164,7 @@ const AcceptInvitationPage: Component = () => {
 					}
 				>
 					<div class="my-8">
-						<Show when={providers.data?.data.disablePassword === false}>
+						<Show when={passwordEnabled() || passwordless()}>
 							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
 								<span class="w-20 h-px bg-border" />
 								<span class="text-body text-sm mx-2.5">{T()("common.or")}</span>

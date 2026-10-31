@@ -1,7 +1,13 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { TbOutlineEye, TbOutlineEyeOff } from "solid-icons/tb";
-import { type Component, createMemo, createSignal, Show } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	onMount,
+	Show,
+} from "solid-js";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
@@ -19,7 +25,8 @@ export const InsetLabelInput: Component<{
 		tooltip?: string;
 	};
 	onBlur?: () => void;
-	autoFoucs?: boolean;
+	/** Focuses the input on mount, which the `autofocus` attribute skips after page load. */
+	autofocus?: boolean;
 	onKeyUp?: (_e: KeyboardEvent) => void;
 	autoComplete?: string;
 	required?: boolean;
@@ -29,14 +36,23 @@ export const InsetLabelInput: Component<{
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [passwordVisible, setPasswordVisible] = createSignal(false);
+	let input: HTMLInputElement | undefined;
 
 	// ----------------------------------------
 	// Memos
 	const inputType = createMemo(() => {
 		if (props.type === "password" && passwordVisible()) return "text";
 		return props.type;
+	});
+
+	// ----------------------------------------
+	// Effects
+	onMount(() => {
+		if (props.autofocus) input?.focus();
 	});
 
 	// ----------------------------------------
@@ -63,6 +79,7 @@ export const InsetLabelInput: Component<{
 					fieldColumnIsMissing={props.fieldColumnIsMissing}
 				/>
 				<input
+					ref={input}
 					class={classnames(
 						"focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-transparent pb-2 pt-1 rounded-b-md",
 						{
@@ -83,7 +100,6 @@ export const InsetLabelInput: Component<{
 						props.copy?.describedBy ? `${props.id}-description` : undefined
 					}
 					autocomplete={props.autoComplete}
-					autofocus={props.autoFoucs}
 					required={props.required}
 					disabled={props.disabled}
 					onFocus={() => setInputFocus(true)}

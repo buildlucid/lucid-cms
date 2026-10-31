@@ -29,6 +29,10 @@ export const useCaptcha = (form: CaptchaForm) => {
 			setHandle(widget);
 			setFailed(false);
 		},
+		/** Forgets the widget once it unmounts, so a submission finishing later doesn't reset a removed widget. */
+		unregister: () => {
+			setHandle(undefined);
+		},
 		onError: () => {
 			setHandle(undefined);
 			setFailed(true);
@@ -66,8 +70,8 @@ export const useCaptcha = (form: CaptchaForm) => {
 				//* the request's own mutation shows its errors
 				await send(token).catch(() => undefined);
 			} finally {
-				handle()?.reset();
 				setSubmitting(false);
+				handle()?.reset();
 			}
 		},
 	};

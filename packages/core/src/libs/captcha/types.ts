@@ -58,7 +58,7 @@ export type CaptchaConfig = {
 		| CaptchaAdapterInstance
 		| Promise<CaptchaAdapterInstance>;
 	/**
-	 * Built-in forms to protect. With an adapter, login, setup, password reset requests and share-link passwords are on by default.
+	 * Built-in forms to protect. With an adapter, login, magic link requests, setup, password reset requests and share-link passwords are on by default.
 	 * Use `false` to protect none, such as for toolkit-only use or while a provider is down.
 	 */
 	forms?: false | Partial<Record<CaptchaForm, boolean>>;

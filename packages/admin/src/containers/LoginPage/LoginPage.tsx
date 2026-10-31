@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { TbOutlineAlertTriangle } from "solid-icons/tb";
+import { TbOutlineAlertTriangle, TbOutlineMail } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -10,12 +10,15 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AuthSkeleton from "@/components/AuthSkeleton/AuthSkeleton";
 import ErrorState from "@/components/ErrorState/ErrorState";
+import Link from "@/components/Link/Link";
 import LoginForm from "@/components/LoginForm/LoginForm";
+import MagicLinkRequestForm from "@/components/MagicLinkRequestForm/MagicLinkRequestForm";
 import ProviderButton from "@/components/ProviderButton/ProviderButton";
-import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import constants from "@/constants";
+import type { MagicLinkPageState } from "@/containers/MagicLinkPage/MagicLinkPage";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
@@ -39,12 +42,17 @@ const LoginPage: Component = () => {
 	const providers = api.auth.useGetProviders({
 		queryParams: {},
 	});
+	//* pages with captcha forms wait for its settings, so the widget's space is there from the first paint
+	const captchaSettings = api.captcha.useGetSettings();
 	const initiateProvider = api.auth.useInitiateProvider();
 
 	// ----------------------------------------
 	// Memos
 	const isLoading = createMemo(
-		() => setupRequired.isLoading || providers.isLoading,
+		() =>
+			setupRequired.isLoading ||
+			providers.isLoading ||
+			captchaSettings.isPending,
 	);
 	const isError = createMemo(() => setupRequired.isError || providers.isError);
 	const isSuccess = createMemo(
@@ -52,6 +60,17 @@ const LoginPage: Component = () => {
 			setupRequired.isSuccess &&
 			providers.isSuccess &&
 			!setupRequired.data.data.setupRequired,
+	);
+	const passwordEnabled = createMemo(
+		() => providers.data?.data.disablePassword === false,
+	);
+	const magicLinkEnabled = createMemo(
+		() => providers.data?.data.magicLink === true,
+	);
+	const providerList = createMemo(() => providers.data?.data.providers ?? []);
+	//* with a password form, magic links are offered as another way in instead
+	const showMagicLinkOption = createMemo(
+		() => passwordEnabled() && magicLinkEnabled(),
 	);
 
 	// ----------------------------------------
@@ -99,9 +118,7 @@ const LoginPage: Component = () => {
 	return (
 		<Switch>
 			<Match when={isLoading()}>
-				<div class="flex items-center justify-center h-full">
-					<Spinner size="sm" />
-				</div>
+				<AuthSkeleton fields={2} />
 			</Match>
 			<Match when={isError()}>
 				<ErrorState
@@ -117,19 +134,25 @@ const LoginPage: Component = () => {
 					{T()("routes.auth.login.description")}
 				</p>
 				<div class="my-10">
-					<Show when={providers.data?.data.disablePassword === false}>
-						<LoginForm showForgotPassword={true} />
-					</Show>
+					<Switch>
+						<Match when={passwordEnabled()}>
+							<LoginForm showForgotPassword={true} />
+						</Match>
+						<Match when={magicLinkEnabled()}>
+							<MagicLinkRequestForm
+								onSent={(email) => {
+									navigate(`/admin/magic-link${location.search}`, {
+										state: { email } satisfies MagicLinkPageState,
+									});
+								}}
+							/>
+						</Match>
+					</Switch>
 				</div>
 
-				<Show
-					when={
-						providers.data?.data.providers?.length &&
-						providers.data?.data.providers?.length > 0
-					}
-				>
+				<Show when={showMagicLinkOption() || providerList().length > 0}>
 					<div class="my-8">
-						<Show when={providers.data?.data.disablePassword === false}>
+						<Show when={passwordEnabled() || magicLinkEnabled()}>
 							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
 								<span class="w-20 h-px bg-border" />
 								<span class="text-body text-sm mx-2.5">{T()("common.or")}</span>
@@ -137,7 +160,19 @@ const LoginPage: Component = () => {
 							</span>
 						</Show>
 						<div class="flex flex-col gap-4 items-center">
-							<For each={providers.data?.data.providers ?? []}>
+							<Show when={showMagicLinkOption()}>
+								{/* matches ProviderButton's text colour, which is quieter than the outline variant */}
+								<Link
+									variant="outline"
+									size="lg"
+									class="w-full text-body! hover:text-secondary-foreground!"
+									href={`/admin/magic-link${location.search}`}
+								>
+									<TbOutlineMail class="size-4 mr-3" />
+									{T()("auth.magic.link.option")}
+								</Link>
+							</Show>
+							<For each={providerList()}>
 								{(p) => (
 									<ProviderButton
 										provider={p}

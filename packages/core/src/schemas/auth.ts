@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../exports/types.js";
 import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 import { translate } from "../libs/i18n/index.js";
@@ -10,6 +11,12 @@ const providerCallbackStateSchema = z
 		description: "The state token for CSRF protection",
 		example: "abc123def456abc123def456abc123def456abc1234",
 	});
+
+const adminRedirectPathSchema = z
+	.string()
+	.trim()
+	.max(2048)
+	.regex(/^\/admin(?:[/?#]|$)/);
 
 const providerCallbackQuerySchema = z.union([
 	z.object({
@@ -150,6 +157,11 @@ export const controllerSchemas = {
 				description: "Whether password login is disabled",
 				example: false,
 			}),
+			magicLink: z.boolean().meta({
+				description:
+					"Whether users can log in with a code or link sent to their email",
+				example: true,
+			}),
 			providers: z.array(AuthProviderSchema.omit({ config: true })),
 		}),
 	} satisfies ControllerSchema,
@@ -205,14 +217,25 @@ export const controllerSchemas = {
 	acceptInvitation: {
 		body: z
 			.object({
-				password: z.string().min(8).max(128).meta({
-					description: "Your new password",
-					example: "password123",
-				}),
-				passwordConfirmation: z.string().min(8).max(128).meta({
-					description: "A repeat of your new password",
-					example: "password123",
-				}),
+				password: z
+					.string()
+					.min(8)
+					.max(128)
+					.meta({
+						description:
+							"Your new password. Required when password login is enabled, and ignored otherwise.",
+						example: "password123",
+					})
+					.optional(),
+				passwordConfirmation: z
+					.string()
+					.min(8)
+					.max(128)
+					.meta({
+						description: "A repeat of your new password",
+						example: "password123",
+					})
+					.optional(),
 			})
 			.refine((data) => data.password === data.passwordConfirmation, {
 				message: translate("server:core.input.ensure.passwords.match"),
@@ -230,6 +253,83 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	sendMagicLink: {
+		body: z
+			.object({
+				email: z.email().trim().toLowerCase().meta({
+					description: "The email address of the account to log in to",
+					example: "admin@example.com",
+				}),
+				redirectPath: adminRedirectPathSchema
+					.meta({
+						description: "Where the emailed link returns to after logging in",
+						example: "/admin",
+					})
+					.optional(),
+			})
+			.meta({ description: "The account to email a login link and code to" }),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	validateMagicLink: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			token: z.string().meta({
+				description: "The token from the emailed login link",
+				example: "abc123def456",
+			}),
+		}),
+		response: z.object({
+			email: z.string().meta({
+				description: "The email address of the account the link logs in to",
+				example: "admin@example.com",
+			}),
+		}),
+	} satisfies ControllerSchema,
+	magicLinkLogin: {
+		body: z
+			.union([
+				z.object({
+					token: z.string().meta({
+						description: "The token from the emailed login link",
+						example: "abc123def456",
+					}),
+				}),
+				z.object({
+					email: z.email().trim().toLowerCase().meta({
+						description: "The email address the code was sent to",
+						example: "admin@example.com",
+					}),
+					code: z
+						.string()
+						.trim()
+						.length(constants.magicLink.codeLength)
+						.regex(/^\d+$/)
+						.meta({
+							description: "The code from the login email",
+							example: "123456",
+						}),
+				}),
+			])
+			.meta({
+				description:
+					"The emailed link's token, or the email address and code from the same email",
+			}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 	providerInitiate: {
 		body: z.object({
 			invitationToken: z
@@ -245,11 +345,7 @@ export const controllerSchemas = {
 					"The type of action to be performed by the auth provider on callback. Are we accepting an invitation (so we should verify the token, user etc.), are we just logging in, or are we authenticated and attempting to link a new provider?",
 				example: "login",
 			}),
-			redirectPath: z
-				.string()
-				.trim()
-				.max(2048)
-				.regex(/^\/admin(?:\/|$)/)
+			redirectPath: adminRedirectPathSchema
 				.meta({
 					description: "The redirect path on a successful callback",
 					example: "/admin",

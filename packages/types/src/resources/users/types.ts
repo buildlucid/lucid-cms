@@ -186,6 +186,8 @@ export type AuthProvider = {
 
 export type AuthProviders = {
 	disablePassword: boolean;
+	/** Whether users can log in with a code or link sent to their email. */
+	magicLink: boolean;
 	providers: AuthProvider[];
 };
 
@@ -215,6 +217,11 @@ export interface UserLogin {
 	ipAddress: string | null;
 	userAgent: string | null;
 	createdAt: string | null;
+}
+
+export interface ValidateMagicLink {
+	/** The email address of the account the link logs in to. */
+	email: User["email"];
 }
 
 export interface ValidateInvitation {

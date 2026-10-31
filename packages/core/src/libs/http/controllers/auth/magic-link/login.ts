@@ -1,0 +1,92 @@
+import { describeRoute } from "hono-openapi";
+import { createFactory } from "hono/factory";
+import constants from "../../../../../constants/constants.js";
+import { controllerSchemas } from "../../../../../schemas/auth.js";
+import {
+	authServices,
+	userLoginServices,
+} from "../../../../../services/index.js";
+import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../../i18n/index.js";
+import rateLimiter from "../../../middleware/rate-limiter.js";
+import validateCSRF from "../../../middleware/validate-csrf.js";
+import validate from "../../../middleware/validate.js";
+import openAPI from "../../../openapi/index.js";
+import createServiceContext from "../../../utils/create-service-context.js";
+
+const factory = createFactory();
+
+const magicLinkLoginController = factory.createHandlers(
+	describeRoute({
+		description:
+			"Logs in with a magic link's token, or its email address and code, and sets a refresh and access token as httpOnly cookies.",
+		tags: ["auth"],
+		summary: "Magic Link Login",
+		responses: openAPI.responses(),
+		parameters: openAPI.parameters({
+			headers: {
+				csrf: true,
+			},
+		}),
+		requestBody: openAPI.requestBody(controllerSchemas.magicLinkLogin.body),
+	}),
+	validateCSRF(),
+	rateLimiter({
+		mode: "ip",
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: 60_000,
+	}),
+	validate("json", controllerSchemas.magicLinkLogin.body),
+	async (c) => {
+		const body = c.req.valid("json");
+		const context = createServiceContext(c);
+
+		const userRes = await serviceWrapper(authServices.magicLink.login, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				code: "login",
+				name: copy("server:core.routes.login.error.name"),
+				message: copy("server:core.routes.login.error.message"),
+			},
+		})(context, body);
+		if (userRes.error) throw new LucidAPIError(userRes.error);
+
+		const [refreshRes, accessRes] = await Promise.all([
+			authServices.refreshToken.generateToken(c, userRes.data.id),
+			authServices.accessToken.generateToken(c, userRes.data.id),
+		]);
+		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
+		if (accessRes.error) throw new LucidAPIError(accessRes.error);
+
+		const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
+		const userAgent = c.req.header("user-agent") || null;
+
+		const userLoginTrackRes = await serviceWrapper(
+			userLoginServices.createSingle,
+			{
+				transaction: false,
+				defaultError: {
+					type: "basic",
+					name: copy("server:core.routes.login.error.name"),
+					message: copy("server:core.routes.login.error.message"),
+				},
+			},
+		)(context, {
+			userId: userRes.data.id,
+			tokenId: refreshRes.data.tokenId,
+			authMethod: "magic_link",
+			ipAddress: connectionInfo.address ?? null,
+			userAgent: userAgent,
+		});
+		if (userLoginTrackRes.error)
+			throw new LucidAPIError(userLoginTrackRes.error);
+
+		c.status(204);
+		return c.body(null);
+	},
+);
+
+export default magicLinkLoginController;

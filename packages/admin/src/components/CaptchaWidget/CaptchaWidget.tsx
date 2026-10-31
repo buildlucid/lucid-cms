@@ -1,4 +1,5 @@
-import { type Component, createMemo, Show } from "solid-js";
+import { TbOutlineRefresh } from "solid-icons/tb";
+import { type Component, createMemo, onCleanup, Show } from "solid-js";
 import { captchaSlots } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import Button from "@/components/Button/Button";
@@ -24,6 +25,12 @@ const CaptchaWidget: Component<{
 		//* a new object on each retry mounts the widget again
 		props.captcha.revision();
 		return { entry, settings };
+	});
+
+	// ----------------------------------------
+	// Effects
+	onCleanup(() => {
+		props.captcha.unregister();
 	});
 
 	// ----------------------------------------
@@ -53,21 +60,25 @@ const CaptchaWidget: Component<{
 				)}
 			</Show>
 			<Show when={props.captcha.failed()}>
-				<div class="flex items-center gap-2">
-					<ErrorMessage
-						theme="inline"
-						message={T()("captcha.unavailable")}
-						classes="min-w-0 flex-1"
-					/>
-					<Button
-						type="button"
-						variant="secondary"
-						size="sm"
-						onClick={props.captcha.retry}
-					>
-						{T()("common.try.again")}
-					</Button>
-				</div>
+				<ErrorMessage
+					theme="inline"
+					message={T()("captcha.unavailable")}
+					classes="w-full"
+					action={
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							shape="square"
+							class="text-danger-low-foreground! hover:bg-danger-low-border/60!"
+							onClick={props.captcha.retry}
+							aria-label={T()("common.try.again")}
+							title={T()("common.try.again")}
+						>
+							<TbOutlineRefresh size={16} />
+						</Button>
+					}
+				/>
 			</Show>
 		</>
 	);

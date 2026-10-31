@@ -36,6 +36,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 			options={{
 				buttonFullWidth: true,
 				buttonSize: "lg",
+				submitSpacing: "lg",
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
@@ -59,7 +60,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 					label: T()("common.password"),
 				}}
 				required={true}
-				autoFoucs={true}
+				autofocus={true}
 				errors={getBodyError("password", resetPassword.errors)}
 			/>
 			<InsetLabelInput

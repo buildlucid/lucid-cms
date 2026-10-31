@@ -6,6 +6,7 @@ import type { ResolvedLucidConfig } from "../../exports/types.js";
 const getAvailableProviders = (config: ResolvedLucidConfig) => {
 	return {
 		disablePassword: config.auth.password.enabled === false,
+		magicLink: config.auth.magicLink.enabled,
 		providers: config.auth.providers.filter((provider) => provider.enabled),
 	};
 };

@@ -1,6 +1,7 @@
 /** Built-in public forms that a captcha adapter can protect. */
 export type CaptchaForm =
 	| "login"
+	| "magicLink"
 	| "setup"
 	| "requestPasswordReset"
 	| "resetPassword"

@@ -9,6 +9,7 @@
 - Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them.
 - Added admin keyboard shortcuts for saving, previewing, creating and switching locales, with a shortcuts list on `?` and in the account menu.
 - Added captcha adapters to protect login and other public forms, with `toolkit.captcha` for your own endpoints and new Cloudflare Turnstile and Google reCAPTCHA plugins.
+- Added magic link login with `auth.magicLink`, which emails users a login link and code.
 - Added a `locale` option to content API and toolkit document and media reads, which returns translations in one locale.
 - Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
 - Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.
@@ -38,6 +39,7 @@
 - Fixed job and routine schedules that are empty or can never run, such as 31 February, passing config checks.
 - Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once.
 - Fixed embedded bricks in localized rich text requiring values in every locale.
+- Fixed password reset, invitation and email change links being kept in email history.
 
 ## v0.19.0-alpha.0
 

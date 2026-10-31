@@ -11,18 +11,24 @@ import { generateSecret } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Accepts an invitation by setting the user's password and marking the invitation as accepted.
+ * Accepts an invitation and marks it as accepted. With password login enabled this
+ * sets the user's password. Without it, magic link login must be on, and the user
+ * logs in with emailed codes from then on.
  */
 const acceptInvitation: ServiceFn<
 	[
 		{
 			token: string;
-			password: string;
+			password?: string;
 		},
 	],
-	undefined
+	{
+		id: number;
+	}
 > = async (context, data) => {
-	if (context.config.auth.password.enabled === false) {
+	const passwordEnabled = context.config.auth.password.enabled;
+
+	if (!passwordEnabled && !context.config.auth.magicLink.enabled) {
 		return {
 			error: {
 				type: "basic",
@@ -30,6 +36,17 @@ const acceptInvitation: ServiceFn<
 				message: copy(
 					"server:core.auth.password.authentication.disabled.message",
 				),
+			},
+			data: undefined,
+		};
+	}
+
+	if (passwordEnabled && data.password === undefined) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:core.auth.invitations.password.required.message"),
 			},
 			data: undefined,
 		};
@@ -79,7 +96,7 @@ const acceptInvitation: ServiceFn<
 	if (tokenRes.error) return tokenRes;
 
 	const userRes = await Users.selectSingle({
-		select: ["id", "invitation_accepted"],
+		select: ["id", "invitation_accepted", "is_deleted", "is_locked"],
 		where: [
 			{
 				key: "id",
@@ -106,6 +123,28 @@ const acceptInvitation: ServiceFn<
 				message: copy(
 					"server:core.auth.invitations.user.already.accepted.message",
 				),
+			},
+			data: undefined,
+		};
+	}
+
+	if (formatter.formatBoolean(userRes.data.is_deleted)) {
+		return {
+			error: {
+				type: "authorisation",
+				status: 401,
+				message: copy("server:core.auth.login.suspended.error.message"),
+			},
+			data: undefined,
+		};
+	}
+
+	if (formatter.formatBoolean(userRes.data.is_locked)) {
+		return {
+			error: {
+				type: "authorisation",
+				status: 401,
+				message: copy("server:core.auth.login.locked.error.message"),
 			},
 			data: undefined,
 		};
@@ -160,16 +199,20 @@ const acceptInvitation: ServiceFn<
 		};
 	}
 
-	const { secret, encryptSecret } = generateSecret(
-		context.config.secrets.encryption,
-	);
-
-	const hashedPassword = await hashSecret(data.password, secret);
+	let passwordData: { password: string; secret: string } | undefined;
+	if (passwordEnabled && data.password !== undefined) {
+		const { secret, encryptSecret } = generateSecret(
+			context.config.secrets.encryption,
+		);
+		passwordData = {
+			password: await hashSecret(data.password, secret),
+			secret: encryptSecret,
+		};
+	}
 
 	const updatedUserRes = await Users.updateSingle({
 		data: {
-			password: hashedPassword,
-			secret: encryptSecret,
+			...passwordData,
 			invitation_accepted: true,
 			updated_at: new Date().toISOString(),
 		},
@@ -192,7 +235,9 @@ const acceptInvitation: ServiceFn<
 
 	return {
 		error: undefined,
-		data: undefined,
+		data: {
+			id: tokenRes.data.user_id,
+		},
 	};
 };
 

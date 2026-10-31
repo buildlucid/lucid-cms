@@ -7,9 +7,9 @@ import {
 	Match,
 	Switch,
 } from "solid-js";
+import AuthSkeleton from "@/components/AuthSkeleton/AuthSkeleton";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import ForgotPasswordForm from "@/components/ForgotPasswordForm/ForgotPasswordForm";
-import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
@@ -26,10 +26,14 @@ const ForgotPasswordPage: Component = () => {
 	const providers = api.auth.useGetProviders({
 		queryParams: {},
 	});
+	//* pages with captcha forms wait for its settings, so the widget's space is there from the first paint
+	const captchaSettings = api.captcha.useGetSettings();
 
 	// ----------------------------------------
 	// Memos
-	const isLoading = createMemo(() => providers.isLoading);
+	const isLoading = createMemo(
+		() => providers.isLoading || captchaSettings.isPending,
+	);
 	const isError = createMemo(() => providers.isError);
 	const isSuccess = createMemo(() => providers.isSuccess);
 
@@ -46,9 +50,7 @@ const ForgotPasswordPage: Component = () => {
 	return (
 		<Switch>
 			<Match when={isLoading()}>
-				<div class="flex items-center justify-center h-full">
-					<Spinner size="sm" />
-				</div>
+				<AuthSkeleton />
 			</Match>
 			<Match when={isError()}>
 				<ErrorState

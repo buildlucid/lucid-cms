@@ -38,6 +38,12 @@ const ForgotPasswordRoute = lazyPage(
 const ResetPasswordRoute = lazyPage(
 	() => import("@/containers/ResetPasswordPage/ResetPasswordPage"),
 );
+const MagicLinkRoute = lazyPage(
+	() => import("@/containers/MagicLinkPage/MagicLinkPage"),
+);
+const MagicLinkVerifyRoute = lazyPage(
+	() => import("@/containers/MagicLinkVerifyPage/MagicLinkVerifyPage"),
+);
 const AcceptInvitationRoute = lazyPage(
 	() => import("@/containers/AcceptInvitationPage/AcceptInvitationPage"),
 );
@@ -456,6 +462,8 @@ const AppRouter: Component = () => {
 			{/* Non authenticated */}
 			<Route path="/admin" component={AuthRoutes}>
 				<Route path="/login" component={LoginRoute} />
+				<Route path="/magic-link" component={MagicLinkRoute} />
+				<Route path="/magic-link/verify" component={MagicLinkVerifyRoute} />
 				<Route path="/setup" component={SetupRoute} />
 				<Route path="/forgot-password" component={ForgotPasswordRoute} />
 				<Route path="/reset-password" component={ResetPasswordRoute} />

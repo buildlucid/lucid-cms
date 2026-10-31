@@ -7,10 +7,10 @@ import {
 	Match,
 	Switch,
 } from "solid-js";
+import AuthSkeleton from "@/components/AuthSkeleton/AuthSkeleton";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import ResetPasswordForm from "@/components/ResetPasswordForm/ResetPasswordForm";
-import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
@@ -36,6 +36,8 @@ const ResetPasswordPage: Component = () => {
 	const providers = api.auth.useGetProviders({
 		queryParams: {},
 	});
+	//* pages with captcha forms wait for its settings, so the widget's space is there from the first paint
+	const captchaSettings = api.captcha.useGetSettings();
 	const checkToken = api.account.useVerifyResetToken({
 		queryParams: {
 			location: {
@@ -48,7 +50,8 @@ const ResetPasswordPage: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const isLoading = createMemo(
-		() => providers.isLoading || checkToken.isLoading,
+		() =>
+			providers.isLoading || checkToken.isLoading || captchaSettings.isPending,
 	);
 	const isError = createMemo(() => providers.isError || checkToken.isError);
 
@@ -65,9 +68,7 @@ const ResetPasswordPage: Component = () => {
 	return (
 		<Switch>
 			<Match when={isLoading()}>
-				<div class="flex items-center justify-center h-full">
-					<Spinner size="sm" />
-				</div>
+				<AuthSkeleton fields={2} />
 			</Match>
 			<Match when={isError()}>
 				<ErrorState

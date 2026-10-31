@@ -4,6 +4,7 @@ import type { CaptchaConfig } from "./types.js";
 /** Whether each built-in form is protected once an adapter is set, and the action its tokens carry. */
 const defaults = {
 	login: { enabled: true, action: "lucid_login" },
+	magicLink: { enabled: true, action: "lucid_magic_link" },
 	setup: { enabled: true, action: "lucid_setup" },
 	requestPasswordReset: {
 		enabled: true,
@@ -29,6 +30,7 @@ const getCaptchaForms = (
 
 	return {
 		login: resolve("login"),
+		magicLink: resolve("magicLink"),
 		setup: resolve("setup"),
 		requestPasswordReset: resolve("requestPasswordReset"),
 		resetPassword: resolve("resetPassword"),

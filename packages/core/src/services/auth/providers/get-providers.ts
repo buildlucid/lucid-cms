@@ -19,6 +19,7 @@ const getProviders: ServiceFn<[], AuthProviders> = async (context) => {
 		error: undefined,
 		data: {
 			disablePassword: providersRes.disablePassword,
+			magicLink: providersRes.magicLink,
 			providers: providers,
 		},
 	};

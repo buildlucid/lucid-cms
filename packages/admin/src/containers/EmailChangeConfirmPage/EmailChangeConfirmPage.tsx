@@ -7,10 +7,10 @@ import {
 	Match,
 	Switch,
 } from "solid-js";
+import AuthSkeleton from "@/components/AuthSkeleton/AuthSkeleton";
 import Button from "@/components/Button/Button";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
-import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
@@ -55,9 +55,7 @@ const EmailChangeConfirmPage: Component = () => {
 	return (
 		<Switch>
 			<Match when={token() !== null && checkToken.isLoading}>
-				<div class="flex items-center justify-center h-full">
-					<Spinner size="sm" />
-				</div>
+				<AuthSkeleton fields={0} />
 			</Match>
 			<Match when={isInvalid()}>
 				<ErrorState

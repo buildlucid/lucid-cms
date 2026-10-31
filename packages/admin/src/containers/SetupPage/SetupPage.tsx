@@ -1,10 +1,10 @@
 import { useNavigate } from "@solidjs/router";
 import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, createEffect, Match, Switch } from "solid-js";
+import AuthSkeleton from "@/components/AuthSkeleton/AuthSkeleton";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import SetupForm from "@/components/SetupForm/SetupForm";
-import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
@@ -21,6 +21,8 @@ const SetupPage: Component = () => {
 	const setupRequired = api.auth.useSetupRequired({
 		queryParams: {},
 	});
+	//* pages with captcha forms wait for its settings, so the widget's space is there from the first paint
+	const captchaSettings = api.captcha.useGetSettings();
 
 	// ----------------------------------------
 	// Effects
@@ -34,10 +36,8 @@ const SetupPage: Component = () => {
 	// Render
 	return (
 		<Switch>
-			<Match when={setupRequired.isLoading}>
-				<div class="flex items-center justify-center h-full">
-					<Spinner size="sm" />
-				</div>
+			<Match when={setupRequired.isLoading || captchaSettings.isPending}>
+				<AuthSkeleton fields={6} />
 			</Match>
 			<Match when={setupRequired.isError}>
 				<ErrorState

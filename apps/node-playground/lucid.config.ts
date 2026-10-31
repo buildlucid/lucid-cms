@@ -92,6 +92,9 @@ export default defineConfig({
 			password: {
 				enabled: true,
 			},
+			magicLink: {
+				enabled: true,
+			},
 		},
 		secrets: {
 			encryption: env.LUCID_ENCRYPTION_SECRET,

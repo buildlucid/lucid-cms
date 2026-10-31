@@ -36,6 +36,7 @@ const SetupForm: Component = () => {
 			options={{
 				buttonFullWidth: true,
 				buttonSize: "lg",
+				submitSpacing: "lg",
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
@@ -61,7 +62,7 @@ const SetupForm: Component = () => {
 					copy={{
 						label: T()("common.first.name"),
 					}}
-					autoFoucs={true}
+					autofocus={true}
 					errors={getBodyError("firstName", setup.errors)}
 				/>
 				<InsetLabelInput

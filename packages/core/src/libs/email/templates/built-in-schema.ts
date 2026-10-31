@@ -31,6 +31,16 @@ export interface Schema<Types extends object = object> {
 			};
 			blocks: never;
 		};
+		"magic-link": {
+			context: {
+				firstName?: string | Markup | null;
+				code: string | Markup;
+				loginLink: string | Markup;
+				expiryMinutes: number;
+				[key: string]: unknown;
+			};
+			blocks: never;
+		};
 		"notification": {
 			context: {
 				title: string | Markup;

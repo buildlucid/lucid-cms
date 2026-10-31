@@ -26,6 +26,7 @@ import checkFieldPermissions from "./checks/check-field-permissions.js";
 import checkField from "./checks/check-field.js";
 import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
+import checkMagicLink from "./checks/check-magic-link.js";
 import checkNotificationDefinitions from "./checks/check-notification-definitions.js";
 import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
@@ -108,6 +109,7 @@ const processConfig = async (
 		checkAdminSlots(configRes);
 		checkAdminRoutes(configRes);
 		checkCaptcha(configRes);
+		checkMagicLink(configRes);
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);

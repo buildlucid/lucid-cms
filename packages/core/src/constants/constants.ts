@@ -230,6 +230,17 @@ export default Object.freeze({
 	passwordResetTokenExpirationMinutes: 15, // 15 minutes
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
 	emailChangeTokenExpirationMinutes: 1440, // 24 hours in minutes
+	magicLink: {
+		/** How long the emailed link and code stay valid. */
+		expirationMinutes: 15,
+		codeLength: 6,
+		/** Code entries allowed per email. The link keeps working after they run out. */
+		maxCodeAttempts: 5,
+		/** Repeat requests inside this window send nothing, matching the admin's resend timer. */
+		resendCooldownSeconds: 60,
+		/** The most magic link emails one account can be sent in an hour. */
+		hourlyLimit: 5,
+	},
 	presignedUrlExpiration: 3600000, // 1 hour in ms
 	uploadSessionExpiration: 3600000, // 1 hour in ms
 	uploadSessionPartSize: 8 * 1024 * 1024, // 8MiB
@@ -404,6 +415,7 @@ export default Object.freeze({
 		invitation: "invitation",
 		emailChangeConfirm: "email_change_confirm",
 		emailChangeRevert: "email_change_revert",
+		magicLink: "magic_link",
 	} as const,
 	refreshTokenRevokeReasons: {
 		logout: "logout",
@@ -422,6 +434,8 @@ export default Object.freeze({
 		emailChangeCancelled: "email_change_cancelled",
 		emailChangeReverted: "email_change_reverted",
 		emailChangeSuperseded: "email_change_superseded",
+		magicLinkUsed: "magic_link_used",
+		magicLinkSuperseded: "magic_link_superseded",
 		expired: "expired",
 	} as const,
 	emailChangeRequestStatuses: {

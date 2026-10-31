@@ -49,7 +49,7 @@ For local development, use Cloudflare's [testing keys](https://developers.cloudf
 
 ## Protected forms
 
-Once the plugin is added, login, first-user setup, password reset requests and share-link passwords need a Turnstile token. Signed-in users sending a reset email from their account page skip the check. Choose the forms with `captcha.forms` in your config:
+Once the plugin is added, login, magic link requests, first-user setup, password reset requests and share-link passwords need a Turnstile token. Signed-in users sending a reset email from their account page skip the check. Choose the forms with `captcha.forms` in your config:
 
 ```typescript
 config: (env) => ({

@@ -65,7 +65,7 @@ Google's free tier covers 10,000 assessments a month. Over that, assessments fai
 
 ## Protected forms
 
-Once the plugin is added, login, first-user setup, password reset requests and share-link passwords need a reCAPTCHA token. Signed-in users sending a reset email from their account page skip the check. Choose the forms with `captcha.forms` in your config:
+Once the plugin is added, login, magic link requests, first-user setup, password reset requests and share-link passwords need a reCAPTCHA token. Signed-in users sending a reset email from their account page skip the check. Choose the forms with `captcha.forms` in your config:
 
 ```typescript
 config: (env) => ({

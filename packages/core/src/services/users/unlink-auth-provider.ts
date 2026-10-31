@@ -12,7 +12,7 @@ import logSecurityAudit from "../security-audit/log-security-audit.js";
 /**
  * Unlinks an auth provider from the target user.
  *
- * You cannot unlink the last auth provider when:
+ * Unless magic link login is enabled, you cannot unlink the last auth provider when:
  * - password authentication is disabled, or
  * - the user does not have a password set.
  */
@@ -30,6 +30,7 @@ const unlinkAuthProvider: ServiceFn<
 	const UserAuthProviders = new UserAuthProvidersRepository(context.db);
 
 	const passwordEnabled = context.config.auth.password.enabled === true;
+	const magicLinkEnabled = context.config.auth.magicLink.enabled === true;
 
 	const [userRes, providerRes, providersCountRes] = await Promise.all([
 		Users.selectSinglePreset({
@@ -89,7 +90,8 @@ const unlinkAuthProvider: ServiceFn<
 	const isLastProvider = providersCount <= 1;
 	const hasPassword = Boolean(userRes.data.password);
 
-	if (isLastProvider && passwordEnabled === false) {
+	//* with magic link login on, every user can still log in by email
+	if (isLastProvider && !magicLinkEnabled && passwordEnabled === false) {
 		return {
 			error: {
 				type: "basic",
@@ -103,7 +105,7 @@ const unlinkAuthProvider: ServiceFn<
 		};
 	}
 
-	if (isLastProvider && hasPassword === false) {
+	if (isLastProvider && !magicLinkEnabled && hasPassword === false) {
 		return {
 			error: {
 				type: "basic",

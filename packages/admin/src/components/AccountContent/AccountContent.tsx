@@ -94,6 +94,9 @@ export const AccountContent: Component = () => {
 	const passwordAuthEnabled = createMemo(
 		() => providers.data?.data.disablePassword === false,
 	);
+	const magicLinkEnabled = createMemo(
+		() => providers.data?.data.magicLink === true,
+	);
 	const userHasPassword = createMemo(() => user()?.hasPassword === true);
 	const linkedProvidersCount = createMemo(
 		() => user()?.authProviders?.length ?? 0,
@@ -323,7 +326,8 @@ export const AccountContent: Component = () => {
 															if (unlinkAuthProvider.action.isPending) return;
 															const isLastLinkedProvider =
 																linkedProvidersCount() <= 1;
-															if (isLastLinkedProvider) {
+															//* with magic link login on, users can still log in by email
+															if (isLastLinkedProvider && !magicLinkEnabled()) {
 																if (!passwordAuthEnabled()) {
 																	spawnToast({
 																		title: T()(

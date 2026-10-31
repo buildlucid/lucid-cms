@@ -1,4 +1,4 @@
-import { type Component, createSignal } from "solid-js";
+import { type Component, createSignal, Show } from "solid-js";
 import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
@@ -9,6 +9,8 @@ import { getBodyError } from "@/utils/error-helpers";
 
 interface AcceptInvitationFormProps {
 	token: string;
+	/** Accepts without setting a password, for when password login is disabled. */
+	passwordless?: boolean;
 }
 
 const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
@@ -36,48 +38,53 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 			options={{
 				buttonFullWidth: true,
 				buttonSize: "lg",
+				submitSpacing: props.passwordless ? "md" : "lg",
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
 				void captcha.submit((captchaToken) =>
 					acceptInvitation.action.mutateAsync({
 						token: props.token,
-						body: {
-							password: password(),
-							passwordConfirmation: passwordConfirmation(),
-						},
+						body: props.passwordless
+							? {}
+							: {
+									password: password(),
+									passwordConfirmation: passwordConfirmation(),
+								},
 						captchaToken,
 					}),
 				);
 			}}
 		>
-			<InsetLabelInput
-				id="password"
-				name="password"
-				type="password"
-				value={password()}
-				onChange={setPassword}
-				copy={{
-					label: T()("common.password"),
-				}}
-				required={true}
-				autoFoucs={true}
-				autoComplete="new-password"
-				errors={getBodyError("password", acceptInvitation.errors)}
-			/>
-			<InsetLabelInput
-				id="passwordConfirmation"
-				name="passwordConfirmation"
-				type="password"
-				value={passwordConfirmation()}
-				onChange={setPasswordConfirmation}
-				copy={{
-					label: T()("common.confirm.password"),
-				}}
-				required={true}
-				autoComplete="new-password"
-				errors={getBodyError("passwordConfirmation", acceptInvitation.errors)}
-			/>
+			<Show when={!props.passwordless}>
+				<InsetLabelInput
+					id="password"
+					name="password"
+					type="password"
+					value={password()}
+					onChange={setPassword}
+					copy={{
+						label: T()("common.password"),
+					}}
+					required={true}
+					autofocus={true}
+					autoComplete="new-password"
+					errors={getBodyError("password", acceptInvitation.errors)}
+				/>
+				<InsetLabelInput
+					id="passwordConfirmation"
+					name="passwordConfirmation"
+					type="password"
+					value={passwordConfirmation()}
+					onChange={setPasswordConfirmation}
+					copy={{
+						label: T()("common.confirm.password"),
+					}}
+					required={true}
+					autoComplete="new-password"
+					errors={getBodyError("passwordConfirmation", acceptInvitation.errors)}
+				/>
+			</Show>
 			<CaptchaWidget captcha={captcha} />
 		</Form>
 	);

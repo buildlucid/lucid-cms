@@ -29,6 +29,8 @@ export const Form: Component<{
 	options?: {
 		buttonFullWidth?: boolean;
 		buttonSize?: "sm" | "md" | "lg";
+		/** Space above the submit button. Auth forms use `lg` when nothing sits under their last input. @default "md" */
+		submitSpacing?: "md" | "lg";
 		disableErrorMessage?: boolean;
 		errorPlacement?: "above" | "inline";
 		hideSubmitWhenDisabled?: boolean;
@@ -72,7 +74,12 @@ export const Form: Component<{
 				>
 					<div class="flex w-full flex-col gap-3">{props.children}</div>
 					<Show when={showSubmitButton() || props.submitRow || errorMessage()}>
-						<div class="mt-4 w-full">
+						<div
+							class={classNames("w-full", {
+								"mt-4": props.options?.submitSpacing !== "lg",
+								"mt-8": props.options?.submitSpacing === "lg",
+							})}
+						>
 							<Show when={errorMessage() && !showInlineError()}>
 								<ErrorMessage
 									theme="basic"

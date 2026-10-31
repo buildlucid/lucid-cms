@@ -267,6 +267,11 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("token", adapter.getDataType("varchar", 255), (col) =>
 					col.notNull().unique(),
 				)
+				.addColumn("code", adapter.getDataType("varchar", 255))
+				.addColumn("code_attempts", adapter.getDataType("integer"), (col) =>
+					col.notNull().defaultTo(0),
+				)
+				.addColumn("email", adapter.getDataType("text"))
 				.addColumn("revoked_at", adapter.getDataType("timestamp"))
 				.addColumn("revoke_reason", adapter.getDataType("varchar", 255))
 				.addColumn("consumed_at", adapter.getDataType("timestamp"))

@@ -263,6 +263,7 @@ export type {
 	UserPreferences,
 	UserRef,
 	ValidateInvitation,
+	ValidateMagicLink,
 	ValueDocumentField,
 	WorkflowStageColor,
 } from "@lucidcms/types";

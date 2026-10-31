@@ -21,6 +21,7 @@ export const userTokensTable = defineTable("lucid_user_tokens", (adapter) => ({
 				z.literal(constants.userTokens.invitation),
 				z.literal(constants.userTokens.emailChangeConfirm),
 				z.literal(constants.userTokens.emailChangeRevert),
+				z.literal(constants.userTokens.magicLink),
 			]),
 			type: "varchar",
 			args: [255],
@@ -29,6 +30,19 @@ export const userTokensTable = defineTable("lucid_user_tokens", (adapter) => ({
 			schema: z.string(),
 			type: "varchar",
 			args: [255],
+		},
+		code: {
+			schema: z.string().nullable(),
+			type: "varchar",
+			args: [255],
+		},
+		code_attempts: {
+			schema: z.number(),
+			type: "integer",
+		},
+		email: {
+			schema: z.string().nullable(),
+			type: "text",
 		},
 		revoked_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
@@ -96,6 +110,11 @@ export interface LucidUserTokens {
 	user_id: number;
 	token_type: UserTokenType;
 	token: string;
+	/** HMAC of the short code that can be entered instead of a magic link's token. */
+	code: string | null;
+	code_attempts: Generated<number>;
+	/** The address a magic link was sent to. It only works while this is still the account's email. */
+	email: string | null;
 	revoked_at: TimestampMutable;
 	revoke_reason: string | null;
 	consumed_at: TimestampMutable;

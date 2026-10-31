@@ -378,6 +378,9 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		password: z.strictObject({
 			enabled: z.boolean(),
 		}),
+		magicLink: z.strictObject({
+			enabled: z.boolean(),
+		}),
 		providers: z.array(AuthProviderSchema),
 	}),
 	ai: z
@@ -445,6 +448,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 					z.literal(false),
 					z.strictObject({
 						login: z.boolean().optional(),
+						magicLink: z.boolean().optional(),
 						setup: z.boolean().optional(),
 						requestPasswordReset: z.boolean().optional(),
 						resetPassword: z.boolean().optional(),

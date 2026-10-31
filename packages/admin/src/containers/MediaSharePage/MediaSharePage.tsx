@@ -330,6 +330,7 @@ const MediaSharePage: Component = () => {
 								options={{
 									buttonFullWidth: true,
 									buttonSize: "lg",
+									submitSpacing: "lg",
 								}}
 								onSubmit={() => {
 									if (!token()) return;
@@ -360,7 +361,7 @@ const MediaSharePage: Component = () => {
 										label: T()("common.password"),
 									}}
 									required={true}
-									autoFoucs={true}
+									autofocus={true}
 									autoComplete="current-password"
 								/>
 								<CaptchaWidget captcha={captcha} />

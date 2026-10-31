@@ -10,6 +10,10 @@ const createSingle: ServiceFn<
 			userId: number;
 			tokenType: UserTokenType;
 			expiryDate: string;
+			/** Hashed short code that can be entered instead of the token. */
+			code?: string;
+			/** The address the token is emailed to, for tokens that stop working when the account's email changes. */
+			email?: string;
 		},
 	],
 	{
@@ -28,6 +32,8 @@ const createSingle: ServiceFn<
 			token_type: data.tokenType,
 			expiry_date: data.expiryDate,
 			token: hashedToken,
+			code: data.code,
+			email: data.email,
 		},
 		returning: ["id"],
 		validation: {

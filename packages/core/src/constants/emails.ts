@@ -7,6 +7,7 @@ const emailConstants = Object.freeze({
 		acceptInvitation: "/admin/accept-invitation",
 		emailChangeConfirm: "/admin/email-change/confirm",
 		emailChangeRevert: "/admin/email-change/revert",
+		magicLink: "/admin/magic-link/verify",
 		account: "/admin/account",
 	},
 	storage: {
@@ -21,7 +22,7 @@ const emailConstants = Object.freeze({
 			external: false,
 			storage: {
 				resetLink: {
-					redact: true,
+					neverStore: true,
 				},
 			},
 		},
@@ -30,7 +31,19 @@ const emailConstants = Object.freeze({
 			external: false,
 			storage: {
 				inviteLink: {
-					redact: true,
+					neverStore: true,
+				},
+			},
+		},
+		magicLink: {
+			key: "magic-link",
+			external: false,
+			storage: {
+				loginLink: {
+					neverStore: true,
+				},
+				code: {
+					neverStore: true,
 				},
 			},
 		},
@@ -49,7 +62,7 @@ const emailConstants = Object.freeze({
 			external: false,
 			storage: {
 				confirmLink: {
-					redact: true,
+					neverStore: true,
 				},
 			},
 		},
@@ -58,7 +71,7 @@ const emailConstants = Object.freeze({
 			external: false,
 			storage: {
 				revertLink: {
-					redact: true,
+					neverStore: true,
 				},
 			},
 		},

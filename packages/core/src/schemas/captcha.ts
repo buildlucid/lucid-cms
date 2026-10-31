@@ -32,6 +32,7 @@ export const controllerSchemas = {
 				}),
 				forms: z.object({
 					login: formSchema,
+					magicLink: formSchema,
 					setup: formSchema,
 					requestPasswordReset: formSchema,
 					resetPassword: formSchema,

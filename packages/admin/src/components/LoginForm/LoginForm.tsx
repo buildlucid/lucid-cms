@@ -59,7 +59,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 					label: T()("common.username.or.email"),
 				}}
 				required={true}
-				autoFoucs={true}
+				autofocus={true}
 				autoComplete="username"
 				errors={getBodyError("usernameOrEmail", login.errors)}
 			/>

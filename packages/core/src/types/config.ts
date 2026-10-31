@@ -361,6 +361,16 @@ export interface LucidConfig {
 			enabled?: boolean;
 		};
 		/**
+		 * Magic link authentication configuration. Users get an email with a
+		 * login link and a code they can enter instead. Needs an email adapter.
+		 */
+		magicLink?: {
+			/**
+			 * Allow sign-in with a magic link. Defaults to false.
+			 */
+			enabled?: boolean;
+		};
+		/**
 		 * The authentication providers to use.
 		 */
 		providers?: AuthProvider[];
@@ -693,6 +703,9 @@ export interface ResolvedLucidConfig {
 	};
 	auth: {
 		password: {
+			enabled: boolean;
+		};
+		magicLink: {
 			enabled: boolean;
 		};
 		providers: AuthProvider[];

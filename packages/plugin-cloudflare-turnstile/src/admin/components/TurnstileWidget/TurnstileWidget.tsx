@@ -1,6 +1,6 @@
 import type { CaptchaWidgetComponent } from "@lucidcms/admin/types";
 import { createCaptchaTokenState, loadScript } from "@lucidcms/admin/utils";
-import { onCleanup, onMount } from "solid-js";
+import { createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import { SCRIPT_URL } from "../../../constants.js";
 import type { TurnstileClientOptions } from "../../../types.js";
 
@@ -39,14 +39,24 @@ const TurnstileWidget: CaptchaWidgetComponent<
 	// ----------------------------------
 	// State & Hooks
 	const tokens = createCaptchaTokenState();
+	const [failed, setFailed] = createSignal(false);
 	let container: HTMLDivElement | undefined;
 	let widgetId: string | undefined;
 	let disposed = false;
 
 	// ----------------------------------
+	// Memos
+	//* the widget's height, kept free while it loads so the form doesn't jump. Hidden appearances only show when needed
+	const reservedHeight = createMemo(() => {
+		if (failed() || props.client.appearance !== "always") return undefined;
+		return props.client.size === "compact" ? "140px" : "65px";
+	});
+
+	// ----------------------------------
 	// Functions
 	const fail = () => {
 		tokens.reset();
+		setFailed(true);
 		props.onError();
 	};
 	const mount = async () => {
@@ -90,7 +100,18 @@ const TurnstileWidget: CaptchaWidgetComponent<
 
 	// ----------------------------------
 	// Render
-	return <div ref={container} />;
+	return (
+		<div
+			ref={container}
+			style={{
+				"min-height": reservedHeight(),
+				//* a colour scheme that differs from the iframe's makes the browser paint it white until it loads
+				"color-scheme": "light",
+				//* stops the inline iframe leaving a text-line gap below it, so it fits the reserved height
+				"line-height": "0",
+			}}
+		/>
+	);
 };
 
 export default TurnstileWidget;
