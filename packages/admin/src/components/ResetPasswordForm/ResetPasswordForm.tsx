@@ -1,6 +1,8 @@
 import { type Component, createSignal } from "solid-js";
+import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
+import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -11,7 +13,8 @@ interface ResetPasswordFormProps {
 
 const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
+	const captcha = useCaptcha("resetPassword");
 	const [password, setPassword] = createSignal("");
 	const [passwordConfirmation, setPasswordConfirmation] = createSignal("");
 
@@ -24,7 +27,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 	return (
 		<Form
 			state={{
-				isLoading: resetPassword.action.isPending,
+				isLoading: resetPassword.action.isPending || captcha.isPending(),
 				errors: resetPassword.errors(),
 			}}
 			content={{
@@ -36,11 +39,14 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
-				resetPassword.action.mutate({
-					token: props.token,
-					password: password(),
-					passwordConfirmation: passwordConfirmation(),
-				});
+				void captcha.submit((captchaToken) =>
+					resetPassword.action.mutateAsync({
+						token: props.token,
+						password: password(),
+						passwordConfirmation: passwordConfirmation(),
+						captchaToken,
+					}),
+				);
 			}}
 		>
 			<InsetLabelInput
@@ -68,6 +74,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				required={true}
 				errors={getBodyError("passwordConfirmation", resetPassword.errors)}
 			/>
+			<CaptchaWidget captcha={captcha} />
 		</Form>
 	);
 };

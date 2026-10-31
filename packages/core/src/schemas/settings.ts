@@ -241,6 +241,10 @@ const settingsResponseSchema = z.object({
 				description: "The media delivery adapter key",
 				example: "custom",
 			}),
+			captcha: z.string().nullable().meta({
+				description: "The captcha adapter key, or null when none is configured",
+				example: "cloudflare-turnstile",
+			}),
 		})
 		.optional(),
 });

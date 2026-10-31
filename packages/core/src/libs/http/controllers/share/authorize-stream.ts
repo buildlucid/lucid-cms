@@ -11,6 +11,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import verifyCaptcha from "../../middleware/verify-captcha.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -27,6 +28,9 @@ const authorizeStreamController = factory.createHandlers(
 		summary: "Authorize Stream",
 		responses: openAPI.responses(),
 		parameters: openAPI.parameters({
+			headers: {
+				captcha: false,
+			},
 			params: controllerSchemas.authorizeShare.params,
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.authorizeShare.body),
@@ -37,6 +41,7 @@ const authorizeStreamController = factory.createHandlers(
 		limit: constants.rateLimit.scopes.low.limit,
 		windowMs: 60_000,
 	}),
+	verifyCaptcha("sharePassword"),
 	validate("param", controllerSchemas.authorizeShare.params),
 	validate("json", controllerSchemas.authorizeShare.body),
 	async (c) => {

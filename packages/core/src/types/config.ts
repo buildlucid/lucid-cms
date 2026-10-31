@@ -1,6 +1,7 @@
 import type { AdminConfig } from "@lucidcms/admin/types";
 import type { AgentDefinition } from "../libs/agent/types.js";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
+import type { CaptchaConfig } from "../libs/captcha/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
 import type { TableDefinition } from "../libs/db/client/table/definition.js";
@@ -498,6 +499,10 @@ export interface LucidConfig {
 		templates?: Record<string, string>;
 	};
 	/**
+	 * Captcha settings for the built-in public forms and `toolkit.captcha`.
+	 */
+	captcha?: CaptchaConfig;
+	/**
 	 * Media settings.
 	 */
 	media?: {
@@ -705,6 +710,7 @@ export interface ResolvedLucidConfig {
 		resendWindowDays: number;
 		templates?: Record<string, string>;
 	};
+	captcha?: CaptchaConfig;
 	http: {
 		security: HttpSecurityConfig & {
 			trustProxyHeaders: boolean;

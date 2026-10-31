@@ -25,6 +25,7 @@ export default Object.freeze({
 	},
 	headers: {
 		csrf: "X-CSRF-Token",
+		captcha: "Lucid-Captcha-Token",
 		idempotencyKey: "idempotency-key",
 		interfaceLocale: "Lucid-Locale",
 		requestId: "X-Request-Id",
@@ -217,6 +218,7 @@ export default Object.freeze({
 		mediaDeliveryAdapter: "media-delivery-adapter",
 		mediaStorageAdapter: "media-storage-adapter",
 		emailAdapter: "email-adapter",
+		captchaAdapter: "captcha-adapter",
 		authProvider: "auth-provider",
 		ai: "ai",
 	} as const,

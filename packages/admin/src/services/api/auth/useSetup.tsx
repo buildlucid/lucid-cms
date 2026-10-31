@@ -11,6 +11,7 @@ interface Params {
 	firstName?: string;
 	lastName?: string;
 	password: string;
+	captchaToken?: string;
 }
 
 export const setupReq = (params: Params) => {
@@ -18,7 +19,14 @@ export const setupReq = (params: Params) => {
 		url: "/api/v1/auth/setup",
 		csrf: true,
 		method: "POST",
-		body: params,
+		body: {
+			email: params.email,
+			username: params.username,
+			firstName: params.firstName,
+			lastName: params.lastName,
+			password: params.password,
+		},
+		captchaToken: params.captchaToken,
 	});
 };
 

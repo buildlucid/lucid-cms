@@ -5,6 +5,7 @@ import serviceHelpers from "@/utils/service-helpers";
 
 interface Params {
 	email: string;
+	captchaToken?: string;
 }
 
 export const sendPasswordResetReq = (params: Params) => {
@@ -17,7 +18,8 @@ export const sendPasswordResetReq = (params: Params) => {
 		url: "/api/v1/account/reset-password",
 		csrf: true,
 		method: "POST",
-		body: params,
+		body: { email: params.email },
+		captchaToken: params.captchaToken,
 	});
 };
 

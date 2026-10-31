@@ -2,6 +2,7 @@ import account from "./account";
 import agent from "./agent";
 import ai from "./ai";
 import auth from "./auth";
+import captcha from "./captcha";
 import collections from "./collections";
 import connection from "./connection";
 import documents from "./documents";
@@ -27,6 +28,7 @@ import users from "./users";
 const exportObject = {
 	auth,
 	account,
+	captcha,
 	agent,
 	ai,
 	users,

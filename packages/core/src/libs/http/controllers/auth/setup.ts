@@ -9,6 +9,7 @@ import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
+import verifyCaptcha from "../../middleware/verify-captcha.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -24,6 +25,7 @@ const setupController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
+				captcha: false,
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.setup.body),
@@ -35,6 +37,7 @@ const setupController = factory.createHandlers(
 		scope: constants.rateLimit.scopes.sensitive.scopeKey,
 		windowMs: 60_000,
 	}),
+	verifyCaptcha("setup"),
 	validate("json", controllerSchemas.setup.body),
 	async (c) => {
 		const { email, username, firstName, lastName, password } =

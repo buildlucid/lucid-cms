@@ -218,6 +218,14 @@ export const adminConfigSchema = z
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
+						slot: z.literal("captcha.widget"),
+						match: z.strictObject({ adapter: key.optional() }).optional(),
+						component: componentReference,
+						options,
+					}),
+					z.strictObject({
+						key,
+						priority: z.number().optional(),
 						slot: z.literal("home.widget"),
 						component: componentReference,
 						options,

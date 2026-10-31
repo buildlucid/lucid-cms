@@ -7,6 +7,7 @@ interface Params {
 	body: {
 		password: string;
 	};
+	captchaToken?: string;
 }
 
 const authorizeReq = (params: Params) => {
@@ -14,6 +15,7 @@ const authorizeReq = (params: Params) => {
 		url: `/api/v1/share/${params.token}/authorize`,
 		method: "POST",
 		body: params.body,
+		captchaToken: params.captchaToken,
 	});
 };
 

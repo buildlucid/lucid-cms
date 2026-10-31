@@ -9,6 +9,7 @@ interface Params {
 		password: string;
 		passwordConfirmation: string;
 	};
+	captchaToken?: string;
 }
 
 export const acceptInvitationReq = (params: Params) => {
@@ -17,6 +18,7 @@ export const acceptInvitationReq = (params: Params) => {
 		csrf: true,
 		method: "POST",
 		body: params.body,
+		captchaToken: params.captchaToken,
 	});
 };
 

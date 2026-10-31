@@ -2,6 +2,7 @@ export type * from "./common/errors.js";
 export type * from "./common/responses.js";
 export type * from "./resources/agent/index.js";
 export type * from "./resources/ai/index.js";
+export type * from "./resources/captcha/index.js";
 export type * from "./resources/content/index.js";
 export type * from "./resources/documents/index.js";
 export type * from "./resources/emails/index.js";

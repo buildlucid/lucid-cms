@@ -8,8 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
+import softAuthenticate from "../../middleware/soft-authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
+import verifyCaptcha from "../../middleware/verify-captcha.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -28,6 +30,7 @@ const sendResetPasswordController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
+				captcha: false,
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.sendResetPassword.body),
@@ -39,6 +42,8 @@ const sendResetPasswordController = factory.createHandlers(
 		scope: constants.rateLimit.scopes.sensitive.scopeKey,
 		windowMs: 60_000,
 	}),
+	softAuthenticate,
+	verifyCaptcha("requestPasswordReset"),
 	validate("json", controllerSchemas.sendResetPassword.body),
 	async (c) => {
 		const { email } = c.req.valid("json");

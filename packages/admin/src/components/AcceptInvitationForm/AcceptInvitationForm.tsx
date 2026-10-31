@@ -1,6 +1,8 @@
 import { type Component, createSignal } from "solid-js";
+import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
+import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -11,7 +13,8 @@ interface AcceptInvitationFormProps {
 
 const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
+	const captcha = useCaptcha("acceptInvitation");
 	const [password, setPassword] = createSignal("");
 	const [passwordConfirmation, setPasswordConfirmation] = createSignal("");
 
@@ -24,7 +27,7 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 	return (
 		<Form
 			state={{
-				isLoading: acceptInvitation.action.isPending,
+				isLoading: acceptInvitation.action.isPending || captcha.isPending(),
 				errors: acceptInvitation.errors(),
 			}}
 			content={{
@@ -36,13 +39,16 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
-				acceptInvitation.action.mutate({
-					token: props.token,
-					body: {
-						password: password(),
-						passwordConfirmation: passwordConfirmation(),
-					},
-				});
+				void captcha.submit((captchaToken) =>
+					acceptInvitation.action.mutateAsync({
+						token: props.token,
+						body: {
+							password: password(),
+							passwordConfirmation: passwordConfirmation(),
+						},
+						captchaToken,
+					}),
+				);
 			}}
 		>
 			<InsetLabelInput
@@ -72,6 +78,7 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 				autoComplete="new-password"
 				errors={getBodyError("passwordConfirmation", acceptInvitation.errors)}
 			/>
+			<CaptchaWidget captcha={captcha} />
 		</Form>
 	);
 };

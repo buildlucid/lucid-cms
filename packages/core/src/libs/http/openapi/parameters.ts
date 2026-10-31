@@ -15,6 +15,8 @@ const parameters = (props: {
 		authorization?: boolean;
 		/** Include the idempotency header. True marks it required. */
 		idempotencyKey?: boolean;
+		/** Include the captcha token header. False marks it optional, as protection depends on config. */
+		captcha?: boolean;
 	};
 	/** Zod schema for path parameters. */
 	params?: ZodType;
@@ -29,6 +31,17 @@ const parameters = (props: {
 			name: constants.headers.csrf,
 			required: props.headers.csrf,
 			description: translate("server:core.openapi.csrf.header.description"),
+			schema: {
+				type: "string",
+			},
+		});
+	}
+	if (props.headers?.captcha !== undefined) {
+		routeParameters.push({
+			in: "header",
+			name: constants.headers.captcha,
+			required: props.headers.captcha,
+			description: translate("server:core.openapi.captcha.header.description"),
 			schema: {
 				type: "string",
 			},

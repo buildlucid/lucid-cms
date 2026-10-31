@@ -303,6 +303,10 @@ const SystemOverviewPage: Component = () => {
 										label: T()("common.media.delivery"),
 										value: systemInfo()?.mediaDelivery ?? "-",
 									},
+									{
+										label: T()("common.captcha"),
+										value: systemInfo()?.captcha ?? "-",
+									},
 								]}
 							/>
 						</InfoRow.Content>

@@ -1,13 +1,16 @@
 import { type Component, createSignal } from "solid-js";
+import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
+import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
 const SetupForm: Component = () => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
+	const captcha = useCaptcha("setup");
 	const [email, setEmail] = createSignal("");
 	const [username, setUsername] = createSignal("");
 	const [firstName, setFirstName] = createSignal("");
@@ -24,7 +27,7 @@ const SetupForm: Component = () => {
 	return (
 		<Form
 			state={{
-				isLoading: setup.action.isPending,
+				isLoading: setup.action.isPending || captcha.isPending(),
 				errors: setup.errors(),
 			}}
 			content={{
@@ -36,13 +39,16 @@ const SetupForm: Component = () => {
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
-				setup.action.mutate({
-					email: email(),
-					username: username(),
-					firstName: firstName() || undefined,
-					lastName: lastName() || undefined,
-					password: password(),
-				});
+				void captcha.submit((captchaToken) =>
+					setup.action.mutateAsync({
+						email: email(),
+						username: username(),
+						firstName: firstName() || undefined,
+						lastName: lastName() || undefined,
+						password: password(),
+						captchaToken,
+					}),
+				);
 			}}
 		>
 			<div class="grid grid-cols-2 gap-4">
@@ -121,6 +127,7 @@ const SetupForm: Component = () => {
 				autoComplete="new-password"
 				errors={getBodyError("passwordConfirmation", setup.errors)}
 			/>
+			<CaptchaWidget captcha={captcha} />
 		</Form>
 	);
 };

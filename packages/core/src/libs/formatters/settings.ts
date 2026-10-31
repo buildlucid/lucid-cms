@@ -14,6 +14,7 @@ interface SettingsPropsT {
 	mediaStorageAdapterEnabled: boolean;
 	mediaStorageAdapterKey: string | null;
 	emailAdapterKey: string;
+	captchaAdapterKey: string | null;
 	emailSimulated: boolean;
 	emailTemplates: string[];
 	mediaDeliveryAdapterKey: string;
@@ -142,6 +143,7 @@ const formatSingle = (props: {
 			mediaStorage: props.settings.mediaStorageAdapterKey,
 			email: props.settings.emailAdapterKey,
 			mediaDelivery: props.settings.mediaDeliveryAdapterKey,
+			captcha: props.settings.captchaAdapterKey,
 		};
 	}
 

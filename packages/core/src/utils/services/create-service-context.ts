@@ -33,6 +33,7 @@ const createServiceContext = (
 		mediaStorage: options.mediaStorage ?? null,
 		mediaDelivery: options.mediaDelivery ?? passthroughMediaDeliveryAdapter(),
 		email: options.email ?? passthroughEmailAdapterInstance,
+		captcha: options.captcha ?? null,
 		agentRunner: options.agentRunner ?? null,
 		translate: createTranslator({
 			store: options.translationStore,

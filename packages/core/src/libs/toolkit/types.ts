@@ -1,6 +1,7 @@
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { ToolkitAgent } from "./agent/index.js";
 import type { ToolkitAuth } from "./auth/index.js";
+import type { ToolkitCaptcha } from "./captcha/index.js";
 import type { ToolkitCollections } from "./collections/index.js";
 import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitEmail } from "./email/index.js";
@@ -23,6 +24,8 @@ export type CoreToolkit = {
 	agent: ToolkitAgent;
 	/** Helpers for resolving request authentication state. */
 	auth: ToolkitAuth;
+	/** Helpers for checking captcha tokens in custom form endpoints. */
+	captcha: ToolkitCaptcha;
 	/** Effective database schemas for custom collection queries. */
 	collections: ToolkitCollections;
 	/** Helpers for creating, editing, reading and deleting collection documents. */
@@ -84,6 +87,8 @@ export type * from "./agent/references/link/index.js";
 export type * from "./agent/references/unlink/index.js";
 export type * from "./auth/index.js";
 export type * from "./auth/status/index.js";
+export type * from "./captcha/index.js";
+export type * from "./captcha/verify/index.js";
 export type * from "./collections/get-schema/index.js";
 export type * from "./collections/index.js";
 export type * from "./documents/create-single/index.js";

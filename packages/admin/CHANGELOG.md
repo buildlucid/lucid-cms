@@ -3,6 +3,7 @@
 ## v0.20.0-alpha.0 (unreleased)
 
 - Added `createAdminVite` to `@lucidcms/admin/build`, which embeds the admin in a host's Vite app, and `buildAdmin` now builds with it. Removed `createAdminDevServer` and the build cache.
+- Added the `captcha.widget` slot for captcha plugins' widgets on public forms.
 
 ## v0.19.0-alpha.0
 

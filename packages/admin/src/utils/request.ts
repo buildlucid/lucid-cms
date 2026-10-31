@@ -18,6 +18,8 @@ export interface RequestParams<Data = unknown> {
 	signal?: AbortSignal;
 	/** Sends a CSRF token. @default true for methods other than GET */
 	csrf?: boolean;
+	/** A captcha token for a protected form, sent in the captcha header. */
+	captchaToken?: string;
 	/** Shows a toast when the request fails. */
 	displayErrorToast?: boolean;
 	/** Lets the request finish after the page closes, eg. letting go of a document. */
@@ -93,6 +95,9 @@ export const sendRequest = async <Data = unknown>(
 			const token = await csrfReq();
 			if (token) headers["X-CSRF-Token"] = token;
 		}
+
+		if (params.captchaToken)
+			headers["Lucid-Captcha-Token"] = params.captchaToken;
 
 		if (
 			typeof body === "string" &&

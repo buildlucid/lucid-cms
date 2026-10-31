@@ -361,6 +361,7 @@ const createLucidHost = async (
 					mediaStorage: adapters.instances.mediaStorage,
 					mediaDelivery: adapters.instances.mediaDelivery,
 					email: adapters.instances.email,
+					captcha: adapters.instances.captcha,
 					agentRunner: adapters.instances.agentRunner,
 					request,
 				});

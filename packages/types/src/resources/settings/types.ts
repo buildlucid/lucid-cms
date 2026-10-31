@@ -76,6 +76,7 @@ export interface Settings {
 		mediaStorage: string | null;
 		email: string;
 		mediaDelivery: string;
+		captcha: string | null;
 	};
 }
 

@@ -4,6 +4,7 @@ import accountRoutes from "./account.routes.js";
 import agentRoutes from "./agent.routes.js";
 import aiRoutes from "./ai.routes.js";
 import authRoutes from "./auth.routes.js";
+import captchaRoutes from "./captcha.routes.js";
 import collectionRoutes from "./collections.routes.js";
 import connectionRoutes from "./connection.routes.js";
 import contentRoutes from "./content/index.js";
@@ -28,6 +29,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/ai", aiRoutes)
 	.route("/agent", agentRoutes)
 	.route("/account", accountRoutes)
+	.route("/captcha", captchaRoutes)
 	.route("/integrations", integrationRoutes)
 	.route("/collections", collectionRoutes)
 	.route("/connection", connectionRoutes)

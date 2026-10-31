@@ -14,6 +14,7 @@ import type { ConfigTransform } from "../runtime/types.js";
 import checkAdminRoutes from "./checks/check-admin-routes.js";
 import checkAdminSlots from "./checks/check-admin-slots.js";
 import checkAgentDefinitions from "./checks/check-agent-definitions.js";
+import checkCaptcha from "./checks/check-captcha.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
 import checkCollectionRouting from "./checks/check-collection-routing.js";
@@ -106,6 +107,7 @@ const processConfig = async (
 
 		checkAdminSlots(configRes);
 		checkAdminRoutes(configRes);
+		checkCaptcha(configRes);
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);

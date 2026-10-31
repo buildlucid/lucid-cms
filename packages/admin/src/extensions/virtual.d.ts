@@ -10,6 +10,8 @@ declare module "virtual:lucid-admin" {
 		AgentWidgetProps,
 		BrickSlot,
 		BrickSlotComponent,
+		CaptchaSlot,
+		CaptchaWidgetComponent,
 		DocumentListSlot,
 		DocumentListSlotComponent,
 		FieldSlot,
@@ -70,6 +72,13 @@ declare module "virtual:lucid-admin" {
 		SlotRegistration<
 			Extract<AdminSlot, { slot: DocumentListSlot }>,
 			DocumentListSlotComponent<AdminOptions | undefined>
+		>
+	>;
+
+	export const captchaSlots: Array<
+		SlotRegistration<
+			Extract<AdminSlot, { slot: CaptchaSlot }>,
+			CaptchaWidgetComponent<AdminOptions | undefined>
 		>
 	>;
 

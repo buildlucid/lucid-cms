@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest";
 import type { LucidConfig } from "../../types/config.js";
+import type { CaptchaAdapterInstance } from "../captcha/types.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { passthroughEmailAdapterInstance } from "../email/adapters/passthrough.js";
 import { getInitializedEmailAdapter } from "../email/lifecycle.js";
@@ -34,6 +35,11 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 		support: { delayedDelivery: false },
 		publish: async () => ({ error: undefined, data: undefined }),
 	};
+	const captcha: CaptchaAdapterInstance = {
+		type: "captcha-adapter",
+		key: "test",
+		verify: async () => ({ success: true }),
+	};
 	const project = {
 		media: {
 			storage,
@@ -46,6 +52,7 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 		},
 		kv: { adapter: passthroughKVAdapter() },
 		queue: { adapter: queue },
+		captcha: { adapter: captcha, forms: { login: false } },
 	} satisfies Partial<LucidConfig>;
 	const defaults = {
 		media: {
@@ -63,6 +70,7 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 		},
 		kv: { adapter: { ...passthroughKVAdapter(), lifecycle } },
 		queue: { adapter: { ...queue, lifecycle } },
+		captcha: { adapter: { ...captcha, lifecycle }, forms: { setup: false } },
 	} satisfies Partial<LucidConfig>;
 	const merged = mergeConfig(project, defaults);
 	const selected = [
@@ -71,6 +79,7 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 		merged.email?.adapter,
 		merged.kv?.adapter,
 		merged.queue?.adapter,
+		merged.captcha?.adapter,
 	];
 	const authored = [
 		project.media.storage,
@@ -78,6 +87,7 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 		project.email.adapter,
 		project.kv.adapter,
 		project.queue.adapter,
+		project.captcha.adapter,
 	];
 	for (const [index, adapter] of selected.entries()) {
 		expect(adapter).toBe(authored[index]);
@@ -89,6 +99,7 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 		name: "Default name",
 		email: "project@example.com",
 	});
+	expect(merged.captcha?.forms).toEqual({ login: false, setup: false });
 	expect(defaults.media.storage.lifecycle).toBe(lifecycle);
 	expect(mergeConfig({}, defaults).media?.storage).toBe(defaults.media.storage);
 });

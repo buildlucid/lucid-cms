@@ -1,4 +1,5 @@
 import type { AgentRunnerInstance } from "../../libs/agent/types.js";
+import type { CaptchaAdapterInstance } from "../../libs/captcha/types.js";
 import type LucidDatabase from "../../libs/db/client/lucid-database.js";
 import type { DatabaseConnection } from "../../libs/db/types.js";
 import type { EmailAdapterInstance } from "../../libs/email/types.js";
@@ -38,6 +39,8 @@ export type CreateServiceContextOptions = {
 	mediaDelivery?: MediaDeliveryAdapterInstance;
 	/** Optional initialized email adapter instance available to services. */
 	email?: EmailAdapterInstance;
+	/** Optional initialized captcha adapter, with `null` when none is configured. */
+	captcha?: CaptchaAdapterInstance | null;
 	/** Runtime-supplied agent runner, with omitted or `null` values selecting inline execution. */
 	agentRunner?: AgentRunnerInstance | null;
 	/** Request metadata, with omitted URLs falling back to `config.urls.cms` or the local Lucid URL. */
@@ -58,6 +61,8 @@ export type ServiceContext = {
 	mediaStorage: MediaStorageAdapterInstance | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
+	/** Verifies captcha tokens, or `null` when no captcha adapter is configured. Use `toolkit.captcha` in custom routes. */
+	captcha: CaptchaAdapterInstance | null;
 	/** Executes agent runs beyond the initiating request or job, with `null` selecting inline execution. */
 	agentRunner: AgentRunnerInstance | null;
 	translate: Translator;

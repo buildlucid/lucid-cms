@@ -5,6 +5,7 @@ import type { CoreToolkit } from "../../toolkit/types.js";
 const coreToolkitKeys = {
 	agent: true,
 	auth: true,
+	captcha: true,
 	collections: true,
 	documents: true,
 	email: true,

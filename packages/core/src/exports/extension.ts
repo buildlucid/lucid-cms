@@ -15,6 +15,7 @@ export {
 } from "../libs/db/adapter-factory.js";
 export { codecs } from "../libs/db/client/index.js";
 export { default as formatDocumentRoute } from "../libs/formatters/document-route.js";
+export { default as addContentSecurityPolicySources } from "../libs/http/utils/add-content-security-policy-sources.js";
 export {
 	formatTranslation,
 	hydrateAdminCopyDefaults,

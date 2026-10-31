@@ -12,6 +12,7 @@ const withoutAdapters = (
 		delivery: undefined,
 	},
 	email: config.email && { ...config.email, adapter: undefined },
+	captcha: config.captcha && { ...config.captcha, adapter: undefined },
 	kv: config.kv && { ...config.kv, adapter: undefined },
 	queue: config.queue && { ...config.queue, adapter: undefined },
 });
@@ -39,6 +40,11 @@ const mergeConfig = (
 			config.email?.adapter !== undefined
 				? config.email.adapter
 				: defaultConfig.email?.adapter;
+	if (merged.captcha)
+		merged.captcha.adapter =
+			config.captcha?.adapter !== undefined
+				? config.captcha.adapter
+				: defaultConfig.captcha?.adapter;
 	if (merged.kv)
 		merged.kv.adapter =
 			config.kv?.adapter !== undefined

@@ -16,6 +16,14 @@ export type {
 	BrickSlotProps,
 } from "../components/BrickSlots/types.js";
 export type {
+	CaptchaSlot,
+	CaptchaSlotMatch,
+	CaptchaSlotPlacement,
+	CaptchaWidgetComponent,
+	CaptchaWidgetHandle,
+	CaptchaWidgetProps,
+} from "../components/CaptchaWidget/types.js";
+export type {
 	DocumentListSlot,
 	DocumentListSlotComponent,
 	DocumentListSlotPlacement,

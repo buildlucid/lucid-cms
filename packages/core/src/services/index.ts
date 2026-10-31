@@ -2,6 +2,7 @@ export * as accountServices from "./account/index.js";
 export * as agentServices from "./agent/index.js";
 export * as aiServices from "./ai/index.js";
 export * as authServices from "./auth/index.js";
+export * as captchaServices from "./captcha/index.js";
 export * as cdnServices from "./cdn/index.js";
 export * as collectionServices from "./collections/index.js";
 export * as connectionServices from "./connection/index.js";

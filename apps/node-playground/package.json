@@ -51,6 +51,7 @@
 		"@lucidcms/plugin-seo": "*",
 		"@lucidcms/site-react": "*",
 		"@lucidcms/site-solid": "*",
+		"@lucidcms/plugin-cloudflare-turnstile": "*",
 		"react": "^19.3.1",
 		"react-dom": "^19.3.1",
 		"@lucidcms/site-vue": "*",

@@ -200,6 +200,13 @@ export type {
 } from "../libs/db/types.js";
 export type { QueryBatchOptions } from "../libs/db/utils/get-query-batch-size.js";
 export type {
+	CaptchaAdapter,
+	CaptchaAdapterInstance,
+	CaptchaConfig,
+	CaptchaVerification,
+	CaptchaVerifyParams,
+} from "../libs/captcha/types.js";
+export type {
 	EmailStorageConfig,
 	EmailStorageEncryptRule,
 	EmailStorageNeverStoreRule,
@@ -548,6 +555,9 @@ export type {
 	ToolkitAuthResponseHeaders,
 	ToolkitAuthStatus,
 	ToolkitAuthStatusInput,
+	ToolkitCaptcha,
+	ToolkitCaptchaVerifyInput,
+	ToolkitCaptchaVerifyResult,
 	ToolkitCollections,
 	ToolkitCollectionsGetSchemaInput,
 	ToolkitCollectionsGetSchemaResult,

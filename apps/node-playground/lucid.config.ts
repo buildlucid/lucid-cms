@@ -5,6 +5,7 @@ import { defineConfig, lucidAgent, mcpTools, z } from "@lucidcms/core";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
+import { cloudflareTurnstilePlugin } from "@lucidcms/plugin-cloudflare-turnstile";
 import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { githubAuthPlugin } from "@lucidcms/plugin-github-auth";
 import { googleAuthPlugin } from "@lucidcms/plugin-google-auth";
@@ -231,6 +232,10 @@ export default defineConfig({
 			sqliteKVPlugin(),
 			seoPlugin({ collections: [{ key: "page" }, { key: "settings" }] }),
 			workerQueuePlugin(),
+			cloudflareTurnstilePlugin({
+				siteKey: "1x00000000000000000000AA",
+				secretKey: "1x0000000000000000000000000000000AA",
+			}),
 			typesensePlugin({
 				host: env.TYPESENSE_HOST,
 				apiKey: env.TYPESENSE_API_KEY,

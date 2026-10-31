@@ -63,6 +63,7 @@ export const generateRegistry = async (
 		home: [],
 		field: [],
 		documentList: [],
+		captcha: [],
 	};
 	for (const { component, ...metadata } of admin.slots ?? []) {
 		//* Home widgets omit match rules; an empty match covers every context.

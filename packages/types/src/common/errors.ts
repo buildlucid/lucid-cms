@@ -11,6 +11,9 @@ export interface PublicErrorData {
 	message?: string;
 	status?: number;
 	code?:
+		| "captcha_required"
+		| "captcha_invalid"
+		| "captcha_unavailable"
 		| "csrf"
 		| "login"
 		| "authorisation"

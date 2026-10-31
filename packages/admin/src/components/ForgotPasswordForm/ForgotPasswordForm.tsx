@@ -1,7 +1,9 @@
 import { A } from "@solidjs/router";
 import { type Component, createSignal, Show } from "solid-js";
+import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
+import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -12,7 +14,8 @@ interface ForgotPasswordFormProps {
 
 const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
+	const captcha = useCaptcha("requestPasswordReset");
 	const [email, setEmail] = createSignal("");
 
 	// ----------------------------------------
@@ -28,7 +31,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 	return (
 		<Form
 			state={{
-				isLoading: forgotPassword.action.isPending,
+				isLoading: forgotPassword.action.isPending || captcha.isPending(),
 				errors: forgotPassword.errors(),
 			}}
 			content={{
@@ -40,7 +43,9 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
-				forgotPassword.action.mutate({ email: email() });
+				void captcha.submit((captchaToken) =>
+					forgotPassword.action.mutateAsync({ email: email(), captchaToken }),
+				);
 			}}
 		>
 			<InsetLabelInput
@@ -65,6 +70,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 					{T()("common.back.to.login")}
 				</A>
 			</Show>
+			<CaptchaWidget captcha={captcha} />
 		</Form>
 	);
 };

@@ -9,6 +9,7 @@ interface Params {
 	token: string;
 	password: string;
 	passwordConfirmation: string;
+	captchaToken?: string;
 }
 
 export const resetPasswordReq = async (params: Params) => {
@@ -24,6 +25,7 @@ export const resetPasswordReq = async (params: Params) => {
 			password: params.password,
 			passwordConfirmation: params.passwordConfirmation,
 		},
+		captchaToken: params.captchaToken,
 	});
 };
 

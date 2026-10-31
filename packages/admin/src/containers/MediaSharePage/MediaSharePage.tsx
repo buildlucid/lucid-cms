@@ -22,10 +22,12 @@ import {
 } from "solid-js";
 import AudioPill from "@/components/AudioPill/AudioPill";
 import Button from "@/components/Button/Button";
+import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
 import Spinner from "@/components/Spinner/Spinner";
+import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
@@ -37,6 +39,7 @@ const MediaSharePage: Component = () => {
 	// --------------------------------------------
 	// State & Hooks
 	const params = useParams<{ token: string }>();
+	const captcha = useCaptcha("sharePassword");
 	const [password, setPassword] = createSignal("");
 	const [showVideoPreview, setShowVideoPreview] = createSignal(false);
 	let videoPreviewRef: HTMLVideoElement | undefined;
@@ -317,7 +320,8 @@ const MediaSharePage: Component = () => {
 						<div class="max-w-md mx-auto mt-4">
 							<Form
 								state={{
-									isLoading: authorizeShare.action.isPending,
+									isLoading:
+										authorizeShare.action.isPending || captcha.isPending(),
 									errors: authorizeShare.errors(),
 								}}
 								content={{
@@ -329,17 +333,20 @@ const MediaSharePage: Component = () => {
 								}}
 								onSubmit={() => {
 									if (!token()) return;
-									authorizeShare.action.mutate(
-										{
-											token: token(),
-											body: { password: password() },
-										},
-										{
-											onSuccess: () => {
-												setPassword("");
-												shareAccess.refetch();
+									void captcha.submit((captchaToken) =>
+										authorizeShare.action.mutateAsync(
+											{
+												token: token(),
+												body: { password: password() },
+												captchaToken,
 											},
-										},
+											{
+												onSuccess: () => {
+													setPassword("");
+													shareAccess.refetch();
+												},
+											},
+										),
 									);
 								}}
 							>
@@ -356,6 +363,7 @@ const MediaSharePage: Component = () => {
 									autoFoucs={true}
 									autoComplete="current-password"
 								/>
+								<CaptchaWidget captcha={captcha} />
 							</Form>
 						</div>
 					</Show>

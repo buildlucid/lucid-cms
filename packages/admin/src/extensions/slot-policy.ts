@@ -1,5 +1,6 @@
 import { agentWidgetSlotPolicies } from "../components/AgentWidget/constants.js";
 import { brickSlotPolicies } from "../components/BrickSlots/constants.js";
+import { captchaSlotPolicies } from "../components/CaptchaWidget/constants.js";
 import { documentListSlotPolicies } from "../components/DocumentSlotCell/constants.js";
 import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
 import { homeWidgetSlotPolicies } from "../components/HomeWidgets/constants.js";
@@ -11,6 +12,7 @@ export const slotDefinitions = {
 	...homeWidgetSlotPolicies,
 	...documentListSlotPolicies,
 	...fieldSlotPolicies,
+	...captchaSlotPolicies,
 } as const;
 
 /** The admin area that renders a slot. */
@@ -24,6 +26,7 @@ type Match = {
 	brick?: string;
 	kind?: string;
 	field?: string;
+	adapter?: string;
 };
 type Entry = {
 	key: string;
@@ -38,6 +41,7 @@ const matchKeys = [
 	"field",
 	"widget",
 	"version",
+	"adapter",
 ] as const;
 
 /** Higher priorities render first; registration order breaks ties for single winners. */

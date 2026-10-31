@@ -10,6 +10,7 @@ import serviceHelpers from "@/utils/service-helpers";
 interface Params {
 	usernameOrEmail: string;
 	password: string;
+	captchaToken?: string;
 }
 
 export const loginReq = (params: Params) => {
@@ -17,7 +18,11 @@ export const loginReq = (params: Params) => {
 		url: "/api/v1/auth/login",
 		csrf: true,
 		method: "POST",
-		body: params,
+		body: {
+			usernameOrEmail: params.usernameOrEmail,
+			password: params.password,
+		},
+		captchaToken: params.captchaToken,
 	});
 };
 

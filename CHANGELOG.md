@@ -4,15 +4,15 @@
 
 ### Features:
 
+- Lucid now runs on Vite.
 - Added an MCP server at `/mcp`, with `defineMcpTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
+- Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them.
+- Added admin keyboard shortcuts for saving, previewing, creating and switching locales, with a shortcuts list on `?` and in the account menu.
+- Added captcha adapters to protect login and other public forms, with `toolkit.captcha` for your own endpoints and new Cloudflare Turnstile and Google reCAPTCHA plugins.
 - Added a `locale` option to content API and toolkit document and media reads, which returns translations in one locale.
 - Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
 - Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.
 - Added an `actor` option to `toolkit.media` reads, and an `ownership` filter to its lists.
-- Lucid now runs on Vite. `lucidcms dev`, `build` and `serve` use `lucid()` from `@lucidcms/core/vite`, which frameworks such as Astro add to their own config, and commands such as `migrate` and `seed` run inside the runtime with its bindings.
-- Plugins can add to the project's Vite app with a `vite` hook, and run work inside the runtime with typed `tasks` from `definePluginTask`.
-- Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them.
-- Added admin keyboard shortcuts for saving, previewing, creating and switching locales, with a shortcuts list on `?` and in the account menu.
 
 ### Breaking Changes:
 

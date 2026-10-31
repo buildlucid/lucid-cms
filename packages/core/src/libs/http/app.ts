@@ -133,6 +133,7 @@ const createApp = async (props: {
 			c.set("mediaStorage", props.adapters.mediaStorage);
 			c.set("mediaDelivery", props.adapters.mediaDelivery);
 			c.set("email", props.adapters.email);
+			c.set("captcha", props.adapters.captcha);
 			c.set("agentRunner", props.adapters.agentRunner);
 			c.set("env", invocation.env ?? null);
 			c.set("cf", c.get("cf") ?? null);
@@ -265,6 +266,11 @@ const createApp = async (props: {
 								name: "account",
 								description:
 									"User account management endpoints for user details, password resets and updating personal settings.",
+							},
+							{
+								name: "captcha",
+								description:
+									"Captcha endpoints for the public settings that browser widgets need on protected forms.",
 							},
 							{
 								name: "collections",

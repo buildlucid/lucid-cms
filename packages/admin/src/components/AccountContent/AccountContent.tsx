@@ -26,6 +26,7 @@ import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePassword
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
 import constants from "@/constants";
 import api from "@/services/api";
+import { refreshTokenReq } from "@/services/api/auth/useRefreshToken";
 import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
@@ -47,6 +48,7 @@ export const AccountContent: Component = () => {
 		createSignal(false);
 	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
 		createSignal(false);
+	const [refreshingSession, setRefreshingSession] = createSignal(false);
 
 	// ----------------------------------------
 	// Memos
@@ -97,7 +99,10 @@ export const AccountContent: Component = () => {
 		() => user()?.authProviders?.length ?? 0,
 	);
 	const setPasswordResetLoading = createMemo(
-		() => forgotPassword.action.isPending || logout.action.isPending,
+		() =>
+			refreshingSession() ||
+			forgotPassword.action.isPending ||
+			logout.action.isPending,
 	);
 	const linkedProvidersByKey = createMemo(() => {
 		const authProviders = user()?.authProviders ?? [];
@@ -264,7 +269,7 @@ export const AccountContent: Component = () => {
 								size="sm"
 								type="button"
 								loading={setPasswordResetLoading()}
-								onClick={() => {
+								onClick={async () => {
 									if (setPasswordResetLoading()) return;
 									const email = user()?.email;
 									if (!email) {
@@ -275,7 +280,14 @@ export const AccountContent: Component = () => {
 										});
 										return;
 									}
-									forgotPassword.action.mutate({ email });
+									//* a fresh session lets the reset request skip its captcha
+									setRefreshingSession(true);
+									try {
+										await refreshTokenReq();
+										forgotPassword.action.mutate({ email });
+									} finally {
+										setRefreshingSession(false);
+									}
 								}}
 							>
 								{T()("account.password.reset.send.and.logout")}

@@ -6,6 +6,10 @@ import lucidAgent from "../agent/lucid-agent.js";
 import { isAgentDefinition } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
+import type {
+	CaptchaAdapter,
+	CaptchaAdapterInstance,
+} from "../captcha/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { isCollectionBuilder } from "../collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
@@ -264,6 +268,16 @@ const EmailAdapterSchema = z.custom<
 	},
 );
 
+const CaptchaAdapterSchema = z.custom<
+	CaptchaAdapter | CaptchaAdapterInstance | Promise<CaptchaAdapterInstance>
+>(
+	(data) =>
+		typeof data === "function" || (typeof data === "object" && data !== null),
+	{
+		message: "Expected a CaptchaAdapter function",
+	},
+);
+
 const ContentSecurityPolicySchema = z
 	.strictObject({
 		defaultSrc: z.array(z.string()).optional(),
@@ -423,6 +437,24 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		adapter: EmailAdapterSchema.optional(),
 		templates: z.record(z.string(), z.string()).optional(),
 	}),
+	captcha: z
+		.strictObject({
+			adapter: CaptchaAdapterSchema.optional(),
+			forms: z
+				.union([
+					z.literal(false),
+					z.strictObject({
+						login: z.boolean().optional(),
+						setup: z.boolean().optional(),
+						requestPasswordReset: z.boolean().optional(),
+						resetPassword: z.boolean().optional(),
+						acceptInvitation: z.boolean().optional(),
+						sharePassword: z.boolean().optional(),
+					}),
+				])
+				.optional(),
+		})
+		.optional(),
 	media: z.strictObject({
 		storage: MediaStorageAdapterSchema.optional(),
 		delivery: MediaDeliveryAdapterSchema.optional(),

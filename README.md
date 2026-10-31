@@ -60,6 +60,8 @@ AI features require a subscription with Lucid. This is planned to become publicl
 - [Redirects](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-redirects): adds a manually managed, environment-aware redirects collection for website integrations.
 - [Typesense](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-typesense): indexes collection content with durable jobs, projections and resumable rebuilds.
 - [SEO](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-seo): adds SEO fields to your collections, with previews of search results and social media cards.
+- [Cloudflare Turnstile](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-turnstile): protects login and other public forms with Cloudflare Turnstile.
+- [Google reCAPTCHA](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-google-recaptcha): protects login and other public forms with Google reCAPTCHA.
 
 ## 🧩 Framework And Client Packages
 

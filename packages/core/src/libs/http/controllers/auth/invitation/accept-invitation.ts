@@ -9,6 +9,7 @@ import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 import validate from "../../../middleware/validate.js";
+import verifyCaptcha from "../../../middleware/verify-captcha.js";
 import openAPI from "../../../openapi/index.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
@@ -24,6 +25,7 @@ const acceptInvitationController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
+				captcha: false,
 			},
 			params: controllerSchemas.acceptInvitation.params,
 		}),
@@ -36,6 +38,7 @@ const acceptInvitationController = factory.createHandlers(
 		scope: constants.rateLimit.scopes.sensitive.scopeKey,
 		windowMs: 60_000,
 	}),
+	verifyCaptcha("acceptInvitation"),
 	validate("param", controllerSchemas.acceptInvitation.params),
 	validate("json", controllerSchemas.acceptInvitation.body),
 	async (c) => {

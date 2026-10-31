@@ -6,6 +6,7 @@ const getProviders = (config: Partial<LucidConfig>) =>
 		["media.storage", config.media?.storage],
 		["media.delivery", config.media?.delivery],
 		["email.adapter", config.email?.adapter],
+		["captcha.adapter", config.captcha?.adapter],
 		["kv.adapter", config.kv?.adapter],
 		["queue.adapter", config.queue?.adapter],
 	] as const;

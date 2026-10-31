@@ -2,6 +2,11 @@ import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import type { AgentRunnerInstance } from "../agent/types.js";
 import {
+	destroyCaptchaAdapter,
+	getInitializedCaptchaAdapter,
+} from "../captcha/lifecycle.js";
+import type { CaptchaAdapterInstance } from "../captcha/types.js";
+import {
 	destroyEmailAdapter,
 	getInitializedEmailAdapter,
 } from "../email/lifecycle.js";
@@ -32,6 +37,7 @@ export type LucidAdapterInstances = {
 	mediaStorage: MediaStorageAdapterInstance | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
+	captcha: CaptchaAdapterInstance | null;
 	/** Runtime-supplied runner, with `null` selecting inline execution. */
 	agentRunner: AgentRunnerInstance | null;
 };
@@ -72,6 +78,7 @@ const createLucidAdapters = async (
 	let mediaStorage: MediaStorageAdapterInstance | null | undefined;
 	let mediaDelivery: MediaDeliveryAdapterInstance | undefined;
 	let email: EmailAdapterInstance | undefined;
+	let captcha: CaptchaAdapterInstance | null | undefined;
 	const lifecycleOptions = {
 		env: options.env,
 		runtimeContext: options.runtimeContext,
@@ -95,6 +102,10 @@ const createLucidAdapters = async (
 				...lifecycleOptions,
 			}),
 			destroyMediaDeliveryAdapter(mediaDelivery, {
+				config: options.config,
+				...lifecycleOptions,
+			}),
+			destroyCaptchaAdapter(captcha, {
 				config: options.config,
 				...lifecycleOptions,
 			}),
@@ -123,6 +134,12 @@ const createLucidAdapters = async (
 			...lifecycleOptions,
 			adapter: options.overrides?.mediaDelivery,
 		});
+		captcha = await getInitializedCaptchaAdapter(options.config, {
+			...lifecycleOptions,
+			...(Object.hasOwn(options.overrides ?? {}, "captcha")
+				? { adapter: options.overrides?.captcha }
+				: {}),
+		});
 	} catch (error) {
 		await destroyInstances();
 		throw error;
@@ -143,6 +160,7 @@ const createLucidAdapters = async (
 			mediaStorage: mediaStorage ?? null,
 			mediaDelivery,
 			email,
+			captcha: captcha ?? null,
 			agentRunner: Object.hasOwn(options.overrides ?? {}, "agentRunner")
 				? (options.overrides?.agentRunner ?? null)
 				: (options.defaults?.agentRunner ?? null),

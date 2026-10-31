@@ -1,7 +1,9 @@
 import { A } from "@solidjs/router";
 import { type Component, createSignal, Show } from "solid-js";
+import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
+import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -12,7 +14,8 @@ interface LoginFormProps {
 
 const LoginForm: Component<LoginFormProps> = (props) => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
+	const captcha = useCaptcha("login");
 	const [usernameOrEmail, setUsernameOrEmail] = createSignal("");
 	const [password, setPassword] = createSignal("");
 
@@ -25,7 +28,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 	return (
 		<Form
 			state={{
-				isLoading: login.action.isPending,
+				isLoading: login.action.isPending || captcha.isPending(),
 				errors: login.errors(),
 			}}
 			content={{
@@ -37,10 +40,13 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
-				login.action.mutate({
-					usernameOrEmail: usernameOrEmail(),
-					password: password(),
-				});
+				void captcha.submit((captchaToken) =>
+					login.action.mutateAsync({
+						usernameOrEmail: usernameOrEmail(),
+						password: password(),
+						captchaToken,
+					}),
+				);
 			}}
 		>
 			<InsetLabelInput
@@ -79,6 +85,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 					{T()("auth.forgot.password.action")}
 				</A>
 			</Show>
+			<CaptchaWidget captcha={captcha} />
 		</Form>
 	);
 };

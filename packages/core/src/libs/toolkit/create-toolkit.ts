@@ -1,5 +1,6 @@
 import createAgentToolkit from "./agent/index.js";
 import createAuthToolkit from "./auth/index.js";
+import createCaptchaToolkit from "./captcha/index.js";
 import createCollectionsToolkit from "./collections/index.js";
 import createDocumentsToolkit from "./documents/index.js";
 import createEmailToolkit from "./email/index.js";
@@ -34,6 +35,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 	const core: CoreToolkit = {
 		agent: createAgentToolkit(context),
 		auth: createAuthToolkit(context),
+		captcha: createCaptchaToolkit(context),
 		collections: createCollectionsToolkit(context),
 		documents: createDocumentsToolkit(context),
 		email: createEmailToolkit(context),

@@ -43,6 +43,7 @@ const getSettings: ServiceFn<
 				mediaStorageAdapterEnabled: context.mediaStorage !== null,
 				mediaStorageAdapterKey: context.mediaStorage?.key ?? null,
 				emailAdapterKey: context.email.key,
+				captchaAdapterKey: context.captcha?.key ?? null,
 				emailSimulated: isEmailSimulated(context),
 				emailTemplates,
 				mediaDeliveryAdapterKey: context.mediaDelivery.key,
