@@ -9,6 +9,8 @@ import pluginTask from "./plugin.js";
 import seedListTask from "./seed-list.js";
 import seedTask from "./seed.js";
 import syncTask from "./sync.js";
+import usersResetTwoFactorTask from "./users-reset-two-factor.js";
+import usersSuperAdminTask from "./users-super-admin.js";
 
 /** Lucid's runtime tasks, keyed by the name their route ends with: `/__lucid/tasks/<name>`. */
 const runtimeTasks = {
@@ -21,6 +23,8 @@ const runtimeTasks = {
 	seed: seedTask,
 	"jobs:list": jobsListTask,
 	"jobs:schedule": jobsScheduleTask,
+	"users:reset-two-factor": usersResetTwoFactorTask,
+	"users:super-admin": usersSuperAdminTask,
 	plugin: pluginTask,
 };
 

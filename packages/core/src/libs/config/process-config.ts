@@ -33,6 +33,7 @@ import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkSkillDefinitions from "./checks/check-skill-definitions.js";
 import checkToolDefinitions from "./checks/check-tool-definitions.js";
 import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
+import checkTwoFactor from "./checks/check-two-factor.js";
 import ConfigSchema from "./config-schema.js";
 import coreJobDefinitions from "./core-job-definitions.js";
 import coreNotificationDefinitions from "./core-notification-definitions.js";
@@ -110,6 +111,7 @@ const processConfig = async (
 		checkAdminRoutes(configRes);
 		checkCaptcha(configRes);
 		checkMagicLink(configRes);
+		checkTwoFactor(configRes);
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);

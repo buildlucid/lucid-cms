@@ -45,6 +45,35 @@ export const usersTable = defineTable("lucid_users", (adapter) => ({
 			schema: z.string(),
 			type: "text",
 		},
+		/** The encrypted authenticator app secret, once two-factor authentication is on. */
+		two_factor_secret: {
+			schema: z.string().nullable(),
+			type: "text",
+		},
+		/** An encrypted secret waiting for its first code, while an authenticator app is being set up. */
+		two_factor_pending_secret: {
+			schema: z.string().nullable(),
+			type: "text",
+		},
+		two_factor_enabled_at: {
+			schema: z.union([z.string(), z.date()]).nullable(),
+			type: "timestamp",
+		},
+		/** The time step of the last code used, so each code only works once. */
+		two_factor_last_step: {
+			schema: z.number().nullable(),
+			type: "integer",
+		},
+		/** Wrong two-factor login codes in the current hour, counted across logins. */
+		two_factor_failed_attempts: {
+			schema: z.number(),
+			type: "integer",
+		},
+		/** When the hour of wrong two-factor login codes ends and the count starts again. */
+		two_factor_attempts_reset_at: {
+			schema: z.union([z.string(), z.date()]).nullable(),
+			type: "timestamp",
+		},
 		triggered_password_reset: {
 			schema: z.union([
 				z.literal(adapter.config.defaults.boolean.true),
@@ -274,6 +303,12 @@ export interface LucidUsers {
 	last_name: string | null;
 	password: ColumnType<string, string | undefined, string>;
 	secret: ColumnType<string, string, string>;
+	two_factor_secret: string | null;
+	two_factor_pending_secret: string | null;
+	two_factor_enabled_at: TimestampMutable;
+	two_factor_last_step: number | null;
+	two_factor_failed_attempts: Generated<number>;
+	two_factor_attempts_reset_at: TimestampMutable;
 	triggered_password_reset: ColumnType<
 		BooleanInt,
 		BooleanInt | undefined,

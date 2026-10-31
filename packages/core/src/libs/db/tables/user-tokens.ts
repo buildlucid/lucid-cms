@@ -22,6 +22,7 @@ export const userTokensTable = defineTable("lucid_user_tokens", (adapter) => ({
 				z.literal(constants.userTokens.emailChangeConfirm),
 				z.literal(constants.userTokens.emailChangeRevert),
 				z.literal(constants.userTokens.magicLink),
+				z.literal(constants.userTokens.twoFactorChallenge),
 			]),
 			type: "varchar",
 			args: [255],
@@ -43,6 +44,12 @@ export const userTokensTable = defineTable("lucid_user_tokens", (adapter) => ({
 		email: {
 			schema: z.string().nullable(),
 			type: "text",
+		},
+		/** The login method a two-factor challenge continues, recorded once it's passed. */
+		auth_method: {
+			schema: z.string().nullable(),
+			type: "varchar",
+			args: [255],
 		},
 		revoked_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
@@ -99,6 +106,9 @@ export const userTokensTable = defineTable("lucid_user_tokens", (adapter) => ({
 				z.literal(adapter.config.defaults.boolean.false),
 			]),
 		},
+		user_two_factor_enabled_at: {
+			schema: z.union([z.string(), z.date()]).nullable(),
+		},
 	},
 }));
 
@@ -115,6 +125,8 @@ export interface LucidUserTokens {
 	code_attempts: Generated<number>;
 	/** The address a magic link was sent to. It only works while this is still the account's email. */
 	email: string | null;
+	/** The login method a two-factor challenge continues, recorded once it's passed. */
+	auth_method: string | null;
 	revoked_at: TimestampMutable;
 	revoke_reason: string | null;
 	consumed_at: TimestampMutable;

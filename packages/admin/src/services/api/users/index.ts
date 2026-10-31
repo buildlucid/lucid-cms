@@ -8,6 +8,7 @@ import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 import useGetMultiple from "./useGetMultiple";
 import useGetSingle from "./useGetSingle";
 import useResendInvitation from "./useResendInvitation";
+import useResetTwoFactor from "./useResetTwoFactor";
 import useRestore from "./useRestore";
 import useRevokeRefreshTokens from "./useRevokeRefreshTokens";
 import useUnlinkAuthProvider from "./useUnlinkAuthProvider";
@@ -29,6 +30,7 @@ const exportObject = {
 	useResendInvitation,
 	useRevokeRefreshTokens,
 	useUnlinkAuthProvider,
+	useResetTwoFactor,
 	integrations,
 };
 

@@ -26,6 +26,8 @@ import {
 	TbOutlinePlus,
 	TbOutlineRotateClockwise2,
 	TbOutlineShare,
+	TbOutlineShield,
+	TbOutlineShieldOff,
 	TbOutlineTarget,
 	TbOutlineTrash,
 	TbOutlineUpload,
@@ -65,6 +67,8 @@ export type ActionIconName =
 	| "restore"
 	| "rotate"
 	| "share"
+	| "shield"
+	| "shield-off"
 	| "sparkle"
 	| "trash"
 	| "upload"
@@ -142,6 +146,10 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				);
 			case "share":
 				return <TbOutlineShare class={iconClasses()} size={iconSize()} />;
+			case "shield":
+				return <TbOutlineShield class={iconClasses()} size={iconSize()} />;
+			case "shield-off":
+				return <TbOutlineShieldOff class={iconClasses()} size={iconSize()} />;
 			case "sparkle":
 				return <TbOutlineWand class={iconClasses()} size={iconSize()} />;
 			case "trash":

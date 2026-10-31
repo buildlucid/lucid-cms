@@ -36,6 +36,61 @@ const providerCallbackQuerySchema = z.union([
 	}),
 ]);
 
+const twoFactorStepSchema = z.enum(["verify", "setup"]);
+
+const loginResultSchema = z.object({
+	twoFactor: twoFactorStepSchema.nullable().meta({
+		description:
+			"The two-factor step needed before a session is issued: entering a code, or setting up an authenticator app first. Null once the user is logged in.",
+		example: null,
+	}),
+});
+
+export const twoFactorCodeSchema = z
+	.string()
+	.trim()
+	.length(constants.twoFactor.codeLength)
+	.regex(/^\d+$/)
+	.meta({
+		description: "A code from the authenticator app",
+		example: "123456",
+	});
+
+export const recoveryCodeSchema = z.string().trim().min(1).max(64).meta({
+	description: "One of the user's recovery codes",
+	example: "k7m2q-x9p4w",
+});
+
+export const twoFactorProofSchema = z
+	.union([
+		z.object({ code: twoFactorCodeSchema }),
+		z.object({ recoveryCode: recoveryCodeSchema }),
+	])
+	.meta({
+		description: "A code from the authenticator app, or a recovery code",
+	});
+
+export const twoFactorSetupSchema = z.object({
+	secret: z.string().meta({
+		description:
+			"The base32 key for authenticator apps, for typing in when the QR code can't be scanned",
+		example: "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP",
+	}),
+	uri: z.string().meta({
+		description: "The otpauth:// link to show as a QR code",
+		example:
+			"otpauth://totp/Lucid%20CMS:admin%40example.com?secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP&issuer=Lucid%20CMS",
+	}),
+});
+
+export const twoFactorRecoveryCodesSchema = z.object({
+	recoveryCodes: z.array(z.string()).meta({
+		description:
+			"Single-use codes that stand in for an authenticator code. They're only shown once.",
+		example: ["k7m2q-x9p4w", "3fz8d-hq2nc"],
+	}),
+});
+
 export const controllerSchemas = {
 	getCSRF: {
 		body: undefined,
@@ -71,7 +126,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: undefined,
+		response: loginResultSchema,
 	} satisfies ControllerSchema,
 	token: {
 		body: undefined,
@@ -160,6 +215,10 @@ export const controllerSchemas = {
 			magicLink: z.boolean().meta({
 				description:
 					"Whether users can log in with a code or link sent to their email",
+				example: true,
+			}),
+			twoFactor: z.boolean().meta({
+				description: "Whether users can turn on two-factor authentication",
 				example: true,
 			}),
 			providers: z.array(AuthProviderSchema.omit({ config: true })),
@@ -251,7 +310,7 @@ export const controllerSchemas = {
 				example: "abc123def456",
 			}),
 		}),
-		response: undefined,
+		response: loginResultSchema,
 	} satisfies ControllerSchema,
 	sendMagicLink: {
 		body: z
@@ -328,7 +387,51 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
+		response: loginResultSchema,
+	} satisfies ControllerSchema,
+	getTwoFactorChallenge: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.object({
+			step: twoFactorStepSchema.meta({
+				description:
+					"Whether the login is waiting for a code, or for an authenticator app to be set up",
+				example: "verify",
+			}),
+		}),
+	} satisfies ControllerSchema,
+	verifyTwoFactorChallenge: {
+		body: twoFactorProofSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
 		response: undefined,
+	} satisfies ControllerSchema,
+	setupTwoFactorChallenge: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: twoFactorSetupSchema,
+	} satisfies ControllerSchema,
+	confirmTwoFactorChallenge: {
+		body: z.object({
+			code: twoFactorCodeSchema,
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: twoFactorRecoveryCodesSchema,
 	} satisfies ControllerSchema,
 	providerInitiate: {
 		body: z.object({

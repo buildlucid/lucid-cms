@@ -68,6 +68,7 @@ import { securityAuditLogsTable } from "./security-audit-logs.js";
 import { userAuthProvidersTable } from "./user-auth-providers.js";
 import { userLoginsTable } from "./user-logins.js";
 import { userPreferencesTable } from "./user-preferences.js";
+import { userRecoveryCodesTable } from "./user-recovery-codes.js";
 import { userRolesTable } from "./user-roles.js";
 import { userTokensTable } from "./user-tokens.js";
 import { usersTable } from "./users.js";
@@ -143,6 +144,7 @@ export * from "./security-audit-logs.js";
 export * from "./user-auth-providers.js";
 export * from "./user-logins.js";
 export * from "./user-preferences.js";
+export * from "./user-recovery-codes.js";
 export * from "./user-roles.js";
 export * from "./user-tokens.js";
 export * from "./users.js";
@@ -217,6 +219,7 @@ export const coreTableDefinitions = [
 	userAuthProvidersTable,
 	userLoginsTable,
 	userPreferencesTable,
+	userRecoveryCodesTable,
 	userRolesTable,
 	userTokensTable,
 	usersTable,

@@ -12,6 +12,7 @@ const createSingle: ServiceFn<
 		{
 			name: string;
 			description?: string | null;
+			requireTwoFactor?: boolean;
 			permissions: string[];
 		},
 	],
@@ -47,7 +48,11 @@ const createSingle: ServiceFn<
 	}
 
 	const newRolesRes = await Roles.createSingle({
-		data: { name: data.name, description: data.description ?? null },
+		data: {
+			name: data.name,
+			description: data.description ?? null,
+			require_two_factor: data.requireTwoFactor ?? false,
+		},
 		returning: ["id"],
 		validation: {
 			enabled: true,

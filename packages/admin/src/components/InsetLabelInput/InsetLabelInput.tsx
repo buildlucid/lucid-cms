@@ -5,6 +5,7 @@ import {
 	type Component,
 	createMemo,
 	createSignal,
+	type JSX,
 	onMount,
 	Show,
 } from "solid-js";
@@ -29,6 +30,7 @@ export const InsetLabelInput: Component<{
 	autofocus?: boolean;
 	onKeyUp?: (_e: KeyboardEvent) => void;
 	autoComplete?: string;
+	inputMode?: JSX.HTMLAttributes<HTMLInputElement>["inputmode"];
 	required?: boolean;
 	disabled?: boolean;
 	errors?: ErrorResult | FieldError;
@@ -100,6 +102,7 @@ export const InsetLabelInput: Component<{
 						props.copy?.describedBy ? `${props.id}-description` : undefined
 					}
 					autocomplete={props.autoComplete}
+					inputmode={props.inputMode}
 					required={props.required}
 					disabled={props.disabled}
 					onFocus={() => setInputFocus(true)}

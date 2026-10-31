@@ -2,6 +2,13 @@ import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
 import { translate } from "../libs/i18n/index.js";
 import {
+	recoveryCodeSchema,
+	twoFactorCodeSchema,
+	twoFactorProofSchema,
+	twoFactorRecoveryCodesSchema,
+	twoFactorSetupSchema,
+} from "./auth.js";
+import {
 	mediaCropInputSchema,
 	mediaOriginSchema,
 	uploadSessionResponseSchema,
@@ -171,6 +178,52 @@ export const controllerSchemas = {
 				example: "github",
 			}),
 		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	startTwoFactorSetup: {
+		body: z
+			.object({
+				code: twoFactorCodeSchema.optional(),
+				recoveryCode: recoveryCodeSchema.optional(),
+			})
+			.meta({
+				description:
+					"Replacing an authenticator app that's already set up needs a code from it, or a recovery code",
+			}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: twoFactorSetupSchema,
+	} satisfies ControllerSchema,
+	confirmTwoFactor: {
+		body: z.object({
+			code: twoFactorCodeSchema,
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: twoFactorRecoveryCodesSchema,
+	} satisfies ControllerSchema,
+	regenerateRecoveryCodes: {
+		body: twoFactorProofSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: twoFactorRecoveryCodesSchema,
+	} satisfies ControllerSchema,
+	disableTwoFactor: {
+		body: twoFactorProofSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
 		response: undefined,
 	} satisfies ControllerSchema,
 	revokeAllRefreshTokens: {

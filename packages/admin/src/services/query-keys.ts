@@ -165,6 +165,7 @@ export const queryKeys = {
 		setupRequired: () => ["lucid", "auth", "setupRequired"] as const,
 		validateInvitation: () => ["lucid", "auth", "validateInvitation"] as const,
 		validateMagicLink: () => ["lucid", "auth", "validateMagicLink"] as const,
+		twoFactorChallenge: () => ["lucid", "auth", "twoFactorChallenge"] as const,
 	},
 	captcha: {
 		settings: () => ["lucid", "captcha", "settings"] as const,

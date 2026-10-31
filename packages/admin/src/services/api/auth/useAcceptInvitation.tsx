@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
-import type { ResponseBody } from "@types";
+import type { LoginResult, ResponseBody } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -15,7 +15,7 @@ interface Params {
 }
 
 export const acceptInvitationReq = (params: Params) => {
-	return request<ResponseBody>({
+	return request<ResponseBody<LoginResult>>({
 		url: `/api/v1/auth/invitation/accept/${params.token}`,
 		csrf: true,
 		method: "POST",
@@ -33,15 +33,17 @@ const useAcceptInvitation = (props?: UseAcceptInvitationProps) => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<LoginResult>>({
 		mutationFn: acceptInvitationReq,
-		onSuccess: (_data, params) => {
-			//* accepting without a password logs the user straight in
-			if (params.body.password === undefined) {
+		onSuccess: (res, params) => {
+			//* accepting without a password logs the user in, after any two-factor step
+			if (params.body.password !== undefined) {
+				navigate("/admin/login");
+			} else if (res.data.twoFactor) {
+				navigate("/admin/two-factor");
+			} else {
 				queryClient.clear();
 				navigate("/admin");
-			} else {
-				navigate("/admin/login");
 			}
 			props?.onSuccess?.();
 		},

@@ -7,6 +7,7 @@ const getAvailableProviders = (config: ResolvedLucidConfig) => {
 	return {
 		disablePassword: config.auth.password.enabled === false,
 		magicLink: config.auth.magicLink.enabled,
+		twoFactor: config.auth.twoFactor.enabled,
 		providers: config.auth.providers.filter((provider) => provider.enabled),
 	};
 };

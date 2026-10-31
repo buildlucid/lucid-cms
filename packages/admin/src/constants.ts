@@ -13,6 +13,14 @@ export default {
 		codeLength: 6,
 		resendCooldownSeconds: 60,
 	},
+	/** Matches core's `constants.twoFactor`. */
+	twoFactor: {
+		codeLength: 6,
+		recoveryCodeCount: 10,
+		recoveryCodeLength: 10,
+		/** Fewer recovery codes than this left shows a warning on the account page. */
+		lowRecoveryCodes: 3,
+	},
 	/** How long preloaded data stays fresh, so opening a link soon after hovering it doesn't fetch it again. */
 	preloadStaleTime: 10_000,
 };

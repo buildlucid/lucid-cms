@@ -28,7 +28,7 @@ export interface ActionMenuItem {
 	href?: string;
 	target?: "_blank" | "_self";
 	rel?: string;
-	/** Nested items, for the `group` type. */
+	/** Nested items, for the `group` type. A group with only one item shown shows that item instead. */
 	actions?: ActionMenuItem[];
 	/**
 	 * Permission keys the user needs, or a boolean when access is checked
@@ -70,19 +70,28 @@ export interface ActionMenuProps {
 	class?: string;
 }
 
+/**
+ * Shown actions in order. Groups left empty are dropped, and a group with one item left shows that
+ * item in its place.
+ */
 const getVisibleActions = (actions: ActionMenuItem[]): ActionMenuItem[] =>
 	actions
-		.map((action, index) => ({
-			action: {
-				...action,
-				actions: action.actions ? getVisibleActions(action.actions) : undefined,
-			},
-			index,
-		}))
+		.filter((action) => action.show !== false)
+		.map((action, index) => {
+			const children = action.actions
+				? getVisibleActions(action.actions)
+				: undefined;
+			const onlyChild = children?.length === 1 ? children[0] : undefined;
+
+			return {
+				action: onlyChild
+					? { ...onlyChild, sortOrder: action.sortOrder }
+					: { ...action, actions: children },
+				index,
+			};
+		})
 		.filter(
-			({ action }) =>
-				action.show !== false &&
-				(action.actions === undefined || action.actions.length > 0),
+			({ action }) => action.actions === undefined || action.actions.length > 0,
 		)
 		.sort((a, b) => {
 			const orderDiff = (a.action.sortOrder ?? 0) - (b.action.sortOrder ?? 0);
@@ -93,34 +102,7 @@ const getVisibleActions = (actions: ActionMenuItem[]): ActionMenuItem[] =>
 		})
 		.map(({ action }) => action);
 
-/**
- * A menu of actions behind a "more options" button, such as the actions for a
- * table row.
- *
- * @example
- * ```tsx
- * import { ActionMenu } from "@lucidcms/admin/components";
- * import { Permissions, useTranslation } from "@lucidcms/admin/hooks";
- *
- * const { t } = useTranslation();
- *
- * return (
- * 	<ActionMenu
- * 		actions={[
- * 			{ type: "button", label: t("common.edit"), icon: "pen", onClick: edit },
- * 			{
- * 				type: "button",
- * 				label: t("common.delete"),
- * 				icon: "trash",
- * 				variant: "danger",
- * 				permission: Permissions.MediaDelete,
- * 				onClick: remove,
- * 			},
- * 		]}
- * 	/>
- * );
- * ```
- */
+/** A menu of actions behind a "more options" button. */
 const ActionMenu: Component<ActionMenuProps> = (props) => {
 	// ----------------------------------------
 	// Memos

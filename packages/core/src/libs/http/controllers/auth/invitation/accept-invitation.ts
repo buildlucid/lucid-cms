@@ -1,5 +1,6 @@
 import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
+import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import {
@@ -14,6 +15,7 @@ import validateCSRF from "../../../middleware/validate-csrf.js";
 import validate from "../../../middleware/validate.js";
 import verifyCaptcha from "../../../middleware/verify-captcha.js";
 import openAPI from "../../../openapi/index.js";
+import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -21,10 +23,12 @@ const factory = createFactory();
 const acceptInvitationController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Accepts an invitation and sets the user's password. When password login is disabled, no password is needed and the user is logged in straight away, setting a refresh and access token as httpOnly cookies.",
+			"Accepts an invitation and sets the user's password. When password login is disabled, no password is needed and the user is logged in straight away, setting a refresh and access token as httpOnly cookies, unless two-factor authentication has to be set up first.",
 		tags: ["auth"],
 		summary: "Accept Invitation",
-		responses: openAPI.responses(),
+		responses: openAPI.responses({
+			dataSchema: z.toJSONSchema(controllerSchemas.acceptInvitation.response),
+		}),
 		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
@@ -68,6 +72,20 @@ const acceptInvitationController = factory.createHandlers(
 
 		//* without a password to log in with, accepting the emailed invitation logs the user in
 		if (context.config.auth.password.enabled === false) {
+			const challengeRes = await authServices.twoFactor.startChallenge(c, {
+				userId: acceptInvitation.data.id,
+				authMethod: "invitation",
+			});
+			if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+			if (challengeRes.data) {
+				c.status(200);
+				return c.json(
+					formatAPIResponse(c, {
+						data: { twoFactor: challengeRes.data.step },
+					}),
+				);
+			}
+
 			const [refreshRes, accessRes] = await Promise.all([
 				authServices.refreshToken.generateToken(c, acceptInvitation.data.id),
 				authServices.accessToken.generateToken(c, acceptInvitation.data.id),
@@ -99,8 +117,12 @@ const acceptInvitationController = factory.createHandlers(
 				throw new LucidAPIError(userLoginTrackRes.error);
 		}
 
-		c.status(204);
-		return c.body(null);
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: { twoFactor: null },
+			}),
+		);
 	},
 );
 

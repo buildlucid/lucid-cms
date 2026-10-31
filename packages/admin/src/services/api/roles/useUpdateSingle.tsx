@@ -10,6 +10,7 @@ interface Params {
 	body: {
 		name?: string;
 		description?: string | null;
+		requireTwoFactor?: boolean;
 		permissions?: string[];
 	};
 }

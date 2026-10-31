@@ -53,6 +53,7 @@ const createSingleController = factory.createHandlers(
 		})(context, {
 			name: body.name,
 			description: body.description,
+			requireTwoFactor: body.requireTwoFactor,
 			permissions: body.permissions,
 		});
 		if (roleId.error) throw new LucidAPIError(roleId.error);

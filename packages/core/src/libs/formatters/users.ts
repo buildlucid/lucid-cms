@@ -28,6 +28,7 @@ export interface UserPropT {
 	is_deleted: BooleanInt | null;
 	is_deleted_at: Date | string | null;
 	password?: string | null;
+	two_factor_enabled_at?: Date | string | null;
 	profile_picture?: MediaPosterPropsT[];
 	auth_providers?: {
 		id: number;
@@ -75,6 +76,11 @@ const formatSingle = (props: {
 		expiresAt: Date | string | null;
 	} | null;
 	preferences?: UserPreferences;
+	/** Only passed for the authenticated user. */
+	twoFactor?: {
+		required: boolean;
+		recoveryCodesRemaining: number;
+	};
 }): User => {
 	const { roles, permissions } = userPermissionsFormatter.formatMultiple({
 		roles: props.user.roles || [],
@@ -125,6 +131,12 @@ const formatSingle = (props: {
 		response.roles = roles;
 		response.permissions = permissions;
 		response.hasPassword = Boolean(props.user.password);
+		response.twoFactor = {
+			enabled: Boolean(props.user.two_factor_enabled_at),
+			enabledAt: formatter.formatDate(props.user.two_factor_enabled_at),
+			required: props.twoFactor?.required,
+			recoveryCodesRemaining: props.twoFactor?.recoveryCodesRemaining,
+		};
 		response.authProviders = (props.user.auth_providers || []).map((p) => {
 			return {
 				id: p.id,

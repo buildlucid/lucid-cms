@@ -225,9 +225,15 @@ export type HttpConfig = {
 export type AiModelConfig<
 	Default extends string | AiModelSelection = string | AiModelSelection,
 > = {
-	/** Model used unless overridden, falling back to configured availability, Lucid's default or the first offered model. */
+	/**
+	 * Model used unless overridden, falling back to configured availability, Lucid's default or the
+	 * first offered model.
+	 */
 	default?: Default;
-	/** Allowed model families, such as `openai/gpt-image`, defaulting to the full catalogue when omitted or none remain available. */
+	/**
+	 * Allowed model families, such as `openai/gpt-image`, defaulting to the full catalogue when
+	 * omitted or none remain available.
+	 */
 	available?: readonly string[];
 };
 
@@ -288,13 +294,22 @@ export type SecretConfig = {
 	refreshToken: string;
 };
 
-/** Project settings returned by `defineConfig`'s `config` callback. Omitted options use Lucid or plugin defaults. */
+/**
+ * Project settings returned by `defineConfig`'s `config` callback. Omitted options use Lucid or plugin
+ * defaults.
+ */
 export interface LucidConfig {
 	/** Custom permission and integration scope groups. */
 	access?: AccessGroup[];
-	/** Resource directories relative to lucid.config. Defaults to ./database/migrations, ./database/seeds, ./translations, ./emails and ./public. Set false to disable one. */
+	/**
+	 * Resource directories relative to lucid.config. Defaults to ./database/migrations,
+	 * ./database/seeds, ./translations, ./emails and ./public. Set false to disable one.
+	 */
 	directories?: ResourceDirectories;
-	/** Additional resource files, directories, package exports or file URLs. These remain enabled when a project directory is disabled. */
+	/**
+	 * Additional resource files, directories, package exports or file URLs. These remain enabled when
+	 * a project directory is disabled.
+	 */
 	sources?: ResourceSources;
 	/**
 	 * Describes custom tables that already exist in the database, allowing
@@ -371,6 +386,22 @@ export interface LucidConfig {
 			enabled?: boolean;
 		};
 		/**
+		 * Authenticator-based two-factor authentication for password and magic link logins. Providers
+		 * handle their own checks.
+		 */
+		twoFactor?: {
+			/**
+			 * Let users turn on two-factor authentication from their account. Defaults to true.
+			 */
+			enabled?: boolean;
+			/**
+			 * Requires setup at next login and prevents disabling: `true` for everyone,
+			 * `"super-admins"` for super admins. Roles can also require it. Needs `enabled`. Defaults
+			 * to false.
+			 */
+			required?: boolean | "super-admins";
+		};
+		/**
 		 * The authentication providers to use.
 		 */
 		providers?: AuthProvider[];
@@ -441,7 +472,10 @@ export interface LucidConfig {
 					| {
 							/** Defaults to true once `mcp` is set. */
 							enabled?: boolean;
-							/** Tools MCP clients can call, including flattened bundles such as `mcpTools.all()` and custom `defineMcpTool` tools. */
+							/**
+							 * Tools MCP clients can call, including flattened bundles such as
+							 * `mcpTools.all()` and custom `defineMcpTool` tools.
+							 */
 							tools?: (McpToolDefinition | readonly McpToolDefinition[])[];
 							skills?: SkillDefinition[];
 					  };
@@ -468,7 +502,10 @@ export interface LucidConfig {
 	seeds?:
 		| SeedDefinition[]
 		| {
-				/** Named seed definitions, with namespaced plugin names such as `pages:example` recommended to avoid collisions. */
+				/**
+				 * Named seed definitions, with namespaced plugin names such as `pages:example`
+				 * recommended to avoid collisions.
+				 */
 				definitions?: SeedDefinition[];
 		  };
 	/**
@@ -707,6 +744,10 @@ export interface ResolvedLucidConfig {
 		};
 		magicLink: {
 			enabled: boolean;
+		};
+		twoFactor: {
+			enabled: boolean;
+			required: boolean | "super-admins";
 		};
 		providers: AuthProvider[];
 	};

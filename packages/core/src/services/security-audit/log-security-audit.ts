@@ -7,12 +7,14 @@ import type { SecurityAuditAction } from "../../types/security-audit.js";
 import { sortRoleSnapshot } from "../../utils/security-audit/sort-role-snapshot.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+/** Records a change to a user's security settings, and who made it. */
 const logSecurityAudit: ServiceFn<
 	[
 		{
 			userId: number;
 			action: SecurityAuditAction;
-			performedBy: number;
+			/** Empty for changes made from the CLI, which no user is behind. */
+			performedBy: number | null;
 			previousValue: string;
 			newValue: string;
 		},
@@ -22,13 +24,16 @@ const logSecurityAudit: ServiceFn<
 	const Users = new UsersRepository(context.db);
 	const SecurityAuditLogs = new SecurityAuditLogsRepository(context.db);
 
-	const actorRes = await Users.selectAuditActorById({
-		id: data.performedBy,
-		validation: {
-			enabled: true,
-		},
-	});
-	if (actorRes.error) return actorRes;
+	const actorRes =
+		data.performedBy === null
+			? undefined
+			: await Users.selectAuditActorById({
+					id: data.performedBy,
+					validation: {
+						enabled: true,
+					},
+				});
+	if (actorRes?.error) return actorRes;
 
 	const createRes = await SecurityAuditLogs.createSingle({
 		data: {
@@ -36,13 +41,13 @@ const logSecurityAudit: ServiceFn<
 			action: data.action,
 			performed_by: data.performedBy,
 			performed_by_roles: sortRoleSnapshot(
-				actorRes.data.roles?.map((role) => ({
+				actorRes?.data.roles?.map((role) => ({
 					id: role.id,
 					name: role.name ?? "",
 				})) ?? [],
 			),
 			performed_by_super_admin: formatter.formatBoolean(
-				actorRes.data.super_admin,
+				actorRes?.data.super_admin ?? false,
 			),
 			ip_address: context.request.ipAddress ?? "unknown",
 			previous_value: data.previousValue,

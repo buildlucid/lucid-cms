@@ -32,6 +32,19 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("secret", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("two_factor_secret", adapter.getDataType("text"))
+				.addColumn("two_factor_pending_secret", adapter.getDataType("text"))
+				.addColumn("two_factor_enabled_at", adapter.getDataType("timestamp"))
+				.addColumn("two_factor_last_step", adapter.getDataType("integer"))
+				.addColumn(
+					"two_factor_failed_attempts",
+					adapter.getDataType("integer"),
+					(col) => col.notNull().defaultTo(0),
+				)
+				.addColumn(
+					"two_factor_attempts_reset_at",
+					adapter.getDataType("timestamp"),
+				)
 				.addColumn(
 					"triggered_password_reset",
 					adapter.getDataType("boolean"),
@@ -169,6 +182,19 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull().unique(),
 				)
 				.addColumn("description", adapter.getDataType("text"))
+				.addColumn(
+					"require_two_factor",
+					adapter.getDataType("boolean"),
+					(col) =>
+						col
+							.notNull()
+							.defaultTo(
+								adapter.formatDefaultValue(
+									"boolean",
+									adapter.getDefault("boolean", "false"),
+								),
+							),
+				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -272,6 +298,7 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull().defaultTo(0),
 				)
 				.addColumn("email", adapter.getDataType("text"))
+				.addColumn("auth_method", adapter.getDataType("varchar", 255))
 				.addColumn("revoked_at", adapter.getDataType("timestamp"))
 				.addColumn("revoke_reason", adapter.getDataType("varchar", 255))
 				.addColumn("consumed_at", adapter.getDataType("timestamp"))
@@ -396,6 +423,34 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
+				.execute();
+
+			await db.schema
+				.createTable("lucid_user_recovery_codes")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").notNull().onDelete("cascade"),
+				)
+				.addColumn("code", adapter.getDataType("varchar", 255), (col) =>
+					col.notNull(),
+				)
+				.addColumn("used_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_user_recovery_codes_user_code")
+				.on("lucid_user_recovery_codes")
+				.columns(["user_id", "code"])
 				.execute();
 
 			await db.schema

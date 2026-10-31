@@ -1,4 +1,5 @@
 import type { User } from "@types";
+import { TbOutlineShieldLock, TbOutlineShieldOff } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -10,6 +11,7 @@ import {
 } from "solid-js";
 import AuthProviderRow from "@/components/AuthProviderRow/AuthProviderRow";
 import Button from "@/components/Button/Button";
+import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
 import CreateUpdateProfilePictureDrawer from "@/components/CreateUpdateProfilePictureDrawer/CreateUpdateProfilePictureDrawer";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import Drawer from "@/components/Drawer/Drawer";
@@ -19,6 +21,7 @@ import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/Pr
 import RadioCards from "@/components/RadioCards/RadioCards";
 import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
 import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
+import TwoFactorMethodRow from "@/components/TwoFactorMethodRow/TwoFactorMethodRow";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -49,7 +52,7 @@ const UpdateUserDrawer: Component<{
 	const [activeTab, setActiveTab] = createSignal<
 		| "options"
 		| "details"
-		| "auth_providers"
+		| "auth"
 		| "oauth_connections"
 		| "integrations"
 		| "meta"
@@ -76,7 +79,6 @@ const UpdateUserDrawer: Component<{
 	});
 	const providers = api.auth.useGetProviders({
 		queryParams: {},
-		enabled: () => userStore.get.user?.superAdmin ?? false,
 	});
 
 	// ---------------------------------
@@ -92,6 +94,7 @@ const UpdateUserDrawer: Component<{
 		},
 	});
 	const deleteProfilePicture = api.users.useDeleteProfilePicture();
+	const resetTwoFactor = api.users.useResetTwoFactor();
 
 	// ---------------------------------
 	// Memos
@@ -109,6 +112,21 @@ const UpdateUserDrawer: Component<{
 			})) ?? []
 		);
 	});
+	const providersList = createMemo(() =>
+		userStore.get.user?.superAdmin
+			? (providers.data?.data.providers ?? [])
+			: [],
+	);
+	const showTwoFactor = createMemo(
+		() =>
+			providers.data?.data.twoFactor === true &&
+			user.data?.data.twoFactor !== undefined,
+	);
+	const canResetTwoFactor = createMemo(
+		() =>
+			user.data?.data.superAdmin !== true ||
+			userStore.get.user?.superAdmin === true,
+	);
 	const linkedProvidersByKey = createMemo(() => {
 		const authProviders = user.data?.data.authProviders ?? [];
 		return authProviders.reduce(
@@ -210,9 +228,9 @@ const UpdateUserDrawer: Component<{
 								{ value: "options", label: T()("common.options") },
 								{ value: "details", label: T()("common.details") },
 								{
-									value: "auth_providers",
-									label: T()("account.auth.providers.title"),
-									show: userStore.get.user?.superAdmin,
+									value: "auth",
+									label: T()("users.auth.tab"),
+									show: showTwoFactor() || providersList().length > 0,
 								},
 								{
 									value: "oauth_connections",
@@ -327,41 +345,65 @@ const UpdateUserDrawer: Component<{
 								]}
 							/>
 						</Show>
-						<Show when={activeTab() === "auth_providers"}>
-							<Show when={userStore.get.user?.superAdmin}>
-								<Show
-									when={(providers.data?.data.providers?.length ?? 0) > 0}
-									fallback={
-										<span class="text-sm text-body">
-											{T()("empty.states.results.title")}
-										</span>
-									}
-								>
-									<div class="flex flex-col gap-3">
-										<For each={providers.data?.data.providers || []}>
-											{(provider) => (
-												<AuthProviderRow
-													provider={provider}
-													linkedProvider={linkedProvidersByKey()[provider.key]}
-													isLoading={
-														unlinkAuthProvider.action.isPending &&
-														getUnlinkingProviderKey() === provider.key
-													}
-													onUnlink={() => {
-														const userId = props.id();
-														if (!userId) return;
-
-														unlinkAuthProvider.action.mutate({
-															userId,
-															providerKey: provider.key,
-														});
-													}}
-												/>
-											)}
-										</For>
-									</div>
+						<Show when={activeTab() === "auth"}>
+							<div class="flex flex-col gap-3">
+								<Show when={showTwoFactor() && user.data?.data.twoFactor}>
+									{(twoFactor) => (
+										<TwoFactorMethodRow
+											icon={<TbOutlineShieldLock class="size-4.5" />}
+											title={T()("account.two.factor.title")}
+											detail={
+												twoFactor().enabled
+													? T()("users.two.factor.enabled.since", {
+															date:
+																dateHelpers.formatFullDate(
+																	twoFactor().enabledAt ?? undefined,
+																) ?? "",
+														})
+													: T()("users.two.factor.disabled")
+											}
+											action={
+												<Show when={twoFactor().enabled && canResetTwoFactor()}>
+													<ConfirmActionButton
+														variant="danger-ghost"
+														shape="square"
+														label={T()("users.two.factor.reset.action")}
+														loading={resetTwoFactor.action.isPending}
+														onConfirm={() => {
+															const userId = props.id();
+															if (!userId) return;
+															resetTwoFactor.action.mutate({ id: userId });
+														}}
+													>
+														<TbOutlineShieldOff class="size-4" />
+													</ConfirmActionButton>
+												</Show>
+											}
+										/>
+									)}
 								</Show>
-							</Show>
+								<For each={providersList()}>
+									{(provider) => (
+										<AuthProviderRow
+											provider={provider}
+											linkedProvider={linkedProvidersByKey()[provider.key]}
+											isLoading={
+												unlinkAuthProvider.action.isPending &&
+												getUnlinkingProviderKey() === provider.key
+											}
+											onUnlink={() => {
+												const userId = props.id();
+												if (!userId) return;
+
+												unlinkAuthProvider.action.mutate({
+													userId,
+													providerKey: provider.key,
+												});
+											}}
+										/>
+									)}
+								</For>
+							</div>
 						</Show>
 						<Show when={activeTab() === "oauth_connections" && props.id()}>
 							{(userId) => (

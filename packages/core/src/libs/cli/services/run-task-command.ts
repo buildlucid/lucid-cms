@@ -21,10 +21,12 @@ const taskSteps: Record<RuntimeTaskName, string> = {
 	seed: "Running seeds",
 	"jobs:list": "Listing jobs",
 	"jobs:schedule": "Running the job",
+	"users:reset-two-factor": "Resetting two-factor authentication",
+	"users:super-admin": "Making the user a super admin",
 	plugin: "Running the plugin's task",
 };
 
-/** Runs commands through a lazily started runtime task server with spinner updates, exiting with their returned code, treating cancelled prompts as success and reporting errors under `failure`. */
+/** Runs a runtime task with spinner updates. Cancelled prompts exit successfully. */
 const runTaskCommand = async (
 	failure: string,
 	command: (

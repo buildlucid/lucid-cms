@@ -22,6 +22,11 @@ const roleResponseSchema = z.object({
 		description: "Whether this role is managed by config and cannot be edited",
 		example: false,
 	}),
+	requireTwoFactor: z.boolean().meta({
+		description:
+			"Whether users with this role have to set up two-factor authentication",
+		example: false,
+	}),
 	permissions: z
 		.array(
 			z.object({
@@ -56,6 +61,10 @@ export const controllerSchemas = {
 			description: z.string().trim().nullable().optional().meta({
 				description: "The role description",
 			}),
+			requireTwoFactor: z.boolean().optional().meta({
+				description:
+					"Whether users with this role have to set up two-factor authentication. Defaults to false.",
+			}),
 			permissions: z.array(z.string().trim()).meta({
 				description: "A lit of permissions",
 				example: ["users:create", "users:update"],
@@ -81,6 +90,13 @@ export const controllerSchemas = {
 				.trim()
 				.nullable()
 				.meta({ description: "The role description" })
+				.optional(),
+			requireTwoFactor: z
+				.boolean()
+				.meta({
+					description:
+						"Whether users with this role have to set up two-factor authentication",
+				})
 				.optional(),
 			permissions: z
 				.array(z.string().trim())

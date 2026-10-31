@@ -67,6 +67,7 @@ export { default as SecurityAuditLogsRepository } from "./security-audit-logs.js
 export { default as UserAuthProvidersRepository } from "./user-auth-providers.js";
 export { default as UserLoginsRepository } from "./user-logins.js";
 export { default as UserPreferencesRepository } from "./user-preferences.js";
+export { default as UserRecoveryCodesRepository } from "./user-recovery-codes.js";
 export { default as UserRolesRepository } from "./user-roles.js";
 export { default as UserTokensRepository } from "./user-tokens.js";
 export { default as UsersRepository } from "./users.js";

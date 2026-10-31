@@ -91,6 +91,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				"name",
 				"description",
 				"locked",
+				"require_two_factor",
 				"created_at",
 				"updated_at",
 
@@ -127,6 +128,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				"name",
 				"description",
 				"locked",
+				"require_two_factor",
 				"created_at",
 				"updated_at",
 				"permissions",
@@ -151,6 +153,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 						"lucid_roles.name",
 						"lucid_roles.description",
 						"lucid_roles.locked",
+						"lucid_roles.require_two_factor",
 						"lucid_roles.created_at",
 						"lucid_roles.updated_at",
 					])
@@ -224,6 +227,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				"name",
 				"description",
 				"locked",
+				"require_two_factor",
 				"created_at",
 				"updated_at",
 				"permissions",

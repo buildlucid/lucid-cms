@@ -16,6 +16,10 @@ import seedCommand, { seedListCommand } from "./commands/seed.js";
 import serveCommand from "./commands/serve.js";
 import syncCommand from "./commands/sync.js";
 import typegenCommand from "./commands/typegen.js";
+import {
+	usersResetTwoFactorCommand,
+	usersSuperAdminCommand,
+} from "./commands/users.js";
 import cliLogger from "./logger.js";
 
 // TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
@@ -132,6 +136,22 @@ program
 	.description("Run a registered job schedule")
 	.option("--remote", remoteOptionDescription)
 	.action(jobSchedulerCommand);
+
+program
+	.command("users:reset-two-factor <email>")
+	.description(
+		"Turn off a user's two-factor authentication, for when they've lost their app and recovery codes",
+	)
+	.option("-f, --force", "Skip confirmation prompt")
+	.option("--remote", remoteOptionDescription)
+	.action(usersResetTwoFactorCommand);
+
+program
+	.command("users:super-admin <email>")
+	.description("Make a user a super admin, for when no super admin can log in")
+	.option("-f, --force", "Skip confirmation prompt")
+	.option("--remote", remoteOptionDescription)
+	.action(usersSuperAdminCommand);
 
 try {
 	await registerPluginCommands(program);

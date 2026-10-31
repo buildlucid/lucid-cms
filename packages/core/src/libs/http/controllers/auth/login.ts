@@ -1,5 +1,6 @@
 import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
+import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/auth.js";
 import { authServices, userLoginServices } from "../../../../services/index.js";
@@ -11,6 +12,7 @@ import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import verifyCaptcha from "../../middleware/verify-captcha.js";
 import openAPI from "../../openapi/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -18,10 +20,12 @@ const factory = createFactory();
 const loginController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Authenticates a user and sets a refresh and access token as httpOnly cookies.",
+			"Authenticates a user and sets a refresh and access token as httpOnly cookies. When a two-factor step is needed, it sets a short-lived challenge cookie instead, and the session waits until the step is done.",
 		tags: ["auth"],
 		summary: "Login",
-		responses: openAPI.responses(),
+		responses: openAPI.responses({
+			dataSchema: z.toJSONSchema(controllerSchemas.login.response),
+		}),
 		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
@@ -57,6 +61,20 @@ const loginController = factory.createHandlers(
 		});
 		if (userRes.error) throw new LucidAPIError(userRes.error);
 
+		const challengeRes = await authServices.twoFactor.startChallenge(c, {
+			userId: userRes.data.id,
+			authMethod: "password",
+		});
+		if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+		if (challengeRes.data) {
+			c.status(200);
+			return c.json(
+				formatAPIResponse(c, {
+					data: { twoFactor: challengeRes.data.step },
+				}),
+			);
+		}
+
 		const [refreshRes, accessRes] = await Promise.all([
 			authServices.refreshToken.generateToken(c, userRes.data.id),
 			authServices.accessToken.generateToken(c, userRes.data.id),
@@ -87,8 +105,12 @@ const loginController = factory.createHandlers(
 		if (userLoginTrackRes.error)
 			throw new LucidAPIError(userLoginTrackRes.error);
 
-		c.status(204);
-		return c.body(null);
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: { twoFactor: null },
+			}),
+		);
 	},
 );
 

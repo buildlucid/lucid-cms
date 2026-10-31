@@ -15,6 +15,10 @@ import initiateProviderontroller from "../../../controllers/auth/providers/initi
 import setupRequiredController from "../../../controllers/auth/setup-required.js";
 import setupController from "../../../controllers/auth/setup.js";
 import tokenController from "../../../controllers/auth/token.js";
+import confirmTwoFactorChallengeController from "../../../controllers/auth/two-factor/confirm.js";
+import getTwoFactorChallengeController from "../../../controllers/auth/two-factor/get-challenge.js";
+import setupTwoFactorChallengeController from "../../../controllers/auth/two-factor/setup.js";
+import verifyTwoFactorChallengeController from "../../../controllers/auth/two-factor/verify.js";
 
 const authRoutes = new Hono<LucidHonoGeneric>()
 	.get("/csrf", ...getCSRFController)
@@ -24,12 +28,16 @@ const authRoutes = new Hono<LucidHonoGeneric>()
 	.get("/invitation/validate/:token", ...validateInvitationController)
 	.get("/magic-link/validate/:token", ...validateMagicLinkController)
 	.get("/providers/:providerKey/callback", ...providerCallbackController)
+	.get("/two-factor", ...getTwoFactorChallengeController)
 	.post("/setup", ...setupController)
 	.post("/login", ...loginController)
 	.post("/logout", ...logoutController)
 	.post("/magic-link", ...sendMagicLinkController)
 	.post("/magic-link/login", ...magicLinkLoginController)
 	.post("/token", ...tokenController)
+	.post("/two-factor/verify", ...verifyTwoFactorChallengeController)
+	.post("/two-factor/setup", ...setupTwoFactorChallengeController)
+	.post("/two-factor/confirm", ...confirmTwoFactorChallengeController)
 	.post("/invitation/accept/:token", ...acceptInvitationController)
 	.post("/providers/:providerKey/initiate", ...initiateProviderontroller);
 

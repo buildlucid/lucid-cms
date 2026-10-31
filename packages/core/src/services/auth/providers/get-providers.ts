@@ -2,7 +2,6 @@ import type { AuthProviders } from "../../../exports/types.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/** Lists the authentication providers available to the admin. */
 const getProviders: ServiceFn<[], AuthProviders> = async (context) => {
 	const providersRes = getAvailableProviders(context.config);
 
@@ -20,6 +19,7 @@ const getProviders: ServiceFn<[], AuthProviders> = async (context) => {
 		data: {
 			disablePassword: providersRes.disablePassword,
 			magicLink: providersRes.magicLink,
+			twoFactor: providersRes.twoFactor,
 			providers: providers,
 		},
 	};

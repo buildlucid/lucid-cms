@@ -36,6 +36,7 @@ export default Object.freeze({
 		accessToken: "_access",
 		connectionFlowPrefix: "_lucid_connection_flow_",
 		authProviderFlowPrefix: "_lucid_auth_provider_flow_",
+		twoFactorChallenge: "_two_factor",
 	},
 	jwt: {
 		algorithm: "HS256" as const,
@@ -153,6 +154,8 @@ export default Object.freeze({
 			low: { limit: 20, scopeKey: "low" },
 			standard: { limit: 60, scopeKey: "standard" },
 			stream: { limit: 500, scopeKey: "stream" },
+			/** Account changes that check a two-factor code, over a 15 minute window. */
+			twoFactor: { limit: 10, scopeKey: "two-factor" },
 		},
 	},
 	directories: {
@@ -240,6 +243,23 @@ export default Object.freeze({
 		resendCooldownSeconds: 60,
 		/** The most magic link emails one account can be sent in an hour. */
 		hourlyLimit: 5,
+	},
+	twoFactor: {
+		/** How long the code step stays open after the first login step. */
+		challengeExpirationMinutes: 10,
+		/** Code entries allowed per login before the first step has to be done again. */
+		maxChallengeAttempts: 5,
+		/** Wrong codes allowed per account per hour, across logins. */
+		hourlyAttemptLimit: 10,
+		codeLength: 6,
+		/** Seconds each authenticator code lasts. */
+		periodSeconds: 30,
+		/** Accepted clock drift in periods before and after the current step. */
+		driftPeriods: 1,
+		secretBytes: 20,
+		recoveryCodeCount: 10,
+		/** Characters per recovery code, shown as two halves joined by a dash. */
+		recoveryCodeLength: 10,
 	},
 	presignedUrlExpiration: 3600000, // 1 hour in ms
 	uploadSessionExpiration: 3600000, // 1 hour in ms
@@ -366,7 +386,10 @@ export default Object.freeze({
 		replySaveIntervalMs: 1_000,
 		watchIntervalMs: 1_000,
 		staleQueuedMs: 120_000,
-		/** How long a run waits on its person before they are notified, so someone still in the chat can answer first. */
+		/**
+		 * How long a run waits on its person before they are notified, so someone still in the chat
+		 * can answer first.
+		 */
 		inputNotifyDelayMs: 120_000,
 		/** Builder response timeout, checked each agent tick before reporting the screen as closed. */
 		screenCallTimeoutMs: 30_000,
@@ -416,6 +439,7 @@ export default Object.freeze({
 		emailChangeConfirm: "email_change_confirm",
 		emailChangeRevert: "email_change_revert",
 		magicLink: "magic_link",
+		twoFactorChallenge: "two_factor_challenge",
 	} as const,
 	refreshTokenRevokeReasons: {
 		logout: "logout",
@@ -436,6 +460,8 @@ export default Object.freeze({
 		emailChangeSuperseded: "email_change_superseded",
 		magicLinkUsed: "magic_link_used",
 		magicLinkSuperseded: "magic_link_superseded",
+		twoFactorChallengePassed: "two_factor_challenge_passed",
+		twoFactorRemoved: "two_factor_removed",
 		expired: "expired",
 	} as const,
 	emailChangeRequestStatuses: {
@@ -451,6 +477,7 @@ export default Object.freeze({
 			passwordChange: "password_change",
 			roleChange: "role_change",
 			authProviderUnlink: "auth_provider_unlink",
+			twoFactorChange: "two_factor_change",
 		},
 		redactedValue: "[REDACTED]",
 	} as const,

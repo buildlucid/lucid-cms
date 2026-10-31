@@ -70,7 +70,10 @@ export type PermissionGroup = {
 	details: PermissionDetails;
 	core: boolean;
 	permissions: PermissionDefinition[];
-	/** Labelled sets of permissions shown below the group's own, such as a collection's generated field permissions. */
+	/**
+	 * Labelled sets of permissions shown below the group's own, such as a collection's generated field
+	 * permissions.
+	 */
 	subgroups?: PermissionSubgroup[];
 };
 
@@ -112,6 +115,15 @@ export type User = {
 	roles?: UserPermission["roles"];
 	permissions?: UserPermission["permissions"];
 	hasPassword?: boolean;
+	/** Visible with `users:update` or on your own account. */
+	twoFactor?: {
+		enabled: boolean;
+		enabledAt: string | null;
+		/** Whether they have to use it, from the config or their roles. Only returned for the authenticated user. */
+		required?: boolean;
+		/** Unused recovery codes. Only returned for the authenticated user. */
+		recoveryCodesRemaining?: number;
+	};
 	authProviders?: Array<{
 		id: number;
 		providerKey: string;
@@ -188,7 +200,33 @@ export type AuthProviders = {
 	disablePassword: boolean;
 	/** Whether users can log in with a code or link sent to their email. */
 	magicLink: boolean;
+	/** Whether users can turn on two-factor authentication. */
+	twoFactor: boolean;
 	providers: AuthProvider[];
+};
+
+export type TwoFactorStep = "verify" | "setup";
+
+/** What password and magic link logins return. With a two-factor step, the session waits until it's done. */
+export type LoginResult = {
+	twoFactor: TwoFactorStep | null;
+};
+
+export type TwoFactorProof = { code: string } | { recoveryCode: string };
+
+export type TwoFactorChallenge = {
+	step: TwoFactorStep;
+};
+
+/** A new authenticator app secret, as a key to type in and an otpauth:// link for the QR code. */
+export type TwoFactorSetup = {
+	secret: string;
+	uri: string;
+};
+
+/** Recovery codes, shown once when they're created. */
+export type TwoFactorRecoveryCodes = {
+	recoveryCodes: string[];
 };
 
 export type InitiateAuth = {
@@ -201,6 +239,7 @@ export interface Role {
 	name: string;
 	description: string | null;
 	locked: boolean;
+	requireTwoFactor: boolean;
 	permissions?: {
 		id: number;
 		permission: Permission;

@@ -21,6 +21,7 @@ import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/Pend
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
 import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
+import TwoFactorSettings from "@/components/TwoFactorSettings/TwoFactorSettings";
 import UpdateAccountDetailsModal from "@/components/UpdateAccountDetailsModal/UpdateAccountDetailsModal";
 import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
@@ -98,6 +99,12 @@ export const AccountContent: Component = () => {
 		() => providers.data?.data.magicLink === true,
 	);
 	const userHasPassword = createMemo(() => user()?.hasPassword === true);
+	//* two-factor authentication only covers password and magic link logins
+	const twoFactorAvailable = createMemo(
+		() =>
+			providers.data?.data.twoFactor === true &&
+			(passwordAuthEnabled() || magicLinkEnabled()),
+	);
 	const linkedProvidersCount = createMemo(
 		() => user()?.authProviders?.length ?? 0,
 	);
@@ -298,6 +305,9 @@ export const AccountContent: Component = () => {
 						}
 						align="center"
 					/>
+				</Show>
+				<Show when={twoFactorAvailable()}>
+					<TwoFactorSettings twoFactor={user()?.twoFactor} />
 				</Show>
 				<Show when={providersList().length > 0}>
 					<InfoRow.Content

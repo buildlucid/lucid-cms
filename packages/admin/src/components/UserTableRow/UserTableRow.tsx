@@ -20,6 +20,7 @@ interface UserRowProps {
 			| "delete"
 			| "passwordReset"
 			| "revokeRefreshTokens"
+			| "resetTwoFactor"
 			| "restore"
 			| "deletePermanently"
 			| "resendInvitation"
@@ -52,6 +53,13 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 	});
 	const canRevokeRefreshTokens = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.UsersUpdate]).all;
+	});
+	const canResetTwoFactor = createMemo(() => {
+		return (
+			canUpdateNotSelf() &&
+			(props.user.superAdmin !== true ||
+				userStore.get.user?.superAdmin === true)
+		);
 	});
 
 	// ----------------------------------
@@ -96,6 +104,20 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					sortOrder: 20,
 				},
 				{
+					label: T()("integrations.create.action"),
+					type: "button",
+					icon: "key",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("createIntegration", true);
+					},
+					permission: userStore.get.user?.superAdmin === true,
+					show: !props.showingDeleted?.(),
+					excludeFromRowClick: true,
+					variant: "primary",
+					sortOrder: 30,
+				},
+				{
 					label: T()("common.restore"),
 					type: "button",
 					icon: "restore",
@@ -107,23 +129,6 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					show: props.showingDeleted?.() !== false,
 					variant: "primary",
 					sortOrder: 50,
-				},
-				{
-					label: T()("actions.reset.password"),
-					type: "button",
-					icon: "lock",
-					onClick: () => {
-						props.rowTarget.setTargetId(props.user.id);
-						props.rowTarget.setTrigger("passwordReset", true);
-					},
-					permission: canUpdateNotSelf(),
-					excludeFromRowClick: true,
-					show:
-						!props.showingDeleted?.() &&
-						props.passwordAuthEnabled === true &&
-						!currentUser(),
-					variant: "primary",
-					sortOrder: 55,
 				},
 				{
 					label: T()("users.invitations.resend.action"),
@@ -142,31 +147,50 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					sortOrder: 60,
 				},
 				{
-					label: T()("integrations.create.action"),
-					type: "button",
-					icon: "key",
-					onClick: () => {
-						props.rowTarget.setTargetId(props.user.id);
-						props.rowTarget.setTrigger("createIntegration", true);
-					},
-					permission: userStore.get.user?.superAdmin === true,
-					show: !props.showingDeleted?.(),
-					excludeFromRowClick: true,
-					sortOrder: 30,
-				},
-				{
-					label: T()("users.sessions.revoke.action"),
-					type: "button",
-					icon: "ban",
-					onClick: () => {
-						props.rowTarget.setTargetId(props.user.id);
-						props.rowTarget.setTrigger("revokeRefreshTokens", true);
-					},
-					permission: canRevokeRefreshTokens(),
-					excludeFromRowClick: true,
+					label: T()("common.security"),
+					type: "group",
+					icon: "shield",
+					//* your own password, two-factor and sessions are managed from your account
 					show: !props.showingDeleted?.() && !currentUser(),
-					variant: "danger",
+					excludeFromRowClick: true,
 					sortOrder: 70,
+					actions: [
+						{
+							label: T()("actions.reset.password"),
+							type: "button",
+							icon: "lock",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.user.id);
+								props.rowTarget.setTrigger("passwordReset", true);
+							},
+							permission: canUpdateNotSelf(),
+							show: props.passwordAuthEnabled === true,
+							variant: "danger",
+						},
+						{
+							label: T()("users.two.factor.reset.action"),
+							type: "button",
+							icon: "shield-off",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.user.id);
+								props.rowTarget.setTrigger("resetTwoFactor", true);
+							},
+							permission: canResetTwoFactor(),
+							show: props.user.twoFactor?.enabled === true,
+							variant: "danger",
+						},
+						{
+							label: T()("users.sessions.revoke.action"),
+							type: "button",
+							icon: "ban",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.user.id);
+								props.rowTarget.setTrigger("revokeRefreshTokens", true);
+							},
+							permission: canRevokeRefreshTokens(),
+							variant: "danger",
+						},
+					],
 				},
 				{
 					label: T()("common.delete"),

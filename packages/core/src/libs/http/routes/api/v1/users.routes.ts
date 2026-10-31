@@ -20,6 +20,7 @@ import regenerateUserIntegrationKey from "../../../controllers/users/integration
 import updateUserIntegration from "../../../controllers/users/integrations/update-single.js";
 import inviteSingle from "../../../controllers/users/invite-single.js";
 import resendInvitation from "../../../controllers/users/resend-invitation.js";
+import resetTwoFactor from "../../../controllers/users/reset-two-factor.js";
 import restoreMultiple from "../../../controllers/users/restore-multiple.js";
 import revokeRefreshTokens from "../../../controllers/users/revoke-refresh-tokens.js";
 import unlinkAuthProvider from "../../../controllers/users/unlink-auth-provider.js";
@@ -48,6 +49,7 @@ const usersRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:id/profile-picture", ...updateProfilePicture)
 	.post("/:id/resend-invitation", ...resendInvitation)
 	.post("/:id/revoke-refresh-tokens", ...revokeRefreshTokens)
+	.post("/:id/reset-two-factor", ...resetTwoFactor)
 	.post("/", ...inviteSingle)
 	.post("/restore", ...restoreMultiple)
 	.delete("/:id/auth-providers/:providerId", ...unlinkAuthProvider)

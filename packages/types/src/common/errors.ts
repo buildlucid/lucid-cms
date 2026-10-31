@@ -32,7 +32,9 @@ export interface PublicErrorData {
 		| "unsupported_grant_type"
 		| "server_error"
 		/** A save from a tab that no longer holds the document. */
-		| "document_held";
+		| "document_held"
+		/** A login's two-factor step timed out or ran out of tries, so the login has to start again. */
+		| "two_factor_expired";
 	key?: string;
 	errors?: ErrorResult;
 }

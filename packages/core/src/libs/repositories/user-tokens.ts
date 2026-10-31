@@ -132,8 +132,85 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 		});
 	}
 
+	/** Finds an active two-factor challenge by its hashed token, with what the second step needs to know about its user. */
+	async selectActiveTwoFactorChallenge<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				token: string;
+			}
+		>,
+	) {
+		const query = this.db
+			.selectFrom("lucid_user_tokens")
+			.select([
+				"lucid_user_tokens.id",
+				"lucid_user_tokens.user_id",
+				"lucid_user_tokens.auth_method",
+			])
+			.innerJoin("lucid_users", "lucid_users.id", "lucid_user_tokens.user_id")
+			.select([
+				"lucid_users.is_deleted as user_is_deleted",
+				"lucid_users.is_locked as user_is_locked",
+				"lucid_users.two_factor_enabled_at as user_two_factor_enabled_at",
+			])
+			.where(
+				"lucid_user_tokens.token_type",
+				"=",
+				constants.userTokens.twoFactorChallenge,
+			)
+			.where("lucid_user_tokens.token", "=", props.token)
+			.where("lucid_user_tokens.expiry_date", ">", new Date().toISOString())
+			.where("lucid_user_tokens.revoked_at", "is", null)
+			.where("lucid_user_tokens.consumed_at", "is", null);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectActiveTwoFactorChallenge",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: [
+				"id",
+				"user_id",
+				"auth_method",
+				"user_is_deleted",
+				"user_is_locked",
+				"user_two_factor_enabled_at",
+			],
+		});
+	}
+
 	// ----------------------------------------
 	// updates
+	/** Uses up an active two-factor challenge once its code has been checked. */
+	async consumeTwoFactorChallenge(props: { id: number }) {
+		const now = new Date().toISOString();
+
+		const query = this.db
+			.updateTable("lucid_user_tokens")
+			.set({
+				consumed_at: now,
+				revoked_at: now,
+				revoke_reason:
+					constants.userTokenRevokeReasons.twoFactorChallengePassed,
+			})
+			.where("id", "=", props.id)
+			.where("token_type", "=", constants.userTokens.twoFactorChallenge)
+			.where("expiry_date", ">", now)
+			.where("revoked_at", "is", null)
+			.where("consumed_at", "is", null)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "consumeTwoFactorChallenge",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
 	/** Uses up an active magic link, as long as the address it was sent to is still the account's email. */
 	async consumeMagicLink(props: { id: number }) {
 		const now = new Date().toISOString();
@@ -168,7 +245,7 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 
 		return { error: undefined, data: exec.response.data !== undefined };
 	}
-	/** Counts one code entry against an active magic link. Returns false once its attempts are used up. */
+	/** Counts one code entry against an active magic link or two-factor challenge. Returns false once its attempts are used up. */
 	async incrementCodeAttempts(props: { id: number; maxAttempts: number }) {
 		const query = this.db
 			.updateTable("lucid_user_tokens")

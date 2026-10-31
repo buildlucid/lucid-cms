@@ -14,6 +14,8 @@ const createSingle: ServiceFn<
 			code?: string;
 			/** The address the token is emailed to, for tokens that stop working when the account's email changes. */
 			email?: string;
+			/** The login method a two-factor challenge continues. */
+			authMethod?: string;
 		},
 	],
 	{
@@ -34,6 +36,7 @@ const createSingle: ServiceFn<
 			token: hashedToken,
 			code: data.code,
 			email: data.email,
+			auth_method: data.authMethod,
 		},
 		returning: ["id"],
 		validation: {

@@ -202,6 +202,13 @@ const ViewUserPanelContent: Component<{
 								: T()("common.no"),
 							show: props.state.user?.isLocked !== undefined,
 						},
+						{
+							label: T()("account.two.factor.title"),
+							value: props.state.user?.twoFactor?.enabled
+								? T()("common.on")
+								: T()("common.off"),
+							show: props.state.user?.twoFactor !== undefined,
+						},
 					]}
 				/>
 				<Show when={authProviderItems().length > 0}>

@@ -7,6 +7,7 @@ import serviceHelpers from "@/utils/service-helpers";
 interface Params {
 	name: string;
 	description?: string | null;
+	requireTwoFactor?: boolean;
 	permissions: string[];
 }
 

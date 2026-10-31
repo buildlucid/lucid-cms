@@ -75,6 +75,7 @@ import type {
 	LucidUserAuthProviders,
 	LucidUserLogins,
 	LucidUserPreferences,
+	LucidUserRecoveryCodes,
 	LucidUserRoles,
 	LucidUsers,
 	LucidUserTokens,
@@ -313,6 +314,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_email_change_requests: LucidEmailChangeRequests;
 	lucid_user_logins: LucidUserLogins;
 	lucid_user_preferences: LucidUserPreferences;
+	lucid_user_recovery_codes: LucidUserRecoveryCodes;
 	lucid_user_auth_providers: LucidUserAuthProviders;
 	lucid_security_audit_logs: LucidSecurityAuditLogs;
 	lucid_emails: LucidEmails;

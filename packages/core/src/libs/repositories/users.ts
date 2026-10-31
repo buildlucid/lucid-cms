@@ -184,6 +184,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			"is_deleted",
 			"is_deleted_at",
 			"password",
+			"two_factor_enabled_at",
 			this.database.fn
 				.jsonArrayFrom(
 					eb
@@ -365,6 +366,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"invitation_accepted",
 				"is_locked",
 				"password",
+				"two_factor_enabled_at",
 				"roles",
 				"auth_providers",
 				"profile_picture",
@@ -603,6 +605,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						"lucid_users.username",
 						"lucid_users.super_admin",
 						"lucid_users.password",
+						"lucid_users.two_factor_enabled_at",
 						"lucid_users.triggered_password_reset",
 						"lucid_users.is_locked",
 						"lucid_users.is_deleted",
@@ -791,6 +794,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"username",
 				"super_admin",
 				"password",
+				"two_factor_enabled_at",
 				"triggered_password_reset",
 				"is_locked",
 				"roles",
@@ -1117,7 +1121,87 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 
 		return { error: undefined, data: [...ids] };
 	}
-	/** Matches full names or usernames, defaulting to contains and requiring neither to match for negated operators. */
+
+	// ----------------------------------------
+	// updates
+	/** Records a TOTP step atomically. Returns false if this or a later step was already used. */
+	async updateTwoFactorLastStep(props: { id: number; step: number }) {
+		const query = this.db
+			.updateTable("lucid_users")
+			.set({ two_factor_last_step: props.step })
+			.where("id", "=", props.id)
+			.where("two_factor_enabled_at", "is not", null)
+			.where((eb) =>
+				eb.or([
+					eb("two_factor_last_step", "is", null),
+					eb("two_factor_last_step", "<", props.step),
+				]),
+			)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "updateTwoFactorLastStep",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
+	/** Reserves an attempt atomically. Returns the window end for refunds, or undefined at the limit. */
+	async reserveTwoFactorAttempt(props: {
+		id: number;
+		limit: number;
+		windowMs: number;
+	}) {
+		const now = new Date();
+		const windowOver = sql<boolean>`(two_factor_attempts_reset_at is null or two_factor_attempts_reset_at <= ${now.toISOString()})`;
+
+		const query = this.db
+			.updateTable("lucid_users")
+			.set({
+				two_factor_failed_attempts: sql<number>`case when ${windowOver} then 1 else two_factor_failed_attempts + 1 end`,
+				two_factor_attempts_reset_at: sql<string>`case when ${windowOver} then ${new Date(now.getTime() + props.windowMs).toISOString()} else two_factor_attempts_reset_at end`,
+			})
+			.where("id", "=", props.id)
+			.where((eb) =>
+				eb.or([windowOver, eb("two_factor_failed_attempts", "<", props.limit)]),
+			)
+			.returning(["id", "two_factor_attempts_reset_at"]);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "reserveTwoFactorAttempt",
+		});
+		if (exec.response.error) return exec.response;
+
+		const resetAt = exec.response.data?.two_factor_attempts_reset_at;
+
+		return {
+			error: undefined,
+			data: resetAt ? { resetAt } : undefined,
+		};
+	}
+	/** Refunds an attempt only within its original window, preserving the next window's count. */
+	async refundTwoFactorAttempt(props: { id: number; resetAt: string | Date }) {
+		const query = this.db
+			.updateTable("lucid_users")
+			.set({
+				two_factor_failed_attempts: sql<number>`two_factor_failed_attempts - 1`,
+			})
+			.where("id", "=", props.id)
+			.where("two_factor_attempts_reset_at", "=", props.resetAt)
+			.where("two_factor_failed_attempts", ">", 0)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "refundTwoFactorAttempt",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
+	/**
+	 * Matches full names or usernames, defaulting to contains and requiring neither to match for
+	 * negated operators.
+	 */
 	private nameCondition<DB, Table extends keyof DB>(
 		eb: ExpressionBuilder<DB, Table>,
 		filter: QueryParamFilterCondition,

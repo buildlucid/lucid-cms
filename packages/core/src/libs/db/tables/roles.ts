@@ -1,4 +1,4 @@
-import type { Generated } from "kysely";
+import type { ColumnType, Generated } from "kysely";
 import z from "zod";
 import { defineTable } from "../client/table/definition.js";
 import type {
@@ -26,6 +26,13 @@ export const rolesTable = defineTable("lucid_roles", (adapter) => ({
 		},
 		name: { schema: z.string(), type: "text" },
 		description: { schema: z.string().nullable(), type: "text" },
+		require_two_factor: {
+			schema: z.union([
+				z.literal(adapter.config.defaults.boolean.true),
+				z.literal(adapter.config.defaults.boolean.false),
+			]),
+			type: "boolean",
+		},
 		updated_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
@@ -74,6 +81,11 @@ export interface LucidRoles {
 	description: string | null;
 	key: string | null;
 	locked: BooleanInt;
+	require_two_factor: ColumnType<
+		BooleanInt,
+		BooleanInt | undefined,
+		BooleanInt
+	>;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutable;
 }

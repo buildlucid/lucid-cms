@@ -1,8 +1,6 @@
 import { A, useLocation } from "@solidjs/router";
-import classNames from "classnames";
 import {
 	type Component,
-	createEffect,
 	createMemo,
 	createSignal,
 	onCleanup,
@@ -11,10 +9,12 @@ import {
 import Button from "@/components/Button/Button";
 import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import { Form } from "@/components/Form/Form";
+import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
 import constants from "@/constants";
 import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import api from "@/services/api";
 import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
 import { getLoginReturnPath } from "@/utils/login-route";
 import spawnToast from "@/utils/spawn-toast";
 
@@ -34,7 +34,6 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 	const [code, setCode] = createSignal("");
 	const [now, setNow] = createSignal(Date.now());
 	const [resendAt, setResendAt] = createSignal(Date.now() + resendCooldownMs);
-	let codeInput: HTMLInputElement | undefined;
 
 	//* a deadline rather than a counter, as timers slow down in background tabs
 	const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -64,8 +63,7 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	//* the error shows as a toast, and the input stays red until the code changes
-	const codeError = createMemo(() => login.errors()?.message);
+	const digits = createMemo(() => code().replace(/\D/g, ""));
 	const resendSeconds = createMemo(() =>
 		Math.max(0, Math.ceil((resendAt() - now()) / 1000)),
 	);
@@ -73,9 +71,10 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 	// ----------------------------------------
 	// Functions
 	const submit = (value: string) => {
-		if (value.length !== constants.magicLink.codeLength) return;
+		const cleaned = value.replace(/\D/g, "");
+		if (cleaned.length !== constants.magicLink.codeLength) return;
 		if (login.action.isPending) return;
-		login.action.mutate({ email: props.email, code: value });
+		login.action.mutate({ email: props.email, code: cleaned });
 	};
 	const resend = () => {
 		void captcha.submit((captchaToken) =>
@@ -86,13 +85,6 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 			}),
 		);
 	};
-
-	// ----------------------------------------
-	// Effects
-	createEffect(() => {
-		//* focus when the input opens, and again after a wrong code clears it
-		if (showCodeInput() && !login.action.isPending) codeInput?.focus();
-	});
 
 	// ----------------------------------------
 	// Render
@@ -115,8 +107,8 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 				<Form
 					state={{
 						isLoading: login.action.isPending,
-						isDisabled: code().length !== constants.magicLink.codeLength,
-						errors: undefined,
+						isDisabled: digits().length !== constants.magicLink.codeLength,
+						errors: login.errors(),
 					}}
 					content={{
 						submit: T()("auth.magic.link.code.submit"),
@@ -129,35 +121,23 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 					}}
 					onSubmit={() => submit(code())}
 				>
-					<input
-						ref={codeInput}
+					<InsetLabelInput
 						id="code"
 						name="code"
-						class={classNames(
-							"h-12 w-full rounded-md border bg-input px-3 text-center font-mono text-lg tracking-[0.4em] text-subtitle caret-primary placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:text-muted transition-colors duration-200 focus:outline-hidden focus:border-primary disabled:cursor-not-allowed disabled:opacity-80",
-							{
-								"border-border": codeError() === undefined,
-								"border-danger": codeError() !== undefined,
-							},
-						)}
 						type="text"
-						inputmode="numeric"
-						autocomplete="one-time-code"
-						placeholder={T()("auth.magic.link.code.placeholder")}
-						aria-label={T()("auth.magic.link.code.label")}
-						aria-invalid={codeError() !== undefined || undefined}
 						value={code()}
-						disabled={login.action.isPending}
-						onInput={(event) => {
-							//* only digits count, so pasted codes with spaces or labels still work
-							const value = event.currentTarget.value
-								.replace(/\D/g, "")
-								.slice(0, constants.magicLink.codeLength);
-							event.currentTarget.value = value;
+						onChange={(value) => {
 							setCode(value);
-							if (codeError()) login.reset();
 							submit(value);
 						}}
+						copy={{
+							label: T()("auth.magic.link.code.label"),
+						}}
+						inputMode="numeric"
+						autoComplete="one-time-code"
+						autofocus={true}
+						required={true}
+						errors={getBodyError("code", login.errors)}
 					/>
 				</Form>
 			</Show>

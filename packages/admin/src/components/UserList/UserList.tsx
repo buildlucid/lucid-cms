@@ -22,6 +22,7 @@ import EmptyState from "@/components/EmptyState/EmptyState";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ResendInvitationModal from "@/components/ResendInvitationModal/ResendInvitationModal";
+import ResetTwoFactorModal from "@/components/ResetTwoFactorModal/ResetTwoFactorModal";
 import RestoreUsers from "@/components/RestoreUserModal/RestoreUserModal";
 import RevokeRefreshTokensModal from "@/components/RevokeRefreshTokensModal/RevokeRefreshTokensModal";
 import Table from "@/components/Table/Table";
@@ -57,6 +58,7 @@ export const UserList: Component<{
 			delete: false,
 			passwordReset: false,
 			revokeRefreshTokens: false,
+			resetTwoFactor: false,
 			restore: false,
 			deletePermanently: false,
 			resendInvitation: false,
@@ -318,6 +320,15 @@ export const UserList: Component<{
 						open: rowTarget.getTriggers().revokeRefreshTokens,
 						setOpen: (state: boolean) => {
 							rowTarget.setTrigger("revokeRefreshTokens", state);
+						},
+					}}
+				/>
+				<ResetTwoFactorModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().resetTwoFactor,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("resetTwoFactor", state);
 						},
 					}}
 				/>

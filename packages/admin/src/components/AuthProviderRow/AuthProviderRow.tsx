@@ -1,8 +1,9 @@
 import type { AuthProviders, User } from "@types";
-import { TbOutlineUserCircle } from "solid-icons/tb";
+import { TbOutlineLink, TbOutlineUnlink, TbOutlineUser } from "solid-icons/tb";
 import type { Component } from "solid-js";
-import { createMemo, createSignal, onCleanup, Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import Button from "@/components/Button/Button";
+import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 
@@ -14,34 +15,6 @@ const AuthProviderRow: Component<{
 	isLoading?: boolean;
 }> = (props) => {
 	// ----------------------------------------
-	// State
-	const [awaitingConfirmation, setAwaitingConfirmation] = createSignal(false);
-	let confirmationTimeout: number | undefined;
-
-	// ----------------------------------------
-	// Functions
-	const handleUnlinkClick = () => {
-		if (awaitingConfirmation()) {
-			clearTimeout(confirmationTimeout);
-			setAwaitingConfirmation(false);
-			props.onUnlink?.();
-		} else {
-			setAwaitingConfirmation(true);
-			confirmationTimeout = window.setTimeout(() => {
-				setAwaitingConfirmation(false);
-			}, 4000);
-		}
-	};
-
-	// ----------------------------------------
-	// Effects
-	onCleanup(() => {
-		if (confirmationTimeout) {
-			clearTimeout(confirmationTimeout);
-		}
-	});
-
-	// ----------------------------------------
 	// Memos
 	const linked = createMemo(() => props.linkedProvider !== undefined);
 	const formattedLinkedDate = createMemo(() =>
@@ -52,19 +25,19 @@ const AuthProviderRow: Component<{
 	// Render
 	return (
 		<div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-input p-2">
-			<div class="flex items-center gap-2">
-				<Show
-					when={props.provider.icon}
-					fallback={
-						<TbOutlineUserCircle class="size-10 rounded-full bg-card p-2 text-title" />
-					}
-				>
-					<img
-						src={props.provider.icon as string}
-						alt={props.provider.name}
-						class="size-10 rounded-full border border-border bg-white object-contain p-2"
-					/>
-				</Show>
+			<div class="flex items-center gap-3">
+				<span class="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-icon">
+					<Show
+						when={props.provider.icon}
+						fallback={<TbOutlineUser class="size-4.5" />}
+					>
+						<img
+							src={props.provider.icon as string}
+							alt={props.provider.name}
+							class="size-4.5 object-contain"
+						/>
+					</Show>
+				</span>
 				<div class="flex flex-col">
 					<span class="text-sm font-medium text-title">
 						{props.provider.name}
@@ -86,27 +59,33 @@ const AuthProviderRow: Component<{
 				</div>
 			</div>
 			<Show when={linked() && props.onUnlink}>
-				<Button
-					onClick={handleUnlinkClick}
-					variant="danger-outline"
-					size="sm"
-					type="button"
+				<ConfirmActionButton
+					variant="danger-ghost"
+					shape="square"
+					label={T()("auth.providers.unlink.action", {
+						provider: props.provider.name,
+					})}
 					loading={props.isLoading}
+					onConfirm={() => props.onUnlink?.()}
 				>
-					{awaitingConfirmation()
-						? T()("common.confirmations.click.to.confirm")
-						: T()("common.unlink")}
-				</Button>
+					<TbOutlineUnlink class="size-4" />
+				</ConfirmActionButton>
 			</Show>
 			<Show when={!linked() && props.onLink}>
 				<Button
-					onClick={props.onLink}
-					variant="outline"
+					variant="ghost"
 					size="sm"
-					type="button"
+					shape="square"
+					title={T()("auth.providers.link.action", {
+						provider: props.provider.name,
+					})}
+					aria-label={T()("auth.providers.link.action", {
+						provider: props.provider.name,
+					})}
 					loading={props.isLoading}
+					onClick={props.onLink}
 				>
-					{T()("common.link")}
+					<TbOutlineLink class="size-4" />
 				</Button>
 			</Show>
 		</div>

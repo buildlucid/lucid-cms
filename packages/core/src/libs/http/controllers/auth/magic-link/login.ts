@@ -1,5 +1,6 @@
 import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
+import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import {
@@ -13,6 +14,7 @@ import rateLimiter from "../../../middleware/rate-limiter.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
+import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -20,10 +22,12 @@ const factory = createFactory();
 const magicLinkLoginController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Logs in with a magic link's token, or its email address and code, and sets a refresh and access token as httpOnly cookies.",
+			"Logs in with a magic link's token, or its email address and code, and sets a refresh and access token as httpOnly cookies. When a two-factor step is needed, it sets a short-lived challenge cookie instead, and the session waits until the step is done.",
 		tags: ["auth"],
 		summary: "Magic Link Login",
-		responses: openAPI.responses(),
+		responses: openAPI.responses({
+			dataSchema: z.toJSONSchema(controllerSchemas.magicLinkLogin.response),
+		}),
 		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
@@ -53,6 +57,20 @@ const magicLinkLoginController = factory.createHandlers(
 			},
 		})(context, body);
 		if (userRes.error) throw new LucidAPIError(userRes.error);
+
+		const challengeRes = await authServices.twoFactor.startChallenge(c, {
+			userId: userRes.data.id,
+			authMethod: "magic_link",
+		});
+		if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+		if (challengeRes.data) {
+			c.status(200);
+			return c.json(
+				formatAPIResponse(c, {
+					data: { twoFactor: challengeRes.data.step },
+				}),
+			);
+		}
 
 		const [refreshRes, accessRes] = await Promise.all([
 			authServices.refreshToken.generateToken(c, userRes.data.id),
@@ -84,8 +102,12 @@ const magicLinkLoginController = factory.createHandlers(
 		if (userLoginTrackRes.error)
 			throw new LucidAPIError(userLoginTrackRes.error);
 
-		c.status(204);
-		return c.body(null);
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: { twoFactor: null },
+			}),
+		);
 	},
 );
 

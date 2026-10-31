@@ -11,6 +11,7 @@ import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import GrantPicker from "@/components/GrantPicker/GrantPicker";
 import Input from "@/components/Input/Input";
+import RadioCards from "@/components/RadioCards/RadioCards";
 import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import T from "@/translations";
@@ -34,6 +35,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 	);
 	const [name, setName] = createSignal("");
 	const [description, setDescription] = createSignal("");
+	const [requireTwoFactor, setRequireTwoFactor] = createSignal(false);
 	const [activeTab, setActiveTab] = createSignal("details");
 
 	// ---------------------------------
@@ -48,6 +50,10 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 		enabled: () => props.state.open && props.id !== undefined,
 	});
 	const permissions = api.permissions.useGetAll({
+		queryParams: {},
+		enabled: () => props.state.open,
+	});
+	const providers = api.auth.useGetProviders({
 		queryParams: {},
 		enabled: () => props.state.open,
 	});
@@ -74,14 +80,17 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 			);
 			setName(role.data?.data.name ?? "");
 			setDescription(role.data?.data.description ?? "");
+			setRequireTwoFactor(role.data?.data.requireTwoFactor ?? false);
 		}
 	});
 
 	// ---------------------------------
 	// Memos
 	const isLoading = createMemo(() => {
-		if (props.id === undefined) return permissions.isLoading;
-		return role.isLoading || permissions.isLoading;
+		if (props.id === undefined) {
+			return permissions.isLoading || providers.isLoading;
+		}
+		return role.isLoading || permissions.isLoading || providers.isLoading;
 	});
 	const isError = createMemo(() => {
 		if (props.id === undefined) return permissions.isError;
@@ -128,6 +137,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 			{
 				name: role.data?.data.name ?? "",
 				description: role.data?.data.description ?? "",
+				requireTwoFactor: role.data?.data.requireTwoFactor ?? false,
 				permissions:
 					role.data?.data.permissions?.map(
 						(permission) => permission.permission,
@@ -136,6 +146,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 			{
 				name: name(),
 				description: description(),
+				requireTwoFactor: requireTwoFactor(),
 				permissions: selectedPermissions() || [],
 			},
 		);
@@ -163,6 +174,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 				setSelectedPermissions([]);
 				setName("");
 				setDescription("");
+				setRequireTwoFactor(false);
 				setActiveTab("details");
 				createRole.reset();
 				updateRole.reset();
@@ -189,6 +201,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 									createRole.action.mutate({
 										name: name(),
 										description: description(),
+										requireTwoFactor: requireTwoFactor(),
 										permissions: selectedPermissions(),
 									});
 								} else {
@@ -206,7 +219,11 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 							{
 								value: "details",
 								label: T()("common.details"),
-								invalid: tabInvalid(["name", "description"]),
+								invalid: tabInvalid([
+									"name",
+									"description",
+									"requireTwoFactor",
+								]),
 							},
 							{
 								value: "permissions",
@@ -239,6 +256,30 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 							errors={getBodyError("description", errors)}
 							rows={4}
 						/>
+						<Show when={providers.data?.data.twoFactor}>
+							<RadioCards
+								id="requireTwoFactor"
+								name="requireTwoFactor"
+								label={T()("roles.two.factor.label")}
+								columns={2}
+								value={requireTwoFactor() ? "required" : "optional"}
+								onChange={(value) => setRequireTwoFactor(value === "required")}
+								disabled={isReadOnly()}
+								options={[
+									{
+										value: "optional",
+										label: T()("roles.two.factor.optional.label"),
+										description: T()("roles.two.factor.optional.description"),
+									},
+									{
+										value: "required",
+										label: T()("roles.two.factor.required.label"),
+										description: T()("roles.two.factor.required.description"),
+									},
+								]}
+								errors={getBodyError("requireTwoFactor", errors)}
+							/>
+						</Show>
 					</Show>
 					<Show when={activeTab() === "permissions"}>
 						<GrantPicker

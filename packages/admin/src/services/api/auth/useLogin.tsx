@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
-import type { ResponseBody, User } from "@types";
+import type { LoginResult, ResponseBody } from "@types";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import { getLoginReturnPath } from "@/utils/login-route";
@@ -14,7 +14,7 @@ interface Params {
 }
 
 export const loginReq = (params: Params) => {
-	return request<ResponseBody<User>>({
+	return request<ResponseBody<LoginResult>>({
 		url: "/api/v1/auth/login",
 		csrf: true,
 		method: "POST",
@@ -38,16 +38,24 @@ const useLogin = (props?: UseLoginProps) => {
 
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<User>>({
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<LoginResult>>({
 		mutationFn: loginReq,
-		getSuccessToast: () => ({
-			title: T()("toasts.common.login.success.title"),
-			message: T()("toasts.common.login.success.message"),
-		}),
+		getSuccessToast: (res) =>
+			res.data.twoFactor
+				? undefined
+				: {
+						title: T()("toasts.common.login.success.title"),
+						message: T()("toasts.common.login.success.message"),
+					},
 		invalidates: [queryKeys.roles.list(), queryKeys.roles.detail()],
-		onSuccess: () => {
-			queryClient.clear();
-			navigate(getLoginReturnPath(location.search));
+		onSuccess: (res) => {
+			//* a two-factor step means there's no session until it's done
+			if (res.data.twoFactor) {
+				navigate(`/admin/two-factor${location.search}`);
+			} else {
+				queryClient.clear();
+				navigate(getLoginReturnPath(location.search));
+			}
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

@@ -306,6 +306,34 @@ export const userResponseSchema = z.object({
 			example: true,
 		})
 		.optional(),
+	twoFactor: z
+		.object({
+			enabled: z.boolean().meta({
+				description: "Whether the user has two-factor authentication on",
+				example: true,
+			}),
+			enabledAt: z.string().nullable().meta({
+				description: "When two-factor authentication was turned on",
+				example: "2026-10-31T12:00:00.000Z",
+			}),
+			required: z
+				.boolean()
+				.meta({
+					description:
+						"Whether the user has to use it, from the config or their roles. Only returned for the authenticated user.",
+					example: false,
+				})
+				.optional(),
+			recoveryCodesRemaining: z
+				.number()
+				.meta({
+					description:
+						"Unused recovery codes. Only returned for the authenticated user.",
+					example: 10,
+				})
+				.optional(),
+		})
+		.optional(),
 	authProviders: z
 		.array(
 			z.object({
@@ -668,6 +696,20 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	revokeRefreshTokens: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().trim().meta({
+				description: "The user's ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	resetTwoFactor: {
 		body: undefined,
 		query: {
 			string: undefined,

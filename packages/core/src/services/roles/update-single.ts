@@ -16,6 +16,7 @@ const updateSingle: ServiceFn<
 			id: number;
 			name?: string;
 			description?: string | null;
+			requireTwoFactor?: boolean;
 			permissions?: string[];
 		},
 	],
@@ -76,6 +77,7 @@ const updateSingle: ServiceFn<
 		data: {
 			name: data.name,
 			description: data.description,
+			require_two_factor: data.requireTwoFactor,
 			updated_at: new Date().toISOString(),
 		},
 		where: [
