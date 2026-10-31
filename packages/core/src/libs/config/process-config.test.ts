@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest";
 import z from "zod";
+import { defaultPasswordSchema } from "../../constants/default-config.js";
 import type { LucidConfig } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
@@ -564,7 +565,7 @@ test("auth methods accept boolean shorthands", async () => {
 	);
 
 	expect(processed.auth).toMatchObject({
-		password: { enabled: false },
+		password: { enabled: false, schema: defaultPasswordSchema },
 		magicLink: { enabled: false },
 		twoFactor: { enabled: true, required: false },
 		passkeys: { enabled: false },

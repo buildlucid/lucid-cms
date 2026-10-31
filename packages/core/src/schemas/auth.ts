@@ -299,6 +299,14 @@ export const controllerSchemas = {
 					description: "Admin password",
 					example: "securepassword123",
 				}),
+				passwordConfirmation: z.string().meta({
+					description: "A repeat of the admin password",
+					example: "securepassword123",
+				}),
+			})
+			.refine((data) => data.password === data.passwordConfirmation, {
+				message: translate("server:core.input.ensure.passwords.match"),
+				path: ["passwordConfirmation"],
 			})
 			.meta({ description: "Initial admin user setup data" }),
 		query: {
@@ -390,8 +398,6 @@ export const controllerSchemas = {
 			.object({
 				password: z
 					.string()
-					.min(8)
-					.max(128)
 					.meta({
 						description:
 							"Your new password. Required when password login is enabled, and ignored otherwise.",
@@ -400,8 +406,6 @@ export const controllerSchemas = {
 					.optional(),
 				passwordConfirmation: z
 					.string()
-					.min(8)
-					.max(128)
 					.meta({
 						description: "A repeat of your new password",
 						example: "password123",

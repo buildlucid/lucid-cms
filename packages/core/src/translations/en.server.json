@@ -314,6 +314,7 @@
 	"core.input.ensure.password.is.correct": "Please ensure the password is correct and try again.",
 	"core.input.provide.new.password": "Please provide a new password.",
 	"core.input.provide.current.password": "Please provide your current password.",
+	"core.input.password.invalid": "Please choose a password that meets the requirements.",
 	"core.auth.password.authentication.disabled.message": "Password authentication is disabled. Please contact your administrator.",
 	"core.auth.magic.link.disabled.message": "Magic link login is disabled. Please contact your administrator.",
 	"core.auth.magic.link.invalid.code.message": "That code is incorrect or has expired.",

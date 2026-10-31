@@ -1,5 +1,6 @@
 import z from "zod";
 import constants from "../../constants/constants.js";
+import { defaultPasswordSchema } from "../../constants/default-config.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { adminConfigSchema } from "../admin/schema.js";
 import lucidAgent from "../agent/lucid-agent.js";
@@ -377,7 +378,18 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 	auth: z.strictObject({
 		password: z.preprocess(
 			enabledShorthand,
-			z.strictObject({ enabled: z.boolean() }),
+			z.strictObject({
+				enabled: z.boolean(),
+				schema: z
+					.custom<z.ZodType<string>>(
+						(value) =>
+							!!value &&
+							typeof value === "object" &&
+							"safeParseAsync" in value &&
+							typeof value.safeParseAsync === "function",
+					)
+					.default(defaultPasswordSchema),
+			}),
 		),
 		magicLink: z.preprocess(
 			enabledShorthand,

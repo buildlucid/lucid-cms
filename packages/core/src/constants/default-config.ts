@@ -1,5 +1,8 @@
+import z from "zod";
 import { defaultDirectories } from "../libs/resources/defaults.js";
 import type { ResolvedLucidConfig } from "../types/config.js";
+
+export const defaultPasswordSchema = z.string().min(8).max(128);
 
 export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	tables: [],
@@ -28,6 +31,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	auth: {
 		password: {
 			enabled: true,
+			schema: defaultPasswordSchema,
 		},
 		magicLink: {
 			enabled: false,

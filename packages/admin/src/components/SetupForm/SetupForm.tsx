@@ -47,6 +47,7 @@ const SetupForm: Component = () => {
 						firstName: firstName() || undefined,
 						lastName: lastName() || undefined,
 						password: password(),
+						passwordConfirmation: passwordConfirmation(),
 						captchaToken,
 					}),
 				);

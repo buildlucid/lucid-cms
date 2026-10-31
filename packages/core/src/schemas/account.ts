@@ -71,11 +71,11 @@ export const controllerSchemas = {
 	resetPassword: {
 		body: z
 			.object({
-				password: z.string().min(8).max(128).meta({
+				password: z.string().meta({
 					description: "Your new password",
 					example: "password123",
 				}),
-				passwordConfirmation: z.string().min(8).max(128).meta({
+				passwordConfirmation: z.string().meta({
 					description: "A repeat of your new password",
 					example: "password123",
 				}),
@@ -345,8 +345,6 @@ export const controllerSchemas = {
 				.optional(),
 			newPassword: z
 				.string()
-				.min(8)
-				.max(128)
 				.meta({
 					description: "Your new password",
 					example: "password123",
@@ -354,8 +352,6 @@ export const controllerSchemas = {
 				.optional(),
 			passwordConfirmation: z
 				.string()
-				.min(8)
-				.max(128)
 				.meta({
 					description: "A repeat of your new password",
 					example: "password123",

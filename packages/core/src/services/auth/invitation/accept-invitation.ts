@@ -9,6 +9,7 @@ import hashSecret from "../../../utils/helpers/hash-secret.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
+import checkPasswordRules from "../checks/check-password-rules.js";
 import savePasskey from "../passkeys/save-passkey.js";
 import verifyRegistration from "../passkeys/verify-registration.js";
 import getPendingInvitation from "./helpers/get-pending-invitation.js";
@@ -62,6 +63,18 @@ const acceptInvitation: ServiceFn<
 			},
 			data: undefined,
 		};
+	}
+
+	if (
+		passwordEnabled &&
+		data.password !== undefined &&
+		data.passkey === undefined
+	) {
+		const passwordRulesRes = await checkPasswordRules(context, {
+			password: data.password,
+			field: "password",
+		});
+		if (passwordRulesRes.error) return passwordRulesRes;
 	}
 
 	const invitationRes = await getPendingInvitation(context, {

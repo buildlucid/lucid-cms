@@ -5,6 +5,7 @@ import generateSecret from "../../utils/helpers/generate-secret.js";
 import hashSecret from "../../utils/helpers/hash-secret.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkPasswordRules from "../auth/checks/check-password-rules.js";
 
 const createInitialAdmin: ServiceFn<
 	[
@@ -34,6 +35,12 @@ const createInitialAdmin: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const passwordRulesRes = await checkPasswordRules(context, {
+		password: data.password,
+		field: "password",
+	});
+	if (passwordRulesRes.error) return passwordRulesRes;
 
 	const { secret, encryptSecret } = generateSecret(
 		context.config.secrets.encryption,

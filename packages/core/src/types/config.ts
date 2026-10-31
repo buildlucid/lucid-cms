@@ -1,4 +1,5 @@
 import type { AdminConfig } from "@lucidcms/admin/types";
+import type z from "zod";
 import type { AgentDefinition } from "../libs/agent/types.js";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type { CaptchaConfig } from "../libs/captcha/types.js";
@@ -369,6 +370,10 @@ export interface LucidConfig {
 			| {
 					/** Allow password login. Defaults to true. */
 					enabled?: boolean;
+					/**
+					 * Validates new passwords without applying transforms. Defaults to 8 to 128 characters.
+					 */
+					schema?: z.ZodType<string>;
 			  };
 		/** Emails a login link and code. Requires an email adapter. */
 		magicLink?:
@@ -742,6 +747,7 @@ export interface ResolvedLucidConfig {
 	auth: {
 		password: {
 			enabled: boolean;
+			schema: z.ZodType<string>;
 		};
 		magicLink: {
 			enabled: boolean;

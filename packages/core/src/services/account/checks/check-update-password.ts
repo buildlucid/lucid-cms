@@ -3,6 +3,7 @@ import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
 import hashSecret from "../../../utils/helpers/hash-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import checkPasswordRules from "../../auth/checks/check-password-rules.js";
 
 const checkPassed = (value: string | undefined) => {
 	return value !== undefined && value.trim() !== "";
@@ -12,7 +13,7 @@ const checkUpdatePassword: ServiceFn<
 	[
 		{
 			encryptedSecret: string;
-			password: string; // the users hashed password
+			password: string; // Stored password hash
 			currentPassword?: string;
 			newPassword?: string;
 			passwordConfirmation?: string;
@@ -24,11 +25,10 @@ const checkUpdatePassword: ServiceFn<
 		triggerPasswordReset: boolean | undefined;
 		encryptSecret: string | undefined;
 	}
-> = async (_, data) => {
+> = async (context, data) => {
 	let newPassword: string | undefined;
 	let triggerPasswordReset: boolean | undefined;
 
-	// if current password is undefined/empty, and new password is passed
 	if (
 		checkPassed(data.newPassword) &&
 		checkPassed(data.currentPassword) === false
@@ -49,7 +49,6 @@ const checkUpdatePassword: ServiceFn<
 		};
 	}
 
-	// if current password is passed, but new password is not
 	if (
 		checkPassed(data.currentPassword) &&
 		checkPassed(data.newPassword) === false
@@ -81,7 +80,12 @@ const checkUpdatePassword: ServiceFn<
 		};
 	}
 
-	// if new password does not match password confirmation
+	const passwordRulesRes = await checkPasswordRules(context, {
+		password: data.newPassword as string,
+		field: "newPassword",
+	});
+	if (passwordRulesRes.error) return passwordRulesRes;
+
 	if (data.newPassword !== data.passwordConfirmation) {
 		return {
 			error: {

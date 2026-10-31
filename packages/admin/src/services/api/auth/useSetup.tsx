@@ -11,6 +11,7 @@ interface Params {
 	firstName?: string;
 	lastName?: string;
 	password: string;
+	passwordConfirmation: string;
 	captchaToken?: string;
 }
 
@@ -25,6 +26,7 @@ export const setupReq = (params: Params) => {
 			firstName: params.firstName,
 			lastName: params.lastName,
 			password: params.password,
+			passwordConfirmation: params.passwordConfirmation,
 		},
 		captchaToken: params.captchaToken,
 	});

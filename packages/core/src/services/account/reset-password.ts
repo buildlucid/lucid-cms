@@ -11,6 +11,7 @@ import {
 	generateSecret,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkPasswordRules from "../auth/checks/check-password-rules.js";
 import sendEmail from "../email/send-email.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import getUserToken from "../user-tokens/get-single.js";
@@ -36,6 +37,12 @@ const resetPassword: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const passwordRulesRes = await checkPasswordRules(context, {
+		password: data.password,
+		field: "password",
+	});
+	if (passwordRulesRes.error) return passwordRulesRes;
 
 	const UserTokens = new UserTokensRepository(context.db);
 	const Users = new UsersRepository(context.db);
