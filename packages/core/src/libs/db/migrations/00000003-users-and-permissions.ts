@@ -45,6 +45,9 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 					"two_factor_attempts_reset_at",
 					adapter.getDataType("timestamp"),
 				)
+				.addColumn("passkey_user_id", adapter.getDataType("text"), (col) =>
+					col.unique(),
+				)
 				.addColumn(
 					"triggered_password_reset",
 					adapter.getDataType("boolean"),
@@ -451,6 +454,96 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_user_recovery_codes_user_code")
 				.on("lucid_user_recovery_codes")
 				.columns(["user_id", "code"])
+				.execute();
+
+			await db.schema
+				.createTable("lucid_user_passkeys")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").notNull().onDelete("cascade"),
+				)
+				.addColumn("credential_id", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("public_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				//* counters are unsigned 32-bit, which can outgrow a Postgres integer
+				.addColumn("counter", adapter.getDataType("real"), (col) =>
+					col.notNull().defaultTo(0),
+				)
+				.addColumn("transports", adapter.getDataType("json"))
+				.addColumn("backed_up", adapter.getDataType("boolean"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "false"),
+							),
+						)
+						.notNull(),
+				)
+				.addColumn("aaguid", adapter.getDataType("text"))
+				.addColumn("name", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("last_used_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_user_passkeys_user_id")
+				.on("lucid_user_passkeys")
+				.column("user_id")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_passkey_challenges")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("challenge", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("purpose", adapter.getDataType("varchar", 255), (col) =>
+					col.notNull(),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("cascade"),
+				)
+				.addColumn("consumed_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("expiry_date", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_passkey_challenges_expiry_date")
+				.on("lucid_passkey_challenges")
+				.column("expiry_date")
 				.execute();
 
 			await db.schema

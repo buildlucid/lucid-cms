@@ -57,6 +57,16 @@ const emailConstants = Object.freeze({
 			external: false,
 			storage: null,
 		},
+		passkeyAdded: {
+			key: "passkey-added",
+			external: false,
+			storage: null,
+		},
+		twoFactorEnabled: {
+			key: "two-factor-enabled",
+			external: false,
+			storage: null,
+		},
 		emailChangeConfirm: {
 			key: "email-change-confirm",
 			external: false,

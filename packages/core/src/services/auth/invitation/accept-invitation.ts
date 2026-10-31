@@ -1,25 +1,29 @@
+import type { RegistrationResponseJSON } from "@simplewebauthn/server";
 import constants from "../../../constants/constants.js";
-import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import hashSecret from "../../../utils/helpers/hash-secret.js";
-import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import withTransaction from "../../../utils/services/with-transaction.js";
+import savePasskey from "../passkeys/save-passkey.js";
+import verifyRegistration from "../passkeys/verify-registration.js";
+import getPendingInvitation from "./helpers/get-pending-invitation.js";
 
 /**
- * Accepts an invitation and marks it as accepted. With password login enabled this
- * sets the user's password. Without it, magic link login must be on, and the user
- * logs in with emailed codes from then on.
+ * Accepts with a password or passkey, or uses magic link login when passwords are disabled. Run
+ * without a transaction so failed passkey checks leave their challenge consumed.
  */
 const acceptInvitation: ServiceFn<
 	[
 		{
 			token: string;
 			password?: string;
+			/** A new passkey from the browser, made with the invitation's passkey options. */
+			passkey?: RegistrationResponseJSON;
 		},
 	],
 	{
@@ -28,7 +32,11 @@ const acceptInvitation: ServiceFn<
 > = async (context, data) => {
 	const passwordEnabled = context.config.auth.password.enabled;
 
-	if (!passwordEnabled && !context.config.auth.magicLink.enabled) {
+	if (
+		!passwordEnabled &&
+		!context.config.auth.magicLink.enabled &&
+		data.passkey === undefined
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -41,7 +49,11 @@ const acceptInvitation: ServiceFn<
 		};
 	}
 
-	if (passwordEnabled && data.password === undefined) {
+	if (
+		passwordEnabled &&
+		data.password === undefined &&
+		data.passkey === undefined
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -52,155 +64,23 @@ const acceptInvitation: ServiceFn<
 		};
 	}
 
-	const UserTokens = new UserTokensRepository(context.db);
-	const Users = new UsersRepository(context.db);
-	const hashedToken = hashUserToken(data.token);
-
-	const tokenRes = await UserTokens.selectSingle({
-		select: ["id", "user_id"],
-		where: [
-			{
-				key: "token",
-				operator: "=",
-				value: hashedToken,
-			},
-			{
-				key: "token_type",
-				operator: "=",
-				value: constants.userTokens.invitation,
-			},
-			{
-				key: "expiry_date",
-				operator: ">",
-				value: new Date().toISOString(),
-			},
-			{
-				key: "revoked_at",
-				operator: "is",
-				value: null,
-			},
-			{
-				key: "consumed_at",
-				operator: "is",
-				value: null,
-			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: copy("server:core.tokens.not.found.message"),
-				status: 404,
-			},
-		},
+	const invitationRes = await getPendingInvitation(context, {
+		token: data.token,
 	});
-	if (tokenRes.error) return tokenRes;
+	if (invitationRes.error) return invitationRes;
+	const { tokenId, userId } = invitationRes.data;
 
-	const userRes = await Users.selectSingle({
-		select: ["id", "invitation_accepted", "is_deleted", "is_locked"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: tokenRes.data.user_id,
-			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				status: 404,
-				message: copy("server:core.user.not.found.message"),
-			},
-		},
-	});
-	if (userRes.error) return userRes;
-
-	if (formatter.formatBoolean(userRes.data?.invitation_accepted)) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				name: copy("server:core.auth.invitations.user.already.accepted.name"),
-				message: copy(
-					"server:core.auth.invitations.user.already.accepted.message",
-				),
-			},
-			data: undefined,
-		};
-	}
-
-	if (formatter.formatBoolean(userRes.data.is_deleted)) {
-		return {
-			error: {
-				type: "authorisation",
-				status: 401,
-				message: copy("server:core.auth.login.suspended.error.message"),
-			},
-			data: undefined,
-		};
-	}
-
-	if (formatter.formatBoolean(userRes.data.is_locked)) {
-		return {
-			error: {
-				type: "authorisation",
-				status: 401,
-				message: copy("server:core.auth.login.locked.error.message"),
-			},
-			data: undefined,
-		};
-	}
-
-	const now = new Date().toISOString();
-	const consumeTokenRes = await UserTokens.updateSingle({
-		data: {
-			consumed_at: now,
-			revoked_at: now,
-			revoke_reason: constants.userTokenRevokeReasons.invitationAccepted,
-			expiry_date: now,
-		},
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: tokenRes.data.id,
-			},
-			{
-				key: "token_type",
-				operator: "=",
-				value: constants.userTokens.invitation,
-			},
-			{
-				key: "expiry_date",
-				operator: ">",
-				value: now,
-			},
-			{
-				key: "revoked_at",
-				operator: "is",
-				value: null,
-			},
-			{
-				key: "consumed_at",
-				operator: "is",
-				value: null,
-			},
-		],
-		returning: ["id"],
-	});
-	if (consumeTokenRes.error) return consumeTokenRes;
-	if (!consumeTokenRes.data) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.tokens.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
+	const passkeyRes =
+		data.passkey === undefined
+			? undefined
+			: await verifyRegistration(context, {
+					userId: userId,
+					response: data.passkey,
+				});
+	if (passkeyRes?.error) return passkeyRes;
 
 	let passwordData: { password: string; secret: string } | undefined;
-	if (passwordEnabled && data.password !== undefined) {
+	if (passwordEnabled && data.password !== undefined && !passkeyRes) {
 		const { secret, encryptSecret } = generateSecret(
 			context.config.secrets.encryption,
 		);
@@ -210,35 +90,114 @@ const acceptInvitation: ServiceFn<
 		};
 	}
 
-	const updatedUserRes = await Users.updateSingle({
-		data: {
-			...passwordData,
-			invitation_accepted: true,
-			updated_at: new Date().toISOString(),
-		},
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: tokenRes.data.user_id,
-			},
-		],
-		returning: ["id"],
-		validation: {
-			enabled: true,
-			defaultError: {
-				status: 400,
-			},
-		},
-	});
-	if (updatedUserRes.error) return updatedUserRes;
+	return withTransaction(context, async (context) => {
+		const UserTokens = new UserTokensRepository(context.db);
+		const Users = new UsersRepository(context.db);
+		const now = new Date().toISOString();
 
-	return {
-		error: undefined,
-		data: {
-			id: tokenRes.data.user_id,
-		},
-	};
+		const consumeTokenRes = await UserTokens.updateSingle({
+			data: {
+				consumed_at: now,
+				revoked_at: now,
+				revoke_reason: constants.userTokenRevokeReasons.invitationAccepted,
+				expiry_date: now,
+			},
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: tokenId,
+				},
+				{
+					key: "token_type",
+					operator: "=",
+					value: constants.userTokens.invitation,
+				},
+				{
+					key: "expiry_date",
+					operator: ">",
+					value: now,
+				},
+				{
+					key: "revoked_at",
+					operator: "is",
+					value: null,
+				},
+				{
+					key: "consumed_at",
+					operator: "is",
+					value: null,
+				},
+			],
+			returning: ["id"],
+		});
+		if (consumeTokenRes.error) return consumeTokenRes;
+		if (!consumeTokenRes.data) {
+			return {
+				error: {
+					type: "basic",
+					message: copy("server:core.tokens.not.found.message"),
+					status: 404,
+				},
+				data: undefined,
+			};
+		}
+
+		const updatedUserRes = await Users.updateSingle({
+			data: {
+				...passwordData,
+				invitation_accepted: true,
+				updated_at: now,
+			},
+			//* the user is checked again here, as they may have been locked or deleted since the first look
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: userId,
+				},
+				{
+					key: "invitation_accepted",
+					operator: "=",
+					value: context.config.db.getDefault("boolean", "false"),
+				},
+				{
+					key: "is_locked",
+					operator: "=",
+					value: context.config.db.getDefault("boolean", "false"),
+				},
+				{
+					key: "is_deleted",
+					operator: "=",
+					value: context.config.db.getDefault("boolean", "false"),
+				},
+			],
+			returning: ["id"],
+			validation: {
+				enabled: true,
+				defaultError: {
+					status: 404,
+					message: copy("server:core.tokens.not.found.message"),
+				},
+			},
+		});
+		if (updatedUserRes.error) return updatedUserRes;
+
+		if (passkeyRes) {
+			const saveRes = await savePasskey(context, {
+				userId: userId,
+				passkey: passkeyRes.data,
+			});
+			if (saveRes.error) return saveRes;
+		}
+
+		return {
+			error: undefined,
+			data: {
+				id: userId,
+			},
+		};
+	});
 };
 
 export default acceptInvitation;

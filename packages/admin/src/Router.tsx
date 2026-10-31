@@ -47,6 +47,9 @@ const MagicLinkVerifyRoute = lazyPage(
 const TwoFactorRoute = lazyPage(
 	() => import("@/containers/TwoFactorPage/TwoFactorPage"),
 );
+const PasskeyPromptRoute = lazyPage(
+	() => import("@/containers/PasskeyPromptPage/PasskeyPromptPage"),
+);
 const AcceptInvitationRoute = lazyPage(
 	() => import("@/containers/AcceptInvitationPage/AcceptInvitationPage"),
 );
@@ -479,6 +482,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route path="/email-change/revert" component={EmailChangeRevertRoute} />
 				<Route path="/two-factor" component={TwoFactorRoute} />
+				<Route path="/passkey" component={PasskeyPromptRoute} />
 				<Route path="/share/:token" component={ShareRoute} />
 			</Route>
 		</Router>

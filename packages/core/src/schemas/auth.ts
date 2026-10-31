@@ -91,6 +91,114 @@ export const twoFactorRecoveryCodesSchema = z.object({
 	}),
 });
 
+/** Binary WebAuthn values travel as unpadded base64url. */
+const base64URLSchema = z
+	.string()
+	.min(1)
+	.max(65_536)
+	.regex(/^[A-Za-z0-9_-]+={0,2}$/);
+
+const passkeyAttachmentSchema = z.enum(["platform", "cross-platform"]);
+
+const passkeyExtensionResultsSchema = z.record(z.string(), z.unknown());
+
+const passkeyCredentialDescriptorSchema = z.object({
+	id: z.string(),
+	type: z.literal("public-key"),
+	transports: z.array(z.string()).optional(),
+});
+
+/** What `navigator.credentials.get()` returns for a passkey sign-in, as JSON. */
+export const passkeyAuthenticationResponseSchema = z
+	.object({
+		id: base64URLSchema,
+		rawId: base64URLSchema,
+		type: z.literal("public-key"),
+		response: z.object({
+			clientDataJSON: base64URLSchema,
+			authenticatorData: base64URLSchema,
+			signature: base64URLSchema,
+			userHandle: base64URLSchema.optional(),
+		}),
+		authenticatorAttachment: passkeyAttachmentSchema.optional(),
+		clientExtensionResults: passkeyExtensionResultsSchema,
+	})
+	.meta({
+		description:
+			"The signed passkey response from the browser, as returned by `startAuthentication()` in `@simplewebauthn/browser`",
+	});
+
+/** What `navigator.credentials.create()` returns for a new passkey, as JSON. */
+export const passkeyRegistrationResponseSchema = z
+	.object({
+		id: base64URLSchema,
+		rawId: base64URLSchema,
+		type: z.literal("public-key"),
+		response: z.object({
+			clientDataJSON: base64URLSchema,
+			attestationObject: base64URLSchema,
+			authenticatorData: base64URLSchema.optional(),
+			transports: z.array(z.string().max(32)).max(10).optional(),
+			publicKeyAlgorithm: z.number().optional(),
+			publicKey: base64URLSchema.optional(),
+		}),
+		authenticatorAttachment: passkeyAttachmentSchema.optional(),
+		clientExtensionResults: passkeyExtensionResultsSchema,
+	})
+	.meta({
+		description:
+			"The new passkey from the browser, as returned by `startRegistration()` in `@simplewebauthn/browser`",
+	});
+
+export const passkeyLoginOptionsSchema = z
+	.object({
+		challenge: z.string().meta({
+			description: "The base64url challenge for the passkey to sign",
+			example: "dGhpcyBpcyBub3QgYSByZWFsIGNoYWxsZW5nZQ",
+		}),
+		timeout: z.number().optional(),
+		rpId: z.string().optional(),
+		allowCredentials: z.array(passkeyCredentialDescriptorSchema).optional(),
+		userVerification: z.string().optional(),
+	})
+	.meta({
+		description:
+			"Options for `navigator.credentials.get()` as JSON, to pass to `startAuthentication()` in `@simplewebauthn/browser`",
+	});
+
+export const passkeyRegistrationOptionsSchema = z
+	.object({
+		rp: z.object({ id: z.string().optional(), name: z.string() }),
+		user: z.object({
+			id: z.string(),
+			name: z.string(),
+			displayName: z.string(),
+		}),
+		challenge: z.string().meta({
+			description: "The base64url challenge for the new passkey to sign",
+			example: "dGhpcyBpcyBub3QgYSByZWFsIGNoYWxsZW5nZQ",
+		}),
+		pubKeyCredParams: z.array(
+			z.object({ alg: z.number(), type: z.literal("public-key") }),
+		),
+		timeout: z.number().optional(),
+		excludeCredentials: z.array(passkeyCredentialDescriptorSchema).optional(),
+		authenticatorSelection: z
+			.object({
+				authenticatorAttachment: passkeyAttachmentSchema.optional(),
+				residentKey: z.string().optional(),
+				requireResidentKey: z.boolean().optional(),
+				userVerification: z.string().optional(),
+			})
+			.optional(),
+		attestation: z.string().optional(),
+		extensions: passkeyExtensionResultsSchema.optional(),
+	})
+	.meta({
+		description:
+			"Options for `navigator.credentials.create()` as JSON, to pass to `startRegistration()` in `@simplewebauthn/browser`",
+	});
+
 export const controllerSchemas = {
 	getCSRF: {
 		body: undefined,
@@ -221,6 +329,10 @@ export const controllerSchemas = {
 				description: "Whether users can turn on two-factor authentication",
 				example: true,
 			}),
+			passkeys: z.boolean().meta({
+				description: "Whether users can add passkeys and sign in with them",
+				example: true,
+			}),
 			providers: z.array(AuthProviderSchema.omit({ config: true })),
 		}),
 	} satisfies ControllerSchema,
@@ -312,6 +424,34 @@ export const controllerSchemas = {
 		}),
 		response: loginResultSchema,
 	} satisfies ControllerSchema,
+	acceptInvitationPasskey: {
+		body: passkeyRegistrationResponseSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			token: z.string().meta({
+				description: "The invitation token",
+				example: "abc123def456",
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	invitationPasskeyOptions: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			token: z.string().meta({
+				description: "The invitation token",
+				example: "abc123def456",
+			}),
+		}),
+		response: passkeyRegistrationOptionsSchema,
+	} satisfies ControllerSchema,
 	sendMagicLink: {
 		body: z
 			.object({
@@ -389,6 +529,60 @@ export const controllerSchemas = {
 		params: undefined,
 		response: loginResultSchema,
 	} satisfies ControllerSchema,
+	passkeyTwoFactorOptions: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: passkeyLoginOptionsSchema,
+	} satisfies ControllerSchema,
+	passkeyTwoFactorVerify: {
+		body: passkeyAuthenticationResponseSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	passkeyTwoFactorSetup: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: passkeyRegistrationOptionsSchema,
+	} satisfies ControllerSchema,
+	passkeyTwoFactorConfirm: {
+		body: passkeyRegistrationResponseSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	passkeyLoginOptions: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: passkeyLoginOptionsSchema,
+	} satisfies ControllerSchema,
+	passkeyLogin: {
+		body: passkeyAuthenticationResponseSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 	getTwoFactorChallenge: {
 		body: undefined,
 		query: {
@@ -399,9 +593,21 @@ export const controllerSchemas = {
 		response: z.object({
 			step: twoFactorStepSchema.meta({
 				description:
-					"Whether the login is waiting for a code, or for an authenticator app to be set up",
+					"Whether the login is waiting for a code or passkey, or for an authenticator app or passkey to be set up",
 				example: "verify",
 			}),
+			methods: z
+				.object({
+					app: z.boolean().meta({
+						description: "Whether the step can use an authenticator app",
+						example: true,
+					}),
+					passkey: z.boolean().meta({
+						description: "Whether the step can use a passkey",
+						example: true,
+					}),
+				})
+				.meta({ description: "What the step can use" }),
 		}),
 	} satisfies ControllerSchema,
 	verifyTwoFactorChallenge: {

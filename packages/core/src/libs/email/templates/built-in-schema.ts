@@ -52,6 +52,14 @@ export interface Schema<Types extends object = object> {
 			};
 			blocks: never;
 		};
+		"passkey-added": {
+			context: {
+				firstName?: string | Markup | null;
+				passkeyName: string | Markup;
+				[key: string]: unknown;
+			};
+			blocks: never;
+		};
 		"password-reset-success": {
 			context: {
 				firstName?: string | Markup | null;
@@ -63,6 +71,13 @@ export interface Schema<Types extends object = object> {
 			context: {
 				firstName?: string | Markup | null;
 				resetLink: string | Markup;
+				[key: string]: unknown;
+			};
+			blocks: never;
+		};
+		"two-factor-enabled": {
+			context: {
+				firstName?: string | Markup | null;
 				[key: string]: unknown;
 			};
 			blocks: never;

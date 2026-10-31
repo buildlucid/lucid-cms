@@ -54,6 +54,7 @@ import { oauthGrantScopesTable } from "./oauth-grant-scopes.js";
 import { oauthGrantsTable } from "./oauth-grants.js";
 import { oauthRefreshTokensTable } from "./oauth-refresh-tokens.js";
 import { optionsTable } from "./options.js";
+import { passkeyChallengesTable } from "./passkey-challenges.js";
 import { previewSessionsTable } from "./preview-sessions.js";
 import { processedImagesTable } from "./processed-images.js";
 import { requestApprovalsTable } from "./request-approvals.js";
@@ -67,6 +68,7 @@ import { rolesTable } from "./roles.js";
 import { securityAuditLogsTable } from "./security-audit-logs.js";
 import { userAuthProvidersTable } from "./user-auth-providers.js";
 import { userLoginsTable } from "./user-logins.js";
+import { userPasskeysTable } from "./user-passkeys.js";
 import { userPreferencesTable } from "./user-preferences.js";
 import { userRecoveryCodesTable } from "./user-recovery-codes.js";
 import { userRolesTable } from "./user-roles.js";
@@ -130,6 +132,7 @@ export * from "./oauth-grant-scopes.js";
 export * from "./oauth-grants.js";
 export * from "./oauth-refresh-tokens.js";
 export * from "./options.js";
+export * from "./passkey-challenges.js";
 export * from "./preview-sessions.js";
 export * from "./processed-images.js";
 export * from "./request-approvals.js";
@@ -143,6 +146,7 @@ export * from "./roles.js";
 export * from "./security-audit-logs.js";
 export * from "./user-auth-providers.js";
 export * from "./user-logins.js";
+export * from "./user-passkeys.js";
 export * from "./user-preferences.js";
 export * from "./user-recovery-codes.js";
 export * from "./user-roles.js";
@@ -210,6 +214,7 @@ export const coreTableDefinitions = [
 	oauthGrantsTable,
 	oauthRefreshTokensTable,
 	optionsTable,
+	passkeyChallengesTable,
 	previewSessionsTable,
 	processedImagesTable,
 	jobsTable,
@@ -218,6 +223,7 @@ export const coreTableDefinitions = [
 	securityAuditLogsTable,
 	userAuthProvidersTable,
 	userLoginsTable,
+	userPasskeysTable,
 	userPreferencesTable,
 	userRecoveryCodesTable,
 	userRolesTable,

@@ -17,6 +17,8 @@ import serveCommand from "./commands/serve.js";
 import syncCommand from "./commands/sync.js";
 import typegenCommand from "./commands/typegen.js";
 import {
+	usersResetPasskeysCommand,
+	usersResetPasswordCommand,
 	usersResetTwoFactorCommand,
 	usersSuperAdminCommand,
 } from "./commands/users.js";
@@ -145,6 +147,24 @@ program
 	.option("-f, --force", "Skip confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(usersResetTwoFactorCommand);
+
+program
+	.command("users:reset-passkeys <email>")
+	.description(
+		"Remove all of a user's passkeys, for when a device is lost and nobody can reset them in the admin",
+	)
+	.option("-f, --force", "Skip confirmation prompt")
+	.option("--remote", remoteOptionDescription)
+	.action(usersResetPasskeysCommand);
+
+program
+	.command("users:reset-password <email>")
+	.description(
+		"Give a user a temporary password, which they have to change when they next log in",
+	)
+	.option("-f, --force", "Skip confirmation prompt")
+	.option("--remote", remoteOptionDescription)
+	.action(usersResetPasswordCommand);
 
 program
 	.command("users:super-admin <email>")

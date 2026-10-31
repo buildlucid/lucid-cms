@@ -10,6 +10,8 @@ import { getBodyError } from "@/utils/error-helpers";
 
 interface LoginFormProps {
 	showForgotPassword?: boolean;
+	/** Lets the username field offer the browser's saved passkeys. */
+	passkeyAutofill?: boolean;
 }
 
 const LoginForm: Component<LoginFormProps> = (props) => {
@@ -60,7 +62,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				}}
 				required={true}
 				autofocus={true}
-				autoComplete="username"
+				autoComplete={props.passkeyAutofill ? "username webauthn" : "username"}
 				errors={getBodyError("usernameOrEmail", login.errors)}
 			/>
 			<InsetLabelInput

@@ -34,7 +34,11 @@ export interface PublicErrorData {
 		/** A save from a tab that no longer holds the document. */
 		| "document_held"
 		/** A login's two-factor step timed out or ran out of tries, so the login has to start again. */
-		| "two_factor_expired";
+		| "two_factor_expired"
+		/** A passkey prompt's challenge was used or timed out, so it has to start again. */
+		| "passkey_expired"
+		/** The passkey used isn't on any account, so the browser should stop offering it. */
+		| "passkey_unknown";
 	key?: string;
 	errors?: ErrorResult;
 }

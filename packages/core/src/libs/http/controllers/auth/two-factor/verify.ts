@@ -55,6 +55,13 @@ const verifyTwoFactorChallengeController = factory.createHandlers(
 				message: copy("server:core.auth.two.factor.verify.not.ready.message"),
 			});
 		}
+		if (!challengeRes.data.methods.app) {
+			throw new LucidAPIError({
+				type: "basic",
+				status: 400,
+				message: copy("server:core.auth.two.factor.app.unavailable.message"),
+			});
+		}
 
 		const verifyRes = await serviceWrapper(
 			authServices.twoFactor.verifyChallenge,

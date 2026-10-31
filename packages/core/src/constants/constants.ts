@@ -41,6 +41,10 @@ export default Object.freeze({
 	jwt: {
 		algorithm: "HS256" as const,
 	},
+	password: {
+		/** Random bytes in a temporary password from `lucidcms users:reset-password`, 16 characters once encoded. */
+		temporaryBytes: 12,
+	},
 	scrypt: {
 		N: 2 ** 16, // 65536 iterations
 		r: 8,
@@ -261,6 +265,27 @@ export default Object.freeze({
 		/** Characters per recovery code, shown as two halves joined by a dash. */
 		recoveryCodeLength: 10,
 	},
+	passkeys: {
+		/** How long a sign-in or setup prompt has before its challenge expires. Browsers are told the same. */
+		challengeExpirationMinutes: 5,
+		challengeBytes: 32,
+		userHandleBytes: 32,
+		maxPerUser: 10,
+		nameMaxLength: 50,
+		/**
+		 * Signing algorithms offered and accepted: EdDSA, ES256 and RS256. Pinned so a runtime that
+		 * supports ML-DSA doesn't create passkeys another runtime can't check.
+		 */
+		algorithms: [-8, -7, -257],
+		/** Recorded as the login method for passkey sign-ins. */
+		authMethod: "passkey",
+		purposes: {
+			login: "login",
+			registration: "registration",
+			/** A login's two-factor step, answered with one of that user's passkeys. */
+			twoFactor: "two_factor",
+		} as const,
+	},
 	presignedUrlExpiration: 3600000, // 1 hour in ms
 	uploadSessionExpiration: 3600000, // 1 hour in ms
 	uploadSessionPartSize: 8 * 1024 * 1024, // 8MiB
@@ -478,6 +503,7 @@ export default Object.freeze({
 			roleChange: "role_change",
 			authProviderUnlink: "auth_provider_unlink",
 			twoFactorChange: "two_factor_change",
+			passkeyChange: "passkey_change",
 		},
 		redactedValue: "[REDACTED]",
 	} as const,

@@ -1,3 +1,4 @@
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { TbOutlineMailX } from "solid-icons/tb";
 import {
@@ -14,12 +15,15 @@ import AcceptInvitationForm from "@/components/AcceptInvitationForm/AcceptInvita
 import AuthSkeleton from "@/components/AuthSkeleton/AuthSkeleton";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
+import OrDivider from "@/components/OrDivider/OrDivider";
+import PasskeyButton from "@/components/PasskeyButton/PasskeyButton";
 import ProviderButton from "@/components/ProviderButton/ProviderButton";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import constants from "@/constants";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
+import { getPostLoginPath } from "@/utils/passkeys";
 import spawnToast from "@/utils/spawn-toast";
 
 const AcceptInvitationPage: Component = () => {
@@ -56,6 +60,7 @@ const AcceptInvitationPage: Component = () => {
 	//* pages with captcha forms wait for its settings, so the widget's space is there from the first paint
 	const captchaSettings = api.captcha.useGetSettings();
 	const initiateProvider = api.auth.useInitiateProvider();
+	const acceptWithPasskey = api.auth.useAcceptInvitationPasskey();
 
 	// ---------------------------------------
 	// Derived state
@@ -80,6 +85,10 @@ const AcceptInvitationPage: Component = () => {
 	//* without password login, magic link users accept with a single button
 	const passwordless = createMemo(
 		() => !passwordEnabled() && providers.data?.data.magicLink === true,
+	);
+	const providerList = createMemo(() => providers.data?.data.providers ?? []);
+	const passkeyOption = createMemo(
+		() => providers.data?.data.passkeys === true && browserSupportsWebAuthn(),
 	);
 
 	// ----------------------------------------
@@ -157,22 +166,24 @@ const AcceptInvitationPage: Component = () => {
 					</div>
 				</Show>
 
-				<Show
-					when={
-						providers.data?.data.providers?.length &&
-						providers.data?.data.providers?.length > 0
-					}
-				>
+				<Show when={passkeyOption() || providerList().length > 0}>
 					<div class="my-8">
 						<Show when={passwordEnabled() || passwordless()}>
-							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
-								<span class="w-20 h-px bg-border" />
-								<span class="text-body text-sm mx-2.5">{T()("common.or")}</span>
-								<span class="w-20 h-px bg-border" />
-							</span>
+							<OrDivider class="my-8" />
 						</Show>
 						<div class="flex flex-col gap-4 items-center">
-							<For each={providers.data?.data.providers ?? []}>
+							<Show when={passkeyOption()}>
+								<PasskeyButton
+									label={T()("auth.passkey.use.instead.option")}
+									loading={acceptWithPasskey.action.isPending}
+									onClick={() =>
+										acceptWithPasskey.action.mutate({
+											token: token() as string,
+										})
+									}
+								/>
+							</Show>
+							<For each={providerList()}>
 								{(p) => (
 									<ProviderButton
 										provider={p}
@@ -183,6 +194,7 @@ const AcceptInvitationPage: Component = () => {
 												body: {
 													invitationToken: token() as string,
 													actionType: "invitation",
+													redirectPath: getPostLoginPath(""),
 												},
 											});
 										}}

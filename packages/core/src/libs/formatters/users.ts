@@ -36,6 +36,13 @@ export interface UserPropT {
 		provider_user_id: string;
 		linked_at: Date | string | null;
 	}[];
+	passkeys?: {
+		id: number;
+		name: string;
+		backed_up: BooleanInt;
+		last_used_at: Date | string | null;
+		created_at: Date | string | null;
+	}[];
 	roles?: {
 		id: number;
 		name: string;
@@ -143,6 +150,15 @@ const formatSingle = (props: {
 				providerKey: p.provider_key,
 				providerUserId: p.provider_user_id,
 				linkedAt: formatter.formatDate(p.linked_at),
+			};
+		});
+		response.passkeys = (props.user.passkeys || []).map((p) => {
+			return {
+				id: p.id,
+				name: p.name,
+				backedUp: formatter.formatBoolean(p.backed_up),
+				lastUsedAt: formatter.formatDate(p.last_used_at),
+				createdAt: formatter.formatDate(p.created_at),
 			};
 		});
 	}

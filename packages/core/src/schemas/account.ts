@@ -1,7 +1,10 @@
 import z from "zod";
+import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../exports/types.js";
 import { translate } from "../libs/i18n/index.js";
 import {
+	passkeyRegistrationOptionsSchema,
+	passkeyRegistrationResponseSchema,
 	recoveryCodeSchema,
 	twoFactorCodeSchema,
 	twoFactorProofSchema,
@@ -34,6 +37,13 @@ const emailChangeTokenParamsSchema = z.object({
 	token: z.string().meta({
 		description: "A unique token granted when an email change is requested",
 		example: "838ece1033bf7c7468e873e79ba2a3ec",
+	}),
+});
+
+const passkeyParamsSchema = z.object({
+	id: z.string().trim().regex(/^\d+$/).meta({
+		description: "The passkey's ID",
+		example: "1",
 	}),
 });
 
@@ -224,6 +234,61 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	createPasskeyOptions: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: passkeyRegistrationOptionsSchema,
+	} satisfies ControllerSchema,
+	createPasskey: {
+		body: passkeyRegistrationResponseSchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.object({
+			id: z.number().meta({
+				description: "The new passkey's ID",
+				example: 1,
+			}),
+			name: z.string().meta({
+				description: "The new passkey's name, from its provider",
+				example: "Apple Passwords",
+			}),
+		}),
+	} satisfies ControllerSchema,
+	updatePasskey: {
+		body: z.object({
+			name: z
+				.string()
+				.trim()
+				.min(1)
+				.max(constants.passkeys.nameMaxLength)
+				.meta({
+					description: "The passkey's new name",
+					example: "Work laptop",
+				}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: passkeyParamsSchema,
+		response: undefined,
+	} satisfies ControllerSchema,
+	deletePasskey: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: passkeyParamsSchema,
 		response: undefined,
 	} satisfies ControllerSchema,
 	revokeAllRefreshTokens: {

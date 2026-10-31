@@ -130,6 +130,7 @@ export type User = {
 		providerUserId: string;
 		linkedAt: string | null;
 	}>;
+	passkeys?: Passkey[];
 	/** Only returned for the authenticated user. */
 	preferences?: UserPreferences;
 };
@@ -202,7 +203,18 @@ export type AuthProviders = {
 	magicLink: boolean;
 	/** Whether users can turn on two-factor authentication. */
 	twoFactor: boolean;
+	/** Whether users can add passkeys and sign in with them. */
+	passkeys: boolean;
 	providers: AuthProvider[];
+};
+
+export type Passkey = {
+	id: number;
+	name: string;
+	/** Whether it's synced between devices, such as by a password manager. */
+	backedUp: boolean;
+	lastUsedAt: string | null;
+	createdAt: string | null;
 };
 
 export type TwoFactorStep = "verify" | "setup";
@@ -214,8 +226,15 @@ export type LoginResult = {
 
 export type TwoFactorProof = { code: string } | { recoveryCode: string };
 
+/** What a login's two-factor step can use: an authenticator app, a passkey or both. */
+export type TwoFactorMethods = {
+	app: boolean;
+	passkey: boolean;
+};
+
 export type TwoFactorChallenge = {
 	step: TwoFactorStep;
+	methods: TwoFactorMethods;
 };
 
 /** A new authenticator app secret, as a key to type in and an otpauth:// link for the QR code. */

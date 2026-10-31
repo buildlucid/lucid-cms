@@ -56,7 +56,7 @@ const acceptInvitationController = factory.createHandlers(
 		const acceptInvitation = await serviceWrapper(
 			authServices.invitation.acceptInvitation,
 			{
-				transaction: true,
+				transaction: false,
 				defaultError: {
 					type: "basic",
 					name: copy("server:core.routes.accept.invitation.error.name"),

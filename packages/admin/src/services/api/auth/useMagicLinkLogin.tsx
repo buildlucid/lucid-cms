@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type { LoginResult, ResponseBody } from "@types";
 import T from "@/translations";
-import { getLoginReturnPath } from "@/utils/login-route";
+import { getPostLoginPath } from "@/utils/passkeys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -48,7 +48,7 @@ const useMagicLinkLogin = (props?: UseMagicLinkLoginProps) => {
 				);
 			} else {
 				queryClient.clear();
-				navigate(getLoginReturnPath(location.search));
+				navigate(getPostLoginPath(location.search));
 			}
 			props?.onSuccess?.();
 		},

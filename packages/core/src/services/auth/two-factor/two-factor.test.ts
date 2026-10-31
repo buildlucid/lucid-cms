@@ -427,6 +427,37 @@ test("turning it off needs a code, and isn't allowed when it's required", async 
 	expect(codes).toHaveLength(0);
 });
 
+test("when it's required, the app can still be turned off by someone whose passkeys cover it", async () => {
+	const userId = await createUser("tf-passkey-cover");
+	const role = await context.db.kysely
+		.insertInto("lucid_roles")
+		.values({ name: "tf-passkey-cover-role", require_two_factor: true })
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	await context.db.kysely
+		.insertInto("lucid_user_roles")
+		.values({ user_id: userId, role_id: role.id })
+		.execute();
+	const { secret } = await enable(userId);
+
+	await context.db.kysely
+		.insertInto("lucid_user_passkeys")
+		.values({
+			user_id: userId,
+			credential_id: "tf-passkey-cover",
+			public_key: "key",
+			name: "Passkey",
+		})
+		.execute();
+
+	const res = await disableTwoFactor(context, {
+		userId,
+		superAdmin: false,
+		proof: { code: nextCode(secret) },
+	});
+	expect(res.error).toBeUndefined();
+});
+
 test("it can be required for everyone, for super admins only, or by a role", async () => {
 	const withRequired = (required: boolean | "super-admins") => ({
 		...context,

@@ -74,6 +74,11 @@ export const usersTable = defineTable("lucid_users", (adapter) => ({
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
 		},
+		/** The random user handle stored with the user's passkeys, made when they add their first one. */
+		passkey_user_id: {
+			schema: z.string().nullable(),
+			type: "text",
+		},
 		triggered_password_reset: {
 			schema: z.union([
 				z.literal(adapter.config.defaults.boolean.true),
@@ -237,6 +242,22 @@ export const usersTable = defineTable("lucid_users", (adapter) => ({
 				)
 				.optional(),
 		},
+		passkeys: {
+			schema: z
+				.array(
+					z.object({
+						id: z.number(),
+						name: z.string(),
+						backed_up: z.union([
+							z.literal(adapter.config.defaults.boolean.true),
+							z.literal(adapter.config.defaults.boolean.false),
+						]),
+						last_used_at: z.union([z.string(), z.date()]).nullable(),
+						created_at: z.union([z.string(), z.date()]).nullable(),
+					}),
+				)
+				.optional(),
+		},
 		roles: {
 			schema: z
 				.array(
@@ -309,6 +330,8 @@ export interface LucidUsers {
 	two_factor_last_step: number | null;
 	two_factor_failed_attempts: Generated<number>;
 	two_factor_attempts_reset_at: TimestampMutable;
+	/** Base64url user handle, shared by all of the user's passkeys. Never their email or ID. */
+	passkey_user_id: string | null;
 	triggered_password_reset: ColumnType<
 		BooleanInt,
 		BooleanInt | undefined,

@@ -21,6 +21,7 @@ interface UserRowProps {
 			| "passwordReset"
 			| "revokeRefreshTokens"
 			| "resetTwoFactor"
+			| "resetPasskeys"
 			| "restore"
 			| "deletePermanently"
 			| "resendInvitation"
@@ -54,7 +55,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 	const canRevokeRefreshTokens = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.UsersUpdate]).all;
 	});
-	const canResetTwoFactor = createMemo(() => {
+	const canResetSignInMethods = createMemo(() => {
 		return (
 			canUpdateNotSelf() &&
 			(props.user.superAdmin !== true ||
@@ -175,8 +176,20 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 								props.rowTarget.setTargetId(props.user.id);
 								props.rowTarget.setTrigger("resetTwoFactor", true);
 							},
-							permission: canResetTwoFactor(),
+							permission: canResetSignInMethods(),
 							show: props.user.twoFactor?.enabled === true,
+							variant: "danger",
+						},
+						{
+							label: T()("users.passkeys.reset.action"),
+							type: "button",
+							icon: "fingerprint-off",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.user.id);
+								props.rowTarget.setTrigger("resetPasskeys", true);
+							},
+							permission: canResetSignInMethods(),
+							show: (props.user.passkeys?.length ?? 0) > 0,
 							variant: "danger",
 						},
 						{

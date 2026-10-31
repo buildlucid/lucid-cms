@@ -11,7 +11,8 @@
 - Added captcha adapters to protect login and other public forms, with `toolkit.captcha` for your own endpoints and new Cloudflare Turnstile and Google reCAPTCHA plugins.
 - Added magic link login with `auth.magicLink`, which emails users a login link and code.
 - Added two-factor authentication with `auth.twoFactor`, which can be required for everyone, super admins or specific roles.
-- Added `lucidcms users:reset-two-factor` and `lucidcms users:super-admin` for getting back into the admin when you're locked out.
+- Added `lucidcms users:` commands for getting back into the admin when you're locked out.
+- Added passkey login with `auth.passkeys`, which also works as two-factor authentication.
 - Added a `locale` option to content API and toolkit document and media reads, which returns translations in one locale.
 - Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
 - Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.

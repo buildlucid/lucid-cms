@@ -89,16 +89,19 @@ export default defineConfig({
 		// 	level: "debug",
 		// },
 		auth: {
-			password: {
-				enabled: true,
-			},
-			magicLink: {
-				enabled: true,
-			},
-			twoFactor: {
-				enabled: true,
-				// required: "super-admins",
-			},
+			// password: {
+			// 	enabled: true,
+			// },
+			// magicLink: {
+			// 	enabled: true,
+			// },
+			// twoFactor: {
+			// 	enabled: true,
+			// 	required: "super-admins",
+			// },
+			// passkeys: {
+			// 	enabled: true,
+			// },
 		},
 		secrets: {
 			encryption: env.LUCID_ENCRYPTION_SECRET,

@@ -385,6 +385,9 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			enabled: z.boolean(),
 			required: z.union([z.boolean(), z.literal("super-admins")]),
 		}),
+		passkeys: z.strictObject({
+			enabled: z.boolean(),
+		}),
 		providers: z.array(AuthProviderSchema),
 	}),
 	ai: z

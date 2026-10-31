@@ -5,6 +5,10 @@ import confirmEmailChangeController from "../../../controllers/account/confirm-e
 import createProfilePictureUploadSessionController from "../../../controllers/account/create-profile-picture-upload-session.js";
 import deleteProfilePictureController from "../../../controllers/account/delete-profile-picture.js";
 import getMeController from "../../../controllers/account/get-me.js";
+import createPasskeyController from "../../../controllers/account/passkeys/create.js";
+import deletePasskeyController from "../../../controllers/account/passkeys/delete.js";
+import createPasskeyOptionsController from "../../../controllers/account/passkeys/options.js";
+import updatePasskeyController from "../../../controllers/account/passkeys/update.js";
 import resetPasswordController from "../../../controllers/account/reset-password.js";
 import revertEmailChangeController from "../../../controllers/account/revert-email-change.js";
 import revokeRefreshTokensController from "../../../controllers/account/revoke-refresh-tokens.js";
@@ -62,6 +66,10 @@ const accountRoutes = new Hono<LucidHonoGeneric>()
 	.post("/two-factor/confirm", ...confirmTwoFactorController)
 	.post("/two-factor/recovery-codes", ...regenerateRecoveryCodesController)
 	.post("/two-factor/disable", ...disableTwoFactorController)
+	.post("/passkeys/options", ...createPasskeyOptionsController)
+	.post("/passkeys", ...createPasskeyController)
+	.patch("/passkeys/:id", ...updatePasskeyController)
+	.delete("/passkeys/:id", ...deletePasskeyController)
 	.get("/reset-password/:token", ...verifyResetPasswordController)
 	.delete("/auth-providers/:providerId", ...unlinkAuthProviderController)
 	.delete("/profile-picture", ...deleteProfilePictureController);

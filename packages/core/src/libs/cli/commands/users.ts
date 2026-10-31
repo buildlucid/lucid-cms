@@ -13,7 +13,8 @@ const runUserCommand = (props: {
 	question: string;
 	success: string;
 	options?: UserCommandOptions;
-	change: (run: RuntimeTaskClient) => Promise<unknown>;
+	/** Makes the change. A returned line is shown after the success message. */
+	change: (run: RuntimeTaskClient) => Promise<string | undefined>;
 }) =>
 	runTaskCommand(
 		props.failure,
@@ -28,7 +29,7 @@ const runUserCommand = (props: {
 				return 0;
 			}
 
-			await props.change(run);
+			const note = await props.change(run);
 
 			cliLogger.log(
 				cliLogger.createBadge("LUCID CMS"),
@@ -36,8 +37,9 @@ const runUserCommand = (props: {
 				cliLogger.color.green("successfully"),
 				"in",
 				cliLogger.color.green(cliLogger.formatMilliseconds(elapsed())),
-				{ spaceAfter: true, spaceBefore: true },
+				{ spaceAfter: note === undefined, spaceBefore: true },
 			);
+			if (note !== undefined) cliLogger.info(note, { spaceAfter: true });
 			return 0;
 		},
 		props.options,
@@ -53,7 +55,42 @@ export const usersResetTwoFactorCommand = (
 		question: `Turn off two-factor authentication for ${email}?`,
 		success: `Two-factor authentication turned off for ${email}`,
 		options,
-		change: (run) => run("users:reset-two-factor", { email }),
+		change: async (run) => {
+			await run("users:reset-two-factor", { email });
+			return undefined;
+		},
+	});
+
+/** Removes all of a user's passkeys, such as when a device is lost and nobody can reset them in the admin. */
+export const usersResetPasskeysCommand = (
+	email: string,
+	options?: UserCommandOptions,
+) =>
+	runUserCommand({
+		failure: "Passkey reset failed",
+		question: `Remove all passkeys for ${email}?`,
+		success: `Passkeys removed for ${email}`,
+		options,
+		change: async (run) => {
+			await run("users:reset-passkeys", { email });
+			return undefined;
+		},
+	});
+
+/** Gives a user a temporary password, which they have to change when they next log in. */
+export const usersResetPasswordCommand = (
+	email: string,
+	options?: UserCommandOptions,
+) =>
+	runUserCommand({
+		failure: "Password reset failed",
+		question: `Give ${email} a temporary password? Their current one stops working.`,
+		success: `Password reset for ${email}`,
+		options,
+		change: async (run) => {
+			const { password } = await run("users:reset-password", { email });
+			return `Temporary password: ${cliLogger.color.cyan(password)}. They'll be asked to change it when they log in.`;
+		},
 	});
 
 /** Makes a user a super admin, for when no super admin can log in. */
@@ -66,5 +103,8 @@ export const usersSuperAdminCommand = (
 		question: `Make ${email} a super admin?`,
 		success: `${email} made a super admin`,
 		options,
-		change: (run) => run("users:super-admin", { email }),
+		change: async (run) => {
+			await run("users:super-admin", { email });
+			return undefined;
+		},
 	});

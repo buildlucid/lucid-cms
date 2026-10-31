@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/solid-query";
 import type { LoginResult, ResponseBody } from "@types";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
-import { getLoginReturnPath } from "@/utils/login-route";
+import { getPostLoginPath } from "@/utils/passkeys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -54,7 +54,7 @@ const useLogin = (props?: UseLoginProps) => {
 				navigate(`/admin/two-factor${location.search}`);
 			} else {
 				queryClient.clear();
-				navigate(getLoginReturnPath(location.search));
+				navigate(getPostLoginPath(location.search));
 			}
 			props?.onSuccess?.();
 		},

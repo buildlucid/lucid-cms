@@ -65,6 +65,7 @@ const ViewUserDrawer: Component<{
 						user: user.data?.data,
 					}}
 					providers={providers.data?.data.providers}
+					passkeysEnabled={providers.data?.data.passkeys === true}
 				/>
 			</Drawer.Body>
 			<Drawer.Footer>
@@ -90,6 +91,7 @@ const ViewUserPanelContent: Component<{
 		user: User | undefined;
 	};
 	providers: AuthProviders["providers"] | undefined;
+	passkeysEnabled: boolean;
 }> = (props) => {
 	// ---------------------------------
 	// State
@@ -208,6 +210,17 @@ const ViewUserPanelContent: Component<{
 								? T()("common.on")
 								: T()("common.off"),
 							show: props.state.user?.twoFactor !== undefined,
+						},
+						{
+							label: T()("account.passkeys.title"),
+							value: props.state.user?.passkeys?.length
+								? T()("users.passkeys.count", {
+										count: props.state.user.passkeys.length,
+									})
+								: T()("users.passkeys.none"),
+							show:
+								props.passkeysEnabled &&
+								props.state.user?.passkeys !== undefined,
 						},
 					]}
 				/>

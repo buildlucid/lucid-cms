@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type { LoginResult, ResponseBody } from "@types";
+import { getPostLoginPath } from "@/utils/passkeys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -43,7 +44,7 @@ const useAcceptInvitation = (props?: UseAcceptInvitationProps) => {
 				navigate("/admin/two-factor");
 			} else {
 				queryClient.clear();
-				navigate("/admin");
+				navigate(getPostLoginPath(""));
 			}
 			props?.onSuccess?.();
 		},

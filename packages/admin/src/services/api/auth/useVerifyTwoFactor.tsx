@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type { ErrorResponse, ResponseBody, TwoFactorProof } from "@types";
 import T from "@/translations";
-import { getLoginReturnPath } from "@/utils/login-route";
+import { getPostLoginPath } from "@/utils/passkeys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -35,7 +35,7 @@ const useVerifyTwoFactor = (props?: UseVerifyTwoFactorProps) => {
 		}),
 		onSuccess: () => {
 			queryClient.clear();
-			navigate(getLoginReturnPath(location.search));
+			navigate(getPostLoginPath(location.search));
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

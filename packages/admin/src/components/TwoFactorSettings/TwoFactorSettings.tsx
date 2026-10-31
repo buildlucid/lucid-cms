@@ -6,10 +6,10 @@ import {
 	TbOutlineRefresh,
 } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
+import AuthMethodRow from "@/components/AuthMethodRow/AuthMethodRow";
 import Button from "@/components/Button/Button";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import TwoFactorDisableModal from "@/components/TwoFactorDisableModal/TwoFactorDisableModal";
-import TwoFactorMethodRow from "@/components/TwoFactorMethodRow/TwoFactorMethodRow";
 import TwoFactorRecoveryCodesModal from "@/components/TwoFactorRecoveryCodesModal/TwoFactorRecoveryCodesModal";
 import TwoFactorSetupModal from "@/components/TwoFactorSetupModal/TwoFactorSetupModal";
 import constants from "@/constants";
@@ -18,6 +18,8 @@ import dateHelpers from "@/utils/date-helpers";
 
 interface TwoFactorSettingsProps {
 	twoFactor: User["twoFactor"];
+	/** Passkeys meet a two-factor requirement too. */
+	hasPasskeys: boolean;
 }
 
 const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
@@ -31,6 +33,7 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 	// Memos
 	const enabled = createMemo(() => props.twoFactor?.enabled === true);
 	const required = createMemo(() => props.twoFactor?.required === true);
+	const canTurnOff = createMemo(() => !required() || props.hasPasskeys);
 	const recoveryCodesRemaining = createMemo(
 		() => props.twoFactor?.recoveryCodesRemaining ?? 0,
 	);
@@ -51,9 +54,11 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 					<InfoRow.Content
 						title={T()("account.two.factor.title")}
 						description={
-							required()
-								? T()("account.two.factor.required.description")
-								: T()("account.two.factor.description")
+							!required()
+								? T()("account.two.factor.description")
+								: props.hasPasskeys
+									? T()("account.two.factor.passkeys.description")
+									: T()("account.two.factor.required.description")
 						}
 						actions={
 							<Button
@@ -72,12 +77,12 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 				<InfoRow.Content
 					title={T()("account.two.factor.title")}
 					description={
-						required()
-							? T()("account.two.factor.enabled.required.description")
-							: T()("account.two.factor.enabled.description")
+						canTurnOff()
+							? T()("account.two.factor.enabled.description")
+							: T()("account.two.factor.enabled.required.description")
 					}
 					actions={
-						<Show when={!required()}>
+						<Show when={canTurnOff()}>
 							<Button
 								variant="danger-outline"
 								size="sm"
@@ -90,7 +95,7 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 					}
 				>
 					<div class="flex flex-col gap-3">
-						<TwoFactorMethodRow
+						<AuthMethodRow
 							icon={<TbOutlineDeviceMobile class="size-4.5" />}
 							title={T()("account.two.factor.app.title")}
 							detail={
@@ -103,17 +108,17 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 							action={
 								<Button
 									variant="ghost"
-									size="sm"
+									size="xs"
 									shape="square"
 									title={T()("account.two.factor.app.change.action")}
 									aria-label={T()("account.two.factor.app.change.action")}
 									onClick={() => setSetupOpen(true)}
 								>
-									<TbOutlineArrowsExchange class="size-4" />
+									<TbOutlineArrowsExchange class="size-3.5" />
 								</Button>
 							}
 						/>
-						<TwoFactorMethodRow
+						<AuthMethodRow
 							icon={<TbOutlineKey class="size-4.5" />}
 							title={T()("account.two.factor.recovery.title")}
 							detail={
@@ -130,7 +135,7 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 							action={
 								<Button
 									variant="ghost"
-									size="sm"
+									size="xs"
 									shape="square"
 									title={T()("account.two.factor.recovery.regenerate.action")}
 									aria-label={T()(
@@ -138,7 +143,7 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 									)}
 									onClick={() => setRecoveryCodesOpen(true)}
 								>
-									<TbOutlineRefresh class="size-4" />
+									<TbOutlineRefresh class="size-3.5" />
 								</Button>
 							}
 						/>

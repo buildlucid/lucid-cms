@@ -1,3 +1,4 @@
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { useNavigate } from "@solidjs/router";
 import { TbOutlineAlertTriangle, TbOutlineMail } from "solid-icons/tb";
 import {
@@ -15,14 +16,17 @@ import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import LoginForm from "@/components/LoginForm/LoginForm";
 import MagicLinkRequestForm from "@/components/MagicLinkRequestForm/MagicLinkRequestForm";
+import OrDivider from "@/components/OrDivider/OrDivider";
+import PasskeyButton from "@/components/PasskeyButton/PasskeyButton";
 import ProviderButton from "@/components/ProviderButton/ProviderButton";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import constants from "@/constants";
 import type { MagicLinkPageState } from "@/containers/MagicLinkPage/MagicLinkPage";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
+import { usePasskeyAutofill } from "@/hooks/usePasskeyAutofill/usePasskeyAutofill";
 import api from "@/services/api";
 import T from "@/translations";
-import { getLoginReturnPath } from "@/utils/login-route";
+import { getPostLoginPath } from "@/utils/passkeys";
 import spawnToast from "@/utils/spawn-toast";
 
 const LoginPage: Component = () => {
@@ -45,6 +49,7 @@ const LoginPage: Component = () => {
 	//* pages with captcha forms wait for its settings, so the widget's space is there from the first paint
 	const captchaSettings = api.captcha.useGetSettings();
 	const initiateProvider = api.auth.useInitiateProvider();
+	const passkeyLogin = api.auth.usePasskeyLogin();
 
 	// ----------------------------------------
 	// Memos
@@ -72,9 +77,29 @@ const LoginPage: Component = () => {
 	const showMagicLinkOption = createMemo(
 		() => passwordEnabled() && magicLinkEnabled(),
 	);
+	const passkeysEnabled = createMemo(
+		() => providers.data?.data.passkeys === true && browserSupportsWebAuthn(),
+	);
+	//* autofill needs the form's username or email field on the page to offer passkeys in
+	const passkeyAutofillEnabled = createMemo(
+		() =>
+			!isLoading() &&
+			isSuccess() &&
+			passkeysEnabled() &&
+			(passwordEnabled() || magicLinkEnabled()),
+	);
+	const showAlternatives = createMemo(
+		() =>
+			passkeysEnabled() || showMagicLinkOption() || providerList().length > 0,
+	);
 
 	// ----------------------------------------
 	// Effects
+	usePasskeyAutofill({
+		enabled: passkeyAutofillEnabled,
+		paused: () => passkeyLogin.action.isPending,
+	});
+
 	createEffect(() => {
 		if (setupRequired.isSuccess && setupRequired.data.data.setupRequired) {
 			navigate("/admin/setup");
@@ -136,10 +161,14 @@ const LoginPage: Component = () => {
 				<div class="my-10">
 					<Switch>
 						<Match when={passwordEnabled()}>
-							<LoginForm showForgotPassword={true} />
+							<LoginForm
+								showForgotPassword={true}
+								passkeyAutofill={passkeysEnabled()}
+							/>
 						</Match>
 						<Match when={magicLinkEnabled()}>
 							<MagicLinkRequestForm
+								passkeyAutofill={passkeysEnabled()}
 								onSent={(email) => {
 									navigate(`/admin/magic-link${location.search}`, {
 										state: { email } satisfies MagicLinkPageState,
@@ -150,16 +179,19 @@ const LoginPage: Component = () => {
 					</Switch>
 				</div>
 
-				<Show when={showMagicLinkOption() || providerList().length > 0}>
+				<Show when={showAlternatives()}>
 					<div class="my-8">
 						<Show when={passwordEnabled() || magicLinkEnabled()}>
-							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
-								<span class="w-20 h-px bg-border" />
-								<span class="text-body text-sm mx-2.5">{T()("common.or")}</span>
-								<span class="w-20 h-px bg-border" />
-							</span>
+							<OrDivider class="my-8" />
 						</Show>
 						<div class="flex flex-col gap-4 items-center">
+							<Show when={passkeysEnabled()}>
+								<PasskeyButton
+									label={T()("auth.passkey.option")}
+									loading={passkeyLogin.action.isPending}
+									onClick={() => passkeyLogin.action.mutate({})}
+								/>
+							</Show>
 							<Show when={showMagicLinkOption()}>
 								{/* matches ProviderButton's text colour, which is quieter than the outline variant */}
 								<Link
@@ -182,7 +214,7 @@ const LoginPage: Component = () => {
 												providerKey: p.key,
 												body: {
 													actionType: "login",
-													redirectPath: getLoginReturnPath(location.search),
+													redirectPath: getPostLoginPath(location.search),
 												},
 											});
 										}}

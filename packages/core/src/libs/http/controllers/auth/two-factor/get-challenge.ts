@@ -14,7 +14,7 @@ const factory = createFactory();
 const getTwoFactorChallengeController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Returns the two-factor step the current login is waiting on, using the challenge cookie set by logging in.",
+			"Returns the two-factor step the current login is waiting on, and whether it can use an authenticator app, a passkey or both, using the challenge cookie set by logging in.",
 		tags: ["auth"],
 		summary: "Get Two-Factor Login",
 		responses: openAPI.responses({
@@ -37,7 +37,10 @@ const getTwoFactorChallengeController = factory.createHandlers(
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: { step: challengeRes.data.step },
+				data: {
+					step: challengeRes.data.step,
+					methods: challengeRes.data.methods,
+				},
 			}),
 		);
 	},

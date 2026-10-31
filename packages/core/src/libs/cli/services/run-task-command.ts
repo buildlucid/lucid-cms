@@ -22,6 +22,8 @@ const taskSteps: Record<RuntimeTaskName, string> = {
 	"jobs:list": "Listing jobs",
 	"jobs:schedule": "Running the job",
 	"users:reset-two-factor": "Resetting two-factor authentication",
+	"users:reset-passkeys": "Removing passkeys",
+	"users:reset-password": "Resetting the password",
 	"users:super-admin": "Making the user a super admin",
 	plugin: "Running the plugin's task",
 };

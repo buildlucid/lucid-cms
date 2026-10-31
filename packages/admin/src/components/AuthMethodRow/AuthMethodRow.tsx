@@ -1,16 +1,18 @@
 import classNames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
 
-interface TwoFactorMethodRowProps {
+interface AuthMethodRowProps {
 	icon: JSXElement;
 	title: string;
+	/** Shown after the title, such as a status pill. */
+	badge?: JSXElement;
 	detail: string;
 	/** Shows the detail as a warning. */
 	warning?: boolean;
 	action?: JSXElement;
 }
 
-const TwoFactorMethodRow: Component<TwoFactorMethodRowProps> = (props) => {
+const AuthMethodRow: Component<AuthMethodRowProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
@@ -20,7 +22,12 @@ const TwoFactorMethodRow: Component<TwoFactorMethodRowProps> = (props) => {
 					{props.icon}
 				</span>
 				<div class="flex min-w-0 flex-col">
-					<span class="text-sm font-medium text-title">{props.title}</span>
+					<span class="flex min-w-0 items-center gap-2">
+						<span class="truncate text-sm font-medium text-title">
+							{props.title}
+						</span>
+						{props.badge}
+					</span>
 					<span
 						class={classNames("text-xs", {
 							"text-body": !props.warning,
@@ -32,10 +39,10 @@ const TwoFactorMethodRow: Component<TwoFactorMethodRowProps> = (props) => {
 				</div>
 			</div>
 			<Show when={props.action}>
-				<div class="shrink-0">{props.action}</div>
+				<div class="flex shrink-0 items-center gap-0.5">{props.action}</div>
 			</Show>
 		</div>
 	);
 };
 
-export default TwoFactorMethodRow;
+export default AuthMethodRow;

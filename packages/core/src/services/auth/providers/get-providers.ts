@@ -20,6 +20,7 @@ const getProviders: ServiceFn<[], AuthProviders> = async (context) => {
 			disablePassword: providersRes.disablePassword,
 			magicLink: providersRes.magicLink,
 			twoFactor: providersRes.twoFactor,
+			passkeys: providersRes.passkeys,
 			providers: providers,
 		},
 	};

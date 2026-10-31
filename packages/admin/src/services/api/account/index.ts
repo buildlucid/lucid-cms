@@ -2,7 +2,9 @@ import integrations from "./integrations";
 import useCancelEmailChange from "./useCancelEmailChange";
 import useConfirmEmailChange from "./useConfirmEmailChange";
 import useConfirmTwoFactor from "./useConfirmTwoFactor";
+import useCreatePasskey from "./useCreatePasskey";
 import useCreateProfilePictureUploadSession from "./useCreateProfilePictureUploadSession";
+import useDeletePasskey from "./useDeletePasskey";
 import useDeleteProfilePicture from "./useDeleteProfilePicture";
 import useDisableTwoFactor from "./useDisableTwoFactor";
 import useForgotPassword from "./useForgotPassword";
@@ -14,6 +16,7 @@ import useRevokeRefreshTokens from "./useRevokeRefreshTokens";
 import useStartTwoFactorSetup from "./useStartTwoFactorSetup";
 import useUnlinkAuthProvider from "./useUnlinkAuthProvider";
 import useUpdateMe from "./useUpdateMe";
+import useUpdatePasskey from "./useUpdatePasskey";
 import useUpdateProfilePicture from "./useUpdateProfilePicture";
 import useVerifyEmailChangeConfirm from "./useVerifyEmailChangeConfirm";
 import useVerifyEmailChangeRevert from "./useVerifyEmailChangeRevert";
@@ -39,6 +42,9 @@ const exportObject = {
 	useConfirmTwoFactor,
 	useRegenerateRecoveryCodes,
 	useDisableTwoFactor,
+	useCreatePasskey,
+	useUpdatePasskey,
+	useDeletePasskey,
 	integrations,
 };
 

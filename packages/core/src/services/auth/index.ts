@@ -4,6 +4,7 @@ export { default as getStatus } from "./get-status.js";
 export * as invitation from "./invitation/index.js";
 export { default as login } from "./login.js";
 export * as magicLink from "./magic-link/index.js";
+export * as passkeys from "./passkeys/index.js";
 export * as providers from "./providers/index.js";
 export * as refreshToken from "./refresh-token/index.js";
 export { default as setupRequired } from "./setup-required.js";

@@ -1,9 +1,12 @@
 import constants from "../../../constants/constants.js";
+import type { BuiltInEmailTemplates } from "../../../libs/email/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
 import type { TwoFactorRecoveryCodes } from "../../../types/response.js";
 import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
+import { formatEmailSubject } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import sendEmail from "../../email/send-email.js";
 import logSecurityAudit from "../../security-audit/log-security-audit.js";
 import { matchTotpCode } from "./helpers/totp.js";
 import replaceRecoveryCodes from "./replace-recovery-codes.js";
@@ -21,7 +24,12 @@ const activateSecret: ServiceFn<
 	const Users = new UsersRepository(context.db);
 
 	const userRes = await Users.selectSingle({
-		select: ["two_factor_pending_secret", "two_factor_enabled_at"],
+		select: [
+			"two_factor_pending_secret",
+			"two_factor_enabled_at",
+			"email",
+			"first_name",
+		],
 		where: [
 			{
 				key: "id",
@@ -106,7 +114,7 @@ const activateSecret: ServiceFn<
 		};
 	}
 
-	const [codesRes, auditRes] = await Promise.all([
+	const [codesRes, auditRes, emailRes] = await Promise.all([
 		replaceRecoveryCodes(context, { userId: data.userId }),
 		logSecurityAudit(context, {
 			userId: data.userId,
@@ -117,9 +125,24 @@ const activateSecret: ServiceFn<
 				: "disabled",
 			newValue: "enabled",
 		}),
+		//* replacing the app sends it too, so a swapped app is noticed
+		sendEmail(context, {
+			template: constants.email.templates.twoFactorEnabled.key,
+			type: "internal",
+			to: userRes.data.email,
+			subject: (emailData) =>
+				formatEmailSubject(
+					context.translate("server:core.email.two.factor.enabled.subject"),
+					emailData.context.brand.name,
+				),
+			data: {
+				firstName: userRes.data.first_name,
+			} satisfies BuiltInEmailTemplates["two-factor-enabled"],
+		}),
 	]);
 	if (codesRes.error) return codesRes;
 	if (auditRes.error) return auditRes;
+	if (emailRes.error) return emailRes;
 
 	return {
 		error: undefined,

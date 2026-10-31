@@ -12,6 +12,7 @@ import {
 	TbOutlineCrop,
 	TbOutlineDownload,
 	TbOutlineEye,
+	TbOutlineFingerprintOff,
 	TbOutlineFolderPlus,
 	TbOutlineHistory,
 	TbOutlineInfoCircle,
@@ -55,6 +56,7 @@ export type ActionIconName =
 	| "download"
 	| "email"
 	| "eye"
+	| "fingerprint-off"
 	| "folder-plus"
 	| "image"
 	| "images"
@@ -118,6 +120,10 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <TbOutlineMail class={iconClasses()} size={iconSize()} />;
 			case "eye":
 				return <TbOutlineEye class={iconClasses()} size={iconSize()} />;
+			case "fingerprint-off":
+				return (
+					<TbOutlineFingerprintOff class={iconClasses()} size={iconSize()} />
+				);
 			case "folder-plus":
 				return <TbOutlineFolderPlus class={iconClasses()} size={iconSize()} />;
 			case "image":

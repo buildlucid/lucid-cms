@@ -230,6 +230,21 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			this.database.fn
 				.jsonArrayFrom(
 					eb
+						.selectFrom("lucid_user_passkeys")
+						.select([
+							"lucid_user_passkeys.id",
+							"lucid_user_passkeys.name",
+							"lucid_user_passkeys.backed_up",
+							"lucid_user_passkeys.last_used_at",
+							"lucid_user_passkeys.created_at",
+						])
+						.whereRef("lucid_user_passkeys.user_id", "=", "lucid_users.id")
+						.orderBy("lucid_user_passkeys.created_at", "asc"),
+				)
+				.as("passkeys"),
+			this.database.fn
+				.jsonArrayFrom(
+					eb
 						.selectFrom("lucid_media")
 						.select((mediaEb) => [
 							"lucid_media.id",
@@ -369,6 +384,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"two_factor_enabled_at",
 				"roles",
 				"auth_providers",
+				"passkeys",
 				"profile_picture",
 			],
 		});
@@ -627,6 +643,25 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						this.database.fn
 							.jsonArrayFrom(
 								eb
+									.selectFrom("lucid_user_passkeys")
+									.select([
+										"lucid_user_passkeys.id",
+										"lucid_user_passkeys.name",
+										"lucid_user_passkeys.backed_up",
+										"lucid_user_passkeys.last_used_at",
+										"lucid_user_passkeys.created_at",
+									])
+									.whereRef(
+										"lucid_user_passkeys.user_id",
+										"=",
+										"lucid_users.id",
+									)
+									.orderBy("lucid_user_passkeys.created_at", "asc"),
+							)
+							.as("passkeys"),
+						this.database.fn
+							.jsonArrayFrom(
+								eb
 									.selectFrom("lucid_media")
 									.select((mediaEb) => [
 										"lucid_media.id",
@@ -798,6 +833,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"triggered_password_reset",
 				"is_locked",
 				"roles",
+				"passkeys",
 				"invitation_accepted",
 				"profile_picture",
 			],
@@ -1145,6 +1181,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
+	}
+	/**
+	 * Locks the user's row until the transaction ends, so changes that check a
+	 * user's sign-in methods before removing one run one at a time. Databases
+	 * without row locks, such as SQLite, already run write transactions in turn.
+	 */
+	async lockForUpdate(props: { id: number }) {
+		if (!this.dbAdapter.supports("sharedRowLocks")) {
+			return { error: undefined, data: undefined };
+		}
+
+		const query = this.db
+			.selectFrom("lucid_users")
+			.select("id")
+			.where("id", "=", props.id)
+			.forUpdate();
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "lockForUpdate",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: undefined };
+	}
+	/** Sets the user's passkey handle unless they already have one. Returns the handle they end up with. */
+	async setPasskeyUserId(props: { id: number; passkeyUserId: string }) {
+		const query = this.db
+			.updateTable("lucid_users")
+			.set({
+				passkey_user_id: sql<string>`coalesce(passkey_user_id, ${props.passkeyUserId})`,
+			})
+			.where("id", "=", props.id)
+			.returning("passkey_user_id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "setPasskeyUserId",
+		});
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: exec.response.data?.passkey_user_id ?? undefined,
+		};
 	}
 	/** Reserves an attempt atomically. Returns the window end for refunds, or undefined at the limit. */
 	async reserveTwoFactorAttempt(props: {

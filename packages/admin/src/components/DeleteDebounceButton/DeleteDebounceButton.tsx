@@ -7,6 +7,8 @@ import T from "@/translations/index";
 
 interface DeleteButtonProps {
 	disabled?: boolean;
+	/** Shown on hover, such as why it's disabled. */
+	title?: string;
 	callback: () => void;
 }
 
@@ -52,6 +54,7 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 					? T()("common.confirmations.delete")
 					: T()("common.delete")
 			}
+			title={props.title}
 			disabled={props.disabled}
 		>
 			<TbOutlineTrash size={14} />

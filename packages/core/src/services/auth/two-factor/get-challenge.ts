@@ -5,11 +5,18 @@ import createServiceContext from "../../../libs/http/utils/create-service-contex
 import { copy } from "../../../libs/i18n/index.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import type { TwoFactorStep } from "../../../types/response.js";
+import type {
+	TwoFactorMethods,
+	TwoFactorStep,
+} from "../../../types/response.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import hasPasskeys from "../passkeys/has-passkeys.js";
 
-/** Reads the challenge cookie and derives the step from the user's current setup. */
+/**
+ * Reads the challenge cookie and derives the available step and methods from the user's current
+ * setup.
+ */
 const getChallenge = async (
 	c: LucidHonoContext,
 ): ServiceResponse<{
@@ -17,6 +24,7 @@ const getChallenge = async (
 	userId: number;
 	authMethod: string;
 	step: TwoFactorStep;
+	methods: TwoFactorMethods;
 }> => {
 	const token = getCookie(c, constants.cookies.twoFactorChallenge);
 	if (!token) {
@@ -63,13 +71,26 @@ const getChallenge = async (
 		};
 	}
 
+	const passkeysRes = await hasPasskeys(context, {
+		userId: challenge.user_id,
+	});
+	if (passkeysRes.error) return passkeysRes;
+
+	const hasApp = Boolean(challenge.user_two_factor_enabled_at);
+	const step: TwoFactorStep = hasApp || passkeysRes.data ? "verify" : "setup";
+
 	return {
 		error: undefined,
 		data: {
 			id: challenge.id,
 			userId: challenge.user_id,
 			authMethod: challenge.auth_method ?? "password",
-			step: challenge.user_two_factor_enabled_at ? "verify" : "setup",
+			step: step,
+			//* setting up offers either, while verifying offers what the user has
+			methods:
+				step === "verify"
+					? { app: hasApp, passkey: passkeysRes.data }
+					: { app: true, passkey: context.config.auth.passkeys.enabled },
 		},
 	};
 };

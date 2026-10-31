@@ -355,6 +355,31 @@ export const userResponseSchema = z.object({
 		)
 		.meta({ description: "Actively linked auth providers for the user" })
 		.optional(),
+	passkeys: z
+		.array(
+			z.object({
+				id: z.number().meta({ description: "The passkey's ID", example: 1 }),
+				name: z.string().meta({
+					description: "The passkey's name",
+					example: "iCloud Keychain",
+				}),
+				backedUp: z.boolean().meta({
+					description:
+						"Whether the passkey is synced between devices, such as by a password manager",
+					example: true,
+				}),
+				lastUsedAt: z.string().nullable().meta({
+					description: "When the passkey was last used to sign in",
+					example: "2026-10-31T12:00:00.000Z",
+				}),
+				createdAt: z.string().nullable().meta({
+					description: "When the passkey was added",
+					example: "2026-10-31T12:00:00.000Z",
+				}),
+			}),
+		)
+		.meta({ description: "The passkeys the user signs in with" })
+		.optional(),
 	preferences: userPreferencesSchema
 		.meta({ description: "Only returned for the authenticated user" })
 		.optional(),
@@ -710,6 +735,20 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	resetTwoFactor: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().trim().meta({
+				description: "The user's ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	resetPasskeys: {
 		body: undefined,
 		query: {
 			string: undefined,

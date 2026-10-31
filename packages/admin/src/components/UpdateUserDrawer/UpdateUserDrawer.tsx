@@ -1,5 +1,10 @@
 import type { User } from "@types";
-import { TbOutlineShieldLock, TbOutlineShieldOff } from "solid-icons/tb";
+import {
+	TbOutlineFingerprint,
+	TbOutlineFingerprintOff,
+	TbOutlineShieldLock,
+	TbOutlineShieldOff,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -9,6 +14,7 @@ import {
 	For,
 	Show,
 } from "solid-js";
+import AuthMethodRow from "@/components/AuthMethodRow/AuthMethodRow";
 import AuthProviderRow from "@/components/AuthProviderRow/AuthProviderRow";
 import Button from "@/components/Button/Button";
 import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
@@ -21,7 +27,6 @@ import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/Pr
 import RadioCards from "@/components/RadioCards/RadioCards";
 import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
 import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
-import TwoFactorMethodRow from "@/components/TwoFactorMethodRow/TwoFactorMethodRow";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -95,6 +100,7 @@ const UpdateUserDrawer: Component<{
 	});
 	const deleteProfilePicture = api.users.useDeleteProfilePicture();
 	const resetTwoFactor = api.users.useResetTwoFactor();
+	const resetPasskeys = api.users.useResetPasskeys();
 
 	// ---------------------------------
 	// Memos
@@ -122,7 +128,12 @@ const UpdateUserDrawer: Component<{
 			providers.data?.data.twoFactor === true &&
 			user.data?.data.twoFactor !== undefined,
 	);
-	const canResetTwoFactor = createMemo(
+	const showPasskeys = createMemo(
+		() =>
+			providers.data?.data.passkeys === true &&
+			user.data?.data.passkeys !== undefined,
+	);
+	const canResetSignInMethods = createMemo(
 		() =>
 			user.data?.data.superAdmin !== true ||
 			userStore.get.user?.superAdmin === true,
@@ -230,7 +241,10 @@ const UpdateUserDrawer: Component<{
 								{
 									value: "auth",
 									label: T()("users.auth.tab"),
-									show: showTwoFactor() || providersList().length > 0,
+									show:
+										showTwoFactor() ||
+										showPasskeys() ||
+										providersList().length > 0,
 								},
 								{
 									value: "oauth_connections",
@@ -349,7 +363,7 @@ const UpdateUserDrawer: Component<{
 							<div class="flex flex-col gap-3">
 								<Show when={showTwoFactor() && user.data?.data.twoFactor}>
 									{(twoFactor) => (
-										<TwoFactorMethodRow
+										<AuthMethodRow
 											icon={<TbOutlineShieldLock class="size-4.5" />}
 											title={T()("account.two.factor.title")}
 											detail={
@@ -363,9 +377,12 @@ const UpdateUserDrawer: Component<{
 													: T()("users.two.factor.disabled")
 											}
 											action={
-												<Show when={twoFactor().enabled && canResetTwoFactor()}>
+												<Show
+													when={twoFactor().enabled && canResetSignInMethods()}
+												>
 													<ConfirmActionButton
 														variant="danger-ghost"
+														size="xs"
 														shape="square"
 														label={T()("users.two.factor.reset.action")}
 														loading={resetTwoFactor.action.isPending}
@@ -375,7 +392,44 @@ const UpdateUserDrawer: Component<{
 															resetTwoFactor.action.mutate({ id: userId });
 														}}
 													>
-														<TbOutlineShieldOff class="size-4" />
+														<TbOutlineShieldOff class="size-3.5" />
+													</ConfirmActionButton>
+												</Show>
+											}
+										/>
+									)}
+								</Show>
+								<Show when={showPasskeys() && user.data?.data.passkeys}>
+									{(passkeys) => (
+										<AuthMethodRow
+											icon={<TbOutlineFingerprint class="size-4.5" />}
+											title={T()("account.passkeys.title")}
+											detail={
+												passkeys().length > 0
+													? T()("users.passkeys.count", {
+															count: passkeys().length,
+														})
+													: T()("users.passkeys.none")
+											}
+											action={
+												<Show
+													when={
+														passkeys().length > 0 && canResetSignInMethods()
+													}
+												>
+													<ConfirmActionButton
+														variant="danger-ghost"
+														size="xs"
+														shape="square"
+														label={T()("users.passkeys.reset.action")}
+														loading={resetPasskeys.action.isPending}
+														onConfirm={() => {
+															const userId = props.id();
+															if (!userId) return;
+															resetPasskeys.action.mutate({ id: userId });
+														}}
+													>
+														<TbOutlineFingerprintOff class="size-3.5" />
 													</ConfirmActionButton>
 												</Show>
 											}

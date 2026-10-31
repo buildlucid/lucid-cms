@@ -89,6 +89,7 @@
 		"@lezer/highlight": "^1.2.5",
 		"@lucidcms/rich-text": "1.2.0",
 		"@lucidcms/types": "^0.6.0",
+		"@simplewebauthn/browser": "^14.0.0",
 		"@solid-primitives/scheduled": "^1.5.3",
 		"@solidjs/router": "^1.0.1",
 		"@tailwindcss/vite": "^4.3.3",

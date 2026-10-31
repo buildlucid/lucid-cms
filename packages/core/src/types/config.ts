@@ -396,10 +396,21 @@ export interface LucidConfig {
 			enabled?: boolean;
 			/**
 			 * Requires setup at next login and prevents disabling: `true` for everyone,
-			 * `"super-admins"` for super admins. Roles can also require it. Needs `enabled`. Defaults
-			 * to false.
+			 * `"super-admins"` for super admins. Roles can also require it. A passkey meets it too.
+			 * Needs `enabled`. Defaults to false.
 			 */
 			required?: boolean | "super-admins";
+		};
+		/**
+		 * Passkeys support login, invitation acceptance and two-factor challenges. A passkey login
+		 * skips the two-factor step and meets `twoFactor.required`. Changing the CMS domain requires
+		 * registering new passkeys.
+		 */
+		passkeys?: {
+			/**
+			 * Let users add passkeys and sign in with them. Defaults to true.
+			 */
+			enabled?: boolean;
 		};
 		/**
 		 * The authentication providers to use.
@@ -748,6 +759,9 @@ export interface ResolvedLucidConfig {
 		twoFactor: {
 			enabled: boolean;
 			required: boolean | "super-admins";
+		};
+		passkeys: {
+			enabled: boolean;
 		};
 		providers: AuthProvider[];
 	};

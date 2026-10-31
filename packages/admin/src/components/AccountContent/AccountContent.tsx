@@ -17,6 +17,7 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import Modal from "@/components/Modal/Modal";
 import NotificationPreferences from "@/components/NotificationPreferences/NotificationPreferences";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
+import PasskeySettings from "@/components/PasskeySettings/PasskeySettings";
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
 import Select from "@/components/Select/Select";
@@ -99,6 +100,9 @@ export const AccountContent: Component = () => {
 		() => providers.data?.data.magicLink === true,
 	);
 	const userHasPassword = createMemo(() => user()?.hasPassword === true);
+	const passkeysEnabled = createMemo(
+		() => providers.data?.data.passkeys === true,
+	);
 	//* two-factor authentication only covers password and magic link logins
 	const twoFactorAvailable = createMemo(
 		() =>
@@ -108,6 +112,30 @@ export const AccountContent: Component = () => {
 	const linkedProvidersCount = createMemo(
 		() => user()?.authProviders?.length ?? 0,
 	);
+	//* links to providers that have since been turned off can't log anyone in
+	const usableProviderLinks = createMemo(
+		() =>
+			(user()?.authProviders ?? []).filter((link) =>
+				providersList().some((provider) => provider.key === link.providerKey),
+			).length,
+	);
+	//* the last passkey stays when it's the only way in, or the only way to meet a two-factor requirement
+	const keepLastPasskey = createMemo(() => {
+		if (
+			!passwordAuthEnabled() &&
+			!magicLinkEnabled() &&
+			usableProviderLinks() === 0
+		) {
+			return "login";
+		}
+		if (
+			user()?.twoFactor?.required === true &&
+			user()?.twoFactor?.enabled !== true
+		) {
+			return "two-factor";
+		}
+		return undefined;
+	});
 	const setPasswordResetLoading = createMemo(
 		() =>
 			refreshingSession() ||
@@ -306,8 +334,19 @@ export const AccountContent: Component = () => {
 						align="center"
 					/>
 				</Show>
+				<Show when={passkeysEnabled()}>
+					<PasskeySettings
+						passkeys={user()?.passkeys ?? []}
+						keepLast={keepLastPasskey()}
+					/>
+				</Show>
 				<Show when={twoFactorAvailable()}>
-					<TwoFactorSettings twoFactor={user()?.twoFactor} />
+					<TwoFactorSettings
+						twoFactor={user()?.twoFactor}
+						hasPasskeys={
+							passkeysEnabled() && (user()?.passkeys?.length ?? 0) > 0
+						}
+					/>
 				</Show>
 				<Show when={providersList().length > 0}>
 					<InfoRow.Content

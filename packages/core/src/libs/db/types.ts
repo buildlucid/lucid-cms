@@ -60,6 +60,7 @@ import type {
 	LucidOAuthGrants,
 	LucidOAuthRefreshTokens,
 	LucidOptions,
+	LucidPasskeyChallenges,
 	LucidPreviewSessions,
 	LucidProcessedImages,
 	LucidRemoteConnections,
@@ -74,6 +75,7 @@ import type {
 	LucidSecurityAuditLogs,
 	LucidUserAuthProviders,
 	LucidUserLogins,
+	LucidUserPasskeys,
 	LucidUserPreferences,
 	LucidUserRecoveryCodes,
 	LucidUserRoles,
@@ -315,6 +317,8 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_user_logins: LucidUserLogins;
 	lucid_user_preferences: LucidUserPreferences;
 	lucid_user_recovery_codes: LucidUserRecoveryCodes;
+	lucid_user_passkeys: LucidUserPasskeys;
+	lucid_passkey_challenges: LucidPasskeyChallenges;
 	lucid_user_auth_providers: LucidUserAuthProviders;
 	lucid_security_audit_logs: LucidSecurityAuditLogs;
 	lucid_emails: LucidEmails;

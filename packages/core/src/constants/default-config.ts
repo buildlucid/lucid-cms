@@ -36,6 +36,9 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 			enabled: true,
 			required: false,
 		},
+		passkeys: {
+			enabled: true,
+		},
 		providers: [],
 	},
 	email: {

@@ -8,6 +8,7 @@ import type { TwoFactorStep } from "../../../types/response.js";
 import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import createUserToken from "../../user-tokens/create-single.js";
+import hasPasskeys from "../passkeys/has-passkeys.js";
 import isRequired from "./is-required.js";
 
 /**
@@ -32,23 +33,29 @@ const startChallenge = async (
 	}
 
 	const Users = new UsersRepository(context.db);
-	const userRes = await Users.selectSingle({
-		select: ["two_factor_enabled_at", "super_admin"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.userId,
+	const [userRes, passkeysRes] = await Promise.all([
+		Users.selectSingle({
+			select: ["two_factor_enabled_at", "super_admin"],
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.userId,
+				},
+			],
+			validation: {
+				enabled: true,
 			},
-		],
-		validation: {
-			enabled: true,
-		},
-	});
+		}),
+		hasPasskeys(context, { userId: data.userId }),
+	]);
 	if (userRes.error) return userRes;
+	if (passkeysRes.error) return passkeysRes;
 
-	//* without an app set up, only users who are required to use one have a step
-	if (!userRes.data.two_factor_enabled_at) {
+	const hasApp = userRes.data.two_factor_enabled_at !== null;
+
+	//* Passkeys alone trigger a challenge only when two-factor authentication is required.
+	if (!hasApp) {
 		const requiredRes = await isRequired(context, {
 			userId: data.userId,
 			superAdmin: formatter.formatBoolean(userRes.data.super_admin),
@@ -62,9 +69,7 @@ const startChallenge = async (
 		}
 	}
 
-	const step: TwoFactorStep = userRes.data.two_factor_enabled_at
-		? "verify"
-		: "setup";
+	const step: TwoFactorStep = hasApp || passkeysRes.data ? "verify" : "setup";
 
 	const expiresInSeconds = constants.twoFactor.challengeExpirationMinutes * 60;
 	const tokenRes = await createUserToken(context, {

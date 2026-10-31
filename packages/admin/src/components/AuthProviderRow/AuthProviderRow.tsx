@@ -61,6 +61,7 @@ const AuthProviderRow: Component<{
 			<Show when={linked() && props.onUnlink}>
 				<ConfirmActionButton
 					variant="danger-ghost"
+					size="xs"
 					shape="square"
 					label={T()("auth.providers.unlink.action", {
 						provider: props.provider.name,
@@ -68,13 +69,13 @@ const AuthProviderRow: Component<{
 					loading={props.isLoading}
 					onConfirm={() => props.onUnlink?.()}
 				>
-					<TbOutlineUnlink class="size-4" />
+					<TbOutlineUnlink class="size-3.5" />
 				</ConfirmActionButton>
 			</Show>
 			<Show when={!linked() && props.onLink}>
 				<Button
 					variant="ghost"
-					size="sm"
+					size="xs"
 					shape="square"
 					title={T()("auth.providers.link.action", {
 						provider: props.provider.name,
@@ -85,7 +86,7 @@ const AuthProviderRow: Component<{
 					loading={props.isLoading}
 					onClick={props.onLink}
 				>
-					<TbOutlineLink class="size-4" />
+					<TbOutlineLink class="size-3.5" />
 				</Button>
 			</Show>
 		</div>

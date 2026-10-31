@@ -20,6 +20,7 @@ import regenerateUserIntegrationKey from "../../../controllers/users/integration
 import updateUserIntegration from "../../../controllers/users/integrations/update-single.js";
 import inviteSingle from "../../../controllers/users/invite-single.js";
 import resendInvitation from "../../../controllers/users/resend-invitation.js";
+import resetPasskeys from "../../../controllers/users/reset-passkeys.js";
 import resetTwoFactor from "../../../controllers/users/reset-two-factor.js";
 import restoreMultiple from "../../../controllers/users/restore-multiple.js";
 import revokeRefreshTokens from "../../../controllers/users/revoke-refresh-tokens.js";
@@ -53,6 +54,7 @@ const usersRoutes = new Hono<LucidHonoGeneric>()
 	.post("/", ...inviteSingle)
 	.post("/restore", ...restoreMultiple)
 	.delete("/:id/auth-providers/:providerId", ...unlinkAuthProvider)
+	.delete("/:id/passkeys", ...resetPasskeys)
 	.delete("/:userId/oauth-connections/:id", ...revokeUserOAuthConnection)
 	.delete("/:id/profile-picture", ...deleteProfilePicture)
 	.delete("/permanent", ...deleteMultiplePermanently)

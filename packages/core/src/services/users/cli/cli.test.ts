@@ -1,10 +1,15 @@
 import { afterAll, beforeAll, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import { createTranslationStore } from "../../../libs/i18n/index.js";
+import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
+import hashSecret from "../../../utils/helpers/hash-secret.js";
+import { generateSecret } from "../../../utils/helpers/index.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import grantSuperAdmin from "./grant-super-admin.js";
+import resetPasskeys from "./reset-passkeys.js";
+import resetPassword from "./reset-password.js";
 import resetTwoFactor from "./reset-two-factor.js";
 
 const testConfig = getTestConfig();
@@ -101,5 +106,83 @@ test("the CLI makes an existing user a super admin, with no user logged as makin
 		performed_by: null,
 		previous_value: JSON.stringify({ roles: [], superAdmin: false }),
 		new_value: JSON.stringify({ roles: [], superAdmin: true }),
+	});
+});
+
+test("the CLI gives a temporary password the user has to change, with no user logged as making the change", async () => {
+	const { encryptSecret } = generateSecret(context.config.secrets.encryption);
+	const user = await context.db.kysely
+		.insertInto("lucid_users")
+		.values({
+			email: "cli-password@test.local",
+			username: "cli-password",
+			secret: encryptSecret,
+			password: "old-hash",
+		})
+		.returning("id")
+		.executeTakeFirstOrThrow();
+
+	const res = await resetPassword(context, {
+		email: " CLI-Password@test.local ",
+	});
+	expect(res.data?.password).toHaveLength(16);
+
+	const updated = await context.db.kysely
+		.selectFrom("lucid_users")
+		.select(["password", "secret", "triggered_password_reset"])
+		.where("id", "=", user.id)
+		.executeTakeFirstOrThrow();
+	expect(updated.triggered_password_reset).toBe(1);
+	expect(updated.password).toBe(
+		await hashSecret(
+			res.data?.password ?? "",
+			decrypt(updated.secret, context.config.secrets.encryption),
+		),
+	);
+	expect(await readAuditLog(user.id)).toMatchObject({
+		action: constants.securityAudit.actions.passwordChange,
+		performed_by: null,
+	});
+});
+
+test("the CLI removes a user's passkeys by email", async () => {
+	const user = await context.db.kysely
+		.insertInto("lucid_users")
+		.values({
+			email: "cli-passkeys@test.local",
+			username: "cli-passkeys",
+			secret: "test",
+		})
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	await context.db.kysely
+		.insertInto("lucid_user_passkeys")
+		.values([
+			{
+				user_id: user.id,
+				credential_id: "cli-passkey-one",
+				public_key: "key",
+				name: "Apple Passwords",
+			},
+			{
+				user_id: user.id,
+				credential_id: "cli-passkey-two",
+				public_key: "key",
+				name: "Windows Hello",
+			},
+		])
+		.execute();
+
+	expect(
+		await resetPasskeys(context, { email: "cli-passkeys@test.local" }),
+	).toEqual({ error: undefined, data: undefined });
+	expect(
+		(await resetPasskeys(context, { email: "cli-passkeys@test.local" })).error
+			?.status,
+	).toBe(400);
+	expect(await readAuditLog(user.id)).toMatchObject({
+		action: constants.securityAudit.actions.passkeyChange,
+		performed_by: null,
+		previous_value: "Apple Passwords, Windows Hello",
 	});
 });

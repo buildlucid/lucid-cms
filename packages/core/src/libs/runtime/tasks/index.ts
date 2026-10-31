@@ -9,6 +9,8 @@ import pluginTask from "./plugin.js";
 import seedListTask from "./seed-list.js";
 import seedTask from "./seed.js";
 import syncTask from "./sync.js";
+import usersResetPasskeysTask from "./users-reset-passkeys.js";
+import usersResetPasswordTask from "./users-reset-password.js";
 import usersResetTwoFactorTask from "./users-reset-two-factor.js";
 import usersSuperAdminTask from "./users-super-admin.js";
 
@@ -24,6 +26,8 @@ const runtimeTasks = {
 	"jobs:list": jobsListTask,
 	"jobs:schedule": jobsScheduleTask,
 	"users:reset-two-factor": usersResetTwoFactorTask,
+	"users:reset-passkeys": usersResetPasskeysTask,
+	"users:reset-password": usersResetPasswordTask,
 	"users:super-admin": usersSuperAdminTask,
 	plugin: pluginTask,
 };

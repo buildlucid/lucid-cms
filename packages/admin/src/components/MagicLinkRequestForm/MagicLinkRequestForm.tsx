@@ -13,6 +13,8 @@ interface MagicLinkRequestFormProps {
 	/** Runs with the email address once the login code has been requested. */
 	onSent: (_email: string) => void;
 	showBackToLogin?: boolean;
+	/** Lets the email field offer the browser's saved passkeys. */
+	passkeyAutofill?: boolean;
 }
 
 const MagicLinkRequestForm: Component<MagicLinkRequestFormProps> = (props) => {
@@ -69,7 +71,7 @@ const MagicLinkRequestForm: Component<MagicLinkRequestFormProps> = (props) => {
 					}}
 					required={true}
 					autofocus={true}
-					autoComplete="email"
+					autoComplete={props.passkeyAutofill ? "email webauthn" : "email"}
 					errors={getBodyError("email", sendMagicLink.errors)}
 				/>
 				<CaptchaWidget captcha={captcha} />

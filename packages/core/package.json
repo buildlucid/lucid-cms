@@ -84,6 +84,7 @@
 		"@lucidkiln/core": "^1.7.1",
 		"@modelcontextprotocol/server": "^2.4.0",
 		"@scalar/hono-api-reference": "^0.12.17",
+		"@simplewebauthn/server": "^14.0.3",
 		"commander": "^15.0.0",
 		"croner": "^11.0.0",
 		"eventsource-parser": "^4.1.3",
