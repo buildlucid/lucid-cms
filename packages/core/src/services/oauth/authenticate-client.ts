@@ -15,12 +15,7 @@ const authenticateClient: ServiceFn<
 	const OAuthClients = new OAuthClientsRepository(context.db);
 
 	const clientRes = await OAuthClients.selectSingle({
-		select: [
-			"token_endpoint_auth_method",
-			"client_secret_hash",
-			"client_secret_salt",
-			"enabled",
-		],
+		select: ["token_endpoint_auth_method", "client_secret_hash", "enabled"],
 		where: [{ key: "client_id", operator: "=", value: input.clientId }],
 	});
 	if (clientRes.error) return clientRes;
@@ -79,7 +74,11 @@ const authenticateClient: ServiceFn<
 	if (
 		input.clientSecret === undefined ||
 		clientRes.data.client_secret_hash === null ||
-		clientRes.data.client_secret_salt === null
+		!verifyOAuthClientSecret(
+			context,
+			input.clientSecret,
+			clientRes.data.client_secret_hash,
+		)
 	) {
 		return {
 			error: {
@@ -90,14 +89,6 @@ const authenticateClient: ServiceFn<
 			data: undefined,
 		};
 	}
-
-	const verifyRes = await verifyOAuthClientSecret(
-		input.clientSecret,
-		clientRes.data.client_secret_hash,
-		clientRes.data.client_secret_salt,
-		context.config.secrets.encryption,
-	);
-	if (verifyRes.error) return verifyRes;
 
 	return {
 		error: undefined,

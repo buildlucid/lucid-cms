@@ -46,10 +46,6 @@ export const integrationsTable = defineTable(
 				schema: z.string(),
 				type: "text",
 			},
-			secret: {
-				schema: z.string(),
-				type: "text",
-			},
 			last_used_at: {
 				schema: z.union([z.string(), z.date()]).nullable(),
 				type: "timestamp",
@@ -119,7 +115,6 @@ export interface LucidIntegrations {
 	expires_at: TimestampMutable;
 	key: string;
 	api_key: string;
-	secret: string;
 	last_used_at: TimestampMutable;
 	last_used_ip: string | null;
 	last_used_user_agent: string | null;

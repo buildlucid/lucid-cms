@@ -25,9 +25,6 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("api_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("secret", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				)
 				.addColumn("last_used_at", adapter.getDataType("timestamp"))
 				.addColumn("last_used_ip", adapter.getDataType("varchar", 255))
 				.addColumn("last_used_user_agent", adapter.getDataType("text"))
@@ -71,12 +68,6 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_integrations_api_key")
 				.on("lucid_integrations")
 				.column("api_key")
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_integrations_secret")
-				.on("lucid_integrations")
-				.column("secret")
 				.execute();
 
 			await db.schema
@@ -144,7 +135,6 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 					(col) => col.notNull(),
 				)
 				.addColumn("client_secret_hash", adapter.getDataType("text"))
-				.addColumn("client_secret_salt", adapter.getDataType("text"))
 				.addColumn("logo_media_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_media.id").onDelete("set null"),
 				)

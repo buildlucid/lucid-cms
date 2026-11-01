@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import hashSecret from "./hash-secret.js";
 
-/** Checks a password or key against its stored `hashSecret` hash, comparing in constant time. */
+/** Checks a password against its stored `hashSecret` hash, comparing in constant time. */
 const verifySecret = async (
 	value: string,
 	salt: string,

@@ -4,9 +4,8 @@ import { copy } from "../../libs/i18n/index.js";
 import { filterExternalScopes } from "../../libs/permission/scopes.js";
 import { IntegrationsRepository } from "../../libs/repositories/index.js";
 import type { LucidApiKeyExternalAuth } from "../../types/hono.js";
-import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import hashSecret from "../../utils/helpers/hash-secret.js";
 import { decodeApiKey } from "../../utils/integrations/encode-api-key.js";
+import hashApiKey from "../../utils/integrations/hash-api-key.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveUserAuthority from "./resolve-user-authority.js";
 
@@ -71,14 +70,10 @@ const verifyApiKey: ServiceFn<
 		};
 	}
 
-	const secret = decrypt(
-		integrationRes.data.secret,
-		context.config.secrets.encryption,
+	const inputHashBuffer = Buffer.from(
+		hashApiKey(context, decodedApiKey),
+		"utf8",
 	);
-
-	const inputApiKeyHash = await hashSecret(decodedApiKey, secret);
-
-	const inputHashBuffer = Buffer.from(inputApiKeyHash, "utf8");
 	const storedHashBuffer = Buffer.from(integrationRes.data.api_key, "utf8");
 	const verifyApiKey =
 		inputHashBuffer.length === storedHashBuffer.length &&

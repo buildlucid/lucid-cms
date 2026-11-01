@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import testingConstants from "../../../constants/testing-constants";
+import type { ServiceContext } from "../../../utils/services/types";
 import {
 	createOAuthClientId,
 	createOAuthClientSecret,
@@ -7,6 +8,9 @@ import {
 	oauthClientSecretPrefix,
 	verifyOAuthClientSecret,
 } from "./credentials";
+
+const contextWith = (encryption: string) =>
+	({ config: { secrets: { encryption } } }) as unknown as ServiceContext;
 
 describe("OAuth client credentials", () => {
 	test("creates an opaque, header-safe client ID", () => {
@@ -16,8 +20,9 @@ describe("OAuth client credentials", () => {
 		expect(clientId.startsWith(oauthClientIdPrefix)).toBe(true);
 	});
 
-	test("stores a confidential client secret as a salted hash", async () => {
-		const credential = await createOAuthClientSecret(testingConstants.key);
+	test("stores a confidential client secret as a keyed hash", () => {
+		const context = contextWith(testingConstants.key);
+		const credential = createOAuthClientSecret(context);
 
 		expect(credential.clientSecret).toMatch(
 			/^lucid_oauth_secret_[A-Za-z0-9_-]{43}$/,
@@ -26,25 +31,27 @@ describe("OAuth client credentials", () => {
 			true,
 		);
 		expect(credential.clientSecretHash).not.toContain(credential.clientSecret);
-		expect(credential.clientSecretSalt).not.toContain(credential.clientSecret);
 
-		const valid = await verifyOAuthClientSecret(
-			credential.clientSecret,
-			credential.clientSecretHash,
-			credential.clientSecretSalt,
-			testingConstants.key,
-		);
-		expect(valid).toEqual({
-			error: undefined,
-			data: true,
-		});
-
-		const invalid = await verifyOAuthClientSecret(
-			"different-secret",
-			credential.clientSecretHash,
-			credential.clientSecretSalt,
-			testingConstants.key,
-		);
-		expect(invalid.error?.code).toBe("invalid_client");
+		expect(
+			verifyOAuthClientSecret(
+				context,
+				credential.clientSecret,
+				credential.clientSecretHash,
+			),
+		).toBe(true);
+		expect(
+			verifyOAuthClientSecret(
+				context,
+				"different-secret",
+				credential.clientSecretHash,
+			),
+		).toBe(false);
+		expect(
+			verifyOAuthClientSecret(
+				contextWith("a".repeat(64)),
+				credential.clientSecret,
+				credential.clientSecretHash,
+			),
+		).toBe(false);
 	});
 });

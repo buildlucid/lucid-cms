@@ -36,10 +36,6 @@ export const oauthClientsTable = defineTable(
 				schema: z.string().nullable(),
 				type: "text",
 			},
-			client_secret_salt: {
-				schema: z.string().nullable(),
-				type: "text",
-			},
 			logo_media_id: {
 				schema: z.number().nullable(),
 				type: "integer",
@@ -92,7 +88,6 @@ export interface LucidOAuthClients {
 	client_uri: string | null;
 	token_endpoint_auth_method: OAuthClientAuthMethod;
 	client_secret_hash: string | null;
-	client_secret_salt: string | null;
 	logo_media_id: number | null;
 	enabled: BooleanInt;
 	created_by: number | null;

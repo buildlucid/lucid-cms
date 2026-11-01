@@ -1,8 +1,5 @@
-import { randomBytes, timingSafeEqual } from "node:crypto";
-import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
-import hashSecret from "../../../utils/helpers/hash-secret.js";
-import { generateSecret } from "../../../utils/helpers/index.js";
-import type { ServiceResponse } from "../../../utils/services/types.js";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import type { ServiceContext } from "../../../utils/services/types.js";
 
 export const oauthClientIdPrefix = "lucid_oauth_";
 export const oauthClientSecretPrefix = "lucid_oauth_secret_";
@@ -10,56 +7,37 @@ export const oauthClientSecretPrefix = "lucid_oauth_secret_";
 export const createOAuthClientId = () =>
 	`${oauthClientIdPrefix}${randomBytes(12).toString("base64url")}`;
 
-export const createOAuthClientSecret = async (encryptionKey: string) => {
+/** Uses a keyed hash for random credentials, requiring the encryption secret as well as the database. */
+const hashOAuthClientSecret = (context: ServiceContext, clientSecret: string) =>
+	createHmac("sha256", context.config.secrets.encryption)
+		.update("lucid-oauth-client:secret\0", "utf8")
+		.update(clientSecret, "utf8")
+		.digest("hex");
+
+/** Creates a client secret, with the hash to store. */
+export const createOAuthClientSecret = (context: ServiceContext) => {
 	const clientSecret = `${oauthClientSecretPrefix}${randomBytes(32).toString("base64url")}`;
-	const { secret, encryptSecret } = generateSecret(encryptionKey);
-	const clientSecretHash = await hashSecret(clientSecret, secret);
 
 	return {
 		clientSecret,
-		clientSecretHash,
-		clientSecretSalt: encryptSecret,
+		clientSecretHash: hashOAuthClientSecret(context, clientSecret),
 	};
 };
 
-export const verifyOAuthClientSecret = async (
+/** Checks a client secret against its stored hash in constant time. */
+export const verifyOAuthClientSecret = (
+	context: ServiceContext,
 	clientSecret: string,
 	clientSecretHash: string,
-	encryptedSalt: string,
-	encryptionKey: string,
-): ServiceResponse<true> => {
-	try {
-		const salt = decrypt(encryptedSalt, encryptionKey);
-		const candidateHash = await hashSecret(clientSecret, salt);
-		const candidate = Buffer.from(candidateHash, "utf8");
-		const stored = Buffer.from(clientSecretHash, "utf8");
+) => {
+	const candidate = Buffer.from(
+		hashOAuthClientSecret(context, clientSecret),
+		"utf8",
+	);
+	const stored = Buffer.from(clientSecretHash, "utf8");
 
-		if (
-			candidate.byteLength !== stored.byteLength ||
-			!timingSafeEqual(candidate, stored)
-		) {
-			return {
-				error: {
-					type: "authorisation",
-					code: "invalid_client",
-					status: 401,
-				},
-				data: undefined,
-			};
-		}
-
-		return {
-			error: undefined,
-			data: true,
-		};
-	} catch (cause) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-				cause,
-			},
-			data: undefined,
-		};
-	}
+	return (
+		candidate.byteLength === stored.byteLength &&
+		timingSafeEqual(candidate, stored)
+	);
 };

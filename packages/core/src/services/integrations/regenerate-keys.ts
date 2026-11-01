@@ -24,9 +24,7 @@ const regenerateKeys: ServiceFn<
 	});
 	if (checkExistsRes.error) return checkExistsRes;
 
-	const { apiKey, apiKeyHash, secret } = await generateKeys(
-		context.config.secrets.encryption,
-	);
+	const { apiKey, apiKeyHash } = generateKeys(context);
 
 	const updateKeysRes = await Integrations.updateSingle({
 		where: [
@@ -38,7 +36,6 @@ const regenerateKeys: ServiceFn<
 		],
 		data: {
 			api_key: apiKeyHash,
-			secret: secret,
 			updated_at: new Date().toISOString(),
 		},
 		returning: ["id"],

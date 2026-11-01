@@ -77,9 +77,7 @@ const createSingle: ServiceFn<
 	const Integrations = new IntegrationsRepository(context.db);
 	const IntegrationScopes = new IntegrationScopesRepository(context.db);
 
-	const { key, apiKey, apiKeyHash, secret } = await generateKeys(
-		context.config.secrets.encryption,
-	);
+	const { key, apiKey, apiKeyHash } = generateKeys(context);
 
 	const keyExistsRes = await Integrations.selectSingle({
 		select: ["id"],
@@ -113,7 +111,6 @@ const createSingle: ServiceFn<
 			user_id: data.userId,
 			expires_at: getExpiryDate(data.expiry, now) ?? undefined,
 			key: key,
-			secret: secret,
 			api_key: apiKeyHash,
 			created_at: now.toISOString(),
 			updated_at: now.toISOString(),
