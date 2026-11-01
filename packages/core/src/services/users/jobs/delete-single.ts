@@ -2,6 +2,7 @@ import z from "zod";
 import formatter from "../../../libs/formatters/index.js";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
+import systemActor from "../../../libs/permission/system-actor.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
 import { invalidateAuthCache } from "../../auth/helpers/auth-cache.js";
 import removeTarget from "../../document-references/remove-target.js";
@@ -18,6 +19,7 @@ const deleteUser: JobHandler<z.infer<typeof input>> = async ({
 	const User = new UsersRepository(context.db);
 
 	const accessRes = await checkUserAccess(context, {
+		auth: systemActor,
 		id: input.id,
 	});
 	if (accessRes.error) return accessRes;
@@ -74,9 +76,6 @@ const deleteUser: JobHandler<z.infer<typeof input>> = async ({
 	};
 };
 
-/**
- * Deletes a single user
- */
 export const deleteUserJob = defineJob({
 	name: "core:delete-user",
 	version: 1,

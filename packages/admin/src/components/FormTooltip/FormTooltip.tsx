@@ -29,8 +29,12 @@ export const FormTooltip: Component<TooltipProps> = (props) => {
 						},
 					)}
 				>
-					{/* InfoSmall is half the height of other glyphs, so double the size and halve the stroke */}
-					<TbOutlineInfoSmall size={16} stroke-width={1} />
+					{/* InfoSmall only fills the middle of its 24px box, so crop to the glyph to draw it legibly */}
+					<TbOutlineInfoSmall
+						size={12}
+						viewBox="6 6.5 12 12"
+						stroke-width={2}
+					/>
 				</HoverCard.Trigger>
 				<HoverCard.Portal>
 					<HoverCard.Content class="z-70 bg-card w-72 max-w-[calc(100vw-2rem)] mt-1.5 rounded-md px-3 py-2 border border-border shadow-xs">

@@ -9,6 +9,8 @@ import helpers from "@/utils/helpers";
 interface Grant {
 	key: string;
 	details: PermissionDetails;
+	/** Visible but unavailable for selection. */
+	disabled?: boolean;
 }
 
 export interface GrantGroup {
@@ -120,6 +122,7 @@ const GrantPicker: Component<{
 			helpers.getLocaleValue({
 				value: grant.details.description,
 			}) || undefined,
+		disabled: grant.disabled,
 	});
 	//* a group only changes its own keys, so the rest of the value is kept as is
 	const changeGroup = (group: GrantGroup, keys: string[]) => {

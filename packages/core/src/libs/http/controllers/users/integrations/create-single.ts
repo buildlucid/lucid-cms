@@ -10,6 +10,7 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
+import recentAuthentication from "../../../middleware/recent-authentication.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
@@ -36,6 +37,7 @@ const createSingleController = factory.createHandlers(
 	}),
 	validateCSRF(),
 	authenticate(),
+	recentAuthentication(),
 	validate("param", userIntegrationParamsSchema),
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {

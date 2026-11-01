@@ -50,10 +50,7 @@ const updateSingleController = factory.createHandlers(
 				message: copy("server:core.routes.user.update.error.message"),
 			},
 		})(context, {
-			auth: {
-				id: auth.id,
-				superAdmin: auth.superAdmin,
-			},
+			auth,
 			userId: Number.parseInt(id, 10),
 			roleIds: body.roleIds,
 			superAdmin: body.superAdmin,

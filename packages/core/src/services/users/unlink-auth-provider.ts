@@ -9,13 +9,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 
-/**
- * Unlinks an auth provider from the target user.
- *
- * Unless magic link login is enabled, you cannot unlink the last auth provider when:
- * - password authentication is disabled, or
- * - the user does not have a password set.
- */
+/** Keeps the last provider unless magic link login or a usable password is available. */
 const unlinkAuthProvider: ServiceFn<
 	[
 		{
@@ -85,6 +79,20 @@ const unlinkAuthProvider: ServiceFn<
 	if (userRes.error) return userRes;
 	if (providerRes.error) return providerRes;
 	if (providersCountRes.error) return providersCountRes;
+
+	if (
+		formatter.formatBoolean(userRes.data.super_admin) &&
+		!data.auth.superAdmin
+	) {
+		return {
+			error: {
+				type: "forbidden",
+				message: copy("server:core.users.super.admin.denied"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
 
 	const providersCount = formatter.parseCount(providersCountRes.data?.count);
 	const isLastProvider = providersCount <= 1;

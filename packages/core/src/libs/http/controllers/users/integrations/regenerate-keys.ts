@@ -10,10 +10,9 @@ import { integrationServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
-import { Permissions } from "../../../../permission/definitions.js";
-import hasAccess from "../../../../permission/has-access.js";
 import authenticate from "../../../middleware/authenticate.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
+import recentAuthentication from "../../../middleware/recent-authentication.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
@@ -40,6 +39,7 @@ const regenerateKeysController = factory.createHandlers(
 	}),
 	validateCSRF(),
 	authenticate(),
+	recentAuthentication(),
 	rateLimiter({
 		mode: "user",
 		limit: constants.rateLimit.scopes.sensitive.limit,
@@ -50,13 +50,8 @@ const regenerateKeysController = factory.createHandlers(
 	async (c) => {
 		const { id, userId } = c.req.valid("param");
 		const auth = c.get("auth");
-		if (
-			!hasAccess({
-				user: auth,
-				resourceOwnerId: userId,
-				requiredPermissions: [Permissions.UsersUpdate],
-			})
-		) {
+		//* a new key acts as its owner, so only super admins can get one for someone else
+		if (userId !== auth.id && !auth.superAdmin) {
 			throw new LucidAPIError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);

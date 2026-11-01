@@ -6,11 +6,13 @@ import {
 	UserRolesRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
+import checkRolesHeld from "../roles/checks/check-roles-held.js";
 import createUserToken from "../user-tokens/create-single.js";
 import checkRolesExist from "./checks/check-roles-exist.js";
 
@@ -23,7 +25,7 @@ const inviteSingle: ServiceFn<
 			lastName?: string;
 			superAdmin?: boolean;
 			roleIds: Array<number>;
-			authSuperAdmin: boolean;
+			auth: Pick<LucidAuth, "superAdmin" | "permissions">;
 		},
 	],
 	number
@@ -32,24 +34,30 @@ const inviteSingle: ServiceFn<
 	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 	const email = normalizeEmailInput(data.email);
 
-	const [userExistsRes, reservedEmailRes, roleExistsRes] = await Promise.all([
-		Users.selectSingleByEmailUsername({
-			select: ["id", "username", "email"],
-			where: {
-				username: data.username,
-				email: email,
-			},
-		}),
-		EmailChangeRequests.selectReservedByEmail({
-			email,
-		}),
-		checkRolesExist(context, {
-			roleIds: data.roleIds,
-		}),
-	]);
+	const [userExistsRes, reservedEmailRes, roleExistsRes, rolesHeldRes] =
+		await Promise.all([
+			Users.selectSingleByEmailUsername({
+				select: ["id", "username", "email"],
+				where: {
+					username: data.username,
+					email: email,
+				},
+			}),
+			EmailChangeRequests.selectReservedByEmail({
+				email,
+			}),
+			checkRolesExist(context, {
+				roleIds: data.roleIds,
+			}),
+			checkRolesHeld(context, {
+				auth: data.auth,
+				roleIds: data.roleIds,
+			}),
+		]);
 	if (userExistsRes.error) return userExistsRes;
 	if (reservedEmailRes.error) return reservedEmailRes;
 	if (roleExistsRes.error) return roleExistsRes;
+	if (rolesHeldRes.error) return rolesHeldRes;
 
 	if (userExistsRes.data !== undefined || reservedEmailRes.data !== undefined) {
 		return {
@@ -78,7 +86,7 @@ const inviteSingle: ServiceFn<
 		};
 	}
 
-	const targetSuperAdmin = data.authSuperAdmin && data.superAdmin === true;
+	const targetSuperAdmin = data.auth.superAdmin && data.superAdmin === true;
 
 	const { encryptSecret } = generateSecret(context.config.secrets.encryption);
 

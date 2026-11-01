@@ -4,7 +4,10 @@ import {
 	controllerSchemas,
 	userIntegrationItemParamsSchema,
 } from "../../../../../schemas/integrations.js";
-import { integrationServices } from "../../../../../services/index.js";
+import {
+	integrationServices,
+	userServices,
+} from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
@@ -52,6 +55,12 @@ const updateSingleController = factory.createHandlers(
 			throw new LucidAPIError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
+
+		const userAccessRes = await userServices.checks.checkUserAccess(context, {
+			auth,
+			id: userId,
+		});
+		if (userAccessRes.error) throw new LucidAPIError(userAccessRes.error);
 
 		const updateSingleRes = await serviceWrapper(
 			integrationServices.updateSingle,

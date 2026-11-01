@@ -1,14 +1,17 @@
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import checkPermissionsHeld from "./checks/check-permissions-held.js";
 import checkRoleAccess from "./checks/check-role-access.js";
 
 const deleteSingle: ServiceFn<
 	[
 		{
 			id: number;
+			auth: Pick<LucidAuth, "superAdmin" | "permissions">;
 		},
 	],
 	undefined
@@ -19,6 +22,14 @@ const deleteSingle: ServiceFn<
 		id: data.id,
 	});
 	if (roleRes.error) return roleRes;
+
+	const heldRes = checkPermissionsHeld(context, {
+		auth: data.auth,
+		permissions: (roleRes.data.permissions ?? []).map(
+			(entry) => entry.permission,
+		),
+	});
+	if (heldRes.error) return heldRes;
 
 	if (formatter.formatBoolean(roleRes.data.locked)) {
 		return {

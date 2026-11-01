@@ -13,6 +13,7 @@ import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-s
 import { copy, createTranslationStore } from "../../../libs/i18n/index.js";
 import { aiAccessFeatureSchema } from "../../../libs/lucid-remote/schema/connection.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
+import systemActor from "../../../libs/permission/system-actor.js";
 import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
 import type { DocumentPatch } from "../../../libs/toolkit/documents/types.js";
@@ -871,6 +872,7 @@ test("registering a requested document needs access to its request", async () =>
 	});
 
 	const role = await createRole(context, {
+		auth: systemActor,
 		name: randomUUID(),
 		permissions: [getCollectionPermission(pages.key, "read")],
 	});

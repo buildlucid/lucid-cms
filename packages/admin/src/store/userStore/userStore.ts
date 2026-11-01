@@ -11,6 +11,7 @@ type UserStoreT = {
 		some: boolean;
 	};
 	meetsRequirement: (_requirement: PermissionRequirement) => boolean;
+	canGrant: (_permissions: readonly string[]) => boolean;
 };
 
 const [get, set] = createStore<UserStoreT>({
@@ -38,6 +39,14 @@ const [get, set] = createStore<UserStoreT>({
 	meetsRequirement(requirement) {
 		if (this.user?.superAdmin) return true;
 		return matchPermissions(this.user?.permissions ?? [], requirement);
+	},
+	/** Checks whether the user holds every permission. */
+	canGrant(permissions) {
+		if (this.user?.superAdmin) return true;
+		const userPerms = this.user?.permissions ?? [];
+		return permissions.every((permission) =>
+			userPerms.some((held) => held === permission),
+		);
 	},
 });
 

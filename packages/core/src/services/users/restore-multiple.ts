@@ -1,4 +1,5 @@
 import { UsersRepository } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import notifyDependants from "../document-references/notify-dependants.js";
@@ -7,6 +8,7 @@ import checkUserAccess from "./checks/check-user-access.js";
 const restoreMultiple: ServiceFn<
 	[
 		{
+			auth: Pick<LucidAuth, "superAdmin">;
 			ids: number[];
 		},
 	],
@@ -22,6 +24,7 @@ const restoreMultiple: ServiceFn<
 	const Users = new UsersRepository(context.db);
 
 	const accessRes = await checkUserAccess(context, {
+		auth: data.auth,
 		ids: data.ids,
 	});
 	if (accessRes.error) return accessRes;

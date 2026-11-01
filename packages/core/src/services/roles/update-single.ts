@@ -5,8 +5,10 @@ import {
 	RolePermissionsRepository,
 	RolesRepository,
 } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import checkPermissionsHeld from "./checks/check-permissions-held.js";
 import checkRoleAccess from "./checks/check-role-access.js";
 import validatePermissions from "./validate-permissions.js";
 
@@ -18,6 +20,7 @@ const updateSingle: ServiceFn<
 			description?: string | null;
 			requireTwoFactor?: boolean;
 			permissions?: string[];
+			auth: Pick<LucidAuth, "superAdmin" | "permissions">;
 		},
 	],
 	undefined
@@ -26,14 +29,22 @@ const updateSingle: ServiceFn<
 	const roleRes = await checkRoleAccess(context, { id: data.id });
 	if (roleRes.error) return roleRes;
 
+	const existingPermissions = (roleRes.data.permissions ?? []).map(
+		(entry) => entry.permission,
+	);
+	//* editing any part of a role needs its current and new permissions
+	const heldRes = checkPermissionsHeld(context, {
+		auth: data.auth,
+		permissions: [...existingPermissions, ...(data.permissions ?? [])],
+	});
+	if (heldRes.error) return heldRes;
+
 	const validatePermsRes =
 		data.permissions === undefined
 			? undefined
 			: await validatePermissions(context, {
 					permissions: data.permissions,
-					existingPermissions: (roleRes.data.permissions ?? []).map(
-						(entry) => entry.permission,
-					),
+					existingPermissions,
 				});
 	if (validatePermsRes?.error) return validatePermsRes;
 

@@ -1,10 +1,12 @@
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import hashSecret from "../../utils/helpers/hash-secret.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
@@ -13,6 +15,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import sendEmail from "../email/send-email.js";
+import checkRolesHeld from "../roles/checks/check-roles-held.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import prepareUpdateSingleAuditLogs from "./helpers/prepare-update-single-audit-logs.js";
 import updateMultipleRoles from "./update-multiple-roles.js";
@@ -31,10 +34,7 @@ const updateSingle: ServiceFn<
 			triggerPasswordReset?: boolean;
 			isDeleted?: boolean;
 			isLocked?: boolean;
-			auth: {
-				id: number;
-				superAdmin: boolean;
-			};
+			auth: Pick<LucidAuth, "id" | "superAdmin" | "permissions">;
 		},
 	],
 	number
@@ -77,6 +77,34 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (userRes.error) return userRes;
+
+	if (
+		formatter.formatBoolean(userRes.data.super_admin) &&
+		!data.auth.superAdmin
+	) {
+		return {
+			error: {
+				type: "forbidden",
+				message: copy("server:core.users.super.admin.denied"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	//* only roles being given or removed need the actor to hold their permissions
+	if (data.roleIds !== undefined) {
+		const nextRoleIds = data.roleIds;
+		const currentRoleIds = (userRes.data.roles ?? []).map((role) => role.id);
+		const rolesHeldRes = await checkRolesHeld(context, {
+			auth: data.auth,
+			roleIds: [
+				...nextRoleIds.filter((id) => !currentRoleIds.includes(id)),
+				...currentRoleIds.filter((id) => !nextRoleIds.includes(id)),
+			],
+		});
+		if (rolesHeldRes.error) return rolesHeldRes;
+	}
 
 	const [emailExists, reservedEmail, usernameExists] = await Promise.all([
 		normalizedEmail !== undefined && normalizedEmail !== userRes.data.email
@@ -157,7 +185,6 @@ const updateSingle: ServiceFn<
 	let encryptSecret: string | undefined;
 	if (data.password) {
 		const genSecret = generateSecret(context.config.secrets.encryption);
-		// Hash password using scrypt
 		hashedPassword = await hashSecret(data.password, genSecret.secret);
 		encryptSecret = genSecret.encryptSecret;
 	}

@@ -1,13 +1,17 @@
+import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Confirms users exist before writes.
+ * Checks target users exist and can be managed by the actor. Only super admins can manage super
+ * admins.
  */
 const checkUserAccess: ServiceFn<
 	[
 		{
+			auth: Pick<LucidActor, "superAdmin">;
 			id?: number;
 			ids?: number[];
 			where?: Parameters<UsersRepository["selectMultipleByIds"]>[0]["where"];
@@ -42,6 +46,20 @@ const checkUserAccess: ServiceFn<
 				type: "basic",
 				message: copy("server:core.user.not.found.message"),
 				status: 404,
+			},
+			data: undefined,
+		};
+	}
+
+	if (
+		!data.auth.superAdmin &&
+		usersRes.data.some((user) => formatter.formatBoolean(user.super_admin))
+	) {
+		return {
+			error: {
+				type: "forbidden",
+				message: copy("server:core.users.super.admin.denied"),
+				status: 403,
 			},
 			data: undefined,
 		};

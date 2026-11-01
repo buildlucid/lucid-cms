@@ -68,11 +68,11 @@ const UpdateUserDrawer: Component<{
 	const roles = api.roles.useGetMultiple({
 		queryParams: {
 			include: {
-				permissions: false,
+				permissions: true,
 			},
 			perPage: -1,
 		},
-		enabled: () => !props.id(),
+		enabled: () => props.id() !== undefined,
 	});
 	const user = api.users.useGetSingle({
 		queryParams: {
@@ -115,6 +115,9 @@ const UpdateUserDrawer: Component<{
 			roles.data?.data.map((role) => ({
 				value: role.id,
 				label: role.name,
+				locked: !userStore.get.canGrant(
+					role.permissions?.map((entry) => entry.permission) ?? [],
+				),
 			})) ?? []
 		);
 	});
@@ -133,7 +136,7 @@ const UpdateUserDrawer: Component<{
 			providers.data?.data.passkeys === true &&
 			user.data?.data.passkeys !== undefined,
 	);
-	const canResetSignInMethods = createMemo(
+	const canManage = createMemo(
 		() =>
 			user.data?.data.superAdmin !== true ||
 			userStore.get.user?.superAdmin === true,
@@ -377,9 +380,7 @@ const UpdateUserDrawer: Component<{
 													: T()("users.two.factor.disabled")
 											}
 											action={
-												<Show
-													when={twoFactor().enabled && canResetSignInMethods()}
-												>
+												<Show when={twoFactor().enabled && canManage()}>
 													<ConfirmActionButton
 														variant="danger-ghost"
 														size="xs"
@@ -412,11 +413,7 @@ const UpdateUserDrawer: Component<{
 													: T()("users.passkeys.none")
 											}
 											action={
-												<Show
-													when={
-														passkeys().length > 0 && canResetSignInMethods()
-													}
-												>
+												<Show when={passkeys().length > 0 && canManage()}>
 													<ConfirmActionButton
 														variant="danger-ghost"
 														size="xs"
@@ -479,14 +476,15 @@ const UpdateUserDrawer: Component<{
 									services={api.users.integrations(userId)}
 									canCreate={false}
 									canUpdate={
-										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+										userStore.get.hasPermission([Permissions.UsersUpdate])
+											.all && canManage()
 									}
 									canDelete={
-										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+										userStore.get.hasPermission([Permissions.UsersUpdate])
+											.all && canManage()
 									}
-									canRegenerate={
-										userStore.get.hasPermission([Permissions.UsersUpdate]).all
-									}
+									//* a new key acts as its owner, so only super admins can get one
+									canRegenerate={userStore.get.user?.superAdmin === true}
 									embedded={true}
 								/>
 							)}

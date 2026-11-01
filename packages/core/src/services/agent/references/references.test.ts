@@ -14,6 +14,7 @@ import { getJobDefinitionRuntime } from "../../../libs/jobs/registry.js";
 import { aiAccessFeatureSchema } from "../../../libs/lucid-remote/schema/connection.js";
 import { getAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import { Permissions } from "../../../libs/permission/definitions.js";
+import systemActor from "../../../libs/permission/system-actor.js";
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
@@ -574,7 +575,11 @@ const createReader = async (permissions?: string[]) => {
 	});
 	assert(user.data, JSON.stringify(user.error));
 	if (permissions) {
-		const role = await createRole(context, { name: randomUUID(), permissions });
+		const role = await createRole(context, {
+			name: randomUUID(),
+			permissions,
+			auth: systemActor,
+		});
 		assert(role.data, JSON.stringify(role.error));
 		const UserRoles = new UserRolesRepository(context.db);
 		expect(

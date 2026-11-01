@@ -45,6 +45,7 @@ const revokeRefreshTokensController = factory.createHandlers(
 			},
 		})(context, {
 			userId: Number.parseInt(id, 10),
+			auth: c.get("auth"),
 		});
 		if (revokeRes.error) throw new LucidAPIError(revokeRes.error);
 

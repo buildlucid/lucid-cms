@@ -1,6 +1,7 @@
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import removeTarget from "../document-references/remove-target.js";
@@ -12,14 +13,14 @@ const deleteSinglePermanently: ServiceFn<
 	[
 		{
 			userId: number;
-			currentUserId: number;
+			auth: Pick<LucidAuth, "id" | "superAdmin">;
 		},
 	],
 	undefined
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db);
 
-	if (data.currentUserId === data.userId) {
+	if (data.auth.id === data.userId) {
 		return {
 			error: {
 				type: "basic",
@@ -31,6 +32,7 @@ const deleteSinglePermanently: ServiceFn<
 	}
 
 	const accessRes = await checkUserAccess(context, {
+		auth: data.auth,
 		id: data.userId,
 	});
 	if (accessRes.error) return accessRes;
@@ -61,7 +63,7 @@ const deleteSinglePermanently: ServiceFn<
 
 	const ownedMediaRes = await deleteOwnedMedia(context, {
 		userIds: [data.userId],
-		actorUserId: data.currentUserId,
+		actorUserId: data.auth.id,
 	});
 	if (ownedMediaRes.error) return ownedMediaRes;
 

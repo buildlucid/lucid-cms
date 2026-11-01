@@ -36,7 +36,7 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 	const roles = api.roles.useGetMultiple({
 		queryParams: {
 			include: {
-				permissions: false,
+				permissions: true,
 			},
 			perPage: -1,
 		},
@@ -67,6 +67,9 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 			roles.data?.data.map((role) => ({
 				value: role.id,
 				label: role.name,
+				locked: !userStore.get.canGrant(
+					role.permissions?.map((entry) => entry.permission) ?? [],
+				),
 			})) ?? []
 		);
 	});

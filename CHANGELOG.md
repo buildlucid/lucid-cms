@@ -46,6 +46,7 @@
 - Fixed password reset, invitation and email change links being kept in email history.
 - Fixed other sessions staying logged in after a password change or account recovery. Reverting an email change also removes login methods added since.
 - Fixed reusing an OAuth refresh token not revoking the tokens issued after it.
+- Fixed people who manage users or roles being able to give access they don't have.
 
 ## v0.19.0-alpha.0
 

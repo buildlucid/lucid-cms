@@ -40,7 +40,7 @@ export const RolesList: Component<{
 		queryParams: {
 			queryString: props.state.searchParams.queryString,
 			include: {
-				permissions: false,
+				permissions: true,
 			},
 		},
 		enabled: () => props.state.searchParams.ready(),

@@ -49,7 +49,7 @@ const deleteSingleController = factory.createHandlers(
 			},
 		})(context, {
 			userId: Number.parseInt(id, 10),
-			currentUserId: auth.id,
+			auth,
 		});
 		if (deleteSingle.error) throw new LucidAPIError(deleteSingle.error);
 

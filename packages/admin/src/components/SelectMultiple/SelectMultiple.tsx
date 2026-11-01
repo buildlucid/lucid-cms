@@ -26,6 +26,8 @@ import T from "@/translations";
 export type SelectMultipleOption = {
 	value: string | number;
 	label: string;
+	/** Prevents adding or removing this option. */
+	locked?: boolean;
 };
 
 export type SelectMultipleVariant = "default" | "list";
@@ -124,7 +126,13 @@ function SelectMultiple<
 
 		props.onChange(values);
 	};
+	const isLocked = (value: Option) =>
+		value.locked === true ||
+		props.options.some(
+			(option) => option.value === value.value && option.locked === true,
+		);
 	const removeValue = (value: Option) => {
+		if (isLocked(value)) return;
 		setValues(props.values.filter((v) => v.value !== value.value));
 	};
 	const toggleValue = (value: Option) => {
@@ -207,7 +215,7 @@ function SelectMultiple<
 										fallback={
 											<>
 												<span class="min-w-0 truncate">{value.label}</span>
-												<Show when={!props.disabled}>
+												<Show when={!props.disabled && !isLocked(value)}>
 													<span
 														class={classnames(
 															"flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100",
@@ -302,7 +310,7 @@ function SelectMultiple<
 										<Menu.Item
 											closeOnSelect={false}
 											textValue={option.label}
-											disabled={props.disabled}
+											disabled={props.disabled || option.locked === true}
 											selected={selected()}
 											onSelect={() => toggleValue(option)}
 											end={

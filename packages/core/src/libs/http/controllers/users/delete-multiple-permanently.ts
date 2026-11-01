@@ -54,7 +54,7 @@ const deleteMultiplePermanentlyController = factory.createHandlers(
 			},
 		)(context, {
 			ids,
-			currentUserId: auth.id,
+			auth,
 		});
 		if (deleteMultiplePermanently.error)
 			throw new LucidAPIError(deleteMultiplePermanently.error);

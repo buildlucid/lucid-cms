@@ -10,6 +10,7 @@ import {
 import documentBricksFormatter from "../../libs/formatters/document-bricks.js";
 import documentFieldsFormatter from "../../libs/formatters/document-fields.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
+import systemActor from "../../libs/permission/system-actor.js";
 import {
 	DocumentBricksRepository,
 	DocumentIdentitiesRepository,
@@ -451,18 +452,25 @@ describe("unassigned content locales", () => {
 
 	test("creates and updates permission roles with plain names and descriptions", async () => {
 		const role = await createRole(context, {
+			auth: systemActor,
 			name: "Redakteur",
 			description: "Inhalte bearbeiten",
 			permissions: ["documents:locale_adoption:read"],
 		});
 		assert(role.data, JSON.stringify(role.error));
 		expect(
-			(await createRole(context, { name: "Redakteur", permissions: [] })).error
-				?.status,
+			(
+				await createRole(context, {
+					name: "Redakteur",
+					permissions: [],
+					auth: systemActor,
+				})
+			).error?.status,
 		).toBe(400);
 		expect(
 			(
 				await updateRole(context, {
+					auth: systemActor,
 					id: role.data,
 					name: "Editor",
 					description: null,

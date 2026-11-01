@@ -40,26 +40,28 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 	const username = createMemo(() => {
 		return currentUser() ? `${props.user.username} (you)` : props.user.username;
 	});
+	const canManage = createMemo(() => {
+		return (
+			props.user.superAdmin !== true || userStore.get.user?.superAdmin === true
+		);
+	});
 	const canUpdateNotSelf = createMemo(() => {
 		return (
 			userStore.get.hasPermission([Permissions.UsersUpdate]).all &&
-			!currentUser()
+			!currentUser() &&
+			canManage()
 		);
 	});
 	const canDeleteNotSelf = createMemo(() => {
 		return (
 			userStore.get.hasPermission([Permissions.UsersDelete]).all &&
-			!currentUser()
+			!currentUser() &&
+			canManage()
 		);
 	});
 	const canRevokeRefreshTokens = createMemo(() => {
-		return userStore.get.hasPermission([Permissions.UsersUpdate]).all;
-	});
-	const canResetSignInMethods = createMemo(() => {
 		return (
-			canUpdateNotSelf() &&
-			(props.user.superAdmin !== true ||
-				userStore.get.user?.superAdmin === true)
+			userStore.get.hasPermission([Permissions.UsersUpdate]).all && canManage()
 		);
 	});
 
@@ -176,7 +178,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 								props.rowTarget.setTargetId(props.user.id);
 								props.rowTarget.setTrigger("resetTwoFactor", true);
 							},
-							permission: canResetSignInMethods(),
+							permission: canUpdateNotSelf(),
 							show: props.user.twoFactor?.enabled === true,
 							variant: "danger",
 						},
@@ -188,7 +190,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 								props.rowTarget.setTargetId(props.user.id);
 								props.rowTarget.setTrigger("resetPasskeys", true);
 							},
-							permission: canResetSignInMethods(),
+							permission: canUpdateNotSelf(),
 							show: (props.user.passkeys?.length ?? 0) > 0,
 							variant: "danger",
 						},

@@ -1,7 +1,10 @@
 import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { userIntegrationItemParamsSchema } from "../../../../../schemas/integrations.js";
-import { integrationServices } from "../../../../../services/index.js";
+import {
+	integrationServices,
+	userServices,
+} from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
@@ -46,6 +49,12 @@ const deleteSingleController = factory.createHandlers(
 			throw new LucidAPIError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
+
+		const userAccessRes = await userServices.checks.checkUserAccess(context, {
+			auth,
+			id: userId,
+		});
+		if (userAccessRes.error) throw new LucidAPIError(userAccessRes.error);
 
 		const deleteSingleRes = await serviceWrapper(
 			integrationServices.deleteSingle,

@@ -52,7 +52,7 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 			},
 		)(context, {
 			userId: Number.parseInt(id, 10),
-			currentUserId: auth.id,
+			auth,
 		});
 		if (deleteSinglePermanently.error)
 			throw new LucidAPIError(deleteSinglePermanently.error);

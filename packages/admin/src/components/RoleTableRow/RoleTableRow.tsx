@@ -16,7 +16,10 @@ const RoleTableRow: Component<RoleRowProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const canUpdate = () =>
-		userStore.get.hasPermission([Permissions.RolesUpdate]).all;
+		userStore.get.hasPermission([Permissions.RolesUpdate]).all &&
+		userStore.get.canGrant(
+			props.role.permissions?.map((entry) => entry.permission) ?? [],
+		);
 	const canRead = () =>
 		userStore.get.hasPermission([Permissions.RolesRead]).all;
 
@@ -26,7 +29,7 @@ const RoleTableRow: Component<RoleRowProps> = (props) => {
 		<Table.Row
 			index={props.index}
 			actions={
-				props.role.locked
+				props.role.locked || !canUpdate()
 					? [
 							{
 								label: T()("common.details"),

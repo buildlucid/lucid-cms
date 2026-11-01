@@ -53,7 +53,7 @@ const inviteSingleController = factory.createHandlers(
 			firstName: body.firstName,
 			lastName: body.lastName,
 			superAdmin: body.superAdmin,
-			authSuperAdmin: auth.superAdmin,
+			auth,
 		});
 		if (userId.error) throw new LucidAPIError(userId.error);
 

@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
 import checkUserAccess from "./checks/check-user-access.js";
@@ -6,12 +7,14 @@ import checkUserAccess from "./checks/check-user-access.js";
 const revokeRefreshTokens: ServiceFn<
 	[
 		{
+			auth: Pick<LucidAuth, "superAdmin">;
 			userId: number;
 		},
 	],
 	undefined
 > = async (context, data) => {
 	const userRes = await checkUserAccess(context, {
+		auth: data.auth,
 		id: data.userId,
 	});
 	if (userRes.error) return userRes;

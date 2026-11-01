@@ -4,7 +4,9 @@ import {
 	RolePermissionsRepository,
 	RolesRepository,
 } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkPermissionsHeld from "./checks/check-permissions-held.js";
 import validatePermissions from "./validate-permissions.js";
 
 const createSingle: ServiceFn<
@@ -14,10 +16,17 @@ const createSingle: ServiceFn<
 			description?: string | null;
 			requireTwoFactor?: boolean;
 			permissions: string[];
+			auth: Pick<LucidAuth, "superAdmin" | "permissions">;
 		},
 	],
 	number
 > = async (context, data) => {
+	const heldRes = checkPermissionsHeld(context, {
+		auth: data.auth,
+		permissions: data.permissions,
+	});
+	if (heldRes.error) return heldRes;
+
 	const Roles = new RolesRepository(context.db);
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		validatePermissions(context, {

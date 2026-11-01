@@ -14,6 +14,7 @@ import Input from "@/components/Input/Input";
 import RadioCards from "@/components/RadioCards/RadioCards";
 import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
@@ -117,18 +118,24 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 		if (!props.id) return createRole.errors();
 		return updateRole.errors();
 	});
-	const permissionGroups = createMemo(() =>
-		(permissions.data?.data ?? []).map((group) => ({
+	const permissionGroups = createMemo(() => {
+		const withAccess = <G extends { key: string }>(grants: G[]) =>
+			grants.map((grant) => ({
+				...grant,
+				disabled: !userStore.get.canGrant([grant.key]),
+			}));
+
+		return (permissions.data?.data ?? []).map((group) => ({
 			key: group.key,
 			details: group.details,
-			grants: group.permissions,
+			grants: withAccess(group.permissions),
 			subgroups: group.subgroups?.map((subgroup) => ({
 				key: subgroup.key,
 				details: subgroup.details,
-				grants: subgroup.permissions,
+				grants: withAccess(subgroup.permissions),
 			})),
-		})),
-	);
+		}));
+	});
 	const tabInvalid = (fields: string[]) =>
 		fields.some((field) => getBodyError(field, errors) !== undefined);
 

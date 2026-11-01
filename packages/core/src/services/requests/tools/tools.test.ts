@@ -9,6 +9,7 @@ import { createTranslationStore } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import { Permissions } from "../../../libs/permission/definitions.js";
 import { ExternalScopes } from "../../../libs/permission/external-scopes.js";
+import systemActor from "../../../libs/permission/system-actor.js";
 import type { ToolkitActor } from "../../../libs/permission/toolkit-actor.js";
 import { UserRolesRepository } from "../../../libs/repositories/index.js";
 import createToolkit from "../../../libs/toolkit/create-toolkit.js";
@@ -869,6 +870,7 @@ test("people attach requests they can read in every collection, unless the agent
 	const postRequest = await createRequest(posts.key);
 	const pageReader = await insertUser(false);
 	const role = await createRole(context, {
+		auth: systemActor,
 		name: randomUUID(),
 		permissions: [
 			Permissions.RequestsRead,

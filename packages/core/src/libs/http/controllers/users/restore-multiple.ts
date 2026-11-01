@@ -45,7 +45,7 @@ const restoreMultipleController = factory.createHandlers(
 				name: copy("server:core.routes.user.update.error.name"),
 				message: copy("server:core.routes.user.update.error.message"),
 			},
-		})(context, { ids });
+		})(context, { ids, auth: c.get("auth") });
 		if (restoreRes.error) throw new LucidAPIError(restoreRes.error);
 
 		c.status(204);
