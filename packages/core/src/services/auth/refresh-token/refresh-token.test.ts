@@ -42,7 +42,7 @@ const app = new Hono<LucidHonoGeneric>()
 	})
 	.post("/login/:userId", async (c) => {
 		await generateToken(c, Number(c.req.param("userId")), {
-			provider: c.req.query("provider") === "true",
+			provider: c.req.query("provider"),
 		});
 		return c.body(null, 204);
 	})
@@ -78,12 +78,29 @@ const readRefreshCookie = (response: Response) => {
 	return cookie?.split(";")[0] ?? "";
 };
 
-const login = async (userId: number, provider = false) =>
+const login = async (userId: number, provider?: string) =>
 	readRefreshCookie(
-		await app.request(`https://cms.test/login/${userId}?provider=${provider}`, {
-			method: "POST",
-		}),
+		await app.request(
+			`https://cms.test/login/${userId}${provider ? `?provider=${provider}` : ""}`,
+			{ method: "POST" },
+		),
 	);
+
+const provider = (key: string, bypassTwoFactor: boolean) => ({
+	key,
+	name: key,
+	enabled: true,
+	bypassTwoFactor,
+	type: "oauth2" as const,
+	config: {
+		type: "oauth2" as const,
+		clientId: "client",
+		clientSecret: "secret",
+		authorizationEndpoint: "https://provider.test/authorize",
+		tokenEndpoint: "https://provider.test/token",
+		userinfoEndpoint: "https://provider.test/user",
+	},
+});
 
 const refresh = (cookie: string) =>
 	app.request("https://cms.test/refresh", {
@@ -109,12 +126,13 @@ test("a token another refresh used first ends all of the user's sessions", async
 	expect((await refresh(other)).status).toBe(401);
 });
 
-test("once two-factor is required, sessions without it end at the next refresh, unless they came from a provider", async () => {
+test("once two-factor is required, sessions without it end at the next refresh, unless their provider bypasses it", async () => {
 	const userId = await createUser("refresh-two-factor");
 	const passwordRes = await refresh(await login(userId));
 	expect(passwordRes.status).toBe(204);
 	const password = readRefreshCookie(passwordRes);
-	const provider = await login(userId, true);
+	const checked = await login(userId, "checked");
+	const bypassed = await login(userId, "bypassed");
 
 	state.context = {
 		...context,
@@ -123,15 +141,17 @@ test("once two-factor is required, sessions without it end at the next refresh, 
 			auth: {
 				...context.config.auth,
 				twoFactor: { ...context.config.auth.twoFactor, required: true },
+				providers: [provider("checked", false), provider("bypassed", true)],
 			},
 		},
 	};
 	try {
 		expect((await refresh(password)).status).toBe(401);
+		expect((await refresh(checked)).status).toBe(401);
 
-		const providerRes = await refresh(provider);
-		expect(providerRes.status).toBe(204);
-		expect((await refresh(readRefreshCookie(providerRes))).status).toBe(204);
+		const bypassedRes = await refresh(bypassed);
+		expect(bypassedRes.status).toBe(204);
+		expect((await refresh(readRefreshCookie(bypassedRes))).status).toBe(204);
 	} finally {
 		state.context = context;
 	}

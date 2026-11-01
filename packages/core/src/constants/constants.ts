@@ -528,6 +528,8 @@ export default Object.freeze({
 		} as const,
 		defaultRedirectPath: "/admin",
 		defaultErrorRedirectPath: "/admin/login",
+		/** Admin route for provider logins requiring a two-factor step. */
+		twoFactorPath: "/admin/two-factor",
 		ttl: 600000,
 	},
 });

@@ -396,8 +396,8 @@ export interface LucidConfig {
 					enabled?: boolean;
 			  };
 		/**
-		 * Authenticator-based two-factor authentication for password and magic link logins. Providers
-		 * handle their own checks.
+		 * Authenticator-based two-factor authentication for password, magic link and provider logins.
+		 * Providers with `bypassTwoFactor` leave it to their own checks.
 		 */
 		twoFactor?:
 			| boolean

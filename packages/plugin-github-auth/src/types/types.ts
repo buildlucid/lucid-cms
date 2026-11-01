@@ -6,4 +6,6 @@ export type PluginOptions = {
 	clientSecret: string;
 	/** Offer this provider on the login screen. Defaults to true. */
 	enabled?: boolean;
+	/** Skip Lucid's two-factor step for GitHub logins. Defaults to false. */
+	bypassTwoFactor?: boolean;
 };

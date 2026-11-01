@@ -1,5 +1,9 @@
 # @lucidcms/plugin-google-auth
 
+## v1.1.0 (unreleased)
+
+- Added `bypassTwoFactor`, which skips Lucid's two-factor step for Google logins. Defaults to false.
+
 ## v1.0.6
 
 - Moved public asset registration to plugin `sources`.

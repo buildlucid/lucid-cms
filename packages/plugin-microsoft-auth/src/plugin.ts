@@ -5,6 +5,8 @@ import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
 
 const ICON_PATH = pluginPublicPath(PLUGIN_KEY, "icon.svg");
+//* Tenants that allow personal Microsoft accounts.
+const personalTenants = new Set(["common", "consumers"]);
 
 /** Adds Microsoft sign-in. An existing provider with the microsoft key takes precedence. */
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -32,6 +34,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				name: "Microsoft",
 				icon: `/${ICON_PATH}`,
 				enabled: pluginOptions.enabled ?? true,
+				bypassTwoFactor:
+					pluginOptions.bypassTwoFactor ?? !personalTenants.has(tenant),
 				type: "oidc" as const,
 				config: {
 					type: "oidc" as const,

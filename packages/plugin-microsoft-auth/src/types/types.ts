@@ -8,4 +8,9 @@ export type PluginOptions = {
 	tenant?: "common" | "organizations" | "consumers" | string;
 	/** Offer this provider on the login screen. Defaults to true. */
 	enabled?: boolean;
+	/**
+	 * Skip Lucid's two-factor step for Microsoft logins. Defaults to false for `common` and
+	 * `consumers`, true for other tenants.
+	 */
+	bypassTwoFactor?: boolean;
 };

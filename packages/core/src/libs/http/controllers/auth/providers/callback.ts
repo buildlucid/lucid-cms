@@ -4,6 +4,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
 import { AuthStatesRepository } from "../../../../../libs/repositories/index.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
+import bypassesTwoFactor from "../../../../../services/auth/providers/helpers/bypasses-two-factor.js";
 import {
 	authProviderFlowMatches,
 	getAuthProviderFlowCookieName,
@@ -176,12 +177,45 @@ const providerCallbackController = factory.createHandlers(
 		}
 
 		if (callbackAuthRes.data.grantAuthentication) {
+			if (!bypassesTwoFactor(context.config, providerKey)) {
+				const challengeRes = await authServices.twoFactor.startChallenge(c, {
+					userId: callbackAuthRes.data.userId,
+					authMethod: providerKey,
+				});
+				if (challengeRes.error) {
+					await AuthStates.scrubInvitationToken({ state, providerKey });
+					return c.redirect(
+						buildErrorURL(
+							errorRedirectURLRes.data.redirectUrl,
+							challengeRes.error,
+							context.translate,
+						),
+					);
+				}
+
+				//* Defer the session and final redirect until the two-factor step completes.
+				if (challengeRes.data) {
+					const redirect = new URL(callbackAuthRes.data.redirectUrl);
+					const twoFactorUrl = new URL(
+						constants.authState.twoFactorPath,
+						redirect,
+					);
+					twoFactorUrl.searchParams.set(
+						"redirect",
+						`${redirect.pathname}${redirect.search}${redirect.hash}`,
+					);
+
+					await AuthStates.scrubInvitationToken({ state, providerKey });
+					return c.redirect(twoFactorUrl.toString());
+				}
+			}
+
 			const [refreshRes, accessRes] = await Promise.all([
 				authServices.refreshToken.generateToken(
 					c,
 					callbackAuthRes.data.userId,
 					{
-						provider: true,
+						provider: providerKey,
 					},
 				),
 				authServices.accessToken.generateToken(c, callbackAuthRes.data.userId),

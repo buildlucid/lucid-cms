@@ -30,6 +30,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				name: "Google",
 				icon: `/${ICON_PATH}`,
 				enabled: pluginOptions.enabled ?? true,
+				bypassTwoFactor: pluginOptions.bypassTwoFactor ?? false,
 				type: "oidc" as const,
 				config: {
 					type: "oidc" as const,

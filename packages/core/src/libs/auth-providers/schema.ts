@@ -68,6 +68,8 @@ export const AuthProviderSchema = z.object({
 	icon: z.string().optional(),
 	/** Whether users can sign in through this provider. */
 	enabled: z.boolean(),
+	/** Skip Lucid's two-factor step. Enable only when the provider requires MFA. Defaults to false. */
+	bypassTwoFactor: z.boolean().optional(),
 	type: z.enum(["oauth2", "oidc"]),
 	config: AuthProviderConfigSchema,
 });

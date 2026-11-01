@@ -8,6 +8,7 @@ import type { LucidHonoContext } from "../../../types/hono.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import clearAccessToken from "../access-token/clear-token.js";
+import bypassesTwoFactor from "../providers/helpers/bypasses-two-factor.js";
 import needsTwoFactorSetup from "../two-factor/needs-setup.js";
 import clearRefreshToken from "./clear-token.js";
 import revokeUserTokens from "./revoke-user-tokens.js";
@@ -16,13 +17,13 @@ type RefreshedSession = {
 	user_id: number;
 	/** Last login or reauthentication time, preserved during refresh. */
 	authTime: number;
-	/** Whether the session came from a login provider, which skips two-factor authentication. */
-	provider: boolean;
+	/** Provider key used to recheck `bypassTwoFactor` on refresh. */
+	provider?: string;
 };
 
 /**
  * Consumes the refresh token once. Reuse revokes all sessions; newly required two-factor setup
- * forces a fresh login.
+ * forces a fresh login, unless the session's provider bypasses two-factor.
  */
 const verifyToken = async (
 	c: LucidHonoContext,
@@ -51,7 +52,7 @@ const verifyToken = async (
 		)) as {
 			id: number;
 			authTime?: number;
-			provider?: boolean;
+			provider?: string;
 		};
 		//* tokens without the time have to confirm it's the user before security changes
 		const authTime = typeof decode.authTime === "number" ? decode.authTime : 0;
@@ -139,8 +140,9 @@ const verifyToken = async (
 			};
 		}
 
-		const provider = decode.provider === true;
-		if (!provider) {
+		const provider =
+			typeof decode.provider === "string" ? decode.provider : undefined;
+		if (!provider || !bypassesTwoFactor(context.config, provider)) {
 			const setupRes = await needsTwoFactorSetup(context, { userId });
 			if (setupRes.error) return setupRes;
 			if (setupRes.data) {

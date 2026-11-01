@@ -19,7 +19,8 @@ const generateToken = async (
 	userId: number,
 	session?: {
 		authTime?: number;
-		provider?: boolean;
+		/** The login provider's key, for sessions started through one. */
+		provider?: string;
 	},
 ): ServiceResponse<{ tokenId: number }> => {
 	const existingRefreshToken = getCookie(c, constants.cookies.refreshToken);
@@ -43,7 +44,7 @@ const generateToken = async (
 			iat: Math.floor(now / 1000),
 			nonce: nonce,
 			authTime: session?.authTime ?? Math.floor(now / 1000),
-			provider: session?.provider ?? false,
+			provider: session?.provider,
 		},
 		context.config.secrets.refreshToken,
 		constants.jwt.algorithm,

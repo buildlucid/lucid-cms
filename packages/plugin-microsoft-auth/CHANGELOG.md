@@ -1,5 +1,9 @@
 # @lucidcms/plugin-microsoft-auth
 
+## v1.1.0 (unreleased)
+
+- Added `bypassTwoFactor`, which skips Lucid's two-factor step for Microsoft logins. Defaults to true, unless `tenant` allows personal accounts.
+
 ## v1.0.6
 
 - Moved public asset registration to plugin `sources`.

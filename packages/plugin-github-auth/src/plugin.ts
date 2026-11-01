@@ -30,6 +30,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				name: "GitHub",
 				icon: `/${ICON_PATH}`,
 				enabled: pluginOptions.enabled ?? true,
+				bypassTwoFactor: pluginOptions.bypassTwoFactor ?? false,
 				type: "oauth2" as const,
 				config: {
 					type: "oauth2" as const,
