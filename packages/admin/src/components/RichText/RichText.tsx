@@ -204,6 +204,7 @@ const RichText: Component<RichTextProps> = (props) => {
 						{...ariaProps}
 						data-rich-text-control
 						data-owns-undo
+						id={props.id}
 						ref={setContainer}
 					/>
 				</div>

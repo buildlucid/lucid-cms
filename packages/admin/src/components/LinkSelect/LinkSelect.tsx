@@ -67,7 +67,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
-			<div class="w-full">
+			<div id={props.id} class="w-full">
 				<Show when={hasLink()}>
 					<div class="group w-full flex items-center justify-between gap-3 bg-input border border-border rounded-md px-3 py-2 group">
 						<div class="flex flex-col gap-0.5">

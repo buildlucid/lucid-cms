@@ -231,7 +231,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
-			<div class="w-full">
+			<div id={props.id} class="w-full">
 				<Switch>
 					<Match when={selectedMediaIds().length === 0}>
 						<Show when={isMultiple()}>

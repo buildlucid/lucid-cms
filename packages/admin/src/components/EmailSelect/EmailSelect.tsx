@@ -131,7 +131,7 @@ export const EmailSelect: Component<EmailSelectProps> = (props) => {
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
-			<div class="w-full">
+			<div id={props.id} class="w-full">
 				<Switch>
 					<Match when={isMultiple()}>
 						<div class="w-full">

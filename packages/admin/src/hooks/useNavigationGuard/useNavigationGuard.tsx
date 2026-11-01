@@ -28,6 +28,7 @@ export function useNavigationGuard(
 				window.location.origin,
 			);
 			const next = new URL(e.to, current);
+			next.hash = "";
 			current.searchParams.delete("compare");
 			next.searchParams.delete("compare");
 			if (current.href === next.href) return;

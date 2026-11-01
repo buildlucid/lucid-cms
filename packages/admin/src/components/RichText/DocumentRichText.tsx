@@ -124,7 +124,7 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 							{props.copy?.placeholder || T()("editor.rich.text.placeholder")}
 						</div>
 					</Show>
-					<div data-owns-undo ref={setContainer} />
+					<div data-owns-undo id={props.id} ref={setContainer} />
 				</div>
 			</div>
 			<FieldFeedback

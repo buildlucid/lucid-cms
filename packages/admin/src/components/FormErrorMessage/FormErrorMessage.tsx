@@ -6,6 +6,7 @@ import {
 	normalizeFieldErrors,
 	resolveFieldErrorMessage,
 } from "@/utils/error-helpers";
+import { focusField } from "@/utils/focus-field";
 
 interface ErrorMessageProps {
 	id?: string;
@@ -30,6 +31,10 @@ export const FormErrorMessage: Component<ErrorMessageProps> = (props) => {
 		if (isErrorCopy(message)) return resolveFieldErrorMessage(message);
 		return undefined;
 	};
+	const jumpToField = (event: MouseEvent) => {
+		event.preventDefault();
+		if (props.id) focusField(props.id);
+	};
 
 	return (
 		<>
@@ -37,7 +42,11 @@ export const FormErrorMessage: Component<ErrorMessageProps> = (props) => {
 				<div class="mt-2 flex flex-col gap-1">
 					<For each={fieldErrors()}>
 						{(error) => (
-							<a class="flex min-w-0 items-start text-sm" href={`#${props.id}`}>
+							<a
+								class="flex min-w-0 items-start text-sm"
+								href={`#${props.id}`}
+								on:click={jumpToField}
+							>
 								<TbOutlineAlertTriangle
 									size={12}
 									class="text-danger mt-1.25 mr-2 shrink-0"
@@ -54,7 +63,11 @@ export const FormErrorMessage: Component<ErrorMessageProps> = (props) => {
 				</div>
 			</Show>
 			<Show when={fieldErrors().length === 0 && genericMessage()}>
-				<a class="mt-2 flex min-w-0 items-start text-sm" href={`#${props.id}`}>
+				<a
+					class="mt-2 flex min-w-0 items-start text-sm"
+					href={`#${props.id}`}
+					on:click={jumpToField}
+				>
 					<TbOutlineAlertTriangle
 						size={12}
 						class="text-danger mt-1.25 mr-2 shrink-0"
