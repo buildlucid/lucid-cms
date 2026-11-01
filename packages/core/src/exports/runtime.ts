@@ -15,6 +15,7 @@ import { resolveDatabaseAdapter } from "../libs/runtime/resolve-database-adapter
 import setupJobScheduler from "../libs/runtime/setup-job-scheduler.js";
 import withResponseCleanup from "../libs/runtime/with-response-cleanup.js";
 import { LucidError } from "../utils/errors/index.js";
+import isPublicAddress from "../utils/helpers/is-public-address.js";
 import createServiceContext from "../utils/services/create-service-context.js";
 
 export { startRunStream as startAgentRunStream } from "../libs/agent/run-stream.js";
@@ -37,6 +38,7 @@ export {
 	handleHostRequest,
 	inlineQueueAdapter,
 	isDevTaskRequest,
+	isPublicAddress,
 	LucidError,
 	logger,
 	prepareTranslations,

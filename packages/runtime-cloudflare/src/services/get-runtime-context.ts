@@ -14,6 +14,8 @@ const getRuntimeContext = (params: {
 		host: params.host ?? "lucid",
 		compiled: params.compiled,
 		getConnectionInfo: getCloudflareConnInfo,
+		//* Workers send requests from Cloudflare's network, which can't reach the project's private network
+		fetchPublic: (url, init) => fetch(url, { ...init, redirect: "manual" }),
 		support: {
 			unsupported: {
 				databaseAdapter: [

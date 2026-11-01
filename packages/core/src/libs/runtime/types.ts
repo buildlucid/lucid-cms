@@ -107,6 +107,12 @@ export type RuntimeSupport = {
 	};
 };
 
+/** Fetches an external URL with GET without following redirects. */
+export type PublicFetch = (
+	url: URL,
+	init?: Pick<RequestInit, "headers" | "signal">,
+) => Promise<Response>;
+
 export type AdapterRuntimeContext = {
 	/** The runtime key of the adapter */
 	runtime: string;
@@ -116,6 +122,11 @@ export type AdapterRuntimeContext = {
 	compiled: boolean;
 	/** The function to get the connection information from the Hono context */
 	getConnectionInfo: (c: LucidHonoContext) => NetAddrInfo;
+	/**
+	 * Rejects hosts resolving to private addresses. Network-isolated platforms may use plain `fetch`.
+	 * Omit to disable external fetching.
+	 */
+	fetchPublic?: PublicFetch;
 	/** The support information for the runtime adapter */
 	support?: RuntimeSupport;
 	/** Path to an emitted `lucid:build` module relative to the build output, or null, for loading the project in another thread. */

@@ -59,6 +59,7 @@ export const resolveOAuthAuthorizationClient = async (
 
 	const metadataRes = await fetchOAuthClientMetadata(input.clientId, {
 		allowedLoopbackHostname: input.allowedLoopbackHostname,
+		fetchPublic: context.runtimeContext?.fetchPublic,
 	});
 	if (metadataRes.error) return metadataRes;
 

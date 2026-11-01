@@ -1,9 +1,11 @@
 import ipaddr from "ipaddr.js";
 import constants from "../../../constants/constants.js";
+import type { PublicFetch } from "../../../libs/runtime/types.js";
 import {
 	type OAuthClientMetadata,
 	oauthClientMetadataSchema,
 } from "../../../schemas/oauth.js";
+import isPublicAddress from "../../../utils/helpers/is-public-address.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 export type { OAuthClientMetadata };
@@ -25,29 +27,29 @@ const normalizeHostname = (hostname: string) =>
 		.replace(/\.$/, "")
 		.toLowerCase();
 
-const getAddressRange = (hostname: string) => {
-	if (!ipaddr.isValid(hostname)) return undefined;
-	return ipaddr.process(hostname).range();
-};
-
-const isSafeMetadataUrl = (url: URL, allowedLoopbackHostname?: string) => {
+/** A CMS on a loopback host, as in local development, accepts clients on the same host. */
+const isAllowedLoopbackUrl = (url: URL, allowedLoopbackHostname?: string) => {
 	const hostname = normalizeHostname(url.hostname);
-	const addressRange = getAddressRange(hostname);
-	const allowedLoopbackUrl =
+	return (
 		allowedLoopbackHostname !== undefined &&
 		hostname === normalizeHostname(allowedLoopbackHostname) &&
 		isLoopbackHostname(hostname) &&
-		(url.protocol === "http:" || url.protocol === "https:");
+		(url.protocol === "http:" || url.protocol === "https:")
+	);
+};
+
+const isSafeMetadataUrl = (url: URL, allowLoopback: boolean) => {
+	const hostname = normalizeHostname(url.hostname);
 
 	return (
-		(url.protocol === "https:" || allowedLoopbackUrl) &&
+		(url.protocol === "https:" || allowLoopback) &&
 		url.username === "" &&
 		url.password === "" &&
 		url.search === "" &&
 		url.hash === "" &&
 		url.pathname !== "/" &&
-		(allowedLoopbackUrl ||
-			((addressRange === undefined || addressRange === "unicast") &&
+		(allowLoopback ||
+			((!ipaddr.isValid(hostname) || isPublicAddress(hostname)) &&
 				!blockedHostnames.has(hostname) &&
 				!hostname.endsWith(".localhost") &&
 				!hostname.endsWith(".localdomain") &&
@@ -113,15 +115,19 @@ export const matchesOAuthRedirectUri = (
 	return withoutPort(registered) === withoutPort(requested);
 };
 
+/** Bypasses public-address checks for permitted local development URLs. */
+const fetchLoopback: PublicFetch = (url, init) =>
+	fetch(url, { ...init, redirect: "manual" });
+
 const fetchClientMetadataDocument = async (
 	url: URL,
+	fetchDocument: PublicFetch,
 ): ServiceResponse<ClientMetadataDocument> => {
 	try {
-		const response = await fetch(url, {
+		const response = await fetchDocument(url, {
 			headers: {
 				Accept: "application/json",
 			},
-			redirect: "error",
 			signal: AbortSignal.timeout(constants.oauth.clientMetadataTimeoutMs),
 		});
 		if (response.status !== 200) {
@@ -206,13 +212,12 @@ const fetchClientMetadataDocument = async (
 	}
 };
 
-/**
- * Fetches and validates OAuth client metadata from a public client ID URL.
- */
+/** Fetches and validates client metadata through `fetchPublic`, except for permitted loopback URLs. */
 export const fetchOAuthClientMetadata = async (
 	clientId: string,
 	options: {
 		allowedLoopbackHostname?: string;
+		fetchPublic?: PublicFetch;
 	},
 ): ServiceResponse<OAuthClientMetadata> => {
 	if (!URL.canParse(clientId)) {
@@ -227,7 +232,12 @@ export const fetchOAuthClientMetadata = async (
 	}
 
 	const metadataUrl = new URL(clientId);
-	if (!isSafeMetadataUrl(metadataUrl, options.allowedLoopbackHostname)) {
+	const allowLoopback = isAllowedLoopbackUrl(
+		metadataUrl,
+		options.allowedLoopbackHostname,
+	);
+	const fetchDocument = allowLoopback ? fetchLoopback : options.fetchPublic;
+	if (!fetchDocument || !isSafeMetadataUrl(metadataUrl, allowLoopback)) {
 		return {
 			error: {
 				type: "basic",
@@ -238,7 +248,10 @@ export const fetchOAuthClientMetadata = async (
 		};
 	}
 
-	const response = await fetchClientMetadataDocument(metadataUrl);
+	const response = await fetchClientMetadataDocument(
+		metadataUrl,
+		fetchDocument,
+	);
 	if (response.error) return response;
 
 	const contentType = response.data.contentType

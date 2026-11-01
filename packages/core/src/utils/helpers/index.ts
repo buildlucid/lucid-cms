@@ -19,6 +19,7 @@ export {
 	groupDocumentFilterConditions,
 } from "./group-document-filters.js";
 export { default as hashPreviewToken } from "./hash-preview-token.js";
+export { default as isPublicAddress } from "./is-public-address.js";
 export { default as isRequestSecure } from "./is-request-secure.js";
 export { normalizeEmailInput, trimStringInput } from "./normalize-input.js";
 export {

@@ -1,5 +1,27 @@
-import { describe, expect, test } from "vitest";
-import { matchesOAuthRedirectUri } from "./client-metadata.js";
+import { describe, expect, test, vi } from "vitest";
+import type { PublicFetch } from "../../../libs/runtime/types.js";
+import {
+	fetchOAuthClientMetadata,
+	matchesOAuthRedirectUri,
+} from "./client-metadata.js";
+
+test("client metadata is only fetched through the runtime's guarded fetch", async () => {
+	const clientId = "https://client.example/metadata.json";
+	const fetchPublic = vi.fn<PublicFetch>(async () =>
+		Response.json({
+			client_id: clientId,
+			client_name: "Client",
+			redirect_uris: ["https://client.example/callback"],
+		}),
+	);
+
+	const withoutGuard = await fetchOAuthClientMetadata(clientId, {});
+	expect(withoutGuard.error?.code).toBe("invalid_client");
+
+	const res = await fetchOAuthClientMetadata(clientId, { fetchPublic });
+	expect(res.data?.client_name).toBe("Client");
+	expect(fetchPublic).toHaveBeenCalledOnce();
+});
 
 describe("OAuth redirect URI matching", () => {
 	test("allows a native client to choose its loopback port", () => {

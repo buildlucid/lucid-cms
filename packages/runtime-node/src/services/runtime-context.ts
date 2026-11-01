@@ -4,6 +4,7 @@ import type {
 	LucidHonoContext,
 } from "@lucidcms/core/types";
 import constants, { ADAPTER_KEY } from "../constants.js";
+import fetchPublic from "./fetch-public.js";
 
 /** Describes the runtime capabilities and request connection information. Set compiled to match whether source or built code is running. */
 const getRuntimeContext = (params: {
@@ -17,6 +18,7 @@ const getRuntimeContext = (params: {
 		host: params.host ?? "lucid",
 		compiled: params.compiled,
 		getConnectionInfo: (c: LucidHonoContext) => getConnInfo(c).remote,
+		fetchPublic,
 		support: {
 			notices: {
 				emailAdapter: [

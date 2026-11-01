@@ -58,6 +58,7 @@
 - Fixed role, permission and user status changes sometimes taking a minute to apply.
 - Fixed rate limits trusting addresses that visitors can write into `X-Forwarded-For`.
 - Fixed wrong passwords having no limit per account. Each account now allows 10 every 15 minutes.
+- Fixed OAuth client metadata requests reaching private network addresses through hostnames that point to them.
 
 ## v0.19.0-alpha.0
 

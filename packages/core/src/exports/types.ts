@@ -526,6 +526,7 @@ export type {
 	LucidConfigDefinitionMeta,
 	LucidConfigFactory,
 	LucidDevBuild,
+	PublicFetch,
 	RuntimeAdaptConfig,
 	RuntimeAdapter,
 	RuntimeAdapterEnvLoader,
