@@ -28,25 +28,22 @@ export const applyStreamingHeaders = (
 	if (opts.etag) c.header("ETag", formatETag(opts.etag));
 };
 
+/** Sets cache policy and, for partial responses, status and content range. */
 export const applyRangeHeaders = (
 	c: LucidHonoContext,
 	info: {
 		isPartial?: boolean;
 		range?: { start: number; end: number };
 		totalSize?: number;
-		cacheControl?: string;
+		cacheControl: string;
 	},
 ) => {
+	c.header("Cache-Control", info.cacheControl);
 	if (info.isPartial && info.range && info.totalSize !== undefined) {
 		c.status(206);
 		c.header(
 			"Content-Range",
 			`bytes ${info.range.start}-${info.range.end}/${info.totalSize}`,
-		);
-	} else {
-		c.header(
-			"Cache-Control",
-			info.cacheControl ?? "public, max-age=31536000, immutable",
 		);
 	}
 };

@@ -66,6 +66,9 @@
 - Fixed people who manage users renaming or revoking super admins' OAuth connections.
 - Fixed password reset emails having no limit per account. Each account now gets at most one a minute and 5 an hour.
 - Fixed deleting an email not checking the CSRF token.
+- Fixed `/cdn` resizing images again to check whether a browser's copy is current, when the resized image isn't stored.
+- Fixed `/cdn` image responses missing `Vary: Accept` when `media.images.allowFormatQuery` picks the format from the browser.
+- Fixed CDNs being allowed to keep copies of private `/cdn` media and share link media. Share link media could also be cached for a year, past its expiry or revocation.
 
 ## v0.19.0-alpha.0
 

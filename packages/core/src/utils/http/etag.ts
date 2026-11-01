@@ -1,8 +1,10 @@
 import crypto from "node:crypto";
 
+/** Quotes an ETag for a response header, keeping a weak `W/` prefix. */
 export const formatETag = (etag: string) => {
+	const weak = etag.startsWith("W/");
 	const normalized = etag.replace(/^W\//, "").replace(/^"+|"+$/g, "");
-	return `"${normalized}"`;
+	return `${weak ? "W/" : ""}"${normalized}"`;
 };
 
 export const matchesETag = (header: string | undefined, etag: string) => {
@@ -20,9 +22,6 @@ export const matchesETag = (header: string | undefined, etag: string) => {
 		});
 };
 
-/**
- * Produces a stable strong ETag from response bytes when storage does not
- * provide one up front, such as a freshly generated processed image.
- */
+/** Hashes response bytes to produce a strong ETag. */
 export const createBufferETag = (buffer: Uint8Array | Buffer) =>
 	crypto.createHash("md5").update(buffer).digest("hex");

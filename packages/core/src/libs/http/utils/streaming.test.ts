@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { applyStreamingHeaders } from "./streaming.js";
+import { applyRangeHeaders, applyStreamingHeaders } from "./streaming.js";
 
 describe("streaming headers", () => {
 	it("sets nosniff on streamed media responses", () => {
@@ -38,6 +38,28 @@ describe("streaming headers", () => {
 
 		expect(headers.get("Content-Security-Policy")).toBe(
 			"sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:",
+		);
+	});
+
+	it("keeps the cache policy on partial responses", () => {
+		const headers = new Map<string, string>();
+		const context = {
+			status: vi.fn(),
+			header: vi.fn((key: string, value: string) => {
+				headers.set(key, value);
+			}),
+		};
+
+		applyRangeHeaders(context as never, {
+			isPartial: true,
+			range: { start: 0, end: 9 },
+			totalSize: 100,
+			cacheControl: "private, max-age=0, must-revalidate",
+		});
+
+		expect(context.status).toHaveBeenCalledWith(206);
+		expect(headers.get("Cache-Control")).toBe(
+			"private, max-age=0, must-revalidate",
 		);
 	});
 });

@@ -6,7 +6,10 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { cdnServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { normalizeMediaKey } from "../../../../utils/media/index.js";
+import {
+	getKeyVisibility,
+	normalizeMediaKey,
+} from "../../../../utils/media/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
@@ -21,9 +24,7 @@ import {
 
 const factory = createFactory();
 
-/**
- * Steam a piece of media based on the given key.
- */
+/** Streams media by key. */
 const streamSingleController = factory.createHandlers(
 	describeRoute({
 		description:
@@ -147,7 +148,16 @@ const streamSingleController = factory.createHandlers(
 
 		const range = parseRangeHeader(c.req.header("range"));
 		const ifNoneMatch = c.req.header("if-none-match");
-		const cacheControl = "public, max-age=0, must-revalidate";
+		//* Private media may be cached only by the browser.
+		const cacheControl =
+			getKeyVisibility(normalizedKey) === constants.media.visibilityKeys.private
+				? "private, max-age=0, must-revalidate"
+				: "public, max-age=0, must-revalidate";
+
+		//* Vary by Accept when it selects the image format.
+		if (context.config.media.images.allowFormatQuery && !query.format) {
+			c.header("Vary", "Accept", { append: true });
+		}
 
 		const response = await serviceWrapper(cdnServices.streamMedia, {
 			transaction: false,

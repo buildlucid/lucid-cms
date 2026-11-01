@@ -24,11 +24,17 @@ const processedImageWrites = createWritePause({
 	scope: constants.logScopes.lucid,
 });
 
+/**
+ * Resizes and optionally stores images. A matching source-based ETag skips downloading and
+ * resizing.
+ */
 const processImage: ServiceFn<
 	[
 		{
 			key: string;
 			processKey: string;
+			/** Source ETag, or null to hash the resized bytes. */
+			sourceEtag: string | null;
 			ifNoneMatch?: string;
 			options: MediaTransformationOptions;
 		},
@@ -45,29 +51,6 @@ const processImage: ServiceFn<
 	const mediaStorageRes = await checkHasMediaStorage(context);
 	if (mediaStorageRes.error) return mediaStorageRes;
 
-	// get og image
-	const mediaRes = await mediaStorageRes.data.stream(context, {
-		key: data.key,
-	});
-	if (mediaRes.error) return mediaRes;
-
-	// If the response is not an image
-	if (!mediaRes.data?.contentType?.startsWith("image/")) {
-		return {
-			error: undefined,
-			data: {
-				key: data.key,
-				contentLength: mediaRes.data.contentLength,
-				contentType: mediaRes.data.contentType,
-				body: mediaRes.data.body,
-				etag: mediaRes.data.etag,
-			},
-		};
-	}
-
-	const { processingBody, fallbackBody } = splitBodyForProcessing(
-		mediaRes.data.body,
-	);
 	const Media = new MediaRepository(context.db);
 
 	const focalRes = await Media.selectSingle({
@@ -84,7 +67,59 @@ const processImage: ServiceFn<
 				}
 			: undefined;
 
-	// Optimize image
+	//* Weak, as resizing the same original isn't guaranteed to give identical bytes.
+	const sourceBasedEtag = data.sourceEtag
+		? `W/"${createBufferETag(
+				Buffer.from(
+					JSON.stringify([
+						data.sourceEtag,
+						data.processKey,
+						focalPoint ?? null,
+					]),
+				),
+			)}"`
+		: null;
+
+	if (
+		sourceBasedEtag &&
+		data.ifNoneMatch &&
+		matchesETag(data.ifNoneMatch, sourceBasedEtag)
+	) {
+		return {
+			error: undefined,
+			data: {
+				key: data.processKey,
+				contentLength: undefined,
+				contentType: undefined,
+				body: new Uint8Array(),
+				etag: sourceBasedEtag,
+				notModified: true,
+			},
+		};
+	}
+
+	const mediaRes = await mediaStorageRes.data.stream(context, {
+		key: data.key,
+	});
+	if (mediaRes.error) return mediaRes;
+
+	if (!mediaRes.data?.contentType?.startsWith("image/")) {
+		return {
+			error: undefined,
+			data: {
+				key: data.key,
+				contentLength: mediaRes.data.contentLength,
+				contentType: mediaRes.data.contentType,
+				body: mediaRes.data.body,
+				etag: mediaRes.data.etag,
+			},
+		};
+	}
+
+	const { processingBody, fallbackBody } = splitBodyForProcessing(
+		mediaRes.data.body,
+	);
+
 	const [imageRes, processedCountRes] = await Promise.all([
 		optimizeImage(context, {
 			stream: toNodeReadable(processingBody),
@@ -113,8 +148,9 @@ const processImage: ServiceFn<
 		};
 	}
 
-	let processedEtag = createBufferETag(imageRes.data.buffer);
+	let processedEtag = sourceBasedEtag ?? createBufferETag(imageRes.data.buffer);
 
+	//* Only reachable with a match when the original has no ETag.
 	if (data.ifNoneMatch && matchesETag(data.ifNoneMatch, processedEtag)) {
 		return {
 			error: undefined,
@@ -132,7 +168,6 @@ const processImage: ServiceFn<
 	const stream = new PassThrough();
 	stream.end(imageRes.data.buffer);
 
-	// If the image should not be stored, return the stream
 	if (!imageRes.data.shouldStore) {
 		return {
 			error: undefined,
@@ -146,7 +181,6 @@ const processImage: ServiceFn<
 		};
 	}
 
-	// Check if the processed image limit has been reached for this key, if so return processed image without saving
 	if (
 		processedCountRes.data >=
 		context.config.media.images.cache.maxVariantsPerFile
@@ -163,7 +197,6 @@ const processImage: ServiceFn<
 		};
 	}
 
-	// Check if we can store it
 	const canStoreRes = await checkCanStore(context, {
 		size: imageRes.data.size,
 	});

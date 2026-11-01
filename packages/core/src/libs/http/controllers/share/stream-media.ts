@@ -76,7 +76,6 @@ const streamMediaController = factory.createHandlers(
 			});
 		}
 
-		//* we only support previews on images, video and audio for the time being
 		if (!shareAccessRes.data.media.previewable) {
 			throw new LucidAPIError({
 				type: "basic",
@@ -102,6 +101,8 @@ const streamMediaController = factory.createHandlers(
 			isPartial: response.data.isPartialContent,
 			range: response.data.range,
 			totalSize: response.data.totalSize,
+			//* Prevent shared caching of expiring or revocable links.
+			cacheControl: "private, max-age=0, must-revalidate",
 		});
 		applyStreamingHeaders(c, {
 			key: response.data.key,

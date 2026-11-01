@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	checkHasMediaStorage: vi.fn(),
@@ -102,6 +102,7 @@ describe("processImage", () => {
 			{
 				key: "media/original.jpg",
 				processKey: "media/processed.webp",
+				sourceEtag: null,
 				options: {
 					format: "webp",
 				},
@@ -188,6 +189,7 @@ describe("processImage", () => {
 				{
 					key,
 					processKey: "media/processed.webp",
+					sourceEtag: null,
 					options: {
 						format: "webp",
 					},
@@ -207,7 +209,7 @@ describe("processImage", () => {
 		},
 	);
 
-	test("returns a stable etag for generated processed images and short-circuits matching revalidation requests", async () => {
+	test("hashes the resized bytes for the etag when the original has none", async () => {
 		mocks.selectSingle.mockResolvedValueOnce({
 			error: undefined,
 			data: { focal_x: null, focal_y: null },
@@ -276,6 +278,7 @@ describe("processImage", () => {
 			{
 				key: "media/original.png",
 				processKey: "media/processed.webp",
+				sourceEtag: null,
 				ifNoneMatch: `"${processedEtag}"`,
 				options: {
 					format: "webp",
@@ -287,5 +290,117 @@ describe("processImage", () => {
 		expect(response.data?.etag).toBe(processedEtag);
 		expect(response.data?.notModified).toBe(true);
 		expect(response.data?.body).toEqual(new Uint8Array());
+	});
+
+	describe("etags from the original", () => {
+		afterEach(() => {
+			vi.resetAllMocks();
+		});
+
+		/** Runs processImage for an image that is resized but not stored. */
+		const runProcessImage = async (props: {
+			sourceEtag: string;
+			ifNoneMatch?: string;
+			focal?: { focal_x: number; focal_y: number };
+		}) => {
+			const processedBuffer = Buffer.from("processed-image");
+			const stream = vi.fn().mockResolvedValue({
+				error: undefined,
+				data: {
+					contentLength: 12,
+					contentType: "image/png",
+					body: new TextEncoder().encode("source-image"),
+					etag: props.sourceEtag,
+				},
+			});
+
+			mocks.checkHasMediaStorage.mockResolvedValue({
+				error: undefined,
+				data: { stream, upload: vi.fn() },
+			});
+			mocks.selectSingle.mockResolvedValue({
+				error: undefined,
+				data: props.focal ?? { focal_x: null, focal_y: null },
+			});
+			mocks.optimizeImage.mockResolvedValue({
+				error: undefined,
+				data: {
+					processed: true,
+					buffer: processedBuffer,
+					mimeType: "image/webp",
+					size: processedBuffer.length,
+					extension: "webp",
+					shouldStore: false,
+				},
+			});
+			mocks.getSingleCount.mockResolvedValue({
+				error: undefined,
+				data: 0,
+			});
+
+			const response = await processImage(
+				{
+					db: {},
+					config: {
+						db: {},
+						media: {
+							limits: {},
+							images: {
+								cache: {
+									enabled: false,
+									maxVariantsPerFile: 10,
+								},
+							},
+						},
+					},
+				} as never,
+				{
+					key: "media/original.png",
+					processKey: "media/processed.webp",
+					sourceEtag: props.sourceEtag,
+					ifNoneMatch: props.ifNoneMatch,
+					options: {
+						format: "webp",
+					},
+				},
+			);
+
+			return { response, stream };
+		};
+
+		test("answers a matching revalidation without downloading or resizing the original", async () => {
+			const first = await runProcessImage({ sourceEtag: "source-etag" });
+			expect(first.response.data?.etag).toMatch(/^W\/"/);
+
+			const second = await runProcessImage({
+				sourceEtag: "source-etag",
+				ifNoneMatch: first.response.data?.etag ?? undefined,
+			});
+
+			expect(second.response.data?.notModified).toBe(true);
+			expect(second.stream).not.toHaveBeenCalled();
+			expect(mocks.optimizeImage).toHaveBeenCalledTimes(1);
+		});
+
+		test.each([
+			{ change: "the original", sourceEtag: "new-source-etag" },
+			{
+				change: "the focal point",
+				sourceEtag: "source-etag",
+				focal: { focal_x: 2500, focal_y: 7500 },
+			},
+		])("resizes again when $change changes", async ({ sourceEtag, focal }) => {
+			const first = await runProcessImage({ sourceEtag: "source-etag" });
+
+			const second = await runProcessImage({
+				sourceEtag,
+				focal,
+				ifNoneMatch: first.response.data?.etag ?? undefined,
+			});
+
+			expect(second.response.data?.notModified).toBeUndefined();
+			expect(second.response.data?.etag).not.toBe(first.response.data?.etag);
+			expect(mocks.optimizeImage).toHaveBeenCalledTimes(2);
+		});
 	});
 });

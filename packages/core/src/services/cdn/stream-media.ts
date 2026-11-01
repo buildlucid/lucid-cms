@@ -93,18 +93,18 @@ const streamMedia: ServiceFn<
 
 	// ------------------------------
 	// Processed Image
-	let sourceExtension: string | null = processingRequest.format ?? null;
-	if (!sourceExtension) {
-		const metaRes = await mediaStorageRes.data.getMeta(context, {
-			key: normalizedKey,
-		});
-		if (metaRes.error) return metaRes;
-		sourceExtension = mime.getExtension(metaRes.data.mimeType || "");
-	}
+	const metaRes = processingRequest.format
+		? undefined
+		: await mediaStorageRes.data.getMeta(context, {
+				key: normalizedKey,
+			});
+	if (metaRes?.error) return metaRes;
 
 	const processKey = generateProcessKey({
 		key: normalizedKey,
-		extension: sourceExtension,
+		extension:
+			processingRequest.format ??
+			mime.getExtension(metaRes?.data.mimeType || ""),
 		options: {
 			format: processingRequest.format,
 			quality: processingRequest.quality,
@@ -137,10 +137,17 @@ const streamMedia: ServiceFn<
 		};
 	}
 
-	// Process
+	const sourceMetaRes =
+		metaRes ??
+		(await mediaStorageRes.data.getMeta(context, {
+			key: normalizedKey,
+		}));
+	if (sourceMetaRes.error) return sourceMetaRes;
+
 	return await processImage(context, {
 		key: normalizedKey,
 		processKey: processKey,
+		sourceEtag: sourceMetaRes.data.etag,
 		ifNoneMatch: data.ifNoneMatch,
 		options: {
 			format: processingRequest.format,

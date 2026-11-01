@@ -49,14 +49,18 @@ describe("cdn stream media", () => {
 		expect(response.error?.status).toBe(404);
 	});
 
-	it("passes preset rotation into the cache key and processor options", async () => {
+	it("passes preset rotation and the original's etag to the processor", async () => {
 		const stream = vi.fn().mockResolvedValue({
 			error: undefined,
 			data: undefined,
 		});
+		const getMeta = vi.fn().mockResolvedValue({
+			error: undefined,
+			data: { mimeType: "image/png", etag: "source-etag" },
+		});
 		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
-			data: { stream },
+			data: { stream, getMeta },
 		});
 		mocks.processImage.mockResolvedValueOnce({
 			error: undefined,
@@ -100,6 +104,7 @@ describe("cdn stream media", () => {
 		expect(mocks.processImage).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.objectContaining({
+				sourceEtag: "source-etag",
 				options: expect.objectContaining({ rotate: 90 }),
 			}),
 		);
