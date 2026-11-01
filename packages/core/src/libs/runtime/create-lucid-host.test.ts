@@ -1,12 +1,19 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
+import { CompiledQuery } from "kysely";
 import { describe, expect, test, vi } from "vitest";
 import z from "zod";
+import testingConstants from "../../constants/testing-constants.js";
+import { integrationServices, syncServices } from "../../services/index.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AgentRunnerInstance } from "../agent/types.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
 import type { DatabaseConnection } from "../db/types.js";
 import logger from "../logger/index.js";
+import { ExternalScopes } from "../permission/external-scopes.js";
 import type { QueueAdapterInstance } from "../queue/types.js";
 import createLucidHost from "./create-lucid-host.js";
 import withResponseCleanup from "./with-response-cleanup.js";
@@ -466,6 +473,118 @@ describe("createLucidHost database ownership", () => {
 		expect(host.config.tables).toEqual([pluginMetadataTable]);
 		expect("client" in host.config.db).toBe(false);
 		await host.destroy();
+	});
+});
+
+describe("createLucidHost content role", () => {
+	test("serves only health checks and the content API, which takes API keys only", async () => {
+		const fixture = createFixture();
+		const host = await createLucidHost({
+			definition: {
+				...fixture.definition,
+				config: () => ({ ...fixture.definition.config(), role: "content" }),
+			},
+			runtimeContext,
+			databaseScope: "runtime",
+		});
+		const invocation = host.createInvocation();
+
+		const [health, auth, oauthMetadata, content] = await Promise.all([
+			invocation.handle({
+				request: new Request("http://localhost/api/health"),
+			}),
+			invocation.handle({
+				request: new Request("http://localhost/api/v1/auth/csrf"),
+			}),
+			invocation.handle({
+				request: new Request(
+					"http://localhost/.well-known/oauth-authorization-server",
+				),
+			}),
+			invocation.handle({
+				request: new Request("http://localhost/api/v1/content/locales", {
+					headers: { Authorization: "Bearer oauth-access-token" },
+				}),
+			}),
+		]);
+
+		expect(health.status).toBe(200);
+		expect(auth.status).toBe(404);
+		expect(oauthMetadata.status).toBe(404);
+		expect(content.status).toBe(401);
+		expect(content.headers.get("WWW-Authenticate")).toBeNull();
+		expect(await content.json()).toMatchObject({
+			message: "This deployment only accepts API keys.",
+		});
+		await host.destroy();
+	});
+
+	test("serves the content API from a read-only database, pausing last used writes", async () => {
+		const directory = await mkdtemp(path.join(tmpdir(), "lucid-read-only-"));
+		const database = path.join(directory, "db.sqlite");
+		const runtime = { key: "test", lucid: "0.0.0" };
+		const config = () => ({
+			url: "http://localhost:6543",
+			secrets: testingConstants.key,
+			collections: [],
+			plugins: [],
+		});
+
+		const setup = new SQLiteAdapter({ database });
+		const connection = await setup.connect();
+		await setup.migrateCoreToLatest(connection);
+		await connection.destroy();
+
+		const primary = await createLucidHost({
+			definition: { runtime, db: new SQLiteAdapter({ database }), config },
+			runtimeContext,
+			databaseScope: "runtime",
+		});
+		const context = await primary.createInvocation().getServiceContext();
+		await syncServices.syncLocales(context);
+		const integration = await integrationServices.createSingle(context, {
+			name: "Website",
+			expiry: "never",
+			scopes: [ExternalScopes.LocalesRead],
+			userId: null,
+		});
+		await primary.destroy();
+		if (integration.error) throw new Error("Couldn't create the integration.");
+
+		const warn = vi.spyOn(logger, "warn");
+		const content = await createLucidHost({
+			definition: {
+				runtime,
+				// SQLite's equivalent of read-only database credentials.
+				db: new SQLiteAdapter({
+					database,
+					onCreateConnection: async (connection) => {
+						await connection.executeQuery(
+							CompiledQuery.raw("PRAGMA query_only = ON"),
+						);
+					},
+				}),
+				config: () => ({ ...config(), role: "content" }),
+			},
+			runtimeContext,
+			databaseScope: "runtime",
+		});
+		const invocation = content.createInvocation();
+		const requestLocales = () =>
+			invocation.handle({
+				request: new Request("http://localhost/api/v1/content/locales", {
+					headers: { "X-API-Key": integration.data.apiKey },
+				}),
+			});
+
+		expect((await requestLocales()).status).toBe(200);
+		await vi.waitFor(() => expect(warn).toHaveBeenCalledOnce());
+		expect((await requestLocales()).status).toBe(200);
+		expect(warn).toHaveBeenCalledOnce();
+
+		warn.mockRestore();
+		await content.destroy();
+		await rm(directory, { recursive: true, force: true });
 	});
 });
 

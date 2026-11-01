@@ -30,8 +30,10 @@ import type { AdapterRuntimeContext } from "../runtime/types.js";
 import createCorsMiddleware from "./middleware/cors.js";
 import logRoute from "./middleware/log-route.js";
 import noIndex from "./middleware/no-index.js";
+import contentRoleRoutes from "./routes/content-role.js";
 import routes from "./routes/index.js";
 import type { HttpExtension } from "./types.js";
+import contentRoleChecks from "./utils/content-role-checks.js";
 import featureSupportChecks from "./utils/feature-support-checks.js";
 import registerCustomRoutes from "./utils/register-custom-routes.js";
 import runHttpExtensions from "./utils/run-http-extensions.js";
@@ -144,7 +146,7 @@ const createApp = async (props: {
 			});
 			await next();
 		})
-		.route("/", routes)
+		.route("/", props.config.role === "content" ? contentRoleRoutes : routes)
 		.onError(async (err, c) => {
 			const locale = resolveInterfaceLocale({
 				config: props.config,
@@ -474,6 +476,7 @@ const createApp = async (props: {
 		},
 		props.runtimeContext.support,
 	);
+	contentRoleChecks(props.config, props.adapters);
 
 	let destroyPromise: Promise<void> | undefined;
 

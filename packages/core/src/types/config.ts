@@ -289,6 +289,13 @@ export type AiContextEntry = {
 	content: string;
 };
 
+/**
+ * What a deployment serves. `primary` serves everything. `content` serves only the content API,
+ * `/cdn`, health checks and your own routes, without the admin, sign-in or jobs, for a public
+ * instance that shares its database with a private `primary` one.
+ */
+export type LucidRole = "primary" | "content";
+
 /** Separate secrets for encryption and signing. Keep these stable between deployments. */
 export type SecretConfig = {
 	/**
@@ -353,6 +360,11 @@ export interface LucidConfig {
 	 * The URL of the website that renders your content, such as `https://example.com`, or a path such as `/` on the CMS's domain.
 	 */
 	siteUrl?: string;
+	/**
+	 * What this deployment serves, defaulting to `primary`. Set it for builds as well as at runtime,
+	 * as it decides whether the admin is built.
+	 */
+	role?: LucidRole;
 	/**
 	 * A single `64 character` root secret, or separate `64 character` secrets
 	 * to encrypt and sign data.
@@ -736,6 +748,7 @@ export interface ResolvedLucidConfig {
 	access: AccessGroup[];
 	url: string;
 	siteUrl?: string;
+	role: LucidRole;
 	logger: {
 		level: LogLevel;
 		transport?: LogTransport;

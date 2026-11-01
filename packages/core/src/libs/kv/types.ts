@@ -132,6 +132,8 @@ export type KVAdapterInstance = {
 	type: "kv-adapter";
 	/** A unique identifier key for the adapter of this type */
 	key: "passthrough" | "sqlite" | string;
+	/** Data is local to this machine and unavailable to other deployments. */
+	local?: true;
 	/**
 	 * Lifecycle callbacks
 	 */

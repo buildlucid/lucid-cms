@@ -178,8 +178,10 @@ const nodeVite: RuntimeViteIntegration<NodeRuntimeAdapter> = {
 	},
 	hosted: {
 		module: "@lucidcms/runtime-node/hosted",
-		/** Wraps the host's server build input so Lucid's job scheduler starts beside it, as the host owns the process. */
-		plugins: (_project, { serverEntry }) => {
+		/** Wraps the host server entry to start Lucid's scheduler. Content deployments need no wrapper. */
+		plugins: (project, { serverEntry }) => {
+			if (project.config.role === "content") return [];
+
 			if (!serverEntry) {
 				throw new LucidError({
 					message:

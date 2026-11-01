@@ -653,6 +653,7 @@
 	"core.integrations.expired": "The integration has expired.",
 	"core.integrations.api.key.missing": "The external authorization credential is missing.",
 	"core.integrations.api.key.invalid": "The external authorization credential is invalid.",
+	"core.integrations.oauth.content.role": "This deployment only accepts API keys.",
 	"core.integrations.error": "An error occurred while verifying the integration key.",
 	"core.integrations.scopes.error.name": "Integration Scope Error",
 	"core.integrations.scopes.missing.message": "The integration is missing required scopes. Required: {{requiredScopes}}. Missing: {{missingScopes}}.",

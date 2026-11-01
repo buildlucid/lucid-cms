@@ -291,6 +291,8 @@ export type MediaStorageAdapterInstance<T = unknown> = {
 	type: "media-storage-adapter";
 	/** A unique identifier key for the adapter of this type */
 	key: "file-system" | string;
+	/** Files are local to this machine and unavailable to other deployments. */
+	local?: true;
 	/**
 	 * Lifecycle callbacks
 	 * */

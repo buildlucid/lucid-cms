@@ -9,6 +9,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	access: [],
 	directories: defaultDirectories,
 	sources: {},
+	role: "primary",
 	telemetry: true,
 	logger: {
 		level: "info",

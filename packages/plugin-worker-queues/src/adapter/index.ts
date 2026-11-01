@@ -31,6 +31,9 @@ const workerQueueAdapter = (
 		support: { delayedDelivery: true, maxDelayMs: null },
 		lifecycle: {
 			init: async (params) => {
+				//* Content deployments leave jobs to the primary deployment.
+				if (params.config.role === "content") return;
+
 				if (!params.runtimeContext?.buildModule) {
 					throw new LucidError({
 						message:

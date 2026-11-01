@@ -338,6 +338,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			z.string().regex(/^\/(?![/\\])/, "Use a path that starts with /."),
 		])
 		.optional(),
+	role: z.enum(["primary", "content"]),
 	http: z.strictObject({
 		security: z.strictObject({
 			proxy: z

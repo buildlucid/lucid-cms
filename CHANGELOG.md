@@ -17,6 +17,7 @@
 - Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
 - Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.
 - Added an `actor` option to `toolkit.media` reads, and an `ownership` filter to its lists.
+- Added `role: "content"` for public deployments that only serve content and media.
 
 ### Breaking Changes:
 

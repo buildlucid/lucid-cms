@@ -37,6 +37,7 @@ const resolveLucidWorker = async (
 		name: worker.name,
 		compatibilityDate: worker.compatibilityDate,
 		entrypoint,
+		role: project.config.role,
 		options: adapter.getOptions(),
 		artifacts: project.artifacts.prepare,
 		// The host's adapter reads this file for its dev server and builds, which run under `NODE_ENV=production`.

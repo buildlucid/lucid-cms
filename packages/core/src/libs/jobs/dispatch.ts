@@ -87,10 +87,17 @@ export const dispatchPendingJobs: ServiceFn<
 	return { error: undefined, data: { count: jobIds.length } };
 };
 
-/** Publishes every pending job that existed when the flush began. */
+/**
+ * Publishes jobs pending at flush start. Content deployments leave dispatch to the primary
+ * deployment.
+ */
 export const flushPendingJobs: ServiceFn<[], { count: number }> = async (
 	context,
 ) => {
+	if (context.config.role === "content") {
+		return { error: undefined, data: { count: 0 } };
+	}
+
 	const createdBefore = new Date().toISOString();
 	let count = 0;
 

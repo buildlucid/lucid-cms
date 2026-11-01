@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+import constants from "../../../constants/constants.js";
 import type { ExternalPrincipalType } from "../../../libs/permission/external-scopes.js";
 import { integrationServices, oauthServices } from "../../../services/index.js";
 import {
@@ -10,6 +11,7 @@ import type {
 	LucidHonoContext,
 } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
+import { createWritePause } from "../../../utils/helpers/index.js";
 import { integrationApiKeyPrefix } from "../../../utils/integrations/encode-api-key.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -18,13 +20,19 @@ import { ExternalScopes } from "../../permission/external-scopes.js";
 import createServiceContext from "../utils/create-service-context.js";
 import getClientAddress from "../utils/get-client-address.js";
 
-/** Adds the OAuth resource challenge to an unauthorized response. */
+const lastUsedWrites = createWritePause({
+	action: "record when a credential was last used",
+	scope: constants.logScopes.http,
+});
+
+/** Adds the OAuth challenge to unauthorized responses, except on content deployments. */
 const setOAuthBearerChallenge = (
 	c: LucidHonoContext,
 	context: ServiceContext,
 	error?: "invalid_token",
 	resource: OAuthResource = "content",
 ) => {
+	if (context.config.role === "content") return;
 	c.header(
 		"WWW-Authenticate",
 		[
@@ -103,6 +111,14 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 			}
 		}
 
+		if (oauthCredential && context.config.role === "content") {
+			throw new LucidAPIError({
+				type: "authorisation",
+				message: copy("server:core.integrations.oauth.content.role"),
+				status: 401,
+			});
+		}
+
 		let externalAuth: LucidExternalAuth;
 		if (integrationCredential) {
 			const verifyApiKey = await serviceWrapper(
@@ -171,22 +187,25 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 		c.set("externalAuth", externalAuth);
 		const response = await next();
 
-		if (externalAuth.credential.type === "api-key") {
-			void integrationServices
-				.updateLastUsed(context, {
-					id: externalAuth.credential.integrationId,
-					ipAddress: getClientAddress(c),
-					userAgent,
-				})
-				.catch(() => undefined);
-		} else {
-			void oauthServices
-				.updateLastUsed(context, {
-					id: externalAuth.credential.grantId,
-					ipAddress: getClientAddress(c),
-					userAgent,
-				})
-				.catch(() => undefined);
+		if (!lastUsedWrites.isPaused()) {
+			const lastUsed =
+				externalAuth.credential.type === "api-key"
+					? integrationServices.updateLastUsed(context, {
+							id: externalAuth.credential.integrationId,
+							ipAddress: getClientAddress(c),
+							userAgent,
+						})
+					: oauthServices.updateLastUsed(context, {
+							id: externalAuth.credential.grantId,
+							ipAddress: getClientAddress(c),
+							userAgent,
+						});
+			void lastUsed.then(
+				(result) => {
+					if (result.error) lastUsedWrites.pause();
+				},
+				() => lastUsedWrites.pause(),
+			);
 		}
 
 		return response;

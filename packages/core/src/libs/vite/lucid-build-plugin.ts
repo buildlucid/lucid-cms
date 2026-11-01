@@ -39,9 +39,12 @@ const lucidBuildPlugin = (
 				project: props.project,
 				host: props.host,
 				pluginModules: props.pluginModules,
-				adminHtml: dev
-					? props.renderAdminDocument(this.environment.config)
-					: props.adminDocument?.(),
+				adminHtml:
+					props.project.config.role === "content"
+						? undefined
+						: dev
+							? props.renderAdminDocument(this.environment.config)
+							: props.adminDocument?.(),
 				dev: dev
 					? {
 							token: props.token,

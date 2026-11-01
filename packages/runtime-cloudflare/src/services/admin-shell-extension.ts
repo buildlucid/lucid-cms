@@ -9,11 +9,13 @@ type WorkerEnv = EnvironmentVariables & {
 	};
 };
 
-/** Serves the admin's index page from Workers static assets for client-side routes. */
+/** Serves the admin shell for client-side routes. Skipped for content deployments. */
 const adminShellExtension: HttpExtension = {
 	name: "runtime-cloudflare:spa-shell",
 	phase: "afterSetup",
-	register: (app) => {
+	register: (app, config) => {
+		if (config.role === "content") return;
+
 		app.get("/admin/*", async (c, next) => {
 			if (!shouldServeAdminShell(c.req.path, c.req.method)) return next();
 

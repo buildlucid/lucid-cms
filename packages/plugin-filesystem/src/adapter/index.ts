@@ -18,6 +18,7 @@ const fileSystemStorageAdapter: MediaStorageAdapter<
 	return {
 		type: "media-storage-adapter",
 		key: "file-system",
+		local: true,
 		createUploadSession: createUploadSession(options),
 		getDownloadUrl: getDownloadUrl(options),
 		getMeta: getMetadata(options),

@@ -10,7 +10,10 @@ import createNodeJobScheduler from "./services/create-node-job-scheduler.js";
 import getRuntimeContext from "./services/runtime-context.js";
 import type { NodeRuntimeAdapter } from "./types.js";
 
-/** Starts the built Lucid server and job scheduler from the generated entry, stopping both on `SIGINT` or `SIGTERM`. */
+/**
+ * Starts the built server and, for primary deployments, the scheduler. Stops both on process
+ * signals.
+ */
 export const startServer = async (build: LucidBuild) => {
 	let destroyRuntime = async () => {};
 
@@ -58,13 +61,16 @@ export const startServer = async (build: LucidBuild) => {
 			hostname,
 		});
 
-		jobScheduler = createNodeJobScheduler({
-			createInvocation: () => host.createInvocation({ env }),
-			request: {
-				url: host.config.url,
-			},
-		});
-		jobScheduler.start();
+		// Content deployments leave jobs to the primary deployment.
+		if (host.config.role !== "content") {
+			jobScheduler = createNodeJobScheduler({
+				createInvocation: () => host.createInvocation({ env }),
+				request: {
+					url: host.config.url,
+				},
+			});
+			jobScheduler.start();
+		}
 
 		server.on("listening", () => {
 			const address = server.address();

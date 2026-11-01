@@ -60,6 +60,10 @@ const adaptConfig: RuntimeAdaptConfig = (
 					});
 
 					app.use("/*", servePublicAssets);
+
+					// `content` role deployments don't build the admin.
+					if (config.role === "content") return;
+
 					app.get("/admin/*", (c, next) => {
 						if (!shouldServeAdminShell(c.req.path, c.req.method)) return next();
 						return c.html(readFileSync(paths.spaDistHtml, "utf-8"));

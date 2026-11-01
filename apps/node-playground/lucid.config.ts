@@ -89,6 +89,7 @@ export default defineConfig({
 		// 	level: "debug",
 		// },
 		url: "http://localhost:6543",
+		// role: "content",
 		auth: {
 			// password: {
 			// 	enabled: true,

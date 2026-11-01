@@ -18,6 +18,11 @@ const runScheduler: ServiceFn<
 	[options?: { scheduledAt?: Date }],
 	undefined
 > = async (context, options = {}) => {
+	//* Content deployments leave jobs to the primary deployment.
+	if (context.config.role === "content") {
+		return { error: undefined, data: undefined };
+	}
+
 	const locale = context.config.i18n.defaultLocale;
 	const schedulerContext = {
 		...context,

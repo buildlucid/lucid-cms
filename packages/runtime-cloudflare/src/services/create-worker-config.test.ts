@@ -7,6 +7,7 @@ test("declares the entry, secrets, bindings, exports and triggers Lucid needs", 
 		name: "my-site",
 		compatibilityDate: DEFAULT_COMPATIBILITY_DATE,
 		entrypoint: "virtual:lucid/cloudflare-worker",
+		role: "primary",
 		options: { bindings: { kv: { id: "kv-id" } } },
 		artifacts: [
 			{
@@ -54,6 +55,7 @@ test("leaves out the Worker's own bindings and flags, and binds its queue to the
 		name: "my-site",
 		compatibilityDate: DEFAULT_COMPATIBILITY_DATE,
 		entrypoint: "virtual:lucid/cloudflare-worker",
+		role: "primary",
 		options: {
 			bindings: { r2: true, queues: { consumer: { maxRetries: 0 } } },
 		},
@@ -83,6 +85,7 @@ test("connects the Worker's own declarations of Lucid's bindings for --remote", 
 		name: "my-site",
 		compatibilityDate: DEFAULT_COMPATIBILITY_DATE,
 		entrypoint: "virtual:lucid/cloudflare-worker",
+		role: "primary",
 		options: { bindings: { kv: true, r2: true } },
 		artifacts: [],
 		secrets: [],
@@ -113,6 +116,7 @@ test("leaves out triggers the Worker declares itself", () => {
 		name: "my-site",
 		compatibilityDate: DEFAULT_COMPATIBILITY_DATE,
 		entrypoint: "virtual:lucid/cloudflare-worker",
+		role: "primary",
 		options: { bindings: { queues: { queueName: "my-jobs" } } },
 		artifacts: [],
 		secrets: [],
@@ -127,11 +131,42 @@ test("leaves out triggers the Worker declares itself", () => {
 	expect(config.triggers).toEqual([]);
 });
 
+test("leaves out the scheduler and queue consumer for content role Workers", () => {
+	const config = createWorkerConfig({
+		name: "my-site",
+		compatibilityDate: DEFAULT_COMPATIBILITY_DATE,
+		entrypoint: "virtual:lucid/cloudflare-worker",
+		role: "content",
+		options: { bindings: { queues: { queueName: "my-jobs" } } },
+		artifacts: [],
+		secrets: [],
+	});
+
+	expect(config.triggers).toEqual([]);
+	expect(config.env?.LUCID_QUEUE).toEqual({ type: "queue", name: "my-jobs" });
+});
+
+test("rejects a content role Worker that declares Lucid's queue consumer", () => {
+	expect(() =>
+		createWorkerConfig({
+			name: "my-site",
+			compatibilityDate: DEFAULT_COMPATIBILITY_DATE,
+			entrypoint: "virtual:lucid/cloudflare-worker",
+			role: "content",
+			options: { bindings: { queues: { queueName: "my-jobs" } } },
+			artifacts: [],
+			secrets: [],
+			worker: { triggers: [{ type: "queue", name: "my-jobs" }] },
+		}),
+	).toThrow('Remove the "my-jobs" queue consumer');
+});
+
 test("leaves out the agent run Durable Object when the Worker declares it", () => {
 	const config = createWorkerConfig({
 		name: "my-site",
 		compatibilityDate: DEFAULT_COMPATIBILITY_DATE,
 		entrypoint: "virtual:lucid/cloudflare-worker",
+		role: "primary",
 		artifacts: [],
 		secrets: [],
 		worker: {

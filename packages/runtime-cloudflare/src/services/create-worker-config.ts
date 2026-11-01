@@ -1,6 +1,7 @@
 import type { WorkerConfig } from "@cloudflare/config";
 import type { PluginConfig } from "@cloudflare/vite-plugin";
-import type { RuntimeArtifactCustom } from "@lucidcms/core/types";
+import { LucidError } from "@lucidcms/core/runtime";
+import type { LucidRole, RuntimeArtifactCustom } from "@lucidcms/core/types";
 import constants, {
 	AGENT_RUNS_BINDING,
 	AGENT_RUNS_EXPORT,
@@ -30,11 +31,16 @@ type LucidTrigger = Extract<
 	{ type: "scheduled" | "queue" }
 >;
 
-/** Adds Lucid's Worker entry, Node.js compatibility, admin assets, scheduler, queue consumers, agent run Durable Object, bindings and secrets (`.dev.vars` or `.env` locally), preserving declared bindings, exports, flags, triggers and queue names while `--remote` connects declared Lucid resources. */
+/**
+ * Adds Lucid's Worker configuration while preserving declared settings. Loads local secrets and
+ * connects remote resources with `--remote`. Content Workers omit job triggers and reject Lucid
+ * queue consumers.
+ */
 const createWorkerConfig = (props: {
 	name: string;
 	compatibilityDate: string;
 	entrypoint: string;
+	role: LucidRole;
 	options?: AdapterOptions;
 	artifacts: RuntimeArtifactCustom[];
 	/** Env variable names to declare as secrets, which Cloudflare requires at deploy. */
@@ -58,8 +64,10 @@ const createWorkerConfig = (props: {
 	const env: WorkerEnv = {};
 	const triggers: WorkerTriggers = [];
 
-	/** Adds a trigger unless the Worker declares the same schedule or queue consumer itself. */
+	/** Adds a trigger unless the Worker runs no jobs or declares the same schedule or queue consumer itself. */
 	const addTrigger = (trigger: LucidTrigger) => {
+		if (props.role === "content") return;
+
 		const declared = props.worker?.triggers?.some((existing) =>
 			existing.type === "scheduled" && trigger.type === "scheduled"
 				? existing.schedule === trigger.schedule
@@ -127,6 +135,17 @@ const createWorkerConfig = (props: {
 			bindings.queues.queueName ??
 			defaultResourceName(props.name, bindings.queues.binding);
 		const consumer = bindings.queues.consumer;
+
+		if (
+			props.role === "content" &&
+			props.worker?.triggers?.some(
+				(trigger) => trigger.type === "queue" && trigger.name === name,
+			)
+		) {
+			throw new LucidError({
+				message: `Content role Workers don't run jobs. Remove the "${name}" queue consumer from the Worker's triggers.`,
+			});
+		}
 
 		addBinding(bindings.queues.binding, { type: "queue", name, ...dev });
 		addTrigger({

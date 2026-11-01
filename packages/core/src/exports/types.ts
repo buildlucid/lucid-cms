@@ -675,6 +675,7 @@ export type {
 	I18nConfig,
 	LocalizationConfig,
 	LucidConfig,
+	LucidRole,
 	MediaGenerationConfig,
 	MediaGenerationTypeConfig,
 	ResolvedLucidConfig,

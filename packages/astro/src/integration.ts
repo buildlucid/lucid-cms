@@ -120,7 +120,8 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				}
 			},
 			"astro:build:start": async () => {
-				if (!project) return;
+				// `content` role deployments don't serve the admin, so it isn't built or copied.
+				if (!project || project.config.role === "content") return;
 
 				await buildAdmin({
 					configPath: project.configPath,
@@ -139,11 +140,13 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				adminCopied = false;
 			},
 			"astro:build:generated": async ({ dir }) => {
-				if (project) await copyAdmin(fileURLToPath(dir));
+				if (adminDocument !== undefined) await copyAdmin(fileURLToPath(dir));
 			},
 			"astro:build:done": async ({ dir }) => {
 				// Astro skips build:generated when no routes are prerendered.
-				if (project && !adminCopied) await copyAdmin(fileURLToPath(dir));
+				if (adminDocument !== undefined && !adminCopied) {
+					await copyAdmin(fileURLToPath(dir));
+				}
 			},
 		},
 	};

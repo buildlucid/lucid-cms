@@ -127,6 +127,7 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 	return {
 		type: "kv-adapter",
 		key: "sqlite",
+		local: true,
 		lifecycle: {
 			init: async () => {
 				if (database?.open) return;

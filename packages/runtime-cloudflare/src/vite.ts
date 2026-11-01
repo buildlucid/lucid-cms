@@ -98,6 +98,7 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 							: (options?.worker?.compatibilityDate ??
 								DEFAULT_COMPATIBILITY_DATE),
 						entrypoint: workerEntryId,
+						role: project.config.role,
 						options,
 						artifacts: project.artifacts.prepare,
 						secrets: getWorkerSecrets(project, { deploy }),

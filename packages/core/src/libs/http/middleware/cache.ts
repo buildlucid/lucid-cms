@@ -63,7 +63,9 @@ const generateCacheKey = (
 
 	const { mode = "include-query", includeHeaders = [] } = options;
 
+	//* Scope cached links by deployment URL, even when KV is shared.
 	const cacheObject: Record<string, unknown> = {
+		url: c.get("config").url,
 		path: c.req.path,
 	};
 

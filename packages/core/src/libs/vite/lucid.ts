@@ -7,6 +7,7 @@ import createAdminClientConfig from "../admin/create-client-config.js";
 import getConfigPath from "../config/get-config-path.js";
 import loadPluginClis from "../plugins/load-plugin-clis.js";
 import assertNoHost from "./assert-no-host.js";
+import emptyClientEntryPlugin from "./empty-client-entry-plugin.js";
 import loadPluginVite from "./load-plugin-vite.js";
 import loadProject from "./load-project.js";
 import lucidBuildPlugin from "./lucid-build-plugin.js";
@@ -54,6 +55,24 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 		});
 	}
 	const props = { project, token, host };
+
+	/** The admin's plugins, or an empty client entry for `content` role deployments' own builds, as they don't serve the admin. */
+	const getClientPlugins = (): Plugin[] => {
+		if (options?.admin === false) return [];
+		if (project.config.role === "content") {
+			return host ? [] : [emptyClientEntryPlugin()];
+		}
+
+		// A host's build sets the client's inputs itself, so it builds the admin apart and Lucid only serves it in development.
+		if (host) {
+			return admin.plugins
+				.filter((plugin) => plugin.apply !== "build")
+				.map((plugin): Plugin => ({ ...plugin, apply: "serve" }));
+		}
+
+		return admin.plugins;
+	};
+
 	const ready = Promise.withResolvers<boolean>();
 
 	return [
@@ -76,14 +95,7 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 			renderAdminDocument: admin.renderDevDocument,
 			adminDocument: options?.adminDocument,
 		}),
-		// A host's build sets the client's inputs itself, so it builds the admin apart and Lucid only serves it in development.
-		...(options?.admin === false
-			? []
-			: host
-				? admin.plugins
-						.filter((plugin) => plugin.apply !== "build")
-						.map((plugin): Plugin => ({ ...plugin, apply: "serve" }))
-				: admin.plugins),
+		...getClientPlugins(),
 		...pluginVite.flatMap(({ plugins }) => plugins ?? []),
 		// Vite awaits and flattens plugin promises, so integrations may set themselves up asynchronously. A host owns the
 		// server, so the runtime adds its hosted plugins around the host's server instead of its own.

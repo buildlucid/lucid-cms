@@ -1,4 +1,5 @@
 import { PassThrough } from "node:stream";
+import constants from "../../constants/constants.js";
 import type { MediaTransformationOptions } from "../../libs/media-delivery/types.js";
 import {
 	splitBodyForProcessing,
@@ -9,6 +10,7 @@ import {
 	MediaRepository,
 	ProcessedImagesRepository,
 } from "../../libs/repositories/index.js";
+import { createWritePause } from "../../utils/helpers/index.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import adjustStorageUsage from "../media/adjust-storage-usage.js";
@@ -16,6 +18,11 @@ import checkHasMediaStorage from "../media/checks/check-has-media-storage.js";
 import checkCanStore from "./checks/check-can-store.js";
 import getSingleCount from "./get-single-count.js";
 import optimizeImage from "./optimize-image.js";
+
+const processedImageWrites = createWritePause({
+	action: "store a processed image",
+	scope: constants.logScopes.lucid,
+});
 
 const processImage: ServiceFn<
 	[
@@ -175,7 +182,10 @@ const processImage: ServiceFn<
 
 	const ProcessedImages = new ProcessedImagesRepository(context.db);
 
-	if (context.config.media.images.cache.enabled) {
+	if (
+		context.config.media.images.cache.enabled &&
+		!processedImageWrites.isPaused()
+	) {
 		const storageLimit = context.config.media.limits.storageBytes;
 		const adjustStorageRes = await adjustStorageUsage(context, {
 			delta: imageRes.data.size,
@@ -183,6 +193,7 @@ const processImage: ServiceFn<
 			min: 0,
 		});
 		if (adjustStorageRes.error || !adjustStorageRes.data.applied) {
+			if (adjustStorageRes.error) processedImageWrites.pause();
 			return {
 				error: undefined,
 				data: {
@@ -217,6 +228,7 @@ const processImage: ServiceFn<
 			createProcessedImageRes.error !== undefined ||
 			uploadRes.error !== undefined
 		) {
+			processedImageWrites.pause();
 			await adjustStorageUsage(context, {
 				delta: imageRes.data.size * -1,
 				min: 0,
