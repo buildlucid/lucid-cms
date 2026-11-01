@@ -21,6 +21,7 @@ import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
 import createServiceContext from "../../../utils/create-service-context.js";
+import getClientAddress from "../../../utils/get-client-address.js";
 import getRequestBaseUrl from "../../../utils/get-request-base-url.js";
 
 const factory = createFactory();
@@ -206,7 +207,6 @@ const providerCallbackController = factory.createHandlers(
 				);
 			}
 
-			const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 			const userAgent = c.req.header("user-agent") || null;
 
 			const userLoginTrackRes = await serviceWrapper(
@@ -223,7 +223,7 @@ const providerCallbackController = factory.createHandlers(
 				userId: callbackAuthRes.data.userId,
 				tokenId: refreshRes.data.tokenId,
 				authMethod: providerKey,
-				ipAddress: connectionInfo.address ?? null,
+				ipAddress: getClientAddress(c),
 				userAgent: userAgent,
 			});
 			if (userLoginTrackRes.error) {

@@ -4,6 +4,7 @@
 
 - Rebuilt on `lucid()` from `@lucidcms/core/vite`, so Lucid runs in Astro's server environment, including workerd on Cloudflare, and projects no longer get generated files in `.lucid/astro`.
 - Runtime bridges return Vite settings from `vite`, replacing `prepare` and `teardown`.
+- Passes Astro's `clientAddress` to Lucid for rate limits and login records.
 
 ## v0.3.2
 

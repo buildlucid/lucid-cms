@@ -4,6 +4,7 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import withTransaction from "../../utils/services/with-transaction.js";
 import checkRecentAuthentication from "../auth/checks/check-recent-authentication.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
@@ -12,6 +13,10 @@ import logSecurityAudit from "../security-audit/log-security-audit.js";
 import checkUpdatePassword from "./checks/check-update-password.js";
 import requestEmailChange from "./request-email-change.js";
 
+/**
+ * Run without an outer transaction so wrong passwords stay counted. Account changes commit
+ * together.
+ */
 const updateMe: ServiceFn<
 	[
 		{
@@ -94,6 +99,7 @@ const updateMe: ServiceFn<
 				})
 			: undefined,
 		checkUpdatePassword(context, {
+			userId: data.auth.id,
 			encryptedSecret: getUserRes.data.secret,
 			password: getUserRes.data.password,
 			currentPassword: data.currentPassword,
@@ -121,82 +127,86 @@ const updateMe: ServiceFn<
 		};
 	}
 
-	const [updateMeRes, updatePasswordAuditRes] = await Promise.all([
-		Users.updateSingle({
+	return withTransaction(context, async (context) => {
+		const Users = new UsersRepository(context.db);
+
+		const [updateMeRes, updatePasswordAuditRes] = await Promise.all([
+			Users.updateSingle({
+				data: {
+					first_name: data.firstName,
+					last_name: data.lastName,
+					username: data.username,
+					updated_at: new Date().toISOString(),
+					password: updatePassword.data.newPassword,
+					secret: updatePassword.data.encryptSecret,
+					triggered_password_reset: updatePassword.data.triggerPasswordReset,
+				},
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: data.auth.id,
+					},
+				],
+				returning: ["id", "first_name", "last_name", "email"],
+				validation: {
+					enabled: true,
+					defaultError: {
+						message: copy("server:core.routes.user.me.update.error.message"),
+						status: 400,
+					},
+				},
+			}),
+			updatePassword.data.newPassword !== undefined
+				? logSecurityAudit(context, {
+						userId: data.auth.id,
+						action: constants.securityAudit.actions.passwordChange,
+						performedBy: data.auth.id,
+						previousValue: constants.securityAudit.redactedValue,
+						newValue: constants.securityAudit.redactedValue,
+					})
+				: undefined,
+		]);
+
+		await invalidateAuthCache(context);
+
+		if (updateMeRes.error) return updateMeRes;
+		if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;
+
+		const passwordChanged = updatePassword.data.newPassword !== undefined;
+		if (passwordChanged) {
+			const revokeRes = await revokeUserTokens(context, {
+				userId: data.auth.id,
+				revokeReason: constants.refreshTokenRevokeReasons.passwordChanged,
+			});
+			if (revokeRes.error) return revokeRes;
+		}
+
+		const references = await notifyDependants(context, {
+			resource: "users",
+			table: "lucid_users",
+			ids: [data.auth.id],
+		});
+		if (references.error) return references;
+
+		if (emailChanged) {
+			const requestEmailChangeRes = await requestEmailChange(context, {
+				auth: data.auth,
+				oldEmail: getUserRes.data.email,
+				newEmail: normalizedEmail as string,
+				firstName: updateMeRes.data.first_name,
+				lastName: updateMeRes.data.last_name,
+			});
+			if (requestEmailChangeRes.error) return requestEmailChangeRes;
+		}
+
+		return {
+			error: undefined,
 			data: {
-				first_name: data.firstName,
-				last_name: data.lastName,
-				username: data.username,
-				updated_at: new Date().toISOString(),
-				password: updatePassword.data.newPassword,
-				secret: updatePassword.data.encryptSecret,
-				triggered_password_reset: updatePassword.data.triggerPasswordReset,
+				passwordChanged,
 			},
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.auth.id,
-				},
-			],
-			returning: ["id", "first_name", "last_name", "email"],
-			validation: {
-				enabled: true,
-				defaultError: {
-					message: copy("server:core.routes.user.me.update.error.message"),
-					status: 400,
-				},
-			},
-		}),
-		updatePassword.data.newPassword !== undefined
-			? logSecurityAudit(context, {
-					userId: data.auth.id,
-					action: constants.securityAudit.actions.passwordChange,
-					performedBy: data.auth.id,
-					previousValue: constants.securityAudit.redactedValue,
-					newValue: constants.securityAudit.redactedValue,
-				})
-			: undefined,
-	]);
-
-	await invalidateAuthCache(context);
-
-	if (updateMeRes.error) return updateMeRes;
-	if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;
-
-	const passwordChanged = updatePassword.data.newPassword !== undefined;
-	if (passwordChanged) {
-		const revokeRes = await revokeUserTokens(context, {
-			userId: data.auth.id,
-			revokeReason: constants.refreshTokenRevokeReasons.passwordChanged,
-		});
-		if (revokeRes.error) return revokeRes;
-	}
-
-	const references = await notifyDependants(context, {
-		resource: "users",
-		table: "lucid_users",
-		ids: [data.auth.id],
+		};
 	});
-	if (references.error) return references;
-
-	if (emailChanged) {
-		const requestEmailChangeRes = await requestEmailChange(context, {
-			auth: data.auth,
-			oldEmail: getUserRes.data.email,
-			newEmail: normalizedEmail as string,
-			firstName: updateMeRes.data.first_name,
-			lastName: updateMeRes.data.last_name,
-		});
-		if (requestEmailChangeRes.error) return requestEmailChangeRes;
-	}
-
-	return {
-		error: undefined,
-		data: {
-			passwordChanged,
-		},
-	};
 };
 
 export default updateMe;

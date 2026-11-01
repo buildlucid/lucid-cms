@@ -2,5 +2,6 @@ import type { APIRoute } from "astro";
 import lucid from "lucid:hosted";
 
 /** Serves Lucid's paths, which the integration routes here, with Lucid. */
-export const ALL: APIRoute = ({ request }) => lucid.handle(request);
+export const ALL: APIRoute = ({ request, clientAddress }) =>
+	lucid.handle(request, { clientAddress });
 export const prerender = false;

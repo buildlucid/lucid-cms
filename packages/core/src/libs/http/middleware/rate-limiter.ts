@@ -6,6 +6,7 @@ import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
 import { supportsKVIncrement } from "../../kv/utils.js";
 import createServiceContext from "../utils/create-service-context.js";
+import getClientAddress from "../utils/get-client-address.js";
 
 type RateLimitMode = "ip" | "user" | "client";
 
@@ -21,18 +22,13 @@ type RateLimitOptions = {
 	windowMs: number;
 	/** Maximum number of requests allowed within the window */
 	limit: number;
-	/**
-	 * Scope for the rate limit. Creates separate rate limit groups per scope value. Useful for per-route or per-action limits.
-	 */
+	/** Separates limits by route or action. */
 	scope?: string | ((c: LucidHonoContext) => string | Promise<string>);
 	/**
 	 * Custom key generator function. Takes precedence over mode and scope.
 	 */
 	keyGenerator?: (c: LucidHonoContext) => string | Promise<string>;
-	/**
-	 * Function to skip rate limiting for certain requests.
-	 * Return true to bypass rate limiting.
-	 */
+	/** Return true to bypass rate limiting. */
 	skip?: (c: LucidHonoContext) => boolean | Promise<boolean>;
 };
 
@@ -99,16 +95,15 @@ const rateLimiter = (options: RateLimitOptions) =>
 					break;
 				}
 				default: {
-					const runtimeContext = c.get("runtimeContext");
-					const connectionInfo = runtimeContext.getConnectionInfo(c);
-					if (!connectionInfo.address) {
+					const address = getClientAddress(c);
+					if (!address) {
 						throw new LucidAPIError({
 							type: "authorisation",
 							message: copy("server:core.rate.limit.ip.address.required"),
 							status: 401,
 						});
 					}
-					key = cacheKeys.rateLimit.ip(connectionInfo.address);
+					key = cacheKeys.rateLimit.ip(address);
 					break;
 				}
 			}

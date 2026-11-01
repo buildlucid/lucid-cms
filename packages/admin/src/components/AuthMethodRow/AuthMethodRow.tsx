@@ -4,7 +4,7 @@ import { type Component, type JSXElement, Show } from "solid-js";
 interface AuthMethodRowProps {
 	icon: JSXElement;
 	title: string;
-	/** Shown after the title, such as a status pill. */
+	/** Shown after the title with a dot between them, such as a status pill. */
 	badge?: JSXElement;
 	detail: string;
 	/** Shows the detail as a warning. */
@@ -26,7 +26,12 @@ const AuthMethodRow: Component<AuthMethodRowProps> = (props) => {
 						<span class="truncate text-sm font-medium text-title">
 							{props.title}
 						</span>
-						{props.badge}
+						<Show when={props.badge}>
+							<span class="text-sm text-body" aria-hidden="true">
+								·
+							</span>
+							{props.badge}
+						</Show>
 					</span>
 					<span
 						class={classNames("text-xs", {

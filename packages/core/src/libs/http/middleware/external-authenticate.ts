@@ -16,6 +16,7 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
 import { ExternalScopes } from "../../permission/external-scopes.js";
 import createServiceContext from "../utils/create-service-context.js";
+import getClientAddress from "../utils/get-client-address.js";
 
 /** Adds the OAuth resource challenge to an unauthorized response. */
 const setOAuthBearerChallenge = (
@@ -60,8 +61,6 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 			return await next();
 		}
 
-		const runtimeContext = c.get("runtimeContext");
-		const connectionInfo = runtimeContext.getConnectionInfo(c);
 		const userAgent = c.req.header("user-agent") || null;
 
 		const context = createServiceContext(c);
@@ -176,7 +175,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 			void integrationServices
 				.updateLastUsed(context, {
 					id: externalAuth.credential.integrationId,
-					ipAddress: connectionInfo.address ?? null,
+					ipAddress: getClientAddress(c),
 					userAgent,
 				})
 				.catch(() => undefined);
@@ -184,7 +183,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 			void oauthServices
 				.updateLastUsed(context, {
 					id: externalAuth.credential.grantId,
-					ipAddress: connectionInfo.address ?? null,
+					ipAddress: getClientAddress(c),
 					userAgent,
 				})
 				.catch(() => undefined);

@@ -340,7 +340,12 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		.optional(),
 	http: z.strictObject({
 		security: z.strictObject({
-			trustProxyHeaders: z.boolean(),
+			proxy: z
+				.union([
+					z.strictObject({ hops: z.number().int().min(1) }),
+					z.strictObject({ header: z.string().trim().toLowerCase().min(1) }),
+				])
+				.optional(),
 			cors: z
 				.strictObject({
 					origin: z.array(z.string()).optional(),

@@ -65,8 +65,14 @@ export type LucidDevModule = {
  * framework reaches through `lucid:hosted`.
  */
 export type HostedLucid = {
-	/** Serves a request for one of Lucid's paths, running development tasks first. */
-	handle(request: Request): Promise<Response>;
+	/**
+	 * Serves Lucid routes after development tasks. Pass `clientAddress` when the runtime cannot read
+	 * the connection address.
+	 */
+	handle(
+		request: Request,
+		options?: { clientAddress?: string },
+	): Promise<Response>;
 	/** Creates an invocation the caller destroys, such as one per framework request for the toolkit. */
 	createInvocation(): Promise<LucidInvocation>;
 	/** Destroys the hosts this instance created. */

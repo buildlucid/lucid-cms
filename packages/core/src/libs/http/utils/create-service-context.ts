@@ -2,12 +2,10 @@ import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import { createTranslator, resolveInterfaceLocale } from "../../i18n/index.js";
+import getClientAddress from "./get-client-address.js";
 
-/**
- * A helper to build the service context from a Hono context.
- */
+/** Builds a service context from the Hono context. */
 const createServiceContext = (c: LucidHonoContext): ServiceContext => {
-	const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 	const config = c.get("config");
 	const env = c.get("env");
 	const runtimeContext = c.get("runtimeContext");
@@ -20,7 +18,7 @@ const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 	});
 	const request = {
 		url: c.req.url,
-		ipAddress: connectionInfo.address ?? null,
+		ipAddress: getClientAddress(c),
 		locale,
 	};
 

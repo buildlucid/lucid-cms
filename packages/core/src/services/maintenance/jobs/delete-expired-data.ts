@@ -7,6 +7,7 @@ import clearExpiredJobs from "../tasks/clear-expired-jobs.js";
 import clearExpiredLocales from "../tasks/clear-expired-locales.js";
 import clearExpiredOAuthData from "../tasks/clear-expired-oauth-data.js";
 import clearExpiredPasskeyChallenges from "../tasks/clear-expired-passkey-challenges.js";
+import clearExpiredPasswordAttempts from "../tasks/clear-expired-password-attempts.js";
 import clearExpiredPreviewSessions from "../tasks/clear-expired-preview-sessions.js";
 import clearExpiredTokens from "../tasks/clear-expired-tokens.js";
 import deleteExpiredDeletedDocuments from "../tasks/delete-expired-deleted-documents.js";
@@ -24,6 +25,7 @@ const tasks = [
 	clearExpiredTokens,
 	clearExpiredAuthStates,
 	clearExpiredPasskeyChallenges,
+	clearExpiredPasswordAttempts,
 	clearExpiredOAuthData,
 	deleteExpiredUnsyncedMedia,
 	deleteExpiredDeletedMedia,

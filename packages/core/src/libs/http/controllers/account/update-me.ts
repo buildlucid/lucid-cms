@@ -41,8 +41,9 @@ const updateMeController = factory.createHandlers(
 		} = c.req.valid("json");
 		const context = createServiceContext(c);
 
+		//* the service owns its transaction so a wrong current password stays counted
 		const updateMe = await serviceWrapper(accountServices.updateMe, {
-			transaction: true,
+			transaction: false,
 			defaultError: {
 				type: "basic",
 				name: copy("server:core.routes.user.me.update.error.name"),

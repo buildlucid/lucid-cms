@@ -4,6 +4,7 @@
 
 - Runs on Vite through `@lucidcms/core/vite`, with builds writing a Node server whose packages load from `node_modules`. Removed the `./runtime` export.
 - Fixed scheduled jobs ignoring `url`.
+- Hosted Lucid, such as in Astro, uses the client address its host passes instead of trusting `X-Forwarded-For`.
 
 ## v1.2.2
 

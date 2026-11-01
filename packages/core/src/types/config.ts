@@ -151,13 +151,27 @@ export type SecurityContentSecurityPolicy = {
 	trustedTypes?: string[];
 };
 
+/** How Lucid finds a visitor's address behind a reverse proxy or load balancer. */
+export type HttpProxyConfig =
+	| {
+			/**
+			 * The number of proxies in front of Lucid. Each one adds the address it received the request
+			 * from to the end of `X-Forwarded-For`, so Lucid reads that many entries from the right.
+			 */
+			hops: number;
+	  }
+	| {
+			/** A header your platform always sets to the visitor's address, such as `fly-client-ip`. */
+			header: string;
+	  };
+
 /** Proxy trust, cross-origin access and response headers for the HTTP app. */
 export type HttpSecurityConfig = {
 	/**
-	 * Whether proxy-forwarded protocol headers should be trusted when
-	 * determining secure request context. Defaults to false.
+	 * How to find each visitor's address behind a proxy, for rate limits and login records. Leave it
+	 * unset when visitors connect to Lucid directly, as forwarding headers are then ignored.
 	 */
-	trustProxyHeaders?: boolean;
+	proxy?: HttpProxyConfig;
 	/**
 	 * The CORS configuration.
 	 */
@@ -773,9 +787,7 @@ export interface ResolvedLucidConfig {
 	};
 	captcha?: CaptchaConfig;
 	http: {
-		security: HttpSecurityConfig & {
-			trustProxyHeaders: boolean;
-		};
+		security: HttpSecurityConfig;
 		openAPI: {
 			enabled: boolean;
 		};

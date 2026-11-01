@@ -54,6 +54,7 @@ export { default as OAuthGrantsRepository } from "./oauth-grants.js";
 export { default as OAuthRefreshTokensRepository } from "./oauth-refresh-tokens.js";
 export { default as OptionsRepository } from "./options.js";
 export { default as PasskeyChallengesRepository } from "./passkey-challenges.js";
+export { default as PasswordAttemptsRepository } from "./password-attempts.js";
 export { default as PreviewSessionsRepository } from "./preview-sessions.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
 export { default as RequestApprovalsRepository } from "./request-approvals.js";

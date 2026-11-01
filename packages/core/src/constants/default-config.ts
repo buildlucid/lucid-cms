@@ -15,7 +15,6 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	},
 	http: {
 		security: {
-			trustProxyHeaders: false,
 			headers: {
 				crossOriginResourcePolicy: false,
 				xFrameOptions: true,

@@ -547,6 +547,28 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_password_attempts")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("key", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("failed_attempts", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("reset_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_password_attempts_reset_at")
+				.on("lucid_password_attempts")
+				.column("reset_at")
+				.execute();
+
+			await db.schema
 				.createTable("lucid_auth_states")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),

@@ -44,6 +44,9 @@ export default Object.freeze({
 	password: {
 		/** Random bytes in a temporary password from `lucidcms users:reset-password`, 16 characters once encoded. */
 		temporaryBytes: 12,
+		/** Wrong passwords allowed per account in each window, across logins and confirmations. */
+		attemptLimit: 10,
+		attemptWindowMs: 15 * 60_000,
 	},
 	scrypt: {
 		N: 2 ** 16, // 65536 iterations

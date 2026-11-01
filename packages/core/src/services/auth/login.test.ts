@@ -70,3 +70,45 @@ test("a locked or suspended account only says so to someone with its password", 
 		copy("server:core.auth.login.suspended.error.message"),
 	);
 });
+
+test("wrong passwords are limited per account, and right ones aren't counted", async () => {
+	const { secret, encryptSecret } = generateSecret(
+		context.config.secrets.encryption,
+	);
+	await context.db.kysely
+		.insertInto("lucid_users")
+		.values({
+			email: "limited@test.local",
+			username: "limited",
+			password: await hashSecret("right-password", secret),
+			secret: encryptSecret,
+			invitation_accepted: true,
+			is_locked: false,
+			is_deleted: false,
+		})
+		.execute();
+
+	const attempt = (usernameOrEmail: string, password: string) =>
+		login(context, { usernameOrEmail, password });
+
+	for (let i = 0; i < 9; i++) {
+		await attempt(i % 2 ? "limited" : "LIMITED@test.local", "wrong-password");
+	}
+	expect((await attempt("limited", "right-password")).data).toBeDefined();
+	expect((await attempt("limited", "wrong-password")).error?.status).toBe(401);
+	expect((await attempt("limited", "right-password")).error?.status).toBe(429);
+});
+
+test("unknown accounts reach the limit like real ones", async () => {
+	for (let i = 0; i < 10; i++) {
+		await login(context, {
+			usernameOrEmail: "Nobody@test.local",
+			password: "wrong-password",
+		});
+	}
+	const res = await login(context, {
+		usernameOrEmail: "nobody@test.local",
+		password: "wrong-password",
+	});
+	expect(res.error?.status).toBe(429);
+});

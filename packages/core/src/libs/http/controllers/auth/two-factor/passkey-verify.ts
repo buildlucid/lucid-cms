@@ -15,6 +15,7 @@ import validateCSRF from "../../../middleware/validate-csrf.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import createServiceContext from "../../../utils/create-service-context.js";
+import getClientAddress from "../../../utils/get-client-address.js";
 
 const factory = createFactory();
 
@@ -87,7 +88,6 @@ const passkeyTwoFactorVerifyController = factory.createHandlers(
 		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
 		if (accessRes.error) throw new LucidAPIError(accessRes.error);
 
-		const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 		const userAgent = c.req.header("user-agent") || null;
 
 		const userLoginTrackRes = await serviceWrapper(
@@ -104,7 +104,7 @@ const passkeyTwoFactorVerifyController = factory.createHandlers(
 			userId: challengeRes.data.userId,
 			tokenId: refreshRes.data.tokenId,
 			authMethod: challengeRes.data.authMethod,
-			ipAddress: connectionInfo.address ?? null,
+			ipAddress: getClientAddress(c),
 			userAgent: userAgent,
 		});
 		if (userLoginTrackRes.error)

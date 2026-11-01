@@ -17,7 +17,7 @@ import getRuntimeContext from "./services/runtime-context.js";
 
 /** Handles requests for a server that runs Lucid in-process: Vite's during development or previewing a build, or a host's. */
 export type NodeRequestHandler = Omit<HostedLucid, "handle"> & {
-	/** Serves a request, with the Node bindings Vite's servers pass for reading connections. */
+	/** Serves requests using Vite's Node bindings or the host's `clientAddress`. */
 	handle: (request: Request, requestBindings?: object) => Promise<Response>;
 };
 

@@ -1,12 +1,11 @@
 import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import type { Passkey } from "@types";
 import { TbOutlineFingerprint, TbOutlinePencil } from "solid-icons/tb";
-import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import { type Component, createMemo, createSignal, For } from "solid-js";
 import AuthMethodRow from "@/components/AuthMethodRow/AuthMethodRow";
 import Button from "@/components/Button/Button";
 import DeleteDebounceButton from "@/components/DeleteDebounceButton/DeleteDebounceButton";
 import InfoRow from "@/components/InfoRow/InfoRow";
-import Pill from "@/components/Pill/Pill";
 import RenamePasskeyModal from "@/components/RenamePasskeyModal/RenamePasskeyModal";
 import constants from "@/constants";
 import api from "@/services/api";
@@ -99,14 +98,14 @@ const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 									icon={<TbOutlineFingerprint class="size-4.5" />}
 									title={passkey.name}
 									badge={
-										<Show when={passkey.backedUp}>
-											<Pill
-												size="xs"
-												tooltip={T()("account.passkeys.synced.tooltip")}
+										passkey.backedUp ? (
+											<span
+												class="text-[11px] leading-4 font-medium text-subtitle"
+												title={T()("account.passkeys.synced.tooltip")}
 											>
 												{T()("account.passkeys.synced")}
-											</Pill>
-										</Show>
+											</span>
+										) : undefined
 									}
 									detail={describePasskey(passkey)}
 									action={

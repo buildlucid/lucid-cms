@@ -55,6 +55,7 @@ import { oauthGrantsTable } from "./oauth-grants.js";
 import { oauthRefreshTokensTable } from "./oauth-refresh-tokens.js";
 import { optionsTable } from "./options.js";
 import { passkeyChallengesTable } from "./passkey-challenges.js";
+import { passwordAttemptsTable } from "./password-attempts.js";
 import { previewSessionsTable } from "./preview-sessions.js";
 import { processedImagesTable } from "./processed-images.js";
 import { requestApprovalsTable } from "./request-approvals.js";
@@ -133,6 +134,7 @@ export * from "./oauth-grants.js";
 export * from "./oauth-refresh-tokens.js";
 export * from "./options.js";
 export * from "./passkey-challenges.js";
+export * from "./password-attempts.js";
 export * from "./preview-sessions.js";
 export * from "./processed-images.js";
 export * from "./request-approvals.js";
@@ -215,6 +217,7 @@ export const coreTableDefinitions = [
 	oauthRefreshTokensTable,
 	optionsTable,
 	passkeyChallengesTable,
+	passwordAttemptsTable,
 	previewSessionsTable,
 	processedImagesTable,
 	jobsTable,

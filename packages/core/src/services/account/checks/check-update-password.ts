@@ -1,20 +1,21 @@
 import { copy } from "../../../libs/i18n/index.js";
-import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
 import hashSecret from "../../../utils/helpers/hash-secret.js";
-import verifySecret from "../../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkPasswordRules from "../../auth/checks/check-password-rules.js";
+import verifyPassword from "../../auth/verify-password.js";
 
 const checkPassed = (value: string | undefined) => {
 	return value !== undefined && value.trim() !== "";
 };
 
+/** Checks a password change, counting a wrong current password. Run it outside a transaction. */
 const checkUpdatePassword: ServiceFn<
 	[
 		{
+			userId: number;
 			encryptedSecret: string;
-			password: string; // Stored password hash
+			password: string | null; // Stored password hash
 			currentPassword?: string;
 			newPassword?: string;
 			passwordConfirmation?: string;
@@ -104,13 +105,15 @@ const checkUpdatePassword: ServiceFn<
 		};
 	}
 
-	const passwordValid = await verifySecret(
-		data.currentPassword as string,
-		decrypt(data.encryptedSecret, data.encryptionKey),
-		data.password,
-	);
-
-	if (!passwordValid) {
+	const passwordRes = await verifyPassword(context, {
+		account: { userId: data.userId },
+		password: data.currentPassword as string,
+		stored: data.password
+			? { password: data.password, secret: data.encryptedSecret }
+			: null,
+	});
+	if (passwordRes.error) return passwordRes;
+	if (!passwordRes.data) {
 		return {
 			error: {
 				type: "basic",

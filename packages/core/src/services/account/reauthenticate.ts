@@ -2,15 +2,14 @@ import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { TwoFactorProof } from "../../types/response.js";
-import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import verifySecret from "../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import passkeyLogin from "../auth/passkeys/login.js";
 import checkProof from "../auth/two-factor/check-proof.js";
+import verifyPassword from "../auth/verify-password.js";
 
 /**
  * Checks reauthentication proof. Run without a transaction so failed passkey checks leave the
- * challenge consumed.
+ * challenge consumed and wrong passwords stay counted.
  */
 const reauthenticate: ServiceFn<
 	[
@@ -74,12 +73,13 @@ const reauthenticate: ServiceFn<
 		};
 	}
 
-	const passwordValid = await verifySecret(
-		data.proof.password,
-		decrypt(userRes.data.secret, context.config.secrets.encryption),
-		userRes.data.password,
-	);
-	if (!passwordValid) {
+	const passwordRes = await verifyPassword(context, {
+		account: { userId: data.userId },
+		password: data.proof.password,
+		stored: { password: userRes.data.password, secret: userRes.data.secret },
+	});
+	if (passwordRes.error) return passwordRes;
+	if (!passwordRes.data) {
 		return {
 			error: {
 				type: "basic",

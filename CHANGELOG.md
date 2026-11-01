@@ -32,6 +32,7 @@
 - Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module.
 - Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails.
 - Renamed `host` to `url`, which is now required. Lucid no longer falls back to the request's address.
+- Replaced `http.security.trustProxyHeaders` with `http.security.proxy`, which says how to find visitors' addresses behind a proxy. Secure cookies now follow `url`.
 
 ### Bug Fixes:
 
@@ -55,6 +56,8 @@
 - Fixed tokens from emailed links being written to request logs.
 - Fixed provider invitation logins storing the invitation token unencrypted.
 - Fixed role, permission and user status changes sometimes taking a minute to apply.
+- Fixed rate limits trusting addresses that visitors can write into `X-Forwarded-For`.
+- Fixed wrong passwords having no limit per account. Each account now allows 10 every 15 minutes.
 
 ## v0.19.0-alpha.0
 

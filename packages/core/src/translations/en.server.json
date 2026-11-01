@@ -317,6 +317,7 @@
 	"core.input.provide.current.password": "Please provide your current password.",
 	"core.input.password.invalid": "Please choose a password that meets the requirements.",
 	"core.auth.password.authentication.disabled.message": "Password authentication is disabled. Please contact your administrator.",
+	"core.auth.password.attempts.limit.message": "Too many incorrect passwords have been entered for this account. Please wait a while before trying again.",
 	"core.auth.magic.link.disabled.message": "Magic link login is disabled. Please contact your administrator.",
 	"core.auth.magic.link.invalid.code.message": "That code is incorrect or has expired.",
 	"core.auth.magic.link.invalid.link.message": "This login link is invalid, has expired or has already been used.",

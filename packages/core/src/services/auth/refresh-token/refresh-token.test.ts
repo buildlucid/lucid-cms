@@ -36,6 +36,10 @@ beforeAll(async () => {
 
 /** Logs in and refreshes as the auth controllers do. */
 const app = new Hono<LucidHonoGeneric>()
+	.use(async (c, next) => {
+		c.set("config", context.config);
+		await next();
+	})
 	.post("/login/:userId", async (c) => {
 		await generateToken(c, Number(c.req.param("userId")), {
 			provider: c.req.query("provider") === "true",

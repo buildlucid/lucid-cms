@@ -1,12 +1,11 @@
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import hashSecret from "../../utils/helpers/hash-secret.js";
 import { trimStringInput } from "../../utils/helpers/normalize-input.js";
-import verifySecret from "../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import verifyPassword from "./verify-password.js";
 
+/** Checks a login's password. Run it without an outer transaction so wrong passwords stay counted. */
 const login: ServiceFn<
 	[
 		{
@@ -44,25 +43,15 @@ const login: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const user = userRes.data;
-	if (!user?.password) {
-		//* Hash for unknown accounts too, reducing account enumeration through timing.
-		await hashSecret(data.password, "lucid-login");
-		return {
-			error: {
-				type: "authorisation",
-				message: copy("server:core.auth.login.error.message"),
-				status: 401,
-			},
-			data: undefined,
-		};
-	}
-
-	const valid = await verifySecret(
-		data.password,
-		decrypt(user.secret, context.config.secrets.encryption),
-		user.password,
-	);
-	if (!valid) {
+	const passwordRes = await verifyPassword(context, {
+		account: user ? { userId: user.id } : { identifier: usernameOrEmail },
+		password: data.password,
+		stored: user?.password
+			? { password: user.password, secret: user.secret }
+			: null,
+	});
+	if (passwordRes.error) return passwordRes;
+	if (!user || !passwordRes.data) {
 		return {
 			error: {
 				type: "authorisation",
