@@ -3,7 +3,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { getRequestListener } from "@hono/node-server";
 import { buildModuleId, hostedModuleId } from "@lucidcms/core/build";
-import { LucidError } from "@lucidcms/core/runtime";
+import { LucidError, logger } from "@lucidcms/core/runtime";
 import type { LucidBuild } from "@lucidcms/core/types";
 import type { RuntimeViteIntegration } from "@lucidcms/core/vite";
 import { type Connect, isRunnableDevEnvironment } from "vite";
@@ -36,14 +36,28 @@ export default handler;
 const createMiddleware = (
 	getHandler: () => Promise<NodeRequestHandler>,
 ): Connect.NextHandleFunction => {
-	const listener = getRequestListener(async (request, requestBindings) => {
-		const response = await (
-			await getHandler()
-		).handle(request, requestBindings);
-		// Vite's preview compression holds `writeHead` back, so Hono flushing a streamed body's headers would send 200.
-		requestBindings.outgoing.statusCode = response.status;
-		return response;
-	});
+	const listener = getRequestListener(
+		async (request, requestBindings) => {
+			const response = await (
+				await getHandler()
+			).handle(request, requestBindings);
+			// Vite's preview compression holds `writeHead` back, so Hono flushing a streamed body's headers would send 200.
+			requestBindings.outgoing.statusCode = response.status;
+			return response;
+		},
+		{
+			// Lucid starts on the first request, so a failed start, such as a config error, would otherwise be an empty 500 with nothing logged.
+			errorHandler: (error) => {
+				logger.error({
+					error,
+					event: "runtime-node.request.failed",
+					message: "Lucid couldn't handle the request",
+					scope: "runtime-node",
+				});
+				return new Response(null, { status: 500 });
+			},
+		},
+	);
 	return (request, response, next) => {
 		listener(request, response).catch(next);
 	};

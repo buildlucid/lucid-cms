@@ -31,6 +31,7 @@
 - Removed the D1 database adapter. Database adapters must now support transactions.
 - Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module.
 - Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails.
+- Renamed `host` to `url`, which is now required. Lucid no longer falls back to the request's address.
 
 ### Bug Fixes:
 
@@ -43,6 +44,8 @@
 - Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once.
 - Fixed embedded bricks in localized rich text requiring values in every locale.
 - Fixed password reset, invitation and email change links being kept in email history.
+- Fixed other sessions staying logged in after a password change or account recovery. Reverting an email change also removes login methods added since.
+- Fixed reusing an OAuth refresh token not revoking the tokens issued after it.
 
 ## v0.19.0-alpha.0
 

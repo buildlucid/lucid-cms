@@ -61,7 +61,7 @@ export const startServer = async (build: LucidBuild) => {
 		jobScheduler = createNodeJobScheduler({
 			createInvocation: () => host.createInvocation({ env }),
 			request: {
-				url: host.config.urls.cms ?? `http://localhost:${port}`,
+				url: host.config.url,
 			},
 		});
 		jobScheduler.start();

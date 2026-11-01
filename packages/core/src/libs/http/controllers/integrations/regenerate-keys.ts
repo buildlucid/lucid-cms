@@ -11,6 +11,7 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
+import recentAuthentication from "../../middleware/recent-authentication.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
@@ -43,6 +44,7 @@ const regenerateKeysController = factory.createHandlers(
 		windowMs: 60_000,
 	}),
 	permissions([Permissions.IntegrationRegenerate]),
+	recentAuthentication(),
 	validate("param", controllerSchemas.regenerateKeys.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

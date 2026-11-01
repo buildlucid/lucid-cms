@@ -35,6 +35,7 @@ test("resolves no-call runtime and database adapter creators", async () => {
 			runtime,
 			db,
 			config: (env) => ({
+				url: "http://localhost:6543",
 				secrets: {
 					encryption: env.SECRET as string,
 					cookie: env.SECRET as string,
@@ -73,6 +74,7 @@ test("resolves a named env schema supplied separately from the config definition
 		config: (env) => {
 			const secret = env.SECRET as string;
 			return {
+				url: "http://localhost:6543",
 				secrets: {
 					encryption: secret,
 					cookie: secret,
@@ -112,6 +114,7 @@ test("skips env schema validation and fills missing secrets during build resolut
 		},
 		db: adapter,
 		config: (env) => ({
+			url: "http://localhost:6543",
 			secrets: env.SECRET as string,
 			collections: [],
 			plugins: [],
@@ -167,7 +170,11 @@ test("parsed env output reaches every consumer while runtime bindings survive", 
 				TOKEN: "raw:parsed",
 				BINDING: binding,
 			});
-			return { collections: [], plugins: [] };
+			return {
+				url: "http://localhost:6543",
+				collections: [],
+				plugins: [],
+			};
 		},
 	});
 	const result = await resolveConfigDefinition({

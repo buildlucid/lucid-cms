@@ -16,7 +16,7 @@ import createUsersToolkit from "./users/index.js";
 /**
  * Creates server helpers bound to a Lucid service context.
  * @remarks Methods return `{ error, data }`; use the Lucid SDK for client-side fetching.
- * Absolute URLs use `config.urls.cms`, then `request.url`, then the local Lucid URL.
+ * Absolute URLs use `config.url`.
  *
  * @example
  * ```ts

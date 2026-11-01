@@ -28,6 +28,7 @@ export default defineConfig({
   runtime: node,
   db: sqlite,
   config: (env) => ({
+    url: "https://cms.example.com",
     plugins: [
       googleRecaptchaPlugin({
         siteKey: env.RECAPTCHA_SITE_KEY,

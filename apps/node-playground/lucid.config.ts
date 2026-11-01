@@ -88,6 +88,7 @@ export default defineConfig({
 		// logger: {
 		// 	level: "debug",
 		// },
+		url: "http://localhost:6543",
 		auth: {
 			// password: {
 			// 	enabled: true,

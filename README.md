@@ -79,7 +79,7 @@ For a local Node.js project, the smallest useful setup is typically:
 npm install @lucidcms/core @lucidcms/runtime-node @lucidcms/db-sqlite @lucidcms/plugin-filesystem
 ```
 
-Then create a `lucid.config.ts` file with a runtime, database adapter, secrets, media settings, and collections. SQLite plus the filesystem plugin is the fastest way to explore Lucid locally without external infrastructure.
+Then create a `lucid.config.ts` file with a runtime, database adapter, the public `url`, secrets, media settings, and collections. SQLite plus the filesystem plugin is the fastest way to explore Lucid locally without external infrastructure.
 
 Or deploy our Cloudflare template by clicking the button below.
 

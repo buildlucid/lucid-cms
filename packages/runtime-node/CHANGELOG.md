@@ -3,7 +3,7 @@
 ## v1.3.0 (unreleased)
 
 - Runs on Vite through `@lucidcms/core/vite`, with builds writing a Node server whose packages load from `node_modules`. Removed the `./runtime` export.
-- Fixed scheduled jobs ignoring `urls.cms`.
+- Fixed scheduled jobs ignoring `url`.
 
 ## v1.2.2
 

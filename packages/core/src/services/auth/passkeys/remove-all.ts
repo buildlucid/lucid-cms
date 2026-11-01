@@ -3,8 +3,12 @@ import { copy } from "../../../libs/i18n/index.js";
 import { UserPasskeysRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import logSecurityAudit from "../../security-audit/log-security-audit.js";
+import revokeUserTokens from "../refresh-token/revoke-user-tokens.js";
 
-/** Removes all of a user's passkeys and logs the change. Errors when they have none. */
+/**
+ * Removes all of a user's passkeys and logs the change. Errors when they have none. A reset by
+ * someone else, such as an admin or the CLI, also logs the user out everywhere.
+ */
 const removeAll: ServiceFn<
 	[
 		{
@@ -51,6 +55,14 @@ const removeAll: ServiceFn<
 		newValue: "",
 	});
 	if (auditRes.error) return auditRes;
+
+	if (data.performedBy !== data.userId) {
+		const sessionsRes = await revokeUserTokens(context, {
+			userId: data.userId,
+			revokeReason: constants.refreshTokenRevokeReasons.passkeysReset,
+		});
+		if (sessionsRes.error) return sessionsRes;
+	}
 
 	return {
 		error: undefined,

@@ -6,6 +6,7 @@ import hashSecret from "../../../utils/helpers/hash-secret.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import revokeUserTokens from "../../auth/refresh-token/revoke-user-tokens.js";
 import logSecurityAudit from "../../security-audit/log-security-audit.js";
 
 /**
@@ -93,6 +94,12 @@ const resetPassword: ServiceFn<
 	]);
 	if (updateRes.error) return updateRes;
 	if (auditRes.error) return auditRes;
+
+	const sessionsRes = await revokeUserTokens(context, {
+		userId: userRes.data.id,
+		revokeReason: constants.refreshTokenRevokeReasons.passwordReset,
+	});
+	if (sessionsRes.error) return sessionsRes;
 
 	return {
 		error: undefined,

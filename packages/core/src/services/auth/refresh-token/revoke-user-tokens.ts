@@ -1,8 +1,12 @@
 import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
-import { UserTokensRepository } from "../../../libs/repositories/index.js";
+import {
+	AuthStatesRepository,
+	UserTokensRepository,
+} from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
+/** Revokes all refresh tokens and pending provider links so ended sessions cannot finish linking. */
 const revokeUserTokens: ServiceFn<
 	[
 		{
@@ -15,7 +19,19 @@ const revokeUserTokens: ServiceFn<
 	}
 > = async (context, data) => {
 	const UserTokens = new UserTokensRepository(context.db);
+	const AuthStates = new AuthStatesRepository(context.db);
 	const now = new Date().toISOString();
+
+	const deleteStatesRes = await AuthStates.deleteMultiple({
+		where: [
+			{
+				key: "authenticated_user_id",
+				operator: "=",
+				value: data.userId,
+			},
+		],
+	});
+	if (deleteStatesRes.error) return deleteStatesRes;
 
 	const activeTokenRes = await UserTokens.selectMultiple({
 		select: ["id", "token"],

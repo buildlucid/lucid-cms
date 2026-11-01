@@ -43,7 +43,7 @@ export type CreateServiceContextOptions = {
 	captcha?: CaptchaAdapterInstance | null;
 	/** Runtime-supplied agent runner, with omitted or `null` values selecting inline execution. */
 	agentRunner?: AgentRunnerInstance | null;
-	/** Request metadata, with omitted URLs falling back to `config.urls.cms` or the local Lucid URL. */
+	/** Request metadata, with an omitted URL falling back to `config.url`. */
 	request?: {
 		url?: string;
 		ipAddress?: string | null;
@@ -67,7 +67,7 @@ export type ServiceContext = {
 	agentRunner: AgentRunnerInstance | null;
 	translate: Translator;
 	request: {
-		/** The request URL, used to derive the base URL when `config.urls.cms` is unset. */
+		/** The request URL, or `config.url` outside a request. */
 		url: string;
 		/** The connecting client IP address when the service runs in an HTTP request context. */
 		ipAddress?: string | null;

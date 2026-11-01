@@ -23,6 +23,7 @@ const createAdapter = (adapter: string) =>
 	}) as unknown as DatabaseAdapter;
 
 const config: LucidConfig = {
+	url: "http://localhost:6543",
 	collections: [],
 	plugins: [],
 };
@@ -92,6 +93,7 @@ test("rejects toolkit services that conflict with core services", async () => {
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				plugins: [
 					{
@@ -122,6 +124,7 @@ test("rejects duplicate plugin toolkit service keys", async () => {
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				plugins: [
 					{
@@ -150,6 +153,7 @@ test("rejects static content-route scopes that cannot be granted", async () => {
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				http: {
 					routes: [
@@ -245,6 +249,7 @@ test("rejects duplicate job definitions after plugin config is merged", async ()
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				jobs: { definitions: [job, job] },
 			},
@@ -269,6 +274,7 @@ test("rejects notification audiences with an unknown permission", async () => {
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				notifications: [notification],
 			},
@@ -298,6 +304,7 @@ test("rejects schedule input that does not match its job schema", async () => {
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				jobs: { definitions: [job] },
 			},
@@ -323,6 +330,7 @@ test("rejects schedules that do not use minute precision", async () => {
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				jobs: { definitions: [job] },
 			},
@@ -351,6 +359,7 @@ test("rejects schedules with an invalid timezone", async () => {
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				jobs: { definitions: [job] },
 			},
@@ -385,12 +394,12 @@ test("plugin defaults preserve project values and arrays replace defaults", asyn
 test("site URLs must be http(s) URLs or root paths", async () => {
 	const processSite = (url: string) =>
 		processConfig(
-			{ ...config, urls: { site: url } },
+			{ ...config, url: "http://localhost:6543", siteUrl: url },
 			{ resolvedDb: createAdapter("test"), skipValidation: true },
 		);
 
 	await expect(processSite("/")).resolves.toMatchObject({
-		urls: { site: "/" },
+		siteUrl: "/",
 	});
 	await expect(processSite("https://example.com")).resolves.toBeDefined();
 	await expect(processSite("//elsewhere.example")).rejects.toThrow();
@@ -466,6 +475,7 @@ test("each resolution owns collection mutations made by plugins", async () => {
 		details: { labels: { singular: "Page", plural: "Pages" } },
 	});
 	const authored: LucidConfig = {
+		url: "http://localhost:6543",
 		collections: [collection],
 		plugins: [
 			{
@@ -542,6 +552,7 @@ test("rejects plugin keys that aren't package names or simple keys", async () =>
 		processConfig(
 			{
 				...config,
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				plugins: [{ key: "../escape", lucid: "*" }],
 			},

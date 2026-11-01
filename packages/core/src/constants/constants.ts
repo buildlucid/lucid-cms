@@ -237,6 +237,10 @@ export default Object.freeze({
 	passwordResetTokenExpirationMinutes: 15, // 15 minutes
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
 	emailChangeTokenExpirationMinutes: 1440, // 24 hours in minutes
+	reauthentication: {
+		/** Window after login or reauthentication for changing sign-in methods. */
+		windowSeconds: 600,
+	},
 	magicLink: {
 		/** How long the emailed link and code stay valid. */
 		expirationMinutes: 15,
@@ -474,6 +478,10 @@ export default Object.freeze({
 		accountRevokeAll: "account_revoke_all",
 		adminRevokeAll: "admin_revoke_all",
 		emailChangeReverted: "email_change_reverted",
+		passwordChanged: "password_changed",
+		passwordReset: "password_reset",
+		twoFactorReset: "two_factor_reset",
+		passkeysReset: "passkeys_reset",
 	} as const,
 	userTokenRevokeReasons: {
 		passwordResetUsed: "password_reset_used",

@@ -174,7 +174,7 @@ export const resolveConfigDefinition = async (props: {
 		configure: props.meta?.host
 			? (draft) => {
 					// A host renders the website on the CMS's own domain unless the project says otherwise.
-					draft.urls.site ??= "/";
+					draft.siteUrl ??= "/";
 					wrappedDefinition.configure?.(draft);
 				}
 			: wrappedDefinition.configure,

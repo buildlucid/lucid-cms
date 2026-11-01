@@ -67,6 +67,7 @@ const authFor = (id: number, superAdmin: boolean): LucidAuth => ({
 	exp: 0,
 	iat: 0,
 	nonce: "test",
+	authTime: 0,
 });
 
 /** Reads the user's pending secret, as the authenticator app would from the QR code. */
@@ -348,6 +349,23 @@ test("two recovery codes sent to one login at once only use up the one that logs
 	expect(user.two_factor_failed_attempts).toBe(1);
 });
 
+test("setting up the first app needs a recent login", async () => {
+	const userId = await createUser("tf-first-setup");
+
+	const staleRes = await startTwoFactorSetup(context, {
+		auth: authFor(userId, false),
+	});
+	expect(staleRes.error?.code).toBe("reauthentication_required");
+
+	const recentRes = await startTwoFactorSetup(context, {
+		auth: {
+			...authFor(userId, false),
+			authTime: Math.floor(Date.now() / 1000),
+		},
+	});
+	expect(recentRes.error).toBeUndefined();
+});
+
 test("replacing an app needs a code from the current one, which keeps working until the new one is confirmed", async () => {
 	const userId = await createUser("tf-replace");
 	const { secret } = await enable(userId);
@@ -359,11 +377,12 @@ test("replacing an app needs a code from the current one, which keeps working un
 			.executeTakeFirstOrThrow();
 	const before = await readActiveSecret();
 
-	expect((await startTwoFactorSetup(context, { userId })).error?.status).toBe(
-		400,
-	);
+	expect(
+		(await startTwoFactorSetup(context, { auth: authFor(userId, false) })).error
+			?.status,
+	).toBe(400);
 	const replaceRes = await startTwoFactorSetup(context, {
-		userId,
+		auth: authFor(userId, false),
 		proof: { code: nextCode(secret) },
 	});
 	expect(replaceRes.error).toBeUndefined();

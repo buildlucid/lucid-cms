@@ -1,6 +1,7 @@
 import type { ErrorResponse } from "@types";
 import { clearCsrfSession, csrfReq } from "@/services/api/auth/useCsrf";
 import { refreshTokenReq } from "@/services/api/auth/useRefreshToken";
+import reauthenticationStore from "@/store/reauthenticationStore/reauthenticationStore";
 import {
 	getRequestInterfaceLocale,
 	interfaceLocaleHeader,
@@ -66,9 +67,8 @@ const parseError = (data: unknown, response: Response): ErrorResponse => {
 };
 
 /**
- * Sends a request with the admin session, locale and CSRF token, retrying once
- * after refreshing an expired session or token. Resolves with the successful
- * response and throws a `LucidError` otherwise.
+ * Sends an authenticated request with locale and CSRF headers. Retries after session refresh or
+ * reauthentication; throws `LucidError` on failure.
  */
 export const sendRequest = async <Data = unknown>(
 	params: RequestParams<Data>,
@@ -83,6 +83,7 @@ export const sendRequest = async <Data = unknown>(
 				: JSON.stringify(params.body);
 	let refreshed = false;
 	let refreshedCsrf = false;
+	let reauthenticated = false;
 
 	while (true) {
 		params.signal?.throwIfAborted();
@@ -141,6 +142,17 @@ export const sendRequest = async <Data = unknown>(
 			refreshedCsrf = true;
 			clearCsrfSession();
 			continue;
+		}
+
+		if (
+			response.status === 403 &&
+			error.code === "reauthentication_required" &&
+			!reauthenticated
+		) {
+			reauthenticated = true;
+			if (await reauthenticationStore.request()) continue;
+			//* closing the modal is the user's own choice, so it needs no error toast
+			throw new LucidError(error.message, error);
 		}
 
 		if (params.displayErrorToast !== false) handleSiteErrors(error);

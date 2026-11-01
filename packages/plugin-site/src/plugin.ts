@@ -12,7 +12,7 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
-		defaults: { urls: { site: "/" } },
+		defaults: { siteUrl: "/" },
 		// Hosting frameworks, such as Astro, render the site themselves and only pass Lucid's own paths through.
 		checkCompatibility: ({ runtimeContext }) => {
 			if (runtimeContext.host !== "lucid") {

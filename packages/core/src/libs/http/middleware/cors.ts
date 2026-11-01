@@ -6,7 +6,7 @@ import type { LucidHonoContext } from "../../../types/hono.js";
 
 /** Browser origins permitted by both CORS and the MCP endpoint. */
 export const getAllowedCorsOrigins = (config: ResolvedLucidConfig) => [
-	...(config.urls.cms ? [new URL(config.urls.cms).origin] : []),
+	new URL(config.url).origin,
 	...(config.http.security.cors?.origin ?? []),
 ];
 

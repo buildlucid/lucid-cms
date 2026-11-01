@@ -14,6 +14,7 @@ const authUser = (props: {
 	exp: 0,
 	iat: 0,
 	nonce: "test",
+	authTime: 0,
 });
 
 test("resolves readable variable resources from the editor permissions", () => {

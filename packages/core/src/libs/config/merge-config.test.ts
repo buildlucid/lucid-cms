@@ -120,6 +120,7 @@ test("does not initialize a plugin default lifecycle for an explicit project ema
 	const projectAdapter = { ...passthroughEmailAdapterInstance, key: "project" };
 	const processed = await processConfig(
 		{
+			url: "http://localhost:6543",
 			secrets: "a".repeat(64),
 			email: { adapter: projectAdapter },
 			plugins: [

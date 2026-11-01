@@ -1,19 +1,18 @@
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { TwoFactorSetup } from "../../types/response.js";
 import type { TwoFactorProof } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkRecentAuthentication from "../auth/checks/check-recent-authentication.js";
 import checkProof from "../auth/two-factor/check-proof.js";
 import createSecret from "../auth/two-factor/create-secret.js";
 
-/**
- * Starts setting up an authenticator app from the account page. Replacing an
- * app that's already set up needs a code from it, or a recovery code.
- */
+/** Requires an app or recovery code for replacement, or a recent login for initial setup. */
 const startTwoFactorSetup: ServiceFn<
 	[
 		{
-			userId: number;
+			auth: LucidAuth;
 			proof?: TwoFactorProof;
 		},
 	],
@@ -37,7 +36,7 @@ const startTwoFactorSetup: ServiceFn<
 			{
 				key: "id",
 				operator: "=",
-				value: data.userId,
+				value: data.auth.id,
 			},
 		],
 		validation: {
@@ -59,13 +58,16 @@ const startTwoFactorSetup: ServiceFn<
 		}
 
 		const proofRes = await checkProof(context, {
-			userId: data.userId,
+			userId: data.auth.id,
 			proof: data.proof,
 		});
 		if (proofRes.error) return proofRes;
+	} else {
+		const recentRes = checkRecentAuthentication(data.auth);
+		if (recentRes.error) return recentRes;
 	}
 
-	return createSecret(context, { userId: data.userId });
+	return createSecret(context, { userId: data.auth.id });
 };
 
 export default startTwoFactorSetup;

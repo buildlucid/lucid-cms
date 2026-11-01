@@ -18,7 +18,7 @@ export default defineConfig({
 });
 ```
 
-Lucid needs nothing Astro-specific in `lucid.config.*`: Lucid's CLI finds this package in your dependencies. Run the project with `astro dev`, `astro build` and `astro preview`, which `lucidcms dev`, `build` and `serve` point you to. Lucid's other commands, such as `lucidcms migrate` and `lucidcms seed`, run through Astro's Vite config, so they use the same adapter, options and bindings as `astro dev`.
+Lucid needs nothing Astro-specific in `lucid.config.*`: Lucid's CLI finds this package in your dependencies. Set its `url` to the address Astro serves, such as `http://localhost:4321` while developing. Run the project with `astro dev`, `astro build` and `astro preview`, which `lucidcms dev`, `build` and `serve` point you to. Lucid's other commands, such as `lucidcms migrate` and `lucidcms seed`, run through Astro's Vite config, so they use the same adapter, options and bindings as `astro dev`.
 
 On Cloudflare, wrap the Worker in `cloudflare.config.ts` with `withLucid`. See the [Cloudflare runtime](../runtime-cloudflare/README.md#astro).
 

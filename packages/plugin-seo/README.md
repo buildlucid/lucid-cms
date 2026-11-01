@@ -24,6 +24,7 @@ export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
+    url: "https://cms.example.com",
     // Register your collections here as usual.
     plugins: [
       seoPlugin({

@@ -62,6 +62,7 @@ test("permission middleware accepts custom grants and rejects removed permission
 				exp: 0,
 				iat: 0,
 				nonce: "test",
+				authTime: 0,
 			});
 			await next();
 		});

@@ -38,7 +38,9 @@ export interface PublicErrorData {
 		/** A passkey prompt's challenge was used or timed out, so it has to start again. */
 		| "passkey_expired"
 		/** The passkey used isn't on any account, so the browser should stop offering it. */
-		| "passkey_unknown";
+		| "passkey_unknown"
+		/** The change needs a recent login, so the user has to confirm it's them first. */
+		| "reauthentication_required";
 	key?: string;
 	errors?: ErrorResult;
 }

@@ -22,6 +22,7 @@ export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
+    url: "https://cms.example.com",
     media: {
       images: {
         presets: {

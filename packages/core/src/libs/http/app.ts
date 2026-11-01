@@ -83,7 +83,7 @@ const createApp = async (props: {
 	};
 }) => {
 	const app = new Hono<LucidHonoGeneric>();
-	const cmsUrl = props.config.urls.cms;
+	const cmsUrl = props.config.url;
 	app
 		.use(
 			requestId({

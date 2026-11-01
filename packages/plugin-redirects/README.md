@@ -24,6 +24,7 @@ export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
+    url: "https://cms.example.com",
     collections: [PageCollection, PostCollection],
     plugins: [
       redirectsPlugin({

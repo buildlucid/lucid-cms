@@ -1,7 +1,6 @@
 import type { LucidHonoContext } from "../../../types/hono.js";
 
-/** Returns the CMS's base URL from a Hono context: `urls.cms` when set, otherwise the request's origin. */
-const getRequestBaseUrl = (c: LucidHonoContext): string =>
-	c.get("config").urls.cms ?? new URL(c.req.url).origin;
+/** Returns the CMS's base URL from `url`. Never derive it from the request, as Host headers can be forged. */
+const getRequestBaseUrl = (c: LucidHonoContext): string => c.get("config").url;
 
 export default getRequestBaseUrl;

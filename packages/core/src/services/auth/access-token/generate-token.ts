@@ -9,9 +9,14 @@ import type {
 import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
+/**
+ * Sets the access cookie. Omit `authTime` for login or reauthentication; preserve it during
+ * refresh.
+ */
 const generateToken = async (
 	c: LucidHonoContext,
 	userId: number,
+	authTime?: number,
 ): ServiceResponse<undefined> => {
 	try {
 		const config = c.get("config");
@@ -25,6 +30,7 @@ const generateToken = async (
 				exp: Math.floor(now / 1000) + constants.accessTokenExpiration,
 				iat: Math.floor(now / 1000),
 				nonce: nonce,
+				authTime: authTime ?? Math.floor(now / 1000),
 			} satisfies LucidAccessToken,
 			config.secrets.accessToken,
 			constants.jwt.algorithm,

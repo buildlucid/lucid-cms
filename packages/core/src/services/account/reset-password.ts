@@ -12,6 +12,7 @@ import {
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkPasswordRules from "../auth/checks/check-password-rules.js";
+import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
 import sendEmail from "../email/send-email.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import getUserToken from "../user-tokens/get-single.js";
@@ -170,6 +171,12 @@ const resetPassword: ServiceFn<
 	]);
 	if (updatedUserRes.error) return updatedUserRes;
 	if (auditRes.error) return auditRes;
+
+	const sessionsRes = await revokeUserTokens(context, {
+		userId: tokenRes.data.user_id,
+		revokeReason: constants.refreshTokenRevokeReasons.passwordReset,
+	});
+	if (sessionsRes.error) return sessionsRes;
 
 	const sendEmailRes = await sendEmail(context, {
 		template: constants.email.templates.passwordResetSuccess.key,

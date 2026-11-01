@@ -1,4 +1,3 @@
-import constants from "../../constants/constants.js";
 import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import { passthroughEmailAdapterInstance } from "../../libs/email/adapters/passthrough.js";
 import { createTranslator } from "../../libs/i18n/index.js";
@@ -40,10 +39,7 @@ const createServiceContext = (
 			locale,
 		}),
 		request: {
-			url:
-				options.request?.url ??
-				options.config.urls.cms ??
-				constants.urls.localhost,
+			url: options.request?.url ?? options.config.url,
 			ipAddress: options.request?.ipAddress ?? null,
 			locale,
 		},

@@ -9,6 +9,7 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
+import recentAuthentication from "../../../middleware/recent-authentication.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -35,6 +36,7 @@ const createPasskeyOptionsController = factory.createHandlers(
 	}),
 	validateCSRF(),
 	authenticate(),
+	recentAuthentication(),
 	rateLimiter({
 		mode: "user",
 		limit: constants.rateLimit.scopes.low.limit,

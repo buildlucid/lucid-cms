@@ -26,6 +26,7 @@ export default defineConfig({
   runtime: node,
   db: sqlite,
   config: (env) => ({
+    url: "https://cms.example.com",
     plugins: [
       typesensePlugin({
         host: env.TYPESENSE_HOST,

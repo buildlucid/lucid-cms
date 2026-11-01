@@ -332,14 +332,13 @@ export interface LucidConfig {
 	 */
 	http?: HttpConfig;
 	/**
-	 * Public URLs for the CMS and the website that renders your content.
+	 * The CMS's public URL, such as `https://cms.example.com`. Emailed links, passkeys and OAuth use it.
 	 */
-	urls?: {
-		/** The CMS's public URL, such as `https://cms.example.com`, falling back to the request origin when omitted. */
-		cms?: string;
-		/** The website URL, such as `https://example.com`, or a path such as `/` on the CMS domain. */
-		site?: string;
-	};
+	url: string;
+	/**
+	 * The URL of the website that renders your content, such as `https://example.com`, or a path such as `/` on the CMS's domain.
+	 */
+	siteUrl?: string;
 	/**
 	 * A single `64 character` root secret, or separate `64 character` secrets
 	 * to encrypt and sign data.
@@ -721,10 +720,8 @@ export interface LucidConfig {
 /** Runtime configuration after defaults, plugin contributions and configure callbacks have been applied. */
 export interface ResolvedLucidConfig {
 	access: AccessGroup[];
-	urls: {
-		cms?: string;
-		site?: string;
-	};
+	url: string;
+	siteUrl?: string;
 	logger: {
 		level: LogLevel;
 		transport?: LogTransport;

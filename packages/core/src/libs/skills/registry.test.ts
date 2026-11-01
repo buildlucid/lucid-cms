@@ -24,6 +24,7 @@ test("a skill can be shared by MCP and several agents", async () => {
 	const shared = skill("test-shared");
 	const config = await processConfig(
 		{
+			url: "http://localhost:6543",
 			secrets: "a".repeat(64),
 			ai: {
 				mcp: { skills: [shared] },
@@ -44,6 +45,7 @@ test("rejects names clients cannot verify and duplicates within a placement", as
 	await expect(
 		processConfig(
 			{
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				ai: { mcp: { skills: [skill("test_seo")] } },
 			},
@@ -53,6 +55,7 @@ test("rejects names clients cannot verify and duplicates within a placement", as
 	await expect(
 		processConfig(
 			{
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				ai: {
 					agents: [agent("test", [skill("test-seo"), skill("test-seo")])],

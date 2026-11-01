@@ -11,6 +11,7 @@ import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import getUserToken from "../user-tokens/get-single.js";
+import removeSignInsSince from "./helpers/remove-sign-ins-since.js";
 
 const revertEmailChange: ServiceFn<
 	[
@@ -134,6 +135,13 @@ const revertEmailChange: ServiceFn<
 		]);
 		if (consumeRevertTokenRes.error) return consumeRevertTokenRes;
 		if (revokeConfirmTokenRes.error) return revokeConfirmTokenRes;
+
+		//* someone asked to change the email without the owner, so their session ends
+		const revokeRes = await revokeUserTokens(context, {
+			userId: requestRes.data.user_id,
+			revokeReason: constants.refreshTokenRevokeReasons.emailChangeReverted,
+		});
+		if (revokeRes.error) return revokeRes;
 
 		return {
 			error: undefined,
@@ -283,6 +291,13 @@ const revertEmailChange: ServiceFn<
 	if (consumeTokenRes.error) return consumeTokenRes;
 	if (auditRes.error) return auditRes;
 	if (revokeRefreshTokensRes.error) return revokeRefreshTokensRes;
+
+	//* whoever changed the email may have added a passkey or provider to get back in with
+	const removeSignInsRes = await removeSignInsSince(context, {
+		userId: requestRes.data.user_id,
+		since: requestRes.data.created_at,
+	});
+	if (removeSignInsRes.error) return removeSignInsRes;
 
 	const references = await notifyDependants(context, {
 		resource: "users",

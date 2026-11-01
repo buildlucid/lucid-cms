@@ -28,7 +28,7 @@ export const getServerUrl = (
 	return `http://${hostname}:${address.port}`;
 };
 
-/** Prints the introduction once per CLI session, with the website when `urls.site` is set. */
+/** Prints the introduction once per CLI session, with the website when `siteUrl` is set. */
 export const logServerReady = (props: {
 	url: string;
 	site?: string;

@@ -16,6 +16,8 @@ const verifyToken = async (
 	c: LucidHonoContext,
 ): ServiceResponse<{
 	user_id: number;
+	/** Last login or reauthentication time, preserved during refresh. */
+	authTime: number;
 }> => {
 	try {
 		const _refresh = getCookie(c, constants.cookies.refreshToken);
@@ -40,7 +42,10 @@ const verifyToken = async (
 			constants.jwt.algorithm,
 		)) as {
 			id: number;
+			authTime?: number;
 		};
+		//* tokens without the time have to confirm it's the user before security changes
+		const authTime = typeof decode.authTime === "number" ? decode.authTime : 0;
 		const hashedRefreshToken = hashUserToken(_refresh);
 
 		const tokenRes = await UserTokens.selectSingle({
@@ -145,7 +150,7 @@ const verifyToken = async (
 		if (kvEntry && kvEntry.user_id === tokenRes.data.user_id) {
 			return {
 				error: undefined,
-				data: { user_id: kvEntry.user_id },
+				data: { user_id: kvEntry.user_id, authTime },
 			};
 		}
 
@@ -160,6 +165,7 @@ const verifyToken = async (
 			error: undefined,
 			data: {
 				user_id: tokenRes.data.user_id,
+				authTime,
 			},
 		};
 	} catch (_err) {

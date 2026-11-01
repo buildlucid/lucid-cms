@@ -3,11 +3,15 @@ import {
 	OAuthRefreshTokensRepository,
 } from "../../libs/repositories/index.js";
 import type { OAuthTokenResponse } from "../../schemas/oauth.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
+import withTransaction from "../../utils/services/with-transaction.js";
 import { hashOAuthRefreshToken } from "./helpers/security.js";
 import issueOAuthTokens from "./issue-tokens.js";
 
-/** Rotates a valid refresh token and issues a new OAuth token pair. */
+/**
+ * Run without an outer transaction so token-family revocation survives failed reuse attempts. Only
+ * rotation is transactional.
+ */
 const refreshAccessToken: ServiceFn<
 	[
 		{
@@ -45,15 +49,12 @@ const refreshAccessToken: ServiceFn<
 		};
 	}
 
-	const now = new Date().toISOString();
-	if (
-		tokenRes.data.consumed_at !== null ||
-		tokenRes.data.revoked_at !== null ||
-		new Date(tokenRes.data.expires_at).getTime() <= Date.now()
-	) {
+	const token = tokenRes.data;
+	const familyId = token.family_id;
+	const revokeFamily = async (): ServiceResponse<OAuthTokenResponse> => {
 		const revokeRes = await RefreshTokens.revokeFamily({
-			familyId: tokenRes.data.family_id,
-			revokedAt: now,
+			familyId,
+			revokedAt: new Date().toISOString(),
 		});
 		if (revokeRes.error) return revokeRes;
 		return {
@@ -64,6 +65,14 @@ const refreshAccessToken: ServiceFn<
 			},
 			data: undefined,
 		};
+	};
+
+	if (
+		tokenRes.data.consumed_at !== null ||
+		tokenRes.data.revoked_at !== null ||
+		new Date(tokenRes.data.expires_at).getTime() <= Date.now()
+	) {
+		return revokeFamily();
 	}
 	if (
 		tokenRes.data.client_id !== input.clientId ||
@@ -79,46 +88,50 @@ const refreshAccessToken: ServiceFn<
 		};
 	}
 
-	const consumeRes = await RefreshTokens.consume({
-		tokenHash,
-		consumedAt: now,
-	});
-	if (consumeRes.error) return consumeRes;
-	if (!consumeRes.data) {
-		const revokeRes = await RefreshTokens.revokeFamily({
-			familyId: tokenRes.data.family_id,
-			revokedAt: now,
+	//* set when another request used the token first, which counts as reuse
+	let reused = false;
+	const rotateRes = await withTransaction(context, async (context) => {
+		const RefreshTokens = new OAuthRefreshTokensRepository(context.db);
+		const consumeRes = await RefreshTokens.consume({
+			tokenHash,
+			consumedAt: new Date().toISOString(),
 		});
-		if (revokeRes.error) return revokeRes;
-		return {
-			error: {
-				type: "authorisation",
-				code: "invalid_grant",
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
+		if (consumeRes.error) return consumeRes;
+		if (!consumeRes.data) {
+			reused = true;
+			return {
+				error: {
+					type: "authorisation",
+					code: "invalid_grant",
+					status: 400,
+				},
+				data: undefined,
+			};
+		}
 
-	const Grants = new OAuthGrantsRepository(context.db);
-	const grantRes = await Grants.selectSingleWithScopes({
-		id: consumeRes.data.grant_id,
-		validation: {
-			enabled: true,
-			defaultError: {
-				type: "authorisation",
-				code: "invalid_grant",
-				status: 400,
+		const Grants = new OAuthGrantsRepository(context.db);
+		const grantRes = await Grants.selectSingleWithScopes({
+			id: consumeRes.data.grant_id,
+			validation: {
+				enabled: true,
+				defaultError: {
+					type: "authorisation",
+					code: "invalid_grant",
+					status: 400,
+				},
 			},
-		},
-	});
-	if (grantRes.error) return grantRes;
+		});
+		if (grantRes.error) return grantRes;
 
-	return issueOAuthTokens(context, {
-		grant: grantRes.data,
-		resource: tokenRes.data.resource,
-		familyId: consumeRes.data.family_id,
+		return issueOAuthTokens(context, {
+			grant: grantRes.data,
+			resource: token.resource,
+			familyId: consumeRes.data.family_id,
+		});
 	});
+	if (reused) return revokeFamily();
+
+	return rotateRes;
 };
 
 export default refreshAccessToken;

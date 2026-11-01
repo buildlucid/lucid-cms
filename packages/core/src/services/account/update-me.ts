@@ -4,7 +4,9 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkRecentAuthentication from "../auth/checks/check-recent-authentication.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import checkUpdatePassword from "./checks/check-update-password.js";
@@ -23,7 +25,10 @@ const updateMe: ServiceFn<
 			passwordConfirmation?: string;
 		},
 	],
-	undefined
+	{
+		/** The password changed, which logs out every session, so the caller renews its own. */
+		passwordChanged: boolean;
+	}
 > = async (context, data) => {
 	if (data.newPassword && context.config.auth.password.enabled === false) {
 		return {
@@ -43,7 +48,7 @@ const updateMe: ServiceFn<
 		data.email !== undefined ? normalizeEmailInput(data.email) : undefined;
 
 	const getUserRes = await Users.selectSingle({
-		select: ["super_admin", "password", "first_name", "secret", "email"],
+		select: ["password", "first_name", "secret", "email"],
 		where: [
 			{
 				key: "id",
@@ -63,6 +68,12 @@ const updateMe: ServiceFn<
 
 	const emailChanged =
 		normalizedEmail !== undefined && normalizedEmail !== getUserRes.data.email;
+
+	//* the new address can reset the password, so it needs a recent login
+	if (emailChanged) {
+		const recentRes = checkRecentAuthentication(data.auth);
+		if (recentRes.error) return recentRes;
+	}
 
 	const [userWithUsername, updatePassword] = await Promise.all([
 		data.username !== undefined
@@ -153,6 +164,15 @@ const updateMe: ServiceFn<
 	if (updateMeRes.error) return updateMeRes;
 	if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;
 
+	const passwordChanged = updatePassword.data.newPassword !== undefined;
+	if (passwordChanged) {
+		const revokeRes = await revokeUserTokens(context, {
+			userId: data.auth.id,
+			revokeReason: constants.refreshTokenRevokeReasons.passwordChanged,
+		});
+		if (revokeRes.error) return revokeRes;
+	}
+
 	const references = await notifyDependants(context, {
 		resource: "users",
 		table: "lucid_users",
@@ -171,18 +191,11 @@ const updateMe: ServiceFn<
 		if (requestEmailChangeRes.error) return requestEmailChangeRes;
 	}
 
-	if (getUserRes.data.super_admin === 0) {
-		return {
-			error: undefined,
-			data: undefined,
-		};
-	}
-
-	// super admin specific
-
 	return {
 		error: undefined,
-		data: undefined,
+		data: {
+			passwordChanged,
+		},
 	};
 };
 

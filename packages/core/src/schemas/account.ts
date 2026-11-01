@@ -3,6 +3,8 @@ import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../exports/types.js";
 import { translate } from "../libs/i18n/index.js";
 import {
+	passkeyAuthenticationResponseSchema,
+	passkeyLoginOptionsSchema,
 	passkeyRegistrationOptionsSchema,
 	passkeyRegistrationResponseSchema,
 	recoveryCodeSchema,
@@ -226,6 +228,39 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		response: twoFactorRecoveryCodesSchema,
+	} satisfies ControllerSchema,
+	reauthenticateOptions: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: passkeyLoginOptionsSchema,
+	} satisfies ControllerSchema,
+	reauthenticate: {
+		body: z
+			.union([
+				z.object({
+					password: z.string().min(1).meta({
+						description: "The user's password",
+						example: "password",
+					}),
+				}),
+				z.object({ code: twoFactorCodeSchema }),
+				z.object({ recoveryCode: recoveryCodeSchema }),
+				z.object({ passkey: passkeyAuthenticationResponseSchema }),
+			])
+			.meta({
+				description:
+					"The user's password, a code from their authenticator app, a recovery code, or a passkey response to the reauthentication options",
+			}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
 	} satisfies ControllerSchema,
 	disableTwoFactor: {
 		body: twoFactorProofSchema,

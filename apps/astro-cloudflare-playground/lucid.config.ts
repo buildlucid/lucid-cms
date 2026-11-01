@@ -26,6 +26,7 @@ export default defineConfig({
 		url: env.BUILDLUCID_CMS_DB?.connectionString ?? env.DATABASE_URL,
 	})),
 	config: (env) => ({
+		url: "http://localhost:4321",
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,
 			cookie: env.COOKIE_SECRET,

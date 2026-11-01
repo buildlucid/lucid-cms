@@ -67,6 +67,7 @@ const authFor = (id: number, superAdmin: boolean): LucidAuth => ({
 	exp: 0,
 	iat: 0,
 	nonce: "test",
+	authTime: 0,
 });
 
 const sha256 = (data: Uint8Array | string) =>

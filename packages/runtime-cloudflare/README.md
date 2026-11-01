@@ -31,6 +31,7 @@ export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
+    url: "https://cms.example.com",
     // ...other config
   }),
 });
@@ -55,6 +56,7 @@ export default defineConfig({
   })),
   db: libsql,
   config: () => ({
+    url: "https://cms.example.com",
     // ...other config
   }),
 });
@@ -111,6 +113,7 @@ export default defineConfig({
   runtime: cloudflare,
   db: postgres((env) => ({ url: env.LUCID_DB.connectionString })),
   config: () => ({
+    url: "https://cms.example.com",
     // ...other config
   }),
 });
@@ -174,6 +177,7 @@ export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
+    url: "https://cms.example.com",
     plugins: [
       cloudflareR2Plugin({
         bucketName: "lucid-media",
@@ -199,6 +203,7 @@ export default defineConfig({
   }),
   db: libsql,
   config: () => ({
+    url: "https://cms.example.com",
     // ...other config
   }),
 });
@@ -224,6 +229,7 @@ export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
+    url: "https://cms.example.com",
     plugins: [
       cloudflareR2Plugin({
         bucketName: "lucid-media",
@@ -244,6 +250,7 @@ export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
+    url: "https://cms.example.com",
     plugins: [cloudflareImagesPlugin()],
   }),
 });

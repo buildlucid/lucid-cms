@@ -18,6 +18,7 @@ export default defineConfig({
 	runtime: node,
 	db: sqlite,
 	config: (env) => ({
+		url: "http://localhost:4321",
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,
 			cookie: env.COOKIE_SECRET,

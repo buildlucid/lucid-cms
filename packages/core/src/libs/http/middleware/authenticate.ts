@@ -15,7 +15,7 @@ import { isRegisteredPermission } from "../../permission/registry.js";
 import { UsersRepository } from "../../repositories/index.js";
 import createServiceContext from "../utils/create-service-context.js";
 
-type CachedAuthState = Omit<LucidAuth, "exp" | "iat" | "nonce">;
+type CachedAuthState = Omit<LucidAuth, "exp" | "iat" | "nonce" | "authTime">;
 
 /**
  * Reads the cached live auth state for a user.
@@ -119,6 +119,8 @@ const resolveAuthState = async (
 		exp: token.exp,
 		iat: token.iat,
 		nonce: token.nonce,
+		//* tokens without the time have to confirm it's the user before security changes
+		authTime: typeof token.authTime === "number" ? token.authTime : 0,
 	};
 };
 

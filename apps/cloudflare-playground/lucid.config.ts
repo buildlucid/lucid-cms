@@ -20,6 +20,7 @@ export default defineConfig({
 	runtime: cloudflare,
 	db: postgres((env) => ({ url: env.LUCID_DB.connectionString })),
 	config: (env) => ({
+		url: "http://localhost:6543",
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,
 			cookie: env.COOKIE_SECRET,

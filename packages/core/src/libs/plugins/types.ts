@@ -146,8 +146,8 @@ export type LucidPluginCliFactory<Options = undefined> = (
 /** A callback that mutates the resolved configuration draft. */
 export type PluginConfigure = ConfigTransform;
 
-/** Fallback project settings. Explicit project values take precedence. */
-export type PluginDefaults = Omit<Partial<LucidConfig>, "plugins">;
+/** Fallback project settings. Explicit project values take precedence, and the CMS's own `url` is the project's to set. */
+export type PluginDefaults = Omit<Partial<LucidConfig>, "plugins" | "url">;
 
 /** A plugin returned by `definePlugin` and registered in project config. */
 export type LucidPluginDefinition = {

@@ -5,6 +5,7 @@ import {
 	Show,
 	untrack,
 } from "solid-js";
+import ReauthenticateModal from "@/components/ReauthenticateModal/ReauthenticateModal";
 import Spinner from "@/components/Spinner/Spinner";
 import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
 import api from "@/services/api";
@@ -69,6 +70,7 @@ const AuthenticatedRoutes: ParentComponent = (props) => {
 				}}
 				options={{ forced: true }}
 			/>
+			<ReauthenticateModal />
 		</Show>
 	);
 };

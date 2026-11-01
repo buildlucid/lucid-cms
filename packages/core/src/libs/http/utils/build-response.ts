@@ -25,12 +25,12 @@ type FormattedAPIResponse<Data, Refs> = Omit<ResponseBody<Data>, "refs"> & {
 const constructBaseUrl = (c: Context): URL => {
 	const requestUrl = new URL(c.req.url);
 	const config = c.get("config") as
-		| Pick<ResolvedLucidConfig, "urls">
+		| Pick<ResolvedLucidConfig, "url">
 		| undefined;
 
-	if (!config?.urls.cms) return requestUrl;
+	if (!config) return requestUrl;
 
-	return new URL(`${requestUrl.pathname}${requestUrl.search}`, config.urls.cms);
+	return new URL(`${requestUrl.pathname}${requestUrl.search}`, config.url);
 };
 
 const getPath = (c: Context) => {

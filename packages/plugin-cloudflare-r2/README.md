@@ -27,6 +27,7 @@ export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: (env) => ({
+    url: "https://cms.example.com",
     plugins: [
       cloudflareR2Plugin({
         bucketName: "lucid-media",

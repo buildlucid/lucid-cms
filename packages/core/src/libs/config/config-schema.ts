@@ -324,19 +324,20 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		...value,
 	})),
 	sources: ResourceSourcesSchema,
-	urls: z.strictObject({
-		//* trailing slashes are dropped so paths can be appended directly
-		cms: z
-			.url({ protocol: /^https?$/ })
-			.transform((value) => value.replace(/\/+$/, ""))
-			.optional(),
-		site: z
-			.union([
-				z.url({ protocol: /^https?$/ }),
-				z.string().regex(/^\/(?![/\\])/, "Use a path that starts with /."),
-			])
-			.optional(),
-	}),
+	//* trailing slashes are dropped so paths can be appended directly
+	url: z
+		.url({
+			protocol: /^https?$/,
+			error:
+				"Set url to the CMS's public address, such as https://cms.example.com.",
+		})
+		.transform((value) => value.replace(/\/+$/, "")),
+	siteUrl: z
+		.union([
+			z.url({ protocol: /^https?$/ }),
+			z.string().regex(/^\/(?![/\\])/, "Use a path that starts with /."),
+		])
+		.optional(),
 	http: z.strictObject({
 		security: z.strictObject({
 			trustProxyHeaders: z.boolean(),

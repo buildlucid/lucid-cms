@@ -11,12 +11,15 @@ export const env = z.object({
 	/** Hyperdrive binding declared in cloudflare.config.ts. */
 	LUCID_DB: z.object({ connectionString: z.string() }),
 	LUCID_SECRET: z.string().length(64),
+	/** The CMS's public address, such as its workers.dev URL or custom domain. */
+	LUCID_CMS_URL: z.url(),
 });
 
 export default defineConfig({
 	runtime: cloudflare,
 	db: postgres((env) => ({ url: env.LUCID_DB.connectionString })),
 	config: (env) => ({
+		url: env.LUCID_CMS_URL,
 		secrets: env.LUCID_SECRET,
 		collections: [PageCollection],
 		plugins: [

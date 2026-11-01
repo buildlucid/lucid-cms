@@ -7,7 +7,7 @@ import {
 	type NavigationActionVariant,
 } from "@/utils/navigation";
 
-/** Opens `urls.site` in a new tab when configured. */
+/** Opens `siteUrl` in a new tab when configured. */
 export const SiteLink: Component<{
 	size?: "sm" | "md";
 	variant?: NavigationActionVariant;

@@ -34,8 +34,16 @@ const tokenController = factory.createHandlers(
 		if (payloadRes.error) throw new LucidAPIError(payloadRes.error);
 
 		const [refreshRes, accessRes] = await Promise.all([
-			authServices.refreshToken.generateToken(c, payloadRes.data.user_id),
-			authServices.accessToken.generateToken(c, payloadRes.data.user_id),
+			authServices.refreshToken.generateToken(
+				c,
+				payloadRes.data.user_id,
+				payloadRes.data.authTime,
+			),
+			authServices.accessToken.generateToken(
+				c,
+				payloadRes.data.user_id,
+				payloadRes.data.authTime,
+			),
 		]);
 
 		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);

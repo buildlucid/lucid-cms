@@ -56,6 +56,7 @@ export default {
         }),
     },
     config: (values) => ({
+        url: "http://localhost:6543",
         secrets: "a".repeat(64),
         brand: { name: describe(values) },
         logger: { level: "silent" },

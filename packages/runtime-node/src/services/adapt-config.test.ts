@@ -9,6 +9,7 @@ test("makes hosted email templates available without a filesystem artifact", asy
 			runtime: node(),
 			db: sqlite,
 			config: () => ({
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				email: { templates: { manual: "Manual template" } },
 			}),

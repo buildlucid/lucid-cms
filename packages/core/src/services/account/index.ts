@@ -7,6 +7,7 @@ export { default as deletePasskey } from "./delete-passkey.js";
 export { default as deleteProfilePicture } from "./delete-profile-picture.js";
 export { default as disableTwoFactor } from "./disable-two-factor.js";
 export { default as getAuthenticatedUser } from "./get-authenticated-user.js";
+export { default as reauthenticate } from "./reauthenticate.js";
 export { default as regenerateRecoveryCodes } from "./regenerate-recovery-codes.js";
 export { default as renamePasskey } from "./rename-passkey.js";
 export { default as requestEmailChange } from "./request-email-change.js";

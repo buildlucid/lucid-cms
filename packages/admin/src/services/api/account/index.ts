@@ -9,6 +9,7 @@ import useDeleteProfilePicture from "./useDeleteProfilePicture";
 import useDisableTwoFactor from "./useDisableTwoFactor";
 import useForgotPassword from "./useForgotPassword";
 import useGetAuthenticatedUser from "./useGetAuthenticatedUser";
+import useReauthenticate from "./useReauthenticate";
 import useRegenerateRecoveryCodes from "./useRegenerateRecoveryCodes";
 import useResetPassword from "./useResetPassword";
 import useRevertEmailChange from "./useRevertEmailChange";
@@ -42,6 +43,7 @@ const exportObject = {
 	useConfirmTwoFactor,
 	useRegenerateRecoveryCodes,
 	useDisableTwoFactor,
+	useReauthenticate,
 	useCreatePasskey,
 	useUpdatePasskey,
 	useDeletePasskey,

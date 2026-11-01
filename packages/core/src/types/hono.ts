@@ -41,9 +41,14 @@ export type LucidAuth = LucidUser & {
 	exp: number;
 	iat: number;
 	nonce: string;
+	/** Last login or reauthentication time, in seconds. */
+	authTime: number;
 };
 
-export type LucidAccessToken = Pick<LucidAuth, "id" | "exp" | "iat" | "nonce">;
+export type LucidAccessToken = Pick<
+	LucidAuth,
+	"id" | "exp" | "iat" | "nonce" | "authTime"
+>;
 
 type LucidExternalAuthBase = {
 	scopes: ExternalScope[];

@@ -71,6 +71,7 @@ const createFixture = () => {
 			},
 			db: adapter,
 			config: () => ({
+				url: "http://localhost:6543",
 				tables: [pluginMetadataTable],
 				collections: [],
 				plugins: [

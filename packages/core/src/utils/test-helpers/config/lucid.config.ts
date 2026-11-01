@@ -12,6 +12,7 @@ export default defineConfig({
 		logger: {
 			level: "silent",
 		},
+		url: "http://localhost:6543",
 		secrets: {
 			encryption: testingConstants.key,
 			cookie: testingConstants.key,

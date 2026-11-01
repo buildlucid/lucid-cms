@@ -1,7 +1,7 @@
 import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/account.js";
-import { accountServices } from "../../../../services/index.js";
+import { accountServices, authServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
@@ -60,6 +60,16 @@ const updateMeController = factory.createHandlers(
 		});
 
 		if (updateMe.error) throw new LucidAPIError(updateMe.error);
+
+		//* a new password logs out every session, so this one starts again
+		if (updateMe.data.passwordChanged) {
+			const [refreshRes, accessRes] = await Promise.all([
+				authServices.refreshToken.generateToken(c, c.get("auth").id),
+				authServices.accessToken.generateToken(c, c.get("auth").id),
+			]);
+			if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
+			if (accessRes.error) throw new LucidAPIError(accessRes.error);
+		}
 
 		c.status(204);
 		return c.body(null);

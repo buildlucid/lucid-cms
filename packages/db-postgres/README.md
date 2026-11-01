@@ -23,6 +23,7 @@ export default defineConfig({
   runtime: node,
   db: postgres,
   config: () => ({
+    url: "https://cms.example.com",
     // ...other config
   }),
 });

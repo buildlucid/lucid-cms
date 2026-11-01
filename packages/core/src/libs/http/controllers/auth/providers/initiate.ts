@@ -54,7 +54,14 @@ const providerInitiateController = factory.createHandlers(
 	async (c) => {
 		const { providerKey } = c.req.valid("param");
 		const { invitationToken, redirectPath, actionType } = c.req.valid("json");
+		const auth = c.get("auth");
 		const context = createServiceContext(c);
+
+		//* a linked provider logs in without two-factor authentication, so linking one needs a recent login
+		if (actionType === constants.authState.actionTypes.authLink && auth) {
+			const recentRes = authServices.checks.checkRecentAuthentication(auth);
+			if (recentRes.error) throw new LucidAPIError(recentRes.error);
+		}
 
 		const initiateAuthRes = await serviceWrapper(
 			authServices.providers.initiate,
@@ -71,7 +78,7 @@ const providerInitiateController = factory.createHandlers(
 			invitationToken,
 			redirectPath,
 			actionType,
-			authenticatedUserId: c.get("auth")?.id,
+			authenticatedUserId: auth?.id,
 		});
 		if (initiateAuthRes.error) throw new LucidAPIError(initiateAuthRes.error);
 

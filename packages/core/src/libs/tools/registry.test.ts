@@ -61,6 +61,7 @@ const agent = (key: string, tools: AgentToolDefinition[] = [agentEcho]) =>
 test("plugins can add MCP tools and agents while configuring", async () => {
 	const config = await processConfig(
 		{
+			url: "http://localhost:6543",
 			secrets: "a".repeat(64),
 			ai: {
 				mcp: { tools: [echo] },
@@ -92,7 +93,11 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 
 test("ai boolean shorthand keeps the remaining AI defaults", async () => {
 	const config = await processConfig(
-		{ secrets: "a".repeat(64), ai: false },
+		{
+			url: "http://localhost:6543",
+			secrets: "a".repeat(64),
+			ai: false,
+		},
 		{ resolvedDb: adapter, skipValidation: true },
 	);
 	expect(config.ai).toMatchObject({
@@ -105,7 +110,7 @@ test("ai boolean shorthand keeps the remaining AI defaults", async () => {
 
 test("Lucid's agent passes config checks when no agents are given", async () => {
 	const config = await processConfig(
-		{ secrets: "a".repeat(64) },
+		{ url: "http://localhost:6543", secrets: "a".repeat(64) },
 		{ resolvedDb: adapter },
 	);
 	expect(config.ai.agents.definitions).toEqual([lucidAgent]);
@@ -115,13 +120,18 @@ test("names are unique within a placement, which only holds its own target", asy
 	const options = { resolvedDb: adapter };
 	await expect(
 		processConfig(
-			{ secrets: "a".repeat(64), ai: { mcp: { tools: [echo, echo] } } },
+			{
+				url: "http://localhost:6543",
+				secrets: "a".repeat(64),
+				ai: { mcp: { tools: [echo, echo] } },
+			},
 			options,
 		),
 	).rejects.toThrow('MCP registers tool "test_echo" more than once.');
 	await expect(
 		processConfig(
 			{
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				ai: {
 					agents: [
@@ -136,6 +146,7 @@ test("names are unique within a placement, which only holds its own target", asy
 
 	const config = await processConfig(
 		{
+			url: "http://localhost:6543",
 			secrets: "a".repeat(64),
 			ai: { mcp: { tools: [echo] }, agents: [agent("one"), agent("two")] },
 		},
@@ -150,6 +161,7 @@ test("a tool name can only be registered once in each placement", async () => {
 	await expect(
 		processConfig(
 			{
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				ai: {
 					mcp: {
@@ -163,6 +175,7 @@ test("a tool name can only be registered once in each placement", async () => {
 	await expect(
 		processConfig(
 			{
+				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
 				ai: {
 					agents: [
@@ -182,7 +195,7 @@ test("a tool name can only be registered once in each placement", async () => {
 
 test("interaction keys cannot use the prefix reserved for Lucid's own widgets, except a core tool's own key", async () => {
 	const base = await processConfig(
-		{ secrets: "a".repeat(64) },
+		{ url: "http://localhost:6543", secrets: "a".repeat(64) },
 		{ resolvedDb: adapter },
 	);
 	const picker = (key: string) =>
@@ -229,7 +242,7 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets, e
 
 test("only Lucid's own tools can use the lucid_ name prefix", async () => {
 	const base = await processConfig(
-		{ secrets: "a".repeat(64) },
+		{ url: "http://localhost:6543", secrets: "a".repeat(64) },
 		{ resolvedDb: adapter },
 	);
 	const check = (name: string) => () =>

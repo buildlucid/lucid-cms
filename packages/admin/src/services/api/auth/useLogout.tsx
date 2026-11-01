@@ -22,6 +22,8 @@ export const logoutReq = () => {
 };
 
 interface UseLogoutProps {
+	/** Where to go once logged out. @default "/admin/login" */
+	loginPath?: () => string;
 	onSuccess?: () => void;
 	onError?: () => void;
 }
@@ -48,7 +50,7 @@ const useLogout = (props?: UseLogoutProps) => {
 			queryClient.clear();
 			userStore.get.reset();
 			siteStore.get.reset();
-			navigate("/admin/login");
+			navigate(props?.loginPath?.() ?? "/admin/login");
 			clearCsrfSession();
 			props?.onSuccess?.();
 		},

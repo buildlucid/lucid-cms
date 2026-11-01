@@ -11,9 +11,14 @@ import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import clearToken from "./clear-token.js";
 
+/**
+ * Rotates and records the refresh token. Omit `authTime` for login or reauthentication; preserve
+ * it during refresh.
+ */
 const generateToken = async (
 	c: LucidHonoContext,
 	userId: number,
+	authTime?: number,
 ): ServiceResponse<{ tokenId: number }> => {
 	const existingRefreshToken = getCookie(c, constants.cookies.refreshToken);
 
@@ -35,6 +40,7 @@ const generateToken = async (
 			exp: Math.floor(now / 1000) + constants.refreshTokenExpiration,
 			iat: Math.floor(now / 1000),
 			nonce: nonce,
+			authTime: authTime ?? Math.floor(now / 1000),
 		},
 		context.config.secrets.refreshToken,
 		constants.jwt.algorithm,

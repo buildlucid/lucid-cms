@@ -24,6 +24,7 @@ export default defineConfig({
   runtime: node,
   db: sqlite,
   config: (env) => ({
+    url: "https://cms.example.com",
     plugins: [
       cloudflareTurnstilePlugin({
         siteKey: env.TURNSTILE_SITE_KEY,

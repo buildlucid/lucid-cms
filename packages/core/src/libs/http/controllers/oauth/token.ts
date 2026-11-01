@@ -177,8 +177,9 @@ const tokenController = factory.createHandlers(
 						resource: parsed.data.resource,
 						codeVerifier: parsed.data.code_verifier,
 					})
-				: await serviceWrapper(oauthServices.refreshAccessToken, {
-						transaction: true,
+				: //* the service owns its transaction so reuse revocation isn't rolled back
+					await serviceWrapper(oauthServices.refreshAccessToken, {
+						transaction: false,
 						defaultError: { type: "authorisation" },
 					})(context, {
 						refreshToken: parsed.data.refresh_token,

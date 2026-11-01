@@ -6,8 +6,12 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import logSecurityAudit from "../../security-audit/log-security-audit.js";
+import revokeUserTokens from "../refresh-token/revoke-user-tokens.js";
 
-/** Removes the authenticator, recovery codes and pending challenges, and logs the change. */
+/**
+ * Removes the authenticator, recovery codes and pending challenges, and logs the change. A reset by
+ * someone else, such as an admin or the CLI, also logs the user out everywhere.
+ */
 const remove: ServiceFn<
 	[
 		{
@@ -90,6 +94,14 @@ const remove: ServiceFn<
 	if (deleteCodesRes.error) return deleteCodesRes;
 	if (revokeRes.error) return revokeRes;
 	if (auditRes.error) return auditRes;
+
+	if (data.performedBy !== data.userId) {
+		const sessionsRes = await revokeUserTokens(context, {
+			userId: data.userId,
+			revokeReason: constants.refreshTokenRevokeReasons.twoFactorReset,
+		});
+		if (sessionsRes.error) return sessionsRes;
+	}
 
 	return {
 		error: undefined,

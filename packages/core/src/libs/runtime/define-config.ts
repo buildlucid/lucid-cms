@@ -20,6 +20,7 @@ import type { LucidConfigDefinition } from "./types.js";
  *   runtime: node,
  *   db: sqlite,
  *   config: (environment) => ({
+ *     url: "https://cms.example.com",
  *     secrets: env.parse(environment).SECRET,
  *   }),
  * });

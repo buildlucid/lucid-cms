@@ -9,6 +9,8 @@ import createPasskeyController from "../../../controllers/account/passkeys/creat
 import deletePasskeyController from "../../../controllers/account/passkeys/delete.js";
 import createPasskeyOptionsController from "../../../controllers/account/passkeys/options.js";
 import updatePasskeyController from "../../../controllers/account/passkeys/update.js";
+import reauthenticateController from "../../../controllers/account/reauthenticate/confirm.js";
+import reauthenticateOptionsController from "../../../controllers/account/reauthenticate/options.js";
 import resetPasswordController from "../../../controllers/account/reset-password.js";
 import revertEmailChangeController from "../../../controllers/account/revert-email-change.js";
 import revokeRefreshTokensController from "../../../controllers/account/revoke-refresh-tokens.js";
@@ -62,6 +64,8 @@ const accountRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/reset-password/:token", ...resetPasswordController)
 	.post("/reset-password", ...sendResetPasswordController)
 	.post("/revoke-refresh-tokens", ...revokeRefreshTokensController)
+	.post("/reauthenticate/options", ...reauthenticateOptionsController)
+	.post("/reauthenticate", ...reauthenticateController)
 	.post("/two-factor/setup", ...startTwoFactorSetupController)
 	.post("/two-factor/confirm", ...confirmTwoFactorController)
 	.post("/two-factor/recovery-codes", ...regenerateRecoveryCodesController)

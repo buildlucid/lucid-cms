@@ -25,6 +25,7 @@ export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
+    url: "https://cms.example.com",
     // ...other config
   }),
 });
@@ -47,6 +48,7 @@ export default defineConfig({
   })),
   db: sqlite,
   config: () => ({
+    url: "https://cms.example.com",
     // ...other config
   }),
 });

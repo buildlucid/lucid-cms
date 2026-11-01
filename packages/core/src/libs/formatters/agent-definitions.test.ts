@@ -20,6 +20,7 @@ const authUser = (permissions: string[]): LucidAuth => ({
 	exp: 0,
 	iat: 0,
 	nonce: "test",
+	authTime: 0,
 });
 
 test("agent details expose suggestions to users and tools to managers", async () => {

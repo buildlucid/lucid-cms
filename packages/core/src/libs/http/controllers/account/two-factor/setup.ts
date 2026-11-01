@@ -59,7 +59,7 @@ const startTwoFactorSetupController = factory.createHandlers(
 				message: copy("server:core.routes.two.factor.error.message"),
 			},
 		})(context, {
-			userId: auth.id,
+			auth: auth,
 			proof:
 				recoveryCode !== undefined
 					? { recoveryCode }
