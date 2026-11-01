@@ -1,54 +1,50 @@
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
-import type { CollectionConfig, ProjectedFullSlug } from "../types/types.js";
-import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
+import type { CollectionConfig, ProjectedPath } from "../types/types.js";
+import buildPath from "../utils/build-path-from-slugs.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
 import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages-collection-localization.js";
 import type { PageVersionFields } from "./get-pages-fields.js";
 
-/**
- * Constructs the fullSlug for the child documents, leaving out descendants
- * whose stored routes already match so nothing is rewritten needlessly.
- */
-const constructChildFullSlug = (data: {
+/** Rebuilds descendant paths, skipping unchanged routes. */
+const constructChildPath = (data: {
 	descendants: PageVersionFields[];
 	localization: ResolvedPagesCollectionLocalization;
-	parentFullSlugField?: FieldInputSchema;
+	parentPathField?: FieldInputSchema;
 	collection: CollectionConfig;
 	routePrefixes?: Map<number, Map<string | null, string | null>>;
-}): Awaited<ServiceResponse<ProjectedFullSlug[]>> => {
-	const documentFullSlugs: ProjectedFullSlug[] = [];
+}): Awaited<ServiceResponse<ProjectedPath[]>> => {
+	const documentPaths: ProjectedPath[] = [];
 
 	for (const descendant of data.descendants) {
-		const fullSlug = new Map<string | null, string | null>();
+		const path = new Map<string | null, string | null>();
 		const routePrefixes = data.routePrefixes?.get(
 			descendant.document_version_id,
 		);
 
 		if (data.localization.enabled) {
 			if (
-				data.parentFullSlugField !== undefined &&
-				!data.parentFullSlugField.translations
+				data.parentPathField !== undefined &&
+				!data.parentPathField.translations
 			) {
 				break;
 			}
 
 			for (const locale of data.localization.locales) {
-				const currentFullSlugValue =
-					data.parentFullSlugField?.translations?.[locale];
+				const currentPathValue = data.parentPathField?.translations?.[locale];
 
-				if (data.parentFullSlugField !== undefined && !currentFullSlugValue) {
+				if (data.parentPathField !== undefined && !currentPathValue) {
 					continue;
 				}
 
-				fullSlug.set(
+				path.set(
 					locale,
-					buildFullSlug({
+					buildPath({
 						targetLocale: locale,
 						currentDescendant: descendant,
 						descendants: data.descendants,
-						topLevelFullSlug:
-							currentFullSlugValue ??
+						topLevelPath:
+							currentPathValue ??
 							routePrefixes?.get(locale) ??
 							resolveCollectionPrefix({
 								collection: data.collection,
@@ -58,21 +54,18 @@ const constructChildFullSlug = (data: {
 				);
 			}
 		} else {
-			if (
-				data.parentFullSlugField !== undefined &&
-				!data.parentFullSlugField.value
-			) {
+			if (data.parentPathField !== undefined && !data.parentPathField.value) {
 				break;
 			}
 
-			fullSlug.set(
+			path.set(
 				data.localization.defaultLocale,
-				buildFullSlug({
+				buildPath({
 					targetLocale: data.localization.defaultLocale,
 					currentDescendant: descendant,
 					descendants: data.descendants,
-					topLevelFullSlug:
-						data.parentFullSlugField?.value ??
+					topLevelPath:
+						data.parentPathField?.value ??
 						routePrefixes?.get(data.localization.defaultLocale) ??
 						resolveCollectionPrefix({
 							collection: data.collection,
@@ -82,25 +75,25 @@ const constructChildFullSlug = (data: {
 			);
 		}
 
-		const unchanged = [...fullSlug].every(
+		const unchanged = [...path].every(
 			([locale, value]) =>
 				normalizePathValue(
-					descendant.rows.find((row) => row.locale === locale)?._fullSlug,
+					descendant.rows.find((row) => row.locale === locale)?._path,
 				) === normalizePathValue(value),
 		);
 		if (unchanged) continue;
 
-		documentFullSlugs.push({
+		documentPaths.push({
 			documentId: descendant.document_id,
 			versionId: descendant.document_version_id,
-			values: fullSlug,
+			values: path,
 		});
 	}
 
 	return {
 		error: undefined,
-		data: documentFullSlugs,
+		data: documentPaths,
 	};
 };
 
-export default constructChildFullSlug;
+export default constructChildPath;

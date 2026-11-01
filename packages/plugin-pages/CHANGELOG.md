@@ -2,7 +2,8 @@
 
 ## v0.9.0 (unreleased)
 
-- `toolkit.pages.getByFullSlug()` now returns the document as the content API does, and accepts `locale`, `fallbackLocale` and `depth`.
+- Renamed the `fullSlug` field to `path`, and `toolkit.pages.getByFullSlug()` to `toolkit.pages.getByPath()`.
+- `toolkit.pages.getByPath()` now returns the document as the content API does, and accepts `locale`, `fallbackLocale` and `depth`.
 
 ## v0.8.0
 

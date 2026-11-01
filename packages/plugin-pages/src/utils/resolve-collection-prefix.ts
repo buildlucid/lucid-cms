@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "../types/types.js";
-import formatFullSlug from "./format-fullslug.js";
+import formatPath from "./format-path.js";
 
 /** Resolves a collection's static route prefix for a locale, formatted like a stored route, eg. `/blog`. */
 const resolveCollectionPrefix = (data: {
@@ -13,7 +13,7 @@ const resolveCollectionPrefix = (data: {
 				? undefined
 				: data.collection.prefix?.[data.localeCode];
 
-	return formatFullSlug(prefix) ?? undefined;
+	return formatPath(prefix) ?? undefined;
 };
 
 export default resolveCollectionPrefix;

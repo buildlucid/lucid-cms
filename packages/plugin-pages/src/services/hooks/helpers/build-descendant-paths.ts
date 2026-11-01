@@ -6,17 +6,17 @@ import type {
 } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
-	ProjectedFullSlug,
+	ProjectedPath,
 	RouteScope,
 } from "../../../types/types.js";
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
 import { scopeRelationVersionType } from "../../../utils/route-scope.js";
-import constructChildFullSlug from "../../construct-child-fullslugs.js";
+import constructChildPath from "../../construct-child-paths.js";
 import getDescendantFields from "../../get-descendant-fields.js";
 import resolveStoredRoutePrefixes from "../../resolve-stored-route-prefixes.js";
 
-/** Projects new full slugs for every descendant version the scope may rewrite. */
-const buildDescendantFullSlugs: ServiceFn<
+/** Projects new paths for every descendant version the scope may rewrite. */
+const buildDescendantPaths: ServiceFn<
 	[
 		{
 			documentIds: number[];
@@ -24,10 +24,10 @@ const buildDescendantFullSlugs: ServiceFn<
 			tables: CollectionTableNames;
 			collection: CollectionConfig;
 			collectionInstance: CollectionBuilder;
-			parentFullSlugField?: FieldInputSchema;
+			parentPathField?: FieldInputSchema;
 		},
 	],
-	ProjectedFullSlug[]
+	ProjectedPath[]
 > = async (context, data) => {
 	const localization = resolvePagesCollectionLocalization({
 		localization: context.config.localization,
@@ -52,13 +52,13 @@ const buildDescendantFullSlugs: ServiceFn<
 	});
 	if (routePrefixesRes.error) return routePrefixesRes;
 
-	return constructChildFullSlug({
+	return constructChildPath({
 		descendants: descendantsRes.data,
 		localization,
-		parentFullSlugField: data.parentFullSlugField,
+		parentPathField: data.parentPathField,
 		collection: data.collection,
 		routePrefixes: routePrefixesRes.data,
 	});
 };
 
-export default buildDescendantFullSlugs;
+export default buildDescendantPaths;

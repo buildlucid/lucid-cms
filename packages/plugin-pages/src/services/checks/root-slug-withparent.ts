@@ -7,9 +7,7 @@ import type {
 import constants from "../../constants.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 
-/**
- *  If slug is / and parentPage is set (would cause fullSlug to be the same as parentPage just with trailing slash)
- */
+/** Rejects a root slug with a parent, which would duplicate the parent path. */
 const checkRootSlugWithParent = (data: {
 	localized: boolean;
 	defaultLocale: string | null;

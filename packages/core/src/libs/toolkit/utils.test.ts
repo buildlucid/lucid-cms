@@ -127,7 +127,7 @@ describe("toolkit document query normalization", () => {
 		expect(
 			normalizeDocumentQuery({
 				filter: {
-					_fullSlug: {
+					_path: {
 						value: "/about",
 					},
 				},
@@ -135,7 +135,7 @@ describe("toolkit document query normalization", () => {
 			}),
 		).toEqual({
 			filter: {
-				_fullSlug: {
+				_path: {
 					value: "/about",
 				},
 			},
@@ -168,12 +168,12 @@ describe("toolkit document query normalization", () => {
 			normalizeDocumentQuery({
 				filter: [
 					{
-						_fullSlug: {
+						_path: {
 							value: "/",
 						},
 					},
 					{
-						_fullSlug: {
+						_path: {
 							value: "/about",
 						},
 						banner: {
@@ -189,13 +189,13 @@ describe("toolkit document query normalization", () => {
 			filterOr: [
 				[
 					{
-						key: "_fullSlug",
+						key: "_path",
 						value: "/",
 					},
 				],
 				[
 					{
-						key: "_fullSlug",
+						key: "_path",
 						value: "/about",
 					},
 					{
@@ -213,7 +213,7 @@ describe("toolkit document query normalization", () => {
 			normalizePaginatedDocumentQuery({
 				filter: [
 					{
-						_fullSlug: {
+						_path: {
 							value: "/",
 						},
 					},
@@ -223,7 +223,7 @@ describe("toolkit document query normalization", () => {
 			filterOr: [
 				[
 					{
-						key: "_fullSlug",
+						key: "_path",
 						value: "/",
 					},
 				],

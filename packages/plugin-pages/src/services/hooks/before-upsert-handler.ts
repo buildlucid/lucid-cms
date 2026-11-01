@@ -7,24 +7,24 @@ import { resolveRouteScope } from "../../utils/route-scope.js";
 import {
 	checkCircularParents,
 	checkFieldsExist,
-	checkFullSlugUniqueness,
+	checkPathUniqueness,
 	checkParentIsPageOfSelf,
 	checkRootSlugWithParent,
 } from "../checks/index.js";
 import getTargetCollection from "../get-target-collection.js";
-import setFullSlug from "../set-full-slug.js";
-import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
+import setPath from "../set-path.js";
+import buildDescendantPaths from "./helpers/build-descendant-paths.js";
 import {
 	applyDuplicateSlugCandidate,
 	getDuplicateSlugSource,
-	isFullSlugCollisionError,
+	isPathCollisionError,
 } from "./helpers/duplicate-slug.js";
-import resolveParentFullSlug from "./helpers/resolve-parent-full-slug.js";
+import resolveParentPath from "./helpers/resolve-parent-path.js";
 
 const MAX_DUPLICATE_SLUG_ATTEMPTS = 50;
 
 /**
- * Validates the page's parent and slug, then sets its fullSlug. Writes owned
+ * Validates the page's parent and slug, then sets its path. Writes owned
  * by a request read parents from the request's own versions, falling back to
  * latest, and never compare against other requests.
  */
@@ -66,14 +66,14 @@ const beforeUpsertHandler =
 					(f) =>
 						f.key === constants.fields.parentPage.key && f.type === "relation",
 				),
-				//* dont care what this value is - only needed to update translations/value
-				fullSlug: data.fields?.find(
-					(f) => f.key === constants.fields.fullSlug.key && f.type === "text",
+				//* Only needed to update translations/value; the value itself is unused.
+				path: data.fields?.find(
+					(f) => f.key === constants.fields.path.key && f.type === "text",
 				),
 			},
 		});
 		if (checkFieldsExistRes.error) return checkFieldsExistRes;
-		const { slug, parentPage, fullSlug } = checkFieldsExistRes.data;
+		const { slug, parentPage, path } = checkFieldsExistRes.data;
 
 		const checkParentIsPageOfSelfRes = checkParentIsPageOfSelf({
 			defaultLocale: localization.storageLocale,
@@ -95,7 +95,7 @@ const beforeUpsertHandler =
 		if (checkRootSlugWithParentRes.error) return checkRootSlugWithParentRes;
 
 		// ----------------------------------------------------------------
-		// Build, validate and set fullSlug
+		// Build, validate and set path
 
 		const parentPageId = getParentPageId(parentPage);
 		const isDuplicate = meta.execution.origin.type === "duplicate";
@@ -119,7 +119,7 @@ const beforeUpsertHandler =
 				applyDuplicateSlugCandidate(slug, duplicateSlugSource, attempt);
 			}
 
-			const fullSlugRes = await resolveParentFullSlug(context, {
+			const pathRes = await resolveParentPath(context, {
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,
 				scope,
@@ -130,63 +130,58 @@ const beforeUpsertHandler =
 					all: data.fields ?? [],
 				},
 			});
-			if (fullSlugRes.error) return fullSlugRes;
+			if (pathRes.error) return pathRes;
 
-			const candidateFullSlugField = { ...fullSlug };
-			setFullSlug({
-				fullSlug: fullSlugRes.data,
+			const candidatePathField = { ...path };
+			setPath({
+				path: pathRes.data,
 				localization,
 				fields: {
-					fullSlug: candidateFullSlugField,
+					path: candidatePathField,
 				},
 			});
 
-			const projectedFullSlugs = [
+			const projectedPaths = [
 				{
 					documentId: data.documentId,
 					versionId: data.versionId,
-					values: fullSlugRes.data,
+					values: pathRes.data,
 				},
 			];
 
-			const descendantFullSlugsRes = await buildDescendantFullSlugs(context, {
+			const descendantPathsRes = await buildDescendantPaths(context, {
 				documentIds: [data.documentId],
 				scope,
 				tables: meta.collectionTableNames,
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,
-				parentFullSlugField: candidateFullSlugField,
+				parentPathField: candidatePathField,
 			});
-			if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
-			projectedFullSlugs.push(...descendantFullSlugsRes.data);
+			if (descendantPathsRes.error) return descendantPathsRes;
+			projectedPaths.push(...descendantPathsRes.data);
 
-			const checkFullSlugUniquenessRes = await checkFullSlugUniqueness(
-				context,
-				{
-					collection: targetCollectionRes.data,
-					projectedFullSlugs,
-					scope,
-					tables: meta.collectionTableNames,
-					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
-				},
-			);
-			if (checkFullSlugUniquenessRes.error) {
+			const checkPathUniquenessRes = await checkPathUniqueness(context, {
+				collection: targetCollectionRes.data,
+				projectedPaths,
+				scope,
+				tables: meta.collectionTableNames,
+				excludeDocumentIds: projectedPaths.map((doc) => doc.documentId),
+			});
+			if (checkPathUniquenessRes.error) {
 				if (
 					!isDuplicate ||
 					attempt === MAX_DUPLICATE_SLUG_ATTEMPTS ||
-					!isFullSlugCollisionError(checkFullSlugUniquenessRes.error)
+					!isPathCollisionError(checkPathUniquenessRes.error)
 				) {
-					return checkFullSlugUniquenessRes;
+					return checkPathUniquenessRes;
 				}
 				continue;
 			}
 
-			setFullSlug({
-				fullSlug: fullSlugRes.data,
+			setPath({
+				path: pathRes.data,
 				localization,
-				fields: {
-					fullSlug: fullSlug,
-				},
+				fields: { path },
 			});
 
 			return {

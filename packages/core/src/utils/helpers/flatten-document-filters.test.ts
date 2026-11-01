@@ -7,7 +7,7 @@ test("flattens nested document filter objects into Lucid's dotted query keys", (
 			id: {
 				value: 1,
 			},
-			_fullSlug: {
+			_path: {
 				value: "/about",
 			},
 			fields: {
@@ -32,7 +32,7 @@ test("flattens nested document filter objects into Lucid's dotted query keys", (
 		id: {
 			value: 1,
 		},
-		_fullSlug: {
+		_path: {
 			value: "/about",
 		},
 		"fields.sections._section_title": {

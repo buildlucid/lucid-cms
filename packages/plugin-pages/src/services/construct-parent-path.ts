@@ -1,7 +1,7 @@
 import { copy } from "@lucidcms/core";
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
-import buildFullSlug from "../utils/build-fullslug-from-fullslug.js";
+import buildPath from "../utils/build-path-from-path.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
 import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages-collection-localization.js";
@@ -12,23 +12,20 @@ const parentMatchesRoutePrefix = (
 	locale: string | null,
 	prefix: string | null | undefined,
 ) => {
-	const parentFullSlug = normalizePathValue(
-		parentFields.find((field) => field.locale === locale)?._fullSlug,
+	const parentPath = normalizePathValue(
+		parentFields.find((field) => field.locale === locale)?._path,
 	);
 	const normalizedPrefix = normalizePathValue(prefix);
-	if (!parentFullSlug || !normalizedPrefix || normalizedPrefix === "/") {
+	if (!parentPath || !normalizedPrefix || normalizedPrefix === "/") {
 		return true;
 	}
 	return (
-		parentFullSlug === normalizedPrefix ||
-		parentFullSlug.startsWith(`${normalizedPrefix}/`)
+		parentPath === normalizedPrefix ||
+		parentPath.startsWith(`${normalizedPrefix}/`)
 	);
 };
 
-/**
- *  Constructs the fullSlug from the slug and parentPage fields
- */
-const constructParentFullSlug = (data: {
+const constructParentPath = (data: {
 	collection: CollectionConfig;
 	parentFields: Array<ParentPageQueryResponse>;
 	localization: ResolvedPagesCollectionLocalization;
@@ -47,7 +44,7 @@ const constructParentFullSlug = (data: {
 				typeof slug === "string" &&
 				slug.trim() !== "" &&
 				!normalizePathValue(
-					data.parentFields.find((field) => field.locale === locale)?._fullSlug,
+					data.parentFields.find((field) => field.locale === locale)?._path,
 				)
 			);
 		});
@@ -68,7 +65,7 @@ const constructParentFullSlug = (data: {
 			};
 		}
 	}
-	const fullSlug = new Map<string | null, string | null>(
+	const path = new Map<string | null, string | null>(
 		data.localization.locales.map((locale) => [locale, null]),
 	);
 
@@ -107,9 +104,9 @@ const constructParentFullSlug = (data: {
 				};
 			}
 
-			fullSlug.set(
+			path.set(
 				locale,
-				buildFullSlug({
+				buildPath({
 					parentFields: data.parentFields || [],
 					targetLocale: locale,
 					slug: data.fields.slug.translations[locale],
@@ -151,9 +148,9 @@ const constructParentFullSlug = (data: {
 				data: undefined,
 			};
 		}
-		fullSlug.set(
+		path.set(
 			data.localization.defaultLocale,
-			buildFullSlug({
+			buildPath({
 				parentFields: data.parentFields || [],
 				targetLocale: data.localization.defaultLocale,
 				slug: data.fields.slug.value,
@@ -164,8 +161,8 @@ const constructParentFullSlug = (data: {
 
 	return {
 		error: undefined,
-		data: fullSlug,
+		data: path,
 	};
 };
 
-export default constructParentFullSlug;
+export default constructParentPath;

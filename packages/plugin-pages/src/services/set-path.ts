@@ -1,24 +1,19 @@
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages-collection-localization.js";
 
-/**
- *  Update the fullSlug field with the computed value
- */
-const setFullSlug = (data: {
-	fullSlug: Map<string | null, string | null>;
+const setPath = (data: {
+	path: Map<string | null, string | null>;
 	localization: ResolvedPagesCollectionLocalization;
 	fields: {
-		fullSlug: FieldInputSchema;
+		path: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
 	if (data.localization.enabled) {
-		data.fields.fullSlug.translations = Object.fromEntries(
-			[...data.fullSlug].filter(([locale]) => locale !== null),
+		data.fields.path.translations = Object.fromEntries(
+			[...data.path].filter(([locale]) => locale !== null),
 		);
 	} else {
-		data.fields.fullSlug.value = data.fullSlug.get(
-			data.localization.storageLocale,
-		);
+		data.fields.path.value = data.path.get(data.localization.storageLocale);
 	}
 
 	return {
@@ -27,4 +22,4 @@ const setFullSlug = (data: {
 	};
 };
 
-export default setFullSlug;
+export default setPath;

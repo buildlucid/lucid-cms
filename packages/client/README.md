@@ -72,7 +72,7 @@ const page = await client.documents.getSingle({
   version: "published",
   query: {
     filter: {
-      _fullSlug: {
+      _path: {
         value: "/about",
       },
     },
@@ -201,7 +201,7 @@ const page = await client.documents.getSingle({
   version: "published",
   preview: token,
   query: {
-    filter: { _fullSlug: { value: "/about" } },
+    filter: { _path: { value: "/about" } },
   },
 });
 ```

@@ -5,20 +5,17 @@ import type {
 	ServiceResponse,
 } from "@lucidcms/core/types";
 
-/**
- *  Returns an error if the required fields do not exist
- */
 const checkFieldsExist = (data: {
 	fields: {
 		slug: FieldInputSchema | undefined;
 		parentPage: FieldInputSchema | undefined;
-		fullSlug: FieldInputSchema | undefined;
+		path: FieldInputSchema | undefined;
 	};
 }): Awaited<
 	ServiceResponse<{
 		slug: FieldInputSchema;
 		parentPage: FieldInputSchema;
-		fullSlug: FieldInputSchema;
+		path: FieldInputSchema;
 	}>
 > => {
 	const fieldErrors: FieldError[] = [];
@@ -37,9 +34,9 @@ const checkFieldsExist = (data: {
 			message: copy("server:plugin.pages.fields.validation.required"),
 		});
 	}
-	if (data.fields.fullSlug === undefined) {
+	if (data.fields.path === undefined) {
 		fieldErrors.push({
-			key: "fullSlug",
+			key: "path",
 			localeCode: null,
 			message: copy("server:plugin.pages.fields.validation.required"),
 		});
@@ -64,7 +61,7 @@ const checkFieldsExist = (data: {
 		data: {
 			slug: data.fields.slug as FieldInputSchema,
 			parentPage: data.fields.parentPage as FieldInputSchema,
-			fullSlug: data.fields.fullSlug as FieldInputSchema,
+			path: data.fields.path as FieldInputSchema,
 		},
 	};
 };

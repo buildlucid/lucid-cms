@@ -12,10 +12,10 @@ const collection = new CollectionBuilder("pages", {
 		},
 	},
 	localized: true,
-	routing: { field: "fullSlug" },
+	routing: { field: "path" },
 })
 	.addText("title", { useAsLabel: true })
-	.addText("fullSlug", { localized: true });
+	.addText("path", { localized: true });
 
 describe("formatDocumentRoute", () => {
 	test("resolves localized paths and standard document labels", () => {
@@ -27,7 +27,7 @@ describe("formatDocumentRoute", () => {
 				translations: { en: "About", fr: "À propos" },
 			},
 			{
-				key: "fullSlug",
+				key: "path",
 				type: "text",
 				value: null,
 				translations: { en: "/en/about", fr: "/fr/a-propos" },
@@ -60,7 +60,7 @@ describe("formatDocumentRoute", () => {
 						translations: { en: null, fr: null },
 					},
 					{
-						key: "fullSlug",
+						key: "path",
 						type: "text",
 						value: null,
 						translations: { en: "/en/about", fr: null },
@@ -81,7 +81,7 @@ describe("formatDocumentRoute", () => {
 				documentId: 42,
 				fields: [
 					{
-						key: "fullSlug",
+						key: "path",
 						type: "text",
 						value: null,
 						translations: { en: null, fr: null },

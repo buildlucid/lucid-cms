@@ -3,7 +3,7 @@ import {
 	applyDuplicateSlugCandidate,
 	getDuplicateSlugCandidate,
 	getDuplicateSlugSource,
-	isFullSlugCollisionError,
+	isPathCollisionError,
 } from "./duplicate-slug.js";
 
 test("adds and increments a copy suffix", () => {
@@ -43,14 +43,14 @@ test("updates localized slug values from an unchanged source", () => {
 
 test("only identifies slug field conflicts as retryable", () => {
 	expect(
-		isFullSlugCollisionError({
+		isPathCollisionError({
 			status: 400,
 			errors: { fields: [{ key: "slug" }] },
 		}),
 	).toBe(true);
-	expect(isFullSlugCollisionError({ status: 500 })).toBe(false);
+	expect(isPathCollisionError({ status: 500 })).toBe(false);
 	expect(
-		isFullSlugCollisionError({
+		isPathCollisionError({
 			status: 400,
 			errors: { fields: [{ key: "title" }] },
 		}),

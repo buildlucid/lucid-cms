@@ -62,7 +62,7 @@ describe("@lucidcms/client", () => {
 			depth: 2,
 			query: {
 				filter: {
-					_fullSlug: {
+					_path: {
 						value: "/about",
 						operator: "starts-with",
 					},
@@ -103,7 +103,7 @@ describe("@lucidcms/client", () => {
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page?filter%5B_fullSlug%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&filter%5B_author._first_name%5D=Will&filter%5B_author.people._surname%3Astarts-with%5D=Yal&include=bricks%2Cmeta",
+			"/document/page?filter%5B_path%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&filter%5B_author._first_name%5D=Will&filter%5B_author.people._surname%3Astarts-with%5D=Yal&include=bricks%2Cmeta",
 		);
 		expect(new URL(String(url)).searchParams.get("preview")).toBe(
 			"a".repeat(43),

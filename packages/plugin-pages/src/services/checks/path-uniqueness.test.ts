@@ -1,16 +1,16 @@
 import { copy } from "@lucidcms/core";
 import { describe, expect, test } from "vitest";
-import type { CollectionConfig, ProjectedFullSlug } from "../../types/types.js";
+import type { CollectionConfig, ProjectedPath } from "../../types/types.js";
 import {
 	buildRouteUniquenessItems,
 	findExistingRouteCollisions,
 	findProjectedRouteDuplicates,
 } from "../../utils/route-uniqueness.js";
-import checkFullSlugUniqueness from "./fullslug-uniqueness.js";
+import checkPathUniqueness from "./path-uniqueness.js";
 
-const buildItems = (projectedFullSlugs: ProjectedFullSlug[]) =>
+const buildItems = (projectedPaths: ProjectedPath[]) =>
 	buildRouteUniquenessItems({
-		projectedFullSlugs,
+		projectedPaths,
 	});
 
 const collection = {
@@ -24,7 +24,7 @@ const collection = {
 	unique: true,
 } satisfies CollectionConfig;
 
-describe("fullSlug route uniqueness", () => {
+describe("path uniqueness", () => {
 	test("detects projected collisions by complete route and locale", () => {
 		const items = buildItems([
 			{
@@ -44,7 +44,7 @@ describe("fullSlug route uniqueness", () => {
 				documentId: 2,
 				versionId: 20,
 				locale: "en",
-				fullSlug: "/docs/v1/about",
+				path: "/docs/v1/about",
 			},
 		]);
 	});
@@ -93,7 +93,7 @@ describe("fullSlug route uniqueness", () => {
 				documentId: 1,
 				versionId: 10,
 				locale: "en",
-				fullSlug: "/docs/v1/about",
+				path: "/docs/v1/about",
 			},
 		]);
 	});
@@ -117,17 +117,17 @@ describe("fullSlug route uniqueness", () => {
 		expect(
 			findExistingRouteCollisions({ projectedItems, existingItems }),
 		).toEqual([
-			{ documentId: 1, versionId: 10, locale: "fr", fullSlug: "/a-propos" },
+			{ documentId: 1, versionId: 10, locale: "fr", path: "/a-propos" },
 		]);
 	});
 
 	test("uses the supplied message for projected collisions", async () => {
 		const duplicateMessage = copy(
-			"server:plugin.pages.full.slug.duplicate.on.delete",
+			"server:plugin.pages.path.duplicate.on.delete",
 		);
-		const response = await checkFullSlugUniqueness({} as never, {
+		const response = await checkPathUniqueness({} as never, {
 			collection,
-			projectedFullSlugs: [
+			projectedPaths: [
 				{
 					documentId: 1,
 					versionId: 10,
@@ -153,9 +153,9 @@ describe("fullSlug route uniqueness", () => {
 	});
 
 	test("allows route collisions when uniqueness is disabled", async () => {
-		const response = await checkFullSlugUniqueness({} as never, {
+		const response = await checkPathUniqueness({} as never, {
 			collection: { ...collection, unique: false },
-			projectedFullSlugs: [
+			projectedPaths: [
 				{
 					documentId: 1,
 					versionId: 10,

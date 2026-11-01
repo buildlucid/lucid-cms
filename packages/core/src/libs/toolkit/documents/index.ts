@@ -144,7 +144,7 @@ export type ToolkitDocuments = {
 	 *   locale: "en",
 	 *   query: {
 	 *     filter: {
-	 *       _fullSlug: {
+	 *       _path: {
 	 *         value: "/about",
 	 *       },
 	 *     },

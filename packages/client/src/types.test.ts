@@ -79,7 +79,7 @@ declare module "./types.js" {
 			id?: {
 				value: number;
 			};
-			_fullSlug?: {
+			_path?: {
 				value: string;
 			};
 			fields?: {
@@ -337,7 +337,7 @@ test("document client queries narrow filters, includes, and sorts from the colle
 		id?: {
 			value: number;
 		};
-		_fullSlug?: {
+		_path?: {
 			value: string;
 		};
 		fields?: {

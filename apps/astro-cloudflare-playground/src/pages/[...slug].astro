@@ -5,16 +5,16 @@ import getLucidData, { resolvePageLocale } from "../services/lucid-data";
 
 export const prerender = false;
 
-const requestedFullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
-const locale = resolvePageLocale(requestedFullSlug);
+const requestedPath = Astro.params.slug ? `/${Astro.params.slug}` : "/";
+const locale = resolvePageLocale(requestedPath);
 
 if (!locale) {
-	const redirectPath = `/en${requestedFullSlug === "/" ? "" : requestedFullSlug}`;
+	const redirectPath = `/en${requestedPath === "/" ? "" : requestedPath}`;
 	return Astro.redirect(`${redirectPath}${Astro.url.search}`);
 }
 
 const { page, blogs, preview, authenticated, isPreviewError, isBlogError } =
-	await getLucidData({ fullSlug: requestedFullSlug, locale, astro: Astro });
+	await getLucidData({ path: requestedPath, locale, astro: Astro });
 
 const contentBrick = page?.bricks?.find((brick) => brick.key === "content");
 const updatedAt = page?.meta?.updatedAt;
@@ -29,7 +29,7 @@ const documentRows = [
 	["Title", page?.fields.title],
 	["Summary", page?.fields.summary],
 	["Slug", page?.fields.slug],
-	["Full slug", page?.route?.path],
+	["Path", page?.route?.path],
 	["Brick heading", contentBrick?.fields.heading],
 	["Repeater heading", contentBrick?.fields.sections[0]?.sectionHeading],
 	[

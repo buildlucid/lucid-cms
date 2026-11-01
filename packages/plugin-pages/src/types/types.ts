@@ -56,7 +56,7 @@ export interface PluginOptions {
 		segments?: CollectionRouteSegment[];
 		/** Editor layout for generated fields. */
 		ui?: CollectionUI;
-		/** Reject conflicting full paths. Defaults to true. */
+		/** Reject conflicting paths. Defaults to true. */
 		unique?: boolean;
 	}>;
 }
@@ -78,10 +78,8 @@ export interface CollectionConfig {
 }
 
 /**
- * Which versions route queries read and rewrite. A version scope is one
- * version per document, eg. latest or an environment. A request scope is the
- * versions a request has captured, keyed by document ID, with every other
- * document read from the fallback version type and never rewritten.
+ * Version scopes read and rewrite one version per document. Request scopes rewrite captured
+ * versions only; other documents use the read-only fallback version.
  */
 export type RouteScope =
 	| {
@@ -95,7 +93,7 @@ export type RouteScope =
 	  };
 
 /** A page version's computed route per locale, ready to check and write. */
-export type ProjectedFullSlug = {
+export type ProjectedPath = {
 	documentId: number;
 	versionId: number;
 	values: Map<string | null, string | null>;
@@ -105,7 +103,7 @@ export type RouteUniquenessItem = {
 	documentId: number;
 	versionId: number;
 	locale: string | null;
-	fullSlug: string;
+	path: string;
 };
 
 export type RouteSegmentSelection = {

@@ -14,11 +14,8 @@ import projectRequestTargetRoutes, {
 import updateRouteFields from "./update-route-fields.js";
 
 /**
- * Writes the routes of a request's pages once they are all published to one
- * environment. Every page is projected first, so the order they were added in
- * does not matter, then each page's environment descendants are rebuilt once
- * from the top-most completed page above them. Routes are checked for
- * uniqueness together before anything is written.
+ * Projects all published request pages before validating uniqueness and writing. Rebuilds
+ * environment descendants once from their topmost completed ancestor.
  */
 const refreshRequestTargetRoutes: ServiceFn<
 	[
@@ -69,7 +66,7 @@ const refreshRequestTargetRoutes: ServiceFn<
 	const projected = [...projection.projected, ...descendantsRes.data];
 	const conflictsRes = await findRouteConflicts(context, {
 		collection: data.collection,
-		projectedFullSlugs: projected,
+		projectedPaths: projected,
 		scope,
 		tables: data.tables,
 		excludeDocumentIds: projected.map((document) => document.documentId),
@@ -83,7 +80,7 @@ const refreshRequestTargetRoutes: ServiceFn<
 				type: "basic",
 				status: 400,
 				message: copy("server:plugin.pages.request.route.duplicate", {
-					data: { route: conflict.fullSlug, target: data.target },
+					data: { route: conflict.path, target: data.target },
 				}),
 			},
 			data: undefined,
@@ -112,7 +109,7 @@ const refreshRequestTargetRoutes: ServiceFn<
 	return updateRouteFields(context, {
 		toolkit: data.toolkit,
 		collectionKey: data.collection.key,
-		field: "fullSlug",
+		field: "path",
 		scope,
 		excludeDocumentIds: [...memberIds],
 		values: projected,

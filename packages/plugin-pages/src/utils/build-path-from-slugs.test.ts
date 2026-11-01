@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import type { PageVersionFields } from "../services/get-pages-fields.js";
-import buildFullSlugFromSlugs from "./build-fullslug-from-slugs.js";
+import buildPathFromSlugs from "./build-path-from-slugs.js";
 
 const descendants: Array<PageVersionFields> = [
 	{
@@ -10,7 +10,7 @@ const descendants: Array<PageVersionFields> = [
 			{
 				locale: "en",
 				_slug: "Test",
-				_fullSlug: null,
+				_path: null,
 				_parentPage: 2,
 			},
 		],
@@ -22,7 +22,7 @@ const descendants: Array<PageVersionFields> = [
 			{
 				locale: "en",
 				_slug: "Parent",
-				_fullSlug: null,
+				_path: null,
 				_parentPage: 3,
 			},
 		],
@@ -34,48 +34,48 @@ const descendants: Array<PageVersionFields> = [
 			{
 				locale: "en",
 				_slug: "Grandparent",
-				_fullSlug: null,
+				_path: null,
 				_parentPage: null,
 			},
 		],
 	},
 ];
 
-test("should return correctly formatted and built fullSlug", async () => {
-	const testFullSlug = buildFullSlugFromSlugs({
+test("should return correctly formatted and built path", async () => {
+	const testPath = buildPathFromSlugs({
 		targetLocale: "en",
 		currentDescendant: descendants[0] as PageVersionFields,
 		descendants: descendants,
-		topLevelFullSlug: undefined,
+		topLevelPath: undefined,
 	});
 
-	const grandparentFullSlug = buildFullSlugFromSlugs({
+	const grandparentPath = buildPathFromSlugs({
 		targetLocale: "en",
 		currentDescendant: descendants[2] as PageVersionFields,
 		descendants: descendants,
-		topLevelFullSlug: undefined,
+		topLevelPath: undefined,
 	});
 
-	expect(testFullSlug).toBe("/grandparent/parent/test");
-	expect(grandparentFullSlug).toBe("/grandparent");
+	expect(testPath).toBe("/grandparent/parent/test");
+	expect(grandparentPath).toBe("/grandparent");
 });
 
-test("should prepend topLevelFullSlug to fullSlug if it exists", async () => {
-	const testFullSlug = buildFullSlugFromSlugs({
+test("should prepend topLevelPath to path if it exists", async () => {
+	const testPath = buildPathFromSlugs({
 		targetLocale: "en",
 		currentDescendant: descendants[0] as PageVersionFields,
 		descendants: descendants,
-		topLevelFullSlug: "/top-level",
+		topLevelPath: "/top-level",
 	});
 
-	const grandparentFullSlug = buildFullSlugFromSlugs({
+	const grandparentPath = buildPathFromSlugs({
 		targetLocale: "en",
 		currentDescendant: descendants[2] as PageVersionFields,
 		descendants: descendants,
-		topLevelFullSlug:
+		topLevelPath:
 			"//top-level" /* double slashes to test that they are removed */,
 	});
 
-	expect(testFullSlug).toBe("/top-level/grandparent/parent/test");
-	expect(grandparentFullSlug).toBe("/top-level/grandparent");
+	expect(testPath).toBe("/top-level/grandparent/parent/test");
+	expect(grandparentPath).toBe("/top-level/grandparent");
 });

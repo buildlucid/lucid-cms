@@ -5,15 +5,15 @@ const previewCookieName = "lucid_preview";
 export const pageLocales = ["en", "fr"] as const;
 export type PageLocale = (typeof pageLocales)[number];
 
-/** Resolves the supported locale from the first full-slug segment. */
-export const resolvePageLocale = (fullSlug: string): PageLocale | undefined => {
-	const locale = fullSlug.split("/")[1];
+/** Resolves the supported locale from the first path segment. */
+export const resolvePageLocale = (path: string): PageLocale | undefined => {
+	const locale = path.split("/")[1];
 
 	return pageLocales.find((supportedLocale) => supportedLocale === locale);
 };
 
 type GetLucidDataOptions = {
-	fullSlug: string;
+	path: string;
 	locale: PageLocale;
 	astro: Pick<
 		AstroGlobal,
@@ -21,11 +21,7 @@ type GetLucidDataOptions = {
 	>;
 };
 
-const getLucidData = async ({
-	fullSlug,
-	locale,
-	astro,
-}: GetLucidDataOptions) => {
+const getLucidData = async ({ path, locale, astro }: GetLucidDataOptions) => {
 	const toolkit = await getToolkit(astro);
 
 	const [authentication, preview] = await Promise.all([
@@ -85,7 +81,7 @@ const getLucidData = async ({
 					query: {
 						filter: scopedPageEntry
 							? { id: { value: scopedPageEntry.documentId } }
-							: { _fullSlug: { value: fullSlug } },
+							: { _path: { value: path } },
 						include: ["bricks", "meta"],
 					},
 				}),

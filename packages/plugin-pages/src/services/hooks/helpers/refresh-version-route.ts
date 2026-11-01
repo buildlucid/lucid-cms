@@ -12,19 +12,17 @@ import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-col
 import {
 	checkCircularParents,
 	checkFieldsExist,
-	checkFullSlugUniqueness,
+	checkPathUniqueness,
 } from "../../checks/index.js";
 import getPagesFields from "../../get-pages-fields.js";
-import setFullSlug from "../../set-full-slug.js";
+import setPath from "../../set-path.js";
 import updateRouteFields from "../../update-route-fields.js";
-import buildDescendantFullSlugs from "./build-descendant-full-slugs.js";
-import resolveParentFullSlug from "./resolve-parent-full-slug.js";
+import buildDescendantPaths from "./build-descendant-paths.js";
+import resolveParentPath from "./resolve-parent-path.js";
 
 /**
- * Recomputes a stored page version's route from its parent in the scope, then
- * rewrites the descendants the scope may touch. Used after a version is
- * promoted into latest or an environment, captured into a request or restored,
- * and when a parent page is removed from a request.
+ * Recomputes a version's route and writable descendants after promotion, capture, restoration or
+ * removal of a request parent.
  */
 const refreshVersionRoute: ServiceFn<
 	[
@@ -72,8 +70,8 @@ const refreshVersionRoute: ServiceFn<
 				rows,
 				data.collection.key,
 			),
-			fullSlug: fieldResToSchema(
-				constants.fields.fullSlug.key,
+			path: fieldResToSchema(
+				constants.fields.path.key,
 				data.collection.localized,
 				localization,
 				rows,
@@ -81,7 +79,7 @@ const refreshVersionRoute: ServiceFn<
 		},
 	});
 	if (checkFieldsExistRes.error) return checkFieldsExistRes;
-	const { slug, parentPage, fullSlug } = checkFieldsExistRes.data;
+	const { slug, parentPage, path } = checkFieldsExistRes.data;
 
 	if (getParentPageId(parentPage) !== null) {
 		const circularParentsRes = await checkCircularParents(context, {
@@ -94,46 +92,46 @@ const refreshVersionRoute: ServiceFn<
 		if (circularParentsRes.error) return circularParentsRes;
 	}
 
-	const fullSlugRes = await resolveParentFullSlug(context, {
+	const pathRes = await resolveParentPath(context, {
 		collection: data.collection,
 		collectionInstance: data.collectionInstance,
 		scope: data.scope,
 		tables: data.tables,
-		fields: { slug, parentPage, all: [slug, parentPage, fullSlug] },
+		fields: { slug, parentPage, all: [slug, parentPage, path] },
 		documentVersionId: data.versionId,
 	});
-	if (fullSlugRes.error) return fullSlugRes;
+	if (pathRes.error) return pathRes;
 
-	setFullSlug({
-		fullSlug: fullSlugRes.data,
+	setPath({
+		path: pathRes.data,
 		localization,
-		fields: { fullSlug },
+		fields: { path },
 	});
 
-	const descendantsRes = await buildDescendantFullSlugs(context, {
+	const descendantsRes = await buildDescendantPaths(context, {
 		documentIds: [data.documentId],
 		scope: data.scope,
 		tables: data.tables,
 		collection: data.collection,
 		collectionInstance: data.collectionInstance,
-		parentFullSlugField: fullSlug,
+		parentPathField: path,
 	});
 	if (descendantsRes.error) return descendantsRes;
 
-	const projectedFullSlugs = [
+	const projectedPaths = [
 		{
 			documentId: data.documentId,
 			versionId: data.versionId,
-			values: fullSlugRes.data,
+			values: pathRes.data,
 		},
 		...descendantsRes.data,
 	];
-	const uniquenessRes = await checkFullSlugUniqueness(context, {
+	const uniquenessRes = await checkPathUniqueness(context, {
 		collection: data.collection,
-		projectedFullSlugs,
+		projectedPaths,
 		scope: data.scope,
 		tables: data.tables,
-		excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
+		excludeDocumentIds: projectedPaths.map((doc) => doc.documentId),
 	});
 	if (uniquenessRes.error) return uniquenessRes;
 
@@ -159,10 +157,10 @@ const refreshVersionRoute: ServiceFn<
 	return updateRouteFields(context, {
 		toolkit: data.toolkit,
 		collectionKey: data.collection.key,
-		field: "fullSlug",
+		field: "path",
 		scope: data.scope,
 		excludeDocumentIds: [data.documentId],
-		values: projectedFullSlugs,
+		values: projectedPaths,
 		tables: data.tables,
 	});
 };

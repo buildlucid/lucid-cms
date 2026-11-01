@@ -272,7 +272,7 @@ export default defineConfig({
 								locales: ["en", "fr"],
 								fields: {
 									title: "page_title",
-									path: "fullSlug",
+									path: "path",
 									documentId: ({ document }) => document.id,
 									locale: ({ locale }) => locale,
 								},

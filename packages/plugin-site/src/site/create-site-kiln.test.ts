@@ -100,7 +100,7 @@ const page = (locale?: "en" | "fr") => ({
 });
 
 const getSingle = vi.fn(async ({ query, locale }) =>
-	query.filter._fullSlug.value === "/missing"
+	query.filter._path.value === "/missing"
 		? { error: { status: 404, message: "Not found" }, data: undefined }
 		: { error: undefined, data: page(locale) },
 );
@@ -189,23 +189,23 @@ const kiln = createSiteKiln({
 			: formatTranslation(translation, data);
 	},
 	loader: memoryLoader({
-		"page.kiln": `{% set page = document("page", { filter: { _fullSlug: path }, include: ["bricks"] }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
+		"page.kiln": `{% set page = document("page", { filter: { _path: path }, include: ["bricks"] }) ?? notFound() %}{{ page.fields.title }} ({{ page.locale }})`,
 		"list.kiln": `{{ documentList("page").items|length }}{{ documentList("blog").items|length }}`,
 		"pages.kiln": `{% set list = documentList("page", { page: 2, perPage: 1, depth: 2, fallbackLocale: "en" }) %}{% set p = list.pagination %}{{ list.items|length }}:{{ p.currentPage }},{{ p.perPage }},{{ p.total }},{{ p.lastPage }}`,
 		"media.kiln": `{% set item = media(5, { locale: "fr" }) %}{{ item.title }}|{{ media(6) ?? "none" }}|{{ mediaUrl(item, { preset: "card" }) }}`,
 		"media-list.kiln": `{% set list = mediaList({ filter: { type: "image" }, perPage: 20 }) %}{{ list.items[0].alt }}|{{ list.pagination.lastPage }}`,
 		"locales.kiln": `{% for locale in locales() %}{{ locale.code }}{% endfor %}`,
-		"locale.kiln": `{{ locale }}|{% include "locale-part" %}|{{ document("page", { filter: { _fullSlug: path }, locale: "en" }).fields.title }}`,
+		"locale.kiln": `{{ locale }}|{% include "locale-part" %}|{{ document("page", { filter: { _path: path }, locale: "en" }).fields.title }}`,
 		"locale-part.kiln": `{{ locale }}`,
 		"translate.kiln": `{{ translate("nav.home", { data: { name: "Ada" } }) }}|{{ translate("nav.blog") }}|{{ translate("nav.home", { locale: "en" }) }}|{{ translate("nav.missing", { fallback: "Hi {{name}}", data: { name: "Ada" } }) }}|{{ translate("nav.missing") }}`,
 		"wrong-locale.kiln": `{{ media(5, { locale: "de" }) }}`,
-		"island.kiln": `{% set page = document("page", { filter: { _fullSlug: path } }) %}{% island "islands/typed" with { image: media(5), page: page, brick: page.bricks[0] } %}{% endisland %}`,
+		"island.kiln": `{% set page = document("page", { filter: { _path: path } }) %}{% island "islands/typed" with { image: media(5), page: page, brick: page.bricks[0] } %}{% endisland %}`,
 		"islands/typed.kiln": `{% props image: Media, page: Document, brick: Brick %}{{ image.title }}:{{ page.id }}:{{ brick.key }}`,
 		"paths.kiln": `{{ documentPaths("page")|join(",") }}|{{ documentPaths("blog")|length }}`,
-		"editable.kiln": `{% set page = document("page", filter: { _fullSlug: path }) %}<h1{{ editable(page, "title") }}></h1>{% for link in page.bricks[0].fields.links %}<a{{ editable(link, "label") }}></a>{% endfor %}`,
+		"editable.kiln": `{% set page = document("page", filter: { _path: path }) %}<h1{{ editable(page, "title") }}></h1>{% for link in page.bricks[0].fields.links %}<a{{ editable(link, "label") }}></a>{% endfor %}`,
 		"moved.kiln": `{{ redirect("/new", 301) }}`,
 		"layout.kiln": `{{ head() }}|{{ footer() }}|{{ footer() }}`,
-		"typed.kiln": `{% set page = document("page", filter: { _fullSlug: path }) %}{% include "brick" with { page: page, brick: brick ?? page.bricks[0] } %}`,
+		"typed.kiln": `{% set page = document("page", filter: { _path: path }) %}{% include "brick" with { page: page, brick: brick ?? page.bricks[0] } %}`,
 		"brick.kiln": `{% props page: Document, brick: Brick %}{{ page.id }}:{{ brick.key }}`,
 	}),
 });
@@ -243,7 +243,7 @@ describe("site template functions", () => {
 			preview: null,
 			locale: "fr",
 			query: {
-				filter: { _fullSlug: { value: "/fr" } },
+				filter: { _path: { value: "/fr" } },
 				include: ["bricks"],
 			},
 		});

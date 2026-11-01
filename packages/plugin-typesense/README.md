@@ -47,7 +47,7 @@ export default defineConfig({
                 key: "pages",
                 collection: "page",
                 version: "published",
-                fields: { title: "title", path: "fullSlug" },
+                fields: { title: "title", path: "path" },
               },
             ],
           },

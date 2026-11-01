@@ -53,7 +53,7 @@ export interface LucidClient {
  * 	version: "published",
  * 	query: {
  * 		filter: {
- * 			_fullSlug: {
+ * 			_path: {
  * 				value: "/about",
  * 			},
  * 		},

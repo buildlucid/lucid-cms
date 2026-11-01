@@ -1,9 +1,9 @@
 import type { AdminSlot } from "@lucidcms/admin/types";
-import fullSlugConfig from "../admin/components/FullSlug/config.js";
+import pathDisplayConfig from "../admin/components/PathDisplay/config.js";
 import slugCellConfig from "../admin/components/SlugCell/config.js";
 
 const registerAdminSlots = (collection: string): AdminSlot[] => [
-	fullSlugConfig(collection),
+	pathDisplayConfig(collection),
 	slugCellConfig(collection),
 ];
 export default registerAdminSlots;

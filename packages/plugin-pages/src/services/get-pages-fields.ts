@@ -19,7 +19,7 @@ import {
 export const pageFieldsRowSchema = z.object({
 	locale: z.string().nullable(),
 	_slug: z.string().nullable(),
-	_fullSlug: z.string().nullable(),
+	_path: z.string().nullable(),
 	_parentPage: z.number().nullable(),
 });
 
@@ -32,9 +32,8 @@ export type PageVersionFields = {
 };
 
 /**
- * Reads the slug, fullSlug and parent page of page versions, by document in the
- * scope's version or by explicit version ID. Rows are grouped per version with
- * unassigned values exposed under the default locale.
+ * Reads route fields by scoped document or explicit version ID. Groups rows by version, mapping
+ * unassigned values to the default locale.
  */
 const getPagesFields: ServiceFn<
 	[
@@ -57,9 +56,7 @@ const getPagesFields: ServiceFn<
 	try {
 		const { version: versionTable, documentFields: fieldsTable } = data.tables;
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
-		const fullSlugColumn = prefixGeneratedColName(
-			constants.fields.fullSlug.key,
-		);
+		const pathColumn = prefixGeneratedColName(constants.fields.path.key);
 		const parentPageColumn = prefixGeneratedColName("document_id");
 		const parentPageTableRes = getParentPageRelationTable(
 			data.collectionKey,
@@ -115,7 +112,7 @@ const getPagesFields: ServiceFn<
 					`${fieldsTable}.document_version_id`,
 					`${fieldsTable}.locale`,
 					`${fieldsTable}.${slugColumn} as _slug`,
-					`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
+					`${fieldsTable}.${pathColumn} as _path`,
 					`${parentPageAlias}.${parentPageColumn} as _parentPage`,
 				])
 				.where(idColumn, "in", ids.slice(offset, offset + batchSize))
@@ -138,7 +135,7 @@ const getPagesFields: ServiceFn<
 			version.rows.push({
 				locale: row.locale,
 				_slug: row._slug,
-				_fullSlug: row._fullSlug,
+				_path: row._path,
 				_parentPage: row._parentPage,
 			});
 			versions.set(row.document_version_id, version);

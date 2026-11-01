@@ -8,13 +8,13 @@ const slugSpaceMessage = "The slug cannot contain spaces.";
 const slugFormatMessage =
 	"The slug may only contain letters, numbers, underscores, and hyphens.";
 
-/** Adds the fullSlug, slug, parent page and route segment fields to a pages collection. */
+/** Adds the path, slug, parent page and route segment fields to a pages collection. */
 const registerFields = (
 	collection: CollectionBuilder,
 	config: CollectionConfig,
 ) => {
 	const fieldKeys = [
-		constants.fields.fullSlug.key,
+		constants.fields.path.key,
 		constants.fields.slug.key,
 		constants.fields.parentPage.key,
 		...config.segments.map((segment) => segment.relation),
@@ -26,10 +26,10 @@ const registerFields = (
 		placement: config.ui.placement,
 		register: () => {
 			collection
-				.addText(constants.fields.fullSlug.key, {
+				.addText(constants.fields.path.key, {
 					details: {
-						label: copy("admin:plugin.pages.fields.full.slug.label", {
-							defaultMessage: "Full slug",
+						label: copy("admin:plugin.pages.fields.path.label", {
+							defaultMessage: "Path",
 						}),
 					},
 					localized: config.localized,
@@ -39,7 +39,7 @@ const registerFields = (
 					},
 					ai: {
 						instructions:
-							"Generated from the slug and parent pages. Read it for a page's full path, but set the slug and parent page to change it.",
+							"Generated from the slug and parent pages. Read it for a page's path, but set the slug and parent page to change it.",
 					},
 					showInList: false,
 				})

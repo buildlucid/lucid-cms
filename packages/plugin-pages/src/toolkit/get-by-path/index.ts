@@ -8,8 +8,8 @@ import type {
 	ToolkitDocumentsGetSingleQuery,
 } from "@lucidcms/core/types";
 
-/** Collection, version and full path to look up. Additional query options control included content. */
-export type PagesGetByFullSlugInput<
+/** Collection, version and path to look up. Additional query options control included content. */
+export type PagesGetByPathInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
 > = Omit<
@@ -18,38 +18,38 @@ export type PagesGetByFullSlugInput<
 > &
 	ContentLocaleInput<TLocale> & {
 		/** The complete page path, including any locale or collection prefix. */
-		fullSlug: string;
+		path: string;
 		query?: Omit<ToolkitDocumentsGetSingleQuery<TCollectionKey>, "filter">;
 	};
 
-/** Finds a document in a pages collection by its full slug, as the content API returns it. */
-const getByFullSlug = <
+/** Finds a document in a pages collection by its path, as the content API returns it. */
+const getByPath = <
 	TCollectionKey extends CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
 >(
 	core: CoreToolkit,
-	input: PagesGetByFullSlugInput<TCollectionKey, TLocale>,
+	input: PagesGetByPathInput<TCollectionKey, TLocale>,
 ) =>
 	runToolkitService({
 		handler: () => {
-			const { fullSlug, query, ...options } = input;
+			const { path, query, ...options } = input;
 			return core.documents.getSingle({
 				...options,
 				query: {
 					...query,
 					// Pages registers this field; collection filter types come from the consuming project.
 					filter: {
-						_fullSlug: { value: fullSlug },
+						_path: { value: path },
 					} as CollectionDocumentFilters<TCollectionKey>,
 				},
 			});
 		},
 		name: {
-			key: "plugin.pages.toolkit.get-by-full-slug.error.name",
+			key: "plugin.pages.toolkit.get-by-path.error.name",
 		},
 		message: {
-			key: "plugin.pages.toolkit.get-by-full-slug.error.message",
+			key: "plugin.pages.toolkit.get-by-path.error.message",
 		},
 	});
 
-export default getByFullSlug;
+export default getByPath;

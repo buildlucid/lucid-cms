@@ -27,7 +27,7 @@ const fixture = getTestConfig();
 const pages = new CollectionBuilder("mcp_pages", {
 	mode: "multiple",
 	localized: true,
-	routing: { field: "fullSlug" },
+	routing: { field: "path" },
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	bricks: {
 		builder: [new BrickBuilder("hero").addText("heading", { localized: true })],
@@ -38,7 +38,7 @@ const pages = new CollectionBuilder("mcp_pages", {
 		useAsLabel: true,
 	})
 	.addNumber("rank")
-	.addText("fullSlug", { localized: false })
+	.addText("path", { localized: false })
 	.addJSON("settings", { localized: false })
 	.addRepeater("links")
 	.addText("caption", {
@@ -141,7 +141,7 @@ beforeAll(async () => {
 		(await applyCollectionMigrations(context, plan.data)).error,
 	).toBeUndefined();
 	const toolkit = createToolkit(context);
-	for (const [title, fullSlug, caption, heading] of [
+	for (const [title, path, caption, heading] of [
 		["About", "/about", "Team", "About heading"],
 		["Contact", "/contact", "Email", "Contact heading"],
 	]) {
@@ -151,7 +151,7 @@ beforeAll(async () => {
 			data: {
 				fields: {
 					title: { en: title, fr: `FR ${title}` },
-					fullSlug,
+					path,
 					settings: { en: "keep-en", fr: "keep-fr" },
 					links: [{ fields: { caption } }],
 				},
@@ -166,8 +166,8 @@ beforeAll(async () => {
 			},
 		});
 		assert(created.data, JSON.stringify(created.error));
-		if (fullSlug === "/about") aboutId = created.data.id;
-		if (fullSlug === "/contact") contactId = created.data.id;
+		if (path === "/about") aboutId = created.data.id;
+		if (path === "/contact") contactId = created.data.id;
 	}
 });
 
@@ -220,7 +220,7 @@ test("MCP discovery describes routing and excludes inaccessible collections", as
 	expect(described.structuredContent).toMatchObject({
 		meta: {
 			collection: {
-				routing: { field: "fullSlug" },
+				routing: { field: "path" },
 			},
 		},
 	});
@@ -236,7 +236,7 @@ test("MCP discovery describes routing and excludes inaccessible collections", as
 
 test("MCP document reads use real custom-field, brick and repeater filters", async () => {
 	for (const filter of [
-		[{ key: "_fullSlug", value: "/about" }],
+		[{ key: "_path", value: "/about" }],
 		[{ key: "hero._heading", value: "About heading" }],
 		[{ key: "fields.links._caption", value: "Team" }],
 	]) {
@@ -288,17 +288,17 @@ test("MCP document reads respect pagination, field selection and content locales
 	const selected = await call("documents_get", {
 		collectionKey: pages.key,
 		documentId: aboutId,
-		fieldKeys: ["fullSlug"],
+		fieldKeys: ["path"],
 	});
 	expect(selected.structuredContent).toMatchObject({
-		data: { fields: { fullSlug: "/about" } },
+		data: { fields: { path: "/about" } },
 	});
 	const selectedData = z
 		.object({
 			data: z.object({ fields: z.record(z.string(), z.unknown()) }),
 		})
 		.parse(selected.structuredContent);
-	expect(Object.keys(selectedData.data.fields)).toEqual(["fullSlug"]);
+	expect(Object.keys(selectedData.data.fields)).toEqual(["path"]);
 	const invalidLocale = await call("documents_get", {
 		collectionKey: pages.key,
 		documentId: aboutId,
@@ -309,10 +309,10 @@ test("MCP document reads respect pagination, field selection and content locales
 
 test("MCP document filters preserve content API operators and OR groups", async () => {
 	for (const filter of [
-		[{ key: "_fullSlug", operator: "contains", value: "bout" }],
-		[{ key: "_fullSlug", operator: "starts-with", value: "/abo" }],
-		[{ key: "_fullSlug", operator: "!=", value: "/contact" }],
-		[{ key: "_fullSlug", operator: "in", value: ["/about"] }],
+		[{ key: "_path", operator: "contains", value: "bout" }],
+		[{ key: "_path", operator: "starts-with", value: "/abo" }],
+		[{ key: "_path", operator: "!=", value: "/contact" }],
+		[{ key: "_path", operator: "in", value: ["/about"] }],
 	]) {
 		const result = await call("documents_find", {
 			collectionKey: pages.key,

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
-import constructParentFullSlug from "./construct-parent-fullslug.js";
+import constructParentPath from "./construct-parent-path.js";
 
 const localization: import("../utils/resolve-pages-collection-localization.js").ResolvedPagesCollectionLocalization =
 	{
@@ -26,9 +26,9 @@ const collection = {
 	unique: true,
 } satisfies CollectionConfig;
 
-describe("constructParentFullSlug", () => {
+describe("constructParentPath", () => {
 	test("allows ordinary prefixed pages to use the homepage as their parent", () => {
-		const result = constructParentFullSlug({
+		const result = constructParentPath({
 			collection,
 			localization,
 			parentFields: [
@@ -36,7 +36,7 @@ describe("constructParentFullSlug", () => {
 					document_id: 1,
 					locale: null,
 					_slug: "/",
-					_fullSlug: "/",
+					_path: "/",
 					_parentPage: null,
 				},
 			],
@@ -51,7 +51,7 @@ describe("constructParentFullSlug", () => {
 	});
 
 	test("blocks a child route when its parent only has another locale", () => {
-		const result = constructParentFullSlug({
+		const result = constructParentPath({
 			collection: { ...collection, localized: true },
 			localization: {
 				enabled: true,
@@ -64,7 +64,7 @@ describe("constructParentFullSlug", () => {
 					document_id: 1,
 					locale: "fr",
 					_slug: "parent",
-					_fullSlug: "/parent",
+					_path: "/parent",
 					_parentPage: null,
 				},
 			],
@@ -84,7 +84,7 @@ describe("constructParentFullSlug", () => {
 	});
 
 	test("allows a child when its parent has the matching route and other child translations are empty", () => {
-		const result = constructParentFullSlug({
+		const result = constructParentPath({
 			collection: { ...collection, localized: true },
 			localization: {
 				enabled: true,
@@ -97,7 +97,7 @@ describe("constructParentFullSlug", () => {
 					document_id: 1,
 					locale: "de",
 					_slug: "parent",
-					_fullSlug: "/parent",
+					_path: "/parent",
 					_parentPage: null,
 				},
 			],
@@ -115,7 +115,7 @@ describe("constructParentFullSlug", () => {
 	});
 
 	test("still rejects parents from a different configured route segment", () => {
-		const result = constructParentFullSlug({
+		const result = constructParentPath({
 			collection: {
 				...collection,
 				segments: [
@@ -128,7 +128,7 @@ describe("constructParentFullSlug", () => {
 					document_id: 1,
 					locale: null,
 					_slug: "intro",
-					_fullSlug: "/docs/other/intro",
+					_path: "/docs/other/intro",
 					_parentPage: null,
 				},
 			],
@@ -142,7 +142,7 @@ describe("constructParentFullSlug", () => {
 	});
 
 	test("matches a parent under the collection prefix when no segment prefix is given", () => {
-		const result = constructParentFullSlug({
+		const result = constructParentPath({
 			collection: {
 				...collection,
 				segments: [
@@ -155,7 +155,7 @@ describe("constructParentFullSlug", () => {
 					document_id: 1,
 					locale: null,
 					_slug: "parent",
-					_fullSlug: "/en/parent",
+					_path: "/en/parent",
 					_parentPage: null,
 				},
 			],

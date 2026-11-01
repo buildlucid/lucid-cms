@@ -42,7 +42,7 @@ export const inputSchema = z.object({
 		}))
 		.meta({
 			description:
-				"All query fields are optional. Use {} to list documents. filter is a list of conditions combined with AND: include only the conditions you need. Prefix custom field keys with _, eg. {filter:[{key:'_fullSlug',value:'/blog/',operator:'starts-with'}]}. Brick fields use dotted keys, eg. {key:'hero._heading',value:'Spring',operator:'contains'}, repeaters add their key, eg. hero.links._label, top-level repeaters start with fields, eg. fields.links._label, and relation fields name the target collection, eg. {key:'_author.people._name',value:'Will'}. Also id, createdBy, updatedBy, createdAt and updatedAt. filterOr takes groups of conditions where any group can match. Sort, refs includes and pagination (perPage max 50).",
+				"All query fields are optional. Use {} to list documents. filter is a list of conditions combined with AND: include only the conditions you need. Prefix custom field keys with _, eg. {filter:[{key:'_path',value:'/blog/',operator:'starts-with'}]}. Brick fields use dotted keys, eg. {key:'hero._heading',value:'Spring',operator:'contains'}, repeaters add their key, eg. hero.links._label, top-level repeaters start with fields, eg. fields.links._label, and relation fields name the target collection, eg. {key:'_author.people._name',value:'Will'}. Also id, createdBy, updatedBy, createdAt and updatedAt. filterOr takes groups of conditions where any group can match. Sort, refs includes and pagination (perPage max 50).",
 		}),
 });
 

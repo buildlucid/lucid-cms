@@ -44,7 +44,7 @@ describe("route segments", () => {
 		).not.toThrow();
 	});
 
-	test("the plugin exposes its computed fullSlug as collection routing", () => {
+	test("the plugin exposes its computed path as collection routing", () => {
 		const product = new CollectionBuilder("product", {
 			mode: "multiple",
 			details,
@@ -76,7 +76,7 @@ describe("route segments", () => {
 				},
 			],
 		}).configure?.(draft);
-		expect(documentation.getData.routing).toEqual({ field: "fullSlug" });
+		expect(documentation.getData.routing).toEqual({ field: "path" });
 	});
 
 	test("rejects missing collections and structurally nested segment fields", () => {

@@ -2,10 +2,10 @@ import { copy } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal, RouteScope } from "../../types/types.js";
 import getRouteVersionTypes from "../../utils/get-route-version-types.js";
-import { checkFullSlugUniqueness } from "../checks/index.js";
+import { checkPathUniqueness } from "../checks/index.js";
 import getTargetCollection from "../get-target-collection.js";
 import updateRouteFields from "../update-route-fields.js";
-import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
+import buildDescendantPaths from "./helpers/build-descendant-paths.js";
 import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
 /**
@@ -41,43 +41,38 @@ const beforeDeleteHandler =
 
 		for (const versionType of getRouteVersionTypes(meta.collection)) {
 			const scope: RouteScope = { type: "version", versionType };
-			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
+			const docPathsRes = await buildDescendantPaths(context, {
 				documentIds: data.ids,
 				scope,
 				tables: meta.collectionTableNames,
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,
 			});
-			if (docFullSlugsRes.error) return docFullSlugsRes;
+			if (docPathsRes.error) return docPathsRes;
 
-			if (docFullSlugsRes.data.length === 0) {
+			if (docPathsRes.data.length === 0) {
 				continue;
 			}
 
-			const projectedDocumentIds = docFullSlugsRes.data.map(
+			const projectedDocumentIds = docPathsRes.data.map(
 				(doc) => doc.documentId,
 			);
-			const checkFullSlugUniquenessRes = await checkFullSlugUniqueness(
-				context,
-				{
-					collection: targetCollectionRes.data,
-					projectedFullSlugs: docFullSlugsRes.data,
-					scope,
-					tables: meta.collectionTableNames,
-					excludeDocumentIds: [...data.ids, ...projectedDocumentIds],
-					duplicateMessage: copy(
-						"server:plugin.pages.full.slug.duplicate.on.delete",
-					),
-				},
-			);
-			if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
+			const checkPathUniquenessRes = await checkPathUniqueness(context, {
+				collection: targetCollectionRes.data,
+				projectedPaths: docPathsRes.data,
+				scope,
+				tables: meta.collectionTableNames,
+				excludeDocumentIds: [...data.ids, ...projectedDocumentIds],
+				duplicateMessage: copy("server:plugin.pages.path.duplicate.on.delete"),
+			});
+			if (checkPathUniquenessRes.error) return checkPathUniquenessRes;
 
 			const updateRes = await updateRouteFields(context, {
 				toolkit,
 				collectionKey: meta.collectionKey,
-				field: "fullSlug",
+				field: "path",
 				excludeDocumentIds: data.ids,
-				values: docFullSlugsRes.data,
+				values: docPathsRes.data,
 				scope,
 				tables: meta.collectionTableNames,
 			});

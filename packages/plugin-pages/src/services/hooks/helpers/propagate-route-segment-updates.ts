@@ -9,8 +9,8 @@ import type {
 	RouteScope,
 } from "../../../types/types.js";
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
-import checkFullSlugUniqueness from "../../checks/fullslug-uniqueness.js";
-import constructChildFullSlug from "../../construct-child-fullslugs.js";
+import checkPathUniqueness from "../../checks/path-uniqueness.js";
+import constructChildPath from "../../construct-child-paths.js";
 import findSegmentDependents from "../../find-segment-dependents.js";
 import getDescendantFields from "../../get-descendant-fields.js";
 import getPagesFields from "../../get-pages-fields.js";
@@ -113,23 +113,23 @@ const propagateRouteSegmentUpdates: ServiceFn<
 						});
 						if (routePrefixesRes.error) return routePrefixesRes;
 
-						const fullSlugsRes = constructChildFullSlug({
+						const pathsRes = constructChildPath({
 							descendants: affected,
 							localization,
 							collection,
 							routePrefixes: routePrefixesRes.data,
 						});
-						if (fullSlugsRes.error) return fullSlugsRes;
+						if (pathsRes.error) return pathsRes;
 
-						const uniquenessRes = await checkFullSlugUniqueness(context, {
+						const uniquenessRes = await checkPathUniqueness(context, {
 							collection,
-							projectedFullSlugs: fullSlugsRes.data,
+							projectedPaths: pathsRes.data,
 							duplicateMessage: deletedTargets
-								? copy("server:plugin.pages.full.slug.duplicate.on.delete")
+								? copy("server:plugin.pages.path.duplicate.on.delete")
 								: undefined,
 							scope,
 							tables,
-							excludeDocumentIds: fullSlugsRes.data.map(
+							excludeDocumentIds: pathsRes.data.map(
 								(document) => document.documentId,
 							),
 						});
@@ -138,12 +138,12 @@ const propagateRouteSegmentUpdates: ServiceFn<
 						return updateRouteFields(context, {
 							toolkit: data.toolkit,
 							collectionKey: collection.key,
-							field: "fullSlug",
+							field: "path",
 							excludeDocumentIds:
 								collection.key === data.targetCollectionKey
 									? targetDocumentIds
 									: [],
-							values: fullSlugsRes.data,
+							values: pathsRes.data,
 							scope,
 							tables,
 						});

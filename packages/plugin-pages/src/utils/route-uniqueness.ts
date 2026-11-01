@@ -1,26 +1,26 @@
-import type { ProjectedFullSlug, RouteUniquenessItem } from "../types/types.js";
+import type { ProjectedPath, RouteUniquenessItem } from "../types/types.js";
 import normalizePathValue from "./normalize-path-value.js";
 
 const routeKey = (item: RouteUniquenessItem) => {
-	return `${item.locale}::${item.fullSlug}`;
+	return `${item.locale}::${item.path}`;
 };
 
-/** Flattens projected full slugs into one normalised route per document version and locale. */
+/** Flattens projected paths into one normalised route per document version and locale. */
 export const buildRouteUniquenessItems = (data: {
-	projectedFullSlugs: ProjectedFullSlug[];
+	projectedPaths: ProjectedPath[];
 }): RouteUniquenessItem[] => {
 	const items: RouteUniquenessItem[] = [];
 
-	for (const projected of data.projectedFullSlugs) {
-		for (const [locale, fullSlug] of projected.values) {
-			const normalizedFullSlug = normalizePathValue(fullSlug);
-			if (typeof normalizedFullSlug !== "string") continue;
+	for (const projected of data.projectedPaths) {
+		for (const [locale, path] of projected.values) {
+			const normalizedPath = normalizePathValue(path);
+			if (typeof normalizedPath !== "string") continue;
 
 			items.push({
 				documentId: projected.documentId,
 				versionId: projected.versionId,
 				locale,
-				fullSlug: normalizedFullSlug,
+				path: normalizedPath,
 			});
 		}
 	}

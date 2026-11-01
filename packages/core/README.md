@@ -41,7 +41,7 @@ AI features require a subscription with Lucid. This is planned to become publicl
 
 ## 🔌 First-Party Plugins
 
-- [Pages](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages): adds hierarchical documents, slugs, parent pages, and computed full slugs for website page collections.
+- [Pages](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages): adds hierarchical documents, slugs, parent pages, and computed paths for website page collections.
 - [Filesystem](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-filesystem): stores uploaded media on the local filesystem.
 - [S3](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-s3): stores media in AWS S3, Cloudflare R2, or another S3-compatible provider.
 - [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2): uses a Cloudflare R2 binding with optional S3-compatible HTTP fallback.

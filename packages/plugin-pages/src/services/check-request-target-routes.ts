@@ -50,7 +50,7 @@ const checkRequestTargetRoutes: ServiceFn<
 
 	const conflictsRes = await findRouteConflicts(context, {
 		collection: data.collection,
-		projectedFullSlugs: projected,
+		projectedPaths: projected,
 		scope: projection.scope,
 		tables: data.tables,
 		excludeDocumentIds: projected.map((document) => document.documentId),
@@ -65,7 +65,7 @@ const checkRequestTargetRoutes: ServiceFn<
 		if (requestDocumentId === undefined) continue;
 		const message = context.translate(
 			copy("server:plugin.pages.request.route.duplicate", {
-				data: { route: conflict.fullSlug, target: data.target },
+				data: { route: conflict.path, target: data.target },
 			}),
 		);
 		if (seen.has(`${requestDocumentId}:${message}`)) continue;

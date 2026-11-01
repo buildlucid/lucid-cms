@@ -7,11 +7,11 @@ import type {
 import constants from "../constants.js";
 import type {
 	CollectionConfig,
-	ProjectedFullSlug,
+	ProjectedPath,
 	RouteScope,
 } from "../types/types.js";
 import resolvePagesCollectionLocalization from "../utils/resolve-pages-collection-localization.js";
-import buildDescendantFullSlugs from "./hooks/helpers/build-descendant-full-slugs.js";
+import buildDescendantPaths from "./hooks/helpers/build-descendant-paths.js";
 import type { RequestTargetProjection } from "./project-request-target-routes.js";
 
 /** Projects descendant routes in the target environment from request roots, excluding request members and associating each route with its root. */
@@ -25,7 +25,7 @@ const projectRequestTargetDescendants: ServiceFn<
 			projection: RequestTargetProjection;
 		},
 	],
-	Array<ProjectedFullSlug & { rootDocumentId: number }>
+	Array<ProjectedPath & { rootDocumentId: number }>
 > = async (context, data) => {
 	const scope: RouteScope = { type: "version", versionType: data.target };
 	const localization = resolvePagesCollectionLocalization({
@@ -43,13 +43,13 @@ const projectRequestTargetDescendants: ServiceFn<
 		]),
 	);
 
-	const descendants: Array<ProjectedFullSlug & { rootDocumentId: number }> = [];
+	const descendants: Array<ProjectedPath & { rootDocumentId: number }> = [];
 	for (const root of data.projection.roots) {
 		const route = projectedById.get(root);
 		if (!route) continue;
 
-		const parentFullSlugField: FieldInputSchema = {
-			key: constants.fields.fullSlug.key,
+		const parentPathField: FieldInputSchema = {
+			key: constants.fields.path.key,
 			type: "text",
 			...(localization.enabled
 				? {
@@ -59,13 +59,13 @@ const projectRequestTargetDescendants: ServiceFn<
 					}
 				: { value: route.values.get(null) ?? null }),
 		};
-		const descendantsRes = await buildDescendantFullSlugs(context, {
+		const descendantsRes = await buildDescendantPaths(context, {
 			documentIds: [root],
 			scope,
 			tables: data.tables,
 			collection: data.collection,
 			collectionInstance: data.collectionInstance,
-			parentFullSlugField,
+			parentPathField,
 		});
 		if (descendantsRes.error) return descendantsRes;
 

@@ -1,12 +1,12 @@
 import type { PageVersionFields } from "../services/get-pages-fields.js";
-import formatFullSlug from "./format-fullslug.js";
+import formatPath from "./format-path.js";
 
-/** Builds a descendant's route from ancestor slugs and the top-level full slug. */
-const buildFullSlugFromSlugs = (data: {
+/** Builds a descendant's route from ancestor slugs and the top-level path. */
+const buildPathFromSlugs = (data: {
 	targetLocale: string | null;
 	currentDescendant: PageVersionFields;
 	descendants: Array<PageVersionFields>;
-	topLevelFullSlug?: string;
+	topLevelPath?: string;
 }): string | null => {
 	const rowForLocale = data.currentDescendant.rows.find(
 		(row) => row.locale === data.targetLocale,
@@ -18,7 +18,7 @@ const buildFullSlugFromSlugs = (data: {
 	const parentPageValue = rowForLocale._parentPage;
 
 	if (!parentPageValue) {
-		return formatFullSlug(data.topLevelFullSlug, slugFieldValue);
+		return formatPath(data.topLevelPath, slugFieldValue);
 	}
 
 	const parentDescendant = data.descendants.find(
@@ -26,20 +26,17 @@ const buildFullSlugFromSlugs = (data: {
 	);
 
 	if (!parentDescendant) {
-		return formatFullSlug(data.topLevelFullSlug, slugFieldValue);
+		return formatPath(data.topLevelPath, slugFieldValue);
 	}
 
-	const parentFullSlug = buildFullSlugFromSlugs({
+	const parentPath = buildPathFromSlugs({
 		targetLocale: data.targetLocale,
 		currentDescendant: parentDescendant,
 		descendants: data.descendants,
-		topLevelFullSlug: data.topLevelFullSlug,
+		topLevelPath: data.topLevelPath,
 	});
 
-	return formatFullSlug(
-		parentFullSlug || data.topLevelFullSlug,
-		slugFieldValue,
-	);
+	return formatPath(parentPath || data.topLevelPath, slugFieldValue);
 };
 
-export default buildFullSlugFromSlugs;
+export default buildPathFromSlugs;

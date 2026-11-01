@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
-import constructChildFullSlug from "./construct-child-fullslugs.js";
+import constructChildPath from "./construct-child-paths.js";
 import type { PageVersionFields } from "./get-pages-fields.js";
 
 const localization: import("../utils/resolve-pages-collection-localization.js").ResolvedPagesCollectionLocalization =
@@ -26,7 +26,7 @@ const baseCollection = {
 	unique: true,
 } satisfies CollectionConfig;
 
-describe("constructChildFullSlug", () => {
+describe("constructChildPath", () => {
 	test("applies the collection prefix when descendants become top-level after a parent delete", () => {
 		const descendants: PageVersionFields[] = [
 			{
@@ -36,7 +36,7 @@ describe("constructChildFullSlug", () => {
 					{
 						locale: null,
 						_slug: "Child",
-						_fullSlug: "/old-parent/child",
+						_path: "/old-parent/child",
 						_parentPage: 1,
 					},
 				],
@@ -48,14 +48,14 @@ describe("constructChildFullSlug", () => {
 					{
 						locale: null,
 						_slug: "Grandchild",
-						_fullSlug: "/old-parent/child/grandchild",
+						_path: "/old-parent/child/grandchild",
 						_parentPage: 2,
 					},
 				],
 			},
 		];
 
-		const res = constructChildFullSlug({
+		const res = constructChildPath({
 			descendants,
 			localization,
 			collection: {
@@ -88,20 +88,20 @@ describe("constructChildFullSlug", () => {
 					{
 						locale: "en",
 						_slug: "Child",
-						_fullSlug: "/old-parent/child",
+						_path: "/old-parent/child",
 						_parentPage: 1,
 					},
 					{
 						locale: "fr",
 						_slug: "Enfant",
-						_fullSlug: "/ancien-parent/enfant",
+						_path: "/ancien-parent/enfant",
 						_parentPage: 1,
 					},
 				],
 			},
 		];
 
-		const res = constructChildFullSlug({
+		const res = constructChildPath({
 			descendants,
 			localization: {
 				enabled: true,
@@ -143,14 +143,14 @@ describe("constructChildFullSlug", () => {
 					{
 						locale: null,
 						_slug: "getting-started",
-						_fullSlug: "/old/getting-started",
+						_path: "/old/getting-started",
 						_parentPage: null,
 					},
 				],
 			},
 		];
 
-		const res = constructChildFullSlug({
+		const res = constructChildPath({
 			descendants,
 			localization,
 			collection: {

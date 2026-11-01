@@ -15,8 +15,8 @@ vi.mock("../../get-descendant-fields.js", () => ({
 	default: mocks.getDescendantFields,
 }));
 
-import buildDescendantFullSlugs from "./build-descendant-full-slugs.js";
-import resolveParentFullSlug from "./resolve-parent-full-slug.js";
+import buildDescendantPaths from "./build-descendant-paths.js";
+import resolveParentPath from "./resolve-parent-path.js";
 
 const context = {
 	config: {
@@ -50,18 +50,18 @@ const collectionInstance = new CollectionBuilder("pages", {
 	},
 });
 
-describe("page full-slug helpers", () => {
+describe("page path helpers", () => {
 	afterEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("resolves a parent and constructs the document full slug", async () => {
+	it("resolves a parent and constructs the document path", async () => {
 		mocks.getParentFields.mockResolvedValueOnce({
 			error: undefined,
 			data: [
 				{
 					_slug: "parent",
-					_fullSlug: "/parent",
+					_path: "/parent",
 					_parentPage: null,
 					document_id: 1,
 					locale: null,
@@ -69,7 +69,7 @@ describe("page full-slug helpers", () => {
 			],
 		});
 
-		const response = await resolveParentFullSlug(context, {
+		const response = await resolveParentPath(context, {
 			collection,
 			collectionInstance,
 			scope: { type: "version", versionType: "latest" },
@@ -89,7 +89,7 @@ describe("page full-slug helpers", () => {
 		expect(response.data).toEqual(new Map([[null, "/parent/child"]]));
 	});
 
-	it("constructs descendant full slugs from the shared query result", async () => {
+	it("constructs descendant paths from the shared query result", async () => {
 		mocks.getDescendantFields.mockResolvedValueOnce({
 			error: undefined,
 			data: [
@@ -100,7 +100,7 @@ describe("page full-slug helpers", () => {
 						{
 							locale: null,
 							_slug: "child",
-							_fullSlug: "/child",
+							_path: "/child",
 							_parentPage: 1,
 						},
 					],
@@ -108,14 +108,14 @@ describe("page full-slug helpers", () => {
 			],
 		});
 
-		const response = await buildDescendantFullSlugs(context, {
+		const response = await buildDescendantPaths(context, {
 			documentIds: [1],
 			scope: { type: "version", versionType: "latest" },
 			tables: {} as never,
 			collection,
 			collectionInstance,
-			parentFullSlugField: {
-				key: "fullSlug",
+			parentPathField: {
+				key: "path",
 				type: "text",
 				value: "/parent",
 			},

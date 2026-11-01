@@ -5,11 +5,11 @@ describe("normalizeFilter", () => {
 	test("treats a plain value as equals and keeps the toolkit's own shape", () => {
 		expect(
 			normalizeFilter({
-				_fullSlug: "/en/about",
+				_path: "/en/about",
 				_views: { value: 10, operator: ">" },
 			}),
 		).toEqual({
-			_fullSlug: { value: "/en/about" },
+			_path: { value: "/en/about" },
 			_views: { value: 10, operator: ">" },
 		});
 	});

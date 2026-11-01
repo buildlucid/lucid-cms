@@ -17,9 +17,8 @@ import {
 } from "./get-pages-fields.js";
 
 /**
- * Walks down from the given pages through the versions the scope may rewrite,
- * returning each descendant version's route fields. The walk uses UNION, so a
- * loop among descendants ends it instead of recursing forever.
+ * Reads descendant route fields within the writable scope. UNION prevents cycles from recursing
+ * forever.
  */
 const getDescendantFields: ServiceFn<
 	[
@@ -45,9 +44,7 @@ const getDescendantFields: ServiceFn<
 
 		const { documentFields: fieldsTable, version: versionTable } = data.tables;
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
-		const fullSlugColumn = prefixGeneratedColName(
-			constants.fields.fullSlug.key,
-		);
+		const pathColumn = prefixGeneratedColName(constants.fields.path.key);
 		const parentPageColumn = prefixGeneratedColName("document_id");
 		const parentPageTableRes = getParentPageRelationTable(
 			data.collectionKey,
@@ -134,7 +131,7 @@ const getDescendantFields: ServiceFn<
 							.select([
 								`${fieldsTable}.locale`,
 								`${fieldsTable}.${slugColumn} as _slug`,
-								`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
+								`${fieldsTable}.${pathColumn} as _path`,
 								`${parentPageAlias}.${parentPageColumn} as _parentPage`,
 							])
 							.whereRef(

@@ -2,7 +2,7 @@ import type { FieldInputSchema, FieldValue } from "@lucidcms/core/types";
 import type { PageFieldsRow } from "../services/get-pages-fields.js";
 import type { ResolvedPagesCollectionLocalization } from "./resolve-pages-collection-localization.js";
 
-/** Converts stored route field rows into field input for the slug, fullSlug or parent page field. */
+/** Converts stored route field rows into field input for the slug, path or parent page field. */
 const fieldResToSchema = (
 	key: string,
 	fieldLocalized: boolean,
@@ -10,12 +10,12 @@ const fieldResToSchema = (
 	items: PageFieldsRow[],
 	relationCollectionKey?: string,
 ): FieldInputSchema => {
-	if (key !== "slug" && key !== "fullSlug" && key !== "parentPage") {
+	if (key !== "slug" && key !== "path" && key !== "parentPage") {
 		throw new Error(`Unable to determine field type for key: ${key}`);
 	}
 	const valueFor = (item?: PageFieldsRow): FieldValue => {
 		if (key !== "parentPage") {
-			return item?.[key === "slug" ? "_slug" : "_fullSlug"] ?? null;
+			return item?.[key === "slug" ? "_slug" : "_path"] ?? null;
 		}
 		return typeof item?._parentPage === "number" && relationCollectionKey
 			? [{ id: item._parentPage, collectionKey: relationCollectionKey }]

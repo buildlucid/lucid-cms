@@ -8,17 +8,17 @@ import type {
 import constants from "../../constants.js";
 import type {
 	CollectionConfig,
-	ProjectedFullSlug,
+	ProjectedPath,
 	RouteScope,
 } from "../../types/types.js";
 import findRouteConflicts from "../find-route-conflicts.js";
 
 /** Rejects a write whose projected routes collide with each other or with stored routes in the scope. */
-const checkFullSlugUniqueness: ServiceFn<
+const checkPathUniqueness: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			projectedFullSlugs: ProjectedFullSlug[];
+			projectedPaths: ProjectedPath[];
 			scope: RouteScope;
 			tables: CollectionTableNames;
 			excludeDocumentIds?: number[];
@@ -35,7 +35,7 @@ const checkFullSlugUniqueness: ServiceFn<
 		}
 
 		const message =
-			data.duplicateMessage ?? copy("server:plugin.pages.full.slug.duplicate");
+			data.duplicateMessage ?? copy("server:plugin.pages.path.duplicate");
 		const fieldErrors: FieldError[] = conflictsRes.data.map((conflict) => ({
 			key: constants.fields.slug.key,
 			localeCode: conflict.locale,
@@ -56,11 +56,11 @@ const checkFullSlugUniqueness: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: copy("server:plugin.pages.full.slug.duplicate.check.failed"),
+				message: copy("server:plugin.pages.path.duplicate.check.failed"),
 			},
 			data: undefined,
 		};
 	}
 };
 
-export default checkFullSlugUniqueness;
+export default checkPathUniqueness;

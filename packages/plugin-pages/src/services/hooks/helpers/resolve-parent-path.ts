@@ -7,12 +7,12 @@ import type {
 import type { CollectionConfig, RouteScope } from "../../../types/types.js";
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
 import { scopeRelationVersionType } from "../../../utils/route-scope.js";
-import constructParentFullSlug from "../../construct-parent-fullslug.js";
+import constructParentPath from "../../construct-parent-path.js";
 import getParentFields from "../../get-parent-fields.js";
 import resolveRoutePrefix from "../../resolve-route-prefix.js";
 
-/** Builds a page's full slug from its parent in the scope, its route prefix and its slug. */
-const resolveParentFullSlug: ServiceFn<
+/** Builds a page's path from its parent in the scope, its route prefix and its slug. */
+const resolveParentPath: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
@@ -57,7 +57,7 @@ const resolveParentFullSlug: ServiceFn<
 	if (parentFieldsRes.error) return parentFieldsRes;
 	if (routePrefixRes.error) return routePrefixRes;
 
-	return constructParentFullSlug({
+	return constructParentPath({
 		parentFields: parentFieldsRes.data,
 		localization,
 		collection: data.collection,
@@ -68,4 +68,4 @@ const resolveParentFullSlug: ServiceFn<
 	});
 };
 
-export default resolveParentFullSlug;
+export default resolveParentPath;

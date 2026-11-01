@@ -1,7 +1,7 @@
 import normalizePathValue from "./normalize-path-value.js";
 
 /** Joins normalized path parts with a leading slash, preserving `/` and returning null for empty input. */
-const formatFullSlug = (
+const formatPath = (
 	...parts: Array<string | null | undefined>
 ): string | null => {
 	const hasRoot = parts.some((part) => part === "/");
@@ -21,4 +21,4 @@ const formatFullSlug = (
 	return `/${normalizedParts.join("/")}`.replace(/\/+/g, "/");
 };
 
-export default formatFullSlug;
+export default formatPath;

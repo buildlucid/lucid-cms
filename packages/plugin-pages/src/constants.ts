@@ -10,8 +10,8 @@ export default {
 		slug: {
 			key: "slug",
 		},
-		fullSlug: {
-			key: "fullSlug",
+		path: {
+			key: "path",
 		},
 	},
 };

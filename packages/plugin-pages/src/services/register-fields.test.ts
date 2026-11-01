@@ -120,7 +120,7 @@ test("registers fields in an existing named tab with configured widths", () => {
 	const settingsTab = collection.fieldTree[1] as FieldConfig<"tab">;
 	expect(contentTab.fields.map((field) => field.key)).toEqual([
 		"title",
-		"fullSlug",
+		"path",
 		"slug",
 		"parentPage",
 	]);
@@ -153,7 +153,7 @@ test("registers fields after a root field", () => {
 
 	expect(collection.fieldTree.map((field) => field.key)).toEqual([
 		"title",
-		"fullSlug",
+		"path",
 		"slug",
 		"parentPage",
 		"description",
@@ -184,7 +184,7 @@ test("inherits the placement anchor tab", () => {
 	const settingsTab = collection.fieldTree[1] as FieldConfig<"tab">;
 	expect(contentTab.fields.map((field) => field.key)).toEqual([
 		"title",
-		"fullSlug",
+		"path",
 		"slug",
 		"parentPage",
 		"description",
@@ -209,7 +209,7 @@ test("registers fields at the start of the collection root", () => {
 	);
 
 	expect(collection.fieldTree.map((field) => field.key)).toEqual([
-		"fullSlug",
+		"path",
 		"slug",
 		"parentPage",
 		"title",

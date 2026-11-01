@@ -3,7 +3,7 @@ import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import { resolveRouteScope } from "../../utils/route-scope.js";
 import updateRouteFields from "../update-route-fields.js";
-import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
+import buildDescendantPaths from "./helpers/build-descendant-paths.js";
 import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
 /**
@@ -26,26 +26,26 @@ const afterUpsertHandler =
 		const pageCollection = options.collections.find(
 			(collection) => collection.key === meta.collectionKey,
 		);
-		const currentFullSlugField = data.fields.find(
-			(field) => field.key === constants.fields.fullSlug.key,
+		const currentPathField = data.fields.find(
+			(field) => field.key === constants.fields.path.key,
 		);
-		if (pageCollection && currentFullSlugField) {
-			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
+		if (pageCollection && currentPathField) {
+			const docPathsRes = await buildDescendantPaths(context, {
 				documentIds: [data.documentId],
 				scope,
 				tables: meta.collectionTableNames,
 				collection: pageCollection,
 				collectionInstance: meta.collection,
-				parentFullSlugField: currentFullSlugField,
+				parentPathField: currentPathField,
 			});
-			if (docFullSlugsRes.error) return docFullSlugsRes;
+			if (docPathsRes.error) return docPathsRes;
 
-			if (docFullSlugsRes.data.length > 0) {
+			if (docPathsRes.data.length > 0) {
 				const updateRes = await updateRouteFields(context, {
 					collectionKey: meta.collectionKey,
-					field: "fullSlug",
+					field: "path",
 					excludeDocumentIds: [data.documentId],
-					values: docFullSlugsRes.data,
+					values: docPathsRes.data,
 					scope,
 					tables: meta.collectionTableNames,
 					toolkit,

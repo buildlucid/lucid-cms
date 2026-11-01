@@ -8,7 +8,7 @@ import type {
 } from "@lucidcms/core/types";
 import { sql } from "kysely";
 import constants from "../constants.js";
-import type { ProjectedFullSlug, RouteScope } from "../types/types.js";
+import type { ProjectedPath, RouteScope } from "../types/types.js";
 import getCollectionDefaultLocale from "../utils/get-collection-default-locale.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 import {
@@ -17,20 +17,18 @@ import {
 } from "../utils/route-scope.js";
 
 /**
- * Writes computed slug or fullSlug values to page versions in the scope, one
- * batched statement per locale. Unassigned rows take the default locale's value
- * until that locale has its own row. Full slug changes are reported as document
- * updates, except for the excluded documents whose own write reports them.
+ * Writes scoped route values in batches per locale, inheriting unassigned values from the default
+ * locale. Reports document updates except where the caller already does.
  */
 const updateRouteFields: ServiceFn<
 	[
 		{
 			collectionKey: string;
-			field: "slug" | "fullSlug";
+			field: "slug" | "path";
 			scope: RouteScope;
 			toolkit: Toolkit;
 			excludeDocumentIds?: number[];
-			values: ProjectedFullSlug[];
+			values: ProjectedPath[];
 			tables: {
 				documentFields: LucidBrickTableName;
 				version: LucidVersionTableName;
@@ -98,7 +96,7 @@ const updateRouteFields: ServiceFn<
 			}
 		}
 
-		if (data.field !== "fullSlug") return { error: undefined, data: undefined };
+		if (data.field !== "path") return { error: undefined, data: undefined };
 
 		return data.toolkit.documents.notifyChange({
 			change: {
@@ -120,7 +118,7 @@ const updateRouteFields: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: copy("server:plugin.pages.full.slug.children.update.failed"),
+				message: copy("server:plugin.pages.path.children.update.failed"),
 			},
 			data: undefined,
 		};

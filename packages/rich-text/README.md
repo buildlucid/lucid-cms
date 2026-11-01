@@ -179,7 +179,7 @@ Document links require routing on their target collection. The configured field 
 ```typescript
 const Posts = new CollectionBuilder("posts", {
   mode: "multiple",
-  routing: "fullSlug",
+  routing: { field: "path" },
   // ...
 });
 ```

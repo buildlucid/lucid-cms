@@ -41,7 +41,7 @@ const collectionResponseSchema = z.object({
 		.meta({
 			description:
 				"The top-level field containing each document's complete public path",
-			example: { field: "fullSlug" },
+			example: { field: "path" },
 		}),
 	group: z
 		.object({
@@ -147,7 +147,7 @@ const collectionResponseSchema = z.object({
 	}),
 	listing: z.array(z.string()).meta({
 		description: "Field keys included in the document listing columns",
-		example: ["pageTitle", "author", "fullSlug", "slug"],
+		example: ["pageTitle", "author", "path", "slug"],
 	}),
 	labelFields: z.array(z.string()).meta({
 		description:

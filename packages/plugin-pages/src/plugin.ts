@@ -20,7 +20,7 @@ import registerFields from "./services/register-fields.js";
 import toolkit from "./toolkit/index.js";
 import type { PluginOptions } from "./types/types.js";
 
-/** Adds slug, parent-page and full-path fields to selected collections, plus route maintenance hooks and toolkit.pages. */
+/** Adds slug, parent page and path fields to selected collections, plus route maintenance hooks and toolkit.pages. */
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	const options = pluginOptions(plugin);
 
@@ -49,7 +49,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 
 				registerFields(collectionInstance, collectionConfig);
 				draft.admin.slots.push(...registerAdminSlots(collectionConfig.key));
-				collectionInstance.config.routing = { field: "fullSlug" };
+				collectionInstance.config.routing = { field: "path" };
 				configuredCollections.push({ collectionConfig, collectionInstance });
 
 				if (!collectionInstance.config.hooks) {

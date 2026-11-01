@@ -1,7 +1,7 @@
 import { type CollectionBuilder, copy } from "@lucidcms/core";
 import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
 import type { CollectionConfig, RouteSegmentTarget } from "../types/types.js";
-import formatFullSlug from "../utils/format-fullslug.js";
+import formatPath from "../utils/format-path.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
 import resolvePagesCollectionLocalization from "../utils/resolve-pages-collection-localization.js";
 import fetchRouteSegmentValues, {
@@ -108,7 +108,7 @@ const resolveRouteSegmentValues: ServiceFn<
 
 			valuesByLocale.set(
 				locale,
-				formatFullSlug(
+				formatPath(
 					resolveCollectionPrefix({
 						collection: data.collection,
 						localeCode: locale,

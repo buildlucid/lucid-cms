@@ -3,7 +3,7 @@
 {% export paths = documentPaths("page") %}
 
 {% set page = document("page", {
-	filter: { _fullSlug: route.path },
+	filter: { _path: route.path },
 	include: ["bricks"],
 }) ?? notFound() %}
 {% set alternates = page.route?.alternates %}

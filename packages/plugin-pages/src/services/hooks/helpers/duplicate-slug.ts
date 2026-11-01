@@ -58,7 +58,7 @@ export const applyDuplicateSlugCandidate = (
 };
 
 /** Returns true when an error only contains retryable slug collisions. */
-export const isFullSlugCollisionError = (error: {
+export const isPathCollisionError = (error: {
 	status?: number;
 	errors?: Record<string, unknown>;
 }) => {

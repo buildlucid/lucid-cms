@@ -1,6 +1,5 @@
 {
-	"plugin.pages.fields.full.slug.label": "Full slug",
+	"plugin.pages.fields.path.label": "Path",
 	"plugin.pages.fields.slug.label": "Slug",
-	"plugin.pages.fields.parent.page.label": "Parent page",
-	"plugin.pages.route.label": "Full path"
+	"plugin.pages.fields.parent.page.label": "Parent page"
 }

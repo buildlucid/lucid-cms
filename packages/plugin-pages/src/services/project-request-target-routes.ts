@@ -2,10 +2,10 @@ import { type CollectionBuilder, copy } from "@lucidcms/core";
 import type { CollectionTableNames, ServiceFn } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
-	ProjectedFullSlug,
+	ProjectedPath,
 	RouteScope,
 } from "../types/types.js";
-import formatFullSlug from "../utils/format-fullslug.js";
+import formatPath from "../utils/format-path.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
 import resolvePagesCollectionLocalization from "../utils/resolve-pages-collection-localization.js";
 import getPagesFields, { type PageVersionFields } from "./get-pages-fields.js";
@@ -22,7 +22,7 @@ export type RequestTargetProjection = {
 	/** Reads members by their version and everything else from the target. */
 	scope: RouteScope;
 	members: PageVersionFields[];
-	projected: ProjectedFullSlug[];
+	projected: ProjectedPath[];
 	/** Members whose route cannot be built in the target, with a translated reason. */
 	problems: Array<{ requestDocumentId: number; message: string }>;
 	/** Members with no captured page above them in the target. Their descendant passes reach every other member. */
@@ -30,12 +30,8 @@ export type RequestTargetProjection = {
 };
 
 /**
- * Projects the routes a request's pages will have in one target environment,
- * reading parents from the request where captured and from the environment
- * otherwise. Environment parents are followed up to the nearest captured page,
- * so a completed rename reaches every captured page below it. Pages whose
- * parent is missing there or whose parents loop are reported as problems
- * rather than routes.
+ * Projects request routes using captured parents, falling back to target environment ancestors up
+ * to the nearest captured page. Reports missing parents and cycles instead of routes.
  */
 const projectRequestTargetRoutes: ServiceFn<
 	[
@@ -176,10 +172,10 @@ const projectRequestTargetRoutes: ServiceFn<
 
 		//* an environment page with no captured page above it keeps its stored route
 		if (!isMember && !reachesMember(row._parentPage, [...visited])) {
-			return row._fullSlug ?? null;
+			return row._path ?? null;
 		}
 		if (row._parentPage === null) {
-			return formatFullSlug(
+			return formatPath(
 				prefixesRes.data.get(version.document_version_id)?.get(locale) ??
 					resolveCollectionPrefix({
 						collection: data.collection,
@@ -214,7 +210,7 @@ const projectRequestTargetRoutes: ServiceFn<
 			...visited,
 			version.document_id,
 		]);
-		return parentRoute === null ? null : formatFullSlug(parentRoute, row._slug);
+		return parentRoute === null ? null : formatPath(parentRoute, row._slug);
 	};
 
 	return {

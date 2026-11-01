@@ -8,7 +8,7 @@ import { sql } from "kysely";
 import constants from "../constants.js";
 import type {
 	CollectionConfig,
-	ProjectedFullSlug,
+	ProjectedPath,
 	RouteScope,
 	RouteUniquenessItem,
 } from "../types/types.js";
@@ -38,9 +38,7 @@ const getExistingRouteItems: ServiceFn<
 		return { error: undefined, data: [] };
 	}
 
-	const fullSlugValues = [
-		...new Set(data.projectedItems.map((item) => item.fullSlug)),
-	];
+	const pathValues = [...new Set(data.projectedItems.map((item) => item.path))];
 	const localeValues = [
 		...new Set(data.projectedItems.map((item) => item.locale)),
 	];
@@ -49,7 +47,7 @@ const getExistingRouteItems: ServiceFn<
 		version: versionTable,
 		documentFields: fieldsTable,
 	} = data.tables;
-	const fullSlugColumn = prefixGeneratedColName(constants.fields.fullSlug.key);
+	const pathColumn = prefixGeneratedColName(constants.fields.path.key);
 	const defaultLocale = getCollectionDefaultLocale(
 		context.config,
 		data.collectionKey,
@@ -72,13 +70,9 @@ const getExistingRouteItems: ServiceFn<
 			"d.id as document_id",
 			"v.id as document_version_id",
 			"f.locale",
-			sql<string | null>`${sql.ref(`f.${fullSlugColumn}`)}`.as("_fullSlug"),
+			sql<string | null>`${sql.ref(`f.${pathColumn}`)}`.as("_path"),
 		])
-		.where(
-			sql<string>`lower(${sql.ref(`f.${fullSlugColumn}`)})`,
-			"in",
-			fullSlugValues,
-		)
+		.where(sql<string>`lower(${sql.ref(`f.${pathColumn}`)})`, "in", pathValues)
 		.where((eb) =>
 			assignedLocales.length > 0
 				? eb.or([
@@ -119,21 +113,21 @@ const getExistingRouteItems: ServiceFn<
 			document_id: number;
 			document_version_id: number;
 			locale: string | null;
-			_fullSlug: string | null;
+			_path: string | null;
 		}>("pages.unique.existing-routes.find", () => query)
 		.many();
 	if (rowsRes.error) return rowsRes;
 
 	const items: RouteUniquenessItem[] = [];
 	for (const row of rowsRes.data) {
-		const fullSlug = normalizePathValue(row._fullSlug);
-		if (!fullSlug) continue;
+		const path = normalizePathValue(row._path);
+		if (!path) continue;
 
 		items.push({
 			documentId: row.document_id,
 			versionId: row.document_version_id,
 			locale: row.locale ?? (includesUnassigned ? null : defaultLocale),
-			fullSlug,
+			path,
 		});
 	}
 
@@ -144,15 +138,14 @@ const getExistingRouteItems: ServiceFn<
 };
 
 /**
- * Finds projected routes that collide with each other or with routes stored in
- * the scope, ignoring the excluded documents. Returns nothing when the
- * collection does not enforce unique routes.
+ * Finds projected and stored route collisions, ignoring excluded documents. Skips collections
+ * without route uniqueness.
  */
 const findRouteConflicts: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			projectedFullSlugs: ProjectedFullSlug[];
+			projectedPaths: ProjectedPath[];
 			scope: RouteScope;
 			tables: CollectionTableNames;
 			excludeDocumentIds?: number[];
@@ -163,7 +156,7 @@ const findRouteConflicts: ServiceFn<
 	if (!data.collection.unique) return { error: undefined, data: [] };
 
 	const projectedItems = buildRouteUniquenessItems({
-		projectedFullSlugs: data.projectedFullSlugs,
+		projectedPaths: data.projectedPaths,
 	});
 	const projectedDuplicates = findProjectedRouteDuplicates(projectedItems);
 	if (projectedDuplicates.length > 0) {
