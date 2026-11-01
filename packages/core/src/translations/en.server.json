@@ -208,6 +208,7 @@
 	"core.email.magic.link.email.subject": "Your login code and link",
 	"core.email.passkey.added.subject": "A passkey was added to your account",
 	"core.email.two.factor.enabled.subject": "Two-factor authentication turned on",
+	"core.email.test.subject": "Test email",
 	"core.auth.invitations.user.already.accepted.message": "You have already accepted an invitation.",
 	"core.auth.password.reset.success.subject": "Your password was reset",
 	"core.email.update.success.subject": "Your email address was updated",

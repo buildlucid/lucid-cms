@@ -12,6 +12,10 @@ import cliSpinner from "../spinner.js";
 import createViteConfig from "./create-vite-config.js";
 import createViteLogger from "./create-vite-logger.js";
 
+/** `--remote`'s help text, shared by built-in and plugin commands. */
+export const remoteOptionDescription =
+	"Connect to the runtime's deployed resources where supported, such as Cloudflare bindings";
+
 export type TaskServerOptions = {
 	/** Connects the runtime's bindings to their deployed resources, for `--remote`. */
 	remote?: boolean;
@@ -25,7 +29,10 @@ export type TaskServer = {
 	close: () => Promise<void>;
 };
 
-/** Starts tasks through Lucid's Vite config, or that of the framework serving the project, with runtime bindings, isolated cache, a free local port and no watcher or HMR socket, restoring `NODE_ENV` on close. */
+/**
+ * Starts a task server through the project or framework Vite config, with isolated cache and
+ * runtime bindings. Disables watching and HMR sockets; restores `NODE_ENV` on close.
+ */
 const startTaskServer = async (
 	options?: TaskServerOptions,
 ): Promise<TaskServer> => {

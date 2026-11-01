@@ -4,6 +4,7 @@
 
 - Media sources now index library media only, leaving out personal and system media.
 - Collection sources now project filled content API documents instead of `refs`, with a new `depth` option.
+- Added `lucidcms typesense:rebuild` and `typesense:status` commands.
 
 ## v0.1.0
 

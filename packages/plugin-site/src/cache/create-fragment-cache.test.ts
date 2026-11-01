@@ -1,6 +1,9 @@
 import type { ServiceContext } from "@lucidcms/core/types";
 import { describe, expect, test, vi } from "vitest";
-import { DEFAULT_STORE_LIFETIME_SECONDS } from "../constants.js";
+import {
+	DEFAULT_STORE_LIFETIME_SECONDS,
+	STORE_CACHE_TAG,
+} from "../constants.js";
 import type { SiteState } from "../types.js";
 import createFragmentCache from "./create-fragment-cache.js";
 
@@ -62,6 +65,14 @@ describe("createFragmentCache", () => {
 		tokens["content-documents:menu"] = "1";
 		await expect(
 			cache.get({ key: "nav", state: request() }),
+		).resolves.toBeNull();
+	});
+
+	test("goes stale when the site cache is cleared, even without tags", async () => {
+		await save("banner", "<aside></aside>", []);
+		tokens[STORE_CACHE_TAG] = "1";
+		await expect(
+			cache.get({ key: "banner", state: request() }),
 		).resolves.toBeNull();
 	});
 

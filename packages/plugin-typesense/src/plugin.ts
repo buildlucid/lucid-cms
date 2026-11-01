@@ -5,6 +5,8 @@ import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import createSyncJob from "./jobs/sync.js";
 import migration from "./migrations/1788900000000-typesense.js";
 import recordChange from "./services/record-change.js";
+import readStatuses from "./tasks/read-statuses.js";
+import rebuildIndexes from "./tasks/rebuild-indexes.js";
 import toolkit from "./toolkit/index.js";
 import type { PluginOptions } from "./types.js";
 import pluginOptions from "./utils/plugin-options.js";
@@ -19,6 +21,11 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 		lucid: LUCID_VERSION,
 		sources: { translations: ["@lucidcms/plugin-typesense/translations"] },
 		toolkit: toolkit(options, job),
+		cli: { module: "@lucidcms/plugin-typesense/cli" },
+		tasks: {
+			rebuild: rebuildIndexes(options, job),
+			status: readStatuses(options),
+		},
 		configure: (draft) => {
 			draft.migrations.definitions.push({
 				name: "1788900000000-typesense",

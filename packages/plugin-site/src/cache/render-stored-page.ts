@@ -15,7 +15,7 @@ const renderStoredPage = async (props: {
 	params: Record<string, string>;
 	state: SiteState;
 }): Promise<StoredPage> => {
-	const tracked = trackContentReads(props.state.toolkit, props.context);
+	const tracked = await trackContentReads(props.state.toolkit, props.context);
 	const islands = deferIslands({ url: ISLANDS_URL });
 
 	const rendered = await props.site.freshKiln.render(

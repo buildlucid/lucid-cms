@@ -1,6 +1,8 @@
 import type z from "zod";
+import emailTestTask from "./email-test.js";
 import jobsListTask from "./jobs-list.js";
 import jobsScheduleTask from "./jobs-schedule.js";
+import kvClearTask from "./kv-clear.js";
 import migrateResetTask from "./migrate-reset.js";
 import migrateRollbackTask from "./migrate-rollback.js";
 import migrateStatusTask from "./migrate-status.js";
@@ -8,6 +10,7 @@ import migrateTask from "./migrate.js";
 import pluginTask from "./plugin.js";
 import seedListTask from "./seed-list.js";
 import seedTask from "./seed.js";
+import storageTestTask from "./storage-test.js";
 import syncTask from "./sync.js";
 import usersResetPasskeysTask from "./users-reset-passkeys.js";
 import usersResetPasswordTask from "./users-reset-password.js";
@@ -25,6 +28,9 @@ const runtimeTasks = {
 	seed: seedTask,
 	"jobs:list": jobsListTask,
 	"jobs:schedule": jobsScheduleTask,
+	"kv:clear": kvClearTask,
+	"email:test": emailTestTask,
+	"storage:test": storageTestTask,
 	"users:reset-two-factor": usersResetTwoFactorTask,
 	"users:reset-passkeys": usersResetPasskeysTask,
 	"users:reset-password": usersResetPasswordTask,

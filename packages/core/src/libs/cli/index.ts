@@ -3,7 +3,9 @@ import { Command } from "commander";
 import packageJson from "../../../package.json" with { type: "json" };
 import buildCommand from "./commands/build.js";
 import devCommand from "./commands/dev.js";
+import emailTestCommand from "./commands/email-test.js";
 import jobSchedulerCommand from "./commands/job-scheduler.js";
+import kvClearCommand from "./commands/kv-clear.js";
 import migrateFreshCommand from "./commands/migrate-fresh.js";
 import migrateNewCommand from "./commands/migrate-new.js";
 import migrateResetCommand from "./commands/migrate-reset.js";
@@ -14,6 +16,7 @@ import { registerPluginCommands } from "./commands/plugin-command.js";
 import seedNewCommand from "./commands/seed-new.js";
 import seedCommand, { seedListCommand } from "./commands/seed.js";
 import serveCommand from "./commands/serve.js";
+import storageTestCommand from "./commands/storage-test.js";
 import syncCommand from "./commands/sync.js";
 import typegenCommand from "./commands/typegen.js";
 import {
@@ -23,11 +26,10 @@ import {
 	usersSuperAdminCommand,
 } from "./commands/users.js";
 import cliLogger from "./logger.js";
+import { remoteOptionDescription } from "./services/start-task-server.js";
 
 // TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
 const program = new Command();
-const remoteOptionDescription =
-	"Connect to the runtime's deployed resources where supported, such as Cloudflare bindings";
 
 program
 	.name("lucidcms")
@@ -138,6 +140,28 @@ program
 	.description("Run a registered job schedule")
 	.option("--remote", remoteOptionDescription)
 	.action(jobSchedulerCommand);
+
+program
+	.command("kv:clear")
+	.description(
+		"Clear Lucid's KV store, such as cached responses and rate limits",
+	)
+	.option("--remote", remoteOptionDescription)
+	.action(kvClearCommand);
+
+program
+	.command("email:test <email>")
+	.description("Send a test email through the configured email adapter")
+	.option("--remote", remoteOptionDescription)
+	.action(emailTestCommand);
+
+program
+	.command("storage:test")
+	.description(
+		"Test that the media storage adapter can write, read and delete a file",
+	)
+	.option("--remote", remoteOptionDescription)
+	.action(storageTestCommand);
 
 program
 	.command("users:reset-two-factor <email>")

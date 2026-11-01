@@ -1,6 +1,7 @@
 import path from "node:path";
 import type { LucidPluginCliFactory } from "@lucidcms/core/types";
 import type { SitePluginOptionsInternal } from "../types.js";
+import clearCache from "./clear-cache.js";
 import buildSite from "./static/build-site.js";
 import resolveIntegrations from "./ui/resolve-integrations.js";
 import uiVitePlugins from "./ui/ui-vite-plugins.js";
@@ -8,7 +9,6 @@ import { SITE_MODULE_ID } from "./vite/site-module-plugin.js";
 import siteVitePlugins from "./vite/site-vite-plugins.js";
 import writeKilnManifest from "./write-kiln-manifest.js";
 
-/** The site plugin's CLI module, loaded only by `lucidcms` commands and Lucid's Vite plugin. */
 const siteCli: LucidPluginCliFactory<SitePluginOptionsInternal> = (options) => {
 	const ui = options.ui?.length ? resolveIntegrations(options.ui) : null;
 	const root = (projectRoot: string) =>
@@ -46,6 +46,12 @@ const siteCli: LucidPluginCliFactory<SitePluginOptionsInternal> = (options) => {
 				name: "site:build",
 				description: "Build a static site into its own output folder",
 				run: (props) => buildSite(options, props),
+			},
+			{
+				name: "site:clear-cache",
+				description:
+					"Clear stored ISR pages and fragments, so they render afresh on their next request",
+				run: (props) => clearCache(options, props),
 			},
 		],
 	};

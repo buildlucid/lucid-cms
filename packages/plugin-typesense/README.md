@@ -85,3 +85,5 @@ Rich-text variables, document links and embedded media are also refreshed when t
 Use `toolkit.typesense.client` in a server route to query Typesense. Your frontend calls that route, keeping the Typesense API key on the server. Results contain the values stored in Typesense; the plugin does not fetch live content during a search.
 
 Call `toolkit.typesense.rebuild({ index: "pages" })` after changing an index's schema or field mapping. Existing search results remain available during a rebuild. Use `toolkit.typesense.getStatus({ index: "pages" })` to check progress or the last error.
+
+From the terminal, `lucidcms typesense:rebuild` rebuilds every index and waits for it to finish, and `lucidcms typesense:status` shows each index's pending changes and last error. Add `--remote` to run them against your deployed resources where your runtime supports it.

@@ -14,6 +14,10 @@ import loadProject from "../../vite/load-project.js";
 import cliLogger from "../logger.js";
 import createViteConfig from "../services/create-vite-config.js";
 import runTaskCommand from "../services/run-task-command.js";
+import {
+	remoteOptionDescription,
+	type TaskServerOptions,
+} from "../services/start-task-server.js";
 
 const logger: LucidPluginCommandLogger = {
 	info: (message) => cliLogger.info(message),
@@ -31,48 +35,53 @@ const logger: LucidPluginCommandLogger = {
 
 /** Runs a plugin's command, which reaches the runtime through the plugin's tasks. */
 const pluginCommand =
-	(command: LucidPluginCommand, key: string, loaded: LoadConfigResult) => () =>
-		runTaskCommand(`"${command.name}" failed`, async (run, elapsed) => {
-			await command.run({
-				config: loaded.config,
-				projectRoot: loaded.projectRoot,
-				publicFiles: loaded.resources.files.public,
-				// Load build config only when requested, rejecting projects whose framework owns the build.
-				viteConfig: async () => {
-					await assertNoHost(loaded.projectRoot);
-					// Commands report their own progress, so Vite only reports warnings and errors.
-					return createViteConfig({
-						configPath: loaded.configPath,
-						mode: "production",
-						logLevel: "warn",
-						prepare: false,
-						// Commands build their own entries, such as a static site's, which the admin isn't part of.
-						admin: false,
-					});
-				},
-				// The runtime runs this version of the plugin's tasks, so their JSON is the result the command asked for.
-				runTask: async <Task extends LucidPluginTask>(
-					name: string,
-					input: z.input<Task["input"]>,
-				) =>
-					(await run("plugin", {
-						key,
-						name,
-						input,
-					})) as LucidPluginTaskResult<Task>,
-				logger,
-			});
+	(command: LucidPluginCommand, key: string, loaded: LoadConfigResult) =>
+	(options: TaskServerOptions) =>
+		runTaskCommand(
+			`"${command.name}" failed`,
+			async (run, elapsed) => {
+				await command.run({
+					config: loaded.config,
+					projectRoot: loaded.projectRoot,
+					publicFiles: loaded.resources.files.public,
+					// Load build config only when requested, rejecting projects whose framework owns the build.
+					viteConfig: async () => {
+						await assertNoHost(loaded.projectRoot);
+						// Commands report their own progress, so Vite only reports warnings and errors.
+						return createViteConfig({
+							configPath: loaded.configPath,
+							mode: "production",
+							logLevel: "warn",
+							prepare: false,
+							// Commands build their own entries, such as a static site's, which the admin isn't part of.
+							admin: false,
+						});
+					},
+					// Run matching plugin task versions to keep command results compatible.
+					runTask: async <Task extends LucidPluginTask>(
+						name: string,
+						input: z.input<Task["input"]>,
+					) =>
+						(await run("plugin", {
+							key,
+							name,
+							input,
+						})) as LucidPluginTaskResult<Task>,
+					logger,
+				});
 
-			cliLogger.log(
-				cliLogger.createBadge("LUCID CMS"),
-				`"${command.name}" completed`,
-				cliLogger.color.green("successfully"),
-				"in",
-				cliLogger.color.green(cliLogger.formatMilliseconds(elapsed())),
-				{ spaceAfter: true, spaceBefore: true },
-			);
-			return 0;
-		});
+				cliLogger.log(
+					cliLogger.createBadge("LUCID CMS"),
+					`"${command.name}" completed`,
+					cliLogger.color.green("successfully"),
+					"in",
+					cliLogger.color.green(cliLogger.formatMilliseconds(elapsed())),
+					{ spaceAfter: true, spaceBefore: true },
+				);
+				return 0;
+			},
+			options,
+		);
 
 /** Registers plugin commands after loading the project as `lucid()` does, only for unknown commands so they stay out of `lucidcms --help`. */
 export const registerPluginCommands = async (program: Command) => {
@@ -101,6 +110,7 @@ export const registerPluginCommands = async (program: Command) => {
 			program
 				.command(command.name)
 				.description(command.description)
+				.option("--remote", remoteOptionDescription)
 				.action(pluginCommand(command, key, loaded));
 		}
 	}

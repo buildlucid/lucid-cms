@@ -90,6 +90,11 @@ const emailConstants = Object.freeze({
 			external: false,
 			storage: null,
 		},
+		test: {
+			key: "test",
+			external: false,
+			storage: null,
+		},
 	},
 } as const);
 

@@ -1,5 +1,6 @@
 import type { ServiceContext, Toolkit } from "@lucidcms/core/types";
 import { describe, expect, test, vi } from "vitest";
+import { STORE_CACHE_TAG } from "../constants.js";
 import readStoredPage from "./read-stored-page.js";
 import trackContentReads from "./track-content-reads.js";
 
@@ -33,7 +34,7 @@ const toolkit = {
 
 describe("stored pages", () => {
 	test("stay current until a collection the page read changes", async () => {
-		const tracked = trackContentReads(toolkit, request());
+		const tracked = await trackContentReads(toolkit, request());
 		await tracked.toolkit.documents.getSingle({
 			collectionKey: "page",
 			version: "latest",
@@ -53,6 +54,7 @@ describe("stored pages", () => {
 			tokens: await tracked.tokens(),
 		};
 		expect(page.tokens).toEqual({
+			[STORE_CACHE_TAG]: "0",
 			"content-documents:page": "0",
 			"content-documents:blog": "0",
 			"content-media": "0",
@@ -67,7 +69,7 @@ describe("stored pages", () => {
 	});
 
 	test("go stale when media changes, since document reads include their media", async () => {
-		const tracked = trackContentReads(toolkit, request());
+		const tracked = await trackContentReads(toolkit, request());
 		await tracked.toolkit.documents.getSingle({
 			collectionKey: "page",
 			version: "latest",
@@ -83,7 +85,7 @@ describe("stored pages", () => {
 	});
 
 	test("pages that read one media item go stale when any media changes, such as its video's poster", async () => {
-		const tracked = trackContentReads(toolkit, request());
+		const tracked = await trackContentReads(toolkit, request());
 		await tracked.toolkit.media.getSingle({ id: 7 });
 		store.set("video", {
 			body: "<video></video>",
@@ -93,5 +95,17 @@ describe("stored pages", () => {
 
 		tokens["content-media"] = "2";
 		await expect(readStoredPage(request(), "video")).resolves.toBeNull();
+	});
+
+	test("go stale when the site cache is cleared, even without content reads", async () => {
+		const tracked = await trackContentReads(toolkit, request());
+		store.set("robots", {
+			body: "User-agent: *",
+			contentType: "text/plain; charset=utf-8",
+			tokens: await tracked.tokens(),
+		});
+
+		tokens[STORE_CACHE_TAG] = "1";
+		await expect(readStoredPage(request(), "robots")).resolves.toBeNull();
 	});
 });

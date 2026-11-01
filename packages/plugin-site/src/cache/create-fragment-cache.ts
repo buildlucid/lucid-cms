@@ -1,6 +1,6 @@
 import { contentCacheTags, getCacheTagTokens } from "@lucidcms/core/extension";
 import type { KilnCache } from "@lucidkiln/core";
-import { storeKeys } from "../constants.js";
+import { STORE_CACHE_TAG, storeKeys } from "../constants.js";
 import type { SiteState } from "../types.js";
 import readCacheTagTokens from "./read-cache-tag-tokens.js";
 import storeLifetime from "./store-lifetime.js";
@@ -9,8 +9,12 @@ type Fragment = { value: string; tokens: Record<string, string> };
 
 /** Kiln's fragment store, shared by every request the site serves, which reads KV with the context of the render's request. */
 const createFragmentCache = (): KilnCache<SiteState> => {
-	// Tokens at cache misses prevent saving fragments rendered across a content change.
-	const guards = [contentCacheTags.documents, contentCacheTags.media];
+	// Tokens at cache misses prevent saving fragments rendered across a content change or cache clear.
+	const guards = [
+		contentCacheTags.documents,
+		contentCacheTags.media,
+		STORE_CACHE_TAG,
+	];
 	const missed = new Map<string, string>();
 	const guardToken = (tokens: Record<string, string>) =>
 		guards.map((tag) => tokens[tag] ?? "").join("|");
@@ -47,8 +51,9 @@ const createFragmentCache = (): KilnCache<SiteState> => {
 				key: storeKeys.fragment(key),
 				value: {
 					value,
+					// Include the shared tag so clearing the site also invalidates fragments.
 					tokens: Object.fromEntries(
-						tags.map((tag) => [tag, tokens[tag] ?? ""]),
+						[...tags, STORE_CACHE_TAG].map((tag) => [tag, tokens[tag] ?? ""]),
 					),
 				},
 				hash: true,

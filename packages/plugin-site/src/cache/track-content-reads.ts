@@ -1,15 +1,18 @@
 import { contentCacheTags } from "@lucidcms/core/extension";
 import type { ServiceContext, Toolkit } from "@lucidcms/core/types";
+import { STORE_CACHE_TAG } from "../constants.js";
 import readCacheTagTokens from "./read-cache-tag-tokens.js";
 
 /** Captures tokens before content reads so concurrent changes invalidate stored pages; the request's memo keeps the first token each tag resolved to. */
-const trackContentReads = (toolkit: Toolkit, context: ServiceContext) => {
+const trackContentReads = async (toolkit: Toolkit, context: ServiceContext) => {
 	const tracked = new Set<string>();
 
 	const track = async (...tags: string[]) => {
 		for (const tag of tags) tracked.add(tag);
 		await readCacheTagTokens(context, tags);
 	};
+	// Read before the render, so a clear while it runs still makes the page stale.
+	await track(STORE_CACHE_TAG);
 
 	// Document reads include their media, which media changes don't rotate the collection's token for.
 	const documents: Toolkit["documents"] = {

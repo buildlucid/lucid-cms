@@ -12,6 +12,7 @@
 - Added magic link login with `auth.magicLink`, which emails users a login link and code.
 - Added two-factor authentication with `auth.twoFactor`, which can be required for everyone, super admins or specific roles.
 - Added `lucidcms users:` commands for getting back into the admin when you're locked out.
+- Added `lucidcms kv:clear`, `email:test` and `storage:test` commands for clearing KV and testing your email and media storage adapters.
 - Added passkey login with `auth.passkeys`, which also works as two-factor authentication.
 - Added a `locale` option to content API and toolkit document and media reads, which returns translations in one locale.
 - Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.

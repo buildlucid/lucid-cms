@@ -41,6 +41,9 @@ export const ISLANDS_URL = `/${pluginPublicPath(PLUGIN_KEY, "islands")}/`;
  */
 export const DEFAULT_STORE_LIFETIME_SECONDS = 30 * 24 * 60 * 60;
 
+/** Shared page and fragment tag rotated by `site:clear-cache`. */
+export const STORE_CACHE_TAG = `${PLUGIN_KEY}:store`;
+
 export const storeKeys = {
 	page: (version: string, locale: string, path: string) =>
 		`${PLUGIN_KEY}:page:${version}:${locale}:${path}`,

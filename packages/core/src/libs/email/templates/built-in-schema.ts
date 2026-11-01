@@ -75,6 +75,13 @@ export interface Schema<Types extends object = object> {
 			};
 			blocks: never;
 		};
+		"test": {
+			context: {
+				adapter: string | Markup;
+				[key: string]: unknown;
+			};
+			blocks: never;
+		};
 		"two-factor-enabled": {
 			context: {
 				firstName?: string | Markup | null;

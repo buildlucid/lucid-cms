@@ -25,7 +25,10 @@ export { consumeJob } from "../libs/jobs/consume/index.js";
 export { drainJobs } from "../libs/jobs/drain.js";
 export { DEFAULT_KV_NAMESPACE } from "../libs/kv/constants.js";
 export { default as contentCacheTags } from "../libs/kv/content-cache-tags.js";
-export { getHttpCacheNamespaceTokens as getCacheTagTokens } from "../libs/kv/http-cache.js";
+export {
+	getHttpCacheNamespaceTokens as getCacheTagTokens,
+	invalidateHttpCacheTags as invalidateCacheTags,
+} from "../libs/kv/http-cache.js";
 export {
 	getNamespacePrefix as getKVNamespacePrefix,
 	resolveKey as resolveKVKey,

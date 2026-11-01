@@ -3,6 +3,7 @@ import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import { CLIENT_SCRIPT_PATH, LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import registerSiteRoute from "./http/register-site-route.js";
 import resolvePluginOptions from "./site/resolve-plugin-options.js";
+import clearCache from "./tasks/clear-cache.js";
 import renderSite from "./tasks/static-build/render-site.js";
 import type { SitePluginOptions } from "./types.js";
 
@@ -26,7 +27,7 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 			module: "@lucidcms/plugin-site/cli",
 			options,
 		},
-		tasks: { build: renderSite(options) },
+		tasks: { build: renderSite(options), "clear-cache": clearCache },
 		sources: {
 			public: [
 				{

@@ -61,7 +61,10 @@ export type LucidPluginCommandLogger = {
 	error: (error: unknown, heading: string) => void;
 };
 
-/** Defines a plugin command's runtime work through `definePluginTask`, parsing JSON with `input` and returning JSON through the development task route with runtime bindings and services. */
+/**
+ * Defines runtime work for a plugin command. Parses JSON input and returns JSON through the task
+ * route.
+ */
 export type LucidPluginTask<
 	Input extends z.ZodType = z.ZodType,
 	Result = unknown,
@@ -80,7 +83,10 @@ export type LucidPluginTaskResult<Task extends LucidPluginTask> = Awaited<
 	ReturnType<Task["run"]>
 >;
 
-/** Defines a Node `lucidcms` command with filesystem access and runtime `tasks`; run `lucidcms migrate` first when needed and throw to fail. */
+/**
+ * Defines a Node CLI command with filesystem access and runtime tasks. `--remote` uses deployed
+ * resources where supported. Run migrations first when needed; throw to fail.
+ */
 export type LucidPluginCommand = {
 	/** Plugin command name, such as `site:build`, which cannot replace a built-in command. */
 	name: string;
