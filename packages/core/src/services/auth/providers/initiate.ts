@@ -13,6 +13,7 @@ import {
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import createPkce from "../../../utils/helpers/create-pkce.js";
+import { encrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -34,7 +35,6 @@ const initiate: ServiceFn<
 	const AuthStates = new AuthStatesRepository(context.db);
 	const Users = new UsersRepository(context.db);
 
-	//* check if the provider is enabled and exists
 	const availableProviders = getAvailableProviders(context.config);
 	const provider = availableProviders.providers.find(
 		(p) => p.key === data.providerKey,
@@ -52,7 +52,6 @@ const initiate: ServiceFn<
 		};
 	}
 
-	//* validate invitation token if provided
 	let invitationTokenId: number | undefined;
 	if (data.invitationToken) {
 		const invitationTokenRes = await UserTokens.selectSingle({
@@ -144,9 +143,11 @@ const initiate: ServiceFn<
 			code_verifier: codeVerifier,
 			nonce,
 			invitation_token_id: invitationTokenId,
+			//* encrypted so a database read can't use it, but kept to send failed logins back to the invitation
 			invitation_token:
-				data.actionType === constants.authState.actionTypes.invitation
-					? data.invitationToken
+				data.actionType === constants.authState.actionTypes.invitation &&
+				data.invitationToken
+					? encrypt(data.invitationToken, context.config.secrets.encryption)
 					: undefined,
 			action_type: data.actionType,
 			authenticated_user_id: data.authenticatedUserId,

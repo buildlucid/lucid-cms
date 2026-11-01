@@ -1,10 +1,9 @@
-import { timingSafeEqual } from "node:crypto";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { TwoFactorProof } from "../../types/response.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import hashSecret from "../../utils/helpers/hash-secret.js";
+import verifySecret from "../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import passkeyLogin from "../auth/passkeys/login.js";
 import checkProof from "../auth/two-factor/check-proof.js";
@@ -75,17 +74,12 @@ const reauthenticate: ServiceFn<
 		};
 	}
 
-	const passwordHash = Buffer.from(
-		await hashSecret(
-			data.proof.password,
-			decrypt(userRes.data.secret, context.config.secrets.encryption),
-		),
+	const passwordValid = await verifySecret(
+		data.proof.password,
+		decrypt(userRes.data.secret, context.config.secrets.encryption),
+		userRes.data.password,
 	);
-	const storedHash = Buffer.from(userRes.data.password);
-	if (
-		passwordHash.length !== storedHash.length ||
-		!timingSafeEqual(passwordHash, storedHash)
-	) {
+	if (!passwordValid) {
 		return {
 			error: {
 				type: "basic",

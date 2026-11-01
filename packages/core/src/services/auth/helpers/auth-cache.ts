@@ -13,9 +13,6 @@ const AUTH_NAMESPACE = "auth:user";
 export const getAuthCacheNamespaceToken = (context: ServiceContext) =>
 	getNamespaceToken(context, AUTH_NAMESPACE);
 
-/**
- * Invalidates cached user auth state across the app.
- * Used after role, permission, or user status changes.
- */
+/** Invalidates auth caches after commit so concurrent requests cannot cache uncommitted state. */
 export const invalidateAuthCache = (context: ServiceContext) =>
-	invalidateNamespace(context, AUTH_NAMESPACE);
+	context.db.afterCommit(() => invalidateNamespace(context, AUTH_NAMESPACE));

@@ -2,13 +2,12 @@ import constants from "../../../constants/constants.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { AuthStatesRepository } from "../../../libs/repositories/index.js";
+import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import urlAddPath from "../../../utils/helpers/url-add-path.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/**
- * Gets the ideal redirect URL for when provider auth fails
- */
+/** Builds the redirect URL for a failed provider login. */
 const authRedirectUrl: ServiceFn<
 	[
 		{
@@ -29,7 +28,6 @@ const authRedirectUrl: ServiceFn<
 		constants.authState.defaultErrorRedirectPath,
 	);
 
-	//* get provider config
 	const availableProviders = getAvailableProviders(context.config);
 	const provider = availableProviders.providers.find(
 		(p) => p.key === data.providerKey,
@@ -43,7 +41,6 @@ const authRedirectUrl: ServiceFn<
 		};
 	}
 
-	//* retrieve and validate auth state
 	const authStateRes = await AuthStates.selectSingleWithInvitation({
 		state: data.state,
 		providerKey: data.providerKey,
@@ -79,12 +76,16 @@ const authRedirectUrl: ServiceFn<
 			constants.authState.actionTypes.invitation &&
 		authStateRes.data.invitation_token
 	) {
+		const invitationToken = decrypt(
+			authStateRes.data.invitation_token,
+			context.config.secrets.encryption,
+		);
 		return {
 			error: undefined,
 			data: {
 				redirectUrl: urlAddPath(
 					baseUrl,
-					`${constants.paths.admin}/accept-invitation?token=${authStateRes.data.invitation_token}`,
+					`${constants.paths.admin}/accept-invitation?token=${invitationToken}`,
 				),
 			},
 		};

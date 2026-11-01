@@ -34,6 +34,8 @@ export default class LucidDatabase {
 	readonly fn: LucidDatabaseFunctions;
 	readonly kysely: KyselyDB;
 	readonly tables: TableRegistry;
+	/** Work queued with `afterCommit` until this client's transaction commits. */
+	private readonly commitCallbacks: Array<() => Promise<unknown>> = [];
 
 	private constructor(
 		options: LucidDatabaseOptions,
@@ -147,6 +149,26 @@ export default class LucidDatabase {
 		options: QueryExecutionOptions,
 	): Promise<ManagedExecution<T>> {
 		return executeManagedQuery(execute, options);
+	}
+
+	/**
+	 * Runs `callback` once the current transaction commits, or straight away outside one. Use it for
+	 * side effects other requests shouldn't act on before the change is saved, such as clearing a
+	 * cache.
+	 */
+	async afterCommit(callback: () => Promise<unknown>): Promise<void> {
+		if (!this.isTransaction) {
+			await callback();
+			return;
+		}
+		this.commitCallbacks.push(callback);
+	}
+
+	/** Runs the work queued with `afterCommit`. Whoever commits this client's transaction calls it. */
+	async runCommitCallbacks(): Promise<void> {
+		for (const callback of this.commitCallbacks.splice(0)) {
+			await callback();
+		}
 	}
 }
 

@@ -482,9 +482,11 @@ export default Object.freeze({
 		passwordReset: "password_reset",
 		twoFactorReset: "two_factor_reset",
 		passkeysReset: "passkeys_reset",
+		twoFactorRequired: "two_factor_required",
 	} as const,
 	userTokenRevokeReasons: {
 		passwordResetUsed: "password_reset_used",
+		passwordResetSuperseded: "password_reset_superseded",
 		invitationAccepted: "invitation_accepted",
 		invitationResent: "invitation_resent",
 		emailChangeConfirmed: "email_change_confirmed",

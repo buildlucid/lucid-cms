@@ -28,10 +28,6 @@ const cacheKeys = {
 	auth: {
 		user: (userId: string | number, namespaceToken: string) =>
 			`auth:user:${namespaceToken}:${userId}`,
-		/**
-		 * Cache key for refresh token existence
-		 */
-		refresh: (token: string) => `auth:refresh:${token}`,
 	},
 	/**
 	 * Generate namespace keys for token-based invalidation/versioning.

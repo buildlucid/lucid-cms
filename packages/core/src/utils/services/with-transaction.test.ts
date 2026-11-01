@@ -132,3 +132,26 @@ test("an isolated success still rolls back when the caller's transaction fails",
 	expect(result.error).toBe(failure);
 	expect(await exists("tx_child_success")).toBe(false);
 });
+
+test("work queued after commit waits for the commit, and is dropped on rollback", async () => {
+	const ran: string[] = [];
+
+	await withTransaction(context, async (transaction) => {
+		await transaction.db.afterCommit(async () => {
+			ran.push("committed");
+		});
+		expect(ran).toEqual([]);
+		return { error: undefined, data: undefined };
+	});
+	await withTransaction(context, async (transaction) => {
+		await transaction.db.afterCommit(async () => {
+			ran.push("rolled back");
+		});
+		return { error: failure, data: undefined };
+	});
+	await context.db.afterCommit(async () => {
+		ran.push("no transaction");
+	});
+
+	expect(ran).toEqual(["committed", "no transaction"]);
+});

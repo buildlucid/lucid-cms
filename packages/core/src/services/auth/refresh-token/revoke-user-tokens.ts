@@ -1,5 +1,4 @@
 import constants from "../../../constants/constants.js";
-import cacheKeys from "../../../libs/kv/cache-keys.js";
 import {
 	AuthStatesRepository,
 	UserTokensRepository,
@@ -34,7 +33,7 @@ const revokeUserTokens: ServiceFn<
 	if (deleteStatesRes.error) return deleteStatesRes;
 
 	const activeTokenRes = await UserTokens.selectMultiple({
-		select: ["id", "token"],
+		select: ["id"],
 		where: [
 			{
 				key: "user_id",
@@ -90,15 +89,6 @@ const revokeUserTokens: ServiceFn<
 		],
 	});
 	if (revokeTokensRes.error) return revokeTokensRes;
-
-	await Promise.all(
-		activeTokenRes.data.map((token) =>
-			context.kv.delete(context, {
-				key: cacheKeys.auth.refresh(token.token),
-				hash: true,
-			}),
-		),
-	);
 
 	return {
 		error: undefined,

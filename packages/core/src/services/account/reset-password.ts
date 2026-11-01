@@ -133,6 +133,33 @@ const resetPassword: ServiceFn<
 		};
 	}
 
+	//* other reset links stop working once one is used
+	const revokeLinksRes = await UserTokens.updateMultiple({
+		data: {
+			revoked_at: now,
+			revoke_reason: constants.userTokenRevokeReasons.passwordResetSuperseded,
+			expiry_date: now,
+		},
+		where: [
+			{
+				key: "user_id",
+				operator: "=",
+				value: tokenRes.data.user_id,
+			},
+			{
+				key: "token_type",
+				operator: "=",
+				value: constants.userTokens.passwordReset,
+			},
+			{
+				key: "revoked_at",
+				operator: "is",
+				value: null,
+			},
+		],
+	});
+	if (revokeLinksRes.error) return revokeLinksRes;
+
 	const { secret, encryptSecret } = generateSecret(
 		context.config.secrets.encryption,
 	);

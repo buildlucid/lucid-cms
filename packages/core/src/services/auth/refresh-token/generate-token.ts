@@ -3,7 +3,6 @@ import { getCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import createServiceContext from "../../../libs/http/utils/create-service-context.js";
-import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
@@ -12,13 +11,16 @@ import type { ServiceResponse } from "../../../utils/services/types.js";
 import clearToken from "./clear-token.js";
 
 /**
- * Rotates and records the refresh token. Omit `authTime` for login or reauthentication; preserve
- * it during refresh.
+ * Rotates the refresh token. Preserve `session.authTime` and `session.provider` during refresh;
+ * omit `authTime` for login or reauthentication.
  */
 const generateToken = async (
 	c: LucidHonoContext,
 	userId: number,
-	authTime?: number,
+	session?: {
+		authTime?: number;
+		provider?: boolean;
+	},
 ): ServiceResponse<{ tokenId: number }> => {
 	const existingRefreshToken = getCookie(c, constants.cookies.refreshToken);
 
@@ -40,7 +42,8 @@ const generateToken = async (
 			exp: Math.floor(now / 1000) + constants.refreshTokenExpiration,
 			iat: Math.floor(now / 1000),
 			nonce: nonce,
-			authTime: authTime ?? Math.floor(now / 1000),
+			authTime: session?.authTime ?? Math.floor(now / 1000),
+			provider: session?.provider ?? false,
 		},
 		context.config.secrets.refreshToken,
 		constants.jwt.algorithm,
@@ -91,15 +94,6 @@ const generateToken = async (
 		secure: isRequestSecure(c),
 		sameSite: "strict",
 		path: "/",
-	});
-
-	const kv = context.kv;
-
-	await kv.set(context, {
-		key: cacheKeys.auth.refresh(token),
-		value: { user_id: userId },
-		ttlSeconds: constants.refreshTokenExpiration,
-		hash: true,
 	});
 
 	return {

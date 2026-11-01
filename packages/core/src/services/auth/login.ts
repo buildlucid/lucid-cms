@@ -4,6 +4,7 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import hashSecret from "../../utils/helpers/hash-secret.js";
 import { trimStringInput } from "../../utils/helpers/normalize-input.js";
+import verifySecret from "../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const login: ServiceFn<
@@ -39,18 +40,41 @@ const login: ServiceFn<
 			username: usernameOrEmail,
 			email: usernameOrEmail.toLowerCase(),
 		},
-		validation: {
-			enabled: true,
-			defaultError: {
+	});
+	if (userRes.error) return userRes;
+
+	const user = userRes.data;
+	if (!user?.password) {
+		//* Hash for unknown accounts too, reducing account enumeration through timing.
+		await hashSecret(data.password, "lucid-login");
+		return {
+			error: {
 				type: "authorisation",
 				message: copy("server:core.auth.login.error.message"),
 				status: 401,
 			},
-		},
-	});
-	if (userRes.error) return userRes;
+			data: undefined,
+		};
+	}
 
-	if (formatter.formatBoolean(userRes.data.is_deleted)) {
+	const valid = await verifySecret(
+		data.password,
+		decrypt(user.secret, context.config.secrets.encryption),
+		user.password,
+	);
+	if (!valid) {
+		return {
+			error: {
+				type: "authorisation",
+				message: copy("server:core.auth.login.error.message"),
+				status: 401,
+			},
+			data: undefined,
+		};
+	}
+
+	//* Check the password before revealing account status.
+	if (formatter.formatBoolean(user.is_deleted)) {
 		return {
 			error: {
 				type: "authorisation",
@@ -61,7 +85,7 @@ const login: ServiceFn<
 		};
 	}
 
-	if (formatter.formatBoolean(userRes.data.is_locked)) {
+	if (formatter.formatBoolean(user.is_locked)) {
 		return {
 			error: {
 				type: "authorisation",
@@ -72,28 +96,10 @@ const login: ServiceFn<
 		};
 	}
 
-	const decryptedSecret = decrypt(
-		userRes.data.secret,
-		context.config.secrets.encryption,
-	);
-	const inputPasswordHash = await hashSecret(data.password, decryptedSecret);
-
-	const valid = inputPasswordHash === userRes.data.password;
-
-	if (!valid)
-		return {
-			error: {
-				type: "authorisation",
-				message: copy("server:core.auth.login.error.message"),
-				status: 401,
-			},
-			data: undefined,
-		};
-
 	return {
 		error: undefined,
 		data: {
-			id: userRes.data.id,
+			id: user.id,
 		},
 	};
 };

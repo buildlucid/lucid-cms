@@ -3,22 +3,30 @@ import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import createServiceContext from "../../../libs/http/utils/create-service-context.js";
 import { copy } from "../../../libs/i18n/index.js";
-import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import clearAccessToken from "../access-token/clear-token.js";
+import needsTwoFactorSetup from "../two-factor/needs-setup.js";
 import clearRefreshToken from "./clear-token.js";
 import revokeUserTokens from "./revoke-user-tokens.js";
 
-const verifyToken = async (
-	c: LucidHonoContext,
-): ServiceResponse<{
+type RefreshedSession = {
 	user_id: number;
 	/** Last login or reauthentication time, preserved during refresh. */
 	authTime: number;
-}> => {
+	/** Whether the session came from a login provider, which skips two-factor authentication. */
+	provider: boolean;
+};
+
+/**
+ * Consumes the refresh token once. Reuse revokes all sessions; newly required two-factor setup
+ * forces a fresh login.
+ */
+const verifyToken = async (
+	c: LucidHonoContext,
+): ServiceResponse<RefreshedSession> => {
 	try {
 		const _refresh = getCookie(c, constants.cookies.refreshToken);
 
@@ -43,19 +51,14 @@ const verifyToken = async (
 		)) as {
 			id: number;
 			authTime?: number;
+			provider?: boolean;
 		};
 		//* tokens without the time have to confirm it's the user before security changes
 		const authTime = typeof decode.authTime === "number" ? decode.authTime : 0;
 		const hashedRefreshToken = hashUserToken(_refresh);
 
 		const tokenRes = await UserTokens.selectSingle({
-			select: [
-				"user_id",
-				"expiry_date",
-				"revoked_at",
-				"revoke_reason",
-				"replaced_by_token_id",
-			],
+			select: ["user_id", "expiry_date", "revoked_at", "replaced_by_token_id"],
 			where: [
 				{
 					key: "token",
@@ -82,16 +85,68 @@ const verifyToken = async (
 			};
 		}
 
-		if (tokenRes.data.revoked_at !== null) {
-			if (tokenRes.data.replaced_by_token_id !== null) {
-				await revokeUserTokens(context, {
-					userId: tokenRes.data.user_id,
-					revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
-				});
+		const userId = tokenRes.data.user_id;
+		//* Token reuse revokes all sessions.
+		const endAllSessions = async (): ServiceResponse<RefreshedSession> => {
+			await revokeUserTokens(context, {
+				userId,
+				revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
+			});
 
+			const [refreshRes, accessRes] = await Promise.all([
+				clearRefreshToken(c, {
+					revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
+				}),
+				clearAccessToken(c),
+			]);
+			if (refreshRes.error) return refreshRes;
+			if (accessRes.error) return accessRes;
+
+			return {
+				error: {
+					type: "authorisation",
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.error.message"),
+				},
+				data: undefined,
+			};
+		};
+
+		if (tokenRes.data.revoked_at !== null) {
+			if (tokenRes.data.replaced_by_token_id !== null) return endAllSessions();
+
+			return {
+				error: {
+					type: "authorisation",
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.missing"),
+				},
+				data: undefined,
+			};
+		}
+
+		const expiryMs = tokenRes.data.expiry_date
+			? new Date(tokenRes.data.expiry_date).getTime()
+			: Number.NaN;
+		if (Number.isNaN(expiryMs) || expiryMs <= Date.now()) {
+			return {
+				error: {
+					type: "authorisation",
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.missing"),
+				},
+				data: undefined,
+			};
+		}
+
+		const provider = decode.provider === true;
+		if (!provider) {
+			const setupRes = await needsTwoFactorSetup(context, { userId });
+			if (setupRes.error) return setupRes;
+			if (setupRes.data) {
 				const [refreshRes, accessRes] = await Promise.all([
 					clearRefreshToken(c, {
-						revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
+						revokeReason: constants.refreshTokenRevokeReasons.twoFactorRequired,
 					}),
 					clearAccessToken(c),
 				]);
@@ -107,65 +162,20 @@ const verifyToken = async (
 					data: undefined,
 				};
 			}
-
-			return {
-				error: {
-					type: "authorisation",
-					name: copy("server:core.auth.refresh.token.error.name"),
-					message: copy("server:core.auth.refresh.token.missing"),
-				},
-				data: undefined,
-			};
 		}
 
-		if (!tokenRes.data.expiry_date) {
-			return {
-				error: {
-					type: "authorisation",
-					name: copy("server:core.auth.refresh.token.error.name"),
-					message: copy("server:core.auth.refresh.token.missing"),
-				},
-				data: undefined,
-			};
-		}
-
-		const expiryMs = new Date(tokenRes.data.expiry_date).getTime();
-		if (Number.isNaN(expiryMs) || expiryMs <= Date.now()) {
-			return {
-				error: {
-					type: "authorisation",
-					name: copy("server:core.auth.refresh.token.error.name"),
-					message: copy("server:core.auth.refresh.token.missing"),
-				},
-				data: undefined,
-			};
-		}
-
-		const kv = context.kv;
-		const kvEntry = await kv.get<{ user_id: number }>(context, {
-			key: cacheKeys.auth.refresh(_refresh),
-			hash: true,
+		const consumeRes = await UserTokens.consumeRefreshToken({
+			token: hashedRefreshToken,
 		});
-
-		if (kvEntry && kvEntry.user_id === tokenRes.data.user_id) {
-			return {
-				error: undefined,
-				data: { user_id: kvEntry.user_id, authTime },
-			};
-		}
-
-		await kv.set(context, {
-			key: cacheKeys.auth.refresh(_refresh),
-			value: { user_id: tokenRes.data.user_id },
-			ttlSeconds: constants.refreshTokenExpiration,
-			hash: true,
-		});
+		if (consumeRes.error) return consumeRes;
+		if (!consumeRes.data) return endAllSessions();
 
 		return {
 			error: undefined,
 			data: {
-				user_id: tokenRes.data.user_id,
+				user_id: userId,
 				authTime,
+				provider,
 			},
 		};
 	} catch (_err) {

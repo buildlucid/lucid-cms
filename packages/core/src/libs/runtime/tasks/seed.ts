@@ -3,6 +3,7 @@ import { LucidError } from "../../../utils/errors/index.js";
 import cliLogger from "../../cli/logger.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
+import type { LucidDatabase } from "../../db/client/index.js";
 import collectSeeds from "../../seed/collect-seeds.js";
 import createToolkit from "../../toolkit/create-toolkit.js";
 import createTaskServiceContext from "./create-task-service-context.js";
@@ -81,10 +82,12 @@ const seedTask = defineRuntimeTask({
 		try {
 			for (const { name, seed } of selected) {
 				cliLogger.info(`Running seed "${name}"...`);
+				let transactionDb: LucidDatabase | undefined;
 				await serviceContext.db.kysely.transaction().execute((transaction) => {
+					transactionDb = serviceContext.db.withTransaction(transaction);
 					const transactionContext = {
 						...serviceContext,
-						db: serviceContext.db.withTransaction(transaction),
+						db: transactionDb,
 					};
 
 					return seed({
@@ -92,6 +95,7 @@ const seedTask = defineRuntimeTask({
 						toolkit: createToolkit(transactionContext),
 					});
 				});
+				await transactionDb?.runCommitCallbacks();
 
 				cliLogger.success(
 					`Seed "${name}" completed`,

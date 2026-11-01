@@ -1,7 +1,10 @@
 import { sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { LucidDatabase } from "../db/client/index.js";
-import { userTokensTable } from "../db/tables/user-tokens.js";
+import {
+	type UserTokenType,
+	userTokensTable,
+} from "../db/tables/user-tokens.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
@@ -66,6 +69,43 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 				"user_is_deleted",
 				"user_is_locked",
 			],
+		});
+	}
+	/** Finds an active hashed token, requiring its email to still match the account. */
+	async selectActive<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				token: string;
+				tokenType: UserTokenType;
+			}
+		>,
+	) {
+		const query = this.db
+			.selectFrom("lucid_user_tokens")
+			.select(["lucid_user_tokens.id", "lucid_user_tokens.user_id"])
+			.leftJoin("lucid_users", "lucid_users.id", "lucid_user_tokens.user_id")
+			.where("lucid_user_tokens.token", "=", props.token)
+			.where("lucid_user_tokens.token_type", "=", props.tokenType)
+			.where("lucid_user_tokens.expiry_date", ">", new Date().toISOString())
+			.where("lucid_user_tokens.revoked_at", "is", null)
+			.where("lucid_user_tokens.consumed_at", "is", null)
+			.where((eb) =>
+				eb.or([
+					eb("lucid_user_tokens.email", "is", null),
+					eb("lucid_user_tokens.email", "=", eb.ref("lucid_users.email")),
+				]),
+			);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectActive",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: ["id", "user_id"],
 		});
 	}
 	/** Finds the newest active magic link by its hashed token, or by its user's email when a code is entered. */
@@ -185,6 +225,30 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 
 	// ----------------------------------------
 	// updates
+	/** Consumes an unrevoked refresh token atomically. Returns false if already consumed. */
+	async consumeRefreshToken(props: { token: string }) {
+		const now = new Date().toISOString();
+
+		const query = this.db
+			.updateTable("lucid_user_tokens")
+			.set({
+				consumed_at: now,
+				revoked_at: now,
+				revoke_reason: constants.refreshTokenRevokeReasons.rotated,
+				expiry_date: now,
+			})
+			.where("token", "=", props.token)
+			.where("token_type", "=", constants.userTokens.refresh)
+			.where("revoked_at", "is", null)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "consumeRefreshToken",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
 	/** Uses up an active two-factor challenge once its code has been checked. */
 	async consumeTwoFactorChallenge(props: { id: number }) {
 		const now = new Date().toISOString();

@@ -63,6 +63,7 @@ const sendResetPassword: ServiceFn<
 		userId: userExistsRes.data.id,
 		tokenType: constants.userTokens.passwordReset,
 		expiryDate: expiryDate,
+		email: userExistsRes.data.email,
 	});
 	if (userToken.error) return userToken;
 

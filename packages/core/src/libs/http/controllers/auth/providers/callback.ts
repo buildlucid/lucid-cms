@@ -176,7 +176,13 @@ const providerCallbackController = factory.createHandlers(
 
 		if (callbackAuthRes.data.grantAuthentication) {
 			const [refreshRes, accessRes] = await Promise.all([
-				authServices.refreshToken.generateToken(c, callbackAuthRes.data.userId),
+				authServices.refreshToken.generateToken(
+					c,
+					callbackAuthRes.data.userId,
+					{
+						provider: true,
+					},
+				),
 				authServices.accessToken.generateToken(c, callbackAuthRes.data.userId),
 			]);
 			if (refreshRes.error) {

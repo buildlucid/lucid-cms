@@ -2,6 +2,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
 import hashSecret from "../../../utils/helpers/hash-secret.js";
+import verifySecret from "../../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkPasswordRules from "../../auth/checks/check-password-rules.js";
 
@@ -103,13 +104,11 @@ const checkUpdatePassword: ServiceFn<
 		};
 	}
 
-	const decryptedSecret = decrypt(data.encryptedSecret, data.encryptionKey);
-	const currentPasswordHash = await hashSecret(
+	const passwordValid = await verifySecret(
 		data.currentPassword as string,
-		decryptedSecret,
+		decrypt(data.encryptedSecret, data.encryptionKey),
+		data.password,
 	);
-
-	const passwordValid = currentPasswordHash === data.password;
 
 	if (!passwordValid) {
 		return {

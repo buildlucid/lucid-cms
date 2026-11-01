@@ -44,9 +44,16 @@
 - Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once.
 - Fixed embedded bricks in localized rich text requiring values in every locale.
 - Fixed password reset, invitation and email change links being kept in email history.
-- Fixed other sessions staying logged in after a password change or account recovery. Reverting an email change also removes login methods added since.
+- Fixed other sessions staying logged in after a password change or account recovery.
 - Fixed reusing an OAuth refresh token not revoking the tokens issued after it.
 - Fixed people who manage users or roles being able to give access they don't have.
+- Fixed two refreshes of the same session at once both getting a new session.
+- Fixed a second email change cancelling the undo link sent to the old address.
+- Fixed password reset links still working after the password is reset or the email changes.
+- Fixed login showing whether an account exists, is locked or is suspended to someone without its password.
+- Fixed tokens from emailed links being written to request logs.
+- Fixed provider invitation logins storing the invitation token unencrypted.
+- Fixed role, permission and user status changes sometimes taking a minute to apply.
 
 ## v0.19.0-alpha.0
 

@@ -4,6 +4,7 @@ import { UserTokensRepository } from "../../libs/repositories/index.js";
 import hashUserToken from "../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+/** Finds an active token, requiring its email to still match the account. */
 const getSingle: ServiceFn<
 	[
 		{
@@ -19,35 +20,9 @@ const getSingle: ServiceFn<
 	const UserTokens = new UserTokensRepository(context.db);
 	const hashedToken = hashUserToken(data.token);
 
-	const userTokenRes = await UserTokens.selectSingle({
-		select: ["id", "user_id"],
-		where: [
-			{
-				key: "token",
-				operator: "=",
-				value: hashedToken,
-			},
-			{
-				key: "token_type",
-				operator: "=",
-				value: data.tokenType,
-			},
-			{
-				key: "expiry_date",
-				operator: ">",
-				value: new Date().toISOString(),
-			},
-			{
-				key: "revoked_at",
-				operator: "is",
-				value: null,
-			},
-			{
-				key: "consumed_at",
-				operator: "is",
-				value: null,
-			},
-		],
+	const userTokenRes = await UserTokens.selectActive({
+		token: hashedToken,
+		tokenType: data.tokenType,
 		validation: {
 			enabled: true,
 			defaultError: {

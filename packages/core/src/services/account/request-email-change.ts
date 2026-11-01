@@ -4,13 +4,13 @@ import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
-	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
 import createUserToken from "../user-tokens/create-single.js";
+import supersedeEmailChanges from "./helpers/supersede-email-changes.js";
 
 const requestEmailChange: ServiceFn<
 	[
@@ -25,10 +25,8 @@ const requestEmailChange: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db);
-	const UserTokens = new UserTokensRepository(context.db);
 	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 
-	const now = new Date().toISOString();
 	const [userWithEmailRes, reservedEmailRes] = await Promise.all([
 		Users.selectSingle({
 			select: ["id"],
@@ -63,73 +61,12 @@ const requestEmailChange: ServiceFn<
 		};
 	}
 
-	const [activePendingRes, activeConfirmedRes] = await Promise.all([
-		EmailChangeRequests.selectMultiple({
-			select: ["id", "confirm_token_id", "revert_token_id"],
-			where: [
-				{ key: "user_id", operator: "=", value: data.auth.id },
-				{
-					key: "status",
-					operator: "=",
-					value: constants.emailChangeRequestStatuses.pending,
-				},
-				{ key: "expires_at", operator: ">", value: now },
-			],
-		}),
-		EmailChangeRequests.selectMultiple({
-			select: ["id", "revert_token_id"],
-			where: [
-				{ key: "user_id", operator: "=", value: data.auth.id },
-				{
-					key: "status",
-					operator: "=",
-					value: constants.emailChangeRequestStatuses.confirmed,
-				},
-				{ key: "expires_at", operator: ">", value: now },
-			],
-		}),
-	]);
-	if (activePendingRes.error) return activePendingRes;
-	if (activeConfirmedRes.error) return activeConfirmedRes;
-
-	const activePending = activePendingRes.data ?? [];
-	const activeConfirmed = activeConfirmedRes.data ?? [];
-	const activeRequestIds = [
-		...activePending.map((request) => request.id),
-		...activeConfirmed.map((request) => request.id),
-	];
-	const activeTokenIds = [
-		...activePending.flatMap((request) => [
-			request.confirm_token_id,
-			request.revert_token_id,
-		]),
-		...activeConfirmed.map((request) => request.revert_token_id),
-	];
-
-	if (activeRequestIds.length > 0) {
-		const [supersedeRequestsRes, supersedeTokensRes] = await Promise.all([
-			EmailChangeRequests.updateMultiple({
-				data: {
-					status: constants.emailChangeRequestStatuses.superseded,
-					updated_at: now,
-				},
-				where: [{ key: "id", operator: "in", value: activeRequestIds }],
-			}),
-			activeTokenIds.length > 0
-				? UserTokens.updateMultiple({
-						data: {
-							revoked_at: now,
-							revoke_reason:
-								constants.userTokenRevokeReasons.emailChangeSuperseded,
-							expiry_date: now,
-						},
-						where: [{ key: "id", operator: "in", value: activeTokenIds }],
-					})
-				: undefined,
-		]);
-		if (supersedeRequestsRes.error) return supersedeRequestsRes;
-		if (supersedeTokensRes?.error) return supersedeTokensRes;
-	}
+	//* Preserve undo links for confirmed email changes.
+	const supersedeRes = await supersedeEmailChanges(context, {
+		userId: data.auth.id,
+		statuses: [constants.emailChangeRequestStatuses.pending],
+	});
+	if (supersedeRes.error) return supersedeRes;
 
 	const expiresAt = new Date(
 		Date.now() + constants.emailChangeTokenExpirationMinutes * 60_000,

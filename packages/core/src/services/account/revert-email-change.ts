@@ -12,6 +12,7 @@ import notifyDependants from "../document-references/notify-dependants.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import getUserToken from "../user-tokens/get-single.js";
 import removeSignInsSince from "./helpers/remove-sign-ins-since.js";
+import supersedeEmailChanges from "./helpers/supersede-email-changes.js";
 
 const revertEmailChange: ServiceFn<
 	[
@@ -150,7 +151,7 @@ const revertEmailChange: ServiceFn<
 	}
 
 	const userRes = await Users.selectSingle({
-		select: ["id", "email"],
+		select: ["email"],
 		where: [{ key: "id", operator: "=", value: requestRes.data.user_id }],
 		validation: {
 			enabled: true,
@@ -161,17 +162,6 @@ const revertEmailChange: ServiceFn<
 		},
 	});
 	if (userRes.error) return userRes;
-
-	if (userRes.data.email !== requestRes.data.new_email) {
-		return {
-			error: {
-				type: "basic",
-				status: 409,
-				message: copy("server:core.email.change.request.stale.message"),
-			},
-			data: undefined,
-		};
-	}
 
 	const [userWithOldEmailRes, reservedOldEmailRes] = await Promise.all([
 		Users.selectSingle({
@@ -229,6 +219,17 @@ const revertEmailChange: ServiceFn<
 	});
 	if (updateRequestRes.error) return updateRequestRes;
 
+	//* the old address can undo even after later changes, which end with it
+	const supersedeRes = await supersedeEmailChanges(context, {
+		userId: requestRes.data.user_id,
+		statuses: [
+			constants.emailChangeRequestStatuses.pending,
+			constants.emailChangeRequestStatuses.confirmed,
+		],
+		afterId: requestRes.data.id,
+	});
+	if (supersedeRes.error) return supersedeRes;
+
 	const [updateUserRes, consumeTokenRes, auditRes, revokeRefreshTokensRes] =
 		await Promise.all([
 			Users.updateSingle({
@@ -276,7 +277,7 @@ const revertEmailChange: ServiceFn<
 				userId: requestRes.data.user_id,
 				action: constants.securityAudit.actions.emailChange,
 				performedBy: requestRes.data.user_id,
-				previousValue: requestRes.data.new_email,
+				previousValue: userRes.data.email,
 				newValue: requestRes.data.old_email,
 			}),
 			revokeUserTokens(context, {
