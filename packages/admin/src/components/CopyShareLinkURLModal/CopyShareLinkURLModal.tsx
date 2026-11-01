@@ -1,9 +1,8 @@
 import { type Accessor, type Component, createMemo } from "solid-js";
-import Copy from "@/components/Copy/Copy";
-import Modal from "@/components/Modal/Modal";
+import ShareLinkModal from "@/components/ShareLinkModal/ShareLinkModal";
 import api from "@/services/api";
-import T from "@/translations";
 
+/** Loads a media share link by ID and shows it in the share link modal. */
 const CopyShareLinkURLModal: Component<{
 	ids: Accessor<[number, number] | undefined>;
 	state: {
@@ -36,29 +35,14 @@ const CopyShareLinkURLModal: Component<{
 	});
 
 	// ------------------------------
-	// Memos
-	const url = createMemo(() => shareLink.data?.data.url);
-
-	// ------------------------------
 	// Render
 	return (
-		<Modal.Root
-			role="alertdialog"
-			open={props.state.open}
-			onOpenChange={props.state.setOpen}
-		>
-			<Modal.Header>
-				<Modal.Title>
-					{T()("modals.common.copy.share.link.url.title")}
-				</Modal.Title>
-				<Modal.Description>
-					{T()("modals.common.copy.share.link.url.description")}
-				</Modal.Description>
-			</Modal.Header>
-			<Modal.Body>
-				<Copy.Input value={url() || ""} />
-			</Modal.Body>
-		</Modal.Root>
+		<ShareLinkModal
+			url={shareLink.data?.data.url}
+			token={shareLink.data?.data.token}
+			title={shareLink.data?.data.name ?? undefined}
+			state={props.state}
+		/>
 	);
 };
 

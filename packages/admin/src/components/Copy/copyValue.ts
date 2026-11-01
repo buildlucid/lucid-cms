@@ -2,10 +2,15 @@ import { createSignal, onCleanup } from "solid-js";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
-/** Copies a value to the clipboard, shows a toast with the result and resolves whether it worked. */
-export const copyValue = (value: string): Promise<boolean> =>
-	navigator.clipboard
-		.writeText(value)
+/**
+ * Copies text or PNG data, shows a toast and returns success. Pass image promises to preserve
+ * Safari's click activation.
+ */
+export const copyValue = (value: string | Promise<Blob>): Promise<boolean> =>
+	(typeof value === "string"
+		? navigator.clipboard.writeText(value)
+		: navigator.clipboard.write([new ClipboardItem({ "image/png": value })])
+	)
 		.then(() => {
 			spawnToast({
 				title: T()("toasts.common.copy.to.clipboard.title"),
@@ -21,11 +26,8 @@ export const copyValue = (value: string): Promise<boolean> =>
 			return false;
 		});
 
-/**
- * Returns a `copied` flag and a `copy` function for copy buttons. The flag is
- * true for two seconds after a successful copy, so a copy icon can swap to a tick.
- */
-export const createCopy = (value: () => string) => {
+/** Returns a copy function and a flag that stays true for two seconds after success. */
+export const createCopy = (value: () => string | Promise<Blob>) => {
 	const [copied, setCopied] = createSignal(false);
 	let resetTimeout: ReturnType<typeof setTimeout> | undefined;
 

@@ -19,6 +19,7 @@ import T from "@/translations";
 import type { AiFeatureAccessState } from "@/utils/ai-feature-access";
 import helpers from "@/utils/helpers";
 import { isSupportedCropMimeType } from "@/utils/image-crop";
+import { canShareMediaFile, shareMediaFile } from "@/utils/share-media";
 
 interface MediaCardProps {
 	media: Media;
@@ -250,7 +251,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 		{
 			label: T()("media.share.links.action"),
 			type: "group",
-			icon: "link",
+			icon: "share",
 			//* personal and system media can't be shared by link
 			show:
 				!props.showingDeleted?.() &&
@@ -270,6 +271,14 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					icon: "eye",
 					onClick: () => openMediaAction("viewShareLinks"),
 					permission: canReadMedia(),
+				},
+				{
+					label: T()("common.share.via"),
+					type: "button",
+					icon: "share",
+					onClick: () => void shareMediaFile(props.media),
+					permission: canReadMedia(),
+					show: canShareMediaFile(props.media),
 				},
 				{
 					label: T()("media.share.links.delete.action"),

@@ -10,6 +10,7 @@ import {
 	TbOutlineLinkOff,
 	TbOutlineMovie,
 	TbOutlinePlayerPlay,
+	TbOutlineShare,
 } from "solid-icons/tb";
 import {
 	type Component,
@@ -26,6 +27,7 @@ import CaptchaWidget from "@/components/CaptchaWidget/CaptchaWidget";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
+import ShareLinkModal from "@/components/ShareLinkModal/ShareLinkModal";
 import Spinner from "@/components/Spinner/Spinner";
 import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
@@ -42,6 +44,8 @@ const MediaSharePage: Component = () => {
 	const captcha = useCaptcha("sharePassword");
 	const [password, setPassword] = createSignal("");
 	const [showVideoPreview, setShowVideoPreview] = createSignal(false);
+	const [shareOpen, setShareOpen] = createSignal(false);
+	const pageUrl = `${window.location.origin}${window.location.pathname}`;
 	let videoPreviewRef: HTMLVideoElement | undefined;
 
 	const token = createMemo(() => params.token);
@@ -284,28 +288,48 @@ const MediaSharePage: Component = () => {
 									<div class="border-t border-border pt-4 space-y-2 text-sm">
 										<div class="flex justify-between gap-4 items-start">
 											<span class="text-body flex items-center gap-1.5">
-												<TbOutlineCalendar class="shrink-0 mt-0.5" />
+												<TbOutlineCalendar class="shrink-0" />
 												{T()("common.expires.at")}
 											</span>
 											<span class="text-right">{formattedExpiresAt()}</span>
 										</div>
 									</div>
 								</div>
-								<Button
-									variant="outline"
-									size="md"
-									loading={requestDownload.action.isPending}
-									onClick={() => {
-										if (!token()) return;
-										requestDownload.action.mutate({ token: token() });
-									}}
-									class="w-full"
-								>
-									<span class="flex items-center justify-center gap-2">
-										<TbOutlineDownload />
-										<span>{T()("media.share.route.download")}</span>
-									</span>
-								</Button>
+								<div class="flex gap-3">
+									<Button
+										variant="outline"
+										size="md"
+										loading={requestDownload.action.isPending}
+										onClick={() => {
+											if (!token()) return;
+											requestDownload.action.mutate({ token: token() });
+										}}
+										class="flex-1"
+									>
+										<span class="flex items-center justify-center gap-2">
+											<TbOutlineDownload />
+											<span>{T()("media.share.route.download")}</span>
+										</span>
+									</Button>
+									<Button
+										variant="outline"
+										size="md"
+										onClick={() => setShareOpen(true)}
+										class="flex-1"
+									>
+										<span class="flex items-center justify-center gap-2">
+											<TbOutlineShare />
+											<span>{T()("media.share.route.share")}</span>
+										</span>
+									</Button>
+								</div>
+								<ShareLinkModal
+									url={pageUrl}
+									token={token()}
+									title={grantedAccess()?.name ?? undefined}
+									share={true}
+									state={{ open: shareOpen(), setOpen: setShareOpen }}
+								/>
 							</div>
 						}
 					>

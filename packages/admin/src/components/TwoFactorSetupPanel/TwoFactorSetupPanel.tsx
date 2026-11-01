@@ -8,7 +8,7 @@ import {
 import { type Component, createMemo, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import { createCopy } from "@/components/Copy/copyValue";
-import TwoFactorQRCode from "@/components/TwoFactorQRCode/TwoFactorQRCode";
+import QRCode from "@/components/QRCode/QRCode";
 import T from "@/translations";
 
 interface TwoFactorSetupPanelProps {
@@ -57,7 +57,12 @@ const TwoFactorSetupPanel: Component<TwoFactorSetupPanelProps> = (props) => {
 						when={props.setup}
 						fallback={<span class="skeleton block size-full rounded-md" />}
 					>
-						{(setup) => <TwoFactorQRCode uri={setup().uri} />}
+						{(setup) => (
+							<QRCode
+								value={setup().uri}
+								label={T()("auth.two.factor.qr.label")}
+							/>
+						)}
 					</Show>
 				</div>
 				<div class="min-w-0 flex-1 text-center sm:pt-1 sm:text-left">
