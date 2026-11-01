@@ -52,11 +52,12 @@ const OAuthConsentPage: Component = () => {
 	const clientHostname = createMemo(() => {
 		const authorization = request.data?.data;
 		if (!authorization) return "";
-		if (authorization.clientUri && URL.canParse(authorization.clientUri)) {
-			return new URL(authorization.clientUri).hostname;
-		}
+		//* Use the client ID's origin; metadata can claim any website.
 		if (URL.canParse(authorization.clientId)) {
 			return new URL(authorization.clientId).hostname;
+		}
+		if (authorization.clientUri && URL.canParse(authorization.clientUri)) {
+			return new URL(authorization.clientUri).hostname;
 		}
 		return authorization.clientName;
 	});

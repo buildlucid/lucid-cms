@@ -1,11 +1,13 @@
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
-import hashSecret from "../../utils/helpers/hash-secret.js";
+import verifySecret from "../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { createShareSession, verifyShareSession } from "./helpers/session.js";
 
 /**
- * Authorize share access by validating the share password and checking that it isn't expired or soft-deleted
+ * Checks share availability and password or session proof. Returns a session cookie after a
+ * correct password.
  */
 const authorizeShare: ServiceFn<
 	[
@@ -20,6 +22,8 @@ const authorizeShare: ServiceFn<
 		mediaKey: string;
 		posterKey: string | null;
 		passwordRequired: boolean;
+		/** Cookie value returned after password verification. */
+		session?: string;
 	}
 > = async (context, data) => {
 	const MediaShareLinks = new MediaShareLinksRepository(context.db);
@@ -39,7 +43,6 @@ const authorizeShare: ServiceFn<
 		};
 	}
 
-	//* check if expired
 	if (
 		linkRes.data.expires_at &&
 		new Date(linkRes.data.expires_at).getTime() < Date.now()
@@ -55,7 +58,6 @@ const authorizeShare: ServiceFn<
 		};
 	}
 
-	//* check if media is soft-deleted
 	const isDeleted = formatter.formatBoolean(linkRes.data.media_is_deleted);
 	if (isDeleted) {
 		return {
@@ -69,8 +71,15 @@ const authorizeShare: ServiceFn<
 		};
 	}
 
-	//* check if password is required
-	if (linkRes.data.password && !data.sessionCookie) {
+	const password = linkRes.data.password;
+	if (
+		password &&
+		!verifyShareSession(context, {
+			token: data.token,
+			password: password,
+			session: data.sessionCookie,
+		})
+	) {
 		if (!data.providedPassword) {
 			if (data.enforcePasswordSession) {
 				return {
@@ -94,12 +103,12 @@ const authorizeShare: ServiceFn<
 			};
 		}
 
-		const hashed = await hashSecret(
+		const valid = await verifySecret(
 			data.providedPassword,
 			context.config.secrets.encryption,
+			password,
 		);
-
-		if (hashed !== linkRes.data.password) {
+		if (!valid) {
 			return {
 				error: {
 					type: "authorisation",
@@ -110,6 +119,19 @@ const authorizeShare: ServiceFn<
 				data: undefined,
 			};
 		}
+
+		return {
+			error: undefined,
+			data: {
+				mediaKey: linkRes.data.media_key,
+				posterKey: linkRes.data.media_poster_key ?? null,
+				passwordRequired: false,
+				session: createShareSession(context, {
+					token: data.token,
+					password: password,
+				}),
+			},
+		};
 	}
 
 	return {

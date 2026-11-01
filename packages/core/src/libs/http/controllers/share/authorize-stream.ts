@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { describeRoute } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
@@ -17,10 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-/**
- * Authorize access to a password-protected share link by validating the provided password
- * and setting a session cookie if valid.
- */
+/** Validates share access and sets a session cookie after a correct password. */
 const authorizeStreamController = factory.createHandlers(
 	describeRoute({
 		description: "Validate share password and set a session cookie.",
@@ -55,14 +51,16 @@ const authorizeStreamController = factory.createHandlers(
 		)(context, { token, providedPassword: password });
 		if (authorizeRes.error) throw new LucidAPIError(authorizeRes.error);
 
-		const cookieName = createAuthCookieName(token);
-		setCookie(c, cookieName, randomUUID(), {
-			maxAge: constants.shareLinkExpiration,
-			httpOnly: true,
-			secure: isRequestSecure(c),
-			sameSite: "strict",
-			path: `${constants.paths.api}/v1/share`,
-		});
+		//* links without a password, or with a session already, have nothing to store
+		if (authorizeRes.data.session) {
+			setCookie(c, createAuthCookieName(token), authorizeRes.data.session, {
+				maxAge: constants.shareLinkExpiration,
+				httpOnly: true,
+				secure: isRequestSecure(c),
+				sameSite: "strict",
+				path: `${constants.paths.api}/v1/share`,
+			});
+		}
 
 		return c.json({ success: true }, 200);
 	},

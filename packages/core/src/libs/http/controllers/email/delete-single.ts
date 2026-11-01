@@ -8,6 +8,7 @@ import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -29,6 +30,7 @@ const deleteSingleController = factory.createHandlers(
 			},
 		}),
 	}),
+	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.EmailDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),

@@ -70,6 +70,15 @@ const authFor = (id: number, email: string): LucidAuth => ({
 	authTime: Math.floor(Date.now() / 1000),
 });
 
+/** Ages reset links to test resend limits. */
+const ageResetLinks = (userId: number, ms: number) =>
+	context.db.kysely
+		.updateTable("lucid_user_tokens")
+		.set({ created_at: new Date(Date.now() - ms).toISOString() })
+		.where("user_id", "=", userId)
+		.where("token_type", "=", constants.userTokens.passwordReset)
+		.execute();
+
 const expiresAt = () =>
 	new Date(
 		Date.now() + constants.emailChangeTokenExpirationMinutes * 60_000,
@@ -185,6 +194,7 @@ test("reset links stop working once one is used, or when the email changes", asy
 	await setEmail(userId, "reset-links-new@test.local");
 	expect(await isActive(beforeChange)).toBe(false);
 
+	await ageResetLinks(userId, 2 * 3_600_000);
 	await sendResetPassword(context, { email: "reset-links-new@test.local" });
 	const sent = await context.db.kysely
 		.selectFrom("lucid_user_tokens")
@@ -194,4 +204,32 @@ test("reset links stop working once one is used, or when the email changes", asy
 		.orderBy("id", "desc")
 		.executeTakeFirstOrThrow();
 	expect(sent.email).toBe("reset-links-new@test.local");
+});
+
+test("repeat reset requests inside the resend window, or over the hourly limit, send nothing", async () => {
+	const userId = await createUser("reset-limit@test.local");
+	const request = async () =>
+		expect(
+			(await sendResetPassword(context, { email: "reset-limit@test.local" }))
+				.error,
+		).toBeUndefined();
+	const countLinks = async () =>
+		(
+			await context.db.kysely
+				.selectFrom("lucid_user_tokens")
+				.select("id")
+				.where("user_id", "=", userId)
+				.where("token_type", "=", constants.userTokens.passwordReset)
+				.execute()
+		).length;
+
+	await request();
+	await request();
+	expect(await countLinks()).toBe(1);
+
+	for (let i = 1; i <= constants.passwordReset.hourlyLimit; i++) {
+		await ageResetLinks(userId, 2 * 60_000);
+		await request();
+	}
+	expect(await countLinks()).toBe(constants.passwordReset.hourlyLimit);
 });

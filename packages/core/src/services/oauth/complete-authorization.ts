@@ -9,6 +9,7 @@ import {
 	OAuthGrantsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkRecentAuthentication from "../auth/checks/check-recent-authentication.js";
 import { getGrantableOAuthScopes } from "./helpers/grant-scopes.js";
 import {
 	createOAuthOpaqueToken,
@@ -28,6 +29,8 @@ const completeAuthorization: ServiceFn<
 				canConnectAsSystem: boolean;
 				superAdmin: boolean;
 				permissions?: Permission[];
+				/** Last login or reauthentication time, from the session. */
+				authTime: number;
 			};
 		},
 	],
@@ -46,6 +49,12 @@ const completeAuthorization: ServiceFn<
 			},
 			data: undefined,
 		};
+	}
+
+	//* Require recent authentication before issuing lasting access.
+	if (input.decision === "allow") {
+		const recentRes = checkRecentAuthentication(input.actor);
+		if (recentRes.error) return recentRes;
 	}
 
 	const now = new Date().toISOString();

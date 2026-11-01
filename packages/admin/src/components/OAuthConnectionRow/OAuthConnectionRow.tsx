@@ -46,14 +46,15 @@ const OAuthConnectionRow: Component<{
 		() => props.connection.name !== props.connection.clientName,
 	);
 	const clientHostname = createMemo(() => {
+		//* Use the client ID's origin; metadata can claim any website.
+		if (URL.canParse(props.connection.clientId)) {
+			return new URL(props.connection.clientId).hostname;
+		}
 		if (
 			props.connection.clientUri &&
 			URL.canParse(props.connection.clientUri)
 		) {
 			return new URL(props.connection.clientUri).hostname;
-		}
-		if (URL.canParse(props.connection.clientId)) {
-			return new URL(props.connection.clientId).hostname;
 		}
 		return props.connection.clientId;
 	});

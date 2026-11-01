@@ -7,6 +7,7 @@ import type { ShareLinkAccess } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import { createShareStreamUrl } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { verifyShareSession } from "./helpers/session.js";
 
 const getShareAccess: ServiceFn<
 	[
@@ -62,8 +63,13 @@ const getShareAccess: ServiceFn<
 		};
 	}
 
-	const hasPassword = Boolean(linkRes.data.password);
-	const passwordRequired = hasPassword && !data.sessionCookie;
+	const passwordRequired = linkRes.data.password
+		? !verifyShareSession(context, {
+				token: data.token,
+				password: linkRes.data.password,
+				session: data.sessionCookie,
+			})
+		: false;
 
 	const host = getBaseUrl(context);
 	const shareUrl = createShareStreamUrl({

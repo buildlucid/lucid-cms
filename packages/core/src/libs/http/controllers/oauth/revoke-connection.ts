@@ -1,7 +1,7 @@
 import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { oauthSchemas } from "../../../../schemas/oauth.js";
-import { oauthServices } from "../../../../services/index.js";
+import { oauthServices, userServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -51,6 +51,13 @@ const revokeConnectionController = factory.createHandlers(
 			})
 		) {
 			throw new LucidAPIError({ type: "authorisation", status: 403 });
+		}
+		if (current.data.principalType === "user" && current.data.userId !== null) {
+			const userAccessRes = await userServices.checks.checkUserAccess(context, {
+				auth: c.get("auth"),
+				id: current.data.userId,
+			});
+			if (userAccessRes.error) throw new LucidAPIError(userAccessRes.error);
 		}
 
 		const result = await serviceWrapper(oauthServices.revokeConnection, {

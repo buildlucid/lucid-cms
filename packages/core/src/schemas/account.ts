@@ -18,6 +18,7 @@ import {
 	mediaOriginSchema,
 	uploadSessionResponseSchema,
 } from "./media.js";
+import { usernameSchema } from "./shared/username.js";
 import {
 	contentAccountResponseSchema,
 	userPreferencesSchema,
@@ -353,10 +354,7 @@ export const controllerSchemas = {
 					example: "Smith",
 				})
 				.optional(),
-			username: z
-				.string()
-				.trim()
-				.min(3)
+			username: usernameSchema
 				.meta({
 					description: "Your new username",
 					example: "admin",

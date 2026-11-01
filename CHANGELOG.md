@@ -59,6 +59,12 @@
 - Fixed rate limits trusting addresses that visitors can write into `X-Forwarded-For`.
 - Fixed wrong passwords having no limit per account. Each account now allows 10 every 15 minutes.
 - Fixed OAuth client metadata requests reaching private network addresses through hostnames that point to them.
+- Fixed OAuth connections being allowed without a recent login, which creating an API key needs.
+- Fixed the OAuth consent page naming the publisher a client claims, rather than the site its client ID comes from.
+- Fixed a username set to someone else's email stopping them logging in with it. Usernames can no longer contain `@`.
+- Fixed people who manage users renaming or revoking super admins' OAuth connections.
+- Fixed password reset emails having no limit per account. Each account now gets at most one a minute and 5 an hour.
+- Fixed deleting an email not checking the CSRF token.
 
 ## v0.19.0-alpha.0
 

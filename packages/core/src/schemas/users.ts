@@ -10,6 +10,7 @@ import {
 	mediaOriginSchema,
 	uploadSessionResponseSchema,
 } from "./media.js";
+import { usernameSchema } from "./shared/username.js";
 
 const userIdParamSchema = z.object({
 	id: z.string().trim().meta({
@@ -406,7 +407,7 @@ export const controllerSchemas = {
 				description: "The user's email address",
 				example: "admin@lucidcms.io",
 			}),
-			username: z.string().trim().meta({
+			username: usernameSchema.meta({
 				description: "The user's username",
 				example: "Admin",
 			}),

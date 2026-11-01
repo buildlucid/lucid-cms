@@ -244,6 +244,12 @@ export default Object.freeze({
 		/** Window after login or reauthentication for changing sign-in methods. */
 		windowSeconds: 600,
 	},
+	passwordReset: {
+		/** Repeat requests inside this window send nothing. */
+		resendCooldownSeconds: 60,
+		/** The most reset emails one account can be sent in an hour. */
+		hourlyLimit: 5,
+	},
 	magicLink: {
 		/** How long the emailed link and code stay valid. */
 		expirationMinutes: 15,

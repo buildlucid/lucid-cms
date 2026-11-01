@@ -1,7 +1,11 @@
 import constants from "../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../libs/email/types.js";
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
+import {
+	UsersRepository,
+	UserTokensRepository,
+} from "../../libs/repositories/index.js";
 import type { ErrorCopy } from "../../types/errors.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
@@ -9,6 +13,10 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
 import createUserToken from "../user-tokens/create-single.js";
 
+/**
+ * Emails a reset link. Unknown accounts and rate-limited requests receive the same response
+ * without sending email.
+ */
 const sendResetPassword: ServiceFn<
 	[
 		{
@@ -33,6 +41,7 @@ const sendResetPassword: ServiceFn<
 	}
 
 	const Users = new UsersRepository(context.db);
+	const UserTokens = new UserTokensRepository(context.db);
 	const email = normalizeEmailInput(data.email);
 
 	const userExistsRes = await Users.selectSingle({
@@ -55,8 +64,47 @@ const sendResetPassword: ServiceFn<
 		};
 	}
 
+	const recentRes = await UserTokens.selectMultiple({
+		select: ["created_at"],
+		where: [
+			{
+				key: "user_id",
+				operator: "=",
+				value: userExistsRes.data.id,
+			},
+			{
+				key: "token_type",
+				operator: "=",
+				value: constants.userTokens.passwordReset,
+			},
+		],
+		orderBy: [{ column: "created_at", direction: "desc" }],
+		limit: constants.passwordReset.hourlyLimit,
+		validation: { enabled: true },
+	});
+	if (recentRes.error) return recentRes;
+
+	const now = Date.now();
+	const sentAgo = recentRes.data.map(
+		(token) => now - Date.parse(formatter.formatDate(token.created_at) ?? ""),
+	);
+	const inCooldown = sentAgo.some(
+		(ms) => ms < constants.passwordReset.resendCooldownSeconds * 1000,
+	);
+	const overHourlyLimit =
+		sentAgo.filter((ms) => ms < 3_600_000).length >=
+		constants.passwordReset.hourlyLimit;
+	if (inCooldown || overHourlyLimit) {
+		return {
+			error: undefined,
+			data: {
+				message: copy("server:core.auth.password.reset.request.accepted"),
+			},
+		};
+	}
+
 	const expiryDate = new Date(
-		Date.now() + constants.passwordResetTokenExpirationMinutes * 60_000,
+		now + constants.passwordResetTokenExpirationMinutes * 60_000,
 	).toISOString();
 
 	const userToken = await createUserToken(context, {
