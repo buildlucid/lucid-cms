@@ -18,6 +18,7 @@
 - Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
 - Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.
 - Added an `actor` option to `toolkit.media` reads, and an `ownership` filter to its lists.
+- Added toolkit helpers for reading sent emails, finding and creating media folders, and publishing or unpublishing documents.
 - Added `role: "content"` for public deployments that only serve content and media.
 - Media share links now come with a QR code you can copy or download, and media can be sent through your device's share menu from the media library and share pages.
 

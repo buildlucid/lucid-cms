@@ -5,7 +5,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import hasAccess from "../../libs/permission/has-access.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import canPublishTarget from "../document-workflows/can-publish-target.js";
@@ -24,7 +24,8 @@ const publish: ServiceFn<
 			environment: string;
 			/** Defaults to latest. */
 			sourceVersionId?: number;
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 		},
 	],
 	undefined
@@ -203,6 +204,7 @@ const publish: ServiceFn<
 				collectionKey: data.collectionKey,
 				documentId: data.documentId,
 				userId: data.user.id,
+				agentRunId: data.agentRunId,
 				fromVersionId: source.id,
 				toVersionType: data.environment,
 				skipRevisionCheck: true,

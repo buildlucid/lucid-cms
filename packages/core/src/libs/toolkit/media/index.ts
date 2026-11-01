@@ -9,6 +9,13 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import deleteSingle from "./delete-single/index.js";
+import createFolder, {
+	type ToolkitMediaFoldersCreateSingleInput,
+} from "./folders/create-single/index.js";
+import getFolders, {
+	type ToolkitMediaFoldersGetMultipleInput,
+	type ToolkitMediaFoldersGetMultipleResult,
+} from "./folders/get-multiple/index.js";
 import type {
 	ToolkitMediaGetMultipleInput,
 	ToolkitMediaGetMultipleResult,
@@ -63,6 +70,16 @@ export type ToolkitMedia = {
 	notifyChange: (
 		input: Parameters<typeof notifyChange>[1],
 	) => ReturnType<typeof notifyChange>;
+	folders: {
+		/** Lists folders as `items` and `pagination`. Use `parentFolderId: null` for top-level folders. */
+		getMultiple: (
+			input?: ToolkitMediaFoldersGetMultipleInput,
+		) => ServiceResponse<ToolkitMediaFoldersGetMultipleResult>;
+		/** Creates a folder and returns its ID, requiring `media:create` for user actors. */
+		createSingle: (
+			input: ToolkitMediaFoldersCreateSingleInput,
+		) => ServiceResponse<{ id: number }>;
+	};
 };
 
 /** Creates media helpers for a toolkit instance. */
@@ -81,6 +98,10 @@ export const createMediaToolkit = (context: ServiceContext): ToolkitMedia => ({
 	) => getSingle<TLocale>(context, input),
 	resolveUrl: (input) => resolveUrl(context, input),
 	notifyChange: (input) => notifyChange(context, input),
+	folders: {
+		getMultiple: (input) => getFolders(context, input),
+		createSingle: (input) => createFolder(context, input),
+	},
 });
 
 export default createMediaToolkit;

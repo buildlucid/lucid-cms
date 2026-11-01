@@ -9,6 +9,7 @@ import {
 	invalidateHttpCacheTag,
 	invalidateHttpCacheTags,
 } from "../../kv/http-cache.js";
+import { Permissions } from "../../permission/definitions.js";
 import createToolkit from "../create-toolkit.js";
 
 vi.mock(import("../../kv/http-cache.js"), async (importOriginal) => {
@@ -44,7 +45,7 @@ beforeAll(async () => {
 });
 afterAll(() => fixture.destroy());
 
-const insertUser = async (superAdmin: boolean) => {
+const insertUser = async (superAdmin: boolean, permissions: string[] = []) => {
 	const user = await context.db.kysely
 		.insertInto("lucid_users")
 		.values({
@@ -55,6 +56,27 @@ const insertUser = async (superAdmin: boolean) => {
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
+	if (permissions.length === 0) return user.id;
+
+	const role = await context.db.kysely
+		.insertInto("lucid_roles")
+		.values({ name: randomUUID(), description: null, key: null, locked: false })
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	await context.db.kysely
+		.insertInto("lucid_user_roles")
+		.values({ user_id: user.id, role_id: role.id })
+		.execute();
+	await context.db.kysely
+		.insertInto("lucid_role_permissions")
+		.values(
+			permissions.map((permission) => ({
+				role_id: role.id,
+				permission,
+				core: true,
+			})),
+		)
+		.execute();
 	return user.id;
 };
 
@@ -186,5 +208,43 @@ test("notifyChange clears the content API's media caches after direct writes", a
 	);
 	expect(invalidateHttpCacheTags).toHaveBeenCalledWith(context, [
 		"content-media",
+	]);
+});
+
+test("folders are created by the system or users with media:create, and listed by parent", async () => {
+	const toolkit = createToolkit(context);
+	const title = randomUUID();
+	const denied = await toolkit.media.folders.createSingle({
+		title,
+		actor: { type: "user", userId: await insertUser(false) },
+	});
+	expect(denied.error?.status).toBe(403);
+
+	const parent = await toolkit.media.folders.createSingle({ title });
+	assert(parent.data, JSON.stringify(parent.error));
+	const creator = await insertUser(false, [Permissions.MediaCreate]);
+	const child = await toolkit.media.folders.createSingle({
+		title,
+		parentFolderId: parent.data.id,
+		actor: { type: "user", userId: creator },
+	});
+	assert(child.data, JSON.stringify(child.error));
+
+	const listed = async (parentFolderId: number | null) =>
+		(
+			await toolkit.media.folders.getMultiple({
+				query: {
+					filter: {
+						title: { value: title },
+						parentFolderId: { value: parentFolderId },
+					},
+				},
+			})
+		).data?.items;
+	expect(await listed(null)).toEqual([
+		expect.objectContaining({ id: parent.data.id, createdBy: null }),
+	]);
+	expect(await listed(parent.data.id)).toEqual([
+		expect.objectContaining({ id: child.data.id, createdBy: creator }),
 	]);
 });

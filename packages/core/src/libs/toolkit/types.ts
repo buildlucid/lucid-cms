@@ -28,15 +28,15 @@ export type CoreToolkit = {
 	captcha: ToolkitCaptcha;
 	/** Effective database schemas for custom collection queries. */
 	collections: ToolkitCollections;
-	/** Helpers for creating, editing, reading and deleting collection documents. */
+	/** Document reads, writes and publishing. */
 	documents: ToolkitDocuments;
-	/** Helpers for sending external emails. */
+	/** Send external emails and read sent emails. */
 	email: ToolkitEmail;
 	/** Helpers for enqueueing and cancelling durable jobs. */
 	jobs: ToolkitJobs;
 	/** Helpers for reading enabled locales. */
 	locales: ToolkitLocales;
-	/** Helpers for uploading, updating, reading and deleting media. */
+	/** Media and folder reads and writes. */
 	media: ToolkitMedia;
 	/** Helpers for sending in-app and email notifications. */
 	notifications: ToolkitNotifications;
@@ -100,13 +100,19 @@ export type * from "./documents/get-single/index.js";
 export type * from "./documents/index.js";
 export type * from "./documents/notify-change/index.js";
 export type * from "./documents/patch-single/index.js";
+export type * from "./documents/publish/index.js";
+export type * from "./documents/unpublish/index.js";
 export type * from "./documents/update-single/index.js";
+export type * from "./email/get-multiple/index.js";
+export type * from "./email/get-single/index.js";
 export type * from "./email/index.js";
 export type * from "./email/send/index.js";
 export type * from "./jobs/index.js";
 export type * from "./locales/get-all/index.js";
 export type * from "./locales/index.js";
 export type * from "./media/delete-single/index.js";
+export type * from "./media/folders/create-single/index.js";
+export type * from "./media/folders/get-multiple/index.js";
 export type * from "./media/get-multiple/index.js";
 export type * from "./media/get-single/index.js";
 export type * from "./media/index.js";

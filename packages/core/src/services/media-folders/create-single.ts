@@ -7,7 +7,7 @@ const createSingle: ServiceFn<
 		{
 			title: string;
 			parentFolderId?: number | null;
-			userId: number;
+			userId: number | null;
 		},
 	],
 	number

@@ -11,6 +11,8 @@ import createGetMultiple from "./get-multiple/index.js";
 import createGetSingle from "./get-single/index.js";
 import notifyChange from "./notify-change/index.js";
 import patchSingle from "./patch-single/index.js";
+import publish from "./publish/index.js";
+import unpublish from "./unpublish/index.js";
 import updateSingle from "./update-single/index.js";
 
 export type ToolkitDocumentVersion<
@@ -18,7 +20,7 @@ export type ToolkitDocumentVersion<
 > = CollectionDocumentVersionKey<TCollectionKey>;
 
 /**
- * Read collection content and create, edit or delete stored documents.
+ * Read collection content and create, edit, publish or delete stored documents.
  */
 export type ToolkitDocuments = {
 	/**
@@ -118,6 +120,12 @@ export type ToolkitDocuments = {
 	deleteMultiple: (
 		input: Parameters<typeof deleteMultiple>[1],
 	) => ReturnType<typeof deleteMultiple>;
+	/** Publishes latest to an environment that doesn't require review. */
+	publish: (input: Parameters<typeof publish>[1]) => ReturnType<typeof publish>;
+	/** Unpublishes a document from an environment that doesn't require review. */
+	unpublish: (
+		input: Parameters<typeof unpublish>[1],
+	) => ReturnType<typeof unpublish>;
 	/**
 	 * Returns document `items` with `pagination`, resolving media, users and relations through `depth`, selecting `locale` when supplied and treating `query.filter` arrays as OR branches.
 	 *
@@ -154,7 +162,7 @@ export type ToolkitDocuments = {
 	 * ```
 	 */
 	getSingle: ReturnType<typeof createGetSingle>;
-	/** Invalidates cached content after direct writes; skips saves and authoring hooks. */
+	/** Reports changed IDs after direct writes, such as to `collections.getSchema` tables, so caches, change subscribers and referencing documents update. Does not save content or run authoring hooks. */
 	notifyChange: (
 		input: Parameters<typeof notifyChange>[1],
 	) => ReturnType<typeof notifyChange>;
@@ -170,6 +178,8 @@ export const createDocumentsToolkit = (
 	patchSingle: (input) => patchSingle(context, input),
 	deleteSingle: (input) => deleteSingle(context, input),
 	deleteMultiple: (input) => deleteMultiple(context, input),
+	publish: (input) => publish(context, input),
+	unpublish: (input) => unpublish(context, input),
 	getMultiple: createGetMultiple(context),
 	getSingle: createGetSingle(context),
 	notifyChange: (input) => notifyChange(context, input),
