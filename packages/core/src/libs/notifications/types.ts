@@ -19,7 +19,7 @@ export type NotificationAudience = "recipients" | { permission: Permission };
 export type NotificationRender = {
 	title: CopyInput;
 	body?: CopyInput;
-	/** Admin path the notification opens, eg. `/admin/requests/12`. */
+	/** Admin path or HTTPS URL to open. HTTPS URLs open in a new tab. */
 	href?: string;
 	/** Overrides the type's level for this send. */
 	level?: NotificationLevel;

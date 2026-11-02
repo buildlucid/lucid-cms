@@ -9,6 +9,10 @@ import T from "@/translations";
 export const isNotificationUnread = (notification: Notification) =>
 	notification.readAt === null;
 
+/** HTTPS notification links open in a new tab. */
+export const isExternalNotificationHref = (href: string) =>
+	href.startsWith("https://");
+
 /** Open to-dos stay flagged until whatever caused them is dealt with. */
 export const isNotificationOpen = (notification: Notification) =>
 	notification.actionRequired && notification.resolvedAt === null;

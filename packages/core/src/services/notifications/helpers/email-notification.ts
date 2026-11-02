@@ -147,7 +147,11 @@ const emailNotification: ServiceFn<
 				body,
 				actor,
 				level: notification.level,
-				link: notification.href ? `${baseUrl}${notification.href}` : null,
+				link: notification.href
+					? notification.href.startsWith("https://")
+						? notification.href
+						: `${baseUrl}${notification.href}`
+					: null,
 				manageLink: `${baseUrl}${constants.email.locations.account}`,
 				...definition.email.data?.({ data: notification.data }),
 			} satisfies NotificationEmailData & BuiltInEmailTemplates["notification"],

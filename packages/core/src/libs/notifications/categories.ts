@@ -27,4 +27,10 @@ export const notificationCategories = {
 			defaultMessage: "Agent",
 		}),
 	},
+	lucid: {
+		key: "lucid",
+		label: copy("admin:core.notifications.category.lucid", {
+			defaultMessage: "Lucid",
+		}),
+	},
 } as const satisfies Record<string, NotificationCategory>;

@@ -46,6 +46,11 @@ const diagnosticsResponseSchema = z.object({
 			description: "Whether anonymous telemetry is enabled",
 			example: true,
 		}),
+		announcements: z.boolean().meta({
+			description:
+				"Whether Lucid's security alerts and announcements are checked for",
+			example: true,
+		}),
 	}),
 	server: z.object({
 		time: z.string().meta({

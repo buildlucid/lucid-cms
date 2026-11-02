@@ -12,14 +12,15 @@ type LucidRemotePublicClient = {
 		body: unknown,
 		options?: PublicRequestOptions,
 	) => Promise<boolean>;
+	/** Resolves to the parsed JSON body, or null when the request or parsing fails. */
+	get: (path: `/${string}`, options?: PublicRequestOptions) => Promise<unknown>;
 };
 
 const clients = new Map<string, LucidRemotePublicClient>();
 
 /**
- * Creates the deliberately constrained client used for unauthenticated Lucid
- * Remote endpoints. It cannot attach arbitrary headers, send the CMS origin,
- * retry, or read response data.
+ * Public Lucid Remote client without custom headers, CMS origin or retries. Only reads return
+ * data; callers validate it.
  */
 const createLucidRemotePublicClient = (
 	apiDomain: string,
@@ -48,10 +49,35 @@ const createLucidRemotePublicClient = (
 			return false;
 		}
 	},
+	get: async (path, options = {}) => {
+		try {
+			const url = new URL(path, apiDomain);
+			if (url.origin !== apiDomain || !path.startsWith("/")) return null;
+
+			const response = await fetch(url, {
+				method: "GET",
+				headers: {
+					Accept: "application/json",
+					"User-Agent": `LucidCMS/${packageJson.version}`,
+				},
+				cache: "no-store",
+				credentials: "omit",
+				redirect: "error",
+				signal: AbortSignal.timeout(options.timeoutMs ?? 5000),
+			});
+			if (!response.ok) return null;
+
+			return await response.json();
+		} catch {
+			return null;
+		}
+	},
 });
 
-/** Returns a cached client for public, write-only Lucid Remote endpoints. */
-export const getLucidRemotePublicClient = (env?: EnvironmentVariables) => {
+/** Returns a cached client for public Lucid Remote endpoints. */
+export const getLucidRemotePublicClient = (
+	env?: EnvironmentVariables | null,
+) => {
 	const apiDomain = getLucidRemoteConfigFromEnv(env).issuer;
 	const cached = clients.get(apiDomain);
 	if (cached) return cached;

@@ -32,6 +32,8 @@ export interface Diagnostics {
 		url: string;
 		siteUrl: string | null;
 		telemetry: boolean;
+		/** Whether Lucid's security alerts and announcements are checked for. */
+		announcements: boolean;
 	};
 	server: {
 		/** The server's clock when the response was built, to compare with the browser's. */

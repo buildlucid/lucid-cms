@@ -45,6 +45,7 @@ const formatSingle = (props: {
 			url: props.config.url,
 			siteUrl: props.diagnostics.siteUrl,
 			telemetry: props.config.telemetry,
+			announcements: props.config.announcements,
 		},
 		server: {
 			time: props.diagnostics.generatedAt.toISOString(),

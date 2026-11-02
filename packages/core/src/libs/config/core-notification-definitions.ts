@@ -7,6 +7,7 @@ const coreNotificationDefinitions = [
 	...Object.values(notifications.requests),
 	...Object.values(notifications.workflows),
 	...Object.values(notifications.agent),
+	...Object.values(notifications.lucid),
 ] as const satisfies readonly AnyNotificationDefinition[];
 
 export default coreNotificationDefinitions;

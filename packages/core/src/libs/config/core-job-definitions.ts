@@ -1,6 +1,7 @@
 import { executeAgentRunJob } from "../../services/agent/jobs/execute-run.js";
 import { generateAgentTitleJob } from "../../services/agent/jobs/generate-title.js";
 import { agentTickJob } from "../../services/agent/jobs/tick.js";
+import { syncAnnouncementsJob } from "../../services/announcements/jobs/sync-announcements.js";
 import { deleteCollectionJob } from "../../services/collections/jobs/delete-single.js";
 import { verifyConnectionsJob } from "../../services/connection/jobs/verify-connections.js";
 import { deleteExpiredRevisionsJob } from "../../services/documents-versions/jobs/delete-expired-revisions.js";
@@ -37,6 +38,7 @@ const coreJobDefinitions = [
 	dispatchScheduledRequestsJob,
 	deleteExpiredDataJob,
 	verifyConnectionsJob,
+	syncAnnouncementsJob,
 	agentTickJob,
 	executeAgentRunJob,
 	generateAgentTitleJob,

@@ -6,6 +6,7 @@ import {
 	TbOutlineMessages,
 	TbOutlineProgress,
 	TbOutlineSettings,
+	TbOutlineSpeakerphone,
 } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import { Dynamic } from "solid-js/web";
@@ -19,6 +20,7 @@ const categoryIcons: Record<string, IconTypes> = {
 	requests: TbOutlineExternalLink,
 	workflows: TbOutlineProgress,
 	agent: TbOutlineMessages,
+	lucid: TbOutlineSpeakerphone,
 };
 
 const NotificationThumb: Component<NotificationThumbProps> = (props) => {

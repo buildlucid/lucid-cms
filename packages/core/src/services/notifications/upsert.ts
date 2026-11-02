@@ -10,9 +10,8 @@ import type {
 import writeNotification from "./helpers/write-notification.js";
 
 /**
- * Sends a notification, or refreshes the open one with the same key: its
- * content is replaced and new recipients are added. People are only told
- * again when the fingerprint changes or the notification was resolved.
+ * Creates or refreshes a keyed notification. Unchanged content keeps its inbox position;
+ * fingerprint changes or reopening notify recipients again.
  */
 const upsert = <Definition extends AnyNotificationDefinition>(
 	context: ServiceContext,

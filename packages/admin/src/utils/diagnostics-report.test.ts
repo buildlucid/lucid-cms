@@ -14,6 +14,7 @@ const diagnostics: Diagnostics = {
 		url: "https://cms.example.com",
 		siteUrl: null,
 		telemetry: false,
+		announcements: true,
 	},
 	server: {
 		time: "2026-11-02T12:00:00.000Z",

@@ -388,6 +388,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		refreshToken: z.string().length(64),
 	}),
 	telemetry: z.boolean(),
+	announcements: z.boolean(),
 	logger: z.strictObject({
 		level: LogLevelSchema,
 		transport: LogTransportSchema.optional(),

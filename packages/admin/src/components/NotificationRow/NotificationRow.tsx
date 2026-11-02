@@ -15,6 +15,7 @@ import type { Params as UpdateNotificationsParams } from "@/services/api/notific
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import {
+	isExternalNotificationHref,
 	isNotificationOpen,
 	isNotificationUnread,
 	notificationStates,
@@ -34,6 +35,11 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 	// Memos
 	const unread = createMemo(() => isNotificationUnread(props.notification));
 	const open = createMemo(() => isNotificationOpen(props.notification));
+	const external = createMemo(
+		() =>
+			props.notification.href !== null &&
+			isExternalNotificationHref(props.notification.href),
+	);
 	const readLabel = createMemo(() =>
 		unread()
 			? T()("notifications.mark.read")
@@ -52,8 +58,10 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 	return (
 		<li class="group relative flex items-center" data-notification-row>
 			<Dynamic
-				component={props.notification.href ? A : "button"}
+				component={props.notification.href ? (external() ? "a" : A) : "button"}
 				href={props.notification.href ?? undefined}
+				target={external() ? "_blank" : undefined}
+				rel={external() ? "noopener noreferrer" : undefined}
 				type={props.notification.href ? undefined : "button"}
 				onClick={openNotification}
 				class="flex min-w-0 grow items-center gap-3 rounded-md px-2 py-2 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"

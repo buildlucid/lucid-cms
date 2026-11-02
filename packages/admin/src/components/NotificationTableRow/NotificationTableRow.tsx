@@ -9,6 +9,7 @@ import T from "@/translations";
 import helpers from "@/utils/helpers";
 import {
 	getNotificationState,
+	isExternalNotificationHref,
 	isNotificationUnread,
 	notificationStates,
 } from "@/utils/notifications";
@@ -34,6 +35,13 @@ const NotificationTableRow: Component<NotificationTableRowProps> = (props) => {
 	const state = createMemo(
 		() => notificationStates[getNotificationState(props.notification)],
 	);
+	//* Open external links explicitly; row navigation handles admin routes.
+	const adminHref = createMemo(() =>
+		props.notification.href &&
+		!isExternalNotificationHref(props.notification.href)
+			? props.notification.href
+			: undefined,
+	);
 
 	// ----------------------------------------
 	// Functions
@@ -42,7 +50,14 @@ const NotificationTableRow: Component<NotificationTableRowProps> = (props) => {
 	};
 	const openNotification = () => {
 		markRead();
-		if (props.notification.href) navigate(props.notification.href);
+		const href = props.notification.href;
+		if (!href) return;
+
+		if (isExternalNotificationHref(href)) {
+			window.open(href, "_blank", "noopener,noreferrer");
+		} else {
+			navigate(href);
+		}
 	};
 
 	// ----------------------------------------
@@ -50,9 +65,9 @@ const NotificationTableRow: Component<NotificationTableRowProps> = (props) => {
 	return (
 		<Table.Row
 			index={props.index}
-			href={props.notification.href ?? undefined}
+			href={adminHref()}
 			onOpen={markRead}
-			onClick={props.notification.href ? undefined : markRead}
+			onClick={adminHref() ? undefined : openNotification}
 			actions={[
 				{
 					label: T()("common.open"),

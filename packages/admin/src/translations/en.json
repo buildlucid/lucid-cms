@@ -1343,6 +1343,7 @@
 	"diagnostics.install.url": "CMS URL",
 	"diagnostics.install.site.url": "Site URL",
 	"diagnostics.install.telemetry": "Telemetry",
+	"diagnostics.install.announcements": "Lucid announcements",
 	"diagnostics.server.title": "Server",
 	"diagnostics.server.description": "Where this CMS runs and how its clock compares to your browser's.",
 	"diagnostics.server.time": "Server time",

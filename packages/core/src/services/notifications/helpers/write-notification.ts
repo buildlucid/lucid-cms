@@ -1,4 +1,6 @@
+import { isDeepStrictEqual } from "node:util";
 import constants from "../../../constants/constants.js";
+import formatter from "../../../libs/formatters/index.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { normalizeCopy } from "../../../libs/i18n/copy.js";
 import { copy } from "../../../libs/i18n/index.js";
@@ -18,14 +20,9 @@ import getTypeSettings from "./get-type-settings.js";
 import resolveRecipients from "./resolve-recipients.js";
 
 /**
- * Creates a notification, or finds the one with the same type and key.
- * `send` leaves an open match alone. `upsert` refreshes its content and
- * recipients. Either reopens a resolved match. Refreshing drops people who
- * are no longer in the audience. Recipients are told again, in-app and by
- * email, when the notification is reopened or its fingerprint changes, and
- * people added later are emailed too. Emails are due after the type's delay
- * and sent by the email job, straight after the caller's transaction commits
- * when there is no delay.
+ * Matches by type and key. `send` preserves open matches; `upsert` refreshes content and audience
+ * without moving unchanged items. Reopening or changing the fingerprint notifies recipients again;
+ * new recipients also get email. Email jobs respect the configured delay and transaction commit.
  */
 const writeNotification: ServiceFn<
 	[
@@ -157,7 +154,20 @@ const writeNotification: ServiceFn<
 		if (recipientsCreateRes.error) return recipientsCreateRes;
 	} else {
 		const existingRes = await Notifications.selectSingle({
-			select: ["id", "fingerprint", "resolved_at"],
+			select: [
+				"id",
+				"fingerprint",
+				"resolved_at",
+				"category",
+				"level",
+				"action_required",
+				"title",
+				"body",
+				"href",
+				"data",
+				"actor_user_id",
+				"actor_run_id",
+			],
 			where: [
 				{ key: "type", operator: "=", value: definition.key },
 				{ key: "key", operator: "=", value: key },
@@ -176,16 +186,39 @@ const writeNotification: ServiceFn<
 			existing.resolved_at !== null || fingerprint !== existing.fingerprint;
 		id = existing.id;
 
-		const updateRes = await Notifications.updateSingle({
-			data: {
-				...content,
-				fingerprint,
-				resolved_at: null,
-				updated_at: now,
-			},
-			where: [{ key: "id", operator: "=", value: id }],
-		});
-		if (updateRes.error) return updateRes;
+		//* Normalize both sides through JSON because stored JSON omits undefined keys.
+		const unchanged =
+			!notifyAgain &&
+			formatter.formatBoolean(existing.action_required) ===
+				content.action_required &&
+			isDeepStrictEqual(
+				JSON.parse(JSON.stringify({ ...content, action_required: null })),
+				JSON.parse(
+					JSON.stringify({
+						category: existing.category,
+						level: existing.level,
+						action_required: null,
+						title: existing.title,
+						body: existing.body,
+						href: existing.href,
+						data: existing.data,
+						actor_user_id: existing.actor_user_id,
+						actor_run_id: existing.actor_run_id,
+					}),
+				),
+			);
+		if (!unchanged) {
+			const updateRes = await Notifications.updateSingle({
+				data: {
+					...content,
+					fingerprint,
+					resolved_at: null,
+					updated_at: now,
+				},
+				where: [{ key: "id", operator: "=", value: id }],
+			});
+			if (updateRes.error) return updateRes;
+		}
 
 		const currentRes = await Recipients.selectMultiple({
 			select: ["user_id"],

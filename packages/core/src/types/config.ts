@@ -382,6 +382,12 @@ export interface LucidConfig {
 	 */
 	telemetry?: boolean;
 	/**
+	 * Whether Lucid checks lucidjs.build every 6 hours for security alerts and announcements,
+	 * and shows those for your version as notifications to people with settings access.
+	 * Defaults to true. Unconnected sites send nothing about themselves.
+	 */
+	announcements?: boolean;
+	/**
 	 * Process-level logger configuration.
 	 */
 	logger?: {
@@ -772,6 +778,7 @@ export interface ResolvedLucidConfig {
 	};
 	secrets: SecretConfig;
 	telemetry: boolean;
+	announcements: boolean;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 	};

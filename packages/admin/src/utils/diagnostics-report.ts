@@ -70,6 +70,7 @@ export const buildDiagnosticsReport = (data: DiagnosticsReportData) => {
 			`- CMS URL: ${diagnostics.install.url}`,
 			`- Site URL: ${diagnostics.install.siteUrl ?? "-"}`,
 			`- Telemetry: ${yesNo(diagnostics.install.telemetry)}`,
+			`- Announcements: ${yesNo(diagnostics.install.announcements)}`,
 		]),
 		section("Server", [
 			`- Runtime: ${[diagnostics.server.runtime, diagnostics.server.runtimeVersion].filter(Boolean).join(" ") || "-"}`,

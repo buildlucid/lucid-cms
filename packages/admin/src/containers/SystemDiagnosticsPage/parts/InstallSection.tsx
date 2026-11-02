@@ -78,6 +78,12 @@ const InstallSection: Component<{
 								? T()("common.on")
 								: T()("common.off"),
 						},
+						{
+							label: T()("diagnostics.install.announcements"),
+							value: props.data.install.announcements
+								? T()("common.on")
+								: T()("common.off"),
+						},
 					]}
 				/>
 			</InfoRow.Content>

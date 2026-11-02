@@ -3,6 +3,8 @@ import { routineFailedNotification } from "../../services/agent/notifications/ro
 import { routineManagedNotification } from "../../services/agent/notifications/routine-managed.js";
 import { routineNeedsReviewNotification } from "../../services/agent/notifications/routine-needs-review.js";
 import { routineReportNotification } from "../../services/agent/notifications/routine-report.js";
+import { announcementNotification } from "../../services/announcements/notifications/announcement.js";
+import { securityAlertNotification } from "../../services/announcements/notifications/security-alert.js";
 import { assignedNotification } from "../../services/document-workflows/notifications/assigned.js";
 import { stageChangedNotification } from "../../services/document-workflows/notifications/stage-changed.js";
 import { jobFailedNotification } from "../../services/jobs/notifications/job-failed.js";
@@ -56,5 +58,9 @@ export const notifications = {
 		routineNeedsReview: routineNeedsReviewNotification,
 		routineReport: routineReportNotification,
 		routineManaged: routineManagedNotification,
+	},
+	lucid: {
+		securityAlert: securityAlertNotification,
+		announcement: announcementNotification,
 	},
 } as const;
