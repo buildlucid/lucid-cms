@@ -25,6 +25,7 @@ const ClearAllProcessedImagesModal: Component<ClearAllProcessedImagesProps> = (
 	// Render
 	return (
 		<Modal.Confirm
+			confirmVariant="primary"
 			open={props.state.open}
 			onOpenChange={props.state.setOpen}
 			title={T()("modals.common.clear.all.processed.images.title")}

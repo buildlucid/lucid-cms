@@ -13,7 +13,6 @@ import {
 import { type Component, createMemo, createSignal, For } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import { openShortcutsModal } from "@/components/ShortcutsModal/ShortcutsModal";
-import Spinner from "@/components/Spinner/Spinner";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import constants from "@/constants";
 import themeStore, {
@@ -162,7 +161,7 @@ const NavigationAccountMenu: Component<{
 				</Menu.Sub>
 				<Menu.Item
 					icon={<TbOutlineLogout class="size-3.5 shrink-0" />}
-					end={props.logoutPending ? <Spinner size="sm" /> : undefined}
+					loading={props.logoutPending}
 					disabled={props.logoutPending}
 					onSelect={props.onLogout}
 				>

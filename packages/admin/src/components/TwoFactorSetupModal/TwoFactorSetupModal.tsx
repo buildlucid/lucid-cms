@@ -16,6 +16,7 @@ import TwoFactorProofStep from "@/components/TwoFactorProofStep/TwoFactorProofSt
 import TwoFactorSetupPanel from "@/components/TwoFactorSetupPanel/TwoFactorSetupPanel";
 import constants from "@/constants";
 import api from "@/services/api";
+import reauthenticationStore from "@/store/reauthenticationStore/reauthenticationStore";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
@@ -88,7 +89,8 @@ const TwoFactorSetupModal: Component<TwoFactorSetupModalProps> = (props) => {
 	// Render
 	return (
 		<Modal.Root
-			open={props.state.open}
+			//* setup starts as it opens, which can ask the user to confirm it's them, so it steps aside for that modal
+			open={props.state.open && !reauthenticationStore.isOpen()}
 			onOpenChange={props.state.setOpen}
 			role={step() === "codes" ? "alertdialog" : undefined}
 			//* closing mid-request could lose a used code's result or the new recovery codes

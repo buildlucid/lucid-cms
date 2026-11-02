@@ -10,7 +10,8 @@ export type ProgressBarVariant =
 	| "danger"
 	| "danger-subtle"
 	| "warning"
-	| "warning-subtle";
+	| "warning-subtle"
+	| "neutral";
 
 export type ProgressBarSize = "sm" | "md" | "lg";
 
@@ -18,7 +19,8 @@ export interface ProgressBarProps {
 	/** A percentage from 0 to 100. */
 	value: number;
 	/**
-	 * Colour variants use the solid colour. `-subtle` variants use a softer fill.
+	 * Colour variants use the solid colour. `-subtle` variants use a softer fill. `neutral` is grey, for bars
+	 * that shouldn't compete with coloured ones nearby.
 	 * @default "primary"
 	 */
 	variant?: ProgressBarVariant;
@@ -88,6 +90,7 @@ export const ProgressBar: Component<ProgressBarProps> = (props) => {
 						"bg-danger-medium": variant() === "danger-subtle",
 						"bg-warning": variant() === "warning",
 						"bg-warning-medium": variant() === "warning-subtle",
+						"bg-subtitle": variant() === "neutral",
 					})}
 					style={{
 						width: `${progress()}%`,

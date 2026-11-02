@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import type { User } from "@types";
+import { TbOutlinePencil } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -8,6 +9,7 @@ import {
 	For,
 	Show,
 } from "solid-js";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import { AppearancePreference } from "@/components/AppearancePreference/AppearancePreference";
 import AuthProviderRow from "@/components/AuthProviderRow/AuthProviderRow";
 import Button from "@/components/Button/Button";
@@ -19,12 +21,12 @@ import NotificationPreferences from "@/components/NotificationPreferences/Notifi
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
 import PasskeySettings from "@/components/PasskeySettings/PasskeySettings";
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
-import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
 import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
 import TwoFactorSettings from "@/components/TwoFactorSettings/TwoFactorSettings";
 import UpdateAccountDetailsModal from "@/components/UpdateAccountDetailsModal/UpdateAccountDetailsModal";
 import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
+import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
 import constants from "@/constants";
 import api from "@/services/api";
@@ -33,8 +35,10 @@ import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T, { getLocale, localesConfig, setLocale } from "@/translations";
+import helpers from "@/utils/helpers";
 import spawnToast from "@/utils/spawn-toast";
 
+/** The signed-in user's account page: profile, security, developer access, preferences and email notifications. */
 export const AccountContent: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
@@ -50,11 +54,10 @@ export const AccountContent: Component = () => {
 		createSignal(false);
 	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
 		createSignal(false);
+	const [removeProfilePictureOpen, setRemoveProfilePictureOpen] =
+		createSignal(false);
+	const [createIntegrationOpen, setCreateIntegrationOpen] = createSignal(false);
 	const [refreshingSession, setRefreshingSession] = createSignal(false);
-
-	// ----------------------------------------
-	// Memos
-	const user = createMemo(() => userStore.get.user);
 
 	// ----------------------------------------
 	// Queries
@@ -88,10 +91,15 @@ export const AccountContent: Component = () => {
 		},
 	});
 	const cancelEmailChange = api.account.useCancelEmailChange();
-	const deleteProfilePicture = api.account.useDeleteProfilePicture();
+	const deleteProfilePicture = api.account.useDeleteProfilePicture({
+		onSuccess: () => {
+			setRemoveProfilePictureOpen(false);
+		},
+	});
 
 	// ----------------------------------------
-	// Derived state
+	// Memos
+	const user = createMemo(() => userStore.get.user);
 	const providersList = createMemo(() => providers.data?.data.providers ?? []);
 	const passwordAuthEnabled = createMemo(
 		() => providers.data?.data.disablePassword === false,
@@ -153,10 +161,72 @@ export const AccountContent: Component = () => {
 			return map;
 		}, {});
 	});
+	const profilePictureLabel = createMemo(() =>
+		user()?.profilePicture
+			? T()("account.profile.picture.update")
+			: T()("account.profile.picture.set"),
+	);
+
 	// ----------------------------------------
-	// Handlers
-	const handleClearProfilePicture = () => {
-		deleteProfilePicture.action.mutate({});
+	// Functions
+	const sendPasswordReset = async () => {
+		if (setPasswordResetLoading()) return;
+		const email = user()?.email;
+		if (!email) {
+			spawnToast({
+				title: T()("errors.generic.title"),
+				message: T()("errors.generic.message"),
+				status: "error",
+			});
+			return;
+		}
+		//* a fresh session lets the reset request skip its captcha
+		setRefreshingSession(true);
+		try {
+			await refreshTokenReq();
+			forgotPassword.action.mutate({ email });
+		} finally {
+			setRefreshingSession(false);
+		}
+	};
+	const unlinkProvider = (providerKey: string) => {
+		if (unlinkAuthProvider.action.isPending) return;
+		const isLastLinkedProvider = linkedProvidersCount() <= 1;
+		//* with magic link login on, users can still log in by email
+		if (isLastLinkedProvider && !magicLinkEnabled()) {
+			if (!passwordAuthEnabled()) {
+				spawnToast({
+					title: T()("toasts.common.auth.provider.last.unlink.blocked.title"),
+					message: T()(
+						"toasts.common.auth.provider.last.unlink.password.disabled.message",
+					),
+					status: "error",
+				});
+				return;
+			}
+			if (!userHasPassword()) {
+				spawnToast({
+					title: T()("toasts.common.auth.provider.last.unlink.blocked.title"),
+					message: T()(
+						"toasts.common.auth.provider.last.unlink.no.password.message",
+					),
+					status: "error",
+				});
+				return;
+			}
+		}
+		unlinkAuthProvider.action.mutate({ providerKey });
+	};
+	const linkProvider = (providerKey: string) => {
+		if (initiateProvider.action.isPending) return;
+		setLinkingProviderKey(providerKey);
+		initiateProvider.action.mutate({
+			providerKey,
+			body: {
+				actionType: "authenticated-link",
+				redirectPath: `${location.pathname}${location.search}${location.hash}`,
+			},
+		});
 	};
 
 	// ----------------------------------------
@@ -210,246 +280,224 @@ export const AccountContent: Component = () => {
 				title={T()("account.profile.title")}
 				description={T()("account.profile.description")}
 			>
-				<ProfilePicturePreviewCard
-					classes="mb-4"
-					user={{
-						username: user()?.username,
-						firstName: user()?.firstName,
-						lastName: user()?.lastName,
-						profilePicture: user()?.profilePicture,
-					}}
-					onEdit={() => setProfilePicturePanelOpen(true)}
-					onClear={
-						user()?.profilePicture ? handleClearProfilePicture : undefined
-					}
-					clearLoading={deleteProfilePicture.action.isPending}
-				/>
-				<InfoRow.Content
-					title={T()("account.details.summary.title")}
-					actions={
-						<Button
-							variant="outline"
-							size="sm"
-							type="button"
-							onClick={() => setAccountDetailsModalOpen(true)}
-						>
-							{T()("account.details.edit.action")}
-						</Button>
-					}
-					align="center"
-				>
-					<DetailsList
-						layout="columns"
-						variant="plain"
-						items={[
-							{
-								label: T()("common.first.name"),
-								value: user()?.firstName || T()("common.not.set"),
-							},
-							{
-								label: T()("common.last.name"),
-								value: user()?.lastName || T()("common.not.set"),
-							},
-							{
-								label: T()("common.username"),
-								value: user()?.username || T()("common.not.set"),
-								wrap: true,
-							},
-							{
-								label: T()("common.email"),
-								value: user()?.email || T()("common.not.set"),
-								wrap: true,
-							},
-						]}
-					/>
-					<Show when={user()?.pendingEmailChange}>
-						{(pendingEmailChange) => (
-							<div class="mt-4">
-								<PendingEmailChangeNotice
-									email={pendingEmailChange().email}
-									isLoading={cancelEmailChange.action.isPending}
-									onCancel={() => cancelEmailChange.action.mutate({})}
+				<InfoRow.Content padding="none">
+					<div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+						<div class="flex min-w-0 items-center gap-4">
+							<div class="relative shrink-0">
+								<UserDisplay
+									variant="icon"
+									size="lg"
+									user={{
+										username: user()?.username,
+										email: user()?.email,
+										firstName: user()?.firstName,
+										lastName: user()?.lastName,
+										profilePicture: user()?.profilePicture,
+									}}
 								/>
+								{/* covers the avatar, with an edit badge on its corner */}
+								<button
+									type="button"
+									class="group absolute inset-0 rounded-full outline-none focus-visible:ring-1 focus-visible:ring-primary"
+									title={profilePictureLabel()}
+									aria-label={profilePictureLabel()}
+									onClick={() => setProfilePicturePanelOpen(true)}
+								>
+									<span class="absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full border border-border bg-card text-icon transition-colors group-hover:text-title">
+										<TbOutlinePencil class="size-3" />
+									</span>
+								</button>
 							</div>
-						)}
-					</Show>
+							<div class="min-w-0">
+								<p class="truncate text-sm font-medium text-title">
+									{helpers.formatUserName(user(), "name")}
+								</p>
+								<p class="truncate text-sm">{user()?.email}</p>
+							</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-1">
+							<Button
+								variant="outline"
+								size="sm"
+								type="button"
+								onClick={() => setAccountDetailsModalOpen(true)}
+							>
+								{T()("account.details.edit.action")}
+							</Button>
+							<ActionMenu
+								variant="ghost"
+								size="md"
+								actions={[
+									{
+										type: "button",
+										label: profilePictureLabel(),
+										icon: "image",
+										onClick: () => setProfilePicturePanelOpen(true),
+										sortOrder: 0,
+									},
+									{
+										type: "button",
+										label: T()("account.profile.picture.remove"),
+										icon: "trash",
+										onClick: () => setRemoveProfilePictureOpen(true),
+										show: Boolean(user()?.profilePicture),
+										sortOrder: 80,
+										variant: "danger",
+									},
+								]}
+							/>
+						</div>
+					</div>
+					<div class="border-t border-border px-5 py-4">
+						<DetailsList
+							layout="columns"
+							variant="plain"
+							items={[
+								{
+									label: T()("common.first.name"),
+									value: user()?.firstName || T()("common.not.set"),
+								},
+								{
+									label: T()("common.last.name"),
+									value: user()?.lastName || T()("common.not.set"),
+								},
+								{
+									label: T()("common.username"),
+									value: user()?.username || T()("common.not.set"),
+									wrap: true,
+								},
+								{
+									label: T()("common.email"),
+									value: user()?.email || T()("common.not.set"),
+									wrap: true,
+								},
+							]}
+						/>
+						<Show when={user()?.pendingEmailChange}>
+							{(pendingEmailChange) => (
+								<div class="mt-4">
+									<PendingEmailChangeNotice
+										email={pendingEmailChange().email}
+										isLoading={cancelEmailChange.action.isPending}
+										onCancel={() => cancelEmailChange.action.mutate({})}
+									/>
+								</div>
+							)}
+						</Show>
+					</div>
 				</InfoRow.Content>
 			</InfoRow.Root>
+
 			{/* Security */}
 			<InfoRow.Root
 				title={T()("common.security")}
 				description={T()("account.security.description")}
 			>
-				<Show when={passwordAuthEnabled() && userHasPassword()}>
-					<InfoRow.Content
-						title={T()("common.password")}
-						description={T()("account.password.description")}
-						actions={
-							<Button
-								variant="danger"
-								size="sm"
-								type="button"
-								onClick={() => setPasswordModalOpen(true)}
+				<InfoRow.Content padding="none">
+					<ul class="divide-y divide-border">
+						<Show when={passwordAuthEnabled() && userHasPassword()}>
+							<InfoRow.Item
+								title={T()("common.password")}
+								description={T()("account.password.description")}
+								actions={
+									<Button
+										variant="outline"
+										size="sm"
+										type="button"
+										onClick={() => setPasswordModalOpen(true)}
+									>
+										{T()("account.password.change.action")}
+									</Button>
+								}
+							/>
+						</Show>
+						<Show when={passwordAuthEnabled() && !userHasPassword()}>
+							<InfoRow.Item
+								title={T()("common.password")}
+								description={T()("account.password.set.description")}
+								actions={
+									<Button
+										variant="outline"
+										size="sm"
+										type="button"
+										loading={setPasswordResetLoading()}
+										onClick={sendPasswordReset}
+									>
+										{T()("account.password.reset.send.and.logout")}
+									</Button>
+								}
+							/>
+						</Show>
+						<Show when={passkeysEnabled()}>
+							<PasskeySettings
+								passkeys={user()?.passkeys ?? []}
+								keepLast={keepLastPasskey()}
+							/>
+						</Show>
+						<Show when={twoFactorAvailable()}>
+							<TwoFactorSettings
+								twoFactor={user()?.twoFactor}
+								hasPasskeys={
+									passkeysEnabled() && (user()?.passkeys?.length ?? 0) > 0
+								}
+							/>
+						</Show>
+						<Show when={providersList().length > 0}>
+							<InfoRow.Item
+								title={T()("account.auth.providers.title")}
+								description={T()("account.auth.providers.description")}
 							>
-								{T()("actions.reset.password")}
-							</Button>
-						}
-						align="center"
-					/>
-				</Show>
-				<Show when={passwordAuthEnabled() && !userHasPassword()}>
-					<InfoRow.Content
-						title={T()("common.password")}
-						description={T()("account.password.set.description")}
-						actions={
-							<Button
-								variant="danger"
-								size="sm"
-								type="button"
-								loading={setPasswordResetLoading()}
-								onClick={async () => {
-									if (setPasswordResetLoading()) return;
-									const email = user()?.email;
-									if (!email) {
-										spawnToast({
-											title: T()("errors.generic.title"),
-											message: T()("errors.generic.message"),
-											status: "error",
-										});
-										return;
-									}
-									//* a fresh session lets the reset request skip its captcha
-									setRefreshingSession(true);
-									try {
-										await refreshTokenReq();
-										forgotPassword.action.mutate({ email });
-									} finally {
-										setRefreshingSession(false);
-									}
-								}}
-							>
-								{T()("account.password.reset.send.and.logout")}
-							</Button>
-						}
-						align="center"
-					/>
-				</Show>
-				<Show when={passkeysEnabled()}>
-					<PasskeySettings
-						passkeys={user()?.passkeys ?? []}
-						keepLast={keepLastPasskey()}
-					/>
-				</Show>
-				<Show when={twoFactorAvailable()}>
-					<TwoFactorSettings
-						twoFactor={user()?.twoFactor}
-						hasPasskeys={
-							passkeysEnabled() && (user()?.passkeys?.length ?? 0) > 0
-						}
-					/>
-				</Show>
-				<Show when={providersList().length > 0}>
-					<InfoRow.Content
-						title={T()("account.auth.providers.title")}
-						description={T()("account.auth.providers.description")}
-					>
-						<div class="flex flex-col gap-3">
-							<For each={providersList()}>
-								{(provider) => {
-									const linkedProvider = linkedProvidersByKey()[provider.key];
-									const isLinking =
-										linkingProviderKey() === provider.key &&
-										initiateProvider.action.isPending;
+								<ul class="flex flex-col gap-3">
+									<For each={providersList()}>
+										{(provider) => {
+											const linkedProvider = () =>
+												linkedProvidersByKey()[provider.key];
 
-									const isUnlinking =
-										unlinkingProviderKey() === provider.key &&
-										unlinkAuthProvider.action.isPending;
-
-									return (
-										<AuthProviderRow
-											provider={provider}
-											linkedProvider={linkedProvider}
-											onUnlink={
-												linkedProvider
-													? () => {
-															if (unlinkAuthProvider.action.isPending) return;
-															const isLastLinkedProvider =
-																linkedProvidersCount() <= 1;
-															//* with magic link login on, users can still log in by email
-															if (isLastLinkedProvider && !magicLinkEnabled()) {
-																if (!passwordAuthEnabled()) {
-																	spawnToast({
-																		title: T()(
-																			"toasts.common.auth.provider.last.unlink.blocked.title",
-																		),
-																		message: T()(
-																			"toasts.common.auth.provider.last.unlink.password.disabled.message",
-																		),
-																		status: "error",
-																	});
-																	return;
-																}
-																if (!userHasPassword()) {
-																	spawnToast({
-																		title: T()(
-																			"toasts.common.auth.provider.last.unlink.blocked.title",
-																		),
-																		message: T()(
-																			"toasts.common.auth.provider.last.unlink.no.password.message",
-																		),
-																		status: "error",
-																	});
-																	return;
-																}
-															}
-															unlinkAuthProvider.action.mutate({
-																providerKey: provider.key,
-															});
+											return (
+												<li>
+													<AuthProviderRow
+														provider={provider}
+														linkedProvider={linkedProvider()}
+														onUnlink={
+															linkedProvider()
+																? () => unlinkProvider(provider.key)
+																: undefined
 														}
-													: undefined
-											}
-											onLink={
-												!linkedProvider
-													? () => {
-															if (initiateProvider.action.isPending) {
-																return;
-															}
-															setLinkingProviderKey(provider.key);
-															initiateProvider.action.mutate({
-																providerKey: provider.key,
-																body: {
-																	actionType: "authenticated-link",
-																	redirectPath: `${location.pathname}${location.search}${location.hash}`,
-																},
-															});
+														onLink={
+															!linkedProvider()
+																? () => linkProvider(provider.key)
+																: undefined
 														}
-													: undefined
-											}
-											isLoading={isLinking || isUnlinking}
-										/>
-									);
-								}}
-							</For>
-						</div>
-					</InfoRow.Content>
-				</Show>
-				<InfoRow.Content
-					title={T()("account.sessions.title")}
-					description={T()("account.sessions.description")}
-					actions={
-						<Button
-							variant="danger"
-							size="sm"
-							type="button"
-							onClick={() => {
-								setRevokeSessionsModalOpen(true);
-							}}
-						>
-							{T()("common.logout.everywhere")}
-						</Button>
-					}
-					align="center"
-				/>
+														isLoading={
+															(linkingProviderKey() === provider.key &&
+																initiateProvider.action.isPending) ||
+															(unlinkingProviderKey() === provider.key &&
+																unlinkAuthProvider.action.isPending)
+														}
+													/>
+												</li>
+											);
+										}}
+									</For>
+								</ul>
+							</InfoRow.Item>
+						</Show>
+						<InfoRow.Item
+							title={T()("account.sessions.title")}
+							description={T()("account.sessions.description")}
+							actions={
+								<Button
+									variant="outline"
+									size="sm"
+									type="button"
+									onClick={() => setRevokeSessionsModalOpen(true)}
+								>
+									{T()("common.logout.everywhere")}
+								</Button>
+							}
+						/>
+					</ul>
+				</InfoRow.Content>
 			</InfoRow.Root>
 
 			{/* Developer Access */}
@@ -457,33 +505,43 @@ export const AccountContent: Component = () => {
 				title={T()("account.developer.access.title")}
 				description={T()("account.developer.access.description")}
 			>
-				<InfoRow.Content
-					title={T()("oauth.connections.manage.title")}
-					description={T()("oauth.connections.manage.description")}
-				>
-					<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
-						<OAuthConnectionsList
-							owner={{ type: "account" }}
-							canUpdate={true}
-							canRevoke={true}
-							embedded={true}
-							contained={false}
-						/>
-					</div>
+				<InfoRow.Content padding="none">
+					<ul class="divide-y divide-border">
+						<InfoRow.Item
+							title={T()("oauth.connections.manage.title")}
+							description={T()("oauth.connections.manage.description")}
+						>
+							<OAuthConnectionsList
+								owner={{ type: "account" }}
+								canUpdate={true}
+								canRevoke={true}
+							/>
+						</InfoRow.Item>
+						<InfoRow.Item
+							title={T()("user.integrations.manage.title")}
+							description={T()("user.integrations.manage.description")}
+							actions={
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={() => setCreateIntegrationOpen(true)}
+								>
+									{T()("integrations.create.action")}
+								</Button>
+							}
+						>
+							<UserIntegrationsList
+								services={api.account.integrations}
+								canUpdate={true}
+								canDelete={true}
+								canRegenerate={true}
+								openCreate={createIntegrationOpen()}
+								setOpenCreate={setCreateIntegrationOpen}
+							/>
+						</InfoRow.Item>
+					</ul>
 				</InfoRow.Content>
-				<UserIntegrationsList
-					services={api.account.integrations}
-					canCreate={true}
-					canUpdate={true}
-					canDelete={true}
-					canRegenerate={true}
-					embedded={true}
-					contained={false}
-					contentRow={{
-						title: T()("user.integrations.manage.title"),
-						description: T()("user.integrations.manage.description"),
-					}}
-				/>
 			</InfoRow.Root>
 
 			{/* Preferences */}
@@ -491,57 +549,70 @@ export const AccountContent: Component = () => {
 				title={T()("account.preferences.title")}
 				description={T()("account.preferences.description")}
 			>
-				<InfoRow.Content
-					title={T()("settings.interface.cms.appearance.title")}
-					description={T()("settings.interface.cms.appearance.description")}
-				>
-					<AppearancePreference />
-				</InfoRow.Content>
-				<InfoRow.Content
-					title={T()("settings.interface.cms.locale.title")}
-					description={T()("settings.interface.cms.locale.description")}
-				>
-					<Select
-						id={"cms-locale"}
-						value={getLocale()}
-						options={localesConfig.map((locale) => ({
-							label: locale.name || locale.code,
-							value: locale.code,
-						}))}
-						onChange={(value) => {
-							if (typeof value !== "string") return;
-							setLocale(value);
-							userPreferencesStore.setInterfaceLocale(value);
-						}}
-						name={"cms-locale"}
-					/>
-				</InfoRow.Content>
-				<Show when={siteStore.get.ai.enabled}>
-					<InfoRow.Content
-						title={T()("account.preferences.ai.title")}
-						description={T()("account.preferences.ai.description")}
-					>
-						<Switch
-							id="ai-features"
-							name="aiFeatures"
-							value={!userPreferencesStore.getAiHidden()}
-							onChange={(shown) => userPreferencesStore.setAiHidden(!shown)}
-							trueLabel={T()("common.yes")}
-							falseLabel={T()("common.no")}
+				<InfoRow.Content padding="none">
+					<ul class="divide-y divide-border">
+						<InfoRow.Item
+							title={T()("settings.interface.cms.appearance.title")}
+							description={T()("settings.interface.cms.appearance.description")}
+							actions={<AppearancePreference class="w-full md:w-44" />}
 						/>
-					</InfoRow.Content>
-				</Show>
-				<InfoRow.Content
-					title={T()("account.notifications.email.title")}
-					description={T()("account.notifications.email.description")}
-				>
-					<div class="-mx-4 -mb-4 border-t border-border">
-						<NotificationPreferences />
-					</div>
+						<InfoRow.Item
+							title={T()("settings.interface.cms.locale.title")}
+							description={T()("settings.interface.cms.locale.description")}
+							actions={
+								<Select
+									id="cms-locale"
+									name="cms-locale"
+									size="sm"
+									class="w-full md:w-44"
+									aria-label={T()("settings.interface.cms.locale.title")}
+									value={getLocale()}
+									options={localesConfig.map((locale) => ({
+										label: locale.name || locale.code,
+										value: locale.code,
+									}))}
+									onChange={(value) => {
+										if (typeof value !== "string") return;
+										setLocale(value);
+										userPreferencesStore.setInterfaceLocale(value);
+									}}
+								/>
+							}
+						/>
+						<Show when={siteStore.get.ai.enabled}>
+							<InfoRow.Item
+								title={T()("account.preferences.ai.title")}
+								description={T()("account.preferences.ai.description")}
+								actions={
+									<Switch
+										id="ai-features"
+										name="aiFeatures"
+										aria-label={T()("account.preferences.ai.title")}
+										value={!userPreferencesStore.getAiHidden()}
+										onChange={(shown) =>
+											userPreferencesStore.setAiHidden(!shown)
+										}
+										trueLabel={T()("common.yes")}
+										falseLabel={T()("common.no")}
+									/>
+								}
+							/>
+						</Show>
+					</ul>
 				</InfoRow.Content>
 			</InfoRow.Root>
 
-			{/* Modals */}
+			{/* Email Notifications */}
+			<InfoRow.Root
+				title={T()("account.notifications.email.title")}
+				description={T()("account.notifications.email.description")}
+			>
+				<InfoRow.Content padding="none">
+					<NotificationPreferences />
+				</InfoRow.Content>
+			</InfoRow.Root>
+
+			{/* Panels & Modals */}
 			<UpdateAccountDetailsModal
 				state={{
 					open: accountDetailsModalOpen(),
@@ -580,6 +651,20 @@ export const AccountContent: Component = () => {
 				onCancel={() => {
 					setRevokeSessionsModalOpen(false);
 					revokeRefreshTokens.reset();
+				}}
+			/>
+			<Modal.Confirm
+				open={removeProfilePictureOpen()}
+				onOpenChange={setRemoveProfilePictureOpen}
+				title={T()("account.profile.picture.clear.confirm.title")}
+				description={T()("account.profile.picture.clear.confirm.description")}
+				confirmLabel={T()("common.remove")}
+				loading={deleteProfilePicture.action.isPending}
+				error={deleteProfilePicture.errors()?.message}
+				onConfirm={() => deleteProfilePicture.action.mutate({})}
+				onCancel={() => {
+					setRemoveProfilePictureOpen(false);
+					deleteProfilePicture.reset();
 				}}
 			/>
 			<CreateUpdateProfilePictureDrawer

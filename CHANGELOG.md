@@ -22,6 +22,7 @@
 - Added `role: "content"` for public deployments that only serve content and media.
 - Media share links now come with a QR code you can copy or download, and media can be sent through your device's share menu from the media library and share pages.
 - Added document import and export, with their media, to move content between Lucid sites, plus `toolkit.transfer` and `defineTransfer` for scripts and plugins.
+- The system overview is now a Diagnostics page, with health checks for the database, KV, media storage and email, and a report you can copy or download for support.
 
 ### Breaking Changes:
 

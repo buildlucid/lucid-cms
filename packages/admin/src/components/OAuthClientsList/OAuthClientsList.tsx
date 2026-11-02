@@ -1,38 +1,31 @@
 import type { OAuthClientCreateResponse, Permission } from "@types";
-import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import { TbOutlineKey } from "solid-icons/tb";
+import { type Component, createMemo, createSignal, For } from "solid-js";
 import Button from "@/components/Button/Button";
-import EmptyState from "@/components/EmptyState/EmptyState";
+import CardState from "@/components/CardState/CardState";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
 import OAuthClientRow from "@/components/OAuthClientRow/OAuthClientRow";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import SkeletonCardRows from "@/components/SkeletonCardRows/SkeletonCardRows";
 import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
+/** The OAuth Applications section: registered applications in a card of divided rows, with the register action under the section's description. */
 export const OAuthClientsList: Component<{
 	createPermission: Permission | undefined;
 	canUpdate: boolean;
 	canDelete: boolean;
 	canRegenerate: boolean;
-	contentRow?: {
-		title: string;
-		description?: string;
-	};
 }> = (props) => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
 	const [createOpen, setCreateOpen] = createSignal(false);
 	const [credentialsOpen, setCredentialsOpen] = createSignal(false);
 	const [credentials, setCredentials] =
 		createSignal<OAuthClientCreateResponse>();
-
-	// ----------------------------------------
-	// Memos
-	const canCreate = createMemo(
-		() => userStore.get.hasPermission([props.createPermission]).all,
-	);
 
 	// ----------------------------------------
 	// Queries
@@ -41,130 +34,64 @@ export const OAuthClientsList: Component<{
 	});
 
 	// ----------------------------------------
+	// Memos
+	const canCreate = createMemo(
+		() => userStore.get.hasPermission([props.createPermission]).all,
+	);
+
+	// ----------------------------------------
 	// Render
 	return (
 		<>
-			<Show
-				when={props.contentRow}
-				fallback={
-					<InfoRow.Root
-						title={T()("oauth.clients.manage.title")}
-						description={T()("oauth.clients.manage.description")}
-					>
-						<QueryBoundary
-							loading={clients.isLoading}
-							error={clients.isError}
-							empty={clients.isSuccess && clients.data.data.length === 0}
-							emptyFallback={
-								<EmptyState
-									title={T()("oauth.clients.empty.title")}
-									description={T()("oauth.clients.empty.description")}
-									actions={
-										<Button
-											size="sm"
-											onClick={() => setCreateOpen(true)}
-											permission={props.createPermission}
-										>
-											{T()("oauth.clients.create.action")}
-										</Button>
-									}
-								/>
-							}
-							class="overflow-hidden rounded-md border border-border bg-card"
+			<InfoRow.Root
+				title={T()("oauth.clients.manage.title")}
+				description={T()("oauth.clients.manage.description")}
+				aside={
+					canCreate() ? (
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => setCreateOpen(true)}
 						>
-							<div class="flex flex-col">
-								<For each={clients.data?.data ?? []}>
-									{(client) => (
+							{T()("oauth.clients.create.action")}
+						</Button>
+					) : undefined
+				}
+			>
+				<InfoRow.Content padding="none">
+					<QueryBoundary
+						appearance="contained"
+						loading={clients.isLoading}
+						loadingFallback={<SkeletonCardRows variant="row" />}
+						error={clients.isError}
+						onRetry={() => clients.refetch()}
+						empty={clients.isSuccess && clients.data.data.length === 0}
+						emptyFallback={
+							<CardState
+								icon={<TbOutlineKey />}
+								title={T()("oauth.clients.empty.title")}
+								description={T()("oauth.clients.empty.description")}
+							/>
+						}
+					>
+						<ul class="divide-y divide-border">
+							<For each={clients.data?.data ?? []}>
+								{(client) => (
+									<li>
 										<OAuthClientRow
 											client={client}
 											canUpdate={props.canUpdate}
 											canDelete={props.canDelete}
 											canRegenerate={props.canRegenerate}
 										/>
-									)}
-								</For>
-							</div>
-						</QueryBoundary>
-						<Show
-							when={
-								canCreate() && clients.isSuccess && clients.data.data.length > 0
-							}
-						>
-							<div class="mt-3 flex justify-start">
-								<Button
-									type="button"
-									variant="primary"
-									size="sm"
-									onClick={() => setCreateOpen(true)}
-								>
-									{T()("oauth.clients.create.action")}
-								</Button>
-							</div>
-						</Show>
-					</InfoRow.Root>
-				}
-			>
-				{(contentRow) => (
-					<>
-						<InfoRow.Content
-							title={contentRow().title}
-							description={contentRow().description}
-						>
-							<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
-								<QueryBoundary
-									loading={clients.isLoading}
-									error={clients.isError}
-									empty={clients.isSuccess && clients.data.data.length === 0}
-									emptyFallback={
-										<EmptyState
-											title={T()("oauth.clients.empty.title")}
-											description={T()("oauth.clients.empty.description")}
-											actions={
-												<Button
-													size="sm"
-													onClick={() => setCreateOpen(true)}
-													permission={props.createPermission}
-												>
-													{T()("oauth.clients.create.action")}
-												</Button>
-											}
-										/>
-									}
-								>
-									<div class="flex flex-col">
-										<For each={clients.data?.data ?? []}>
-											{(client) => (
-												<OAuthClientRow
-													client={client}
-													canUpdate={props.canUpdate}
-													canDelete={props.canDelete}
-													canRegenerate={props.canRegenerate}
-												/>
-											)}
-										</For>
-									</div>
-								</QueryBoundary>
-							</div>
-						</InfoRow.Content>
-						<Show
-							when={
-								canCreate() && clients.isSuccess && clients.data.data.length > 0
-							}
-						>
-							<div class="mt-2 flex justify-start">
-								<Button
-									type="button"
-									variant="primary"
-									size="sm"
-									onClick={() => setCreateOpen(true)}
-								>
-									{T()("oauth.clients.create.action")}
-								</Button>
-							</div>
-						</Show>
-					</>
-				)}
-			</Show>
+									</li>
+								)}
+							</For>
+						</ul>
+					</QueryBoundary>
+				</InfoRow.Content>
+			</InfoRow.Root>
 
 			{/* Panels */}
 			<UpsertOAuthClientDrawer

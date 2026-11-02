@@ -2,7 +2,7 @@ import type { Integration } from "@types";
 import { TbOutlineKey } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
-import IconContainer from "@/components/IconContainer/IconContainer";
+import RowIcon from "@/components/RowIcon/RowIcon";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import T from "@/translations";
@@ -40,11 +40,11 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<article class="flex items-start justify-between gap-3 border-b border-border p-4 last:border-b-0">
+		<article class="flex items-center justify-between gap-3 rounded-lg border border-border bg-input p-2">
 			<div class="flex min-w-0 items-start gap-3">
-				<IconContainer>
-					<TbOutlineKey class="size-3.5 text-primary" />
-				</IconContainer>
+				<RowIcon>
+					<TbOutlineKey class="size-4" />
+				</RowIcon>
 				<div class="min-w-0">
 					<h3 class="truncate text-sm font-semibold text-title">
 						{props.integration.name}
@@ -54,7 +54,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 							{props.integration.description}
 						</p>
 					</Show>
-					<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+					<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
 						<code class="font-mono text-xs text-body">
 							{props.integration.key}
 						</code>
@@ -76,6 +76,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 				</div>
 			</div>
 			<ActionMenu
+				variant="ghost"
 				actions={[
 					{
 						type: "button",

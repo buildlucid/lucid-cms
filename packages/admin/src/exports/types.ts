@@ -43,6 +43,13 @@ export type {
 	HomeWidgetSlot,
 } from "../components/HomeWidgets/types.js";
 export type {
+	MaintenanceGroup,
+	MaintenanceSlot,
+	MaintenanceSlotComponent,
+	MaintenanceSlotPlacement,
+	MaintenanceSlotProps,
+} from "../components/MaintenanceSlots/types.js";
+export type {
 	BrickState,
 	EditorContext,
 	EditorFieldConfig,

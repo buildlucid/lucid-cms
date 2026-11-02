@@ -7,7 +7,7 @@ export interface DrawerFooterProps {
 	children: JSXElement;
 }
 
-/** The bottom of the drawer, for messages and `Drawer.Actions`. */
+/** The bottom of the drawer, for messages and `Drawer.Actions`. Stays in view while the rest of the drawer scrolls. */
 export const DrawerFooter: Component<DrawerFooterProps> = (props) => {
 	// ------------------------------
 	// State & Hooks
@@ -19,7 +19,7 @@ export const DrawerFooter: Component<DrawerFooterProps> = (props) => {
 		<div
 			data-drawer-footer
 			class={classNames(
-				"mt-4 md:mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card py-4 md:py-6",
+				"sticky bottom-0 z-10 mt-4 md:mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card py-4 md:py-6",
 				{
 					"px-4": padding() === "sm",
 					"px-4 md:px-6": padding() === "md",

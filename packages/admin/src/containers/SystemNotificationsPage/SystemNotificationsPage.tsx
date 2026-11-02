@@ -39,6 +39,15 @@ const SystemNotificationsPage: Component = () => {
 				<QueryBoundary
 					loading={types.isLoading || roles.isLoading}
 					error={types.isError || roles.isError}
+					loadingFallback={
+						<Index each={Array.from({ length: 2 })}>
+							{() => (
+								<InfoRow.Root loading>
+									<span class="skeleton block h-48 w-full" />
+								</InfoRow.Root>
+							)}
+						</Index>
+					}
 					class="flex-1 h-full p-4 md:p-6"
 				>
 					{/* by position, so rows keep their open role pickers across refetches */}
@@ -51,7 +60,7 @@ const SystemNotificationsPage: Component = () => {
 									{ category: group().label },
 								)}
 							>
-								<InfoRow.Content class="overflow-hidden p-0">
+								<InfoRow.Content padding="none">
 									<ul class="divide-y divide-border">
 										<Index each={group().items}>
 											{(type) => (

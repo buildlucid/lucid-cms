@@ -30,6 +30,7 @@ import { DocumentSidebar } from "@/components/DocumentSidebar/DocumentSidebar";
 import { FixedBricks } from "@/components/FixedBricks/FixedBricks";
 import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHeader";
 import type { ViewSelectorOption } from "@/components/PageBuilderHeader/parts/ViewSelector";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import WorkflowStageSelect from "@/components/WorkflowStageSelect/WorkflowStageSelect";
 import { useBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import { useBuilderTools } from "@/hooks/useBuilderTools/useBuilderTools";
@@ -56,6 +57,7 @@ import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getRequestRoute } from "@/utils/route-helpers";
 import DocumentChangedBar from "./parts/DocumentChangedBar";
+import DocumentEditorSkeleton from "./parts/DocumentEditorSkeleton";
 import DocumentHeldModal from "./parts/DocumentHeldModal";
 import { PageBuilderModals } from "./parts/PageBuilderModals";
 
@@ -590,15 +592,7 @@ const DocumentEditorPage: Component<{
 					docState.collectionsQuery.isLoading
 				}
 			>
-				<div class="-mt-4 relative bg-background rounded-b-xl border border-border h-36">
-					<span class="absolute inset-4 bg-background-hover z-5 skeleton" />
-				</div>
-				<div class="mt-2 bg-background rounded-t-xl border border-border grow overflow-hidden relative">
-					<div class="absolute top-4 left-4 bottom-4 right-4 flex flex-col z-10">
-						<span class="h-62 w-full skeleton block mb-4" />
-						<span class="h-full w-full skeleton block" />
-					</div>
-				</div>
+				<DocumentEditorSkeleton />
 			</Match>
 			<Match when={uiState.isSuccess()}>
 				<PageBuilderStateProvider
@@ -842,14 +836,11 @@ const DocumentEditorPage: Component<{
 													<Show
 														when={comparison.query.isError}
 														fallback={
-															<div
-																class="grid gap-4 p-4 md:p-6"
-																aria-busy="true"
-															>
+															<Skeleton class="grid gap-4 p-4 md:p-6">
 																<span class="skeleton block h-48 w-full" />
 																<span class="skeleton block h-24 w-full" />
 																<span class="skeleton block h-72 w-full" />
-															</div>
+															</Skeleton>
 														}
 													>
 														<p class="p-6 text-sm text-body">

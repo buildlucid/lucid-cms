@@ -33,5 +33,6 @@
 	"plugin.pages.descendants.fields.fetch.failed": "An error occurred while getting the descendant page fields.",
 	"plugin.pages.path.children.update.failed": "An error occurred while updating the paths of child pages.",
 	"plugin.pages.documents.version.fields.fetch.failed": "An error occurred while getting the document version fields.",
-	"plugin.pages.fields.validation.required": "This field is required."
+	"plugin.pages.fields.validation.required": "This field is required.",
+	"plugin.pages.rebuild.paths.duplicate": "Page paths weren't rebuilt because more than one page would use {{route}} in {{target}}. Change one of their slugs, then try again."
 }

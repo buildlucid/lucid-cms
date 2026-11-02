@@ -1,0 +1,9 @@
+{
+	"plugin.site.maintenance.title": "Site Pages",
+	"plugin.site.maintenance.description": "Clear stored pages and fragments so they render afresh on their next request. CDN caches keep their copies until they expire",
+	"plugin.site.maintenance.action": "Clear Pages",
+	"plugin.site.maintenance.modal.title": "Clear Stored Pages",
+	"plugin.site.maintenance.modal.description": "Stored ISR pages and fragments will render afresh on their next request, so the site may be slower for a moment. CDN caches keep their copies until they expire.",
+	"plugin.site.maintenance.toast.title": "Stored pages cleared",
+	"plugin.site.maintenance.toast.message": "Pages and fragments will render afresh on their next request."
+}

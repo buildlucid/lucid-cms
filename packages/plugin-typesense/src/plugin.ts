@@ -1,9 +1,11 @@
 import { copy, definePlugin, LucidError } from "@lucidcms/core";
 import { resolveCollectionLocalization } from "@lucidcms/core/extension";
 import type { LucidPlugin } from "@lucidcms/core/types";
+import rebuildIndexesConfig from "./admin/components/RebuildIndexes/config.js";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import createSyncJob from "./jobs/sync.js";
 import migration from "./migrations/1788900000000-typesense.js";
+import routes from "./routes/index.js";
 import recordChange from "./services/record-change.js";
 import readStatuses from "./tasks/read-statuses.js";
 import rebuildIndexes from "./tasks/rebuild-indexes.js";
@@ -32,6 +34,8 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 				migration,
 			});
 			draft.jobs.definitions.push(job);
+			draft.http.routes.push(...routes(options, job));
+			draft.admin.slots.push(rebuildIndexesConfig());
 			draft.hooks.push(
 				{
 					service: "documents",

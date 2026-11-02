@@ -4,6 +4,7 @@ import type { Component } from "solid-js";
 import { createMemo, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
+import RowIcon from "@/components/RowIcon/RowIcon";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 
@@ -26,7 +27,7 @@ const AuthProviderRow: Component<{
 	return (
 		<div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-input p-2">
 			<div class="flex items-center gap-3">
-				<span class="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-icon">
+				<RowIcon>
 					<Show
 						when={props.provider.icon}
 						fallback={<TbOutlineUser class="size-4.5" />}
@@ -37,7 +38,7 @@ const AuthProviderRow: Component<{
 							class="size-4.5 object-contain"
 						/>
 					</Show>
-				</span>
+				</RowIcon>
 				<div class="flex flex-col">
 					<span class="text-sm font-medium text-title">
 						{props.provider.name}
@@ -45,12 +46,12 @@ const AuthProviderRow: Component<{
 					<Show
 						when={linked()}
 						fallback={
-							<span class="text-xs text-body">
+							<span class="mt-0.5 text-xs text-body">
 								{T()("common.status.not.linked")}
 							</span>
 						}
 					>
-						<span class="text-xs text-body">
+						<span class="mt-0.5 text-xs text-body">
 							{formattedLinkedDate()
 								? T()("common.linked.on", { date: formattedLinkedDate() })
 								: T()("common.status.linked")}

@@ -1,6 +1,7 @@
 import type { Collection, InternalCollectionDocument } from "@types";
 import { TbOutlineCheck } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import T from "@/translations";
 import { getDocumentReferencePreviewFields } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
@@ -49,7 +50,11 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 		<div class="flex min-h-0 grow flex-col">
 			<Show
 				when={!props.isLoading}
-				fallback={<div class="skeleton min-h-36 grow rounded-lg" />}
+				fallback={
+					<Skeleton class="flex min-h-36 grow flex-col">
+						<span class="skeleton grow rounded-lg" />
+					</Skeleton>
+				}
 			>
 				<Show
 					when={!props.isError && props.document && !props.isExcluded}

@@ -8,6 +8,7 @@ import captchaRoutes from "./captcha.routes.js";
 import collectionRoutes from "./collections.routes.js";
 import connectionRoutes from "./connection.routes.js";
 import contentRoutes from "./content/index.js";
+import diagnosticsRoutes from "./diagnostics.routes.js";
 import documentRoutes from "./document.routes.js";
 import emailRoutes from "./email.routes.js";
 import i18nRoutes from "./i18n.routes.js";
@@ -34,6 +35,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/integrations", integrationRoutes)
 	.route("/collections", collectionRoutes)
 	.route("/connection", connectionRoutes)
+	.route("/diagnostics", diagnosticsRoutes)
 	.route("/documents", documentRoutes)
 	.route("/emails", emailRoutes)
 	.route("/i18n", i18nRoutes)

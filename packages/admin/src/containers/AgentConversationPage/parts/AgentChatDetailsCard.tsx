@@ -10,6 +10,7 @@ import {
 	Switch,
 } from "solid-js";
 import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import WebSourceRow from "@/components/WebSourceRow/WebSourceRow";
 import api from "@/services/api";
 import T from "@/translations";
@@ -104,7 +105,9 @@ const AgentChatDetailsCard: Component<{
 						</p>
 					</Match>
 					<Match when={!data()}>
-						<span class="skeleton block h-8 w-full" />
+						<Skeleton>
+							<span class="skeleton block h-8 w-full" />
+						</Skeleton>
 					</Match>
 					<Match when={sources().length === 0}>
 						<p class="text-xs text-muted">

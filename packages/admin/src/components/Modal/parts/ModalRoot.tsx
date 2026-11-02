@@ -82,21 +82,25 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 						}}
 					>
 						<div
-							class={classNames("w-full m-auto flex flex-col gap-3", {
-								"max-w-md": props.size === "sm",
-								"max-w-2xl": props.size === undefined || props.size === "md",
-								"max-w-7xl": props.size === "lg",
-							})}
+							class={classNames(
+								"w-full max-h-full m-auto flex flex-col gap-3",
+								{
+									"max-w-md": props.size === "sm",
+									"max-w-2xl": props.size === undefined || props.size === "md",
+									"max-w-7xl": props.size === "lg",
+								},
+							)}
 						>
 							<LayerContext.Provider value={layer}>
 								<ModalContext.Provider value={{ dismissible }}>
 									<Show when={above()}>
-										<div class="pointer-events-auto">{above()}</div>
+										<div class="shrink-0 pointer-events-auto">{above()}</div>
 									</Show>
+									{/* never taller than the screen: the dialog scrolls, with `Modal.Footer` stuck to its bottom */}
 									<div
 										data-modal-content
 										class={classNames(
-											"w-full bg-background border border-border rounded-xl overflow-hidden pointer-events-auto",
+											"scrollbar w-full min-h-0 bg-background border border-border rounded-xl overflow-x-hidden overflow-y-auto overscroll-contain pointer-events-auto",
 											props.class,
 										)}
 									>

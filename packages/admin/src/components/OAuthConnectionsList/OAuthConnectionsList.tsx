@@ -1,19 +1,24 @@
-import classnames from "classnames";
-import { type Component, For, Show } from "solid-js";
-import EmptyState from "@/components/EmptyState/EmptyState";
-import InfoRow from "@/components/InfoRow/InfoRow";
+import { TbOutlineWorld } from "solid-icons/tb";
+import { type Component, createMemo, For, Show } from "solid-js";
+import CardState from "@/components/CardState/CardState";
 import OAuthConnectionRow from "@/components/OAuthConnectionRow/OAuthConnectionRow";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import SkeletonCardRows from "@/components/SkeletonCardRows/SkeletonCardRows";
+import StateNote from "@/components/StateNote/StateNote";
 import api from "@/services/api";
 import type { OAuthConnectionOwner } from "@/services/api/oauth-connections";
 import T from "@/translations";
 
+/**
+ * Lists connections as stacked `cards` or divided `rows`. Use rows in `InfoRow.Content` with
+ * `padding="none"`.
+ */
 export const OAuthConnectionsList: Component<{
 	owner: OAuthConnectionOwner;
 	canUpdate: boolean;
 	canRevoke: boolean;
-	embedded?: boolean;
-	contained?: boolean;
+	/** @default "cards" */
+	variant?: "cards" | "rows";
 }> = (props) => {
 	// ----------------------------------------
 	// Queries
@@ -22,53 +27,47 @@ export const OAuthConnectionsList: Component<{
 	});
 
 	// ----------------------------------------
-	// Functions
-	const content = () => (
-		<QueryBoundary
-			loading={connections.isLoading}
-			error={connections.isError}
-			empty={connections.isSuccess && connections.data.data.length === 0}
-			emptyFallback={
-				<EmptyState
-					title={T()("oauth.connections.empty.title")}
-					description={T()("oauth.connections.empty.description")}
-				/>
-			}
-			class={classnames({
-				"overflow-hidden rounded-md border border-border bg-card":
-					props.contained !== false,
-			})}
-		>
-			<div class="flex flex-col">
-				<For each={connections.data?.data ?? []}>
-					{(connection) => (
-						<OAuthConnectionRow
-							connection={connection}
-							owner={props.owner}
-							canUpdate={props.canUpdate}
-							canRevoke={props.canRevoke}
-						/>
-					)}
-				</For>
-			</div>
-		</QueryBoundary>
-	);
+	// Memos
+	const isRows = createMemo(() => props.variant === "rows");
 
 	// ----------------------------------------
 	// Render
 	return (
-		<Show
-			when={props.embedded}
-			fallback={
-				<InfoRow.Root
-					title={T()("oauth.connections.manage.title")}
-					description={T()("oauth.connections.manage.description")}
+		<QueryBoundary
+			appearance={isRows() ? "contained" : "inline"}
+			loading={connections.isLoading}
+			loadingFallback={<SkeletonCardRows variant={isRows() ? "row" : "card"} />}
+			error={connections.isError}
+			onRetry={() => connections.refetch()}
+			empty={connections.isSuccess && connections.data.data.length === 0}
+			emptyFallback={
+				<Show
+					when={isRows()}
+					fallback={<StateNote>{T()("oauth.connections.empty")}</StateNote>}
 				>
-					{content()}
-				</InfoRow.Root>
+					<CardState
+						icon={<TbOutlineWorld />}
+						title={T()("oauth.connections.empty.title")}
+						description={T()("oauth.connections.empty.description")}
+					/>
+				</Show>
 			}
 		>
-			{content()}
-		</Show>
+			<ul class={isRows() ? "divide-y divide-border" : "flex flex-col gap-3"}>
+				<For each={connections.data?.data ?? []}>
+					{(connection) => (
+						<li>
+							<OAuthConnectionRow
+								connection={connection}
+								owner={props.owner}
+								canUpdate={props.canUpdate}
+								canRevoke={props.canRevoke}
+								variant={isRows() ? "row" : "card"}
+							/>
+						</li>
+					)}
+				</For>
+			</ul>
+		</QueryBoundary>
 	);
 };

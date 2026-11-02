@@ -342,3 +342,28 @@ export const toolLabel = (part: AgentToolPart, retried?: boolean) => {
 		? summary
 		: `${summary} · ${T()(`agent.tool.status.${status}`)}`;
 };
+
+export interface ToolGroup {
+	/** The resource prefix, such as `documents`. */
+	key: string;
+	label: string;
+	/** What's left of each name, such as `find` or `list versions`. */
+	actions: string[];
+}
+
+/** Groups tools named `<resource>_<action>`, like `documents_find`, by resource, for compact listings. */
+export const groupTools = (names: string[]): ToolGroup[] => {
+	const groups = new Map<string, string[]>();
+	for (const name of names) {
+		const split = name.indexOf("_");
+		const key = split === -1 ? name : name.slice(0, split);
+		const actions = groups.get(key) ?? [];
+		if (split !== -1) actions.push(name.slice(split + 1).replaceAll("_", " "));
+		groups.set(key, actions);
+	}
+	return Array.from(groups, ([key, actions]) => ({
+		key,
+		label: key.charAt(0).toUpperCase() + key.slice(1),
+		actions,
+	}));
+};

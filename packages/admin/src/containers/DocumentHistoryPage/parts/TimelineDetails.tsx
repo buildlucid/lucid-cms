@@ -36,6 +36,7 @@ import DateText from "@/components/DateText/DateText";
 import Link from "@/components/Link/Link";
 import Pill, { type PillProps } from "@/components/Pill/Pill";
 import RequestCompactList from "@/components/RequestCompactList/RequestCompactList";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import type {
 	RetentionInfo,
 	TimelineItem,
@@ -265,12 +266,12 @@ const TimelineDetails: Component<{
 			>
 				<Switch>
 					<Match when={props.selectedVersionDocumentLoading()}>
-						<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-							<span class="h-16 rounded-md skeleton" />
-							<span class="h-16 rounded-md skeleton" />
-							<span class="h-16 rounded-md skeleton" />
-							<span class="h-16 rounded-md skeleton" />
-						</div>
+						<Skeleton class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+							<span class="h-16 skeleton" />
+							<span class="h-16 skeleton" />
+							<span class="h-16 skeleton" />
+							<span class="h-16 skeleton" />
+						</Skeleton>
 					</Match>
 					<Match when={true}>
 						<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">

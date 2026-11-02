@@ -222,7 +222,7 @@ export const Workflow: Component<{
 			>
 				<div class="relative space-y-3">
 					<Show when={updatePending()}>
-						<div class="absolute inset-0 z-10 rounded-md bg-card/60 animate-pulse" />
+						<span class="loading-overlay rounded-md" aria-hidden="true" />
 					</Show>
 					<Select
 						id="document-workflow-stage"

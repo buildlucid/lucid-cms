@@ -69,6 +69,26 @@
 		@apply bg-input rounded-md animate-pulse;
 	}
 
+	/* pulses over a busy control, tinted from its text colour so it suits any variant. The parent needs `relative` */
+	.loading-overlay {
+		@apply pointer-events-none absolute inset-0 z-10 rounded-[inherit] bg-current/15 animate-pulse;
+	}
+
+	/* InfoRow titles stack into a sticky bar below lg. Once it's stuck, content fades out beneath it, where scroll-state queries are supported */
+	.info-row-heading {
+		container-type: scroll-state;
+	}
+
+	.info-row-fade {
+		opacity: 0;
+	}
+
+	@container scroll-state(stuck: top) {
+		.info-row-fade {
+			opacity: 1;
+		}
+	}
+
 	.skeleton-shimmer {
 		display: block;
 		background: linear-gradient(

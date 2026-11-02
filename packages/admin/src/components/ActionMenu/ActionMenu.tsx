@@ -9,7 +9,6 @@ import Menu, {
 	type MenuItemVariant,
 	type MenuPlacement,
 } from "@/components/Menu/Menu";
-import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 import {
 	checkPermission,
@@ -215,7 +214,7 @@ const ActionItem: Component<{
 			rel={props.action.rel}
 			textValue={props.action.label}
 			icon={<ActionIcon icon={props.action.icon} />}
-			end={props.action.loading ? <Spinner size="sm" /> : undefined}
+			loading={props.action.loading}
 			variant={props.action.variant}
 			unavailable={refused()}
 			onSelect={() => props.onSelect(props.action)}

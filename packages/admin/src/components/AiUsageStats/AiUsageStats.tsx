@@ -7,6 +7,7 @@ export interface AiUsageStat {
 	accent?: string;
 }
 
+/** Totals as a strip along the bottom of a card with `padding="none"`. An `accent` adds a coloured dot, such as the charted metric's line colour. */
 const AiUsageStats: Component<{ stats: AiUsageStat[]; class?: string }> = (
 	props,
 ) => {
@@ -15,14 +16,14 @@ const AiUsageStats: Component<{ stats: AiUsageStat[]; class?: string }> = (
 	return (
 		<dl
 			class={classnames(
-				"grid grid-cols-2 gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-4",
+				"grid grid-cols-2 gap-px border-t border-border bg-border sm:grid-cols-4",
 				props.class,
 			)}
 		>
 			<For each={props.stats}>
 				{(stat) => (
-					<div class="flex min-w-0 flex-col gap-0.5 bg-card px-3 py-2">
-						<dt class="flex items-center gap-1.5 text-[11px] leading-4 text-muted">
+					<div class="flex min-w-0 flex-col gap-0.5 bg-card px-5 py-3">
+						<dt class="flex items-center gap-1.5 text-xs text-muted">
 							<Show when={stat.accent}>
 								{(accent) => (
 									<span
@@ -33,7 +34,7 @@ const AiUsageStats: Component<{ stats: AiUsageStat[]; class?: string }> = (
 							</Show>
 							{stat.label}
 						</dt>
-						<dd class="truncate text-sm text-title tabular-nums">
+						<dd class="truncate text-sm font-medium text-title tabular-nums">
 							{stat.value ?? "-"}
 						</dd>
 					</div>

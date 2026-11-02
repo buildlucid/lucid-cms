@@ -19,7 +19,8 @@ export const DrawerBody: Component<DrawerBodyProps> = (props) => {
 		<div
 			data-drawer-body
 			class={classNames(
-				"grow",
+				//* isolate keeps content z-indexes, like media previews, beneath the sticky footer
+				"grow isolate",
 				{
 					"px-4": padding() === "sm",
 					"px-4 md:px-6": padding() === "md",

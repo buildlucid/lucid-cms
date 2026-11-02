@@ -1,26 +1,33 @@
 import type { AuthProviders } from "@types";
+import classNames from "classnames";
 import { TbOutlineUserCircle } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
-import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 
+/** A "Continue with" button for an auth provider, used on the login and invitation pages. */
 const ProviderButton: Component<{
 	provider: AuthProviders["providers"][number];
 	onClick: () => void;
 	disabled: boolean;
 	isLoading?: boolean;
 }> = (props) => {
+	// ----------------------------------------
+	// Render
 	return (
 		<button
 			type="button"
-			class="px-6 py-3 h-12 text-base flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 border border-border hover:border-transparent text-body bg-input hover:bg-secondary-hover hover:text-secondary-foreground w-full group"
+			class={classNames(
+				"px-6 py-3 h-12 text-base flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative border border-border hover:border-transparent text-body bg-input hover:bg-secondary-hover hover:text-secondary-foreground w-full group",
+				{
+					"disabled:cursor-not-allowed disabled:opacity-80": !props.isLoading,
+				},
+			)}
 			onClick={props.onClick}
 			disabled={props.disabled || props.isLoading}
+			aria-busy={props.isLoading ? "true" : undefined}
 		>
 			<Show when={props.isLoading}>
-				<div class="flex items-center justify-center absolute inset-0 z-10 rounded-md bg-card/50">
-					<Spinner size="sm" />
-				</div>
+				<span class="loading-overlay" aria-hidden="true" />
 			</Show>
 			{props.provider.icon ? (
 				<img

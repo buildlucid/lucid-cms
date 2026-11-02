@@ -14,7 +14,7 @@ import Button from "@/components/Button/Button";
 import { DegreeRangeControl } from "@/components/DegreeRangeControl/DegreeRangeControl";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import Modal from "@/components/Modal/Modal";
-import Spinner from "@/components/Spinner/Spinner";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import T from "@/translations";
 import {
 	canvasToFile,
@@ -548,9 +548,9 @@ const ImageCropEditorModal: Component<{
 				<div class="relative z-10">
 					<div ref={stageRef} class="image-cropper-stage" />
 					<Show when={isPreparing()}>
-						<div class="absolute inset-0 z-30 flex items-center justify-center bg-background/70">
-							<Spinner size="md" />
-						</div>
+						<Skeleton class="absolute inset-0 z-30 bg-background p-4">
+							<span class="skeleton block size-full" />
+						</Skeleton>
 					</Show>
 				</div>
 				<div

@@ -1,3 +1,4 @@
+import { TbOutlineRefresh } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -8,11 +9,15 @@ import {
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import Button from "@/components/Button/Button";
 import DateText from "@/components/DateText/DateText";
+import DetailsList from "@/components/DetailsList/DetailsList";
 import DisconnectConnectionModal from "@/components/DisconnectConnectionModal/DisconnectConnectionModal";
 import InfoRow from "@/components/InfoRow/InfoRow";
-import Pill from "@/components/Pill/Pill";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ResetConnectionModal from "@/components/ResetConnectionModal/ResetConnectionModal";
+import RowIcon from "@/components/RowIcon/RowIcon";
+import StateNote from "@/components/StateNote/StateNote";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
+import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import constants from "@/constants";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -79,6 +84,7 @@ const LucidConnection: Component = () => {
 		() => userStore.get.hasPermission([Permissions.ConnectionUpdate]).all,
 	);
 	const isConnected = createMemo(() => connection()?.status === "connected");
+	const isRevoked = createMemo(() => connection()?.status === "revoked");
 	const lastVerifiedIso = createMemo(() => {
 		const timestamp = connection()?.lastVerified;
 		return timestamp ? new Date(timestamp * 1000).toISOString() : null;
@@ -116,49 +122,73 @@ const LucidConnection: Component = () => {
 	// Render
 	return (
 		<>
-			{/* matches the gap between rows in an InfoRow, which this wrapper would otherwise hide */}
 			<QueryBoundary
 				loading={status.isLoading}
 				error={status.isError}
-				class="gap-2"
+				appearance="card"
+				onRetry={() => status.refetch()}
+				loadingFallback={<span class="skeleton block h-40 w-full" />}
 			>
-				<InfoRow.Content>
-					<div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-						<div class="min-w-0">
-							<Pill
-								variant={
-									isConnected()
-										? "success-subtle"
-										: connection()?.status === "revoked"
-											? "danger-subtle"
-											: "outline"
+				<InfoRow.Content padding="none">
+					<div class="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+						<div class="flex min-w-0 items-center gap-4">
+							<RowIcon>
+								<ThemeLogoIcon class="size-4.5" alt="" />
+							</RowIcon>
+							<div class="min-w-0">
+								<h3 class="flex items-center gap-2 text-sm font-medium">
+									<StatusIndicator
+										variant={
+											isConnected()
+												? "success"
+												: isRevoked()
+													? "danger"
+													: "neutral-subtle"
+										}
+									/>
+									{isConnected()
+										? T()("connection.connected.title")
+										: isRevoked()
+											? T()("connection.revoked.title")
+											: T()("connection.disconnected.title")}
+								</h3>
+								<p class="mt-0.5 text-sm">
+									{isConnected()
+										? T()("connection.connected.description")
+										: isRevoked()
+											? T()("connection.revoked.description")
+											: T()("connection.disconnected.description")}
+								</p>
+							</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-1.5">
+							<Show
+								when={isConnected()}
+								fallback={
+									<Button
+										type="button"
+										size="sm"
+										variant="primary"
+										permission={Permissions.ConnectionUpdate}
+										loading={connect.action.isPending}
+										onClick={() => connect.action.mutate({})}
+									>
+										{T()("connection.connect.action")}
+									</Button>
 								}
 							>
-								{isConnected()
-									? T()("connection.status.connected")
-									: connection()?.status === "revoked"
-										? T()("connection.status.revoked")
-										: T()("connection.status.disconnected")}
-							</Pill>
-							<p class="mt-2 text-sm">
-								{isConnected()
-									? T()("connection.connected.description")
-									: connection()?.status === "revoked"
-										? T()("connection.revoked.description")
-										: T()("connection.disconnected.description")}
-							</p>
-						</div>
-						<div class="flex shrink-0 items-center gap-2">
-							<Show when={!isConnected()}>
 								<Button
 									type="button"
 									size="sm"
-									variant="primary"
+									variant="ghost"
+									shape="square"
+									title={T()("connection.verify.action")}
+									aria-label={T()("connection.verify.action")}
 									permission={Permissions.ConnectionUpdate}
-									loading={connect.action.isPending}
-									onClick={() => connect.action.mutate({})}
+									loading={verify.action.isPending}
+									onClick={() => verify.action.mutate({})}
 								>
-									{T()("connection.connect.action")}
+									<TbOutlineRefresh class="size-4" />
 								</Button>
 							</Show>
 							<ActionMenu
@@ -172,15 +202,6 @@ const LucidConnection: Component = () => {
 										target: "_blank",
 										rel: "noreferrer",
 										sortOrder: 0,
-									},
-									{
-										type: "button",
-										label: T()("connection.verify.action"),
-										icon: "rotate",
-										onClick: () => verify.action.mutate({}),
-										permission: canManage() && isConnected(),
-										loading: verify.action.isPending,
-										sortOrder: 10,
 									},
 									{
 										type: "button",
@@ -214,54 +235,50 @@ const LucidConnection: Component = () => {
 						</div>
 					</div>
 					<Show when={connection()?.errorKey}>
-						<div class="mt-4 border-t border-border pt-3">
-							<p class="text-xs text-danger">
+						<div class="px-5 pb-5">
+							<StateNote variant="danger">
 								{errorMessage(connection()?.errorKey)}
-							</p>
+							</StateNote>
 						</div>
 					</Show>
-				</InfoRow.Content>
-				<Show when={lastVerifiedIso()}>
-					{(verified) => (
-						<InfoRow.Content>
-							<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-								<Show when={isConnected()}>
-									<div class="min-w-0">
-										<dt class="mb-1 text-xs font-medium text-body">
-											{T()("connection.organisation.label")}
-										</dt>
-										<dd class="truncate text-sm font-medium text-subtitle">
-											{connection()?.organisation?.name ??
-												T()("common.not.set")}
-										</dd>
-									</div>
-									<div class="min-w-0">
-										<dt class="mb-1 text-xs font-medium text-body">
-											{T()("connection.name.label")}
-										</dt>
-										<dd class="truncate text-sm font-medium text-subtitle">
-											{connection()?.connection?.name ??
+					<Show when={lastVerifiedIso()}>
+						{(verified) => (
+							<div class="border-t border-border px-5 py-4">
+								<DetailsList
+									layout="columns"
+									variant="plain"
+									items={[
+										{
+											label: T()("connection.organisation.label"),
+											value:
+												connection()?.organisation?.name ??
+												T()("common.not.set"),
+											show: isConnected(),
+										},
+										{
+											label: T()("connection.name.label"),
+											value:
+												connection()?.connection?.name ??
 												connection()?.connection?.clientName ??
-												T()("common.not.set")}
-										</dd>
-									</div>
-								</Show>
-								<div class="min-w-0">
-									<dt class="mb-1 text-xs font-medium text-body">
-										{T()("connection.last.verified.label")}
-									</dt>
-									<dd class="text-sm font-medium text-subtitle">
-										<DateText
-											date={verified()}
-											includeTime={true}
-											class="text-sm!"
-										/>
-									</dd>
-								</div>
-							</dl>
-						</InfoRow.Content>
-					)}
-				</Show>
+												T()("common.not.set"),
+											show: isConnected(),
+										},
+										{
+											label: T()("connection.last.verified.label"),
+											value: (
+												<DateText
+													date={verified()}
+													includeTime={true}
+													class="text-sm!"
+												/>
+											),
+										},
+									]}
+								/>
+							</div>
+						)}
+					</Show>
+				</InfoRow.Content>
 			</QueryBoundary>
 			<ResetConnectionModal
 				state={{ open: resetOpen(), setOpen: setResetOpen }}

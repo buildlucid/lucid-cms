@@ -1,4 +1,5 @@
 import type { OAuthConnection } from "@types";
+import classnames from "classnames";
 import {
 	TbOutlineChevronDown,
 	TbOutlineShieldHalf,
@@ -7,19 +8,22 @@ import {
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import DateText from "@/components/DateText/DateText";
-import IconContainer from "@/components/IconContainer/IconContainer";
 import Modal from "@/components/Modal/Modal";
+import RowIcon from "@/components/RowIcon/RowIcon";
 import UpdateOAuthConnectionModal from "@/components/UpdateOAuthConnectionModal/UpdateOAuthConnectionModal";
 import api from "@/services/api";
 import type { OAuthConnectionOwner } from "@/services/api/oauth-connections";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
+/** An OAuth connection with its permissions, which expand below it, and a menu to rename or revoke it. */
 const OAuthConnectionRow: Component<{
 	connection: OAuthConnection;
 	owner: OAuthConnectionOwner;
 	canUpdate: boolean;
 	canRevoke: boolean;
+	/** `card` is a bordered card, for stacked lists. `row` is a divided row in an `InfoRow.Content` with `padding="none"`. @default "card" */
+	variant?: "card" | "row";
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -59,6 +63,7 @@ const OAuthConnectionRow: Component<{
 		return props.connection.clientId;
 	});
 	const permissionCount = createMemo(() => props.connection.scopes.length);
+	const isRow = createMemo(() => props.variant === "row");
 
 	// ----------------------------------------
 	// Functions
@@ -77,24 +82,39 @@ const OAuthConnectionRow: Component<{
 	// Render
 	return (
 		<>
-			<article class="border-b border-border p-4 last:border-b-0">
-				<div class="flex min-w-0 items-start justify-between gap-3">
-					<div class="flex min-w-0 items-start gap-3">
-						<IconContainer>
-							<TbOutlineWorld class="size-3.5 text-primary" />
-						</IconContainer>
+			<article
+				class={classnames({
+					"rounded-lg border border-border bg-input p-2": !isRow(),
+					"px-5 py-4": isRow(),
+				})}
+			>
+				<div
+					class={classnames("flex min-w-0 items-center justify-between", {
+						"gap-3": !isRow(),
+						"gap-4": isRow(),
+					})}
+				>
+					<div
+						class={classnames("flex min-w-0 items-center", {
+							"gap-3": !isRow(),
+							"gap-4": isRow(),
+						})}
+					>
+						<RowIcon>
+							<TbOutlineWorld class="size-4" />
+						</RowIcon>
 						<div class="min-w-0">
-							<h3 class="truncate text-sm font-semibold text-title">
+							<h3 class="truncate text-sm font-medium text-title">
 								{props.connection.name}
 							</h3>
-							<p class="mt-0.5 truncate text-xs">
-								<Show when={hasCustomName()}>
-									<span>{props.connection.clientName}</span>
-									<span class="mx-1.5 text-muted">·</span>
-								</Show>
-								<span>{clientHostname()}</span>
-							</p>
-							<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+							<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+								<span class="min-w-0 truncate text-body">
+									<Show when={hasCustomName()}>
+										{props.connection.clientName}
+										<span class="mx-1.5 text-muted">·</span>
+									</Show>
+									{clientHostname()}
+								</span>
 								<button
 									type="button"
 									class="inline-flex items-center gap-1 rounded text-xs text-body hover:text-title"
@@ -125,6 +145,7 @@ const OAuthConnectionRow: Component<{
 						</div>
 					</div>
 					<ActionMenu
+						variant="ghost"
 						actions={[
 							{
 								type: "button",
@@ -147,7 +168,12 @@ const OAuthConnectionRow: Component<{
 					/>
 				</div>
 				<Show when={detailsOpen()}>
-					<div class="mt-3 border-t border-border pt-3 sm:ml-12">
+					<div
+						class={classnames("mt-3 border-t border-border pt-3", {
+							"sm:ml-13": !isRow(),
+							"sm:ml-14": isRow(),
+						})}
+					>
 						<p class="mb-2 text-xs font-medium text-subtitle">
 							{T()("common.permissions")}
 						</p>

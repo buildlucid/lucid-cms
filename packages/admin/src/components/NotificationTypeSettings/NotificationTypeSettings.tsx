@@ -72,12 +72,13 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 	// ----------------------------------------
 	// Render
 	return (
-		<li data-notification-type-settings class="px-4 py-3">
-			<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+		//* spaced like `InfoRow.Item`, with the roles picker tucked closer beneath
+		<li data-notification-type-settings class="px-5 py-4">
+			<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 				<div class="min-w-0 grow">
-					<h3 class="text-sm text-title">{props.type.name}</h3>
+					<h3 class="text-sm font-medium">{props.type.name}</h3>
 					<Show when={props.type.description}>
-						<p class="mt-0.5 text-sm text-muted">{props.type.description}</p>
+						<p class="mt-0.5 max-w-2xl text-sm">{props.type.description}</p>
 					</Show>
 				</div>
 				<div class="flex shrink-0 items-center gap-2">

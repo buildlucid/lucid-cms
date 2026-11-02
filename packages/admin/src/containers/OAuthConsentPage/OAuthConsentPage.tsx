@@ -20,6 +20,7 @@ import {
 import Button from "@/components/Button/Button";
 import IconContainer from "@/components/IconContainer/IconContainer";
 import Pill from "@/components/Pill/Pill";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
@@ -144,23 +145,23 @@ const OAuthConsentPage: Component = () => {
 		<Switch>
 			{/* Loading */}
 			<Match when={request.isLoading}>
-				<div class="mx-auto w-full max-w-160 animate-pulse">
-					<div class="mx-auto mb-2 h-5 w-48 rounded bg-input" />
-					<div class="mx-auto mb-5 h-3 w-72 max-w-full rounded bg-input" />
+				<Skeleton class="mx-auto w-full max-w-160">
+					<span class="skeleton mx-auto mb-2 block h-5 w-48" />
+					<span class="skeleton mx-auto mb-5 block h-3 w-72 max-w-full" />
 					<div class="overflow-hidden rounded-xl border border-border bg-card">
 						<div class="h-20 border-b border-border p-4">
-							<div class="h-full rounded-md bg-input" />
+							<span class="skeleton block h-full" />
 						</div>
 						<div class="grid gap-3 border-b border-border p-4 sm:grid-cols-2">
-							<div class="h-24 rounded-md bg-input" />
-							<div class="h-24 rounded-md bg-input" />
+							<span class="skeleton block h-24" />
+							<span class="skeleton block h-24" />
 						</div>
 						<div class="h-32 border-b border-border p-4">
-							<div class="h-full rounded-md bg-input" />
+							<span class="skeleton block h-full" />
 						</div>
 						<div class="h-16 bg-input/25" />
 					</div>
-				</div>
+				</Skeleton>
 			</Match>
 
 			{/* Invalid, expired or completed request */}

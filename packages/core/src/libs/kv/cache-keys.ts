@@ -30,6 +30,12 @@ const cacheKeys = {
 			`auth:user:${namespaceToken}:${userId}`,
 	},
 	/**
+	 * Generate short-lived probe keys for the diagnostics KV check.
+	 */
+	diagnostics: {
+		probe: (id: string) => `diagnostics:probe:${id}`,
+	},
+	/**
 	 * Generate namespace keys for token-based invalidation/versioning.
 	 */
 	namespace: {

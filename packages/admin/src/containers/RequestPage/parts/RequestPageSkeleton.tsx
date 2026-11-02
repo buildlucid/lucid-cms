@@ -1,11 +1,12 @@
 import { type Component, For } from "solid-js";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import Skeleton from "@/components/Skeleton/Skeleton";
 
 export const RequestPageSkeleton: Component = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div aria-busy="true" class="flex grow flex-col">
+		<Skeleton class="flex grow flex-col">
 			<div class="rounded-t-xl border-b border-border bg-background">
 				<div class="flex flex-col items-start gap-x-8 gap-y-4 px-4 pt-4 pb-4 md:flex-row md:justify-between md:px-6 md:pt-6 md:pb-6">
 					<div class="w-full min-w-0 md:grow">
@@ -49,6 +50,6 @@ export const RequestPageSkeleton: Component = () => {
 					</aside>
 				</div>
 			</PageLayout.Body>
-		</div>
+		</Skeleton>
 	);
 };

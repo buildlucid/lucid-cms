@@ -134,6 +134,57 @@ describe("constructChildPath", () => {
 		]);
 	});
 
+	test("rebuilds stale paths from the root when given every page, leaving current ones out", () => {
+		const pages: PageVersionFields[] = [
+			{
+				document_id: 1,
+				document_version_id: 10,
+				rows: [
+					{ locale: null, _slug: "about", _path: "/about", _parentPage: null },
+				],
+			},
+			{
+				document_id: 2,
+				document_version_id: 20,
+				rows: [
+					{
+						locale: null,
+						_slug: "team",
+						_path: "/old-parent/team",
+						_parentPage: 1,
+					},
+				],
+			},
+			{
+				document_id: 3,
+				document_version_id: 30,
+				rows: [
+					{
+						locale: null,
+						_slug: "jobs",
+						_path: "/about/team/jobs",
+						_parentPage: 2,
+					},
+				],
+			},
+		];
+
+		const res = constructChildPath({
+			descendants: pages,
+			localization,
+			collection: baseCollection,
+		});
+
+		expect(res.error).toBeUndefined();
+		expect(res.data).toEqual([
+			{
+				documentId: 2,
+				versionId: 20,
+				values: new Map([[null, "/about/team"]]),
+			},
+		]);
+	});
+
 	test("uses each descendant's resolved relation-derived prefix", () => {
 		const descendants: PageVersionFields[] = [
 			{

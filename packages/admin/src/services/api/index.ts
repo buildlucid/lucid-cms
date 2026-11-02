@@ -5,6 +5,7 @@ import auth from "./auth";
 import captcha from "./captcha";
 import collections from "./collections";
 import connection from "./connection";
+import diagnostics from "./diagnostics";
 import documents from "./documents";
 import email from "./email";
 import integrations from "./integrations";
@@ -45,6 +46,7 @@ const exportObject = {
 	mediaShareLinks,
 	notifications,
 	settings,
+	diagnostics,
 	email,
 	jobs,
 	locales,

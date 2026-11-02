@@ -5,6 +5,7 @@ import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import DocumentEditorPage from "@/containers/DocumentEditorPage/DocumentEditorPage";
+import DocumentEditorSkeleton from "@/containers/DocumentEditorPage/parts/DocumentEditorSkeleton";
 import api from "@/services/api";
 import T from "@/translations";
 import { getRequestRoute } from "@/utils/route-helpers";
@@ -58,35 +59,36 @@ const RequestContentPage: Component = () => {
 		<Show
 			when={content()?.versionId}
 			fallback={
-				<PageLayout.Root>
-					<PageLayout.Body class="rounded-t-xl">
-						<QueryBoundary
-							class="grow"
-							loading={query.isLoading}
-							error={query.isError}
-							empty={true}
-							emptyFallback={
-								<EmptyState
-									title={T()("requests.content.missing.title")}
-									description={T()("requests.content.missing.description")}
-									actions={
-										<Link
-											variant="primary"
-											size="sm"
-											href={getRequestRoute({
-												requestId: Number(params.requestId),
-											})}
-										>
-											{T()("requests.content.missing.back")}
-										</Link>
-									}
-								/>
-							}
-						>
-							{null}
-						</QueryBoundary>
-					</PageLayout.Body>
-				</PageLayout.Root>
+				<Show when={!query.isLoading} fallback={<DocumentEditorSkeleton />}>
+					<PageLayout.Root>
+						<PageLayout.Body class="rounded-t-xl">
+							<QueryBoundary
+								class="grow"
+								error={query.isError}
+								empty={true}
+								emptyFallback={
+									<EmptyState
+										title={T()("requests.content.missing.title")}
+										description={T()("requests.content.missing.description")}
+										actions={
+											<Link
+												variant="primary"
+												size="sm"
+												href={getRequestRoute({
+													requestId: Number(params.requestId),
+												})}
+											>
+												{T()("requests.content.missing.back")}
+											</Link>
+										}
+									/>
+								}
+							>
+								{null}
+							</QueryBoundary>
+						</PageLayout.Body>
+					</PageLayout.Root>
+				</Show>
 			}
 		>
 			{(versionId) => (

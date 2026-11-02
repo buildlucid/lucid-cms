@@ -40,12 +40,12 @@ export const formatAiCreditAmount = (value?: number | null) => {
 
 export const aiUsageHref = "/admin/system/ai-usage";
 
-/** Returns used allowance as a whole percentage capped at 100; meters warn at `aiCreditsWarningPercent`. */
-export const getAllowancePercentUsed = (
-	allowance: { used: number; total: number } | null | undefined,
+/** Returns used credits, such as the allowance or the connection's cap, as a whole percentage capped at 100; meters warn at `aiCreditsWarningPercent`. */
+export const getCreditsPercentUsed = (
+	credits: { used: number; total: number } | null | undefined,
 ) => {
-	if (!allowance || allowance.total <= 0) return 0;
-	return Math.min(100, Math.floor((allowance.used / allowance.total) * 100));
+	if (!credits || credits.total <= 0) return 0;
+	return Math.min(100, Math.floor((credits.used / credits.total) * 100));
 };
 export const aiCreditsWarningPercent = 90;
 

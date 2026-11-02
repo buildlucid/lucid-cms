@@ -64,6 +64,8 @@ describe("route segments", () => {
 			},
 			collections: [documentation, product],
 			hooks: [],
+			jobs: { definitions: [] },
+			http: { routes: [] },
 		} as never;
 
 		pagesPlugin({

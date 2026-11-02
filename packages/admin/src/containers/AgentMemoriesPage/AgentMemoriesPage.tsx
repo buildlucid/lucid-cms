@@ -97,7 +97,7 @@ const AgentMemoriesPage: Component = () => {
 					error={memories.isError}
 					empty={sections().length === 0}
 					loadingFallback={
-						<div aria-busy="true" class="flex w-full flex-col gap-8 self-start">
+						<div class="flex flex-col gap-8">
 							<For each={[0, 1]}>
 								{() => (
 									<div>

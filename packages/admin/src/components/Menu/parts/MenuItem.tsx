@@ -17,6 +17,8 @@ export interface MenuItemProps {
 	icon?: JSXElement;
 	/** Content shown at the end of the item, such as a shortcut. */
 	end?: JSXElement;
+	/** Pulses an overlay over the item while its action runs. */
+	loading?: boolean;
 	variant?: MenuItemVariant;
 	disabled?: boolean;
 	/** Looks disabled but can still be selected, so `onSelect` can explain why. */
@@ -40,6 +42,9 @@ const MenuItem: Component<MenuItemProps> = (props) => {
 			<Show when={props.icon}>{props.icon}</Show>
 			<span class="line-clamp-1 flex-1">{props.children}</span>
 			<Show when={props.end}>{props.end}</Show>
+			<Show when={props.loading}>
+				<span class="loading-overlay" aria-hidden="true" />
+			</Show>
 		</>
 	);
 
@@ -53,6 +58,7 @@ const MenuItem: Component<MenuItemProps> = (props) => {
 					textValue={props.textValue}
 					disabled={props.disabled}
 					aria-disabled={props.unavailable || undefined}
+					aria-busy={props.loading || undefined}
 					closeOnSelect={
 						props.closeOnSelect !== false && props.unavailable !== true
 					}
@@ -75,6 +81,7 @@ const MenuItem: Component<MenuItemProps> = (props) => {
 				textValue={props.textValue}
 				disabled={props.disabled}
 				aria-disabled={props.unavailable || undefined}
+				aria-busy={props.loading || undefined}
 				closeOnSelect={
 					props.closeOnSelect !== false && props.unavailable !== true
 				}

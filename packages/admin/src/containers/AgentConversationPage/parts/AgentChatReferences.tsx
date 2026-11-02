@@ -12,6 +12,7 @@ import {
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import AgentReferenceRow from "@/components/AgentReferenceRow/AgentReferenceRow";
 import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
@@ -144,7 +145,9 @@ const AgentChatReferences: Component<{
 					</p>
 				</Match>
 				<Match when={references.isPending}>
-					<span class="skeleton block h-16 w-full" />
+					<Skeleton>
+						<span class="skeleton block h-16 w-full" />
+					</Skeleton>
 				</Match>
 				<Match when={items().length === 0}>
 					<p class="text-xs text-muted">{T()("agent.references.none")}</p>

@@ -14,6 +14,7 @@ import DetailsList from "@/components/DetailsList/DetailsList";
 import Drawer from "@/components/Drawer/Drawer";
 import Pill from "@/components/Pill/Pill";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
@@ -249,7 +250,9 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 				<Show when={activeTab() === "input"}>
 					<Suspense
 						fallback={
-							<div class="h-40 bg-card border border-border rounded-md animate-pulse" />
+							<Skeleton>
+								<span class="skeleton block h-40 w-full" />
+							</Skeleton>
 						}
 					>
 						<JSONPreview json={data()?.displayData || {}} />

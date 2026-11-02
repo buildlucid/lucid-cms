@@ -18,7 +18,7 @@ const TableActionMenuCell: Component<TableActionMenuCellProps> = (props) => {
 					minWidth={false}
 					class="row-actions-td text-right sticky right-0 pointer-events-none"
 				>
-					<ActionMenu actions={props.actions} />
+					<ActionMenu variant="ghost" actions={props.actions} />
 				</TableCell>
 			</Match>
 			<Match when={props.actions.length === 0}>

@@ -5,7 +5,7 @@ import {
 	TbOutlineKey,
 	TbOutlineRefresh,
 } from "solid-icons/tb";
-import { type Component, createMemo, createSignal, Show } from "solid-js";
+import { type Component, createMemo, createSignal } from "solid-js";
 import AuthMethodRow from "@/components/AuthMethodRow/AuthMethodRow";
 import Button from "@/components/Button/Button";
 import InfoRow from "@/components/InfoRow/InfoRow";
@@ -22,6 +22,7 @@ interface TwoFactorSettingsProps {
 	hasPasskeys: boolean;
 }
 
+/** Authenticator and recovery code settings. Render in a `<ul>` of `InfoRow.Item`s. */
 const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -43,57 +44,49 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 	const enabledDate = createMemo(() =>
 		dateHelpers.formatFullDate(props.twoFactor?.enabledAt ?? undefined),
 	);
+	const description = createMemo(() => {
+		if (enabled()) {
+			return canTurnOff()
+				? T()("account.two.factor.enabled.description")
+				: T()("account.two.factor.enabled.required.description");
+		}
+		if (!required()) return T()("account.two.factor.description");
+		return props.hasPasskeys
+			? T()("account.two.factor.passkeys.description")
+			: T()("account.two.factor.required.description");
+	});
 
 	// ----------------------------------------
 	// Render
 	return (
 		<>
-			<Show
-				when={enabled()}
-				fallback={
-					<InfoRow.Content
-						title={T()("account.two.factor.title")}
-						description={
-							!required()
-								? T()("account.two.factor.description")
-								: props.hasPasskeys
-									? T()("account.two.factor.passkeys.description")
-									: T()("account.two.factor.required.description")
-						}
-						actions={
-							<Button
-								variant="outline"
-								size="sm"
-								type="button"
-								onClick={() => setSetupOpen(true)}
-							>
-								{T()("account.two.factor.setup.action")}
-							</Button>
-						}
-						align="center"
-					/>
+			<InfoRow.Item
+				title={T()("account.two.factor.title")}
+				description={description()}
+				actions={
+					!enabled() ? (
+						<Button
+							variant="outline"
+							size="sm"
+							type="button"
+							onClick={() => setSetupOpen(true)}
+						>
+							{T()("account.two.factor.setup.action")}
+						</Button>
+					) : canTurnOff() ? (
+						<Button
+							variant="danger-ghost"
+							size="sm"
+							type="button"
+							onClick={() => setDisableOpen(true)}
+						>
+							{T()("account.two.factor.disable.action")}
+						</Button>
+					) : undefined
 				}
 			>
-				<InfoRow.Content
-					title={T()("account.two.factor.title")}
-					description={
-						canTurnOff()
-							? T()("account.two.factor.enabled.description")
-							: T()("account.two.factor.enabled.required.description")
-					}
-					actions={
-						<Show when={canTurnOff()}>
-							<Button
-								variant="danger-outline"
-								size="sm"
-								type="button"
-								onClick={() => setDisableOpen(true)}
-							>
-								{T()("account.two.factor.disable.action")}
-							</Button>
-						</Show>
-					}
-				>
+				{/* only passed once it's on, so the row has no gap under its heading before then */}
+				{enabled() ? (
 					<div class="flex flex-col gap-3">
 						<AuthMethodRow
 							icon={<TbOutlineDeviceMobile class="size-4.5" />}
@@ -148,8 +141,8 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 							}
 						/>
 					</div>
-				</InfoRow.Content>
-			</Show>
+				) : undefined}
+			</InfoRow.Item>
 
 			{/* Modals */}
 			<TwoFactorSetupModal

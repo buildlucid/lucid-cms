@@ -466,7 +466,6 @@ const UpdateUserDrawer: Component<{
 									canRevoke={
 										userStore.get.hasPermission([Permissions.UsersUpdate]).all
 									}
-									embedded={true}
 								/>
 							)}
 						</Show>
@@ -474,7 +473,6 @@ const UpdateUserDrawer: Component<{
 							{(userId) => (
 								<UserIntegrationsList
 									services={api.users.integrations(userId)}
-									canCreate={false}
 									canUpdate={
 										userStore.get.hasPermission([Permissions.UsersUpdate])
 											.all && canManage()
@@ -485,7 +483,6 @@ const UpdateUserDrawer: Component<{
 									}
 									//* a new key acts as its owner, so only super admins can get one
 									canRegenerate={userStore.get.user?.superAdmin === true}
-									embedded={true}
 								/>
 							)}
 						</Show>

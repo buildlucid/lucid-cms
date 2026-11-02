@@ -18,6 +18,8 @@ declare module "virtual:lucid-admin" {
 		FieldSlotComponent,
 		HomeWidgetComponent,
 		HomeWidgetSlot,
+		MaintenanceSlot,
+		MaintenanceSlotComponent,
 		RouteComponent,
 	} from "@lucidcms/admin/types";
 
@@ -86,6 +88,13 @@ declare module "virtual:lucid-admin" {
 		SlotRegistration<
 			Extract<AdminSlot, { slot: FieldSlot }>,
 			FieldSlotComponent<AdminOptions | undefined>
+		>
+	>;
+
+	export const maintenanceSlots: Array<
+		SlotRegistration<
+			Extract<AdminSlot, { slot: MaintenanceSlot }>,
+			MaintenanceSlotComponent<AdminOptions | undefined>
 		>
 	>;
 }

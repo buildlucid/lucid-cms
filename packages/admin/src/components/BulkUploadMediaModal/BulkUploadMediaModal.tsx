@@ -58,7 +58,6 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	let inputRef: HTMLInputElement | undefined;
-	let scrollRef: HTMLDivElement | undefined;
 	const rowRefs = new Map<string, HTMLDivElement>();
 	const queryClient = useQueryClient();
 	const [rows, setRows] = createSignal<UploadItem[]>([]);
@@ -158,16 +157,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 	};
 	const scrollRowToTop = (id: string) => {
 		window.requestAnimationFrame(() => {
-			const container = scrollRef;
-			const row = rowRefs.get(id);
-			if (!container || !row) return;
-
-			const containerRect = container.getBoundingClientRect();
-			const rowRect = row.getBoundingClientRect();
-			container.scrollTo({
-				top: container.scrollTop + rowRect.top - containerRect.top,
-				behavior: "smooth",
-			});
+			rowRefs.get(id)?.scrollIntoView({ block: "start", behavior: "smooth" });
 		});
 	};
 	const invalidateMediaQueries = () => {
@@ -348,204 +338,198 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 	// Render
 	return (
 		<Modal.Root open={props.state.open} onOpenChange={closeModal}>
-			<div class="flex max-h-[calc(100vh-2rem)] flex-col">
-				<input
-					ref={inputRef}
-					type="file"
-					multiple
-					class="hidden"
-					onChange={(event) => {
-						addFiles(Array.from(event.currentTarget.files ?? []));
-						resetInput();
-					}}
-				/>
+			<input
+				ref={inputRef}
+				type="file"
+				multiple
+				class="hidden"
+				onChange={(event) => {
+					addFiles(Array.from(event.currentTarget.files ?? []));
+					resetInput();
+				}}
+			/>
 
-				<div
-					ref={scrollRef}
-					class={classNames(
-						"max-h-[60vh] overflow-y-auto p-4 md:p-6 transition-colors",
-						{
-							"bg-primary-low": dragOver(),
-						},
-					)}
-					onDragOver={(event) => {
-						event.preventDefault();
-						setDragOver(true);
-					}}
-					onDragLeave={(event) => {
-						event.preventDefault();
-						if (event.currentTarget === event.target) setDragOver(false);
-					}}
-					onDrop={onDrop}
-				>
-					<div class="flex items-start justify-between gap-4">
-						<div class="min-w-0">
-							<Modal.Title>{T()("media.upload.bulk.title")}</Modal.Title>
-							<Modal.Description class="mt-1">
-								{T()("media.upload.bulk.description")}
-							</Modal.Description>
-						</div>
-						<Button
-							type="button"
-							variant="ghost"
-							size="xs"
-							shape="square"
-							onClick={closeModal}
-							disabled={isProcessing()}
-							aria-label={T()("common.close")}
-						>
-							<TbOutlineX size={14} />
-						</Button>
+			<div
+				class={classNames("p-4 md:p-6 transition-colors", {
+					"bg-primary-low": dragOver(),
+				})}
+				onDragOver={(event) => {
+					event.preventDefault();
+					setDragOver(true);
+				}}
+				onDragLeave={(event) => {
+					event.preventDefault();
+					if (event.currentTarget === event.target) setDragOver(false);
+				}}
+				onDrop={onDrop}
+			>
+				<div class="flex items-start justify-between gap-4">
+					<div class="min-w-0">
+						<Modal.Title>{T()("media.upload.bulk.title")}</Modal.Title>
+						<Modal.Description class="mt-1">
+							{T()("media.upload.bulk.description")}
+						</Modal.Description>
 					</div>
-					<Show
-						when={rows().length > 0}
-						fallback={
-							<div class="mt-4 flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-6 text-center">
-								<TbOutlineUpload size={18} class="mb-2 text-muted" />
-								<p class="text-sm font-medium text-subtitle">
-									{T()("media.upload.bulk.drop.title")}{" "}
-									<button
-										type="button"
-										class="font-medium text-primary"
-										onClick={openFileBrowser}
-									>
-										{T()("media.upload.drop.here")}
-									</button>
-								</p>
-								<p class="mt-1 text-xs text-body">
-									{T()("media.upload.bulk.drop.description")}
-								</p>
-							</div>
-						}
+					<Button
+						type="button"
+						variant="ghost"
+						size="xs"
+						shape="square"
+						onClick={closeModal}
+						disabled={isProcessing()}
+						aria-label={T()("common.close")}
 					>
-						<div class="mt-4 flex flex-col gap-2">
-							<For each={rows()}>
-								{(row) => (
-									<div
-										ref={(el) => rowRefs.set(row.id, el)}
-										class={classNames(
-											"relative overflow-hidden rounded-md border border-border bg-card p-3 transition-colors",
-											{
-												"border-primary": row.status === "uploading",
-												"border-danger": row.status === "error",
-											},
-										)}
-									>
-										<div class="grid grid-cols-[2rem_1fr_auto] items-center gap-3">
-											<div class="flex h-8 w-8 items-center justify-center rounded-md bg-input text-icon">
-												<Show
-													when={row.status === "success"}
-													fallback={
-														<Show
-															when={row.status === "error"}
-															fallback={<TbOutlineFile size={14} />}
-														>
-															<TbOutlineAlertTriangle size={14} />
-														</Show>
-													}
-												>
-													<TbOutlineCheck size={14} />
-												</Show>
-											</div>
-											<div class="min-w-0">
-												<p class="truncate text-sm font-medium text-subtitle">
-													{row.file.name}
-												</p>
-												<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-													<span class="text-xs text-body">
-														{helpers.bytesToSize(row.file.size)}
-													</span>
-													<span class="text-xs text-body">
-														{row.file.type || T()("media.types.unknown")}
-													</span>
-													<span class={rowStatusClasses(row.status)}>
-														{rowStatusLabel(row.status)}
-													</span>
-												</div>
-												<Show when={row.error}>
-													{(error) => (
-														<p class="mt-2 text-xs text-danger">
-															{error().message}
-														</p>
-													)}
-												</Show>
-											</div>
-											<Show when={row.status === "queued"}>
-												<Button
-													type="button"
-													variant="danger-ghost"
-													size="xs"
-													shape="square"
-													onClick={() => removeRow(row.id)}
-													disabled={isProcessing()}
-													aria-label={T()("common.remove")}
-												>
-													<TbOutlineX size={14} />
-												</Button>
+						<TbOutlineX size={14} />
+					</Button>
+				</div>
+				<Show
+					when={rows().length > 0}
+					fallback={
+						<div class="mt-4 flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-6 text-center">
+							<TbOutlineUpload size={18} class="mb-2 text-muted" />
+							<p class="text-sm font-medium text-subtitle">
+								{T()("media.upload.bulk.drop.title")}{" "}
+								<button
+									type="button"
+									class="font-medium text-primary"
+									onClick={openFileBrowser}
+								>
+									{T()("media.upload.drop.here")}
+								</button>
+							</p>
+							<p class="mt-1 text-xs text-body">
+								{T()("media.upload.bulk.drop.description")}
+							</p>
+						</div>
+					}
+				>
+					<div class="mt-4 flex flex-col gap-2">
+						<For each={rows()}>
+							{(row) => (
+								<div
+									ref={(el) => rowRefs.set(row.id, el)}
+									class={classNames(
+										"relative overflow-hidden rounded-md border border-border bg-card p-3 transition-colors",
+										{
+											"border-primary": row.status === "uploading",
+											"border-danger": row.status === "error",
+										},
+									)}
+								>
+									<div class="grid grid-cols-[2rem_1fr_auto] items-center gap-3">
+										<div class="flex h-8 w-8 items-center justify-center rounded-md bg-input text-icon">
+											<Show
+												when={row.status === "success"}
+												fallback={
+													<Show
+														when={row.status === "error"}
+														fallback={<TbOutlineFile size={14} />}
+													>
+														<TbOutlineAlertTriangle size={14} />
+													</Show>
+												}
+											>
+												<TbOutlineCheck size={14} />
 											</Show>
 										</div>
-										<Show
-											when={
-												row.status === "uploading" || row.status === "creating"
-											}
-										>
-											<div class="absolute right-0 bottom-0 left-0">
-												<ProgressBar
-													value={row.progress}
-													variant="primary-subtle"
-													size="sm"
-													square
-												/>
+										<div class="min-w-0">
+											<p class="truncate text-sm font-medium text-subtitle">
+												{row.file.name}
+											</p>
+											<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+												<span class="text-xs text-body">
+													{helpers.bytesToSize(row.file.size)}
+												</span>
+												<span class="text-xs text-body">
+													{row.file.type || T()("media.types.unknown")}
+												</span>
+												<span class={rowStatusClasses(row.status)}>
+													{rowStatusLabel(row.status)}
+												</span>
 											</div>
+											<Show when={row.error}>
+												{(error) => (
+													<p class="mt-2 text-xs text-danger">
+														{error().message}
+													</p>
+												)}
+											</Show>
+										</div>
+										<Show when={row.status === "queued"}>
+											<Button
+												type="button"
+												variant="danger-ghost"
+												size="xs"
+												shape="square"
+												onClick={() => removeRow(row.id)}
+												disabled={isProcessing()}
+												aria-label={T()("common.remove")}
+											>
+												<TbOutlineX size={14} />
+											</Button>
 										</Show>
 									</div>
-								)}
-							</For>
-							<button
-								type="button"
-								class="mt-2 flex min-h-14 items-center justify-center rounded-md border border-dashed border-border px-4 text-sm font-medium text-body transition-colors hover:border-primary hover:bg-primary-low focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
-								onClick={openFileBrowser}
-								disabled={isProcessing()}
-							>
-								<TbOutlineUpload class="mr-2" size={14} />
-								{T()("media.upload.add.more.files")}
-							</button>
-						</div>
-					</Show>
-				</div>
-				<Modal.Footer>
-					<p class="text-sm text-subtitle">
-						{T()("media.upload.bulk.summary", {
-							total: totalCount(),
-							completed: successCount(),
-							failed: errorCount(),
-						})}
-					</p>
-					<Modal.Actions class="flex-wrap">
-						<Button
+									<Show
+										when={
+											row.status === "uploading" || row.status === "creating"
+										}
+									>
+										<div class="absolute right-0 bottom-0 left-0">
+											<ProgressBar
+												value={row.progress}
+												variant="primary-subtle"
+												size="sm"
+												square
+											/>
+										</div>
+									</Show>
+								</div>
+							)}
+						</For>
+						<button
 							type="button"
-							variant="outline"
-							size="md"
-							onClick={closeModal}
+							class="mt-2 flex min-h-14 items-center justify-center rounded-md border border-dashed border-border px-4 text-sm font-medium text-body transition-colors hover:border-primary hover:bg-primary-low focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+							onClick={openFileBrowser}
 							disabled={isProcessing()}
 						>
-							{secondaryLabel()}
-						</Button>
-						<Button
-							type="button"
-							variant={
-								errorCount() > 0 && queuedCount() === 0 ? "danger" : "primary"
-							}
-							size="md"
-							onClick={primaryAction}
-							loading={isProcessing()}
-							disabled={primaryDisabled()}
-						>
-							{primaryLabel()}
-						</Button>
-					</Modal.Actions>
-				</Modal.Footer>
+							<TbOutlineUpload class="mr-2" size={14} />
+							{T()("media.upload.add.more.files")}
+						</button>
+					</div>
+				</Show>
 			</div>
+			<Modal.Footer>
+				<p class="text-sm text-subtitle">
+					{T()("media.upload.bulk.summary", {
+						total: totalCount(),
+						completed: successCount(),
+						failed: errorCount(),
+					})}
+				</p>
+				<Modal.Actions class="flex-wrap">
+					<Button
+						type="button"
+						variant="outline"
+						size="md"
+						onClick={closeModal}
+						disabled={isProcessing()}
+					>
+						{secondaryLabel()}
+					</Button>
+					<Button
+						type="button"
+						variant={
+							errorCount() > 0 && queuedCount() === 0 ? "danger" : "primary"
+						}
+						size="md"
+						onClick={primaryAction}
+						loading={isProcessing()}
+						disabled={primaryDisabled()}
+					>
+						{primaryLabel()}
+					</Button>
+				</Modal.Actions>
+			</Modal.Footer>
 		</Modal.Root>
 	);
 };

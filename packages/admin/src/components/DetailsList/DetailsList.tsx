@@ -79,7 +79,9 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 			class={classNames(
 				"w-full",
 				{
-					"sm:grid sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-16": columns(),
+					//* a fixed label column, so values line up at the same distance whatever the labels' lengths
+					"sm:grid sm:grid-cols-[minmax(0,16rem)_minmax(0,1fr)] sm:gap-x-6":
+						columns(),
 					"rounded-md border border-border bg-card": props.variant !== "plain",
 					"p-3": props.variant !== "plain" && props.padding === "sm",
 					"px-4 py-3": props.variant !== "plain" && props.padding !== "sm",
@@ -98,7 +100,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 									? {
 											"flex-col items-start sm:col-span-2": true,
 											//* a subgrid uses its own column gap, so it matches the list's
-											"sm:grid sm:grid-cols-subgrid sm:items-center sm:gap-x-16":
+											"sm:grid sm:grid-cols-subgrid sm:items-baseline sm:gap-x-6":
 												!item.stacked,
 										}
 									: {

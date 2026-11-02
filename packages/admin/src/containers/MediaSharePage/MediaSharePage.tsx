@@ -28,7 +28,7 @@ import ErrorState from "@/components/ErrorState/ErrorState";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
 import ShareLinkModal from "@/components/ShareLinkModal/ShareLinkModal";
-import Spinner from "@/components/Spinner/Spinner";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import { useCaptcha } from "@/hooks/useCaptcha/useCaptcha";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
@@ -120,9 +120,10 @@ const MediaSharePage: Component = () => {
 	return (
 		<Switch>
 			<Match when={shareAccess.isLoading}>
-				<div class="flex items-center justify-center h-full">
-					<Spinner size="sm" />
-				</div>
+				<Skeleton class="w-full max-w-lg mx-auto space-y-3">
+					<span class="skeleton block h-64 w-full" />
+					<span class="skeleton block h-48 w-full" />
+				</Skeleton>
 			</Match>
 			<Match when={isExpired()}>
 				<ErrorState

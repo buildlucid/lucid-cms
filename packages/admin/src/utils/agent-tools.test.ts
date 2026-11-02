@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import {
 	type AgentToolPart,
 	generatingMediaType,
+	groupTools,
 	imageAspectRatio,
 	isToolRow,
 	partGroupAt,
@@ -95,4 +96,23 @@ it("groups consecutive matching parts from the first one only", () => {
 	});
 	expect(partGroupAt(parts, 1, isToolRow)).toBeUndefined();
 	expect(partGroupAt(parts, 3, isToolRow)?.parts).toEqual([parts[3]]);
+});
+
+it("groups tools by resource, keeping names without an action as their own group", () => {
+	expect(
+		groupTools([
+			"documents_find",
+			"documents_list_versions",
+			"media_get",
+			"search",
+		]),
+	).toEqual([
+		{
+			key: "documents",
+			label: "Documents",
+			actions: ["find", "list versions"],
+		},
+		{ key: "media", label: "Media", actions: ["get"] },
+		{ key: "search", label: "Search", actions: [] },
+	]);
 });

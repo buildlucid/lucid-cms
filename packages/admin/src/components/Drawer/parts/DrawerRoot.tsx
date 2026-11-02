@@ -16,6 +16,7 @@ import {
 	useContext,
 } from "solid-js";
 import ErrorState from "@/components/ErrorState/ErrorState";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
 import { usePageScrollPin } from "@/hooks/usePageScrollPin/usePageScrollPin";
@@ -261,7 +262,9 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 					>
 						<Switch>
 							<Match when={!props.open || props.loading}>
-								<div class="skeleton absolute inset-4 md:inset-5 rounded-xl overflow-hidden" />
+								<Skeleton>
+									<span class="skeleton absolute inset-4 md:inset-5 rounded-xl" />
+								</Skeleton>
 							</Match>
 							<Match when={props.error}>
 								<div class="flex items-center h-full justify-center">

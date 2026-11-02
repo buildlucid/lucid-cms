@@ -4,6 +4,7 @@
 
 - Renamed the `fullSlug` field to `path`, and `toolkit.pages.getByFullSlug()` to `toolkit.pages.getByPath()`.
 - `toolkit.pages.getByPath()` now returns the document as the content API does, and accepts `locale`, `fallbackLocale` and `depth`.
+- Added a page path rebuild tile to System → Operations.
 
 ## v0.8.0
 

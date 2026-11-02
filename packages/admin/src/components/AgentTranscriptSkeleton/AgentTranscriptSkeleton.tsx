@@ -1,11 +1,12 @@
 import type { Component } from "solid-js";
+import Skeleton from "@/components/Skeleton/Skeleton";
 
 /** Shows placeholder messages while chat history loads. */
 const AgentTranscriptSkeleton: Component = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div aria-busy="true" class="flex flex-col gap-6">
+		<Skeleton class="flex flex-col gap-6">
 			<span class="skeleton block h-11 w-1/2 max-w-sm self-end rounded-2xl rounded-ee-md" />
 			<div class="flex flex-col gap-2">
 				<span class="skeleton block h-4 w-full" />
@@ -17,7 +18,7 @@ const AgentTranscriptSkeleton: Component = () => {
 				<span class="skeleton block h-4 w-full" />
 				<span class="skeleton block h-4 w-3/4" />
 			</div>
-		</div>
+		</Skeleton>
 	);
 };
 

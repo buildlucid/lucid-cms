@@ -23,6 +23,7 @@ const ClearCacheModal: Component<ClearCacheProps> = (props) => {
 	// Render
 	return (
 		<Modal.Confirm
+			confirmVariant="primary"
 			open={props.state.open}
 			onOpenChange={props.state.setOpen}
 			title={T()("modals.system.cache.title")}

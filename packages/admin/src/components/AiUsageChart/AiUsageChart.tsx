@@ -6,10 +6,11 @@ import AiUsageStats, {
 	type AiUsageStat,
 } from "@/components/AiUsageStats/AiUsageStats";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
+import InfoRow from "@/components/InfoRow/InfoRow";
 import Input from "@/components/Input/Input";
 import { LineChart } from "@/components/LineChart/LineChart";
 import Select from "@/components/Select/Select";
-import Spinner from "@/components/Spinner/Spinner";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
 import api from "@/services/api";
@@ -45,7 +46,7 @@ const readThemeVariable = (name: string, fallback: string) => {
 
 export const AiUsageChart: Component = () => {
 	// ----------------------------------
-	// Hooks & State
+	// State & Hooks
 	const defaultDates = getDefaultAiUsageChartDates();
 	const [metric, setMetric] = createSignal<AiUsageChartMetric>(defaultMetric);
 	const [featureKey, setFeatureKey] = createSignal<string>(allFeaturesValue);
@@ -53,6 +54,22 @@ export const AiUsageChart: Component = () => {
 	const [endDate, setEndDate] = createSignal(defaultDates.endDate);
 	const [user, setUser] = createSignal<UserRelationRef>();
 	const [userPickerOpen, setUserPickerOpen] = createSignal(false);
+
+	// ----------------------------------
+	// Queries
+	const usageChart = api.ai.useGetUsageChart({
+		queryParams: {
+			dimension: () => "day",
+			metrics: () => [metric()],
+			startDate,
+			endDate,
+			featureKey: () =>
+				featureKey() === allFeaturesValue ? undefined : featureKey(),
+			userId: () => user()?.id,
+		},
+		enabled: () =>
+			startDate().length > 0 && endDate().length > 0 && metric().length > 0,
+	});
 
 	// ----------------------------------
 	// Memos
@@ -64,25 +81,6 @@ export const AiUsageChart: Component = () => {
 		},
 		...getAiUsageFeatureOptions(),
 	]);
-	const selectedFeatureKey = createMemo(() =>
-		featureKey() === allFeaturesValue ? undefined : featureKey(),
-	);
-
-	// ----------------------------------
-	// Queries
-	const usageChart = api.ai.useGetUsageChart({
-		queryParams: {
-			dimension: () => "day",
-			metrics: () => [metric()],
-			startDate,
-			endDate,
-			featureKey: selectedFeatureKey,
-			userId: () => user()?.id,
-		},
-		enabled: () =>
-			startDate().length > 0 && endDate().length > 0 && metric().length > 0,
-	});
-
 	const selectedUsers = createMemo(() => {
 		const selected = user();
 		return selected ? [selected] : [];
@@ -296,8 +294,9 @@ export const AiUsageChart: Component = () => {
 
 	// ----------------------------------------
 	// Render
+	//* the filters sit above the card, like the sessions toolbar, so the card holds only the chart and its totals
 	return (
-		<div class="flex flex-col gap-4">
+		<div class="flex flex-col gap-3">
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
 				<Select
 					id="ai-usage-chart-metric"
@@ -407,25 +406,29 @@ export const AiUsageChart: Component = () => {
 					label={T()("common.to")}
 				/>
 			</div>
-			<div class="relative h-72 min-h-72">
-				<LineChart
-					data={chartData()}
-					options={chartOptions()}
-					class="h-full w-full"
-					ariaLabel={T()("ai.usage.charts.title")}
-				/>
-				<Show when={usageChart.isFetching && !usageChart.data}>
-					<div class="absolute inset-0 flex items-center justify-center bg-card">
-						<Spinner size="sm" />
+			<InfoRow.Content padding="none">
+				<div class="p-5">
+					<div class="relative h-72 min-h-72">
+						<LineChart
+							data={chartData()}
+							options={chartOptions()}
+							class="h-full w-full"
+							ariaLabel={T()("ai.usage.charts.title")}
+						/>
+						<Show when={usageChart.isFetching && !usageChart.data}>
+							<Skeleton class="absolute inset-0 bg-card">
+								<span class="skeleton block h-full w-full" />
+							</Skeleton>
+						</Show>
+						<Show when={usageChart.isError && !usageChart.data}>
+							<div class="absolute inset-0 flex items-center justify-center bg-card">
+								<p class="text-sm text-body">{T()("ai.usage.charts.error")}</p>
+							</div>
+						</Show>
 					</div>
-				</Show>
-				<Show when={usageChart.isError && !usageChart.data}>
-					<div class="absolute inset-0 flex items-center justify-center bg-card">
-						<p class="text-sm text-body">{T()("ai.usage.charts.error")}</p>
-					</div>
-				</Show>
-			</div>
-			<AiUsageStats stats={stats()} />
+				</div>
+				<AiUsageStats stats={stats()} />
+			</InfoRow.Content>
 		</div>
 	);
 };

@@ -291,20 +291,22 @@ export type AiUsageChart = {
 	};
 };
 
+/** One source of credits. `used` includes credits held for requests in progress. */
+export type AiCreditSource = {
+	total: number;
+	used: number;
+	remaining: number;
+};
+
 export type AiCredits = {
-	/** What can be spent now, including any monthly cap on the connection. */
+	/** What can be spent now, after any debt and the connection's monthly cap. */
 	available: number;
 	/** The subscription allowance for the current period. Null without an active subscription. */
-	allowance: {
-		total: number;
-		used: number;
-		remaining: number;
-		resetsAt: string;
-	} | null;
-	/** Purchased and granted credits. These do not reset. */
-	additional: {
-		remaining: number;
-	};
+	allowance: (AiCreditSource & { resetsAt: string }) | null;
+	/** Credits granted by Lucid. These do not reset. */
+	granted: AiCreditSource;
+	/** Purchased credits. These do not reset. */
+	purchased: AiCreditSource;
 	/** The monthly spend cap on this connection. Null when uncapped. */
 	connectionCap: {
 		limit: number;
@@ -312,6 +314,8 @@ export type AiCredits = {
 		remaining: number;
 		resetsAt: string;
 	} | null;
+	/** The organisation owes Lucid for past usage, so nothing can be spent until it's settled. */
+	hasDebt: boolean;
 };
 
 /** Reasoning efforts agents can use. Each model lists the ones it supports; models without reasoning list none. */

@@ -13,6 +13,7 @@ import {
 import Button from "@/components/Button/Button";
 import Pill from "@/components/Pill/Pill";
 import PreviewEmailDrawer from "@/components/PreviewEmailDrawer/PreviewEmailDrawer";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import { userAvatarClasses } from "@/components/UserDisplay/UserDisplay";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -132,7 +133,9 @@ export const EmailPreviewCard: Component<{
 								</div>
 							</Match>
 							<Match when={email.isLoading}>
-								<div class="h-full w-full animate-pulse bg-input" />
+								<Skeleton class="size-full">
+									<span class="skeleton block size-full rounded-none" />
+								</Skeleton>
 							</Match>
 							<Match when={email.data}>
 								<iframe

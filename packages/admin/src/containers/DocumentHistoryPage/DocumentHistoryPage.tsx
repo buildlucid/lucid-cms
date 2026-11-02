@@ -11,6 +11,7 @@ import {
 import Button from "@/components/Button/Button";
 import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHeader";
 import RestoreRevisionModal from "@/components/RestoreRevisionModal/RestoreRevisionModal";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { useDocumentHistoryState } from "@/hooks/useDocumentHistoryState/useDocumentHistoryState";
 import { useDocumentHistoryUIState } from "@/hooks/useDocumentHistoryUIState/useDocumentHistoryUIState";
@@ -92,11 +93,13 @@ const DocumentHistoryPage: Component = () => {
 			<Match
 				when={state.isLoading() && state.searchParams.pagination().page === 1}
 			>
-				<span class="absolute top-0 left-0 md:left-55 right-4 h-32 bg-background-hover z-5" />
-				<div class="fixed top-4 left-4 md:left-55 bottom-4 right-4 flex flex-col z-10">
-					<span class="h-32 w-full skeleton block mb-4" />
-					<span class="h-full w-full skeleton block" />
-				</div>
+				<Skeleton>
+					<span class="absolute top-0 left-0 md:left-55 right-4 h-32 bg-background-hover z-5" />
+					<div class="fixed top-4 left-4 md:left-55 bottom-4 right-4 flex flex-col z-10">
+						<span class="h-32 w-full skeleton block mb-4" />
+						<span class="h-full w-full skeleton block" />
+					</div>
+				</Skeleton>
 			</Match>
 			<Match when={state.isSuccess()}>
 				<PageBuilderHeader

@@ -1,8 +1,8 @@
 import { useQueryClient } from "@tanstack/solid-query";
-import classnames from "classnames";
 import {
 	TbOutlineCalendar,
 	TbOutlineId,
+	TbOutlineKey,
 	TbOutlineLetterT,
 } from "solid-icons/tb";
 import {
@@ -14,9 +14,9 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
+import CardState from "@/components/CardState/CardState";
 import CopyAPIKeyModal from "@/components/CopyAPIKeyModal/CopyAPIKeyModal";
 import DeleteIntegrationModal from "@/components/DeleteIntegrationModal/DeleteIntegrationModal";
-import EmptyState from "@/components/EmptyState/EmptyState";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import IntegrationTableRow from "@/components/IntegrationTableRow/IntegrationTableRow";
 import { OAuthClientsList } from "@/components/OAuthClientsList/OAuthClientsList";
@@ -78,6 +78,12 @@ export const IntegrationsList: Component<{
 	const hasCreatePermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.IntegrationsCreate]).all;
 	});
+	const showingState = createMemo(
+		() => integrations.isError || integrations.data?.data.length === 0,
+	);
+	const showToolbar = createMemo(
+		() => !showingState() || !props.state.searchParams.filtersAreDefault(),
+	);
 	const scopeOptions = createMemo(() => {
 		return (scopes.data?.data ?? []).flatMap((group) =>
 			group.scopes.map((scope) => {
@@ -103,60 +109,28 @@ export const IntegrationsList: Component<{
 	// Render
 	return (
 		<div class="flex-1 h-full p-4 md:p-6">
-			{/* OAuth Access */}
 			<Show when={canReadIntegrations()}>
+				{/* API Key Integrations */}
 				<InfoRow.Root
-					title={T()("oauth.access.manage.title")}
-					description={T()("oauth.access.manage.description")}
+					title={T()("integrations.api.keys.title")}
+					description={T()("integrations.api.keys.description")}
+					aside={
+						hasCreatePermission() ? (
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={() => props.state.setOpenCreateIntegrationPanel(true)}
+							>
+								{T()("integrations.create.action")}
+							</Button>
+						) : undefined
+					}
 				>
-					<InfoRow.Content
-						title={T()("oauth.connections.manage.title")}
-						description={T()("oauth.connections.manage.description")}
-					>
-						<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
-							<OAuthConnectionsList
-								owner={{ type: "system" }}
-								canUpdate={
-									userStore.get.hasPermission([Permissions.IntegrationsUpdate])
-										.all
-								}
-								canRevoke={
-									userStore.get.hasPermission([Permissions.IntegrationsDelete])
-										.all
-								}
-								embedded={true}
-								contained={false}
-							/>
-						</div>
-					</InfoRow.Content>
-					<OAuthClientsList
-						createPermission={Permissions.IntegrationsCreate}
-						canUpdate={
-							userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all
-						}
-						canDelete={
-							userStore.get.hasPermission([Permissions.IntegrationsDelete]).all
-						}
-						canRegenerate={
-							userStore.get.hasPermission([Permissions.IntegrationsRegenerate])
-								.all
-						}
-						contentRow={{
-							title: T()("oauth.clients.manage.title"),
-							description: T()("oauth.clients.manage.description"),
-						}}
-					/>
-				</InfoRow.Root>
-			</Show>
-
-			{/* Integrations */}
-			<Show when={canReadIntegrations()}>
-				<InfoRow.Root
-					title={T()("integrations.manage.title")}
-					description={T()("routes.system.integrations.description")}
-				>
-					<InfoRow.Content>
-						<div class="-mx-4 overflow-hidden">
+					{/* the query toolbar sits above the card, which holds only the table and pagination */}
+					<div class="flex flex-col gap-3">
+						{/* nothing to filter until there are integrations or filters are set */}
+						<Show when={showToolbar()}>
 							<QueryToolbar
 								queryState={props.state.searchParams}
 								onRefresh={() => {
@@ -240,35 +214,23 @@ export const IntegrationsList: Component<{
 									},
 								]}
 								perPage
-								padding="sm"
+								padding="none"
 							/>
+						</Show>
+						<InfoRow.Content padding="none">
 							<QueryBoundary
+								appearance="contained"
 								error={integrations.isError}
+								onRetry={() => integrations.refetch()}
 								empty={integrations.data?.data.length === 0}
 								queryState={props.state.searchParams}
 								emptyFallback={
-									<EmptyState
-										title={T()("empty.states.integrations.title")}
-										description={T()("empty.states.integrations.description")}
-										actions={
-											<Button
-												size="sm"
-												permission={Permissions.IntegrationsCreate}
-												onClick={() =>
-													props.state.setOpenCreateIntegrationPanel(true)
-												}
-											>
-												{T()("integrations.create.action")}
-											</Button>
-										}
+									<CardState
+										icon={<TbOutlineKey />}
+										title={T()("integrations.api.keys.empty.title")}
+										description={T()("integrations.api.keys.empty.description")}
 									/>
 								}
-								class={classnames(
-									"border-t border-border",
-									integrations.isError || integrations.data?.data.length === 0
-										? "-mb-4"
-										: undefined,
-								)}
 							>
 								<Table.Root
 									id="integrations.list"
@@ -324,6 +286,7 @@ export const IntegrationsList: Component<{
 									loading={integrations.isFetching}
 									padding="sm"
 									variant="contained"
+									class="border-y-0"
 								>
 									<Index each={integrations.data?.data || []}>
 										{(integration, i) => (
@@ -339,30 +302,48 @@ export const IntegrationsList: Component<{
 							<Pagination
 								queryState={props.state.searchParams}
 								meta={integrations.data?.meta}
-								variant="inline"
+								variant="footer"
 								padding="sm"
 								hideWhenEmpty
 							/>
-						</div>
+						</InfoRow.Content>
+					</div>
+				</InfoRow.Root>
+
+				{/* OAuth Applications */}
+				<OAuthClientsList
+					createPermission={Permissions.IntegrationsCreate}
+					canUpdate={
+						userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all
+					}
+					canDelete={
+						userStore.get.hasPermission([Permissions.IntegrationsDelete]).all
+					}
+					canRegenerate={
+						userStore.get.hasPermission([Permissions.IntegrationsRegenerate])
+							.all
+					}
+				/>
+
+				{/* OAuth Connections */}
+				<InfoRow.Root
+					title={T()("oauth.connections.manage.title")}
+					description={T()("oauth.connections.manage.description")}
+				>
+					<InfoRow.Content padding="none">
+						<OAuthConnectionsList
+							owner={{ type: "system" }}
+							variant="rows"
+							canUpdate={
+								userStore.get.hasPermission([Permissions.IntegrationsUpdate])
+									.all
+							}
+							canRevoke={
+								userStore.get.hasPermission([Permissions.IntegrationsDelete])
+									.all
+							}
+						/>
 					</InfoRow.Content>
-					<Show
-						when={
-							hasCreatePermission() &&
-							integrations.isSuccess &&
-							integrations.data.data.length > 0
-						}
-					>
-						<div class="mt-2 flex justify-start">
-							<Button
-								type="button"
-								size="sm"
-								variant="primary"
-								onClick={() => props.state.setOpenCreateIntegrationPanel(true)}
-							>
-								{T()("integrations.create.action")}
-							</Button>
-						</div>
-					</Show>
 				</InfoRow.Root>
 			</Show>
 

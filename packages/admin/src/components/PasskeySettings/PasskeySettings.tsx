@@ -18,6 +18,7 @@ interface PasskeySettingsProps {
 	keepLast?: "login" | "two-factor";
 }
 
+/** The passkeys row of the account's security card: add, rename and delete passkeys. Render it in a `<ul>` of `InfoRow.Item`s. */
 const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -71,7 +72,7 @@ const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 	// Render
 	return (
 		<>
-			<InfoRow.Content
+			<InfoRow.Item
 				title={T()("account.passkeys.title")}
 				description={T()("account.passkeys.description")}
 				actions={
@@ -87,9 +88,8 @@ const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 						{T()("account.passkeys.add.action")}
 					</Button>
 				}
-				align={props.passkeys.length === 0 ? "center" : "top"}
 			>
-				{/* only passed with passkeys to list, so an empty section has no gap under its heading */}
+				{/* only passed with passkeys to list, so an empty row has no gap under its heading */}
 				{props.passkeys.length > 0 ? (
 					<div class="flex flex-col gap-3">
 						<For each={props.passkeys}>
@@ -140,7 +140,7 @@ const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 						</For>
 					</div>
 				) : undefined}
-			</InfoRow.Content>
+			</InfoRow.Item>
 
 			{/* Modals */}
 			<RenamePasskeyModal

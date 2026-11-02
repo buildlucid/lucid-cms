@@ -8,7 +8,7 @@ import {
 	aiCreditsWarningPercent,
 	aiUsageHref,
 	formatAiCreditAmount,
-	getAllowancePercentUsed,
+	getCreditsPercentUsed,
 } from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
 
@@ -21,7 +21,7 @@ const AiCreditsWidget: Component<{ size: HomeWidgetSize }> = () => {
 	// ----------------------------------------
 	// Memos
 	const data = createMemo(() => credits.data?.data);
-	const percent = createMemo(() => getAllowancePercentUsed(data()?.allowance));
+	const percent = createMemo(() => getCreditsPercentUsed(data()?.allowance));
 	const labels = createMemo(() => {
 		if (credits.isLoading) return undefined;
 		if (credits.isError) return { start: T()("home.widget.ai.credits.error") };

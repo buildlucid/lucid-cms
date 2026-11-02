@@ -2,6 +2,7 @@ import { A } from "@solidjs/router";
 import type { RequestSummary } from "@types";
 import { TbOutlineExternalLink } from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
 import { getRequestState, requestStates } from "@/utils/requests";
@@ -20,7 +21,9 @@ const RequestCompactList: Component<{
 	return (
 		<div>
 			<Show when={props.loading}>
-				<span class="block h-12 skeleton rounded-md" />
+				<Skeleton>
+					<span class="block h-12 skeleton" />
+				</Skeleton>
 			</Show>
 			<Show when={!props.loading && props.requests.length === 0}>
 				<p class="text-xs text-muted">{T()("requests.document.none")}</p>

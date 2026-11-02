@@ -8,7 +8,6 @@ import {
 	splitProps,
 } from "solid-js";
 import { getButtonClasses } from "@/components/Button/classes";
-import Spinner from "@/components/Spinner/Spinner";
 import {
 	checkPermission,
 	type PermissionRequirement,
@@ -35,7 +34,7 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 	size?: ButtonSize;
 	/** `square` and `circle` have equal width and height, for icon buttons. @default "standard" */
 	shape?: ButtonShape;
-	/** Shows a spinner and disables the button. */
+	/** Pulses an overlay over the button and disables it. */
 	loading?: boolean;
 	/**
 	 * Permission keys the user needs, or a boolean when access is checked
@@ -99,6 +98,7 @@ const Button: Component<ButtonProps> = (props) => {
 			size: local.size,
 			shape: local.shape,
 			permitted: access().permitted,
+			loading: local.loading,
 		}),
 	);
 
@@ -133,9 +133,7 @@ const Button: Component<ButtonProps> = (props) => {
 			aria-busy={local.loading ? "true" : undefined}
 		>
 			<Show when={local.loading}>
-				<div class="flex items-center justify-center absolute inset-0 z-10 rounded-md bg-card/50">
-					<Spinner size="sm" />
-				</div>
+				<span class="loading-overlay" aria-hidden="true" />
 			</Show>
 			{local.children}
 		</button>

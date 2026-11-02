@@ -138,6 +138,7 @@ export type MigrationDefinition = {
 
 export type DatabaseMigrationStatus = {
 	registered: string[];
+	/** Executed migration names, oldest first. */
 	executed: string[];
 	pendingCore: string[];
 	pendingExternal: string[];

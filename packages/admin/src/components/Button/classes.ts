@@ -10,12 +10,15 @@ export const getButtonClasses = (props: {
 	size: ButtonSize;
 	shape: ButtonShape;
 	permitted?: boolean;
+	/** Loading buttons are disabled but keep full opacity, as the pulse overlay already shows they're busy. */
+	loading?: boolean;
 }) => {
 	const square = props.shape !== "standard";
 
 	return classnames(
-		"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80",
+		"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
 		{
+			"disabled:cursor-not-allowed disabled:opacity-80": !props.loading,
 			// Variants
 			"bg-primary hover:bg-primary-hover text-primary-foreground ring-primary":
 				props.variant === "primary",

@@ -264,10 +264,7 @@ const AgentHome: Component<{
 				<Show
 					when={panel()}
 					fallback={
-						<section
-							aria-busy="true"
-							class="mx-auto flex w-full max-w-3xl flex-col gap-8 self-start pt-[18vh] pb-10"
-						>
+						<section class="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-[18vh] pb-10">
 							<div class="flex flex-col items-center gap-1.5">
 								<div class="text-2xl">
 									<span class="skeleton block w-48">&nbsp;</span>
@@ -280,7 +277,7 @@ const AgentHome: Component<{
 						</section>
 					}
 				>
-					<section aria-busy="true" class="flex w-full grow flex-col">
+					<section class="flex w-full grow flex-col">
 						<div class="my-auto flex flex-col items-center gap-1.5 px-5 py-6">
 							<div class="text-base">
 								<span class="skeleton block w-48">&nbsp;</span>

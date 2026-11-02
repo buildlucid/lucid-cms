@@ -88,8 +88,8 @@ const RolesListRoute = lazyPage(
 const SystemIndexRoute = lazyPage(
 	() => import("@/containers/SystemRedirectPage/SystemRedirectPage"),
 );
-const SystemOverviewRoute = lazyPage(
-	() => import("@/containers/SystemOverviewPage/SystemOverviewPage"),
+const SystemDiagnosticsRoute = lazyPage(
+	() => import("@/containers/SystemDiagnosticsPage/SystemDiagnosticsPage"),
 );
 const SystemOperationsRoute = lazyPage(
 	() => import("@/containers/SystemOperationsPage/SystemOperationsPage"),
@@ -372,11 +372,11 @@ const AppRouter: Component = () => {
 						component={() => <SystemIndexRoute />}
 					/>
 					<Route
-						path="/system/overview"
-						preload={preloadRoutes(SystemOverviewRoute)}
+						path="/system/diagnostics"
+						preload={preloadRoutes(SystemDiagnosticsRoute)}
 						component={() => (
 							<PermissionGuard permission={Permissions.SettingsRead}>
-								<SystemOverviewRoute />
+								<SystemDiagnosticsRoute />
 							</PermissionGuard>
 						)}
 					/>
@@ -397,7 +397,7 @@ const AppRouter: Component = () => {
 								condition={() => siteStore.get.hasAnyAiFeatureEnabled()}
 								redirect={() =>
 									userStore.get.hasPermission([Permissions.SettingsRead]).all
-										? "/admin/system/overview"
+										? "/admin/system/diagnostics"
 										: "/admin"
 								}
 							>

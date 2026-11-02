@@ -4,6 +4,7 @@ import { captchaSlotPolicies } from "../components/CaptchaWidget/constants.js";
 import { documentListSlotPolicies } from "../components/DocumentSlotCell/constants.js";
 import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
 import { homeWidgetSlotPolicies } from "../components/HomeWidgets/constants.js";
+import { maintenanceSlotPolicies } from "../components/MaintenanceSlots/constants.js";
 
 /** Component-owned policies shared by config diagnostics, compilation and slot selection. */
 export const slotDefinitions = {
@@ -13,6 +14,7 @@ export const slotDefinitions = {
 	...documentListSlotPolicies,
 	...fieldSlotPolicies,
 	...captchaSlotPolicies,
+	...maintenanceSlotPolicies,
 } as const;
 
 /** The admin area that renders a slot. */

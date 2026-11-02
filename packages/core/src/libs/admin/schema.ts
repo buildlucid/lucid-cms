@@ -113,7 +113,8 @@ const navigationIcon = z.enum([
 	"extensions",
 ]) satisfies z.ZodType<AdminNavigationIcon>;
 
-const navigationGroupKey = z
+/** Navigation and maintenance group keys. */
+const groupKey = z
 	.string()
 	.min(1)
 	.max(50)
@@ -123,9 +124,9 @@ const routeNavigation = z.strictObject({
 	label: adminCopyInputSchema,
 	group: z
 		.union([
-			navigationGroupKey,
+			groupKey,
 			z.strictObject({
-				key: navigationGroupKey,
+				key: groupKey,
 				label: adminCopyInputSchema.optional(),
 				order: z.number().optional(),
 			}),
@@ -222,6 +223,24 @@ export const adminConfigSchema = z
 						match: z.strictObject({ adapter: key.optional() }).optional(),
 						component: componentReference,
 						options,
+					}),
+					z.strictObject({
+						key,
+						priority: z.number().optional(),
+						slot: z.literal("maintenance.action"),
+						component: componentReference,
+						options,
+						// Registration is checked against the resolved access config in checkAdminSlots.
+						permission: permissionRequirement.optional(),
+						group: z
+							.union([
+								groupKey,
+								z.strictObject({
+									key: groupKey,
+									label: adminCopyInputSchema.optional(),
+								}),
+							])
+							.optional(),
 					}),
 					z.strictObject({
 						key,

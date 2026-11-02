@@ -1,6 +1,6 @@
 import classnames from "classnames";
 import { TbOutlineChevronDown } from "solid-icons/tb";
-import { type Component, For, type JSXElement } from "solid-js";
+import { type Component, For, type JSXElement, Show } from "solid-js";
 import Button, {
 	type ButtonSize,
 	type ButtonVariant,
@@ -52,10 +52,14 @@ const SplitButton: Component<SplitButtonProps> = (props) => {
 							variant: props.variant ?? "primary",
 							size: props.size ?? "md",
 							shape: "square",
+							loading: props.loading,
 						}),
 						"rounded-s-none border-s border-black/10",
 					)}
 				>
+					<Show when={props.loading}>
+						<span class="loading-overlay" aria-hidden="true" />
+					</Show>
 					<span class="sr-only">{T()("common.options")}</span>
 					<TbOutlineChevronDown size={10} />
 				</Menu.Trigger>

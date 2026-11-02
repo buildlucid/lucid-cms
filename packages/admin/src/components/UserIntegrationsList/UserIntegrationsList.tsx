@@ -1,30 +1,23 @@
-import classnames from "classnames";
-import { type Component, createSignal, For, Show } from "solid-js";
-import Button from "@/components/Button/Button";
+import { type Component, createSignal, For } from "solid-js";
 import CopyAPIKeyModal from "@/components/CopyAPIKeyModal/CopyAPIKeyModal";
 import DeleteIntegrationModal from "@/components/DeleteIntegrationModal/DeleteIntegrationModal";
-import EmptyState from "@/components/EmptyState/EmptyState";
-import InfoRow from "@/components/InfoRow/InfoRow";
 import IntegrationRow from "@/components/IntegrationRow/IntegrationRow";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RegenerateAPIKeyModal from "@/components/RegenerateAPIKeyModal/RegenerateAPIKeyModal";
+import SkeletonCardRows from "@/components/SkeletonCardRows/SkeletonCardRows";
+import StateNote from "@/components/StateNote/StateNote";
 import UpsertIntegrationDrawer from "@/components/UpsertIntegrationDrawer/UpsertIntegrationDrawer";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import type { IntegrationServices } from "@/services/api/integrations";
 import T from "@/translations";
 
+/** Lists a user's integrations as stacked cards, for drawers and `InfoRow.Item`s. */
 export const UserIntegrationsList: Component<{
 	services: IntegrationServices;
-	canCreate: boolean;
 	canUpdate: boolean;
 	canDelete: boolean;
 	canRegenerate: boolean;
-	embedded?: boolean;
-	contained?: boolean;
-	contentRow?: {
-		title: string;
-		description?: string;
-	};
+	/** Opens the create drawer, for a create button outside the list. */
 	openCreate?: boolean;
 	setOpenCreate?: (open: boolean) => void;
 }> = (props) => {
@@ -37,7 +30,6 @@ export const UserIntegrationsList: Component<{
 			update: false,
 		},
 	});
-	const [internalCreateOpen, setInternalCreateOpen] = createSignal(false);
 	const [apiKey, setAPIKey] = createSignal<string>();
 	const [copyAPIKeyOpen, setCopyAPIKeyOpen] = createSignal(false);
 
@@ -50,206 +42,41 @@ export const UserIntegrationsList: Component<{
 	});
 
 	// ----------------------------------------
-	// Functions
-	const createOpen = () => props.openCreate ?? internalCreateOpen();
-	const setCreateOpen = (open: boolean) => {
-		props.setOpenCreate?.(open);
-		if (props.setOpenCreate === undefined) setInternalCreateOpen(open);
-	};
-
-	// ----------------------------------------
 	// Render
 	return (
 		<>
-			<Show
-				when={props.embedded}
-				fallback={
-					<InfoRow.Root
-						title={T()("user.integrations.manage.title")}
-						description={T()("user.integrations.manage.description")}
-					>
-						<QueryBoundary
-							loading={integrations.isLoading}
-							error={integrations.isError}
-							empty={
-								integrations.isSuccess && integrations.data.data.length === 0
-							}
-							emptyFallback={
-								<EmptyState
-									title={T()("empty.states.integrations.title")}
-									description={T()(
-										"empty.states.user.integrations.description",
-									)}
-								/>
-							}
-							class={classnames({
-								"overflow-hidden rounded-md border border-border bg-card":
-									props.contained !== false,
-							})}
-						>
-							<div class="flex flex-col">
-								<For each={integrations.data?.data ?? []}>
-									{(integration) => (
-										<IntegrationRow
-											integration={integration}
-											rowTarget={rowTarget}
-											canUpdate={props.canUpdate}
-											canDelete={props.canDelete}
-											canRegenerate={props.canRegenerate}
-										/>
-									)}
-								</For>
-							</div>
-						</QueryBoundary>
-						<Show
-							when={
-								props.canCreate &&
-								integrations.isSuccess &&
-								integrations.data.data.length > 0
-							}
-						>
-							<div class="mt-3 flex justify-start">
-								<Button
-									type="button"
-									size="sm"
-									variant="primary"
-									onClick={() => setCreateOpen(true)}
-								>
-									{T()("integrations.create.action")}
-								</Button>
-							</div>
-						</Show>
-					</InfoRow.Root>
+			<QueryBoundary
+				appearance="inline"
+				loading={integrations.isLoading}
+				loadingFallback={<SkeletonCardRows />}
+				error={integrations.isError}
+				onRetry={() => integrations.refetch()}
+				empty={integrations.isSuccess && integrations.data.data.length === 0}
+				emptyFallback={
+					<StateNote>{T()("empty.states.integrations")}</StateNote>
 				}
 			>
-				<Show
-					when={props.contentRow}
-					fallback={
-						<>
-							<QueryBoundary
-								loading={integrations.isLoading}
-								error={integrations.isError}
-								empty={
-									integrations.isSuccess && integrations.data.data.length === 0
-								}
-								emptyFallback={
-									<EmptyState
-										title={T()("empty.states.integrations.title")}
-										description={T()(
-											"empty.states.user.integrations.description",
-										)}
-									/>
-								}
-								class={classnames({
-									"overflow-hidden rounded-md border border-border bg-card":
-										props.contained !== false,
-								})}
-							>
-								<div class="flex flex-col">
-									<For each={integrations.data?.data ?? []}>
-										{(integration) => (
-											<IntegrationRow
-												integration={integration}
-												rowTarget={rowTarget}
-												canUpdate={props.canUpdate}
-												canDelete={props.canDelete}
-												canRegenerate={props.canRegenerate}
-											/>
-										)}
-									</For>
-								</div>
-							</QueryBoundary>
-							<Show
-								when={
-									props.canCreate &&
-									integrations.isSuccess &&
-									integrations.data.data.length > 0
-								}
-							>
-								<div class="mt-3 flex justify-start">
-									<Button
-										type="button"
-										size="sm"
-										variant="primary"
-										onClick={() => setCreateOpen(true)}
-									>
-										{T()("integrations.create.action")}
-									</Button>
-								</div>
-							</Show>
-						</>
-					}
-				>
-					{(contentRow) => (
-						<>
-							<InfoRow.Content
-								title={contentRow().title}
-								description={contentRow().description}
-							>
-								<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
-									<QueryBoundary
-										loading={integrations.isLoading}
-										error={integrations.isError}
-										empty={
-											integrations.isSuccess &&
-											integrations.data.data.length === 0
-										}
-										emptyFallback={
-											<EmptyState
-												title={T()("empty.states.integrations.title")}
-												description={T()(
-													"empty.states.user.integrations.description",
-												)}
-											/>
-										}
-										class={classnames({
-											"overflow-hidden rounded-md border border-border bg-card":
-												props.contained !== false,
-										})}
-									>
-										<div class="flex flex-col">
-											<For each={integrations.data?.data ?? []}>
-												{(integration) => (
-													<IntegrationRow
-														integration={integration}
-														rowTarget={rowTarget}
-														canUpdate={props.canUpdate}
-														canDelete={props.canDelete}
-														canRegenerate={props.canRegenerate}
-													/>
-												)}
-											</For>
-										</div>
-									</QueryBoundary>
-								</div>
-							</InfoRow.Content>
-							<Show
-								when={
-									props.canCreate &&
-									integrations.isSuccess &&
-									integrations.data.data.length > 0
-								}
-							>
-								<div class="mt-2 flex justify-start">
-									<Button
-										type="button"
-										size="sm"
-										variant="primary"
-										onClick={() => setCreateOpen(true)}
-									>
-										{T()("integrations.create.action")}
-									</Button>
-								</div>
-							</Show>
-						</>
-					)}
-				</Show>
-			</Show>
+				<ul class="flex flex-col gap-3">
+					<For each={integrations.data?.data ?? []}>
+						{(integration) => (
+							<li>
+								<IntegrationRow
+									integration={integration}
+									rowTarget={rowTarget}
+									canUpdate={props.canUpdate}
+									canDelete={props.canDelete}
+									canRegenerate={props.canRegenerate}
+								/>
+							</li>
+						)}
+					</For>
+				</ul>
+			</QueryBoundary>
 			<UpsertIntegrationDrawer
 				services={props.services}
 				state={{
-					open: createOpen(),
-					setOpen: setCreateOpen,
+					open: props.openCreate ?? false,
+					setOpen: (open) => props.setOpenCreate?.(open),
 				}}
 				callbacks={{
 					onCreateSuccess: (key) => {

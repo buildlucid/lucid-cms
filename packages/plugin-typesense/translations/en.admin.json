@@ -1,0 +1,13 @@
+{
+	"plugin.typesense.maintenance.title": "Search Indexes",
+	"plugin.typesense.maintenance.description": "Rebuild every Typesense index from your content. Search keeps working while each index rebuilds",
+	"plugin.typesense.maintenance.action": "Rebuild Indexes",
+	"plugin.typesense.maintenance.status.rebuilding": "Rebuilding",
+	"plugin.typesense.maintenance.status.failed": "Last sync failed",
+	"plugin.typesense.maintenance.status.pending": "{{count}} pending",
+	"plugin.typesense.maintenance.status.current": "Up to date",
+	"plugin.typesense.maintenance.modal.title": "Rebuild Search Indexes",
+	"plugin.typesense.maintenance.modal.description": "This rebuilds every Typesense index from its sources in the background. Search keeps using the current index until its rebuild is ready.",
+	"plugin.typesense.maintenance.toast.title": "Search rebuild started",
+	"plugin.typesense.maintenance.toast.message": "Each index is swapped in once it has been rebuilt."
+}

@@ -629,231 +629,228 @@ const ImportModal: Component<ImportModalProps> = (props) => {
 					resetInput();
 				}}
 			/>
-			<div class="flex max-h-[calc(100vh-2rem)] flex-col">
-				<div class="overflow-y-auto p-4 md:p-6">
-					<div class="flex items-start justify-between gap-4">
-						<div class="min-w-0">
-							<Modal.Title>
-								{props.title ?? T()("transfer.import.title")}
-							</Modal.Title>
-							<Modal.Description class="mt-1">
-								{props.description ?? T()("transfer.import.description")}
-							</Modal.Description>
-						</div>
-						<Button
-							type="button"
-							variant="ghost"
-							size="xs"
-							shape="square"
-							onClick={close}
-							disabled={running() || checking()}
-							aria-label={T()("common.close")}
-						>
-							<TbOutlineX size={14} />
-						</Button>
+			<Modal.Body>
+				<div class="flex items-start justify-between gap-4">
+					<div class="min-w-0">
+						<Modal.Title>
+							{props.title ?? T()("transfer.import.title")}
+						</Modal.Title>
+						<Modal.Description class="mt-1">
+							{props.description ?? T()("transfer.import.description")}
+						</Modal.Description>
 					</div>
-					<div class="mt-4 flex flex-col gap-4">
-						<Show when={errors().length > 0}>
-							<Alert variant="danger">
-								<For each={errors()}>{(error) => <p>{error}</p>}</For>
-							</Alert>
-						</Show>
-						<Show
-							when={phase() !== "choose"}
-							fallback={
-								<ImportDropZone
-									checking={checking()}
-									onBrowse={() => inputRef?.click()}
-									onFiles={(files) => void addFiles(files)}
-								/>
-							}
-						>
-							<ul class="flex flex-col gap-1.5">
-								<For each={uploads()}>
-									{(upload) => (
-										<li class="flex min-w-0 items-center gap-2 text-xs text-body">
-											<TbOutlineFileZip size={14} class="shrink-0 text-icon" />
-											<span class="truncate">
-												<span class="font-medium text-subtitle">
-													{upload.name}
-												</span>
-												{" · "}
-												{sourceLabel(upload)}
-											</span>
-										</li>
-									)}
-								</For>
-							</ul>
-							<Show when={showMode()}>
-								<Select
-									id="import-mode"
-									name="importMode"
-									label={T()("transfer.import.mode.label")}
-									value={mode()}
-									onChange={(value) => {
-										if (value) changeMode(value);
-									}}
-									options={modeOptions()}
-									//* the choice stays on screen once importing starts, so the list doesn't move
-									disabled={checking() || phase() === "import"}
-								/>
-							</Show>
-							<ul
-								class={classNames(
-									"divide-y divide-border overflow-hidden rounded-md border border-border bg-card transition-opacity",
-									{ "pointer-events-none opacity-60": checking() },
-								)}
-								aria-busy={checking()}
-							>
-								<ImportMediaGroup
-									items={mediaItems()}
-									importing={phase() === "import"}
-									finished={finished()}
-									statusFor={statusFor}
-									onRetry={(id) => void run([id])}
-								/>
-								<For each={entryItems()}>
-									{(item) => (
-										<ImportRow
-											icon={item.resource === "media" ? "media" : "document"}
-											label={item.planned.label}
-											subtitle={subtitleFor(item)}
-											status={statusFor(item)}
-											busy={
-												item.state === "uploading" || item.state === "importing"
-											}
-											progress={
-												item.state === "uploading" ? item.progress : undefined
-											}
-											done={
-												item.state === "done" &&
-												item.result?.status !== "failed"
-											}
-											failed={itemOutcome(item).status === "failed"}
-											warnings={itemOutcome(item).warnings}
-											errors={
-												itemOutcome(item).error
-													? [
-															{
-																message: itemOutcome(item).error?.message ?? "",
-															},
-														]
-													: undefined
-											}
-											href={hrefFor(item)}
-											onRetry={
-												finished() &&
-												item.valid &&
-												itemOutcome(item).status === "failed"
-													? () => void run([item.id])
-													: undefined
-											}
-										/>
-									)}
-								</For>
-							</ul>
-						</Show>
-					</div>
+					<Button
+						type="button"
+						variant="ghost"
+						size="xs"
+						shape="square"
+						onClick={close}
+						disabled={running() || checking()}
+						aria-label={T()("common.close")}
+					>
+						<TbOutlineX size={14} />
+					</Button>
 				</div>
-				<Modal.Footer>
-					<p class="text-sm text-subtitle">
-						<Show
-							when={phase() === "import"}
-							fallback={
-								<Show when={phase() === "review"}>
-									{T()("transfer.import.summary.ready", {
-										count: importable().length,
-									})}
-									<Show when={blockedCount() > 0}>
-										{", "}
-										{T()("transfer.import.summary.blocked", {
-											count: blockedCount(),
-										})}
-									</Show>
-								</Show>
-							}
-						>
-							{T()("transfer.import.summary.done", {
-								completed: succeededCount(),
-								total: items().length,
-								failed: failedItems().length,
-							})}
+				<div class="mt-4 flex flex-col gap-4">
+					<Show when={errors().length > 0}>
+						<Alert variant="danger">
+							<For each={errors()}>{(error) => <p>{error}</p>}</For>
+						</Alert>
+					</Show>
+					<Show
+						when={phase() !== "choose"}
+						fallback={
+							<ImportDropZone
+								checking={checking()}
+								onBrowse={() => inputRef?.click()}
+								onFiles={(files) => void addFiles(files)}
+							/>
+						}
+					>
+						<ul class="flex flex-col gap-1.5">
+							<For each={uploads()}>
+								{(upload) => (
+									<li class="flex min-w-0 items-center gap-2 text-xs text-body">
+										<TbOutlineFileZip size={14} class="shrink-0 text-icon" />
+										<span class="truncate">
+											<span class="font-medium text-subtitle">
+												{upload.name}
+											</span>
+											{" · "}
+											{sourceLabel(upload)}
+										</span>
+									</li>
+								)}
+							</For>
+						</ul>
+						<Show when={showMode()}>
+							<Select
+								id="import-mode"
+								name="importMode"
+								label={T()("transfer.import.mode.label")}
+								value={mode()}
+								onChange={(value) => {
+									if (value) changeMode(value);
+								}}
+								options={modeOptions()}
+								//* the choice stays on screen once importing starts, so the list doesn't move
+								disabled={checking() || phase() === "import"}
+							/>
 						</Show>
-					</p>
-					<Modal.Actions class="flex-wrap">
-						<Show
-							when={phase() === "import"}
-							fallback={
-								<>
-									<Button
-										type="button"
-										variant="outline"
-										size="md"
-										disabled={checking()}
-										onClick={() =>
-											phase() === "review" ? inputRef?.click() : close()
-										}
-									>
-										{phase() === "review"
-											? T()("transfer.import.choose.other")
-											: T()("common.cancel")}
-									</Button>
-									<Show when={phase() === "review"}>
-										<Button
-											type="button"
-											variant="primary"
-											size="md"
-											disabled={checking() || importable().length === 0}
-											onClick={() =>
-												void run(importable().map((item) => item.id))
-											}
-										>
-											{T()("transfer.import.start", {
-												count: importable().length,
-											})}
-										</Button>
-									</Show>
-								</>
-							}
+						<ul
+							class={classNames(
+								"divide-y divide-border overflow-hidden rounded-md border border-border bg-card transition-opacity",
+								{ "pointer-events-none opacity-60": checking() },
+							)}
+							aria-busy={checking()}
 						>
-							<Show when={finished() && retryableItems().length > 0}>
+							<ImportMediaGroup
+								items={mediaItems()}
+								importing={phase() === "import"}
+								finished={finished()}
+								statusFor={statusFor}
+								onRetry={(id) => void run([id])}
+							/>
+							<For each={entryItems()}>
+								{(item) => (
+									<ImportRow
+										icon={item.resource === "media" ? "media" : "document"}
+										label={item.planned.label}
+										subtitle={subtitleFor(item)}
+										status={statusFor(item)}
+										busy={
+											item.state === "uploading" || item.state === "importing"
+										}
+										progress={
+											item.state === "uploading" ? item.progress : undefined
+										}
+										done={
+											item.state === "done" && item.result?.status !== "failed"
+										}
+										failed={itemOutcome(item).status === "failed"}
+										warnings={itemOutcome(item).warnings}
+										errors={
+											itemOutcome(item).error
+												? [
+														{
+															message: itemOutcome(item).error?.message ?? "",
+														},
+													]
+												: undefined
+										}
+										href={hrefFor(item)}
+										onRetry={
+											finished() &&
+											item.valid &&
+											itemOutcome(item).status === "failed"
+												? () => void run([item.id])
+												: undefined
+										}
+									/>
+								)}
+							</For>
+						</ul>
+					</Show>
+				</div>
+			</Modal.Body>
+			<Modal.Footer>
+				<p class="text-sm text-subtitle">
+					<Show
+						when={phase() === "import"}
+						fallback={
+							<Show when={phase() === "review"}>
+								{T()("transfer.import.summary.ready", {
+									count: importable().length,
+								})}
+								<Show when={blockedCount() > 0}>
+									{", "}
+									{T()("transfer.import.summary.blocked", {
+										count: blockedCount(),
+									})}
+								</Show>
+							</Show>
+						}
+					>
+						{T()("transfer.import.summary.done", {
+							completed: succeededCount(),
+							total: items().length,
+							failed: failedItems().length,
+						})}
+					</Show>
+				</p>
+				<Modal.Actions class="flex-wrap">
+					<Show
+						when={phase() === "import"}
+						fallback={
+							<>
 								<Button
 									type="button"
 									variant="outline"
 									size="md"
-									class="gap-2"
-									onClick={() => void downloadFailed()}
-								>
-									<TbOutlineDownload size={14} />
-									{T()("transfer.import.download.failed")}
-								</Button>
-								<Button
-									type="button"
-									variant="outline"
-									size="md"
+									disabled={checking()}
 									onClick={() =>
-										void run(retryableItems().map((item) => item.id))
+										phase() === "review" ? inputRef?.click() : close()
 									}
 								>
-									{T()("transfer.import.retry.failed")}
+									{phase() === "review"
+										? T()("transfer.import.choose.other")
+										: T()("common.cancel")}
 								</Button>
-							</Show>
+								<Show when={phase() === "review"}>
+									<Button
+										type="button"
+										variant="primary"
+										size="md"
+										disabled={checking() || importable().length === 0}
+										onClick={() =>
+											void run(importable().map((item) => item.id))
+										}
+									>
+										{T()("transfer.import.start", {
+											count: importable().length,
+										})}
+									</Button>
+								</Show>
+							</>
+						}
+					>
+						<Show when={finished() && retryableItems().length > 0}>
 							<Button
 								type="button"
-								variant="primary"
+								variant="outline"
 								size="md"
-								loading={running()}
-								disabled={running()}
-								onClick={close}
+								class="gap-2"
+								onClick={() => void downloadFailed()}
 							>
-								{running()
-									? T()("transfer.import.importing")
-									: T()("common.done")}
+								<TbOutlineDownload size={14} />
+								{T()("transfer.import.download.failed")}
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								size="md"
+								onClick={() =>
+									void run(retryableItems().map((item) => item.id))
+								}
+							>
+								{T()("transfer.import.retry.failed")}
 							</Button>
 						</Show>
-					</Modal.Actions>
-				</Modal.Footer>
-			</div>
+						<Button
+							type="button"
+							variant="primary"
+							size="md"
+							loading={running()}
+							disabled={running()}
+							onClick={close}
+						>
+							{running()
+								? T()("transfer.import.importing")
+								: T()("common.done")}
+						</Button>
+					</Show>
+				</Modal.Actions>
+			</Modal.Footer>
 		</Modal.Root>
 	);
 };

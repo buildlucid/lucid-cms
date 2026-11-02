@@ -1,6 +1,9 @@
 import { definePlugin, logger } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
+import rebuildPathsConfig from "./admin/components/RebuildPaths/config.js";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import createRebuildPathsJob from "./jobs/rebuild-paths.js";
+import routes from "./routes/index.js";
 import { checkRouteSegments } from "./services/checks/index.js";
 import {
 	afterRestoreHandler,
@@ -20,9 +23,10 @@ import registerFields from "./services/register-fields.js";
 import toolkit from "./toolkit/index.js";
 import type { PluginOptions } from "./types/types.js";
 
-/** Adds slug, parent page and path fields to selected collections, plus route maintenance hooks and toolkit.pages. */
+/** Adds slug, parent page and path fields to selected collections, plus route maintenance hooks, a path rebuild job and toolkit.pages. */
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	const options = pluginOptions(plugin);
+	const rebuildPathsJob = createRebuildPathsJob(options);
 
 	return definePlugin({
 		key: PLUGIN_KEY,
@@ -30,6 +34,10 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 		toolkit,
 		sources: { translations: ["@lucidcms/plugin-pages/translations"] },
 		configure: (draft) => {
+			draft.jobs.definitions.push(rebuildPathsJob);
+			draft.http.routes.push(...routes(rebuildPathsJob));
+			draft.admin.slots.push(rebuildPathsConfig());
+
 			const configuredCollections = [];
 
 			for (const collectionConfig of options.collections) {

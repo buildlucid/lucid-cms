@@ -8,7 +8,7 @@ import {
 	Switch,
 } from "solid-js";
 import ErrorState from "@/components/ErrorState/ErrorState";
-import Spinner from "@/components/Spinner/Spinner";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import StatusIndicator, {
 	type StatusIndicatorSize,
 } from "@/components/StatusIndicator/StatusIndicator";
@@ -83,10 +83,9 @@ const AdminExtensionBoundary: ParentComponent<{
 		>
 			<Suspense
 				fallback={
+					//* the same empty frame core pages show while their code loads
 					<Show when={props.placement === "page"}>
-						<div class="flex h-full items-center justify-center p-8">
-							<Spinner />
-						</div>
+						<PageLayout.Root />
 					</Show>
 				}
 			>

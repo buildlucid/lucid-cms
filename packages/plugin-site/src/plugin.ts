@@ -1,7 +1,9 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
+import clearPageCacheConfig from "./admin/components/ClearPageCache/config.js";
 import { CLIENT_SCRIPT_PATH, LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import registerSiteRoute from "./http/register-site-route.js";
+import routes from "./routes/index.js";
 import resolvePluginOptions from "./site/resolve-plugin-options.js";
 import clearCache from "./tasks/clear-cache.js";
 import renderSite from "./tasks/static-build/render-site.js";
@@ -29,6 +31,7 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 		},
 		tasks: { build: renderSite(options), "clear-cache": clearCache },
 		sources: {
+			translations: ["@lucidcms/plugin-site/translations"],
 			public: [
 				{
 					input: "@lucidcms/plugin-site/client/lucid.js",
@@ -42,6 +45,11 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 				phase: "fallback",
 				register: registerSiteRoute(options),
 			});
+			//* static sites are served from site:build's files, so they store nothing to clear
+			if (options.mode !== "static") {
+				draft.http.routes.push(...routes());
+				draft.admin.slots.push(clearPageCacheConfig());
+			}
 		},
 	});
 };

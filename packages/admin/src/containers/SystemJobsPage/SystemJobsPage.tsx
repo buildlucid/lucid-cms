@@ -25,21 +25,13 @@ const SystemJobsPage: Component = () => {
 						title={T()("routes.system.jobs.schedules.title")}
 						description={T()("routes.system.jobs.schedules.description")}
 					>
-						<InfoRow.Content>
-							<div class="-mx-4 overflow-hidden">
-								<JobSchedulesList />
-							</div>
-						</InfoRow.Content>
+						<JobSchedulesList />
 					</InfoRow.Root>
 					<InfoRow.Root
 						title={T()("routes.system.jobs.title")}
 						description={T()("routes.system.jobs.description")}
 					>
-						<InfoRow.Content>
-							<div class="-mx-4 overflow-hidden">
-								<JobsList />
-							</div>
-						</InfoRow.Content>
+						<JobsList />
 					</InfoRow.Root>
 				</div>
 			</PageLayout.Body>

@@ -18,6 +18,8 @@ export const ModalBody: Component<ModalBodyProps> = (props) => {
 		<div
 			data-modal-body
 			class={classNames(
+				//* keeps content z-indexes, like media previews, beneath the sticky footer
+				"isolate",
 				{
 					// The header already supplies the gap when one is present.
 					"px-4 md:px-6 py-4 md:py-6 [[data-modal-header]+&]:pt-0":

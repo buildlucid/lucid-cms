@@ -3,6 +3,7 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import {
 	TbOutlineAlertTriangle,
 	TbOutlineEye,
+	TbOutlineKey,
 	TbOutlineLinkOff,
 	TbOutlineLock,
 	TbOutlinePencil,
@@ -33,6 +34,7 @@ import Button, {
 	type ButtonSize,
 	type ButtonVariant,
 } from "@/components/Button/Button";
+import CardState from "@/components/CardState/CardState";
 import Checkbox, { type CheckboxVariant } from "@/components/Checkbox/Checkbox";
 import CodeEditor from "@/components/CodeEditor/CodeEditor";
 import ColorPicker from "@/components/ColorPicker/ColorPicker";
@@ -57,7 +59,6 @@ import Link, {
 	type LinkSize,
 	type LinkVariant,
 } from "@/components/Link/Link";
-import LoadingState from "@/components/LoadingState/LoadingState";
 import Menu from "@/components/Menu/Menu";
 import Modal, { type ModalSize } from "@/components/Modal/Modal";
 import PageLayout from "@/components/PageLayout/PageLayout";
@@ -80,8 +81,10 @@ import SelectMultiple, {
 	type SelectMultipleOption,
 	type SelectMultipleVariant,
 } from "@/components/SelectMultiple/SelectMultiple";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import Slider from "@/components/Slider/Slider";
 import Spinner, { type SpinnerSize } from "@/components/Spinner/Spinner";
+import StateNote from "@/components/StateNote/StateNote";
 import StatusIndicator, {
 	type StatusIndicatorSize,
 	type StatusIndicatorVariant,
@@ -205,6 +208,7 @@ const PROGRESS_BAR_VARIANTS = valuesOf<ProgressBarVariant>({
 	"danger-subtle": true,
 	warning: true,
 	"warning-subtle": true,
+	neutral: true,
 });
 const PROGRESS_BAR_SIZES = valuesOf<ProgressBarSize>({
 	sm: true,
@@ -530,6 +534,19 @@ const ComponentLibraryPage: Component = () => {
 										<Row label={`shape="${shape}"`}>
 											<Button variant="primary" size="md" shape={shape}>
 												{shape === "standard" ? "Button" : <TbOutlinePlus />}
+											</Button>
+										</Row>
+									)}
+								</For>
+							</div>
+						</InfoRow.Content>
+						<InfoRow.Content title={"Loading"}>
+							<div class="flex flex-col gap-2">
+								<For each={BUTTON_VARIANTS}>
+									{(variant) => (
+										<Row label={`variant="${variant}"`}>
+											<Button variant={variant} size="md" loading>
+												Button
 											</Button>
 										</Row>
 									)}
@@ -1109,23 +1126,6 @@ const ComponentLibraryPage: Component = () => {
 						</InfoRow.Content>
 					</InfoRow.Root>
 
-					{/* ---------------------------------------------- LoadingState */}
-					<InfoRow.Root
-						title={"LoadingState"}
-						description={"title, description, size"}
-					>
-						<InfoRow.Content title={"Default"}>
-							<LoadingState />
-						</InfoRow.Content>
-						<InfoRow.Content title={"With copy"}>
-							<LoadingState
-								size="lg"
-								title="Building the preview"
-								description="This takes a moment the first time."
-							/>
-						</InfoRow.Content>
-					</InfoRow.Root>
-
 					{/* ---------------------------------------------- Menu */}
 					<InfoRow.Root
 						title={"Menu"}
@@ -1266,7 +1266,7 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- InfoRow */}
 					<InfoRow.Root
 						title={"InfoRow"}
-						description={"Root, Content, align, actions"}
+						description={"Root, Content, align, actions, loading"}
 					>
 						<InfoRow.Content title={"A row of cards"}>
 							<p class="text-sm">
@@ -1456,7 +1456,9 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- QueryBoundary */}
 					<InfoRow.Root
 						title={"QueryBoundary"}
-						description={"loading, error, empty"}
+						description={
+							"loading, loadingFallback, error, empty, appearance, onRetry"
+						}
 					>
 						<InfoRow.Content title={"Loading"}>
 							<QueryBoundary loading={true}>
@@ -1465,6 +1467,50 @@ const ComponentLibraryPage: Component = () => {
 						</InfoRow.Content>
 						<InfoRow.Content title={"Error"}>
 							<QueryBoundary error={true}>
+								<span />
+							</QueryBoundary>
+						</InfoRow.Content>
+						<InfoRow.Content title={"Inline error"}>
+							<QueryBoundary
+								error={true}
+								appearance="inline"
+								onRetry={() => {}}
+							>
+								<span />
+							</QueryBoundary>
+						</InfoRow.Content>
+						<InfoRow.Content title={"Inline empty"}>
+							<QueryBoundary
+								empty={true}
+								appearance="inline"
+								emptyFallback={
+									<StateNote>Nothing has been added yet.</StateNote>
+								}
+							>
+								<span />
+							</QueryBoundary>
+						</InfoRow.Content>
+						<InfoRow.Content padding="none">
+							<QueryBoundary
+								error={true}
+								appearance="contained"
+								onRetry={() => {}}
+							>
+								<span />
+							</QueryBoundary>
+						</InfoRow.Content>
+						<InfoRow.Content padding="none">
+							<QueryBoundary
+								empty={true}
+								appearance="contained"
+								emptyFallback={
+									<CardState
+										icon={<TbOutlineKey />}
+										title="No API Keys"
+										description="Keys you create appear here."
+									/>
+								}
+							>
 								<span />
 							</QueryBoundary>
 						</InfoRow.Content>
@@ -1679,6 +1725,29 @@ const ComponentLibraryPage: Component = () => {
 									)}
 								</For>
 							</div>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
+					{/* ---------------------------------------------- Skeleton */}
+					<InfoRow.Root
+						title={"Skeleton"}
+						description={"children, plus the .skeleton class"}
+					>
+						<InfoRow.Content title={"Default"}>
+							<Skeleton />
+						</InfoRow.Content>
+						<InfoRow.Content title={"Shaped like the content"}>
+							<Skeleton class="flex items-center gap-3">
+								<span class="skeleton block size-9 shrink-0" />
+								<div class="grow">
+									<div class="text-sm">
+										<span class="skeleton block w-40">&nbsp;</span>
+									</div>
+									<div class="mt-0.5 text-xs">
+										<span class="skeleton block w-64 max-w-full">&nbsp;</span>
+									</div>
+								</div>
+							</Skeleton>
 						</InfoRow.Content>
 					</InfoRow.Root>
 

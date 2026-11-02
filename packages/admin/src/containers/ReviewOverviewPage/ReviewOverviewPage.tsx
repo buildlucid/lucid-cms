@@ -116,7 +116,7 @@ const ReviewOverviewPage: Component = () => {
 					loading={collections.isLoading || overview.isLoading}
 					error={collections.isError || overview.isError}
 					loadingFallback={
-						<div aria-busy="true" class="flex w-full flex-col gap-8 self-start">
+						<div class="flex flex-col gap-8">
 							<div>
 								<span class="skeleton mb-3 block h-5 w-40" />
 								<span class="skeleton block h-24 w-full" />

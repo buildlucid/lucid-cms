@@ -10,6 +10,7 @@ import type {
 	FieldSlotMatch,
 } from "../../components/FieldSlots/types.js";
 import type { HomeWidgetPlacement } from "../../components/HomeWidgets/types.js";
+import type { MaintenanceSlotPlacement } from "../../components/MaintenanceSlots/types.js";
 import type { AdminRoute } from "./route.js";
 
 /** Project-relative path, exported package subpath, absolute path or file URL. */
@@ -46,6 +47,7 @@ export type AdminSlot = {
 	| (BrickSlotPlacement & { match?: BrickSlotMatch })
 	| { slot: FieldSlot; match?: FieldSlotMatch }
 	| CaptchaSlotPlacement
+	| MaintenanceSlotPlacement
 );
 
 export type AdminConfig = {

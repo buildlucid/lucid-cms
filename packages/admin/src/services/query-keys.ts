@@ -259,6 +259,9 @@ export const queryKeys = {
 		all: () => ["lucid", "settings"] as const,
 		detail: () => ["lucid", "settings", "detail"] as const,
 	},
+	diagnostics: {
+		detail: () => ["lucid", "diagnostics", "detail"] as const,
+	},
 	share: {
 		all: () => ["lucid", "share"] as const,
 		access: () => ["lucid", "share", "access"] as const,

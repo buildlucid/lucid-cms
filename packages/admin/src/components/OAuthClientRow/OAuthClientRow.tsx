@@ -1,16 +1,21 @@
 import type { OAuthClient, OAuthClientCreateResponse } from "@types";
+import classnames from "classnames";
 import { TbOutlineArrowsLeftRight, TbOutlineKey } from "solid-icons/tb";
 import { type Component, createSignal, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
-import IconContainer from "@/components/IconContainer/IconContainer";
 import Modal from "@/components/Modal/Modal";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
+import RowIcon from "@/components/RowIcon/RowIcon";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";
 import T from "@/translations";
 import mediaUrl from "@/utils/media-url";
 
+/**
+ * OAuth application row with edit, delete and secret rotation actions. Use in `InfoRow.Content`
+ * with `padding="none"`.
+ */
 const OAuthClientRow: Component<{
 	client: OAuthClient;
 	canUpdate: boolean;
@@ -18,7 +23,7 @@ const OAuthClientRow: Component<{
 	canRegenerate: boolean;
 }> = (props) => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
 	const [updateOpen, setUpdateOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
 	const [regenerateOpen, setRegenerateOpen] = createSignal(false);
@@ -57,110 +62,107 @@ const OAuthClientRow: Component<{
 	// Render
 	return (
 		<>
-			<article class="border-b border-border p-4 last:border-b-0">
-				<div class="flex min-w-0 items-start justify-between gap-3">
-					<div class="flex min-w-0 items-start gap-3">
-						<IconContainer
-							class={
-								props.client.logo
-									? "rectangle-background overflow-hidden"
-									: "overflow-hidden"
-							}
+			<article class="flex min-w-0 items-center justify-between gap-4 px-5 py-4">
+				<div class="flex min-w-0 items-center gap-4">
+					<RowIcon
+						class={props.client.logo ? "rectangle-background" : undefined}
+					>
+						<Show
+							when={props.client.logo}
+							fallback={<TbOutlineKey class="size-4" />}
 						>
-							<Show
-								when={props.client.logo}
-								fallback={<TbOutlineKey class="size-3.5 text-primary" />}
-							>
-								{(logo) => (
-									<img
-										src={mediaUrl(logo(), "thumbnail-small")}
-										alt=""
-										class="relative z-10 size-full object-contain"
-									/>
+							{(logo) => (
+								<img
+									src={mediaUrl(logo(), "thumbnail-small")}
+									alt=""
+									class="relative z-10 size-full object-contain p-2"
+								/>
+							)}
+						</Show>
+					</RowIcon>
+					<div class="min-w-0">
+						<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+							<h3 class="truncate text-sm font-medium text-title">
+								{props.client.name}
+							</h3>
+							<span
+								class={classnames(
+									"inline-flex items-center gap-1.5 text-xs font-medium",
+									props.client.enabled ? "text-success" : "text-muted",
 								)}
-							</Show>
-						</IconContainer>
-						<div class="min-w-0">
-							<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-								<h3 class="truncate text-sm font-semibold text-title">
-									{props.client.name}
-								</h3>
-								<span
-									class={
-										props.client.enabled
-											? "inline-flex items-center gap-1.5 text-xs font-medium text-success"
-											: "inline-flex items-center gap-1.5 text-xs font-medium text-muted"
-									}
-								>
-									<StatusIndicator
-										variant={props.client.enabled ? "success" : "neutral"}
-										size="xs"
-									/>
-									{props.client.enabled
-										? T()("common.status.active")
-										: T()("common.status.inactive")}
-								</span>
-							</div>
-							<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-body">
-								<span>
-									{props.client.authMethod === "client_secret_basic"
-										? T()("oauth.clients.auth.confidential.short")
-										: T()("oauth.clients.auth.public.short")}
-								</span>
-								<span class="text-muted" aria-hidden="true">
-									·
-								</span>
-								<span class="flex items-center gap-1.5">
-									<TbOutlineArrowsLeftRight class="size-2.5 text-muted" />
-									{T()(
-										props.client.redirectUris.length === 1
-											? "oauth.clients.redirect.count"
-											: "oauth.clients.redirects.count",
-										{ count: props.client.redirectUris.length },
-									)}
-								</span>
-							</div>
-							<p
-								class="mt-1.5 max-w-xl truncate font-mono text-[11px] text-muted"
+							>
+								<StatusIndicator
+									variant={props.client.enabled ? "success" : "neutral"}
+									size="xs"
+								/>
+								{props.client.enabled
+									? T()("common.status.active")
+									: T()("common.status.inactive")}
+							</span>
+						</div>
+						<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-body">
+							<span>
+								{props.client.authMethod === "client_secret_basic"
+									? T()("oauth.clients.auth.confidential.short")
+									: T()("oauth.clients.auth.public.short")}
+							</span>
+							<span class="text-muted" aria-hidden="true">
+								·
+							</span>
+							<span class="flex items-center gap-1.5">
+								<TbOutlineArrowsLeftRight class="size-2.5 text-muted" />
+								{T()(
+									props.client.redirectUris.length === 1
+										? "oauth.clients.redirect.count"
+										: "oauth.clients.redirects.count",
+									{ count: props.client.redirectUris.length },
+								)}
+							</span>
+							<span class="text-muted" aria-hidden="true">
+								·
+							</span>
+							<code
+								class="min-w-0 truncate font-mono text-[11px] text-muted"
 								title={props.client.clientId}
 							>
 								{props.client.clientId}
-							</p>
+							</code>
 						</div>
 					</div>
-					<ActionMenu
-						actions={[
-							{
-								type: "button",
-								label: T()("common.update"),
-								icon: "pen",
-								onClick: () => setUpdateOpen(true),
-								show: props.canUpdate,
-								sortOrder: 0,
-							},
-							{
-								type: "button",
-								label: T()("oauth.clients.secret.regenerate.action"),
-								icon: "rotate",
-								onClick: () => setRegenerateOpen(true),
-								show:
-									props.canRegenerate &&
-									props.client.authMethod === "client_secret_basic",
-								sortOrder: 70,
-								variant: "danger",
-							},
-							{
-								type: "button",
-								label: T()("common.delete"),
-								icon: "trash",
-								onClick: () => setDeleteOpen(true),
-								show: props.canDelete,
-								sortOrder: 80,
-								variant: "danger",
-							},
-						]}
-					/>
 				</div>
+				<ActionMenu
+					variant="ghost"
+					actions={[
+						{
+							type: "button",
+							label: T()("common.update"),
+							icon: "pen",
+							onClick: () => setUpdateOpen(true),
+							show: props.canUpdate,
+							sortOrder: 0,
+						},
+						{
+							type: "button",
+							label: T()("oauth.clients.secret.regenerate.action"),
+							icon: "rotate",
+							onClick: () => setRegenerateOpen(true),
+							show:
+								props.canRegenerate &&
+								props.client.authMethod === "client_secret_basic",
+							sortOrder: 70,
+							variant: "danger",
+						},
+						{
+							type: "button",
+							label: T()("common.delete"),
+							icon: "trash",
+							onClick: () => setDeleteOpen(true),
+							show: props.canDelete,
+							sortOrder: 80,
+							variant: "danger",
+						},
+					]}
+				/>
 			</article>
 
 			{/* Panels */}

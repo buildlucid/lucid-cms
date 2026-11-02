@@ -21,7 +21,7 @@ import ShowDeletedToggle from "@/components/ShowDeletedToggle/ShowDeletedToggle"
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
-export type QueryToolbarPadding = "sm" | "md";
+export type QueryToolbarPadding = "none" | "sm" | "md";
 
 export interface QueryToolbarProps {
 	queryState: QueryStateResponse;
@@ -46,7 +46,7 @@ export interface QueryToolbarProps {
 	/** Adds a "show deleted" toggle button. Requires `onShowDeletedChange`. */
 	showDeleted?: boolean;
 	onShowDeletedChange?: (_value: boolean) => void;
-	/** @default "md" */
+	/** Use `none` when the toolbar sits above a card rather than inside one. @default "md" */
 	padding?: QueryToolbarPadding;
 	/** Adds padding above the toolbar. */
 	paddingTop?: boolean;
@@ -119,9 +119,12 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 				"w-full flex flex-col gap-2.5",
 				{
 					"px-4 pb-4": props.padding === "sm",
-					"px-4 md:px-6 pb-4 md:pb-6": props.padding !== "sm",
+					"px-4 md:px-6 pb-4 md:pb-6":
+						props.padding === undefined || props.padding === "md",
 					"pt-4": props.paddingTop && props.padding === "sm",
-					"pt-4 md:pt-6": props.paddingTop && props.padding !== "sm",
+					"pt-4 md:pt-6":
+						props.paddingTop &&
+						(props.padding === undefined || props.padding === "md"),
 				},
 				props.class,
 			)}
@@ -198,7 +201,9 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 						queryState={props.queryState}
 						preserveSubjectCase={props.preserveFilterSubjectCase}
 						presets={props.filterPresets}
-						padding={props.padding ?? "md"}
+						//* without a card around the toolbar, the panel draws its own box
+						embedded={props.padding === "none"}
+						padding={props.padding === "sm" ? "sm" : "md"}
 					/>
 				)}
 			</Show>

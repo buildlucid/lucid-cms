@@ -2,6 +2,9 @@ import { pluginPublicPath } from "@lucidcms/core/extension";
 
 export const PLUGIN_KEY = "@lucidcms/plugin-site";
 export const LUCID_VERSION = "0.x.x";
+export const COMPONENTS_MODULE = "@lucidcms/plugin-site/components";
+/** Clears stored pages from the admin's Operations page. */
+export const CLEAR_CACHE_ROUTE = "/api/v1/site/clear-cache";
 
 export const TEMPLATE_EXTENSION = ".kiln";
 export const DEFAULT_SITE_DIRECTORY = "site";

@@ -7,7 +7,7 @@ const SystemRedirectPage: Component = () => {
 	// ----------------------------------
 	// Render
 	if (userStore.get.hasPermission([Permissions.SettingsRead]).all) {
-		return <Navigate href="/admin/system/overview" />;
+		return <Navigate href="/admin/system/operations" />;
 	}
 
 	if (userStore.get.hasPermission([Permissions.IntegrationsRead]).all) {

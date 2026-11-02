@@ -61,7 +61,7 @@ export const NavigationMenuContent: Component<{
 			users: can(Permissions.UsersRead),
 			roles: can(Permissions.RolesRead),
 			jobs: can(Permissions.JobsRead),
-			systemOverview: settings,
+			systemDiagnostics: settings,
 			integrations:
 				can(Permissions.IntegrationsRead) || can(Permissions.ConnectionUpdate),
 			aiUsage: settings && siteStore.get.hasAnyAiFeatureEnabled(),
@@ -293,7 +293,7 @@ export const NavigationMenuContent: Component<{
 
 					<Show
 						when={
-							permissions().systemOverview ||
+							permissions().systemDiagnostics ||
 							permissions().integrations ||
 							permissions().jobs ||
 							permissions().aiUsage
@@ -305,22 +305,16 @@ export const NavigationMenuContent: Component<{
 							active={isActive("/admin/system")}
 						>
 							<NavigationLink
-								href="/admin/system/overview"
-								icon="overview"
-								title={T()("common.overview")}
-								permission={permissions().systemOverview}
-							/>
-							<NavigationLink
 								href="/admin/system/operations"
 								icon="settings"
 								title={T()("common.operations")}
-								permission={permissions().systemOverview}
+								permission={permissions().systemDiagnostics}
 							/>
 							<NavigationLink
 								href="/admin/system/notifications"
 								icon="notifications"
 								title={T()("notifications.title")}
-								permission={permissions().systemOverview}
+								permission={permissions().systemDiagnostics}
 							/>
 							<NavigationLink
 								href="/admin/system/integrations"
@@ -339,6 +333,12 @@ export const NavigationMenuContent: Component<{
 								icon="queue"
 								title={T()("routes.system.jobs.title")}
 								permission={permissions().jobs}
+							/>
+							<NavigationLink
+								href="/admin/system/diagnostics"
+								icon="overview"
+								title={T()("common.diagnostics")}
+								permission={permissions().systemDiagnostics}
 							/>
 						</NavigationSection>
 					</Show>

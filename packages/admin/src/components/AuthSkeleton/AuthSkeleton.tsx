@@ -1,5 +1,5 @@
 import { type Component, Index, Show } from "solid-js";
-import T from "@/translations";
+import Skeleton from "@/components/Skeleton/Skeleton";
 
 interface AuthSkeletonProps {
 	/** Form inputs to sketch. Use 0 for pages that only have a button. @default 1 */
@@ -13,7 +13,7 @@ const AuthSkeleton: Component<AuthSkeletonProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="w-full" role="status" aria-label={T()("common.loading")}>
+		<Skeleton class="w-full">
 			<span class="skeleton mx-auto mb-6 block size-8" />
 			<span class="skeleton mx-auto mb-2 block h-6 w-44" />
 			<span class="skeleton mx-auto block h-5 w-64 max-w-full" />
@@ -30,7 +30,7 @@ const AuthSkeleton: Component<AuthSkeletonProps> = (props) => {
 					</Index>
 				</div>
 			</Show>
-		</div>
+		</Skeleton>
 	);
 };
 

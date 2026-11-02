@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import Menu from "@/components/Menu/Menu";
-import Spinner from "@/components/Spinner/Spinner";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import T from "@/translations";
@@ -101,11 +100,15 @@ export const PublishTrigger: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="flex items-center relative">
+		<div
+			class="flex items-center relative"
+			aria-busy={props.loading ? "true" : undefined}
+		>
 			<Show when={props.loading}>
-				<span class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center rounded-md cursor-wait pointer-events-none">
-					<Spinner size="sm" />
-				</span>
+				<span
+					class="loading-overlay rounded-md text-secondary-foreground"
+					aria-hidden="true"
+				/>
 			</Show>
 			<button
 				type="button"

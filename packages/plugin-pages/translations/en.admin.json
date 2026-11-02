@@ -1,5 +1,12 @@
 {
 	"plugin.pages.fields.path.label": "Path",
 	"plugin.pages.fields.slug.label": "Slug",
-	"plugin.pages.fields.parent.page.label": "Parent page"
+	"plugin.pages.fields.parent.page.label": "Parent page",
+	"plugin.pages.maintenance.title": "Page Paths",
+	"plugin.pages.maintenance.description": "Recalculate every page's path from its parents and slug, such as after moving or importing pages in bulk",
+	"plugin.pages.maintenance.action": "Rebuild Paths",
+	"plugin.pages.maintenance.modal.title": "Rebuild Page Paths",
+	"plugin.pages.maintenance.modal.description": "This recalculates every page's path in the background, in latest and each environment. If a rebuilt path would clash with another page's, nothing changes and the failed job says which path.",
+	"plugin.pages.maintenance.toast.title": "Path rebuild started",
+	"plugin.pages.maintenance.toast.message": "Page paths are being rebuilt in the background."
 }

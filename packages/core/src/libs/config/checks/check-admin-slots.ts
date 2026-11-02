@@ -4,7 +4,7 @@ import logger from "../../logger/index.js";
 import { requirementPermissions } from "../../permission/match-permissions.js";
 import { isRegisteredPermission } from "../../permission/registry.js";
 
-/** Warns about equal-priority exclusive slots and rejects Home widgets requiring unavailable role permissions. */
+/** Warns about equal-priority exclusive slots and rejects slots requiring unavailable role permissions. */
 const checkAdminSlots = (config: ResolvedLucidConfig) => {
 	const slots = config.admin.slots ?? [];
 
@@ -17,7 +17,7 @@ const checkAdminSlots = (config: ResolvedLucidConfig) => {
 	}
 
 	for (const slot of slots) {
-		if (slot.slot !== "home.widget" || slot.permission === undefined) {
+		if (!("permission" in slot) || slot.permission === undefined) {
 			continue;
 		}
 

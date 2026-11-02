@@ -1,18 +1,18 @@
 import { useQueryClient } from "@tanstack/solid-query";
-import classnames from "classnames";
 import {
 	TbOutlineCalendar,
 	TbOutlineCircleCheck,
 	TbOutlineLetterT,
 } from "solid-icons/tb";
-import { type Component, createMemo, Index } from "solid-js";
-import EmptyState from "@/components/EmptyState/EmptyState";
+import { type Component, createMemo, Index, Show } from "solid-js";
+import InfoRow from "@/components/InfoRow/InfoRow";
 import JobScheduleTableRow from "@/components/JobScheduleTableRow/JobScheduleTableRow";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import ScheduleDetailsDrawer from "@/components/ScheduleDetailsDrawer/ScheduleDetailsDrawer";
 import SetScheduleStateModal from "@/components/SetScheduleStateModal/SetScheduleStateModal";
+import StateNote from "@/components/StateNote/StateNote";
 import Table from "@/components/Table/Table";
 import ViewScheduleRunsDrawer from "@/components/ViewScheduleRunsDrawer/ViewScheduleRunsDrawer";
 import useQueryState, {
@@ -60,6 +60,12 @@ export const JobSchedulesList: Component = () => {
 
 	// ----------------------------------
 	// Memos
+	const showingState = createMemo(
+		() => schedules.isError || schedules.data?.data.length === 0,
+	);
+	const showToolbar = createMemo(
+		() => !showingState() || !searchParams.filtersAreDefault(),
+	);
 	const selectedSchedule = createMemo(() =>
 		schedules.data?.data.find(
 			(schedule) => schedule.key === rowTarget.getTargetId(),
@@ -70,113 +76,117 @@ export const JobSchedulesList: Component = () => {
 	// Render
 	return (
 		<>
-			<QueryToolbar
-				queryState={searchParams}
-				onRefresh={() => {
-					queryClient.invalidateQueries({
-						queryKey: queryKeys.jobs.schedules(),
-					});
-				}}
-				filterSubject={T()("routes.system.jobs.schedules.title")}
-				filterFields={[
-					{ label: T()("common.schedule"), key: "name", type: "text" },
-					{ label: T()("jobs.name"), key: "jobName", type: "text" },
-					{
-						label: T()("common.status"),
-						key: "state",
-						type: "select",
-						options: [
-							{ label: T()("common.status.active"), value: "active" },
-							{ label: T()("common.status.paused"), value: "paused" },
-						],
-					},
-				]}
-				sorts={[
-					{ label: T()("common.schedule"), key: "name" },
-					{ label: T()("jobs.name"), key: "jobName" },
-					{ label: T()("jobs.schedules.next.run"), key: "nextRunAt" },
-				]}
-				perPage={[5, 10, 20]}
-				padding="sm"
-			/>
-			<QueryBoundary
-				error={schedules.isError}
-				empty={schedules.data?.data.length === 0}
-				emptyFallback={
-					<EmptyState
-						title={T()("empty.states.job.schedules.title")}
-						description={T()("empty.states.job.schedules.description")}
+			{/* the query toolbar sits above the card, which holds only the table and pagination */}
+			<div class="flex flex-col gap-3">
+				{/* nothing to filter until there are rows or filters are set */}
+				<Show when={showToolbar()}>
+					<QueryToolbar
+						queryState={searchParams}
+						onRefresh={() => {
+							queryClient.invalidateQueries({
+								queryKey: queryKeys.jobs.schedules(),
+							});
+						}}
+						filterSubject={T()("routes.system.jobs.schedules.title")}
+						filterFields={[
+							{ label: T()("common.schedule"), key: "name", type: "text" },
+							{ label: T()("jobs.name"), key: "jobName", type: "text" },
+							{
+								label: T()("common.status"),
+								key: "state",
+								type: "select",
+								options: [
+									{ label: T()("common.status.active"), value: "active" },
+									{ label: T()("common.status.paused"), value: "paused" },
+								],
+							},
+						]}
+						sorts={[
+							{ label: T()("common.schedule"), key: "name" },
+							{ label: T()("jobs.name"), key: "jobName" },
+							{ label: T()("jobs.schedules.next.run"), key: "nextRunAt" },
+						]}
+						perPage={[5, 10, 20]}
+						padding="none"
 					/>
-				}
-				class={classnames(
-					"border-t border-border",
-					schedules.isError || schedules.data?.data.length === 0
-						? "-mb-4"
-						: undefined,
-				)}
-			>
-				<Table.Root
-					id="jobs.schedules.list"
-					rowCount={schedules.data?.data.length ?? 0}
-					queryState={searchParams}
-					columns={[
-						{
-							label: T()("common.status"),
-							key: "state",
-							icon: <TbOutlineCircleCheck />,
-						},
-						{
-							label: T()("common.schedule"),
-							key: "name",
-							icon: <TbOutlineLetterT />,
-							minWidth: 260,
-							sortable: true,
-						},
-						{
-							label: T()("common.job"),
-							key: "jobName",
-							icon: <TbOutlineLetterT />,
-							minWidth: 260,
-							sortable: true,
-						},
-						{
-							label: T()("jobs.schedules.next.run"),
-							key: "nextRunAt",
-							icon: <TbOutlineCalendar />,
-							sortable: true,
-						},
-						{
-							label: T()("jobs.schedules.last.result"),
-							key: "lastResult",
-							icon: <TbOutlineCircleCheck />,
-						},
-					]}
-					loading={schedules.isFetching}
-					padding="sm"
-					variant="contained"
-				>
-					<Index each={schedules.data?.data ?? []}>
-						{(schedule, index) => (
-							<JobScheduleTableRow
-								index={index}
-								schedule={schedule()}
-								rowTarget={rowTarget}
-								triggerPending={trigger.action.isPending}
-								onTrigger={() =>
-									trigger.action.mutate({ scheduleKey: schedule().key })
-								}
-							/>
-						)}
-					</Index>
-				</Table.Root>
-			</QueryBoundary>
-			<Pagination
-				queryState={searchParams}
-				meta={schedules.data?.meta}
-				variant="inline"
-				padding="sm"
-				hideWhenEmpty
-			/>
+				</Show>
+				<InfoRow.Content padding="none">
+					<QueryBoundary
+						appearance="inline"
+						error={schedules.isError}
+						onRetry={() => schedules.refetch()}
+						empty={schedules.data?.data.length === 0}
+						queryState={searchParams}
+						emptyFallback={
+							<StateNote>{T()("empty.states.job.schedules")}</StateNote>
+						}
+						class={showingState() ? "p-4" : undefined}
+					>
+						<Table.Root
+							id="jobs.schedules.list"
+							rowCount={schedules.data?.data.length ?? 0}
+							queryState={searchParams}
+							columns={[
+								{
+									label: T()("common.status"),
+									key: "state",
+									icon: <TbOutlineCircleCheck />,
+								},
+								{
+									label: T()("common.schedule"),
+									key: "name",
+									icon: <TbOutlineLetterT />,
+									minWidth: 260,
+									sortable: true,
+								},
+								{
+									label: T()("common.job"),
+									key: "jobName",
+									icon: <TbOutlineLetterT />,
+									minWidth: 260,
+									sortable: true,
+								},
+								{
+									label: T()("jobs.schedules.next.run"),
+									key: "nextRunAt",
+									icon: <TbOutlineCalendar />,
+									sortable: true,
+								},
+								{
+									label: T()("jobs.schedules.last.result"),
+									key: "lastResult",
+									icon: <TbOutlineCircleCheck />,
+								},
+							]}
+							loading={schedules.isFetching}
+							padding="sm"
+							variant="contained"
+							class="border-y-0"
+						>
+							<Index each={schedules.data?.data ?? []}>
+								{(schedule, index) => (
+									<JobScheduleTableRow
+										index={index}
+										schedule={schedule()}
+										rowTarget={rowTarget}
+										triggerPending={trigger.action.isPending}
+										onTrigger={() =>
+											trigger.action.mutate({ scheduleKey: schedule().key })
+										}
+									/>
+								)}
+							</Index>
+						</Table.Root>
+					</QueryBoundary>
+					<Pagination
+						queryState={searchParams}
+						meta={schedules.data?.meta}
+						variant="footer"
+						padding="sm"
+						hideWhenEmpty
+					/>
+				</InfoRow.Content>
+			</div>
 
 			<ScheduleDetailsDrawer
 				id={rowTarget.getTargetId}

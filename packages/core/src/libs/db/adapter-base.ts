@@ -316,7 +316,7 @@ export default abstract class DatabaseAdapter {
 
 		try {
 			const executedMigrations = await sql<{ name: string }>`
-				SELECT name FROM kysely_migration
+				SELECT name FROM kysely_migration ORDER BY ${sql.ref("timestamp")}, name
 			`.execute(db);
 			executed = executedMigrations.rows.map((row) => row.name);
 		} catch (_) {

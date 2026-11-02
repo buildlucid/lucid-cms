@@ -6,6 +6,7 @@ export * as captchaServices from "./captcha/index.js";
 export * as cdnServices from "./cdn/index.js";
 export * as collectionServices from "./collections/index.js";
 export * as connectionServices from "./connection/index.js";
+export * as diagnosticServices from "./diagnostics/index.js";
 export * as documentEditorServices from "./document-editors/index.js";
 export * as documentWorkflowServices from "./document-workflows/index.js";
 export * as documentServices from "./documents/index.js";

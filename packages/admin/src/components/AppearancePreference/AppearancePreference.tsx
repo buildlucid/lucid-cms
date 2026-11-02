@@ -8,7 +8,8 @@ import T from "@/translations";
 const isThemePreference = (value: unknown): value is ThemePreference =>
 	value === "system" || value === "light" || value === "dark";
 
-export const AppearancePreference: Component = () => {
+/** A compact select for the light, dark or device theme preference. */
+export const AppearancePreference: Component<{ class?: string }> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const options = createMemo<Array<{ label: string; value: ThemePreference }>>(
@@ -33,6 +34,9 @@ export const AppearancePreference: Component = () => {
 	return (
 		<Select
 			id="cms-appearance"
+			size="sm"
+			class={props.class}
+			aria-label={T()("settings.interface.cms.appearance.title")}
 			value={themeStore.preference()}
 			options={options()}
 			onChange={(value) => {

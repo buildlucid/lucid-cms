@@ -1142,6 +1142,28 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
+	/**
+	 * Counts documents that aren't deleted in each collection document table, in one query.
+	 * @remarks Returns raw counts, which some databases provide as strings. Tables without documents are left out.
+	 */
+	async selectCountsByCollection(props: { tables: LucidDocumentTableName[] }) {
+		const [first, ...rest] = props.tables.map((table) =>
+			this.db
+				.selectFrom(table)
+				.select(["collection_key", sql<string | number>`count(*)`.as("count")])
+				.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
+				.groupBy("collection_key"),
+		);
+		if (first === undefined) return { error: undefined, data: [] };
+
+		const query = rest.reduce((union, table) => union.unionAll(table), first);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectCountsByCollection",
+		});
+		return exec.response;
+	}
+
 	// ----------------------------------------
 	// helpers
 	/** Builds scalar subqueries for custom field sort values. */

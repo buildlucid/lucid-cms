@@ -9,6 +9,7 @@ import {
 	untrack,
 } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
+import Skeleton from "@/components/Skeleton/Skeleton";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
@@ -105,9 +106,9 @@ export const CodeField: Component<CodeFieldProps> = (props) => {
 	return (
 		<Suspense
 			fallback={
-				<div class="w-full">
-					<div class="h-36 bg-input border border-border rounded-md animate-pulse" />
-				</div>
+				<Skeleton class="w-full">
+					<span class="skeleton block h-36 w-full border border-border" />
+				</Skeleton>
 			}
 		>
 			<CodeEditor

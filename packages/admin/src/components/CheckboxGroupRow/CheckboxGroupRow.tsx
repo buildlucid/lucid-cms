@@ -28,6 +28,8 @@ export interface CheckboxGroupRowProps {
 	onChange: (_value: string[]) => void;
 	forceOpen?: boolean;
 	disabled?: boolean;
+	/** `md` matches `InfoRow.Item`, for rows that fill an `InfoRow.Content` with `padding="none"`. @default "sm" */
+	padding?: "sm" | "md";
 }
 
 const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
@@ -91,7 +93,12 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 	// Render
 	return (
 		<li data-checkbox-group-row>
-			<div class="flex items-center gap-3 px-4">
+			<div
+				class={classnames("flex items-center gap-3", {
+					"px-4": props.padding !== "md",
+					"px-5": props.padding === "md",
+				})}
+			>
 				<Checkbox
 					id={props.id}
 					value={allSelected()}
@@ -102,7 +109,10 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 				/>
 				<button
 					type="button"
-					class="flex min-w-0 grow items-center gap-3 py-3 text-left"
+					class={classnames("flex min-w-0 grow items-center gap-3 text-left", {
+						"py-3": props.padding !== "md",
+						"py-4": props.padding === "md",
+					})}
 					aria-expanded={isOpen()}
 					disabled={props.forceOpen}
 					onClick={() => setOpen((open) => !open)}
@@ -120,7 +130,12 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 				</button>
 			</div>
 			<Show when={isOpen()}>
-				<div class="px-4 pt-1 pb-4 ps-12">
+				<div
+					class={classnames("pt-1 pb-4", {
+						"px-4 ps-12": props.padding !== "md",
+						"px-5 ps-13": props.padding === "md",
+					})}
+				>
 					<Show when={props.description}>
 						{(description) => (
 							<p class="mb-3 text-xs text-subtitle">{description()}</p>

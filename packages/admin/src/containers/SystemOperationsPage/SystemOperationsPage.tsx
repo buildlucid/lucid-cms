@@ -5,6 +5,8 @@ import ClearCacheModal from "@/components/ClearCacheModal/ClearCacheModal";
 import DeleteAllShareLinksSystemModal from "@/components/DeleteAllShareLinksSystemModal/DeleteAllShareLinksSystemModal";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import LucidConnection from "@/components/LucidConnection/LucidConnection";
+import MaintenanceGroups from "@/components/MaintenanceGroups/MaintenanceGroups";
+import MaintenanceTile from "@/components/MaintenanceTile/MaintenanceTile";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { Permissions } from "@/constants/permissions";
@@ -14,7 +16,7 @@ import T from "@/translations";
 
 const SystemOperationsPage: Component = () => {
 	// ----------------------------------------
-	// State / Hooks
+	// State & Hooks
 	usePageTitle(() => T()("routes.system.operations.title"));
 	const [getOpenClearAllProcessedImages, setOpenClearAllProcessedImages] =
 		createSignal(false);
@@ -22,7 +24,7 @@ const SystemOperationsPage: Component = () => {
 	const [getOpenDeleteAllShareLinks, setOpenDeleteAllShareLinks] =
 		createSignal(false);
 
-	// ----------------------------------
+	// ----------------------------------------
 	// Queries
 	const settingsData = api.settings.useGetSettings({
 		queryParams: {
@@ -51,77 +53,107 @@ const SystemOperationsPage: Component = () => {
 						<LucidConnection />
 					</InfoRow.Root>
 
-					{/* Settings */}
-					<QueryBoundary
-						loading={settingsData.isLoading}
-						error={settingsData.isError}
+					{/* Maintenance */}
+					<InfoRow.Root
+						title={T()("system.maintenance.title")}
+						description={T()("system.maintenance.description")}
 					>
-						{/* Maintenance */}
-						<InfoRow.Root
-							title={T()("system.maintenance.title")}
-							description={T()("system.maintenance.description")}
+						<QueryBoundary
+							loading={settingsData.isLoading}
+							error={settingsData.isError}
+							loadingFallback={
+								<div class="grid gap-2 sm:grid-cols-2">
+									<span class="skeleton block h-48 w-full" />
+									<span class="skeleton block h-48 w-full" />
+									<span class="skeleton block h-48 w-full" />
+								</div>
+							}
+							appearance="card"
+							onRetry={() => settingsData.refetch()}
 						>
-							<InfoRow.Content
-								title={T()("common.actions.clear.all")}
-								description={T()("media.processed.clear.all.settings.message")}
-								actions={
-									<Button
-										size="md"
-										type="button"
-										variant="danger"
-										onClick={() => {
-											setOpenClearAllProcessedImages(true);
-										}}
-										permission={Permissions.MediaUpdate}
-									>
-										{T()("media.processed.clear.all.action", {
-											count:
-												settingsData.data?.data?.media?.processed.total || 0,
-										})}
-									</Button>
-								}
-								align="center"
+							{/* plugins add tiles through the `maintenance.action` slot */}
+							<MaintenanceGroups
+								tiles={[
+									{
+										key: "lucid.processedImages",
+										group: "rebuild",
+										render: () => (
+											<MaintenanceTile
+												icon="image"
+												title={T()("media.processed.title")}
+												description={T()(
+													"media.processed.clear.all.settings.message",
+												)}
+												status={T()("system.maintenance.processed.status", {
+													count:
+														settingsData.data?.data?.media?.processed.total ||
+														0,
+												})}
+												action={
+													<Button
+														type="button"
+														size="sm"
+														variant="outline"
+														permission={Permissions.MediaUpdate}
+														onClick={() => setOpenClearAllProcessedImages(true)}
+													>
+														{T()("media.processed.clear.action")}
+													</Button>
+												}
+											/>
+										),
+									},
+									{
+										key: "lucid.cache",
+										group: "rebuild",
+										render: () => (
+											<MaintenanceTile
+												icon="cache"
+												title={T()("system.maintenance.cache.title")}
+												description={T()("system.cache.setting.message")}
+												status={settingsData.data?.data?.system?.kv}
+												action={
+													<Button
+														type="button"
+														size="sm"
+														variant="outline"
+														permission={Permissions.CacheClear}
+														onClick={() => setOpenClearCache(true)}
+													>
+														{T()("system.cache.button")}
+													</Button>
+												}
+											/>
+										),
+									},
+									{
+										key: "lucid.shareLinks",
+										group: "remove",
+										render: () => (
+											<MaintenanceTile
+												icon="share"
+												title={T()("system.maintenance.share.links.title")}
+												description={T()(
+													"media.share.links.system.delete.all.settings.message",
+												)}
+												action={
+													<Button
+														type="button"
+														size="sm"
+														variant="danger-outline"
+														permission={Permissions.MediaDelete}
+														onClick={() => setOpenDeleteAllShareLinks(true)}
+													>
+														{T()("media.share.links.system.delete.all.action")}
+													</Button>
+												}
+											/>
+										),
+									},
+								]}
 							/>
-							<InfoRow.Content
-								title={T()("media.share.links.system.delete.all.title")}
-								description={T()(
-									"media.share.links.system.delete.all.settings.message",
-								)}
-								actions={
-									<Button
-										size="md"
-										type="button"
-										variant="danger"
-										onClick={() => {
-											setOpenDeleteAllShareLinks(true);
-										}}
-										permission={Permissions.MediaDelete}
-									>
-										{T()("media.share.links.system.delete.all.action")}
-									</Button>
-								}
-								align="center"
-							/>
-							<InfoRow.Content
-								title={T()("system.cache.clear.title")}
-								description={T()("system.cache.setting.message")}
-								actions={
-									<Button
-										size="md"
-										type="button"
-										variant="danger"
-										onClick={() => {
-											setOpenClearCache(true);
-										}}
-										permission={Permissions.CacheClear}
-									>
-										{T()("system.cache.button")}
-									</Button>
-								}
-								align="center"
-							/>
-						</InfoRow.Root>
-					</QueryBoundary>
+						</QueryBoundary>
+					</InfoRow.Root>
 				</div>
 
 				{/* Modals */}

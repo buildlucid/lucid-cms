@@ -240,6 +240,14 @@ const aiCreditsBalanceSchema = z
 	})
 	.strict();
 
+const aiCreditSourceSchema = z
+	.object({
+		total: z.number().nonnegative(),
+		used: z.number().nonnegative(),
+		remaining: z.number().nonnegative(),
+	})
+	.strict();
+
 export const controllerSchemas = {
 	getUsageChart: {
 		body: undefined,
@@ -423,13 +431,15 @@ export const controllerSchemas = {
 		response: z
 			.object({
 				available: z.number().nonnegative(),
-				allowance: aiCreditsBalanceSchema
-					.extend({ total: z.number().nonnegative() })
+				allowance: aiCreditSourceSchema
+					.extend({ resetsAt: z.string() })
 					.nullable(),
-				additional: z.object({ remaining: z.number().nonnegative() }).strict(),
+				granted: aiCreditSourceSchema,
+				purchased: aiCreditSourceSchema,
 				connectionCap: aiCreditsBalanceSchema
 					.extend({ limit: z.number().nonnegative() })
 					.nullable(),
+				hasDebt: z.boolean(),
 			})
 			.strict() satisfies z.ZodType<AiCredits>,
 	} satisfies ControllerSchema,

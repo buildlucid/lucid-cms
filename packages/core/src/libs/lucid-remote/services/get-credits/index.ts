@@ -11,18 +11,18 @@ const credits = z
 	.regex(/^(0|[1-9]\d*)(\.\d+)?$/)
 	.transform(Number);
 
+const creditSource = z.object({
+	total: credits,
+	used: credits,
+	remaining: credits,
+});
+
 const responseSchema = z.object({
 	data: z.object({
 		available: credits,
-		allowance: z
-			.object({
-				total: credits,
-				used: credits,
-				remaining: credits,
-				resetsAt: z.string(),
-			})
-			.nullable(),
-		additional: z.object({ remaining: credits }),
+		allowance: creditSource.extend({ resetsAt: z.string() }).nullable(),
+		granted: creditSource,
+		purchased: creditSource,
 		connectionCap: z
 			.object({
 				limit: credits,
@@ -31,6 +31,7 @@ const responseSchema = z.object({
 				resetsAt: z.string(),
 			})
 			.nullable(),
+		hasDebt: z.boolean(),
 	}),
 }) satisfies z.ZodType<{ data: AiCredits }, unknown>;
 

@@ -18,6 +18,13 @@ export default defineConfig([
 		},
 	},
 	{
+		entry: { components: "src/admin/components/index.ts" },
+		outDir: "dist/admin",
+		format: "esm",
+		dts: { emitDtsOnly: true },
+		clean: true,
+	},
+	{
 		entry: { "client/lucid": "src/client/lucid.ts" },
 		dts: false,
 		format: "esm",
