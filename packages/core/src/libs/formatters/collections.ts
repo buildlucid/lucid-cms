@@ -154,6 +154,7 @@ const formatSingle = (props: {
 		labelFields: collectionData.labelFields,
 		autoSave: collectionData.autoSave,
 		orderable: collectionData.orderable,
+		transfer: collectionData.transfer,
 		preview: collectionData.preview,
 		capabilities: {
 			scheduling:

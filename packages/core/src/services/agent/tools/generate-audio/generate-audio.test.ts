@@ -174,6 +174,7 @@ beforeEach(() => {
 		const media = await Media.createSingle({
 			data: {
 				key: randomUUID(),
+				uid: randomUUID(),
 				storage_adapter_key: "test",
 				origin: "ai_generated",
 				public: false,

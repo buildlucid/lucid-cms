@@ -10,6 +10,7 @@ import DocumentUnpublishModal from "@/components/DocumentUnpublishModal/Document
 import DuplicateDocumentModal from "@/components/DuplicateDocumentModal/DuplicateDocumentModal";
 import EmailSelectDrawer from "@/components/EmailSelectDrawer/EmailSelectDrawer";
 import EmbeddedBrickEditDrawer from "@/components/EmbeddedBrickEditDrawer/EmbeddedBrickEditDrawer";
+import ExportModal from "@/components/ExportModal/ExportModal";
 import LinkSelectModal from "@/components/LinkSelectModal/LinkSelectModal";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import NavigationGuardModal from "@/components/NavigationGuardModal/NavigationGuardModal";
@@ -21,6 +22,7 @@ import type { UseDocumentState } from "@/hooks/useDocumentState/useDocumentState
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuard";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
+import T from "@/translations";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const PageBuilderModals: Component<{
@@ -40,6 +42,15 @@ export const PageBuilderModals: Component<{
 
 	// ----------------------------------
 	// Memos
+	const exportSelect = createMemo(() => {
+		const id = props.hooks.state.document()?.id;
+		if (id === undefined) return undefined;
+		return {
+			documents: [
+				{ collectionKey: props.hooks.state.collectionKey(), ids: [id] },
+			],
+		};
+	});
 	const mediaSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("mediaSelect"),
 	);
@@ -267,6 +278,16 @@ export const PageBuilderModals: Component<{
 						);
 					},
 				}}
+			/>
+			<ExportModal
+				open={props.hooks.uiState.getExportOpen()}
+				onOpenChange={props.hooks.uiState.setExportOpen}
+				select={exportSelect()}
+				title={T()("transfer.export.title.single", {
+					name: props.hooks.state.collectionSingularName(),
+				})}
+				fileName={`${props.hooks.state.collectionSingularName()}-${props.hooks.state.document()?.id ?? ""}`}
+				unsaved={props.hooks.state.isDocumentMutated()}
 			/>
 			<RestoreRevisionModal
 				versionId={props.hooks.uiState.getRestoreRevisionVersionId}

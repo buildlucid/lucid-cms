@@ -212,6 +212,12 @@ export default Object.freeze({
 	seeds: {
 		nameRegex: /^[a-z0-9][a-z0-9_-]*(?::[a-z0-9][a-z0-9_-]*)*$/,
 	},
+	transfer: {
+		/** Export file format version. */
+		format: 1 as const,
+		/** How long an import waits for a file download from another site, in milliseconds. */
+		downloadTimeout: 60_000,
+	},
 	logScopes: {
 		lucid: "lucid",
 		migrations: "migrations",

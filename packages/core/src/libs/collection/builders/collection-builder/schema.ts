@@ -115,6 +115,15 @@ const CollectionConfigSchema = z
 			.boolean()
 			.default(constants.collectionBuilder.orderable)
 			.optional(),
+		transfer: z
+			.union([
+				z.boolean(),
+				z.strictObject({
+					export: z.boolean().optional(),
+					import: z.boolean().optional(),
+				}),
+			])
+			.optional(),
 		routing: z.strictObject({ field: z.string().trim().min(1) }).optional(),
 		preview: z
 			.union([

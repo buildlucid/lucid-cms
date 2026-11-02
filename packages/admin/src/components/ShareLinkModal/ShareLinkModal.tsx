@@ -11,6 +11,7 @@ import { createCopy } from "@/components/Copy/copyValue";
 import Modal from "@/components/Modal/Modal";
 import QRCode from "@/components/QRCode/QRCode";
 import T from "@/translations";
+import downloadFile from "@/utils/download-file";
 import { createQRCodePNG } from "@/utils/qr-code";
 import spawnToast from "@/utils/spawn-toast";
 
@@ -50,13 +51,10 @@ const ShareLinkModal: Component<ShareLinkModalProps> = (props) => {
 		if (!props.url) return;
 
 		try {
-			const file = URL.createObjectURL(await createQRCodePNG(props.url));
-			const anchor = document.createElement("a");
-			anchor.href = file;
-			anchor.download = `share-link-${props.token}.png`;
-			anchor.click();
-			//* some browsers cancel the download if the URL goes before it starts
-			window.setTimeout(() => URL.revokeObjectURL(file));
+			downloadFile(
+				await createQRCodePNG(props.url),
+				`share-link-${props.token}.png`,
+			);
 		} catch {
 			spawnToast({
 				title: T()("toasts.common.qr.code.download.error"),

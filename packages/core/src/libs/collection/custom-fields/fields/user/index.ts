@@ -1,5 +1,6 @@
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import { formatIntegerFilterValue } from "../../utils/filter-values.js";
+import mapListRefs from "../../utils/map-list-refs.js";
 import parseListToolValue from "../../utils/parse-list-tool-value.js";
 import { userFieldConfig } from "./config.js";
 import UserCustomField from "./custom-field.js";
@@ -11,5 +12,6 @@ export default {
 	validateInput: validateUserInputData,
 	formatFilterValue: formatIntegerFilterValue,
 	parseToolValue: parseListToolValue,
+	mapRefs: mapListRefs(userFieldConfig.resource),
 	contentTypeGen: createValueFieldTypeGenerator("UserFieldValue"),
 };

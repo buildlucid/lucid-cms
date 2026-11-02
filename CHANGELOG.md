@@ -21,6 +21,7 @@
 - Added toolkit helpers for reading sent emails, finding and creating media folders, and publishing or unpublishing documents.
 - Added `role: "content"` for public deployments that only serve content and media.
 - Media share links now come with a QR code you can copy or download, and media can be sent through your device's share menu from the media library and share pages.
+- Added document import and export, with their media, to move content between Lucid sites, plus `toolkit.transfer` and `defineTransfer` for scripts and plugins.
 
 ### Breaking Changes:
 

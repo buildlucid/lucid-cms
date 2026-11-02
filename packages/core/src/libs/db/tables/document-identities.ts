@@ -7,6 +7,7 @@ export const documentIdentitiesTable = defineTable(
 		columns: {
 			collection_key: { schema: z.string(), type: "text" },
 			document_id: { schema: z.number().int(), type: "integer" },
+			uid: { schema: z.string(), type: "text" },
 		},
 	}),
 );
@@ -15,4 +16,6 @@ export const documentIdentitiesTable = defineTable(
 export interface LucidDocumentIdentities {
 	collection_key: string;
 	document_id: number;
+	/** Portable identity carried by export files, so imports can match the document on any site. */
+	uid: string;
 }

@@ -7,6 +7,7 @@ import { type Component, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import { createCopy } from "@/components/Copy/copyValue";
 import T from "@/translations";
+import downloadFile from "@/utils/download-file";
 
 interface RecoveryCodesListProps {
 	codes: string[];
@@ -28,13 +29,7 @@ const RecoveryCodesList: Component<RecoveryCodesListProps> = (props) => {
 			],
 			{ type: "text/plain" },
 		);
-		const url = URL.createObjectURL(file);
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = `${host}-recovery-codes.txt`;
-		link.click();
-		//* some browsers cancel the download if the URL goes before it starts
-		window.setTimeout(() => URL.revokeObjectURL(url));
+		downloadFile(file, `${host}-recovery-codes.txt`);
 	};
 
 	// ----------------------------------------

@@ -469,6 +469,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.select((eb) => [
 				"id",
 				"key",
+				"uid",
 				"status",
 				"storage_adapter_key",
 				"storage_adapter_reference",
@@ -698,6 +699,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: [
 				"id",
 				"key",
+				"uid",
 				"status",
 				"storage_adapter_key",
 				"storage_adapter_reference",

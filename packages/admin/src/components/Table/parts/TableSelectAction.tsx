@@ -25,6 +25,8 @@ export interface TableSelectActionItem<TRow> {
 		/** @default "primary" */
 		confirmVariant?: ButtonVariant;
 	};
+	/** Keeps the rows selected afterwards, eg. when the action opens a modal that can be cancelled. */
+	keepSelection?: boolean;
 	/** Receives the selected rows, including ones on other pages. */
 	onClick: (_rows: TRow[]) => Promise<void>;
 }
@@ -146,7 +148,7 @@ const TableSelectAction = <TRow,>(
 		setIsRunningAction(true);
 		try {
 			await action.onClick(props.rows());
-			props.clear();
+			if (!action.keepSelection) props.clear();
 			setPendingAction(undefined);
 		} finally {
 			setIsRunningAction(false);

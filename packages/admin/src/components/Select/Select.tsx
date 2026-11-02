@@ -24,7 +24,12 @@ import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 
 export type ValueT = string | number | undefined;
-export type SelectOption = { value: ValueT; label: string };
+export type SelectOption = {
+	value: ValueT;
+	label: string;
+	/** Shown under the label in the dropdown, not on the trigger. */
+	description?: string;
+};
 
 export type SelectValue<Option extends SelectOption = SelectOption> =
 	| Option["value"]
@@ -365,12 +370,23 @@ function Select<Option extends SelectOption = SelectOption>(
 											) : undefined
 										}
 									>
-										{props.renderOption
-											? props.renderOption({
-													option,
-													selected: props.value === option.value,
-												})
-											: option.label}
+										{props.renderOption ? (
+											props.renderOption({
+												option,
+												selected: props.value === option.value,
+											})
+										) : (
+											<Show when={option.description} fallback={option.label}>
+												{(description) => (
+													<span class="flex flex-col">
+														<span>{option.label}</span>
+														<span class="whitespace-normal text-xs text-muted">
+															{description()}
+														</span>
+													</span>
+												)}
+											</Show>
+										)}
 									</Menu.Item>
 								)}
 							</For>

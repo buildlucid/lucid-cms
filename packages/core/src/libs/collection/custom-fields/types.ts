@@ -11,7 +11,7 @@ import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyInput } from "../../i18n/types.js";
 import type { FieldPermissions } from "../../permission/types.js";
-import type { RefTarget } from "../../refs/types.js";
+import type { FieldRefResource, RefTarget } from "../../refs/types.js";
 import type { AiInstructionsConfig } from "../ai-instructions.js";
 import type {
 	CollectionSchemaColumn,
@@ -315,7 +315,19 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	contentChildren?(config: FieldConfig<T>): ContentChildren;
 	/** Leaves out the targets in `validateInput`'s data that `canLink` refuses, so they validate as missing. */
 	restrictValidationData?(data: unknown, canLink: CanLinkTarget): unknown;
+	/** Rewrites the IDs an authoring value links to, eg. when importing, leaving out links `map` returns null for. */
+	mapRefs?(value: unknown, map: FieldRefMapper): unknown;
+	/** Removes references to the embedded bricks with these refs, eg. ones an import leaves out. Pairs with `extractEmbeddedBrickRefs`. */
+	removeEmbeddedBrickRefs?(value: unknown, refs: ReadonlySet<string>): unknown;
 };
+
+/** A record an authoring value links to. Documents also name their collection. */
+export type FieldRef =
+	| { resource: "documents"; collectionKey: string; id: number }
+	| { resource: Exclude<FieldRefResource, "documents">; id: number };
+
+/** Returns the ID to link instead, or null to leave the link out. */
+export type FieldRefMapper = (ref: FieldRef) => number | null;
 
 export type CustomFieldToolValueConverter = (value: unknown) => unknown;
 

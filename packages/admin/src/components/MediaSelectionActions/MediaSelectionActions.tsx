@@ -19,6 +19,8 @@ export const MediaSelectionActions: Component<{
 		deletePermanently?: () => void;
 		/** Adds the selected media to the agent's chat box. */
 		addToChat?: () => void;
+		/** Exports the selected media. */
+		export?: () => void;
 	};
 }> = (props) => {
 	// ----------------------------------------
@@ -41,6 +43,7 @@ export const MediaSelectionActions: Component<{
 			delete: remove,
 			deletePermanently,
 			addToChat,
+			export: exportMedia,
 		} = props.actions;
 		if (restore) {
 			items.push({
@@ -64,6 +67,13 @@ export const MediaSelectionActions: Component<{
 				icon: "trash",
 				variant: "danger",
 				onSelect: deletePermanently,
+			});
+		}
+		if (exportMedia) {
+			items.push({
+				label: T()("common.export"),
+				icon: "export",
+				onSelect: exportMedia,
 			});
 		}
 		if (addToChat) {

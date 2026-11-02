@@ -956,6 +956,7 @@ export const PageBuilderHeader: Component<{
 									props.state.ui.showDeleteButton?.() ||
 									props.state.ui.unpublishTarget() !== undefined ||
 									props.state.ui.showDuplicateButton?.() ||
+									props.state.ui.showExportButton() ||
 									props.actions.requestAlignment !== undefined ||
 									props.requestLink !== undefined ||
 									showCopyPreview()
@@ -971,6 +972,14 @@ export const PageBuilderHeader: Component<{
 														props.state.ui.setDuplicateOpen(true),
 													permission: props.state.ui.hasDuplicatePermission(),
 													disabled: props.state.ui.duplicateDisabled(),
+												}
+											: undefined
+									}
+									export={
+										props.state.ui.showExportButton()
+											? {
+													onExport: () => props.state.ui.setExportOpen(true),
+													permission: true,
 												}
 											: undefined
 									}

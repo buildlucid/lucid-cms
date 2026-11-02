@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, describe, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
 import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
@@ -120,6 +121,7 @@ describe("unassigned content locales", () => {
 					data: {
 						collection_key: collection.key,
 						document_id: document.data.id,
+						uid: randomUUID(),
 					},
 				})
 			).error,
@@ -273,6 +275,7 @@ describe("unassigned content locales", () => {
 		const media = await Media.createSingle({
 			data: {
 				key: "unassigned-image",
+				uid: randomUUID(),
 				storage_adapter_key: "test",
 				origin: "human",
 				type: "image",

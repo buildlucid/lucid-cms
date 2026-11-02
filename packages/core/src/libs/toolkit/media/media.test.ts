@@ -85,6 +85,7 @@ const insertMedia = (ownerUserId: number | null = null) =>
 		.insertInto("lucid_media")
 		.values({
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			type: "image",
@@ -163,6 +164,7 @@ test("lists include audio transcripts only when asked", async () => {
 		.insertInto("lucid_media")
 		.values({
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			type: "audio",

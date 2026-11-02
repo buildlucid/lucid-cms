@@ -29,6 +29,7 @@ import DeleteMediaModal from "@/components/DeleteMediaModal/DeleteMediaModal";
 import DeleteMediaPermanentlyModal from "@/components/DeleteMediaPermanentlyModal/DeleteMediaPermanentlyModal";
 import DownloadMediaModal from "@/components/DownloadMediaModal/DownloadMediaModal";
 import EmptyState from "@/components/EmptyState/EmptyState";
+import ExportModal from "@/components/ExportModal/ExportModal";
 import Grid from "@/components/Grid/Grid";
 import ImageCropEditorModal from "@/components/ImageCropEditorModal/ImageCropEditorModal";
 import { MediaBreadcrumbs } from "@/components/MediaBreadcrumbs/MediaBreadcrumbs";
@@ -103,9 +104,11 @@ export const MediaList: Component<{
 			deleteAllShareLinks: false,
 			quickCrop: false,
 			download: false,
+			export: false,
 			addToLibrary: false,
 		},
 	});
+	const [exportSelection, setExportSelection] = createSignal<number[]>();
 	const mediaAltGeneration = useMediaAltGeneration();
 	const quickCropUpdateMedia = useUpdateMedia(rowTarget.getTargetId);
 	const [isDragging, setIsDragging] = createSignal(false);
@@ -203,6 +206,17 @@ export const MediaList: Component<{
 		const selected = new Set(mediaStore.get.selectedMedia);
 		return (media.data?.data ?? []).filter(
 			(item) => selected.has(item.id) && canAddToChat(item),
+		);
+	});
+	//* personal and system media belong to their owner, so only shown library media is exported
+	const exportableMedia = createMemo(() => {
+		const selected = new Set(mediaStore.get.selectedMedia);
+		return (media.data?.data ?? []).flatMap((item) =>
+			selected.has(item.id) &&
+			item.ownership.type === "library" &&
+			item.status === "ready"
+				? [item.id]
+				: [],
 		);
 	});
 
@@ -405,6 +419,16 @@ export const MediaList: Component<{
 	const canDeleteMedia = createMemo(
 		() => userStore.get.hasPermission([Permissions.MediaDelete]).all,
 	);
+	const canExportMedia = createMemo(
+		() => userStore.get.hasPermission([Permissions.MediaRead]).all,
+	);
+	//* exports a card's file, or the selection when it's exported from the selection bar
+	const exportIds = createMemo(() => {
+		const selected = exportSelection();
+		if (selected) return selected;
+		const id = rowTarget.getTargetId();
+		return id === undefined ? [] : [id];
+	});
 
 	// ----------------------------------------
 	// Effects
@@ -555,6 +579,15 @@ export const MediaList: Component<{
 							props.state.showingDeleted() && canDeleteMedia()
 								? () => rowTarget.setTrigger("deleteBatchPermanently", true)
 								: undefined,
+						export:
+							!props.state.showingDeleted() &&
+							canExportMedia() &&
+							exportableMedia().length > 0
+								? () => {
+										setExportSelection(exportableMedia());
+										rowTarget.setTrigger("export", true);
+									}
+								: undefined,
 						addToChat:
 							attachableMedia().length > 0
 								? () => {
@@ -638,6 +671,24 @@ export const MediaList: Component<{
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("viewShareLinks", state);
 					},
+				}}
+			/>
+			<ExportModal
+				open={rowTarget.getTriggers().export}
+				onOpenChange={(open) => {
+					rowTarget.setTrigger("export", open);
+					if (!open) setExportSelection(undefined);
+				}}
+				select={exportIds().length > 0 ? { media: exportIds() } : undefined}
+				title={T()("transfer.export.media.title", {
+					count: exportIds().length,
+				})}
+				description={T()("transfer.export.media.description")}
+				fileName={
+					exportIds().length > 1 ? "media" : `media-${exportIds()[0] ?? ""}`
+				}
+				onSuccess={() => {
+					if (exportSelection()) mediaStore.get.reset();
 				}}
 			/>
 			<DownloadMediaModal

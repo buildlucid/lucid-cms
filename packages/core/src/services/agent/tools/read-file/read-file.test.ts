@@ -102,6 +102,7 @@ const createFile = async (
 	const file = await Media.createSingle({
 		data: {
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			public: false,

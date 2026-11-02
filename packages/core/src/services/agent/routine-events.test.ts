@@ -81,6 +81,7 @@ const insertMedia = async (type: MediaType) => {
 		.insertInto("lucid_media")
 		.values({
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			type,

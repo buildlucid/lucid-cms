@@ -90,6 +90,7 @@ const insertMedia = async (
 		.insertInto("lucid_media")
 		.values({
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			type: values.type ?? "image",
@@ -342,6 +343,7 @@ test("media_add_to_library with only a title keeps the audio's description and t
 		.insertInto("lucid_media")
 		.values({
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "ai_generated",
 			type: "audio",

@@ -19,6 +19,10 @@ export const DocumentActions: Component<{
 		permission: boolean;
 		disabled: boolean;
 	};
+	export?: {
+		onExport: () => void;
+		permission: boolean;
+	};
 	align?: {
 		onAlign: () => void;
 		permission: boolean;
@@ -49,7 +53,7 @@ export const DocumentActions: Component<{
 			href: props.requestLink,
 		},
 		{
-			label: getActionLabel(T()("preview.copy.group")),
+			label: T()("preview.copy.group"),
 			type: "button",
 			icon: "link",
 			show: props.preview !== undefined && props.preview.scopedOnly === true,
@@ -58,14 +62,14 @@ export const DocumentActions: Component<{
 			onClick: () => props.preview?.onCopy("scoped"),
 		},
 		{
-			label: getActionLabel(T()("preview.copy.group")),
+			label: T()("preview.copy.group"),
 			type: "group",
 			icon: "link",
 			show: props.preview !== undefined && !props.preview.scopedOnly,
 			permission: props.preview?.permission,
 			actions: [
 				{
-					label: getActionLabel(T()("preview.copy.scoped")),
+					label: T()("preview.copy.scoped"),
 					type: "button",
 					icon: "lock",
 					permission: props.preview?.permission,
@@ -73,7 +77,7 @@ export const DocumentActions: Component<{
 					onClick: () => props.preview?.onCopy("scoped"),
 				},
 				{
-					label: getActionLabel(T()("preview.copy.navigable")),
+					label: T()("preview.copy.navigable"),
 					type: "button",
 					icon: "share",
 					permission: props.preview?.permission,
@@ -107,6 +111,14 @@ export const DocumentActions: Component<{
 				message: T()("toasts.documents.duplicate.disabled.message"),
 			},
 			onClick: props.duplicate?.onDuplicate,
+		},
+		{
+			label: getActionLabel(T()("common.export")),
+			type: "button",
+			icon: "export",
+			show: props.export !== undefined,
+			permission: props.export?.permission,
+			onClick: props.export?.onExport,
 		},
 		{
 			label: getActionLabel(T()("documents.unpublish.action")),

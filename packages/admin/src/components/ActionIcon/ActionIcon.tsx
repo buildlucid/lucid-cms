@@ -12,6 +12,8 @@ import {
 	TbOutlineCrop,
 	TbOutlineDownload,
 	TbOutlineEye,
+	TbOutlineFileExport,
+	TbOutlineFileImport,
 	TbOutlineFingerprintOff,
 	TbOutlineFolderPlus,
 	TbOutlineHistory,
@@ -55,11 +57,13 @@ export type ActionIconName =
 	| "crop"
 	| "download"
 	| "email"
+	| "export"
 	| "eye"
 	| "fingerprint-off"
 	| "folder-plus"
 	| "image"
 	| "images"
+	| "import"
 	| "info"
 	| "key"
 	| "link"
@@ -118,6 +122,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <TbOutlineDownload class={iconClasses()} size={iconSize()} />;
 			case "email":
 				return <TbOutlineMail class={iconClasses()} size={iconSize()} />;
+			case "export":
+				return <TbOutlineFileExport class={iconClasses()} size={iconSize()} />;
 			case "eye":
 				return <TbOutlineEye class={iconClasses()} size={iconSize()} />;
 			case "fingerprint-off":
@@ -132,6 +138,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return (
 					<TbOutlineLibraryPhoto class={iconClasses()} size={iconSize()} />
 				);
+			case "import":
+				return <TbOutlineFileImport class={iconClasses()} size={iconSize()} />;
 			case "info":
 				return <TbOutlineInfoCircle class={iconClasses()} size={iconSize()} />;
 			case "key":

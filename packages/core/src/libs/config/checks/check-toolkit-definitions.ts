@@ -15,6 +15,7 @@ const coreToolkitKeys = {
 	notifications: true,
 	previews: true,
 	requests: true,
+	transfer: true,
 	users: true,
 } satisfies Record<keyof CoreToolkit, true>;
 const unsafeToolkitKeys = new Set(["__proto__", "constructor", "prototype"]);

@@ -35,6 +35,7 @@ interface MediaCardProps {
 			| "createShareLink"
 			| "deleteAllShareLinks"
 			| "download"
+			| "export"
 			| "addToLibrary"
 		>
 	>;
@@ -86,6 +87,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			| "createShareLink"
 			| "deleteAllShareLinks"
 			| "download"
+			| "export"
 			| "addToLibrary",
 	) => {
 		props.rowTarget.setTargetId(props.media.id);
@@ -297,6 +299,18 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onClick: () => openMediaAction("download"),
 			permission: canReadMedia(),
 			show: !props.showingDeleted?.() && props.media.status === "ready",
+		},
+		{
+			label: T()("common.export"),
+			type: "button",
+			icon: "export",
+			onClick: () => openMediaAction("export"),
+			permission: canReadMedia(),
+			//* personal and system media belong to their owner, so only library media moves between sites
+			show:
+				!props.showingDeleted?.() &&
+				props.media.status === "ready" &&
+				isLibrary(),
 		},
 		{
 			label: T()("media.library.add.action"),

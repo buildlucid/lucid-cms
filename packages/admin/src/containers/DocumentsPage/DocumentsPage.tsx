@@ -20,6 +20,7 @@ import {
 	type FilterPreset,
 	findActiveFilterPreset,
 } from "@/components/FilterPanel/preset-state";
+import ImportModal from "@/components/ImportModal/ImportModal";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
@@ -68,6 +69,7 @@ const DocumentsPage: Component = () => {
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 	const [orderMode, setOrderMode] = createSignal(false);
 	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
+	const [importOpen, setImportOpen] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -305,12 +307,23 @@ const DocumentsPage: Component = () => {
 	const createAction = createMemo(
 		() => getDocumentCreateActions(collectionData())[0],
 	);
-	const createActions = createMemo<CreateMenuAction[]>(() => {
-		const action = createAction();
-		if (action === undefined || collectionData()?.locked === true) return [];
+	//* imports add documents, or update ones already here
+	const canImport = createMemo(() => {
+		const collection = collectionData();
+		if (collection?.transfer.import !== true || collection.locked) return false;
 
-		return [
-			{
+		return (
+			createAction() !== undefined ||
+			userStore.get.hasPermission([collection.permissions.update]).all
+		);
+	});
+	const createActions = createMemo<CreateMenuAction[]>(() => {
+		if (collectionData()?.locked === true) return [];
+
+		const actions: CreateMenuAction[] = [];
+		const action = createAction();
+		if (action !== undefined) {
+			actions.push({
 				type: "link",
 				label: T()(
 					action === "request"
@@ -318,11 +331,21 @@ const DocumentsPage: Component = () => {
 						: "actions.create.dynamic",
 					{ name: collectionSingularName() || "" },
 				),
+				icon: "plus",
 				href: getDocumentRoute("create", {
 					collectionKey: collectionKey() || "",
 				}),
-			},
-		];
+			});
+		}
+		if (canImport()) {
+			actions.push({
+				type: "button",
+				label: T()("common.import"),
+				icon: "import",
+				onClick: () => setImportOpen(true),
+			});
+		}
+		return actions;
 	});
 
 	// ----------------------------------
@@ -439,6 +462,13 @@ const DocumentsPage: Component = () => {
 					</Show>
 				</QueryToolbar>
 			</PageLayout.Header>
+			<ImportModal
+				open={importOpen()}
+				onOpenChange={setImportOpen}
+				title={T()("transfer.import.collection.title", {
+					name: collectionName(),
+				})}
+			/>
 			<PageLayout.Body>
 				<DocumentsList
 					state={{

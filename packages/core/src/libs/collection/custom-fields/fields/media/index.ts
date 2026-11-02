@@ -1,5 +1,6 @@
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import { formatIntegerFilterValue } from "../../utils/filter-values.js";
+import mapListRefs from "../../utils/map-list-refs.js";
 import parseListToolValue from "../../utils/parse-list-tool-value.js";
 import { mediaFieldConfig } from "./config.js";
 import MediaCustomField from "./custom-field.js";
@@ -13,5 +14,6 @@ export default {
 	restrictValidationData: restrictMediaValidationData,
 	formatFilterValue: formatIntegerFilterValue,
 	parseToolValue: parseListToolValue,
+	mapRefs: mapListRefs(mediaFieldConfig.resource),
 	contentTypeGen: createValueFieldTypeGenerator("MediaFieldValue"),
 };

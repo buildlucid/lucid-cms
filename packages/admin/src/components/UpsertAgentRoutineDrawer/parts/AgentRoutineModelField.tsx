@@ -1,12 +1,10 @@
 import type { AiModelSelection, ErrorResult, FieldError } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
-import Select from "@/components/Select/Select";
+import Select, { type SelectOption } from "@/components/Select/Select";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import { effortFor, selectModel } from "@/utils/agent-models";
-
-type ModelOption = { value: string; label: string; description?: string };
 
 /** Picks the model and reasoning effort a routine runs with. Empty follows the agent's default. */
 const AgentRoutineModelField: Component<{
@@ -37,7 +35,7 @@ const AgentRoutineModelField: Component<{
 			? T()("agent.models.default", { name })
 			: T()("agent.models.default.plain");
 	});
-	const modelOptions = createMemo((): ModelOption[] => {
+	const modelOptions = createMemo((): SelectOption[] => {
 		const models = catalog()?.models;
 		//* without the catalogue, the saved choice is still shown by its ID
 		if (!models) {
@@ -67,7 +65,7 @@ const AgentRoutineModelField: Component<{
 	return (
 		//* the model takes the full row when there is no reasoning to choose
 		<div class="grid items-start gap-3 md:grid-cols-2">
-			<Select<ModelOption>
+			<Select
 				class={effortOptions().length ? undefined : "md:col-span-2"}
 				id="agent-routine-model"
 				name="modelId"
@@ -92,16 +90,6 @@ const AgentRoutineModelField: Component<{
 				}
 				disabled={props.disabled || !catalog()}
 				errors={props.errors}
-				renderOption={(option) => (
-					<span class="flex flex-col">
-						<span>{option.option.label}</span>
-						<Show when={option.option.description}>
-							<span class="whitespace-normal text-xs text-muted">
-								{option.option.description}
-							</span>
-						</Show>
-					</span>
-				)}
 			/>
 			<Show when={effortOptions().length ? model() : undefined}>
 				{(current) => (

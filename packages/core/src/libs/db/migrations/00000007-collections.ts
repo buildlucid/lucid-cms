@@ -39,6 +39,10 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
+				// Portable identity that export files carry, so imports can match documents across sites.
+				.addColumn("uid", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
 				.addPrimaryKeyConstraint("pk_lucid_document_identities", [
 					"collection_key",
 					"document_id",

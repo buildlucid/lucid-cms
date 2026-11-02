@@ -22,6 +22,7 @@ import reviewRoutes from "./review.routes.js";
 import roleRoutes from "./roles.routes.js";
 import settingsRoutes from "./settings.routes.js";
 import shareRoutes from "./share.routes.js";
+import transferRoutes from "./transfer.routes.js";
 import userRoutes from "./users.routes.js";
 
 const routes = new Hono<LucidHonoGeneric>()
@@ -44,6 +45,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/review", reviewRoutes)
 	.route("/settings", settingsRoutes)
 	.route("/roles", roleRoutes)
+	.route("/transfer", transferRoutes)
 	.route("/users", userRoutes)
 	.route("/media", mediaRoutes)
 	.route("/share", shareRoutes)

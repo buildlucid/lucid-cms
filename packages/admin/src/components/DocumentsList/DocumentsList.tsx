@@ -20,6 +20,7 @@ import {
 	type Component,
 	createEffect,
 	createMemo,
+	createSignal,
 	Index,
 	on,
 } from "solid-js";
@@ -30,10 +31,11 @@ import DeleteDocumentPermanentlyModal from "@/components/DeleteDocumentPermanent
 import DocumentTableRow from "@/components/DocumentTableRow/DocumentTableRow";
 import DuplicateDocumentModal from "@/components/DuplicateDocumentModal/DuplicateDocumentModal";
 import EmptyState from "@/components/EmptyState/EmptyState";
+import ExportModal from "@/components/ExportModal/ExportModal";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RestoreDocumentModal from "@/components/RestoreDocumentModal/RestoreDocumentModal";
-import Table from "@/components/Table/Table";
+import Table, { type TableSelectActionItem } from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import { resolveSlots } from "@/extensions/slot-policy";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
@@ -78,6 +80,11 @@ export const DocumentsList: Component<{
 	const queryClient = useQueryClient();
 	const selection = useTableSelection<InternalCollectionDocument>();
 	const session = useAgentSession();
+	const [exporting, setExporting] = createSignal<{
+		ids: number[];
+		selection: boolean;
+	}>({ ids: [], selection: false });
+	const [exportOpen, setExportOpen] = createSignal(false);
 	const rowTarget = useRowTarget({
 		triggers: {
 			duplicate: false,
@@ -91,6 +98,10 @@ export const DocumentsList: Component<{
 
 	// ----------------------------------
 	// Functions
+	const openExport = (ids: number[], selection = false) => {
+		setExporting({ ids, selection });
+		setExportOpen(true);
+	};
 	const documentCreateEntry = () => {
 		navigate(
 			getDocumentRoute("create", {
@@ -217,6 +228,36 @@ export const DocumentsList: Component<{
 
 		return userStore.get.hasPermission([permissions.read, permissions.create])
 			.all;
+	});
+	const canExportDocuments = createMemo(
+		() =>
+			props.state.collection?.transfer.export === true &&
+			!props.state.showingDeleted() &&
+			!props.state.showingRequests(),
+	);
+	const selectActions = createMemo(() => {
+		const actions: TableSelectActionItem<InternalCollectionDocument>[] = [];
+		if (canExportDocuments()) {
+			actions.push({
+				label: T()("common.export"),
+				icon: "export",
+				keepSelection: true,
+				onClick: async (rows) => {
+					openExport(
+						rows.map((row) => row.id),
+						true,
+					);
+				},
+			});
+		}
+		if (canAddToChat()) {
+			actions.push({
+				label: T()("agent.attach"),
+				icon: "chat",
+				onClick: (rows) => addSelectedToChat(rows),
+			});
+		}
+		return actions;
 	});
 	//* reorder only after order mode pins the list to manual order
 	const rowsAreReorderable = createMemo(
@@ -493,17 +534,7 @@ export const DocumentsList: Component<{
 					selectable={
 						!props.state.orderMode() && !props.state.showingRequests()
 					}
-					selectActions={
-						canAddToChat()
-							? [
-									{
-										label: T()("agent.attach"),
-										icon: "chat",
-										onClick: addSelectedToChat,
-									},
-								]
-							: []
-					}
+					selectActions={selectActions()}
 					allowRestore={props.state.showingDeleted() && canRestoreDocuments()}
 					allowDelete={
 						!props.state.showingDeleted() &&
@@ -670,6 +701,15 @@ export const DocumentsList: Component<{
 										sortOrder: 30,
 									},
 									{
+										label: getActionLabel(T()("common.export")),
+										type: "button",
+										icon: "export",
+										onClick: () => openExport([doc().id]),
+										permission: true,
+										show: canExportDocuments(),
+										sortOrder: 40,
+									},
+									{
 										label: getActionLabel(T()("common.restore")),
 										type: "button",
 										icon: "restore",
@@ -752,6 +792,37 @@ export const DocumentsList: Component<{
 								}),
 							);
 						},
+					}}
+				/>
+				<ExportModal
+					open={exportOpen()}
+					onOpenChange={setExportOpen}
+					select={
+						exporting().ids.length > 0
+							? {
+									documents: [
+										{ collectionKey: collectionKey(), ids: exporting().ids },
+									],
+								}
+							: undefined
+					}
+					title={
+						exporting().ids.length > 1
+							? T()("transfer.export.title.multiple", {
+									count: exporting().ids.length,
+									name: collectionName(),
+								})
+							: T()("transfer.export.title.single", {
+									name: collectionSingularName(),
+								})
+					}
+					fileName={
+						exporting().ids.length > 1
+							? collectionName()
+							: `${collectionSingularName()}-${exporting().ids[0] ?? ""}`
+					}
+					onSuccess={() => {
+						if (exporting().selection) selection.clear();
 					}}
 				/>
 				<RestoreDocumentModal

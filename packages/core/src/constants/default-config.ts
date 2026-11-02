@@ -6,6 +6,7 @@ export const defaultPasswordSchema = z.string().min(8).max(128);
 
 export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	tables: [],
+	transfers: [],
 	access: [],
 	directories: defaultDirectories,
 	sources: {},

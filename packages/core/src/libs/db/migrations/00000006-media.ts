@@ -46,6 +46,10 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.unique().notNull(),
 				)
+				// Portable identity that export files carry, so imports can reuse files across sites.
+				.addColumn("uid", adapter.getDataType("text"), (col) =>
+					col.unique().notNull(),
+				)
 				.addColumn("folder_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_media_folders.id").onDelete("set null"),
 				)

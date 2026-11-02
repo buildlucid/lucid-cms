@@ -764,6 +764,8 @@ export interface Collection {
 	labelFields: string[];
 	autoSave: boolean;
 	orderable: boolean;
+	/** Whether documents can be exported and imported. */
+	transfer: { export: boolean; import: boolean };
 	publishing: {
 		scheduling: boolean;
 		review?: {

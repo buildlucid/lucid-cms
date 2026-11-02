@@ -11,6 +11,7 @@ import type { ToolkitMedia } from "./media/index.js";
 import type { ToolkitNotifications } from "./notifications/index.js";
 import type { ToolkitPreviews } from "./previews/index.js";
 import type { ToolkitRequests } from "./requests/index.js";
+import type { ToolkitTransfer } from "./transfer/index.js";
 import type { ToolkitUsers } from "./users/index.js";
 
 export type { ToolkitActor } from "../permission/toolkit-actor.js";
@@ -44,6 +45,8 @@ export type CoreToolkit = {
 	previews: ToolkitPreviews;
 	/** Helpers for reading, discussing and managing requests. */
 	requests: ToolkitRequests;
+	/** Helpers for exporting records to portable files and importing them, such as in seeds. */
+	transfer: ToolkitTransfer;
 	/** Helpers for reading users, such as to fill user fields or choose reviewers. */
 	users: ToolkitUsers;
 };
@@ -147,6 +150,9 @@ export type * from "./requests/reopen/index.js";
 export type * from "./requests/schedule/index.js";
 export type * from "./requests/unapprove/index.js";
 export type * from "./requests/update-single/index.js";
+export type * from "./transfer/export/index.js";
+export type * from "./transfer/import/index.js";
+export type * from "./transfer/index.js";
 export type * from "./users/get-multiple/index.js";
 export type * from "./users/get-single/index.js";
 export type * from "./users/index.js";

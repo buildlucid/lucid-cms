@@ -41,6 +41,7 @@ export function useDocumentUIState(props: {
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
 	const [getUnpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
+	const [getExportOpen, setExportOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
@@ -268,6 +269,14 @@ export function useDocumentUIState(props: {
 		return props.collection()?.mode === "multiple";
 	});
 
+	/** Exports read saved latest content, so they're offered from latest only. */
+	const showExportButton = createMemo(() => {
+		if (props.mode !== "edit") return false;
+		if (props.version() !== "latest") return false;
+		if (props.document()?.isDeleted) return false;
+		return props.collection()?.transfer.export === true;
+	});
+
 	/**
 	 * Prevents duplication until the latest local changes have been persisted
 	 */
@@ -382,6 +391,8 @@ export function useDocumentUIState(props: {
 		setUnpublishOpen,
 		getDuplicateOpen,
 		setDuplicateOpen,
+		getExportOpen,
+		setExportOpen,
 		getRestoreRevisionOpen,
 		setRestoreRevisionOpen,
 		getRestoreRevisionVersionId,
@@ -419,6 +430,7 @@ export function useDocumentUIState(props: {
 		showDuplicateButton,
 		duplicateDisabled,
 		hasDuplicatePermission,
+		showExportButton,
 		collectionNeedsMigrating,
 		autoSave,
 		hasAutoSavePermission,

@@ -648,12 +648,27 @@ export type {
 	ToolkitRequestsUpdateSingleInput,
 	ToolkitRequestTarget,
 	ToolkitServices,
+	ToolkitTransfer,
+	ToolkitTransferExportInput,
+	ToolkitTransferImportInput,
+	ToolkitTransferImportResult,
 	ToolkitUsers,
 	ToolkitUsersGetMultipleInput,
 	ToolkitUsersGetMultipleQuery,
 	ToolkitUsersGetMultipleResult,
 	ToolkitUsersGetSingleInput,
 } from "../libs/toolkit/types.js";
+export type {
+	TransferDefinition,
+	TransferDefinitionInput,
+	TransferExportFile,
+	TransferExportProps,
+	TransferFileReader,
+	TransferFileSource,
+	TransferImportOutcome,
+	TransferImportProps,
+	TransferSelections,
+} from "../libs/transfer/types.js";
 export type {
 	AgentToolAuthority,
 	AgentToolAvailabilityProps,

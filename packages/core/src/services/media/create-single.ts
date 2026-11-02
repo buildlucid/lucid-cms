@@ -16,6 +16,8 @@ const createSingle: ServiceFn<
 	[
 		{
 			key: string;
+			/** Portable identity, eg. from an import. Defaults to a new one. */
+			uid?: string;
 			fileName: string;
 			folderId?: number | null;
 			/** Makes the media personal to this user, such as an agent chat upload or a profile picture. */

@@ -61,6 +61,8 @@ export const fieldHooks: Readonly<
 			| "parseToolValue"
 			| "contentChildren"
 			| "restrictValidationData"
+			| "mapRefs"
+			| "removeEmbeddedBrickRefs"
 		>
 	>
 > = registeredFields;

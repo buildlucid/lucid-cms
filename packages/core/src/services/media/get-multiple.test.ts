@@ -51,6 +51,7 @@ const createMedia = async (
 	const result = await Media.createSingle({
 		data: {
 			key: `private/${randomUUID()}`,
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			type: "document",

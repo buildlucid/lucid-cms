@@ -9,9 +9,15 @@ export {
 	LucidVariable,
 	mergeExtensions,
 } from "./extensions/index.js";
-export type { RichTextReference } from "./references.js";
+export type {
+	RichTextReference,
+	RichTextReferenceMapper,
+	RichTextReferenceTarget,
+} from "./references.js";
 export {
 	extractEmbeddedBrickRefs,
 	extractRichTextReferences,
+	mapRichTextReferences,
+	removeRichTextEmbeddedBricks,
 } from "./references.js";
 export * from "./types.js";

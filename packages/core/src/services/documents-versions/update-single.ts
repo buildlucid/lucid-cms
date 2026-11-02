@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { documentVersionsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentsRepository,
@@ -34,6 +35,8 @@ const updateSingle: ServiceFn<
 			userId: number | null;
 			authUser?: LucidActor;
 			agentRunId?: string;
+			/** Why the version is saved, passed to `beforeUpsert` hooks. Defaults to a standard save. */
+			origin?: DocumentBeforeUpsertHookOrigin;
 			documentId: number;
 			versionId: number;
 			/** Callers that already hold the document's write claim, eg. request syncs. */
@@ -132,7 +135,7 @@ const updateSingle: ServiceFn<
 							mode: "upsert",
 							action: "update",
 							willPersist: true,
-							origin: { type: "standard" },
+							origin: data.origin ?? { type: "standard" },
 						},
 					},
 					data: {

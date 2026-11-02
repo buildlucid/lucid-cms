@@ -195,6 +195,7 @@ test("collection options are correct along with field includes and filters", asy
 		localized: true,
 		autoSave: false,
 		orderable: false,
+		transfer: { export: true, import: true },
 		listing: [
 			"text_test",
 			"textarea_test",

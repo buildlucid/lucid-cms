@@ -230,6 +230,10 @@ export const queryKeys = {
 		types: () => ["lucid", "notifications", "types"] as const,
 		preferences: () => ["lucid", "notifications", "preferences"] as const,
 	},
+	transfer: {
+		export: (select: Record<string, unknown> | undefined, linked: boolean) =>
+			["lucid", "transfer", "export", select, linked] as const,
+	},
 	requests: {
 		all: () => ["lucid", "requests"] as const,
 		list: () => ["lucid", "requests", "list"] as const,

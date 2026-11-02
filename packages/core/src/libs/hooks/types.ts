@@ -117,6 +117,10 @@ export type DocumentBeforeUpsertHookOrigin =
 			sourceDocumentId: number;
 			sourceVersionId: number;
 			sourceVersionType: "latest";
+	  }
+	/** Saved from an export file, eg. one downloaded from another site. */
+	| {
+			type: "import";
 	  };
 
 /** Explains whether this is a save, validation check or duplication. Check willPersist before performing side effects. */

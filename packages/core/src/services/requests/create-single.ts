@@ -1,5 +1,6 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { RequestType } from "../../libs/db/tables/requests.js";
+import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
@@ -30,6 +31,10 @@ type CreateDocumentRequestInput = CreateRequestInput & {
 	/** The new document, saved as the request's proposal. */
 	document: {
 		collectionKey: string;
+		/** Portable identity for the new document, eg. from an import. */
+		uid?: string;
+		/** Why the document is saved, passed to `beforeUpsert` hooks. */
+		origin?: DocumentBeforeUpsertHookOrigin;
 		bricks?: Array<BrickInputSchema>;
 		fields?: Array<FieldInputSchema>;
 	};

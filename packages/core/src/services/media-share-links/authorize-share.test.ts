@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, expect, test } from "vitest";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import hashSecret from "../../utils/helpers/hash-secret.js";
@@ -31,6 +32,7 @@ const createLink = async (token: string, password: string) => {
 		.insertInto("lucid_media")
 		.values({
 			key: `${token}.png`,
+			uid: randomUUID(),
 			origin: "human",
 			type: "image",
 			mime_type: "image/png",

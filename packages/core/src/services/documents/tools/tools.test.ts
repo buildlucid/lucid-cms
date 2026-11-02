@@ -815,6 +815,7 @@ test("accepts a fixed brick by ref and a single media ID, and explains media out
 			.insertInto("lucid_media")
 			.values({
 				key: randomUUID(),
+				uid: randomUUID(),
 				storage_adapter_key: "test",
 				origin: "human",
 				type: "image",
@@ -1441,6 +1442,7 @@ test("resolves refs for content the builder takes back, by each field's own conf
 		.insertInto("lucid_media")
 		.values({
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			type: "image",

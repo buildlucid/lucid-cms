@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
 import type { Media } from "../../../exports/types.js";
 import { mediaFormatter } from "../../../libs/formatters/index.js";
@@ -124,6 +125,7 @@ const registerUploadedMedia: ServiceFn<
 	const mediaRes = await Media.createSingle({
 		data: {
 			key: mediaKey,
+			uid: data.uid ?? randomUUID(),
 			status: uploaded.status,
 			storage_adapter_key: uploaded.storageAdapterKey,
 			storage_adapter_reference: uploaded.storageAdapterReference,

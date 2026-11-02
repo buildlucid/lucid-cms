@@ -371,7 +371,7 @@ test("creates one identity and retains it through updates, soft deletion and res
 		(await restoreMultiple(context, { collectionKey, ids: [id] })).error,
 	).toBeUndefined();
 	expect(await identity(id)).toEqual([
-		{ collection_key: collectionKey, document_id: id },
+		{ collection_key: collectionKey, document_id: id, uid: expect.any(String) },
 	]);
 });
 

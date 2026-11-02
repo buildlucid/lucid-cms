@@ -45,6 +45,7 @@ import type {
 import type { SeedDefinition } from "../libs/seed/types.js";
 import type { SkillDefinition } from "../libs/skills/types.js";
 import type { McpToolDefinition } from "../libs/tools/types.js";
+import type { TransferDefinition } from "../libs/transfer/types.js";
 import type {
 	AgentMemoryScope,
 	AiModelSelection,
@@ -339,6 +340,11 @@ export interface LucidConfig {
 	 * migrate the tables.
 	 */
 	tables?: readonly TableDefinition[];
+	/**
+	 * How records outside collections, eg. in custom tables, are exported and imported, created
+	 * with `defineTransfer`. Documents and media are covered already. Plugins add theirs in `configure`.
+	 */
+	transfers?: readonly TransferDefinition[];
 	/**
 	 * KV storage settings.
 	 */
@@ -757,6 +763,7 @@ export interface ResolvedLucidConfig {
 	sources: ResourceSources;
 	db: DatabaseAdapter;
 	tables: TableDefinition[];
+	transfers: TransferDefinition[];
 	migrations: {
 		definitions: MigrationDefinition[];
 	};

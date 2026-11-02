@@ -125,6 +125,7 @@ const createMedia = async (
 	const result = await Media.createSingle({
 		data: {
 			key: randomUUID(),
+			uid: randomUUID(),
 			storage_adapter_key: "test",
 			origin: "human",
 			type: "image",
@@ -164,7 +165,11 @@ const createDocument = async () => {
 	expect(
 		(
 			await DocumentIdentities.createSingle({
-				data: { collection_key: collection.key, document_id: document.data.id },
+				data: {
+					collection_key: collection.key,
+					document_id: document.data.id,
+					uid: randomUUID(),
+				},
 			})
 		).error,
 	).toBeUndefined();

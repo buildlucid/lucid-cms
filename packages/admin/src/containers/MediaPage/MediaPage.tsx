@@ -20,6 +20,7 @@ import {
 	type FilterPreset,
 	findActiveFilterPreset,
 } from "@/components/FilterPanel/preset-state";
+import ImportModal from "@/components/ImportModal/ImportModal";
 import { MediaList } from "@/components/MediaList/MediaList";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
@@ -90,6 +91,7 @@ const MediaPage: Component = () => {
 		createSignal<boolean>(false);
 	const [getOpenBulkUploadModal, setOpenBulkUploadModal] =
 		createSignal<boolean>(false);
+	const [importOpen, setImportOpen] = createSignal(false);
 	const [getOpenMediaGenerationOnCreate, setOpenMediaGenerationOnCreate] =
 		createSignal(false);
 	const [getSingleUploadInitialFile, setSingleUploadInitialFile] =
@@ -329,12 +331,20 @@ const MediaPage: Component = () => {
 			});
 		}
 
-		actions.push({
-			type: "button",
-			label: T()("media.upload.bulk.action"),
-			icon: "images",
-			onClick: () => setBulkUploadModalOpen(true),
-		});
+		actions.push(
+			{
+				type: "button",
+				label: T()("media.upload.bulk.action"),
+				icon: "images",
+				onClick: () => setBulkUploadModalOpen(true),
+			},
+			{
+				type: "button",
+				label: T()("common.import"),
+				icon: "import",
+				onClick: () => setImportOpen(true),
+			},
+		);
 
 		return actions;
 	});
@@ -612,6 +622,13 @@ const MediaPage: Component = () => {
 							setOpen: setBulkUploadModalOpen,
 							parentFolderId: folderIdFilter,
 						}}
+					/>
+					<ImportModal
+						open={importOpen()}
+						onOpenChange={setImportOpen}
+						title={T()("transfer.import.media.page.title")}
+						description={T()("transfer.import.media.page.description")}
+						resources={["media"]}
 					/>
 					<CreateMediaFolderModal
 						state={{

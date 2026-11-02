@@ -22,6 +22,7 @@ import review from "./review";
 import roles from "./roles";
 import settings from "./settings";
 import share from "./share";
+import transfer from "./transfer";
 import userLogins from "./user-logins";
 import users from "./users";
 
@@ -38,6 +39,7 @@ const exportObject = {
 	requests,
 	review,
 	share,
+	transfer,
 	media,
 	mediaFolders,
 	mediaShareLinks,

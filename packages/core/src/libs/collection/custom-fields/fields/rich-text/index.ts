@@ -1,6 +1,8 @@
 import {
 	extractEmbeddedBrickRefs,
+	mapRichTextReferences,
 	type RichTextJSON,
+	removeRichTextEmbeddedBricks,
 } from "@lucidcms/rich-text";
 import {
 	generateSourceHTML,
@@ -8,6 +10,7 @@ import {
 } from "@lucidcms/rich-text/server";
 import isPlainObject from "../../../../../utils/helpers/is-plain-object.js";
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
+import type { FieldRefMapper } from "../../types.js";
 import { richTextFieldConfig } from "./config.js";
 import RichTextCustomField from "./custom-field.js";
 import restrictRichTextValidationData from "./restrict-validation-data.js";
@@ -26,4 +29,12 @@ export default {
 		isPlainObject(value) ? generateSourceHTML(value as RichTextJSON) : value,
 	parseToolValue: (value: unknown) =>
 		typeof value === "string" ? parseSourceHTML(value) : value,
+	mapRefs: (value: unknown, map: FieldRefMapper) =>
+		isPlainObject(value)
+			? mapRichTextReferences(value as RichTextJSON, map)
+			: value,
+	removeEmbeddedBrickRefs: (value: unknown, refs: ReadonlySet<string>) =>
+		isPlainObject(value)
+			? removeRichTextEmbeddedBricks(value as RichTextJSON, refs)
+			: value,
 };

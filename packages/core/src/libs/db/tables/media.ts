@@ -23,6 +23,10 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			schema: z.string(),
 			type: "text",
 		},
+		uid: {
+			schema: z.string(),
+			type: "text",
+		},
 		folder_id: {
 			schema: z.number().nullable(),
 			type: "integer",
@@ -438,6 +442,8 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 export interface LucidMedia {
 	id: Generated<number>;
 	key: string;
+	/** Portable identity carried by export files. */
+	uid: string;
 	folder_id: number | null;
 	parent_media_id: number | null;
 	relation_type: "crop" | "poster" | null;

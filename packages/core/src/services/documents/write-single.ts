@@ -3,6 +3,7 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import collections from "../../libs/collection/collections.js";
 import filterReadableData from "../../libs/collection/field-access/filter-readable-data.js";
 import getContentAccess from "../../libs/collection/field-access/get-content-access.js";
+import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import systemActor from "../../libs/permission/system-actor.js";
 import type {
@@ -31,10 +32,14 @@ const writeSingle: ServiceFn<
 			userId: number | null;
 			authUser?: LucidActor;
 			agentRunId?: string;
+			/** Why the document is saved, passed to `beforeUpsert` hooks. Defaults to a standard save. */
+			origin?: DocumentBeforeUpsertHookOrigin;
 		} & (
 			| {
 					kind: "create";
 					data: DocumentData;
+					/** Portable identity for the new document, eg. from an import. */
+					uid?: string;
 					/** Saves the document as the proposal of a new create request instead. */
 					request?: {
 						title: string;
@@ -181,7 +186,12 @@ const writeSingle: ServiceFn<
 				const requested = await createRequest(context, {
 					type: "create",
 					...input.request,
-					document: { collectionKey: input.collectionKey, ...payload.data },
+					document: {
+						collectionKey: input.collectionKey,
+						uid: input.uid,
+						origin: input.origin,
+						...payload.data,
+					},
 					user: input.authUser ?? systemActor,
 					agentRunId: input.agentRunId,
 				});
@@ -198,6 +208,7 @@ const writeSingle: ServiceFn<
 					userId: input.userId,
 					authUser: input.authUser,
 					agentRunId: input.agentRunId,
+					origin: input.origin,
 					skipDocumentWriteClaims: true,
 					...payload.data,
 				});
@@ -206,9 +217,11 @@ const writeSingle: ServiceFn<
 				const saved = await saveDocument(context, {
 					collectionKey: input.collectionKey,
 					documentId: id,
+					uid: input.kind === "create" ? input.uid : undefined,
 					userId: input.userId,
 					authUser: input.authUser,
 					agentRunId: input.agentRunId,
+					origin: input.origin,
 					...payload.data,
 				});
 				if (saved.error) return saved;

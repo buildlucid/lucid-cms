@@ -42,6 +42,8 @@ import { isSkillDefinition } from "../skills/registry.js";
 import type { SkillDefinition } from "../skills/types.js";
 import { isToolDefinition } from "../tools/registry.js";
 import type { McpToolDefinition } from "../tools/types.js";
+import { isTransferDefinition } from "../transfer/registry.js";
+import type { TransferDefinition } from "../transfer/types.js";
 import { mediaGenerationTypes } from "./ai-features.js";
 import {
 	hookSchema,
@@ -93,6 +95,13 @@ const QueueAdapterSchema = z.custom<
 const JobDefinitionSchema = z.custom<AnyJobDefinition>(isJobDefinition, {
 	message: "Expected a job definition created with defineJob",
 });
+
+const TransferDefinitionSchema = z.custom<TransferDefinition>(
+	isTransferDefinition,
+	{
+		message: "Expected a transfer definition created with defineTransfer",
+	},
+);
 
 const NotificationDefinitionSchema = z.custom<AnyNotificationDefinition>(
 	isNotificationDefinition,
@@ -318,6 +327,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			typeof value.connect === "function",
 	),
 	tables: z.array(tableSchema),
+	transfers: z.array(TransferDefinitionSchema),
 	access: z.array(accessGroupSchema).default([]),
 	directories: ResourceDirectoriesSchema.transform((value) => ({
 		...defaultDirectories,

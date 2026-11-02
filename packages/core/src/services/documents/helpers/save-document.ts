@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import collections from "../../../libs/collection/collections.js";
 import getMigrationStatus from "../../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../../libs/collection/migration/get-current-collection-migration-id.js";
@@ -41,6 +42,8 @@ const saveDocument: ServiceFn<
 			agentRunId?: string;
 
 			documentId?: number;
+			/** Portable identity for a new document, eg. from an import. Defaults to a new one. */
+			uid?: string;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
@@ -189,6 +192,7 @@ const saveDocument: ServiceFn<
 			data: {
 				collection_key: data.collectionKey,
 				document_id: upsertDocRes.data.id,
+				uid: data.uid ?? randomUUID(),
 			},
 		});
 		if (identity.error) return identity;

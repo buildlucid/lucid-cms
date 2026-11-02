@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import type { DocumentBeforeUpsertHookOrigin } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
@@ -23,6 +24,10 @@ const captureNewDocument: ServiceFn<
 	[
 		{
 			collectionKey: string;
+			/** Portable identity for the new document, eg. from an import. */
+			uid?: string;
+			/** Why the document is saved, passed to `beforeUpsert` hooks. */
+			origin?: DocumentBeforeUpsertHookOrigin;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			requestId: number;
@@ -72,6 +77,8 @@ const captureNewDocument: ServiceFn<
 
 	const documentRes = await saveDocument(context, {
 		collectionKey: data.collectionKey,
+		uid: data.uid,
+		origin: data.origin,
 		userId: data.user.id,
 		authUser: data.user,
 		agentRunId: data.agentRunId,

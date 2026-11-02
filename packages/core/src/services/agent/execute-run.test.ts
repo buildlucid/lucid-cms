@@ -3567,6 +3567,7 @@ describe("queued and steering inputs", () => {
 			const media = await Media.createSingle({
 				data: {
 					key: randomUUID(),
+					uid: randomUUID(),
 					storage_adapter_key: "test",
 					origin: "human",
 					type: "image",
@@ -3671,6 +3672,7 @@ describe("queued and steering inputs", () => {
 		const media = await Media.createSingle({
 			data: {
 				key: randomUUID(),
+				uid: randomUUID(),
 				storage_adapter_key: "test",
 				origin: "human",
 				type: "image",

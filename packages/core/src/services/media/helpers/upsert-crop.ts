@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { BooleanInt } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
@@ -179,6 +180,7 @@ const upsertCrop: ServiceFn<
 		: await Media.createSingle({
 				data: {
 					...cropData,
+					uid: randomUUID(),
 					is_deleted_at: undefined,
 					deleted_by: undefined,
 					created_at: now,

@@ -19,6 +19,8 @@ const uploadSingle: ServiceFn<
 	[
 		{
 			id?: number;
+			/** Portable identity for new media, eg. from an import. Defaults to a new one. */
+			uid?: string;
 			/** Whose access is checked, eg. to the media being replaced. */
 			actor: MediaActor;
 			userId: number | null;

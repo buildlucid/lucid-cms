@@ -10,6 +10,7 @@ import createMediaToolkit from "./media/index.js";
 import createNotificationsToolkit from "./notifications/index.js";
 import createPreviewsToolkit from "./previews/index.js";
 import createRequestsToolkit from "./requests/index.js";
+import createTransferToolkit from "./transfer/index.js";
 import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
 import createUsersToolkit from "./users/index.js";
 
@@ -45,6 +46,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 		notifications: createNotificationsToolkit(context),
 		previews: createPreviewsToolkit(context),
 		requests: createRequestsToolkit(context),
+		transfer: createTransferToolkit(context),
 		users: createUsersToolkit(context),
 	};
 	const toolkit: Toolkit = { ...core };

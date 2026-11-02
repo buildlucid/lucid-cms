@@ -112,3 +112,138 @@ export const extractEmbeddedBrickRefs = (
 		),
 	);
 };
+
+/** A Lucid record that rich text links to. */
+export type RichTextReferenceTarget =
+	| { resource: "documents"; collectionKey: string; id: number }
+	| { resource: "media"; id: number }
+	| { resource: "users"; id: number };
+
+/** Returns the ID to link instead, or null to leave the link out. */
+export type RichTextReferenceMapper = (
+	target: RichTextReferenceTarget,
+) => number | null;
+
+const documentTarget = (
+	attrs: Record<string, unknown> | undefined,
+): RichTextReferenceTarget | null =>
+	typeof attrs?.collectionKey === "string" &&
+	typeof attrs.documentId === "number"
+		? {
+				resource: "documents",
+				collectionKey: attrs.collectionKey,
+				id: attrs.documentId,
+			}
+		: null;
+
+/**
+ * Rewrites the document, media and user IDs rich text links to, eg. when importing content from another site.
+ * Nodes whose target maps to null are removed, mentions keep their label as text and document links keep their text.
+ */
+export const mapRichTextReferences = (
+	json: RichTextJSON,
+	map: RichTextReferenceMapper,
+): RichTextJSON => {
+	const visit = (node: RichTextJSON): RichTextJSON[] => {
+		const attrs = node.attrs;
+		let id: number | null | undefined;
+		let key: "documentId" | "mediaId" | "userId" | undefined;
+
+		if (node.type === richTextNodeNames.document) {
+			const target = documentTarget(attrs);
+			key = "documentId";
+			id = target ? map(target) : undefined;
+		} else if (
+			node.type === richTextNodeNames.media &&
+			typeof attrs?.mediaId === "number"
+		) {
+			key = "mediaId";
+			id = map({ resource: "media", id: attrs.mediaId });
+		} else if (node.type === richTextNodeNames.variable) {
+			if (attrs?.source === "user" && typeof attrs.userId === "number") {
+				key = "userId";
+				id = map({ resource: "users", id: attrs.userId });
+			} else if (attrs?.source === "document") {
+				const target = documentTarget(attrs);
+				key = "documentId";
+				id = target ? map(target) : undefined;
+			}
+		} else if (
+			node.type === richTextNodeNames.mention &&
+			typeof attrs?.userId === "number"
+		) {
+			key = "userId";
+			id = map({ resource: "users", id: attrs.userId });
+			if (id === null) {
+				return typeof attrs.label === "string" && attrs.label.length > 0
+					? [{ type: "text", text: `@${attrs.label}`, marks: node.marks }]
+					: [];
+			}
+		}
+		if (id === null) return [];
+
+		//* invalid values are left for validation to report
+		const marks = (Array.isArray(node.marks) ? node.marks : undefined)?.flatMap(
+			(mark) => {
+				if (mark.type !== "link" || mark.attrs?.kind !== "document") {
+					return [mark];
+				}
+				const target = documentTarget(mark.attrs);
+				const documentId = target ? map(target) : undefined;
+				if (documentId === null) return [];
+				return documentId === undefined
+					? [mark]
+					: [{ ...mark, attrs: { ...mark.attrs, documentId } }];
+			},
+		);
+
+		return [
+			{
+				...node,
+				...(key && id !== undefined ? { attrs: { ...attrs, [key]: id } } : {}),
+				...(marks ? { marks } : {}),
+				...(Array.isArray(node.content)
+					? {
+							content: node.content.flatMap((child) =>
+								typeof child === "object" && child !== null
+									? visit(child)
+									: [child],
+							),
+						}
+					: {}),
+			},
+		];
+	};
+
+	return visit(json)[0] ?? { type: "doc", content: [] };
+};
+
+/** Removes embedded brick nodes whose refs are given, eg. bricks an import leaves out. */
+export const removeRichTextEmbeddedBricks = (
+	json: RichTextJSON,
+	refs: ReadonlySet<string>,
+): RichTextJSON => {
+	const visit = (node: RichTextJSON): RichTextJSON[] => {
+		if (
+			node.type === richTextNodeNames.embeddedBrick &&
+			typeof node.attrs?.ref === "string" &&
+			refs.has(node.attrs.ref)
+		) {
+			return [];
+		}
+		return [
+			Array.isArray(node.content)
+				? {
+						...node,
+						content: node.content.flatMap((child) =>
+							typeof child === "object" && child !== null
+								? visit(child)
+								: [child],
+						),
+					}
+				: node,
+		];
+	};
+
+	return visit(json)[0] ?? { type: "doc", content: [] };
+};

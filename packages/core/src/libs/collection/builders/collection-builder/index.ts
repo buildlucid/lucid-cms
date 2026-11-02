@@ -254,6 +254,7 @@ class CollectionBuilder<
 				? { enabled: true }
 				: this.config.revisions;
 		const publishing = this.config.publishing;
+		const transfer = this.config.transfer ?? true;
 		const review = publishing?.review;
 		const workflow = publishing?.workflow;
 		const data: CollectionData = {
@@ -279,6 +280,12 @@ class CollectionBuilder<
 			},
 			autoSave: this.config.autoSave ?? constants.collectionBuilder.autoSave,
 			orderable: this.config.orderable ?? constants.collectionBuilder.orderable,
+			transfer: {
+				export:
+					typeof transfer === "boolean" ? transfer : (transfer.export ?? true),
+				import:
+					typeof transfer === "boolean" ? transfer : (transfer.import ?? true),
+			},
 			listing: [...this.listing],
 			labelFields: [...this.labelFields],
 			publishing: {

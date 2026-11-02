@@ -232,6 +232,8 @@ export type CollectionOptions<
 	autoSave?: boolean;
 	/** Allow editors to reorder documents. Defaults to false. */
 	orderable?: boolean;
+	/** Allow exporting and importing documents. `false` turns both off. Defaults to true. */
+	transfer?: boolean | { export?: boolean; import?: boolean };
 	/** Environments, scheduling, review and workflow settings. */
 	publishing?: CollectionPublishingOptions;
 	/** Top-level field containing each document's complete public path. */
@@ -264,6 +266,7 @@ export type CollectionData = {
 	localized: boolean;
 	autoSave: boolean;
 	orderable: boolean;
+	transfer: { export: boolean; import: boolean };
 	listing: string[];
 	labelFields: string[];
 	publishing: {
