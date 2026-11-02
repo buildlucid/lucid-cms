@@ -30,6 +30,13 @@ export default {
 		/** Days "Not now" hides the prompt to add a passkey after logging in, on this browser. */
 		promptSnoozeDays: 30,
 	},
+	/** Matches core's `constants.bugReports`. */
+	bugReports: {
+		maxImages: 3,
+		maxImageBytes: 4 * 1024 * 1024,
+		/** Longest edge images are scaled down to before sending. */
+		maxImageEdge: 2560,
+	},
 	/** How long preloaded data stays fresh, so opening a link soon after hovering it doesn't fetch it again. */
 	preloadStaleTime: 10_000,
 };

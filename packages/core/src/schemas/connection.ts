@@ -23,7 +23,7 @@ const connectionStatusResponseSchema = z
 			.strict()
 			.nullable(),
 		ai: aiAccessSchema.nullable(),
-		scope: z.literal("cms:ai"),
+		scope: z.literal("cms"),
 		resource: z.string(),
 		lastAttempt: z.number().int().nullable(),
 		lastVerified: z.number().int().nullable(),

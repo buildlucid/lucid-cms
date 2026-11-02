@@ -73,7 +73,7 @@ const remoteConnection: RemoteConnectionData = {
 	ai: {
 		features: ["agent", "chat_titles", "web_research"],
 	},
-	scope: "cms:ai",
+	scope: "cms",
 	resource,
 };
 
@@ -132,7 +132,7 @@ const installOAuthFetch = () => {
 					token_endpoint: `${issuer}/v1/oauth/token`,
 					registration_endpoint: `${issuer}/v1/oauth/register`,
 					revocation_endpoint: `${issuer}/v1/oauth/revoke`,
-					scopes_supported: ["cms:ai"],
+					scopes_supported: ["cms"],
 					response_types_supported: ["code"],
 					grant_types_supported: ["authorization_code", "refresh_token"],
 					token_endpoint_auth_methods_supported: ["client_secret_basic"],
@@ -144,7 +144,7 @@ const installOAuthFetch = () => {
 				return jsonResponse({
 					resource,
 					authorization_servers: [issuer],
-					scopes_supported: ["cms:ai"],
+					scopes_supported: ["cms"],
 				});
 			case "/v1/oauth/register":
 				return jsonResponse({
@@ -164,7 +164,7 @@ const installOAuthFetch = () => {
 					token_type: "Bearer",
 					expires_in: 900,
 					refresh_token: "exchanged-refresh-token",
-					scope: "cms:ai",
+					scope: "cms",
 					resource,
 				});
 			case "/v1/cms/connection":
@@ -293,7 +293,7 @@ describe("Lucid remote connection", () => {
 					access_token: "refreshed-access-token",
 					token_type: "Bearer",
 					expires_in: 900,
-					scope: "cms:ai",
+					scope: "cms",
 					resource,
 				}),
 			),

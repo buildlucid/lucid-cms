@@ -326,8 +326,17 @@ export default Object.freeze({
 		/** How long Lucid's media generation model catalogues are cached. */
 		modelCatalogTtlSeconds: 300,
 	},
+	/** Bug reports sent to Lucid through the connection. Matches what the Lucid API accepts. */
+	bugReports: {
+		maxImages: 3,
+		/** Per image, after the admin re-encodes it. */
+		maxImageBytes: 4 * 1024 * 1024,
+		maxMessageLength: 20_000,
+		maxDiagnosticsLength: 50_000,
+		maxPageLength: 500,
+	},
 	connection: {
-		scope: "cms:ai" as const,
+		scope: "cms" as const,
 		pendingExpirationSeconds: 300,
 		accessTokenCacheThresholdSeconds: 60,
 		/** Recheck interval in seconds for stored connection status and organisation AI access. */

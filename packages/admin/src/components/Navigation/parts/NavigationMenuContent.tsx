@@ -23,6 +23,7 @@ import {
 	type NavigationGroup,
 } from "../navigation-groups";
 import NavigationAccountMenu from "./NavigationAccountMenu";
+import { NavigationBugReport } from "./NavigationBugReport";
 import { NavigationSection } from "./NavigationSection";
 
 /**
@@ -365,10 +366,18 @@ export const NavigationMenuContent: Component<{
 						/>
 					)}
 				</Show>
-				<div class="mt-2 flex justify-center">
-					<small class="px-2 py-1 text-center text-[10px] leading-none text-muted">
+				<div
+					class={classNames("mt-2 flex items-center", {
+						"justify-between ps-2": permissions().systemDiagnostics,
+						"justify-center": !permissions().systemDiagnostics,
+					})}
+				>
+					<small class="py-1 text-[10px] leading-none text-muted">
 						v{packageJson.version}
 					</small>
+					<Show when={permissions().systemDiagnostics}>
+						<NavigationBugReport />
+					</Show>
 				</div>
 			</div>
 		</div>

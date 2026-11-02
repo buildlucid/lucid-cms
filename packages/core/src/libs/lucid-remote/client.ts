@@ -185,6 +185,17 @@ const getErrorCopy = (errorKey?: string) => {
 				name: copy("server:core.ai.remote.access.restricted.name"),
 				message: copy("server:core.ai.remote.access.restricted.message"),
 			};
+		case "bug_report_limit_reached":
+			return {
+				name: copy("server:core.bug.report.remote.limit.reached.name"),
+				message: copy("server:core.bug.report.remote.limit.reached.message"),
+			};
+		case "bug_report_image_invalid":
+		case "bug_report_too_large":
+			return {
+				name: copy("server:core.bug.report.remote.image.invalid.name"),
+				message: copy("server:core.bug.report.remote.image.invalid.message"),
+			};
 		case "ai_feature_disabled":
 			return {
 				name: copy("server:core.ai.remote.feature.disabled.name"),

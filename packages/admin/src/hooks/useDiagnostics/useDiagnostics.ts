@@ -16,8 +16,8 @@ import {
 	type ClientDiagnostics,
 } from "@/utils/diagnostics-report";
 
-/** Loads diagnostics, runs checks and builds a report shared by the page and support tools. */
-export const useDiagnostics = () => {
+/** Loads diagnostics, runs checks and builds a shared report. `enabled` defers loading. */
+export const useDiagnostics = (props?: { enabled?: () => boolean }) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [checkResults, setCheckResults] = createSignal<DiagnosticCheckResult[]>(
@@ -36,8 +36,12 @@ export const useDiagnostics = () => {
 				system: true,
 			},
 		},
+		enabled: props?.enabled,
 	});
-	const diagnostics = api.diagnostics.useGetDiagnostics();
+	const diagnostics = api.diagnostics.useGetDiagnostics({
+		queryParams: {},
+		enabled: props?.enabled,
+	});
 	const checks = api.diagnostics.useRunChecks({
 		onSuccess: (response) => {
 			//* keeps earlier results for checks this run didn't cover

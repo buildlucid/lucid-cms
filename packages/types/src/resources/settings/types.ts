@@ -110,7 +110,7 @@ export interface ConnectionStatus {
 	ai: {
 		features: AiAccessFeature[];
 	} | null;
-	scope: "cms:ai";
+	scope: "cms";
 	resource: string;
 	lastAttempt: number | null;
 	lastVerified: number | null;

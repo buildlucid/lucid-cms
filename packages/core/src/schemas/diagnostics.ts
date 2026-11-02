@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../exports/types.js";
 import type {
 	DiagnosticCheckKey,
@@ -6,6 +7,7 @@ import type {
 	Diagnostics,
 } from "../types/response.js";
 import { controllerSchemas as settingsControllerSchemas } from "./settings.js";
+import { richTextJSONSchema } from "./shared/rich-text.js";
 
 const settingsAiSchema =
 	settingsControllerSchemas.getSettings.response.shape.ai.unwrap();
@@ -263,5 +265,40 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		response: z.array(diagnosticCheckResultSchema),
+	} satisfies ControllerSchema,
+	submitBugReport: {
+		body: z.object({
+			message: richTextJSONSchema.meta({
+				description: "What went wrong, as rich text",
+			}),
+			diagnostics: z
+				.string()
+				.max(constants.bugReports.maxDiagnosticsLength)
+				.nullable()
+				.meta({
+					description:
+						"The Markdown diagnostics report, or null to leave it out",
+					example: "# Lucid CMS diagnostics",
+				}),
+			page: z.string().max(constants.bugReports.maxPageLength).nullable().meta({
+				description: "The admin path the reporter was on",
+				example: "/admin/collections/page/12",
+			}),
+			images: z
+				.array(
+					z.base64().meta({
+						description:
+							"A PNG, JPEG or WebP image as base64, without a data URL prefix",
+					}),
+				)
+				.max(constants.bugReports.maxImages)
+				.meta({ description: "Screenshots or other images" }),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
 	} satisfies ControllerSchema,
 };
