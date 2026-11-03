@@ -2,6 +2,7 @@ import constants from "../../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../../libs/email/types.js";
 import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
+import getEmailTemplate from "../../../libs/notifications/get-email-template.js";
 import { getNotificationDefinition } from "../../../libs/notifications/registry.js";
 import type { NotificationEmailData } from "../../../libs/notifications/types.js";
 import {
@@ -25,11 +26,9 @@ type DueEmail = NonNullable<
 >[number];
 
 /**
- * Emails people who are due an email about one notification. Each person is
- * claimed first, so overlapping jobs never email anyone twice. Everyone is
- * claimed without an email once the notification is resolved or its type
- * stops sending emails, and so is anyone who read or archived it, opted out
- * or can no longer sign in.
+ * Claims recipients before sending to prevent duplicate emails. Skips resolved, disabled, read,
+ * archived or opted-out notifications and inactive recipients. Templates receive the type key,
+ * stored data and rendered content.
  */
 const emailNotification: ServiceFn<
 	[{ notificationId: number; before: string; recipients: DueEmail[] }],
@@ -138,11 +137,13 @@ const emailNotification: ServiceFn<
 			to: recipient.email,
 			subject: (emailData) =>
 				formatEmailSubject(title, emailData.context.brand.name),
-			template:
-				definition.email.template ?? constants.email.templates.notification.key,
+			template: getEmailTemplate(context.config, definition),
 			priority: notification.level === "error" ? "high" : "normal",
 			isSystem: true,
 			data: {
+				...definition.email.data?.({ data: notification.data }),
+				type: notification.type,
+				data: notification.data,
 				title,
 				body,
 				actor,
@@ -153,7 +154,6 @@ const emailNotification: ServiceFn<
 						: `${baseUrl}${notification.href}`
 					: null,
 				manageLink: `${baseUrl}${constants.email.locations.account}`,
-				...definition.email.data?.({ data: notification.data }),
 			} satisfies NotificationEmailData & BuiltInEmailTemplates["notification"],
 		});
 		if (sendRes.error) return sendRes;

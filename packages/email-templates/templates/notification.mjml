@@ -1,4 +1,4 @@
-{% props title: string, body: string = "", actor: string = "", link: string = "", manageLink: string, ...data %}
+{% props title: string, body: string = "", actor: string = "", link: string = "", manageLink: string, ...extra %}
 <mjml>
   <mj-head>
     <mj-attributes>

@@ -12,7 +12,8 @@ import type {
  * then send it with `toolkit.notifications.send`. Sends of unregistered types
  * are refused. People manage it in the notification settings and their own
  * email preferences. Emails wait `email.delayMinutes` and are skipped for
- * anyone who reads the notification first.
+ * anyone who reads the notification first. A project template at
+ * `emails/notifications/<namespace>/<name>.kiln` replaces its email.
  *
  * @example
  * const orderFailed = defineNotification({
@@ -35,7 +36,7 @@ import type {
 const defineNotification = <
 	const Key extends string,
 	Data extends z.ZodObject,
-	const Template extends NotificationEmailTemplateName = never,
+	const Template extends NotificationEmailTemplateName<z.output<Data>> = never,
 >(
 	options: DefineNotificationOptions<Key, Data, Template>,
 ): NotificationDefinition<Key, Data> => ({

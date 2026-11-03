@@ -25,8 +25,12 @@ export type NotificationRender = {
 	level?: NotificationLevel;
 };
 
-/** Default notification email data, extended by `email.data`. */
-export type NotificationEmailData = {
+/** Built-in email data takes precedence over `email.data`. */
+export type NotificationEmailData<Data = Record<string, unknown>> = {
+	/** The type's key, eg. `deploys:failed`. */
+	type: string;
+	/** The data the notification was sent with. */
+	data: Data;
 	title: string;
 	body: string | null;
 	actor: string | null;
@@ -35,9 +39,9 @@ export type NotificationEmailData = {
 	manageLink: string;
 };
 
-/** Project templates that accept `NotificationEmailData`, by declaring it in their `props` or with a rest prop. */
-export type NotificationEmailTemplateName = {
-	[Name in EmailTemplateName]: NotificationEmailData extends {
+/** Templates accepting `NotificationEmailData<Data>` through declared or rest props. */
+export type NotificationEmailTemplateName<Data = Record<string, unknown>> = {
+	[Name in EmailTemplateName]: NotificationEmailData<Data> extends {
 		[
 			Key in keyof NotificationEmailData
 		]: Key extends keyof EmailTemplateInput<Name>
@@ -62,7 +66,7 @@ type NotificationEmailDataOption<Data, Template extends string> = [
 	Template,
 ] extends [never]
 	? {
-			/** Extra template data merged with the defaults. */
+			/** Extra template data merged with the defaults, which win on shared keys. */
 			data?(props: { data: Data }): Record<string, unknown>;
 		}
 	: Record<string, never> extends NotificationEmailExtraData<Template>
@@ -79,14 +83,17 @@ type NotificationEmailDataOption<Data, Template extends string> = [
 export type NotificationEmail<Data, Template extends string = never> = {
 	/** Minutes to wait before emailing. Nobody is emailed about a notification they read or archive in the meantime, or once it is resolved. Defaults to 10. Use 0 for anything people must hear about straight away. */
 	delayMinutes?: number;
-	/** A project template accepting `NotificationEmailData`, defaulting to Lucid's template for the title, body and link. */
+	/**
+	 * Template accepting `NotificationEmailData`, defaulting to Lucid's. A per-type file at
+	 * `emails/notifications/<namespace>/<name>.kiln` overrides it.
+	 */
 	template?: Template;
 } & NotificationEmailDataOption<Data, Template>;
 
 export type DefineNotificationOptions<
 	Key extends string,
 	Data extends z.ZodObject,
-	Template extends NotificationEmailTemplateName = never,
+	Template extends NotificationEmailTemplateName<z.output<Data>> = never,
 > = {
 	/** Unique `namespace:name` key, eg. `shop:order-failed`. */
 	key: Key;

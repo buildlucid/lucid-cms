@@ -10,6 +10,11 @@ declare module "../email/types.js" {
 			[key: string]: unknown;
 		};
 		"order-summary": { [key: string]: unknown };
+		"order-details": {
+			title: string;
+			data: { orderId: number };
+			[key: string]: unknown;
+		};
 		receipt: { total: number };
 	}
 }
@@ -43,3 +48,12 @@ defineNotification({
 });
 // @ts-expect-error The template doesn't accept the data Lucid sends.
 defineNotification({ ...base, email: { template: "receipt" } });
+
+// Templates reading the sent data must match the type's data.
+defineNotification({ ...base, email: { template: "order-details" } });
+defineNotification({
+	...base,
+	data: z.object({ orderId: z.string() }),
+	// @ts-expect-error `data.orderId` is a string, but the template expects a number.
+	email: { template: "order-details" },
+});

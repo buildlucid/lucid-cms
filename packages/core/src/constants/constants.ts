@@ -142,6 +142,8 @@ export default Object.freeze({
 		emailDelayMinutes: 10,
 		emailBatchSize: 100,
 		emailExpiryHours: 24,
+		/** Per-type template directory, such as `notifications/deploys/failed`. */
+		emailTemplateDirectory: "notifications",
 		storageThresholds: [80, 90, 100],
 	},
 	requests: {

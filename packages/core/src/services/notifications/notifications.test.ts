@@ -92,16 +92,16 @@ const emailsTo = async (userId: number) =>
 			.execute()
 	).length;
 /** Runs the scheduled email job as if `minutesLater` minutes had passed. */
-const sweep = async (minutesLater = 0) => {
+const sweep = async (minutesLater = 0, on = context) => {
 	vi.useFakeTimers({ toFake: ["Date"] });
 	try {
 		vi.setSystemTime(Date.now() + minutesLater * 60_000);
-		const enqueued = await enqueueJob(context, {
+		const enqueued = await enqueueJob(on, {
 			job: sendNotificationEmailsJob,
 			payload: null,
 		});
 		assert(enqueued.data, JSON.stringify(enqueued.error));
-		expect(await consumeJob(context, { jobId: enqueued.data.jobId })).toEqual({
+		expect(await consumeJob(on, { jobId: enqueued.data.jobId })).toEqual({
 			type: "completed",
 		});
 	} finally {
@@ -381,6 +381,49 @@ test("delayed emails only reach people who haven't read the notification or opte
 	expect(
 		await Promise.all([reviewer, bystander, editor].map(emailsTo)),
 	).toEqual([before[0], before[1], (before[2] ?? 0) + 1]);
+});
+
+test("a project template for a type replaces its email and gets the type and data", async () => {
+	const definition = notifications.requests.reviewRequested;
+	const template = `${constants.notifications.emailTemplateDirectory}/${definition.key.replace(":", "/")}`;
+	const withTemplate: ServiceContext = {
+		...context,
+		config: {
+			...context.config,
+			email: {
+				...context.config.email,
+				templates: {
+					...context.config.email.templates,
+					[template]: "{% props title: string, ...rest %}{{ title }}",
+				},
+			},
+		},
+	};
+
+	const sent = await send(context, {
+		definition,
+		key: "request:7:review",
+		recipients: [editor],
+		actorUserId: author,
+		data: { requestId: 7, title: "Spring launch" },
+	});
+	assert(sent.data?.id, JSON.stringify(sent.error));
+	await sweep(reviewDelay + 1, withTemplate);
+
+	const email = await context.db.kysely
+		.selectFrom("lucid_emails")
+		.innerJoin("lucid_users", "lucid_users.email", "lucid_emails.to_address")
+		.select(["lucid_emails.template", "lucid_emails.data"])
+		.where("lucid_users.id", "=", editor)
+		.orderBy("lucid_emails.id", "desc")
+		.executeTakeFirstOrThrow();
+	expect(email.template).toBe(template);
+	expect(
+		typeof email.data === "string" ? JSON.parse(email.data) : email.data,
+	).toMatchObject({
+		type: definition.key,
+		data: { requestId: 7, title: "Spring launch" },
+	});
 });
 
 test("nobody is emailed about a notification resolved before its email is due", async () => {
