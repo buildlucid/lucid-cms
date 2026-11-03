@@ -5,9 +5,27 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { copy, createTranslationStore } from "../i18n/index.js";
+import defineHookEvents from "./define-hook-events.js";
 import defineHook from "./define-hook.js";
 import executeHooks from "./execute-hooks.js";
-import type { HookPayload, LucidHookDocuments } from "./types.js";
+import type {
+	HookPayload,
+	LucidHookDocuments,
+	TransformHookEvent,
+} from "./types.js";
+
+declare module "./types.js" {
+	interface PluginHookEvents {
+		test: {
+			beforeList: TransformHookEvent<{ source: string }, { items: string[] }>;
+		};
+	}
+}
+
+const testHookEvents = defineHookEvents({
+	key: "test",
+	events: { beforeList: "transform" },
+});
 
 const collection = new CollectionBuilder("pages", {
 	mode: "multiple",
@@ -249,5 +267,45 @@ describe("execute hooks", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data).toBe(payload.data);
+	});
+
+	it("runs plugin hook events registered on a configured plugin", async () => {
+		const pluginContext: ServiceContext = {
+			...context,
+			config: {
+				...context.config,
+				plugins: [
+					{ key: "test-plugin", lucid: "0.x.x", hookEvents: testHookEvents },
+				],
+				hooks: [
+					defineHook({
+						service: "test",
+						event: "beforeList",
+						handler: async ({ data, meta: hookMeta }) => {
+							data.items.push(hookMeta.source);
+							return { error: undefined, data: undefined };
+						},
+					}),
+				],
+			},
+		};
+
+		const response = await testHookEvents.execute(pluginContext, "beforeList", {
+			meta: { source: "hook" },
+			data: { items: ["original"] },
+		});
+
+		expect(response.error).toBeUndefined();
+		expect(response.data).toEqual({ items: ["original", "hook"] });
+	});
+
+	it("returns an error when a plugin's hook events aren't registered", async () => {
+		const response = await testHookEvents.execute(context, "beforeList", {
+			meta: { source: "hook" },
+			data: { items: [] },
+		});
+
+		expect(response.error?.status).toBe(500);
+		expect(response.data).toBeUndefined();
 	});
 });

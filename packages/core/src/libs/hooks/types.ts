@@ -1,4 +1,4 @@
-import type { Draft } from "immer";
+import type { Draft, Objectish } from "immer";
 import type constants from "../../constants/constants.js";
 import type {
 	AgentRunOutcome,
@@ -39,7 +39,7 @@ export type MediaChangeMetadata =
 
 export type HookExecutionKind = "effect" | "transform";
 
-export type HookExecutionKindMap = {
+export type CoreHookExecutionKindMap = {
 	documents: {
 		afterChange: "effect";
 		beforeUpsert: "transform";
@@ -73,6 +73,17 @@ export type HookExecutionKindMap = {
 	};
 	agent: {
 		runFinished: "effect";
+	};
+};
+
+/** Whether each core and plugin hook event transforms data or only runs side effects. */
+export type HookExecutionKindMap = CoreHookExecutionKindMap & {
+	[S in keyof PluginHookEvents]: {
+		[E in keyof PluginHookEvents[S]]: PluginHookEvents[S][E] extends {
+			kind: infer Kind extends HookExecutionKind;
+		}
+			? Kind
+			: never;
 	};
 };
 
@@ -326,27 +337,21 @@ export type EffectHookPayload<TMeta, TData> = {
 	data: TData;
 };
 
-export type TransformHookDataMap = {
-	documents: {
-		beforeUpsert: DocumentBeforeUpsertHookData;
-		afterFetch: DocumentAfterFetchHookData;
-	};
-	requests: {
-		check: RequestCheckHookData;
-	};
-	notifications: {
-		beforeSend: NotificationBeforeSendHookData;
-	};
-};
+/** The execution kind of one hook event. */
+export type HookExecutionKindOf<S, E> = S extends keyof HookExecutionKindMap
+	? E extends keyof HookExecutionKindMap[S]
+		? HookExecutionKindMap[S][E]
+		: never
+	: never;
 
+/** The data a transform event passes through its hooks. Never for effect events. */
 export type TransformHookData<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
-> = S extends keyof TransformHookDataMap
-	? E extends keyof TransformHookDataMap[S]
-		? TransformHookDataMap[S][E]
-		: never
-	: never;
+> =
+	HookExecutionKindOf<S, E> extends "transform"
+		? Extract<HookData<S, E>, Objectish>
+		: never;
 
 export type ExecuteHookData<
 	S extends keyof HookServiceHandlers,
@@ -385,7 +390,7 @@ type HookHandler<
 	},
 ) => ServiceResponse<TData>;
 
-export type HookServiceHandlers = {
+type CoreHookServiceHandlers = {
 	documents: {
 		afterChange: HookHandler<
 			EffectHookPayload<
@@ -504,6 +509,72 @@ export type HookServiceHandlers = {
 	};
 };
 
+// --------------------------------------------------
+// plugin hook events
+
+/** Plugin event for side effects. */
+export type EffectHookEvent<TMeta, TData> = {
+	kind: "effect";
+	meta: TMeta;
+	data: TData;
+};
+
+/** Transform event with mutable plain object, array, Map or Set data. */
+export type TransformHookEvent<TMeta, TData extends Objectish> = {
+	kind: "transform";
+	meta: TMeta;
+	data: TData;
+};
+
+/**
+ * Augment by service key with `EffectHookEvent` or `TransformHookEvent`, then register matching
+ * events with `defineHookEvents`. Events require the plugin to be configured.
+ */
+// oxlint-disable-next-line typescript/no-empty-object-type -- plugins merge their hook events into this interface
+export interface PluginHookEvents {}
+
+type PluginHookHandler<TEvent> =
+	TEvent extends TransformHookEvent<infer TMeta, infer TData extends Objectish>
+		? HookHandler<TransformHookPayload<TMeta, TData>, TData | undefined>
+		: TEvent extends EffectHookEvent<infer TMeta, infer TData>
+			? HookHandler<EffectHookPayload<TMeta, TData>, undefined>
+			: never;
+
+type PluginHookServiceHandlers = {
+	[S in keyof PluginHookEvents]: {
+		[E in keyof PluginHookEvents[S]]: PluginHookHandler<PluginHookEvents[S][E]>;
+	};
+};
+
+/** Every hook event handler, by service and event, including plugin events. */
+export type HookServiceHandlers = CoreHookServiceHandlers &
+	PluginHookServiceHandlers;
+
+/** Hook events a plugin registers through its `hookEvents`. */
+export type HookEventsDefinition = {
+	readonly type: "hook-events-definition";
+	/** The service key hooks subscribe with, such as `pages`. */
+	readonly key: string;
+	/** Each event's execution kind. */
+	readonly events: Readonly<Record<string, HookExecutionKind>>;
+};
+
+/** A plugin's hook events, returned by `defineHookEvents`, with a typed way to run them. */
+export type PluginHookEventsDefinition<TKey extends keyof PluginHookEvents> =
+	HookEventsDefinition & {
+		readonly key: TKey;
+		readonly events: HookExecutionKindMap[TKey];
+		/**
+		 * Runs hooks in order until the first error. Transforms return final data; effects return
+		 * undefined data.
+		 */
+		readonly execute: <E extends keyof HookServiceHandlers[TKey]>(
+			context: ServiceContext,
+			event: E,
+			payload: HookPayload<TKey, E>,
+		) => ServiceResponse<ExecuteHookData<TKey, E>>;
+	};
+
 export type HookOptions<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
@@ -583,10 +654,18 @@ export type MediaHooks =
 
 export type AgentHooks = LucidHook<"agent", "runFinished">;
 
+/** Hooks for the events configured plugins register. */
+export type PluginHooks = {
+	[S in keyof PluginHookEvents]: {
+		[E in keyof HookServiceHandlers[S]]: LucidHook<S, E>;
+	}[keyof HookServiceHandlers[S]];
+}[keyof PluginHookEvents];
+
 export type AllHooks =
 	| DocumentHooks
 	| DocumentWorkflowHooks
 	| RequestHooks
 	| NotificationHooks
 	| MediaHooks
-	| AgentHooks;
+	| AgentHooks
+	| PluginHooks;

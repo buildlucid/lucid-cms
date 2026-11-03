@@ -5,6 +5,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import type { HookEventsDefinition } from "../hooks/types.js";
 import type { Translator } from "../i18n/types.js";
 import type { PackageInfo } from "../package-updates/types.js";
 import type { ResourceFile, ResourceSources } from "../resources/types.js";
@@ -193,6 +194,8 @@ export type LucidPluginDefinition = {
 	 * A plugin-owned service to add to Lucid's server toolkit.
 	 */
 	toolkit?: ToolkitDefinition;
+	/** Events created with `defineHookEvents` for project hooks and deploy triggers. */
+	hookEvents?: HookEventsDefinition;
 	/** Work the plugin's commands run inside the runtime, by name. */
 	tasks?: Record<string, LucidPluginTask>;
 	/**

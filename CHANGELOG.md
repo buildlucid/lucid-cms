@@ -27,6 +27,7 @@
 - Lucid now sends security alerts and announcements for your version as notifications, which `announcements: false` turns off.
 - Diagnostics now shows when your Lucid packages are out of date, which `updateChecks: false` turns off.
 - Added deploys, for running and tracking site builds from the admin, plus a GitHub Actions provider.
+- Plugins can now add their own hook events with `defineHookEvents`, for project hooks and deploy triggers to subscribe to.
 
 ### Breaking Changes:
 

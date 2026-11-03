@@ -48,7 +48,7 @@ import { isTransferDefinition } from "../transfer/registry.js";
 import type { TransferDefinition } from "../transfer/types.js";
 import { mediaGenerationTypes } from "./ai-features.js";
 import {
-	hookSchema,
+	configHookSchema,
 	migrationSchema,
 	routeSchema,
 	seedSchema,
@@ -554,7 +554,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			fallbackUrl: z.string().optional(),
 		}),
 	}),
-	hooks: z.array(hookSchema),
+	hooks: z.array(configHookSchema),
 	queue: z.strictObject({
 		adapter: QueueAdapterSchema.optional(),
 	}),

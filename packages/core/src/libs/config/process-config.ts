@@ -31,6 +31,8 @@ import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkFieldConditions from "./checks/check-field-conditions.js";
 import checkFieldPermissions from "./checks/check-field-permissions.js";
 import checkField from "./checks/check-field.js";
+import checkHookEvents from "./checks/check-hook-events.js";
+import checkHooks from "./checks/check-hooks.js";
 import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkMagicLink from "./checks/check-magic-link.js";
@@ -48,12 +50,7 @@ import coreNotificationDefinitions from "./core-notification-definitions.js";
 import coreTransferDefinitions from "./core-transfer-definitions.js";
 import resolveConfig from "./resolve-config.js";
 
-/**
- * Responsible for:
- * - merging the default config with the config
- * - initializing the plugins
- * - validation & checks
- */
+/** Merges config defaults, initializes plugins and validates the resolved config. */
 const processConfig = async (
 	config: LucidConfig,
 	options?: {
@@ -136,7 +133,11 @@ const processConfig = async (
 		checkAdminSlots(configRes);
 		checkAdminRoutes(configRes);
 		checkCaptcha(configRes);
+
+		// plugin hook events, before the hooks and deploy triggers that use them
+		checkHookEvents(configRes.plugins);
 		checkDeploys(configRes);
+		checkHooks(configRes);
 		checkMagicLink(configRes);
 		checkTwoFactor(configRes);
 

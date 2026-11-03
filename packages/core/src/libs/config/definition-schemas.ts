@@ -52,6 +52,7 @@ export const routeSchema = z.custom<LucidCustomRouteDefinition>(
 	{ error: "Expected defineRoute() or defineContentApiRoute()" },
 );
 
+/** A collection hook, which can only subscribe to core events. */
 export const hookSchema = z.custom<AllHooks>(
 	(value) => {
 		const parsed = hookShape.safeParse(value);
@@ -59,6 +60,12 @@ export const hookSchema = z.custom<AllHooks>(
 		return hookEvents.get(parsed.data.service)?.has(parsed.data.event) ?? false;
 	},
 	{ error: "Expected defineHook() with a supported service and event" },
+);
+
+/** Config hook validated after plugin events are registered. */
+export const configHookSchema = z.custom<AllHooks>(
+	(value) => hookShape.safeParse(value).success,
+	{ error: "Expected defineHook()" },
 );
 
 export const migrationSchema = z.object({

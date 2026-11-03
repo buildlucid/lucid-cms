@@ -48,6 +48,15 @@ export const PluginDefinitionSchema: z.ZodType<LucidPluginDefinition> =
 					typeof value.create === "function",
 			)
 			.optional(),
+		hookEvents: z
+			.custom<LucidPluginDefinition["hookEvents"]>(
+				(value) =>
+					!!value &&
+					typeof value === "object" &&
+					"type" in value &&
+					value.type === "hook-events-definition",
+			)
+			.optional(),
 		tasks: z
 			.record(
 				z.string(),

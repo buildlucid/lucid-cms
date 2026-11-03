@@ -1,6 +1,6 @@
 import { Cron } from "croner";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
-import { hookExecutionKinds } from "../../hooks/hook-map.js";
+import getHookKind from "../../hooks/get-hook-kind.js";
 
 //* keys appear in URLs and schedule names, so they share the agent key rules
 const keyPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -18,7 +18,9 @@ const isWebUrl = (value: string) => {
 };
 
 /** Checks deploy keys, links, providers, triggers, schedules and timings at config time. */
-const checkDeploys = (config: Pick<ResolvedLucidConfig, "deploys">) => {
+const checkDeploys = (
+	config: Pick<ResolvedLucidConfig, "deploys" | "plugins">,
+) => {
 	const keys = new Set<string>();
 
 	for (const deploy of config.deploys) {
@@ -50,9 +52,9 @@ const checkDeploys = (config: Pick<ResolvedLucidConfig, "deploys">) => {
 		}
 
 		for (const trigger of deploy.triggers) {
-			const kinds: Record<string, string> | undefined =
-				hookExecutionKinds[trigger.service as keyof typeof hookExecutionKinds];
-			if (kinds?.[String(trigger.event)] !== "effect") {
+			if (
+				getHookKind(config, trigger.service, String(trigger.event)) !== "effect"
+			) {
 				throw new Error(
 					`Deploy "${deploy.key}" can't trigger on ${trigger.service}.${String(trigger.event)}. Use a hook event that runs after a change, such as documents.afterChange.`,
 				);

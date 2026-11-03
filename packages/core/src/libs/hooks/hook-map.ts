@@ -1,19 +1,10 @@
-import type {
-	HookExecutionKind,
-	HookExecutionKindMap,
-	HookServiceHandlers,
-} from "./types.js";
+import type { CoreHookExecutionKindMap } from "./types.js";
 
 /**
- * Defines whether each hook event transforms request data or runs only for
- * side effects. Transform hooks run sequentially with Immer-drafted data while
- * effect hooks keep the lightweight fire-in-order behaviour.
+ * Classifies core events as transforms or effects. Transforms use sequential Immer drafts; effects
+ * run in order. Plugins use `defineHookEvents`.
  */
-export const hookExecutionKinds: {
-	[S in keyof HookServiceHandlers]: {
-		[E in keyof HookServiceHandlers[S]]: HookExecutionKind;
-	};
-} = {
+export const hookExecutionKinds: CoreHookExecutionKindMap = {
 	documents: {
 		afterChange: "effect",
 		beforeUpsert: "transform",
@@ -48,4 +39,4 @@ export const hookExecutionKinds: {
 	agent: {
 		runFinished: "effect",
 	},
-} satisfies HookExecutionKindMap;
+};

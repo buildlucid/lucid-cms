@@ -1,11 +1,12 @@
-import { createDraft, finishDraft } from "immer";
+import { createDraft, enableMapSet, finishDraft } from "immer";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import { copy } from "../i18n/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import type { Toolkit } from "../toolkit/types.js";
-import { hookExecutionKinds } from "./hook-map.js";
+import getHookKind from "./get-hook-kind.js";
 import type {
 	ExecuteHookData,
 	HookData,
@@ -14,6 +15,9 @@ import type {
 	HookServiceHandlers,
 	TransformHookData,
 } from "./types.js";
+
+//* plugin transform events can carry Maps and Sets, which Immer only drafts with this enabled
+enableMapSet();
 
 type HookArguments<
 	S extends keyof HookServiceHandlers,
@@ -112,8 +116,25 @@ const executeHooks = async <
 	options: HookOptions<S, E>,
 	payload: HookPayload<S, E>,
 ): ServiceResponse<ExecuteHookData<S, E>> => {
+	const executionKind = getHookKind(
+		options.config,
+		options.service,
+		String(options.event),
+	);
+	if (executionKind === undefined) {
+		return {
+			error: {
+				type: "basic",
+				status: 500,
+				message: copy("server:core.hooks.event.not.found", {
+					data: { event: `${options.service}.${String(options.event)}` },
+				}),
+			},
+			data: undefined,
+		};
+	}
+
 	const hooks = getOrderedHooks(options);
-	const executionKind = hookExecutionKinds[options.service][options.event];
 
 	if (hooks.length === 0) {
 		return {

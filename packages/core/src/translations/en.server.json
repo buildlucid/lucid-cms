@@ -935,6 +935,7 @@
 	"core.routes.document.workflow.assignees.error.message": "An error occurred while fetching document workflow assignees.",
 	"core.jobs.schedule.state.failed": "The job schedule state could not be updated.",
 	"core.deploys.not.found": "The \"{{deploy}}\" deploy isn't configured.",
+	"core.hooks.event.not.found": "The \"{{event}}\" hook event isn't registered. Add its defineHookEvents() to the plugin's hookEvents.",
 	"core.deploys.not.configured": "This deploy is no longer configured.",
 	"core.deploys.disabled": "The \"{{deploy}}\" deploy is turned off.",
 	"core.deploys.run.failed": "The deploy could not be run.",

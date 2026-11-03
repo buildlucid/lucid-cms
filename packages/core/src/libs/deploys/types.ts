@@ -1,7 +1,7 @@
 import type { DeployRunSource } from "../../types/response.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type {
-	HookExecutionKindMap,
+	HookExecutionKindOf,
 	HookPayload,
 	HookServiceHandlers,
 } from "../hooks/types.js";
@@ -10,8 +10,10 @@ import type { Toolkit } from "../toolkit/types.js";
 
 /** Hook events that only run side effects. Transform hooks such as `afterFetch` also run on reads. */
 type DeployTriggerEvent<S extends keyof HookServiceHandlers> = {
-	[E in keyof HookServiceHandlers[S]]: HookExecutionKindMap[S][E &
-		keyof HookExecutionKindMap[S]] extends "effect"
+	[E in keyof HookServiceHandlers[S]]: HookExecutionKindOf<
+		S,
+		E
+	> extends "effect"
 		? E
 		: never;
 }[keyof HookServiceHandlers[S]];

@@ -1,6 +1,7 @@
 import { copy } from "@lucidcms/core";
 import { getCollectionTableNames } from "@lucidcms/core/extension";
 import type { ServiceFn, Toolkit } from "@lucidcms/core/types";
+import hookEvents from "../hook-events/index.js";
 import type { PluginOptionsInternal, RouteScope } from "../types/types.js";
 import findRebuildConflict from "../utils/find-rebuild-conflict.js";
 import getRouteVersionTypes from "../utils/get-route-version-types.js";
@@ -12,17 +13,21 @@ import updateRouteFields from "./update-route-fields.js";
 
 /**
  * Rebuilds latest and environment paths, skipping binned pages and request proposals. Children of
- * binned parents become top-level. Run in a transaction so path conflicts roll back all changes.
+ * binned parents become top-level, then `pages.afterRebuildPaths` hooks run. Run in a transaction
+ * so path conflicts and hook errors roll back all changes.
  */
 const rebuildPaths: ServiceFn<
 	[{ options: PluginOptionsInternal; toolkit: Toolkit }],
 	undefined
 > = async (context, data) => {
+	const collectionKeys: string[] = [];
+
 	for (const collection of data.options.collections) {
 		const collectionInstance = context.config.collections.find(
 			(instance) => instance.key === collection.key,
 		);
 		if (!collectionInstance) continue;
+		collectionKeys.push(collection.key);
 
 		const tablesRes = await getCollectionTableNames(context, collection.key);
 		if (tablesRes.error) return tablesRes;
@@ -113,7 +118,10 @@ const rebuildPaths: ServiceFn<
 		}
 	}
 
-	return { error: undefined, data: undefined };
+	return hookEvents.execute(context, "afterRebuildPaths", {
+		meta: {},
+		data: { collectionKeys },
+	});
 };
 
 export default rebuildPaths;

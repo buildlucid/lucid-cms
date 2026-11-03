@@ -2,6 +2,7 @@ import { definePlugin, logger } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import rebuildPathsConfig from "./admin/components/RebuildPaths/config.js";
 import { LUCID_VERSION, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
+import hookEvents from "./hook-events/index.js";
 import createRebuildPathsJob from "./jobs/rebuild-paths.js";
 import routes from "./routes/index.js";
 import { checkRouteSegments } from "./services/checks/index.js";
@@ -23,7 +24,7 @@ import registerFields from "./services/register-fields.js";
 import toolkit from "./toolkit/index.js";
 import type { PluginOptions } from "./types/types.js";
 
-/** Adds slug, parent page and path fields to selected collections, plus route maintenance hooks, a path rebuild job and toolkit.pages. */
+/** Adds page routing fields, maintenance hooks, path rebuilds, toolkit helpers and hook events. */
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	const options = pluginOptions(plugin);
 	const rebuildPathsJob = createRebuildPathsJob(options);
@@ -33,6 +34,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		toolkit,
+		hookEvents,
 		sources: { translations: ["@lucidcms/plugin-pages/translations"] },
 		configure: (draft) => {
 			draft.jobs.definitions.push(rebuildPathsJob);
