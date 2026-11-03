@@ -10,6 +10,10 @@ const referenceNotFound = (reference: AgentReferenceInput) => {
 			return copy("server:core.documents.not.found.message");
 		case "request":
 			return copy("server:core.requests.not.found");
+		case "deploy":
+			return copy("server:core.deploys.not.found", {
+				data: { deploy: reference.deployKey },
+			});
 	}
 };
 

@@ -14,6 +14,7 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import { aiUsageHref } from "@/utils/ai-usage";
+import { canViewDeploys } from "@/utils/deploys";
 import helpers from "@/utils/helpers";
 import { getHomeView } from "@/utils/home-view";
 import { isNavigationLinkActive } from "@/utils/navigation";
@@ -23,6 +24,7 @@ import {
 } from "../navigation-groups";
 import NavigationAccountMenu from "./NavigationAccountMenu";
 import { NavigationBugReport } from "./NavigationBugReport";
+import { NavigationDeploys } from "./NavigationDeploys";
 import { NavigationSection } from "./NavigationSection";
 import { NavigationVersion } from "./NavigationVersion";
 
@@ -40,6 +42,9 @@ export const NavigationMenuContent: Component<{
 	const logout = api.auth.useLogout();
 	const collections = api.collections.useGetAll({
 		queryParams: {},
+	});
+	const deploys = api.deploys.useGetMultiple({
+		enabled: canViewDeploys,
 	});
 
 	// ----------------------------------
@@ -69,6 +74,7 @@ export const NavigationMenuContent: Component<{
 			agent:
 				getAgentAccess().all.length > 0 || getAgentAccess().manageAllRoutines,
 			requests: can(Permissions.RequestsRead),
+			deploys: canViewDeploys() && (deploys.data?.data.length ?? 0) > 0,
 		};
 	});
 	const visibleCollections = createMemo(() => {
@@ -296,6 +302,7 @@ export const NavigationMenuContent: Component<{
 						when={
 							permissions().systemDiagnostics ||
 							permissions().integrations ||
+							permissions().deploys ||
 							permissions().jobs ||
 							permissions().aiUsage
 						}
@@ -330,6 +337,12 @@ export const NavigationMenuContent: Component<{
 								permission={permissions().aiUsage}
 							/>
 							<NavigationLink
+								href="/admin/system/deploys"
+								icon="publishing"
+								title={T()("routes.system.deploys.title")}
+								permission={permissions().deploys}
+							/>
+							<NavigationLink
 								href="/admin/system/jobs"
 								icon="queue"
 								title={T()("routes.system.jobs.title")}
@@ -356,6 +369,12 @@ export const NavigationMenuContent: Component<{
 			</div>
 
 			<div class="px-4 pt-3 pb-4">
+				<Show when={permissions().deploys}>
+					<NavigationDeploys
+						deploys={deploys.data?.data ?? []}
+						onNavigate={props.onNavigate}
+					/>
+				</Show>
 				<Show when={userStore.get.user}>
 					{(user) => (
 						<NavigationAccountMenu

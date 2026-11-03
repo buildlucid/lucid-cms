@@ -6,6 +6,7 @@ import type {
 } from "../../types/response.js";
 import { getCollectionPermission } from "../permission/collection-permissions.js";
 import { Permissions } from "../permission/definitions.js";
+import { getDeployPermission } from "../permission/deploy-permissions.js";
 import hasPermission, {
 	type PermissionGrant,
 } from "../permission/has-permission.js";
@@ -25,6 +26,8 @@ export const referenceKey = (reference: AgentReferenceInput) => {
 			return `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
 		case "request":
 			return `request:${reference.requestId}`;
+		case "deploy":
+			return `deploy:${reference.deployKey}`;
 	}
 };
 
@@ -45,6 +48,8 @@ const referenceReadPermissions = (
 					getCollectionPermission(key, "read"),
 				),
 			];
+		case "deploy":
+			return [getDeployPermission(reference.deployKey, "read")];
 	}
 };
 

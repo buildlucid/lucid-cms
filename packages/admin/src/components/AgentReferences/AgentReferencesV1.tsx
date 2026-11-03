@@ -1,7 +1,15 @@
 import type { AgentReference, AgentWidgetPart } from "@types";
 import { TbOutlineLink } from "solid-icons/tb";
-import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	For,
+	type JSXElement,
+	Show,
+} from "solid-js";
 import AgentReferenceRow from "@/components/AgentReferenceRow/AgentReferenceRow";
+import DeployReferenceStatus from "@/components/DeployReferenceStatus/DeployReferenceStatus";
 import SkeletonListItems from "@/components/SkeletonListItems/SkeletonListItems";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
@@ -72,12 +80,16 @@ const AgentReferencesV1: Component<{
 			.filter(Boolean)
 			.join(" · ");
 	};
-	const details = (reference: AgentReference) => {
+	const details = (reference: AgentReference): JSXElement => {
 		switch (reference.type) {
 			case "media":
 				return mediaDetails(reference);
 			case "request":
 				return T()("common.request");
+			case "deploy":
+				return (
+					<DeployReferenceStatus deployKey={reference.deployKey} part="runs" />
+				);
 			case "document": {
 				const collection = collections.data?.data.find(
 					(item) => item.key === reference.collectionKey,

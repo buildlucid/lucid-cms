@@ -5,6 +5,7 @@ import auth from "./auth";
 import captcha from "./captcha";
 import collections from "./collections";
 import connection from "./connection";
+import deploys from "./deploys";
 import diagnostics from "./diagnostics";
 import documents from "./documents";
 import email from "./email";
@@ -47,6 +48,7 @@ const exportObject = {
 	notifications,
 	settings,
 	diagnostics,
+	deploys,
 	email,
 	jobs,
 	locales,

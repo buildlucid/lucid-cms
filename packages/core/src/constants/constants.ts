@@ -237,6 +237,7 @@ export default Object.freeze({
 		captchaAdapter: "captcha-adapter",
 		authProvider: "auth-provider",
 		ai: "ai",
+		deploys: "deploys",
 	} as const,
 	jobSchedulerCron: "* * * * *",
 	csrfExpiration: 604800, // 7 days in seconds
@@ -463,6 +464,18 @@ export default Object.freeze({
 			/** Queued-event lifetime in milliseconds, including when an agent is unavailable. */
 			expiryMs: 86_400_000,
 		},
+	} as const,
+	deploys: {
+		/** Seconds of quiet after the last trigger before a deploy starts, unless it sets `debounceSeconds`. */
+		debounceSeconds: 60,
+		/** Seconds a deploy waits at most after its first trigger, unless it sets `maxWaitSeconds`. */
+		maxWaitSeconds: 900,
+		/** Seconds before an unfinished run times out, unless the deploy or its provider sets one. */
+		timeoutSeconds: 1800,
+		/** How long providers wait for a host to answer. */
+		requestTimeoutMs: 15_000,
+		/** Finished runs returned with each deploy, for its recent history. */
+		recentRuns: 20,
 	} as const,
 	documentEditors: {
 		/** Heartbeat expiry, allowing 30-second admin heartbeats to slow to a minute in hidden tabs. */

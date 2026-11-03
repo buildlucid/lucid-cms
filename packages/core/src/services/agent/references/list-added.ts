@@ -1,4 +1,5 @@
 import {
+	AgentDeployReferencesRepository,
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
 	AgentRequestReferencesRepository,
@@ -14,8 +15,9 @@ const listAdded: ServiceFn<
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
 	const Requests = new AgentRequestReferencesRepository(context.db);
+	const Deploys = new AgentDeployReferencesRepository(context.db);
 
-	const [media, documents, requests] = await Promise.all([
+	const [media, documents, requests, deploys] = await Promise.all([
 		Media.selectMultiple({
 			select: ["media_id"],
 			where: [
@@ -46,10 +48,21 @@ const listAdded: ServiceFn<
 			orderBy: [{ column: "created_at", direction: "asc" }],
 			validation: { enabled: true },
 		}),
+		Deploys.selectMultiple({
+			select: ["deploy_key"],
+			where: [
+				{ key: "conversation_id", operator: "=", value: input.conversationId },
+				{ key: "source", operator: "=", value: "tool" },
+				{ key: "created_at", operator: ">=", value: input.since },
+			],
+			orderBy: [{ column: "created_at", direction: "asc" }],
+			validation: { enabled: true },
+		}),
 	]);
 	if (media.error) return media;
 	if (documents.error) return documents;
 	if (requests.error) return requests;
+	if (deploys.error) return deploys;
 
 	return {
 		error: undefined,
@@ -63,6 +76,10 @@ const listAdded: ServiceFn<
 			...requests.data.map((row) => ({
 				type: "request" as const,
 				requestId: row.request_id,
+			})),
+			...deploys.data.map((row) => ({
+				type: "deploy" as const,
+				deployKey: row.deploy_key,
 			})),
 			...media.data.map((row) => ({
 				type: "media" as const,

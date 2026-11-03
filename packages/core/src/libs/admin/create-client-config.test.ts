@@ -12,12 +12,14 @@ test("copies only explicitly public values from resolved config", () => {
 			scripts: [],
 			stylesheets: [],
 		},
+		deploys: [],
 		secret: "private-server-value",
 	};
 	const client = createAdminClientConfig(config);
 	expect(client).toEqual({
 		brand: { name: "My site" },
 		agentHomescreen: false,
+		deploys: [],
 	});
 	expect(client.brand).not.toBe(config.brand);
 	config.brand.name = "Changed server config";
@@ -35,6 +37,7 @@ test.each([
 		const client = createAdminClientConfig({
 			brand: { name: "My site" },
 			admin: adminConfigSchema.parse(admin),
+			deploys: [],
 		});
 		expect(client.agentHomescreen).toBe(admin?.agentHomescreen ?? true);
 	},

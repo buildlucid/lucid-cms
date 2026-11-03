@@ -21,6 +21,12 @@ export const notificationCategories = {
 			defaultMessage: "Workflows",
 		}),
 	},
+	deploys: {
+		key: "deploys",
+		label: copy("admin:core.notifications.category.deploys", {
+			defaultMessage: "Deploys",
+		}),
+	},
 	agent: {
 		key: "agent",
 		label: copy("admin:core.notifications.category.agent", {

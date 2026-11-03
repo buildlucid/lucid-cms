@@ -28,6 +28,7 @@ export default defineConfig({
 		adminClientConfigPlugin({
 			brand: { name: "Lucid test" },
 			agentHomescreen: true,
+			deploys: [],
 		}),
 		adminExtensionsPlugin({
 			configPath: fileURLToPath(import.meta.url),

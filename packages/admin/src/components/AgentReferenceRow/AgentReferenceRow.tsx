@@ -3,12 +3,13 @@ import type { AgentReference } from "@types";
 import classnames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
 import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
+import DeployReferenceStatus from "@/components/DeployReferenceStatus/DeployReferenceStatus";
 import { agentReferenceHref } from "@/utils/agent-references";
 
-/** Shows chat references with previews and details, linking documents and requests to their pages and calling `onSelect` for media. */
+/** Shows reference previews. Links resources to their pages; media uses `onSelect`. */
 const AgentReferenceRow: Component<{
 	reference: AgentReference;
-	details: string;
+	details: JSXElement;
 	onSelect?: () => void;
 	class?: string;
 	/** An overlay at the row's end, such as a remove button, with room reserved through `class`. */
@@ -18,7 +19,7 @@ const AgentReferenceRow: Component<{
 	// Functions
 	const classes = () =>
 		classnames(
-			"flex w-full min-w-0 items-center gap-2.5 rounded-md py-1.5 ps-1.5 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+			"flex min-w-0 items-center gap-2.5 rounded-md py-1.5 ps-1.5 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
 			props.class,
 		);
 	const content = () => (
@@ -33,9 +34,19 @@ const AgentReferenceRow: Component<{
 			>
 				<AgentReferenceThumb reference={props.reference} />
 			</span>
-			<span class="min-w-0">
-				<span class="block truncate text-xs text-title">
-					{props.reference.label}
+			<span class="min-w-0 flex-1">
+				<span class="flex min-w-0 items-center gap-1.5">
+					<span class="truncate text-xs text-title">
+						{props.reference.label}
+					</span>
+					<Show when={props.reference.type === "deploy" && props.reference}>
+						{(reference) => (
+							<DeployReferenceStatus
+								deployKey={reference().deployKey}
+								part="time"
+							/>
+						)}
+					</Show>
 				</span>
 				<Show when={props.details}>
 					<span class="block truncate text-[11px] text-muted">
@@ -55,7 +66,7 @@ const AgentReferenceRow: Component<{
 				fallback={
 					<button
 						type="button"
-						class={classes()}
+						class={classnames("w-full", classes())}
 						onClick={() => props.onSelect?.()}
 					>
 						{content()}

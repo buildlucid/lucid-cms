@@ -27,6 +27,8 @@ const lucidAgent = defineAgent({
 		agentTools.system(),
 		agentTools.emails.resend(),
 		agentTools.jobs.runSchedule(),
+		agentTools.deploys.run(),
+		agentTools.deploys.update(),
 		agentTools.notifications.find(),
 	],
 	suggestions: [

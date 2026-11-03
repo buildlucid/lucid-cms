@@ -9,6 +9,7 @@ import type { RuntimeViteIntegration } from "@lucidcms/core/vite";
 import { type Connect, isRunnableDevEnvironment } from "vite";
 import constants from "./constants.js";
 import { createRequestHandler, type NodeRequestHandler } from "./handler.js";
+import createNodeJobScheduler from "./services/create-node-job-scheduler.js";
 import type { NodeRuntimeAdapter } from "./types.js";
 
 const serverEntryId = "virtual:lucid/node-server";
@@ -63,12 +64,16 @@ const createMiddleware = (
 	};
 };
 
-/** Runs development and preview Lucid servers in Vite's process, building a Node server beside client output with project code bundled and packages loaded from `node_modules`. */
+/**
+ * Runs dev and preview servers in Vite, including preview scheduling. Builds a Node server with
+ * bundled project code and dependencies from `node_modules`.
+ */
 const nodeVite: RuntimeViteIntegration<NodeRuntimeAdapter> = {
 	listen: (adapter) => adapter.getOptions()?.server,
 	plugins: (project) => {
 		let devHandler: NodeRequestHandler | undefined;
 		let previewHandler: Promise<NodeRequestHandler> | undefined;
+		let previewScheduler: ReturnType<typeof createNodeJobScheduler> | undefined;
 
 		return [
 			{
@@ -162,13 +167,24 @@ const nodeVite: RuntimeViteIntegration<NodeRuntimeAdapter> = {
 						return previewHandler;
 					};
 
+					//* runs scheduled jobs as the built server does, starting Lucid on the first tick if no request has yet
+					if (project.config.role !== "content") {
+						previewScheduler = createNodeJobScheduler({
+							createInvocation: async () =>
+								(await getHandler()).createInvocation(),
+						});
+						previewScheduler.start();
+					}
+
 					// Runs after Vite serves the client output, so only other requests reach Lucid.
 					return () => {
 						server.middlewares.use(createMiddleware(getHandler));
 					};
 				},
-				// Closing waits for the host's cleanup, such as its queue, so commands can exit once it resolves.
+				// Closing waits for scheduled jobs in progress and the host's cleanup, such as its queue, so commands can exit once it resolves.
 				async closePreviewServer() {
+					await previewScheduler?.destroy();
+					previewScheduler = undefined;
 					const current = await previewHandler?.catch(() => undefined);
 					previewHandler = undefined;
 					await current?.destroy();

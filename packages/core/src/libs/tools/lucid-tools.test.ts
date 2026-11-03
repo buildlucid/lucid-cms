@@ -125,12 +125,15 @@ test("the system bundle holds the reads, and the system writes ask first", () =>
 		"jobs_find",
 		"jobs_get",
 		"jobs_list_schedules",
+		"deploys_get",
 		"settings_get",
 		"ai_usage_get",
 	]);
 	expect(agentTools.system().every((tool) => tool.readOnly)).toBe(true);
 	expect(agentTools.emails.resend().requiresConfirmation).toBe(true);
 	expect(agentTools.jobs.runSchedule().requiresConfirmation).toBe(true);
+	expect(agentTools.deploys.run().requiresConfirmation).toBe(true);
+	expect(agentTools.deploys.update().requiresConfirmation).toBe(true);
 });
 
 const allowsNull = (schema: unknown): boolean =>

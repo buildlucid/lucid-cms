@@ -71,6 +71,11 @@ export const memoryTools: ReadonlySet<string> = new Set([
 	"lucid_memory_save",
 	"lucid_memory_delete",
 ] satisfies AgentLucidToolName[]);
+/** Tools that trigger an immediate deploy status refresh. */
+export const deployTools: ReadonlySet<string> = new Set([
+	"deploys_run",
+	"deploys_update",
+]);
 /** Tools that change chat references without a references widget: previews show their media in a gallery instead, and removals show nothing. */
 export const referenceTools: ReadonlySet<string> = new Set([
 	"lucid_preview_media",

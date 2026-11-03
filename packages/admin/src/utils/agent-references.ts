@@ -8,6 +8,7 @@ import type {
 	Media,
 } from "@types";
 import T from "@/translations";
+import { getDeployHref } from "@/utils/deploys";
 import mediaUrl from "@/utils/media-url";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import { getTranslation } from "@/utils/translation-helpers";
@@ -28,6 +29,7 @@ export type AgentUpload = {
 export type AgentReferenceKind =
 	| "document"
 	| "request"
+	| "deploy"
 	| "image"
 	| "pdf"
 	| "audio"
@@ -44,6 +46,8 @@ export const agentReferenceKey = (reference: AgentReferenceInput) => {
 			return `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
 		case "request":
 			return `request:${reference.requestId}`;
+		case "deploy":
+			return `deploy:${reference.deployKey}`;
 	}
 };
 
@@ -65,6 +69,8 @@ export const agentReferenceInput = (
 			};
 		case "request":
 			return { type: "request", requestId: reference.requestId };
+		case "deploy":
+			return { type: "deploy", deployKey: reference.deployKey };
 	}
 };
 
@@ -76,6 +82,8 @@ const fallbackLabel = (reference: AgentReferenceInput) => {
 			return `${reference.collectionKey} #${reference.documentId}`;
 		case "request":
 			return `${T()("common.request")} #${reference.requestId}`;
+		case "deploy":
+			return reference.deployKey;
 	}
 };
 
@@ -267,21 +275,27 @@ export const agentReferenceTilt = (reference: AgentReferenceInput) => {
 	return tilts[Math.abs(hash) % tilts.length] ?? 0;
 };
 
-/** The page a linked document or request opens on. Media has no page of its own. */
+/** The page a linked document, request or deploy opens on. Media has no page of its own. */
 export const agentReferenceHref = (
 	reference: Exclude<AgentReferenceInput, { type: "media" }> & {
 		version?: DocumentVersionType;
 	},
-) =>
-	reference.type === "request"
-		? getRequestRoute({ requestId: reference.requestId })
-		: getDocumentRoute("edit", {
+) => {
+	switch (reference.type) {
+		case "request":
+			return getRequestRoute({ requestId: reference.requestId });
+		case "deploy":
+			return getDeployHref(reference.deployKey);
+		case "document":
+			return getDocumentRoute("edit", {
 				collectionKey: reference.collectionKey,
 				documentId: reference.documentId,
 				versionId: reference.versionId,
 				version:
 					reference.versionId === undefined ? undefined : reference.version,
 			});
+	}
+};
 
 /** Where a tool call's changes are reviewed: the request holding them, or else the document it changed. */
 export const agentChangesHref = (changes: AgentResource[]) => {

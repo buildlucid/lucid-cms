@@ -38,6 +38,7 @@ import type {
 	AgentToolSummary,
 } from "../types/response.js";
 import {
+	agentAttachableReferenceInputSchema,
 	agentReferenceInputSchema,
 	agentReferenceSchema,
 	agentReferenceSnapshotSchema,
@@ -714,7 +715,10 @@ export const controllerSchemas = {
 		body: z
 			.object({
 				text: z.string().trim().max(20_000),
-				references: z.array(agentReferenceInputSchema).max(50).default([]),
+				references: z
+					.array(agentAttachableReferenceInputSchema)
+					.max(50)
+					.default([]),
 				screen: agentScreenSchema.optional().meta({
 					description:
 						"The admin screen the message was sent from. The document builder answers the agent's builder tools.",

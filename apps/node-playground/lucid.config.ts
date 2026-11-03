@@ -34,8 +34,10 @@ import RoutePageCollection from "./src/collections/route-pages.js";
 import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
+import deploys from "./src/deploys/index.js";
 import transporter from "./src/email-transporter.js";
 import { deployFinishedNotification } from "./src/notifications/deploy-finished.js";
+import fakeCiRoute from "./src/routes/fake-ci.js";
 import searchMediaRoute from "./src/routes/search-media.js";
 import searchRoute from "./src/routes/search.js";
 import sendTestEmailRoute from "./src/routes/send-test-email.js";
@@ -174,8 +176,10 @@ export default defineConfig({
 		],
 		tables: [testOrganisationsTable],
 		notifications: [deployFinishedNotification],
+		deploys: [deploys.productionDeploy, deploys.stagingDeploy],
 		http: {
 			routes: [
+				fakeCiRoute,
 				searchMediaRoute,
 				searchRoute,
 				sendTestEmailRoute,

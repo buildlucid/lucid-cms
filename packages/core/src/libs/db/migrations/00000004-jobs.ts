@@ -1,4 +1,4 @@
-import type { Kysely } from "kysely";
+import { type Kysely, sql } from "kysely";
 import type DatabaseAdapter from "../adapter-base.js";
 import type { MigrationFn } from "../types.js";
 
@@ -206,6 +206,132 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.unique()
 				.on("lucid_job_schedule_overrides")
 				.column("schedule_key")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_deploy_triggers")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("deploy_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_deploy_triggers_deploy")
+				.on("lucid_deploy_triggers")
+				.columns(["deploy_key", "created_at"])
+				.execute();
+
+			await db.schema
+				.createTable("lucid_deploy_runs")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("deploy_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("status", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("source", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("trigger_count", adapter.getDataType("integer"), (col) =>
+					col.notNull().defaultTo(0),
+				)
+				.addColumn(
+					"started_by_user_id",
+					adapter.getDataType("integer"),
+					(col) => col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("agent_run_id", adapter.getDataType("text"))
+				.addColumn("external_id", adapter.getDataType("text"))
+				.addColumn("url", adapter.getDataType("text"))
+				.addColumn("message", adapter.getDataType("text"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						),
+				)
+				.addColumn("started_at", adapter.getDataType("timestamp"))
+				.addColumn("expires_at", adapter.getDataType("timestamp"))
+				.addColumn("finished_at", adapter.getDataType("timestamp"))
+				.execute();
+
+			await db.schema
+				.createIndex("idx_deploy_runs_deploy")
+				.on("lucid_deploy_runs")
+				.columns(["deploy_key", "created_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_deploy_runs_external")
+				.on("lucid_deploy_runs")
+				.columns(["deploy_key", "external_id"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_deploy_runs_queued")
+				.unique()
+				.on("lucid_deploy_runs")
+				.column("deploy_key")
+				.where(sql<boolean>`status = 'queued'`)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_deploy_runs_active")
+				.unique()
+				.on("lucid_deploy_runs")
+				.column("deploy_key")
+				.where(sql<boolean>`status in ('starting', 'running')`)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_deploy_runs_finished_retention")
+				.on("lucid_deploy_runs")
+				.column("finished_at")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_deploy_overrides")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("deploy_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("disabled_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addColumn(
+					"disabled_by_user_id",
+					adapter.getDataType("integer"),
+					(col) => col.references("lucid_users.id").onDelete("set null"),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_deploy_override_key")
+				.unique()
+				.on("lucid_deploy_overrides")
+				.column("deploy_key")
 				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},

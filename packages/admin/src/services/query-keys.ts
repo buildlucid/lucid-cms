@@ -186,6 +186,11 @@ export const queryKeys = {
 		scopes: () => ["lucid", "integrations", "scopes"] as const,
 		detail: () => ["lucid", "integrations", "detail"] as const,
 	},
+	deploys: {
+		all: () => ["lucid", "deploys"] as const,
+		list: () => ["lucid", "deploys", "list"] as const,
+		runs: () => ["lucid", "deploys", "runs"] as const,
+	},
 	jobs: {
 		all: () => ["lucid", "jobs"] as const,
 		list: () => ["lucid", "jobs", "list"] as const,

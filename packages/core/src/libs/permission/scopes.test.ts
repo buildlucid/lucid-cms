@@ -22,6 +22,7 @@ describe("external scopes", () => {
 					collections: [],
 					access: [],
 					ai: aiConfig(false),
+					deploys: [],
 				},
 				{ principalType: "user" },
 			),
@@ -32,6 +33,7 @@ describe("external scopes", () => {
 					collections: [],
 					access: [],
 					ai: aiConfig(false),
+					deploys: [],
 				},
 				{ principalType: "system" },
 			),
@@ -41,6 +43,7 @@ describe("external scopes", () => {
 				collections: [],
 				access: [],
 				ai: aiConfig(false),
+				deploys: [],
 			}),
 		).toContain(ExternalScopes.AccountRead);
 	});
@@ -52,6 +55,7 @@ describe("external scopes", () => {
 					collections: [],
 					access: [],
 					ai: aiConfig(false),
+					deploys: [],
 				},
 				[ExternalScopes.AccountRead],
 				{
@@ -65,6 +69,7 @@ describe("external scopes", () => {
 					collections: [],
 					access: [],
 					ai: aiConfig(false),
+					deploys: [],
 				},
 				[ExternalScopes.AccountRead],
 				{
@@ -80,6 +85,7 @@ describe("external scopes", () => {
 				collections: [],
 				access: [],
 				ai: aiConfig(true),
+				deploys: [],
 			}),
 		).toContain(ExternalScopes.McpAccess);
 		expect(
@@ -87,6 +93,7 @@ describe("external scopes", () => {
 				collections: [],
 				access: [],
 				ai: aiConfig(false),
+				deploys: [],
 			}),
 		).not.toContain(ExternalScopes.McpAccess);
 	});

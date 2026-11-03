@@ -104,6 +104,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	jobs: {
 		definitions: [],
 	},
+	deploys: [],
 	notifications: {
 		definitions: [],
 	},
@@ -128,6 +129,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		completedJobs: 7,
 		failedJobs: 30,
 		notifications: 90,
+		deployRuns: 90,
 	} satisfies ResolvedLucidConfig["retention"],
 };
 

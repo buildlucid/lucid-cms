@@ -14,6 +14,8 @@ import type {
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { isCollectionBuilder } from "../collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
+import { isDeployDefinition } from "../deploys/registry.js";
+import type { DeployDefinition } from "../deploys/types.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
 import type { HttpExtension, HttpExtensionRegister } from "../http/types.js";
 import { isJobDefinition } from "../jobs/registry.js";
@@ -562,6 +564,11 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			definitions: z.array(JobDefinitionSchema),
 		}),
 	),
+	deploys: z.array(
+		z.custom<DeployDefinition>(isDeployDefinition, {
+			message: "Expected a deploy created with defineDeploy",
+		}),
+	),
 	notifications: z.preprocess(
 		definitionsShorthand,
 		z.strictObject({
@@ -595,6 +602,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		completedJobs: z.number().int().nonnegative(),
 		failedJobs: z.number().int().nonnegative(),
 		notifications: z.number().int().nonnegative(),
+		deployRuns: z.number().int().nonnegative(),
 	}),
 	brand: z.strictObject({
 		name: z.string(),

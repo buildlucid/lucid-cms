@@ -5,6 +5,7 @@ import {
 	createMemo,
 	createSignal,
 	For,
+	type JSXElement,
 	Match,
 	Show,
 	Switch,
@@ -12,6 +13,7 @@ import {
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import AgentReferenceRow from "@/components/AgentReferenceRow/AgentReferenceRow";
 import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
+import DeployReferenceStatus from "@/components/DeployReferenceStatus/DeployReferenceStatus";
 import Skeleton from "@/components/Skeleton/Skeleton";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
@@ -23,7 +25,7 @@ const mediaColumns = 4;
 const shownMedia = mediaColumns * 2;
 const shownRows = 4;
 
-/** Lists a chat's linked media, documents and requests. */
+/** Lists a chat's linked media, documents, requests and deploys. */
 const AgentChatReferences: Component<{
 	conversationId: string;
 	agentKey: string;
@@ -107,10 +109,18 @@ const AgentChatReferences: Component<{
 			conversationId: props.conversationId,
 			referenceId: reference.id,
 		});
-	const rowDetails = (reference: Exclude<AgentReference, { type: "media" }>) =>
-		(reference.type === "request"
-			? [T()("common.request"), sourceLabel(reference)]
-			: [
+	const rowDetails = (
+		reference: Exclude<AgentReference, { type: "media" }>,
+	): JSXElement => {
+		switch (reference.type) {
+			case "deploy":
+				return (
+					<DeployReferenceStatus deployKey={reference.deployKey} part="runs" />
+				);
+			case "request":
+				return [T()("common.request"), sourceLabel(reference)].join(" · ");
+			case "document":
+				return [
 					collectionNames().get(reference.collectionKey) ??
 						reference.collectionKey,
 					reference.versionId === undefined
@@ -118,9 +128,10 @@ const AgentChatReferences: Component<{
 						: T()("agent.references.pinned"),
 					sourceLabel(reference),
 				]
-		)
-			.filter(Boolean)
-			.join(" · ");
+					.filter(Boolean)
+					.join(" · ");
+		}
+	};
 
 	// ----------------------------------------
 	// Render
@@ -217,7 +228,7 @@ const AgentChatReferences: Component<{
 									<AgentReferenceRow
 										reference={reference}
 										details={rowDetails(reference)}
-										class="-mx-1.5 w-[calc(100%+0.75rem)] pe-8"
+										class="-mx-1.5 pe-8"
 										end={
 											<Show
 												when={!reference.managed}

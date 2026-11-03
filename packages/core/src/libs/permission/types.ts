@@ -2,6 +2,7 @@ import type { ResolvedAdminCopy } from "../i18n/types.js";
 import type { agentPermissionActions } from "./agent-permissions.js";
 import type { collectionPermissionActions } from "./collection-permissions.js";
 import type { PermissionGroups, Permissions } from "./definitions.js";
+import type { deployPermissionActions } from "./deploy-permissions.js";
 import type { fieldPermissionActions } from "./field-permissions.js";
 
 export type StaticPermission = (typeof Permissions)[keyof typeof Permissions];
@@ -19,6 +20,13 @@ export type AgentPermission<
 	TAction extends AgentPermissionAction = AgentPermissionAction,
 > = `agents:${string}:${TAction}`;
 
+export type DeployPermissionAction = (typeof deployPermissionActions)[number];
+
+/** A permission Lucid generates for each configured deploy, eg. `deploys:production:run`. */
+export type DeployPermission<
+	TAction extends DeployPermissionAction = DeployPermissionAction,
+> = `deploys:${string}:${TAction}`;
+
 export type FieldPermissionAction = (typeof fieldPermissionActions)[number];
 
 /** A permission Lucid generates for a field or brick that opts in, eg. `documents:page:fields:seo:read` or `documents:page:bricks:banner:update`. */
@@ -32,7 +40,8 @@ export type CorePermission =
 	| StaticPermission
 	| CollectionPermission
 	| FieldPermission
-	| AgentPermission;
+	| AgentPermission
+	| DeployPermission;
 
 /** Project permissions added by Lucid type generation or a plugin. */
 // oxlint-disable-next-line typescript/no-empty-object-type -- generated types and plugins augment this interface

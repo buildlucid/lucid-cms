@@ -5,4 +5,6 @@ export type AdminClientConfig = {
 	};
 	/** Whether Home can open on the agent's chat box. */
 	readonly agentHomescreen: boolean;
+	/** Configured deploy keys for permission checks. Empty hides deploy controls. */
+	readonly deploys: readonly string[];
 };

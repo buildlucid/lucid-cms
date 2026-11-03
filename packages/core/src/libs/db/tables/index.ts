@@ -1,6 +1,7 @@
 import { agentAttributionsTable } from "./agent-attributions.js";
 import { agentCompactionsTable } from "./agent-compactions.js";
 import { agentConversationsTable } from "./agent-conversations.js";
+import { agentDeployReferencesTable } from "./agent-deploy-references.js";
 import { agentDocumentReferencesTable } from "./agent-document-references.js";
 import { agentInputsTable } from "./agent-inputs.js";
 import { agentMediaReferencesTable } from "./agent-media-references.js";
@@ -16,6 +17,9 @@ import { aiGenerationsTable } from "./ai-generations.js";
 import { authStatesTable } from "./auth-states.js";
 import { collectionMigrationsTable } from "./collection-migrations.js";
 import { collectionsTable } from "./collections.js";
+import { deployOverridesTable } from "./deploy-overrides.js";
+import { deployRunsTable } from "./deploy-runs.js";
+import { deployTriggersTable } from "./deploy-triggers.js";
 import { documentBricksTable } from "./document-bricks.js";
 import { documentHoldsTable } from "./document-holds.js";
 import { documentIdentitiesTable } from "./document-identities.js";
@@ -79,6 +83,7 @@ import { usersTable } from "./users.js";
 export * from "./agent-attributions.js";
 export * from "./agent-compactions.js";
 export * from "./agent-conversations.js";
+export * from "./agent-deploy-references.js";
 export * from "./agent-document-references.js";
 export * from "./agent-inputs.js";
 export * from "./agent-media-references.js";
@@ -104,6 +109,9 @@ export * from "./document-versions.js";
 export * from "./document-workflow-assignees.js";
 export * from "./document-workflows.js";
 export * from "./documents.js";
+export * from "./deploy-overrides.js";
+export * from "./deploy-runs.js";
+export * from "./deploy-triggers.js";
 export * from "./email-attachments.js";
 export * from "./email-change-requests.js";
 export * from "./email-transactions.js";
@@ -160,6 +168,7 @@ export const coreTableDefinitions = [
 	agentMediaReferencesTable,
 	agentDocumentReferencesTable,
 	agentRequestReferencesTable,
+	agentDeployReferencesTable,
 	agentAttributionsTable,
 	agentCompactionsTable,
 	agentInputsTable,
@@ -196,6 +205,9 @@ export const coreTableDefinitions = [
 	integrationsTable,
 	jobSchedulerTable,
 	jobScheduleOverridesTable,
+	deployTriggersTable,
+	deployRunsTable,
+	deployOverridesTable,
 	localesTable,
 	lucidRemoteConnectionsTable,
 	mediaTable,

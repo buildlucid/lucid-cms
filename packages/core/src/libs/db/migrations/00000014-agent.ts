@@ -320,6 +320,50 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.column("request_id")
 			.execute();
 
+		//* deploys live in config, so the key isn't a foreign key
+		await db.schema
+			.createTable("lucid_agent_deploy_references")
+			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col
+					.notNull()
+					.references("lucid_agent_conversations.id")
+					.onDelete("cascade"),
+			)
+			.addColumn("deploy_key", adapter.getDataType("text"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("source", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("tool_name", adapter.getDataType("text"))
+			.addColumn("managed", adapter.getDataType("boolean"), (col) =>
+				col
+					.notNull()
+					.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.getDefault("boolean", "false"),
+						),
+					),
+			)
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col
+					.notNull()
+					.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("uniq_lucid_agent_deploy_references_deploy")
+			.on("lucid_agent_deploy_references")
+			.columns(["conversation_id", "deploy_key"])
+			.unique()
+			.execute();
+
 		await db.schema
 			.createTable("lucid_agent_document_references")
 			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())

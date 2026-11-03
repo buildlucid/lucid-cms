@@ -31,14 +31,23 @@ const checkInput: ServiceFn<
 	if (access.error) return access;
 
 	for (const reference of input.references) {
-		const attachable =
-			reference.type === "media"
-				? agent?.features.media.attach ||
-					(access.data.ownership.get(reference.mediaId)?.type === "user" &&
-						agent?.features.media.upload)
-				: reference.type === "document"
-					? agent?.features.documents.attach
-					: agent?.features.requests.attach;
+		const attachable = (() => {
+			switch (reference.type) {
+				case "media":
+					return (
+						agent?.features.media.attach ||
+						(access.data.ownership.get(reference.mediaId)?.type === "user" &&
+							agent?.features.media.upload)
+					);
+				case "document":
+					return agent?.features.documents.attach;
+				case "request":
+					return agent?.features.requests.attach;
+				//* only the tool that runs a deploy links it
+				case "deploy":
+					return false;
+			}
+		})();
 
 		const detail = details.data.get(referenceKey(reference));
 

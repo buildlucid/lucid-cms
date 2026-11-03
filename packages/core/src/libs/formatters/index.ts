@@ -1,6 +1,7 @@
 export { default as agentFormatter } from "./agent.js";
 export { default as aiUsageFormatter } from "./ai-usage.js";
 export { default as collectionsFormatter } from "./collections.js";
+export { default as deploysFormatter } from "./deploys.js";
 export { default as diagnosticsFormatter } from "./diagnostics.js";
 export { default as documentBricksFormatter } from "./document-bricks.js";
 export { default as documentVersionsFormatter } from "./document-versions.js";

@@ -63,5 +63,19 @@ export const getCollectionPermission = <
 ): DocumentPermission<TAction> => `documents:${collectionKey}:${action}`;
 export type AgentPermission =
 	`agents:${string}:${"chat" | "manage-own-routines" | "manage-code-routines"}`;
+export type DeployPermissionAction = "read" | "run" | "manage";
+export type DeployPermission<
+	TAction extends DeployPermissionAction = DeployPermissionAction,
+> = `deploys:${string}:${TAction}`;
 
-export type Permission = CorePermission | DocumentPermission | AgentPermission;
+/** Builds a deploy permission key, eg. `deploys:production:run`, as core's `getDeployPermission` does. */
+export const getDeployPermission = <TAction extends DeployPermissionAction>(
+	deployKey: string,
+	action: TAction,
+): DeployPermission<TAction> => `deploys:${deployKey}:${action}`;
+
+export type Permission =
+	| CorePermission
+	| DocumentPermission
+	| AgentPermission
+	| DeployPermission;

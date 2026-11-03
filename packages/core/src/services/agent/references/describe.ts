@@ -2,6 +2,7 @@ import { referenceKey } from "../../../libs/agent/references.js";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
+import { getDeploy } from "../../../libs/deploys/registry.js";
 import formatter from "../../../libs/formatters/helpers.js";
 import {
 	DocumentBricksRepository,
@@ -177,6 +178,16 @@ const describe: ServiceFn<
 	for (const request of requests?.data ?? []) {
 		details.set(referenceKey({ type: "request", requestId: request.id }), {
 			label: request.title,
+		});
+	}
+
+	//* deploys live in config, so one removed from it reads as missing
+	for (const reference of input.references) {
+		if (reference.type !== "deploy") continue;
+		const deploy = getDeploy(context.config, reference.deployKey);
+		if (!deploy) continue;
+		details.set(referenceKey(reference), {
+			label: context.translate(deploy.name),
 		});
 	}
 

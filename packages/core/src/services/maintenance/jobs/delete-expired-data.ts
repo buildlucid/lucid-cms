@@ -3,6 +3,7 @@ import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
 import clearExpiredAuthStates from "../tasks/clear-expired-auth-states.js";
 import clearExpiredCollections from "../tasks/clear-expired-collections.js";
+import clearExpiredDeployRuns from "../tasks/clear-expired-deploy-runs.js";
 import clearExpiredJobs from "../tasks/clear-expired-jobs.js";
 import clearExpiredLocales from "../tasks/clear-expired-locales.js";
 import clearExpiredOAuthData from "../tasks/clear-expired-oauth-data.js";
@@ -20,6 +21,7 @@ import deleteExpiredUnsyncedMedia from "../tasks/delete-expired-unsynced-media.j
 const tasks = [
 	clearExpiredLocales,
 	clearExpiredJobs,
+	clearExpiredDeployRuns,
 	clearExpiredCollections,
 	clearExpiredPreviewSessions,
 	clearExpiredTokens,

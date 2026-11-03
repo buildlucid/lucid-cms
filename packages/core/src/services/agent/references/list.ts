@@ -1,4 +1,5 @@
 import {
+	AgentDeployReferencesRepository,
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
 	AgentRequestReferencesRepository,
@@ -38,8 +39,9 @@ const list: ServiceFn<
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
 	const Requests = new AgentRequestReferencesRepository(context.db);
+	const Deploys = new AgentDeployReferencesRepository(context.db);
 
-	const [media, documents, requests] = await Promise.all([
+	const [media, documents, requests, deploys] = await Promise.all([
 		Media.selectMultiple({
 			select: ["id", "media_id", "source", "tool_name", "managed"],
 			where: [
@@ -81,10 +83,22 @@ const list: ServiceFn<
 			],
 			validation: { enabled: true },
 		}),
+		Deploys.selectMultiple({
+			select: ["id", "deploy_key", "source", "tool_name", "managed"],
+			where: [
+				{ key: "conversation_id", operator: "=", value: input.conversationId },
+			],
+			orderBy: [
+				{ column: "created_at", direction: "asc" },
+				{ column: "id", direction: "asc" },
+			],
+			validation: { enabled: true },
+		}),
 	]);
 	if (media.error) return media;
 	if (documents.error) return documents;
 	if (requests.error) return requests;
+	if (deploys.error) return deploys;
 
 	const links: AgentReferenceLink[] = [
 		...media.data.map((row) => ({
@@ -107,6 +121,13 @@ const list: ServiceFn<
 			id: row.id,
 			type: "request" as const,
 			requestId: row.request_id,
+			source: linkSource(row),
+			managed: Boolean(row.managed),
+		})),
+		...deploys.data.map((row) => ({
+			id: row.id,
+			type: "deploy" as const,
+			deployKey: row.deploy_key,
 			source: linkSource(row),
 			managed: Boolean(row.managed),
 		})),

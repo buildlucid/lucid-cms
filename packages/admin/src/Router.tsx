@@ -19,6 +19,7 @@ import { messagesQueryOptions } from "@/services/api/agent/useGetMessages";
 import { requestQueryOptions } from "@/services/api/requests/useGetSingle";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
+import { getDeploysViewRequirement } from "@/utils/deploys";
 import lazyPage from "@/utils/lazy-page";
 import PermissionSomeGuard from "./guards/PermissionSomeGuard/PermissionSomeGuard";
 
@@ -99,6 +100,9 @@ const SystemAiUsageRoute = lazyPage(
 );
 const SystemIntegrationsRoute = lazyPage(
 	() => import("@/containers/SystemIntegrationsPage/SystemIntegrationsPage"),
+);
+const SystemDeploysRoute = lazyPage(
+	() => import("@/containers/SystemDeploysPage/SystemDeploysPage"),
 );
 const SystemJobsRoute = lazyPage(
 	() => import("@/containers/SystemJobsPage/SystemJobsPage"),
@@ -413,6 +417,15 @@ const AppRouter: Component = () => {
 						component={() => (
 							<PermissionGuard permission={Permissions.SettingsRead}>
 								<SystemNotificationsRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/system/deploys"
+						preload={preloadRoutes(SystemDeploysRoute)}
+						component={() => (
+							<PermissionGuard permission={getDeploysViewRequirement()}>
+								<SystemDeploysRoute />
 							</PermissionGuard>
 						)}
 					/>

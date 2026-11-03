@@ -1,5 +1,6 @@
 import { referenceKey } from "../../../libs/agent/references.js";
 import {
+	AgentDeployReferencesRepository,
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
 	AgentRequestReferencesRepository,
@@ -73,13 +74,17 @@ const register: ServiceFn<
 	const requestIds = snapshots.flatMap((reference) =>
 		reference.type === "request" ? [reference.requestId] : [],
 	);
+	const deployKeys = snapshots.flatMap((reference) =>
+		reference.type === "deploy" ? [reference.deployKey] : [],
+	);
 	const toolName =
 		input.source.type === "tool" ? input.source.toolName : undefined;
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
 	const Requests = new AgentRequestReferencesRepository(context.db);
+	const Deploys = new AgentDeployReferencesRepository(context.db);
 
-	const [media, documentLinks, requestLinks] = await Promise.all([
+	const [media, documentLinks, requestLinks, deployLinks] = await Promise.all([
 		mediaIds.length
 			? Media.register({
 					conversationId: input.conversationId,
@@ -107,10 +112,20 @@ const register: ServiceFn<
 					managed: input.managed,
 				})
 			: undefined,
+		deployKeys.length
+			? Deploys.register({
+					conversationId: input.conversationId,
+					deployKeys,
+					source: input.source.type,
+					toolName,
+					managed: input.managed,
+				})
+			: undefined,
 	]);
 	if (media?.error) return media;
 	if (documentLinks?.error) return documentLinks;
 	if (requestLinks?.error) return requestLinks;
+	if (deployLinks?.error) return deployLinks;
 
 	return { error: undefined, data: snapshots };
 };

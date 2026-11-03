@@ -6,6 +6,7 @@ import {
 	TbOutlineGitPullRequest,
 	TbOutlineMovie,
 	TbOutlinePhoto,
+	TbOutlineRocket,
 } from "solid-icons/tb";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import Image from "@/components/Image/Image";
@@ -32,7 +33,9 @@ const AgentReferenceThumb: Component<{
 				<span
 					class={classnames(
 						"flex h-full w-full items-center justify-center bg-input",
-						kind() === "request" ? "text-muted" : "text-subtitle",
+						kind() === "request" || kind() === "deploy"
+							? "text-muted"
+							: "text-subtitle",
 					)}
 				>
 					<Switch fallback={<TbOutlineFile size={size()} />}>
@@ -50,6 +53,9 @@ const AgentReferenceThumb: Component<{
 						</Match>
 						<Match when={kind() === "request"}>
 							<TbOutlineGitPullRequest size={size()} />
+						</Match>
+						<Match when={kind() === "deploy"}>
+							<TbOutlineRocket size={size()} />
 						</Match>
 					</Switch>
 				</span>

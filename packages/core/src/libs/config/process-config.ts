@@ -1,4 +1,9 @@
 import { produce } from "immer";
+import { createRunScheduledDeployJob } from "../../services/deploys/jobs/run-scheduled.js";
+import { startDeployRunJob } from "../../services/deploys/jobs/start-run.js";
+import { deploysTickJob } from "../../services/deploys/jobs/tick.js";
+import { deployFailedNotification } from "../../services/deploys/notifications/deploy-failed.js";
+import { deploySucceededNotification } from "../../services/deploys/notifications/deploy-succeeded.js";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
 import BrickConfigSchema from "../collection/builders/brick-builder/schema.js";
@@ -6,6 +11,7 @@ import CollectionConfigSchema from "../collection/builders/collection-builder/sc
 import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
+import createDeployTriggerHooks from "../deploys/trigger-hooks.js";
 import { getJobRegistry } from "../jobs/registry.js";
 import { initializeLogger } from "../logger/index.js";
 import type { LoggerOverride } from "../logger/types.js";
@@ -19,6 +25,7 @@ import checkCollectionEnvironmentVersionMap from "./checks/check-collection-envi
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
 import checkCollectionRouting from "./checks/check-collection-routing.js";
 import checkContentRoutes from "./checks/check-content-routes.js";
+import checkDeploys from "./checks/check-deploys.js";
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkFieldConditions from "./checks/check-field-conditions.js";
@@ -76,9 +83,20 @@ const processConfig = async (
 		resolvedDb: options.resolvedDb,
 	});
 
-	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
+	const hasDeploys = configRes.deploys.length > 0;
+	const jobDefinitions = [
+		...coreJobDefinitions,
+		...(hasDeploys ? [deploysTickJob, startDeployRunJob] : []),
+		...(configRes.deploys.some((deploy) => deploy.schedule)
+			? [createRunScheduledDeployJob(configRes.deploys)]
+			: []),
+		...configRes.jobs.definitions,
+	];
 	const notificationDefinitions = [
 		...coreNotificationDefinitions,
+		...(hasDeploys
+			? [deployFailedNotification, deploySucceededNotification]
+			: []),
 		...configRes.notifications.definitions,
 	];
 	const transferDefinitions = [
@@ -108,6 +126,7 @@ const processConfig = async (
 			definitions: notificationDefinitions,
 		},
 		transfers: transferDefinitions,
+		hooks: [...configRes.hooks, ...createDeployTriggerHooks(configRes.deploys)],
 	};
 
 	if (!options?.skipValidation) {
@@ -117,6 +136,7 @@ const processConfig = async (
 		checkAdminSlots(configRes);
 		checkAdminRoutes(configRes);
 		checkCaptcha(configRes);
+		checkDeploys(configRes);
 		checkMagicLink(configRes);
 		checkTwoFactor(configRes);
 

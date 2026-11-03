@@ -207,6 +207,16 @@ export type {
 	CaptchaVerifyParams,
 } from "../libs/captcha/types.js";
 export type {
+	DefineDeployOptions,
+	DeployDefinition,
+	DeployProviderInstance,
+	DeployProviderRun,
+	DeployProviderUpdate,
+	DeployTrigger,
+	DeployTriggerResult,
+} from "../libs/deploys/types.js";
+export type { DeployWebhookOptions } from "../libs/deploys/providers/webhook.js";
+export type {
 	EmailStorageConfig,
 	EmailStorageEncryptRule,
 	EmailStorageNeverStoreRule,
@@ -455,6 +465,8 @@ export type {
 	CollectionPermissionAction,
 	CorePermission,
 	CustomPermissions,
+	DeployPermission,
+	DeployPermissionAction,
 	FieldPermission,
 	FieldPermissionAction,
 	FieldPermissions,
@@ -566,6 +578,10 @@ export type {
 	ToolkitContext,
 	ToolkitDefinition,
 	ToolkitDefinitionInput,
+	ToolkitDeploys,
+	ToolkitDeploysGetSingleInput,
+	ToolkitDeploysQueueInput,
+	ToolkitDeploysRunInput,
 	ToolkitDocuments,
 	ToolkitDocumentsCreateSingleInput,
 	ToolkitDocumentsDeleteMultipleInput,

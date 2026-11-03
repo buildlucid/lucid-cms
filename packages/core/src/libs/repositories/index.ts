@@ -1,6 +1,7 @@
 export { default as AgentAttributionsRepository } from "./agent-attributions.js";
 export { default as AgentCompactionsRepository } from "./agent-compactions.js";
 export { default as AgentConversationsRepository } from "./agent-conversations.js";
+export { default as AgentDeployReferencesRepository } from "./agent-deploy-references.js";
 export { default as AgentDocumentReferencesRepository } from "./agent-document-references.js";
 export { default as AgentInputsRepository } from "./agent-inputs.js";
 export { default as AgentMediaReferencesRepository } from "./agent-media-references.js";
@@ -16,6 +17,9 @@ export { default as AiGenerationsRepository } from "./ai-generations.js";
 export { default as AuthStatesRepository } from "./auth-states.js";
 export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
 export { default as CollectionsRepository } from "./collections.js";
+export { default as DeployOverridesRepository } from "./deploy-overrides.js";
+export { default as DeployRunsRepository } from "./deploy-runs.js";
+export { default as DeployTriggersRepository } from "./deploy-triggers.js";
 export { default as DocumentBricksRepository } from "./document-bricks.js";
 export { default as DocumentHoldsRepository } from "./document-holds.js";
 export { default as DocumentIdentitiesRepository } from "./document-identities.js";

@@ -44,6 +44,7 @@ import {
 	isScreenCallData,
 	memoryTools,
 	referencesWidget,
+	deployTools,
 	referenceTools,
 	screenWidget,
 	webReadTool,
@@ -179,6 +180,9 @@ export const useAgentChat = (
 			void queryClient.invalidateQueries({
 				queryKey: queryKeys.agent.memories(),
 			});
+		}
+		if (deployTools.has(tool.name)) {
+			void queryClient.invalidateQueries({ queryKey: queryKeys.deploys.all() });
 		}
 		refreshAgentChanges(queryClient, tool.changes);
 		if (tool.changes.length > 0) options.onChanges?.(tool.changes);

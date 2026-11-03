@@ -1,3 +1,4 @@
+import { A } from "@solidjs/router";
 import type { AgentConversation } from "@types";
 import classnames from "classnames";
 import {
@@ -13,7 +14,10 @@ import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 
-/** Keeps the chat title and actions visible above scrolling messages, with the agent name omitted in the panel. */
+/**
+ * Keeps chat actions visible while scrolling. Panel mode omits the agent name and links the title
+ * to the full chat.
+ */
 const AgentChatHeader: Component<{
 	conversation?: AgentConversation;
 	/** Shown when there is no chat to load, eg. before a new one starts. Otherwise a missing chat shows as loading. */
@@ -103,12 +107,24 @@ const AgentChatHeader: Component<{
 								{T()("agent.routine.run")}
 							</Pill>
 						</Show>
-						<Dynamic
-							component={props.variant === "panel" ? "h2" : "h1"}
-							class="min-w-0 truncate text-sm font-medium text-title"
+						<Show
+							when={props.variant === "panel"}
+							fallback={
+								<h1 class="min-w-0 truncate text-sm font-medium text-title">
+									{displayTitle()}
+								</h1>
+							}
 						>
-							{displayTitle()}
-						</Dynamic>
+							<h2 class="min-w-0 truncate text-sm font-medium text-title">
+								<A
+									href={`/admin/agent/chats/${conversation().id}`}
+									title={T()("agent.panel.expand")}
+									class="rounded-sm text-sm font-medium text-title transition-colors hover:text-primary-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								>
+									{displayTitle()}
+								</A>
+							</h2>
+						</Show>
 					</div>
 				)}
 			</Show>

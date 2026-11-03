@@ -7,6 +7,7 @@ import type {
 	LucidAgentAttributions,
 	LucidAgentCompactions,
 	LucidAgentConversations,
+	LucidAgentDeployReferences,
 	LucidAgentDocumentReferences,
 	LucidAgentInputs,
 	LucidAgentMediaReferences,
@@ -32,6 +33,9 @@ import type {
 	LucidDocumentVersionIdentities,
 	LucidDocumentWorkflowAssignees,
 	LucidDocumentWorkflows,
+	LucidDeployOverrides,
+	LucidDeployRuns,
+	LucidDeployTriggers,
 	LucidEmailAttachments,
 	LucidEmailChangeRequests,
 	LucidEmails,
@@ -360,10 +364,14 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_jobs: LucidJobs;
 	lucid_job_scheduler: LucidJobScheduler;
 	lucid_job_schedule_overrides: LucidJobScheduleOverrides;
+	lucid_deploy_triggers: LucidDeployTriggers;
+	lucid_deploy_runs: LucidDeployRuns;
+	lucid_deploy_overrides: LucidDeployOverrides;
 	lucid_ai_generations: LucidAiGenerations;
 	lucid_agent_media_references: LucidAgentMediaReferences;
 	lucid_agent_document_references: LucidAgentDocumentReferences;
 	lucid_agent_request_references: LucidAgentRequestReferences;
+	lucid_agent_deploy_references: LucidAgentDeployReferences;
 	lucid_agent_conversations: LucidAgentConversations;
 	lucid_agent_compactions: LucidAgentCompactions;
 	lucid_agent_inputs: LucidAgentInputs;

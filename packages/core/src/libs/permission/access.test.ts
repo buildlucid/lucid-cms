@@ -56,6 +56,7 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 		agents: { enabled: true, definitions: [] },
 		mcp: { enabled: false, tools: [], skills: [] },
 	},
+	deploys: [],
 });
 
 test("role grants put content and agents before administration and destructive actions last", () => {

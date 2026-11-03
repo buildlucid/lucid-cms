@@ -1,4 +1,5 @@
 import {
+	AgentDeployReferencesRepository,
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
 	AgentRequestReferencesRepository,
@@ -23,11 +24,15 @@ const unlink: ServiceFn<
 	const requestIds = input.references.flatMap((reference) =>
 		reference.type === "request" ? [reference.requestId] : [],
 	);
+	const deployKeys = input.references.flatMap((reference) =>
+		reference.type === "deploy" ? [reference.deployKey] : [],
+	);
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
 	const Requests = new AgentRequestReferencesRepository(context.db);
+	const Deploys = new AgentDeployReferencesRepository(context.db);
 
-	const [media, documentLinks, requestLinks] = await Promise.all([
+	const [media, documentLinks, requestLinks, deployLinks] = await Promise.all([
 		mediaIds.length
 			? Media.deleteMultiple({
 					where: [
@@ -55,10 +60,23 @@ const unlink: ServiceFn<
 					],
 				})
 			: undefined,
+		deployKeys.length
+			? Deploys.deleteMultiple({
+					where: [
+						{
+							key: "conversation_id",
+							operator: "=",
+							value: input.conversationId,
+						},
+						{ key: "deploy_key", operator: "in", value: deployKeys },
+					],
+				})
+			: undefined,
 	]);
 	if (media?.error) return media;
 	if (documentLinks?.error) return documentLinks;
 	if (requestLinks?.error) return requestLinks;
+	if (deployLinks?.error) return deployLinks;
 
 	return { error: undefined, data: undefined };
 };

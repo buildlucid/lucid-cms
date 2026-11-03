@@ -2,6 +2,7 @@ import createAgentToolkit from "./agent/index.js";
 import createAuthToolkit from "./auth/index.js";
 import createCaptchaToolkit from "./captcha/index.js";
 import createCollectionsToolkit from "./collections/index.js";
+import createDeploysToolkit from "./deploys/index.js";
 import createDocumentsToolkit from "./documents/index.js";
 import createEmailToolkit from "./email/index.js";
 import createJobsToolkit from "./jobs/index.js";
@@ -38,6 +39,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 		auth: createAuthToolkit(context),
 		captcha: createCaptchaToolkit(context),
 		collections: createCollectionsToolkit(context),
+		deploys: createDeploysToolkit(context),
 		documents: createDocumentsToolkit(context),
 		email: createEmailToolkit(context),
 		jobs: createJobsToolkit(context),

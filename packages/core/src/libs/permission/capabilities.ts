@@ -7,6 +7,7 @@ import type FieldBuilder from "../collection/builders/field-builder/index.js";
 import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import keyToTitle from "../collection/custom-fields/utils/key-to-title.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
+import type { DeployDefinition } from "../deploys/types.js";
 import { copy, normalizeCopy, translate } from "../i18n/index.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import type { AccessPermission } from "./access-config.js";
@@ -19,6 +20,10 @@ import {
 	getCollectionPermission,
 } from "./collection-permissions.js";
 import { PermissionGroups, Permissions } from "./definitions.js";
+import {
+	deployPermissionActions,
+	getDeployPermission,
+} from "./deploy-permissions.js";
 import {
 	type ExternalPrincipalType,
 	type ExternalScope,
@@ -33,6 +38,7 @@ import {
 import type {
 	AgentPermissionAction,
 	CollectionPermissionAction,
+	DeployPermissionAction,
 	FieldPermissionAction,
 	FieldPermissions,
 	PermissionDetails,
@@ -402,6 +408,55 @@ const mcpCapabilityGroup: CapabilityGroup = {
 	],
 };
 
+const deployPermissionDetails = {
+	read: {
+		name: copy("admin:core.permissions.deploys.read", {
+			defaultMessage: "View",
+		}),
+		description: copy("admin:core.permissions.deploys.read.description", {
+			defaultMessage: "See the deploy, its status and its runs.",
+		}),
+	},
+	run: {
+		name: copy("admin:core.permissions.deploys.run", {
+			defaultMessage: "Run",
+		}),
+		description: copy("admin:core.permissions.deploys.run.description", {
+			defaultMessage: "Start the deploy from the admin.",
+		}),
+	},
+	manage: {
+		name: copy("admin:core.permissions.deploys.manage", {
+			defaultMessage: "Manage",
+		}),
+		description: copy("admin:core.permissions.deploys.manage.description", {
+			defaultMessage: "Turn the deploy on and off, and cancel its runs.",
+		}),
+	},
+} satisfies Record<DeployPermissionAction, PermissionDetails>;
+
+/** A group for each deploy, so roles can run one deploy, such as staging, without another. */
+const getDeployCapabilityGroups = (
+	deploys: readonly DeployDefinition[],
+): CapabilityGroup[] =>
+	deploys.map((deploy) => ({
+		key: `deploys:${deploy.key}`,
+		details: { name: deploy.name },
+		core: true,
+		capabilities: deployPermissionActions.map(
+			(action): CapabilityDefinition => {
+				const permission = getDeployPermission(deploy.key, action);
+
+				return {
+					key: permission,
+					details: deployPermissionDetails[action],
+					core: true,
+					permission,
+				};
+			},
+		),
+	}));
+
 const accountCapabilityGroup: CapabilityGroup = {
 	key: "account",
 	details: {
@@ -438,7 +493,7 @@ const accountCapabilityGroup: CapabilityGroup = {
 
 export type AccessConfig = Pick<
 	ResolvedLucidConfig,
-	"collections" | "access" | "ai"
+	"collections" | "access" | "ai" | "deploys"
 >;
 
 const resolveDetails = (details: AccessPermission): PermissionDetails => ({
@@ -462,6 +517,7 @@ export const getCapabilityRegistry = (
 		...getAgentCapabilityGroups(getAgents(config)),
 		localesCapabilityGroup,
 		...(isAiFeatureEnabled(config, "mcp") ? [mcpCapabilityGroup] : []),
+		...getDeployCapabilityGroups(config.deploys),
 	];
 	const groupKeys = new Set(groups.map((group) => group.key));
 	const permissions = new Map(

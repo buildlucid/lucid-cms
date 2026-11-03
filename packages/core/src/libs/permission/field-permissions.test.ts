@@ -19,6 +19,7 @@ const accessConfig = (collection: CollectionBuilder): AccessConfig => ({
 		agents: { enabled: false, definitions: [] },
 		mcp: { enabled: false, tools: [], skills: [] },
 	},
+	deploys: [],
 });
 
 describe("field permissions", () => {

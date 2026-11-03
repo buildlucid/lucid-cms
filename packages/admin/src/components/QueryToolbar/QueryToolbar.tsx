@@ -201,9 +201,9 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 						queryState={props.queryState}
 						preserveSubjectCase={props.preserveFilterSubjectCase}
 						presets={props.filterPresets}
-						//* without a card around the toolbar, the panel draws its own box
 						embedded={props.padding === "none"}
 						padding={props.padding === "sm" ? "sm" : "md"}
+						class={props.padding === "none" ? "mb-0!" : undefined}
 					/>
 				)}
 			</Show>

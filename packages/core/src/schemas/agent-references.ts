@@ -25,13 +25,24 @@ export const agentResourceSchema = z.discriminatedUnion("type", [
 		.strict(),
 ]) satisfies z.ZodType<AgentResource>;
 
-/** A Lucid resource linked to a conversation. */
+/** A resource people attach to messages and the agent links itself. */
+export const agentAttachableReferenceInputSchema = z.discriminatedUnion(
+	"type",
+	[
+		agentResourceSchema.options[0],
+		agentResourceSchema.options[1].extend({
+			versionId: z.number().int().positive().optional(),
+		}),
+		agentResourceSchema.options[2],
+	],
+) satisfies z.ZodType<Exclude<AgentReferenceInput, { type: "deploy" }>>;
+
+/** A Lucid resource linked to a conversation. Deploys are only linked by the tool that runs them. */
 export const agentReferenceInputSchema = z.discriminatedUnion("type", [
-	agentResourceSchema.options[0],
-	agentResourceSchema.options[1].extend({
-		versionId: z.number().int().positive().optional(),
-	}),
-	agentResourceSchema.options[2],
+	...agentAttachableReferenceInputSchema.options,
+	z
+		.object({ type: z.literal("deploy"), deployKey: z.string().min(1) })
+		.strict(),
 ]) satisfies z.ZodType<AgentReferenceInput>;
 
 const snapshotDetails = {
@@ -44,6 +55,7 @@ export const agentReferenceSnapshotSchema = z.discriminatedUnion("type", [
 	agentReferenceInputSchema.options[0].extend(snapshotDetails),
 	agentReferenceInputSchema.options[1].extend(snapshotDetails),
 	agentReferenceInputSchema.options[2].extend(snapshotDetails),
+	agentReferenceInputSchema.options[3].extend(snapshotDetails),
 ]) satisfies z.ZodType<AgentReferenceSnapshot>;
 
 const referenceDetails = {
@@ -64,4 +76,5 @@ export const agentReferenceSchema = z.discriminatedUnion("type", [
 		version: z.string().optional(),
 	}),
 	agentReferenceInputSchema.options[2].extend(referenceDetails),
+	agentReferenceInputSchema.options[3].extend(referenceDetails),
 ]);

@@ -7,6 +7,7 @@ const coreToolkitKeys = {
 	auth: true,
 	captcha: true,
 	collections: true,
+	deploys: true,
 	documents: true,
 	email: true,
 	jobs: true,

@@ -30,6 +30,7 @@ export type CorePermission =
 	| "ai:routines-manage-all"
 	| "ai:memories-manage"
 	| `agents:${string}:${"chat" | "manage-own-routines" | "manage-code-routines"}`
+	| `deploys:${string}:${"read" | "run" | "manage"}`
 	| "integrations:read"
 	| "integrations:create"
 	| "integrations:update"

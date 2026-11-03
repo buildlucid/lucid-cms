@@ -3,6 +3,7 @@ import type { ToolkitAgent } from "./agent/index.js";
 import type { ToolkitAuth } from "./auth/index.js";
 import type { ToolkitCaptcha } from "./captcha/index.js";
 import type { ToolkitCollections } from "./collections/index.js";
+import type { ToolkitDeploys } from "./deploys/index.js";
 import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitEmail } from "./email/index.js";
 import type { ToolkitJobs } from "./jobs/index.js";
@@ -29,6 +30,8 @@ export type CoreToolkit = {
 	captcha: ToolkitCaptcha;
 	/** Effective database schemas for custom collection queries. */
 	collections: ToolkitCollections;
+	/** Run, queue and read the deploys in your config. */
+	deploys: ToolkitDeploys;
 	/** Document reads, writes and publishing. */
 	documents: ToolkitDocuments;
 	/** Send external emails and read sent emails. */
@@ -94,6 +97,10 @@ export type * from "./captcha/index.js";
 export type * from "./captcha/verify/index.js";
 export type * from "./collections/get-schema/index.js";
 export type * from "./collections/index.js";
+export type * from "./deploys/get-single/index.js";
+export type * from "./deploys/index.js";
+export type * from "./deploys/queue/index.js";
+export type * from "./deploys/run/index.js";
 export type * from "./documents/create-single/index.js";
 export type * from "./documents/delete-multiple/index.js";
 export type * from "./documents/delete-single/index.js";

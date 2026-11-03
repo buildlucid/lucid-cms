@@ -1,7 +1,7 @@
 import type { AgentRunnerToolName } from "@lucidcms/types";
 import z from "zod";
 import constants from "../../constants/constants.js";
-import { agentReferenceInputSchema } from "../../schemas/agent-references.js";
+import { agentAttachableReferenceInputSchema } from "../../schemas/agent-references.js";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
 import { copy } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
@@ -67,7 +67,7 @@ const runnerTools = {
 		description:
 			"Link documents, media or requests to this chat. Nothing else can be linked.",
 		input: z.object({
-			references: z.array(agentReferenceInputSchema).min(1).max(50),
+			references: z.array(agentAttachableReferenceInputSchema).min(1).max(50),
 		}),
 		available: () => true,
 	},

@@ -9,6 +9,7 @@ test.each([true, false])(
 		const config = {
 			brand: { name: "Client brand" },
 			agentHomescreen,
+			deploys: [],
 		};
 		const server = await createServer({
 			configFile: false,

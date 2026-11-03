@@ -1,0 +1,43 @@
+import type { Generated } from "kysely";
+import z from "zod";
+import { agentReferenceSourceTypeSchema } from "../../agent/references.js";
+import { defineTable } from "../client/table/definition.js";
+import type { BooleanInt, TimestampImmutable } from "../types.js";
+
+export const agentDeployReferencesTable = defineTable(
+	"lucid_agent_deploy_references",
+	(adapter) => ({
+		columns: {
+			id: { schema: z.uuid(), type: "text" },
+			conversation_id: { schema: z.uuid(), type: "text" },
+			deploy_key: { schema: z.string(), type: "text" },
+			source: { schema: agentReferenceSourceTypeSchema, type: "text" },
+			tool_name: { schema: z.string().nullable(), type: "text" },
+			managed: {
+				schema: z.union([
+					z.literal(adapter.config.defaults.boolean.true),
+					z.literal(adapter.config.defaults.boolean.false),
+				]),
+				type: "boolean",
+			},
+			created_at: {
+				schema: z.union([z.string(), z.date()]),
+				type: "timestamp",
+			},
+		},
+	}),
+);
+
+/** Chat deploy reference. The key has no foreign key because deploys live in config. */
+export interface LucidAgentDeployReferences {
+	id: string;
+	conversation_id: string;
+	deploy_key: string;
+	/** Whether a person attached it to a message or a tool linked it. */
+	source: z.infer<typeof agentReferenceSourceTypeSchema>;
+	/** The tool that linked it, when `source` is "tool". */
+	tool_name: string | null;
+	/** Linked through the toolkit by a tool that manages it. Only the toolkit can unlink it. */
+	managed: Generated<BooleanInt>;
+	created_at: TimestampImmutable;
+}

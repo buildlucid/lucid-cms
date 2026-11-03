@@ -9,6 +9,7 @@ import CollectionBuilder from "../../../libs/collection/builders/collection-buil
 import getCurrentCollectionMigrationId from "../../../libs/collection/migration/get-current-collection-migration-id.js";
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import defineDeploy from "../../../libs/deploys/define-deploy.js";
 import { copy, createTranslationStore } from "../../../libs/i18n/index.js";
 import { getJobDefinitionRuntime } from "../../../libs/jobs/registry.js";
 import { aiAccessFeatureSchema } from "../../../libs/lucid-remote/schema/connection.js";
@@ -36,6 +37,8 @@ import createServiceContext from "../../../utils/services/create-service-context
 import type { ServiceContext } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
+import { startDeployRunJob } from "../../deploys/jobs/start-run.js";
+import runDeployTool from "../../deploys/tools/run/handler.js";
 import createDocumentBricks from "../../documents-bricks/create-multiple.js";
 import { deleteExpiredRevisionsJob } from "../../documents-versions/jobs/delete-expired-revisions.js";
 import deleteMultiplePermanently from "../../documents/delete-multiple-permanently.js";
@@ -76,6 +79,15 @@ const agent = defineAgent({
 		documents: { attach: false },
 	},
 });
+const production = defineDeploy({
+	key: "production",
+	name: "Production",
+	provider: {
+		type: "deploy-provider",
+		key: "test",
+		trigger: async () => ({ status: "triggered" }),
+	},
+});
 let context: ServiceContext;
 
 beforeAll(async () => {
@@ -84,6 +96,8 @@ beforeAll(async () => {
 		config: {
 			...config,
 			collections: [collection],
+			deploys: [production],
+			jobs: { definitions: [...config.jobs.definitions, startDeployRunJob] },
 			ai: { ...config.ai, agents: { enabled: true, definitions: [agent] } },
 		},
 		database: await fixture.getDatabase(),
@@ -1493,4 +1507,80 @@ test("a references widget lists what tools newly linked since a call started, sk
 			{ type: "media", mediaId: added },
 		],
 	});
+});
+
+test("deploys link by key with their name, and only people who can view the deploy see them", async () => {
+	const conversationId = await createChat();
+	const source = { type: "tool", toolName: "deploys_run" } as const;
+
+	const linked = await register(context, {
+		conversationId,
+		references: [{ type: "deploy", deployKey: production.key }],
+		source,
+		managed: true,
+	});
+	expect(linked.data).toEqual([
+		{ type: "deploy", deployKey: production.key, label: "Production" },
+	]);
+	expect(
+		(
+			await register(context, {
+				conversationId,
+				references: [{ type: "deploy", deployKey: "removed" }],
+				source,
+			})
+		).error?.status,
+	).toBe(404);
+
+	const viewer = await createReader(["deploys:production:read"]);
+	const outsider = await createReader([Permissions.MediaRead]);
+	expect(
+		(await list(context, { conversationId, userId: viewer })).data?.map(
+			(reference) => reference.type,
+		),
+	).toEqual(["deploy"]);
+	expect(
+		(await list(context, { conversationId, userId: outsider })).data,
+	).toEqual([]);
+});
+
+test("agents run deploys people can run, credited to the agent and linked into the chat", async () => {
+	const conversationId = await createChat();
+	const agentRunId = randomUUID();
+	const runAs = (userId: number) =>
+		withTransaction(context, (context) =>
+			runDeployTool(context, {
+				input: { key: production.key },
+				actor: { type: "user", userId },
+				agentRunId,
+				conversationId,
+			}),
+		);
+
+	const viewer = await createReader(["deploys:production:read"]);
+	expect((await runAs(viewer)).error?.status).toBe(403);
+
+	const runner = await createReader([
+		"deploys:production:read",
+		"deploys:production:run",
+	]);
+	const ran = await runAs(runner);
+	assert(ran.data, JSON.stringify(ran.error));
+
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_deploy_runs")
+			.select(["source", "started_by_user_id", "agent_run_id"])
+			.where("id", "=", ran.data.output.runId)
+			.executeTakeFirst(),
+	).toEqual({
+		source: "agent",
+		started_by_user_id: runner,
+		agent_run_id: agentRunId,
+	});
+	expect(
+		(await list(context, { conversationId, userId: runner })).data?.map(
+			(reference) => reference.type,
+		),
+	).toEqual(["deploy"]);
 });

@@ -5,6 +5,7 @@ import {
 	TbOutlineExternalLink,
 	TbOutlineMessages,
 	TbOutlineProgress,
+	TbOutlineRocket,
 	TbOutlineSettings,
 	TbOutlineSpeakerphone,
 } from "solid-icons/tb";
@@ -19,6 +20,7 @@ const categoryIcons: Record<string, IconTypes> = {
 	system: TbOutlineSettings,
 	requests: TbOutlineExternalLink,
 	workflows: TbOutlineProgress,
+	deploys: TbOutlineRocket,
 	agent: TbOutlineMessages,
 	lucid: TbOutlineSpeakerphone,
 };

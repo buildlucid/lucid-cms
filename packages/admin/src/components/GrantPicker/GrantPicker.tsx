@@ -25,9 +25,14 @@ export interface GrantGroup {
 	}>;
 }
 
-type GrantSection = "collections" | "agents" | "general";
+type GrantSection = "collections" | "agents" | "deploys" | "general";
 
-const sectionOrder: GrantSection[] = ["collections", "agents", "general"];
+const sectionOrder: GrantSection[] = [
+	"collections",
+	"agents",
+	"deploys",
+	"general",
+];
 
 /** Every grant in a group, including its subgroups'. */
 const groupGrants = (group: GrantGroup) => [
@@ -35,10 +40,11 @@ const groupGrants = (group: GrantGroup) => [
 	...(group.subgroups ?? []).flatMap((subgroup) => subgroup.grants),
 ];
 
-//* collection and agent groups are keyed by core as `documents:{key}` and `agents:{key}`
+//* collection, agent and deploy groups are keyed by core as `documents:{key}`, `agents:{key}` and `deploys:{key}`
 const getSection = (key: string): GrantSection => {
 	if (key.startsWith("documents:")) return "collections";
 	if (key.startsWith("agents:")) return "agents";
+	if (key.startsWith("deploys:")) return "deploys";
 	return "general";
 };
 
@@ -110,6 +116,7 @@ const GrantPicker: Component<{
 	const sectionLabel = (section: GrantSection) => {
 		if (section === "collections") return T()("common.collections");
 		if (section === "agents") return T()("common.agents");
+		if (section === "deploys") return T()("common.deploys");
 		return T()("common.general");
 	};
 	const grantItem = (grant: Grant) => ({

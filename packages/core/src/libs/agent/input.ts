@@ -48,6 +48,12 @@ const attachmentAttributes = (reference: AgentReferenceSnapshot) => {
 				request_id: reference.requestId,
 				name: reference.label,
 			};
+		case "deploy":
+			return {
+				type: "deploy",
+				deploy_key: reference.deployKey,
+				name: reference.label,
+			};
 	}
 };
 

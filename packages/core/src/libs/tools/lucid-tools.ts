@@ -7,6 +7,9 @@ import {
 	listCollectionsAgentTool,
 	listCollectionsMcpTool,
 } from "../../services/collections/tools/list/index.js";
+import { getDeploysAgentTool } from "../../services/deploys/tools/get/index.js";
+import { runDeployAgentTool } from "../../services/deploys/tools/run/index.js";
+import { updateDeployAgentTool } from "../../services/deploys/tools/update/index.js";
 import { createDocumentAgentTool } from "../../services/documents/tools/create/index.js";
 import { deleteDocumentAgentTool } from "../../services/documents/tools/delete/index.js";
 import {
@@ -172,6 +175,14 @@ export const agentTools = {
 		/** Queues a job schedule to run now, after the person confirms. */
 		runSchedule: runJobScheduleAgentTool,
 	},
+	deploys: {
+		/** Reads deploys with their status and recent runs. Offered only when deploys are configured. */
+		get: getDeploysAgentTool,
+		/** Runs a deploy, or queues it behind the run in progress, after the person confirms. */
+		run: runDeployAgentTool,
+		/** Cancels a deploy's running or queued run, after the person confirms. */
+		update: updateDeployAgentTool,
+	},
 	settings: {
 		/** Reads how the CMS is set up. */
 		get: getSettingsAgentTool,
@@ -212,13 +223,14 @@ export const agentTools = {
 		updateRequestCommentAgentTool(options),
 		acknowledgeRequestAgentTool(options),
 	],
-	/** Reads emails, jobs, schedules, settings and AI usage; add `emails.resend` or `jobs.runSchedule` to act on them. */
+	/** Reads emails, jobs, schedules, deploys, settings and AI usage; add `emails.resend`, `jobs.runSchedule` or `deploys.run` to act on them. */
 	system: () => [
 		findEmailsAgentTool(),
 		getEmailAgentTool(),
 		findJobsAgentTool(),
 		getJobAgentTool(),
 		listJobSchedulesAgentTool(),
+		getDeploysAgentTool(),
 		getSettingsAgentTool(),
 		getAiUsageAgentTool(),
 	],

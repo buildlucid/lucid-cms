@@ -16,10 +16,11 @@ export type AgentResource =
 	| { type: "document"; collectionKey: string; documentId: number }
 	| { type: "request"; requestId: number };
 
-/** A media item, document or request linked to a chat. A document can be pinned to one version. */
+/** A media item, document, request or deploy linked to a chat. A document can be pinned to one version. */
 export type AgentReferenceInput =
 	| Exclude<AgentResource, { type: "document" }>
-	| (Extract<AgentResource, { type: "document" }> & { versionId?: number });
+	| (Extract<AgentResource, { type: "document" }> & { versionId?: number })
+	| { type: "deploy"; deployKey: string };
 
 /** A reference with the details saved when it was attached, so a message keeps what was sent. */
 export type AgentReferenceSnapshot = AgentReferenceInput & {
@@ -216,6 +217,7 @@ export type AgentReference = {
 			version?: DocumentVersionType;
 	  })
 	| Extract<AgentReferenceInput, { type: "request" }>
+	| Extract<AgentReferenceInput, { type: "deploy" }>
 );
 
 /** Capabilities derived from the tools available to the current user. */

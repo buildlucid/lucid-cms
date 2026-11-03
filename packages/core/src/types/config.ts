@@ -7,6 +7,7 @@ import type CollectionBuilder from "../libs/collection/builders/collection-build
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
 import type { TableDefinition } from "../libs/db/client/table/definition.js";
 import type { MigrationDefinition } from "../libs/db/types.js";
+import type { DeployDefinition } from "../libs/deploys/types.js";
 import type {
 	EmailAdapter,
 	EmailAdapterInstance,
@@ -694,6 +695,8 @@ export interface LucidConfig {
 				/** Job definitions registered by the project and its plugins. */
 				definitions?: AnyJobDefinition[];
 		  };
+	/** Deploys created with `defineDeploy`, which people with the deploy permissions can run from the admin. */
+	deploys?: DeployDefinition[];
 	/** Configures `defineNotification` types, with arrays as shorthand for `{ definitions }`. */
 	notifications?:
 		| AnyNotificationDefinition[]
@@ -719,6 +722,8 @@ export interface LucidConfig {
 		failedJobs?: number;
 		/** Notification retention after the last change, defaulting to 90 days and preserving unresolved to-dos. */
 		notifications?: number;
+		/** Finished deploy runs. Defaults to 90. */
+		deployRuns?: number;
 	};
 	/**
 	 * Hooks to register. Allows you to register custom hooks to run before or after certain events.
@@ -892,6 +897,7 @@ export interface ResolvedLucidConfig {
 	jobs: {
 		definitions: AnyJobDefinition[];
 	};
+	deploys: DeployDefinition[];
 	notifications: {
 		definitions: AnyNotificationDefinition[];
 	};
