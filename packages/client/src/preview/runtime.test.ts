@@ -14,7 +14,7 @@ afterEach(() => {
 describe("preview runtime targeting hints", () => {
 	test("does not install hints in a normal frontend window", () => {
 		window.name = "";
-		const controller = setupPreviewRuntime("perspective");
+		const controller = setupPreviewRuntime("perspective", new Set());
 
 		expect(controller.active).toBe(false);
 		expect(

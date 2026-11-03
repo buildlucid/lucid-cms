@@ -5,6 +5,7 @@ import type {
 import type {
 	CollectionPreviewBreakpoint,
 	DocumentVersionType,
+	InternalCollectionDocument,
 	PreviewMode,
 } from "@types";
 import {
@@ -16,8 +17,10 @@ import {
 	on,
 	onCleanup,
 } from "solid-js";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import api from "@/services/api";
 import T from "@/translations";
+import brickHelpers from "@/utils/brick-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import {
 	PreviewCanvas,
@@ -25,10 +28,32 @@ import {
 	type PreviewZoom,
 	type ResolverState,
 } from "./parts/PreviewCanvas";
-import { createPreviewBridge } from "./utils/preview-bridge";
+import {
+	createPreviewBridge,
+	previewContextQueryParam,
+	previewQueryParam,
+} from "./utils/preview-bridge";
 
-const previewContextQueryParam = "previewContext";
 const builderPreviewContext = "builder";
+const DRAFT_DEBOUNCE_MS = 250;
+//* the first edit after a pause shows at once, the rest wait for editing to pause
+const DRAFT_IDLE_MS = 1000;
+//* sessions this close to expiring, or past half their lifetime when that's shorter, are replaced rather than updated
+const SESSION_RENEW_MS = 5 * 60 * 1000;
+//* keeps a clock ahead of the server's from replacing the session on every edit
+const SESSION_MIN_MS = 60 * 1000;
+
+/** The preview the frame shows, which the editor's unsaved content is written to. */
+type PreviewSession = {
+	url: string;
+	token: string;
+	/** When the session is replaced rather than updated, ahead of its expiry. */
+	renewAt: number;
+	/** Rises with every draft write and refresh. */
+	revision: number;
+	/** Whether the server may hold unsaved content for this session. */
+	hasDraft: boolean;
+};
 
 export const DocumentPreview: Component<{
 	open: Accessor<boolean>;
@@ -41,6 +66,12 @@ export const DocumentPreview: Component<{
 	breakpoints: Accessor<CollectionPreviewBreakpoint[]>;
 	dirty: Accessor<boolean>;
 	saveStamp: Accessor<string>;
+	/** The version being edited, which unsaved content is previewed against. */
+	draftVersionId: Accessor<number | undefined>;
+	/** Whether unsaved content can be previewed, matching who can save it. */
+	canSyncDraft: Accessor<boolean>;
+	/** The saved route, which the preview URL is built from. */
+	route: Accessor<InternalCollectionDocument["route"] | undefined>;
 	onFocusField: (target: PreviewFieldTarget) => void;
 	registerScrollCapture?: (
 		capture: () => Promise<PreviewScrollState | null>,
@@ -49,7 +80,14 @@ export const DocumentPreview: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
+	const brickStore = useBrickStore();
 	let resolveSequence = 0;
+	let session: PreviewSession | null = null;
+	let syncTimer: number | undefined;
+	let lastChangeAt = 0;
+	let syncing = false;
+	let syncQueued = false;
+	let refreshQueued = false;
 	const [url, setUrl] = createSignal<string | null>(null);
 	const [resolverState, setResolverState] = createSignal<ResolverState>("idle");
 	const [frameLoading, setFrameLoading] = createSignal(false);
@@ -59,6 +97,7 @@ export const DocumentPreview: Component<{
 	const [zoom, setZoom] = createSignal<PreviewZoom>(100);
 	const previewBridge = createPreviewBridge({
 		onFocusField: props.onFocusField,
+		onReload: () => setFrameLoading(true),
 	});
 	const unregisterScrollCapture = props.registerScrollCapture?.(
 		previewBridge.captureScroll,
@@ -72,10 +111,13 @@ export const DocumentPreview: Component<{
 	// ----------------------------------
 	// Memos
 	const frameSrc = createMemo(() => url() ?? undefined);
+	const routeKey = createMemo(() =>
+		JSON.stringify(props.route()?.path ?? null),
+	);
 
 	// ----------------------------------
 	// Functions
-	const createPersistedPreviewUrl = async (
+	const createPersistedPreview = async (
 		context: "builder" | "standalone" = "standalone",
 	) => {
 		const documentId = props.documentId();
@@ -89,12 +131,91 @@ export const DocumentPreview: Component<{
 			mode: props.mode(),
 			locale: props.locale(),
 		});
-		const previewUrl = response.data.url;
-		if (!previewUrl || context !== "builder") return previewUrl;
+		const { url: previewUrl, expiresAt } = response.data;
+		if (!previewUrl) return null;
+		if (context !== "builder") return { url: previewUrl, expiresAt };
 
 		const url = new URL(previewUrl);
 		url.searchParams.set(previewContextQueryParam, builderPreviewContext);
-		return url.toString();
+		return { url: url.toString(), expiresAt };
+	};
+	/** Changes whenever the editor's content or saved snapshot does. */
+	const editStamp = () =>
+		`${brickStore.get.contentRevision}:${brickStore.get.snapshotRevision}`;
+	/** Writes the editor's unsaved content to a session, or clears it once saved. Returns whether what the preview shows changed. */
+	const writeDraft = async (target: PreviewSession) => {
+		const documentId = props.documentId();
+		const versionId = props.draftVersionId();
+		if (documentId === undefined || versionId === undefined) return false;
+
+		const draft =
+			props.canSyncDraft() && brickStore.getDocumentContentMutated()
+				? {
+						bricks: brickHelpers.getUpsertBricks(),
+						fields: brickHelpers.getCollectionPseudoBrickFields(),
+					}
+				: null;
+		if (draft === null && !target.hasDraft) return false;
+
+		target.revision += 1;
+		//* a write whose response is lost may still have landed, so it's cleared later either way
+		if (draft !== null) target.hasDraft = true;
+		try {
+			await api.documents.updatePreviewDraftReq({
+				collectionKey: props.collectionKey(),
+				documentId,
+				versionId,
+				token: target.token,
+				revision: target.revision,
+				draft,
+			});
+			target.hasDraft = draft !== null;
+			return true;
+		} catch {
+			return false;
+		}
+	};
+	/** Writes the latest content to the session and shows it, one sync at a time. */
+	const sync = async () => {
+		const target = session;
+		if (!target) return;
+		if (syncing) {
+			syncQueued = true;
+			return;
+		}
+
+		syncing = true;
+		const refresh = refreshQueued;
+		refreshQueued = false;
+		try {
+			if (Date.now() >= target.renewAt) {
+				await resolvePersistedPreview(true);
+				return;
+			}
+
+			const changed = await writeDraft(target);
+			if (!changed && !refresh) return;
+			if (!changed) target.revision += 1;
+			if (target === session) previewBridge.show(target.revision);
+		} finally {
+			syncing = false;
+			if (syncQueued) {
+				syncQueued = false;
+				void sync();
+			}
+		}
+	};
+	/** Queues a sync, straight away after a pause in editing. `refresh` shows the content even when no draft changed, eg. after a save. */
+	const scheduleSync = (refresh = false) => {
+		if (refresh) refreshQueued = true;
+		const now = performance.now();
+		const idle = now - lastChangeAt > DRAFT_IDLE_MS;
+		lastChangeAt = now;
+		window.clearTimeout(syncTimer);
+		syncTimer = window.setTimeout(
+			() => void sync(),
+			idle ? 0 : DRAFT_DEBOUNCE_MS,
+		);
 	};
 	const resolvePersistedPreview = async (preserveScroll = false) => {
 		const currentResolve = ++resolveSequence;
@@ -110,9 +231,13 @@ export const DocumentPreview: Component<{
 			if (currentResolve !== resolveSequence) return;
 
 			setResolverState("loading");
-			const nextUrl = await createPersistedPreviewUrl("builder");
+			const persisted = await createPersistedPreview("builder");
 			if (currentResolve !== resolveSequence) return;
-			if (!nextUrl) {
+			const token = persisted
+				? new URL(persisted.url).searchParams.get(previewQueryParam)
+				: null;
+			if (!persisted || !token) {
+				session = null;
 				previewBridge.queueScrollRestore(null);
 				setUrl(null);
 				setFrameLoading(false);
@@ -120,12 +245,37 @@ export const DocumentPreview: Component<{
 				return;
 			}
 
+			const lifetime = persisted.expiresAt
+				? Date.parse(persisted.expiresAt) - Date.now()
+				: Number.POSITIVE_INFINITY;
+			const nextSession: PreviewSession = {
+				url: persisted.url,
+				token,
+				renewAt:
+					Date.now() +
+					Math.max(
+						SESSION_MIN_MS,
+						lifetime - Math.min(SESSION_RENEW_MS, lifetime / 2),
+					),
+				revision: 0,
+				hasDraft: false,
+			};
+			//* unsaved content is written first so the page's first render shows it
+			const writtenAt = editStamp();
+			await writeDraft(nextSession);
+			if (currentResolve !== resolveSequence) return;
+
+			session = nextSession;
+			previewBridge.expectLoad();
+			//* edits made while the first draft was written had no session to go to
+			if (editStamp() !== writtenAt) scheduleSync();
 			setFrameLoading(true);
-			previewBridge.queueScrollRestore(scrollState, nextUrl);
-			setUrl(nextUrl);
+			previewBridge.queueScrollRestore(scrollState, persisted.url);
+			setUrl(persisted.url);
 			setResolverState("ready");
 		} catch {
 			if (currentResolve !== resolveSequence) return;
+			session = null;
 			previewBridge.queueScrollRestore(null);
 			setFrameLoading(false);
 			setResolverState("error");
@@ -142,8 +292,8 @@ export const DocumentPreview: Component<{
 	const copyPersistedUrl = async () => {
 		try {
 			warnWhenDirty();
-			const persistedUrl = await createPersistedPreviewUrl();
-			if (!persistedUrl) {
+			const persisted = await createPersistedPreview();
+			if (!persisted) {
 				spawnToast({
 					title: T()("preview.unavailable.title"),
 					message: T()("preview.unavailable.message"),
@@ -151,7 +301,7 @@ export const DocumentPreview: Component<{
 				});
 				return;
 			}
-			await navigator.clipboard.writeText(persistedUrl);
+			await navigator.clipboard.writeText(persisted.url);
 			spawnToast({
 				title: T()("toasts.common.copy.to.clipboard.title"),
 				status: "success",
@@ -165,8 +315,8 @@ export const DocumentPreview: Component<{
 		if (previewWindow) previewWindow.opener = null;
 		warnWhenDirty();
 		try {
-			const persistedUrl = await createPersistedPreviewUrl();
-			if (!persistedUrl) {
+			const persisted = await createPersistedPreview();
+			if (!persisted) {
 				previewWindow?.close();
 				spawnToast({
 					title: T()("preview.unavailable.title"),
@@ -176,10 +326,10 @@ export const DocumentPreview: Component<{
 				return;
 			}
 			if (previewWindow) {
-				previewWindow.location.replace(persistedUrl);
+				previewWindow.location.replace(persisted.url);
 				return;
 			}
-			window.open(persistedUrl, "_blank", "noopener,noreferrer");
+			window.open(persisted.url, "_blank", "noopener,noreferrer");
 		} catch {
 			previewWindow?.close();
 		}
@@ -198,6 +348,7 @@ export const DocumentPreview: Component<{
 					props.versionId(),
 					props.mode(),
 					props.locale(),
+					routeKey(),
 				] as const,
 			([open, collectionKey, documentId], previous) => {
 				if (!open) return;
@@ -210,9 +361,18 @@ export const DocumentPreview: Component<{
 		),
 	);
 	createEffect(
+		on(
+			editStamp,
+			() => {
+				if (props.open()) scheduleSync();
+			},
+			{ defer: true },
+		),
+	);
+	createEffect(
 		on(props.saveStamp, (next, previous) => {
 			if (previous === undefined || next === previous || !props.open()) return;
-			void resolvePersistedPreview(true);
+			scheduleSync(true);
 		}),
 	);
 
@@ -220,6 +380,8 @@ export const DocumentPreview: Component<{
 	// Lifecycle
 	onCleanup(() => {
 		resolveSequence += 1;
+		window.clearTimeout(syncTimer);
+		session = null;
 		unregisterScrollCapture?.();
 		previewBridge.cleanup();
 	});

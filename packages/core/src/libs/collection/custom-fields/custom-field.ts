@@ -236,12 +236,15 @@ abstract class CustomField<T extends FieldTypes> {
 	abstract uniqueValidation(
 		value: unknown,
 		refData?: unknown,
+		options?: { allowIncomplete?: boolean },
 	): CustomFieldValidateResponse;
 	/** Runs shared validation and then delegates to `uniqueValidation`. */
 	public validate(props: {
 		type: FieldTypes;
 		value: unknown;
 		refData?: unknown;
+		/** Allows unfinished preview content, relaxing required fields, Zod rules and repeater minimums. */
+		allowIncomplete?: boolean;
 	}): CustomFieldValidateResponse {
 		if (this.sharedValidationFlags.skipValidation) return { valid: true };
 
@@ -250,8 +253,10 @@ abstract class CustomField<T extends FieldTypes> {
 
 		const normalizedValue = this.normalizeInputValue(props.value);
 
-		const requiredRes = this.validateRequired(normalizedValue);
-		if (!requiredRes.valid) return requiredRes;
+		if (!props.allowIncomplete) {
+			const requiredRes = this.validateRequired(normalizedValue);
+			if (!requiredRes.valid) return requiredRes;
+		}
 
 		if (
 			normalizedValue === null ||
@@ -261,10 +266,14 @@ abstract class CustomField<T extends FieldTypes> {
 			return { valid: true };
 		}
 
-		const zodRes = this.validateZodConstraint(normalizedValue);
-		if (!zodRes.valid) return zodRes;
+		if (!props.allowIncomplete) {
+			const zodRes = this.validateZodConstraint(normalizedValue);
+			if (!zodRes.valid) return zodRes;
+		}
 
-		return this.uniqueValidation(normalizedValue, props.refData);
+		return this.uniqueValidation(normalizedValue, props.refData, {
+			allowIncomplete: props.allowIncomplete,
+		});
 	}
 	/** Validates that the submitted field type matches this instance type. */
 	private validateFieldType(type: FieldTypes) {

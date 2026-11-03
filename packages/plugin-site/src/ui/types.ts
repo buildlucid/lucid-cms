@@ -64,14 +64,17 @@ export type UiHydrateContext = {
 	render: boolean;
 };
 
-/** Defines the integration's `client` module default export, hydrating library components with named `<client-slot>` elements from the template. */
+/** Unmounts a hydrated component, run when its element leaves the page, eg. when a builder preview update replaces it. */
+export type UiDispose = () => void;
+
+/** Defines the integration's `client` module default export, hydrating library components with named `<client-slot>` elements from the template, and returning how to unmount them. */
 export type UiHydrate<Component = unknown> = (
 	element: HTMLElement,
 	component: Component,
 	props: Record<string, unknown>,
 	slots: Record<string, Element>,
 	context: UiHydrateContext,
-) => void | Promise<void>;
+) => UiDispose | Promise<UiDispose>;
 
 /** Selects when a component loads through `client`, with `only` skipping server rendering and showing the template's `fallback` fill until loading finishes. */
 export type UiClient = "load" | "idle" | "visible" | "only" | { media: string };

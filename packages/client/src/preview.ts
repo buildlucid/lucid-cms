@@ -1,2 +1,7 @@
 export { setupPreview } from "./preview/loader.js";
-export type { PreviewController } from "./preview/types.js";
+export { morphPage } from "./preview/morph-page.js";
+export type {
+	PreviewController,
+	PreviewUpdate,
+	PreviewUpdateHandler,
+} from "./preview/types.js";

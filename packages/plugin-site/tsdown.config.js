@@ -34,7 +34,7 @@ export default defineConfig([
 		shims: false,
 		clean: false,
 		deps: {
-			alwaysBundle: ["@lucidcms/client/bootstrap"],
+			alwaysBundle: ["@lucidcms/client/preview", "@lucidcms/client/toolbar"],
 		},
 		outputOptions: { codeSplitting: false },
 	},

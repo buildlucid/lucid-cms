@@ -33,6 +33,7 @@ const resolveSession: ServiceFn<
 			"mode",
 			"entry_version_id",
 			"expires_at",
+			"created_by",
 		],
 		where: [
 			{

@@ -13,11 +13,14 @@ export type PreviewSessionRecord = Pick<
 	| "mode"
 	| "entry_version_id"
 	| "expires_at"
+	| "created_by"
 >;
 
 export type ResolvedPreviewSession = PreviewSessionRecord;
 
 type PreviewSessionDocumentEntry = {
+	/** Finds the session's unsaved draft for reads of its entry document. */
+	sessionId: number;
 	entry: {
 		collectionKey: string;
 		documentId: number;

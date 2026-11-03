@@ -8,6 +8,8 @@ export const previewProtocol = {
 		scrollState: "scroll-state",
 		restoreScroll: "restore-scroll",
 		focusField: "focus-field",
+		update: "update",
+		unload: "unload",
 	},
 } as const;
 

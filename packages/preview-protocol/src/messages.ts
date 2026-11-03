@@ -26,6 +26,11 @@ export const isPreviewChildMessage = (
 
 	switch (value.type) {
 		case previewProtocol.messages.ready:
+			return (
+				hasOnlyKeys(value, ["scope", "version", "type", "updates"]) &&
+				typeof value.updates === "boolean"
+			);
+		case previewProtocol.messages.unload:
 			return hasOnlyKeys(value, ["scope", "version", "type"]);
 		case previewProtocol.messages.scrollState:
 			return (
@@ -67,6 +72,13 @@ export const isPreviewParentMessage = (
 			return (
 				hasOnlyKeys(value, ["scope", "version", "type", "state"]) &&
 				isPreviewScrollState(value.state)
+			);
+		case previewProtocol.messages.update:
+			return (
+				hasOnlyKeys(value, ["scope", "version", "type", "revision"]) &&
+				typeof value.revision === "number" &&
+				Number.isSafeInteger(value.revision) &&
+				value.revision >= 0
 			);
 		default:
 			return false;

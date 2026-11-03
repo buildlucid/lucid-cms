@@ -4,7 +4,10 @@ import {
 	getBricksTableSchema,
 	getTableNames,
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { DocumentVersionType } from "../../libs/db/tables/index.js";
+import type {
+	DocumentVersionType,
+	LucidPreviewDraftContent,
+} from "../../libs/db/tables/index.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import type { DocumentRefVersionTypeResolver } from "../../libs/refs/documents/types.js";
@@ -18,6 +21,7 @@ import type {
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveDocumentRefs from "../documents/helpers/resolve-document-refs.js";
+import buildDraftTables from "./helpers/build-draft-tables.js";
 
 /**
  * Returns all of the bricks and collection fields
@@ -42,6 +46,8 @@ const getMultiple: ServiceFn<
 			refTargets?: Iterable<RefTarget>;
 			/** Leaves out refs only hidden fields point at and related documents' hidden fields. */
 			reader?: FieldAccessActor;
+			/** Unsaved preview content to format in place of the version's stored rows. */
+			draft?: LucidPreviewDraftContent | null;
 		},
 	],
 	{
@@ -81,7 +87,8 @@ const getMultiple: ServiceFn<
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
 			versionId: data.versionId,
-			bricksSchema: selectedBricksTableSchema,
+			//* drafts only need the version row, their rows are built below
+			bricksSchema: data.draft ? [] : selectedBricksTableSchema,
 		},
 		{
 			tableName: tableNameRes.data.version,
@@ -99,12 +106,26 @@ const getMultiple: ServiceFn<
 		};
 	}
 
+	const bricksQuery = data.draft
+		? {
+				...bricksQueryRes.data,
+				...buildDraftTables({
+					collection: collectionRes.data,
+					documentId: bricksQueryRes.data.document_id,
+					versionId: data.versionId,
+					draft: data.draft,
+					bricksSchema: selectedBricksTableSchema,
+					config: context.config,
+				}),
+			}
+		: bricksQueryRes.data;
+
 	const baseUrl = getBaseUrl(context);
 	const refsRes = await resolveDocumentRefs(context, {
 		collection: collectionRes.data,
 		collections: collectionsRes.data,
 		brickSchema: selectedBricksTableSchema,
-		responses: [bricksQueryRes.data],
+		responses: [bricksQuery],
 		versionType: data.versionType,
 		resolveVersionType: data.resolveVersionType,
 		refResources,
@@ -121,7 +142,7 @@ const getMultiple: ServiceFn<
 		data: {
 			bricks: includeBricks
 				? documentBricksFormatter.formatMultiple({
-						bricksQuery: bricksQueryRes.data,
+						bricksQuery,
 						bricksSchema: selectedBricksTableSchema,
 						refs: refsRes.data.hydratedRefs,
 						collection: collectionRes.data,
@@ -130,7 +151,7 @@ const getMultiple: ServiceFn<
 					})
 				: [],
 			fields: documentBricksFormatter.formatDocumentFields({
-				bricksQuery: bricksQueryRes.data,
+				bricksQuery,
 				bricksSchema: selectedBricksTableSchema,
 				refs: refsRes.data.hydratedRefs,
 				collection: collectionRes.data,

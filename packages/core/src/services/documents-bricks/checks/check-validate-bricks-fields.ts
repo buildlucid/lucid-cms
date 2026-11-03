@@ -64,6 +64,8 @@ type ConditionScopeLevel = {
 };
 
 type ValidationMeta = {
+	/** Allows unfinished preview content, relaxing required fields, Zod rules and repeater minimums. */
+	allowIncomplete?: boolean;
 	localized: boolean;
 	defaultLocale: string | null;
 	locales?: string[];
@@ -267,6 +269,8 @@ const checkValidateBricksFields: ServiceFn<
 			collection: CollectionBuilder;
 			authUser?: LucidActor;
 			existingVersion?: { id: number; documentId: number };
+			/** Allows unfinished preview content, relaxing required fields, Zod rules and repeater minimums. */
+			allowIncomplete?: boolean;
 		},
 	],
 	undefined
@@ -351,6 +355,7 @@ const checkValidateBricksFields: ServiceFn<
 		}),
 		defaultLocale: localization.defaultLocale,
 		locales: localization.locales,
+		allowIncomplete: data.allowIncomplete,
 	});
 	const fieldErrors = recursiveFieldValidate({
 		fields: data.fields,
@@ -364,6 +369,7 @@ const checkValidateBricksFields: ServiceFn<
 			localized: localization.enabled,
 			defaultLocale: localization.defaultLocale,
 			locales: localization.locales,
+			allowIncomplete: data.allowIncomplete,
 		},
 	});
 
@@ -405,6 +411,7 @@ const validateBricks = (props: {
 	embeddedLocales: ReadonlyMap<string, string | null>;
 	defaultLocale: string | null;
 	locales: string[];
+	allowIncomplete?: boolean;
 }): Array<BrickError> => {
 	const errors: BrickError[] = [];
 
@@ -486,6 +493,7 @@ const validateBricks = (props: {
 				defaultLocale: onlyLocale ?? props.defaultLocale,
 				locales: props.locales,
 				onlyLocale,
+				allowIncomplete: props.allowIncomplete,
 			},
 		});
 		if (fieldErrors.length === 0) continue;
@@ -580,6 +588,7 @@ export const recursiveFieldValidate = (props: {
 			const validationResult = fieldInstance.validate({
 				type: field.type,
 				value: groups,
+				allowIncomplete: props.meta.allowIncomplete,
 			});
 			if (!validationResult.valid) {
 				errors.push({
@@ -653,6 +662,7 @@ export const recursiveFieldValidate = (props: {
 	}
 
 	//* check for required fields that are missing
+	if (props.meta.allowIncomplete) return errors;
 	const submittedFieldKeys = new Set(props.fields.map((field) => field.key));
 	getFieldBuilderState(props.instance).fields.forEach((fieldInstance, key) => {
 		if (submittedFieldKeys.has(key)) return;
@@ -804,6 +814,7 @@ export const validateField = (props: {
 				type: props.field.type,
 				value,
 				refData: refData,
+				allowIncomplete: props.meta.allowIncomplete,
 			});
 
 			if (!validationResult.valid) {
@@ -826,6 +837,7 @@ export const validateField = (props: {
 							? props.field.value
 							: undefined,
 					refData: refData,
+					allowIncomplete: props.meta.allowIncomplete,
 				});
 
 				if (!validationResult.valid) {
@@ -844,6 +856,7 @@ export const validateField = (props: {
 			type: props.field.type,
 			value: props.field.value,
 			refData: refData,
+			allowIncomplete: props.meta.allowIncomplete,
 		});
 
 		if (!validationResult.valid) {

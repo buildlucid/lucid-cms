@@ -876,6 +876,14 @@ const DocumentEditorPage: Component<{
 											}
 											dirty={docState.isDocumentMutated}
 											saveStamp={preview.saveStamp}
+											draftVersionId={() =>
+												docState.document()?.versionId ?? undefined
+											}
+											canSyncDraft={() =>
+												uiState.hasSavePermission() &&
+												!uiState.isBuilderLocked()
+											}
+											route={() => docState.document()?.route}
 											onFocusField={previewFocus.requestTarget}
 											registerScrollCapture={registerPreviewScrollCapture}
 											consumeScrollRestore={consumePreviewScrollRestore}

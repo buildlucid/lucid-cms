@@ -24,7 +24,7 @@ describe("client preview bridge handshake", () => {
 			const postMessage = vi
 				.spyOn(window.parent, "postMessage")
 				.mockImplementation(() => undefined);
-			const cleanup = installPreviewBridge(window);
+			const { cleanup } = installPreviewBridge(window, new Set());
 			const button = document.createElement("button");
 			button.setAttribute(
 				"data-lucid-preview-field",
@@ -95,7 +95,7 @@ describe("client preview bridge scroll", () => {
 		const postMessage = vi
 			.spyOn(window.parent, "postMessage")
 			.mockImplementation(() => undefined);
-		const cleanup = installPreviewBridge(window);
+		const { cleanup } = installPreviewBridge(window, new Set());
 		const parentOrigin = "https://admin.example";
 		const state = { pageKey: getPreviewPageKey(window), x: 0, y: 800 };
 		for (const data of [
@@ -127,5 +127,85 @@ describe("client preview bridge scroll", () => {
 			parentOrigin,
 		);
 		cleanup();
+	});
+});
+
+describe("client preview bridge announcements", () => {
+	test("says whether the page handles updates, again when that changes or its runtime is torn down", () => {
+		const postMessage = vi
+			.spyOn(window.parent, "postMessage")
+			.mockImplementation(() => undefined);
+		const handlers = new Set<() => void>();
+		const bridge = installPreviewBridge(window, handlers);
+		const parentOrigin = "https://admin.example";
+		window.dispatchEvent(
+			new MessageEvent("message", {
+				source: window.parent,
+				origin: parentOrigin,
+				data: createPreviewMessage({ type: previewProtocol.messages.connect }),
+			}),
+		);
+
+		handlers.add(() => undefined);
+		bridge.handlersChanged();
+		bridge.handlersChanged();
+		//* tearing down without leaving the page hands updates back to the builder
+		bridge.cleanup();
+
+		expect(postMessage.mock.calls).toEqual([
+			[
+				createPreviewMessage({
+					type: previewProtocol.messages.ready,
+					updates: false,
+				}),
+				"*",
+			],
+			[
+				createPreviewMessage({
+					type: previewProtocol.messages.ready,
+					updates: true,
+				}),
+				parentOrigin,
+			],
+			[
+				createPreviewMessage({
+					type: previewProtocol.messages.ready,
+					updates: false,
+				}),
+				parentOrigin,
+			],
+		]);
+	});
+
+	test("says when the page leaves, and announces itself again when restored from the back/forward cache", () => {
+		const postMessage = vi
+			.spyOn(window.parent, "postMessage")
+			.mockImplementation(() => undefined);
+		const bridge = installPreviewBridge(window, new Set());
+		window.dispatchEvent(
+			new MessageEvent("message", {
+				source: window.parent,
+				origin: "https://admin.example",
+				data: createPreviewMessage({ type: previewProtocol.messages.connect }),
+			}),
+		);
+		//* happy-dom ignores `persisted` in PageTransitionEvent's options
+		const transition = (type: string) =>
+			Object.assign(new Event(type), { persisted: true });
+		window.dispatchEvent(transition("pagehide"));
+		expect(postMessage).toHaveBeenLastCalledWith(
+			createPreviewMessage({ type: previewProtocol.messages.unload }),
+			"https://admin.example",
+		);
+		window.dispatchEvent(transition("pageshow"));
+
+		expect(postMessage).toHaveBeenLastCalledWith(
+			createPreviewMessage({
+				type: previewProtocol.messages.ready,
+				updates: false,
+			}),
+			"https://admin.example",
+		);
+		bridge.cleanup();
 	});
 });

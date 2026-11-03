@@ -4,6 +4,7 @@ import type { UiIntegration, UiRenderer, UiVite } from "./types.js";
 export { clientSlot } from "./client-slot.js";
 export type {
 	UiClient,
+	UiDispose,
 	UiFilter,
 	UiHydrate,
 	UiHydrateContext,

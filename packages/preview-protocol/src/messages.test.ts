@@ -12,9 +12,24 @@ describe("direction-specific message validation", () => {
 	test("accepts current child messages and rejects parent or unknown messages", () => {
 		expect(
 			isPreviewChildMessage(
-				createPreviewMessage({ type: previewProtocol.messages.ready }),
+				createPreviewMessage({
+					type: previewProtocol.messages.ready,
+					updates: true,
+				}),
 			),
 		).toBe(true);
+		expect(
+			isPreviewChildMessage(
+				createPreviewMessage({ type: previewProtocol.messages.unload }),
+			),
+		).toBe(true);
+		expect(
+			isPreviewChildMessage({
+				scope: previewProtocol.scope,
+				version: previewProtocol.version,
+				type: previewProtocol.messages.ready,
+			}),
+		).toBe(false);
 		expect(
 			isPreviewChildMessage(
 				createPreviewMessage({
@@ -33,11 +48,15 @@ describe("direction-specific message validation", () => {
 				scope: previewProtocol.scope,
 				version: 2,
 				type: previewProtocol.messages.ready,
+				updates: false,
 			}),
 		).toBe(false);
 		expect(
 			isPreviewChildMessage({
-				...createPreviewMessage({ type: previewProtocol.messages.ready }),
+				...createPreviewMessage({
+					type: previewProtocol.messages.ready,
+					updates: false,
+				}),
 				extra: "x",
 			}),
 		).toBe(false);
@@ -73,5 +92,21 @@ describe("direction-specific message validation", () => {
 				requestId: "",
 			}),
 		).toBe(false);
+	});
+
+	test("accepts updates with a whole, non-negative revision", () => {
+		const update = (revision: unknown) =>
+			isPreviewParentMessage({
+				scope: previewProtocol.scope,
+				version: previewProtocol.version,
+				type: previewProtocol.messages.update,
+				revision,
+			});
+
+		expect(update(0)).toBe(true);
+		expect(update(12)).toBe(true);
+		expect(update(-1)).toBe(false);
+		expect(update(1.5)).toBe(false);
+		expect(update("1")).toBe(false);
 	});
 });

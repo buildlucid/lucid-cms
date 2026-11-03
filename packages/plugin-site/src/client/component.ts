@@ -5,7 +5,7 @@ type HydrateModule = {
 		props: Record<string, unknown>,
 		slots: Record<string, Element>,
 		context: { id: string; render: boolean },
-	) => void | Promise<void>;
+	) => (() => void) | Promise<() => void>;
 };
 
 const hasBox = (element: Element) =>
@@ -84,13 +84,15 @@ const takeTemplateSlots = (element: HTMLElement) => {
 
 class ClientComponent extends HTMLElement {
 	#started = false;
+	#removed = false;
+	#dispose: (() => void) | undefined;
 
 	connectedCallback() {
 		if (this.#started) return;
 		this.#started = true;
 		when(this, () => {
 			const src = this.getAttribute("src");
-			if (!src) return;
+			if (!src || this.#removed) return;
 			const render = this.getAttribute("client") === "only";
 			import(/* @vite-ignore */ src)
 				.then((module: HydrateModule) =>
@@ -101,9 +103,23 @@ class ClientComponent extends HTMLElement {
 						{ id: this.getAttribute("prefix") ?? "", render },
 					),
 				)
+				.then((dispose) => {
+					if (this.#removed) dispose();
+					else this.#dispose = dispose;
+				})
 				.catch((error: unknown) => {
 					console.error(`Failed to hydrate ${src}`, error);
 				});
+		});
+	}
+
+	//* moved elements reconnect straight away, so only ones still detached afterwards unmount, eg. islands a preview update replaced
+	disconnectedCallback() {
+		queueMicrotask(() => {
+			if (this.isConnected || this.#removed) return;
+			this.#removed = true;
+			this.#dispose?.();
+			this.#dispose = undefined;
 		});
 	}
 }

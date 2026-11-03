@@ -25,7 +25,9 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
+import buildDraftTables from "../../documents-bricks/helpers/build-draft-tables.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
+import readPreviewDraft from "../../preview-sessions/helpers/read-draft.js";
 import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
 import checkFilterAccess from "../checks/check-filter-access.js";
 import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
@@ -237,7 +239,41 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 	);
 	if (documentsRes.error) return documentsRes;
 
-	const documentRows = documentsRes.data?.[0] ?? [];
+	const storedRows = documentsRes.data?.[0] ?? [];
+
+	//* the builder preview's unsaved edits replace its entry document's stored fields, though filters and sorting still match what's saved
+	const entryRow = preview
+		? storedRows.find((row) => row.id === preview.entry.documentId)
+		: undefined;
+	const entryVersionId = entryRow?.version_id;
+	const draftRes =
+		preview && entryRow && typeof entryVersionId === "number"
+			? await readPreviewDraft(context, {
+					preview,
+					collectionKey: data.collectionKey,
+					documentId: entryRow.id,
+					versionId: entryVersionId,
+					contentId: entryRow.version_content_id,
+				})
+			: undefined;
+	if (draftRes?.error) return draftRes;
+
+	const draftTables =
+		draftRes?.data && entryRow && typeof entryVersionId === "number"
+			? buildDraftTables({
+					collection: collectionRes.data,
+					documentId: entryRow.id,
+					versionId: entryVersionId,
+					draft: draftRes.data,
+					bricksSchema: collectionFieldsTableSchemas,
+					config: context.config,
+				})
+			: undefined;
+	const documentRows = draftTables
+		? storedRows.map((row) =>
+				row === entryRow ? { ...row, ...draftTables } : row,
+			)
+		: storedRows;
 	const baseUrl = getBaseUrl(context);
 
 	const refsRes = await resolveDocumentRefs(context, {

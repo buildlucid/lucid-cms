@@ -21,6 +21,7 @@ const hydrateComponent: UiHydrate<Component> = (
 	});
 	app.config.idPrefix = id;
 	app.mount(element);
+	return () => app.unmount();
 };
 
 export default hydrateComponent;

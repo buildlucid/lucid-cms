@@ -62,7 +62,11 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	formatResponseValue() {
 		return null satisfies FieldResponse<"repeater">["value"];
 	}
-	uniqueValidation(value: unknown) {
+	uniqueValidation(
+		value: unknown,
+		_refData?: unknown,
+		options?: { allowIncomplete?: boolean },
+	) {
 		if (
 			Array.isArray(value) &&
 			typeof this.config.validation?.maxGroups === "number"
@@ -83,6 +87,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 		}
 
 		if (
+			!options?.allowIncomplete &&
 			Array.isArray(value) &&
 			typeof this.config.validation?.minGroups === "number"
 		) {

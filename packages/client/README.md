@@ -250,9 +250,40 @@ The `@lucidcms/client/preview` browser entry lazily installs safe exact/session 
 import { setupPreview } from "@lucidcms/client/preview";
 
 const preview = setupPreview();
-
-window.addEventListener("pagehide", preview.cleanup, { once: true });
 ```
+
+Call `preview.cleanup()` only when tearing the app down without leaving the page; the builder then reloads the frame to show changes. Pages that leave or enter the back/forward cache tell the builder themselves.
+
+### Live Updates
+
+The builder shows unsaved edits in the preview. Every document read that passes the preview token gets the editor's current content, with relations, media and locales filled in as they would be after a save. By default the page reloads after each change.
+
+Register an update handler to re-render in place instead. Handlers receive the change's `revision` and a `signal` that aborts when a newer change arrives. They run one change at a time, and if one throws, the page reloads. `setupPreview()` returns the same controller each time it is called, so separate parts of a page can register their own handlers.
+
+```typescript
+import { morphPage, setupPreview } from "@lucidcms/client/preview";
+
+const preview = setupPreview();
+
+// Single-page apps: read again and re-render
+preview.onUpdate(async ({ signal }) => {
+  const response = await client.documents.getSingle({
+    collectionKey: "page",
+    version: "published",
+    preview: preview.token ?? undefined,
+    query: { filter: { _path: { value: location.pathname } } },
+    request: { signal },
+  });
+  if (response.data) render(response.data);
+});
+
+// Server-rendered sites: fetch the page again and update it in place
+preview.onUpdate(morphPage);
+```
+
+`morphPage` keeps scroll position and leaves elements marked `data-lucid-preview-keep` alone. Custom elements, such as hydrated islands, are replaced whole when their server markup changes. Frameworks with their own refresh can call it from a handler instead, such as `router.refresh()` in Next.js, `refreshNuxtData()` in Nuxt or `invalidateAll()` in SvelteKit.
+
+Filters and sorting still match saved content, so a list keeps the previewed document where it was, showing its unsaved fields.
 
 For click-to-field targeting, add `previewFieldMarkup(target)` from `@lucidcms/client/markup` to the element rendering a field while previewing, such as `<h1${previewFieldMarkup(target)}>`. The target names the document, the brick when the field is in one, and the field's path, such as `{ collectionKey: page.collectionKey, documentId: page.id, locale: page.locale ?? undefined, brick: { type: "builder", key: brick.key, order: brick.order }, path: ["sections", 0, "heading"] }`. Consumers should not construct preview attributes or messages directly.
 

@@ -24,6 +24,7 @@ import type {
 } from "../../../utils/services/types.js";
 import getDocumentBricks from "../../documents-bricks/get-multiple.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
+import readPreviewDraft from "../../preview-sessions/helpers/read-draft.js";
 import type { PreviewSessionDocumentTarget } from "../../preview-sessions/types.js";
 import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
@@ -202,6 +203,18 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 		};
 	}
 
+	//* the builder preview's unsaved edits replace the stored content of its entry document
+	const draftRes = preview
+		? await readPreviewDraft(context, {
+				preview,
+				collectionKey: data.collectionKey,
+				documentId: documentRes.data.id,
+				versionId: documentRes.data.version_id,
+				contentId: documentRes.data.version_content_id,
+			})
+		: undefined;
+	if (draftRes?.error) return draftRes;
+
 	const bricksRes = await getDocumentBricks(context, {
 		versionId: documentRes.data.version_id,
 		collectionKey: collectionRes.data.key,
@@ -216,6 +229,7 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 			includeMeta: include.meta,
 		}),
 		reader: data.reader,
+		draft: draftRes?.data,
 	});
 	if (bricksRes.error) return bricksRes;
 

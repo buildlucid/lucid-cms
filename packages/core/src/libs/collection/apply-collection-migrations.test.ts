@@ -1,35 +1,34 @@
-import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import type { ServiceContext } from "../../exports/types.js";
-import createLucidDatabase from "../db/create-lucid-database.js";
-import type { DatabaseConnection } from "../db/types.js";
+import createServiceContext from "../../utils/services/create-service-context.js";
+import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import { createTranslationStore } from "../i18n/index.js";
 import applyCollectionMigrations from "./apply-collection-migrations.js";
 import type { CollectionMigrationPlan } from "./migration/types.js";
 
 describe("applyCollectionMigrations", () => {
-	let db: SQLiteAdapter;
-	let connection: DatabaseConnection;
+	let fixture: ReturnType<typeof getTestConfig>;
 	let context: ServiceContext;
 
+	//* every test gets its own in-memory database, as one drops a core table
 	beforeEach(async () => {
-		db = new SQLiteAdapter({ database: ":memory:" });
-		connection = await db.connect();
-		await db.migrateCoreToLatest(connection);
-		await connection.client
+		fixture = getTestConfig();
+		await fixture.migrate();
+		context = createServiceContext({
+			config: await fixture.getConfig(),
+			database: await fixture.getDatabase(),
+			translationStore: createTranslationStore({
+				defaultLocale: "en",
+				bundles: { en: { admin: {}, server: {} } },
+			}),
+		});
+		await context.db.kysely
 			.insertInto("lucid_collections")
 			.values({ key: "pages" })
 			.execute();
-
-		// @ts-expect-error
-		context = {
-			db: createLucidDatabase({ client: connection.client, adapter: db }),
-			config: { db, tables: [], collections: [] },
-		} as ServiceContext;
 	});
 
-	afterEach(async () => {
-		await connection.destroy();
-	});
+	afterEach(() => fixture.destroy());
 
 	/** Builds an exact plan that creates one standalone test table. */
 	const createExactPlan = (): CollectionMigrationPlan => {
@@ -77,7 +76,7 @@ describe("applyCollectionMigrations", () => {
 		const plan = createExactPlan();
 
 		const result = await applyCollectionMigrations(context, plan);
-		const inferred = await db.inferSchema(connection.client);
+		const inferred = await context.config.db.inferSchema(context.db.kysely);
 		const snapshotsResult = await context.db
 			.query("test.collection-migrations.find", (database) =>
 				database.selectFrom("lucid_collection_migrations").selectAll(),
@@ -101,13 +100,13 @@ describe("applyCollectionMigrations", () => {
 	});
 
 	test("rolls back table changes when snapshot insertion fails", async () => {
-		await connection.client.schema
+		await context.db.kysely.schema
 			.dropTable("lucid_collection_migrations")
 			.ifExists()
 			.execute();
 
 		const result = await applyCollectionMigrations(context, createExactPlan());
-		const inferred = await db.inferSchema(connection.client);
+		const inferred = await context.config.db.inferSchema(context.db.kysely);
 
 		expect(result.error).toBeDefined();
 		expect(inferred.map((table) => table.name)).not.toContain(

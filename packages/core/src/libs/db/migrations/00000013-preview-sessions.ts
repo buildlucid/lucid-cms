@@ -28,6 +28,12 @@ const Migration00000013: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("entry_version_id", adapter.getDataType("integer"))
+				.addColumn("draft_version_id", adapter.getDataType("integer"))
+				.addColumn("draft_content_id", adapter.getDataType("text"))
+				.addColumn("draft_content", adapter.getDataType("json"))
+				.addColumn("draft_revision", adapter.getDataType("integer"), (col) =>
+					col.notNull().defaultTo(0),
+				)
 				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
 					col.notNull(),
 				)

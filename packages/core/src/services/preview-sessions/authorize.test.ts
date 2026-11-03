@@ -169,6 +169,7 @@ describe("preview session resolution and authorization", () => {
 			expect(related).toEqual({
 				error: undefined,
 				data: {
+					sessionId: 4,
 					mode: "scoped",
 					target: "auxiliary",
 					entry: {
@@ -227,6 +228,7 @@ describe("preview session resolution and authorization", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data).toEqual({
+			sessionId: 4,
 			mode: "perspective",
 			entry: {
 				collectionKey: "page",
@@ -256,6 +258,7 @@ describe("preview session resolution and authorization", () => {
 		expect(response).toEqual({
 			error: undefined,
 			data: {
+				sessionId: 4,
 				mode: "perspective",
 				entry: {
 					collectionKey: "page",

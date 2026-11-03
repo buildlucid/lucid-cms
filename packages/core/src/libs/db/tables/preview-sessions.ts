@@ -1,5 +1,13 @@
-import type { Generated } from "kysely";
+import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
+import {
+	type BrickInputSchema,
+	brickInputSchema,
+} from "../../../schemas/collection-bricks.js";
+import {
+	type FieldInputSchema,
+	fieldInputSchema,
+} from "../../../schemas/collection-fields.js";
 import type { PreviewMode } from "../../../types/response.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable } from "../types.js";
@@ -40,6 +48,27 @@ export const previewSessionsTable = defineTable(
 				schema: z.number().nullable(),
 				type: "integer",
 			},
+			draft_version_id: {
+				schema: z.number().nullable(),
+				type: "integer",
+			},
+			draft_content_id: {
+				schema: z.string().nullable(),
+				type: "text",
+			},
+			draft_content: {
+				schema: z
+					.object({
+						bricks: z.array(brickInputSchema),
+						fields: z.array(fieldInputSchema),
+					})
+					.nullable(),
+				type: "json",
+			},
+			draft_revision: {
+				schema: z.number(),
+				type: "integer",
+			},
 			expires_at: {
 				schema: z.union([z.string(), z.date()]),
 				type: "timestamp",
@@ -64,7 +93,24 @@ export interface LucidPreviewSessions {
 	entry_version_type: DocumentVersionType;
 	mode: PreviewMode;
 	entry_version_id: number | null;
+	/** The version the unsaved draft was edited from. Reads of other versions ignore the draft. */
+	draft_version_id: number | null;
+	/** The saved content the draft was edited from. Once the version is saved again, reads ignore the draft. */
+	draft_content_id: string | null;
+	/** Unsaved editor content shown in place of the stored version, only through this session's token. */
+	draft_content: JSONColumnType<
+		LucidPreviewDraftContent | null,
+		LucidPreviewDraftContent | null | undefined,
+		LucidPreviewDraftContent | null
+	>;
+	/** Rises with every draft write so late, older writes are ignored. */
+	draft_revision: Generated<number>;
 	expires_at: TimestampImmutable;
 	created_by: number | null;
 	created_at: TimestampImmutable;
 }
+
+export type LucidPreviewDraftContent = {
+	bricks: BrickInputSchema[];
+	fields: FieldInputSchema[];
+};

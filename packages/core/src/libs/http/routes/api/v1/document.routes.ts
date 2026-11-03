@@ -23,6 +23,7 @@ import restoreRevision from "../../../controllers/documents/restore-revision.js"
 import unpublish from "../../../controllers/documents/unpublish.js";
 import updateEditor from "../../../controllers/documents/update-editor.js";
 import updateOrder from "../../../controllers/documents/update-order.js";
+import updatePreviewDraft from "../../../controllers/documents/update-preview-draft.js";
 import updateVersion from "../../../controllers/documents/update-version.js";
 import updateWorkflow from "../../../controllers/documents/update-workflow.js";
 
@@ -48,6 +49,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:versionOrId", ...getSingle)
 	.post("/:collectionKey/:id/:versionId/check", ...checkVersion)
+	.put("/:collectionKey/:id/:versionId/preview-draft", ...updatePreviewDraft)
 	.post("/:collectionKey/:id/:versionId/align", ...align)
 	.post("/:collectionKey/:id/:versionId/restore-revision", ...restoreRevision)
 	.post("/:collectionKey/:id/:versionId/promote-version", ...promoteVersion)

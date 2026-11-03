@@ -3,21 +3,30 @@ import { installPreviewBridge } from "./bridge.js";
 import { resolvePreviewToken } from "./context.js";
 import { installPreviewNavigation } from "./navigation.js";
 import { createPreviewNotice } from "./notice.js";
-import type { PreviewController, PreviewMode } from "./types.js";
+import type { PreviewMode, PreviewUpdateHandler } from "./types.js";
+
+/** The lazily loaded part of a preview controller. */
+export type PreviewRuntime = {
+	readonly active: boolean;
+	/** Tells the builder whether the page now has update handlers. */
+	handlersChanged: () => void;
+	cleanup: () => void;
+};
 
 const activePreviewCleanups = new WeakMap<Window, () => void>();
 
-const inactiveController = (): PreviewController => ({
-	active: false,
-	ready: Promise.resolve(),
-	cleanup: () => undefined,
-});
-
-/** Initializes Lucid's builder-only preview runtime. */
-export const setupPreviewRuntime = (mode: PreviewMode): PreviewController => {
+/** Initializes Lucid's builder-only preview runtime, running `handlers` when the previewed content changes. */
+export const setupPreviewRuntime = (
+	mode: PreviewMode,
+	handlers: ReadonlySet<PreviewUpdateHandler>,
+): PreviewRuntime => {
 	const targetWindow = getWindow();
 	if (!targetWindow || !isLucidBuilderPreview(targetWindow)) {
-		return inactiveController();
+		return {
+			active: false,
+			handlersChanged: () => undefined,
+			cleanup: () => undefined,
+		};
 	}
 
 	activePreviewCleanups.get(targetWindow)?.();
@@ -26,7 +35,7 @@ export const setupPreviewRuntime = (mode: PreviewMode): PreviewController => {
 	const notice = mode === "scoped" ? createPreviewNotice(targetWindow) : null;
 	let cleanedUp = false;
 
-	const cleanupBridge = installPreviewBridge(targetWindow);
+	const bridge = installPreviewBridge(targetWindow, handlers);
 	const cleanupNavigation = installPreviewNavigation({
 		targetWindow,
 		mode,
@@ -38,7 +47,7 @@ export const setupPreviewRuntime = (mode: PreviewMode): PreviewController => {
 		if (cleanedUp) return;
 		cleanedUp = true;
 		cleanupNavigation();
-		cleanupBridge();
+		bridge.cleanup();
 		notice?.remove();
 		activePreviewCleanups.delete(targetWindow);
 	};
@@ -48,7 +57,7 @@ export const setupPreviewRuntime = (mode: PreviewMode): PreviewController => {
 		get active() {
 			return !cleanedUp;
 		},
-		ready: Promise.resolve(),
+		handlersChanged: bridge.handlersChanged,
 		cleanup,
 	};
 };

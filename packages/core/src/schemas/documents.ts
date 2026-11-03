@@ -653,6 +653,38 @@ export const controllerSchemas = {
 			expiresAt: z.iso.datetime().nullable(),
 		}),
 	} satisfies ControllerSchema,
+	updatePreviewDraft: {
+		body: z.object({
+			token: z.string().trim().min(1).meta({
+				description: "The preview token from the builder preview's URL",
+			}),
+			revision: z.number().int().positive().meta({
+				description:
+					"Rises with every write from the editor; older writes are ignored",
+				example: 3,
+			}),
+			draft: z
+				.object({
+					bricks: z.array(brickInputSchema),
+					fields: z.array(fieldInputSchema),
+				})
+				.nullable()
+				.meta({
+					description:
+						"The unsaved bricks and collection fields, or null to show the stored version again",
+				}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim(),
+			id: z.string().trim(),
+			versionId: z.string().trim(),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	deleteMultiple: {
 		body: z.object({
 			ids: z.array(z.number()).meta({

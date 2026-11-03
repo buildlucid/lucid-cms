@@ -68,6 +68,7 @@ const authorize: ServiceFn<
 			return {
 				error: undefined,
 				data: {
+					sessionId: session.id,
 					mode: "scoped",
 					target: "entry",
 					entry: {
@@ -84,6 +85,7 @@ const authorize: ServiceFn<
 			return {
 				error: undefined,
 				data: {
+					sessionId: session.id,
 					mode: "scoped",
 					target: "auxiliary",
 					entry: {
@@ -104,6 +106,7 @@ const authorize: ServiceFn<
 		return {
 			error: undefined,
 			data: {
+				sessionId: session.id,
 				mode: "scoped",
 				target: "auxiliary",
 				entry: {
@@ -118,6 +121,7 @@ const authorize: ServiceFn<
 	return {
 		error: undefined,
 		data: {
+			sessionId: session.id,
 			mode: "perspective",
 			entry: {
 				collectionKey: session.entry_collection_key,

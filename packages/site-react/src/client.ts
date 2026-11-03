@@ -20,12 +20,13 @@ const hydrateComponent: UiHydrate<ComponentType<Record<string, unknown>>> = (
 	);
 	const app = createElement(component, parts.props, parts.children);
 	if (!render) {
-		hydrateRoot(element, app, { identifierPrefix: id });
-		return;
+		const root = hydrateRoot(element, app, { identifierPrefix: id });
+		return () => root.unmount();
 	}
 	const root = createRoot(element, { identifierPrefix: id });
 	// The fallback is gone already, so render before the browser paints.
 	flushSync(() => root.render(app));
+	return () => root.unmount();
 };
 
 export default hydrateComponent;

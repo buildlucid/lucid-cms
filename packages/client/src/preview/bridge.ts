@@ -6,6 +6,8 @@ import {
 } from "@lucidcms/preview-protocol";
 import { getPreviewPageKey } from "./context.js";
 import { installPreviewFieldInteraction } from "./field-target.js";
+import type { PreviewUpdateHandler } from "./types.js";
+import { createPreviewUpdates } from "./updates.js";
 
 /** Restores a scroll position once the page has loaded, retrying while late content grows the page. */
 const installScrollRestoration = (targetWindow: Window) => {
@@ -60,10 +62,43 @@ const installScrollRestoration = (targetWindow: Window) => {
 	};
 };
 
-/** Installs the child side of Lucid's builder preview bridge. */
-export const installPreviewBridge = (targetWindow: Window): (() => void) => {
+/**
+ * Installs the page-side bridge and update handlers. Reports handler availability and navigation
+ * so the builder can reload or defer updates.
+ */
+export const installPreviewBridge = (
+	targetWindow: Window,
+	handlers: ReadonlySet<PreviewUpdateHandler>,
+) => {
 	const scrollRestoration = installScrollRestoration(targetWindow);
+	const updates = createPreviewUpdates(targetWindow, handlers);
 	let parentOrigin: string | null = null;
+	let announcedUpdates = handlers.size > 0;
+	let unloaded = false;
+
+	const announce = () => {
+		targetWindow.parent.postMessage(
+			createPreviewMessage({
+				type: previewProtocol.messages.ready,
+				updates: announcedUpdates,
+			}),
+			parentOrigin ?? "*",
+		);
+	};
+	const sendUnload = () => {
+		if (unloaded || parentOrigin === null) return;
+		unloaded = true;
+		targetWindow.parent.postMessage(
+			createPreviewMessage({ type: previewProtocol.messages.unload }),
+			parentOrigin,
+		);
+	};
+	//* pages restored from the back/forward cache announce themselves again
+	const onPageShow = (event: PageTransitionEvent) => {
+		if (!event.persisted || !unloaded) return;
+		unloaded = false;
+		announce();
+	};
 
 	const onMessage = (event: MessageEvent<unknown>) => {
 		if (
@@ -103,6 +138,11 @@ export const installPreviewBridge = (targetWindow: Window): (() => void) => {
 			event.data.state.pageKey === getPreviewPageKey(targetWindow)
 		) {
 			scrollRestoration.restore(event.data.state);
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.update) {
+			updates.receive(event.data.revision);
 		}
 	};
 	const cleanupFieldInteraction = installPreviewFieldInteraction({
@@ -122,15 +162,31 @@ export const installPreviewBridge = (targetWindow: Window): (() => void) => {
 	});
 
 	targetWindow.addEventListener("message", onMessage);
-	targetWindow.parent.postMessage(
-		createPreviewMessage({ type: previewProtocol.messages.ready }),
-		"*",
-	);
+	targetWindow.addEventListener("pagehide", sendUnload);
+	targetWindow.addEventListener("pageshow", onPageShow);
+	announce();
 
-	return () => {
-		targetWindow.removeEventListener("message", onMessage);
-		cleanupFieldInteraction();
-		scrollRestoration.cancel();
-		parentOrigin = null;
+	return {
+		/** Announces again when handlers were added to an empty set or it emptied. */
+		handlersChanged: () => {
+			const hasHandlers = handlers.size > 0;
+			if (hasHandlers === announcedUpdates) return;
+			announcedUpdates = hasHandlers;
+			announce();
+		},
+		cleanup: () => {
+			//* the page stays without its runtime, so the builder reloads it for updates instead
+			if (!unloaded && parentOrigin !== null && announcedUpdates) {
+				announcedUpdates = false;
+				announce();
+			}
+			targetWindow.removeEventListener("message", onMessage);
+			targetWindow.removeEventListener("pagehide", sendUnload);
+			targetWindow.removeEventListener("pageshow", onPageShow);
+			cleanupFieldInteraction();
+			scrollRestoration.cancel();
+			updates.cancel();
+			parentOrigin = null;
+		},
 	};
 };

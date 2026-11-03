@@ -1,4 +1,8 @@
-import { previewNoticeTagName, scopedLockMessage } from "./constants.js";
+import {
+	previewKeepAttribute,
+	previewNoticeTagName,
+	scopedLockMessage,
+} from "./constants.js";
 import { previewNoticeStyles } from "./styles.js";
 
 type LucidPreviewNoticeElement = HTMLElement & {
@@ -51,6 +55,7 @@ export const createPreviewNotice = (
 		previewNoticeTagName,
 	) as LucidPreviewNoticeElement;
 	element.hidden = true;
+	element.setAttribute(previewKeepAttribute, "");
 	(targetWindow.document.body ?? targetWindow.document.documentElement).append(
 		element,
 	);

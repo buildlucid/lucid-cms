@@ -21,11 +21,8 @@ const hydrateComponent: UiHydrate<Component<Record<string, unknown>>> = (
 				});
 			},
 		});
-	if (render) {
-		renderInto(app, element);
-		return;
-	}
-	hydrate(app, element, { renderId: id });
+	if (render) return renderInto(app, element);
+	return hydrate(app, element, { renderId: id });
 };
 
 export default hydrateComponent;

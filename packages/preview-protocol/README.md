@@ -13,7 +13,7 @@ The package owns the small, transport-safe part of preview communication:
 - Message envelope creation and direction-specific validation.
 - Versioned field-target attribute encoding and decoding.
 
-It deliberately does not contain DOM access, iframe handling, origin policy, event listeners, scrolling, highlighting, or application state. Those behaviours remain in the [client preview runtime](../client/src/preview/) and the [admin preview bridge](../admin/src/utils/preview-bridge.ts).
+It deliberately does not contain DOM access, iframe handling, origin policy, event listeners, scrolling, highlighting, or application state. Those behaviours remain in the [client preview runtime](../client/src/preview/) and the [admin preview bridge](../admin/src/components/DocumentPreview/utils/preview-bridge.ts).
 
 The root export is intentionally narrow. Keep implementation-only message types and validation helpers internal unless a consumer genuinely needs them.
 
@@ -23,6 +23,8 @@ The root export is intentionally narrow. Keep implementation-only message types 
 2. The admin validates the iframe window and configured origin, then replies with a connection message.
 3. The frontend records that exact parent origin.
 4. Field-focus and scroll messages are exchanged only after that connection is established.
+5. The ready message says whether the frontend re-renders itself on updates, and is sent again when that changes. The frontend sends an unload message when its page goes away, so the admin waits for the next page before sending more.
+6. When the previewed content changes, the admin sends an update with a rising revision to frontends that re-render themselves, and reloads the frame for the rest. The content itself never crosses the frame: the frontend reads it again with its preview token, which returns the editor's unsaved draft.
 
 The protocol validates message versions and payload shapes. The admin and client remain responsible for checking windows and origins. Unsupported or malformed messages are ignored safely.
 
@@ -40,7 +42,7 @@ A field target describes a logical location in a document: its collection, docum
 }
 ```
 
-Frontend code should annotate fields with `document.field(...).preview()`. Do not construct the attribute or protocol message by hand; their encoding is an internal detail that may change with the protocol version.
+Frontend code should annotate fields with `previewFieldMarkup(target)` from `@lucidcms/client/markup`, or `editable()` in the site plugin. Do not construct the attribute or protocol message by hand; their encoding is an internal detail that may change with the protocol version.
 
 ## Making changes
 

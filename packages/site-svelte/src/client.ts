@@ -1,5 +1,5 @@
 import type { UiHydrate } from "@lucidcms/plugin-site/ui";
-import { type Component, hydrate, mount } from "svelte";
+import { type Component, hydrate, mount, unmount } from "svelte";
 import { slotProps } from "./slots.js";
 
 /** Hydrates Svelte with slot HTML and IDs restored from server markup via `$props.id()`, or mounts for `client: "only"`. */
@@ -19,8 +19,10 @@ const hydrateComponent: UiHydrate<Component<Record<string, unknown>>> = (
 			),
 		),
 	};
-	if (render) mount(component, options);
-	else hydrate(component, options);
+	const instance = render
+		? mount(component, options)
+		: hydrate(component, options);
+	return () => void unmount(instance);
 };
 
 export default hydrateComponent;
