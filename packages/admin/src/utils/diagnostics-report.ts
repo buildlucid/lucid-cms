@@ -71,7 +71,12 @@ export const buildDiagnosticsReport = (data: DiagnosticsReportData) => {
 			`- Site URL: ${diagnostics.install.siteUrl ?? "-"}`,
 			`- Telemetry: ${yesNo(diagnostics.install.telemetry)}`,
 			`- Announcements: ${yesNo(diagnostics.install.announcements)}`,
+			`- Update checks: ${yesNo(diagnostics.install.updateChecks)}`,
 		]),
+		section(
+			"Packages",
+			diagnostics.packages.map((item) => `- ${item.name} ${item.version}`),
+		),
 		section("Server", [
 			`- Runtime: ${[diagnostics.server.runtime, diagnostics.server.runtimeVersion].filter(Boolean).join(" ") || "-"}`,
 			`- Time: ${diagnostics.server.time}`,

@@ -595,6 +595,8 @@
 	"core.routes.diagnostics.fetch.error.message": "An error occurred while fetching the diagnostics.",
 	"core.routes.diagnostics.checks.error.name": "Diagnostics Check Error",
 	"core.routes.diagnostics.checks.error.message": "An error occurred while running the diagnostics checks.",
+	"core.routes.diagnostics.updates.error.name": "Update Check Error",
+	"core.routes.diagnostics.updates.error.message": "An error occurred while checking for package updates.",
 	"core.routes.diagnostics.bug.report.error.name": "Bug Report Error",
 	"core.routes.diagnostics.bug.report.error.message": "An error occurred while sending the bug report.",
 	"core.routes.diagnostics.bug.report.too.large": "This bug report is too large. Remove an image or use smaller ones.",

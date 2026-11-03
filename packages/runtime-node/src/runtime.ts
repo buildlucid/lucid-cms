@@ -1,5 +1,5 @@
 import type { EnvironmentVariables } from "@lucidcms/core/types";
-import { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
+import { ADAPTER_KEY, LUCID_VERSION, PACKAGE_INFO } from "./constants.js";
 import adaptConfig from "./services/adapt-config.js";
 import type {
 	NodeAdapterOptions,
@@ -29,6 +29,7 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		vite: "@lucidcms/runtime-node/vite",
 		adaptConfig,
 		getEnvVars: async ({ logger }) => {

@@ -1,5 +1,12 @@
+import packageJson from "../package.json" with { type: "json" };
+
 export const PLUGIN_KEY = "@lucidcms/plugin-cloudflare-queues";
 export const LUCID_VERSION = "0.x.x";
+
+export const PACKAGE_INFO = {
+	name: packageJson.name,
+	version: packageJson.version,
+};
 export const ADAPTER_KEY = "cloudflare-queues";
 export const SUPPORTED_RUNTIME_ADAPTER_KEY = "cloudflare";
 export const DEFAULT_QUEUE_BINDING = "LUCID_QUEUE";

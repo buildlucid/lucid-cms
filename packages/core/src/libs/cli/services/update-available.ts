@@ -1,111 +1,73 @@
-import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import picocolors from "picocolors";
-import semver from "semver";
+import z from "zod";
 import packageJson from "../../../../package.json" with { type: "json" };
+import type { ResolvedLucidConfig } from "../../../types/config.js";
 import { ensureLucidDirectoryExists } from "../../../utils/helpers/lucid-directory.js";
+import fetchLatestPackage from "../../package-updates/fetch-latest-package.js";
+import getInstalledPackages from "../../package-updates/get-installed-packages.js";
+import getUpdateStatus from "../../package-updates/get-update-status.js";
+import type { AdapterRuntimeContext } from "../../runtime/types.js";
 
 const UPDATE_AVAILABLE_FILE = "update-available.json";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-type UpdateCache = {
-	checkedAt: number;
-	latestVersion: string | null;
-	currentVersion: string;
+const cacheSchema = z.object({
+	checkedAt: z.number(),
+	packages: z.record(
+		z.string(),
+		z.object({
+			installed: z.string(),
+			latest: z
+				.object({ version: z.string(), requiresCore: z.string().nullable() })
+				.nullable(),
+		}),
+	),
+});
+
+type UpdateCache = z.infer<typeof cacheSchema>;
+
+type UpdateLine = {
+	name: string;
+	installed: string;
+	latest: string;
+	/** Set when the update needs a newer core first. */
+	requiresCore: string | null;
 };
 
-type CoreUpdateAvailable = {
-	available: boolean;
-	show: boolean;
-	latestVersion: string | null;
-	currentVersion: string;
-	renderUpdateBox: () => void;
-};
-
-const parseCache = async (filePath: string): Promise<UpdateCache | null> => {
-	if (!existsSync(filePath)) {
-		return null;
-	}
+const readCache = async (filePath: string): Promise<UpdateCache | null> => {
 	try {
-		const raw = await readFile(filePath, "utf-8");
-		const parsed = JSON.parse(raw);
-		const checkedAt =
-			typeof parsed.checkedAt === "number" ? parsed.checkedAt : null;
-		const latestVersion =
-			typeof parsed.latestVersion === "string" || parsed.latestVersion === null
-				? parsed.latestVersion
-				: null;
-		const currentVersion =
-			typeof parsed.currentVersion === "string" ? parsed.currentVersion : null;
-
-		if (checkedAt === null || currentVersion === null) {
-			return null;
-		}
-
-		return {
-			checkedAt,
-			latestVersion,
-			currentVersion,
-		};
+		return cacheSchema.parse(JSON.parse(await readFile(filePath, "utf-8")));
 	} catch {
 		return null;
 	}
 };
 
-const writeCache = async (filePath: string, data: UpdateCache) => {
-	await writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
-};
+const renderUpdateBox = (updates: UpdateLine[]) => {
+	const installable = updates.filter((update) => !update.requiresCore);
+	if (installable.length === 0) return;
 
-/**
- * Gets the latest version of a package from the npm registry
- */
-const getLatestVersion = async (packageName: string) => {
-	try {
-		const response = await fetch(
-			`https://registry.npmjs.org/${packageName}/latest`,
-			{ signal: AbortSignal.timeout(3000) },
-		);
-		if (!response.ok) return null;
-
-		const data: unknown = await response.json();
-		return data &&
-			typeof data === "object" &&
-			"version" in data &&
-			typeof data.version === "string"
-			? data.version
-			: null;
-	} catch {
-		return null;
-	}
-};
-
-/**
- * Renders a box with the update information
- */
-const renderUpdateBox = (
-	updateAvailable: Omit<CoreUpdateAvailable, "renderUpdateBox">,
-) => {
-	if (!updateAvailable.show || !updateAvailable.available) {
-		return;
-	}
-
-	const { currentVersion, latestVersion } = updateAvailable;
-
-	const versionLines = [
-		`Current: ${picocolors.yellow(currentVersion)}`,
-		`Latest:  ${picocolors.green(latestVersion ?? "unknown")}`,
-	];
-
+	const nameWidth = Math.max(...updates.map((update) => update.name.length));
+	const installedWidth = Math.max(
+		...updates.map((update) => update.installed.length),
+	);
 	const updateCommand = picocolors.cyan(
-		`npm install ${packageJson.name}@latest`,
+		`npm install ${installable.map((update) => `${update.name}@latest`).join(" ")}`,
 	);
 
 	const lines = [
-		"A new version of Lucid CMS is available!",
-		"",
-		...versionLines,
+		...updates.map(
+			(update) =>
+				`${update.name.padEnd(nameWidth)}  ${picocolors.yellow(update.installed.padEnd(installedWidth))} → ${
+					update.requiresCore
+						? picocolors.dim(
+								`${update.latest} needs core ${update.requiresCore}`,
+							)
+						: picocolors.green(update.latest)
+				}`,
+		),
 		"",
 		`Run ${updateCommand} to update`,
 		"",
@@ -116,7 +78,7 @@ const renderUpdateBox = (
 		),
 	];
 
-	const title = " Update Available ";
+	const title = " Updates Available ";
 	const width = Math.max(
 		title.length + 2,
 		...lines.map((line) => stripVTControlCharacters(line).length),
@@ -138,51 +100,82 @@ const renderUpdateBox = (
 };
 
 /**
- * Checks if an update is available for the core package
- *
- * - Will only check once per day
- * - Invalidates cache if current version changes
+ * Checks daily or when installed versions change. Compares compatibility against the suggested
+ * core update and displays results only after a fresh check.
  */
-const updateAvailable = async (): Promise<CoreUpdateAvailable> => {
-	const lucidDir = await ensureLucidDirectoryExists();
-	const cachePath = join(lucidDir, UPDATE_AVAILABLE_FILE);
-	const cache = await parseCache(cachePath);
-	const now = Date.now();
-	const currentVersion = packageJson.version;
+const updateAvailable = async (props: {
+	config: ResolvedLucidConfig;
+	runtimeContext: AdapterRuntimeContext;
+}) => {
+	if (!props.config.updateChecks) return { renderUpdateBox: () => {} };
 
-	const versionChanged = cache ? cache.currentVersion !== currentVersion : true;
-	const isCacheFresh = cache
-		? now - cache.checkedAt < ONE_DAY_MS && !versionChanged
-		: false;
+	const cachePath = join(
+		await ensureLucidDirectoryExists(),
+		UPDATE_AVAILABLE_FILE,
+	);
+	const packages = getInstalledPackages(props);
+	const cache = await readCache(cachePath);
+	const isCacheFresh =
+		cache !== null &&
+		Date.now() - cache.checkedAt < ONE_DAY_MS &&
+		packages.every(
+			(item) => cache.packages[item.name]?.installed === item.version,
+		);
 
-	let latestVersion = isCacheFresh ? (cache?.latestVersion ?? null) : null;
-
+	const checked: UpdateCache["packages"] = isCacheFresh
+		? cache.packages
+		: Object.fromEntries(
+				await Promise.all(
+					packages.map(async (item) => [
+						item.name,
+						{
+							installed: item.version,
+							latest: await fetchLatestPackage(item.name),
+						},
+					]),
+				),
+			);
 	if (!isCacheFresh) {
-		latestVersion = await getLatestVersion(packageJson.name);
-		await writeCache(cachePath, {
-			checkedAt: now,
-			latestVersion,
-			currentVersion,
-		});
+		await writeFile(
+			cachePath,
+			JSON.stringify({ checkedAt: Date.now(), packages: checked }, null, 2),
+			"utf-8",
+		);
 	}
 
-	const updateAvailableFlag =
-		latestVersion && semver.valid(latestVersion) && semver.valid(currentVersion)
-			? semver.gt(latestVersion, currentVersion)
-			: false;
+	//* the command updates core alongside the others, so their core ranges must fit the core it installs
+	const coreLatest = checked[packageJson.name]?.latest ?? null;
+	const targetCore =
+		coreLatest &&
+		getUpdateStatus({ installed: packageJson.version, latest: coreLatest }) ===
+			"available"
+			? coreLatest.version
+			: packageJson.version;
+
+	const updates = packages.flatMap((item): UpdateLine[] => {
+		const latest = checked[item.name]?.latest ?? null;
+		const status = getUpdateStatus({
+			installed: item.version,
+			latest,
+			coreVersion: targetCore,
+		});
+		if (!latest || (status !== "available" && status !== "needs-core")) {
+			return [];
+		}
+		return [
+			{
+				name: item.name,
+				installed: item.version,
+				latest: latest.version,
+				requiresCore: status === "needs-core" ? latest.requiresCore : null,
+			},
+		];
+	});
 
 	return {
-		available: updateAvailableFlag,
-		show: !isCacheFresh && updateAvailableFlag,
-		latestVersion,
-		currentVersion,
-		renderUpdateBox: () =>
-			renderUpdateBox({
-				available: updateAvailableFlag,
-				show: !isCacheFresh && updateAvailableFlag,
-				latestVersion,
-				currentVersion,
-			}),
+		renderUpdateBox: () => {
+			if (!isCacheFresh) renderUpdateBox(updates);
+		},
 	};
 };
 

@@ -1,6 +1,7 @@
 import packageJson from "../../../package.json" with { type: "json" };
 import { diagnosticsFormatter } from "../../libs/formatters/index.js";
 import { getRegisteredJobSchedules } from "../../libs/jobs/scheduler/registered-schedules.js";
+import getInstalledPackages from "../../libs/package-updates/get-installed-packages.js";
 import { JobsRepository } from "../../libs/repositories/index.js";
 import type { Diagnostics } from "../../types/response.js";
 import { getSiteUrl } from "../../utils/helpers/index.js";
@@ -52,6 +53,10 @@ const getDiagnostics: ServiceFn<[], Diagnostics> = async (context) => {
 				siteUrl: getSiteUrl(context),
 				runtime: context.runtimeContext?.runtime ?? null,
 				runtimeVersion: nodeVersion ? `v${nodeVersion}` : null,
+				packages: getInstalledPackages({
+					config: context.config,
+					runtimeContext: context.runtimeContext,
+				}),
 				migrations,
 				documentCounts: documentCounts.data,
 				connectionStatus: connection.data?.status ?? null,

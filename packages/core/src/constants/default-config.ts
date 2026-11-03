@@ -13,6 +13,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	role: "primary",
 	telemetry: true,
 	announcements: true,
+	updateChecks: true,
 	logger: {
 		level: "info",
 	},

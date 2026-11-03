@@ -1,4 +1,3 @@
-import packageJson from "@lucidcms/admin/package.json" with { type: "json" };
 import { useLocation } from "@solidjs/router";
 import type { Permission } from "@types";
 import classNames from "classnames";
@@ -25,6 +24,7 @@ import {
 import NavigationAccountMenu from "./NavigationAccountMenu";
 import { NavigationBugReport } from "./NavigationBugReport";
 import { NavigationSection } from "./NavigationSection";
+import { NavigationVersion } from "./NavigationVersion";
 
 /**
  * The scrollable link list and pinned account footer shared by the desktop
@@ -372,9 +372,10 @@ export const NavigationMenuContent: Component<{
 						"justify-center": !permissions().systemDiagnostics,
 					})}
 				>
-					<small class="py-1 text-[10px] leading-none text-muted">
-						v{packageJson.version}
-					</small>
+					<NavigationVersion
+						checkUpdates={permissions().systemDiagnostics}
+						onNavigate={props.onNavigate}
+					/>
 					<Show when={permissions().systemDiagnostics}>
 						<NavigationBugReport />
 					</Show>

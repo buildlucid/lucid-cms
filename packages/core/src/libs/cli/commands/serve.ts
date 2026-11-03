@@ -18,8 +18,10 @@ import cliSpinner from "../spinner.js";
 /** Runs migrations before building and previewing the deployed app through the runtime adapter, keeping migration servers outside the build's `NODE_ENV`. */
 const serveCommand = async () => {
 	const commandStartedAt = Date.now();
-	const coreUpdateAvailable = updateAvailable().catch(() => undefined);
 	let server: PreviewServer | undefined;
+	let packageUpdates:
+		| Promise<Awaited<ReturnType<typeof updateAvailable>> | undefined>
+		| undefined;
 	let telemetryReporter: CommandTelemetryReporter | undefined;
 	let stage: TelemetryStage = "migration";
 
@@ -53,6 +55,10 @@ const serveCommand = async () => {
 			step: true,
 			preview: true,
 			onProject: (loaded) => {
+				packageUpdates = updateAvailable({
+					config: loaded.config,
+					runtimeContext: loaded.runtimeContext,
+				}).catch(() => undefined);
 				telemetryReporter = createCommandTelemetryReporter({
 					config: loaded.config,
 					env: loaded.env,
@@ -84,7 +90,7 @@ const serveCommand = async () => {
 		});
 
 		void telemetryReporter?.report({ outcome: "succeeded", stage });
-		void coreUpdateAvailable.then((update) => update?.renderUpdateBox());
+		void packageUpdates?.then((update) => update?.renderUpdateBox());
 	} catch (error) {
 		cliSpinner.stop();
 		await server?.close();

@@ -3,10 +3,13 @@ import type {
 	DiagnosticCheckKey,
 	DiagnosticCheckResult,
 	DiagnosticCheckStep,
+	DiagnosticPackageUpdate,
 	Diagnostics,
 } from "../../types/response.js";
 import { aiFeatureFlags } from "../config/ai-features.js";
 import type { DatabaseMigrationStatus } from "../db/types.js";
+import getUpdateStatus from "../package-updates/get-update-status.js";
+import type { LatestPackage, PackageInfo } from "../package-updates/types.js";
 import formatter from "./helpers.js";
 
 interface DiagnosticsPropsT {
@@ -15,6 +18,7 @@ interface DiagnosticsPropsT {
 	siteUrl: string | null;
 	runtime: string | null;
 	runtimeVersion: string | null;
+	packages: PackageInfo[];
 	migrations: DatabaseMigrationStatus;
 	documentCounts: Array<{ collection_key: string; count: number | string }>;
 	connectionStatus: Diagnostics["ai"]["connection"] | null;
@@ -46,6 +50,7 @@ const formatSingle = (props: {
 			siteUrl: props.diagnostics.siteUrl,
 			telemetry: props.config.telemetry,
 			announcements: props.config.announcements,
+			updateChecks: props.config.updateChecks,
 		},
 		server: {
 			time: props.diagnostics.generatedAt.toISOString(),
@@ -82,6 +87,10 @@ const formatSingle = (props: {
 				default: locale.code === localization.defaultLocale,
 			})),
 		},
+		packages: props.diagnostics.packages.map((item) => ({
+			name: item.name,
+			version: item.version,
+		})),
 		plugins: props.config.plugins.map((plugin) => ({
 			key: plugin.key,
 			lucid: plugin.lucid,
@@ -151,7 +160,27 @@ const formatCheckResult = (props: {
 	};
 };
 
+/** Compares an installed package with its latest version on npm, naming the core range only when it holds the update back. */
+const formatPackageUpdate = (props: {
+	package: PackageInfo;
+	latest: LatestPackage | null;
+}): DiagnosticPackageUpdate => {
+	const status = getUpdateStatus({
+		installed: props.package.version,
+		latest: props.latest,
+	});
+
+	return {
+		name: props.package.name,
+		latest: props.latest?.version ?? null,
+		status,
+		requiresCore:
+			status === "needs-core" ? (props.latest?.requiresCore ?? null) : null,
+	};
+};
+
 export default {
 	formatSingle,
 	formatCheckResult,
+	formatPackageUpdate,
 };

@@ -19,6 +19,7 @@ import type {
 } from "@lucidcms/core/types";
 import { type ColumnDataType, Kysely, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
+import packageJson from "../package.json" with { type: "json" };
 import {
 	LibsqlDialect,
 	type LibsqlDialectConfig,
@@ -41,6 +42,10 @@ export class LibSQLAdapter extends DatabaseAdapter {
 		| LibSQLAdapterOptionsFactory
 		| undefined;
 	readonly limits: DatabaseLimits = { maxQueryParameters: 32_766 };
+	readonly package = {
+		name: packageJson.name,
+		version: packageJson.version,
+	};
 	constructor(options?: LibsqlDialectConfig | LibSQLAdapterOptionsFactory) {
 		super("libsql");
 		this.#options = options;

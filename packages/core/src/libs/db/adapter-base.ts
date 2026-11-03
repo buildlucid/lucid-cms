@@ -10,6 +10,7 @@ import { LucidError } from "../../utils/errors/index.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { translate } from "../i18n/index.js";
 import logger from "../logger/index.js";
+import type { PackageInfo } from "../package-updates/types.js";
 import type { EnvironmentVariables } from "../runtime/types.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 // Migrations
@@ -42,6 +43,8 @@ import getQueryBatchSize, {
 
 export default abstract class DatabaseAdapter {
 	adapter: string;
+	/** Published package metadata for update checks. */
+	readonly package?: PackageInfo;
 	private externalMigrations: Record<string, ExternalMigration> = {};
 	constructor(adapter: string) {
 		this.adapter = adapter;

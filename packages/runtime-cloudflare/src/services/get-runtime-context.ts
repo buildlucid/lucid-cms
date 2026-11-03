@@ -1,5 +1,5 @@
 import type { AdapterRuntimeContext } from "@lucidcms/core/types";
-import { ADAPTER_KEY } from "../constants.js";
+import { ADAPTER_KEY, PACKAGE_INFO } from "../constants.js";
 import getCloudflareConnInfo from "../utils/cloudflare-conn-info.js";
 
 /** Describes runtime capabilities and request connection information, with `compiled` matching whether source or built code is running. */
@@ -11,6 +11,7 @@ const getRuntimeContext = (params: {
 }) =>
 	({
 		runtime: ADAPTER_KEY,
+		package: PACKAGE_INFO,
 		host: params.host ?? "lucid",
 		compiled: params.compiled,
 		getConnectionInfo: getCloudflareConnInfo,

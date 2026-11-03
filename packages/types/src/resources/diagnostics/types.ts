@@ -22,6 +22,32 @@ export interface DiagnosticCheckResult {
 	message: string | null;
 }
 
+/** An installed Lucid package. Admin always shares core's version, so it isn't listed. */
+export interface DiagnosticPackage {
+	/** The npm package name, such as `@lucidcms/db-postgres`. */
+	name: string;
+	version: string;
+}
+
+/**
+ * Update status: `available` is compatible, `needs-core` requires a core update, and `unknown`
+ * means lookup or comparison failed.
+ */
+export type DiagnosticPackageStatus =
+	| "current"
+	| "available"
+	| "needs-core"
+	| "unknown";
+
+export interface DiagnosticPackageUpdate {
+	name: string;
+	/** The `latest` version on npm, or null when npm couldn't be reached. */
+	latest: string | null;
+	status: DiagnosticPackageStatus;
+	/** The `@lucidcms/core` range the latest version needs, when `status` is `needs-core`. */
+	requiresCore: string | null;
+}
+
 /** Install and runtime details for the system diagnostics page and bug reports. Never includes secrets or personal data. */
 export interface Diagnostics {
 	generatedAt: string;
@@ -34,6 +60,8 @@ export interface Diagnostics {
 		telemetry: boolean;
 		/** Whether Lucid's security alerts and announcements are checked for. */
 		announcements: boolean;
+		/** Whether installed packages are compared with their latest versions on npm. */
+		updateChecks: boolean;
 	};
 	server: {
 		/** The server's clock when the response was built, to compare with the browser's. */
@@ -71,6 +99,8 @@ export interface Diagnostics {
 			default: boolean;
 		}[];
 	};
+	/** Core, the runtime, the database adapter and plugins that declare their package, in that order. */
+	packages: DiagnosticPackage[];
 	plugins: {
 		key: string;
 		/** The Lucid version range the plugin supports. */

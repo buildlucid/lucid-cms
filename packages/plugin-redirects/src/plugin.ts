@@ -1,6 +1,11 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
-import { COLLECTION_KEY, LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import {
+	COLLECTION_KEY,
+	LUCID_VERSION,
+	PACKAGE_INFO,
+	PLUGIN_KEY,
+} from "./constants.js";
 import createRedirectsCollection from "./services/create-collection.js";
 import {
 	beforeUpsertHandler,
@@ -14,6 +19,7 @@ const plugin: LucidPlugin<RedirectsPluginOptions> = (givenOptions) =>
 	definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		sources: { translations: ["@lucidcms/plugin-redirects/translations"] },
 		configure: (draft) => {
 			if (

@@ -2,7 +2,7 @@ import { copy, definePlugin, LucidError } from "@lucidcms/core";
 import { resolveCollectionLocalization } from "@lucidcms/core/extension";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import rebuildIndexesConfig from "./admin/components/RebuildIndexes/config.js";
-import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import { LUCID_VERSION, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
 import createSyncJob from "./jobs/sync.js";
 import migration from "./migrations/1788900000000-typesense.js";
 import routes from "./routes/index.js";
@@ -21,6 +21,7 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		sources: { translations: ["@lucidcms/plugin-typesense/translations"] },
 		toolkit: toolkit(options, job),
 		cli: { module: "@lucidcms/plugin-typesense/cli" },

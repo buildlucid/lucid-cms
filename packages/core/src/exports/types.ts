@@ -536,6 +536,7 @@ export type {
 	RuntimeArtifactProvider,
 	RuntimeSupport,
 } from "../libs/runtime/types.js";
+export type { PackageInfo } from "../libs/package-updates/types.js";
 export type { Seed, SeedDefinition } from "../libs/seed/types.js";
 export type {
 	DefineSkillOptions,

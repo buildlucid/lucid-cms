@@ -335,6 +335,11 @@ export default Object.freeze({
 		maxDiagnosticsLength: 50_000,
 		maxPageLength: 500,
 	},
+	/** Cache lifetimes for npm versions and failed lookups. */
+	updateChecks: {
+		ttlSeconds: 12 * 60 * 60,
+		failedTtlSeconds: 60 * 60,
+	},
 	connection: {
 		scope: "cms" as const,
 		pendingExpirationSeconds: 300,

@@ -388,6 +388,12 @@ export interface LucidConfig {
 	 */
 	announcements?: boolean;
 	/**
+	 * Whether Lucid compares core, the runtime, the database adapter and plugins with their latest
+	 * versions on npm, for the diagnostics page and the `dev` and `serve` startup message.
+	 * Defaults to true. Requests only ask npm for each package's latest version.
+	 */
+	updateChecks?: boolean;
+	/**
 	 * Process-level logger configuration.
 	 */
 	logger?: {
@@ -779,6 +785,7 @@ export interface ResolvedLucidConfig {
 	secrets: SecretConfig;
 	telemetry: boolean;
 	announcements: boolean;
+	updateChecks: boolean;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 	};

@@ -2,10 +2,11 @@ import { copy, definePlugin } from "@lucidcms/core";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
+	PACKAGE_INFO,
 	PLUGIN_IDENTIFIER,
 	PLUGIN_KEY,
-	priorityHeaders,
 	WEBHOOK_ENABLED,
+	priorityHeaders,
 } from "./constants.js";
 import routes from "./routes/index.js";
 import type { PluginOptions } from "./types/types.js";
@@ -22,6 +23,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		sources: { translations: ["@lucidcms/plugin-resend/translations"] },
 		defaults: () => {
 			return {

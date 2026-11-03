@@ -7,6 +7,7 @@ import type { DatabaseAdapterFactory } from "../db/adapter-factory.js";
 import type { RenderedTemplates } from "../email/types.js";
 import type { TranslationBundles } from "../i18n/types.js";
 import type { LoggerOverride } from "../logger/types.js";
+import type { PackageInfo } from "../package-updates/types.js";
 import type { LucidAdapterOverrides } from "./create-lucid-adapters.js";
 import type { LucidInvocation } from "./create-lucid-host.js";
 import type RuntimeAdapterSchema from "./schema.js";
@@ -116,6 +117,8 @@ export type PublicFetch = (
 export type AdapterRuntimeContext = {
 	/** The runtime key of the adapter */
 	runtime: string;
+	/** Runtime package metadata for update checks. */
+	package?: PackageInfo;
 	/** The server handling requests, `lucid` for Lucid's server or a framework key such as `astro`. */
 	host: string;
 	/** True when running from built/compiled bundle, false when running from source in development */

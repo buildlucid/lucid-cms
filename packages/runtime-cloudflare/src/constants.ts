@@ -1,3 +1,4 @@
+import packageJson from "../package.json" with { type: "json" };
 import type {
 	CloudflareBindingsArtifact,
 	CloudflareWorkerHandlerArtifact,
@@ -5,6 +6,11 @@ import type {
 
 export const ADAPTER_KEY = "cloudflare";
 export const LUCID_VERSION = "0.x.x";
+
+export const PACKAGE_INFO = {
+	name: packageJson.name,
+	version: packageJson.version,
+};
 export const DEFAULT_KV_BINDING = "LUCID_KV";
 export const DEFAULT_R2_BINDING = "LUCID_MEDIA_BUCKET";
 export const DEFAULT_QUEUE_BINDING = "LUCID_QUEUE";

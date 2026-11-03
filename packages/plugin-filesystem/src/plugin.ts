@@ -4,6 +4,7 @@ import fileSystemStorageAdapter from "./adapter/index.js";
 import {
 	DEFAULT_UPLOAD_DIRECTORY,
 	LUCID_VERSION,
+	PACKAGE_INFO,
 	PLUGIN_KEY,
 } from "./constants.js";
 import routes from "./routes/index.js";
@@ -16,6 +17,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		cli: {
 			module: "@lucidcms/plugin-filesystem/cli",
 			options: { uploadDir },

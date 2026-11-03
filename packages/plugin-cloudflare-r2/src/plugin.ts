@@ -4,6 +4,7 @@ import cloudflareR2StorageAdapter from "./adapter.js";
 import {
 	DEFAULT_MAX_UPLOAD_SIZE,
 	LUCID_VERSION,
+	PACKAGE_INFO,
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
@@ -18,6 +19,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		hooks: {
 			runtime: async ({ phase }) => ({
 				error: undefined,

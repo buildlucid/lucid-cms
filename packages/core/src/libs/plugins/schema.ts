@@ -5,17 +5,26 @@ import type { LucidPluginDefinition } from "./types.js";
 const callback = <Callback>() =>
 	z.custom<Callback>((value) => typeof value === "function");
 
+/** An npm package name, or a lowercase project key using the same characters. */
+const packageNameSchema = z
+	.string()
+	.trim()
+	.regex(
+		/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/,
+		'Use the package name, such as "@acme/lucid-seo", or lowercase letters, numbers, ".", "_" and "-".',
+	);
+
 export const PluginDefinitionSchema: z.ZodType<LucidPluginDefinition> =
 	z.strictObject({
 		// Keys appear in folder and URL paths, such as `.lucid/plugins/<key>`.
-		key: z
-			.string()
-			.trim()
-			.regex(
-				/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/,
-				'Use the package name, such as "@acme/lucid-seo", or lowercase letters, numbers, ".", "_" and "-".',
-			),
+		key: packageNameSchema,
 		lucid: z.string().trim().min(1),
+		package: z
+			.strictObject({
+				name: packageNameSchema,
+				version: z.string().trim().min(1),
+			})
+			.optional(),
 		sources: ResourceSourcesSchema.optional(),
 		defaults: z
 			.custom<LucidPluginDefinition["defaults"]>(

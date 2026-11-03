@@ -1,7 +1,7 @@
 import { definePlugin, logger } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import rebuildPathsConfig from "./admin/components/RebuildPaths/config.js";
-import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import { LUCID_VERSION, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
 import createRebuildPathsJob from "./jobs/rebuild-paths.js";
 import routes from "./routes/index.js";
 import { checkRouteSegments } from "./services/checks/index.js";
@@ -31,6 +31,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		toolkit,
 		sources: { translations: ["@lucidcms/plugin-pages/translations"] },
 		configure: (draft) => {

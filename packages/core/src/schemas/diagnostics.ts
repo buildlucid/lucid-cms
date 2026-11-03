@@ -4,6 +4,7 @@ import type { ControllerSchema } from "../exports/types.js";
 import type {
 	DiagnosticCheckKey,
 	DiagnosticCheckResult,
+	DiagnosticPackageUpdate,
 	Diagnostics,
 } from "../types/response.js";
 import { controllerSchemas as settingsControllerSchemas } from "./settings.js";
@@ -49,6 +50,11 @@ const diagnosticsResponseSchema = z.object({
 		announcements: z.boolean().meta({
 			description:
 				"Whether Lucid's security alerts and announcements are checked for",
+			example: true,
+		}),
+		updateChecks: z.boolean().meta({
+			description:
+				"Whether installed packages are compared with their latest versions on npm",
 			example: true,
 		}),
 	}),
@@ -135,6 +141,23 @@ const diagnosticsResponseSchema = z.object({
 			}),
 		),
 	}),
+	packages: z
+		.array(
+			z.object({
+				name: z.string().meta({
+					description: "The npm package name",
+					example: "@lucidcms/db-postgres",
+				}),
+				version: z.string().meta({
+					description: "The installed version",
+					example: "1.2.2",
+				}),
+			}),
+		)
+		.meta({
+			description:
+				"Core, the runtime, the database adapter and plugins that declare their package, in that order",
+		}),
 	plugins: z.array(
 		z.object({
 			key: z.string().meta({
@@ -211,6 +234,28 @@ const diagnosticsResponseSchema = z.object({
 	}),
 }) satisfies z.ZodType<Diagnostics>;
 
+const packageUpdateSchema = z.object({
+	name: z.string().meta({
+		description: "The npm package name",
+		example: "@lucidcms/db-postgres",
+	}),
+	latest: z.string().nullable().meta({
+		description:
+			"The `latest` version on npm, or null when npm couldn't be reached",
+		example: "1.3.0",
+	}),
+	status: z.enum(["current", "available", "needs-core", "unknown"]).meta({
+		description:
+			"`available` when a newer version works with the installed core, `needs-core` when it needs a newer core first, and `unknown` when it couldn't be checked",
+		example: "available",
+	}),
+	requiresCore: z.string().nullable().meta({
+		description:
+			"The `@lucidcms/core` range the latest version needs, when `status` is `needs-core`",
+		example: null,
+	}),
+}) satisfies z.ZodType<DiagnosticPackageUpdate>;
+
 const diagnosticCheckResultSchema = z.object({
 	key: diagnosticCheckKeySchema,
 	adapter: z.string().nullable().meta({
@@ -253,6 +298,15 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		response: diagnosticsResponseSchema,
+	} satisfies ControllerSchema,
+	getPackageUpdates: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.array(packageUpdateSchema),
 	} satisfies ControllerSchema,
 	runChecks: {
 		body: z.object({

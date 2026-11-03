@@ -20,6 +20,7 @@ import ContentSection from "./parts/ContentSection";
 import HealthChecksSection from "./parts/HealthChecksSection";
 import InstallSection from "./parts/InstallSection";
 import JobsSection from "./parts/JobsSection";
+import PackagesSection from "./parts/PackagesSection";
 import PluginsSection from "./parts/PluginsSection";
 import SignInSection from "./parts/SignInSection";
 
@@ -120,6 +121,7 @@ const SystemDiagnosticsPage: Component = () => {
 									data={diagnostics()}
 									clockSkew={state.clockSkew()}
 								/>
+								<PackagesSection data={diagnostics()} />
 								<HealthChecksSection state={state} />
 								<InfoRow.Root
 									title={T()("system.info.title")}

@@ -1,7 +1,13 @@
 import { pluginPublicPath } from "@lucidcms/core/extension";
+import packageJson from "../package.json" with { type: "json" };
 
 export const PLUGIN_KEY = "@lucidcms/plugin-site";
 export const LUCID_VERSION = "0.x.x";
+
+export const PACKAGE_INFO = {
+	name: packageJson.name,
+	version: packageJson.version,
+};
 export const COMPONENTS_MODULE = "@lucidcms/plugin-site/components";
 /** Clears stored pages from the admin's Operations page. */
 export const CLEAR_CACHE_ROUTE = "/api/v1/site/clear-cache";

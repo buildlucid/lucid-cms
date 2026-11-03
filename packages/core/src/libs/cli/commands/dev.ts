@@ -34,7 +34,6 @@ const devCommand = async (options?: {
 	remote?: boolean;
 }) => {
 	const commandStartedAt = Date.now();
-	const coreUpdateAvailable = updateAvailable().catch(() => undefined);
 	const watchPaths = options?.watch ? [path.resolve(options.watch)] : [];
 	let server: ViteDevServer | undefined;
 	let telemetryReporter: CommandTelemetryReporter | undefined;
@@ -190,6 +189,10 @@ const devCommand = async (options?: {
 		ownShutdownSignals();
 
 		const { project, ready } = findLucidViteApi(server.config.plugins);
+		const packageUpdates = updateAvailable({
+			config: project.config,
+			runtimeContext: project.runtimeContext,
+		}).catch(() => undefined);
 		telemetryReporter = createCommandTelemetryReporter({
 			config: project.config,
 			env: project.env,
@@ -222,7 +225,7 @@ const devCommand = async (options?: {
 			outcome: "succeeded",
 			stage: "server_listen",
 		});
-		void coreUpdateAvailable.then((update) => update?.renderUpdateBox());
+		void packageUpdates.then((update) => update?.renderUpdateBox());
 	} catch (error) {
 		cliSpinner.stop();
 		await server?.close();

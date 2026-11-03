@@ -1,5 +1,9 @@
 import type { EnvironmentVariables } from "@lucidcms/core/types";
-import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
+import constants, {
+	ADAPTER_KEY,
+	LUCID_VERSION,
+	PACKAGE_INFO,
+} from "./constants.js";
 import adaptConfig from "./services/adapt-config.js";
 import type {
 	AdapterOptions,
@@ -31,6 +35,7 @@ export const cloudflare = (
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
+		package: PACKAGE_INFO,
 		vite: "@lucidcms/runtime-cloudflare/vite",
 		config: {
 			customBuildArtifacts: [constants.WORKER_HANDLER_ARTIFACT_TYPE],

@@ -3,7 +3,7 @@ import type {
 	AdapterRuntimeContext,
 	LucidHonoContext,
 } from "@lucidcms/core/types";
-import constants, { ADAPTER_KEY } from "../constants.js";
+import constants, { ADAPTER_KEY, PACKAGE_INFO } from "../constants.js";
 import fetchPublic from "./fetch-public.js";
 
 /** Describes the runtime capabilities and request connection information. Set compiled to match whether source or built code is running. */
@@ -15,6 +15,7 @@ const getRuntimeContext = (params: {
 }) =>
 	({
 		runtime: ADAPTER_KEY,
+		package: PACKAGE_INFO,
 		host: params.host ?? "lucid",
 		compiled: params.compiled,
 		getConnectionInfo: (c: LucidHonoContext) => getConnInfo(c).remote,

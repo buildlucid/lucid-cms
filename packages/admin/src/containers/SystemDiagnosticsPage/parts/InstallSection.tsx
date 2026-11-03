@@ -84,6 +84,12 @@ const InstallSection: Component<{
 								? T()("common.on")
 								: T()("common.off"),
 						},
+						{
+							label: T()("diagnostics.install.update.checks"),
+							value: props.data.install.updateChecks
+								? T()("common.on")
+								: T()("common.off"),
+						},
 					]}
 				/>
 			</InfoRow.Content>

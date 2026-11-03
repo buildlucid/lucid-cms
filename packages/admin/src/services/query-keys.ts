@@ -261,6 +261,7 @@ export const queryKeys = {
 	},
 	diagnostics: {
 		detail: () => ["lucid", "diagnostics", "detail"] as const,
+		updates: () => ["lucid", "diagnostics", "updates"] as const,
 	},
 	share: {
 		all: () => ["lucid", "share"] as const,

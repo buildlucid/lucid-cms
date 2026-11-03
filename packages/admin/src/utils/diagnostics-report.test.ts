@@ -15,6 +15,7 @@ const diagnostics: Diagnostics = {
 		siteUrl: null,
 		telemetry: false,
 		announcements: true,
+		updateChecks: true,
 	},
 	server: {
 		time: "2026-11-02T12:00:00.000Z",
@@ -40,6 +41,10 @@ const diagnostics: Diagnostics = {
 		bricks: 2,
 		locales: [{ code: "en", default: true }],
 	},
+	packages: [
+		{ name: "@lucidcms/core", version: "0.20.0" },
+		{ name: "@lucidcms/db-sqlite", version: "1.2.2" },
+	],
 	plugins: [],
 	auth: {
 		password: true,
@@ -92,6 +97,12 @@ describe("buildDiagnosticsReport", () => {
 		const report = buildDiagnosticsReport(data);
 		expect(report).toContain("  - pages: multiple, localized, 3 documents");
 		expect(report).not.toContain("## Checks");
+	});
+
+	it("lists installed packages with their versions", () => {
+		expect(buildDiagnosticsReport(data)).toContain(
+			"## Packages\n- @lucidcms/core 0.20.0\n- @lucidcms/db-sqlite 1.2.2",
+		);
 	});
 
 	it("includes failed check steps", () => {

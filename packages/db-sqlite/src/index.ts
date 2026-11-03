@@ -19,6 +19,7 @@ import type {
 } from "@lucidcms/core/types";
 import { type ColumnDataType, Kysely, SqliteDialect, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
+import packageJson from "../package.json" with { type: "json" };
 import type {
 	SQLiteAdapterCreator,
 	SQLiteAdapterOptions,
@@ -37,6 +38,10 @@ import normalizeSQLiteConfig, {
 export class SQLiteAdapter extends DatabaseAdapter {
 	readonly #options: SQLiteAdapterOptions | SQLiteAdapterOptionsFactory;
 	readonly limits: DatabaseLimits = { maxQueryParameters: 32_766 };
+	readonly package = {
+		name: packageJson.name,
+		version: packageJson.version,
+	};
 	constructor(
 		options: SQLiteAdapterOptions | SQLiteAdapterOptionsFactory = {},
 	) {

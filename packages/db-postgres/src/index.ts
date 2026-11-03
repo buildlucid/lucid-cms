@@ -20,6 +20,7 @@ import { type ColumnDataType, Kysely, sql } from "kysely";
 import { PostgresJSDialect } from "kysely-postgres-js";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 import postgresClient from "postgres";
+import packageJson from "../package.json" with { type: "json" };
 import type {
 	PostgresAdapterCreator,
 	PostgresAdapterOptions,
@@ -39,6 +40,10 @@ export class PostgresAdapter extends DatabaseAdapter {
 		| PostgresAdapterOptionsFactory
 		| undefined;
 	readonly limits: DatabaseLimits = { maxQueryParameters: 65_535 };
+	readonly package = {
+		name: packageJson.name,
+		version: packageJson.version,
+	};
 	constructor(
 		options?: PostgresAdapterOptions | PostgresAdapterOptionsFactory,
 	) {

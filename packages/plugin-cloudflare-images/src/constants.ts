@@ -1,6 +1,13 @@
+import packageJson from "../package.json" with { type: "json" };
+
 export const PLUGIN_KEY = "@lucidcms/plugin-cloudflare-images";
 export const PROCESSOR_KEY = "cloudflare-images";
 export const LUCID_VERSION = "0.x.x";
+
+export const PACKAGE_INFO = {
+	name: packageJson.name,
+	version: packageJson.version,
+};
 export const SUPPORTED_RUNTIME_ADAPTER_KEY = "cloudflare";
 export const DEFAULT_IMAGES_BINDING = "LUCID_IMAGES";
 export const MAX_INPUT_BYTES = 20 * 1024 * 1024;

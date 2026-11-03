@@ -6,6 +6,7 @@ import type {
 	ServiceResponse,
 } from "../../utils/services/types.js";
 import type { Translator } from "../i18n/types.js";
+import type { PackageInfo } from "../package-updates/types.js";
 import type { ResourceFile, ResourceSources } from "../resources/types.js";
 import type {
 	AdapterRuntimeContext,
@@ -167,6 +168,8 @@ export type LucidPluginDefinition = {
 	 * The Lucid CMS semver range that the plugin is compatible with.
 	 */
 	lucid: string;
+	/** Published package metadata for update checks. Omit for project plugins. */
+	package?: PackageInfo;
 	/**
 	 * The hooks that the plugin can register.
 	 */
