@@ -6,7 +6,7 @@ import type { QueueAdapterInstance } from "../types.js";
 
 const CONCURRENT_LIMIT = 4;
 
-/** Executes durable jobs in-process after their surrounding transaction commits. */
+/** Runs jobs in-process after commit. Retries resume on a scheduler tick after their backoff. */
 const inlineQueueAdapter = (): QueueAdapterInstance => ({
 	type: "queue-adapter",
 	key: "inline",
@@ -28,12 +28,9 @@ const inlineQueueAdapter = (): QueueAdapterInstance => ({
 	publish: async (context, messages) => {
 		for (let index = 0; index < messages.length; index += CONCURRENT_LIMIT) {
 			const results = await Promise.all(
-				messages.slice(index, index + CONCURRENT_LIMIT).map((message) =>
-					consumeJob(context, {
-						jobId: message.jobId,
-						retry: "immediate",
-					}),
-				),
+				messages
+					.slice(index, index + CONCURRENT_LIMIT)
+					.map((message) => consumeJob(context, { jobId: message.jobId })),
 			);
 			if (results.some((result) => result.type === "retry-transport")) {
 				return {

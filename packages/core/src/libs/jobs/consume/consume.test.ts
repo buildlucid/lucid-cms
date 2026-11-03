@@ -296,11 +296,12 @@ describe("consuming durable jobs", () => {
 		});
 		if (enqueued.error) throw new Error("Failed to enqueue the test job");
 
-		const result = await consumeJob(context, {
-			jobId: enqueued.data.jobId,
-			retry: "immediate",
+		expect(
+			await consumeJob(context, { jobId: enqueued.data.jobId }),
+		).toMatchObject({ type: "retry-scheduled" });
+		expect(await consumeJob(context, { jobId: enqueued.data.jobId })).toEqual({
+			type: "failed",
 		});
-		expect(result).toEqual({ type: "failed" });
 		expect(onPermanentFailure).toHaveBeenCalledOnce();
 		expect(onPermanentFailure).toHaveBeenCalledWith({
 			context,

@@ -8,7 +8,10 @@ const DISPATCH_BATCH_SIZE = 100;
 const DISPATCH_RETRY_BASE_MS = 1_000;
 const DISPATCH_RETRY_MAX_MS = 60_000;
 
-/** Publishes queued jobs whose durable dispatch record is ready. */
+/**
+ * Publishes ready dispatch records. Adapters without delayed delivery receive only due jobs;
+ * retries wait for a scheduler tick.
+ */
 export const dispatchPendingJobs: ServiceFn<
 	[
 		data?: {
@@ -29,6 +32,7 @@ export const dispatchPendingJobs: ServiceFn<
 		jobIds: data.jobIds,
 		limit: data.limit ?? DISPATCH_BATCH_SIZE,
 		now: new Date().toISOString(),
+		dueOnly: !context.queue.support.delayedDelivery,
 	});
 	if (pending.error) return pending;
 	if (pending.data.length === 0) {
@@ -79,7 +83,7 @@ export const dispatchPendingJobs: ServiceFn<
 	}
 
 	const marked = await Jobs.markDispatched({
-		jobIds,
+		jobs: pending.data,
 		now: new Date().toISOString(),
 	});
 	if (marked.error) return marked;

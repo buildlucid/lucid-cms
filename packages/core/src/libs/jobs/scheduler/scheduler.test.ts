@@ -14,7 +14,7 @@ import triggerSchedule from "../../../services/jobs/trigger-schedule.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
-import { createTranslationStore } from "../../i18n/index.js";
+import { copy, createTranslationStore } from "../../i18n/index.js";
 import inlineQueueAdapter from "../../queue/adapters/inline.js";
 import type {
 	QueueAdapterInstance,
@@ -192,6 +192,61 @@ describe("job schedules", () => {
 
 		expect(result.error).toBeUndefined();
 		expect(handler).toHaveBeenCalledOnce();
+		const stored = await context.db.kysely
+			.selectFrom("lucid_jobs")
+			.select("status")
+			.executeTakeFirstOrThrow();
+		expect(stored.status).toBe("completed");
+	});
+
+	test("leaves an inline retry queued until a scheduler tick after its backoff", async () => {
+		let attempts = 0;
+		const job = defineJob({
+			name: "test:inline-retry",
+			version: 1,
+			input: z.null(),
+			retry: {
+				type: "exponential",
+				maxAttempts: 2,
+				baseDelayMs: 30_000,
+				maxDelayMs: 30_000,
+				jitter: "none",
+			},
+			schedules: [{ name: "every-minute", cron: "* * * * *", input: null }],
+			handler: async () => {
+				attempts += 1;
+				if (attempts === 1) {
+					return {
+						error: { message: copy.literal("Expected failure") },
+						data: undefined,
+					};
+				}
+				return { error: undefined, data: undefined };
+			},
+		});
+		const context = await createContext({
+			jobs: [job],
+			adapter: inlineQueueAdapter(),
+		});
+		const scheduledAt = new Date("2026-08-30T09:15:00.000Z");
+
+		vi.useFakeTimers({ toFake: ["Date"] });
+		try {
+			await setupJobScheduler().run(context, { scheduledAt });
+			expect(attempts).toBe(1);
+			const waiting = await context.db.kysely
+				.selectFrom("lucid_jobs")
+				.select("status")
+				.executeTakeFirstOrThrow();
+			expect(waiting.status).toBe("queued");
+
+			vi.setSystemTime(Date.now() + 31_000);
+			await setupJobScheduler().run(context, { scheduledAt });
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect(attempts).toBe(2);
 		const stored = await context.db.kysely
 			.selectFrom("lucid_jobs")
 			.select("status")

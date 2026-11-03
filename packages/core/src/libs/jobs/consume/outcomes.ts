@@ -97,7 +97,6 @@ const scheduleRetry = async (
 		message: string;
 		stack: string | null;
 		delayMs: number;
-		immediateRetry: boolean;
 	},
 ): Promise<JobConsumptionResult> => {
 	const now = new Date();
@@ -115,10 +114,7 @@ const scheduleRetry = async (
 	if (retried.error) return { type: "retry-transport" };
 	if (!retried.data) return finishCancellation(context, job);
 
-	//* An immediate retry is handled by the caller, not the queue adapter
-	if (!props.immediateRetry) {
-		await dispatchPendingJobs(context, { jobIds: [job.job_id] });
-	}
+	await dispatchPendingJobs(context, { jobIds: [job.job_id] });
 
 	return { type: "retry-scheduled", availableAt };
 };
@@ -159,7 +155,6 @@ export const handleFailure = async (
 		message: string;
 		stack: string | null;
 		permanent: boolean;
-		immediateRetry: boolean;
 		error?: LucidErrorData;
 	},
 ): Promise<JobConsumptionResult> => {
@@ -178,7 +173,6 @@ export const handleFailure = async (
 	return scheduleRetry(context, job, {
 		message: props.message,
 		stack: props.stack,
-		delayMs: props.immediateRetry ? 0 : retryDelay(job, policy),
-		immediateRetry: props.immediateRetry,
+		delayMs: retryDelay(job, policy),
 	});
 };

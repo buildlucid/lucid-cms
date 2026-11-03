@@ -138,16 +138,17 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 		});
 		return exec.response;
 	}
-	/** Returns queued jobs whose delivery notification is ready. */
+	/** Returns queued jobs whose delivery notification is ready, optionally only those due to run. */
 	async selectPendingDispatch(props: {
 		createdBefore?: string;
 		jobIds?: readonly string[];
 		limit: number;
 		now: string;
+		dueOnly: boolean;
 	}) {
 		let query = this.db
 			.selectFrom("lucid_jobs")
-			.select(["job_id", "available_at", "dispatch_attempts"])
+			.select(["job_id", "attempts", "available_at", "dispatch_attempts"])
 			.where("status", "=", "queued")
 			.where("dispatch_status", "=", "pending")
 			.where((eb) =>
@@ -166,6 +167,9 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 		}
 		if (props.createdBefore) {
 			query = query.where("created_at", "<=", props.createdBefore);
+		}
+		if (props.dueOnly) {
+			query = query.where("available_at", "<=", props.now);
 		}
 
 		const exec = await this.executeQuery(() => query.execute(), {
@@ -499,7 +503,10 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 		return exec.response;
 	}
 	/** Marks delivery notifications as published. */
-	async markDispatched(props: { jobIds: readonly string[]; now: string }) {
+	async markDispatched(props: {
+		jobs: readonly { job_id: string; attempts: number }[];
+		now: string;
+	}) {
 		const query = this.db
 			.updateTable("lucid_jobs")
 			.set({
@@ -509,7 +516,17 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 				next_dispatch_at: null,
 				updated_at: props.now,
 			})
-			.where("job_id", "in", [...props.jobIds])
+			//* A matching attempt count skips jobs claimed during publish, such as an inline retry
+			.where((eb) =>
+				eb.or(
+					props.jobs.map((job) =>
+						eb.and([
+							eb("job_id", "=", job.job_id),
+							eb("attempts", "=", job.attempts),
+						]),
+					),
+				),
+			)
 			.where("dispatch_status", "=", "pending");
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {

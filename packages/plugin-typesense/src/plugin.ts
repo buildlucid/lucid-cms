@@ -3,6 +3,7 @@ import { resolveCollectionLocalization } from "@lucidcms/core/extension";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import rebuildIndexesConfig from "./admin/components/RebuildIndexes/config.js";
 import { LUCID_VERSION, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
+import createReconcileJob from "./jobs/reconcile.js";
 import createSyncJob from "./jobs/sync.js";
 import migration from "./migrations/1788900000000-typesense.js";
 import routes from "./routes/index.js";
@@ -34,7 +35,7 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 				name: "1788900000000-typesense",
 				migration,
 			});
-			draft.jobs.definitions.push(job);
+			draft.jobs.definitions.push(job, createReconcileJob(options, job));
 			draft.http.routes.push(...routes(options, job));
 			draft.admin.slots.push(rebuildIndexesConfig());
 			draft.hooks.push(

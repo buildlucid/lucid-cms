@@ -79,6 +79,7 @@
 - Fixed `/cdn` resizing images again to check whether a browser's copy is current, when the resized image isn't stored.
 - Fixed `/cdn` image responses missing `Vary: Accept` when `media.images.allowFormatQuery` picks the format from the browser.
 - Fixed CDNs being allowed to keep copies of private `/cdn` media and share link media. Share link media could also be cached for a year, past its expiry or revocation.
+- Fixed failed jobs on the built-in inline queue retrying straight away instead of waiting for their backoff.
 
 ## v0.19.0-alpha.0
 

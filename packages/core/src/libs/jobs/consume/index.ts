@@ -105,10 +105,13 @@ const resolveTrigger = (job: ClaimedJob): JobTrigger => {
 	};
 };
 
-/** Claims and handles one attempt of a durable job. */
-const consumeAttempt = async (
+/**
+ * Runs one durable job attempt. Transports retry only `retry-transport`; acknowledge all other
+ * outcomes.
+ */
+export const consumeJob = async (
 	context: ServiceContext,
-	props: { jobId: string; immediateRetry: boolean },
+	props: { jobId: string },
 ): Promise<JobConsumptionResult> => {
 	const claimed = await claimJob(context, {
 		jobId: props.jobId,
@@ -131,7 +134,6 @@ const consumeAttempt = async (
 			),
 			stack: null,
 			permanent: true,
-			immediateRetry: props.immediateRetry,
 		});
 	}
 
@@ -160,7 +162,6 @@ const consumeAttempt = async (
 			stack: toErrorStack(result.error),
 			error: result.error,
 			permanent: result.type === "invalid-payload",
-			immediateRetry: props.immediateRetry,
 		});
 	} catch (error) {
 		if (error instanceof JobTransactionError) {
@@ -174,7 +175,6 @@ const consumeAttempt = async (
 				stack: toErrorStack(error.result.error),
 				error: error.result.error,
 				permanent: error.result.type === "invalid-payload",
-				immediateRetry: props.immediateRetry,
 			});
 		}
 
@@ -190,30 +190,8 @@ const consumeAttempt = async (
 			message: toErrorMessage(context, error),
 			stack: toErrorStack(error),
 			permanent: false,
-			immediateRetry: props.immediateRetry,
 		});
 	} finally {
 		stopHeartbeat?.();
-	}
-};
-
-/**
- * Claims and runs one durable job. Queue transports should retry only a
- * `retry-transport` result and acknowledge every other outcome.
- */
-export const consumeJob = async (
-	context: ServiceContext,
-	data: { jobId: string; retry?: "scheduled" | "immediate" },
-): Promise<JobConsumptionResult> => {
-	const immediateRetry = data.retry === "immediate";
-
-	while (true) {
-		const result = await consumeAttempt(context, {
-			jobId: data.jobId,
-			immediateRetry,
-		});
-		if (immediateRetry && result.type === "retry-scheduled") continue;
-
-		return result;
 	}
 };
