@@ -20,6 +20,7 @@ export const previewProtocol = {
 		hover: "hover",
 		drag: "drag",
 		dragEnd: "drag-end",
+		navigationLocked: "navigation-locked",
 	},
 } as const;
 

@@ -4,6 +4,7 @@ import type {
 	InternalCollectionDocument,
 	Refs,
 } from "@types";
+import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Permissions } from "@/constants/permissions";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
@@ -22,6 +23,8 @@ export const DocumentSidebar: Component<{
 	disabled: Accessor<boolean>;
 	mutations: UseDocumentMutations;
 	requestContext?: boolean;
+	/** Places it, eg. as a column beside the fields. */
+	class?: string;
 }> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -41,7 +44,7 @@ export const DocumentSidebar: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<aside class="w-full shrink-0 bg-card p-4 md:p-5 flex-col flex gap-5 rounded-t-xl border-t border-border content-xl:sticky content-xl:top-(--document-header-bar-height) content-xl:h-[calc(100vh-var(--document-header-bar-height))] content-xl:w-82.5 content-xl:self-start content-xl:overflow-y-auto content-xl:rounded-tl-none content-xl:border-t-0 content-xl:border-l">
+		<aside class={classNames("flex flex-col gap-5 p-4 md:p-5", props.class)}>
 			<Workflow
 				collection={props.collection}
 				collectionKey={props.collectionKey}

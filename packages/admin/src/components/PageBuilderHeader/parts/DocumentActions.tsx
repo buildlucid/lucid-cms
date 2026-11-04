@@ -2,12 +2,20 @@ import type { PreviewMode } from "@types";
 import type { Component } from "solid-js";
 import ActionMenu, {
 	type ActionMenuItem,
+	type ActionMenuVariant,
 } from "@/components/ActionMenu/ActionMenu";
 import T from "@/translations";
 
 export const DocumentActions: Component<{
 	collectionSingularName?: string;
 	requestLink?: string;
+	/** Auto save's on/off switch, left out without permission to save. */
+	autoSave?: {
+		enabled: boolean;
+		onToggle: () => void;
+	};
+	/** The published page on the website. */
+	liveUrl?: string;
 	onDelete?: () => void;
 	deletePermission?: boolean;
 	unpublish?: {
@@ -34,7 +42,13 @@ export const DocumentActions: Component<{
 		loading: boolean;
 		scopedOnly: boolean;
 	};
+	/** @default "outline" */
+	variant?: ActionMenuVariant;
+	/** Applied to the menu's trigger. */
+	class?: string;
 }> = (props) => {
+	// ----------------------------------------
+	// Functions
 	const getActionLabel = (action: string) => {
 		if (!props.collectionSingularName) return action;
 
@@ -45,6 +59,23 @@ export const DocumentActions: Component<{
 	};
 
 	const actions = (): ActionMenuItem[] => [
+		{
+			label: T()("builder.auto.save.label"),
+			type: "checkbox",
+			icon: "rotate",
+			show: props.autoSave !== undefined,
+			checked: props.autoSave?.enabled,
+			onClick: props.autoSave?.onToggle,
+		},
+		{
+			label: T()("documents.live.view"),
+			type: "link",
+			icon: "eye",
+			show: props.liveUrl !== undefined,
+			href: props.liveUrl,
+			target: "_blank",
+			rel: "noreferrer",
+		},
 		{
 			label: T()("requests.view"),
 			type: "link",
@@ -139,5 +170,15 @@ export const DocumentActions: Component<{
 		},
 	];
 
-	return <ActionMenu actions={actions()} placement="bottom-end" size="md" />;
+	// ----------------------------------------
+	// Render
+	return (
+		<ActionMenu
+			actions={actions()}
+			placement="bottom-end"
+			size="md"
+			variant={props.variant}
+			class={props.class}
+		/>
+	);
 };

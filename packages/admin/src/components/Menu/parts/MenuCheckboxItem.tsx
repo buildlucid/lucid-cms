@@ -1,6 +1,7 @@
 import { DropdownMenu as KobalteMenu } from "@kobalte/core";
+import classNames from "classnames";
 import { TbOutlineCheck } from "solid-icons/tb";
-import type { Component, JSXElement } from "solid-js";
+import { type Component, type JSXElement, Show } from "solid-js";
 import { menuItemClasses } from "@/components/Menu/itemClasses";
 
 export interface MenuCheckboxItemProps {
@@ -11,6 +12,8 @@ export interface MenuCheckboxItemProps {
 	closeOnSelect?: boolean;
 	/** Text used for typeahead when the children are not plain text. */
 	textValue?: string;
+	/** Shown at the start like other items' icons, which moves the checkbox to the end. */
+	icon?: JSXElement;
 	class?: string;
 	children: JSXElement;
 }
@@ -31,11 +34,17 @@ const MenuCheckboxItem: Component<MenuCheckboxItemProps> = (props) => {
 			onClick={(event) => event.stopPropagation()}
 			class={menuItemClasses(props)}
 		>
-			<span class="flex size-4 shrink-0 items-center justify-center rounded border border-border bg-input">
+			<span
+				class={classNames(
+					"flex size-4 shrink-0 items-center justify-center rounded border border-border bg-input",
+					{ "order-last": props.icon !== undefined },
+				)}
+			>
 				<KobalteMenu.ItemIndicator>
 					<TbOutlineCheck size={9} class="text-title" />
 				</KobalteMenu.ItemIndicator>
 			</span>
+			<Show when={props.icon}>{props.icon}</Show>
 			<span class="line-clamp-1 flex-1">{props.children}</span>
 		</KobalteMenu.CheckboxItem>
 	);

@@ -1,6 +1,13 @@
 import classNames from "classnames";
 import { TbOutlineDots, TbOutlineDotsVertical } from "solid-icons/tb";
-import { type Component, createMemo, For, Show } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	Index,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import { Dynamic } from "solid-js/web";
 import ActionIcon, {
 	type ActionIconName,
@@ -17,12 +24,14 @@ import {
 } from "@/utils/permission-requirement";
 import spawnToast from "@/utils/spawn-toast";
 
-export type ActionMenuItemType = "button" | "link" | "group";
+export type ActionMenuItemType = "button" | "link" | "group" | "checkbox";
 
 export interface ActionMenuItem {
 	label: string;
 	type: ActionMenuItemType;
 	icon?: ActionIconName;
+	/** Whether a `checkbox` item is ticked. Choosing it runs `onClick` and keeps the menu open. */
+	checked?: boolean;
 	onClick?: () => void;
 	href?: string;
 	target?: "_blank" | "_self";
@@ -169,31 +178,49 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 	);
 };
 
+//* by position, as the actions are rebuilt whenever one changes, so an item's state updates in place rather than replacing it and losing focus
 const ActionList: Component<{
 	actions: ActionMenuItem[];
 	onSelect: (_action: ActionMenuItem) => void;
-}> = (props) => (
-	<For each={props.actions}>
-		{(action) => (
-			<Show
-				when={action.actions && action.actions.length > 0}
-				fallback={<ActionItem action={action} onSelect={props.onSelect} />}
-			>
-				<Menu.Sub
-					label={action.label}
-					icon={<ActionIcon icon={action.icon} />}
-					variant={action.variant}
-					unavailable={!checkPermission(action.permission).permitted}
+}> = (props) => {
+	// ----------------------------------------
+	// Render
+	return (
+		<Index each={props.actions}>
+			{(action) => (
+				<Switch
+					fallback={<ActionItem action={action()} onSelect={props.onSelect} />}
 				>
-					<ActionList
-						actions={action.actions ?? []}
-						onSelect={props.onSelect}
-					/>
-				</Menu.Sub>
-			</Show>
-		)}
-	</For>
-);
+					<Match when={(action().actions?.length ?? 0) > 0}>
+						<Menu.Sub
+							label={action().label}
+							icon={<ActionIcon icon={action().icon} />}
+							variant={action().variant}
+							unavailable={!checkPermission(action().permission).permitted}
+						>
+							<ActionList
+								actions={action().actions ?? []}
+								onSelect={props.onSelect}
+							/>
+						</Menu.Sub>
+					</Match>
+					<Match when={action().type === "checkbox"}>
+						<Menu.CheckboxItem
+							icon={
+								action().icon ? <ActionIcon icon={action().icon} /> : undefined
+							}
+							checked={action().checked === true}
+							onChange={() => props.onSelect(action())}
+							textValue={action().label}
+						>
+							{action().label}
+						</Menu.CheckboxItem>
+					</Match>
+				</Switch>
+			)}
+		</Index>
+	);
+};
 
 const ActionItem: Component<{
 	action: ActionMenuItem;

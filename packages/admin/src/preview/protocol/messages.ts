@@ -56,6 +56,7 @@ export const isPreviewChildMessage = (
 			);
 		case previewProtocol.messages.unload:
 		case previewProtocol.messages.deselect:
+		case previewProtocol.messages.navigationLocked:
 			return hasOnlyKeys(value, ["scope", "version", "type"]);
 		case previewProtocol.messages.rendered:
 			return (

@@ -210,8 +210,12 @@ export const createUserPreferencesStore = (
 			return typeof open === "boolean" ? open : undefined;
 		},
 
+		getBuilderFieldsWidth() {
+			return state.preferences.builderFieldsWidth;
+		},
+
 		getCollectionPreviewOpen(collectionKey: string) {
-			return state.preferences.collections[collectionKey]?.previewOpen;
+			return synced.previewOpen?.[collectionKey];
 		},
 
 		getCollectionPreviewEditing(collectionKey: string) {
@@ -337,16 +341,18 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		setCollectionPreviewOpen(collectionKey: string, open: boolean) {
-			if (state.preferences.collections[collectionKey]?.previewOpen === open) {
-				return;
-			}
+		setBuilderFieldsWidth(width: number) {
+			if (state.preferences.builderFieldsWidth === width) return;
 			updatePreferences((preferenceState) => {
-				const collectionState = ensureCollectionPreferenceState(
-					preferenceState,
-					collectionKey,
-				);
-				collectionState.previewOpen = open;
+				preferenceState.preferences.builderFieldsWidth = width;
+			});
+		},
+
+		setCollectionPreviewOpen(collectionKey: string, open: boolean) {
+			if (synced.previewOpen?.[collectionKey] === open) return;
+			updateSynced("previewOpen", {
+				...unwrap(synced).previewOpen,
+				[collectionKey]: open,
 			});
 		},
 

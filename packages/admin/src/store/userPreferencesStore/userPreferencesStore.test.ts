@@ -67,6 +67,42 @@ describe("synced preferences", () => {
 	});
 });
 
+describe("builder preview preferences", () => {
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it("saves preview open state to the account per collection", () => {
+		vi.useFakeTimers();
+		const save = vi.fn(() => Promise.resolve());
+		const store = createUserPreferencesStore({ save });
+		store.hydrate({ previewOpen: { pages: true } });
+		store.setCollectionPreviewOpen("blogs", false);
+
+		vi.advanceTimersByTime(SYNCED_SAVE_DELAY);
+		expect(save).toHaveBeenCalledWith({
+			previewOpen: { pages: true, blogs: false },
+		});
+		expect(store.getCollectionPreviewOpen("pages")).toBe(true);
+	});
+
+	it("keeps the fields width on this device, dropping invalid values", () => {
+		const storage = createMemoryStorage();
+		createUserPreferencesStore({ storage }).setBuilderFieldsWidth(480);
+		expect(
+			createUserPreferencesStore({ storage }).getBuilderFieldsWidth(),
+		).toBe(480);
+
+		storage.setItem(
+			USER_PREFERENCES_STORAGE_KEY,
+			JSON.stringify({ version: 1, preferences: { builderFieldsWidth: -1 } }),
+		);
+		expect(
+			createUserPreferencesStore({ storage }).getBuilderFieldsWidth(),
+		).toBeUndefined();
+	});
+});
+
 describe("navigation group preferences", () => {
 	it("persists open state across store instances", () => {
 		const storage = createMemoryStorage();

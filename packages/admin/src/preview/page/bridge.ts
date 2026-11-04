@@ -201,6 +201,10 @@ export const installPreviewBridge = (
 	announce();
 
 	return {
+		/** Tells the builder a link was clicked, which the preview doesn't follow, so it can say how to open it. */
+		navigationLocked: () => {
+			send({ type: previewProtocol.messages.navigationLocked });
+		},
 		/** Announces again when handlers were added to an empty set or it emptied. */
 		handlersChanged: () => {
 			const hasHandlers = handlers().length > 0;

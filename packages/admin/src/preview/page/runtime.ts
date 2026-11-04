@@ -7,7 +7,6 @@ import { isLucidBuilderPreview } from "../protocol/index.js";
 import { installPreviewBridge } from "./bridge.js";
 import { createMorphHandler } from "./morph-handler.js";
 import { installPreviewNavigation } from "./navigation.js";
-import { createPreviewNotice } from "./notice.js";
 
 let cleanupActive: (() => void) | null = null;
 
@@ -24,11 +23,10 @@ export const setupPreviewPage = (
 	const morph = options.morph ? createMorphHandler(options.serverMarkup) : null;
 	const handlers = (): PreviewUpdateHandler[] =>
 		morph ? [morph, ...options.handlers] : [...options.handlers];
-	const notice = createPreviewNotice(window);
 	const bridge = installPreviewBridge(window, handlers);
 	const cleanupNavigation = installPreviewNavigation({
 		targetWindow: window,
-		showNavigationLocked: () => notice.show(),
+		showNavigationLocked: bridge.navigationLocked,
 	});
 
 	const cleanup = () => {
@@ -36,7 +34,6 @@ export const setupPreviewPage = (
 		cleanupActive = null;
 		cleanupNavigation();
 		bridge.cleanup();
-		notice.remove();
 	};
 	cleanupActive = cleanup;
 	return {

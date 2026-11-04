@@ -1,3 +1,4 @@
+import { Tooltip } from "@kobalte/core";
 import { createHotkey, formatForDisplay } from "@tanstack/solid-hotkeys";
 import type {
 	Collection,
@@ -9,22 +10,17 @@ import classNames from "classnames";
 import {
 	TbOutlineArrowBackUp,
 	TbOutlineArrowForwardUp,
-	TbOutlineCalendarPlus,
-	TbOutlineClock,
-	TbOutlineExternalLink,
 	TbOutlineEye,
 	TbOutlineEyeOff,
 	TbOutlineLanguage,
 	TbOutlineLayoutColumns,
-	TbOutlineRotateClockwise2,
+	TbOutlineListDetails,
+	TbOutlineLock,
 } from "solid-icons/tb";
 import type { Accessor } from "solid-js";
 import { type Component, createMemo, onCleanup, onMount, Show } from "solid-js";
-import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Breadcrumbs/Breadcrumbs";
 import Button from "@/components/Button/Button";
-import { getButtonClasses } from "@/components/Button/classes";
 import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
-import DateText from "@/components/DateText/DateText";
 import { Permissions } from "@/constants/permissions";
 import type { UseBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import type { UseDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
@@ -56,20 +52,26 @@ import { ViewSelector, type ViewSelectorOption } from "./parts/ViewSelector";
 //* ghost buttons are already faint, so disabled ones fade further and ignore hover
 const editButtonClass =
 	"disabled:opacity-40! disabled:hover:bg-transparent disabled:hover:text-muted";
+//* ghost while the bar wraps onto two rows, then outlined at the end of the one row
+const actionsTriggerClass =
+	"order-4 @3xl/builder-header:order-8 @3xl/builder-header:border @3xl/builder-header:border-border @3xl/builder-header:bg-input @3xl/builder-header:text-subtitle @3xl/builder-header:hover:bg-background-hover";
+//* a toggle stays filled while its view or panel is open
+const toggleButtonClass =
+	"aria-pressed:bg-background-hover aria-pressed:text-title";
 
-type HeaderBreadcrumb = {
-	link?: string;
-	label: string;
-	include?: boolean;
-};
+/** A header button that opens and closes a view beside the fields. */
+type HeaderToggle = { open: Accessor<boolean>; toggle: () => void };
 
 export const PageBuilderHeader: Component<{
 	mode: "create" | "edit" | undefined;
 	version?: Accessor<"latest" | string>;
 	versionId?: Accessor<number | undefined>;
-	trailingBreadcrumbs?: Accessor<Array<HeaderBreadcrumb> | undefined>;
+	/** Toggles the preview beside the fields. Left out where it isn't available. */
+	preview?: HeaderToggle;
 	/** Toggles the side-by-side view. Left out where it isn't available. */
-	comparison?: { open: Accessor<boolean>; toggle: () => void };
+	comparison?: HeaderToggle;
+	/** Swaps the document's details in for the fields, where they don't fit beside them. */
+	details?: HeaderToggle;
 	/** The request that owns the proposal being edited. */
 	requestLink?: string;
 	currentViewLabel?: Accessor<string | undefined>;
@@ -87,15 +89,12 @@ export const PageBuilderHeader: Component<{
 		autoSave?: UseDocumentAutoSave;
 		autoSaveUserEnabled?: Accessor<boolean>;
 		showRevisionNavigation: UseDocumentUIState["showRevisionNavigation"];
-		showPreview?: UseDocumentUIState["showPreview"];
-		previewOpen?: UseDocumentUIState["getPreviewOpen"];
 		isDocumentMutated?: Accessor<boolean>;
 	};
 	actions: {
 		upsertDocumentAction?: UseDocumentMutations["upsertDocumentAction"];
 		publishDocumentAction?: UseDocumentMutations["publishDocumentAction"];
 		restoreRevisionAction?: UseDocumentMutations["restoreRevisionAction"];
-		togglePreview?: () => void;
 		beforeVersionChange?: (
 			option: ViewSelectorOption,
 		) => Promise<string | null>;
@@ -105,7 +104,7 @@ export const PageBuilderHeader: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
-	let stickyBarRef: HTMLDivElement | undefined;
+	let headerRef: HTMLElement | undefined;
 	const documentLocalization = useDocumentLocalization();
 
 	// -------------------------------
@@ -143,17 +142,6 @@ export const PageBuilderHeader: Component<{
 	const hasMultipleLocales = createMemo(() => {
 		return documentLocalization.locales().length > 1;
 	});
-	const collectionSummary = createMemo(() => {
-		const fallback = T()("builder.header.summary.fallback", {
-			collectionSingle: props.state.collectionSingularName(),
-		});
-		const summary = helpers.getLocaleValue({
-			value: props.state.collection()?.details.description,
-			fallback,
-		});
-
-		return summary.trim() || fallback;
-	});
 	const actionCollectionSingularName = createMemo(() =>
 		helpers.getLocaleValue({
 			value: props.state.collection()?.details.labels.singular,
@@ -168,49 +156,12 @@ export const PageBuilderHeader: Component<{
 
 		return metadata;
 	});
-	const documentUpdatedAt = createMemo(() => {
-		return (
-			matchingAutoSaveMetadata()?.updatedAt ?? props.state.document()?.updatedAt
-		);
-	});
 	const versionContentId = (versionType: string) => {
 		const metadata = matchingAutoSaveMetadata();
 		if (metadata?.versionType === versionType) return metadata.contentId;
 
 		return props.state.document()?.versions[versionType]?.contentId;
 	};
-	const breadcrumbs = createMemo(() => {
-		const documentRoute = getDocumentRoute("edit", {
-			collectionKey: props.state.collectionKey(),
-			documentId: props.state.documentID(),
-		});
-		const currentDocumentRoute = getDocumentRoute("edit", {
-			collectionKey: props.state.collectionKey(),
-			documentId: props.state.documentID(),
-			version: props.version?.(),
-			versionId: props.versionId?.(),
-		});
-		const trailing = props.trailingBreadcrumbs?.() ?? [];
-
-		return [
-			{
-				link: "/admin",
-				label: T()("common.home"),
-			},
-			{
-				link: `/admin/collections/${props.state.collectionKey()}`,
-				label: props.state.collectionName(),
-			},
-			{
-				link: trailing.length > 0 ? documentRoute : currentDocumentRoute,
-				label:
-					props.mode === "create"
-						? T()("common.create")
-						: `${T()("media.types.document")} #${props.state.documentID()}`,
-			},
-			...trailing,
-		];
-	});
 	const viewOptions = createMemo(() => {
 		const options: ViewSelectorOption[] = [
 			{
@@ -557,6 +508,30 @@ export const PageBuilderHeader: Component<{
 
 		return userStore.get.hasPermission([permission]).some;
 	});
+	const showAutoSave = createMemo(
+		() =>
+			props.mode === "edit" && props.state.ui.hasAutoSavePermission() === true,
+	);
+	const showActions = createMemo(
+		() =>
+			props.state.ui.showDeleteButton() ||
+			props.state.ui.unpublishTarget() !== undefined ||
+			props.state.ui.showDuplicateButton() ||
+			props.state.ui.showExportButton() ||
+			props.actions.requestAlignment !== undefined ||
+			props.requestLink !== undefined ||
+			showCopyPreview() ||
+			showAutoSave() ||
+			liveDocumentUrl() !== null,
+	);
+	//* locale and saving drop below the view when the header is narrow
+	const hasSecondRow = createMemo(
+		() =>
+			props.mode !== undefined ||
+			currentEnvironmentPublishOption() !== undefined ||
+			props.state.ui.showUpsertButton() ||
+			props.state.ui.showRestoreRevisionButton(),
+	);
 
 	// ----------------------------------
 	// Functions
@@ -644,24 +619,24 @@ export const PageBuilderHeader: Component<{
 	}));
 	createHotkey(
 		shortcuts.togglePreview.hotkey,
-		() => props.actions.togglePreview?.(),
-		() => ({ enabled: props.state.showPreview?.() === true }),
+		() => props.preview?.toggle(),
+		() => ({ enabled: props.preview !== undefined }),
 	);
 	onMount(() => {
-		if (!stickyBarRef) return;
+		if (!headerRef) return;
+		const header = headerRef;
 
+		//* the part of the screen the stuck header covers, as its first row scrolls away on small screens
 		const updateHeight = () => {
-			if (stickyBarRef) {
-				const height = stickyBarRef.offsetHeight;
-				document.documentElement.style.setProperty(
-					"--document-header-bar-height",
-					`${height}px`,
-				);
-			}
+			const top = Number.parseFloat(getComputedStyle(header).top) || 0;
+			document.documentElement.style.setProperty(
+				"--document-header-bar-height",
+				`${header.offsetHeight + Math.min(top, 0)}px`,
+			);
 		};
 
 		const resizeObserver = new ResizeObserver(updateHeight);
-		resizeObserver.observe(stickyBarRef);
+		resizeObserver.observe(header);
 		updateHeight();
 
 		onCleanup(() => {
@@ -676,357 +651,326 @@ export const PageBuilderHeader: Component<{
 	// Render
 	return (
 		<>
-			<div class="w-full -mt-4 px-4 md:px-6 pt-4 mt:pt-6 bg-background border-x max-md:border-t border-border max-md:rounded-t-xl max-md:mt-px">
-				<div class="flex md:items-center md:justify-between gap-3 w-full text-sm">
-					<div class="flex-1 min-w-0">
-						<LayoutBreadcrumbs
-							breadcrumbs={breadcrumbs()}
-							options={{
-								noBorder: true,
-								noPadding: true,
-							}}
-						/>
+			<header
+				ref={headerRef}
+				style={{ "view-transition-name": "document-builder-header" }}
+				class={classNames(
+					"@container/builder-header sticky top-0 z-30 w-full shrink-0 rounded-b-xl border-x border-b border-border bg-background md:-mt-4 max-md:mt-px max-md:rounded-t-xl max-md:border-t",
+					{
+						"max-md:-top-12": hasSecondRow(),
+					},
+				)}
+			>
+				<div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-4 py-3 md:px-6 @3xl/builder-header:h-14 @3xl/builder-header:flex-nowrap @3xl/builder-header:py-0">
+					<div class="order-1 flex min-h-9 min-w-0 flex-1 items-center gap-2">
+						<Show when={props.mode === "create"}>
+							<h2 class="truncate text-base font-medium text-title">
+								{T()("actions.create.document", {
+									collectionSingle: props.state.collectionSingularName(),
+								})}
+							</h2>
+						</Show>
+						<Show when={props.mode !== "create" && !showViewSelector()}>
+							<h2 class="truncate text-base font-medium text-title">
+								{props.currentViewLabel?.() || props.state.collectionName()}
+							</h2>
+						</Show>
+						<Show when={showViewSelector()}>
+							<ViewSelector
+								options={viewOptions}
+								collectionSingularName={props.state.collectionSingularName}
+								isDocumentMutated={props.state.isDocumentMutated}
+								currentViewLabel={props.currentViewLabel}
+								onBeforeVersionChange={props.actions.beforeVersionChange}
+								comparing={() => props.comparison?.open() === true}
+							/>
+						</Show>
+						<Show
+							when={
+								props.mode !== undefined && props.state.ui.isDocumentLocked()
+							}
+						>
+							<span
+								role="img"
+								class="flex shrink-0 text-muted"
+								title={T()("documents.locked.message")}
+								aria-label={T()("documents.locked.message")}
+							>
+								<TbOutlineLock size={14} />
+							</span>
+						</Show>
 					</div>
-					<Show when={props.mode === "edit"}>
-						<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 shrink-0 text-xs md:text-sm">
-							<div class="hidden content-lg:flex items-center gap-x-3 gap-y-1.5 flex-wrap">
-								<div class="flex items-center gap-1.5 text-body">
-									<TbOutlineCalendarPlus size={12} />
-									<DateText date={props.state.document()?.createdAt} />
-								</div>
-								<div class="flex items-center gap-1.5 text-body">
-									<TbOutlineClock size={12} />
-									<DateText date={documentUpdatedAt()} />
-								</div>
-							</div>
-							<Show when={props.state.ui.hasAutoSavePermission?.()}>
-								<button
+					<Show when={props.edits}>
+						{(edits) => (
+							<div class="order-2 flex shrink-0 items-center gap-1">
+								<Button
 									type="button"
-									onClick={userPreferencesStore.toggleAutoSaveEnabled}
-									class={classNames(
-										"flex items-center justify-center w-6 h-6 rounded transition-colors",
-										{
-											"text-primary hover:text-primary-hover":
-												props.state.autoSaveUserEnabled?.(),
-											"text-body/40 hover:text-body":
-												!props.state.autoSaveUserEnabled?.(),
-										},
-									)}
-									title={
-										props.state.autoSaveUserEnabled?.()
-											? `${T()("builder.auto.save.label")} - ${T()("common.status.enabled")}`
-											: `${T()("builder.auto.save.label")} - ${T()("common.status.disabled")}`
-									}
+									variant="ghost"
+									size="sm"
+									shape="square"
+									title={`${T()("builder.undo")} (${formatForDisplay(shortcuts.undo.hotkey)})`}
+									aria-label={T()("builder.undo")}
+									disabled={!edits().canUndo()}
+									class={editButtonClass}
+									onClick={() => edits().undo()}
 								>
-									<TbOutlineRotateClockwise2 size={12} />
-								</button>
+									<TbOutlineArrowBackUp />
+								</Button>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									shape="square"
+									title={`${T()("builder.redo")} (${formatForDisplay(shortcuts.redo.hotkey)})`}
+									aria-label={T()("builder.redo")}
+									disabled={!edits().canRedo()}
+									class={editButtonClass}
+									onClick={() => edits().redo()}
+								>
+									<TbOutlineArrowForwardUp />
+								</Button>
+							</div>
+						)}
+					</Show>
+					<Show when={props.preview || props.comparison || props.details}>
+						<div class="order-3 flex shrink-0 items-center gap-1">
+							<Show when={props.edits}>
+								<span
+									aria-hidden="true"
+									class="mx-1.5 hidden h-5 w-px bg-border @3xl/builder-header:block"
+								/>
+							</Show>
+							<Show when={props.preview}>
+								{(preview) => (
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										shape="square"
+										title={`${T()("common.preview")} (${formatForDisplay(shortcuts.togglePreview.hotkey)})`}
+										aria-label={T()("common.preview")}
+										aria-pressed={preview().open()}
+										class={toggleButtonClass}
+										onClick={() => preview().toggle()}
+									>
+										<Show when={preview().open()} fallback={<TbOutlineEye />}>
+											<TbOutlineEyeOff />
+										</Show>
+									</Button>
+								)}
 							</Show>
 							<Show when={props.comparison}>
 								{(comparison) => (
-									<button
+									<Button
 										type="button"
-										onClick={() => comparison().toggle()}
-										aria-pressed={comparison().open()}
-										class={classNames(
-											"flex items-center justify-center w-6 h-6 rounded transition-colors",
-											{
-												"text-primary hover:text-primary-hover":
-													comparison().open(),
-												"text-body/40 hover:text-body": !comparison().open(),
-											},
-										)}
+										variant="ghost"
+										size="sm"
+										shape="square"
 										title={T()("documents.compare.action")}
 										aria-label={T()("documents.compare.action")}
+										aria-pressed={comparison().open()}
+										class={toggleButtonClass}
+										onClick={() => comparison().toggle()}
 									>
-										<TbOutlineLayoutColumns size={12} />
-									</button>
+										<TbOutlineLayoutColumns />
+									</Button>
+								)}
+							</Show>
+							<Show when={props.details}>
+								{(details) => (
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										shape="square"
+										title={T()("builder.details.toggle")}
+										aria-label={T()("builder.details.toggle")}
+										aria-pressed={details().open()}
+										class={toggleButtonClass}
+										onClick={() => details().toggle()}
+									>
+										<TbOutlineListDetails />
+									</Button>
 								)}
 							</Show>
 						</div>
 					</Show>
-				</div>
-			</div>
-			<div
-				ref={stickyBarRef}
-				style={{ "view-transition-name": "document-builder-header" }}
-				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background border-x border-b border-border rounded-b-xl flex flex-col content-lg:flex-row content-lg:items-center content-lg:justify-between gap-3 content-lg:gap-2.5"
-			>
-				<div class="flex min-w-0 items-center gap-2.5 w-full content-lg:w-auto">
-					<div class="flex min-w-0 flex-col gap-1">
-						<div class="flex min-w-0 flex-wrap items-center gap-2">
-							<Show when={props.mode === "create"}>
-								<h2 class="text-base font-medium text-title">
-									{T()("actions.create.document", {
-										collectionSingle: props.state.collectionSingularName(),
-									})}
-								</h2>
-							</Show>
-							<Show when={props.mode !== "create" && !showViewSelector()}>
-								<h2 class="text-base font-medium text-title">
-									{props.currentViewLabel?.() || props.state.collectionName()}
-								</h2>
-							</Show>
-							<Show when={showViewSelector()}>
-								<ViewSelector
-									options={viewOptions}
-									collectionSingularName={props.state.collectionSingularName}
-									isDocumentMutated={props.state.isDocumentMutated}
-									currentViewLabel={props.currentViewLabel}
-									onBeforeVersionChange={props.actions.beforeVersionChange}
-									comparing={() => props.comparison?.open() === true}
-								/>
-							</Show>
-						</div>
-						<p class="text-sm text-body">{collectionSummary()}</p>
-					</div>
-				</div>
-				<Show
-					when={
-						props.state.ui.showUpsertButton?.() ||
-						props.state.ui.showDeleteButton?.() ||
-						props.state.ui.showRestoreRevisionButton?.() ||
-						props.mode !== undefined
-					}
-				>
-					{/* the title wraps rather than this row shrinking, which would push the locale select under the save button */}
-					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full content-lg:w-auto content-lg:shrink-0">
-						<Show when={props.mode !== undefined}>
-							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
-								<Show when={props.edits}>
-									{(edits) => (
-										<div class="flex items-center gap-1">
-											<Button
-												type="button"
-												variant="ghost"
-												size="sm"
-												shape="square"
-												title={`${T()("builder.undo")} (${formatForDisplay(shortcuts.undo.hotkey)})`}
-												aria-label={T()("builder.undo")}
-												disabled={!edits().canUndo()}
-												class={editButtonClass}
-												onClick={() => edits().undo()}
-											>
-												<TbOutlineArrowBackUp />
-											</Button>
-											<Button
-												type="button"
-												variant="ghost"
-												size="sm"
-												shape="square"
-												title={`${T()("builder.redo")} (${formatForDisplay(shortcuts.redo.hotkey)})`}
-												aria-label={T()("builder.redo")}
-												disabled={!edits().canRedo()}
-												class={editButtonClass}
-												onClick={() => edits().redo()}
-											>
-												<TbOutlineArrowForwardUp />
-											</Button>
+					<Show when={showActions()}>
+						<DocumentActions
+							variant="ghost"
+							class={actionsTriggerClass}
+							collectionSingularName={actionCollectionSingularName()}
+							requestLink={props.requestLink}
+							autoSave={
+								showAutoSave()
+									? {
+											enabled: props.state.autoSaveUserEnabled?.() ?? true,
+											onToggle: userPreferencesStore.toggleAutoSaveEnabled,
+										}
+									: undefined
+							}
+							liveUrl={liveDocumentUrl() ?? undefined}
+							duplicate={
+								props.state.ui.showDuplicateButton?.()
+									? {
+											onDuplicate: () => props.state.ui.setDuplicateOpen(true),
+											permission: props.state.ui.hasDuplicatePermission(),
+											disabled: props.state.ui.duplicateDisabled(),
+										}
+									: undefined
+							}
+							export={
+								props.state.ui.showExportButton()
+									? {
+											onExport: () => props.state.ui.setExportOpen(true),
+											permission: true,
+										}
+									: undefined
+							}
+							align={
+								props.actions.requestAlignment
+									? {
+											onAlign: props.actions.requestAlignment,
+											permission: props.state.ui.hasSavePermission(),
+											disabled:
+												props.state.ui.isSaving() ||
+												props.state.ui.isAutoSaving() ||
+												props.state.autoSave?.isDraftCheckPending() === true,
+										}
+									: undefined
+							}
+							onDelete={
+								props.state.ui.showDeleteButton?.()
+									? () => props.state.ui?.setDeleteOpen?.(true)
+									: undefined
+							}
+							deletePermission={props.state.ui.hasDeletePermission?.()}
+							unpublish={
+								props.state.ui.unpublishTarget() !== undefined
+									? {
+											onUnpublish: () => props.state.ui.setUnpublishOpen(true),
+											permission: props.state.ui.hasUnpublishPermission(),
+										}
+									: undefined
+							}
+							preview={
+								showCopyPreview()
+									? {
+											onCopy: (mode) => void copyPreviewUrl(mode),
+											permission: hasPreviewPermission(),
+											loading: createPreview.action.isPending,
+											scopedOnly: scopedPreviewOnly(),
+										}
+									: undefined
+							}
+						/>
+					</Show>
+					<Show when={hasSecondRow()}>
+						<span
+							aria-hidden="true"
+							class="order-5 basis-full @3xl/builder-header:hidden"
+						/>
+					</Show>
+					<Show when={props.mode !== undefined}>
+						<Show
+							when={
+								Boolean(props.state.collection()?.localized) &&
+								hasMultipleLocales()
+							}
+							fallback={
+								<Show when={displayLocale()}>
+									{(locale) => (
+										<div class="order-6 flex flex-1 @3xl/builder-header:flex-none">
+											<Tooltip.Root openDelay={300} placement="bottom">
+												<Tooltip.Trigger
+													as="span"
+													tabIndex={0}
+													aria-label={T()("builder.locale.label", {
+														locale: `${locale().name} (${locale().code})`,
+													})}
+													class="flex size-9 items-center justify-center rounded-md text-muted outline-none focus-visible:ring-1 focus-visible:ring-primary"
+												>
+													<TbOutlineLanguage size={16} />
+												</Tooltip.Trigger>
+												<Tooltip.Portal>
+													<Tooltip.Content class="z-60 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs font-medium text-title shadow-md animate-dropdown">
+														{T()("builder.locale.label", {
+															locale: `${locale().name} (${locale().code})`,
+														})}
+													</Tooltip.Content>
+												</Tooltip.Portal>
+											</Tooltip.Root>
 										</div>
 									)}
 								</Show>
-								<Show
-									when={
-										Boolean(props.state.collection()?.localized) &&
-										hasMultipleLocales()
-									}
-								>
-									<div class="flex-1 min-w-0 content-lg:flex-none content-lg:w-54">
-										<ContentLocaleSelect
-											locales={documentLocalization.locales()}
-											invalid={props.state.ui.brickTranslationErrors?.()}
-											showShortcut={true}
-										/>
-									</div>
-								</Show>
-								<Show
-									when={
-										(!props.state.collection()?.localized ||
-											!hasMultipleLocales()) &&
-										displayLocale()
-									}
-								>
-									<div class="flex items-center">
-										<TbOutlineLanguage size={16} />
-										<span class="ml-2.5 text-base font-medium text-body">
-											{displayLocale()?.name} ({displayLocale()?.code})
-										</span>
-									</div>
-								</Show>
+							}
+						>
+							<div class="order-6 min-w-0 flex-1 @3xl/builder-header:w-44 @3xl/builder-header:flex-none @5xl/builder-header:w-54">
+								<ContentLocaleSelect
+									locales={documentLocalization.locales()}
+									invalid={props.state.ui.brickTranslationErrors?.()}
+									showShortcut={true}
+								/>
 							</div>
 						</Show>
-						<div class="flex items-center gap-2.5 w-auto ml-auto">
-							<Show when={currentEnvironmentPublishOption()}>
-								{(option) => (
-									<Button
-										type="button"
-										variant="secondary"
-										size="sm"
-										aria-disabled={option().disabled === true}
-										class={classNames({
-											"cursor-not-allowed opacity-80":
-												option().disabled === true,
-										})}
-										loading={props.state.ui.isPublishing?.()}
-										onClick={() => openPublishOption(option())}
-									>
-										{T()("documents.publish.update.environment", {
-											environment: option().label,
-										})}
-									</Button>
-								)}
-							</Show>
-							<Show when={liveDocumentUrl()}>
-								{(url) => (
-									<a
-										href={url()}
-										target="_blank"
-										rel="noreferrer"
-										class={getButtonClasses({
-											variant: "outline",
-											size: "sm",
-											shape: "square",
-										})}
-										title={T()("documents.live.view")}
-										aria-label={T()("documents.live.view")}
-									>
-										<TbOutlineExternalLink />
-									</a>
-								)}
-							</Show>
-							<Show when={props.state.showPreview?.()}>
-								<Button
-									type="button"
-									variant={props.state.previewOpen?.() ? "primary" : "outline"}
-									size="sm"
-									shape="square"
-									title={`${T()("common.preview")} (${formatForDisplay(shortcuts.togglePreview.hotkey)})`}
-									aria-label={T()("common.preview")}
-									aria-pressed={props.state.previewOpen?.()}
-									class={
-										props.state.previewOpen?.()
-											? "border-secondary! bg-secondary! text-secondary-foreground! hover:bg-secondary-hover!"
-											: undefined
-									}
-									onClick={() => props.actions.togglePreview?.()}
-								>
-									<Show
-										when={props.state.previewOpen?.()}
-										fallback={<TbOutlineEye />}
-									>
-										<TbOutlineEyeOff />
-									</Show>
-								</Button>
-							</Show>
-							<Show when={props.state.ui.showUpsertButton?.()}>
-								<PublishTrigger
-									options={publishOptions}
-									onSelect={openPublishOption}
-									actions={createAlternatives()}
-									onSave={save}
-									saveLabel={
-										createDefault() === "request"
-											? T()("documents.request.action")
-											: createDefault() === "create"
-												? T()("common.create")
-												: undefined
-									}
-									saveDisabled={props.state.ui.saveDisabled?.()}
-									savePermission={props.state.ui.hasSavePermission?.()}
-									loading={isBusy()}
-								/>
-							</Show>
-							<Show when={props.state.ui.showRestoreRevisionButton?.()}>
+					</Show>
+					<div class="order-7 flex shrink-0 items-center gap-2">
+						<Show when={currentEnvironmentPublishOption()}>
+							{(option) => (
 								<Button
 									type="button"
 									variant="secondary"
 									size="sm"
-									onClick={() => {
-										const versionId = props.versionId?.();
-										if (!versionId) return;
-										props.state.ui.setRestoreRevisionVersionId(versionId);
-										props.state.ui.setRestoreRevisionOpen(true);
-									}}
-									permission={props.state.ui.restorePermission?.()}
+									aria-disabled={option().disabled === true}
+									class={classNames({
+										"cursor-not-allowed opacity-80": option().disabled === true,
+									})}
+									loading={props.state.ui.isPublishing?.()}
+									onClick={() => openPublishOption(option())}
 								>
-									{T()("documents.revisions.restore.action")}
+									{T()("documents.publish.update.environment", {
+										environment: option().label,
+									})}
 								</Button>
-							</Show>
-							<Show
-								when={
-									props.state.ui.showDeleteButton?.() ||
-									props.state.ui.unpublishTarget() !== undefined ||
-									props.state.ui.showDuplicateButton?.() ||
-									props.state.ui.showExportButton() ||
-									props.actions.requestAlignment !== undefined ||
-									props.requestLink !== undefined ||
-									showCopyPreview()
+							)}
+						</Show>
+						<Show when={props.state.ui.showUpsertButton?.()}>
+							<PublishTrigger
+								options={publishOptions}
+								onSelect={openPublishOption}
+								actions={createAlternatives()}
+								onSave={save}
+								saveLabel={
+									createDefault() === "request"
+										? T()("documents.request.action")
+										: createDefault() === "create"
+											? T()("common.create")
+											: undefined
 								}
+								saveDisabled={props.state.ui.saveDisabled?.()}
+								savePermission={props.state.ui.hasSavePermission?.()}
+								loading={isBusy()}
+							/>
+						</Show>
+						<Show when={props.state.ui.showRestoreRevisionButton?.()}>
+							<Button
+								type="button"
+								variant="secondary"
+								size="sm"
+								onClick={() => {
+									const versionId = props.versionId?.();
+									if (!versionId) return;
+									props.state.ui.setRestoreRevisionVersionId(versionId);
+									props.state.ui.setRestoreRevisionOpen(true);
+								}}
+								permission={props.state.ui.restorePermission?.()}
 							>
-								<DocumentActions
-									collectionSingularName={actionCollectionSingularName()}
-									requestLink={props.requestLink}
-									duplicate={
-										props.state.ui.showDuplicateButton?.()
-											? {
-													onDuplicate: () =>
-														props.state.ui.setDuplicateOpen(true),
-													permission: props.state.ui.hasDuplicatePermission(),
-													disabled: props.state.ui.duplicateDisabled(),
-												}
-											: undefined
-									}
-									export={
-										props.state.ui.showExportButton()
-											? {
-													onExport: () => props.state.ui.setExportOpen(true),
-													permission: true,
-												}
-											: undefined
-									}
-									align={
-										props.actions.requestAlignment
-											? {
-													onAlign: props.actions.requestAlignment,
-													permission: props.state.ui.hasSavePermission(),
-													disabled:
-														props.state.ui.isSaving() ||
-														props.state.ui.isAutoSaving() ||
-														props.state.autoSave?.isDraftCheckPending() ===
-															true,
-												}
-											: undefined
-									}
-									onDelete={
-										props.state.ui.showDeleteButton?.()
-											? () => props.state.ui?.setDeleteOpen?.(true)
-											: undefined
-									}
-									deletePermission={props.state.ui.hasDeletePermission?.()}
-									unpublish={
-										props.state.ui.unpublishTarget() !== undefined
-											? {
-													onUnpublish: () =>
-														props.state.ui.setUnpublishOpen(true),
-													permission: props.state.ui.hasUnpublishPermission(),
-												}
-											: undefined
-									}
-									preview={
-										showCopyPreview()
-											? {
-													onCopy: (mode) => void copyPreviewUrl(mode),
-													permission: hasPreviewPermission(),
-													loading: createPreview.action.isPending,
-													scopedOnly: scopedPreviewOnly(),
-												}
-											: undefined
-									}
-								/>
-							</Show>
-						</div>
+								{T()("documents.revisions.restore.action")}
+							</Button>
+						</Show>
 					</div>
-				</Show>
-			</div>
+				</div>
+			</header>
 			<AutoSaveStatusPill
 				ui={props.state.ui}
 				autoSave={props.state.autoSave}

@@ -16,7 +16,12 @@ import {
 	tabsItemClasses,
 	tabsListClasses,
 	tabsRootClasses,
+	tabsScrollerClasses,
 } from "../tabsClasses";
+import { TabsScrollButton } from "./TabsScrollButton";
+
+//* the scroll buttons' fade, which a tab scrolled into view keeps clear of
+const SCROLL_FADE_WIDTH = 48;
 
 export interface TabsItem {
 	value: string;
@@ -54,8 +59,11 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 	});
 	const [hoveredKey, setHoveredKey] = createSignal<string>();
 	const [isReady, setIsReady] = createSignal(false);
+	const [canScrollStart, setCanScrollStart] = createSignal(false);
+	const [canScrollEnd, setCanScrollEnd] = createSignal(false);
 
 	let containerRef!: HTMLDivElement;
+	let scrollerRef!: HTMLDivElement;
 	const itemRefs = new Map<string, HTMLElement>();
 	let indicatorFrame: number | undefined;
 	let indicatorRetryTimeouts: ReturnType<typeof setTimeout>[] = [];
@@ -92,28 +100,38 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 		for (const timeout of indicatorRetryTimeouts) clearTimeout(timeout);
 		indicatorRetryTimeouts = [];
 	};
+	//* the indicator scrolls with the tabs, so it's placed within the scrolled content
 	const updateIndicator = (key = targetKey()) => {
-		if (!key || !containerRef) return false;
+		if (!key || !scrollerRef) return false;
 		const item = itemRefs.get(key);
 		if (!item) return false;
 
-		const containerRect = containerRef.getBoundingClientRect();
+		const scrollerRect = scrollerRef.getBoundingClientRect();
 		const itemRect = item.getBoundingClientRect();
-		if (containerRect.width === 0 || itemRect.width === 0) return false;
+		if (scrollerRect.width === 0 || itemRect.width === 0) return false;
 
 		setIndicatorStyle({
 			height: itemRect.height,
 			width: itemRect.width,
-			x: itemRect.left - containerRect.left,
-			y: itemRect.top - containerRect.top,
+			x: itemRect.left - scrollerRect.left + scrollerRef.scrollLeft,
+			y: itemRect.top - scrollerRect.top,
 		});
 		return true;
+	};
+	//* scrollLeft runs negative right to left, so the distance scrolled is its size
+	const updateScrollEdges = () => {
+		const scrolled = Math.abs(scrollerRef.scrollLeft);
+		setCanScrollStart(scrolled > 1);
+		setCanScrollEnd(
+			scrolled + scrollerRef.clientWidth < scrollerRef.scrollWidth - 1,
+		);
 	};
 	const scheduleIndicatorUpdate = (key = targetKey()) => {
 		if (indicatorFrame !== undefined) cancelAnimationFrame(indicatorFrame);
 		indicatorFrame = requestAnimationFrame(() => {
 			indicatorFrame = undefined;
 			updateIndicator(key);
+			updateScrollEdges();
 		});
 	};
 	//* measure again after fonts and late layout shift the tabs
@@ -137,6 +155,28 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
+	//* brings a tab out from under the fades, jumping rather than gliding on first paint
+	const scrollToItem = (key: string | undefined, instant = false) => {
+		const item = key ? itemRefs.get(key) : undefined;
+		if (!item || scrollerRef.scrollWidth <= scrollerRef.clientWidth) return;
+
+		const scrollerRect = scrollerRef.getBoundingClientRect();
+		const itemRect = item.getBoundingClientRect();
+		const before = itemRect.left - (scrollerRect.left + SCROLL_FADE_WIDTH);
+		const after = itemRect.right - (scrollerRect.right - SCROLL_FADE_WIDTH);
+		const left = before < 0 ? before : Math.max(after, 0);
+		if (left === 0) return;
+
+		scrollerRef.scrollBy({ left, behavior: instant ? "instant" : undefined });
+	};
+	const scrollPage = (edge: "start" | "end") => {
+		const towardsStart = edge === "start";
+		const rtl = getComputedStyle(scrollerRef).direction === "rtl";
+		const distance = scrollerRef.clientWidth * 0.75;
+		scrollerRef.scrollBy({
+			left: towardsStart !== rtl ? -distance : distance,
+		});
+	};
 	const handleEnter = (key: string) => {
 		setHoveredKey(key);
 		scheduleIndicatorUpdate(key);
@@ -155,6 +195,7 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 	// Effects
 	onMount(() => {
 		scheduleIndicatorRetries();
+		requestAnimationFrame(() => scrollToItem(activeKey(), true));
 		if (typeof ResizeObserver !== "undefined") {
 			resizeObserver = new ResizeObserver(() => scheduleIndicatorUpdate());
 			resizeObserver.observe(containerRef);
@@ -171,7 +212,10 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 	createEffect(
 		on(
 			() => [activeKey(), itemSignature()],
-			() => scheduleIndicatorRetries(),
+			() => {
+				scheduleIndicatorRetries();
+				scrollToItem(activeKey());
+			},
 			{ defer: true },
 		),
 	);
@@ -184,79 +228,98 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 			data-tabs
 			class={tabsRootClasses(fill(), props.class)}
 		>
-			<span
-				data-tabs-indicator
-				class={tabsIndicatorClasses(isReady(), hoveredKey() !== undefined)}
-				style={{
-					height: `${indicatorStyle().height}px`,
-					transform: `translate3d(${indicatorStyle().x}px, ${indicatorStyle().y}px, 0)`,
-					width: `${indicatorStyle().width}px`,
-				}}
-				aria-hidden="true"
-			/>
-			<ul
-				data-tabs-list
-				class={tabsListClasses(stretch())}
-				onMouseLeave={handleLeave}
-				role={isNavigation() ? undefined : "tablist"}
+			<div
+				ref={scrollerRef}
+				data-tabs-scroller
+				class={tabsScrollerClasses}
+				onScroll={updateScrollEdges}
 			>
-				<For each={items()}>
-					{(item) => {
-						const itemClass = () =>
-							tabsItemClasses(
-								stretch(),
-								targetKey() === item.value,
-								item.class,
-							);
-
-						return (
-							<li role={isNavigation() ? undefined : "presentation"}>
-								<Show
-									when={item.href}
-									fallback={
-										<button
-											ref={(element) => setItemRef(item.value, element)}
-											id={item.id}
-											data-tabs-item
-											type="button"
-											class={itemClass()}
-											disabled={item.disabled}
-											onClick={() => handleSelect(item)}
-											onMouseEnter={() => handleEnter(item.value)}
-											onFocus={() => handleEnter(item.value)}
-											onBlur={handleLeave}
-											role="tab"
-											aria-selected={activeKey() === item.value}
-										>
-											{item.label}
-										</button>
-									}
-								>
-									{(href) => (
-										<A
-											ref={(element) => setItemRef(item.value, element)}
-											id={item.id}
-											data-tabs-item
-											class={itemClass()}
-											href={href()}
-											onClick={() => handleSelect(item)}
-											onMouseEnter={() => handleEnter(item.value)}
-											onFocus={() => handleEnter(item.value)}
-											onBlur={handleLeave}
-											end
-											aria-current={
-												activeKey() === item.value ? "page" : undefined
-											}
-										>
-											{item.label}
-										</A>
-									)}
-								</Show>
-							</li>
-						);
+				<span
+					data-tabs-indicator
+					class={tabsIndicatorClasses(isReady(), hoveredKey() !== undefined)}
+					style={{
+						height: `${indicatorStyle().height}px`,
+						transform: `translate3d(${indicatorStyle().x}px, ${indicatorStyle().y}px, 0)`,
+						width: `${indicatorStyle().width}px`,
 					}}
-				</For>
-			</ul>
+					aria-hidden="true"
+				/>
+				<ul
+					data-tabs-list
+					class={tabsListClasses(stretch())}
+					onMouseLeave={handleLeave}
+					role={isNavigation() ? undefined : "tablist"}
+				>
+					<For each={items()}>
+						{(item) => {
+							const itemClass = () =>
+								tabsItemClasses(
+									stretch(),
+									targetKey() === item.value,
+									item.class,
+								);
+
+							return (
+								<li role={isNavigation() ? undefined : "presentation"}>
+									<Show
+										when={item.href}
+										fallback={
+											<button
+												ref={(element) => setItemRef(item.value, element)}
+												id={item.id}
+												data-tabs-item
+												type="button"
+												class={itemClass()}
+												disabled={item.disabled}
+												onClick={() => handleSelect(item)}
+												onMouseEnter={() => handleEnter(item.value)}
+												onFocus={() => {
+													handleEnter(item.value);
+													scrollToItem(item.value);
+												}}
+												onBlur={handleLeave}
+												role="tab"
+												aria-selected={activeKey() === item.value}
+											>
+												{item.label}
+											</button>
+										}
+									>
+										{(href) => (
+											<A
+												ref={(element) => setItemRef(item.value, element)}
+												id={item.id}
+												data-tabs-item
+												class={itemClass()}
+												href={href()}
+												onClick={() => handleSelect(item)}
+												onMouseEnter={() => handleEnter(item.value)}
+												onFocus={() => {
+													handleEnter(item.value);
+													scrollToItem(item.value);
+												}}
+												onBlur={handleLeave}
+												end
+												aria-current={
+													activeKey() === item.value ? "page" : undefined
+												}
+											>
+												{item.label}
+											</A>
+										)}
+									</Show>
+								</li>
+							);
+						}}
+					</For>
+				</ul>
+			</div>
+			<Show when={canScrollStart()}>
+				<TabsScrollButton edge="start" onClick={() => scrollPage("start")} />
+			</Show>
+			<Show when={canScrollEnd()}>
+				<TabsScrollButton edge="end" onClick={() => scrollPage("end")} />
+			</Show>
 		</div>
 	);
 };

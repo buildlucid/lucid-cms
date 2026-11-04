@@ -262,4 +262,16 @@
 			transform: scaleY(1);
 		}
 	}
+
+	@keyframes animation-draw-line {
+		0%,
+		100% {
+			opacity: 0.45;
+			transform: scaleX(0.3);
+		}
+		50% {
+			opacity: 1;
+			transform: scaleX(1);
+		}
+	}
 }

@@ -5,6 +5,7 @@ import {
 	createMemo,
 	createSignal,
 	type JSXElement,
+	on,
 	Show,
 } from "solid-js";
 import AgentPanel from "@/components/AgentPanel/AgentPanel";
@@ -17,7 +18,9 @@ import ShortcutFeedback from "@/components/ShortcutFeedback/ShortcutFeedback";
 import ShortcutsModal from "@/components/ShortcutsModal/ShortcutsModal";
 import { AgentSessionProvider } from "@/hooks/useAgentSession/useAgentSession";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
+import { useMediaQuery } from "@/hooks/useMediaQuery/useMediaQuery";
 import api from "@/services/api";
+import navigationStore from "@/store/navigationStore/navigationStore";
 import siteStore from "@/store/siteStore/siteStore";
 import { LazyPageFallback } from "@/utils/lazy-page";
 
@@ -27,6 +30,9 @@ const NavigationShell: Component<{
 	// ----------------------------------
 	// Hooks
 	const interfaceDirection = useInterfaceDirection();
+	const desktop = useMediaQuery("(width >= 48rem)");
+	const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+	let mainRef: HTMLElement | undefined;
 
 	// ----------------------------------
 	// Mutations & Queries
@@ -70,6 +76,33 @@ const NavigationShell: Component<{
 
 		if (connection.isSuccess && settings.isSuccess) setSynced(true);
 	});
+	//* the sidebar's column opens or closes in one step, so the content slides that distance back into place rather than reflowing every frame
+	createEffect(
+		on(
+			() => navigationStore.get.tucked,
+			(tucked) => {
+				if (!mainRef || !desktop() || reducedMotion()) return;
+				//* the sidebar's own width and easing, so the content moves with it
+				const theme = getComputedStyle(document.documentElement);
+				const width = theme.getPropertyValue("--spacing-sidebar").trim();
+				if (!width) return;
+
+				const direction = tucked === interfaceDirection.isLTR() ? 1 : -1;
+				mainRef.animate(
+					[
+						{ translate: `calc(${width} * ${direction}) 0` },
+						{ translate: "0 0" },
+					],
+					{
+						duration: 300,
+						easing:
+							theme.getPropertyValue("--ease-emphasized").trim() || "ease",
+					},
+				);
+			},
+			{ defer: true },
+		),
+	);
 
 	// ------------------------------------------------------
 	// Render
@@ -79,11 +112,18 @@ const NavigationShell: Component<{
 				<div class="grid grid-cols-1 md:grid-cols-main-layout min-h-full relative">
 					<Navigation />
 					<main
+						ref={mainRef}
 						class={classNames(
-							"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-var(--spacing-sidebar)-var(--spacing-agent-panel)-(--spacing(4)))]",
+							"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0",
 							{
-								"md:pr-4": interfaceDirection.isLTR(),
-								"md:pl-4": interfaceDirection.isRTL(),
+								"md:pr-4":
+									interfaceDirection.isLTR() || navigationStore.get.tucked,
+								"md:pl-4":
+									interfaceDirection.isRTL() || navigationStore.get.tucked,
+								"md:min-w-[calc(100vw-var(--spacing-sidebar)-var(--spacing-agent-panel)-(--spacing(4)))]":
+									!navigationStore.get.tucked,
+								"md:min-w-[calc(100vw-var(--spacing-agent-panel)-(--spacing(8)))]":
+									navigationStore.get.tucked,
 							},
 						)}
 						aria-busy={isLoading()}

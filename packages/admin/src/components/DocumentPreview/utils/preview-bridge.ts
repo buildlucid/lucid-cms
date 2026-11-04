@@ -52,6 +52,8 @@ export const createPreviewBridge = (options?: {
 	onDeselect?: () => void;
 	/** Runs when the bridge reloads the frame, eg. to show a loading state. */
 	onReload?: () => void;
+	/** Runs when a link on the page is clicked, which the preview doesn't follow. */
+	onNavigationLocked?: () => void;
 }) => {
 	let frame: HTMLIFrameElement | null = null;
 	let page: FramePage = { state: "loading" };
@@ -296,6 +298,11 @@ export const createPreviewBridge = (options?: {
 
 		if (event.data.type === previewProtocol.messages.deselect) {
 			options?.onDeselect?.();
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.navigationLocked) {
+			options?.onNavigationLocked?.();
 			return;
 		}
 

@@ -174,6 +174,11 @@ export type PreviewDragEndMessage = PreviewEnvelope & {
 	drop: boolean;
 };
 
+/** Says a link was clicked on the page, which the builder's preview doesn't follow. */
+export type PreviewNavigationLockedMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.navigationLocked;
+};
+
 export type PreviewChildMessage =
 	| PreviewReadyMessage
 	| PreviewUnloadMessage
@@ -182,7 +187,8 @@ export type PreviewChildMessage =
 	| PreviewFocusFieldMessage
 	| PreviewDeselectMessage
 	| PreviewMoveMessage
-	| PreviewHoverMessage;
+	| PreviewHoverMessage
+	| PreviewNavigationLockedMessage;
 
 export type PreviewParentMessage =
 	| PreviewConnectMessage

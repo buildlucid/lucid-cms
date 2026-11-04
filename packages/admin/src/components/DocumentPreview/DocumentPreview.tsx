@@ -128,7 +128,7 @@ export const DocumentPreview: Component<{
 	const [selectedWidth, setSelectedWidth] =
 		createSignal<PreviewWidthSelection>("fit");
 	const [customWidth, setCustomWidth] = createSignal(768);
-	const [zoom, setZoom] = createSignal<PreviewZoom>(100);
+	const [zoom, setZoom] = createSignal<PreviewZoom>("fit");
 	const [hover, setHover] = createSignal<PreviewHover | null>(null);
 	const previewBridge = createPreviewBridge({
 		onFocusField: (target) => focusField(target),
@@ -143,6 +143,11 @@ export const DocumentPreview: Component<{
 			pendingHighlight = null;
 		},
 		onReload: () => setFrameLoading(true),
+		onNavigationLocked: () =>
+			spawnToast({
+				title: T()("preview.navigation.locked.title"),
+				message: T()("preview.navigation.locked.message"),
+			}),
 	});
 	const unregisterScrollCapture = props.registerScrollCapture?.(
 		previewBridge.captureScroll,
@@ -508,7 +513,7 @@ export const DocumentPreview: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<section class="h-full min-h-0 min-w-0 overflow-hidden rounded-t-xl border-t border-border bg-card xl:rounded-tl-none xl:border-l xl:border-t-0">
+		<section class="h-full min-h-0 min-w-0 flex-1 overflow-hidden bg-card">
 			<PreviewCanvas
 				frameSrc={frameSrc}
 				resolverState={resolverState}

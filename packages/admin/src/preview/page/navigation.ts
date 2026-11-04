@@ -1,5 +1,4 @@
 import { previewQueryParams } from "../protocol/index.js";
-import { previewNoticeTagName } from "./constants.js";
 
 type PreviewNavigationOptions = {
 	targetWindow: Window;
@@ -63,7 +62,7 @@ export const installPreviewNavigation = (
 		if (event.type === "click" && event.button !== 0) return;
 		if (event.type === "auxclick" && event.button !== 1) return;
 		const anchor = findAnchor(options.targetWindow, event.target);
-		if (!anchor || anchor.closest(previewNoticeTagName)) return;
+		if (!anchor) return;
 
 		event.preventDefault();
 		event.stopImmediatePropagation();

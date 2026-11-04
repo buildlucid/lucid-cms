@@ -1,13 +1,5 @@
-import classNames from "classnames";
 import { TbOutlineX } from "solid-icons/tb";
-import {
-	type Component,
-	createMemo,
-	createSignal,
-	type JSXElement,
-	onCleanup,
-	onMount,
-} from "solid-js";
+import { type Component, createMemo, type JSXElement } from "solid-js";
 import Button from "@/components/Button/Button";
 import type {
 	ComparisonOption,
@@ -17,10 +9,8 @@ import T from "@/translations";
 import ComparisonVersionSelect from "./ComparisonVersionSelect";
 
 /**
- * The bar above both side-by-side columns. Each half picks its column's
- * version: editable versions on the left, anything on the right. It sticks
- * under the page builder header while scrolling and is where the comparison
- * closes.
+ * Sticky comparison controls. Selects editable versions on the left and any version on the right,
+ * with a close action.
  */
 const DocumentComparisonBar: Component<{
 	comparison: UseDocumentComparison;
@@ -29,11 +19,6 @@ const DocumentComparisonBar: Component<{
 	/** Shown at the end of the left half, eg. the workflow stage. */
 	leftEnd: JSXElement;
 }> = (props) => {
-	// ----------------------------------------
-	// State & Hooks
-	let ref: HTMLDivElement | undefined;
-	const [stuck, setStuck] = createSignal(false);
-
 	// ----------------------------------------
 	// Memos
 	const leftOptions = createMemo(() =>
@@ -49,46 +34,9 @@ const DocumentComparisonBar: Component<{
 	);
 
 	// ----------------------------------------
-	// Functions
-	//* the bar normally sits at the top of its container, so any gap means it is stuck
-	const updateStuck = () => {
-		const container = ref?.parentElement;
-		if (!ref || !container) return;
-
-		setStuck(
-			ref.getBoundingClientRect().top - container.getBoundingClientRect().top >
-				2,
-		);
-	};
-
-	// ----------------------------------------
-	// Effects
-	onMount(() => {
-		updateStuck();
-		document.addEventListener("scroll", updateStuck, {
-			capture: true,
-			passive: true,
-		});
-		window.addEventListener("resize", updateStuck);
-		onCleanup(() => {
-			document.removeEventListener("scroll", updateStuck, { capture: true });
-			window.removeEventListener("resize", updateStuck);
-		});
-	});
-
-	// ----------------------------------------
 	// Render
 	return (
-		<div
-			ref={ref}
-			class={classNames(
-				"sticky top-(--document-header-bar-height) z-20 flex h-(--comparison-bar-height) items-center border-b border-border bg-card",
-				{
-					"w-full rounded-t-xl": !stuck(),
-					"-mx-px w-[calc(100%+2px)] rounded-b-xl border-x": stuck(),
-				},
-			)}
-		>
+		<div class="flex h-(--comparison-bar-height) shrink-0 items-center border-b border-border bg-card">
 			<div class="flex h-full w-1/2 min-w-0 items-center justify-between gap-3 ps-2.5 pe-4 md:ps-4.5 md:pe-6">
 				<ComparisonVersionSelect
 					label={T()("documents.compare.left")}

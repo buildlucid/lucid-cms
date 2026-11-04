@@ -38,7 +38,6 @@ type BuilderCollectionState = {
 };
 
 export type CollectionPreferenceState = {
-	previewOpen?: boolean;
 	/** Whether the preview outlines fields and shows brick controls. Unset means on. */
 	previewEditing?: boolean;
 };
@@ -46,6 +45,8 @@ export type CollectionPreferenceState = {
 /** Device-local UI state, with synced choices stored separately in `UserPreferences`. */
 export type UserPreferenceState = {
 	preferences: {
+		/** The page builder's fields column width beside the preview, in pixels. Unset uses the default. */
+		builderFieldsWidth?: number;
 		collections: Record<string, CollectionPreferenceState>;
 		/** Open state of navigation groups, keyed by group key. Unset means open. */
 		navigationGroups: Record<string, boolean>;
@@ -147,6 +148,15 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 
 	const preferences = value.preferences;
 	if (isObjectRecord(preferences)) {
+		if (
+			typeof preferences.builderFieldsWidth === "number" &&
+			Number.isFinite(preferences.builderFieldsWidth) &&
+			preferences.builderFieldsWidth > 0
+		) {
+			normalized.preferences.builderFieldsWidth =
+				preferences.builderFieldsWidth;
+		}
+
 		if (isObjectRecord(preferences.sections)) {
 			for (const [key, open] of Object.entries(preferences.sections)) {
 				if (typeof open !== "boolean" || !sectionPreferenceKeys.has(key)) {
@@ -172,9 +182,6 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 			)) {
 				if (!isObjectRecord(collectionValue)) continue;
 				const collectionState: CollectionPreferenceState = {};
-				if (typeof collectionValue.previewOpen === "boolean") {
-					collectionState.previewOpen = collectionValue.previewOpen;
-				}
 				if (typeof collectionValue.previewEditing === "boolean") {
 					collectionState.previewEditing = collectionValue.previewEditing;
 				}

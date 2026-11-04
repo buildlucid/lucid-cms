@@ -11,9 +11,12 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import HoverRevealBar from "@/components/HoverRevealBar/HoverRevealBar";
 import NotificationBell from "@/components/NotificationBell/NotificationBell";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
+import { useHoverReveal } from "@/hooks/useHoverReveal/useHoverReveal";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
+import navigationStore from "@/store/navigationStore/navigationStore";
 import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
 import {
@@ -38,6 +41,12 @@ export const Navigation: Component = () => {
 	const interfaceDirection = useInterfaceDirection();
 	const session = useAgentSession();
 	const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
+	let panelRef: HTMLDivElement | undefined;
+	//* while the page builder's preview or a comparison takes its width, the sidebar slides in from the edge
+	const tuck = useHoverReveal({
+		element: () => panelRef,
+		enabled: () => navigationStore.get.tucked,
+	});
 
 	// ----------------------------------------
 	// Memos
@@ -55,6 +64,7 @@ export const Navigation: Component = () => {
 	createEffect(() => {
 		const pathname = location.pathname;
 		setMobileMenuOpen(false);
+		tuck.conceal();
 
 		if (typeof document === "undefined") return;
 		const synchronizeLinks = () => {
@@ -92,9 +102,23 @@ export const Navigation: Component = () => {
 		if (typeof window === "undefined") return;
 
 		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape") {
-				setMobileMenuOpen(false);
+			if (event.key !== "Escape") return;
+			setMobileMenuOpen(false);
+			//* a menu opened from the sidebar closes on Escape first, returning focus inside it
+			if (
+				event.target instanceof Element &&
+				event.target.closest("[role='menu']")
+			) {
+				return;
 			}
+			if (
+				tuck.revealed() &&
+				document.activeElement instanceof HTMLElement &&
+				panelRef?.contains(document.activeElement)
+			) {
+				document.activeElement.blur();
+			}
+			tuck.conceal();
 		};
 
 		window.addEventListener("keydown", onKeyDown);
@@ -134,24 +158,70 @@ export const Navigation: Component = () => {
 			</header>
 
 			{/* Desktop Navigation */}
-			<aside class="hidden md:flex w-sidebar flex-col bg-sidebar max-h-screen sticky top-0 z-40">
-				<div class="pt-6 pb-3">
-					<div class="ps-6 pe-4 flex min-h-8 items-center justify-between gap-2">
-						<NavigationLogo />
-						<Show when={!showActionRow()}>
-							<NotificationBell />
+			<aside
+				class={classNames("hidden md:block max-h-screen sticky top-0", {
+					"z-40 w-sidebar": !navigationStore.get.tucked,
+					"z-50 w-0": navigationStore.get.tucked,
+				})}
+			>
+				<div
+					ref={panelRef}
+					class={classNames(
+						"flex h-full w-sidebar flex-col bg-sidebar transition-[translate,box-shadow] duration-300 ease-emphasized motion-reduce:transition-none",
+						{
+							"translate-x-0": !navigationStore.get.tucked || tuck.revealed(),
+							"fixed inset-y-0 inset-s-0 border-e border-border":
+								navigationStore.get.tucked,
+							"shadow-[0_20px_70px_rgba(0,0,0,0.45)]":
+								navigationStore.get.tucked && tuck.revealed(),
+							"-translate-x-full rtl:translate-x-full":
+								navigationStore.get.tucked && !tuck.revealed(),
+						},
+					)}
+					onPointerEnter={tuck.handlers.onPointerEnter}
+					onPointerLeave={tuck.handlers.onPointerLeave}
+					onFocusIn={tuck.handlers.onFocusIn}
+					onFocusOut={tuck.handlers.onFocusOut}
+				>
+					<div class="pt-6 pb-3">
+						<div class="ps-6 pe-4 flex min-h-8 items-center justify-between gap-2">
+							<NavigationLogo />
+							<Show when={!showActionRow()}>
+								<NotificationBell />
+							</Show>
+						</div>
+						<Show when={showActionRow()}>
+							<div class="px-4 mt-4 grid grid-flow-col auto-cols-fr gap-1.5">
+								<SiteLink variant="tile" />
+								<AgentPanelToggle variant="tile" />
+								<NotificationBell variant="tile" />
+							</div>
 						</Show>
 					</div>
-					<Show when={showActionRow()}>
-						<div class="px-4 mt-4 grid grid-flow-col auto-cols-fr gap-1.5">
-							<SiteLink variant="tile" />
-							<AgentPanelToggle variant="tile" />
-							<NotificationBell variant="tile" />
-						</div>
-					</Show>
+					<NavigationMenuContent />
 				</div>
-				<NavigationMenuContent />
 			</aside>
+			<Show when={navigationStore.get.tucked}>
+				<div
+					aria-hidden="true"
+					class="group fixed inset-y-0 inset-s-0 z-40 hidden w-6 md:block"
+					onPointerEnter={tuck.handlers.onPointerEnter}
+					onPointerLeave={tuck.handlers.onPointerLeave}
+				>
+					<HoverRevealBar
+						orientation="vertical"
+						hidden={tuck.revealed()}
+						class="top-1/2 inset-s-1.5 -translate-y-1/2"
+					/>
+				</div>
+				<Show when={tuck.revealed()}>
+					<div
+						aria-hidden="true"
+						class="fixed inset-0 z-45 hidden md:block"
+						onClick={tuck.conceal}
+					/>
+				</Show>
+			</Show>
 
 			{/* Mobile Navigation */}
 			<div

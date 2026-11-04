@@ -9,8 +9,7 @@ import {
 	on,
 } from "solid-js";
 import { Permissions } from "@/constants/permissions";
-import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
-import { useMediaQuery } from "@/hooks/useMediaQuery/useMediaQuery";
+import { useBuilderSideBySide } from "@/hooks/useBuilderSideBySide/useBuilderSideBySide";
 import api from "@/services/api";
 import { createBrickStore } from "@/store/brickStore/brickStore";
 import userStore from "@/store/userStore/userStore";
@@ -59,9 +58,7 @@ export const useDocumentComparison = (props: {
 	const [pinned, setPinned] =
 		createSignal<ResponseBody<InternalCollectionDocument, Refs>>();
 	const [pinnedKey, setPinnedKey] = createSignal<string>();
-	const session = useAgentSession();
-	const xl = useMediaQuery("(width >= 80rem)");
-	const xlBesidePanel = useMediaQuery("(width >= 105rem)");
+	const wide = useBuilderSideBySide();
 
 	// ----------------------------------------
 	// Queries
@@ -88,10 +85,6 @@ export const useDocumentComparison = (props: {
 
 	// ----------------------------------------
 	// Memos
-	//* side-by-side columns only fit wide content, matching the content-xl variant, which waits for the docked agent panel's width too
-	const wide = createMemo(
-		() => xl() && (!session.panel.docked() || xlBesidePanel()),
-	);
 	const available = createMemo(() => props.available() && wide());
 	const documentKey = createMemo(
 		() => `${props.state.collectionKey()}:${props.state.documentId()}`,

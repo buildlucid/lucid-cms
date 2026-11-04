@@ -1,10 +1,12 @@
 import type { CollectionPreviewBreakpoint, PreviewMode } from "@types";
+import classNames from "classnames";
 import {
 	TbOutlineChevronDown,
 	TbOutlineCopy,
 	TbOutlineExternalLink,
 	TbOutlinePointer,
 	TbOutlineRotateClockwise2,
+	TbOutlineZoomReset,
 } from "solid-icons/tb";
 import {
 	type Accessor,
@@ -13,14 +15,18 @@ import {
 	type JSXElement,
 	createMemo,
 	createSignal,
+	Index,
 	onCleanup,
 	onMount,
 	type Setter,
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
+import HoverRevealBar from "@/components/HoverRevealBar/HoverRevealBar";
+import { useHoverReveal } from "@/hooks/useHoverReveal/useHoverReveal";
 import { previewFrameNames } from "@/preview/protocol";
 import T, { translateAdminCopy } from "@/translations";
+import { PreviewLoading } from "./PreviewLoading";
 
 export type PreviewWidthSelection =
 	| "fit"
@@ -29,7 +35,8 @@ export type PreviewWidthSelection =
 			type: "breakpoint";
 			key: string;
 	  };
-export type PreviewZoom = 25 | 50 | 75 | 100;
+/** `fit` shrinks a breakpoint or custom width that's wider than the canvas until it fits. */
+export type PreviewZoom = "fit" | 25 | 50 | 75 | 100;
 export type ResolverState =
 	| "idle"
 	| "loading"
@@ -61,7 +68,7 @@ const defaultBreakpoints: Array<{
 		label: () => T()("preview.width.mobile"),
 	},
 ];
-const zoomOptions: PreviewZoom[] = [25, 50, 75, 100];
+const zoomOptions: PreviewZoom[] = ["fit", 25, 50, 75, 100];
 
 export const PreviewCanvas: Component<{
 	frameSrc: Accessor<string | undefined>;
@@ -93,26 +100,26 @@ export const PreviewCanvas: Component<{
 	// ----------------------------------
 	// Refs
 	let canvasRef: HTMLDivElement | undefined;
+	let dockRef: HTMLDivElement | undefined;
 	let resizeObserver: ResizeObserver | undefined;
 	let viewportResizeHandle: HTMLButtonElement | undefined;
 	let viewportResizePointerId: number | undefined;
 	let viewportResizeStartX = 0;
 	let viewportResizeStartWidth = 0;
+	let viewportResizeStartScale = 1;
 	let viewportResizeDirection: "left" | "right" = "right";
 
 	// ----------------------------------
 	// State
 	const [canvasWidth, setCanvasWidth] = createSignal(0);
 	const [viewportResizing, setViewportResizing] = createSignal(false);
+	//* the options dock stays out of the page's way until the pointer rests near the bottom
+	const dock = useHoverReveal({ element: () => dockRef });
 
 	// ----------------------------------
 	// Memos
 	const availableCanvasWidth = createMemo(() =>
 		Math.max(canvasWidth() - 20, 0),
-	);
-	const zoomScale = createMemo(() => props.zoom() / 100);
-	const maximumLayoutWidth = createMemo(() =>
-		Math.max(availableCanvasWidth() / zoomScale(), 0),
 	);
 	const widthOptions = createMemo(() => {
 		const breakpoints = props.breakpoints();
@@ -130,21 +137,35 @@ export const PreviewCanvas: Component<{
 			label: translateAdminCopy(breakpoint.label),
 		}));
 	});
+	//* a breakpoint or custom width, or null while the page fills the canvas
+	const explicitWidth = createMemo(() => {
+		const selection = props.selectedWidth();
+		if (selection === "fit") return null;
+		if (selection === "custom") return props.customWidth();
+		return (
+			widthOptions().find((option) => option.key === selection.key)?.width ??
+			null
+		);
+	});
+	const zoomScale = createMemo(() => {
+		const zoom = props.zoom();
+		if (zoom !== "fit") return zoom / 100;
+		const width = explicitWidth();
+		if (width === null || availableCanvasWidth() === 0) return 1;
+		return Math.min(1, availableCanvasWidth() / width);
+	});
+	const maximumLayoutWidth = createMemo(() =>
+		Math.max(availableCanvasWidth() / zoomScale(), 0),
+	);
 	const selectedWidthValue = createMemo(() => {
 		const selection = props.selectedWidth();
 		return typeof selection === "object"
 			? `breakpoint:${selection.key}`
 			: selection;
 	});
-	const requestedWidth = createMemo(() => {
-		const selection = props.selectedWidth();
-		if (selection === "fit") return maximumLayoutWidth();
-		if (selection === "custom") return props.customWidth();
-		return (
-			widthOptions().find((option) => option.key === selection.key)?.width ??
-			maximumLayoutWidth()
-		);
-	});
+	const requestedWidth = createMemo(
+		() => explicitWidth() ?? maximumLayoutWidth(),
+	);
 	const layoutWidth = createMemo(() => {
 		return Math.min(maximumLayoutWidth(), requestedWidth());
 	});
@@ -163,9 +184,15 @@ export const PreviewCanvas: Component<{
 	};
 	const resizeViewport = (event: PointerEvent) => {
 		const direction = viewportResizeDirection === "right" ? 1 : -1;
+		//* the scale it started at, as fit zoom rescales while the width changes
 		const delta =
-			((event.clientX - viewportResizeStartX) * direction * 2) / zoomScale();
-		const maximumWidth = Math.max(maximumLayoutWidth(), 1);
+			((event.clientX - viewportResizeStartX) * direction * 2) /
+			viewportResizeStartScale;
+		//* fit zoom shrinks any width to fit, so only the canvas limits other zooms
+		const maximumWidth =
+			props.zoom() === "fit"
+				? MAX_PREVIEW_WIDTH
+				: Math.max(maximumLayoutWidth(), 1);
 		const minimumWidth = Math.min(MIN_PREVIEW_WIDTH, maximumWidth);
 		props.setCustomWidth(
 			Math.round(
@@ -205,6 +232,7 @@ export const PreviewCanvas: Component<{
 		viewportResizePointerId = event.pointerId;
 		viewportResizeStartX = event.clientX;
 		viewportResizeStartWidth = layoutWidth();
+		viewportResizeStartScale = zoomScale();
 		viewportResizeDirection = direction;
 		viewportResizeHandle.setPointerCapture(event.pointerId);
 		setViewportResizing(true);
@@ -247,6 +275,9 @@ export const PreviewCanvas: Component<{
 	};
 	const selectZoom = (value: string) => {
 		switch (value) {
+			case "fit":
+				props.setZoom("fit");
+				break;
 			case "25":
 				props.setZoom(25);
 				break;
@@ -289,217 +320,265 @@ export const PreviewCanvas: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-card">
-			<div class="flex h-12 shrink-0 items-center justify-between gap-3 overflow-x-auto border-b border-border bg-background px-3">
-				<div class="flex shrink-0 items-center gap-2">
-					<div class="relative">
-						<select
-							value={selectedWidthValue()}
-							aria-label={T()("preview.width.mode")}
-							class="h-8 min-w-30 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium text-subtitle outline-none transition-colors focus:border-primary"
-							onChange={(event) => selectWidth(event.currentTarget.value)}
-						>
-							<option value="fit">{T()("preview.width.fit")}</option>
-							{widthOptions().map((option) => (
-								<option value={`breakpoint:${option.key}`}>
-									{option.label}
-								</option>
-							))}
-							<option value="custom">{T()("preview.width.custom")}</option>
-						</select>
-						<TbOutlineChevronDown
-							size={10}
-							class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
-						/>
-					</div>
-					<input
-						type="number"
-						value={Math.round(layoutWidth())}
-						min={MIN_PREVIEW_WIDTH}
-						max={MAX_PREVIEW_WIDTH}
-						aria-label={T()("preview.width.input")}
-						class="h-8 w-18 appearance-none rounded-md border border-border bg-input px-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
-						onInput={(event) => setWidth(event.currentTarget.value, false)}
-						onChange={(event) => setWidth(event.currentTarget.value, true)}
-						onKeyDown={(event) => {
-							if (event.key === "Enter") event.currentTarget.blur();
-						}}
-					/>
-					<div class="relative">
-						<select
-							value={String(props.zoom())}
-							aria-label={T()("preview.zoom")}
-							class="h-8 w-19 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
-							onChange={(event) => selectZoom(event.currentTarget.value)}
-						>
-							{zoomOptions.map((zoom) => (
-								<option value={String(zoom)}>{zoom}%</option>
-							))}
-						</select>
-						<TbOutlineChevronDown
-							size={10}
-							class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
-						/>
-					</div>
+		<div
+			ref={setCanvasRef}
+			class="relative h-full min-h-0 min-w-0 overflow-hidden bg-card dotted-background"
+		>
+			<Show when={props.resolverState() === "unavailable"}>
+				<div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-6 text-center">
+					<h3 class="font-medium text-title">
+						{T()("preview.unavailable.title")}
+					</h3>
+					<p class="max-w-md text-sm text-body">
+						{T()("preview.unavailable.message")}
+					</p>
 				</div>
-				<div class="flex shrink-0 items-center gap-0.5">
+			</Show>
+			<Show when={props.resolverState() === "error"}>
+				<div class="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center">
+					<h3 class="font-medium text-title">{T()("preview.error.title")}</h3>
+					<p class="mt-1 max-w-md text-sm text-body">
+						{T()("preview.error.message")}
+					</p>
 					<Button
 						type="button"
-						variant={props.editMode() ? "secondary" : "ghost"}
-						size="xs"
-						shape="square"
-						title={T()("preview.edit.label")}
-						aria-label={T()("preview.edit.label")}
-						aria-pressed={props.editMode()}
-						onClick={props.onToggleEditMode}
+						variant="outline"
+						size="sm"
+						class="mt-4"
+						onClick={props.onRetry}
 					>
-						<TbOutlinePointer size={12} />
-					</Button>
-					<Button
-						type="button"
-						variant="ghost"
-						size="xs"
-						shape="square"
-						title={T()("common.refresh")}
-						aria-label={T()("common.refresh")}
-						onClick={props.onRefresh}
-					>
-						<TbOutlineRotateClockwise2 size={12} />
-					</Button>
-					<Button
-						type="button"
-						variant="ghost"
-						size="xs"
-						shape="square"
-						title={T()("preview.copy.url")}
-						aria-label={T()("preview.copy.url")}
-						loading={props.actionLoading()}
-						onClick={props.onCopy}
-					>
-						<TbOutlineCopy size={12} />
-					</Button>
-					<Button
-						type="button"
-						variant="ghost"
-						size="xs"
-						shape="square"
-						title={T()("preview.open")}
-						aria-label={T()("preview.open")}
-						loading={props.actionLoading()}
-						onClick={props.onOpen}
-					>
-						<TbOutlineExternalLink size={12} />
+						{T()("preview.retry")}
 					</Button>
 				</div>
-			</div>
-			<div
-				ref={setCanvasRef}
-				class="relative min-h-0 min-w-0 grow overflow-hidden bg-card dotted-background"
+			</Show>
+
+			<Show when={props.resolverState() === "ready" && props.frameSrc()}>
+				<div
+					class="relative mx-auto flex h-full"
+					style={{ width: `${visualWidth() + 20}px` }}
+				>
+					<button
+						type="button"
+						aria-label={T()("preview.resize.viewport.left")}
+						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+						onPointerDown={(event) => startViewportResize("left", event)}
+					>
+						<span class="flex items-center gap-0.5" aria-hidden="true">
+							<span class="h-7 w-px rounded-full bg-muted/80" />
+							<span class="h-7 w-px rounded-full bg-muted/80" />
+						</span>
+					</button>
+					<div
+						class="relative h-full overflow-hidden bg-white shadow-sm"
+						style={{ width: `${visualWidth()}px` }}
+					>
+						<div
+							class="absolute top-0 left-0 bg-white"
+							style={{
+								width: `${layoutWidth()}px`,
+								height: `${100 / zoomScale()}%`,
+								transform: `scale(${zoomScale()})`,
+								"transform-origin": "top left",
+							}}
+						>
+							<iframe
+								ref={props.setFrameRef}
+								name={frameName()}
+								src={props.frameSrc()}
+								title={T()("preview.iframe.title")}
+								referrerpolicy="no-referrer"
+								class="block h-full w-full border-0 bg-white"
+								onLoad={() => props.setFrameLoading(false)}
+							/>
+						</div>
+						{props.overlay?.({ scale: zoomScale, width: visualWidth })}
+						<Show when={viewportResizing()}>
+							<div class="absolute inset-0 z-40 cursor-ew-resize" />
+						</Show>
+					</div>
+					<button
+						type="button"
+						aria-label={T()("preview.resize.viewport.right")}
+						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+						onPointerDown={(event) => startViewportResize("right", event)}
+					>
+						<span class="flex items-center gap-0.5" aria-hidden="true">
+							<span class="h-7 w-px rounded-full bg-muted/80" />
+							<span class="h-7 w-px rounded-full bg-muted/80" />
+						</span>
+					</button>
+				</div>
+			</Show>
+			<Show
+				when={
+					props.resolverState() === "loading" ||
+					props.resolverState() === "idle" ||
+					props.frameLoading()
+				}
 			>
-				<Show when={props.resolverState() === "unavailable"}>
-					<div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-6 text-center">
-						<h3 class="font-medium text-title">
-							{T()("preview.unavailable.title")}
-						</h3>
-						<p class="max-w-md text-sm text-body">
-							{T()("preview.unavailable.message")}
-						</p>
-					</div>
-				</Show>
-				<Show when={props.resolverState() === "error"}>
-					<div class="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center">
-						<h3 class="font-medium text-title">{T()("preview.error.title")}</h3>
-						<p class="mt-1 max-w-md text-sm text-body">
-							{T()("preview.error.message")}
-						</p>
+				<PreviewLoading width={visualWidth() || undefined} />
+			</Show>
+			<div class="pointer-events-none absolute inset-x-3 bottom-0 z-40 flex justify-center">
+				<div
+					ref={dockRef}
+					class={classNames("relative flex max-w-full px-4 pt-4 pb-4", {
+						"pointer-events-auto": dock.revealed(),
+					})}
+					onPointerEnter={dock.handlers.onPointerEnter}
+					onPointerLeave={dock.handlers.onPointerLeave}
+					onFocusIn={dock.handlers.onFocusIn}
+					onFocusOut={dock.handlers.onFocusOut}
+				>
+					<span
+						aria-hidden="true"
+						class="group pointer-events-auto absolute inset-x-0 bottom-0 h-8"
+					>
+						<HoverRevealBar
+							orientation="horizontal"
+							hidden={dock.revealed()}
+							class="bottom-2 left-1/2 -translate-x-1/2"
+						/>
+					</span>
+					<div
+						role="group"
+						aria-label={T()("preview.options")}
+						class={classNames(
+							"relative flex max-w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-border bg-popover/90 p-1.5 shadow-lg backdrop-blur-md transition-[translate,opacity] duration-300 ease-emphasized motion-reduce:transition-none",
+							{
+								"translate-y-[calc(100%+1rem)] opacity-0": !dock.revealed(),
+							},
+						)}
+					>
+						<div class="relative shrink-0">
+							<select
+								value={selectedWidthValue()}
+								aria-label={T()("preview.width.mode")}
+								class="h-8 min-w-30 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium text-subtitle outline-none transition-colors focus:border-primary"
+								onChange={(event) => selectWidth(event.currentTarget.value)}
+							>
+								<option value="fit">{T()("preview.width.fit")}</option>
+								{widthOptions().map((option) => (
+									<option value={`breakpoint:${option.key}`}>
+										{option.label}
+									</option>
+								))}
+								<option value="custom">{T()("preview.width.custom")}</option>
+							</select>
+							<TbOutlineChevronDown
+								size={10}
+								class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
+							/>
+						</div>
+						<input
+							type="number"
+							value={Math.round(layoutWidth())}
+							min={MIN_PREVIEW_WIDTH}
+							max={MAX_PREVIEW_WIDTH}
+							aria-label={T()("preview.width.input")}
+							class="h-8 w-18 shrink-0 appearance-none rounded-md border border-border bg-input px-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
+							onInput={(event) => setWidth(event.currentTarget.value, false)}
+							onChange={(event) => setWidth(event.currentTarget.value, true)}
+							onKeyDown={(event) => {
+								if (event.key === "Enter") event.currentTarget.blur();
+							}}
+						/>
+						<div class="relative shrink-0">
+							<select
+								value={String(props.zoom())}
+								aria-label={T()("preview.zoom")}
+								class="h-8 w-27 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
+								onChange={(event) => selectZoom(event.currentTarget.value)}
+							>
+								<Index each={zoomOptions}>
+									{(zoom) => (
+										<option value={String(zoom())}>
+											{zoom() === "fit"
+												? T()("preview.zoom.fit", {
+														zoom: Math.round(zoomScale() * 100),
+													})
+												: `${zoom()}%`}
+										</option>
+									)}
+								</Index>
+							</select>
+							<TbOutlineChevronDown
+								size={10}
+								class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
+							/>
+						</div>
 						<Button
 							type="button"
-							variant="outline"
-							size="sm"
-							class="mt-4"
-							onClick={props.onRetry}
+							variant="ghost"
+							size="xs"
+							shape="square"
+							title={T()("preview.reset")}
+							aria-label={T()("preview.reset")}
+							class="disabled:opacity-40!"
+							disabled={
+								props.selectedWidth() === "fit" && props.zoom() === "fit"
+							}
+							onClick={() => {
+								props.setSelectedWidth("fit");
+								props.setZoom("fit");
+							}}
 						>
-							{T()("preview.retry")}
+							<TbOutlineZoomReset size={12} />
 						</Button>
-					</div>
-				</Show>
-
-				<Show when={props.resolverState() === "ready" && props.frameSrc()}>
-					<div
-						class="relative mx-auto flex h-full"
-						style={{ width: `${visualWidth() + 20}px` }}
-					>
-						<button
-							type="button"
-							aria-label={T()("preview.resize.viewport.left")}
-							class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-							onPointerDown={(event) => startViewportResize("left", event)}
-						>
-							<span class="flex items-center gap-0.5" aria-hidden="true">
-								<span class="h-7 w-px rounded-full bg-muted/80" />
-								<span class="h-7 w-px rounded-full bg-muted/80" />
-							</span>
-						</button>
-						<div
-							class="relative h-full overflow-hidden bg-white shadow-sm"
-							style={{ width: `${visualWidth()}px` }}
-						>
-							<div
-								class="absolute top-0 left-0 bg-white"
-								style={{
-									width: `${layoutWidth()}px`,
-									height: `${100 / zoomScale()}%`,
-									transform: `scale(${zoomScale()})`,
-									"transform-origin": "top left",
-								}}
-							>
-								<iframe
-									ref={props.setFrameRef}
-									name={frameName()}
-									src={props.frameSrc()}
-									title={T()("preview.iframe.title")}
-									referrerpolicy="no-referrer"
-									class="block h-full w-full border-0 bg-white"
-									onLoad={() => props.setFrameLoading(false)}
-								/>
-							</div>
-							{props.overlay?.({ scale: zoomScale, width: visualWidth })}
-							<Show when={viewportResizing()}>
-								<div class="absolute inset-0 z-40 cursor-ew-resize" />
-							</Show>
-						</div>
-						<button
-							type="button"
-							aria-label={T()("preview.resize.viewport.right")}
-							class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-							onPointerDown={(event) => startViewportResize("right", event)}
-						>
-							<span class="flex items-center gap-0.5" aria-hidden="true">
-								<span class="h-7 w-px rounded-full bg-muted/80" />
-								<span class="h-7 w-px rounded-full bg-muted/80" />
-							</span>
-						</button>
-					</div>
-				</Show>
-				<Show
-					when={
-						props.resolverState() === "loading" ||
-						props.resolverState() === "idle" ||
-						props.frameLoading()
-					}
-				>
-					<div
-						class="absolute inset-0 z-20 bg-card"
-						role="status"
-						aria-live="polite"
-					>
-						<span class="sr-only">{T()("preview.loading")}</span>
 						<span
-							class="skeleton-shimmer block h-full w-full"
 							aria-hidden="true"
+							class="mx-0.5 h-5 w-px shrink-0 bg-border"
 						/>
+						<div class="flex shrink-0 items-center gap-0.5">
+							<Button
+								type="button"
+								variant={props.editMode() ? "secondary" : "ghost"}
+								size="xs"
+								shape="square"
+								title={T()("preview.edit.label")}
+								aria-label={T()("preview.edit.label")}
+								aria-pressed={props.editMode()}
+								onClick={props.onToggleEditMode}
+							>
+								<TbOutlinePointer size={12} />
+							</Button>
+							<Button
+								type="button"
+								variant="ghost"
+								size="xs"
+								shape="square"
+								title={T()("common.refresh")}
+								aria-label={T()("common.refresh")}
+								onClick={props.onRefresh}
+							>
+								<TbOutlineRotateClockwise2 size={12} />
+							</Button>
+							<Button
+								type="button"
+								variant="ghost"
+								size="xs"
+								shape="square"
+								title={T()("preview.copy.url")}
+								aria-label={T()("preview.copy.url")}
+								loading={props.actionLoading()}
+								onClick={props.onCopy}
+							>
+								<TbOutlineCopy size={12} />
+							</Button>
+							<Button
+								type="button"
+								variant="ghost"
+								size="xs"
+								shape="square"
+								title={T()("preview.open")}
+								aria-label={T()("preview.open")}
+								loading={props.actionLoading()}
+								onClick={props.onOpen}
+							>
+								<TbOutlineExternalLink size={12} />
+							</Button>
+						</div>
 					</div>
-				</Show>
+				</div>
 			</div>
 		</div>
 	);

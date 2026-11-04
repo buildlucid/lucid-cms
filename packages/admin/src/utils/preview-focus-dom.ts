@@ -108,13 +108,32 @@ export const findPreviewFocusTarget = (
 	return null;
 };
 
-/** The height of the sticky document header, which covers the top of the builder. */
-const getHeaderHeight = (targetDocument: Document, targetWindow: Window) =>
+/** How much of a target's scroll area the sticky document header covers. Builder columns that scroll below the header set it to 0. */
+const getHeaderHeight = (element: Element, targetWindow: Window) =>
 	Number.parseFloat(
 		targetWindow
-			.getComputedStyle(targetDocument.documentElement)
+			.getComputedStyle(element)
 			.getPropertyValue("--document-header-bar-height"),
 	) || 0;
+
+/** The visible area that scrolls a target: its nearest scrolling ancestor, or the window. */
+const getScrollport = (element: Element, targetWindow: Window) => {
+	for (
+		let current = element.parentElement;
+		current;
+		current = current.parentElement
+	) {
+		const overflow = targetWindow.getComputedStyle(current).overflowY;
+		if (
+			(overflow === "auto" || overflow === "scroll") &&
+			current.scrollHeight > current.clientHeight
+		) {
+			const rect = current.getBoundingClientRect();
+			return { top: rect.top, bottom: rect.top + current.clientHeight };
+		}
+	}
+	return { top: 0, bottom: targetWindow.innerHeight };
+};
 
 //* the highlight each indicator shows now, so highlighting it again restarts it
 const activeHighlights = new WeakMap<HTMLElement, () => void>();
@@ -159,19 +178,20 @@ const scrollPreviewFieldIntoView = (
 	const reducedMotion =
 		targetWindow.matchMedia?.("(prefers-reduced-motion: reduce)").matches ===
 		true;
-	const header = getHeaderHeight(element.ownerDocument, targetWindow);
+	const header = getHeaderHeight(element, targetWindow);
 	const labelAbove = Math.max(
 		0,
 		element.getBoundingClientRect().top - indicator.getBoundingClientRect().top,
 	);
 	const margin = header + revealGap + labelAbove;
+	const scrollport = getScrollport(element, targetWindow);
 
 	//* the margin makes room for the header and label; the scroll target is set when the scroll starts, so it can be removed straight after
 	element.style.scrollMarginTop = `${margin}px`;
 	element.scrollIntoView({
 		behavior: reducedMotion ? "auto" : "smooth",
 		block:
-			element.offsetHeight + margin <= targetWindow.innerHeight
+			element.offsetHeight + margin <= scrollport.bottom - scrollport.top
 				? "center"
 				: "start",
 		inline: "nearest",
@@ -282,10 +302,13 @@ export const highlightPreviewFields = (fieldIds: string[]) => {
 	const [first] = shown;
 	if (!first) return 0;
 
-	const header = getHeaderHeight(document, window);
+	const scrollport = getScrollport(first, window);
+	const header = getHeaderHeight(first, window);
 	const inView = shown.some((element) => {
 		const rect = element.getBoundingClientRect();
-		return rect.bottom > header && rect.top < window.innerHeight;
+		return (
+			rect.bottom > scrollport.top + header && rect.top < scrollport.bottom
+		);
 	});
 	if (!inView) {
 		scrollPreviewFieldIntoView(first, getPreviewFieldIndicator(first));

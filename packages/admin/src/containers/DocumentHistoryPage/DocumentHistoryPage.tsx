@@ -104,11 +104,6 @@ const DocumentHistoryPage: Component = () => {
 			<Match when={state.isSuccess()}>
 				<PageBuilderHeader
 					mode={undefined}
-					trailingBreadcrumbs={() => [
-						{
-							label: T()("common.history"),
-						},
-					]}
 					state={{
 						collection: state.collection,
 						collectionKey: state.collectionKey,

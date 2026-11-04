@@ -31,6 +31,13 @@ describe("direction-specific message validation", () => {
 			),
 		).toBe(true);
 		expect(
+			isPreviewChildMessage(
+				createPreviewMessage({
+					type: previewProtocol.messages.navigationLocked,
+				}),
+			),
+		).toBe(true);
+		expect(
 			isPreviewChildMessage({
 				scope: previewProtocol.scope,
 				version: previewProtocol.version,

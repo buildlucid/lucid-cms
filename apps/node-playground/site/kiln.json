@@ -8,6 +8,7 @@
 		"editable",
 		"footer",
 		"head",
+		"isPreview",
 		"localePaths",
 		"locales",
 		"media",

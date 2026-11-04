@@ -156,6 +156,8 @@ export type UserPreferences = {
 	/** The last model and effort chosen for each agent, keyed by agent key. */
 	agentModels?: Record<string, AiModelSelection>;
 	autoSaveEnabled?: boolean;
+	/** Whether the page builder's preview is open, keyed by collection key. */
+	previewOpen?: Record<string, boolean>;
 	home?: {
 		/** Ask opens Home on the agent's chat box, Overview on its widgets. */
 		view?: "ask" | "overview";

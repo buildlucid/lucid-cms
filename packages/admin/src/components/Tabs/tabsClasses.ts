@@ -10,11 +10,15 @@ export const tabsRootClasses = (fill: boolean, custom?: string) =>
 		custom,
 	);
 
+//* tabs that don't fit scroll in one row rather than wrapping
+export const tabsScrollerClasses =
+	"relative min-w-0 grow overflow-x-auto overscroll-x-contain scroll-smooth scrollbar-none motion-reduce:scroll-auto";
+
 export const tabsListClasses = (stretch: boolean) =>
 	classNames(
-		"relative z-10 flex min-w-0 flex-row flex-wrap items-center gap-1",
+		"relative z-10 flex w-max min-w-full flex-row items-center gap-1",
 		{
-			"w-full [&>li]:grow": stretch,
+			"[&>li]:grow": stretch,
 		},
 	);
 

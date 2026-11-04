@@ -168,6 +168,10 @@ export const userPreferencesSchema = z.object({
 		description: "Whether documents auto-save",
 		example: true,
 	}),
+	previewOpen: z.record(z.string().max(200), z.boolean()).optional().meta({
+		description:
+			"Whether the page builder's preview is open, keyed by collection key",
+	}),
 	home: z
 		.object({
 			view: z.enum(["ask", "overview"]).optional(),
