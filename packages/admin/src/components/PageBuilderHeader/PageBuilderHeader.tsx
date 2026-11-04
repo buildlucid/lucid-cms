@@ -55,6 +55,8 @@ const editButtonClass =
 //* ghost while the bar wraps onto two rows, then outlined at the end of the one row
 const actionsTriggerClass =
 	"order-4 @3xl/builder-header:order-8 @3xl/builder-header:border @3xl/builder-header:border-border @3xl/builder-header:bg-input @3xl/builder-header:text-subtitle @3xl/builder-header:hover:bg-background-hover";
+//* toggles' icons fill more of their box than undo and redo's, so they're drawn smaller to match
+const toggleIconSize = 12;
 //* a toggle stays filled while its view or panel is open
 const toggleButtonClass =
 	"aria-pressed:bg-background-hover aria-pressed:text-title";
@@ -70,7 +72,7 @@ export const PageBuilderHeader: Component<{
 	preview?: HeaderToggle;
 	/** Toggles the side-by-side view. Left out where it isn't available. */
 	comparison?: HeaderToggle;
-	/** Swaps the document's details in for the fields, where they don't fit beside them. */
+	/** Toggles the document's details, beside the fields where they fit, or swapped in for them. */
 	details?: HeaderToggle;
 	/** The request that owns the proposal being edited. */
 	requestLink?: string;
@@ -753,8 +755,11 @@ export const PageBuilderHeader: Component<{
 										class={toggleButtonClass}
 										onClick={() => preview().toggle()}
 									>
-										<Show when={preview().open()} fallback={<TbOutlineEye />}>
-											<TbOutlineEyeOff />
+										<Show
+											when={preview().open()}
+											fallback={<TbOutlineEye size={toggleIconSize} />}
+										>
+											<TbOutlineEyeOff size={toggleIconSize} />
 										</Show>
 									</Button>
 								)}
@@ -772,7 +777,7 @@ export const PageBuilderHeader: Component<{
 										class={toggleButtonClass}
 										onClick={() => comparison().toggle()}
 									>
-										<TbOutlineLayoutColumns />
+										<TbOutlineLayoutColumns size={toggleIconSize} />
 									</Button>
 								)}
 							</Show>
@@ -789,7 +794,7 @@ export const PageBuilderHeader: Component<{
 										class={toggleButtonClass}
 										onClick={() => details().toggle()}
 									>
-										<TbOutlineListDetails />
+										<TbOutlineListDetails size={toggleIconSize} />
 									</Button>
 								)}
 							</Show>

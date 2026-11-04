@@ -10,6 +10,7 @@ export const datetimeFieldConfig = {
 		sortable: true,
 		canBeLabel: true,
 		canBeRichTextVariable: true,
+		inlineText: false,
 	},
 } as const satisfies FieldStaticConfig<"datetime">;
 

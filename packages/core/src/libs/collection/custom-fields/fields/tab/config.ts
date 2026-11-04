@@ -10,6 +10,7 @@ export const tabFieldConfig = {
 		sortable: false,
 		canBeLabel: false,
 		canBeRichTextVariable: false,
+		inlineText: false,
 	},
 } as const satisfies FieldStaticConfig<"tab">;
 

@@ -15,16 +15,20 @@ import {
 	Show,
 } from "solid-js";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import type { UsePreviewAgent } from "@/hooks/usePreviewAgent/usePreviewAgent";
+import type { UsePreviewFieldEdit } from "@/hooks/usePreviewFieldEdit/usePreviewFieldEdit";
 import type {
 	PreviewRepeaterCapacity,
 	PreviewStructureChange,
 } from "@/hooks/usePreviewStructure/usePreviewStructure";
 import {
 	builderPreviewContext,
+	getPreviewTargetKind,
 	type PreviewEditing,
 	type PreviewFieldPath,
 	type PreviewFieldTarget,
 	type PreviewHover,
+	type PreviewDragged,
 	type PreviewScrollState,
 	previewQueryParams,
 } from "@/preview/protocol";
@@ -85,15 +89,19 @@ export const DocumentPreview: Component<{
 	canSyncDraft: Accessor<boolean>;
 	/** The saved route, which the preview URL is built from. */
 	route: Accessor<InternalCollectionDocument["route"] | undefined>;
-	/** Whether bricks and repeater items can be added, moved and removed from the page. */
-	canEditStructure: Accessor<boolean>;
+	/** Whether the document can be changed from the page: fields edited, and bricks and repeater items added, moved and removed. */
+	canEdit: Accessor<boolean>;
 	/** The brick and field names edit mode's controls show. */
 	editingDetails: Accessor<PreviewEditingDetails | null>;
 	/** The fields with validation errors, which edit mode outlines in red. */
 	errors: Accessor<PreviewFieldPath[]>;
 	/** The field or brick last focused in the builder, which the page points out. */
 	builderTarget: Accessor<PreviewFieldTarget | null>;
-	onFocusField: (target: PreviewFieldTarget) => void;
+	/** Opens a field, item or brick in the builder; `activate` also opens a field's picker, or puts the cursor in it. */
+	onFocusField: (
+		target: PreviewFieldTarget,
+		options?: { activate?: boolean },
+	) => void;
 	/** Applies a change to bricks or repeater items made from the page, returning its undo step, or null when it made none. */
 	onChange: (
 		target: PreviewFieldTarget,
@@ -105,6 +113,10 @@ export const DocumentPreview: Component<{
 	repeaterCapacity: (
 		target: PreviewFieldTarget,
 	) => PreviewRepeaterCapacity | null;
+	/** Edits text fields picked on the page where it shows them. */
+	fieldEdit: UsePreviewFieldEdit;
+	/** Adds bricks, items and fields picked on the page to the agent chat. */
+	agent: UsePreviewAgent;
 	registerScrollCapture?: (
 		capture: () => Promise<PreviewScrollState | null>,
 	) => () => void;
@@ -130,6 +142,10 @@ export const DocumentPreview: Component<{
 	const [customWidth, setCustomWidth] = createSignal(768);
 	const [zoom, setZoom] = createSignal<PreviewZoom>("fit");
 	const [hover, setHover] = createSignal<PreviewHover | null>(null);
+	//* whether a field is being typed into on the page
+	const [typing, setTyping] = createSignal(false);
+	//* a brick dragged on the page, while which the page zooms out
+	const [pageDrag, setPageDrag] = createSignal(false);
 	const previewBridge = createPreviewBridge({
 		onFocusField: (target) => focusField(target),
 		onMove: (target, place, anchor) => {
@@ -148,6 +164,12 @@ export const DocumentPreview: Component<{
 				title: T()("preview.navigation.locked.title"),
 				message: T()("preview.navigation.locked.message"),
 			}),
+		onEdit: (target, text) => editField(target, text),
+		onInlineInput: props.fieldEdit.input,
+		onInlineEnd: (target, cancelled) => {
+			setTyping(false);
+			props.fieldEdit.end(target, cancelled);
+		},
 	});
 	const unregisterScrollCapture = props.registerScrollCapture?.(
 		previewBridge.captureScroll,
@@ -169,6 +191,43 @@ export const DocumentPreview: Component<{
 			userPreferencesStore.getCollectionPreviewEditing(props.collectionKey()) ??
 			true,
 	);
+	//* a builder brick dragged in the fields column and where it would land, which the page shows it moving to while it zooms out
+	const columnDrag = createMemo(
+		(): PreviewDragged | null => {
+			const drag = brickStore.get.brickDrag;
+			const documentId = props.documentId();
+			if (!drag || documentId === undefined) return null;
+			const ordered = brickStore.get.bricks
+				.filter((brick) => brick.type === "builder")
+				.sort((a, b) => a.order - b.order);
+			const from = ordered.findIndex((brick) => brick.ref === drag.ref);
+			const to = ordered.findIndex((brick) => brick.ref === drag.over);
+			const targetAt = (index: number): PreviewFieldTarget | null => {
+				const brick = ordered[index];
+				return brick
+					? {
+							collectionKey: props.collectionKey(),
+							documentId,
+							brick: { type: "builder", key: brick.key, ref: brick.ref },
+							path: [],
+						}
+					: null;
+			};
+			const target = targetAt(from);
+			const anchor = to === from ? null : targetAt(to);
+			if (!target) return null;
+			return {
+				target,
+				//* dropped on a brick, it takes that brick's place, so it goes after those below it and before those above
+				landing: anchor
+					? { anchor, place: to > from ? "after" : "before" }
+					: null,
+			};
+		},
+		null,
+		{ equals: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
+	);
+	const zoomedOut = () => pageDrag() || columnDrag() !== null;
 	const editing = createMemo((): PreviewEditing | null => {
 		const documentId = props.documentId();
 		const details = props.editingDetails();
@@ -176,7 +235,7 @@ export const DocumentPreview: Component<{
 		return {
 			collectionKey: props.collectionKey(),
 			documentId,
-			structure: props.canEditStructure(),
+			editable: props.canEdit(),
 			repeaters: getPreviewRepeaters(details),
 			errors: props.errors(),
 		};
@@ -391,6 +450,27 @@ export const DocumentPreview: Component<{
 		props.onFocusField(target);
 		return true;
 	};
+	/** Edits a field the page asked to: typed into there, or opened in the builder's fields with its picker or cursor. */
+	const editField = (target: PreviewFieldTarget, text: string | null) => {
+		if (waitsForPage([target])) return;
+		const edit = props.fieldEdit.request(target, text);
+		switch (edit.mode) {
+			case "inline": {
+				const started = previewBridge.startInline(target, {
+					multiline: edit.multiline,
+					clear: edit.clear,
+				});
+				if (started) setTyping(true);
+				else props.fieldEdit.end(target, true);
+				return;
+			}
+			case "builder":
+				props.onFocusField(target, { activate: true });
+				return;
+			case "none":
+				return;
+		}
+	};
 	const change = (target: PreviewFieldTarget, next: PreviewStructureChange) =>
 		waitsForPage(next.action === "move" ? [target, next.anchor] : [target])
 			? null
@@ -490,6 +570,17 @@ export const DocumentPreview: Component<{
 		}),
 	);
 	createEffect(() => previewBridge.setEditing(editing()));
+	//* the page shows the brick as being moved, then points it out where it was dropped
+	createEffect(
+		on(
+			columnDrag,
+			(drag, previous) => {
+				previewBridge.setDragged(drag);
+				if (!drag && previous) highlight(previous.target);
+			},
+			{ defer: true },
+		),
+	);
 	createEffect(
 		on(
 			props.builderTarget,
@@ -528,6 +619,9 @@ export const DocumentPreview: Component<{
 				zoom={zoom}
 				setZoom={setZoom}
 				previewMode={props.mode}
+				zoomedOut={zoomedOut}
+				onZoomingChange={previewBridge.setZooming}
+				pagePointer={() => hover()?.pointer ?? null}
 				editMode={editMode}
 				onToggleEditMode={() =>
 					userPreferencesStore.setCollectionPreviewEditing(
@@ -546,17 +640,26 @@ export const DocumentPreview: Component<{
 							hover={hover()}
 							scale={viewport.scale()}
 							width={viewport.width()}
-							structure={props.canEditStructure()}
+							editable={props.canEdit()}
 							details={props.editingDetails()}
 							errors={props.errors()}
 							capacity={props.repeaterCapacity}
 							onOpen={(target) => {
 								if (focusField(target)) highlight(target);
 							}}
+							onEditField={previewBridge.editSelected}
+							onAsk={props.agent.available() ? props.agent.ask : undefined}
+							typing={typing()}
 							onChange={change}
 							onUndo={props.onUndo}
-							onDrag={previewBridge.drag}
-							onDragEnd={previewBridge.endDrag}
+							onDrag={(target, point) => {
+								if (getPreviewTargetKind(target) === "brick") setPageDrag(true);
+								previewBridge.drag(target, point);
+							}}
+							onDragEnd={(drop) => {
+								setPageDrag(false);
+								previewBridge.endDrag(drop);
+							}}
 						/>
 					</Show>
 				)}

@@ -25,9 +25,15 @@ type RevealPreviewFieldOptions = {
 	targetWindow?: Window;
 	waitMs?: number;
 	highlightMs?: number;
+	/** Opens the field's picker when it has one, such as media or a link, or else puts the cursor in it. */
+	activate?: boolean;
 };
 
 const FIELD_ID_PREFIX = "lucid-preview-field";
+//* a field's main action, such as opening its media or link picker, which editing it from elsewhere presses
+const FIELD_ACTION_SELECTOR = "[data-field-action]";
+const FIELD_INPUT_SELECTOR =
+	'input:not([type="hidden"]):not(:disabled), textarea:not(:disabled), select:not(:disabled), [contenteditable="true"], button:not(:disabled)';
 const STRUCTURE_ID_PREFIX = "lucid-preview-structure";
 
 /** Finds the field or trigger's own label to position the focus indicator. */
@@ -241,7 +247,21 @@ const waitForElement = (props: {
 	});
 };
 
-/** Opens structural controls, then scrolls and highlights the target field. */
+/** Activates the field's main action or focuses its first own input. Leaves disabled actions alone. */
+const activateField = (field: HTMLElement) => {
+	const owned = (selector: string) =>
+		[...field.querySelectorAll<HTMLElement>(selector)].filter(
+			(element) => element.closest("[data-preview-focus-field]") === field,
+		);
+	const [action] = owned(FIELD_ACTION_SELECTOR);
+	if (action) {
+		if (!action.matches(":disabled")) action.click();
+		return;
+	}
+	owned(FIELD_INPUT_SELECTOR)[0]?.focus({ preventScroll: true });
+};
+
+/** Opens structural controls, then scrolls and highlights the target field, activating it when asked. */
 export const revealPreviewField = async (
 	options: RevealPreviewFieldOptions,
 ): Promise<(() => void) | null> => {
@@ -276,6 +296,7 @@ export const revealPreviewField = async (
 
 	const indicator = getPreviewFieldIndicator(field);
 	scrollPreviewFieldIntoView(field, indicator, targetWindow);
+	if (options.activate) activateField(field);
 	const removeHighlight = highlightIndicator(
 		indicator,
 		targetWindow,

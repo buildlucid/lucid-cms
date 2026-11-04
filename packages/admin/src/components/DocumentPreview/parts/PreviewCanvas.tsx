@@ -16,14 +16,17 @@ import {
 	createMemo,
 	createSignal,
 	Index,
+	on,
 	onCleanup,
 	onMount,
 	type Setter,
 	Show,
+	untrack,
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import HoverRevealBar from "@/components/HoverRevealBar/HoverRevealBar";
 import { useHoverReveal } from "@/hooks/useHoverReveal/useHoverReveal";
+import { usePointerNear } from "@/hooks/usePointerNear/usePointerNear";
 import { previewFrameNames } from "@/preview/protocol";
 import T, { translateAdminCopy } from "@/translations";
 import { PreviewLoading } from "./PreviewLoading";
@@ -69,6 +72,9 @@ const defaultBreakpoints: Array<{
 	},
 ];
 const zoomOptions: PreviewZoom[] = ["fit", 25, 50, 75, 100];
+//* how far the page zooms out while a brick is dragged, unless it's already smaller, and how long that takes
+const ZOOMED_OUT_SCALE = 0.5;
+const ZOOM_MS = 320;
 
 export const PreviewCanvas: Component<{
 	frameSrc: Accessor<string | undefined>;
@@ -91,6 +97,12 @@ export const PreviewCanvas: Component<{
 	onCopy: () => void;
 	onOpen: () => void;
 	onRetry: () => void;
+	/** Zooms the page out, keeping its layout, eg. while a brick is dragged, to show more of where it can go. */
+	zoomedOut?: Accessor<boolean>;
+	/** Runs as zooming out or back in starts and ends, so the page can keep what's dragged or selected in place. */
+	onZoomingChange?: (zooming: boolean) => void;
+	/** Where the pointer is on the page, in its own pixels, which it reports while over it as the frame hides it. */
+	pagePointer?: Accessor<{ x: number; y: number } | null>;
 	/** Drawn over the page at its zoom, such as edit controls. */
 	overlay?: (viewport: {
 		scale: Accessor<number>;
@@ -101,6 +113,8 @@ export const PreviewCanvas: Component<{
 	// Refs
 	let canvasRef: HTMLDivElement | undefined;
 	let dockRef: HTMLDivElement | undefined;
+	let dockEdgeRef: HTMLSpanElement | undefined;
+	let frameBoxRef: HTMLDivElement | undefined;
 	let resizeObserver: ResizeObserver | undefined;
 	let viewportResizeHandle: HTMLButtonElement | undefined;
 	let viewportResizePointerId: number | undefined;
@@ -113,8 +127,23 @@ export const PreviewCanvas: Component<{
 	// State
 	const [canvasWidth, setCanvasWidth] = createSignal(0);
 	const [viewportResizing, setViewportResizing] = createSignal(false);
+	let zoomFrame: number | undefined;
+	let zooming = false;
 	//* the options dock stays out of the page's way until the pointer rests near the bottom
 	const dock = useHoverReveal({ element: () => dockRef });
+	//* its edge marker shows once the pointer heads for it, over the page included
+	const nearDock = usePointerNear({
+		element: () => dockEdgeRef,
+		pointer: () => {
+			const point = props.pagePointer?.();
+			if (!point || !frameBoxRef) return null;
+			const box = frameBoxRef.getBoundingClientRect();
+			return {
+				x: box.left + point.x * displayScale(),
+				y: box.top + point.y * displayScale(),
+			};
+		},
+	});
 
 	// ----------------------------------
 	// Memos
@@ -169,7 +198,13 @@ export const PreviewCanvas: Component<{
 	const layoutWidth = createMemo(() => {
 		return Math.min(maximumLayoutWidth(), requestedWidth());
 	});
-	const visualWidth = createMemo(() => layoutWidth() * zoomScale());
+	//* zooming out keeps the page's layout width, so its breakpoints don't change while a brick is dragged
+	const targetScale = createMemo(() =>
+		props.zoomedOut?.() ? Math.min(zoomScale(), ZOOMED_OUT_SCALE) : zoomScale(),
+	);
+	//* the scale the page is drawn at, easing to the target as it zooms out or back in
+	const [displayScale, setDisplayScale] = createSignal(untrack(targetScale));
+	const visualWidth = createMemo(() => layoutWidth() * displayScale());
 	const frameName = createMemo(() => previewFrameNames[props.previewMode()]);
 
 	// ----------------------------------
@@ -293,8 +328,55 @@ export const PreviewCanvas: Component<{
 		}
 	};
 
+	const setZooming = (next: boolean) => {
+		if (zooming === next) return;
+		zooming = next;
+		props.onZoomingChange?.(next);
+	};
+	const stopZoom = () => {
+		if (zoomFrame !== undefined) cancelAnimationFrame(zoomFrame);
+		zoomFrame = undefined;
+	};
+
 	// ----------------------------------
 	// Effects
+	//* zooming out or back in eases there; other changes, such as the canvas resizing, apply at once
+	createEffect(
+		on(
+			() => [targetScale(), props.zoomedOut?.() === true] as const,
+			([target, zoomedOut], previous) => {
+				stopZoom();
+				const from = untrack(displayScale);
+				const reducedMotion = window.matchMedia(
+					"(prefers-reduced-motion: reduce)",
+				).matches;
+				if (
+					previous === undefined ||
+					previous[1] === zoomedOut ||
+					from === target ||
+					reducedMotion
+				) {
+					setDisplayScale(target);
+					setZooming(false);
+					return;
+				}
+				setZooming(true);
+				const start = performance.now();
+				const step = (now: number) => {
+					const progress = Math.min((now - start) / ZOOM_MS, 1);
+					const eased = 1 - (1 - progress) ** 3;
+					setDisplayScale(from + (target - from) * eased);
+					if (progress < 1) {
+						zoomFrame = requestAnimationFrame(step);
+						return;
+					}
+					zoomFrame = undefined;
+					setZooming(false);
+				};
+				zoomFrame = requestAnimationFrame(step);
+			},
+		),
+	);
 	createEffect(() => {
 		const selection = props.selectedWidth();
 		if (
@@ -315,6 +397,7 @@ export const PreviewCanvas: Component<{
 	onCleanup(() => {
 		resizeObserver?.disconnect();
 		stopViewportResize();
+		stopZoom();
 	});
 
 	// ----------------------------------
@@ -322,7 +405,8 @@ export const PreviewCanvas: Component<{
 	return (
 		<div
 			ref={setCanvasRef}
-			class="relative h-full min-h-0 min-w-0 overflow-hidden bg-card dotted-background"
+			//* its own stacking context, so the dock and controls inside stay below what floats over the page, such as the agent chat. Clipped rather than hidden, so nothing can scroll it, such as the page scrolling to a field or focus moving into the tucked dock
+			class="relative isolate h-full min-h-0 min-w-0 overflow-clip bg-card dotted-background"
 		>
 			<Show when={props.resolverState() === "unavailable"}>
 				<div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-6 text-center">
@@ -369,15 +453,16 @@ export const PreviewCanvas: Component<{
 						</span>
 					</button>
 					<div
-						class="relative h-full overflow-hidden bg-white shadow-sm"
+						ref={frameBoxRef}
+						class="relative h-full overflow-clip bg-white shadow-sm"
 						style={{ width: `${visualWidth()}px` }}
 					>
 						<div
 							class="absolute top-0 left-0 bg-white"
 							style={{
 								width: `${layoutWidth()}px`,
-								height: `${100 / zoomScale()}%`,
-								transform: `scale(${zoomScale()})`,
+								height: `${100 / displayScale()}%`,
+								transform: `scale(${displayScale()})`,
 								"transform-origin": "top left",
 							}}
 						>
@@ -391,7 +476,7 @@ export const PreviewCanvas: Component<{
 								onLoad={() => props.setFrameLoading(false)}
 							/>
 						</div>
-						{props.overlay?.({ scale: zoomScale, width: visualWidth })}
+						{props.overlay?.({ scale: displayScale, width: visualWidth })}
 						<Show when={viewportResizing()}>
 							<div class="absolute inset-0 z-40 cursor-ew-resize" />
 						</Show>
@@ -430,12 +515,13 @@ export const PreviewCanvas: Component<{
 					onFocusOut={dock.handlers.onFocusOut}
 				>
 					<span
+						ref={dockEdgeRef}
 						aria-hidden="true"
 						class="group pointer-events-auto absolute inset-x-0 bottom-0 h-8"
 					>
 						<HoverRevealBar
 							orientation="horizontal"
-							hidden={dock.revealed()}
+							hidden={dock.revealed() || !nearDock()}
 							class="bottom-2 left-1/2 -translate-x-1/2"
 						/>
 					</span>
@@ -443,7 +529,7 @@ export const PreviewCanvas: Component<{
 						role="group"
 						aria-label={T()("preview.options")}
 						class={classNames(
-							"relative flex max-w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-border bg-popover/90 p-1.5 shadow-lg backdrop-blur-md transition-[translate,opacity] duration-300 ease-emphasized motion-reduce:transition-none",
+							"relative flex max-w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-border bg-background/90 p-1.5 shadow-lg backdrop-blur-md transition-[translate,opacity] duration-300 ease-emphasized motion-reduce:transition-none",
 							{
 								"translate-y-[calc(100%+1rem)] opacity-0": !dock.revealed(),
 							},

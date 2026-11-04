@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	fieldTypeCapabilities,
 	getFieldTypeCapabilities,
+	getFieldTypeInlineText,
 	isFieldTypeFilterable,
 	isFieldTypeRichTextVariable,
 	isFieldTypeSortable,
@@ -59,12 +60,24 @@ describe("field type capabilities", () => {
 		);
 	});
 
+	it("only edits text and textarea fields inline, on one line and several", () => {
+		const inline = fieldTypes.flatMap((fieldType) => {
+			const mode = getFieldTypeInlineText(fieldType);
+			return mode ? [[fieldType, mode]] : [];
+		});
+		expect(Object.fromEntries(inline)).toEqual({
+			text: "line",
+			textarea: "lines",
+		});
+	});
+
 	it("treats unknown field types as supporting nothing", () => {
 		expect(getFieldTypeCapabilities("unknown")).toEqual({
 			filterable: false,
 			sortable: false,
 			canBeLabel: false,
 			canBeRichTextVariable: false,
+			inlineText: false,
 		});
 		expect(isFieldTypeSortable("unknown")).toBe(false);
 		expect(isFieldTypeFilterable("unknown")).toBe(false);

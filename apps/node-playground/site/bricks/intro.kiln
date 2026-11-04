@@ -2,7 +2,7 @@
 
 <section class="section"{{ editable(brick) }}>
 	{% if brick.fields.title %}<h2 {{ editable(brick, "title") }}>{{ brick.fields.title }}</h2>{% endif %}
-	{% include "components/rich-text" with { node: brick.fields.intro } %}
+	{% include "components/rich-text" with { node: brick.fields.intro, editable: editable(brick, "intro") } %}
 	{% set audio = brick.fields.intro_audio|first %}
 	{% if audio?.url %}
 		<audio controls src="{{ audio.url }}"></audio>

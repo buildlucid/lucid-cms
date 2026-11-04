@@ -44,7 +44,11 @@ export const usePreviewFocus = (props: {
 			status: "warning",
 		});
 	};
-	const requestTarget = async (target: PreviewFieldTarget) => {
+	/** Opens a field, item or brick in the builder. `activate` also opens a field's picker, or puts the cursor in it. */
+	const requestTarget = async (
+		target: PreviewFieldTarget,
+		options?: { activate?: boolean },
+	) => {
 		const documentId = props.documentId();
 		if (
 			target.collectionKey !== props.collectionKey() ||
@@ -88,6 +92,7 @@ export const usePreviewFocus = (props: {
 			fieldId: resolution.fieldId,
 			structureIds: resolution.structureIds,
 			signal: controller.signal,
+			activate: options?.activate,
 		});
 		if (controller.signal.aborted || revealController !== controller) {
 			cleanup?.();

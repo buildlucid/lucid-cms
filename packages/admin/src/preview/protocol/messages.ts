@@ -2,6 +2,8 @@ import { previewProtocol, previewProtocolLimits } from "./constants.js";
 import type {
 	PreviewChildMessage,
 	PreviewEnvelope,
+	PreviewFieldTarget,
+	PreviewLanding,
 	PreviewMessagePayload,
 	PreviewParentMessage,
 } from "./types.js";
@@ -15,10 +17,12 @@ import {
 	arePreviewSiblings,
 	getPreviewTargetKind,
 	isPreviewEditing,
+	isPreviewFieldOnlyTarget,
 	isPreviewFieldTarget,
 	isPreviewHover,
 	isPreviewPlace,
 	isPreviewScrollState,
+	isPreviewText,
 } from "./validators.js";
 
 /** Checks the shared scope and version before handling a message. */
@@ -100,10 +104,45 @@ export const isPreviewChildMessage = (
 				hasOnlyKeys(value, ["scope", "version", "type", "hover"]) &&
 				isPreviewHover(value.hover)
 			);
+		case previewProtocol.messages.edit:
+			return (
+				hasOnlyKeys(value, ["scope", "version", "type", "target", "text"]) &&
+				isPreviewFieldOnlyTarget(value.target) &&
+				(value.text === null || isPreviewText(value.text))
+			);
+		case previewProtocol.messages.inlineInput:
+			return (
+				hasOnlyKeys(value, ["scope", "version", "type", "target", "value"]) &&
+				isPreviewFieldOnlyTarget(value.target) &&
+				isPreviewText(value.value)
+			);
+		case previewProtocol.messages.inlineEnd:
+			return (
+				hasOnlyKeys(value, [
+					"scope",
+					"version",
+					"type",
+					"target",
+					"cancelled",
+				]) &&
+				isPreviewFieldOnlyTarget(value.target) &&
+				typeof value.cancelled === "boolean"
+			);
 		default:
 			return false;
 	}
 };
+
+/** Validates where a dragged brick would land: next to one of its siblings. */
+const isPreviewLanding = (
+	target: PreviewFieldTarget,
+	value: unknown,
+): value is PreviewLanding =>
+	isRecord(value) &&
+	hasOnlyKeys(value, ["anchor", "place"]) &&
+	isPreviewFieldTarget(value.anchor) &&
+	arePreviewSiblings(target, value.anchor) &&
+	isPreviewPlace(value.place);
 
 /** Validates messages sent from the builder parent to the preview child. */
 export const isPreviewParentMessage = (
@@ -151,6 +190,40 @@ export const isPreviewParentMessage = (
 			return (
 				hasOnlyKeys(value, ["scope", "version", "type", "drop"]) &&
 				typeof value.drop === "boolean"
+			);
+		case previewProtocol.messages.dragged:
+			return (
+				hasOnlyKeys(value, ["scope", "version", "type", "target", "landing"]) &&
+				(value.target === null
+					? value.landing === null
+					: isPreviewFieldTarget(value.target) &&
+						getPreviewTargetKind(value.target) === "brick" &&
+						(value.landing === null ||
+							isPreviewLanding(value.target, value.landing)))
+			);
+		case previewProtocol.messages.zoom:
+			return (
+				hasOnlyKeys(value, ["scope", "version", "type", "zooming"]) &&
+				typeof value.zooming === "boolean"
+			);
+		case previewProtocol.messages.editSelected:
+			return (
+				hasOnlyKeys(value, ["scope", "version", "type", "target"]) &&
+				isPreviewFieldOnlyTarget(value.target)
+			);
+		case previewProtocol.messages.inlineStart:
+			return (
+				hasOnlyKeys(value, [
+					"scope",
+					"version",
+					"type",
+					"target",
+					"multiline",
+					"clear",
+				]) &&
+				isPreviewFieldOnlyTarget(value.target) &&
+				typeof value.multiline === "boolean" &&
+				typeof value.clear === "boolean"
 			);
 		default:
 			return false;

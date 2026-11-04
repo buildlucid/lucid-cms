@@ -13,8 +13,8 @@ export type PreviewScrollState = {
 export type PreviewEditing = {
 	collectionKey: string;
 	documentId: number;
-	/** Whether bricks and repeater items can be moved from the page. */
-	structure: boolean;
+	/** Whether the document can be changed from the page: its fields edited, and its bricks and repeater items moved. */
+	editable: boolean;
 	/** The repeaters items can be added to, by brick key (none for the document's own fields) and content path. */
 	repeaters: PreviewRepeater[];
 	/** The fields with validation errors. Items, repeaters and bricks holding one show as invalid too. */
@@ -58,12 +58,14 @@ export type PreviewHoverBlock = PreviewHoverElement & {
 	horizontal: boolean;
 };
 
-/** What the pointer is over on the page, for the builder to draw controls against. */
+/** What the pointer is over on the page, and what's selected, for the builder to draw controls against. */
 export type PreviewHover = {
 	brick: PreviewHoverBlock | null;
 	item: PreviewHoverBlock | null;
 	/** A repeater that items can be added to. */
 	repeater: PreviewHoverElement | null;
+	/** The selected field, item or brick, which a field's bar is drawn above. */
+	selected: PreviewHoverElement | null;
 	/** Where the pointer is, or null once it has left the page. */
 	pointer: { x: number; y: number } | null;
 	/** The bottom of a bar fixed across the top of the page, such as a site header, which controls stay below. */
@@ -179,6 +181,73 @@ export type PreviewNavigationLockedMessage = PreviewEnvelope & {
 	type: typeof previewProtocol.messages.navigationLocked;
 };
 
+/**
+ * Requests editing on a second click or Enter. `text` contains the element's text-only value for
+ * inline editing checks, otherwise null.
+ */
+export type PreviewEditMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.edit;
+	target: PreviewFieldTarget;
+	text: string | null;
+};
+
+/** Where a dragged brick would be moved to: next to a sibling. */
+export type PreviewLanding = {
+	anchor: PreviewFieldTarget;
+	place: PreviewPlace;
+};
+
+/** A brick dragged in the builder's fields and where it would land, which the page shows it moving to. */
+export type PreviewDragged = {
+	target: PreviewFieldTarget;
+	/** Null while it's over where it already is. */
+	landing: PreviewLanding | null;
+};
+
+/** Says which brick is being dragged in the builder's fields and where it would land, which the page shows it moving to, or null once it's dropped. */
+export type PreviewDraggedMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.dragged;
+	target: PreviewFieldTarget | null;
+	/** Null while it's over where it already is. */
+	landing: PreviewLanding | null;
+};
+
+/** Says the builder is zooming the page out or back in, while which the page keeps what's dragged or selected where it's drawn. */
+export type PreviewZoomMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.zoom;
+	zooming: boolean;
+};
+
+/** Asks the page to edit its selected field, as clicking it again would. */
+export type PreviewEditSelectedMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.editSelected;
+	target: PreviewFieldTarget;
+};
+
+/** Starts typing a field's text where the page shows it. */
+export type PreviewInlineStartMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.inlineStart;
+	target: PreviewFieldTarget;
+	/** Whether Enter starts a new line rather than finishing. */
+	multiline: boolean;
+	/** Whether the element shows a placeholder for an empty field, which is cleared to type into. */
+	clear: boolean;
+};
+
+/** The text typed into a field on the page so far. */
+export type PreviewInlineInputMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.inlineInput;
+	target: PreviewFieldTarget;
+	value: string;
+};
+
+/** Finishes typing on the page, keeping what was typed, or going back to what was there when `cancelled`. */
+export type PreviewInlineEndMessage = PreviewEnvelope & {
+	type: typeof previewProtocol.messages.inlineEnd;
+	target: PreviewFieldTarget;
+	cancelled: boolean;
+};
+
 export type PreviewChildMessage =
 	| PreviewReadyMessage
 	| PreviewUnloadMessage
@@ -188,7 +257,10 @@ export type PreviewChildMessage =
 	| PreviewDeselectMessage
 	| PreviewMoveMessage
 	| PreviewHoverMessage
-	| PreviewNavigationLockedMessage;
+	| PreviewNavigationLockedMessage
+	| PreviewEditMessage
+	| PreviewInlineInputMessage
+	| PreviewInlineEndMessage;
 
 export type PreviewParentMessage =
 	| PreviewConnectMessage
@@ -198,7 +270,11 @@ export type PreviewParentMessage =
 	| PreviewEditModeMessage
 	| PreviewHighlightFieldMessage
 	| PreviewDragMessage
-	| PreviewDragEndMessage;
+	| PreviewDragEndMessage
+	| PreviewEditSelectedMessage
+	| PreviewInlineStartMessage
+	| PreviewZoomMessage
+	| PreviewDraggedMessage;
 
 /** Each message in a union without its envelope. */
 type WithoutEnvelope<TMessage> = TMessage extends PreviewEnvelope

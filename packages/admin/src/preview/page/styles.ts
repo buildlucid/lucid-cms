@@ -65,6 +65,17 @@ export const previewOverlayStyles = /* css */ `
 	box-shadow: 0 0 0 1.5px rgba(18, 18, 20, 0.55);
 }
 .selected--invalid::after { background: var(--danger); }
+/* typing into the field: unfilled so its text reads clearly, ringed in Lucid's green with a dark edge that shows on light pages */
+.selected--typing,
+.selected--typing.selected--filled {
+	--ring: var(--accent);
+	background: transparent;
+	box-shadow: inset 0 0 0 1.5px var(--ring), 0 0 0 1px rgba(18, 18, 20, 0.35);
+}
+.selected--typing.selected--invalid {
+	--ring: var(--danger);
+	box-shadow: inset 0 0 0 1.5px var(--ring);
+}
 .selected--pulse { animation: pulse 900ms var(--ease); }
 @keyframes pulse {
 	from { box-shadow: inset 0 0 0 1.5px var(--ring), 0 0 0 0 color-mix(in srgb, var(--ring) 45%, transparent); }
@@ -89,6 +100,7 @@ export const previewOverlayStyles = /* css */ `
 
 @media (forced-colors: active) {
 	.fill, .hint, .selected { box-shadow: none; outline: 2px solid Highlight; }
+	.selected--typing { outline-style: dashed; }
 	.landing { box-shadow: none; outline-color: Highlight; }
 }
 `;

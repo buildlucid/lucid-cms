@@ -1,6 +1,7 @@
 import type {
 	Agent,
 	AgentCapabilities,
+	AgentDocumentFocus,
 	AgentReferenceInput,
 	AgentReferenceSnapshot,
 	AgentResource,
@@ -28,6 +29,7 @@ export type AgentUpload = {
 
 export type AgentReferenceKind =
 	| "document"
+	| "focus"
 	| "request"
 	| "deploy"
 	| "image"
@@ -37,13 +39,17 @@ export type AgentReferenceKind =
 	| "text"
 	| "file";
 
-/** Identifies a linked resource, including a pinned document version. */
+/** Identifies a linked resource, including a pinned document version and the brick or field it points at. */
 export const agentReferenceKey = (reference: AgentReferenceInput) => {
 	switch (reference.type) {
 		case "media":
 			return `media:${reference.mediaId}`;
-		case "document":
-			return `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
+		case "document": {
+			const key = `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
+			return reference.focus
+				? `${key}#${reference.focus.brick ?? ""}/${reference.focus.path.join("/")}`
+				: key;
+		}
 		case "request":
 			return `request:${reference.requestId}`;
 		case "deploy":
@@ -66,6 +72,7 @@ export const agentReferenceInput = (
 				...(reference.versionId === undefined
 					? {}
 					: { versionId: reference.versionId }),
+				...(reference.focus ? { focus: reference.focus } : {}),
 			};
 		case "request":
 			return { type: "request", requestId: reference.requestId };
@@ -227,10 +234,13 @@ export const canAttachMedia = (
 	}
 };
 
-/** A coarse file kind, for choosing an icon when there is no preview. */
+/** A coarse file kind, for choosing an icon when there is no preview. A document's brick or field is a `focus`. */
 export const agentReferenceKind = (
-	reference: Pick<AgentReferenceSnapshot, "type" | "mimeType">,
+	reference: Pick<AgentReferenceSnapshot, "type" | "mimeType"> & {
+		focus?: AgentDocumentFocus;
+	},
 ): AgentReferenceKind => {
+	if (reference.focus) return "focus";
 	if (reference.type !== "media") return reference.type;
 	const mimeType = reference.mimeType ?? "";
 	if (mimeType === "application/pdf") return "pdf";
@@ -304,3 +314,9 @@ export const agentChangesHref = (changes: AgentResource[]) => {
 		changes.find((change) => change.type === "document");
 	return changed ? agentReferenceHref(changed) : undefined;
 };
+
+/** What an attachment is called in the chat: a document's brick or field by its own name. */
+export const agentReferenceLabel = (reference: AgentReferenceSnapshot) =>
+	reference.type === "document" && reference.focus
+		? reference.focus.label
+		: reference.label;

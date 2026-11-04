@@ -1,4 +1,4 @@
-import { referenceKey } from "../../../libs/agent/references.js";
+import { attachmentKey, referenceKey } from "../../../libs/agent/references.js";
 import {
 	AgentDeployReferencesRepository,
 	AgentDocumentReferencesRepository,
@@ -15,7 +15,11 @@ import describe from "./describe.js";
 import linkRequestedDocuments from "./link-requested-documents.js";
 import referenceNotFound from "./reference-not-found.js";
 
-/** Links resources without granting access, substituting create requests for pending documents. */
+/**
+ * Links resources without granting access, substituting create requests for pending documents.
+ * Attachments pointing at different parts of one document are each kept, with the document
+ * linked once.
+ */
 const register: ServiceFn<
 	[
 		{
@@ -35,7 +39,7 @@ const register: ServiceFn<
 
 	const references = [
 		...new Map(
-			linked.data.map((reference) => [referenceKey(reference), reference]),
+			linked.data.map((reference) => [attachmentKey(reference), reference]),
 		).values(),
 	];
 	if (!references.length) return { error: undefined, data: [] };
@@ -68,9 +72,13 @@ const register: ServiceFn<
 	const mediaIds = snapshots.flatMap((reference) =>
 		reference.type === "media" ? [reference.mediaId] : [],
 	);
-	const documents = snapshots.filter(
-		(reference) => reference.type === "document",
-	);
+	const documents = [
+		...new Map(
+			snapshots
+				.filter((reference) => reference.type === "document")
+				.map((reference) => [referenceKey(reference), reference]),
+		).values(),
+	];
 	const requestIds = snapshots.flatMap((reference) =>
 		reference.type === "request" ? [reference.requestId] : [],
 	);

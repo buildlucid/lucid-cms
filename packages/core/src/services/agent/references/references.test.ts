@@ -315,6 +315,32 @@ test("user attachments take precedence over repeated tool registrations for medi
 	);
 });
 
+test("keeps each brick or field a person points at in one document, linking the document once", async () => {
+	const conversationId = await createChat();
+	const document = await createDocument();
+	const focused = (brick: string, label: string): AgentReferenceInput => ({
+		type: "document",
+		collectionKey: collection.key,
+		documentId: document.id,
+		focus: { brick, path: ["title"], label },
+	});
+
+	const linked = await link(conversationId, [
+		focused("a", "Hero › Title"),
+		focused("b", "Banner › Title"),
+		focused("a", "Hero › Title"),
+	]);
+	expect(linked.error).toBeUndefined();
+	expect(
+		linked.data?.map((reference) =>
+			reference.type === "document" ? reference.focus?.label : undefined,
+		),
+	).toEqual(["Hero › Title", "Banner › Title"]);
+	expect(await documentLinks(conversationId)).toEqual([
+		{ document_id: document.id, version_id: null },
+	]);
+});
+
 test("rejects another document's version without partially registering the batch", async () => {
 	const conversationId = await createChat();
 	const document = await createDocument();

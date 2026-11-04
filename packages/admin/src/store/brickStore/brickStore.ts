@@ -99,6 +99,8 @@ export const createBrickStore = (idPrefix = "") => {
 		autoSaveCounter: number;
 		autoSavePaused: boolean;
 		relationFieldDragCount: number;
+		/** The builder brick being dragged in the fields column and the one it's over, which the preview shows it moving to. */
+		brickDrag: { ref: string; over: string } | null;
 		locked: boolean;
 		/** The saved content the editor's state is based on, sent with saves so one based on content saved since is refused. Null until loaded, or after a save whose content the next load brings. */
 		baseContentId: string | null;
@@ -150,10 +152,6 @@ export const createBrickStore = (idPrefix = "") => {
 		}) => void;
 		removeBrick: (brickIndex: number) => void;
 		toggleBrickOpen: (brickIndex: number) => void;
-		swapBrickOrder: (props: {
-			brickRef: string;
-			targetBrickRef: string;
-		}) => void;
 		moveBrick: (props: { brickRef: string; index: number }) => void;
 		setFieldValue: (params: {
 			brickIndex: number;
@@ -243,6 +241,7 @@ export const createBrickStore = (idPrefix = "") => {
 		autoSaveCounter: 0,
 		autoSavePaused: false,
 		relationFieldDragCount: 0,
+		brickDrag: null,
 		collectionLocalized: false,
 		documentRevision: 0,
 		contentRevision: 0,
@@ -265,6 +264,7 @@ export const createBrickStore = (idPrefix = "") => {
 				set("autoSaveCounter", 0);
 				set("autoSavePaused", false);
 				set("relationFieldDragCount", 0);
+				set("brickDrag", null);
 				set("collectionLocalized", false);
 				set("baseContentId", null);
 				set("contentChanged", false);
@@ -507,38 +507,6 @@ export const createBrickStore = (idPrefix = "") => {
 					draft[brickIndex].open = draft[brickIndex].open !== true;
 				}),
 			);
-		},
-		/** Swaps two brick positions and marks the structure dirty so autosave and preview observe the new order. */
-		swapBrickOrder(props) {
-			recordBricks({}, () => {
-				let brickOrderChanged = false;
-
-				batch(() => {
-					set(
-						"bricks",
-						produce((draft) => {
-							const brick = draft.find((b) => b.ref === props.brickRef);
-							const targetBrick = draft.find(
-								(b) => b.ref === props.targetBrickRef,
-							);
-
-							if (!brick || !targetBrick) return;
-
-							const order = brick.order;
-							brick.order = targetBrick.order;
-							targetBrick.order = order;
-							brickOrderChanged = true;
-
-							draft.sort((a, b) => a.order - b.order);
-						}),
-					);
-
-					if (brickOrderChanged) {
-						set("autoSaveCounter", (prev) => prev + 1);
-						markDocumentChange({ content: true, structure: true });
-					}
-				});
-			});
 		},
 		/** Moves a builder brick to a position among the builder bricks, renumbering their order. */
 		moveBrick(props) {

@@ -4,11 +4,7 @@ import Skeleton from "@/components/Skeleton/Skeleton";
 import FieldsSkeleton from "./FieldsSkeleton";
 
 /** What the builder shows beside its fields, which the skeleton sketches. */
-export type DocumentEditorSkeletonLayout =
-	| "fields"
-	| "details"
-	| "preview"
-	| "compare";
+export type DocumentEditorSkeletonLayout = "fields" | "preview" | "compare";
 
 type DocumentEditorSkeletonProps =
 	| {
@@ -21,7 +17,7 @@ type DocumentEditorSkeletonProps =
 			fieldsWidth: number;
 	  };
 
-/** Loading skeleton matching the editor's fields, details, preview or comparison layout. */
+/** Loading skeleton matching the editor's fields, preview or comparison layout. */
 const DocumentEditorSkeleton: Component<DocumentEditorSkeletonProps> = (
 	props,
 ) => {
@@ -53,30 +49,6 @@ const DocumentEditorSkeleton: Component<DocumentEditorSkeletonProps> = (
 						</div>
 					}
 				>
-					<Match when={props.layout === "details"}>
-						<div class="flex min-h-0 flex-1">
-							<div class="min-w-0 flex-1">
-								<FieldsSkeleton />
-							</div>
-							<div
-								aria-hidden="true"
-								class="flex w-82.5 shrink-0 flex-col gap-5 border-s border-border bg-card p-6"
-							>
-								<span class="skeleton block h-5 w-28" />
-								<span class="skeleton block h-9 w-full" />
-								<div class="flex flex-col gap-3 border-t border-border pt-5">
-									<span class="skeleton block h-4 w-3/4" />
-									<span class="skeleton block h-4 w-2/3" />
-									<span class="skeleton block h-4 w-4/5" />
-									<span class="skeleton block h-4 w-1/2" />
-								</div>
-								<div class="flex flex-col gap-3 border-t border-border pt-5">
-									<span class="skeleton block h-5 w-24" />
-									<span class="skeleton block h-16 w-full" />
-								</div>
-							</div>
-						</div>
-					</Match>
 					<Match when={props.layout === "preview" && props}>
 						{(preview) => (
 							<div class="flex min-h-0 flex-1">

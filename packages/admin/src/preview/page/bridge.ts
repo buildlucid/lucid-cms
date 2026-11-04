@@ -177,6 +177,29 @@ export const installPreviewBridge = (
 
 		if (event.data.type === previewProtocol.messages.dragEnd) {
 			editing.endDrag(event.data.drop);
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.dragged) {
+			editing.showDragged(event.data.target, event.data.landing);
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.zoom) {
+			editing.setZooming(event.data.zooming);
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.editSelected) {
+			editing.editSelected(event.data.target);
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.inlineStart) {
+			editing.startInline(event.data.target, {
+				multiline: event.data.multiline,
+				clear: event.data.clear,
+			});
 		}
 	};
 	const editing = installPreviewEditing({
@@ -192,6 +215,15 @@ export const installPreviewBridge = (
 		},
 		sendMove: (target, place, anchor) => {
 			send({ type: previewProtocol.messages.move, target, place, anchor });
+		},
+		sendEdit: (target, text) => {
+			send({ type: previewProtocol.messages.edit, target, text });
+		},
+		sendInlineInput: (target, value) => {
+			send({ type: previewProtocol.messages.inlineInput, target, value });
+		},
+		sendInlineEnd: (target, cancelled) => {
+			send({ type: previewProtocol.messages.inlineEnd, target, cancelled });
 		},
 	});
 

@@ -61,28 +61,6 @@ export const PreviewLoading: Component<{
 					</div>
 				</div>
 			</div>
-			<div
-				aria-hidden="true"
-				class="absolute inset-0 flex items-center justify-center p-6"
-			>
-				<div class="flex animate-rise-in flex-col items-center gap-3 rounded-2xl border border-border bg-popover/90 px-6 pt-5 pb-4 shadow-lg backdrop-blur-md">
-					<div class="flex h-12 w-16 flex-col overflow-hidden rounded-md border border-border bg-card">
-						<div class="flex h-3 shrink-0 items-center gap-0.5 border-b border-border px-1">
-							<span class="size-1 rounded-full bg-muted/60" />
-							<span class="size-1 rounded-full bg-muted/60" />
-							<span class="size-1 rounded-full bg-muted/60" />
-						</div>
-						<div class="flex flex-1 flex-col justify-center gap-1 px-1.5">
-							<span class="block h-1 w-full origin-left animate-draw-line rounded-full bg-primary motion-reduce:animate-none rtl:origin-right" />
-							<span class="block h-1 w-4/5 origin-left animate-draw-line rounded-full bg-primary/70 [animation-delay:200ms] motion-reduce:animate-none rtl:origin-right" />
-							<span class="block h-1 w-3/5 origin-left animate-draw-line rounded-full bg-primary/40 [animation-delay:400ms] motion-reduce:animate-none rtl:origin-right" />
-						</div>
-					</div>
-					<span class="agent-shimmer text-xs font-medium text-subtitle">
-						{T()("preview.loading")}
-					</span>
-				</div>
-			</div>
 		</div>
 	);
 };

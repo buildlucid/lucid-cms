@@ -16,6 +16,7 @@ import NotificationBell from "@/components/NotificationBell/NotificationBell";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { useHoverReveal } from "@/hooks/useHoverReveal/useHoverReveal";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
+import { usePointerNear } from "@/hooks/usePointerNear/usePointerNear";
 import navigationStore from "@/store/navigationStore/navigationStore";
 import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
@@ -42,9 +43,15 @@ export const Navigation: Component = () => {
 	const session = useAgentSession();
 	const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
 	let panelRef: HTMLDivElement | undefined;
+	let edgeRef: HTMLDivElement | undefined;
 	//* while the page builder's preview or a comparison takes its width, the sidebar slides in from the edge
 	const tuck = useHoverReveal({
 		element: () => panelRef,
+		enabled: () => navigationStore.get.tucked,
+	});
+	//* its edge marker shows once the pointer heads for it
+	const nearEdge = usePointerNear({
+		element: () => edgeRef,
 		enabled: () => navigationStore.get.tucked,
 	});
 
@@ -203,6 +210,7 @@ export const Navigation: Component = () => {
 			</aside>
 			<Show when={navigationStore.get.tucked}>
 				<div
+					ref={edgeRef}
 					aria-hidden="true"
 					class="group fixed inset-y-0 inset-s-0 z-40 hidden w-6 md:block"
 					onPointerEnter={tuck.handlers.onPointerEnter}
@@ -210,14 +218,15 @@ export const Navigation: Component = () => {
 				>
 					<HoverRevealBar
 						orientation="vertical"
-						hidden={tuck.revealed()}
+						hidden={tuck.revealed() || !nearEdge()}
 						class="top-1/2 inset-s-1.5 -translate-y-1/2"
 					/>
 				</div>
+				{/* below the edge, so covering the page doesn't count as the pointer leaving it */}
 				<Show when={tuck.revealed()}>
 					<div
 						aria-hidden="true"
-						class="fixed inset-0 z-45 hidden md:block"
+						class="fixed inset-0 z-39 hidden md:block"
 						onClick={tuck.conceal}
 					/>
 				</Show>

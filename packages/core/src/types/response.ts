@@ -15,6 +15,7 @@ export type {
 	AgentConversationDetails,
 	AgentConversationKind,
 	AgentConversationSource,
+	AgentDocumentFocus,
 	AgentInteraction,
 	AgentInteractionAction,
 	AgentMemories,

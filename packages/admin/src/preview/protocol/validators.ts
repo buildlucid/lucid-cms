@@ -115,7 +115,7 @@ export const isPreviewEditing = (value: unknown): value is PreviewEditing =>
 	hasOnlyKeys(value, [
 		"collectionKey",
 		"documentId",
-		"structure",
+		"editable",
 		"repeaters",
 		"errors",
 	]) &&
@@ -124,7 +124,7 @@ export const isPreviewEditing = (value: unknown): value is PreviewEditing =>
 		previewProtocolLimits.collectionKeyLength,
 	) &&
 	isDocumentId(value.documentId) &&
-	typeof value.structure === "boolean" &&
+	typeof value.editable === "boolean" &&
 	Array.isArray(value.repeaters) &&
 	value.repeaters.length <= previewProtocolLimits.repeaters &&
 	value.repeaters.every(isPreviewRepeater) &&
@@ -176,6 +176,7 @@ export const isPreviewHover = (value: unknown): value is PreviewHover =>
 		"brick",
 		"item",
 		"repeater",
+		"selected",
 		"pointer",
 		"inset",
 		"scrolling",
@@ -183,6 +184,7 @@ export const isPreviewHover = (value: unknown): value is PreviewHover =>
 	(value.brick === null || isPreviewHoverBlock(value.brick)) &&
 	(value.item === null || isPreviewHoverBlock(value.item)) &&
 	(value.repeater === null || isPreviewHoverElement(value.repeater)) &&
+	(value.selected === null || isPreviewHoverElement(value.selected)) &&
 	(value.pointer === null ||
 		(isRecord(value.pointer) &&
 			hasOnlyKeys(value.pointer, ["x", "y"]) &&
@@ -252,3 +254,13 @@ export const arePreviewSiblings = (
 
 export const isPreviewPlace = (value: unknown): value is PreviewPlace =>
 	value === "before" || value === "after";
+
+/** Validates a field's target, rather than a brick's or repeater item's, for editing its value. */
+export const isPreviewFieldOnlyTarget = (
+	value: unknown,
+): value is PreviewFieldTarget =>
+	isPreviewFieldTarget(value) && getPreviewTargetKind(value) === "field";
+
+/** Accepts text typed or shown on the page, which may be empty, within the protocol's limit. */
+export const isPreviewText = (value: unknown): value is string =>
+	typeof value === "string" && value.length <= previewProtocolLimits.text;

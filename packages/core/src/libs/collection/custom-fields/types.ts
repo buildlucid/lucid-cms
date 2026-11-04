@@ -197,6 +197,8 @@ export type FieldCapabilities = {
 	canBeLabel: boolean;
 	/** Whether this field can be inserted as a rich-text variable. */
 	canBeRichTextVariable: boolean;
+	/** How the builder's preview edits this field's text where the page shows it: on one line, several, or not at all. */
+	inlineText: "line" | "lines" | false;
 };
 
 export type FieldStaticConfig<T extends string = string> = {

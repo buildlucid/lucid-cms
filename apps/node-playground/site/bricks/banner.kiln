@@ -2,7 +2,7 @@
 
 <section{{ attrs({ class: ["section", "banner", brick.fields.full_width ? "banner--wide"] }) }}{{ editable(brick) }}>
 	<h2 {{ editable(brick, "title") }}>{{ brick.fields.title }}</h2>
-	{% include "components/rich-text" with { node: brick.fields.intro } %}
+	{% include "components/rich-text" with { node: brick.fields.intro, editable: editable(brick, "intro") } %}
 	{% if brick.fields.call_to_actions %}
 		<ul class="banner__actions"{{ editable(brick, "call_to_actions") }}>
 			{% for action in brick.fields.call_to_actions %}

@@ -8,9 +8,10 @@ import {
 	TbOutlineGripVertical,
 	TbOutlinePencil,
 	TbOutlinePlus,
+	TbOutlineRobot,
 	TbOutlineTrash,
 } from "solid-icons/tb";
-import { type Component, createMemo } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import { getButtonClasses } from "@/components/Button/classes";
 import Menu from "@/components/Menu/Menu";
@@ -45,6 +46,8 @@ export const PreviewHandle: Component<{
 	onMenuOpenChange: (open: boolean) => void;
 	onAdd: (place: PreviewPlace) => void;
 	onOpen: () => void;
+	/** Asks the agent about it. Left out when there's no chat to ask in. */
+	onAsk?: () => void;
 	onMove: (place: PreviewPlace, anchor: PreviewFieldTarget) => void;
 	onRemove: () => void;
 	onDragStart: () => void;
@@ -124,7 +127,7 @@ export const PreviewHandle: Component<{
 	return (
 		<div
 			ref={props.ref}
-			class="pointer-events-auto absolute top-0 left-0 flex items-center gap-px rounded-md border border-border bg-popover p-px shadow-md transition-opacity duration-100 animate-dropdown"
+			class="pointer-events-auto absolute top-0 left-0 flex items-center gap-px rounded-md border border-border bg-background p-px shadow-md transition-opacity duration-100 animate-dropdown"
 			classList={{ "opacity-0": props.hidden }}
 			style={{
 				translate: `${Math.round(props.position.x)}px ${Math.round(props.position.y)}px`,
@@ -181,6 +184,16 @@ export const PreviewHandle: Component<{
 					>
 						{T()("preview.edit.open")}
 					</Menu.Item>
+					<Show when={props.onAsk}>
+						{(ask) => (
+							<Menu.Item
+								icon={<TbOutlineRobot size={14} />}
+								onSelect={() => ask()()}
+							>
+								{T()("preview.edit.ask")}
+							</Menu.Item>
+						)}
+					</Show>
 					<Menu.Separator />
 					<Menu.Item
 						icon={

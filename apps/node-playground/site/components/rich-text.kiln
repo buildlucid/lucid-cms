@@ -1,7 +1,7 @@
-{# Loops over a rich text field's nodes: embedded bricks, media and documents use templates, everything else gets richText()'s HTML. #}
-{% props node: RichText | null %}
+{# Loops over a rich text field's nodes: embedded bricks, media and documents use templates, everything else gets richText()'s HTML. Pass `editable` to mark the field for the builder's preview, which opens it in the builder. #}
+{% props node: RichText | null, editable = "" %}
 
-<div class="prose">
+<div class="prose" {{ editable }}>
 	{% for child in node?.content ?? [] %}
 		{% if child.type == "lucidEmbeddedBrick" %}
 			{% if child.attrs.brick %}

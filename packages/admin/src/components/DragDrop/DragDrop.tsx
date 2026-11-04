@@ -24,6 +24,8 @@ export interface DragDropCBT {
 
 interface DragDropProps {
 	sortOrder: (_ref: string, _targetRef: string) => void;
+	/** Runs as a drag starts, moves over another item and ends: the dragged item's ref and the one it's over, then undefined. */
+	onDragChange?: (drag: { ref: string; over: string } | undefined) => void;
 	animationMode?: "auto" | "view-transition" | "web-animation";
 	children: (_props: { dragDrop: DragDropCBT }) => JSXElement;
 }
@@ -183,6 +185,7 @@ const DragDrop: Component<DragDropProps> = (props) => {
 		setDragging(item);
 		setDraggingTarget(item);
 		setIsDragging(true);
+		props.onDragChange?.({ ref: item.ref, over: item.ref });
 	};
 
 	const onDragEnd = (e: DragEvent) => {
@@ -193,6 +196,7 @@ const DragDrop: Component<DragDropProps> = (props) => {
 		setDragging(undefined);
 		setDraggingTarget(undefined);
 		setIsDragging(false);
+		props.onDragChange?.(undefined);
 	};
 
 	const onDragEnter = (e: DragEvent, item: DragItemProps) => {
@@ -200,6 +204,8 @@ const DragDrop: Component<DragDropProps> = (props) => {
 		if (!validDragTarget(e.target as HTMLElement)) return;
 
 		setDraggingTarget(item);
+		const dragging = getDragging();
+		if (dragging) props.onDragChange?.({ ref: dragging.ref, over: item.ref });
 	};
 
 	const onDragOver = (e: DragEvent) => {

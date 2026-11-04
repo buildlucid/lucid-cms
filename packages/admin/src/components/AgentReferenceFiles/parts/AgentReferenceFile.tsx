@@ -5,6 +5,7 @@ import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReference
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
+	agentReferenceLabel,
 	agentReferenceTilt,
 } from "@/utils/agent-references";
 
@@ -18,6 +19,13 @@ const AgentReferenceFile: Component<{
 	// ----------------------------------------
 	// Memos
 	const tilt = createMemo(() => `${agentReferenceTilt(props.reference)}deg`);
+	const label = createMemo(() => agentReferenceLabel(props.reference));
+	//* a brick or field also names the document it's in
+	const title = createMemo(() =>
+		props.reference.type === "document" && props.reference.focus
+			? `${props.reference.label} › ${label()}`
+			: label(),
+	);
 	const readableLabel = createMemo(() =>
 		T()(
 			props.readable
@@ -32,7 +40,7 @@ const AgentReferenceFile: Component<{
 		<div
 			class="agent-reference-file group relative w-24 rounded-lg border border-border bg-card p-1 shadow-sm"
 			style={{ "--agent-reference-tilt": tilt() }}
-			title={props.reference.label}
+			title={title()}
 		>
 			<span
 				class="block h-14 overflow-hidden rounded-md transition-opacity"
@@ -42,7 +50,7 @@ const AgentReferenceFile: Component<{
 			</span>
 			<span class="flex items-center gap-1 px-0.5 pt-1">
 				<span class="min-w-0 flex-1 truncate text-[11px] text-title">
-					{props.reference.label}
+					{label()}
 				</span>
 				<Show when={props.readable !== undefined}>
 					<span
@@ -65,7 +73,7 @@ const AgentReferenceFile: Component<{
 				{(remove) => (
 					<AgentReferenceRemoveButton
 						label={T()("agent.references.remove", {
-							label: props.reference.label,
+							label: title(),
 						})}
 						class="start-1.5 top-1.5"
 						onRemove={() => remove()()}

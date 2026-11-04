@@ -13,6 +13,7 @@ export const rangeFieldConfig = {
 		sortable: false,
 		canBeLabel: false,
 		canBeRichTextVariable: false,
+		inlineText: false,
 	},
 } as const satisfies FieldStaticConfig<"range">;
 

@@ -31,6 +31,12 @@ export const referenceKey = (reference: AgentReferenceInput) => {
 	}
 };
 
+/** Identifies an attachment: its resource, and the brick or field of a document it points at, if any. */
+export const attachmentKey = (reference: AgentReferenceInput) =>
+	reference.type === "document" && reference.focus
+		? `${referenceKey(reference)}#${reference.focus.brick ?? ""}/${reference.focus.path.join("/")}`
+		: referenceKey(reference);
+
 /** Returns read permissions for a reference, including every collection in a request. */
 const referenceReadPermissions = (
 	reference: AgentReferenceInput,
@@ -54,10 +60,8 @@ const referenceReadPermissions = (
 };
 
 /**
- * Whether a principal can link or read a resource in a chat. Personal media is
- * only ever available to its owner, even with `media:read-all`, and system media
- * never is. Without a grant the principal is the system, which reads every other
- * resource.
+ * Checks chat reference access. Personal media remains owner-only; system media is excluded.
+ * Without a grant, system access applies to other resources.
  */
 export const canReadReference = (props: {
 	reference: AgentReferenceInput;

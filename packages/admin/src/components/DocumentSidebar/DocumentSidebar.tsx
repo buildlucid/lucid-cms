@@ -25,6 +25,8 @@ export const DocumentSidebar: Component<{
 	requestContext?: boolean;
 	/** Places it, eg. as a column beside the fields. */
 	class?: string;
+	/** `lg` matches the fields' padding, for when it shows in their place. Defaults to `md`. */
+	padding?: "md" | "lg";
 }> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -44,7 +46,13 @@ export const DocumentSidebar: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<aside class={classNames("flex flex-col gap-5 p-4 md:p-5", props.class)}>
+		<aside
+			class={classNames(
+				"flex flex-col gap-5 p-4",
+				props.padding === "lg" ? "md:p-6" : "md:p-5",
+				props.class,
+			)}
+		>
 			<Workflow
 				collection={props.collection}
 				collectionKey={props.collectionKey}

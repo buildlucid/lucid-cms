@@ -59,6 +59,7 @@ export const getFieldTypeCapabilities = (
 			sortable: false,
 			canBeLabel: false,
 			canBeRichTextVariable: false,
+			inlineText: false,
 		}
 	);
 };
@@ -76,4 +77,11 @@ export const isFieldTypeSortable = (type: string): boolean => {
 /** Whether this field type can be inserted as a rich-text variable. */
 export const isFieldTypeRichTextVariable = (type: string): boolean => {
 	return getFieldTypeCapabilities(type).canBeRichTextVariable;
+};
+
+/** How the builder's preview edits this field type's text on the page: on one line, several, or not at all. */
+export const getFieldTypeInlineText = (
+	type: string,
+): FieldTypeCapabilities["inlineText"] => {
+	return getFieldTypeCapabilities(type).inlineText;
 };

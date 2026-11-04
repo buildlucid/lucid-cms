@@ -10,6 +10,7 @@ export const textFieldConfig = {
 		sortable: true,
 		canBeLabel: true,
 		canBeRichTextVariable: true,
+		inlineText: "line",
 	},
 } as const satisfies FieldStaticConfig<"text">;
 

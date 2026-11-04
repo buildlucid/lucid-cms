@@ -24,6 +24,7 @@ const hoverOver = (
 	brick: block,
 	item: null,
 	repeater: null,
+	selected: null,
 	pointer,
 	inset: 0,
 	scrolling: false,
@@ -36,10 +37,11 @@ const setup = (
 	capacity: PreviewRepeaterCapacity | null = null,
 ) => {
 	const [hover, setHover] = createSignal(initial);
-	const [structure, setStructure] = createSignal(true);
+	const [editable, setEditable] = createSignal(true);
 	const props = {
 		capacity: vi.fn(() => capacity),
 		onOpen: vi.fn(),
+		onEditField: vi.fn(),
 		onChange: vi.fn(() => 7),
 		onUndo: vi.fn(),
 		onDrag: vi.fn(),
@@ -54,12 +56,13 @@ const setup = (
 					hover={hover()}
 					scale={0.5}
 					width={600}
-					structure={structure()}
+					editable={editable()}
 					details={{
 						bricks: [{ key: "hero", label: "Hero", addable: true }],
 						fields: [],
 					}}
 					errors={[]}
+					typing={false}
 					{...props}
 				/>
 			),
@@ -70,7 +73,7 @@ const setup = (
 		container.querySelector<HTMLElement>('[title^="Drag to move"]');
 	const options = () =>
 		container.querySelector<HTMLButtonElement>('[aria-label^="Options for"]');
-	return { ...props, setHover, setStructure, container, grip, options };
+	return { ...props, setHover, setEditable, container, grip, options };
 };
 
 const pointer = (type: string, target: Element, x = 0, y = 0) =>
@@ -101,6 +104,29 @@ describe("preview edit controls", () => {
 		expect(handle?.style.translate).toBe(`4px ${200 - 2 - 32 - 6}px`);
 	});
 
+	test("show the selected field's bar above its outline's right end, to edit it", () => {
+		const title = { ...page, path: ["title"] };
+		const { container, onEditField } = setup({
+			...hoverOver(brick("a", 400), null),
+			selected: {
+				key: 9,
+				target: title,
+				rect: { x: 100, y: 500, width: 300, height: 40 },
+			},
+		});
+		const edit = container.querySelector<HTMLButtonElement>(
+			'[aria-label="Edit title"]',
+		);
+		const bar = edit?.parentElement;
+
+		//* its right end at the outline's, 2px out at half zoom, and above it by its height and gap
+		expect(bar?.style.translate).toBe(
+			`max(4px, calc(${50 + 150 + 2}px - 100%)) ${250 - 2 - 32 - 6}px`,
+		);
+		edit?.click();
+		expect(onEditField).toHaveBeenCalledWith(title);
+	});
+
 	test("hand drags to the page in its own pixels, and drop them there", () => {
 		const { grip, onDrag, onDragEnd } = setup(
 			hoverOver(brick("a", 400), { x: 10, y: 410 }),
@@ -120,7 +146,7 @@ describe("preview edit controls", () => {
 	});
 
 	test("cancel a drag when changes stop being allowed, eg. the builder locks", () => {
-		const { grip, setStructure, onDragEnd } = setup(
+		const { grip, setEditable, onDragEnd } = setup(
 			hoverOver(brick("a", 400), { x: 10, y: 410 }),
 		);
 		const button = grip();
@@ -128,7 +154,7 @@ describe("preview edit controls", () => {
 
 		pointer("pointerdown", button, 20, 170);
 		pointer("pointermove", button, 20, 300);
-		setStructure(false);
+		setEditable(false);
 
 		expect(onDragEnd).toHaveBeenCalledWith(false);
 		expect(grip()).toBeNull();

@@ -3,9 +3,8 @@ import type {
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
-import resolveFieldAccess, {
-	type FieldAccess,
-} from "@/utils/resolve-field-access";
+import { findPreviewConfig } from "@/utils/find-preview-config";
+import type { FieldAccess } from "@/utils/resolve-field-access";
 
 type RepeaterConfig = CollectionFieldConfigByType<"repeater">;
 type Group = NonNullable<InternalDocumentField["groups"]>[number];
@@ -21,45 +20,6 @@ export type RepeaterScope = {
 	groups: Group[];
 	/** Whether the user can add, move and remove its groups. */
 	editable: boolean;
-};
-
-type Match =
-	| { kind: "container"; fields: CollectionFieldConfig[]; access: FieldAccess }
-	| { kind: "repeater"; config: RepeaterConfig; access: FieldAccess };
-
-/**
- * Finds `key` among configs: a nested section or collapsible, which content paths name, or a
- * repeater. Tabs and inline containers are passed through, their permissions applied on the way.
- */
-const find = (
-	configs: CollectionFieldConfig[],
-	key: string,
-	access: FieldAccess,
-): Match | null => {
-	for (const config of configs) {
-		const own = resolveFieldAccess(config.permissions, access);
-		if (
-			config.type === "tab" ||
-			config.type === "section" ||
-			config.type === "collapsible"
-		) {
-			if (config.type !== "tab" && config.output === "nested") {
-				if (config.key === key) {
-					return { kind: "container", fields: config.fields, access: own };
-				}
-				continue;
-			}
-			const nested = find(config.fields, key, own);
-			if (nested) return nested;
-			continue;
-		}
-		if (config.key === key) {
-			return config.type === "repeater"
-				? { kind: "repeater", config, access: own }
-				: null;
-		}
-	}
-	return null;
 };
 
 /**
@@ -81,7 +41,7 @@ export const resolveRepeater = (props: {
 	for (let offset = 0; offset < props.path.length;) {
 		const key = props.path[offset];
 		if (typeof key !== "string") return null;
-		const match = find(configs, key, access);
+		const match = findPreviewConfig(configs, key, access);
 		if (!match) return null;
 		if (match.kind === "container") {
 			configs = match.fields;
@@ -89,6 +49,8 @@ export const resolveRepeater = (props: {
 			offset += 1;
 			continue;
 		}
+		const { config } = match;
+		if (config.type !== "repeater") return null;
 
 		const groups = [
 			...(fields.find((field) => field.key === key)?.groups ?? []),
@@ -97,10 +59,9 @@ export const resolveRepeater = (props: {
 			repeaterKey: key,
 			parentRef,
 			parentRepeaterKey,
-			config: match.config,
+			config,
 			groups,
-			editable:
-				match.access === "editable" && match.config.ui?.disabled !== true,
+			editable: match.access === "editable" && config.ui?.disabled !== true,
 		};
 		const index = props.path[offset + 1];
 		if (index === undefined) return { scope };
@@ -111,7 +72,7 @@ export const resolveRepeater = (props: {
 		if (!group) return null;
 		parentRef = group.ref;
 		parentRepeaterKey = key;
-		configs = match.config.fields;
+		configs = config.fields;
 		fields = group.fields;
 		access = match.access;
 		offset += 2;

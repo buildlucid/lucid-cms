@@ -10,6 +10,7 @@ export const numberFieldConfig = {
 		sortable: true,
 		canBeLabel: true,
 		canBeRichTextVariable: true,
+		inlineText: false,
 	},
 } as const satisfies FieldStaticConfig<"number">;
 

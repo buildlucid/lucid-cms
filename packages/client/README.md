@@ -244,4 +244,10 @@ preview.onUpdate(async ({ signal }) => {
 
 Filters and sorting still match saved content, so a list keeps the previewed document where it was, showing its unsaved fields.
 
-For click-to-field targeting, add `previewFieldMarkup(target)` from `@lucidcms/client/markup` to the element rendering a field while previewing, such as `<h1${previewFieldMarkup(target)}>`. Consumers should not construct preview attributes or messages directly.
+For click-to-field targeting, spread `previewAttributes(source, field?)` from `@lucidcms/client/markup` onto the element rendering a field, such as `<h1 {...previewAttributes(page, "title")}>`. `source` is the document, brick or repeater item the content API returned while previewing, and leaving out `field` marks the brick or item itself. String templates can use `previewFieldMarkup(target)` instead. The attributes are empty outside previews. Consumers should not construct preview attributes or messages directly.
+
+### Editing on the Page
+
+With "Edit on page" on, clicking a marked field selects it and opens it in the builder, and clicking it again (or pressing Enter) edits it. Text and textarea fields are typed into where the page shows them; other fields open in the builder's fields column, with their picker open when they have one, such as media or a link.
+
+A field is typed into on the page only when its element holds nothing but the field's text, so mark the element that renders the text itself, eg. `<h1 {...previewAttributes(page, "title")}>{page.fields.title}</h1>`, rather than a wrapper around it. Fields shown alongside other text, or changed for display, open in the builder instead. For an empty field, render a placeholder in the marked element while previewing; it's cleared once typing starts.

@@ -14,6 +14,7 @@ export const userFieldConfig = {
 		sortable: false,
 		canBeLabel: false,
 		canBeRichTextVariable: false,
+		inlineText: false,
 	},
 } as const satisfies FieldStaticConfig<"user">;
 

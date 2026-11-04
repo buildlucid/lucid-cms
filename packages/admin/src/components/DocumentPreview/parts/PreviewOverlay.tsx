@@ -14,6 +14,7 @@ import type {
 	PreviewStructureChange,
 } from "@/hooks/usePreviewStructure/usePreviewStructure";
 import {
+	getPreviewTargetKind,
 	hasPreviewError,
 	type PreviewFieldPath,
 	type PreviewFieldTarget,
@@ -30,12 +31,14 @@ import spawnToast from "@/utils/spawn-toast";
 import {
 	distanceTo,
 	HANDLE_GAP,
+	HANDLE_SIZE,
 	OUTLINE_RADIUS,
 	outlineRect,
 	placeHandle,
 	placeItemHandle,
 } from "../utils/preview-handles";
 import { PreviewBrickPicker } from "./PreviewBrickPicker";
+import { PreviewFieldBar } from "./PreviewFieldBar";
 import { PreviewHandle } from "./PreviewHandle";
 
 //* how long controls stay after the pointer leaves what they belong to, to reach them across a gap
@@ -57,8 +60,8 @@ const heldKeys = ["brick", "item", "repeater"] as const satisfies ReadonlyArray<
 
 /**
  * Draws brick and repeater controls using positions reported by the page. Includes drag handles,
- * insertion actions, menus and validation outlines. Sends changes through `onChange` for builder
- * validation.
+ * insertion actions, menus, validation outlines and the selected field's bar. Sends changes
+ * through `onChange` for builder validation.
  */
 export const PreviewOverlay: Component<{
 	hover: PreviewHover | null;
@@ -66,14 +69,20 @@ export const PreviewOverlay: Component<{
 	scale: number;
 	/** The visible preview's width, in the overlay's pixels. */
 	width: number;
-	/** Whether bricks and repeater items can be changed from the page. */
-	structure: boolean;
+	/** Whether the document can be changed from the page, which its controls need. */
+	editable: boolean;
 	details: PreviewEditingDetails | null;
 	/** The fields with validation errors. */
 	errors: PreviewFieldPath[];
 	/** How many items a repeater, or an item's repeater, has and can have. */
 	capacity: (target: PreviewFieldTarget) => PreviewRepeaterCapacity | null;
 	onOpen: (target: PreviewFieldTarget) => void;
+	/** Edits the selected field, as clicking it again does. */
+	onEditField: (target: PreviewFieldTarget) => void;
+	/** Asks the agent about a brick, item or field. Left out when there's no chat to ask in. */
+	onAsk?: (target: PreviewFieldTarget) => void;
+	/** Whether the selected field is being typed into on the page, which its bar makes way for. */
+	typing: boolean;
 	/** Applies a change, returning its undo step, or null when it made none. */
 	onChange: (
 		target: PreviewFieldTarget,
@@ -156,6 +165,25 @@ export const PreviewOverlay: Component<{
 		return capacity && capacity.max !== null
 			? { count: capacity.count, max: capacity.max }
 			: null;
+	});
+	//* the selected field's bar, above its outline's right end, unless it's a brick or item, whose handles do its job
+	const fieldBar = createMemo(() => {
+		const selected = props.hover?.selected;
+		if (!selected || getPreviewTargetKind(selected.target) !== "field") {
+			return null;
+		}
+		const outline = outlineRect(selected.rect, props.scale, props.width);
+		const { inset } = view();
+		return {
+			target: selected.target,
+			position: {
+				x: Math.min(outline.x + outline.width, props.width - 4),
+				y: Math.min(
+					Math.max(outline.y - HANDLE_SIZE.height - HANDLE_GAP, inset + 4),
+					outline.y + outline.height - HANDLE_SIZE.height,
+				),
+			},
+		};
 	});
 	const repeaterTitle = createMemo(() => {
 		const repeater = held().repeater;
@@ -309,9 +337,9 @@ export const PreviewOverlay: Component<{
 	);
 	createEffect(
 		on(
-			() => props.structure,
-			(structure) => {
-				if (!structure) stopInteracting();
+			() => props.editable,
+			(editable) => {
+				if (!editable) stopInteracting();
 			},
 		),
 	);
@@ -358,6 +386,7 @@ export const PreviewOverlay: Component<{
 			onMenuOpenChange={(open) => setMenu(open ? kind : null)}
 			onAdd={(place) => add(kind, block(), place)}
 			onOpen={() => props.onOpen(block().target)}
+			onAsk={props.onAsk ? () => props.onAsk?.(block().target) : undefined}
 			onMove={(place, anchor) =>
 				props.onChange(block().target, { action: "move", place, anchor })
 			}
@@ -387,7 +416,7 @@ export const PreviewOverlay: Component<{
 				leaveAll();
 			}}
 		>
-			<Show when={props.structure && held().brick}>
+			<Show when={props.editable && held().brick}>
 				{(brick) => (
 					<>
 						<Show when={brickOutline()}>
@@ -413,15 +442,15 @@ export const PreviewOverlay: Component<{
 					</>
 				)}
 			</Show>
-			<Show when={props.structure && held().item}>
+			<Show when={props.editable && held().item}>
 				{(item) => handle("item", item)}
 			</Show>
-			<Show when={props.structure && !hidden() && !busy() && held().repeater}>
+			<Show when={props.editable && !hidden() && !busy() && held().repeater}>
 				{(repeater) => (
 					<button
 						ref={addItem}
 						type="button"
-						class="pointer-events-auto absolute top-0 left-0 flex h-7 items-center gap-1.5 rounded-md border border-border bg-popover px-2.5 text-xs font-medium text-title shadow-md transition-colors duration-200 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-popover animate-dropdown"
+						class="pointer-events-auto absolute top-0 left-0 flex h-7 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-title shadow-md transition-colors duration-200 hover:bg-background-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-background animate-dropdown"
 						style={{
 							translate: `calc(${Math.round((repeater().rect.x + repeater().rect.width / 2) * props.scale)}px - 50%) calc(${Math.round((repeater().rect.y + repeater().rect.height) * props.scale)}px - 50%)`,
 						}}
@@ -446,6 +475,21 @@ export const PreviewOverlay: Component<{
 					</button>
 				)}
 			</Show>
+			<Show
+				when={!props.typing && (props.editable || props.onAsk) && fieldBar()}
+			>
+				{(bar) => (
+					<PreviewFieldBar
+						name={nameOf(bar().target)}
+						position={bar().position}
+						hidden={hidden() || busy()}
+						onEdit={
+							props.editable ? () => props.onEditField(bar().target) : undefined
+						}
+						onAsk={props.onAsk ? () => props.onAsk?.(bar().target) : undefined}
+					/>
+				)}
+			</Show>
 			<Show when={drag()}>
 				{(current) => (
 					<>
@@ -453,7 +497,7 @@ export const PreviewOverlay: Component<{
 						<Show when={current().point}>
 							{(point) => (
 								<div
-									class="absolute top-0 left-0 flex h-8 max-w-60 -rotate-1 items-center gap-2 rounded-md border border-border bg-popover px-3 text-sm text-title shadow-md"
+									class="absolute top-0 left-0 flex h-8 max-w-60 -rotate-1 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm text-title shadow-md"
 									style={{
 										translate: `${Math.round(point().x + 14)}px ${Math.round(point().y + 10)}px`,
 									}}

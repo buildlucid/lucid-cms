@@ -10,9 +10,12 @@ import {
 	Show,
 } from "solid-js";
 import { Portal } from "solid-js/web";
+import { LayerContext, useLayer } from "@/hooks/useLayer/useLayer";
 import { getPillPosition } from "../utils/pill-position";
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
+//* above the page's drawers and modals, or above the layer its editor is in, eg. the agent panel
+const PILL_LAYER = 60;
 
 /**
  * Floats formatting controls beside the editor's text selection on desktop.
@@ -30,6 +33,8 @@ const SelectionPill: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
+	const parentLayer = useLayer();
+	const layer = () => Math.max(PILL_LAYER, (parentLayer?.() ?? 0) + 1);
 	const [isDesktop, setIsDesktop] = createSignal(false);
 	const [visible, setVisible] = createSignal(false);
 	const [position, setPosition] = createSignal({ top: -9999, left: -9999 });
@@ -156,7 +161,7 @@ const SelectionPill: Component<{
 					data-kb-top-layer
 					ref={pillRef}
 					class={classNames(
-						"fixed z-60 flex items-center gap-1 rounded-xl border border-border bg-card px-1.5 py-1 shadow-md backdrop-blur-sm transition-opacity duration-150",
+						"fixed flex items-center gap-1 rounded-xl border border-border bg-card px-1.5 py-1 shadow-md backdrop-blur-sm transition-opacity duration-150",
 						{
 							"opacity-100 pointer-events-auto": visible(),
 							"opacity-0 pointer-events-none": !visible(),
@@ -165,9 +170,13 @@ const SelectionPill: Component<{
 					style={{
 						top: `${position().top}px`,
 						left: `${position().left}px`,
+						"z-index": layer(),
 					}}
 				>
-					{props.children}
+					{/* its menus, such as the heading picker, open above it */}
+					<LayerContext.Provider value={layer}>
+						{props.children}
+					</LayerContext.Provider>
 				</div>
 			</Portal>
 		</Show>

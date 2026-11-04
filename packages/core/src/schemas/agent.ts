@@ -38,7 +38,7 @@ import type {
 	AgentToolSummary,
 } from "../types/response.js";
 import {
-	agentAttachableReferenceInputSchema,
+	agentMessageReferenceInputSchema,
 	agentReferenceInputSchema,
 	agentReferenceSchema,
 	agentReferenceSnapshotSchema,
@@ -716,7 +716,7 @@ export const controllerSchemas = {
 			.object({
 				text: z.string().trim().max(20_000),
 				references: z
-					.array(agentAttachableReferenceInputSchema)
+					.array(agentMessageReferenceInputSchema)
 					.max(50)
 					.default([]),
 				screen: agentScreenSchema.optional().meta({

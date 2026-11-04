@@ -4,6 +4,7 @@ import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type { PreviewFieldTarget, PreviewPlace } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
+import { findPreviewBrick } from "@/utils/find-preview-brick";
 import resolveFieldAccess from "@/utils/resolve-field-access";
 import spawnToast from "@/utils/spawn-toast";
 import { resolveRepeater } from "./utils/resolve-repeater";
@@ -151,32 +152,19 @@ export const usePreviewStructure = (props: {
 
 	/** The repeater a target is, or is an item of, with its brick's place in the store. */
 	const findRepeater = (collection: Collection, target: PreviewFieldTarget) => {
-		const targetBrick = target.brick;
-		const brickIndex = brickStore.get.bricks.findIndex((brick) =>
-			targetBrick
-				? brick.type === targetBrick.type && brick.ref === targetBrick.ref
-				: brick.type === "collection-fields",
-		);
-		const brick = brickStore.get.bricks[brickIndex];
-		const brickConfig =
-			brick?.type === "fixed"
-				? collection.fixedBricks.find((item) => item.key === brick.key)
-				: collection.builderBricks.find((item) => item.key === brick?.key);
-		const resolved = brick
-			? resolveRepeater({
-					configs:
-						brick.type === "collection-fields"
-							? collection.fields
-							: (brickConfig?.fields ?? []),
-					fields: brick.fields,
-					path: target.path,
-					access:
-						brick.type === "collection-fields"
-							? "editable"
-							: resolveFieldAccess(brickConfig?.permissions),
-				})
-			: null;
-		return resolved ? { ...resolved, brickIndex } : null;
+		const found = findPreviewBrick({
+			target,
+			collection,
+			bricks: brickStore.get.bricks,
+		});
+		if (!found) return null;
+		const resolved = resolveRepeater({
+			configs: found.configs,
+			fields: found.brick.fields,
+			path: target.path,
+			access: found.access,
+		});
+		return resolved ? { ...resolved, brickIndex: found.brickIndex } : null;
 	};
 
 	const changeRepeater = (

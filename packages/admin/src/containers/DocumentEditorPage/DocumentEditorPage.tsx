@@ -30,6 +30,7 @@ import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHea
 import type { ViewSelectorOption } from "@/components/PageBuilderHeader/parts/ViewSelector";
 import Skeleton from "@/components/Skeleton/Skeleton";
 import WorkflowStageSelect from "@/components/WorkflowStageSelect/WorkflowStageSelect";
+import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { useBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import { useBuilderSideBySide } from "@/hooks/useBuilderSideBySide/useBuilderSideBySide";
 import { useBuilderSplit } from "@/hooks/useBuilderSplit/useBuilderSplit";
@@ -47,6 +48,8 @@ import { useDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIStat
 import { useNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
+import { usePreviewAgent } from "@/hooks/usePreviewAgent/usePreviewAgent";
+import { usePreviewFieldEdit } from "@/hooks/usePreviewFieldEdit/usePreviewFieldEdit";
 import { usePreviewFocus } from "@/hooks/usePreviewFocus/usePreviewFocus";
 import { usePreviewStructure } from "@/hooks/usePreviewStructure/usePreviewStructure";
 import { useStoredVersionRedirect } from "@/hooks/useStoredVersionRedirect/useStoredVersionRedirect";
@@ -105,6 +108,7 @@ const DocumentEditorPage: Component<{
 	//* set from the editors below, which need the UI state to know whether this tab can hold the document
 	const [heldElsewhere, setHeldElsewhere] = createSignal(false);
 	const [detailsOpen, setDetailsOpen] = createSignal(false);
+	const agentSession = useAgentSession();
 	const sideBySide = useBuilderSideBySide();
 	const split = useBuilderSplit();
 
@@ -221,6 +225,10 @@ const DocumentEditorPage: Component<{
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
 		locales: docState.contentLocales,
+		//* the details cover the preview, so stepping back or forward closes them to show the page change
+		onStep: () => {
+			if (previewing()) setDetailsOpen(false);
+		},
 	});
 
 	const autoSave = useDocumentAutoSave({
@@ -291,6 +299,19 @@ const DocumentEditorPage: Component<{
 	const previewEditingDetails = createMemo(() => {
 		const collection = docState.collection();
 		return collection ? getPreviewEditingDetails(collection) : null;
+	});
+	const previewFieldEdit = usePreviewFieldEdit({
+		collection: docState.collection,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		locales: docState.contentLocales,
+	});
+	const previewAgent = usePreviewAgent({
+		collection: docState.collection,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		label: documentLabel,
+		details: previewEditingDetails,
 	});
 	const previewErrors = createMemo(
 		() => {
@@ -457,6 +478,16 @@ const DocumentEditorPage: Component<{
 		if (loading()) return;
 		navigationStore.set("tucked", previewing() || comparison.open());
 	});
+	//* opening the agent chat makes room for it by closing the details beside the fields, which can be opened again
+	createEffect(
+		on(
+			agentSession.panel.visible,
+			(visible) => {
+				if (visible && !previewing()) setDetailsOpen(false);
+			},
+			{ defer: true },
+		),
+	);
 
 	onCleanup(() => {
 		navigationStore.set("tucked", false);
@@ -592,16 +623,17 @@ const DocumentEditorPage: Component<{
 		) {
 			return "preview";
 		}
-		return detailsAvailable() ? "details" : "fields";
+		return "fields";
 	});
-	//* the details sit beside the fields where they fit, otherwise they swap in for them
-	const showSidebar = createMemo(
+	//* the details, hidden until toggled, sit beside the fields where they fit, otherwise they swap in for them
+	const detailsBeside = createMemo(
 		() =>
 			detailsAvailable() && sideBySide() && !previewing() && !comparison.open(),
 	);
 	const detailsSwappable = createMemo(
 		() => detailsAvailable() && (previewing() || !sideBySide()),
 	);
+	const showSidebar = createMemo(() => detailsBeside() && detailsOpen());
 	const showDetails = createMemo(() => detailsSwappable() && detailsOpen());
 	//* notices take their own room at the end of the fields, so they never cover the last of them
 	const showNotices = createMemo(
@@ -630,9 +662,12 @@ const DocumentEditorPage: Component<{
 		}
 		uiState.setPreviewOpen(!uiState.getPreviewOpen());
 	};
-	const focusPreviewField = (target: PreviewFieldTarget) => {
+	const focusPreviewField = (
+		target: PreviewFieldTarget,
+		options?: { activate?: boolean },
+	) => {
 		setDetailsOpen(false);
-		void previewFocus.requestTarget(target);
+		void previewFocus.requestTarget(target, options);
 	};
 	//* side-by-side stays open when moving between editable versions, and
 	//* read-only versions open in its right column instead. The view picked is
@@ -738,7 +773,7 @@ const DocumentEditorPage: Component<{
 									: undefined
 							}
 							details={
-								detailsSwappable()
+								detailsSwappable() || detailsBeside()
 									? {
 											open: detailsOpen,
 											toggle: () => setDetailsOpen(!detailsOpen()),
@@ -878,6 +913,7 @@ const DocumentEditorPage: Component<{
 										</div>
 										<Show when={showDetails()}>
 											<DocumentSidebar
+												padding="lg"
 												collection={docState.collection}
 												collectionKey={docState.collectionKey}
 												document={docState.document}
@@ -969,7 +1005,7 @@ const DocumentEditorPage: Component<{
 													}
 													canSyncDraft={canSyncPreviewDraft}
 													route={() => docState.document()?.route}
-													canEditStructure={() =>
+													canEdit={() =>
 														canSyncPreviewDraft() && !brickStore.get.locked
 													}
 													editingDetails={previewEditingDetails}
@@ -979,6 +1015,8 @@ const DocumentEditorPage: Component<{
 													onChange={previewStructure.handle}
 													onUndo={previewStructure.undo}
 													repeaterCapacity={previewStructure.capacity}
+													fieldEdit={previewFieldEdit}
+													agent={previewAgent}
 													registerScrollCapture={registerPreviewScrollCapture}
 													consumeScrollRestore={consumePreviewScrollRestore}
 												/>

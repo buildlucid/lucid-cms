@@ -26,3 +26,37 @@ test("points out a repeater group by its title, not its repeater's label", async
 		"title",
 	);
 });
+
+test("activating a field presses its own picker, or else focuses its own input", async () => {
+	document.body.innerHTML = `
+		<div id="media" data-preview-focus-field>
+			<button type="button" data-field-action id="pick">Select media</button>
+		</div>
+		<div id="title" data-preview-focus-field>
+			<div data-preview-focus-field>
+				<button type="button" data-field-action>Nested picker</button>
+			</div>
+			<input id="title-input" />
+		</div>
+	`;
+	let picked = 0;
+	document.getElementById("pick")?.addEventListener("click", () => {
+		picked += 1;
+	});
+
+	await revealPreviewField({
+		fieldId: "media",
+		structureIds: [],
+		signal: new AbortController().signal,
+		activate: true,
+	});
+	await revealPreviewField({
+		fieldId: "title",
+		structureIds: [],
+		signal: new AbortController().signal,
+		activate: true,
+	});
+
+	expect(picked).toBe(1);
+	expect(document.activeElement?.id).toBe("title-input");
+});

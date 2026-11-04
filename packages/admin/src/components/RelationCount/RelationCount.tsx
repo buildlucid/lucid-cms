@@ -7,6 +7,8 @@ const RelationCount: Component<{
 	count: number;
 	min?: number;
 	max?: number;
+	/** Shows the count against its limit, ∞ without a maximum, even when there's no minimum or maximum. */
+	showLimit?: boolean;
 	class?: string;
 }> = (props) => {
 	// ----------------------------------------
@@ -31,7 +33,7 @@ const RelationCount: Component<{
 	// ----------------------------------------
 	// Render
 
-	if (!hasMin() && !hasMax()) {
+	if (!props.showLimit && !hasMin() && !hasMax()) {
 		return <span class={props.class}>{props.count}</span>;
 	}
 

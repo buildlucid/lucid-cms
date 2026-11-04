@@ -135,3 +135,26 @@ export const getPreviewTargetName = (
 	}
 	return nameAt(target.path) ?? String(target.path.at(-1) ?? "");
 };
+
+/** Target label path, such as ["Hero", "Links 2", "Label"]. */
+export const getPreviewTargetTrail = (
+	details: PreviewEditingDetails,
+	target: PreviewFieldTarget,
+): string[] => [
+	...(target.brick
+		? [getPreviewTargetName(details, { ...target, path: [] })]
+		: []),
+	...target.path.flatMap((segment, index) =>
+		typeof segment === "number"
+			? [
+					getPreviewTargetName(details, {
+						...target,
+						path: target.path.slice(0, index + 1),
+					}),
+				]
+			: [],
+	),
+	...(getPreviewTargetKind(target) === "field"
+		? [getPreviewTargetName(details, target)]
+		: []),
+];

@@ -137,7 +137,7 @@ describe("direction-specific message validation", () => {
 		const editing = {
 			collectionKey: "page",
 			documentId: 1,
-			structure: true,
+			editable: true,
 			repeaters: [{ brick: "hero", path: ["links"] }, { path: ["faq"] }],
 			errors: [
 				{
@@ -150,7 +150,7 @@ describe("direction-specific message validation", () => {
 
 		expect(editMode(editing)).toBe(true);
 		expect(editMode(null)).toBe(true);
-		expect(editMode({ ...editing, structure: undefined })).toBe(false);
+		expect(editMode({ ...editing, editable: undefined })).toBe(false);
 		expect(editMode({ ...editing, documentId: 0 })).toBe(false);
 		expect(editMode({ ...editing, repeaters: [{ path: [] }] })).toBe(false);
 		expect(editMode({ ...editing, errors: [{ path: [-1] }] })).toBe(false);
@@ -211,6 +211,7 @@ describe("direction-specific message validation", () => {
 			},
 			item: null,
 			repeater: { key: 2, target: { ...brickTarget, path: ["items"] }, rect },
+			selected: { key: 3, target, rect },
 			pointer: { x: 12, y: 40 },
 			inset: 0,
 			scrolling: false,
@@ -232,6 +233,8 @@ describe("direction-specific message validation", () => {
 				repeater: { ...value.repeater, rect: { ...rect, width: -1 } },
 			}),
 		).toBe(false);
+		expect(hover({ ...value, selected: null })).toBe(true);
+		expect(hover({ ...value, selected: undefined })).toBe(false);
 		expect(hover({ ...value, pointer: { x: 1 } })).toBe(false);
 		expect(hover({ ...value, brick: { ...value.brick, key: -1 } })).toBe(false);
 	});
@@ -248,6 +251,31 @@ describe("direction-specific message validation", () => {
 			});
 
 		expect(drag(brickTarget, 10)).toBe(true);
+		expect(
+			isPreviewParentMessage(
+				createPreviewMessage({
+					type: previewProtocol.messages.zoom,
+					zooming: true,
+				}),
+			),
+		).toBe(true);
+		const dragged = (value: unknown, landing: unknown) =>
+			isPreviewParentMessage({
+				scope: previewProtocol.scope,
+				version: previewProtocol.version,
+				type: previewProtocol.messages.dragged,
+				target: value,
+				landing,
+			});
+		const other = { ...brickTarget, brick: { ...brickTarget.brick, ref: "b" } };
+		expect(dragged(brickTarget, { anchor: other, place: "after" })).toBe(true);
+		expect(dragged(brickTarget, null)).toBe(true);
+		expect(dragged(null, null)).toBe(true);
+		expect(dragged(null, { anchor: other, place: "after" })).toBe(false);
+		expect(dragged(target, null)).toBe(false);
+		expect(dragged(brickTarget, { anchor: target, place: "after" })).toBe(
+			false,
+		);
 		expect(drag(brickTarget, Infinity)).toBe(false);
 		expect(drag(target, 10)).toBe(false);
 		expect(
@@ -258,5 +286,58 @@ describe("direction-specific message validation", () => {
 				}),
 			),
 		).toBe(true);
+	});
+
+	test("accepts editing a field's text on the page, but not a brick's or item's", () => {
+		const child = (message: Record<string, unknown>) =>
+			isPreviewChildMessage({
+				scope: previewProtocol.scope,
+				version: previewProtocol.version,
+				...message,
+			});
+		const item = { ...brickTarget, path: ["items", 0] };
+
+		expect(child({ type: "edit", target, text: "Welcome" })).toBe(true);
+		expect(child({ type: "edit", target, text: "" })).toBe(true);
+		expect(child({ type: "edit", target, text: null })).toBe(true);
+		expect(child({ type: "edit", target: item, text: null })).toBe(false);
+		expect(child({ type: "edit", target: brickTarget, text: null })).toBe(
+			false,
+		);
+		expect(child({ type: "edit", target, text: "a".repeat(65537) })).toBe(
+			false,
+		);
+		expect(child({ type: "inline-input", target, value: "" })).toBe(true);
+		expect(child({ type: "inline-input", target, value: 1 })).toBe(false);
+		expect(child({ type: "inline-end", target, cancelled: true })).toBe(true);
+		expect(child({ type: "inline-end", target })).toBe(false);
+		expect(
+			isPreviewParentMessage(
+				createPreviewMessage({
+					type: previewProtocol.messages.inlineStart,
+					target,
+					multiline: false,
+					clear: true,
+				}),
+			),
+		).toBe(true);
+		expect(
+			isPreviewParentMessage(
+				createPreviewMessage({
+					type: previewProtocol.messages.editSelected,
+					target,
+				}),
+			),
+		).toBe(true);
+		expect(
+			isPreviewParentMessage({
+				scope: previewProtocol.scope,
+				version: previewProtocol.version,
+				type: previewProtocol.messages.inlineStart,
+				target: item,
+				multiline: false,
+				clear: false,
+			}),
+		).toBe(false);
 	});
 });

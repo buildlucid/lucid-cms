@@ -33,13 +33,18 @@ export const useHoverReveal = (options: {
 		clearTimeout(timer);
 		setRevealed(false);
 	};
-	const schedule = (next: boolean, delay: number) => {
+	const revealSoon = () => {
 		clearTimeout(timer);
-		timer = setTimeout(() => setRevealed(next), delay);
+		timer = setTimeout(() => setRevealed(true), REVEAL_DELAY);
 	};
 	const concealSoon = () => {
 		if (options.element()?.querySelector(HOLD_OPEN_SELECTOR)) return;
-		schedule(false, CONCEAL_DELAY);
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			//* it can slide in under a resting pointer without an event, which the hover state still sees
+			if (options.element()?.matches(":hover")) return;
+			setRevealed(false);
+		}, CONCEAL_DELAY);
 	};
 
 	// ----------------------------------------
@@ -57,7 +62,7 @@ export const useHoverReveal = (options: {
 			onPointerEnter: () => {
 				if (!enabled()) return;
 				if (revealed()) reveal();
-				else schedule(true, REVEAL_DELAY);
+				else revealSoon();
 			},
 			//* a tap ends by leaving, so touch keeps it open until focus moves elsewhere
 			onPointerLeave: (event: PointerEvent) => {

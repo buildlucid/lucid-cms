@@ -1,5 +1,6 @@
 import z from "zod";
 import type {
+	AgentDocumentFocus,
 	AgentReferenceInput,
 	AgentReferenceSnapshot,
 	AgentResource,
@@ -25,21 +26,44 @@ export const agentResourceSchema = z.discriminatedUnion("type", [
 		.strict(),
 ]) satisfies z.ZodType<AgentResource>;
 
-/** A resource people attach to messages and the agent links itself. */
+/** A brick or field of a document a person pointed the agent at, eg. picked on the builder's preview. */
+const agentDocumentFocusSchema = z
+	.object({
+		brick: z.string().min(1).max(128).optional(),
+		path: z.array(z.string().min(1).max(128)).max(32),
+		label: z.string().min(1).max(256),
+	})
+	.strict()
+	.refine((focus) => focus.brick !== undefined || focus.path.length > 0, {
+		message: "Give a brick or field",
+	}) satisfies z.ZodType<AgentDocumentFocus>;
+
+const documentReferenceInputSchema = agentResourceSchema.options[1].extend({
+	versionId: z.number().int().positive().optional(),
+});
+
+/** A resource the agent links itself. Kept without a document's focus, so the linking tool's input stays small. */
 export const agentAttachableReferenceInputSchema = z.discriminatedUnion(
 	"type",
 	[
 		agentResourceSchema.options[0],
-		agentResourceSchema.options[1].extend({
-			versionId: z.number().int().positive().optional(),
-		}),
+		documentReferenceInputSchema,
 		agentResourceSchema.options[2],
 	],
 ) satisfies z.ZodType<Exclude<AgentReferenceInput, { type: "deploy" }>>;
 
+/** A resource people attach to messages, where a document can point at one of its bricks or fields. */
+export const agentMessageReferenceInputSchema = z.discriminatedUnion("type", [
+	agentResourceSchema.options[0],
+	documentReferenceInputSchema.extend({
+		focus: agentDocumentFocusSchema.optional(),
+	}),
+	agentResourceSchema.options[2],
+]) satisfies z.ZodType<Exclude<AgentReferenceInput, { type: "deploy" }>>;
+
 /** A Lucid resource linked to a conversation. Deploys are only linked by the tool that runs them. */
 export const agentReferenceInputSchema = z.discriminatedUnion("type", [
-	...agentAttachableReferenceInputSchema.options,
+	...agentMessageReferenceInputSchema.options,
 	z
 		.object({ type: z.literal("deploy"), deployKey: z.string().min(1) })
 		.strict(),
@@ -71,7 +95,8 @@ const referenceDetails = {
 
 export const agentReferenceSchema = z.discriminatedUnion("type", [
 	agentReferenceInputSchema.options[0].extend(referenceDetails),
-	agentReferenceInputSchema.options[1].extend({
+	//* linked documents don't keep the focus an attachment had
+	documentReferenceInputSchema.extend({
 		...referenceDetails,
 		version: z.string().optional(),
 	}),

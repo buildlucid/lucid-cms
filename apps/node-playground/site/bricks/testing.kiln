@@ -2,5 +2,5 @@
 
 <section class="section"{{ editable(brick) }}>
 	{% if brick.fields["text-key"] %}<h2 {{ editable(brick, "text-key") }}>{{ brick.fields["text-key"] }}</h2>{% endif %}
-	{% include "components/rich-text" with { node: brick.fields["rich-text-key"] } %}
+	{% include "components/rich-text" with { node: brick.fields["rich-text-key"], editable: editable(brick, "rich-text-key") } %}
 </section>

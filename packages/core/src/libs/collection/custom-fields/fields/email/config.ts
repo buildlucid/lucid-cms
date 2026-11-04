@@ -14,6 +14,7 @@ export const emailFieldConfig = {
 		sortable: false,
 		canBeLabel: false,
 		canBeRichTextVariable: false,
+		inlineText: false,
 	},
 } as const satisfies FieldStaticConfig<"email">;
 

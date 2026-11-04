@@ -21,6 +21,13 @@ export const previewProtocol = {
 		drag: "drag",
 		dragEnd: "drag-end",
 		navigationLocked: "navigation-locked",
+		edit: "edit",
+		editSelected: "edit-selected",
+		zoom: "zoom",
+		dragged: "dragged",
+		inlineStart: "inline-start",
+		inlineInput: "inline-input",
+		inlineEnd: "inline-end",
 	},
 } as const;
 
@@ -53,4 +60,6 @@ export const previewProtocolLimits = {
 	pathKeyLength: 128,
 	repeaters: 4096,
 	errors: 4096,
+	//* text typed into a field on the page, or shown by the element being edited
+	text: 65536,
 } as const;

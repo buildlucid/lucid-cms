@@ -335,6 +335,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										type="button"
 										variant="outline"
 										size="sm"
+										data-field-action=""
 										onClick={openDocuSelectModal}
 										disabled={props.disabled || !canAddMore()}
 										class="capitalize"
@@ -348,11 +349,9 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 											count={selectedDocumentItems().length}
 											min={props.minItems}
 											max={props.maxItems}
+											showLimit={true}
+											class="tabular-nums"
 										/>
-										{typeof props.minItems !== "number" &&
-										typeof props.maxItems !== "number"
-											? ` ${T()("common.selected").toLowerCase()}`
-											: ""}
 									</p>
 								</Show>
 							</div>
@@ -393,6 +392,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 											variant="ghost"
 											size="xs"
 											shape="square"
+											data-field-action=""
 											onClick={openDocuSelectModal}
 											disabled={props.disabled}
 											aria-label={T()("common.edit")}
@@ -439,6 +439,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								type="button"
 								variant="outline"
 								size="sm"
+								data-field-action=""
 								onClick={openDocuSelectModal}
 								disabled={props.disabled || !canAddMore()}
 								class="capitalize"

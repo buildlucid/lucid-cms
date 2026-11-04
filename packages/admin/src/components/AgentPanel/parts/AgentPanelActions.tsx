@@ -4,6 +4,7 @@ import {
 	TbOutlineDots,
 	TbOutlineHistory,
 	TbOutlineList,
+	TbOutlinePin,
 	TbOutlinePlus,
 	TbOutlineX,
 } from "solid-icons/tb";
@@ -20,10 +21,12 @@ const recentChats = 5;
 const triggerClasses =
 	"flex size-7 items-center justify-center rounded-md text-icon transition-colors hover:bg-background-hover hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary data-expanded:bg-background-hover";
 
-/** The agent panel's header actions: recent chats, a menu with a new chat and the chat's full page, then closing the panel. */
+/** The agent panel's header actions: recent chats, a menu with a new chat and the chat's full page, keeping a peeking panel open, then closing it. */
 const AgentPanelActions: Component<{
 	conversationId?: string;
 	onOpen: (conversationId: string | undefined) => void;
+	/** Keeps a panel peeking in from the edge open beside the content. */
+	onPin?: () => void;
 	onClose: () => void;
 }> = (props) => {
 	// ----------------------------------------
@@ -122,12 +125,31 @@ const AgentPanelActions: Component<{
 					</Menu.Root>
 				)}
 			</Show>
+			<Show when={props.onPin}>
+				{(pin) => (
+					<Button
+						size="xs"
+						shape="square"
+						variant="ghost"
+						aria-label={T()("agent.panel.pin")}
+						title={`${T()("agent.panel.pin")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`}
+						onClick={() => pin()()}
+					>
+						<TbOutlinePin size={12} />
+					</Button>
+				)}
+			</Show>
 			<Button
 				size="xs"
 				shape="square"
 				variant="ghost"
 				aria-label={T()("agent.panel.close")}
-				title={`${T()("agent.panel.close")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`}
+				//* while peeking, the shortcut keeps it open rather than closing it
+				title={
+					props.onPin
+						? T()("agent.panel.close")
+						: `${T()("agent.panel.close")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`
+				}
 				onClick={() => props.onClose()}
 			>
 				<TbOutlineX size={12} />

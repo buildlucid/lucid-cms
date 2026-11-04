@@ -24,3 +24,39 @@ test("messages tell the model when they were sent, in local time, and who the ru
 		'acting_for="system"',
 	);
 });
+
+test("an attached document's focus names the brick and field the person picked", () => {
+	const text = messageText([
+		{ type: "text", text: "Make this punchier" },
+		{
+			type: "reference",
+			reference: {
+				type: "document",
+				collectionKey: "page",
+				documentId: 3,
+				label: "Home",
+				focus: {
+					brick: "Xy12ab",
+					path: ["items", "Cd34ef", "title"],
+					label: "Hero › Items 2 › Title",
+				},
+			},
+		},
+		{
+			type: "reference",
+			reference: {
+				type: "document",
+				collectionKey: "page",
+				documentId: 3,
+				label: "Home",
+				focus: { brick: "Gh56ij", path: [], label: "FAQ" },
+			},
+		},
+	]);
+	expect(text).toContain(
+		'<attachment type="document" collection_key="page" document_id="3" name="Home" focus="Hero › Items 2 › Title" brick="Xy12ab" field_path="items/Cd34ef/title" />',
+	);
+	expect(text).toContain(
+		'<attachment type="document" collection_key="page" document_id="3" name="Home" focus="FAQ" brick="Gh56ij" />',
+	);
+});

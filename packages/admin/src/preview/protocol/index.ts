@@ -1,9 +1,7 @@
 /**
- * Builder/page messaging protocol. The page announces readiness, handler changes and unloading;
- * the builder verifies its window and origin. Updates re-render or reload the page, which reads
- * content using its preview token. Edit mode exchanges pointer targets, focus and drag requests;
- * the builder applies changes. Field markup is written by `@lucidcms/client`. Invalid messages are
- * ignored.
+ * Builder/page protocol for readiness, updates and editing. The builder verifies window and origin
+ * and applies requested changes. Pages read content with their preview token; only inline text
+ * edits send content back. `@lucidcms/client` writes field markup. Invalid messages are ignored.
  */
 export {
 	builderPreviewContext,
@@ -20,12 +18,15 @@ export {
 	isPreviewChildMessage,
 	isPreviewParentMessage,
 } from "./messages.js";
+export { toShownText } from "./text.js";
 export type {
 	PreviewEditing,
 	PreviewFieldPath,
 	PreviewFieldTarget,
 	PreviewHover,
 	PreviewHoverBlock,
+	PreviewDragged,
+	PreviewLanding,
 	PreviewPlace,
 	PreviewRect,
 	PreviewRepeater,

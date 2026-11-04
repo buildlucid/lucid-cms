@@ -1,6 +1,11 @@
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
-import { TbOutlinePencil, TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
+import {
+	TbOutlinePencil,
+	TbOutlinePlus,
+	TbOutlineUpload,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -251,6 +256,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									type="button"
 									variant="outline"
 									size="sm"
+									data-field-action=""
 									onClick={openMediaSelectModal}
 									disabled={props.disabled || !canAddMore()}
 									class="capitalize"
@@ -362,6 +368,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											variant="ghost"
 											size="xs"
 											shape="square"
+											data-field-action=""
 											onClick={openMediaSelectModal}
 											disabled={props.disabled}
 											aria-label={T()("media.select.new", {
@@ -389,104 +396,113 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						</div>
 					</Match>
 					<Match when={isMultiple()}>
-						<div class="w-full overflow-hidden rounded-md border border-border dotted-background border-dashed">
-							<Show when={selectedMediaRefs().length > 0}>
-								<DragDrop
-									animationMode="web-animation"
-									sortOrder={(ref, targetRef) => {
-										reorderSelectedMedia(ref, targetRef);
-									}}
-								>
-									{({ dragDrop }) => (
-										<div class="relative z-20 grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 xl:grid-cols-3">
-											<For each={selectedMediaIds()}>
-												{(mediaId, index) => (
-													<Show when={selectedMediaById().get(mediaId)}>
-														{(media) => (
-															<MediaSortableItem
-																media={media()}
-																title={
-																	getMediaTitle(media()) ||
-																	T()("empty.states.translation")
-																}
-																alt={getMediaAlt(media()) || ""}
-																dimensions={getMediaDimensions(media())}
-																hasError={hasItemError(index())}
-																removeSelectedMedia={removeSelectedMedia}
-																disabled={props.disabled}
-																dragDrop={dragDrop}
-															/>
-														)}
-													</Show>
-												)}
-											</For>
-											<Show when={selectedMediaRefs().length > 0}>
-												<div class="relative hidden h-full items-center justify-center lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2">
-													<Show when={props.canBrowse !== false}>
-														<Button
-															type="button"
-															variant="outline"
-															shape="circle"
-															size="xs"
-															onClick={openMediaSelectModal}
-															disabled={props.disabled || !canAddMore()}
-															aria-label={T()("media.select.action", {
-																type: props.type || "media",
-															})}
-															title={T()("media.select.action", {
-																type: props.type || "media",
-															})}
-														>
-															<TbOutlinePlus size={12} />
-														</Button>
-													</Show>
-												</div>
-											</Show>
-										</div>
-									)}
-								</DragDrop>
-							</Show>
-						</div>
-						<div class="flex flex-wrap items-center justify-between gap-3 mt-3">
-							<div class="flex flex-wrap items-center gap-2">
-								<Show when={props.canBrowse !== false}>
+						{/* follows the field's width: narrow places such as the fields column beside the preview list plain rows with compact actions, wider ones card columns */}
+						<div class="@container">
+							<div class="w-full overflow-hidden rounded-md border border-border dotted-background border-dashed @max-[26rem]:rounded-none @max-[26rem]:border-0 @max-[26rem]:[background:none]">
+								<Show when={selectedMediaRefs().length > 0}>
+									<DragDrop
+										animationMode="web-animation"
+										sortOrder={(ref, targetRef) => {
+											reorderSelectedMedia(ref, targetRef);
+										}}
+									>
+										{({ dragDrop }) => (
+											<div class="relative z-20 grid grid-cols-1 gap-2 @min-[26rem]:grid-cols-2 @min-[26rem]:gap-3 @min-[26rem]:p-3 @min-[40rem]:grid-cols-3">
+												<For each={selectedMediaIds()}>
+													{(mediaId, index) => (
+														<Show when={selectedMediaById().get(mediaId)}>
+															{(media) => (
+																<MediaSortableItem
+																	media={media()}
+																	title={
+																		getMediaTitle(media()) ||
+																		T()("empty.states.translation")
+																	}
+																	alt={getMediaAlt(media()) || ""}
+																	dimensions={getMediaDimensions(media())}
+																	hasError={hasItemError(index())}
+																	removeSelectedMedia={removeSelectedMedia}
+																	disabled={props.disabled}
+																	dragDrop={dragDrop}
+																/>
+															)}
+														</Show>
+													)}
+												</For>
+												<Show when={selectedMediaRefs().length > 0}>
+													<div class="relative hidden h-full items-center justify-center @min-[26rem]:flex @max-[40rem]:[&:last-child:nth-child(2n+1)]:hidden @min-[40rem]:[&:last-child:nth-child(3n+1)]:hidden @min-[40rem]:[&:last-child:nth-child(3n+2)]:col-span-2">
+														<Show when={props.canBrowse !== false}>
+															<Button
+																type="button"
+																variant="outline"
+																shape="circle"
+																size="xs"
+																onClick={openMediaSelectModal}
+																disabled={props.disabled || !canAddMore()}
+																aria-label={T()("media.select.action", {
+																	type: props.type || "media",
+																})}
+																title={T()("media.select.action", {
+																	type: props.type || "media",
+																})}
+															>
+																<TbOutlinePlus size={12} />
+															</Button>
+														</Show>
+													</div>
+												</Show>
+											</div>
+										)}
+									</DragDrop>
+								</Show>
+							</div>
+							<div class="flex flex-wrap items-center justify-between gap-3 mt-3 @max-[26rem]:mt-2">
+								<div class="flex flex-wrap items-center gap-2">
+									<Show when={props.canBrowse !== false}>
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											data-field-action=""
+											onClick={openMediaSelectModal}
+											disabled={props.disabled || !canAddMore()}
+											class="capitalize"
+										>
+											{T()("media.select.action", {
+												type: props.type || "media",
+											})}
+										</Button>
+									</Show>
 									<Button
 										type="button"
-										variant="outline"
+										variant="ghost"
 										size="sm"
-										onClick={openMediaSelectModal}
+										onClick={openMediaUploadPanel}
 										disabled={props.disabled || !canAddMore()}
-										class="capitalize"
+										class="capitalize @max-[26rem]:w-9 @max-[26rem]:px-0"
+										title={T()("media.upload.action")}
 									>
-										{T()("media.select.action", {
-											type: props.type || "media",
-										})}
+										<TbOutlineUpload
+											size={14}
+											class="hidden @max-[26rem]:block"
+										/>
+										<span class="@max-[26rem]:sr-only">
+											{T()("media.upload.action")}
+										</span>
 									</Button>
+								</div>
+								<Show when={selectedMediaIds().length > 0}>
+									<p class="text-sm text-muted">
+										<RelationCount
+											count={selectedMediaIds().length}
+											min={props.minItems}
+											max={props.maxItems}
+											showLimit={true}
+											class="tabular-nums"
+										/>
+									</p>
 								</Show>
-								<Button
-									type="button"
-									variant="ghost"
-									size="sm"
-									onClick={openMediaUploadPanel}
-									disabled={props.disabled || !canAddMore()}
-									class="capitalize"
-								>
-									{T()("media.upload.action")}
-								</Button>
 							</div>
-							<Show when={selectedMediaIds().length > 0}>
-								<p class="text-sm text-muted">
-									<RelationCount
-										count={selectedMediaIds().length}
-										min={props.minItems}
-										max={props.maxItems}
-									/>
-									{typeof props.minItems !== "number" &&
-									typeof props.maxItems !== "number"
-										? ` ${T()("common.selected").toLowerCase()}`
-										: ""}
-								</p>
-							</Show>
 						</div>
 					</Match>
 				</Switch>
@@ -524,7 +540,7 @@ const MediaSortableItem: Component<{
 				"view-transition-name": `media-select-item-${props.media.id}`,
 			}}
 			class={classNames(
-				"group overflow-hidden rounded-md border bg-card ring-inset transition-colors duration-200 transform-gpu",
+				"group overflow-hidden rounded-md border bg-card ring-inset transition-colors duration-200 transform-gpu @max-[26rem]:flex @max-[26rem]:items-center @max-[26rem]:bg-input",
 				{
 					"border-border": !props.hasError,
 					"border-danger ring-1 ring-inset ring-danger": props.hasError,
@@ -558,12 +574,15 @@ const MediaSortableItem: Component<{
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			<div
-				class={classNames("relative border-b border-border p-3", {
-					"rectangle-background":
-						props.media.type === "image" || props.media.type === "video",
-				})}
+				class={classNames(
+					"relative border-b border-border p-3 @max-[26rem]:shrink-0 @max-[26rem]:border-e @max-[26rem]:border-b-0 @max-[26rem]:p-1",
+					{
+						"rectangle-background":
+							props.media.type === "image" || props.media.type === "video",
+					},
+				)}
 			>
-				<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-black/45 via-black/20 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+				<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-black/45 via-black/20 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 @max-[26rem]:hidden">
 					<div class="flex flex-wrap gap-1.5">
 						<Show when={props.media.isDeleted}>
 							<Pill variant="danger">{T()("common.status.deleted")}</Pill>
@@ -581,7 +600,7 @@ const MediaSortableItem: Component<{
 						</Show>
 					</div>
 				</div>
-				<div class="pointer-events-none flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
+				<div class="pointer-events-none flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full @max-[26rem]:size-10 @max-[26rem]:[&_img]:max-h-10 @max-[26rem]:[&_video]:max-h-10">
 					<MediaPreview
 						media={{
 							status: props.media.status,
@@ -600,7 +619,7 @@ const MediaSortableItem: Component<{
 					/>
 				</div>
 			</div>
-			<div class="flex items-center justify-between gap-2 p-3">
+			<div class="flex items-center justify-between gap-2 p-3 @max-[26rem]:min-w-0 @max-[26rem]:flex-1 @max-[26rem]:px-2.5 @max-[26rem]:py-1.5">
 				<div class="min-w-0">
 					<p class="line-clamp-1 text-sm font-medium text-subtitle">
 						{props.title}

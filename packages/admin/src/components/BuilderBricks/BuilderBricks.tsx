@@ -106,12 +106,18 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 					<Match when={builderBricks().length > 0}>
 						<ol class="w-full">
 							<DragDrop
+								//* moves the brick to where the one dropped on is, as the preview shows while it's dragged
 								sortOrder={(ref, targetRef) => {
-									brickStore.get.swapBrickOrder({
+									brickStore.get.moveBrick({
 										brickRef: ref,
-										targetBrickRef: targetRef,
+										index: builderBricks().findIndex(
+											(brick) => brick.ref === targetRef,
+										),
 									});
 								}}
+								onDragChange={(drag) =>
+									brickStore.set("brickDrag", drag ?? null)
+								}
 							>
 								{({ dragDrop }) => (
 									<For each={builderBricks()}>

@@ -58,8 +58,11 @@ const describe: ServiceFn<
 			),
 		),
 	];
-	const documents = input.references.filter(
-		(reference) => reference.type === "document",
+	//* one lookup per document, however many of its bricks or fields are attached
+	const documents = new Map(
+		input.references
+			.filter((reference) => reference.type === "document")
+			.map((reference) => [referenceKey(reference), reference]),
 	);
 	const requestIds = [
 		...new Set(
@@ -98,7 +101,7 @@ const describe: ServiceFn<
 					validation: { enabled: true },
 				})
 			: undefined,
-		...documents.map(async (reference) => {
+		...[...documents.values()].map(async (reference) => {
 			const collection = await collections.getSingle(context, {
 				key: reference.collectionKey,
 			});

@@ -20,6 +20,6 @@
 			{% if author %}· {{ [author.firstName, author.lastName]|filter(part => part)|join(" ") ?: author.username }}{% endif %}
 		</p>
 		{% if post.fields.page_excerpt %}<p class="lead">{{ post.fields.page_excerpt }}</p>{% endif %}
-		{% include "components/rich-text" with { node: post.fields.content } %}
+		{% include "components/rich-text" with { node: post.fields.content, editable: editable(post, "content") } %}
 	</article>
 {% endblock %}

@@ -13,9 +13,8 @@ export type Layer = {
 };
 
 /**
- * A layer above the page in its own shadow root, so the page's DOM and styles are never
- * changed. `draw` returns whether anything moved, and keeps running while things move, eg.
- * during smooth scrolling or a re-render.
+ * Isolates overlays in a shadow root. `draw` reports movement and repeats while scrolling or
+ * rendering changes positions.
  */
 export const createLayer = (
 	targetWindow: Window,
@@ -159,15 +158,20 @@ export const isInView = (targetWindow: Window, element: Element) => {
 	return rect.bottom > 0 && rect.top < targetWindow.innerHeight;
 };
 
+/**
+ * Scrolls the page to an element below any bar across its top, centred when it fits. Only the
+ * page's window scrolls, as `scrollIntoView` would also scroll the builder around the frame.
+ */
 export const scrollToElement = (targetWindow: Window, element: Element) => {
 	const reducedMotion =
 		targetWindow.matchMedia?.("(prefers-reduced-motion: reduce)").matches ===
 		true;
-	element.scrollIntoView({
+	const rect = element.getBoundingClientRect();
+	const inset = topInset(targetWindow);
+	const room = targetWindow.innerHeight - inset;
+	const offset = rect.height < room * 0.7 ? (room - rect.height) / 2 : 0;
+	targetWindow.scrollBy({
+		top: rect.top - inset - offset,
 		behavior: reducedMotion ? "auto" : "smooth",
-		block:
-			element.getBoundingClientRect().height < targetWindow.innerHeight * 0.7
-				? "center"
-				: "start",
 	});
 };

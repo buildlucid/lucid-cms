@@ -15,7 +15,7 @@ export type ScreenContext = {
 export const screenInstructions = (screen: ScreenContext) => {
 	const intro = dedent(`
 		## The Person's Screen
-		<current_screen> in a message says which admin screen the person sent it from. When they say "this" or "here", they usually mean what it shows. A list screen's filter is the filter preset they applied, while items they picked from a list arrive in <attachments>.
+		<current_screen> in a message says which admin screen the person sent it from. When they say "this" or "here", they usually mean what it shows. A list screen's filter is the filter preset they applied, while items they picked from a list arrive in <attachments>. A document attachment with a focus is a brick or field they picked in it: brick is a builder brick's ref or a fixed brick's key, left out for the document's own fields, and field_path is field keys with repeater item refs between them.
 	`);
 	if (screen.type !== "document" || !screen.builder.read) return intro;
 

@@ -16,10 +16,26 @@ export type AgentResource =
 	| { type: "document"; collectionKey: string; documentId: number }
 	| { type: "request"; requestId: number };
 
-/** A media item, document, request or deploy linked to a chat. A document can be pinned to one version. */
+/** A brick or field of a document a person pointed the agent at, eg. picked on the builder's preview. */
+export type AgentDocumentFocus = {
+	/** A builder brick's ref or a fixed brick's key. Left out for the document's own fields. */
+	brick?: string;
+	/** Field keys from the brick down, with repeater item refs between them, eg. `["items", "Xy12ab", "title"]`. Empty for the whole brick. */
+	path: string[];
+	/** What the person sees it called, eg. "Hero › Items 2 › Title". */
+	label: string;
+};
+
+/**
+ * A media item, document, request or deploy linked to a chat. A document can be pinned to one
+ * version, and a person's attachment can point at one of its bricks or fields.
+ */
 export type AgentReferenceInput =
 	| Exclude<AgentResource, { type: "document" }>
-	| (Extract<AgentResource, { type: "document" }> & { versionId?: number })
+	| (Extract<AgentResource, { type: "document" }> & {
+			versionId?: number;
+			focus?: AgentDocumentFocus;
+	  })
 	| { type: "deploy"; deployKey: string };
 
 /** A reference with the details saved when it was attached, so a message keeps what was sent. */
@@ -212,7 +228,7 @@ export type AgentReference = {
 	managed: boolean;
 } & (
 	| Extract<AgentReferenceInput, { type: "media" }>
-	| (Extract<AgentReferenceInput, { type: "document" }> & {
+	| (Omit<Extract<AgentReferenceInput, { type: "document" }>, "focus"> & {
 			/** The resolved document version. */
 			version?: DocumentVersionType;
 	  })

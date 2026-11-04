@@ -242,7 +242,7 @@ describe("preview page bridge editing", () => {
 			editing: {
 				collectionKey: "page",
 				documentId: 1,
-				structure: false,
+				editable: false,
 				repeaters: [],
 				errors: [],
 			},

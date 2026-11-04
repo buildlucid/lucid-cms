@@ -185,6 +185,7 @@ export const EmailSelect: Component<EmailSelectProps> = (props) => {
 										type="button"
 										variant="outline"
 										size="sm"
+										data-field-action=""
 										onClick={openEmailSelectModal}
 										disabled={props.disabled || hasReachedMaxItems()}
 										class="capitalize"
@@ -198,11 +199,9 @@ export const EmailSelect: Component<EmailSelectProps> = (props) => {
 											count={selectedEmailIds().length}
 											min={props.minItems}
 											max={props.maxItems}
+											showLimit={true}
+											class="tabular-nums"
 										/>
-										{typeof props.minItems !== "number" &&
-										typeof props.maxItems !== "number"
-											? ` ${T()("common.selected").toLowerCase()}`
-											: ""}
 									</p>
 								</Show>
 							</div>
@@ -233,6 +232,7 @@ export const EmailSelect: Component<EmailSelectProps> = (props) => {
 								type="button"
 								variant="outline"
 								size="sm"
+								data-field-action=""
 								onClick={openEmailSelectModal}
 								disabled={props.disabled}
 								class="capitalize"

@@ -10,6 +10,7 @@ export const selectFieldConfig = {
 		sortable: true,
 		canBeLabel: true,
 		canBeRichTextVariable: true,
+		inlineText: false,
 	},
 } as const satisfies FieldStaticConfig<"select">;
 

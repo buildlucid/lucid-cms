@@ -1,10 +1,133 @@
+{# Every built-in field, each marked for the builder's preview so it can be picked and edited on the page: text and textareas are typed into, everything else opens in the builder. Empty fields show a placeholder while previewing. #}
 {% props brick: Brick %}
 
-<section class="section"{{ editable(brick) }}>
-	{% if brick.fields.shared_text %}<h2 {{ editable(brick, "shared_text") }}>{{ brick.fields.shared_text }}</h2>{% endif %}
-	{% include "components/rich-text" with { node: brick.fields.rich_text } %}
+{% set fields = brick.fields %}
+{% set previewing = isPreview() %}
+
+<section class="section all-fields"{{ editable(brick) }}>
+	<p class="all-fields__eyebrow">All custom fields</p>
+
+	{# Content #}
+	{% if fields.localized_required_text or previewing %}
+		<h2 {{ editable(brick, "localized_required_text") }}>{{ fields.localized_required_text ?: "Add localized required text" }}</h2>
+	{% endif %}
+	{% if fields.shared_text or previewing %}
+		<p class="lead" {{ editable(brick, "shared_text") }}>{{ fields.shared_text ?: "Add shared text" }}</p>
+	{% endif %}
+	{% if fields.textarea or previewing %}
+		<p class="all-fields__textarea" {{ editable(brick, "textarea") }}>{{ fields.textarea ?: "Add a textarea, which keeps its line breaks" }}</p>
+	{% endif %}
+	{% include "components/rich-text" with { node: fields.rich_text, editable: editable(brick, "rich_text") } %}
+
+	<dl class="all-fields__grid">
+		<div>
+			<dt>Number</dt>
+			<dd {{ editable(brick, "number") }}>{{ fields.number ?? "—" }}</dd>
+		</div>
+		<div>
+			<dt>Range</dt>
+			<dd {{ editable(brick, "range") }}>{{ (fields.range ?? [])|join(" – ") ?: "—" }}</dd>
+		</div>
+		<div>
+			<dt>Checkbox</dt>
+			<dd {{ editable(brick, "checkbox") }}>{{ fields.checkbox ? "Checked" : "Unchecked" }}</dd>
+		</div>
+		<div>
+			<dt>Select</dt>
+			<dd {{ editable(brick, "localized_required_select") }}>{{ fields.localized_required_select ?: "—" }}</dd>
+		</div>
+		<div>
+			<dt>Date and time</dt>
+			<dd {{ editable(brick, "datetime") }}>{{ fields.datetime ? fields.datetime|formatDate(dateStyle: "medium", timeStyle: "short") : "—" }}</dd>
+		</div>
+		<div>
+			<dt>Colour</dt>
+			<dd class="all-fields__colour" {{ editable(brick, "color") }}>
+				<span class="all-fields__swatch"{{ attrs({ style: "background: " ~ (fields.color ?: "transparent") }) }}></span>
+				{{ fields.color ?: "—" }}
+			</dd>
+		</div>
+	</dl>
+
+	{# Structure #}
+	<h3>Structure</h3>
+	{% if fields.section?.section_text or previewing %}
+		<p {{ editable(fields.section, "section_text") }}>{{ fields.section?.section_text ?: "Add section text" }}</p>
+	{% endif %}
+	{% if fields.collapsible?.collapsible_text or previewing %}
+		<p {{ editable(fields.collapsible, "collapsible_text") }}>{{ fields.collapsible?.collapsible_text ?: "Add collapsible text" }}</p>
+	{% endif %}
+	<ol class="all-fields__items"{{ editable(brick, "items") }}>
+		{% for item in fields.items ?? [] %}
+			<li class="all-fields__item"{{ editable(item) }}>
+				<p class="all-fields__item-head">
+					<strong {{ editable(item, "item_title") }}>{{ item.item_title ?: (previewing ? "Add an item title" : "") }}</strong>
+					<span class="all-fields__tag" {{ editable(item, "item_enabled") }}>{{ item.item_enabled ? "Enabled" : "Disabled" }}</span>
+				</p>
+				<ul class="all-fields__nested"{{ editable(item, "nested_items") }}>
+					{% for nested in item.nested_items ?? [] %}
+						<li class="all-fields__nested-item"{{ editable(nested) }}>
+							<span {{ editable(nested, "nested_item_title") }}>{{ nested.nested_item_title ?: (previewing ? "Add a nested title" : "") }}</span>
+							<code {{ editable(nested, "nested_item_select") }}>{{ nested.nested_item_select ?: "—" }}</code>
+						</li>
+					{% endfor %}
+				</ul>
+			</li>
+		{% endfor %}
+	</ol>
+
+	{# References #}
+	<h3>References</h3>
+	<div class="all-fields__media" {{ editable(brick, "media") }}>
+		{% if fields.media %}
+			<div class="media-grid">
+				{% for media in fields.media %}
+					<figure>
+						{% if media.type == "image" %}
+							<img {{ attrs({ src: media.url, alt: media.alt, loading: "lazy" }) }}>
+						{% endif %}
+						<figcaption>{{ media.title ?: media.key }}</figcaption>
+					</figure>
+				{% endfor %}
+			</div>
+		{% else %}
+			<p class="all-fields__empty">No media yet</p>
+		{% endif %}
+	</div>
+	<dl class="all-fields__grid">
+		<div>
+			<dt>Related pages</dt>
+			<dd {{ editable(brick, "related_pages") }}>
+				{% if fields.related_pages %}
+					<ul class="all-fields__list">
+						{% for related in fields.related_pages %}
+							<li><a href="{{ related.route?.path ?? "#" }}">{{ related.fields?.page_title ?: related.collectionKey ~ " #" ~ related.id }}</a></li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					—
+				{% endif %}
+			</dd>
+		</div>
+		<div>
+			<dt>Users</dt>
+			<dd {{ editable(brick, "users") }}>{{ (fields.users ?? [])|map(user => user.username)|join(", ") ?: "—" }}</dd>
+		</div>
+		<div>
+			<dt>Link</dt>
+			<dd>
+				<a class="button button--quiet" href="{{ fields.required_link?.url ?: "#" }}" {{ editable(brick, "required_link") }}>{{ fields.required_link?.label ?: fields.required_link?.url ?: (previewing ? "Add a link" : "") }}</a>
+			</dd>
+		</div>
+	</dl>
+
+	{# Technical #}
+	<h3>Technical</h3>
+	<pre {{ editable(brick, "json") }}><code>{{ fields.json|json(2) }}</code></pre>
+	<pre {{ editable(brick, "code") }}><code>{{ fields.code?.value ?: (previewing ? "// Add some code" : "") }}</code></pre>
+
 	<details>
 		<summary>All fields</summary>
-		<pre><code>{{ brick.fields|json(2) }}</code></pre>
+		<pre><code>{{ fields|json(2) }}</code></pre>
 	</details>
 </section>

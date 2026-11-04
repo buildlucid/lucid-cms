@@ -1,9 +1,11 @@
 import {
 	createPreviewMessage,
 	isPreviewChildMessage,
+	isSamePreviewTarget,
 	type PreviewEditing,
 	type PreviewFieldTarget,
 	type PreviewHover,
+	type PreviewDragged,
 	type PreviewPlace,
 	type PreviewScrollState,
 	previewProtocol,
@@ -34,7 +36,7 @@ type FramePage =
 
 /**
  * Connects preview scrolling, field focus, editing and content updates. Reloads pages without
- * update handlers and queues updates during navigation.
+ * update handlers, and queues updates during navigation and while a field is typed into.
  */
 export const createPreviewBridge = (options?: {
 	onFocusField?: (target: PreviewFieldTarget) => void;
@@ -54,10 +56,20 @@ export const createPreviewBridge = (options?: {
 	onReload?: () => void;
 	/** Runs when a link on the page is clicked, which the preview doesn't follow. */
 	onNavigationLocked?: () => void;
+	/** Runs when the page asks to edit a selected field, with the text its element shows when that's all it holds. */
+	onEdit?: (target: PreviewFieldTarget, text: string | null) => void;
+	/** Runs with the text typed into a field on the page so far. */
+	onInlineInput?: (target: PreviewFieldTarget, value: string) => void;
+	/** Runs when typing on the page ends, kept or `cancelled`, including when the page goes. */
+	onInlineEnd?: (target: PreviewFieldTarget, cancelled: boolean) => void;
 }) => {
 	let frame: HTMLIFrameElement | null = null;
 	let page: FramePage = { state: "loading" };
 	let editing: PreviewEditing | null = null;
+	//* a brick dragged in the builder's fields, shown on every page the frame loads until it's dropped
+	let dragged: PreviewDragged | null = null;
+	//* the field being typed into on the page, which updates wait for so a re-render can't move its caret
+	let typing: PreviewFieldTarget | null = null;
 	let pendingRevision: number | null = null;
 	//* the newest revision shown, when recent ones were, and the one the page shows
 	let latestRevision = 0;
@@ -179,8 +191,17 @@ export const createPreviewBridge = (options?: {
 		});
 	};
 
+	/** Ends typing on the page, keeping what was typed or not, eg. once the page goes. */
+	const endTyping = (cancelled: boolean) => {
+		const target = typing;
+		if (!target) return;
+		typing = null;
+		options?.onInlineEnd?.(target, cancelled);
+	};
+
 	/** Marks the frame as loading a page, so updates wait for it. */
 	const expectLoad = () => {
+		endTyping(false);
 		clearReadyGrace();
 		page = { state: "loading" };
 		renderedRevision = null;
@@ -220,7 +241,7 @@ export const createPreviewBridge = (options?: {
 
 	const show = (revision: number) => {
 		noteShown(revision);
-		if (page.state === "loading") {
+		if (page.state === "loading" || typing) {
 			pendingRevision = revision;
 			return;
 		}
@@ -311,6 +332,27 @@ export const createPreviewBridge = (options?: {
 			return;
 		}
 
+		if (event.data.type === previewProtocol.messages.edit) {
+			if (editing?.editable && !typing) {
+				options?.onEdit?.(event.data.target, event.data.text);
+			}
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.inlineInput) {
+			if (typing && isSamePreviewTarget(typing, event.data.target)) {
+				options?.onInlineInput?.(event.data.target, event.data.value);
+			}
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.inlineEnd) {
+			if (!typing || !isSamePreviewTarget(typing, event.data.target)) return;
+			endTyping(event.data.cancelled);
+			showPending();
+			return;
+		}
+
 		if (event.data.type === previewProtocol.messages.hover) {
 			if (editing) options?.onHover?.(event.data.hover);
 			return;
@@ -352,6 +394,9 @@ export const createPreviewBridge = (options?: {
 			if (editing) {
 				postToRuntime({ type: previewProtocol.messages.editMode, editing });
 			}
+			if (dragged) {
+				postToRuntime({ type: previewProtocol.messages.dragged, ...dragged });
+			}
 			//* pages that loaded before the latest revision are brought up to date
 			if (
 				loaded &&
@@ -388,6 +433,42 @@ export const createPreviewBridge = (options?: {
 		highlight: (target: PreviewFieldTarget) => {
 			postToRuntime({ type: previewProtocol.messages.highlightField, target });
 		},
+		/** Shows a brick dragged in the builder's fields moving to where it would land on the page, or ends with null. */
+		setDragged: (next: PreviewDragged | null) => {
+			dragged = next;
+			postToRuntime({
+				type: previewProtocol.messages.dragged,
+				target: next?.target ?? null,
+				landing: next?.landing ?? null,
+			});
+		},
+		/** Tells the page the builder is zooming it out or back in, so it keeps what's dragged or selected in place. */
+		setZooming: (zooming: boolean) => {
+			postToRuntime({ type: previewProtocol.messages.zoom, zooming });
+		},
+		/** Asks the page to edit its selected field, as clicking it again would. */
+		editSelected: (target: PreviewFieldTarget) => {
+			postToRuntime({ type: previewProtocol.messages.editSelected, target });
+		},
+		/**
+		 * Starts typing a field's text where the page shows it, holding updates until it ends.
+		 * Returns false when the page's runtime isn't there to do it.
+		 */
+		startInline: (
+			target: PreviewFieldTarget,
+			props: { multiline: boolean; clear: boolean },
+		) => {
+			if (page.state !== "ready" || typing) return false;
+			typing = target;
+			//* keys go to the page, eg. when typing was started from the builder's controls
+			frame?.focus({ preventScroll: true });
+			postToRuntime({
+				type: previewProtocol.messages.inlineStart,
+				target,
+				...props,
+			});
+			return true;
+		},
 		/** Drags a brick or item to a point in the page's viewport, which shows where it would land. */
 		drag: (target: PreviewFieldTarget, point: { x: number; y: number }) => {
 			postToRuntime({ type: previewProtocol.messages.drag, target, ...point });
@@ -408,6 +489,7 @@ export const createPreviewBridge = (options?: {
 			page.state === "ready" && renderedRevision === revision,
 		/** Removes listeners, timeouts, and iframe references. */
 		cleanup: () => {
+			endTyping(false);
 			window.removeEventListener("message", onMessage);
 			frame?.removeEventListener("load", onFrameLoad);
 			clearCapture();

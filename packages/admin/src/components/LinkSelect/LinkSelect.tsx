@@ -101,6 +101,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								variant="ghost"
 								size="xs"
 								shape="square"
+								data-field-action=""
 								onClick={openLinkModal}
 								disabled={props.disabled}
 							>
@@ -127,6 +128,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 						type="button"
 						variant="outline"
 						size="sm"
+						data-field-action=""
 						onClick={openLinkModal}
 						disabled={props.disabled}
 					>

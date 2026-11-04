@@ -10,6 +10,7 @@ export const textareaFieldConfig = {
 		sortable: true,
 		canBeLabel: true,
 		canBeRichTextVariable: true,
+		inlineText: "lines",
 	},
 } as const satisfies FieldStaticConfig<"textarea">;
 

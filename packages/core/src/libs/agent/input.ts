@@ -41,6 +41,9 @@ const attachmentAttributes = (reference: AgentReferenceSnapshot) => {
 				document_id: reference.documentId,
 				version_id: reference.versionId,
 				name: reference.label,
+				focus: reference.focus?.label,
+				brick: reference.focus?.brick,
+				field_path: reference.focus?.path.join("/") || undefined,
 			};
 		case "request":
 			return {

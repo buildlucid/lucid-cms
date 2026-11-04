@@ -27,11 +27,11 @@ const titleTarget = (index: number): PreviewFieldTarget => ({
 });
 
 const editingFor = (
-	structure = true,
+	editable = true,
 	errors: PreviewFieldPath[] = [],
 ): PreviewEditing => ({
 	...page,
-	structure,
+	editable,
 	repeaters: [{ brick: "features", path: ["items"] }],
 	errors,
 });
@@ -137,6 +137,9 @@ const install = (connected = true) => {
 	const sendHover = vi.fn<(hover: PreviewHover) => void>();
 	const sendDeselect = vi.fn();
 	const sendMove = vi.fn();
+	const sendEdit = vi.fn();
+	const sendInlineInput = vi.fn();
+	const sendInlineEnd = vi.fn();
 	const editing = installPreviewEditing({
 		targetWindow: window,
 		isConnected: () => connected,
@@ -144,9 +147,20 @@ const install = (connected = true) => {
 		sendDeselect,
 		sendHover,
 		sendMove,
+		sendEdit,
+		sendInlineInput,
+		sendInlineEnd,
 	});
 	installed.push(editing.cleanup);
-	return { editing, sendFocus, sendHover, sendMove };
+	return {
+		editing,
+		sendFocus,
+		sendHover,
+		sendMove,
+		sendEdit,
+		sendInlineInput,
+		sendInlineEnd,
+	};
 };
 
 const layer = () =>
@@ -358,7 +372,7 @@ describe("preview editing", () => {
 		).toBe(true);
 	});
 
-	test("moves the selection's item with Alt and the arrow keys, only when structure changes are allowed", () => {
+	test("moves the selection's item with Alt and the arrow keys, only when the document can be changed", () => {
 		const { editing, sendMove } = install();
 		const { items } = renderPage();
 		editing.setEditing(editingFor(false));
@@ -444,6 +458,181 @@ describe("preview editing", () => {
 		editing.setEditing(editingFor());
 		window.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt" }));
 		expect(hints()).toBe(0);
+		editing.cleanup();
+	});
+
+	test("a selected field clicked again, or Enter, asks to edit it with the text it shows", () => {
+		const { editing, sendFocus, sendEdit } = install();
+		const { items } = renderPage();
+		const [first, second] = items.map((item) => item.title);
+		if (!first || !second) throw new Error("missing titles");
+		first.append("Fast ", document.createComment("[]"), "setup");
+		second.append(document.createElement("span"));
+		editing.setEditing(editingFor());
+
+		click(first);
+		expect(sendFocus).toHaveBeenLastCalledWith(titleTarget(0));
+		expect(sendEdit).not.toHaveBeenCalled();
+		expect(click(first).defaultPrevented).toBe(true);
+		expect(sendEdit).toHaveBeenLastCalledWith(titleTarget(0), "Fast setup");
+		window.dispatchEvent(
+			new KeyboardEvent("keydown", { key: "Enter", cancelable: true }),
+		);
+		expect(sendEdit).toHaveBeenCalledTimes(2);
+
+		//* an element holding more than text can't be typed into
+		click(second);
+		click(second);
+		expect(sendEdit).toHaveBeenLastCalledWith(titleTarget(1), null);
+
+		//* nothing is edited when the document can't be changed
+		sendEdit.mockClear();
+		editing.setEditing(editingFor(false));
+		click(first);
+		click(first);
+		expect(sendEdit).not.toHaveBeenCalled();
+		editing.cleanup();
+	});
+
+	test("types into a field on the page, then gives its own text node back with the new text", () => {
+		const { editing, sendInlineInput, sendInlineEnd } = install();
+		const { items } = renderPage();
+		const title = items[0]?.title;
+		if (!title) throw new Error("missing title");
+		title.append("Fast setup");
+		const text = title.firstChild as Text;
+		editing.setEditing(editingFor());
+		click(title);
+		click(title);
+
+		editing.startInline(titleTarget(0), { multiline: false, clear: false });
+		expect(title.isContentEditable).toBe(true);
+		text.data = "Faster  setup ";
+		title.dispatchEvent(new Event("input"));
+		expect(sendInlineInput).toHaveBeenLastCalledWith(
+			titleTarget(0),
+			"Faster setup",
+		);
+		//* clicks in the text move the caret rather than following the link around it
+		expect(click(text.parentElement ?? title).defaultPrevented).toBe(true);
+
+		title.dispatchEvent(
+			new KeyboardEvent("keydown", { key: "Enter", cancelable: true }),
+		);
+		expect(sendInlineEnd).toHaveBeenLastCalledWith(titleTarget(0), false);
+		expect(title.hasAttribute("contenteditable")).toBe(false);
+		expect(title.firstChild).toBe(text);
+		expect(text.data).toBe("Faster setup");
+		editing.cleanup();
+	});
+
+	test("Escape goes back to the text that was there, and a placeholder is cleared to type into", () => {
+		const { editing, sendInlineInput, sendInlineEnd } = install();
+		const { items } = renderPage();
+		const title = items[0]?.title;
+		if (!title) throw new Error("missing title");
+		title.append("Add a title");
+		const text = title.firstChild as Text;
+		editing.setEditing(editingFor());
+
+		editing.startInline(titleTarget(0), { multiline: false, clear: true });
+		expect(text.data).toBe("");
+		text.data = "Hello";
+		title.dispatchEvent(new Event("input"));
+		expect(sendInlineInput).toHaveBeenLastCalledWith(titleTarget(0), "Hello");
+
+		title.dispatchEvent(
+			new KeyboardEvent("keydown", { key: "Escape", cancelable: true }),
+		);
+		expect(sendInlineEnd).toHaveBeenLastCalledWith(titleTarget(0), true);
+		expect(text.data).toBe("Add a title");
+
+		//* turning edit mode off finishes typing, keeping it
+		editing.startInline(titleTarget(0), { multiline: true, clear: false });
+		editing.setEditing(null);
+		expect(sendInlineEnd).toHaveBeenLastCalledWith(titleTarget(0), false);
+		expect(title.hasAttribute("contenteditable")).toBe(false);
+		editing.cleanup();
+	});
+
+	test("says typing ended when the field to type into isn't on the page", () => {
+		const { editing, sendInlineEnd } = install();
+		renderPage();
+		editing.setEditing(editingFor());
+		const missing = { ...titleTarget(0), path: ["items", 0, "summary"] };
+
+		editing.startInline(missing, { multiline: false, clear: false });
+		expect(sendInlineEnd).toHaveBeenCalledWith(missing, true);
+		editing.cleanup();
+	});
+
+	test("keeps the selection where it's drawn while the builder zooms, scrolling as the viewport grows", () => {
+		const { editing } = install();
+		renderPage();
+		editing.setEditing(editingFor());
+		editing.highlight(brickTarget("b"));
+		const scrollBy = vi.spyOn(window, "scrollBy").mockImplementation(() => {});
+		const resize = (height: number) => {
+			Object.defineProperty(window, "innerHeight", {
+				value: height,
+				configurable: true,
+			});
+			window.dispatchEvent(new Event("resize"));
+		};
+		resize(800);
+
+		//* without zooming, a taller viewport is only a resize
+		resize(1000);
+		expect(scrollBy).not.toHaveBeenCalled();
+
+		editing.setZooming(true);
+		resize(2000);
+		//* the second brick's middle, 600px down, would be drawn at 1200px, so the page scrolls up by 600px
+		expect(scrollBy).toHaveBeenLastCalledWith({
+			top: -600,
+			behavior: "instant",
+		});
+		editing.setZooming(false);
+		editing.cleanup();
+	});
+
+	test("shows a brick dragged in the builder's fields moving to where it would land, in place of its selection", async () => {
+		const shifts = trackShifts();
+		const { editing } = install();
+		const { first, second } = renderPage();
+		editing.setEditing(editingFor());
+		editing.highlight(brickTarget("b"));
+		const box = (name: string) =>
+			layer()?.querySelector<HTMLElement>(`.${name}`) ?? null;
+
+		//* dropped on the second brick, the first takes its place, which moves up to make room
+		editing.showDragged(brickTarget("a"), {
+			anchor: brickTarget("b"),
+			place: "after",
+		});
+		await frame();
+		await frame();
+		expect(box("landing")?.hidden).toBe(false);
+		expect(box("selected")?.hidden).toBe(true);
+		expect(shifts.get(first)).toEqual({
+			translate: "0px 400px",
+			opacity: "0.4",
+		});
+		expect(shifts.get(second)).toEqual({
+			translate: "0px -400px",
+			opacity: "1",
+		});
+
+		//* once dropped it waits there for the page to re-render with the move
+		editing.showDragged(null, null);
+		await frame();
+		await frame();
+		expect(box("landing")?.hidden).toBe(true);
+		expect(box("selected")?.hidden).toBe(false);
+		expect(shifts.get(first)).toEqual({
+			translate: "0px 400px",
+			opacity: "1",
+		});
 		editing.cleanup();
 	});
 });

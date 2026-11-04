@@ -176,6 +176,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 									type="button"
 									variant="outline"
 									size="sm"
+									data-field-action=""
 									onClick={openUserSelectModal}
 									disabled={props.disabled || !canAddMore()}
 									class="capitalize"
@@ -188,11 +189,9 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 											count={selectedUserIds().length}
 											min={props.minItems}
 											max={props.maxItems}
+											showLimit={true}
+											class="tabular-nums"
 										/>
-										{typeof props.minItems !== "number" &&
-										typeof props.maxItems !== "number"
-											? ` ${T()("common.selected").toLowerCase()}`
-											: ""}
 									</p>
 								</Show>
 							</div>
@@ -224,6 +223,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										variant="ghost"
 										size="xs"
 										shape="square"
+										data-field-action=""
 										onClick={openUserSelectModal}
 										disabled={props.disabled}
 									>
@@ -250,6 +250,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 							type="button"
 							variant="outline"
 							size="sm"
+							data-field-action=""
 							onClick={openUserSelectModal}
 							disabled={props.disabled || !canAddMore()}
 							class="capitalize"
