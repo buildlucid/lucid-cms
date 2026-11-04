@@ -629,6 +629,7 @@ const formatContentRead = (props: {
 		);
 		return {
 			id: brick.id,
+			ref: brick.ref,
 			key: brick.key,
 			order: brick.order,
 			fields: builder

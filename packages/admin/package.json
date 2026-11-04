@@ -39,6 +39,10 @@
 		"./utils": {
 			"types": "./dist/browser/utils.d.mts",
 			"default": "./src/exports/utils.ts"
+		},
+		"./toolbar": {
+			"types": "./dist/toolbar/toolbar.d.ts",
+			"default": "./dist/toolbar/toolbar.js"
 		}
 	},
 	"scripts": {
@@ -61,7 +65,6 @@
 	],
 	"license": "MIT",
 	"devDependencies": {
-		"@lucidcms/preview-protocol": "*",
 		"@types/classnames": "^2.3.4",
 		"@types/node": "^24.19.2",
 		"@types/object-hash": "^3.0.6",

@@ -1,5 +1,5 @@
 ---
-import { createToolbarAttributes } from "@lucidcms/client/toolbar";
+import { createToolbarAttributes } from "@lucidcms/admin/toolbar";
 import "../index.css";
 import getLucidData, { resolvePageLocale } from "../services/lucid-data";
 
@@ -192,7 +192,7 @@ const toolbarAttributes = createToolbarAttributes({
 
 		<script>
 			import { setupPreview } from "@lucidcms/client/preview";
-			import { LucidToolbarElement } from "@lucidcms/client/toolbar";
+			import { LucidToolbarElement } from "@lucidcms/admin/toolbar";
 
 			const preview = setupPreview();
 			window.addEventListener("pagehide", preview.cleanup, { once: true });

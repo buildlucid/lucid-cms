@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@astrojs/node": "^11.1.9",
 		"@lucidcms/astro": "*",
+		"@lucidcms/admin": "*",
 		"@lucidcms/client": "*",
 		"@lucidcms/core": "*",
 		"@lucidcms/db-sqlite": "*",

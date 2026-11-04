@@ -375,6 +375,59 @@ export type PreviewRuntimeState =
 			expiresAt: string;
 	  };
 
+/** A brick by its `ref`, which stays the same when bricks are reordered or saved. */
+export type PreviewFieldBrick = {
+	type: "fixed" | "builder";
+	key: string;
+	ref: string;
+};
+
+/** A place in a document that preview markup points to: a field by its content path, or a brick itself when the path is empty. */
+export type PreviewFieldTarget = {
+	collectionKey: string;
+	documentId: number;
+	brick?: PreviewFieldBrick;
+	path: Array<string | number>;
+	locale?: string;
+};
+
+/** A change to the previewed content: unsaved edits in the builder, or a save. */
+export type PreviewUpdate = {
+	/** Rises with every change within one preview. */
+	readonly revision: number;
+	/** Aborts when a newer update replaces this one. Pass it to fetches. */
+	readonly signal: AbortSignal;
+};
+
+/** Re-reads the page's Lucid content and re-renders it. Throwing or rejecting reloads the page instead. */
+export type PreviewUpdateHandler = (
+	update: PreviewUpdate,
+) => void | Promise<void>;
+
+/** What a site's `setupPreview` hands the preview page script the CMS serves. */
+export type PreviewPageOptions = {
+	/** The page's update handlers, which can change while it runs. */
+	handlers: ReadonlySet<PreviewUpdateHandler>;
+	/** Whether to fetch the page again and update its markup in place on each change. */
+	morph: boolean;
+	/** Custom elements' server markup, recorded before they hydrate, which morphing compares new markup with. */
+	serverMarkup: WeakMap<Element, string>;
+};
+
+/** A running preview page script. */
+export type PreviewPageRuntime = {
+	/** Tells the builder whether the page now re-renders itself. */
+	handlersChanged: () => void;
+	cleanup: () => void;
+};
+
+/** The preview page script, found on `window` under `Symbol.for("lucid.preview-page")` once it loads. */
+export type PreviewPageScript = {
+	version: 1;
+	/** Starts the runtime, or returns null outside the builder's preview frame. */
+	setup: (options: PreviewPageOptions) => PreviewPageRuntime | null;
+};
+
 /** Public metadata returned after resolving a browser-held preview token. */
 export type PreviewResolution = Pick<
 	Extract<PreviewRuntimeState, { kind: "preview" }>,

@@ -8,6 +8,8 @@ interface SpawnToastProps {
 	status?: "success" | "error" | "warning" | "info";
 	/** In milliseconds. */
 	duration?: number;
+	/** A button that runs `onClick` and closes the toast, such as undoing what it reports. */
+	action?: { label: string; onClick: () => void };
 }
 
 /**
@@ -32,6 +34,7 @@ const spawnToast = (props: SpawnToastProps) => {
 				message={props.message}
 				type={props.status || "info"}
 				duration={props.duration}
+				action={props.action}
 			/>
 		),
 		{

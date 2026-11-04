@@ -358,3 +358,73 @@ describe("undo and redo", () => {
 		expect(title(store)).toBe("Changed");
 	});
 });
+
+test("a brick added at an order moves the builder bricks from there down", () => {
+	const store = createStore();
+	const brickConfig = {
+		key: "cta",
+		fields: [],
+	} as unknown as Parameters<typeof store.get.addBrick>[0]["brickConfig"];
+	const last = store.get.addBrick({ brickConfig, locales: ["en"] });
+	const first = store.get.addBrick({ brickConfig, locales: ["en"], order: 0 });
+
+	const orders = Object.fromEntries(
+		store.get.bricks.map((brick) => [brick.ref, brick.order]),
+	);
+	expect(orders).toEqual({
+		"collection-pseudo-brick": -1,
+		[first]: 0,
+		hero: 1,
+		[last]: 2,
+	});
+});
+
+test("bricks and repeater groups move to a position, and groups can be added at one", () => {
+	const store = createStore();
+	const labelConfig: CollectionLeafFieldConfig = {
+		type: "text",
+		key: "label",
+		details: { label: { type: "lucid.literal", value: "Label" } },
+	};
+	const linkRefs = () =>
+		store.get.bricks
+			.find((brick) => brick.ref === "hero")
+			?.fields[1]?.groups?.map((group) => [group.ref, group.order]);
+
+	const first = store.get.addRepeaterGroup({
+		brickIndex: 1,
+		fieldConfig: [labelConfig],
+		key: "links",
+		locales: ["en"],
+		index: 0,
+	});
+	expect(linkRefs()).toEqual([
+		[first, 0],
+		["link-1", 1],
+	]);
+	store.get.moveRepeaterGroup({
+		brickIndex: 1,
+		repeaterKey: "links",
+		groupRef: "link-1",
+		index: 0,
+	});
+	expect(linkRefs()).toEqual([
+		["link-1", 0],
+		[first, 1],
+	]);
+
+	const brickConfig = {
+		key: "cta",
+		fields: [],
+	} as unknown as Parameters<typeof store.get.addBrick>[0]["brickConfig"];
+	const cta = store.get.addBrick({ brickConfig, locales: ["en"] });
+	store.get.moveBrick({ brickRef: cta, index: 0 });
+	expect(
+		store.get.bricks
+			.filter((brick) => brick.type === "builder")
+			.map((brick) => [brick.ref, brick.order]),
+	).toEqual([
+		[cta, 0],
+		["hero", 1],
+	]);
+});

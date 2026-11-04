@@ -1,5 +1,5 @@
-import type { PreviewFieldTarget } from "@lucidcms/preview-protocol";
 import type { Collection } from "@types";
+import type { PreviewFieldTarget } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import type {
 	CollectionDataFieldConfig,
@@ -115,11 +115,15 @@ const findContainerConfig = (props: {
 	return null;
 };
 
-/** Resolves preview paths from content responses into builder DOM targets, omitting section and collapsible keys from stored field paths. */
+/**
+ * Resolves preview paths from content responses into builder DOM targets, omitting section and
+ * collapsible keys from stored field paths. A brick without a path resolves to its header and a
+ * repeater item to its group, both opened.
+ */
 export const resolvePreviewFieldTarget = (props: {
 	target: PreviewFieldTarget;
 	collection: Collection;
-	bricks: Array<Pick<BrickData, "key" | "order" | "type">>;
+	bricks: Array<Pick<BrickData, "key" | "ref" | "type">>;
 }): ResolvedPreviewField | null => {
 	const targetBrick = props.target.brick;
 	const brickIndex = targetBrick
@@ -127,11 +131,17 @@ export const resolvePreviewFieldTarget = (props: {
 				(brick) =>
 					brick.type === targetBrick.type &&
 					brick.key === targetBrick.key &&
-					brick.order === targetBrick.order,
+					brick.ref === targetBrick.ref,
 			)
 		: props.bricks.findIndex((brick) => brick.type === "collection-fields");
 	const brick = props.bricks[brickIndex];
 	if (!brick) return null;
+
+	if (props.target.path.length === 0) {
+		if (brick.type === "collection-fields") return null;
+		const headerId = getPreviewStructureId({ brickIndex, type: "brick" });
+		return { structureIds: [headerId], fieldId: headerId };
+	}
 
 	const brickConfig =
 		brick.type === "fixed"
@@ -205,13 +215,16 @@ export const resolvePreviewFieldTarget = (props: {
 
 		storedPath.push(groupIndex);
 		const groupPath = [...pathPrefix, key, groupIndex];
-		structureIds.push(
-			getPreviewStructureId({
-				brickIndex,
-				type: "group",
-				path: groupPath,
-			}),
-		);
+		const groupId = getPreviewStructureId({
+			brickIndex,
+			type: "group",
+			path: groupPath,
+		});
+		structureIds.push(groupId);
+		//* a repeater item on its own opens and shows its group
+		if (pathOffset + 2 === props.target.path.length) {
+			return { structureIds, fieldId: groupId };
+		}
 		configs = match.config.fields;
 		pathPrefix = groupPath;
 		pathOffset += 2;

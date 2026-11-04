@@ -1,4 +1,3 @@
-import type { PreviewScrollState } from "@lucidcms/preview-protocol";
 import { useNavigate, useParams } from "@solidjs/router";
 import type { RequestDetails, RequestDocument } from "@types";
 import classnames from "classnames";
@@ -48,13 +47,17 @@ import { useNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuar
 import { PageBuilderStateProvider } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import { usePreviewFocus } from "@/hooks/usePreviewFocus/usePreviewFocus";
+import { usePreviewStructure } from "@/hooks/usePreviewStructure/usePreviewStructure";
 import { useStoredVersionRedirect } from "@/hooks/useStoredVersionRedirect/useStoredVersionRedirect";
+import type { PreviewScrollState } from "@/preview/protocol";
 import brickStore from "@/store/brickStore/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
+import { getPreviewEditingDetails } from "@/utils/preview-editing";
+import { getPreviewErrors } from "@/utils/preview-errors";
 import { getRequestRoute } from "@/utils/route-helpers";
 import DocumentChangedBar from "./parts/DocumentChangedBar";
 import DocumentEditorSkeleton from "./parts/DocumentEditorSkeleton";
@@ -254,14 +257,51 @@ const DocumentEditorPage: Component<{
 		autoSaveMetadata: mutations.autoSaveMetadata,
 		locale: docState.contentLocale,
 	});
+	//* the preview shows unsaved edits only to those who could save them
+	const canSyncPreviewDraft = () =>
+		uiState.hasSavePermission() && !uiState.isBuilderLocked();
 	const previewFocus = usePreviewFocus({
 		collection: docState.collection,
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
 		locales: docState.contentLocales,
-		hasUnsavedContent: brickStore.getDocumentContentMutated,
-		hasUnsavedBuilderStructure: brickStore.getBuilderBrickStructureMutated,
+		previewBehind: () =>
+			!canSyncPreviewDraft() && brickStore.getDocumentContentMutated(),
 	});
+	const previewStructure = usePreviewStructure({
+		collection: docState.collection,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		locales: docState.contentLocales,
+		reveal: (target) => {
+			void previewFocus.requestTarget(target);
+			previewFocus.pointOut(target);
+		},
+	});
+	const previewEditingDetails = createMemo(() => {
+		const collection = docState.collection();
+		return collection ? getPreviewEditingDetails(collection) : null;
+	});
+	const previewErrors = createMemo(
+		() => {
+			const collection = docState.collection();
+			const brickErrors = brickStore.get.brickErrors;
+			const fieldsErrors = brickStore.get.fieldsErrors;
+			if (!collection || (!brickErrors.length && !fieldsErrors.length)) {
+				return [];
+			}
+			return getPreviewErrors({
+				collection,
+				bricks: brickStore.get.bricks,
+				brickErrors,
+				fieldsErrors,
+				locale: preview.locale(),
+			});
+		},
+		[],
+		//* item indexes come from the bricks, which change with every edit
+		{ equals: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
+	);
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
 	const registerPreviewScrollCapture = (
@@ -879,12 +919,18 @@ const DocumentEditorPage: Component<{
 											draftVersionId={() =>
 												docState.document()?.versionId ?? undefined
 											}
-											canSyncDraft={() =>
-												uiState.hasSavePermission() &&
-												!uiState.isBuilderLocked()
-											}
+											canSyncDraft={canSyncPreviewDraft}
 											route={() => docState.document()?.route}
+											canEditStructure={() =>
+												canSyncPreviewDraft() && !brickStore.get.locked
+											}
+											editingDetails={previewEditingDetails}
+											errors={previewErrors}
+											builderTarget={previewFocus.builderTarget}
 											onFocusField={previewFocus.requestTarget}
+											onChange={previewStructure.handle}
+											onUndo={previewStructure.undo}
+											repeaterCapacity={previewStructure.capacity}
 											registerScrollCapture={registerPreviewScrollCapture}
 											consumeScrollRestore={consumePreviewScrollRestore}
 										/>

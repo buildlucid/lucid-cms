@@ -137,7 +137,9 @@ export const createBrickStore = (idPrefix = "") => {
 		addBrick: (props: {
 			brickConfig: CollectionBrickConfig;
 			locales: string[];
-		}) => void;
+			/** The order to insert the brick at, moving later builder bricks down. Appends without one. */
+			order?: number;
+		}) => string;
 		addEmbeddedBrick: (props: {
 			brickConfig: CollectionBrickConfig;
 			locales: string[];
@@ -152,6 +154,7 @@ export const createBrickStore = (idPrefix = "") => {
 			brickRef: string;
 			targetBrickRef: string;
 		}) => void;
+		moveBrick: (props: { brickRef: string; index: number }) => void;
 		setFieldValue: (params: {
 			brickIndex: number;
 			key: string;
@@ -189,7 +192,9 @@ export const createBrickStore = (idPrefix = "") => {
 			ref?: string;
 			parentRepeaterKey?: string;
 			locales: string[];
-		}) => void;
+			/** The position to insert the group at, moving later groups down. Appends without one. */
+			index?: number;
+		}) => string | undefined;
 		removeRepeaterGroup: (params: {
 			brickIndex: number;
 			repeaterKey: string;
@@ -202,6 +207,14 @@ export const createBrickStore = (idPrefix = "") => {
 			repeaterKey: string;
 			selectedRef: string;
 			targetRef: string;
+			ref?: string;
+			parentRepeaterKey?: string;
+		}) => void;
+		moveRepeaterGroup: (params: {
+			brickIndex: number;
+			repeaterKey: string;
+			groupRef: string;
+			index: number;
 			ref?: string;
 			parentRepeaterKey?: string;
 		}) => void;
@@ -364,8 +377,9 @@ export const createBrickStore = (idPrefix = "") => {
 				set("agentEdited", true);
 			});
 		},
-		/** Appends an initialized builder brick and schedules autosave for the structural change. */
+		/** Adds an initialized builder brick, at the end or at an order, and schedules autosave for the structural change. Returns its ref. */
 		addBrick(props) {
+			const ref = nanoid();
 			recordBricks({}, () => {
 				batch(() => {
 					set(
@@ -374,11 +388,19 @@ export const createBrickStore = (idPrefix = "") => {
 							const largestOrder = draft?.reduce((prev, current) => {
 								return prev.order > current.order ? prev : current;
 							});
+							if (props.order !== undefined) {
+								for (const brick of draft) {
+									if (brick.type === "builder" && brick.order >= props.order) {
+										brick.order += 1;
+									}
+								}
+							}
 
 							draft.push({
-								ref: nanoid(),
+								ref,
 								key: props.brickConfig.key,
-								order: largestOrder ? largestOrder.order + 1 : 0,
+								order:
+									props.order ?? (largestOrder ? largestOrder.order + 1 : 0),
 								type: "builder",
 								open: false,
 								fields: createBrickFields({
@@ -393,12 +415,11 @@ export const createBrickStore = (idPrefix = "") => {
 				});
 				rebuildBrickFieldIndex(get.bricks.length - 1);
 			});
+			return ref;
 		},
 		/**
-		 * Creates a brick owned by a rich-text embedded-brick node. Its fields are
-		 * seeded here rather than on first edit, because nothing renders an embedded
-		 * brick's body until the edit drawer opens, so it would otherwise save with
-		 * no values and preview as a bare brick key.
+		 * Creates an embedded brick and seeds its fields immediately, since its edit drawer may never open
+		 * before saving or previewing.
 		 */
 		addEmbeddedBrick(props) {
 			const ref = nanoid();
@@ -516,6 +537,37 @@ export const createBrickStore = (idPrefix = "") => {
 						set("autoSaveCounter", (prev) => prev + 1);
 						markDocumentChange({ content: true, structure: true });
 					}
+				});
+			});
+		},
+		/** Moves a builder brick to a position among the builder bricks, renumbering their order. */
+		moveBrick(props) {
+			const ordered = get.bricks
+				.filter((brick) => brick.type === "builder")
+				.sort((a, b) => a.order - b.order)
+				.map((brick) => brick.ref);
+			const from = ordered.indexOf(props.brickRef);
+			const index = Math.min(Math.max(props.index, 0), ordered.length - 1);
+			if (from === -1 || from === index) return;
+			ordered.splice(from, 1);
+			ordered.splice(index, 0, props.brickRef);
+
+			recordBricks({}, () => {
+				batch(() => {
+					set(
+						"bricks",
+						produce((draft) => {
+							for (const brick of draft) {
+								const order = ordered.indexOf(brick.ref);
+								if (brick.type === "builder" && order !== -1) {
+									brick.order = order;
+								}
+							}
+							draft.sort((a, b) => a.order - b.order);
+						}),
+					);
+					set("autoSaveCounter", (prev) => prev + 1);
+					markDocumentChange({ content: true, structure: true });
 				});
 			});
 		},
@@ -648,6 +700,7 @@ export const createBrickStore = (idPrefix = "") => {
 		/** Appends an initialized repeater group and refreshes field paths so nested fields stay fast to locate. */
 		addRepeaterGroup(params) {
 			let groupAdded = false;
+			const groupRef = nanoid();
 			const fieldPath = getBrickFieldPath({
 				brickIndex: params.brickIndex,
 				key: params.key,
@@ -691,7 +744,7 @@ export const createBrickStore = (idPrefix = "") => {
 							if (field.groups.length === 0) {
 								field.groups = [
 									{
-										ref: nanoid(),
+										ref: groupRef,
 										order: 0,
 										open: false,
 										fields: groupFields,
@@ -701,12 +754,28 @@ export const createBrickStore = (idPrefix = "") => {
 								return;
 							}
 
+							if (params.index !== undefined) {
+								//* groups are renumbered in their current order, with a gap for the new one
+								field.groups.sort((a, b) => a.order - b.order);
+								field.groups.forEach((group, index) => {
+									group.order = index < (params.index ?? 0) ? index : index + 1;
+								});
+								field.groups.splice(params.index, 0, {
+									ref: groupRef,
+									order: Math.min(params.index, field.groups.length),
+									open: false,
+									fields: groupFields,
+								});
+								groupAdded = true;
+								return;
+							}
+
 							const largestOrder = field.groups?.reduce((prev, current) => {
 								return prev.order > current.order ? prev : current;
 							});
 
 							field.groups.push({
-								ref: nanoid(),
+								ref: groupRef,
 								order: largestOrder.order + 1,
 								open: false,
 								fields: groupFields,
@@ -722,6 +791,7 @@ export const createBrickStore = (idPrefix = "") => {
 				});
 				if (groupAdded) rebuildBrickFieldIndex(params.brickIndex);
 			});
+			return groupAdded ? groupRef : undefined;
 		},
 		/** Removes a repeater group and rebuilds indexed paths so deleted nested fields cannot be resolved later. */
 		removeRepeaterGroup(params) {
@@ -825,6 +895,58 @@ export const createBrickStore = (idPrefix = "") => {
 					}
 				});
 				if (groupOrderChanged) rebuildBrickFieldIndex(params.brickIndex);
+			});
+		},
+		/** Moves a repeater group to a position in its repeater, renumbering the groups' order. */
+		moveRepeaterGroup(params) {
+			let groupMoved = false;
+			const fieldPath = getBrickFieldPath({
+				brickIndex: params.brickIndex,
+				key: params.repeaterKey,
+				groupRef: params.ref,
+			});
+
+			recordBricks({ brickIndex: params.brickIndex }, () => {
+				batch(() => {
+					set(
+						"bricks",
+						params.brickIndex,
+						"fields",
+						produce((fieldsDraft) => {
+							const field =
+								(fieldPath && getFieldAtPath(fieldsDraft, fieldPath)) ||
+								brickHelpers.findFieldRecursive({
+									fields: fieldsDraft,
+									targetKey: params.repeaterKey,
+									groupRef: params.ref,
+									repeaterKey: params.parentRepeaterKey,
+								});
+							if (field?.type !== "repeater" || !field.groups) return;
+
+							field.groups.sort((a, b) => a.order - b.order);
+							const from = field.groups.findIndex(
+								(group) => group.ref === params.groupRef,
+							);
+							const index = Math.min(
+								Math.max(params.index, 0),
+								field.groups.length - 1,
+							);
+							const [group] = from === -1 ? [] : field.groups.splice(from, 1);
+							if (!group) return;
+							field.groups.splice(index, 0, group);
+							field.groups.forEach((item, order) => {
+								item.order = order;
+							});
+							groupMoved = from !== index;
+						}),
+					);
+
+					if (groupMoved) {
+						set("autoSaveCounter", (prev) => prev + 1);
+						markDocumentChange({ content: true });
+					}
+				});
+				if (groupMoved) rebuildBrickFieldIndex(params.brickIndex);
 			});
 		},
 		/** Toggles a repeater group's UI expansion and advances only the revision that tracks editor state. */

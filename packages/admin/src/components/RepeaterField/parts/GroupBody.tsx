@@ -227,13 +227,18 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						<Pill variant="outline" class="shrink-0">
 							#{props.groupIndex() + 1}
 						</Pill>
-						<h3 class="text-sm text-subtitle font-medium truncate">
-							<Show when={titlePreview()}>{titlePreview()}</Show>
-							<Show when={!titlePreview()}>
-								{helpers.getLocaleValue({
-									value: props.fieldConfig.details?.label,
-								})}
-							</Show>
+						<h3
+							data-preview-focus-label
+							class="flex min-w-0 items-center text-sm text-subtitle font-medium"
+						>
+							<span class="truncate">
+								<Show when={titlePreview()}>{titlePreview()}</Show>
+								<Show when={!titlePreview()}>
+									{helpers.getLocaleValue({
+										value: props.fieldConfig.details?.label,
+									})}
+								</Show>
+							</span>
 						</h3>
 					</div>
 				</div>

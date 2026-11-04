@@ -4,9 +4,6 @@ export default defineConfig([
 	{
 		dts: true,
 		format: "esm",
-		deps: {
-			alwaysBundle: ["@lucidcms/preview-protocol"],
-		},
 		shims: false,
 		sourcemap: true,
 		metafile: true,
@@ -20,25 +17,6 @@ export default defineConfig([
 	{
 		dts: true,
 		format: "esm",
-		deps: {
-			onlyBundle: false,
-		},
-		shims: false,
-		sourcemap: true,
-		metafile: true,
-		minify: true,
-		platform: "browser",
-		target: "es2022",
-		entry: ["src/toolbar.ts"],
-		clean: false,
-		unbundle: false,
-	},
-	{
-		dts: true,
-		format: "esm",
-		deps: {
-			alwaysBundle: ["@lucidcms/preview-protocol"],
-		},
 		shims: false,
 		sourcemap: true,
 		metafile: true,
@@ -52,9 +30,6 @@ export default defineConfig([
 	{
 		dts: true,
 		format: "esm",
-		deps: {
-			alwaysBundle: ["@lucidcms/preview-protocol"],
-		},
 		shims: false,
 		sourcemap: true,
 		metafile: true,
@@ -64,22 +39,5 @@ export default defineConfig([
 		entry: ["src/markup.ts"],
 		clean: false,
 		unbundle: false,
-	},
-	{
-		dts: false,
-		format: "esm",
-		deps: {
-			alwaysBundle: ["@lucidcms/preview-protocol"],
-		},
-		shims: false,
-		sourcemap: true,
-		metafile: true,
-		minify: true,
-		platform: "browser",
-		target: "es2022",
-		entry: ["src/bootstrap.ts"],
-		clean: false,
-		unbundle: false,
-		outputOptions: { codeSplitting: false },
 	},
 ]);

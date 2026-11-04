@@ -1,23 +1,19 @@
-export type { PreviewMode } from "@lucidcms/types";
+import type { PreviewUpdateHandler } from "@lucidcms/types";
 
-/** A change to the previewed content: unsaved edits in the builder, or a save. */
-export type PreviewUpdate = {
-	/** Rises with every change within one preview. */
-	readonly revision: number;
-	/** Aborts when a newer update replaces this one. Pass it to fetches. */
-	readonly signal: AbortSignal;
+export type { PreviewUpdate, PreviewUpdateHandler } from "@lucidcms/types";
+
+export type PreviewOptions = {
+	/** The CMS's address, which serves the preview script. Defaults to the page's own origin, for sites the CMS serves. */
+	host?: string | URL;
+	/** Fetches the page again on each change and updates it in place, for server-rendered sites. Handlers registered with `onUpdate` run too. */
+	morph?: boolean;
 };
-
-/** Re-reads the page's Lucid content and re-renders it. Throwing or rejecting reloads the page instead. */
-export type PreviewUpdateHandler = (
-	update: PreviewUpdate,
-) => void | Promise<void>;
 
 /** Preview runtime lifecycle. Await ready before relying on installed listeners; call cleanup when disposing the page. */
 export type PreviewController = {
-	/** Whether the builder preview runtime is installed. */
+	/** Whether the builder preview runtime is running. */
 	readonly active: boolean;
-	/** Resolves after the builder preview runtime has loaded. */
+	/** Resolves once the preview script has loaded, or failed to. */
 	readonly ready: Promise<void>;
 	/** The preview token from the page URL, to pass to Lucid reads. Null outside the builder preview. */
 	readonly token: string | null;

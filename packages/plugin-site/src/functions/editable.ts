@@ -1,18 +1,12 @@
-import { previewFieldMarkup } from "@lucidcms/client/markup";
+import { getPreviewTarget, previewFieldMarkup } from "@lucidcms/client/markup";
 import { type RenderInfo, safe, withRender } from "@lucidkiln/core";
-import { fieldTargets } from "../preview/field-targets.js";
 import type { SiteState } from "../types.js";
 
+/** Preview attributes for a field of a document, brick, section or repeater item, or for a brick itself without a field. */
 const editable = withRender(
-	(render: RenderInfo<SiteState>, source: unknown, field: string) => {
+	(render: RenderInfo<SiteState>, source: unknown, field?: string) => {
 		if (render.state.preview === null) return "";
-
-		if (typeof source !== "object" || source === null) return "";
-
-		const target = fieldTargets.get(source);
-		return target
-			? safe(previewFieldMarkup({ ...target, path: [...target.path, field] }))
-			: "";
+		return safe(previewFieldMarkup(getPreviewTarget(source, field)));
 	},
 );
 

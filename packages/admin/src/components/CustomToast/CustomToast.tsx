@@ -17,6 +17,7 @@ import {
 	Switch,
 } from "solid-js";
 import { type Toast, toast } from "solid-toast";
+import Button from "@/components/Button/Button";
 import T from "@/translations";
 
 interface CustomToastProps {
@@ -25,6 +26,7 @@ interface CustomToastProps {
 	type: "success" | "error" | "warning" | "info";
 	toast: Toast;
 	duration?: number;
+	action?: { label: string; onClick: () => void };
 }
 
 const CustomToast: Component<CustomToastProps> = (props) => {
@@ -109,6 +111,23 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 						<p class="text-sm leading-5 text-body">{props.message}</p>
 					</Show>
 				</div>
+				<Show when={props.action}>
+					{(action) => (
+						<Button
+							data-drawer-ignore
+							type="button"
+							variant="outline"
+							size="xs"
+							class="ml-auto shrink-0"
+							onClick={() => {
+								action().onClick();
+								toast.dismiss(props.toast.id);
+							}}
+						>
+							{action().label}
+						</Button>
+					)}
+				</Show>
 			</div>
 			<button
 				data-drawer-ignore

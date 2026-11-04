@@ -35,8 +35,8 @@ const getPreviewFieldIndicator = (field: HTMLElement): HTMLElement => {
 	const labels = field.querySelectorAll<HTMLElement>(
 		"label, [data-preview-focus-label]",
 	);
-	//* a trigger isn't a field, so only labels outside any field are its own
-	const owner = field.hasAttribute("data-preview-focus-field") ? field : null;
+	//* labels inside a nested field are that field's, eg. a repeater group header's title belongs to the group, which sits in its repeater's field
+	const owner = field.closest("[data-preview-focus-field]");
 	for (const label of labels) {
 		if (label.closest("[data-preview-focus-field]") === owner) return label;
 	}
@@ -61,6 +61,51 @@ export const getPreviewStructureId = (props: PreviewFocusStructure) => {
 	return `${STRUCTURE_ID_PREFIX}:${props.type}:${props.brickIndex}:${encodeURIComponent(
 		JSON.stringify(path),
 	)}`;
+};
+
+const isPreviewFocusPath = (value: unknown): value is PreviewFocusPath =>
+	Array.isArray(value) &&
+	value.every((part) => typeof part === "string" || typeof part === "number");
+
+/** Reads the brick index and path written by `getPreviewFieldId`, or null when malformed. */
+const parsePreviewId = (value: string) => {
+	const separator = value.indexOf(":");
+	const brickIndex = Number(value.slice(0, separator));
+	if (separator < 0 || !Number.isSafeInteger(brickIndex)) return null;
+	try {
+		const path: unknown = JSON.parse(
+			decodeURIComponent(value.slice(separator + 1)),
+		);
+		return isPreviewFocusPath(path) ? { brickIndex, path } : null;
+	} catch {
+		return null;
+	}
+};
+
+/**
+ * The field, or brick header, an element in the builder belongs to, read from the IDs that
+ * `getPreviewFieldId` and `getPreviewStructureId` give them. A brick header has an empty path.
+ */
+export const findPreviewFocusTarget = (
+	element: Element,
+	idPrefix = "",
+): { brickIndex: number; path: PreviewFocusPath } | null => {
+	const fieldPrefix = `${idPrefix}${FIELD_ID_PREFIX}:`;
+	const brickPrefix = `${idPrefix}${STRUCTURE_ID_PREFIX}:brick:`;
+	for (
+		let current: Element | null = element;
+		current;
+		current = current.parentElement
+	) {
+		if (current.id.startsWith(fieldPrefix)) {
+			return parsePreviewId(current.id.slice(fieldPrefix.length));
+		}
+		if (current.id.startsWith(brickPrefix)) {
+			const brick = parsePreviewId(current.id.slice(brickPrefix.length));
+			return brick ? { brickIndex: brick.brickIndex, path: [] } : null;
+		}
+	}
+	return null;
 };
 
 /** The height of the sticky document header, which covers the top of the builder. */

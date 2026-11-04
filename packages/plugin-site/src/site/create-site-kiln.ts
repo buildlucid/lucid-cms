@@ -14,6 +14,7 @@ import createReadFunctions, {
 import editable from "../functions/editable.js";
 import footer from "../functions/footer.js";
 import head from "../functions/head.js";
+import isPreview from "../functions/is-preview.js";
 import notFound from "../functions/not-found.js";
 import redirect from "../functions/redirect.js";
 import richText from "../functions/rich-text.js";
@@ -62,6 +63,7 @@ const createSiteKiln = (props: {
 			development: props.data.kind === "dev",
 		}),
 		editable,
+		isPreview,
 		head,
 		footer,
 		notFound,

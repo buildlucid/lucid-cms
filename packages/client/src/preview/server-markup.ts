@@ -1,18 +1,17 @@
-/**
- * Tracks custom elements' original server markup. Once hydrated, their DOM is client-owned;
- * changed server markup replaces the entire element.
- */
-export const serverMarkup = new WeakMap<Element, string>();
+const isCustomElement = (element: Element) => element.localName.includes("-");
 
-export const isCustomElement = (element: Element) =>
-	element.localName.includes("-");
-
-/** Records the server markup of the custom elements in a subtree, before it is inserted or they upgrade and hydrate. */
-export const recordServerMarkup = (node: Node) => {
-	if (node.nodeType !== Node.ELEMENT_NODE) return;
-	const root = node as Element;
-	if (isCustomElement(root)) serverMarkup.set(root, root.outerHTML);
-	for (const element of root.querySelectorAll("*")) {
-		if (isCustomElement(element)) serverMarkup.set(element, element.outerHTML);
+/** Records custom elements' server markup before hydration for later morph comparisons. */
+export const recordServerMarkup = (document: Document) => {
+	const markup = new WeakMap<Element, string>();
+	const record = () => {
+		for (const element of document.body.querySelectorAll("*")) {
+			if (isCustomElement(element)) markup.set(element, element.outerHTML);
+		}
+	};
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", record, { once: true });
+	} else {
+		record();
 	}
+	return markup;
 };

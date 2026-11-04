@@ -1,8 +1,0 @@
-/dist/
-/node_modules/
-.npm-cache
-.DS_Store
-._*
-.idea/
-.vscode/
-*.swp

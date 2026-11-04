@@ -88,18 +88,13 @@ const bricks: BrickData[] = [
 	},
 ];
 
-const createFocus = (options?: {
-	hasUnsavedContent?: boolean;
-	hasUnsavedBuilderStructure?: boolean;
-}) =>
+const createFocus = (options?: { previewBehind?: boolean }) =>
 	usePreviewFocus({
 		collection: () => collection,
 		collectionKey: () => "page",
 		documentId: () => 1,
 		locales: () => ["en"],
-		hasUnsavedContent: () => options?.hasUnsavedContent ?? false,
-		hasUnsavedBuilderStructure: () =>
-			options?.hasUnsavedBuilderStructure ?? false,
+		previewBehind: () => options?.previewBehind ?? false,
 	});
 
 afterEach(() => {
@@ -189,12 +184,28 @@ describe("preview focus target resolution", () => {
 		);
 	});
 
-	test("finds a builder brick by its public key and order", () => {
+	test("opens a repeater item's group when the item itself is targeted", () => {
+		const groupId = getPreviewStructureId({
+			brickIndex: 0,
+			type: "group",
+			path: ["sections", 1],
+		});
+		const result = resolvePreviewFieldTarget({
+			target: { collectionKey: "page", documentId: 1, path: ["sections", 1] },
+			collection,
+			bricks,
+		});
+
+		expect(result?.fieldId).toBe(groupId);
+		expect(result?.structureIds.at(-1)).toBe(groupId);
+	});
+
+	test("finds a builder brick by its ref", () => {
 		const result = resolvePreviewFieldTarget({
 			target: {
 				collectionKey: "page",
 				documentId: 1,
-				brick: { type: "builder", key: "content", order: 0 },
+				brick: { type: "builder", key: "content", ref: "local-brick-ref" },
 				path: ["title"],
 			},
 			collection,
@@ -210,9 +221,10 @@ describe("preview focus target resolution", () => {
 	test("rejects missing bricks, fields, and invalid paths", () => {
 		for (const target of [
 			{
-				brick: { type: "builder", key: "content", order: 4 },
+				brick: { type: "builder", key: "content", ref: "removed-ref" },
 				path: ["title"],
 			},
+			{ path: [] },
 			{ path: ["sections", 0, "missing"] },
 			{ path: ["sections", "not-an-index", "heading"] },
 		]) {
@@ -268,8 +280,9 @@ describe("preview focus coordination", () => {
 		});
 	});
 
-	test("targets a newly saved brick without depending on its local ref", async () => {
+	test("opens a brick targeted without a field", async () => {
 		brickStore.set("bricks", structuredClone(bricks));
+		const header = getPreviewStructureId({ brickIndex: 1, type: "brick" });
 
 		await new Promise<void>((resolve) => {
 			createRoot((dispose) => {
@@ -278,18 +291,14 @@ describe("preview focus coordination", () => {
 					.requestTarget({
 						collectionKey: "page",
 						documentId: 1,
-						brick: { type: "builder", key: "content", order: 0 },
-						path: ["title"],
+						brick: { type: "builder", key: "content", ref: "local-brick-ref" },
+						path: [],
 					})
 					.then(() => {
 						expect(revealMock).toHaveBeenCalledWith(
 							expect.objectContaining({
-								structureIds: [
-									getPreviewStructureId({
-										brickIndex: 1,
-										type: "brick",
-									}),
-								],
+								structureIds: [header],
+								fieldId: header,
 							}),
 						);
 						dispose();
@@ -321,16 +330,13 @@ describe("preview focus coordination", () => {
 		});
 	});
 
-	test("rejects cross-document and unsafe dirty positional targets", async () => {
+	test("rejects other documents, and repeater items while the preview shows saved content", async () => {
 		brickStore.set("bricks", structuredClone(bricks));
 
 		await new Promise<void>((resolve) => {
 			createRoot((dispose) => {
 				const crossDocument = createFocus();
-				const dirtyRepeater = createFocus({ hasUnsavedContent: true });
-				const dirtyBricks = createFocus({
-					hasUnsavedBuilderStructure: true,
-				});
+				const behind = createFocus({ previewBehind: true });
 
 				void Promise.all([
 					crossDocument.requestTarget({
@@ -338,24 +344,63 @@ describe("preview focus coordination", () => {
 						documentId: 2,
 						path: ["title"],
 					}),
-					dirtyRepeater.requestTarget({
+					behind.requestTarget({
 						collectionKey: "page",
 						documentId: 1,
 						path: ["sections", 0, "heading"],
 					}),
-					dirtyBricks.requestTarget({
-						collectionKey: "page",
-						documentId: 1,
-						brick: { type: "builder", key: "content", order: 0 },
-						path: ["title"],
-					}),
 				]).then(() => {
 					expect(revealMock).not.toHaveBeenCalled();
-					expect(spawnToast).toHaveBeenCalledTimes(3);
+					expect(spawnToast).toHaveBeenCalledTimes(2);
 					dispose();
 					resolve();
 				});
 			});
+		});
+	});
+
+	test("turns builder focus into the page location, with the containers content nests it under", () => {
+		brickStore.set("bricks", structuredClone(bricks));
+		const nestedCollection = structuredClone(collection);
+		const [, tab] = nestedCollection.fields;
+		const [section] = tab?.type === "tab" ? tab.fields : [];
+		if (section?.type === "collapsible") section.output = "nested";
+
+		createRoot((dispose) => {
+			const focus = usePreviewFocus({
+				collection: () => nestedCollection,
+				collectionKey: () => "page",
+				documentId: () => 1,
+				locales: () => ["en"],
+				previewBehind: () => false,
+			});
+			const focusIn = (id: string) => {
+				const wrapper = document.createElement("div");
+				const input = document.createElement("input");
+				wrapper.id = id;
+				wrapper.append(input);
+				document.body.append(wrapper);
+				input.focus();
+				wrapper.remove();
+			};
+
+			focusIn(
+				getPreviewFieldId({ brickIndex: 0, path: ["sections", 1, "heading"] }),
+			);
+			expect(focus.builderTarget()).toEqual({
+				collectionKey: "page",
+				documentId: 1,
+				path: ["content-section", "sections", 1, "heading"],
+			});
+
+			focusIn(getPreviewStructureId({ brickIndex: 1, type: "brick" }));
+			expect(focus.builderTarget()).toEqual({
+				collectionKey: "page",
+				documentId: 1,
+				brick: { type: "builder", key: "content", ref: "local-brick-ref" },
+				path: [],
+			});
+			dispose();
 		});
 	});
 

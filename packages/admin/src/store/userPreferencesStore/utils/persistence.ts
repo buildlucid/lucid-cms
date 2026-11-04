@@ -39,6 +39,8 @@ type BuilderCollectionState = {
 
 export type CollectionPreferenceState = {
 	previewOpen?: boolean;
+	/** Whether the preview outlines fields and shows brick controls. Unset means on. */
+	previewEditing?: boolean;
 };
 
 /** Device-local UI state, with synced choices stored separately in `UserPreferences`. */
@@ -172,6 +174,9 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 				const collectionState: CollectionPreferenceState = {};
 				if (typeof collectionValue.previewOpen === "boolean") {
 					collectionState.previewOpen = collectionValue.previewOpen;
+				}
+				if (typeof collectionValue.previewEditing === "boolean") {
+					collectionState.previewEditing = collectionValue.previewEditing;
 				}
 				normalized.preferences.collections[collectionKey] = collectionState;
 			}

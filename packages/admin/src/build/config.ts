@@ -41,7 +41,6 @@ export const adminAliases: Record<string, string> = {
 		adminRoot,
 		"dist/shared/ai-feature-access.js",
 	),
-	"@lucidcms/preview-protocol": path.join(adminRoot, "dist/shared/preview.js"),
 };
 
 /** Packages Vite should pre-bundle for the admin, and Solid source packages it must leave for the Solid plugin. */

@@ -1,3 +1,4 @@
+import { recordPreviewTargets } from "@lucidcms/client/markup";
 import { LucidAPIError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
 import type {
@@ -5,7 +6,6 @@ import type {
 	ContentDocument,
 } from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
-import recordFieldTargets from "../preview/field-targets.js";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
 import normalizeFilter from "./normalize-filter.js";
@@ -64,8 +64,7 @@ const createDocumentFunction = (config: SiteConfig) =>
 
 			// Documents include their media, so any media change can affect them.
 			render.tagCache(contentCacheTags.media);
-			if (render.state.preview)
-				recordFieldTargets(response.data, config.collections);
+			if (render.state.preview) recordPreviewTargets(response.data);
 			// The key was widened for the read; the document is the one asked for.
 			return response.data as ContentDocument<Key, true>;
 		},

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { createAdminVite } from "@lucidcms/admin/build";
+import { adminPreviewPlugin, createAdminVite } from "@lucidcms/admin/build";
 import type { Plugin, PluginOption } from "vite";
 import { LucidError } from "../../utils/errors/index.js";
 import createAdminClientConfig from "../admin/create-client-config.js";
@@ -56,11 +56,14 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 	}
 	const props = { project, token, host };
 
-	/** The admin's plugins, or an empty client entry for `content` role deployments' own builds, as they don't serve the admin. */
+	/** The admin's plugins. `content` role deployments don't serve the admin, so get only the preview script sites they serve load, with an empty client entry for their own builds. */
 	const getClientPlugins = (): Plugin[] => {
 		if (options?.admin === false) return [];
 		if (project.config.role === "content") {
-			return host ? [] : [emptyClientEntryPlugin()];
+			return [
+				...(host ? [] : [emptyClientEntryPlugin()]),
+				adminPreviewPlugin(),
+			];
 		}
 
 		// A host's build sets the client's inputs itself, so it builds the admin apart and Lucid only serves it in development.

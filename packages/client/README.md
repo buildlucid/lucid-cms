@@ -206,45 +206,9 @@ const page = await client.documents.getSingle({
 });
 ```
 
-## Frontend Toolbar
-
-The `@lucidcms/client/toolbar` browser entry exports an isolated `<lucid-toolbar>` with Admin, edit-page, preview-status, and exit actions. Authentication and previews are resolved automatically. Set `host` when Lucid is served from another origin.
-
-```html
-<script type="module">
-  import { LucidToolbarElement } from "@lucidcms/client/toolbar";
-
-  if (!customElements.get(LucidToolbarElement.tagName)) {
-    customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
-  }
-</script>
-
-<lucid-toolbar
-  edit-collection="page"
-  edit-document-id="42"
-  edit-version="latest"
-></lucid-toolbar>
-```
-
-For JavaScript-controlled integrations, `setupToolbar()` returns a controller for SPA route updates and cleanup.
-
-```typescript
-import { setupToolbar } from "@lucidcms/client/toolbar";
-
-const toolbar = setupToolbar({
-  document: {
-    collectionKey: "page",
-    id: 42,
-    version: "latest",
-  },
-});
-
-window.addEventListener("pagehide", toolbar.cleanup, { once: true });
-```
-
 ## Builder Preview Runtime
 
-The `@lucidcms/client/preview` browser entry lazily installs safe exact/session navigation, scroll restoration, and click-to-field targeting inside Lucid's builder iframe. `setupPreview()` reads the mode and token from the builder-controlled frame context; outside the recognized iframe it remains inactive and does not load the runtime.
+The `@lucidcms/client/preview` browser entry lazily installs scroll restoration and click-to-field targeting inside Lucid's builder iframe. `setupPreview()` reads the token from the builder-controlled frame context; outside the recognized iframe it remains inactive and does not load the runtime.
 
 ```typescript
 import { setupPreview } from "@lucidcms/client/preview";
@@ -261,7 +225,7 @@ The builder shows unsaved edits in the preview. Every document read that passes 
 Register an update handler to re-render in place instead. Handlers receive the change's `revision` and a `signal` that aborts when a newer change arrives. They run one change at a time, and if one throws, the page reloads. `setupPreview()` returns the same controller each time it is called, so separate parts of a page can register their own handlers.
 
 ```typescript
-import { morphPage, setupPreview } from "@lucidcms/client/preview";
+import { setupPreview } from "@lucidcms/client/preview";
 
 const preview = setupPreview();
 
@@ -276,33 +240,8 @@ preview.onUpdate(async ({ signal }) => {
   });
   if (response.data) render(response.data);
 });
-
-// Server-rendered sites: fetch the page again and update it in place
-preview.onUpdate(morphPage);
 ```
-
-`morphPage` keeps scroll position and leaves elements marked `data-lucid-preview-keep` alone. Custom elements, such as hydrated islands, are replaced whole when their server markup changes. Frameworks with their own refresh can call it from a handler instead, such as `router.refresh()` in Next.js, `refreshNuxtData()` in Nuxt or `invalidateAll()` in SvelteKit.
 
 Filters and sorting still match saved content, so a list keeps the previewed document where it was, showing its unsaved fields.
 
-For click-to-field targeting, add `previewFieldMarkup(target)` from `@lucidcms/client/markup` to the element rendering a field while previewing, such as `<h1${previewFieldMarkup(target)}>`. The target names the document, the brick when the field is in one, and the field's path, such as `{ collectionKey: page.collectionKey, documentId: page.id, locale: page.locale ?? undefined, brick: { type: "builder", key: brick.key, order: brick.order }, path: ["sections", 0, "heading"] }`. Consumers should not construct preview attributes or messages directly.
-
-## Server-Rendered Toolbar
-
-Server-rendered frontends can create `<lucid-toolbar>` attributes with `createToolbarAttributes()`, passing what the server already knows.
-
-```typescript
-import { createToolbarAttributes } from "@lucidcms/client/toolbar";
-
-const [authentication, preview] = await Promise.all([
-  toolkit.auth.status(authOptions),
-  toolkit.previews.state(previewOptions),
-]);
-
-const toolbarAttributes = createToolbarAttributes({
-  host: "https://cms.example.com",
-  document: { collectionKey: "page", id: page.id, version: page.version },
-  authentication: authentication.data?.authenticated ?? "auto",
-  preview: preview.data ?? "auto",
-});
-```
+For click-to-field targeting, add `previewFieldMarkup(target)` from `@lucidcms/client/markup` to the element rendering a field while previewing, such as `<h1${previewFieldMarkup(target)}>`. Consumers should not construct preview attributes or messages directly.

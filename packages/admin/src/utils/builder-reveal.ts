@@ -113,7 +113,7 @@ const resolveBuilderTarget = (
 					: {
 							type: brick.type === "fixed" ? "fixed" : "builder",
 							key: brick.key,
-							order: brick.order,
+							ref: brick.ref,
 						},
 			path: target.path,
 		},

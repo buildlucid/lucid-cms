@@ -4,7 +4,6 @@ import type {
 	ServiceContext,
 	Toolkit,
 } from "@lucidcms/core/types";
-import { decodePreviewFieldTarget } from "@lucidcms/preview-protocol";
 import { KilnRenderError, memoryLoader } from "@lucidkiln/core";
 import { describe, expect, test, vi } from "vitest";
 import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
@@ -88,6 +87,7 @@ const page = (locale?: "en" | "fr") => ({
 	bricks: [
 		{
 			id: 9,
+			ref: "banner-ref",
 			key: "banner",
 			order: 0,
 			// A field named `type` doesn't make the group look like media or rich text.
@@ -202,7 +202,8 @@ const kiln = createSiteKiln({
 		"island.kiln": `{% set page = document("page", { filter: { _path: path } }) %}{% island "islands/typed" with { image: media(5), page: page, brick: page.bricks[0] } %}{% endisland %}`,
 		"islands/typed.kiln": `{% props image: Media, page: Document, brick: Brick %}{{ image.title }}:{{ page.id }}:{{ brick.key }}`,
 		"paths.kiln": `{{ documentPaths("page")|join(",") }}|{{ documentPaths("blog")|length }}`,
-		"editable.kiln": `{% set page = document("page", filter: { _path: path }) %}<h1{{ editable(page, "title") }}></h1>{% for link in page.bricks[0].fields.links %}<a{{ editable(link, "label") }}></a>{% endfor %}`,
+		"editable.kiln": `{% set page = document("page", filter: { _path: path }) %}<h1{{ editable(page, "title") }}></h1><section{{ editable(page.bricks[0]) }}>{% for link in page.bricks[0].fields.links %}<a{{ editable(link, "label") }}></a>{% endfor %}</section>`,
+		"fallback.kiln": `{% if isPreview() %}placeholder{% else %}nothing{% endif %}`,
 		"moved.kiln": `{{ redirect("/new", 301) }}`,
 		"layout.kiln": `{{ head() }}|{{ footer() }}|{{ footer() }}`,
 		"typed.kiln": `{% set page = document("page", filter: { _path: path }) %}{% include "brick" with { page: page, brick: brick ?? page.bricks[0] } %}`,
@@ -227,9 +228,10 @@ const render = (
 ) =>
 	kiln.render(template, { path }, renderOptions(siteState({ path, ...state })));
 
+//* targets are encoded after a version prefix, eg. `1:%7B...%7D`
 const editTargets = (html: string) =>
-	[...html.matchAll(/data-lucid-preview-field="([^"]+)"/g)].map((match) =>
-		decodePreviewFieldTarget(match[1] ?? ""),
+	[...html.matchAll(/data-lucid-preview-field="1:([^"]+)"/g)].map(
+		(match): unknown => JSON.parse(decodeURIComponent(match[1] ?? "")),
 	);
 
 describe("site template functions", () => {
@@ -382,19 +384,28 @@ describe("site template functions", () => {
 		await expect(render("layout.kiln", "/")).resolves.toBe("||");
 	});
 
-	test("editable() points documents, bricks and repeater groups at their fields during a preview", async () => {
+	test("isPreview() is true only while rendering a preview", async () => {
+		await expect(render("fallback.kiln", "/")).resolves.toBe("nothing");
+		await expect(render("fallback.kiln", "/", { preview })).resolves.toBe(
+			"placeholder",
+		);
+	});
+
+	test("editable() points at document, brick and repeater item fields, and at bricks themselves, during a preview", async () => {
 		await expect(render("editable.kiln", "/en")).resolves.toBe(
-			"<h1></h1><a></a>",
+			"<h1></h1><section><a></a></section>",
 		);
 
 		const html = await render("editable.kiln", "/en", { preview });
+		const brick = { type: "builder", key: "banner", ref: "banner-ref" };
 		expect(editTargets(html)).toEqual([
 			{ collectionKey: "page", documentId: 2, locale: "en", path: ["title"] },
+			{ collectionKey: "page", documentId: 2, locale: "en", brick, path: [] },
 			{
 				collectionKey: "page",
 				documentId: 2,
 				locale: "en",
-				brick: { type: "builder", key: "banner", order: 0 },
+				brick,
 				path: ["links", 0, "label"],
 			},
 		]);

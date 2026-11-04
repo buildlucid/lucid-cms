@@ -6,6 +6,9 @@
 - Added `locale`, `fallbackLocale` and `depth` options to reads.
 - Added `include: ["transcripts"]` to `media.getMultiple` for audio transcripts.
 - Removed `createDocumentView`, `createDocumentViews` and `toolbarFromToolkit`.
+- Added `previewAttributes`, `recordPreviewTargets` and `getPreviewTarget` for marking fields, bricks and repeater items for visual editing.
+- `setupPreview` now loads the builder's preview runtime from the CMS at its `host` option, and `morph: true` replaces `morphPage`.
+- The toolbar moved to `@lucidcms/admin/toolbar`, and `@lucidcms/client/bootstrap` was removed.
 
 ## v0.5.0
 

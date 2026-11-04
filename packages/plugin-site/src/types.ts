@@ -16,6 +16,7 @@ import type { DocumentReadOptions } from "./functions/document.js";
 import type editable from "./functions/editable.js";
 import type footer from "./functions/footer.js";
 import type head from "./functions/head.js";
+import type isPreview from "./functions/is-preview.js";
 import type createLocalesFunction from "./functions/locales.js";
 import type createMediaListFunction from "./functions/media-list.js";
 import type { MediaListOptions } from "./functions/media-list.js";
@@ -77,8 +78,16 @@ declare module "@lucidkiln/core" {
 		>;
 		/** Renders a rich text field or node as HTML; embedded bricks and document nodes are yours to render. */
 		richText: typeof richText;
-		/** Preview attributes for `<h1{{ editable(page, "title") }}>`, empty outside previews. */
+		/**
+		 * Preview attributes for fields, bricks or repeater items. Mark a repeater to enable item
+		 * insertion. Empty outside previews.
+		 */
 		editable: typeof editable;
+		/**
+		 * True in builder or shared previews. Use to render editable placeholders for empty bricks or
+		 * repeater items.
+		 */
+		isPreview: typeof isPreview;
 		/** Preview referrer policy for `<head>`, empty outside previews. */
 		head: typeof head;
 		/** Preview toolbar and script to place before `</body>`, empty outside previews. */

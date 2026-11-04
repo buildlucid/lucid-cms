@@ -1,3 +1,4 @@
+import { recordPreviewTargets } from "../markup/preview-targets.js";
 import type {
 	CollectionDocumentKey,
 	ContentDocument,
@@ -23,7 +24,7 @@ export type DocumentsGetSingleInput<
 > = {
 	collectionKey: TCollectionKey;
 	version: CollectionDocumentVersionKey<TCollectionKey>;
-	/** Optional preview context that may override the requested version. */
+	/** Optional preview token that may override the requested version. Reads with one record preview targets for `previewAttributes()`. */
 	preview?: string;
 	/** The locale empty translations fall back to, such as the default locale. */
 	fallbackLocale?: string;
@@ -40,7 +41,7 @@ export type DocumentsGetMultipleInput<
 > = {
 	collectionKey: TCollectionKey;
 	version: CollectionDocumentVersionKey<TCollectionKey>;
-	/** Optional preview context that may override the requested version. */
+	/** Optional preview token that may override the requested version. Reads with one record preview targets for `previewAttributes()`. */
 	preview?: string;
 	/** The locale empty translations fall back to, such as the default locale. */
 	fallbackLocale?: string;
@@ -91,8 +92,8 @@ export const createDocumentsClient = (
 		TLocale extends string | undefined = undefined,
 	>(
 		input: DocumentsGetSingleInput<TCollectionKey, TLocale>,
-	) =>
-		await transport.request<
+	) => {
+		const response = await transport.request<
 			ContentDocument<TCollectionKey, IsLocalized<TLocale>>
 		>({
 			operation: "documents.getSingle",
@@ -107,14 +108,17 @@ export const createDocumentsClient = (
 				depth: input.depth,
 			},
 			request: input.request,
-		}),
+		});
+		if (input.preview && response.data) recordPreviewTargets(response.data);
+		return response;
+	},
 	getMultiple: async <
 		TCollectionKey extends CollectionDocumentKey,
 		TLocale extends string | undefined = undefined,
 	>(
 		input: DocumentsGetMultipleInput<TCollectionKey, TLocale>,
-	) =>
-		await transport.request<
+	) => {
+		const response = await transport.request<
 			Array<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>
 		>({
 			operation: "documents.getMultiple",
@@ -129,5 +133,10 @@ export const createDocumentsClient = (
 				depth: input.depth,
 			},
 			request: input.request,
-		}),
+		});
+		if (input.preview && response.data) {
+			for (const document of response.data) recordPreviewTargets(document);
+		}
+		return response;
+	},
 });

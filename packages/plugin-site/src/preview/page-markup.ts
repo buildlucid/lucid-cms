@@ -1,4 +1,4 @@
-import type { PageMarkup } from "@lucidcms/client/markup";
+import type { PageMarkup } from "@lucidcms/admin/toolbar";
 import type { SiteState } from "../types.js";
 
 export type PageMarkupState = PageMarkup & { footerWritten: boolean };

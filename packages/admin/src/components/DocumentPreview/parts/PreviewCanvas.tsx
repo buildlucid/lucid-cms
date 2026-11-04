@@ -3,12 +3,14 @@ import {
 	TbOutlineChevronDown,
 	TbOutlineCopy,
 	TbOutlineExternalLink,
+	TbOutlinePointer,
 	TbOutlineRotateClockwise2,
 } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
 	createEffect,
+	type JSXElement,
 	createMemo,
 	createSignal,
 	onCleanup,
@@ -17,9 +19,8 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
+import { previewFrameNames } from "@/preview/protocol";
 import T, { translateAdminCopy } from "@/translations";
-import { PreviewHelp } from "./PreviewHelp";
-import { PreviewStatus } from "./PreviewStatus";
 
 export type PreviewWidthSelection =
 	| "fit"
@@ -76,11 +77,18 @@ export const PreviewCanvas: Component<{
 	zoom: Accessor<PreviewZoom>;
 	setZoom: Setter<PreviewZoom>;
 	previewMode: Accessor<PreviewMode>;
+	editMode: Accessor<boolean>;
+	onToggleEditMode: () => void;
 	actionLoading: Accessor<boolean>;
 	onRefresh: () => void;
 	onCopy: () => void;
 	onOpen: () => void;
 	onRetry: () => void;
+	/** Drawn over the page at its zoom, such as edit controls. */
+	overlay?: (viewport: {
+		scale: Accessor<number>;
+		width: Accessor<number>;
+	}) => JSXElement;
 }> = (props) => {
 	// ----------------------------------
 	// Refs
@@ -141,11 +149,7 @@ export const PreviewCanvas: Component<{
 		return Math.min(maximumLayoutWidth(), requestedWidth());
 	});
 	const visualWidth = createMemo(() => layoutWidth() * zoomScale());
-	const frameName = createMemo(() =>
-		props.previewMode() === "scoped"
-			? "lucid-builder-preview:scoped"
-			: "lucid-builder-preview:perspective",
-	);
+	const frameName = createMemo(() => previewFrameNames[props.previewMode()]);
 
 	// ----------------------------------
 	// Functions
@@ -338,46 +342,54 @@ export const PreviewCanvas: Component<{
 						/>
 					</div>
 				</div>
-				<div class="flex shrink-0 items-center gap-1.5">
-					<PreviewStatus mode={props.previewMode()} />
-					<div class="flex items-center gap-0.5">
-						<PreviewHelp mode={props.previewMode()} />
-						<Button
-							type="button"
-							variant="ghost"
-							size="xs"
-							shape="square"
-							title={T()("common.refresh")}
-							aria-label={T()("common.refresh")}
-							onClick={props.onRefresh}
-						>
-							<TbOutlineRotateClockwise2 size={12} />
-						</Button>
-						<Button
-							type="button"
-							variant="ghost"
-							size="xs"
-							shape="square"
-							title={T()("preview.copy.url")}
-							aria-label={T()("preview.copy.url")}
-							loading={props.actionLoading()}
-							onClick={props.onCopy}
-						>
-							<TbOutlineCopy size={12} />
-						</Button>
-						<Button
-							type="button"
-							variant="ghost"
-							size="xs"
-							shape="square"
-							title={T()("preview.open")}
-							aria-label={T()("preview.open")}
-							loading={props.actionLoading()}
-							onClick={props.onOpen}
-						>
-							<TbOutlineExternalLink size={12} />
-						</Button>
-					</div>
+				<div class="flex shrink-0 items-center gap-0.5">
+					<Button
+						type="button"
+						variant={props.editMode() ? "secondary" : "ghost"}
+						size="xs"
+						shape="square"
+						title={T()("preview.edit.label")}
+						aria-label={T()("preview.edit.label")}
+						aria-pressed={props.editMode()}
+						onClick={props.onToggleEditMode}
+					>
+						<TbOutlinePointer size={12} />
+					</Button>
+					<Button
+						type="button"
+						variant="ghost"
+						size="xs"
+						shape="square"
+						title={T()("common.refresh")}
+						aria-label={T()("common.refresh")}
+						onClick={props.onRefresh}
+					>
+						<TbOutlineRotateClockwise2 size={12} />
+					</Button>
+					<Button
+						type="button"
+						variant="ghost"
+						size="xs"
+						shape="square"
+						title={T()("preview.copy.url")}
+						aria-label={T()("preview.copy.url")}
+						loading={props.actionLoading()}
+						onClick={props.onCopy}
+					>
+						<TbOutlineCopy size={12} />
+					</Button>
+					<Button
+						type="button"
+						variant="ghost"
+						size="xs"
+						shape="square"
+						title={T()("preview.open")}
+						aria-label={T()("preview.open")}
+						loading={props.actionLoading()}
+						onClick={props.onOpen}
+					>
+						<TbOutlineExternalLink size={12} />
+					</Button>
 				</div>
 			</div>
 			<div
@@ -451,6 +463,7 @@ export const PreviewCanvas: Component<{
 									onLoad={() => props.setFrameLoading(false)}
 								/>
 							</div>
+							{props.overlay?.({ scale: zoomScale, width: visualWidth })}
 							<Show when={viewportResizing()}>
 								<div class="absolute inset-0 z-40 cursor-ew-resize" />
 							</Show>

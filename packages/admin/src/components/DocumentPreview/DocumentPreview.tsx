@@ -1,8 +1,4 @@
 import type {
-	PreviewFieldTarget,
-	PreviewScrollState,
-} from "@lucidcms/preview-protocol";
-import type {
 	CollectionPreviewBreakpoint,
 	DocumentVersionType,
 	InternalCollectionDocument,
@@ -16,11 +12,30 @@ import {
 	createSignal,
 	on,
 	onCleanup,
+	Show,
 } from "solid-js";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import type {
+	PreviewRepeaterCapacity,
+	PreviewStructureChange,
+} from "@/hooks/usePreviewStructure/usePreviewStructure";
+import {
+	builderPreviewContext,
+	type PreviewEditing,
+	type PreviewFieldPath,
+	type PreviewFieldTarget,
+	type PreviewHover,
+	type PreviewScrollState,
+	previewQueryParams,
+} from "@/preview/protocol";
 import api from "@/services/api";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 import brickHelpers from "@/utils/brick-helpers";
+import {
+	getPreviewRepeaters,
+	type PreviewEditingDetails,
+} from "@/utils/preview-editing";
 import spawnToast from "@/utils/spawn-toast";
 import {
 	PreviewCanvas,
@@ -28,13 +43,9 @@ import {
 	type PreviewZoom,
 	type ResolverState,
 } from "./parts/PreviewCanvas";
-import {
-	createPreviewBridge,
-	previewContextQueryParam,
-	previewQueryParam,
-} from "./utils/preview-bridge";
+import { PreviewOverlay } from "./parts/PreviewOverlay";
+import { createPreviewBridge } from "./utils/preview-bridge";
 
-const builderPreviewContext = "builder";
 const DRAFT_DEBOUNCE_MS = 250;
 //* the first edit after a pause shows at once, the rest wait for editing to pause
 const DRAFT_IDLE_MS = 1000;
@@ -53,6 +64,8 @@ type PreviewSession = {
 	revision: number;
 	/** Whether the server may hold unsaved content for this session. */
 	hasDraft: boolean;
+	/** The editor's content as last written to this session, or null before a write succeeds. */
+	syncedStamp: string | null;
 };
 
 export const DocumentPreview: Component<{
@@ -72,7 +85,26 @@ export const DocumentPreview: Component<{
 	canSyncDraft: Accessor<boolean>;
 	/** The saved route, which the preview URL is built from. */
 	route: Accessor<InternalCollectionDocument["route"] | undefined>;
+	/** Whether bricks and repeater items can be added, moved and removed from the page. */
+	canEditStructure: Accessor<boolean>;
+	/** The brick and field names edit mode's controls show. */
+	editingDetails: Accessor<PreviewEditingDetails | null>;
+	/** The fields with validation errors, which edit mode outlines in red. */
+	errors: Accessor<PreviewFieldPath[]>;
+	/** The field or brick last focused in the builder, which the page points out. */
+	builderTarget: Accessor<PreviewFieldTarget | null>;
 	onFocusField: (target: PreviewFieldTarget) => void;
+	/** Applies a change to bricks or repeater items made from the page, returning its undo step, or null when it made none. */
+	onChange: (
+		target: PreviewFieldTarget,
+		change: PreviewStructureChange,
+	) => number | null;
+	/** Undoes a change's step, when nothing has changed since. */
+	onUndo: (step: number) => void;
+	/** How many items a repeater, or an item's repeater, has and can have. */
+	repeaterCapacity: (
+		target: PreviewFieldTarget,
+	) => PreviewRepeaterCapacity | null;
 	registerScrollCapture?: (
 		capture: () => Promise<PreviewScrollState | null>,
 	) => () => void;
@@ -82,6 +114,8 @@ export const DocumentPreview: Component<{
 	// State / Hooks
 	const brickStore = useBrickStore();
 	let resolveSequence = 0;
+	//* a highlight the builder asked for, waiting for the page to catch up
+	let pendingHighlight: PreviewFieldTarget | null = null;
 	let session: PreviewSession | null = null;
 	let syncTimer: number | undefined;
 	let lastChangeAt = 0;
@@ -95,8 +129,19 @@ export const DocumentPreview: Component<{
 		createSignal<PreviewWidthSelection>("fit");
 	const [customWidth, setCustomWidth] = createSignal(768);
 	const [zoom, setZoom] = createSignal<PreviewZoom>(100);
+	const [hover, setHover] = createSignal<PreviewHover | null>(null);
 	const previewBridge = createPreviewBridge({
-		onFocusField: props.onFocusField,
+		onFocusField: (target) => focusField(target),
+		onMove: (target, place, anchor) => {
+			change(target, { action: "move", place, anchor });
+		},
+		onHover: setHover,
+		onRendered: () => {
+			if (pendingHighlight) highlight(pendingHighlight);
+		},
+		onDeselect: () => {
+			pendingHighlight = null;
+		},
 		onReload: () => setFrameLoading(true),
 	});
 	const unregisterScrollCapture = props.registerScrollCapture?.(
@@ -114,6 +159,23 @@ export const DocumentPreview: Component<{
 	const routeKey = createMemo(() =>
 		JSON.stringify(props.route()?.path ?? null),
 	);
+	const editMode = createMemo(
+		() =>
+			userPreferencesStore.getCollectionPreviewEditing(props.collectionKey()) ??
+			true,
+	);
+	const editing = createMemo((): PreviewEditing | null => {
+		const documentId = props.documentId();
+		const details = props.editingDetails();
+		if (!editMode() || documentId === undefined || !details) return null;
+		return {
+			collectionKey: props.collectionKey(),
+			documentId,
+			structure: props.canEditStructure(),
+			repeaters: getPreviewRepeaters(details),
+			errors: props.errors(),
+		};
+	});
 
 	// ----------------------------------
 	// Functions
@@ -136,7 +198,7 @@ export const DocumentPreview: Component<{
 		if (context !== "builder") return { url: previewUrl, expiresAt };
 
 		const url = new URL(previewUrl);
-		url.searchParams.set(previewContextQueryParam, builderPreviewContext);
+		url.searchParams.set(previewQueryParams.context, builderPreviewContext);
 		return { url: url.toString(), expiresAt };
 	};
 	/** Changes whenever the editor's content or saved snapshot does. */
@@ -147,15 +209,21 @@ export const DocumentPreview: Component<{
 		const documentId = props.documentId();
 		const versionId = props.draftVersionId();
 		if (documentId === undefined || versionId === undefined) return false;
+		const stamp = editStamp();
+		const mutated = brickStore.getDocumentContentMutated();
 
 		const draft =
-			props.canSyncDraft() && brickStore.getDocumentContentMutated()
+			props.canSyncDraft() && mutated
 				? {
 						bricks: brickHelpers.getUpsertBricks(),
 						fields: brickHelpers.getCollectionPseudoBrickFields(),
 					}
 				: null;
-		if (draft === null && !target.hasDraft) return false;
+		if (draft === null && !target.hasDraft) {
+			//* the page shows saved content, which only matches the editor's without unsaved edits
+			if (!mutated) target.syncedStamp = stamp;
+			return false;
+		}
 
 		target.revision += 1;
 		//* a write whose response is lost may still have landed, so it's cleared later either way
@@ -170,6 +238,7 @@ export const DocumentPreview: Component<{
 				draft,
 			});
 			target.hasDraft = draft !== null;
+			target.syncedStamp = stamp;
 			return true;
 		} catch {
 			return false;
@@ -234,7 +303,7 @@ export const DocumentPreview: Component<{
 			const persisted = await createPersistedPreview("builder");
 			if (currentResolve !== resolveSequence) return;
 			const token = persisted
-				? new URL(persisted.url).searchParams.get(previewQueryParam)
+				? new URL(persisted.url).searchParams.get(previewQueryParams.token)
 				: null;
 			if (!persisted || !token) {
 				session = null;
@@ -259,6 +328,7 @@ export const DocumentPreview: Component<{
 					),
 				revision: 0,
 				hasDraft: false,
+				syncedStamp: null,
 			};
 			//* unsaved content is written first so the page's first render shows it
 			const writtenAt = editStamp();
@@ -266,7 +336,7 @@ export const DocumentPreview: Component<{
 			if (currentResolve !== resolveSequence) return;
 
 			session = nextSession;
-			previewBridge.expectLoad();
+			previewBridge.expectLoad(nextSession.revision);
 			//* edits made while the first draft was written had no session to go to
 			if (editStamp() !== writtenAt) scheduleSync();
 			setFrameLoading(true);
@@ -281,6 +351,45 @@ export const DocumentPreview: Component<{
 			setResolverState("error");
 		}
 	};
+	/**
+	 * Defers targets until the page catches up with edits. Repeater positions may be stale; brick refs
+	 * remain stable.
+	 */
+	const isBehind = (targets: PreviewFieldTarget[]) =>
+		props.canSyncDraft() &&
+		targets.some((target) =>
+			target.path.some((segment) => typeof segment === "number"),
+		) &&
+		!(
+			session !== null &&
+			session.syncedStamp === editStamp() &&
+			previewBridge.isShowing(session.revision)
+		);
+	/** Refuses targets that have to wait for the page, saying why. */
+	const waitsForPage = (targets: PreviewFieldTarget[]) => {
+		if (!isBehind(targets)) return false;
+		spawnToast({
+			title: T()("preview.behind.title"),
+			message: T()("preview.behind.message"),
+			status: "warning",
+		});
+		return true;
+	};
+	/** Points a target out on the page, once the page shows where it is. */
+	const highlight = (target: PreviewFieldTarget) => {
+		pendingHighlight = isBehind([target]) ? target : null;
+		if (!pendingHighlight) previewBridge.highlight(target);
+	};
+	/** Opens a field in the builder, returning whether it did. */
+	const focusField = (target: PreviewFieldTarget) => {
+		if (waitsForPage([target])) return false;
+		props.onFocusField(target);
+		return true;
+	};
+	const change = (target: PreviewFieldTarget, next: PreviewStructureChange) =>
+		waitsForPage(next.action === "move" ? [target, next.anchor] : [target])
+			? null
+			: props.onChange(target, next);
 	const warnWhenDirty = () => {
 		if (!props.dirty()) return;
 		spawnToast({
@@ -375,6 +484,16 @@ export const DocumentPreview: Component<{
 			scheduleSync(true);
 		}),
 	);
+	createEffect(() => previewBridge.setEditing(editing()));
+	createEffect(
+		on(
+			props.builderTarget,
+			(target) => {
+				if (target) highlight(target);
+			},
+			{ defer: true },
+		),
+	);
 
 	// ----------------------------------
 	// Lifecycle
@@ -404,11 +523,38 @@ export const DocumentPreview: Component<{
 				zoom={zoom}
 				setZoom={setZoom}
 				previewMode={props.mode}
+				editMode={editMode}
+				onToggleEditMode={() =>
+					userPreferencesStore.setCollectionPreviewEditing(
+						props.collectionKey(),
+						!editMode(),
+					)
+				}
 				actionLoading={() => createPreview.action.isPending}
 				onRefresh={() => void resolvePersistedPreview(true)}
 				onCopy={() => void copyPersistedUrl()}
 				onOpen={() => void openPersistedUrl()}
 				onRetry={() => void resolvePersistedPreview()}
+				overlay={(viewport) => (
+					<Show when={editing()}>
+						<PreviewOverlay
+							hover={hover()}
+							scale={viewport.scale()}
+							width={viewport.width()}
+							structure={props.canEditStructure()}
+							details={props.editingDetails()}
+							errors={props.errors()}
+							capacity={props.repeaterCapacity}
+							onOpen={(target) => {
+								if (focusField(target)) highlight(target);
+							}}
+							onChange={change}
+							onUndo={props.onUndo}
+							onDrag={previewBridge.drag}
+							onDragEnd={previewBridge.endDrag}
+						/>
+					</Show>
+				)}
 			/>
 		</section>
 	);

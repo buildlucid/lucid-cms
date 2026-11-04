@@ -3,7 +3,8 @@ export {
 	previewFieldMarkup,
 } from "./markup/field-markup.js";
 export {
-	createPageMarkup,
-	type PageMarkup,
-	type PageMarkupOptions,
-} from "./markup/page-markup.js";
+	getPreviewTarget,
+	type PreviewTargetSource,
+	previewAttributes,
+	recordPreviewTargets,
+} from "./markup/preview-targets.js";

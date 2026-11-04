@@ -1,3 +1,4 @@
+import { recordPreviewTargets } from "@lucidcms/client/markup";
 import { LucidAPIError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
 import type {
@@ -7,7 +8,6 @@ import type {
 	Toolkit,
 } from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
-import recordFieldTargets from "../preview/field-targets.js";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
 import type { DocumentFilter, DocumentReadOptions } from "./document.js";
@@ -76,7 +76,7 @@ const createDocumentListFunction = (config: SiteConfig) =>
 			render.tagCache(contentCacheTags.media);
 			if (render.state.preview) {
 				for (const document of response.data.items) {
-					recordFieldTargets(document, config.collections);
+					recordPreviewTargets(document);
 				}
 			}
 			// The key was widened for the read; the documents are the ones asked for.

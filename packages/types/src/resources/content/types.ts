@@ -184,6 +184,8 @@ export type ContentBrick<
 > = TBrick extends unknown
 	? {
 			id: number;
+			/** Stays the same across saves and reorders, unlike `id`, eg. for list keys. */
+			ref: string;
 			key: TBrick["key"];
 			order: number;
 			fields: ContentFields<TBrick["fields"], TLocalized>;

@@ -12,6 +12,7 @@ import adminDocumentPlugin, {
 	adminIconFiles,
 } from "./admin-document-plugin.js";
 import createAdminModules from "./admin-modules-plugin.js";
+import adminPreviewPlugin from "./admin-preview-plugin.js";
 import renderAdminDocument from "./render-admin-document.js";
 import scopePlugin from "./scope-plugin.js";
 import serializeTag from "./serialize-tag.js";
@@ -77,6 +78,7 @@ const createAdminVite = (options: AdminViteOptions) => {
 		},
 		{ ...extensions, applyToEnvironment: inClient },
 		adminDocumentPlugin({ tags: extensions.api.tags }),
+		adminPreviewPlugin(),
 		// Extension components' stylesheets join the admin's graph, so they can use its theme with `@reference`.
 		...tailwindcss().map((plugin) =>
 			scopePlugin(plugin, modules.isAdminModule),

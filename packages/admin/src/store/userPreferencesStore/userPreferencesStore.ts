@@ -214,6 +214,10 @@ export const createUserPreferencesStore = (
 			return state.preferences.collections[collectionKey]?.previewOpen;
 		},
 
+		getCollectionPreviewEditing(collectionKey: string) {
+			return state.preferences.collections[collectionKey]?.previewEditing;
+		},
+
 		getHomeView() {
 			return synced.home?.view;
 		},
@@ -343,6 +347,21 @@ export const createUserPreferencesStore = (
 					collectionKey,
 				);
 				collectionState.previewOpen = open;
+			});
+		},
+
+		setCollectionPreviewEditing(collectionKey: string, editing: boolean) {
+			if (
+				state.preferences.collections[collectionKey]?.previewEditing === editing
+			) {
+				return;
+			}
+			updatePreferences((preferenceState) => {
+				const collectionState = ensureCollectionPreferenceState(
+					preferenceState,
+					collectionKey,
+				);
+				collectionState.previewEditing = editing;
 			});
 		},
 

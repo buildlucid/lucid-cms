@@ -22,6 +22,7 @@
 	"dependencies": {
 		"@astrojs/cloudflare": "^15.0.0-beta.4",
 		"@lucidcms/astro": "*",
+		"@lucidcms/admin": "*",
 		"@lucidcms/client": "*",
 		"@lucidcms/core": "*",
 		"@lucidcms/db-postgres": "*",

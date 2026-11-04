@@ -1,4 +1,4 @@
-import { createPageMarkup } from "@lucidcms/client/markup";
+import { createPageMarkup } from "@lucidcms/admin/toolbar";
 import type { LucidHonoContext, Toolkit } from "@lucidcms/core/types";
 import { getCookie } from "hono/cookie";
 import { CLIENT_SCRIPT_PATH } from "../constants.js";
