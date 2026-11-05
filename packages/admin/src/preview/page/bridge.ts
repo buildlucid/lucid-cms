@@ -1,9 +1,13 @@
 import type { PreviewUpdateHandler } from "@lucidcms/types";
 import {
 	createPreviewMessage,
-	isPreviewParentMessage,
+	handlePreviewMessage,
+	isPreviewBuilderMessage,
+	type PreviewBuilderMessages,
+	type PreviewMessageHandlers,
+	type PreviewMessagePayload,
+	type PreviewPageMessages,
 	type PreviewScrollState,
-	previewProtocol,
 } from "../protocol/index.js";
 import { getPreviewPageKey } from "./context.js";
 import { installPreviewEditing } from "./editing.js";
@@ -76,7 +80,7 @@ export const installPreviewBridge = (
 	let unloaded = false;
 
 	/** Sends a message to the builder once it has connected. */
-	const send = (message: Parameters<typeof createPreviewMessage>[0]) => {
+	const send = (message: PreviewMessagePayload<PreviewPageMessages>) => {
 		if (parentOrigin === null) return false;
 		targetWindow.parent.postMessage(
 			createPreviewMessage(message),
@@ -84,15 +88,14 @@ export const installPreviewBridge = (
 		);
 		return true;
 	};
-	const updates = createPreviewUpdates(targetWindow, handlers, (revision) => {
-		editing.settle();
-		send({ type: previewProtocol.messages.rendered, revision });
-	});
+	const updates = createPreviewUpdates(targetWindow, handlers, () =>
+		editing.settle(),
+	);
 
 	const announce = () => {
 		targetWindow.parent.postMessage(
 			createPreviewMessage({
-				type: previewProtocol.messages.ready,
+				type: "ready",
 				updates: announcedUpdates,
 				loadedAt: Math.floor(targetWindow.performance.timeOrigin),
 			}),
@@ -103,7 +106,7 @@ export const installPreviewBridge = (
 		if (unloaded || parentOrigin === null) return;
 		unloaded = true;
 		targetWindow.parent.postMessage(
-			createPreviewMessage({ type: previewProtocol.messages.unload }),
+			createPreviewMessage({ type: "unload" }),
 			parentOrigin,
 		);
 	};
@@ -114,116 +117,75 @@ export const installPreviewBridge = (
 		announce();
 	};
 
+	const messageHandlers: PreviewMessageHandlers<PreviewBuilderMessages> = {
+		connect: () => undefined,
+		captureScroll: (message) => {
+			const pending = scrollRestoration.pending();
+			send({
+				type: "scrollState",
+				requestId: message.requestId,
+				state: {
+					pageKey: getPreviewPageKey(targetWindow),
+					x: pending?.x ?? targetWindow.scrollX,
+					y: pending?.y ?? targetWindow.scrollY,
+				},
+			});
+		},
+		restoreScroll: (message) => {
+			if (message.state.pageKey === getPreviewPageKey(targetWindow)) {
+				scrollRestoration.restore(message.state);
+			}
+		},
+		update: (message) => updates.receive(message.revision),
+		editMode: (message) => editing.setEditing(message.editing),
+		highlight: (message) => editing.highlight(message.target),
+		drag: (message) => editing.drag(message.target, message.x, message.y),
+		dragEnd: (message) => editing.endDrag(message.drop),
+		dragged: (message) => editing.showDragged(message.target, message.landing),
+		zoom: (message) => editing.setZooming(message.zooming),
+		editSelected: (message) => editing.editSelected(message.target),
+		inlineStart: (message) =>
+			editing.startInline(message.target, {
+				multiline: message.multiline,
+				clear: message.clear,
+			}),
+	};
+
 	const onMessage = (event: MessageEvent<unknown>) => {
 		if (
 			event.source !== targetWindow.parent ||
-			!isPreviewParentMessage(event.data)
+			!isPreviewBuilderMessage(event.data)
 		) {
 			return;
 		}
-
-		if (event.data.type === previewProtocol.messages.connect) {
-			if (parentOrigin === null) parentOrigin = event.origin;
+		if (event.data.type === "connect") {
+			parentOrigin ??= event.origin;
 			return;
 		}
-
 		if (event.origin !== parentOrigin) return;
-
-		if (event.data.type === previewProtocol.messages.captureScroll) {
-			const pending = scrollRestoration.pending();
-			const state: PreviewScrollState = {
-				pageKey: getPreviewPageKey(targetWindow),
-				x: pending?.x ?? targetWindow.scrollX,
-				y: pending?.y ?? targetWindow.scrollY,
-			};
-			targetWindow.parent.postMessage(
-				createPreviewMessage({
-					type: previewProtocol.messages.scrollState,
-					requestId: event.data.requestId,
-					state,
-				}),
-				event.origin,
-			);
-			return;
-		}
-
-		if (
-			event.data.type === previewProtocol.messages.restoreScroll &&
-			event.data.state.pageKey === getPreviewPageKey(targetWindow)
-		) {
-			scrollRestoration.restore(event.data.state);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.update) {
-			updates.receive(event.data.revision);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.editMode) {
-			editing.setEditing(event.data.editing);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.highlightField) {
-			editing.highlight(event.data.target);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.drag) {
-			editing.drag(event.data.target, event.data.x, event.data.y);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.dragEnd) {
-			editing.endDrag(event.data.drop);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.dragged) {
-			editing.showDragged(event.data.target, event.data.landing);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.zoom) {
-			editing.setZooming(event.data.zooming);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.editSelected) {
-			editing.editSelected(event.data.target);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.inlineStart) {
-			editing.startInline(event.data.target, {
-				multiline: event.data.multiline,
-				clear: event.data.clear,
-			});
-		}
+		handlePreviewMessage(event.data, messageHandlers);
 	};
 	const editing = installPreviewEditing({
 		targetWindow,
 		isConnected: () => parentOrigin !== null,
-		sendFocus: (target) =>
-			send({ type: previewProtocol.messages.focusField, target }),
+		sendFocus: (target) => send({ type: "focus", target }),
 		sendDeselect: () => {
-			send({ type: previewProtocol.messages.deselect });
+			send({ type: "deselect" });
 		},
 		sendHover: (hover) => {
-			send({ type: previewProtocol.messages.hover, hover });
+			send({ type: "hover", hover });
 		},
 		sendMove: (target, place, anchor) => {
-			send({ type: previewProtocol.messages.move, target, place, anchor });
+			send({ type: "move", target, place, anchor });
 		},
 		sendEdit: (target, text) => {
-			send({ type: previewProtocol.messages.edit, target, text });
+			send({ type: "edit", target, text });
 		},
 		sendInlineInput: (target, value) => {
-			send({ type: previewProtocol.messages.inlineInput, target, value });
+			send({ type: "inlineInput", target, value });
 		},
 		sendInlineEnd: (target, cancelled) => {
-			send({ type: previewProtocol.messages.inlineEnd, target, cancelled });
+			send({ type: "inlineEnd", target, cancelled });
 		},
 	});
 
@@ -233,9 +195,9 @@ export const installPreviewBridge = (
 	announce();
 
 	return {
-		/** Tells the builder a link was clicked, which the preview doesn't follow, so it can say how to open it. */
-		navigationLocked: () => {
-			send({ type: previewProtocol.messages.navigationLocked });
+		/** Tells the builder a link was clicked, which the preview doesn't follow, so it can offer what the link goes to. */
+		navigationLocked: (href: string | null) => {
+			send({ type: "navigationLocked", href });
 		},
 		/** Announces again when handlers were added to an empty set or it emptied. */
 		handlersChanged: () => {

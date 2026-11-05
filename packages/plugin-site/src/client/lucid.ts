@@ -1,9 +1,4 @@
-/** Browser entry for site previews: the Lucid toolbar, and the builder preview, which morphs the server-rendered page in place when its content changes. */
-import { LucidToolbarElement } from "@lucidcms/admin/toolbar";
+/** Browser entry for site previews: Lucid's toolbar, or the builder's runtime, which morphs the server-rendered page in place when its content changes. */
 import { setupPreview } from "@lucidcms/client/preview";
 
 setupPreview({ morph: true });
-
-if (!customElements.get(LucidToolbarElement.tagName)) {
-	customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
-}

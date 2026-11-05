@@ -10,7 +10,7 @@ const parsePage = (html: string) =>
 
 /**
  * Refreshes a server-rendered page in place by fetching it again. Keeps scroll and
- * `data-lucid-preview-keep` elements, and replaces custom elements when their server markup changes.
+ * `data-lucid-keep` elements, and replaces custom elements when their server markup changes.
  */
 export const createMorphHandler =
 	(markup: ServerMarkup): PreviewUpdateHandler =>

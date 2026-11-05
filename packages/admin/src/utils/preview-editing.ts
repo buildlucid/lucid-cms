@@ -1,11 +1,14 @@
 import type { Collection, ResolvedAdminCopy } from "@types";
 import {
 	getPreviewTargetKind,
-	type PreviewFieldTarget,
+	isPreviewItem,
 	type PreviewRepeater,
+	type PreviewTarget,
 	previewProtocolLimits,
 } from "@/preview/protocol";
+import type { BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfig } from "@/types/collection-config";
+import { findPreviewItemPosition } from "@/utils/find-preview-group";
 import helpers from "@/utils/helpers";
 import resolveFieldAccess from "@/utils/resolve-field-access";
 
@@ -105,16 +108,17 @@ export const getPreviewRepeaters = (
 		);
 
 /** Whether a field name's path, with "*" for items, matches a target's content path. */
-const matchesPath = (pattern: string[], path: Array<string | number>) =>
+const matchesPath = (pattern: string[], path: PreviewTarget["path"]) =>
 	pattern.length === path.length &&
 	pattern.every((segment, index) =>
-		segment === "*" ? typeof path[index] === "number" : segment === path[index],
+		segment === "*" ? isPreviewItem(path[index]) : segment === path[index],
 	);
 
-/** The name of a brick, repeater item or field on the page, eg. "Hero" or "Links 2". */
+/** The name of a brick, repeater item or field on the page, eg. "Hero" or "Links 2", numbering items as the builder lists them. */
 export const getPreviewTargetName = (
 	details: PreviewEditingDetails,
-	target: PreviewFieldTarget,
+	target: PreviewTarget,
+	bricks: BrickData[],
 ): string => {
 	const brickKey = target.brick?.key;
 	if (getPreviewTargetKind(target) === "brick") {
@@ -124,37 +128,47 @@ export const getPreviewTargetName = (
 			""
 		);
 	}
-	const nameAt = (path: Array<string | number>) =>
+	const nameAt = (path: PreviewTarget["path"]) =>
 		details.fields.find(
 			(field) => field.brick === brickKey && matchesPath(field.path, path),
 		)?.label;
-	const index = target.path.at(-1);
-	if (typeof index === "number") {
-		const repeater = nameAt(target.path.slice(0, -1));
-		return `${repeater ?? target.path.at(-2) ?? ""} ${index + 1}`;
+	const last = target.path.at(-1);
+	if (isPreviewItem(last)) {
+		const key = target.path.at(-2);
+		const repeater =
+			nameAt(target.path.slice(0, -1)) ?? (typeof key === "string" ? key : "");
+		const brick = bricks.find((item) =>
+			target.brick
+				? item.type === target.brick.type && item.ref === target.brick.ref
+				: item.type === "collection-fields",
+		);
+		const position = brick ? findPreviewItemPosition(brick.fields, last) : null;
+		return position === null ? repeater : `${repeater} ${position + 1}`;
 	}
-	return nameAt(target.path) ?? String(target.path.at(-1) ?? "");
+	return nameAt(target.path) ?? last ?? "";
 };
 
 /** Target label path, such as ["Hero", "Links 2", "Label"]. */
 export const getPreviewTargetTrail = (
 	details: PreviewEditingDetails,
-	target: PreviewFieldTarget,
+	target: PreviewTarget,
+	bricks: BrickData[],
 ): string[] => [
 	...(target.brick
-		? [getPreviewTargetName(details, { ...target, path: [] })]
+		? [getPreviewTargetName(details, { ...target, path: [] }, bricks)]
 		: []),
 	...target.path.flatMap((segment, index) =>
-		typeof segment === "number"
+		isPreviewItem(segment)
 			? [
-					getPreviewTargetName(details, {
-						...target,
-						path: target.path.slice(0, index + 1),
-					}),
+					getPreviewTargetName(
+						details,
+						{ ...target, path: target.path.slice(0, index + 1) },
+						bricks,
+					),
 				]
 			: [],
 	),
 	...(getPreviewTargetKind(target) === "field"
-		? [getPreviewTargetName(details, target)]
+		? [getPreviewTargetName(details, target, bricks)]
 		: []),
 ];

@@ -1,4 +1,3 @@
-import { recordPreviewTargets } from "../markup/preview-targets.js";
 import type {
 	CollectionDocumentKey,
 	ContentDocument,
@@ -24,7 +23,7 @@ export type DocumentsGetSingleInput<
 > = {
 	collectionKey: TCollectionKey;
 	version: CollectionDocumentVersionKey<TCollectionKey>;
-	/** Optional preview token that may override the requested version. Reads with one record preview targets for `previewAttributes()`. */
+	/** Preview token overriding the requested version and adding `editable()` markers. */
 	preview?: string;
 	/** The locale empty translations fall back to, such as the default locale. */
 	fallbackLocale?: string;
@@ -41,7 +40,7 @@ export type DocumentsGetMultipleInput<
 > = {
 	collectionKey: TCollectionKey;
 	version: CollectionDocumentVersionKey<TCollectionKey>;
-	/** Optional preview token that may override the requested version. Reads with one record preview targets for `previewAttributes()`. */
+	/** Preview token overriding the requested version and adding `editable()` markers. */
 	preview?: string;
 	/** The locale empty translations fall back to, such as the default locale. */
 	fallbackLocale?: string;
@@ -93,7 +92,7 @@ export const createDocumentsClient = (
 	>(
 		input: DocumentsGetSingleInput<TCollectionKey, TLocale>,
 	) => {
-		const response = await transport.request<
+		return transport.request<
 			ContentDocument<TCollectionKey, IsLocalized<TLocale>>
 		>({
 			operation: "documents.getSingle",
@@ -109,8 +108,6 @@ export const createDocumentsClient = (
 			},
 			request: input.request,
 		});
-		if (input.preview && response.data) recordPreviewTargets(response.data);
-		return response;
 	},
 	getMultiple: async <
 		TCollectionKey extends CollectionDocumentKey,
@@ -118,7 +115,7 @@ export const createDocumentsClient = (
 	>(
 		input: DocumentsGetMultipleInput<TCollectionKey, TLocale>,
 	) => {
-		const response = await transport.request<
+		return transport.request<
 			Array<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>
 		>({
 			operation: "documents.getMultiple",
@@ -134,9 +131,5 @@ export const createDocumentsClient = (
 			},
 			request: input.request,
 		});
-		if (input.preview && response.data) {
-			for (const document of response.data) recordPreviewTargets(document);
-		}
-		return response;
 	},
 });

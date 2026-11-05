@@ -1,5 +1,4 @@
-import { previewFieldAttribute } from "../protocol/index.js";
-import { previewKeepAttribute } from "./constants.js";
+import { editAttribute, keepAttribute } from "@lucidcms/client/contract";
 import {
 	isCustomElement,
 	recordServerMarkup,
@@ -11,7 +10,7 @@ const isElement = (node: Node): node is Element =>
 
 /** Marked elements, such as Lucid's own preview UI, are never changed or removed. */
 const isKept = (node: Node) =>
-	isElement(node) && node.hasAttribute(previewKeepAttribute);
+	isElement(node) && node.hasAttribute(keepAttribute);
 
 /** Finds a kept element among `candidates` matching `incoming` by tag and ID that hasn't been matched yet, and claims it. */
 const claimKeptMatch = (
@@ -36,9 +35,7 @@ const claimKeptMatch = (
 
 /** What an element is matched by when it moves: its ID, or its field or brick marker, which stays the same when bricks are reordered. */
 const keyOf = (node: Node) =>
-	isElement(node)
-		? node.id || (node.getAttribute(previewFieldAttribute) ?? "")
-		: "";
+	isElement(node) ? node.id || (node.getAttribute(editAttribute) ?? "") : "";
 
 const isSameNode = (current: Node, next: Node) =>
 	current.nodeType === next.nodeType &&
@@ -183,7 +180,7 @@ export const morphDocument = (
 	next: Document,
 	markup: ServerMarkup,
 ) => {
-	const keepSelector = `[${previewKeepAttribute}]`;
+	const keepSelector = `[${keepAttribute}]`;
 	const kept = [...current.body.querySelectorAll(keepSelector)];
 
 	if (next.title && current.title !== next.title) current.title = next.title;

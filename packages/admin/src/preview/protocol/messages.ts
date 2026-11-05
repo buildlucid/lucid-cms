@@ -1,11 +1,13 @@
 import { previewProtocol, previewProtocolLimits } from "./constants.js";
 import type {
-	PreviewChildMessage,
+	PreviewBuilderMessages,
 	PreviewEnvelope,
-	PreviewFieldTarget,
 	PreviewLanding,
+	PreviewMessage,
+	PreviewMessageHandlers,
 	PreviewMessagePayload,
-	PreviewParentMessage,
+	PreviewPageMessages,
+	PreviewTarget,
 } from "./types.js";
 import {
 	hasOnlyKeys,
@@ -17,224 +19,179 @@ import {
 	arePreviewSiblings,
 	getPreviewTargetKind,
 	isPreviewEditing,
-	isPreviewFieldOnlyTarget,
 	isPreviewFieldTarget,
 	isPreviewHover,
 	isPreviewPlace,
 	isPreviewScrollState,
+	isPreviewTarget,
 	isPreviewText,
 } from "./validators.js";
 
-/** Checks the shared scope and version before handling a message. */
-const hasEnvelope = (value: unknown): value is Record<string, unknown> =>
-	isRecord(value) &&
-	value.scope === previewProtocol.scope &&
-	value.version === previewProtocol.version;
+type Untrusted = Record<string, unknown>;
+type MessageChecks<TMessages> = {
+	[Type in keyof TMessages]: (message: Untrusted) => boolean;
+};
 
-/** Bounds request IDs used to pair scroll capture replies. */
+const envelopeKeys = ["scope", "version", "type"] as const;
+
+/** Whether a message holds only its envelope and these keys. */
+const hasKeys = (message: Untrusted, ...keys: string[]) =>
+	hasOnlyKeys(message, [...envelopeKeys, ...keys]);
+
 const isRequestId = (value: unknown): value is string =>
 	isBoundedString(value, previewProtocolLimits.requestIdLength);
+
+/** A web address on the previewed site, within the protocol's limit. */
+const isPreviewHref = (value: unknown): value is string => {
+	if (!isBoundedString(value, previewProtocolLimits.pageKeyLength)) {
+		return false;
+	}
+	try {
+		const { protocol } = new URL(value);
+		return protocol === "http:" || protocol === "https:";
+	} catch {
+		return false;
+	}
+};
 
 /** Revisions only rise within one preview, from zero. */
 const isRevision = (value: unknown): value is number =>
 	typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
-/** Validates messages sent from the preview child to the builder parent. */
-export const isPreviewChildMessage = (
-	value: unknown,
-): value is PreviewChildMessage => {
-	if (!hasEnvelope(value)) return false;
+/** Bricks and repeater items can be dragged and moved; fields can't. */
+const isMovableTarget = (value: unknown): value is PreviewTarget =>
+	isPreviewTarget(value) && getPreviewTargetKind(value) !== "field";
 
-	switch (value.type) {
-		case previewProtocol.messages.ready:
-			return (
-				hasOnlyKeys(value, [
-					"scope",
-					"version",
-					"type",
-					"updates",
-					"loadedAt",
-				]) &&
-				typeof value.updates === "boolean" &&
-				isFiniteNumber(value.loadedAt)
-			);
-		case previewProtocol.messages.unload:
-		case previewProtocol.messages.deselect:
-		case previewProtocol.messages.navigationLocked:
-			return hasOnlyKeys(value, ["scope", "version", "type"]);
-		case previewProtocol.messages.rendered:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "revision"]) &&
-				isRevision(value.revision)
-			);
-		case previewProtocol.messages.scrollState:
-			return (
-				hasOnlyKeys(value, [
-					"scope",
-					"version",
-					"type",
-					"requestId",
-					"state",
-				]) &&
-				isRequestId(value.requestId) &&
-				isPreviewScrollState(value.state)
-			);
-		case previewProtocol.messages.focusField:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "target"]) &&
-				isPreviewFieldTarget(value.target)
-			);
-		case previewProtocol.messages.move:
-			return (
-				hasOnlyKeys(value, [
-					"scope",
-					"version",
-					"type",
-					"target",
-					"place",
-					"anchor",
-				]) &&
-				isPreviewFieldTarget(value.target) &&
-				isPreviewPlace(value.place) &&
-				isPreviewFieldTarget(value.anchor) &&
-				arePreviewSiblings(value.target, value.anchor)
-			);
-		case previewProtocol.messages.hover:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "hover"]) &&
-				isPreviewHover(value.hover)
-			);
-		case previewProtocol.messages.edit:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "target", "text"]) &&
-				isPreviewFieldOnlyTarget(value.target) &&
-				(value.text === null || isPreviewText(value.text))
-			);
-		case previewProtocol.messages.inlineInput:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "target", "value"]) &&
-				isPreviewFieldOnlyTarget(value.target) &&
-				isPreviewText(value.value)
-			);
-		case previewProtocol.messages.inlineEnd:
-			return (
-				hasOnlyKeys(value, [
-					"scope",
-					"version",
-					"type",
-					"target",
-					"cancelled",
-				]) &&
-				isPreviewFieldOnlyTarget(value.target) &&
-				typeof value.cancelled === "boolean"
-			);
-		default:
-			return false;
-	}
-};
-
-/** Validates where a dragged brick or item would land: next to one of its siblings. */
 const isPreviewLanding = (
-	target: PreviewFieldTarget,
+	target: PreviewTarget,
 	value: unknown,
 ): value is PreviewLanding =>
 	isRecord(value) &&
 	hasOnlyKeys(value, ["anchor", "place"]) &&
-	isPreviewFieldTarget(value.anchor) &&
+	isPreviewTarget(value.anchor) &&
 	arePreviewSiblings(target, value.anchor) &&
 	isPreviewPlace(value.place);
 
-/** Validates messages sent from the builder parent to the preview child. */
-export const isPreviewParentMessage = (
-	value: unknown,
-): value is PreviewParentMessage => {
-	if (!hasEnvelope(value)) return false;
+const pageMessageChecks = {
+	ready: (message) =>
+		hasKeys(message, "updates", "loadedAt") &&
+		typeof message.updates === "boolean" &&
+		isFiniteNumber(message.loadedAt),
+	unload: (message) => hasKeys(message),
+	scrollState: (message) =>
+		hasKeys(message, "requestId", "state") &&
+		isRequestId(message.requestId) &&
+		isPreviewScrollState(message.state),
+	focus: (message) =>
+		hasKeys(message, "target") && isPreviewTarget(message.target),
+	deselect: (message) => hasKeys(message),
+	move: (message) =>
+		hasKeys(message, "target", "place", "anchor") &&
+		isPreviewTarget(message.target) &&
+		isPreviewPlace(message.place) &&
+		isPreviewTarget(message.anchor) &&
+		arePreviewSiblings(message.target, message.anchor),
+	hover: (message) =>
+		hasKeys(message, "hover") && isPreviewHover(message.hover),
+	navigationLocked: (message) =>
+		hasKeys(message, "href") &&
+		(message.href === null || isPreviewHref(message.href)),
+	edit: (message) =>
+		hasKeys(message, "target", "text") &&
+		isPreviewFieldTarget(message.target) &&
+		(message.text === null || isPreviewText(message.text)),
+	inlineInput: (message) =>
+		hasKeys(message, "target", "value") &&
+		isPreviewFieldTarget(message.target) &&
+		isPreviewText(message.value),
+	inlineEnd: (message) =>
+		hasKeys(message, "target", "cancelled") &&
+		isPreviewFieldTarget(message.target) &&
+		typeof message.cancelled === "boolean",
+} satisfies MessageChecks<PreviewPageMessages>;
 
-	switch (value.type) {
-		case previewProtocol.messages.connect:
-			return hasOnlyKeys(value, ["scope", "version", "type"]);
-		case previewProtocol.messages.captureScroll:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "requestId"]) &&
-				isRequestId(value.requestId)
-			);
-		case previewProtocol.messages.restoreScroll:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "state"]) &&
-				isPreviewScrollState(value.state)
-			);
-		case previewProtocol.messages.update:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "revision"]) &&
-				isRevision(value.revision)
-			);
-		case previewProtocol.messages.editMode:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "editing"]) &&
-				(value.editing === null || isPreviewEditing(value.editing))
-			);
-		case previewProtocol.messages.highlightField:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "target"]) &&
-				isPreviewFieldTarget(value.target)
-			);
-		case previewProtocol.messages.drag:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "target", "x", "y"]) &&
-				isPreviewFieldTarget(value.target) &&
-				getPreviewTargetKind(value.target) !== "field" &&
-				isFiniteNumber(value.x) &&
-				isFiniteNumber(value.y)
-			);
-		case previewProtocol.messages.dragEnd:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "drop"]) &&
-				typeof value.drop === "boolean"
-			);
-		case previewProtocol.messages.dragged:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "target", "landing"]) &&
-				(value.target === null
-					? value.landing === null
-					: isPreviewFieldTarget(value.target) &&
-						getPreviewTargetKind(value.target) !== "field" &&
-						(value.landing === null ||
-							isPreviewLanding(value.target, value.landing)))
-			);
-		case previewProtocol.messages.zoom:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "zooming"]) &&
-				typeof value.zooming === "boolean"
-			);
-		case previewProtocol.messages.editSelected:
-			return (
-				hasOnlyKeys(value, ["scope", "version", "type", "target"]) &&
-				isPreviewFieldOnlyTarget(value.target)
-			);
-		case previewProtocol.messages.inlineStart:
-			return (
-				hasOnlyKeys(value, [
-					"scope",
-					"version",
-					"type",
-					"target",
-					"multiline",
-					"clear",
-				]) &&
-				isPreviewFieldOnlyTarget(value.target) &&
-				typeof value.multiline === "boolean" &&
-				typeof value.clear === "boolean"
-			);
-		default:
+const builderMessageChecks = {
+	connect: (message) => hasKeys(message),
+	captureScroll: (message) =>
+		hasKeys(message, "requestId") && isRequestId(message.requestId),
+	restoreScroll: (message) =>
+		hasKeys(message, "state") && isPreviewScrollState(message.state),
+	update: (message) =>
+		hasKeys(message, "revision") && isRevision(message.revision),
+	editMode: (message) =>
+		hasKeys(message, "editing") &&
+		(message.editing === null || isPreviewEditing(message.editing)),
+	highlight: (message) =>
+		hasKeys(message, "target") && isPreviewTarget(message.target),
+	drag: (message) =>
+		hasKeys(message, "target", "x", "y") &&
+		isMovableTarget(message.target) &&
+		isFiniteNumber(message.x) &&
+		isFiniteNumber(message.y),
+	dragEnd: (message) =>
+		hasKeys(message, "drop") && typeof message.drop === "boolean",
+	dragged: (message) =>
+		hasKeys(message, "target", "landing") &&
+		(message.target === null
+			? message.landing === null
+			: isMovableTarget(message.target) &&
+				(message.landing === null ||
+					isPreviewLanding(message.target, message.landing))),
+	zoom: (message) =>
+		hasKeys(message, "zooming") && typeof message.zooming === "boolean",
+	editSelected: (message) =>
+		hasKeys(message, "target") && isPreviewFieldTarget(message.target),
+	inlineStart: (message) =>
+		hasKeys(message, "target", "multiline", "clear") &&
+		isPreviewFieldTarget(message.target) &&
+		typeof message.multiline === "boolean" &&
+		typeof message.clear === "boolean",
+} satisfies MessageChecks<PreviewBuilderMessages>;
+
+/** Builds a guard that accepts a message in the current protocol whose type and shape `checks` knows. */
+const createMessageGuard =
+	<TMessages>(checks: MessageChecks<TMessages>) =>
+	(value: unknown): value is PreviewMessage<TMessages> => {
+		if (
+			!isRecord(value) ||
+			value.scope !== previewProtocol.scope ||
+			value.version !== previewProtocol.version ||
+			typeof value.type !== "string" ||
+			!Object.hasOwn(checks, value.type)
+		) {
 			return false;
-	}
-};
+		}
+		return checks[value.type as keyof TMessages](value);
+	};
 
-/** Adds the current protocol envelope to an outgoing message payload. */
-export const createPreviewMessage = <TPayload extends PreviewMessagePayload>(
+/** Validates a message the page sent the builder. */
+export const isPreviewPageMessage =
+	createMessageGuard<PreviewPageMessages>(pageMessageChecks);
+
+/** Validates a message the builder sent the page. */
+export const isPreviewBuilderMessage =
+	createMessageGuard<PreviewBuilderMessages>(builderMessageChecks);
+
+/** Adds the current protocol envelope to a message. */
+export const createPreviewMessage = <
+	TPayload extends
+		| PreviewMessagePayload<PreviewPageMessages>
+		| PreviewMessagePayload<PreviewBuilderMessages>,
+>(
 	payload: TPayload,
 ): PreviewEnvelope & TPayload => ({
 	scope: previewProtocol.scope,
 	version: previewProtocol.version,
 	...payload,
 });
+
+/** Runs the handler for a validated message's type. */
+export const handlePreviewMessage = <TMessages>(
+	message: PreviewMessage<NoInfer<TMessages>>,
+	handlers: PreviewMessageHandlers<TMessages>,
+) => {
+	const handler = handlers[message.type] as (
+		message: PreviewMessage<TMessages>,
+	) => void;
+	handler(message);
+};

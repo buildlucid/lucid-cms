@@ -13,25 +13,18 @@ export default defineConfig([
 		dts: { emitDtsOnly: true },
 		clean: true,
 	},
-	{
-		entry: { page: "src/preview/page/index.ts" },
+	...["page", "toolbar"].map((script) => ({
+		entry: { [script]: `src/preview/${script}/index.ts` },
 		outDir: "dist/preview",
 		format: "iife",
 		platform: "browser",
 		target: "es2022",
 		minify: true,
+		//* sites load these scripts on their own, so everything they import is bundled into them
+		deps: { alwaysBundle: () => true },
 		dts: false,
-		clean: true,
-	},
-	{
-		entry: { toolbar: "src/exports/toolbar.ts" },
-		outDir: "dist/toolbar",
-		format: "esm",
-		platform: "browser",
-		target: "es2022",
-		dts: true,
-		clean: true,
-	},
+		clean: false,
+	})),
 	{
 		entry: { types: "src/exports/types.ts" },
 		outDir: "dist/types",

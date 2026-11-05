@@ -32,7 +32,9 @@ test("changed fields are listed down to the repeater item, ignoring items that o
 		]),
 	] satisfies InternalDocumentField[];
 
-	expect(getChangedFieldPaths(after, before)).toEqual([["links", 1, "label"]]);
+	expect(getChangedFieldPaths(after, before)).toEqual([
+		["links", { ref: "b" }, "label"],
+	]);
 });
 
 test("items added, removed or reordered point at their repeater", () => {

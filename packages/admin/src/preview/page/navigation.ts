@@ -1,17 +1,9 @@
-import { previewQueryParams } from "../protocol/index.js";
+import { findLink, withoutPreviewParams } from "../links.js";
 
 type PreviewNavigationOptions = {
 	targetWindow: Window;
-	showNavigationLocked: () => void;
-};
-
-const findAnchor = (
-	targetWindow: Window,
-	target: EventTarget | null,
-): HTMLAnchorElement | null => {
-	const WindowElement = (targetWindow as Window & typeof globalThis).Element;
-	if (!(target instanceof WindowElement)) return null;
-	return (target as Element).closest<HTMLAnchorElement>("a[href]");
+	/** Says a link wasn't followed, with where it goes when that's on the page's own site. */
+	showNavigationLocked: (href: string | null) => void;
 };
 
 const isIntentionalNewTab = (event: MouseEvent): boolean =>
@@ -29,9 +21,7 @@ const sanitizePreviewDestination = (
 		return null;
 	}
 	if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-	url.searchParams.delete(previewQueryParams.token);
-	url.searchParams.delete(previewQueryParams.context);
-	return url;
+	return withoutPreviewParams(url);
 };
 
 const openSanitizedDestination = (
@@ -61,16 +51,24 @@ export const installPreviewNavigation = (
 	const onNavigate = (event: MouseEvent) => {
 		if (event.type === "click" && event.button !== 0) return;
 		if (event.type === "auxclick" && event.button !== 1) return;
-		const anchor = findAnchor(options.targetWindow, event.target);
+		const anchor = findLink(options.targetWindow, event.target);
 		if (!anchor) return;
 
 		event.preventDefault();
 		event.stopImmediatePropagation();
 		if (isIntentionalNewTab(event)) {
 			openSanitizedDestination(options.targetWindow, anchor);
-		} else {
-			options.showNavigationLocked();
+			return;
 		}
+		const url = sanitizePreviewDestination(
+			anchor.href,
+			options.targetWindow.location.href,
+		);
+		options.showNavigationLocked(
+			url?.origin === options.targetWindow.location.origin
+				? url.toString()
+				: null,
+		);
 	};
 
 	options.targetWindow.document.addEventListener("click", onNavigate, true);

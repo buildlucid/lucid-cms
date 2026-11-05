@@ -21,6 +21,7 @@ import {
 	TbOutlineKey,
 	TbOutlineLibraryPhoto,
 	TbOutlineLink,
+	TbOutlineLinkOff,
 	TbOutlineLock,
 	TbOutlineMail,
 	TbOutlineMessagePlus,
@@ -67,6 +68,7 @@ export type ActionIconName =
 	| "info"
 	| "key"
 	| "link"
+	| "link-off"
 	| "lock"
 	| "pen"
 	| "plus"
@@ -146,6 +148,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <TbOutlineKey class={iconClasses()} size={iconSize()} />;
 			case "link":
 				return <TbOutlineLink class={iconClasses()} size={iconSize()} />;
+			case "link-off":
+				return <TbOutlineLinkOff class={iconClasses()} size={iconSize()} />;
 			case "lock":
 				return <TbOutlineLock class={iconClasses()} size={iconSize()} />;
 			case "pen":

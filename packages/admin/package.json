@@ -39,10 +39,6 @@
 		"./utils": {
 			"types": "./dist/browser/utils.d.mts",
 			"default": "./src/exports/utils.ts"
-		},
-		"./toolbar": {
-			"types": "./dist/toolbar/toolbar.d.ts",
-			"default": "./dist/toolbar/toolbar.js"
 		}
 	},
 	"scripts": {
@@ -90,6 +86,7 @@
 		"@codemirror/view": "^6.43.15",
 		"@kobalte/core": "^0.13.14",
 		"@lezer/highlight": "^1.2.5",
+		"@lucidcms/client": "^0.5.0",
 		"@lucidcms/rich-text": "1.2.0",
 		"@lucidcms/types": "^0.6.0",
 		"@simplewebauthn/browser": "^14.0.0",

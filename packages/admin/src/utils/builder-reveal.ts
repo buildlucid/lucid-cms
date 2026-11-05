@@ -1,5 +1,6 @@
 import type { Collection, InternalDocumentField } from "@types";
 import { resolvePreviewFieldTarget } from "@/hooks/usePreviewFocus/utils/resolve-preview-field-target";
+import type { PreviewTarget } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import {
 	getPreviewStructureId,
@@ -11,8 +12,8 @@ import safeDeepEqual from "@/utils/safe-deep-equal";
 //* lazy builder content can take a moment to render once its brick opens
 const revealWaitMs = 3_000;
 
-/** A field's keys and repeater item positions from its brick down, which an empty path leaves at the brick itself. */
-export type BuilderFieldPath = Array<string | number>;
+/** A field's keys and repeater items from its brick down, which an empty path leaves at the brick itself. */
+export type BuilderFieldPath = PreviewTarget["path"];
 
 /** A field, or a brick's header, in the bricks as the builder has them. */
 export type BuilderFieldTarget = {
@@ -38,12 +39,12 @@ export const getBuilderFieldPath = (
 	}
 
 	for (const field of fields) {
-		for (const [index, group] of (field.groups ?? []).entries()) {
+		for (const group of field.groups ?? []) {
 			const nested =
 				group.ref === groupRef
 					? getBuilderFieldPath(group.fields, key)
 					: getBuilderFieldPath(group.fields, key, groupRef);
-			if (nested) return [field.key, index, ...nested];
+			if (nested) return [field.key, { ref: group.ref }, ...nested];
 		}
 	}
 	return undefined;
@@ -75,7 +76,7 @@ export const getChangedFieldPaths = (
 		return groups.flatMap((group, index) =>
 			getChangedFieldPaths(group.fields, previousGroups[index]?.fields ?? [], [
 				...path,
-				index,
+				{ ref: group.ref },
 			]),
 		);
 	});

@@ -283,6 +283,7 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 					bricks: include.bricks,
 					meta: include.meta,
 				},
+				preview: preview !== undefined,
 			}),
 			refs: include.refs !== null ? (bricksRes.data.refs ?? {}) : undefined,
 		},

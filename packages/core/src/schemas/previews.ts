@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import { versionTypesSchema } from "./document-versions.js";
 
 const previewTokenSchema = z
 	.string()
@@ -19,8 +20,16 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		response: z.object({
-			mode: z.enum(["perspective", "scoped"]),
+			mode: z.enum(["navigable", "scoped"]),
 			expiresAt: z.iso.datetime(),
+			entry: z
+				.object({
+					collectionKey: z.string(),
+					documentId: z.number(),
+					version: versionTypesSchema,
+					versionId: z.number().nullable(),
+				})
+				.meta({ description: "The document the preview shows" }),
 		}),
 	} satisfies ControllerSchema,
 };

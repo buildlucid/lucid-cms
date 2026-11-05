@@ -347,6 +347,7 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 					bricks: include.bricks,
 					meta: include.meta,
 				},
+				preview: preview !== undefined,
 			}),
 			count: formatter.parseCount(documentsRes.data?.[1]?.count),
 			refs: refsRes.data.refs,

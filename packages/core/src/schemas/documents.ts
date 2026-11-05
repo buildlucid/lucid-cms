@@ -636,7 +636,7 @@ export const controllerSchemas = {
 	createPreview: {
 		body: z.object({
 			locale: z.string().trim().min(1).optional(),
-			mode: z.enum(["perspective", "scoped"]).optional(),
+			mode: z.enum(["navigable", "scoped"]).optional(),
 			versionType: versionTypesSchema,
 			versionId: z.number().int().positive().optional(),
 		}),
@@ -652,6 +652,18 @@ export const controllerSchemas = {
 			url: z.url().nullable(),
 			expiresAt: z.iso.datetime().nullable(),
 		}),
+	} satisfies ControllerSchema,
+	revokePreviews: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim(),
+			id: z.string().trim(),
+		}),
+		response: undefined,
 	} satisfies ControllerSchema,
 	updatePreviewDraft: {
 		body: z.object({

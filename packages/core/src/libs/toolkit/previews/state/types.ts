@@ -9,13 +9,26 @@ type MaybePromise<T> = T | Promise<T>;
 
 export type ToolkitPreviewSource = "query" | "stored" | "exit" | null;
 
-export type ToolkitPreviewStore = {
-	/** Reads the raw preview token persisted by the frontend adapter. */
-	get: () => MaybePromise<string | null | undefined>;
-	/** Persists a validated perspective preview until its server-issued expiry. */
-	set: (preview: { token: string; expiresAt: string }) => MaybePromise<void>;
-	/** Clears the frontend's persisted preview. */
-	clear: () => MaybePromise<void>;
+export type ToolkitPreviewCookieOptions = {
+	path: string;
+	httpOnly: boolean;
+	sameSite: "lax";
+	secure: boolean;
+	expires?: Date;
+};
+
+/** The host framework's request and response cookies, which keep a navigable preview while its site is browsed. */
+export type ToolkitPreviewCookies = {
+	get: (name: string) => MaybePromise<string | null | undefined>;
+	set: (
+		name: string,
+		value: string,
+		options: ToolkitPreviewCookieOptions,
+	) => MaybePromise<void>;
+	delete: (
+		name: string,
+		options: ToolkitPreviewCookieOptions,
+	) => MaybePromise<void>;
 };
 
 export type ToolkitPreviewResponseHeaders = {
@@ -32,4 +45,6 @@ export type ToolkitPreviewState =
 	| (Extract<PreviewRuntimeState, { kind: "preview" }> & {
 			source: Extract<ToolkitPreviewSource, "query" | "stored">;
 			entry: PreviewSession["entry"];
+			/** Whether the page renders in the builder's preview frame, where editors see placeholders for empty fields. */
+			builder: boolean;
 	  });

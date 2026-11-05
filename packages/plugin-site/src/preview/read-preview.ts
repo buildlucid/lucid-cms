@@ -1,7 +1,8 @@
+import { previewParams } from "@lucidcms/client/contract";
 import type { LucidHonoContext, Toolkit } from "@lucidcms/core/types";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { SitePreview } from "../types.js";
 import createPreviewErrorPage from "./create-preview-error-page.js";
-import createPreviewSession from "./create-preview-session.js";
 
 const readPreview = async (props: {
 	hono: LucidHonoContext;
@@ -10,7 +11,13 @@ const readPreview = async (props: {
 	const { hono } = props;
 	const result = await props.toolkit.previews.state({
 		url: hono.req.url,
-		session: createPreviewSession(hono),
+		cookies: {
+			get: (name) => getCookie(hono, name),
+			set: (name, value, options) => setCookie(hono, name, value, options),
+			delete: (name, options) => {
+				deleteCookie(hono, name, options);
+			},
+		},
 		headers: { set: (name, value) => hono.header(name, value) },
 	});
 
@@ -19,7 +26,7 @@ const readPreview = async (props: {
 	}
 	if (result.data.kind === "published" && result.data.source === "exit") {
 		const url = new URL(hono.req.url);
-		url.searchParams.delete("preview");
+		url.searchParams.delete(previewParams.token);
 		return { response: hono.redirect(`${url.pathname}${url.search}`, 302) };
 	}
 	return { preview: result.data.kind === "preview" ? result.data : null };

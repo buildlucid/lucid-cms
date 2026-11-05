@@ -1,4 +1,5 @@
-import type { CollectionPreviewBreakpoint, PreviewMode } from "@types";
+import { previewFrameName } from "@lucidcms/client/contract";
+import type { CollectionPreviewBreakpoint } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -15,7 +16,6 @@ import {
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import Button from "@/components/Button/Button";
-import { previewFrameNames } from "@/preview/protocol";
 import T, { translateAdminCopy } from "@/translations";
 import { PreviewLoading } from "./PreviewLoading";
 import { PreviewToolbar } from "./PreviewToolbar";
@@ -31,10 +31,12 @@ export type PreviewWidthSelection =
 export type PreviewZoom = "fit" | 25 | 50 | 75 | 100;
 /** A breakpoint the preview can be sized to. */
 export type PreviewWidthOption = { key: string; width: number; label: string };
+/** Where the preview is: making a session, showing the page, or why it can't, eg. a new document that isn't saved yet. */
 export type ResolverState =
 	| "idle"
 	| "loading"
 	| "ready"
+	| "unsaved"
 	| "unavailable"
 	| "error";
 
@@ -79,7 +81,6 @@ export const PreviewCanvas: Component<{
 	setCustomWidth: Setter<number>;
 	zoom: Accessor<PreviewZoom>;
 	setZoom: Setter<PreviewZoom>;
-	previewMode: Accessor<PreviewMode>;
 	editMode: Accessor<boolean>;
 	onToggleEditMode: () => void;
 	actionLoading: Accessor<boolean>;
@@ -170,7 +171,6 @@ export const PreviewCanvas: Component<{
 	//* the scale the page is drawn at, easing to the target as it zooms out or back in
 	const [displayScale, setDisplayScale] = createSignal(untrack(targetScale));
 	const visualWidth = createMemo(() => layoutWidth() * displayScale());
-	const frameName = createMemo(() => previewFrameNames[props.previewMode()]);
 
 	// ----------------------------------
 	// Functions
@@ -335,13 +335,22 @@ export const PreviewCanvas: Component<{
 			ref={setCanvasRef}
 			class="relative isolate h-full min-h-0 min-w-0 overflow-clip bg-card dotted-background"
 		>
-			<Show when={props.resolverState() === "unavailable"}>
+			<Show
+				when={
+					props.resolverState() === "unsaved" ||
+					props.resolverState() === "unavailable"
+				}
+			>
 				<div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-6 text-center">
 					<h3 class="font-medium text-title">
-						{T()("preview.unavailable.title")}
+						{props.resolverState() === "unsaved"
+							? T()("preview.unsaved.title")
+							: T()("preview.unavailable.title")}
 					</h3>
 					<p class="max-w-md text-sm text-body">
-						{T()("preview.unavailable.message")}
+						{props.resolverState() === "unsaved"
+							? T()("preview.unsaved.message")
+							: T()("preview.unavailable.message")}
 					</p>
 				</div>
 			</Show>
@@ -394,7 +403,7 @@ export const PreviewCanvas: Component<{
 						>
 							<iframe
 								ref={props.setFrameRef}
-								name={frameName()}
+								name={previewFrameName}
 								src={props.frameSrc()}
 								title={T()("preview.iframe.title")}
 								referrerpolicy="no-referrer"
@@ -447,6 +456,10 @@ export const PreviewCanvas: Component<{
 							editMode={props.editMode}
 							onToggleEditMode={props.onToggleEditMode}
 							actionLoading={props.actionLoading}
+							hasPage={() =>
+								props.resolverState() !== "unsaved" &&
+								props.resolverState() !== "unavailable"
+							}
 							onRefresh={props.onRefresh}
 							onOpen={props.onOpen}
 						/>

@@ -172,7 +172,7 @@ const dependants = async (documentId: number, key = collectionKey) => {
 			entry_collection_key: key,
 			entry_document_id: documentId,
 			entry_version_type: "latest",
-			mode: "perspective",
+			mode: "navigable",
 			expires_at: "2099-01-01T00:00:00.000Z",
 		})
 		.execute();
@@ -482,7 +482,7 @@ test.each(["single", "multiple"] as const)(
 					entry_collection_key: collectionKey,
 					entry_document_id: first,
 					entry_version_type: "latest",
-					mode: "perspective",
+					mode: "navigable",
 					expires_at: "2099-01-01T00:00:00.000Z",
 				})
 				.execute(),

@@ -1,9 +1,10 @@
 import type { Collection, InternalDocumentField } from "@types";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import { isPreviewItem, type PreviewTarget } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import { findPreviewBrick } from "@/utils/find-preview-brick";
 import { findPreviewConfig } from "@/utils/find-preview-config";
+import { findPreviewGroup } from "@/utils/find-preview-group";
 import type { FieldAccess } from "@/utils/resolve-field-access";
 
 /** A field on the page, with where its value is kept in the builder's store. */
@@ -25,7 +26,7 @@ export type PreviewEditableField = {
  * and repeater items. Null for bricks, items, repeaters and anything no longer there.
  */
 export const resolvePreviewField = (props: {
-	target: PreviewFieldTarget;
+	target: PreviewTarget;
 	collection: Collection;
 	bricks: BrickData[];
 }): PreviewEditableField | null => {
@@ -63,11 +64,9 @@ export const resolvePreviewField = (props: {
 			};
 		}
 
-		const index = path[offset + 1];
-		if (last || typeof index !== "number") return null;
-		const group = [...(fields.find((field) => field.key === key)?.groups ?? [])]
-			.sort((a, b) => a.order - b.order)
-			.at(index);
+		const segment = path[offset + 1];
+		if (last || !isPreviewItem(segment)) return null;
+		const group = findPreviewGroup(fields, key, segment)?.group;
 		if (!group) return null;
 		configs = config.fields;
 		access = match.access;

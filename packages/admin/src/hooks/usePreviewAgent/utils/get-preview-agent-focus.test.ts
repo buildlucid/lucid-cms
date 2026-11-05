@@ -85,7 +85,11 @@ describe("preview targets for the agent", () => {
 			label: "Part",
 		});
 		expect(
-			focus({ ...page, brick: hero, path: ["links", 1, "label"] }),
+			focus({
+				...page,
+				brick: hero,
+				path: ["links", { ref: "second" }, "label"],
+			}),
 		).toEqual({
 			brick: "Xy12ab",
 			path: ["links", "second", "label"],
@@ -102,6 +106,8 @@ describe("preview targets for the agent", () => {
 			path: ["title"],
 			label: "Part",
 		});
-		expect(focus({ ...page, brick: hero, path: ["links", 4] })).toBeNull();
+		expect(
+			focus({ ...page, brick: hero, path: ["links", { ref: "removed" }] }),
+		).toBeNull();
 	});
 });

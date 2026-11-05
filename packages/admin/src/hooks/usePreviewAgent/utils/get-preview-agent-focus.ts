@@ -1,15 +1,16 @@
 import type { AgentDocumentFocus, Collection } from "@types";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import { isPreviewItem, type PreviewTarget } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import { findPreviewBrick } from "@/utils/find-preview-brick";
 import { findPreviewConfig } from "@/utils/find-preview-config";
+import { findPreviewGroup } from "@/utils/find-preview-group";
 
 /**
  * Resolves preview targets to agent paths: builder brick refs or fixed brick keys, then field keys
  * and repeater item refs. Returns null for removed targets.
  */
 export const getPreviewAgentFocus = (props: {
-	target: PreviewFieldTarget;
+	target: PreviewTarget;
 	collection: Collection;
 	bricks: BrickData[];
 	label: string;
@@ -33,12 +34,10 @@ export const getPreviewAgentFocus = (props: {
 		}
 		path.push(key);
 		const { config } = match;
-		const index = segments[offset + 1];
-		if (config.type !== "repeater" || index === undefined) continue;
-		if (typeof index !== "number") return null;
-		const group = [...(fields.find((field) => field.key === key)?.groups ?? [])]
-			.sort((a, b) => a.order - b.order)
-			.at(index);
+		const item = segments[offset + 1];
+		if (config.type !== "repeater" || item === undefined) continue;
+		if (!isPreviewItem(item)) return null;
+		const group = findPreviewGroup(fields, key, item)?.group;
 		if (!group) return null;
 		path.push(group.ref);
 		configs = config.fields;

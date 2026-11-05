@@ -1,4 +1,5 @@
 import type { InternalDocumentField } from "@types";
+import { isPreviewItem, type PreviewTarget } from "@/preview/protocol";
 import type {
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
@@ -16,7 +17,7 @@ export type RepeaterScope = {
 	parentRef?: string;
 	parentRepeaterKey?: string;
 	config: RepeaterConfig;
-	/** Its groups in content order, which content paths index. */
+	/** Its groups in content order. */
 	groups: Group[];
 	/** Whether the user can add, move and remove its groups. */
 	editable: boolean;
@@ -24,14 +25,14 @@ export type RepeaterScope = {
 
 /**
  * Resolves a content path to the repeater it targets, either the repeater itself or one of its
- * items (`index`). Null when the path doesn't lead to a repeater.
+ * items (`group`). Null when the path doesn't lead to a repeater, or its item is gone.
  */
 export const resolveRepeater = (props: {
 	configs: CollectionFieldConfig[];
 	fields: InternalDocumentField[];
-	path: Array<string | number>;
+	path: PreviewTarget["path"];
 	access: FieldAccess;
-}): { scope: RepeaterScope; index?: number } | null => {
+}): { scope: RepeaterScope; group?: Group } | null => {
 	let configs = props.configs;
 	let fields = props.fields;
 	let access = props.access;
@@ -63,13 +64,13 @@ export const resolveRepeater = (props: {
 			groups,
 			editable: match.access === "editable" && config.ui?.disabled !== true,
 		};
-		const index = props.path[offset + 1];
-		if (index === undefined) return { scope };
-		if (typeof index !== "number") return null;
-		if (offset + 2 === props.path.length) return { scope, index };
-
-		const group = groups[index];
+		const item = props.path[offset + 1];
+		if (item === undefined) return { scope };
+		if (!isPreviewItem(item)) return null;
+		const group = groups.find((entry) => entry.ref === item.ref);
 		if (!group) return null;
+		if (offset + 2 === props.path.length) return { scope, group };
+
 		parentRef = group.ref;
 		parentRepeaterKey = key;
 		configs = config.fields;

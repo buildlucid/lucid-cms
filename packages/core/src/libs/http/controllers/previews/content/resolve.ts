@@ -61,6 +61,7 @@ const resolvePreviewController = factory.createHandlers(
 				data: {
 					mode: preview.data.mode,
 					expiresAt: preview.data.expiresAt,
+					entry: preview.data.entry,
 				} satisfies PreviewResolution,
 			}),
 		);

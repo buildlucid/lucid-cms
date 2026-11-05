@@ -7,6 +7,7 @@ export default defineConfig({
 		"src/internal/route.ts",
 		"src/internal/middleware.ts",
 		"src/toolkit.ts",
+		"src/preview.ts",
 	],
 	dts: true,
 	format: "esm",

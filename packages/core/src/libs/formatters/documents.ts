@@ -43,6 +43,7 @@ import formatDocumentRoute, {
 import documentWorkflowsFormatter from "./document-workflows.js";
 import formatter, { type ContentReadLocale } from "./helpers.js";
 import mediaFormatter, { type MediaFormatterOptions } from "./media.js";
+import { markDocument } from "./preview-targets.js";
 
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];
@@ -240,6 +241,8 @@ const formatContentMultiple = <TCollectionKey extends string>(props: {
 		bricks: boolean;
 		meta: boolean;
 	};
+	/** Whether the read is for a preview, which keeps repeater items' refs to mark them with. */
+	preview: boolean;
 }): CollectionDocument<TCollectionKey>[] => {
 	return props.documents.map((document) =>
 		formatContentSingle({
@@ -247,6 +250,7 @@ const formatContentMultiple = <TCollectionKey extends string>(props: {
 			collectionKey: props.collectionKey,
 			collection: props.collection,
 			include: props.include,
+			preview: props.preview,
 		}),
 	);
 };
@@ -254,6 +258,7 @@ const formatContentMultiple = <TCollectionKey extends string>(props: {
 const formatContentBricks = (
 	bricks: InternalDocumentBrick[] | null | undefined,
 	collection: CollectionBuilder,
+	preview: boolean,
 ) => {
 	return (bricks ?? []).map((brick) => {
 		const brickInstance = collection.brickInstances.find(
@@ -269,6 +274,7 @@ const formatContentBricks = (
 			fields: documentFieldsFormatter.flattenFields(
 				brick.fields,
 				brickInstance?.contentFieldTree,
+				preview,
 			),
 		};
 	});
@@ -286,6 +292,8 @@ const formatContentSingle = <TCollectionKey extends string>(props: {
 		bricks: boolean;
 		meta: boolean;
 	};
+	/** Whether the read is for a preview, which keeps repeater items' refs to mark them with. */
+	preview: boolean;
 }): CollectionDocument<TCollectionKey> => {
 	return {
 		id: props.document.id,
@@ -295,10 +303,15 @@ const formatContentSingle = <TCollectionKey extends string>(props: {
 		fields: documentFieldsFormatter.flattenFields(
 			props.document.fields ?? [],
 			props.collection.contentFieldTree,
+			props.preview,
 		),
 		...(props.include.bricks
 			? {
-					bricks: formatContentBricks(props.document.bricks, props.collection),
+					bricks: formatContentBricks(
+						props.document.bricks,
+						props.collection,
+						props.preview,
+					),
 				}
 			: undefined),
 		...(props.include.meta
@@ -318,11 +331,13 @@ const formatContentSingle = <TCollectionKey extends string>(props: {
 	} satisfies CollectionDocument<string> as CollectionDocument<TCollectionKey>;
 };
 
-/** What a content read asks for: one locale and its fallback, or every translation, and how many relation levels to fill in. */
+/** What a content read asks for: one locale and its fallback, or every translation, how many relation levels to fill in, and whether it's for a preview. */
 type ContentRead = {
 	locale: string | null;
 	fallbackLocale: string | null;
 	depth: number;
+	/** Marks the content with where its parts are, for sites to point the builder's preview at. */
+	preview?: boolean;
 };
 
 type Brick = DocumentBrick & { id: number };
@@ -643,7 +658,7 @@ const formatContentRead = (props: {
 		context,
 	);
 
-	return {
+	const content = {
 		id: document.id,
 		collectionKey: document.collectionKey,
 		version: document.version,
@@ -678,6 +693,8 @@ const formatContentRead = (props: {
 			: {}),
 		...(document.meta ? { meta: fillMeta(document.meta, context) } : {}),
 	};
+	if (read.preview) markDocument(content, props.collections);
+	return content;
 };
 
 export default {

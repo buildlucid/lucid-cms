@@ -38,7 +38,10 @@ export const DocumentActions: Component<{
 	};
 	preview?: {
 		onCopy: (mode: PreviewMode) => void;
+		/** Stops every preview link shared so far from working, after confirming. */
+		onRevoke: () => void;
 		permission: boolean;
+		revokePermission: boolean;
 		loading: boolean;
 		scopedOnly: boolean;
 	};
@@ -84,23 +87,14 @@ export const DocumentActions: Component<{
 			href: props.requestLink,
 		},
 		{
-			label: T()("preview.copy.group"),
-			type: "button",
-			icon: "link",
-			show: props.preview !== undefined && props.preview.scopedOnly === true,
-			permission: props.preview?.permission,
-			loading: props.preview?.loading,
-			onClick: () => props.preview?.onCopy("scoped"),
-		},
-		{
-			label: T()("preview.copy.group"),
+			label: T()("preview.links.group"),
 			type: "group",
 			icon: "link",
-			show: props.preview !== undefined && !props.preview.scopedOnly,
+			show: props.preview !== undefined,
 			permission: props.preview?.permission,
 			actions: [
 				{
-					label: T()("preview.copy.scoped"),
+					label: T()("preview.links.copy.scoped"),
 					type: "button",
 					icon: "lock",
 					permission: props.preview?.permission,
@@ -108,12 +102,21 @@ export const DocumentActions: Component<{
 					onClick: () => props.preview?.onCopy("scoped"),
 				},
 				{
-					label: T()("preview.copy.navigable"),
+					label: T()("preview.links.copy.navigable"),
 					type: "button",
 					icon: "share",
+					show: props.preview?.scopedOnly === false,
 					permission: props.preview?.permission,
 					loading: props.preview?.loading,
-					onClick: () => props.preview?.onCopy("perspective"),
+					onClick: () => props.preview?.onCopy("navigable"),
+				},
+				{
+					label: T()("preview.links.revoke"),
+					type: "button",
+					icon: "link-off",
+					variant: "danger",
+					permission: props.preview?.revokePermission,
+					onClick: props.preview?.onRevoke,
 				},
 			],
 		},

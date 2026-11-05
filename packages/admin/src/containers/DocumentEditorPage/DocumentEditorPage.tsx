@@ -36,6 +36,7 @@ import Skeleton from "@/components/Skeleton/Skeleton";
 import WorkflowStageSelect from "@/components/WorkflowStageSelect/WorkflowStageSelect";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { useBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
+import { useBuilderPreview } from "@/hooks/useBuilderPreview/useBuilderPreview";
 import { useBuilderSideBySide } from "@/hooks/useBuilderSideBySide/useBuilderSideBySide";
 import { useBuilderSplit } from "@/hooks/useBuilderSplit/useBuilderSplit";
 import { useBuilderTools } from "@/hooks/useBuilderTools/useBuilderTools";
@@ -46,18 +47,12 @@ import {
 } from "@/hooks/useDocumentComparison/useDocumentComparison";
 import { useDocumentEditors } from "@/hooks/useDocumentEditors/useDocumentEditors";
 import { useDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
-import { useDocumentPreview } from "@/hooks/useDocumentPreview/useDocumentPreview";
 import { useDocumentState } from "@/hooks/useDocumentState/useDocumentState";
 import { useDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
-import { usePreviewAgent } from "@/hooks/usePreviewAgent/usePreviewAgent";
-import { usePreviewFieldEdit } from "@/hooks/usePreviewFieldEdit/usePreviewFieldEdit";
-import { usePreviewFocus } from "@/hooks/usePreviewFocus/usePreviewFocus";
-import { usePreviewStructure } from "@/hooks/usePreviewStructure/usePreviewStructure";
 import { useStoredVersionRedirect } from "@/hooks/useStoredVersionRedirect/useStoredVersionRedirect";
-import type { PreviewScrollState } from "@/preview/protocol";
 import brickStore from "@/store/brickStore/brickStore";
 import navigationStore from "@/store/navigationStore/navigationStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
@@ -66,8 +61,6 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { getPreviewEditingDetails } from "@/utils/preview-editing";
-import { getPreviewErrors } from "@/utils/preview-errors";
 import { getRequestRoute } from "@/utils/route-helpers";
 import BuilderSplitHandle from "./parts/BuilderSplitHandle";
 import DetailsColumn from "./parts/DetailsColumn";
@@ -103,10 +96,6 @@ const DocumentEditorPage: Component<{
 	const [hydratedViewKey, setHydratedViewKey] = createSignal<string | null>(
 		null,
 	);
-	let capturePreviewScroll:
-		| (() => Promise<PreviewScrollState | null>)
-		| undefined;
-	let pendingPreviewScroll: PreviewScrollState | null = null;
 	//* set from the editors below, which need the UI state to know whether this tab can hold the document
 	const [heldElsewhere, setHeldElsewhere] = createSignal(false);
 	const [previewToolbar, setPreviewToolbar] = createSignal<HTMLDivElement>();
@@ -266,89 +255,25 @@ const DocumentEditorPage: Component<{
 		}
 		return document?.versions[versionType()]?.contentId;
 	};
-	const preview = useDocumentPreview({
-		version: versionType,
+	const preview = useBuilderPreview({
+		collection: docState.collection,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
 		document: docState.document,
+		versionType,
+		versionId,
 		autoSaveMetadata: mutations.autoSaveMetadata,
 		locale: docState.contentLocale,
-	});
-	//* the preview shows unsaved edits only to those who could save them
-	const canSyncPreviewDraft = () =>
-		uiState.hasSavePermission() && !uiState.isBuilderLocked();
-	const previewFocus = usePreviewFocus({
-		collection: docState.collection,
-		collectionKey: docState.collectionKey,
-		documentId: docState.documentId,
 		locales: docState.contentLocales,
-		previewBehind: () =>
-			!canSyncPreviewDraft() && brickStore.getDocumentContentMutated(),
-	});
-	const previewStructure = usePreviewStructure({
-		collection: docState.collection,
-		collectionKey: docState.collectionKey,
-		documentId: docState.documentId,
-		locales: docState.contentLocales,
-		reveal: (target) => {
-			void previewFocus.requestTarget(target);
-			previewFocus.pointOut(target);
-		},
-	});
-	const previewEditingDetails = createMemo(() => {
-		const collection = docState.collection();
-		return collection ? getPreviewEditingDetails(collection) : null;
-	});
-	const previewFieldEdit = usePreviewFieldEdit({
-		collection: docState.collection,
-		collectionKey: docState.collectionKey,
-		documentId: docState.documentId,
-		locales: docState.contentLocales,
-	});
-	const previewAgent = usePreviewAgent({
-		collection: docState.collection,
-		collectionKey: docState.collectionKey,
-		documentId: docState.documentId,
 		label: documentLabel,
-		details: previewEditingDetails,
+		dirty: docState.isDocumentMutated,
+		//* the preview shows unsaved edits only to those who could save them
+		canSave: () => uiState.hasSavePermission() && !uiState.isBuilderLocked(),
+		ready: () => getViewKey() !== null && hydratedViewKey() === getViewKey(),
+		collections: docState.collections,
 	});
-	const previewErrors = createMemo(
-		() => {
-			const collection = docState.collection();
-			const brickErrors = brickStore.get.brickErrors;
-			const fieldsErrors = brickStore.get.fieldsErrors;
-			if (!collection || (!brickErrors.length && !fieldsErrors.length)) {
-				return [];
-			}
-			return getPreviewErrors({
-				collection,
-				bricks: brickStore.get.bricks,
-				brickErrors,
-				fieldsErrors,
-				locale: preview.locale(),
-			});
-		},
-		[],
-		//* item indexes come from the bricks, which change with every edit
-		{ equals: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
-	);
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
-	const registerPreviewScrollCapture = (
-		capture: () => Promise<PreviewScrollState | null>,
-	) => {
-		capturePreviewScroll = capture;
-		return () => {
-			if (capturePreviewScroll === capture) capturePreviewScroll = undefined;
-		};
-	};
-	const preparePreviewVersionChange = async () => {
-		pendingPreviewScroll = (await capturePreviewScroll?.()) ?? null;
-	};
-	const consumePreviewScrollRestore = () => {
-		const scrollState = pendingPreviewScroll;
-		pendingPreviewScroll = null;
-		return scrollState;
-	};
-
 	// ------------------------------------------
 	// Setup document state
 	const setDocumentState = () => {
@@ -493,7 +418,7 @@ const DocumentEditorPage: Component<{
 			() => previewing(),
 			(open) => {
 				if (open) return;
-				previewFocus.forgetOpened();
+				preview.focus.forgetOpened();
 				setPreviewToolbar(undefined);
 			},
 			{ defer: true },
@@ -504,8 +429,7 @@ const DocumentEditorPage: Component<{
 		navigationStore.set("tucked", false);
 		if (snapshotTimeout !== undefined) clearTimeout(snapshotTimeout);
 		setHydratedViewKey(null);
-		capturePreviewScroll = undefined;
-		pendingPreviewScroll = null;
+		preview.scroll.reset();
 		brickStore.get.reset();
 		pageBuilderModalsStore.reset();
 	});
@@ -691,7 +615,7 @@ const DocumentEditorPage: Component<{
 			return null;
 		}
 
-		await preparePreviewVersionChange();
+		await preview.scroll.keep();
 		if (!compared) return option.location;
 
 		comparison.rememberView(undefined);
@@ -792,6 +716,7 @@ const DocumentEditorPage: Component<{
 									: undefined
 							}
 							requestLink={requestLink()}
+							onPreviewLinksRevoked={preview.restart}
 							edits={uiState.isBuilderLocked() ? undefined : edits}
 							state={{
 								collection: docState.collection,
@@ -994,40 +919,7 @@ const DocumentEditorPage: Component<{
 										<div class="sticky top-(--document-header-bar-height) flex h-[calc(100dvh-var(--document-header-bar-height,0px)-0.5rem)] min-w-0 flex-1 self-start">
 											<DocumentPreview
 												open={previewing}
-												collectionKey={docState.collectionKey}
-												documentId={docState.documentId}
-												versionType={versionType}
-												versionId={versionId}
-												mode={preview.mode}
-												locale={preview.locale}
-												breakpoints={() =>
-													docState.collection()?.preview?.breakpoints ?? []
-												}
-												dirty={docState.isDocumentMutated}
-												saveStamp={preview.saveStamp}
-												draftVersionId={() =>
-													docState.document()?.versionId ?? undefined
-												}
-												canSyncDraft={canSyncPreviewDraft}
-												route={() => docState.document()?.route}
-												canEdit={() =>
-													canSyncPreviewDraft() && !brickStore.get.locked
-												}
-												editingDetails={previewEditingDetails}
-												errors={previewErrors}
-												builderTarget={previewFocus.builderTarget}
-												onFocusField={(target, options) =>
-													void previewFocus.requestTarget(target, options)
-												}
-												dragged={previewStructure.dragged}
-												onChange={previewStructure.handle}
-												onUndo={previewStructure.undo}
-												repeaterCapacity={previewStructure.capacity}
-												fieldEdit={previewFieldEdit}
-												agent={previewAgent}
-												registerScrollCapture={registerPreviewScrollCapture}
-												consumeScrollRestore={consumePreviewScrollRestore}
-												onDeselect={previewFocus.deselect}
+												preview={preview}
 												toolbarMount={previewToolbar}
 											/>
 										</div>

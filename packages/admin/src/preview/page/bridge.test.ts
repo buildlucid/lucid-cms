@@ -1,17 +1,12 @@
 // @vitest-environment happy-dom
 
+import { encodeEditMarkup } from "@lucidcms/client/contract";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import {
-	createPreviewMessage,
-	type PreviewFieldTarget,
-	previewProtocol,
-} from "../protocol/index.js";
+import { createPreviewMessage, type PreviewTarget } from "../protocol/index.js";
 import { installPreviewBridge } from "./bridge.js";
 import { getPreviewPageKey } from "./context.js";
 
-//* the markup `@lucidcms/client`'s `previewAttributes` writes
-const markup = (target: PreviewFieldTarget) =>
-	`1:${encodeURIComponent(JSON.stringify(target))}`;
+const markup = (target: PreviewTarget) => encodeEditMarkup(target) ?? "";
 
 afterEach(() => {
 	document.body.replaceChildren();
@@ -31,7 +26,7 @@ describe("preview page bridge handshake", () => {
 			const { cleanup } = installPreviewBridge(window, () => []);
 			const button = document.createElement("button");
 			button.setAttribute(
-				"data-lucid-preview-field",
+				"data-lucid-edit",
 				markup({ collectionKey: "page", documentId: 1, path: ["title"] }),
 			);
 			document.body.append(button);
@@ -50,7 +45,7 @@ describe("preview page bridge handshake", () => {
 					source: window.parent,
 					origin: parentOrigin,
 					data: createPreviewMessage({
-						type: previewProtocol.messages.connect,
+						type: "connect",
 					}),
 				}),
 			);
@@ -65,7 +60,7 @@ describe("preview page bridge handshake", () => {
 			expect(connectedClick.defaultPrevented).toBe(true);
 			expect(postMessage).toHaveBeenCalledWith(
 				createPreviewMessage({
-					type: previewProtocol.messages.focusField,
+					type: "focus",
 					target: { collectionKey: "page", documentId: 1, path: ["title"] },
 				}),
 				parentOrigin,
@@ -99,13 +94,13 @@ describe("preview page bridge scroll", () => {
 		const parentOrigin = "https://admin.example";
 		const state = { pageKey: getPreviewPageKey(window), x: 0, y: 800 };
 		for (const data of [
-			createPreviewMessage({ type: previewProtocol.messages.connect }),
+			createPreviewMessage({ type: "connect" }),
 			createPreviewMessage({
-				type: previewProtocol.messages.restoreScroll,
+				type: "restoreScroll",
 				state,
 			}),
 			createPreviewMessage({
-				type: previewProtocol.messages.captureScroll,
+				type: "captureScroll",
 				requestId: "capture-1",
 			}),
 		]) {
@@ -120,7 +115,7 @@ describe("preview page bridge scroll", () => {
 
 		expect(postMessage).toHaveBeenLastCalledWith(
 			createPreviewMessage({
-				type: previewProtocol.messages.scrollState,
+				type: "scrollState",
 				requestId: "capture-1",
 				state,
 			}),
@@ -142,7 +137,7 @@ describe("preview page bridge announcements", () => {
 			new MessageEvent("message", {
 				source: window.parent,
 				origin: parentOrigin,
-				data: createPreviewMessage({ type: previewProtocol.messages.connect }),
+				data: createPreviewMessage({ type: "connect" }),
 			}),
 		);
 
@@ -155,7 +150,7 @@ describe("preview page bridge announcements", () => {
 		expect(postMessage.mock.calls).toEqual([
 			[
 				createPreviewMessage({
-					type: previewProtocol.messages.ready,
+					type: "ready",
 					updates: false,
 					loadedAt: Math.floor(performance.timeOrigin),
 				}),
@@ -163,7 +158,7 @@ describe("preview page bridge announcements", () => {
 			],
 			[
 				createPreviewMessage({
-					type: previewProtocol.messages.ready,
+					type: "ready",
 					updates: true,
 					loadedAt: Math.floor(performance.timeOrigin),
 				}),
@@ -171,7 +166,7 @@ describe("preview page bridge announcements", () => {
 			],
 			[
 				createPreviewMessage({
-					type: previewProtocol.messages.ready,
+					type: "ready",
 					updates: false,
 					loadedAt: Math.floor(performance.timeOrigin),
 				}),
@@ -189,7 +184,7 @@ describe("preview page bridge announcements", () => {
 			new MessageEvent("message", {
 				source: window.parent,
 				origin: "https://admin.example",
-				data: createPreviewMessage({ type: previewProtocol.messages.connect }),
+				data: createPreviewMessage({ type: "connect" }),
 			}),
 		);
 		//* happy-dom ignores `persisted` in PageTransitionEvent's options
@@ -197,14 +192,14 @@ describe("preview page bridge announcements", () => {
 			Object.assign(new Event(type), { persisted: true });
 		window.dispatchEvent(transition("pagehide"));
 		expect(postMessage).toHaveBeenLastCalledWith(
-			createPreviewMessage({ type: previewProtocol.messages.unload }),
+			createPreviewMessage({ type: "unload" }),
 			"https://admin.example",
 		);
 		window.dispatchEvent(transition("pageshow"));
 
 		expect(postMessage).toHaveBeenLastCalledWith(
 			createPreviewMessage({
-				type: previewProtocol.messages.ready,
+				type: "ready",
 				updates: false,
 				loadedAt: Math.floor(performance.timeOrigin),
 			}),
@@ -220,7 +215,7 @@ describe("preview page bridge editing", () => {
 		const { cleanup } = installPreviewBridge(window, () => []);
 		const heading = document.createElement("h1");
 		heading.setAttribute(
-			"data-lucid-preview-field",
+			"data-lucid-edit",
 			markup({ collectionKey: "page", documentId: 1, path: ["title"] }),
 		);
 		document.body.append(heading);
@@ -238,7 +233,7 @@ describe("preview page bridge editing", () => {
 			return event.defaultPrevented;
 		};
 		const editMode = createPreviewMessage({
-			type: previewProtocol.messages.editMode,
+			type: "editMode",
 			editing: {
 				collectionKey: "page",
 				documentId: 1,
@@ -249,10 +244,7 @@ describe("preview page bridge editing", () => {
 			},
 		});
 
-		send(
-			"https://admin.example",
-			createPreviewMessage({ type: previewProtocol.messages.connect }),
-		);
+		send("https://admin.example", createPreviewMessage({ type: "connect" }));
 		send("https://other.example", editMode);
 		expect(click()).toBe(false);
 		send("https://admin.example", editMode);

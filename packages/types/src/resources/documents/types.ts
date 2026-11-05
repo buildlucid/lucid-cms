@@ -363,7 +363,8 @@ export type PreviewSessionURLResponse = {
 	expiresAt: string | null;
 };
 
-export type PreviewMode = "perspective" | "scoped";
+/** Navigable previews keep the preview while browsing the site; scoped previews show one document. */
+export type PreviewMode = "navigable" | "scoped";
 
 /** Browser runtime state shared by preview-aware Lucid integrations. */
 export type PreviewRuntimeState =
@@ -376,18 +377,21 @@ export type PreviewRuntimeState =
 	  };
 
 /** A brick by its `ref`, which stays the same when bricks are reordered or saved. */
-export type PreviewFieldBrick = {
+export type PreviewTargetBrick = {
 	type: "fixed" | "builder";
 	key: string;
 	ref: string;
 };
 
-/** A place in a document that preview markup points to: a field by its content path, or a brick itself when the path is empty. */
-export type PreviewFieldTarget = {
+/** A repeater item in a content path, by the `ref` it keeps when items are reordered or saved. */
+export type PreviewItem = { ref: string };
+
+/** A place in a document that preview markup points to: a field or repeater item by its content path of field keys and items, or a brick itself when the path is empty. */
+export type PreviewTarget = {
 	collectionKey: string;
 	documentId: number;
-	brick?: PreviewFieldBrick;
-	path: Array<string | number>;
+	brick?: PreviewTargetBrick;
+	path: Array<string | PreviewItem>;
 	locale?: string;
 };
 
@@ -432,7 +436,41 @@ export type PreviewPageScript = {
 export type PreviewResolution = Pick<
 	Extract<PreviewRuntimeState, { kind: "preview" }>,
 	"mode" | "expiresAt"
->;
+> &
+	Pick<PreviewSession, "entry">;
+
+/** The document a page shows, which signed-in editors get an edit link to. A content API document can be passed as it is. */
+export type PreviewDocument = Pick<
+	CollectionDocument,
+	"collectionKey" | "id" | "version"
+> & {
+	meta?: Pick<NonNullable<CollectionDocument["meta"]>, "versionId">;
+};
+
+/** What a site's `setupPreview` hands the toolbar script the CMS serves. */
+export type PreviewToolbarOptions = {
+	/** The CMS's origin. */
+	host: string;
+	document: PreviewDocument | null;
+	/** Whether to draw the toolbar. Without it, previews still follow links and can be exited. */
+	visible: boolean;
+	/** Navigates when a preview is exited, for sites whose router owns navigation. */
+	navigate?: (url: URL) => void | Promise<void>;
+};
+
+/** A running toolbar script. */
+export type PreviewToolbarRuntime = {
+	setDocument: (document: PreviewDocument | null) => void;
+	/** Ends the preview and shows the published page. */
+	exit: () => Promise<void>;
+	cleanup: () => void;
+};
+
+/** The toolbar script, found on `window` under `Symbol.for("lucid.preview-toolbar")` once it loads. */
+export type PreviewToolbarScript = {
+	version: 1;
+	setup: (options: PreviewToolbarOptions) => PreviewToolbarRuntime;
+};
 
 export type PreviewSession = {
 	mode: PreviewMode;

@@ -1,9 +1,9 @@
+import { isBuilderPreviewFrame } from "@lucidcms/client/contract";
 import type {
 	PreviewPageOptions,
 	PreviewPageRuntime,
 	PreviewUpdateHandler,
 } from "@lucidcms/types";
-import { isLucidBuilderPreview } from "../protocol/index.js";
 import { installPreviewBridge } from "./bridge.js";
 import { createMorphHandler } from "./morph-handler.js";
 import { installPreviewNavigation } from "./navigation.js";
@@ -17,7 +17,7 @@ let cleanupActive: (() => void) | null = null;
 export const setupPreviewPage = (
 	options: PreviewPageOptions,
 ): PreviewPageRuntime | null => {
-	if (!isLucidBuilderPreview(window)) return null;
+	if (!isBuilderPreviewFrame(window)) return null;
 	cleanupActive?.();
 
 	const morph = options.morph ? createMorphHandler(options.serverMarkup) : null;

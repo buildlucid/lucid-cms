@@ -79,6 +79,7 @@
 		"@inquirer/confirm": "^6.3.5",
 		"@inquirer/select": "^5.2.8",
 		"@lucidcms/admin": "0.19.0-alpha.0",
+		"@lucidcms/client": "^0.5.0",
 		"@lucidcms/rich-text": "1.2.0",
 		"@lucidcms/types": "^0.6.0",
 		"@lucidkiln/core": "^1.7.1",

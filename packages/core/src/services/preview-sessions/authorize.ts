@@ -7,20 +7,10 @@ import resolveSession from "./helpers/resolve-session.js";
 import type { PreviewSessionDocumentTarget } from "./types.js";
 
 /**
- * Authorizes a preview token and resolves the requested collection's version.
- *
- * A scoped preview deliberately applies different access rules to its entry
- * collection and to auxiliary collections. Reads against the entry collection
- * stay locked to its document and version target. Latest and environment
- * targets remain fluid; revision and snapshot targets use their pinned version.
- * Reads against other collections are allowed so that the rendered page can load
- * supporting content such as menus, settings, or article carousels. Projectable
- * preview perspectives use configured or same-named collection mappings. Exact
- * revisions and collections without a mapping use the request's explicit version.
- *
- * The preview token is validated before either path. This distinction limits
- * access to other documents in the previewed collection without breaking pages
- * that are composed from several collections.
+ * Validates the preview token before resolving access. Scoped previews restrict the entry
+ * collection to its document and target: latest and environment targets remain fluid, revisions
+ * and snapshots stay pinned. Other collections allow supporting content reads, using perspective
+ * mappings where available or the requested version otherwise.
  */
 const authorize: ServiceFn<
 	[
@@ -122,7 +112,7 @@ const authorize: ServiceFn<
 		error: undefined,
 		data: {
 			sessionId: session.id,
-			mode: "perspective",
+			mode: "navigable",
 			entry: {
 				collectionKey: session.entry_collection_key,
 				documentId: session.entry_document_id,

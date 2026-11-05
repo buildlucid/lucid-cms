@@ -1,7 +1,7 @@
 import type { Collection } from "@types";
 import { createRoot } from "solid-js";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import type { PreviewTarget } from "@/preview/protocol";
 import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
 import { usePreviewStructure } from "./usePreviewStructure";
 
@@ -48,14 +48,14 @@ const group = (ref: string, order: number) => ({
 });
 
 const page = { collectionKey: "page", documentId: 1 };
-const brick = (ref: string, key = "hero"): PreviewFieldTarget => ({
+const brick = (ref: string, key = "hero"): PreviewTarget => ({
 	...page,
 	brick: { type: "builder", key, ref },
 	path: [],
 });
-const link = (index: number): PreviewFieldTarget => ({
+const link = (ref: string): PreviewTarget => ({
 	...page,
-	path: ["links", index],
+	path: ["links", { ref }],
 });
 
 const bricks = () =>
@@ -141,15 +141,15 @@ describe("structure changes from the preview", () => {
 	test("adds, moves and removes repeater items, up to the repeater's limit", () => {
 		const { structure, reveal, dispose } = setup();
 
-		expect(structure.capacity(link(0))).toEqual({
+		expect(structure.capacity(link("one"))).toEqual({
 			count: 2,
 			max: 3,
 			canAdd: true,
 		});
-		structure.handle(link(0), { action: "add", place: "after" });
+		structure.handle(link("one"), { action: "add", place: "after" });
 		const added = links()[1] ?? "";
 		expect(links()).toEqual(["one", added, "two"]);
-		expect(reveal).toHaveBeenCalledWith(link(1));
+		expect(reveal).toHaveBeenCalledWith(link(added));
 		expect(structure.capacity({ ...page, path: ["links"] })).toEqual({
 			count: 3,
 			max: 3,
@@ -163,13 +163,13 @@ describe("structure changes from the preview", () => {
 		expect(links()).toHaveLength(3);
 		expect(spawnToast).toHaveBeenCalledOnce();
 
-		structure.handle(link(2), {
+		structure.handle(link("two"), {
 			action: "move",
 			place: "before",
-			anchor: link(0),
+			anchor: link("one"),
 		});
 		expect(links()).toEqual(["two", "one", added]);
-		structure.handle(link(0), { action: "remove" });
+		structure.handle(link("two"), { action: "remove" });
 		expect(links()).toEqual(["one", added]);
 		dispose();
 	});

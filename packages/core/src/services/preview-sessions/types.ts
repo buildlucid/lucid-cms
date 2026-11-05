@@ -28,7 +28,7 @@ type PreviewSessionDocumentEntry = {
 };
 
 export type PreviewSessionPerspectiveTarget = PreviewSessionDocumentEntry & {
-	mode: "perspective";
+	mode: "navigable";
 	versionType: DocumentVersionType;
 	versionId?: number;
 };

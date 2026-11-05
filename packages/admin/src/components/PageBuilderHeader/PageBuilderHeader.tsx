@@ -30,6 +30,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
+import RevokePreviewLinksModal from "@/components/RevokePreviewLinksModal/RevokePreviewLinksModal";
 import SegmentedControl, {
 	type SegmentedControlOption,
 } from "@/components/SegmentedControl/SegmentedControl";
@@ -93,6 +94,8 @@ export const PageBuilderHeader: Component<{
 	};
 	/** The request that owns the proposal being edited. */
 	requestLink?: string;
+	/** Runs once the document's preview links are revoked, which ends the builder's own preview too. */
+	onPreviewLinksRevoked?: () => void;
 	currentViewLabel?: Accessor<string | undefined>;
 	/** Undo and redo controls, omitted when the document cannot be edited. */
 	edits?: UseBuilderEdits;
@@ -126,6 +129,7 @@ export const PageBuilderHeader: Component<{
 	let headerRef: HTMLElement | undefined;
 	const documentLocalization = useDocumentLocalization();
 	const [oneRow, setOneRow] = createSignal(false);
+	const [revokeOpen, setRevokeOpen] = createSignal(false);
 	const [now, setNow] = createSignal(Date.now());
 	const condense = useScrollProgress(CONDENSE_DISTANCE);
 	const shadow = useScrollProgress(120);
@@ -536,6 +540,12 @@ export const PageBuilderHeader: Component<{
 
 		return userStore.get.hasPermission([permission]).some;
 	});
+	const hasRevokePermission = createMemo(() => {
+		const permission = props.state.collection()?.permissions.update;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).some;
+	});
 	const showAutoSave = createMemo(
 		() =>
 			props.mode === "edit" && props.state.ui.hasAutoSavePermission() === true,
@@ -924,7 +934,9 @@ export const PageBuilderHeader: Component<{
 					showCopyPreview()
 						? {
 								onCopy: (mode) => void copyPreviewUrl(mode),
+								onRevoke: () => setRevokeOpen(true),
 								permission: hasPreviewPermission(),
+								revokePermission: hasRevokePermission(),
 								loading: createPreview.action.isPending,
 								scopedOnly: scopedPreviewOnly(),
 							}
@@ -1104,6 +1116,13 @@ export const PageBuilderHeader: Component<{
 					</div>
 				</div>
 			</header>
+			<RevokePreviewLinksModal
+				collectionKey={props.state.collectionKey()}
+				documentId={props.state.documentID()}
+				open={revokeOpen()}
+				onOpenChange={setRevokeOpen}
+				onRevoked={props.onPreviewLinksRevoked}
+			/>
 			<AutoSaveStatusPill
 				ui={props.state.ui}
 				autoSave={props.state.autoSave}

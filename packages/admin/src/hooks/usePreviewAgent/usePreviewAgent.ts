@@ -2,7 +2,7 @@ import type { Collection } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import type { PreviewTarget } from "@/preview/protocol";
 import T from "@/translations";
 import {
 	getPreviewTargetTrail,
@@ -35,7 +35,7 @@ export const usePreviewAgent = (props: {
 				session.attachAgent()?.features.documents.attach === true,
 		),
 		/** Attaches a part of the document to the chat, opening it. */
-		ask: (target: PreviewFieldTarget) => {
+		ask: (target: PreviewTarget) => {
 			const collection = props.collection();
 			const details = props.details();
 			const documentId = props.documentId();
@@ -45,7 +45,11 @@ export const usePreviewAgent = (props: {
 				target,
 				collection,
 				bricks: brickStore.get.bricks,
-				label: getPreviewTargetTrail(details, target).join(" › "),
+				label: getPreviewTargetTrail(
+					details,
+					target,
+					brickStore.get.bricks,
+				).join(" › "),
 			});
 			if (!focus) {
 				spawnToast({

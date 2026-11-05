@@ -1,15 +1,20 @@
 import type {
 	PreviewPageRuntime,
 	PreviewPageScript,
+	PreviewToolbarRuntime,
+	PreviewToolbarScript,
 	PreviewUpdateHandler,
 } from "@lucidcms/types";
-import { isBuilderPreviewFrame, resolvePreviewToken } from "./frame.js";
+import {
+	isBuilderPreviewFrame,
+	normalizePreviewToken,
+	previewParams,
+	previewScripts,
+	readStoredPreview,
+} from "../contract.js";
+import { loadScript } from "./scripts.js";
 import { recordServerMarkup } from "./server-markup.js";
 import type { PreviewController, PreviewOptions } from "./types.js";
-
-//* where the CMS serves the preview page script, and where the script puts itself on `window` once it runs
-const pageScriptPath = "/admin/preview.js";
-const pageScriptKey = Symbol.for("lucid.preview-page");
 
 const activeControllers = new WeakMap<Window, PreviewController>();
 
@@ -18,71 +23,21 @@ const inactiveController = (): PreviewController => ({
 	ready: Promise.resolve(),
 	token: null,
 	onUpdate: () => () => undefined,
+	setDocument: () => undefined,
+	exit: async () => undefined,
 	cleanup: () => undefined,
 });
 
-/** Whether a value is a page script this client knows how to start. */
-const isPageScript = (value: unknown): value is PreviewPageScript =>
-	typeof value === "object" &&
-	value !== null &&
-	"version" in value &&
-	value.version === 1 &&
-	"setup" in value &&
-	typeof value.setup === "function";
+const readUrlToken = (targetWindow: Window) =>
+	new URL(targetWindow.location.href).searchParams.get(previewParams.token);
 
-const readPageScript = (targetWindow: Window): PreviewPageScript | null => {
-	const value: unknown = Reflect.get(targetWindow, pageScriptKey);
-	return isPageScript(value) ? value : null;
-};
-
-/** Loads the CMS's preview page script, resolving with it, or null when it can't load. */
-const loadPageScript = (
+/** Runs the CMS's page script in the builder's preview frame, which shows edits and draws edit mode. */
+const createBuilderController = (
 	targetWindow: Window,
-	host: string | URL,
-): Promise<PreviewPageScript | null> => {
-	const existing = readPageScript(targetWindow);
-	if (existing) return Promise.resolve(existing);
-
-	const { document } = targetWindow;
-	const src = new URL(pageScriptPath, host).toString();
-	return new Promise((resolve) => {
-		const script = document.createElement("script");
-		script.src = src;
-		script.async = true;
-		script.addEventListener(
-			"load",
-			() => resolve(readPageScript(targetWindow)),
-			{
-				once: true,
-			},
-		);
-		script.addEventListener(
-			"error",
-			() => {
-				console.warn(
-					`Lucid's preview script couldn't load from ${src}. Check the preview host, and that the page's Content-Security-Policy allows it.`,
-				);
-				resolve(null);
-			},
-			{ once: true },
-		);
-		(document.head ?? document.documentElement).append(script);
-	});
-};
-
-/**
- * Loads the preview runtime from `host` inside the builder frame. Reuses the controller and
- * first-call options; returns an inactive controller during SSR or outside the builder.
- */
-export const setupPreview = (
-	options: PreviewOptions = {},
+	host: string,
+	options: PreviewOptions,
+	remove: () => void,
 ): PreviewController => {
-	const targetWindow = typeof window === "undefined" ? null : window;
-	if (!targetWindow) return inactiveController();
-	const existing = activeControllers.get(targetWindow);
-	if (existing) return existing;
-	if (!isBuilderPreviewFrame(targetWindow)) return inactiveController();
-
 	const handlers = new Set<PreviewUpdateHandler>();
 	const morph = options.morph === true;
 	const serverMarkup = morph
@@ -90,21 +45,24 @@ export const setupPreview = (
 		: new WeakMap<Element, string>();
 	let cleanedUp = false;
 	let runtime: PreviewPageRuntime | null = null;
-	const ready = loadPageScript(
+	const ready = loadScript<PreviewPageScript>(
 		targetWindow,
-		options.host ?? targetWindow.location.origin,
+		host,
+		previewScripts.page,
 	).then((script) => {
 		if (cleanedUp || !script) return;
 		runtime = script.setup({ handlers, morph, serverMarkup });
 	});
 
-	const controller: PreviewController = {
+	return {
 		get active() {
 			return !cleanedUp && runtime !== null;
 		},
 		ready,
 		get token() {
-			return cleanedUp ? null : resolvePreviewToken(targetWindow);
+			return cleanedUp
+				? null
+				: normalizePreviewToken(readUrlToken(targetWindow));
 		},
 		onUpdate: (handler) => {
 			if (cleanedUp) return () => undefined;
@@ -116,14 +74,103 @@ export const setupPreview = (
 				runtime?.handlersChanged();
 			};
 		},
+		setDocument: () => undefined,
+		exit: async () => undefined,
 		cleanup: () => {
 			if (cleanedUp) return;
 			cleanedUp = true;
 			handlers.clear();
-			activeControllers.delete(targetWindow);
+			remove();
 			runtime?.cleanup();
 		},
 	};
+};
+
+/** Runs the CMS's toolbar script on previews, and for signed-in editors when the page names its document. */
+const createSiteController = (
+	targetWindow: Window,
+	host: string,
+	options: PreviewOptions,
+	remove: () => void,
+): PreviewController => {
+	let document = options.document ?? null;
+	let cleanedUp = false;
+	let runtime: PreviewToolbarRuntime | null = null;
+	let loading: Promise<void> | null = null;
+
+	const start = () => {
+		loading ??= loadScript<PreviewToolbarScript>(
+			targetWindow,
+			host,
+			previewScripts.toolbar,
+		).then((script) => {
+			if (cleanedUp || !script) return;
+			runtime = script.setup({
+				host,
+				document,
+				visible: options.toolbar !== false,
+				navigate: options.navigate,
+			});
+		});
+		return loading;
+	};
+	const previewing =
+		readUrlToken(targetWindow) !== null ||
+		readStoredPreview(targetWindow, host) !== null;
+	if (document || previewing) void start();
+
+	return {
+		get active() {
+			return !cleanedUp && runtime !== null;
+		},
+		get ready() {
+			return loading ?? Promise.resolve();
+		},
+		get token() {
+			if (cleanedUp) return null;
+			return (
+				normalizePreviewToken(readUrlToken(targetWindow)) ??
+				readStoredPreview(targetWindow, host)?.token ??
+				null
+			);
+		},
+		onUpdate: () => () => undefined,
+		setDocument: (next) => {
+			if (cleanedUp) return;
+			document = next;
+			if (runtime) runtime.setDocument(next);
+			else if (next) void start();
+		},
+		exit: async () => {
+			await loading;
+			await runtime?.exit();
+		},
+		cleanup: () => {
+			if (cleanedUp) return;
+			cleanedUp = true;
+			remove();
+			runtime?.cleanup();
+		},
+	};
+};
+
+/**
+ * Starts the builder runtime inside its frame, otherwise the toolbar. Reuses the controller with
+ * first-call options. Returns an inactive controller during SSR.
+ */
+export const setupPreview = (
+	options: PreviewOptions = {},
+): PreviewController => {
+	const targetWindow = typeof window === "undefined" ? null : window;
+	if (!targetWindow) return inactiveController();
+	const existing = activeControllers.get(targetWindow);
+	if (existing) return existing;
+
+	const host = new URL(options.host ?? targetWindow.location.origin).origin;
+	const remove = () => activeControllers.delete(targetWindow);
+	const controller = isBuilderPreviewFrame(targetWindow)
+		? createBuilderController(targetWindow, host, options, remove)
+		: createSiteController(targetWindow, host, options, remove);
 	activeControllers.set(targetWindow, controller);
 	return controller;
 };

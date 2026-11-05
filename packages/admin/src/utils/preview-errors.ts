@@ -1,12 +1,12 @@
 import type { BrickError, Collection, FieldError } from "@types";
 import {
-	type PreviewFieldPath,
+	type PreviewTargetPath,
 	previewProtocolLimits,
 } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfig } from "@/types/collection-config";
 
-type Path = Array<string | number>;
+type Path = PreviewTargetPath["path"];
 
 /** Finds a data field by key, with its content path: nested sections and collapsibles add their key, tabs and inline ones don't. */
 const findField = (
@@ -35,10 +35,9 @@ const findField = (
 	return null;
 };
 
-/** The content paths of fields with errors in the shown locale, within a brick or repeater item, with items by their index. */
+/** The content paths of fields with errors in the shown locale, within a brick or repeater item. */
 const errorPaths = (props: {
 	configs: CollectionFieldConfig[];
-	fields: BrickData["fields"];
 	errors: FieldError[];
 	prefix: Path;
 	locale: string | undefined;
@@ -55,22 +54,14 @@ const errorPaths = (props: {
 			return shown ? [path] : [];
 		}
 		const { fields } = found.config;
-		const groups = [
-			...(props.fields.find((field) => field.key === error.key)?.groups ?? []),
-		].sort((a, b) => a.order - b.order);
-		return error.groupErrors.flatMap((groupError) => {
-			const index = groups.findIndex((group) => group.ref === groupError.ref);
-			const group = groups[index];
-			return group
-				? errorPaths({
-						configs: fields,
-						fields: group.fields,
-						errors: groupError.fields,
-						prefix: [...path, index],
-						locale: props.locale,
-					})
-				: [];
-		});
+		return error.groupErrors.flatMap((groupError) =>
+			errorPaths({
+				configs: fields,
+				errors: groupError.fields,
+				prefix: [...path, { ref: groupError.ref }],
+				locale: props.locale,
+			}),
+		);
 	});
 
 /** The fields with validation errors, by brick and content path, which the preview outlines in red. */
@@ -80,13 +71,10 @@ export const getPreviewErrors = (props: {
 	brickErrors: BrickError[];
 	fieldsErrors: FieldError[];
 	locale: string | undefined;
-}): PreviewFieldPath[] =>
+}): PreviewTargetPath[] =>
 	[
 		...errorPaths({
 			configs: props.collection.fields,
-			fields:
-				props.bricks.find((brick) => brick.type === "collection-fields")
-					?.fields ?? [],
 			errors: props.fieldsErrors,
 			prefix: [],
 			locale: props.locale,
@@ -105,7 +93,6 @@ export const getPreviewErrors = (props: {
 			const owner = { type: brick.type, key: brick.key, ref: brick.ref };
 			return errorPaths({
 				configs: config.fields,
-				fields: brick.fields,
 				errors: brickError.fields,
 				prefix: [],
 				locale: props.locale,

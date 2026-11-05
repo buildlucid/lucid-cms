@@ -1,12 +1,12 @@
 import z from "zod";
 import type {
+	ToolkitPreviewCookies,
 	ToolkitPreviewResponseHeaders,
-	ToolkitPreviewStore,
 } from "./types.js";
 
 export const inputSchema = z.object({
 	url: z.union([z.url(), z.instanceof(URL)]),
-	session: z.custom<ToolkitPreviewStore>(
+	cookies: z.custom<ToolkitPreviewCookies>(
 		(value) =>
 			value !== null &&
 			typeof value === "object" &&
@@ -14,9 +14,9 @@ export const inputSchema = z.object({
 			typeof value.get === "function" &&
 			"set" in value &&
 			typeof value.set === "function" &&
-			"clear" in value &&
-			typeof value.clear === "function",
-		"Provide a preview store with get, set and clear methods.",
+			"delete" in value &&
+			typeof value.delete === "function",
+		"Provide cookies with get, set and delete methods.",
 	),
 	headers: z
 		.custom<ToolkitPreviewResponseHeaders>(

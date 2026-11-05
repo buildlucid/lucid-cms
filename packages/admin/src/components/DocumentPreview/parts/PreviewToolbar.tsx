@@ -51,6 +51,8 @@ export const PreviewToolbar: Component<{
 	editMode: Accessor<boolean>;
 	onToggleEditMode: () => void;
 	actionLoading: Accessor<boolean>;
+	/** Whether there's a page to refresh or open, which unsaved documents and ones without a page don't have. */
+	hasPage: Accessor<boolean>;
 	onRefresh: () => void;
 	onOpen: () => void;
 }> = (props) => {
@@ -165,6 +167,7 @@ export const PreviewToolbar: Component<{
 					shape="square"
 					title={T()("common.refresh")}
 					aria-label={T()("common.refresh")}
+					disabled={!props.hasPage()}
 					onClick={() => props.onRefresh()}
 				>
 					<TbOutlineRotateClockwise2 size={12} />
@@ -177,6 +180,7 @@ export const PreviewToolbar: Component<{
 					title={T()("preview.open")}
 					aria-label={T()("preview.open")}
 					loading={props.actionLoading()}
+					disabled={!props.hasPage()}
 					onClick={() => props.onOpen()}
 				>
 					<TbOutlineExternalLink size={12} />

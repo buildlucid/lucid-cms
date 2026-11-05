@@ -16,6 +16,7 @@ import type { DocumentReadOptions } from "./functions/document.js";
 import type editable from "./functions/editable.js";
 import type footer from "./functions/footer.js";
 import type head from "./functions/head.js";
+import type isEditing from "./functions/is-editing.js";
 import type isPreview from "./functions/is-preview.js";
 import type createLocalesFunction from "./functions/locales.js";
 import type createMediaListFunction from "./functions/media-list.js";
@@ -83,14 +84,16 @@ declare module "@lucidkiln/core" {
 		 * insertion. Empty outside previews.
 		 */
 		editable: typeof editable;
-		/**
-		 * True in builder or shared previews. Use to render editable placeholders for empty bricks or
-		 * repeater items.
-		 */
+		/** True in builder and shared previews. */
 		isPreview: typeof isPreview;
+		/**
+		 * True in the builder's preview, where editors fill in the page. Use it to render placeholders
+		 * for empty fields, bricks or repeater items that shared previews shouldn't show.
+		 */
+		isEditing: typeof isEditing;
 		/** Preview referrer policy for `<head>`, empty outside previews. */
 		head: typeof head;
-		/** Preview toolbar and script to place before `</body>`, empty outside previews. */
+		/** The preview script to place before `</body>`, empty outside previews. */
 		footer: typeof footer;
 		/** Stops rendering with `pages/_404.kiln` and status 404. */
 		notFound: typeof notFound;

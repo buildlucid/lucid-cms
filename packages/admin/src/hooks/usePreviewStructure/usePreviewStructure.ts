@@ -2,10 +2,11 @@ import type { Collection } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { getBuilderPreviewTarget } from "@/hooks/usePreviewFocus/utils/get-builder-preview-target";
-import type {
-	PreviewDragged,
-	PreviewFieldTarget,
-	PreviewPlace,
+import {
+	isPreviewItem,
+	type PreviewDragged,
+	type PreviewPlace,
+	type PreviewTarget,
 } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
@@ -21,7 +22,7 @@ import { resolveRepeater } from "./utils/resolve-repeater";
  */
 export type PreviewStructureChange =
 	| { action: "add"; place: PreviewPlace; brickKey?: string }
-	| { action: "move"; place: PreviewPlace; anchor: PreviewFieldTarget }
+	| { action: "move"; place: PreviewPlace; anchor: PreviewTarget }
 	| { action: "remove" };
 
 /** How many items a repeater has and can have, and whether the user can add one now. */
@@ -59,7 +60,7 @@ export const usePreviewStructure = (props: {
 	documentId: Accessor<number | undefined>;
 	locales: Accessor<string[]>;
 	/** Opens a brick or repeater item in the builder and points it out on the page. */
-	reveal: (target: PreviewFieldTarget) => void;
+	reveal: (target: PreviewTarget) => void;
 }) => {
 	const brickStore = useBrickStore();
 
@@ -75,7 +76,7 @@ export const usePreviewStructure = (props: {
 
 	const changeBrick = (
 		collection: Collection,
-		target: PreviewFieldTarget,
+		target: PreviewTarget,
 		change: PreviewStructureChange,
 	): number | null => {
 		const ref = target.brick?.ref;
@@ -156,7 +157,7 @@ export const usePreviewStructure = (props: {
 	};
 
 	/** The repeater a target is, or is an item of, with its brick's place in the store. */
-	const findRepeater = (collection: Collection, target: PreviewFieldTarget) => {
+	const findRepeater = (collection: Collection, target: PreviewTarget) => {
 		const found = findPreviewBrick({
 			target,
 			collection,
@@ -174,7 +175,7 @@ export const usePreviewStructure = (props: {
 
 	const changeRepeater = (
 		collection: Collection,
-		target: PreviewFieldTarget,
+		target: PreviewTarget,
 		change: PreviewStructureChange,
 	): number | null => {
 		const resolved = findRepeater(collection, target);
@@ -182,7 +183,7 @@ export const usePreviewStructure = (props: {
 			notify(T()("preview.structure.missing"));
 			return null;
 		}
-		const { scope, index, brickIndex } = resolved;
+		const { scope, group, brickIndex } = resolved;
 		if (!scope.editable) {
 			notify(T()("preview.structure.denied"));
 			return null;
@@ -193,8 +194,6 @@ export const usePreviewStructure = (props: {
 			ref: scope.parentRef,
 			parentRepeaterKey: scope.parentRepeaterKey,
 		};
-		const group = index === undefined ? undefined : scope.groups[index];
-
 		if (change.action === "add") {
 			const max = scope.config.validation?.maxGroups;
 			const documentId = props.documentId();
@@ -203,15 +202,16 @@ export const usePreviewStructure = (props: {
 				notify(T()("preview.structure.full"));
 				return null;
 			}
+			const index = group ? scope.groups.indexOf(group) : null;
 			const position =
-				index === undefined
+				index === null
 					? change.place === "before"
 						? 0
 						: scope.groups.length
 					: change.place === "before"
 						? index
 						: index + 1;
-			brickStore.get.addRepeaterGroup({
+			const ref = brickStore.get.addRepeaterGroup({
 				brickIndex,
 				fieldConfig: scope.config.fields,
 				key: scope.repeaterKey,
@@ -220,13 +220,12 @@ export const usePreviewStructure = (props: {
 				locales: props.locales(),
 				index: position,
 			});
-			props.reveal({
-				...target,
-				path: [
-					...(index === undefined ? target.path : target.path.slice(0, -1)),
-					position,
-				],
-			});
+			if (ref) {
+				props.reveal({
+					...target,
+					path: [...(group ? target.path.slice(0, -1) : target.path), { ref }],
+				});
+			}
 			return changed();
 		}
 
@@ -239,10 +238,8 @@ export const usePreviewStructure = (props: {
 			return changed();
 		}
 
-		const anchorIndex = change.anchor.path.at(-1);
-		const anchor =
-			typeof anchorIndex === "number" ? scope.groups[anchorIndex] : undefined;
-		const position = anchor
+		const anchor = change.anchor.path.at(-1);
+		const position = isPreviewItem(anchor)
 			? positionNextTo(
 					scope.groups.map((item) => item.ref),
 					group.ref,
@@ -304,7 +301,7 @@ export const usePreviewStructure = (props: {
 		dragged,
 		/** Applies a change, returning its undo step, or null when it made none. */
 		handle: (
-			target: PreviewFieldTarget,
+			target: PreviewTarget,
 			change: PreviewStructureChange,
 		): number | null => {
 			const collection = props.collection();
@@ -321,7 +318,7 @@ export const usePreviewStructure = (props: {
 				: changeRepeater(collection, target, change);
 		},
 		/** How many items a repeater, or an item's repeater, has and can have. Null when it isn't found. */
-		capacity: (target: PreviewFieldTarget): PreviewRepeaterCapacity | null => {
+		capacity: (target: PreviewTarget): PreviewRepeaterCapacity | null => {
 			const collection = props.collection();
 			const resolved = collection ? findRepeater(collection, target) : null;
 			if (!resolved) return null;

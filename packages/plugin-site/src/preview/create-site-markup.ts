@@ -1,34 +1,14 @@
-import { createPageMarkup } from "@lucidcms/admin/toolbar";
-import type { LucidHonoContext, Toolkit } from "@lucidcms/core/types";
-import { getCookie } from "hono/cookie";
 import { CLIENT_SCRIPT_PATH } from "../constants.js";
 import type { SitePreview } from "../types.js";
+import type { PageMarkup } from "./page-markup.js";
 
-/** Auth checks disable caching, so only previews request toolbar markup. */
-const createSiteMarkup = async (props: {
-	hono: LucidHonoContext;
-	toolkit: Toolkit;
-	preview: SitePreview | null;
-}) => {
-	const { hono, preview } = props;
-	if (!preview) return { head: "", footer: "" };
-
-	const authentication = await props.toolkit.auth.status({
-		cookies: { get: (name) => getCookie(hono, name) },
-		headers: { set: (name, value) => hono.header(name, value) },
-	});
-
-	return createPageMarkup({
-		scriptSrc: `/${CLIENT_SCRIPT_PATH}`,
-		authentication: authentication.data?.authenticated ?? "auto",
-		preview,
-		document: {
-			collectionKey: preview.entry.collectionKey,
-			id: preview.entry.documentId,
-			version: preview.entry.version,
-			meta: { versionId: preview.entry.versionId },
-		},
-	});
-};
+/** The referrer policy and preview script previews add to a page, which loads Lucid's toolbar or the builder's runtime. */
+const createSiteMarkup = (preview: SitePreview | null): PageMarkup =>
+	preview
+		? {
+				head: '<meta name="referrer" content="no-referrer">',
+				footer: `<script type="module" src="/${CLIENT_SCRIPT_PATH}"></script>`,
+			}
+		: { head: "", footer: "" };
 
 export default createSiteMarkup;

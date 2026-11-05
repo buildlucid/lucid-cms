@@ -120,7 +120,7 @@ const registerSiteRoute =
 					version: site.config.getVersion,
 				};
 				pageMarkup.set(state, {
-					...(await createSiteMarkup({ hono, toolkit, preview })),
+					...createSiteMarkup(preview),
 					footerWritten: false,
 				});
 				// Previews keep the no-store header the toolkit set, and development skips caching so edits show.

@@ -8,7 +8,7 @@ export const createPreviewUpdates = (
 	targetWindow: Window,
 	handlers: () => PreviewUpdateHandler[],
 	/** Runs once the handlers have shown a revision. */
-	onRendered: (revision: number) => void,
+	onRendered: () => void,
 ) => {
 	let running: AbortController | null = null;
 	let queued: number | null = null;
@@ -34,7 +34,7 @@ export const createPreviewUpdates = (
 				targetWindow.location.reload();
 				return;
 			}
-			onRendered(revision);
+			onRendered();
 		}
 
 		if (queued !== null) {

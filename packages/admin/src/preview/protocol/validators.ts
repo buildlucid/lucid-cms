@@ -1,9 +1,12 @@
+import { decodeEditMarkup } from "@lucidcms/client/contract";
 import { previewProtocolLimits } from "./constants.js";
 import type {
 	PreviewEditing,
-	PreviewFieldBrick,
-	PreviewFieldPath,
-	PreviewFieldTarget,
+	PreviewItem,
+	PreviewPathSegment,
+	PreviewTargetBrick,
+	PreviewTargetPath,
+	PreviewTarget,
 	PreviewHover,
 	PreviewHoverBlock,
 	PreviewHoverElement,
@@ -21,12 +24,12 @@ import {
 } from "./utils/validation.js";
 
 /** Validates the brick a field is in. */
-const isPreviewFieldBrick = (value: unknown): value is PreviewFieldBrick =>
+const isPreviewTargetBrick = (value: unknown): value is PreviewTargetBrick =>
 	isRecord(value) &&
 	hasOnlyKeys(value, ["type", "key", "ref"]) &&
 	(value.type === "fixed" || value.type === "builder") &&
 	isBoundedString(value.key, previewProtocolLimits.brickKeyLength) &&
-	isBoundedString(value.ref, previewProtocolLimits.brickRefLength);
+	isBoundedString(value.ref, previewProtocolLimits.refLength);
 
 /** Accepts saved document IDs only. */
 const isDocumentId = (value: unknown): value is number =>
@@ -42,22 +45,35 @@ export const isPreviewScrollState = (
 	isFiniteNumber(value.x) &&
 	isFiniteNumber(value.y);
 
-/** Validates a content path, with keys for fields and indexes for repeater items. */
-const isPreviewPath = (value: unknown): value is Array<string | number> =>
+/** Whether a content path segment is a repeater item, rather than a field key. */
+export const isPreviewItem = (
+	segment: PreviewPathSegment | undefined,
+): segment is PreviewItem => typeof segment === "object";
+
+/** Whether two content path segments name the same field or repeater item. */
+const isSamePreviewSegment = (
+	a: PreviewPathSegment | undefined,
+	b: PreviewPathSegment | undefined,
+) => (isPreviewItem(a) ? isPreviewItem(b) && a.ref === b.ref : a === b);
+
+const isSamePath = (a: PreviewTarget["path"], b: PreviewTarget["path"]) =>
+	a.length === b.length &&
+	a.every((segment, index) => isSamePreviewSegment(segment, b[index]));
+
+/** Validates a content path, with keys for fields and refs for repeater items. */
+const isPreviewPath = (value: unknown): value is PreviewTarget["path"] =>
 	Array.isArray(value) &&
 	value.length <= previewProtocolLimits.pathDepth &&
 	value.every((segment) =>
 		typeof segment === "string"
 			? isBoundedString(segment, previewProtocolLimits.pathKeyLength)
-			: typeof segment === "number" &&
-				Number.isSafeInteger(segment) &&
-				segment >= 0,
+			: isRecord(segment) &&
+				hasOnlyKeys(segment, ["ref"]) &&
+				isBoundedString(segment.ref, previewProtocolLimits.refLength),
 	);
 
-/** Validates and bounds a field target received from markup or a message. */
-export const isPreviewFieldTarget = (
-	value: unknown,
-): value is PreviewFieldTarget => {
+/** Validates and bounds a target received from markup or a message. */
+export const isPreviewTarget = (value: unknown): value is PreviewTarget => {
 	if (
 		!isRecord(value) ||
 		!hasOnlyKeys(value, [
@@ -77,7 +93,7 @@ export const isPreviewFieldTarget = (
 		return false;
 	}
 
-	if (value.brick !== undefined && !isPreviewFieldBrick(value.brick)) {
+	if (value.brick !== undefined && !isPreviewTargetBrick(value.brick)) {
 		return false;
 	}
 	//* only a brick can be targeted without a path
@@ -89,10 +105,10 @@ export const isPreviewFieldTarget = (
 	);
 };
 
-const isPreviewFieldPath = (value: unknown): value is PreviewFieldPath =>
+const isPreviewTargetPath = (value: unknown): value is PreviewTargetPath =>
 	isRecord(value) &&
 	hasOnlyKeys(value, ["brick", "path"]) &&
-	(value.brick === undefined || isPreviewFieldBrick(value.brick)) &&
+	(value.brick === undefined || isPreviewTargetBrick(value.brick)) &&
 	isPreviewPath(value.path);
 
 const isBrickKey = (value: unknown): value is string =>
@@ -131,7 +147,7 @@ export const isPreviewEditing = (value: unknown): value is PreviewEditing =>
 	value.repeaters.every(isPreviewRepeater) &&
 	Array.isArray(value.errors) &&
 	value.errors.length <= previewProtocolLimits.errors &&
-	value.errors.every(isPreviewFieldPath) &&
+	value.errors.every(isPreviewTargetPath) &&
 	(value.theme === "light" || value.theme === "dark");
 
 const isPreviewRect = (value: unknown): value is PreviewRect =>
@@ -148,7 +164,7 @@ const isElementParts = (value: Record<string, unknown>) =>
 	typeof value.key === "number" &&
 	Number.isSafeInteger(value.key) &&
 	value.key >= 0 &&
-	isPreviewFieldTarget(value.target) &&
+	isPreviewTarget(value.target) &&
 	isPreviewRect(value.rect);
 
 const isPreviewHoverElement = (value: unknown): value is PreviewHoverElement =>
@@ -167,8 +183,8 @@ const isPreviewHoverBlock = (value: unknown): value is PreviewHoverBlock =>
 		"horizontal",
 	]) &&
 	isElementParts(value) &&
-	(value.previous === null || isPreviewFieldTarget(value.previous)) &&
-	(value.next === null || isPreviewFieldTarget(value.next)) &&
+	(value.previous === null || isPreviewTarget(value.previous)) &&
+	(value.next === null || isPreviewTarget(value.next)) &&
 	typeof value.horizontal === "boolean";
 
 /** Validates what the page reports is under the pointer. */
@@ -196,44 +212,39 @@ export const isPreviewHover = (value: unknown): value is PreviewHover =>
 	typeof value.scrolling === "boolean";
 
 export const getPreviewTargetKind = (
-	target: PreviewFieldTarget,
+	target: PreviewTarget,
 ): PreviewTargetKind =>
 	target.path.length === 0
 		? "brick"
-		: typeof target.path.at(-1) === "number"
+		: isPreviewItem(target.path.at(-1))
 			? "item"
 			: "field";
 
 /** Whether two targets are the same field, item or brick, in any locale. */
-export const isSamePreviewTarget = (
-	a: PreviewFieldTarget,
-	b: PreviewFieldTarget,
-) =>
+export const isSamePreviewTarget = (a: PreviewTarget, b: PreviewTarget) =>
 	a.collectionKey === b.collectionKey &&
 	a.documentId === b.documentId &&
 	a.brick?.type === b.brick?.type &&
 	a.brick?.ref === b.brick?.ref &&
-	a.path.length === b.path.length &&
-	a.path.every((segment, index) => segment === b.path[index]);
+	isSamePath(a.path, b.path);
 
 /** Whether a field, item or brick has a validation error, or holds a field that does. */
 export const hasPreviewError = (
-	errors: PreviewFieldPath[],
-	target: PreviewFieldTarget,
+	errors: PreviewTargetPath[],
+	target: PreviewTarget,
 ) =>
 	errors.some(
 		(error) =>
 			error.brick?.type === target.brick?.type &&
 			error.brick?.ref === target.brick?.ref &&
 			target.path.length <= error.path.length &&
-			target.path.every((segment, index) => segment === error.path[index]),
+			target.path.every((segment, index) =>
+				isSamePreviewSegment(segment, error.path[index]),
+			),
 	);
 
 /** Whether two targets are bricks of one document, or items of one repeater, which can be moved next to each other. */
-export const arePreviewSiblings = (
-	a: PreviewFieldTarget,
-	b: PreviewFieldTarget,
-) => {
+export const arePreviewSiblings = (a: PreviewTarget, b: PreviewTarget) => {
 	const kind = getPreviewTargetKind(a);
 	if (
 		kind === "field" ||
@@ -249,8 +260,7 @@ export const arePreviewSiblings = (
 	return (
 		a.brick?.type === b.brick?.type &&
 		a.brick?.ref === b.brick?.ref &&
-		a.path.length === b.path.length &&
-		a.path.slice(0, -1).every((segment, index) => segment === b.path[index])
+		isSamePath(a.path.slice(0, -1), b.path.slice(0, -1))
 	);
 };
 
@@ -258,11 +268,15 @@ export const isPreviewPlace = (value: unknown): value is PreviewPlace =>
 	value === "before" || value === "after";
 
 /** Validates a field's target, rather than a brick's or repeater item's, for editing its value. */
-export const isPreviewFieldOnlyTarget = (
-	value: unknown,
-): value is PreviewFieldTarget =>
-	isPreviewFieldTarget(value) && getPreviewTargetKind(value) === "field";
+export const isPreviewFieldTarget = (value: unknown): value is PreviewTarget =>
+	isPreviewTarget(value) && getPreviewTargetKind(value) === "field";
 
 /** Accepts text typed or shown on the page, which may be empty, within the protocol's limit. */
 export const isPreviewText = (value: unknown): value is string =>
 	typeof value === "string" && value.length <= previewProtocolLimits.text;
+
+/** Decodes the edit markup `@lucidcms/client` writes into a target, or null when it isn't a valid one. */
+export const decodePreviewTarget = (value: string): PreviewTarget | null => {
+	const decoded = decodeEditMarkup(value);
+	return isPreviewTarget(decoded) ? decoded : null;
+};

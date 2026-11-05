@@ -20,7 +20,7 @@ afterEach(() => {
 describe("preview page morphing", () => {
 	test("updates text, attributes and the title in place, keeping marked elements", () => {
 		document.body.innerHTML =
-			'<main class="old"><h1>About</h1><p>Intro</p></main><div data-lucid-preview-keep>notice</div>';
+			'<main class="old"><h1>About</h1><p>Intro</p></main><div data-lucid-keep>notice</div>';
 		const heading = document.querySelector("h1");
 
 		morphDocument(
@@ -32,7 +32,7 @@ describe("preview page morphing", () => {
 		expect(document.querySelector("h1")).toBe(heading);
 		expect(document.title).toBe("About us");
 		expect(document.body.innerHTML).toBe(
-			'<main class="new"><h1>About us</h1></main><div data-lucid-preview-keep="">notice</div>',
+			'<main class="new"><h1>About us</h1></main><div data-lucid-keep="">notice</div>',
 		);
 	});
 
@@ -59,7 +59,7 @@ describe("preview page morphing", () => {
 
 	test("moves marked bricks with their DOM when they are reordered", () => {
 		const brick = (ref: string, text: string) =>
-			`<section data-lucid-preview-field="${ref}">${text}</section>`;
+			`<section data-lucid-edit="${ref}">${text}</section>`;
 		document.body.innerHTML = brick("a", "Hero") + brick("b", "CTA");
 		const [hero, cta] = document.querySelectorAll("section");
 
@@ -104,10 +104,9 @@ describe("preview page morphing", () => {
 
 	test("leaves kept elements the server renders too, without adding copies", () => {
 		document.body.innerHTML =
-			'<main>Page</main><div id="chat" data-lucid-preview-keep>Live chat</div>';
+			'<main>Page</main><div id="chat" data-lucid-keep>Live chat</div>';
 		const chat = document.getElementById("chat");
-		const next =
-			'<main>Page</main><div id="chat" data-lucid-preview-keep></div>';
+		const next = '<main>Page</main><div id="chat" data-lucid-keep></div>';
 
 		morphDocument(document, render(next), markup);
 		morphDocument(document, render(next), markup);
@@ -142,19 +141,19 @@ describe("preview page morphing", () => {
 
 	test("adds a new kept element beside existing ones and keeps kept elements whose wrapper changed", () => {
 		document.body.innerHTML =
-			'<div data-lucid-preview-keep>One</div><div data-lucid-preview-keep>Two</div><div class="old"><span id="widget" data-lucid-preview-keep>Live</span></div>';
+			'<div data-lucid-keep>One</div><div data-lucid-keep>Two</div><div class="old"><span id="widget" data-lucid-keep>Live</span></div>';
 		const widget = document.getElementById("widget");
 
 		morphDocument(
 			document,
 			render(
-				'<div data-lucid-preview-keep></div><div data-lucid-preview-keep></div><div data-lucid-preview-keep>Three</div><section><span id="widget" data-lucid-preview-keep></span></section>',
+				'<div data-lucid-keep></div><div data-lucid-keep></div><div data-lucid-keep>Three</div><section><span id="widget" data-lucid-keep></span></section>',
 			),
 			markup,
 		);
 
 		expect(
-			[...document.body.querySelectorAll("div[data-lucid-preview-keep]")].map(
+			[...document.body.querySelectorAll("div[data-lucid-keep]")].map(
 				(element) => element.textContent,
 			),
 		).toEqual(["One", "Two", "Three"]);

@@ -1,4 +1,3 @@
-import { recordPreviewTargets } from "@lucidcms/client/markup";
 import { LucidAPIError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
 import type {
@@ -74,11 +73,6 @@ const createDocumentListFunction = (config: SiteConfig) =>
 
 			// Documents include their media, so any media change can affect them.
 			render.tagCache(contentCacheTags.media);
-			if (render.state.preview) {
-				for (const document of response.data.items) {
-					recordPreviewTargets(document);
-				}
-			}
 			// The key was widened for the read; the documents are the ones asked for.
 			return response.data as ContentList<ContentDocument<Key, true>>;
 		},

@@ -1,34 +1,36 @@
 // @vitest-environment happy-dom
 
+import { encodeEditMarkup } from "@lucidcms/client/contract";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import type {
 	PreviewEditing,
-	PreviewFieldPath,
-	PreviewFieldTarget,
+	PreviewTargetPath,
+	PreviewTarget,
 	PreviewHover,
 } from "../protocol/index.js";
 import { previewOverlayTagName } from "./constants.js";
 import { installPreviewEditing } from "./editing.js";
 
 const page = { collectionKey: "page", documentId: 42 };
-const brickTarget = (ref: string): PreviewFieldTarget => ({
+const brickTarget = (ref: string): PreviewTarget => ({
 	...page,
 	brick: { type: "builder", key: "features", ref },
 	path: [],
 });
-const itemTarget = (index: number): PreviewFieldTarget => ({
+const item = (index: number) => ({ ref: `item-${index}` });
+const itemTarget = (index: number): PreviewTarget => ({
 	...page,
 	brick: { type: "builder", key: "features", ref: "a" },
-	path: ["items", index],
+	path: ["items", item(index)],
 });
-const titleTarget = (index: number): PreviewFieldTarget => ({
+const titleTarget = (index: number): PreviewTarget => ({
 	...itemTarget(index),
-	path: ["items", index, "title"],
+	path: ["items", item(index), "title"],
 });
 
 const editingFor = (
 	editable = true,
-	errors: PreviewFieldPath[] = [],
+	errors: PreviewTargetPath[] = [],
 ): PreviewEditing => ({
 	...page,
 	editable,
@@ -37,17 +39,15 @@ const editingFor = (
 	theme: "dark",
 });
 
-//* the markup `@lucidcms/client`'s `previewAttributes` writes
-const markup = (target: PreviewFieldTarget) =>
-	`1:${encodeURIComponent(JSON.stringify(target))}`;
+const markup = (target: PreviewTarget) => encodeEditMarkup(target) ?? "";
 
 const mark = <TElement extends Element>(
 	element: TElement,
-	target: PreviewFieldTarget | string,
+	target: PreviewTarget | string,
 	rect?: { x: number; y: number; width: number; height: number },
 ) => {
 	element.setAttribute(
-		"data-lucid-preview-field",
+		"data-lucid-edit",
 		typeof target === "string" ? target : markup(target),
 	);
 	if (rect) {
@@ -303,7 +303,7 @@ describe("preview editing", () => {
 		const card = items[0]?.card ?? document.body;
 
 		await hover(card);
-		card.setAttribute("data-lucid-preview-field", markup(itemTarget(1)));
+		card.setAttribute("data-lucid-edit", markup(itemTarget(1)));
 		await frame();
 		await frame();
 		expect(sendHover.mock.lastCall?.[0].item?.target).toEqual(itemTarget(1));
@@ -355,7 +355,7 @@ describe("preview editing", () => {
 		const { items } = renderPage();
 		editing.setEditing(
 			editingFor(true, [
-				{ brick: brickTarget("a").brick, path: ["items", 1, "title"] },
+				{ brick: brickTarget("a").brick, path: ["items", item(1), "title"] },
 			]),
 		);
 		const fill = () => layer()?.querySelector<HTMLElement>(".fill");
@@ -573,7 +573,10 @@ describe("preview editing", () => {
 		const { editing, sendInlineEnd } = install();
 		renderPage();
 		editing.setEditing(editingFor());
-		const missing = { ...titleTarget(0), path: ["items", 0, "summary"] };
+		const missing = {
+			...titleTarget(0),
+			path: ["items", item(0), "summary"],
+		};
 
 		editing.startInline(missing, { multiline: false, clear: false });
 		expect(sendInlineEnd).toHaveBeenCalledWith(missing, true);

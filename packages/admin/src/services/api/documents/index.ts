@@ -18,6 +18,7 @@ import usePublishSingle from "./usePublishSingle";
 import useRequestSingle from "./useRequestSingle";
 import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
+import useRevokePreviews from "./useRevokePreviews";
 import useUnpublishSingle from "./useUnpublishSingle";
 import useUpdateOrder from "./useUpdateOrder";
 import useUpdateSingleVersion from "./useUpdateSingleVersion";
@@ -30,6 +31,7 @@ const exportObject = {
 	useAlign,
 	useGetMultiple,
 	useCreatePreview,
+	useRevokePreviews,
 	useDeleteSingle,
 	useDeleteMultiple,
 	useDeleteMultiplePermanently,

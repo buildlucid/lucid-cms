@@ -4,7 +4,7 @@ import type { Accessor } from "solid-js";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import {
 	isSamePreviewTarget,
-	type PreviewFieldTarget,
+	type PreviewTarget,
 	toShownText,
 } from "@/preview/protocol";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
@@ -27,7 +27,7 @@ export type PreviewFieldEdit =
 
 /** A field being typed into on the page, found by refs so edits around it don't lose it. */
 type InlineSession = {
-	target: PreviewFieldTarget;
+	target: PreviewTarget;
 	brickRef: string;
 	groupRef?: string;
 	repeaterKey?: string;
@@ -51,7 +51,7 @@ export const usePreviewFieldEdit = (props: {
 	let session: InlineSession | null = null;
 
 	/** The field a target shows, when it's in the document being edited. */
-	const resolve = (target: PreviewFieldTarget) => {
+	const resolve = (target: PreviewTarget) => {
 		const collection = props.collection();
 		if (
 			!collection ||
@@ -67,7 +67,7 @@ export const usePreviewFieldEdit = (props: {
 		});
 	};
 	/** The content language a target's field is edited in: the page's, when the document has it. */
-	const localeOf = (target: PreviewFieldTarget) =>
+	const localeOf = (target: PreviewTarget) =>
 		target.locale && props.locales().includes(target.locale)
 			? target.locale
 			: (contentLocaleStore.get.contentLocale ?? "");
@@ -93,10 +93,7 @@ export const usePreviewFieldEdit = (props: {
 		 * Decides how to edit a field the page asked to, from the text its element shows (null when
 		 * it holds more than text), starting a typing session when it's typed into on the page.
 		 */
-		request: (
-			target: PreviewFieldTarget,
-			text: string | null,
-		): PreviewFieldEdit => {
+		request: (target: PreviewTarget, text: string | null): PreviewFieldEdit => {
 			const field = resolve(target);
 			if (!field || field.config.ui?.hidden) return { mode: "builder" };
 			if (
@@ -156,7 +153,7 @@ export const usePreviewFieldEdit = (props: {
 			};
 		},
 		/** Writes the text typed so far into the field being typed into. */
-		input: (target: PreviewFieldTarget, value: string) => {
+		input: (target: PreviewTarget, value: string) => {
 			if (
 				!session ||
 				!isSamePreviewTarget(session.target, target) ||
@@ -167,7 +164,7 @@ export const usePreviewFieldEdit = (props: {
 			write(session, value);
 		},
 		/** Ends typing, as one undo step, putting the value back first when it was cancelled. */
-		end: (target: PreviewFieldTarget, cancelled: boolean) => {
+		end: (target: PreviewTarget, cancelled: boolean) => {
 			const current = session;
 			if (!current || !isSamePreviewTarget(current.target, target)) return;
 			session = null;

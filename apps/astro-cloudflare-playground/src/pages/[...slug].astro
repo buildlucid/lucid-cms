@@ -1,5 +1,5 @@
 ---
-import { createToolbarAttributes } from "@lucidcms/admin/toolbar";
+import { editable } from "@lucidcms/client/preview";
 import "../index.css";
 import getLucidData, { resolvePageLocale } from "../services/lucid-data";
 
@@ -13,7 +13,7 @@ if (!locale) {
 	return Astro.redirect(`${redirectPath}${Astro.url.search}`);
 }
 
-const { page, blogs, preview, authenticated, isPreviewError, isBlogError } =
+const { page, blogs, preview, isPreviewError, isBlogError } =
 	await getLucidData({ path: requestedPath, locale, astro: Astro });
 
 const contentBrick = page?.bricks?.find((brick) => brick.key === "content");
@@ -25,29 +25,36 @@ const alternateLocaleHref =
 const alternateLocaleLabel = alternateLocale === "en" ? "English" : "Français";
 const localeRoot = `/${locale}`;
 
+const firstSection = contentBrick?.fields.sections[0];
 const documentRows = [
-	["Title", page?.fields.title],
-	["Summary", page?.fields.summary],
-	["Slug", page?.fields.slug],
-	["Path", page?.route?.path],
-	["Brick heading", contentBrick?.fields.heading],
-	["Repeater heading", contentBrick?.fields.sections[0]?.sectionHeading],
-	[
-		"Updated",
-		updatedAt
+	{ label: "Title", value: page?.fields.title, edit: editable(page, "title") },
+	{
+		label: "Summary",
+		value: page?.fields.summary,
+		edit: editable(page, "summary"),
+	},
+	{ label: "Slug", value: page?.fields.slug, edit: editable(page, "slug") },
+	{ label: "Path", value: page?.route?.path },
+	{
+		label: "Brick heading",
+		value: contentBrick?.fields.heading,
+		edit: editable(contentBrick, "heading"),
+	},
+	{
+		label: "Repeater heading",
+		value: firstSection?.sectionHeading,
+		edit: editable(firstSection, "sectionHeading"),
+	},
+	{
+		label: "Updated",
+		value: updatedAt
 			? new Date(updatedAt).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", {
 					dateStyle: "medium",
 					timeStyle: "short",
 				})
 			: undefined,
-	],
+	},
 ];
-
-const toolbarAttributes = createToolbarAttributes({
-	document: page,
-	authentication: authenticated ?? "auto",
-	preview: preview ?? "auto",
-});
 ---
 
 <html lang={locale}>
@@ -145,10 +152,10 @@ const toolbarAttributes = createToolbarAttributes({
 					{page && (
 						<section class="content-card">
 							<div class="document-panel">
-								{documentRows.map(([label, value]) => (
+								{documentRows.map(({ label, value, edit }) => (
 									<div class="document-row">
 										<span class="document-label">{label}</span>
-										<p class="document-value">{value || "Not set"}</p>
+										<p class="document-value" {...edit}>{value || "Not set"}</p>
 									</div>
 								))}
 							</div>
@@ -173,7 +180,9 @@ const toolbarAttributes = createToolbarAttributes({
 											<div class="blog-card-placeholder" aria-hidden="true" />
 										)}
 										<div class="blog-card-overlay">
-											<h3>{blog.fields.title || "Untitled blog"}</h3>
+											<h3 {...editable(blog, "title")}>
+												{blog.fields.title || "Untitled blog"}
+											</h3>
 										</div>
 									</article>
 								))}
@@ -188,18 +197,10 @@ const toolbarAttributes = createToolbarAttributes({
 			</div>
 		</main>
 
-		{toolbarAttributes && <lucid-toolbar {...toolbarAttributes} />}
-
 		<script>
 			import { setupPreview } from "@lucidcms/client/preview";
-			import { LucidToolbarElement } from "@lucidcms/admin/toolbar";
 
-			const preview = setupPreview();
-			window.addEventListener("pagehide", preview.cleanup, { once: true });
-
-			if (!customElements.get(LucidToolbarElement.tagName)) {
-				customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
-			}
+			setupPreview({ morph: true });
 		</script>
 	</body>
 </html>

@@ -764,6 +764,8 @@
 	"core.documents.editors.taken.self.message": "You took over editing this document in another tab, so your changes here weren't saved. Take over again to save them here.",
 	"core.routes.document.editors.error.name": "Document Editors Error",
 	"core.routes.document.editors.error.message": "We couldn't update who has this document open.",
+	"core.routes.document.previews.revoke.error.name": "Preview Links Error",
+	"core.routes.document.previews.revoke.error.message": "We couldn't revoke this document's preview links.",
 	"core.error.update.non.latest.version.name": "Update Version Error",
 	"core.error.update.non.latest.version.message": "Only the latest document version can be updated.",
 	"core.email.failed.to.send": "An error occurred while sending the email.",

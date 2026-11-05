@@ -1,35 +1,61 @@
+import { useNavigate } from "@solidjs/router";
+import { formatForDisplay, resolveModifier } from "@tanstack/solid-hotkeys";
 import type { Collection } from "@types";
-import { type Accessor, createSignal, onCleanup } from "solid-js";
+import { type Accessor, createEffect, createSignal, onCleanup } from "solid-js";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import type { PreviewTarget } from "@/preview/protocol";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
+import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
+import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
+import { findLinkedDocument } from "@/utils/find-linked-document";
 import {
 	findPreviewFocusTarget,
 	revealPreviewField,
 } from "@/utils/preview-focus-dom";
+import { getDocumentRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import { getBuilderPreviewTarget } from "./utils/get-builder-preview-target";
 import { resolvePreviewFieldTarget } from "./utils/resolve-preview-field-target";
 
+//* how long another document opened from the page waits for its editor to load
+const HANDOFF_MS = 15_000;
+
+/** Another document opened from the page, with the locale and field to show once its editor has its content. */
+type Handoff = {
+	collectionKey: string;
+	documentId: number;
+	locale: string | null;
+	target: PreviewTarget | null;
+	until: number;
+};
+
+let handoff: Handoff | null = null;
+
 /**
  * Synchronizes builder and preview focus. Closes automatically opened sections when selection
- * leaves them, unless the user has toggled them.
+ * leaves them, unless the user has toggled them. Other documents, picked or linked to on the page,
+ * open in their own editor.
  */
 export const usePreviewFocus = (props: {
 	collection: Accessor<Collection | undefined>;
 	collectionKey: Accessor<string>;
 	documentId: Accessor<number | undefined>;
 	locales: Accessor<string[]>;
-	/** Whether the preview shows saved content while there are unsaved edits, so repeater items may be in other positions. */
-	previewBehind: Accessor<boolean>;
+	/** Whether the editor has loaded the document's content, which fields are found in. */
+	ready: Accessor<boolean>;
+	/** The collections the person can read, whose documents the page can open. */
+	collections: Accessor<Collection[]>;
 }) => {
 	const brickStore = useBrickStore();
+	const navigate = useNavigate();
 	let revealController: AbortController | undefined;
 	let clearHighlight: (() => void) | undefined;
 	//* a new object for every focus, so focusing the same field again points it out again
-	const [builderTarget, setBuilderTarget] =
-		createSignal<PreviewFieldTarget | null>(null, { equals: false });
+	const [builderTarget, setBuilderTarget] = createSignal<PreviewTarget | null>(
+		null,
+		{ equals: false },
+	);
 	//* the triggers of what preview targets opened, kept by element so a brick moving doesn't change which one it is
 	const opened = new Set<HTMLElement>();
 
@@ -67,9 +93,90 @@ export const usePreviewFocus = (props: {
 			status: "warning",
 		});
 	};
+	/** Opens another document's editor, which then shows the locale and field asked for. */
+	const openDocument = (next: Omit<Handoff, "until">) => {
+		handoff = { ...next, until: Date.now() + HANDOFF_MS };
+		navigate(
+			getDocumentRoute("edit", {
+				collectionKey: next.collectionKey,
+				documentId: next.documentId,
+			}),
+		);
+	};
+	/** Offers to open the editor of the document a target belongs to, which shows the target once it loads. */
+	const offerOtherDocument = (target: PreviewTarget) => {
+		const canOpen = props
+			.collections()
+			.some((collection) => collection.key === target.collectionKey);
+		spawnToast({
+			title: T()("preview.focus.other.title"),
+			message: T()(
+				canOpen ? "preview.focus.other.message" : "preview.focus.other.denied",
+			),
+			action: canOpen
+				? {
+						label: T()("preview.focus.other.open"),
+						icon: "pen",
+						onClick: () =>
+							openDocument({
+								collectionKey: target.collectionKey,
+								documentId: target.documentId,
+								locale: target.locale ?? null,
+								target,
+							}),
+					}
+				: undefined,
+		});
+	};
+	/** Says a link on the page wasn't followed, offering to open the document it goes to when that's another one the person can read. */
+	const explainLink = async (href: string | null) => {
+		const linked = href
+			? await findLinkedDocument({
+					url: new URL(href),
+					siteUrl: siteStore.get.siteUrl,
+					collections: props.collections(),
+				})
+			: null;
+		//* the platform's own modifier, eg. ⌘ on a Mac
+		const key = formatForDisplay(resolveModifier("Mod"));
+		if (
+			!linked ||
+			(linked.document.collectionKey === props.collectionKey() &&
+				linked.document.id === props.documentId())
+		) {
+			spawnToast({
+				title: T()("preview.navigation.locked.title"),
+				message: T()("preview.navigation.locked.message", { key }),
+				icon: "link",
+			});
+			return;
+		}
+		const name = getDocumentPreviewLabel({
+			collection: linked.collection,
+			document: linked.document,
+			contentLocale:
+				linked.locale ?? contentLocaleStore.get.contentLocale ?? "",
+		});
+		spawnToast({
+			title: T()("preview.link.title", { name }),
+			message: T()("preview.link.message", { key }),
+			icon: "link",
+			action: {
+				label: T()("preview.focus.other.open"),
+				icon: "pen",
+				onClick: () =>
+					openDocument({
+						collectionKey: linked.document.collectionKey,
+						documentId: linked.document.id,
+						locale: linked.locale,
+						target: null,
+					}),
+			},
+		});
+	};
 	/** Opens a field, item or brick in the builder. `activate` also opens a field's picker, or puts the cursor in it. */
 	const requestTarget = async (
-		target: PreviewFieldTarget,
+		target: PreviewTarget,
 		options?: { activate?: boolean },
 	) => {
 		const documentId = props.documentId();
@@ -78,15 +185,7 @@ export const usePreviewFocus = (props: {
 			documentId === undefined ||
 			target.documentId !== documentId
 		) {
-			notify(T()("preview.focus.different.document"));
-			return;
-		}
-
-		if (
-			props.previewBehind() &&
-			target.path.some((segment) => typeof segment === "number")
-		) {
-			notify(T()("preview.focus.dirty.repeater"));
+			offerOtherDocument(target);
 			return;
 		}
 
@@ -158,6 +257,24 @@ export const usePreviewFocus = (props: {
 		if (target) setBuilderTarget(target);
 	};
 
+	//* another document opened from the page shows its locale and field once its own editor has loaded
+	createEffect(() => {
+		if (!props.ready() || !handoff) return;
+		const opening = handoff;
+		if (
+			opening.collectionKey !== props.collectionKey() ||
+			opening.documentId !== props.documentId()
+		) {
+			if (Date.now() > opening.until) handoff = null;
+			return;
+		}
+		handoff = null;
+		if (opening.locale && props.locales().includes(opening.locale)) {
+			contentLocaleStore.get.setContentLocale(opening.locale);
+		}
+		if (opening.target) void requestTarget(opening.target);
+	});
+
 	document.addEventListener("focusin", onFocusIn);
 	document.addEventListener("click", onToggle, true);
 	document.addEventListener("keydown", onToggle, true);
@@ -170,9 +287,10 @@ export const usePreviewFocus = (props: {
 	});
 	return {
 		requestTarget,
+		explainLink,
 		builderTarget,
 		/** Points out a field, brick or repeater item on the page, eg. one just added. */
-		pointOut: (target: PreviewFieldTarget) => setBuilderTarget(target),
+		pointOut: (target: PreviewTarget) => setBuilderTarget(target),
 		/** The page cleared its selection, so what preview targets opened closes again. */
 		deselect: () => {
 			cancelReveal();

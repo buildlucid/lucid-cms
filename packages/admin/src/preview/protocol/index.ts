@@ -1,40 +1,41 @@
 /**
  * Builder/page protocol for readiness, updates and editing. The builder verifies window and origin
  * and applies requested changes. Pages read content with their preview token; only inline text
- * edits send content back. `@lucidcms/client` writes field markup. Invalid messages are ignored.
+ * edits send content back. Invalid messages are ignored.
  */
-export {
-	builderPreviewContext,
-	previewFieldAttribute,
-	previewFrameNames,
-	previewProtocol,
-	previewProtocolLimits,
-	previewQueryParams,
-} from "./constants.js";
-export { decodePreviewFieldTarget } from "./field-target.js";
-export { isLucidBuilderPreview, normalizePreviewToken } from "./frame.js";
+export { previewProtocol, previewProtocolLimits } from "./constants.js";
 export {
 	createPreviewMessage,
-	isPreviewChildMessage,
-	isPreviewParentMessage,
+	handlePreviewMessage,
+	isPreviewBuilderMessage,
+	isPreviewPageMessage,
 } from "./messages.js";
 export { toShownText } from "./text.js";
 export type {
+	PreviewBuilderMessages,
+	PreviewDragged,
 	PreviewEditing,
-	PreviewFieldPath,
-	PreviewFieldTarget,
 	PreviewHover,
 	PreviewHoverBlock,
-	PreviewDragged,
+	PreviewItem,
 	PreviewLanding,
+	PreviewMessageHandlers,
+	PreviewMessagePayload,
+	PreviewPageMessages,
+	PreviewPathSegment,
 	PreviewPlace,
 	PreviewRect,
 	PreviewRepeater,
 	PreviewScrollState,
+	PreviewTarget,
+	PreviewTargetBrick,
+	PreviewTargetPath,
 } from "./types.js";
 export {
 	arePreviewSiblings,
+	decodePreviewTarget,
 	getPreviewTargetKind,
 	hasPreviewError,
+	isPreviewItem,
 	isSamePreviewTarget,
 } from "./validators.js";

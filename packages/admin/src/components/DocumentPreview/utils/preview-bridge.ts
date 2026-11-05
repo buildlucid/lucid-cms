@@ -1,15 +1,20 @@
+import { previewParams } from "@lucidcms/client/contract";
+import { withoutPreviewParams } from "@/preview/links";
 import {
 	createPreviewMessage,
-	isPreviewChildMessage,
+	handlePreviewMessage,
+	isPreviewPageMessage,
 	isSamePreviewTarget,
+	type PreviewBuilderMessages,
 	type PreviewEditing,
-	type PreviewFieldTarget,
+	type PreviewTarget,
 	type PreviewHover,
 	type PreviewDragged,
 	type PreviewPlace,
+	type PreviewMessageHandlers,
+	type PreviewMessagePayload,
+	type PreviewPageMessages,
 	type PreviewScrollState,
-	previewProtocol,
-	previewQueryParams,
 } from "@/preview/protocol";
 
 const CAPTURE_TIMEOUT_MS = 150;
@@ -23,6 +28,17 @@ type PendingCapture = {
 	requestId: string;
 	resolve: (state: PreviewScrollState | null) => void;
 	timeout: number;
+};
+
+const reportedStatic = new Set<string>();
+
+/** Tells whoever builds the site, once per page, why a page without Lucid's preview script reloads on every change. */
+const reportStatic = (pageKey: string | null) => {
+	if (pageKey === null || reportedStatic.has(pageKey)) return;
+	reportedStatic.add(pageKey);
+	console.info(
+		`Lucid preview: ${pageKey} didn't start Lucid's preview script, so it reloads after every change. Call setupPreview() from @lucidcms/client/preview on the page to update it in place.`,
+	);
 };
 
 /**
@@ -39,29 +55,27 @@ type FramePage =
  * update handlers, and queues updates during navigation and while a field is typed into.
  */
 export const createPreviewBridge = (options?: {
-	onFocusField?: (target: PreviewFieldTarget) => void;
+	onFocusField?: (target: PreviewTarget) => void;
 	/** Runs when the page asks to move a brick or item, after a drag or keyboard move. */
 	onMove?: (
-		target: PreviewFieldTarget,
+		target: PreviewTarget,
 		place: PreviewPlace,
-		anchor: PreviewFieldTarget,
+		anchor: PreviewTarget,
 	) => void;
 	/** Runs with what the pointer is over on the page, or null when the page goes or edit mode ends. */
 	onHover?: (hover: PreviewHover | null) => void;
-	/** Runs when the page shows a newer revision, eg. to point out what waited for it. */
-	onRendered?: () => void;
 	/** Runs when the user clears the page's selection, or makes their own. */
 	onDeselect?: () => void;
 	/** Runs when the bridge reloads the frame, eg. to show a loading state. */
 	onReload?: () => void;
-	/** Runs when a link on the page is clicked, which the preview doesn't follow. */
-	onNavigationLocked?: () => void;
+	/** Runs when a link on the page is clicked, which the preview doesn't follow, with where it goes when that's on the previewed site. */
+	onNavigationLocked?: (href: string | null) => void;
 	/** Runs when the page asks to edit a selected field, with the text its element shows when that's all it holds. */
-	onEdit?: (target: PreviewFieldTarget, text: string | null) => void;
+	onEdit?: (target: PreviewTarget, text: string | null) => void;
 	/** Runs with the text typed into a field on the page so far. */
-	onInlineInput?: (target: PreviewFieldTarget, value: string) => void;
+	onInlineInput?: (target: PreviewTarget, value: string) => void;
 	/** Runs when typing on the page ends, kept or `cancelled`, including when the page goes. */
-	onInlineEnd?: (target: PreviewFieldTarget, cancelled: boolean) => void;
+	onInlineEnd?: (target: PreviewTarget, cancelled: boolean) => void;
 }) => {
 	let frame: HTMLIFrameElement | null = null;
 	let page: FramePage = { state: "loading" };
@@ -69,12 +83,13 @@ export const createPreviewBridge = (options?: {
 	//* a brick or item dragged in the builder's fields, shown on every page the frame loads until it's dropped
 	let dragged: PreviewDragged | null = null;
 	//* the field being typed into on the page, which updates wait for so a re-render can't move its caret
-	let typing: PreviewFieldTarget | null = null;
+	let typing: PreviewTarget | null = null;
+	//* what the builder asked the page to point out while it loaded
+	let highlighted: PreviewTarget | null = null;
 	let pendingRevision: number | null = null;
-	//* the newest revision shown, when recent ones were, and the one the page shows
+	//* the newest revision shown, and when recent ones were, to tell which one a loading page shows
 	let latestRevision = 0;
 	let shownAt: Array<{ revision: number; at: number }> = [];
-	let renderedRevision: number | null = null;
 	let readyGrace: number | undefined;
 	let requestSequence = 0;
 	let pendingCapture: PendingCapture | null = null;
@@ -113,10 +128,7 @@ export const createPreviewBridge = (options?: {
 	/** Creates the page key expected by the destination preview runtime. */
 	const getPageKey = (url: string): string | null => {
 		try {
-			const pageUrl = new URL(url);
-			pageUrl.searchParams.delete(previewQueryParams.token);
-			pageUrl.searchParams.delete(previewQueryParams.context);
-			return pageUrl.toString();
+			return withoutPreviewParams(new URL(url)).toString();
 		} catch {
 			return null;
 		}
@@ -127,7 +139,7 @@ export const createPreviewBridge = (options?: {
 			const url = new URL(pageKey);
 			const source = new URL(frameUrl);
 			if (url.origin !== source.origin) return frameUrl;
-			for (const name of Object.values(previewQueryParams)) {
+			for (const name of Object.values(previewParams)) {
 				const value = source.searchParams.get(name);
 				if (value !== null) url.searchParams.set(name, value);
 			}
@@ -183,7 +195,7 @@ export const createPreviewBridge = (options?: {
 			};
 			frameWindow.postMessage(
 				createPreviewMessage({
-					type: previewProtocol.messages.captureScroll,
+					type: "captureScroll",
 					requestId,
 				}),
 				frameOrigin,
@@ -204,7 +216,6 @@ export const createPreviewBridge = (options?: {
 		endTyping(false);
 		clearReadyGrace();
 		page = { state: "loading" };
-		renderedRevision = null;
 		options?.onHover?.(null);
 	};
 
@@ -226,7 +237,6 @@ export const createPreviewBridge = (options?: {
 		frame.src = url;
 	};
 
-	/** Shows a revision: pages that re-render themselves get an update, others reload, and loading pages are waited for. */
 	/** Notes a revision as written and shown, keeping the last few to match loading pages against. */
 	const noteShown = (revision: number) => {
 		latestRevision = revision;
@@ -239,31 +249,23 @@ export const createPreviewBridge = (options?: {
 	const revisionLoadedAt = (loadedAt: number) =>
 		shownAt.findLast((entry) => entry.at <= loadedAt)?.revision ?? null;
 
+	/** Shows a revision: pages that re-render themselves get an update, others reload, and loading pages are waited for. */
 	const show = (revision: number) => {
 		noteShown(revision);
 		if (page.state === "loading" || typing) {
 			pendingRevision = revision;
 			return;
 		}
-
-		const frameOrigin = getFrameOrigin();
-		const frameWindow = frame?.contentWindow;
-		if (page.state === "ready" && page.updates && frameOrigin && frameWindow) {
-			frameWindow.postMessage(
-				createPreviewMessage({
-					type: previewProtocol.messages.update,
-					revision,
-				}),
-				frameOrigin,
-			);
+		if (page.state === "ready" && page.updates && getFrameOrigin()) {
+			postToRuntime({ type: "update", revision });
 			return;
 		}
 		void reload();
 	};
 
-	/** Sends a message to a page whose runtime has connected, dropping it otherwise. */
+	/** Sends a message to a page whose runtime has announced itself, dropping it otherwise. */
 	const postToRuntime = (
-		message: Parameters<typeof createPreviewMessage>[0],
+		message: PreviewMessagePayload<PreviewBuilderMessages>,
 	) => {
 		const frameOrigin = getFrameOrigin();
 		const frameWindow = frame?.contentWindow;
@@ -287,127 +289,90 @@ export const createPreviewBridge = (options?: {
 			readyGrace = undefined;
 			if (page.state !== "loading") return;
 			page = { state: "static" };
+			if (frame) reportStatic(getPageKey(frame.src));
 			showPending();
 		}, READY_GRACE_MS);
+	};
+
+	const messageHandlers: PreviewMessageHandlers<PreviewPageMessages> = {
+		ready: (message) => {
+			clearReadyGrace();
+			//* a page that just loaded, by navigating or from the back/forward cache, shows what was written before it started loading. Later readies only say whether it re-renders itself.
+			const loaded = page.state !== "ready";
+			page = { state: "ready", updates: message.updates };
+			postToRuntime({ type: "connect" });
+			if (pendingRestore) {
+				postToRuntime({ type: "restoreScroll", state: pendingRestore });
+				queueScrollRestore(null);
+			}
+			//* each page starts without edit mode
+			if (editing) postToRuntime({ type: "editMode", editing });
+			if (dragged) postToRuntime({ type: "dragged", ...dragged });
+			if (highlighted)
+				postToRuntime({ type: "highlight", target: highlighted });
+			highlighted = null;
+			//* pages that loaded before the latest revision are brought up to date
+			if (
+				loaded &&
+				pendingRevision === null &&
+				revisionLoadedAt(message.loadedAt) !== latestRevision
+			) {
+				show(latestRevision);
+			} else {
+				showPending();
+			}
+		},
+		unload: () => expectLoad(),
+		scrollState: (message) => {
+			if (message.requestId === pendingCapture?.requestId) {
+				clearCapture(message.state);
+			}
+		},
+		focus: (message) => {
+			options?.onDeselect?.();
+			options?.onFocusField?.(message.target);
+		},
+		deselect: () => options?.onDeselect?.(),
+		move: (message) =>
+			options?.onMove?.(message.target, message.place, message.anchor),
+		hover: (message) => {
+			if (editing) options?.onHover?.(message.hover);
+		},
+		navigationLocked: (message) => {
+			//* only links within the previewed site can go to one of its documents
+			const href =
+				message.href && new URL(message.href).origin === getFrameOrigin()
+					? message.href
+					: null;
+			options?.onNavigationLocked?.(href);
+		},
+		edit: (message) => {
+			if (editing?.editable && !typing) {
+				options?.onEdit?.(message.target, message.text);
+			}
+		},
+		inlineInput: (message) => {
+			if (typing && isSamePreviewTarget(typing, message.target)) {
+				options?.onInlineInput?.(message.target, message.value);
+			}
+		},
+		inlineEnd: (message) => {
+			if (!typing || !isSamePreviewTarget(typing, message.target)) return;
+			endTyping(message.cancelled);
+			showPending();
+		},
 	};
 
 	/** Handles validated messages from the active preview iframe. */
 	const onMessage = (event: MessageEvent<unknown>) => {
 		const frameOrigin = getFrameOrigin();
 		if (
-			!frameOrigin ||
-			event.source !== frame?.contentWindow ||
-			event.origin !== frameOrigin ||
-			!isPreviewChildMessage(event.data)
+			frameOrigin &&
+			event.source === frame?.contentWindow &&
+			event.origin === frameOrigin &&
+			isPreviewPageMessage(event.data)
 		) {
-			return;
-		}
-
-		if (
-			event.data.type === previewProtocol.messages.scrollState &&
-			event.data.requestId === pendingCapture?.requestId
-		) {
-			clearCapture(event.data.state);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.focusField) {
-			options?.onDeselect?.();
-			options?.onFocusField?.(event.data.target);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.deselect) {
-			options?.onDeselect?.();
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.navigationLocked) {
-			options?.onNavigationLocked?.();
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.move) {
-			options?.onMove?.(event.data.target, event.data.place, event.data.anchor);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.edit) {
-			if (editing?.editable && !typing) {
-				options?.onEdit?.(event.data.target, event.data.text);
-			}
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.inlineInput) {
-			if (typing && isSamePreviewTarget(typing, event.data.target)) {
-				options?.onInlineInput?.(event.data.target, event.data.value);
-			}
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.inlineEnd) {
-			if (!typing || !isSamePreviewTarget(typing, event.data.target)) return;
-			endTyping(event.data.cancelled);
-			showPending();
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.hover) {
-			if (editing) options?.onHover?.(event.data.hover);
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.unload) {
-			expectLoad();
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.rendered) {
-			if (page.state !== "ready") return;
-			renderedRevision = event.data.revision;
-			options?.onRendered?.();
-			return;
-		}
-
-		if (event.data.type === previewProtocol.messages.ready) {
-			clearReadyGrace();
-			//* a page that just loaded, by navigating or from the back/forward cache, shows what was written before it started loading. Later readies only say whether it re-renders itself.
-			const loaded = page.state !== "ready";
-			if (loaded) renderedRevision = revisionLoadedAt(event.data.loadedAt);
-			page = { state: "ready", updates: event.data.updates };
-			frame?.contentWindow?.postMessage(
-				createPreviewMessage({ type: previewProtocol.messages.connect }),
-				event.origin,
-			);
-			if (pendingRestore) {
-				frame?.contentWindow?.postMessage(
-					createPreviewMessage({
-						type: previewProtocol.messages.restoreScroll,
-						state: pendingRestore,
-					}),
-					event.origin,
-				);
-				queueScrollRestore(null);
-			}
-			//* each page starts without edit mode
-			if (editing) {
-				postToRuntime({ type: previewProtocol.messages.editMode, editing });
-			}
-			if (dragged) {
-				postToRuntime({ type: previewProtocol.messages.dragged, ...dragged });
-			}
-			//* pages that loaded before the latest revision are brought up to date
-			if (
-				loaded &&
-				pendingRevision === null &&
-				renderedRevision !== latestRevision
-			) {
-				show(latestRevision);
-			} else {
-				showPending();
-			}
-			options?.onRendered?.();
+			handlePreviewMessage(event.data, messageHandlers);
 		}
 	};
 
@@ -426,36 +391,37 @@ export const createPreviewBridge = (options?: {
 		/** Turns edit mode on for a document, or off with null, now and on every page the frame loads. */
 		setEditing: (next: PreviewEditing | null) => {
 			editing = next;
-			postToRuntime({ type: previewProtocol.messages.editMode, editing });
+			postToRuntime({ type: "editMode", editing });
 			if (!next) options?.onHover?.(null);
 		},
-		/** Points out a field or brick on the page, if its runtime is connected. */
-		highlight: (target: PreviewFieldTarget) => {
-			postToRuntime({ type: previewProtocol.messages.highlightField, target });
+		/** Points out a field, item or brick on the page, once its runtime is ready. */
+		highlight: (target: PreviewTarget) => {
+			if (page.state === "ready") postToRuntime({ type: "highlight", target });
+			else highlighted = target;
 		},
 		/** Shows a fields-column drag in the preview; null ends it. */
 		setDragged: (next: PreviewDragged | null) => {
 			dragged = next;
 			postToRuntime({
-				type: previewProtocol.messages.dragged,
+				type: "dragged",
 				target: next?.target ?? null,
 				landing: next?.landing ?? null,
 			});
 		},
 		/** Tells the page the builder is zooming it out or back in, so it keeps what's dragged or selected in place. */
 		setZooming: (zooming: boolean) => {
-			postToRuntime({ type: previewProtocol.messages.zoom, zooming });
+			postToRuntime({ type: "zoom", zooming });
 		},
 		/** Asks the page to edit its selected field, as clicking it again would. */
-		editSelected: (target: PreviewFieldTarget) => {
-			postToRuntime({ type: previewProtocol.messages.editSelected, target });
+		editSelected: (target: PreviewTarget) => {
+			postToRuntime({ type: "editSelected", target });
 		},
 		/**
 		 * Starts typing a field's text where the page shows it, holding updates until it ends.
 		 * Returns false when the page's runtime isn't there to do it.
 		 */
 		startInline: (
-			target: PreviewFieldTarget,
+			target: PreviewTarget,
 			props: { multiline: boolean; clear: boolean },
 		) => {
 			if (page.state !== "ready" || typing) return false;
@@ -463,19 +429,19 @@ export const createPreviewBridge = (options?: {
 			//* keys go to the page, eg. when typing was started from the builder's controls
 			frame?.focus({ preventScroll: true });
 			postToRuntime({
-				type: previewProtocol.messages.inlineStart,
+				type: "inlineStart",
 				target,
 				...props,
 			});
 			return true;
 		},
 		/** Drags a brick or item to a point in the page's viewport, which shows where it would land. */
-		drag: (target: PreviewFieldTarget, point: { x: number; y: number }) => {
-			postToRuntime({ type: previewProtocol.messages.drag, target, ...point });
+		drag: (target: PreviewTarget, point: { x: number; y: number }) => {
+			postToRuntime({ type: "drag", target, ...point });
 		},
 		/** Ends a drag, moving what was dragged when `drop` is true. */
 		endDrag: (drop: boolean) => {
-			postToRuntime({ type: previewProtocol.messages.dragEnd, drop });
+			postToRuntime({ type: "dragEnd", drop });
 		},
 		/** Prepares for the frame loading a new preview URL at `revision`, dropping updates meant for the old one. */
 		expectLoad: (revision: number) => {
@@ -484,9 +450,6 @@ export const createPreviewBridge = (options?: {
 			noteShown(revision);
 			expectLoad();
 		},
-		/** Whether the page has shown `revision`, so what's on it matches what was written then. */
-		isShowing: (revision: number) =>
-			page.state === "ready" && renderedRevision === revision,
 		/** Removes listeners, timeouts, and iframe references. */
 		cleanup: () => {
 			endTyping(false);
@@ -500,3 +463,6 @@ export const createPreviewBridge = (options?: {
 		},
 	};
 };
+
+/** The builder's side of the preview protocol, for one frame. */
+export type PreviewBridge = ReturnType<typeof createPreviewBridge>;

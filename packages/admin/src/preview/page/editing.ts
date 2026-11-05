@@ -1,16 +1,25 @@
+import { editAttribute } from "@lucidcms/client/contract";
 import {
 	getPreviewTargetKind,
 	hasPreviewError,
+	isPreviewItem,
 	isSamePreviewTarget,
 	type PreviewEditing,
-	type PreviewFieldTarget,
+	type PreviewTarget,
 	type PreviewHover,
 	type PreviewHoverBlock,
 	type PreviewLanding,
 	type PreviewPlace,
 	type PreviewRect,
-	previewFieldAttribute,
 } from "../protocol/index.js";
+import { checkEditMarkup } from "./diagnostics.js";
+import {
+	createShifts,
+	type Drag,
+	isHorizontal,
+	measureDrag,
+	slotAt,
+} from "./drag.js";
 import { createInlineEditing, readPlainText } from "./inline.js";
 import {
 	create,
@@ -22,7 +31,6 @@ import {
 	setBox,
 	topInset,
 } from "./layer.js";
-import { reorderOffsets } from "./reorder.js";
 import { previewOverlayStyles } from "./styles.js";
 import {
 	findRendered,
@@ -40,11 +48,8 @@ const PENDING_HIGHLIGHT_MS = 4000;
 const FLASH_MS = 1600;
 //* how long after its last scroll event the page still counts as scrolling
 const SCROLL_SETTLE_MS = 150;
-const SHIFT_MS = 200;
-//* how long a dropped brick or item stays where it was shown landing, waiting for the page to re-render with the move
-const LANDED_MS = 4000;
-//* how faint a dragged brick or item is where it would land
-const DRAGGED_OPACITY = 0.4;
+//* how long after edit mode starts the page's markup is checked, once it has had time to render
+const CHECK_MARKUP_MS = 2000;
 //* how long after a drop zooming back in keeps where it was dropped in place
 const DROP_ANCHOR_MS = 1500;
 
@@ -52,38 +57,22 @@ type PreviewEditingOptions = {
 	targetWindow: Window;
 	isConnected: () => boolean;
 	/** Asks the builder to open a field, item or brick, returning whether it was sent. */
-	sendFocus: (target: PreviewFieldTarget) => boolean;
+	sendFocus: (target: PreviewTarget) => boolean;
 	/** Tells the builder the user cleared the selection. */
 	sendDeselect: () => void;
 	/** Tells the builder what the pointer is over, for it to draw controls against. */
 	sendHover: (hover: PreviewHover) => void;
 	sendMove: (
-		target: PreviewFieldTarget,
+		target: PreviewTarget,
 		place: PreviewPlace,
-		anchor: PreviewFieldTarget,
+		anchor: PreviewTarget,
 	) => void;
 	/** Asks the builder to edit a selected field, with the text its element shows when that's all it holds. */
-	sendEdit: (target: PreviewFieldTarget, text: string | null) => void;
+	sendEdit: (target: PreviewTarget, text: string | null) => void;
 	/** Sends the text typed into a field on the page so far. */
-	sendInlineInput: (target: PreviewFieldTarget, value: string) => void;
+	sendInlineInput: (target: PreviewTarget, value: string) => void;
 	/** Says typing into a field finished, keeping the text or, when `cancelled`, going back. */
-	sendInlineEnd: (target: PreviewFieldTarget, cancelled: boolean) => void;
-};
-
-type Slot = { anchor: MarkedElement; place: PreviewPlace };
-
-type Offset = { x: number; y: number };
-
-type Drag = {
-	/** Dragged on the page by the builder's handle, following the pointer, or in the builder's fields, which say where it would land. */
-	source: "page" | "builder";
-	owner: MarkedElement;
-	/** The owner and its siblings in page order, where they were in the document when the drag started. */
-	list: Array<{ marked: MarkedElement; rect: PreviewRect }>;
-	horizontal: boolean;
-	x: number;
-	y: number;
-	slot: Slot | null;
+	sendInlineEnd: (target: PreviewTarget, cancelled: boolean) => void;
 };
 
 const kindOf = (marked: MarkedElement) => getPreviewTargetKind(marked.target);
@@ -105,28 +94,15 @@ const roundRect = (rect: PreviewRect): PreviewRect => ({
 	height: Math.round(rect.height),
 });
 
-/** Whether siblings sit side by side, eg. cards in a row, rather than one above another. */
-const isHorizontal = (rects: PreviewRect[]) => {
-	const [a, b] = rects;
-	if (!a || !b) return false;
-	return Math.abs(a.y - b.y) < Math.min(a.height, b.height) / 2;
-};
-
-const distanceTo = (rect: PreviewRect, x: number, y: number) =>
-	Math.hypot(
-		Math.max(rect.x - x, 0, x - rect.x - rect.width),
-		Math.max(rect.y - y, 0, y - rect.y - rect.height),
-	);
-
-/** Whether a target is one of the repeaters edit mode lists, whose paths have "*" for item indexes. */
-const isRepeater = (editing: PreviewEditing, target: PreviewFieldTarget) =>
+/** Whether a target is one of the repeaters edit mode lists, whose paths have "*" for items. */
+const isRepeater = (editing: PreviewEditing, target: PreviewTarget) =>
 	editing.repeaters.some(
 		(repeater) =>
 			repeater.brick === target.brick?.key &&
 			repeater.path.length === target.path.length &&
 			repeater.path.every((segment, index) => {
 				const part = target.path[index];
-				return segment === "*" ? typeof part === "number" : segment === part;
+				return segment === "*" ? isPreviewItem(part) : segment === part;
 			}),
 	);
 
@@ -147,13 +123,12 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 	let selected: MarkedElement | null = null;
 	let drag: Drag | null = null;
 	let hints: Array<{ element: Element; box: HTMLElement }> = [];
-	let pending: { target: PreviewFieldTarget; until: number } | null = null;
+	let pending: { target: PreviewTarget; until: number } | null = null;
 	let reported = "";
 	let scrolling = false;
 	let scrollTimer: number | undefined;
 	let flashTimer: number | undefined;
 	let scrollFrame: number | undefined;
-	let landedTimer: number | undefined;
 	let ui: ReturnType<typeof buildUi> | null = null;
 	//* the field asked to be edited, with where it was clicked to put the caret there
 	let editRequest: {
@@ -161,11 +136,12 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		point: { x: number; y: number } | null;
 	} | null = null;
 	//* the field being typed into, whose target the builder knows it by
-	let typing: PreviewFieldTarget | null = null;
+	let typing: PreviewTarget | null = null;
 	//* while the builder zooms, the viewport's height changes, which scrolling makes up for
 	let zooming = false;
 	let viewportHeight = targetWindow.innerHeight;
 	let dropAnchor: { y: number; until: number } | null = null;
+	let checkTimer: number | undefined;
 	const inline = createInlineEditing({
 		targetWindow,
 		onInput: (value) => {
@@ -178,16 +154,11 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 			schedule();
 		},
 	});
-	//* elements moved to show where a drag would land, until the page re-renders or they move back
-	const shifts = new Map<
-		Element,
-		{ offset: Offset; opacity: number; animation: Animation }
-	>();
 	//* names for elements in hover reports, which stay the same while the element does
 	const elementKeys = new WeakMap<Element, number>();
 	let nextElementKey = 0;
 
-	const isEdited = (target: PreviewFieldTarget) =>
+	const isEdited = (target: PreviewTarget) =>
 		editing !== null && isEditedTarget(target, editing);
 	const isTyping = (marked: MarkedElement | null) =>
 		marked !== null && marked.element === inline.element();
@@ -196,6 +167,8 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		marked !== null &&
 		hasPreviewError(editing.errors, marked.target);
 	const schedule = () => ui?.layer.schedule();
+	//* elements moved aside to show where a drag would land, until the page re-renders or they move back
+	const shifts = createShifts(targetWindow, schedule);
 
 	// ----------------------------------------
 	// Layer
@@ -426,48 +399,9 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 
 	// ----------------------------------------
 	// Dragging
-	const ownerIndex = (current: Drag) =>
-		current.list.findIndex(
-			(entry) => entry.marked.element === current.owner.element,
-		);
-	/** Where a drag would land, measured against where its siblings were, as they move to make room. */
-	const slotAt = (current: Drag): Slot | null => {
-		const x = current.x + targetWindow.scrollX;
-		const y = current.y + targetWindow.scrollY;
-		const from = ownerIndex(current);
-		let nearest = -1;
-		let distance = Number.POSITIVE_INFINITY;
-		for (const [index, { rect }] of current.list.entries()) {
-			if (index === from || (rect.width === 0 && rect.height === 0)) continue;
-			const next = distanceTo(rect, x, y);
-			if (next < distance) {
-				nearest = index;
-				distance = next;
-			}
-		}
-		const anchor = current.list[nearest];
-		if (!anchor) return null;
-		const { rect } = anchor;
-		const place: PreviewPlace = current.horizontal
-			? x < rect.x + rect.width / 2
-				? "before"
-				: "after"
-			: y < rect.y + rect.height / 2
-				? "before"
-				: "after";
-		//* dropping either side of itself leaves it where it is
-		if (
-			(place === "before" && nearest === from + 1) ||
-			(place === "after" && nearest === from - 1)
-		) {
-			return null;
-		}
-		return { anchor: anchor.marked, place };
-	};
-
 	/** Starts a drag of a brick or item, measuring it and its siblings where the page has them. Null when it isn't on the page. */
 	const beginDrag = (
-		target: PreviewFieldTarget,
+		target: PreviewTarget,
 		source: Drag["source"],
 	): Drag | null => {
 		const element = findRendered(document, target, true).find(
@@ -476,7 +410,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		if (!element) return null;
 		const owner = { element, target };
 		//* a drop still waiting for the page to re-render goes back, to measure where things are
-		settle();
+		shifts.settle();
 		stopDrag();
 		const list = siblingsOf(document, owner).map((marked) => {
 			const rect = rectOf(marked.element);
@@ -502,129 +436,14 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		};
 	};
 
-	/** Measures where a drag's elements are in the document, as the page lays them out without the drag's shifts. */
-	const measureList = (current: Drag) => {
-		current.list = current.list.map(({ marked }) => {
-			const rect = rectOf(marked.element);
-			const [x = "0", y = "0"] = targetWindow
-				.getComputedStyle(marked.element)
-				.translate.split(" ");
-			return {
-				marked,
-				rect: {
-					...rect,
-					x: rect.x - (Number.parseFloat(x) || 0) + targetWindow.scrollX,
-					y: rect.y - (Number.parseFloat(y) || 0) + targetWindow.scrollY,
-				},
-			};
-		});
-	};
-
-	/** Animates an element to an offset from where the page has it, starting from wherever it is now. */
-	const shiftTo = (element: Element, offset: Offset, opacity = 1) => {
-		const current = shifts.get(element);
-		if (
-			current &&
-			current.offset.x === offset.x &&
-			current.offset.y === offset.y &&
-			current.opacity === opacity
-		) {
-			return current.animation;
-		}
-		if (!current && offset.x === 0 && offset.y === 0 && opacity === 1) {
-			return null;
-		}
-		const style = targetWindow.getComputedStyle(element);
-		const from = {
-			translate: style.translate || "none",
-			opacity: style.opacity || "1",
-		};
-		current?.animation.cancel();
-		const reducedMotion =
-			targetWindow.matchMedia?.("(prefers-reduced-motion: reduce)").matches ===
-			true;
-		const animation = element.animate(
-			[
-				from,
-				{ translate: `${offset.x}px ${offset.y}px`, opacity: String(opacity) },
-			],
-			{
-				duration: reducedMotion ? 0 : SHIFT_MS,
-				easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
-				fill: "forwards",
-			},
-		);
-		shifts.set(element, { offset, opacity, animation });
-		schedule();
-		return animation;
-	};
-	const release = (element: Element, animation: Animation) => {
-		if (shifts.get(element)?.animation !== animation) return;
-		animation.cancel();
-		shifts.delete(element);
-	};
-	/** Lets go of moved elements at once, eg. once the page re-renders with them where they were shown. */
-	const settle = () => {
-		targetWindow.clearTimeout(landedTimer);
-		for (const { animation } of shifts.values()) animation.cancel();
-		shifts.clear();
-		schedule();
-	};
-	/** Moves elements back to where the page has them, then lets go of them. */
-	const restore = () => {
-		targetWindow.clearTimeout(landedTimer);
-		for (const element of [...shifts.keys()]) {
-			const animation = shiftTo(element, { x: 0, y: 0 });
-			if (!animation) continue;
-			if (animation.playState === "finished") release(element, animation);
-			else {
-				animation.addEventListener(
-					"finish",
-					() => release(element, animation),
-					{ once: true },
-				);
-			}
-		}
-	};
-	/** Holds what was dropped where it was shown landing, at full strength, until the page re-renders with the move, or moves it back after a while. */
-	const holdLanded = (element: Element) => {
-		const landed = shifts.get(element);
-		if (landed) shiftTo(element, landed.offset);
-		landedTimer = targetWindow.setTimeout(restore, LANDED_MS);
-	};
-	/** Shows what's dragged, faint, where it would land, with the siblings it passes making room. */
-	const showLanding = (current: Drag) => {
-		const from = ownerIndex(current);
-		const anchor = current.list.findIndex(
-			(entry) => entry.marked.element === current.slot?.anchor.element,
-		);
-		//* the index it would have once taken out and put next to the anchor
-		const to =
-			anchor === -1
-				? from
-				: (anchor > from ? anchor - 1 : anchor) +
-					(current.slot?.place === "after" ? 1 : 0);
-		const offsets = reorderOffsets(
-			current.list.map((entry) => entry.rect),
-			from,
-			to,
-		);
-		for (const [index, entry] of current.list.entries()) {
-			shiftTo(
-				entry.marked.element,
-				offsets[index] ?? { x: 0, y: 0 },
-				index === from ? DRAGGED_OPACITY : 1,
-			);
-		}
-	};
 	/** Works out where the drag would land, showing it there when that changed. */
 	const follow = (current: Drag) => {
-		const slot = slotAt(current);
+		const slot = slotAt(targetWindow, current);
 		const changed =
 			slot?.anchor.element !== current.slot?.anchor.element ||
 			slot?.place !== current.slot?.place;
 		current.slot = slot;
-		if (changed) showLanding(current);
+		if (changed) shifts.showLanding(current);
 		schedule();
 	};
 
@@ -663,7 +482,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 	const showHints = () => {
 		if (editing || hints.length > 0 || !options.isConnected()) return;
 		const parts = getUi();
-		hints = [...document.querySelectorAll(`[${previewFieldAttribute}]`)]
+		hints = [...document.querySelectorAll(`[${editAttribute}]`)]
 			.filter((element) => readTarget(element) !== null)
 			.map((element) => {
 				const box = create(document, "div", "hint floating");
@@ -724,8 +543,8 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		if (dropAnchor) dropAnchor.y = anchor * ratio;
 		if (drag) {
 			//* sizes tied to the viewport's height change too
-			measureList(drag);
-			showLanding(drag);
+			measureDrag(targetWindow, drag);
+			shifts.showLanding(drag);
 			if (drag.source === "page") {
 				drag.y = anchor * ratio;
 				follow(drag);
@@ -882,7 +701,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 			}
 			inline.stop();
 			editRequest = null;
-			if (drag) restore();
+			if (drag) shifts.restore();
 			stopDrag();
 			hideHints();
 			field = null;
@@ -891,14 +710,22 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 			repeater = null;
 			pointer = null;
 			reported = "";
+			targetWindow.clearTimeout(checkTimer);
 			if (!next) {
 				selected = null;
 				pending = null;
-			} else getUi();
+			} else {
+				getUi();
+				//* pages that render on the client may still be adding their content
+				checkTimer = targetWindow.setTimeout(
+					() => checkEditMarkup(document, next),
+					CHECK_MARKUP_MS,
+				);
+			}
 			schedule();
 		},
 		/** Selects a field, item or brick focused in the builder, waiting a moment for it when it isn't on the page yet. */
-		highlight: (target: PreviewFieldTarget) => {
+		highlight: (target: PreviewTarget) => {
 			const exact = findRendered(document, target, true);
 			const [element] =
 				exact.length > 0 ? exact : findRendered(document, target);
@@ -911,15 +738,15 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		},
 		/** Shows a brick the builder drags in its fields as being moved, scrolling to it, or stops with null. */
 		showDragged: (
-			target: PreviewFieldTarget | null,
+			target: PreviewTarget | null,
 			landing: PreviewLanding | null,
 		) => {
 			if (!target) {
 				const current = drag;
 				if (current?.source !== "builder") return;
 				stopDrag();
-				if (current.slot) holdLanded(current.owner.element);
-				else restore();
+				if (current.slot) shifts.holdLanded(current.owner.element);
+				else shifts.restore();
 				return;
 			}
 			if (
@@ -943,7 +770,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 				anchor && landing
 					? { anchor: anchor.marked, place: landing.place }
 					: null;
-			showLanding(current);
+			shifts.showLanding(current);
 			getUi();
 			schedule();
 		},
@@ -953,7 +780,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 			viewportHeight = targetWindow.innerHeight;
 		},
 		/** Asks to edit a field, as clicking it again would, once it's the selected one. */
-		editSelected: (target: PreviewFieldTarget) => {
+		editSelected: (target: PreviewTarget) => {
 			if (
 				!editing?.editable ||
 				!selected ||
@@ -968,7 +795,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		 * Says typing ended straight away when its element has gone or can't be typed into.
 		 */
 		startInline: (
-			target: PreviewFieldTarget,
+			target: PreviewTarget,
 			props: { multiline: boolean; clear: boolean },
 		) => {
 			const request =
@@ -995,7 +822,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 			schedule();
 		},
 		/** Follows a brick or item the builder's handle drags, showing where it would land. */
-		drag: (target: PreviewFieldTarget, x: number, y: number) => {
+		drag: (target: PreviewTarget, x: number, y: number) => {
 			if (!editing?.editable || !isEdited(target)) return;
 			if (
 				drag?.source !== "page" ||
@@ -1004,7 +831,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 				const next = beginDrag(target, "page");
 				if (!next) return;
 				drag = next;
-				showLanding(drag);
+				shifts.showLanding(drag);
 				scrollFrame = targetWindow.requestAnimationFrame(autoScroll);
 			}
 			drag.x = x;
@@ -1025,15 +852,16 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 			const owner = resolveMarked(document, current.owner);
 			const anchor = resolveMarked(document, current.slot?.anchor ?? null);
 			if (!drop || !current.slot || !owner || !anchor) {
-				restore();
+				shifts.restore();
 				return;
 			}
 			options.sendMove(owner.target, current.slot.place, anchor.target);
-			holdLanded(current.owner.element);
+			shifts.holdLanded(current.owner.element);
 		},
 		/** Lets go of what a drop moved, once the page has re-rendered with it. */
-		settle,
+		settle: shifts.settle,
 		cleanup: () => {
+			targetWindow.clearTimeout(checkTimer);
 			targetWindow.removeEventListener("keydown", onKeyDown);
 			targetWindow.removeEventListener("keyup", onKeyUp);
 			targetWindow.removeEventListener("blur", onBlur);
@@ -1048,7 +876,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 			inline.stop();
 			targetWindow.clearTimeout(flashTimer);
 			targetWindow.clearTimeout(scrollTimer);
-			settle();
+			shifts.settle();
 			stopDrag();
 			ui?.layer.remove();
 			ui = null;

@@ -40,7 +40,7 @@ export const previewSessionsTable = defineTable(
 				args: [255],
 			},
 			mode: {
-				schema: z.enum(["perspective", "scoped"]),
+				schema: z.enum(["navigable", "scoped"]),
 				type: "varchar",
 				args: [255],
 			},

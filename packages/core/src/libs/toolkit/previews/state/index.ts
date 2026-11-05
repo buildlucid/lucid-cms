@@ -1,3 +1,9 @@
+import {
+	builderPreviewContext,
+	previewCookie,
+	previewExitValue,
+	previewParams,
+} from "@lucidcms/client/contract";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -11,11 +17,6 @@ import type {
 } from "./types.js";
 
 export type * from "./types.js";
-
-const previewQueryParam = "preview";
-const previewExitValue = "exit";
-const previewContextQueryParam = "previewContext";
-const builderPreviewContext = "builder";
 
 const setPreviewResponseHeaders = async (
 	headers?: ToolkitPreviewResponseHeaders,
@@ -41,17 +42,22 @@ const state = async (
 				await import("../../../../services/preview-sessions/resolve.js");
 
 			const url = new URL(data.url);
-			const hasQueryValue = url.searchParams.has(previewQueryParam);
+			const cookieOptions = {
+				...previewCookie.options,
+				secure: url.protocol === "https:",
+			};
+			const clearCookie = () =>
+				data.cookies.delete(previewCookie.name, cookieOptions);
+			const hasQueryValue = url.searchParams.has(previewParams.token);
 			const isBuilderPreview =
-				url.searchParams.get(previewContextQueryParam) ===
-				builderPreviewContext;
+				url.searchParams.get(previewParams.context) === builderPreviewContext;
 			const queryValue = hasQueryValue
-				? (url.searchParams.get(previewQueryParam) ?? "")
+				? (url.searchParams.get(previewParams.token) ?? "")
 				: undefined;
 
 			if (queryValue === previewExitValue) {
 				await setPreviewResponseHeaders(data.headers);
-				await data.session.clear();
+				await clearCookie();
 
 				return {
 					error: undefined,
@@ -62,7 +68,9 @@ const state = async (
 				};
 			}
 
-			const storedToken = hasQueryValue ? undefined : await data.session.get();
+			const storedToken = hasQueryValue
+				? undefined
+				: await data.cookies.get(previewCookie.name);
 			const token = queryValue ?? storedToken ?? null;
 			if (token === null) {
 				return {
@@ -79,16 +87,16 @@ const state = async (
 				token,
 			});
 			if (previewRes.error) {
-				await data.session.clear();
+				await clearCookie();
 				return previewRes;
 			}
 
 			if (previewRes.data.mode === "scoped") {
-				await data.session.clear();
+				await clearCookie();
 			} else if (hasQueryValue && !isBuilderPreview) {
-				await data.session.set({
-					token,
-					expiresAt: previewRes.data.expiresAt,
+				await data.cookies.set(previewCookie.name, token, {
+					...cookieOptions,
+					expires: new Date(previewRes.data.expiresAt),
 				});
 			}
 
@@ -101,6 +109,7 @@ const state = async (
 					mode: previewRes.data.mode,
 					expiresAt: previewRes.data.expiresAt,
 					entry: previewRes.data.entry,
+					builder: isBuilderPreview,
 				},
 			};
 		},

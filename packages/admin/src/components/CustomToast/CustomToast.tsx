@@ -3,7 +3,7 @@ import {
 	TbOutlineAlertTriangle,
 	TbOutlineCheck,
 	TbOutlineExclamationMark,
-	TbOutlineInfoSmall,
+	TbOutlineInfoCircle,
 	TbOutlineX,
 } from "solid-icons/tb";
 import {
@@ -17,6 +17,9 @@ import {
 	Switch,
 } from "solid-js";
 import { type Toast, toast } from "solid-toast";
+import ActionIcon, {
+	type ActionIconName,
+} from "@/components/ActionIcon/ActionIcon";
 import Button from "@/components/Button/Button";
 import T from "@/translations";
 
@@ -26,7 +29,9 @@ interface CustomToastProps {
 	type: "success" | "error" | "warning" | "info";
 	toast: Toast;
 	duration?: number;
-	action?: { label: string; onClick: () => void };
+	/** Shown in place of the status glyph, for toasts about something specific, such as a link. */
+	icon?: ActionIconName;
+	action?: { label: string; icon?: ActionIconName; onClick: () => void };
 }
 
 const CustomToast: Component<CustomToastProps> = (props) => {
@@ -40,6 +45,8 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 	const duration = createMemo(() => {
 		return props.duration || 5000;
 	});
+	//* with more than a title, the icon sits just above the top of the text rather than at the title's middle
+	const stacked = () => Boolean(props.message || props.action);
 
 	// ----------------------------------------
 	// Effects
@@ -60,7 +67,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"relative w-[min(400px,calc(100vw-2rem))] overflow-hidden rounded-md border border-border bg-card p-3.5 shadow-md",
+				"relative w-[min(400px,calc(100vw-2rem))] overflow-hidden rounded-lg border border-border bg-card shadow-lg",
 				{
 					"animate-enter": props.toast.visible,
 					"animate-leave": !props.toast.visible,
@@ -68,70 +75,78 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 			)}
 		>
 			<div
-				class={classNames("relative z-10 flex gap-3 pr-8", {
-					"items-start": !!props.message,
-					"items-center": !props.message,
+				class={classNames("flex gap-3 ps-3.5 pe-11", {
+					"pt-3 pb-3.5": stacked(),
+					"items-center py-3.5": !stacked(),
 				})}
 			>
 				<span
 					class={classNames(
-						"flex size-5 shrink-0 items-center justify-center rounded-full border border-border bg-background",
+						"flex size-7 shrink-0 items-center justify-center rounded-md border border-border bg-input",
 						{
-							"mt-0.5": !!props.message,
-							"text-success": props.type === "success",
-							"text-danger": props.type === "error",
-							"text-warning": props.type === "warning",
-							"text-info": props.type === "info",
+							"mt-0.5": stacked(),
+							"text-icon": props.icon !== undefined,
+							"text-success": !props.icon && props.type === "success",
+							"text-danger": !props.icon && props.type === "error",
+							"text-warning": !props.icon && props.type === "warning",
+							"text-info": !props.icon && props.type === "info",
 						},
 					)}
 				>
-					<Switch>
-						<Match when={props.type === "success"}>
-							<TbOutlineCheck class="m-auto size-2.5" />
-						</Match>
-						<Match when={props.type === "error"}>
-							<TbOutlineExclamationMark class="m-auto size-2.5" />
-						</Match>
-						<Match when={props.type === "warning"}>
-							<TbOutlineAlertTriangle class="m-auto size-2.5" />
-						</Match>
-						<Match when={props.type === "info"}>
-							{/* InfoSmall is half the height of other glyphs, so double the size and halve the stroke */}
-							<TbOutlineInfoSmall class="m-auto size-5" stroke-width={1} />
-						</Match>
-					</Switch>
-				</span>
-				<div class="flex min-w-0 flex-col gap-y-0.5">
-					<Show when={props.title}>
-						<p class="text-sm font-semibold leading-5 text-title">
-							{props.title}
-						</p>
+					<Show
+						when={props.icon}
+						fallback={
+							<Switch>
+								<Match when={props.type === "success"}>
+									<TbOutlineCheck class="size-3.5" />
+								</Match>
+								<Match when={props.type === "error"}>
+									<TbOutlineExclamationMark class="size-3.5" />
+								</Match>
+								<Match when={props.type === "warning"}>
+									<TbOutlineAlertTriangle class="size-3.5" />
+								</Match>
+								<Match when={props.type === "info"}>
+									<TbOutlineInfoCircle class="size-3.5" />
+								</Match>
+							</Switch>
+						}
+					>
+						{(icon) => <ActionIcon icon={icon()} />}
 					</Show>
+				</span>
+				<div class="flex min-w-0 flex-col gap-0.5">
+					<p class="text-sm font-medium leading-5 text-title">{props.title}</p>
 					<Show when={props.message}>
-						<p class="text-sm leading-5 text-body">{props.message}</p>
+						<p class="text-[13px] leading-[19px] text-body">{props.message}</p>
+					</Show>
+					<Show when={props.action}>
+						{(action) => (
+							<div class="mt-2.5 flex">
+								<Button
+									data-drawer-ignore
+									type="button"
+									variant="secondary"
+									size="xs"
+									class="gap-1.5"
+									onClick={() => {
+										action().onClick();
+										toast.dismiss(props.toast.id);
+									}}
+								>
+									<Show when={action().icon}>
+										{(icon) => <ActionIcon icon={icon()} size={12} />}
+									</Show>
+									{action().label}
+								</Button>
+							</div>
+						)}
 					</Show>
 				</div>
-				<Show when={props.action}>
-					{(action) => (
-						<Button
-							data-drawer-ignore
-							type="button"
-							variant="outline"
-							size="xs"
-							class="ml-auto shrink-0"
-							onClick={() => {
-								action().onClick();
-								toast.dismiss(props.toast.id);
-							}}
-						>
-							{action().label}
-						</Button>
-					)}
-				</Show>
 			</div>
 			<button
 				data-drawer-ignore
-				class="absolute right-2.5 top-2.5 z-20 flex size-7 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-background-hover hover:text-icon focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+				class="absolute top-2.5 right-2.5 flex size-7 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-background-hover hover:text-icon focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 				onClick={() => toast.dismiss(props.toast.id)}
 				type="button"
 				aria-label={T()("common.close")}
@@ -140,12 +155,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 			</button>
 			{/* Duration bar */}
 			<span
-				class={classNames("absolute bottom-0 left-0 z-20 h-0.5 opacity-80", {
-					"bg-success": props.type === "success",
-					"bg-danger": props.type === "error",
-					"bg-warning": props.type === "warning",
-					"bg-info": props.type === "info",
-				})}
+				class="absolute bottom-0 left-0 h-0.5 bg-title/15"
 				style={{ width: `${life()}%` }}
 			/>
 		</div>

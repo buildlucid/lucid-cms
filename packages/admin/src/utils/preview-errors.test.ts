@@ -60,7 +60,7 @@ const bricks = [
 	},
 ] satisfies BrickData[];
 
-test("finds errors by content path, items by their index, in the shown locale", () => {
+test("finds errors by content path, items by their ref, in the shown locale", () => {
 	expect(
 		getPreviewErrors({
 			collection,
@@ -96,7 +96,7 @@ test("finds errors by content path, items by their index, in the shown locale", 
 		{ path: ["seo", "heading"] },
 		{
 			brick: { type: "builder", key: "hero", ref: "a" },
-			path: ["links", 1, "label"],
+			path: ["links", { ref: "second" }, "label"],
 		},
 	]);
 });

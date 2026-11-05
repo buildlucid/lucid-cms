@@ -1,4 +1,5 @@
 import toast from "solid-toast";
+import type { ActionIconName } from "@/components/ActionIcon/ActionIcon";
 import CustomToast from "@/components/CustomToast/CustomToast";
 
 interface SpawnToastProps {
@@ -8,8 +9,10 @@ interface SpawnToastProps {
 	status?: "success" | "error" | "warning" | "info";
 	/** In milliseconds. */
 	duration?: number;
-	/** A button that runs `onClick` and closes the toast, such as undoing what it reports. */
-	action?: { label: string; onClick: () => void };
+	/** Shown in place of the status glyph, for toasts about something specific, such as a link. */
+	icon?: ActionIconName;
+	/** A button under the message that runs `onClick` and closes the toast, such as undoing what it reports. */
+	action?: { label: string; icon?: ActionIconName; onClick: () => void };
 }
 
 /**
@@ -34,6 +37,7 @@ const spawnToast = (props: SpawnToastProps) => {
 				message={props.message}
 				type={props.status || "info"}
 				duration={props.duration}
+				icon={props.icon}
 				action={props.action}
 			/>
 		),

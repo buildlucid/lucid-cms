@@ -72,6 +72,7 @@ const getSingle = async <TDocument = ContentDocument<string, boolean>>(
 				locale: data.locale ?? null,
 				fallbackLocale: data.fallbackLocale ?? null,
 				depth,
+				preview: data.preview !== undefined,
 			},
 		}) as TDocument,
 	};

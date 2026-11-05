@@ -1,7 +1,7 @@
+import getPreview from "@lucidcms/astro/preview";
 import getToolkit from "@lucidcms/astro/toolkit";
 import type { AstroGlobal } from "astro";
 
-const previewCookieName = "lucid_preview";
 export const pageLocales = ["en", "fr"] as const;
 export type PageLocale = (typeof pageLocales)[number];
 
@@ -22,50 +22,11 @@ type GetLucidDataOptions = {
 };
 
 const getLucidData = async ({ path, locale, astro }: GetLucidDataOptions) => {
-	const toolkit = await getToolkit(astro);
-
-	const [authentication, preview] = await Promise.all([
-		toolkit.auth.status({
-			cookies: {
-				get: (name) => astro.cookies.get(name)?.value,
-			},
-			headers: {
-				set: (name, value) => astro.response.headers.set(name, value),
-			},
-		}),
-		toolkit.previews.state({
-			url: astro.url,
-			session: {
-				get: () => astro.cookies.get(previewCookieName)?.value,
-				set: ({ token, expiresAt }) => {
-					astro.cookies.set(previewCookieName, token, {
-						path: "/",
-						httpOnly: true,
-						secure: astro.url.protocol === "https:",
-						sameSite: astro.url.protocol === "https:" ? "none" : "lax",
-						expires: new Date(expiresAt),
-					});
-				},
-				clear: () => {
-					astro.cookies.delete(previewCookieName, {
-						path: "/",
-						httpOnly: true,
-						secure: astro.url.protocol === "https:",
-						sameSite: astro.url.protocol === "https:" ? "none" : "lax",
-					});
-				},
-			},
-			headers: {
-				set: (name, value) => astro.response.headers.set(name, value),
-			},
-		}),
+	const [toolkit, preview] = await Promise.all([
+		getToolkit(astro),
+		getPreview(astro),
 	]);
 	const activePreview = preview.data?.kind === "preview" ? preview.data : null;
-	const scopedPageEntry =
-		activePreview?.mode === "scoped" &&
-		activePreview.entry.collectionKey === "page"
-			? activePreview.entry
-			: null;
 
 	const [documentResponse, blogsResponse] = preview.error
 		? [
@@ -79,9 +40,7 @@ const getLucidData = async ({ path, locale, astro }: GetLucidDataOptions) => {
 					preview: activePreview?.token,
 					locale,
 					query: {
-						filter: scopedPageEntry
-							? { id: { value: scopedPageEntry.documentId } }
-							: { _path: { value: path } },
+						filter: { _path: { value: path } },
 						include: ["bricks", "meta"],
 					},
 				}),
@@ -112,7 +71,6 @@ const getLucidData = async ({ path, locale, astro }: GetLucidDataOptions) => {
 		page: documentResponse.data,
 		blogs: blogsResponse.data?.items ?? [],
 		preview: preview.data,
-		authenticated: authentication.data?.authenticated,
 		isPreviewError,
 		isBlogError:
 			preview.error === undefined && blogsResponse.error !== undefined,

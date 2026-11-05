@@ -110,7 +110,7 @@ describe("preview session resolution and authorization", () => {
 				error: undefined,
 				data: buildPreview({
 					entry_version_type: entryVersionType,
-					mode: "perspective",
+					mode: "navigable",
 					entry_version_id: null,
 				}),
 			});
@@ -122,7 +122,7 @@ describe("preview session resolution and authorization", () => {
 			});
 
 			expect(response.data).toMatchObject({
-				mode: "perspective",
+				mode: "navigable",
 				versionType: expectedVersionType,
 			});
 		},
@@ -185,10 +185,10 @@ describe("preview session resolution and authorization", () => {
 	it.each([
 		["scoped", "latest", 73],
 		["scoped", "revision", null],
-		["perspective", "latest", 73],
-		["perspective", "revision", 73],
-		["perspective", "revision", null],
-		["perspective", "snapshot", null],
+		["navigable", "latest", 73],
+		["navigable", "revision", 73],
+		["navigable", "revision", null],
+		["navigable", "snapshot", null],
 	] as const)(
 		"rejects an invalid persisted %s %s session with version ID %s",
 		async (mode, entryVersionType, entryVersionId) => {
@@ -215,7 +215,7 @@ describe("preview session resolution and authorization", () => {
 			error: undefined,
 			data: buildPreview({
 				entry_version_type: "latest",
-				mode: "perspective",
+				mode: "navigable",
 				entry_version_id: null,
 			}),
 		});
@@ -229,7 +229,7 @@ describe("preview session resolution and authorization", () => {
 		expect(response.error).toBeUndefined();
 		expect(response.data).toEqual({
 			sessionId: 4,
-			mode: "perspective",
+			mode: "navigable",
 			entry: {
 				collectionKey: "page",
 				documentId: 42,
@@ -243,7 +243,7 @@ describe("preview session resolution and authorization", () => {
 			error: undefined,
 			data: buildPreview({
 				entry_version_type: "staging",
-				mode: "perspective",
+				mode: "navigable",
 				entry_version_id: null,
 			}),
 		});
@@ -259,7 +259,7 @@ describe("preview session resolution and authorization", () => {
 			error: undefined,
 			data: {
 				sessionId: 4,
-				mode: "perspective",
+				mode: "navigable",
 				entry: {
 					collectionKey: "page",
 					documentId: 42,

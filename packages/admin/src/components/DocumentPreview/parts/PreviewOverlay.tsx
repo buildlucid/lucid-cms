@@ -9,6 +9,7 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type {
 	PreviewRepeaterCapacity,
 	PreviewStructureChange,
@@ -16,8 +17,8 @@ import type {
 import {
 	getPreviewTargetKind,
 	hasPreviewError,
-	type PreviewFieldPath,
-	type PreviewFieldTarget,
+	type PreviewTargetPath,
+	type PreviewTarget,
 	type PreviewHover,
 	type PreviewHoverBlock,
 	type PreviewPlace,
@@ -73,29 +74,30 @@ export const PreviewOverlay: Component<{
 	editable: boolean;
 	details: PreviewEditingDetails | null;
 	/** The fields with validation errors. */
-	errors: PreviewFieldPath[];
+	errors: PreviewTargetPath[];
 	/** How many items a repeater, or an item's repeater, has and can have. */
-	capacity: (target: PreviewFieldTarget) => PreviewRepeaterCapacity | null;
-	onOpen: (target: PreviewFieldTarget) => void;
+	capacity: (target: PreviewTarget) => PreviewRepeaterCapacity | null;
+	onOpen: (target: PreviewTarget) => void;
 	/** Edits the selected field, as clicking it again does. */
-	onEditField: (target: PreviewFieldTarget) => void;
+	onEditField: (target: PreviewTarget) => void;
 	/** Asks the agent about a brick, item or field. Left out when there's no chat to ask in. */
-	onAsk?: (target: PreviewFieldTarget) => void;
+	onAsk?: (target: PreviewTarget) => void;
 	/** Whether the selected field is being typed into on the page, which its bar makes way for. */
 	typing: boolean;
 	/** Applies a change, returning its undo step, or null when it made none. */
 	onChange: (
-		target: PreviewFieldTarget,
+		target: PreviewTarget,
 		change: PreviewStructureChange,
 	) => number | null;
 	/** Undoes a change's step, when nothing has changed since. */
 	onUndo: (step: number) => void;
 	/** Drags a brick or item to a point in the page's pixels. */
-	onDrag: (target: PreviewFieldTarget, point: { x: number; y: number }) => void;
+	onDrag: (target: PreviewTarget, point: { x: number; y: number }) => void;
 	onDragEnd: (drop: boolean) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	let root: HTMLDivElement | undefined;
 	let brickHandle: HTMLDivElement | undefined;
 	let itemHandle: HTMLDivElement | undefined;
@@ -197,8 +199,10 @@ export const PreviewOverlay: Component<{
 
 	// ----------------------------------------
 	// Functions
-	const nameOf = (target: PreviewFieldTarget) =>
-		props.details ? getPreviewTargetName(props.details, target) : "";
+	const nameOf = (target: PreviewTarget) =>
+		props.details
+			? getPreviewTargetName(props.details, target, brickStore.get.bricks)
+			: "";
 	/** Whether the pointer is on a control, asked of the page as controls can leave from under it without a pointerout. */
 	const isOverControls = () => root?.querySelector(":hover") !== null;
 
@@ -292,6 +296,7 @@ export const PreviewOverlay: Component<{
 			status: "success",
 			action: {
 				label: T()("preview.edit.undo"),
+				icon: "restore",
 				onClick: () => props.onUndo(step),
 			},
 		});

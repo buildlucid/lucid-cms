@@ -19,6 +19,10 @@
 			"types": "./dist/toolkit.d.mts",
 			"default": "./dist/toolkit.mjs"
 		},
+		"./preview": {
+			"types": "./dist/preview.d.mts",
+			"default": "./dist/preview.mjs"
+		},
 		"./internal/route": {
 			"types": "./dist/internal/route.d.mts",
 			"default": "./dist/internal/route.mjs"

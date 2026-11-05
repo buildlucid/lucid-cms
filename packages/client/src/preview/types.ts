@@ -1,28 +1,41 @@
-import type { PreviewUpdateHandler } from "@lucidcms/types";
+import type { PreviewDocument, PreviewUpdateHandler } from "@lucidcms/types";
 
-export type { PreviewUpdate, PreviewUpdateHandler } from "@lucidcms/types";
+export type {
+	PreviewDocument,
+	PreviewUpdate,
+	PreviewUpdateHandler,
+} from "@lucidcms/types";
 
 export type PreviewOptions = {
-	/** The CMS's address, which serves the preview script. Defaults to the page's own origin, for sites the CMS serves. */
+	/** The CMS's address, which serves the preview scripts. Defaults to the page's own origin, for sites the CMS serves. */
 	host?: string | URL;
-	/** Fetches the page again on each change and updates it in place, for server-rendered sites. Handlers registered with `onUpdate` run too. */
+	/** Fetches the page again on each change in the builder and updates it in place, for server-rendered sites. Handlers registered with `onUpdate` run too. */
 	morph?: boolean;
+	/** The document the page shows, which signed-in editors get an Edit page link to. Previews link to the document they show without it. */
+	document?: PreviewDocument | null;
+	/** Shows Lucid's toolbar on previews and for signed-in editors. Defaults to true; turn it off to draw your own with `token` and `exit()`. */
+	toolbar?: boolean;
+	/** Navigates when a preview is exited, for sites whose router owns navigation. Defaults to loading the page again. */
+	navigate?: (url: URL) => void | Promise<void>;
 };
 
-/** Preview runtime lifecycle. Await ready before relying on installed listeners; call cleanup when disposing the page. */
+/** The page's preview: the builder's runtime in its preview frame, or the toolbar everywhere else. */
 export type PreviewController = {
-	/** Whether the builder preview runtime is running. */
+	/** Whether a Lucid runtime is running on the page. */
 	readonly active: boolean;
-	/** Resolves once the preview script has loaded, or failed to. */
+	/** Resolves once the runtime's script has loaded, or failed to. */
 	readonly ready: Promise<void>;
-	/** The preview token from the page URL, to pass to Lucid reads. Null outside the builder preview. */
+	/** The preview token to pass to Lucid reads, or null when the page isn't previewing. */
 	readonly token: string | null;
 	/**
-	 * Re-renders the page when its content changes instead of reloading it.
-	 * Handlers run one update at a time and newer updates abort older ones.
-	 * Returns a function that removes the handler.
+	 * Re-renders the page when the builder's content changes instead of reloading it. Handlers run
+	 * one update at a time and newer updates abort older ones. Returns a function that removes it.
 	 */
 	onUpdate: (handler: PreviewUpdateHandler) => () => void;
-	/** Removes preview listeners, update handlers and isolated UI. */
+	/** Changes the document the page shows, eg. after a client-side navigation. */
+	setDocument: (document: PreviewDocument | null) => void;
+	/** Ends the preview and shows the published page. */
+	exit: () => Promise<void>;
+	/** Removes the runtime, its listeners and its UI. */
 	cleanup: () => void;
 };

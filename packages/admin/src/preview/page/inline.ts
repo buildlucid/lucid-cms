@@ -1,12 +1,12 @@
+import { keepAttribute } from "@lucidcms/client/contract";
 import { previewProtocolLimits, toShownText } from "../protocol/index.js";
-import { previewKeepAttribute } from "./constants.js";
 
 //* attributes typing changes on the element, put back as they were once it ends
 const borrowedAttributes = [
 	"contenteditable",
 	"spellcheck",
 	"style",
-	previewKeepAttribute,
+	keepAttribute,
 ] as const;
 
 type InlineSession = {
@@ -32,11 +32,7 @@ type InlineEditingOptions = {
 
 const isText = (node: Node): node is Text => node.nodeType === Node.TEXT_NODE;
 
-/**
- * What an element shows when it holds nothing but text and line breaks, read as typed text, or
- * null when it holds anything else, such as other elements. Comments that frameworks leave
- * between text are skipped.
- */
+/** Reads text and line breaks, ignoring framework comments. Returns null for other element content. */
 export const readPlainText = (element: Element): string | null => {
 	let text = "";
 	for (const node of element.childNodes) {
@@ -182,7 +178,7 @@ export const createInlineEditing = (options: InlineEditingOptions) => {
 			makeEditable(element);
 			element.spellcheck = true;
 			//* morphing the page leaves it alone, and the builder's outline stands in for the browser's
-			element.setAttribute(previewKeepAttribute, "");
+			element.setAttribute(keepAttribute, "");
 			element.style.setProperty("outline", "none", "important");
 			element.style.setProperty("cursor", "text", "important");
 			element.style.setProperty("user-select", "text", "important");

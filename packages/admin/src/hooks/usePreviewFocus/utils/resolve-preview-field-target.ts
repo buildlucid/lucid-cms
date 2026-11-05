@@ -1,10 +1,11 @@
 import type { Collection } from "@types";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import { isPreviewItem, type PreviewTarget } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import type {
 	CollectionDataFieldConfig,
 	CollectionFieldConfig,
 } from "@/types/collection-config";
+import { findPreviewGroup } from "@/utils/find-preview-group";
 import {
 	getPreviewFieldId,
 	getPreviewStructureId,
@@ -116,14 +117,13 @@ const findContainerConfig = (props: {
 };
 
 /**
- * Resolves preview paths from content responses into builder DOM targets, omitting section and
- * collapsible keys from stored field paths. A brick without a path resolves to its header and a
- * repeater item to its group, both opened.
+ * Resolves preview paths to builder targets, finding repeater items by ref and omitting container
+ * keys from stored paths. Opens brick headers and item groups as needed.
  */
 export const resolvePreviewFieldTarget = (props: {
-	target: PreviewFieldTarget;
+	target: PreviewTarget;
 	collection: Collection;
-	bricks: Array<Pick<BrickData, "key" | "ref" | "type">>;
+	bricks: Array<Pick<BrickData, "key" | "ref" | "type" | "fields">>;
 }): ResolvedPreviewField | null => {
 	const targetBrick = props.target.brick;
 	const brickIndex = targetBrick
@@ -155,6 +155,7 @@ export const resolvePreviewFieldTarget = (props: {
 		brick.type === "collection-fields"
 			? props.collection.fields
 			: (brickConfig?.fields ?? []);
+	let fields = brick.fields;
 	let pathOffset = 0;
 	let pathPrefix: Array<string | number> = [];
 	const storedPath: Array<string | number> = [];
@@ -207,13 +208,13 @@ export const resolvePreviewFieldTarget = (props: {
 			};
 		}
 
-		const groupIndex = props.target.path[pathOffset + 1];
-		if (match.config.type !== "repeater" || typeof groupIndex !== "number") {
-			return null;
-		}
+		const item = props.target.path[pathOffset + 1];
+		if (match.config.type !== "repeater" || !isPreviewItem(item)) return null;
+		const found = findPreviewGroup(fields, key, item);
+		if (!found) return null;
 
-		storedPath.push(groupIndex);
-		const groupPath = [...pathPrefix, key, groupIndex];
+		storedPath.push(found.position);
+		const groupPath = [...pathPrefix, key, found.position];
 		const groupId = getPreviewStructureId({
 			brickIndex,
 			type: "group",
@@ -225,6 +226,7 @@ export const resolvePreviewFieldTarget = (props: {
 			return { structureIds, fieldId: groupId };
 		}
 		configs = match.config.fields;
+		fields = found.group.fields;
 		pathPrefix = groupPath;
 		pathOffset += 2;
 	}

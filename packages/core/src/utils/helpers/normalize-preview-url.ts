@@ -1,3 +1,4 @@
+import { previewParams } from "@lucidcms/client/contract";
 import { copy } from "../../libs/i18n/index.js";
 import type { ServiceResponse } from "../services/types.js";
 
@@ -49,7 +50,7 @@ const normalizePreviewUrl = async (
 		};
 	}
 
-	url.searchParams.set("preview", token);
+	url.searchParams.set(previewParams.token, token);
 	return {
 		error: undefined,
 		data: url.toString(),

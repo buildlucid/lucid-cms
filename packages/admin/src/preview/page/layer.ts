@@ -1,5 +1,6 @@
+import { keepAttribute } from "@lucidcms/client/contract";
 import type { PreviewRect } from "../protocol/index.js";
-import { previewKeepAttribute, previewOverlayTagName } from "./constants.js";
+import { previewOverlayTagName } from "./constants.js";
 
 //* frames the layer keeps following elements for once they stop moving
 const SETTLE_FRAMES = 12;
@@ -23,7 +24,7 @@ export const createLayer = (
 ): Layer => {
 	const { document } = targetWindow;
 	const host = document.createElement(previewOverlayTagName);
-	host.setAttribute(previewKeepAttribute, "");
+	host.setAttribute(keepAttribute, "");
 	const root = host.attachShadow({ mode: "open" });
 	const style = document.createElement("style");
 	style.textContent = styles;

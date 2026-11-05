@@ -28,6 +28,7 @@ import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import formatter from "./helpers.js";
+import { itemRef } from "./preview-targets.js";
 
 export interface FieldFormatMeta {
 	/** Read authoring values without display defaults or hydrated references. */
@@ -400,11 +401,25 @@ const objectifyFields = (
 	);
 };
 
+/** A repeater item's content, which keeps its ref for preview reads to mark it with. */
+const toItem = (
+	group: NonNullable<InternalDocumentField["groups"]>[number],
+	values: DocumentFieldValueMap,
+	itemRefs: boolean,
+) => (itemRefs ? Object.assign(values, { [itemRef]: group.ref }) : values);
+
 const flattenFieldValue = (
 	field: InternalDocumentField,
+	itemRefs: boolean,
 ): DocumentFieldPlainValue => {
 	if (field.groups) {
-		return field.groups.map((group) => flattenFields(group.fields || []));
+		return field.groups.map((group) =>
+			toItem(
+				group,
+				flattenFields(group.fields || [], undefined, itemRefs),
+				itemRefs,
+			),
+		);
 	}
 
 	if (field.translations) {
@@ -427,15 +442,16 @@ const collectContentFieldValues = (
 	target: DocumentFieldValueMap,
 	fieldMap: Map<string, InternalDocumentField>,
 	configs: FieldConfig<FieldTypes>[],
+	itemRefs: boolean,
 ): void => {
 	for (const config of configs) {
 		const children = fieldHooks[config.type].contentChildren?.(config);
 		if (children) {
 			if (children.output === "inline") {
-				collectContentFieldValues(target, fieldMap, children.fields);
+				collectContentFieldValues(target, fieldMap, children.fields, itemRefs);
 			} else {
 				const nested: DocumentFieldValueMap = {};
-				collectContentFieldValues(nested, fieldMap, children.fields);
+				collectContentFieldValues(nested, fieldMap, children.fields, itemRefs);
 				target[config.key] = nested;
 			}
 			continue;
@@ -450,12 +466,16 @@ const collectContentFieldValues = (
 					? (config.fields as FieldConfig<FieldTypes>[])
 					: undefined;
 			target[config.key] = field.groups.map((group) =>
-				flattenFields(group.fields || [], childConfigs),
+				toItem(
+					group,
+					flattenFields(group.fields || [], childConfigs, itemRefs),
+					itemRefs,
+				),
 			);
 			continue;
 		}
 
-		target[config.key] = flattenFieldValue(field);
+		target[config.key] = flattenFieldValue(field, itemRefs);
 	}
 };
 
@@ -467,12 +487,13 @@ const collectContentFieldValues = (
 const flattenFields = (
 	fields: InternalDocumentField[],
 	contentFieldTree?: FieldConfig<FieldTypes>[],
+	itemRefs = false,
 ): DocumentFieldValueMap => {
 	if (!contentFieldTree) {
 		return fields.reduce((acc, field) => {
 			if (!field) return acc;
 
-			acc[field.key] = flattenFieldValue(field);
+			acc[field.key] = flattenFieldValue(field, itemRefs);
 			return acc;
 		}, {} as DocumentFieldValueMap);
 	}
@@ -481,7 +502,7 @@ const flattenFields = (
 		fields.filter((field) => !!field).map((field) => [field.key, field]),
 	);
 	const result: DocumentFieldValueMap = {};
-	collectContentFieldValues(result, fieldMap, contentFieldTree);
+	collectContentFieldValues(result, fieldMap, contentFieldTree, itemRefs);
 	return result;
 };
 

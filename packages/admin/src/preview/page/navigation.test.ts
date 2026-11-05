@@ -66,7 +66,20 @@ describe("builder preview link navigation", () => {
 
 		expect(mouseEvent.defaultPrevented).toBe(true);
 		expect(state.open).not.toHaveBeenCalled();
-		expect(state.showNavigationLocked).toHaveBeenCalledOnce();
+		//* links to other sites aren't looked up, so only say the link didn't open
+		expect(state.showNavigationLocked).toHaveBeenCalledWith(null);
+		state.cleanup();
+	});
+
+	test("says where a link on the page's own site goes, without the preview's parameters", () => {
+		const state = setupNavigation();
+		state.anchor.href = `${window.location.origin}/about?preview=token&previewContext=builder#team`;
+
+		state.anchor.click();
+
+		expect(state.showNavigationLocked).toHaveBeenCalledWith(
+			`${window.location.origin}/about#team`,
+		);
 		state.cleanup();
 	});
 });

@@ -17,7 +17,7 @@ const resolvePreviewMode = async (data: {
 	mode?: PreviewMode;
 }): ServiceResponse<PreviewMode> => {
 	if (
-		data.mode === "perspective" &&
+		data.mode === "navigable" &&
 		requiresPinnedPreviewVersion(data.versionType)
 	) {
 		return {
@@ -34,9 +34,7 @@ const resolvePreviewMode = async (data: {
 		error: undefined,
 		data:
 			data.mode ??
-			(requiresPinnedPreviewVersion(data.versionType)
-				? "scoped"
-				: "perspective"),
+			(requiresPinnedPreviewVersion(data.versionType) ? "scoped" : "navigable"),
 	};
 };
 

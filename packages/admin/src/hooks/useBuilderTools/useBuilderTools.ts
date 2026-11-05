@@ -88,26 +88,9 @@ const contentKeys = () =>
 		),
 	);
 
-/** Resolves field keys and repeater refs to builder positions, stopping at the repeater if an item is missing. */
-const previewPath = (fields: InternalDocumentField[], path: string[]) => {
-	const resolved: BuilderFieldPath = [];
-	let scope = fields;
-	for (let index = 0; index < path.length; index += 2) {
-		const key = path[index];
-		if (key === undefined) break;
-		resolved.push(key);
-
-		const ref = path[index + 1];
-		if (ref === undefined || path[index + 2] === undefined) break;
-		const groups = scope.find((field) => field.key === key)?.groups ?? [];
-		const position = groups.findIndex((group) => group.ref === ref);
-		const group = groups[position];
-		if (!group) break;
-		resolved.push(position);
-		scope = group.fields;
-	}
-	return resolved;
-};
+/** Turns an agent's field path, of field keys and repeater item refs, into a builder field path. */
+const previewPath = (path: string[]): BuilderFieldPath =>
+	path.map((segment, index) => (index % 2 === 1 ? { ref: segment } : segment));
 
 /** Registers the open builder for agent reads, unsaved edits and field or brick navigation from tools and chat links. */
 export const useBuilderTools = (props: {
@@ -218,7 +201,7 @@ export const useBuilderTools = (props: {
 			documentId: props.documentId(),
 			bricks,
 			brickIndex,
-			path: previewPath(brick.fields, target.path),
+			path: previewPath(target.path),
 		});
 	};
 

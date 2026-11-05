@@ -38,7 +38,6 @@ export const contentTypes: Record<string, string> = {
 
 export const redirectStatuses = [301, 302, 303, 307, 308] as const;
 
-export const PREVIEW_COOKIE = "lucid_preview";
 export const CLIENT_SCRIPT_PATH = pluginPublicPath(PLUGIN_KEY, "lucid.js");
 /** The outlet UI components add their head content to, such as Svelte's `<svelte:head>`. */
 export const HEAD_OUTLET = "head";

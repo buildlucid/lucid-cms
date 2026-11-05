@@ -1,5 +1,5 @@
 import type { Collection } from "@types";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import type { PreviewTarget } from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfig } from "@/types/collection-config";
 import resolveFieldAccess, {
@@ -11,7 +11,7 @@ import resolveFieldAccess, {
  * permissions allow. The document's own fields count as a brick. Null once it's gone.
  */
 export const findPreviewBrick = (props: {
-	target: PreviewFieldTarget;
+	target: PreviewTarget;
 	collection: Collection;
 	bricks: BrickData[];
 }): {

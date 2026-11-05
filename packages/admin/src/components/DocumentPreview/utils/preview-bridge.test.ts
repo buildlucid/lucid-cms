@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { createPreviewMessage, previewProtocol } from "@/preview/protocol";
+import { createPreviewMessage } from "@/preview/protocol";
 import { createPreviewBridge } from "./preview-bridge";
 
 const origin = "https://site.example";
@@ -34,41 +34,43 @@ afterEach(() => {
 });
 
 describe("preview bridge", () => {
-	test("knows which revision the page shows through loads, updates and navigation", () => {
+	test("brings pages that loaded before the latest revision up to date", () => {
 		vi.useFakeTimers({ now: 1000 });
 		const { bridge, posted, receive } = setup();
 		const ready = (loadedAt: number) =>
-			receive({
-				type: previewProtocol.messages.ready,
-				updates: true,
-				loadedAt,
-			});
+			receive({ type: "ready", updates: true, loadedAt });
+		const update = createPreviewMessage({ type: "update", revision: 2 });
 
 		bridge.expectLoad(1);
 		ready(1001);
-		expect(bridge.isShowing(1)).toBe(true);
-
 		vi.setSystemTime(2000);
 		bridge.show(2);
-		expect(bridge.isShowing(2)).toBe(false);
-		receive({ type: previewProtocol.messages.rendered, revision: 2 });
-		expect(bridge.isShowing(2)).toBe(true);
+		expect(posted).toHaveBeenLastCalledWith(update, origin);
+		posted.mockClear();
 
-		//* a page that started loading before revision 2 was written, eg. by navigating or from the back/forward cache, is brought up to date
-		receive({ type: previewProtocol.messages.unload });
+		//* a page that started loading before revision 2 was written, eg. by navigating or from the back/forward cache
+		receive({ type: "unload" });
 		ready(1500);
-		expect(bridge.isShowing(2)).toBe(false);
-		expect(posted).toHaveBeenLastCalledWith(
-			createPreviewMessage({
-				type: previewProtocol.messages.update,
-				revision: 2,
-			}),
+		expect(posted).toHaveBeenCalledWith(update, origin);
+		posted.mockClear();
+
+		receive({ type: "unload" });
+		ready(2500);
+		expect(posted).not.toHaveBeenCalledWith(update, origin);
+		vi.useRealTimers();
+	});
+
+	test("holds a highlight asked for while the page loads until it's ready", () => {
+		const { bridge, posted, receive } = setup();
+		const target = { collectionKey: "page", documentId: 1, path: ["title"] };
+
+		bridge.expectLoad(0);
+		bridge.highlight(target);
+		expect(posted).not.toHaveBeenCalled();
+		receive({ type: "ready", updates: true, loadedAt: Date.now() });
+		expect(posted).toHaveBeenCalledWith(
+			createPreviewMessage({ type: "highlight", target }),
 			origin,
 		);
-
-		receive({ type: previewProtocol.messages.unload });
-		ready(2500);
-		expect(bridge.isShowing(2)).toBe(true);
-		vi.useRealTimers();
 	});
 });

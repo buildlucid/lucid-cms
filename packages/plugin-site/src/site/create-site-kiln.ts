@@ -14,6 +14,7 @@ import createReadFunctions, {
 import editable from "../functions/editable.js";
 import footer from "../functions/footer.js";
 import head from "../functions/head.js";
+import isEditing from "../functions/is-editing.js";
 import isPreview from "../functions/is-preview.js";
 import notFound from "../functions/not-found.js";
 import redirect from "../functions/redirect.js";
@@ -64,6 +65,7 @@ const createSiteKiln = (props: {
 		}),
 		editable,
 		isPreview,
+		isEditing,
 		head,
 		footer,
 		notFound,

@@ -61,7 +61,7 @@ describe("preview updates", () => {
 		expect(seen[1]?.signal.aborted).toBe(false);
 		expect(reload).not.toHaveBeenCalled();
 		//* only the revision that finished is shown
-		expect(rendered.mock.calls).toEqual([[3]]);
+		expect(rendered).toHaveBeenCalledOnce();
 	});
 
 	test("waits for every handler to settle before running the queued revision", async () => {

@@ -16,7 +16,7 @@ import Button from "@/components/Button/Button";
 import { getButtonClasses } from "@/components/Button/classes";
 import Menu from "@/components/Menu/Menu";
 import type {
-	PreviewFieldTarget,
+	PreviewTarget,
 	PreviewHoverBlock,
 	PreviewPlace,
 } from "@/preview/protocol";
@@ -48,7 +48,7 @@ export const PreviewHandle: Component<{
 	onOpen: () => void;
 	/** Asks the agent about it. Left out when there's no chat to ask in. */
 	onAsk?: () => void;
-	onMove: (place: PreviewPlace, anchor: PreviewFieldTarget) => void;
+	onMove: (place: PreviewPlace, anchor: PreviewTarget) => void;
 	onRemove: () => void;
 	onDragStart: () => void;
 	onDrag: (point: { x: number; y: number }) => void;
@@ -118,7 +118,7 @@ export const PreviewHandle: Component<{
 		}
 		props.onDrag({ x: event.clientX, y: event.clientY });
 	};
-	const move = (place: PreviewPlace, anchor: PreviewFieldTarget | null) => {
+	const move = (place: PreviewPlace, anchor: PreviewTarget | null) => {
 		if (anchor) props.onMove(place, anchor);
 	};
 

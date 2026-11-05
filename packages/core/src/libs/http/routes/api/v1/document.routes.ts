@@ -20,6 +20,7 @@ import publish from "../../../controllers/documents/publish.js";
 import requestSingle from "../../../controllers/documents/request-single.js";
 import restoreMultiple from "../../../controllers/documents/restore-multiple.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
+import revokePreviews from "../../../controllers/documents/revoke-previews.js";
 import unpublish from "../../../controllers/documents/unpublish.js";
 import updateEditor from "../../../controllers/documents/update-editor.js";
 import updateOrder from "../../../controllers/documents/update-order.js";
@@ -45,6 +46,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.put("/:collectionKey/:id/editors/:tabId", ...updateEditor)
 	.delete("/:collectionKey/:id/editors/:tabId", ...deleteEditor)
 	.post("/:collectionKey/:id/preview", ...createPreview)
+	.delete("/:collectionKey/:id/preview", ...revokePreviews)
 	.get("/:collectionKey/:version", ...getMultiple)
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:versionOrId", ...getSingle)

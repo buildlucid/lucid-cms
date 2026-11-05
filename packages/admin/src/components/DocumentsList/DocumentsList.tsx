@@ -618,7 +618,7 @@ export const DocumentsList: Component<{
 												type: "button",
 												icon: "share",
 												onClick: () =>
-													void copyPreviewUrl(doc().id, "perspective"),
+													void copyPreviewUrl(doc().id, "navigable"),
 												loading: createPreview.action.isPending,
 												permission: collectionPermissions()?.read
 													? userStore.get.hasPermission([

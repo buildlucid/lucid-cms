@@ -1,7 +1,7 @@
 import type { Collection } from "@types";
 import { createRoot } from "solid-js";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import type { PreviewFieldTarget } from "@/preview/protocol";
+import type { PreviewTarget } from "@/preview/protocol";
 import brickStore from "@/store/brickStore/brickStore";
 import { usePreviewFieldEdit } from "./usePreviewFieldEdit";
 
@@ -40,7 +40,7 @@ const collection = {
 } as unknown as Collection;
 
 const page = { collectionKey: "page", documentId: 1 };
-const at = (...path: Array<string | number>): PreviewFieldTarget => ({
+const at = (...path: PreviewTarget["path"]): PreviewTarget => ({
 	...page,
 	path,
 });
@@ -124,13 +124,15 @@ describe("editing fields from the preview", () => {
 			clear: true,
 		});
 		edit.end(at("seo", "summary"), false);
-		expect(edit.request(at("links", 0, "label"), "Docs")).toMatchObject({
+		expect(
+			edit.request(at("links", { ref: "one" }, "label"), "Docs"),
+		).toMatchObject({
 			mode: "inline",
 		});
-		edit.input(at("links", 0, "label"), "Guides");
+		edit.input(at("links", { ref: "one" }, "label"), "Guides");
 		//* text sent for another field is ignored
 		edit.input(at("title"), "Nope");
-		edit.end(at("links", 0, "label"), false);
+		edit.end(at("links", { ref: "one" }, "label"), false);
 		expect(
 			brickStore.get.bricks[0]?.fields.find((field) => field.key === "links")
 				?.groups?.[0]?.fields[0]?.value,
@@ -146,11 +148,13 @@ describe("editing fields from the preview", () => {
 			mode: "builder",
 		});
 		expect(edit.request(at("title"), null)).toEqual({ mode: "builder" });
-		expect(edit.request(at("links", 0, "icon"), null)).toEqual({
+		expect(edit.request(at("links", { ref: "one" }, "icon"), null)).toEqual({
 			mode: "builder",
 		});
 		expect(edit.request(at("links"), null)).toEqual({ mode: "builder" });
-		expect(edit.request(at("links", 3, "label"), "Docs")).toEqual({
+		expect(
+			edit.request(at("links", { ref: "removed" }, "label"), "Docs"),
+		).toEqual({
 			mode: "builder",
 		});
 		dispose();

@@ -10,17 +10,23 @@ import {
 import { usePreviewFocus } from "./usePreviewFocus";
 import { resolvePreviewFieldTarget } from "./utils/resolve-preview-field-target";
 
-const { revealMock, spawnToast } = vi.hoisted(() => ({
-	revealMock: vi.fn(
-		async (_options?: {
-			onOpen?: (trigger: HTMLElement) => void;
-		}): Promise<(() => void) | null> =>
-			() =>
-				undefined,
-	),
-	spawnToast: vi.fn(),
-}));
+const { findLinkedDocument, navigate, revealMock, spawnToast } = vi.hoisted(
+	() => ({
+		findLinkedDocument: vi.fn(),
+		navigate: vi.fn(),
+		revealMock: vi.fn(
+			async (_options?: {
+				onOpen?: (trigger: HTMLElement) => void;
+			}): Promise<(() => void) | null> =>
+				() =>
+					undefined,
+		),
+		spawnToast: vi.fn(),
+	}),
+);
 vi.mock("@/utils/spawn-toast", () => ({ default: spawnToast }));
+vi.mock("@solidjs/router", () => ({ useNavigate: () => navigate }));
+vi.mock("@/utils/find-linked-document", () => ({ findLinkedDocument }));
 vi.mock("@/utils/preview-focus-dom", async (importOriginal) => ({
 	...(await importOriginal()),
 	revealPreviewField: revealMock,
@@ -94,14 +100,18 @@ const bricks: BrickData[] = [
 	},
 ];
 
-const createFocus = (options?: { previewBehind?: boolean }) =>
+const createFocus = (props?: { documentId?: () => number }) =>
 	usePreviewFocus({
 		collection: () => collection,
 		collectionKey: () => "page",
-		documentId: () => 1,
+		documentId: props?.documentId ?? (() => 1),
 		locales: () => ["en"],
-		previewBehind: () => options?.previewBehind ?? false,
+		ready: () => true,
+		collections: () => [{ ...collection, key: "page" }],
 	});
+//* items are found by ref, at their place in the builder's list
+const first = { ref: "group-first" };
+const second = { ref: "group-second" };
 
 afterEach(() => {
 	brickStore.get.reset();
@@ -133,7 +143,7 @@ describe("preview focus target resolution", () => {
 			target: {
 				collectionKey: "page",
 				documentId: 1,
-				path: ["sections", 1, "heading"],
+				path: ["sections", first, "heading"],
 			},
 			collection,
 			bricks,
@@ -171,7 +181,7 @@ describe("preview focus target resolution", () => {
 			target: {
 				collectionKey: "page",
 				documentId: 1,
-				path: ["content-section", "sections", 1, "heading"],
+				path: ["content-section", "sections", first, "heading"],
 			},
 			collection,
 			bricks,
@@ -197,7 +207,11 @@ describe("preview focus target resolution", () => {
 			path: ["sections", 1],
 		});
 		const result = resolvePreviewFieldTarget({
-			target: { collectionKey: "page", documentId: 1, path: ["sections", 1] },
+			target: {
+				collectionKey: "page",
+				documentId: 1,
+				path: ["sections", first],
+			},
 			collection,
 			bricks,
 		});
@@ -231,8 +245,9 @@ describe("preview focus target resolution", () => {
 				path: ["title"],
 			},
 			{ path: [] },
-			{ path: ["sections", 0, "missing"] },
-			{ path: ["sections", "not-an-index", "heading"] },
+			{ path: ["sections", second, "missing"] },
+			{ path: ["sections", { ref: "removed" }, "heading"] },
+			{ path: ["sections", "not-an-item", "heading"] },
 		]) {
 			expect(
 				resolvePreviewFieldTarget({
@@ -250,6 +265,44 @@ describe("preview focus target resolution", () => {
 });
 
 describe("preview focus coordination", () => {
+	test("offers to open the document a link on the page goes to, but not the one being edited", async () => {
+		const about = {
+			collection: {
+				key: "page",
+				details: { labels: { singular: "Page", plural: "Pages" } },
+			},
+			document: { id: 5, collectionKey: "page", fields: [] },
+			locale: "en",
+		};
+		findLinkedDocument.mockResolvedValueOnce(about);
+		findLinkedDocument.mockResolvedValueOnce({
+			...about,
+			document: { ...about.document, id: 1 },
+		});
+
+		await new Promise<void>((resolve) => {
+			createRoot((dispose) => {
+				const focus = createFocus();
+				void (async () => {
+					await focus.explainLink("http://localhost:3000/en/about");
+					const offer = spawnToast.mock.lastCall?.[0];
+					expect(offer).toMatchObject({ title: "This links to Page #5" });
+					offer.action.onClick();
+					expect(navigate).toHaveBeenCalledWith(
+						"/admin/collections/page/latest/5",
+					);
+
+					await focus.explainLink("http://localhost:3000/en");
+					expect(spawnToast.mock.lastCall?.[0]).toMatchObject({
+						title: "Links don't open in the preview",
+					});
+					dispose();
+					resolve();
+				})();
+			});
+		});
+	});
+
 	test("delegates the resolved reveal sequence", async () => {
 		brickStore.set("bricks", structuredClone(bricks));
 
@@ -260,7 +313,7 @@ describe("preview focus coordination", () => {
 					.requestTarget({
 						collectionKey: "page",
 						documentId: 1,
-						path: ["sections", 0, "heading"],
+						path: ["sections", second, "heading"],
 					})
 					.then(() => {
 						expect(revealPreviewField).toHaveBeenCalledOnce();
@@ -336,33 +389,38 @@ describe("preview focus coordination", () => {
 		});
 	});
 
-	test("rejects other documents, and repeater items while the preview shows saved content", async () => {
+	test("offers to open another document's field in its own editor, showing it once that loads", async () => {
 		brickStore.set("bricks", structuredClone(bricks));
+		const target = { collectionKey: "page", documentId: 2, path: ["slug"] };
 
 		await new Promise<void>((resolve) => {
 			createRoot((dispose) => {
-				const crossDocument = createFocus();
-				const behind = createFocus({ previewBehind: true });
-
-				void Promise.all([
-					crossDocument.requestTarget({
-						collectionKey: "article",
-						documentId: 2,
-						path: ["title"],
-					}),
-					behind.requestTarget({
-						collectionKey: "page",
-						documentId: 1,
-						path: ["sections", 0, "heading"],
-					}),
-				]).then(() => {
-					expect(revealMock).not.toHaveBeenCalled();
-					expect(spawnToast).toHaveBeenCalledTimes(2);
-					dispose();
-					resolve();
-				});
+				void createFocus()
+					.requestTarget(target)
+					.then(() => {
+						expect(revealMock).not.toHaveBeenCalled();
+						spawnToast.mock.lastCall?.[0].action.onClick();
+						expect(navigate).toHaveBeenCalledWith(
+							"/admin/collections/page/latest/2",
+						);
+						dispose();
+						resolve();
+					});
 			});
 		});
+
+		const dispose = createRoot((dispose) => {
+			createFocus({ documentId: () => 2 });
+			return dispose;
+		});
+		await vi.waitFor(() =>
+			expect(revealMock).toHaveBeenCalledWith(
+				expect.objectContaining({
+					fieldId: getPreviewFieldId({ brickIndex: 0, path: ["slug"] }),
+				}),
+			),
+		);
+		dispose();
 	});
 
 	test("turns builder focus into the page location, with the containers content nests it under", () => {
@@ -378,7 +436,8 @@ describe("preview focus coordination", () => {
 				collectionKey: () => "page",
 				documentId: () => 1,
 				locales: () => ["en"],
-				previewBehind: () => false,
+				ready: () => true,
+				collections: () => [{ ...collection, key: "page" }],
 			});
 			const focusIn = (id: string) => {
 				const wrapper = document.createElement("div");
@@ -396,7 +455,7 @@ describe("preview focus coordination", () => {
 			expect(focus.builderTarget()).toEqual({
 				collectionKey: "page",
 				documentId: 1,
-				path: ["content-section", "sections", 1, "heading"],
+				path: ["content-section", "sections", first, "heading"],
 			});
 
 			focusIn(getPreviewStructureId({ brickIndex: 1, type: "brick" }));

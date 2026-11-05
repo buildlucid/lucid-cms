@@ -99,10 +99,34 @@ const page = (locale?: "en" | "fr") => ({
 	fixed: {},
 });
 
-const getSingle = vi.fn(async ({ query, locale }) =>
+/** The page as preview reads return it, marked with where its parts are for `editable()`. */
+const previewedPage = (locale?: "en" | "fr") => {
+	const read = page(locale);
+	const base = { collectionKey: "page", documentId: read.id, locale };
+	const brick = { type: "builder", key: "banner", ref: "banner-ref" };
+	return {
+		...read,
+		$preview: { ...base, path: [] },
+		bricks: read.bricks.map((item) => ({
+			...item,
+			$preview: { ...base, brick, path: [] },
+			fields: {
+				links: item.fields.links.map((link) => ({
+					...link,
+					$preview: { ...base, brick, path: ["links", { ref: "link-ref" }] },
+				})),
+			},
+		})),
+	};
+};
+
+const getSingle = vi.fn(async ({ query, locale, preview }) =>
 	query.filter._path.value === "/missing"
 		? { error: { status: 404, message: "Not found" }, data: undefined }
-		: { error: undefined, data: page(locale) },
+		: {
+				error: undefined,
+				data: preview ? previewedPage(locale) : page(locale),
+			},
 );
 /** Pagination as the toolkit reports it for `total` matches. */
 const pagination = (
@@ -204,6 +228,7 @@ const kiln = createSiteKiln({
 		"paths.kiln": `{{ documentPaths("page")|join(",") }}|{{ documentPaths("blog")|length }}`,
 		"editable.kiln": `{% set page = document("page", filter: { _path: path }) %}<h1{{ editable(page, "title") }}></h1><section{{ editable(page.bricks[0]) }}>{% for link in page.bricks[0].fields.links %}<a{{ editable(link, "label") }}></a>{% endfor %}</section>`,
 		"fallback.kiln": `{% if isPreview() %}placeholder{% else %}nothing{% endif %}`,
+		"editing.kiln": `{% if isEditing() %}placeholder{% else %}nothing{% endif %}`,
 		"moved.kiln": `{{ redirect("/new", 301) }}`,
 		"layout.kiln": `{{ head() }}|{{ footer() }}|{{ footer() }}`,
 		"typed.kiln": `{% set page = document("page", filter: { _path: path }) %}{% include "brick" with { page: page, brick: brick ?? page.bricks[0] } %}`,
@@ -230,8 +255,8 @@ const render = (
 
 //* targets are encoded after a version prefix, eg. `1:%7B...%7D`
 const editTargets = (html: string) =>
-	[...html.matchAll(/data-lucid-preview-field="1:([^"]+)"/g)].map(
-		(match): unknown => JSON.parse(decodeURIComponent(match[1] ?? "")),
+	[...html.matchAll(/data-lucid-edit="1:([^"]+)"/g)].map((match): unknown =>
+		JSON.parse(decodeURIComponent(match[1] ?? "")),
 	);
 
 describe("site template functions", () => {
@@ -384,11 +409,17 @@ describe("site template functions", () => {
 		await expect(render("layout.kiln", "/")).resolves.toBe("||");
 	});
 
-	test("isPreview() is true only while rendering a preview", async () => {
+	test("isPreview() is true while rendering any preview, isEditing() only in the builder's", async () => {
 		await expect(render("fallback.kiln", "/")).resolves.toBe("nothing");
 		await expect(render("fallback.kiln", "/", { preview })).resolves.toBe(
 			"placeholder",
 		);
+		await expect(render("editing.kiln", "/", { preview })).resolves.toBe(
+			"nothing",
+		);
+		await expect(
+			render("editing.kiln", "/", { preview: { ...preview, builder: true } }),
+		).resolves.toBe("placeholder");
 	});
 
 	test("editable() points at document, brick and repeater item fields, and at bricks themselves, during a preview", async () => {
@@ -406,7 +437,7 @@ describe("site template functions", () => {
 				documentId: 2,
 				locale: "en",
 				brick,
-				path: ["links", 0, "label"],
+				path: ["links", { ref: "link-ref" }, "label"],
 			},
 		]);
 	});

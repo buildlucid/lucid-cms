@@ -1,41 +1,41 @@
+import { editAttribute } from "@lucidcms/client/contract";
 import {
 	arePreviewSiblings,
-	decodePreviewFieldTarget,
+	decodePreviewTarget,
 	isSamePreviewTarget,
 	type PreviewEditing,
-	type PreviewFieldTarget,
-	previewFieldAttribute,
+	type PreviewTarget,
 } from "../protocol/index.js";
 
 /** A page element and the field, repeater item or brick it renders. */
 export type MarkedElement = {
 	element: Element;
-	target: PreviewFieldTarget;
+	target: PreviewTarget;
 };
 
 //* decoded once per attribute value, as pointer moves read them constantly
 const decoded = new WeakMap<
 	Element,
-	{ value: string; target: PreviewFieldTarget | null }
+	{ value: string; target: PreviewTarget | null }
 >();
 
 export const isElement = (value: EventTarget): value is Element =>
 	typeof (value as Element).getAttribute === "function";
 
 /** The field or brick an element is marked with, or null. */
-export const readTarget = (element: Element): PreviewFieldTarget | null => {
-	const value = element.getAttribute(previewFieldAttribute);
+export const readTarget = (element: Element): PreviewTarget | null => {
+	const value = element.getAttribute(editAttribute);
 	if (value === null) return null;
 	const cached = decoded.get(element);
 	if (cached?.value === value) return cached.target;
-	const target = decodePreviewFieldTarget(value);
+	const target = decodePreviewTarget(value);
 	decoded.set(element, { value, target });
 	return target;
 };
 
 /** Whether a target is in the document being edited. */
 export const isEditedTarget = (
-	target: PreviewFieldTarget,
+	target: PreviewTarget,
 	editing: PreviewEditing,
 ) =>
 	target.collectionKey === editing.collectionKey &&
@@ -44,7 +44,7 @@ export const isEditedTarget = (
 /** Marked elements along an event's path, innermost first, skipping targets `accept` turns down. */
 export const markedAlong = (
 	path: EventTarget[],
-	accept: (target: PreviewFieldTarget) => boolean,
+	accept: (target: PreviewTarget) => boolean,
 ): MarkedElement[] =>
 	path.flatMap((item) => {
 		if (!isElement(item)) return [];
@@ -53,12 +53,10 @@ export const markedAlong = (
 	});
 
 const allMarked = (root: ParentNode): MarkedElement[] =>
-	[...root.querySelectorAll(`[${previewFieldAttribute}]`)].flatMap(
-		(element) => {
-			const target = readTarget(element);
-			return target ? [{ element, target }] : [];
-		},
-	);
+	[...root.querySelectorAll(`[${editAttribute}]`)].flatMap((element) => {
+		const target = readTarget(element);
+		return target ? [{ element, target }] : [];
+	});
 
 /**
  * The page's elements for a target. Unless `exact`, those for the nearest thing around it that
@@ -66,7 +64,7 @@ const allMarked = (root: ParentNode): MarkedElement[] =>
  */
 export const findRendered = (
 	root: ParentNode,
-	target: PreviewFieldTarget,
+	target: PreviewTarget,
 	exact = false,
 ): Element[] => {
 	const marked = allMarked(root);

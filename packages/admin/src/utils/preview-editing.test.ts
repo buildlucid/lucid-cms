@@ -1,5 +1,7 @@
 import type { Collection } from "@types";
 import { describe, expect, test } from "vitest";
+import type { PreviewTarget } from "@/preview/protocol";
+import type { BrickData } from "@/store/brickStore/brickStore";
 import {
 	getPreviewEditingDetails,
 	getPreviewRepeaters,
@@ -92,15 +94,34 @@ describe("preview editing details", () => {
 		const page = { collectionKey: "page", documentId: 1 };
 		const hero = { type: "builder", key: "hero", ref: "a" } as const;
 
-		expect(
-			getPreviewTargetName(details, { ...page, brick: hero, path: [] }),
-		).toBe("Hero");
-		expect(getPreviewTargetName(details, { ...page, path: ["links", 1] })).toBe(
-			"Links 2",
-		);
-		expect(
-			getPreviewTargetName(details, { ...page, path: ["links", 0, "label"] }),
-		).toBe("Label");
+		//* items are numbered as the builder lists them
+		const bricks = [
+			{
+				ref: "fields",
+				key: "fields",
+				order: -1,
+				type: "collection-fields",
+				open: true,
+				fields: [
+					{
+						key: "links",
+						type: "repeater",
+						groups: [
+							{ ref: "first", order: 0, open: false, fields: [] },
+							{ ref: "second", order: 1, open: false, fields: [] },
+						],
+					},
+				],
+			},
+		] satisfies BrickData[];
+		const name = (
+			target: Omit<PreviewTarget, "collectionKey" | "documentId">,
+		) => getPreviewTargetName(details, { ...page, ...target }, bricks);
+
+		expect(name({ brick: hero, path: [] })).toBe("Hero");
+		expect(name({ path: ["links", { ref: "second" }] })).toBe("Links 2");
+		expect(name({ path: ["links", { ref: "removed" }] })).toBe("Links");
+		expect(name({ path: ["links", { ref: "first" }, "label"] })).toBe("Label");
 		expect(getPreviewRepeaters(details)).toEqual([{ path: ["links"] }]);
 	});
 });
