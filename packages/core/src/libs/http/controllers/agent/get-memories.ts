@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent-memories.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMemoriesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the authenticated user's personal agent memories and the shared ones, with each scope's limit.",
 		tags: ["agent"],
@@ -23,7 +22,7 @@ const getMemoriesController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getMemories.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	async (c) => {

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { previewSessionServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updatePreviewDraftController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Show unsaved editor content in a builder preview, or clear it so the preview shows the stored version.",
 		tags: ["documents"],
@@ -28,7 +27,7 @@ const updatePreviewDraftController = factory.createHandlers(
 			params: controllerSchemas.updatePreviewDraft.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updatePreviewDraft.body),

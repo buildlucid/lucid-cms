@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/notifications.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSummaryController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Unread and to-do counts for your inbox. Poll this instead of the list.",
 		tags: ["notifications"],
@@ -22,7 +21,7 @@ const getSummaryController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getSummary.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);

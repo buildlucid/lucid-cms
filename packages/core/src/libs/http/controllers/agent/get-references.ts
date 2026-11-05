@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getReferencesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns current details for media and documents linked to this chat.",
 		tags: ["agent"],
@@ -27,7 +26,7 @@ const getReferencesController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getReferences.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.getReferences.params),

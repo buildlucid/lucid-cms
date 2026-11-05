@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentVersionServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const alignController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Align editable document content with latest or an environment.",
 		tags: ["documents"],
@@ -30,7 +29,7 @@ const alignController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.align.params),

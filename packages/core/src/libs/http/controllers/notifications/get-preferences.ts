@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/notifications.js";
@@ -14,14 +13,14 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getPreferencesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Your email choice for every notification type that is on.",
 		tags: ["notifications"],
 		summary: "Get Notification Preferences",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getPreferences.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);

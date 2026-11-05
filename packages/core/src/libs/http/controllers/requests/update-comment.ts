@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/requests.js";
 import { requestServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateCommentController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Edit one of your comments.",
 		tags: ["requests"],
 		summary: "Update Request Comment",
@@ -30,7 +29,7 @@ const updateCommentController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateComment.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),

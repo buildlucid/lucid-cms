@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/jobs.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSchedulesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns the schedules registered on active job definitions.",
 		tags: ["jobs"],
 		summary: "Get Job Schedules",
@@ -29,7 +28,7 @@ const getSchedulesController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getSchedules.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.JobsRead]),
 	validate("query", controllerSchemas.getSchedules.query.string),

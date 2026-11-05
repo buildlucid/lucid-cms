@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const setStateController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Turns a deploy on or off. Turning it off drops its waiting triggers and queued run.",
 		tags: ["deploys"],
@@ -29,7 +28,7 @@ const setStateController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.setState.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

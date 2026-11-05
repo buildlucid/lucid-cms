@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent-memories.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createMemoryController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Adds an agent memory. Shared memories need the manage shared memories permission.",
 		tags: ["agent"],
@@ -28,7 +27,7 @@ const createMemoryController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createMemory.body),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(),

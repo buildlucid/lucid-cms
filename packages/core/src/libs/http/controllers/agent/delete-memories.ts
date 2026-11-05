@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent-memories.js";
 import { agentServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const deleteMemoriesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Deletes agent memories. Shared memories need the manage shared memories permission.",
 		tags: ["agent"],
@@ -23,7 +22,7 @@ const deleteMemoriesController = factory.createHandlers(
 		responses: openAPI.responses({ noProperties: true }),
 		requestBody: openAPI.requestBody(controllerSchemas.deleteMemories.body),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(),

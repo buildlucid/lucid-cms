@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/integrations.js";
@@ -19,7 +18,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Creates an integration that can authenticate external endpoints.",
 		tags: ["integrations"],
@@ -34,7 +33,7 @@ const createSingleController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationCreate]),

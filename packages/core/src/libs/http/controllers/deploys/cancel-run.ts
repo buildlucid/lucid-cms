@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
 import { deployServices } from "../../../../services/index.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const cancelRunController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Cancels a queued, starting or running deploy run, stopping it on the host when the provider can, so its deploy's queued run can start.",
 		tags: ["deploys"],
@@ -24,7 +23,7 @@ const cancelRunController = factory.createHandlers(
 			params: controllerSchemas.cancelRun.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.cancelRun.params),

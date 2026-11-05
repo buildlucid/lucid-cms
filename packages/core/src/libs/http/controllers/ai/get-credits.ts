@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getCreditsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the credits this CMS can spend through its Lucid connection, and when they reset.",
 		tags: ["ai"],
@@ -24,7 +23,7 @@ const getCreditsController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getCredits.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.SettingsRead]),
 	async (c) => {

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const completeUploadSessionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Complete a resumable upload session.",
 		tags: ["media"],
 		summary: "Complete Upload Session",
@@ -32,7 +31,7 @@ const completeUploadSessionController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.completeUploadSession.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.completeUploadSession.params),

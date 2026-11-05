@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const mediaCompletionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Check a Lucid AI media generation, returning the generated file once it is ready. Responds 202 while it is still queued or processing.",
 		tags: ["ai"],
@@ -28,7 +27,7 @@ const mediaCompletionController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.mediaCompletion.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions({ some: mediaGenerationPermissions }),
 	validate("param", controllerSchemas.mediaCompletion.params),

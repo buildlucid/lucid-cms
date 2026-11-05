@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { userServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const unlinkAuthProviderController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Unlinks an auth provider from the target user.",
 		tags: ["users"],
 		summary: "Unlink User Auth Provider",
@@ -29,7 +28,7 @@ const unlinkAuthProviderController = factory.createHandlers(
 			},
 			params: controllerSchemas.unlinkAuthProvider.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.UsersUpdate]),

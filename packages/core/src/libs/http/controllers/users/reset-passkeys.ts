@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { userServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const resetPasskeysController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Removes all of a specific user's passkeys, such as when a device is lost or stolen. They can still log in with their other methods.",
 		tags: ["users"],
@@ -28,7 +27,7 @@ const resetPasskeysController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.UsersUpdate]),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Creates a single media item.",
 		tags: ["media"],
 		summary: "Create Media",
@@ -32,7 +31,7 @@ const createSingleController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaCreate]),

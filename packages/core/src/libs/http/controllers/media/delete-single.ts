@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { mediaServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const deleteSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Soft delete a single media item by its ID.",
 		tags: ["media"],
 		summary: "Delete Media",
@@ -29,7 +28,7 @@ const deleteSingleController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaDelete]),

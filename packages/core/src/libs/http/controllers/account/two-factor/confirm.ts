@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const confirmTwoFactorController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Turns on the authenticated user's new authenticator app once its first code checks out, replacing any app set up before. Returns new recovery codes, which are only shown once.",
 		tags: ["account"],
@@ -32,7 +31,7 @@ const confirmTwoFactorController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.confirmTwoFactor.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

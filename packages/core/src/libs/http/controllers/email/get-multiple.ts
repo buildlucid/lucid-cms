@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/email.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns multiple emails based on the query parameters.",
 		tags: ["emails"],
 		summary: "Get Multiple Emails",
@@ -29,7 +28,7 @@ const getMultipleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getMultiple.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.EmailRead]),
 	validate("query", controllerSchemas.getMultiple.query.string),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the configured deploys with their on/off state, waiting triggers and current runs.",
 		tags: ["deploys"],
@@ -22,7 +21,7 @@ const getMultipleController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);

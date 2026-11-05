@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import {
@@ -21,7 +20,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get a single document from the collection key and ID.",
 		tags: ["documents"],
 		summary: "Get Document",
@@ -33,7 +32,7 @@ const getSingleController = factory.createHandlers(
 			params: controllerSchemas.getSingle.params,
 			query: controllerSchemas.getSingle.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getSingle.params),
 	validate("query", controllerSchemas.getSingle.query.string),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { userServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const inviteSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Invite a single user.",
 		tags: ["users"],
 		summary: "Invite User",
@@ -29,7 +28,7 @@ const inviteSingleController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.UsersCreate]),

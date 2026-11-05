@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateEditorController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Records that a browser tab has a document version open in the editor, and returns who holds it. Only people who can save the version can hold it. The admin sends it every 30 seconds while the editor is open.",
 		tags: ["documents"],
@@ -32,7 +31,7 @@ const updateEditorController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateEditor.body),

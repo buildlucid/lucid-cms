@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -20,7 +19,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const runController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Runs a deploy now, or queues it behind the run in progress, taking any waiting triggers with it.",
 		tags: ["deploys"],
@@ -32,7 +31,7 @@ const runController = factory.createHandlers(
 			params: controllerSchemas.run.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

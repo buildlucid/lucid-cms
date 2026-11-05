@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { oauthSchemas } from "../../../../schemas/oauth.js";
 import { oauthServices, userServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const revokeConnectionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Revokes an OAuth connection and its active tokens.",
 		tags: ["oauth-connections"],
 		summary: "Revoke OAuth Connection",
@@ -24,7 +23,7 @@ const revokeConnectionController = factory.createHandlers(
 			headers: { csrf: true },
 			params: oauthSchemas.connection.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", oauthSchemas.connection.params),

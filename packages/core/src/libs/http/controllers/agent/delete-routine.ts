@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const deleteRoutineController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Deletes a routine created in the admin. Its past runs remain as chats.",
 		tags: ["agent"],
@@ -25,7 +24,7 @@ const deleteRoutineController = factory.createHandlers(
 			params: controllerSchemas.deleteRoutine.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(),

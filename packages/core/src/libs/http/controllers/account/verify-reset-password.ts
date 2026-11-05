@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
@@ -13,7 +12,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const verifyResetPasswordController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Verifies the password reset token is valid.",
 		tags: ["account"],
 		summary: "Verify Reset Token",
@@ -21,7 +20,7 @@ const verifyResetPasswordController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.verifyResetPassword.params,
 		}),
-	}),
+	})),
 	validate("param", controllerSchemas.verifyResetPassword.params),
 	async (c) => {
 		const { token } = c.req.valid("param");

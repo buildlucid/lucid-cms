@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const retryConversationController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Answers the chat again after its latest run failed, without a new message, and streams the reply.",
 		tags: ["agent"],
@@ -27,7 +26,7 @@ const retryConversationController = factory.createHandlers(
 			params: controllerSchemas.retryConversation.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(true),

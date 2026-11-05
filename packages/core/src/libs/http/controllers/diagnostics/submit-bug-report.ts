@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { bodyLimit } from "hono/body-limit";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
@@ -27,7 +26,7 @@ const MAX_BODY_BYTES =
 const factory = createFactory();
 
 const submitBugReportController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Sends a bug report to Lucid through the CMS's Lucid connection, with optional diagnostics and images. Lucid replies to the connected organisation's account email.",
 		tags: ["diagnostics"],
@@ -41,7 +40,7 @@ const submitBugReportController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.submitBugReport.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

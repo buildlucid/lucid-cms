@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMediaPreviewsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns current details for images, videos and audio linked to this chat that the current viewer can read, for preview galleries.",
 		tags: ["agent"],
@@ -27,7 +26,7 @@ const getMediaPreviewsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getMediaPreviews.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.getMediaPreviews.params),

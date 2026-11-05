@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get multiple media share links for a media item.",
 		tags: ["media-share-links"],
 		summary: "Get Media Share Links",
@@ -28,7 +27,7 @@ const getMultipleController = factory.createHandlers(
 			params: controllerSchemas.getMultiple.params,
 			query: controllerSchemas.getMultiple.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getMultiple.params),
 	validate("query", controllerSchemas.getMultiple.query.string),

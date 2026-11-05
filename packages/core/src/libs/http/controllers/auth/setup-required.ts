@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { z } from "zod";
 import constants from "../../../../constants/constants.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const setupRequiredController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Checks if initial user setup is required. Returns true if no users exist in the system.",
 		tags: ["auth"],
@@ -24,7 +23,7 @@ const setupRequiredController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.setupRequired.response),
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -19,7 +18,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createPasskeyController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Adds a passkey to the authenticated user's account from the browser's response to the passkey setup options. It's named after its provider, such as Apple Passwords.",
 		tags: ["account"],
@@ -33,7 +32,7 @@ const createPasskeyController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createPasskey.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	recentAuthentication(),

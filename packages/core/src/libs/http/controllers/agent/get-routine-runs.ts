@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getRoutineRunsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns a routine's runs, newest first, with their usage.",
 		tags: ["agent"],
 		summary: "Get Agent Routine Runs",
@@ -29,7 +28,7 @@ const getRoutineRunsController = factory.createHandlers(
 			params: controllerSchemas.getRoutineRuns.params,
 			query: controllerSchemas.getRoutineRuns.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.getRoutineRuns.params),

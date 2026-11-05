@@ -1,5 +1,5 @@
 import type { Handler, Hono, ValidationTargets } from "hono";
-import { type DescribeRouteOptions, describeRoute } from "hono-openapi";
+import type { DescribeRouteOptions } from "hono-openapi";
 import z from "zod";
 import type {
 	LucidHonoContext,
@@ -130,7 +130,7 @@ const buildContentAccessHandlers = (
 const buildRouteHandlers = (
 	route: LucidCustomRouteDefinition,
 ): Handler<LucidHonoGeneric>[] => [
-	describeRoute(buildOpenAPIOptions(route)),
+	openAPI.describeRoute(() => buildOpenAPIOptions(route)),
 	...(isContentRouteDefinition(route) ? buildContentAccessHandlers(route) : []),
 	...(route.middleware ?? []),
 	...(route.schema?.params ? [validate("param", route.schema.params)] : []),

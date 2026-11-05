@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const publishController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Publish saved document content to a target that does not need an approved request.",
 		tags: ["documents"],
@@ -30,7 +29,7 @@ const publishController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.publish.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.publish.params),

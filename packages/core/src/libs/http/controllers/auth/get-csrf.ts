@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { z } from "zod";
 import constants from "../../../../constants/constants.js";
@@ -13,7 +12,7 @@ import formatAPIResponse from "../../utils/build-response.js";
 const factory = createFactory();
 
 const csrfController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"This endpoint returns a CSRF token in the response body as well as setting a _csrf httpOnly cookie. Some endpoints require this value to be passed via a X-CSRF-Token header.",
 		tags: ["auth"],
@@ -21,7 +20,7 @@ const csrfController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getCSRF.response),
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

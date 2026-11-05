@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import getAccessibleRun from "../../../../services/agent/helpers/get-accessible-run.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const watchRunController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Streams a run's saved replies as server-sent events while it executes in the background.",
 		tags: ["agent"],
@@ -25,7 +24,7 @@ const watchRunController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.watchRun.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.watchRun.params),

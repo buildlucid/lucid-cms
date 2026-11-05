@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/requests.js";
 import { requestServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const acknowledgeTargetController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Acknowledge that someone else published to a request target since the request was created, or withdraw the acknowledgement. Pass the reviewToken you read as ifUnchanged.",
 		tags: ["requests"],
@@ -31,7 +30,7 @@ const acknowledgeTargetController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.acknowledgeTarget.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),

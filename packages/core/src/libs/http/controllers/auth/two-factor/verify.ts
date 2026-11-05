@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { deleteCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
@@ -20,7 +19,7 @@ import getClientAddress from "../../../utils/get-client-address.js";
 const factory = createFactory();
 
 const verifyTwoFactorChallengeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Checks the authenticator or recovery code entered at a login's two-factor step, using the challenge cookie set by logging in. Once it checks out, sets a refresh and access token as httpOnly cookies.",
 		tags: ["auth"],
@@ -34,7 +33,7 @@ const verifyTwoFactorChallengeController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.verifyTwoFactorChallenge.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

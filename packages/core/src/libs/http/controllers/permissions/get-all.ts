@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
@@ -14,14 +13,14 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getAllController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns a list of all permissions available for users.",
 		tags: ["permissions"],
 		summary: "Get All Permissions",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);

@@ -1,5 +1,4 @@
 import { Readable } from "node:stream";
-import { describeRoute } from "hono-openapi";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
@@ -26,14 +25,14 @@ const factory = createFactory();
  * Stream shared media content by token for previewable media types.
  */
 const streamMediaController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Streams shared media content by token.",
 		tags: ["share"],
 		summary: "Stream Shared Media",
 		parameters: openAPI.parameters({
 			params: controllerSchemas.streamShareMedia.params,
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		scope: constants.rateLimit.scopes.stream.scopeKey,

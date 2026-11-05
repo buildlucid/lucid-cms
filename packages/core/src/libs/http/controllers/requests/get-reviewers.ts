@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/requests.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getReviewersController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Search the people who can be asked to approve a request, by name or ID. Returns up to limit people.",
 		tags: ["requests"],
@@ -29,7 +28,7 @@ const getReviewersController = factory.createHandlers(
 			params: controllerSchemas.getReviewers.params,
 			query: controllerSchemas.getReviewers.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.getReviewers.params),

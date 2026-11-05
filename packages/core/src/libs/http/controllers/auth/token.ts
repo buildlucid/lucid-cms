@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { authServices } from "../../../../services/index.js";
@@ -10,7 +9,7 @@ import openAPI from "../../openapi/index.js";
 const factory = createFactory();
 
 const tokenController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Verifies the refresh token and issues a new access and refresh token.",
 		tags: ["auth"],
@@ -21,7 +20,7 @@ const tokenController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

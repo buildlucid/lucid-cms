@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -19,7 +18,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const regenerateKeysController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Regenerates the API key for an integration owned by the current user.",
 		tags: ["integrations"],
@@ -33,7 +32,7 @@ const regenerateKeysController = factory.createHandlers(
 			},
 			params: controllerSchemas.regenerateKeys.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	recentAuthentication(),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const passkeyLoginOptionsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Creates the options for a passkey sign-in, with a challenge that works once for a few minutes. Pass them to the browser, then send its response to the passkey login endpoint.",
 		tags: ["auth"],
@@ -31,7 +30,7 @@ const passkeyLoginOptionsController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

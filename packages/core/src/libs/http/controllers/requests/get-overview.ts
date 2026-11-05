@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/requests.js";
@@ -16,14 +15,14 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getOverviewController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Counts the open requests you can see.",
 		tags: ["requests"],
 		summary: "Get Request Overview",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getOverview.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	async (c) => {

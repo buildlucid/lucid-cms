@@ -1,9 +1,7 @@
-import {
-	type RegistrationResponseJSON,
-	type VerifiedRegistrationResponse,
-	verifyRegistrationResponse,
+import type {
+	RegistrationResponseJSON,
+	VerifiedRegistrationResponse,
 } from "@simplewebauthn/server";
-import { decodeClientDataJSON } from "@simplewebauthn/server/helpers";
 import constants from "../../../constants/constants.js";
 import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
@@ -42,6 +40,13 @@ const verifyRegistration: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	// Defer WebAuthn loading until needed.
+	const [{ verifyRegistrationResponse }, { decodeClientDataJSON }] =
+		await Promise.all([
+			import("@simplewebauthn/server"),
+			import("@simplewebauthn/server/helpers"),
+		]);
 
 	const PasskeyChallenges = new PasskeyChallengesRepository(context.db);
 	const Passkeys = new UserPasskeysRepository(context.db);

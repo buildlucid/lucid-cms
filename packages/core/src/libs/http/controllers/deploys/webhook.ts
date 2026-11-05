@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const webhookController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Takes run status updates from a deploy's host, for providers that verify and read them, such as GitHub's workflow run webhooks.",
 		tags: ["deploys"],
@@ -23,7 +22,7 @@ const webhookController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.webhook.params,
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

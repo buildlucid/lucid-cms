@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getUsageChartController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns aggregated AI usage chart data.",
 		tags: ["ai"],
 		summary: "Get AI Usage Chart",
@@ -27,7 +26,7 @@ const getUsageChartController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getUsageChart.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.SettingsRead]),
 	validate("query", controllerSchemas.getUsageChart.query.string),

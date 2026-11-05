@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createUploadSessionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Starts a private upload for a file attached to an agent chat. Continue it with the media upload session routes, then register it with the chat upload route.",
 		tags: ["agent"],
@@ -31,7 +30,7 @@ const createUploadSessionController = factory.createHandlers(
 			controllerSchemas.createUploadSession.body,
 		),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(),

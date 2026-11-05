@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get a single media item by ID.",
 		tags: ["media"],
 		summary: "Get Media",
@@ -25,7 +24,7 @@ const getSingleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getSingle.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {

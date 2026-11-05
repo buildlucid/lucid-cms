@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/collections.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get a single collection instance.",
 		tags: ["collections"],
 		summary: "Get Collection",
@@ -26,7 +25,7 @@ const getSingleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getSingle.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getSingle.params),
 	collectionPermissions("read"),

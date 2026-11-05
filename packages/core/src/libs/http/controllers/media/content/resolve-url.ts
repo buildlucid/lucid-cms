@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/media.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const resolveUrlController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Get a single media item by key and return the public CDN URL. This supports image presets and formats.",
 		tags: ["content-media"],
@@ -32,7 +31,7 @@ const resolveUrlController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.content.resolveUrl.body),
-	}),
+	})),
 	externalAuthentication(),
 	externalScopes([ExternalScopes.MediaResolveUrl]),
 	validate("param", controllerSchemas.content.resolveUrl.params),

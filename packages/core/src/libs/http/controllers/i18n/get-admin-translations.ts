@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/i18n.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getAdminTranslationsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns merged admin interface translations for a locale.",
 		tags: ["i18n"],
 		summary: "Get Admin Translations",
@@ -27,7 +26,7 @@ const getAdminTranslationsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getAdminTranslations.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getAdminTranslations.params),
 	async (c) => {

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const deleteMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Delete all share links for a media item.",
 		tags: ["media-share-links"],
 		summary: "Delete All Media Share Links",
@@ -25,7 +24,7 @@ const deleteMultipleController = factory.createHandlers(
 			params: controllerSchemas.deleteMultiple.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaDelete]),

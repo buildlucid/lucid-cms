@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getWorkflowAssigneesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get users who can be assigned to a document workflow.",
 		tags: ["documents"],
 		summary: "Get Document Workflow Assignees",
@@ -28,7 +27,7 @@ const getWorkflowAssigneesController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getWorkflowAssignees.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getWorkflowAssignees.params),
 	collectionPermissions("read"),

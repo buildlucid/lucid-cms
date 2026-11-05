@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import {
@@ -20,7 +19,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Get multiple document entries for a given collection and version.",
 		tags: ["documents"],
@@ -34,7 +33,7 @@ const getMultipleController = factory.createHandlers(
 			params: controllerSchemas.getMultiple.params,
 			query: controllerSchemas.getMultiple.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getMultiple.params),
 	validate("query", controllerSchemas.getMultiple.query.string),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updatePreferencesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Update the authenticated user's admin preferences. Each top-level key sent replaces the stored value.",
 		tags: ["account"],
@@ -24,7 +23,7 @@ const updatePreferencesController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updatePreferences.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updatePreferences.body),

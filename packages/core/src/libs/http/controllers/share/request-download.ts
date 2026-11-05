@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { z } from "zod";
@@ -20,7 +19,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const requestDownloadController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Request a direct download URL for a shared media item after validating share access.",
 		tags: ["share"],
@@ -31,7 +30,7 @@ const requestDownloadController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.requestDownload.response),
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		scope: constants.rateLimit.scopes.low.scopeKey,

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/account.js";
@@ -19,7 +18,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const reauthenticateController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: `Confirms it's the authenticated user with their password, an authenticator or recovery code, or a passkey, then renews the session. Changes to how the user signs in, such as adding a passkey or changing their email, need this, or a login, within the last ${constants.reauthentication.windowSeconds / 60} minutes.`,
 		tags: ["account"],
 		summary: "Reauthenticate",
@@ -32,7 +31,7 @@ const reauthenticateController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.reauthenticate.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

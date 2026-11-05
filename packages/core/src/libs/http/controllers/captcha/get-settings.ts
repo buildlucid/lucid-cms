@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSettingsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the public captcha settings and which built-in forms need a token, or null when no captcha adapter is configured.",
 		tags: ["captcha"],
@@ -24,7 +23,7 @@ const getSettingsController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getSettings.response),
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

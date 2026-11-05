@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const completeAuthorizationController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: `Allows or denies a pending OAuth authorization request. Allowing one needs a login or reauthentication within the last ${constants.reauthentication.windowSeconds / 60} minutes.`,
 		tags: ["oauth-connections"],
 		summary: "Complete OAuth Authorization",
@@ -30,7 +29,7 @@ const completeAuthorizationController = factory.createHandlers(
 			params: oauthSchemas.completeAuthorization.params,
 		}),
 		requestBody: openAPI.requestBody(oauthSchemas.completeAuthorization.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", oauthSchemas.completeAuthorization.params),

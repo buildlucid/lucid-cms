@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getToolDetailsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns the saved input and output of one tool call.",
 		tags: ["agent"],
 		summary: "Get Agent Tool Details",
@@ -26,7 +25,7 @@ const getToolDetailsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getToolDetails.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.getToolDetails.params),

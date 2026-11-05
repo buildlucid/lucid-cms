@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
@@ -12,13 +11,13 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getStatusController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Checks whether the current browser cookies represent an active session without refreshing or rotating tokens.",
 		tags: ["auth"],
 		summary: "Get Auth Status",
 		responses: openAPI.responses(),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

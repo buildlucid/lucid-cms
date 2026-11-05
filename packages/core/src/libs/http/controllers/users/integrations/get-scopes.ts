@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import {
@@ -20,7 +19,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getScopesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns integration scopes available to the selected user.",
 		tags: ["integrations"],
 		summary: "Get User Integration Scopes",
@@ -30,7 +29,7 @@ const getScopesController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: userIntegrationParamsSchema,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", userIntegrationParamsSchema),
 	async (c) => {

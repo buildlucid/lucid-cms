@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import type { StatusCode } from "hono/utils/http-status";
 import constants from "../../../../constants/constants.js";
@@ -21,7 +20,7 @@ import {
 const factory = createFactory();
 
 const tokenController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Exchanges an authorization code or rotating refresh token for OAuth tokens.",
 		tags: ["oauth"],
@@ -64,7 +63,7 @@ const tokenController = factory.createHandlers(
 				},
 			},
 		},
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

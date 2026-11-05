@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/jobs.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns a single job based on the ID.",
 		tags: ["jobs"],
 		summary: "Get Job",
@@ -27,7 +26,7 @@ const getSingleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getSingle.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.JobsRead]),
 	validate("param", controllerSchemas.getSingle.params),

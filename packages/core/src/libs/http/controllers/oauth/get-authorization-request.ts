@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthSchemas } from "../../../../schemas/oauth.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getAuthorizationRequestController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the pending OAuth request and effective scopes for the consent screen.",
 		tags: ["oauth-connections"],
@@ -27,7 +26,7 @@ const getAuthorizationRequestController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: oauthSchemas.authorizationRequest.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", oauthSchemas.authorizationRequest.params),
 	async (c) => {

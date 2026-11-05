@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/transfer.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const exportFileController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Builds an export file from records you can read, with the media they link to. Bundled files are left to the client.",
 		tags: ["transfer"],
@@ -30,7 +29,7 @@ const exportFileController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.exportFile.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.exportFile.body),

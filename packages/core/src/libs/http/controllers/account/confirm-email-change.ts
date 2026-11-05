@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
@@ -13,7 +12,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const confirmEmailChangeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Confirms a pending email change.",
 		tags: ["account"],
 		summary: "Confirm Email Change",
@@ -24,7 +23,7 @@ const confirmEmailChangeController = factory.createHandlers(
 			},
 			params: controllerSchemas.confirmEmailChange.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	validate("param", controllerSchemas.confirmEmailChange.params),
 	async (c) => {

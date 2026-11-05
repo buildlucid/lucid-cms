@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { deleteCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
@@ -20,7 +19,7 @@ import getClientAddress from "../../../utils/get-client-address.js";
 const factory = createFactory();
 
 const passkeyTwoFactorConfirmController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Finishes a login's two-factor setup by adding a passkey instead of an authenticator app, using the challenge cookie set by logging in. Once it's saved, sets a refresh and access token as httpOnly cookies.",
 		tags: ["auth"],
@@ -34,7 +33,7 @@ const passkeyTwoFactorConfirmController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.passkeyTwoFactorConfirm.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

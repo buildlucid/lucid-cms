@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const setupTwoFactorChallengeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Creates an authenticator app secret for a login that has to set up two-factor authentication first, using the challenge cookie set by logging in.",
 		tags: ["auth"],
@@ -31,7 +30,7 @@ const setupTwoFactorChallengeController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

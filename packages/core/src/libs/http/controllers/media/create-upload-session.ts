@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createUploadSessionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Create an upload session for a single media item.",
 		tags: ["media"],
 		summary: "Create Upload Session",
@@ -35,7 +34,7 @@ const createUploadSessionController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.createUploadSession.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import type { StatusCode } from "hono/utils/http-status";
 import {
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const contentProtectedResourceMetadataController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns OAuth metadata for the Lucid content API.",
 		tags: ["oauth"],
 		summary: "Get Content OAuth Protected Resource Metadata",
@@ -39,7 +38,7 @@ const contentProtectedResourceMetadataController = factory.createHandlers(
 				},
 			},
 		},
-	}),
+	})),
 	async (c: LucidHonoContext) => {
 		const context = createServiceContext(c);
 

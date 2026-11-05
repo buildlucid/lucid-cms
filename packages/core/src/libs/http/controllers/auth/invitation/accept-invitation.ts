@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -22,7 +21,7 @@ import getClientAddress from "../../../utils/get-client-address.js";
 const factory = createFactory();
 
 const acceptInvitationController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Accepts an invitation and sets the user's password. When password login is disabled, no password is needed and the user is logged in straight away, setting a refresh and access token as httpOnly cookies, unless two-factor authentication has to be set up first.",
 		tags: ["auth"],
@@ -38,7 +37,7 @@ const acceptInvitationController = factory.createHandlers(
 			params: controllerSchemas.acceptInvitation.params,
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.acceptInvitation.body),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

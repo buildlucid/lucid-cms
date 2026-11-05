@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/notifications.js";
 import { notificationServices } from "../../../../services/index.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updatePreferencesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Choose which notification types email you.",
 		tags: ["notifications"],
 		summary: "Update Notification Preferences",
@@ -23,7 +22,7 @@ const updatePreferencesController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updatePreferences.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updatePreferences.body),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/auth.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const setupController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Creates the initial admin user. This endpoint can only be used when no users exist in the system. Even if password auth is disabled, you will still be required to set one here.",
 		tags: ["auth"],
@@ -29,7 +28,7 @@ const setupController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.setup.body),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

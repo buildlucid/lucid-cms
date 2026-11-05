@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getUsageSessionRecordsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns a page of the requests in one AI usage session.",
 		tags: ["ai"],
 		summary: "Get AI Usage Session Records",
@@ -32,7 +31,7 @@ const getUsageSessionRecordsController = factory.createHandlers(
 			params: controllerSchemas.getUsageSessionRecords.params,
 			query: controllerSchemas.getUsageSessionRecords.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.SettingsRead]),
 	validate("param", controllerSchemas.getUsageSessionRecords.params),

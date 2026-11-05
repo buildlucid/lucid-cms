@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const sendMessageController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Sends or queues input. When the conversation is idle and the request accepts text/event-stream, the new run is streamed. Otherwise it returns 202 with the run answering it, or null while the input is queued.",
 		tags: ["agent"],
@@ -33,7 +32,7 @@ const sendMessageController = factory.createHandlers(
 			params: controllerSchemas.sendMessage.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(true),

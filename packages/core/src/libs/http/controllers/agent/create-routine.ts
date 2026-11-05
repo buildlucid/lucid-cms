@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createRoutineController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Creates an agent routine that runs on a schedule.",
 		tags: ["agent"],
 		summary: "Create Agent Routine",
@@ -27,7 +26,7 @@ const createRoutineController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createRoutine.body),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(),

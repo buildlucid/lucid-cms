@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/account.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const disableTwoFactorController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Turns off two-factor authentication for the authenticated user, after a code from their authenticator app or a recovery code. Not allowed when two-factor authentication is required.",
 		tags: ["account"],
@@ -30,7 +29,7 @@ const disableTwoFactorController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.disableTwoFactor.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

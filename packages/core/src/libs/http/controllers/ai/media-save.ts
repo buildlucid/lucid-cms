@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
@@ -19,7 +18,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const mediaSaveController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Copies your finished media generation into media storage. Create or update media with the returned key before it expires.",
 		tags: ["ai"],
@@ -34,7 +33,7 @@ const mediaSaveController = factory.createHandlers(
 			},
 			params: controllerSchemas.mediaSave.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions({ some: mediaGenerationPermissions }),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -19,7 +18,7 @@ import getClientAddress from "../../utils/get-client-address.js";
 const factory = createFactory();
 
 const loginController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Authenticates a user and sets a refresh and access token as httpOnly cookies. When a two-factor step is needed, it sets a short-lived challenge cookie instead, and the session waits until the step is done.",
 		tags: ["auth"],
@@ -34,7 +33,7 @@ const loginController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.login.body),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/documents.js";
@@ -21,7 +20,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Get multiple documents by filters via an external credential.",
 		tags: ["content-documents"],
@@ -39,7 +38,7 @@ const getMultipleController = factory.createHandlers(
 				authorization: true,
 			},
 		}),
-	}),
+	})),
 	externalAuthentication(),
 	validate("param", controllerSchemas.content.getMultiple.params),
 	externalScopes((c) => [

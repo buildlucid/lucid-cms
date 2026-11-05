@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateProfilePictureController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Update the authenticated user's profile picture.",
 		tags: ["account"],
 		summary: "Update Profile Picture",
@@ -27,7 +26,7 @@ const updateProfilePictureController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.updateProfilePicture.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateProfilePicture.body),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/user-logins.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns multiple user login records.",
 		tags: ["users"],
 		summary: "Get Multiple User Logins",
@@ -28,7 +27,7 @@ const getMultipleController = factory.createHandlers(
 			query: controllerSchemas.getMultiple.query.string,
 			params: controllerSchemas.getMultiple.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	validate("param", controllerSchemas.getMultiple.params),

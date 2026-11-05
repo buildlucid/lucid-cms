@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { deleteCookie, getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
@@ -28,7 +27,7 @@ import getRequestBaseUrl from "../../../utils/get-request-base-url.js";
 const factory = createFactory();
 
 const providerCallbackController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Handle OAuth callback from authentication provider.",
 		tags: ["auth"],
 		summary: "Provider Authentication Callback",
@@ -37,7 +36,7 @@ const providerCallbackController = factory.createHandlers(
 			params: controllerSchemas.providerCallback.params,
 			query: controllerSchemas.providerCallback.query.string,
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.sensitive.limit,

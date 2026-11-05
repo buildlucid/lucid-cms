@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/notifications.js";
 import { notificationServices } from "../../../../services/index.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Mark your notifications read, unread, archived or unarchived. Pass ids, or all for your whole inbox.",
 		tags: ["notifications"],
@@ -24,7 +23,7 @@ const updateMultipleController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateMultiple.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.updateMultiple.body),

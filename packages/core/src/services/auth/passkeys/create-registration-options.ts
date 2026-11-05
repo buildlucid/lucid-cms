@@ -1,8 +1,4 @@
-import {
-	generateRegistrationOptions,
-	type PublicKeyCredentialCreationOptionsJSON,
-} from "@simplewebauthn/server";
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/server";
 import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
@@ -35,6 +31,14 @@ const createRegistrationOptions: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	// Defer WebAuthn loading until needed.
+	const [{ generateRegistrationOptions }, { isoBase64URL }] = await Promise.all(
+		[
+			import("@simplewebauthn/server"),
+			import("@simplewebauthn/server/helpers"),
+		],
+	);
 
 	const Users = new UsersRepository(context.db);
 	const Passkeys = new UserPasskeysRepository(context.db);

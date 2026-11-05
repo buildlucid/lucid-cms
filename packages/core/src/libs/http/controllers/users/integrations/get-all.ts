@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import {
@@ -21,7 +20,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getAllController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns API key integrations owned by the selected user.",
 		tags: ["integrations"],
 		summary: "Get User Integrations",
@@ -33,7 +32,7 @@ const getAllController = factory.createHandlers(
 			params: userIntegrationParamsSchema,
 			query: controllerSchemas.getAll.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", userIntegrationParamsSchema),
 	validate("query", controllerSchemas.getAll.query.string),

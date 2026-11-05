@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/account.js";
@@ -15,14 +14,14 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns the authenticated user based on the access token.",
 		tags: ["account"],
 		summary: "Get Authenticated User",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	async (c: LucidHonoContext) => {
 		const context = createServiceContext(c);

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Update a media share link.",
 		tags: ["media-share-links"],
 		summary: "Update Media Share Link",
@@ -26,7 +25,7 @@ const updateSingleController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateSingle.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.MediaUpdate]),

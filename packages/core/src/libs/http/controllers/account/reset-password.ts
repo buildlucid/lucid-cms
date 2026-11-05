@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const resetPasswordController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Resets the password for the authenticated user.",
 		tags: ["account"],
 		summary: "Reset Password",
@@ -29,7 +28,7 @@ const resetPasswordController = factory.createHandlers(
 			params: controllerSchemas.resetPassword.params,
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.resetPassword.body),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

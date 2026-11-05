@@ -93,7 +93,17 @@ describe("Nodemailer plugin", () => {
 		await adapter.lifecycle?.init?.(runtimeContext as never);
 
 		expect(transporter.verify).toHaveBeenCalledTimes(1);
-		expect(mocks.warn).toHaveBeenCalledTimes(1);
+		await vi.waitFor(() => expect(mocks.warn).toHaveBeenCalledTimes(1));
+	});
+
+	test("initializes without waiting for verification", async () => {
+		const transporter = createTransporter();
+		vi.mocked(transporter.verify).mockReturnValue(new Promise(() => {}));
+		const adapter = createAdapter(transporter);
+
+		await adapter.lifecycle?.init?.(runtimeContext as never);
+
+		expect(transporter.verify).toHaveBeenCalledTimes(1);
 	});
 
 	test("sends without running a second transporter verification", async () => {

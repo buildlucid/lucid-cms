@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getConversationsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the user's own conversations, and conversations started by code routines on agents they manage.",
 		tags: ["agent"],
@@ -31,7 +30,7 @@ const getConversationsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getMultipleConversations.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	validate("query", controllerSchemas.getMultipleConversations.query.string),

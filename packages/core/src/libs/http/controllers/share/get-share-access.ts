@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { z } from "zod";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getShareAccessController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns share link metadata and whether the current visitor must provide a password.",
 		tags: ["share"],
@@ -28,7 +27,7 @@ const getShareAccessController = factory.createHandlers(
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getShareAccess.response),
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		scope: constants.rateLimit.scopes.low.scopeKey,

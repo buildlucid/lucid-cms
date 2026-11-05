@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleRevisionsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get multiple revisions entries for a document.",
 		tags: ["documents"],
 		summary: "Get Multiple Revisions",
@@ -31,7 +30,7 @@ const getMultipleRevisionsController = factory.createHandlers(
 			params: controllerSchemas.getMultipleRevisions.params,
 			query: controllerSchemas.getMultipleRevisions.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("param", controllerSchemas.getMultipleRevisions.params),
 	validate("query", controllerSchemas.getMultipleRevisions.query.string),

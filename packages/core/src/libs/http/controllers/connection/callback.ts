@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { deleteCookie, getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { parseConnectionCallbackParameters } from "../../../../services/connection/helpers/callback-parameters.js";
@@ -14,13 +13,13 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory<LucidHonoGeneric>();
 
 const callbackController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Consumes a single-use OAuth callback and redirects to Integrations settings.",
 		tags: ["connection"],
 		summary: "Lucid OAuth Callback",
 		responses: openAPI.responses(),
-	}),
+	})),
 	async (c) => {
 		const context = createServiceContext(c);
 		const callbackUrl = new URL(c.req.url);

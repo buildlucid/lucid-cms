@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { accountServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -12,7 +11,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const cancelEmailChangeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Cancels the authenticated user's pending email change.",
 		tags: ["account"],
 		summary: "Cancel Pending Email Change",
@@ -22,7 +21,7 @@ const cancelEmailChangeController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	async (c) => {

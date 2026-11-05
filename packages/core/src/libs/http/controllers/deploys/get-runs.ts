@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getRunsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns deploy runs, newest first.",
 		tags: ["deploys"],
 		summary: "Get Deploy Runs",
@@ -27,7 +26,7 @@ const getRunsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getRuns.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("query", controllerSchemas.getRuns.query.string),
 	async (c) => {

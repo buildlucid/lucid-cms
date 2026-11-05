@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { z } from "zod";
@@ -25,7 +24,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const providerInitiateController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Handle oidc auth initiation. Creates auth state and redirects to provider login page",
 		tags: ["auth"],
@@ -40,7 +39,7 @@ const providerInitiateController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.providerInitiate.body),
-	}),
+	})),
 	validateCSRF(),
 	softAuthenticate,
 	rateLimiter({

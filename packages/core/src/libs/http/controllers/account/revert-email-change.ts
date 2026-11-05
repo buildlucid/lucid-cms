@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
@@ -13,7 +12,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const revertEmailChangeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Cancels or reverts an email change.",
 		tags: ["account"],
 		summary: "Cancel or Revert Email Change",
@@ -24,7 +23,7 @@ const revertEmailChangeController = factory.createHandlers(
 			},
 			params: controllerSchemas.revertEmailChange.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	validate("param", controllerSchemas.revertEmailChange.params),
 	async (c) => {

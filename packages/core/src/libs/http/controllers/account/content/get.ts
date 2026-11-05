@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/account.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the account associated with an external user credential.",
 		tags: ["content-account"],
@@ -29,7 +28,7 @@ const getController = factory.createHandlers(
 				authorization: true,
 			},
 		}),
-	}),
+	})),
 	externalAuthentication({ principalType: "user" }),
 	externalScopes([ExternalScopes.AccountRead]),
 	async (c) => {

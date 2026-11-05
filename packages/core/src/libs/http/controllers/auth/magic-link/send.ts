@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const sendMagicLinkController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Emails a login link and code to the account with this email address. The response is the same whether or not an account exists.",
 		tags: ["auth"],
@@ -29,7 +28,7 @@ const sendMagicLinkController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.sendMagicLink.body),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

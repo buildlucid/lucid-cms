@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { userIntegrationItemParamsSchema } from "../../../../../schemas/integrations.js";
 import {
@@ -19,7 +18,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const deleteSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Deletes an API key integration owned by the selected user.",
 		tags: ["integrations"],
 		summary: "Delete User Integration",
@@ -32,7 +31,7 @@ const deleteSingleController = factory.createHandlers(
 			},
 			params: userIntegrationItemParamsSchema,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", userIntegrationItemParamsSchema),

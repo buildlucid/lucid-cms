@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/requests.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Get the requests you can see. A request is visible when you can read every document in it.",
 		tags: ["requests"],
@@ -30,7 +29,7 @@ const getMultipleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getMultiple.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("query", controllerSchemas.getMultiple.query.string),

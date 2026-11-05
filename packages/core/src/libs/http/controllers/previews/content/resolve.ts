@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const resolvePreviewController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Validate a preview token for use by a browser application.",
 		tags: ["content-previews"],
 		summary: "Resolve Preview",
@@ -27,7 +26,7 @@ const resolvePreviewController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.resolve.body),
 		parameters: openAPI.parameters({ headers: { authorization: false } }),
-	}),
+	})),
 	externalAuthentication({ optional: true }),
 	rateLimiter({
 		mode: "ip",

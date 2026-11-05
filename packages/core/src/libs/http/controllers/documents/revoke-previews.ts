@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { previewSessionServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const revokePreviewsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Ends every preview of a document, so its preview links stop working. Builder previews start a new one.",
 		tags: ["documents"],
@@ -27,7 +26,7 @@ const revokePreviewsController = factory.createHandlers(
 			params: controllerSchemas.revokePreviews.params,
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.revokePreviews.params),

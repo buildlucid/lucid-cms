@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const invitationPasskeyOptionsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Creates the options for accepting an invitation with a passkey instead of a password. Pass them to the browser, then send its response with the accept invitation request.",
 		tags: ["auth"],
@@ -33,7 +32,7 @@ const invitationPasskeyOptionsController = factory.createHandlers(
 			},
 			params: controllerSchemas.invitationPasskeyOptions.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { oauthClientSchemas } from "../../../../../schemas/oauth-clients.js";
 import { oauthClientServices } from "../../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const deleteSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Deletes a registered OAuth client and revokes its grants.",
 		tags: ["integrations"],
 		summary: "Delete OAuth Client",
@@ -27,7 +26,7 @@ const deleteSingleController = factory.createHandlers(
 			},
 			params: oauthClientSchemas.deleteSingle.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationDelete]),

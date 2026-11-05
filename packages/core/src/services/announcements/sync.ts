@@ -1,4 +1,4 @@
-import { satisfies } from "semver";
+import satisfies from "semver/functions/satisfies.js";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import logger from "../../libs/logger/index.js";

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMessagesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns a conversation's latest messages in order. Pass before to load earlier messages.",
 		tags: ["agent"],
@@ -28,7 +27,7 @@ const getMessagesController = factory.createHandlers(
 			params: controllerSchemas.getMessages.params,
 			query: controllerSchemas.getMessages.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	agentAccess(),
 	validate("param", controllerSchemas.getMessages.params),

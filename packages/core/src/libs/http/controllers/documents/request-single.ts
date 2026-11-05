@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
@@ -19,7 +18,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const requestSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Request a new document through a create request. The document is only created once the request is approved and completed.",
 		tags: ["documents"],
@@ -35,7 +34,7 @@ const requestSingleController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),

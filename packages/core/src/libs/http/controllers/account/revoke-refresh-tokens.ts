@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { accountServices, authServices } from "../../../../services/index.js";
@@ -13,7 +12,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const revokeRefreshTokensController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Revoke all refresh tokens for the authenticated user and clear the current auth session.",
 		tags: ["account"],
@@ -24,7 +23,7 @@ const revokeRefreshTokensController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	async (c) => {

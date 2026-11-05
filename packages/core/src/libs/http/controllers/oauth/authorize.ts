@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import type { StatusCode } from "hono/utils/http-status";
 import constants from "../../../../constants/constants.js";
@@ -18,7 +17,7 @@ import { uniqueOAuthParameters } from "../../utils/oauth.js";
 const factory = createFactory();
 
 const authorizeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Starts an OAuth Authorization Code flow for a registered client or client metadata document using S256 PKCE.",
 		tags: ["oauth"],
@@ -40,7 +39,7 @@ const authorizeController = factory.createHandlers(
 				},
 			},
 		},
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.low.limit,

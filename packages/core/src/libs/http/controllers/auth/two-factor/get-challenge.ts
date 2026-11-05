@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -12,7 +11,7 @@ import formatAPIResponse from "../../../utils/build-response.js";
 const factory = createFactory();
 
 const getTwoFactorChallengeController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the two-factor step the current login is waiting on, and whether it can use an authenticator app, a passkey or both, using the challenge cookie set by logging in.",
 		tags: ["auth"],
@@ -22,7 +21,7 @@ const getTwoFactorChallengeController = factory.createHandlers(
 				controllerSchemas.getTwoFactorChallenge.response,
 			),
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

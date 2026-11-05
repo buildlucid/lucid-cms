@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
 import { controllerSchemas } from "../../../../schemas/ai.js";
@@ -17,14 +16,14 @@ const factory = createFactory();
 
 /** Streams generated media using the connection's access token. */
 const mediaStreamController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Stream a file generated with Lucid AI, for previews.",
 		tags: ["ai"],
 		summary: "Stream Generated Media",
 		parameters: openAPI.parameters({
 			params: controllerSchemas.mediaStream.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions({ some: mediaGenerationPermissions }),
 	validate("param", controllerSchemas.mediaStream.params),

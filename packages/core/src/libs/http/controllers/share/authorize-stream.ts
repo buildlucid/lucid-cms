@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
@@ -18,7 +17,7 @@ const factory = createFactory();
 
 /** Validates share access and sets a session cookie after a correct password. */
 const authorizeStreamController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Validate share password and set a session cookie.",
 		tags: ["share"],
 		summary: "Authorize Stream",
@@ -30,7 +29,7 @@ const authorizeStreamController = factory.createHandlers(
 			params: controllerSchemas.authorizeShare.params,
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.authorizeShare.body),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		scope: constants.rateLimit.scopes.low.scopeKey,

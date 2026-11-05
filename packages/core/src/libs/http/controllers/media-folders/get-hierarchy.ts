@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media-folders.js";
@@ -14,14 +13,14 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getAllController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get all media folders with hierarchy metadata.",
 		tags: ["media-folders"],
 		summary: "Get Media Folders Hierarchy",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.hierarchy.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);

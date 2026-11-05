@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMediaModelsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Returns the models people can pick to generate a media type, and the one used by default.",
 		tags: ["ai"],
@@ -28,7 +27,7 @@ const getMediaModelsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getMediaModels.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions({ some: mediaGenerationPermissions }),
 	validate("param", controllerSchemas.getMediaModels.params),

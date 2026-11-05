@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const reauthenticateOptionsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Creates the options for confirming it's the authenticated user with one of their passkeys, with a challenge that works once for a few minutes. Pass them to the browser, then send its response to the reauthenticate endpoint.",
 		tags: ["account"],
@@ -32,7 +31,7 @@ const reauthenticateOptionsController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

@@ -1,10 +1,12 @@
+import describeRoute from "./describe-route.js";
 import parameters from "./parameters.js";
 import requestBody from "./request-body.js";
 import responses, { defaultErrorResponse } from "./responses.js";
 import schema from "./schema.js";
 
-/** Helpers for describing route parameters, request bodies, schemas and response envelopes. */
+/** OpenAPI route, parameter, body, schema and response helpers. */
 const openAPI = {
+	describeRoute,
 	parameters,
 	requestBody,
 	responses,

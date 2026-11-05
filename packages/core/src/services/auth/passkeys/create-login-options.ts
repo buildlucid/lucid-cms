@@ -1,7 +1,4 @@
-import {
-	generateAuthenticationOptions,
-	type PublicKeyCredentialRequestOptionsJSON,
-} from "@simplewebauthn/server";
+import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/server";
 import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
@@ -63,6 +60,9 @@ const createLoginOptions: ServiceFn<
 		};
 	}
 
+	// Defer WebAuthn loading until needed.
+	const { generateAuthenticationOptions } =
+		await import("@simplewebauthn/server");
 	const expiresInMs = constants.passkeys.challengeExpirationMinutes * 60_000;
 	const options = await generateAuthenticationOptions({
 		rpID: getRelyingParty(context).id,

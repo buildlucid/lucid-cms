@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getUploadSessionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get resumable upload session state.",
 		tags: ["media"],
 		summary: "Get Upload Session",
@@ -27,7 +26,7 @@ const getUploadSessionController = factory.createHandlers(
 			headers: { csrf: true },
 			params: controllerSchemas.getUploadSession.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.getUploadSession.params),

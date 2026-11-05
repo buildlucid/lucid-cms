@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -19,7 +18,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const sendResetPasswordController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Sends an email to the given email address informing them to reset their password.",
 		tags: ["account"],
@@ -34,7 +33,7 @@ const sendResetPasswordController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.sendResetPassword.body),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

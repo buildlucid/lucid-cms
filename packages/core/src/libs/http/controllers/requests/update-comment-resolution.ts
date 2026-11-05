@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/requests.js";
 import { requestServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateCommentResolutionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Resolve or close a comment, or reopen it.",
 		tags: ["requests"],
 		summary: "Update Request Comment Resolution",
@@ -32,7 +31,7 @@ const updateCommentResolutionController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.updateCommentResolution.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),

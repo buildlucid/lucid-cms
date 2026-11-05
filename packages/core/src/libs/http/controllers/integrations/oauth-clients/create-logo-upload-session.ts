@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthClientSchemas } from "../../../../../schemas/oauth-clients.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createLogoUploadSessionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Creates an upload session for an OAuth client logo.",
 		tags: ["integrations"],
 		summary: "Create OAuth Client Logo Upload Session",
@@ -34,7 +33,7 @@ const createLogoUploadSessionController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			oauthClientSchemas.createLogoUploadSession.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationCreate]),

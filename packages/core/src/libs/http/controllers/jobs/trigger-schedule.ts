@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -20,7 +19,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const triggerScheduleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Enqueues one registered job schedule immediately.",
 		tags: ["jobs"],
 		summary: "Trigger Job Schedule",
@@ -29,7 +28,7 @@ const triggerScheduleController = factory.createHandlers(
 		}),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
 		requestBody: openAPI.requestBody(controllerSchemas.triggerSchedule.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

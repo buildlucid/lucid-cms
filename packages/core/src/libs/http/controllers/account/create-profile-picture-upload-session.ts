@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/account.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createProfilePictureUploadSessionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Create an upload session for the authenticated user's profile picture.",
 		tags: ["account"],
@@ -34,7 +33,7 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.createProfilePictureUploadSession.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("json", controllerSchemas.createProfilePictureUploadSession.body),

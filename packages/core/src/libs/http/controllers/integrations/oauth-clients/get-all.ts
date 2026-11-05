@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthClientSchemas } from "../../../../../schemas/oauth-clients.js";
@@ -16,14 +15,14 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getAllController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns the registered OAuth clients.",
 		tags: ["integrations"],
 		summary: "Get OAuth Clients",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(oauthClientSchemas.getAll.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.IntegrationRead]),
 	async (c) => {

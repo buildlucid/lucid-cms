@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthClientSchemas } from "../../../../../schemas/oauth-clients.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns a registered OAuth client.",
 		tags: ["integrations"],
 		summary: "Get OAuth Client",
@@ -27,7 +26,7 @@ const getSingleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: oauthClientSchemas.getSingle.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.IntegrationRead]),
 	validate("param", oauthClientSchemas.getSingle.params),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthClientSchemas } from "../../../../../schemas/oauth-clients.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const regenerateSecretController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Regenerates a confidential OAuth client's secret.",
 		tags: ["integrations"],
 		summary: "Regenerate OAuth Client Secret",
@@ -31,7 +30,7 @@ const regenerateSecretController = factory.createHandlers(
 			},
 			params: oauthClientSchemas.regenerateSecret.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationRegenerate]),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { z } from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -16,14 +15,14 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getProvidersController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get all available authentication providers.",
 		tags: ["auth"],
 		summary: "Get Auth Providers",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getProviders.response),
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

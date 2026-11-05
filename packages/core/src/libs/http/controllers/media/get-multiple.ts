@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get a multiple media items.",
 		tags: ["media"],
 		summary: "Get Multiple Media",
@@ -27,7 +26,7 @@ const getMultipleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getMultiple.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {

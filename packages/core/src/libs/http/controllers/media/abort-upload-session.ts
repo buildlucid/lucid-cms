@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { mediaServices } from "../../../../services/index.js";
@@ -15,7 +14,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const abortUploadSessionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Abort a resumable upload session.",
 		tags: ["media"],
 		summary: "Abort Upload Session",
@@ -23,7 +22,7 @@ const abortUploadSessionController = factory.createHandlers(
 			headers: { csrf: true },
 			params: controllerSchemas.abortUploadSession.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.abortUploadSession.params),

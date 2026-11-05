@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../../schemas/account.js";
 import { accountServices } from "../../../../../services/index.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updatePasskeyController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Renames one of the authenticated user's passkeys.",
 		tags: ["account"],
 		summary: "Rename Passkey",
@@ -28,7 +27,7 @@ const updatePasskeyController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updatePasskey.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.updatePasskey.params),

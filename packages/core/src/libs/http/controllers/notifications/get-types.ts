@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/notifications.js";
@@ -16,14 +15,14 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getTypesController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Every notification type with its current settings.",
 		tags: ["notifications"],
 		summary: "Get Notification Types",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getTypes.response),
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.SettingsRead]),
 	async (c) => {

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/documents.js";
@@ -21,7 +20,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get a single document by filters via an external credential.",
 		tags: ["content-documents"],
 		summary: "Get Document",
@@ -35,7 +34,7 @@ const getSingleController = factory.createHandlers(
 				authorization: true,
 			},
 		}),
-	}),
+	})),
 	externalAuthentication(),
 	validate("param", controllerSchemas.content.getSingle.params),
 	externalScopes((c) => [

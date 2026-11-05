@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/locales.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getAllController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns all content locales.",
 		tags: ["locales"],
 		summary: "Get All Locales",
@@ -22,7 +21,7 @@ const getAllController = factory.createHandlers(
 			dataSchema: z.toJSONSchema(controllerSchemas.getAll.response),
 			paginated: true,
 		}),
-	}),
+	})),
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);

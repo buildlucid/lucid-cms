@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../services/index.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Update an integration.",
 		tags: ["integrations"],
 		summary: "Update Integration",
@@ -30,7 +29,7 @@ const updateSingleController = factory.createHandlers(
 			},
 			params: controllerSchemas.updateSingle.params,
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationUpdate]),

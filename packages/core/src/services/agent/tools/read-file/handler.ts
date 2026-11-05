@@ -9,7 +9,6 @@ import readMedia from "../../helpers/read-media.js";
 import register from "../../references/register.js";
 import { MAX_FILE_BYTES, readFileToolName } from "./constants.js";
 import decodeText from "./decode-text.js";
-import extractHtml from "./extract-html.js";
 import readPassages from "./read-passages.js";
 import {
 	fileMimeTypeSchema,
@@ -50,9 +49,13 @@ const readFile: ServiceFn<
 	if (linked.error) return linked;
 
 	const isHtml = file.data.mimeType === "text/html";
+	// Defer HTML parser loading until needed.
+	const extractHtml = isHtml
+		? (await import("./extract-html.js")).default
+		: undefined;
 
 	const output = readPassages({
-		text: isHtml ? extractHtml(text) : text,
+		text: extractHtml ? extractHtml(text) : text,
 		input,
 		file: {
 			mimeType: file.data.mimeType,

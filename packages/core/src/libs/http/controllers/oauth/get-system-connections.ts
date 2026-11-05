@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthConnectionResponseSchema } from "../../../../schemas/oauth.js";
@@ -15,14 +14,14 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSystemConnectionsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns system-scoped OAuth integration connections.",
 		tags: ["oauth-connections"],
 		summary: "Get System OAuth Connections",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions(Permissions.IntegrationRead),
 	async (c) => {

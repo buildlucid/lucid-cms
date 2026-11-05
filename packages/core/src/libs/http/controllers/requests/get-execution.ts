@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/requests.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getExecutionController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Get the current publication attempt for a request.",
 		tags: ["requests"],
 		summary: "Get Request Execution",
@@ -27,7 +26,7 @@ const getExecutionController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getExecution.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.getExecution.params),

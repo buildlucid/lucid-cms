@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const validateInvitationController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Validate an invitation token and retrieve user information if valid.",
 		tags: ["auth"],
@@ -27,7 +26,7 @@ const validateInvitationController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: controllerSchemas.validateInvitation.params,
 		}),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
@@ -19,7 +18,7 @@ import getClientAddress from "../../../utils/get-client-address.js";
 const factory = createFactory();
 
 const acceptInvitationPasskeyController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Accepts an invitation with a new passkey instead of a password, made with the invitation's passkey options, then logs the user in, setting a refresh and access token as httpOnly cookies. The passkey checked who's holding the device, so there's no two-factor step.",
 		tags: ["auth"],
@@ -34,7 +33,7 @@ const acceptInvitationPasskeyController = factory.createHandlers(
 		requestBody: openAPI.requestBody(
 			controllerSchemas.acceptInvitationPasskey.body,
 		),
-	}),
+	})),
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",

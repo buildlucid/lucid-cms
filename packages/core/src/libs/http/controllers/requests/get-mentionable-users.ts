@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/requests.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMentionableUsersController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Search the people who can see a request, and so can be mentioned in its comments, by name or ID. Returns up to limit people.",
 		tags: ["requests"],
@@ -31,7 +30,7 @@ const getMentionableUsersController = factory.createHandlers(
 			params: controllerSchemas.getMentionableUsers.params,
 			query: controllerSchemas.getMentionableUsers.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.getMentionableUsers.params),

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
@@ -17,7 +16,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const createUploadController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Registers an uploaded chat attachment as your personal media. It stays private and out of the media library until you move it there.",
 		tags: ["agent"],
@@ -28,7 +27,7 @@ const createUploadController = factory.createHandlers(
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createUpload.body),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	agentAccess(),

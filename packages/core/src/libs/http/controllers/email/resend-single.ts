@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -20,7 +19,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const resendSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Resends the email with the given ID.",
 		tags: ["emails"],
 		summary: "Resend Email",
@@ -33,7 +32,7 @@ const resendSingleController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

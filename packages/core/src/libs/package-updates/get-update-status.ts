@@ -1,4 +1,7 @@
-import { gt, satisfies, valid, validRange } from "semver";
+import gt from "semver/functions/gt.js";
+import satisfies from "semver/functions/satisfies.js";
+import valid from "semver/functions/valid.js";
+import validRange from "semver/ranges/valid.js";
 import packageJson from "../../../package.json" with { type: "json" };
 import type { DiagnosticPackageStatus } from "../../types/response.js";
 import type { LatestPackage } from "./types.js";

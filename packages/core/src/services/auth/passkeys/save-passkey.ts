@@ -1,4 +1,3 @@
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
 import constants from "../../../constants/constants.js";
 import type { BuiltInEmailTemplates } from "../../../libs/email/types.js";
 import {
@@ -25,6 +24,8 @@ const savePasskey: ServiceFn<
 		name: string;
 	}
 > = async (context, data) => {
+	// Defer WebAuthn loading until needed.
+	const { isoBase64URL } = await import("@simplewebauthn/server/helpers");
 	const Users = new UsersRepository(context.db);
 	const Passkeys = new UserPasskeysRepository(context.db);
 	const { credential, aaguid, credentialBackedUp } = data.passkey;

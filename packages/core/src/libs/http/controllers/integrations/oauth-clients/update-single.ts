@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthClientSchemas } from "../../../../../schemas/oauth-clients.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const updateSingleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Updates a registered OAuth client.",
 		tags: ["integrations"],
 		summary: "Update OAuth Client",
@@ -32,7 +31,7 @@ const updateSingleController = factory.createHandlers(
 			params: oauthClientSchemas.updateSingle.params,
 		}),
 		requestBody: openAPI.requestBody(oauthClientSchemas.updateSingle.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.IntegrationUpdate]),

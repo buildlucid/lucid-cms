@@ -33,7 +33,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						lifecycle: {
 							init: async (context) => {
 								if (context.config.email.simulate) return;
-								await verifyOnce();
+								// SMTP verification only warns, so it can run after startup.
+								void verifyOnce();
 							},
 							destroy: async () => {
 								pluginOptions.transporter.close();

@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import {
@@ -21,7 +20,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const mediaAltGenerateController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Generate alt text for media using Lucid AI.",
 		tags: ["ai"],
 		summary: "Generate Media Alt Text",
@@ -34,7 +33,7 @@ const mediaAltGenerateController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.AiAltGenerate]),

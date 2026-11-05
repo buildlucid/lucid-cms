@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -20,7 +19,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const runChecksController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Runs the requested adapter health checks in order. Failing adapters are reported in the results. The email check sends a test email to the signed-in user.",
 		tags: ["diagnostics"],
@@ -34,7 +33,7 @@ const runChecksController = factory.createHandlers(
 			},
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.runChecks.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

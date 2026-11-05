@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -22,7 +21,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const mediaImageGenerateController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Generate or edit an image with Lucid AI. Poll the generation with the returned requestId until the image is ready.",
 		tags: ["ai"],
@@ -38,7 +37,7 @@ const mediaImageGenerateController = factory.createHandlers(
 				idempotencyKey: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.AiImageGenerate]),

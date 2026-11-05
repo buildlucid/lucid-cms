@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/email.js";
@@ -18,7 +17,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getTransactionsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns the delivery transactions recorded for one email.",
 		tags: ["emails"],
 		summary: "Get Email Transactions",
@@ -30,7 +29,7 @@ const getTransactionsController = factory.createHandlers(
 			query: controllerSchemas.getTransactions.query.string,
 			params: controllerSchemas.getTransactions.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions([Permissions.EmailRead]),
 	validate("query", controllerSchemas.getTransactions.query.string),

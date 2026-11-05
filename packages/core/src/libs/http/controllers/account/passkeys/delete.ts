@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../../schemas/account.js";
 import { accountServices } from "../../../../../services/index.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../../utils/create-service-context.js";
 const factory = createFactory();
 
 const deletePasskeyController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Removes one of the authenticated user's passkeys, so it can no longer be used to sign in.",
 		tags: ["account"],
@@ -28,7 +27,7 @@ const deletePasskeyController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	validate("param", controllerSchemas.deletePasskey.params),

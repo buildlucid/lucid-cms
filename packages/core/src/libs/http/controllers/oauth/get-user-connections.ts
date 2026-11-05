@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import {
@@ -19,7 +18,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getUserConnectionsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns OAuth connections owned by a user.",
 		tags: ["oauth-connections"],
 		summary: "Get User OAuth Connections",
@@ -29,7 +28,7 @@ const getUserConnectionsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			params: oauthSchemas.userConnections.params,
 		}),
-	}),
+	})),
 	authenticate(),
 	permissions(Permissions.UsersRead),
 	validate("param", oauthSchemas.userConnections.params),

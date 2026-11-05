@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import constants from "../../../../constants/constants.js";
@@ -20,7 +19,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const setScheduleStateController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Pauses or resumes a registered job schedule.",
 		tags: ["jobs"],
 		summary: "Set Job Schedule State",
@@ -29,7 +28,7 @@ const setScheduleStateController = factory.createHandlers(
 		}),
 		parameters: openAPI.parameters({ headers: { csrf: true } }),
 		requestBody: openAPI.requestBody(controllerSchemas.setScheduleState.body),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	rateLimiter({

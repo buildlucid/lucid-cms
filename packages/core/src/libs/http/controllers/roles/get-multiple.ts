@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/roles.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns multiple roles based on the query parameters.",
 		tags: ["roles"],
 		summary: "Get Multiple Roles",
@@ -27,7 +26,7 @@ const getMultipleController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getMultiple.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {

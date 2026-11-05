@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
@@ -14,7 +13,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const callbackController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Takes a run's status from its CI. The URL is signed for one run and handed to the provider as `callbackUrl`.",
 		tags: ["deploys"],
@@ -25,7 +24,7 @@ const callbackController = factory.createHandlers(
 			query: controllerSchemas.callback.query.string,
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.callback.body),
-	}),
+	})),
 	rateLimiter({
 		mode: "ip",
 		limit: constants.rateLimit.scopes.standard.limit,

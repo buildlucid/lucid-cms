@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/settings.js";
@@ -16,7 +15,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const getSettingsController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description: "Returns the site settings including meta data.",
 		tags: ["settings"],
 		summary: "Get Settings",
@@ -26,7 +25,7 @@ const getSettingsController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getSettings.query.string,
 		}),
-	}),
+	})),
 	authenticate(),
 	validate("query", controllerSchemas.getSettings.query.string),
 	async (c) => {

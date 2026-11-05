@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { describeRoute } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import z from "zod";
@@ -24,7 +23,7 @@ import createServiceContext from "../../utils/create-service-context.js";
 const factory = createFactory();
 
 const connectController = factory.createHandlers(
-	describeRoute({
+	openAPI.describeRoute(() => ({
 		description:
 			"Creates or reuses a confidential OAuth client and starts authorization.",
 		tags: ["connection"],
@@ -35,7 +34,7 @@ const connectController = factory.createHandlers(
 		parameters: openAPI.parameters({
 			headers: { csrf: true },
 		}),
-	}),
+	})),
 	validateCSRF(),
 	authenticate(),
 	permissions([Permissions.ConnectionUpdate]),
