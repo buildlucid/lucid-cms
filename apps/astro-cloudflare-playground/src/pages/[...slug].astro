@@ -175,7 +175,7 @@ const documentRows = [
 								{blogs.map((blog) => (
 									<article class="blog-card" data-document-id={blog.id}>
 										{blog.fields.image[0] ? (
-											<img src={blog.fields.image[0].file.url} alt="" loading="lazy" />
+											<img src={blog.fields.image[0].url} alt="" loading="lazy" />
 										) : (
 											<div class="blog-card-placeholder" aria-hidden="true" />
 										)}

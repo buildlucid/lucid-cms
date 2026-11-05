@@ -2,7 +2,6 @@ import { copy } from "@lucidcms/core";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { DEFAULT_MAX_UPLOAD_SIZE, STORAGE_UPLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
-import { createFixedLengthStream } from "../utils/create-fixed-length-stream.js";
 import { validateSignedMediaUrl } from "../utils/signed-media-url.js";
 import { putObject } from "./upload-single.js";
 
@@ -94,52 +93,23 @@ const storageUpload =
 			};
 		}
 
-		const fixedLengthBody = createFixedLengthStream(
-			data.body,
-			data.contentLength,
-		);
-		let uploadError: unknown;
-		let streamError: unknown;
-
+		// putObject enforces contentLength with a FixedLengthStream.
 		try {
-			await Promise.all([
-				putObject(pluginOptions, context, {
-					key: data.key,
-					body: fixedLengthBody.stream,
-					mimeType: data.contentType ?? "application/octet-stream",
-					extension: data.extension ?? "",
-					size: data.contentLength,
-					type: "unknown",
-				}),
-				fixedLengthBody.completed.catch((error) => {
-					streamError = error;
-					throw error;
-				}),
-			]);
+			await putObject(pluginOptions, context, {
+				key: data.key,
+				body: data.body,
+				mimeType: data.contentType ?? "application/octet-stream",
+				extension: data.extension ?? "",
+				size: data.contentLength,
+				type: "unknown",
+			});
 		} catch (error) {
-			uploadError = error;
-		}
-
-		if (streamError) {
 			return {
 				error: {
 					type: "plugin",
 					message:
-						streamError instanceof Error
-							? copy.literal(streamError.message)
-							: copy("server:plugin.cloudflare.r2.errors.unknown"),
-				},
-				data: undefined,
-			};
-		}
-
-		if (uploadError) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						uploadError instanceof Error
-							? copy.literal(uploadError.message)
+						error instanceof Error
+							? copy.literal(error.message)
 							: copy("server:plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,

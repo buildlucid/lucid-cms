@@ -4,6 +4,7 @@
 
 - Removed the `previewBucketName` option, which Cloudflare's `cf` CLI has no equivalent for.
 - The binding now reaches the Cloudflare runtime as a `cloudflare:bindings` artifact.
+- Fixed media uploads through the R2 binding failing with "Inter-TransformStream ReadableStream.pipeTo() is not implemented."
 
 ## v1.1.0
 
