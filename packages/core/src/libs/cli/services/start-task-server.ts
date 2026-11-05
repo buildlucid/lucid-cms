@@ -30,8 +30,8 @@ export type TaskServer = {
 };
 
 /**
- * Starts a task server through the project or framework Vite config, with isolated cache and
- * runtime bindings. Disables watching and HMR sockets; restores `NODE_ENV` on close.
+ * Starts a Vite task server with runtime bindings and isolated cache. Disables watching, HMR
+ * sockets and client optimization; restores `NODE_ENV` on close.
  */
 const startTaskServer = async (
 	options?: TaskServerOptions,
@@ -66,6 +66,19 @@ const startTaskServer = async (
 			...(config.plugins ?? []),
 			{
 				name: constants.dev.taskServerPlugin,
+				// Tasks run in server environments, so the client's dependencies, such as the admin's, aren't optimized.
+				// Plugins' `include` lists merge into one, so it's emptied after them.
+				configEnvironment: {
+					order: "post",
+					handler: (name, environment) => {
+						if (name !== "client") return;
+						environment.optimizeDeps = {
+							...environment.optimizeDeps,
+							noDiscovery: true,
+							include: [],
+						};
+					},
+				},
 				// The project has loaded by now, and the runtime's server environment starts next.
 				configResolved: (resolved) => {
 					cliSpinner.start(findLucidViteApi(resolved.plugins).startMessage);

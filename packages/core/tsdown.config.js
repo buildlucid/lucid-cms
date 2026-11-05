@@ -2,16 +2,17 @@ import { defineConfig } from "tsdown";
 import packageJson from "./package.json" with { type: "json" };
 
 export default defineConfig({
-	entry: [
-		"src/exports/index.ts",
-		"src/exports/types.ts",
-		"src/exports/build.ts",
-		"src/exports/extension.ts",
-		"src/exports/runtime.ts",
-		"src/exports/toolkit.ts",
-		"src/exports/vite.ts",
-		"src/libs/cli/index.ts",
-	],
+	// Named entries keep the paths `package.json` exports.
+	entry: {
+		"exports/index": "src/exports/index.ts",
+		"exports/types": "src/exports/types.ts",
+		"exports/build": "src/exports/build.ts",
+		"exports/extension": "src/exports/extension.ts",
+		"exports/runtime": "src/exports/runtime.ts",
+		"exports/toolkit": "src/exports/toolkit.ts",
+		"exports/vite": "src/exports/vite.ts",
+		"libs/cli/index": "src/libs/cli/index.ts",
+	},
 	deps: {
 		neverBundle: [...Object.keys(packageJson.dependencies)],
 		onlyBundle: false,
@@ -28,5 +29,9 @@ export default defineConfig({
 		},
 	},
 	platform: "node",
-	unbundle: true,
+	// Bundle chunks to avoid thousands of development module loads. Stable names prevent stale watch output.
+	hash: false,
+	outputOptions: { chunkFileNames: "chunks/[name].mjs" },
+	// The toolkit imports services on demand, some of which the rest of core imports statically.
+	checks: { ineffectiveDynamicImport: false },
 });

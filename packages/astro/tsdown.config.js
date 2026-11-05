@@ -6,6 +6,7 @@ export default defineConfig({
 		"src/cli.ts",
 		"src/internal/route.ts",
 		"src/internal/middleware.ts",
+		"src/internal/logger.ts",
 		"src/toolkit.ts",
 		"src/preview.ts",
 	],

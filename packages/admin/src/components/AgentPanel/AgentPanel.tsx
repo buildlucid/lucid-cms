@@ -11,8 +11,10 @@ import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { useHoverReveal } from "@/hooks/useHoverReveal/useHoverReveal";
 import { useMediaQuery } from "@/hooks/useMediaQuery/useMediaQuery";
 import { usePointerNear } from "@/hooks/usePointerNear/usePointerNear";
+import lazyPage from "@/utils/lazy-page";
 import { shortcuts } from "@/utils/shortcuts";
-import AgentPanelContent from "./parts/AgentPanelContent";
+
+const AgentPanelContent = lazyPage(() => import("./parts/AgentPanelContent"));
 
 //* what the chat opens outside itself, such as its menus, model picker and dialogs, which pressing doesn't count as leaving it
 const FLOATING_SELECTOR =

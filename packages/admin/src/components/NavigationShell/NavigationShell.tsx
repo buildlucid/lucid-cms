@@ -10,8 +10,6 @@ import {
 } from "solid-js";
 import AgentPanel from "@/components/AgentPanel/AgentPanel";
 import FullPageLoading from "@/components/FullPageLoading/FullPageLoading";
-import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
-import MediaGenerationModal from "@/components/MediaGenerationModal/MediaGenerationModal";
 import { Navigation } from "@/components/Navigation/Navigation";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import ShortcutFeedback from "@/components/ShortcutFeedback/ShortcutFeedback";
@@ -22,7 +20,14 @@ import { useMediaQuery } from "@/hooks/useMediaQuery/useMediaQuery";
 import api from "@/services/api";
 import navigationStore from "@/store/navigationStore/navigationStore";
 import siteStore from "@/store/siteStore/siteStore";
-import { LazyPageFallback } from "@/utils/lazy-page";
+import lazyPage, { LazyPageFallback } from "@/utils/lazy-page";
+
+const MediaAltGenerationModal = lazyPage(
+	() => import("@/components/MediaAltGenerationModal/MediaAltGenerationModal"),
+);
+const MediaGenerationModal = lazyPage(
+	() => import("@/components/MediaGenerationModal/MediaGenerationModal"),
+);
 
 const NavigationShell: Component<{
 	children?: JSXElement;

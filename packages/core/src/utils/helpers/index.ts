@@ -9,6 +9,7 @@ export {
 } from "./fractional-order.js";
 export { default as generateSecret } from "./generate-secret.js";
 export { default as getBaseUrl } from "./get-base-url.js";
+export { default as getCorePackageRoot } from "./get-core-package-root.js";
 export { default as getDirName } from "./get-dir-name.js";
 export { default as getEmailFrom } from "./get-email-from.js";
 export { default as getFilterValues } from "./get-filter-values.js";

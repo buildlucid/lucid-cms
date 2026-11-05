@@ -17,9 +17,13 @@ import constants from "./constants.js";
 import collectWatchFiles, {
 	createResourceWatchPlugin,
 } from "./integration/watch.js";
+import type { LucidLoggerConfig } from "./internal/logger.js";
 import type { LucidAstroOptions } from "./types.js";
 
-/** Adds Lucid's routes, type updates and admin output to Astro, using runtime server wrapping and waiting for development migrations before reporting readiness. */
+/**
+ * Integrates Lucid routes, types and admin output with Astro. Waits for development migrations and
+ * avoids duplicate request logs.
+ */
 const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 	let project: LucidViteProject | undefined;
 	/** Settles once the dev server's start-up migrations finish, with whether they completed. */
@@ -41,6 +45,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				addMiddleware,
 				addWatchFile,
 				command,
+				config,
 				injectRoute,
 				updateConfig,
 			}) => {
@@ -94,6 +99,14 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				};
 
 				updateConfig({
+					// Avoid duplicate Lucid request logs, preserving custom project loggers.
+					...(command === "dev" &&
+						!config.logger && {
+							logger: {
+								entrypoint: constants.loggerEntrypoint,
+								config: { paths: mountPaths } satisfies LucidLoggerConfig,
+							},
+						}),
 					vite: {
 						environments: {
 							ssr: serverEnvironment,

@@ -1,8 +1,12 @@
 import { TbOutlineBug } from "solid-icons/tb";
 import { type Component, createMemo, createSignal } from "solid-js";
-import BugReportModal from "@/components/BugReportModal/BugReportModal";
 import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
+import lazyPage from "@/utils/lazy-page";
+
+const BugReportModal = lazyPage(
+	() => import("@/components/BugReportModal/BugReportModal"),
+);
 
 /** Opens bug reporting from navigation. Requires a Lucid connection. */
 export const NavigationBugReport: Component = () => {

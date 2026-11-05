@@ -31,6 +31,10 @@
 			"types": "./dist/internal/middleware.d.mts",
 			"default": "./dist/internal/middleware.mjs"
 		},
+		"./internal/logger": {
+			"types": "./dist/internal/logger.d.mts",
+			"default": "./dist/internal/logger.mjs"
+		},
 		"./package.json": "./package.json"
 	},
 	"lucid": {

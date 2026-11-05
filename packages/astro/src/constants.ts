@@ -5,6 +5,8 @@ const constants = {
 	/** Lucid's route and middleware, which reach Lucid through `lucid:hosted`. */
 	routeEntrypoint: "@lucidcms/astro/internal/route",
 	middlewareEntrypoint: "@lucidcms/astro/internal/middleware",
+	/** The development logger destination that leaves Lucid's request logging to Lucid. */
+	loggerEntrypoint: "@lucidcms/astro/internal/logger",
 	/** Where builds put the admin before it joins Astro's output. */
 	adminBuildDirectory: ".lucid/astro/admin",
 	/** The admin app, Lucid's server endpoints and its OAuth metadata, all handled by Lucid. */

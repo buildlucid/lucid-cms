@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { adminPreviewPlugin, createAdminVite } from "@lucidcms/admin/build";
-import type { Plugin, PluginOption } from "vite";
+import {
+	adminEntry,
+	adminPreviewPlugin,
+	createAdminVite,
+} from "@lucidcms/admin/build";
+import { convertPathToPattern } from "tinyglobby";
+import { normalizePath, type Plugin, type PluginOption } from "vite";
 import { LucidError } from "../../utils/errors/index.js";
 import createAdminClientConfig from "../admin/create-client-config.js";
 import getConfigPath from "../config/get-config-path.js";
@@ -68,9 +73,30 @@ const lucid = async (options?: LucidViteOptions): Promise<PluginOption[]> => {
 
 		// A host's build sets the client's inputs itself, so it builds the admin apart and Lucid only serves it in development.
 		if (host) {
-			return admin.plugins
-				.filter((plugin) => plugin.apply !== "build")
-				.map((plugin): Plugin => ({ ...plugin, apply: "serve" }));
+			return [
+				...admin.plugins
+					.filter((plugin) => plugin.apply !== "build")
+					.map((plugin): Plugin => ({ ...plugin, apply: "serve" })),
+				{
+					name: "lucid:admin-scan",
+					apply: "serve",
+					// Hosts such as Astro name their own source as the client's scan entries, so the admin's dependencies would
+					// otherwise be found as it first loads, each reloading the page. Entries replace Vite's scan of the build's
+					// inputs, so they're only added beside a host's own, and as a glob pattern, as Vite reads them.
+					configEnvironment: {
+						order: "post",
+						handler: (name, config) => {
+							if (name !== "client" || !config.optimizeDeps?.entries) return;
+							return {
+								// Forward slashes first, as the Windows conversion keeps a backslash before `@`, as in a scoped package.
+								optimizeDeps: {
+									entries: [convertPathToPattern(normalizePath(adminEntry))],
+								},
+							};
+						},
+					},
+				},
+			];
 		}
 
 		return admin.plugins;

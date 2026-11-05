@@ -58,6 +58,7 @@ const AgentPanelContent: Component<{
 		loadEarlier: () => chat.history.fetchNextPage(),
 	});
 	const [details, setDetails] = createSignal<HTMLElement>();
+	const [panel, setPanel] = createSignal<HTMLElement>();
 	//* opening slides it in, unless it was already showing as a peek, as when it's pinned
 	const opening = createMemo(
 		(previous: { revealed: boolean; slides: boolean }) =>
@@ -70,6 +71,11 @@ const AgentPanelContent: Component<{
 	// ----------------------------------------
 	// Effects
 	createEffect(on(conversationId, () => scroll.scrollToEnd(), { defer: true }));
+	//* Resolve the peek element on entry; the panel may have started open.
+	createEffect(() => {
+		const element = panel();
+		if (element) props.peek?.ref(element);
+	});
 
 	// ----------------------------------------
 	// Render
@@ -86,7 +92,7 @@ const AgentPanelContent: Component<{
 			>
 				{/* full height and flush with the right edge, with only a start border, mirroring the navigation on the left */}
 				<aside
-					ref={(element) => props.peek?.ref(element)}
+					ref={setPanel}
 					aria-label={T()("agent.panel.label")}
 					style={{ "z-index": panelLayer }}
 					//* hidden off the edge while peeking, so it can't be tabbed into

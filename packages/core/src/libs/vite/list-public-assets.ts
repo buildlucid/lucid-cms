@@ -2,13 +2,12 @@ import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { normalizePath } from "vite";
 import constants from "../../constants/constants.js";
-import { getDirName } from "../../utils/helpers/index.js";
+import { getCorePackageRoot } from "../../utils/helpers/index.js";
 import { pathExists } from "../../utils/helpers/resolve-source-path.js";
 import type { ResourceFile } from "../resources/types.js";
 
 const corePublicDirectory = path.join(
-	getDirName(import.meta.url),
-	"../../../",
+	getCorePackageRoot(),
 	constants.directories.public,
 );
 

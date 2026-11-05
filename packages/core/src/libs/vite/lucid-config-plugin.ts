@@ -1,13 +1,13 @@
 import path from "node:path";
 import { normalizePath, type Plugin, type PluginOption } from "vite";
 import constants from "../../constants/constants.js";
-import { getDirName } from "../../utils/helpers/index.js";
+import { getCorePackageRoot } from "../../utils/helpers/index.js";
 import buildApp from "./build-app.js";
 import listResolvedPaths from "./list-resolved-paths.js";
 import type { LucidPluginProps, LucidViteApi } from "./types.js";
 
 /** Lucid's core package, as Vite's module IDs write it. */
-const coreDirectory = `${normalizePath(path.resolve(getDirName(import.meta.url), "../../../"))}/`;
+const coreDirectory = `${normalizePath(getCorePackageRoot())}/`;
 
 /** Lucid's generated files and common database names excluded from watching and serving, alongside adapter files and plugin additions such as uploads. */
 const lucidFiles = [

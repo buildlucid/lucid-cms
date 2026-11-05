@@ -13,11 +13,11 @@ import { Dynamic } from "solid-js/web";
 export const LazyPageFallback = createContext<() => JSXElement>();
 
 /**
- * A route page whose code loads on first use, like `lazy`, but without a
- * Suspense boundary. A boundary above a page also hides it, dropping focus,
- * whenever a query it read refetches, so while loading this shows the nearest
- * `LazyPageFallback` instead. `preload` starts loading ahead, such as on
- * navigation intent.
+ * A route page, or a shell part kept out of the admin's entry, whose code loads
+ * on first use, like `lazy`, but without a Suspense boundary. A boundary above a
+ * page also hides it, dropping focus, whenever a query it read refetches, so
+ * while loading this shows the nearest `LazyPageFallback`, or nothing outside
+ * one. `preload` starts loading ahead, such as on navigation intent.
  *
  * @example
  * ```tsx

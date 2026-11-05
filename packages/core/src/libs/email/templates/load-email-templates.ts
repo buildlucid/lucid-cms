@@ -1,11 +1,10 @@
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
-import { getDirName } from "../../../utils/helpers/index.js";
+import { getCorePackageRoot } from "../../../utils/helpers/index.js";
 import cliLogger from "../../cli/logger.js";
 import type { ResourceFile } from "../../resources/types.js";
 import type { RenderedTemplates } from "../types.js";
 
-const currentDir = getDirName(import.meta.url);
 const templateExtensions = new Set([".kiln"]);
 
 const pathExists = async (targetPath: string): Promise<boolean> => {
@@ -74,7 +73,7 @@ const loadEmailTemplates = async (props: {
 	const verbose = props.verbose ?? false;
 	const renderedTemplates: RenderedTemplates = {};
 
-	const packageTemplatePath = path.join(currentDir, "../../../../templates");
+	const packageTemplatePath = path.join(getCorePackageRoot(), "templates");
 	await processTemplatesInDirectory(
 		packageTemplatePath,
 		renderedTemplates,
