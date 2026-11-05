@@ -112,12 +112,15 @@ export function useDocumentUIState(props: {
 		);
 	});
 
-	const brickTranslationErrors = createMemo(() => {
-		return brickHelpers.hasErrorsOnOtherLocale({
+	const errorLocales = createMemo(() => {
+		return brickHelpers.getErrorLocales({
 			fieldErrors: brickStore.get.fieldsErrors,
 			brickErrors: brickStore.get.brickErrors,
-			currentLocale: contentLocale() || "",
 		});
+	});
+	const brickTranslationErrors = createMemo(() => {
+		const current = contentLocale() || "";
+		return errorLocales().some((code) => code !== current);
 	});
 
 	const collectionNeedsMigrating = createMemo(() => {
@@ -412,6 +415,7 @@ export function useDocumentUIState(props: {
 		isSaving,
 		isAutoSaving,
 		brickTranslationErrors,
+		errorLocales,
 		saveDisabled,
 		canPublishDocument,
 		isBuilderLocked,

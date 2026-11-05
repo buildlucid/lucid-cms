@@ -802,7 +802,7 @@ const DocumentEditorPage: Component<{
 							</Show>
 							<div ref={split.observe} class="flex flex-1">
 								<div
-									class={classnames({
+									class={classnames("flex flex-col", {
 										"min-w-0 flex-1": !previewing() && !comparison.open(),
 										"shrink-0": previewing(),
 										"w-1/2 shrink-0": comparison.open(),

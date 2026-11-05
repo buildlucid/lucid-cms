@@ -1,7 +1,11 @@
 import { createHotkey, formatForDisplay } from "@tanstack/solid-hotkeys";
 import type { Locale } from "@types";
 import classNames from "classnames";
-import { TbOutlineChevronDown, TbOutlineLanguage } from "solid-icons/tb";
+import {
+	TbOutlineAlertTriangle,
+	TbOutlineChevronDown,
+	TbOutlineLanguage,
+} from "solid-icons/tb";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { getButtonClasses } from "@/components/Button/classes";
 import Menu from "@/components/Menu/Menu";
@@ -15,6 +19,8 @@ interface ContentLocaleSelectProps {
 	value?: string | undefined;
 	setValue?: (_value: string | undefined) => void;
 	invalid?: boolean;
+	/** Locales marked with an error icon in the compact menu. */
+	errorLocales?: string[];
 	showShortcut?: boolean;
 	locales?: Locale[];
 	/** A toolbar button showing the language icon and code, listing the full names in its menu. For headers, with the global locale only. */
@@ -42,6 +48,10 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 	const currentOption = createMemo(() =>
 		options().find((option) => option.value === contentLocale()),
 	);
+	const triggerLabel = createMemo(() => {
+		const label = currentOption()?.label ?? "";
+		return props.invalid ? `${label} - ${T()("builder.locale.errors")}` : label;
+	});
 
 	// ----------------------------------
 	// Functions
@@ -88,12 +98,12 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 				<Menu.Root placement="bottom-end">
 					<Menu.Trigger
 						aria-label={T()("builder.locale.label", {
-							locale: currentOption()?.label ?? "",
+							locale: triggerLabel(),
 						})}
 						title={
 							props.showShortcut
-								? `${currentOption()?.label ?? ""} (${shortcutText})`
-								: currentOption()?.label
+								? `${triggerLabel()} (${shortcutText})`
+								: triggerLabel()
 						}
 						class={classNames(
 							getButtonClasses({
@@ -104,15 +114,16 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 							"gap-1.5 font-medium text-subtitle",
 						)}
 					>
-						<TbOutlineLanguage size={12} class="text-icon" />
+						<Show
+							when={props.invalid}
+							fallback={<TbOutlineLanguage size={12} class="text-icon" />}
+						>
+							<span class="flex size-3 shrink-0 items-center justify-center">
+								<TbOutlineAlertTriangle size={10} class="text-danger" />
+							</span>
+						</Show>
 						<span class="uppercase">{contentLocale()}</span>
 						<TbOutlineChevronDown size={10} class="text-icon" />
-						<Show when={props.invalid}>
-							<span
-								aria-hidden="true"
-								class="absolute top-1 right-1 size-1.5 rounded-full bg-danger"
-							/>
-						</Show>
 					</Menu.Trigger>
 					<Menu.Content>
 						<For each={options()}>
@@ -121,6 +132,16 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 									selected={option.value === contentLocale()}
 									onSelect={() =>
 										contentLocaleStore.get.setContentLocale(option.value)
+									}
+									end={
+										<Show when={props.errorLocales?.includes(option.value)}>
+											<TbOutlineAlertTriangle
+												size={12}
+												class="text-danger"
+												role="img"
+												aria-label={T()("common.errors")}
+											/>
+										</Show>
 									}
 								>
 									{option.label}

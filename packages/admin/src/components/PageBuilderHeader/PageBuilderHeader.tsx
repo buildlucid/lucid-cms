@@ -855,6 +855,7 @@ export const PageBuilderHeader: Component<{
 					compact
 					locales={documentLocalization.locales()}
 					invalid={props.state.ui.brickTranslationErrors?.()}
+					errorLocales={props.state.ui.errorLocales?.()}
 					showShortcut={true}
 				/>
 			</Show>

@@ -1659,6 +1659,7 @@
 	"builder.split.resize": "Resize fields and preview",
 	"builder.split.hint": "Drag to resize. Double-click to reset.",
 	"builder.locale.label": "Locale: {{locale}}",
+	"builder.locale.errors": "other locales have errors",
 	"builder.redo": "Redo",
 	"common.status.disabled": "Disabled",
 	"common.status.saved": "Saved",

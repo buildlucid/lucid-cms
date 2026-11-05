@@ -42,6 +42,8 @@ export function useDocumentHistoryUIState(props: {
 
 	const brickTranslationErrors = createMemo(() => false);
 
+	const errorLocales = createMemo((): string[] => []);
+
 	const collectionNeedsMigrating = createMemo(() => {
 		return props.collection()?.migrationStatus?.requiresMigration === true;
 	});
@@ -120,6 +122,7 @@ export function useDocumentHistoryUIState(props: {
 		isSaving,
 		isAutoSaving,
 		brickTranslationErrors,
+		errorLocales,
 		saveDisabled,
 		canPublishDocument,
 		isBuilderLocked,

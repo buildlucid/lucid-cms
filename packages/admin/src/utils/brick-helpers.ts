@@ -406,36 +406,36 @@ function getFieldRef(
 }
 
 /**
- * Recursively checks field and brick errors for any that are of a differetn locale to the current one
+ * Lists the locales with field or brick errors, so locale selects can flag them.
+ */
+const getErrorLocales = (props: {
+	fieldErrors: FieldError[];
+	brickErrors: BrickError[];
+}): string[] => {
+	const locales = new Set<string>();
+	const collect = (field: FieldError) => {
+		if (typeof field.localeCode === "string") locales.add(field.localeCode);
+		for (const groupError of field.groupErrors ?? []) {
+			for (const nestedField of groupError.fields) collect(nestedField);
+		}
+	};
+
+	for (const field of props.fieldErrors) collect(field);
+	for (const brick of props.brickErrors) {
+		for (const field of brick.fields) collect(field);
+	}
+
+	return [...locales];
+};
+
+/**
+ * Checks for field or brick errors on a locale other than the current one.
  */
 const hasErrorsOnOtherLocale = (props: {
 	currentLocale: string;
 	fieldErrors: FieldError[];
 	brickErrors: BrickError[];
-}) => {
-	const hasFieldErrors = (field: FieldError): boolean => {
-		if (
-			typeof field.localeCode === "string" &&
-			field.localeCode !== props.currentLocale
-		) {
-			return true;
-		}
-
-		if (field.groupErrors?.length) {
-			return field.groupErrors.some((groupError) =>
-				groupError.fields.some((nestedField) => hasFieldErrors(nestedField)),
-			);
-		}
-
-		return false;
-	};
-
-	if (props.fieldErrors.some(hasFieldErrors)) {
-		return true;
-	}
-
-	return props.brickErrors.some((brick) => brick.fields.some(hasFieldErrors));
-};
+}) => getErrorLocales(props).some((code) => code !== props.currentLocale);
 
 /**
  * Converts a InternalDocumentField array into a DocumentField object
@@ -579,6 +579,7 @@ const brickHelpers = {
 	getFieldRefs,
 	getFieldRef,
 	hasErrorsOnOtherLocale,
+	getErrorLocales,
 	objectifyFields,
 	getBrickSyncKey,
 	preserveRepeaterGroupOpenState,
