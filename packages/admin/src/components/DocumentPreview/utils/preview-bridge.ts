@@ -66,7 +66,7 @@ export const createPreviewBridge = (options?: {
 	let frame: HTMLIFrameElement | null = null;
 	let page: FramePage = { state: "loading" };
 	let editing: PreviewEditing | null = null;
-	//* a brick dragged in the builder's fields, shown on every page the frame loads until it's dropped
+	//* a brick or item dragged in the builder's fields, shown on every page the frame loads until it's dropped
 	let dragged: PreviewDragged | null = null;
 	//* the field being typed into on the page, which updates wait for so a re-render can't move its caret
 	let typing: PreviewFieldTarget | null = null;
@@ -433,7 +433,7 @@ export const createPreviewBridge = (options?: {
 		highlight: (target: PreviewFieldTarget) => {
 			postToRuntime({ type: previewProtocol.messages.highlightField, target });
 		},
-		/** Shows a brick dragged in the builder's fields moving to where it would land on the page, or ends with null. */
+		/** Shows a fields-column drag in the preview; null ends it. */
 		setDragged: (next: PreviewDragged | null) => {
 			dragged = next;
 			postToRuntime({

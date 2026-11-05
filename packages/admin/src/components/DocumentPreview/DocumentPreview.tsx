@@ -103,6 +103,8 @@ export const DocumentPreview: Component<{
 		target: PreviewFieldTarget,
 		options?: { activate?: boolean },
 	) => void;
+	/** Fields-column drag and landing target. Preview zooms out for bricks. */
+	dragged: Accessor<PreviewDragged | null>;
 	/** Applies a change to bricks or repeater items made from the page, returning its undo step, or null when it made none. */
 	onChange: (
 		target: PreviewFieldTarget,
@@ -197,43 +199,14 @@ export const DocumentPreview: Component<{
 			userPreferencesStore.getCollectionPreviewEditing(props.collectionKey()) ??
 			true,
 	);
-	//* a builder brick dragged in the fields column and where it would land, which the page shows it moving to while it zooms out
-	const columnDrag = createMemo(
-		(): PreviewDragged | null => {
-			const drag = brickStore.get.brickDrag;
-			const documentId = props.documentId();
-			if (!drag || documentId === undefined) return null;
-			const ordered = brickStore.get.bricks
-				.filter((brick) => brick.type === "builder")
-				.sort((a, b) => a.order - b.order);
-			const from = ordered.findIndex((brick) => brick.ref === drag.ref);
-			const to = ordered.findIndex((brick) => brick.ref === drag.over);
-			const targetAt = (index: number): PreviewFieldTarget | null => {
-				const brick = ordered[index];
-				return brick
-					? {
-							collectionKey: props.collectionKey(),
-							documentId,
-							brick: { type: "builder", key: brick.key, ref: brick.ref },
-							path: [],
-						}
-					: null;
-			};
-			const target = targetAt(from);
-			const anchor = to === from ? null : targetAt(to);
-			if (!target) return null;
-			return {
-				target,
-				//* dropped on a brick, it takes that brick's place, so it goes after those below it and before those above
-				landing: anchor
-					? { anchor, place: to > from ? "after" : "before" }
-					: null,
-			};
-		},
-		null,
-		{ equals: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
-	);
-	const zoomedOut = () => pageDrag() || columnDrag() !== null;
+	//* bricks zoom the page out while they're dragged, to show more of where they can go; repeater items stay close
+	const zoomedOut = () => {
+		const dragged = props.dragged();
+		return (
+			pageDrag() ||
+			(dragged !== null && getPreviewTargetKind(dragged.target) === "brick")
+		);
+	};
 	const editing = createMemo((): PreviewEditing | null => {
 		const documentId = props.documentId();
 		const details = props.editingDetails();
@@ -556,10 +529,10 @@ export const DocumentPreview: Component<{
 		}),
 	);
 	createEffect(() => previewBridge.setEditing(editing()));
-	//* the page shows the brick as being moved, then points it out where it was dropped
+	//* the page shows the brick or item as being moved, then points it out where it was dropped
 	createEffect(
 		on(
-			columnDrag,
+			props.dragged,
 			(drag, previous) => {
 				previewBridge.setDragged(drag);
 				if (!drag && previous) highlight(previous.target);

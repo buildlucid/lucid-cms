@@ -49,6 +49,16 @@ import {
 	normalizeGroupOpenState,
 } from "./utils/snapshots";
 
+/**
+ * Fields-column drag indexes among siblings. Repeater groups also identify their brick index and
+ * field path.
+ */
+export type StructureDrag = {
+	repeater?: { brickIndex: number; path: Array<string | number> };
+	from: number;
+	over: number;
+};
+
 export interface BrickData {
 	ref: string;
 	key: string;
@@ -99,8 +109,8 @@ export const createBrickStore = (idPrefix = "") => {
 		autoSaveCounter: number;
 		autoSavePaused: boolean;
 		relationFieldDragCount: number;
-		/** The builder brick being dragged in the fields column and the one it's over, which the preview shows it moving to. */
-		brickDrag: { ref: string; over: string } | null;
+		/** Active fields-column drag shown in the preview. */
+		structureDrag: StructureDrag | null;
 		locked: boolean;
 		/** The saved content the editor's state is based on, sent with saves so one based on content saved since is refused. Null until loaded, or after a save whose content the next load brings. */
 		baseContentId: string | null;
@@ -200,14 +210,6 @@ export const createBrickStore = (idPrefix = "") => {
 			ref?: string;
 			parentRepeaterKey?: string;
 		}) => void;
-		swapGroupOrder: (_props: {
-			brickIndex: number;
-			repeaterKey: string;
-			selectedRef: string;
-			targetRef: string;
-			ref?: string;
-			parentRepeaterKey?: string;
-		}) => void;
 		moveRepeaterGroup: (params: {
 			brickIndex: number;
 			repeaterKey: string;
@@ -241,7 +243,7 @@ export const createBrickStore = (idPrefix = "") => {
 		autoSaveCounter: 0,
 		autoSavePaused: false,
 		relationFieldDragCount: 0,
-		brickDrag: null,
+		structureDrag: null,
 		collectionLocalized: false,
 		documentRevision: 0,
 		contentRevision: 0,
@@ -264,7 +266,7 @@ export const createBrickStore = (idPrefix = "") => {
 				set("autoSaveCounter", 0);
 				set("autoSavePaused", false);
 				set("relationFieldDragCount", 0);
-				set("brickDrag", null);
+				set("structureDrag", null);
 				set("collectionLocalized", false);
 				set("baseContentId", null);
 				set("contentChanged", false);
@@ -806,63 +808,6 @@ export const createBrickStore = (idPrefix = "") => {
 					}
 				});
 				if (groupRemoved) rebuildBrickFieldIndex(params.brickIndex);
-			});
-		},
-		/** Reorders two repeater groups and refreshes paths so persisted order and indexed access remain aligned. */
-		swapGroupOrder(params) {
-			let groupOrderChanged = false;
-			const fieldPath = getBrickFieldPath({
-				brickIndex: params.brickIndex,
-				key: params.repeaterKey,
-				groupRef: params.ref,
-			});
-
-			recordBricks({ brickIndex: params.brickIndex }, () => {
-				batch(() => {
-					set(
-						"bricks",
-						params.brickIndex,
-						"fields",
-						produce((fieldsDraft) => {
-							const field =
-								(fieldPath && getFieldAtPath(fieldsDraft, fieldPath)) ||
-								brickHelpers.findFieldRecursive({
-									fields: fieldsDraft,
-									targetKey: params.repeaterKey,
-									groupRef: params.ref,
-									repeaterKey: params.parentRepeaterKey,
-								});
-
-							if (!field) return;
-							if (field.type !== "repeater") return;
-							if (field.groups === undefined) field.groups = [];
-
-							const selectedIndex = field.groups.findIndex(
-								(group) => group.ref === params.selectedRef,
-							);
-							const targetGroupIndex = field.groups.findIndex(
-								(group) => group.ref === params.targetRef,
-							);
-
-							if (selectedIndex === -1 || targetGroupIndex === -1) return;
-
-							const groupOrder = field.groups[selectedIndex].order;
-
-							field.groups[selectedIndex].order =
-								field.groups[targetGroupIndex].order;
-							field.groups[targetGroupIndex].order = groupOrder;
-							groupOrderChanged = true;
-
-							field.groups.sort((a, b) => a.order - b.order);
-						}),
-					);
-
-					if (groupOrderChanged) {
-						set("autoSaveCounter", (prev) => prev + 1);
-						markDocumentChange({ content: true });
-					}
-				});
-				if (groupOrderChanged) rebuildBrickFieldIndex(params.brickIndex);
 			});
 		},
 		/** Moves a repeater group to a position in its repeater, renumbering the groups' order. */

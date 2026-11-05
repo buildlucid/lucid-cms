@@ -115,9 +115,18 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 										),
 									});
 								}}
-								onDragChange={(drag) =>
-									brickStore.set("brickDrag", drag ?? null)
-								}
+								onDragChange={(drag) => {
+									const refs = builderBricks().map((brick) => brick.ref);
+									brickStore.set(
+										"structureDrag",
+										drag
+											? {
+													from: refs.indexOf(drag.ref),
+													over: refs.indexOf(drag.over),
+												}
+											: null,
+									);
+								}}
 							>
 								{({ dragDrop }) => (
 									<For each={builderBricks()}>
@@ -214,8 +223,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				"view-transition-name": `brick-item-${props.brick.ref}`,
 			}}
 			class={classNames(
-				"drag-item w-full bg-card border border-border rounded-md mb-4 last:mb-0 ring-inset ring-primary",
+				"drag-item w-full bg-card border border-border rounded-md first:mt-0 last:mb-0 ring-inset ring-primary",
 				{
+					"mb-2": !brickOpen(),
+					"my-4": brickOpen(),
 					"border-danger-low-border bg-linear-to-b from-danger-low to-card to-30%":
 						errorCount() > 0,
 					"opacity-60": props.dragDrop.getDragging()?.ref === props.brick.ref,
@@ -258,12 +269,17 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						toggleDropdown();
 					}
 				}}
-				class="flex cursor-pointer items-center justify-between gap-3 rounded-md px-4 py-3 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
+				class={classNames(
+					"flex cursor-pointer items-center justify-between gap-3 rounded-[calc(var(--radius-md)-1px)] px-4 py-3 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary",
+					{
+						"rounded-b-none": brickOpen(),
+					},
+				)}
 			>
 				<div class="flex min-w-0 flex-1 items-center gap-2">
 					<button
 						type="button"
-						class="text-muted hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-muted hover:text-primary-hover transition-colors duration-200 cursor-grab active:cursor-grabbing focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={(e) => e.stopPropagation()}
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
@@ -289,10 +305,12 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						data-preview-focus-label
 						class="flex min-h-8 min-w-0 flex-1 items-center"
 					>
-						{helpers.getLocaleValue({
-							value: config()?.details.label,
-							fallback: config()?.key,
-						})}
+						<span class="truncate">
+							{helpers.getLocaleValue({
+								value: config()?.details.label,
+								fallback: config()?.key,
+							})}
+						</span>
 					</h3>
 				</div>
 				<div class="flex items-center gap-2">

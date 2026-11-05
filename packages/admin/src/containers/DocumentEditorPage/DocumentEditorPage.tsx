@@ -1019,6 +1019,7 @@ const DocumentEditorPage: Component<{
 												onFocusField={(target, options) =>
 													void previewFocus.requestTarget(target, options)
 												}
+												dragged={previewStructure.dragged}
 												onChange={previewStructure.handle}
 												onUndo={previewStructure.undo}
 												repeaterCapacity={previewStructure.capacity}

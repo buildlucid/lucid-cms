@@ -1040,6 +1040,12 @@ export const PageBuilderHeader: Component<{
 									? "flex min-w-0 flex-1 items-center"
 									: "flex min-w-0 basis-full flex-col justify-center @3xl/builder-header:flex-1 @3xl/builder-header:basis-auto"
 							}
+							//* Offset the title block to keep it centred as the subtitle collapses.
+							style={
+								condensing()
+									? { "margin-top": `${-6 * (1 - condense())}px` }
+									: undefined
+							}
 						>
 							{title()}
 							<Show when={condensing()}>

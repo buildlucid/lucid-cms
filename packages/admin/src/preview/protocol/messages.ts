@@ -133,7 +133,7 @@ export const isPreviewChildMessage = (
 	}
 };
 
-/** Validates where a dragged brick would land: next to one of its siblings. */
+/** Validates where a dragged brick or item would land: next to one of its siblings. */
 const isPreviewLanding = (
 	target: PreviewFieldTarget,
 	value: unknown,
@@ -197,7 +197,7 @@ export const isPreviewParentMessage = (
 				(value.target === null
 					? value.landing === null
 					: isPreviewFieldTarget(value.target) &&
-						getPreviewTargetKind(value.target) === "brick" &&
+						getPreviewTargetKind(value.target) !== "field" &&
 						(value.landing === null ||
 							isPreviewLanding(value.target, value.landing)))
 			);

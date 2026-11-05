@@ -1,7 +1,12 @@
 import type { Collection } from "@types";
-import type { Accessor } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import type { PreviewFieldTarget, PreviewPlace } from "@/preview/protocol";
+import { getBuilderPreviewTarget } from "@/hooks/usePreviewFocus/utils/get-builder-preview-target";
+import type {
+	PreviewDragged,
+	PreviewFieldTarget,
+	PreviewPlace,
+} from "@/preview/protocol";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import { findPreviewBrick } from "@/utils/find-preview-brick";
@@ -257,7 +262,46 @@ export const usePreviewStructure = (props: {
 		return changed();
 	};
 
+	const dragged = createMemo(
+		(): PreviewDragged | null => {
+			const drag = brickStore.get.structureDrag;
+			const collection = props.collection();
+			const documentId = props.documentId();
+			if (!drag || !collection || documentId === undefined) return null;
+			const { repeater } = drag;
+			const builderBricks = brickStore.get.bricks
+				.filter((brick) => brick.type === "builder")
+				.sort((a, b) => a.order - b.order);
+			const targetAt = (index: number) => {
+				const brick = repeater
+					? brickStore.get.bricks[repeater.brickIndex]
+					: builderBricks[index];
+				if (!brick || index < 0) return null;
+				return getBuilderPreviewTarget({
+					collectionKey: props.collectionKey(),
+					documentId,
+					collection,
+					brick,
+					path: repeater ? [...repeater.path, index] : [],
+				});
+			};
+			const target = targetAt(drag.from);
+			const anchor = drag.over === drag.from ? null : targetAt(drag.over);
+			if (!target) return null;
+			return {
+				target,
+				//* Insert after a lower sibling or before a higher one to occupy its index.
+				landing: anchor
+					? { anchor, place: drag.over > drag.from ? "after" : "before" }
+					: null,
+			};
+		},
+		null,
+		{ equals: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
+	);
+
 	return {
+		dragged,
 		/** Applies a change, returning its undo step, or null when it made none. */
 		handle: (
 			target: PreviewFieldTarget,

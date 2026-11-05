@@ -152,16 +152,30 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 					<Match when={groups().length > 0}>
 						<DragDrop
 							sortOrder={(ref, targetRef) => {
-								brickStore.get.swapGroupOrder({
+								brickStore.get.moveRepeaterGroup({
 									brickIndex: fieldRenderState.brickIndex(),
 									repeaterKey: fieldConfig().key,
-									selectedRef: ref,
-									targetRef: targetRef,
-
+									groupRef: ref,
+									index: groupRefs().indexOf(targetRef),
 									ref: props.groupRef,
 									parentRepeaterKey: props.parentRepeaterKey,
 								});
 							}}
+							onDragChange={(drag) =>
+								brickStore.set(
+									"structureDrag",
+									drag
+										? {
+												repeater: {
+													brickIndex: fieldRenderState.brickIndex(),
+													path: props.fieldPath,
+												},
+												from: groupRefs().indexOf(drag.ref),
+												over: groupRefs().indexOf(drag.over),
+											}
+										: null,
+								)
+							}
 						>
 							{({ dragDrop }) => (
 								<div class="w-full border-t border-border bg-card divide-y divide-border">

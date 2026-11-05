@@ -193,20 +193,20 @@ export type PreviewEditMessage = PreviewEnvelope & {
 	text: string | null;
 };
 
-/** Where a dragged brick would be moved to: next to a sibling. */
+/** Where a dragged brick or item would be moved to: next to a sibling. */
 export type PreviewLanding = {
 	anchor: PreviewFieldTarget;
 	place: PreviewPlace;
 };
 
-/** A brick dragged in the builder's fields and where it would land, which the page shows it moving to. */
+/** Fields-column drag target and proposed landing position. */
 export type PreviewDragged = {
 	target: PreviewFieldTarget;
 	/** Null while it's over where it already is. */
 	landing: PreviewLanding | null;
 };
 
-/** Says which brick is being dragged in the builder's fields and where it would land, which the page shows it moving to, or null once it's dropped. */
+/** Reports a fields-column drag and landing position, or null after drop. */
 export type PreviewDraggedMessage = PreviewEnvelope & {
 	type: typeof previewProtocol.messages.dragged;
 	target: PreviewFieldTarget | null;

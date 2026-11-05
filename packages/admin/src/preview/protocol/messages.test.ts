@@ -275,6 +275,12 @@ describe("direction-specific message validation", () => {
 		expect(dragged(null, null)).toBe(true);
 		expect(dragged(null, { anchor: other, place: "after" })).toBe(false);
 		expect(dragged(target, null)).toBe(false);
+		expect(
+			dragged(
+				{ ...brickTarget, path: ["items", 0] },
+				{ anchor: { ...brickTarget, path: ["items", 2] }, place: "after" },
+			),
+		).toBe(true);
 		expect(dragged(brickTarget, { anchor: target, place: "after" })).toBe(
 			false,
 		);
