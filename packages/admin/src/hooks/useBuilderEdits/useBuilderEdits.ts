@@ -89,8 +89,6 @@ export const useBuilderEdits = (props: {
 	collectionKey: Accessor<string>;
 	documentId: Accessor<number | undefined>;
 	locales: Accessor<string[]>;
-	/** Called once a step is undone or redone, from the controls or the keyboard. */
-	onStep?: () => void;
 }) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -136,7 +134,6 @@ export const useBuilderEdits = (props: {
 			direction === "undo" ? brickStore.edits.undo() : brickStore.edits.redo();
 		if (!entry) return;
 		reveal(entry, direction);
-		props.onStep?.();
 	};
 	const handleKeyDown = (event: KeyboardEvent, phase: "capture" | "bubble") => {
 		if (!props.enabled()) return;

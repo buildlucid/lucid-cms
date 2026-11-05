@@ -12,6 +12,7 @@ import { Dynamic } from "solid-js/web";
 import ActionIcon, {
 	type ActionIconName,
 } from "@/components/ActionIcon/ActionIcon";
+import { getButtonClasses } from "@/components/Button/classes";
 import Menu, {
 	type MenuItemVariant,
 	type MenuPlacement,
@@ -63,13 +64,13 @@ export interface ActionMenuItem {
 
 export type ActionMenuSize = "sm" | "md";
 
-export type ActionMenuVariant = "outline" | "ghost";
+export type ActionMenuVariant = "outline" | "ghost" | "toolbar";
 
 export interface ActionMenuProps {
 	actions: ActionMenuItem[];
 	/** @default "sm" */
 	size?: ActionMenuSize;
-	/** `ghost` drops the trigger's background and border, like the ghost button. @default "outline" */
+	/** `ghost` drops the trigger's background and border, like the ghost button; `toolbar` matches the toolbar button, for headers. @default "outline" */
 	variant?: ActionMenuVariant;
 	/** Which way the trigger's dots run. @default "vertical" */
 	orientation?: "vertical" | "horizontal";
@@ -146,15 +147,22 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 					data-action-menu
 					onClick={(event) => event.stopPropagation()}
 					class={classNames(
-						"pointer-events-auto outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors",
-						{
-							"bg-input border border-border hover:bg-background-hover":
-								props.variant !== "ghost",
-							"text-muted hover:text-subtitle hover:bg-background/50":
-								props.variant === "ghost",
-							"min-w-7 w-7 h-7": props.size !== "md",
-							"min-w-9 w-9 h-9": props.size === "md",
-						},
+						"pointer-events-auto",
+						props.variant === "toolbar"
+							? getButtonClasses({
+									variant: "toolbar",
+									size: props.size === "md" ? "sm" : "xs",
+									shape: "square",
+								})
+							: {
+									"outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors": true,
+									"bg-input border border-border hover:bg-background-hover":
+										props.variant !== "ghost",
+									"text-muted hover:text-subtitle hover:bg-background/50":
+										props.variant === "ghost",
+									"min-w-7 w-7 h-7": props.size !== "md",
+									"min-w-9 w-9 h-9": props.size === "md",
+								},
 						props.class,
 					)}
 				>
@@ -165,8 +173,10 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 								? TbOutlineDots
 								: TbOutlineDotsVertical
 						}
+						size={props.variant === "toolbar" ? 12 : undefined}
 						class={classNames("pointer-events-none", {
-							"text-subtitle": props.variant !== "ghost",
+							"text-subtitle":
+								props.variant === undefined || props.variant === "outline",
 						})}
 					/>
 				</Menu.Trigger>

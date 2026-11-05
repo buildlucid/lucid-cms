@@ -10,6 +10,7 @@ export const SECTION_PREFERENCE_KEYS = [
 	"history.inspector.requestActivity",
 	"history.inspector.revisionRetention",
 	"history.inspector.versionDetails",
+	"pageBuilder.sidebar",
 	"pageBuilder.sidebar.documentDetails",
 	"pageBuilder.sidebar.requests",
 	"pageBuilder.sidebar.workflow",

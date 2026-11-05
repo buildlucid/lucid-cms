@@ -13,8 +13,8 @@ import { getBuilderPreviewTarget } from "./utils/get-builder-preview-target";
 import { resolvePreviewFieldTarget } from "./utils/resolve-preview-field-target";
 
 /**
- * Synchronizes focus: preview targets open builder fields, and builder focus sets the highlighted
- * preview target.
+ * Synchronizes builder and preview focus. Closes automatically opened sections when selection
+ * leaves them, unless the user has toggled them.
  */
 export const usePreviewFocus = (props: {
 	collection: Accessor<Collection | undefined>;
@@ -30,6 +30,29 @@ export const usePreviewFocus = (props: {
 	//* a new object for every focus, so focusing the same field again points it out again
 	const [builderTarget, setBuilderTarget] =
 		createSignal<PreviewFieldTarget | null>(null, { equals: false });
+	//* the triggers of what preview targets opened, kept by element so a brick moving doesn't change which one it is
+	const opened = new Set<HTMLElement>();
+
+	/** Closes what preview targets opened, apart from the triggers in `keep`, which the next target needs. */
+	const closeOpened = (keep: ReadonlySet<Element> = new Set()) => {
+		for (const trigger of opened) {
+			if (keep.has(trigger)) continue;
+			opened.delete(trigger);
+			if (trigger.isConnected && trigger.dataset.previewFocusOpen === "true") {
+				trigger.click();
+			}
+		}
+	};
+	//* Preserve manual toggles. Ignore synthetic reveal clicks and drag handles; wait for handlers before checking state.
+	const onToggle = (event: Event) => {
+		if (!event.isTrusted || !(event.target instanceof Element)) return;
+		const trigger = event.target.closest("[data-preview-focus-open]");
+		if (!(trigger instanceof HTMLElement) || !opened.has(trigger)) return;
+		const before = trigger.dataset.previewFocusOpen;
+		setTimeout(() => {
+			if (trigger.dataset.previewFocusOpen !== before) opened.delete(trigger);
+		});
+	};
 
 	const cancelReveal = () => {
 		revealController?.abort();
@@ -83,6 +106,14 @@ export const usePreviewFocus = (props: {
 		}
 
 		cancelReveal();
+		closeOpened(
+			new Set(
+				resolution.structureIds.flatMap((id) => {
+					const trigger = document.getElementById(id);
+					return trigger ? [trigger] : [];
+				}),
+			),
+		);
 		if (target.locale && props.locales().includes(target.locale)) {
 			contentLocaleStore.get.setContentLocale(target.locale);
 		}
@@ -93,6 +124,7 @@ export const usePreviewFocus = (props: {
 			structureIds: resolution.structureIds,
 			signal: controller.signal,
 			activate: options?.activate,
+			onOpen: (trigger) => opened.add(trigger),
 		});
 		if (controller.signal.aborted || revealController !== controller) {
 			cleanup?.();
@@ -127,14 +159,26 @@ export const usePreviewFocus = (props: {
 	};
 
 	document.addEventListener("focusin", onFocusIn);
+	document.addEventListener("click", onToggle, true);
+	document.addEventListener("keydown", onToggle, true);
 	onCleanup(() => {
 		cancelReveal();
+		opened.clear();
 		document.removeEventListener("focusin", onFocusIn);
+		document.removeEventListener("click", onToggle, true);
+		document.removeEventListener("keydown", onToggle, true);
 	});
 	return {
 		requestTarget,
 		builderTarget,
 		/** Points out a field, brick or repeater item on the page, eg. one just added. */
 		pointOut: (target: PreviewFieldTarget) => setBuilderTarget(target),
+		/** The page cleared its selection, so what preview targets opened closes again. */
+		deselect: () => {
+			cancelReveal();
+			closeOpened();
+		},
+		/** Leaves what preview targets opened as it is, eg. once the preview closes. */
+		forgetOpened: () => opened.clear(),
 	};
 };

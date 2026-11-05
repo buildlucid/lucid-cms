@@ -19,6 +19,8 @@ export type PreviewEditing = {
 	repeaters: PreviewRepeater[];
 	/** The fields with validation errors. Items, repeaters and bricks holding one show as invalid too. */
 	errors: PreviewFieldPath[];
+	/** The admin's theme, whose green the page's selection and drop outlines use. */
+	theme: "light" | "dark";
 };
 
 /** Where a field, item or brick is in the edited document: its brick, if any, and content path. */

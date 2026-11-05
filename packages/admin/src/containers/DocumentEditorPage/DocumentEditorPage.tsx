@@ -26,8 +26,12 @@ import ReadOnlyDocument from "@/components/DocumentComparison/ReadOnlyDocument";
 import { DocumentPreview } from "@/components/DocumentPreview/DocumentPreview";
 import { DocumentSidebar } from "@/components/DocumentSidebar/DocumentSidebar";
 import { FixedBricks } from "@/components/FixedBricks/FixedBricks";
-import { PageBuilderHeader } from "@/components/PageBuilderHeader/PageBuilderHeader";
+import {
+	type BuilderView,
+	PageBuilderHeader,
+} from "@/components/PageBuilderHeader/PageBuilderHeader";
 import type { ViewSelectorOption } from "@/components/PageBuilderHeader/parts/ViewSelector";
+import { PageLayoutCorners } from "@/components/PageLayout/parts/PageLayoutCorners";
 import Skeleton from "@/components/Skeleton/Skeleton";
 import WorkflowStageSelect from "@/components/WorkflowStageSelect/WorkflowStageSelect";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
@@ -53,10 +57,7 @@ import { usePreviewFieldEdit } from "@/hooks/usePreviewFieldEdit/usePreviewField
 import { usePreviewFocus } from "@/hooks/usePreviewFocus/usePreviewFocus";
 import { usePreviewStructure } from "@/hooks/usePreviewStructure/usePreviewStructure";
 import { useStoredVersionRedirect } from "@/hooks/useStoredVersionRedirect/useStoredVersionRedirect";
-import type {
-	PreviewFieldTarget,
-	PreviewScrollState,
-} from "@/preview/protocol";
+import type { PreviewScrollState } from "@/preview/protocol";
 import brickStore from "@/store/brickStore/brickStore";
 import navigationStore from "@/store/navigationStore/navigationStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
@@ -69,6 +70,7 @@ import { getPreviewEditingDetails } from "@/utils/preview-editing";
 import { getPreviewErrors } from "@/utils/preview-errors";
 import { getRequestRoute } from "@/utils/route-helpers";
 import BuilderSplitHandle from "./parts/BuilderSplitHandle";
+import DetailsColumn from "./parts/DetailsColumn";
 import DocumentChangedBar from "./parts/DocumentChangedBar";
 import DocumentEditorSkeleton, {
 	type DocumentEditorSkeletonLayout,
@@ -107,7 +109,7 @@ const DocumentEditorPage: Component<{
 	let pendingPreviewScroll: PreviewScrollState | null = null;
 	//* set from the editors below, which need the UI state to know whether this tab can hold the document
 	const [heldElsewhere, setHeldElsewhere] = createSignal(false);
-	const [detailsOpen, setDetailsOpen] = createSignal(false);
+	const [previewToolbar, setPreviewToolbar] = createSignal<HTMLDivElement>();
 	const agentSession = useAgentSession();
 	const sideBySide = useBuilderSideBySide();
 	const split = useBuilderSplit();
@@ -225,10 +227,6 @@ const DocumentEditorPage: Component<{
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
 		locales: docState.contentLocales,
-		//* the details cover the preview, so stepping back or forward closes them to show the page change
-		onStep: () => {
-			if (previewing()) setDetailsOpen(false);
-		},
 	});
 
 	const autoSave = useDocumentAutoSave({
@@ -291,7 +289,6 @@ const DocumentEditorPage: Component<{
 		documentId: docState.documentId,
 		locales: docState.contentLocales,
 		reveal: (target) => {
-			setDetailsOpen(false);
 			void previewFocus.requestTarget(target);
 			previewFocus.pointOut(target);
 		},
@@ -473,17 +470,31 @@ const DocumentEditorPage: Component<{
 		}
 	});
 
-	//* the preview and comparisons take the sidebar's width, kept while another version loads so the nav doesn't flash in and out
+	//* the preview takes the sidebar's width, kept while another version loads so the nav doesn't flash in and out
 	createEffect(() => {
 		if (loading()) return;
-		navigationStore.set("tucked", previewing() || comparison.open());
+		navigationStore.set("tucked", previewing());
 	});
-	//* opening the agent chat makes room for it by closing the details beside the fields, which can be opened again
+	//* opening the agent chat makes room for it by folding the details beside the fields, which can be opened again
 	createEffect(
 		on(
 			agentSession.panel.visible,
 			(visible) => {
-				if (visible && !previewing()) setDetailsOpen(false);
+				if (visible && detailsBeside()) {
+					userPreferencesStore.setSectionOpen("pageBuilder.sidebar", false);
+				}
+			},
+			{ defer: true },
+		),
+	);
+	//* what the preview opened stays open once it closes, as it's what's being edited, and the header drops its controls' slot
+	createEffect(
+		on(
+			() => previewing(),
+			(open) => {
+				if (open) return;
+				previewFocus.forgetOpened();
+				setPreviewToolbar(undefined);
 			},
 			{ defer: true },
 		),
@@ -625,16 +636,12 @@ const DocumentEditorPage: Component<{
 		}
 		return "fields";
 	});
-	//* the details, hidden until toggled, sit beside the fields where they fit, otherwise they swap in for them
+	//* the details show while editing: beside the fields where they fit, otherwise below them
 	const detailsBeside = createMemo(
 		() =>
 			detailsAvailable() && sideBySide() && !previewing() && !comparison.open(),
 	);
-	const detailsSwappable = createMemo(
-		() => detailsAvailable() && (previewing() || !sideBySide()),
-	);
-	const showSidebar = createMemo(() => detailsBeside() && detailsOpen());
-	const showDetails = createMemo(() => detailsSwappable() && detailsOpen());
+	const detailsBelow = createMemo(() => detailsAvailable() && !sideBySide());
 	//* notices take their own room at the end of the fields, so they never cover the last of them
 	const showNotices = createMemo(
 		() =>
@@ -651,23 +658,27 @@ const DocumentEditorPage: Component<{
 						option.versionId !== null && option.key !== comparisonKey(),
 				),
 	);
+	const view = createMemo((): BuilderView => {
+		if (comparison.open()) return "compare";
+		return previewing() ? "preview" : "fields";
+	});
+	const viewOptions = createMemo(() => {
+		const options: Exclude<BuilderView, "fields">[] = [];
+		if (uiState.showPreview() && sideBySide()) options.push("preview");
+		if (showComparisonToggle()) options.push("compare");
+		return options;
+	});
 
 	// ----------------------------------
 	// Functions
-	const togglePreview = () => {
-		if (comparison.open()) {
-			comparison.close();
-			uiState.setPreviewOpen(true);
+	//* comparing hides the preview without changing whether it's open, so the fields alone close both
+	const changeView = (next: BuilderView) => {
+		if (next === "compare") {
+			if (!comparison.open()) comparison.toggle();
 			return;
 		}
-		uiState.setPreviewOpen(!uiState.getPreviewOpen());
-	};
-	const focusPreviewField = (
-		target: PreviewFieldTarget,
-		options?: { activate?: boolean },
-	) => {
-		setDetailsOpen(false);
-		void previewFocus.requestTarget(target, options);
+		if (comparison.open()) comparison.close();
+		uiState.setPreviewOpen(next === "preview");
 	};
 	//* side-by-side stays open when moving between editable versions, and
 	//* read-only versions open in its right column instead. The view picked is
@@ -740,6 +751,14 @@ const DocumentEditorPage: Component<{
 				<DocumentEditorSkeleton
 					layout={skeletonLayout()}
 					fieldsWidth={split.size()}
+					details={
+						detailsAvailable() && sideBySide()
+							? userPreferencesStore.getSectionOpen("pageBuilder.sidebar") ===
+								false
+								? "collapsed"
+								: "open"
+							: undefined
+					}
 				/>
 			</Match>
 			<Match when={uiState.isSuccess()}>
@@ -756,28 +775,20 @@ const DocumentEditorPage: Component<{
 					autoSave={autoSave}
 					navigationGuard={navigationGuard}
 				>
-					<div class="flex flex-col md:h-[calc(100dvh-1rem)]">
+					<div class="flex flex-col">
 						<PageBuilderHeader
 							mode={props.mode}
 							version={versionType}
 							versionId={versionId}
 							currentViewLabel={currentViewLabel}
-							preview={
-								uiState.showPreview() && sideBySide()
-									? { open: previewing, toggle: togglePreview }
+							view={
+								viewOptions().length > 0
+									? { value: view, options: viewOptions, onChange: changeView }
 									: undefined
 							}
-							comparison={
-								showComparisonToggle()
-									? { open: comparison.open, toggle: comparison.toggle }
-									: undefined
-							}
-							details={
-								detailsSwappable() || detailsBeside()
-									? {
-											open: detailsOpen,
-											toggle: () => setDetailsOpen(!detailsOpen()),
-										}
+							previewBar={
+								previewing()
+									? { fieldsWidth: split.size, setToolbar: setPreviewToolbar }
 									: undefined
 							}
 							requestLink={requestLink()}
@@ -809,46 +820,53 @@ const DocumentEditorPage: Component<{
 								beforeVersionChange: resolveVersionChange,
 							}}
 						/>
-						{/* inputs in here write to the document, so undo belongs to it rather than the browser */}
 						<div
 							data-document-builder
-							class="mt-2 mb-4 flex flex-col overflow-clip rounded-xl border border-border bg-background md:min-h-0 md:flex-1 [--comparison-bar-height:2.75rem] md:[--document-header-bar-height:0px]"
+							class={classnames(
+								"flex flex-col overflow-clip border-x border-border bg-background",
+								previewing()
+									? "mb-2 rounded-b-lg md:min-h-[calc(100dvh-3.8125rem)]"
+									: "mt-4 rounded-t-xl border-t max-md:mb-4 max-md:rounded-b-xl max-md:border-b md:mb-4 md:min-h-[calc(100dvh-6.375rem)]",
+								{ "[--comparison-bar-height:44px]": comparison.open() },
+							)}
 						>
 							<Show when={comparison.open()}>
-								<DocumentComparisonBar
-									comparison={comparison}
-									leftKey={comparisonKey()}
-									onSelectLeft={selectLeftVersion}
-									leftEnd={
-										<Show
-											when={
-												docState.collection()?.publishing.workflow &&
-												docState.document()?.workflow
-											}
-											fallback={
-												<span class="text-xs text-muted">
-													{uiState.isBuilderLocked()
-														? T()("documents.compare.read.only")
-														: T()("documents.compare.editing")}
-												</span>
-											}
-										>
-											<WorkflowStageSelect
-												collection={docState.collection()}
-												stage={docState.document()?.workflow?.stage}
-												editable={canUpdateWorkflow()}
-												loading={
-													mutations.updateWorkflowMutation.action.isPending
+								<div class="sticky top-(--document-header-bar-height) z-20">
+									<DocumentComparisonBar
+										comparison={comparison}
+										leftKey={comparisonKey()}
+										onSelectLeft={selectLeftVersion}
+										leftEnd={
+											<Show
+												when={
+													docState.collection()?.publishing.workflow &&
+													docState.document()?.workflow
 												}
-												onChange={(stage) =>
-													void mutations
-														.updateWorkflowAction({ stage })
-														.catch(() => undefined)
+												fallback={
+													<span class="text-xs text-muted">
+														{uiState.isBuilderLocked()
+															? T()("documents.compare.read.only")
+															: T()("documents.compare.editing")}
+													</span>
 												}
-											/>
-										</Show>
-									}
-								/>
+											>
+												<WorkflowStageSelect
+													collection={docState.collection()}
+													stage={docState.document()?.workflow?.stage}
+													editable={canUpdateWorkflow()}
+													loading={
+														mutations.updateWorkflowMutation.action.isPending
+													}
+													onChange={(stage) =>
+														void mutations
+															.updateWorkflowAction({ stage })
+															.catch(() => undefined)
+													}
+												/>
+											</Show>
+										}
+									/>
+								</div>
 							</Show>
 							<Show when={brickStore.get.contentChanged}>
 								<DocumentChangedBar
@@ -857,122 +875,108 @@ const DocumentEditorPage: Component<{
 									onReload={() => void reloadChangedContent()}
 								/>
 							</Show>
-							<div
-								class={classnames("flex min-h-0 flex-1 flex-col", {
-									"overflow-y-auto": comparison.open(),
-								})}
-							>
+							<div ref={split.observe} class="flex flex-1">
 								<div
-									ref={split.observe}
-									class={classnames(
-										"flex",
-										comparison.open() ? "min-h-full" : "min-h-0 flex-1",
-									)}
+									class={classnames({
+										"min-w-0 flex-1": !previewing() && !comparison.open(),
+										"shrink-0": previewing(),
+										"w-1/2 shrink-0": comparison.open(),
+									})}
+									style={
+										previewing() ? { width: `${split.size()}px` } : undefined
+									}
 								>
-									<div
-										class={classnames({
-											"min-w-0 flex-1": !previewing() && !comparison.open(),
-											"shrink-0": previewing(),
-											"w-1/2 shrink-0": comparison.open(),
-											"md:min-h-0 md:overflow-y-auto": !comparison.open(),
-										})}
-										style={
-											previewing() ? { width: `${split.size()}px` } : undefined
+									<CollectionPseudoBrick
+										fields={collectionFields()}
+										collectionMigrationStatus={
+											docState.collection()?.migrationStatus
 										}
-									>
-										<div class={classnames({ hidden: showDetails() })}>
-											<CollectionPseudoBrick
-												fields={collectionFields()}
-												collectionMigrationStatus={
-													docState.collection()?.migrationStatus
-												}
-												collectionKey={docState.collectionKey()}
-												documentId={docState.documentId()}
-												hasFollowingSection={
-													fixedBrickConfig().length > 0 ||
-													builderBrickConfig().length > 0
-												}
-											/>
-											<FixedBricks
-												brickConfig={fixedBrickConfig()}
-												collectionMigrationStatus={
-													docState.collection()?.migrationStatus
-												}
-												collectionKey={docState.collectionKey()}
-												documentId={docState.documentId()}
-												hasFollowingSection={builderBrickConfig().length > 0}
-											/>
-											<BuilderBricks
-												brickConfig={builderBrickConfig()}
-												collectionMigrationStatus={
-													docState.collection()?.migrationStatus
-												}
-												collectionKey={docState.collectionKey()}
-												documentId={docState.documentId()}
-											/>
-										</div>
-										<Show when={showDetails()}>
-											<DocumentSidebar
-												padding="lg"
-												collection={docState.collection}
-												collectionKey={docState.collectionKey}
-												document={docState.document}
-												refs={docState.refs}
-												autoSaveMetadata={mutations.autoSaveMetadata}
-												documentId={docState.documentId}
-												disabled={disableWorkflow}
-												mutations={mutations}
-												requestContext={Boolean(props.request)}
-											/>
-										</Show>
-										<Show when={showNotices()}>
-											<div class="pointer-events-none sticky bottom-6 z-30 my-6 flex flex-wrap justify-center gap-4 px-4">
-												{/* takes over from the modal once it's closed */}
-												<Show when={!editors.noticeOpen() && editors.holder()}>
-													{(holder) => (
-														<Alert
-															variant="warning"
-															appearance="pill"
-															class="pointer-events-auto"
-														>
-															{holder().self
-																? T()("documents.held.self.view.only")
-																: T()("documents.held.view.only", {
-																		name: helpers.formatUserName(
-																			holder().user,
-																			"name",
-																		),
-																	})}
-															<button
-																type="button"
-																class="ml-3 rounded-sm font-medium text-warning-foreground underline underline-offset-2 decoration-warning-foreground/50 hover:text-warning-foreground hover:decoration-warning-foreground focus:ring-warning-foreground focus-visible:ring-1"
-																disabled={editors.takingOver()}
-																aria-busy={editors.takingOver()}
-																onClick={() => void editors.takeOver()}
-															>
-																{editors.takingOver()
-																	? T()("documents.held.taking.over")
-																	: T()("documents.held.take.over")}
-															</button>
-														</Alert>
-													)}
-												</Show>
-												<Show when={uiState.collectionNeedsMigrating()}>
+										collectionKey={docState.collectionKey()}
+										documentId={docState.documentId()}
+										hasFollowingSection={
+											fixedBrickConfig().length > 0 ||
+											builderBrickConfig().length > 0
+										}
+									/>
+									<FixedBricks
+										brickConfig={fixedBrickConfig()}
+										collectionMigrationStatus={
+											docState.collection()?.migrationStatus
+										}
+										collectionKey={docState.collectionKey()}
+										documentId={docState.documentId()}
+										hasFollowingSection={builderBrickConfig().length > 0}
+									/>
+									<BuilderBricks
+										brickConfig={builderBrickConfig()}
+										collectionMigrationStatus={
+											docState.collection()?.migrationStatus
+										}
+										collectionKey={docState.collectionKey()}
+										documentId={docState.documentId()}
+									/>
+									<Show when={detailsBelow()}>
+										<DocumentSidebar
+											class="border-t border-border"
+											padding="lg"
+											collection={docState.collection}
+											collectionKey={docState.collectionKey}
+											document={docState.document}
+											refs={docState.refs}
+											autoSaveMetadata={mutations.autoSaveMetadata}
+											documentId={docState.documentId}
+											disabled={disableWorkflow}
+											mutations={mutations}
+											requestContext={Boolean(props.request)}
+										/>
+									</Show>
+									<Show when={showNotices()}>
+										<div class="pointer-events-none sticky bottom-6 z-30 my-6 flex flex-wrap justify-center gap-4 px-4">
+											<Show when={!editors.noticeOpen() && editors.holder()}>
+												{(holder) => (
 													<Alert
 														variant="warning"
 														appearance="pill"
 														class="pointer-events-auto"
 													>
-														{T()("collections.migrations.required.message")}
+														{holder().self
+															? T()("documents.held.self.view.only")
+															: T()("documents.held.view.only", {
+																	name: helpers.formatUserName(
+																		holder().user,
+																		"name",
+																	),
+																})}
+														<button
+															type="button"
+															class="ml-3 rounded-sm font-medium text-warning-foreground underline underline-offset-2 decoration-warning-foreground/50 hover:text-warning-foreground hover:decoration-warning-foreground focus:ring-warning-foreground focus-visible:ring-1"
+															disabled={editors.takingOver()}
+															aria-busy={editors.takingOver()}
+															onClick={() => void editors.takeOver()}
+														>
+															{editors.takingOver()
+																? T()("documents.held.taking.over")
+																: T()("documents.held.take.over")}
+														</button>
 													</Alert>
-												</Show>
-											</div>
-										</Show>
-									</div>
-									<Switch>
-										<Match when={showSidebar()}>
+												)}
+											</Show>
+											<Show when={uiState.collectionNeedsMigrating()}>
+												<Alert
+													variant="warning"
+													appearance="pill"
+													class="pointer-events-auto"
+												>
+													{T()("collections.migrations.required.message")}
+												</Alert>
+											</Show>
+										</div>
+									</Show>
+								</div>
+								<Switch>
+									<Match when={detailsBeside()}>
+										<DetailsColumn>
 											<DocumentSidebar
-												class="w-82.5 shrink-0 overflow-y-auto border-s border-border bg-card"
 												collection={docState.collection}
 												collectionKey={docState.collectionKey}
 												document={docState.document}
@@ -983,106 +987,111 @@ const DocumentEditorPage: Component<{
 												mutations={mutations}
 												requestContext={Boolean(props.request)}
 											/>
-										</Match>
-										<Match when={previewing()}>
-											<BuilderSplitHandle split={split} />
-											<div class="flex min-w-0 flex-1">
-												<DocumentPreview
-													open={previewing}
-													collectionKey={docState.collectionKey}
-													documentId={docState.documentId}
-													versionType={versionType}
-													versionId={versionId}
-													mode={preview.mode}
-													locale={preview.locale}
-													breakpoints={() =>
-														docState.collection()?.preview?.breakpoints ?? []
-													}
-													dirty={docState.isDocumentMutated}
-													saveStamp={preview.saveStamp}
-													draftVersionId={() =>
-														docState.document()?.versionId ?? undefined
-													}
-													canSyncDraft={canSyncPreviewDraft}
-													route={() => docState.document()?.route}
-													canEdit={() =>
-														canSyncPreviewDraft() && !brickStore.get.locked
-													}
-													editingDetails={previewEditingDetails}
-													errors={previewErrors}
-													builderTarget={previewFocus.builderTarget}
-													onFocusField={focusPreviewField}
-													onChange={previewStructure.handle}
-													onUndo={previewStructure.undo}
-													repeaterCapacity={previewStructure.capacity}
-													fieldEdit={previewFieldEdit}
-													agent={previewAgent}
-													registerScrollCapture={registerPreviewScrollCapture}
-													consumeScrollRestore={consumePreviewScrollRestore}
-												/>
-											</div>
-										</Match>
-										<Match when={comparison.open()}>
-											<div class="min-w-0 flex-1 border-s border-border">
-												<Show when={comparison.changed()}>
-													<Alert variant="warning" appearance="bar">
-														<div class="flex items-center justify-between gap-3">
-															<span>{T()("documents.compare.changed")}</span>
-															<Button
-																size="xs"
-																variant="outline"
-																loading={comparison.query.isFetching}
-																onClick={() => void comparison.refresh()}
-															>
-																{T()("documents.compare.refresh")}
-															</Button>
-														</div>
-													</Alert>
-												</Show>
+										</DetailsColumn>
+									</Match>
+									<Match when={previewing()}>
+										<BuilderSplitHandle split={split} />
+										<div class="sticky top-(--document-header-bar-height) flex h-[calc(100dvh-var(--document-header-bar-height,0px)-0.5rem)] min-w-0 flex-1 self-start">
+											<DocumentPreview
+												open={previewing}
+												collectionKey={docState.collectionKey}
+												documentId={docState.documentId}
+												versionType={versionType}
+												versionId={versionId}
+												mode={preview.mode}
+												locale={preview.locale}
+												breakpoints={() =>
+													docState.collection()?.preview?.breakpoints ?? []
+												}
+												dirty={docState.isDocumentMutated}
+												saveStamp={preview.saveStamp}
+												draftVersionId={() =>
+													docState.document()?.versionId ?? undefined
+												}
+												canSyncDraft={canSyncPreviewDraft}
+												route={() => docState.document()?.route}
+												canEdit={() =>
+													canSyncPreviewDraft() && !brickStore.get.locked
+												}
+												editingDetails={previewEditingDetails}
+												errors={previewErrors}
+												builderTarget={previewFocus.builderTarget}
+												onFocusField={(target, options) =>
+													void previewFocus.requestTarget(target, options)
+												}
+												onChange={previewStructure.handle}
+												onUndo={previewStructure.undo}
+												repeaterCapacity={previewStructure.capacity}
+												fieldEdit={previewFieldEdit}
+												agent={previewAgent}
+												registerScrollCapture={registerPreviewScrollCapture}
+												consumeScrollRestore={consumePreviewScrollRestore}
+												onDeselect={previewFocus.deselect}
+												toolbarMount={previewToolbar}
+											/>
+										</div>
+									</Match>
+									<Match when={comparison.open()}>
+										<div class="min-w-0 flex-1 border-s border-border">
+											<Show when={comparison.changed()}>
+												<Alert variant="warning" appearance="bar">
+													<div class="flex items-center justify-between gap-3">
+														<span>{T()("documents.compare.changed")}</span>
+														<Button
+															size="xs"
+															variant="outline"
+															loading={comparison.query.isFetching}
+															onClick={() => void comparison.refresh()}
+														>
+															{T()("documents.compare.refresh")}
+														</Button>
+													</div>
+												</Alert>
+											</Show>
+											<Show
+												when={
+													comparison.pinned() ||
+													comparison.selected()?.versionId !== null
+												}
+												fallback={
+													<p class="p-6 text-sm text-body">
+														{T()("documents.compare.unpublished")}
+													</p>
+												}
+											>
 												<Show
-													when={
-														comparison.pinned() ||
-														comparison.selected()?.versionId !== null
-													}
+													when={comparison.pinned()}
 													fallback={
-														<p class="p-6 text-sm text-body">
-															{T()("documents.compare.unpublished")}
-														</p>
+														<Show
+															when={comparison.query.isError}
+															fallback={
+																<Skeleton class="grid gap-4 p-4 md:p-6">
+																	<span class="skeleton block h-48 w-full" />
+																	<span class="skeleton block h-24 w-full" />
+																	<span class="skeleton block h-72 w-full" />
+																</Skeleton>
+															}
+														>
+															<p class="p-6 text-sm text-body">
+																{T()("documents.compare.error")}
+															</p>
+														</Show>
 													}
 												>
-													<Show
-														when={comparison.pinned()}
-														fallback={
-															<Show
-																when={comparison.query.isError}
-																fallback={
-																	<Skeleton class="grid gap-4 p-4 md:p-6">
-																		<span class="skeleton block h-48 w-full" />
-																		<span class="skeleton block h-24 w-full" />
-																		<span class="skeleton block h-72 w-full" />
-																	</Skeleton>
-																}
-															>
-																<p class="p-6 text-sm text-body">
-																	{T()("documents.compare.error")}
-																</p>
-															</Show>
-														}
-													>
-														{(response) => (
-															<ReadOnlyDocument
-																store={comparison.rightStore}
-																document={() => response().data}
-																refs={() => response().refs}
-															/>
-														)}
-													</Show>
+													{(response) => (
+														<ReadOnlyDocument
+															store={comparison.rightStore}
+															document={() => response().data}
+															refs={() => response().refs}
+														/>
+													)}
 												</Show>
-											</div>
-										</Match>
-									</Switch>
-								</div>
+											</Show>
+										</div>
+									</Match>
+								</Switch>
 							</div>
+							<PageLayoutCorners position="bottom" tight={previewing()} />
 						</div>
 					</div>
 					<Show when={docState.document()}>

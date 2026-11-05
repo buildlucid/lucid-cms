@@ -1,6 +1,6 @@
 @layer base {
 	.navigation-link-active {
-		@apply bg-card! text-title! shadow-xs ring-1 ring-border dark:bg-secondary! dark:text-secondary-foreground! dark:shadow-none dark:ring-0;
+		@apply bg-secondary! text-secondary-foreground!;
 	}
 
 	.scrollbar {
@@ -25,30 +25,32 @@
 	}
 	.inverted-corner-top-left {
 		mask: radial-gradient(
-			calc(var(--radius-xl) - 0.3px) at bottom right,
-			transparent calc(var(--radius-xl) - 0.3px),
-			black calc(var(--radius-xl) + 0.3px)
+			calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px) at bottom
+				right,
+			transparent calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px),
+			black calc(var(--inverted-corner-radius, var(--radius-xl)) + 0.3px)
 		);
 	}
 	.inverted-corner-top-right {
 		mask: radial-gradient(
-			calc(var(--radius-xl) - 0.3px) at bottom left,
-			transparent calc(var(--radius-xl) - 0.3px),
-			black calc(var(--radius-xl) + 0.3px)
+			calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px) at bottom
+				left,
+			transparent calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px),
+			black calc(var(--inverted-corner-radius, var(--radius-xl)) + 0.3px)
 		);
 	}
 	.inverted-corner-bottom-left {
 		mask: radial-gradient(
-			calc(var(--radius-xl) - 0.3px) at top right,
-			transparent calc(var(--radius-xl) - 0.3px),
-			black calc(var(--radius-xl) + 0.3px)
+			calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px) at top right,
+			transparent calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px),
+			black calc(var(--inverted-corner-radius, var(--radius-xl)) + 0.3px)
 		);
 	}
 	.inverted-corner-bottom-right {
 		mask: radial-gradient(
-			calc(var(--radius-xl) - 0.3px) at top left,
-			transparent calc(var(--radius-xl) - 0.3px),
-			black calc(var(--radius-xl) + 0.3px)
+			calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px) at top left,
+			transparent calc(var(--inverted-corner-radius, var(--radius-xl)) - 0.3px),
+			black calc(var(--inverted-corner-radius, var(--radius-xl)) + 0.3px)
 		);
 	}
 	.dropdown-trigger {

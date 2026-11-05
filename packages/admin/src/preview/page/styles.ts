@@ -1,4 +1,7 @@
-/** The page's side of edit mode: outlines that read on light and dark pages, with Lucid's green only marking what's selected and where things will go, and red marking errors. The builder draws the controls. */
+/**
+ * Page outlines use the admin theme's green for selection and drop targets, and red for errors.
+ * The builder draws controls.
+ */
 export const previewOverlayStyles = /* css */ `
 :host {
 	all: initial;
@@ -15,6 +18,10 @@ export const previewOverlayStyles = /* css */ `
 	--danger: rgb(232, 72, 72);
 	--danger-soft: rgba(232, 72, 72, 0.1);
 	--ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* the admin's light theme green, rather than dark mode's brighter one */
+:host([data-lucid-theme="light"]) {
+	--accent: rgb(98, 159, 63);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -85,7 +92,7 @@ export const previewOverlayStyles = /* css */ `
 /* Dragging: where the dragged brick or item would land, which moves there */
 .landing {
 	border-radius: 7px;
-	background: rgba(151, 248, 95, 0.12);
+	background: color-mix(in srgb, var(--accent) 12%, transparent);
 	outline: 2px dashed var(--accent);
 	outline-offset: -1px;
 	box-shadow: 0 0 0 1px rgba(18, 18, 20, 0.4), inset 0 0 0 2px rgba(18, 18, 20, 0.25);

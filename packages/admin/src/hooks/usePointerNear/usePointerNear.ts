@@ -5,17 +5,13 @@ type Point = { x: number; y: number };
 //* how close the pointer comes before, eg., an edge's reveal bar shows
 const NEAR_DISTANCE = 96;
 
-/**
- * Checks whether the pointer is within `distance` pixels. An optional reported `pointer` in client
- * coordinates takes precedence, supporting iframe pages.
- */
+/** Checks whether the pointer is within `distance` pixels of an element. */
 export const usePointerNear = (options: {
 	element: () => HTMLElement | undefined;
 	/** In pixels. @default 96 */
 	distance?: number;
 	/** Ignores the pointer, as if it were far away, while false. @default true */
 	enabled?: Accessor<boolean>;
-	pointer?: Accessor<Point | null>;
 }) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -45,7 +41,7 @@ export const usePointerNear = (options: {
 
 	return createMemo(() => {
 		if (options.enabled?.() === false) return false;
-		const point = options.pointer?.() ?? documentPointer();
+		const point = documentPointer();
 		const element = options.element();
 		if (!point || !element) return false;
 		const rect = element.getBoundingClientRect();

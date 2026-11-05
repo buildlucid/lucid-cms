@@ -115,16 +115,13 @@ const NavigationShell: Component<{
 						ref={mainRef}
 						class={classNames(
 							"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0",
-							{
-								"md:pr-4":
-									interfaceDirection.isLTR() || navigationStore.get.tucked,
-								"md:pl-4":
-									interfaceDirection.isRTL() || navigationStore.get.tucked,
-								"md:min-w-[calc(100vw-var(--spacing-sidebar)-var(--spacing-agent-panel)-(--spacing(4)))]":
-									!navigationStore.get.tucked,
-								"md:min-w-[calc(100vw-var(--spacing-agent-panel)-(--spacing(8)))]":
-									navigationStore.get.tucked,
-							},
+							navigationStore.get.tucked
+								? "md:px-2 md:min-w-[calc(100vw-var(--spacing-agent-panel)-(--spacing(4)))]"
+								: {
+										"md:pr-4": interfaceDirection.isLTR(),
+										"md:pl-4": interfaceDirection.isRTL(),
+										"md:min-w-[calc(100vw-var(--spacing-sidebar)-var(--spacing-agent-panel)-(--spacing(4)))]": true,
+									},
 						)}
 						aria-busy={isLoading()}
 					>

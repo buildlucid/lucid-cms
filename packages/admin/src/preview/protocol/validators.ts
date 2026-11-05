@@ -118,6 +118,7 @@ export const isPreviewEditing = (value: unknown): value is PreviewEditing =>
 		"editable",
 		"repeaters",
 		"errors",
+		"theme",
 	]) &&
 	isBoundedString(
 		value.collectionKey,
@@ -130,7 +131,8 @@ export const isPreviewEditing = (value: unknown): value is PreviewEditing =>
 	value.repeaters.every(isPreviewRepeater) &&
 	Array.isArray(value.errors) &&
 	value.errors.length <= previewProtocolLimits.errors &&
-	value.errors.every(isPreviewFieldPath);
+	value.errors.every(isPreviewFieldPath) &&
+	(value.theme === "light" || value.theme === "dark");
 
 const isPreviewRect = (value: unknown): value is PreviewRect =>
 	isRecord(value) &&

@@ -21,7 +21,8 @@ export type ButtonVariant =
 	| "danger"
 	| "danger-outline"
 	| "ghost"
-	| "danger-ghost";
+	| "danger-ghost"
+	| "toolbar";
 
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 

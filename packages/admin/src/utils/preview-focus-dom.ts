@@ -27,6 +27,11 @@ type RevealPreviewFieldOptions = {
 	highlightMs?: number;
 	/** Opens the field's picker when it has one, such as media or a link, or else puts the cursor in it. */
 	activate?: boolean;
+	/**
+	 * Reports automatically opened bricks, items and collapsibles for later cleanup. Excludes tab
+	 * switches.
+	 */
+	onOpen?: (trigger: HTMLElement) => void;
 };
 
 const FIELD_ID_PREFIX = "lucid-preview-field";
@@ -114,13 +119,15 @@ export const findPreviewFocusTarget = (
 	return null;
 };
 
-/** How much of a target's scroll area the sticky document header covers. Builder columns that scroll below the header set it to 0. */
-const getHeaderHeight = (element: Element, targetWindow: Window) =>
-	Number.parseFloat(
-		targetWindow
-			.getComputedStyle(element)
-			.getPropertyValue("--document-header-bar-height"),
-	) || 0;
+/** How much of the window the sticky document header covers above a target, with the comparison bar below it while comparing. */
+const getHeaderHeight = (element: Element, targetWindow: Window) => {
+	const style = targetWindow.getComputedStyle(element);
+	const height = (property: string) =>
+		Number.parseFloat(style.getPropertyValue(property)) || 0;
+	return (
+		height("--document-header-bar-height") + height("--comparison-bar-height")
+	);
+};
 
 /** The visible area that scrolls a target: its nearest scrolling ancestor, or the window. */
 const getScrollport = (element: Element, targetWindow: Window) => {
@@ -282,7 +289,12 @@ export const revealPreviewField = async (
 		const isOpen =
 			trigger.dataset.previewFocusOpen === "true" ||
 			trigger.getAttribute("aria-selected") === "true";
-		if (!isOpen) trigger.click();
+		if (!isOpen) {
+			trigger.click();
+			if (trigger.dataset.previewFocusOpen !== undefined) {
+				options.onOpen?.(trigger);
+			}
+		}
 	}
 
 	const field = await waitForElement({

@@ -28,13 +28,13 @@ const BuilderSplitHandle: Component<{ split: UseBuilderSplit }> = (props) => {
 			onPointerDown={(event) => props.split.onPointerDown(event)}
 			onKeyDown={(event) => props.split.onKeyDown(event)}
 			onDblClick={() => props.split.reset()}
-			class="group/handle relative z-20 flex w-px shrink-0 cursor-col-resize touch-none items-center justify-center bg-border outline-none"
+			class="group/handle relative z-20 flex w-px shrink-0 cursor-col-resize touch-none flex-col items-center bg-border outline-none"
 		>
 			<span aria-hidden="true" class="absolute inset-y-0 -inset-x-1.5" />
 			<span
 				aria-hidden="true"
 				class={classNames(
-					"pointer-events-none relative h-10 w-1 rounded-full transition-colors duration-150",
+					"pointer-events-none sticky top-[calc(50dvh-1.25rem)] mt-[calc(50dvh-5rem)] h-10 w-1 shrink-0 rounded-full transition-colors duration-150",
 					props.split.dragging()
 						? "bg-primary"
 						: "bg-transparent group-hover/handle:bg-muted group-focus-visible/handle:bg-primary",

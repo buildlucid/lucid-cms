@@ -27,8 +27,11 @@ export const tabsIndicatorClasses = (ready: boolean, hovered: boolean) =>
 		"transition-none": !ready,
 		"transition-[transform,width,height,background-color] duration-200 ease-out will-change-transform":
 			ready,
-		"bg-secondary dark:bg-input": !hovered,
-		"bg-secondary-hover dark:bg-card-hover": hovered,
+		//* its ring is drawn inside, as the tab row scrolls and would clip one outside
+		"bg-background shadow-xs inset-ring inset-ring-border dark:bg-input dark:shadow-none dark:inset-ring-0":
+			!hovered,
+		"bg-background/70 inset-ring inset-ring-border dark:bg-card-hover dark:inset-ring-0":
+			hovered,
 	});
 
 export const tabsItemClasses = (
@@ -40,7 +43,7 @@ export const tabsItemClasses = (
 		"relative z-10 flex h-8 items-center gap-1.5 rounded px-3 text-sm font-medium whitespace-nowrap ring-inset transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
 		{
 			"w-full justify-center": stretch,
-			"text-secondary-foreground dark:text-title": active,
+			"text-title": active,
 			"text-body hover:text-title": !active,
 		},
 		custom,

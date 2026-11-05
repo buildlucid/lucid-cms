@@ -108,7 +108,7 @@ const QuerySort: Component<QuerySortProps> = (props) => {
 				data-query-sort
 				disabled={props.disabled}
 				class={classNames(
-					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary pr-3 pl-2 text-sm text-secondary-foreground hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-secondary",
+					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary pr-3 pl-2 text-sm text-secondary-foreground hover:bg-secondary-hover disabled:cursor-not-allowed disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground",
 					props.class,
 				)}
 			>

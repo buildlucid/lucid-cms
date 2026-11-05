@@ -51,6 +51,7 @@ const App: Component = () => {
 					duration: 5000,
 					position: "bottom-left",
 				}}
+				containerStyle={{ left: "2rem", bottom: "2rem" }}
 			/>
 			<Router />
 		</QueryClientProvider>

@@ -11,27 +11,41 @@ import {
 	TbOutlineArrowBackUp,
 	TbOutlineArrowForwardUp,
 	TbOutlineEye,
-	TbOutlineEyeOff,
+	TbOutlineForms,
 	TbOutlineLanguage,
 	TbOutlineLayoutColumns,
-	TbOutlineListDetails,
 	TbOutlineLock,
 } from "solid-icons/tb";
-import type { Accessor } from "solid-js";
-import { type Component, createMemo, onCleanup, onMount, Show } from "solid-js";
+import type { Accessor, JSX } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	type JSXElement,
+	on,
+	onCleanup,
+	onMount,
+	Show,
+} from "solid-js";
 import Button from "@/components/Button/Button";
 import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
+import SegmentedControl, {
+	type SegmentedControlOption,
+} from "@/components/SegmentedControl/SegmentedControl";
 import { Permissions } from "@/constants/permissions";
 import type { UseBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import type { UseDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
+import { useScrollProgress } from "@/hooks/useScrollProgress/useScrollProgress";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
 import { getDocumentEnvironmentStatus } from "@/utils/document-environment-status";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import helpers from "@/utils/helpers";
@@ -49,31 +63,34 @@ import {
 } from "./parts/PublishTrigger";
 import { ViewSelector, type ViewSelectorOption } from "./parts/ViewSelector";
 
-//* ghost buttons are already faint, so disabled ones fade further and ignore hover
+//* icon buttons are already faint, so disabled ones fade further and ignore hover
 const editButtonClass =
-	"disabled:opacity-40! disabled:hover:bg-transparent disabled:hover:text-muted";
-//* ghost while the bar wraps onto two rows, then outlined at the end of the one row
-const actionsTriggerClass =
-	"order-4 @3xl/builder-header:order-8 @3xl/builder-header:border @3xl/builder-header:border-border @3xl/builder-header:bg-input @3xl/builder-header:text-subtitle @3xl/builder-header:hover:bg-background-hover";
-//* toggles' icons fill more of their box than undo and redo's, so they're drawn smaller to match
-const toggleIconSize = 12;
-//* a toggle stays filled while its view or panel is open
-const toggleButtonClass =
-	"aria-pressed:bg-background-hover aria-pressed:text-title";
+	"disabled:opacity-40! disabled:hover:bg-transparent disabled:hover:text-icon";
+//* the primary actions sit at 32px, between the 28px icon buttons and a 36px button
+const actionButtonClass = "h-8!";
+//* the editing header starts this much taller, for the line under the title, and condenses as the page scrolls it away
+const CONDENSE_DISTANCE = 16;
 
-/** A header button that opens and closes a view beside the fields. */
-type HeaderToggle = { open: Accessor<boolean>; toggle: () => void };
+/** What sits beside the page builder's fields. */
+export type BuilderView = "fields" | "preview" | "compare";
 
 export const PageBuilderHeader: Component<{
 	mode: "create" | "edit" | undefined;
 	version?: Accessor<"latest" | string>;
 	versionId?: Accessor<number | undefined>;
-	/** Toggles the preview beside the fields. Left out where it isn't available. */
-	preview?: HeaderToggle;
-	/** Toggles the side-by-side view. Left out where it isn't available. */
-	comparison?: HeaderToggle;
-	/** Toggles the document's details, beside the fields where they fit, or swapped in for them. */
-	details?: HeaderToggle;
+	/** What sits beside the fields, picked with the header's view switch. Left out where neither the preview nor a comparison is available. */
+	view?: {
+		value: Accessor<BuilderView>;
+		/** The views offered besides the fields alone. */
+		options: Accessor<Exclude<BuilderView, "fields">[]>;
+		onChange: (view: BuilderView) => void;
+	};
+	/** While previewing, the header is the top row of the preview's card, split where its columns split. */
+	previewBar?: {
+		fieldsWidth: Accessor<number>;
+		/** Receives the element the preview renders its own controls into. */
+		setToolbar: (element: HTMLDivElement) => void;
+	};
 	/** The request that owns the proposal being edited. */
 	requestLink?: string;
 	currentViewLabel?: Accessor<string | undefined>;
@@ -108,6 +125,10 @@ export const PageBuilderHeader: Component<{
 	// State / Hooks
 	let headerRef: HTMLElement | undefined;
 	const documentLocalization = useDocumentLocalization();
+	const [oneRow, setOneRow] = createSignal(false);
+	const [now, setNow] = createSignal(Date.now());
+	const condense = useScrollProgress(CONDENSE_DISTANCE);
+	const shadow = useScrollProgress(120);
 
 	// -------------------------------
 	// Queries & Mutations
@@ -158,6 +179,11 @@ export const PageBuilderHeader: Component<{
 
 		return metadata;
 	});
+	const documentUpdatedAt = createMemo(
+		() =>
+			matchingAutoSaveMetadata()?.updatedAt ??
+			props.state.document()?.updatedAt,
+	);
 	const versionContentId = (versionType: string) => {
 		const metadata = matchingAutoSaveMetadata();
 		if (metadata?.versionType === versionType) return metadata.contentId;
@@ -526,13 +552,61 @@ export const PageBuilderHeader: Component<{
 			showAutoSave() ||
 			liveDocumentUrl() !== null,
 	);
-	//* locale and saving drop below the view when the header is narrow
+	//* the controls drop below the view when the header is narrow
 	const hasSecondRow = createMemo(
 		() =>
 			props.mode !== undefined ||
 			currentEnvironmentPublishOption() !== undefined ||
 			props.state.ui.showUpsertButton() ||
 			props.state.ui.showRestoreRevisionButton(),
+	);
+	//* the editing header condenses as it sticks; the preview's is the top of its card instead
+	const condensing = createMemo(() => !props.previewBar && oneRow());
+	const subtitle = createMemo(() => {
+		const updatedAt = documentUpdatedAt();
+		return updatedAt
+			? T()("builder.header.subtitle", {
+					collection: props.state.collectionName(),
+					time: dateHelpers.formatRelativeDate(updatedAt, now()),
+				})
+			: props.state.collectionName();
+	});
+	const viewSwitchOptions = createMemo(
+		(): SegmentedControlOption<BuilderView>[] => {
+			const offered = props.view?.options() ?? [];
+			return [
+				{
+					value: "fields",
+					label: T()("builder.view.fields"),
+					icon: <TbOutlineForms size={12} />,
+				},
+				...(offered.includes("preview")
+					? [
+							{
+								value: "preview" as const,
+								label: `${T()("common.preview")} (${formatForDisplay(shortcuts.togglePreview.hotkey)})`,
+								icon: <TbOutlineEye size={12} />,
+							},
+						]
+					: []),
+				...(offered.includes("compare")
+					? [
+							{
+								value: "compare" as const,
+								label: T()("documents.compare.action"),
+								icon: <TbOutlineLayoutColumns size={12} />,
+							},
+						]
+					: []),
+			];
+		},
+	);
+	const headerStyle = createMemo((): JSX.CSSProperties | undefined =>
+		condensing()
+			? {
+					"box-shadow": `0 10px 24px -18px rgb(0 0 0 / ${0.6 * shadow()})`,
+				}
+			: undefined,
 	);
 
 	// ----------------------------------
@@ -621,14 +695,17 @@ export const PageBuilderHeader: Component<{
 	}));
 	createHotkey(
 		shortcuts.togglePreview.hotkey,
-		() => props.preview?.toggle(),
-		() => ({ enabled: props.preview !== undefined }),
+		() =>
+			props.view?.onChange(
+				props.view.value() === "preview" ? "fields" : "preview",
+			),
+		() => ({ enabled: props.view?.options().includes("preview") === true }),
 	);
 	onMount(() => {
 		if (!headerRef) return;
 		const header = headerRef;
 
-		//* the part of the screen the stuck header covers, as its first row scrolls away on small screens
+		//* Subtract header content that scrolls away from the sticky offset.
 		const updateHeight = () => {
 			const top = Number.parseFloat(getComputedStyle(header).top) || 0;
 			document.documentElement.style.setProperty(
@@ -636,13 +713,19 @@ export const PageBuilderHeader: Component<{
 				`${header.offsetHeight + Math.min(top, 0)}px`,
 			);
 		};
-
-		const resizeObserver = new ResizeObserver(updateHeight);
+		const resizeObserver = new ResizeObserver(() => {
+			setOneRow(header.clientWidth >= 768);
+			updateHeight();
+		});
 		resizeObserver.observe(header);
-		updateHeight();
+		//* the offset changes with the layout rather than the size
+		createEffect(on([condensing, hasSecondRow], updateHeight));
+		//* keeps the subtitle's "updated" time current
+		const clock = setInterval(() => setNow(Date.now()), 60_000);
 
 		onCleanup(() => {
 			resizeObserver.disconnect();
+			clearInterval(clock);
 			document.documentElement.style.removeProperty(
 				"--document-header-bar-height",
 			);
@@ -651,328 +734,367 @@ export const PageBuilderHeader: Component<{
 
 	// ----------------------------------
 	// Render
+	const title = (): JSXElement => (
+		<div class="flex min-h-9 min-w-0 items-center gap-2">
+			<Show when={props.mode === "create"}>
+				<h2 class="truncate text-base font-medium text-title">
+					{T()("actions.create.document", {
+						collectionSingle: props.state.collectionSingularName(),
+					})}
+				</h2>
+			</Show>
+			<Show when={props.mode !== "create" && !showViewSelector()}>
+				<h2 class="truncate text-base font-medium text-title">
+					{props.currentViewLabel?.() || props.state.collectionName()}
+				</h2>
+			</Show>
+			<Show when={showViewSelector()}>
+				<ViewSelector
+					options={viewOptions}
+					collectionSingularName={props.state.collectionSingularName}
+					isDocumentMutated={props.state.isDocumentMutated}
+					currentViewLabel={props.currentViewLabel}
+					onBeforeVersionChange={props.actions.beforeVersionChange}
+					comparing={() => props.view?.value() === "compare"}
+				/>
+			</Show>
+			<Show
+				when={props.mode !== undefined && props.state.ui.isDocumentLocked()}
+			>
+				<span
+					role="img"
+					class="flex shrink-0 text-muted"
+					title={T()("documents.locked.message")}
+					aria-label={T()("documents.locked.message")}
+				>
+					<TbOutlineLock size={14} />
+				</span>
+			</Show>
+		</div>
+	);
+	const edits = (): JSXElement => (
+		<Show when={props.edits}>
+			{(edits) => (
+				<div class="flex shrink-0 items-center gap-1">
+					<Button
+						type="button"
+						variant="toolbar"
+						size="xs"
+						shape="square"
+						title={`${T()("builder.undo")} (${formatForDisplay(shortcuts.undo.hotkey)})`}
+						aria-label={T()("builder.undo")}
+						disabled={!edits().canUndo()}
+						class={editButtonClass}
+						onClick={() => edits().undo()}
+					>
+						<TbOutlineArrowBackUp size={12} />
+					</Button>
+					<Button
+						type="button"
+						variant="toolbar"
+						size="xs"
+						shape="square"
+						title={`${T()("builder.redo")} (${formatForDisplay(shortcuts.redo.hotkey)})`}
+						aria-label={T()("builder.redo")}
+						disabled={!edits().canRedo()}
+						class={editButtonClass}
+						onClick={() => edits().redo()}
+					>
+						<TbOutlineArrowForwardUp size={12} />
+					</Button>
+				</div>
+			)}
+		</Show>
+	);
+	const divider = (): JSXElement => (
+		<span aria-hidden="true" class="mx-1 h-4 w-px shrink-0 bg-border" />
+	);
+	const locale = (): JSXElement => (
+		<Show when={props.mode !== undefined}>
+			<Show
+				when={
+					Boolean(props.state.collection()?.localized) && hasMultipleLocales()
+				}
+				fallback={
+					<Show when={displayLocale()}>
+						{(locale) => (
+							<Tooltip.Root openDelay={300} placement="bottom">
+								<Tooltip.Trigger
+									as="span"
+									tabIndex={0}
+									aria-label={T()("builder.locale.label", {
+										locale: `${locale().name} (${locale().code})`,
+									})}
+									class="flex size-7 shrink-0 items-center justify-center rounded-md text-icon outline-none focus-visible:ring-1 focus-visible:ring-primary"
+								>
+									<TbOutlineLanguage size={12} />
+								</Tooltip.Trigger>
+								<Tooltip.Portal>
+									<Tooltip.Content class="z-60 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs font-medium text-title shadow-md animate-dropdown">
+										{T()("builder.locale.label", {
+											locale: `${locale().name} (${locale().code})`,
+										})}
+									</Tooltip.Content>
+								</Tooltip.Portal>
+							</Tooltip.Root>
+						)}
+					</Show>
+				}
+			>
+				<ContentLocaleSelect
+					compact
+					locales={documentLocalization.locales()}
+					invalid={props.state.ui.brickTranslationErrors?.()}
+					showShortcut={true}
+				/>
+			</Show>
+		</Show>
+	);
+	const viewSwitch = (): JSXElement => (
+		<Show when={props.view}>
+			{(view) => (
+				<SegmentedControl
+					label={T()("builder.view.label")}
+					value={view().value()}
+					options={viewSwitchOptions()}
+					onChange={(next) => view().onChange(next)}
+				/>
+			)}
+		</Show>
+	);
+	const actions = (): JSXElement => (
+		<Show when={showActions()}>
+			<DocumentActions
+				variant="toolbar"
+				collectionSingularName={actionCollectionSingularName()}
+				requestLink={props.requestLink}
+				autoSave={
+					showAutoSave()
+						? {
+								enabled: props.state.autoSaveUserEnabled?.() ?? true,
+								onToggle: userPreferencesStore.toggleAutoSaveEnabled,
+							}
+						: undefined
+				}
+				liveUrl={liveDocumentUrl() ?? undefined}
+				duplicate={
+					props.state.ui.showDuplicateButton?.()
+						? {
+								onDuplicate: () => props.state.ui.setDuplicateOpen(true),
+								permission: props.state.ui.hasDuplicatePermission(),
+								disabled: props.state.ui.duplicateDisabled(),
+							}
+						: undefined
+				}
+				export={
+					props.state.ui.showExportButton()
+						? {
+								onExport: () => props.state.ui.setExportOpen(true),
+								permission: true,
+							}
+						: undefined
+				}
+				align={
+					props.actions.requestAlignment
+						? {
+								onAlign: props.actions.requestAlignment,
+								permission: props.state.ui.hasSavePermission(),
+								disabled:
+									props.state.ui.isSaving() ||
+									props.state.ui.isAutoSaving() ||
+									props.state.autoSave?.isDraftCheckPending() === true,
+							}
+						: undefined
+				}
+				onDelete={
+					props.state.ui.showDeleteButton?.()
+						? () => props.state.ui?.setDeleteOpen?.(true)
+						: undefined
+				}
+				deletePermission={props.state.ui.hasDeletePermission?.()}
+				unpublish={
+					props.state.ui.unpublishTarget() !== undefined
+						? {
+								onUnpublish: () => props.state.ui.setUnpublishOpen(true),
+								permission: props.state.ui.hasUnpublishPermission(),
+							}
+						: undefined
+				}
+				preview={
+					showCopyPreview()
+						? {
+								onCopy: (mode) => void copyPreviewUrl(mode),
+								permission: hasPreviewPermission(),
+								loading: createPreview.action.isPending,
+								scopedOnly: scopedPreviewOnly(),
+							}
+						: undefined
+				}
+			/>
+		</Show>
+	);
+	const primaryActions = (): JSXElement => (
+		<div class="flex shrink-0 items-center gap-2">
+			<Show when={currentEnvironmentPublishOption()}>
+				{(option) => (
+					<Button
+						type="button"
+						variant="secondary"
+						size="sm"
+						aria-disabled={option().disabled === true}
+						class={classNames(actionButtonClass, {
+							"cursor-not-allowed opacity-80": option().disabled === true,
+						})}
+						loading={props.state.ui.isPublishing?.()}
+						onClick={() => openPublishOption(option())}
+					>
+						{T()("documents.publish.update.environment", {
+							environment: option().label,
+						})}
+					</Button>
+				)}
+			</Show>
+			<Show when={props.state.ui.showUpsertButton?.()}>
+				<PublishTrigger
+					options={publishOptions}
+					onSelect={openPublishOption}
+					actions={createAlternatives()}
+					onSave={save}
+					saveLabel={
+						createDefault() === "request"
+							? T()("documents.request.action")
+							: createDefault() === "create"
+								? T()("common.create")
+								: undefined
+					}
+					saveDisabled={props.state.ui.saveDisabled?.()}
+					savePermission={props.state.ui.hasSavePermission?.()}
+					loading={isBusy()}
+				/>
+			</Show>
+			<Show when={props.state.ui.showRestoreRevisionButton?.()}>
+				<Button
+					type="button"
+					variant="secondary"
+					size="sm"
+					class={actionButtonClass}
+					onClick={() => {
+						const versionId = props.versionId?.();
+						if (!versionId) return;
+						props.state.ui.setRestoreRevisionVersionId(versionId);
+						props.state.ui.setRestoreRevisionOpen(true);
+					}}
+					permission={props.state.ui.restorePermission?.()}
+				>
+					{T()("documents.revisions.restore.action")}
+				</Button>
+			</Show>
+		</div>
+	);
+
 	return (
 		<>
 			<header
 				ref={headerRef}
-				style={{ "view-transition-name": "document-builder-header" }}
+				style={{
+					"view-transition-name": "document-builder-header",
+					...headerStyle(),
+				}}
 				class={classNames(
-					"@container/builder-header sticky top-0 z-30 w-full shrink-0 rounded-b-xl border-x border-b border-border bg-background md:-mt-4 max-md:mt-px max-md:rounded-t-xl max-md:border-t",
+					"@container/builder-header sticky z-30 w-full shrink-0 border-x border-b border-border bg-background md:-mt-4 max-md:mt-px max-md:rounded-t-xl max-md:border-t",
 					{
+						"rounded-b-xl": !props.previewBar,
+						"top-0": !condensing(),
+						"-top-4": condensing(),
 						"max-md:-top-12": hasSecondRow(),
 					},
 				)}
 			>
-				<div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-4 py-3 md:px-6 @3xl/builder-header:h-14 @3xl/builder-header:flex-nowrap @3xl/builder-header:py-0">
-					<div class="order-1 flex min-h-9 min-w-0 flex-1 items-center gap-2">
-						<Show when={props.mode === "create"}>
-							<h2 class="truncate text-base font-medium text-title">
-								{T()("actions.create.document", {
-									collectionSingle: props.state.collectionSingularName(),
-								})}
-							</h2>
-						</Show>
-						<Show when={props.mode !== "create" && !showViewSelector()}>
-							<h2 class="truncate text-base font-medium text-title">
-								{props.currentViewLabel?.() || props.state.collectionName()}
-							</h2>
-						</Show>
-						<Show when={showViewSelector()}>
-							<ViewSelector
-								options={viewOptions}
-								collectionSingularName={props.state.collectionSingularName}
-								isDocumentMutated={props.state.isDocumentMutated}
-								currentViewLabel={props.currentViewLabel}
-								onBeforeVersionChange={props.actions.beforeVersionChange}
-								comparing={() => props.comparison?.open() === true}
-							/>
-						</Show>
-						<Show
-							when={
-								props.mode !== undefined && props.state.ui.isDocumentLocked()
+				<div
+					class={
+						props.previewBar
+							? "flex h-13"
+							: "flex flex-wrap items-center gap-x-1 gap-y-1.5 px-4 py-3 md:px-6 @3xl/builder-header:h-17 @3xl/builder-header:flex-nowrap @3xl/builder-header:py-0"
+					}
+					style={
+						condensing()
+							? { transform: `translateY(${condense() * 8}px)` }
+							: undefined
+					}
+				>
+					<div
+						class={
+							props.previewBar
+								? "flex shrink-0 items-center gap-1 border-e border-border ps-4 pe-2 md:ps-6"
+								: "contents"
+						}
+						style={
+							props.previewBar
+								? { width: `${props.previewBar.fieldsWidth() + 1}px` }
+								: undefined
+						}
+					>
+						<div
+							class={
+								props.previewBar
+									? "flex min-w-0 flex-1 items-center"
+									: "flex min-w-0 basis-full flex-col justify-center @3xl/builder-header:flex-1 @3xl/builder-header:basis-auto"
 							}
 						>
-							<span
-								role="img"
-								class="flex shrink-0 text-muted"
-								title={T()("documents.locked.message")}
-								aria-label={T()("documents.locked.message")}
-							>
-								<TbOutlineLock size={14} />
-							</span>
-						</Show>
-					</div>
-					<Show when={props.edits}>
-						{(edits) => (
-							<div class="order-2 flex shrink-0 items-center gap-1">
-								<Button
-									type="button"
-									variant="ghost"
-									size="sm"
-									shape="square"
-									title={`${T()("builder.undo")} (${formatForDisplay(shortcuts.undo.hotkey)})`}
-									aria-label={T()("builder.undo")}
-									disabled={!edits().canUndo()}
-									class={editButtonClass}
-									onClick={() => edits().undo()}
+							{title()}
+							<Show when={condensing()}>
+								{/* tucked up under the title, then gone as it condenses, so the title ends up centred */}
+								<p
+									class="truncate text-xs text-muted"
+									style={{
+										opacity: 1 - condense(),
+										"max-height": `${18 * (1 - condense())}px`,
+										"margin-top": `${-6 * (1 - condense())}px`,
+									}}
 								>
-									<TbOutlineArrowBackUp />
-								</Button>
-								<Button
-									type="button"
-									variant="ghost"
-									size="sm"
-									shape="square"
-									title={`${T()("builder.redo")} (${formatForDisplay(shortcuts.redo.hotkey)})`}
-									aria-label={T()("builder.redo")}
-									disabled={!edits().canRedo()}
-									class={editButtonClass}
-									onClick={() => edits().redo()}
-								>
-									<TbOutlineArrowForwardUp />
-								</Button>
-							</div>
-						)}
-					</Show>
-					<Show when={props.preview || props.comparison || props.details}>
-						<div class="order-3 flex shrink-0 items-center gap-1">
-							<Show when={props.edits}>
-								<span
-									aria-hidden="true"
-									class="mx-1.5 hidden h-5 w-px bg-border @3xl/builder-header:block"
-								/>
-							</Show>
-							<Show when={props.preview}>
-								{(preview) => (
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										shape="square"
-										title={`${T()("common.preview")} (${formatForDisplay(shortcuts.togglePreview.hotkey)})`}
-										aria-label={T()("common.preview")}
-										aria-pressed={preview().open()}
-										class={toggleButtonClass}
-										onClick={() => preview().toggle()}
-									>
-										<Show
-											when={preview().open()}
-											fallback={<TbOutlineEye size={toggleIconSize} />}
-										>
-											<TbOutlineEyeOff size={toggleIconSize} />
-										</Show>
-									</Button>
-								)}
-							</Show>
-							<Show when={props.comparison}>
-								{(comparison) => (
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										shape="square"
-										title={T()("documents.compare.action")}
-										aria-label={T()("documents.compare.action")}
-										aria-pressed={comparison().open()}
-										class={toggleButtonClass}
-										onClick={() => comparison().toggle()}
-									>
-										<TbOutlineLayoutColumns size={toggleIconSize} />
-									</Button>
-								)}
-							</Show>
-							<Show when={props.details}>
-								{(details) => (
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										shape="square"
-										title={T()("builder.details.toggle")}
-										aria-label={T()("builder.details.toggle")}
-										aria-pressed={details().open()}
-										class={toggleButtonClass}
-										onClick={() => details().toggle()}
-									>
-										<TbOutlineListDetails size={toggleIconSize} />
-									</Button>
-								)}
+									{subtitle()}
+								</p>
 							</Show>
 						</div>
-					</Show>
-					<Show when={showActions()}>
-						<DocumentActions
-							variant="ghost"
-							class={actionsTriggerClass}
-							collectionSingularName={actionCollectionSingularName()}
-							requestLink={props.requestLink}
-							autoSave={
-								showAutoSave()
-									? {
-											enabled: props.state.autoSaveUserEnabled?.() ?? true,
-											onToggle: userPreferencesStore.toggleAutoSaveEnabled,
-										}
-									: undefined
-							}
-							liveUrl={liveDocumentUrl() ?? undefined}
-							duplicate={
-								props.state.ui.showDuplicateButton?.()
-									? {
-											onDuplicate: () => props.state.ui.setDuplicateOpen(true),
-											permission: props.state.ui.hasDuplicatePermission(),
-											disabled: props.state.ui.duplicateDisabled(),
-										}
-									: undefined
-							}
-							export={
-								props.state.ui.showExportButton()
-									? {
-											onExport: () => props.state.ui.setExportOpen(true),
-											permission: true,
-										}
-									: undefined
-							}
-							align={
-								props.actions.requestAlignment
-									? {
-											onAlign: props.actions.requestAlignment,
-											permission: props.state.ui.hasSavePermission(),
-											disabled:
-												props.state.ui.isSaving() ||
-												props.state.ui.isAutoSaving() ||
-												props.state.autoSave?.isDraftCheckPending() === true,
-										}
-									: undefined
-							}
-							onDelete={
-								props.state.ui.showDeleteButton?.()
-									? () => props.state.ui?.setDeleteOpen?.(true)
-									: undefined
-							}
-							deletePermission={props.state.ui.hasDeletePermission?.()}
-							unpublish={
-								props.state.ui.unpublishTarget() !== undefined
-									? {
-											onUnpublish: () => props.state.ui.setUnpublishOpen(true),
-											permission: props.state.ui.hasUnpublishPermission(),
-										}
-									: undefined
-							}
-							preview={
-								showCopyPreview()
-									? {
-											onCopy: (mode) => void copyPreviewUrl(mode),
-											permission: hasPreviewPermission(),
-											loading: createPreview.action.isPending,
-											scopedOnly: scopedPreviewOnly(),
-										}
-									: undefined
-							}
-						/>
-					</Show>
-					<Show when={hasSecondRow()}>
-						<span
-							aria-hidden="true"
-							class="order-5 basis-full @3xl/builder-header:hidden"
-						/>
-					</Show>
-					<Show when={props.mode !== undefined}>
-						<Show
-							when={
-								Boolean(props.state.collection()?.localized) &&
-								hasMultipleLocales()
-							}
-							fallback={
-								<Show when={displayLocale()}>
-									{(locale) => (
-										<div class="order-6 flex flex-1 @3xl/builder-header:flex-none">
-											<Tooltip.Root openDelay={300} placement="bottom">
-												<Tooltip.Trigger
-													as="span"
-													tabIndex={0}
-													aria-label={T()("builder.locale.label", {
-														locale: `${locale().name} (${locale().code})`,
-													})}
-													class="flex size-9 items-center justify-center rounded-md text-muted outline-none focus-visible:ring-1 focus-visible:ring-primary"
-												>
-													<TbOutlineLanguage size={16} />
-												</Tooltip.Trigger>
-												<Tooltip.Portal>
-													<Tooltip.Content class="z-60 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs font-medium text-title shadow-md animate-dropdown">
-														{T()("builder.locale.label", {
-															locale: `${locale().name} (${locale().code})`,
-														})}
-													</Tooltip.Content>
-												</Tooltip.Portal>
-											</Tooltip.Root>
-										</div>
-									)}
-								</Show>
-							}
-						>
-							<div class="order-6 min-w-0 flex-1 @3xl/builder-header:w-44 @3xl/builder-header:flex-none @5xl/builder-header:w-54">
-								<ContentLocaleSelect
-									locales={documentLocalization.locales()}
-									invalid={props.state.ui.brickTranslationErrors?.()}
-									showShortcut={true}
+						{edits()}
+						<Show when={props.edits}>{divider()}</Show>
+						{locale()}
+					</div>
+					<div
+						class={
+							props.previewBar
+								? "@container/preview-bar flex min-w-0 flex-1 items-center gap-1 ps-2 pe-3 md:pe-4"
+								: "contents"
+						}
+					>
+						<Show when={props.previewBar}>
+							{(bar) => (
+								<div
+									ref={bar().setToolbar}
+									class="scrollbar-none -my-1 flex min-w-0 items-center overflow-x-auto py-1"
 								/>
-							</div>
-						</Show>
-					</Show>
-					<div class="order-7 flex shrink-0 items-center gap-2">
-						<Show when={currentEnvironmentPublishOption()}>
-							{(option) => (
-								<Button
-									type="button"
-									variant="secondary"
-									size="sm"
-									aria-disabled={option().disabled === true}
-									class={classNames({
-										"cursor-not-allowed opacity-80": option().disabled === true,
-									})}
-									loading={props.state.ui.isPublishing?.()}
-									onClick={() => openPublishOption(option())}
-								>
-									{T()("documents.publish.update.environment", {
-										environment: option().label,
-									})}
-								</Button>
 							)}
 						</Show>
-						<Show when={props.state.ui.showUpsertButton?.()}>
-							<PublishTrigger
-								options={publishOptions}
-								onSelect={openPublishOption}
-								actions={createAlternatives()}
-								onSave={save}
-								saveLabel={
-									createDefault() === "request"
-										? T()("documents.request.action")
-										: createDefault() === "create"
-											? T()("common.create")
-											: undefined
+						<div
+							class={
+								props.previewBar
+									? "ms-auto flex shrink-0 items-center gap-1"
+									: "contents"
+							}
+						>
+							<Show when={!props.previewBar && props.view}>{divider()}</Show>
+							{viewSwitch()}
+							{actions()}
+							<div
+								class={
+									props.previewBar
+										? "ps-1"
+										: "ms-auto ps-1 @3xl/builder-header:ms-0"
 								}
-								saveDisabled={props.state.ui.saveDisabled?.()}
-								savePermission={props.state.ui.hasSavePermission?.()}
-								loading={isBusy()}
-							/>
-						</Show>
-						<Show when={props.state.ui.showRestoreRevisionButton?.()}>
-							<Button
-								type="button"
-								variant="secondary"
-								size="sm"
-								onClick={() => {
-									const versionId = props.versionId?.();
-									if (!versionId) return;
-									props.state.ui.setRestoreRevisionVersionId(versionId);
-									props.state.ui.setRestoreRevisionOpen(true);
-								}}
-								permission={props.state.ui.restorePermission?.()}
 							>
-								{T()("documents.revisions.restore.action")}
-							</Button>
-						</Show>
+								{primaryActions()}
+							</div>
+						</div>
 					</div>
 				</div>
 			</header>

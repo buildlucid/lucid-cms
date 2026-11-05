@@ -146,6 +146,7 @@ describe("direction-specific message validation", () => {
 				},
 				{ path: ["title"] },
 			],
+			theme: "light",
 		};
 
 		expect(editMode(editing)).toBe(true);
@@ -156,6 +157,7 @@ describe("direction-specific message validation", () => {
 		expect(editMode({ ...editing, errors: [{ path: [-1] }] })).toBe(false);
 		expect(editMode({ ...editing, errors: undefined })).toBe(false);
 		expect(editMode({ ...editing, bricks: [] })).toBe(false);
+		expect(editMode({ ...editing, theme: "sepia" })).toBe(false);
 	});
 
 	test("accepts moves of builder bricks and repeater items next to a sibling", () => {

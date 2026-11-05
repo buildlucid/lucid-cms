@@ -115,17 +115,17 @@ export const PublishTrigger: Component<{
 				onClick={handleSaveClick}
 				disabled={props.saveDisabled}
 				class={classNames(
-					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
-					"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary",
-					"px-4 h-9 text-sm",
+					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2 ring-primary",
+					props.saveDisabled || props.savePermission === false
+						? "cursor-not-allowed bg-secondary-disabled text-secondary-disabled-foreground"
+						: "bg-secondary hover:bg-secondary-hover text-secondary-foreground",
+					"px-3 h-8 text-sm",
 					{
 						"rounded-md": !hasOptions(),
-						"rounded-l-md border-r border-black/10":
+						"rounded-l-md border-r border-white/20 dark:border-black/10":
 							hasOptions() && interfaceDirection.isLTR(),
-						"rounded-r-md border-l border-black/10":
+						"rounded-r-md border-l border-white/20 dark:border-black/10":
 							hasOptions() && interfaceDirection.isRTL(),
-						"opacity-80 cursor-not-allowed":
-							props.saveDisabled || props.savePermission === false,
 					},
 				)}
 			>
@@ -135,20 +135,20 @@ export const PublishTrigger: Component<{
 				<Menu.Root>
 					<Menu.Trigger
 						class={classNames(
-							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
-							"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary",
-							"px-2 w-9 h-9 text-sm",
+							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2 ring-primary",
+							isDisabled() || props.permission === false
+								? "cursor-not-allowed bg-secondary-disabled text-secondary-disabled-foreground"
+								: "bg-secondary hover:bg-secondary-hover text-secondary-foreground",
+							"w-7 h-8 text-sm",
 							{
 								"rounded-r-md": interfaceDirection.isLTR(),
 								"rounded-l-md": interfaceDirection.isRTL(),
-								"opacity-80 cursor-not-allowed":
-									isDisabled() || props.permission === false,
 							},
 						)}
 						disabled={isDisabled()}
 						onClick={handleTriggerClick}
 					>
-						<TbOutlineChevronDown />
+						<TbOutlineChevronDown size={12} />
 					</Menu.Trigger>
 					<Menu.Content>
 						<For each={props.actions}>

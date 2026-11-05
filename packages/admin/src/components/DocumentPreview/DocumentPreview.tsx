@@ -33,6 +33,7 @@ import {
 	previewQueryParams,
 } from "@/preview/protocol";
 import api from "@/services/api";
+import themeStore from "@/store/themeStore/themeStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 import brickHelpers from "@/utils/brick-helpers";
@@ -121,6 +122,10 @@ export const DocumentPreview: Component<{
 		capture: () => Promise<PreviewScrollState | null>,
 	) => () => void;
 	consumeScrollRestore?: () => PreviewScrollState | null;
+	/** Runs when the page clears its selection, eg. a click off every brick. */
+	onDeselect?: () => void;
+	/** Where the preview's controls render, in the page builder header above it. */
+	toolbarMount?: Accessor<HTMLElement | undefined>;
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
@@ -157,6 +162,7 @@ export const DocumentPreview: Component<{
 		},
 		onDeselect: () => {
 			pendingHighlight = null;
+			props.onDeselect?.();
 		},
 		onReload: () => setFrameLoading(true),
 		onNavigationLocked: () =>
@@ -238,6 +244,7 @@ export const DocumentPreview: Component<{
 			editable: props.canEdit(),
 			repeaters: getPreviewRepeaters(details),
 			errors: props.errors(),
+			theme: themeStore.resolved(),
 		};
 	});
 
@@ -483,27 +490,6 @@ export const DocumentPreview: Component<{
 			status: "warning",
 		});
 	};
-	const copyPersistedUrl = async () => {
-		try {
-			warnWhenDirty();
-			const persisted = await createPersistedPreview();
-			if (!persisted) {
-				spawnToast({
-					title: T()("preview.unavailable.title"),
-					message: T()("preview.unavailable.message"),
-					status: "warning",
-				});
-				return;
-			}
-			await navigator.clipboard.writeText(persisted.url);
-			spawnToast({
-				title: T()("toasts.common.copy.to.clipboard.title"),
-				status: "success",
-			});
-		} catch {
-			return;
-		}
-	};
 	const openPersistedUrl = async () => {
 		const previewWindow = window.open("about:blank", "_blank");
 		if (previewWindow) previewWindow.opener = null;
@@ -621,7 +607,6 @@ export const DocumentPreview: Component<{
 				previewMode={props.mode}
 				zoomedOut={zoomedOut}
 				onZoomingChange={previewBridge.setZooming}
-				pagePointer={() => hover()?.pointer ?? null}
 				editMode={editMode}
 				onToggleEditMode={() =>
 					userPreferencesStore.setCollectionPreviewEditing(
@@ -631,9 +616,9 @@ export const DocumentPreview: Component<{
 				}
 				actionLoading={() => createPreview.action.isPending}
 				onRefresh={() => void resolvePersistedPreview(true)}
-				onCopy={() => void copyPersistedUrl()}
 				onOpen={() => void openPersistedUrl()}
 				onRetry={() => void resolvePersistedPreview()}
+				toolbarMount={props.toolbarMount}
 				overlay={(viewport) => (
 					<Show when={editing()}>
 						<PreviewOverlay

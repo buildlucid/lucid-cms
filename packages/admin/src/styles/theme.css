@@ -9,6 +9,10 @@
 	--color-secondary: var(--lucid-secondary);
 	--color-secondary-hover: var(--lucid-secondary-hover);
 	--color-secondary-foreground: var(--lucid-secondary-foreground);
+	--color-secondary-disabled: var(--lucid-secondary-disabled);
+	--color-secondary-disabled-foreground: var(
+		--lucid-secondary-disabled-foreground
+	);
 	--color-success: var(--lucid-success);
 	--color-success-foreground: var(--lucid-success-foreground);
 	--color-success-medium: var(--lucid-success-medium);

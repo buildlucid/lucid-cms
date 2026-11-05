@@ -52,7 +52,7 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 			<button
 				type="button"
 				class={classNames(
-					"gap-2 pl-2 pr-3 h-9 text-sm border border-transparent flex items-center outline-primary focus:outline-1 disabled:cursor-not-allowed disabled:text-muted duration-200 transition-colors",
+					"gap-2 pl-2 pr-3 h-9 text-sm border border-transparent flex items-center outline-primary focus:outline-1 disabled:cursor-not-allowed disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground duration-200 transition-colors",
 					tone(),
 					resettable() ? "rounded-l-md" : "rounded-md",
 				)}

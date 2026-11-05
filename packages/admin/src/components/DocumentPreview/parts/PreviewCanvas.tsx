@@ -1,13 +1,4 @@
 import type { CollectionPreviewBreakpoint, PreviewMode } from "@types";
-import classNames from "classnames";
-import {
-	TbOutlineChevronDown,
-	TbOutlineCopy,
-	TbOutlineExternalLink,
-	TbOutlinePointer,
-	TbOutlineRotateClockwise2,
-	TbOutlineZoomReset,
-} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -15,7 +6,6 @@ import {
 	type JSXElement,
 	createMemo,
 	createSignal,
-	Index,
 	on,
 	onCleanup,
 	onMount,
@@ -23,13 +13,12 @@ import {
 	Show,
 	untrack,
 } from "solid-js";
+import { Portal } from "solid-js/web";
 import Button from "@/components/Button/Button";
-import HoverRevealBar from "@/components/HoverRevealBar/HoverRevealBar";
-import { useHoverReveal } from "@/hooks/useHoverReveal/useHoverReveal";
-import { usePointerNear } from "@/hooks/usePointerNear/usePointerNear";
 import { previewFrameNames } from "@/preview/protocol";
 import T, { translateAdminCopy } from "@/translations";
 import { PreviewLoading } from "./PreviewLoading";
+import { PreviewToolbar } from "./PreviewToolbar";
 
 export type PreviewWidthSelection =
 	| "fit"
@@ -40,6 +29,8 @@ export type PreviewWidthSelection =
 	  };
 /** `fit` shrinks a breakpoint or custom width that's wider than the canvas until it fits. */
 export type PreviewZoom = "fit" | 25 | 50 | 75 | 100;
+/** A breakpoint the preview can be sized to. */
+export type PreviewWidthOption = { key: string; width: number; label: string };
 export type ResolverState =
 	| "idle"
 	| "loading"
@@ -71,7 +62,6 @@ const defaultBreakpoints: Array<{
 		label: () => T()("preview.width.mobile"),
 	},
 ];
-const zoomOptions: PreviewZoom[] = ["fit", 25, 50, 75, 100];
 //* how far the page zooms out while a brick is dragged, unless it's already smaller, and how long that takes
 const ZOOMED_OUT_SCALE = 0.5;
 const ZOOM_MS = 320;
@@ -94,15 +84,14 @@ export const PreviewCanvas: Component<{
 	onToggleEditMode: () => void;
 	actionLoading: Accessor<boolean>;
 	onRefresh: () => void;
-	onCopy: () => void;
 	onOpen: () => void;
 	onRetry: () => void;
+	/** Where the preview's controls render, in the page builder header above it. */
+	toolbarMount?: Accessor<HTMLElement | undefined>;
 	/** Zooms the page out, keeping its layout, eg. while a brick is dragged, to show more of where it can go. */
 	zoomedOut?: Accessor<boolean>;
 	/** Runs as zooming out or back in starts and ends, so the page can keep what's dragged or selected in place. */
 	onZoomingChange?: (zooming: boolean) => void;
-	/** Where the pointer is on the page, in its own pixels, which it reports while over it as the frame hides it. */
-	pagePointer?: Accessor<{ x: number; y: number } | null>;
 	/** Drawn over the page at its zoom, such as edit controls. */
 	overlay?: (viewport: {
 		scale: Accessor<number>;
@@ -112,9 +101,6 @@ export const PreviewCanvas: Component<{
 	// ----------------------------------
 	// Refs
 	let canvasRef: HTMLDivElement | undefined;
-	let dockRef: HTMLDivElement | undefined;
-	let dockEdgeRef: HTMLSpanElement | undefined;
-	let frameBoxRef: HTMLDivElement | undefined;
 	let resizeObserver: ResizeObserver | undefined;
 	let viewportResizeHandle: HTMLButtonElement | undefined;
 	let viewportResizePointerId: number | undefined;
@@ -129,28 +115,13 @@ export const PreviewCanvas: Component<{
 	const [viewportResizing, setViewportResizing] = createSignal(false);
 	let zoomFrame: number | undefined;
 	let zooming = false;
-	//* the options dock stays out of the page's way until the pointer rests near the bottom
-	const dock = useHoverReveal({ element: () => dockRef });
-	//* its edge marker shows once the pointer heads for it, over the page included
-	const nearDock = usePointerNear({
-		element: () => dockEdgeRef,
-		pointer: () => {
-			const point = props.pagePointer?.();
-			if (!point || !frameBoxRef) return null;
-			const box = frameBoxRef.getBoundingClientRect();
-			return {
-				x: box.left + point.x * displayScale(),
-				y: box.top + point.y * displayScale(),
-			};
-		},
-	});
 
 	// ----------------------------------
 	// Memos
 	const availableCanvasWidth = createMemo(() =>
 		Math.max(canvasWidth() - 20, 0),
 	);
-	const widthOptions = createMemo(() => {
+	const widthOptions = createMemo((): PreviewWidthOption[] => {
 		const breakpoints = props.breakpoints();
 		if (breakpoints.length === 0) {
 			return defaultBreakpoints.map((breakpoint) => ({
@@ -186,12 +157,6 @@ export const PreviewCanvas: Component<{
 	const maximumLayoutWidth = createMemo(() =>
 		Math.max(availableCanvasWidth() / zoomScale(), 0),
 	);
-	const selectedWidthValue = createMemo(() => {
-		const selection = props.selectedWidth();
-		return typeof selection === "object"
-			? `breakpoint:${selection.key}`
-			: selection;
-	});
 	const requestedWidth = createMemo(
 		() => explicitWidth() ?? maximumLayoutWidth(),
 	);
@@ -278,23 +243,6 @@ export const PreviewCanvas: Component<{
 		window.addEventListener("pointercancel", stopViewportResize);
 		window.addEventListener("blur", stopViewportResize);
 	};
-	const selectWidth = (value: string) => {
-		if (value === "fit") {
-			props.setSelectedWidth(value);
-			return;
-		}
-		if (value === "custom") {
-			props.setCustomWidth(Math.round(layoutWidth()));
-			props.setSelectedWidth(value);
-			return;
-		}
-
-		const key = value.startsWith("breakpoint:")
-			? value.slice("breakpoint:".length)
-			: null;
-		if (!key || !widthOptions().some((option) => option.key === key)) return;
-		props.setSelectedWidth({ type: "breakpoint", key });
-	};
 	const setWidth = (value: string, clamp: boolean) => {
 		const width = Number.parseInt(value, 10);
 		if (!Number.isFinite(width)) return;
@@ -308,26 +256,6 @@ export const PreviewCanvas: Component<{
 		);
 		props.setSelectedWidth("custom");
 	};
-	const selectZoom = (value: string) => {
-		switch (value) {
-			case "fit":
-				props.setZoom("fit");
-				break;
-			case "25":
-				props.setZoom(25);
-				break;
-			case "50":
-				props.setZoom(50);
-				break;
-			case "75":
-				props.setZoom(75);
-				break;
-			case "100":
-				props.setZoom(100);
-				break;
-		}
-	};
-
 	const setZooming = (next: boolean) => {
 		if (zooming === next) return;
 		zooming = next;
@@ -405,7 +333,6 @@ export const PreviewCanvas: Component<{
 	return (
 		<div
 			ref={setCanvasRef}
-			//* its own stacking context, so the dock and controls inside stay below what floats over the page, such as the agent chat. Clipped rather than hidden, so nothing can scroll it, such as the page scrolling to a field or focus moving into the tucked dock
 			class="relative isolate h-full min-h-0 min-w-0 overflow-clip bg-card dotted-background"
 		>
 			<Show when={props.resolverState() === "unavailable"}>
@@ -453,7 +380,6 @@ export const PreviewCanvas: Component<{
 						</span>
 					</button>
 					<div
-						ref={frameBoxRef}
 						class="relative h-full overflow-clip bg-white shadow-sm"
 						style={{ width: `${visualWidth()}px` }}
 					>
@@ -503,169 +429,30 @@ export const PreviewCanvas: Component<{
 			>
 				<PreviewLoading width={visualWidth() || undefined} />
 			</Show>
-			<div class="pointer-events-none absolute inset-x-3 bottom-0 z-40 flex justify-center">
-				<div
-					ref={dockRef}
-					class={classNames("relative flex max-w-full px-4 pt-4 pb-4", {
-						"pointer-events-auto": dock.revealed(),
-					})}
-					onPointerEnter={dock.handlers.onPointerEnter}
-					onPointerLeave={dock.handlers.onPointerLeave}
-					onFocusIn={dock.handlers.onFocusIn}
-					onFocusOut={dock.handlers.onFocusOut}
-				>
-					<span
-						ref={dockEdgeRef}
-						aria-hidden="true"
-						class="group pointer-events-auto absolute inset-x-0 bottom-0 h-8"
+			<Show when={props.toolbarMount?.()} keyed>
+				{(mount) => (
+					<Portal
+						mount={mount}
+						ref={(element) => element.classList.add("contents")}
 					>
-						<HoverRevealBar
-							orientation="horizontal"
-							hidden={dock.revealed() || !nearDock()}
-							class="bottom-2 left-1/2 -translate-x-1/2"
+						<PreviewToolbar
+							widthOptions={widthOptions}
+							selectedWidth={props.selectedWidth}
+							onSelectWidth={props.setSelectedWidth}
+							layoutWidth={layoutWidth}
+							onWidth={setWidth}
+							zoom={props.zoom}
+							zoomScale={zoomScale}
+							onZoom={props.setZoom}
+							editMode={props.editMode}
+							onToggleEditMode={props.onToggleEditMode}
+							actionLoading={props.actionLoading}
+							onRefresh={props.onRefresh}
+							onOpen={props.onOpen}
 						/>
-					</span>
-					<div
-						role="group"
-						aria-label={T()("preview.options")}
-						class={classNames(
-							"relative flex max-w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-border bg-background/90 p-1.5 shadow-lg backdrop-blur-md transition-[translate,opacity] duration-300 ease-emphasized motion-reduce:transition-none",
-							{
-								"translate-y-[calc(100%+1rem)] opacity-0": !dock.revealed(),
-							},
-						)}
-					>
-						<div class="relative shrink-0">
-							<select
-								value={selectedWidthValue()}
-								aria-label={T()("preview.width.mode")}
-								class="h-8 min-w-30 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium text-subtitle outline-none transition-colors focus:border-primary"
-								onChange={(event) => selectWidth(event.currentTarget.value)}
-							>
-								<option value="fit">{T()("preview.width.fit")}</option>
-								{widthOptions().map((option) => (
-									<option value={`breakpoint:${option.key}`}>
-										{option.label}
-									</option>
-								))}
-								<option value="custom">{T()("preview.width.custom")}</option>
-							</select>
-							<TbOutlineChevronDown
-								size={10}
-								class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
-							/>
-						</div>
-						<input
-							type="number"
-							value={Math.round(layoutWidth())}
-							min={MIN_PREVIEW_WIDTH}
-							max={MAX_PREVIEW_WIDTH}
-							aria-label={T()("preview.width.input")}
-							class="h-8 w-18 shrink-0 appearance-none rounded-md border border-border bg-input px-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
-							onInput={(event) => setWidth(event.currentTarget.value, false)}
-							onChange={(event) => setWidth(event.currentTarget.value, true)}
-							onKeyDown={(event) => {
-								if (event.key === "Enter") event.currentTarget.blur();
-							}}
-						/>
-						<div class="relative shrink-0">
-							<select
-								value={String(props.zoom())}
-								aria-label={T()("preview.zoom")}
-								class="h-8 w-27 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
-								onChange={(event) => selectZoom(event.currentTarget.value)}
-							>
-								<Index each={zoomOptions}>
-									{(zoom) => (
-										<option value={String(zoom())}>
-											{zoom() === "fit"
-												? T()("preview.zoom.fit", {
-														zoom: Math.round(zoomScale() * 100),
-													})
-												: `${zoom()}%`}
-										</option>
-									)}
-								</Index>
-							</select>
-							<TbOutlineChevronDown
-								size={10}
-								class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
-							/>
-						</div>
-						<Button
-							type="button"
-							variant="ghost"
-							size="xs"
-							shape="square"
-							title={T()("preview.reset")}
-							aria-label={T()("preview.reset")}
-							class="disabled:opacity-40!"
-							disabled={
-								props.selectedWidth() === "fit" && props.zoom() === "fit"
-							}
-							onClick={() => {
-								props.setSelectedWidth("fit");
-								props.setZoom("fit");
-							}}
-						>
-							<TbOutlineZoomReset size={12} />
-						</Button>
-						<span
-							aria-hidden="true"
-							class="mx-0.5 h-5 w-px shrink-0 bg-border"
-						/>
-						<div class="flex shrink-0 items-center gap-0.5">
-							<Button
-								type="button"
-								variant={props.editMode() ? "secondary" : "ghost"}
-								size="xs"
-								shape="square"
-								title={T()("preview.edit.label")}
-								aria-label={T()("preview.edit.label")}
-								aria-pressed={props.editMode()}
-								onClick={props.onToggleEditMode}
-							>
-								<TbOutlinePointer size={12} />
-							</Button>
-							<Button
-								type="button"
-								variant="ghost"
-								size="xs"
-								shape="square"
-								title={T()("common.refresh")}
-								aria-label={T()("common.refresh")}
-								onClick={props.onRefresh}
-							>
-								<TbOutlineRotateClockwise2 size={12} />
-							</Button>
-							<Button
-								type="button"
-								variant="ghost"
-								size="xs"
-								shape="square"
-								title={T()("preview.copy.url")}
-								aria-label={T()("preview.copy.url")}
-								loading={props.actionLoading()}
-								onClick={props.onCopy}
-							>
-								<TbOutlineCopy size={12} />
-							</Button>
-							<Button
-								type="button"
-								variant="ghost"
-								size="xs"
-								shape="square"
-								title={T()("preview.open")}
-								aria-label={T()("preview.open")}
-								loading={props.actionLoading()}
-								onClick={props.onOpen}
-							>
-								<TbOutlineExternalLink size={12} />
-							</Button>
-						</div>
-					</div>
-				</div>
-			</div>
+					</Portal>
+				)}
+			</Show>
 		</div>
 	);
 };

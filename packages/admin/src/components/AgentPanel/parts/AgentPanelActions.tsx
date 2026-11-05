@@ -10,6 +10,7 @@ import {
 } from "solid-icons/tb";
 import { type Component, For, Match, Show, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
+import { getButtonClasses } from "@/components/Button/classes";
 import Menu from "@/components/Menu/Menu";
 import api from "@/services/api";
 import T from "@/translations";
@@ -18,8 +19,11 @@ import dateHelpers from "@/utils/date-helpers";
 import { shortcuts } from "@/utils/shortcuts";
 
 const recentChats = 5;
-const triggerClasses =
-	"flex size-7 items-center justify-center rounded-md text-icon transition-colors hover:bg-background-hover hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary data-expanded:bg-background-hover";
+const triggerClasses = getButtonClasses({
+	variant: "toolbar",
+	size: "xs",
+	shape: "square",
+});
 
 /** The agent panel's header actions: recent chats, a menu with a new chat and the chat's full page, keeping a peeking panel open, then closing it. */
 const AgentPanelActions: Component<{
@@ -130,7 +134,7 @@ const AgentPanelActions: Component<{
 					<Button
 						size="xs"
 						shape="square"
-						variant="ghost"
+						variant="toolbar"
 						aria-label={T()("agent.panel.pin")}
 						title={`${T()("agent.panel.pin")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`}
 						onClick={() => pin()()}
@@ -142,7 +146,7 @@ const AgentPanelActions: Component<{
 			<Button
 				size="xs"
 				shape="square"
-				variant="ghost"
+				variant="toolbar"
 				aria-label={T()("agent.panel.close")}
 				//* while peeking, the shortcut keeps it open rather than closing it
 				title={

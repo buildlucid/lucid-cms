@@ -11,7 +11,13 @@ import { usePreviewFocus } from "./usePreviewFocus";
 import { resolvePreviewFieldTarget } from "./utils/resolve-preview-field-target";
 
 const { revealMock, spawnToast } = vi.hoisted(() => ({
-	revealMock: vi.fn(async (): Promise<(() => void) | null> => () => undefined),
+	revealMock: vi.fn(
+		async (_options?: {
+			onOpen?: (trigger: HTMLElement) => void;
+		}): Promise<(() => void) | null> =>
+			() =>
+				undefined,
+	),
 	spawnToast: vi.fn(),
 }));
 vi.mock("@/utils/spawn-toast", () => ({ default: spawnToast }));
@@ -401,6 +407,67 @@ describe("preview focus coordination", () => {
 				path: [],
 			});
 			dispose();
+		});
+	});
+
+	test("closes what preview targets opened once the page selects elsewhere, keeping what the next target needs", async () => {
+		brickStore.set("bricks", structuredClone(bricks));
+		//* stands in for a brick or item header, which flips open on each click
+		const createTrigger = (id: string) => {
+			const trigger = document.createElement("div");
+			trigger.id = id;
+			trigger.dataset.previewFocusOpen = "false";
+			trigger.addEventListener("click", () => {
+				trigger.dataset.previewFocusOpen = String(
+					trigger.dataset.previewFocusOpen !== "true",
+				);
+			});
+			document.body.append(trigger);
+			return trigger;
+		};
+		const brick = createTrigger(
+			getPreviewStructureId({ brickIndex: 1, type: "brick" }),
+		);
+		const item = createTrigger("an-item-in-the-brick");
+		revealMock.mockImplementation(async (options) => {
+			for (const trigger of [brick, item]) {
+				if (trigger.dataset.previewFocusOpen === "true") continue;
+				trigger.click();
+				options?.onOpen?.(trigger);
+			}
+			return () => undefined;
+		});
+		const brickTarget = {
+			collectionKey: "page",
+			documentId: 1,
+			brick: {
+				type: "builder" as const,
+				key: "content",
+				ref: "local-brick-ref",
+			},
+			path: [],
+		};
+
+		await new Promise<void>((resolve) => {
+			createRoot(async (dispose) => {
+				const focus = createFocus();
+				await focus.requestTarget(brickTarget);
+				expect(brick.dataset.previewFocusOpen).toBe("true");
+				expect(item.dataset.previewFocusOpen).toBe("true");
+
+				//* the brick holds the next target, so only the item closes before it's revealed
+				revealMock.mockResolvedValueOnce(() => undefined);
+				await focus.requestTarget(brickTarget);
+				expect(brick.dataset.previewFocusOpen).toBe("true");
+				expect(item.dataset.previewFocusOpen).toBe("false");
+
+				focus.deselect();
+				expect(brick.dataset.previewFocusOpen).toBe("false");
+				brick.remove();
+				item.remove();
+				dispose();
+				resolve();
+			});
 		});
 	});
 

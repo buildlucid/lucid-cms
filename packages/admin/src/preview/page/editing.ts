@@ -202,6 +202,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 	/** Everything drawn on the page, made the first time it's needed. */
 	function buildUi() {
 		const layer = createLayer(targetWindow, previewOverlayStyles, draw);
+		applyTheme(layer.host);
 		const box = (className: string) => {
 			const element = create(document, "div", `${className} floating`);
 			element.hidden = true;
@@ -221,6 +222,10 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 		ui ??= buildUi();
 		return ui;
 	};
+	//* namespaced, as the host sits in the page, where its own styles could match a plain `data-theme`
+	function applyTheme(host: HTMLElement) {
+		host.dataset.lucidTheme = editing?.theme ?? "dark";
+	}
 
 	// ----------------------------------------
 	// Drawing
@@ -870,6 +875,7 @@ export const installPreviewEditing = (options: PreviewEditingOptions) => {
 				editing.documentId === next.documentId &&
 				editing.editable === next.editable;
 			editing = next;
+			if (ui) applyTheme(ui.layer.host);
 			if (same) {
 				schedule();
 				return;

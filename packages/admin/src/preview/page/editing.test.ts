@@ -34,6 +34,7 @@ const editingFor = (
 	editable,
 	repeaters: [{ brick: "features", path: ["items"] }],
 	errors,
+	theme: "dark",
 });
 
 //* the markup `@lucidcms/client`'s `previewAttributes` writes
@@ -370,6 +371,19 @@ describe("preview editing", () => {
 				?.querySelector<HTMLElement>(".selected")
 				?.classList.contains("selected--invalid"),
 		).toBe(true);
+	});
+
+	test("draws in the admin theme's green, following it when it changes", async () => {
+		const { editing } = install();
+		const { items } = renderPage();
+		const host = () =>
+			document.querySelector<HTMLElement>(previewOverlayTagName);
+		editing.setEditing({ ...editingFor(), theme: "light" });
+		await hover(items[0]?.title ?? document.body);
+		expect(host()?.dataset.lucidTheme).toBe("light");
+
+		editing.setEditing({ ...editingFor(), theme: "dark" });
+		expect(host()?.dataset.lucidTheme).toBe("dark");
 	});
 
 	test("moves the selection's item with Alt and the arrow keys, only when the document can be changed", () => {

@@ -18,11 +18,13 @@ export const getButtonClasses = (props: {
 	return classnames(
 		"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
 		{
-			"disabled:cursor-not-allowed disabled:opacity-80": !props.loading,
+			"disabled:cursor-not-allowed": !props.loading,
+			//* secondary has disabled colours of its own, which fading as well would muddy
+			"disabled:opacity-80": !props.loading && props.variant !== "secondary",
 			// Variants
 			"bg-primary hover:bg-primary-hover text-primary-foreground ring-primary":
 				props.variant === "primary",
-			"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary":
+			"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground":
 				props.variant === "secondary",
 			"bg-input border border-border hover:border-transparent hover:bg-secondary-hover text-subtitle hover:text-secondary-foreground ring-primary":
 				props.variant === "outline",
@@ -34,6 +36,8 @@ export const getButtonClasses = (props: {
 				props.variant === "ghost",
 			"text-muted hover:text-danger-low-foreground hover:bg-danger-low ring-primary":
 				props.variant === "danger-ghost",
+			"text-icon hover:text-icon-hover hover:bg-background-hover data-expanded:bg-background-hover ring-primary":
+				props.variant === "toolbar",
 
 			// Shape
 			"rounded-full!": props.shape === "circle",

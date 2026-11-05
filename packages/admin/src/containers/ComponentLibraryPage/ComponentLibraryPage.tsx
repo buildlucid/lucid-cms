@@ -120,6 +120,7 @@ const BUTTON_VARIANTS = valuesOf<ButtonVariant>({
 	"danger-outline": true,
 	ghost: true,
 	"danger-ghost": true,
+	toolbar: true,
 });
 const BUTTON_SIZES = valuesOf<ButtonSize>({
 	xs: true,

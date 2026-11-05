@@ -176,7 +176,6 @@ export const DocumentActions: Component<{
 		<ActionMenu
 			actions={actions()}
 			placement="bottom-end"
-			size="md"
 			variant={props.variant}
 			class={props.class}
 		/>

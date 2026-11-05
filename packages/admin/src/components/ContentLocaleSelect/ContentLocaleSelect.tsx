@@ -1,6 +1,10 @@
 import { createHotkey, formatForDisplay } from "@tanstack/solid-hotkeys";
 import type { Locale } from "@types";
-import { type Component, createMemo, Match, Switch } from "solid-js";
+import classNames from "classnames";
+import { TbOutlineChevronDown, TbOutlineLanguage } from "solid-icons/tb";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
+import { getButtonClasses } from "@/components/Button/classes";
+import Menu from "@/components/Menu/Menu";
 import Select from "@/components/Select/Select";
 import { showShortcutFeedback } from "@/components/ShortcutFeedback/ShortcutFeedback";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
@@ -13,6 +17,8 @@ interface ContentLocaleSelectProps {
 	invalid?: boolean;
 	showShortcut?: boolean;
 	locales?: Locale[];
+	/** A toolbar button showing the language icon and code, listing the full names in its menu. For headers, with the global locale only. */
+	compact?: boolean;
 }
 
 const shortcutText = `${formatForDisplay(shortcuts.previousLocale.hotkey)} / ${formatForDisplay(shortcuts.nextLocale.hotkey)}`;
@@ -33,6 +39,9 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 			})) || []
 		);
 	});
+	const currentOption = createMemo(() =>
+		options().find((option) => option.value === contentLocale()),
+	);
 
 	// ----------------------------------
 	// Functions
@@ -75,6 +84,52 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 	// Render
 	return (
 		<Switch>
+			<Match when={props.compact && hasMultipleLocales()}>
+				<Menu.Root placement="bottom-end">
+					<Menu.Trigger
+						aria-label={T()("builder.locale.label", {
+							locale: currentOption()?.label ?? "",
+						})}
+						title={
+							props.showShortcut
+								? `${currentOption()?.label ?? ""} (${shortcutText})`
+								: currentOption()?.label
+						}
+						class={classNames(
+							getButtonClasses({
+								variant: "toolbar",
+								size: "xs",
+								shape: "standard",
+							}),
+							"gap-1.5 font-medium text-subtitle",
+						)}
+					>
+						<TbOutlineLanguage size={12} class="text-icon" />
+						<span class="uppercase">{contentLocale()}</span>
+						<TbOutlineChevronDown size={10} class="text-icon" />
+						<Show when={props.invalid}>
+							<span
+								aria-hidden="true"
+								class="absolute top-1 right-1 size-1.5 rounded-full bg-danger"
+							/>
+						</Show>
+					</Menu.Trigger>
+					<Menu.Content>
+						<For each={options()}>
+							{(option) => (
+								<Menu.Item
+									selected={option.value === contentLocale()}
+									onSelect={() =>
+										contentLocaleStore.get.setContentLocale(option.value)
+									}
+								>
+									{option.label}
+								</Menu.Item>
+							)}
+						</For>
+					</Menu.Content>
+				</Menu.Root>
+			</Match>
 			<Match when={props.value === undefined && hasMultipleLocales()}>
 				<Select
 					id={"content-locale"}

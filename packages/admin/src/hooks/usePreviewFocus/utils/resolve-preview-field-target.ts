@@ -158,10 +158,9 @@ export const resolvePreviewFieldTarget = (props: {
 	let pathOffset = 0;
 	let pathPrefix: Array<string | number> = [];
 	const storedPath: Array<string | number> = [];
-	const structureIds =
-		targetBrick?.type === "builder"
-			? [getPreviewStructureId({ brickIndex, type: "brick" })]
-			: [];
+	const structureIds = targetBrick
+		? [getPreviewStructureId({ brickIndex, type: "brick" })]
+		: [];
 
 	while (pathOffset < props.target.path.length) {
 		const key = props.target.path[pathOffset];

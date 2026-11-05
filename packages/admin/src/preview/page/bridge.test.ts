@@ -245,6 +245,7 @@ describe("preview page bridge editing", () => {
 				editable: false,
 				repeaters: [],
 				errors: [],
+				theme: "dark",
 			},
 		});
 
