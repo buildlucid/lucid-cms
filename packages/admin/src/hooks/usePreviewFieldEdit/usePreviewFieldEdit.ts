@@ -10,6 +10,7 @@ import {
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import brickHelpers from "@/utils/brick-helpers";
+import isLocaleLockedField from "@/utils/is-locale-locked-field";
 import spawnToast from "@/utils/spawn-toast";
 import {
 	type PreviewEditableField,
@@ -46,6 +47,8 @@ export const usePreviewFieldEdit = (props: {
 	collectionKey: Accessor<string>;
 	documentId: Accessor<number | undefined>;
 	locales: Accessor<string[]>;
+	/** The locales a locale-limited proposal can change. Null when every locale can. */
+	editableLocales: Accessor<string[] | null>;
 }) => {
 	const brickStore = useBrickStore();
 	let session: InlineSession | null = null;
@@ -96,10 +99,16 @@ export const usePreviewFieldEdit = (props: {
 		request: (target: PreviewTarget, text: string | null): PreviewFieldEdit => {
 			const field = resolve(target);
 			if (!field || field.config.ui?.hidden) return { mode: "builder" };
+			const locale = localeOf(target);
 			if (
 				field.access !== "editable" ||
 				field.config.ui?.disabled ||
-				brickStore.get.locked
+				brickStore.get.locked ||
+				isLocaleLockedField({
+					config: field.config,
+					editableLocales: props.editableLocales(),
+					locale,
+				})
 			) {
 				spawnToast({
 					title: T()("preview.structure.title"),
@@ -110,7 +119,6 @@ export const usePreviewFieldEdit = (props: {
 			}
 
 			const inline = getFieldTypeInlineText(field.config.type);
-			const locale = localeOf(target);
 			const before = brickHelpers.getFieldValue<FieldValue>({
 				fieldData: field.fields.find((item) => item.key === field.config.key),
 				fieldConfig: field.config,

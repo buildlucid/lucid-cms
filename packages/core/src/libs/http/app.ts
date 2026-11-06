@@ -380,6 +380,11 @@ const createApp = async (props: {
 									"Notification endpoints for your inbox, notification types and your email preferences.",
 							},
 							{
+								name: "translations",
+								description:
+									"Translation endpoints for the glossary and style notes AI translations follow.",
+							},
+							{
 								name: "integrations",
 								description:
 									"Endpoints for managing integration credentials used by external applications.",

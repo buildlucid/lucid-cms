@@ -54,6 +54,7 @@ const createSingleController = factory.createHandlers(
 			description: body.description,
 			documents: body.documents,
 			reviewerIds: body.reviewerIds,
+			locales: body.locales,
 			user: c.get("auth"),
 		});
 		if (result.error) throw new LucidAPIError(result.error);

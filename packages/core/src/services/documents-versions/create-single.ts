@@ -15,6 +15,7 @@ import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import keepRestrictedContent from "../documents/helpers/keep-restricted-content.js";
+import readStoredContent from "./helpers/read-stored-content.js";
 
 /**
  * Creates a new latest version. A requested document's content is instead
@@ -36,7 +37,11 @@ const createSingle: ServiceFn<
 			createRequestId?: number;
 		},
 	],
-	{ versionId: number }
+	{
+		versionId: number;
+		/** The locales whose values changed from the previous latest, with null for shared content. Null for a document's first version. */
+		changedLocales: Array<string | null> | null;
+	}
 > = async (context, data) => {
 	const [tableNamesRes, migrationIdRes] = await Promise.all([
 		getTableNames(context, data.collection.key),
@@ -69,6 +74,16 @@ const createSingle: ServiceFn<
 	if (currentLatestRes?.error) return currentLatestRes;
 
 	const previousLatestId = currentLatestRes?.data?.id;
+
+	const previousRes =
+		previousLatestId === undefined
+			? undefined
+			: await readStoredContent(context, {
+					collection: data.collection,
+					documentId: data.documentId,
+					versionId: previousLatestId,
+				});
+	if (previousRes?.error) return previousRes;
 
 	const contentRes = await keepRestrictedContent(context, {
 		collection: data.collection,
@@ -126,6 +141,7 @@ const createSingle: ServiceFn<
 			? undefined
 			: {
 					id: data.createRequestId,
+					locales: null,
 					documents: [
 						{
 							collectionKey: data.collection.key,
@@ -178,6 +194,7 @@ const createSingle: ServiceFn<
 		documentId: data.documentId,
 		bricks: hookResponse.data.bricks,
 		fields: hookResponse.data.fields,
+		previous: previousRes?.data ?? null,
 		collection: data.collection,
 		authUser: data.authUser,
 		//* the source content is already persisted and may predate current field
@@ -241,7 +258,10 @@ const createSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: { versionId: newVersionRes.data.id },
+		data: {
+			versionId: newVersionRes.data.id,
+			changedLocales: createMultipleBricks.data.changedLocales,
+		},
 	};
 };
 

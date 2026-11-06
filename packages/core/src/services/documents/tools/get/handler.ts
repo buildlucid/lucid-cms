@@ -13,6 +13,7 @@ import readDocumentContent from "../../helpers/read-document-content.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
 import { projectRefs, projectRoute } from "../helpers/project-document.js";
 import projectMeta from "../helpers/project-meta.js";
+import projectTranslations from "../helpers/project-translations.js";
 import resolveVersion from "./resolve-version.js";
 import type { agentInputSchema, outputSchema } from "./schema.js";
 
@@ -111,6 +112,15 @@ const getDocument: ServiceFn<
 	);
 	if (projected.error) return projected;
 
+	const translations = input.translations
+		? projectTranslations({
+				collection,
+				localization: context.config.localization,
+				access: getContentAccess(collection, props.reader),
+				content: contentRes.data.stored,
+			})
+		: undefined;
+
 	const document = documentRes.data.document;
 	const metaRes = document.meta
 		? await projectMeta(context, { meta: document.meta })
@@ -130,6 +140,7 @@ const getDocument: ServiceFn<
 					fields: projected.data.fields,
 					bricks: projected.data.bricks,
 					...(metaRes && { meta: metaRes.data }),
+					...(translations && { translations }),
 					links: {
 						edit:
 							requestId !== null

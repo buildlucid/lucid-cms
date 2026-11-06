@@ -26,6 +26,7 @@ export default class RequestDocumentsRepository extends StaticRepository<"lucid_
 			.select([
 				"lucid_request_documents.id",
 				"lucid_request_documents.request_id",
+				"lucid_requests.locales",
 			])
 			.where("lucid_request_documents.collection_key", "=", props.collectionKey)
 			.where("lucid_request_documents.document_id", "=", props.documentId)

@@ -1,11 +1,12 @@
 import type { Collection, RequestSummary } from "@types";
-import { type Component, Show } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import Table from "@/components/Table/Table";
 import TableUserStackCell from "@/components/TableUserStackCell/TableUserStackCell";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { getLocaleName } from "@/utils/locale-name";
 import { getRequestState, requestStates, requestTypes } from "@/utils/requests";
 import { getRequestRoute } from "@/utils/route-helpers";
 
@@ -20,6 +21,13 @@ const RequestTableRow: Component<{
 		onChange: () => void;
 	};
 }> = (props) => {
+	// ----------------------------------------
+	// Memos
+	//* language-only requests, eg. translations, say which languages they change
+	const localeNames = createMemo(() =>
+		props.request.locales?.map((code) => getLocaleName(code)),
+	);
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -69,6 +77,16 @@ const RequestTableRow: Component<{
 								),
 							),
 						].join(", ")}
+						<Show when={localeNames()}>
+							{(names) => (
+								<>
+									{" · "}
+									{T()("requests.locales.only", {
+										locales: names().join(", "),
+									})}
+								</>
+							)}
+						</Show>
 					</p>
 				</div>
 			</Table.Cell>

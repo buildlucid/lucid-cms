@@ -59,6 +59,8 @@ export const usePreviewStructure = (props: {
 	collectionKey: Accessor<string>;
 	documentId: Accessor<number | undefined>;
 	locales: Accessor<string[]>;
+	/** Whether bricks and repeater items can be added, moved and removed. Locale-limited proposals keep the stored ones. */
+	canChange: Accessor<boolean>;
 	/** Opens a brick or repeater item in the builder and points it out on the page. */
 	reveal: (target: PreviewTarget) => void;
 }) => {
@@ -311,6 +313,11 @@ export const usePreviewStructure = (props: {
 				target.collectionKey !== props.collectionKey() ||
 				target.documentId !== props.documentId()
 			) {
+				return null;
+			}
+			//* page moves, eg. ⌥ and the arrow keys, reach here even when the controls are hidden
+			if (!props.canChange()) {
+				notify(T()("preview.structure.locales"));
 				return null;
 			}
 			return target.path.length === 0

@@ -27,6 +27,7 @@ export type CorePermission =
 	| "ai:image-generate"
 	| "ai:audio-generate"
 	| "ai:alt-generate"
+	| "ai:translate"
 	| "ai:routines-manage-all"
 	| "ai:memories-manage"
 	| `agents:${string}:${"chat" | "manage-own-routines" | "manage-code-routines"}`

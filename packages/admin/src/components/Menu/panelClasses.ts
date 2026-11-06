@@ -9,6 +9,9 @@ const DIVIDER_CLASSES = [
 	"[&>[data-menu-row]+[data-menu-row]]:before:right-0",
 	"[&>[data-menu-row]+[data-menu-row]]:before:h-px",
 	"[&>[data-menu-row]+[data-menu-row]]:before:bg-border",
+	//* separators take the same 8px as the lines between rows, set apart by running full width
+	"[&>[data-menu-separator]]:mt-1",
+	"[&>[data-menu-separator]]:mb-[3px]",
 ].join(" ");
 
 export interface MenuPanelAppearance {

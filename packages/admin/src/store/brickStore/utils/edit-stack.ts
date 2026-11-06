@@ -1,4 +1,4 @@
-import type { InternalDocumentField } from "@types";
+import type { InternalDocumentField, TranslationSource } from "@types";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 
 //* typing that pauses for longer than this starts a new step, as in Gutenberg
@@ -6,8 +6,11 @@ const MERGE_WINDOW_MS = 1_000;
 //* enough for a long session, with the oldest steps dropped once reached
 const LIMIT = 100;
 
-/** Who made an edit, so the chat can offer to undo an agent reply's changes as a whole. */
-export type EditSource = { type: "user" } | { type: "agent"; runId: string };
+/** Who made an edit, so the chat can offer to undo an agent reply's changes as a whole, and machine edits wait for review before autosave. */
+export type EditSource =
+	| { type: "user" }
+	| { type: "agent"; runId: string }
+	| { type: "translation" };
 
 /** Where a field value lives, which stays valid because structural edits around it are undone in order. */
 export type FieldEditTarget = {
@@ -40,6 +43,8 @@ export type EditEntry =
 			target: FieldEditTarget;
 			before: InternalDocumentField["value"];
 			after: InternalDocumentField["value"];
+			/** What the translation was made from before the edit cleared it, which undoing restores. */
+			sourceBefore?: TranslationSource;
 			source: EditSource;
 			at: number;
 			/** True when a save included the step, allowing agent redo without another review. */

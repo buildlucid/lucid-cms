@@ -20,6 +20,8 @@ export interface LinkFieldConfig extends SharedFieldConfig {
 	};
 	/** Store a value per content locale when collection localization is enabled. Defaults to false. */
 	localized?: boolean;
+	/** Include localized values in AI translation. Defaults to true. */
+	translate?: boolean;
 	/** Initial value for a new field. */
 	default?: LinkResValue;
 	/** Create a database index for this field. */

@@ -243,6 +243,7 @@ const DocumentEditorPage: Component<{
 		state: docState,
 		available: comparisonAvailable,
 		currentKey: comparisonKey,
+		preferSource: () => !!props.request?.()?.locales,
 	});
 	const destinationContentId = () => {
 		const document = docState.document();
@@ -269,6 +270,10 @@ const DocumentEditorPage: Component<{
 		dirty: docState.isDocumentMutated,
 		//* the preview shows unsaved edits only to those who could save them
 		canSave: () => uiState.hasSavePermission() && !uiState.isBuilderLocked(),
+		editableLocales: () =>
+			versionType() === "proposal"
+				? (props.request?.()?.locales ?? null)
+				: null,
 		ready: () => getViewKey() !== null && hydratedViewKey() === getViewKey(),
 		collections: docState.collections,
 	});
@@ -388,10 +393,10 @@ const DocumentEditorPage: Component<{
 
 	//* another tab taking hold, or letting go, locks or unlocks the builder straight away
 	createEffect(() => brickStore.set("locked", uiState.isBuilderLocked()));
-	//* once the person saves or drops the agent's changes, autosave carries on
+	//* once the person saves or drops the agent's or AI translation's changes, autosave carries on
 	createEffect(() => {
-		if (brickStore.get.agentEdited && !brickStore.getDocumentMutated()) {
-			brickStore.set("agentEdited", false);
+		if (brickStore.get.reviewPending && !brickStore.getDocumentMutated()) {
+			brickStore.set("reviewPending", false);
 		}
 	});
 
@@ -976,6 +981,9 @@ const DocumentEditorPage: Component<{
 															store={comparison.rightStore}
 															document={() => response().data}
 															refs={() => response().refs}
+															contentLocale={() =>
+																comparison.selected()?.locale
+															}
 														/>
 													)}
 												</Show>

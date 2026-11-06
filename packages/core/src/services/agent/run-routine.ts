@@ -1,5 +1,6 @@
 import { copy } from "../../libs/i18n/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkRoutineFeatures from "./helpers/check-routine-features.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import startRoutineRun from "./helpers/start-routine-run.js";
 
@@ -18,6 +19,23 @@ const runRoutine: ServiceFn<
 				type: "basic",
 				status: 403,
 				message: copy("server:agent.routine.oversight.locked"),
+			},
+		};
+	}
+
+	const available = await checkRoutineFeatures(context, {
+		agentKey: routine.data.agent_key,
+		key: routine.data.key,
+		source: routine.data.source,
+	});
+	if (available.error) return available;
+	if (!available.data) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 409,
+				message: copy("server:agent.routine.features.off"),
 			},
 		};
 	}

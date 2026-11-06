@@ -20,6 +20,7 @@ import {
 	getDocumentAgentTool,
 	getDocumentMcpTool,
 } from "../../services/documents/tools/get/index.js";
+import { translateDocumentAgentTool } from "../../services/documents/tools/translate/index.js";
 import type { DocumentWriteToolOptions } from "../../services/documents/tools/types.js";
 import { unpublishDocumentAgentTool } from "../../services/documents/tools/unpublish/index.js";
 import { updateDocumentAgentTool } from "../../services/documents/tools/update/index.js";
@@ -116,6 +117,8 @@ export const agentTools = {
 		delete: deleteDocumentAgentTool,
 		/** Unpublishes a document through an unpublish request, or directly with `direct: true`. */
 		unpublish: unpublishDocumentAgentTool,
+		/** Translates documents with Lucid AI into a request per locale or an existing request, or directly with `direct: true`. */
+		translate: translateDocumentAgentTool,
 	},
 	media: {
 		/** Searches the media library. */
@@ -206,12 +209,13 @@ export const agentTools = {
 		listLocalesAgentTool(),
 		findUsersAgentTool(options),
 	],
-	/** Creates, updates, deletes and unpublishes documents for use alongside `read()`. */
+	/** Creates, updates, deletes, unpublishes and translates documents for use alongside `read()`. */
 	edit: (options: DocumentWriteToolOptions = {}) => [
 		createDocumentAgentTool(options),
 		updateDocumentAgentTool(options),
 		deleteDocumentAgentTool(options),
 		unpublishDocumentAgentTool(options),
+		translateDocumentAgentTool(options),
 	],
 	/** Finds and reads requests and the review overview, comments on requests and acknowledges changed targets. */
 	review: (options: CollectionToolOptions = {}) => [

@@ -12,6 +12,7 @@ import createGetSingle from "./get-single/index.js";
 import notifyChange from "./notify-change/index.js";
 import patchSingle from "./patch-single/index.js";
 import publish from "./publish/index.js";
+import translate from "./translate/index.js";
 import unpublish from "./unpublish/index.js";
 import updateSingle from "./update-single/index.js";
 
@@ -162,6 +163,22 @@ export type ToolkitDocuments = {
 	 * ```
 	 */
 	getSingle: ReturnType<typeof createGetSingle>;
+	/**
+	 * Translates documents from their default locale with Lucid AI, opening a request per locale. Pass `requestId` to translate an existing request's proposals, or `direct: true` to save straight to latest without review. Only missing and out-of-date machine translations are made unless `overwrite` is set.
+	 *
+	 * @example
+	 * ```ts
+	 * await toolkit.documents.translate({
+	 *   collectionKey: "page",
+	 *   documentIds: [1, 2],
+	 *   locales: ["fr"],
+	 *   actor: { type: "system" },
+	 * });
+	 * ```
+	 */
+	translate: (
+		input: Parameters<typeof translate>[1],
+	) => ReturnType<typeof translate>;
 	/** Reports changed IDs after direct writes, such as to `collections.getSchema` tables, so caches, change subscribers and referencing documents update. Does not save content or run authoring hooks. */
 	notifyChange: (
 		input: Parameters<typeof notifyChange>[1],
@@ -180,6 +197,7 @@ export const createDocumentsToolkit = (
 	deleteMultiple: (input) => deleteMultiple(context, input),
 	publish: (input) => publish(context, input),
 	unpublish: (input) => unpublish(context, input),
+	translate: (input) => translate(context, input),
 	getMultiple: createGetMultiple(context),
 	getSingle: createGetSingle(context),
 	notifyChange: (input) => notifyChange(context, input),

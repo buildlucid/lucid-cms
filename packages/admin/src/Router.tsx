@@ -110,6 +110,9 @@ const SystemJobsRoute = lazyPage(
 const SystemNotificationsRoute = lazyPage(
 	() => import("@/containers/SystemNotificationsPage/SystemNotificationsPage"),
 );
+const SystemTranslationsRoute = lazyPage(
+	() => import("@/containers/SystemTranslationsPage/SystemTranslationsPage"),
+);
 const NotificationsRoute = lazyPage(
 	() => import("@/containers/NotificationsPage/NotificationsPage"),
 );
@@ -417,6 +420,15 @@ const AppRouter: Component = () => {
 						component={() => (
 							<PermissionGuard permission={Permissions.SettingsRead}>
 								<SystemNotificationsRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/system/translations"
+						preload={preloadRoutes(SystemTranslationsRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.SettingsRead}>
+								<SystemTranslationsRoute />
 							</PermissionGuard>
 						)}
 					/>

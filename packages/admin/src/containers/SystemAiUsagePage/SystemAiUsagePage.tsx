@@ -1,15 +1,12 @@
 import { useSearchParams } from "@solidjs/router";
 import { type Component, createMemo, Show } from "solid-js";
+import AiConnectionNotice from "@/components/AiConnectionNotice/AiConnectionNotice";
 import AiCreditsSummary from "@/components/AiCreditsSummary/AiCreditsSummary";
 import { AiUsageChart } from "@/components/AiUsageChart/AiUsageChart";
 import AiUsageSessionDrawer from "@/components/AiUsageSessionDrawer/AiUsageSessionDrawer";
 import { AiUsageSessionList } from "@/components/AiUsageSessionList/AiUsageSessionList";
 import InfoRow from "@/components/InfoRow/InfoRow";
-import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import RowIcon from "@/components/RowIcon/RowIcon";
-import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
-import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	numberFilter,
@@ -74,32 +71,9 @@ const SystemAiUsagePage: Component = () => {
 						<Show
 							when={connectionActive()}
 							fallback={
-								<InfoRow.Content padding="none">
-									<div class="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
-										<div class="flex min-w-0 items-center gap-4">
-											<RowIcon>
-												<ThemeLogoIcon class="size-4.5" alt="" />
-											</RowIcon>
-											<div class="min-w-0">
-												<h3 class="flex items-center gap-2 text-sm font-medium">
-													<StatusIndicator variant="neutral-subtle" />
-													{T()("ai.usage.connection.warning.title")}
-												</h3>
-												<p class="mt-0.5 text-sm">
-													{T()("ai.usage.connection.warning.description")}
-												</p>
-											</div>
-										</div>
-										<Link
-											href="/admin/system/operations"
-											variant="outline"
-											size="sm"
-											class="self-start md:self-auto"
-										>
-											{T()("ai.usage.connection.manage.action")}
-										</Link>
-									</div>
-								</InfoRow.Content>
+								<AiConnectionNotice
+									description={T()("ai.usage.connection.warning.description")}
+								/>
 							}
 						>
 							<AiCreditsSummary />

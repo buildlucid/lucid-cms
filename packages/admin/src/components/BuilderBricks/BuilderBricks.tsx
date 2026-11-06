@@ -43,6 +43,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 	// ------------------------------
 	// State
 	const brickStore = useBrickStore();
+	const localization = useDocumentLocalization();
 	const [getSelectBrickOpen, setSelectBrickOpen] = createSignal(false);
 
 	// ------------------------------
@@ -62,8 +63,9 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 			.filter((brick) => brick.type === "builder")
 			.sort((a, b) => a.order - b.order),
 	);
+	//* locale-limited proposals keep the stored bricks, so they can't add, move or remove any
 	const isDisabled = createMemo(() => {
-		return brickStore.get.locked;
+		return brickStore.get.locked || localization.editableLocales() !== null;
 	});
 	//* bricks the user can't change can be moved, but not added or removed
 	const addableBrickConfig = createMemo(() =>
@@ -191,8 +193,9 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			brickStore.idPrefix +
 			getPreviewStructureId({ brickIndex: brickIndex(), type: "brick" }),
 	);
+	//* locale-limited proposals keep the stored bricks, so they can't add, move or remove any
 	const isDisabled = createMemo(() => {
-		return brickStore.get.locked;
+		return brickStore.get.locked || localization.editableLocales() !== null;
 	});
 	const fieldErrors = createMemo(() => {
 		return (

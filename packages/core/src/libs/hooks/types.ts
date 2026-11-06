@@ -90,6 +90,8 @@ export type HookExecutionKindMap = CoreHookExecutionKindMap & {
 /** The request that owns the version being written, with every version it has captured. */
 export type DocumentHookRequest = {
 	id: number;
+	/** The content locales the request changes. Completing it writes only their values to latest. Null for whole documents. */
+	locales: string[] | null;
 	documents: Array<{
 		collectionKey: string;
 		documentId: number;

@@ -171,6 +171,8 @@ export type RequestDetails = {
 	title: string;
 	description: RichTextJSON | null;
 	status: RequestStatus;
+	/** The content locales the request changes. Completing it writes only their values to latest, so edits to other locales meanwhile are kept. Null for requests that change whole documents. */
+	locales: string[] | null;
 	approved: boolean;
 	revision: number;
 	/** The current request attempt, retained until the request plan changes. */
@@ -240,6 +242,7 @@ export type RequestSummary = Pick<
 	| "type"
 	| "title"
 	| "status"
+	| "locales"
 	| "approved"
 	| "createdBy"
 	| "createdByAgent"

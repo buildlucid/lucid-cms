@@ -42,6 +42,8 @@ type CreateDocumentRequestInput = CreateRequestInput & {
 type ChangeDocumentsRequestInput = CreateRequestInput & {
 	type: Exclude<RequestType, "create">;
 	documents: RequestDocumentInput[];
+	/** Limits a publish request from latest to these content locales, so completing it keeps other locales' edits made meanwhile. */
+	locales?: string[];
 };
 
 /**
@@ -82,7 +84,26 @@ async function createSingle(
 
 		const sizeRes = checkRequestSize(data.documents.length);
 		if (sizeRes.error) return sizeRes;
+
+		if (
+			data.locales !== undefined &&
+			(data.type !== "publish" ||
+				data.locales.length === 0 ||
+				new Set(data.locales).size !== data.locales.length)
+		) {
+			return {
+				error: {
+					type: "basic",
+					message: copy("server:core.requests.locales.invalid"),
+					status: 400,
+				},
+				data: undefined,
+			};
+		}
 	}
+
+	const locales =
+		data.type === "create" ? null : (data.locales?.toSorted() ?? null);
 
 	const documents =
 		data.type === "create"
@@ -106,6 +127,7 @@ async function createSingle(
 			title: data.title,
 			description: descriptionRes?.data ?? null,
 			status: "open",
+			locales,
 			revision: 1,
 			created_by: data.user.id,
 			created_by_run_id: data.agentRunId ?? null,
@@ -143,6 +165,7 @@ async function createSingle(
 					id: requestRes.data.id,
 					type: data.type,
 					created_by: data.user.id,
+					locales,
 				},
 				user: data.user,
 				agentRunId: data.agentRunId,

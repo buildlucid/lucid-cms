@@ -62,6 +62,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			localized: this.props?.localized ?? true,
+			translate: this.props?.translate,
 			default: this.props?.default ?? {
 				type: "doc",
 				content: [{ type: "paragraph" }],

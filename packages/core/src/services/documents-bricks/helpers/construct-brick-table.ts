@@ -178,6 +178,17 @@ const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
 
 				row[prefixGeneratedColName(context.field.key)] =
 					valuesByLocale.get(locale);
+
+				const translationSource =
+					locale === null
+						? undefined
+						: context.field.translationSources?.[locale];
+				if (translationSource) {
+					row.translation_sources = {
+						...row.translation_sources,
+						[context.field.key]: translationSource,
+					};
+				}
 			}
 		},
 	},
@@ -436,6 +447,7 @@ const constructBrickTable = (
 			document_version_id: params.versionId,
 			locale: locale,
 			position: params.order,
+			translation_sources: null,
 		};
 		baseRowData.is_open = params.open;
 

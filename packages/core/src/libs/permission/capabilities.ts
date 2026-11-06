@@ -1,6 +1,5 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
-import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type FieldBuilder from "../collection/builders/field-builder/index.js";
@@ -514,7 +513,8 @@ export const getCapabilityRegistry = (
 		accountCapabilityGroup,
 		...getStaticCapabilityGroups(),
 		...getCollectionCapabilityGroups(config.collections),
-		...getAgentCapabilityGroups(getAgents(config)),
+		//* every configured agent, even switched off, so its grants survive while it's off
+		...getAgentCapabilityGroups(config.ai.agents.definitions),
 		localesCapabilityGroup,
 		...(isAiFeatureEnabled(config, "mcp") ? [mcpCapabilityGroup] : []),
 		...getDeployCapabilityGroups(config.deploys),

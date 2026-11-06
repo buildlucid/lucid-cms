@@ -249,10 +249,12 @@ const saveDocument: ServiceFn<
 		});
 		if (resetRes.error) return resetRes;
 
+		const { changedLocales } = createVersionRes.data;
 		const invalidateRes = await invalidateRequests(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.documentId],
 			versionType: "latest",
+			changedLocales,
 			userId: data.userId,
 		});
 		if (invalidateRes.error) return invalidateRes;
@@ -261,6 +263,8 @@ const saveDocument: ServiceFn<
 			collectionKey: data.collectionKey,
 			documentId: data.documentId,
 			target: "latest",
+			changedLocales,
+			versionId: createVersionRes.data.versionId,
 			userId: data.userId,
 			agentRunId: data.agentRunId,
 		});

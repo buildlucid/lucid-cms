@@ -37,7 +37,7 @@ const setup = (
 	capacity: PreviewRepeaterCapacity | null = null,
 ) => {
 	const [hover, setHover] = createSignal(initial);
-	const [editable, setEditable] = createSignal(true);
+	const [canChangeStructure, setCanChangeStructure] = createSignal(true);
 	const props = {
 		capacity: vi.fn(() => capacity),
 		onOpen: vi.fn(),
@@ -56,7 +56,8 @@ const setup = (
 					hover={hover()}
 					scale={0.5}
 					width={600}
-					editable={editable()}
+					editable={true}
+					canChangeStructure={canChangeStructure()}
 					details={{
 						bricks: [{ key: "hero", label: "Hero", addable: true }],
 						fields: [],
@@ -73,7 +74,14 @@ const setup = (
 		container.querySelector<HTMLElement>('[title^="Drag to move"]');
 	const options = () =>
 		container.querySelector<HTMLButtonElement>('[aria-label^="Options for"]');
-	return { ...props, setHover, setEditable, container, grip, options };
+	return {
+		...props,
+		setHover,
+		setCanChangeStructure,
+		container,
+		grip,
+		options,
+	};
 };
 
 const pointer = (type: string, target: Element, x = 0, y = 0) =>
@@ -146,7 +154,7 @@ describe("preview edit controls", () => {
 	});
 
 	test("cancel a drag when changes stop being allowed, eg. the builder locks", () => {
-		const { grip, setEditable, onDragEnd } = setup(
+		const { grip, setCanChangeStructure, onDragEnd } = setup(
 			hoverOver(brick("a", 400), { x: 10, y: 410 }),
 		);
 		const button = grip();
@@ -154,7 +162,7 @@ describe("preview edit controls", () => {
 
 		pointer("pointerdown", button, 20, 170);
 		pointer("pointermove", button, 20, 300);
-		setEditable(false);
+		setCanChangeStructure(false);
 
 		expect(onDragEnd).toHaveBeenCalledWith(false);
 		expect(grip()).toBeNull();

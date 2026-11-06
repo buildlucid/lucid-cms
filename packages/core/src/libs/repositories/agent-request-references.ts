@@ -88,6 +88,8 @@ export default class AgentRequestReferencesRepository extends StaticRepository<"
 			)
 			.where("lucid_requests.status", "=", "open")
 			.where("lucid_requests.type", "in", props.types)
+			//* locale-limited requests only land their locales, so other edits never reuse them
+			.where("lucid_requests.locales", "is", null)
 			.where("lucid_request_documents.collection_key", "=", props.collectionKey)
 			.where("lucid_request_documents.document_id", "=", props.documentId)
 			.where(

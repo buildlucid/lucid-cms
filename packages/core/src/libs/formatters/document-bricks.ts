@@ -29,6 +29,7 @@ const formatMultiple = (props: {
 	config: ResolvedLucidConfig;
 	host: string;
 	editable?: boolean;
+	sourceHashes?: boolean;
 }): InternalDocumentBrick[] => {
 	const localization = resolveCollectionLocalization({
 		localization: props.config.localization,
@@ -92,6 +93,7 @@ const formatMultiple = (props: {
 						config: props.config,
 						bricksTableSchema: props.bricksSchema,
 						editable: props.editable,
+						sourceHashes: props.sourceHashes,
 					},
 				),
 			});
@@ -109,6 +111,7 @@ const formatDocumentFields = (props: {
 	config: ResolvedLucidConfig;
 	host: string;
 	editable?: boolean;
+	sourceHashes?: boolean;
 }): InternalDocumentField[] => {
 	const localization = resolveCollectionLocalization({
 		localization: props.config.localization,
@@ -145,6 +148,7 @@ const formatDocumentFields = (props: {
 			config: props.config,
 			bricksTableSchema: props.bricksSchema,
 			editable: props.editable,
+			sourceHashes: props.sourceHashes,
 		},
 	);
 };

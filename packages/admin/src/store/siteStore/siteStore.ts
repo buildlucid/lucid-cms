@@ -23,6 +23,7 @@ const defaultAiSettings = (): AiSettings => ({
 		imageGeneration: true,
 		audioGeneration: true,
 		altGeneration: true,
+		translation: true,
 		chatTitles: true,
 		agents: true,
 		mcp: false,
@@ -60,7 +61,8 @@ const [get, set] = createStore<SiteStoreT>({
 			(this.ai.agents.length > 0 ||
 				features.imageGeneration ||
 				features.audioGeneration ||
-				features.altGeneration)
+				features.altGeneration ||
+				features.translation)
 		);
 	},
 });

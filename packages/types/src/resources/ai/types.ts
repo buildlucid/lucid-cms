@@ -63,6 +63,7 @@ export type AiFeature =
 	| "chatTitles"
 	| "altGeneration"
 	| `${MediaGenerationType}Generation`
+	| "translation"
 	| "agents"
 	| "mcp";
 
@@ -74,6 +75,7 @@ export type AiAccessFeature =
 	| "media_analysis"
 	| "image_generation"
 	| "audio_generation"
+	| "translation"
 	| "web_research";
 
 /** The Lucid feature behind each media type. */
@@ -202,13 +204,15 @@ export type AiUsageFeatureKey =
 	| "web.fetch"
 	| "media.analyze"
 	| "media.alt.generate"
+	| "content.translate"
 	| MediaGenerateFeatures[MediaGenerationType]["key"];
 
 /** What a usage session was for. Agent sessions are chats, including routine runs. */
 export type AiUsageSessionType =
 	| "agent"
 	| "media-alt"
-	| `media-${MediaGenerationType}`;
+	| `media-${MediaGenerationType}`
+	| "translation";
 
 export type AiUsageTokens = {
 	input: number;

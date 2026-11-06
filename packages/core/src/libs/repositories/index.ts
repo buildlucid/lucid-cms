@@ -70,6 +70,8 @@ export { default as RequestsRepository } from "./requests.js";
 export { default as RolePermissionsRepository } from "./role-permissions.js";
 export { default as RolesRepository } from "./roles.js";
 export { default as SecurityAuditLogsRepository } from "./security-audit-logs.js";
+export { default as TranslationGlossaryRepository } from "./translation-glossary.js";
+export { default as TranslationStylesRepository } from "./translation-styles.js";
 export { default as UserAuthProvidersRepository } from "./user-auth-providers.js";
 export { default as UserLoginsRepository } from "./user-logins.js";
 export { default as UserPasskeysRepository } from "./user-passkeys.js";

@@ -17,6 +17,7 @@ import { updateMediaStorageJob } from "../../services/media/jobs/update-storage.
 import { sendNotificationEmailsJob } from "../../services/notifications/jobs/send-emails.js";
 import { dispatchScheduledRequestsJob } from "../../services/requests/jobs/dispatch-scheduled.js";
 import { executeRequestJob } from "../../services/requests/jobs/execute.js";
+import { translateDocumentsJob } from "../../services/translations/jobs/translate.js";
 import { deleteUserJob } from "../../services/users/jobs/delete-single.js";
 import type { AnyJobDefinition } from "../jobs/types.js";
 
@@ -36,6 +37,7 @@ const coreJobDefinitions = [
 	deleteExpiredRevisionsJob,
 	executeRequestJob,
 	dispatchScheduledRequestsJob,
+	translateDocumentsJob,
 	deleteExpiredDataJob,
 	verifyConnectionsJob,
 	syncAnnouncementsJob,

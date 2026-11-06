@@ -106,6 +106,55 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 				.on("lucid_media")
 				.column("ai_generation_id")
 				.execute();
+
+			//* glossary terms and style notes every AI translation follows
+			await db.schema
+				.createTable("lucid_translation_glossary")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("term", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("locale", adapter.getDataType("text"), (col) =>
+					col.references("lucid_locales.code").onDelete("cascade"),
+				)
+				.addColumn("translation", adapter.getDataType("text"))
+				.addColumn("updated_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						),
+				)
+				.execute();
+
+			await db.schema
+				.createTable("lucid_translation_styles")
+				.addColumn("locale", adapter.getDataType("text"), (col) =>
+					col.primaryKey().references("lucid_locales.code").onDelete("cascade"),
+				)
+				.addColumn("instructions", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("updated_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						),
+				)
+				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},
 	};

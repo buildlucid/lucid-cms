@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+import { agentRoutines } from "../agent/agent-routines.js";
 import defineAgent from "../agent/define-agent.js";
 import defineRoutine from "../agent/define-routine.js";
 import lucidAgent from "../agent/lucid-agent.js";
@@ -224,6 +225,26 @@ test("routine tool settings accept the agent's tools and reject unknown names", 
 			},
 		]),
 	).toThrow("must name tools");
+});
+
+test("the ready-made translations routine can save directly without asking", () => {
+	const translations = agentRoutines.translations({
+		toolSettings: { documents_translate: { requiresConfirmation: false } },
+	});
+	expect(translations.toolSettings).toEqual({
+		documents_translate: { requiresConfirmation: false },
+	});
+	expect(
+		check([
+			defineAgent({
+				key: "translator",
+				name: "Translator",
+				description: "Keeps translations up to date.",
+				tools: [agentTools.documents.translate({ direct: true })],
+				routines: [translations],
+			}),
+		]),
+	).not.toThrow();
 });
 
 test("builder editing needs builder reading", () => {

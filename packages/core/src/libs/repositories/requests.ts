@@ -19,6 +19,7 @@ export interface RequestSummaryQueryResponse extends Pick<
 	| "type"
 	| "title"
 	| "status"
+	| "locales"
 	| "revision"
 	| "approved_revision"
 	| "scheduled_at"
@@ -276,6 +277,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 			"lucid_requests.type",
 			"lucid_requests.title",
 			"lucid_requests.status",
+			"lucid_requests.locales",
 			"lucid_requests.revision",
 			"lucid_requests.approved_revision",
 			"lucid_requests.scheduled_at",
@@ -353,6 +355,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 				"type",
 				"title",
 				"status",
+				"locales",
 				"revision",
 				"approved_revision",
 				"scheduled_at",
@@ -505,8 +508,8 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 		});
 		return exec.response;
 	}
-	/** Finds requests affected by writes to their proposal or selected destinations. */
-	async selectAffectedRequestIds(props: {
+	/** Finds requests affected by writes to their proposal or selected destinations, with the locales they're limited to. */
+	async selectAffectedRequests(props: {
 		collectionKey: string;
 		documentIds: number[];
 		versionType?: string;
@@ -519,7 +522,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 				"lucid_requests.id",
 				"lucid_request_documents.request_id",
 			)
-			.select("lucid_requests.id")
+			.select(["lucid_requests.id", "lucid_requests.locales"])
 			.distinct()
 			.where("lucid_requests.status", "=", "open")
 			.where("lucid_request_documents.collection_key", "=", props.collectionKey)
@@ -549,14 +552,11 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 		}
 
 		const exec = await this.executeQuery(() => query.execute(), {
-			method: "selectAffectedRequestIds",
+			method: "selectAffectedRequests",
 		});
 		if (exec.response.error) return exec.response;
 
-		return {
-			error: undefined,
-			data: (exec.response.data ?? []).map((request) => request.id),
-		};
+		return { error: undefined, data: exec.response.data ?? [] };
 	}
 	/** Finds the request that owns a proposal or snapshot, with what is needed to check access. */
 	async selectVersionOwner(props: {
@@ -575,6 +575,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 				"lucid_requests.id",
 				"lucid_requests.type",
 				"lucid_requests.status",
+				"lucid_requests.locales",
 				"lucid_requests.created_by",
 				"lucid_request_documents.source",
 				"lucid_request_documents.source_version_id",

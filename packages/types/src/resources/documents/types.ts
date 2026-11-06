@@ -948,9 +948,28 @@ export interface InternalDocumentField {
 	resource?: RefResource;
 	groupRef?: string;
 	translations?: Record<string, DocumentFieldValueResponse>;
+	/** What each locale's translation was made from, by locale. */
+	translationSources?: Record<string, TranslationSource>;
+	/** A hash of the default locale's text, which translations compare their `source` with. Only on translated fields with source text. */
+	sourceHash?: string;
 	value?: DocumentFieldValueResponse;
 	groups?: Array<InternalDocumentFieldGroup>;
 }
+
+/** Who wrote a translation: the translation feature or a person. */
+export type TranslationOrigin = "ai" | "person";
+
+/**
+ * What a translated value was made from. A translation is out of date when its
+ * `source` no longer matches the field's `sourceHash`.
+ */
+export type TranslationSource = {
+	/** A hash of the default locale's text the translation was made from, or last checked against. */
+	source: string;
+	origin: TranslationOrigin;
+	/** A hash of the text the translation feature wrote, so later edits count as a person's. Only for `ai` sources. */
+	output?: string;
+};
 
 export interface InternalDocumentFieldGroup {
 	ref: string;

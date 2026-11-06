@@ -41,6 +41,10 @@ const settingsResponseSchema = z.object({
 						description: "Whether AI alt text generation is enabled",
 						example: true,
 					}),
+					translation: z.boolean().meta({
+						description: "Whether documents can be translated with AI",
+						example: true,
+					}),
 					chatTitles: z.boolean().meta({
 						description: "Whether agent chats are titled automatically",
 						example: true,

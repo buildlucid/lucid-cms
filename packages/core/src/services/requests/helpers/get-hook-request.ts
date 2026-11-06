@@ -4,6 +4,7 @@ import type { RequestDocumentRecord } from "../types.js";
 /** Shapes a request for hooks, listing only the proposals and snapshots it has captured. */
 const getHookRequest = (request: {
 	id: number;
+	locales: string[] | null;
 	documents: Array<
 		Pick<
 			RequestDocumentRecord,
@@ -12,6 +13,7 @@ const getHookRequest = (request: {
 	>;
 }): DocumentHookRequest => ({
 	id: request.id,
+	locales: request.locales,
 	documents: request.documents.flatMap((document) =>
 		document.source === null || document.source_version_id === null
 			? []

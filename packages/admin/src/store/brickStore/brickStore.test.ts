@@ -1,3 +1,4 @@
+import { unwrap } from "solid-js/store";
 import { describe, expect, test } from "vitest";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import { createBrickStore } from "./brickStore";
@@ -306,10 +307,10 @@ describe("undo and redo", () => {
 			runId: "run-1",
 		});
 		store.edits.undo();
-		store.set("agentEdited", false);
+		store.set("reviewPending", false);
 
 		store.edits.redo();
-		expect(store.get.agentEdited).toBe(true);
+		expect(store.get.reviewPending).toBe(true);
 	});
 
 	test("redoing the agent's step after it was saved keeps autosave on", () => {
@@ -320,11 +321,30 @@ describe("undo and redo", () => {
 			runId: "run-1",
 		});
 		store.get.captureInitialSnapshot();
-		store.set("agentEdited", false);
+		store.set("reviewPending", false);
 		store.edits.undo();
 
 		store.edits.redo();
-		expect(store.get.agentEdited).toBe(false);
+		expect(store.get.reviewPending).toBe(false);
+	});
+
+	test("filling in translations pauses autosave until the person reviews them", () => {
+		const store = createStore();
+		store.get.applyTranslations(
+			[
+				{
+					brick: "hero",
+					path: ["title"],
+					locale: "fr",
+					value: "Bonjour",
+					source: { source: "source-hash", origin: "ai", output: "output" },
+				},
+			],
+			{ bricks: structuredClone(unwrap(store.get.bricks)), fields: [] },
+		);
+
+		expect(store.get.bricks[1]?.fields[0]?.translations?.fr).toBe("Bonjour");
+		expect(store.get.reviewPending).toBe(true);
 	});
 
 	test("saved content syncing back keeps the steps, while loading a document or locking the pane leaves nothing to undo", () => {

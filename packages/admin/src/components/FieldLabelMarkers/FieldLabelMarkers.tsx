@@ -1,12 +1,17 @@
 import classnames from "classnames";
 import {
+	TbOutlineClockExclamation,
 	TbOutlineDatabase,
 	TbOutlineLock,
+	TbOutlineSparkles,
 	TbOutlineWorld,
 } from "solid-icons/tb";
-import { type Component, Show } from "solid-js";
+import { type Component, createMemo, Match, Show, Switch } from "solid-js";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { useFieldAccess } from "@/hooks/useFieldAccess/useFieldAccess";
+import { useFieldTranslation } from "@/hooks/useFieldTranslation/useFieldTranslation";
 import T from "@/translations";
+import { getLocaleName } from "@/utils/locale-name";
 
 export interface FieldLabelMarkersProps {
 	/** The field stores a value per content locale. */
@@ -21,13 +26,28 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const access = useFieldAccess();
+	const translation = useFieldTranslation();
+	const documentLocalization = useDocumentLocalization();
+
+	// ----------------------------------------
+	// Memos
+	//* language-only requests lock shared fields and other locales, which isn't about permissions
+	const lockReason = createMemo(() => {
+		const editable = documentLocalization.editableLocales();
+		if (editable === null) return T()("fields.permission.locked");
+		if (!props.localised) return T()("fields.locale.locked");
+
+		const code = documentLocalization.contentLocale() ?? "";
+		if (editable.includes(code)) return T()("fields.permission.locked");
+		return T()("fields.locale.request", { locale: getLocaleName(code) });
+	});
 
 	// ----------------------------------------
 	// Render
 	return (
 		<span class="mr-1 inline-flex items-center gap-1 empty:hidden">
 			<Show when={access() === "locked"}>
-				<span class="inline" title={T()("fields.permission.locked")}>
+				<span class="inline" title={lockReason()}>
 					<TbOutlineLock size={12} />
 				</span>
 			</Show>
@@ -36,6 +56,45 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 					<TbOutlineDatabase size={12} />
 				</span>
 			</Show>
+			<Switch>
+				<Match when={translation.state() === "machine"}>
+					<span
+						class="inline text-primary"
+						title={T()("fields.translation.machine")}
+					>
+						<TbOutlineSparkles size={12} />
+					</span>
+				</Match>
+				<Match when={translation.state() === "outdated"}>
+					<Show
+						when={translation.markChecked}
+						fallback={
+							<span
+								class="inline text-warning"
+								title={T()("fields.translation.outdated")}
+							>
+								<TbOutlineClockExclamation size={12} />
+							</span>
+						}
+					>
+						{(markChecked) => (
+							<button
+								type="button"
+								class="inline-flex text-warning rounded-sm hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								title={T()("fields.translation.outdated.check")}
+								aria-label={T()("fields.translation.outdated.check")}
+								onClick={(event) => {
+									event.preventDefault();
+									event.stopPropagation();
+									markChecked()();
+								}}
+							>
+								<TbOutlineClockExclamation size={12} />
+							</button>
+						)}
+					</Show>
+				</Match>
+			</Switch>
 			<Show when={props.localised}>
 				<span
 					class={classnames("inline", {

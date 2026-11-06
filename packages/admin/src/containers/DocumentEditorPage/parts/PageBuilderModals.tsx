@@ -16,13 +16,18 @@ import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer"
 import NavigationGuardModal from "@/components/NavigationGuardModal/NavigationGuardModal";
 import RestoreRevisionModal from "@/components/RestoreRevisionModal/RestoreRevisionModal";
 import RichTextVariableSelectDrawer from "@/components/RichTextVariableSelectDrawer/RichTextVariableSelectDrawer";
+import TranslateModal from "@/components/TranslateModal/TranslateModal";
 import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
+import { Permissions } from "@/constants/permissions";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/useDocumentState/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuard";
+import brickStore from "@/store/brickStore/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import brickHelpers from "@/utils/brick-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const PageBuilderModals: Component<{
@@ -50,6 +55,10 @@ export const PageBuilderModals: Component<{
 				{ collectionKey: props.hooks.state.collectionKey(), ids: [id] },
 			],
 		};
+	});
+	const translateDocumentIds = createMemo(() => {
+		const id = props.hooks.state.document()?.id;
+		return id === undefined ? [] : [id];
 	});
 	const mediaSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("mediaSelect"),
@@ -113,6 +122,11 @@ export const PageBuilderModals: Component<{
 		props.hooks.uiState.setPublishOpen(false);
 		props.hooks.uiState.setPublishTarget(null);
 		props.hooks.uiState.setPublishAction(null);
+	};
+	//* the version type rather than its ID, as each save of latest makes a new version
+	const editorIdentity = () => {
+		const document = props.hooks.state.document();
+		return `${props.hooks.state.collectionKey()}:${document?.id}:${document?.version}`;
 	};
 
 	// ----------------------------------
@@ -278,6 +292,29 @@ export const PageBuilderModals: Component<{
 						);
 					},
 				}}
+			/>
+			<TranslateModal
+				open={props.hooks.uiState.getTranslateOpen()}
+				onOpenChange={props.hooks.uiState.setTranslateOpen}
+				collection={props.hooks.state.collection()}
+				documentIds={translateDocumentIds()}
+				canRequest={userStore.get.hasPermission([Permissions.RequestsRead]).all}
+				editor={
+					props.hooks.uiState.hasSavePermission()
+						? {
+								content: () => ({
+									bricks: brickHelpers.getUpsertBricks(),
+									fields: brickHelpers.getCollectionPseudoBrickFields(),
+								}),
+								identity: editorIdentity,
+								//* only into the collection, document and version the translation was made from
+								onFill: (changes, submitted) => {
+									if (submitted.identity !== editorIdentity()) return;
+									brickStore.get.applyTranslations(changes, submitted.content);
+								},
+							}
+						: undefined
+				}
 			/>
 			<ExportModal
 				open={props.hooks.uiState.getExportOpen()}

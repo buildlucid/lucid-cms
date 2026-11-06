@@ -137,6 +137,7 @@ const removeDocument: ServiceFn<
 			data: {
 				request: getHookRequest({
 					id: request.id,
+					locales: request.locales,
 					documents: request.documents.filter(
 						(member) => member.id !== document.id,
 					),

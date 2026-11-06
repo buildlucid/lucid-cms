@@ -28,17 +28,23 @@ import { SelectField } from "@/components/SelectField/SelectField";
 import { TextareaField } from "@/components/TextareaField/TextareaField";
 import { UserField } from "@/components/UserField/UserField";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import {
 	FieldAccessProvider,
 	useFieldAccess,
 } from "@/hooks/useFieldAccess/useFieldAccess";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
+import {
+	FieldTranslationProvider,
+	type FieldTranslationState,
+} from "@/hooks/useFieldTranslation/useFieldTranslation";
 import type {
 	CollectionDataFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
 import type { DynamicFieldProps } from "@/types/custom-fields";
 import { evaluateFieldVisibility } from "@/utils/field-condition-helpers";
+import isLocaleLockedField from "@/utils/is-locale-locked-field";
 import { getPreviewFieldId } from "@/utils/preview-focus-dom";
 import resolveFieldAccess from "@/utils/resolve-field-access";
 
@@ -57,14 +63,24 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 	const parentAccess = useFieldAccess();
+	const documentLocalization = useDocumentLocalization();
 	const [tabHasMounted, setTabHasMounted] = createSignal(false);
 
 	// -------------------------------
 	// Memos
 	//* hidden fields aren't sent by the server; locked ones render disabled and keep their stored value on save
-	const access = createMemo(() =>
-		resolveFieldAccess(props.fieldConfig.permissions, parentAccess()),
-	);
+	const access = createMemo(() => {
+		const resolved = resolveFieldAccess(
+			props.fieldConfig.permissions,
+			parentAccess(),
+		);
+		const localeLocked = isLocaleLockedField({
+			config: props.fieldConfig,
+			editableLocales: documentLocalization.editableLocales(),
+			locale: documentLocalization.contentLocale(),
+		});
+		return resolved === "editable" && localeLocked ? "locked" : resolved;
+	});
 	const fieldConfig = createMemo(() => {
 		const config = props.fieldConfig;
 		if (
@@ -177,6 +193,23 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		if (fieldConfig().type !== "tab") return false;
 		return activeTab() || tabHasMounted();
 	});
+	//* only the open translation's state, compared with the default locale's text as last saved
+	const translationState = createMemo((): FieldTranslationState | null => {
+		const field = fieldData();
+		const locale = fieldRenderState.contentLocale();
+		if (
+			!field ||
+			!isLocalised() ||
+			locale === fieldRenderState.defaultLocale()
+		) {
+			return null;
+		}
+
+		const source = field.translationSources?.[locale];
+		if (!source || field.sourceHash === undefined) return null;
+		if (source.source !== field.sourceHash) return "outdated";
+		return source.origin === "ai" ? "machine" : null;
+	});
 	const fieldColumnIsMissing = createMemo(() => {
 		return fieldRenderState.missingFieldColumns().includes(fieldConfig().key);
 	});
@@ -210,6 +243,22 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	});
 
 	// -------------------------------
+	// Functions
+	const markTranslationChecked = () => {
+		const sourceHash = fieldData()?.sourceHash;
+		if (sourceHash === undefined) return;
+
+		brickStore.get.setTranslationSource({
+			brickIndex: fieldRenderState.brickIndex(),
+			key: fieldConfig().key,
+			ref: props.groupRef,
+			repeaterKey: props.repeaterKey,
+			contentLocale: fieldRenderState.contentLocale(),
+			source: { source: sourceHash, origin: "person" },
+		});
+	};
+
+	// -------------------------------
 	// Effects
 	createEffect(() => {
 		if (fieldConfig().type === "tab" && activeTab()) {
@@ -222,379 +271,389 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	return (
 		<Show when={access() !== "hidden" && conditionVisible()}>
 			<FieldAccessProvider access={access}>
-				<div
-					data-preview-focus-field={
-						previewFieldId() === undefined ? undefined : ""
+				<FieldTranslationProvider
+					state={translationState}
+					markChecked={
+						access() === "editable" && !brickStore.get.locked
+							? markTranslationChecked
+							: undefined
 					}
-					id={previewFieldId()}
-					class={classNames("w-full relative", widthClass(), {
-						hidden:
-							!activeTab() ||
-							(fieldConfig().type !== "tab" &&
-								// @ts-expect-error
-								fieldConfig()?.ui?.hidden === true),
-					})}
 				>
-					<div class="w-full h-full">
-						<FieldSlots
-							slot="field.before"
-							config={slotField()}
-							errors={fieldErrors()}
-							scope={props.conditionScopes?.()[0]}
-							groupRef={props.groupRef}
-							data={fieldData()}
-						/>
-						<Switch>
-							<Match when={fieldConfig().type === "tab"}>
-								<div
-									inert={!activeTab()}
-									class={classNames(
-										"transition-opacity duration-200 ease-in-out @container/fields grid grid-cols-12 gap-3",
-										{
-											"visible h-full opacity-100": activeTab(),
-											"invisible h-0 overflow-hidden opacity-0": !activeTab(),
-										},
-									)}
-								>
-									<Index
-										each={
-											tabBodyMounted()
-												? (fieldConfig() as CollectionFieldConfigByType<"tab">)
-														.fields
-												: []
-										}
-									>
-										{(config) => (
-											<DynamicField
-												fieldConfig={config()}
-												fields={props.fields}
-												fieldsByKey={props.fieldsByKey}
-												activeTab={props.activeTab}
-												conditionScopes={props.conditionScopes}
-												groupRef={props.groupRef}
-												groupPath={props.groupPath}
-												repeaterKey={props.repeaterKey}
-												repeaterDepth={props.repeaterDepth}
-												pathPrefix={props.pathPrefix}
-												fieldErrors={props.fieldErrors}
-											/>
+					<div
+						data-preview-focus-field={
+							previewFieldId() === undefined ? undefined : ""
+						}
+						id={previewFieldId()}
+						class={classNames("w-full relative", widthClass(), {
+							hidden:
+								!activeTab() ||
+								(fieldConfig().type !== "tab" &&
+									// @ts-expect-error
+									fieldConfig()?.ui?.hidden === true),
+						})}
+					>
+						<div class="w-full h-full">
+							<FieldSlots
+								slot="field.before"
+								config={slotField()}
+								errors={fieldErrors()}
+								scope={props.conditionScopes?.()[0]}
+								groupRef={props.groupRef}
+								data={fieldData()}
+							/>
+							<Switch>
+								<Match when={fieldConfig().type === "tab"}>
+									<div
+										inert={!activeTab()}
+										class={classNames(
+											"transition-opacity duration-200 ease-in-out @container/fields grid grid-cols-12 gap-3",
+											{
+												"visible h-full opacity-100": activeTab(),
+												"invisible h-0 overflow-hidden opacity-0": !activeTab(),
+											},
 										)}
-									</Index>
-								</div>
-							</Match>
-							<Match when={fieldConfig().type === "section"}>
-								<SectionField
-									renderField={DynamicField}
-									fieldConfig={
-										fieldConfig() as CollectionFieldConfigByType<"section">
-									}
-									fields={props.fields}
-									fieldsByKey={props.fieldsByKey}
-									fieldErrors={props.fieldErrors}
-									conditionScopes={props.conditionScopes}
-									groupRef={props.groupRef}
-									groupPath={props.groupPath}
-									repeaterKey={props.repeaterKey}
-									repeaterDepth={props.repeaterDepth}
-									pathPrefix={props.pathPrefix}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "collapsible"}>
-								<CollapsibleField
-									renderField={DynamicField}
-									fieldConfig={
-										fieldConfig() as CollectionFieldConfigByType<"collapsible">
-									}
-									fields={props.fields}
-									fieldsByKey={props.fieldsByKey}
-									fieldErrors={props.fieldErrors}
-									conditionScopes={props.conditionScopes}
-									groupRef={props.groupRef}
-									groupPath={props.groupPath}
-									repeaterKey={props.repeaterKey}
-									repeaterDepth={props.repeaterDepth}
-									pathPrefix={props.pathPrefix}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "repeater"}>
-								<RepeaterField
-									renderField={DynamicField}
-									fieldConfig={
-										fieldConfig() as CollectionFieldConfigByType<"repeater">
-									}
-									fieldData={fieldData()}
-									groupRef={props.groupRef}
-									groupPath={props.groupPath}
-									parentRepeaterKey={props.repeaterKey}
-									repeaterDepth={props.repeaterDepth ?? 0}
-									fieldPath={fieldPath()}
-									fieldError={fieldError()}
-									conditionScopes={props.conditionScopes}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "text"}>
-								<InputField
-									type="text"
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"text">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "user"}>
-								<UserField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"user">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										fieldErrors: fieldErrors(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "email"}>
-								<EmailField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"email">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										fieldErrors: fieldErrors(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "relation"}>
-								<RelationField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"relation">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										fieldErrors: fieldErrors(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "number"}>
-								<InputField
-									type="number"
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"number">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "range"}>
-								<RangeField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"range">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "datetime"}>
-								<InputField
-									type={
-										(fieldConfig() as CollectionFieldConfigByType<"datetime">)
-											.time === false
-											? "date"
-											: "datetime-local"
-									}
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"datetime">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "checkbox"}>
-								<CheckboxField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"checkbox">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "color"}>
-								<ColorField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"color">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "json"}>
-								<JSONField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"json">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "code"}>
-								<CodeField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"code">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "link"}>
-								<LinkField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"link">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "media"}>
-								<MediaField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"media">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										fieldErrors: fieldErrors(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "select"}>
-								<SelectField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"select">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "textarea"}>
-								<TextareaField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"textarea">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldError: fieldError(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-							<Match when={fieldConfig().type === "rich-text"}>
-								<RichTextField
-									state={{
-										fieldConfig:
-											fieldConfig() as CollectionFieldConfigByType<"rich-text">,
-										fieldData: fieldData(),
-										groupRef: props.groupRef,
-										repeaterKey: props.repeaterKey,
-										fieldErrors: fieldErrors(),
-										altLocaleError: altLocaleError(),
-										localised: isLocalised(),
-										fieldColumnIsMissing: fieldColumnIsMissing(),
-									}}
-								/>
-							</Match>
-						</Switch>
-						<FieldSlots
-							slot="field.after"
-							config={slotField()}
-							errors={fieldErrors()}
-							scope={props.conditionScopes?.()[0]}
-							groupRef={props.groupRef}
-							data={fieldData()}
-						/>
+									>
+										<Index
+											each={
+												tabBodyMounted()
+													? (
+															fieldConfig() as CollectionFieldConfigByType<"tab">
+														).fields
+													: []
+											}
+										>
+											{(config) => (
+												<DynamicField
+													fieldConfig={config()}
+													fields={props.fields}
+													fieldsByKey={props.fieldsByKey}
+													activeTab={props.activeTab}
+													conditionScopes={props.conditionScopes}
+													groupRef={props.groupRef}
+													groupPath={props.groupPath}
+													repeaterKey={props.repeaterKey}
+													repeaterDepth={props.repeaterDepth}
+													pathPrefix={props.pathPrefix}
+													fieldErrors={props.fieldErrors}
+												/>
+											)}
+										</Index>
+									</div>
+								</Match>
+								<Match when={fieldConfig().type === "section"}>
+									<SectionField
+										renderField={DynamicField}
+										fieldConfig={
+											fieldConfig() as CollectionFieldConfigByType<"section">
+										}
+										fields={props.fields}
+										fieldsByKey={props.fieldsByKey}
+										fieldErrors={props.fieldErrors}
+										conditionScopes={props.conditionScopes}
+										groupRef={props.groupRef}
+										groupPath={props.groupPath}
+										repeaterKey={props.repeaterKey}
+										repeaterDepth={props.repeaterDepth}
+										pathPrefix={props.pathPrefix}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "collapsible"}>
+									<CollapsibleField
+										renderField={DynamicField}
+										fieldConfig={
+											fieldConfig() as CollectionFieldConfigByType<"collapsible">
+										}
+										fields={props.fields}
+										fieldsByKey={props.fieldsByKey}
+										fieldErrors={props.fieldErrors}
+										conditionScopes={props.conditionScopes}
+										groupRef={props.groupRef}
+										groupPath={props.groupPath}
+										repeaterKey={props.repeaterKey}
+										repeaterDepth={props.repeaterDepth}
+										pathPrefix={props.pathPrefix}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "repeater"}>
+									<RepeaterField
+										renderField={DynamicField}
+										fieldConfig={
+											fieldConfig() as CollectionFieldConfigByType<"repeater">
+										}
+										fieldData={fieldData()}
+										groupRef={props.groupRef}
+										groupPath={props.groupPath}
+										parentRepeaterKey={props.repeaterKey}
+										repeaterDepth={props.repeaterDepth ?? 0}
+										fieldPath={fieldPath()}
+										fieldError={fieldError()}
+										conditionScopes={props.conditionScopes}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "text"}>
+									<InputField
+										type="text"
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"text">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "user"}>
+									<UserField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"user">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											fieldErrors: fieldErrors(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "email"}>
+									<EmailField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"email">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											fieldErrors: fieldErrors(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "relation"}>
+									<RelationField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"relation">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											fieldErrors: fieldErrors(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "number"}>
+									<InputField
+										type="number"
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"number">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "range"}>
+									<RangeField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"range">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "datetime"}>
+									<InputField
+										type={
+											(fieldConfig() as CollectionFieldConfigByType<"datetime">)
+												.time === false
+												? "date"
+												: "datetime-local"
+										}
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"datetime">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "checkbox"}>
+									<CheckboxField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"checkbox">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "color"}>
+									<ColorField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"color">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "json"}>
+									<JSONField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"json">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "code"}>
+									<CodeField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"code">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "link"}>
+									<LinkField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"link">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "media"}>
+									<MediaField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"media">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											fieldErrors: fieldErrors(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "select"}>
+									<SelectField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"select">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "textarea"}>
+									<TextareaField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"textarea">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldError: fieldError(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+								<Match when={fieldConfig().type === "rich-text"}>
+									<RichTextField
+										state={{
+											fieldConfig:
+												fieldConfig() as CollectionFieldConfigByType<"rich-text">,
+											fieldData: fieldData(),
+											groupRef: props.groupRef,
+											repeaterKey: props.repeaterKey,
+											fieldErrors: fieldErrors(),
+											altLocaleError: altLocaleError(),
+											localised: isLocalised(),
+											fieldColumnIsMissing: fieldColumnIsMissing(),
+										}}
+									/>
+								</Match>
+							</Switch>
+							<FieldSlots
+								slot="field.after"
+								config={slotField()}
+								errors={fieldErrors()}
+								scope={props.conditionScopes?.()[0]}
+								groupRef={props.groupRef}
+								data={fieldData()}
+							/>
+						</div>
 					</div>
-				</div>
+				</FieldTranslationProvider>
 			</FieldAccessProvider>
 		</Show>
 	);

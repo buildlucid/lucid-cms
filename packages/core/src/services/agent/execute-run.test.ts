@@ -3060,7 +3060,7 @@ describe("conversation compaction", () => {
 	};
 	beforeEach(() => {
 		// Leave room for the runner tool definitions as well as conversation history.
-		inputTokenLimit = 6_000;
+		inputTokenLimit = 6_300;
 	});
 
 	test("a summary outlives the run that wrote it", async () => {
@@ -3085,7 +3085,7 @@ describe("conversation compaction", () => {
 
 	test("manual compaction keeps history and continues from only the newest summary", async () => {
 		//* reserve context budget for metadata, the newest summary and a follow-up
-		inputTokenLimit = 6_800;
+		inputTokenLimit = 6_900;
 		const prepared = await compactAfterReply();
 		reply(
 			"Current goal: draft content. Constraint: never publish without approval.",
@@ -3191,7 +3191,7 @@ describe("conversation compaction", () => {
 		expect(conversation.data?.compactions).toHaveLength(2);
 		expect(conversation.data?.context).toMatchObject({
 			model: "test-model",
-			tokenLimit: 6_800,
+			tokenLimit: 6_900,
 			status: "ready",
 		});
 	});

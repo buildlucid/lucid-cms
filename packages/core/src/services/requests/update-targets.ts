@@ -7,6 +7,7 @@ import {
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
+import checkLocaleScope from "./helpers/check-locale-scope.js";
 import checkPublishedTargets from "./helpers/check-published-targets.js";
 import createTargets from "./helpers/create-targets.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
@@ -93,6 +94,17 @@ const updateTargets: ServiceFn<
 		targets: data.targets,
 	});
 	if (targetsRes.error) return targetsRes;
+
+	if (request.locales !== null) {
+		const scopeRes = checkLocaleScope({
+			collection: collectionRes.data,
+			localization: context.config.localization,
+			locales: request.locales,
+			source: document.source,
+			targets: targetsRes.data,
+		});
+		if (scopeRes.error) return scopeRes;
+	}
 
 	const targets = targetsRes.data;
 	const removed = document.targets.filter(

@@ -6,6 +6,7 @@ export const aiFeatureAccess = {
 	altGeneration: "alt_text",
 	imageGeneration: "image_generation",
 	audioGeneration: "audio_generation",
+	translation: "translation",
 	agents: "agent",
 	mcp: null,
 } as const satisfies Record<AiFeature, AiAccessFeature | null>;

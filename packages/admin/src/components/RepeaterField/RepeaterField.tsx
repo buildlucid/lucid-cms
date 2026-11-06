@@ -16,6 +16,7 @@ import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
 import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
 import RelationCount from "@/components/RelationCount/RelationCount";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
@@ -44,6 +45,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	// State & Hooks
 	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
+	const localization = useDocumentLocalization();
 
 	// -------------------------------
 	// Memos
@@ -61,8 +63,13 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			props.groupRef || ""
 		}`;
 	});
+	//* locale-limited proposals keep the stored items, so they can't add, move or remove any
 	const disabled = createMemo(
-		() => !canAddGroup() || fieldConfig().ui?.disabled || brickStore.get.locked,
+		() =>
+			!canAddGroup() ||
+			fieldConfig().ui?.disabled ||
+			brickStore.get.locked ||
+			localization.editableLocales() !== null,
 	);
 	const groupErrors = createMemo(() => {
 		return props.fieldError?.groupErrors || [];

@@ -4,6 +4,7 @@ import {
 	createContext,
 	createEffect,
 	createMemo,
+	on,
 	type ParentComponent,
 	useContext,
 } from "solid-js";
@@ -37,6 +38,8 @@ export const resolveCollectionContentLocales = (
 
 export const createDocumentLocalization = (
 	collection: Accessor<Collection | undefined>,
+	/** The locales a locale-limited request's proposal can change. Null when every locale can. Other locales can still be viewed. */
+	editableLocales: Accessor<string[] | null> = () => null,
 ) => {
 	const locales = createMemo(() =>
 		resolveCollectionContentLocales(
@@ -52,11 +55,17 @@ export const createDocumentLocalization = (
 		if (locales().some((locale) => locale.code === activeLocale)) {
 			return activeLocale ?? defaultLocale();
 		}
-		return defaultLocale();
+		return editableLocales()?.[0] ?? defaultLocale();
 	});
 	const localeCodes = createMemo(() => locales().map((locale) => locale.code));
 
-	return { locales, localeCodes, defaultLocale, contentLocale };
+	return {
+		locales,
+		localeCodes,
+		defaultLocale,
+		contentLocale,
+		editableLocales,
+	};
 };
 
 type DocumentLocalizationContextValue = ReturnType<
@@ -68,8 +77,12 @@ const DocumentLocalizationContext =
 
 export const DocumentLocalizationProvider: ParentComponent<{
 	collection: Accessor<Collection | undefined>;
+	editableLocales?: Accessor<string[] | null>;
 }> = (props) => {
-	const localization = createDocumentLocalization(props.collection);
+	const localization = createDocumentLocalization(
+		props.collection,
+		props.editableLocales,
+	);
 
 	createEffect(() => {
 		if (!props.collection()) return;
@@ -77,9 +90,49 @@ export const DocumentLocalizationProvider: ParentComponent<{
 		if (activeLocale === localization.contentLocale()) return;
 		contentLocaleStore.get.setContentLocale(localization.contentLocale());
 	});
+	//* a locale-limited proposal opens in a locale it changes, once, so other locales can still be viewed
+	createEffect(
+		on(
+			() => localization.editableLocales()?.join(",") ?? null,
+			() => {
+				const editable = localization.editableLocales();
+				const first = editable?.[0];
+				if (
+					!first ||
+					editable.includes(contentLocaleStore.get.contentLocale ?? "")
+				) {
+					return;
+				}
+				contentLocaleStore.get.setContentLocale(first);
+			},
+		),
+	);
 
 	return (
 		<DocumentLocalizationContext.Provider value={localization}>
+			{props.children}
+		</DocumentLocalizationContext.Provider>
+	);
+};
+
+/**
+ * Shows read-only content, optionally in another locale without changing the
+ * editor's, eg. the source text beside a translation. Nothing in it can be
+ * edited, so it isn't limited to a request's locales.
+ */
+export const DocumentLocaleOverride: ParentComponent<{
+	locale: Accessor<string | undefined>;
+}> = (props) => {
+	const parent = useDocumentLocalization();
+
+	return (
+		<DocumentLocalizationContext.Provider
+			value={{
+				...parent,
+				contentLocale: () => props.locale() ?? parent.contentLocale(),
+				editableLocales: () => null,
+			}}
+		>
 			{props.children}
 		</DocumentLocalizationContext.Provider>
 	);
@@ -98,5 +151,6 @@ export const useDocumentLocalization = () => {
 		defaultLocale,
 		contentLocale: () =>
 			contentLocaleStore.get.contentLocale ?? defaultLocale(),
+		editableLocales: () => null,
 	};
 };

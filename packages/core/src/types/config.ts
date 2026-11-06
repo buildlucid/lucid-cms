@@ -482,6 +482,8 @@ export interface LucidConfig {
 				chatTitles?: boolean;
 				/** Media alt text generation, enabled by default. */
 				altGeneration?: boolean;
+				/** Translating documents' localized fields into other locales, enabled by default. */
+				translation?: boolean;
 				/** Image generation and text to speech for the admin and agents, with all media types enabled by default. */
 				mediaGeneration?: MediaGenerationConfig;
 				/**
@@ -837,6 +839,7 @@ export interface ResolvedLucidConfig {
 		enabled: boolean;
 		chatTitles: boolean;
 		altGeneration: boolean;
+		translation: boolean;
 		mediaGeneration: Record<
 			MediaGenerationType,
 			{ enabled: boolean; models: AiModelConfig<string> }

@@ -1,5 +1,5 @@
 import type { Collection, RequestDetails, RequestDocument } from "@types";
-import { TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
+import { TbOutlineLanguage, TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import Menu from "@/components/Menu/Menu";
@@ -8,6 +8,7 @@ import StatusIndicator, {
 } from "@/components/StatusIndicator/StatusIndicator";
 import type { TargetUpdates } from "@/containers/RequestPage/hooks/useTargetUpdates";
 import T from "@/translations";
+import { getLocaleName } from "@/utils/locale-name";
 import {
 	getAllowedTargets,
 	getTargetLabel,
@@ -40,10 +41,16 @@ export const RequestTargets: Component<{
 			props.request.status === "open" &&
 			props.request.permissions.edit,
 	);
+	//* locale-limited requests only land in latest
 	const available = createMemo(() =>
-		getAllowedTargets(props.collection, props.document.source).filter(
-			(target) => !props.targets.selected().includes(target),
-		),
+		props.request.locales
+			? []
+			: getAllowedTargets(props.collection, props.document.source).filter(
+					(target) => !props.targets.selected().includes(target),
+				),
+	);
+	const localeNames = createMemo(() =>
+		props.request.locales?.map((code) => getLocaleName(code)),
 	);
 	//* a request always keeps at least one target
 	const removable = createMemo(
@@ -88,6 +95,17 @@ export const RequestTargets: Component<{
 					);
 				}}
 			</For>
+			<Show when={localeNames()}>
+				{(names) => (
+					<li
+						class="flex h-8 items-center gap-2 rounded-full border border-border bg-input px-3 text-xs text-subtitle"
+						title={T()("requests.locales.description")}
+					>
+						<TbOutlineLanguage size={12} class="text-icon" />
+						{T()("requests.locales.only", { locales: names().join(", ") })}
+					</li>
+				)}
+			</Show>
 			<Show when={editable() && available().length > 0}>
 				<li>
 					<Menu.Root>

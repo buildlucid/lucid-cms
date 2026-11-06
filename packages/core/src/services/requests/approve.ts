@@ -148,6 +148,7 @@ const approve: ServiceFn<
 			documentId: document.document_id,
 			versionId: state.source.id,
 			user: data.user,
+			locales: request.locales,
 		});
 		if (validateRes.error) return validateRes;
 	}

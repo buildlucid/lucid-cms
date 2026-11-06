@@ -17,6 +17,7 @@ import cloneVersion from "../../documents-versions/clone-version.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
 import canWriteDocument from "./can-write-document.js";
+import checkLocaleScope from "./check-locale-scope.js";
 import checkPublishedTargets from "./check-published-targets.js";
 import createTargets from "./create-targets.js";
 import getHookRequest from "./get-hook-request.js";
@@ -31,6 +32,8 @@ const captureDocument: ServiceFn<
 				type: Exclude<RequestType, "create">;
 				/** Only the request's creator writes with their own request permission. */
 				created_by: number | null;
+				/** The content locales the request changes, or null for whole documents. */
+				locales: string[] | null;
 			};
 			user: LucidActor;
 			agentRunId?: string;
@@ -90,6 +93,17 @@ const captureDocument: ServiceFn<
 		targets: data.targets ?? [],
 	});
 	if (targetsRes.error) return targetsRes;
+
+	if (data.request.locales !== null) {
+		const scopeRes = checkLocaleScope({
+			collection: collectionRes.data,
+			localization: context.config.localization,
+			locales: data.request.locales,
+			source,
+			targets: targetsRes.data,
+		});
+		if (scopeRes.error) return scopeRes;
+	}
 
 	await using claims = new AsyncDisposableStack();
 	if (!data.skipDocumentWriteClaims) {
@@ -221,6 +235,7 @@ const captureDocument: ServiceFn<
 				collectionTableNames: tablesRes.data,
 				request: getHookRequest({
 					id: data.request.id,
+					locales: data.request.locales,
 					documents: membersRes.data ?? [],
 				}),
 			},

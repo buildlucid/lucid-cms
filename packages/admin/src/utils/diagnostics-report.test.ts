@@ -61,6 +61,7 @@ const diagnostics: Diagnostics = {
 			imageGeneration: false,
 			audioGeneration: false,
 			altGeneration: false,
+			translation: false,
 			chatTitles: false,
 			agents: false,
 			mcp: false,

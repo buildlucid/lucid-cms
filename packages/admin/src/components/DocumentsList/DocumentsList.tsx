@@ -36,6 +36,7 @@ import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RestoreDocumentModal from "@/components/RestoreDocumentModal/RestoreDocumentModal";
 import Table, { type TableSelectActionItem } from "@/components/Table/Table";
+import TranslateModal from "@/components/TranslateModal/TranslateModal";
 import { Permissions } from "@/constants/permissions";
 import { resolveSlots } from "@/extensions/slot-policy";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
@@ -45,10 +46,15 @@ import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
+import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import type { AgentReferenceItem } from "@/utils/agent-references";
+import {
+	createAiFeatureAccessState,
+	spawnAiFeatureAccessToast,
+} from "@/utils/ai-feature-access";
 import {
 	documentListingRefIncludes,
 	getDocumentPreviewLabel,
@@ -85,6 +91,8 @@ export const DocumentsList: Component<{
 		selection: boolean;
 	}>({ ids: [], selection: false });
 	const [exportOpen, setExportOpen] = createSignal(false);
+	const [translating, setTranslating] = createSignal<number[]>([]);
+	const [translateOpen, setTranslateOpen] = createSignal(false);
 	const rowTarget = useRowTarget({
 		triggers: {
 			duplicate: false,
@@ -235,8 +243,44 @@ export const DocumentsList: Component<{
 			!props.state.showingDeleted() &&
 			!props.state.showingRequests(),
 	);
+	//* translations start from latest content, so bin and request views leave it out
+	const canTranslateDocuments = createMemo(() => {
+		const localization = props.state.collection?.localized;
+		const permissions = collectionPermissions();
+		return (
+			!!localization &&
+			localization.locales.length > 1 &&
+			!props.state.showingDeleted() &&
+			!props.state.showingRequests() &&
+			siteStore.get.isAiFeatureEnabled("translation") &&
+			permissions !== undefined &&
+			userStore.get.hasPermission([
+				Permissions.AiTranslate,
+				Permissions.RequestsRead,
+				permissions.read,
+				permissions.update,
+			]).all
+		);
+	});
+	//* offered without a Lucid connection too, explaining why it can't run when chosen
+	const translateAccess = createAiFeatureAccessState({
+		hasPermission: canTranslateDocuments,
+		connection: () => siteStore.get.connection ?? undefined,
+	});
 	const selectActions = createMemo(() => {
 		const actions: TableSelectActionItem<InternalCollectionDocument>[] = [];
+		if (canTranslateDocuments()) {
+			actions.push({
+				label: T()("translations.action"),
+				icon: "language",
+				keepSelection: true,
+				onClick: async (rows) => {
+					if (spawnAiFeatureAccessToast(translateAccess())) return;
+					setTranslating(rows.map((row) => row.id));
+					setTranslateOpen(true);
+				},
+			});
+		}
 		if (canExportDocuments()) {
 			actions.push({
 				label: T()("common.export"),
@@ -793,6 +837,13 @@ export const DocumentsList: Component<{
 							);
 						},
 					}}
+				/>
+				<TranslateModal
+					open={translateOpen()}
+					onOpenChange={setTranslateOpen}
+					collection={props.state.collection}
+					documentIds={translating()}
+					onSuccess={() => selection.clear()}
 				/>
 				<ExportModal
 					open={exportOpen()}

@@ -18,7 +18,7 @@ const PageCollection = new CollectionBuilder("page", {
 		order: 0,
 	},
 	orderable: true,
-	localized: { locales: ["en", "fr"], defaultLocale: "fr" },
+	localized: { locales: ["en", "fr"], defaultLocale: "en" },
 	revisions: true,
 	autoSave: true,
 	hooks: [

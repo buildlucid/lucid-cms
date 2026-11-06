@@ -70,8 +70,10 @@ export const PreviewOverlay: Component<{
 	scale: number;
 	/** The visible preview's width, in the overlay's pixels. */
 	width: number;
-	/** Whether the document can be changed from the page, which its controls need. */
+	/** Whether fields can be edited from the page, which the field bar's edit button needs. */
 	editable: boolean;
+	/** Whether bricks and repeater items can be added, moved and removed, which their handles and add buttons need. */
+	canChangeStructure: boolean;
 	details: PreviewEditingDetails | null;
 	/** The fields with validation errors. */
 	errors: PreviewTargetPath[];
@@ -342,9 +344,9 @@ export const PreviewOverlay: Component<{
 	);
 	createEffect(
 		on(
-			() => props.editable,
-			(editable) => {
-				if (!editable) stopInteracting();
+			() => props.canChangeStructure,
+			(canChange) => {
+				if (!canChange) stopInteracting();
 			},
 		),
 	);
@@ -421,7 +423,7 @@ export const PreviewOverlay: Component<{
 				leaveAll();
 			}}
 		>
-			<Show when={props.editable && held().brick}>
+			<Show when={props.canChangeStructure && held().brick}>
 				{(brick) => (
 					<>
 						<Show when={brickOutline()}>
@@ -447,10 +449,14 @@ export const PreviewOverlay: Component<{
 					</>
 				)}
 			</Show>
-			<Show when={props.editable && held().item}>
+			<Show when={props.canChangeStructure && held().item}>
 				{(item) => handle("item", item)}
 			</Show>
-			<Show when={props.editable && !hidden() && !busy() && held().repeater}>
+			<Show
+				when={
+					props.canChangeStructure && !hidden() && !busy() && held().repeater
+				}
+			>
 				{(repeater) => (
 					<button
 						ref={addItem}

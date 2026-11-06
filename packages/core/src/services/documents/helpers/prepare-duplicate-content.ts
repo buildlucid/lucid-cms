@@ -26,6 +26,9 @@ const prepareFields = (fields: InternalDocumentField[]): FieldInputSchema[] => {
 		if (field.translations !== undefined) {
 			preparedField.translations = { ...field.translations };
 		}
+		if (field.translationSources !== undefined) {
+			preparedField.translationSources = { ...field.translationSources };
+		}
 		if (field.groups !== undefined) {
 			preparedField.groups = field.groups.map((group) => ({
 				ref: group.ref,

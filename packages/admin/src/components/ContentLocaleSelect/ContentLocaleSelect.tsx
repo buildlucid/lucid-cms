@@ -5,12 +5,14 @@ import {
 	TbOutlineAlertTriangle,
 	TbOutlineChevronDown,
 	TbOutlineLanguage,
+	TbOutlineLock,
 } from "solid-icons/tb";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { getButtonClasses } from "@/components/Button/classes";
 import Menu from "@/components/Menu/Menu";
 import Select from "@/components/Select/Select";
 import { showShortcutFeedback } from "@/components/ShortcutFeedback/ShortcutFeedback";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import { inModal, shortcuts } from "@/utils/shortcuts";
@@ -25,6 +27,12 @@ interface ContentLocaleSelectProps {
 	locales?: Locale[];
 	/** A toolbar button showing the language icon and code, listing the full names in its menu. For headers, with the global locale only. */
 	compact?: boolean;
+	/** Locales whose translations need attention, with what to say about them, marked with a dot in the compact menu. */
+	translationNotes?: Record<string, string>;
+	/** Locales that can be viewed but not edited, with why, marked with a padlock in the compact menu. */
+	lockedLocales?: Record<string, string>;
+	/** Adds a translate action to the compact menu. `unavailable` makes it look disabled, for `onTranslate` to explain why. */
+	translate?: { onTranslate: () => void; unavailable: boolean };
 }
 
 const shortcutText = `${formatForDisplay(shortcuts.previousLocale.hotkey)} / ${formatForDisplay(shortcuts.nextLocale.hotkey)}`;
@@ -48,9 +56,13 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 	const currentOption = createMemo(() =>
 		options().find((option) => option.value === contentLocale()),
 	);
+	const lockedReason = createMemo(
+		() => props.lockedLocales?.[contentLocale() ?? ""],
+	);
 	const triggerLabel = createMemo(() => {
 		const label = currentOption()?.label ?? "";
-		return props.invalid ? `${label} - ${T()("builder.locale.errors")}` : label;
+		if (props.invalid) return `${label} - ${T()("builder.locale.errors")}`;
+		return lockedReason() ? `${label} - ${lockedReason()}` : label;
 	});
 
 	// ----------------------------------
@@ -114,14 +126,18 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 							"gap-1.5 font-medium text-subtitle",
 						)}
 					>
-						<Show
-							when={props.invalid}
+						<Switch
 							fallback={<TbOutlineLanguage size={12} class="text-icon" />}
 						>
-							<span class="flex size-3 shrink-0 items-center justify-center">
-								<TbOutlineAlertTriangle size={10} class="text-danger" />
-							</span>
-						</Show>
+							<Match when={props.invalid}>
+								<span class="flex size-3 shrink-0 items-center justify-center">
+									<TbOutlineAlertTriangle size={10} class="text-danger" />
+								</span>
+							</Match>
+							<Match when={lockedReason()}>
+								<TbOutlineLock size={12} class="text-icon" />
+							</Match>
+						</Switch>
 						<span class="uppercase">{contentLocale()}</span>
 						<TbOutlineChevronDown size={10} class="text-icon" />
 					</Menu.Trigger>
@@ -134,20 +150,57 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 										contentLocaleStore.get.setContentLocale(option.value)
 									}
 									end={
-										<Show when={props.errorLocales?.includes(option.value)}>
-											<TbOutlineAlertTriangle
-												size={12}
-												class="text-danger"
-												role="img"
-												aria-label={T()("common.errors")}
-											/>
-										</Show>
+										<Switch>
+											<Match when={props.errorLocales?.includes(option.value)}>
+												<TbOutlineAlertTriangle
+													size={12}
+													class="text-danger"
+													role="img"
+													aria-label={T()("common.errors")}
+												/>
+											</Match>
+											<Match when={props.lockedLocales?.[option.value]}>
+												{(reason) => (
+													<span
+														role="img"
+														class="flex text-icon"
+														title={reason()}
+														aria-label={reason()}
+													>
+														<TbOutlineLock size={12} />
+													</span>
+												)}
+											</Match>
+											<Match when={props.translationNotes?.[option.value]}>
+												{(note) => (
+													<StatusIndicator
+														variant="warning"
+														size="xs"
+														label={note()}
+													/>
+												)}
+											</Match>
+										</Switch>
 									}
 								>
 									{option.label}
 								</Menu.Item>
 							)}
 						</For>
+						<Show when={props.translate}>
+							{(translate) => (
+								<>
+									<Menu.Separator />
+									<Menu.Item
+										icon={<TbOutlineLanguage size={14} />}
+										unavailable={translate().unavailable}
+										onSelect={() => translate().onTranslate()}
+									>
+										{T()("translations.action")}
+									</Menu.Item>
+								</>
+							)}
+						</Show>
 					</Menu.Content>
 				</Menu.Root>
 			</Match>

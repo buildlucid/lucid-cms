@@ -8,6 +8,7 @@ import {
 import type { AgentRoutineTrigger } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
+import checkRoutineFeatures from "./check-routine-features.js";
 import claimRoutineEvents from "./claim-routine-events.js";
 import enqueueRun from "./enqueue-run.js";
 import insertConversation from "./insert-conversation.js";
@@ -16,7 +17,7 @@ import startRun from "./start-run.js";
 /**
  * Starts a routine occurrence in its reused chat or a new chat carrying the previous summary.
  * @remarks Admin routines act for their user; code routines act as the system.
- * @returns Null if the routine is missing, it or its reused chat has an unfinished run, or an event run has no remaining changes.
+ * @returns Null if the routine is missing, it or its reused chat has an unfinished run, an event run has no remaining changes, or an AI feature it needs is off.
  */
 const startRoutineRun: ServiceFn<
 	[{ routineId: string; trigger: AgentRoutineTrigger }],
@@ -30,6 +31,8 @@ const startRoutineRun: ServiceFn<
 			select: [
 				"id",
 				"agent_key",
+				"key",
+				"source",
 				"name",
 				"instructions",
 				"user_id",
@@ -63,6 +66,14 @@ const startRoutineRun: ServiceFn<
 		if (input.trigger === "event" && events.data.length === 0) {
 			return { error: undefined, data: null };
 		}
+		//* the claimed changes are dropped with the run, like changes for a routine its user can't run
+		const available = await checkRoutineFeatures(context, {
+			agentKey: routine.data.agent_key,
+			key: routine.data.key,
+			source: routine.data.source,
+		});
+		if (available.error) return available;
+		if (!available.data) return { error: undefined, data: null };
 
 		let conversationId = reusedId;
 		let summary: string | undefined;

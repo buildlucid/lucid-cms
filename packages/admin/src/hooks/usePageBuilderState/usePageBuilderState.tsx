@@ -33,7 +33,14 @@ export const PageBuilderStateProvider: ParentComponent<
 	PageBuilderStateContextValue
 > = (props) => {
 	return (
-		<DocumentLocalizationProvider collection={props.documentState.collection}>
+		<DocumentLocalizationProvider
+			collection={props.documentState.collection}
+			editableLocales={() =>
+				props.version() === "proposal"
+					? (props.request?.()?.locales ?? null)
+					: null
+			}
+		>
 			<PageBuilderStateContext.Provider
 				value={{
 					mode: props.mode,

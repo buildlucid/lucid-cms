@@ -68,6 +68,8 @@ import type {
 	LucidPasswordAttempts,
 	LucidPreviewSessions,
 	LucidProcessedImages,
+	LucidTranslationGlossary,
+	LucidTranslationStyles,
 	LucidRemoteConnections,
 	LucidRequestApprovals,
 	LucidRequestDocuments,
@@ -346,6 +348,8 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_notification_recipients: LucidNotificationRecipients;
 	lucid_notification_type_settings: LucidNotificationTypeSettings;
 	lucid_notification_preferences: LucidNotificationPreferences;
+	lucid_translation_glossary: LucidTranslationGlossary;
+	lucid_translation_styles: LucidTranslationStyles;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_media_upload_sessions: LucidMediaUploadSessions;
 	lucid_media_share_links: LucidMediaShareLinks;

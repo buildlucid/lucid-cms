@@ -145,6 +145,7 @@ const cloneVersion: ServiceFn<
 	if (newVersionRes.error) return newVersionRes;
 
 	const baseUrl = getBaseUrl(context);
+	//* copies stored values as they are, without display defaults filling empty translations
 	const brickTables = aggregateBrickTables({
 		collection: collectionRes.data,
 		documentId: data.documentId,
@@ -156,6 +157,7 @@ const cloneVersion: ServiceFn<
 			collection: collectionRes.data,
 			config: context.config,
 			host: baseUrl,
+			editable: true,
 		}),
 		fields: documentBricksFormatter.formatDocumentFields({
 			bricksQuery: bricksQueryRes.data,
@@ -163,6 +165,7 @@ const cloneVersion: ServiceFn<
 			collection: collectionRes.data,
 			config: context.config,
 			host: baseUrl,
+			editable: true,
 		}),
 		tableNameByteLimit: context.config.db.config.tableNameByteLimit,
 	});

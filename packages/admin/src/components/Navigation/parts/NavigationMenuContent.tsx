@@ -71,6 +71,7 @@ export const NavigationMenuContent: Component<{
 			integrations:
 				can(Permissions.IntegrationsRead) || can(Permissions.ConnectionUpdate),
 			aiUsage: settings && siteStore.get.hasAnyAiFeatureEnabled(),
+			translations: settings && siteStore.get.isAiFeatureEnabled("translation"),
 			agent:
 				getAgentAccess().all.length > 0 || getAgentAccess().manageAllRoutines,
 			requests: can(Permissions.RequestsRead),
@@ -323,6 +324,12 @@ export const NavigationMenuContent: Component<{
 								icon="notifications"
 								title={T()("notifications.title")}
 								permission={permissions().systemDiagnostics}
+							/>
+							<NavigationLink
+								href="/admin/system/translations"
+								icon="translations"
+								title={T()("routes.system.translations.title")}
+								permission={permissions().translations}
 							/>
 							<NavigationLink
 								href="/admin/system/integrations"

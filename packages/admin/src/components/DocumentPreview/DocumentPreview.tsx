@@ -193,6 +193,7 @@ export const DocumentPreview: Component<{
 							scale={viewport.scale()}
 							width={viewport.width()}
 							editable={props.preview.canEdit()}
+							canChangeStructure={props.preview.canChangeStructure()}
 							details={props.preview.details()}
 							errors={props.preview.errors()}
 							capacity={structure.capacity}

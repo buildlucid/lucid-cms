@@ -85,6 +85,7 @@ const addDocuments: ServiceFn<
 				id: request.id,
 				type: request.type,
 				created_by: request.created_by,
+				locales: request.locales,
 			},
 			user: data.user,
 			agentRunId: data.agentRunId,

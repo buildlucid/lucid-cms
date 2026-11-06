@@ -42,6 +42,7 @@ const loadRequest: ServiceFn<
 				"title",
 				"description",
 				"status",
+				"locales",
 				"revision",
 				"approved_revision",
 				"scheduled_at",

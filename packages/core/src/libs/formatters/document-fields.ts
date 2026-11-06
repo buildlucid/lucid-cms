@@ -9,6 +9,7 @@ import type {
 	InternalDocumentFieldGroup,
 	Refs,
 	ResolvedLucidConfig,
+	TranslationSource,
 } from "../../exports/types.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
@@ -26,6 +27,8 @@ import type {
 import type { Select } from "../db/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
+import getFieldTranslation from "../translations/get-field-translation.js";
+import hashTranslationText from "../translations/hash-translation-text.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import formatter from "./helpers.js";
 import { itemRef } from "./preview-targets.js";
@@ -33,6 +36,8 @@ import { itemRef } from "./preview-targets.js";
 export interface FieldFormatMeta {
 	/** Read authoring values without display defaults or hydrated references. */
 	editable?: boolean;
+	/** Adds each translated field's `sourceHash`, for editors telling which translations are out of date. */
+	sourceHashes?: boolean;
 	builder: BrickBuilder | CollectionBuilder;
 	host: string;
 	collection: CollectionBuilder;
@@ -57,6 +62,8 @@ interface FieldFormatData {
 interface IntermediaryFieldValues {
 	value: unknown;
 	locale: string | null;
+	/** What the locale's value was translated from, for column fields. */
+	translationSource?: TranslationSource;
 }
 
 /**
@@ -80,6 +87,7 @@ const getFieldValues = (
 		return data.brickRows.map((row) => ({
 			value: row[fieldKey],
 			locale: row.locale,
+			translationSource: row.translation_sources?.[meta.fieldConfig.key],
 		}));
 	}
 
@@ -149,6 +157,7 @@ const formatMultiple = (
 		config: meta.config,
 		bricksTableSchema: meta.bricksTableSchema,
 		editable: meta.editable,
+		sourceHashes: meta.sourceHashes,
 	});
 };
 
@@ -187,6 +196,7 @@ const buildFieldTree = (
 					config: meta.config,
 					bricksTableSchema: meta.bricksTableSchema,
 					editable: meta.editable,
+					sourceHashes: meta.sourceHashes,
 				}),
 			});
 			continue;
@@ -202,6 +212,7 @@ const buildFieldTree = (
 			config: meta.config,
 			bricksTableSchema: meta.bricksTableSchema,
 			editable: meta.editable,
+			sourceHashes: meta.sourceHashes,
 		});
 
 		const fieldValue = buildField(
@@ -221,6 +232,7 @@ const buildFieldTree = (
 				groupRef: meta.groupRef,
 				bricksTableSchema: meta.bricksTableSchema,
 				editable: meta.editable,
+				sourceHashes: meta.sourceHashes,
 			},
 		);
 		if (fieldValue) fieldsRes.push(fieldValue);
@@ -260,6 +272,7 @@ const buildField = (
 		meta.localization.enabled
 	) {
 		const fieldTranslations: Record<string, FieldValue> = {};
+		const translationSources: Record<string, TranslationSource> = {};
 
 		//* populate the translations/meta
 		for (const locale of meta.localization.locales) {
@@ -269,6 +282,9 @@ const buildField = (
 					? data.values.find((v) => v.locale === null)
 					: undefined);
 
+			if (localeValue?.translationSource && locale !== data.defaultLocale) {
+				translationSources[locale] = localeValue.translationSource;
+			}
 			if (localeValue) {
 				fieldTranslations[locale] = meta.editable
 					? cfInstance.formatEditableValue(localeValue.value)
@@ -281,12 +297,26 @@ const buildField = (
 			}
 		}
 
+		const translation = getFieldTranslation(meta.localization, {
+			instance: cfInstance,
+		});
+		const sourceValue =
+			data.values.find((v) => v.locale === data.defaultLocale) ??
+			data.values.find((v) => v.locale === null);
+		const sourceText = meta.sourceHashes
+			? translation?.read(cfInstance.formatEditableValue(sourceValue?.value))
+			: null;
+
 		return {
 			key: meta.fieldConfig.key,
 			type: meta.fieldConfig.type,
 			...(resource ? { resource } : {}),
 			groupRef: meta.groupRef,
 			translations: fieldTranslations,
+			...(translation && Object.keys(translationSources).length > 0
+				? { translationSources }
+				: {}),
+			...(sourceText ? { sourceHash: hashTranslationText(sourceText) } : {}),
 		};
 	}
 
@@ -368,6 +398,7 @@ const buildTreeGroups = (
 					groupRef: ref,
 					bricksTableSchema: meta.bricksTableSchema,
 					editable: meta.editable,
+					sourceHashes: meta.sourceHashes,
 				},
 			),
 		});

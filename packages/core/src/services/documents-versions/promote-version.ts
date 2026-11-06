@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import collections from "../../libs/collection/collections.js";
 import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
@@ -25,6 +26,7 @@ import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.
 import notifyChange from "../documents/notify-change.js";
 import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import recordTargetChange from "../requests/helpers/record-target-change.js";
+import landLocaleContent from "./helpers/land-locale-content.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -45,6 +47,8 @@ const promoteVersion: ServiceFn<
 			requestId?: number;
 			/** Leaves versionPromote hooks, cache invalidation and change notifications to the caller, eg. a request that runs them once every document is in place. */
 			deferEffects?: boolean;
+			/** Writes only these content locales' values onto the current latest and keeps the rest of it, eg. for a locale-limited request. Latest only. */
+			locales?: string[] | null;
 		},
 	],
 	{ versionId: number }
@@ -210,6 +214,19 @@ const promoteVersion: ServiceFn<
 			);
 			if (migrationIdRes.error) return migrationIdRes;
 
+			//* locale-limited promotions only write their locales, onto latest as it is now
+			let landed: Awaited<ReturnType<typeof landLocaleContent>>["data"];
+			if (data.locales && data.toVersionType === "latest") {
+				const landedRes = await landLocaleContent(context, {
+					collection: collectionRes.data,
+					documentId: data.documentId,
+					fromVersionId: data.fromVersionId,
+					locales: data.locales,
+				});
+				if (landedRes.error) return landedRes;
+				landed = landedRes.data;
+			}
+
 			//-------------------------------------------------------------------------------
 			// Mutate/create revisions and update the document
 			const shouldCreateRevision =
@@ -299,7 +316,7 @@ const promoteVersion: ServiceFn<
 							collection_migration_id: migrationIdRes.data,
 							type: data.toVersionType,
 							promoted_from: data.fromVersionId,
-							content_id: versionRes.data.content_id,
+							content_id: landed ? randomUUID() : versionRes.data.content_id,
 							created_by: data.userId,
 							created_by_run_id: data.agentRunId ?? null,
 							updated_by: data.userId,
@@ -322,20 +339,26 @@ const promoteVersion: ServiceFn<
 				documentId: data.documentId,
 				versionId: createVersionRes.data.id,
 				localization: context.config.localization,
-				bricks: documentBricksFormatter.formatMultiple({
-					bricksQuery: bricksQueryRes.data,
-					bricksSchema: bricksTableSchemaRes.data,
-					collection: collectionRes.data,
-					config: context.config,
-					host: baseUrl,
-				}),
-				fields: documentBricksFormatter.formatDocumentFields({
-					bricksQuery: bricksQueryRes.data,
-					bricksSchema: bricksTableSchemaRes.data,
-					collection: collectionRes.data,
-					config: context.config,
-					host: baseUrl,
-				}),
+				bricks:
+					landed?.bricks ??
+					documentBricksFormatter.formatMultiple({
+						bricksQuery: bricksQueryRes.data,
+						bricksSchema: bricksTableSchemaRes.data,
+						collection: collectionRes.data,
+						config: context.config,
+						host: baseUrl,
+						editable: true,
+					}),
+				fields:
+					landed?.fields ??
+					documentBricksFormatter.formatDocumentFields({
+						bricksQuery: bricksQueryRes.data,
+						bricksSchema: bricksTableSchemaRes.data,
+						collection: collectionRes.data,
+						config: context.config,
+						host: baseUrl,
+						editable: true,
+					}),
 				tableNameByteLimit: context.config.db.config.tableNameByteLimit,
 			});
 			const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
@@ -374,11 +397,13 @@ const promoteVersion: ServiceFn<
 				if (hookResponse.error) return hookResponse;
 			}
 
+			const changedLocales = landed ? data.locales : null;
 			const invalidateRes = await invalidateRequests(context, {
 				collectionKey: data.collectionKey,
 				documentIds: [data.documentId],
 				versionType: data.toVersionType,
 				requestId: data.requestId,
+				changedLocales,
 				userId: data.userId,
 			});
 			if (invalidateRes.error) return invalidateRes;
@@ -401,6 +426,8 @@ const promoteVersion: ServiceFn<
 				documentId: data.documentId,
 				target: data.toVersionType,
 				requestId: data.requestId,
+				changedLocales,
+				versionId: createVersionRes.data.id,
 				userId: data.userId,
 				agentRunId: data.agentRunId,
 			});

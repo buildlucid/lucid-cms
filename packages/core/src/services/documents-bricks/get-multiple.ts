@@ -148,6 +148,7 @@ const getMultiple: ServiceFn<
 						collection: collectionRes.data,
 						config: context.config,
 						host: baseUrl,
+						sourceHashes: data.content !== true,
 					})
 				: [],
 			fields: documentBricksFormatter.formatDocumentFields({
@@ -157,6 +158,7 @@ const getMultiple: ServiceFn<
 				collection: collectionRes.data,
 				config: context.config,
 				host: baseUrl,
+				sourceHashes: data.content !== true,
 			}),
 			refs: refsRes.data.refs ?? null,
 		},

@@ -44,7 +44,7 @@ const resolveRequest: ServiceFn<
 		},
 	],
 	{
-		request: Pick<RequestRecord, "id" | "type">;
+		request: Pick<RequestRecord, "id" | "type" | "locales">;
 		document: RequestDocumentRecord;
 	}
 > = async (context, data) => {
@@ -152,7 +152,11 @@ const resolveRequest: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			request: { id: requestRes.data.id, type: requestRes.data.type },
+			request: {
+				id: requestRes.data.id,
+				type: requestRes.data.type,
+				locales: requestRes.data.locales,
+			},
 			document,
 		},
 	};

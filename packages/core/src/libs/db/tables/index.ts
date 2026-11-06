@@ -71,6 +71,8 @@ import { requestsTable } from "./requests.js";
 import { rolePermissionsTable } from "./role-permissions.js";
 import { rolesTable } from "./roles.js";
 import { securityAuditLogsTable } from "./security-audit-logs.js";
+import { translationGlossaryTable } from "./translation-glossary.js";
+import { translationStylesTable } from "./translation-styles.js";
 import { userAuthProvidersTable } from "./user-auth-providers.js";
 import { userLoginsTable } from "./user-logins.js";
 import { userPasskeysTable } from "./user-passkeys.js";
@@ -154,6 +156,8 @@ export * from "./requests.js";
 export * from "./role-permissions.js";
 export * from "./roles.js";
 export * from "./security-audit-logs.js";
+export * from "./translation-glossary.js";
+export * from "./translation-styles.js";
 export * from "./user-auth-providers.js";
 export * from "./user-logins.js";
 export * from "./user-passkeys.js";
@@ -236,6 +240,8 @@ export const coreTableDefinitions = [
 	rolePermissionsTable,
 	rolesTable,
 	securityAuditLogsTable,
+	translationGlossaryTable,
+	translationStylesTable,
 	userAuthProvidersTable,
 	userLoginsTable,
 	userPasskeysTable,

@@ -15,6 +15,7 @@ import type {
 	AgentRoutineEvent,
 	AgentRoutineSchedule,
 	AgentRoutineToolSettings,
+	AiFeature,
 	AiModelSelection,
 	MediaGenerationType,
 } from "../../types/response.js";
@@ -228,6 +229,11 @@ export type DefineRoutineOptions<Key extends string> = {
 	 * @remarks Omitted settings keep tool defaults; system runs refuse confirmation unless overridden with `requiresConfirmation: false`.
 	 */
 	toolSettings?: Readonly<Record<string, AgentRoutineToolSettings>>;
+	/**
+	 * AI features the routine needs, such as `["translation"]`. It doesn't start while any is off,
+	 * in the config or the organisation's AI access, and changes waiting for it are dropped.
+	 */
+	features?: readonly AiFeature[];
 } & (
 	| {
 			schedule: JobScheduleTiming;
@@ -255,6 +261,7 @@ export type RoutineDefinition<Key extends string = string> = {
 	readonly conversationMode: AgentRoutineConversationMode;
 	readonly model?: AiModelSelection;
 	readonly toolSettings: Readonly<Record<string, AgentRoutineToolSettings>>;
+	readonly features: readonly AiFeature[];
 	/** Null when the routine only runs on events. */
 	readonly schedule: Readonly<AgentRoutineSchedule> | null;
 	readonly events: readonly AgentRoutineEvent[];

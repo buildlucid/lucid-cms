@@ -321,6 +321,22 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	mapRefs?(value: unknown, map: FieldRefMapper): unknown;
 	/** Removes references to the embedded bricks with these refs, eg. ones an import leaves out. Pairs with `extractEmbeddedBrickRefs`. */
 	removeEmbeddedBrickRefs?(value: unknown, refs: ReadonlySet<string>): unknown;
+	/** How translation reads and writes the field's text, left out by fields that aren't translated. */
+	translation?: FieldTranslation;
+};
+
+/** Text a translation is made from: plain text, or rich text as source HTML. */
+export type TranslationText = {
+	format: "text" | "html";
+	text: string;
+};
+
+/** Reads a field value's text for translation and builds a translated value from it. */
+export type FieldTranslation = {
+	/** The text to translate, or null when the value has none. */
+	read(value: unknown): TranslationText | null;
+	/** Builds a target locale's value from its translated text, the source value and the target's current value. */
+	write(text: string, values: { source: unknown; current: unknown }): unknown;
 };
 
 /** A record an authoring value links to. Documents also name their collection. */

@@ -4,8 +4,12 @@ import {
 	RequestTargetsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import touchesLocales from "./touches-locales.js";
 
-/** Records target changes on other open or closed requests and clears their affected acknowledgements. */
+/**
+ * Records target changes and clears affected acknowledgements. Unaffected locale-limited requests
+ * carry approval and acknowledgement forward to the new version.
+ */
 const recordTargetChange: ServiceFn<
 	[
 		{
@@ -16,6 +20,10 @@ const recordTargetChange: ServiceFn<
 			unpublished?: boolean;
 			/** The request making the change. Null for a direct change. */
 			requestId?: number;
+			/** The locales the change wrote, with null for shared content. Null or left out when unknown. */
+			changedLocales?: ReadonlyArray<string | null> | null;
+			/** The target's new version, which unaffected locale-limited requests move on to. */
+			versionId?: number;
 			userId: number | null;
 			agentRunId?: string;
 		},
@@ -33,9 +41,38 @@ const recordTargetChange: ServiceFn<
 	});
 	if (documentsRes.error) return documentsRes;
 
-	const documents = documentsRes.data.filter(
+	const others = documentsRes.data.filter(
 		(document) => document.request_id !== data.requestId,
 	);
+	const documents = others.filter((document) =>
+		touchesLocales(document.locales, data.changedLocales),
+	);
+	const unaffected = others.filter(
+		(document) => !touchesLocales(document.locales, data.changedLocales),
+	);
+
+	if (unaffected.length > 0 && data.versionId !== undefined) {
+		const unaffectedIds = unaffected.map((document) => document.id);
+		const approvedRes = await RequestTargets.updateMultiple({
+			data: { approved_version_id: data.versionId },
+			where: [
+				{ key: "request_document_id", operator: "in", value: unaffectedIds },
+				{ key: "target", operator: "=", value: data.target },
+				{ key: "approved_version_id", operator: "is not", value: null },
+			],
+		});
+		if (approvedRes.error) return approvedRes;
+
+		const acknowledgedRes = await RequestTargets.updateMultiple({
+			data: { acknowledged_version_id: data.versionId },
+			where: [
+				{ key: "request_document_id", operator: "in", value: unaffectedIds },
+				{ key: "target", operator: "=", value: data.target },
+				{ key: "acknowledged_version_id", operator: "is not", value: null },
+			],
+		});
+		if (acknowledgedRes.error) return acknowledgedRes;
+	}
 	if (documents.length === 0) return { error: undefined, data: undefined };
 
 	const eventsRes = await RequestEvents.createEvents({

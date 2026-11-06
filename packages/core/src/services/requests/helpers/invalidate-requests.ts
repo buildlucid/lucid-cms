@@ -1,12 +1,11 @@
 import { RequestsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import dismissApproval from "./dismiss-approval.js";
+import touchesLocales from "./touches-locales.js";
 
 /**
- * Called after document content changes. Open requests that publish to the
- * changed version or own the edited proposal lose their approval, so reviewers
- * always approve what will actually be completed. Latest edits only affect
- * requests that target latest.
+ * Invalidates approval for requests owning the edited proposal or targeting the changed version.
+ * Locale-limited requests are affected only when their locales change.
  */
 const invalidateRequests: ServiceFn<
 	[
@@ -19,6 +18,8 @@ const invalidateRequests: ServiceFn<
 			versionId?: number;
 			/** The request doing the writing, which keeps its approval. */
 			requestId?: number;
+			/** The locales the write changed, with null for shared content. Null or left out when unknown. */
+			changedLocales?: ReadonlyArray<string | null> | null;
 			userId?: number | null;
 		},
 	],
@@ -29,7 +30,7 @@ const invalidateRequests: ServiceFn<
 	}
 
 	const Requests = new RequestsRepository(context.db);
-	const affectedRes = await Requests.selectAffectedRequestIds({
+	const affectedRes = await Requests.selectAffectedRequests({
 		collectionKey: data.collectionKey,
 		documentIds: data.documentIds,
 		versionType: data.versionType,
@@ -38,7 +39,13 @@ const invalidateRequests: ServiceFn<
 	if (affectedRes.error) return affectedRes;
 
 	return dismissApproval(context, {
-		ids: affectedRes.data.filter((id) => id !== data.requestId),
+		ids: affectedRes.data
+			.filter(
+				(request) =>
+					request.id !== data.requestId &&
+					touchesLocales(request.locales, data.changedLocales),
+			)
+			.map((request) => request.id),
 		userId: data.userId,
 	});
 };

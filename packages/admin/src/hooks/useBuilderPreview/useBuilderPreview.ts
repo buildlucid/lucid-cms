@@ -36,6 +36,8 @@ export const useBuilderPreview = (props: {
 	dirty: Accessor<boolean>;
 	/** Whether the person could save the content, which is what lets the preview show it unsaved. */
 	canSave: Accessor<boolean>;
+	/** The locales a locale-limited proposal can change, so other locales are only shown. Null when every locale can. */
+	editableLocales: Accessor<string[] | null>;
 	/** Whether the editor has loaded the document's content. */
 	ready: Accessor<boolean>;
 	/** The collections the person can read, whose documents the page can open. */
@@ -74,6 +76,7 @@ export const useBuilderPreview = (props: {
 		collectionKey: props.collectionKey,
 		documentId: props.documentId,
 		locales: props.locales,
+		canChange: () => props.editableLocales() === null,
 		reveal: (target) => {
 			void focus.requestTarget(target);
 			focus.pointOut(target);
@@ -84,6 +87,7 @@ export const useBuilderPreview = (props: {
 		collectionKey: props.collectionKey,
 		documentId: props.documentId,
 		locales: props.locales,
+		editableLocales: props.editableLocales,
 	});
 
 	// ----------------------------------
@@ -147,8 +151,20 @@ export const useBuilderPreview = (props: {
 		saveStamp,
 		/** Whether unsaved content can be previewed, matching who can save it. */
 		canSyncDraft: props.canSave,
-		/** Whether the document can be changed from the page: fields edited, and bricks and repeater items added, moved and removed. */
-		canEdit: () => props.canSave() && !brickStore.get.locked,
+		/** Whether fields can be edited from the page. Locale-limited proposals only edit their own locales. */
+		canEdit: () => {
+			const editable = props.editableLocales();
+			return (
+				props.canSave() &&
+				!brickStore.get.locked &&
+				(editable === null || editable.includes(locale() ?? ""))
+			);
+		},
+		/** Whether bricks and repeater items can be added, moved and removed from the page. Locale-limited proposals keep the stored ones. */
+		canChangeStructure: () =>
+			props.canSave() &&
+			!brickStore.get.locked &&
+			props.editableLocales() === null,
 		/** The brick and field names edit mode's controls show. */
 		details,
 		/** The fields with validation errors, which edit mode outlines in red. */

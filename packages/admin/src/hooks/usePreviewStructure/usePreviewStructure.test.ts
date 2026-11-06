@@ -66,7 +66,7 @@ const bricks = () =>
 const links = () =>
 	brickStore.get.bricks[0]?.fields[0]?.groups?.map((item) => item.ref) ?? [];
 
-const setup = () => {
+const setup = (canChange = true) => {
 	brickStore.set("bricks", [
 		{
 			ref: "collection-pseudo-brick",
@@ -93,6 +93,7 @@ const setup = () => {
 			collectionKey: () => "page",
 			documentId: () => 1,
 			locales: () => ["en"],
+			canChange: () => canChange,
 			reveal,
 		}),
 		reveal,
@@ -106,6 +107,21 @@ afterEach(() => {
 });
 
 describe("structure changes from the preview", () => {
+	test("refuses changes, eg. in a locale-limited proposal, and says why", () => {
+		const { structure, dispose } = setup(false);
+
+		expect(
+			structure.handle(brick("a"), {
+				action: "move",
+				place: "after",
+				anchor: brick("b"),
+			}),
+		).toBeNull();
+		expect(bricks()).toEqual(["a", "b", "c"]);
+		expect(spawnToast).toHaveBeenCalledOnce();
+		dispose();
+	});
+
 	test("moves bricks next to an anchor and removes only those the user can change", () => {
 		const { structure, dispose } = setup();
 

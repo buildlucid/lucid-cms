@@ -163,6 +163,7 @@ const execute: ServiceFn<
 				documentId: document.document_id,
 				versionId: approvedVersionId,
 				user,
+				locales: request.locales,
 			});
 			if (validateRes.error) return validateRes;
 
@@ -187,6 +188,7 @@ const execute: ServiceFn<
 					skipDocumentWriteClaims: true,
 					requestId: request.id,
 					deferEffects: true,
+					locales: request.locales,
 				});
 				if (promoteRes.error) return promoteRes;
 
@@ -252,6 +254,8 @@ const execute: ServiceFn<
 				});
 				if (createdRes.error) return createdRes;
 			} else if (
+				//* locale-limited requests leave the rest of latest as it is, so latest keeps its own workflow
+				request.locales === null &&
 				document.targets.some((target) => target.target === "latest")
 			) {
 				const workflowRes = await landProposalWorkflow(context, { document });

@@ -140,6 +140,7 @@ export const aiUsageFeatureKeySchema = z.enum([
 	"web.fetch",
 	"media.analyze",
 	"media.alt.generate",
+	"content.translate",
 	"media.image.generate",
 	"media.audio.generate",
 ]) satisfies z.ZodType<AiUsageFeatureKey>;
@@ -149,6 +150,7 @@ export const aiUsageSessionTypeSchema = z.enum([
 	"media-image",
 	"media-audio",
 	"media-alt",
+	"translation",
 ]) satisfies z.ZodType<AiUsageSessionType>;
 
 const aiUsageTokensResponseSchema = z

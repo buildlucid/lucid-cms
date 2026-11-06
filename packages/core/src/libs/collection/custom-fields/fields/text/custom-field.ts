@@ -35,6 +35,7 @@ class TextCustomField extends CustomField<"text"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			localized: this.props?.localized ?? true,
+			translate: this.props?.translate,
 			default: this.props?.default ?? "",
 			index: this.props?.index,
 			permissions: this.props?.permissions,

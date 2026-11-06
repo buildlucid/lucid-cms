@@ -6,11 +6,12 @@ import {
 } from "@lucidcms/rich-text";
 import {
 	generateSourceHTML,
+	generateText,
 	parseSourceHTML,
 } from "@lucidcms/rich-text/server";
 import isPlainObject from "../../../../../utils/helpers/is-plain-object.js";
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
-import type { FieldRefMapper } from "../../types.js";
+import type { FieldRefMapper, FieldTranslation } from "../../types.js";
 import { richTextFieldConfig } from "./config.js";
 import RichTextCustomField from "./custom-field.js";
 import restrictRichTextValidationData from "./restrict-validation-data.js";
@@ -37,4 +38,12 @@ export default {
 		isPlainObject(value)
 			? removeRichTextEmbeddedBricks(value as RichTextJSON, refs)
 			: value,
+	//* translated as source HTML so marks, links and embedded content keep their attributes
+	translation: {
+		read: (value) =>
+			isPlainObject(value) && generateText(value as RichTextJSON).trim() !== ""
+				? { format: "html", text: generateSourceHTML(value as RichTextJSON) }
+				: null,
+		write: (text) => parseSourceHTML(text),
+	} satisfies FieldTranslation,
 };

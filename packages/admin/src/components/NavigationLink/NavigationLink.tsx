@@ -9,6 +9,7 @@ import {
 	TbOutlineExternalLink,
 	TbOutlineHistory,
 	TbOutlineHome,
+	TbOutlineLanguage,
 	TbOutlineLogout,
 	TbOutlineMail,
 	TbOutlineMessages,
@@ -55,6 +56,7 @@ const icons = {
 	publishing: TbOutlineCloudUpload,
 	extensions: TbOutlinePuzzle,
 	notifications: TbOutlineBell,
+	translations: TbOutlineLanguage,
 } satisfies Record<AdminNavigationIcon, IconTypes>;
 
 /** A sidebar link rendered as a list item. Hidden when `permission` is false. */

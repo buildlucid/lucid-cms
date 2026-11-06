@@ -271,6 +271,8 @@ const checkValidateBricksFields: ServiceFn<
 			existingVersion?: { id: number; documentId: number };
 			/** Allows unfinished preview content, relaxing required fields, Zod rules and repeater minimums. */
 			allowIncomplete?: boolean;
+			/** Only checks these locales' values, with shared fields and the default locale, eg. for a locale-limited request that can't change the others. */
+			locales?: string[] | null;
 		},
 	],
 	undefined
@@ -373,7 +375,25 @@ const checkValidateBricksFields: ServiceFn<
 		},
 	});
 
-	if (brickErrors.length > 0 || fieldErrors.length > 0) {
+	//* a locale-limited request can't fix other locales, so only its own count
+	const checked = !data.locales
+		? undefined
+		: new Set<string | null>([
+				null,
+				localization.defaultLocale,
+				...data.locales,
+			]);
+	const reportedBricks = checked
+		? brickErrors.flatMap((brick) => {
+				const fields = keepLocaleErrors(brick.fields, checked);
+				return fields.length > 0 ? [{ ...brick, fields }] : [];
+			})
+		: brickErrors;
+	const reportedFields = checked
+		? keepLocaleErrors(fieldErrors, checked)
+		: fieldErrors;
+
+	if (reportedBricks.length > 0 || reportedFields.length > 0) {
 		return {
 			data: undefined,
 			error: {
@@ -382,8 +402,8 @@ const checkValidateBricksFields: ServiceFn<
 				message: copy("server:core.fields.validation.error.message"),
 				status: 400,
 				errors: {
-					bricks: brickErrors,
-					fields: fieldErrors,
+					bricks: reportedBricks,
+					fields: reportedFields,
 				},
 			},
 		};
@@ -394,6 +414,23 @@ const checkValidateBricksFields: ServiceFn<
 		error: undefined,
 	};
 };
+
+/** Keeps errors in the given locales, where null stands for shared fields, including those inside repeater items. */
+const keepLocaleErrors = (
+	errors: FieldError[],
+	locales: ReadonlySet<string | null>,
+): FieldError[] =>
+	errors.flatMap((error) => {
+		if (!error.groupErrors) {
+			return locales.has(error.localeCode) ? [error] : [];
+		}
+
+		const groupErrors = error.groupErrors.flatMap((group) => {
+			const fields = keepLocaleErrors(group.fields, locales);
+			return fields.length > 0 ? [{ ...group, fields }] : [];
+		});
+		return groupErrors.length > 0 ? [{ ...error, groupErrors }] : [];
+	});
 
 /**
  * Loops over bricks and runs validation against their fields recursively and return errors

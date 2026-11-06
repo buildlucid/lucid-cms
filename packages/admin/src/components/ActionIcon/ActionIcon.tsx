@@ -19,6 +19,7 @@ import {
 	TbOutlineHistory,
 	TbOutlineInfoCircle,
 	TbOutlineKey,
+	TbOutlineLanguage,
 	TbOutlineLibraryPhoto,
 	TbOutlineLink,
 	TbOutlineLinkOff,
@@ -29,6 +30,7 @@ import {
 	TbOutlinePhoto,
 	TbOutlinePlus,
 	TbOutlineRotateClockwise2,
+	TbOutlineSend,
 	TbOutlineShare,
 	TbOutlineShield,
 	TbOutlineShieldOff,
@@ -67,6 +69,7 @@ export type ActionIconName =
 	| "import"
 	| "info"
 	| "key"
+	| "language"
 	| "link"
 	| "link-off"
 	| "lock"
@@ -74,6 +77,7 @@ export type ActionIconName =
 	| "plus"
 	| "restore"
 	| "rotate"
+	| "send"
 	| "share"
 	| "shield"
 	| "shield-off"
@@ -146,6 +150,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <TbOutlineInfoCircle class={iconClasses()} size={iconSize()} />;
 			case "key":
 				return <TbOutlineKey class={iconClasses()} size={iconSize()} />;
+			case "language":
+				return <TbOutlineLanguage class={iconClasses()} size={iconSize()} />;
 			case "link":
 				return <TbOutlineLink class={iconClasses()} size={iconSize()} />;
 			case "link-off":
@@ -162,6 +168,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return (
 					<TbOutlineRotateClockwise2 class={iconClasses()} size={iconSize()} />
 				);
+			case "send":
+				return <TbOutlineSend class={iconClasses()} size={iconSize()} />;
 			case "share":
 				return <TbOutlineShare class={iconClasses()} size={iconSize()} />;
 			case "shield":

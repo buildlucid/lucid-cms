@@ -104,6 +104,22 @@ const updateDocument: ServiceFn<
 	if (requestRes?.error) return requestRes;
 
 	const request = requestRes?.data.request;
+	//* locale-limited requests keep only their locales' values, so other changes would be lost
+	if (
+		request?.locales &&
+		(localeRes.data === null || !request.locales.includes(localeRes.data))
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.requests.locales.outside", {
+					data: { requestId: request.id, locales: request.locales.join(", ") },
+				}),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
 	const versionId = requestRes?.data.document.source_version_id ?? undefined;
 	const held = await checkNotHeld(context, {
 		collectionKey: collection.key,
@@ -171,7 +187,7 @@ const updateDocument: ServiceFn<
 			output: {
 				outcome: request ? "requested" : "applied",
 				document: { collectionKey: collection.key, id: input.documentId },
-				request: request ?? null,
+				request: request ? { id: request.id, type: request.type } : null,
 				links: request
 					? { request: getRequestLink(context, request.id) }
 					: {

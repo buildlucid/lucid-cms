@@ -201,6 +201,13 @@ const createFieldTables = (props: {
 			nullable: false,
 			default: props.db.getDefault("boolean", "false"),
 		});
+		//* what each translated field on the row was made from, keyed by field key
+		columns.push({
+			name: "translation_sources",
+			source: "core",
+			type: props.db.getDataType("json"),
+			nullable: true,
+		});
 	}
 
 	//* bricks only

@@ -2,6 +2,7 @@ import * as z from "zod";
 import { fieldConditionSchema } from "../libs/collection/custom-fields/conditions/schema.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import { fieldPermissionKeysSchema } from "../libs/permission/schema.js";
+import { translationSourceSchema } from "./shared/translation-source.js";
 
 export const fieldInputSchema = z.object({
 	key: z.string(),
@@ -25,6 +26,13 @@ export const fieldInputSchema = z.object({
 		z.literal("relation"),
 	]),
 	translations: z.record(z.string(), z.any()).optional(),
+	translationSources: z
+		.record(z.string(), translationSourceSchema)
+		.optional()
+		.meta({
+			description:
+				"What each locale's translation was made from. Changed values without a matching source are recorded as a person's",
+		}),
 	value: z.any().optional(),
 
 	get groups() {
@@ -430,6 +438,19 @@ export const fieldResponseBaseSchema = z.object({
 				en: "Welcome to our website",
 				fr: "Bienvenue sur notre site web",
 			},
+		})
+		.optional(),
+	translationSources: z
+		.record(z.string(), translationSourceSchema)
+		.meta({
+			description: "What each locale's translation was made from",
+		})
+		.optional(),
+	sourceHash: z
+		.string()
+		.meta({
+			description:
+				"A hash of the default locale's text. Translations whose source differs are out of date",
 		})
 		.optional(),
 	value: z

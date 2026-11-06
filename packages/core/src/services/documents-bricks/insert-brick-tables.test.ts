@@ -147,7 +147,14 @@ test("large localized content survives parameter-bounded inserts and version cop
 		versionType: "latest",
 	});
 	assert(source.data, JSON.stringify(source.error));
-	expect(source.data.content).toEqual(content);
+	//* saving records the French values as a person's translations, which copies keep
+	expect(
+		JSON.parse(
+			JSON.stringify(source.data.content, (key, value) =>
+				key === "translationSources" ? undefined : value,
+			),
+		),
+	).toEqual(content);
 	const fromVersionId = source.data.id;
 	const copied = await withTransaction(context, (transaction) =>
 		cloneVersion(transaction, {
@@ -165,7 +172,7 @@ test("large localized content survives parameter-bounded inserts and version cop
 		versionId: copied.data.versionId,
 	});
 	assert(destination.data, JSON.stringify(destination.error));
-	expect(destination.data.content).toEqual(content);
+	expect(destination.data.content).toEqual(source.data.content);
 
 	let rolledBackVersionId: number | undefined;
 	const rolledBack = await withTransaction(context, async (transaction) => {

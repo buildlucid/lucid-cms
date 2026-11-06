@@ -189,6 +189,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("status", adapter.getDataType("text"), (col) =>
 					col.notNull().defaultTo("open"),
 				)
+				.addColumn("locales", adapter.getDataType("json"))
 				.addColumn("revision", adapter.getDataType("integer"), (col) =>
 					col.notNull().defaultTo(1),
 				)

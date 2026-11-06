@@ -87,7 +87,7 @@ const Link: Component<LinkProps> = (props) => {
 		const square = local.shape !== "standard";
 
 		return classnames(
-			"flex items-center justify-center text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
+			"flex items-center justify-center min-w-max text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
 			{
 				// Variants
 				"bg-primary hover:bg-primary-hover text-primary-foreground ring-primary":

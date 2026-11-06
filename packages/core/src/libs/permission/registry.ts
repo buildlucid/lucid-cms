@@ -1,3 +1,8 @@
+import { getAgents } from "../agent/registry.js";
+import {
+	aiPermissionFeatures,
+	isAiFeatureEnabled,
+} from "../config/ai-features.js";
 import { agentPermissionActions } from "./agent-permissions.js";
 import { type AccessConfig, getCapabilityRegistry } from "./capabilities.js";
 import { collectionPermissionActions } from "./collection-permissions.js";
@@ -123,7 +128,10 @@ const permissionActionOrder = new Map(
 	].map((key, index) => [key, index]),
 );
 
-/** Orders role grants by content, agents and administration, placing destructive actions last while preserving subgroup declaration order. */
+/**
+ * Orders grants by content, agents and administration, with destructive actions last. Hides
+ * disabled AI and agent permissions without invalidating stored grants or tool declarations.
+ */
 export const getGrantablePermissionRegistry = (config: AccessConfig) => {
 	const groupOrder = (key: string) =>
 		permissionGroupOrder.get(key.split(":")[0] ?? key) ??
@@ -134,13 +142,31 @@ export const getGrantablePermissionRegistry = (config: AccessConfig) => {
 			: (permissionActionOrder.get(key.split(":").at(-1) ?? key) ??
 				permissionActionOrder.size);
 
+	const offered = (permission: PermissionDefinition) => {
+		const feature = aiPermissionFeatures.get(permission.key);
+		return feature === undefined || isAiFeatureEnabled(config, feature);
+	};
+	const offeredAgents = new Set(
+		getAgents(config).map((agent) => `agents:${agent.key}`),
+	);
+	const switchedOffAgents = new Set(
+		config.ai.agents.definitions
+			.map((agent) => `agents:${agent.key}`)
+			.filter((key) => !offeredAgents.has(key)),
+	);
+
 	return getPermissionRegistry(config)
 		.map((group) => ({
 			...group,
-			permissions: group.permissions.toSorted(
-				(a, b) => actionOrder(a.key) - actionOrder(b.key),
-			),
+			permissions: group.permissions
+				.filter(offered)
+				.toSorted((a, b) => actionOrder(a.key) - actionOrder(b.key)),
 		}))
+		.filter(
+			(group) =>
+				!switchedOffAgents.has(group.key) &&
+				(group.permissions.length > 0 || group.subgroups !== undefined),
+		)
 		.sort((a, b) => groupOrder(a.key) - groupOrder(b.key));
 };
 

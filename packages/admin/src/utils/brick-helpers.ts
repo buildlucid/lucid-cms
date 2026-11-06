@@ -80,6 +80,22 @@ const findFieldRecursive = (props: {
 	return null;
 };
 
+/** The ref of the brick the builder keeps the document's own fields in. */
+const pseudoBrickRef = "collection-pseudo-brick";
+
+/** Finds a field by its keys and repeater item refs, eg. `["items", "<item ref>", "title"]`. */
+const getFieldAtContentPath = (
+	fields: InternalDocumentField[],
+	path: string[],
+): InternalDocumentField | undefined => {
+	const [key, groupRef, ...rest] = path;
+	const field = fields.find((candidate) => candidate.key === key);
+	if (!field || groupRef === undefined) return field;
+
+	const group = field.groups?.find((candidate) => candidate.ref === groupRef);
+	return group ? getFieldAtContentPath(group.fields, rest) : undefined;
+};
+
 const getCollectionPseudoBrickFields = () => {
 	const pseudoBrick = brickStore.get.bricks.find(
 		(b) => b.type === "collection-fields",
@@ -535,8 +551,8 @@ const buildBricks = (props: {
 	const collectionFields = structuredClone(props.document?.fields) || [];
 	const bricks = [
 		{
-			ref: "collection-pseudo-brick",
-			key: "collection-pseudo-brick",
+			ref: pseudoBrickRef,
+			key: pseudoBrickRef,
 			order: -1,
 			type: "collection-fields" as const,
 			open: false,
@@ -568,7 +584,9 @@ const buildBricks = (props: {
 // ---------------------------------------------
 // Exports
 const brickHelpers = {
+	pseudoBrickRef,
 	findFieldRecursive,
+	getFieldAtContentPath,
 	getCollectionPseudoBrickFields,
 	getUpsertBricks,
 	customFieldId,

@@ -30,7 +30,20 @@ export const inputSchema = z.object({
 		description:
 			"What to return besides fields: bricks, meta (versions and authors), and refs to the documents, media and users the content links to.",
 	}),
+	translations: z.boolean().optional().meta({
+		description:
+			"Also return every localized field's translation state per language.",
+	}),
 });
+
+/** Where a localized field's translation stands, as agents read it. */
+export const translationStateSchema = z.enum([
+	"missing",
+	"machine",
+	"machine_outdated",
+	"person",
+	"person_outdated",
+]);
 
 /** Agents also read request proposals as the version `request:ID`, and any of the document's versions as `version:ID`. */
 export const agentInputSchema = inputSchema.extend({
@@ -85,6 +98,27 @@ export const outputSchema = z.object({
 			meta: documentMetaSchema
 				.optional()
 				.meta({ description: "Content version metadata when requested." }),
+			translations: z
+				.object({
+					sourceLocale: z.string(),
+					locales: z.array(
+						z.object({
+							locale: z.string(),
+							fields: z.array(
+								z.object({
+									brick: z.string().nullable(),
+									path: z.array(z.string()),
+									state: translationStateSchema,
+								}),
+							),
+						}),
+					),
+				})
+				.optional()
+				.meta({
+					description:
+						"When requested: each field by brick (ref, or key for fixed bricks) and path of keys and item refs. _outdated means the source text changed since.",
+				}),
 			links: z
 				.object({ edit: z.string() })
 				.meta({ description: "Admin editor or request link." }),

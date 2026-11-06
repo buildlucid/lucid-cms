@@ -208,6 +208,7 @@ const formatSingle = (props: {
 		title: props.request.title,
 		description: props.request.description,
 		status: props.request.status,
+		locales: props.request.locales,
 		approved,
 		revision: props.request.revision,
 		executionJobId: props.request.execution_job_id,
@@ -300,6 +301,7 @@ const formatSummary = (props: {
 	type: props.request.type,
 	title: props.request.title,
 	status: props.request.status,
+	locales: props.request.locales,
 	approved: props.request.approved_revision === props.request.revision,
 	createdBy:
 		props.request.created_by === null

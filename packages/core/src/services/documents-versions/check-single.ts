@@ -78,6 +78,8 @@ const checkSingle: ServiceFn<
 		bricks,
 		fields,
 		authUser: data.authUser,
+		//* locale-limited proposals can't change other locales, so only their own are checked
+		locales: updateContextRes.data.request?.locales,
 	});
 	if (checkValidateRes.error) return checkValidateRes;
 

@@ -1,4 +1,5 @@
 import { Tooltip } from "@kobalte/core";
+import { A } from "@solidjs/router";
 import { createHotkey, formatForDisplay } from "@tanstack/solid-hotkeys";
 import type {
 	Collection,
@@ -10,6 +11,7 @@ import classNames from "classnames";
 import {
 	TbOutlineArrowBackUp,
 	TbOutlineArrowForwardUp,
+	TbOutlineExternalLink,
 	TbOutlineEye,
 	TbOutlineForms,
 	TbOutlineLanguage,
@@ -27,14 +29,17 @@ import {
 	onCleanup,
 	onMount,
 	Show,
+	untrack,
 } from "solid-js";
 import Button from "@/components/Button/Button";
+import { getButtonClasses } from "@/components/Button/classes";
 import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
 import RevokePreviewLinksModal from "@/components/RevokePreviewLinksModal/RevokePreviewLinksModal";
 import SegmentedControl, {
 	type SegmentedControlOption,
 } from "@/components/SegmentedControl/SegmentedControl";
 import { Permissions } from "@/constants/permissions";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type { UseBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import type { UseDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
@@ -46,15 +51,24 @@ import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import {
+	createAiFeatureAccessState,
+	spawnAiFeatureAccessToast,
+} from "@/utils/ai-feature-access";
 import dateHelpers from "@/utils/date-helpers";
 import { getDocumentEnvironmentStatus } from "@/utils/document-environment-status";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import helpers from "@/utils/helpers";
 import { getLiveDocumentUrl } from "@/utils/live-document-url";
+import { getLocaleName } from "@/utils/locale-name";
 import { getDocumentProposals } from "@/utils/requests";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import { shortcuts } from "@/utils/shortcuts";
 import spawnToast from "@/utils/spawn-toast";
+import {
+	countLocaleTranslations,
+	describeTranslationNeeds,
+} from "@/utils/translation-status";
 import { AutoSaveStatusPill } from "./parts/AutoSaveStatusPill";
 import { DocumentActions } from "./parts/DocumentActions";
 import {
@@ -92,7 +106,7 @@ export const PageBuilderHeader: Component<{
 		/** Receives the element the preview renders its own controls into. */
 		setToolbar: (element: HTMLDivElement) => void;
 	};
-	/** The request that owns the proposal being edited. */
+	/** The request that owns the proposal or snapshot being viewed, linked beside the title. */
 	requestLink?: string;
 	/** Runs once the document's preview links are revoked, which ends the builder's own preview too. */
 	onPreviewLinksRevoked?: () => void;
@@ -128,6 +142,7 @@ export const PageBuilderHeader: Component<{
 	// State / Hooks
 	let headerRef: HTMLElement | undefined;
 	const documentLocalization = useDocumentLocalization();
+	const brickStore = useBrickStore();
 	const [oneRow, setOneRow] = createSignal(false);
 	const [revokeOpen, setRevokeOpen] = createSignal(false);
 	const [now, setNow] = createSignal(Date.now());
@@ -168,6 +183,53 @@ export const PageBuilderHeader: Component<{
 	});
 	const hasMultipleLocales = createMemo(() => {
 		return documentLocalization.locales().length > 1;
+	});
+	//* locale-limited proposals show their other locales, which can't be edited
+	const lockedLocales = createMemo(() => {
+		const editable = documentLocalization.editableLocales();
+		if (editable === null) return undefined;
+		return Object.fromEntries(
+			documentLocalization
+				.locales()
+				.filter((locale) => !editable.includes(locale.code))
+				.map((locale) => [
+					locale.code,
+					T()("requests.locales.locked", {
+						locale: getLocaleName(locale.code),
+					}),
+				]),
+		);
+	});
+	//* counted from the builder's content each time it changes, so filling in translations clears the dots
+	const translationNotes = createMemo(() => {
+		brickStore.get.contentRevision;
+		const defaultLocaleCode = documentLocalization.defaultLocale();
+		if (!defaultLocaleCode) return undefined;
+
+		const counts = untrack(() =>
+			countLocaleTranslations({
+				fields: brickStore.get.bricks.flatMap((brick) => brick.fields),
+				locales: documentLocalization.localeCodes(),
+				defaultLocale: defaultLocaleCode,
+			}),
+		);
+		return Object.fromEntries(
+			[...counts].flatMap(([locale, count]) => {
+				const needs = describeTranslationNeeds(count);
+				return needs ? [[locale, needs]] : [];
+			}),
+		);
+	});
+	//* like other AI features, translate stays offered without a Lucid connection and explains why it can't run
+	const translateAccess = createAiFeatureAccessState({
+		hasPermission: props.state.ui.hasTranslatePermission,
+		connection: () => siteStore.get.connection ?? undefined,
+	});
+	const translateDisabledToast = createMemo(() => {
+		const access = translateAccess();
+		return access.disabled
+			? { title: access.title, message: access.message }
+			: undefined;
 	});
 	const actionCollectionSingularName = createMemo(() =>
 		helpers.getLocaleValue({
@@ -478,6 +540,7 @@ export const PageBuilderHeader: Component<{
 			? [
 					{
 						label: T()("documents.request.instead"),
+						icon: "send",
 						disabled: props.state.ui.isSaving(),
 						onSelect: () => props.state.ui.setDocumentRequestOpen(true),
 					},
@@ -556,8 +619,8 @@ export const PageBuilderHeader: Component<{
 			props.state.ui.unpublishTarget() !== undefined ||
 			props.state.ui.showDuplicateButton() ||
 			props.state.ui.showExportButton() ||
+			props.state.ui.showTranslateButton() ||
 			props.actions.requestAlignment !== undefined ||
-			props.requestLink !== undefined ||
 			showCopyPreview() ||
 			showAutoSave() ||
 			liveDocumentUrl() !== null,
@@ -621,6 +684,10 @@ export const PageBuilderHeader: Component<{
 
 	// ----------------------------------
 	// Functions
+	const openTranslate = () => {
+		if (spawnAiFeatureAccessToast(translateAccess())) return;
+		props.state.ui.setTranslateOpen(true);
+	};
 	const save = () => {
 		if (createDefault() === "request") {
 			props.state.ui.setDocumentRequestOpen(true);
@@ -768,18 +835,40 @@ export const PageBuilderHeader: Component<{
 					comparing={() => props.view?.value() === "compare"}
 				/>
 			</Show>
-			<Show
-				when={props.mode !== undefined && props.state.ui.isDocumentLocked()}
-			>
-				<span
-					role="img"
-					class="flex shrink-0 text-muted"
-					title={T()("documents.locked.message")}
-					aria-label={T()("documents.locked.message")}
+			<div class="flex shrink-0 items-center empty:hidden">
+				<Show when={props.requestLink}>
+					{(href) => (
+						<A
+							href={href()}
+							title={T()("requests.view")}
+							aria-label={T()("requests.view")}
+							class={classNames(
+								getButtonClasses({
+									variant: "toolbar",
+									size: "xs",
+									shape: "square",
+								}),
+								"shrink-0",
+							)}
+						>
+							<TbOutlineExternalLink size={14} />
+						</A>
+					)}
+				</Show>
+				<Show
+					when={props.mode !== undefined && props.state.ui.isDocumentLocked()}
 				>
-					<TbOutlineLock size={14} />
-				</span>
-			</Show>
+					{/* the same box as the request link, so the icons match and keep clear of the locale button */}
+					<span
+						role="img"
+						class="flex size-7 shrink-0 items-center justify-center text-muted"
+						title={T()("documents.locked.message")}
+						aria-label={T()("documents.locked.message")}
+					>
+						<TbOutlineLock size={14} />
+					</span>
+				</Show>
+			</div>
 		</div>
 	);
 	const edits = (): JSXElement => (
@@ -854,8 +943,19 @@ export const PageBuilderHeader: Component<{
 				<ContentLocaleSelect
 					compact
 					locales={documentLocalization.locales()}
+					lockedLocales={lockedLocales()}
 					invalid={props.state.ui.brickTranslationErrors?.()}
 					errorLocales={props.state.ui.errorLocales?.()}
+					translationNotes={translationNotes()}
+					translate={
+						props.state.ui.showTranslateButton() &&
+						props.state.ui.hasTranslatePermission()
+							? {
+									onTranslate: openTranslate,
+									unavailable: translateAccess().disabled,
+								}
+							: undefined
+					}
 					showShortcut={true}
 				/>
 			</Show>
@@ -878,7 +978,6 @@ export const PageBuilderHeader: Component<{
 			<DocumentActions
 				variant="toolbar"
 				collectionSingularName={actionCollectionSingularName()}
-				requestLink={props.requestLink}
 				autoSave={
 					showAutoSave()
 						? {
@@ -894,6 +993,15 @@ export const PageBuilderHeader: Component<{
 								onDuplicate: () => props.state.ui.setDuplicateOpen(true),
 								permission: props.state.ui.hasDuplicatePermission(),
 								disabled: props.state.ui.duplicateDisabled(),
+							}
+						: undefined
+				}
+				translate={
+					props.state.ui.showTranslateButton()
+						? {
+								onTranslate: openTranslate,
+								permission: props.state.ui.hasTranslatePermission(),
+								disabledToast: translateDisabledToast(),
 							}
 						: undefined
 				}

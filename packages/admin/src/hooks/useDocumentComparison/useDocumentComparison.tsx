@@ -12,10 +12,12 @@ import { Permissions } from "@/constants/permissions";
 import { useBuilderSideBySide } from "@/hooks/useBuilderSideBySide/useBuilderSideBySide";
 import api from "@/services/api";
 import { createBrickStore } from "@/store/brickStore/brickStore";
+import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import helpers from "@/utils/helpers";
+import { getLocaleName } from "@/utils/locale-name";
 import { getDocumentProposals } from "@/utils/requests";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import type { UseDocumentState } from "../useDocumentState/useDocumentState";
@@ -29,6 +31,8 @@ export type ComparisonOption = {
 	editable: boolean;
 	/** Where an editable option is edited. */
 	location?: string;
+	/** Shows the option in this locale instead of the editor's, eg. the source text beside a translation. */
+	locale?: string;
 };
 
 /**
@@ -49,6 +53,8 @@ export const useDocumentComparison = (props: {
 	available: Accessor<boolean>;
 	/** The side-by-side key of the editable document on the left. */
 	currentKey: Accessor<string | undefined>;
+	/** Opens with the source locale first, eg. for translation requests. */
+	preferSource?: Accessor<boolean>;
 }) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -93,18 +99,33 @@ export const useDocumentComparison = (props: {
 		const document = props.state.document();
 		if (!document) return [];
 
-		const options: ComparisonOption[] = [
-			{
-				key: "latest",
-				label: T()("common.status.latest"),
-				versionId: document.versions.latest?.id ?? null,
-				editable: true,
-				location: getDocumentRoute("edit", {
-					collectionKey: props.state.collectionKey(),
-					documentId: document.id,
+		const options: ComparisonOption[] = [];
+		//* the same version in the default locale, to check translations against their source text
+		const localization = props.state.collection()?.localized;
+		if (
+			localization &&
+			contentLocaleStore.get.contentLocale !== localization.defaultLocale
+		) {
+			options.push({
+				key: "source",
+				label: T()("translations.compare.source", {
+					locale: getLocaleName(localization.defaultLocale),
 				}),
-			},
-		];
+				versionId: document.versionId,
+				editable: false,
+				locale: localization.defaultLocale,
+			});
+		}
+		options.push({
+			key: "latest",
+			label: T()("common.status.latest"),
+			versionId: document.versions.latest?.id ?? null,
+			editable: true,
+			location: getDocumentRoute("edit", {
+				collectionKey: props.state.collectionKey(),
+				documentId: document.id,
+			}),
+		});
 		for (const environment of props.state.collection()?.publishing
 			.environments ?? []) {
 			options.push({
@@ -152,10 +173,15 @@ export const useDocumentComparison = (props: {
 			location: {
 				collectionKey: props.state.collectionKey,
 				id: props.state.documentId,
-				version: () =>
-					selected()?.key.startsWith("proposal:")
-						? (selected()?.versionId ?? undefined)
-						: selected()?.key,
+				version: () => {
+					const option = selected();
+					if (option?.key === "source" && props.currentKey() === "latest") {
+						return "latest";
+					}
+					return option?.key.startsWith("proposal:") || option?.key === "source"
+						? (option.versionId ?? undefined)
+						: option?.key;
+				},
 			},
 			include: { bricks: true, refs: true },
 		},
@@ -195,7 +221,9 @@ export const useDocumentComparison = (props: {
 	const openFirst = () => {
 		const first = options().find(
 			(option) =>
-				option.versionId !== null && option.key !== props.currentKey(),
+				option.versionId !== null &&
+				option.key !== props.currentKey() &&
+				(option.key !== "source" || props.preferSource?.() === true),
 		);
 		if (first) select(first.key);
 	};
@@ -254,7 +282,7 @@ export const useDocumentComparison = (props: {
 		if (!query.isFetchedAfterMount || query.isFetching) return;
 		if (!response || response.data.id !== props.state.documentId()) return;
 		if (
-			key.startsWith("proposal:")
+			key.startsWith("proposal:") || key === "source"
 				? response.data.versionId !== versionId
 				: response.data.version !== key
 		) {

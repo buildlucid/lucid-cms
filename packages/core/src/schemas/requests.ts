@@ -217,6 +217,14 @@ const requestResponseSchema = z.object({
 	title: z.string(),
 	description: richTextJSONSchema.nullable(),
 	status: requestStatusSchema,
+	locales: z
+		.array(z.string())
+		.nullable()
+		.meta({
+			description:
+				"The content locales the request changes. Completing it writes only their values to latest. Null for whole documents",
+			example: ["fr"],
+		}),
 	approved: z.boolean().meta({
 		description: "Whether the current revision of the request is approved",
 	}),
@@ -280,6 +288,7 @@ const requestSummaryResponseSchema = requestResponseSchema
 		type: true,
 		title: true,
 		status: true,
+		locales: true,
 		approved: true,
 		createdBy: true,
 		createdByAgent: true,
@@ -542,6 +551,15 @@ export const controllerSchemas = {
 			description: richTextJSONSchema.nullable().optional(),
 			documents: z.array(requestDocumentInputSchema).min(1),
 			reviewerIds: z.array(z.number().int().positive()).optional(),
+			locales: z
+				.array(z.string().trim().min(1))
+				.min(1)
+				.optional()
+				.meta({
+					description:
+						"Publish requests from latest that target only latest: limits the request to these content locales, so completing it keeps other locales' edits made meanwhile",
+					example: ["fr"],
+				}),
 		}),
 		query: noQuery,
 		params: undefined,

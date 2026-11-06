@@ -177,6 +177,7 @@ const AiConfigSchema = z.strictObject({
 	enabled: z.boolean().default(true),
 	chatTitles: z.boolean().default(true),
 	altGeneration: z.boolean().default(true),
+	translation: z.boolean().default(true),
 	mediaGeneration: z
 		.preprocess(
 			(value) =>

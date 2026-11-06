@@ -54,6 +54,16 @@ export const mediaGenerations: {
 	},
 };
 
+/** The AI feature each AI permission belongs to, so roles only offer the ones switched on. */
+export const aiPermissionFeatures = new Map<string, AiFeature>([
+	[Permissions.AiImageGenerate, "imageGeneration"],
+	[Permissions.AiAudioGenerate, "audioGeneration"],
+	[Permissions.AiAltGenerate, "altGeneration"],
+	[Permissions.AiTranslate, "translation"],
+	[Permissions.AiRoutinesManageAll, "agents"],
+	[Permissions.AiMemoriesManage, "agents"],
+]);
+
 /** The media type and Lucid feature behind a feature key, if it generates media. */
 export const mediaGenerationOf = (featureKey: string) =>
 	Object.values(mediaGenerations).find(
@@ -68,6 +78,7 @@ export const aiFeatureFlags = (
 	altGeneration: ai.altGeneration,
 	imageGeneration: ai.mediaGeneration.image.enabled,
 	audioGeneration: ai.mediaGeneration.audio.enabled,
+	translation: ai.translation,
 	agents: ai.agents.enabled,
 	mcp: ai.mcp.enabled,
 });

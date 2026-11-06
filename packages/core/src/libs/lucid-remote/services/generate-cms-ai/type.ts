@@ -125,10 +125,42 @@ export type AgentTitleGenerateV1Request = CmsAiGenerateBaseRequest<
 	Record<string, never>
 >;
 
+/** Text from one document to translate from its source locale into one target locale. */
+export type ContentTranslateSegment = {
+	/** Unique within the request, matching `^[a-z0-9_-]{1,40}$`. */
+	id: string;
+	/** HTML segments are rich text, whose tags and attributes must come back unchanged. */
+	format: "text" | "html";
+	text: string;
+	/** The field's labels from its brick down, eg. `Hero › Heading`. */
+	label?: string;
+	/** Guidance on the field written for models. */
+	instructions?: string;
+	maxLength?: number;
+};
+
+export type ContentTranslateV1Request = CmsAiGenerateBaseRequest<
+	{ key: "content.translate"; version: "v1" },
+	CmsAiGenerateRequestInputText<"user-instruction">,
+	{
+		locale: {
+			source: { code: string; label: string };
+			target: { code: string; label: string };
+		};
+		document?: { collection?: string; title?: string };
+		/** Notes on tone and style for the target locale. */
+		style?: string;
+		/** Terms to keep (null translation) or always translate the same way. */
+		glossary?: Array<{ term: string; translation: string | null }>;
+		segments: ContentTranslateSegment[];
+	}
+>;
+
 export type CmsAiGenerateRequest =
 	| MediaAnalyzeRequest
 	| AgentTitleGenerateV1Request
 	| MediaAltGenerateV1Request
+	| ContentTranslateV1Request
 	| MediaImageGenerateV1Request
 	| MediaAudioGenerateV1Request
 	| WebRequest;

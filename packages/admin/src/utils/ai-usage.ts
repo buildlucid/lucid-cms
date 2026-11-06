@@ -25,6 +25,7 @@ const aiUsageSessionTypes = [
 	"media-image",
 	"media-audio",
 	"media-alt",
+	"translation",
 ] as const satisfies AiUsageSessionType[];
 
 export const formatAiUsageNumber = (value?: number | null) => {
@@ -64,6 +65,7 @@ const aiUsageFeatureLabels = {
 	"web.fetch": "ai.usage.features.web.fetch",
 	"media.analyze": "ai.usage.features.media.analyze",
 	"media.alt.generate": "ai.usage.features.media.alt.generate",
+	"content.translate": "ai.usage.features.content.translate",
 	"media.image.generate": "ai.usage.features.media.image.generate",
 	"media.audio.generate": "ai.usage.features.media.audio.generate",
 } satisfies Record<AiUsageFeatureKey, string>;

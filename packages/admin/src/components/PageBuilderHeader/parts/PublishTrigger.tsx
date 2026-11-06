@@ -2,6 +2,9 @@ import type { DocumentVersionType } from "@types";
 import classNames from "classnames";
 import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
+import ActionIcon, {
+	type ActionIconName,
+} from "@/components/ActionIcon/ActionIcon";
 import Menu from "@/components/Menu/Menu";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
@@ -30,6 +33,7 @@ export interface PublishTriggerOption {
 /** An alternative to saving, listed in the menu above the request options. */
 export interface PublishTriggerAction {
 	label: string;
+	icon: ActionIconName;
 	onSelect: () => void;
 	disabled?: boolean;
 }
@@ -155,6 +159,7 @@ export const PublishTrigger: Component<{
 							{(action) => (
 								<Menu.Item
 									textValue={action.label}
+									icon={<ActionIcon icon={action.icon} />}
 									unavailable={action.disabled === true || isDisabled()}
 									onSelect={() => {
 										if (action.disabled === true || isDisabled()) return;

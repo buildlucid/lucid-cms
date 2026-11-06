@@ -10,6 +10,7 @@ export const aiAccessFeatureSchema = z.enum([
 	"media_analysis",
 	"image_generation",
 	"audio_generation",
+	"translation",
 	"web_research",
 ]) satisfies z.ZodType<AiAccessFeature>;
 

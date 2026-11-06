@@ -1,5 +1,7 @@
 import type { Generated } from "kysely";
 import z from "zod";
+import { translationSourceSchema } from "../../../schemas/shared/translation-source.js";
+import type { TranslationSource } from "../../../types/response.js";
 import type { BrickTypes } from "../../collection/builders/brick-builder/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type { BooleanInt } from "../types.js";
@@ -39,6 +41,13 @@ export const documentBricksTable = defineTable(
 					z.literal(adapter.config.defaults.boolean.false),
 				]),
 				type: "boolean",
+			},
+			translation_sources: {
+				schema: z
+					.record(z.string(), translationSourceSchema)
+					.nullable()
+					.optional(),
+				type: "json",
 			},
 			// brick specific
 			brick_type: {
@@ -100,6 +109,8 @@ export interface LucidBricksTable {
 	locale: string | null;
 	position: number;
 	is_open: BooleanInt;
+	/** What each translated field on the row was made from, keyed by field key. Absent on relation tables. */
+	translation_sources?: Record<string, TranslationSource> | null;
 	// brick specific
 	brick_type?: BrickTypes;
 	brick_instance_id?: string;

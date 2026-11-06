@@ -14,6 +14,8 @@ const validateVersionContent: ServiceFn<
 			documentId: number;
 			versionId: number;
 			user?: LucidActor;
+			/** Only checks these locales' values, with shared fields and the default locale, eg. for a locale-limited request. */
+			locales?: string[] | null;
 		},
 	],
 	undefined
@@ -46,6 +48,7 @@ const validateVersionContent: ServiceFn<
 		fields: content.fields,
 		authUser: data.user,
 		existingVersion: { id: data.versionId, documentId: data.documentId },
+		locales: data.locales,
 	});
 };
 

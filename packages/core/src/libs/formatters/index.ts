@@ -27,6 +27,7 @@ export { default as requestsFormatter } from "./requests.js";
 export { default as reviewFormatter } from "./review.js";
 export { default as rolesFormatter } from "./roles.js";
 export { default as settingsFormatter } from "./settings.js";
+export { default as translationsFormatter } from "./translations.js";
 export { default as userLoginsFormatter } from "./user-logins.js";
 export { default as userPermissionsFormatter } from "./user-permissions.js";
 // formatters

@@ -43,6 +43,7 @@ const customFieldSchema = z.object({
 		])
 		.optional(),
 	localized: z.boolean().optional(),
+	translate: z.boolean().optional(),
 	time: z.boolean().optional(),
 	multiple: z.boolean().optional(),
 	thumbs: z.union([z.literal(1), z.literal(2)]).optional(),

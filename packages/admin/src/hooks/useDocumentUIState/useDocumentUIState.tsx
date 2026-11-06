@@ -7,6 +7,7 @@ import { type Accessor, createMemo, createSignal } from "solid-js";
 import { Permissions } from "@/constants/permissions";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type api from "@/services/api";
+import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -42,6 +43,7 @@ export function useDocumentUIState(props: {
 	const [getUnpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
 	const [getExportOpen, setExportOpen] = createSignal(false);
+	const [getTranslateOpen, setTranslateOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
@@ -152,18 +154,16 @@ export function useDocumentUIState(props: {
 			return false;
 		}
 		if (props.document()?.isDeleted) return false;
-		//* the person saves the agent's changes themselves, once they've reviewed them
-		if (brickStore.get.agentEdited || props.heldElsewhere?.()) return false;
+		//* the person saves the agent's or AI translation's changes themselves, once they've reviewed them
+		if (brickStore.get.reviewPending || props.heldElsewhere?.()) return false;
 
 		return hasUpdateAccess() && autoSave() && autoSaveUserEnabled();
 	});
 
-	const saveDisabled = createMemo(() => {
-		if (isAutoSaveActive()) {
-			return isSaving() || isAutoSaving() || brickStore.getDocumentMutated();
-		}
-		return !brickStore.getDocumentMutated() || isSaving();
-	});
+	//* with auto-save on too, Save only does something while there are unsaved changes, saving them straight away
+	const saveDisabled = createMemo(
+		() => !brickStore.getDocumentMutated() || isSaving() || isAutoSaving(),
+	);
 
 	const canPublishDocument = createMemo(() => {
 		// Fallback, if the document has been mutated and not saved
@@ -279,6 +279,26 @@ export function useDocumentUIState(props: {
 		if (props.document()?.isDeleted) return false;
 		return props.collection()?.transfer.export === true;
 	});
+
+	/** Translations start from latest, so they're offered there in localized collections with AI translation on. */
+	const showTranslateButton = createMemo(() => {
+		if (props.mode !== "edit") return false;
+		if (props.version() !== "latest") return false;
+		if (props.document()?.isDeleted) return false;
+		const localization = props.collection()?.localized;
+		return (
+			localization !== undefined &&
+			localization !== false &&
+			localization.locales.length > 1 &&
+			siteStore.get.isAiFeatureEnabled("translation")
+		);
+	});
+	//* translating changes content, whether into requests or the editor
+	const hasTranslatePermission = createMemo(
+		() =>
+			hasUpdateAccess() &&
+			userStore.get.hasPermission([Permissions.AiTranslate]).all,
+	);
 
 	/**
 	 * Prevents duplication until the latest local changes have been persisted
@@ -396,6 +416,8 @@ export function useDocumentUIState(props: {
 		setDuplicateOpen,
 		getExportOpen,
 		setExportOpen,
+		getTranslateOpen,
+		setTranslateOpen,
 		getRestoreRevisionOpen,
 		setRestoreRevisionOpen,
 		getRestoreRevisionVersionId,
@@ -435,6 +457,8 @@ export function useDocumentUIState(props: {
 		duplicateDisabled,
 		hasDuplicatePermission,
 		showExportButton,
+		showTranslateButton,
+		hasTranslatePermission,
 		collectionNeedsMigrating,
 		autoSave,
 		hasAutoSavePermission,

@@ -47,7 +47,7 @@ const at = (...path: PreviewTarget["path"]): PreviewTarget => ({
 const value = (key: string) =>
 	brickStore.get.bricks[0]?.fields.find((field) => field.key === key)?.value;
 
-const setup = () => {
+const setup = (editableLocales: string[] | null = null) => {
 	brickStore.set("bricks", [
 		{
 			ref: "collection-pseudo-brick",
@@ -79,6 +79,7 @@ const setup = () => {
 			collectionKey: () => "page",
 			documentId: () => 1,
 			locales: () => ["en"],
+			editableLocales: () => editableLocales,
 		}),
 		dispose,
 	}));
@@ -90,6 +91,14 @@ afterEach(() => {
 });
 
 describe("editing fields from the preview", () => {
+	test("leaves shared fields alone in a proposal limited to other locales", () => {
+		const { edit, dispose } = setup(["fr"]);
+
+		expect(edit.request(at("title"), "Fast setup")).toEqual({ mode: "none" });
+		expect(spawnToast).toHaveBeenCalledOnce();
+		dispose();
+	});
+
 	test("types into a field the page shows as one undo step, putting it back when cancelled", () => {
 		const { edit, dispose } = setup();
 		const title = at("title");

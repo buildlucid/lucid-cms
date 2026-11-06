@@ -49,6 +49,7 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 		enabled: true,
 		chatTitles: true,
 		altGeneration: true,
+		translation: true,
 		mediaGeneration: {
 			image: { enabled: true, models: {} },
 			audio: { enabled: true, models: {} },
@@ -110,6 +111,41 @@ test("role grants put content and agents before administration and destructive a
 	expect(getValidPermissions(resolved)).toContain(
 		"agents:seo:manage-own-routines",
 	);
+});
+
+test("roles are only offered AI permissions for the AI features switched on, which stay valid", () => {
+	const resolved = config();
+	resolved.ai.mediaGeneration.audio.enabled = false;
+	resolved.ai.agents.enabled = false;
+	expect(
+		getGrantablePermissionRegistry(resolved)
+			.find((value) => value.key === "ai_permissions")
+			?.permissions.map((value) => value.key),
+	).toEqual(["ai:image-generate", "ai:alt-generate", "ai:translate"]);
+
+	const off = config();
+	off.ai.enabled = false;
+	expect(
+		getGrantablePermissionRegistry(off).some(
+			(value) => value.key === "ai_permissions",
+		),
+	).toBe(false);
+	expect(getValidPermissions(off)).toContain("ai:translate");
+});
+
+test("switched-off agents keep their permissions valid, but roles aren't offered them", () => {
+	const resolved = config();
+	resolved.ai.agents.definitions = [
+		defineAgent({ key: "seo", name: "SEO", description: "SEO", tools: [] }),
+	];
+	resolved.ai.agents.enabled = false;
+
+	expect(
+		getGrantablePermissionRegistry(resolved).some(
+			(value) => value.key === "agents:seo",
+		),
+	).toBe(false);
+	expect(getValidPermissions(resolved)).toContain("agents:seo:chat");
 });
 
 describe("custom access", () => {

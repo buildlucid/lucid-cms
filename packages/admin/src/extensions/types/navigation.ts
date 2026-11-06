@@ -22,7 +22,8 @@ export type AdminNavigationIcon =
 	| "requests"
 	| "publishing"
 	| "extensions"
-	| "notifications";
+	| "notifications"
+	| "translations";
 
 /** Use an existing group key or define a group. */
 export type AdminNavigationGroup =

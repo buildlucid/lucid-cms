@@ -16,6 +16,7 @@ import type { DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
 import Pill from "@/components/Pill/Pill";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
@@ -52,6 +53,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// State & Hooks
 	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
+	const localization = useDocumentLocalization();
 	const [childrenMounted, setChildrenMounted] = createSignal(
 		props.group()?.open === true,
 	);
@@ -91,7 +93,10 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		}),
 	);
 	const disabled = createMemo(
-		() => props.fieldConfig.ui?.disabled || brickStore.get.locked,
+		() =>
+			props.fieldConfig.ui?.disabled ||
+			brickStore.get.locked ||
+			localization.editableLocales() !== null,
 	);
 	const groupError = createMemo(() => {
 		return props.groupErrors.find((g) => {

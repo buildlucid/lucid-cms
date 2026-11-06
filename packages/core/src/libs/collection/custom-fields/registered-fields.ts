@@ -63,6 +63,7 @@ export const fieldHooks: Readonly<
 			| "restrictValidationData"
 			| "mapRefs"
 			| "removeEmbeddedBrickRefs"
+			| "translation"
 		>
 	>
 > = registeredFields;

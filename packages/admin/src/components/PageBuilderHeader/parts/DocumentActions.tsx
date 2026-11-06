@@ -8,7 +8,6 @@ import T from "@/translations";
 
 export const DocumentActions: Component<{
 	collectionSingularName?: string;
-	requestLink?: string;
 	/** Auto save's on/off switch, left out without permission to save. */
 	autoSave?: {
 		enabled: boolean;
@@ -30,6 +29,12 @@ export const DocumentActions: Component<{
 	export?: {
 		onExport: () => void;
 		permission: boolean;
+	};
+	translate?: {
+		onTranslate: () => void;
+		permission: boolean;
+		/** Why translating can't run, eg. without a Lucid connection. The item looks disabled and shows this instead. */
+		disabledToast?: { title: string; message: string };
 	};
 	align?: {
 		onAlign: () => void;
@@ -78,13 +83,6 @@ export const DocumentActions: Component<{
 			href: props.liveUrl,
 			target: "_blank",
 			rel: "noreferrer",
-		},
-		{
-			label: T()("requests.view"),
-			type: "link",
-			icon: "share",
-			show: props.requestLink !== undefined,
-			href: props.requestLink,
 		},
 		{
 			label: T()("preview.links.group"),
@@ -145,6 +143,16 @@ export const DocumentActions: Component<{
 				message: T()("toasts.documents.duplicate.disabled.message"),
 			},
 			onClick: props.duplicate?.onDuplicate,
+		},
+		{
+			label: T()("translations.action"),
+			type: "button",
+			icon: "language",
+			show: props.translate !== undefined,
+			permission: props.translate?.permission,
+			disabled: props.translate?.disabledToast !== undefined,
+			disabledToast: props.translate?.disabledToast,
+			onClick: props.translate?.onTranslate,
 		},
 		{
 			label: getActionLabel(T()("common.export")),

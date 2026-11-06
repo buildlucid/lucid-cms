@@ -40,6 +40,7 @@ class LinkCustomField extends CustomField<"link"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			localized: this.props?.localized ?? false,
+			translate: this.props?.translate,
 			default: this.props?.default ?? {
 				url: null,
 				label: null,

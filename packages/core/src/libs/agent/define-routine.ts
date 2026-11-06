@@ -24,6 +24,7 @@ const defineRoutine = <const Key extends string>(
 			],
 		),
 	),
+	features: options.features ?? [],
 	schedule: options.schedule
 		? {
 				cron: options.schedule.cron.trim().split(/\s+/).join(" "),

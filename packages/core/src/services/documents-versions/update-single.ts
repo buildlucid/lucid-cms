@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import resolveCollectionLocalization from "../../libs/collection/helpers/resolve-collection-localization.js";
 import { documentVersionsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
@@ -7,6 +8,7 @@ import {
 	DocumentsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
+import mergeLocaleContent from "../../libs/translations/merge-locale-content.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { LucidActor } from "../../types/hono.js";
@@ -27,6 +29,7 @@ import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import recordProposalActivity from "../requests/helpers/record-proposal-activity.js";
 import recordTargetChange from "../requests/helpers/record-target-change.js";
 import getUpdateContext from "./helpers/get-update-context.js";
+import readStoredContent from "./helpers/read-stored-content.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -115,6 +118,29 @@ const updateSingle: ServiceFn<
 			});
 			if (contentRes.error) return contentRes;
 
+			const previousRes = await readStoredContent(context, {
+				collection: updateContextRes.data.collection,
+				documentId: data.documentId,
+				versionId: data.versionId,
+			});
+			if (previousRes.error) return previousRes;
+
+			//* proposals of locale-limited requests only change those locales, so everything else stays as stored
+			const requestLocales = updateContextRes.data.request?.locales ?? null;
+			const content =
+				requestLocales !== null && previousRes.data
+					? mergeLocaleContent({
+							collection: updateContextRes.data.collection,
+							localization: resolveCollectionLocalization({
+								localization: context.config.localization,
+								collection: updateContextRes.data.collection,
+							}),
+							target: previousRes.data,
+							source: contentRes.data,
+							locales: requestLocales,
+						})
+					: contentRes.data;
+
 			// Fire beforeUpsert transform hooks
 			const hookResponse = await executeHooks(
 				context,
@@ -142,8 +168,8 @@ const updateSingle: ServiceFn<
 						documentId: data.documentId,
 						versionId: data.versionId,
 						versionType: updateContextRes.data.versionType,
-						bricks: contentRes.data.bricks,
-						fields: contentRes.data.fields,
+						bricks: content.bricks,
+						fields: content.fields,
 					},
 				},
 			);
@@ -160,6 +186,7 @@ const updateSingle: ServiceFn<
 				bricks: hookResponse.data.bricks ?? [],
 				fields: hookResponse.data.fields ?? [],
 				authUser: data.authUser,
+				locales: requestLocales,
 			});
 			if (checkValidateRes.error) return checkValidateRes;
 
@@ -179,6 +206,7 @@ const updateSingle: ServiceFn<
 				documentId: data.documentId,
 				bricks: hookResponse.data.bricks,
 				fields: hookResponse.data.fields,
+				previous: previousRes.data,
 				collection: updateContextRes.data.collection,
 				skipValidation: true,
 			});
@@ -249,11 +277,12 @@ const updateSingle: ServiceFn<
 				if (documentUpdate.error) return documentUpdate;
 			}
 
+			const { changedLocales } = createMultipleBricks.data;
 			const invalidateRes = await invalidateRequests(context, {
 				collectionKey: data.collectionKey,
 				documentIds: [data.documentId],
 				...(updateContextRes.data.versionType === "latest"
-					? { versionType: "latest" }
+					? { versionType: "latest", changedLocales }
 					: { versionId: data.versionId }),
 				userId: data.userId,
 			});
@@ -264,6 +293,8 @@ const updateSingle: ServiceFn<
 					collectionKey: data.collectionKey,
 					documentId: data.documentId,
 					target: "latest",
+					changedLocales,
+					versionId: data.versionId,
 					userId: data.userId,
 					agentRunId: data.agentRunId,
 				});

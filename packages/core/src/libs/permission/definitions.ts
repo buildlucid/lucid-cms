@@ -38,6 +38,7 @@ export const Permissions = {
 	AiImageGenerate: "ai:image-generate",
 	AiAudioGenerate: "ai:audio-generate",
 	AiAltGenerate: "ai:alt-generate",
+	AiTranslate: "ai:translate",
 	AiRoutinesManageAll: "ai:routines-manage-all",
 	AiMemoriesManage: "ai:memories-manage",
 
@@ -245,6 +246,19 @@ export const PermissionGroups = Object.freeze({
 				details: {
 					name: copy("admin:core.permissions.alt.generate", {
 						defaultMessage: "Generate Alt Text",
+					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.AiTranslate,
+				details: {
+					name: copy("admin:core.permissions.translate", {
+						defaultMessage: "Translate Documents",
+					}),
+					description: copy("admin:core.permissions.translate.description", {
+						defaultMessage:
+							"Translate documents with AI into requests, or into the open editor.",
 					}),
 				},
 				core: true,

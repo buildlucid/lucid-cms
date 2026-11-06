@@ -9,6 +9,8 @@ import type {
 	RefResource,
 	RefResourceMap,
 	Refs,
+	TranslationChange,
+	TranslationSource,
 } from "@types";
 import { nanoid } from "nanoid";
 import { batch, untrack } from "solid-js";
@@ -116,8 +118,8 @@ export const createBrickStore = (idPrefix = "") => {
 		baseContentId: string | null;
 		/** The saved content moved on while there were unsaved edits, eg. the agent changed it. Autosave waits until the reader chooses. */
 		contentChanged: boolean;
-		/** The agent changed the content through its builder tools. Autosave waits until the person saves, so they review its changes first. */
-		agentEdited: boolean;
+		/** The agent's builder tools or an AI translation changed the content. Autosave waits until the person saves, so they review the changes first. */
+		reviewPending: boolean;
 		refs: Refs;
 		collectionLocalized: boolean;
 		documentRevision: number;
@@ -141,6 +143,26 @@ export const createBrickStore = (idPrefix = "") => {
 			collection?: Collection;
 			/** The agent run making the change, so its reply can offer to undo it. */
 			runId: string;
+		}) => void;
+		/**
+		 * Fills in translated values and their sources as one undoable step, pausing autosave until the person saves.
+		 * Fields that changed since `submitted`, the content sent for translation, keep their edits.
+		 */
+		applyTranslations: (
+			changes: TranslationChange[],
+			submitted: {
+				bricks: Array<Pick<BrickData, "ref" | "fields">>;
+				fields: InternalDocumentField[];
+			},
+		) => void;
+		/** Records what a field's translation into a locale was made from, eg. when someone marks it as checked. */
+		setTranslationSource: (params: {
+			brickIndex: number;
+			key: string;
+			ref?: string;
+			repeaterKey?: string;
+			contentLocale: string;
+			source: TranslationSource;
 		}) => void;
 		captureInitialSnapshot: (snapshot?: BrickSnapshot[]) => void;
 		createSnapshotFromPayload: (
@@ -239,7 +261,7 @@ export const createBrickStore = (idPrefix = "") => {
 		locked: false,
 		baseContentId: null,
 		contentChanged: false,
-		agentEdited: false,
+		reviewPending: false,
 		autoSaveCounter: 0,
 		autoSavePaused: false,
 		relationFieldDragCount: 0,
@@ -270,7 +292,7 @@ export const createBrickStore = (idPrefix = "") => {
 				set("collectionLocalized", false);
 				set("baseContentId", null);
 				set("contentChanged", false);
-				set("agentEdited", false);
+				set("reviewPending", false);
 				set("refs", {});
 				markDocumentChange({ content: true, structure: true });
 				set("snapshotRevision", (previous) => previous + 1);
@@ -300,6 +322,93 @@ export const createBrickStore = (idPrefix = "") => {
 				},
 				...structuredClone(unwrap(payload.bricks ?? [])),
 			]);
+		},
+		applyTranslations(changes, submitted) {
+			if (changes.length === 0) return;
+
+			const submittedField = (change: TranslationChange) => {
+				const fields =
+					change.brick === null
+						? submitted.fields
+						: submitted.bricks.find((brick) => brick.ref === change.brick)
+								?.fields;
+				return brickHelpers.getFieldAtContentPath(fields ?? [], change.path);
+			};
+
+			recordBricks({ source: { type: "translation" } }, () => {
+				batch(() => {
+					set(
+						"bricks",
+						produce((draft) => {
+							for (const change of changes) {
+								const brick = draft.find(
+									(item) =>
+										item.ref === (change.brick ?? brickHelpers.pseudoBrickRef),
+								);
+								const field = brick
+									? brickHelpers.getFieldAtContentPath(
+											brick.fields,
+											change.path,
+										)
+									: undefined;
+								//* edited or checked while the translation was being made
+								const before = submittedField(change);
+								if (
+									!field ||
+									!safeDeepEqual(
+										field.translations?.[change.locale] ?? null,
+										before?.translations?.[change.locale] ?? null,
+									) ||
+									!safeDeepEqual(
+										field.translationSources?.[change.locale] ?? null,
+										before?.translationSources?.[change.locale] ?? null,
+									)
+								) {
+									continue;
+								}
+
+								field.translations = {
+									...field.translations,
+									[change.locale]: change.value,
+								};
+								field.translationSources = {
+									...field.translationSources,
+									[change.locale]: change.source,
+								};
+							}
+						}),
+					);
+					set("autoSaveCounter", (previous) => previous + 1);
+					set("reviewPending", true);
+					markDocumentChange({ content: true });
+				});
+				rebuildAllBrickFieldIndexes();
+			});
+		},
+		setTranslationSource(params) {
+			recordBricks({ brickIndex: params.brickIndex }, () => {
+				set(
+					"bricks",
+					params.brickIndex,
+					"fields",
+					produce((fieldsDraft) => {
+						const field = brickHelpers.findFieldRecursive({
+							fields: fieldsDraft,
+							targetKey: params.key,
+							groupRef: params.ref,
+							repeaterKey: params.repeaterKey,
+						});
+						if (!field) return;
+
+						field.translationSources = {
+							...field.translationSources,
+							[params.contentLocale]: params.source,
+						};
+					}),
+				);
+				set("autoSaveCounter", (previous) => previous + 1);
+				markDocumentChange({ content: true });
+			});
 		},
 		// Bricks
 		/** Hydrates every brick from the document and collection config, then indexes fields for fast builder access. */
@@ -376,7 +485,7 @@ export const createBrickStore = (idPrefix = "") => {
 				);
 				get.addRefs(props.refs);
 				set("autoSaveCounter", (previous) => previous + 1);
-				set("agentEdited", true);
+				set("reviewPending", true);
 			});
 		},
 		/** Adds an initialized builder brick, at the end or at an order, and schedules autosave for the structural change. Returns its ref. */
@@ -571,6 +680,7 @@ export const createBrickStore = (idPrefix = "") => {
 				target,
 				before: written.previous,
 				after: structuredClone(unwrap(params.value)),
+				sourceBefore: written.previousSource,
 				source: { type: "user" },
 				at: Date.now(),
 			});
@@ -1077,19 +1187,31 @@ export const createBrickStore = (idPrefix = "") => {
 		);
 	};
 
-	/** Writes shared or localized values without recording undo steps, returning `{ previous }` on a change or nothing for missing or unchanged fields. */
+	/** Writes shared or localized values without recording undo steps, returning what they replaced on a change or nothing for missing or unchanged fields. */
 	const writeFieldValue = (props: {
 		brickIndex: number;
 		target: FieldEditTarget;
 		value: InternalDocumentField["value"];
 		clearFromItemIndex?: number;
-	}): { previous: InternalDocumentField["value"] } | undefined => {
+		/** The record to leave on a localized value, eg. when undoing. By default an edited translation loses its record, as it's the person's own. */
+		source?: TranslationSource;
+	}):
+		| {
+				previous: InternalDocumentField["value"];
+				previousSource?: TranslationSource;
+		  }
+		| undefined => {
 		const fieldPath = getBrickFieldPath({
 			brickIndex: props.brickIndex,
 			key: props.target.key,
 			groupRef: props.target.groupRef,
 		});
-		let written: { previous: InternalDocumentField["value"] } | undefined;
+		let written:
+			| {
+					previous: InternalDocumentField["value"];
+					previousSource?: TranslationSource;
+			  }
+			| undefined;
 
 		batch(() => {
 			set(
@@ -1112,10 +1234,27 @@ export const createBrickStore = (idPrefix = "") => {
 						locale !== undefined ? field.translations?.[locale] : field.value;
 					if (safeDeepEqual(previous, props.value)) return;
 
-					written = { previous: structuredClone(unwrap(previous)) };
+					const previousSource =
+						locale !== undefined
+							? field.translationSources?.[locale]
+							: undefined;
+					written = {
+						previous: structuredClone(unwrap(previous)),
+						previousSource: previousSource
+							? structuredClone(unwrap(previousSource))
+							: undefined,
+					};
 					if (locale !== undefined) {
 						if (!field.translations) field.translations = {};
 						field.translations[locale] = props.value;
+						//* an edited translation is the person's own, which saving records
+						if (field.translationSources || props.source) {
+							const { [locale]: _edited, ...sources } =
+								field.translationSources ?? {};
+							field.translationSources = props.source
+								? { ...sources, [locale]: props.source }
+								: sources;
+						}
 					} else {
 						field.value = props.value;
 					}
@@ -1247,11 +1386,11 @@ export const createBrickStore = (idPrefix = "") => {
 		mutate: () => void,
 	) => {
 		const batching = batchDepth > 0;
-		if (batching && props.source?.type !== "agent") {
+		if (batching && (props.source?.type ?? "user") === "user") {
 			mutate();
 			return;
 		}
-		//* what the batch collected so far goes first, and it carries on collecting after the agent's step
+		//* what the batch collected so far goes first, and it carries on collecting after the agent's or translation's step
 		if (batching) commitBatch();
 
 		const before = captureBricks(props.brickIndex);
@@ -1313,6 +1452,7 @@ export const createBrickStore = (idPrefix = "") => {
 			brickIndex,
 			target: entry.target,
 			value: structuredClone(direction === "undo" ? entry.before : entry.after),
+			source: direction === "undo" ? entry.sourceBefore : undefined,
 		});
 	};
 
@@ -1323,13 +1463,13 @@ export const createBrickStore = (idPrefix = "") => {
 
 		batch(() => {
 			applyEdit(entry, direction);
-			//* redoing unsaved agent edits requires review before autosave resumes
+			//* redoing unsaved agent or translation edits requires review before autosave resumes
 			if (
 				direction === "redo" &&
-				entry.source.type === "agent" &&
+				entry.source.type !== "user" &&
 				!entry.saved
 			) {
-				set("agentEdited", true);
+				set("reviewPending", true);
 			}
 			set("editRevision", (previous) => previous + 1);
 		});

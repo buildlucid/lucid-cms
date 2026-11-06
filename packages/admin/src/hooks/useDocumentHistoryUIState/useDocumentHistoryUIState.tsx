@@ -11,6 +11,7 @@ export function useDocumentHistoryUIState(props: {
 	const [getUnpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
 	const [getExportOpen, setExportOpen] = createSignal(false);
+	const [getTranslateOpen, setTranslateOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
@@ -84,6 +85,8 @@ export function useDocumentHistoryUIState(props: {
 	const hasUnpublishPermission = createMemo(() => false);
 	const hasDuplicatePermission = createMemo(() => false);
 	const showExportButton = createMemo(() => false);
+	const showTranslateButton = createMemo(() => false);
+	const hasTranslatePermission = createMemo(() => false);
 
 	const showRestoreRevisionButton = createMemo(() => false);
 	const showPreview = createMemo(() => false);
@@ -103,6 +106,8 @@ export function useDocumentHistoryUIState(props: {
 		setDuplicateOpen,
 		getExportOpen,
 		setExportOpen,
+		getTranslateOpen,
+		setTranslateOpen,
 		getRestoreRevisionOpen,
 		setRestoreRevisionOpen,
 		getRestoreRevisionVersionId,
@@ -142,6 +147,8 @@ export function useDocumentHistoryUIState(props: {
 		duplicateDisabled,
 		hasDuplicatePermission,
 		showExportButton,
+		showTranslateButton,
+		hasTranslatePermission,
 		collectionNeedsMigrating,
 		autoSave,
 		hasAutoSavePermission,

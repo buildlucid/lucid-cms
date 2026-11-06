@@ -27,11 +27,15 @@ import updateOrder from "../../../controllers/documents/update-order.js";
 import updatePreviewDraft from "../../../controllers/documents/update-preview-draft.js";
 import updateVersion from "../../../controllers/documents/update-version.js";
 import updateWorkflow from "../../../controllers/documents/update-workflow.js";
+import getTranslationStatus from "../../../controllers/translations/get-status.js";
+import translateDocuments from "../../../controllers/translations/translate-documents.js";
 
 const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey", ...createSingle)
 	.post("/:collectionKey/restore", ...restoreMultiple)
 	.post("/:collectionKey/request", ...requestSingle)
+	.post("/:collectionKey/translate", ...translateDocuments)
+	.post("/:collectionKey/translate/status", ...getTranslationStatus)
 	.post("/:collectionKey/:id/duplicate", ...duplicateSingle)
 	.post("/:collectionKey/:id/publish", ...publish)
 	.post("/:collectionKey/:id/unpublish", ...unpublish)
