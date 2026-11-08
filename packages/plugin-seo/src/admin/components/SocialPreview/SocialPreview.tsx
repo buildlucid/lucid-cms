@@ -4,16 +4,17 @@ import { mediaUrl } from "@lucidcms/admin/utils";
 import { TbOutlinePhoto } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import type {} from "../../../shared/translations.js";
-import { useImage } from "../../hooks/use-image.js";
+import type { SeoImage } from "../../utils/field-values.js";
 
 type SocialPreviewProps = {
 	title: string;
 	description: string;
 	host: string;
 	siteName: string;
-	imageId?: number;
+	image: SeoImage | undefined;
+	/** The field links to media, which may not be an image or may still be loading. */
+	linked: boolean;
 	alt: string;
-	locale: string;
 	compact?: boolean;
 };
 
@@ -21,10 +22,6 @@ const SocialPreview: Component<SocialPreviewProps> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();
-	const media = useImage(
-		() => props.imageId,
-		() => props.locale,
-	);
 
 	// ----------------------------------
 	// Render
@@ -41,17 +38,15 @@ const SocialPreview: Component<SocialPreviewProps> = (props) => {
 				}}
 			>
 				<Show
-					when={media.image()}
+					when={props.image}
 					fallback={
 						<div class="flex flex-col items-center gap-2 p-4 text-subtitle">
 							<TbOutlinePhoto aria-hidden="true" size={24} class="opacity-50" />
 							<p class="text-center text-sm">
 								{t(
-									props.imageId === undefined
-										? "plugin.seo.preview.image"
-										: media.query.isFetching
-											? "plugin.seo.image.loading"
-											: "plugin.seo.image.unavailable",
+									props.linked
+										? "plugin.seo.image.unavailable"
+										: "plugin.seo.preview.image",
 								)}
 							</p>
 						</div>
@@ -64,7 +59,7 @@ const SocialPreview: Component<SocialPreviewProps> = (props) => {
 									image(),
 									props.compact ? "thumbnail-small" : "thumbnail-medium",
 								)}
-								alt={props.alt.trim() || media.alt()}
+								alt={props.alt.trim()}
 							/>
 						</div>
 					)}

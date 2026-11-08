@@ -5,7 +5,7 @@ import { createMemo, Show } from "solid-js";
 import { fields } from "../../../constants.js";
 import { assessBasics } from "../../../shared/assessments.js";
 import type {} from "../../../shared/translations.js";
-import { readImageField, readText } from "../../utils/field-values.js";
+import { hasMedia, readText } from "../../utils/field-values.js";
 
 const SeoSummary: BrickSlotComponent = (props) => {
 	// ----------------------------------
@@ -20,9 +20,7 @@ const SeoSummary: BrickSlotComponent = (props) => {
 			: assessBasics({
 					title: readText(props.brick.fields, fields.title),
 					description: readText(props.brick.fields, fields.description),
-					image:
-						readImageField(props.brick.fields, fields.socialImage) !==
-						undefined,
+					image: hasMedia(props.brick.fields, fields.socialImage),
 				}),
 	);
 	const variant = createMemo(() =>

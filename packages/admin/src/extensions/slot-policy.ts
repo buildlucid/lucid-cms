@@ -28,6 +28,7 @@ type Match = {
 	brick?: string;
 	kind?: string;
 	field?: string;
+	fieldType?: string;
 	adapter?: string;
 };
 type Entry = {
@@ -41,6 +42,7 @@ const matchKeys = [
 	"brick",
 	"kind",
 	"field",
+	"fieldType",
 	"widget",
 	"version",
 	"adapter",

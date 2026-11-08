@@ -9,12 +9,18 @@ import {
 	Show,
 } from "solid-js";
 import { brickSlots } from "virtual:lucid-admin";
-import { createFieldStates } from "@/extensions/editor/field-state";
+import { createFieldScope } from "@/extensions/editor/field-scope";
+import type { EditorBrick } from "@/extensions/editor/types";
 import { resolveSlots } from "@/extensions/slot-policy";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
+import {
+	useFieldEnvironment,
+	useFieldScope,
+} from "@/hooks/useFieldScope/useFieldScope";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionBrickConfig } from "@/types/collection-config";
+import hasRenderedContent from "@/utils/has-rendered-content";
+import resolveFieldAccess from "@/utils/resolve-field-access";
 import AdminExtensionBoundary from "../AdminExtensionBoundary/AdminExtensionBoundary";
 import type { BrickSlot } from "./types";
 
@@ -25,7 +31,6 @@ const BrickSlots: Component<{
 	header?: boolean;
 	/** Extra classes for each header slot, for aligning with the header's own actions. */
 	headerClass?: string;
-	documentId?: number;
 	config?: CollectionBrickConfig;
 	errors?: FieldError[];
 	brick: BrickData;
@@ -35,7 +40,25 @@ const BrickSlots: Component<{
 	// ----------------------------------
 	// State & Hooks
 	const brickStore = useBrickStore();
-	const route = useDocumentRoute(() => props.contentLocale);
+	//* inside a brick body, its fields share the body's level; brick headers build their own
+	const fields =
+		useFieldScope()?.scope ??
+		createFieldScope(
+			useFieldEnvironment({
+				contentLocale: () => props.contentLocale,
+				collectionKey: () => props.collectionKey,
+			}),
+			{
+				brickIndex: () =>
+					brickStore.get.bricks.findIndex(
+						(brick) => brick.ref === props.brick.ref,
+					),
+				configs: () => props.config?.fields ?? [],
+				fields: () => props.brick.fields,
+				errors: () => props.errors,
+				access: () => resolveFieldAccess(props.config?.permissions),
+			},
+		);
 
 	// ----------------------------------
 	// Memos
@@ -58,7 +81,7 @@ const BrickSlots: Component<{
 			> => entry.slot === "brick.start" || entry.slot === "brick.end",
 		),
 	);
-	const brick = createMemo(() => {
+	const brick = createMemo((): EditorBrick | undefined => {
 		if (!props.config || props.brick.type === "collection-fields") {
 			return undefined;
 		}
@@ -68,14 +91,7 @@ const BrickSlots: Component<{
 			ref: props.brick.ref,
 			kind: props.brick.type,
 			config: props.config,
-			fields: createFieldStates({
-				configs: props.config.fields,
-				fields: props.brick.fields,
-				errors: props.errors,
-				contentLocale: props.contentLocale,
-				localized: brickStore.get.collectionLocalized,
-				readOnly: brickStore.get.locked,
-			}),
+			fields,
 		};
 	});
 
@@ -96,18 +112,11 @@ const BrickSlots: Component<{
 									options={entry.options}
 									open={props.open}
 									brick={brick()}
-									context={{
-										route: route(),
-										collectionKey: props.collectionKey,
-										documentId: props.documentId,
-										contentLocale: props.contentLocale,
-										readOnly: brickStore.get.locked,
-									}}
 								/>
 							</AdminExtensionBoundary>
 						));
 						return (
-							<Show when={content.toArray().length > 0}>
+							<Show when={hasRenderedContent(content.toArray())}>
 								<div
 									class={
 										props.header

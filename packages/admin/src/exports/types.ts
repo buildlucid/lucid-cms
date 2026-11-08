@@ -50,12 +50,16 @@ export type {
 	MaintenanceSlotProps,
 } from "../components/MaintenanceSlots/types.js";
 export type {
-	BrickState,
-	EditorContext,
+	DocumentEditor,
+	EditorBrick,
+	EditorField,
 	EditorFieldConfig,
-	EditorFieldState,
-	EditorFieldValue,
-	FieldContext,
+	EditorFieldType,
+	FieldRefByType,
+	FieldScope,
+	FieldState,
+	FieldValueByType,
+	ValueFieldType,
 } from "../extensions/editor/types.js";
 export type {
 	AdminComponentReference,

@@ -159,12 +159,21 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 
 	// -------------------------------
 	// Functions
-	const getMediaRef = (id: number): NonNullable<MediaRef> | undefined =>
-		brickHelpers.getFieldRef({
-			refs: brickStore.get.refs,
+	//* lookups that miss fetch the item, eg. one a field slot linked without its display data
+	const getMediaRef = (id: number): NonNullable<MediaRef> | undefined => {
+		brickStore.requestRefs({
+			collectionKey: fieldRenderState.collectionKey(),
 			resource: "media",
-			fieldValue: [id],
-		}) ?? undefined;
+			value: [id],
+		});
+		return (
+			brickHelpers.getFieldRef({
+				refs: brickStore.get.refs,
+				resource: "media",
+				fieldValue: [id],
+			}) ?? undefined
+		);
+	};
 	const getDocumentRef = (
 		collectionKey: string,
 		documentId: number,
@@ -174,6 +183,11 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			return current;
 		}
 
+		brickStore.requestRefs({
+			collectionKey: fieldRenderState.collectionKey(),
+			resource: "documents",
+			value: [{ collectionKey, id: documentId }],
+		});
 		return (
 			brickHelpers.getFieldRef({
 				refs: brickStore.get.refs,
@@ -182,12 +196,20 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			}) ?? undefined
 		);
 	};
-	const getUserRef = (userId: number): NonNullable<UserRef> | undefined =>
-		brickHelpers.getFieldRef({
-			refs: brickStore.get.refs,
+	const getUserRef = (userId: number): NonNullable<UserRef> | undefined => {
+		brickStore.requestRefs({
+			collectionKey: fieldRenderState.collectionKey(),
 			resource: "users",
-			fieldValue: [userId],
-		}) ?? undefined;
+			value: [userId],
+		});
+		return (
+			brickHelpers.getFieldRef({
+				refs: brickStore.get.refs,
+				resource: "users",
+				fieldValue: [userId],
+			}) ?? undefined
+		);
+	};
 	const isCurrentDocument = (document: DocumentRef) => {
 		const current = currentDocumentRef();
 		return (

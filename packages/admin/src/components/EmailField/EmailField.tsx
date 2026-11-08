@@ -70,6 +70,14 @@ export const EmailField: Component<EmailFieldProps> = (props) => {
 	createEffect(() => {
 		setValue(fieldValue());
 	});
+	//* values written without display data, eg. by a field slot, fetch what's missing
+	createEffect(() => {
+		brickStore.requestRefs({
+			collectionKey: fieldRenderState.collectionKey(),
+			resource: "emails",
+			value: fieldValue(),
+		});
+	});
 
 	// -------------------------------
 	// Render

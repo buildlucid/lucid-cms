@@ -1,4 +1,8 @@
-import type { AdminConfig, AdminNavigationIcon } from "@lucidcms/admin/types";
+import type {
+	AdminConfig,
+	AdminNavigationIcon,
+	ValueFieldType,
+} from "@lucidcms/admin/types";
 import z from "zod";
 import { adminCopyInputSchema } from "../i18n/index.js";
 import type { Permission } from "../permission/types.js";
@@ -70,6 +74,26 @@ const brickSlotMatch = z.strictObject({
 	brick: key.optional(),
 	kind: z.enum(["fixed", "builder", "embedded"]).optional(),
 });
+
+//* keyed by type, so a field type missing here fails the type check
+const fieldSlotType = z.enum({
+	text: "text",
+	textarea: "textarea",
+	"rich-text": "rich-text",
+	number: "number",
+	range: "range",
+	checkbox: "checkbox",
+	select: "select",
+	color: "color",
+	datetime: "datetime",
+	json: "json",
+	code: "code",
+	link: "link",
+	media: "media",
+	relation: "relation",
+	user: "user",
+	email: "email",
+} satisfies { [Type in ValueFieldType]: Type });
 
 const homeWidgetSize = z.enum(["sm", "md", "lg", "full"]);
 
@@ -187,10 +211,11 @@ export const adminConfigSchema = z
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
-						slot: z.enum(["field.before", "field.after"]),
+						slot: z.enum(["field.input", "field.before", "field.after"]),
 						match: brickSlotMatch
 							.extend({
 								field: key.optional(),
+								fieldType: fieldSlotType.optional(),
 								kind: z
 									.enum(["fixed", "builder", "embedded", "collection-fields"])
 									.optional(),

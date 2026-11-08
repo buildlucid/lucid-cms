@@ -23,6 +23,7 @@ import type {
 } from "../../../libs/refs/types.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
+import type { MediaActor } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import collectRefTargets from "../../documents-bricks/helpers/collect-ref-targets.js";
 import filterReadableRefs from "./filter-readable-refs.js";
@@ -53,6 +54,8 @@ const resolveDocumentRefs: ServiceFn<
 			allowedDocumentCollectionKeys?: string[];
 			/** Content API mode flattens relation fields, omits user emails and email recipients, and limits media to the library; admin readers need the matching `users:read` or `email:read` permission for those details. */
 			content?: boolean;
+			/** Who media refs are read for. Defaults to the library for content API mode, or all media for trusted admin reads. */
+			mediaActor?: MediaActor;
 			host: string;
 			/** Excludes refs linked only by hidden content and related documents' hidden fields; omitted for trusted and external reads. */
 			reader?: FieldAccessActor;
@@ -109,7 +112,8 @@ const resolveDocumentRefs: ServiceFn<
 			registeredRefResources.media.resolve(context, {
 				targets,
 				actor:
-					data.content === true ? { type: "content" } : { type: "internal" },
+					data.mediaActor ??
+					(data.content === true ? { type: "content" } : { type: "internal" }),
 				format: mediaFormat,
 			}),
 		users: (targets) =>

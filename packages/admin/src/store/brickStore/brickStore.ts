@@ -43,6 +43,7 @@ import {
 	getIndexedFieldPath,
 } from "./utils/field-index";
 import { createInternalField, ensureFieldsForConfigs } from "./utils/fields";
+import { createRefRequests } from "./utils/ref-requests";
 import {
 	type BrickSnapshot,
 	createBricksSnapshot,
@@ -279,6 +280,7 @@ export const createBrickStore = (idPrefix = "") => {
 			clearInitialSnapshotCaches();
 			batchDepth = 0;
 			batchBefore = undefined;
+			refRequests.reset();
 			batch(() => {
 				clearEdits();
 				set("bricks", []);
@@ -1008,6 +1010,7 @@ export const createBrickStore = (idPrefix = "") => {
 			});
 		},
 		setRefs(responseRefs) {
+			refRequests.reset();
 			set("refs", structuredClone(unwrap(responseRefs ?? {})));
 		},
 		/** Upserts resolved references by stable identity so newly selected records are available without a refetch. */
@@ -1282,6 +1285,11 @@ export const createBrickStore = (idPrefix = "") => {
 	//* edits made inside a batch are recorded as one step when it ends
 	let batchDepth = 0;
 	let batchBefore: BricksCapture | undefined;
+	const refRequests = createRefRequests({
+		refs: () => get.refs,
+		locked: () => get.locked,
+		addRefs: (refs) => get.addRefs(refs),
+	});
 
 	type BricksCapture = {
 		layout: BrickLayoutItem[];
@@ -1699,6 +1707,8 @@ export const createBrickStore = (idPrefix = "") => {
 		get,
 		set,
 		edits,
+		/** Fetches missing display data for linked field values. */
+		requestRefs: refRequests.request,
 		getDocumentMutated,
 		getDocumentContentMutated,
 		getBuilderBrickStructureMutated,

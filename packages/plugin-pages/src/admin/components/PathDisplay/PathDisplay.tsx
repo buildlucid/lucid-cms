@@ -11,10 +11,7 @@ const PathDisplay: FieldSlotComponent = (props) => {
 
 	// ----------------------------------
 	// Memos
-	const path = createMemo(() => {
-		const value = props.context.getValue("path");
-		return typeof value === "string" ? value : "";
-	});
+	const path = createMemo(() => props.fields.get("path", "text")?.value ?? "");
 
 	// ----------------------------------
 	// Render

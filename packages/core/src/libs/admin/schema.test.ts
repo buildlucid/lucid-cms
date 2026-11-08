@@ -241,3 +241,31 @@ describe("route permissions", () => {
 		).toBe(false);
 	});
 });
+
+describe("field slots", () => {
+	const input = {
+		key: "palette",
+		component: "./Palette.tsx",
+		slot: "field.input",
+	};
+
+	it("accepts input slots matched by field type", () => {
+		const config = adminConfigSchema.parse({
+			slots: [{ ...input, match: { collection: "page", fieldType: "color" } }],
+		});
+		expect(config.slots[0]).toMatchObject({
+			slot: "field.input",
+			match: { fieldType: "color" },
+		});
+	});
+
+	it("rejects field types that don't hold a value", () => {
+		for (const fieldType of ["repeater", "tab", "colour"]) {
+			expect(
+				adminConfigSchema.safeParse({
+					slots: [{ ...input, match: { fieldType } }],
+				}).success,
+			).toBe(false);
+		}
+	});
+});

@@ -124,7 +124,6 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 											),
 											contentLocale: props.contentLocale ?? "",
 											localized: props.collection.localized !== false,
-											readOnly: true,
 										}),
 									}}
 								/>

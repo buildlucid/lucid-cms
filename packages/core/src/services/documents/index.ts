@@ -7,6 +7,7 @@ export { default as deleteSingle } from "./delete-single.js";
 export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
 export { default as duplicateSingle } from "./duplicate-single.js";
 export { default as getEditable } from "./get-editable.js";
+export { default as getEditorRefs } from "./get-editor-refs.js";
 export { default as getMultiple } from "./get-multiple.js";
 export { default as getMultipleRevisions } from "./get-multiple-revisions.js";
 export { default as getSingle } from "./get-single.js";

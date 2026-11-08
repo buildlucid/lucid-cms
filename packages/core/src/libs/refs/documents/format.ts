@@ -61,10 +61,11 @@ const formatDocumentRefs = (
 			id: document.document_id,
 			versionId: document.id,
 			collectionKey: targetCollectionKey,
+			//* the path and label only come from fields the reader can see
 			route: formatDocumentRoute({
 				collection,
 				documentId: document.document_id,
-				fields: formattedFields,
+				fields: readableFields,
 				locales: localization.locales,
 			}),
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,

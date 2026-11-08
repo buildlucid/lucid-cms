@@ -314,6 +314,13 @@ function getFieldRefs(props: {
 	collection?: string;
 	refs: Refs;
 }): DocumentRef[];
+function getFieldRefs(
+	props: FieldRefsInput,
+):
+	| Array<NonNullable<MediaRef>>
+	| Array<NonNullable<UserRef>>
+	| EmailRef[]
+	| DocumentRef[];
 /**
  * Returns matching resource refs for an array-backed field, preserving selection order.
  */

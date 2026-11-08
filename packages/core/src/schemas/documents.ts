@@ -1077,6 +1077,48 @@ export const controllerSchemas = {
 		body: undefined,
 		response: documentResponseSchema,
 	} satisfies ControllerSchema,
+	getEditorRefs: {
+		body: z
+			.object({
+				documents: z
+					.array(
+						z.object({
+							collectionKey: z.string().trim().min(1),
+							id: z.number().int().positive(),
+						}),
+					)
+					.max(500)
+					.optional()
+					.meta({ description: "Related documents to fetch display data for" }),
+				media: z
+					.array(z.number().int().positive())
+					.max(500)
+					.optional()
+					.meta({ description: "Media IDs to fetch display data for" }),
+				users: z
+					.array(z.number().int().positive())
+					.max(500)
+					.optional()
+					.meta({ description: "User IDs to fetch display data for" }),
+				emails: z
+					.array(z.number().int().positive())
+					.max(500)
+					.optional()
+					.meta({ description: "Email IDs to fetch display data for" }),
+			})
+			.strict(),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection of the document being edited",
+				example: "page",
+			}),
+		}),
+		response: documentRefsResponseSchema,
+	} satisfies ControllerSchema,
 	promoteVersion: {
 		body: z.object({
 			versionType: z

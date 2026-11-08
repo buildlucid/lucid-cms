@@ -68,6 +68,14 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	createEffect(() => {
 		setValue(fieldValue());
 	});
+	//* values written without display data, eg. by a field slot, fetch what's missing
+	createEffect(() => {
+		brickStore.requestRefs({
+			collectionKey: fieldRenderState.collectionKey(),
+			resource: "media",
+			value: fieldValue(),
+		});
+	});
 
 	// -------------------------------
 	// Render

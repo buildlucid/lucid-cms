@@ -1,48 +1,47 @@
-import { useTranslation } from "@lucidcms/admin/hooks";
+import { useDocumentEditor, useTranslation } from "@lucidcms/admin/hooks";
 import type { FieldSlotComponent } from "@lucidcms/admin/types";
 import { fields } from "../../../constants.js";
 import type {} from "../../../shared/translations.js";
-import { useImage } from "../../hooks/use-image.js";
-import { readImageId } from "../../utils/field-values.js";
+import {
+	hasMedia,
+	readAlt,
+	readImage,
+	readText,
+} from "../../utils/field-values.js";
 
 const AltGuidance: FieldSlotComponent = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();
-	const isX = () => props.field.key === fields.xImageAlt;
-
-	const ownImage = () =>
-		readImageId(
-			props.context.getValue(isX() ? fields.xImage : fields.socialImage),
-		);
-	const media = useImage(
-		() =>
-			ownImage() ??
-			(isX()
-				? readImageId(props.context.getValue(fields.socialImage))
-				: undefined),
-		() => props.context.contentLocale,
-	);
+	const editor = useDocumentEditor();
 
 	// ----------------------------------
 	// Memos
+	const isX = () => props.field.key === fields.xImageAlt;
+	const ownImageKey = () => (isX() ? fields.xImage : fields.socialImage);
+	//* the X image falls back to the social image when it has none of its own
+	const image = () =>
+		hasMedia(props.fields, ownImageKey())
+			? readImage(props.fields, ownImageKey())
+			: isX()
+				? readImage(props.fields, fields.socialImage)
+				: undefined;
 	const message = () => {
 		if (typeof props.field.value === "string" && props.field.value.trim()) {
 			return "plugin.seo.image.altHelp";
 		}
 
-		const socialAlt = props.context.getValue(fields.socialImageAlt);
-
 		if (
 			isX() &&
-			ownImage() === undefined &&
-			typeof socialAlt === "string" &&
-			socialAlt.trim()
+			!hasMedia(props.fields, fields.xImage) &&
+			readText(props.fields, fields.socialImageAlt).trim()
 		) {
 			return "plugin.seo.image.altFromSocial";
 		}
 
-		if (media.alt().trim()) return "plugin.seo.image.altFromMedia";
+		if (readAlt(image(), editor.locale.current).trim()) {
+			return "plugin.seo.image.altFromMedia";
+		}
 
 		return "plugin.seo.image.altHelp";
 	};

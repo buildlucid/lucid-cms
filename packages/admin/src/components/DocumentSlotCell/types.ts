@@ -5,7 +5,7 @@ import type {
 	ResolvedAdminCopy,
 } from "@lucidcms/types";
 import type { Component } from "solid-js";
-import type { EditorFieldState } from "../../extensions/editor/types.js";
+import type { FieldState } from "../../extensions/editor/types.js";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type { documentListSlotPolicies } from "./constants.js";
 
@@ -35,7 +35,7 @@ export type DocumentListSlotProps<
 	readonly options: TOptions;
 } & (
 	| { readonly slot: "documentList.column" }
-	| { readonly slot: "field.cell"; readonly field: EditorFieldState }
+	| { readonly slot: "field.cell"; readonly field: FieldState }
 );
 
 export type DocumentListSlotComponent<

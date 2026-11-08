@@ -11,6 +11,7 @@ import deleteMultiple from "../../../controllers/documents/delete-multiple.js";
 import deleteSinglePermanently from "../../../controllers/documents/delete-single-permanently.js";
 import deleteSingle from "../../../controllers/documents/delete-single.js";
 import duplicateSingle from "../../../controllers/documents/duplicate-single.js";
+import getEditorRefs from "../../../controllers/documents/get-editor-refs.js";
 import getMultipleRevisions from "../../../controllers/documents/get-multiple-revisions.js";
 import getMultiple from "../../../controllers/documents/get-multiple.js";
 import getSingle from "../../../controllers/documents/get-single.js";
@@ -36,6 +37,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey/request", ...requestSingle)
 	.post("/:collectionKey/translate", ...translateDocuments)
 	.post("/:collectionKey/translate/status", ...getTranslationStatus)
+	.post("/:collectionKey/refs", ...getEditorRefs)
 	.post("/:collectionKey/:id/duplicate", ...duplicateSingle)
 	.post("/:collectionKey/:id/publish", ...publish)
 	.post("/:collectionKey/:id/unpublish", ...unpublish)

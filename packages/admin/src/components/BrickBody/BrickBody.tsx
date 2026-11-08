@@ -17,6 +17,10 @@ import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { FieldAccessProvider } from "@/hooks/useFieldAccess/useFieldAccess";
 import { FieldRenderStateProvider } from "@/hooks/useFieldRenderState/useFieldRenderState";
+import {
+	FieldScopeProvider,
+	useFieldEnvironment,
+} from "@/hooks/useFieldScope/useFieldScope";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import type {
@@ -60,6 +64,11 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	const [getActiveTab, setActiveTab] = createSignal<string>();
 	const [contentMounted, setContentMounted] = createSignal(props.open);
 	const documentLocalization = useDocumentLocalization();
+	const fieldEnvironment = useFieldEnvironment({
+		contentLocale: () => contentLocale(),
+		collectionKey: () => props.collectionKey,
+		locales: props.contentLocales,
+	});
 
 	// ----------------------------------
 	// Memos
@@ -215,43 +224,53 @@ export const BrickBody: Component<BrickProps> = (props) => {
 							missingFieldColumns={missingFieldColumns}
 							brickRef={brickRef}
 						>
-							<BrickSlots
-								open={props.open}
-								documentId={props.documentId}
-								config={props.brickConfig}
-								errors={props.fieldErrors}
-								brick={props.brick}
-								collectionKey={props.collectionKey}
-								contentLocale={contentLocale()}
+							<FieldScopeProvider
+								environment={fieldEnvironment}
+								level={{
+									brickIndex,
+									configs: configFields,
+									fields: () => props.brick.fields,
+									errors: () => props.fieldErrors,
+									access: brickAccess,
+								}}
 							>
-								<div class="@container/fields grid grid-cols-12 gap-3">
-									{/* Tabs */}
-									<Show when={allTabs().length > 0}>
-										<TabField
-											tabs={allTabs()}
-											setActiveTab={setActiveTab}
-											getActiveTab={getActiveTab}
-											fieldErrors={props.fieldErrors}
-											class={classNames("col-span-12 shadow-inner", {
-												"-mt-4": props.options.bleedTop,
-											})}
-										/>
-									</Show>
-									{/* Body */}
-									<Index each={configFields()}>
-										{(config) => (
-											<DynamicField
-												fields={props.brick.fields}
-												fieldsByKey={fieldsByKey}
-												fieldConfig={config()}
-												activeTab={getActiveTab}
+								<BrickSlots
+									open={props.open}
+									config={props.brickConfig}
+									errors={props.fieldErrors}
+									brick={props.brick}
+									collectionKey={props.collectionKey}
+									contentLocale={contentLocale()}
+								>
+									<div class="@container/fields grid grid-cols-12 gap-3">
+										{/* Tabs */}
+										<Show when={allTabs().length > 0}>
+											<TabField
+												tabs={allTabs()}
+												setActiveTab={setActiveTab}
+												getActiveTab={getActiveTab}
 												fieldErrors={props.fieldErrors}
-												conditionScopes={conditionScopes}
+												class={classNames("col-span-12 shadow-inner", {
+													"-mt-4": props.options.bleedTop,
+												})}
 											/>
-										)}
-									</Index>
-								</div>
-							</BrickSlots>
+										</Show>
+										{/* Body */}
+										<Index each={configFields()}>
+											{(config) => (
+												<DynamicField
+													fields={props.brick.fields}
+													fieldsByKey={fieldsByKey}
+													fieldConfig={config()}
+													activeTab={getActiveTab}
+													fieldErrors={props.fieldErrors}
+													conditionScopes={conditionScopes}
+												/>
+											)}
+										</Index>
+									</div>
+								</BrickSlots>
+							</FieldScopeProvider>
 						</FieldRenderStateProvider>
 					</FieldAccessProvider>
 				</Show>

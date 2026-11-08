@@ -72,7 +72,6 @@
 	"plugin.seo.guidance.concise": "Within length guide",
 	"plugin.seo.guidance.long": "May be truncated",
 	"plugin.seo.guidance.note": "Length guides are not ranking scores or search-engine limits.",
-	"plugin.seo.image.loading": "Loading image details…",
 	"plugin.seo.image.unavailable": "Image details are unavailable. Check your media access and the selected image.",
 	"plugin.seo.indexing.noindex": "Exclude this page from search. Your website must render noindex and allow crawlers to read it; blocking the page in robots.txt can prevent this.",
 	"plugin.seo.indexing.index": "Allow search engines to index this page. Your website must render this setting; inclusion in search results is not guaranteed.",

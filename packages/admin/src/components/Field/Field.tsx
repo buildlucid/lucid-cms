@@ -28,6 +28,19 @@ export type { FieldRootProps } from "./parts/FieldRoot";
  * 	</Field.Root>
  * );
  * ```
+ *
+ * In a field slot, pass the slot's field instead. It sets the id, required
+ * state and errors, the label and description default to the field's, and
+ * the label shows the built-in input's markers.
+ *
+ * ```tsx
+ * <Field.Root field={props.field}>
+ * 	<Field.Label />
+ * 	<BrandPalette id={props.field.id} value={props.field.value} />
+ * 	<Field.Description />
+ * 	<Field.Error />
+ * </Field.Root>
+ * ```
  */
 const Field = {
 	Root: FieldRoot,

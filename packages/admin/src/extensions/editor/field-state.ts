@@ -1,13 +1,61 @@
-import type { FieldError, InternalDocumentField } from "@types";
+import type { InternalDocumentField } from "@types";
+import { isRecord } from "@/preview/protocol/utils/validation";
 import type { CollectionFieldConfig } from "@/types/collection-config";
-import { getFieldError } from "@/utils/get-field-error";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 import type {
-	EditorContext,
+	DocumentEditor,
 	EditorFieldConfig,
-	EditorFieldState,
+	FieldState,
+	FieldValueByType,
+	ValueFieldType,
 } from "./types";
 
+const isText = (value: unknown): value is string | null =>
+	value === null || typeof value === "string";
+const isIds = (value: unknown): value is number[] =>
+	Array.isArray(value) && value.every((item) => typeof item === "number");
+
+/** Validates stored values against their field type. */
+export const isFieldValue: {
+	[Type in ValueFieldType]: (value: unknown) => value is FieldValueByType[Type];
+} = {
+	text: isText,
+	textarea: isText,
+	select: isText,
+	color: isText,
+	datetime: isText,
+	number: (value) => value === null || typeof value === "number",
+	range: isIds,
+	checkbox: (value) => value === null || typeof value === "boolean",
+	json: (value): value is FieldValueByType["json"] =>
+		value === null || typeof value === "object",
+	code: (value): value is FieldValueByType["code"] =>
+		value === null ||
+		(isRecord(value) &&
+			typeof value.language === "string" &&
+			typeof value.value === "string"),
+	link: (value): value is FieldValueByType["link"] =>
+		value === null ||
+		(isRecord(value) &&
+			isText(value.url) &&
+			isText(value.target) &&
+			isText(value.label)),
+	"rich-text": (value): value is FieldValueByType["rich-text"] =>
+		value === null || isRecord(value),
+	media: isIds,
+	user: isIds,
+	email: isIds,
+	relation: (value): value is FieldValueByType["relation"] =>
+		Array.isArray(value) &&
+		value.every(
+			(item) =>
+				isRecord(item) &&
+				typeof item.id === "number" &&
+				typeof item.collectionKey === "string",
+		),
+};
+
+/** Reads the stored value in the content locale, or the shared value when the field or collection isn't localized. */
 export const readFieldValue = (
 	config: EditorFieldConfig,
 	data: InternalDocumentField | undefined,
@@ -18,6 +66,13 @@ export const readFieldValue = (
 		? data?.translations?.[contentLocale]
 		: data?.value;
 
+/** Narrows a stored value to its field type, or undefined when it's missing or has another shape. */
+export const readTypedValue = <TType extends ValueFieldType>(
+	type: TType,
+	value: unknown,
+): FieldValueByType[TType] | undefined =>
+	isFieldValue[type](value) ? value : undefined;
+
 /** Resolves the configured route from live collection fields, without locale fallback. */
 export const readDocumentRoute = (options: {
 	field: string | undefined;
@@ -25,7 +80,7 @@ export const readDocumentRoute = (options: {
 	fields: InternalDocumentField[];
 	contentLocale: string;
 	localized: boolean;
-}): EditorContext["route"] => {
+}): DocumentEditor["route"] => {
 	if (!options.field) return undefined;
 
 	const config = flattenStructuralScopeConfigs(options.configs).find(
@@ -46,96 +101,31 @@ export const readDocumentRoute = (options: {
 	};
 };
 
-/** Reads a field value in the current content locale. */
+/** Reads a listed document's field in the current content locale. */
 export const createFieldState = (options: {
 	config: EditorFieldConfig;
 	data?: InternalDocumentField;
-	errors?: FieldError[];
 	contentLocale: string;
 	localized: boolean;
-	readOnly: boolean;
-}): EditorFieldState => {
-	const { config, data } = options;
-	const value = readFieldValue(
-		config,
-		data,
-		options.contentLocale,
-		options.localized,
-	);
+}): FieldState => {
+	const { config } = options;
 
-	const common = {
+	//* type, config and value come from the same config, which TypeScript can't correlate across the union
+	return {
 		key: config.key,
+		type: config.type,
 		config,
-		errors: (options.errors ?? [])
-			.filter(
-				(error) =>
-					error.key === config.key &&
-					(error.localeCode === null ||
-						error.localeCode === options.contentLocale),
-			)
-			.flatMap((error) => {
-				const message = getFieldError(error);
-				return message ? [message] : [];
-			}),
-		readOnly: options.readOnly || config.ui?.disabled === true,
-	};
-
-	switch (config.type) {
-		case "text":
-		case "textarea":
-		case "select":
-		case "color":
-		case "datetime":
-			return {
-				...common,
-				type: config.type,
-				value: typeof value === "string" ? value : undefined,
-			};
-		case "number":
-			return {
-				...common,
-				type: config.type,
-				value: typeof value === "number" || value === null ? value : undefined,
-			};
-		case "checkbox":
-			return {
-				...common,
-				type: config.type,
-				value: typeof value === "boolean" ? value : undefined,
-			};
-		case "repeater":
-			return {
-				...common,
-				type: config.type,
-				groups: (data?.groups ?? []).map((group) => ({
-					ref: group.ref,
-					fields: createFieldStates({
-						...options,
-						configs: config.fields,
-						fields: group.fields,
-						errors: options.errors
-							?.find((error) => error.key === config.key)
-							?.groupErrors?.find((error) => error.ref === group.ref)?.fields,
-					}),
-				})),
-			};
-		default:
-			return { ...common, type: config.type, value };
-	}
+		value:
+			config.type === "repeater"
+				? undefined
+				: readTypedValue(
+						config.type,
+						readFieldValue(
+							config,
+							options.data,
+							options.contentLocale,
+							options.localized,
+						),
+					),
+	} as FieldState;
 };
-
-export const createFieldStates = (options: {
-	configs: CollectionFieldConfig[];
-	fields: InternalDocumentField[];
-	errors?: FieldError[];
-	contentLocale: string;
-	localized: boolean;
-	readOnly: boolean;
-}): EditorFieldState[] =>
-	flattenStructuralScopeConfigs(options.configs).map((config) =>
-		createFieldState({
-			...options,
-			config,
-			data: options.fields.find((field) => field.key === config.key),
-		}),
-	);

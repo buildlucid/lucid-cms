@@ -17,7 +17,12 @@ import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
 import Pill from "@/components/Pill/Pill";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
+import { useFieldAccess } from "@/hooks/useFieldAccess/useFieldAccess";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
+import {
+	FieldScopeProvider,
+	useFieldEnvironment,
+} from "@/hooks/useFieldScope/useFieldScope";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { DynamicFieldRenderer } from "@/types/custom-fields";
@@ -54,6 +59,13 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 	const localization = useDocumentLocalization();
+	//* the repeater's own access, which its items' fields can only narrow
+	const repeaterAccess = useFieldAccess();
+	const fieldEnvironment = useFieldEnvironment({
+		contentLocale: fieldRenderState.contentLocale,
+		collectionKey: fieldRenderState.collectionKey,
+		locales: fieldRenderState.contentLocales,
+	});
 	const [childrenMounted, setChildrenMounted] = createSignal(
 		props.group()?.open === true,
 	);
@@ -289,24 +301,37 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					},
 				)}
 			>
-				<div class="border-t border-border p-3 md:p-4 @container/fields grid grid-cols-12 gap-3">
-					<Index each={childrenMounted() ? configChildrenFields() : []}>
-						{(config) => (
-							<props.renderField
-								fieldConfig={config()}
-								fields={groupFields()}
-								fieldsByKey={groupFieldsByKey}
-								groupRef={ref()}
-								groupPath={groupPath()}
-								repeaterKey={repeaterKey()}
-								repeaterDepth={nextRepeaterDepth()}
-								pathPrefix={props.pathPrefix}
-								fieldErrors={fieldErrors() || []}
-								conditionScopes={conditionScopes}
-							/>
-						)}
-					</Index>
-				</div>
+				<FieldScopeProvider
+					environment={fieldEnvironment}
+					level={{
+						brickIndex: fieldRenderState.brickIndex,
+						groupRef: ref(),
+						repeaterKey: repeaterKey(),
+						configs: configChildrenFields,
+						fields: groupFields,
+						errors: fieldErrors,
+						access: repeaterAccess,
+					}}
+				>
+					<div class="border-t border-border p-3 md:p-4 @container/fields grid grid-cols-12 gap-3">
+						<Index each={childrenMounted() ? configChildrenFields() : []}>
+							{(config) => (
+								<props.renderField
+									fieldConfig={config()}
+									fields={groupFields()}
+									fieldsByKey={groupFieldsByKey}
+									groupRef={ref()}
+									groupPath={groupPath()}
+									repeaterKey={repeaterKey()}
+									repeaterDepth={nextRepeaterDepth()}
+									pathPrefix={props.pathPrefix}
+									fieldErrors={fieldErrors() || []}
+									conditionScopes={conditionScopes}
+								/>
+							)}
+						</Index>
+					</div>
+				</FieldScopeProvider>
 			</div>
 		</div>
 	);

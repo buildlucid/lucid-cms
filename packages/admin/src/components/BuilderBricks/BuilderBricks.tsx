@@ -325,7 +325,6 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						config={config()}
 						errors={fieldErrors()}
 						collectionKey={props.collectionKey}
-						documentId={props.documentId}
 						contentLocale={localization.contentLocale() ?? ""}
 					/>
 					<FieldErrorBadge count={errorCount()} class="mr-1" />

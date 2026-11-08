@@ -1,8 +1,5 @@
 import type { Component } from "solid-js";
-import type {
-	BrickState,
-	EditorContext,
-} from "../../extensions/editor/types.js";
+import type { EditorBrick } from "../../extensions/editor/types.js";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type { brickSlotPolicies } from "./constants.js";
 
@@ -26,14 +23,13 @@ export type BrickSlotMatch = {
 	kind?: "fixed" | "builder" | "embedded";
 };
 
-/** A read-only view of this brick instance and its unsaved fields. */
+/** This brick instance and its unsaved fields. `useDocumentEditor` gives the rest of the document. */
 export type BrickSlotProps<
 	TOptions extends AdminOptions | undefined = undefined,
 > = {
 	readonly slot: BrickSlot;
 	readonly open: boolean;
-	readonly brick: BrickState;
-	readonly context: EditorContext;
+	readonly brick: EditorBrick;
 	readonly options: TOptions;
 };
 

@@ -86,6 +86,14 @@ export const RelationField: Component<RelationFieldProps> = (props) => {
 	createEffect(() => {
 		setValue(fieldValue());
 	});
+	//* values written without display data, eg. by a field slot, fetch what's missing
+	createEffect(() => {
+		brickStore.requestRefs({
+			collectionKey: fieldRenderState.collectionKey(),
+			resource: "documents",
+			value: fieldValue(),
+		});
+	});
 
 	// -------------------------------
 	// Render

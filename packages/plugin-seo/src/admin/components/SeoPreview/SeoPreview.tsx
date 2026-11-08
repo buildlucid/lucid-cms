@@ -1,11 +1,20 @@
 import { Select } from "@lucidcms/admin/components";
-import { useAdminConfig, useTranslation } from "@lucidcms/admin/hooks";
+import {
+	useAdminConfig,
+	useDocumentEditor,
+	useTranslation,
+} from "@lucidcms/admin/hooks";
 import type { BrickSlotComponent } from "@lucidcms/admin/types";
 import { createMemo, createSignal, Match, Switch } from "solid-js";
 import { fields } from "../../../constants.js";
 import { resolveSocialText } from "../../../shared/assessments.js";
 import type {} from "../../../shared/translations.js";
-import { readImageField, readText } from "../../utils/field-values.js";
+import {
+	hasMedia,
+	readAlt,
+	readImage,
+	readText,
+} from "../../utils/field-values.js";
 import PageGuidance from "../PageGuidance/PageGuidance.js";
 import SearchPreview from "../SearchPreview/SearchPreview.js";
 import SocialPreview from "../SocialPreview/SocialPreview.js";
@@ -19,6 +28,7 @@ const SeoPreview: BrickSlotComponent<SeoPreviewOptions> = (props) => {
 	// State & Hooks
 	const { t } = useTranslation();
 	const config = useAdminConfig();
+	const editor = useDocumentEditor();
 	const [view, setView] = createSignal<PreviewView>("search");
 
 	// ----------------------------------
@@ -37,7 +47,7 @@ const SeoPreview: BrickSlotComponent<SeoPreviewOptions> = (props) => {
 	const url = createMemo(() => {
 		try {
 			return new URL(
-				text(fields.canonicalUrl) || props.context.route?.path || "",
+				text(fields.canonicalUrl) || editor.route?.path || "",
 				props.options.siteUrl,
 			);
 		} catch {
@@ -47,17 +57,21 @@ const SeoPreview: BrickSlotComponent<SeoPreviewOptions> = (props) => {
 	const host = () => url()?.hostname || "";
 	const siteName = () => config.brand.name || t("plugin.seo.preview.url");
 	const path = createMemo(() =>
-		(url()?.pathname || props.context.route?.path || "")
+		(url()?.pathname || editor.route?.path || "")
 			.split(/[?#]/)[0]
 			?.split("/")
 			.filter(Boolean)
 			.join(" › "),
 	);
 	const socialImage = createMemo(() =>
-		readImageField(props.brick.fields, fields.socialImage),
+		readImage(props.brick.fields, fields.socialImage),
 	);
+	const hasXImage = createMemo(() =>
+		hasMedia(props.brick.fields, fields.xImage),
+	);
+	//* the X card falls back to the social image when it has none of its own
 	const xImage = createMemo(() =>
-		readImageField(props.brick.fields, fields.xImage),
+		hasXImage() ? readImage(props.brick.fields, fields.xImage) : socialImage(),
 	);
 
 	// ----------------------------------
@@ -107,9 +121,12 @@ const SeoPreview: BrickSlotComponent<SeoPreviewOptions> = (props) => {
 						description={resolved().social.description}
 						host={host()}
 						siteName={siteName()}
-						imageId={socialImage()}
-						alt={text(fields.socialImageAlt)}
-						locale={props.context.contentLocale}
+						image={socialImage()}
+						linked={hasMedia(props.brick.fields, fields.socialImage)}
+						alt={
+							text(fields.socialImageAlt).trim() ||
+							readAlt(socialImage(), editor.locale.current)
+						}
 					/>
 				</Match>
 				<Match when={view() === "x"}>
@@ -118,12 +135,15 @@ const SeoPreview: BrickSlotComponent<SeoPreviewOptions> = (props) => {
 						description={resolved().x.description}
 						host={host()}
 						siteName={siteName()}
-						imageId={xImage() ?? socialImage()}
+						image={xImage()}
+						linked={
+							hasXImage() || hasMedia(props.brick.fields, fields.socialImage)
+						}
 						alt={
 							text(fields.xImageAlt).trim() ||
-							(xImage() === undefined ? text(fields.socialImageAlt) : "")
+							(hasXImage() ? "" : text(fields.socialImageAlt).trim()) ||
+							readAlt(xImage(), editor.locale.current)
 						}
-						locale={props.context.contentLocale}
 						compact={text(fields.xCard) === "summary"}
 					/>
 				</Match>

@@ -98,3 +98,44 @@ test("widget slots match both key and version and allow explicit overrides", () 
 	expect(resolveSlots(entries, { widget: "other", version: 1 })).toEqual([]);
 	expect(findSlotConflicts(entries)).toEqual([]);
 });
+
+test("one input replaces a field, and field types match every field of that type", () => {
+	const entries = [
+		{
+			key: "palette",
+			slot: "field.input",
+			component: "palette.tsx",
+			match: { fieldType: "color" },
+		},
+		{
+			key: "hero-colour",
+			slot: "field.input",
+			component: "hero.tsx",
+			match: { brick: "hero", field: "accent" },
+			priority: 1,
+		},
+		{
+			key: "hint",
+			slot: "field.after",
+			component: "hint.tsx",
+			match: { fieldType: "color" },
+		},
+	] satisfies AdminSlot[];
+
+	expect(
+		resolveSlots(entries, { field: "accent", fieldType: "color" }).map(
+			(entry) => entry.key,
+		),
+	).toEqual(["palette", "hint"]);
+	expect(
+		resolveSlots(entries, {
+			brick: "hero",
+			field: "accent",
+			fieldType: "color",
+		}).map((entry) => entry.key),
+	).toEqual(["hero-colour", "hint"]);
+	expect(resolveSlots(entries, { field: "title", fieldType: "text" })).toEqual(
+		[],
+	);
+	expect(findSlotConflicts(entries)).toEqual([]);
+});

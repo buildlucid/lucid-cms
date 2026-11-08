@@ -1,120 +1,108 @@
-import type { InternalDocumentField } from "@lucidcms/types";
-import type { FieldError } from "@types";
-import { type Component, children, createMemo, For, Show } from "solid-js";
+import {
+	children,
+	createMemo,
+	For,
+	type ParentComponent,
+	Show,
+} from "solid-js";
 import { fieldSlots } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
-import {
-	createFieldState,
-	readFieldValue,
-} from "@/extensions/editor/field-state";
+import { FieldMarkersContext } from "@/components/Field/FieldContext";
+import type { FieldLabelMarkersProps } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import { resolveSlots } from "@/extensions/slot-policy";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
-import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
+import { useFieldScope } from "@/hooks/useFieldScope/useFieldScope";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
-import type { FieldConditionScope } from "@/utils/field-condition-helpers";
-import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
+import hasRenderedContent from "@/utils/has-rendered-content";
 import type { FieldSlot } from "./types";
 
-/** Uses the current field instance, including its repeater group and content locale. */
-const FieldSlots: Component<{
+const slotClasses: Record<FieldSlot, string | undefined> = {
+	"field.input": undefined,
+	"field.before": "mb-2",
+	"field.after": "mt-2",
+};
+
+/** Renders the extensions matching a field. For `field.input`, `children` is the built-in input, shown when nothing replaces it. */
+const FieldSlots: ParentComponent<{
 	slot: FieldSlot;
 	config?: CollectionLeafFieldConfig;
-	data?: InternalDocumentField;
-	errors?: FieldError[];
-	scope?: FieldConditionScope;
-	groupRef?: string;
+	/** The built-in input's label markers, which `Field.Label` shows when an input slot replaces it. */
+	markers?: FieldLabelMarkersProps;
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const brickStore = useBrickStore();
 	const context = useFieldRenderState();
-	const route = useDocumentRoute(context.contentLocale);
+	const scope = useFieldScope()?.scope;
+	if (!scope) {
+		throw new Error(
+			"Field slots must be rendered inside a FieldScopeProvider.",
+		);
+	}
 
 	// ----------------------------------
 	// Memos
+	const field = createMemo(() =>
+		props.config ? scope.get(props.config.key, props.config.type) : undefined,
+	);
 	const contributions = createMemo(() => {
-		if (!props.config) return [];
-		const target = {
-			collection: context.collectionKey(),
-			brick: context.brickKey(),
-			kind: brickStore.get.bricks[context.brickIndex()]?.type,
-			field: props.config.key,
-		};
+		const config = props.config;
+		if (!config || !field()) return [];
+
 		return resolveSlots(
 			fieldSlots.filter((entry) => entry.slot === props.slot),
-			target,
+			{
+				collection: context.collectionKey(),
+				brick: context.brickKey(),
+				kind: brickStore.get.bricks[context.brickIndex()]?.type,
+				field: config.key,
+				fieldType: config.type,
+			},
 		);
 	});
 
 	// ----------------------------------
 	// Render
 	return (
-		<Show when={props.config}>
-			{(config) => (
-				<For each={contributions()}>
-					{(entry) => {
-						const content = children(() => (
-							<AdminExtensionBoundary name={entry.key} placement="content">
-								<entry.component
-									slot={props.slot}
-									options={entry.options}
-									field={createFieldState({
-										config: config(),
-										data: props.data,
-										errors: props.errors,
-										contentLocale: context.contentLocale(),
-										localized: brickStore.get.collectionLocalized,
-										readOnly: brickStore.get.locked,
-									})}
-									context={{
-										route: route(),
-										collectionKey: context.collectionKey(),
-										documentId: context.documentId(),
-										contentLocale: context.contentLocale(),
-										readOnly: brickStore.get.locked,
-										get brick() {
-											const brick = brickStore.get.bricks[context.brickIndex()];
-											return brick && brick.type !== "collection-fields"
-												? { key: brick.key, ref: brick.ref, kind: brick.type }
-												: undefined;
-										},
-										groupRef: props.groupRef,
-										getValue: (key) => {
-											const config = flattenStructuralScopeConfigs(
-												props.scope?.configFields ?? [],
-											).find((field) => field.key === key);
+		<For each={contributions()} fallback={props.children}>
+			{(entry) => {
+				const content = children(() => (
+					<Show when={field()}>
+						{(field) => (
+							<FieldMarkersContext.Provider
+								value={
+									props.slot === "field.input"
+										? { key: field().key, markers: () => props.markers ?? {} }
+										: undefined
+								}
+							>
+								<AdminExtensionBoundary name={entry.key} placement="content">
+									<entry.component
+										slot={props.slot}
+										field={field()}
+										fields={scope}
+										options={entry.options}
+									/>
+								</AdminExtensionBoundary>
+							</FieldMarkersContext.Provider>
+						)}
+					</Show>
+				));
 
-											return config
-												? readFieldValue(
-														config,
-														props.scope?.fields.find(
-															(field) => field.key === key,
-														),
-														context.contentLocale(),
-														brickStore.get.collectionLocalized,
-													)
-												: undefined;
-										},
-									}}
-								/>
-							</AdminExtensionBoundary>
-						));
-
-						return (
-							<Show when={content.toArray().length > 0}>
-								<div
-									class={props.slot === "field.before" ? "mb-2" : "mt-2"}
-									data-admin-slot={entry.key}
-								>
-									{content()}
-								</div>
-							</Show>
-						);
-					}}
-				</For>
-			)}
-		</Show>
+				//* an input slot that renders nothing keeps the built-in input
+				return (
+					<Show
+						when={hasRenderedContent(content.toArray())}
+						fallback={props.slot === "field.input" ? props.children : undefined}
+					>
+						<div class={slotClasses[props.slot]} data-admin-slot={entry.key}>
+							{content()}
+						</div>
+					</Show>
+				);
+			}}
+		</For>
 	);
 };
 

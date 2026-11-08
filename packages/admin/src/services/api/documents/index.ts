@@ -1,5 +1,6 @@
 import { deleteEditorReq, updateEditorReq } from "./editors";
 import { updatePreviewDraftReq } from "./preview-drafts";
+import { getEditorRefsReq } from "./refs";
 import useAlign from "./useAlign";
 import useCheckSingleVersion from "./useCheckSingleVersion";
 import useCreatePreview from "./useCreatePreview";
@@ -28,6 +29,7 @@ const exportObject = {
 	updateEditorReq,
 	deleteEditorReq,
 	updatePreviewDraftReq,
+	getEditorRefsReq,
 	useAlign,
 	useGetMultiple,
 	useCreatePreview,
