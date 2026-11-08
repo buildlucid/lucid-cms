@@ -2,7 +2,11 @@ import { sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { AgentReferenceInput, AgentScreen } from "../../types/response.js";
 import type { LucidDatabase } from "../db/client/index.js";
-import { agentInputsTable } from "../db/tables/agent-inputs.js";
+import {
+	agentInputsTable,
+	type LucidAgentInputs,
+} from "../db/tables/agent-inputs.js";
+import type { Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 
 const { deliverableInputStatuses } = constants.agent;
@@ -17,7 +21,9 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 	async submit(input: {
 		id: string;
 		conversationId: string;
-		userId: number;
+		/** Who the run acts for, or null for the system. */
+		userId: number | null;
+		source?: Select<LucidAgentInputs>["source"];
 		text: string;
 		references?: AgentReferenceInput[];
 		screen?: AgentScreen;
@@ -30,6 +36,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				id: input.id,
 				conversation_id: input.conversationId,
 				user_id: input.userId,
+				source: input.source ?? "person",
 				text: input.text,
 				references: input.references ?? [],
 				screen: input.screen ?? null,
@@ -55,6 +62,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				"id",
 				"conversation_id",
 				"user_id",
+				"source",
 				"text",
 				"references",
 				"screen",
@@ -151,6 +159,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				"id",
 				"conversation_id",
 				"user_id",
+				"source",
 				"text",
 				"references",
 				"screen",
@@ -188,6 +197,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				"id",
 				"conversation_id",
 				"user_id",
+				"source",
 				"text",
 				"references",
 				"screen",
@@ -232,6 +242,35 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 
 		const result = await this.executeQuery(() => query.execute(), {
 			method: "defer",
+		});
+
+		return result.response;
+	}
+	/** Drops a sub-agent's undelivered messages from its parent agent, so a stopped sub-agent stays stopped. */
+	async discardFromParent(conversationId: string) {
+		const query = this.db
+			.updateTable("lucid_agent_inputs")
+			.set({ status: "cancelled" })
+			.where("conversation_id", "=", conversationId)
+			.where("source", "=", "parent")
+			.where("status", "in", deliverableInputStatuses);
+
+		const result = await this.executeQuery(() => query.execute(), {
+			method: "discardFromParent",
+		});
+
+		return result.response;
+	}
+	/** Drops undelivered input that can no longer be delivered, claimed or not. */
+	async discard(id: string) {
+		const query = this.db
+			.updateTable("lucid_agent_inputs")
+			.set({ status: "cancelled" })
+			.where("id", "=", id)
+			.where("status", "in", deliverableInputStatuses);
+
+		const result = await this.executeQuery(() => query.execute(), {
+			method: "discard",
 		});
 
 		return result.response;

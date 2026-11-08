@@ -1,4 +1,5 @@
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
+import AgentComposerNotice from "@/components/AgentComposerNotice/AgentComposerNotice";
 import Link from "@/components/Link/Link";
 import { Permissions } from "@/constants/permissions";
 import userStore from "@/store/userStore/userStore";
@@ -23,24 +24,18 @@ const AgentUnavailableNotice: Component<{ children: JSXElement }> = (props) => {
 	return (
 		<Show when={reason()} fallback={props.children}>
 			{(current) => (
-				<section
-					role="status"
-					class="flex flex-col items-start gap-3 rounded-2xl border border-warning-low-border bg-card p-4"
-				>
-					<div>
-						<h3 class="text-sm font-medium text-title">
-							{T()(`agent.unavailable.${current()}.title`)}
-						</h3>
-						<p class="mt-0.5 text-sm text-body">
-							{T()(`agent.unavailable.${current()}.message`)}
-						</p>
-					</div>
-					<Show when={canManageConnection()}>
-						<Link href="/admin/system/operations" variant="outline" size="sm">
-							{T()("agent.unavailable.action")}
-						</Link>
-					</Show>
-				</section>
+				<AgentComposerNotice
+					warning={true}
+					title={T()(`agent.unavailable.${current()}.title`)}
+					message={T()(`agent.unavailable.${current()}.message`)}
+					action={
+						<Show when={canManageConnection()}>
+							<Link href="/admin/system/operations" variant="outline" size="sm">
+								{T()("agent.unavailable.action")}
+							</Link>
+						</Show>
+					}
+				/>
 			)}
 		</Show>
 	);

@@ -4,9 +4,11 @@ import type {
 	AgentConversation,
 	AgentMessage,
 	AgentMessagePart,
+	AgentRun,
 	AgentRunOutcome,
 	AgentRunResultPart,
 	AgentRunStatus,
+	AgentRunWaitingFor,
 	AgentToolSummary,
 	AgentWidgetPart,
 } from "@types";
@@ -21,6 +23,8 @@ import {
 	finishTool,
 	progressTool,
 	screenWidget,
+	subagentWaitWidget,
+	subagentWidget,
 } from "@/utils/agent-tools";
 
 /**
@@ -39,6 +43,10 @@ export const partLayout = (
 		case "text": {
 			return "block";
 		}
+		//* the user message shows who sent it by itself
+		case "parent": {
+			return "hidden";
+		}
 		case "tool": {
 			if (part.name === askTool) return "hidden";
 			if (part.name === progressTool) {
@@ -55,9 +63,15 @@ export const partLayout = (
 		}
 		case "widget": {
 			//* a reply lists its builder changes together at its end
-			if (part.key === screenWidget || part.key === builderChangesWidget) {
+			if (
+				part.key === screenWidget ||
+				part.key === builderChangesWidget ||
+				part.key === subagentWaitWidget
+			) {
 				return "hidden";
 			}
+			//* the sub-agents a reply started always share their card, even if a plugin registers a row for the key
+			if (part.key === subagentWidget) return "block";
 			if (!part.interaction) return hasRow(part) ? "row" : "block";
 
 			return part.interaction.placement === "inline" &&
@@ -243,6 +257,19 @@ export const runStatusFilters = [
 export const isRunWorking = (status: AgentRunStatus | undefined) =>
 	status === "queued" || status === "running" || status === "interrupted";
 
+/** Whether a run has stopped for good. */
+export const isRunFinished = (status: AgentRunStatus) =>
+	status === "completed" || status === "failed" || status === "cancelled";
+
+/** Whether a run is paused while its sub-agents work, which needs nothing from the person. */
+export const isWaitingOnSubagents = (
+	run: Pick<AgentRun, "status" | "waitingFor"> | null | undefined,
+) => run?.status === "waiting" && run.waitingFor === "subagents";
+
+/** Whether a chat's latest run is busy, including one paused while its sub-agents work. */
+export const isRunBusy = (run: AgentConversation["latestRun"] | undefined) =>
+	isRunWorking(run?.status) || isWaitingOnSubagents(run);
+
 /**
  * Where to mark compactions: before the first message created after each one.
  * `trailing` marks a compaction newer than every message, such as one just run.
@@ -338,11 +365,20 @@ export const completedTools = (event: AgentStreamEvent) => {
 export const getAgentRunDisplay = (
 	status: AgentRunStatus,
 	outcome?: AgentRunOutcome | null,
+	waitingFor?: AgentRunWaitingFor | null,
 ): {
 	label: string;
 	variant: PillVariant & StatusIndicatorVariant;
 	attention: boolean;
 } => {
+	//* a run waiting on its sub-agents is still working for the person
+	if (isWaitingOnSubagents({ status, waitingFor: waitingFor ?? null })) {
+		return {
+			label: T()("agent.status.subagents"),
+			variant: "info-subtle",
+			attention: false,
+		};
+	}
 	switch (status) {
 		case "queued":
 		case "running":

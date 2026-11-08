@@ -10,7 +10,7 @@ import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
-import { getAgentRunDisplay, isRunWorking } from "@/utils/agent-chat";
+import { getAgentRunDisplay, isRunBusy } from "@/utils/agent-chat";
 import dateHelpers from "@/utils/date-helpers";
 
 /**
@@ -41,6 +41,7 @@ const AgentActivityWidget: Component<{ size: HomeWidgetSize }> = () => {
 										? getAgentRunDisplay(
 												conversation.latestRun.status,
 												conversation.latestRun.outcome,
+												conversation.latestRun.waitingFor,
 											)
 										: undefined;
 
@@ -66,8 +67,8 @@ const AgentActivityWidget: Component<{ size: HomeWidgetSize }> = () => {
 														class={classnames(
 															"absolute -right-1 -bottom-0.5 ring-2 ring-card",
 															{
-																"animate-pulse": isRunWorking(
-																	conversation.latestRun?.status,
+																"animate-pulse": isRunBusy(
+																	conversation.latestRun,
 																),
 															},
 														)}

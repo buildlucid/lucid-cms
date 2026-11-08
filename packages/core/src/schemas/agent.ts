@@ -32,6 +32,7 @@ import type {
 	AgentRunOutcome,
 	AgentRunResultPart,
 	AgentRunStatus,
+	AgentRunWaitingFor,
 	AgentTitleStatus,
 	AgentToolDetails,
 	AgentToolStatus,
@@ -110,6 +111,11 @@ export const agentRunStatusSchema = z.enum([
 	"failed",
 	"cancelled",
 ]) satisfies z.ZodType<AgentRunStatus>;
+
+export const agentRunWaitingForSchema = z.enum([
+	"person",
+	"subagents",
+]) satisfies z.ZodType<AgentRunWaitingFor>;
 
 export const agentConfirmationModeSchema = z.enum([
 	"confirm-all",
@@ -260,6 +266,15 @@ export const agentRoutinePartSchema = z
 	})
 	.strict();
 
+/** Marks a message the parent agent sent to its sub-agent. */
+export const agentParentPartSchema = z
+	.object({
+		type: z.literal("parent"),
+		agentKey: z.string(),
+		conversationId: z.uuid(),
+	})
+	.strict();
+
 const agentRunResultPartSchema = z
 	.object({
 		type: z.literal("run-result"),
@@ -276,6 +291,7 @@ const agentChatPartSchema = z.discriminatedUnion("type", [
 	agentScreenPartSchema,
 	agentRoutinePartSchema,
 	agentRunResultPartSchema,
+	agentParentPartSchema,
 	agentToolSummarySchema,
 	agentWidgetSchema,
 ]) satisfies z.ZodType<AgentMessagePart>;
@@ -327,16 +343,27 @@ const agentConversationResponseSchema = z.object({
 	kind: agentConversationKindSchema,
 	userId: z.number().nullable(),
 	routineId: z.uuid().nullable(),
+	parentConversationId: z.uuid().nullable(),
 	latestRun: z
 		.object({
 			id: z.uuid(),
 			status: agentRunStatusSchema,
 			outcome: agentRunOutcomeSchema.nullable(),
 			errorMessage: z.string().nullable(),
+			waitingFor: agentRunWaitingForSchema.nullable(),
 		})
 		.nullable(),
 	createdAt: z.string().nullable(),
 	updatedAt: z.string().nullable(),
+});
+
+const agentSubagentsResponseSchema = z.object({
+	parent: agentConversationResponseSchema,
+	subagents: z.array(
+		agentConversationResponseSchema.extend({
+			pending: agentWidgetSchema.nullable(),
+		}),
+	),
 });
 
 const agentMessageResponseSchema = z.object({
@@ -406,6 +433,7 @@ const agentRunResponseSchema = z.object({
 	routineId: z.uuid().nullable(),
 	status: agentRunStatusSchema,
 	outcome: agentRunOutcomeSchema.nullable(),
+	waitingFor: agentRunWaitingForSchema.nullable(),
 	summary: z.string().nullable(),
 	errorMessage: z.string().nullable(),
 	usage: agentUsageSchema,
@@ -452,6 +480,7 @@ const agentRoutineResponseSchema = z.object({
 			conversationId: true,
 			status: true,
 			outcome: true,
+			waitingFor: true,
 			createdAt: true,
 		})
 		.nullable(),
@@ -581,6 +610,9 @@ export const controllerSchemas = {
 					"filter[status]": queryString.schema.filter(true, {
 						example: "waiting",
 					}),
+					"filter[waitingFor]": queryString.schema.filter(false, {
+						example: "person",
+					}),
 					sort: queryString.schema.sort("updatedAt,createdAt,title"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -593,6 +625,7 @@ export const controllerSchemas = {
 						agentKey: queryFormatted.schema.filters.union.optional(),
 						routineId: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
+						waitingFor: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,
@@ -635,6 +668,12 @@ export const controllerSchemas = {
 		query: noQuery,
 		params: idParams,
 		response: agentConversationDetailsResponseSchema,
+	} satisfies ControllerSchema,
+	getSubagents: {
+		body: undefined,
+		query: noQuery,
+		params: idParams,
+		response: agentSubagentsResponseSchema,
 	} satisfies ControllerSchema,
 	getMediaPreviews: {
 		body: undefined,

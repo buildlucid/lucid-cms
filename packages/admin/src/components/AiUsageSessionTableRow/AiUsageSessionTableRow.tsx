@@ -7,6 +7,7 @@ import T from "@/translations";
 import {
 	formatAiCredits,
 	formatAiUsageNumber,
+	getAiUsageSessionLabel,
 	getAiUsageSessionTypeLabel,
 } from "@/utils/ai-usage";
 
@@ -41,7 +42,7 @@ const AiUsageSessionTableRow: Component<AiUsageSessionTableRowProps> = (
 					</span>
 					<Show when={props.session.conversation}>
 						<span class="text-xs text-muted">
-							{getAiUsageSessionTypeLabel(props.session.type)}
+							{getAiUsageSessionLabel(props.session)}
 						</span>
 					</Show>
 				</div>

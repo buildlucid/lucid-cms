@@ -30,7 +30,7 @@ import useQueryState, {
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
-import { getAiUsageSessionTypeLabel } from "@/utils/ai-usage";
+import { getAiUsageSessionLabel } from "@/utils/ai-usage";
 import helpers from "@/utils/helpers";
 
 interface AiUsageSessionDrawerProps {
@@ -57,7 +57,7 @@ const AiUsageSessionDrawer: Component<AiUsageSessionDrawerProps> = (props) => {
 		const current = data();
 		if (!current) return undefined;
 		return [
-			getAiUsageSessionTypeLabel(current.type),
+			getAiUsageSessionLabel(current),
 			helpers.formatUserName(current.user, "name") ||
 				T()("ai.usage.session.user.system"),
 		].join(" · ");

@@ -1,6 +1,7 @@
 import z from "zod";
 import {
 	agentMessageContextPartSchema,
+	agentParentPartSchema,
 	agentReferencePartSchema,
 	agentRoutinePartSchema,
 	agentScreenPartSchema,
@@ -15,6 +16,7 @@ export const agentMessagePartSchema = z.discriminatedUnion("type", [
 	agentReferencePartSchema,
 	agentScreenPartSchema,
 	agentRoutinePartSchema,
+	agentParentPartSchema,
 	agentToolDetailsSchema,
 	agentWidgetSchema,
 	agentMessageContextPartSchema,

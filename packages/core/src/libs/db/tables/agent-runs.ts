@@ -3,6 +3,7 @@ import z from "zod";
 import {
 	agentRunOutcomeSchema,
 	agentRunStatusSchema,
+	agentRunWaitingForSchema,
 } from "../../../schemas/agent.js";
 import { type Checkpoint, checkpointSchema } from "../../agent/types.js";
 import { defineTable } from "../client/table/definition.js";
@@ -47,6 +48,11 @@ export const agentRunsTable = defineTable("lucid_agent_runs", () => ({
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
 		},
+		waiting_for: { schema: agentRunWaitingForSchema.nullable(), type: "text" },
+		parent_notified_at: {
+			schema: z.union([z.string(), z.date()]).nullable(),
+			type: "timestamp",
+		},
 	},
 	query: {
 		filters: { status: "status", conversationId: "conversation_id" },
@@ -80,4 +86,8 @@ export interface LucidAgentRuns {
 	execution_version: Generated<number>;
 	/** Set once the run's person is told it is waiting on them. Cleared when the run resumes. */
 	input_notified_at: TimestampMutable;
+	/** What a waiting run waits on. Null unless the run is waiting. */
+	waiting_for: z.infer<typeof agentRunWaitingForSchema> | null;
+	/** Set on a sub-agent's finished run once its parent has been given the result. */
+	parent_notified_at: TimestampMutable;
 }

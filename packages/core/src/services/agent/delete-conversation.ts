@@ -6,7 +6,7 @@ import { inputNeededNotification } from "./notifications/input-needed.js";
 import { agentNotificationKeys } from "./notifications/keys.js";
 import { routineNeedsReviewNotification } from "./notifications/routine-needs-review.js";
 
-/** Deletes a conversation with its messages and runs, and clears its to-dos. A worker still executing a run stops at its next write. */
+/** Deletes a conversation with its messages, runs and sub-agent chats, and clears their to-dos. A worker still executing a run stops at its next write. */
 const deleteConversation: ServiceFn<
 	[{ id: string; userId: number }],
 	undefined
@@ -15,6 +15,10 @@ const deleteConversation: ServiceFn<
 	if (conversation.error) return conversation;
 
 	const AgentConversations = new AgentConversationsRepository(context.db);
+
+	//* sub-agent chats go with their parent, so their to-dos are cleared too
+	const subagents = await AgentConversations.selectSubagents(input.id);
+	if (subagents.error) return subagents;
 
 	const deleted = await AgentConversations.deleteSingle({
 		where: [{ key: "id", operator: "=", value: input.id }],
@@ -26,6 +30,10 @@ const deleteConversation: ServiceFn<
 			definition: inputNeededNotification,
 			key: agentNotificationKeys.input(input.id),
 		},
+		...subagents.data.map((subagent) => ({
+			definition: inputNeededNotification,
+			key: agentNotificationKeys.input(subagent.id),
+		})),
 		{
 			definition: routineNeedsReviewNotification,
 			key: agentNotificationKeys.review(input.id),

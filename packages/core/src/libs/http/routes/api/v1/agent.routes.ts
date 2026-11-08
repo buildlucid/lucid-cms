@@ -25,6 +25,7 @@ import getReferences from "../../../controllers/agent/get-references.js";
 import getRoutineRuns from "../../../controllers/agent/get-routine-runs.js";
 import getRoutine from "../../../controllers/agent/get-routine.js";
 import getRoutines from "../../../controllers/agent/get-routines.js";
+import getSubagents from "../../../controllers/agent/get-subagents.js";
 import getToolDetails from "../../../controllers/agent/get-tool-details.js";
 import respondRun from "../../../controllers/agent/respond-run.js";
 import retryConversation from "../../../controllers/agent/retry-conversation.js";
@@ -48,6 +49,7 @@ const agentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/conversations/:id/title/generate", ...generateConversationTitle)
 	.delete("/conversations/:id", ...deleteConversation)
 	.get("/conversations/:id/details", ...getConversationDetails)
+	.get("/conversations/:id/subagents", ...getSubagents)
 	.get("/conversations/:id/media-previews", ...getMediaPreviews)
 	.get("/conversations/:id/references", ...getReferences)
 	.delete("/conversations/:id/references/:referenceId", ...deleteReference)

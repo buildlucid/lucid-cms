@@ -145,7 +145,11 @@ const AgentRoutineCard: Component<{
 													T()("agent.routine.run.no.summary")}
 											</span>
 										</span>
-										<AgentRunStatus status={run.status} outcome={run.outcome} />
+										<AgentRunStatus
+											status={run.status}
+											outcome={run.outcome}
+											waitingFor={run.waitingFor}
+										/>
 									</button>
 								</li>
 							)}

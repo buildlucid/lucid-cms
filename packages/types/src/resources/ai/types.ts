@@ -259,6 +259,8 @@ export type AiUsageSession = {
 	conversation: {
 		id: string;
 		title: string;
+		/** The chat that started it, when it is a sub-agent's chat. */
+		parentConversationId: string | null;
 	} | null;
 	/** Null for system sessions, or once the person is deleted. */
 	user: UserDisplay | null;

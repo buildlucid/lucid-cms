@@ -1,10 +1,10 @@
-import { createHash } from "node:crypto";
 import type z from "zod";
 import type { cmsAgentUsageSchema } from "../../../libs/lucid-remote/schema/ai.js";
 import type { CmsAiActor } from "../../../libs/lucid-remote/types.js";
 import { cmsAiActor } from "../../../libs/lucid-remote/utils.js";
 import type { AgentToolExecution } from "../../../libs/tools/types.js";
 import type { AiUsageFeatureKey } from "../../../types/response.js";
+import hashUuid from "../../../utils/helpers/hash-uuid.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -13,18 +13,6 @@ import handleRemoteError from "../../connection/helpers/handle-remote-error.js";
 import getAccessToken from "../../connection/token-manager.js";
 import paidToolError from "./paid-tool-error.js";
 import trackPaidRequest from "./track-paid-request.js";
-
-//* Reuse the request and usage ID across retries to avoid duplicate charges.
-const requestIdFor = (featureKey: AiUsageFeatureKey, operationId: string) => {
-	const hash = createHash("sha256")
-		.update(`lucid-${featureKey}:${operationId}`)
-		.digest("hex");
-	const variant = ((Number.parseInt(hash.charAt(16), 16) & 0x3) | 0x8).toString(
-		16,
-	);
-
-	return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-8${hash.slice(13, 16)}-${variant}${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
-};
 
 /**
  * Runs a paid tool request under the run's principal and records its usage.
@@ -52,7 +40,10 @@ const runPaidToolRequest = async <
 	const token = await getAccessToken(context, {});
 	if (token.error) return token;
 
-	const requestId = requestIdFor(props.featureKey, execution.operationId);
+	//* reusing the request and usage ID across retries avoids duplicate charges
+	const requestId = hashUuid(
+		`lucid-${props.featureKey}:${execution.operationId}`,
+	);
 	const response = await trackPaidRequest(context, {
 		record: {
 			requestId,

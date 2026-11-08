@@ -2,6 +2,7 @@ import type {
 	AiUsageChartMetric,
 	AiUsageFeatureKey,
 	AiUsageMeasure,
+	AiUsageSession,
 	AiUsageSessionType,
 } from "@types";
 import { Permissions } from "@/constants/permissions";
@@ -88,6 +89,14 @@ export const getAiUsageSessionTypeOptions = () =>
 
 export const getAiUsageSessionTypeLabel = (type: AiUsageSessionType) =>
 	T()(`ai.usage.session.types.${type}`);
+
+/** A session's type, naming sub-agent chats apart from the chats people start. */
+export const getAiUsageSessionLabel = (
+	session: Pick<AiUsageSession, "type" | "conversation">,
+) =>
+	session.conversation?.parentConversationId
+		? T()("ai.usage.session.subagent")
+		: getAiUsageSessionTypeLabel(session.type);
 
 export const isAiUsageSessionType = (
 	value: unknown,

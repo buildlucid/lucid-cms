@@ -30,6 +30,7 @@ import resolveRunSetup from "./resolve-run-setup.js";
 import runModelTurn from "./run-model-turn.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import startNextTurn from "./start-next-turn.js";
+import addSubagentWait from "./subagents/add-subagent-wait.js";
 
 /** Runs model turns and tools until execution finishes, pauses or yields to the queue. */
 const driveRun: ServiceFn<
@@ -207,7 +208,27 @@ const driveRun: ServiceFn<
 			}
 
 			if (!checkpoint.calls.length) {
-				if (mode === "chat") return session.finish("completed");
+				//* a chat answers a steer sent during its reply in a follow-up run, which people can't start in a sub-agent's chat
+				if (mode === "subagent") {
+					const steered = await consumeSteering(context, {
+						checkpoint,
+						session,
+					});
+					if (steered.error) return steered;
+					if (steered.data) continue;
+				}
+
+				//* a reply doesn't end the run while the parent still has to hear from its sub-agents
+				const waiting = await addSubagentWait(context, {
+					run,
+					checkpoint,
+					session,
+					setup,
+				});
+				if (waiting.error) return waiting;
+				if (waiting.data) continue;
+
+				if (mode !== "routine") return session.finish("completed");
 				//* Nudge routine runs to finish explicitly, up to the configured limit.
 				//* Keep the last reply when later routine nudges return no text.
 				const reply =

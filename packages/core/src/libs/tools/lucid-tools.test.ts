@@ -27,6 +27,12 @@ test("built-in features are enabled by default and explicit bundles flatten", ()
 		"lucid_builder_update",
 		"lucid_memory_save",
 		"lucid_memory_delete",
+		"lucid_subagent_agents",
+		"lucid_subagent_start",
+		"lucid_subagent_message",
+		"lucid_subagent_wait",
+		"lucid_subagent_read",
+		"lucid_subagent_stop",
 		...agentTools.read().map((tool) => tool.name),
 	]);
 	expect(mcpTools.all().map((tool) => tool.name)).toContain("media_preview");
@@ -65,9 +71,18 @@ test("all features can be disabled without registering supporting tools", () => 
 			builder: { read: false },
 			memory: { read: false },
 			web: { search: false, read: false },
+			subagents: false,
 		},
 	});
 	expect(agent.tools).toEqual([]);
+});
+
+test("sub-agents can start any agent unless limited to a list of keys", () => {
+	expect(defineAgent(options).features.subagents).toEqual({ enabled: true });
+	expect(
+		defineAgent({ ...options, features: { subagents: ["writer"] } }).features
+			.subagents,
+	).toEqual({ enabled: true, agents: ["writer"] });
 });
 
 test("builder editing follows builder reading by default, and the builder tools only appear on a document screen", () => {

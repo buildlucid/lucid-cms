@@ -1,4 +1,5 @@
 import { submitInput, updateInput } from "./input";
+import respondToRun from "./respond-to-run";
 import streamRun, { runStreamUrls } from "./stream-run";
 import { createUploadReq, createUploadSessionReq } from "./uploads";
 import useBranchConversation from "./useBranchConversation";
@@ -23,6 +24,7 @@ import useGetReferences from "./useGetReferences";
 import useGetRoutine from "./useGetRoutine";
 import useGetRoutineRuns from "./useGetRoutineRuns";
 import useGetRoutines from "./useGetRoutines";
+import useGetSubagents from "./useGetSubagents";
 import useGetToolDetails from "./useGetToolDetails";
 import useRunRoutine from "./useRunRoutine";
 import useUpdateConversation from "./useUpdateConversation";
@@ -30,6 +32,7 @@ import useUpdateMemory from "./useUpdateMemory";
 import useUpdateRoutine from "./useUpdateRoutine";
 
 const exportObject = {
+	respondToRun,
 	submitInput,
 	updateInput,
 	createUploadSessionReq,
@@ -59,6 +62,7 @@ const exportObject = {
 	useGetRoutine,
 	useGetRoutineRuns,
 	useGetRoutines,
+	useGetSubagents,
 	useRunRoutine,
 	useUpdateConversation,
 	useUpdateMemory,

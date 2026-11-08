@@ -33,7 +33,9 @@ import {
 	completedTools,
 	createAgentMessages,
 	findPendingInteraction,
+	isRunFinished,
 	isRunWorking,
+	isWaitingOnSubagents,
 	settlesInteraction,
 } from "@/utils/agent-chat";
 import {
@@ -47,6 +49,7 @@ import {
 	deployTools,
 	referenceTools,
 	screenWidget,
+	subagentTools,
 	webReadTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
@@ -103,9 +106,12 @@ export const useAgentChat = (
 		id: conversationId,
 		poll: (data) => {
 			if (!untrack(streaming) && awaitsDelivery(data)) return 1_000;
+			//* nothing streams while the run waits on its sub-agents, so check back for it carrying on
+			if (isWaitingOnSubagents(data.latestRun)) return 3_000;
 			return data.titleStatus === "generating" ? 4_000 : false;
 		},
 	});
+	const subagents = api.agent.useGetSubagents({ id: conversationId });
 	const data = createMemo(() =>
 		conversation.isSuccess ? conversation.data?.data : undefined,
 	);
@@ -119,6 +125,17 @@ export const useAgentChat = (
 
 	// ----------------------------------------
 	// Memos
+	const waitingOnSubagents = createMemo(() =>
+		isWaitingOnSubagents(latestRun()),
+	);
+	//* sub-agents of this chat, or its siblings when it is one, that are still going
+	const busySubagents = createMemo(
+		() =>
+			subagents.data?.data.subagents.filter(
+				(subagent) =>
+					subagent.latestRun && !isRunFinished(subagent.latestRun.status),
+			).length ?? 0,
+	);
 	const saved = createMemo(() =>
 		(history.isSuccess ? history.data.pages : [])
 			.toReversed()
@@ -138,7 +155,7 @@ export const useAgentChat = (
 			: undefined;
 	});
 	const pendingInteraction = createMemo(() =>
-		screenCall() ? undefined : waitingOn(),
+		screenCall() || waitingOnSubagents() ? undefined : waitingOn(),
 	);
 	const activeRunId = createMemo(
 		() =>
@@ -165,6 +182,11 @@ export const useAgentChat = (
 			queryKey: queryKeys.agent.conversationDetails(id),
 			exact: true,
 		});
+	const refreshSubagents = (id: string) =>
+		queryClient.invalidateQueries({
+			queryKey: queryKeys.agent.subagents(id),
+			exact: true,
+		});
 	/** Refreshes what a completed call changed during the run: the chat's references and web sources, and open views of the resources it reports. */
 	const refreshAfterTool = (
 		id: string,
@@ -184,6 +206,7 @@ export const useAgentChat = (
 		if (deployTools.has(tool.name)) {
 			void queryClient.invalidateQueries({ queryKey: queryKeys.deploys.all() });
 		}
+		if (subagentTools.has(tool.name)) void refreshSubagents(id);
 		refreshAgentChanges(queryClient, tool.changes);
 		if (tool.changes.length > 0) options.onChanges?.(tool.changes);
 	};
@@ -279,6 +302,7 @@ export const useAgentChat = (
 										status: "queued",
 										outcome: null,
 										errorMessage: null,
+										waitingFor: null,
 									},
 								}));
 								return;
@@ -440,6 +464,22 @@ export const useAgentChat = (
 				if (!untrack(streaming)) {
 					void messageHistory.refreshLatest().catch(failed);
 				}
+				//* a run that starts or stops may have started, messaged or stopped sub-agents
+				const id = untrack(conversationId);
+				if (id) void refreshSubagents(id);
+			},
+			{ defer: true },
+		),
+	);
+	//* a sub-agent finishing can resume this chat's waiting run
+	createEffect(
+		on(
+			busySubagents,
+			(busy, previous) => {
+				const id = conversationId();
+				if (id && previous !== undefined && busy < previous) {
+					void refreshConversation(id);
+				}
 			},
 			{ defer: true },
 		),
@@ -471,11 +511,24 @@ export const useAgentChat = (
 		/** The screen call the run waits on, for this tab's screen to answer. */
 		screenCall,
 		working: createMemo(
-			() => streaming() || background() || screenCall() !== undefined,
+			() =>
+				streaming() ||
+				background() ||
+				screenCall() !== undefined ||
+				waitingOnSubagents(),
 		),
 		waiting: createMemo(
-			() => latestRun()?.status === "waiting" && screenCall() === undefined,
+			() =>
+				latestRun()?.status === "waiting" &&
+				screenCall() === undefined &&
+				!waitingOnSubagents(),
 		),
+		/** The chat's parent and sub-agents, kept fresh while any is still going. */
+		subagents: createMemo(() => subagents.data?.data),
+		/** The run is paused until its sub-agents finish, which a message steers it out of. */
+		waitingOnSubagents,
+		/** The chat that started this one, when it is a sub-agent's. */
+		parentId: createMemo(() => data()?.parentConversationId ?? undefined),
 		inputs,
 		queuePaused: createMemo(() => data()?.queuePaused ?? false),
 		/** Sends a message. While the agent is busy it queues, or steers the current run. */

@@ -16,7 +16,12 @@ const AgentWaitingChats: Component<{
 	// Queries
 	const waiting = api.agent.useGetConversations({
 		queryParams: {
-			filters: { status: "waiting", agentKey: () => props.agentKey },
+			//* a chat waiting on its sub-agents needs nothing from the person yet
+			filters: {
+				status: "waiting",
+				waitingFor: "person",
+				agentKey: () => props.agentKey,
+			},
 			perPage: 3,
 		},
 	});

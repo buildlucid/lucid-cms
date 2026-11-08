@@ -13,6 +13,17 @@ const retryConversation: ServiceFn<
 		userId: input.userId,
 	});
 	if (conversation.error) return conversation;
+	//* sub-agent chats only take steering while they run
+	if (conversation.data.parent_conversation_id) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 409,
+				message: copy("server:agent.subagent.steer.only"),
+			},
+		};
+	}
 	if (conversation.data.latest_run_status !== "failed") {
 		return {
 			data: undefined,

@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import { pendingWaitingFor } from "../../libs/agent/interactions.js";
 import { checkpointSchema } from "../../libs/agent/types.js";
 import logger from "../../libs/logger/index.js";
 import {
@@ -11,6 +12,8 @@ import withTransaction from "../../utils/services/with-transaction.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import executeRunFinishedHooks from "./helpers/execute-run-finished-hooks.js";
 import notifyRoutineRun from "./helpers/notify-routine-run.js";
+import stopSubagents from "./helpers/subagents/stop-subagents.js";
+import wakeParent from "./helpers/subagents/wake-parent.js";
 
 /** Retries runs whose workers crashed, stopped or never started up to the recovery limit, returning runs with unanswered questions to waiting unless a steer replaces the answer. */
 const recoverRuns: ServiceFn<[], number> = async (context) => {
@@ -57,6 +60,7 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 					runId: run.id,
 					from: ["queued", "interrupted"],
 					status: "waiting",
+					waitingFor: pendingWaitingFor(checkpoint.data.pending),
 					now,
 				});
 				if (waiting.error) {
@@ -85,11 +89,14 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 				});
 				if (moved.error || !moved.data) return moved;
 
-				const paused = await AgentConversations.pauseQueue({
-					conversationId: run.conversation_id,
-					runId: run.id,
-				});
-				if (paused.error) return paused;
+				//* a sub-agent's queue only holds its parent's messages, which carry on
+				if (checkpoint.data?.mode !== "subagent") {
+					const paused = await AgentConversations.pauseQueue({
+						conversationId: run.conversation_id,
+						runId: run.id,
+					});
+					if (paused.error) return paused;
+				}
 
 				const released = await AgentConversations.releaseRun({
 					conversationId: run.conversation_id,
@@ -108,6 +115,16 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 				}
 
 				await executeRunFinishedHooks(context, { runId: run.id });
+
+				//* a sub-agent tells its parent it's done. Other runs stop their sub-agents, however they end
+				if (checkpoint.data?.mode === "subagent") {
+					await wakeParent(context, { conversationId: run.conversation_id });
+				} else {
+					const stopped = await stopSubagents(context, {
+						conversationId: run.conversation_id,
+					});
+					if (stopped.error) return stopped;
+				}
 
 				return { error: undefined, data: undefined };
 			});

@@ -30,6 +30,17 @@ const branchConversation: ServiceFn<
 		userId: input.userId,
 	});
 	if (source.error) return source;
+	//* sub-agent chats only take steering while they run
+	if (source.data.parent_conversation_id) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 409,
+				message: copy("server:agent.subagent.steer.only"),
+			},
+		};
+	}
 
 	const access = await checkAgentAccess(context, {
 		userId: input.userId,

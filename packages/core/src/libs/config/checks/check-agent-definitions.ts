@@ -37,6 +37,12 @@ const featuresSchema = z
 				allowedDomains: z.array(z.string()).optional(),
 			})
 			.strict(),
+		subagents: z
+			.object({
+				enabled: z.boolean(),
+				agents: z.array(z.string()).readonly().optional(),
+			})
+			.strict(),
 	})
 	.strict() satisfies z.ZodType<AgentFeatures>;
 
@@ -217,6 +223,18 @@ const checkAgentDefinitions = (config: {
 					`Routine "${label}" needs a schedule or at least one event.`,
 				);
 			}
+		}
+	}
+
+	//* checked once every key is known, since agents can name agents registered after them
+	for (const agent of config.ai.agents.definitions) {
+		const unknown = agent.features.subagents.agents?.find(
+			(key) => !keys.has(key),
+		);
+		if (unknown) {
+			throw new Error(
+				`Agent "${agent.key}" lists sub-agent "${unknown}" in features.subagents, which is not a registered agent.`,
+			);
 		}
 	}
 };

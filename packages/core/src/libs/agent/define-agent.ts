@@ -8,6 +8,12 @@ import { generateImageAgentTool } from "../../services/agent/tools/generate-imag
 import { deleteMemoryAgentTool } from "../../services/agent/tools/memory-delete/index.js";
 import { saveMemoryAgentTool } from "../../services/agent/tools/memory-save/index.js";
 import { readFileAgentTool } from "../../services/agent/tools/read-file/index.js";
+import { subagentAgentsAgentTool } from "../../services/agent/tools/subagent-agents/index.js";
+import { subagentMessageAgentTool } from "../../services/agent/tools/subagent-message/index.js";
+import { subagentReadAgentTool } from "../../services/agent/tools/subagent-read/index.js";
+import { subagentStartAgentTool } from "../../services/agent/tools/subagent-start/index.js";
+import { subagentStopAgentTool } from "../../services/agent/tools/subagent-stop/index.js";
+import { subagentWaitAgentTool } from "../../services/agent/tools/subagent-wait/index.js";
 import { addMediaToLibraryAgentTool } from "../../services/media/tools/add-to-library/index.js";
 import { resolveWebToolOptions } from "../../services/web/helpers/web-tool-options.js";
 import { webReadAgentTool } from "../../services/web/tools/read/index.js";
@@ -18,6 +24,7 @@ import type {
 	AgentDefinition,
 	AgentFeatures,
 	AgentMediaGenerateOptions,
+	AgentSubagentsOption,
 	DefineAgentOptions,
 } from "./types.js";
 
@@ -27,6 +34,13 @@ const resolveGenerate = (
 	typeof generate === "boolean"
 		? { image: generate, audio: generate }
 		: { image: generate.image ?? true, audio: generate.audio ?? true };
+
+const resolveSubagents = (
+	subagents: AgentSubagentsOption = true,
+): AgentFeatures["subagents"] =>
+	typeof subagents === "boolean"
+		? { enabled: subagents }
+		: { enabled: true, agents: subagents };
 
 /**
  * Defines an admin agent with built-in and custom tools.
@@ -38,7 +52,7 @@ const resolveGenerate = (
  * 	name: "SEO Agent",
  * 	description: "Reviews and improves page metadata.",
  * 	tools: [agentTools.read(), customAgentTool],
- * 	features: { web: { allowedDomains: ["example.com"] } },
+ * 	features: { web: { allowedDomains: ["example.com"] }, subagents: ["writer"] },
  * 	models: {
  * 		default: { modelId: "openai/gpt-sol", reasoningEffort: "low" },
  * 		available: ["openai/gpt-luna", "openai/gpt-sol"],
@@ -76,6 +90,7 @@ const defineAgent = <const Key extends string>(
 				allowedDomains: options.features?.web?.allowedDomains,
 			}),
 		},
+		subagents: resolveSubagents(options.features?.subagents),
 	};
 
 	return {
@@ -114,6 +129,16 @@ const defineAgent = <const Key extends string>(
 			...(features.builder.edit ? [builderUpdateAgentTool()] : []),
 			...(features.memory.save
 				? [saveMemoryAgentTool(), deleteMemoryAgentTool()]
+				: []),
+			...(features.subagents.enabled
+				? [
+						subagentAgentsAgentTool({ agents: features.subagents.agents }),
+						subagentStartAgentTool({ agents: features.subagents.agents }),
+						subagentMessageAgentTool(),
+						subagentWaitAgentTool(),
+						subagentReadAgentTool(),
+						subagentStopAgentTool(),
+					]
 				: []),
 			...(options.tools?.flat() ?? []),
 		],

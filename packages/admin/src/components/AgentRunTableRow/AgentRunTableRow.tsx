@@ -45,6 +45,7 @@ const AgentRunTableRow: Component<{
 				<AgentRunStatus
 					status={props.run.status}
 					outcome={props.run.outcome}
+					waitingFor={props.run.waitingFor}
 					size="sm"
 				/>
 			</Table.Cell>

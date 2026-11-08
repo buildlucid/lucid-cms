@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import type { AgentConversation } from "@types";
 import classnames from "classnames";
+import { TbOutlineCaretRight } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -16,10 +17,12 @@ import { getAgentName } from "@/utils/agent-access";
 
 /**
  * Keeps chat actions visible while scrolling. Panel mode omits the agent name and links the title
- * to the full chat.
+ * to the full chat. A sub-agent's chat leads with the chat that started it.
  */
 const AgentChatHeader: Component<{
 	conversation?: AgentConversation;
+	/** The chat that started this one, when it is a sub-agent's. Shows as loading until given. */
+	parent?: Pick<AgentConversation, "id" | "title">;
 	/** Shown when there is no chat to load, eg. before a new one starts. Otherwise a missing chat shows as loading. */
 	emptyTitle?: string;
 	/** The panel sits beside a page's own heading, so it uses a smaller inset and a second-level heading. @default "page" */
@@ -106,6 +109,34 @@ const AgentChatHeader: Component<{
 							>
 								{T()("agent.routine.run")}
 							</Pill>
+						</Show>
+						<Show
+							when={
+								props.variant !== "panel" && conversation().parentConversationId
+							}
+						>
+							{(parentId) => (
+								<span class="hidden min-w-0 shrink items-center gap-2.5 sm:flex">
+									<Show
+										when={props.parent?.id === parentId() && props.parent}
+										fallback={<span class="skeleton block h-4 w-24" />}
+									>
+										{(parent) => (
+											<A
+												href={`/admin/agent/chats/${parent().id}`}
+												title={parent().title}
+												class="max-w-48 truncate rounded-sm text-sm text-body transition-colors hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+											>
+												{parent().title}
+											</A>
+										)}
+									</Show>
+									<TbOutlineCaretRight
+										class="shrink-0 text-sm text-muted"
+										aria-hidden="true"
+									/>
+								</span>
+							)}
 						</Show>
 						<Show
 							when={props.variant === "panel"}

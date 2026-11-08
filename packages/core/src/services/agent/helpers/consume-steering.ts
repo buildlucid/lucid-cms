@@ -1,9 +1,9 @@
-import constants from "../../../constants/constants.js";
 import {
 	isToolCallComplete,
 	settleToolCall,
 } from "../../../libs/agent/context.js";
 import { messageText } from "../../../libs/agent/input.js";
+import { hiddenInteractionKeys } from "../../../libs/agent/interactions.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import {
@@ -11,6 +11,7 @@ import {
 	AgentMessagesRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import { subagentWaitToolName } from "../tools/subagent-wait/constants.js";
 import getInputsEvent from "./get-inputs-event.js";
 import type { RunSession } from "./run-session.js";
 import startNextTurn from "./start-next-turn.js";
@@ -47,19 +48,25 @@ const consumeSteering: ServiceFn<
 			skipped: true,
 			reason: "The person redirected this run before the tool started.",
 		};
+		//* a message ends a sub-agent wait without changing the plan, so the model isn't told it was redirected
+		const waitOutput = {
+			skipped: true,
+			reason:
+				"The person sent a message, so the wait ended early. Your sub-agents are still working, and ending your reply waits for them again.",
+		};
 
 		for (const call of checkpoint.calls.slice(checkpoint.cursor)) {
 			if (isToolCallComplete(checkpoint, call.id)) continue;
 			const skipped = settleToolCall(checkpoint, call, {
 				status: "skipped",
-				output,
+				output: call.name === subagentWaitToolName ? waitOutput : output,
 			});
 
-			//* screen calls are only for their tool, so they leave the reply rather than stay in it dismissed
+			//* hidden interactions are only for their tool, so they leave the reply rather than stay in it dismissed
 			checkpoint.parts = checkpoint.parts.filter(
 				(part) =>
 					part.type !== "widget" ||
-					part.key !== constants.agent.widgets.screen ||
+					!hiddenInteractionKeys.has(part.key) ||
 					part.interaction?.toolCallId !== call.id,
 			);
 			for (const part of checkpoint.parts) {
@@ -95,6 +102,7 @@ const consumeSteering: ServiceFn<
 				references: input.references,
 				screen: input.screen,
 				timezone: input.timezone,
+				source: input.source,
 				createdAt: new Date(input.created_at).toISOString(),
 			});
 			if (appended.error) return appended;

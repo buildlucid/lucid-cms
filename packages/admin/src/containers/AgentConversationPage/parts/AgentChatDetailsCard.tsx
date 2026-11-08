@@ -15,10 +15,12 @@ import WebSourceRow from "@/components/WebSourceRow/WebSourceRow";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
+import { resolveModelSelection } from "@/utils/agent-models";
 import { aiUsageSessionHref, canViewAiUsage } from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
 import AgentCardDetail from "./AgentCardDetail";
 import AgentChatReferences from "./AgentChatReferences";
+import AgentChatSubagents from "./AgentChatSubagents";
 
 const shownSources = 3;
 
@@ -32,6 +34,11 @@ const AgentChatDetailsCard: Component<{
 	const details = api.agent.useGetConversationDetails({
 		id: () => props.conversation.id,
 	});
+	//* shares the composer's query for the chat's models
+	const models = api.agent.useGetModels({
+		agentKey: () => props.conversation.agentKey,
+		routineId: () => props.conversation.routineId ?? undefined,
+	});
 
 	// ----------------------------------------
 	// Memos
@@ -43,6 +50,18 @@ const AgentChatDetailsCard: Component<{
 	const visibleSources = createMemo(() =>
 		showAll() ? sources() : sources().slice(0, shownSources),
 	);
+	//* a sub-agent keeps the model the agent that started it chose, so it is shown here rather than picked
+	const subagentModel = createMemo(() => {
+		if (!props.conversation.parentConversationId || !models.isSuccess) {
+			return undefined;
+		}
+		const catalog = models.data.data;
+		const { model, effort } = resolveModelSelection(
+			catalog,
+			props.conversation.modelSelection ?? catalog.default,
+		);
+		return model ? { name: model.name, effort } : undefined;
+	});
 
 	// ----------------------------------------
 	// Render
@@ -56,6 +75,22 @@ const AgentChatDetailsCard: Component<{
 				<AgentCardDetail label={T()("agent.chat.details.agent")}>
 					{getAgentName(props.conversation.agentKey)}
 				</AgentCardDetail>
+				<Show when={subagentModel()}>
+					{(model) => (
+						<>
+							<AgentCardDetail label={T()("agent.models.label")}>
+								{model().name}
+							</AgentCardDetail>
+							<Show when={model().effort}>
+								{(effort) => (
+									<AgentCardDetail label={T()("agent.models.effort")}>
+										{T()(`agent.models.effort.${effort()}`)}
+									</AgentCardDetail>
+								)}
+							</Show>
+						</>
+					)}
+				</Show>
 				<AgentCardDetail label={T()("agent.confirmation.mode.label")}>
 					{T()(
 						`agent.confirmation.mode.${props.conversation.confirmationMode}`,
@@ -81,6 +116,7 @@ const AgentChatDetailsCard: Component<{
 					</AgentCardDetail>
 				</Show>
 			</dl>
+			<AgentChatSubagents conversationId={props.conversation.id} />
 			<AgentChatReferences
 				conversationId={props.conversation.id}
 				agentKey={props.conversation.agentKey}

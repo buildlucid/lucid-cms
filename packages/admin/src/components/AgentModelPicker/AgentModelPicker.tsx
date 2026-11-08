@@ -12,7 +12,7 @@ import {
 import ModelPicker from "@/components/ModelPicker/ModelPicker";
 import api from "@/services/api";
 import T from "@/translations";
-import { effortFor, selectModel } from "@/utils/agent-models";
+import { resolveModelSelection, selectModel } from "@/utils/agent-models";
 
 /** Chooses the model and reasoning effort for a chat's next reply, from the composer toolbar. */
 const AgentModelPicker: Component<{
@@ -43,11 +43,14 @@ const AgentModelPicker: Component<{
 		query.isSuccess ? query.data.data : undefined,
 	);
 	const saved = createMemo(() =>
-		resolve(committed() ?? props.value ?? catalog()?.default),
+		resolveModelSelection(
+			catalog(),
+			committed() ?? props.value ?? catalog()?.default,
+		),
 	);
 	const shown = createMemo(() => {
 		const current = draft();
-		return current ? resolve(current) : saved();
+		return current ? resolveModelSelection(catalog(), current) : saved();
 	});
 	//* only the first load, so background refreshes do not show a spinner
 	const loading = createMemo(() => query.isFetching && !query.isSuccess);
@@ -59,15 +62,6 @@ const AgentModelPicker: Component<{
 
 	// ----------------------------------------
 	// Functions
-	function resolve(selection?: AiModelSelection | null) {
-		const model = catalog()?.models.find(
-			(model) => model.id === selection?.modelId,
-		);
-		return {
-			model,
-			effort: model ? effortFor(model, selection?.reasoningEffort) : null,
-		};
-	}
 	const commit = () => {
 		const next = draft();
 		setDraft(undefined);

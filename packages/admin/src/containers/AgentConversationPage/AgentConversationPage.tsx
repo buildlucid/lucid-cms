@@ -186,6 +186,7 @@ const AgentConversationPage: Component = () => {
 			>
 				<AgentChatHeader
 					conversation={conversation()}
+					parent={chat.subagents()?.parent}
 					actions={
 						<AgentChatActions
 							routineCard={

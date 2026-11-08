@@ -161,7 +161,11 @@ test("groups requests into sessions and links chats only for their owner", async
 				type: "agent",
 				id: conversation.data.id,
 				//* the first message names the chat
-				conversation: { id: conversation.data.id, title: "Test" },
+				conversation: {
+					id: conversation.data.id,
+					title: "Test",
+					parentConversationId: null,
+				},
 				credits: 5,
 				tokens: { input: 6, output: 4, total: 10 },
 				requests: expect.objectContaining({ total: 2, failed: 0 }),

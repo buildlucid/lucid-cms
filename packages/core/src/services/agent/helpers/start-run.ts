@@ -3,6 +3,8 @@ import constants from "../../../constants/constants.js";
 import { summaryMessage } from "../../../libs/agent/context.js";
 import { inputMessageParts } from "../../../libs/agent/input.js";
 import type { StoredAgentMessagePart } from "../../../libs/agent/messages.js";
+import type { LucidAgentInputs } from "../../../libs/db/tables/agent-inputs.js";
+import type { Select } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
 	AgentAttributionsRepository,
@@ -29,6 +31,7 @@ import getRoutineTools from "./get-routine-tools.js";
 import messageContext from "./message-context.js";
 import registerUrlKeys from "./register-url-keys.js";
 import routineRequestParts from "./routine-request-parts.js";
+import getParentPart from "./subagents/get-parent-part.js";
 import titleFromMessage from "./title-from-message.js";
 
 /**
@@ -53,6 +56,7 @@ const startRun: ServiceFn<
 					purpose: "compact" | "retry";
 					text?: never;
 					screen?: never;
+					source?: never;
 					routine?: never;
 			  }
 			| {
@@ -60,12 +64,15 @@ const startRun: ServiceFn<
 					text: string;
 					/** Originating admin screen used for builder tool interactions. */
 					screen?: AgentScreen;
+					/** Who sent the message: a person, or the agent that started this sub-agent chat. Defaults to a person. */
+					source?: Select<LucidAgentInputs>["source"];
 					routine?: never;
 			  }
 			| {
 					purpose?: never;
 					text?: never;
 					screen?: never;
+					source?: never;
 					routine: {
 						id: string;
 						name: string;
@@ -86,6 +93,7 @@ const startRun: ServiceFn<
 			"agent_key",
 			"confirmation_mode",
 			"routine_id",
+			"parent_conversation_id",
 			"model_selection",
 			"queue_paused",
 		],
@@ -108,6 +116,7 @@ const startRun: ServiceFn<
 		routine_id: routineId,
 		model_selection: modelSelection,
 		queue_paused: queuePaused,
+		parent_conversation_id: parentConversationId,
 	} = conversation.data;
 
 	const repaired = await AgentConversations.releaseFinishedClaims({
@@ -150,6 +159,13 @@ const startRun: ServiceFn<
 
 				return { error: undefined, data: [...request.data, sent.data] };
 			}
+			const parent =
+				input.source === "parent"
+					? await getParentPart(context, {
+							conversationId: input.conversationId,
+						})
+					: undefined;
+			if (parent?.error) return parent;
 
 			const references = await registerReferences(context, {
 				conversationId: input.conversationId,
@@ -162,6 +178,7 @@ const startRun: ServiceFn<
 			return {
 				error: undefined,
 				data: [
+					...(parent?.data ? [parent.data] : []),
 					...inputMessageParts({
 						text: input.text ?? "",
 						references: references.data,
@@ -287,7 +304,11 @@ const startRun: ServiceFn<
 			status: "queued",
 			checkpoint: {
 				version: 1,
-				mode: input.routine ? "routine" : "chat",
+				mode: input.routine
+					? "routine"
+					: parentConversationId
+						? "subagent"
+						: "chat",
 				confirmationMode,
 				routineTools: routineId ? routineTools.data[routineId] : undefined,
 				messages: latest.data ? [summaryMessage(latest.data.summary)] : [],

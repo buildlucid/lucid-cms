@@ -1,7 +1,10 @@
 import { type Insertable, sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { QueryParams } from "../../types/query-params.js";
-import type { AgentRunOutcome } from "../../types/response.js";
+import type {
+	AgentRunOutcome,
+	AgentRunWaitingFor,
+} from "../../types/response.js";
 import { isTerminalRunStatus } from "../agent/run-status.js";
 import type { Checkpoint } from "../agent/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
@@ -110,6 +113,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 						"routine_id",
 						"status",
 						"outcome",
+						"waiting_for",
 						"summary",
 						"error_message",
 						"created_at",
@@ -150,6 +154,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				"routine_id",
 				"status",
 				"outcome",
+				"waiting_for",
 				"summary",
 				"error_message",
 				"created_at",
@@ -170,6 +175,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				"run.conversation_id",
 				"run.status",
 				"run.outcome",
+				"run.waiting_for",
 				"run.created_at",
 			])
 			.where("run.routine_id", "in", routineIds)
@@ -192,7 +198,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		return exec.response;
 	}
-	/** Reads the run's conversation kind to distinguish routine and personal chats. */
+	/** Reads the run's conversation kind, and its parent's for a sub-agent chat, to distinguish routine and personal chats. */
 	async selectConversationKind(runId: string) {
 		const query = this.db
 			.selectFrom("lucid_agent_runs")
@@ -201,7 +207,12 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				"lucid_agent_conversations.id",
 				"lucid_agent_runs.conversation_id",
 			)
-			.select(["lucid_agent_conversations.kind"])
+			.leftJoin(
+				"lucid_agent_conversations as parent",
+				"parent.id",
+				"lucid_agent_conversations.parent_conversation_id",
+			)
+			.select(["lucid_agent_conversations.kind", "parent.kind as parent_kind"])
 			.where("lucid_agent_runs.id", "=", runId);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
@@ -320,6 +331,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				"lucid_agent_conversations.title",
 			])
 			.where("lucid_agent_runs.status", "=", "waiting")
+			.where("lucid_agent_runs.waiting_for", "=", "person")
 			.where("lucid_agent_runs.user_id", "is not", null)
 			.where("lucid_agent_runs.input_notified_at", "is", null)
 			.where("lucid_agent_runs.updated_at", "<", props.waitingBefore)
@@ -340,6 +352,63 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectUnnotifiedWaiting",
+		});
+
+		return exec.response;
+	}
+	/**
+	 * Locks the run through transaction completion and reports whether it is running.
+	 * @remarks Check before tool writes to prevent changes after cancellation.
+	 */
+	async lockRunning(runId: string) {
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({ status: "running" })
+			.where("id", "=", runId)
+			.where("status", "=", "running")
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "lockRunning",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
+	/** Records that the parent heard about these sub-agent chats' finished runs, so it isn't told again. */
+	async markParentNotified(props: { conversationIds: string[]; now: string }) {
+		if (props.conversationIds.length === 0) {
+			return { error: undefined, data: undefined };
+		}
+
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({ parent_notified_at: props.now })
+			.where("conversation_id", "in", props.conversationIds)
+			.where("status", "in", constants.agent.runStatuses.terminal)
+			.where("parent_notified_at", "is", null);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "markParentNotified",
+		});
+
+		return exec.response;
+	}
+	/** A page of runs paused until their sub-agents finish, in ID order after a cursor. */
+	async selectWaitingForSubagents(props: { after?: string; limit: number }) {
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.select(["id", "conversation_id", "user_id", "checkpoint"])
+			.where("status", "=", "waiting")
+			.where("waiting_for", "=", "subagents")
+			.$if(props.after !== undefined, (query) =>
+				query.where("id", ">", props.after ?? ""),
+			)
+			.orderBy("id", "asc")
+			.limit(props.limit);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectWaitingForSubagents",
 		});
 
 		return exec.response;
@@ -374,6 +443,8 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		runId: string;
 		from: readonly AgentRunStatus[];
 		status: AgentRunStatus;
+		/** What the run waits for, when it moves to waiting. */
+		waitingFor?: AgentRunWaitingFor;
 		errorMessage?: string;
 		recovered?: boolean;
 		now: string;
@@ -384,6 +455,8 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 			.updateTable("lucid_agent_runs")
 			.set({
 				status: props.status,
+				waiting_for:
+					props.status === "waiting" ? (props.waitingFor ?? "person") : null,
 				execution_token: null,
 				lease_expires_at: null,
 				updated_at: props.now,
@@ -421,6 +494,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				lease_expires_at: props.leaseExpiresAt,
 				started_at: sql`coalesce(started_at, ${props.now})`,
 				input_notified_at: null,
+				waiting_for: null,
 				updated_at: props.now,
 			})
 			.where("id", "=", props.runId)
@@ -473,6 +547,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		token: string;
 		checkpoint: Checkpoint;
 		status: AgentRunStatus;
+		waitingFor: AgentRunWaitingFor | null;
 		errorMessage?: string | null;
 		finish?: { outcome: AgentRunOutcome; summary: string };
 		now: string;
@@ -484,6 +559,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 			.updateTable("lucid_agent_runs")
 			.set({
 				status: props.status,
+				waiting_for: props.waitingFor,
 				checkpoint: props.checkpoint,
 				updated_at: props.now,
 				...(props.errorMessage !== undefined

@@ -6,11 +6,12 @@ import { AgentConversationsRepository } from "../../../libs/repositories/index.j
 import type {
 	AgentRunOutcome,
 	AgentRunStatus,
+	AgentRunWaitingFor,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess from "./check-agent-access.js";
 
-/** Chats are private to their user. Chats started by code routines are shared with the agent's managers. */
+/** Chats are private to their user. Chats started by code routines are shared with the agent's managers, and sub-agent chats with whoever can open their parent. */
 const getAccessibleConversation: ServiceFn<
 	[{ id: string; userId: number }],
 	Select<LucidAgentConversations> & {
@@ -18,16 +19,36 @@ const getAccessibleConversation: ServiceFn<
 		latest_run_status: AgentRunStatus | null;
 		latest_run_outcome: AgentRunOutcome | null;
 		latest_run_error: string | null;
+		latest_run_waiting_for: AgentRunWaitingFor | null;
 	}
 > = async (context, input) => {
 	const AgentConversations = new AgentConversationsRepository(context.db);
 
 	const result = await AgentConversations.selectSingleWithLatestRun(input);
 	if (result.error) return result;
-	if (
-		!result.data ||
-		(result.data.user_id !== null && result.data.user_id !== input.userId)
-	) {
+	if (!result.data) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 404,
+				message: copy("server:agent.conversation.not.found"),
+			},
+		};
+	}
+
+	//* a sub-agent chat is open to whoever can open the chat that started it, even when it runs for someone else there
+	if (result.data.parent_conversation_id) {
+		const parent = await getAccessibleConversation(context, {
+			id: result.data.parent_conversation_id,
+			userId: input.userId,
+		});
+		if (parent.error) return parent;
+
+		return { error: undefined, data: result.data };
+	}
+
+	if (result.data.user_id !== null && result.data.user_id !== input.userId) {
 		return {
 			data: undefined,
 			error: {

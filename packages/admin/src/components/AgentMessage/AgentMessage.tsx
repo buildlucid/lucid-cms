@@ -1,4 +1,5 @@
 import type { AgentBuilderChangesData } from "@lucidcms/types";
+import { A } from "@solidjs/router";
 import type {
 	AgentInteractionAction,
 	AgentMessage as AgentMessageData,
@@ -32,6 +33,7 @@ import AgentWidgetRow from "@/components/AgentWidgetRow/AgentWidgetRow";
 import AudioPill from "@/components/AudioPill/AudioPill";
 import { createCopy } from "@/components/Copy/copyValue";
 import T from "@/translations";
+import { getAgentName } from "@/utils/agent-access";
 import { messageText } from "@/utils/agent-chat";
 import {
 	type AgentReferenceItem,
@@ -52,6 +54,7 @@ import AgentConfirmationGroup, {
 	isConfirmationRow,
 } from "./parts/AgentConfirmationGroup";
 import AgentRoutineRequest from "./parts/AgentRoutineRequest";
+import AgentSubagentGroup, { isSubagentPart } from "./parts/AgentSubagentGroup";
 import AgentToolGroup from "./parts/AgentToolGroup";
 import AgentUserBubble from "./parts/AgentUserBubble";
 
@@ -94,6 +97,9 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 		props.message.parts.find((part) => part.type === "run-result"),
 	);
 	const user = createMemo(() => props.message.role === "user");
+	const parent = createMemo(() =>
+		props.message.parts.find((part) => part.type === "parent"),
+	);
 	const screen = createMemo(() =>
 		props.message.parts.find((part) => part.type === "screen"),
 	);
@@ -164,13 +170,14 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	};
 	const groupAt = (index: number) =>
 		partGroupAt(props.message.parts, index, isToolRow) ??
-		partGroupAt(props.message.parts, index, isConfirmationRow);
+		partGroupAt(props.message.parts, index, isConfirmationRow) ??
+		partGroupAt(props.message.parts, index, isSubagentPart);
 	const visible = (index: number) => {
 		const part = props.message.parts[index];
 		return (
 			part !== undefined &&
 			layoutOf(part) !== "hidden" &&
-			(!(isToolRow(part) || isConfirmationRow(part)) ||
+			(!(isToolRow(part) || isConfirmationRow(part) || isSubagentPart(part)) ||
 				groupAt(index) !== undefined)
 		);
 	};
@@ -203,6 +210,18 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 				</Match>
 				<Match when={user()}>
 					<div class="flex flex-col items-end gap-1">
+						<Show when={parent()}>
+							{(from) => (
+								<A
+									href={`/admin/agent/chats/${from().conversationId}`}
+									class="rounded text-xs text-muted underline-offset-2 hover:text-title hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+								>
+									{T()("agent.subagent.from", {
+										agent: getAgentName(from().agentKey),
+									})}
+								</A>
+							)}
+						</Show>
 						<AgentReferenceFiles
 							references={attachments()}
 							align="end"
@@ -325,6 +344,20 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 																<AgentReferencesV1
 																	conversationId={props.message.conversationId}
 																	widget={widget()}
+																/>
+															)}
+														</Match>
+														<Match
+															when={partGroupAt(
+																props.message.parts,
+																index(),
+																isSubagentPart,
+															)}
+														>
+															{(group) => (
+																<AgentSubagentGroup
+																	conversationId={props.message.conversationId}
+																	group={group()}
 																/>
 															)}
 														</Match>

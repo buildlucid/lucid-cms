@@ -11,8 +11,9 @@ import notifyWaitingRuns from "../notify-waiting-runs.js";
 import reconcileUsage from "../reconcile-usage.js";
 import recoverInputs from "../recover-inputs.js";
 import recoverRuns from "../recover-runs.js";
+import resumeSubagentWaits from "../resume-subagent-waits.js";
 
-/** Recovers agent work, dispatches routines, expires screen calls, notifies waiting users and reconciles usage. */
+/** Recovers agent work, dispatches routines, expires screen calls, resumes finished sub-agent waits, notifies waiting users and reconciles usage. */
 const tick: JobHandler = async ({ context }) => {
 	if (getAgents(context.config).length === 0) {
 		return { error: undefined, data: undefined };
@@ -25,6 +26,7 @@ const tick: JobHandler = async ({ context }) => {
 		dispatchDueRoutines,
 		dispatchEventRoutines,
 		expireScreenCalls,
+		resumeSubagentWaits,
 		notifyWaitingRuns,
 		reconcileUsage,
 	]) {

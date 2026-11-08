@@ -21,6 +21,7 @@ import checkReferenceInput from "./references/check-input.js";
  * Records input sent to a conversation. Sending resumes a paused queue, since the
  * user chose to carry on, and counts as reviewing a routine run that asked for it.
  * Only a run acting for the sender can be steered; other input starts its own run.
+ * Sub-agent chats only take steering while they run.
  */
 const submitInput: ServiceFn<
 	[
@@ -103,6 +104,17 @@ const submitInput: ServiceFn<
 		});
 		if (actsFor.error) return actsFor;
 		if (actsFor.data) targetRunId = input.delivery.targetRunId;
+	}
+	//* sub-agents work for the chat that started them, so people can only redirect one while it runs
+	if (owned.data.parent_conversation_id && !targetRunId) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 409,
+				message: copy("server:agent.subagent.steer.only"),
+			},
+		};
 	}
 
 	const submitted = await Inputs.submit({

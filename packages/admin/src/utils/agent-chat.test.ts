@@ -11,6 +11,8 @@ import {
 	awaitsDelivery,
 	createAgentMessages,
 	findPendingInteraction,
+	getAgentRunDisplay,
+	isRunBusy,
 	messageText,
 	partLayout,
 	placeCompactions,
@@ -233,6 +235,53 @@ describe("partLayout", () => {
 		expect(partLayout(widget, noRows)).toBe("block");
 		expect(partLayout(widget, () => true)).toBe("row");
 	});
+
+	it("hides a sub-agent's parent marker and a parent's wait, and keeps started sub-agents in their card", () => {
+		expect(
+			partLayout(
+				{ type: "parent", agentKey: "lucid", conversationId: "c1" },
+				noRows,
+			),
+		).toBe("hidden");
+		expect(
+			partLayout(
+				{
+					...widget,
+					key: "lucid-subagent-wait",
+					interaction: interaction("composer", "pending"),
+				},
+				noRows,
+			),
+		).toBe("hidden");
+		expect(
+			partLayout(
+				{
+					...widget,
+					key: "lucid-subagent",
+					data: { conversationId: "c1", agentKey: "seo" },
+				},
+				() => true,
+			),
+		).toBe("block");
+	});
+});
+
+it("a run waiting on its sub-agents reads as working, and one waiting on the person needs them", () => {
+	const run = (waitingFor: "subagents" | "person") =>
+		({
+			id: "r1",
+			status: "waiting",
+			outcome: null,
+			waitingFor,
+			errorMessage: null,
+		}) as const;
+
+	expect(isRunBusy(run("subagents"))).toBe(true);
+	expect(getAgentRunDisplay("waiting", null, "subagents").attention).toBe(
+		false,
+	);
+	expect(isRunBusy(run("person"))).toBe(false);
+	expect(getAgentRunDisplay("waiting", null, "person").attention).toBe(true);
 });
 
 describe("findPendingInteraction", () => {
@@ -357,6 +406,7 @@ describe("awaitsDelivery", () => {
 		status,
 		outcome: null,
 		errorMessage: null,
+		waitingFor: status === "waiting" ? ("person" as const) : null,
 	});
 
 	it("checks back only while the server owes the chat a new run", () => {

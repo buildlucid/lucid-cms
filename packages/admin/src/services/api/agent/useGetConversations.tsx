@@ -1,9 +1,13 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
-import type { AgentConversation, ResponseBody } from "@types";
+import type {
+	AgentConversation,
+	AgentRunWaitingFor,
+	ResponseBody,
+} from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
-import { isRunWorking } from "@/utils/agent-chat";
+import { isRunBusy } from "@/utils/agent-chat";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -13,6 +17,8 @@ interface QueryParams {
 	filters?: {
 		title?: Accessor<string | undefined>;
 		status?: Accessor<string | undefined> | string;
+		/** Narrows waiting chats to those waiting on a person, or on sub-agents. */
+		waitingFor?: AgentRunWaitingFor;
 		agentKey?: Accessor<string | string[] | undefined>;
 	};
 	perPage?: Accessor<number> | number;
@@ -51,7 +57,7 @@ const useGetConversations = (
 		refetchInterval: (query) =>
 			query.state.data?.data.some(
 				(conversation) =>
-					isRunWorking(conversation.latestRun?.status) ||
+					isRunBusy(conversation.latestRun) ||
 					conversation.titleStatus === "generating",
 			)
 				? 5000

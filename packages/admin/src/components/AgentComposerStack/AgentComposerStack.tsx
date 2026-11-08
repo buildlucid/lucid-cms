@@ -8,20 +8,13 @@ import {
 	TbOutlineTrash,
 	TbOutlineX,
 } from "solid-icons/tb";
-import {
-	type Component,
-	createMemo,
-	For,
-	type JSX,
-	Match,
-	Show,
-	Switch,
-} from "solid-js";
+import { type Component, createMemo, For, type JSX, Show } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 import { markdownPreview } from "@/utils/agent-markdown";
 
 export interface AgentComposerStackProps {
+	/** The chat's inputs. Only queued ones show here; steers show in the transcript, where they will land. */
 	inputs: AgentInput[];
 	paused: boolean;
 	/** Steering needs a run to redirect. */
@@ -79,7 +72,7 @@ const Row: Component<{
 	);
 };
 
-/** A queued or steering message. Claimed messages are on their way, so they have no actions. */
+/** A queued message. Claimed messages are on their way, so they have no actions. */
 const InputRow: Component<
 	Pick<
 		AgentComposerStackProps,
@@ -100,7 +93,6 @@ const InputRow: Component<
 			.filter(Boolean)
 			.join(" · "),
 	);
-	const steering = createMemo(() => props.input.delivery.kind === "steer");
 
 	// ----------------------------------------
 	// Render
@@ -108,21 +100,20 @@ const InputRow: Component<
 		<Row
 			text={preview()}
 			icon={
-				<Switch fallback={<TbOutlineClock size={11} />}>
-					<Match when={props.input.status === "claimed" || steering()}>
-						<Spinner size="xs" variant="subtle" />
-					</Match>
-				</Switch>
+				<Show
+					when={props.input.status === "claimed"}
+					fallback={<TbOutlineClock size={11} />}
+				>
+					<Spinner size="xs" variant="subtle" />
+				</Show>
 			}
 			title={`${T()(
 				props.input.status === "claimed"
 					? "agent.queue.delivering"
-					: steering()
-						? "agent.queue.steering"
-						: "agent.queue.queued",
+					: "agent.queue.queued",
 			)}: ${preview()}`}
 		>
-			<Show when={props.input.status === "pending" && !steering()}>
+			<Show when={props.input.status === "pending"}>
 				<Show when={props.canSteer}>
 					<RowAction
 						label={T()("agent.queue.steer")}
@@ -159,9 +150,15 @@ const InputRow: Component<
  */
 const AgentComposerStack: Component<AgentComposerStackProps> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const queued = createMemo(() =>
+		props.inputs.filter((input) => input.delivery.kind === "queue"),
+	);
+
+	// ----------------------------------------
 	// Render
 	return (
-		<Show when={props.inputs.length > 0}>
+		<Show when={queued().length > 0}>
 			<ul
 				class="mx-3 max-h-48 divide-y divide-border overflow-y-auto rounded-t-xl border border-b-0 border-border"
 				aria-label={T()("agent.queue.label")}
@@ -183,7 +180,7 @@ const AgentComposerStack: Component<AgentComposerStackProps> = (props) => {
 						</RowAction>
 					</Row>
 				</Show>
-				<For each={props.inputs}>
+				<For each={queued()}>
 					{(input) => (
 						<InputRow
 							input={input}

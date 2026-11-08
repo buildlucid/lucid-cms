@@ -3,9 +3,11 @@ import { TbOutlineDots } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import AgentCompactionDivider from "@/components/AgentCompactionDivider/AgentCompactionDivider";
 import AgentErrorNotice from "@/components/AgentErrorNotice/AgentErrorNotice";
+import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
 import AgentMessage, {
 	type AgentMessageProps,
 } from "@/components/AgentMessage/AgentMessage";
+import AgentUserBubble from "@/components/AgentMessage/parts/AgentUserBubble";
 import { layoutOf } from "@/components/AgentWidget/slots";
 import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
 import T from "@/translations";
@@ -15,8 +17,8 @@ import type { AgentReferenceItem } from "@/utils/agent-references";
 
 /**
  * The chat's messages, then what the agent is doing now: a status line while it
- * works, a note when it was stopped, or the error that ended its run. Runs of
- * rows read as one block, even across messages.
+ * works, steers it hasn't taken yet, a note when it was stopped, or the error
+ * that ended its run. Runs of rows read as one block, even across messages.
  */
 const AgentChatTranscript: Component<{
 	chat: AgentChat;
@@ -59,6 +61,10 @@ const AgentChatTranscript: Component<{
 			props.chat.messages,
 			props.chat.working() ? props.chat.activeRunId() : undefined,
 		),
+	);
+	//* a steer waits for the run's next step, so it shows where it will land until the run takes it
+	const steers = createMemo(() =>
+		props.chat.inputs.filter((input) => input.delivery.kind === "steer"),
 	);
 	const runError = createMemo(() => {
 		const run = latestRun();
@@ -176,6 +182,28 @@ const AgentChatTranscript: Component<{
 					</div>
 				)}
 			</Show>
+			<For each={steers()}>
+				{(input) => (
+					<div
+						class="flex flex-col items-end gap-1"
+						title={T()("agent.queue.delivering")}
+					>
+						<span class="sr-only">{T()("agent.queue.delivering")}</span>
+						<AgentUserBubble pending={true}>
+							<AgentMarkdown text={input.text} tone="bubble" />
+						</AgentUserBubble>
+						<Show when={input.references.length}>
+							{(count) => (
+								<span class="text-xs text-muted">
+									{count() === 1
+										? T()("agent.references.count.one")
+										: T()("agent.references.count", { count: count() })}
+								</span>
+							)}
+						</Show>
+					</div>
+				)}
+			</For>
 			<Show
 				when={!props.chat.streaming() && latestRun()?.status === "cancelled"}
 			>

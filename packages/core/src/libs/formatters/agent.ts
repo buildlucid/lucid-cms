@@ -15,6 +15,7 @@ import type {
 	AgentRunOutcome,
 	AgentRunResultPart,
 	AgentRunStatus,
+	AgentRunWaitingFor,
 	AgentToolDetails,
 	AgentToolSummary,
 	AgentUsage,
@@ -117,6 +118,7 @@ type ConversationPropT = Select<LucidAgentConversations> & {
 	latest_run_status?: AgentRunStatus | null;
 	latest_run_outcome?: AgentRunOutcome | null;
 	latest_run_error?: string | null;
+	latest_run_waiting_for?: AgentRunWaitingFor | null;
 };
 type RunPropT = Pick<
 	Select<LucidAgentRuns>,
@@ -125,6 +127,7 @@ type RunPropT = Pick<
 	| "routine_id"
 	| "status"
 	| "outcome"
+	| "waiting_for"
 	| "summary"
 	| "error_message"
 	| "created_at"
@@ -133,7 +136,7 @@ type RunPropT = Pick<
 >;
 type LastRunPropT = Pick<
 	Select<LucidAgentRuns>,
-	"id" | "conversation_id" | "status" | "outcome" | "created_at"
+	"id" | "conversation_id" | "status" | "outcome" | "waiting_for" | "created_at"
 >;
 
 const emptyUsage: AgentUsage = { credits: 0, modelCalls: 0 };
@@ -204,6 +207,7 @@ const formatConversation = (props: {
 	kind: props.conversation.kind,
 	userId: props.conversation.user_id,
 	routineId: props.conversation.routine_id,
+	parentConversationId: props.conversation.parent_conversation_id,
 	latestRun:
 		props.conversation.latest_run_id && props.conversation.latest_run_status
 			? {
@@ -211,6 +215,7 @@ const formatConversation = (props: {
 					status: props.conversation.latest_run_status,
 					outcome: props.conversation.latest_run_outcome ?? null,
 					errorMessage: props.conversation.latest_run_error ?? null,
+					waitingFor: props.conversation.latest_run_waiting_for ?? null,
 				}
 			: null,
 	createdAt: formatter.formatDate(props.conversation.created_at),
@@ -286,6 +291,7 @@ const formatRun = (props: { run: RunPropT; usage?: AgentUsage }): AgentRun => ({
 	routineId: props.run.routine_id,
 	status: props.run.status,
 	outcome: props.run.outcome,
+	waitingFor: props.run.waiting_for,
 	summary: props.run.summary,
 	errorMessage: props.run.error_message,
 	usage: props.usage ?? emptyUsage,
@@ -326,6 +332,7 @@ const formatRoutine = (props: {
 				conversationId: props.lastRun.conversation_id,
 				status: props.lastRun.status,
 				outcome: props.lastRun.outcome,
+				waitingFor: props.lastRun.waiting_for,
 				createdAt: formatter.formatDate(props.lastRun.created_at),
 			}
 		: null,

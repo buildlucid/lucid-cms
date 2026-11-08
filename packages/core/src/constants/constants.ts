@@ -386,6 +386,10 @@ export default Object.freeze({
 			confirmation: "lucid-tool-confirmation" satisfies AgentCoreWidgetKey,
 			confirmationBatch:
 				"lucid-tool-confirmation-batch" satisfies AgentCoreWidgetKey,
+			/** Links a sub-agent start call to the sub-agent's chat. */
+			subagent: "lucid-subagent" satisfies AgentCoreWidgetKey,
+			/** Pauses a run until its sub-agents finish, answered by the runner rather than a person. */
+			subagentWait: "lucid-subagent-wait" satisfies AgentCoreWidgetKey,
 			reservedPrefix: "lucid-",
 			/** Reserved interaction and result widget keys allowed for each core tool. */
 			tools: {
@@ -398,6 +402,8 @@ export default Object.freeze({
 				lucid_builder_focus: ["lucid-screen"],
 				lucid_memory_save: ["lucid-memory-review"],
 				lucid_memory_delete: ["lucid-memory-review"],
+				lucid_subagent_start: ["lucid-subagent"],
+				lucid_subagent_wait: ["lucid-subagent-wait"],
 			} satisfies Partial<
 				Record<AgentLucidToolName | "media_select", AgentCoreWidgetKey[]>
 			>,
@@ -454,6 +460,12 @@ export default Object.freeze({
 		inputNotifyDelayMs: 120_000,
 		/** Builder response timeout, checked each agent tick before reporting the screen as closed. */
 		screenCallTimeoutMs: 30_000,
+		subagents: {
+			/** The most sub-agents one chat can have working at once. */
+			activeLimit: 4,
+			/** The longest sub-agent reply passed back to its parent, in characters. Longer replies are read with lucid_subagent_read. */
+			replyChars: 8_000,
+		},
 		batchSize: 50,
 		modelCatalogTtlSeconds: 300,
 		routineEvents: {

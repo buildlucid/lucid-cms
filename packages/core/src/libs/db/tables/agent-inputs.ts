@@ -9,6 +9,8 @@ import type {
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable } from "../types.js";
 
+const agentInputSourceSchema = z.enum(["person", "parent"]);
+
 /** Pending and claimed input is still to be delivered; the rest is kept as a receipt. */
 const agentInputStatusSchema = z.enum([
 	"pending",
@@ -22,7 +24,8 @@ export const agentInputsTable = defineTable("lucid_agent_inputs", () => ({
 		sequence: { schema: z.number().int(), type: "integer" },
 		id: { schema: z.uuid(), type: "text" },
 		conversation_id: { schema: z.uuid(), type: "text" },
-		user_id: { schema: z.number(), type: "integer" },
+		user_id: { schema: z.number().nullable(), type: "integer" },
+		source: { schema: agentInputSourceSchema, type: "text" },
 		text: { schema: z.string(), type: "text" },
 		references: { schema: z.array(agentReferenceInputSchema), type: "json" },
 		screen: { schema: agentScreenSchema.nullable(), type: "json" },
@@ -38,8 +41,10 @@ export interface LucidAgentInputs {
 	sequence: Generated<number>;
 	id: string;
 	conversation_id: string;
-	/** Who sent it. The run it starts acts for them. */
-	user_id: number;
+	/** Who the run it starts acts for: the person who sent it, or the parent run's person. Null for the system. */
+	user_id: number | null;
+	/** Sent by a person, or by the agent that started this sub-agent. */
+	source: Generated<z.infer<typeof agentInputSourceSchema>>;
 	text: string;
 	references: JSONColumnType<
 		AgentReferenceInput[],

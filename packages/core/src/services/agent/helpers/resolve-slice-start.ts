@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import { answerInteraction } from "../../../libs/agent/interactions.js";
 import { isTerminalRunStatus } from "../../../libs/agent/run-status.js";
 import {
@@ -20,7 +21,10 @@ type SliceRun = NonNullable<
 	>["data"]
 >;
 
-/** Loads the next run slice, validates and applies required answers, accepts saved-answer retries, lets steers replace unanswered questions and rejects missing or unexpected answers before host handoff. */
+/**
+ * Prepares the next slice: validates answers and retries, resumes sub-agent waits and applies
+ * steering before host handoff.
+ */
 const resolveSliceStart: ServiceFn<
 	[{ runId: string; answer?: AgentRunAnswer }],
 	| { run: SliceRun; finished: true }
@@ -80,6 +84,22 @@ const resolveSliceStart: ServiceFn<
 		answered.action === input.answer.action
 			? undefined
 			: input.answer;
+
+	//* nobody answers a sub-agent wait: resuming it is the answer, and the tool checks its sub-agents again
+	if (
+		pending &&
+		!pending.answer &&
+		!steering &&
+		!submitted &&
+		pending.widget.key === constants.agent.widgets.subagentWait
+	) {
+		pending.answer = { action: "submit", response: {} };
+
+		return {
+			error: undefined,
+			data: { run, finished: false, checkpoint, applied: true },
+		};
+	}
 
 	if (pending && !pending.answer && !steering) {
 		if (submitted?.interactionId !== pending.widget.interaction.id) {

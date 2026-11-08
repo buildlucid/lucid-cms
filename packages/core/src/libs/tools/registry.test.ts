@@ -135,8 +135,13 @@ test("names are unique within a placement, which only holds its own target", asy
 				secrets: "a".repeat(64),
 				ai: {
 					agents: [
-						// @ts-expect-error agents only accept agent tools
-						defineAgent({ ...agent("test"), tools: [echo] }),
+						defineAgent({
+							key: "test",
+							name: "Test",
+							description: "Test",
+							// @ts-expect-error agents only accept agent tools
+							tools: [echo],
+						}),
 					],
 				},
 			},

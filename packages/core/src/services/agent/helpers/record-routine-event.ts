@@ -55,7 +55,7 @@ const pendingSubject = (
 /**
  * Queues matching content changes for enabled routines.
  * @remarks Call in the transaction that writes the content so rollback removes queued events too.
- * Skips attributed changes from routine conversations, including retries and follow-ups.
+ * Skips attributed changes from routine conversations and their sub-agents, including retries and follow-ups.
  * Skips routines with invalid stored events.
  */
 const recordRoutineEvent: ServiceFn<
@@ -83,7 +83,12 @@ const recordRoutineEvent: ServiceFn<
 
 		const run = await AgentRuns.selectConversationKind(input.agentRunId);
 		if (run.error) return run;
-		if (run.data && run.data.kind !== "chat") {
+		//* a sub-agent's changes count as its parent chat's
+		if (
+			run.data &&
+			(run.data.kind !== "chat" ||
+				(run.data.parent_kind != null && run.data.parent_kind !== "chat"))
+		) {
 			return { error: undefined, data: undefined };
 		}
 	}

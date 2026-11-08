@@ -5,6 +5,12 @@ import { builderReadToolName } from "../../../services/agent/tools/builder-read/
 import { builderUpdateToolName } from "../../../services/agent/tools/builder-update/constants.js";
 import { deleteMemoryToolName } from "../../../services/agent/tools/memory-delete/constants.js";
 import { saveMemoryToolName } from "../../../services/agent/tools/memory-save/constants.js";
+import { subagentAgentsToolName } from "../../../services/agent/tools/subagent-agents/constants.js";
+import { subagentMessageToolName } from "../../../services/agent/tools/subagent-message/constants.js";
+import { subagentReadToolName } from "../../../services/agent/tools/subagent-read/constants.js";
+import { subagentStartToolName } from "../../../services/agent/tools/subagent-start/constants.js";
+import { subagentStopToolName } from "../../../services/agent/tools/subagent-stop/constants.js";
+import { subagentWaitToolName } from "../../../services/agent/tools/subagent-wait/constants.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import { runnerToolNames } from "../../agent/runner-tools.js";
 import { getExternalCapability } from "../../permission/capabilities.js";
@@ -50,6 +56,12 @@ const reservedToolNames: ReadonlySet<string> = new Set([
 	builderUpdateToolName,
 	saveMemoryToolName,
 	deleteMemoryToolName,
+	subagentAgentsToolName,
+	subagentStartToolName,
+	subagentMessageToolName,
+	subagentWaitToolName,
+	subagentReadToolName,
+	subagentStopToolName,
 ]);
 
 /** Checks a tool's name, schemas and access requirements. */

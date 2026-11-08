@@ -3,14 +3,24 @@ import { isDeepStrictEqual } from "node:util";
 import z from "zod";
 import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
-import type { AgentInteraction } from "../../types/response.js";
+import type {
+	AgentInteraction,
+	AgentRunWaitingFor,
+} from "../../types/response.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { toolDefinitionInternal } from "../tools/tool-definition-internal.js";
 import type { AgentToolDefinition } from "../tools/types.js";
 import type { Checkpoint, ToolCall } from "./types.js";
 
 export type PendingInteraction = NonNullable<Checkpoint["pending"]>;
+
 export type InteractionAnswer = NonNullable<PendingInteraction["answer"]>;
+
+/** Interactions answered by the browser or the runner rather than a person, so they are never shown, confirmed in place or notified. */
+export const hiddenInteractionKeys: ReadonlySet<string> = new Set([
+	constants.agent.widgets.screen,
+	constants.agent.widgets.subagentWait,
+]);
 
 export const questionResponseSchema = z.object({
 	answer: z.string().trim().min(1).max(20_000),
@@ -45,6 +55,14 @@ export const needsConfirmation = (props: {
 			return false;
 	}
 };
+
+/** What a run paused on its pending interaction waits for: its sub-agents, or a person (or their open screen). */
+export const pendingWaitingFor = (
+	pending: Checkpoint["pending"],
+): AgentRunWaitingFor =>
+	pending?.widget.key === constants.agent.widgets.subagentWait
+		? "subagents"
+		: "person";
 
 /** A grouped decision applies only to the saved call and exact validated input. */
 export const toolInteractionAnswer = (

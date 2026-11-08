@@ -5,14 +5,20 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import enqueueRun from "./enqueue-run.js";
 import startRun from "./start-run.js";
 
-/** Starts the run answering a queued message, acting for its sender. Retrying the same input resumes a partial start. */
+/** Starts the run answering a queued message, acting for whoever it names. Retrying the same input resumes a partial start. */
 const startInput: ServiceFn<
 	[
 		{
 			conversationId: string;
 			input: Pick<
 				Select<LucidAgentInputs>,
-				"id" | "user_id" | "text" | "references" | "screen" | "timezone"
+				| "id"
+				| "user_id"
+				| "source"
+				| "text"
+				| "references"
+				| "screen"
+				| "timezone"
 			>;
 			dispatch: boolean;
 		},
@@ -27,6 +33,7 @@ const startInput: ServiceFn<
 		references: props.input.references,
 		screen: props.input.screen ?? undefined,
 		timezone: props.input.timezone,
+		source: props.input.source,
 	});
 	if (started.error) return started;
 

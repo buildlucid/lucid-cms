@@ -169,6 +169,7 @@ const aiUsageSessionResponseSchema = z
 			.object({
 				id: z.string(),
 				title: z.string(),
+				parentConversationId: z.string().nullable(),
 			})
 			.strict()
 			.nullable(),

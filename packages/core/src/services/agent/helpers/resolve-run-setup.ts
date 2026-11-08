@@ -5,6 +5,7 @@ import {
 } from "../../../libs/agent/capabilities.js";
 import buildInstructions from "../../../libs/agent/instructions/index.js";
 import type { MemoryContext } from "../../../libs/agent/instructions/memories.js";
+import { hiddenInteractionKeys } from "../../../libs/agent/interactions.js";
 import { getRunnerTools } from "../../../libs/agent/runner-tools.js";
 import type {
 	AgentDefinition,
@@ -40,7 +41,7 @@ const toInputSchema = (input: z.ZodObject) => {
 
 /**
  * Resolves accessible tools, skills and instructions before each model turn.
- * @remarks System runs omit tools with required interactions and controls that ask a person.
+ * @remarks System and sub-agent runs omit tools with required interactions and controls that ask a person, and sub-agents get no screen.
  */
 const resolveRunSetup = (
 	context: Pick<ServiceContext, "config" | "translate">,
@@ -58,10 +59,13 @@ const resolveRunSetup = (
 	},
 ) => {
 	const { agent, authority } = props;
-	const screen = props.screen
-		? { type: props.screen.type, builder: agent.features.builder }
-		: undefined;
-	const attended = authority.principal.type === "user";
+	//* sub-agents work for another agent, so they never get a screen and never ask the person
+	const subagent = props.mode === "subagent";
+	const screen =
+		props.screen && !subagent
+			? { type: props.screen.type, builder: agent.features.builder }
+			: undefined;
+	const attended = authority.principal.type === "user" && !subagent;
 	const memoryScopes = getMemoryScopes(
 		context.config,
 		hasPermission(authority, Permissions.AiMemoriesManage),
@@ -72,7 +76,13 @@ const resolveRunSetup = (
 		screen: screen?.type,
 		mode: props.mode,
 	})
-		.filter((tool) => attended || (tool.interaction?.skippable ?? true))
+		.filter(
+			(tool) =>
+				attended ||
+				!tool.interaction ||
+				tool.interaction.skippable ||
+				hiddenInteractionKeys.has(tool.interaction.key),
+		)
 		//* Hide memory tools when the user has no enabled, writable scope.
 		.filter(
 			(tool) => memoryScopes.length > 0 || !memoryToolNames.has(tool.name),

@@ -263,3 +263,23 @@ test("builder editing needs builder reading", () => {
 		"features.builder.edit without features.builder.read",
 	);
 });
+
+test("sub-agent lists only name registered agents, including ones registered later", () => {
+	const writer = defineAgent({
+		key: "writer",
+		name: "Writer",
+		description: "Writes copy.",
+	});
+	const lead = (subagents: readonly string[]) =>
+		defineAgent({
+			key: "lead",
+			name: "Lead",
+			description: "Delegates.",
+			features: { subagents },
+		});
+
+	expect(check([lead(["writer"]), writer])).not.toThrow();
+	expect(check([lead(["editor"]), writer])).toThrow(
+		'Agent "lead" lists sub-agent "editor" in features.subagents, which is not a registered agent.',
+	);
+});

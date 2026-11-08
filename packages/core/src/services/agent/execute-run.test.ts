@@ -368,6 +368,7 @@ const testAgent = defineAgent({
 		media: { analyze: false, readFile: false },
 		web: { search: false, read: false },
 		memory: { read: false },
+		subagents: false,
 	},
 	tools: [
 		agentTools.read(),

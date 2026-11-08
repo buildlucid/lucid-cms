@@ -25,6 +25,8 @@ const insertConversation: ServiceFn<
 			/** Preserves a copied title's status, including eligibility for automatic generation. */
 			titleStatus?: Select<LucidAgentConversations>["title_status"];
 			routineId?: string;
+			/** Starts the chat as a sub-agent of this one. */
+			parentConversationId?: string;
 		},
 	],
 	AgentConversation
@@ -53,6 +55,7 @@ const insertConversation: ServiceFn<
 				(input.title && !input.routineId ? "user_set" : "provisional"),
 			user_id: input.userId,
 			routine_id: input.routineId ?? null,
+			parent_conversation_id: input.parentConversationId ?? null,
 			active_run_id: null,
 			created_at: now,
 			updated_at: now,

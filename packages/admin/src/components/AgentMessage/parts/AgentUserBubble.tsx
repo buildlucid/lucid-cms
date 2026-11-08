@@ -1,3 +1,4 @@
+import classnames from "classnames";
 import {
 	type Component,
 	createSignal,
@@ -11,8 +12,10 @@ import T from "@/translations";
 
 const collapsedHeight = 112;
 
+/** A person's message. A pending one, such as a steer the run hasn't taken yet, is outlined and faded. */
 const AgentUserBubble: Component<{
 	children: JSX.Element;
+	pending?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -37,10 +40,17 @@ const AgentUserBubble: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="max-w-[85%] rounded-2xl rounded-ee-md bg-input px-4 py-2.5">
+		<div
+			class={classnames(
+				"max-w-[85%] rounded-2xl rounded-ee-md px-4 py-2.5",
+				props.pending
+					? "border border-dashed border-border bg-background"
+					: "bg-input",
+			)}
+		>
 			<div
 				id={id}
-				class="overflow-hidden"
+				class={classnames("overflow-hidden", { "opacity-60": props.pending })}
 				style={
 					expandable() && !expanded()
 						? { "max-height": `${collapsedHeight}px` }
@@ -54,7 +64,10 @@ const AgentUserBubble: Component<{
 					<Show when={!expanded()}>
 						<div
 							aria-hidden="true"
-							class="pointer-events-none absolute -inset-x-4 bottom-full h-10 bg-linear-to-t from-input to-transparent"
+							class={classnames(
+								"pointer-events-none absolute -inset-x-4 bottom-full h-10 bg-linear-to-t to-transparent",
+								props.pending ? "from-background" : "from-input",
+							)}
 						/>
 					</Show>
 					<button

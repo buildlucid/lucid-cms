@@ -49,10 +49,14 @@ const AgentChatThread: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const canBranch = createMemo(() =>
-		getAgentAccess().chat.some(
-			(agent) => agent.key === props.chat.data()?.agentKey,
-		),
+	//* sub-agent chats only take steering while they run, so they can't be retried or branched
+	const subagent = createMemo(() => props.chat.parentId() !== undefined);
+	const canBranch = createMemo(
+		() =>
+			!subagent() &&
+			getAgentAccess().chat.some(
+				(agent) => agent.key === props.chat.data()?.agentKey,
+			),
 	);
 
 	// ----------------------------------------
@@ -122,7 +126,7 @@ const AgentChatThread: Component<{
 									retriedToolIds={props.view.retriedTools()}
 									onSelectTool={props.view.selectTool}
 									onRespond={props.view.respond}
-									canRetry={!props.view.unavailable()}
+									canRetry={!props.view.unavailable() && !subagent()}
 									onBranch={
 										canBranch()
 											? (messageId) => {

@@ -377,7 +377,13 @@ export type AgentLucidToolName =
 	| "lucid_builder_update"
 	| "lucid_builder_focus"
 	| "lucid_memory_save"
-	| "lucid_memory_delete";
+	| "lucid_memory_delete"
+	| "lucid_subagent_agents"
+	| "lucid_subagent_start"
+	| "lucid_subagent_message"
+	| "lucid_subagent_wait"
+	| "lucid_subagent_read"
+	| "lucid_subagent_stop";
 
 /** Widgets supplied by Lucid's runner and core tools. */
 export type AgentCoreWidgetKey =
@@ -391,7 +397,9 @@ export type AgentCoreWidgetKey =
 	| "lucid-references"
 	| "lucid-image-settings"
 	| "lucid-audio-settings"
-	| "lucid-memory-review";
+	| "lucid-memory-review"
+	| "lucid-subagent"
+	| "lucid-subagent-wait";
 
 /** A memory the person checks before an agent saves or forgets it. */
 export type AgentMemoryReviewItem = Pick<
@@ -478,6 +486,9 @@ export type AgentRunOutcome = "done" | "nothing_to_report" | "needs_review";
 /** Personal chats or chats for routines owned by users or defined in code. */
 export type AgentConversationKind = "chat" | "own-routine" | "code-routine";
 
+/** What a waiting run waits on: a person's answer, or sub-agents it started finishing. */
+export type AgentRunWaitingFor = "person" | "subagents";
+
 /** What started a routine run: its schedule, a person, or content changes it listens for. */
 export type AgentRoutineTrigger = "schedule" | "manual" | "event";
 
@@ -541,6 +552,12 @@ export type AgentRunResultPart = {
 	outcome: AgentRunOutcome;
 	summary: string;
 	finishedAt: string;
+};
+
+/** Saved `lucid-subagent` data, which links a start call to the sub-agent's chat. */
+export type AgentSubagentWidgetData = {
+	conversationId: string;
+	agentKey: string;
 };
 
 /** How the title was set, with `generating` indicating clients should poll for an automatic title. */
@@ -633,6 +650,8 @@ export type AgentMessagePart =
 			events?: AgentRoutineEventSubject[];
 	  }
 	| AgentRunResultPart
+	/** Sent by the agent that started this sub-agent, rather than the person. */
+	| { type: "parent"; agentKey: string; conversationId: string }
 	| AgentToolSummary
 	| AgentWidgetPart;
 
@@ -744,12 +763,27 @@ export interface AgentConversation {
 	/** Null for chats started by routines defined in code. */
 	userId: number | null;
 	routineId: string | null;
+	/** The chat whose agent started this one as a sub-agent. Sub-agent chats stay out of chat lists. */
+	parentConversationId: string | null;
 	latestRun: Pick<
 		AgentRun,
-		"id" | "status" | "outcome" | "errorMessage"
+		"id" | "status" | "outcome" | "waitingFor" | "errorMessage"
 	> | null;
 	createdAt: string | null;
 	updatedAt: string | null;
+}
+
+/** A sub-agent chat, with the confirmation its run waits on so the parent chat can answer it. */
+export type AgentSubagent = AgentConversation & {
+	/** A pending `lucid-tool-confirmation` or `lucid-tool-confirmation-batch` widget. */
+	pending: AgentWidgetPart | null;
+};
+
+/** A chat's parent and sub-agents. A sub-agent chat returns its parent and siblings. */
+export interface AgentSubagents {
+	/** The chat that started the sub-agents. */
+	parent: AgentConversation;
+	subagents: AgentSubagent[];
 }
 
 export interface AgentMessage {
@@ -768,6 +802,8 @@ export interface AgentRun {
 	routineId: string | null;
 	status: AgentRunStatus;
 	outcome: AgentRunOutcome | null;
+	/** Set while the run waits. */
+	waitingFor: AgentRunWaitingFor | null;
 	summary: string | null;
 	errorMessage: string | null;
 	usage: AgentUsage;
@@ -836,7 +872,7 @@ export interface AgentRoutine {
 	nextRunAt: string | null;
 	lastRun: Pick<
 		AgentRun,
-		"id" | "conversationId" | "status" | "outcome" | "createdAt"
+		"id" | "conversationId" | "status" | "outcome" | "waitingFor" | "createdAt"
 	> | null;
 	createdAt: string | null;
 	updatedAt: string | null;

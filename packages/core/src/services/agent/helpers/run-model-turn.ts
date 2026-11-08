@@ -4,7 +4,6 @@ import { modelMessages, reportedModel } from "../../../libs/agent/context.js";
 import { textFromParts } from "../../../libs/agent/input.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
-import { copy } from "../../../libs/i18n/index.js";
 import { cmsAiActor } from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import isPermanentFailure from "./is-permanent-failure.js";
@@ -12,6 +11,7 @@ import type { RunSetup } from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import runnerRequestRecord from "./runner-request-record.js";
 import streamModelTurn from "./stream-model-turn.js";
+import toolCallPart from "./tool-call-part.js";
 import trackPaidRequest from "./track-paid-request.js";
 
 type TurnResult =
@@ -74,17 +74,7 @@ const runModelTurn: ServiceFn<
 			});
 		} else if (event.type === "tool-call") {
 			const call = { id: event.id, name: event.name, input: event.input };
-			const presentation = setup.presentation.get(call.name);
-			const part = {
-				type: "tool" as const,
-				...call,
-				title: presentation?.title,
-				summary:
-					presentation?.describe(call.input) ??
-					copy.literal(call.name.replaceAll("_", " ")),
-				outputVersion: presentation?.outputVersion,
-				status: "pending" as const,
-			};
+			const part = toolCallPart(call, setup);
 			checkpoint.calls.push(call);
 			checkpoint.parts.push(part);
 			partsSize += JSON.stringify(part).length;

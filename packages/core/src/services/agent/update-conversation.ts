@@ -10,7 +10,7 @@ import getConversation from "./get-conversation.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 import resolveModel from "./helpers/resolve-model.js";
 
-/** Updates chat title, confirmation mode or model, retaining tool-default confirmations for routine chats. */
+/** Updates chat title, confirmation mode or model, retaining tool-default confirmations for routine chats and the parent's settings for sub-agent chats. */
 const updateConversation: ServiceFn<
 	[
 		{
@@ -25,6 +25,21 @@ const updateConversation: ServiceFn<
 > = async (context, input) => {
 	const conversation = await getAccessibleConversation(context, input);
 	if (conversation.error) return conversation;
+
+	//* a sub-agent follows the confirmation mode and model its parent gave it
+	if (
+		conversation.data.parent_conversation_id &&
+		(input.confirmationMode !== undefined || input.modelSelection !== undefined)
+	) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:agent.subagent.settings.locked"),
+			},
+		};
+	}
 
 	if (
 		conversation.data.routine_id &&

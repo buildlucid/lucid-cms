@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import {
 	createInteraction,
+	hiddenInteractionKeys,
 	needsConfirmation,
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
@@ -30,18 +31,23 @@ const runToolCall = async (
 	const { run, call, checkpoint, session, setup } = props;
 	const { pending } = checkpoint;
 	const answer = toolInteractionAnswer(checkpoint, call);
-	//* Remove browser-only interactions from the reply once answered.
-	const screenAnswered =
+	//* Remove hidden interactions from the reply once answered.
+	const hiddenAnswered =
 		answer !== undefined &&
-		pending?.widget.key === constants.agent.widgets.screen;
-	if (screenAnswered) {
+		pending !== undefined &&
+		hiddenInteractionKeys.has(pending.widget.key);
+	if (hiddenAnswered) {
 		checkpoint.parts = checkpoint.parts.filter(
 			(part) =>
 				part.type !== "widget" ||
 				part.interaction?.id !== pending.widget.interaction.id,
 		);
 	}
-	if (screenAnswered && answer.action === "cancel") {
+	if (
+		hiddenAnswered &&
+		pending.widget.key === constants.agent.widgets.screen &&
+		answer.action === "cancel"
+	) {
 		return toolFailure(
 			context.translate("server:agent.screen.unavailable.closed"),
 		);
@@ -66,8 +72,10 @@ const runToolCall = async (
 		return toolFailure(context.translate("server:agent.tool.unavailable"));
 	}
 
-	//* Browser-only interactions need separate confirmation when required.
-	const screenTool = tool.interaction?.key === constants.agent.widgets.screen;
+	//* Hidden interactions need separate confirmation when required.
+	const hiddenTool =
+		tool.interaction !== undefined &&
+		hiddenInteractionKeys.has(tool.interaction.key);
 	const interactionAnswered =
 		answer !== undefined &&
 		pending !== undefined &&
@@ -95,9 +103,9 @@ const runToolCall = async (
 		signal: session.signal,
 	});
 
-	//* Routine and system runs skip optional interactions.
+	//* Routine, sub-agent and system runs skip optional interactions.
 	const unattended =
-		props.mode === "routine" || props.authority.principal.type === "system";
+		props.mode !== "chat" || props.authority.principal.type === "system";
 	const asks =
 		tool.interaction !== undefined &&
 		!interactionAnswered &&
@@ -136,7 +144,7 @@ const runToolCall = async (
 	});
 
 	//* Visible interactions also confirm the call when required.
-	if (question && tool.interaction && !screenTool) {
+	if (question && tool.interaction && !hiddenTool) {
 		return ask({
 			key: tool.interaction.key,
 			version: tool.interaction.version,

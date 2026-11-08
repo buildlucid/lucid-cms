@@ -11,6 +11,20 @@ export const effortFor = (model: AiModel, effort?: AiReasoningEffort | null) =>
 		? effort
 		: model.defaultReasoningEffort;
 
+/** Finds a selection's model in the catalogue, with the effort it runs with. The model is undefined when it isn't offered. */
+export const resolveModelSelection = (
+	catalog: AiModelCatalog | undefined,
+	selection?: AiModelSelection | null,
+) => {
+	const model = catalog?.models.find(
+		(model) => model.id === selection?.modelId,
+	);
+	return {
+		model,
+		effort: model ? effortFor(model, selection?.reasoningEffort) : null,
+	};
+};
+
 /** Switches to `model`, keeping the current effort when it supports it. */
 export const selectModel = (
 	model: AiModel,

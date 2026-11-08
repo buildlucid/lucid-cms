@@ -11,6 +11,7 @@ import type {
 	AgentReferencesData,
 	AgentRunnerToolName,
 	AgentScreenCall,
+	AgentSubagentWidgetData,
 	AgentWebReadOutput,
 	AgentWebSearchOutput,
 } from "@lucidcms/types";
@@ -41,6 +42,11 @@ export const builderChangesWidget =
 	"lucid-builder-changes" satisfies AgentCoreWidgetKey;
 /** Lists the references a tool call linked, where it linked them. */
 export const referencesWidget = "lucid-references" satisfies AgentCoreWidgetKey;
+/** Links a sub-agent start call to the sub-agent's chat. */
+export const subagentWidget = "lucid-subagent" satisfies AgentCoreWidgetKey;
+/** Pauses a run until its sub-agents finish. The server answers it, so it never shows. */
+export const subagentWaitWidget =
+	"lucid-subagent-wait" satisfies AgentCoreWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webReadTool = "web_read" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
@@ -70,6 +76,13 @@ export const memoryReviewWidget =
 export const memoryTools: ReadonlySet<string> = new Set([
 	"lucid_memory_save",
 	"lucid_memory_delete",
+] satisfies AgentLucidToolName[]);
+/** Tools that start, redirect, stop or collect sub-agents, which the chat's sub-agent rows then refresh for. */
+export const subagentTools: ReadonlySet<string> = new Set([
+	"lucid_subagent_start",
+	"lucid_subagent_message",
+	"lucid_subagent_wait",
+	"lucid_subagent_stop",
 ] satisfies AgentLucidToolName[]);
 /** Tools that trigger an immediate deploy status refresh. */
 export const deployTools: ReadonlySet<string> = new Set([
@@ -295,6 +308,14 @@ export const isScreenCallData = (value: unknown): value is AgentScreenCall =>
 	(value.action === "read" ||
 		value.action === "update" ||
 		value.action === "focus");
+
+/** Sub-agent rows come from saved widget data, so only the fields they read are checked. */
+export const isSubagentWidgetData = (
+	value: unknown,
+): value is AgentSubagentWidgetData =>
+	isObjectRecord(value) &&
+	typeof value.conversationId === "string" &&
+	typeof value.agentKey === "string";
 
 /** Builder changes come from the server, so only the parts the card reads are checked. */
 export const isBuilderChangesData = (

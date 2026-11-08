@@ -1,16 +1,9 @@
-import constants from "../../constants/constants.js";
-import {
-	AgentConversationsRepository,
-	AgentRunsRepository,
-} from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import resolveNotification from "../notifications/resolve.js";
-import executeRunFinishedHooks from "./helpers/execute-run-finished-hooks.js";
 import getAccessibleRun from "./helpers/get-accessible-run.js";
-import { inputNeededNotification } from "./notifications/input-needed.js";
-import { agentNotificationKeys } from "./notifications/keys.js";
+import stopRun from "./helpers/stop-run.js";
+import stopSubagents from "./helpers/subagents/stop-subagents.js";
 
-/** Stops a run. A worker still executing it loses its token and stops at the next write. */
+/** Stops a run, and the sub-agents its chat still has working. A worker still executing it loses its token and stops at the next write. */
 const cancelRun: ServiceFn<
 	[{ runId: string; userId: number }],
 	undefined
@@ -18,40 +11,16 @@ const cancelRun: ServiceFn<
 	const run = await getAccessibleRun(context, input);
 	if (run.error) return run;
 
-	const now = new Date().toISOString();
-	const AgentRuns = new AgentRunsRepository(context.db);
-
-	const AgentConversations = new AgentConversationsRepository(context.db);
-	const paused = await AgentConversations.pauseQueue({
+	const stopped = await stopRun(context, {
+		runId: input.runId,
 		conversationId: run.data.conversationId,
-		runId: input.runId,
+		tellParent: true,
 	});
-	if (paused.error) return paused;
+	if (stopped.error) return stopped;
+	//* a stale stop for a run that already ended leaves a newer run's sub-agents alone
+	if (!stopped.data) return { error: undefined, data: undefined };
 
-	const cancelled = await AgentRuns.transition({
-		runId: input.runId,
-		from: constants.agent.runStatuses.active,
-		status: "cancelled",
-		now,
-	});
-	if (cancelled.error) return cancelled;
-
-	const released = await AgentConversations.releaseRun({
-		conversationId: run.data.conversationId,
-		runId: input.runId,
-		updatedAt: now,
-	});
-	if (released.error) return released;
-
-	//* a run that had already stopped was told about then
-	if (cancelled.data) {
-		await executeRunFinishedHooks(context, { runId: input.runId });
-	}
-
-	return resolveNotification(context, {
-		definition: inputNeededNotification,
-		key: agentNotificationKeys.input(run.data.conversationId),
-	});
+	return stopSubagents(context, { conversationId: run.data.conversationId });
 };
 
 export default cancelRun;

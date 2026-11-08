@@ -29,7 +29,14 @@ const hydrateUsageSessions: ServiceFn<
 		}),
 		conversationIds.length
 			? AgentConversations.selectMultiple({
-					select: ["id", "title", "user_id", "agent_key", "kind"],
+					select: [
+						"id",
+						"title",
+						"user_id",
+						"agent_key",
+						"kind",
+						"parent_conversation_id",
+					],
 					where: [{ key: "id", operator: "in", value: conversationIds }],
 					validation: { enabled: true },
 				})
@@ -58,7 +65,11 @@ const hydrateUsageSessions: ServiceFn<
 			)
 			.map((conversation) => [
 				conversation.id,
-				{ id: conversation.id, title: conversation.title },
+				{
+					id: conversation.id,
+					title: conversation.title,
+					parentConversationId: conversation.parent_conversation_id,
+				},
 			]),
 	);
 

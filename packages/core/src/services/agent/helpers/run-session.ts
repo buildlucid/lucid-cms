@@ -8,6 +8,7 @@ import {
 	settleToolCall,
 } from "../../../libs/agent/context.js";
 import { inputMessageParts } from "../../../libs/agent/input.js";
+import { pendingWaitingFor } from "../../../libs/agent/interactions.js";
 import type { StoredAgentMessagePart } from "../../../libs/agent/messages.js";
 import { isTerminalRunStatus } from "../../../libs/agent/run-status.js";
 import type {
@@ -15,6 +16,8 @@ import type {
 	ConversationContext,
 } from "../../../libs/agent/types.js";
 import type { LucidAgentConversations } from "../../../libs/db/tables/agent-conversations.js";
+import type { LucidAgentInputs } from "../../../libs/db/tables/agent-inputs.js";
+import type { Select } from "../../../libs/db/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
@@ -41,6 +44,9 @@ import executeRunFinishedHooks from "./execute-run-finished-hooks.js";
 import messageContext from "./message-context.js";
 import notifyRoutineRun from "./notify-routine-run.js";
 import registerUrlKeys from "./register-url-keys.js";
+import getParentPart from "./subagents/get-parent-part.js";
+import stopSubagents from "./subagents/stop-subagents.js";
+import wakeParent from "./subagents/wake-parent.js";
 
 export type SessionRun = {
 	id: string;
@@ -142,6 +148,8 @@ const openRunSession = async (
 			token,
 			checkpoint,
 			status,
+			waitingFor:
+				status === "waiting" ? pendingWaitingFor(checkpoint.pending) : null,
 			errorMessage: props?.errorMessage,
 			finish: status === "completed" ? checkpoint.finish : undefined,
 			now: props?.now ?? new Date().toISOString(),
@@ -212,6 +220,7 @@ const openRunSession = async (
 				references: AgentReferenceInput[];
 				screen: AgentScreen | null;
 				timezone: string | null;
+				source: Select<LucidAgentInputs>["source"];
 				createdAt: string;
 			}) =>
 				withTransaction<StoredAgentMessagePart[]>(context, async (context) => {
@@ -231,7 +240,16 @@ const openRunSession = async (
 					});
 					if (sent.error) return sent;
 
+					const parent =
+						input.source === "parent"
+							? await getParentPart(context, {
+									conversationId: run.conversation_id,
+								})
+							: undefined;
+					if (parent?.error) return parent;
+
 					const parts = [
+						...(parent?.data ? [parent.data] : []),
 						...inputMessageParts({
 							text: input.text,
 							references: references.data,
@@ -312,7 +330,8 @@ const openRunSession = async (
 				status: Exclude<AgentRunStatus, "queued" | "running" | "cancelled">,
 				errorMessage?: string,
 			): ServiceResponse<{ status: AgentRunStatus }> => {
-				if (status === "failed") {
+				//* a failed run pauses its queue for the person to decide, but a sub-agent's queue only holds its parent's messages, which carry on
+				if (status === "failed" && checkpoint.mode !== "subagent") {
 					const AgentConversations = new AgentConversationsRepository(
 						context.db,
 					);
@@ -411,6 +430,18 @@ const openRunSession = async (
 
 					if (isTerminalRunStatus(status)) {
 						await executeRunFinishedHooks(writeContext, { runId: run.id });
+
+						//* a sub-agent tells its parent it's done. Other runs stop their sub-agents, since nothing would hear their results
+						if (checkpoint.mode === "subagent") {
+							await wakeParent(writeContext, {
+								conversationId: run.conversation_id,
+							});
+						} else {
+							const stopped = await stopSubagents(writeContext, {
+								conversationId: run.conversation_id,
+							});
+							if (stopped.error) return stopped;
+						}
 					}
 
 					return { error: undefined, data: undefined };

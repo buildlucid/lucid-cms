@@ -6,6 +6,7 @@ import {
 	agentConversationKindSchema,
 	agentRunOutcomeSchema,
 	agentRunStatusSchema,
+	agentRunWaitingForSchema,
 	agentTitleStatusSchema,
 } from "../../../schemas/agent.js";
 import type { AiModelSelection } from "../../../types/response.js";
@@ -39,6 +40,7 @@ export const agentConversationsTable = defineTable(
 			},
 			user_id: { schema: z.number().nullable(), type: "integer" },
 			routine_id: { schema: z.uuid().nullable(), type: "text" },
+			parent_conversation_id: { schema: z.uuid().nullable(), type: "text" },
 			queue_paused: {
 				schema: z.union([
 					z.literal(adapter.config.defaults.boolean.true),
@@ -62,6 +64,7 @@ export const agentConversationsTable = defineTable(
 			latest_run_status: { schema: agentRunStatusSchema.nullish() },
 			latest_run_outcome: { schema: agentRunOutcomeSchema.nullish() },
 			latest_run_error: { schema: z.string().nullish() },
+			latest_run_waiting_for: { schema: agentRunWaitingForSchema.nullish() },
 		},
 		query: {
 			filters: {
@@ -69,6 +72,7 @@ export const agentConversationsTable = defineTable(
 				agentKey: "lucid_agent_conversations.agent_key",
 				routineId: "lucid_agent_conversations.routine_id",
 				status: "lucid_agent_runs.status",
+				waitingFor: "lucid_agent_runs.waiting_for",
 			},
 			sorts: {
 				title: "lucid_agent_conversations.title",
@@ -100,6 +104,8 @@ export interface LucidAgentConversations {
 	/** Private to this user. Null for chats started by routines defined in code. */
 	user_id: number | null;
 	routine_id: string | null;
+	/** The chat whose agent started this one as a sub-agent. Deleted with it. */
+	parent_conversation_id: string | null;
 	active_run_id: string | null;
 	queue_paused: Generated<BooleanInt>;
 	/** The latest measured context, written by the conversation's active run. */

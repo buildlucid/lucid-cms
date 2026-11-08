@@ -3,7 +3,7 @@ import { agentFormatter } from "../../../libs/formatters/index.js";
 import { AgentInputsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/** The conversation's undelivered input, in queue order. */
+/** The person's undelivered input, in queue order. Messages from a parent agent are left out. */
 const getInputs: ServiceFn<[{ conversationId: string }], AgentInput[]> = async (
 	context,
 	input,
@@ -15,7 +15,9 @@ const getInputs: ServiceFn<[{ conversationId: string }], AgentInput[]> = async (
 
 	return {
 		error: undefined,
-		data: result.data.map((row) => agentFormatter.formatInput({ input: row })),
+		data: result.data
+			.filter((row) => row.source === "person")
+			.map((row) => agentFormatter.formatInput({ input: row })),
 	};
 };
 

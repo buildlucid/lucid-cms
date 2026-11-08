@@ -157,6 +157,11 @@ export const messageText = (parts: StoredAgentMessagePart[]) => {
 		text = `${text}\n\n${routineEventsIntro}\n<routine_events>\n${changes.join("\n")}\n</routine_events>`;
 	}
 
+	const parent = parts.find((part) => part.type === "parent");
+	if (parent) {
+		text = `${text}\n\n${contextTag("from_parent_agent", { agent_key: parent.agentKey })}`;
+	}
+
 	const references = parts.flatMap((part) =>
 		part.type === "reference" ? [part.reference] : [],
 	);

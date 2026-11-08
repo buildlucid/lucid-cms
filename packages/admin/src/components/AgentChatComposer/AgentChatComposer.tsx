@@ -12,15 +12,18 @@ import AgentComposer, {
 	type AgentComposerHandle,
 	type AgentComposerProps,
 } from "@/components/AgentComposer/AgentComposer";
+import AgentComposerNotice from "@/components/AgentComposerNotice/AgentComposerNotice";
 import AgentComposerStack from "@/components/AgentComposerStack/AgentComposerStack";
 import AgentConfirmationPicker from "@/components/AgentConfirmationPicker/AgentConfirmationPicker";
 import AgentContextRing from "@/components/AgentContextRing/AgentContextRing";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
+import AgentSubagentConfirmations from "@/components/AgentSubagentConfirmations/AgentSubagentConfirmations";
 import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import Link from "@/components/Link/Link";
 import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import api from "@/services/api";
@@ -29,7 +32,11 @@ import T, { translateAdminCopy } from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import type { AgentReferenceItem } from "@/utils/agent-references";
 
-/** Shows queued input and chat controls, with composer interactions replacing the chat box until answered or set aside. */
+/**
+ * Shows queued input, controls and pending interactions, including sub-agent confirmations in the
+ * parent chat. Sub-agent chats allow steering only while running, inherit model and confirmation
+ * settings, and link back to the parent after finishing.
+ */
 const AgentChatComposer: Component<{
 	chat: AgentChat;
 	conversationId: string;
@@ -62,6 +69,11 @@ const AgentChatComposer: Component<{
 	// ----------------------------------------
 	// Memos
 	const conversation = createMemo(() => props.chat.data());
+	const subagent = createMemo(() => props.chat.parentId() !== undefined);
+	//* a sub-agent works for the chat that started it, so people can only redirect it while it runs
+	const subagentFinished = createMemo(
+		() => subagent() && props.chat.activeRunId() === undefined,
+	);
 	//* shares the model picker's query; chat waits for it as it needs the same Lucid connection
 	const models = api.agent.useGetModels({
 		agentKey: () => conversation()?.agentKey,
@@ -77,12 +89,16 @@ const AgentChatComposer: Component<{
 		const pending = composerWidget();
 		return pending?.id !== redirecting() ? pending : undefined;
 	});
+	//* a run waiting on its sub-agents takes a message straight away, so the box reads like an idle chat's
+	const busy = createMemo(
+		() => props.chat.working() && !props.chat.waitingOnSubagents(),
+	);
 	const placeholder = createMemo(() => {
 		if (models.isError) return T()("agent.composer.placeholder.unreachable");
 		if (props.chat.pendingInteraction()) {
 			return T()("agent.composer.placeholder.instructions");
 		}
-		if (props.chat.working()) return T()("agent.composer.placeholder.busy");
+		if (busy()) return T()("agent.composer.placeholder.busy");
 		return T()("agent.composer.placeholder");
 	});
 
@@ -104,7 +120,9 @@ const AgentChatComposer: Component<{
 		props.onSend();
 		return props.chat.send(
 			text,
-			props.chat.waiting() ? "steer" : mode,
+			props.chat.waiting() || props.chat.waitingOnSubagents() || subagent()
+				? "steer"
+				: mode,
 			references,
 		);
 	};
@@ -175,12 +193,29 @@ const AgentChatComposer: Component<{
 				onResume={() => void props.chat.updateInput({ kind: "resume" })}
 				onClear={() => void props.chat.updateInput({ kind: "clear" })}
 			/>
+			<AgentSubagentConfirmations conversationId={props.conversationId} />
 			<ErrorMessage
 				theme="basic"
 				message={updateConversation.errors()?.message}
 			/>
 			<AgentUnavailableNotice>
-				<Show when={!activeWidget()}>
+				<Show when={subagentFinished() && props.chat.parentId()}>
+					{(parent) => (
+						<AgentComposerNotice
+							message={T()("agent.subagent.composer.finished")}
+							action={
+								<Link
+									href={`/admin/agent/chats/${parent()}`}
+									variant="outline"
+									size="sm"
+								>
+									{T()("agent.subagent.composer.parent")}
+								</Link>
+							}
+						/>
+					)}
+				</Show>
+				<Show when={!activeWidget() && !subagentFinished()}>
 					<AgentComposer
 						ref={(handle) => {
 							setComposer(handle);
@@ -217,10 +252,10 @@ const AgentChatComposer: Component<{
 							</Show>
 						}
 						queueable={true}
-						busy={props.chat.working()}
+						busy={busy()}
 						onStop={props.chat.working() ? stop : undefined}
 						controls={
-							<Show when={conversation()}>
+							<Show when={!subagent() && conversation()}>
 								{(current) => (
 									<AgentConfirmationPicker
 										routine={
@@ -257,7 +292,7 @@ const AgentChatComposer: Component<{
 										/>
 									)}
 								</Show>
-								<Show when={conversation()}>
+								<Show when={!subagent() && conversation()}>
 									{(current) => (
 										<AgentModelPicker
 											agentKey={current().agentKey}

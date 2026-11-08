@@ -77,8 +77,8 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 /** Everything needed to resume a run exactly where it stopped. */
 export const checkpointSchema = z.object({
 	version: z.literal(1),
-	/** Run mode fixed at creation, independent of later routine deletion. */
-	mode: z.enum(["chat", "routine"]),
+	/** Run mode fixed at creation, independent of later routine deletion. Sub-agent chats always run as `subagent`. */
+	mode: z.enum(["chat", "routine", "subagent"]),
 	/** The model and effort for this run, resolved once when it starts. */
 	selection: aiModelSelectionSchema.optional(),
 	/** Captured when the run starts, so changing chat settings never changes a pending decision. */
@@ -348,7 +348,16 @@ export type AgentFeatures = {
 		/** Limit Lucid's web tools to these domains. Omit to allow public sites. */
 		allowedDomains?: string[];
 	};
+	/** Registers the `lucid_subagent_*` tools, which start other agents as sub-agents and wait for their results. */
+	subagents: {
+		enabled: boolean;
+		/** The agent keys it can start. Omit to allow every enabled agent. */
+		agents?: readonly string[];
+	};
 };
+
+/** Sub-agents: `false` turns them off, a list of agent keys limits which agents can be started, and leaving it out allows every agent. */
+export type AgentSubagentsOption = boolean | readonly string[];
 
 /** Lucid's per-type media generation tools: a boolean turns every type on or off, and omitted types stay on. */
 export type AgentMediaGenerateOptions =
@@ -361,7 +370,9 @@ export type AgentFeatureOptions = {
 		? Partial<Omit<AgentFeatures["media"], "generate">> & {
 				generate?: AgentMediaGenerateOptions;
 			}
-		: Partial<AgentFeatures[Key]>;
+		: Key extends "subagents"
+			? AgentSubagentsOption
+			: Partial<AgentFeatures[Key]>;
 };
 
 /** An agent created with `defineAgent`, with its own chat and routine permissions. */

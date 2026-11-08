@@ -141,6 +141,7 @@ const AgentRoutineTableRow: Component<{
 						<AgentRunStatus
 							status={run().status}
 							outcome={run().outcome}
+							waitingFor={run().waitingFor}
 							size="sm"
 						/>
 					)}

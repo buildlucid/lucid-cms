@@ -16,6 +16,7 @@ import { routineInstructions } from "./routine.js";
 import { type ScreenContext, screenInstructions } from "./screen.js";
 import { siteContextInstructions } from "./site-context.js";
 import { skillInstructions } from "./skills.js";
+import { subagentInstructions } from "./subagent.js";
 import { terminologyInstructions } from "./terminology.js";
 
 /** Identifies CMS-owned sections so the remote service can prepend its base prompt. */
@@ -40,9 +41,11 @@ const buildInstructions = (props: {
 		terminologyInstructions,
 		siteContextInstructions(props.siteContext),
 		environmentInstructions(props.localization),
-		props.mode === "chat"
-			? chatInstructions
-			: routineInstructions(props.attended),
+		{
+			chat: chatInstructions,
+			routine: routineInstructions(props.attended),
+			subagent: subagentInstructions,
+		}[props.mode],
 		referenceInstructions,
 		props.screen ? screenInstructions(props.screen) : "",
 		capabilityInstructions(props.capabilities),
