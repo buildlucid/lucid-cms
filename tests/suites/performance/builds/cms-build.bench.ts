@@ -37,14 +37,26 @@ benchmark({
 				tolerance: 0.15,
 				blocking: false,
 			},
-			"server.size": { label: "Server size", unit: "bytes", value: server.bytes },
+			"server.size": {
+				label: "Server size",
+				unit: "bytes",
+				value: server.bytes,
+			},
 			"server.gzip": {
 				label: "Server size (gzip)",
 				unit: "bytes",
 				value: server.gzipBytes,
 			},
-			"assets.size": { label: "Assets size", unit: "bytes", value: client.bytes },
-			"assets.files": { label: "Assets files", unit: "count", value: client.files },
+			"assets.size": {
+				label: "Assets size",
+				unit: "bytes",
+				value: client.bytes,
+			},
+			"assets.files": {
+				label: "Assets files",
+				unit: "count",
+				value: client.files,
+			},
 		};
 	},
 });
