@@ -3,9 +3,6 @@ import type {
 	TypeGenerationFile,
 	TypeGenerationModule,
 } from "../../type-generation/types.js";
-import type BrickBuilder from "../builders/brick-builder/index.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../builders/field-builder/index.js";
 import registeredFields, {
 	fieldHooks,
 } from "../custom-fields/registered-fields.js";
@@ -15,6 +12,9 @@ import type {
 	FieldConfig,
 	FieldTypes,
 } from "../custom-fields/types.js";
+import type BrickDefinition from "../definitions/brick/index.js";
+import type CollectionDefinition from "../definitions/collection/index.js";
+import { getFieldSetState } from "../definitions/fields/index.js";
 import resolveCollectionLocalization from "../helpers/resolve-collection-localization.js";
 import { generateAuthoringTypes } from "./authoring.js";
 import {
@@ -24,7 +24,7 @@ import {
 	toPascalCaseIdentifier,
 } from "./helpers.js";
 
-type BuilderContext = BrickBuilder | CollectionBuilder;
+type BuilderContext = BrickDefinition | CollectionDefinition;
 
 type CollectionTypeGenLocalization = Parameters<
 	typeof resolveCollectionLocalization
@@ -74,7 +74,7 @@ const collectionDocumentSortKeys = ["createdAt", "updatedAt"] as const;
 
 /** Collects sortable top-level field sort keys, independent of listing config. */
 const collectCustomFieldSortKeys = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ): string[] => {
 	const sortKeys: string[] = [];
 
@@ -90,7 +90,7 @@ const collectCustomFieldSortKeys = (
 };
 
 /** Returns sort keys for a collection. */
-const getCollectionSortKeys = (collection: CollectionBuilder): string[] => {
+const getCollectionSortKeys = (collection: CollectionDefinition): string[] => {
 	const sortKeys = collection.getData.orderable
 		? [...collectionDocumentSortKeys, "order"]
 		: [...collectionDocumentSortKeys];
@@ -251,9 +251,7 @@ const renderField = (
 	context: RenderFieldContext,
 ): RenderedField => {
 	const fieldDefinition = registeredFields[field.type];
-	const fieldInstance = getFieldBuilderState(context.builder).fields.get(
-		field.key,
-	);
+	const fieldInstance = getFieldSetState(context.builder).fields.get(field.key);
 	const fieldMode =
 		context.collectionUsesTranslations &&
 		fieldInstance?.localizedEnabled === true
@@ -386,9 +384,9 @@ const collectFilterTree = (
 
 /** Returns every configured brick so generation can treat them uniformly. */
 const getCollectionBricks = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ): Array<{
-	brick: BrickBuilder;
+	brick: BrickDefinition;
 	brickType: "builder" | "fixed" | "embedded";
 }> => {
 	return [
@@ -476,7 +474,7 @@ const applyRelationIdFilterTypes = (props: {
 
 /** Builds the target collection's existing custom-field filter tree without recursive traversals. */
 const collectCollectionCustomFilterTree = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ): FilterTreeNode => {
 	const tree = collectFilterTree(collection.persistedFieldTree, {
 		kind: "collection",
@@ -508,7 +506,7 @@ const addRelationDocumentFilterBranches = (props: {
 	tree: FilterTreeNode;
 	fields: FieldConfig<FieldTypes>[];
 	scope: FilterScope;
-	collectionsByKey: Map<string, CollectionBuilder>;
+	collectionsByKey: Map<string, CollectionDefinition>;
 }): void => {
 	for (const field of props.fields) {
 		const fieldDefinition = registeredFields[field.type];
@@ -556,7 +554,7 @@ const addRelationDocumentFilterBranches = (props: {
 };
 
 /** Returns every version type that a resolved document can report. */
-const getCollectionVersions = (collection: CollectionBuilder): string[] => {
+const getCollectionVersions = (collection: CollectionDefinition): string[] => {
 	return dedupeStrings([
 		"latest",
 		"revision",
@@ -568,7 +566,9 @@ const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 };
 
 /** Returns the moving version targets exposed to external integrations. */
-const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
+const getCollectionVersionKeys = (
+	collection: CollectionDefinition,
+): string[] => {
 	return dedupeStrings([
 		"latest",
 		...collection.getData.publishing.environments.map(
@@ -579,8 +579,8 @@ const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
 
 /** Builds all generated declarations for a single collection. */
 const buildCollectionTypeDeclarations = (
-	collection: CollectionBuilder,
-	collectionsByKey: Map<string, CollectionBuilder>,
+	collection: CollectionDefinition,
+	collectionsByKey: Map<string, CollectionDefinition>,
 	localizationConfig: CollectionTypeGenLocalization,
 ) => {
 	const localization = resolveCollectionLocalization({
@@ -739,7 +739,7 @@ const renderRegistry = (
  * `Collections` in the selected core or client module.
  */
 const generateCollectionTypes = (props: {
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	localization: CollectionTypeGenLocalization;
 	/** The module the read types are imported from and merged into. Defaults to core's types. */
 	module?: TypeGenerationModule;

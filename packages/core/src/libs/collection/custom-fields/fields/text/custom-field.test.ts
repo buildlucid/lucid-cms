@@ -2,14 +2,16 @@ import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import TextCutomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const TextCollection = new CollectionBuilder("collection", {
+const TextCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -22,18 +24,20 @@ const TextCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addText("standard_text")
-	.addText("required_text", {
-		validation: {
-			required: true,
-		},
-	})
-	.addText("min_length_text", {
-		validation: {
-			zod: z.string().min(5),
-		},
-	});
+	fields: [
+		field.text("standard_text"),
+		field.text("required_text", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.text("min_length_text", {
+			validation: {
+				zod: z.string().min(5),
+			},
+		}),
+	],
+});
 
 test("successfully validate field - text", async () => {
 	// Standard
@@ -44,7 +48,7 @@ test("successfully validate field - text", async () => {
 			value: "Standard text",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TextCollection).fields.get("standard_text")!,
+		instance: getFieldSetState(TextCollection).fields.get("standard_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -65,7 +69,7 @@ test("successfully validate field - text", async () => {
 			value: "Required text",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TextCollection).fields.get("required_text")!,
+		instance: getFieldSetState(TextCollection).fields.get("required_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -87,7 +91,7 @@ test("successfully validate field - text", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TextCollection).fields.get("min_length_text")!,
+			getFieldSetState(TextCollection).fields.get("min_length_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -110,7 +114,7 @@ test("fail to validate field - text", async () => {
 			value: 100,
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TextCollection).fields.get("standard_text")!,
+		instance: getFieldSetState(TextCollection).fields.get("standard_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -139,7 +143,7 @@ test("fail to validate field - text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(TextCollection).fields.get("required_text")!,
+				getFieldSetState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -158,7 +162,7 @@ test("fail to validate field - text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(TextCollection).fields.get("required_text")!,
+				getFieldSetState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -177,7 +181,7 @@ test("fail to validate field - text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(TextCollection).fields.get("required_text")!,
+				getFieldSetState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -222,7 +226,7 @@ test("fail to validate field - text", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TextCollection).fields.get("min_length_text")!,
+			getFieldSetState(TextCollection).fields.get("min_length_text")!,
 		validationData: {
 			media: [],
 			user: [],

@@ -1,12 +1,12 @@
 import type { LocalizationConfig } from "../../types/config.js";
 import type { Collection } from "../../types/response.js";
-import type BrickBuilder from "../collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type {
 	FieldConfig,
 	FieldTypes,
 	SharedFieldConfig,
 } from "../collection/custom-fields/types.js";
+import type BrickDefinition from "../collection/definitions/brick/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import getContentAccess from "../collection/field-access/get-content-access.js";
 import type {
 	BrickAccess,
@@ -37,8 +37,8 @@ const conditionFields = (expression: ConditionExpression): string[] =>
 			);
 
 const formatMultiple = (props: {
-	collections: CollectionBuilder[];
-	allCollections: CollectionBuilder[];
+	collections: CollectionDefinition[];
+	allCollections: CollectionDefinition[];
 	queueSupportsDelayedDelivery?: boolean;
 	adminTranslations?: Record<string, string>;
 	localization: LocalizationConfig;
@@ -73,8 +73,8 @@ const formatMultiple = (props: {
 };
 
 const formatSingle = (props: {
-	collection: CollectionBuilder;
-	allCollections?: CollectionBuilder[];
+	collection: CollectionDefinition;
+	allCollections?: CollectionDefinition[];
 	documentTargetCollectionKeys?: Set<string>;
 	queueSupportsDelayedDelivery?: boolean;
 	adminTranslations?: Record<string, string>;
@@ -99,7 +99,7 @@ const formatSingle = (props: {
 		? getContentAccess(props.collection, props.reader)
 		: undefined;
 
-	const formatBricks = (bricks: BrickBuilder[] | undefined) =>
+	const formatBricks = (bricks: BrickDefinition[] | undefined) =>
 		(bricks ?? []).flatMap((brick) => {
 			const brickAccess = access?.bricks.get(brick.key);
 			if (brickAccess?.access === "hidden") return [];
@@ -209,7 +209,7 @@ const formatSingle = (props: {
 };
 
 const formatBrick = (props: {
-	brick: BrickBuilder;
+	brick: BrickDefinition;
 	collectionKey: string;
 	documentTargetCollectionKeys: Set<string>;
 	access?: BrickAccess;
@@ -323,7 +323,7 @@ const formatField = (
 };
 
 const getDocumentTargetCollectionKeys = (props: {
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 }) => new Set(props.collections.map((collection) => collection.key));
 
 const getDocumentId = (

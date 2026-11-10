@@ -3,14 +3,16 @@ import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import DatetimeCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const DateTimeCollection = new CollectionBuilder("collection", {
+const DateTimeCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -23,13 +25,15 @@ const DateTimeCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addDateTime("standard_datetime")
-	.addDateTime("required_datetime", {
-		validation: {
-			required: true,
-		},
-	});
+	fields: [
+		field.datetime("standard_datetime"),
+		field.datetime("required_datetime", {
+			validation: {
+				required: true,
+			},
+		}),
+	],
+});
 
 test("successfully validate field - datetime", async () => {
 	// Standard with string value
@@ -41,7 +45,7 @@ test("successfully validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -63,7 +67,7 @@ test("successfully validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -85,7 +89,7 @@ test("successfully validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -107,7 +111,7 @@ test("successfully validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -129,7 +133,7 @@ test("successfully validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("required_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("required_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -153,7 +157,7 @@ test("fail to validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -181,7 +185,7 @@ test("fail to validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -209,7 +213,7 @@ test("fail to validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -237,7 +241,7 @@ test("fail to validate field - datetime", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DateTimeCollection).fields.get("required_datetime")!,
+			getFieldSetState(DateTimeCollection).fields.get("required_datetime")!,
 		validationData: {
 			media: [],
 			user: [],

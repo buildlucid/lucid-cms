@@ -1,16 +1,20 @@
 import { describe, expect, test } from "vitest";
 import type { InternalDocumentField } from "../../exports/types.js";
-import BrickBuilder from "../collection/builders/brick-builder/index.js";
+import defineBrick from "../collection/define-brick.js";
+import field from "../collection/definitions/fields/field.js";
 import documentFieldsFormatter from "./document-fields.js";
 
 describe("content response shaping for structural fields", () => {
 	test("sections nest their children under the section key by default", () => {
-		const brick = new BrickBuilder("navItem")
-			.addText("title")
-			.addSection("badge")
-			.addText("label")
-			.addSelect("theme")
-			.endSection();
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.text("title"),
+				field.section("badge", {
+					fields: [field.text("label"), field.select("theme")],
+				}),
+			],
+		});
 
 		const fields: InternalDocumentField[] = [
 			{ key: "title", type: "text", value: "Home" },
@@ -30,10 +34,15 @@ describe("content response shaping for structural fields", () => {
 	});
 
 	test("inline sections flatten their children as if absent", () => {
-		const brick = new BrickBuilder("navItem")
-			.addSection("badge", { output: "inline" })
-			.addText("label")
-			.endSection();
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.section("badge", {
+					output: "inline",
+					fields: [field.text("label")],
+				}),
+			],
+		});
 
 		const fields: InternalDocumentField[] = [
 			{ key: "label", type: "text", value: "New" },
@@ -47,15 +56,22 @@ describe("content response shaping for structural fields", () => {
 	});
 
 	test("collapsibles support nested and inline output", () => {
-		const nestedBrick = new BrickBuilder("navItem")
-			.addCollapsible("advanced")
-			.addText("anchorLabel")
-			.endCollapsible();
+		const nestedBrick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.collapsible("advanced", { fields: [field.text("anchorLabel")] }),
+			],
+		});
 
-		const inlineBrick = new BrickBuilder("navItem")
-			.addCollapsible("advanced", { output: "inline" })
-			.addText("anchorLabel")
-			.endCollapsible();
+		const inlineBrick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.collapsible("advanced", {
+					output: "inline",
+					fields: [field.text("anchorLabel")],
+				}),
+			],
+		});
 
 		const fields: InternalDocumentField[] = [
 			{ key: "anchorLabel", type: "text", value: "Jump to" },
@@ -81,13 +97,15 @@ describe("content response shaping for structural fields", () => {
 	});
 
 	test("tabs stay transparent in content responses", () => {
-		const brick = new BrickBuilder("navItem")
-			.addTab("contentTab")
-			.addText("title")
-			.addTab("settingsTab")
-			.addSection("badge")
-			.addText("label")
-			.endSection();
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.tab("contentTab", { fields: [field.text("title")] }),
+				field.tab("settingsTab", {
+					fields: [field.section("badge", { fields: [field.text("label")] })],
+				}),
+			],
+		});
 
 		const fields: InternalDocumentField[] = [
 			{ key: "title", type: "text", value: "Home" },
@@ -103,13 +121,20 @@ describe("content response shaping for structural fields", () => {
 	});
 
 	test("sections inside repeater groups shape each group", () => {
-		const brick = new BrickBuilder("navItem")
-			.addRepeater("items")
-			.addText("title")
-			.addSection("meta", { output: "nested" })
-			.addText("caption")
-			.endSection()
-			.endRepeater();
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.repeater("items", {
+					fields: [
+						field.text("title"),
+						field.section("meta", {
+							output: "nested",
+							fields: [field.text("caption")],
+						}),
+					],
+				}),
+			],
+		});
 
 		const fields: InternalDocumentField[] = [
 			{
@@ -149,13 +174,20 @@ describe("content response shaping for structural fields", () => {
 	});
 
 	test("nested structural fields shape recursively", () => {
-		const brick = new BrickBuilder("navItem")
-			.addSection("outer")
-			.addText("outerText")
-			.addCollapsible("inner", { output: "inline" })
-			.addText("innerText")
-			.endCollapsible()
-			.endSection();
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.section("outer", {
+					fields: [
+						field.text("outerText"),
+						field.collapsible("inner", {
+							output: "inline",
+							fields: [field.text("innerText")],
+						}),
+					],
+				}),
+			],
+		});
 
 		const fields: InternalDocumentField[] = [
 			{ key: "outerText", type: "text", value: "outer" },

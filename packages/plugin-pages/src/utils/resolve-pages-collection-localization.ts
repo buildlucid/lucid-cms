@@ -1,5 +1,5 @@
-import type { CollectionBuilder } from "@lucidcms/core";
 import { resolveCollectionLocalization } from "@lucidcms/core/extension";
+import type { CollectionDefinition } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
 
 export type ResolvedPagesCollectionLocalization =
@@ -19,7 +19,7 @@ export type ResolvedPagesCollectionLocalization =
 /** Resolves locale support for the collection and the plugin's slug fields. */
 const resolvePagesCollectionLocalization = (props: {
 	collection: CollectionConfig;
-	collectionInstance: CollectionBuilder;
+	collectionInstance: CollectionDefinition;
 	localization: {
 		locales: Array<{ code: string }>;
 		defaultLocale: string | null;

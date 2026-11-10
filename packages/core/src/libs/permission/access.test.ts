@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import LucidError from "../../utils/errors/lucid-error.js";
 import defineAgent from "../agent/define-agent.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import defineCollection from "../collection/define-collection.js";
 import { type AccessGroup, accessGroupSchema } from "./access-config.js";
 import {
 	type AccessConfig,
@@ -63,7 +63,8 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 test("role grants put content and agents before administration and destructive actions last", () => {
 	const resolved = config();
 	resolved.collections = [
-		new CollectionBuilder("pages", {
+		defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: { labels: { singular: "Page", plural: "Pages" } },
 		}),

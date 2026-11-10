@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
-import type { CollectionLocalizationConfig } from "../../collection/builders/collection-builder/types.js";
+import defineCollection from "../../collection/define-collection.js";
+import type { CollectionLocalizationConfig } from "../../collection/definitions/collection/types.js";
 import checkCollectionLocalization from "./check-collection-localization.js";
 
 const localization = {
@@ -13,7 +13,8 @@ const localization = {
 };
 
 const collection = (localized?: CollectionLocalizationConfig) =>
-	new CollectionBuilder("articles", {
+	defineCollection({
+		key: "articles",
 		mode: "multiple",
 		details: {
 			labels: {

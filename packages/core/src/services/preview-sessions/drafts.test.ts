@@ -2,8 +2,9 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, describe, expect, test } from "vitest";
 import z from "zod";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import BrickBuilder from "../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../libs/collection/define-brick.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import type { LucidPreviewDraftContent } from "../../libs/db/tables/index.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
@@ -22,29 +23,45 @@ import syncCollections from "../sync/sync-collections.js";
 import syncLocales from "../sync/sync-locales.js";
 import updateDraft from "./update-draft.js";
 
-const settings = new CollectionBuilder("settings", {
+const settings = defineCollection({
+	key: "settings",
 	mode: "multiple",
 	details: { labels: { singular: "Setting", plural: "Settings" } },
-}).addText("label");
-const pages = new CollectionBuilder("pages", {
+	fields: [field.text("label")],
+});
+const pages = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	bricks: {
-		builder: [new BrickBuilder("hero").addText("heading", { localized: true })],
-		fixed: [new BrickBuilder("seo").addText("summary", { localized: false })],
+		builder: [
+			defineBrick({
+				key: "hero",
+				fields: [field.text("heading", { localized: true })],
+			}),
+		],
+		fixed: [
+			defineBrick({
+				key: "seo",
+				fields: [field.text("summary", { localized: false })],
+			}),
+		],
 	},
-})
-	.addText("title", { localized: true })
-	.addText("subtitle", {
-		localized: false,
-		validation: { required: true, zod: z.string().min(5) },
-	})
-	.addText("notes", { localized: false, permissions: { read: true } })
-	.addRelation("settings", { collection: "settings", localized: false })
-	.addRepeater("links", { validation: { minGroups: 1 } })
-	.addText("label", { localized: false })
-	.endRepeater();
+	fields: [
+		field.text("title", { localized: true }),
+		field.text("subtitle", {
+			localized: false,
+			validation: { required: true, zod: z.string().min(5) },
+		}),
+		field.text("notes", { localized: false, permissions: { read: true } }),
+		field.relation("settings", { collection: "settings", localized: false }),
+		field.repeater("links", {
+			validation: { minGroups: 1 },
+			fields: [field.text("label", { localized: false })],
+		}),
+	],
+});
 
 /** Content without the marks preview reads add, to compare it with published reads. */
 const withoutMarks = (value: unknown): unknown =>
@@ -55,7 +72,7 @@ const withoutMarks = (value: unknown): unknown =>
 	);
 
 /** Finds a field in draft input, failing the test when it is missing. */
-const field = (fields: FieldInputSchema[] | undefined, key: string) => {
+const findField = (fields: FieldInputSchema[] | undefined, key: string) => {
 	const found = fields?.find((item) => item.key === key);
 	assert(found, `missing field ${key}`);
 	return found;
@@ -94,13 +111,13 @@ describe("preview drafts", () => {
 	/** The stored content with a changed title, hero heading and repeater, plus an added link. */
 	const editedContent = (title: string): LucidPreviewDraftContent => {
 		const draft = structuredClone(stored);
-		field(draft.fields, "title").translations = { en: title };
+		findField(draft.fields, "title").translations = { en: title };
 		const hero = draft.bricks.find((brick) => brick.key === "hero");
-		field(hero?.fields, "heading").translations = { en: "Draft heading" };
-		const links = field(draft.fields, "links");
+		findField(hero?.fields, "heading").translations = { en: "Draft heading" };
+		const links = findField(draft.fields, "links");
 		const [first] = links.groups ?? [];
 		assert(first);
-		field(first.fields, "label").value = "Draft link";
+		findField(first.fields, "label").value = "Draft link";
 		links.groups = [
 			first,
 			{
@@ -300,7 +317,7 @@ describe("preview drafts", () => {
 		const page = JSON.parse(JSON.stringify(previewed.data));
 		const base = { collectionKey: "pages", documentId: pageId, locale: "en" };
 		const hero = draft.bricks.find((brick) => brick.key === "hero");
-		const added = field(draft.fields, "links").groups?.[1];
+		const added = findField(draft.fields, "links").groups?.[1];
 		assert(hero && added);
 
 		expect(page.$preview).toEqual({ ...base, path: [] });
@@ -397,7 +414,7 @@ describe("preview drafts", () => {
 			notes: "Secret",
 		});
 
-		field(draft.fields, "settings").value = [
+		findField(draft.fields, "settings").value = [
 			{ id: otherSettingId, collectionKey: "settings" },
 		];
 		const unreadable = await writeDraft(token, draft, { user: editor });
@@ -408,8 +425,8 @@ describe("preview drafts", () => {
 	test("drafts pass a save's validation, allowing unfinished content", async () => {
 		const token = await createSession();
 		const unfinished = editedContent("Unfinished");
-		field(unfinished.fields, "subtitle").value = "Hi";
-		field(unfinished.fields, "links").groups = [];
+		findField(unfinished.fields, "subtitle").value = "Hi";
+		findField(unfinished.fields, "links").groups = [];
 		expect((await writeDraft(token, unfinished)).error).toBeUndefined();
 		expect((await readPage(token)).data?.fields).toMatchObject({
 			title: "Unfinished",
@@ -418,7 +435,7 @@ describe("preview drafts", () => {
 		});
 
 		const mistyped = editedContent("Mistyped");
-		field(mistyped.fields, "subtitle").type = "json";
+		findField(mistyped.fields, "subtitle").type = "json";
 		expect((await writeDraft(token, mistyped)).error?.status).toBe(400);
 		expect((await readPage(token)).data?.fields.title).toBe("Unfinished");
 	});

@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import type { DocumentRefVersionTypeResolver } from "../../../libs/refs/documents/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -17,14 +17,14 @@ const snapshotVersionType =
 	constants.collectionBuilder.publishing.snapshotVersionType;
 
 const findCollection = (
-	collections: CollectionBuilder[],
+	collections: CollectionDefinition[],
 	collectionKey: string,
 ) => {
 	return collections.find((collection) => collection.key === collectionKey);
 };
 
 const findEnvironment = (
-	collection: CollectionBuilder | undefined,
+	collection: CollectionDefinition | undefined,
 	versionType: RelationVersionType,
 ) => {
 	return collection?.getData.publishing.environments.find(
@@ -33,7 +33,7 @@ const findEnvironment = (
 };
 
 const resolveMappedDocumentVersionType = (props: {
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 	targetCollectionKey?: string;
@@ -73,7 +73,7 @@ const resolveMappedDocumentVersionType = (props: {
 
 /** Maps a source document's version to its related document's version, treating pinned sources as latest. */
 export const resolveRelatedDocumentVersionType = (props: {
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	sourceCollectionKey: string;
 	sourceVersionType: DocumentVersionType;
 	targetCollectionKey?: string;
@@ -91,7 +91,7 @@ export const resolveRelatedDocumentVersionType = (props: {
  * explicit version when no configured or same-named mapping exists.
  */
 export const resolvePreviewCollectionVersionType = (props: {
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 	targetCollectionKey: string;
@@ -111,7 +111,7 @@ const toRelationSourceVersionType = (
 		: versionType;
 
 const createRelationVersionTypeResolver = (props: {
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 }): DocumentRefVersionTypeResolver => {
@@ -126,17 +126,9 @@ const createRelationVersionTypeResolver = (props: {
 };
 
 /**
- * Resolves the version context used when hydrating document relation refs.
- *
- * The document being fetched and the documents it references do not always use
- * the same version type. Latest documents hydrate latest refs, revisions keep
- * the historical document body but still preview refs from latest, and request
- * proposals and snapshots also hydrate against latest.
- *
- * The returned `resolveVersionType` is per related collection. That lets source
- * environments map to different target environments, falls back to same-named
- * target environments when they exist, and finally uses latest when a target
- * collection does not support the source environment.
+ * Resolves relation versions per target collection. Latest, revisions and request versions use
+ * latest refs. Environments use configured mappings, then a same-named target environment, then
+ * latest.
  */
 const resolveRelationVersionType: ServiceFn<
 	[

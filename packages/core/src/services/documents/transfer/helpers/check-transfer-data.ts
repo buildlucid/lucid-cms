@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../../libs/collection/definitions/collection/index.js";
 import filterReadableData from "../../../../libs/collection/field-access/filter-readable-data.js";
 import getContentAccess from "../../../../libs/collection/field-access/get-content-access.js";
 import type { DocumentData } from "../../../../libs/toolkit/documents/types.js";
@@ -17,7 +17,7 @@ import toDocumentInput from "../../helpers/to-document-input.js";
 const checkTransferData: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			data: DocumentData;
 			authUser?: LucidActor;
 			/** The document, or request proposal, the values would update. */

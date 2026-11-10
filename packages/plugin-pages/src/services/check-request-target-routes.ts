@@ -1,5 +1,6 @@
-import { type CollectionBuilder, copy } from "@lucidcms/core";
+import { copy } from "@lucidcms/core";
 import type {
+	CollectionDefinition,
 	CollectionTableNames,
 	RequestCheckBlocker,
 	ServiceFn,
@@ -16,7 +17,7 @@ const checkRequestTargetRoutes: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			tables: CollectionTableNames;
 			target: string;
 			members: RequestTargetMember[];

@@ -1,4 +1,4 @@
-import { CollectionBuilder, LucidError } from "@lucidcms/core";
+import { defineCollection, field, LucidError } from "@lucidcms/core";
 import { describe, expect, test } from "vitest";
 import pagesPlugin from "../../plugin.js";
 import type { CollectionConfig } from "../../types/types.js";
@@ -26,11 +26,14 @@ const config = {
 
 describe("route segments", () => {
 	test("accepts a generated single relation to a scalar field", () => {
-		const product = new CollectionBuilder("product", {
+		const product = defineCollection({
+			key: "product",
 			mode: "multiple",
 			details,
-		}).addText("key");
-		const documentation = new CollectionBuilder("documentation", {
+			fields: [field.text("key")],
+		});
+		const documentation = defineCollection({
+			key: "documentation",
 			mode: "multiple",
 			details,
 		});
@@ -46,11 +49,14 @@ describe("route segments", () => {
 	});
 
 	test("the plugin exposes its computed path as collection routing", () => {
-		const product = new CollectionBuilder("product", {
+		const product = defineCollection({
+			key: "product",
 			mode: "multiple",
 			details,
-		}).addText("key");
-		const documentation = new CollectionBuilder("documentation", {
+			fields: [field.text("key")],
+		});
+		const documentation = defineCollection({
+			key: "documentation",
 			mode: "multiple",
 			details,
 		});
@@ -86,14 +92,14 @@ describe("route segments", () => {
 	});
 
 	test("rejects missing collections and structurally nested segment fields", () => {
-		const product = new CollectionBuilder("product", {
+		const product = defineCollection({
+			key: "product",
 			mode: "multiple",
 			details,
-		})
-			.addSection("routing")
-			.addText("key")
-			.endSection();
-		const documentation = new CollectionBuilder("documentation", {
+			fields: [field.section("routing", { fields: [field.text("key")] })],
+		});
+		const documentation = defineCollection({
+			key: "documentation",
 			mode: "multiple",
 			details,
 		});

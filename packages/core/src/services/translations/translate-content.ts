@@ -1,5 +1,5 @@
 import z from "zod";
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import type { ContentAccess } from "../../libs/collection/field-access/types.js";
 import resolveCollectionLocalization from "../../libs/collection/helpers/resolve-collection-localization.js";
 import type {
@@ -53,7 +53,7 @@ const failureKeys = {
 const translateContent: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			documents: Array<{ id: number; content: ContentInput }>;
 			locales: string[];
 			overwrite: boolean;

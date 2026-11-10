@@ -1,9 +1,12 @@
-import type { CollectionBuilder } from "@lucidcms/core";
 import {
 	getCollectionTableNames,
 	resolveRelatedDocumentVersionType,
 } from "@lucidcms/core/extension";
-import type { CollectionTableNames, ServiceFn } from "@lucidcms/core/types";
+import type {
+	CollectionDefinition,
+	CollectionTableNames,
+	ServiceFn,
+} from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
 	PluginOptionsInternal,
@@ -15,7 +18,7 @@ import getRouteSegmentDependents, {
 
 type CollectionSegmentDependents = {
 	collection: CollectionConfig;
-	collectionInstance: CollectionBuilder;
+	collectionInstance: CollectionDefinition;
 	tables: CollectionTableNames;
 	dependents: RouteSegmentDependent[];
 };

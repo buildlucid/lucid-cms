@@ -1,4 +1,4 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { defineCollection, field } from "@lucidcms/core";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -11,7 +11,8 @@ vi.mock("./helpers/propagate-route-segment-updates.js", () => ({
 
 import afterUpsertHandler from "./after-upsert-handler.js";
 
-const routeGroup = new CollectionBuilder("route-group", {
+const routeGroup = defineCollection({
+	key: "route-group",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -19,7 +20,8 @@ const routeGroup = new CollectionBuilder("route-group", {
 			plural: "Route groups",
 		},
 	},
-}).addText("route_key");
+	fields: [field.text("route_key")],
+});
 
 describe("pages afterUpsert hook", () => {
 	afterEach(() => {

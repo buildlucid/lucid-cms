@@ -1,14 +1,14 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type {
 	PublishingWorkflowConfig,
 	PublishingWorkflowStageConfig,
-} from "../../../libs/collection/builders/collection-builder/types.js";
+} from "../../../libs/collection/definitions/collection/types.js";
 
 /**
  * Reads the configured workflow from a collection, if document workflows are enabled.
  */
 export const getWorkflowConfig = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ): PublishingWorkflowConfig | undefined =>
 	collection.getData.publishing.workflow;
 
@@ -16,7 +16,7 @@ export const getWorkflowConfig = (
  * Resolves the persisted stage key, falling back to the workflow initial stage.
  */
 export const resolveEffectiveWorkflowStage = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	stageKey?: string | null;
 }): PublishingWorkflowStageConfig | undefined => {
 	const workflow = getWorkflowConfig(props.collection);
@@ -38,7 +38,7 @@ export const resolveEffectiveWorkflowStage = (props: {
  * is allowed whatever the stage.
  */
 export const workflowStageAllowsTarget = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	stageKey?: string | null;
 	target: string;
 }): boolean => {

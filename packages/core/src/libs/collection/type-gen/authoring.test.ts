@@ -3,31 +3,38 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import ts from "typescript";
 import { expect, test } from "vitest";
-import BrickBuilder from "../builders/brick-builder/index.js";
-import CollectionBuilder from "../builders/collection-builder/index.js";
+import defineBrick from "../define-brick.js";
+import defineCollection from "../define-collection.js";
+import field from "../definitions/fields/field.js";
 import generateCollectionTypes from "./index.js";
 
 test("generated toolkit inputs and patch paths type-check real calls", async () => {
-	const collection = new CollectionBuilder("typed_article", {
+	const collection = defineCollection({
+		key: "typed_article",
 		mode: "multiple",
 		localized: true,
 		details: { labels: { singular: "Article", plural: "Articles" } },
 		bricks: {
 			builder: [
-				new BrickBuilder("hero").addText("heading", { localized: true }),
+				defineBrick({
+					key: "hero",
+					fields: [field.text("heading", { localized: true })],
+				}),
 			],
 		},
-	})
-		.addText("title", { localized: true })
-		.addJSON("settings")
-		.addRepeater("links")
-		.addText("label", { localized: false })
-		.endRepeater()
-		.addRelation("related", {
-			collection: "typed_article",
-			localized: false,
-			multiple: true,
-		});
+		fields: [
+			field.text("title", { localized: true }),
+			field.json("settings"),
+			field.repeater("links", {
+				fields: [field.text("label", { localized: false })],
+			}),
+			field.relation("related", {
+				collection: "typed_article",
+				localized: false,
+				multiple: true,
+			}),
+		],
+	});
 	const generated = generateCollectionTypes({
 		collections: [collection],
 		localization: {

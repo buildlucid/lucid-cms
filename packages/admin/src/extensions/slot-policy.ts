@@ -1,3 +1,4 @@
+import type { PermissionRequirement } from "@lucidcms/types";
 import { agentWidgetSlotPolicies } from "../components/AgentWidget/constants.js";
 import { brickSlotPolicies } from "../components/BrickSlots/constants.js";
 import { captchaSlotPolicies } from "../components/CaptchaWidget/constants.js";
@@ -37,6 +38,7 @@ type Entry = {
 	key: string;
 	slot: keyof typeof slotDefinitions;
 	priority?: number;
+	permission?: PermissionRequirement;
 	match?: Match;
 };
 const matchKeys = [
@@ -50,7 +52,14 @@ const matchKeys = [
 	"adapter",
 ] as const;
 
-/** Higher priorities render first; registration order breaks ties for single winners. */
+/** How many match rules an entry sets. */
+const specificity = (entry: Entry) =>
+	matchKeys.filter((key) => entry.match?.[key] !== undefined).length;
+
+/**
+ * Higher priorities render first. For single winners at equal priority the more specific
+ * match wins, then the later registration.
+ */
 export const resolveSlots = <T extends Entry>(
 	entries: readonly T[],
 	target: Match,
@@ -70,7 +79,11 @@ export const resolveSlots = <T extends Entry>(
 		const policy = slotDefinitions[entry.slot];
 		if (policy.multiple) continue;
 		const previous = winners.get(policy.group);
-		if (!previous || (previous.priority ?? 0) === (entry.priority ?? 0)) {
+		if (
+			!previous ||
+			((previous.priority ?? 0) === (entry.priority ?? 0) &&
+				specificity(entry) >= specificity(previous))
+		) {
 			winners.set(policy.group, entry);
 		}
 	}
@@ -82,7 +95,7 @@ export const resolveSlots = <T extends Entry>(
 	);
 };
 
-/** Equal-priority overlaps are ambiguous; explicit priorities express intentional overrides. */
+/** Overlaps at equal priority and specificity are ambiguous; explicit priorities express intentional overrides. */
 export const findSlotConflicts = (entries: readonly Entry[]) =>
 	entries.flatMap((entry, index) => {
 		const policy = slotDefinitions[entry.slot];
@@ -94,6 +107,7 @@ export const findSlotConflicts = (entries: readonly Entry[]) =>
 				(previous) =>
 					slotDefinitions[previous.slot].group === policy.group &&
 					(previous.priority ?? 0) === (entry.priority ?? 0) &&
+					specificity(previous) === specificity(entry) &&
 					matchKeys.every(
 						(key) =>
 							previous.match?.[key] === undefined ||

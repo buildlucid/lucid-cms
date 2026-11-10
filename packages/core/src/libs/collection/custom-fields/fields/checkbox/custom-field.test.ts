@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import CheckboxCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const CheckboxCollection = new CollectionBuilder("collection", {
+const CheckboxCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -21,13 +23,15 @@ const CheckboxCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addCheckbox("standard_checkbox")
-	.addCheckbox("required_chekbox", {
-		validation: {
-			required: true,
-		},
-	});
+	fields: [
+		field.checkbox("standard_checkbox"),
+		field.checkbox("required_chekbox", {
+			validation: {
+				required: true,
+			},
+		}),
+	],
+});
 
 test("successfully validate field - checkbox", async () => {
 	// Standard
@@ -39,7 +43,7 @@ test("successfully validate field - checkbox", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(CheckboxCollection).fields.get("standard_checkbox")!,
+			getFieldSetState(CheckboxCollection).fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -61,7 +65,7 @@ test("successfully validate field - checkbox", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(CheckboxCollection).fields.get("required_chekbox")!,
+			getFieldSetState(CheckboxCollection).fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -85,7 +89,7 @@ test("fail to validate field - checkbox", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(CheckboxCollection).fields.get("standard_checkbox")!,
+			getFieldSetState(CheckboxCollection).fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -113,7 +117,7 @@ test("fail to validate field - checkbox", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(CheckboxCollection).fields.get("required_chekbox")!,
+			getFieldSetState(CheckboxCollection).fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
 			user: [],

@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import EmailCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const EmailCollection = new CollectionBuilder("collection", {
+const EmailCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -21,24 +23,26 @@ const EmailCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addEmail("required_email", {
-		validation: {
-			required: true,
-		},
-	})
-	.addEmail("multi_email", {
-		multiple: true,
-		validation: {
-			maxItems: 2,
-		},
-	})
-	.addEmail("internal_email", {
-		allowInternal: true,
-	});
+	fields: [
+		field.email("required_email", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.email("multi_email", {
+			multiple: true,
+			validation: {
+				maxItems: 2,
+			},
+		}),
+		field.email("internal_email", {
+			allowInternal: true,
+		}),
+	],
+});
 
 const getInstance = (key: string) => {
-	const instance = getFieldBuilderState(EmailCollection).fields.get(key);
+	const instance = getFieldSetState(EmailCollection).fields.get(key);
 	if (!instance) throw new Error(`Missing test field ${key}`);
 	return instance;
 };

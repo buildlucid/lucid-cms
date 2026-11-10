@@ -1,9 +1,10 @@
-import { CollectionBuilder, copy, defineConfig } from "@lucidcms/core";
+import { copy, defineCollection, defineConfig, field } from "@lucidcms/core";
 import { node } from "@lucidcms/node";
 import { sqlite } from "@lucidcms/sqlite";
 import testingConstants from "../../../constants/testing-constants.js";
 
-const collection = new CollectionBuilder("page", {
+const collection = defineCollection({
+	key: "page",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -15,9 +16,8 @@ const collection = new CollectionBuilder("page", {
 			}),
 		},
 	},
-})
-	.addText("title")
-	.addText("title");
+	fields: [field.text("title"), field.text("title")],
+});
 
 export default defineConfig({
 	runtime: node,

@@ -1,8 +1,8 @@
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type {
 	FieldTranslation,
 	TranslationText,
 } from "../collection/custom-fields/types.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import getFieldTranslation from "./get-field-translation.js";
 import hashTranslationText from "./hash-translation-text.js";
@@ -23,7 +23,7 @@ export type TranslationItem = {
 
 /** Lists the translated fields in document content that have source text in the default locale. */
 const listTranslationItems = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	content: ContentInput;
 }): TranslationItem[] => {

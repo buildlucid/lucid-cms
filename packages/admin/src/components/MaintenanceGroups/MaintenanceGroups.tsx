@@ -3,8 +3,7 @@ import { type Component, createMemo, For } from "solid-js";
 import { maintenanceSlots } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import type { MaintenanceGroup } from "@/components/MaintenanceSlots/types";
-import { resolveSlots } from "@/extensions/slot-policy";
-import userStore from "@/store/userStore/userStore";
+import { matchSlots } from "@/extensions/match-slots";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import {
@@ -29,13 +28,8 @@ const MaintenanceGroups: Component<{ tiles: MaintenanceTileEntry[] }> = (
 	const groups = createMemo(() =>
 		groupMaintenanceTiles([
 			...props.tiles,
-			...resolveSlots(maintenanceSlots, {})
-				.filter(
-					(entry) =>
-						!entry.permission ||
-						userStore.get.meetsRequirement(entry.permission),
-				)
-				.map((entry): MaintenanceTileEntry => ({
+			...matchSlots(maintenanceSlots, {}).map(
+				(entry): MaintenanceTileEntry => ({
 					key: entry.key,
 					group: entry.group,
 					render: () => (
@@ -50,7 +44,8 @@ const MaintenanceGroups: Component<{ tiles: MaintenanceTileEntry[] }> = (
 							</AdminExtensionBoundary>
 						</div>
 					),
-				})),
+				}),
+			),
 		]),
 	);
 

@@ -6,9 +6,9 @@ import type {
 } from "@lucidcms/types";
 import type { FieldConfig, FieldTypes } from "../../exports/types.js";
 import isPlainObject from "../../utils/helpers/is-plain-object.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { fieldHooks } from "../collection/custom-fields/registered-fields.js";
 import { storageModes } from "../collection/custom-fields/storage/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 
 /** Carries a repeater item's ref from its stored group into the content preview reads mark, without showing up in JSON. */
 export const itemRef = Symbol("lucid.item-ref");
@@ -33,7 +33,7 @@ const markFields = (
 	tree: FieldConfig<FieldTypes>[],
 	base: Base,
 	path: Path,
-	collections: CollectionBuilder[],
+	collections: CollectionDefinition[],
 ) => {
 	for (const config of tree) {
 		const value = fields[config.key];
@@ -74,8 +74,8 @@ const markBrick = (
 	brick: unknown,
 	type: PreviewTargetBrick["type"],
 	base: Base,
-	collection: CollectionBuilder,
-	collections: CollectionBuilder[],
+	collection: CollectionDefinition,
+	collections: CollectionDefinition[],
 ) => {
 	if (
 		!isPlainObject(brick) ||
@@ -100,7 +100,7 @@ const markBrick = (
  */
 export const markDocument = (
 	document: Content,
-	collections: CollectionBuilder[],
+	collections: CollectionDefinition[],
 ) => {
 	const collection = collections.find(
 		(item) => item.key === document.collectionKey,

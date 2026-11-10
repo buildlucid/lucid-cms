@@ -3,12 +3,12 @@ import type {
 	ResolvedLucidConfig,
 } from "../../exports/types.js";
 import type { InternalDocumentBrick, Refs } from "../../types/response.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import {
 	getFieldDatabaseConfig,
 	isStorageMode,
 	isTreeTableType,
 } from "../collection/custom-fields/storage/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type {
@@ -23,7 +23,7 @@ import formatter from "./helpers.js";
 
 const formatMultiple = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	refs?: Refs | null;
 	config: ResolvedLucidConfig;
@@ -105,7 +105,7 @@ const formatMultiple = (props: {
 
 const formatDocumentFields = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	refs?: Refs | null;
 	config: ResolvedLucidConfig;

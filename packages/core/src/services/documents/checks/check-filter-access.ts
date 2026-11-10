@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import type {
 	ContentAccess,
@@ -35,8 +35,8 @@ const isHiddenKey = (access: ContentAccess, key: string) => {
  * collections reached through relation filters, so listings can't reveal hidden values.
  */
 const checkFilterAccess = (props: {
-	collection: CollectionBuilder;
-	collections: CollectionBuilder[];
+	collection: CollectionDefinition;
+	collections: CollectionDefinition[];
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[];
 	reader: FieldAccessActor | undefined;
 	filter?: QueryParamFilters;

@@ -31,6 +31,7 @@
 - Added `toolkit.redirects.resolve()` and a content API route for finding where a missing page moved, with `redirects` in config for plugins to answer from.
 - Added AI translation, which translates documents into a request per language for review and tracks which translations are out of date.
 - Added `build.clientTypes`, which writes your collection types to front ends that use `@lucidcms/client`.
+- Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label.
 
 ### Breaking Changes:
 
@@ -62,6 +63,10 @@
 - Every `@lucidcms` package now shares one version, and the database, runtime and plugin packages dropped their `db-`, `runtime-` and `plugin-` prefixes, so `@lucidcms/db-sqlite` is now `@lucidcms/sqlite`. `@lucidcms/rich-text` is now `@lucidcms/richtext`.
 - Removed the `lucid` version range from `definePlugin` and runtime adapters. Packages declare the Lucid version they need as a peer dependency.
 - Plugins dropped the `Plugin` suffix from their exports, so `resendPlugin()` is now `resend()`. Plugins, database adapters and the GitHub Actions deploy provider no longer have default exports.
+- Collections and bricks are now defined with `defineCollection`, `defineBrick` and nested `field` helpers, replacing `CollectionBuilder`, `BrickBuilder` and their chained `add` methods. Plugins add fields with `collection.insertFields`, and the types are now `CollectionDefinition` and `BrickDefinition`.
+- Admin slot and route components are now typed from their definition with `SlotComponent<typeof slot>` and `RouteComponent<typeof route>`, replacing the per-slot component types.
+- `@lucidcms/admin/services` now only exports the `queryKeys` its `queries` read, and `useTranslation` only accepts your own keys and Lucid's `common.*` keys.
+- Exclusive admin slots at the same priority now go to the more specific `match`.
 
 ### Bug Fixes:
 

@@ -1,6 +1,7 @@
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
@@ -21,19 +22,21 @@ import createSingle from "./create-single.js";
 import getSingle from "./get-single.js";
 
 const fixture = getTestConfig();
-const collection = new CollectionBuilder("locale_pages", {
+const collection = defineCollection({
+	key: "locale_pages",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	publishing: { environments: [{ key: "published", label: "Published" }] },
-})
-	.addText("title")
-	.addText("slug", { localized: false });
-const requiredCollection = new CollectionBuilder("required_locale_pages", {
+	fields: [field.text("title"), field.text("slug", { localized: false })],
+});
+const requiredCollection = defineCollection({
+	key: "required_locale_pages",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
-}).addText("title", { validation: { required: true } });
+	fields: [field.text("title", { validation: { required: true } })],
+});
 let context: ServiceContext;
 let editor: LucidUser;
 let reviewer: LucidUser;

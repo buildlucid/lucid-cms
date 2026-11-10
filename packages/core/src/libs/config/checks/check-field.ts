@@ -1,10 +1,10 @@
 import type { ResolvedLucidConfig } from "../../../exports/types.js";
-import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import { normalizeRelationCollections } from "../../collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
 import type {
 	FieldConfig,
 	FieldTypes,
 } from "../../collection/custom-fields/types.js";
+import type CollectionDefinition from "../../collection/definitions/collection/index.js";
 import { translate } from "../../i18n/index.js";
 import checkRichTextField from "./check-rich-text-field.js";
 
@@ -14,7 +14,7 @@ import checkRichTextField from "./check-rich-text-field.js";
 const checkField = (
 	field: FieldConfig<FieldTypes>,
 	config: ResolvedLucidConfig,
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ) => {
 	switch (field.type) {
 		case "relation": {

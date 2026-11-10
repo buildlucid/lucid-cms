@@ -1,11 +1,13 @@
 import { describe, expect, test } from "vitest";
-import BrickBuilder from "../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import defineBrick from "../collection/define-brick.js";
+import defineCollection from "../collection/define-collection.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
+import field from "../collection/definitions/fields/field.js";
 import type { AccessConfig } from "./capabilities.js";
 import { getFieldPermission } from "./field-permissions.js";
 import { getPermissionRegistry, isCorePermission } from "./registry.js";
 
-const accessConfig = (collection: CollectionBuilder): AccessConfig => ({
+const accessConfig = (collection: CollectionDefinition): AccessConfig => ({
 	collections: [collection],
 	access: [],
 	ai: {
@@ -39,19 +41,27 @@ describe("field permissions", () => {
 	});
 
 	test("lists opted-in fields and each brick in the collection's subgroups as core permissions", () => {
-		const collection = new CollectionBuilder("pages", {
+		const collection = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: { labels: { singular: "Page", plural: "Pages" } },
 			bricks: {
 				builder: [
-					new BrickBuilder("banner", {
+					defineBrick({
+						key: "banner",
 						permissions: { update: true },
-					}).addText("cta", { permissions: { read: true } }),
+						fields: [field.text("cta", { permissions: { read: true } })],
+					}),
 				],
 			},
-		})
-			.addText("title")
-			.addTab("seo", { permissions: { read: true, update: true } });
+			fields: [
+				field.text("title"),
+				field.tab("seo", {
+					permissions: { read: true, update: true },
+					fields: [],
+				}),
+			],
+		});
 
 		const group = getPermissionRegistry(accessConfig(collection)).find(
 			(item) => item.key === "documents:pages",
@@ -85,10 +95,12 @@ describe("field permissions", () => {
 	});
 
 	test("leaves subgroups out when nothing opts in", () => {
-		const collection = new CollectionBuilder("pages", {
+		const collection = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: { labels: { singular: "Page", plural: "Pages" } },
-		}).addText("title");
+			fields: [field.text("title")],
+		});
 
 		const group = getPermissionRegistry(accessConfig(collection)).find(
 			(item) => item.key === "documents:pages",

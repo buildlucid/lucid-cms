@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
@@ -12,7 +12,7 @@ import restoreRestrictedContent from "./restore-restricted-content.js";
 const keepRestrictedContent: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			actor: LucidActor | undefined;
 			documentId: number;
 			/** The replaced version, omitted for new documents so restricted fields receive defaults. */

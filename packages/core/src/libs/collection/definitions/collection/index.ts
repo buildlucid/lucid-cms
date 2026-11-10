@@ -1,24 +1,23 @@
 import constants from "../../../../constants/constants.js";
 import deepMerge from "../../../../utils/helpers/deep-merge.js";
 import { normalizeCopy } from "../../../i18n/index.js";
-import type { FieldOptions } from "../../custom-fields/types.js";
-import type BrickBuilder from "../brick-builder/index.js";
-import FieldBuilder from "../field-builder/index.js";
+import type BrickDefinition from "../brick/index.js";
+import FieldSet from "../fields/index.js";
+import type { FieldNode, FieldPlacement } from "../fields/types.js";
+import walkFieldNodes from "../fields/walk-field-nodes.js";
 import type {
 	CollectionBrickConfig,
 	CollectionData,
-	CollectionLabelFieldOptions,
-	CollectionListFieldOptions,
 	CollectionOptions,
 	CollectionPreviewOptions,
 } from "./types.js";
 
-const collectionBrand = Symbol.for("lucidcms.collection-builder");
+const collectionBrand = Symbol.for("lucidcms.collection-definition");
 
-/** Recognizes collection builders across separately loaded copies of core. */
-export const isCollectionBuilder = (
+/** Recognizes collections across separately loaded copies of core. */
+export const isCollectionDefinition = (
 	value: unknown,
-): value is CollectionBuilder =>
+): value is CollectionDefinition =>
 	typeof value === "object" &&
 	value !== null &&
 	collectionBrand in value &&
@@ -30,33 +29,13 @@ export const isCollectionBuilder = (
 	value.config !== null &&
 	"clone" in value &&
 	typeof value.clone === "function" &&
-	"addFields" in value &&
-	typeof value.addFields === "function" &&
-	"moveFields" in value &&
-	typeof value.moveFields === "function";
+	"insertFields" in value &&
+	typeof value.insertFields === "function";
 
-/**
- * Defines a document collection and its fields. Add it to `config.collections`.
- *
- * @example
- * ```ts
- * const pages = new CollectionBuilder("pages", {
- *   mode: "multiple",
- *   details: { labels: { singular: "Page", plural: "Pages" } },
- *   revisions: true,
- * })
- *   .addText("title", {
- *     useAsLabel: true,
- *     validation: { required: true },
- *   })
- *   .addRepeater("links")
- *     .addLink("link")
- *   .endRepeater();
- * ```
- */
-class CollectionBuilder<
+/** A document collection and its fields. Create one with `defineCollection`. */
+class CollectionDefinition<
 	const TCollectionKey extends string = string,
-> extends FieldBuilder {
+> extends FieldSet {
 	readonly [collectionBrand] = true;
 	key: TCollectionKey;
 	config: CollectionOptions<TCollectionKey> & { key: TCollectionKey };
@@ -85,9 +64,9 @@ class CollectionBuilder<
 		}
 	}
 	/** Returns a collection with independent config, bricks and fields. */
-	override clone(): CollectionBuilder<TCollectionKey> {
+	override clone(): CollectionDefinition<TCollectionKey> {
 		const cloned = this.copyFieldsTo(
-			new CollectionBuilder(this.key, this.config),
+			new CollectionDefinition(this.key, this.config),
 		);
 		cloned.listing = [...this.listing];
 		cloned.labelFields = [...this.labelFields];
@@ -95,108 +74,27 @@ class CollectionBuilder<
 	}
 	// ------------------------------------
 	// Builder Methods
-	/** Adds a single-line text input. */
-	addText(
-		key: string,
-		props?: FieldOptions<"text"> & CollectionLabelFieldOptions,
+	/** Adds fields, tracking the ones shown in the document list or used as its label. */
+	override insertFields(
+		nodes: readonly FieldNode[],
+		placement?: FieldPlacement,
 	) {
-		super.addText(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a numeric input. */
-	addNumber(
-		key: string,
-		props?: FieldOptions<"number"> & CollectionLabelFieldOptions,
-	) {
-		super.addNumber(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a slider with one or two numeric values. */
-	addRange(
-		key: string,
-		props?: FieldOptions<"range"> & CollectionListFieldOptions,
-	) {
-		super.addRange(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a boolean checkbox. */
-	addCheckbox(
-		key: string,
-		props?: FieldOptions<"checkbox"> & CollectionListFieldOptions,
-	) {
-		super.addCheckbox(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a dropdown storing the selected option value. */
-	addSelect(
-		key: string,
-		props?: FieldOptions<"select"> & CollectionLabelFieldOptions,
-	) {
-		super.addSelect(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a multiline plain-text input. */
-	addTextarea(
-		key: string,
-		props?: FieldOptions<"textarea"> & CollectionLabelFieldOptions,
-	) {
-		super.addTextarea(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a date input with optional time selection. */
-	addDateTime(
-		key: string,
-		props?: FieldOptions<"datetime"> & CollectionLabelFieldOptions,
-	) {
-		super.addDateTime(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a user picker. Values are user ID arrays, even for single selection. */
-	addUser(
-		key: string,
-		props?: FieldOptions<"user"> & CollectionListFieldOptions,
-	) {
-		super.addUser(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a media picker. Values are media ID arrays, even for single selection. */
-	addMedia(
-		key: string,
-		props?: FieldOptions<"media"> & CollectionListFieldOptions,
-	) {
-		super.addMedia(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a document picker restricted to the configured collection keys. */
-	addRelation(
-		key: string,
-		props: FieldOptions<"relation"> & CollectionListFieldOptions,
-	) {
-		super.addRelation(key, props);
-		this.#fieldCollectionHelper(key, props);
-		return this;
-	}
-	/** Adds a color picker. */
-	addColor(
-		key: string,
-		props?: FieldOptions<"color"> & CollectionLabelFieldOptions,
-	) {
-		super.addColor(key, props);
-		this.#fieldCollectionHelper(key, props);
+		super.insertFields(nodes, placement);
+		walkFieldNodes(nodes, (node) => {
+			const options = node.options;
+			if (!options) return;
+			if ("showInList" in options && options.showInList) {
+				this.listing.push(node.key);
+			}
+			if ("useAsLabel" in options && options.useAsLabel) {
+				this.labelFields.push(node.key);
+			}
+		});
 		return this;
 	}
 	// ------------------------------------
 	// Private Methods
-	#copyBricks = (bricks?: Array<BrickBuilder>) => {
+	#copyBricks = (bricks?: Array<BrickDefinition>) => {
 		if (!bricks) return undefined;
 		return bricks
 			.filter(
@@ -204,14 +102,6 @@ class CollectionBuilder<
 					bricks.findIndex((b) => b.key === brick.key) === index,
 			)
 			.map((brick) => brick.clone());
-	};
-	/** Tracks collection-level field display config while fields are registered. */
-	#fieldCollectionHelper = (
-		key: string,
-		options?: CollectionLabelFieldOptions,
-	) => {
-		if (options?.showInList) this.listing.push(key);
-		if (options?.useAsLabel) this.labelFields.push(key);
 	};
 	#formatGroup = (): CollectionData["group"] => {
 		const group = this.config.group;
@@ -375,11 +265,11 @@ class CollectionBuilder<
 			})) ?? []
 		);
 	}
-	get brickInstances(): Array<BrickBuilder> {
+	get brickInstances(): Array<BrickDefinition> {
 		return (this.config.bricks?.builder || [])
 			.concat(this.config.bricks?.fixed || [])
 			.concat(this.config.bricks?.embedded || []);
 	}
 }
 
-export default CollectionBuilder;
+export default CollectionDefinition;

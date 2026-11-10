@@ -1,10 +1,12 @@
 import { describe, expect, test } from "vitest";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import collectRefTargets from "./collect-ref-targets.js";
 
-const collection = new CollectionBuilder("pages", {
+const collection = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -16,7 +18,8 @@ const collection = new CollectionBuilder("pages", {
 			}),
 		},
 	},
-}).addRichText("body");
+	fields: [field.richText("body")],
+});
 
 const context = {
 	config: {

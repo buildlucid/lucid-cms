@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import { Permissions } from "../../../libs/permission/definitions.js";
 import type { LucidUser } from "../../../types/hono.js";
@@ -7,11 +8,13 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 import { recursiveFieldValidate } from "../checks/check-validate-bricks-fields.js";
 import restrictValidationData from "./restrict-validation-data.js";
 
-const collection = new CollectionBuilder("pages", {
+const collection = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: { labels: { singular: "Page", plural: "Pages" } },
 });
-const settings = new CollectionBuilder("settings", {
+const settings = defineCollection({
+	key: "settings",
 	mode: "single",
 	details: { labels: { singular: "Settings", plural: "Settings" } },
 });
@@ -117,15 +120,18 @@ describe("restrictValidationData", () => {
 	});
 
 	test("hidden fields validate with their stored links, while visible ones only accept readable targets", () => {
-		const restricted = new CollectionBuilder("pages", {
+		const restricted = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: { labels: { singular: "Page", plural: "Pages" } },
-		})
-			.addRelation("visible", { collection: "settings" })
-			.addRelation("hidden", {
-				collection: "settings",
-				permissions: { read: true },
-			});
+			fields: [
+				field.relation("visible", { collection: "settings" }),
+				field.relation("hidden", {
+					collection: "settings",
+					permissions: { read: true },
+				}),
+			],
+		});
 		const validate = (key: string) =>
 			recursiveFieldValidate({
 				fields: [

@@ -10,7 +10,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import type { AgentWidgetComponent } from "@/components/AgentWidget/types";
+import type { AgentWidgetProps } from "@/components/AgentWidget/types";
 import RadioCards from "@/components/RadioCards/RadioCards";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import Textarea from "@/components/Textarea/Textarea";
@@ -46,9 +46,9 @@ const MemoryList: Component<{
 };
 
 /** Reviews and edits proposed memory saves or confirms deletions. */
-const AgentMemoryReview: AgentWidgetComponent<AdminOptions | undefined> = (
-	props,
-) => {
+const AgentMemoryReview: Component<
+	AgentWidgetProps<AdminOptions | undefined>
+> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [content, setContent] = createSignal("");

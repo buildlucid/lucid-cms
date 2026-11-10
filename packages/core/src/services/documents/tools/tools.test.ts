@@ -4,8 +4,9 @@ import defineAgent from "../../../libs/agent/define-agent.js";
 import { needsConfirmation } from "../../../libs/agent/interactions.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import filterReadableContent from "../../../libs/collection/field-access/filter-readable-content.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
@@ -58,83 +59,117 @@ import { outputSchema as readOutputSchema } from "./get/schema.js";
 import { writeOutputSchema } from "./schema.js";
 
 const fixture = getTestConfig();
-const pages = new CollectionBuilder("agent_pages", {
+const pages = defineCollection({
+	key: "agent_pages",
 	mode: "multiple",
 	localized: true,
 	revisions: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	publishing: { environments: [{ key: "production", label: "Production" }] },
 	bricks: {
-		builder: [new BrickBuilder("hero").addText("heading", { localized: true })],
-		fixed: [new BrickBuilder("seo").addText("description").addMedia("image")],
+		builder: [
+			defineBrick({
+				key: "hero",
+				fields: [field.text("heading", { localized: true })],
+			}),
+		],
+		fixed: [
+			defineBrick({
+				key: "seo",
+				fields: [field.text("description"), field.media("image")],
+			}),
+		],
 	},
-})
-	.addText("title", { localized: true, useAsLabel: true })
-	.addRichText("body", { localized: false })
-	.addRepeater("links")
-	.addText("label", { localized: true })
-	.endRepeater();
-const reviewed = new CollectionBuilder("agent_reviewed_pages", {
+	fields: [
+		field.text("title", { localized: true, useAsLabel: true }),
+		field.richText("body", { localized: false }),
+		field.repeater("links", {
+			fields: [field.text("label", { localized: true })],
+		}),
+	],
+});
+const reviewed = defineCollection({
+	key: "agent_reviewed_pages",
 	mode: "multiple",
 	details: { labels: { singular: "Reviewed page", plural: "Reviewed pages" } },
 	publishing: { review: { create: true, delete: true } },
-}).addText("title", { useAsLabel: true });
-const required = new CollectionBuilder("agent_required_pages", {
+	fields: [field.text("title", { useAsLabel: true })],
+});
+const required = defineCollection({
+	key: "agent_required_pages",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Required page", plural: "Required pages" } },
 	ai: { instructions: "Landing pages for campaigns." },
 	bricks: {
 		builder: [
-			new BrickBuilder("banner", {
+			defineBrick({
+				key: "banner",
 				ai: { instructions: "One banner per page." },
-			})
-				.addTab("content_tab")
-				.addText("title", {
-					localized: true,
-					details: { description: "The banner's heading" },
-					ai: { instructions: "Five words or fewer." },
-					validation: { required: true },
-				}),
+				fields: [
+					field.tab("content_tab", {
+						fields: [
+							field.text("title", {
+								localized: true,
+								details: { description: "The banner's heading" },
+								ai: { instructions: "Five words or fewer." },
+								validation: { required: true },
+							}),
+						],
+					}),
+				],
+			}),
 		],
 	},
-}).addText("title", {
-	localized: true,
-	useAsLabel: true,
-	validation: { required: true },
+	fields: [
+		field.text("title", {
+			localized: true,
+			useAsLabel: true,
+			validation: { required: true },
+		}),
+	],
 });
-const secrets = new CollectionBuilder("agent_secret_pages", {
+const secrets = defineCollection({
+	key: "agent_secret_pages",
 	mode: "multiple",
 	details: { labels: { singular: "Secret page", plural: "Secret pages" } },
 	bricks: {
 		embedded: [
-			new BrickBuilder("note")
-				.addText("caption")
-				.addRelation("doc", { collection: "agent_secret_pages" })
-				.addRelation("page", { collection: "agent_pages" }),
+			defineBrick({
+				key: "note",
+				fields: [
+					field.text("caption"),
+					field.relation("doc", { collection: "agent_secret_pages" }),
+					field.relation("page", { collection: "agent_pages" }),
+				],
+			}),
 		],
 	},
-})
-	.addText("title", { useAsLabel: true })
-	.addText("secret", { permissions: { read: true } })
-	.addText("status", { permissions: { update: true } })
-	.addRichText("open", { editor: { bricks: true } })
-	.addRichText("intro", {
-		editor: { bricks: true },
-		permissions: { update: true },
-	})
-	.addRichText("private", {
-		editor: { bricks: true },
-		permissions: { read: true },
-	})
-	.addRepeater("rows")
-	.addText("label")
-	.addRichText("rowNote", {
-		editor: { bricks: true },
-		permissions: { read: true },
-	})
-	.endRepeater()
-	.addRelation("related", { collection: "agent_secret_pages" });
+	fields: [
+		field.text("title", { useAsLabel: true }),
+		field.text("secret", { permissions: { read: true } }),
+		field.text("status", { permissions: { update: true } }),
+		field.richText("open", { editor: { bricks: true } }),
+		field.richText("intro", {
+			editor: { bricks: true },
+			permissions: { update: true },
+		}),
+		field.richText("private", {
+			editor: { bricks: true },
+			permissions: { read: true },
+		}),
+		field.repeater("rows", {
+			fields: [
+				field.text("label"),
+				field.richText("rowNote", {
+					editor: { bricks: true },
+					permissions: { read: true },
+				}),
+			],
+		}),
+		field.relation("related", { collection: "agent_secret_pages" }),
+	],
+});
 const agent = defineAgent({
 	key: "editor",
 	name: "Editor",

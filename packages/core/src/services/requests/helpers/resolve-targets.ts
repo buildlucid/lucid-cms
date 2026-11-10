@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type { RequestType } from "../../../libs/db/tables/requests.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
@@ -6,7 +6,7 @@ import getAllowedTargets from "./get-allowed-targets.js";
 
 /** Validates selected publish or unpublish targets and rejects targets for delete requests. */
 const resolveTargets = (data: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	type: Exclude<RequestType, "create">;
 	source: string | null;
 	targets: string[];

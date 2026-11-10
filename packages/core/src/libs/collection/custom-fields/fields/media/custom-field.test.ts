@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import MediaCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const MediaCollection = new CollectionBuilder("collection", {
+const MediaCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -21,58 +23,60 @@ const MediaCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addMedia("standard_media")
-	.addMedia("required_media", {
-		validation: {
-			required: true,
-		},
-	})
-	.addMedia("min_width_media", {
-		validation: {
-			width: {
-				min: 100,
+	fields: [
+		field.media("standard_media"),
+		field.media("required_media", {
+			validation: {
+				required: true,
 			},
-		},
-	})
-	.addMedia("max_width_media", {
-		validation: {
-			width: {
-				max: 200,
+		}),
+		field.media("min_width_media", {
+			validation: {
+				width: {
+					min: 100,
+				},
 			},
-		},
-	})
-	.addMedia("min_height_media", {
-		validation: {
-			height: {
-				min: 100,
+		}),
+		field.media("max_width_media", {
+			validation: {
+				width: {
+					max: 200,
+				},
 			},
-		},
-	})
-	.addMedia("max_height_media", {
-		validation: {
-			height: {
-				max: 200,
+		}),
+		field.media("min_height_media", {
+			validation: {
+				height: {
+					min: 100,
+				},
 			},
-		},
-	})
-	.addMedia("type_media", {
-		validation: {
-			type: "image",
-		},
-	})
-	.addMedia("extension_media", {
-		validation: {
-			extensions: ["png"],
-		},
-	})
-	.addMedia("multi_media", {
-		multiple: true,
-		validation: {
-			minItems: 2,
-			maxItems: 3,
-		},
-	});
+		}),
+		field.media("max_height_media", {
+			validation: {
+				height: {
+					max: 200,
+				},
+			},
+		}),
+		field.media("type_media", {
+			validation: {
+				type: "image",
+			},
+		}),
+		field.media("extension_media", {
+			validation: {
+				extensions: ["png"],
+			},
+		}),
+		field.media("multi_media", {
+			multiple: true,
+			validation: {
+				minItems: 2,
+				maxItems: 3,
+			},
+		}),
+	],
+});
 
 test("successfully validate field - media", async () => {
 	// Standard
@@ -84,7 +88,7 @@ test("successfully validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("standard_media")!,
+			getFieldSetState(MediaCollection).fields.get("standard_media")!,
 		validationData: {
 			media: [
 				{
@@ -114,7 +118,7 @@ test("successfully validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
+			getFieldSetState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [
 				{
@@ -144,7 +148,7 @@ test("successfully validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("min_width_media")!,
+			getFieldSetState(MediaCollection).fields.get("min_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -174,7 +178,7 @@ test("successfully validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("max_width_media")!,
+			getFieldSetState(MediaCollection).fields.get("max_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -204,7 +208,7 @@ test("successfully validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("min_height_media")!,
+			getFieldSetState(MediaCollection).fields.get("min_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -234,7 +238,7 @@ test("successfully validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("max_height_media")!,
+			getFieldSetState(MediaCollection).fields.get("max_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -263,7 +267,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(MediaCollection).fields.get("type_media")!,
+		instance: getFieldSetState(MediaCollection).fields.get("type_media")!,
 		validationData: {
 			media: [
 				{
@@ -293,7 +297,7 @@ test("successfully validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("extension_media")!,
+			getFieldSetState(MediaCollection).fields.get("extension_media")!,
 		validationData: {
 			media: [
 				{
@@ -325,7 +329,7 @@ test("fail to validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
+			getFieldSetState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -356,7 +360,7 @@ test("fail to validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
+			getFieldSetState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -384,7 +388,7 @@ test("fail to validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("min_width_media")!,
+			getFieldSetState(MediaCollection).fields.get("min_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -425,7 +429,7 @@ test("fail to validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("max_width_media")!,
+			getFieldSetState(MediaCollection).fields.get("max_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -466,7 +470,7 @@ test("fail to validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("min_height_media")!,
+			getFieldSetState(MediaCollection).fields.get("min_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -507,7 +511,7 @@ test("fail to validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("max_height_media")!,
+			getFieldSetState(MediaCollection).fields.get("max_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -547,7 +551,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(MediaCollection).fields.get("type_media")!,
+		instance: getFieldSetState(MediaCollection).fields.get("type_media")!,
 		validationData: {
 			media: [
 				{
@@ -588,7 +592,7 @@ test("fail to validate field - media", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(MediaCollection).fields.get("extension_media")!,
+			getFieldSetState(MediaCollection).fields.get("extension_media")!,
 		validationData: {
 			media: [
 				{
@@ -629,7 +633,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			value: [1],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
+		instance: getFieldSetState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
 				{
@@ -655,7 +659,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			value: [1, 2, 3, 4],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
+		instance: getFieldSetState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
 				{
@@ -702,7 +706,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			value: [1, 99, 100],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
+		instance: getFieldSetState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
 				{

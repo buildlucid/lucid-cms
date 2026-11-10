@@ -2,14 +2,14 @@ import type {
 	CollectionTableNames,
 	ServiceFn,
 } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 
 const executeDeleteHook: ServiceFn<
 	[
 		{
 			event: "beforeDelete" | "afterDelete";
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			collectionKey: string;
 			tableNames: CollectionTableNames;
 			userId: number | null;

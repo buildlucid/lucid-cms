@@ -1,6 +1,13 @@
 import type { AgentAudioSettings as AudioSettings } from "@lucidcms/types";
-import { createEffect, createMemo, createSignal, on, Show } from "solid-js";
-import type { AgentWidgetComponent } from "@/components/AgentWidget/types";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	on,
+	Show,
+} from "solid-js";
+import type { AgentWidgetProps } from "@/components/AgentWidget/types";
 import Input from "@/components/Input/Input";
 import Select from "@/components/Select/Select";
 import Textarea from "@/components/Textarea/Textarea";
@@ -11,9 +18,9 @@ import T from "@/translations";
 import { isAudioSettingsData } from "@/utils/agent-tools";
 
 /** Reviews the script, voice and model before an agent generates audio. */
-const AgentAudioSettings: AgentWidgetComponent<AdminOptions | undefined> = (
-	props,
-) => {
+const AgentAudioSettings: Component<
+	AgentWidgetProps<AdminOptions | undefined>
+> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [settings, setSettings] = createSignal<AudioSettings>();

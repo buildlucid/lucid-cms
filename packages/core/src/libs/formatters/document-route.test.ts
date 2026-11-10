@@ -1,9 +1,11 @@
 import { describe, expect, test } from "vitest";
 import type { InternalDocumentField } from "../../exports/types.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import defineCollection from "../collection/define-collection.js";
+import field from "../collection/definitions/fields/field.js";
 import formatDocumentRoute from "./document-route.js";
 
-const collection = new CollectionBuilder("pages", {
+const collection = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -13,9 +15,11 @@ const collection = new CollectionBuilder("pages", {
 	},
 	localized: true,
 	routing: { field: "path" },
-})
-	.addText("title", { useAsLabel: true })
-	.addText("path", { localized: true });
+	fields: [
+		field.text("title", { useAsLabel: true }),
+		field.text("path", { localized: true }),
+	],
+});
 
 describe("formatDocumentRoute", () => {
 	test("resolves localized paths and standard document labels", () => {
@@ -93,7 +97,8 @@ describe("formatDocumentRoute", () => {
 	});
 
 	test("uses editor-facing select option labels", () => {
-		const selectCollection = new CollectionBuilder("articles", {
+		const selectCollection = defineCollection({
+			key: "articles",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -102,12 +107,14 @@ describe("formatDocumentRoute", () => {
 				},
 			},
 			routing: { field: "path" },
-		})
-			.addSelect("status", {
-				useAsLabel: true,
-				options: [{ label: "In review", value: "review" }],
-			})
-			.addText("path");
+			fields: [
+				field.select("status", {
+					useAsLabel: true,
+					options: [{ label: "In review", value: "review" }],
+				}),
+				field.text("path"),
+			],
+		});
 
 		expect(
 			formatDocumentRoute({

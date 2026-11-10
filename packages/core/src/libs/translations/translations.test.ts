@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import BrickBuilder from "../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { fieldHooks } from "../collection/custom-fields/registered-fields.js";
+import defineBrick from "../collection/define-brick.js";
+import defineCollection from "../collection/define-collection.js";
+import field from "../collection/definitions/fields/field.js";
 import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
 import { copy } from "../i18n/index.js";
 import applyTranslationChanges from "./apply-translation-changes.js";
@@ -18,27 +19,34 @@ import stampTranslationSources from "./stamp-translation-sources.js";
 const label = copy("admin:tests.collections.page.name", {
 	defaultMessage: "Pages",
 });
-const collection = new CollectionBuilder("page", {
+const collection = defineCollection({
+	key: "page",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: label, plural: label } },
 	bricks: {
 		builder: [
-			new BrickBuilder("hero")
-				.addText("heading")
-				.addRepeater("items")
-				.addText("itemTitle")
-				.endRepeater(),
+			defineBrick({
+				key: "hero",
+				fields: [
+					field.text("heading"),
+					field.repeater("items", { fields: [field.text("itemTitle")] }),
+				],
+			}),
 		],
-		embedded: [new BrickBuilder("quote").addText("quoteText")],
+		embedded: [
+			defineBrick({ key: "quote", fields: [field.text("quoteText")] }),
+		],
 	},
-})
-	.addText("title")
-	.addRichText("body")
-	.addLink("cta", { localized: true })
-	.addText("button", { default: "Learn more" })
-	.addText("slug", { localized: false })
-	.addText("phone", { translate: false });
+	fields: [
+		field.text("title"),
+		field.richText("body"),
+		field.link("cta", { localized: true }),
+		field.text("button", { default: "Learn more" }),
+		field.text("slug", { localized: false }),
+		field.text("phone", { translate: false }),
+	],
+});
 
 const localization = resolveCollectionLocalization({
 	localization: {

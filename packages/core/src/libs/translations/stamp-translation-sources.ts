@@ -1,5 +1,5 @@
 import type { TranslationSource } from "../../types/response.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import getFieldTranslation from "./get-field-translation.js";
 import hashTranslationText from "./hash-translation-text.js";
@@ -14,7 +14,7 @@ import listContentFields, {
  * display defaults.
  */
 const stampTranslationSources = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	/** The content being replaced, or null for new content. */
 	previous: ContentInput | null;

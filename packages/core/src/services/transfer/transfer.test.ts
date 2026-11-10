@@ -1,8 +1,9 @@
 import type { TransferEntry } from "@lucidcms/types";
 import { afterAll, assert, beforeAll, describe, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import BrickBuilder from "../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../libs/collection/define-brick.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import { toWebReadable } from "../../libs/media-storage/normalize-body.js";
@@ -88,43 +89,53 @@ const createMemoryStorage = (): ResolvedMediaStorageAdapter => {
 	};
 };
 
-const banner = new BrickBuilder("banner").addText("heading", {
-	localized: true,
+const banner = defineBrick({
+	key: "banner",
+	fields: [
+		field.text("heading", {
+			localized: true,
+		}),
+	],
 });
 /** The same pages collection on both sites, except the source still has a field the target removed. */
 const pages = (withLegacy: boolean) => {
-	const collection = new CollectionBuilder("transfer_pages", {
+	const collection = defineCollection({
+		key: "transfer_pages",
 		mode: "multiple",
 		localized: true,
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		bricks: { builder: [banner] },
-	})
-		.addText("title", { localized: true })
-		.addMedia("hero", { localized: false })
-		.addRelation("related", {
-			collection: "transfer_pages",
-			multiple: true,
-			localized: false,
-		})
-		.addRichText("body", {
-			localized: false,
-			editor: { media: true, links: { internal: true } },
-		})
-		.addJSON("settings", { localized: false })
-		.addRepeater("links")
-		.addText("label", { localized: false })
-		.endRepeater();
+		fields: [
+			field.text("title", { localized: true }),
+			field.media("hero", { localized: false }),
+			field.relation("related", {
+				collection: "transfer_pages",
+				multiple: true,
+				localized: false,
+			}),
+			field.richText("body", {
+				localized: false,
+				editor: { media: true, links: { internal: true } },
+			}),
+			field.json("settings", { localized: false }),
+			field.repeater("links", {
+				fields: [field.text("label", { localized: false })],
+			}),
+		],
+	});
 	return withLegacy
-		? collection.addText("legacy", { localized: false })
+		? collection.insertFields([field.text("legacy", { localized: false })])
 		: collection;
 };
 /** Notes, which the target can require review for before new ones are created. */
 const notes = (review: boolean) =>
-	new CollectionBuilder("transfer_notes", {
+	defineCollection({
+		key: "transfer_notes",
 		mode: "multiple",
 		details: { labels: { singular: "Note", plural: "Notes" } },
 		publishing: review ? { review: { publish: [], create: true } } : undefined,
-	}).addText("title");
+		fields: [field.text("title")],
+	});
 
 const createSite = async (options: { legacy?: boolean; review?: boolean }) => {
 	const fixture = getTestConfig();

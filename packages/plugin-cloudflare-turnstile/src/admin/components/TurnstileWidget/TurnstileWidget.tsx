@@ -1,6 +1,12 @@
-import type { CaptchaWidgetComponent } from "@lucidcms/admin/types";
+import type { CaptchaWidgetProps } from "@lucidcms/admin/types";
 import { createCaptchaTokenState, loadScript } from "@lucidcms/admin/utils";
-import { createMemo, createSignal, onCleanup, onMount } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	onCleanup,
+	onMount,
+} from "solid-js";
 import { SCRIPT_URL } from "../../../constants.js";
 import type { TurnstileClientOptions } from "../../../types.js";
 
@@ -32,9 +38,8 @@ declare global {
 }
 
 /** Renders Cloudflare Turnstile and hands its tokens to the protected form. */
-const TurnstileWidget: CaptchaWidgetComponent<
-	undefined,
-	TurnstileClientOptions
+const TurnstileWidget: Component<
+	CaptchaWidgetProps<undefined, TurnstileClientOptions>
 > = (props) => {
 	// ----------------------------------
 	// State & Hooks

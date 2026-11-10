@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -10,7 +10,7 @@ import readVersionContent from "./read-version-content.js";
 const validateVersionContent: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			documentId: number;
 			versionId: number;
 			user?: LucidActor;

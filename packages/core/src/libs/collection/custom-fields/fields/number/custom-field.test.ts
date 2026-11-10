@@ -2,14 +2,16 @@ import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import NumberCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const NumberCollection = new CollectionBuilder("collection", {
+const NumberCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -22,18 +24,20 @@ const NumberCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addNumber("standard_number")
-	.addNumber("required_number", {
-		validation: {
-			required: true,
-		},
-	})
-	.addNumber("min_number", {
-		validation: {
-			zod: z.number().min(5),
-		},
-	});
+	fields: [
+		field.number("standard_number"),
+		field.number("required_number", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.number("min_number", {
+			validation: {
+				zod: z.number().min(5),
+			},
+		}),
+	],
+});
 
 test("successfully validate field - number", async () => {
 	// Standard
@@ -45,7 +49,7 @@ test("successfully validate field - number", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(NumberCollection).fields.get("standard_number")!,
+			getFieldSetState(NumberCollection).fields.get("standard_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -67,7 +71,7 @@ test("successfully validate field - number", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(NumberCollection).fields.get("required_number")!,
+			getFieldSetState(NumberCollection).fields.get("required_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -88,7 +92,7 @@ test("successfully validate field - number", async () => {
 			value: 5,
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(NumberCollection).fields.get("min_number")!,
+		instance: getFieldSetState(NumberCollection).fields.get("min_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -112,7 +116,7 @@ test("fail to validate field - number", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(NumberCollection).fields.get("standard_number")!,
+			getFieldSetState(NumberCollection).fields.get("standard_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -140,7 +144,7 @@ test("fail to validate field - number", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(NumberCollection).fields.get("required_number")!,
+			getFieldSetState(NumberCollection).fields.get("required_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -167,7 +171,7 @@ test("fail to validate field - number", async () => {
 			value: 1,
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(NumberCollection).fields.get("min_number")!,
+		instance: getFieldSetState(NumberCollection).fields.get("min_number")!,
 		validationData: {
 			media: [],
 			user: [],

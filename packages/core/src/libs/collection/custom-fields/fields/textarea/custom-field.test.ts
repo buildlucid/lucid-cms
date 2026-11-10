@@ -2,14 +2,16 @@ import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import TextareaCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const TextareaCollection = new CollectionBuilder("collection", {
+const TextareaCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -22,18 +24,20 @@ const TextareaCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addTextarea("standard_textarea")
-	.addTextarea("required_textarea", {
-		validation: {
-			required: true,
-		},
-	})
-	.addTextarea("min_length_textarea", {
-		validation: {
-			zod: z.string().min(5),
-		},
-	});
+	fields: [
+		field.textarea("standard_textarea"),
+		field.textarea("required_textarea", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.textarea("min_length_textarea", {
+			validation: {
+				zod: z.string().min(5),
+			},
+		}),
+	],
+});
 
 test("successfully validate field - textarea", async () => {
 	// Standard
@@ -45,7 +49,7 @@ test("successfully validate field - textarea", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TextareaCollection).fields.get("standard_textarea")!,
+			getFieldSetState(TextareaCollection).fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -67,7 +71,7 @@ test("successfully validate field - textarea", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TextareaCollection).fields.get("required_textarea")!,
+			getFieldSetState(TextareaCollection).fields.get("required_textarea")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -88,7 +92,7 @@ test("successfully validate field - textarea", async () => {
 			value: "Min length textarea",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TextareaCollection).fields.get(
+		instance: getFieldSetState(TextareaCollection).fields.get(
 			"min_length_textarea",
 		)!,
 		validationData: {
@@ -114,7 +118,7 @@ test("fail to validate field - textarea", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TextareaCollection).fields.get("standard_textarea")!,
+			getFieldSetState(TextareaCollection).fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -142,7 +146,7 @@ test("fail to validate field - textarea", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TextareaCollection).fields.get("required_textarea")!,
+			getFieldSetState(TextareaCollection).fields.get("required_textarea")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -169,7 +173,7 @@ test("fail to validate field - textarea", async () => {
 			value: "1",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TextareaCollection).fields.get(
+		instance: getFieldSetState(TextareaCollection).fields.get(
 			"min_length_textarea",
 		)!,
 		validationData: {

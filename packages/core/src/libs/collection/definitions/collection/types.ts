@@ -8,11 +8,11 @@ import type {
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../../db/tables/index.js";
-import type { CollectionBuilderHooks } from "../../../hooks/types.js";
+import type { CollectionHooks } from "../../../hooks/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
 import type { AiInstructionsConfig } from "../../ai-instructions.js";
 import type { FieldConfig, FieldTypes } from "../../custom-fields/types.js";
-import type BrickBuilder from "../brick-builder/index.js";
+import type BrickDefinition from "../brick/index.js";
 
 export type ShowInList = boolean;
 export type UseAsLabel = boolean;
@@ -205,7 +205,7 @@ export type CollectionEnvironmentOptions = {
 	collectionVersions?: Record<string, string>;
 };
 
-/** Authoring options for a collection. The key is supplied separately to CollectionBuilder. */
+/** Authoring options for a collection. `defineCollection` takes them alongside the key and fields. */
 export type CollectionOptions<
 	TCollectionKey extends string = CollectionDocumentKey,
 > = {
@@ -241,15 +241,15 @@ export type CollectionOptions<
 	/** Enable website previews. Omitted or false disables previews; true uses the document route. */
 	preview?: CollectionPreviewConfig<TCollectionKey>;
 	/** Document lifecycle hooks scoped to this collection. */
-	hooks?: CollectionBuilderHooks[];
+	hooks?: CollectionHooks[];
 	/** Bricks available in each editing context. */
 	bricks?: {
 		/** Bricks included in every document in this order. */
-		fixed?: Array<BrickBuilder>;
+		fixed?: Array<BrickDefinition>;
 		/** Bricks editors may add and reorder in the document builder. */
-		builder?: Array<BrickBuilder>;
+		builder?: Array<BrickDefinition>;
 		/** Bricks available inside rich-text content. */
-		embedded?: Array<BrickBuilder>;
+		embedded?: Array<BrickDefinition>;
 	};
 };
 
@@ -294,10 +294,10 @@ export type FieldFilters = Array<{
 }>;
 
 export interface CollectionBrickConfig {
-	key: BrickBuilder["key"];
-	details: BrickBuilder["config"]["details"];
-	thumbnail: BrickBuilder["config"]["thumbnail"];
-	permissions: BrickBuilder["config"]["permissions"];
+	key: BrickDefinition["key"];
+	details: BrickDefinition["config"]["details"];
+	thumbnail: BrickDefinition["config"]["thumbnail"];
+	permissions: BrickDefinition["config"]["permissions"];
 	fields: FieldConfig<FieldTypes>[];
 }
 

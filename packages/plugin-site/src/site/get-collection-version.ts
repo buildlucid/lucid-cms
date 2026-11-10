@@ -1,7 +1,7 @@
-import type { CollectionBuilder } from "@lucidcms/core";
+import type { CollectionDefinition } from "@lucidcms/core/types";
 
 const getCollectionVersion = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	siteEnvironment: string | null,
 ): string | null => {
 	const environments = collection.getData.publishing.environments;

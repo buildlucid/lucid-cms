@@ -1,16 +1,13 @@
 export type {
 	AgentSlot,
 	AgentSlotPlacement,
-	AgentTranscriptRowSlotComponent,
 	AgentTranscriptRowSlotProps,
-	AgentWidgetComponent,
 	AgentWidgetInteraction,
 	AgentWidgetMatch,
 	AgentWidgetProps,
 } from "../components/AgentWidget/types.js";
 export type {
 	BrickSlot,
-	BrickSlotComponent,
 	BrickSlotMatch,
 	BrickSlotPlacement,
 	BrickSlotProps,
@@ -19,13 +16,11 @@ export type {
 	CaptchaSlot,
 	CaptchaSlotMatch,
 	CaptchaSlotPlacement,
-	CaptchaWidgetComponent,
 	CaptchaWidgetHandle,
 	CaptchaWidgetProps,
 } from "../components/CaptchaWidget/types.js";
 export type {
 	DocumentListSlot,
-	DocumentListSlotComponent,
 	DocumentListSlotPlacement,
 	DocumentListSlotProps,
 } from "../components/DocumentSlotCell/types.js";
@@ -33,18 +28,15 @@ export type {
 	DocumentSidebarPosition,
 	DocumentSidebarSectionKey,
 	DocumentSidebarSlot,
-	DocumentSidebarSlotComponent,
 	DocumentSidebarSlotPlacement,
 	DocumentSidebarSlotProps,
 } from "../components/DocumentSidebarSlots/types.js";
 export type {
 	FieldSlot,
-	FieldSlotComponent,
 	FieldSlotMatch,
 	FieldSlotProps,
 } from "../components/FieldSlots/types.js";
 export type {
-	HomeWidgetComponent,
 	HomeWidgetPlacement,
 	HomeWidgetProps,
 	HomeWidgetSize,
@@ -53,7 +45,6 @@ export type {
 export type {
 	MaintenanceGroup,
 	MaintenanceSlot,
-	MaintenanceSlotComponent,
 	MaintenanceSlotPlacement,
 	MaintenanceSlotProps,
 } from "../components/MaintenanceSlots/types.js";
@@ -75,7 +66,6 @@ export type {
 	AdminModulePath,
 	AdminOptions,
 	AdminOptionValue,
-	AdminSlot,
 } from "../extensions/types/config.js";
 export type {
 	AdminNavigationGroup,
@@ -84,7 +74,13 @@ export type {
 } from "../extensions/types/navigation.js";
 export type { AdminRoute, RouteComponent } from "../extensions/types/route.js";
 export type {
-	TranslationKey,
+	AdminSlot,
+	SlotComponent,
+	SlotOptions,
+	SlotProps,
+} from "../extensions/types/slot.js";
+export type {
+	ExtensionTranslationKey as TranslationKey,
 	TranslationRegistry,
 	TranslationValues,
 } from "../hooks/useTranslation/useTranslation.js";

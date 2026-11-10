@@ -3,7 +3,6 @@ import { useTranslation } from "@lucidcms/admin/hooks";
 import { mediaUrl } from "@lucidcms/admin/utils";
 import { TbOutlinePhoto } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
-import type {} from "../../../shared/translations.js";
 import type { SeoImage } from "../../utils/field-values.js";
 
 type SocialPreviewProps = {

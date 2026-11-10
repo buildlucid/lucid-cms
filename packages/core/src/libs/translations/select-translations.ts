@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import getEmbeddedBrickAccess from "../collection/field-access/get-embedded-brick-access.js";
 import type { ContentAccess } from "../collection/field-access/types.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
@@ -20,7 +20,7 @@ export type SelectedTranslation = {
  * and embedded bricks the actor cannot change.
  */
 const selectTranslations = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	documents: Array<{ id: number; content: ContentInput }>;
 	locales: string[];

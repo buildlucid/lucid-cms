@@ -4,26 +4,24 @@ declare module "virtual:lucid-admin" {
 		AdminOptions,
 		AdminRoute,
 		AdminSlot,
-		AgentTranscriptRowSlotComponent,
 		AgentTranscriptRowSlotProps,
-		AgentWidgetComponent,
 		AgentWidgetProps,
 		BrickSlot,
-		BrickSlotComponent,
+		BrickSlotProps,
 		CaptchaSlot,
-		CaptchaWidgetComponent,
+		CaptchaWidgetProps,
 		DocumentListSlot,
-		DocumentListSlotComponent,
+		DocumentListSlotProps,
 		DocumentSidebarSlot,
-		DocumentSidebarSlotComponent,
+		DocumentSidebarSlotProps,
 		FieldSlot,
-		FieldSlotComponent,
-		HomeWidgetComponent,
+		FieldSlotProps,
+		HomeWidgetProps,
 		HomeWidgetSlot,
 		MaintenanceSlot,
-		MaintenanceSlotComponent,
-		RouteComponent,
+		MaintenanceSlotProps,
 	} from "@lucidcms/admin/types";
+	import type { Component } from "solid-js";
 
 	/** Compilation replaces module paths with lazy components, which `preload` loads ahead, and supplies a default match. */
 	type SlotRegistration<
@@ -41,7 +39,7 @@ declare module "virtual:lucid-admin" {
 		? Omit<Route, "component"> & {
 				shell: NonNullable<Route["shell"]>;
 				access: NonNullable<Route["access"]>;
-				component: RouteComponent<AdminOptions | undefined>;
+				component: Component<{ readonly options: AdminOptions | undefined }>;
 			}
 		: never;
 
@@ -51,59 +49,59 @@ declare module "virtual:lucid-admin" {
 	export const agentSlots: Array<
 		| SlotRegistration<
 				Extract<AdminSlot, { slot: AgentWidgetProps["slot"] }>,
-				AgentWidgetComponent<AdminOptions | undefined>
+				Component<AgentWidgetProps<AdminOptions | undefined>>
 		  >
 		| SlotRegistration<
 				Extract<AdminSlot, { slot: AgentTranscriptRowSlotProps["slot"] }>,
-				AgentTranscriptRowSlotComponent<AdminOptions | undefined>
+				Component<AgentTranscriptRowSlotProps<AdminOptions | undefined>>
 		  >
 	>;
 
 	export const brickSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: BrickSlot }>,
-			BrickSlotComponent<AdminOptions | undefined>
+			Component<BrickSlotProps<AdminOptions | undefined>>
 		>
 	>;
 
 	export const homeSlots: Array<
 		Omit<Extract<AdminSlot, { slot: HomeWidgetSlot }>, "component"> & {
-			component: HomeWidgetComponent<AdminOptions | undefined>;
+			component: Component<HomeWidgetProps<AdminOptions | undefined>>;
 		}
 	>;
 
 	export const documentListSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: DocumentListSlot }>,
-			DocumentListSlotComponent<AdminOptions | undefined>
+			Component<DocumentListSlotProps<AdminOptions | undefined>>
 		>
 	>;
 
 	export const documentSidebarSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: DocumentSidebarSlot }>,
-			DocumentSidebarSlotComponent<AdminOptions | undefined>
+			Component<DocumentSidebarSlotProps<AdminOptions | undefined>>
 		>
 	>;
 
 	export const captchaSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: CaptchaSlot }>,
-			CaptchaWidgetComponent<AdminOptions | undefined>
+			Component<CaptchaWidgetProps<AdminOptions | undefined>>
 		>
 	>;
 
 	export const fieldSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: FieldSlot }>,
-			FieldSlotComponent<AdminOptions | undefined>
+			Component<FieldSlotProps<AdminOptions | undefined>>
 		>
 	>;
 
 	export const maintenanceSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: MaintenanceSlot }>,
-			MaintenanceSlotComponent<AdminOptions | undefined>
+			Component<MaintenanceSlotProps<AdminOptions | undefined>>
 		>
 	>;
 }

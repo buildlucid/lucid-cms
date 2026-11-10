@@ -1,23 +1,29 @@
 import { describe, expect, test } from "vitest";
-import BrickBuilder from "../builders/brick-builder/index.js";
-import CollectionBuilder from "../builders/collection-builder/index.js";
+import defineBrick from "../define-brick.js";
+import defineCollection from "../define-collection.js";
+import field from "../definitions/fields/field.js";
 import filterReadableContent from "./filter-readable-content.js";
 import filterReadableData from "./filter-readable-data.js";
 import getContentAccess from "./get-content-access.js";
 import getEmbeddedBrickAccess from "./get-embedded-brick-access.js";
 
 const hidden = { read: true } as const;
-const collection = new CollectionBuilder("pages", {
+const collection = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: { labels: { singular: "Page", plural: "Pages" } },
-	bricks: { embedded: [new BrickBuilder("quote").addText("text")] },
-})
-	.addRichText("body")
-	.addRichText("notes", { permissions: hidden })
-	.addCheckbox("promoted", { permissions: hidden })
-	.addText("code", {
-		ui: { condition: { all: [{ field: "promoted", value: true }] } },
-	});
+	bricks: {
+		embedded: [defineBrick({ key: "quote", fields: [field.text("text")] })],
+	},
+	fields: [
+		field.richText("body"),
+		field.richText("notes", { permissions: hidden }),
+		field.checkbox("promoted", { permissions: hidden }),
+		field.text("code", {
+			ui: { condition: { all: [{ field: "promoted", value: true }] } },
+		}),
+	],
+});
 const access = getContentAccess(collection, {
 	superAdmin: false,
 	permissions: [],
@@ -87,14 +93,19 @@ describe("embedded bricks under hidden rich text", () => {
 });
 
 test("embedded bricks get the narrowest access of every field holding them", () => {
-	const locked = new CollectionBuilder("pages", {
+	const locked = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
-		bricks: { embedded: [new BrickBuilder("quote").addText("text")] },
-	})
-		.addRichText("open")
-		.addRichText("intro", { permissions: { update: true } })
-		.addRichText("notes", { permissions: hidden });
+		bricks: {
+			embedded: [defineBrick({ key: "quote", fields: [field.text("text")] })],
+		},
+		fields: [
+			field.richText("open"),
+			field.richText("intro", { permissions: { update: true } }),
+			field.richText("notes", { permissions: hidden }),
+		],
+	});
 	const lockedAccess = getContentAccess(locked, {
 		superAdmin: false,
 		permissions: [],

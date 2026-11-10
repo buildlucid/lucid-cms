@@ -1,5 +1,5 @@
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import { isTreeTableType } from "../../libs/collection/custom-fields/storage/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { CollectionMigrationsRepository } from "../repositories/index.js";
 import stripColumnPrefix from "./helpers/strip-column-prefix.js";
@@ -19,7 +19,7 @@ export type MigrationStatus = {
  * persisted schema snapshot with the current inferred schema.
  */
 const getMigrationStatus: ServiceFn<
-	[{ collection: CollectionBuilder }],
+	[{ collection: CollectionDefinition }],
 	MigrationStatus
 > = async (context, data) => {
 	const CollectionMigrations = new CollectionMigrationsRepository(context.db);

@@ -1,5 +1,5 @@
-import type { CollectionBuilder } from "@lucidcms/core";
 import { LucidError, z } from "@lucidcms/core";
+import type { CollectionDefinition } from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../constants.js";
 import type { SeoPluginOptions } from "../types.js";
 
@@ -19,7 +19,7 @@ const optionsSchema = z.strictObject({
 /** Resolve and check every target before mutating the configuration. */
 const resolvePluginOptions = (
 	given: SeoPluginOptions,
-	collections: CollectionBuilder[],
+	collections: CollectionDefinition[],
 ) => {
 	const parsed = optionsSchema.safeParse(given);
 	if (!parsed.success) {

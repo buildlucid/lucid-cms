@@ -24,11 +24,8 @@
 	"files": [
 		"dist/server",
 		"dist/admin",
-		"src/admin",
-		"src/shared/assessments.ts",
-		"src/shared/translations.ts",
-		"src/constants.ts",
 		"translations",
+		"src",
 		"!src/**/*.test.*"
 	],
 	"author": "Build Lucid Ltd",

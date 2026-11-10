@@ -1,5 +1,5 @@
-import type CollectionBuilder from "../builders/collection-builder/index.js";
-import type { FieldSnapshot } from "../builders/field-builder/types.js";
+import type CollectionDefinition from "../definitions/collection/index.js";
+import type { FieldSnapshot } from "../definitions/fields/types.js";
 
 type CollectionLocalizationSource = {
 	locales: Array<{ code: string }>;
@@ -29,7 +29,7 @@ export type ResolvedCollectionLocalization = CollectionStorage &
  */
 const resolveCollectionLocalization = (props: {
 	localization: CollectionLocalizationSource;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 }): ResolvedCollectionLocalization => {
 	const configured = props.collection.config.localized ?? false;
 	const globalLocaleCodes = props.localization.locales.map(

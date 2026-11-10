@@ -1,9 +1,8 @@
-import type { CollectionBuilder } from "@lucidcms/core";
 import {
 	isCollectionFieldLocalized,
 	resolveCollectionLocalization,
 } from "@lucidcms/core/extension";
-import type { FieldConfig } from "@lucidcms/core/types";
+import type { CollectionDefinition, FieldConfig } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
 	RouteSegmentSelection,
@@ -13,8 +12,8 @@ import type {
 /** Resolves validated segment selections against their configured target fields. */
 const buildRouteSegmentTargets = (data: {
 	collection: CollectionConfig;
-	collectionInstance: CollectionBuilder;
-	collections: CollectionBuilder[];
+	collectionInstance: CollectionDefinition;
+	collections: CollectionDefinition[];
 	localization: {
 		locales: Array<{ code: string }>;
 		defaultLocale: string | null;

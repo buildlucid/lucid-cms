@@ -1,10 +1,12 @@
 import { expect, test } from "vitest";
 import { copy } from "../../i18n/index.js";
-import CollectionBuilder from "../builders/collection-builder/index.js";
+import defineCollection from "../define-collection.js";
+import field from "../definitions/fields/field.js";
 import generateCollectionTypes from "./index.js";
 
 const buildCollection = (key: string) =>
-	new CollectionBuilder(key, {
+	defineCollection({
+		key: key,
 		mode: "multiple",
 		details: {
 			labels: {
@@ -19,14 +21,14 @@ const buildCollection = (key: string) =>
 	});
 
 test("client types nest section children and inline collapsible children", async () => {
-	const collection = buildCollection("nav")
-		.addText("title")
-		.addSection("badge")
-		.addText("label")
-		.endSection()
-		.addCollapsible("advanced", { output: "inline" })
-		.addText("anchorLabel")
-		.endCollapsible();
+	const collection = buildCollection("nav").insertFields([
+		field.text("title"),
+		field.section("badge", { fields: [field.text("label")] }),
+		field.collapsible("advanced", {
+			output: "inline",
+			fields: [field.text("anchorLabel")],
+		}),
+	]);
 
 	const { client: file } = generateCollectionTypes({
 		collections: [collection],
@@ -49,7 +51,8 @@ test("client types nest section children and inline collapsible children", async
 });
 
 test("sort key types only include order for orderable collections", async () => {
-	const orderable = new CollectionBuilder("projects", {
+	const orderable = defineCollection({
+		key: "projects",
 		mode: "multiple",
 		orderable: true,
 		details: {
@@ -83,12 +86,12 @@ test("sort key types only include order for orderable collections", async () => 
 });
 
 test("sort key types include sortable top-level custom fields regardless of listing", async () => {
-	const collection = buildCollection("articles")
-		.addText("title", { showInList: true })
-		.addTextarea("summary")
-		.addNumber("views")
-		.addDateTime("publishedAt")
-		.addSelect("category", {
+	const collection = buildCollection("articles").insertFields([
+		field.text("title", { showInList: true }),
+		field.textarea("summary"),
+		field.number("views"),
+		field.datetime("publishedAt"),
+		field.select("category", {
 			options: [
 				{
 					label: copy("admin:tests.collections.articles.category", {
@@ -97,12 +100,11 @@ test("sort key types include sortable top-level custom fields regardless of list
 					value: "news",
 				},
 			],
-		})
-		.addCheckbox("featured")
-		.addMedia("hero")
-		.addRepeater("items")
-		.addText("itemLabel")
-		.endRepeater();
+		}),
+		field.checkbox("featured"),
+		field.media("hero"),
+		field.repeater("items", { fields: [field.text("itemLabel")] }),
+	]);
 
 	const { client: file } = generateCollectionTypes({
 		collections: [collection],
@@ -131,11 +133,10 @@ test("sort key types include sortable top-level custom fields regardless of list
 });
 
 test("client types keep collection tabs transparent", async () => {
-	const collection = buildCollection("pages")
-		.addTab("contentTab")
-		.addText("title")
-		.addTab("seoTab")
-		.addText("metaTitle");
+	const collection = buildCollection("pages").insertFields([
+		field.tab("contentTab", { fields: [field.text("title")] }),
+		field.tab("seoTab", { fields: [field.text("metaTitle")] }),
+	]);
 
 	const { client: file } = generateCollectionTypes({
 		collections: [collection],

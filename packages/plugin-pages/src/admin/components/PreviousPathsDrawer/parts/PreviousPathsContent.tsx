@@ -30,13 +30,9 @@ import {
 } from "solid-js";
 import type { PreviousPath } from "../../../../schema/previous-paths.js";
 import usePreviousPaths from "../../../hooks/use-previous-paths.js";
-import type {} from "../../../translations.js";
 import filterPreviousPaths from "../../../utils/filter-previous-paths.js";
 
-/**
- * The drawer's toolbar, filters, table and pagination. Filters and pages apply to the paths the
- * page has, which are few, so they run here rather than on the server.
- */
+/** Displays previous paths with client-side filtering and pagination. */
 const PreviousPathsContent: Component<{ onClose: () => void }> = (props) => {
 	// ----------------------------------
 	// State & Hooks

@@ -1,4 +1,3 @@
-import type { Component } from "solid-js";
 import type { EditorBrick } from "../../extensions/editor/types.js";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type { brickSlotPolicies } from "./constants.js";
@@ -28,11 +27,8 @@ export type BrickSlotProps<
 	TOptions extends AdminOptions | undefined = undefined,
 > = {
 	readonly slot: BrickSlot;
+	readonly key: string;
 	readonly open: boolean;
 	readonly brick: EditorBrick;
 	readonly options: TOptions;
 };
-
-export type BrickSlotComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-> = Component<BrickSlotProps<TOptions>>;

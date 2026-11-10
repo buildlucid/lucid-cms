@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import { createTranslationStore } from "../../../libs/i18n/index.js";
 import { Permissions } from "../../../libs/permission/definitions.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
@@ -9,10 +10,12 @@ import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import resolveDocumentRefs from "./resolve-document-refs.js";
 
 const fixture = getTestConfig();
-const pages = new CollectionBuilder("ref_detail_pages", {
+const pages = defineCollection({
+	key: "ref_detail_pages",
 	mode: "multiple",
 	details: { labels: { singular: "Page", plural: "Pages" } },
-}).addText("title");
+	fields: [field.text("title")],
+});
 
 let context: ServiceContext;
 let userId: number;

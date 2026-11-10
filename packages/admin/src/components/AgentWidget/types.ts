@@ -1,5 +1,4 @@
 import type { AgentInteraction } from "@types";
-import type { Component } from "solid-js";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type { agentWidgetSlotPolicies } from "./constants.js";
 
@@ -41,10 +40,6 @@ export type AgentWidgetProps<
 	readonly interaction?: AgentWidgetInteraction<Response>;
 };
 
-export type AgentWidgetComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-> = Component<AgentWidgetProps<TOptions>>;
-
 /** A registered row replaces the inline result card and can open a sidebar panel. */
 export type AgentTranscriptRowSlotProps<
 	TOptions extends AdminOptions | undefined = undefined,
@@ -58,7 +53,3 @@ export type AgentTranscriptRowSlotProps<
 	readonly interaction?: AgentInteraction;
 	readonly status?: string;
 };
-
-export type AgentTranscriptRowSlotComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-> = Component<AgentTranscriptRowSlotProps<TOptions>>;

@@ -6,12 +6,12 @@ import {
 	ViewAllLink,
 } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
-import type { DocumentSidebarSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { TbOutlineHistory } from "solid-icons/tb";
 import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js";
 import usePreviousPaths from "../../hooks/use-previous-paths.js";
-import type {} from "../../translations.js";
 import PreviousPathsDrawer from "../PreviousPathsDrawer/PreviousPathsDrawer.jsx";
+import type previousPathsSectionConfig from "./config.js";
 
 /** How many previous paths the sidebar lists, leaving the rest to the drawer. */
 const PREVIEW_COUNT = 3;
@@ -20,7 +20,9 @@ const PREVIEW_COUNT = 3;
  * Shows recent previous paths in the sidebar and all paths in a drawer. Reserves loading space
  * once the page is saved.
  */
-const PreviousPathsSection: DocumentSidebarSlotComponent = (props) => {
+const PreviousPathsSection: SlotComponent<
+	ReturnType<typeof previousPathsSectionConfig>
+> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

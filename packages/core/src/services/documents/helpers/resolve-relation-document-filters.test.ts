@@ -1,7 +1,8 @@
 import { SQLiteAdapter } from "@lucidcms/sqlite";
 import { afterAll, describe, expect, test } from "vitest";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import inferSchema from "../../../libs/collection/schema/infer-schema.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type { LucidBrickTableName } from "../../../libs/db/tables/index.js";
@@ -14,10 +15,16 @@ describe("relation document filter grouping", async () => {
 
 	afterAll(() => connection.destroy());
 
-	const HeroBrick = new BrickBuilder("hero").addRelation("featured", {
-		collection: "pages",
+	const HeroBrick = defineBrick({
+		key: "hero",
+		fields: [
+			field.relation("featured", {
+				collection: "pages",
+			}),
+		],
 	});
-	const Articles = new CollectionBuilder("articles", {
+	const Articles = defineCollection({
+		key: "articles",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -30,11 +37,13 @@ describe("relation document filter grouping", async () => {
 			},
 		},
 		bricks: { builder: [HeroBrick] },
-	})
-		.addRelation("author", { collection: ["people", "teams"] })
-		.addRepeater("cards")
-		.addRelation("cta", { collection: "pages" })
-		.endRepeater();
+		fields: [
+			field.relation("author", { collection: ["people", "teams"] }),
+			field.repeater("cards", {
+				fields: [field.relation("cta", { collection: "pages" })],
+			}),
+		],
+	});
 	const schema = inferSchema(Articles, db).data?.tables.filter(
 		(table) => table.type !== "document" && table.type !== "versions",
 	) as CollectionSchemaTable<LucidBrickTableName>[];

@@ -1,6 +1,4 @@
 import LucidError from "../../../utils/errors/lucid-error.js";
-import type FieldBuilder from "../../collection/builders/field-builder/index.js";
-import { getFieldBuilderState } from "../../collection/builders/field-builder/index.js";
 import type CustomField from "../../collection/custom-fields/custom-field.js";
 import type {
 	FieldConditionConfig,
@@ -8,6 +6,8 @@ import type {
 	FieldConditionRule,
 	FieldTypes,
 } from "../../collection/custom-fields/types.js";
+import type FieldSet from "../../collection/definitions/fields/index.js";
+import { getFieldSetState } from "../../collection/definitions/fields/index.js";
 import { translate } from "../../i18n/index.js";
 
 const getFieldCondition = (
@@ -55,9 +55,9 @@ const ancestorScopeKeys = (
 const checkFieldConditions = (
 	type: "brick" | "collection",
 	typeKey: string,
-	builder: FieldBuilder,
+	builder: FieldSet,
 ) => {
-	for (const [key, field] of getFieldBuilderState(builder).fields) {
+	for (const [key, field] of getFieldSetState(builder).fields) {
 		const condition = getFieldCondition(field);
 		if (!condition) continue;
 
@@ -77,7 +77,7 @@ const checkFieldConditions = (
 				});
 			}
 
-			const target = getFieldBuilderState(builder).fields.get(rule.field);
+			const target = getFieldSetState(builder).fields.get(rule.field);
 			if (!target) {
 				throw new LucidError({
 					message: translate("server:core.fields.condition.target.not.found", {
@@ -105,10 +105,7 @@ const checkFieldConditions = (
 				});
 			}
 
-			const scopes = ancestorScopeKeys(
-				getFieldBuilderState(builder).fields,
-				field,
-			);
+			const scopes = ancestorScopeKeys(getFieldSetState(builder).fields, field);
 			if (!scopes.includes(target.treeParent)) {
 				throw new LucidError({
 					message: translate(

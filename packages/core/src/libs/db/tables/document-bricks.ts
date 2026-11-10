@@ -2,7 +2,7 @@ import type { Generated } from "kysely";
 import z from "zod";
 import { translationSourceSchema } from "../../../schemas/shared/translation-source.js";
 import type { TranslationSource } from "../../../types/response.js";
-import type { BrickTypes } from "../../collection/builders/brick-builder/types.js";
+import type { BrickTypes } from "../../collection/definitions/brick/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type { BooleanInt } from "../types.js";
 import { isDocumentTableName } from "./document-table-name.js";

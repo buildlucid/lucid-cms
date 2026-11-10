@@ -177,7 +177,8 @@ collection.addRichText("body", {
 Document links require routing on their target collection. The configured field must contain the complete public path:
 
 ```typescript
-const Posts = new CollectionBuilder("posts", {
+const Posts = defineCollection({
+  key: "posts",
   mode: "multiple",
   routing: { field: "path" },
   // ...

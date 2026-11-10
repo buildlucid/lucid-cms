@@ -1,5 +1,9 @@
-import { type CollectionBuilder, copy } from "@lucidcms/core";
-import type { CollectionTableNames, ServiceFn } from "@lucidcms/core/types";
+import { copy } from "@lucidcms/core";
+import type {
+	CollectionDefinition,
+	CollectionTableNames,
+	ServiceFn,
+} from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
 	ProjectedPath,
@@ -37,7 +41,7 @@ const projectRequestTargetRoutes: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			tables: CollectionTableNames;
 			target: string;
 			members: RequestTargetMember[];

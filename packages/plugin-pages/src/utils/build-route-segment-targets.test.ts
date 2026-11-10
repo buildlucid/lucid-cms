@@ -1,4 +1,4 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { defineCollection, field } from "@lucidcms/core";
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
 import buildRouteSegmentTargets from "./build-route-segment-targets.js";
@@ -22,7 +22,8 @@ describe("buildRouteSegmentTargets", () => {
 	])(
 		"resolves effective target localization and its storage locale",
 		({ fieldLocalized, expectedLocalized }) => {
-			const pages = new CollectionBuilder("pages", {
+			const pages = defineCollection({
+				key: "pages",
 				mode: "multiple",
 				details: {
 					labels: {
@@ -30,11 +31,15 @@ describe("buildRouteSegmentTargets", () => {
 						plural: "Pages",
 					},
 				},
-			}).addRelation("category", {
-				collection: "categories",
-				multiple: false,
+				fields: [
+					field.relation("category", {
+						collection: "categories",
+						multiple: false,
+					}),
+				],
 			});
-			const categories = new CollectionBuilder("categories", {
+			const categories = defineCollection({
+				key: "categories",
 				mode: "multiple",
 				details: {
 					labels: {
@@ -43,7 +48,8 @@ describe("buildRouteSegmentTargets", () => {
 					},
 				},
 				localized: { locales: ["fr"], defaultLocale: "fr" },
-			}).addText("slug", { localized: fieldLocalized });
+				fields: [field.text("slug", { localized: fieldLocalized })],
+			});
 
 			const result = buildRouteSegmentTargets({
 				collection: pageConfig,

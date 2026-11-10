@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type {
 	CollectionPermission,
 	CollectionPermissionAction,
@@ -29,11 +29,11 @@ export const getCollectionPermission = <
 	action: TAction,
 ): CollectionPermission<TAction> => `documents:${collectionKey}:${action}`;
 
-/** Builds a collection permission key from a collection builder. */
+/** Builds a collection permission key from a collection. */
 export const resolveCollectionPermission = <
 	TAction extends CollectionPermissionAction,
 >(params: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	action: TAction;
 }): CollectionPermission<TAction> => {
 	return getCollectionPermission(params.collection.key, params.action);
@@ -41,7 +41,7 @@ export const resolveCollectionPermission = <
 
 /** Every permission for a collection, keyed in camelCase as the API returns them. */
 export const resolveCollectionPermissions = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ) => ({
 	read: getCollectionPermission(collection.key, "read"),
 	create: getCollectionPermission(collection.key, "create"),

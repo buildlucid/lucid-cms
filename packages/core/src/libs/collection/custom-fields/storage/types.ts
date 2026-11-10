@@ -59,8 +59,8 @@ export type StorageModeContentTypeGenerationHelpers = {
 		fields: StorageFieldConfig[],
 		options: {
 			builder:
-				| import("../../builders/index.js").BrickBuilder
-				| import("../../builders/index.js").CollectionBuilder;
+				| import("../../definitions/index.js").BrickDefinition
+				| import("../../definitions/index.js").CollectionDefinition;
 			collectionUsesTranslations: boolean;
 			withinGroup: boolean;
 		},
@@ -69,8 +69,8 @@ export type StorageModeContentTypeGenerationHelpers = {
 
 export type StorageModeContentTypeGenerationProps = {
 	builder:
-		| import("../../builders/index.js").BrickBuilder
-		| import("../../builders/index.js").CollectionBuilder;
+		| import("../../definitions/index.js").BrickDefinition
+		| import("../../definitions/index.js").CollectionDefinition;
 	collectionUsesTranslations: boolean;
 	field: StorageFieldConfig;
 	fieldMode: "translations" | "value";

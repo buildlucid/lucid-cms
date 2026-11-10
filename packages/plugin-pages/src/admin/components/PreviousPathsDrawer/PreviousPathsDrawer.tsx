@@ -1,7 +1,6 @@
 import { Button, Drawer } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
 import type { Component } from "solid-js";
-import type {} from "../../translations.js";
 import PreviousPathsContent from "./parts/PreviousPathsContent.jsx";
 
 /** A bottom drawer listing the open page's previous paths, where editors can stop one redirecting. */

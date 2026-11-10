@@ -1,7 +1,8 @@
-import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import { copy, defineCollection, field, z } from "@lucidcms/core";
 import IntroBrick from "../bricks/intro.js";
 
-const TestCollection = new CollectionBuilder("test", {
+const TestCollection = defineCollection({
+	key: "test",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -17,19 +18,22 @@ const TestCollection = new CollectionBuilder("test", {
 	bricks: {
 		builder: [IntroBrick],
 	},
-}).addText("title", {
-	details: {
-		label: copy("admin:collections.test.fields.title.label"),
-	},
-	ui: {
-		hidden: false,
-		disabled: false,
-	},
-	validation: {
-		required: true,
-		zod: z.string().min(2).max(128),
-	},
-	showInList: true,
+	fields: [
+		field.text("title", {
+			details: {
+				label: copy("admin:collections.test.fields.title.label"),
+			},
+			ui: {
+				hidden: false,
+				disabled: false,
+			},
+			validation: {
+				required: true,
+				zod: z.string().min(2).max(128),
+			},
+			showInList: true,
+		}),
+	],
 });
 
 export default TestCollection;

@@ -1,7 +1,8 @@
-import { CollectionBuilder, copy } from "@lucidcms/core";
+import { copy, defineCollection, field } from "@lucidcms/core";
 import RichTextCalloutBrick from "../bricks/rich-text-callout.js";
 
-const BlogCollection = new CollectionBuilder("blog", {
+const BlogCollection = defineCollection({
+	key: "blog",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -30,45 +31,47 @@ const BlogCollection = new CollectionBuilder("blog", {
 		],
 		scheduling: true,
 	},
-})
-	.addText("page_title", {
-		ui: {
-			hidden: false,
-			disabled: false,
-		},
-		showInList: true,
-		useAsLabel: true,
-	})
-	.addTextarea("page_excerpt", {
-		showInList: true,
-	})
-	.addUser("author", {
-		showInList: true,
-	})
-	.addCheckbox("enabled")
-	.addRichText("content", {
-		editor: {
-			links: {
-				external: true,
-				internal: ["page", "blog", "route-page"],
+	fields: [
+		field.text("page_title", {
+			ui: {
+				hidden: false,
+				disabled: false,
 			},
-			media: true,
-			documents: ["page", "settings", "blog"],
-			variables: {
-				document: ["settings", "page"],
-				user: ["firstName", "lastName", "username"],
+			showInList: true,
+			useAsLabel: true,
+		}),
+		field.textarea("page_excerpt", {
+			showInList: true,
+		}),
+		field.user("author", {
+			showInList: true,
+		}),
+		field.checkbox("enabled"),
+		field.richText("content", {
+			editor: {
+				links: {
+					external: true,
+					internal: ["page", "blog", "route-page"],
+				},
+				media: true,
+				documents: ["page", "settings", "blog"],
+				variables: {
+					document: ["settings", "page"],
+					user: ["firstName", "lastName", "username"],
+				},
+				bricks: ["rt-callout"],
+				fullscreen: true,
 			},
-			bricks: ["rt-callout"],
-			fullscreen: true,
-		},
-	})
-	.addRichText("seamless_content", {
-		localized: false,
-		editor: {
-			appearance: "seamless",
-			bricks: ["rt-callout"],
-			fullscreen: true,
-		},
-	});
+		}),
+		field.richText("seamless_content", {
+			localized: false,
+			editor: {
+				appearance: "seamless",
+				bricks: ["rt-callout"],
+				fullscreen: true,
+			},
+		}),
+	],
+});
 
 export default BlogCollection;

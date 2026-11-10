@@ -11,8 +11,9 @@ import createServiceContext from "../../utils/services/create-service-context.js
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import applyCollectionMigrations from "../collection/apply-collection-migrations.js";
-import BrickBuilder from "../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import defineBrick from "../collection/define-brick.js";
+import defineCollection from "../collection/define-collection.js";
+import field from "../collection/definitions/fields/field.js";
 import planCollectionMigrations from "../collection/plan-collection-migrations.js";
 import { createTranslationStore } from "../i18n/index.js";
 import { getCollectionPermission } from "../permission/collection-permissions.js";
@@ -24,31 +25,43 @@ import type { McpToolAuthority } from "../tools/types.js";
 import { createHandler } from "./create-handler.js";
 
 const fixture = getTestConfig();
-const pages = new CollectionBuilder("mcp_pages", {
+const pages = defineCollection({
+	key: "mcp_pages",
 	mode: "multiple",
 	localized: true,
 	routing: { field: "path" },
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	bricks: {
-		builder: [new BrickBuilder("hero").addText("heading", { localized: true })],
+		builder: [
+			defineBrick({
+				key: "hero",
+				fields: [field.text("heading", { localized: true })],
+			}),
+		],
 	},
-})
-	.addText("title", {
-		localized: true,
-		useAsLabel: true,
-	})
-	.addNumber("rank")
-	.addText("path", { localized: false })
-	.addJSON("settings", { localized: false })
-	.addRepeater("links")
-	.addText("caption", {
-		localized: false,
-	})
-	.endRepeater();
-const restricted = new CollectionBuilder("mcp_restricted", {
+	fields: [
+		field.text("title", {
+			localized: true,
+			useAsLabel: true,
+		}),
+		field.number("rank"),
+		field.text("path", { localized: false }),
+		field.json("settings", { localized: false }),
+		field.repeater("links", {
+			fields: [
+				field.text("caption", {
+					localized: false,
+				}),
+			],
+		}),
+	],
+});
+const restricted = defineCollection({
+	key: "mcp_restricted",
 	mode: "multiple",
 	details: { labels: { singular: "Restricted", plural: "Restricted" } },
-}).addText("title");
+	fields: [field.text("title")],
+});
 let context: ServiceContext;
 let aboutId: number;
 let contactId: number;

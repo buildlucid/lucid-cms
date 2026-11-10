@@ -3,13 +3,13 @@ import type {
 	FieldTypes,
 	ResolvedLucidConfig,
 } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields, {
 	fieldHooks,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import resolveCollectionLocalization, {
 	isCollectionFieldLocalized,
 	type ResolvedCollectionLocalization,
@@ -17,10 +17,8 @@ import resolveCollectionLocalization, {
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 /**
- * - Processes fields to remove any that don't exist in the custom fields.
- * - Processes recursively for tree-table fields with nested groups.
- * - Based on collection and field translation support, sort out the fields translations/value props
- * - Normalizes the input value of the field using the custom field instance's normalizeInputValue method
+ * Removes unknown fields, recursively prepares tree-table groups, selects values or translations
+ * and normalizes field input.
  */
 const processFields = (props: {
 	fields: Array<FieldInputSchema>;
@@ -199,7 +197,7 @@ export const filterReachableEmbeddedBricks = <
  * Prepares bricks and fields by removing invalid fields that don't exist in custom fields.
  */
 const prepareBricksAndFields = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	bricks?: Array<BrickInputSchema>;
 	fields?: Array<FieldInputSchema>;
 	localization: ResolvedLucidConfig["localization"];
@@ -213,7 +211,7 @@ const prepareBricksAndFields = (props: {
 	const preparedFields = props.fields
 		? processFields({
 				fields: props.fields,
-				customFields: getFieldBuilderState(props.collection).fields,
+				customFields: getFieldSetState(props.collection).fields,
 				localization,
 			})
 		: undefined;
@@ -229,7 +227,7 @@ const prepareBricksAndFields = (props: {
 				// Process fields for this brick
 				const processedFields = processFields({
 					fields: brick.fields,
-					customFields: getFieldBuilderState(brickDefinition).fields,
+					customFields: getFieldSetState(brickDefinition).fields,
 					localization,
 				});
 

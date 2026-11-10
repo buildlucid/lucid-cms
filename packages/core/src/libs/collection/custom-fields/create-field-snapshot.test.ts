@@ -1,5 +1,5 @@
 import { expect, expectTypeOf, test } from "vitest";
-import type { FieldSnapshot } from "../builders/field-builder/types.js";
+import type { FieldSnapshot } from "../definitions/fields/types.js";
 import createFieldSnapshot from "./create-field-snapshot.js";
 import SelectCustomField from "./fields/select/custom-field.js";
 import type { FieldOptions } from "./types.js";

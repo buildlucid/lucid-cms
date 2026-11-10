@@ -1,47 +1,54 @@
-import { BrickBuilder, copy } from "@lucidcms/core";
+import { copy, defineBrick, field } from "@lucidcms/core";
 
-const IntroBrick = new BrickBuilder("intro", {
+const IntroBrick = defineBrick({
+	key: "intro",
 	details: {
 		label: copy("admin:bricks.intro.name"),
 	},
-})
-	.addTab("content_tab", {
-		details: {
-			label: copy("admin:bricks.intro.tabs.content_tab.label"),
-		},
-	})
-	.addText("title", {
-		localized: true,
-	})
-	.addRichText("intro", {
-		editor: {
-			media: true,
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addMedia("intro_audio", {
-		details: {
-			label: "Audio",
-		},
-		validation: {
-			type: "audio",
-		},
-		permissions: { read: true },
-	})
-	.addTab("advanced_tab", {
-		details: {
-			label: copy("admin:bricks.intro.tabs.advanced_tab.label"),
-		},
-	})
-	.addJSON("json", {
-		details: {
-			label: copy("admin:bricks.intro.fields.json.label"),
-		},
-		validation: {
-			required: true,
-		},
-	});
+	fields: [
+		field.tab("content_tab", {
+			details: {
+				label: copy("admin:bricks.intro.tabs.content_tab.label"),
+			},
+			fields: [
+				field.text("title", {
+					localized: true,
+				}),
+				field.richText("intro", {
+					editor: {
+						media: true,
+					},
+					validation: {
+						required: true,
+					},
+				}),
+				field.media("intro_audio", {
+					details: {
+						label: "Audio",
+					},
+					validation: {
+						type: "audio",
+					},
+					permissions: { read: true },
+				}),
+			],
+		}),
+		field.tab("advanced_tab", {
+			details: {
+				label: copy("admin:bricks.intro.tabs.advanced_tab.label"),
+			},
+			fields: [
+				field.json("json", {
+					details: {
+						label: copy("admin:bricks.intro.fields.json.label"),
+					},
+					validation: {
+						required: true,
+					},
+				}),
+			],
+		}),
+	],
+});
 
 export default IntroBrick;

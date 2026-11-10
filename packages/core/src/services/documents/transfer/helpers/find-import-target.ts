@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../../libs/collection/definitions/collection/index.js";
 import { getTableNames } from "../../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter from "../../../../libs/formatters/helpers.js";
 import { copy } from "../../../../libs/i18n/index.js";
@@ -27,7 +27,7 @@ export type DocumentImportTarget =
 const findImportTarget: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			uid: string;
 			/** The live document matching the uid, as `<collectionKey>:<id>`. */
 			existing: string | undefined;

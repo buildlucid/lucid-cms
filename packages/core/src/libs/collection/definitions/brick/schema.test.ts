@@ -1,10 +1,12 @@
 import { expect, test } from "vitest";
 import { copy } from "../../../i18n/index.js";
-import BrickBuilder from "./index.js";
+import defineBrick from "../../define-brick.js";
+import field from "../fields/field.js";
 import BrickConfigSchema from "./schema.js";
 
-test("brick builder config passes schema validation", async () => {
-	const brick = new BrickBuilder("block", {
+test("brick config passes schema validation", async () => {
+	const brick = defineBrick({
+		key: "block",
 		details: {
 			label: copy("admin:tests.bricks.block.name", {
 				defaultMessage: "Block",
@@ -14,9 +16,8 @@ test("brick builder config passes schema validation", async () => {
 			}),
 		},
 		thumbnail: "https://placehold.co/600x400",
-	})
-		.addText("text_test")
-		.addTextarea("textarea_test");
+		fields: [field.text("text_test"), field.textarea("textarea_test")],
+	});
 
 	const res = await BrickConfigSchema.safeParseAsync(brick.config);
 	expect(res.success).toBe(true);

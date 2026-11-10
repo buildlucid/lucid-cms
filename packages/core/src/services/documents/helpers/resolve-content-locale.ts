@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type {
@@ -12,7 +12,7 @@ import type {
  */
 const resolveContentLocale = (
 	context: ServiceContext,
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	requested: string | undefined,
 ): Awaited<ServiceResponse<string | null>> => {
 	const localization = resolveCollectionLocalization({

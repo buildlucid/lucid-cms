@@ -1,9 +1,4 @@
-import type {
-	HomeWidgetSize,
-	PermissionRequirement,
-	ResolvedAdminCopy,
-} from "@lucidcms/types";
-import type { Component } from "solid-js";
+import type { HomeWidgetSize, ResolvedAdminCopy } from "@lucidcms/types";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type { homeWidgetSlotPolicies } from "./constants.js";
 
@@ -14,8 +9,6 @@ export type { HomeWidgetSize };
 export type HomeWidgetPlacement = {
 	/** Adds a Home overview widget users can hide, resize and reorder. */
 	slot: "home.widget";
-	/** Hides the widget from users without access. */
-	permission?: PermissionRequirement;
 	/** How the widget's card is named and sized on the overview grid. */
 	card: {
 		label: string | ResolvedAdminCopy;
@@ -39,7 +32,3 @@ export type HomeWidgetProps<
 	readonly size: HomeWidgetSize;
 	readonly options: TOptions;
 };
-
-export type HomeWidgetComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-> = Component<HomeWidgetProps<TOptions>>;

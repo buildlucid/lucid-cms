@@ -2,6 +2,8 @@ import { expect, test, vi } from "vitest";
 import z from "zod";
 import { defaultPasswordSchema } from "../../constants/default-config.js";
 import type { LucidConfig } from "../../types/config.js";
+import defineCollection from "../collection/define-collection.js";
+import field from "../collection/definitions/fields/field.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
 import defineContentApiRoute from "../http/define-content-api-route.js";
@@ -454,9 +456,8 @@ test("exclusive plugin providers report both conflicting plugin keys", async () 
 });
 
 test("each resolution owns collection mutations made by plugins", async () => {
-	const { default: CollectionBuilder } =
-		await import("../collection/builders/collection-builder/index.js");
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 	});
@@ -467,7 +468,7 @@ test("each resolution owns collection mutations made by plugins", async () => {
 			{
 				key: "fields",
 				configure: (draft) => {
-					draft.collections[0]?.addText("pluginTitle");
+					draft.collections[0].insertFields([field.text("pluginTitle")]);
 				},
 			},
 		],
@@ -485,7 +486,7 @@ test("each resolution owns collection mutations made by plugins", async () => {
 	expect(second.collections[0]?.fieldTree).toEqual(
 		first.collections[0]?.fieldTree,
 	);
-	first.collections[0]?.addText("requestOnly");
+	first.collections[0].insertFields([field.text("requestOnly")]);
 	expect(second.collections[0]?.fields.has("requestOnly")).toBe(false);
 });
 

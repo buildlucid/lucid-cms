@@ -1,5 +1,5 @@
-import type { CollectionBuilder } from "@lucidcms/core";
 import type {
+	CollectionDefinition,
 	CollectionTableNames,
 	FieldInputSchema,
 	ServiceFn,
@@ -19,7 +19,7 @@ const projectRequestTargetDescendants: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			tables: CollectionTableNames;
 			target: string;
 			projection: RequestTargetProjection;

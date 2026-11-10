@@ -1,9 +1,10 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { defineCollection } from "@lucidcms/core";
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
 import recordPaths from "./record-paths.js";
 
-const page = new CollectionBuilder("page", {
+const page = defineCollection({
+	key: "page",
 	mode: "multiple",
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	publishing: {

@@ -1,5 +1,5 @@
 import type { Refs } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import type { FieldAccessActor } from "../../../libs/collection/field-access/types.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
@@ -42,8 +42,8 @@ type ResolveDocumentRefsResult = {
 const resolveDocumentRefs: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
-			collections: CollectionBuilder[];
+			collection: CollectionDefinition;
+			collections: CollectionDefinition[];
 			brickSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 			responses: Array<BrickQueryResponse | DocumentQueryResponse>;
 			versionType: Exclude<DocumentVersionType, "revision">;

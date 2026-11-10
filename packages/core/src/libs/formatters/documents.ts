@@ -16,10 +16,10 @@ import type {
 } from "../../exports/types.js";
 import { resolveRelatedDocumentVersionType } from "../../services/documents/helpers/resolve-relation-version-type.js";
 import isPlainObject from "../../utils/helpers/is-plain-object.js";
-import type BrickBuilder from "../collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import type { CustomFieldContentFormatContext } from "../collection/custom-fields/types.js";
+import type BrickDefinition from "../collection/definitions/brick/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
+import { getFieldSetState } from "../collection/definitions/fields/index.js";
 import filterReadableContent from "../collection/field-access/filter-readable-content.js";
 import getContentAccess from "../collection/field-access/get-content-access.js";
 import type { FieldAccessActor } from "../collection/field-access/types.js";
@@ -47,7 +47,7 @@ import { markDocument } from "./preview-targets.js";
 
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	config: ResolvedLucidConfig;
 	host: string;
 	mediaOptions: MediaFormatterOptions;
@@ -114,7 +114,7 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	document: DocumentQueryResponse;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	bricks?: InternalDocumentBrick[];
 	fields?: InternalDocumentField[] | null;
 	workflow?: DocumentWorkflow | null;
@@ -200,7 +200,7 @@ const formatSingle = (props: {
 
 const formatVersions = (props: {
 	document: DocumentQueryResponse;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 }): InternalCollectionDocument["versions"] => {
 	const versions: InternalCollectionDocument["versions"] = {
 		latest: null,
@@ -236,7 +236,7 @@ const formatVersions = (props: {
 const formatContentMultiple = <TCollectionKey extends string>(props: {
 	documents: InternalCollectionDocument[];
 	collectionKey: TCollectionKey;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	include: {
 		bricks: boolean;
 		meta: boolean;
@@ -257,7 +257,7 @@ const formatContentMultiple = <TCollectionKey extends string>(props: {
 
 const formatContentBricks = (
 	bricks: InternalDocumentBrick[] | null | undefined,
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	preview: boolean,
 ) => {
 	return (bricks ?? []).map((brick) => {
@@ -287,7 +287,7 @@ const formatContentBricks = (
 const formatContentSingle = <TCollectionKey extends string>(props: {
 	document: InternalCollectionDocument;
 	collectionKey: TCollectionKey;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	include: {
 		bricks: boolean;
 		meta: boolean;
@@ -354,14 +354,14 @@ export type ContentReadRefs = Omit<Refs, "documents"> & {
 
 /** The document whose fields are being filled in, and the version it was read in, which its relations follow. */
 type FillSource = {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	version: DocumentVersionType;
 };
 
 type FillContext = {
 	/** References as stored, which rich text reads its linked text from. */
 	refs: ContentReadRefs;
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	localization: LocalizationConfig;
 	read: ContentRead;
 	media: Map<number, unknown>;
@@ -394,7 +394,7 @@ const relatedVersion = (
 
 /** Resolves a collection's supported read and fallback locales, defaulting unsupported read locales and accepting per-translation overrides. */
 const collectionRead = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	context: FillContext,
 	{
 		locale,
@@ -421,7 +421,7 @@ const collectionRead = (
 /** Fills in a document's or brick's fields through their custom fields, picking translations in the read's locale. */
 const fillFields = (
 	fields: Record<string, unknown>,
-	builder: CollectionBuilder | BrickBuilder,
+	builder: CollectionDefinition | BrickDefinition,
 	source: FillSource,
 	level: number,
 	context: FillContext,
@@ -445,7 +445,7 @@ const fillFields = (
 					locale: context.read.locale,
 					fallbackLocale: context.read.fallbackLocale,
 				};
-	const instances = getFieldBuilderState(builder).fields;
+	const instances = getFieldSetState(builder).fields;
 	const fieldContext = (
 		valueRead: ContentReadLocale | null,
 	): CustomFieldContentFormatContext => ({
@@ -590,8 +590,8 @@ const fillMeta = (
 const formatContentRead = (props: {
 	document: CollectionDocument;
 	refs: ContentReadRefs;
-	collection: CollectionBuilder;
-	collections: CollectionBuilder[];
+	collection: CollectionDefinition;
+	collections: CollectionDefinition[];
 	localization: LocalizationConfig;
 	read: ContentRead;
 }) => {

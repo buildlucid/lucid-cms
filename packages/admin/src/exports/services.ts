@@ -4,7 +4,7 @@ export type {
 	DocumentListQuery,
 	ListQuery,
 } from "../services/queries/types.js";
-export { queryKeys } from "../services/query-keys.js";
+export { publicQueryKeys as queryKeys } from "../services/public-query-keys.js";
 export { LucidError } from "../utils/error-handling.js";
 export {
 	adminRequest as request,

@@ -1,4 +1,3 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import {
 	fieldHooks,
 	registeredFieldTypes,
@@ -7,6 +6,7 @@ import type {
 	CanLinkTarget,
 	LinkTarget,
 } from "../../../libs/collection/custom-fields/types.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import filterReadableContent from "../../../libs/collection/field-access/filter-readable-content.js";
 import type { ContentAccess } from "../../../libs/collection/field-access/types.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
@@ -31,7 +31,7 @@ const restrictValidationData: ServiceFn<
 			validationData: ValidationData;
 			authUser: LucidActor;
 			access: ContentAccess;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			existingVersion?: { id: number; documentId: number };
 		},
 	],

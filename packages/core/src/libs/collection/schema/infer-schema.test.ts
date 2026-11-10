@@ -1,23 +1,26 @@
 import { SQLiteAdapter } from "@lucidcms/sqlite";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import { copy } from "../../../libs/i18n/index.js";
+import defineBrick from "../define-brick.js";
+import defineCollection from "../define-collection.js";
+import field from "../definitions/fields/field.js";
 import inferSchema from "./infer-schema.js";
 
 // -----------------------------------------------
 // Setup and Teardown
 
 describe("Schema inference", async () => {
-	let pagesCollection: CollectionBuilder;
+	let pagesCollection: CollectionDefinition;
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
 	const connection = await db.connect();
 
 	beforeEach(() => {
-		pagesCollection = new CollectionBuilder("pages", {
+		pagesCollection = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -31,7 +34,10 @@ describe("Schema inference", async () => {
 			},
 			bricks: {
 				fixed: [
-					new BrickBuilder("hero").addText("title").addRichText("content"),
+					defineBrick({
+						key: "hero",
+						fields: [field.text("title"), field.richText("content")],
+					}),
 				],
 			},
 		});
@@ -55,7 +61,9 @@ describe("Schema inference", async () => {
 	});
 
 	test("correctly handles repeater fields", () => {
-		pagesCollection.addRepeater("authors").addUser("author").endRepeater();
+		pagesCollection.insertFields([
+			field.repeater("authors", { fields: [field.user("author")] }),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(
@@ -70,12 +78,11 @@ describe("Schema inference", async () => {
 	});
 
 	test("correctly handles nested repeater fields", () => {
-		pagesCollection
-			.addRepeater("authors")
-			.addRepeater("books")
-			.addText("title")
-			.endRepeater()
-			.endRepeater();
+		pagesCollection.insertFields([
+			field.repeater("authors", {
+				fields: [field.repeater("books", { fields: [field.text("title")] })],
+			}),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(
@@ -90,13 +97,14 @@ describe("Schema inference", async () => {
 	});
 
 	test("creates relation tables for media, user, relation and range fields", () => {
-		pagesCollection
-			.addMedia("hero_media")
-			.addUser("author")
-			.addRelation("related_page", {
+		pagesCollection.insertFields([
+			field.media("hero_media"),
+			field.user("author"),
+			field.relation("related_page", {
 				collection: "pages",
-			})
-			.addRange("price_range", { thumbs: 2, step: 0.5 });
+			}),
+			field.range("price_range", { thumbs: 2, step: 0.5 }),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		const mediaTable = res.data?.tables.find(
@@ -175,14 +183,15 @@ describe("Schema inference", async () => {
 	});
 
 	test("keeps relation tables top-level when fields are nested in repeater groups", () => {
-		pagesCollection
-			.addRepeater("authors")
-			.addRelation("related", { collection: "pages" })
-			.addMedia("avatar")
-			.addRepeater("socials")
-			.addUser("owner")
-			.endRepeater()
-			.endRepeater();
+		pagesCollection.insertFields([
+			field.repeater("authors", {
+				fields: [
+					field.relation("related", { collection: "pages" }),
+					field.media("avatar"),
+					field.repeater("socials", { fields: [field.user("owner")] }),
+				],
+			}),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
@@ -198,7 +207,8 @@ describe("Schema inference", async () => {
 	});
 
 	test("keeps brick relation tables top-level when fields are nested in repeater groups", () => {
-		const brickScopedCollection = new CollectionBuilder("pages", {
+		const brickScopedCollection = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -212,11 +222,17 @@ describe("Schema inference", async () => {
 			},
 			bricks: {
 				fixed: [
-					new BrickBuilder("content")
-						.addRepeater("authors")
-						.addRelation("related", { collection: "pages" })
-						.addMedia("avatar")
-						.endRepeater(),
+					defineBrick({
+						key: "content",
+						fields: [
+							field.repeater("authors", {
+								fields: [
+									field.relation("related", { collection: "pages" }),
+									field.media("avatar"),
+								],
+							}),
+						],
+					}),
 				],
 			},
 		});
@@ -244,7 +260,8 @@ describe("Schema inference", async () => {
 	});
 
 	test("ignores ui-only fields during schema inference", () => {
-		const brickScopedCollection = new CollectionBuilder("pages", {
+		const brickScopedCollection = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -257,7 +274,12 @@ describe("Schema inference", async () => {
 				},
 			},
 			bricks: {
-				fixed: [new BrickBuilder("content").addTab("meta").addText("title")],
+				fixed: [
+					defineBrick({
+						key: "content",
+						fields: [field.tab("meta", { fields: [field.text("title")] })],
+					}),
+				],
 			},
 		});
 
@@ -290,9 +312,11 @@ describe("Schema inference", async () => {
 	});
 
 	test("creates column field indexes from explicit config", () => {
-		pagesCollection.addText("title", {
-			index: true,
-		});
+		pagesCollection.insertFields([
+			field.text("title", {
+				index: true,
+			}),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		const fieldsTable = res.data?.tables.find(
@@ -314,9 +338,11 @@ describe("Schema inference", async () => {
 	});
 
 	test("creates column field indexes from listing", () => {
-		pagesCollection.addText("title", {
-			showInList: true,
-		});
+		pagesCollection.insertFields([
+			field.text("title", {
+				showInList: true,
+			}),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		const fieldsTable = res.data?.tables.find(
@@ -338,7 +364,7 @@ describe("Schema inference", async () => {
 	});
 
 	test("does not create column field indexes by default", () => {
-		pagesCollection.addText("title");
+		pagesCollection.insertFields([field.text("title")]);
 
 		const res = inferSchema(pagesCollection, db);
 		const fieldsTable = res.data?.tables.find(
@@ -351,9 +377,11 @@ describe("Schema inference", async () => {
 	});
 
 	test("creates composite relation lookup index for relation fields", () => {
-		pagesCollection.addRelation("related_page", {
-			collection: ["pages", "blog"],
-		});
+		pagesCollection.insertFields([
+			field.relation("related_page", {
+				collection: ["pages", "blog"],
+			}),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		const relationTable = res.data?.tables.find(
@@ -369,7 +397,9 @@ describe("Schema inference", async () => {
 	});
 
 	test("creates core lookup indexes for generated collection tables", () => {
-		pagesCollection.addRepeater("links").addText("label").endRepeater();
+		pagesCollection.insertFields([
+			field.repeater("links", { fields: [field.text("label")] }),
+		]);
 
 		const res = inferSchema(pagesCollection, db);
 		const documentTable = res.data?.tables.find(

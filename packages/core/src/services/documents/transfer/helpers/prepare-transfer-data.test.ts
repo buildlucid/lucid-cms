@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../../libs/collection/define-collection.js";
+import field from "../../../../libs/collection/definitions/fields/field.js";
 import prepareTransferData from "./prepare-transfer-data.js";
 
 const localization = {
@@ -10,13 +11,16 @@ const localization = {
 	],
 };
 const pages = (localized: boolean) =>
-	new CollectionBuilder("pages", {
+	defineCollection({
+		key: "pages",
 		mode: "multiple",
 		localized,
 		details: { labels: { singular: "Page", plural: "Pages" } },
-	})
-		.addText("title", { localized: true })
-		.addJSON("settings", { localized: false });
+		fields: [
+			field.text("title", { localized: true }),
+			field.json("settings", { localized: false }),
+		],
+	});
 
 const prepare = (props: {
 	localized: boolean;

@@ -2,10 +2,11 @@ import type { PermissionRequirement } from "@lucidcms/types";
 import type { Component } from "solid-js";
 import type { AdminComponentReference, AdminOptions } from "./config.js";
 import type { AdminRouteNavigation } from "./navigation.js";
+import type { SlotOptions } from "./slot.js";
 
 export type AdminRoute = {
 	key: string;
-	/** Static path relative to /admin/e, for example pages/reports. */
+	/** Static path, for example pages/reports. Link to it with `adminHref` from @lucidcms/admin/utils. */
 	path: string;
 	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
 	component: AdminComponentReference;
@@ -35,6 +36,17 @@ export type AdminRoute = {
 	  }
 );
 
+/**
+ * Types a route component from its definition, so `options` follows the registration.
+ *
+ * @example
+ * ```tsx
+ * import type { RouteComponent } from "@lucidcms/admin/types";
+ * import type reportsRoute from "./config.js";
+ *
+ * const Reports: RouteComponent<typeof reportsRoute> = (props) => <p>{props.options.title}</p>;
+ * ```
+ */
 export type RouteComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-> = Component<{ readonly options: TOptions }>;
+	TConfig extends { options?: AdminOptions } = { options?: AdminOptions },
+> = Component<{ readonly options: SlotOptions<TConfig> }>;

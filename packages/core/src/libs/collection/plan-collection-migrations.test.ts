@@ -3,7 +3,8 @@ import { afterAll, describe, expect, test } from "vitest";
 import type { ServiceContext } from "../../exports/types.js";
 import createLucidDatabase from "../db/create-lucid-database.js";
 import { copy } from "../i18n/index.js";
-import CollectionBuilder from "./builders/collection-builder/index.js";
+import defineCollection from "./define-collection.js";
+import field from "./definitions/fields/field.js";
 import planCollectionMigrations from "./plan-collection-migrations.js";
 
 describe("planCollectionMigrations", async () => {
@@ -15,7 +16,8 @@ describe("planCollectionMigrations", async () => {
 	});
 
 	test("returns inferred schemas and exact plans without mutating the database", async () => {
-		const pages = new CollectionBuilder("pages", {
+		const pages = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -23,7 +25,8 @@ describe("planCollectionMigrations", async () => {
 					plural: copy.literal("Pages"),
 				},
 			},
-		}).addText("title");
+			fields: [field.text("title")],
+		});
 
 		// @ts-expect-error
 		const context = {

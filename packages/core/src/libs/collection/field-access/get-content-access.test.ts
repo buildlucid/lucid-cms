@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
-import BrickBuilder from "../builders/brick-builder/index.js";
-import CollectionBuilder from "../builders/collection-builder/index.js";
+import defineBrick from "../define-brick.js";
+import defineCollection from "../define-collection.js";
+import field from "../definitions/fields/field.js";
 import getContentAccess from "./get-content-access.js";
 
 const editor = { superAdmin: false, permissions: [] };
@@ -13,26 +14,40 @@ const reader = {
 };
 
 const buildCollection = () =>
-	new CollectionBuilder("pages", {
+	defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		bricks: {
 			builder: [
-				new BrickBuilder("banner", { permissions: { update: true } })
-					.addRepeater("slides")
-					.addText("caption")
-					.endRepeater(),
+				defineBrick({
+					key: "banner",
+					permissions: { update: true },
+					fields: [
+						field.repeater("slides", { fields: [field.text("caption")] }),
+					],
+				}),
 			],
 		},
-	})
-		.addText("title")
-		.addTab("seo", { permissions: { read: true } })
-		.addText("metaTitle")
-		.addTab("content")
-		.addSection("details", { permissions: { update: true } })
-		.addText("summary")
-		.addText("note", { permissions: { read: true } })
-		.endSection();
+		fields: [
+			field.text("title"),
+			field.tab("seo", {
+				permissions: { read: true },
+				fields: [field.text("metaTitle")],
+			}),
+			field.tab("content", {
+				fields: [
+					field.section("details", {
+						permissions: { update: true },
+						fields: [
+							field.text("summary"),
+							field.text("note", { permissions: { read: true } }),
+						],
+					}),
+				],
+			}),
+		],
+	});
 
 describe("getContentAccess", () => {
 	test("combines each field with its tab, section, repeater and brick", () => {

@@ -269,3 +269,21 @@ describe("field slots", () => {
 		}
 	});
 });
+
+describe("slot permissions", () => {
+	it("accepts a permission on slots shown to signed-in users", () => {
+		const config = adminConfigSchema.parse({
+			slots: [{ ...panel, permission: "settings:update" }],
+		});
+		expect(config.slots[0]).toMatchObject({ permission: "settings:update" });
+	});
+
+	it("rejects a permission on captcha widgets, which render without a user", () => {
+		const result = adminConfigSchema.safeParse({
+			slots: [
+				{ ...panel, slot: "captcha.widget", permission: "settings:update" },
+			],
+		});
+		expect(result.success).toBe(false);
+	});
+});

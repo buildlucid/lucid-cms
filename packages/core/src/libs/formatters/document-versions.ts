@@ -1,6 +1,6 @@
 import type { DocumentVersion } from "../../exports/types.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
-import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
+import type { BrickTypes } from "../collection/definitions/brick/types.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type {
 	LucidBrickTableName,

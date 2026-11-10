@@ -1,11 +1,13 @@
 import { useTranslation } from "@lucidcms/admin/hooks";
-import type { FieldSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
-import type {} from "../../translations.js";
 import PreviousPathsButton from "../PreviousPathsButton/PreviousPathsButton.jsx";
+import type pathDisplayConfig from "./config.js";
 
 /** Shows the document's path below the slug field, with a button opening its previous paths when they're tracked. */
-const PathDisplay: FieldSlotComponent<{ previousPaths: boolean }> = (props) => {
+const PathDisplay: SlotComponent<ReturnType<typeof pathDisplayConfig>> = (
+	props,
+) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

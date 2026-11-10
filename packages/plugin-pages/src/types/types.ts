@@ -1,6 +1,7 @@
 import type {
 	CollectionEnvironmentOptions,
 	DocumentVersionType,
+	FieldPlacement,
 	FieldWidth,
 } from "@lucidcms/core/types";
 
@@ -9,25 +10,7 @@ export type CollectionPrefix = string | Record<string, string>;
 export type PagesFieldKey = "slug" | "parentPage" | "segments";
 
 /** Place generated fields at the start or end of a tab, or before or after an existing field. */
-export type PagesFieldPlacement =
-	| {
-			at: "start" | "end";
-			tab?: string;
-			before?: never;
-			after?: never;
-	  }
-	| {
-			before: string;
-			at?: never;
-			tab?: never;
-			after?: never;
-	  }
-	| {
-			after: string;
-			at?: never;
-			tab?: never;
-			before?: never;
-	  };
+export type PagesFieldPlacement = FieldPlacement;
 
 export type CollectionRouteSegment = {
 	/** Relation field key registered on the pages collection. */

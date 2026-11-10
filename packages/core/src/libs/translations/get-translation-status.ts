@@ -1,5 +1,5 @@
 import type { TranslationStatus } from "../../types/response.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import countWords from "./count-words.js";
 import type { ContentInput } from "./list-content-fields.js";
@@ -8,7 +8,7 @@ import readTranslationState from "./read-translation-state.js";
 
 /** How document content's translations into each locale other than the default compare with its source text. */
 const getTranslationStatus = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	content: ContentInput;
 }): TranslationStatus[] => {

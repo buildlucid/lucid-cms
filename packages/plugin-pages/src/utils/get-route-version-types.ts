@@ -1,7 +1,7 @@
-import type { CollectionBuilder } from "@lucidcms/core";
+import type { CollectionDefinition } from "@lucidcms/core/types";
 
 /** Returns latest and each configured publishing environment for route synchronization. */
-const getRouteVersionTypes = (collection: CollectionBuilder) => [
+const getRouteVersionTypes = (collection: CollectionDefinition) => [
 	"latest",
 	...collection.getData.publishing.environments.map(
 		(environment) => environment.key,

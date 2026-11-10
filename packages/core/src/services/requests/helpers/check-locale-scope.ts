@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { LocalizationConfig } from "../../../types/config.js";
@@ -10,7 +10,7 @@ import type { ServiceResponse } from "../../../utils/services/types.js";
  * that has every one of their locales.
  */
 const checkLocaleScope = (data: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: LocalizationConfig;
 	locales: string[];
 	source: string | null;

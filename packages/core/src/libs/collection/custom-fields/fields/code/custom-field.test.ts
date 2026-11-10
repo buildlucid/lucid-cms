@@ -2,15 +2,17 @@ import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import generateCollectionTypes from "../../../type-gen/index.js";
 import CustomFieldSchema from "../../schema.js";
 import CodeCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const CodeCollection = new CollectionBuilder("collection", {
+const CodeCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -23,16 +25,18 @@ const CodeCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addCode("standard_code")
-	.addCode("required_code", {
-		validation: {
-			required: true,
-		},
-	})
-	.addCode("restricted_code", {
-		languages: ["javascript", "typescript"],
-	});
+	fields: [
+		field.code("standard_code"),
+		field.code("required_code", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.code("restricted_code", {
+			languages: ["javascript", "typescript"],
+		}),
+	],
+});
 
 const validationData = {
 	media: [],
@@ -56,7 +60,7 @@ test("successfully validate field - code", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
+		instance: getFieldSetState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -70,7 +74,7 @@ test("successfully validate field - code", async () => {
 			value: "",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
+		instance: getFieldSetState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -87,7 +91,7 @@ test("successfully validate field - code", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
+		instance: getFieldSetState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -105,7 +109,7 @@ test("successfully validate field - code", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(CodeCollection).fields.get("restricted_code")!,
+			getFieldSetState(CodeCollection).fields.get("restricted_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -121,7 +125,7 @@ test("fail to validate field - code", async () => {
 			value: "invalid code value",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
+		instance: getFieldSetState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -143,7 +147,7 @@ test("fail to validate field - code", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
+		instance: getFieldSetState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -165,7 +169,7 @@ test("fail to validate field - code", async () => {
 			value: undefined,
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
+		instance: getFieldSetState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -188,7 +192,7 @@ test("fail to validate field - code", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
+		instance: getFieldSetState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -212,7 +216,7 @@ test("fail to validate field - code", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(CodeCollection).fields.get("restricted_code")!,
+			getFieldSetState(CodeCollection).fields.get("restricted_code")!,
 		validationData,
 		meta: validationMeta,
 	});

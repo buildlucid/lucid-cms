@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import { copy } from "../../../libs/i18n/index.js";
 import applyTranslationChanges from "../../../libs/translations/apply-translation-changes.js";
@@ -22,7 +22,7 @@ const attempts = 3;
 const saveTranslatedLatest: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			localization: ResolvedCollectionLocalization;
 			documentIds: number[];
 			changes: Array<TranslationChange & { documentId: number }>;

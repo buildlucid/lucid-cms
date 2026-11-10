@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
 import type { CollectionTableNames } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import getMigrationStatus from "../../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
@@ -29,7 +29,7 @@ const getUpdateContext: ServiceFn<
 		},
 	],
 	{
-		collection: CollectionBuilder;
+		collection: CollectionDefinition;
 		tableNames: CollectionTableNames;
 		migrationId: number;
 		versionType: Select<LucidVersionTable>["type"];

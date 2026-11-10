@@ -1,10 +1,12 @@
 import { expect, test } from "vitest";
 import { copy } from "../../../i18n/index.js";
-import CollectionBuilder from "./index.js";
+import defineCollection from "../../define-collection.js";
+import field from "../fields/field.js";
 import CollectionConfigSchema from "./schema.js";
 
-test("collection builder options passes schema validation", async () => {
-	const collection = new CollectionBuilder("pages", {
+test("collection options pass schema validation", async () => {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -51,14 +53,16 @@ test("collection builder options passes schema validation", async () => {
 				},
 			},
 		],
-	})
-		.addText("text_test", {
-			showInList: true,
-			useAsLabel: true,
-		})
-		.addTextarea("textarea_test", {
-			showInList: true,
-		});
+		fields: [
+			field.text("text_test", {
+				showInList: true,
+				useAsLabel: true,
+			}),
+			field.textarea("textarea_test", {
+				showInList: true,
+			}),
+		],
+	});
 
 	const res = await CollectionConfigSchema.safeParseAsync(collection.config);
 	expect(res.success).toBe(true);

@@ -11,7 +11,7 @@ import {
 import { brickSlots } from "virtual:lucid-admin";
 import { createFieldScope } from "@/extensions/editor/field-scope";
 import type { EditorBrick } from "@/extensions/editor/types";
-import { resolveSlots } from "@/extensions/slot-policy";
+import { matchSlots } from "@/extensions/match-slots";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import {
 	useFieldEnvironment,
@@ -69,7 +69,7 @@ const BrickSlots: Component<{
 			brick: props.brick.key,
 			kind: props.brick.type,
 		};
-		return resolveSlots(brickSlots, target);
+		return matchSlots(brickSlots, target);
 	});
 	const sidePanel = createMemo(() =>
 		contributions().find(
@@ -109,6 +109,7 @@ const BrickSlots: Component<{
 							>
 								<entry.component
 									slot={slot}
+									key={entry.key}
 									options={entry.options}
 									open={props.open}
 									brick={brick()}

@@ -6,9 +6,6 @@ import type {
 	FieldInputSchema,
 	GroupError,
 } from "../../../exports/types.js";
-import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import {
 	evaluateFieldCondition,
 	type FieldConditionTargetResolver,
@@ -22,6 +19,9 @@ import type {
 	FieldTypes,
 	FieldUIConfig,
 } from "../../../libs/collection/custom-fields/types.js";
+import type BrickDefinition from "../../../libs/collection/definitions/brick/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import getEmbeddedBrickAccess from "../../../libs/collection/field-access/get-embedded-brick-access.js";
 import type {
@@ -86,12 +86,12 @@ const getFieldCondition = (
  * nest under them - hiding a container must hide its whole subtree.
  */
 const buildStructuralConditions = (
-	instance: CollectionBuilder | BrickBuilder,
+	instance: CollectionDefinition | BrickDefinition,
 ): Map<string, FieldConditionConfig[]> => {
 	const conditions = new Map<string, FieldConditionConfig[]>();
 	let currentTabCondition: FieldConditionConfig | undefined;
 
-	for (const [key, field] of getFieldBuilderState(instance).fields) {
+	for (const [key, field] of getFieldSetState(instance).fields) {
 		if (field.type === "tab") {
 			currentTabCondition = getFieldCondition(field);
 			continue;
@@ -106,7 +106,7 @@ const buildStructuralConditions = (
 		let structuralParentKey = field.structuralParent;
 		while (structuralParentKey) {
 			const structuralParent =
-				getFieldBuilderState(instance).fields.get(structuralParentKey);
+				getFieldSetState(instance).fields.get(structuralParentKey);
 			if (!structuralParent) break;
 
 			const structuralCondition = getFieldCondition(structuralParent);
@@ -130,7 +130,7 @@ const buildStructuralConditions = (
  * stay unresolved.
  */
 const createConditionTargetResolver = (props: {
-	instance: CollectionBuilder | BrickBuilder;
+	instance: CollectionDefinition | BrickDefinition;
 	scopes: ConditionScopeLevel[];
 	locale: string | null;
 	defaultLocale: string | null;
@@ -138,7 +138,7 @@ const createConditionTargetResolver = (props: {
 	translationScope: FieldConditionTranslationScope;
 }): FieldConditionTargetResolver => {
 	return (fieldKey) => {
-		const target = getFieldBuilderState(props.instance).fields.get(fieldKey);
+		const target = getFieldSetState(props.instance).fields.get(fieldKey);
 		if (
 			!target ||
 			target.type === "repeater" ||
@@ -220,7 +220,7 @@ const getConditionTranslationScope = (
 const isFieldVisible = (props: {
 	fieldKey: string;
 	fieldInstance: CustomField<FieldTypes>;
-	instance: CollectionBuilder | BrickBuilder;
+	instance: CollectionDefinition | BrickDefinition;
 	scopes: ConditionScopeLevel[];
 	locale: string | null;
 	defaultLocale: string | null;
@@ -266,7 +266,7 @@ const checkValidateBricksFields: ServiceFn<
 		{
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			authUser?: LucidActor;
 			existingVersion?: { id: number; documentId: number };
 			/** Allows unfinished preview content, relaxing required fields, Zod rules and repeater minimums. */
@@ -437,7 +437,7 @@ const keepLocaleErrors = (
  */
 const validateBricks = (props: {
 	bricks: Array<BrickInputSchema>;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	validationData: ValidationData;
 	restricted?: {
 		validationData: ValidationData;
@@ -453,7 +453,7 @@ const validateBricks = (props: {
 	const errors: BrickError[] = [];
 
 	for (const brick of props.bricks) {
-		let instance: BrickBuilder | undefined;
+		let instance: BrickDefinition | undefined;
 
 		switch (brick.type) {
 			case "builder": {
@@ -551,7 +551,7 @@ const validateBricks = (props: {
  */
 export const recursiveFieldValidate = (props: {
 	fields: Array<FieldInputSchema>;
-	instance: CollectionBuilder | BrickBuilder;
+	instance: CollectionDefinition | BrickDefinition;
 	validationData: ValidationData;
 	/** Validation data for content the actor can see, where only links they can read may be added; hidden fields keep `validationData`. */
 	restricted?: {
@@ -590,7 +590,7 @@ export const recursiveFieldValidate = (props: {
 
 	//*  validate all provided fields
 	for (const field of props.fields) {
-		const fieldInstance = getFieldBuilderState(props.instance).fields.get(
+		const fieldInstance = getFieldSetState(props.instance).fields.get(
 			field.key,
 		);
 		if (!fieldInstance) {
@@ -701,7 +701,7 @@ export const recursiveFieldValidate = (props: {
 	//* check for required fields that are missing
 	if (props.meta.allowIncomplete) return errors;
 	const submittedFieldKeys = new Set(props.fields.map((field) => field.key));
-	getFieldBuilderState(props.instance).fields.forEach((fieldInstance, key) => {
+	getFieldSetState(props.instance).fields.forEach((fieldInstance, key) => {
 		if (submittedFieldKeys.has(key)) return;
 
 		//* skip fields that belong to a different tree-table parent context

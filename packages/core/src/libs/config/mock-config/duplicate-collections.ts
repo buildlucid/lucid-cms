@@ -1,4 +1,4 @@
-import { CollectionBuilder, copy, defineConfig } from "@lucidcms/core";
+import { copy, defineCollection, defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/node";
 import { sqlite } from "@lucidcms/sqlite";
 import testingConstants from "../../../constants/testing-constants.js";
@@ -19,7 +19,8 @@ export default defineConfig({
 			accessToken: testingConstants.key,
 		},
 		collections: [
-			new CollectionBuilder("page", {
+			defineCollection({
+				key: "page",
 				mode: "multiple",
 				details: {
 					labels: {
@@ -32,7 +33,8 @@ export default defineConfig({
 					},
 				},
 			}),
-			new CollectionBuilder("page", {
+			defineCollection({
+				key: "page",
 				mode: "multiple",
 				details: {
 					labels: {

@@ -34,7 +34,7 @@
 	"files": [
 		"dist",
 		"translations",
-		"src/admin",
+		"src",
 		"!src/**/*.test.*"
 	],
 	"author": "Build Lucid Ltd",

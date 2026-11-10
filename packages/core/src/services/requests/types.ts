@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import type {
 	LucidRequestApprovals,
 	LucidRequestDocuments,
@@ -32,7 +32,7 @@ export type RequestVersionState = { id: number; contentId: string };
 
 /** Current document state used to validate and present a request. */
 export type RequestDocumentState = {
-	collection: CollectionBuilder | null;
+	collection: CollectionDefinition | null;
 	migrationRequired: boolean;
 	/** In the bin, which can be restored, or permanently deleted. */
 	deleted: "bin" | "permanent" | null;

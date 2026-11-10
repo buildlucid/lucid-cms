@@ -35,8 +35,8 @@ import {
 } from "@/utils/agent-tools";
 import { resolveAgentSlot } from "./slots";
 import type {
-	AgentWidgetComponent,
 	AgentWidgetInteraction,
+	AgentWidgetProps,
 	AgentWidgetSubmitResult,
 } from "./types";
 
@@ -44,7 +44,7 @@ import type {
 const coreEntries: ReadonlyMap<
 	string,
 	{
-		component: AgentWidgetComponent<AdminOptions | undefined>;
+		component: Component<AgentWidgetProps<AdminOptions | undefined>>;
 		options: undefined;
 	}
 > = new Map([

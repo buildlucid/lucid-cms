@@ -18,9 +18,11 @@ import helpers from "@/utils/helpers";
  * @example
  * ```tsx
  * import { useDocumentEditor } from "@lucidcms/admin/hooks";
- * import type { FieldSlotComponent } from "@lucidcms/admin/types";
+ * import type { SlotComponent } from "@lucidcms/admin/types";
+ * import type productPickerSlot from "./config.js";
  *
- * const ProductPicker: FieldSlotComponent<undefined, "json"> = (props) => {
+ * //* the definition matches `fieldType: "json"`, so `props.field` is a JSON field
+ * const ProductPicker: SlotComponent<typeof productPickerSlot> = (props) => {
  * 	// ----------------------------------------
  * 	// State & Hooks
  * 	const editor = useDocumentEditor();

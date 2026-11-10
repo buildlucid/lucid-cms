@@ -1,7 +1,8 @@
 import { SQLiteAdapter } from "@lucidcms/sqlite";
 import { afterAll, describe, expect, test } from "vitest";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import inferSchema from "../../../libs/collection/schema/infer-schema.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type { LucidBrickTableName } from "../../../libs/db/tables/index.js";
@@ -14,26 +15,33 @@ describe("checkFilterAccess", async () => {
 	afterAll(() => connection.destroy());
 
 	const hidden = { read: true } as const;
-	const People = new CollectionBuilder("people", {
+	const People = defineCollection({
+		key: "people",
 		mode: "multiple",
 		details: { labels: { singular: "Person", plural: "People" } },
-	})
-		.addText("name")
-		.addText("salary", { permissions: hidden });
-	const Articles = new CollectionBuilder("articles", {
+		fields: [field.text("name"), field.text("salary", { permissions: hidden })],
+	});
+	const Articles = defineCollection({
+		key: "articles",
 		mode: "multiple",
 		details: { labels: { singular: "Article", plural: "Articles" } },
 		bricks: {
 			builder: [
-				new BrickBuilder("hero")
-					.addText("name", { permissions: hidden })
-					.addRelation("featured", { collection: "people" }),
+				defineBrick({
+					key: "hero",
+					fields: [
+						field.text("name", { permissions: hidden }),
+						field.relation("featured", { collection: "people" }),
+					],
+				}),
 			],
 		},
-	})
-		.addText("title")
-		.addText("secret", { permissions: hidden })
-		.addRelation("author", { collection: "people" });
+		fields: [
+			field.text("title"),
+			field.text("secret", { permissions: hidden }),
+			field.relation("author", { collection: "people" }),
+		],
+	});
 	const schema = inferSchema(Articles, db).data?.tables.filter(
 		(table) => table.type !== "document" && table.type !== "versions",
 	) as CollectionSchemaTable<LucidBrickTableName>[];

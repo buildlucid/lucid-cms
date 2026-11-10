@@ -1,8 +1,9 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import SelectCustomField from "./custom-field.js";
 
@@ -31,7 +32,8 @@ const CONSTANTS = {
 
 // -----------------------------------------------
 // Validation
-const SelectCollection = new CollectionBuilder("collection", {
+const SelectCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -44,16 +46,18 @@ const SelectCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addSelect("standard_select", {
-		options: CONSTANTS.selectOptions,
-	})
-	.addSelect("required_select", {
-		options: CONSTANTS.selectOptions,
-		validation: {
-			required: true,
-		},
-	});
+	fields: [
+		field.select("standard_select", {
+			options: CONSTANTS.selectOptions,
+		}),
+		field.select("required_select", {
+			options: CONSTANTS.selectOptions,
+			validation: {
+				required: true,
+			},
+		}),
+	],
+});
 
 test("successfully validate field - select", async () => {
 	// Standard
@@ -65,7 +69,7 @@ test("successfully validate field - select", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
+			getFieldSetState(SelectCollection).fields.get("standard_select")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -87,7 +91,7 @@ test("successfully validate field - select", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
+			getFieldSetState(SelectCollection).fields.get("standard_select")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -109,7 +113,7 @@ test("successfully validate field - select", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(SelectCollection).fields.get("required_select")!,
+			getFieldSetState(SelectCollection).fields.get("required_select")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -134,7 +138,7 @@ test("fail to validate field - select", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
+				getFieldSetState(SelectCollection).fields.get("standard_select")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -153,7 +157,7 @@ test("fail to validate field - select", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(SelectCollection).fields.get("standard_select")!,
+				getFieldSetState(SelectCollection).fields.get("standard_select")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -193,7 +197,7 @@ test("fail to validate field - select", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(SelectCollection).fields.get("required_select")!,
+			getFieldSetState(SelectCollection).fields.get("required_select")!,
 		validationData: {
 			media: [],
 			user: [],

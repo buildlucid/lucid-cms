@@ -1,4 +1,4 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { defineCollection } from "@lucidcms/core";
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
 import resolveRouteSegmentValues from "./resolve-route-segment-values.js";
@@ -23,7 +23,8 @@ const collection = {
 
 describe("resolveRouteSegmentValues", () => {
 	test("uses only the source collection's supported content locales", async () => {
-		const collectionInstance = new CollectionBuilder("pages", {
+		const collectionInstance = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -52,7 +53,8 @@ describe("resolveRouteSegmentValues", () => {
 	});
 
 	test("uses the storage locale when the Pages fields are not localized", async () => {
-		const collectionInstance = new CollectionBuilder("pages", {
+		const collectionInstance = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: {
 				labels: {

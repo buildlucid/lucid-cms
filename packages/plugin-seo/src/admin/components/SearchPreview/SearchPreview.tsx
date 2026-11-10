@@ -1,7 +1,6 @@
 import { useTranslation } from "@lucidcms/admin/hooks";
 import { TbOutlineWorld } from "solid-icons/tb";
 import type { Component } from "solid-js";
-import type {} from "../../../shared/translations.js";
 
 type SearchPreviewProps = {
 	title: string;

@@ -1,5 +1,6 @@
-import { type CollectionBuilder, copy } from "@lucidcms/core";
+import { copy } from "@lucidcms/core";
 import type {
+	CollectionDefinition,
 	DocumentVersionType,
 	FieldInputSchema,
 	ServiceFn,
@@ -19,7 +20,7 @@ const resolveRoutePrefix: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			fields?: FieldInputSchema[];
 			versionId?: number;

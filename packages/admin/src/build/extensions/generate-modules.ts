@@ -1,4 +1,5 @@
 import type { HtmlTagDescriptor } from "vite";
+import { adminHref } from "../../extensions/route-href.js";
 import {
 	type SlotSurface,
 	slotDefinitions,
@@ -49,7 +50,7 @@ export const generateRegistry = async (
 				...metadata
 			}) =>
 				componentEntry(
-					{ ...metadata, path: `/admin/e/${path}`, shell, access },
+					{ ...metadata, path: adminHref(path), shell, access },
 					component,
 					`route "${metadata.key}"`,
 					resolve,

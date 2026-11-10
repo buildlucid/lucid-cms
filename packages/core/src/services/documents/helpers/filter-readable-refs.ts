@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import filterReadableContent from "../../../libs/collection/field-access/filter-readable-content.js";
 import type { ContentAccess } from "../../../libs/collection/field-access/types.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
@@ -21,7 +21,7 @@ const targetKey = (resource: string, value: unknown, table?: string) =>
 /** Filters refs to readable content, excluding hidden fields, bricks and their embedded bricks, while formatting hydrates with all refs and omits hidden values. */
 const filterReadableRefs = (props: {
 	access: ContentAccess;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	brickSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	responses: Array<BrickQueryResponse | DocumentQueryResponse>;
 	config: ResolvedLucidConfig;

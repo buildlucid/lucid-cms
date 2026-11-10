@@ -1,3 +1,4 @@
+export { adminHref } from "../extensions/route-href.js";
 export { copyValue } from "../components/Copy/copyValue.js";
 export { createCaptchaTokenState } from "../utils/captcha-token-state.js";
 export { getFieldError } from "../utils/get-field-error.js";

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../constants/constants.js";
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
@@ -26,7 +26,7 @@ const createSingle: ServiceFn<
 	[
 		{
 			documentId: number;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			userId: number | null;
 			authUser?: LucidActor;
 			agentRunId?: string;

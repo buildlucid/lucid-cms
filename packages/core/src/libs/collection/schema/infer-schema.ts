@@ -1,5 +1,5 @@
 import type { ServiceResponse } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import { copy } from "../../i18n/index.js";
 import createDocumentTable from "./tables/document-table.js";
@@ -8,10 +8,10 @@ import createVersionsTable from "./tables/versions-table.js";
 import type { CollectionSchema, CollectionSchemaTable } from "./types.js";
 
 /**
- * Infers the collection schema from a given CollectionBuilder instance
+ * Infers the collection schema from a given CollectionDefinition instance
  */
 const inferSchema = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	db: DatabaseAdapter,
 ): Awaited<ServiceResponse<CollectionSchema>> => {
 	try {

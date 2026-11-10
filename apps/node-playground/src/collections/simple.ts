@@ -1,8 +1,9 @@
-import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import { copy, defineCollection, field, z } from "@lucidcms/core";
 import SimpleFixedBrick from "../bricks/simple-fixed.js";
 import SimpleBrick from "../bricks/simple.js";
 
-const SimpleCollection = new CollectionBuilder("simple", {
+const SimpleCollection = defineCollection({
+	key: "simple",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -16,33 +17,33 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		builder: [SimpleBrick, SimpleFixedBrick],
 		fixed: [SimpleFixedBrick],
 	},
-})
-	.addText("simpleHeading", {
-		details: {
-			label: copy("admin:collections.simple.fields.simpleHeading.label"),
-		},
-		validation: {
-			required: true,
-			zod: z.string().min(2).max(128),
-		},
-		showInList: true,
-	})
-	.addUser("user")
-	.addMedia("media")
-	.addRange("priceRange", {
-		details: {
-			label: copy("admin:collections.simple.fields.priceRange.label"),
-			description: copy("admin:collections.simple.fields.priceRange.summary"),
-		},
-		min: 0,
-		max: 100,
-		step: 0.5,
-		thumbs: 2,
-		default: [20, 80],
-		showInList: true,
-	})
-	.addRepeater("people")
-	.addText("firstName")
-	.endRepeater();
+	fields: [
+		field.text("simpleHeading", {
+			details: {
+				label: copy("admin:collections.simple.fields.simpleHeading.label"),
+			},
+			validation: {
+				required: true,
+				zod: z.string().min(2).max(128),
+			},
+			showInList: true,
+		}),
+		field.user("user"),
+		field.media("media"),
+		field.range("priceRange", {
+			details: {
+				label: copy("admin:collections.simple.fields.priceRange.label"),
+				description: copy("admin:collections.simple.fields.priceRange.summary"),
+			},
+			min: 0,
+			max: 100,
+			step: 0.5,
+			thumbs: 2,
+			default: [20, 80],
+			showInList: true,
+		}),
+		field.repeater("people", { fields: [field.text("firstName")] }),
+	],
+});
 
 export default SimpleCollection;

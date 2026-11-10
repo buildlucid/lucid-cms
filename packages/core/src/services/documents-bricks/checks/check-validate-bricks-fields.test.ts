@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
 	recursiveFieldValidate,
 	validateField,
 } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 
-const TranslatedCollection = new CollectionBuilder("collection", {
+const TranslatedCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -21,18 +23,21 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addText("translatable_field")
-	.addText("required_translatable_field", {
-		validation: {
-			required: true,
-		},
-	})
-	.addText("non_translatable_field", {
-		localized: false,
-	});
+	fields: [
+		field.text("translatable_field"),
+		field.text("required_translatable_field", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.text("non_translatable_field", {
+			localized: false,
+		}),
+	],
+});
 
-const NonTranslatedCollection = new CollectionBuilder("non_translated", {
+const NonTranslatedCollection = defineCollection({
+	key: "non_translated",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -46,7 +51,8 @@ const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 		},
 	},
 	localized: false,
-}).addText("text_field");
+	fields: [field.text("text_field")],
+});
 
 test("localeCode is correctly included or omitted based on translation support", async () => {
 	const validationData = {
@@ -70,9 +76,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TranslatedCollection).fields.get(
-				"translatable_field",
-			)!,
+			getFieldSetState(TranslatedCollection).fields.get("translatable_field")!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -96,9 +100,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TranslatedCollection).fields.get(
-				"translatable_field",
-			)!,
+			getFieldSetState(TranslatedCollection).fields.get("translatable_field")!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -122,9 +124,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(TranslatedCollection).fields.get(
-				"translatable_field",
-			)!,
+			getFieldSetState(TranslatedCollection).fields.get("translatable_field")!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -147,7 +147,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			value: 123, //* causes fail
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(NonTranslatedCollection).fields.get(
+		instance: getFieldSetState(NonTranslatedCollection).fields.get(
 			"text_field",
 		)!,
 		validationData,
@@ -172,7 +172,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			value: 123, //* causes fail
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TranslatedCollection).fields.get(
+		instance: getFieldSetState(TranslatedCollection).fields.get(
 			"non_translatable_field",
 		)!,
 		validationData,
@@ -201,9 +201,7 @@ test("rejects translation keys outside the collection locale subset", () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- the fixture always registers this field
-			getFieldBuilderState(TranslatedCollection).fields.get(
-				"translatable_field",
-			)!,
+			getFieldSetState(TranslatedCollection).fields.get("translatable_field")!,
 		validationData: { media: [], user: [], relation: [] },
 		meta: {
 			localized: true,
@@ -239,7 +237,7 @@ test("required localized fields validate every configured locale", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TranslatedCollection).fields.get(
+		instance: getFieldSetState(TranslatedCollection).fields.get(
 			"required_translatable_field",
 		)!,
 		validationData,
@@ -264,7 +262,7 @@ test("required localized fields validate every configured locale", async () => {
 			value: "English title",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(TranslatedCollection).fields.get(
+		instance: getFieldSetState(TranslatedCollection).fields.get(
 			"required_translatable_field",
 		)!,
 		validationData,
@@ -284,9 +282,14 @@ test("required localized fields validate every configured locale", async () => {
 });
 
 test("embedded brick fields follow collection localization independently", () => {
-	const embeddedBrick = new BrickBuilder("callout").addText("heading", {
-		localized: true,
-		validation: { required: true },
+	const embeddedBrick = defineBrick({
+		key: "callout",
+		fields: [
+			field.text("heading", {
+				localized: true,
+				validation: { required: true },
+			}),
+		],
 	});
 
 	const errors = recursiveFieldValidate({
@@ -316,9 +319,14 @@ test("embedded brick fields follow collection localization independently", () =>
 });
 
 test("embedded bricks limited to one locale skip the other locales", () => {
-	const embeddedBrick = new BrickBuilder("callout").addText("heading", {
-		localized: true,
-		validation: { required: true },
+	const embeddedBrick = defineBrick({
+		key: "callout",
+		fields: [
+			field.text("heading", {
+				localized: true,
+				validation: { required: true },
+			}),
+		],
 	});
 
 	const errors = recursiveFieldValidate({

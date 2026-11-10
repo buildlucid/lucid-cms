@@ -2,14 +2,16 @@ import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import JsonCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const JSONCollection = new CollectionBuilder("collection", {
+const JSONCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -22,21 +24,23 @@ const JSONCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addJSON("standard_json")
-	.addJSON("required_json", {
-		validation: {
-			required: true,
-		},
-	})
-	.addJSON("zod_json", {
-		validation: {
-			zod: z.object({
-				key: z.string(),
-				value: z.string(),
-			}),
-		},
-	});
+	fields: [
+		field.json("standard_json"),
+		field.json("required_json", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.json("zod_json", {
+			validation: {
+				zod: z.object({
+					key: z.string(),
+					value: z.string(),
+				}),
+			},
+		}),
+	],
+});
 
 test("successfully validate field - json", async () => {
 	// Standard
@@ -49,7 +53,7 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
+		instance: getFieldSetState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -69,7 +73,7 @@ test("successfully validate field - json", async () => {
 			value: "",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
+		instance: getFieldSetState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -92,7 +96,7 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(JSONCollection).fields.get("required_json")!,
+		instance: getFieldSetState(JSONCollection).fields.get("required_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -116,7 +120,7 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(JSONCollection).fields.get("zod_json")!,
+		instance: getFieldSetState(JSONCollection).fields.get("zod_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -139,7 +143,7 @@ test("fail to validate field - json", async () => {
 			value: "invalid json",
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
+		instance: getFieldSetState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -166,7 +170,7 @@ test("fail to validate field - json", async () => {
 			value: undefined,
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(JSONCollection).fields.get("required_json")!,
+		instance: getFieldSetState(JSONCollection).fields.get("required_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -196,7 +200,7 @@ test("fail to validate field - json", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(JSONCollection).fields.get("zod_json")!,
+		instance: getFieldSetState(JSONCollection).fields.get("zod_json")!,
 		validationData: {
 			media: [],
 			user: [],

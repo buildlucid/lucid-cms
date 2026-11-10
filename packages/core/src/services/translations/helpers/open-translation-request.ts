@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { RequestDocumentsRepository } from "../../../libs/repositories/index.js";
@@ -17,7 +17,7 @@ import saveTranslatedProposals from "./save-translated-proposals.js";
 const openTranslationRequest: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			localization: ResolvedCollectionLocalization;
 			locale: string;
 			documentIds: number[];

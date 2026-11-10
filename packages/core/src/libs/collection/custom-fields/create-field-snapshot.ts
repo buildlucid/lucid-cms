@@ -1,5 +1,5 @@
 import deepMerge from "../../../utils/helpers/deep-merge.js";
-import type { FieldSnapshot } from "../builders/field-builder/types.js";
+import type { FieldSnapshot } from "../definitions/fields/types.js";
 import type CustomField from "./custom-field.js";
 import type { FieldTypes } from "./types.js";
 

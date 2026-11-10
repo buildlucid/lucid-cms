@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import resolveCollectionLocalization from "../../libs/collection/helpers/resolve-collection-localization.js";
 import getChangedLocales from "../../libs/translations/get-changed-locales.js";
 import type { ContentInput } from "../../libs/translations/list-content-fields.js";
@@ -27,7 +27,7 @@ const createMultiple: ServiceFn<
 			fields?: Array<FieldInputSchema>;
 			/** The content this save replaces, so unchanged translations keep their sources. Null for new content. */
 			previous: ContentInput | null;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			authUser?: LucidActor;
 			skipValidation?: boolean;
 		},

@@ -3,9 +3,6 @@ import type {
 	InternalDocumentBrick,
 	InternalDocumentField,
 } from "../../../exports/types.js";
-import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import {
 	getFieldDatabaseConfig,
@@ -16,6 +13,9 @@ import {
 	treeTableSchemaColumns,
 } from "../../../libs/collection/custom-fields/storage/tree-table.js";
 import type { FieldDatabaseMode } from "../../../libs/collection/custom-fields/types.js";
+import type BrickDefinition from "../../../libs/collection/definitions/brick/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
@@ -46,7 +46,7 @@ export type ConstructBrickTableParams = {
 	parentId?: Map<string | null, number> | null;
 	parentIdRef?: Map<string | null, number>;
 	brickIdByLocale?: Map<string | null, number>; // Track brick_id_refs by locale
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	documentId: number;
 	versionId: number;
 	localization: {
@@ -102,7 +102,7 @@ type FieldModeHandler = {
  */
 const getFieldOwner = (
 	params: ConstructBrickTableParams,
-): CollectionBuilder | BrickBuilder | null => {
+): CollectionDefinition | BrickDefinition | null => {
 	if (!params.brick?.key) return params.collection;
 
 	return (
@@ -287,7 +287,7 @@ const constructRelationTableRows = (
 	const fieldOwner = getFieldOwner(params);
 	if (!fieldOwner) return [];
 
-	const fieldInstance = getFieldBuilderState(fieldOwner).fields.get(field.key);
+	const fieldInstance = getFieldSetState(fieldOwner).fields.get(field.key);
 	if (!fieldInstance) return [];
 
 	const valuesByLocale = processFieldValues(

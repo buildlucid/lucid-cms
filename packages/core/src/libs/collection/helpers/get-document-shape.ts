@@ -1,15 +1,15 @@
-import type BrickBuilder from "../builders/brick-builder/index.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../builders/field-builder/index.js";
 import registeredFields, {
 	fieldHooks,
 } from "../custom-fields/registered-fields.js";
 import { storageModes } from "../custom-fields/storage/index.js";
 import type { FieldConfig, FieldTypes } from "../custom-fields/types.js";
+import type BrickDefinition from "../definitions/brick/index.js";
+import type CollectionDefinition from "../definitions/collection/index.js";
+import { getFieldSetState } from "../definitions/fields/index.js";
 import type { ContentAccess, FieldAccess } from "../field-access/types.js";
 import resolveCollectionLocalization from "./resolve-collection-localization.js";
 
-export type Owner = CollectionBuilder | BrickBuilder;
+export type Owner = CollectionDefinition | BrickDefinition;
 export type FieldTree = FieldConfig<FieldTypes>[];
 export type DocumentObjectShape = {
 	kind: "object";
@@ -43,7 +43,7 @@ export type DocumentShape =
 	  };
 
 export type ContentContext = {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: Parameters<
 		typeof resolveCollectionLocalization
 	>[0]["localization"];
@@ -51,7 +51,10 @@ export type ContentContext = {
 	access?: ContentAccess;
 };
 
-/** Models collection structure for merges, patches and generated types with objects for fields, groups and locales, repeater items, brick variants and indivisible compound values, omitting unreadable nodes and marking locks when `access` is supplied. */
+/**
+ * Models content structure for merges, patches and type generation. With `access`, omits
+ * unreadable nodes and marks locked content.
+ */
 export const getDocumentShape = (
 	context: ContentContext,
 ): DocumentObjectShape => {
@@ -95,7 +98,7 @@ export const getDocumentShape = (
 				continue;
 			}
 
-			const instance = getFieldBuilderState(owner).fields.get(field.key);
+			const instance = getFieldSetState(owner).fields.get(field.key);
 			const value: DocumentShape = {
 				kind: "value",
 				field,

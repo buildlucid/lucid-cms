@@ -1,30 +1,34 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { defineBrick, field } from "@lucidcms/core";
 
-const ContentBrick = new BrickBuilder("content", {
+const ContentBrick = defineBrick({
+	key: "content",
 	details: {
 		label: "Content",
 	},
-})
-	.addText("heading", {
-		details: {
-			label: "Heading",
-		},
-	})
-	.addTextarea("body", {
-		details: {
-			label: "Body",
-		},
-	})
-	.addRepeater("sections", {
-		details: {
-			label: "Sections",
-		},
-	})
-	.addText("sectionHeading", {
-		details: {
-			label: "Section heading",
-		},
-	})
-	.endRepeater();
+	fields: [
+		field.text("heading", {
+			details: {
+				label: "Heading",
+			},
+		}),
+		field.textarea("body", {
+			details: {
+				label: "Body",
+			},
+		}),
+		field.repeater("sections", {
+			details: {
+				label: "Sections",
+			},
+			fields: [
+				field.text("sectionHeading", {
+					details: {
+						label: "Section heading",
+					},
+				}),
+			],
+		}),
+	],
+});
 
 export default ContentBrick;

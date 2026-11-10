@@ -1,7 +1,7 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
 import { normalizeRelationCollections } from "../../../libs/collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import primeRuntimeSchemas from "../../../libs/collection/schema/runtime/prime-runtime-schemas.js";
 import {
@@ -69,7 +69,7 @@ const isPrefixedFieldColumn = (
 ): column is CollectionSchemaColumn & { name: `_${string}` } =>
 	column.source === "field" && column.name.startsWith("_");
 
-const collectionBricks = (collection: CollectionBuilder) => [
+const collectionBricks = (collection: CollectionDefinition) => [
 	...(collection.config.bricks?.fixed ?? []),
 	...(collection.config.bricks?.builder ?? []),
 ];
@@ -85,7 +85,7 @@ const relationFilterPath = (
 
 /** Resolves relation field paths and allowed target collections from source config. */
 const relationFilterDescriptors = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
 ): RelationFilterDescriptor[] => {
 	const bricks = collectionBricks(collection);
@@ -100,7 +100,7 @@ const relationFilterDescriptors = (
 			? bricks.find((brick) => brick.key === schema.key.brick)
 			: collection;
 		const field = builder
-			? getFieldBuilderState(builder).fields.get(fieldKey)
+			? getFieldSetState(builder).fields.get(fieldKey)
 			: undefined;
 		if (field?.config.type !== "relation") continue;
 
@@ -202,7 +202,7 @@ const groupConditions = (
 
 /** Relation-field filter paths such as `fields.author` or `bricks.hero.featured`, ordered longest first. */
 export const relationFilterPaths = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
 ): string[] =>
 	relationFilterDescriptors(collection, bricksTableSchema).map(
@@ -211,7 +211,7 @@ export const relationFilterPaths = (
 
 /** Groups traversal conditions that must match the same related document. */
 export const groupRelationDocumentFilterConditions = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[];
 	conditions?: QueryParamFilterCondition[];
 }): PendingRelationDocumentFilter[] =>
@@ -284,7 +284,7 @@ const buildResolvedFilters = (props: {
 const resolveRelationDocumentFilters: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[];
 			filter?: QueryParamFilters;
 			filterOr?: QueryParamFilterGroups;

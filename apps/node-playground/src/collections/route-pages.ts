@@ -1,6 +1,7 @@
-import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import { copy, defineCollection, field, z } from "@lucidcms/core";
 
-const RoutePageCollection = new CollectionBuilder("route-page", {
+const RoutePageCollection = defineCollection({
+	key: "route-page",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -11,16 +12,19 @@ const RoutePageCollection = new CollectionBuilder("route-page", {
 	},
 	group: { key: "content" },
 	localized: true,
-}).addText("title", {
-	details: {
-		label: copy("admin:collections.route-page.fields.title.label"),
-	},
-	validation: {
-		required: true,
-		zod: z.string().min(2),
-	},
-	showInList: true,
-	useAsLabel: true,
+	fields: [
+		field.text("title", {
+			details: {
+				label: copy("admin:collections.route-page.fields.title.label"),
+			},
+			validation: {
+				required: true,
+				zod: z.string().min(2),
+			},
+			showInList: true,
+			useAsLabel: true,
+		}),
+	],
 });
 
 export default RoutePageCollection;

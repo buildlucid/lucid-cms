@@ -1,4 +1,4 @@
-import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import { copy, defineCollection, field, z } from "@lucidcms/core";
 import {
 	REDIRECTS_COLLECTION_KEY,
 	redirectFields,
@@ -48,7 +48,8 @@ const statusCodeLabels: Record<(typeof redirectStatusCodes)[number], string> = {
 
 /** Creates the redirects collection, where editors send old paths to pages or other websites. */
 const createRedirectsCollection = (config: RedirectsConfig) => {
-	const collection = new CollectionBuilder(REDIRECTS_COLLECTION_KEY, {
+	const collection = defineCollection({
+		key: REDIRECTS_COLLECTION_KEY,
 		mode: "multiple",
 		group: config.navigationGroup ?? REDIRECTS_COLLECTION_KEY,
 		details: {
@@ -79,48 +80,52 @@ const createRedirectsCollection = (config: RedirectsConfig) => {
 	});
 
 	if (config.hasLocaleField) {
-		collection.addSelect(redirectFields.locale, {
-			details: {
-				label: copy("admin:plugin.pages.redirects.fields.locale.label", {
-					defaultMessage: "Language",
-				}),
-			},
-			options: config.locales.map((locale) => ({
-				label: locale.label,
-				value: locale.code,
-			})),
-			default: config.defaultLocale ?? undefined,
-			index: true,
-			validation: { required: true },
-			ui: { width: 6 },
-			showInList: true,
-		});
+		collection.insertFields([
+			field.select(redirectFields.locale, {
+				details: {
+					label: copy("admin:plugin.pages.redirects.fields.locale.label", {
+						defaultMessage: "Language",
+					}),
+				},
+				options: config.locales.map((locale) => ({
+					label: locale.label,
+					value: locale.code,
+				})),
+				default: config.defaultLocale ?? undefined,
+				index: true,
+				validation: { required: true },
+				ui: { width: 6 },
+				showInList: true,
+			}),
+		]);
 	}
 
-	collection.addText(redirectFields.from, {
-		details: {
-			label: copy("admin:plugin.pages.redirects.fields.from.label", {
-				defaultMessage: "Redirect from",
-			}),
-			description: copy("admin:plugin.pages.redirects.fields.from.summary", {
-				defaultMessage:
-					"Enter the old path, starting with a slash. For example, /old-page.",
-			}),
-			placeholder: "/old-page",
-		},
-		localized: false,
-		index: true,
-		validation: {
-			required: true,
-			zod: sourcePathSchema,
-		},
-		ui: { width: 12 },
-		useAsLabel: true,
-		showInList: true,
-	});
+	collection.insertFields([
+		field.text(redirectFields.from, {
+			details: {
+				label: copy("admin:plugin.pages.redirects.fields.from.label", {
+					defaultMessage: "Redirect from",
+				}),
+				description: copy("admin:plugin.pages.redirects.fields.from.summary", {
+					defaultMessage:
+						"Enter the old path, starting with a slash. For example, /old-page.",
+				}),
+				placeholder: "/old-page",
+			},
+			localized: false,
+			index: true,
+			validation: {
+				required: true,
+				zod: sourcePathSchema,
+			},
+			ui: { width: 12 },
+			useAsLabel: true,
+			showInList: true,
+		}),
+	]);
 
-	collection
-		.addSelect(redirectFields.targetType, {
+	collection.insertFields([
+		field.select(redirectFields.targetType, {
 			details: {
 				label: copy("admin:plugin.pages.redirects.fields.target.type.label", {
 					defaultMessage: "Redirect to",
@@ -145,8 +150,8 @@ const createRedirectsCollection = (config: RedirectsConfig) => {
 			validation: { required: true },
 			ui: { width: 6 },
 			showInList: true,
-		})
-		.addSelect(redirectFields.statusCode, {
+		}),
+		field.select(redirectFields.statusCode, {
 			details: {
 				label: copy("admin:plugin.pages.redirects.fields.status.code.label", {
 					defaultMessage: "Redirect type",
@@ -170,8 +175,8 @@ const createRedirectsCollection = (config: RedirectsConfig) => {
 			validation: { required: true },
 			ui: { width: 6 },
 			showInList: true,
-		})
-		.addRelation(redirectFields.targetDocument, {
+		}),
+		field.relation(redirectFields.targetDocument, {
 			collection: config.collections.map((collection) => collection.key),
 			details: {
 				label: copy(
@@ -204,8 +209,8 @@ const createRedirectsCollection = (config: RedirectsConfig) => {
 				},
 			},
 			showInList: true,
-		})
-		.addText(redirectFields.targetUrl, {
+		}),
+		field.text(redirectFields.targetUrl, {
 			details: {
 				label: copy("admin:plugin.pages.redirects.fields.target.url.label", {
 					defaultMessage: "Destination web address",
@@ -237,7 +242,8 @@ const createRedirectsCollection = (config: RedirectsConfig) => {
 				},
 			},
 			showInList: true,
-		});
+		}),
+	]);
 
 	return collection;
 };

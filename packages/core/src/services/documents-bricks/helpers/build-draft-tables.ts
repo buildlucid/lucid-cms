@@ -1,5 +1,5 @@
 import type { ResolvedLucidConfig } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type {
 	LucidBricksTable,
@@ -16,7 +16,7 @@ import prepareBricksAndFields from "./prepare-bricks-and-fields.js";
  * ones.
  */
 const buildDraftTables = (params: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	documentId: number;
 	versionId: number;
 	draft: LucidPreviewDraftContent;

@@ -1,5 +1,5 @@
 import type { CollectionTableNames } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import {
 	formatDocumentLabelValue,
 	getDocumentLabelField,
@@ -16,7 +16,7 @@ import type {
 const getDocumentLabel = async (params: {
 	context: ServiceContext;
 	bricks: DocumentBricksRepository;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	tables: CollectionTableNames;
 	documentId: number;
 	versionId: number;

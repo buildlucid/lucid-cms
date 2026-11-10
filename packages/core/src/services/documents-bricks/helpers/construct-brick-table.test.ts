@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import { describe, expect, test, vi } from "vitest";
 import type { FieldInputSchema } from "../../../exports/types.js";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import aggregateBrickTables from "./aggregate-brick-tables.js";
@@ -21,18 +22,24 @@ const TEST_CONFIG = {
 
 describe("brick table construction", () => {
 	test("temporary references stay unique across document fields, bricks and localized repeaters", () => {
-		const brick = new BrickBuilder("nested")
-			.addRepeater("items")
-			.addRepeater("children")
-			.addText("title")
-			.endRepeater()
-			.endRepeater();
-		const collection = new CollectionBuilder("unique_references", {
+		const brick = defineBrick({
+			key: "nested",
+			fields: [
+				field.repeater("items", {
+					fields: [
+						field.repeater("children", { fields: [field.text("title")] }),
+					],
+				}),
+			],
+		});
+		const collection = defineCollection({
+			key: "unique_references",
 			mode: "multiple",
 			localized: true,
 			details: { labels: { singular: "Page", plural: "Pages" } },
 			bricks: { builder: [brick] },
-		}).addText("title");
+			fields: [field.text("title")],
+		});
 		const randomBytes = vi
 			.spyOn(crypto, "randomBytes")
 			.mockReturnValue(Buffer.from([0, 0, 1]));
@@ -92,16 +99,23 @@ describe("brick table construction", () => {
 	});
 
 	test("should correctly generate tables for two level nested repeaters", () => {
-		const simpleBrick = new BrickBuilder("simple")
-			.addText("heading", { localized: false })
-			.addRepeater("items")
-			.addText("itemTitle")
-			.addRepeater("nestedItems")
-			.addText("nestedItemTitle")
-			.endRepeater()
-			.endRepeater();
+		const simpleBrick = defineBrick({
+			key: "simple",
+			fields: [
+				field.text("heading", { localized: false }),
+				field.repeater("items", {
+					fields: [
+						field.text("itemTitle"),
+						field.repeater("nestedItems", {
+							fields: [field.text("nestedItemTitle")],
+						}),
+					],
+				}),
+			],
+		});
 
-		const simpleCollection = new CollectionBuilder("simple", {
+		const simpleCollection = defineCollection({
+			key: "simple",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -118,14 +132,17 @@ describe("brick table construction", () => {
 			bricks: {
 				builder: [simpleBrick],
 			},
-		}).addText("simpleHeading", {
-			details: {
-				label: copy("admin:tests.fields.simpleHeading.label", {
-					defaultMessage: "Heading Default",
+			fields: [
+				field.text("simpleHeading", {
+					details: {
+						label: copy("admin:tests.fields.simpleHeading.label", {
+							defaultMessage: "Heading Default",
+						}),
+					},
+					validation: { required: true },
+					showInList: true,
 				}),
-			},
-			validation: { required: true },
-			showInList: true,
+			],
 		});
 
 		const simpleInputData = {
@@ -363,18 +380,27 @@ describe("brick table construction", () => {
 	});
 
 	test("should handle three-level nested repeaters with correct priorities", () => {
-		const deepBrick = new BrickBuilder("deep")
-			.addRepeater("level1")
-			.addText("level1Title")
-			.addRepeater("level2")
-			.addText("level2Title")
-			.addRepeater("level3")
-			.addText("level3Title")
-			.endRepeater()
-			.endRepeater()
-			.endRepeater();
+		const deepBrick = defineBrick({
+			key: "deep",
+			fields: [
+				field.repeater("level1", {
+					fields: [
+						field.text("level1Title"),
+						field.repeater("level2", {
+							fields: [
+								field.text("level2Title"),
+								field.repeater("level3", {
+									fields: [field.text("level3Title")],
+								}),
+							],
+						}),
+					],
+				}),
+			],
+		});
 
-		const deepCollection = new CollectionBuilder("deep", {
+		const deepCollection = defineCollection({
+			key: "deep",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -515,17 +541,24 @@ describe("brick table construction", () => {
 	});
 
 	test("should create relation tables for relation fields and keep repeater relations top-level", () => {
-		const galleryBrick = new BrickBuilder("gallery")
-			.addMedia("heroMedia", {
-				multiple: true,
-			})
-			.addRepeater("items")
-			.addMedia("itemMedia", {
-				multiple: true,
-			})
-			.endRepeater();
+		const galleryBrick = defineBrick({
+			key: "gallery",
+			fields: [
+				field.media("heroMedia", {
+					multiple: true,
+				}),
+				field.repeater("items", {
+					fields: [
+						field.media("itemMedia", {
+							multiple: true,
+						}),
+					],
+				}),
+			],
+		});
 
-		const galleryCollection = new CollectionBuilder("gallery", {
+		const galleryCollection = defineCollection({
+			key: "gallery",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -542,9 +575,12 @@ describe("brick table construction", () => {
 			bricks: {
 				builder: [galleryBrick],
 			},
-		}).addRelation("relatedPage", {
-			collection: "page",
-			multiple: true,
+			fields: [
+				field.relation("relatedPage", {
+					collection: "page",
+					multiple: true,
+				}),
+			],
 		});
 
 		const brickTables = aggregateBrickTables({
@@ -722,8 +758,9 @@ describe("brick table construction", () => {
 	});
 
 	test("should preserve an embedded brick ref as its persisted instance id", () => {
-		const card = new BrickBuilder("card").addText("title");
-		const collection = new CollectionBuilder("article", {
+		const card = defineBrick({ key: "card", fields: [field.text("title")] });
+		const collection = defineCollection({
+			key: "article",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -768,7 +805,8 @@ describe("brick table construction", () => {
 	});
 
 	test("should not create relation tables when relation values are empty", () => {
-		const articleCollection = new CollectionBuilder("articles", {
+		const articleCollection = defineCollection({
+			key: "articles",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -782,14 +820,16 @@ describe("brick table construction", () => {
 			},
 			localized: true,
 			revisions: { enabled: true },
-		})
-			.addUser("author", {
-				multiple: true,
-			})
-			.addRelation("relatedPage", {
-				collection: "page",
-				multiple: true,
-			});
+			fields: [
+				field.user("author", {
+					multiple: true,
+				}),
+				field.relation("relatedPage", {
+					collection: "page",
+					multiple: true,
+				}),
+			],
+		});
 
 		const brickTables = aggregateBrickTables({
 			collection: articleCollection,
@@ -822,7 +862,8 @@ describe("brick table construction", () => {
 	});
 
 	test("persists subset translations alongside direct fields on the storage locale", () => {
-		const collection = new CollectionBuilder("articles", {
+		const collection = defineCollection({
+			key: "articles",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -831,9 +872,11 @@ describe("brick table construction", () => {
 				},
 			},
 			localized: { locales: ["fr"], defaultLocale: "fr" },
-		})
-			.addText("title", { localized: true })
-			.addText("reference", { localized: false });
+			fields: [
+				field.text("title", { localized: true }),
+				field.text("reference", { localized: false }),
+			],
+		});
 
 		const [fieldsTable] = aggregateBrickTables({
 			collection,

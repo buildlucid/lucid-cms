@@ -4,11 +4,10 @@ import {
 	useDocumentEditor,
 	useTranslation,
 } from "@lucidcms/admin/hooks";
-import type { BrickSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { createMemo, createSignal, Match, Switch } from "solid-js";
 import { fields } from "../../../constants.js";
 import { resolveSocialText } from "../../../shared/assessments.js";
-import type {} from "../../../shared/translations.js";
 import {
 	hasMedia,
 	readAlt,
@@ -18,12 +17,14 @@ import {
 import PageGuidance from "../PageGuidance/PageGuidance.js";
 import SearchPreview from "../SearchPreview/SearchPreview.js";
 import SocialPreview from "../SocialPreview/SocialPreview.js";
-import type { SeoPreviewOptions } from "./config.js";
+import type seoPreviewConfig from "./config.js";
 
 type PreviewView = "search" | "social" | "x";
 type PreviewOption = { value: PreviewView; label: string };
 
-const SeoPreview: BrickSlotComponent<SeoPreviewOptions> = (props) => {
+const SeoPreview: SlotComponent<ReturnType<typeof seoPreviewConfig>> = (
+	props,
+) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

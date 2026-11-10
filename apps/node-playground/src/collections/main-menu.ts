@@ -1,6 +1,7 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { defineCollection, field } from "@lucidcms/core";
 
-const MainMenuCollection = new CollectionBuilder("main-menu", {
+const MainMenuCollection = defineCollection({
+	key: "main-menu",
 	mode: "multiple",
 	group: {
 		key: "navigation",
@@ -21,494 +22,547 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		fixed: [],
 		builder: [],
 	},
-})
-	.addText("title", {
-		details: {
-			label: "Title",
-		},
-		localized: true,
-		showInList: true,
-		validation: {
-			required: true,
-		},
-	})
-	.addSelect("location", {
-		details: {
-			label: "Location",
-		},
-		options: [
-			{
-				label: "Header",
-				value: "header",
+	fields: [
+		field.text("title", {
+			details: {
+				label: "Title",
 			},
-			{
-				label: "Footer",
-				value: "footer",
+			localized: true,
+			showInList: true,
+			validation: {
+				required: true,
 			},
-			{
-				label: "Documentation",
-				value: "documentation",
+		}),
+		field.select("location", {
+			details: {
+				label: "Location",
 			},
-		],
-		default: "header",
-		showInList: true,
-		validation: {
-			required: true,
-		},
-	})
-	.addRepeater("items", {
-		details: {
-			label: "Items",
-		},
-	})
-	.addText("label", {
-		details: {
-			label: "Label",
-		},
-		localized: true,
-		validation: {
-			required: true,
-		},
-	})
-	.addTextarea("description", {
-		details: {
-			label: "Description",
-		},
-		localized: true,
-	})
-	.addSelect("linkType", {
-		details: {
-			label: "Link type",
-		},
-		options: [
-			{
-				label: "Document",
-				value: "document",
+			options: [
+				{
+					label: "Header",
+					value: "header",
+				},
+				{
+					label: "Footer",
+					value: "footer",
+				},
+				{
+					label: "Documentation",
+					value: "documentation",
+				},
+			],
+			default: "header",
+			showInList: true,
+			validation: {
+				required: true,
 			},
-			{
-				label: "Link",
-				value: "link",
+		}),
+		field.repeater("items", {
+			details: {
+				label: "Items",
 			},
-		],
-		default: "document",
-		validation: {
-			required: true,
-		},
-	})
-	.addRelation("document", {
-		collection: ["page", "blog"],
-		details: {
-			label: "Document",
-			description: "Link this item to a CMS document.",
-		},
-		multiple: false,
-		ui: {
-			condition: {
-				all: [{ field: "linkType", operator: "equals", value: "document" }],
-			},
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addLink("link", {
-		details: {
-			label: "Link",
-			description: "Link this item to a custom URL.",
-		},
-		localized: true,
-		ui: {
-			condition: {
-				all: [{ field: "linkType", operator: "equals", value: "link" }],
-			},
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addCheckbox("available", {
-		details: {
-			label: "Available",
-		},
-		default: true,
-	})
-	.addCheckbox("showBadge", {
-		details: {
-			label: "Show badge",
-		},
-		default: false,
-		ui: {
-			condition: {
-				all: [
-					{ field: "location", operator: "equals", value: "documentation" },
-				],
-			},
-		},
-	})
-	.addSection("badge", {
-		details: {
-			label: "Badge",
-			description: "Optional badge shown beside documentation menu items.",
-		},
-		output: "inline",
-		ui: {
-			condition: {
-				all: [
-					{ field: "location", operator: "equals", value: "documentation" },
-					{ field: "showBadge", operator: "equals", value: true },
-				],
-			},
-		},
-	})
-	.addText("badgeLabel", {
-		details: {
-			label: "Badge label",
-		},
-		localized: true,
-		ui: {
-			width: 6,
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addSelect("badgeTheme", {
-		details: {
-			label: "Badge colour",
-		},
-		options: [
-			{
-				label: "Primary",
-				value: "primary",
-			},
-			{
-				label: "Grey",
-				value: "grey",
-			},
-			{
-				label: "Dark grey",
-				value: "dark-grey",
-			},
-			{
-				label: "Red",
-				value: "red",
-			},
-		],
-		default: "primary",
-		localized: true,
-		ui: {
-			width: 6,
-		},
-	})
-	.endSection()
-	.addRepeater("children", {
-		details: {
-			label: "Children",
-		},
-	})
-	.addText("childLabel", {
-		details: {
-			label: "Label",
-		},
-		localized: true,
-		validation: {
-			required: true,
-		},
-	})
-	.addTextarea("childDescription", {
-		details: {
-			label: "Description",
-		},
-		localized: true,
-	})
-	.addSelect("childLinkType", {
-		details: {
-			label: "Link type",
-		},
-		options: [
-			{
-				label: "Document",
-				value: "document",
-			},
-			{
-				label: "Link",
-				value: "link",
-			},
-		],
-		default: "document",
-		validation: {
-			required: true,
-		},
-	})
-	.addRelation("childDocument", {
-		collection: ["page", "blog"],
-		details: {
-			label: "Document",
-			description: "Link this item to a CMS document.",
-		},
-		multiple: false,
-		ui: {
-			condition: {
-				all: [
-					{ field: "childLinkType", operator: "equals", value: "document" },
-				],
-			},
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addLink("childLink", {
-		details: {
-			label: "Link",
-			description: "Link this item to a custom URL.",
-		},
-		localized: true,
-		ui: {
-			condition: {
-				all: [{ field: "childLinkType", operator: "equals", value: "link" }],
-			},
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addCheckbox("childAvailable", {
-		details: {
-			label: "Available",
-		},
-		default: true,
-	})
-	.addCheckbox("childShowBadge", {
-		details: {
-			label: "Show badge",
-		},
-		default: false,
-		ui: {
-			condition: {
-				all: [
-					{ field: "location", operator: "equals", value: "documentation" },
-				],
-			},
-		},
-	})
-	.addSection("childBadge", {
-		details: {
-			label: "Badge",
-			description:
-				"Optional badge shown beside documentation child menu items.",
-		},
-		output: "inline",
-		ui: {
-			condition: {
-				all: [
-					{ field: "location", operator: "equals", value: "documentation" },
-					{ field: "childShowBadge", operator: "equals", value: true },
-				],
-			},
-		},
-	})
-	.addText("childBadgeLabel", {
-		details: {
-			label: "Badge label",
-		},
-		localized: true,
-		ui: {
-			width: 6,
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addSelect("childBadgeTheme", {
-		details: {
-			label: "Badge colour",
-		},
-		options: [
-			{
-				label: "Primary",
-				value: "primary",
-			},
-			{
-				label: "Grey",
-				value: "grey",
-			},
-			{
-				label: "Dark grey",
-				value: "dark-grey",
-			},
-			{
-				label: "Red",
-				value: "red",
-			},
-		],
-		default: "primary",
-		localized: true,
-		ui: {
-			width: 6,
-		},
-	})
-	.endSection()
-	.addRepeater("grandchildren", {
-		details: {
-			label: "Grandchildren",
-		},
-	})
-	.addText("grandchildLabel", {
-		details: {
-			label: "Label",
-		},
-		localized: true,
-		validation: {
-			required: true,
-		},
-	})
-	.addTextarea("grandchildDescription", {
-		details: {
-			label: "Description",
-		},
-		localized: true,
-	})
-	.addSelect("grandchildLinkType", {
-		details: {
-			label: "Link type",
-		},
-		options: [
-			{
-				label: "Document",
-				value: "document",
-			},
-			{
-				label: "Link",
-				value: "link",
-			},
-		],
-		default: "document",
-		validation: {
-			required: true,
-		},
-	})
-	.addRelation("grandchildDocument", {
-		collection: ["page", "blog"],
-		details: {
-			label: "Document",
-			description: "Link this item to a CMS document.",
-		},
-		multiple: false,
-		ui: {
-			condition: {
-				all: [
-					{
-						field: "grandchildLinkType",
-						operator: "equals",
-						value: "document",
+			fields: [
+				field.text("label", {
+					details: {
+						label: "Label",
 					},
-				],
-			},
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addLink("grandchildLink", {
-		details: {
-			label: "Link",
-			description: "Link this item to a custom URL.",
-		},
-		localized: true,
-		ui: {
-			condition: {
-				all: [
-					{
-						field: "grandchildLinkType",
-						operator: "equals",
-						value: "link",
+					localized: true,
+					validation: {
+						required: true,
 					},
-				],
-			},
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addCheckbox("grandchildAvailable", {
-		details: {
-			label: "Available",
-		},
-		default: true,
-	})
-	.addCheckbox("grandchildShowBadge", {
-		details: {
-			label: "Show badge",
-		},
-		default: false,
-		ui: {
-			condition: {
-				all: [
-					{ field: "location", operator: "equals", value: "documentation" },
-				],
-			},
-		},
-	})
-	.addSection("grandchildBadge", {
-		details: {
-			label: "Badge",
-			description:
-				"Optional badge shown beside documentation grandchild menu items.",
-		},
-		output: "inline",
-		ui: {
-			condition: {
-				all: [
-					{ field: "location", operator: "equals", value: "documentation" },
-					{ field: "grandchildShowBadge", operator: "equals", value: true },
-				],
-			},
-		},
-	})
-	.addText("grandchildBadgeLabel", {
-		details: {
-			label: "Badge label",
-		},
-		localized: true,
-		ui: {
-			width: 6,
-		},
-		validation: {
-			required: true,
-		},
-	})
-	.addSelect("grandchildBadgeTheme", {
-		details: {
-			label: "Badge colour",
-		},
-		options: [
-			{
-				label: "Primary",
-				value: "primary",
-			},
-			{
-				label: "Grey",
-				value: "grey",
-			},
-			{
-				label: "Dark grey",
-				value: "dark-grey",
-			},
-			{
-				label: "Red",
-				value: "red",
-			},
-		],
-		default: "primary",
-		localized: true,
-		ui: {
-			width: 6,
-		},
-	})
-	.endSection()
-	.endRepeater()
-	.endRepeater()
-	.endRepeater();
+				}),
+				field.textarea("description", {
+					details: {
+						label: "Description",
+					},
+					localized: true,
+				}),
+				field.select("linkType", {
+					details: {
+						label: "Link type",
+					},
+					options: [
+						{
+							label: "Document",
+							value: "document",
+						},
+						{
+							label: "Link",
+							value: "link",
+						},
+					],
+					default: "document",
+					validation: {
+						required: true,
+					},
+				}),
+				field.relation("document", {
+					collection: ["page", "blog"],
+					details: {
+						label: "Document",
+						description: "Link this item to a CMS document.",
+					},
+					multiple: false,
+					ui: {
+						condition: {
+							all: [
+								{ field: "linkType", operator: "equals", value: "document" },
+							],
+						},
+					},
+					validation: {
+						required: true,
+					},
+				}),
+				field.link("link", {
+					details: {
+						label: "Link",
+						description: "Link this item to a custom URL.",
+					},
+					localized: true,
+					ui: {
+						condition: {
+							all: [{ field: "linkType", operator: "equals", value: "link" }],
+						},
+					},
+					validation: {
+						required: true,
+					},
+				}),
+				field.checkbox("available", {
+					details: {
+						label: "Available",
+					},
+					default: true,
+				}),
+				field.checkbox("showBadge", {
+					details: {
+						label: "Show badge",
+					},
+					default: false,
+					ui: {
+						condition: {
+							all: [
+								{
+									field: "location",
+									operator: "equals",
+									value: "documentation",
+								},
+							],
+						},
+					},
+				}),
+				field.section("badge", {
+					details: {
+						label: "Badge",
+						description:
+							"Optional badge shown beside documentation menu items.",
+					},
+					output: "inline",
+					ui: {
+						condition: {
+							all: [
+								{
+									field: "location",
+									operator: "equals",
+									value: "documentation",
+								},
+								{ field: "showBadge", operator: "equals", value: true },
+							],
+						},
+					},
+					fields: [
+						field.text("badgeLabel", {
+							details: {
+								label: "Badge label",
+							},
+							localized: true,
+							ui: {
+								width: 6,
+							},
+							validation: {
+								required: true,
+							},
+						}),
+						field.select("badgeTheme", {
+							details: {
+								label: "Badge colour",
+							},
+							options: [
+								{
+									label: "Primary",
+									value: "primary",
+								},
+								{
+									label: "Grey",
+									value: "grey",
+								},
+								{
+									label: "Dark grey",
+									value: "dark-grey",
+								},
+								{
+									label: "Red",
+									value: "red",
+								},
+							],
+							default: "primary",
+							localized: true,
+							ui: {
+								width: 6,
+							},
+						}),
+					],
+				}),
+				field.repeater("children", {
+					details: {
+						label: "Children",
+					},
+					fields: [
+						field.text("childLabel", {
+							details: {
+								label: "Label",
+							},
+							localized: true,
+							validation: {
+								required: true,
+							},
+						}),
+						field.textarea("childDescription", {
+							details: {
+								label: "Description",
+							},
+							localized: true,
+						}),
+						field.select("childLinkType", {
+							details: {
+								label: "Link type",
+							},
+							options: [
+								{
+									label: "Document",
+									value: "document",
+								},
+								{
+									label: "Link",
+									value: "link",
+								},
+							],
+							default: "document",
+							validation: {
+								required: true,
+							},
+						}),
+						field.relation("childDocument", {
+							collection: ["page", "blog"],
+							details: {
+								label: "Document",
+								description: "Link this item to a CMS document.",
+							},
+							multiple: false,
+							ui: {
+								condition: {
+									all: [
+										{
+											field: "childLinkType",
+											operator: "equals",
+											value: "document",
+										},
+									],
+								},
+							},
+							validation: {
+								required: true,
+							},
+						}),
+						field.link("childLink", {
+							details: {
+								label: "Link",
+								description: "Link this item to a custom URL.",
+							},
+							localized: true,
+							ui: {
+								condition: {
+									all: [
+										{
+											field: "childLinkType",
+											operator: "equals",
+											value: "link",
+										},
+									],
+								},
+							},
+							validation: {
+								required: true,
+							},
+						}),
+						field.checkbox("childAvailable", {
+							details: {
+								label: "Available",
+							},
+							default: true,
+						}),
+						field.checkbox("childShowBadge", {
+							details: {
+								label: "Show badge",
+							},
+							default: false,
+							ui: {
+								condition: {
+									all: [
+										{
+											field: "location",
+											operator: "equals",
+											value: "documentation",
+										},
+									],
+								},
+							},
+						}),
+						field.section("childBadge", {
+							details: {
+								label: "Badge",
+								description:
+									"Optional badge shown beside documentation child menu items.",
+							},
+							output: "inline",
+							ui: {
+								condition: {
+									all: [
+										{
+											field: "location",
+											operator: "equals",
+											value: "documentation",
+										},
+										{
+											field: "childShowBadge",
+											operator: "equals",
+											value: true,
+										},
+									],
+								},
+							},
+							fields: [
+								field.text("childBadgeLabel", {
+									details: {
+										label: "Badge label",
+									},
+									localized: true,
+									ui: {
+										width: 6,
+									},
+									validation: {
+										required: true,
+									},
+								}),
+								field.select("childBadgeTheme", {
+									details: {
+										label: "Badge colour",
+									},
+									options: [
+										{
+											label: "Primary",
+											value: "primary",
+										},
+										{
+											label: "Grey",
+											value: "grey",
+										},
+										{
+											label: "Dark grey",
+											value: "dark-grey",
+										},
+										{
+											label: "Red",
+											value: "red",
+										},
+									],
+									default: "primary",
+									localized: true,
+									ui: {
+										width: 6,
+									},
+								}),
+							],
+						}),
+						field.repeater("grandchildren", {
+							details: {
+								label: "Grandchildren",
+							},
+							fields: [
+								field.text("grandchildLabel", {
+									details: {
+										label: "Label",
+									},
+									localized: true,
+									validation: {
+										required: true,
+									},
+								}),
+								field.textarea("grandchildDescription", {
+									details: {
+										label: "Description",
+									},
+									localized: true,
+								}),
+								field.select("grandchildLinkType", {
+									details: {
+										label: "Link type",
+									},
+									options: [
+										{
+											label: "Document",
+											value: "document",
+										},
+										{
+											label: "Link",
+											value: "link",
+										},
+									],
+									default: "document",
+									validation: {
+										required: true,
+									},
+								}),
+								field.relation("grandchildDocument", {
+									collection: ["page", "blog"],
+									details: {
+										label: "Document",
+										description: "Link this item to a CMS document.",
+									},
+									multiple: false,
+									ui: {
+										condition: {
+											all: [
+												{
+													field: "grandchildLinkType",
+													operator: "equals",
+													value: "document",
+												},
+											],
+										},
+									},
+									validation: {
+										required: true,
+									},
+								}),
+								field.link("grandchildLink", {
+									details: {
+										label: "Link",
+										description: "Link this item to a custom URL.",
+									},
+									localized: true,
+									ui: {
+										condition: {
+											all: [
+												{
+													field: "grandchildLinkType",
+													operator: "equals",
+													value: "link",
+												},
+											],
+										},
+									},
+									validation: {
+										required: true,
+									},
+								}),
+								field.checkbox("grandchildAvailable", {
+									details: {
+										label: "Available",
+									},
+									default: true,
+								}),
+								field.checkbox("grandchildShowBadge", {
+									details: {
+										label: "Show badge",
+									},
+									default: false,
+									ui: {
+										condition: {
+											all: [
+												{
+													field: "location",
+													operator: "equals",
+													value: "documentation",
+												},
+											],
+										},
+									},
+								}),
+								field.section("grandchildBadge", {
+									details: {
+										label: "Badge",
+										description:
+											"Optional badge shown beside documentation grandchild menu items.",
+									},
+									output: "inline",
+									ui: {
+										condition: {
+											all: [
+												{
+													field: "location",
+													operator: "equals",
+													value: "documentation",
+												},
+												{
+													field: "grandchildShowBadge",
+													operator: "equals",
+													value: true,
+												},
+											],
+										},
+									},
+									fields: [
+										field.text("grandchildBadgeLabel", {
+											details: {
+												label: "Badge label",
+											},
+											localized: true,
+											ui: {
+												width: 6,
+											},
+											validation: {
+												required: true,
+											},
+										}),
+										field.select("grandchildBadgeTheme", {
+											details: {
+												label: "Badge colour",
+											},
+											options: [
+												{
+													label: "Primary",
+													value: "primary",
+												},
+												{
+													label: "Grey",
+													value: "grey",
+												},
+												{
+													label: "Dark grey",
+													value: "dark-grey",
+												},
+												{
+													label: "Red",
+													value: "red",
+												},
+											],
+											default: "primary",
+											localized: true,
+											ui: {
+												width: 6,
+											},
+										}),
+									],
+								}),
+							],
+						}),
+					],
+				}),
+			],
+		}),
+	],
+});
 
 export default MainMenuCollection;

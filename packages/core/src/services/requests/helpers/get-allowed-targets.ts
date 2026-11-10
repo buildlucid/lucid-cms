@@ -1,9 +1,9 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type { RequestType } from "../../../libs/db/tables/requests.js";
 
 /** Lists writable targets for a request type and source, returning none for delete requests. */
 const getAllowedTargets = (data: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	type: RequestType;
 	source: string | null;
 }): string[] => {

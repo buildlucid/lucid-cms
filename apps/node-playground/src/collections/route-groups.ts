@@ -1,6 +1,7 @@
-import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import { copy, defineCollection, field, z } from "@lucidcms/core";
 
-const RouteGroupCollection = new CollectionBuilder("route-group", {
+const RouteGroupCollection = defineCollection({
+	key: "route-group",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -11,22 +12,24 @@ const RouteGroupCollection = new CollectionBuilder("route-group", {
 	},
 	group: { key: "content" },
 	localized: true,
-})
-	.addText("route_key", {
-		details: {
-			label: copy("admin:collections.route-group.fields.route_key.label"),
-		},
-		validation: {
-			required: true,
-			zod: z.string().regex(/^[a-zA-Z0-9_-]+$/),
-		},
-		showInList: true,
-		useAsLabel: true,
-	})
-	.addText("title", {
-		details: {
-			label: copy("admin:collections.route-group.fields.title.label"),
-		},
-	});
+	fields: [
+		field.text("route_key", {
+			details: {
+				label: copy("admin:collections.route-group.fields.route_key.label"),
+			},
+			validation: {
+				required: true,
+				zod: z.string().regex(/^[a-zA-Z0-9_-]+$/),
+			},
+			showInList: true,
+			useAsLabel: true,
+		}),
+		field.text("title", {
+			details: {
+				label: copy("admin:collections.route-group.fields.title.label"),
+			},
+		}),
+	],
+});
 
 export default RouteGroupCollection;

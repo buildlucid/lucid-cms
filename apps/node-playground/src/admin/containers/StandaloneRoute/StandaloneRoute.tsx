@@ -1,5 +1,6 @@
 import { EmptyState, Link } from "@lucidcms/admin/components";
 import type { RouteComponent } from "@lucidcms/admin/types";
+import { adminHref } from "@lucidcms/admin/utils";
 
 /** Routes with `shell: "none"` own the whole page, so they bring their own layout. */
 const StandaloneRoute: RouteComponent = () => {
@@ -11,7 +12,7 @@ const StandaloneRoute: RouteComponent = () => {
 				title="Standalone playground"
 				description="This route requires a session and owns its full-page layout, so it renders without the admin sidebar or header."
 				actions={
-					<Link href="/admin/e/playground" size="sm">
+					<Link href={adminHref("playground")} size="sm">
 						Back to the admin playground
 					</Link>
 				}

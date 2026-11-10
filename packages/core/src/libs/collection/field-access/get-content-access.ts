@@ -1,12 +1,12 @@
 import { resolveFieldPermissions } from "../../permission/field-permissions.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type CollectionDefinition from "../definitions/collection/index.js";
 import getFieldAccess from "./get-field-access.js";
 import resolveFieldAccess from "./resolve-field-access.js";
 import type { BrickAccess, ContentAccess, FieldAccessActor } from "./types.js";
 
 /** Resolves field and brick access for an actor, granting unrestricted access to trusted callers such as hooks and system writes when the actor is omitted. */
 const getContentAccess = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	actor: FieldAccessActor | undefined,
 ): ContentAccess => {
 	const fields = getFieldAccess(collection, actor, {

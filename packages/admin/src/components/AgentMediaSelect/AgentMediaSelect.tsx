@@ -4,9 +4,15 @@ import type {
 } from "@lucidcms/types";
 import type { MediaType } from "@types";
 import { TbOutlinePhoto, TbOutlineUpload } from "solid-icons/tb";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Show,
+} from "solid-js";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
-import type { AgentWidgetComponent } from "@/components/AgentWidget/types";
+import type { AgentWidgetProps } from "@/components/AgentWidget/types";
 import Button from "@/components/Button/Button";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import type { AdminOptions } from "@/extensions/types/config";
@@ -31,9 +37,9 @@ const acceptedFamilies: ReadonlySet<MediaType> = new Set([
 ]);
 
 /** Collects library media or uploads for the widget frame to submit their IDs to `media_select`. */
-const AgentMediaSelect: AgentWidgetComponent<AdminOptions | undefined> = (
-	props,
-) => {
+const AgentMediaSelect: Component<
+	AgentWidgetProps<AdminOptions | undefined>
+> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	let fileInput: HTMLInputElement | undefined;

@@ -2,15 +2,17 @@ import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import RichTextCustomField from "./custom-field.js";
 import type { RichTextValidationData } from "./types.js";
 
 // -----------------------------------------------
 // Validation
-const RichTextCollection = new CollectionBuilder("collection", {
+const RichTextCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -23,20 +25,22 @@ const RichTextCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addRichText("standard_rich_text")
-	.addRichText("required_rich_text", {
-		validation: {
-			required: true,
-		},
-	})
-	.addRichText("min_length_rich_text", {
-		validation: {
-			zod: z.looseObject({
-				type: z.literal("doc"),
-			}),
-		},
-	});
+	fields: [
+		field.richText("standard_rich_text"),
+		field.richText("required_rich_text", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.richText("min_length_rich_text", {
+			validation: {
+				zod: z.looseObject({
+					type: z.literal("doc"),
+				}),
+			},
+		}),
+	],
+});
 
 test("successfully validate field - rich text", async () => {
 	// Standard
@@ -51,9 +55,7 @@ test("successfully validate field - rich text", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(RichTextCollection).fields.get(
-				"standard_rich_text",
-			)!,
+			getFieldSetState(RichTextCollection).fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -83,9 +85,7 @@ test("successfully validate field - rich text", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(RichTextCollection).fields.get(
-				"required_rich_text",
-			)!,
+			getFieldSetState(RichTextCollection).fields.get("required_rich_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -115,9 +115,7 @@ test("successfully validate field - rich text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- test collection always registers this field
-				getFieldBuilderState(RichTextCollection).fields.get(
-					"required_rich_text",
-				)!,
+				getFieldSetState(RichTextCollection).fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -142,7 +140,7 @@ test("successfully validate field - rich text", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(RichTextCollection).fields.get(
+		instance: getFieldSetState(RichTextCollection).fields.get(
 			"min_length_rich_text",
 		)!,
 		validationData: {
@@ -168,9 +166,7 @@ test("fail to validate field - rich text", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(RichTextCollection).fields.get(
-				"standard_rich_text",
-			)!,
+			getFieldSetState(RichTextCollection).fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -202,9 +198,7 @@ test("fail to validate field - rich text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(RichTextCollection).fields.get(
-					"required_rich_text",
-				)!,
+				getFieldSetState(RichTextCollection).fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -236,9 +230,7 @@ test("fail to validate field - rich text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(RichTextCollection).fields.get(
-					"required_rich_text",
-				)!,
+				getFieldSetState(RichTextCollection).fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -257,9 +249,7 @@ test("fail to validate field - rich text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(RichTextCollection).fields.get(
-					"required_rich_text",
-				)!,
+				getFieldSetState(RichTextCollection).fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -278,9 +268,7 @@ test("fail to validate field - rich text", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(RichTextCollection).fields.get(
-					"required_rich_text",
-				)!,
+				getFieldSetState(RichTextCollection).fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -334,7 +322,7 @@ test("fail to validate field - rich text", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(RichTextCollection).fields.get(
+		instance: getFieldSetState(RichTextCollection).fields.get(
 			"min_length_rich_text",
 		)!,
 		validationData: {

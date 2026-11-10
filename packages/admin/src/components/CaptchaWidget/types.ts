@@ -1,5 +1,4 @@
 import type { CaptchaClientOptions, CaptchaForm } from "@lucidcms/types";
-import type { Component } from "solid-js";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type { captchaSlotPolicies } from "./constants.js";
 
@@ -43,8 +42,3 @@ export type CaptchaWidgetProps<
 	/** Reports a failed widget, so the form can offer a retry. */
 	readonly onError: () => void;
 };
-
-export type CaptchaWidgetComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-	TClient extends CaptchaClientOptions = CaptchaClientOptions,
-> = Component<CaptchaWidgetProps<TOptions, TClient>>;

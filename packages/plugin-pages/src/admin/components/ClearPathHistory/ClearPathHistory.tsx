@@ -1,15 +1,17 @@
 import { Button, MaintenanceTile, Modal } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
 import { request } from "@lucidcms/admin/services";
-import type { MaintenanceSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { toast } from "@lucidcms/admin/utils";
 import { useMutation } from "@tanstack/solid-query";
 import { createSignal } from "solid-js";
 import { CLEAR_PATH_HISTORY_ROUTE } from "../../../constants.js";
-import type {} from "../../translations.js";
+import type clearPathHistoryConfig from "./config.js";
 
 /** Queues clearing every page's previous paths from the Operations page. */
-const ClearPathHistory: MaintenanceSlotComponent = () => {
+const ClearPathHistory: SlotComponent<
+	ReturnType<typeof clearPathHistoryConfig>
+> = () => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

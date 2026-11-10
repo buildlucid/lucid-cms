@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type { FieldConditionConfig } from "../../../libs/collection/custom-fields/types.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { recursiveFieldValidate } from "./check-validate-bricks-fields.js";
 
@@ -30,7 +31,8 @@ const selectOptions = [
 ].map((value) => ({ label: value, value }));
 
 const buildCollection = (key: string) =>
-	new CollectionBuilder(key, {
+	defineCollection({
+		key: key,
 		mode: "multiple",
 		details: {
 			labels: {
@@ -45,13 +47,14 @@ const buildCollection = (key: string) =>
 	});
 
 describe("condition-hidden fields skip validation", () => {
-	const collection = buildCollection("nav")
-		.addSelect("menuType", { options: selectOptions })
-		.addText("externalUrl", {
+	const collection = buildCollection("nav").insertFields([
+		field.select("menuType", { options: selectOptions }),
+		field.text("externalUrl", {
 			localized: false,
 			validation: { required: true },
 			ui: { condition: showWhen("menuType", "external") },
-		});
+		}),
+	]);
 
 	test("required hidden fields do not error when missing", () => {
 		const errors = recursiveFieldValidate({
@@ -101,9 +104,9 @@ describe("condition-hidden fields skip validation", () => {
 	});
 
 	test("hide action inverts visibility", () => {
-		const hideCollection = buildCollection("hide_nav")
-			.addSelect("menuType", { options: selectOptions })
-			.addText("legacyUrl", {
+		const hideCollection = buildCollection("hide_nav").insertFields([
+			field.select("menuType", { options: selectOptions }),
+			field.text("legacyUrl", {
 				localized: false,
 				validation: { required: true },
 				ui: {
@@ -112,7 +115,8 @@ describe("condition-hidden fields skip validation", () => {
 						all: [{ field: "menuType", operator: "equals", value: "docs" }],
 					},
 				},
-			});
+			}),
+		]);
 
 		const hidden = recursiveFieldValidate({
 			fields: [{ key: "menuType", type: "select", value: "docs" }],
@@ -134,16 +138,18 @@ describe("condition-hidden fields skip validation", () => {
 });
 
 describe("hidden containers skip their subtree", () => {
-	const collection = buildCollection("container_nav")
-		.addSelect("menuType", { options: selectOptions })
-		.addRepeater("items", {
+	const collection = buildCollection("container_nav").insertFields([
+		field.select("menuType", { options: selectOptions }),
+		field.repeater("items", {
 			ui: { condition: showWhen("menuType", "docs") },
-		})
-		.addText("label", {
-			localized: false,
-			validation: { required: true },
-		})
-		.endRepeater();
+			fields: [
+				field.text("label", {
+					localized: false,
+					validation: { required: true },
+				}),
+			],
+		}),
+	]);
 
 	test("descendants of hidden repeaters are not validated", () => {
 		const errors = recursiveFieldValidate({
@@ -189,22 +195,25 @@ describe("hidden containers skip their subtree", () => {
 });
 
 describe("ancestor fallback and per-group scoping", () => {
-	const collection = buildCollection("links")
-		.addSelect("menuType", { options: selectOptions })
-		.addRepeater("links")
-		.addSelect("linkType", { options: selectOptions })
-		.addText("linkLabel", {
-			localized: false,
-			validation: { required: true },
-			ui: { condition: showWhen("linkType", "text") },
-		})
-		.addText("docNote", {
-			localized: false,
-			validation: { required: true },
-			//* resolves against the root scope via ancestor fallback
-			ui: { condition: showWhen("menuType", "docs") },
-		})
-		.endRepeater();
+	const collection = buildCollection("links").insertFields([
+		field.select("menuType", { options: selectOptions }),
+		field.repeater("links", {
+			fields: [
+				field.select("linkType", { options: selectOptions }),
+				field.text("linkLabel", {
+					localized: false,
+					validation: { required: true },
+					ui: { condition: showWhen("linkType", "text") },
+				}),
+				field.text("docNote", {
+					localized: false,
+					validation: { required: true },
+					//* resolves against the root scope via ancestor fallback
+					ui: { condition: showWhen("menuType", "docs") },
+				}),
+			],
+		}),
+	]);
 
 	test("group-local controllers evaluate per group", () => {
 		const errors = recursiveFieldValidate({
@@ -268,10 +277,15 @@ describe("same-tree scoping", () => {
 	test("brick conditions cannot resolve collection field keys", () => {
 		//* menuType only exists in the collection tree, so the show condition
 		//* stays unresolved and the brick field remains hidden
-		const brick = new BrickBuilder("navItem").addText("title", {
-			localized: false,
-			validation: { required: true },
-			ui: { condition: showWhen("menuType", "docs") },
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.text("title", {
+					localized: false,
+					validation: { required: true },
+					ui: { condition: showWhen("menuType", "docs") },
+				}),
+			],
 		});
 
 		const errors = recursiveFieldValidate({
@@ -284,13 +298,17 @@ describe("same-tree scoping", () => {
 	});
 
 	test("brick conditions resolve within their own tree", () => {
-		const brick = new BrickBuilder("navItem")
-			.addSelect("linkType", { options: selectOptions })
-			.addText("title", {
-				localized: false,
-				validation: { required: true },
-				ui: { condition: showWhen("linkType", "document") },
-			});
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.select("linkType", { options: selectOptions }),
+				field.text("title", {
+					localized: false,
+					validation: { required: true },
+					ui: { condition: showWhen("linkType", "document") },
+				}),
+			],
+		});
 
 		const errors = recursiveFieldValidate({
 			fields: [{ key: "linkType", type: "select", value: "document" }],
@@ -304,15 +322,21 @@ describe("same-tree scoping", () => {
 });
 
 describe("hidden tabs skip their fields", () => {
-	const brick = new BrickBuilder("hero")
-		.addSelect("layout", { options: selectOptions })
-		.addTab("advancedTab", {
-			ui: { condition: showWhen("layout", "advanced") },
-		})
-		.addText("advancedTitle", {
-			localized: false,
-			validation: { required: true },
-		});
+	const brick = defineBrick({
+		key: "hero",
+		fields: [
+			field.select("layout", { options: selectOptions }),
+			field.tab("advancedTab", {
+				ui: { condition: showWhen("layout", "advanced") },
+				fields: [
+					field.text("advancedTitle", {
+						localized: false,
+						validation: { required: true },
+					}),
+				],
+			}),
+		],
+	});
 
 	test("fields under a hidden tab are skipped", () => {
 		const errors = recursiveFieldValidate({
@@ -338,16 +362,18 @@ describe("hidden tabs skip their fields", () => {
 
 describe("hidden sections and collapsibles skip their subtree", () => {
 	test("required fields inside a hidden section are skipped", () => {
-		const collection = buildCollection("section_nav")
-			.addSelect("menuType", { options: selectOptions })
-			.addSection("badge", {
+		const collection = buildCollection("section_nav").insertFields([
+			field.select("menuType", { options: selectOptions }),
+			field.section("badge", {
 				ui: { condition: showWhen("menuType", "docs") },
-			})
-			.addText("label", {
-				localized: false,
-				validation: { required: true },
-			})
-			.endSection();
+				fields: [
+					field.text("label", {
+						localized: false,
+						validation: { required: true },
+					}),
+				],
+			}),
+		]);
 
 		const hidden = recursiveFieldValidate({
 			fields: [{ key: "menuType", type: "select", value: "external" }],
@@ -368,13 +394,13 @@ describe("hidden sections and collapsibles skip their subtree", () => {
 	});
 
 	test("fields inside a hidden section skip value validation", () => {
-		const collection = buildCollection("section_value_nav")
-			.addSelect("menuType", { options: selectOptions })
-			.addSection("badge", {
+		const collection = buildCollection("section_value_nav").insertFields([
+			field.select("menuType", { options: selectOptions }),
+			field.section("badge", {
 				ui: { condition: showWhen("menuType", "docs") },
-			})
-			.addText("label", { localized: false })
-			.endSection();
+				fields: [field.text("label", { localized: false })],
+			}),
+		]);
 
 		const errors = recursiveFieldValidate({
 			fields: [
@@ -390,16 +416,18 @@ describe("hidden sections and collapsibles skip their subtree", () => {
 	});
 
 	test("required fields inside a hidden collapsible are skipped", () => {
-		const collection = buildCollection("collapsible_nav")
-			.addSelect("menuType", { options: selectOptions })
-			.addCollapsible("advanced", {
+		const collection = buildCollection("collapsible_nav").insertFields([
+			field.select("menuType", { options: selectOptions }),
+			field.collapsible("advanced", {
 				ui: { condition: showWhen("menuType", "docs") },
-			})
-			.addText("anchorLabel", {
-				localized: false,
-				validation: { required: true },
-			})
-			.endCollapsible();
+				fields: [
+					field.text("anchorLabel", {
+						localized: false,
+						validation: { required: true },
+					}),
+				],
+			}),
+		]);
 
 		const hidden = recursiveFieldValidate({
 			fields: [{ key: "menuType", type: "select", value: "external" }],
@@ -420,18 +448,22 @@ describe("hidden sections and collapsibles skip their subtree", () => {
 	});
 
 	test("deeply nested descendants of hidden structural fields are skipped", () => {
-		const collection = buildCollection("nested_section_nav")
-			.addSelect("menuType", { options: selectOptions })
-			.addSection("outer", {
+		const collection = buildCollection("nested_section_nav").insertFields([
+			field.select("menuType", { options: selectOptions }),
+			field.section("outer", {
 				ui: { condition: showWhen("menuType", "docs") },
-			})
-			.addCollapsible("inner")
-			.addText("innerLabel", {
-				localized: false,
-				validation: { required: true },
-			})
-			.endCollapsible()
-			.endSection();
+				fields: [
+					field.collapsible("inner", {
+						fields: [
+							field.text("innerLabel", {
+								localized: false,
+								validation: { required: true },
+							}),
+						],
+					}),
+				],
+			}),
+		]);
 
 		const hidden = recursiveFieldValidate({
 			fields: [{ key: "menuType", type: "select", value: "external" }],
@@ -452,18 +484,22 @@ describe("hidden sections and collapsibles skip their subtree", () => {
 	});
 
 	test("repeaters inside hidden sections are skipped", () => {
-		const collection = buildCollection("section_repeater_nav")
-			.addSelect("menuType", { options: selectOptions })
-			.addSection("badge", {
+		const collection = buildCollection("section_repeater_nav").insertFields([
+			field.select("menuType", { options: selectOptions }),
+			field.section("badge", {
 				ui: { condition: showWhen("menuType", "docs") },
-			})
-			.addRepeater("items")
-			.addText("label", {
-				localized: false,
-				validation: { required: true },
-			})
-			.endRepeater()
-			.endSection();
+				fields: [
+					field.repeater("items", {
+						fields: [
+							field.text("label", {
+								localized: false,
+								validation: { required: true },
+							}),
+						],
+					}),
+				],
+			}),
+		]);
 
 		const errors = recursiveFieldValidate({
 			fields: [
@@ -482,18 +518,22 @@ describe("hidden sections and collapsibles skip their subtree", () => {
 	});
 
 	test("hidden sections inside repeater groups skip their children per group", () => {
-		const collection = buildCollection("repeater_section_nav")
-			.addRepeater("links")
-			.addSelect("linkType", { options: selectOptions })
-			.addSection("meta", {
-				ui: { condition: showWhen("linkType", "text") },
-			})
-			.addText("caption", {
-				localized: false,
-				validation: { required: true },
-			})
-			.endSection()
-			.endRepeater();
+		const collection = buildCollection("repeater_section_nav").insertFields([
+			field.repeater("links", {
+				fields: [
+					field.select("linkType", { options: selectOptions }),
+					field.section("meta", {
+						ui: { condition: showWhen("linkType", "text") },
+						fields: [
+							field.text("caption", {
+								localized: false,
+								validation: { required: true },
+							}),
+						],
+					}),
+				],
+			}),
+		]);
 
 		const errors = recursiveFieldValidate({
 			fields: [
@@ -526,15 +566,18 @@ describe("hidden sections and collapsibles skip their subtree", () => {
 });
 
 describe("hidden collection tabs skip their fields", () => {
-	const collection = buildCollection("tabbed_collection")
-		.addSelect("layout", { options: selectOptions })
-		.addTab("advancedTab", {
+	const collection = buildCollection("tabbed_collection").insertFields([
+		field.select("layout", { options: selectOptions }),
+		field.tab("advancedTab", {
 			ui: { condition: showWhen("layout", "advanced") },
-		})
-		.addText("advancedTitle", {
-			localized: false,
-			validation: { required: true },
-		});
+			fields: [
+				field.text("advancedTitle", {
+					localized: false,
+					validation: { required: true },
+				}),
+			],
+		}),
+	]);
 
 	test("fields under a hidden collection tab are skipped", () => {
 		const errors = recursiveFieldValidate({
@@ -559,7 +602,8 @@ describe("hidden collection tabs skip their fields", () => {
 });
 
 describe("localized controllers evaluate per locale", () => {
-	const collection = new CollectionBuilder("localized_nav", {
+	const collection = defineCollection({
+		key: "localized_nav",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -572,12 +616,14 @@ describe("localized controllers evaluate per locale", () => {
 			},
 		},
 		localized: true,
-	})
-		.addSelect("mode", { localized: true, options: selectOptions })
-		.addText("caption", {
-			localized: true,
-			ui: { condition: showWhen("mode", "on") },
-		});
+		fields: [
+			field.select("mode", { localized: true, options: selectOptions }),
+			field.text("caption", {
+				localized: true,
+				ui: { condition: showWhen("mode", "on") },
+			}),
+		],
+	});
 
 	test("only locales where the field is visible are validated", () => {
 		const errors = recursiveFieldValidate({
@@ -607,7 +653,8 @@ describe("localized controllers evaluate per locale", () => {
 	});
 
 	test("non-localized fields resolve localized controllers through the default locale", () => {
-		const collection = new CollectionBuilder("localized_default_nav", {
+		const collection = defineCollection({
+			key: "localized_default_nav",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -623,13 +670,15 @@ describe("localized controllers evaluate per locale", () => {
 				},
 			},
 			localized: true,
-		})
-			.addSelect("mode", { localized: true, options: selectOptions })
-			.addText("ctaLabel", {
-				localized: false,
-				validation: { required: true },
-				ui: { condition: showWhen("mode", "on") },
-			});
+			fields: [
+				field.select("mode", { localized: true, options: selectOptions }),
+				field.text("ctaLabel", {
+					localized: false,
+					validation: { required: true },
+					ui: { condition: showWhen("mode", "on") },
+				}),
+			],
+		});
 
 		const errors = recursiveFieldValidate({
 			fields: [
@@ -648,7 +697,8 @@ describe("localized controllers evaluate per locale", () => {
 	});
 
 	test("structural containers resolve localized controllers through the default locale", () => {
-		const collection = new CollectionBuilder("localized_container_nav", {
+		const collection = defineCollection({
+			key: "localized_container_nav",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -664,16 +714,19 @@ describe("localized controllers evaluate per locale", () => {
 				},
 			},
 			localized: true,
-		})
-			.addSelect("mode", { localized: true, options: selectOptions })
-			.addRepeater("items", {
-				ui: { condition: showWhen("mode", "on") },
-			})
-			.addText("label", {
-				localized: false,
-				validation: { required: true },
-			})
-			.endRepeater();
+			fields: [
+				field.select("mode", { localized: true, options: selectOptions }),
+				field.repeater("items", {
+					ui: { condition: showWhen("mode", "on") },
+					fields: [
+						field.text("label", {
+							localized: false,
+							validation: { required: true },
+						}),
+					],
+				}),
+			],
+		});
 
 		const errors = recursiveFieldValidate({
 			fields: [
@@ -697,7 +750,8 @@ describe("localized controllers evaluate per locale", () => {
 	});
 
 	test("any translation scope can make a non-localized field visible", () => {
-		const collection = new CollectionBuilder("localized_any_nav", {
+		const collection = defineCollection({
+			key: "localized_any_nav",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -713,17 +767,19 @@ describe("localized controllers evaluate per locale", () => {
 				},
 			},
 			localized: true,
-		})
-			.addSelect("mode", { localized: true, options: selectOptions })
-			.addText("ctaLabel", {
-				localized: false,
-				validation: { required: true },
-				ui: {
-					condition: showWhen("mode", "on", {
-						translationScope: "any",
-					}),
-				},
-			});
+			fields: [
+				field.select("mode", { localized: true, options: selectOptions }),
+				field.text("ctaLabel", {
+					localized: false,
+					validation: { required: true },
+					ui: {
+						condition: showWhen("mode", "on", {
+							translationScope: "any",
+						}),
+					},
+				}),
+			],
+		});
 
 		const errors = recursiveFieldValidate({
 			fields: [

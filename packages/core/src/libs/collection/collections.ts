@@ -1,8 +1,8 @@
 import type { ServiceFn } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
-import type BrickBuilder from "./builders/brick-builder/index.js";
-import type { BrickTypes } from "./builders/brick-builder/types.js";
-import type CollectionBuilder from "./builders/collection-builder/index.js";
+import type BrickDefinition from "./definitions/brick/index.js";
+import type { BrickTypes } from "./definitions/brick/types.js";
+import type CollectionDefinition from "./definitions/collection/index.js";
 
 type GetAllParams = Record<string, never>;
 
@@ -11,7 +11,7 @@ type GetSingleParams = {
 };
 
 type GetBricksParams = {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	type?: BrickTypes;
 };
 
@@ -21,13 +21,13 @@ type GetBrickParams = GetBricksParams & {
 
 type Collections = {
 	/** Returns every collection available to the current service context. */
-	getAll: ServiceFn<[params: GetAllParams], CollectionBuilder[]>;
+	getAll: ServiceFn<[params: GetAllParams], CollectionDefinition[]>;
 	/** Returns the collection registered under the given stable key. */
-	getSingle: ServiceFn<[params: GetSingleParams], CollectionBuilder>;
+	getSingle: ServiceFn<[params: GetSingleParams], CollectionDefinition>;
 	/** Returns a collection's bricks, optionally limited to one brick type. */
-	getBricks: ServiceFn<[params: GetBricksParams], BrickBuilder[]>;
+	getBricks: ServiceFn<[params: GetBricksParams], BrickDefinition[]>;
 	/** Returns a collection brick by key, optionally limited to one brick type. */
-	getBrick: ServiceFn<[params: GetBrickParams], BrickBuilder | undefined>;
+	getBrick: ServiceFn<[params: GetBrickParams], BrickDefinition | undefined>;
 };
 
 const collections: Collections = {

@@ -1,6 +1,7 @@
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import resolveCollectionLocalization from "../../libs/collection/helpers/resolve-collection-localization.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
@@ -23,11 +24,13 @@ import saveTranslatedProposals from "./helpers/save-translated-proposals.js";
 import translateDocuments from "./translate-documents.js";
 
 const fixture = getTestConfig();
-const collection = new CollectionBuilder("translated_pages", {
+const collection = defineCollection({
+	key: "translated_pages",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
-}).addText("title");
+	fields: [field.text("title")],
+});
 let context: ServiceContext;
 let editor: LucidUser;
 

@@ -23,9 +23,7 @@
 	"files": [
 		"dist/server",
 		"dist/admin",
-		"src/admin",
-		"src/constants.ts",
-		"src/types.ts",
+		"src",
 		"!src/**/*.test.*"
 	],
 	"author": "Build Lucid Ltd",

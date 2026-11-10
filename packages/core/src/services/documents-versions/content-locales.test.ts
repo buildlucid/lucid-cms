@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, describe, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import {
@@ -35,17 +36,20 @@ import syncCollections from "../sync/sync-collections.js";
 import syncLocales from "../sync/sync-locales.js";
 import updateVersion from "./update-single.js";
 
-const collection = new CollectionBuilder("locale_adoption", {
+const collection = defineCollection({
+	key: "locale_adoption",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Article", plural: "Articles" } },
-})
-	.addText("title", { localized: true })
-	.addText("reference", { localized: false })
-	.addRepeater("items")
-	.addText("caption", { localized: true })
-	.endRepeater()
-	.addUser("authors", { localized: true, multiple: true });
+	fields: [
+		field.text("title", { localized: true }),
+		field.text("reference", { localized: false }),
+		field.repeater("items", {
+			fields: [field.text("caption", { localized: true })],
+		}),
+		field.user("authors", { localized: true, multiple: true }),
+	],
+});
 
 describe("unassigned content locales", () => {
 	const fixture = getTestConfig();

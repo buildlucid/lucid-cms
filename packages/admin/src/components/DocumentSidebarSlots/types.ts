@@ -1,4 +1,3 @@
-import type { Component } from "solid-js";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type {
 	documentSidebarSections,
@@ -28,12 +27,8 @@ export type DocumentSidebarSlotProps<
 	TOptions extends AdminOptions | undefined = undefined,
 > = {
 	readonly slot: "document.sidebar";
+	readonly key: string;
 	/** Pass to `DocumentSidebarSection`, so the section remembers whether it's open. */
 	readonly preferenceKey: `slot.${string}`;
 	readonly options: TOptions;
 };
-
-/** Renders one sidebar section with `DocumentSidebarSection`, or nothing to leave it out. */
-export type DocumentSidebarSlotComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-> = Component<DocumentSidebarSlotProps<TOptions>>;

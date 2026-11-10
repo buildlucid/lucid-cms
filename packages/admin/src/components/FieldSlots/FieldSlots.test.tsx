@@ -4,9 +4,9 @@ import { FieldScopeProvider } from "@/hooks/useFieldScope/useFieldScope";
 import { createBrickStore } from "@/store/brickStore/brickStore";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import FieldSlots from "./FieldSlots";
-import type { FieldSlotComponent } from "./types";
+import type { FieldSlotProps } from "./types";
 
-const Palette: FieldSlotComponent<{ show: boolean }> = (props) => {
+const Palette = (props: FieldSlotProps<{ show: boolean }>) => {
 	// ----------------------------------------
 	// Render
 	return props.options.show && <p>Palette for {props.field.key}</p>;

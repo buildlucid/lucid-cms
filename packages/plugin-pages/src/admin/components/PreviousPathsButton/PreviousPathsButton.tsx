@@ -2,12 +2,11 @@ import { useTranslation } from "@lucidcms/admin/hooks";
 import { TbOutlineHistory } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import usePreviousPaths from "../../hooks/use-previous-paths.js";
-import type {} from "../../translations.js";
 import PreviousPathsDrawer from "../PreviousPathsDrawer/PreviousPathsDrawer.jsx";
 
 /**
- * A history icon and count beside the path that opens the page's previous paths. It shows as soon as
- * the page is saved, with a placeholder count while loading, so the field doesn't shift.
+ * Opens previous paths beside a saved page's path. A placeholder count prevents layout shifts
+ * while loading.
  */
 const PreviousPathsButton: Component = () => {
 	// ----------------------------------

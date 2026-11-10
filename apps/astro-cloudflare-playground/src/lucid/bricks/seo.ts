@@ -1,19 +1,22 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { defineBrick, field } from "@lucidcms/core";
 
-const SeoBrick = new BrickBuilder("seo", {
+const SeoBrick = defineBrick({
+	key: "seo",
 	details: {
 		label: "SEO",
 	},
-})
-	.addText("metaTitle", {
-		details: {
-			label: "Meta Title",
-		},
-	})
-	.addTextarea("metaDescription", {
-		details: {
-			label: "Meta Description",
-		},
-	});
+	fields: [
+		field.text("metaTitle", {
+			details: {
+				label: "Meta Title",
+			},
+		}),
+		field.textarea("metaDescription", {
+			details: {
+				label: "Meta Description",
+			},
+		}),
+	],
+});
 
 export default SeoBrick;

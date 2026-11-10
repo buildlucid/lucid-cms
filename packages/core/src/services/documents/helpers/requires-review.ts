@@ -1,8 +1,8 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 
 /** Checks whether a change requires an approved request, using the environment for publishing and unpublishing. */
 const requiresReview = (
-	collection: CollectionBuilder | undefined,
+	collection: CollectionDefinition | undefined,
 	change:
 		| { type: "create" | "delete" }
 		| { type: "publish" | "unpublish"; environment: string },

@@ -1,6 +1,6 @@
 import type z from "zod";
 import type { agentBuilderContentSchema } from "../../../../libs/agent/screen.js";
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../../libs/collection/definitions/collection/index.js";
 import describeErrorDetails from "../../../../libs/tools/describe-error-details.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
@@ -17,7 +17,7 @@ const builderValidation = async (
 	context: ServiceContext,
 	props: {
 		execution: AgentToolExecution;
-		collection: CollectionBuilder;
+		collection: CollectionDefinition;
 		content: z.output<typeof agentBuilderContentSchema>;
 		documentId: number | null;
 		versionId: number | null;

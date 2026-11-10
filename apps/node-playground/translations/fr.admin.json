@@ -402,7 +402,7 @@
 	"empty.states.media.folder.description": "Ce dossier est vide. Téléchargez votre premier fichier pour commencer.",
 	"empty.states.media.folder.title": "Ce dossier est vide",
 	"empty.states.collections.title": "Aucune collection trouvée",
-	"empty.states.collections.description": "Aucune collection trouvée. Pour en créer un, utilisez CollectionBuilder et importez l'instance dans le fichier lucid.config.",
+	"empty.states.collections.description": "Aucune collection trouvée. Pour en créer un, utilisez defineCollection et importez-la dans le fichier lucid.config.",
 	"empty.states.documents.title": "Aucun {{collectionMultiple}} trouvé",
 	"empty.states.documents.description": "Commencez par créer votre premier {{collectionSingle}}",
 	"empty.states.documents.select.description": "Nous ne trouvons aucun {{collectionMultiple}}. Vous pouvez créer un nouveau {{collectionSingle}} en accédant à la page de collection.",

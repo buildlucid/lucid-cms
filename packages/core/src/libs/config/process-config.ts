@@ -6,10 +6,10 @@ import { deployFailedNotification } from "../../services/deploys/notifications/d
 import { deploySucceededNotification } from "../../services/deploys/notifications/deploy-succeeded.js";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
-import BrickConfigSchema from "../collection/builders/brick-builder/schema.js";
-import CollectionConfigSchema from "../collection/builders/collection-builder/schema.js";
-import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
+import BrickConfigSchema from "../collection/definitions/brick/schema.js";
+import CollectionConfigSchema from "../collection/definitions/collection/schema.js";
+import { getFieldSetState } from "../collection/definitions/fields/index.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import createDeployTriggerHooks from "../deploys/trigger-hooks.js";
 import { getJobRegistry } from "../jobs/registry.js";
@@ -37,7 +37,6 @@ import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkMagicLink from "./checks/check-magic-link.js";
 import checkNotificationDefinitions from "./checks/check-notification-definitions.js";
-import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkSkillDefinitions from "./checks/check-skill-definitions.js";
 import checkToolDefinitions from "./checks/check-tool-definitions.js";
@@ -190,7 +189,7 @@ const processConfig = async (
 			checkDuplicateFieldKeys(
 				"collection",
 				collection.key,
-				getFieldBuilderState(collection).meta.fieldKeys,
+				getFieldSetState(collection).meta.fieldKeys,
 			);
 
 			checkFieldConditions("collection", collection.key, collection);
@@ -199,12 +198,7 @@ const processConfig = async (
 			checkRepeaterDepth(
 				"collection",
 				collection.key,
-				getFieldBuilderState(collection).meta.repeaterDepth,
-			);
-			checkOpenRepeaters(
-				"collection",
-				collection.key,
-				getFieldBuilderState(collection).repeaterStack,
+				getFieldSetState(collection).meta.repeaterDepth,
 			);
 
 			for (const brick of collection.brickInstances) {
@@ -217,18 +211,13 @@ const processConfig = async (
 				checkDuplicateFieldKeys(
 					"brick",
 					brick.key,
-					getFieldBuilderState(brick).meta.fieldKeys,
+					getFieldSetState(brick).meta.fieldKeys,
 				);
 				checkFieldConditions("brick", brick.key, brick);
 				checkRepeaterDepth(
 					"brick",
 					brick.key,
-					getFieldBuilderState(brick).meta.repeaterDepth,
-				);
-				checkOpenRepeaters(
-					"brick",
-					brick.key,
-					getFieldBuilderState(brick).repeaterStack,
+					getFieldSetState(brick).meta.repeaterDepth,
 				);
 			}
 		}

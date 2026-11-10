@@ -1,14 +1,16 @@
 import { Button, MaintenanceTile, Modal } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
 import { request } from "@lucidcms/admin/services";
-import type { MaintenanceSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { toast } from "@lucidcms/admin/utils";
 import { useMutation } from "@tanstack/solid-query";
 import { createSignal } from "solid-js";
-import type {} from "../../translations.js";
+import type clearPageCacheConfig from "./config.js";
 
 /** Clears the site's stored pages and fragments from the Operations page. */
-const ClearPageCache: MaintenanceSlotComponent<{ route: string }> = (props) => {
+const ClearPageCache: SlotComponent<ReturnType<typeof clearPageCacheConfig>> = (
+	props,
+) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

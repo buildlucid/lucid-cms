@@ -238,7 +238,7 @@ export type CustomFieldMap = {
 
 /** Field configuration including its key and type. */
 export type FieldConfig<T extends FieldTypes> = CustomFieldMap[T]["config"];
-/** Options accepted by the matching builder method. */
+/** Options accepted by the matching `field` helper. */
 export type FieldOptions<T extends FieldTypes> = CustomFieldMap[T]["props"];
 /** Value returned by the matching field type. */
 export type FieldResponse<T extends FieldTypes> = CustomFieldMap[T]["response"];

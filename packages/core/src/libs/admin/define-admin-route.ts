@@ -1,8 +1,10 @@
 import type { AdminRoute } from "@lucidcms/admin/types";
+import type { ExactDefinition } from "./types.js";
 
 /**
  * Defines an admin route rendered at `/admin/e/<path>`. Add it to `config.admin.routes`.
- * Relative component paths resolve from lucid.config.
+ * Relative component paths resolve from lucid.config. Type the component with
+ * `RouteComponent<typeof reportsRoute>`, so its options follow this definition.
  *
  * @example
  * ```ts
@@ -14,6 +16,8 @@ import type { AdminRoute } from "@lucidcms/admin/types";
  * });
  * ```
  */
-const defineAdminRoute = (route: AdminRoute): AdminRoute => route;
+const defineAdminRoute = <const TRoute extends AdminRoute>(
+	route: ExactDefinition<TRoute, AdminRoute>,
+): TRoute => route;
 
 export default defineAdminRoute;

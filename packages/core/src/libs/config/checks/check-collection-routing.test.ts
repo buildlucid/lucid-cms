@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import defineCollection from "../../collection/define-collection.js";
+import field from "../../collection/definitions/fields/field.js";
 import checkCollectionRouting from "./check-collection-routing.js";
 
 const details = {
@@ -11,29 +12,34 @@ const details = {
 
 describe("checkCollectionRouting", () => {
 	test("accepts a top-level scalar route field", () => {
-		const collection = new CollectionBuilder("pages", {
+		const collection = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details,
 			routing: { field: "path" },
 			preview: true,
-		}).addText("path");
+			fields: [field.text("path")],
+		});
 
 		expect(() => checkCollectionRouting(collection)).not.toThrow();
 		expect(collection.getData.routing).toEqual({ field: "path" });
 	});
 
 	test("requires routing only for enabled previews using the default URL", () => {
-		const defaultPreview = new CollectionBuilder("default-preview", {
+		const defaultPreview = defineCollection({
+			key: "default-preview",
 			mode: "multiple",
 			details,
 			preview: true,
 		});
-		const customPreview = new CollectionBuilder("custom-preview", {
+		const customPreview = defineCollection({
+			key: "custom-preview",
 			mode: "multiple",
 			details,
 			preview: { enabled: true, url: () => "https://example.com" },
 		});
-		const disabledPreview = new CollectionBuilder("disabled-preview", {
+		const disabledPreview = defineCollection({
+			key: "disabled-preview",
 			mode: "multiple",
 			details,
 			preview: { enabled: false },
@@ -48,24 +54,26 @@ describe("checkCollectionRouting", () => {
 
 	test("rejects missing, relational, and structurally nested fields", () => {
 		const collections = [
-			new CollectionBuilder("missing", {
+			defineCollection({
+				key: "missing",
 				mode: "multiple",
 				details,
 				routing: { field: "path" },
 			}),
-			new CollectionBuilder("relational", {
+			defineCollection({
+				key: "relational",
 				mode: "multiple",
 				details,
 				routing: { field: "path" },
-			}).addRelation("path", { collection: "relational" }),
-			new CollectionBuilder("nested", {
+				fields: [field.relation("path", { collection: "relational" })],
+			}),
+			defineCollection({
+				key: "nested",
 				mode: "multiple",
 				details,
 				routing: { field: "path" },
-			})
-				.addSection("seo")
-				.addText("path")
-				.endSection(),
+				fields: [field.section("seo", { fields: [field.text("path")] })],
+			}),
 		];
 
 		for (const collection of collections) {

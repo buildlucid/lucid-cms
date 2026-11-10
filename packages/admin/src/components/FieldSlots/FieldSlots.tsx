@@ -9,7 +9,7 @@ import { fieldSlots } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import { FieldMarkersContext } from "@/components/Field/FieldContext";
 import type { FieldLabelMarkersProps } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
-import { resolveSlots } from "@/extensions/slot-policy";
+import { matchSlots } from "@/extensions/match-slots";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import { useFieldScope } from "@/hooks/useFieldScope/useFieldScope";
@@ -50,7 +50,7 @@ const FieldSlots: ParentComponent<{
 		const config = props.config;
 		if (!config || !field()) return [];
 
-		return resolveSlots(
+		return matchSlots(
 			fieldSlots.filter((entry) => entry.slot === props.slot),
 			{
 				collection: context.collectionKey(),
@@ -80,6 +80,7 @@ const FieldSlots: ParentComponent<{
 								<AdminExtensionBoundary name={entry.key} placement="content">
 									<entry.component
 										slot={props.slot}
+										key={entry.key}
 										field={field()}
 										fields={scope}
 										options={entry.options}

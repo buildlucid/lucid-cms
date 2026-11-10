@@ -37,10 +37,10 @@ export interface HomeCardProps {
  * const { t } = useTranslation();
  *
  * return (
- * 	<HomeCard title={t("reports.title")} href="/admin/e/reports">
+ * 	<HomeCard title={t("reports.title")} href={adminHref("reports")}>
  * 		<ul>
  * 			<li>
- * 				<HomeCardItem title={t("reports.weekly")} href="/admin/e/reports/weekly" />
+ * 				<HomeCardItem title={t("reports.weekly")} href={adminHref("reports/weekly")} />
  * 			</li>
  * 		</ul>
  * 	</HomeCard>

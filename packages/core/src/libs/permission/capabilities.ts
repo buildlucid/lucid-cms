@@ -1,10 +1,10 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
 import type { AgentDefinition } from "../agent/types.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import type FieldBuilder from "../collection/builders/field-builder/index.js";
-import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import keyToTitle from "../collection/custom-fields/utils/key-to-title.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
+import type FieldSet from "../collection/definitions/fields/index.js";
+import { getFieldSetState } from "../collection/definitions/fields/index.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
 import type { DeployDefinition } from "../deploys/types.js";
 import { copy, normalizeCopy, translate } from "../i18n/index.js";
@@ -233,7 +233,7 @@ const fieldsSubgroup: CapabilitySubgroup = {
 
 /** Builds a collection's generated permissions for the fields and bricks that opt in, in a Fields subgroup and one subgroup per brick, in declaration order. */
 const getFieldCapabilities = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ): CapabilityDefinition[] => {
 	const capabilities: CapabilityDefinition[] = [];
 	const add = (
@@ -259,11 +259,11 @@ const getFieldCapabilities = (
 		}
 	};
 	const addFields = (
-		builder: FieldBuilder,
+		builder: FieldSet,
 		owner: { collection: string; brick?: string },
 		subgroup: CapabilitySubgroup,
 	) => {
-		for (const [key, field] of getFieldBuilderState(builder).fields) {
+		for (const [key, field] of getFieldSetState(builder).fields) {
 			const label = labelText(field.config.details.label, key);
 			add(
 				{ ...owner, field: key },
@@ -293,7 +293,7 @@ const getFieldCapabilities = (
 };
 
 const getCollectionCapabilityGroups = (
-	collections: CollectionBuilder[] = [],
+	collections: CollectionDefinition[] = [],
 ): CapabilityGroup[] => {
 	return collections.map((collection) => ({
 		key: `documents:${collection.key}`,

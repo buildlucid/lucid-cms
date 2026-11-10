@@ -4,7 +4,7 @@ import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import defineCollection from "../collection/define-collection.js";
 import { copy, createTranslationStore } from "../i18n/index.js";
 import defineHookEvents from "./define-hook-events.js";
 import defineHook from "./define-hook.js";
@@ -28,7 +28,8 @@ const testHookEvents = defineHookEvents({
 	events: { beforeList: "transform" },
 });
 
-const collection = new CollectionBuilder("pages", {
+const collection = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: { labels: { singular: "Page", plural: "Pages" } },
 });

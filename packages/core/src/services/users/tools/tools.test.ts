@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
 import { createTranslationStore } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
@@ -25,11 +26,13 @@ import { outputSchema } from "./find/schema.js";
 
 const fixture = getTestConfig();
 const collection = (key: string) =>
-	new CollectionBuilder(key, {
+	defineCollection({
+		key: key,
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		publishing: { environments: [{ key: "production", label: "Production" }] },
-	}).addText("title", { useAsLabel: true });
+		fields: [field.text("title", { useAsLabel: true })],
+	});
 const pages = collection("user_tool_pages");
 const posts = collection("user_tool_posts");
 

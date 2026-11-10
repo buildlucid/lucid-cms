@@ -25,7 +25,7 @@ import {
 } from "@lucidcms/admin/hooks";
 import { queries, queryKeys } from "@lucidcms/admin/services";
 import type { RouteComponent } from "@lucidcms/admin/types";
-import { copyValue, toast } from "@lucidcms/admin/utils";
+import { adminHref, copyValue, toast } from "@lucidcms/admin/utils";
 import { useQuery, useQueryClient } from "@tanstack/solid-query";
 import { createSignal, Index, Show } from "solid-js";
 
@@ -222,14 +222,14 @@ const DiagnosticsRoute: RouteComponent = () => {
 									Open page editor
 								</Link>
 								<Link
-									href="/admin/e/standalone-playground"
+									href={adminHref("standalone-playground")}
 									variant="outline"
 									size="sm"
 								>
 									Standalone route
 								</Link>
 								<Link
-									href="/admin/e/public-playground"
+									href={adminHref("public-playground")}
 									variant="outline"
 									size="sm"
 								>

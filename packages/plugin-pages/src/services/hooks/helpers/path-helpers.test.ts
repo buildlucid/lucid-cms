@@ -1,4 +1,4 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { defineCollection } from "@lucidcms/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CollectionConfig } from "../../../types/types.js";
 
@@ -41,7 +41,8 @@ const collection = {
 	unique: true,
 	trackPaths: false,
 } satisfies CollectionConfig;
-const collectionInstance = new CollectionBuilder("pages", {
+const collectionInstance = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: {
 		labels: {

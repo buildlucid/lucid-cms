@@ -1,8 +1,11 @@
-import { type CollectionBuilder, LucidError } from "@lucidcms/core";
-import type { ResolvedLucidConfig } from "@lucidcms/core/types";
+import { LucidError } from "@lucidcms/core";
+import type {
+	CollectionDefinition,
+	ResolvedLucidConfig,
+} from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../constants.js";
 
-const getFinalEnvironments = (collection: CollectionBuilder) => {
+const getFinalEnvironments = (collection: CollectionDefinition) => {
 	const environments = collection.getData.publishing.environments;
 	const required = new Set(
 		environments.flatMap((environment) => environment.requires),

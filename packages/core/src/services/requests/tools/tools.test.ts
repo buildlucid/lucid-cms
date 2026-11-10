@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import defineAgent from "../../../libs/agent/define-agent.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../../libs/i18n/index.js";
@@ -34,11 +35,13 @@ import { outputSchema as overviewOutputSchema } from "./overview/schema.js";
 
 const fixture = getTestConfig();
 const collection = (key: string) =>
-	new CollectionBuilder(key, {
+	defineCollection({
+		key: key,
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		publishing: { environments: [{ key: "production", label: "Production" }] },
-	}).addText("title", { useAsLabel: true });
+		fields: [field.text("title", { useAsLabel: true })],
+	});
 const pages = collection("request_tool_pages");
 const posts = collection("request_tool_posts");
 const reviewer = defineAgent({

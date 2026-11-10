@@ -1,7 +1,4 @@
 import type { FieldInputSchema } from "../../../exports/types.js";
-import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import type { RichTextValidationData } from "../../../libs/collection/custom-fields/fields/rich-text/types.js";
 import registeredFields, {
 	registeredFieldTypes,
@@ -11,6 +8,9 @@ import type {
 	FieldRelationValidationInput,
 	FieldTypes,
 } from "../../../libs/collection/custom-fields/types.js";
+import type BrickDefinition from "../../../libs/collection/definitions/brick/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import { addRefTarget } from "../../../libs/refs/targets.js";
 import { DocumentReferencesRepository } from "../../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
@@ -66,9 +66,9 @@ const mergeValidationInput = (
  */
 const collectFieldValidationInput = (
 	field: FieldInputSchema,
-	instance: CollectionBuilder | BrickBuilder,
+	instance: CollectionDefinition | BrickDefinition,
 ): FieldRelationValidationInput | null => {
-	const fieldInstance = getFieldBuilderState(instance).fields.get(field.key);
+	const fieldInstance = getFieldSetState(instance).fields.get(field.key);
 	if (!fieldInstance) return null;
 
 	const mergedInput: FieldRelationValidationInput = {};
@@ -111,7 +111,7 @@ const fetchValidationData: ServiceFn<
 		{
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			authUser?: LucidActor;
 			existingVersion?: { id: number; documentId: number };
 		},
@@ -179,7 +179,7 @@ const fetchValidationData: ServiceFn<
 const extractRelationIds = (
 	bricks: Array<BrickInputSchema>,
 	fields: Array<FieldInputSchema>,
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ): ValidationBuckets => {
 	const buckets: ValidationBuckets = {};
 
@@ -199,8 +199,8 @@ const extractRelationIds = (
  */
 const getBrickInstance = (
 	brick: BrickInputSchema,
-	collection: CollectionBuilder,
-): CollectionBuilder | BrickBuilder | undefined => {
+	collection: CollectionDefinition,
+): CollectionDefinition | BrickDefinition | undefined => {
 	switch (brick.type) {
 		case "builder":
 			return collection.config.bricks?.builder?.find(
@@ -222,11 +222,11 @@ const getBrickInstance = (
  */
 const extractRelationIdsFromFields = (
 	fields: Array<FieldInputSchema>,
-	instance: CollectionBuilder | BrickBuilder,
+	instance: CollectionDefinition | BrickDefinition,
 	buckets: ValidationBuckets,
 ) => {
 	for (const field of fields) {
-		const fieldInstance = getFieldBuilderState(instance).fields.get(field.key);
+		const fieldInstance = getFieldSetState(instance).fields.get(field.key);
 		if (!fieldInstance) continue;
 
 		const fieldDefinition = registeredFields[fieldInstance.type];

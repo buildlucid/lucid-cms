@@ -1,6 +1,6 @@
 import type { ResolvedLucidConfig } from "../../../exports/types.js";
-import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import type { FieldConfig } from "../../collection/custom-fields/types.js";
+import type CollectionDefinition from "../../collection/definitions/collection/index.js";
 import { translate } from "../../i18n/index.js";
 
 const checkCollectionKeys = (props: {
@@ -99,7 +99,7 @@ const checkDocuments = (
 
 const checkEmbeddedBricks = (
 	field: FieldConfig<"rich-text">,
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ) => {
 	const embeddedBricks = collection.config.bricks?.embedded ?? [];
 	if (Array.isArray(field.editor?.bricks)) {
@@ -134,7 +134,7 @@ const checkEmbeddedBricks = (
 const checkRichTextField = (
 	field: FieldConfig<"rich-text">,
 	config: ResolvedLucidConfig,
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ) => {
 	checkInternalLinks(field, config);
 	checkDocuments(field, config);

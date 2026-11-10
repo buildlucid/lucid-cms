@@ -1,5 +1,9 @@
-import { type CollectionBuilder, copy } from "@lucidcms/core";
-import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
+import { copy } from "@lucidcms/core";
+import type {
+	CollectionDefinition,
+	DocumentVersionType,
+	ServiceFn,
+} from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
 import buildRouteSegmentTargets from "../utils/build-route-segment-targets.js";
 import getStoredRouteSegmentSelections from "./get-stored-route-segment-selections.js";
@@ -10,7 +14,7 @@ const resolveStoredRoutePrefixes: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			versionIds: number[];
 			excludedTargets?: { collectionKey: string; documentIds: number[] };

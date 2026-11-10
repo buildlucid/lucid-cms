@@ -1,5 +1,5 @@
 import type { DocumentWorkflow } from "@lucidcms/types";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
 import formatter from "./helpers.js";
 import type { MediaFormatterOptions } from "./media.js";
@@ -17,7 +17,7 @@ type DocumentWorkflowFormatInput = {
 };
 
 const getEffectiveStage = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	stageKey?: string | null;
 }) => {
 	const workflow = props.collection.getData.publishing.workflow;
@@ -35,7 +35,7 @@ const getEffectiveStage = (props: {
 
 const formatSingle = (props: {
 	workflow?: DocumentWorkflowFormatInput | null;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	mediaOptions: MediaFormatterOptions;
 }): DocumentWorkflow | null => {
 	const stage = getEffectiveStage({
@@ -61,7 +61,7 @@ const formatSingle = (props: {
 
 const formatSummary = (props: {
 	stageKey?: string | null;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 }): DocumentWorkflow | null => {
 	const stage = getEffectiveStage({
 		collection: props.collection,

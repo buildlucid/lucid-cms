@@ -1,5 +1,5 @@
 import type { ServiceResponse } from "../../../../exports/types.js";
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../../libs/collection/definitions/collection/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import buildSchemaIndex from "../../helpers/build-schema-index.js";
 import buildTableName from "../../helpers/build-table-name.js";
@@ -9,7 +9,7 @@ import type { CollectionSchemaTable } from "../types.js";
  * Returns the versions table
  */
 const createVersionsTable = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	db: DatabaseAdapter;
 }): Awaited<
 	ServiceResponse<{

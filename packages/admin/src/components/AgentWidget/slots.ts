@@ -1,6 +1,6 @@
 import type { AgentMessagePart, AgentWidgetPart } from "@types";
 import { agentSlots } from "virtual:lucid-admin";
-import { resolveSlots } from "@/extensions/slot-policy";
+import { matchSlots } from "@/extensions/match-slots";
 import { partLayout } from "@/utils/agent-chat";
 
 type AgentSlot = (typeof agentSlots)[number];
@@ -21,7 +21,7 @@ export const resolveAgentSlot = <Slot extends AgentSlot["slot"]>(
 	if (!resolved.has(id)) {
 		resolved.set(
 			id,
-			resolveSlots(
+			matchSlots(
 				agentSlots.filter((entry) => isSlot(entry, slot)),
 				{ widget: widget.key, version: widget.version },
 			)[0],

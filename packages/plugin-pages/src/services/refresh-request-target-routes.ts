@@ -1,5 +1,6 @@
-import { type CollectionBuilder, copy } from "@lucidcms/core";
+import { copy } from "@lucidcms/core";
 import type {
+	CollectionDefinition,
 	CollectionTableNames,
 	ServiceFn,
 	Toolkit,
@@ -21,7 +22,7 @@ const refreshRequestTargetRoutes: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			tables: CollectionTableNames;
 			toolkit: Toolkit;
 			target: string;

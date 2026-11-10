@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
@@ -60,7 +61,8 @@ import updateTargets from "./update-targets.js";
 const fixture = getTestConfig();
 const collections = [
 	...["request_pages", "request_articles"].map((key) =>
-		new CollectionBuilder(key, {
+		defineCollection({
+			key: key,
 			mode: "multiple",
 			revisions: { enabled: true },
 			details: { labels: { singular: "Page", plural: "Pages" } },
@@ -72,11 +74,14 @@ const collections = [
 					{ key: "production", label: "Production", requires: ["staging"] },
 				],
 			},
-		})
-			.addText("title", { validation: { required: true } })
-			.addText("summary"),
+			fields: [
+				field.text("title", { validation: { required: true } }),
+				field.text("summary"),
+			],
+		}),
 	),
-	new CollectionBuilder("workflow_pages", {
+	defineCollection({
+		key: "workflow_pages",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		revisions: true,
@@ -97,10 +102,10 @@ const collections = [
 				],
 			},
 		},
-	})
-		.addText("title")
-		.addText("summary"),
-	new CollectionBuilder("create_request_pages", {
+		fields: [field.text("title"), field.text("summary")],
+	}),
+	defineCollection({
+		key: "create_request_pages",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		revisions: true,
@@ -115,21 +120,24 @@ const collections = [
 				],
 			},
 		},
-	})
-		.addText("title", { validation: { required: true } })
-		.addText("summary")
-		.addRelation("related", { collection: "create_request_pages" }),
-	new CollectionBuilder("approval_pages", {
+		fields: [
+			field.text("title", { validation: { required: true } }),
+			field.text("summary"),
+			field.relation("related", { collection: "create_request_pages" }),
+		],
+	}),
+	defineCollection({
+		key: "approval_pages",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		publishing: {
 			review: { publish: ["staging"], approvals: 2 },
 			environments: [{ key: "staging", label: "Staging" }],
 		},
-	})
-		.addText("title")
-		.addText("summary"),
-	new CollectionBuilder("reset_pages", {
+		fields: [field.text("title"), field.text("summary")],
+	}),
+	defineCollection({
+		key: "reset_pages",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		publishing: {
@@ -148,18 +156,21 @@ const collections = [
 				],
 			},
 		},
-	})
-		.addText("title")
-		.addText("summary"),
-	new CollectionBuilder("reviewed_delete_pages", {
+		fields: [field.text("title"), field.text("summary")],
+	}),
+	defineCollection({
+		key: "reviewed_delete_pages",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		publishing: { review: { delete: true } },
-	})
-		.addText("title")
-		.addText("summary")
-		.addRelation("related", { collection: "reviewed_delete_pages" }),
-	new CollectionBuilder("checked_pages", {
+		fields: [
+			field.text("title"),
+			field.text("summary"),
+			field.relation("related", { collection: "reviewed_delete_pages" }),
+		],
+	}),
+	defineCollection({
+		key: "checked_pages",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		publishing: { environments: [{ key: "staging", label: "Staging" }] },
@@ -178,9 +189,8 @@ const collections = [
 				},
 			},
 		],
-	})
-		.addText("title")
-		.addText("summary"),
+		fields: [field.text("title"), field.text("summary")],
+	}),
 ];
 let context: ServiceContext;
 let creator: LucidUser;
@@ -3119,16 +3129,16 @@ test("an earlier approval approves the request once its collections need fewer",
 			...context.config,
 			collections: context.config.collections.map((collection) =>
 				collection.key === "approval_pages"
-					? new CollectionBuilder("approval_pages", {
+					? defineCollection({
+							key: "approval_pages",
 							details: { labels: { singular: "Page", plural: "Pages" } },
 							mode: "multiple",
 							publishing: {
 								review: { publish: ["staging"] },
 								environments: [{ key: "staging", label: "Staging" }],
 							},
+							fields: [field.text("title"), field.text("summary")],
 						})
-							.addText("title")
-							.addText("summary")
 					: collection,
 			),
 		},

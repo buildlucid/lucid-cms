@@ -66,9 +66,10 @@ export interface MaintenanceTileProps {
  * ```tsx
  * import { Button, MaintenanceTile } from "@lucidcms/admin/components";
  * import { useTranslation } from "@lucidcms/admin/hooks";
- * import type { MaintenanceSlotComponent } from "@lucidcms/admin/types";
+ * import type { SlotComponent } from "@lucidcms/admin/types";
+ * import type rebuildIndexSlot from "./config.js";
  *
- * const RebuildIndex: MaintenanceSlotComponent = () => {
+ * const RebuildIndex: SlotComponent<typeof rebuildIndexSlot> = () => {
  * 	const { t } = useTranslation();
  *
  * 	return (

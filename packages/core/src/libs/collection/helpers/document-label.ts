@@ -1,8 +1,8 @@
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../i18n/types.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../builders/field-builder/index.js";
 import fieldConfigs from "../custom-fields/field-configs.js";
 import type { FieldConfig, FieldTypes } from "../custom-fields/types.js";
+import type CollectionDefinition from "../definitions/collection/index.js";
+import { getFieldSetState } from "../definitions/fields/index.js";
 
 type SupportedLabelFieldType = {
 	[
@@ -22,11 +22,11 @@ const getCopyFallback = (
 };
 
 const isSupportedLabelField = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	fieldKey: string | null | undefined,
 ) => {
 	if (!fieldKey) return false;
-	const field = getFieldBuilderState(collection).fields.get(fieldKey);
+	const field = getFieldSetState(collection).fields.get(fieldKey);
 	if (!field) return false;
 	if (field.treeParent !== null || field.structuralParent !== null)
 		return false;
@@ -36,17 +36,17 @@ const isSupportedLabelField = (
 
 /** Returns the first supported field using standard document-label precedence. */
 export const getDocumentLabelField = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ): DocumentLabelFieldConfig | null => {
 	const candidates = [
 		...collection.labelFields,
 		...collection.listing,
-		...getFieldBuilderState(collection).fields.keys(),
+		...getFieldSetState(collection).fields.keys(),
 	];
 
 	for (const fieldKey of candidates) {
 		if (!isSupportedLabelField(collection, fieldKey)) continue;
-		return getFieldBuilderState(collection).fields.get(fieldKey)
+		return getFieldSetState(collection).fields.get(fieldKey)
 			?.config as DocumentLabelFieldConfig;
 	}
 
@@ -55,7 +55,7 @@ export const getDocumentLabelField = (
 
 /** Builds a stable label when a document has no usable label value. */
 export const getDocumentFallbackLabel = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	documentId: number,
 ) => {
 	const details = collection.getData.details;

@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import listContentFields, {
 	type ContentField,
@@ -23,7 +23,7 @@ const itemRefs = (entry: ContentField | undefined) =>
  * fields and which bricks and repeater items there are, and their order.
  */
 const getChangedLocales = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	previous: ContentInput;
 	next: ContentInput;

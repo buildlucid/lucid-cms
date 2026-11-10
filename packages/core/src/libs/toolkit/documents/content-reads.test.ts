@@ -7,48 +7,64 @@ import syncLocales from "../../../services/sync/sync-locales.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import applyCollectionMigrations from "../../collection/apply-collection-migrations.js";
-import BrickBuilder from "../../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import defineBrick from "../../collection/define-brick.js";
+import defineCollection from "../../collection/define-collection.js";
+import field from "../../collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import { getTableNames } from "../../collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../i18n/index.js";
 import createToolkit from "../create-toolkit.js";
 
-const settings = new CollectionBuilder("settings", {
+const settings = defineCollection({
+	key: "settings",
 	mode: "multiple",
 	localized: { locales: ["en"] },
 	details: { labels: { singular: "Setting", plural: "Settings" } },
-}).addText("label", { localized: true });
-const guides = new CollectionBuilder("guides", {
+	fields: [field.text("label", { localized: true })],
+});
+const guides = defineCollection({
+	key: "guides",
 	mode: "multiple",
 	localized: { locales: ["en"] },
 	routing: { field: "slug" },
 	details: { labels: { singular: "Guide", plural: "Guides" } },
-}).addText("slug", { localized: true });
-const notes = new CollectionBuilder("notes", {
+	fields: [field.text("slug", { localized: true })],
+});
+const notes = defineCollection({
+	key: "notes",
 	mode: "multiple",
 	details: { labels: { singular: "Note", plural: "Notes" } },
-}).addRichText("body", { editor: { links: { internal: ["pages"] } } });
-const articles = new CollectionBuilder("articles", {
+	fields: [
+		field.richText("body", { editor: { links: { internal: ["pages"] } } }),
+	],
+});
+const articles = defineCollection({
+	key: "articles",
 	mode: "multiple",
 	revisions: true,
 	details: { labels: { singular: "Article", plural: "Articles" } },
-}).addRelation("settings", { collection: "settings" });
+	fields: [field.relation("settings", { collection: "settings" })],
+});
 const environments = [
 	{ key: "staging", label: "Staging" },
 	{ key: "production", label: "Production" },
 ];
-const labels = new CollectionBuilder("labels", {
+const labels = defineCollection({
+	key: "labels",
 	mode: "multiple",
 	details: { labels: { singular: "Label", plural: "Labels" } },
 	publishing: { environments },
-}).addText("name");
-const cards = new CollectionBuilder("cards", {
+	fields: [field.text("name")],
+});
+const cards = defineCollection({
+	key: "cards",
 	mode: "multiple",
 	details: { labels: { singular: "Card", plural: "Cards" } },
 	publishing: { environments },
-}).addRelation("label", { collection: "labels" });
-const boards = new CollectionBuilder("boards", {
+	fields: [field.relation("label", { collection: "labels" })],
+});
+const boards = defineCollection({
+	key: "boards",
 	mode: "multiple",
 	details: { labels: { singular: "Board", plural: "Boards" } },
 	publishing: {
@@ -60,37 +76,52 @@ const boards = new CollectionBuilder("boards", {
 			},
 		],
 	},
-})
-	.addRelation("label", { collection: "labels" })
-	.addRelation("card", { collection: "cards" });
-const pages = new CollectionBuilder("pages", {
+	fields: [
+		field.relation("label", { collection: "labels" }),
+		field.relation("card", { collection: "cards" }),
+	],
+});
+const pages = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	localized: true,
 	routing: { field: "slug" },
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	bricks: {
-		builder: [new BrickBuilder("hero").addText("heading", { localized: true })],
-		fixed: [new BrickBuilder("seo").addText("summary", { localized: false })],
+		builder: [
+			defineBrick({
+				key: "hero",
+				fields: [field.text("heading", { localized: true })],
+			}),
+		],
+		fixed: [
+			defineBrick({
+				key: "seo",
+				fields: [field.text("summary", { localized: false })],
+			}),
+		],
 	},
-})
-	.addText("slug", { localized: true })
-	.addText("title", { localized: true })
-	.addText("intro", { localized: true })
-	.addJSON("data", { localized: false })
-	.addRichText("body", {
-		localized: false,
-		editor: {
-			variables: { document: ["pages"] },
-			links: { internal: ["pages", "guides"] },
-		},
-	})
-	.addRelation("settings", { collection: "settings", localized: false })
-	.addRelation("related", { collection: "pages", localized: false })
-	.addJSON("block", { localized: true })
-	.addRichText("summary", {
-		localized: true,
-		editor: { links: { internal: ["guides"] } },
-	});
+	fields: [
+		field.text("slug", { localized: true }),
+		field.text("title", { localized: true }),
+		field.text("intro", { localized: true }),
+		field.json("data", { localized: false }),
+		field.richText("body", {
+			localized: false,
+			editor: {
+				variables: { document: ["pages"] },
+				links: { internal: ["pages", "guides"] },
+			},
+		}),
+		field.relation("settings", { collection: "settings", localized: false }),
+		field.relation("related", { collection: "pages", localized: false }),
+		field.json("block", { localized: true }),
+		field.richText("summary", {
+			localized: true,
+			editor: { links: { internal: ["guides"] } },
+		}),
+	],
+});
 
 describe("content document reads", () => {
 	const fixture = getTestConfig();

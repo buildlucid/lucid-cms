@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import type { ContentInput } from "./list-content-fields.js";
 import listTranslationItems from "./list-translation-items.js";
@@ -8,7 +8,7 @@ import readTranslationState, {
 
 /** Each translated field's state in every locale other than the default, for reporting what translation needs. */
 const listTranslationStates = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	content: ContentInput;
 }): Array<{

@@ -2,8 +2,8 @@ import type {
 	CollectionTableNames,
 	ServiceFn,
 } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
@@ -24,7 +24,7 @@ const beginSingleDeletion: ServiceFn<
 		},
 	],
 	{
-		collection: CollectionBuilder;
+		collection: CollectionDefinition;
 		documents: DocumentsRepository;
 		tableNames: CollectionTableNames;
 	}

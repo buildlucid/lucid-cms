@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import { copy } from "../../../libs/i18n/index.js";
 import getEmbeddedBrickLocales from "./get-embedded-brick-locales.js";
 
@@ -9,7 +10,8 @@ const richText = (ref: string) => ({
 	content: [{ type: "lucidEmbeddedBrick", attrs: { ref } }],
 });
 
-const collection = new CollectionBuilder("blog", {
+const collection = defineCollection({
+	key: "blog",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -24,14 +26,20 @@ const collection = new CollectionBuilder("blog", {
 	localized: true,
 	bricks: {
 		embedded: [
-			new BrickBuilder("callout")
-				.addText("body")
-				.addRichText("content", { localized: false }),
+			defineBrick({
+				key: "callout",
+				fields: [
+					field.text("body"),
+					field.richText("content", { localized: false }),
+				],
+			}),
 		],
 	},
-})
-	.addRichText("localized_content")
-	.addRichText("shared_content", { localized: false });
+	fields: [
+		field.richText("localized_content"),
+		field.richText("shared_content", { localized: false }),
+	],
+});
 
 const callout = (ref: string, nestedRef?: string) => ({
 	ref,

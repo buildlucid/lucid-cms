@@ -1,13 +1,13 @@
 import type { FieldTypes } from "../../exports/types.js";
-import type BrickBuilder from "../collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import type CustomField from "../collection/custom-fields/custom-field.js";
 import fieldConfigs from "../collection/custom-fields/field-configs.js";
 import {
 	getFieldDatabaseConfig,
 	isStorageMode,
 } from "../collection/custom-fields/storage/index.js";
+import type BrickDefinition from "../collection/definitions/brick/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
+import { getFieldSetState } from "../collection/definitions/fields/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaColumn,
@@ -24,7 +24,7 @@ import type { RefTarget } from "./types.js";
  * Resolves the custom field instance for a schema-backed field table.
  */
 const getRelationTableFieldInstance = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	schema: {
 		name: LucidBrickTableName;
 		columns: CollectionSchemaColumn[];
@@ -44,12 +44,13 @@ const getRelationTableFieldInstance = (
 	const fieldKey = schema.key.fieldPath?.[schema.key.fieldPath.length - 1];
 	if (!fieldKey) return null;
 
-	const owner: CollectionBuilder | BrickBuilder | undefined = schema.key.brick
+	const owner: CollectionDefinition | BrickDefinition | undefined = schema.key
+		.brick
 		? collection.brickInstances.find((brick) => brick.key === schema.key.brick)
 		: collection;
 	if (!owner) return null;
 
-	return getFieldBuilderState(owner).fields.get(fieldKey) ?? null;
+	return getFieldSetState(owner).fields.get(fieldKey) ?? null;
 };
 
 /**
@@ -74,7 +75,7 @@ const hasMultipleFlag = (
  * the global ref fetch.
  */
 const shouldSkipRelationRow = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	schema: {
 		name: LucidBrickTableName;
 		columns: CollectionSchemaColumn[];
@@ -99,19 +100,20 @@ const shouldSkipRelationRow = (
 
 /** Maps concrete field-table columns to their owning custom-field instance. */
 const getColumnFieldInstances = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	schema: {
 		key: { brick?: string };
 		columns: CollectionSchemaColumn[];
 	},
 ): Map<string, CustomField<FieldTypes>> => {
-	const owner: CollectionBuilder | BrickBuilder | undefined = schema.key.brick
+	const owner: CollectionDefinition | BrickDefinition | undefined = schema.key
+		.brick
 		? collection.brickInstances.find((brick) => brick.key === schema.key.brick)
 		: collection;
 	if (!owner) return new Map();
 
 	const fieldsByColumn = new Map<string, CustomField<FieldTypes>>(
-		Array.from(getFieldBuilderState(owner).fields.values()).map((field) => [
+		Array.from(getFieldSetState(owner).fields.values()).map((field) => [
 			prefixGeneratedColName(field.key),
 			field,
 		]),
@@ -134,7 +136,7 @@ export type StoredFieldTarget = RefTarget & {
 
 /** Uses field-owned extraction for both content reads and the reverse index. */
 export const createFieldTargetCollector = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	schema: Parameters<typeof getRelationTableFieldInstance>[1],
 ) => {
 	const columns = getColumnFieldInstances(collection, schema);

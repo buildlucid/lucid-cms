@@ -1,28 +1,36 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { defineBrick, field } from "@lucidcms/core";
 
-const SimpleBrick = new BrickBuilder("simple", {})
-	.addText("heading", {
-		localized: false,
-	})
-	.addMedia("image", {
-		multiple: true,
-	})
-	.addRelation("document", {
-		collection: "simple",
-		validation: {
-			// required: true,
-		},
-	})
-	.addRepeater("items")
-	.addText("itemTitle")
-	.addRepeater("nestedItems")
-	.addText("nestedItemTitle", {
-		validation: {
-			required: true,
-		},
-	})
-	.addCheckbox("nestedCheckbox")
-	.endRepeater()
-	.endRepeater();
+const SimpleBrick = defineBrick({
+	key: "simple",
+	fields: [
+		field.text("heading", {
+			localized: false,
+		}),
+		field.media("image", {
+			multiple: true,
+		}),
+		field.relation("document", {
+			collection: "simple",
+			validation: {
+				// required: true,
+			},
+		}),
+		field.repeater("items", {
+			fields: [
+				field.text("itemTitle"),
+				field.repeater("nestedItems", {
+					fields: [
+						field.text("nestedItemTitle", {
+							validation: {
+								required: true,
+							},
+						}),
+						field.checkbox("nestedCheckbox"),
+					],
+				}),
+			],
+		}),
+	],
+});
 
 export default SimpleBrick;

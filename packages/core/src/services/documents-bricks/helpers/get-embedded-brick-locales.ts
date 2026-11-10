@@ -1,8 +1,8 @@
 import type { FieldInputSchema } from "../../../exports/types.js";
-import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import { fieldHooks } from "../../../libs/collection/custom-fields/registered-fields.js";
+import type BrickDefinition from "../../../libs/collection/definitions/brick/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 /**
@@ -14,7 +14,7 @@ import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 const getEmbeddedBrickLocales = (props: {
 	fields: FieldInputSchema[];
 	bricks: BrickInputSchema[];
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localized: boolean;
 }): Map<string, string | null> => {
 	const result = new Map<string, string | null>();
@@ -23,14 +23,14 @@ const getEmbeddedBrickLocales = (props: {
 			.filter((brick) => brick.type === "embedded")
 			.map((brick) => [brick.ref, brick]),
 	);
-	const findInstance = (brick: BrickInputSchema): BrickBuilder | undefined =>
+	const findInstance = (brick: BrickInputSchema): BrickDefinition | undefined =>
 		props.collection.config.bricks?.[brick.type]?.find(
 			(instance) => instance.key === brick.key,
 		);
 
 	const visit = (
 		fields: FieldInputSchema[],
-		instance: CollectionBuilder | BrickBuilder,
+		instance: CollectionDefinition | BrickDefinition,
 		parent: string | null,
 	) => {
 		for (const field of fields) {
@@ -38,8 +38,8 @@ const getEmbeddedBrickLocales = (props: {
 			if (extract) {
 				const localized =
 					props.localized &&
-					getFieldBuilderState(instance).fields.get(field.key)
-						?.localizedEnabled === true;
+					getFieldSetState(instance).fields.get(field.key)?.localizedEnabled ===
+						true;
 				for (const ref of extract(field.value)) hold(ref, parent);
 				for (const [locale, value] of Object.entries(
 					field.translations ?? {},

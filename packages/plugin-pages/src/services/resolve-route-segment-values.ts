@@ -1,5 +1,9 @@
-import { type CollectionBuilder, copy } from "@lucidcms/core";
-import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
+import { copy } from "@lucidcms/core";
+import type {
+	CollectionDefinition,
+	DocumentVersionType,
+	ServiceFn,
+} from "@lucidcms/core/types";
 import type { CollectionConfig, RouteSegmentTarget } from "../types/types.js";
 import formatPath from "../utils/format-path.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
@@ -19,7 +23,7 @@ const resolveRouteSegmentValues: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			targets: RouteSegmentTarget[];
 			sourceKeys: string[];

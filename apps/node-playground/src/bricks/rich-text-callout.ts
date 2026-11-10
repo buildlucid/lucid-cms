@@ -1,12 +1,16 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { defineBrick, field } from "@lucidcms/core";
 
-const RichTextCalloutBrick = new BrickBuilder("rt-callout", {})
-	.addText("heading")
-	.addTextarea("body", {
-		validation: {
-			required: true,
-		},
-	})
-	.addCheckbox("emphasised");
+const RichTextCalloutBrick = defineBrick({
+	key: "rt-callout",
+	fields: [
+		field.text("heading"),
+		field.textarea("body", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.checkbox("emphasised"),
+	],
+});
 
 export default RichTextCalloutBrick;

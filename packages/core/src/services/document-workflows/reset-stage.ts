@@ -1,5 +1,5 @@
 import type { CollectionTableNames } from "../../exports/types.js";
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -15,7 +15,7 @@ import notifyAssignees from "./helpers/notify-assignees.js";
 const resetStage: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			tableNames: CollectionTableNames;
 			documentId: number;
 			versionId: number;

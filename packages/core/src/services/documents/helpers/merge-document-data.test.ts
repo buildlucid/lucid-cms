@@ -1,30 +1,37 @@
 import { describe, expect, test } from "vitest";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { DocumentEditableData } from "../../../libs/toolkit/documents/types.js";
 import mergeDocumentData from "./merge-document-data.js";
 import patchDocumentData from "./patch-document-data.js";
 
-const collection = new CollectionBuilder("pages", {
+const collection = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	bricks: {
 		builder: [
-			new BrickBuilder("text").addText("body"),
-			new BrickBuilder("legal", {
+			defineBrick({ key: "text", fields: [field.text("body")] }),
+			defineBrick({
+				key: "legal",
 				permissions: { update: true },
-			}).addText("body"),
+				fields: [field.text("body")],
+			}),
 		],
 	},
-})
-	.addText("title")
-	.addText("slug", { permissions: { update: true } })
-	.addText("notes", { permissions: { read: true } })
-	.addRepeater("links", { permissions: { update: true } })
-	.addText("label")
-	.endRepeater();
+	fields: [
+		field.text("title"),
+		field.text("slug", { permissions: { update: true } }),
+		field.text("notes", { permissions: { read: true } }),
+		field.repeater("links", {
+			permissions: { update: true },
+			fields: [field.text("label")],
+		}),
+	],
+});
 
 const context = {
 	collection,

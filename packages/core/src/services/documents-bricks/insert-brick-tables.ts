@@ -1,8 +1,8 @@
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import {
 	getFieldDatabaseConfig,
 	isStorageMode,
 } from "../../libs/collection/custom-fields/storage/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { LucidBricksTable } from "../../libs/db/tables/index.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
@@ -18,7 +18,7 @@ const insertBrickTables: ServiceFn<
 	[
 		{
 			tables: InsertBrickTables[];
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 		},
 	],
 	undefined

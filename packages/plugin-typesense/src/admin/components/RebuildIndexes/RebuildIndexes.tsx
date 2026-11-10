@@ -10,19 +10,21 @@ import {
 	useTranslation,
 } from "@lucidcms/admin/hooks";
 import { request } from "@lucidcms/admin/services";
-import type { MaintenanceSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { toast } from "@lucidcms/admin/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import { createMemo, createSignal } from "solid-js";
 import { REBUILD_ROUTE, STATUS_ROUTE } from "../../../constants.js";
-import type {} from "../../translations.js";
 import summariseStatuses from "../../utils/summarise-statuses.js";
+import type rebuildIndexesConfig from "./config.js";
 
 const statusQueryKey = ["typesense", "status"];
 const REBUILDING_REFETCH_MS = 5000;
 
 /** Rebuilds every search index from the Operations page, showing whether they're up to date. */
-const RebuildIndexes: MaintenanceSlotComponent = () => {
+const RebuildIndexes: SlotComponent<
+	ReturnType<typeof rebuildIndexesConfig>
+> = () => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

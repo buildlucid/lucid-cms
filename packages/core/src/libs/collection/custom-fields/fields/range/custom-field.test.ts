@@ -3,14 +3,16 @@ import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import generateCollectionTypes from "../../../type-gen/index.js";
 import CustomFieldSchema from "../../schema.js";
 import { formatNumberFilterValue } from "../../utils/filter-values.js";
 import RangeCustomField from "./custom-field.js";
 
-const RangeCollection = new CollectionBuilder("collection", {
+const RangeCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -22,27 +24,29 @@ const RangeCollection = new CollectionBuilder("collection", {
 			}),
 		},
 	},
-})
-	.addRange("standard_range", {
-		min: -10,
-		max: 10,
-		step: 0.5,
-	})
-	.addRange("dual_range", {
-		min: 0,
-		max: 10,
-		step: 0.25,
-		thumbs: 2,
-	})
-	.addRange("required_range", {
-		validation: { required: true },
-	})
-	.addRange("zod_range", {
-		validation: { zod: z.array(z.number()).refine(([value]) => value === 5) },
-	});
+	fields: [
+		field.range("standard_range", {
+			min: -10,
+			max: 10,
+			step: 0.5,
+		}),
+		field.range("dual_range", {
+			min: 0,
+			max: 10,
+			step: 0.25,
+			thumbs: 2,
+		}),
+		field.range("required_range", {
+			validation: { required: true },
+		}),
+		field.range("zod_range", {
+			validation: { zod: z.array(z.number()).refine(([value]) => value === 5) },
+		}),
+	],
+});
 
 const validate = (key: string, value: unknown) => {
-	const instance = getFieldBuilderState(RangeCollection).fields.get(key);
+	const instance = getFieldSetState(RangeCollection).fields.get(key);
 	if (!instance) throw new Error(`Missing test field ${key}`);
 
 	return validateField({

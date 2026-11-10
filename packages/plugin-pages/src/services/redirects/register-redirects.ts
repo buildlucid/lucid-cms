@@ -1,5 +1,8 @@
-import { type CollectionBuilder, LucidError } from "@lucidcms/core";
-import type { ResolvedLucidConfig } from "@lucidcms/core/types";
+import { LucidError } from "@lucidcms/core";
+import type {
+	CollectionDefinition,
+	ResolvedLucidConfig,
+} from "@lucidcms/core/types";
 import clearPathHistoryConfig from "../../admin/components/ClearPathHistory/config.js";
 import { PLUGIN_KEY, REDIRECTS_COLLECTION_KEY } from "../../constants.js";
 import createClearPathHistoryJob from "../../jobs/clear-path-history.js";
@@ -30,7 +33,7 @@ const registerRedirects = (props: {
 	redirects: RedirectsOptionsInternal;
 	collections: Array<{
 		collectionConfig: CollectionConfig;
-		collectionInstance: CollectionBuilder;
+		collectionInstance: CollectionDefinition;
 	}>;
 }) => {
 	const { draft } = props;

@@ -1,5 +1,5 @@
 import type z from "zod";
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../../libs/collection/definitions/collection/index.js";
 import filterReadableContent from "../../../../libs/collection/field-access/filter-readable-content.js";
 import type { ContentAccess } from "../../../../libs/collection/field-access/types.js";
 import resolveCollectionLocalization from "../../../../libs/collection/helpers/resolve-collection-localization.js";
@@ -28,7 +28,7 @@ const stateNames = {
  * collection isn't localized.
  */
 const projectTranslations = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedLucidConfig["localization"];
 	access: ContentAccess;
 	content: ContentInput;

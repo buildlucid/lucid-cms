@@ -1,11 +1,12 @@
 import { describe, expect, test } from "vitest";
 import type { ServiceContext } from "../../exports/types.js";
 import { copy } from "../i18n/index.js";
-import BrickBuilder from "./builders/brick-builder/index.js";
-import CollectionBuilder from "./builders/collection-builder/index.js";
 import collections from "./collections.js";
+import defineBrick from "./define-brick.js";
+import defineCollection from "./define-collection.js";
 
-const pages = new CollectionBuilder("pages", {
+const pages = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -14,9 +15,9 @@ const pages = new CollectionBuilder("pages", {
 		},
 	},
 	bricks: {
-		builder: [new BrickBuilder("content")],
-		fixed: [new BrickBuilder("metadata")],
-		embedded: [new BrickBuilder("callout")],
+		builder: [defineBrick({ key: "content" })],
+		fixed: [defineBrick({ key: "metadata" })],
+		embedded: [defineBrick({ key: "callout" })],
 	},
 });
 

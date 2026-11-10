@@ -3,7 +3,7 @@ import type {
 	InternalDocumentField,
 	ResolvedLucidConfig,
 } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import type { LucidBrickTableName } from "../../../libs/db/tables/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
@@ -20,7 +20,7 @@ const aggregateBrickTables = (params: {
 	documentId: number;
 	bricks?: Array<BrickInputSchema> | Array<InternalDocumentBrick>;
 	fields?: Array<FieldInputSchema> | Array<InternalDocumentField>;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedLucidConfig["localization"];
 	tableNameByteLimit: number | null;
 }) => {

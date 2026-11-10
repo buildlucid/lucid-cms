@@ -1,5 +1,5 @@
 import type { RefResource, ServiceFn } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import type {
 	CollectionSchemaColumn,
@@ -48,7 +48,7 @@ const isCurrentDocumentTarget = (
 const collectRefTargets: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			brickSchema: {
 				name: LucidBrickTableName;
 				type: TableType;

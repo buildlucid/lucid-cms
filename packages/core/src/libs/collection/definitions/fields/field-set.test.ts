@@ -1,77 +1,75 @@
 import { expect, test } from "vitest";
 import { copy } from "../../../i18n/index.js";
-import FieldBuilder, { getFieldBuilderState } from "./index.js";
+import defineBrick from "../../define-brick.js";
+import field from "./field.js";
+import { getFieldSetState } from "./index.js";
 
 test("all fields should be added", async () => {
-	const instance = new FieldBuilder()
-		.addText("text_test")
-		.addTextarea("textarea_test")
-		.addRichText("rich_text_test")
-		.addNumber("number_test")
-		.addRange("range_test")
-		.addCheckbox("checkbox_test")
-		.addSelect("select_test")
-		.addJSON("json_test")
-		.addColor("color_test")
-		.addMedia("media_test")
-		.addDateTime("datetime_test")
-		.addLink("link_test")
-		.addUser("user_test")
-		.addRepeater("repeater_test")
-		.addText("repeater_text_test")
-		.endRepeater();
-	expect(getFieldBuilderState(instance).fields.size).toBe(15);
-	expect(getFieldBuilderState(instance).fields.get("text_test")).toBeDefined();
+	const instance = defineBrick({
+		key: "test",
+		fields: [
+			field.text("text_test"),
+			field.textarea("textarea_test"),
+			field.richText("rich_text_test"),
+			field.number("number_test"),
+			field.range("range_test"),
+			field.checkbox("checkbox_test"),
+			field.select("select_test"),
+			field.json("json_test"),
+			field.color("color_test"),
+			field.media("media_test"),
+			field.datetime("datetime_test"),
+			field.link("link_test"),
+			field.user("user_test"),
+			field.repeater("repeater_test", {
+				fields: [field.text("repeater_text_test")],
+			}),
+		],
+	});
+	expect(getFieldSetState(instance).fields.size).toBe(15);
+	expect(getFieldSetState(instance).fields.get("text_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("textarea_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("rich_text_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("number_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("range_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("checkbox_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("select_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("json_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("color_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("media_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("datetime_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("link_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("user_test")).toBeDefined();
+	expect(getFieldSetState(instance).fields.get("repeater_test")).toBeDefined();
 	expect(
-		getFieldBuilderState(instance).fields.get("textarea_test"),
-	).toBeDefined();
-	expect(
-		getFieldBuilderState(instance).fields.get("rich_text_test"),
-	).toBeDefined();
-	expect(
-		getFieldBuilderState(instance).fields.get("number_test"),
-	).toBeDefined();
-	expect(getFieldBuilderState(instance).fields.get("range_test")).toBeDefined();
-	expect(
-		getFieldBuilderState(instance).fields.get("checkbox_test"),
-	).toBeDefined();
-	expect(
-		getFieldBuilderState(instance).fields.get("select_test"),
-	).toBeDefined();
-	expect(getFieldBuilderState(instance).fields.get("json_test")).toBeDefined();
-	expect(getFieldBuilderState(instance).fields.get("color_test")).toBeDefined();
-	expect(getFieldBuilderState(instance).fields.get("media_test")).toBeDefined();
-	expect(
-		getFieldBuilderState(instance).fields.get("datetime_test"),
-	).toBeDefined();
-	expect(getFieldBuilderState(instance).fields.get("link_test")).toBeDefined();
-	expect(getFieldBuilderState(instance).fields.get("user_test")).toBeDefined();
-	expect(
-		getFieldBuilderState(instance).fields.get("repeater_test"),
-	).toBeDefined();
-	expect(
-		getFieldBuilderState(instance).fields.get("repeater_text_test"),
+		getFieldSetState(instance).fields.get("repeater_text_test"),
 	).toBeDefined();
 });
 
 test("repeater fields should be nested correctly", async () => {
-	const instance = new FieldBuilder()
-		.addRepeater("repeater_test")
-		.addText("text_test")
-		.addText("text_test_2")
-		.endRepeater()
-		.addRepeater("repeater_test_2")
-		.addText("text_test_3")
-		.addText("text_test_4")
-		.addRepeater("repeater_test_3")
-		.addText("text_test_5")
-		.addText("text_test_6")
-		.addRepeater("repeater_test_4")
-		.addText("text_test_7")
-		.addText("text_test_8")
-		.endRepeater()
-		.endRepeater()
-		.endRepeater();
+	const instance = defineBrick({
+		key: "test",
+		fields: [
+			field.repeater("repeater_test", {
+				fields: [field.text("text_test"), field.text("text_test_2")],
+			}),
+			field.repeater("repeater_test_2", {
+				fields: [
+					field.text("text_test_3"),
+					field.text("text_test_4"),
+					field.repeater("repeater_test_3", {
+						fields: [
+							field.text("text_test_5"),
+							field.text("text_test_6"),
+							field.repeater("repeater_test_4", {
+								fields: [field.text("text_test_7"), field.text("text_test_8")],
+							}),
+						],
+					}),
+				],
+			}),
+		],
+	});
 
 	expect(instance.fieldTree.length).toBe(2);
 
@@ -106,23 +104,27 @@ test("repeater fields should be nested correctly", async () => {
 });
 
 test("flat fields should return correct config", async () => {
-	const instance = new FieldBuilder()
-		.addText("text_test")
-		.addTextarea("textarea_test")
-		.addRichText("rich_text_test")
-		.addNumber("number_test")
-		.addRange("range_test")
-		.addCheckbox("checkbox_test")
-		.addSelect("select_test")
-		.addJSON("json_test")
-		.addColor("color_test")
-		.addMedia("media_test")
-		.addDateTime("datetime_test")
-		.addLink("link_test")
-		.addUser("user_test")
-		.addRepeater("repeater_test")
-		.addText("repeater_text_test")
-		.endRepeater();
+	const instance = defineBrick({
+		key: "test",
+		fields: [
+			field.text("text_test"),
+			field.textarea("textarea_test"),
+			field.richText("rich_text_test"),
+			field.number("number_test"),
+			field.range("range_test"),
+			field.checkbox("checkbox_test"),
+			field.select("select_test"),
+			field.json("json_test"),
+			field.color("color_test"),
+			field.media("media_test"),
+			field.datetime("datetime_test"),
+			field.link("link_test"),
+			field.user("user_test"),
+			field.repeater("repeater_test", {
+				fields: [field.text("repeater_text_test")],
+			}),
+		],
+	});
 
 	expect(instance.flatFields.length).toBe(15);
 
@@ -414,25 +416,31 @@ test("flat fields should return correct config", async () => {
 	]);
 });
 test("field snapshots reflect added fields", async () => {
-	const instance = new FieldBuilder().addText("text_test");
+	const instance = defineBrick({
+		key: "test",
+		fields: [field.text("text_test")],
+	});
 
 	const initialTree = instance.fieldTree;
 	const cachedTree = instance.fieldTree;
 	expect(cachedTree).toEqual(initialTree);
-	instance.addNumber("number_test");
+	instance.insertFields([field.number("number_test")]);
 
 	const updatedTree = instance.fieldTree;
 	expect(updatedTree).not.toBe(initialTree);
 	expect(updatedTree.length).toBe(2);
 });
 test("persisted field snapshots reflect completed repeaters", async () => {
-	const instance = new FieldBuilder()
-		.addRepeater("repeater_test")
-		.addText("text_test");
+	const instance = defineBrick({
+		key: "test",
+		fields: [
+			field.repeater("repeater_test", { fields: [field.text("text_test")] }),
+		],
+	});
 
 	const beforeEnd = instance.persistedFieldTree;
 	expect(instance.persistedFieldTree).toEqual(beforeEnd);
-	instance.endRepeater();
+	instance.insertFields([]);
 
 	const afterEnd = instance.persistedFieldTree;
 	expect(afterEnd).not.toBe(beforeEnd);

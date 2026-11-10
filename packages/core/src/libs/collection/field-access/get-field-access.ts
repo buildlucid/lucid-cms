@@ -1,17 +1,17 @@
 import { resolveFieldPermissions } from "../../permission/field-permissions.js";
-import type FieldBuilder from "../builders/field-builder/index.js";
-import { getFieldBuilderState } from "../builders/field-builder/index.js";
+import type FieldSet from "../definitions/fields/index.js";
+import { getFieldSetState } from "../definitions/fields/index.js";
 import resolveFieldAccess, { narrowestAccess } from "./resolve-field-access.js";
 import type { FieldAccess, FieldAccessActor } from "./types.js";
 
 /** Resolves each field's narrowest access from generated permissions, tabs, sections, collapsibles, repeaters and `base`, using `owner` to scope the collection and brick. */
 const getFieldAccess = (
-	builder: FieldBuilder,
+	builder: FieldSet,
 	actor: FieldAccessActor | undefined,
 	owner: { collection: string; brick?: string },
 	base: FieldAccess = "editable",
 ): Map<string, FieldAccess> => {
-	const fields = getFieldBuilderState(builder).fields;
+	const fields = getFieldSetState(builder).fields;
 	const access = new Map<string, FieldAccess>();
 
 	const resolve = (key: string): FieldAccess => {

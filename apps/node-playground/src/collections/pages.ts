@@ -1,10 +1,11 @@
-import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import { copy, defineCollection, field, z } from "@lucidcms/core";
 import AllFieldsBrick from "../bricks/all-fields.js";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
 import TestingBrick from "../bricks/testing.js";
 
-const PageCollection = new CollectionBuilder("page", {
+const PageCollection = defineCollection({
+	key: "page",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -88,49 +89,51 @@ const PageCollection = new CollectionBuilder("page", {
 		},
 		scheduling: true,
 	},
-})
-	.addText("page_title", {
-		details: {
-			label: copy("admin:collections.page.fields.page_title.label"),
-			description: copy("admin:collections.page.fields.page_title.summary"),
-		},
-		ui: {
-			hidden: false,
-			disabled: false,
-		},
-		validation: {
-			required: true,
-			zod: z.string().min(2).max(128),
-		},
-		showInList: true,
-		useAsLabel: true,
-	})
-	.addUser("author", {
-		showInList: true,
-		multiple: true,
-		permissions: { update: true },
-	})
-	.addRelation("settings", {
-		collection: "settings",
-		details: {
-			label: "Settings",
-		},
-		permissions: { read: true },
-	})
-	.addEmail("confirmation_email", {
-		details: {
-			label: "Confirmation Email",
-		},
-		allowInternal: true,
-		permissions: { read: true },
-	})
-	.addEmail("sent_emails", {
-		multiple: true,
-		details: {
-			label: "Sent Emails",
-		},
-		allowInternal: true,
-		permissions: { read: true },
-	});
+	fields: [
+		field.text("page_title", {
+			details: {
+				label: copy("admin:collections.page.fields.page_title.label"),
+				description: copy("admin:collections.page.fields.page_title.summary"),
+			},
+			ui: {
+				hidden: false,
+				disabled: false,
+			},
+			validation: {
+				required: true,
+				zod: z.string().min(2).max(128),
+			},
+			showInList: true,
+			useAsLabel: true,
+		}),
+		field.user("author", {
+			showInList: true,
+			multiple: true,
+			permissions: { update: true },
+		}),
+		field.relation("settings", {
+			collection: "settings",
+			details: {
+				label: "Settings",
+			},
+			permissions: { read: true },
+		}),
+		field.email("confirmation_email", {
+			details: {
+				label: "Confirmation Email",
+			},
+			allowInternal: true,
+			permissions: { read: true },
+		}),
+		field.email("sent_emails", {
+			multiple: true,
+			details: {
+				label: "Sent Emails",
+			},
+			allowInternal: true,
+			permissions: { read: true },
+		}),
+	],
+});
 
 export default PageCollection;

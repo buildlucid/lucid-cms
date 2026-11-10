@@ -1,8 +1,8 @@
-import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import fieldConfigs from "../../../libs/collection/custom-fields/field-configs.js";
 import { normalizeStoredRelationCustomFieldValues } from "../../../libs/collection/custom-fields/fields/relation/utils/relation-field-values.js";
+import type BrickDefinition from "../../../libs/collection/definitions/brick/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import {
 	emailsTable,
@@ -53,10 +53,10 @@ const linkedTargets = (
 
 /** Extracts media, user, email and document refs from field values using field config and custom extraction for values such as rich text. */
 const fieldTargets = (
-	owner: CollectionBuilder | BrickBuilder,
+	owner: CollectionDefinition | BrickDefinition,
 	field: FieldInputSchema,
 ): RefTarget[] => {
-	const instance = getFieldBuilderState(owner).fields.get(field.key);
+	const instance = getFieldSetState(owner).fields.get(field.key);
 	if (!instance) return [];
 
 	const config = fieldConfigs[instance.type];
@@ -78,7 +78,7 @@ const fieldTargets = (
 
 /** Collects the media, users, emails and documents stored content links to, field by field. */
 const collectContentRefTargets = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	content: { fields: FieldInputSchema[]; bricks: BrickInputSchema[] },
 ): RefTarget[] => [
 	...content.fields.flatMap((field) => fieldTargets(collection, field)),

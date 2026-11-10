@@ -3,8 +3,9 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "vitest";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
-import BrickBuilder from "../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import defineBrick from "../collection/define-brick.js";
+import defineCollection from "../collection/define-collection.js";
+import field from "../collection/definitions/fields/field.js";
 import resolveConfig from "../config/resolve-config.js";
 import { copy } from "../i18n/index.js";
 import generateTypes from "./index.js";
@@ -95,18 +96,28 @@ test("generates collection-aware client document types that lean on the public L
 		}),
 	);
 
-	const BannerBrick = new BrickBuilder("banner")
-		.addTab("content_tab")
-		.addText("title", {
-			localized: true,
-		})
-		.addRepeater("call_to_actions")
-		.addText("label", {
-			localized: false,
-		})
-		.endRepeater();
+	const BannerBrick = defineBrick({
+		key: "banner",
+		fields: [
+			field.tab("content_tab", {
+				fields: [
+					field.text("title", {
+						localized: true,
+					}),
+					field.repeater("call_to_actions", {
+						fields: [
+							field.text("label", {
+								localized: false,
+							}),
+						],
+					}),
+				],
+			}),
+		],
+	});
 
-	const PageCollection = new CollectionBuilder("page", {
+	const PageCollection = defineCollection({
+		key: "page",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -132,25 +143,30 @@ test("generates collection-aware client document types that lean on the public L
 				},
 			],
 		},
-	})
-		.addText("_page_title", {
-			localized: true,
-		})
-		.addRelation("_related_page", {
-			collection: "page",
-			localized: false,
-		})
-		.addRelation("_related_content", {
-			collection: ["page", "blog"],
-			localized: false,
-			multiple: true,
-		})
-		.addRepeater("sections")
-		.addText("_section_title", {
-			localized: false,
-		})
-		.endRepeater();
-	const ArticleCollection = new CollectionBuilder("article", {
+		fields: [
+			field.text("_page_title", {
+				localized: true,
+			}),
+			field.relation("_related_page", {
+				collection: "page",
+				localized: false,
+			}),
+			field.relation("_related_content", {
+				collection: ["page", "blog"],
+				localized: false,
+				multiple: true,
+			}),
+			field.repeater("sections", {
+				fields: [
+					field.text("_section_title", {
+						localized: false,
+					}),
+				],
+			}),
+		],
+	});
+	const ArticleCollection = defineCollection({
+		key: "article",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -159,7 +175,8 @@ test("generates collection-aware client document types that lean on the public L
 			},
 		},
 		localized: { locales: ["de"], defaultLocale: "de" },
-	}).addText("title", { localized: true });
+		fields: [field.text("title", { localized: true })],
+	});
 
 	try {
 		process.chdir(tempDir);

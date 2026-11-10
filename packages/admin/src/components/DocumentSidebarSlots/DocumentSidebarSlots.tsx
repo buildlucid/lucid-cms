@@ -1,7 +1,7 @@
 import { createMemo, For, type ParentComponent } from "solid-js";
 import { documentSidebarSlots } from "virtual:lucid-admin";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
-import { resolveSlots } from "@/extensions/slot-policy";
+import { matchSlots } from "@/extensions/match-slots";
 import type {
 	DocumentSidebarPosition,
 	DocumentSidebarSectionKey,
@@ -17,7 +17,7 @@ const DocumentSidebarSlots: ParentComponent<{
 	// ----------------------------------
 	// Memos
 	const entries = createMemo(() =>
-		resolveSlots(documentSidebarSlots, { collection: props.collectionKey }),
+		matchSlots(documentSidebarSlots, { collection: props.collectionKey }),
 	);
 
 	// ----------------------------------
@@ -35,6 +35,7 @@ const DocumentSidebarSlots: ParentComponent<{
 			<AdminExtensionBoundary name={entry.key} placement="content">
 				<entry.component
 					slot={entry.slot}
+					key={entry.key}
 					preferenceKey={`slot.${entry.key}`}
 					options={entry.options}
 				/>

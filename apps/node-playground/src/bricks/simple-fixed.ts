@@ -1,10 +1,12 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { defineBrick, field } from "@lucidcms/core";
 
-const SimpleFixedBrick = new BrickBuilder("simple-fixed", {}).addText(
-	"heading",
-	{
-		localized: false,
-	},
-);
+const SimpleFixedBrick = defineBrick({
+	key: "simple-fixed",
+	fields: [
+		field.text("heading", {
+			localized: false,
+		}),
+	],
+});
 
 export default SimpleFixedBrick;

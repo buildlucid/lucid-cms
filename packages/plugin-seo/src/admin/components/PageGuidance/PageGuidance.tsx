@@ -1,7 +1,6 @@
 import { useTranslation } from "@lucidcms/admin/hooks";
 import { TbOutlineEyeOff } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
-import type {} from "../../../shared/translations.js";
 
 const PageGuidance: Component<{ noindex: boolean }> = (props) => {
 	// ----------------------------------

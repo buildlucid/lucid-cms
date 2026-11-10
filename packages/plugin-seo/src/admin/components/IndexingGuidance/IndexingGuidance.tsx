@@ -1,8 +1,10 @@
 import { useTranslation } from "@lucidcms/admin/hooks";
-import type { FieldSlotComponent } from "@lucidcms/admin/types";
-import type {} from "../../../shared/translations.js";
+import type { SlotComponent } from "@lucidcms/admin/types";
+import type indexingGuidanceConfig from "./config.js";
 
-const IndexingGuidance: FieldSlotComponent = (props) => {
+const IndexingGuidance: SlotComponent<
+	ReturnType<typeof indexingGuidanceConfig>
+> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

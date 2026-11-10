@@ -12,7 +12,6 @@ export type {
 	BrickSlot,
 	BrickSlotMatch,
 	DocumentListSlot,
-	DocumentListSlotComponent,
 	DocumentListSlotPlacement,
 	DocumentListSlotProps,
 	FieldSlot,
@@ -50,7 +49,7 @@ export type {
 	BrickConfig,
 	BrickOptions,
 	BrickTypes,
-} from "../libs/collection/builders/brick-builder/types.js";
+} from "../libs/collection/definitions/brick/types.js";
 export type {
 	CollectionBrickConfig,
 	CollectionData,
@@ -74,8 +73,18 @@ export type {
 	PublishingWorkflowConfig,
 	PublishingWorkflowStageColor,
 	PublishingWorkflowStageConfig,
-} from "../libs/collection/builders/collection-builder/types.js";
-export type { FieldSnapshot } from "../libs/collection/builders/field-builder/types.js";
+} from "../libs/collection/definitions/collection/types.js";
+export type { default as BrickDefinition } from "../libs/collection/definitions/brick/index.js";
+export type { default as CollectionDefinition } from "../libs/collection/definitions/collection/index.js";
+export type {
+	ContentFieldNode,
+	FieldNode,
+	FieldNodeOptions,
+	FieldPlacement,
+	FieldSnapshot,
+} from "../libs/collection/definitions/fields/types.js";
+export type { DefineBrickOptions } from "../libs/collection/define-brick.js";
+export type { DefineCollectionOptions } from "../libs/collection/define-collection.js";
 export type {
 	CheckboxFieldConfig,
 	CheckboxFieldProps,
@@ -254,7 +263,7 @@ export type {
 export type {
 	AgentRunFinishedHookData,
 	AllHooks,
-	CollectionBuilderHooks,
+	CollectionHooks,
 	DocumentAfterFetchHookData,
 	DocumentAfterUpsertHookData,
 	DocumentBeforeUnpublishHookData,

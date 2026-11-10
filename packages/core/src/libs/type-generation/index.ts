@@ -5,7 +5,7 @@ import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
 import writeFileIfChanged from "../../utils/helpers/write-file-if-changed.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import generateCollectionTypes from "../collection/type-gen/index.js";
 import type { RenderedTemplates } from "../email/types.js";
 import logger from "../logger/index.js";
@@ -110,7 +110,7 @@ const generateTypes = async (props: {
 	projectRoot?: string;
 	translationFiles?: ResourceFile[];
 	emailTemplates?: RenderedTemplates;
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	access: ResolvedLucidConfig["access"];
 	localization: ResolvedLucidConfig["localization"];
 	/** Extra files, relative to the config, to write the collection types to for front ends that install `@lucidcms/client`. */

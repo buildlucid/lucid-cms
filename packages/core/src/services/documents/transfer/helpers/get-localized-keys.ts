@@ -1,4 +1,4 @@
-import { getFieldBuilderState } from "../../../../libs/collection/builders/field-builder/index.js";
+import { getFieldSetState } from "../../../../libs/collection/definitions/fields/index.js";
 import type {
 	ContentContext,
 	Owner,
@@ -10,8 +10,8 @@ const getLocalizedKeys = (context: Omit<ContentContext, "access">) => {
 	const enabled = resolveCollectionLocalization(context).enabled;
 	const keys = (owner: Owner) =>
 		enabled
-			? Array.from(getFieldBuilderState(owner).fields.values()).flatMap(
-					(field) => (field.localizedEnabled ? [field.key] : []),
+			? Array.from(getFieldSetState(owner).fields.values()).flatMap((field) =>
+					field.localizedEnabled ? [field.key] : [],
 				)
 			: [];
 	const bricks = [

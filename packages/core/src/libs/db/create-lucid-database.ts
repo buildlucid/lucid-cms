@@ -1,5 +1,5 @@
 import { LucidError } from "../../utils/errors/index.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import inferCollectionSchema from "../collection/schema/infer-schema.js";
 import { translate } from "../i18n/index.js";
 import type DatabaseAdapter from "./adapter-base.js";
@@ -14,7 +14,7 @@ import type { KyselyDB } from "./types.js";
 export type CreateLucidDatabaseOptions = {
 	client: KyselyDB;
 	adapter: DatabaseAdapter;
-	collections?: readonly CollectionBuilder[];
+	collections?: readonly CollectionDefinition[];
 	/** Table metadata registered through `config.tables` at runtime. */
 	tables?: readonly TableDefinition[];
 };

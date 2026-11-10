@@ -1,11 +1,11 @@
-import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../collection/builders/field-builder/index.js";
+import type CollectionDefinition from "../../collection/definitions/collection/index.js";
+import { getFieldSetState } from "../../collection/definitions/fields/index.js";
 import { translate } from "../../i18n/index.js";
 
 const routingFieldTypes = new Set(["text", "textarea", "number"]);
 
 /** Validates collection routing and its use by the default preview URL. */
-const checkCollectionRouting = (collection: CollectionBuilder) => {
+const checkCollectionRouting = (collection: CollectionDefinition) => {
 	const routing = collection.getData.routing;
 	if (!routing) {
 		const preview = collection.resolvedPreviewConfig;
@@ -19,7 +19,7 @@ const checkCollectionRouting = (collection: CollectionBuilder) => {
 		return;
 	}
 
-	const field = getFieldBuilderState(collection).fields.get(routing.field);
+	const field = getFieldSetState(collection).fields.get(routing.field);
 	if (
 		field &&
 		field.treeParent === null &&

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { findSlotConflicts, resolveSlots } from "./slot-policy";
-import type { AdminSlot } from "./types/config";
+import type { AdminSlot } from "./types/slot";
 
 const slots = [
 	{ key: "default", slot: "brick.start", component: "default.ts" },
@@ -23,20 +23,20 @@ test("selects one side panel and orders additive slots by priority", () => {
 		resolveSlots(slots, { brick: "other" }).map((entry) => entry.key),
 	).toEqual(["header-two", "default", "header-one"]);
 });
-test("last registration wins tied overrides, without reordering additive ties", () => {
+test("the more specific match wins tied overrides, then the last registration", () => {
 	const entries = [
-		{
-			key: "first",
-			slot: "field.cell",
-			component: "one.ts",
-			match: { field: "slug" },
-		},
 		{
 			key: "second",
 			slot: "field.cell",
 			component: "two.ts",
 			match: { collection: "page", field: "slug" },
 			priority: 0,
+		},
+		{
+			key: "first",
+			slot: "field.cell",
+			component: "one.ts",
+			match: { field: "slug" },
 		},
 	] satisfies AdminSlot[];
 	expect(
@@ -48,10 +48,20 @@ test("last registration wins tied overrides, without reordering additive ties", 
 	expect(resolveSlots(entries, { collection: "page", field: "title" })).toEqual(
 		[],
 	);
-	expect(findSlotConflicts(entries)).toEqual([
-		{ previous: "first", winner: "second", group: "field.cell" },
-	]);
+	expect(findSlotConflicts(entries)).toEqual([]);
 	expect(findSlotConflicts(slots)).toEqual([]);
+	const tied = [
+		{ ...entries[1], key: "one" },
+		{ ...entries[1], key: "two" },
+	] satisfies AdminSlot[];
+	expect(resolveSlots(tied, { field: "slug" })[0]?.key).toBe("two");
+	expect(findSlotConflicts(tied)).toEqual([
+		{ previous: "one", winner: "two", group: "field.cell" },
+	]);
+	const broadOverride = [entries[0], { ...entries[1], priority: 1 }];
+	expect(
+		resolveSlots(broadOverride, { collection: "page", field: "slug" })[0]?.key,
+	).toBe("first");
 	const headers = [
 		{ key: "one", slot: "brick.header", component: "a.ts" },
 		{ key: "two", slot: "brick.header", component: "b.ts" },

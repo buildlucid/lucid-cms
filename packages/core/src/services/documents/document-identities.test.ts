@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import constants from "../../constants/constants.js";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import {
 	getBricksTableSchema,
@@ -32,7 +33,8 @@ const collections = [
 	"identity_articles",
 	"identity_revisions",
 ].map((key) =>
-	new CollectionBuilder(key, {
+	defineCollection({
+		key: key,
 		mode: "multiple",
 		revisions: { enabled: key === "identity_revisions" },
 		details: { labels: { singular: "Page", plural: "Pages" } },
@@ -47,12 +49,18 @@ const collections = [
 				],
 			},
 		},
-	})
-		.addText("title", { validation: { required: true } })
-		.addRelation("related", {
-			collection: ["identity_pages", "identity_articles", "identity_revisions"],
-			multiple: true,
-		}),
+		fields: [
+			field.text("title", { validation: { required: true } }),
+			field.relation("related", {
+				collection: [
+					"identity_pages",
+					"identity_articles",
+					"identity_revisions",
+				],
+				multiple: true,
+			}),
+		],
+	}),
 );
 const collectionKey = "identity_pages";
 let context: ServiceContext;

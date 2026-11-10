@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 import type {
 	LucidBrickTableName,
@@ -14,7 +14,7 @@ import type { InsertBrickTables } from "../documents-bricks/helpers/construct-br
 const recordTable: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			schema: Omit<CollectionSchemaTable<LucidBrickTableName>, "rawName">;
 			rows: InsertBrickTables["data"];
 			generation?: string;

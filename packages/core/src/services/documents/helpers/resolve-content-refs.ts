@@ -1,5 +1,5 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type { FieldAccessActor } from "../../../libs/collection/field-access/types.js";
 import { getBricksTableSchema } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
@@ -14,7 +14,7 @@ import resolveDocumentRefs from "./resolve-document-refs.js";
 const resolveContentRefs: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			content: { fields: FieldInputSchema[]; bricks: BrickInputSchema[] };
 			/** Leaves out related documents' fields this reader can't see. */
 			reader?: FieldAccessActor;

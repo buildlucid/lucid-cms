@@ -1,3 +1,7 @@
+import {
+	type UseExtensionTranslation,
+	useTranslation as useAdminTranslation,
+} from "../hooks/useTranslation/useTranslation.js";
 export { Permissions } from "../constants/permissions.js";
 export { useAdminConfig } from "../hooks/useAdminConfig/useAdminConfig.js";
 export { useDocumentEditor } from "../hooks/useDocumentEditor/useDocumentEditor.js";
@@ -11,8 +15,8 @@ export {
 	type TableSelection,
 	useTableSelection,
 } from "../hooks/useTableSelection/useTableSelection.js";
-export {
-	type TranslationKey,
-	type TranslationRegistry,
-	useTranslation,
+export type {
+	ExtensionTranslationKey as TranslationKey,
+	TranslationRegistry,
 } from "../hooks/useTranslation/useTranslation.js";
+export const useTranslation: UseExtensionTranslation = useAdminTranslation;

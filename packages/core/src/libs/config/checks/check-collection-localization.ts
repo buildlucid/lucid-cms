@@ -1,11 +1,11 @@
 import type { ResolvedLucidConfig } from "../../../exports/types.js";
-import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../collection/definitions/collection/index.js";
 import { translate } from "../../i18n/index.js";
 
 /** Validates collection locale options against the project locale catalogue. */
 const checkCollectionLocalization = (
 	localization: ResolvedLucidConfig["localization"],
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 ) => {
 	const configured = collection.config.localized ?? false;
 	if (configured === false) return;

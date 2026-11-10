@@ -1,15 +1,17 @@
 import { useDocumentEditor, useTranslation } from "@lucidcms/admin/hooks";
-import type { FieldSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { fields } from "../../../constants.js";
-import type {} from "../../../shared/translations.js";
 import {
 	hasMedia,
 	readAlt,
 	readImage,
 	readText,
 } from "../../utils/field-values.js";
+import type altGuidanceConfig from "./config.js";
 
-const AltGuidance: FieldSlotComponent = (props) => {
+const AltGuidance: SlotComponent<
+	ReturnType<typeof altGuidanceConfig>[number]
+> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

@@ -1,5 +1,4 @@
-import type { PermissionRequirement, ResolvedAdminCopy } from "@lucidcms/types";
-import type { Component } from "solid-js";
+import type { ResolvedAdminCopy } from "@lucidcms/types";
 import type { AdminOptions } from "../../extensions/types/config.js";
 import type { maintenanceSlotPolicies } from "./constants.js";
 
@@ -19,8 +18,6 @@ export type MaintenanceGroup =
 export type MaintenanceSlotPlacement = {
 	/** Adds a tile to the Maintenance section on System → Operations. Render it with `MaintenanceTile`. */
 	slot: "maintenance.action";
-	/** Hides the tile from users without access. */
-	permission?: PermissionRequirement;
 	/** @default "rebuild" */
 	group?: MaintenanceGroup;
 };
@@ -32,8 +29,3 @@ export type MaintenanceSlotProps<
 	readonly key: string;
 	readonly options: TOptions;
 };
-
-/** Renders one maintenance tile with `MaintenanceTile`, usually with a button that opens a confirm modal. */
-export type MaintenanceSlotComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-> = Component<MaintenanceSlotProps<TOptions>>;

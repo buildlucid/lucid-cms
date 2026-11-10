@@ -1,10 +1,10 @@
 import z from "zod";
-import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import registeredFields, {
 	fieldHooks,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import { storageModes } from "../../../libs/collection/custom-fields/storage/index.js";
 import isContainerField from "../../../libs/collection/custom-fields/utils/is-container-field.js";
+import { getFieldSetState } from "../../../libs/collection/definitions/fields/index.js";
 import type {
 	ContentContext,
 	FieldTree,
@@ -109,7 +109,7 @@ const toDocumentInput = (
 				continue;
 			}
 
-			const instance = getFieldBuilderState(owner).fields.get(field.key);
+			const instance = getFieldSetState(owner).fields.get(field.key);
 			const value = values[field.key];
 			if (localization.enabled && instance?.localizedEnabled) {
 				const translations = readDocumentObject(value, field.key);

@@ -34,7 +34,7 @@ export interface HomeCardItemProps {
  * 		title={report.title}
  * 		description={t("reports.item.description", { author: report.author })}
  * 		meta={<DateText date={report.createdAt} />}
- * 		href={`/admin/e/reports/${report.id}`}
+ * 		href={adminHref(`reports/${report.id}`)}
  * 	/>
  * );
  * ```

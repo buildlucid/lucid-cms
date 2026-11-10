@@ -1,19 +1,22 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { defineBrick, field } from "@lucidcms/core";
 
-const ContentBrick = new BrickBuilder("content", {
+const ContentBrick = defineBrick({
+	key: "content",
 	details: {
 		label: "Content",
 	},
-})
-	.addText("heading", {
-		details: {
-			label: "Heading",
-		},
-	})
-	.addRichText("body", {
-		details: {
-			label: "Body",
-		},
-	});
+	fields: [
+		field.text("heading", {
+			details: {
+				label: "Heading",
+			},
+		}),
+		field.richText("body", {
+			details: {
+				label: "Body",
+			},
+		}),
+	],
+});
 
 export default ContentBrick;

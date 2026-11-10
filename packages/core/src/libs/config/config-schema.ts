@@ -11,8 +11,8 @@ import type {
 	CaptchaAdapter,
 	CaptchaAdapterInstance,
 } from "../captcha/types.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { isCollectionBuilder } from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
+import { isCollectionDefinition } from "../collection/definitions/collection/index.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { isDeployDefinition } from "../deploys/registry.js";
 import type { DeployDefinition } from "../deploys/types.js";
@@ -588,8 +588,8 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		})
 		.optional(),
 	collections: z.array(
-		z.custom<CollectionBuilder>(isCollectionBuilder, {
-			message: "Expected a collection created with CollectionBuilder",
+		z.custom<CollectionDefinition>(isCollectionDefinition, {
+			message: "Expected a collection created with CollectionDefinition",
 		}),
 	),
 	admin: adminConfigSchema,

@@ -3,7 +3,7 @@ import type z from "zod";
 import type { AgentDefinition } from "../libs/agent/types.js";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type { CaptchaConfig } from "../libs/captcha/types.js";
-import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../libs/collection/definitions/collection/index.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
 import type { TableDefinition } from "../libs/db/client/table/definition.js";
 import type { MigrationDefinition } from "../libs/db/types.js";
@@ -735,9 +735,9 @@ export interface LucidConfig {
 	 */
 	hooks?: Array<AllHooks>;
 	/**
-	 * CollectionBuilder instances to register.
+	 * CollectionDefinition instances to register.
 	 */
-	collections?: CollectionBuilder[];
+	collections?: CollectionDefinition[];
 	/** Browser components and assets. Modules are imported only by the admin build. */
 	admin?: AdminConfig;
 	/**
@@ -916,7 +916,7 @@ export interface ResolvedLucidConfig {
 	};
 	retention: Required<NonNullable<LucidConfig["retention"]>>;
 	hooks: Array<AllHooks>;
-	collections: CollectionBuilder[];
+	collections: CollectionDefinition[];
 	admin: Required<AdminConfig>;
 	plugins: Array<LucidPluginDefinition>;
 	brand: {

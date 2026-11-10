@@ -1,4 +1,4 @@
-import { CollectionBuilder, copy, LucidError } from "@lucidcms/core";
+import { copy, defineCollection, field, LucidError } from "@lucidcms/core";
 import type { FieldConfig } from "@lucidcms/core/types";
 import { expect, test } from "vitest";
 import type { ZodType } from "zod";
@@ -37,7 +37,8 @@ const createConfig = (
 });
 
 test("slug validation returns specific English zod messages", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -99,7 +100,8 @@ test("slug validation returns specific English zod messages", () => {
 });
 
 test("registers fields in an existing named tab with configured widths", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -107,11 +109,11 @@ test("registers fields in an existing named tab with configured widths", () => {
 				plural: "Pages",
 			},
 		},
-	})
-		.addTab("content")
-		.addText("title")
-		.addTab("settings")
-		.addText("theme");
+		fields: [
+			field.tab("content", { fields: [field.text("title")] }),
+			field.tab("settings", { fields: [field.text("theme")] }),
+		],
+	});
 
 	registerFields(
 		collection as never,
@@ -135,7 +137,8 @@ test("registers fields in an existing named tab with configured widths", () => {
 });
 
 test("registers fields after a root field", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -143,9 +146,8 @@ test("registers fields after a root field", () => {
 				plural: "Pages",
 			},
 		},
-	})
-		.addText("title")
-		.addTextarea("description");
+		fields: [field.text("title"), field.textarea("description")],
+	});
 
 	registerFields(
 		collection as never,
@@ -162,7 +164,8 @@ test("registers fields after a root field", () => {
 });
 
 test("inherits the placement anchor tab", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -170,12 +173,13 @@ test("inherits the placement anchor tab", () => {
 				plural: "Pages",
 			},
 		},
-	})
-		.addTab("content")
-		.addText("title")
-		.addTextarea("description")
-		.addTab("settings")
-		.addText("theme");
+		fields: [
+			field.tab("content", {
+				fields: [field.text("title"), field.textarea("description")],
+			}),
+			field.tab("settings", { fields: [field.text("theme")] }),
+		],
+	});
 
 	registerFields(
 		collection as never,
@@ -194,7 +198,8 @@ test("inherits the placement anchor tab", () => {
 });
 
 test("registers fields at the start of the collection root", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -202,7 +207,8 @@ test("registers fields at the start of the collection root", () => {
 				plural: "Pages",
 			},
 		},
-	}).addText("title");
+		fields: [field.text("title")],
+	});
 
 	registerFields(
 		collection as never,
@@ -218,7 +224,8 @@ test("registers fields at the start of the collection root", () => {
 });
 
 test("rejects a missing placement tab", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -226,7 +233,8 @@ test("rejects a missing placement tab", () => {
 				plural: "Pages",
 			},
 		},
-	}).addText("title");
+		fields: [field.text("title")],
+	});
 
 	expect(() =>
 		registerFields(
@@ -238,7 +246,8 @@ test("rejects a missing placement tab", () => {
 });
 
 test("rejects a nested placement anchor", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -246,10 +255,8 @@ test("rejects a nested placement anchor", () => {
 				plural: "Pages",
 			},
 		},
-	})
-		.addSection("content")
-		.addText("title")
-		.endSection();
+		fields: [field.section("content", { fields: [field.text("title")] })],
+	});
 
 	expect(() =>
 		registerFields(
@@ -262,7 +269,8 @@ test("rejects a nested placement anchor", () => {
 });
 
 test("registers route segment relations with responsive widths", () => {
-	const collection = new CollectionBuilder("docs", {
+	const collection = defineCollection({
+		key: "docs",
 		mode: "multiple",
 		details: {
 			labels: {

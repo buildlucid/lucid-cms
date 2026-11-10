@@ -13,7 +13,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { DocumentVersionType } from "../db/tables/index.js";
 import type { RequestType } from "../db/tables/requests.js";
 import type { Toolkit } from "../toolkit/types.js";
@@ -76,7 +76,7 @@ type RequestHookMeta = {
 };
 
 type CollectionHookMeta = {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	collectionKey: string;
 };
 
@@ -517,7 +517,7 @@ export type HookOptions<
 	service: S;
 	event: E;
 	config: ResolvedLucidConfig;
-	collectionInstance?: CollectionBuilder;
+	collectionInstance?: CollectionDefinition;
 };
 
 export type HookPayload<
@@ -545,7 +545,7 @@ export type ServiceHooks<S extends keyof HookServiceHandlers> = {
 }[keyof HookServiceHandlers[S]];
 
 /** Hooks registered only for one collection. */
-export type CollectionBuilderHooks =
+export type CollectionHooks =
 	| ServiceHooks<"documents">
 	| ServiceHooks<"documentWorkflows">
 	| LucidHook<"requests", "afterCheck">;

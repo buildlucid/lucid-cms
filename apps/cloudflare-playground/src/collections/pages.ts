@@ -1,8 +1,9 @@
-import { CollectionBuilder, z } from "@lucidcms/core";
+import { defineCollection, field, z } from "@lucidcms/core";
 import ContentBrick from "../bricks/content.js";
 import SeoBrick from "../bricks/seo.js";
 
-const PageCollection = new CollectionBuilder("page", {
+const PageCollection = defineCollection({
+	key: "page",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -14,21 +15,23 @@ const PageCollection = new CollectionBuilder("page", {
 		fixed: [SeoBrick],
 		builder: [ContentBrick],
 	},
-})
-	.addText("title", {
-		details: {
-			label: "Title",
-		},
-		validation: {
-			required: true,
-			zod: z.string().min(2).max(96),
-		},
-		showInList: true,
-	})
-	.addTextarea("summary", {
-		details: {
-			label: "Summary",
-		},
-	});
+	fields: [
+		field.text("title", {
+			details: {
+				label: "Title",
+			},
+			validation: {
+				required: true,
+				zod: z.string().min(2).max(96),
+			},
+			showInList: true,
+		}),
+		field.textarea("summary", {
+			details: {
+				label: "Summary",
+			},
+		}),
+	],
+});
 
 export default PageCollection;

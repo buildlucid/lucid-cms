@@ -11,12 +11,12 @@ import type {
 	ResolvedLucidConfig,
 	TranslationSource,
 } from "../../exports/types.js";
-import type BrickBuilder from "../collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import fieldConfigs from "../collection/custom-fields/field-configs.js";
 import { fieldHooks } from "../collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../collection/custom-fields/storage/index.js";
+import type BrickDefinition from "../collection/definitions/brick/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
+import { getFieldSetState } from "../collection/definitions/fields/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
@@ -38,11 +38,11 @@ export interface FieldFormatMeta {
 	editable?: boolean;
 	/** Adds each translated field's `sourceHash`, for editors telling which translations are out of date. */
 	sourceHashes?: boolean;
-	builder: BrickBuilder | CollectionBuilder;
+	builder: BrickDefinition | CollectionDefinition;
 	host: string;
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
-	/** Used to help workout the target brick schema item and the table name. Set to `undefined` if the brick table you're creating fields for is the `document-fields` one */
+	/** Identifies the brick schema and table. Omit for `document-fields`. */
 	brickKey: string | undefined;
 	config: ResolvedLucidConfig;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
@@ -75,7 +75,7 @@ const getFieldValues = (
 		fieldConfig: FieldConfig<FieldTypes>;
 	},
 ): IntermediaryFieldValues[] => {
-	const fieldInstance = getFieldBuilderState(meta.builder).fields.get(
+	const fieldInstance = getFieldSetState(meta.builder).fields.get(
 		meta.fieldConfig.key,
 	);
 	if (!fieldInstance) return [];
@@ -242,9 +242,8 @@ const buildFieldTree = (
 };
 
 /**
- * Responsible for building a single InternalDocumentField object.
- *
- * Adds in empty locale values, formats the value and constructs either translations or values based on the fields config
+ * Builds an InternalDocumentField with formatted values and empty locales, using translations when
+ * configured.
  */
 const buildField = (
 	data: {
@@ -257,7 +256,7 @@ const buildField = (
 		groupRef?: string;
 	},
 ): InternalDocumentField | null => {
-	const cfInstance = getFieldBuilderState(meta.builder).fields.get(
+	const cfInstance = getFieldSetState(meta.builder).fields.get(
 		meta.fieldConfig.key,
 	);
 	if (!cfInstance) return null;
@@ -511,9 +510,8 @@ const collectContentFieldValues = (
 };
 
 /**
- * Flattens fields into the content value map. When a content field tree is
- * provided, sections/collapsibles shape their children based on their
- * `output` config - nested under their key or inlined as if absent.
+ * Flattens content values, nesting or inlining section and collapsible children according to
+ * `output`.
  */
 const flattenFields = (
 	fields: InternalDocumentField[],

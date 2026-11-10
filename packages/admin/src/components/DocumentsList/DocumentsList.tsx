@@ -38,7 +38,7 @@ import RestoreDocumentModal from "@/components/RestoreDocumentModal/RestoreDocum
 import Table, { type TableSelectActionItem } from "@/components/Table/Table";
 import TranslateModal from "@/components/TranslateModal/TranslateModal";
 import { Permissions } from "@/constants/permissions";
-import { resolveSlots } from "@/extensions/slot-policy";
+import { matchSlots } from "@/extensions/match-slots";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
@@ -126,7 +126,7 @@ export const DocumentsList: Component<{
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
 	const customColumns = createMemo(() =>
-		resolveSlots(
+		matchSlots(
 			documentListSlots.filter((entry) => entry.slot === "documentList.column"),
 			{ collection: collectionKey() },
 		),

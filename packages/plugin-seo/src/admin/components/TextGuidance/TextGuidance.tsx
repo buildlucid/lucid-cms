@@ -1,10 +1,10 @@
 import { ProgressBar } from "@lucidcms/admin/components";
 import { type TranslationKey, useTranslation } from "@lucidcms/admin/hooks";
-import type { FieldSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
 import { fields } from "../../../constants.js";
 import { assessText } from "../../../shared/assessments.js";
-import type {} from "../../../shared/translations.js";
+import type textGuidanceConfig from "./config.js";
 
 const descriptions: Partial<Record<string, TranslationKey>> = {
 	[fields.title]: "plugin.seo.help.title",
@@ -15,7 +15,9 @@ const descriptions: Partial<Record<string, TranslationKey>> = {
 	[fields.xDescription]: "plugin.seo.help.xDescription",
 };
 
-const TextGuidance: FieldSlotComponent = (props) => {
+const TextGuidance: SlotComponent<
+	ReturnType<typeof textGuidanceConfig>[number]
+> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

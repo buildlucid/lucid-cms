@@ -22,8 +22,9 @@ import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import applyCollectionMigrations from "../../collection/apply-collection-migrations.js";
-import BrickBuilder from "../../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import defineBrick from "../../collection/define-brick.js";
+import defineCollection from "../../collection/define-collection.js";
+import field from "../../collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import { getTableNames } from "../../collection/schema/runtime/runtime-schema-selectors.js";
 import { copy, createTranslationStore } from "../../i18n/index.js";
@@ -33,8 +34,12 @@ import {
 } from "../../repositories/index.js";
 import createToolkit from "../create-toolkit.js";
 
-const hero = new BrickBuilder("hero").addText("heading", { localized: true });
-const collection = new CollectionBuilder("authoring", {
+const hero = defineBrick({
+	key: "hero",
+	fields: [field.text("heading", { localized: true })],
+});
+const collection = defineCollection({
+	key: "authoring",
 	mode: "multiple",
 	localized: true,
 	revisions: true,
@@ -42,36 +47,47 @@ const collection = new CollectionBuilder("authoring", {
 	bricks: {
 		builder: [hero],
 		fixed: [
-			new BrickBuilder("seo")
-				.addText("description", { localized: false })
-				.addText("summary", { localized: false }),
+			defineBrick({
+				key: "seo",
+				fields: [
+					field.text("description", { localized: false }),
+					field.text("summary", { localized: false }),
+				],
+			}),
 		],
 		embedded: [
-			new BrickBuilder("callout").addText("message", { localized: false }),
+			defineBrick({
+				key: "callout",
+				fields: [field.text("message", { localized: false })],
+			}),
 		],
 	},
-})
-	.addText("title", { localized: true, validation: { required: true } })
-	.addCheckbox("featured", { default: false })
-	.addJSON("settings", { localized: false })
-	.addRichText("body", {
-		localized: false,
-		editor: { bricks: true, documents: ["authoring"] },
-	})
-	.addSection("meta")
-	.addText("subtitle", { localized: false })
-	.endSection()
-	.addRepeater("links")
-	.addText("label", { localized: false })
-	.addRepeater("children")
-	.addText("caption", { localized: false })
-	.endRepeater()
-	.endRepeater()
-	.addRelation("related", {
-		collection: "authoring",
-		multiple: true,
-		localized: false,
-	});
+	fields: [
+		field.text("title", { localized: true, validation: { required: true } }),
+		field.checkbox("featured", { default: false }),
+		field.json("settings", { localized: false }),
+		field.richText("body", {
+			localized: false,
+			editor: { bricks: true, documents: ["authoring"] },
+		}),
+		field.section("meta", {
+			fields: [field.text("subtitle", { localized: false })],
+		}),
+		field.repeater("links", {
+			fields: [
+				field.text("label", { localized: false }),
+				field.repeater("children", {
+					fields: [field.text("caption", { localized: false })],
+				}),
+			],
+		}),
+		field.relation("related", {
+			collection: "authoring",
+			multiple: true,
+			localized: false,
+		}),
+	],
+});
 
 describe("document authoring toolkit", () => {
 	const fixture = getTestConfig();

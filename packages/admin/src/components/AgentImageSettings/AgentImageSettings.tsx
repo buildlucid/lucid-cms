@@ -1,5 +1,6 @@
 import type { AgentImageSettings as ImageSettings } from "@lucidcms/types";
 import {
+	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
@@ -8,7 +9,7 @@ import {
 	Show,
 } from "solid-js";
 import { mediaAlt, mediaLabel } from "@/components/AgentMediaPreview/helpers";
-import type { AgentWidgetComponent } from "@/components/AgentWidget/types";
+import type { AgentWidgetProps } from "@/components/AgentWidget/types";
 import Input from "@/components/Input/Input";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import Select from "@/components/Select/Select";
@@ -31,9 +32,9 @@ const guidanceOptions = () =>
 	}));
 
 /** Reviews image settings and media metadata before generation, showing the source image for edits. */
-const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
-	props,
-) => {
+const AgentImageSettings: Component<
+	AgentWidgetProps<AdminOptions | undefined>
+> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [settings, setSettings] = createSignal<ImageSettings>();

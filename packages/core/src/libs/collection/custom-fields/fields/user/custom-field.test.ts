@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import UserCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const UserCollection = new CollectionBuilder("collection", {
+const UserCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -21,20 +23,22 @@ const UserCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addUser("standard_user")
-	.addUser("required_user", {
-		validation: {
-			required: true,
-		},
-	})
-	.addUser("multi_user", {
-		multiple: true,
-		validation: {
-			minItems: 2,
-			maxItems: 3,
-		},
-	});
+	fields: [
+		field.user("standard_user"),
+		field.user("required_user", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.user("multi_user", {
+			multiple: true,
+			validation: {
+				minItems: 2,
+				maxItems: 3,
+			},
+		}),
+	],
+});
 
 test("successfully validate field - user", async () => {
 	// Standard
@@ -45,7 +49,7 @@ test("successfully validate field - user", async () => {
 			value: [1],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(UserCollection).fields.get("standard_user")!,
+		instance: getFieldSetState(UserCollection).fields.get("standard_user")!,
 		validationData: {
 			media: [],
 			user: [
@@ -74,7 +78,7 @@ test("successfully validate field - user", async () => {
 			value: [1],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(UserCollection).fields.get("required_user")!,
+		instance: getFieldSetState(UserCollection).fields.get("required_user")!,
 		validationData: {
 			media: [],
 			user: [
@@ -107,7 +111,7 @@ test("fail to validate field - user", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(UserCollection).fields.get("required_user")!,
+				getFieldSetState(UserCollection).fields.get("required_user")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -126,7 +130,7 @@ test("fail to validate field - user", async () => {
 			},
 			instance:
 				// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-				getFieldBuilderState(UserCollection).fields.get("required_user")!,
+				getFieldSetState(UserCollection).fields.get("required_user")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -165,7 +169,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			value: [1],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
+		instance: getFieldSetState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
 			user: [{ id: 1 }],
@@ -183,7 +187,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			value: [1, 2, 3, 4],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
+		instance: getFieldSetState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
 			user: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
@@ -201,7 +205,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			value: [1, 99, 100],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
+		instance: getFieldSetState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
 			user: [{ id: 1 }],

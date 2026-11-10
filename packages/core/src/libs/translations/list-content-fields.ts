@@ -1,10 +1,10 @@
 import type { FieldTypes } from "../../exports/types.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type BrickBuilder from "../collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import type CustomField from "../collection/custom-fields/custom-field.js";
+import type BrickDefinition from "../collection/definitions/brick/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
+import { getFieldSetState } from "../collection/definitions/fields/index.js";
 
 /** Document content in the input shape saves take and stored reads return. */
 export type ContentInput = {
@@ -20,7 +20,7 @@ export type ContentField = {
 	path: string[];
 	field: FieldInputSchema;
 	instance: CustomField<FieldTypes>;
-	owner: CollectionBuilder | BrickBuilder;
+	owner: CollectionDefinition | BrickDefinition;
 };
 
 /** Identifies a field across two versions of the same document's content. */
@@ -32,18 +32,18 @@ export const contentFieldId = (entry: Pick<ContentField, "brick" | "path">) =>
  * in their items, skipping fields the collection or brick no longer defines.
  */
 const listContentFields = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	content: ContentInput,
 ): ContentField[] => {
 	const entries: ContentField[] = [];
 
 	const visit = (
 		fields: FieldInputSchema[],
-		owner: CollectionBuilder | BrickBuilder,
+		owner: CollectionDefinition | BrickDefinition,
 		brick: string | null,
 		path: string[],
 	) => {
-		const instances = getFieldBuilderState(owner).fields;
+		const instances = getFieldSetState(owner).fields;
 		for (const field of fields) {
 			const instance = instances.get(field.key);
 			if (!instance) continue;

@@ -1,7 +1,8 @@
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import BrickBuilder from "../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../libs/collection/define-brick.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
@@ -17,20 +18,28 @@ import syncCollections from "../sync/sync-collections.js";
 import syncLocales from "../sync/sync-locales.js";
 
 const fixture = getTestConfig();
-const brick = new BrickBuilder("nested")
-	.addText("heading", { localized: false })
-	.addRepeater("items")
-	.addText("title", { localized: true })
-	.addRepeater("children")
-	.addText("childTitle", { localized: true })
-	.endRepeater()
-	.endRepeater();
-const collection = new CollectionBuilder("batched_content", {
+const brick = defineBrick({
+	key: "nested",
+	fields: [
+		field.text("heading", { localized: false }),
+		field.repeater("items", {
+			fields: [
+				field.text("title", { localized: true }),
+				field.repeater("children", {
+					fields: [field.text("childTitle", { localized: true })],
+				}),
+			],
+		}),
+	],
+});
+const collection = defineCollection({
+	key: "batched_content",
 	mode: "multiple",
 	localized: true,
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	bricks: { builder: [brick] },
-}).addText("title", { localized: true });
+	fields: [field.text("title", { localized: true })],
+});
 let context: ServiceContext;
 let userId: number;
 

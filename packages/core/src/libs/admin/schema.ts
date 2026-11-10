@@ -70,6 +70,20 @@ const routePath = z
 			),
 	);
 
+/** What every slot takes, whichever slot it fills. */
+const slotBase = {
+	key,
+	priority: z.number().optional(),
+	component: componentReference,
+	options,
+};
+
+/** Slots shown to signed-in users. Registration is checked against the resolved access config in checkAdminSlots. */
+const userSlotBase = {
+	...slotBase,
+	permission: permissionRequirement.optional(),
+};
+
 const brickSlotMatch = z.strictObject({
 	collection: key.optional(),
 	brick: key.optional(),
@@ -187,41 +201,31 @@ export const adminConfigSchema = z
 			.array(
 				z.discriminatedUnion("slot", [
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.enum(["agent.widget", "agent.transcriptRow"]),
-						component: componentReference,
-						options,
 						match: z.strictObject({
 							widget: key,
 							version: z.number().int().positive(),
 						}),
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.enum([
 							"brick.header",
 							"brick.beforeFields",
 							"brick.afterFields",
 						]),
 						match: brickSlotMatch.optional(),
-						component: componentReference,
-						options,
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.enum(["brick.start", "brick.end"]),
 						width: z.literal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).optional(),
 						sticky: z.boolean().optional(),
 						match: brickSlotMatch.optional(),
-						component: componentReference,
-						options,
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.enum(["field.input", "field.before", "field.after"]),
 						match: brickSlotMatch
 							.extend({
@@ -232,29 +236,20 @@ export const adminConfigSchema = z
 									.optional(),
 							})
 							.optional(),
-						component: componentReference,
-						options,
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.literal("documentList.column"),
-						component: componentReference,
-						options,
 						match: z.strictObject({ collection: key.optional() }).optional(),
 						column: z.strictObject({ label: adminCopyInputSchema }),
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.literal("field.cell"),
-						component: componentReference,
-						options,
 						match: z.strictObject({ collection: key.optional(), field: key }),
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.literal("document.sidebar"),
 						match: z.strictObject({ collection: key.optional() }).optional(),
 						position: z
@@ -263,25 +258,15 @@ export const adminConfigSchema = z
 								z.strictObject({ after: documentSidebarSection }),
 							])
 							.optional(),
-						component: componentReference,
-						options,
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...slotBase,
 						slot: z.literal("captcha.widget"),
 						match: z.strictObject({ adapter: key.optional() }).optional(),
-						component: componentReference,
-						options,
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.literal("maintenance.action"),
-						component: componentReference,
-						options,
-						// Registration is checked against the resolved access config in checkAdminSlots.
-						permission: permissionRequirement.optional(),
 						group: z
 							.union([
 								groupKey,
@@ -293,13 +278,8 @@ export const adminConfigSchema = z
 							.optional(),
 					}),
 					z.strictObject({
-						key,
-						priority: z.number().optional(),
+						...userSlotBase,
 						slot: z.literal("home.widget"),
-						component: componentReference,
-						options,
-						// Registration is checked against the resolved access config in checkAdminSlots.
-						permission: permissionRequirement.optional(),
 						card: homeCard,
 					}),
 				]),

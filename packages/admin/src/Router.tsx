@@ -14,12 +14,14 @@ import agentGuard from "@/guards/AgentGuard/AgentGuard";
 import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
 import PermissionGuard from "@/guards/PermissionGuard/PermissionGuard";
 import { documentQueryOptions } from "@/hooks/useDocumentState/document-query";
+import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import { conversationQueryOptions } from "@/services/api/agent/useGetConversation";
 import { messagesQueryOptions } from "@/services/api/agent/useGetMessages";
 import { requestQueryOptions } from "@/services/api/requests/useGetSingle";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import { getDeploysViewRequirement } from "@/utils/deploys";
+import helpers from "@/utils/helpers";
 import lazyPage from "@/utils/lazy-page";
 import preloadDocumentSlots from "@/utils/preload-document-slots";
 import PermissionSomeGuard from "./guards/PermissionSomeGuard/PermissionSomeGuard";
@@ -157,9 +159,8 @@ const RequestProposalRoute = lazyPage(async () => {
 });
 
 /**
- * Loads route code ahead, such as when a link is hovered. Routes that also
- * prefetch their data write their own `preload` with the page's query options,
- * so the page opens with that data cached.
+ * Preloads route code. Routes can also prefetch data through their own `preload` using page query
+ * options.
  */
 const preloadRoutes =
 	(...routes: LazyRoute[]) =>
@@ -183,6 +184,10 @@ const extensionRoute = (route: (typeof extensionRoutes)[number]) => (
 	<Route
 		path={route.path.slice("/admin".length)}
 		component={() => {
+			//* the navigation label names the page until the page sets a title of its own
+			usePageTitle(() =>
+				helpers.getLocaleValue({ value: route.navigation?.label }),
+			);
 			const page = (
 				<AdminExtensionBoundary name={route.key} placement="page">
 					<route.component options={route.options} />

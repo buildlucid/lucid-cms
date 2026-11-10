@@ -1,9 +1,9 @@
 import { hasher } from "node-object-hash";
-import type CollectionBuilder from "../../../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../collection/definitions/collection/index.js";
 
 const hashInstance = hasher({ sort: true, coerce: true });
 
-const createCollectionSnapshot = (collection: CollectionBuilder) => {
+const createCollectionSnapshot = (collection: CollectionDefinition) => {
 	return {
 		key: collection.key,
 		data: collection.getData,
@@ -14,6 +14,6 @@ const createCollectionSnapshot = (collection: CollectionBuilder) => {
 	};
 };
 
-export const getCollectionSignature = (collection: CollectionBuilder) => {
+export const getCollectionSignature = (collection: CollectionDefinition) => {
 	return hashInstance.hash(createCollectionSnapshot(collection));
 };

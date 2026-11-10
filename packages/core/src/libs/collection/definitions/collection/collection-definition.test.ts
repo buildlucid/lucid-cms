@@ -1,8 +1,9 @@
 import { expect, test } from "vitest";
 import collectionsFormatter from "../../../formatters/collections.js";
 import { copy } from "../../../i18n/index.js";
-import { getFieldBuilderState } from "../field-builder/index.js";
-import CollectionBuilder from "./index.js";
+import defineCollection from "../../define-collection.js";
+import field from "../fields/field.js";
+import { getFieldSetState } from "../fields/index.js";
 import CollectionSchema from "./schema.js";
 import type { CollectionPublishingOptions } from "./types.js";
 
@@ -24,7 +25,8 @@ test("resolves revision settings independently from enablement", () => {
 			{ enabled: true, retentionDays: false },
 		],
 	] as const) {
-		const collection = new CollectionBuilder("pages", {
+		const collection = defineCollection({
+			key: "pages",
 			...options,
 			revisions,
 		});
@@ -43,7 +45,8 @@ test("resolves revision settings independently from enablement", () => {
 });
 
 test("formats the resolved collection locale contract", () => {
-	const collection = new CollectionBuilder("articles", {
+	const collection = defineCollection({
+		key: "articles",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -70,7 +73,8 @@ test("formats the resolved collection locale contract", () => {
 });
 
 test("collection options are correct along with field includes and filters", async () => {
-	const pagesCollection = new CollectionBuilder("pages", {
+	const pagesCollection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -117,49 +121,51 @@ test("collection options are correct along with field includes and filters", asy
 				},
 			},
 		],
-	})
-		.addText("text_test", {
-			showInList: true,
-			useAsLabel: true,
-		})
-		.addTextarea("textarea_test", {
-			showInList: true,
-		})
-		.addNumber("number_test", {
-			showInList: true,
-		})
-		.addRange("range_test", {
-			showInList: true,
-		})
-		.addCheckbox("checkbox_test", {
-			showInList: true,
-		})
-		.addSelect("select_test", {
-			showInList: true,
-		})
-		.addDateTime("datetime_test", {
-			showInList: true,
-		})
-		.addUser("user_test", {
-			showInList: true,
-		})
-		.addMedia("media_test", {
-			showInList: true,
-		})
-		.addRelation("relation_test", {
-			collection: "pages",
-			showInList: true,
-		})
-		.addRichText("rich_text_test")
-		.addLink("link_test")
-		.addJSON("json_test")
-		.addColor("color_test", {
-			showInList: true,
-		})
-		.addRepeater("repeater_test")
-		.addText("repeater_text_test")
-		.endRepeater();
-	expect(getFieldBuilderState(pagesCollection).fields.size).toBe(16);
+		fields: [
+			field.text("text_test", {
+				showInList: true,
+				useAsLabel: true,
+			}),
+			field.textarea("textarea_test", {
+				showInList: true,
+			}),
+			field.number("number_test", {
+				showInList: true,
+			}),
+			field.range("range_test", {
+				showInList: true,
+			}),
+			field.checkbox("checkbox_test", {
+				showInList: true,
+			}),
+			field.select("select_test", {
+				showInList: true,
+			}),
+			field.datetime("datetime_test", {
+				showInList: true,
+			}),
+			field.user("user_test", {
+				showInList: true,
+			}),
+			field.media("media_test", {
+				showInList: true,
+			}),
+			field.relation("relation_test", {
+				collection: "pages",
+				showInList: true,
+			}),
+			field.richText("rich_text_test"),
+			field.link("link_test"),
+			field.json("json_test"),
+			field.color("color_test", {
+				showInList: true,
+			}),
+			field.repeater("repeater_test", {
+				fields: [field.text("repeater_text_test")],
+			}),
+		],
+	});
+	expect(getFieldSetState(pagesCollection).fields.size).toBe(16);
 	expect(pagesCollection.getData).toEqual({
 		key: "pages",
 		mode: "multiple",
@@ -209,7 +215,8 @@ test("collection options are correct along with field includes and filters", asy
 
 test("collection preview configuration exposes normalized breakpoints without private resolver data", () => {
 	const preview = async () => new URL("https://example.com/page");
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -289,7 +296,8 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	expect(serializedCollection).not.toContain(preview.toString());
 	expect(serializedCollection).not.toContain("expiresIn");
 
-	const collectionWithoutBreakpoints = new CollectionBuilder("posts", {
+	const collectionWithoutBreakpoints = defineCollection({
+		key: "posts",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -309,7 +317,8 @@ test("collection preview configuration exposes normalized breakpoints without pr
 		}).preview,
 	).toEqual({ breakpoints: [] });
 
-	const shorthandCollection = new CollectionBuilder("shorthand", {
+	const shorthandCollection = defineCollection({
+		key: "shorthand",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -322,7 +331,8 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	expect(shorthandCollection.resolvedPreviewConfig).toEqual({ enabled: true });
 	expect(shorthandCollection.getData.preview).toEqual({ breakpoints: [] });
 
-	const disabledCollection = new CollectionBuilder("disabled", {
+	const disabledCollection = defineCollection({
+		key: "disabled",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -345,7 +355,8 @@ test("collection preview configuration exposes normalized breakpoints without pr
 });
 
 test("collection workflow features normalizes defaults", async () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -414,7 +425,8 @@ test("collection workflow features normalizes defaults", async () => {
 
 test("review environments expand true, and unpublish follows publish unless set", () => {
 	const review = (config: NonNullable<CollectionPublishingOptions["review"]>) =>
-		new CollectionBuilder("pages", {
+		defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: { labels: { singular: "Page", plural: "Pages" } },
 			publishing: {
@@ -439,7 +451,8 @@ test("review environments expand true, and unpublish follows publish unless set"
 });
 
 test("collection environment version mappings normalizes defaults", async () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -495,7 +508,8 @@ test("collection environment version mappings normalizes defaults", async () => 
 });
 
 test("collection group config normalizes shorthand and named groups", () => {
-	const shorthandCollection = new CollectionBuilder("pages", {
+	const shorthandCollection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		group: "content",
 		details: {
@@ -512,7 +526,8 @@ test("collection group config normalizes shorthand and named groups", () => {
 		order: null,
 	});
 
-	const namedCollection = new CollectionBuilder("blogs", {
+	const namedCollection = defineCollection({
+		key: "blogs",
 		mode: "multiple",
 		group: {
 			key: "content",
@@ -535,7 +550,8 @@ test("collection group config normalizes shorthand and named groups", () => {
 });
 
 test("plain string copy on details and fields is normalised to literal copy", () => {
-	const collection = new CollectionBuilder("snippets", {
+	const collection = defineCollection({
+		key: "snippets",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -544,11 +560,14 @@ test("plain string copy on details and fields is normalised to literal copy", ()
 			},
 			description: "Reusable content snippets.",
 		},
-	}).addText("title", {
-		details: {
-			label: "Title",
-			placeholder: "Enter a title",
-		},
+		fields: [
+			field.text("title", {
+				details: {
+					label: "Title",
+					placeholder: "Enter a title",
+				},
+			}),
+		],
 	});
 
 	expect(collection.getData.details).toEqual({

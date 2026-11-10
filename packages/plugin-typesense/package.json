@@ -29,8 +29,7 @@
 	"files": [
 		"dist",
 		"translations",
-		"src/admin",
-		"src/constants.ts",
+		"src",
 		"!src/**/*.test.*"
 	],
 	"author": "Build Lucid Ltd",

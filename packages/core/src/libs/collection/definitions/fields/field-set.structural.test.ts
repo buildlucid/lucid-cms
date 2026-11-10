@@ -1,18 +1,22 @@
 import { describe, expect, test } from "vitest";
 import LucidError from "../../../../utils/errors/lucid-error.js";
 import type { FieldConfig } from "../../custom-fields/types.js";
-import BrickBuilder from "../brick-builder/index.js";
-import FieldBuilder, { getFieldBuilderState } from "./index.js";
+import defineBrick from "../../define-brick.js";
+import field from "./field.js";
+import { getFieldSetState } from "./index.js";
 
 describe("section and collapsible builder support", () => {
 	test("sections nest their children in the field tree", () => {
-		const instance = new FieldBuilder()
-			.addText("intro")
-			.addSection("badge")
-			.addText("label")
-			.addSelect("theme")
-			.endSection()
-			.addText("outro");
+		const instance = defineBrick({
+			key: "test",
+			fields: [
+				field.text("intro"),
+				field.section("badge", {
+					fields: [field.text("label"), field.select("theme")],
+				}),
+				field.text("outro"),
+			],
+		});
 
 		expect(instance.fieldTree.map((f) => f.key)).toEqual([
 			"intro",
@@ -26,11 +30,16 @@ describe("section and collapsible builder support", () => {
 	});
 
 	test("collapsibles nest their children in the field tree", () => {
-		const instance = new FieldBuilder()
-			.addCollapsible("advanced", { defaultOpen: true })
-			.addText("anchorLabel")
-			.endCollapsible()
-			.addText("after");
+		const instance = defineBrick({
+			key: "test",
+			fields: [
+				field.collapsible("advanced", {
+					defaultOpen: true,
+					fields: [field.text("anchorLabel")],
+				}),
+				field.text("after"),
+			],
+		});
 
 		expect(instance.fieldTree.map((f) => f.key)).toEqual(["advanced", "after"]);
 
@@ -41,13 +50,17 @@ describe("section and collapsible builder support", () => {
 	});
 
 	test("structural fields can nest within each other", () => {
-		const instance = new FieldBuilder()
-			.addSection("outer")
-			.addText("outerText")
-			.addCollapsible("inner")
-			.addText("innerText")
-			.endCollapsible()
-			.endSection();
+		const instance = defineBrick({
+			key: "test",
+			fields: [
+				field.section("outer", {
+					fields: [
+						field.text("outerText"),
+						field.collapsible("inner", { fields: [field.text("innerText")] }),
+					],
+				}),
+			],
+		});
 
 		const outer = instance.fieldTree[0] as FieldConfig<"section">;
 		expect(outer.fields.map((f) => f.key)).toEqual(["outerText", "inner"]);
@@ -57,13 +70,13 @@ describe("section and collapsible builder support", () => {
 	});
 
 	test("persisted field tree flattens structural fields", () => {
-		const instance = new FieldBuilder()
-			.addSection("badge")
-			.addText("label")
-			.endSection()
-			.addCollapsible("advanced")
-			.addText("anchorLabel")
-			.endCollapsible();
+		const instance = defineBrick({
+			key: "test",
+			fields: [
+				field.section("badge", { fields: [field.text("label")] }),
+				field.collapsible("advanced", { fields: [field.text("anchorLabel")] }),
+			],
+		});
 
 		expect(instance.persistedFieldTree.map((f) => f.key)).toEqual([
 			"label",
@@ -72,13 +85,17 @@ describe("section and collapsible builder support", () => {
 	});
 
 	test("storage nesting is unaffected by sections inside repeaters", () => {
-		const instance = new FieldBuilder()
-			.addRepeater("items")
-			.addText("title")
-			.addSection("meta")
-			.addText("caption")
-			.endSection()
-			.endRepeater();
+		const instance = defineBrick({
+			key: "test",
+			fields: [
+				field.repeater("items", {
+					fields: [
+						field.text("title"),
+						field.section("meta", { fields: [field.text("caption")] }),
+					],
+				}),
+			],
+		});
 
 		//* full tree keeps the section nested inside the repeater
 		const repeater = instance.fieldTree[0] as FieldConfig<"repeater">;
@@ -95,22 +112,26 @@ describe("section and collapsible builder support", () => {
 		]);
 
 		//* both children share the repeater's storage scope
-		expect(getFieldBuilderState(instance).fields.get("title")?.treeParent).toBe(
+		expect(getFieldSetState(instance).fields.get("title")?.treeParent).toBe(
 			"items",
 		);
-		expect(
-			getFieldBuilderState(instance).fields.get("caption")?.treeParent,
-		).toBe("items");
+		expect(getFieldSetState(instance).fields.get("caption")?.treeParent).toBe(
+			"items",
+		);
 	});
 
 	test("repeaters nested inside sections keep their own children", () => {
-		const instance = new FieldBuilder()
-			.addSection("gallery")
-			.addRepeater("images")
-			.addMedia("image")
-			.endRepeater()
-			.addText("caption")
-			.endSection();
+		const instance = defineBrick({
+			key: "test",
+			fields: [
+				field.section("gallery", {
+					fields: [
+						field.repeater("images", { fields: [field.media("image")] }),
+						field.text("caption"),
+					],
+				}),
+			],
+		});
 
 		const section = instance.fieldTree[0] as FieldConfig<"section">;
 		expect(section.fields.map((f) => f.key)).toEqual(["images", "caption"]);
@@ -120,24 +141,33 @@ describe("section and collapsible builder support", () => {
 
 		//* caption belongs to the section, not the repeater
 		expect(
-			getFieldBuilderState(instance).fields.get("caption")?.treeParent,
+			getFieldSetState(instance).fields.get("caption")?.treeParent,
 		).toBeNull();
-		expect(getFieldBuilderState(instance).fields.get("image")?.treeParent).toBe(
+		expect(getFieldSetState(instance).fields.get("image")?.treeParent).toBe(
 			"images",
 		);
 	});
 
 	test("content field tree keeps sections nested and tabs transparent", () => {
-		const instance = new BrickBuilder("hero")
-			.addTab("contentTab")
-			.addText("title")
-			.addSection("badge")
-			.addText("label")
-			.endSection()
-			.addTab("settingsTab")
-			.addCollapsible("advanced", { output: "inline" })
-			.addText("anchorLabel")
-			.endCollapsible();
+		const instance = defineBrick({
+			key: "hero",
+			fields: [
+				field.tab("contentTab", {
+					fields: [
+						field.text("title"),
+						field.section("badge", { fields: [field.text("label")] }),
+					],
+				}),
+				field.tab("settingsTab", {
+					fields: [
+						field.collapsible("advanced", {
+							output: "inline",
+							fields: [field.text("anchorLabel")],
+						}),
+					],
+				}),
+			],
+		});
 
 		expect(instance.contentFieldTree.map((f) => f.key)).toEqual([
 			"title",
@@ -155,11 +185,14 @@ describe("section and collapsible builder support", () => {
 	});
 
 	test("sections render inside their tab in the full field tree", () => {
-		const instance = new BrickBuilder("hero")
-			.addTab("contentTab")
-			.addSection("badge")
-			.addText("label")
-			.endSection();
+		const instance = defineBrick({
+			key: "hero",
+			fields: [
+				field.tab("contentTab", {
+					fields: [field.section("badge", { fields: [field.text("label")] })],
+				}),
+			],
+		});
 
 		const tab = instance.fieldTree[0] as FieldConfig<"tab">;
 		expect(tab.type).toBe("tab");
@@ -170,10 +203,15 @@ describe("section and collapsible builder support", () => {
 	});
 
 	test("width config is stored on structural and normal fields", () => {
-		const instance = new FieldBuilder()
-			.addSection("badge", { ui: { width: 6 } })
-			.addText("label", { ui: { width: 4 } })
-			.endSection();
+		const instance = defineBrick({
+			key: "test",
+			fields: [
+				field.section("badge", {
+					ui: { width: 6 },
+					fields: [field.text("label", { ui: { width: 4 } })],
+				}),
+			],
+		});
 
 		const section = instance.fieldTree[0] as FieldConfig<"section">;
 		expect(section.ui?.width).toBe(6);
@@ -181,44 +219,60 @@ describe("section and collapsible builder support", () => {
 	});
 });
 
-describe("tab targeting", () => {
+describe("inserting into tabs", () => {
+	const build = () =>
+		defineBrick({
+			key: "test",
+			fields: [
+				field.tab("content", { fields: [field.text("title")] }),
+				field.tab("settings", { fields: [field.text("theme")] }),
+			],
+		});
+
 	test("fields can be added to an existing tab", () => {
-		const instance = new FieldBuilder()
-			.addTab("content")
-			.addText("title")
-			.addTab("settings")
-			.addText("theme")
-			.addToTab("content")
-			.addText("summary");
+		const instance = build();
+		instance.insertFields([field.text("summary")], {
+			at: "end",
+			tab: "content",
+		});
+		instance.insertFields([field.text("lead")], {
+			at: "start",
+			tab: "content",
+		});
 
 		const contentTab = instance.fieldTree[0] as FieldConfig<"tab">;
 		const settingsTab = instance.fieldTree[1] as FieldConfig<"tab">;
 
-		expect(contentTab.fields.map((field) => field.key)).toEqual([
+		expect(contentTab.fields.map((f) => f.key)).toEqual([
+			"lead",
 			"title",
 			"summary",
 		]);
-		expect(settingsTab.fields.map((field) => field.key)).toEqual(["theme"]);
+		expect(settingsTab.fields.map((f) => f.key)).toEqual(["theme"]);
 	});
 
-	test("targeting a missing tab preserves the current field position", () => {
-		const instance = new FieldBuilder()
-			.addText("title")
-			.addToTab("routing")
-			.addText("slug");
+	test("targeting a missing tab or another field type throws", () => {
+		const instance = build();
+		const before = instance.fieldTree;
 
-		expect(instance.fieldTree.map((field) => field.key)).toEqual([
-			"title",
-			"slug",
-		]);
+		expect(() =>
+			instance.insertFields([field.text("slug")], {
+				at: "end",
+				tab: "routing",
+			}),
+		).toThrow(LucidError);
+		expect(() =>
+			instance.insertFields([field.text("slug")], { at: "end", tab: "title" }),
+		).toThrow('Tab "title" does not exist.');
+		expect(instance.fieldTree).toEqual(before);
 	});
 
-	test("targeting a key owned by another field type throws", () => {
-		const instance = new FieldBuilder().addText("routing");
-
-		expect(() => instance.addToTab("routing")).toThrow(LucidError);
-		expect(() => instance.addToTab("routing")).toThrow(
-			"Cannot add fields to tab 'routing' because that key belongs to a text field.",
-		);
+	test("tabs cannot be added inside a tab", () => {
+		expect(() =>
+			build().insertFields([field.tab("nested", { fields: [] })], {
+				at: "end",
+				tab: "content",
+			}),
+		).toThrow("Tabs only go at the top level");
 	});
 });

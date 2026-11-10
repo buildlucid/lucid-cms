@@ -1,10 +1,5 @@
-import {
-	type CollectionBuilder,
-	copy,
-	LucidError,
-	translate,
-} from "@lucidcms/core";
-import type { FieldConfig } from "@lucidcms/core/types";
+import { copy, LucidError, translate } from "@lucidcms/core";
+import type { CollectionDefinition, FieldConfig } from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../../constants.js";
 import type { CollectionConfig } from "../../types/types.js";
 
@@ -12,8 +7,8 @@ const segmentFieldTypes = new Set(["text", "textarea", "select", "number"]);
 
 /** Validates generated route segment relations and their target fields. */
 const checkRouteSegments = (data: {
-	collection: CollectionBuilder;
-	collections: CollectionBuilder[];
+	collection: CollectionDefinition;
+	collections: CollectionDefinition[];
 	config: CollectionConfig;
 }) => {
 	const seenRelations = new Set<string>();

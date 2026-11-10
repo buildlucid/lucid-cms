@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import type { CollectionTableNames } from "../../exports/types.js";
-import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../libs/collection/definitions/collection/index.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -107,7 +107,7 @@ const execute: ServiceFn<
 
 		const promoted: Array<{
 			document: RequestDocumentRecord;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			target: string;
 			versionId: number;
 		}> = [];

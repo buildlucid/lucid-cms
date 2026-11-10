@@ -1,4 +1,3 @@
-import type { Component } from "solid-js";
 import type {
 	EditorField,
 	FieldScope,
@@ -26,13 +25,9 @@ export type FieldSlotProps<
 	TType extends ValueFieldType = ValueFieldType,
 > = {
 	readonly slot: FieldSlot;
+	readonly key: string;
 	readonly field: EditorField<TType>;
 	/** The field's siblings: the same repeater item, or the brick's top level. */
 	readonly fields: FieldScope;
 	readonly options: TOptions;
 };
-
-export type FieldSlotComponent<
-	TOptions extends AdminOptions | undefined = undefined,
-	TType extends ValueFieldType = ValueFieldType,
-> = Component<FieldSlotProps<TOptions, TType>>;

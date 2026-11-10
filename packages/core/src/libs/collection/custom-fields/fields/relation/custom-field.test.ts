@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import RelationCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const DocumentCollection = new CollectionBuilder("collection", {
+const DocumentCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -21,34 +23,36 @@ const DocumentCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addRelation("standard_doc", {
-		collection: "page",
-	})
-	.addRelation("required_doc", {
-		collection: "page",
-		validation: {
-			required: true,
-		},
-	})
-	.addRelation("wrong_collection", {
-		collection: "wrong_collection",
-		validation: {
-			required: true,
-		},
-	})
-	.addRelation("multi_doc", {
-		collection: "page",
-		multiple: true,
-		validation: {
-			minItems: 2,
-			maxItems: 3,
-		},
-	})
-	.addRelation("multi_collection_doc", {
-		collection: ["page", "blog"],
-		multiple: true,
-	});
+	fields: [
+		field.relation("standard_doc", {
+			collection: "page",
+		}),
+		field.relation("required_doc", {
+			collection: "page",
+			validation: {
+				required: true,
+			},
+		}),
+		field.relation("wrong_collection", {
+			collection: "wrong_collection",
+			validation: {
+				required: true,
+			},
+		}),
+		field.relation("multi_doc", {
+			collection: "page",
+			multiple: true,
+			validation: {
+				minItems: 2,
+				maxItems: 3,
+			},
+		}),
+		field.relation("multi_collection_doc", {
+			collection: ["page", "blog"],
+			multiple: true,
+		}),
+	],
+});
 
 test("successfully validate field - relation", async () => {
 	// Standard
@@ -60,7 +64,7 @@ test("successfully validate field - relation", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DocumentCollection).fields.get("standard_doc")!,
+			getFieldSetState(DocumentCollection).fields.get("standard_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -87,7 +91,7 @@ test("successfully validate field - relation", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
+			getFieldSetState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -116,7 +120,7 @@ test("fail to validate field - relation", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
+			getFieldSetState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -145,7 +149,7 @@ test("fail to validate field - relation", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
+			getFieldSetState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -173,7 +177,7 @@ test("fail to validate field - relation", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(DocumentCollection).fields.get("wrong_collection")!,
+			getFieldSetState(DocumentCollection).fields.get("wrong_collection")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -207,7 +211,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
+		instance: getFieldSetState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -230,7 +234,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 			],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
+		instance: getFieldSetState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -257,7 +261,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 			],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
+		instance: getFieldSetState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -318,7 +322,7 @@ test("relation field validates multiple target collections", async () => {
 			],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(DocumentCollection).fields.get(
+		instance: getFieldSetState(DocumentCollection).fields.get(
 			"multi_collection_doc",
 		)!,
 		validationData: {
@@ -341,7 +345,7 @@ test("relation field validates multiple target collections", async () => {
 			value: [{ id: 1, collectionKey: "author" }],
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(DocumentCollection).fields.get(
+		instance: getFieldSetState(DocumentCollection).fields.get(
 			"multi_collection_doc",
 		)!,
 		validationData: {

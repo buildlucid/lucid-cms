@@ -1,7 +1,7 @@
 import { type Insertable, sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
-import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
+import type { BrickTypes } from "../collection/definitions/brick/types.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaTable,

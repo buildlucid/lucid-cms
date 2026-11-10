@@ -1,18 +1,5 @@
-import type { AgentSlotPlacement } from "../../components/AgentWidget/types.js";
-import type {
-	BrickSlotMatch,
-	BrickSlotPlacement,
-} from "../../components/BrickSlots/types.js";
-import type { CaptchaSlotPlacement } from "../../components/CaptchaWidget/types.js";
-import type { DocumentSidebarSlotPlacement } from "../../components/DocumentSidebarSlots/types.js";
-import type { DocumentListSlotPlacement } from "../../components/DocumentSlotCell/types.js";
-import type {
-	FieldSlot,
-	FieldSlotMatch,
-} from "../../components/FieldSlots/types.js";
-import type { HomeWidgetPlacement } from "../../components/HomeWidgets/types.js";
-import type { MaintenanceSlotPlacement } from "../../components/MaintenanceSlots/types.js";
 import type { AdminRoute } from "./route.js";
+import type { AdminSlot } from "./slot.js";
 
 /** Project-relative path, exported package subpath, absolute path or file URL. */
 export type AdminModulePath = string | URL;
@@ -33,24 +20,6 @@ export type AdminOptionValue =
 export type AdminOptions = {
 	readonly [key: string]: AdminOptionValue | undefined;
 };
-
-export type AdminSlot = {
-	key: string;
-	/** Higher priorities render first or win exclusive slots. Defaults to zero. */
-	priority?: number;
-	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
-	component: AdminComponentReference;
-	options?: AdminOptions;
-} & (
-	| AgentSlotPlacement
-	| HomeWidgetPlacement
-	| DocumentListSlotPlacement
-	| DocumentSidebarSlotPlacement
-	| (BrickSlotPlacement & { match?: BrickSlotMatch })
-	| { slot: FieldSlot; match?: FieldSlotMatch }
-	| CaptchaSlotPlacement
-	| MaintenanceSlotPlacement
-);
 
 export type AdminConfig = {
 	agentHomescreen?: boolean;

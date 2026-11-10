@@ -1,5 +1,5 @@
 import type { ResolvedLucidConfig } from "../../../exports/types.js";
-import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../collection/definitions/collection/index.js";
 import type { FieldAccessActor } from "../../collection/field-access/types.js";
 import type { CollectionSchemaTable } from "../../collection/schema/types.js";
 import type {
@@ -23,8 +23,8 @@ export type DocumentRefVersionTypeResolver = (input: {
 }) => Exclude<DocumentVersionType, "revision">;
 
 export type DocumentRefFormatContext = {
-	collection: CollectionBuilder;
-	collections: CollectionBuilder[];
+	collection: CollectionDefinition;
+	collections: CollectionDefinition[];
 	config: ResolvedLucidConfig;
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;

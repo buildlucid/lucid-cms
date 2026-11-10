@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
 import type { FieldInputSchema } from "../../../exports/types.js";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import prepareBricksAndFields, {
@@ -24,16 +25,23 @@ describe("testing prepareBricksAndFields", () => {
 		defaultLocale: "en",
 	};
 
-	const simpleBrick = new BrickBuilder("simple")
-		.addText("heading")
-		.addRepeater("items")
-		.addText("itemTitle")
-		.addRepeater("nestedItems")
-		.addText("nestedItemTitle")
-		.endRepeater()
-		.endRepeater();
+	const simpleBrick = defineBrick({
+		key: "simple",
+		fields: [
+			field.text("heading"),
+			field.repeater("items", {
+				fields: [
+					field.text("itemTitle"),
+					field.repeater("nestedItems", {
+						fields: [field.text("nestedItemTitle")],
+					}),
+				],
+			}),
+		],
+	});
 
-	const simpleCollection = new CollectionBuilder("simple", {
+	const simpleCollection = defineCollection({
+		key: "simple",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -48,12 +56,15 @@ describe("testing prepareBricksAndFields", () => {
 		bricks: {
 			builder: [simpleBrick],
 		},
-	}).addText("simpleHeading", {
-		details: {
-			label: copy("admin:tests.fields.simpleHeading.label", {
-				defaultMessage: "Heading Default",
+		fields: [
+			field.text("simpleHeading", {
+				details: {
+					label: copy("admin:tests.fields.simpleHeading.label", {
+						defaultMessage: "Heading Default",
+					}),
+				},
 			}),
-		},
+		],
 	});
 
 	test("should filter out fields that don't exist in the collection", () => {
@@ -203,8 +214,12 @@ describe("testing prepareBricksAndFields", () => {
 	});
 
 	test("should keep only embedded bricks reachable from rich text", () => {
-		const cardBrick = new BrickBuilder("card").addText("title");
-		const collection = new CollectionBuilder("rich-content", {
+		const cardBrick = defineBrick({
+			key: "card",
+			fields: [field.text("title")],
+		});
+		const collection = defineCollection({
+			key: "rich-content",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -217,7 +232,8 @@ describe("testing prepareBricksAndFields", () => {
 				},
 			},
 			bricks: { embedded: [cardBrick] },
-		}).addRichText("body");
+			fields: [field.richText("body")],
+		});
 		const richTextValue = {
 			type: "doc",
 			content: [
@@ -302,7 +318,8 @@ describe("testing prepareBricksAndFields", () => {
 	});
 
 	test("should trim string custom field values and translations", () => {
-		const collection = new CollectionBuilder("trim-test", {
+		const collection = defineCollection({
+			key: "trim-test",
 			mode: "single",
 			details: {
 				labels: {
@@ -315,25 +332,27 @@ describe("testing prepareBricksAndFields", () => {
 				},
 			},
 			localized: true,
-		})
-			.addText("title")
-			.addSelect("status", {
-				options: [
-					{
-						label: copy("admin:tests.fields.status.options.draft", {
-							defaultMessage: "Draft",
-						}),
-						value: "draft",
-					},
-					{
-						label: copy("admin:tests.fields.status.options.live", {
-							defaultMessage: "Live",
-						}),
-						value: "live",
-					},
-				],
-			})
-			.addLink("cta");
+			fields: [
+				field.text("title"),
+				field.select("status", {
+					options: [
+						{
+							label: copy("admin:tests.fields.status.options.draft", {
+								defaultMessage: "Draft",
+							}),
+							value: "draft",
+						},
+						{
+							label: copy("admin:tests.fields.status.options.live", {
+								defaultMessage: "Live",
+							}),
+							value: "live",
+						},
+					],
+				}),
+				field.link("cta"),
+			],
+		});
 
 		const fields: Array<FieldInputSchema> = [
 			{
@@ -379,7 +398,8 @@ describe("testing prepareBricksAndFields", () => {
 	});
 
 	test("should normalize empty json custom field values to null", () => {
-		const collection = new CollectionBuilder("json-empty-test", {
+		const collection = defineCollection({
+			key: "json-empty-test",
 			mode: "single",
 			details: {
 				labels: {
@@ -394,7 +414,8 @@ describe("testing prepareBricksAndFields", () => {
 					}),
 				},
 			},
-		}).addJSON("metadata");
+			fields: [field.json("metadata")],
+		});
 
 		const fields: Array<FieldInputSchema> = [
 			{
@@ -414,7 +435,8 @@ describe("testing prepareBricksAndFields", () => {
 	});
 
 	test("should normalize empty datetime custom field values to null", () => {
-		const collection = new CollectionBuilder("datetime-empty-test", {
+		const collection = defineCollection({
+			key: "datetime-empty-test",
 			mode: "single",
 			details: {
 				labels: {
@@ -429,7 +451,8 @@ describe("testing prepareBricksAndFields", () => {
 					}),
 				},
 			},
-		}).addDateTime("publishDate");
+			fields: [field.datetime("publishDate")],
+		});
 
 		const fields: Array<FieldInputSchema> = [
 			{

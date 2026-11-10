@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../../libs/collection/definitions/collection/index.js";
 import {
 	formatDocumentLabelValue,
 	getDocumentLabelField,
@@ -11,7 +11,7 @@ import type { ServiceContext } from "../../../../utils/services/types.js";
 const getTransferLabel = (
 	context: ServiceContext,
 	props: {
-		collection: CollectionBuilder;
+		collection: CollectionDefinition;
 		data: DocumentEditableData;
 		documentId: number;
 	},

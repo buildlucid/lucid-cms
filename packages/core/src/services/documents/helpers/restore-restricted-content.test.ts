@@ -1,35 +1,45 @@
 import { describe, expect, test } from "vitest";
-import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineBrick from "../../../libs/collection/define-brick.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import getContentAccess from "../../../libs/collection/field-access/get-content-access.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import restoreRestrictedContent from "./restore-restricted-content.js";
 
-const collection = new CollectionBuilder("pages", {
+const collection = defineCollection({
+	key: "pages",
 	mode: "multiple",
 	details: { labels: { singular: "Page", plural: "Pages" } },
 	bricks: {
 		builder: [
-			new BrickBuilder("text").addText("body"),
-			new BrickBuilder("secret", {
+			defineBrick({ key: "text", fields: [field.text("body")] }),
+			defineBrick({
+				key: "secret",
 				permissions: { read: true },
-			}).addText("body"),
-			new BrickBuilder("legal", {
+				fields: [field.text("body")],
+			}),
+			defineBrick({
+				key: "legal",
 				permissions: { update: true },
-			}).addText("body"),
+				fields: [field.text("body")],
+			}),
 		],
-		embedded: [new BrickBuilder("quote").addText("body")],
+		embedded: [defineBrick({ key: "quote", fields: [field.text("body")] })],
 	},
-})
-	.addText("title")
-	.addText("slug", { permissions: { update: true } })
-	.addText("notes", { permissions: { read: true } })
-	.addRichText("intro", { permissions: { update: true } })
-	.addRepeater("links")
-	.addText("label")
-	.addText("url", { permissions: { update: true } })
-	.endRepeater();
+	fields: [
+		field.text("title"),
+		field.text("slug", { permissions: { update: true } }),
+		field.text("notes", { permissions: { read: true } }),
+		field.richText("intro", { permissions: { update: true } }),
+		field.repeater("links", {
+			fields: [
+				field.text("label"),
+				field.text("url", { permissions: { update: true } }),
+			],
+		}),
+	],
+});
 
 const access = getContentAccess(collection, {
 	superAdmin: false,

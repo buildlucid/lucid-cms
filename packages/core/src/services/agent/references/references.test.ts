@@ -5,7 +5,8 @@ import constants from "../../../constants/constants.js";
 import defineAgent from "../../../libs/agent/define-agent.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import getCurrentCollectionMigrationId from "../../../libs/collection/migration/get-current-collection-migration-id.js";
 import planCollectionMigrations from "../../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
@@ -61,7 +62,8 @@ import list from "./list.js";
 import register from "./register.js";
 
 const fixture = getTestConfig();
-const collection = new CollectionBuilder("agent_reference_test", {
+const collection = defineCollection({
+	key: "agent_reference_test",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -69,7 +71,8 @@ const collection = new CollectionBuilder("agent_reference_test", {
 			plural: "Pages",
 		},
 	},
-}).addText("title", { useAsLabel: true });
+	fields: [field.text("title", { useAsLabel: true })],
+});
 const agent = defineAgent({
 	key: "references",
 	name: "References",

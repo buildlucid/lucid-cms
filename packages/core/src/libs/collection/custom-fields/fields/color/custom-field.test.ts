@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import ColorCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const ColorCollection = new CollectionBuilder("collection", {
+const ColorCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -21,13 +23,15 @@ const ColorCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addColor("standard_color")
-	.addColor("required_color", {
-		validation: {
-			required: true,
-		},
-	});
+	fields: [
+		field.color("standard_color"),
+		field.color("required_color", {
+			validation: {
+				required: true,
+			},
+		}),
+	],
+});
 
 test("successfully validate field - color", async () => {
 	// Standard
@@ -39,7 +43,7 @@ test("successfully validate field - color", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(ColorCollection).fields.get("standard_color")!,
+			getFieldSetState(ColorCollection).fields.get("standard_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -61,7 +65,7 @@ test("successfully validate field - color", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
+			getFieldSetState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -85,7 +89,7 @@ test("fail to validate field - color", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(ColorCollection).fields.get("standard_color")!,
+			getFieldSetState(ColorCollection).fields.get("standard_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -113,7 +117,7 @@ test("fail to validate field - color", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
+			getFieldSetState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -141,7 +145,7 @@ test("fail to validate field - color", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
+			getFieldSetState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -169,7 +173,7 @@ test("fail to validate field - color", async () => {
 		},
 		instance:
 			// oxlint-disable-next-line typescript/no-non-null-assertion -- This field is registered in the test fixture.
-			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
+			getFieldSetState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],

@@ -19,7 +19,7 @@ import type {
 import resolveCustomFieldSorts, {
 	type CustomFieldSort,
 } from "../../utils/helpers/resolve-custom-field-sorts.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import resolveCollectionLocalization, {
 	type ResolvedCollectionLocalization,
 } from "../collection/helpers/resolve-collection-localization.js";
@@ -338,7 +338,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			brickFilters: BrickFilters[];
 			relationDocumentFilters: RelationDocumentFilter[];
 			query: Pick<GetMultipleQueryParams, "sort" | "page" | "perPage">;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			documentFieldsTableSchema:
 				| CollectionSchemaTable<LucidBrickTableName>
 				| undefined;
@@ -791,7 +791,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			brickFilters: BrickFilters[];
 			relationDocumentFilters: RelationDocumentFilter[];
 			query: ContentGetSingleQueryParams;
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			config: ResolvedLucidConfig;
 			filterOr?: DocumentFilterGroup[];
 			tables: {

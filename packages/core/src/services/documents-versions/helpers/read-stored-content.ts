@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -18,7 +18,7 @@ import prepareDuplicateContent from "../../documents/helpers/prepare-duplicate-c
 const readStoredContent: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			documentId: number;
 			versionId: number;
 		},

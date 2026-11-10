@@ -6,7 +6,7 @@ import DocumentSlotCell from "@/components/DocumentSlotCell/DocumentSlotCell";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import Table from "@/components/Table/Table";
 import { createFieldState } from "@/extensions/editor/field-state";
-import { resolveSlots } from "@/extensions/slot-policy";
+import { matchSlots } from "@/extensions/match-slots";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import DocumentAuthorCell from "./parts/DocumentAuthorCell";
 import DocumentDynamicCell from "./parts/DocumentDynamicCell";
@@ -42,7 +42,7 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 	// Memos
 	const additions = createMemo(() =>
 		props.extensions
-			? resolveSlots(
+			? matchSlots(
 					documentListSlots.filter(
 						(entry) => entry.slot === "documentList.column",
 					),
@@ -87,7 +87,7 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 				{(field) => {
 					const override = createMemo(() =>
 						props.extensions
-							? resolveSlots(
+							? matchSlots(
 									documentListSlots.filter(
 										(entry) => entry.slot === "field.cell",
 									),
@@ -115,6 +115,7 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 									entry={entry()}
 									data={{
 										...data(),
+										key: entry().key,
 										options: entry().options,
 										slot: "field.cell",
 										field: createFieldState({
@@ -139,6 +140,7 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 						entry={entry}
 						data={{
 							...data(),
+							key: entry.key,
 							options: entry.options,
 							slot: "documentList.column",
 						}}

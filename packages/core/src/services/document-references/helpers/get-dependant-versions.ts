@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { FieldRefResource } from "../../../libs/refs/types.js";
@@ -30,7 +30,7 @@ const getDependantVersions: ServiceFn<
 	[
 		{
 			target: ChangedTarget;
-			collections: CollectionBuilder[];
+			collections: CollectionDefinition[];
 			batchSize: number;
 		},
 	],

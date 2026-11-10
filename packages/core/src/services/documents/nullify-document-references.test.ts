@@ -3,7 +3,8 @@ import { sql } from "kysely";
 import { afterAll, assert, beforeAll, expect, test, vi } from "vitest";
 import { PostgresAdapter } from "../../../../db-postgres/src/index.js";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DatabaseConnection } from "../../libs/db/types.js";
@@ -30,7 +31,8 @@ const fixture = getTestConfig();
 const postgresUrl = process.env.LUCID_REQUEST_TEST_POSTGRES_URL;
 let postgresDatabase: DatabaseConnection | undefined;
 const key = "relation_request_docs";
-const collection = new CollectionBuilder(key, {
+const collection = defineCollection({
+	key: key,
 	mode: "multiple",
 	details: { labels: { singular: "Document", plural: "Documents" } },
 	publishing: {
@@ -40,9 +42,11 @@ const collection = new CollectionBuilder(key, {
 		},
 		environments: [{ key: "staging", label: "Staging" }],
 	},
-})
-	.addText("title", { localized: false, validation: { required: true } })
-	.addRelation("related", { collection: key, multiple: true });
+	fields: [
+		field.text("title", { localized: false, validation: { required: true } }),
+		field.relation("related", { collection: key, multiple: true }),
+	],
+});
 let context: ServiceContext;
 let actor: LucidUser;
 

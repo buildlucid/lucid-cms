@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { CollectionTableNames } from "../../../exports/types.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import field from "../../../libs/collection/definitions/fields/field.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { DocumentBricksRepository } from "../../../libs/repositories/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -30,7 +31,8 @@ describe("getDocumentLabel", () => {
 	});
 
 	test("uses select option labels for useAsLabel values", async () => {
-		const collection = new CollectionBuilder("pages", {
+		const collection = defineCollection({
+			key: "pages",
 			mode: "multiple",
 			details: {
 				labels: {
@@ -38,20 +40,23 @@ describe("getDocumentLabel", () => {
 					plural: "Pages",
 				},
 			},
-		}).addSelect("status", {
-			showInList: true,
-			useAsLabel: true,
-			options: [
-				{
-					value: "draft",
-					label: "Draft",
-				},
-				{
-					value: "published",
-					label: copy("admin:tests.status.published", {
-						defaultMessage: "Published",
-					}),
-				},
+			fields: [
+				field.select("status", {
+					showInList: true,
+					useAsLabel: true,
+					options: [
+						{
+							value: "draft",
+							label: "Draft",
+						},
+						{
+							value: "published",
+							label: copy("admin:tests.status.published", {
+								defaultMessage: "Published",
+							}),
+						},
+					],
+				}),
 			],
 		});
 		const bricks = {

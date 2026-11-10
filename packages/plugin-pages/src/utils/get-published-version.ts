@@ -1,8 +1,8 @@
-import type { CollectionBuilder } from "@lucidcms/core";
+import type { CollectionDefinition } from "@lucidcms/core/types";
 
 /** The version a site showing `environment` reads from a collection: latest without environments, or null when it lacks this one. */
 const getPublishedVersion = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	environment: string,
 ): string | null => {
 	const environments = collection.getData.publishing.environments;

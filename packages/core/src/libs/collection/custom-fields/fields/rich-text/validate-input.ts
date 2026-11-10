@@ -1,5 +1,5 @@
 import type { ServiceContext } from "../../../../../exports/types.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import type { FieldRelationValidationInput } from "../../types.js";
 import validateMediaInputData from "../media/validate-input.js";
 import validateRelationInputData from "../relation/validate-input.js";
@@ -41,7 +41,7 @@ const validateRichTextInputData = async (
 							collection.key,
 							{
 								fields: Array.from(
-									getFieldBuilderState(collection).fields.values(),
+									getFieldSetState(collection).fields.values(),
 								).map((field) => ({
 									key: field.key,
 									type: field.type,

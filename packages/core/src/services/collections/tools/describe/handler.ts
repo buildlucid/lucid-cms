@@ -1,6 +1,6 @@
 import type z from "zod";
-import type FieldBuilder from "../../../../libs/collection/builders/field-builder/index.js";
 import collections from "../../../../libs/collection/collections.js";
+import type FieldSet from "../../../../libs/collection/definitions/fields/index.js";
 import getContentAccess from "../../../../libs/collection/field-access/get-content-access.js";
 import type {
 	FieldAccess,
@@ -21,7 +21,7 @@ import type {
 type Entry = z.output<typeof entrySchema>;
 
 /** Maps field guidance by keys unique within a collection or brick. */
-const getFieldInstructions = (builder: FieldBuilder) =>
+const getFieldInstructions = (builder: FieldSet) =>
 	new Map(
 		builder.flatFields.flatMap((field) =>
 			"ai" in field && field.ai ? [[field.key, field.ai.instructions]] : [],

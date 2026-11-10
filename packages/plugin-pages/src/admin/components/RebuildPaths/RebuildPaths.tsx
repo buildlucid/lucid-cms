@@ -1,15 +1,17 @@
 import { Button, MaintenanceTile, Modal } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
 import { request } from "@lucidcms/admin/services";
-import type { MaintenanceSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { toast } from "@lucidcms/admin/utils";
 import { useMutation } from "@tanstack/solid-query";
 import { createSignal } from "solid-js";
 import { REBUILD_PATHS_ROUTE } from "../../../constants.js";
-import type {} from "../../translations.js";
+import type rebuildPathsConfig from "./config.js";
 
 /** Queues a rebuild of every page's path from the Operations page. */
-const RebuildPaths: MaintenanceSlotComponent = () => {
+const RebuildPaths: SlotComponent<
+	ReturnType<typeof rebuildPathsConfig>
+> = () => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();

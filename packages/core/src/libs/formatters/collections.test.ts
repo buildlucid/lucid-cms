@@ -1,18 +1,24 @@
 import { expect, test } from "vitest";
 import z from "zod";
-import BrickBuilder from "../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import defineBrick from "../collection/define-brick.js";
+import defineCollection from "../collection/define-collection.js";
+import field from "../collection/definitions/fields/field.js";
 import collectionsFormatter from "./collections.js";
 
 test("collection field responses expose validation metadata and preserve server schemas", () => {
 	const schema = z.string().min(3);
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
-	})
-		.addRepeater("items")
-		.addText("title", { validation: { required: true, zod: schema } })
-		.endRepeater();
+		fields: [
+			field.repeater("items", {
+				fields: [
+					field.text("title", { validation: { required: true, zod: schema } }),
+				],
+			}),
+		],
+	});
 	const response = collectionsFormatter.formatSingle({
 		collection,
 		localization: {
@@ -36,21 +42,27 @@ test("collection field responses expose validation metadata and preserve server 
 });
 
 test("collection responses send the permissions fields and bricks opt in to", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		bricks: {
 			builder: [
-				new BrickBuilder("banner", { permissions: { update: true } }).addText(
-					"cta",
-					{ permissions: { read: true } },
-				),
+				defineBrick({
+					key: "banner",
+					permissions: { update: true },
+					fields: [field.text("cta", { permissions: { read: true } })],
+				}),
 			],
 		},
-	})
-		.addText("title")
-		.addTab("seo", { permissions: { read: true, update: true } })
-		.addText("metaTitle");
+		fields: [
+			field.text("title"),
+			field.tab("seo", {
+				permissions: { read: true, update: true },
+				fields: [field.text("metaTitle")],
+			}),
+		],
+	});
 	const response = collectionsFormatter.formatSingle({
 		collection,
 		localization: {
@@ -74,20 +86,23 @@ test("collection responses send the permissions fields and bricks opt in to", ()
 });
 
 test("collection responses leave out what the reader can't see, and conditions that depend on it", () => {
-	const collection = new CollectionBuilder("pages", {
+	const collection = defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		bricks: {
 			builder: [
-				new BrickBuilder("banner").addText("cta"),
-				new BrickBuilder("legal", { permissions: { read: true } }),
+				defineBrick({ key: "banner", fields: [field.text("cta")] }),
+				defineBrick({ key: "legal", permissions: { read: true } }),
 			],
 		},
-	})
-		.addCheckbox("promoted", { permissions: { read: true } })
-		.addText("code", {
-			ui: { condition: { all: [{ field: "promoted", value: true }] } },
-		});
+		fields: [
+			field.checkbox("promoted", { permissions: { read: true } }),
+			field.text("code", {
+				ui: { condition: { all: [{ field: "promoted", value: true }] } },
+			}),
+		],
+	});
 	const response = collectionsFormatter.formatSingle({
 		collection,
 		localization: {

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import constants from "../../../constants/constants.js";
-import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import defineCollection from "../../../libs/collection/define-collection.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import resolveRelationVersionType from "./resolve-relation-version-type.js";
 
-const buildContext = (collections: CollectionBuilder[] = []) =>
+const buildContext = (collections: CollectionDefinition[] = []) =>
 	({
 		db: {},
 		config: {
@@ -16,10 +17,13 @@ const buildContext = (collections: CollectionBuilder[] = []) =>
 const createCollection = (
 	key: string,
 	environments: NonNullable<
-		ConstructorParameters<typeof CollectionBuilder>[1]["publishing"]["targets"]
+		ConstructorParameters<
+			typeof CollectionDefinition
+		>[1]["publishing"]["targets"]
 	> = [],
 ) =>
-	new CollectionBuilder(key, {
+	defineCollection({
+		key: key,
 		mode: "multiple",
 		details: {
 			labels: {

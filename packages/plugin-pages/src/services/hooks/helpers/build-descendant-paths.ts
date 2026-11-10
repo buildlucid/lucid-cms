@@ -1,5 +1,5 @@
-import type { CollectionBuilder } from "@lucidcms/core";
 import type {
+	CollectionDefinition,
 	CollectionTableNames,
 	FieldInputSchema,
 	ServiceFn,
@@ -23,7 +23,7 @@ const buildDescendantPaths: ServiceFn<
 			scope: RouteScope;
 			tables: CollectionTableNames;
 			collection: CollectionConfig;
-			collectionInstance: CollectionBuilder;
+			collectionInstance: CollectionDefinition;
 			parentPathField?: FieldInputSchema;
 		},
 	],

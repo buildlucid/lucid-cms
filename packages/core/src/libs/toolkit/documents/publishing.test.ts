@@ -6,13 +6,15 @@ import createServiceContext from "../../../utils/services/create-service-context
 import type { ServiceContext } from "../../../utils/services/types.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import applyCollectionMigrations from "../../collection/apply-collection-migrations.js";
-import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import defineCollection from "../../collection/define-collection.js";
+import field from "../../collection/definitions/fields/field.js";
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import { getTableNames } from "../../collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../i18n/index.js";
 import createToolkit from "../create-toolkit.js";
 
-const collection = new CollectionBuilder("toolkit_publishing", {
+const collection = defineCollection({
+	key: "toolkit_publishing",
 	mode: "multiple",
 	details: { labels: { singular: "Article", plural: "Articles" } },
 	publishing: {
@@ -22,7 +24,8 @@ const collection = new CollectionBuilder("toolkit_publishing", {
 			{ key: "production", label: "Production" },
 		],
 	},
-}).addText("title");
+	fields: [field.text("title")],
+});
 
 const fixture = getTestConfig();
 let context: ServiceContext;

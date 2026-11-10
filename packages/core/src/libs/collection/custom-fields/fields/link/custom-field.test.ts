@@ -2,14 +2,16 @@ import { expect, test } from "vitest";
 import constants from "../../../../../constants/constants.js";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
-import CollectionBuilder from "../../../builders/collection-builder/index.js";
-import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
+import defineCollection from "../../../define-collection.js";
+import field from "../../../definitions/fields/field.js";
+import { getFieldSetState } from "../../../definitions/fields/index.js";
 import CustomFieldSchema from "../../schema.js";
 import LinkCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const LinkCollection = new CollectionBuilder("collection", {
+const LinkCollection = defineCollection({
+	key: "collection",
 	mode: "multiple",
 	details: {
 		labels: {
@@ -22,19 +24,21 @@ const LinkCollection = new CollectionBuilder("collection", {
 		},
 	},
 	localized: true,
-})
-	.addLink("standard_link")
-	.addLink("required_link", {
-		validation: {
-			required: true,
-		},
-	})
-	.addLink("required_localized_link", {
-		localized: true,
-		validation: {
-			required: true,
-		},
-	});
+	fields: [
+		field.link("standard_link"),
+		field.link("required_link", {
+			validation: {
+				required: true,
+			},
+		}),
+		field.link("required_localized_link", {
+			localized: true,
+			validation: {
+				required: true,
+			},
+		}),
+	],
+});
 
 test("successfully validate field - link", async () => {
 	// Standard
@@ -49,7 +53,7 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
+		instance: getFieldSetState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -74,7 +78,7 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
+		instance: getFieldSetState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -105,7 +109,7 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get(
+		instance: getFieldSetState(LinkCollection).fields.get(
 			"required_localized_link",
 		)!,
 		validationData: {
@@ -135,7 +139,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
+		instance: getFieldSetState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -168,7 +172,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
+		instance: getFieldSetState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -203,7 +207,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
+		instance: getFieldSetState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -232,7 +236,7 @@ test("fail to validate field - link", async () => {
 			value: undefined,
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
+		instance: getFieldSetState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -262,7 +266,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
+		instance: getFieldSetState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -294,7 +298,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// oxlint-disable-next-line typescript/no-non-null-assertion
-		instance: getFieldBuilderState(LinkCollection).fields.get(
+		instance: getFieldSetState(LinkCollection).fields.get(
 			"required_localized_link",
 		)!,
 		validationData: {

@@ -1,8 +1,9 @@
-import type { DocumentListSlotComponent } from "@lucidcms/admin/types";
+import type { SlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
+import type slugCellConfig from "./config.js";
 
 /** Document list cell showing the slug, with the path below when it differs. */
-const SlugCell: DocumentListSlotComponent = (props) => {
+const SlugCell: SlotComponent<ReturnType<typeof slugCellConfig>> = (props) => {
 	// ----------------------------------
 	// Memos
 	const path = createMemo(() => {

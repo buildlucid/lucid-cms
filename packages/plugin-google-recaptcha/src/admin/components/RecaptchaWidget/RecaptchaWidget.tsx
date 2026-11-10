@@ -1,6 +1,6 @@
-import type { CaptchaWidgetComponent } from "@lucidcms/admin/types";
+import type { CaptchaWidgetProps } from "@lucidcms/admin/types";
 import { createCaptchaTokenState, loadScript } from "@lucidcms/admin/utils";
-import { onCleanup, onMount } from "solid-js";
+import { type Component, onCleanup, onMount } from "solid-js";
 import { SCRIPT_URL } from "../../../constants.js";
 import type { RecaptchaClientOptions } from "../../../types.js";
 
@@ -34,9 +34,8 @@ const setBadgeVisible = (visible: boolean) => {
 };
 
 /** Renders Google reCAPTCHA and hands its tokens to the protected form. */
-const RecaptchaWidget: CaptchaWidgetComponent<
-	undefined,
-	RecaptchaClientOptions
+const RecaptchaWidget: Component<
+	CaptchaWidgetProps<undefined, RecaptchaClientOptions>
 > = (props) => {
 	// ----------------------------------
 	// State & Hooks

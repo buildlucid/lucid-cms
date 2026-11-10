@@ -2,10 +2,10 @@ import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 import type { DocumentEditableData } from "../../toolkit/documents/types.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
 import { fieldHooks } from "../custom-fields/registered-fields.js";
 import { storageModes } from "../custom-fields/storage/index.js";
 import type { FieldConfig, FieldTypes } from "../custom-fields/types.js";
+import type CollectionDefinition from "../definitions/collection/index.js";
 import getEmbeddedBrickAccess from "./get-embedded-brick-access.js";
 import type { ContentAccess, FieldAccess } from "./types.js";
 
@@ -50,7 +50,7 @@ const filterFields = (
 
 /** Omits unreadable authoring fields and bricks for agent tools, using `stored` input to retain embedded bricks only when every referencing field is readable. */
 const filterReadableData = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	access: ContentAccess,
 	data: DocumentEditableData,
 	stored: { fields: FieldInputSchema[]; bricks: BrickInputSchema[] },

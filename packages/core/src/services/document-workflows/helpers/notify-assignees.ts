@@ -1,9 +1,9 @@
 import type { CollectionTableNames } from "../../../exports/types.js";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../../../libs/collection/definitions/collection/index.js";
 import type {
 	PublishingWorkflowConfig,
 	PublishingWorkflowStageConfig,
-} from "../../../libs/collection/builders/collection-builder/types.js";
+} from "../../../libs/collection/definitions/collection/types.js";
 import {
 	DocumentBricksRepository,
 	RequestDocumentsRepository,
@@ -25,7 +25,7 @@ import { stageChangedNotification } from "../notifications/stage-changed.js";
 const notifyAssignees: ServiceFn<
 	[
 		{
-			collection: CollectionBuilder;
+			collection: CollectionDefinition;
 			tableNames: CollectionTableNames;
 			workflow: PublishingWorkflowConfig;
 			workflowId: number;

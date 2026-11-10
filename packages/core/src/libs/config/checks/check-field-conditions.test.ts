@@ -1,13 +1,15 @@
 import { describe, expect, test } from "vitest";
-import BrickBuilder from "../../collection/builders/brick-builder/index.js";
-import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import CustomFieldSchema from "../../collection/custom-fields/schema.js";
 import type { FieldConditionConfig } from "../../collection/custom-fields/types.js";
+import defineBrick from "../../collection/define-brick.js";
+import defineCollection from "../../collection/define-collection.js";
+import field from "../../collection/definitions/fields/field.js";
 import { copy } from "../../i18n/index.js";
 import checkFieldConditions from "./check-field-conditions.js";
 
 const buildCollection = () =>
-	new CollectionBuilder("pages", {
+	defineCollection({
+		key: "pages",
 		mode: "multiple",
 		details: {
 			labels: {
@@ -27,31 +29,36 @@ const showWhen = (field: string, value: string): FieldConditionConfig => ({
 
 describe("checkFieldConditions", () => {
 	test("sibling and ancestor references are valid", () => {
-		const collection = buildCollection()
-			.addSelect("menuType")
-			.addText("headline", {
+		const collection = buildCollection().insertFields([
+			field.select("menuType"),
+			field.text("headline", {
 				ui: { condition: showWhen("menuType", "docs") },
-			})
-			.addRepeater("items")
-			.addSelect("itemType")
-			.addText("label", {
-				//* sibling within the same repeater scope
-				ui: { condition: showWhen("itemType", "text") },
-			})
-			.addRepeater("nested")
-			.addText("nestedLabel", {
-				//* ancestor scopes: parent repeater and root
-				ui: {
-					condition: {
-						all: [
-							{ field: "itemType", operator: "equals", value: "text" },
-							{ field: "menuType", operator: "equals", value: "docs" },
+			}),
+			field.repeater("items", {
+				fields: [
+					field.select("itemType"),
+					field.text("label", {
+						//* sibling within the same repeater scope
+						ui: { condition: showWhen("itemType", "text") },
+					}),
+					field.repeater("nested", {
+						fields: [
+							field.text("nestedLabel", {
+								//* ancestor scopes: parent repeater and root
+								ui: {
+									condition: {
+										all: [
+											{ field: "itemType", operator: "equals", value: "text" },
+											{ field: "menuType", operator: "equals", value: "docs" },
+										],
+									},
+								},
+							}),
 						],
-					},
-				},
-			})
-			.endRepeater()
-			.endRepeater();
+					}),
+				],
+			}),
+		]);
 
 		expect(() =>
 			checkFieldConditions("collection", collection.key, collection),
@@ -59,13 +66,13 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("repeater conditions can reference root fields", () => {
-		const collection = buildCollection()
-			.addSelect("menuType")
-			.addRepeater("items", {
+		const collection = buildCollection().insertFields([
+			field.select("menuType"),
+			field.repeater("items", {
 				ui: { condition: showWhen("menuType", "docs") },
-			})
-			.addText("label")
-			.endRepeater();
+				fields: [field.text("label")],
+			}),
+		]);
 
 		expect(() =>
 			checkFieldConditions("collection", collection.key, collection),
@@ -73,9 +80,11 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("unknown targets throw", () => {
-		const collection = buildCollection().addText("headline", {
-			ui: { condition: showWhen("missingField", "docs") },
-		});
+		const collection = buildCollection().insertFields([
+			field.text("headline", {
+				ui: { condition: showWhen("missingField", "docs") },
+			}),
+		]);
 
 		expect(() =>
 			checkFieldConditions("collection", collection.key, collection),
@@ -83,9 +92,11 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("self references throw", () => {
-		const collection = buildCollection().addText("headline", {
-			ui: { condition: showWhen("headline", "docs") },
-		});
+		const collection = buildCollection().insertFields([
+			field.text("headline", {
+				ui: { condition: showWhen("headline", "docs") },
+			}),
+		]);
 
 		expect(() =>
 			checkFieldConditions("collection", collection.key, collection),
@@ -93,17 +104,16 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("repeater targets throw", () => {
-		const collection = buildCollection()
-			.addRepeater("items")
-			.addText("label")
-			.endRepeater()
-			.addText("headline", {
+		const collection = buildCollection().insertFields([
+			field.repeater("items", { fields: [field.text("label")] }),
+			field.text("headline", {
 				ui: {
 					condition: {
 						all: [{ field: "items", operator: "isNotEmpty" }],
 					},
 				},
-			});
+			}),
+		]);
 
 		expect(() =>
 			checkFieldConditions("collection", collection.key, collection),
@@ -111,14 +121,13 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("descendant references throw", () => {
-		const collection = buildCollection()
-			.addText("headline", {
+		const collection = buildCollection().insertFields([
+			field.text("headline", {
 				//* root fields cannot depend on repeater-scoped fields
 				ui: { condition: showWhen("itemType", "text") },
-			})
-			.addRepeater("items")
-			.addSelect("itemType")
-			.endRepeater();
+			}),
+			field.repeater("items", { fields: [field.select("itemType")] }),
+		]);
 
 		expect(() =>
 			checkFieldConditions("collection", collection.key, collection),
@@ -126,15 +135,16 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("cousin scope references throw", () => {
-		const collection = buildCollection()
-			.addRepeater("linkItems")
-			.addSelect("linkType")
-			.endRepeater()
-			.addRepeater("menuItems")
-			.addText("label", {
-				ui: { condition: showWhen("linkType", "document") },
-			})
-			.endRepeater();
+		const collection = buildCollection().insertFields([
+			field.repeater("linkItems", { fields: [field.select("linkType")] }),
+			field.repeater("menuItems", {
+				fields: [
+					field.text("label", {
+						ui: { condition: showWhen("linkType", "document") },
+					}),
+				],
+			}),
+		]);
 
 		expect(() =>
 			checkFieldConditions("collection", collection.key, collection),
@@ -142,21 +152,32 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("brick trees are checked independently", () => {
-		const brick = new BrickBuilder("navItem")
-			.addSelect("linkType")
-			.addRepeater("items")
-			.addText("label")
-			.addRelation("document", {
-				collection: "pages",
-				ui: { condition: showWhen("linkType", "document") },
-			})
-			.endRepeater();
+		const brick = defineBrick({
+			key: "navItem",
+			fields: [
+				field.select("linkType"),
+				field.repeater("items", {
+					fields: [
+						field.text("label"),
+						field.relation("document", {
+							collection: "pages",
+							ui: { condition: showWhen("linkType", "document") },
+						}),
+					],
+				}),
+			],
+		});
 
 		expect(() => checkFieldConditions("brick", brick.key, brick)).not.toThrow();
 
 		//* a brick field cannot depend on a collection field key
-		const invalidBrick = new BrickBuilder("hero").addText("title", {
-			ui: { condition: showWhen("menuType", "docs") },
+		const invalidBrick = defineBrick({
+			key: "hero",
+			fields: [
+				field.text("title", {
+					ui: { condition: showWhen("menuType", "docs") },
+				}),
+			],
 		});
 
 		expect(() =>
@@ -165,12 +186,16 @@ describe("checkFieldConditions", () => {
 	});
 
 	test("tab conditions resolve against root fields", () => {
-		const brick = new BrickBuilder("hero")
-			.addSelect("layout")
-			.addTab("advancedTab", {
-				ui: { condition: showWhen("layout", "advanced") },
-			})
-			.addText("advancedTitle");
+		const brick = defineBrick({
+			key: "hero",
+			fields: [
+				field.select("layout"),
+				field.tab("advancedTab", {
+					ui: { condition: showWhen("layout", "advanced") },
+					fields: [field.text("advancedTitle")],
+				}),
+			],
+		});
 
 		expect(() => checkFieldConditions("brick", brick.key, brick)).not.toThrow();
 	});
@@ -178,9 +203,9 @@ describe("checkFieldConditions", () => {
 
 describe("condition config schema", () => {
 	test("valid conditions parse", async () => {
-		const collection = buildCollection()
-			.addSelect("menuType")
-			.addText("headline", {
+		const collection = buildCollection().insertFields([
+			field.select("menuType"),
+			field.text("headline", {
 				ui: {
 					condition: {
 						action: "hide",
@@ -193,7 +218,8 @@ describe("condition config schema", () => {
 						],
 					},
 				},
-			});
+			}),
+		]);
 
 		for (const field of collection.flatFields) {
 			const res = await CustomFieldSchema.safeParseAsync(field);

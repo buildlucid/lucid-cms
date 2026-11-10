@@ -1,6 +1,7 @@
 import { EmptyState, Link, Pill } from "@lucidcms/admin/components";
 import { useSession } from "@lucidcms/admin/hooks";
 import type { RouteComponent } from "@lucidcms/admin/types";
+import { adminHref } from "@lucidcms/admin/utils";
 
 /** Public routes render with or without a session, so avoid permission-gated data. */
 const PublicRoute: RouteComponent = () => {
@@ -19,7 +20,7 @@ const PublicRoute: RouteComponent = () => {
 				title="Public playground"
 				description="This route works both with and without a session."
 				actions={
-					<Link href="/admin/e/playground" size="sm">
+					<Link href={adminHref("playground")} size="sm">
 						Open the admin playground
 					</Link>
 				}

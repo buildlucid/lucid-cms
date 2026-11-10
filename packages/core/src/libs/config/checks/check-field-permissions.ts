@@ -1,6 +1,6 @@
-import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
-import type FieldBuilder from "../../collection/builders/field-builder/index.js";
-import { getFieldBuilderState } from "../../collection/builders/field-builder/index.js";
+import type CollectionDefinition from "../../collection/definitions/collection/index.js";
+import type FieldSet from "../../collection/definitions/fields/index.js";
+import { getFieldSetState } from "../../collection/definitions/fields/index.js";
 import getFieldAccess from "../../collection/field-access/get-field-access.js";
 import logger from "../../logger/index.js";
 
@@ -9,11 +9,11 @@ const unprivileged = { superAdmin: false, permissions: [] };
 
 const checkFields = (
 	label: string,
-	builder: FieldBuilder,
+	builder: FieldSet,
 	owner: { collection: string; brick?: string },
 ) => {
 	const access = getFieldAccess(builder, unprivileged, owner);
-	for (const [key, field] of getFieldBuilderState(builder).fields) {
+	for (const [key, field] of getFieldSetState(builder).fields) {
 		const validation =
 			"validation" in field.config ? field.config.validation : undefined;
 		if (
@@ -33,7 +33,7 @@ const checkFields = (
  * Checks field, tab, section, collapsible and brick permissions: embedded bricks can't be hidden
  * from readers, label and route fields must be readable by everyone, and restricted required fields warn.
  */
-const checkFieldPermissions = (collection: CollectionBuilder) => {
+const checkFieldPermissions = (collection: CollectionDefinition) => {
 	const label = `collection "${collection.key}"`;
 	checkFields(label, collection, { collection: collection.key });
 

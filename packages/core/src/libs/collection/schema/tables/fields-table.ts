@@ -3,11 +3,10 @@ import type {
 	FieldTypes,
 	ServiceResponse,
 } from "../../../../exports/types.js";
-import type BrickBuilder from "../../../../libs/collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type BrickDefinition from "../../../../libs/collection/definitions/brick/index.js";
+import type CollectionDefinition from "../../../../libs/collection/definitions/collection/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import { copy } from "../../../i18n/index.js";
-import { getFieldBuilderState } from "../../builders/field-builder/index.js";
 import fieldConfigs from "../../custom-fields/field-configs.js";
 import {
 	getFieldDatabaseConfig,
@@ -17,6 +16,7 @@ import {
 } from "../../custom-fields/storage/index.js";
 import { relationTableMode } from "../../custom-fields/storage/relation-table.js";
 import { treeTableMode } from "../../custom-fields/storage/tree-table.js";
+import { getFieldSetState } from "../../definitions/fields/index.js";
 import buildSchemaIndex from "../../helpers/build-schema-index.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../helpers/prefix-generated-column-name.js";
@@ -28,7 +28,7 @@ import type {
 } from "../types.js";
 
 const shouldIndexField = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	field: FieldConfig<FieldTypes>,
 ) => {
 	const hasConfiguredIndex = "index" in field && field.index === true;
@@ -95,13 +95,13 @@ const createCoreIndexes = (props: {
  * Handles document fields, brick fields, and custom-field storage tables
  */
 const createFieldTables = (props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	fields: FieldConfig<FieldTypes>[];
 	db: DatabaseAdapter;
 	type: Exclude<TableType, "document" | "versions">;
 	documentTable: string;
 	versionTable: string;
-	brick?: BrickBuilder;
+	brick?: BrickDefinition;
 	fieldPath?: string[];
 	rootTable?: string;
 	additionalCoreColumns?: CollectionSchemaColumn[];
@@ -313,7 +313,7 @@ const createFieldTables = (props: {
 			}
 			case "column": {
 				//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and tree-table tables) we need to update this
-				const fieldInstance = getFieldBuilderState(
+				const fieldInstance = getFieldSetState(
 					props.brick || props.collection,
 				).fields.get(field.key);
 				if (!fieldInstance) {
@@ -390,7 +390,7 @@ const createFieldTables = (props: {
 				}
 
 				//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and tree-table tables) we need to update this
-				const fieldInstance = getFieldBuilderState(
+				const fieldInstance = getFieldSetState(
 					props.brick || props.collection,
 				).fields.get(field.key);
 				if (!fieldInstance) {

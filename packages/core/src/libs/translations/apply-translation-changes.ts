@@ -1,5 +1,5 @@
 import type { TranslationChange } from "../../types/response.js";
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import hashTranslationText from "./hash-translation-text.js";
 import { type ContentInput, contentFieldId } from "./list-content-fields.js";
@@ -12,7 +12,7 @@ import readTranslationState from "./read-translation-state.js";
  * edits, such as link URLs.
  */
 const applyTranslationChanges = <T extends ContentInput>(props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	content: T;
 	changes: readonly TranslationChange[];

@@ -1,5 +1,5 @@
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { fieldHooks } from "../collection/custom-fields/registered-fields.js";
+import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import listContentFields, {
 	type ContentInput,
@@ -8,7 +8,7 @@ import listContentFields, {
 
 /** The embedded bricks the content's values point at, in any locale. */
 const referencedEmbeddedBricks = (
-	collection: CollectionBuilder,
+	collection: CollectionDefinition,
 	content: ContentInput,
 ): Set<string> =>
 	new Set(
@@ -27,7 +27,7 @@ const referencedEmbeddedBricks = (
  * referenced embedded bricks so copied rich text has no missing targets.
  */
 const mergeLocaleContent = <T extends ContentInput>(props: {
-	collection: CollectionBuilder;
+	collection: CollectionDefinition;
 	localization: ResolvedCollectionLocalization;
 	target: T;
 	source: ContentInput;
