@@ -7,15 +7,44 @@ import userPreferencesStore, {
 	type SectionPreferenceKey,
 } from "@/store/userPreferencesStore/userPreferencesStore";
 
-const DocumentSidebarSection: Component<{
+export interface DocumentSidebarSectionProps {
 	title: string;
 	icon: JSXElement;
+	/** Remembers whether the section is open. Slot sections use the one their props give. */
 	preferenceKey: SectionPreferenceKey;
+	/** A short fact shown beside the title, such as a count. */
 	meta?: string | number;
 	children: JSXElement;
-}> = (props) => {
+}
+
+/**
+ * A collapsible section of the document sidebar. Plugins render one from a
+ * `document.sidebar` slot component.
+ *
+ * @example
+ * ```tsx
+ * import { DocumentSidebarSection } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ * import { TbOutlineChartBar } from "solid-icons/tb";
+ *
+ * const { t } = useTranslation();
+ *
+ * return (
+ * 	<DocumentSidebarSection
+ * 		title={t("analytics.views.title")}
+ * 		icon={<TbOutlineChartBar size={12} />}
+ * 		preferenceKey={props.preferenceKey}
+ * 	>
+ * 		<p>{t("analytics.views.summary", { count: views() })}</p>
+ * 	</DocumentSidebarSection>
+ * );
+ * ```
+ */
+const DocumentSidebarSection: Component<DocumentSidebarSectionProps> = (
+	props,
+) => {
 	// ----------------------------------
-	// State
+	// State & Hooks
 	const [open, setOpen] = useUserPreference({
 		value: () => userPreferencesStore.getSectionOpen(props.preferenceKey),
 		setValue: (value) =>

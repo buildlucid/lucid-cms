@@ -105,6 +105,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		definitions: [],
 	},
 	deploys: [],
+	redirects: [],
 	notifications: {
 		definitions: [],
 	},

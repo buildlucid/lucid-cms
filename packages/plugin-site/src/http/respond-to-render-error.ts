@@ -6,6 +6,7 @@ import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
 import type { Site } from "../site/create-site-loader.js";
 import type { SiteState } from "../types.js";
 import createDevErrorPage from "./create-dev-error-page.js";
+import redirectNotFound from "./redirect-not-found.js";
 import renderErrorPage from "./render-error-page.js";
 
 const respondToRenderError = async (props: {
@@ -24,6 +25,9 @@ const respondToRenderError = async (props: {
 		return hono.redirect(cause.location, cause.status);
 	}
 	if (cause instanceof SiteNotFoundError) {
+		const redirect = await redirectNotFound({ hono, site, state });
+		if (redirect) return redirect;
+
 		return renderErrorPage({
 			hono,
 			site,

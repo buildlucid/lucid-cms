@@ -41,7 +41,7 @@ AI features require a subscription with Lucid. This is planned to become publicl
 
 ## 🔌 First-Party Plugins
 
-- [Pages](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages): adds hierarchical documents, slugs, parent pages, and computed paths for website page collections.
+- [Pages](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages): adds hierarchical documents, slugs, parent pages, computed paths and redirects for website page collections.
 - [Filesystem](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-filesystem): stores uploaded media on the local filesystem.
 - [S3](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-s3): stores media in AWS S3, Cloudflare R2, or another S3-compatible provider.
 - [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2): uses a Cloudflare R2 binding with optional S3-compatible HTTP fallback.
@@ -57,7 +57,6 @@ AI features require a subscription with Lucid. This is planned to become publicl
 - [SQLite KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-sqlite-kv): registers a local SQLite-backed KV adapter.
 - [Redis](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-redis): registers a Redis-backed KV adapter.
 - [Cloudflare KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-kv): registers a Cloudflare KV adapter.
-- [Redirects](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-redirects): adds a manually managed, environment-aware redirects collection for website integrations.
 - [Typesense](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-typesense): indexes collection content with durable jobs, projections and resumable rebuilds.
 - [SEO](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-seo): adds SEO fields to your collections, with previews of search results and social media cards.
 - [Cloudflare Turnstile](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-turnstile): protects login and other public forms with Cloudflare Turnstile.

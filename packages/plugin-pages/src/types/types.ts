@@ -1,4 +1,8 @@
-import type { DocumentVersionType, FieldWidth } from "@lucidcms/core/types";
+import type {
+	CollectionEnvironmentOptions,
+	DocumentVersionType,
+	FieldWidth,
+} from "@lucidcms/core/types";
 
 /** A shared URL prefix or prefixes keyed by content locale. */
 export type CollectionPrefix = string | Record<string, string>;
@@ -42,6 +46,19 @@ export interface CollectionUI {
 	widths?: Partial<Record<PagesFieldKey, FieldWidth>>;
 }
 
+/** The redirects collection and automatic redirects for pages whose paths change. */
+export interface RedirectsOptions {
+	/**
+	 * Remember a page's old paths when they change in a published environment, so visitors and
+	 * search engines are sent to its current path. Defaults to true.
+	 */
+	trackPathChanges?: boolean;
+	/** Admin navigation group key for the redirects collection. Defaults to `redirects`. */
+	navigationGroup?: string;
+	/** Redirect environments. Defaults to every pages collection's environments, merged. */
+	environments?: CollectionEnvironmentOptions[];
+}
+
 /** Collections that should receive page routing fields. */
 export interface PluginOptions {
 	/** Collection-specific routing options. */
@@ -59,11 +76,52 @@ export interface PluginOptions {
 		/** Reject conflicting paths. Defaults to true. */
 		unique?: boolean;
 	}>;
+	/**
+	 * Adds a redirects collection for sending old addresses to pages or other websites, and
+	 * redirects pages' old paths to their current ones. `false` turns both off. Defaults to true.
+	 */
+	redirects?: boolean | RedirectsOptions;
 }
 
 export interface PluginOptionsInternal {
 	collections: Array<CollectionConfig>;
+	redirects: false | RedirectsOptionsInternal;
 }
+
+export type RedirectsOptionsInternal = Omit<
+	RedirectsOptions,
+	"trackPathChanges"
+> & {
+	trackPathChanges: boolean;
+};
+
+/** A pages collection redirects can point at, and whether its paths differ per locale. */
+export type RedirectTargetCollection = {
+	key: string;
+	localized: boolean;
+};
+
+/** Redirects settings once the collections and locales they depend on are known. */
+export type RedirectsConfig = {
+	/** Pages collections redirects can point at. */
+	collections: RedirectTargetCollection[];
+	environments: CollectionEnvironmentOptions[];
+	navigationGroup?: string;
+	locales: Array<{ code: string; label: string }>;
+	defaultLocale: string | null;
+	/** Redirects pick a language when the site has more than one. */
+	hasLocaleField: boolean;
+	/** Pages' old paths redirect to their current ones. */
+	trackPathChanges: boolean;
+};
+
+/** The values a redirect's integrity checks compare: its source, language and target. */
+export type RedirectIdentity = {
+	from: string;
+	locale: string | null;
+	targetType: "document" | "url";
+	targetUrl: string | null;
+};
 
 export interface CollectionConfig {
 	key: string;
@@ -75,6 +133,8 @@ export interface CollectionConfig {
 		widths: Record<PagesFieldKey, FieldWidth>;
 	};
 	unique: boolean;
+	/** Record the collection's old published paths, so they redirect to current ones. */
+	trackPaths: boolean;
 }
 
 /**

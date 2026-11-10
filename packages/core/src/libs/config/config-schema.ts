@@ -35,6 +35,7 @@ import type { AnyNotificationDefinition } from "../notifications/types.js";
 import { accessGroupSchema } from "../permission/access-config.js";
 import { PluginDefinitionSchema } from "../plugins/schema.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
+import type { RedirectResolver } from "../redirects/types.js";
 import { defaultDirectories } from "../resources/defaults.js";
 import {
 	ResourceDirectoriesSchema,
@@ -568,6 +569,11 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 	deploys: z.array(
 		z.custom<DeployDefinition>(isDeployDefinition, {
 			message: "Expected a deploy created with defineDeploy",
+		}),
+	),
+	redirects: z.array(
+		z.custom<RedirectResolver>((value) => typeof value === "function", {
+			message: "Expected a redirect resolver function",
 		}),
 	),
 	notifications: z.preprocess(

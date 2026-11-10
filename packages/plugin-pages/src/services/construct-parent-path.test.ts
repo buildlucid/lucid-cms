@@ -24,6 +24,7 @@ const collection = {
 		},
 	},
 	unique: true,
+	trackPaths: false,
 } satisfies CollectionConfig;
 
 describe("constructParentPath", () => {

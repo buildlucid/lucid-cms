@@ -59,7 +59,8 @@
 	},
 	"dependencies": {
 		"immer": "^11.2.9",
-		"kysely": "0.29.7"
+		"kysely": "0.29.7",
+		"solid-icons": "^1.2.0"
 	},
 	"volta": {
 		"node": "26.12.1"

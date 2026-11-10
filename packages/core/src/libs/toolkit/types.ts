@@ -11,6 +11,7 @@ import type { ToolkitLocales } from "./locales/index.js";
 import type { ToolkitMedia } from "./media/index.js";
 import type { ToolkitNotifications } from "./notifications/index.js";
 import type { ToolkitPreviews } from "./previews/index.js";
+import type { ToolkitRedirects } from "./redirects/index.js";
 import type { ToolkitRequests } from "./requests/index.js";
 import type { ToolkitTransfer } from "./transfer/index.js";
 import type { ToolkitUsers } from "./users/index.js";
@@ -46,6 +47,8 @@ export type CoreToolkit = {
 	notifications: ToolkitNotifications;
 	/** Helpers for resolving and handling previews. */
 	previews: ToolkitPreviews;
+	/** Look up where a website path redirects to. */
+	redirects: ToolkitRedirects;
 	/** Helpers for reading, discussing and managing requests. */
 	requests: ToolkitRequests;
 	/** Helpers for exporting records to portable files and importing them, such as in seeds. */
@@ -137,6 +140,8 @@ export type * from "./notifications/index.js";
 export type * from "./previews/index.js";
 export type * from "./previews/resolve/index.js";
 export type * from "./previews/state/index.js";
+export type * from "./redirects/index.js";
+export type * from "./redirects/resolve/index.js";
 export type * from "./requests/acknowledge/index.js";
 export type * from "./requests/approve/index.js";
 export type * from "./requests/close/index.js";

@@ -12,6 +12,7 @@ const pageConfig = {
 		widths: { slug: 6, parentPage: 12, segments: 12 },
 	},
 	unique: true,
+	trackPaths: false,
 } satisfies CollectionConfig;
 
 describe("buildRouteSegmentTargets", () => {

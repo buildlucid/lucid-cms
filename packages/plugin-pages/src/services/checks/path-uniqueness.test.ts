@@ -22,6 +22,7 @@ const collection = {
 		widths: { slug: 12, parentPage: 12, segments: 12 },
 	},
 	unique: true,
+	trackPaths: false,
 } satisfies CollectionConfig;
 
 describe("path uniqueness", () => {

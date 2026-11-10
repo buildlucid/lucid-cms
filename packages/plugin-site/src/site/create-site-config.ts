@@ -17,6 +17,8 @@ export type SiteConfig = {
 	getVersion: (collectionKey: string, requested?: string) => string | null;
 	/** The collection's site version without the warning, for checks across every collection. */
 	siteVersion: (collectionKey: string) => string | null;
+	/** The environment the site shows, or latest when no collection has environments. */
+	environment: string;
 };
 
 /** Rejects site locales absent from the CMS or unsupported by `Intl` for rendering dates and numbers. */
@@ -92,6 +94,7 @@ const createSiteConfig = (
 			return locale;
 		},
 		siteVersion,
+		environment: siteEnvironment ?? "latest",
 		getVersion: (collectionKey, requested) => {
 			const version = siteVersion(collectionKey);
 			if (requested !== undefined) return requested;

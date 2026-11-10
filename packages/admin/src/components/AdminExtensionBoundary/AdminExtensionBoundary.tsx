@@ -20,7 +20,8 @@ const indicatorStyles = {
 } satisfies Record<string, { size: StatusIndicatorSize; class: string }>;
 
 /**
- * Keeps a failed extension from removing the surrounding editor or admin layout.
+ * Keeps a failed extension from removing the surrounding editor or admin layout. Pages wait for
+ * their code behind the empty page frame; slots show nothing until theirs loads.
  */
 const AdminExtensionBoundary: ParentComponent<{
 	name: string;
@@ -81,16 +82,12 @@ const AdminExtensionBoundary: ParentComponent<{
 				);
 			}}
 		>
-			<Suspense
-				fallback={
-					//* the same empty frame core pages show while their code loads
-					<Show when={props.placement === "page"}>
-						<PageLayout.Root />
-					</Show>
-				}
-			>
-				{props.children}
-			</Suspense>
+			{/* only pages wait behind a boundary, showing the empty frame core pages show while their code
+			loads. Slots render nothing until their code loads, and a boundary would also hide them whenever
+			a query they read loads, so they couldn't show their own placeholder */}
+			<Show when={props.placement === "page"} fallback={props.children}>
+				<Suspense fallback={<PageLayout.Root />}>{props.children}</Suspense>
+			</Show>
 		</ErrorBoundary>
 	);
 };

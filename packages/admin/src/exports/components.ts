@@ -68,6 +68,10 @@ export {
 	type DetailsListVariant,
 	default as DetailsList,
 } from "../components/DetailsList/DetailsList.js";
+export {
+	default as DocumentSidebarSection,
+	type DocumentSidebarSectionProps,
+} from "../components/DocumentSidebarSection/DocumentSidebarSection.js";
 export * from "../components/Drawer/Drawer.js";
 export { default as Drawer } from "../components/Drawer/Drawer.js";
 export {

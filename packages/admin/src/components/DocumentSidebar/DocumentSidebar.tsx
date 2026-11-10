@@ -5,10 +5,9 @@ import type {
 	Refs,
 } from "@types";
 import classNames from "classnames";
-import { type Accessor, type Component, createMemo, Show } from "solid-js";
-import { Permissions } from "@/constants/permissions";
+import { type Accessor, type Component, Show } from "solid-js";
+import DocumentSidebarSlots from "@/components/DocumentSidebarSlots/DocumentSidebarSlots";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
-import userStore from "@/store/userStore/userStore";
 import { DocumentDetails } from "./parts/DocumentDetails";
 import { DocumentRequests } from "./parts/DocumentRequests";
 import { Workflow } from "./parts/Workflow";
@@ -29,58 +28,52 @@ export const DocumentSidebar: Component<{
 	padding?: "md" | "lg";
 }> = (props) => {
 	// ----------------------------------
-	// Memos
-	const hasWorkflow = createMemo(
-		() =>
-			props.collection()?.publishing.workflow !== undefined &&
-			props.documentId() !== undefined &&
-			Boolean(props.document()?.workflow),
-	);
-	const hasPendingRequests = createMemo(
-		() =>
-			!props.requestContext &&
-			userStore.get.hasPermission([Permissions.RequestsRead]).all &&
-			props.documentId() !== undefined,
-	);
-
-	// ----------------------------------
 	// Render
 	return (
 		<aside
 			class={classNames(
-				"flex flex-col gap-5 p-4",
+				"flex flex-col gap-5 p-4 [&>:empty]:hidden [&>:not(:empty)~:not(:empty)]:border-t [&>:not(:empty)~:not(:empty)]:border-border [&>:not(:empty)~:not(:empty)]:pt-5",
 				props.padding === "lg" ? "md:p-6" : "md:p-5",
 				props.class,
 			)}
 		>
-			<Workflow
-				collection={props.collection}
-				collectionKey={props.collectionKey}
-				document={props.document}
-				refs={props.refs}
-				documentId={props.documentId}
-				disabled={props.disabled}
-				mutations={props.mutations}
-			/>
-			<Show when={hasWorkflow() && hasPendingRequests()}>
-				<div class="border-t border-border" aria-hidden="true" />
-			</Show>
-			<Show when={hasPendingRequests()}>
-				<DocumentRequests
+			<DocumentSidebarSlots
+				section="workflow"
+				collectionKey={props.collectionKey()}
+			>
+				<Workflow
+					collection={props.collection}
 					collectionKey={props.collectionKey}
+					document={props.document}
+					refs={props.refs}
+					documentId={props.documentId}
+					disabled={props.disabled}
+					mutations={props.mutations}
+				/>
+			</DocumentSidebarSlots>
+			<DocumentSidebarSlots
+				section="requests"
+				collectionKey={props.collectionKey()}
+			>
+				<Show when={!props.requestContext}>
+					<DocumentRequests
+						collectionKey={props.collectionKey}
+						documentId={props.documentId}
+					/>
+				</Show>
+			</DocumentSidebarSlots>
+			<DocumentSidebarSlots
+				section="details"
+				collectionKey={props.collectionKey()}
+			>
+				<DocumentDetails
+					collection={props.collection}
+					document={props.document}
+					refs={props.refs}
+					autoSaveMetadata={props.autoSaveMetadata}
 					documentId={props.documentId}
 				/>
-			</Show>
-			<Show when={hasWorkflow() || hasPendingRequests()}>
-				<div class="border-t border-border" aria-hidden="true" />
-			</Show>
-			<DocumentDetails
-				collection={props.collection}
-				document={props.document}
-				refs={props.refs}
-				autoSaveMetadata={props.autoSaveMetadata}
-				documentId={props.documentId}
-			/>
+			</DocumentSidebarSlots>
 		</aside>
 	);
 };

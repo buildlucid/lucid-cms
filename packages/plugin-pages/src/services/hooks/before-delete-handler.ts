@@ -69,7 +69,7 @@ const beforeDeleteHandler =
 
 			const updateRes = await updateRouteFields(context, {
 				toolkit,
-				collectionKey: meta.collectionKey,
+				collection: targetCollectionRes.data,
 				field: "path",
 				excludeDocumentIds: data.ids,
 				values: docPathsRes.data,

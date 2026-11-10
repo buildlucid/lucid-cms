@@ -9,6 +9,7 @@ const externalScopeValues = {
 	MediaDelete: "media:delete",
 	MediaResolveUrl: "media:resolve-url",
 	LocalesRead: "locales:read",
+	RedirectsRead: "redirects:read",
 	RequestsRead: "requests:read",
 	McpAccess: "mcp:access",
 } as const;

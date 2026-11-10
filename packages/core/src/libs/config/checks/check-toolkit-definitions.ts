@@ -15,6 +15,7 @@ const coreToolkitKeys = {
 	media: true,
 	notifications: true,
 	previews: true,
+	redirects: true,
 	requests: true,
 	transfer: true,
 	users: true,

@@ -21,6 +21,7 @@ export type CoreExternalScope =
 	| "media:delete"
 	| "media:resolve-url"
 	| "locales:read"
+	| "redirects:read"
 	| "requests:read"
 	| "mcp:access";
 

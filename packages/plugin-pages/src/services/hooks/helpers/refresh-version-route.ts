@@ -138,7 +138,7 @@ const refreshVersionRoute: ServiceFn<
 	//* promoted and captured slugs are stored as typed, so normalise them like a save would
 	const updateSlugRes = await updateRouteFields(context, {
 		toolkit: data.toolkit,
-		collectionKey: data.collection.key,
+		collection: data.collection,
 		field: "slug",
 		scope: data.scope,
 		values: [
@@ -156,7 +156,7 @@ const refreshVersionRoute: ServiceFn<
 
 	return updateRouteFields(context, {
 		toolkit: data.toolkit,
-		collectionKey: data.collection.key,
+		collection: data.collection,
 		field: "path",
 		scope: data.scope,
 		excludeDocumentIds: [data.documentId],

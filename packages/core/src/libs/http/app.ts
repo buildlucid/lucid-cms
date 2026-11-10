@@ -415,6 +415,11 @@ const createApp = async (props: {
 									"Content locale endpoints for fetching locale information.",
 							},
 							{
+								name: "content-redirects",
+								description:
+									"Content redirect endpoints for finding where a website path redirects to.",
+							},
+							{
 								name: "content-media",
 								description:
 									"External media endpoints authorized by API keys or OAuth access tokens.",

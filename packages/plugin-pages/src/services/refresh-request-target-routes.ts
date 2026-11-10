@@ -90,7 +90,7 @@ const refreshRequestTargetRoutes: ServiceFn<
 	//* completed slugs are stored as typed, so normalise them like a save would
 	const slugsRes = await updateRouteFields(context, {
 		toolkit: data.toolkit,
-		collectionKey: data.collection.key,
+		collection: data.collection,
 		field: "slug",
 		scope,
 		values: projection.members.map((member) => ({
@@ -108,7 +108,7 @@ const refreshRequestTargetRoutes: ServiceFn<
 
 	return updateRouteFields(context, {
 		toolkit: data.toolkit,
-		collectionKey: data.collection.key,
+		collection: data.collection,
 		field: "path",
 		scope,
 		excludeDocumentIds: [...memberIds],

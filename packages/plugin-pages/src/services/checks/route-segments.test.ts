@@ -21,6 +21,7 @@ const config = {
 		widths: { slug: 6, parentPage: 12, segments: 12 },
 	},
 	unique: true,
+	trackPaths: false,
 } satisfies CollectionConfig;
 
 describe("route segments", () => {
@@ -65,6 +66,9 @@ describe("route segments", () => {
 			collections: [documentation, product],
 			hooks: [],
 			jobs: { definitions: [] },
+			migrations: { definitions: [] },
+			redirects: [],
+			localization: { locales: [], defaultLocale: null },
 			http: { routes: [] },
 		} as never;
 

@@ -132,3 +132,40 @@ A page with product `lucid`, release `v1`, and slug `getting-started` resolves t
 By default, each computed `path` must be unique within the same collection, version type, and locale. This checks the computed route rather than the raw slug value.
 
 Set `unique: false` to disable this route uniqueness validation for a collection.
+
+## Redirects
+
+The plugin also adds a `redirects` collection and keeps pages' old paths working. Set `redirects: false` to turn both off, or pass options:
+
+```typescript
+pagesPlugin({
+  collections: [{ key: "page" }],
+  redirects: {
+    trackPathChanges: true,
+    navigationGroup: "website",
+  },
+});
+```
+
+| Property           | Type                             | Default     | Description                                                                                        |
+| ------------------ | -------------------------------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| `trackPathChanges` | `boolean`                        | `true`      | Redirects a page's old published paths to its current one                                          |
+| `navigationGroup`  | `string`                         | `redirects` | The admin navigation group for the redirects collection                                            |
+| `environments`     | `CollectionEnvironmentOptions[]` | -           | The redirects collection's environments. Defaults to every pages collection's environments, merged |
+
+- **Editors' redirects** send an old path to a page or another web address. A redirect to a page follows it when its path changes.
+- **Old paths** are remembered whenever a page's path changes in a published environment, including when a parent's slug moves its children. Draft changes are never recorded. Each old path redirects to the page's current path with a 301. Editors see a page's old paths for the environment they're viewing from the history button beside its path, or in the document sidebar, and can remove one there. For pages published before tracking was on, run the Page Paths rebuild in System → Operations once, or their first change won't redirect. Clear Previous Paths, also in System → Operations, forgets every old path at once.
+- **Pages always win.** A path a page uses is never redirected, and a redirect from it can't be saved.
+
+The site plugin redirects automatically when a page isn't found. Other websites ask `toolkit.redirects.resolve()`, or the content API's `GET /api/v1/content/redirects/resolve` with the `redirects:read` scope, before showing their not found page:
+
+```typescript
+const redirect = await toolkit.redirects.resolve({
+  path: "/about-us",
+  environment: "production",
+  locale: "en",
+});
+if (redirect.data) {
+  return Astro.redirect(redirect.data.location, redirect.data.status);
+}
+```

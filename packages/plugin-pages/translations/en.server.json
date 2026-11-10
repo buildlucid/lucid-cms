@@ -34,5 +34,15 @@
 	"plugin.pages.path.children.update.failed": "An error occurred while updating the paths of child pages.",
 	"plugin.pages.documents.version.fields.fetch.failed": "An error occurred while getting the document version fields.",
 	"plugin.pages.fields.validation.required": "This field is required.",
-	"plugin.pages.rebuild.paths.duplicate": "Page paths weren't rebuilt because more than one page would use {{route}} in {{target}}. Change one of their slugs, then try again."
+	"plugin.pages.rebuild.paths.duplicate": "Page paths weren't rebuilt because more than one page would use {{route}} in {{target}}. Change one of their slugs, then try again.",
+	"plugin.pages.redirects.source.duplicate": "Another redirect already uses this starting path for the selected language.",
+	"plugin.pages.redirects.source.check.failed": "The redirect source could not be checked.",
+	"plugin.pages.redirects.source.page": "A page already uses this path, so the redirect would never be used.",
+	"plugin.pages.redirects.target.self": "A redirect cannot point to its own source path.",
+	"plugin.pages.redirects.page.check.failed": "The pages using this path could not be checked.",
+	"plugin.pages.redirects.resolve.failed": "The redirect could not be looked up.",
+	"plugin.pages.path.history.record.failed": "The page's previous paths could not be saved.",
+	"plugin.pages.previous.paths.fetch.failed": "The page's previous paths could not be loaded.",
+	"plugin.pages.previous.paths.delete.failed": "The previous path could not be removed.",
+	"plugin.pages.path.history.clear.failed": "The previous paths could not be cleared."
 }

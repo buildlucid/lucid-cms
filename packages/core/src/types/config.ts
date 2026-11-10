@@ -39,6 +39,7 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
+import type { RedirectResolver } from "../libs/redirects/types.js";
 import type {
 	ResourceDirectories,
 	ResourceSources,
@@ -699,6 +700,8 @@ export interface LucidConfig {
 		  };
 	/** Deploys created with `defineDeploy`, which people with the deploy permissions can run from the admin. */
 	deploys?: DeployDefinition[];
+	/** Sources of website redirects, asked in order by `toolkit.redirects.resolve()`. Plugins such as the pages plugin add theirs. */
+	redirects?: RedirectResolver[];
 	/** Configures `defineNotification` types, with arrays as shorthand for `{ definitions }`. */
 	notifications?:
 		| AnyNotificationDefinition[]
@@ -901,6 +904,7 @@ export interface ResolvedLucidConfig {
 		definitions: AnyJobDefinition[];
 	};
 	deploys: DeployDefinition[];
+	redirects: RedirectResolver[];
 	notifications: {
 		definitions: AnyNotificationDefinition[];
 	};

@@ -33,6 +33,7 @@ const createConfig = (
 		},
 	},
 	unique: true,
+	trackPaths: false,
 });
 
 test("slug validation returns specific English zod messages", () => {

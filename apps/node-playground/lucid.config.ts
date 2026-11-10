@@ -12,7 +12,6 @@ import { googleAuthPlugin } from "@lucidcms/plugin-google-auth";
 import { microsoftAuthPlugin } from "@lucidcms/plugin-microsoft-auth";
 import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
-import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { seoPlugin } from "@lucidcms/plugin-seo";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { sitePlugin } from "@lucidcms/plugin-site";
@@ -368,9 +367,6 @@ export default defineConfig({
 						],
 					},
 				],
-			}),
-			redirectsPlugin({
-				collections: ["page"],
 			}),
 			nodemailerPlugin({
 				transporter: transporter,

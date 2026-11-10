@@ -2,14 +2,16 @@ import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import { resolveRouteScope } from "../../utils/route-scope.js";
+import recordPaths from "../record-paths.js";
 import updateRouteFields from "../update-route-fields.js";
 import buildDescendantPaths from "./helpers/build-descendant-paths.js";
 import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
 /**
- * Rewrites descendant routes once a page is saved. A request write only
- * rewrites descendants captured in the same request. Route-segment changes
- * only propagate from latest and environment versions.
+ * Rewrites descendant routes once a page is saved and records the page's own
+ * published path. A request write only rewrites descendants captured in the
+ * same request. Route-segment changes only propagate from latest and
+ * environment versions.
  */
 const afterUpsertHandler =
 	(
@@ -42,7 +44,7 @@ const afterUpsertHandler =
 
 			if (docPathsRes.data.length > 0) {
 				const updateRes = await updateRouteFields(context, {
-					collectionKey: meta.collectionKey,
+					collection: pageCollection,
 					field: "path",
 					excludeDocumentIds: [data.documentId],
 					values: docPathsRes.data,
@@ -52,6 +54,28 @@ const afterUpsertHandler =
 				});
 				if (updateRes.error) return updateRes;
 			}
+
+			//* the save wrote this page's own path, so updateRouteFields didn't record it
+			const pathValue = (value: unknown) =>
+				typeof value === "string" ? value : null;
+			const recordRes = await recordPaths(context, {
+				collection: pageCollection,
+				scope,
+				values: [
+					{
+						documentId: data.documentId,
+						versionId: data.versionId,
+						values: currentPathField.translations
+							? new Map(
+									Object.entries(currentPathField.translations).map(
+										([locale, value]) => [locale, pathValue(value)],
+									),
+								)
+							: new Map([[null, pathValue(currentPathField.value)]]),
+					},
+				],
+			});
+			if (recordRes.error) return recordRes;
 		}
 		if (scope.type !== "version") {
 			return { error: undefined, data: undefined };

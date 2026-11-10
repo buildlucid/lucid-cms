@@ -21,6 +21,7 @@ import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import { getDeploysViewRequirement } from "@/utils/deploys";
 import lazyPage from "@/utils/lazy-page";
+import preloadDocumentSlots from "@/utils/preload-document-slots";
 import PermissionSomeGuard from "./guards/PermissionSomeGuard/PermissionSomeGuard";
 
 type LazyRoute = {
@@ -134,18 +135,26 @@ const OAuthConsentRoute = lazyPage(
 const CollectionsDocumentsListRoute = lazyPage(
 	() => import("@/containers/DocumentsPage/DocumentsPage"),
 );
-const CollectionDocumentPageBuilderRoute = lazyPage(
-	() => import("@/containers/DocumentEditorPage/DocumentEditorPage"),
-);
+const CollectionDocumentPageBuilderRoute = lazyPage(async () => {
+	const [page] = await Promise.all([
+		import("@/containers/DocumentEditorPage/DocumentEditorPage"),
+		preloadDocumentSlots(),
+	]);
+	return page;
+});
 const CollectionsDocumentsHistoryRoute = lazyPage(
 	() => import("@/containers/DocumentHistoryPage/DocumentHistoryPage"),
 );
 const RequestRoute = lazyPage(
 	() => import("@/containers/RequestPage/RequestPage"),
 );
-const RequestProposalRoute = lazyPage(
-	() => import("@/containers/RequestContentPage/RequestContentPage"),
-);
+const RequestProposalRoute = lazyPage(async () => {
+	const [page] = await Promise.all([
+		import("@/containers/RequestContentPage/RequestContentPage"),
+		preloadDocumentSlots(),
+	]);
+	return page;
+});
 
 /**
  * Loads route code ahead, such as when a link is hovered. Routes that also

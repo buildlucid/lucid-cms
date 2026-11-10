@@ -137,7 +137,7 @@ const propagateRouteSegmentUpdates: ServiceFn<
 
 						return updateRouteFields(context, {
 							toolkit: data.toolkit,
-							collectionKey: collection.key,
+							collection,
 							field: "path",
 							excludeDocumentIds:
 								collection.key === data.targetCollectionKey

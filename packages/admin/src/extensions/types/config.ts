@@ -4,6 +4,7 @@ import type {
 	BrickSlotPlacement,
 } from "../../components/BrickSlots/types.js";
 import type { CaptchaSlotPlacement } from "../../components/CaptchaWidget/types.js";
+import type { DocumentSidebarSlotPlacement } from "../../components/DocumentSidebarSlots/types.js";
 import type { DocumentListSlotPlacement } from "../../components/DocumentSlotCell/types.js";
 import type {
 	FieldSlot,
@@ -44,6 +45,7 @@ export type AdminSlot = {
 	| AgentSlotPlacement
 	| HomeWidgetPlacement
 	| DocumentListSlotPlacement
+	| DocumentSidebarSlotPlacement
 	| (BrickSlotPlacement & { match?: BrickSlotMatch })
 	| { slot: FieldSlot; match?: FieldSlotMatch }
 	| CaptchaSlotPlacement

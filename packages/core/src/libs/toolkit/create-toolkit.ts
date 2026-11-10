@@ -10,6 +10,7 @@ import createLocalesToolkit from "./locales/index.js";
 import createMediaToolkit from "./media/index.js";
 import createNotificationsToolkit from "./notifications/index.js";
 import createPreviewsToolkit from "./previews/index.js";
+import createRedirectsToolkit from "./redirects/index.js";
 import createRequestsToolkit from "./requests/index.js";
 import createTransferToolkit from "./transfer/index.js";
 import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
@@ -47,6 +48,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 		media: createMediaToolkit(context),
 		notifications: createNotificationsToolkit(context),
 		previews: createPreviewsToolkit(context),
+		redirects: createRedirectsToolkit(context),
 		requests: createRequestsToolkit(context),
 		transfer: createTransferToolkit(context),
 		users: createUsersToolkit(context),

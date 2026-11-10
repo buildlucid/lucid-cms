@@ -17,6 +17,7 @@ test("should resolve a shared string prefix", async () => {
 				},
 			},
 			unique: true,
+			trackPaths: false,
 			prefix: "Blog",
 		} satisfies CollectionConfig,
 		localeCode: "en",
@@ -40,6 +41,7 @@ test("should resolve a locale specific prefix", async () => {
 				},
 			},
 			unique: true,
+			trackPaths: false,
 			prefix: {
 				en: "News",
 				fr: "/Actualites/",

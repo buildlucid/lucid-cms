@@ -7,14 +7,16 @@ import findRebuildConflict from "../utils/find-rebuild-conflict.js";
 import getRouteVersionTypes from "../utils/get-route-version-types.js";
 import resolvePagesCollectionLocalization from "../utils/resolve-pages-collection-localization.js";
 import constructChildPath from "./construct-child-paths.js";
+import getPageDocumentIds from "./get-page-document-ids.js";
 import getPagesFields from "./get-pages-fields.js";
+import recordStoredPaths from "./record-stored-paths.js";
 import resolveStoredRoutePrefixes from "./resolve-stored-route-prefixes.js";
 import updateRouteFields from "./update-route-fields.js";
 
 /**
- * Rebuilds latest and environment paths, skipping binned pages and request proposals. Children of
- * binned parents become top-level, then `pages.afterRebuildPaths` hooks run. Run in a transaction
- * so path conflicts and hook errors roll back all changes.
+ * Rebuilds latest and environment paths, promoting children of binned parents to top-level.
+ * Records published paths before and after, then runs `pages.afterRebuildPaths`. Skips request
+ * proposals. Run in a transaction to roll back conflicts and hook errors.
  */
 const rebuildPaths: ServiceFn<
 	[{ options: PluginOptionsInternal; toolkit: Toolkit }],
@@ -33,22 +35,11 @@ const rebuildPaths: ServiceFn<
 		if (tablesRes.error) return tablesRes;
 		const tables = tablesRes.data;
 
-		const documentsQuery = context.db.kysely
-			.selectFrom(context.db.kysely.dynamic.table(tables.document).as("d"))
-			.select("d.id")
-			.where("d.collection_key", "=", collection.key)
-			.where(
-				"d.is_deleted",
-				"=",
-				context.config.db.getDefault("boolean", "false"),
-			);
-		const documentsRes = await context.db
-			.query<{ id: number }>(
-				"pages.rebuild-paths.documents",
-				() => documentsQuery,
-			)
-			.many();
-		if (documentsRes.error) return documentsRes;
+		const documentIdsRes = await getPageDocumentIds(context, {
+			collectionKey: collection.key,
+			tables,
+		});
+		if (documentIdsRes.error) return documentIdsRes;
 
 		const localization = resolvePagesCollectionLocalization({
 			localization: context.config.localization,
@@ -62,7 +53,7 @@ const rebuildPaths: ServiceFn<
 				collectionKey: collection.key,
 				scope,
 				tables,
-				documentIds: documentsRes.data.map((document) => document.id),
+				documentIds: documentIdsRes.data,
 			});
 			if (versionsRes.error) return versionsRes;
 
@@ -84,6 +75,16 @@ const rebuildPaths: ServiceFn<
 				routePrefixes: routePrefixesRes.data,
 			});
 			if (pathsRes.error) return pathsRes;
+
+			//* recording stored paths starts tracking pages published before it, and keeps the paths a rebuild replaces
+			const storedRes = await recordStoredPaths(context, {
+				collection,
+				scope,
+				versions: versionsRes.data,
+				localized: localization.enabled,
+			});
+			if (storedRes.error) return storedRes;
+
 			if (pathsRes.data.length === 0) continue;
 
 			const conflict = collection.unique
@@ -108,7 +109,7 @@ const rebuildPaths: ServiceFn<
 
 			const updateRes = await updateRouteFields(context, {
 				toolkit: data.toolkit,
-				collectionKey: collection.key,
+				collection,
 				field: "path",
 				scope,
 				values: pathsRes.data,

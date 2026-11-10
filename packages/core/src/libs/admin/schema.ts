@@ -1,6 +1,7 @@
 import type {
 	AdminConfig,
 	AdminNavigationIcon,
+	DocumentSidebarSectionKey,
 	ValueFieldType,
 } from "@lucidcms/admin/types";
 import z from "zod";
@@ -94,6 +95,13 @@ const fieldSlotType = z.enum({
 	user: "user",
 	email: "email",
 } satisfies { [Type in ValueFieldType]: Type });
+
+//* keyed by section, so a section missing here fails the type check
+const documentSidebarSection = z.enum({
+	workflow: "workflow",
+	requests: "requests",
+	details: "details",
+} satisfies { [Section in DocumentSidebarSectionKey]: Section });
 
 const homeWidgetSize = z.enum(["sm", "md", "lg", "full"]);
 
@@ -240,6 +248,20 @@ export const adminConfigSchema = z
 						component: componentReference,
 						options,
 						match: z.strictObject({ collection: key.optional(), field: key }),
+					}),
+					z.strictObject({
+						key,
+						priority: z.number().optional(),
+						slot: z.literal("document.sidebar"),
+						match: z.strictObject({ collection: key.optional() }).optional(),
+						position: z
+							.union([
+								z.strictObject({ before: documentSidebarSection }),
+								z.strictObject({ after: documentSidebarSection }),
+							])
+							.optional(),
+						component: componentReference,
+						options,
 					}),
 					z.strictObject({
 						key,

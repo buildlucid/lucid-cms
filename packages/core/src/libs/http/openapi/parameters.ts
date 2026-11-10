@@ -93,7 +93,10 @@ const parameters = (props: {
 	}
 
 	if (props.query) {
-		const querySchema = z.toJSONSchema(props.query) as OpenAPIV3.SchemaObject;
+		//* described as clients send it, so query values with a default aren't marked required
+		const querySchema = z.toJSONSchema(props.query, {
+			io: "input",
+		}) as OpenAPIV3.SchemaObject;
 		if (querySchema.properties) {
 			for (const [paramName, paramSchema] of Object.entries(
 				querySchema.properties,

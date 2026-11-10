@@ -22,7 +22,10 @@ export const SECTION_PREFERENCE_KEYS = [
 	"agent.panel",
 ] as const;
 
-export type SectionPreferenceKey = (typeof SECTION_PREFERENCE_KEYS)[number];
+/** Plugin sections in the document sidebar are keyed by their slot key. */
+export type SectionPreferenceKey =
+	| (typeof SECTION_PREFERENCE_KEYS)[number]
+	| `slot.${string}`;
 
 export type BuilderStateItem = {
 	activeTab?: string;
@@ -123,6 +126,8 @@ export const ensureCollectionPreferenceState = (
 };
 
 const sectionPreferenceKeys = new Set<string>(SECTION_PREFERENCE_KEYS);
+const isSectionPreferenceKey = (key: string): key is SectionPreferenceKey =>
+	sectionPreferenceKeys.has(key) || key.startsWith("slot.");
 
 const isBuilderStateItem = (value: unknown): value is BuilderStateItem => {
 	if (!isObjectRecord(value) || typeof value.lastUpdated !== "number") {
@@ -160,10 +165,10 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 
 		if (isObjectRecord(preferences.sections)) {
 			for (const [key, open] of Object.entries(preferences.sections)) {
-				if (typeof open !== "boolean" || !sectionPreferenceKeys.has(key)) {
+				if (typeof open !== "boolean" || !isSectionPreferenceKey(key)) {
 					continue;
 				}
-				normalized.preferences.sections[key as SectionPreferenceKey] = open;
+				normalized.preferences.sections[key] = open;
 			}
 		}
 

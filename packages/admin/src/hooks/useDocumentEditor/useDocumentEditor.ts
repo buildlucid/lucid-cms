@@ -9,6 +9,7 @@ import {
 	useFieldScope,
 } from "@/hooks/useFieldScope/useFieldScope";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
+import helpers from "@/utils/helpers";
 
 /**
  * The open document, for field and brick slots and the components they render.
@@ -40,7 +41,7 @@ import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderS
  * ```
  */
 export const useDocumentEditor = (): DocumentEditor => {
-	const { documentState } = usePageBuilderState();
+	const { documentState, version } = usePageBuilderState();
 	if (!documentState) {
 		throw new Error(
 			"useDocumentEditor() only works inside the document editor, eg. in a field or brick slot.",
@@ -88,6 +89,27 @@ export const useDocumentEditor = (): DocumentEditor => {
 		},
 		get readOnly() {
 			return store.get.locked;
+		},
+		get environments() {
+			return (documentState.collection()?.publishing.environments ?? []).map(
+				(environment) => ({
+					key: environment.key,
+					label: helpers.getLocaleValue({
+						value: environment.label,
+						fallback: environment.key,
+					}),
+				}),
+			);
+		},
+		get environment() {
+			const viewed = version?.();
+			return documentState
+				.collection()
+				?.publishing.environments.some(
+					(environment) => environment.key === viewed,
+				)
+				? viewed
+				: undefined;
 		},
 		fields,
 		batch: (write) => {

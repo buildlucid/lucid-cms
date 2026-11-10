@@ -39,6 +39,7 @@ const collection = {
 		},
 	},
 	unique: true,
+	trackPaths: false,
 } satisfies CollectionConfig;
 const collectionInstance = new CollectionBuilder("pages", {
 	mode: "multiple",

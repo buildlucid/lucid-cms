@@ -14,6 +14,8 @@ declare module "virtual:lucid-admin" {
 		CaptchaWidgetComponent,
 		DocumentListSlot,
 		DocumentListSlotComponent,
+		DocumentSidebarSlot,
+		DocumentSidebarSlotComponent,
 		FieldSlot,
 		FieldSlotComponent,
 		HomeWidgetComponent,
@@ -23,13 +25,13 @@ declare module "virtual:lucid-admin" {
 		RouteComponent,
 	} from "@lucidcms/admin/types";
 
-	/** Compilation replaces module paths with components and supplies a default match. */
+	/** Compilation replaces module paths with lazy components, which `preload` loads ahead, and supplies a default match. */
 	type SlotRegistration<
 		Slot extends AdminSlot,
 		Component,
 	> = Slot extends AdminSlot
 		? Omit<Slot, "component" | "match"> & {
-				component: Component;
+				component: Component & { preload: () => Promise<unknown> };
 				match: NonNullable<Slot["match"]>;
 			}
 		: never;
@@ -74,6 +76,13 @@ declare module "virtual:lucid-admin" {
 		SlotRegistration<
 			Extract<AdminSlot, { slot: DocumentListSlot }>,
 			DocumentListSlotComponent<AdminOptions | undefined>
+		>
+	>;
+
+	export const documentSidebarSlots: Array<
+		SlotRegistration<
+			Extract<AdminSlot, { slot: DocumentSidebarSlot }>,
+			DocumentSidebarSlotComponent<AdminOptions | undefined>
 		>
 	>;
 

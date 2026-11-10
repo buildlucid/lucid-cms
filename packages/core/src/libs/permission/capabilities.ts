@@ -385,6 +385,28 @@ const localesCapabilityGroup: CapabilityGroup = {
 	],
 };
 
+const redirectsCapabilityGroup: CapabilityGroup = {
+	key: "redirects",
+	details: {
+		name: copy("admin:integrations.scopes.redirects.label"),
+	},
+	core: true,
+	capabilities: [
+		{
+			key: ExternalScopes.RedirectsRead,
+			details: {
+				name: copy("admin:integrations.scopes.redirects.read"),
+			},
+			core: true,
+			external: {
+				scope: ExternalScopes.RedirectsRead,
+				userPermission: null,
+			},
+			availableToIntegrations: true,
+		},
+	],
+};
+
 const mcpCapabilityGroup: CapabilityGroup = {
 	key: "mcp",
 	details: {
@@ -516,6 +538,7 @@ export const getCapabilityRegistry = (
 		//* every configured agent, even switched off, so its grants survive while it's off
 		...getAgentCapabilityGroups(config.ai.agents.definitions),
 		localesCapabilityGroup,
+		redirectsCapabilityGroup,
 		...(isAiFeatureEnabled(config, "mcp") ? [mcpCapabilityGroup] : []),
 		...getDeployCapabilityGroups(config.deploys),
 	];

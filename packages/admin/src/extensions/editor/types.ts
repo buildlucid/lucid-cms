@@ -151,6 +151,13 @@ export type DocumentEditor = {
 		| undefined;
 	/** The document can't be edited, eg. another tab holds it or it's an older version. */
 	readonly readOnly: boolean;
+	/** The collection's environments, labelled in the admin's language. */
+	readonly environments: ReadonlyArray<{
+		readonly key: string;
+		readonly label: string;
+	}>;
+	/** The environment being viewed, or undefined for latest, revisions, snapshots and proposals. */
+	readonly environment: string | undefined;
 	/** The document's own fields, outside bricks. */
 	readonly fields: FieldScope;
 	/** Records the writes `write` makes as one undo step. */

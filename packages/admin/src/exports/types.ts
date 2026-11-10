@@ -30,6 +30,14 @@ export type {
 	DocumentListSlotProps,
 } from "../components/DocumentSlotCell/types.js";
 export type {
+	DocumentSidebarPosition,
+	DocumentSidebarSectionKey,
+	DocumentSidebarSlot,
+	DocumentSidebarSlotComponent,
+	DocumentSidebarSlotPlacement,
+	DocumentSidebarSlotProps,
+} from "../components/DocumentSidebarSlots/types.js";
+export type {
 	FieldSlot,
 	FieldSlotComponent,
 	FieldSlotMatch,

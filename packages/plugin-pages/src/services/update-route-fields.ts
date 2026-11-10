@@ -8,22 +8,28 @@ import type {
 } from "@lucidcms/core/types";
 import { sql } from "kysely";
 import constants from "../constants.js";
-import type { ProjectedPath, RouteScope } from "../types/types.js";
+import type {
+	CollectionConfig,
+	ProjectedPath,
+	RouteScope,
+} from "../types/types.js";
 import getCollectionDefaultLocale from "../utils/get-collection-default-locale.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 import {
 	scopeMemberFilter,
 	scopeParameterCount,
 } from "../utils/route-scope.js";
+import recordPaths from "./record-paths.js";
 
 /**
  * Writes scoped route values in batches per locale, inheriting unassigned values from the default
- * locale. Reports document updates except where the caller already does.
+ * locale. Published paths are recorded so they redirect once they change. Reports document updates
+ * except where the caller already does.
  */
 const updateRouteFields: ServiceFn<
 	[
 		{
-			collectionKey: string;
+			collection: CollectionConfig;
 			field: "slug" | "path";
 			scope: RouteScope;
 			toolkit: Toolkit;
@@ -42,7 +48,7 @@ const updateRouteFields: ServiceFn<
 		const column = prefixGeneratedColName(constants.fields[data.field].key);
 		const defaultLocale = getCollectionDefaultLocale(
 			context.config,
-			data.collectionKey,
+			data.collection.key,
 		);
 
 		const byLocale = new Map<
@@ -98,13 +104,20 @@ const updateRouteFields: ServiceFn<
 
 		if (data.field !== "path") return { error: undefined, data: undefined };
 
+		const recordRes = await recordPaths(context, {
+			collection: data.collection,
+			scope: data.scope,
+			values: data.values,
+		});
+		if (recordRes.error) return recordRes;
+
 		return data.toolkit.documents.notifyChange({
 			change: {
 				type: "updated",
 				version:
 					data.scope.type === "version" ? data.scope.versionType : undefined,
 			},
-			collectionKey: data.collectionKey,
+			collectionKey: data.collection.key,
 			ids: [
 				...new Set(
 					data.values

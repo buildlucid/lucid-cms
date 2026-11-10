@@ -2,9 +2,10 @@ import { useTranslation } from "@lucidcms/admin/hooks";
 import type { FieldSlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
 import type {} from "../../translations.js";
+import PreviousPathsButton from "../PreviousPathsButton/PreviousPathsButton.jsx";
 
-/** Shows the document's path below the slug field. */
-const PathDisplay: FieldSlotComponent = (props) => {
+/** Shows the document's path below the slug field, with a button opening its previous paths when they're tracked. */
+const PathDisplay: FieldSlotComponent<{ previousPaths: boolean }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();
@@ -25,7 +26,11 @@ const PathDisplay: FieldSlotComponent = (props) => {
 					{path()}
 				</p>
 			</Show>
+			<Show when={props.options.previousPaths}>
+				<PreviousPathsButton />
+			</Show>
 		</div>
 	);
 };
+
 export default PathDisplay;

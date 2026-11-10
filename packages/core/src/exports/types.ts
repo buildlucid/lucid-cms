@@ -217,6 +217,12 @@ export type {
 } from "../libs/deploys/types.js";
 export type { DeployWebhookOptions } from "../libs/deploys/providers/webhook.js";
 export type {
+	RedirectLookup,
+	RedirectResolver,
+	RedirectStatus,
+	ResolvedRedirect,
+} from "../libs/redirects/types.js";
+export type {
 	EmailStorageConfig,
 	EmailStorageEncryptRule,
 	EmailStorageNeverStoreRule,

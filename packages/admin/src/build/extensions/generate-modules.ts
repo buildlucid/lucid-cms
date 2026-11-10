@@ -63,6 +63,7 @@ export const generateRegistry = async (
 		home: [],
 		field: [],
 		documentList: [],
+		documentSidebar: [],
 		captcha: [],
 		maintenance: [],
 	};
