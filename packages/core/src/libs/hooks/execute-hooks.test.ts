@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { InternalCollectionDocument } from "../../exports/types.js";
+import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
@@ -84,7 +85,7 @@ describe("execute hooks", () => {
 					type: "text",
 					value: "Default",
 				});
-				return { error: undefined, data: undefined };
+				return;
 			},
 		);
 		const earlyHook = defineHook({
@@ -98,7 +99,7 @@ describe("execute hooks", () => {
 					type: "text",
 					value: "Early",
 				});
-				return { error: undefined, data: undefined };
+				return;
 			},
 		});
 		const lateHook = defineHook({
@@ -108,17 +109,14 @@ describe("execute hooks", () => {
 			handler: async ({ data }) => {
 				order.push("late");
 				return {
-					error: undefined,
-					data: {
-						...data,
-						documents: data.documents.map((document) => ({
-							...document,
-							fields: [
-								...(document.fields ?? []).map((field) => ({ ...field })),
-								{ key: "late", type: "text" as const, value: "Late" },
-							],
-						})),
-					},
+					...data,
+					documents: data.documents.map((document) => ({
+						...document,
+						fields: [
+							...(document.fields ?? []).map((field) => ({ ...field })),
+							{ key: "late", type: "text" as const, value: "Late" },
+						],
+					})),
 				};
 			},
 		});
@@ -164,19 +162,16 @@ describe("execute hooks", () => {
 		const globalHook = vi.fn<LucidHookDocuments<"afterRestore">["handler"]>(
 			async () => {
 				order.push("global");
-				return { error: undefined, data: undefined };
+				return;
 			},
 		);
 		const collectionHook = vi.fn<LucidHookDocuments<"afterRestore">["handler"]>(
 			async () => {
 				order.push("collection");
-				return { error: undefined, data: undefined };
+				return;
 			},
 		);
-		const ignoredHook = vi.fn(async () => ({
-			error: undefined,
-			data: undefined,
-		}));
+		const ignoredHook = vi.fn(async () => {});
 		collection.config.hooks = [
 			{
 				service: "documents",
@@ -220,12 +215,13 @@ describe("execute hooks", () => {
 		expect(collectionHook.mock.calls[0]?.[0]).toBe(args);
 	});
 
-	it("stops when a hook returns an error", async () => {
+	it("stops when a hook throws a LucidError and keeps its details", async () => {
 		const error = {
 			type: "basic" as const,
+			status: 409,
 			message: copy.literal("Test hook failure"),
 		};
-		const nextHook = vi.fn(async () => ({ error: undefined, data: undefined }));
+		const nextHook = vi.fn(async () => {});
 		const response = await executeHooks(
 			context,
 			{
@@ -237,7 +233,9 @@ describe("execute hooks", () => {
 						{
 							service: "media",
 							event: "afterRestore",
-							handler: async () => ({ error, data: undefined }),
+							handler: async () => {
+								throw new LucidError(error);
+							},
 						},
 						{ service: "media", event: "afterRestore", handler: nextHook },
 					],
@@ -246,7 +244,7 @@ describe("execute hooks", () => {
 			{ meta: {}, data: { ids: [1] } },
 		);
 
-		expect(response.error).toBe(error);
+		expect(response.error).toMatchObject(error);
 		expect(nextHook).not.toHaveBeenCalled();
 	});
 
@@ -283,7 +281,7 @@ describe("execute hooks", () => {
 						event: "beforeList",
 						handler: async ({ data, meta: hookMeta }) => {
 							data.items.push(hookMeta.source);
-							return { error: undefined, data: undefined };
+							return;
 						},
 					}),
 				],

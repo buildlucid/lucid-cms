@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceListUploadParts } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types/types.js";
@@ -26,37 +26,29 @@ export const listUploadParts = (
 			);
 			const response = await fetch(signed);
 			if (!response.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.metadata.fetch.failed", {
-							data: {
-								status: response.status,
-								statusText: response.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.metadata.fetch.failed", {
+						data: {
+							status: response.status,
+							statusText: response.statusText,
+						},
+					}),
+				});
 			}
 
 			return {
-				error: undefined,
-				data: {
-					uploadedParts: parseParts(await response.text()),
-				},
+				uploadedParts: parseParts(await response.text()),
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 };

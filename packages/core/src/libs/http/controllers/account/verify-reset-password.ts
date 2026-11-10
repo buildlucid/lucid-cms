@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { userTokenServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import validate from "../../middleware/validate.js";
@@ -38,7 +38,7 @@ const verifyResetPasswordController = factory.createHandlers(
 			token: token,
 		});
 
-		if (tokenResult.error) throw new LucidAPIError(tokenResult.error);
+		if (tokenResult.error) throw new LucidError(tokenResult.error);
 
 		c.status(204);
 		return c.body(null);

@@ -7,7 +7,7 @@ import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type {
 	AgentRoutine,
 	AgentRoutineConversationMode,
-	AgentRoutineEvent,
+	ContentEvent,
 	AgentRoutineSchedule,
 	AiModelSelection,
 } from "../../types/response.js";
@@ -29,7 +29,7 @@ const createRoutine: ServiceFn<
 			instructions: string;
 			/** Null when the routine only runs on events. */
 			schedule: AgentRoutineSchedule | null;
-			events: AgentRoutineEvent[];
+			events: ContentEvent[];
 			enabled: boolean;
 		},
 	],

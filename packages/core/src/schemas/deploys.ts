@@ -76,7 +76,11 @@ export const controllerSchemas = {
 				disabledBy: userDisplaySchema.nullable(),
 				triggers: z.array(z.string()),
 				schedule: z
-					.object({ cron: z.string(), nextRunAt: z.string().nullable() })
+					.object({
+						cron: z.string(),
+						timezone: z.string(),
+						nextRunAt: z.string().nullable(),
+					})
 					.nullable(),
 				webhookUrl: z.string().nullable(),
 				pending: z

@@ -9,7 +9,7 @@ import {
 	getAuthProviderFlowCookieOptions,
 } from "../../../../../services/auth/providers/helpers/flow-security.js";
 import { authServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import { getBaseUrl } from "../../../../../utils/helpers/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
@@ -59,7 +59,7 @@ const providerInitiateController = factory.createHandlers(
 		//* a linked provider logs in without two-factor authentication, so linking one needs a recent login
 		if (actionType === constants.authState.actionTypes.authLink && auth) {
 			const recentRes = authServices.checks.checkRecentAuthentication(auth);
-			if (recentRes.error) throw new LucidAPIError(recentRes.error);
+			if (recentRes.error) throw new LucidError(recentRes.error);
 		}
 
 		const initiateAuthRes = await serviceWrapper(
@@ -79,13 +79,13 @@ const providerInitiateController = factory.createHandlers(
 			actionType,
 			authenticatedUserId: auth?.id,
 		});
-		if (initiateAuthRes.error) throw new LucidAPIError(initiateAuthRes.error);
+		if (initiateAuthRes.error) throw new LucidError(initiateAuthRes.error);
 
 		const state = new URL(initiateAuthRes.data.redirectUrl).searchParams.get(
 			"state",
 		);
 		if (!state) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				status: 500,
 				message: copy("server:core.routes.initiate.auth.error.message"),

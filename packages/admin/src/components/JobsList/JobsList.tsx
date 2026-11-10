@@ -32,7 +32,7 @@ export const JobsList: Component = () => {
 		schema: {
 			filters: {
 				jobId: textFilter(),
-				jobName: textFilter(),
+				jobKey: textFilter(),
 				jobVersion: numberFilter(),
 				triggerType: textFilter(),
 				scheduleKey: textFilter(),
@@ -113,7 +113,7 @@ export const JobsList: Component = () => {
 						filterSubject={T()("routes.system.jobs.title")}
 						filterFields={[
 							{ label: T()("jobs.id"), key: "jobId", type: "text" },
-							{ label: T()("jobs.name"), key: "jobName", type: "text" },
+							{ label: T()("jobs.key"), key: "jobKey", type: "text" },
 							{
 								label: T()("jobs.version"),
 								key: "jobVersion",

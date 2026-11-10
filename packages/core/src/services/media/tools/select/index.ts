@@ -2,6 +2,7 @@ import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import selectMedia from "./handler.js";
 import prepareSelectMedia from "./prepare.js";
 import {
@@ -28,8 +29,11 @@ export const selectMediaAgentTool = () =>
 			version: 1,
 			data: dataSchema,
 			response: ({ data }) => responseSchema(data),
-			prepare: ({ context, input, execution }) =>
-				prepareSelectMedia(context, { input, execution }),
+			prepare: async ({ context, input, execution }) => {
+				const result = await prepareSelectMedia(context, { input, execution });
+				if (result.error) throw new LucidError(result.error);
+				return result.data;
+			},
 		},
 		handler: async ({ context, input, execution, data, response }) => {
 			const result = await selectMedia(context, {
@@ -40,20 +44,17 @@ export const selectMediaAgentTool = () =>
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const count = result.data.output.data.length;
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy(
-						count === 1
-							? "admin:core.tools.media_select.summary.one"
-							: "admin:core.tools.media_select.summary",
-						{ data: { count } },
-					),
-				},
+				...result.data,
+				summary: copy(
+					count === 1
+						? "admin:core.tools.media_select.summary.one"
+						: "admin:core.tools.media_select.summary",
+					{ data: { count } },
+				),
 			};
 		},
 	});

@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/settings.js";
 import { settingServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -46,7 +46,7 @@ const getSettingsController = factory.createHandlers(
 			includes: formattedQuery.include,
 			authUser: c.get("auth"),
 		});
-		if (settings.error) throw new LucidAPIError(settings.error);
+		if (settings.error) throw new LucidError(settings.error);
 
 		c.status(200);
 		return c.json(

@@ -14,6 +14,7 @@ import systemActor from "../../libs/permission/system-actor.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { RequestDetails } from "../../types/response.js";
+import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
@@ -165,7 +166,7 @@ const collections = [
 		hooks: [
 			{
 				service: "requests",
-				event: "check",
+				event: "afterCheck",
 				handler: async ({ data }) => {
 					for (const document of data.documents) {
 						data.blockers.push({
@@ -173,7 +174,7 @@ const collections = [
 							message: `Checked ${document.collectionKey}`,
 						});
 					}
-					return { error: undefined, data: undefined };
+					return;
 				},
 			},
 		],
@@ -593,20 +594,15 @@ test("failed publication rolls back targets and retains diagnostics for retry", 
 			hooks: [
 				{
 					service: "documents",
-					event: "versionPromote",
-					handler: async ({ data }) =>
-						data.versionType === "production"
-							? {
-									error: {
-										status: 409,
-										message: {
-											type: "lucid.literal",
-											value: "Production is frozen",
-										},
-									},
-									data: undefined,
-								}
-							: { error: undefined, data: undefined },
+					event: "afterVersionPromote",
+					handler: async ({ data }) => {
+						if (data.versionType === "production") {
+							throw new LucidError({
+								status: 409,
+								message: "Production is frozen",
+							});
+						}
+					},
 				},
 			],
 		},
@@ -2318,24 +2314,21 @@ test.each(["response", "throw"] as const)(
 					...context.config.hooks,
 					{
 						service: "documents",
-						event: "versionPromote",
+						event: "afterVersionPromote",
 						handler: async ({ meta }) => {
 							if (meta.collectionKey !== failedDocument.collectionKey) {
-								return { error: undefined, data: undefined };
+								return;
 							}
 							if (failureMode === "throw") {
 								throw new Error("Unexpected hook failure");
 							}
-							return {
-								error: {
-									status: 409,
-									message: {
-										type: "lucid.literal",
-										value: "Target is frozen",
-									},
+							throw new LucidError({
+								status: 409,
+								message: {
+									type: "lucid.literal",
+									value: "Target is frozen",
 								},
-								data: undefined,
-							};
+							});
 						},
 					},
 				],

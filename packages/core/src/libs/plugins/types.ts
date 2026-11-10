@@ -1,10 +1,7 @@
 import type { InlineConfig, PluginOption } from "vite";
 import type z from "zod";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
-import type {
-	ServiceContext,
-	ServiceResponse,
-} from "../../utils/services/types.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import type { HookEventsDefinition } from "../hooks/types.js";
 import type { Translator } from "../i18n/types.js";
 import type { PackageInfo } from "../package-updates/types.js";
@@ -22,7 +19,7 @@ export type LucidPluginRuntimeHookResult = {
 	artifacts?: Array<RuntimeArtifactCustom>;
 };
 
-export type LucidPluginHookInit = () => ServiceResponse<undefined>;
+export type LucidPluginHookInit = () => void | Promise<void>;
 export type LucidPluginRuntimeHookContext =
 	| {
 			phase: "prepare";
@@ -44,14 +41,14 @@ export type LucidPluginRuntimeHookPhase =
 	LucidPluginRuntimeHookContext["phase"];
 export type LucidPluginHookRuntime = (
 	props: LucidPluginRuntimeHookContext,
-) => ServiceResponse<LucidPluginRuntimeHookResult>;
+) => LucidPluginRuntimeHookResult | Promise<LucidPluginRuntimeHookResult>;
 
 export type LucidPluginHooks = {
 	/**
-	 * Runs while loading configuration. Return a service result; an error stops initialization.
+	 * Runs while loading configuration. Throw a LucidError to stop initialization.
 	 */
 	init?: LucidPluginHookInit;
-	/** Supplies runtime artifacts for preparation or builds according to `phase`. */
+	/** Supplies runtime artifacts for preparation or builds according to `phase`. Throw to fail. */
 	runtime?: LucidPluginHookRuntime;
 };
 

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, expect, test, vi } from "vitest";
 import defineAgent from "../../libs/agent/define-agent.js";
-import { matchesRoutineEvent } from "../../libs/agent/routine-events.js";
+import { matchesContentEvent } from "../../libs/events/content-events.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import { Permissions } from "../../libs/permission/definitions.js";
 import { AgentMessagesRepository } from "../../libs/repositories/index.js";
@@ -109,28 +109,28 @@ test("routine events match every filter they set, and missing filters match ever
 	} as const;
 
 	expect(
-		matchesRoutineEvent(trigger, "requests:approved", {
+		matchesContentEvent(trigger, "requests:approved", {
 			collections: ["blog", "page"],
 			requestType: "publish",
 		}),
 	).toBe(true);
 	expect(
-		matchesRoutineEvent(trigger, "requests:approved", {
+		matchesContentEvent(trigger, "requests:approved", {
 			collections: ["page"],
 			requestType: "delete",
 		}),
 	).toBe(false);
 	expect(
-		matchesRoutineEvent(trigger, "requests:completed", {
+		matchesContentEvent(trigger, "requests:completed", {
 			collections: ["page"],
 			requestType: "publish",
 		}),
 	).toBe(false);
 	expect(
-		matchesRoutineEvent({ event: "media:updated" }, "media:updated", {}),
+		matchesContentEvent({ event: "media:updated" }, "media:updated", {}),
 	).toBe(true);
 	expect(
-		matchesRoutineEvent(
+		matchesContentEvent(
 			{ event: "media:updated", filter: { fields: ["file"] } },
 			"media:updated",
 			{ mediaType: "image", fields: [] },

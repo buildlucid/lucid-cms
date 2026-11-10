@@ -54,6 +54,11 @@
 - Filter keys a list doesn't support are now refused with a 400 instead of being ignored.
 - API responses now return `pagination` on lists instead of `meta` and `links`.
 - Generated collection types now merge into one `Collections` registry, and document write types into `CollectionWrites`.
+- Hooks, jobs, tools, transfers and plugin `init` and `runtime` hooks now return their value and throw `LucidError` to fail, instead of returning `{ error, data }`. The toolkit still returns `{ error, data }`.
+- Replaced `LucidAPIError` with `LucidError`, which now takes a status, code and field errors and accepts plain text for its message.
+- Hook events now all start with `before` or `after`: `afterVersionPromote`, `afterVersionCapture`, `requests.afterCheck`, `requests.afterComplete`, `requests.afterDocumentRemove` and `agent.afterRunFinish`.
+- `defineJob` and its schedules now use `key` instead of `name`. The jobs API returns and filters on `jobKey` instead of `jobName`, and schedules return `shortKey` instead of `name`.
+- `defineSeed` now takes `{ run }` instead of a function.
 
 ### Bug Fixes:
 

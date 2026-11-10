@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaDeliveryServiceProcessImage } from "@lucidcms/core/types";
 import {
 	DEFAULT_IMAGES_BINDING,
@@ -33,11 +33,8 @@ import {
 } from "../../utils/validate-options.js";
 
 /**
- * Processes one image using the configured Cloudflare Images binding.
- *
- * Source validation happens before the transform is created. Rotation is
- * applied before resizing, and source format is preserved unless the caller
- * explicitly requests a supported output format.
+ * Validates and processes an image with Cloudflare Images. Rotates before resizing and preserves
+ * the source format unless a supported output format is requested.
  */
 const processImage = (
 	pluginOptions: CloudflareImagesPluginOptions,
@@ -47,126 +44,99 @@ const processImage = (
 		const binding = resolveImagesBinding(context, bindingName);
 
 		if (!binding) {
-			return {
-				error: {
-					type: "plugin",
-					message: copy(
-						"server:plugin.cloudflare.images.errors.binding.missing",
-						{
-							data: { binding: bindingName },
-						},
-					),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				type: "plugin",
+				message: copy(
+					"server:plugin.cloudflare.images.errors.binding.missing",
+					{
+						data: { binding: bindingName },
+					},
+				),
+			});
 		}
 
 		if (options.rotate !== undefined && !isSupportedRotation(options.rotate)) {
-			return {
-				error: {
-					type: "plugin",
-					message: copy(
-						"server:plugin.cloudflare.images.errors.rotate.unsupported",
-						{ data: { rotate: String(options.rotate) } },
-					),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				type: "plugin",
+				message: copy(
+					"server:plugin.cloudflare.images.errors.rotate.unsupported",
+					{ data: { rotate: String(options.rotate) } },
+				),
+			});
 		}
 
 		if (options.format !== undefined && !isSupportedFormat(options.format)) {
-			return {
-				error: {
-					type: "plugin",
-					message: copy(
-						"server:plugin.cloudflare.images.errors.output.format.unsupported",
-						{ data: { format: String(options.format) } },
-					),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				type: "plugin",
+				message: copy(
+					"server:plugin.cloudflare.images.errors.output.format.unsupported",
+					{ data: { format: String(options.format) } },
+				),
+			});
 		}
 
 		if (options.quality !== undefined && !isValidQuality(options.quality)) {
-			return {
-				error: {
-					type: "plugin",
-					message: copy(
-						"server:plugin.cloudflare.images.errors.quality.invalid",
-						{
-							data: { quality: String(options.quality) },
-						},
-					),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				type: "plugin",
+				message: copy(
+					"server:plugin.cloudflare.images.errors.quality.invalid",
+					{
+						data: { quality: String(options.quality) },
+					},
+				),
+			});
 		}
 
 		try {
 			const input = await readImageStream(stream);
 			if (!input) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.input.too.large",
-							{ data: { max: MAX_INPUT_BYTES } },
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.input.too.large",
+						{ data: { max: MAX_INPUT_BYTES } },
+					),
+				});
 			}
 
 			const info = await binding.info(bufferToWebStream(input));
 			if (!hasImageFormat(info)) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.response.invalid",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.response.invalid",
+					),
+				});
 			}
 
 			const sourceMimeType = normalizeMimeType(info.format);
 			if (!isSupportedSourceMimeType(sourceMimeType)) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.input.format.unsupported",
-							{ data: { format: sourceMimeType || "unknown" } },
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.input.format.unsupported",
+						{ data: { format: sourceMimeType || "unknown" } },
+					),
+				});
 			}
 
 			if (!isRasterImageInfo(info)) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.response.invalid",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.response.invalid",
+					),
+				});
 			}
 
 			if (info.width * info.height > MAX_SOURCE_PIXELS) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.input.area.too.large",
-							{ data: { max: MAX_SOURCE_PIXELS } },
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.input.area.too.large",
+						{ data: { max: MAX_SOURCE_PIXELS } },
+					),
+				});
 			}
 
 			if (
@@ -174,16 +144,13 @@ const processImage = (
 				(info.width > MAX_JPEG_PNG_DIMENSION ||
 					info.height > MAX_JPEG_PNG_DIMENSION)
 			) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.input.dimension.too.large",
-							{ data: { max: MAX_JPEG_PNG_DIMENSION } },
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.input.dimension.too.large",
+						{ data: { max: MAX_JPEG_PNG_DIMENSION } },
+					),
+				});
 			}
 
 			let transformer = binding.input(bufferToWebStream(input));
@@ -214,28 +181,22 @@ const processImage = (
 				typeof output.response !== "function" ||
 				typeof output.contentType !== "function"
 			) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.response.invalid",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.response.invalid",
+					),
+				});
 			}
 
 			const response = output.response();
 			if (!(response instanceof Response)) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.response.invalid",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.response.invalid",
+					),
+				});
 			}
 
 			if (!response.ok) {
@@ -247,79 +208,62 @@ const processImage = (
 			const mimeType = normalizeMimeType(output.contentType());
 			const actualFormat = getFormatFromMimeType(mimeType);
 			if (!actualFormat) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.response.invalid",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.response.invalid",
+					),
+				});
 			}
 
 			const outputBuffer = Buffer.from(await response.arrayBuffer());
 
 			return {
-				error: undefined,
-				data: {
-					processed: true,
-					buffer: outputBuffer,
-					mimeType,
-					size: outputBuffer.byteLength,
-					extension: getExtensionFromFormat(actualFormat),
-					shouldStore: true,
-				},
+				processed: true,
+				buffer: outputBuffer,
+				mimeType,
+				size: outputBuffer.byteLength,
+				extension: getExtensionFromFormat(actualFormat),
+				shouldStore: true,
 			};
 		} catch (error) {
+			if (error instanceof LucidError) throw error;
 			const details = getCloudflareErrorDetails(error);
 
 			if (details.category === "validation") {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.cloudflare.validation",
-							{ data: { code: details.code } },
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.cloudflare.validation",
+						{ data: { code: details.code } },
+					),
+				});
 			}
 
 			if (details.category === "configuration") {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.cloudflare.configuration",
-							{ data: { code: details.code } },
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.cloudflare.configuration",
+						{ data: { code: details.code } },
+					),
+				});
 			}
 
 			if (details.category === "transient") {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.images.errors.cloudflare.transient",
-							{ data: { code: details.code } },
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.images.errors.cloudflare.transient",
+						{ data: { code: details.code } },
+					),
+				});
 			}
 
-			return {
-				error: {
-					type: "plugin",
-					message: copy("server:plugin.cloudflare.images.errors.unknown"),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				type: "plugin",
+				message: copy("server:plugin.cloudflare.images.errors.unknown"),
+			});
 		}
 	};
 };

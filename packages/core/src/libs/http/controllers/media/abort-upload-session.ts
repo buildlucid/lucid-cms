@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { mediaServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -41,7 +41,7 @@ const abortUploadSessionController = factory.createHandlers(
 			sessionId: params.sessionId,
 			userId: c.get("auth").id,
 		});
-		if (aborted.error) throw new LucidAPIError(aborted.error);
+		if (aborted.error) throw new LucidError(aborted.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: aborted.data }));

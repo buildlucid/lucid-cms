@@ -3,7 +3,7 @@ import {
 	defineContentApiRoute,
 	ExternalScopes,
 	formatAPIResponse,
-	LucidAPIError,
+	LucidError,
 	z,
 } from "@lucidcms/core";
 
@@ -36,7 +36,7 @@ export default defineContentApiRoute({
 			const { query, locale, page, perPage } = input.query;
 
 			if (!toolkit.typesense) {
-				throw new LucidAPIError({
+				throw new LucidError({
 					status: 503,
 					message: copy("server:search.unavailable"),
 				});
@@ -65,7 +65,7 @@ export default defineContentApiRoute({
 				}),
 			);
 		} catch {
-			throw new LucidAPIError({
+			throw new LucidError({
 				status: 503,
 				message: copy("server:search.unavailable"),
 			});

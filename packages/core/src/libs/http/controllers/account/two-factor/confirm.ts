@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/account.js";
 import { authServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -60,7 +60,7 @@ const confirmTwoFactorController = factory.createHandlers(
 			userId: auth.id,
 			code: code,
 		});
-		if (confirmRes.error) throw new LucidAPIError(confirmRes.error);
+		if (confirmRes.error) throw new LucidError(confirmRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.status(200);

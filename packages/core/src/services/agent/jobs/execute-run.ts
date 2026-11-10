@@ -1,7 +1,8 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
 import { jobPayloadSchema } from "../../../libs/jobs/payload.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import executeRun from "../execute-run.js";
 import resolveSliceStart from "../helpers/resolve-slice-start.js";
 
@@ -13,7 +14,7 @@ const answerSchema = z
 	})
 	.strict();
 
-const execute: JobHandler<{
+const execute: JobService<{
 	runId: string;
 	answer?: z.infer<typeof answerSchema>;
 }> = async ({ context, input, execution }) => {
@@ -49,7 +50,7 @@ const execute: JobHandler<{
 };
 
 export const executeAgentRunJob = defineJob({
-	name: "core:execute-agent-run",
+	key: "core:execute-agent-run",
 	version: 1,
 	input: z
 		.object({
@@ -59,5 +60,8 @@ export const executeAgentRunJob = defineJob({
 		})
 		.strict(),
 	retry: { type: "none" },
-	handler: execute,
+	handler: async (args) => {
+		const result = await execute(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 });

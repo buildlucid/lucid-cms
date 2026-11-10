@@ -2,7 +2,7 @@ import {
 	copy,
 	defineRoute,
 	formatAPIResponse,
-	LucidAPIError,
+	LucidError,
 	middleware,
 	openAPI,
 	serviceWrapper,
@@ -57,7 +57,7 @@ const routes = (options: ResolvedOptions, job: SyncJob) => [
 					message: copy("server:plugin.typesense.rebuild.error.message"),
 				},
 			})(context, { options, job, toolkit });
-			if (queued.error) throw new LucidAPIError(queued.error);
+			if (queued.error) throw new LucidError(queued.error);
 
 			hono.status(202);
 			return hono.json(formatAPIResponse(hono, { data: queued.data }));
@@ -89,7 +89,7 @@ const routes = (options: ResolvedOptions, job: SyncJob) => [
 					message: copy("server:plugin.typesense.status.error.message"),
 				},
 			})(context, { options });
-			if (statuses.error) throw new LucidAPIError(statuses.error);
+			if (statuses.error) throw new LucidError(statuses.error);
 
 			return hono.json(formatAPIResponse(hono, { data: statuses.data }));
 		},

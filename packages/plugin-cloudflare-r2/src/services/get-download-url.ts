@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY, STORAGE_DOWNLOAD_PATH } from "../constants.js";
@@ -18,32 +18,26 @@ export default (
 		try {
 			if (!pluginOptions.http) {
 				return {
-					error: undefined,
-					data: {
-						url: createSignedMediaUrl({
-							host: props.host,
-							path: STORAGE_DOWNLOAD_PATH,
-							key: props.key,
-							secretKey: props.secretKey,
-							query: {
-								fileName: props.fileName ?? undefined,
-								extension: props.extension ?? undefined,
-							},
-						}),
-					},
+					url: createSignedMediaUrl({
+						host: props.host,
+						path: STORAGE_DOWNLOAD_PATH,
+						key: props.key,
+						secretKey: props.secretKey,
+						query: {
+							fileName: props.fileName ?? undefined,
+							extension: props.extension ?? undefined,
+						},
+					}),
 				};
 			}
 
 			if (!client) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.http.client.not.configured",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.client.not.configured",
+					),
+				});
 			}
 
 			const objectUrl = new URL(
@@ -69,24 +63,17 @@ export default (
 			);
 
 			return {
-				error: undefined,
-				data: {
-					url: response.url.toString(),
-				},
+				url: response.url.toString(),
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy(
-									"server:plugin.cloudflare.r2.download.urls.generate.failed",
-								),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.cloudflare.r2.download.urls.generate.failed"),
+			});
 		}
 	};
 };

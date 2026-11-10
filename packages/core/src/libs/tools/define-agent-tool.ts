@@ -3,6 +3,7 @@ import constants from "../../constants/constants.js";
 import { agentResourceSchema } from "../../schemas/agent-references.js";
 import { agentInteractionPlacementSchema } from "../../schemas/agent.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
+import { LucidError } from "../../utils/errors/index.js";
 import { isJsonObject } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -326,7 +327,7 @@ function defineAgentTool<
 								answer?.data,
 								answer?.response,
 							);
-							if (parsed.error) return parsed;
+							if (parsed.error) throw new LucidError(parsed.error);
 
 							return options.handler({ ...args, execution, ...parsed.data });
 						},

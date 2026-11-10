@@ -8,6 +8,7 @@ import {
 	vi,
 } from "vitest";
 import z from "zod";
+import { LucidError } from "../../utils/errors/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import {
@@ -37,10 +38,10 @@ afterAll(() => testConfig.destroy());
 describe("enqueueing durable jobs", () => {
 	test("binds durable job controls to the toolkit", async () => {
 		const job = defineJob({
-			name: "test:toolkit",
+			key: "test:toolkit",
 			version: 1,
 			input: z.object({ value: z.number() }),
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const context = await createJobsContext(testConfig, {
 			jobs: [job],
@@ -78,10 +79,9 @@ describe("enqueueing durable jobs", () => {
 	test("stores validated input and executes a job only once", async () => {
 		const handler = vi.fn(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 5));
-			return { error: undefined, data: undefined };
 		});
 		const job = defineJob({
-			name: "test:execute-once",
+			key: "test:execute-once",
 			version: 1,
 			input: z.object({ value: z.number() }),
 			describe: ({ input: { value } }) => ({ value }),
@@ -137,11 +137,11 @@ describe("enqueueing durable jobs", () => {
 
 	test("rejects display data that cannot be stored as JSON", async () => {
 		const job = defineJob({
-			name: "test:invalid-display-data",
+			key: "test:invalid-display-data",
 			version: 1,
 			input: z.object({ value: z.number() }),
 			describe: () => ({ value: Number.NaN }),
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const context = await createJobsContext(testConfig, {
 			jobs: [job],
@@ -163,10 +163,10 @@ describe("enqueueing durable jobs", () => {
 
 	test("discards both the job and delivery when its service transaction rolls back", async () => {
 		const job = defineJob({
-			name: "test:rollback",
+			key: "test:rollback",
 			version: 1,
 			input: z.object({ value: z.number() }),
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const publish = vi.fn(async () => ({ error: undefined, data: undefined }));
 		const context = await createJobsContext(testConfig, {
@@ -203,10 +203,10 @@ describe("enqueueing durable jobs", () => {
 
 	test("delivers only after a committed job is visible", async () => {
 		const job = defineJob({
-			name: "test:commit",
+			key: "test:commit",
 			version: 1,
 			input: z.object({ value: z.number() }),
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const publish = vi.fn(
 			async (
@@ -245,10 +245,10 @@ describe("enqueueing durable jobs", () => {
 		"keeps jobs enqueued by hook toolkits in their transaction (rollback: %s)",
 		async (rollback) => {
 			const job = defineJob({
-				name: "test:hook-transaction",
+				key: "test:hook-transaction",
 				version: 1,
 				input: z.object({ id: z.number() }),
-				handler: async () => ({ error: undefined, data: undefined }),
+				handler: async () => {},
 			});
 			const publish = vi.fn(async () => ({
 				error: undefined,
@@ -269,16 +269,11 @@ describe("enqueueing durable jobs", () => {
 							job,
 							payload: { id: data.ids[0] ?? 0 },
 						});
-						if (enqueued.error) return enqueued;
+						if (enqueued.error) throw new LucidError(enqueued.error);
 
 						jobId = enqueued.data.jobId;
 						expect(publish).not.toHaveBeenCalled();
-						return rollback
-							? {
-									error: { message: copy.literal("Roll back") },
-									data: undefined,
-								}
-							: { error: undefined, data: undefined };
+						if (rollback) throw new LucidError({ message: "Roll back" });
 					},
 				},
 			];
@@ -306,10 +301,10 @@ describe("enqueueing durable jobs", () => {
 
 	test("keeps jobs pending when transport delivery fails", async () => {
 		const job = defineJob({
-			name: "test:outbox",
+			key: "test:outbox",
 			version: 1,
 			input: z.object({ value: z.number() }),
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const context = await createJobsContext(testConfig, {
 			jobs: [job],

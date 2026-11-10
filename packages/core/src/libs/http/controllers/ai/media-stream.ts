@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
 import { controllerSchemas } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { mediaGenerationPermissions } from "../../../config/ai-features.js";
 import { copy } from "../../../i18n/index.js";
@@ -45,7 +45,7 @@ const mediaStreamController = factory.createHandlers(
 			signal: c.req.raw.signal,
 			user: c.get("auth"),
 		});
-		if (mediaRes.error) throw new LucidAPIError(mediaRes.error);
+		if (mediaRes.error) throw new LucidError(mediaRes.error);
 
 		c.header("Content-Type", mediaRes.data.contentType);
 		c.header("Cache-Control", "private, max-age=3600");

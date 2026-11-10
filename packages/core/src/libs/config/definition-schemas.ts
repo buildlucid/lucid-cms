@@ -78,7 +78,11 @@ export const migrationSchema = z.object({
 }) satisfies z.ZodType<ExternalMigration>;
 
 export const seedSchema = z.custom<Seed>(
-	(value) => typeof value === "function",
+	(value) =>
+		typeof value === "object" &&
+		value !== null &&
+		"run" in value &&
+		typeof value.run === "function",
 	{ error: "Expected defineSeed()" },
 );
 

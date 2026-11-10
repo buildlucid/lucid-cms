@@ -5,7 +5,7 @@ import {
 	documentRefsResponseSchema,
 } from "../../../../schemas/documents.js";
 import { documentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import type { DocumentVersionType } from "../../../db/tables/index.js";
 import { copy } from "../../../i18n/index.js";
@@ -62,7 +62,7 @@ const getSingleController = factory.createHandlers(
 			collectionKey,
 			query: formattedQuery,
 		});
-		if (document.error) throw new LucidAPIError(document.error);
+		if (document.error) throw new LucidError(document.error);
 
 		c.status(200);
 		return c.json(

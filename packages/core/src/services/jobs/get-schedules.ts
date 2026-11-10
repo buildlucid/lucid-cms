@@ -55,9 +55,12 @@ const getSchedules: ServiceFn<
 		query: data.query,
 		fields: {
 			key: { get: (schedule) => schedule.key },
-			name: { get: (schedule) => schedule.name, defaultOperator: "contains" },
-			jobName: {
-				get: (schedule) => schedule.jobName,
+			shortKey: {
+				get: (schedule) => schedule.shortKey,
+				defaultOperator: "contains",
+			},
+			jobKey: {
+				get: (schedule) => schedule.jobKey,
 				defaultOperator: "contains",
 			},
 			jobVersion: { get: (schedule) => schedule.jobVersion },

@@ -1,6 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import getEmail from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -20,16 +21,13 @@ export const getEmailAgentTool = () =>
 				input,
 				actor: execution.actor,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy("admin:core.tools.emails_get.summary", {
-						data: { id: input.emailId },
-					}),
-				},
+				output: result.data.output,
+				summary: copy("admin:core.tools.emails_get.summary", {
+					data: { id: input.emailId },
+				}),
 			};
 		},
 	});

@@ -47,8 +47,8 @@ export type JobRetryPolicy =
 			readonly jitter: "none" | "full";
 	  };
 
-/** Cron timing that can be shared by multiple scheduled job definitions. */
-export type JobScheduleTiming = {
+/** Cron timing shared by job schedules, routines and deploys. */
+export type ScheduleTiming = {
 	/** Five-field cron expression with minute precision. */
 	readonly cron: string;
 	/** IANA timezone used to evaluate the expression. Defaults to UTC. */
@@ -62,9 +62,9 @@ export type JobScheduleOverlap = z.infer<typeof jobScheduleOverlapSchema>;
 export type JobScheduleMissed = z.infer<typeof jobScheduleMissedSchema>;
 
 /** A resolved schedule attached to a job definition. */
-export type JobSchedule = JobScheduleTiming & {
+export type JobSchedule = ScheduleTiming & {
 	/** Stable identifier, unique within the job definition. */
-	readonly name: string;
+	readonly key: string;
 	readonly timezone: string;
 	/** Static input enqueued for each occurrence. */
 	readonly input: JobPayload | null;
@@ -76,9 +76,9 @@ export type JobSchedule = JobScheduleTiming & {
 
 /** Options for attaching a recurring schedule to a job definition. */
 export type DefineJobSchedule<Input extends JobPayload | null> =
-	JobScheduleTiming & {
+	ScheduleTiming & {
 		/** Stable identifier, unique within the job definition. */
-		readonly name: string;
+		readonly key: string;
 		/** Static input enqueued for each occurrence. */
 		readonly input: Input;
 		/** Whether a new occurrence can run while an earlier one remains active. Defaults to skip. */
@@ -110,13 +110,26 @@ export type JobExecution = {
 	readonly signal: AbortSignal;
 };
 
-/** Job handlers may run again after a crash and must make side effects idempotent. */
-export type JobHandler<Input extends JobPayload | null = null> = (args: {
+/** What a job handler receives for one execution. */
+export type JobHandlerArgs<Input extends JobPayload | null = null> = {
 	context: ServiceContext;
 	input: Input;
 	execution: JobExecution;
 	toolkit: Toolkit;
-}) => ServiceResponse<undefined>;
+};
+
+/**
+ * Job handlers may run again after a crash and must make side effects idempotent. Return nothing
+ * when the work is done and throw to fail the attempt.
+ */
+export type JobHandler<Input extends JobPayload | null = null> = (
+	args: JobHandlerArgs<Input>,
+) => void | Promise<void>;
+
+/** A core job's work written as a service, which its handler runs and throws for. */
+export type JobService<Input extends JobPayload | null = null> = (
+	args: JobHandlerArgs<Input>,
+) => ServiceResponse<undefined>;
 
 /** Details passed to a job's permanent failure hook. */
 export type JobPermanentFailure<Input extends JobPayload | null> = {
@@ -124,7 +137,7 @@ export type JobPermanentFailure<Input extends JobPayload | null> = {
 	readonly input: Input;
 	readonly attempts: number;
 	readonly errorMessage: string;
-	/** Original handler error when failure followed a returned service error. */
+	/** The handler's error when it failed by throwing a LucidError. */
 	readonly error?: LucidErrorData;
 };
 
@@ -171,11 +184,11 @@ type JobDefinitionRuntime = {
 
 /** An opaque, versioned job definition created by `defineJob`. */
 export type JobDefinition<
-	Name extends string = string,
+	Key extends string = string,
 	Input extends JobPayload | null = JobPayload | null,
 > = {
 	readonly type: "job-definition";
-	readonly name: Name;
+	readonly key: Key;
 	readonly version: number;
 	readonly retry: JobRetryPolicy;
 	readonly schedules: readonly JobSchedule[];
@@ -194,11 +207,11 @@ export type JobInput<Definition extends AnyJobDefinition> =
 
 /** Options used to define a versioned job and its handler. */
 export type DefineJobOptions<
-	Name extends string,
+	Key extends string,
 	Input extends JobPayload | null,
 > = {
 	/** Stable, namespaced identifier such as `plugin:rebuild-index`. */
-	name: Name;
+	key: Key;
 	/** Increment when the stored payload or handler contract changes. */
 	version: number;
 	/** Validates payloads before they are stored or handled. */
@@ -238,7 +251,7 @@ export type InternalJobEnqueueOptions = JobEnqueueOptions & {
 /** Identifies a durable job accepted by the queue. */
 export type JobReceipt = {
 	readonly jobId: string;
-	readonly name: string;
+	readonly key: string;
 	readonly version: number;
 };
 

@@ -4,6 +4,7 @@ import {
 	agentScreenResponseSchema,
 } from "../../../../libs/agent/screen.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import resolveBuilderScreen from "../../helpers/builder/resolve-builder-screen.js";
 import screenCall from "../../helpers/builder/screen-call.js";
 import { builderUpdateTitle, builderUpdateToolName } from "./constants.js";
@@ -31,17 +32,22 @@ export const builderUpdateAgentTool = () =>
 			response: () => agentScreenResponseSchema,
 			prepare: async ({ context, execution }) => {
 				const resolved = resolveBuilderScreen(context, execution);
-				if (resolved.error) return resolved;
+				if (resolved.error) throw new LucidError(resolved.error);
 
-				return {
-					error: undefined,
-					data: screenCall({
-						title: builderUpdateTitle,
-						call: { action: "read", screen: resolved.data.screen },
-					}),
-				};
+				return screenCall({
+					title: builderUpdateTitle,
+					call: { action: "read", screen: resolved.data.screen },
+				});
 			},
 		},
-		handler: ({ context, input, execution, data, response }) =>
-			handler(context, { input, execution, call: data, response }),
+		handler: async ({ context, input, execution, data, response }) => {
+			const result = await handler(context, {
+				input,
+				execution,
+				call: data,
+				response,
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

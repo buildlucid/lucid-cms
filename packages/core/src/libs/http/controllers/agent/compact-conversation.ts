@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
@@ -49,7 +49,7 @@ const compactConversationController = factory.createHandlers(
 			userId: c.get("auth").id,
 			runId: body.runId,
 		});
-		if (run.error) throw new LucidAPIError(run.error);
+		if (run.error) throw new LucidError(run.error);
 
 		return streamRun(c, context, { runId: run.data.runId });
 	},

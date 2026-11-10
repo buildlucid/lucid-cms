@@ -57,7 +57,7 @@ describe("pages afterUpsert hook", () => {
 			],
 		} as never;
 
-		const result = await afterUpsertHandler(options)({
+		await afterUpsertHandler(options)({
 			context,
 			toolkit: {} as never,
 			meta: {
@@ -75,7 +75,6 @@ describe("pages afterUpsert hook", () => {
 			},
 		});
 
-		expect(result.error).toBeUndefined();
 		expect(mocks.propagateRouteSegmentUpdates).toHaveBeenCalledWith(context, {
 			toolkit: {},
 			options,

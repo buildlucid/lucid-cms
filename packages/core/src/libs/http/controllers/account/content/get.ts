@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/account.js";
 import { accountServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { ExternalScopes } from "../../../../permission/external-scopes.js";
@@ -43,7 +43,7 @@ const getController = factory.createHandlers(
 		})(context, {
 			userId: c.get("externalUserId"),
 		});
-		if (accountRes.error) throw new LucidAPIError(accountRes.error);
+		if (accountRes.error) throw new LucidError(accountRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");

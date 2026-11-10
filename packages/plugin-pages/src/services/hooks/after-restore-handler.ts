@@ -1,4 +1,4 @@
-import { z } from "@lucidcms/core";
+import { z, LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import getRouteVersionTypes from "../../utils/get-route-version-types.js";
@@ -16,7 +16,7 @@ const afterRestoreHandler =
 			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		const versionTypes = getRouteVersionTypes(meta.collection);
@@ -41,7 +41,7 @@ const afterRestoreHandler =
 						type: z.string(),
 					}),
 				});
-			if (versions.error) return versions;
+			if (versions.error) throw new LucidError(versions.error);
 
 			for (const version of versions.data) {
 				const refreshed = await refreshVersionRoute(context, {
@@ -53,10 +53,10 @@ const afterRestoreHandler =
 					documentId: version.document_id,
 					versionId: version.id,
 				});
-				if (refreshed.error) return refreshed;
+				if (refreshed.error) throw new LucidError(refreshed.error);
 			}
 		}
-		return { error: undefined, data: undefined };
+		return;
 	};
 
 export default afterRestoreHandler;

@@ -28,12 +28,11 @@ describe("rename", () => {
 			},
 		);
 
-		const response = await service({} as never, {
+		await service({} as never, {
 			from: "public/source.png",
 			to: "public/target.png",
 		});
 
-		expect(response.error).toBeUndefined();
 		expect(fetchMock).toHaveBeenCalledTimes(3);
 		expect(
 			fetchMock.mock.calls.map(([request]) => (request as Request).method),

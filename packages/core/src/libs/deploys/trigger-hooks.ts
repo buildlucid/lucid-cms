@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
 import queueDeploy from "../../services/deploys/queue.js";
+import { LucidError } from "../../utils/errors/index.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { AllHooks } from "../hooks/types.js";
 import logger from "../logger/index.js";
@@ -37,10 +38,11 @@ const createDeployTriggerHooks = (
 								},
 							});
 						}
-						if (!matched) return { error: undefined, data: undefined };
+						if (!matched) return;
 					}
 
-					return queueDeploy(props.context, { key: deploy.key });
+					const queued = await queueDeploy(props.context, { key: deploy.key });
+					if (queued.error) throw new LucidError(queued.error);
 				},
 			} as AllHooks;
 		}),

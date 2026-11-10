@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -35,7 +35,7 @@ const getScopesController = factory.createHandlers(
 				message: copy("server:core.routes.integrations.fetch.error.message"),
 			},
 		})(context, {});
-		if (getScopesRes.error) throw new LucidAPIError(getScopesRes.error);
+		if (getScopesRes.error) throw new LucidError(getScopesRes.error);
 
 		c.status(200);
 		return c.json(

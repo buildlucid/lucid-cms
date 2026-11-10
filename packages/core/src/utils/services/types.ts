@@ -6,7 +6,7 @@ import type { EmailAdapterInstance } from "../../libs/email/types.js";
 import type { TranslationStore, Translator } from "../../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../../libs/kv/types.js";
 import type { MediaDeliveryAdapterInstance } from "../../libs/media-delivery/types.js";
-import type { MediaStorageAdapterInstance } from "../../libs/media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../../libs/media-storage/types.js";
 import type { QueueAdapterInstance } from "../../libs/queue/types.js";
 import type {
 	AdapterRuntimeContext,
@@ -34,7 +34,7 @@ export type CreateServiceContextOptions = {
 	/** Optional KV adapter instance available to services. */
 	kv?: KVAdapterInstance;
 	/** Optional initialized media storage adapter available to services. */
-	mediaStorage?: MediaStorageAdapterInstance | null;
+	mediaStorage?: ResolvedMediaStorageAdapter | null;
 	/** Optional initialized media delivery adapter available to services. */
 	mediaDelivery?: MediaDeliveryAdapterInstance;
 	/** Optional initialized email adapter instance available to services. */
@@ -58,7 +58,7 @@ export type ServiceContext = {
 	runtimeContext?: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
-	mediaStorage: MediaStorageAdapterInstance | null;
+	mediaStorage: ResolvedMediaStorageAdapter | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
 	/** Verifies captcha tokens, or `null` when no captcha adapter is configured. Use `toolkit.captcha` in custom routes. */

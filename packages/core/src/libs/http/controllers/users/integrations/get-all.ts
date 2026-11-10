@@ -5,7 +5,7 @@ import {
 	userIntegrationParamsSchema,
 } from "../../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { Permissions } from "../../../../permission/definitions.js";
@@ -46,7 +46,7 @@ const getAllController = factory.createHandlers(
 				optionalPermissions: [Permissions.UsersRead, Permissions.UsersUpdate],
 			})
 		) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		const formattedQuery = await buildFormattedQuery(
 			c,
@@ -64,7 +64,7 @@ const getAllController = factory.createHandlers(
 			query: formattedQuery,
 			userId,
 		});
-		if (getAllRes.error) throw new LucidAPIError(getAllRes.error);
+		if (getAllRes.error) throw new LucidError(getAllRes.error);
 
 		c.status(200);
 		return c.json(

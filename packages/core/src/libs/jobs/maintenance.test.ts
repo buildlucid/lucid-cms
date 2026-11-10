@@ -33,11 +33,11 @@ describe("recovering expired job leases", () => {
 	test("recovers an expired final lease as a permanent failure", async () => {
 		const onPermanentFailure = vi.fn(async () => undefined);
 		const job = defineJob({
-			name: "test:expired-lease",
+			key: "test:expired-lease",
 			version: 1,
 			input: z.object({ value: z.number() }),
 			retry: { type: "none" },
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 			onPermanentFailure,
 		});
 		const context = await createJobsContext(testConfig, {
@@ -80,7 +80,7 @@ describe("recovering expired job leases", () => {
 
 	test("redelivers an expired push lease through the durable outbox", async () => {
 		const job = defineJob({
-			name: "test:push-lease-recovery",
+			key: "test:push-lease-recovery",
 			version: 1,
 			input: z.object({ value: z.number() }),
 			retry: {
@@ -90,7 +90,7 @@ describe("recovering expired job leases", () => {
 				maxDelayMs: 0,
 				jitter: "none",
 			},
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const publish = vi.fn(async () => ({ error: undefined, data: undefined }));
 		const context = await createJobsContext(testConfig, {

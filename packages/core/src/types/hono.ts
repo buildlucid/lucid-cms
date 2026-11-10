@@ -12,7 +12,7 @@ import type { EmailAdapterInstance } from "../libs/email/types.js";
 import type { TranslationStore } from "../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../libs/kv/types.js";
 import type { MediaDeliveryAdapterInstance } from "../libs/media-delivery/types.js";
-import type { MediaStorageAdapterInstance } from "../libs/media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../libs/media-storage/types.js";
 import type { ExternalScope } from "../libs/permission/external-scopes.js";
 import type { QueueAdapterInstance } from "../libs/queue/types.js";
 import type { AdapterRuntimeContext } from "../libs/runtime/types.js";
@@ -106,7 +106,7 @@ export type LucidHonoVariables = {
 	runtimeContext: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
-	mediaStorage: MediaStorageAdapterInstance | null;
+	mediaStorage: ResolvedMediaStorageAdapter | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
 	captcha: CaptchaAdapterInstance | null;

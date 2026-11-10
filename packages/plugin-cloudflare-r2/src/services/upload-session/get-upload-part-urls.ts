@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceGetUploadPartUrls } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
@@ -16,27 +16,21 @@ export const getUploadPartUrls = (
 	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.http.fallback.not.configured",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.fallback.not.configured",
+					),
+				});
 			}
 			const http = pluginOptions.http;
 			if (!client) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.http.client.not.configured",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.client.not.configured",
+					),
+				});
 			}
 			const parts = await Promise.all(
 				props.partNumbers.map(async (partNumber) => {
@@ -61,18 +55,16 @@ export const getUploadPartUrls = (
 				}),
 			);
 
-			return { error: undefined, data: { parts } };
+			return { parts };
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.cloudflare.r2.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.cloudflare.r2.errors.unknown"),
+			});
 		}
 	};
 };

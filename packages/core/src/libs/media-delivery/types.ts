@@ -1,9 +1,6 @@
 import type { Readable } from "node:stream";
 import type { MediaAdapterData, MediaType } from "../../types/response.js";
-import type {
-	ServiceContext,
-	ServiceResponse,
-} from "../../utils/services/types.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
 /** Image transformation request. Supported options depend on the delivery adapter. */
@@ -42,10 +39,11 @@ export type MediaDeliveryProcessImageParams = {
 	options: MediaTransformationOptions;
 };
 
+/** Returns the processed image, or `{ processed: false }` to serve the original. Throw a LucidError to fail. */
 export type MediaDeliveryServiceProcessImage = (
 	context: ServiceContext,
 	params: MediaDeliveryProcessImageParams,
-) => ServiceResponse<MediaDeliveryProcessResult>;
+) => Promise<MediaDeliveryProcessResult>;
 
 export type MediaDeliveryFile = {
 	key: string;

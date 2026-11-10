@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/account.js";
 import { accountServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -56,7 +56,7 @@ const disableTwoFactorController = factory.createHandlers(
 			superAdmin: auth.superAdmin,
 			proof: proof,
 		});
-		if (disableRes.error) throw new LucidAPIError(disableRes.error);
+		if (disableRes.error) throw new LucidError(disableRes.error);
 
 		c.status(204);
 		return c.body(null);

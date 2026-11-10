@@ -51,7 +51,7 @@ export interface BrickError extends Omit<PublicBrickError, "fields"> {
 	fields: FieldError[];
 }
 
-/** Structured failure returned by services or passed to LucidAPIError. Use copy() or copy.literal() for name and message. */
+/** Structured failure returned by services or passed to LucidError. Use copy() or copy.literal() for name and message. */
 export interface LucidErrorData extends Omit<
 	PublicErrorData,
 	"name" | "message" | "errors"

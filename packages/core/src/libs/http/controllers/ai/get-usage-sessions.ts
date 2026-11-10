@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -51,7 +51,7 @@ const getUsageSessionsController = factory.createHandlers(
 			query: formattedQuery,
 			viewerId: c.get("auth").id,
 		});
-		if (sessions.error) throw new LucidAPIError(sessions.error);
+		if (sessions.error) throw new LucidError(sessions.error);
 
 		c.status(200);
 		return c.json(

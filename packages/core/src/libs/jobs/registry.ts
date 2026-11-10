@@ -23,11 +23,11 @@ export const isJobDefinition = (value: unknown): value is AnyJobDefinition =>
 export const getJobDefinitionRuntime = (definition: AnyJobDefinition) =>
 	definition[jobDefinitionInternal].runtime;
 
-/** Builds the persisted name and version key for a job definition. */
+/** Builds the persisted key and version identity for a job definition. */
 export const getJobDefinitionKey = (definition: {
-	name: string;
+	key: string;
 	version: number;
-}) => `${definition.name}@${definition.version}`;
+}) => `${definition.key}@${definition.version}`;
 
 /** Returns the registered core, project and plugin job definitions. */
 export const getJobRegistry = (
@@ -46,8 +46,8 @@ export const getJobRegistry = (
 	return registry;
 };
 
-/** Finds the definition registered for a stored job's name and version. */
+/** Finds the definition registered for a stored job's key and version. */
 export const getRegisteredJob = (
 	config: ResolvedLucidConfig,
-	job: { name: string; version: number },
+	job: { key: string; version: number },
 ) => getJobRegistry(config).get(getJobDefinitionKey(job));

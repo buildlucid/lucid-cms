@@ -14,7 +14,7 @@ import notifiesOnFailure from "./notifies-on-failure.js";
 const notifyFailure = async (
 	context: ServiceContext,
 	props: {
-		job: { job_id: string; job_name: string; job_version: number };
+		job: { job_id: string; job_key: string; job_version: number };
 		errorMessage: string;
 	},
 ) => {
@@ -25,10 +25,10 @@ const notifyFailure = async (
 		(context) =>
 			upsertNotification(context, {
 				definition: jobFailedNotification,
-				key: jobNotificationKeys.failed(props.job.job_name),
+				key: jobNotificationKeys.failed(props.job.job_key),
 				data: {
 					jobId: props.job.job_id,
-					jobName: props.job.job_name,
+					jobKey: props.job.job_key,
 					errorMessage: props.errorMessage,
 				},
 			}),
@@ -40,7 +40,7 @@ const notifyFailure = async (
 			event: "jobs.failure-notification.failed",
 			message: "A job failure notification could not be sent",
 			scope: constants.logScopes.jobs,
-			data: { jobId: props.job.job_id, jobName: props.job.job_name },
+			data: { jobId: props.job.job_id, jobKey: props.job.job_key },
 		});
 	}
 };

@@ -3,6 +3,7 @@ import { Permissions } from "../../../../libs/permission/definitions.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import findMedia from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -16,7 +17,11 @@ export const findMediaMcpTool = () =>
 		output: outputSchema,
 		scopes: [ExternalScopes.MediaRead],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input }) => findMedia(context, { input }),
+		handler: async ({ context, input }) => {
+			const result = await findMedia(context, { input });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const findMediaAgentTool = () =>
@@ -32,21 +37,18 @@ export const findMediaAgentTool = () =>
 		parallelSafe: true,
 		handler: async ({ context, input }) => {
 			const result = await findMedia(context, { input });
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy(
-						result.data.output.data.length === 1
-							? "admin:core.tools.media_find.summary.one"
-							: "admin:core.tools.media_find.summary",
-						{
-							data: { count: result.data.output.data.length },
-						},
-					),
-				},
+				...result.data,
+				summary: copy(
+					result.data.output.data.length === 1
+						? "admin:core.tools.media_find.summary.one"
+						: "admin:core.tools.media_find.summary",
+					{
+						data: { count: result.data.output.data.length },
+					},
+				),
 			};
 		},
 	});

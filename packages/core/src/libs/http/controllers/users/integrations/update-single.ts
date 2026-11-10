@@ -7,7 +7,7 @@ import {
 	integrationServices,
 	userServices,
 } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { Permissions } from "../../../../permission/definitions.js";
@@ -51,7 +51,7 @@ const updateSingleController = factory.createHandlers(
 				requiredPermissions: [Permissions.UsersUpdate],
 			})
 		) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
 
@@ -59,7 +59,7 @@ const updateSingleController = factory.createHandlers(
 			auth,
 			id: userId,
 		});
-		if (userAccessRes.error) throw new LucidAPIError(userAccessRes.error);
+		if (userAccessRes.error) throw new LucidError(userAccessRes.error);
 
 		const updateSingleRes = await serviceWrapper(
 			integrationServices.updateSingle,
@@ -80,7 +80,7 @@ const updateSingleController = factory.createHandlers(
 			scopes,
 			userId,
 		});
-		if (updateSingleRes.error) throw new LucidAPIError(updateSingleRes.error);
+		if (updateSingleRes.error) throw new LucidError(updateSingleRes.error);
 
 		c.status(204);
 		return c.body(null);

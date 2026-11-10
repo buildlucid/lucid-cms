@@ -105,7 +105,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 			<Drawer.Header border={!showTabs()}>
 				<Drawer.Title class="flex min-w-0 items-center gap-2">
 					<span class="truncate">
-						{data()?.jobName ?? T()("panels.jobs.details.title")}
+						{data()?.jobKey ?? T()("panels.jobs.details.title")}
 					</span>
 					<Show when={data()?.status}>
 						{(status) => (
@@ -265,7 +265,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 						items={[
 							{
 								label: T()("common.schedule"),
-								value: schedule()?.name ?? data()?.scheduleKey,
+								value: schedule()?.shortKey ?? data()?.scheduleKey,
 							},
 							{
 								label: T()("common.status"),

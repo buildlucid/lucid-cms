@@ -4,7 +4,7 @@ import constants from "../../../../../constants/constants.js";
 import type { PreviewResolution } from "../../../../../exports/types.js";
 import { controllerSchemas } from "../../../../../schemas/previews.js";
 import { previewSessionServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import externalAuthentication from "../../../middleware/external-authenticate.js";
@@ -48,7 +48,7 @@ const resolvePreviewController = factory.createHandlers(
 				message: copy("server:core.routes.preview.resolve.error.message"),
 			},
 		})(context, { token });
-		if (preview.error) throw new LucidAPIError(preview.error);
+		if (preview.error) throw new LucidError(preview.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");

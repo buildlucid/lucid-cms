@@ -1,7 +1,7 @@
 import {
 	copy,
 	defineRoute,
-	LucidAPIError,
+	LucidError,
 	openAPI,
 	serviceWrapper,
 } from "@lucidcms/core";
@@ -37,7 +37,7 @@ const routes = (pluginOptions: PluginOptions) => [
 				headers: hono.req.header(),
 				pluginOptions: pluginOptions,
 			});
-			if (webhookRes.error) throw new LucidAPIError(webhookRes.error);
+			if (webhookRes.error) throw new LucidError(webhookRes.error);
 
 			hono.status(200);
 			return hono.body(null);

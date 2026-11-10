@@ -7,10 +7,7 @@ import defineMcpTool from "./define-mcp-tool.js";
 const input = z.object({ count: z.number() });
 const output = z.object({ ok: z.boolean() });
 const base = { name: "test", description: "Test", input, output };
-const handler = async () => ({
-	error: undefined,
-	data: { output: { ok: true } },
-});
+const handler = async () => ({ output: { ok: true } });
 
 defineAgentTool({
 	...base,
@@ -28,15 +25,12 @@ defineAgentTool({
 				? execution.authority.principal.userId
 				: null;
 		return {
-			error: undefined,
-			data: {
-				output: { ok: count > 0 && userId !== 0 },
-				summary: copy("admin:test.items.checked", {
-					data: { count },
-					defaultMessage: "Checked {{count}} items.",
-				}),
-				widgets: [{ key: operationId, version: 1, data: { count } }],
-			},
+			output: { ok: count > 0 && userId !== 0 },
+			summary: copy("admin:test.items.checked", {
+				data: { count },
+				defaultMessage: "Checked {{count}} items.",
+			}),
+			widgets: [{ key: operationId, version: 1, data: { count } }],
 		};
 	},
 });
@@ -49,10 +43,7 @@ defineMcpTool({
 		execution.operationId;
 		// @ts-expect-error MCP authority has scopes, not user permissions.
 		execution.authority.permissions;
-		return {
-			error: undefined,
-			data: { output: { ok: true }, content: [{ type: "text", text: "ok" }] },
-		};
+		return { output: { ok: true }, content: [{ type: "text", text: "ok" }] };
 	},
 });
 
@@ -65,12 +56,9 @@ defineAgentTool({
 	permissions: [],
 	// @ts-expect-error Agent handlers cannot return MCP content blocks.
 	handler: async () => ({
-		error: undefined,
-		data: {
-			output: { ok: true },
-			summary: "Checked the items.",
-			content: [{ type: "text", text: "wrong target" }],
-		},
+		output: { ok: true },
+		summary: "Checked the items.",
+		content: [{ type: "text", text: "wrong target" }],
 	}),
 });
 defineMcpTool({
@@ -78,11 +66,8 @@ defineMcpTool({
 	scopes: [],
 	// @ts-expect-error MCP handlers cannot return widgets.
 	handler: async () => ({
-		error: undefined,
-		data: {
-			output: { ok: true },
-			widgets: [{ key: "test", version: 1, data: {} }],
-		},
+		output: { ok: true },
+		widgets: [{ key: "test", version: 1, data: {} }],
 	}),
 });
 
@@ -107,11 +92,8 @@ defineAgentTool({
 	permissions: [],
 	// @ts-expect-error Agent tool summaries cannot use server copy.
 	handler: async () => ({
-		error: undefined,
-		data: {
-			output: { ok: true },
-			summary: copy("server:test.items.checked"),
-		},
+		output: { ok: true },
+		summary: copy("server:test.items.checked"),
 	}),
 });
 
@@ -127,13 +109,10 @@ defineAgentTool({
 		response: ({ data }) =>
 			z.object({ id: z.number().refine((id) => data.ids.includes(id)) }),
 		prepare: async ({ input }) => ({
-			error: undefined,
-			data: {
-				interaction: {
-					title: "Choose",
-					placement: "inline",
-					data: { ids: [input.count] },
-				},
+			interaction: {
+				title: "Choose",
+				placement: "inline",
+				data: { ids: [input.count] },
 			},
 		}),
 	},
@@ -144,11 +123,8 @@ defineAgentTool({
 		// @ts-expect-error Response types come from the schema.
 		response.id satisfies string;
 		return {
-			error: undefined,
-			data: {
-				output: { ok: choices.includes(id) && count > 0 },
-				summary: `Selected item ${id}.`,
-			},
+			output: { ok: choices.includes(id) && count > 0 },
+			summary: `Selected item ${id}.`,
 		};
 	},
 });
@@ -167,7 +143,7 @@ defineAgentTool({
 	permissions: [],
 	parallelSafe: true,
 	handler: async () => ({
-		error: undefined,
-		data: { output: { ok: true }, summary: "Checked the items." },
+		output: { ok: true },
+		summary: "Checked the items.",
 	}),
 });

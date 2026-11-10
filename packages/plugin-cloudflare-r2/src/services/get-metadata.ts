@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
@@ -12,35 +12,27 @@ const getMetadata = (
 			const object = await binding.head(key);
 
 			if (!object) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.cloudflare.r2.objects.not.found"),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.cloudflare.r2.objects.not.found"),
+				});
 			}
 
 			return {
-				error: undefined,
-				data: {
-					size: object.size,
-					mimeType: object.httpMetadata?.contentType || null,
-					etag: object.etag || null,
-					status: "ready",
-				},
+				size: object.size,
+				mimeType: object.httpMetadata?.contentType || null,
+				etag: object.etag || null,
+				status: "ready",
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.cloudflare.r2.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.cloudflare.r2.errors.unknown"),
+			});
 		}
 	};
 };

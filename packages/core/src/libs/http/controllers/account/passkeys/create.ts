@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/account.js";
 import { authServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -59,7 +59,7 @@ const createPasskeyController = factory.createHandlers(
 			userId: auth.id,
 			response: body,
 		});
-		if (passkeyRes.error) throw new LucidAPIError(passkeyRes.error);
+		if (passkeyRes.error) throw new LucidError(passkeyRes.error);
 
 		c.status(200);
 		return c.json(

@@ -5,7 +5,7 @@ import { stream } from "hono/streaming";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import { copy } from "../../../i18n/index.js";
@@ -58,16 +58,16 @@ const streamMediaController = factory.createHandlers(
 			sessionCookie,
 			enforcePasswordSession: true,
 		});
-		if (authorizeRes.error) throw new LucidAPIError(authorizeRes.error);
+		if (authorizeRes.error) throw new LucidError(authorizeRes.error);
 
 		const shareAccessRes = await serviceWrapper(
 			mediaShareLinkServices.getShareAccess,
 			{ transaction: false },
 		)(context, { token, sessionCookie });
-		if (shareAccessRes.error) throw new LucidAPIError(shareAccessRes.error);
+		if (shareAccessRes.error) throw new LucidError(shareAccessRes.error);
 
 		if (shareAccessRes.data.passwordRequired) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "authorisation",
 				status: 401,
 				name: copy("server:core.share.stream.password.required.title"),
@@ -76,7 +76,7 @@ const streamMediaController = factory.createHandlers(
 		}
 
 		if (!shareAccessRes.data.media.previewable) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				status: 415,
 				name: copy("server:core.share.stream.unsupported.media.type.name"),
@@ -94,7 +94,7 @@ const streamMediaController = factory.createHandlers(
 		const response = await serviceWrapper(mediaShareLinkServices.streamMedia, {
 			transaction: false,
 		})(context, { mediaKey, range });
-		if (response.error) throw new LucidAPIError(response.error);
+		if (response.error) throw new LucidError(response.error);
 
 		applyRangeHeaders(c, {
 			isPartial: response.data.isPartialContent,

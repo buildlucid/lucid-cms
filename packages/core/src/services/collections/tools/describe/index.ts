@@ -9,6 +9,7 @@ import {
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import describeCollection from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -31,15 +32,18 @@ export const describeCollectionMcpTool = (
 				(collection) => ExternalScopes.DocumentRead(collection.key),
 			),
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			describeCollection(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await describeCollection(context, {
 				input,
 				allowedCollectionKeys: getScopedCollectionKeys(
 					context.config,
 					execution.authority.scopes,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const describeCollectionAgentTool = (
@@ -68,16 +72,13 @@ export const describeCollectionAgentTool = (
 				),
 				reader: execution.authority,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy("admin:core.tools.collections_describe.summary", {
-						data: { collection: result.data.output.meta.collection.label },
-					}),
-				},
+				...result.data,
+				summary: copy("admin:core.tools.collections_describe.summary", {
+					data: { collection: result.data.output.meta.collection.label },
+				}),
 			};
 		},
 	});

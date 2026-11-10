@@ -6,6 +6,7 @@ import {
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import listCollections from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -19,15 +20,18 @@ export const listCollectionsMcpTool = (options: CollectionToolOptions = {}) =>
 		output: outputSchema,
 		scopes: [],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			listCollections(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await listCollections(context, {
 				input,
 				allowedCollectionKeys: getScopedCollectionKeys(
 					context.config,
 					execution.authority.scopes,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const listCollectionsAgentTool = (options: CollectionToolOptions = {}) =>
@@ -50,21 +54,18 @@ export const listCollectionsAgentTool = (options: CollectionToolOptions = {}) =>
 					options.collections,
 				),
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy(
-						result.data.output.data.length === 1
-							? "admin:core.tools.collections_list.summary.one"
-							: "admin:core.tools.collections_list.summary",
-						{
-							data: { count: result.data.output.data.length },
-						},
-					),
-				},
+				...result.data,
+				summary: copy(
+					result.data.output.data.length === 1
+						? "admin:core.tools.collections_list.summary.one"
+						: "admin:core.tools.collections_list.summary",
+					{
+						data: { count: result.data.output.data.length },
+					},
+				),
 			};
 		},
 	});

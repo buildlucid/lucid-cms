@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
 import { captchaServices } from "../../../services/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getCaptchaForms from "../../captcha/get-forms.js";
 import createServiceContext from "../utils/create-service-context.js";
@@ -20,7 +20,7 @@ const verifyCaptcha = (form: CaptchaForm) =>
 			token: c.req.header(constants.headers.captcha),
 			action: policy.action,
 		});
-		if (verifyRes.error) throw new LucidAPIError(verifyRes.error);
+		if (verifyRes.error) throw new LucidError(verifyRes.error);
 
 		return await next();
 	});

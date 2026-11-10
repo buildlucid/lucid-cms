@@ -110,14 +110,11 @@ describe("Cloudflare R2 plugin", () => {
 			size: 1024,
 		});
 
-		expect(result.error).toBeUndefined();
-		expect(result.data?.key).toBe("public/test.png");
-		expect(result.data?.protocol).toBe("http");
-		if (result.data?.protocol !== "http") return;
-		expect(result.data.request.url).toContain(
-			"/api/v1/media/r2/storage/upload?",
-		);
-		expect(result.data.request.url).toContain("extension=png");
+		expect(result.key).toBe("public/test.png");
+		expect(result.protocol).toBe("http");
+		if (result.protocol !== "http") return;
+		expect(result.request.url).toContain("/api/v1/media/r2/storage/upload?");
+		expect(result.request.url).toContain("extension=png");
 	});
 
 	test("registers plugin-owned storage routes in binding-only mode", () => {

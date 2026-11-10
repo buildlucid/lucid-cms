@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import { subagentReadToolName } from "./constants.js";
 import handler from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
@@ -17,6 +18,9 @@ export const subagentReadAgentTool = () =>
 		readOnly: true,
 		parallelSafe: true,
 		available: ({ mode }) => mode !== "subagent",
-		handler: ({ context, input, execution }) =>
-			handler(context, { input, execution }),
+		handler: async ({ context, input, execution }) => {
+			const result = await handler(context, { input, execution });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

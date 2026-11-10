@@ -20,11 +20,8 @@ const plugin = (
 		package: PACKAGE_INFO,
 		hooks: {
 			runtime: async ({ phase }) => ({
-				error: undefined,
-				data: {
-					artifacts:
-						phase === "prepare" ? [createBindingsArtifact(pluginOptions)] : [],
-				},
+				artifacts:
+					phase === "prepare" ? [createBindingsArtifact(pluginOptions)] : [],
 			}),
 		},
 		checkCompatibility: ({ runtimeContext }) => {

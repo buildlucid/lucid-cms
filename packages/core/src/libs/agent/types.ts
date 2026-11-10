@@ -12,7 +12,7 @@ import type { AiModelConfig } from "../../types/config.js";
 import type {
 	AgentInteractionAction,
 	AgentRoutineConversationMode,
-	AgentRoutineEvent,
+	ContentEvent,
 	AgentRoutineSchedule,
 	AgentRoutineToolSettings,
 	AiFeature,
@@ -21,7 +21,7 @@ import type {
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
-import type { JobScheduleTiming } from "../jobs/types.js";
+import type { ScheduleTiming } from "../jobs/types.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
 import type { SkillDefinition } from "../skills/types.js";
 import type { AgentToolDefinition } from "../tools/types.js";
@@ -236,16 +236,16 @@ export type DefineRoutineOptions<Key extends string> = {
 	features?: readonly AiFeature[];
 } & (
 	| {
-			schedule: JobScheduleTiming;
+			schedule: ScheduleTiming;
 			/**
 			 * Content changes that also start a run, such as `{ event: "media:created", filter: { mediaTypes: ["image"] } }`.
 			 * @remarks Changes from routine chats are ignored, and nearby changes share a run.
 			 */
-			events?: readonly AgentRoutineEvent[];
+			events?: readonly ContentEvent[];
 	  }
 	| {
-			schedule?: JobScheduleTiming;
-			events: readonly [AgentRoutineEvent, ...AgentRoutineEvent[]];
+			schedule?: ScheduleTiming;
+			events: readonly [ContentEvent, ...ContentEvent[]];
 	  }
 );
 
@@ -264,7 +264,7 @@ export type RoutineDefinition<Key extends string = string> = {
 	readonly features: readonly AiFeature[];
 	/** Null when the routine only runs on events. */
 	readonly schedule: Readonly<AgentRoutineSchedule> | null;
-	readonly events: readonly AgentRoutineEvent[];
+	readonly events: readonly ContentEvent[];
 };
 
 export type DefineAgentOptions<Key extends string> = {

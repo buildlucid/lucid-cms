@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentWorkflowServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -47,7 +47,7 @@ const getWorkflowAssigneesController = factory.createHandlers(
 		})(context, {
 			collectionKey,
 		});
-		if (users.error) throw new LucidAPIError(users.error);
+		if (users.error) throw new LucidError(users.error);
 
 		c.status(200);
 		return c.json(

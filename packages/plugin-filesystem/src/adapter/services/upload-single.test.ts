@@ -31,7 +31,7 @@ describe("file-system upload metadata", () => {
 			secretKey: "secret",
 		};
 
-		const uploadRes = await uploadSingle(options)({} as never, {
+		await uploadSingle(options)({} as never, {
 			key: "public/uuid",
 			body: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'),
 			mimeType: "image/svg+xml",
@@ -40,14 +40,11 @@ describe("file-system upload metadata", () => {
 			type: "image",
 		});
 
-		expect(uploadRes.error).toBeUndefined();
-
 		const metadataRes = await getMetadata(options)({} as never, {
 			key: "public/uuid",
 		});
-		expect(metadataRes.error).toBeUndefined();
-		expect(metadataRes.data?.mimeType).toBe("image/svg+xml");
-		expect(metadataRes.data?.status).toBe("ready");
+		expect(metadataRes.mimeType).toBe("image/svg+xml");
+		expect(metadataRes.status).toBe("ready");
 
 		const metadataFile = await readFile(
 			await getStoredMetadataFilePath(),
@@ -64,17 +61,15 @@ describe("file-system upload metadata", () => {
 		const streamRes = await stream(options)({} as never, {
 			key: "public/uuid",
 		});
-		expect(streamRes.error).toBeUndefined();
-		expect(streamRes.data?.contentType).toBe("image/svg+xml");
-		expect(streamRes.data?.etag).toBeTruthy();
+		expect(streamRes.contentType).toBe("image/svg+xml");
+		expect(streamRes.etag).toBeTruthy();
 
 		const conditionalStreamRes = await stream(options)({} as never, {
 			key: "public/uuid",
-			ifNoneMatch: `"${streamRes.data?.etag}"`,
+			ifNoneMatch: `"${streamRes.etag}"`,
 		});
-		expect(conditionalStreamRes.error).toBeUndefined();
-		expect(conditionalStreamRes.data?.notModified).toBe(true);
-		expect(conditionalStreamRes.data?.body).toEqual(new Uint8Array());
+		expect(conditionalStreamRes.notModified).toBe(true);
+		expect(conditionalStreamRes.body).toEqual(new Uint8Array());
 	});
 
 	it("moves stored mime metadata when a key is renamed", async () => {
@@ -92,18 +87,15 @@ describe("file-system upload metadata", () => {
 			type: "image",
 		});
 
-		const renameRes = await rename(options)({} as never, {
+		await rename(options)({} as never, {
 			from: "public/source",
 			to: "private/source",
 		});
 
-		expect(renameRes.error).toBeUndefined();
-
 		const streamRes = await stream(options)({} as never, {
 			key: "private/source",
 		});
-		expect(streamRes.error).toBeUndefined();
-		expect(streamRes.data?.contentType).toBe("image/svg+xml");
-		expect(streamRes.data?.etag).toBeTruthy();
+		expect(streamRes.contentType).toBe("image/svg+xml");
+		expect(streamRes.etag).toBeTruthy();
 	});
 });

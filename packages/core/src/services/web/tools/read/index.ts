@@ -1,6 +1,7 @@
 import type { AgentLucidToolName } from "@lucidcms/types";
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import type { WebToolOptions } from "../../helpers/web-tool-options.js";
 import readWeb from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
@@ -21,6 +22,13 @@ export const webReadAgentTool = ({ allowedDomains }: WebToolOptions = {}) =>
 		readOnly: true,
 		capabilities: { web: { read: true } },
 		available: ({ aiAccess }) => aiAccess.includes("web_research"),
-		handler: ({ context, input, execution }) =>
-			readWeb(context, { input, execution, allowedDomains }),
+		handler: async ({ context, input, execution }) => {
+			const result = await readWeb(context, {
+				input,
+				execution,
+				allowedDomains,
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

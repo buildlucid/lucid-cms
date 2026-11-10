@@ -83,18 +83,20 @@ const seedTask = defineRuntimeTask({
 			for (const { name, seed } of selected) {
 				cliLogger.info(`Running seed "${name}"...`);
 				let transactionDb: LucidDatabase | undefined;
-				await serviceContext.db.kysely.transaction().execute((transaction) => {
-					transactionDb = serviceContext.db.withTransaction(transaction);
-					const transactionContext = {
-						...serviceContext,
-						db: transactionDb,
-					};
+				await serviceContext.db.kysely
+					.transaction()
+					.execute(async (transaction) => {
+						transactionDb = serviceContext.db.withTransaction(transaction);
+						const transactionContext = {
+							...serviceContext,
+							db: transactionDb,
+						};
 
-					return seed({
-						context: transactionContext,
-						toolkit: createToolkit(transactionContext),
+						await seed.run({
+							context: transactionContext,
+							toolkit: createToolkit(transactionContext),
+						});
 					});
-				});
 				await transactionDb?.runCommitCallbacks();
 
 				cliLogger.success(

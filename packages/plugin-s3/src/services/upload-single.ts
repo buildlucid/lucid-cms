@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import { toWebReadable } from "@lucidcms/core/extension";
 import type { MediaStorageAdapterServiceUploadSingle } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
@@ -30,39 +30,29 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			const result = await fetch(response);
 
 			if (!result.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.upload.failed", {
-							data: {
-								status: result.status,
-								statusText: result.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.upload.failed", {
+						data: {
+							status: result.status,
+							statusText: result.statusText,
+						},
+					}),
+				});
 			}
 
 			const etag = result.headers.get("etag")?.replace(/"/g, "");
 
-			return {
-				error: undefined,
-				data: {
-					etag,
-				},
-			};
+			return { etag };
 		} catch (e) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						e instanceof Error
-							? copy.literal(e.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (e instanceof LucidError) throw e;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					e instanceof Error
+						? copy.literal(e.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 

@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/auth.js";
 import { userServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
@@ -60,7 +60,7 @@ const setupController = factory.createHandlers(
 			lastName,
 			password,
 		});
-		if (createAdminRes.error) throw new LucidAPIError(createAdminRes.error);
+		if (createAdminRes.error) throw new LucidError(createAdminRes.error);
 
 		c.status(204);
 		return c.body(null);

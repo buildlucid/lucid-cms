@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -30,35 +30,27 @@ ${keys.map((key) => `<Object><Key>${key}</Key></Object>`).join("")}
 			const result = await fetch(response);
 
 			if (!result.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.delete.multiple.failed", {
-							data: {
-								status: result.status,
-								statusText: result.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.delete.multiple.failed", {
+						data: {
+							status: result.status,
+							statusText: result.statusText,
+						},
+					}),
+				});
 			}
 
-			return {
-				error: undefined,
-				data: undefined,
-			};
+			return;
 		} catch (e) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						e instanceof Error
-							? copy.literal(e.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (e instanceof LucidError) throw e;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					e instanceof Error
+						? copy.literal(e.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 

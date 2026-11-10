@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/diagnostics.js";
 import { diagnosticServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -40,7 +40,7 @@ const getDiagnosticsController = factory.createHandlers(
 				},
 			},
 		)(context);
-		if (diagnostics.error) throw new LucidAPIError(diagnostics.error);
+		if (diagnostics.error) throw new LucidError(diagnostics.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.status(200);

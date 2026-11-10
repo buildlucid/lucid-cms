@@ -10,8 +10,8 @@ import {
 } from "../../agent/model-selection.js";
 import nextRoutineOccurrence from "../../agent/next-routine-occurrence.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
-import { agentRoutineEventsSchema } from "../../agent/routine-events.js";
 import type { AgentFeatures } from "../../agent/types.js";
+import { contentEventsSchema } from "../../events/content-events.js";
 import { resolvedAdminCopySchema } from "../../i18n/copy.js";
 
 const featuresSchema = z
@@ -212,7 +212,7 @@ const checkAgentDefinitions = (config: {
 				throw new Error(`Routine "${label}" has an invalid schedule.`);
 			}
 
-			const events = agentRoutineEventsSchema.safeParse(routine.events);
+			const events = contentEventsSchema.safeParse(routine.events);
 			if (!events.success) {
 				throw new Error(
 					`Routine "${label}" has invalid events: ${z.prettifyError(events.error)}`,

@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/jobs.js";
 import { jobServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -53,7 +53,7 @@ const triggerScheduleController = factory.createHandlers(
 			scheduleKey: body.scheduleKey,
 			userId: c.get("auth").id,
 		});
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: result.data }));

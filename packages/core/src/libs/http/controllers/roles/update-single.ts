@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/roles.js";
 import { roleServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -56,7 +56,7 @@ const updateSingleController = factory.createHandlers(
 			permissions: body.permissions,
 			auth: c.get("auth"),
 		});
-		if (updateRole.error) throw new LucidAPIError(updateRole.error);
+		if (updateRole.error) throw new LucidError(updateRole.error);
 
 		const role = await serviceWrapper(roleServices.getSingle, {
 			transaction: false,
@@ -68,7 +68,7 @@ const updateSingleController = factory.createHandlers(
 		})(context, {
 			id: Number.parseInt(id, 10),
 		});
-		if (role.error) throw new LucidAPIError(role.error);
+		if (role.error) throw new LucidError(role.error);
 
 		c.status(204);
 		return c.body(null);

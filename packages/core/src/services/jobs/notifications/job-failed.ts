@@ -23,12 +23,12 @@ export const jobFailedNotification = defineNotification({
 	audience: { permission: Permissions.JobsRead },
 	data: z.object({
 		jobId: z.string(),
-		jobName: z.string(),
+		jobKey: z.string(),
 		errorMessage: z.string(),
 	}),
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.system.job-failed.title", {
-			data: { name: data.jobName },
+			data: { name: data.jobKey },
 			defaultMessage: "{{name}} failed",
 		}),
 		body: copy.literal(data.errorMessage),

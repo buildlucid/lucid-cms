@@ -1,6 +1,7 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
 import { RequestsRepository } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import scheduleRequest, {
 	QUEUE_WINDOW_MS,
@@ -8,16 +9,14 @@ import scheduleRequest, {
 
 /** Queues scheduled requests once their time is close enough for the queue to hold them. */
 export const dispatchScheduledRequestsJob = defineJob({
-	name: "core:dispatch-scheduled-requests",
+	key: "core:dispatch-scheduled-requests",
 	version: 1,
 	input: z.null(),
 	schedules: [
-		{ name: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
+		{ key: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
 	],
 	handler: async ({ context }) => {
-		if (!context.queue.support.delayedDelivery) {
-			return { error: undefined, data: undefined };
-		}
+		if (!context.queue.support.delayedDelivery) return;
 
 		const Requests = new RequestsRepository(context.db);
 		const requestsRes = await Requests.selectMultiple({
@@ -33,15 +32,13 @@ export const dispatchScheduledRequestsJob = defineJob({
 				},
 			],
 		});
-		if (requestsRes.error) return requestsRes;
+		if (requestsRes.error) throw new LucidError(requestsRes.error);
 
 		for (const request of requestsRes.data ?? []) {
 			const scheduleRes = await serviceWrapper(scheduleRequest, {
 				transaction: true,
 			})(context, { id: request.id });
-			if (scheduleRes.error) return scheduleRes;
+			if (scheduleRes.error) throw new LucidError(scheduleRes.error);
 		}
-
-		return { error: undefined, data: undefined };
 	},
 });

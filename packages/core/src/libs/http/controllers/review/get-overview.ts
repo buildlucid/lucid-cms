@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/review.js";
 import { reviewServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -38,7 +38,7 @@ const getOverviewController = factory.createHandlers(
 		})(context, {
 			user: c.get("auth"),
 		});
-		if (overview.error) throw new LucidAPIError(overview.error);
+		if (overview.error) throw new LucidError(overview.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: overview.data }));

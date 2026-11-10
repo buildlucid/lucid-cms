@@ -1,12 +1,12 @@
-import type { MediaStorageAdapterInstance } from "./types.js";
+import type { ResolvedMediaStorageAdapter } from "./types.js";
 
-type MultipartUploadSessionAdapter = MediaStorageAdapterInstance & {
+type MultipartUploadSessionAdapter = ResolvedMediaStorageAdapter & {
 	getUploadPartUrls: NonNullable<
-		MediaStorageAdapterInstance["getUploadPartUrls"]
+		ResolvedMediaStorageAdapter["getUploadPartUrls"]
 	>;
-	listUploadParts: NonNullable<MediaStorageAdapterInstance["listUploadParts"]>;
+	listUploadParts: NonNullable<ResolvedMediaStorageAdapter["listUploadParts"]>;
 	completeUploadSession: NonNullable<
-		MediaStorageAdapterInstance["completeUploadSession"]
+		ResolvedMediaStorageAdapter["completeUploadSession"]
 	>;
 };
 
@@ -14,7 +14,7 @@ type MultipartUploadSessionAdapter = MediaStorageAdapterInstance & {
  * Checks whether the adapter implements the multipart-parts protocol.
  */
 export const hasMultipartUploadSessions = (
-	adapter: MediaStorageAdapterInstance,
+	adapter: ResolvedMediaStorageAdapter,
 ): adapter is MultipartUploadSessionAdapter => {
 	return Boolean(
 		adapter.getUploadPartUrls &&

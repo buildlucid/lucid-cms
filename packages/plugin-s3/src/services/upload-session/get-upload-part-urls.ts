@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceGetUploadPartUrls } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
@@ -39,21 +39,16 @@ export const getUploadPartUrls = (
 				}),
 			);
 
-			return {
-				error: undefined,
-				data: { parts },
-			};
+			return { parts };
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 };

@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/redirects.js";
 import { redirectServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { ExternalScopes } from "../../../../permission/external-scopes.js";
@@ -46,7 +46,7 @@ const resolveController = factory.createHandlers(
 				message: copy("server:core.routes.redirect.resolve.error.message"),
 			},
 		})(context, query);
-		if (redirect.error) throw new LucidAPIError(redirect.error);
+		if (redirect.error) throw new LucidError(redirect.error);
 
 		c.status(200);
 		return c.json(

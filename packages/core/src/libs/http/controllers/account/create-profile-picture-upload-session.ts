@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -61,7 +61,7 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 			size: body.size,
 			userId: c.get("auth").id,
 		});
-		if (uploadSession.error) throw new LucidAPIError(uploadSession.error);
+		if (uploadSession.error) throw new LucidError(uploadSession.error);
 
 		c.status(200);
 		return c.json(

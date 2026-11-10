@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent-memories.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
@@ -49,7 +49,7 @@ const createMemoryController = factory.createHandlers(
 			content: body.content,
 			replaces: [],
 		});
-		if (memory.error) throw new LucidAPIError(memory.error);
+		if (memory.error) throw new LucidError(memory.error);
 
 		c.status(201);
 

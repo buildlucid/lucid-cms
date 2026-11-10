@@ -22,22 +22,16 @@ export const reviewNoteTool = defineAgentTool({
 		data: z.object({ title: z.string(), body: z.string() }),
 		response: () => noteData,
 		prepare: async ({ input }) => ({
-			error: undefined,
-			data: {
-				interaction: {
-					title: copy("admin:playground.note-editor.title"),
-					placement: "composer",
-					data: input,
-				},
+			interaction: {
+				title: copy("admin:playground.note-editor.title"),
+				placement: "composer",
+				data: input,
 			},
 		}),
 	},
 	handler: async ({ response }) => ({
-		error: undefined,
-		data: {
-			output: { saved: true, ...response },
-			summary: `Saved "${response.title}"`,
-			widgets: [{ key: "playground-note", version: 1, data: response }],
-		},
+		output: { saved: true, ...response },
+		summary: `Saved "${response.title}"`,
+		widgets: [{ key: "playground-note", version: 1, data: response }],
 	}),
 });

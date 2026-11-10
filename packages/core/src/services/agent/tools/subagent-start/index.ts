@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { subagentAgentsToolName } from "../subagent-agents/constants.js";
 import { subagentMessageToolName } from "../subagent-message/constants.js";
@@ -29,6 +30,13 @@ export const subagentStartAgentTool = (options: {
 			copy("admin:core.tools.lucid_subagent_start.describe", {
 				data: { agent: input.agentKey },
 			}),
-		handler: ({ context, input, execution }) =>
-			handler(context, { input, execution, agents: options.agents }),
+		handler: async ({ context, input, execution }) => {
+			const result = await handler(context, {
+				input,
+				execution,
+				agents: options.agents,
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

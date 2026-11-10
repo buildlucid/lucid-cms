@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { accountServices, authServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -43,7 +43,7 @@ const revokeRefreshTokensController = factory.createHandlers(
 		)(context, {
 			userId: auth.id,
 		});
-		if (revokeAllRes.error) throw new LucidAPIError(revokeAllRes.error);
+		if (revokeAllRes.error) throw new LucidError(revokeAllRes.error);
 
 		const [refreshRes, accessRes, csrfRes] = await Promise.all([
 			authServices.refreshToken.clearToken(c, {
@@ -52,9 +52,9 @@ const revokeRefreshTokensController = factory.createHandlers(
 			authServices.accessToken.clearToken(c),
 			authServices.csrf.clearToken(c),
 		]);
-		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-		if (accessRes.error) throw new LucidAPIError(accessRes.error);
-		if (csrfRes.error) throw new LucidAPIError(csrfRes.error);
+		if (refreshRes.error) throw new LucidError(refreshRes.error);
+		if (accessRes.error) throw new LucidError(accessRes.error);
+		if (csrfRes.error) throw new LucidError(csrfRes.error);
 
 		c.status(204);
 		return c.body(null);

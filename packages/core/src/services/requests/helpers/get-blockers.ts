@@ -48,7 +48,7 @@ const getBlockers: ServiceFn<
 			context,
 			{
 				service: "requests",
-				event: "check",
+				event: "afterCheck",
 				config: context.config,
 				collectionInstance: collection,
 			},

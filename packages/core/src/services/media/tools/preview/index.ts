@@ -1,6 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import previewMedia from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -14,6 +15,12 @@ export const previewMediaMcpTool = () =>
 		output: outputSchema,
 		scopes: [ExternalScopes.MediaRead],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			previewMedia(context, { input, signal: execution.signal }),
+		handler: async ({ context, input, execution }) => {
+			const result = await previewMedia(context, {
+				input,
+				signal: execution.signal,
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

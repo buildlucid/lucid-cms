@@ -1,4 +1,4 @@
-import { LucidAPIError } from "@lucidcms/core";
+import { LucidError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
 import type {
 	ContentList,
@@ -42,7 +42,7 @@ const createMediaListFunction = (config: SiteConfig) =>
 				locale: readLocale(config, render, options.locale),
 				fallbackLocale: options.fallbackLocale,
 			});
-			if (response.error) throw new LucidAPIError(response.error);
+			if (response.error) throw new LucidError(response.error);
 
 			return response.data;
 		},

@@ -39,53 +39,22 @@ export type MediaChangeMetadata =
 
 export type HookExecutionKind = "effect" | "transform";
 
-export type CoreHookExecutionKindMap = {
-	documents: {
-		afterChange: "effect";
-		beforeUpsert: "transform";
-		afterUpsert: "effect";
-		afterFetch: "transform";
-		beforeDelete: "effect";
-		beforeUnpublish: "effect";
-		afterRestore: "effect";
-		afterDelete: "effect";
-		versionPromote: "effect";
-		versionCapture: "effect";
-	};
-	documentWorkflows: {
-		afterUpdate: "effect";
-	};
-	requests: {
-		check: "transform";
-		completed: "effect";
-		documentRemoved: "effect";
-	};
-	notifications: {
-		beforeSend: "transform";
-		afterSend: "effect";
-	};
-	media: {
-		afterChange: "effect";
-		afterRestore: "effect";
-		afterCreate: "effect";
-		afterUpdate: "effect";
-		afterDelete: "effect";
-	};
-	agent: {
-		runFinished: "effect";
-	};
-};
-
-/** Whether each core and plugin hook event transforms data or only runs side effects. */
-export type HookExecutionKindMap = CoreHookExecutionKindMap & {
-	[S in keyof PluginHookEvents]: {
-		[E in keyof PluginHookEvents[S]]: PluginHookEvents[S][E] extends {
+type HookEventKinds<TEvents> = {
+	[S in keyof TEvents]: {
+		[E in keyof TEvents[S]]: TEvents[S][E] extends {
 			kind: infer Kind extends HookExecutionKind;
 		}
 			? Kind
 			: never;
 	};
 };
+
+/** Whether each core hook event transforms data or only runs side effects. */
+export type CoreHookExecutionKindMap = HookEventKinds<CoreHookEvents>;
+
+/** Whether each core and plugin hook event transforms data or only runs side effects. */
+export type HookExecutionKindMap = CoreHookExecutionKindMap &
+	HookEventKinds<PluginHookEvents>;
 
 /** The request that owns the version being written, with every version it has captured. */
 export type DocumentHookRequest = {
@@ -327,13 +296,13 @@ export type AgentRunFinishedHookData = {
 	errorMessage: string | null;
 };
 
-/** Mutable data and event metadata. Return undefined data to keep draft edits, or return replacement data. */
+/** Mutable data and event metadata. Edit the draft and return nothing, or return replacement data. */
 export type TransformHookPayload<TMeta, TData> = {
 	meta: TMeta;
 	data: Draft<TData>;
 };
 
-/** Event data and metadata for side effects. Return a service result with undefined data. */
+/** Event data and metadata for side effects. Return nothing. */
 export type EffectHookPayload<TMeta, TData> = {
 	meta: TMeta;
 	data: TData;
@@ -381,7 +350,10 @@ export type LucidHookDocuments<
 // --------------------------------------------------
 // service handlers
 
-/** A hook receives event data, metadata and helpers bound to the current transaction. */
+/**
+ * Receives event data, metadata and transaction-bound helpers. Effects return nothing; transforms
+ * may replace data. Throw LucidError to fail.
+ */
 type HookHandler<
 	TPayload extends EffectHookPayload<unknown, unknown>,
 	TData,
@@ -390,124 +362,85 @@ type HookHandler<
 		context: ServiceContext;
 		toolkit: Toolkit;
 	},
-) => ServiceResponse<TData>;
+) => TData | void | Promise<TData | void>;
 
-type CoreHookServiceHandlers = {
+/** Defines core hook data and metadata. Add new events here and in `hookExecutionKinds`. */
+type CoreHookEvents = {
 	documents: {
-		afterChange: HookHandler<
-			EffectHookPayload<
-				CollectionHookMeta,
-				{ ids: number[]; change?: DocumentChangeMetadata }
-			>,
-			undefined
+		afterChange: EffectHookEvent<
+			CollectionHookMeta,
+			{ ids: number[]; change?: DocumentChangeMetadata }
 		>;
-		beforeUpsert: HookHandler<
-			TransformHookPayload<
-				DocumentBeforeUpsertHookMeta,
-				DocumentBeforeUpsertHookData
-			>,
-			DocumentBeforeUpsertHookData | undefined
+		beforeUpsert: TransformHookEvent<
+			DocumentBeforeUpsertHookMeta,
+			DocumentBeforeUpsertHookData
 		>;
-		afterUpsert: HookHandler<
-			EffectHookPayload<DocumentUserHookMeta, DocumentAfterUpsertHookData>,
-			undefined
+		afterUpsert: EffectHookEvent<
+			DocumentUserHookMeta,
+			DocumentAfterUpsertHookData
 		>;
-		afterFetch: HookHandler<
-			TransformHookPayload<DocumentHookMeta, DocumentAfterFetchHookData>,
-			DocumentAfterFetchHookData | undefined
+		afterFetch: TransformHookEvent<
+			DocumentHookMeta,
+			DocumentAfterFetchHookData
 		>;
-		beforeDelete: HookHandler<
-			EffectHookPayload<DocumentDeleteHookMeta, DocumentDeleteHookData>,
-			undefined
+		beforeDelete: EffectHookEvent<
+			DocumentDeleteHookMeta,
+			DocumentDeleteHookData
 		>;
-		afterDelete: HookHandler<
-			EffectHookPayload<DocumentDeleteHookMeta, DocumentDeleteHookData>,
-			undefined
+		afterDelete: EffectHookEvent<
+			DocumentDeleteHookMeta,
+			DocumentDeleteHookData
 		>;
-		beforeUnpublish: HookHandler<
-			EffectHookPayload<DocumentUserHookMeta, DocumentBeforeUnpublishHookData>,
-			undefined
+		beforeUnpublish: EffectHookEvent<
+			DocumentUserHookMeta,
+			DocumentBeforeUnpublishHookData
 		>;
-		afterRestore: HookHandler<
-			EffectHookPayload<DocumentHookMeta, DocumentDeleteHookData>,
-			undefined
+		afterRestore: EffectHookEvent<DocumentHookMeta, DocumentDeleteHookData>;
+		afterVersionPromote: EffectHookEvent<
+			DocumentUserHookMeta,
+			DocumentVersionPromoteHookData
 		>;
-		versionPromote: HookHandler<
-			EffectHookPayload<DocumentUserHookMeta, DocumentVersionPromoteHookData>,
-			undefined
-		>;
-		versionCapture: HookHandler<
-			EffectHookPayload<DocumentUserHookMeta, DocumentVersionCaptureHookData>,
-			undefined
+		afterVersionCapture: EffectHookEvent<
+			DocumentUserHookMeta,
+			DocumentVersionCaptureHookData
 		>;
 	};
 	documentWorkflows: {
-		afterUpdate: HookHandler<
-			EffectHookPayload<
-				DocumentUserHookMeta,
-				DocumentWorkflowAfterUpdateHookData
-			>,
-			undefined
+		afterUpdate: EffectHookEvent<
+			DocumentUserHookMeta,
+			DocumentWorkflowAfterUpdateHookData
 		>;
 	};
 	requests: {
-		check: HookHandler<
-			TransformHookPayload<Record<string, never>, RequestCheckHookData>,
-			RequestCheckHookData | undefined
-		>;
-		completed: HookHandler<
-			EffectHookPayload<RequestHookMeta, RequestCompletedHookData>,
-			undefined
-		>;
-		documentRemoved: HookHandler<
-			EffectHookPayload<RequestHookMeta, RequestDocumentRemovedHookData>,
-			undefined
+		afterCheck: TransformHookEvent<Record<string, never>, RequestCheckHookData>;
+		afterComplete: EffectHookEvent<RequestHookMeta, RequestCompletedHookData>;
+		afterDocumentRemove: EffectHookEvent<
+			RequestHookMeta,
+			RequestDocumentRemovedHookData
 		>;
 	};
-
 	notifications: {
-		beforeSend: HookHandler<
-			TransformHookPayload<
-				NotificationHookMeta,
-				NotificationBeforeSendHookData
-			>,
-			NotificationBeforeSendHookData | undefined
+		beforeSend: TransformHookEvent<
+			NotificationHookMeta,
+			NotificationBeforeSendHookData
 		>;
-		afterSend: HookHandler<
-			EffectHookPayload<NotificationHookMeta, NotificationAfterSendHookData>,
-			undefined
+		afterSend: EffectHookEvent<
+			NotificationHookMeta,
+			NotificationAfterSendHookData
 		>;
 	};
 	media: {
-		afterChange: HookHandler<
-			EffectHookPayload<
-				MediaHookMeta,
-				{ ids: number[]; change?: MediaChangeMetadata }
-			>,
-			undefined
+		afterChange: EffectHookEvent<
+			MediaHookMeta,
+			{ ids: number[]; change?: MediaChangeMetadata }
 		>;
-		afterRestore: HookHandler<
-			EffectHookPayload<MediaHookMeta, { ids: number[] }>,
-			undefined
-		>;
-		afterCreate: HookHandler<
-			EffectHookPayload<MediaHookMeta, MediaAfterCreateHookData>,
-			undefined
-		>;
-		afterUpdate: HookHandler<
-			EffectHookPayload<MediaHookMeta, MediaAfterUpdateHookData>,
-			undefined
-		>;
-		afterDelete: HookHandler<
-			EffectHookPayload<MediaHookMeta, MediaAfterDeleteHookData>,
-			undefined
-		>;
+		afterRestore: EffectHookEvent<MediaHookMeta, { ids: number[] }>;
+		afterCreate: EffectHookEvent<MediaHookMeta, MediaAfterCreateHookData>;
+		afterUpdate: EffectHookEvent<MediaHookMeta, MediaAfterUpdateHookData>;
+		afterDelete: EffectHookEvent<MediaHookMeta, MediaAfterDeleteHookData>;
 	};
 	agent: {
-		runFinished: HookHandler<
-			EffectHookPayload<AgentHookMeta, AgentRunFinishedHookData>,
-			undefined
-		>;
+		afterRunFinish: EffectHookEvent<AgentHookMeta, AgentRunFinishedHookData>;
 	};
 };
 
@@ -535,22 +468,22 @@ export type TransformHookEvent<TMeta, TData extends Objectish> = {
 // oxlint-disable-next-line typescript/no-empty-object-type -- plugins merge their hook events into this interface
 export interface PluginHookEvents {}
 
-type PluginHookHandler<TEvent> =
+type HookEventHandler<TEvent> =
 	TEvent extends TransformHookEvent<infer TMeta, infer TData extends Objectish>
-		? HookHandler<TransformHookPayload<TMeta, TData>, TData | undefined>
+		? HookHandler<TransformHookPayload<TMeta, TData>, TData>
 		: TEvent extends EffectHookEvent<infer TMeta, infer TData>
 			? HookHandler<EffectHookPayload<TMeta, TData>, undefined>
 			: never;
 
-type PluginHookServiceHandlers = {
-	[S in keyof PluginHookEvents]: {
-		[E in keyof PluginHookEvents[S]]: PluginHookHandler<PluginHookEvents[S][E]>;
+type HookEventHandlers<TEvents> = {
+	[S in keyof TEvents]: {
+		[E in keyof TEvents[S]]: HookEventHandler<TEvents[S][E]>;
 	};
 };
 
 /** Every hook event handler, by service and event, including plugin events. */
-export type HookServiceHandlers = CoreHookServiceHandlers &
-	PluginHookServiceHandlers;
+export type HookServiceHandlers = HookEventHandlers<CoreHookEvents> &
+	HookEventHandlers<PluginHookEvents>;
 
 /** Hook events a plugin registers through its `hookEvents`. */
 export type HookEventsDefinition = {
@@ -600,74 +533,24 @@ export type HookData<
 	E extends keyof HookServiceHandlers[S],
 > =
 	HookServiceHandlers[S][E] extends HookHandler<infer _Args, infer Data>
-		? Data
+		? Data | undefined
 		: never;
 
 // --------------------------------------------------
 // service config
 
+/** Every hook for one service's events. */
+export type ServiceHooks<S extends keyof HookServiceHandlers> = {
+	[E in keyof HookServiceHandlers[S]]: LucidHook<S, E>;
+}[keyof HookServiceHandlers[S]];
+
 /** Hooks registered only for one collection. */
 export type CollectionBuilderHooks =
-	| LucidHookDocuments<"afterChange">
-	| LucidHookDocuments<"beforeUpsert">
-	| LucidHookDocuments<"afterUpsert">
-	| LucidHookDocuments<"afterFetch">
-	| LucidHookDocuments<"beforeDelete">
-	| LucidHookDocuments<"afterDelete">
-	| LucidHookDocuments<"beforeUnpublish">
-	| LucidHookDocuments<"afterRestore">
-	| LucidHookDocuments<"versionPromote">
-	| LucidHookDocuments<"versionCapture">
-	| LucidHook<"documentWorkflows", "afterUpdate">
-	| LucidHook<"requests", "check">;
+	| ServiceHooks<"documents">
+	| ServiceHooks<"documentWorkflows">
+	| LucidHook<"requests", "afterCheck">;
 
-export type DocumentHooks =
-	| LucidHook<"documents", "afterChange">
-	| LucidHook<"documents", "beforeUpsert">
-	| LucidHook<"documents", "afterUpsert">
-	| LucidHook<"documents", "afterFetch">
-	| LucidHook<"documents", "beforeDelete">
-	| LucidHook<"documents", "afterDelete">
-	| LucidHook<"documents", "beforeUnpublish">
-	| LucidHook<"documents", "afterRestore">
-	| LucidHook<"documents", "versionPromote">
-	| LucidHook<"documents", "versionCapture">;
-
-export type DocumentWorkflowHooks = LucidHook<
-	"documentWorkflows",
-	"afterUpdate"
->;
-
-export type RequestHooks =
-	| LucidHook<"requests", "check">
-	| LucidHook<"requests", "completed">
-	| LucidHook<"requests", "documentRemoved">;
-
-export type NotificationHooks =
-	| LucidHook<"notifications", "beforeSend">
-	| LucidHook<"notifications", "afterSend">;
-
-export type MediaHooks =
-	| LucidHook<"media", "afterChange">
-	| LucidHook<"media", "afterRestore">
-	| LucidHook<"media", "afterCreate">
-	| LucidHook<"media", "afterUpdate">
-	| LucidHook<"media", "afterDelete">;
-
-export type AgentHooks = LucidHook<"agent", "runFinished">;
-
-/** Hooks for the events configured plugins register. */
-export type PluginHooks = {
-	[S in keyof PluginHookEvents]: {
-		[E in keyof HookServiceHandlers[S]]: LucidHook<S, E>;
-	}[keyof HookServiceHandlers[S]];
-}[keyof PluginHookEvents];
-
-export type AllHooks =
-	| DocumentHooks
-	| DocumentWorkflowHooks
-	| RequestHooks
-	| NotificationHooks
-	| MediaHooks
-	| AgentHooks
-	| PluginHooks;
+/** Every hook a project or plugin can register, including configured plugins' events. */
+export type AllHooks = {
+	[S in keyof HookServiceHandlers]: ServiceHooks<S>;
+}[keyof HookServiceHandlers];

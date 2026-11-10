@@ -5,7 +5,7 @@ import {
 	userIntegrationParamsSchema,
 } from "../../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { Permissions } from "../../../../permission/definitions.js";
@@ -42,7 +42,7 @@ const getScopesController = factory.createHandlers(
 				requiredPermissions: [Permissions.UsersUpdate],
 			})
 		) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
 		const getScopesRes = await serviceWrapper(integrationServices.getScopes, {
@@ -53,7 +53,7 @@ const getScopesController = factory.createHandlers(
 				message: copy("server:core.routes.integrations.fetch.error.message"),
 			},
 		})(context, { userId });
-		if (getScopesRes.error) throw new LucidAPIError(getScopesRes.error);
+		if (getScopesRes.error) throw new LucidError(getScopesRes.error);
 
 		c.status(200);
 		return c.json(

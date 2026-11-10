@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type {
 	MediaStorageAdapterStreamBody,
 	ServiceFn,
@@ -61,23 +61,27 @@ const storageDownload =
 		}
 
 		const streamMedia = stream(pluginOptions);
-		const streamRes = await streamMedia(context, {
-			key: data.key,
-		});
-		if (streamRes.error) {
-			return streamRes;
+		let streamed: Awaited<ReturnType<typeof streamMedia>>;
+		try {
+			streamed = await streamMedia(context, { key: data.key });
+		} catch (error) {
+			//* the adapter reports failures by throwing, which this service passes on as a result
+			if (error instanceof LucidError) {
+				return { error: error.error, data: undefined };
+			}
+			throw error;
 		}
 
 		return {
 			error: undefined,
 			data: {
 				key: data.key,
-				contentLength: streamRes.data.contentLength,
-				contentType: streamRes.data.contentType,
-				body: streamRes.data.body,
-				isPartialContent: streamRes.data.isPartialContent,
-				totalSize: streamRes.data.totalSize,
-				range: streamRes.data.range,
+				contentLength: streamed.contentLength,
+				contentType: streamed.contentType,
+				body: streamed.body,
+				isPartialContent: streamed.isPartialContent,
+				totalSize: streamed.totalSize,
+				range: streamed.range,
 			},
 		};
 	};

@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices, authServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -59,7 +59,7 @@ const updateMeController = factory.createHandlers(
 			passwordConfirmation,
 		});
 
-		if (updateMe.error) throw new LucidAPIError(updateMe.error);
+		if (updateMe.error) throw new LucidError(updateMe.error);
 
 		//* a new password logs out every session, so this one starts again
 		if (updateMe.data.passwordChanged) {
@@ -67,8 +67,8 @@ const updateMeController = factory.createHandlers(
 				authServices.refreshToken.generateToken(c, c.get("auth").id),
 				authServices.accessToken.generateToken(c, c.get("auth").id),
 			]);
-			if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-			if (accessRes.error) throw new LucidAPIError(accessRes.error);
+			if (refreshRes.error) throw new LucidError(refreshRes.error);
+			if (accessRes.error) throw new LucidError(accessRes.error);
 		}
 
 		c.status(204);

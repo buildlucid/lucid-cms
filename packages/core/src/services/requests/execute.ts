@@ -281,7 +281,7 @@ const execute: ServiceFn<
 				context,
 				{
 					service: "documents",
-					event: "versionPromote",
+					event: "afterVersionPromote",
 					config: context.config,
 					collectionInstance: collection,
 				},
@@ -307,7 +307,7 @@ const execute: ServiceFn<
 
 		const completedHookRes = await executeHooks(
 			context,
-			{ service: "requests", event: "completed", config: context.config },
+			{ service: "requests", event: "afterComplete", config: context.config },
 			{
 				meta: { userId: user.id },
 				data: {

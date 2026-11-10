@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -58,7 +58,7 @@ const createSingleController = factory.createHandlers(
 			expiresAt: body.expiresAt,
 			userId: c.get("auth").id,
 		});
-		if (linkRes.error) throw new LucidAPIError(linkRes.error);
+		if (linkRes.error) throw new LucidError(linkRes.error);
 
 		c.status(201);
 		return c.json(

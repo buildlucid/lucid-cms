@@ -5,6 +5,7 @@ import {
 	type JsonValue,
 } from "../../utils/helpers/is-json-object.js";
 import isPlainObject from "../../utils/helpers/is-plain-object.js";
+import runHandler from "../../utils/services/run-handler.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
@@ -131,12 +132,14 @@ const prepareToolInput = async <
 		data: {
 			requirements: options.requirements?.({ input: parsedInput.data }) ?? [],
 			run: async ({ context, execution }) => {
-				const result = await options.handler({
-					context,
-					input: parsedInput.data,
-					execution,
-					toolkit: createToolkit(context),
-				});
+				const result = await runHandler(() =>
+					options.handler({
+						context,
+						input: parsedInput.data,
+						execution,
+						toolkit: createToolkit(context),
+					}),
+				);
 				if (result.error) {
 					const clientError =
 						result.error.status !== undefined && result.error.status < 500;

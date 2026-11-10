@@ -4,6 +4,7 @@ import {
 	mediaMimeTypeSchema,
 } from "../../../../libs/lucid-remote/schema/media.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import { analyzeMediaToolName } from "./constants.js";
 import analyze from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
@@ -24,6 +25,9 @@ export const analyzeMediaAgentTool = () =>
 			media: { analyze: { mimeTypes: mediaMimeTypeSchema.options } },
 		},
 		available: ({ aiAccess }) => aiAccess.includes("media_analysis"),
-		handler: ({ context, input, execution }) =>
-			analyze(context, { input, execution }),
+		handler: async ({ context, input, execution }) => {
+			const result = await analyze(context, { input, execution });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

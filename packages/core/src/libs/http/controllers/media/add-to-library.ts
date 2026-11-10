@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { mediaServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -54,7 +54,7 @@ const addToLibraryController = factory.createHandlers(
 			folderId: body.folderId,
 			userId: c.get("auth").id,
 		});
-		if (moved.error) throw new LucidAPIError(moved.error);
+		if (moved.error) throw new LucidError(moved.error);
 
 		c.status(204);
 		return c.body(null);

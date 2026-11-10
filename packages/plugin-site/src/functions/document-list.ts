@@ -1,4 +1,4 @@
-import { LucidAPIError } from "@lucidcms/core";
+import { LucidError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
 import type {
 	CollectionDocumentKey,
@@ -66,7 +66,7 @@ const createDocumentListFunction = (config: SiteConfig) =>
 					preview: null,
 				});
 			}
-			if (response.error) throw new LucidAPIError(response.error);
+			if (response.error) throw new LucidError(response.error);
 
 			// Documents include their media, so any media change can affect them.
 			render.tagCache(contentCacheTags.media);

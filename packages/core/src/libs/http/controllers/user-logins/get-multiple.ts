@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/user-logins.js";
 import { userLoginServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -50,7 +50,7 @@ const getMultipleController = factory.createHandlers(
 			userId: Number.parseInt(id, 10),
 			query: formattedQuery,
 		});
-		if (userLogins.error) throw new LucidAPIError(userLogins.error);
+		if (userLogins.error) throw new LucidError(userLogins.error);
 
 		c.status(200);
 		return c.json(

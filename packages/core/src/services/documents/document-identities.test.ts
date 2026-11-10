@@ -10,6 +10,7 @@ import {
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import { getJobDefinitionRuntime } from "../../libs/jobs/registry.js";
+import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
@@ -76,7 +77,7 @@ beforeAll(async () => {
 							ids: data.ids,
 							type: data.change?.type,
 						});
-						return { error: undefined, data: undefined };
+						return;
 					},
 				},
 			],
@@ -553,16 +554,15 @@ test("a failed deletion rolls back the identity and every cascade", async () => 
 		{
 			service: "documents",
 			event: "afterDelete",
-			handler: async () => ({
-				data: undefined,
-				error: {
+			handler: async () => {
+				throw new LucidError({
 					type: "basic",
 					status: 400,
 					message: copy("server:tests.keep.document", {
 						defaultMessage: "Keep this document",
 					}),
-				},
-			}),
+				});
+			},
 		},
 	];
 	try {
@@ -796,16 +796,13 @@ test("failed version saves remove new identities and preserve the previous versi
 			handler: async ({ context: ctx, data }) => {
 				failedVersionId = data.versionId;
 				await pinVersion(documentId, data.versionId, collectionKey, ctx);
-				return {
-					data: undefined,
-					error: {
-						type: "basic",
-						status: 400,
-						message: copy("server:tests.reject.version", {
-							defaultMessage: "Reject version",
-						}),
-					},
-				};
+				throw new LucidError({
+					type: "basic",
+					status: 400,
+					message: copy("server:tests.reject.version", {
+						defaultMessage: "Reject version",
+					}),
+				});
 			},
 		},
 	];

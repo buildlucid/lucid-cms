@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { describe, expect, test, vi } from "vitest";
 import type { LucidHonoGeneric } from "../../../types/hono.js";
-import { LucidAPIError, LucidError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import defineContentApiRoute from "../define-content-api-route.js";
 import defineRoute from "../define-route.js";
 import type { LucidRouteHandler } from "../types.js";
@@ -84,7 +84,7 @@ describe("registerCustomRoutes", () => {
 		const response = await app.request("/api/v1/content/protected");
 
 		expect(response.status).toBe(401);
-		expect(caughtError).toBeInstanceOf(LucidAPIError);
+		expect(caughtError).toBeInstanceOf(LucidError);
 		expect(handler).not.toHaveBeenCalled();
 	});
 

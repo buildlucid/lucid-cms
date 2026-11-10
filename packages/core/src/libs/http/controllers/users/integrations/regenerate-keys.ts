@@ -6,7 +6,7 @@ import {
 	userIntegrationItemParamsSchema,
 } from "../../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -51,7 +51,7 @@ const regenerateKeysController = factory.createHandlers(
 		const auth = c.get("auth");
 		//* a new key acts as its owner, so only super admins can get one for someone else
 		if (userId !== auth.id && !auth.superAdmin) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
 
@@ -69,8 +69,7 @@ const regenerateKeysController = factory.createHandlers(
 			id,
 			userId,
 		});
-		if (regenerateKeysRes.error)
-			throw new LucidAPIError(regenerateKeysRes.error);
+		if (regenerateKeysRes.error) throw new LucidError(regenerateKeysRes.error);
 
 		c.status(200);
 		return c.json(

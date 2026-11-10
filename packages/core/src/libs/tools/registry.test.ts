@@ -24,10 +24,7 @@ const echo = defineMcpTool({
 	output: z.object({ message: z.string() }),
 	scopes: [],
 	handler: async ({ input }) => ({
-		error: undefined,
-		data: {
-			output: input,
-		},
+		output: input,
 	}),
 });
 const pluginTool = defineMcpTool({
@@ -37,10 +34,7 @@ const pluginTool = defineMcpTool({
 	output: z.object({ ok: z.boolean() }),
 	scopes: [],
 	handler: async () => ({
-		error: undefined,
-		data: {
-			output: { ok: true },
-		},
+		output: { ok: true },
 	}),
 });
 const agentEcho = defineAgentTool({
@@ -50,10 +44,7 @@ const agentEcho = defineAgentTool({
 	output: z.object({}),
 	permissions: [],
 	readOnly: true,
-	handler: async () => ({
-		error: undefined,
-		data: { output: {}, summary: "Completed the test action." },
-	}),
+	handler: async () => ({ output: {}, summary: "Completed the test action." }),
 });
 const agent = (key: string, tools: AgentToolDefinition[] = [agentEcho]) =>
 	defineAgent({ key, name: "Test", description: "Test", tools });
@@ -217,13 +208,13 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets, e
 				data: z.object({}),
 				response: () => z.object({}),
 				prepare: async () => ({
-					error: undefined,
-					data: { output: {}, summary: "No selection was needed." },
+					output: {},
+					summary: "No selection was needed.",
 				}),
 			},
 			handler: async () => ({
-				error: undefined,
-				data: { output: {}, summary: "Completed the test action." },
+				output: {},
+				summary: "Completed the test action.",
 			}),
 		});
 	const check = (tool: AgentToolDefinition) => () =>
@@ -266,8 +257,8 @@ test("only Lucid's own tools can use the lucid_ name prefix", async () => {
 								output: z.object({}),
 								permissions: [],
 								handler: async () => ({
-									error: undefined,
-									data: { output: {}, summary: "Saved the note." },
+									output: {},
+									summary: "Saved the note.",
 								}),
 							}),
 						]),
@@ -292,7 +283,7 @@ test("recognises tools from another copy of core, such as one a config loader ev
 		input: z.object({}),
 		output: z.object({}),
 		scopes: [],
-		handler: async () => ({ error: undefined, data: { output: {} } }),
+		handler: async () => ({ output: {} }),
 	});
 
 	expect(isToolDefinition(tool)).toBe(true);

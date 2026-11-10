@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media-folders.js";
 import { mediaFolderServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -54,7 +54,7 @@ const createSingleController = factory.createHandlers(
 			parentFolderId: body.parentFolderId,
 			userId: c.get("auth").id,
 		});
-		if (mediaFolderIdRes.error) throw new LucidAPIError(mediaFolderIdRes.error);
+		if (mediaFolderIdRes.error) throw new LucidError(mediaFolderIdRes.error);
 
 		c.status(204);
 		return c.body(null);

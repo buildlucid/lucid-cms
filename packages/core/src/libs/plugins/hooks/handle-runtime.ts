@@ -1,5 +1,6 @@
 import type { ServiceResponse } from "../../../exports/types.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
+import runHandler from "../../../utils/services/run-handler.js";
 import cliLogger from "../../cli/logger.js";
 import { copy, createTranslator } from "../../i18n/index.js";
 import type { TranslationStore } from "../../i18n/types.js";
@@ -32,11 +33,14 @@ const handlePluginRuntimeHooks = async (props: {
 					return;
 				}
 
-				const res = await plugin.hooks.runtime({
-					phase: "build",
-					definition: props.definition,
-					paths: { configPath: props.configPath },
-				});
+				const runtime = plugin.hooks.runtime;
+				const res = await runHandler(() =>
+					runtime({
+						phase: "build",
+						definition: props.definition,
+						paths: { configPath: props.configPath },
+					}),
+				);
 				if (res.error) {
 					cliLogger.error(
 						translate.english(res.error.message) ??

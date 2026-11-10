@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentEditorServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -50,7 +50,7 @@ const deleteEditorController = factory.createHandlers(
 			tabId,
 			userId: c.get("auth").id,
 		});
-		if (left.error) throw new LucidAPIError(left.error);
+		if (left.error) throw new LucidError(left.error);
 
 		c.status(204);
 		return c.body(null);

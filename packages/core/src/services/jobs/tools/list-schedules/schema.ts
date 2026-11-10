@@ -29,7 +29,7 @@ export const inputSchema = z.object({
 		.pipe(querySchema)
 		.meta({
 			description:
-				"All query fields are optional. Use {} for every schedule, soonest first. filter is a list of conditions combined with AND, eg. {filter:[{key:'state',value:'paused'}]} or {filter:[{key:'jobName',value:'core:'}]}. perPage max 50.",
+				"All query fields are optional. Use {} for every schedule, soonest first. filter is a list of conditions combined with AND, eg. {filter:[{key:'state',value:'paused'}]} or {filter:[{key:'jobKey',value:'core:'}]}. perPage max 50.",
 		}),
 });
 

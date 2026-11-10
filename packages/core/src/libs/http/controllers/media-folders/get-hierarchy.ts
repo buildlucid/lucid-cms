@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media-folders.js";
 import { mediaFolderServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -33,7 +33,7 @@ const getAllController = factory.createHandlers(
 				message: copy("server:core.routes.media.folders.fetch.error.message"),
 			},
 		})(context);
-		if (folders.error) throw new LucidAPIError(folders.error);
+		if (folders.error) throw new LucidError(folders.error);
 
 		c.status(200);
 		return c.json(

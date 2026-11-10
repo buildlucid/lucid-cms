@@ -1,3 +1,3 @@
 export const jobNotificationKeys = {
-	failed: (jobName: string) => `job:${jobName}:failed`,
+	failed: (jobKey: string) => `job:${jobKey}:failed`,
 };

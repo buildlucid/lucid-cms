@@ -26,40 +26,28 @@ test("collection builder options passes schema validation", async () => {
 				service: "documents",
 				event: "beforeUpsert",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 			{
 				service: "documents",
 				event: "beforeDelete",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 			{
 				service: "documents",
 				event: "afterDelete",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 			{
 				service: "documents",
 				event: "afterUpsert",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 		],

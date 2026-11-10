@@ -5,6 +5,7 @@ import {
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import acknowledgeRequest from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
@@ -36,21 +37,18 @@ export const acknowledgeRequestAgentTool = (
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const count = result.data.output.acknowledged.length;
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					changes: [{ type: "request", requestId: input.requestId }],
-					summary: copy(
-						count === 1
-							? "admin:core.tools.requests_acknowledge.summary.one"
-							: "admin:core.tools.requests_acknowledge.summary",
-						{ data: { id: input.requestId, count } },
-					),
-				},
+				output: result.data.output,
+				changes: [{ type: "request", requestId: input.requestId }],
+				summary: copy(
+					count === 1
+						? "admin:core.tools.requests_acknowledge.summary.one"
+						: "admin:core.tools.requests_acknowledge.summary",
+					{ data: { id: input.requestId, count } },
+				),
 			};
 		},
 	});

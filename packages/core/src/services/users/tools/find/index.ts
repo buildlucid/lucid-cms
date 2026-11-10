@@ -9,6 +9,7 @@ import {
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import findUsers from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -25,8 +26,8 @@ export const findUsersMcpTool = (options: CollectionToolOptions = {}) =>
 			query.canReview === undefined ? [] : [ExternalScopes.RequestsRead],
 		possibleScopes: () => [ExternalScopes.RequestsRead],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			findUsers(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await findUsers(context, {
 				input,
 				actor: getMcpActor(execution.authority),
 				showStatus: execution.authority.principal.type === "user",
@@ -35,7 +36,10 @@ export const findUsersMcpTool = (options: CollectionToolOptions = {}) =>
 					execution.authority.scopes,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const findUsersAgentTool = (options: CollectionToolOptions = {}) =>
@@ -62,20 +66,17 @@ export const findUsersAgentTool = (options: CollectionToolOptions = {}) =>
 					options.collections,
 				),
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const count = result.data.output.pagination.count;
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy(
-						count === 1
-							? "admin:core.tools.users_find.summary.one"
-							: "admin:core.tools.users_find.summary",
-						{ data: { count } },
-					),
-				},
+				output: result.data.output,
+				summary: copy(
+					count === 1
+						? "admin:core.tools.users_find.summary.one"
+						: "admin:core.tools.users_find.summary",
+					{ data: { count } },
+				),
 			};
 		},
 	});

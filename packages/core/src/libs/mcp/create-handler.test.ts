@@ -25,10 +25,7 @@ const echo = defineMcpTool({
 	output: z.object({ message: z.string() }),
 	scopes: [],
 	handler: async ({ input }) => ({
-		error: undefined,
-		data: {
-			output: input,
-		},
+		output: input,
 	}),
 });
 
@@ -39,10 +36,7 @@ const restricted = defineMcpTool({
 	output: z.object({ ok: z.boolean() }),
 	scopes: [ExternalScopes.LocalesRead],
 	handler: async () => ({
-		error: undefined,
-		data: {
-			output: { ok: true },
-		},
+		output: { ok: true },
 	}),
 });
 
@@ -159,10 +153,7 @@ test("tool input is parsed once, so transforms reach the handler intact", async 
 		output: z.object({ length: z.number() }),
 		scopes: [],
 		handler: async ({ input }) => ({
-			error: undefined,
-			data: {
-				output: input,
-			},
+			output: input,
 		}),
 	});
 	const base = await testConfig.getConfig();
@@ -200,10 +191,7 @@ test("oversized text results ask the client for a smaller request", async () => 
 		input: z.object({}),
 		output: z.object({ text: z.string() }),
 		scopes: [],
-		handler: async () => ({
-			error: undefined,
-			data: { output: { text: "x".repeat(64 * 1024) } },
-		}),
+		handler: async () => ({ output: { text: "x".repeat(64 * 1024) } }),
 	});
 	const base = await testConfig.getConfig();
 	const handler = createHandler({

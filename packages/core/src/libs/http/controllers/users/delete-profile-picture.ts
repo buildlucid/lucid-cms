@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { accountServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -56,7 +56,7 @@ const deleteProfilePictureController = factory.createHandlers(
 			actorUserId: c.get("auth").id,
 		});
 		if (deleteProfilePicture.error) {
-			throw new LucidAPIError(deleteProfilePicture.error);
+			throw new LucidError(deleteProfilePicture.error);
 		}
 
 		c.status(204);

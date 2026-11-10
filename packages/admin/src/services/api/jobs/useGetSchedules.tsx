@@ -10,7 +10,7 @@ interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: {
 		key?: Accessor<string | undefined>;
-		jobName?: Accessor<string | undefined>;
+		jobKey?: Accessor<string | undefined>;
 		jobVersion?: Accessor<number | undefined>;
 	};
 	perPage?: number;

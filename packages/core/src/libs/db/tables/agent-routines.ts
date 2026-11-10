@@ -5,11 +5,11 @@ import {
 	agentRoutineSourceSchema,
 } from "../../../schemas/agent.js";
 import type {
-	AgentRoutineEvent,
+	ContentEvent,
 	AiModelSelection,
 } from "../../../types/response.js";
 import { aiModelSelectionSchema } from "../../agent/model-selection.js";
-import { agentRoutineEventsSchema } from "../../agent/routine-events.js";
+import { contentEventsSchema } from "../../events/content-events.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
@@ -39,7 +39,7 @@ export const agentRoutinesTable = defineTable(
 			},
 			cron: { schema: z.string().nullable(), type: "text" },
 			timezone: { schema: z.string().nullable(), type: "text" },
-			events: { schema: agentRoutineEventsSchema.nullable(), type: "json" },
+			events: { schema: contentEventsSchema.nullable(), type: "json" },
 			enabled: {
 				schema: z.union([
 					z.literal(adapter.config.defaults.boolean.true),
@@ -93,9 +93,9 @@ export interface LucidAgentRoutines {
 	timezone: string | null;
 	/** Matching content events, or null when none are configured. */
 	events: JSONColumnType<
-		AgentRoutineEvent[] | null,
-		AgentRoutineEvent[] | null | undefined,
-		AgentRoutineEvent[] | null
+		ContentEvent[] | null,
+		ContentEvent[] | null | undefined,
+		ContentEvent[] | null
 	>;
 	enabled: Generated<BooleanInt>;
 	user_id: number | null;

@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceCompleteUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types.js";
@@ -15,31 +15,25 @@ export const completeUploadSession = (
 	return async (_context, props) => {
 		try {
 			if (props.protocol !== "multipart-parts") {
-				return { error: undefined, data: {} };
+				return {};
 			}
 
 			if (!pluginOptions.http) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.http.fallback.not.configured",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.fallback.not.configured",
+					),
+				});
 			}
 			const http = pluginOptions.http;
 			if (!client) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.http.client.not.configured",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.client.not.configured",
+					),
+				});
 			}
 			const body = `<CompleteMultipartUpload>${props.parts
 				.sort((a, b) => a.partNumber - b.partNumber)
@@ -64,43 +58,32 @@ export const completeUploadSession = (
 			);
 			const response = await fetch(signed);
 			if (!response.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.upload.sessions.complete.failed",
-							{
-								data: {
-									status: response.status,
-									statusText: response.statusText,
-								},
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.upload.sessions.complete.failed",
+						{
+							data: {
+								status: response.status,
+								statusText: response.statusText,
 							},
-						),
-					},
-					data: undefined,
-				};
+						},
+					),
+				});
 			}
 
 			return {
-				error: undefined,
-				data: {
-					etag: extractXmlValue(await response.text(), "ETag")?.replace(
-						/"/g,
-						"",
-					),
-				},
+				etag: extractXmlValue(await response.text(), "ETag")?.replace(/"/g, ""),
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.cloudflare.r2.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.cloudflare.r2.errors.unknown"),
+			});
 		}
 	};
 };

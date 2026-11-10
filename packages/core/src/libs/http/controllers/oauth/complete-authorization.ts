@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { oauthSchemas } from "../../../../schemas/oauth.js";
 import { oauthServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import hasAccess from "../../../permission/has-access.js";
@@ -58,7 +58,7 @@ const completeAuthorizationController = factory.createHandlers(
 				}),
 			},
 		});
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		c.header("Cache-Control", "no-store");
 		c.header("Pragma", "no-cache");

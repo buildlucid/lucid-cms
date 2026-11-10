@@ -1,6 +1,7 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import clearExpiredAuthStates from "../tasks/clear-expired-auth-states.js";
 import clearExpiredCollections from "../tasks/clear-expired-collections.js";
 import clearExpiredDeployRuns from "../tasks/clear-expired-deploy-runs.js";
@@ -37,7 +38,7 @@ const tasks = [
 	deleteExpiredNotifications,
 ];
 
-const deleteExpiredData: JobHandler = async ({ context }) => {
+const deleteExpiredData: JobService = async ({ context }) => {
 	for (const task of tasks) {
 		const result = await task(context);
 		if (result.error) return result;
@@ -51,17 +52,20 @@ const deleteExpiredData: JobHandler = async ({ context }) => {
  * shares one transaction so a failure part way through leaves nothing deleted.
  */
 export const deleteExpiredDataJob = defineJob({
-	name: "core:delete-expired-data",
+	key: "core:delete-expired-data",
 	version: 1,
 	input: z.null(),
 	transaction: true,
 	schedules: [
 		{
-			name: "automatic",
+			key: "automatic",
 			cron: "0 0 * * *",
 			timezone: "UTC",
 			input: null,
 		},
 	],
-	handler: deleteExpiredData,
+	handler: async (args) => {
+		const result = await deleteExpiredData(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 });

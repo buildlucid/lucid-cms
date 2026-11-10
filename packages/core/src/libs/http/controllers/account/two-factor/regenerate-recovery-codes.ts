@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/account.js";
 import { accountServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -64,7 +64,7 @@ const regenerateRecoveryCodesController = factory.createHandlers(
 			userId: auth.id,
 			proof: proof,
 		});
-		if (regenerateRes.error) throw new LucidAPIError(regenerateRes.error);
+		if (regenerateRes.error) throw new LucidError(regenerateRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.status(200);

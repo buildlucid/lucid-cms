@@ -18,13 +18,13 @@ import { outputSchema as schedulesOutputSchema } from "./list-schedules/schema.j
 
 const fixture = getTestConfig();
 const tidyJob = defineJob({
-	name: "test:tidy",
+	key: "test:tidy",
 	version: 1,
 	input: z.object({ reason: z.string() }),
 	schedules: [
-		{ name: "nightly", cron: "0 3 * * *", input: { reason: "nightly" } },
+		{ key: "nightly", cron: "0 3 * * *", input: { reason: "nightly" } },
 	],
-	handler: async () => ({ error: undefined, data: undefined }),
+	handler: async () => {},
 });
 
 let context: ServiceContext;
@@ -93,7 +93,7 @@ test("finds jobs by name and reads one by its public ID with its stack trace", a
 	assert(enqueued.data, JSON.stringify(enqueued.error));
 
 	const found = await callAgent(agentTools.jobs.find(), {
-		query: { filter: [{ key: "jobName", value: tidyJob.name }] },
+		query: { filter: [{ key: "jobKey", value: tidyJob.key }] },
 	});
 	assert(found.type === "success", JSON.stringify(found));
 	const jobs = findOutputSchema.parse(found.data.output).data;
@@ -107,7 +107,7 @@ test("finds jobs by name and reads one by its public ID with its stack trace", a
 	assert(read.type === "success", JSON.stringify(read));
 	expect(getOutputSchema.parse(read.data.output).data).toMatchObject({
 		jobId: enqueued.data.jobId,
-		jobName: tidyJob.name,
+		jobKey: tidyJob.key,
 		errorStack: null,
 	});
 
@@ -128,7 +128,7 @@ test("lists schedules and runs one early after confirmation, attributing the job
 	const schedules = schedulesOutputSchema.parse(listed.data.output).data;
 	expect(schedules).toEqual([
 		expect.objectContaining({
-			key: `${tidyJob.name}/nightly`,
+			key: `${tidyJob.key}/nightly`,
 			cron: "0 3 * * *",
 			state: "active",
 		}),
@@ -136,12 +136,12 @@ test("lists schedules and runs one early after confirmation, attributing the job
 
 	const run = agentTools.jobs.runSchedule();
 	expect(run.requiresConfirmation).toBe(true);
-	const ran = await callAgent(run, { scheduleKey: `${tidyJob.name}/nightly` }, [
+	const ran = await callAgent(run, { scheduleKey: `${tidyJob.key}/nightly` }, [
 		Permissions.JobsRun,
 	]);
 	assert(ran.type === "success", JSON.stringify(ran));
 	expect(ran.data.output).toMatchObject({
-		job: { jobId: expect.any(String), name: tidyJob.name, version: 1 },
+		job: { jobId: expect.any(String), key: tidyJob.key, version: 1 },
 	});
 
 	const read = await callAgent(agentTools.jobs.get(), {
@@ -149,7 +149,7 @@ test("lists schedules and runs one early after confirmation, attributing the job
 	});
 	assert(read.type === "success", JSON.stringify(read));
 	expect(getOutputSchema.parse(read.data.output).data).toMatchObject({
-		scheduleKey: `${tidyJob.name}/nightly`,
+		scheduleKey: `${tidyJob.key}/nightly`,
 		triggerType: "schedule",
 		createdByUserId: operator,
 	});
@@ -160,6 +160,6 @@ test("lists schedules and runs one early after confirmation, attributing the job
 		]),
 	).toMatchObject({ type: "failed" });
 	expect(
-		await callAgent(run, { scheduleKey: `${tidyJob.name}/nightly` }),
+		await callAgent(run, { scheduleKey: `${tidyJob.key}/nightly` }),
 	).toMatchObject({ type: "forbidden" });
 });

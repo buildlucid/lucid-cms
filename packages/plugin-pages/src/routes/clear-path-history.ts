@@ -1,7 +1,7 @@
 import {
 	defineRoute,
 	formatAPIResponse,
-	LucidAPIError,
+	LucidError,
 	middleware,
 	openAPI,
 	z,
@@ -48,7 +48,7 @@ const clearPathHistoryRoute = (job: ClearPathHistoryJob) =>
 				payload: null,
 				options: { createdByUserId: hono.get("auth").id },
 			});
-			if (queued.error) throw new LucidAPIError(queued.error);
+			if (queued.error) throw new LucidError(queued.error);
 
 			hono.status(202);
 			return hono.json(

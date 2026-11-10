@@ -5,7 +5,7 @@ import {
 	accountServices,
 	authServices,
 } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -60,15 +60,14 @@ const reauthenticateController = factory.createHandlers(
 			userId: auth.id,
 			proof: proof,
 		});
-		if (reauthenticateRes.error)
-			throw new LucidAPIError(reauthenticateRes.error);
+		if (reauthenticateRes.error) throw new LucidError(reauthenticateRes.error);
 
 		const [refreshRes, accessRes] = await Promise.all([
 			authServices.refreshToken.generateToken(c, auth.id),
 			authServices.accessToken.generateToken(c, auth.id),
 		]);
-		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-		if (accessRes.error) throw new LucidAPIError(accessRes.error);
+		if (refreshRes.error) throw new LucidError(refreshRes.error);
+		if (accessRes.error) throw new LucidError(accessRes.error);
 
 		c.status(204);
 		return c.body(null);

@@ -3,7 +3,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import { isRequestSecure } from "../../../../utils/helpers/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
@@ -48,7 +48,7 @@ const authorizeStreamController = factory.createHandlers(
 			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
 		)(context, { token, providedPassword: password });
-		if (authorizeRes.error) throw new LucidAPIError(authorizeRes.error);
+		if (authorizeRes.error) throw new LucidError(authorizeRes.error);
 
 		//* links without a password, or with a session already, have nothing to store
 		if (authorizeRes.data.session) {

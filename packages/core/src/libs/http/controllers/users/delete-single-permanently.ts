@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { userServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -54,7 +54,7 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 			auth,
 		});
 		if (deleteSinglePermanently.error)
-			throw new LucidAPIError(deleteSinglePermanently.error);
+			throw new LucidError(deleteSinglePermanently.error);
 
 		c.status(204);
 		return c.body(null);

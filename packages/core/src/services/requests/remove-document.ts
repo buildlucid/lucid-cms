@@ -15,7 +15,7 @@ import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestEventFacts from "./helpers/get-request-event-facts.js";
 
 /**
- * Removes a document and its private versions, then tells documentRemoved
+ * Removes a document and its private versions, then tells afterDocumentRemove
  * hooks what the request still holds. A request always keeps one document.
  */
 const removeDocument: ServiceFn<
@@ -131,7 +131,11 @@ const removeDocument: ServiceFn<
 
 	return executeHooks(
 		context,
-		{ service: "requests", event: "documentRemoved", config: context.config },
+		{
+			service: "requests",
+			event: "afterDocumentRemove",
+			config: context.config,
+		},
 		{
 			meta: { userId: data.user.id },
 			data: {

@@ -2,6 +2,7 @@ import { copy } from "../../../../libs/i18n/index.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import listLocales from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -15,7 +16,11 @@ export const listLocalesMcpTool = () =>
 		output: outputSchema,
 		scopes: [ExternalScopes.LocalesRead],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input }) => listLocales(context, { input }),
+		handler: async ({ context, input }) => {
+			const result = await listLocales(context, { input });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const listLocalesAgentTool = () =>
@@ -31,21 +36,18 @@ export const listLocalesAgentTool = () =>
 		parallelSafe: true,
 		handler: async ({ context, input }) => {
 			const result = await listLocales(context, { input });
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy(
-						result.data.output.data.length === 1
-							? "admin:core.tools.locales_list.summary.one"
-							: "admin:core.tools.locales_list.summary",
-						{
-							data: { count: result.data.output.data.length },
-						},
-					),
-				},
+				...result.data,
+				summary: copy(
+					result.data.output.data.length === 1
+						? "admin:core.tools.locales_list.summary.one"
+						: "admin:core.tools.locales_list.summary",
+					{
+						data: { count: result.data.output.data.length },
+					},
+				),
 			};
 		},
 	});

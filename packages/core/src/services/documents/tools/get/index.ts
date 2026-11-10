@@ -9,6 +9,7 @@ import {
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import getDocument from "./handler.js";
 import { agentInputSchema, inputSchema, outputSchema } from "./schema.js";
 
@@ -29,15 +30,18 @@ export const getDocumentMcpTool = (options: CollectionToolOptions = {}) =>
 				(collection) => ExternalScopes.DocumentRead(collection.key),
 			),
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			getDocument(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await getDocument(context, {
 				input,
 				allowedCollectionKeys: getScopedCollectionKeys(
 					context.config,
 					execution.authority.scopes,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
@@ -65,24 +69,21 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 				actor: execution.actor,
 				reader: execution.authority,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const labels = context.config.collections.find(
 				(collection) => collection.key === input.collectionKey,
 			)?.getData.details.labels;
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy("admin:core.tools.documents_get.summary", {
-						data: {
-							id: result.data.output.data.id,
-							collection:
-								context.translate(labels?.singular) ?? input.collectionKey,
-						},
-					}),
-				},
+				...result.data,
+				summary: copy("admin:core.tools.documents_get.summary", {
+					data: {
+						id: result.data.output.data.id,
+						collection:
+							context.translate(labels?.singular) ?? input.collectionKey,
+					},
+				}),
 			};
 		},
 	});

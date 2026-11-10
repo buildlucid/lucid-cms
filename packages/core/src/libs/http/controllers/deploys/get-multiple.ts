@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
 import { deployServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -33,7 +33,7 @@ const getMultipleController = factory.createHandlers(
 				message: copy("server:core.deploys.fetch.failed"),
 			},
 		})(context, { actor: c.get("auth") });
-		if (deploys.error) throw new LucidAPIError(deploys.error);
+		if (deploys.error) throw new LucidError(deploys.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: deploys.data }));

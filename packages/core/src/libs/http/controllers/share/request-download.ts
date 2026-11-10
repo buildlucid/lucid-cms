@@ -7,7 +7,7 @@ import {
 	mediaServices,
 	mediaShareLinkServices,
 } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
@@ -51,7 +51,7 @@ const requestDownloadController = factory.createHandlers(
 			sessionCookie,
 			enforcePasswordSession: true,
 		});
-		if (authorizeRes.error) throw new LucidAPIError(authorizeRes.error);
+		if (authorizeRes.error) throw new LucidError(authorizeRes.error);
 
 		const downloadRes = await serviceWrapper(mediaServices.requestDownload, {
 			transaction: false,
@@ -61,7 +61,7 @@ const requestDownloadController = factory.createHandlers(
 				key: authorizeRes.data.mediaKey,
 			},
 		});
-		if (downloadRes.error) throw new LucidAPIError(downloadRes.error);
+		if (downloadRes.error) throw new LucidError(downloadRes.error);
 
 		c.status(200);
 		return c.json(

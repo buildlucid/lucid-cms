@@ -11,19 +11,20 @@ import renderEmailTemplate from "../../../libs/email/templates/render-email-temp
 import type { EmailStrategyResponse } from "../../../libs/email/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../../libs/repositories/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
+import { LucidError } from "../../../utils/errors/index.js";
 
 const input = z.object({
 	emailId: z.number().int().positive(),
 	transactionId: z.number().int().nonnegative(),
 });
 
-const sendEmail: JobHandler<z.infer<typeof input>> = async ({
+const sendEmail: JobService<z.infer<typeof input>> = async ({
 	context,
 	input,
 }) => {
@@ -228,10 +229,13 @@ const sendEmail: JobHandler<z.infer<typeof input>> = async ({
 };
 
 export const sendEmailJob = defineJob({
-	name: "core:send-email",
+	key: "core:send-email",
 	version: 1,
 	input,
-	handler: sendEmail,
+	handler: async (args) => {
+		const result = await sendEmail(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	describe: ({ input: { emailId, transactionId } }) => ({
 		emailId,
 		transactionId,

@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { mediaServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -56,7 +56,7 @@ const deleteMultiplePermanentlyController = factory.createHandlers(
 			userId: c.get("auth").id,
 		});
 		if (deleteMultiplePermanently.error)
-			throw new LucidAPIError(deleteMultiplePermanently.error);
+			throw new LucidError(deleteMultiplePermanently.error);
 
 		c.status(204);
 		return c.body(null);

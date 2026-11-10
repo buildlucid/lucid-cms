@@ -1,13 +1,16 @@
 import type { TransferImportMode, TransferItemResult } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
 import type { ToolkitActor } from "../../libs/permission/toolkit-actor.js";
+import createToolkit from "../../libs/toolkit/create-toolkit.js";
 import { getTransferRegistry } from "../../libs/transfer/registry.js";
 import type {
 	TransferFileSource,
 	TransferImportOutcome,
 	TransferImportProps,
 } from "../../libs/transfer/types.js";
+import { LucidError } from "../../utils/errors/index.js";
 import isPlainObject from "../../utils/helpers/is-plain-object.js";
+import runHandler from "../../utils/services/run-handler.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import getOrCreateConnectionInstanceId from "../connection/helpers/get-or-create-instance-id.js";
 import formatItemError from "./helpers/format-item-error.js";
@@ -93,10 +96,10 @@ const importEntry: ServiceFn<
 	if (instanceIdRes.error) return instanceIdRes;
 	const sameSite = data.source.instanceId === instanceIdRes.data;
 
-	const matchRes = await definition.match(context, {
-		uids: [entry.uid],
-		sameSite,
-	});
+	const toolkit = createToolkit(context);
+	const matchRes = await runHandler(() =>
+		definition.match({ context, toolkit, uids: [entry.uid], sameSite }),
+	);
 	if (matchRes.error) {
 		return {
 			error: undefined,
@@ -117,10 +120,14 @@ const importEntry: ServiceFn<
 		const target = definitions.get(resource);
 		if (!target) continue;
 
-		const linkedRes = await target.match(context, {
-			uids: Array.from(new Set(Object.values(refs))),
-			sameSite,
-		});
+		const linkedRes = await runHandler(() =>
+			target.match({
+				context,
+				toolkit,
+				uids: Array.from(new Set(Object.values(refs))),
+				sameSite,
+			}),
+		);
 		if (linkedRes.error) {
 			return {
 				error: undefined,
@@ -166,17 +173,23 @@ const importEntry: ServiceFn<
 	};
 	let outcomeRes: Awaited<ServiceResponse<TransferImportOutcome>>;
 	try {
-		outcomeRes = await definition.import(context, importProps);
+		outcomeRes = {
+			error: undefined,
+			data: await definition.import({ context, toolkit, ...importProps }),
+		};
 	} catch (error) {
 		//* a malformed value shouldn't stop the rest of an import
 		outcomeRes = {
-			error: {
-				status: 400,
-				message:
-					error instanceof Error
-						? copy.literal(error.message)
-						: copy("server:core.transfer.import.entry.invalid"),
-			},
+			error:
+				error instanceof LucidError
+					? { ...error.error }
+					: {
+							status: 400,
+							message:
+								error instanceof Error
+									? copy.literal(error.message)
+									: copy("server:core.transfer.import.entry.invalid"),
+						},
 			data: undefined,
 		};
 	}

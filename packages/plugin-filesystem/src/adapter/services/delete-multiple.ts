@@ -1,5 +1,5 @@
 import { rm } from "node:fs/promises";
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceDeleteMultiple,
@@ -18,23 +18,15 @@ export default (options: FileSystemStorageAdapterOptions) => {
 				await rm(targetPath, { force: true });
 				await deleteStoredMetadata(options.uploadDir, key);
 			}
-			return {
-				error: undefined,
-				data: undefined,
-			};
+			return;
 		} catch (e) {
+			if (e instanceof LucidError) throw e;
 			const error = e as Error;
-			return {
-				error: {
-					message: copy(
-						"server:plugin.filesystem.media.errors.default.message",
-						{
-							defaultMessage: error.message,
-						},
-					),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				message: copy("server:plugin.filesystem.media.errors.default.message", {
+					defaultMessage: error.message,
+				}),
+			});
 		}
 	};
 	return deleteMultiple;

@@ -6,6 +6,7 @@ import {
 } from "../../../../libs/agent/screen.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import resolveBuilderScreen from "../../helpers/builder/resolve-builder-screen.js";
 import screenCall from "../../helpers/builder/screen-call.js";
 import screenUnavailableMessage from "../../helpers/builder/screen-unavailable-message.js";
@@ -34,39 +35,30 @@ export const builderFocusAgentTool = () =>
 			response: () => agentScreenResponseSchema,
 			prepare: async ({ context, input, execution }) => {
 				const resolved = resolveBuilderScreen(context, execution);
-				if (resolved.error) return resolved;
+				if (resolved.error) throw new LucidError(resolved.error);
 
-				return {
-					error: undefined,
-					data: screenCall({
-						title,
-						call: {
-							action: "focus",
-							screen: resolved.data.screen,
-							focus: input,
-						},
-					}),
-				};
+				return screenCall({
+					title,
+					call: {
+						action: "focus",
+						screen: resolved.data.screen,
+						focus: input,
+					},
+				});
 			},
 		},
 		handler: async ({ response }) => {
 			if (response.status === "unavailable") {
-				return {
-					data: undefined,
-					error: {
-						type: "basic",
-						status: 409,
-						message: screenUnavailableMessage(response),
-					},
-				};
+				throw new LucidError({
+					type: "basic",
+					status: 409,
+					message: screenUnavailableMessage(response),
+				});
 			}
 
 			return {
-				error: undefined,
-				data: {
-					output: { shown: true },
-					summary: copy("admin:core.tools.lucid_builder_focus.summary"),
-				},
+				output: { shown: true },
+				summary: copy("admin:core.tools.lucid_builder_focus.summary"),
 			};
 		},
 	});

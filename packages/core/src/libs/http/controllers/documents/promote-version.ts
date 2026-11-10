@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import publish from "../../../../services/documents/publish.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -56,7 +56,7 @@ const promoteVersionController = factory.createHandlers(
 			environment: versionType,
 		});
 		if (publishRes.error) {
-			throw new LucidAPIError(publishRes.error);
+			throw new LucidError(publishRes.error);
 		}
 
 		c.status(204);

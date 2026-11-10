@@ -17,12 +17,13 @@ export type AuthProviderUserInfo = {
 
 type AuthProviderMapper<TUserInfoResponse> = {
 	mappers?: {
-		/** Map the provider response to a stable identity and optional names. Return a service result. */
+		/**
+		 * Maps the provider response to an identity and optional names. Throw LucidError to refuse sign-
+		 * in.
+		 */
 		userInfo?: (
 			response: TUserInfoResponse,
-		) =>
-			| Awaited<ServiceResponse<AuthProviderUserInfo>>
-			| ServiceResponse<AuthProviderUserInfo>;
+		) => AuthProviderUserInfo | Promise<AuthProviderUserInfo>;
 	};
 };
 

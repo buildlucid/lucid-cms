@@ -29,7 +29,7 @@ export const isContentRouteDefinition = (
  *       collectionKey: "pages",
  *       version: "published",
  *     });
- *     if (result.error) throw new LucidAPIError(result.error);
+ *     if (result.error) throw new LucidError(result.error);
  *
  *     return hono.json(result.data);
  *   },

@@ -1,4 +1,5 @@
 export type * from "./common/errors.js";
+export type * from "./common/events.js";
 export type * from "./common/responses.js";
 export type * from "./resources/agent/index.js";
 export type * from "./resources/ai/index.js";

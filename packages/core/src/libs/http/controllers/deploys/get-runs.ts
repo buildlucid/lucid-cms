@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
 import { deployServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -43,7 +43,7 @@ const getRunsController = factory.createHandlers(
 				message: copy("server:core.deploys.runs.fetch.failed"),
 			},
 		})(context, { query: formattedQuery, actor: c.get("auth") });
-		if (runs.error) throw new LucidAPIError(runs.error);
+		if (runs.error) throw new LucidError(runs.error);
 
 		c.status(200);
 		return c.json(

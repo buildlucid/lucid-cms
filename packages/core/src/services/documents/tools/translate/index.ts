@@ -5,6 +5,7 @@ import { Permissions } from "../../../../libs/permission/definitions.js";
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import type { AgentResource } from "../../../../types/response.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import type { DocumentWriteToolOptions } from "../types.js";
@@ -59,7 +60,7 @@ export const translateDocumentAgentTool = (
 					options.collections,
 				),
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const { output } = result.data;
 			const requestIds = [
@@ -81,21 +82,18 @@ export const translateDocumentAgentTool = (
 					? output.documents.length
 					: requestIds.length;
 			return {
-				error: undefined,
-				data: {
-					output,
-					changes,
-					summary: copy(
-						count === 0
-							? "admin:core.tools.documents_translate.summary.none"
-							: output.outcome === "applied"
-								? "admin:core.tools.documents_translate.summary.applied"
-								: count === 1
-									? "admin:core.tools.documents_translate.summary.one"
-									: "admin:core.tools.documents_translate.summary",
-						{ data: { count } },
-					),
-				},
+				output,
+				changes,
+				summary: copy(
+					count === 0
+						? "admin:core.tools.documents_translate.summary.none"
+						: output.outcome === "applied"
+							? "admin:core.tools.documents_translate.summary.applied"
+							: count === 1
+								? "admin:core.tools.documents_translate.summary.one"
+								: "admin:core.tools.documents_translate.summary",
+					{ data: { count } },
+				),
 			};
 		},
 	});

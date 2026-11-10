@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthSchemas } from "../../../../schemas/oauth.js";
 import { oauthServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import hasAccess from "../../../permission/has-access.js";
@@ -47,7 +47,7 @@ const getAuthorizationRequestController = factory.createHandlers(
 				permissions: auth.permissions,
 			},
 		});
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		c.header("Cache-Control", "no-store");
 		c.header("Pragma", "no-cache");

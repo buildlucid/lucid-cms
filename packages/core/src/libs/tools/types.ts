@@ -98,13 +98,14 @@ export type ResolvedAgentToolResult<Output> = Omit<
 	"summary"
 > & { summary: ResolvedAdminCopy };
 
+/** Returns the tool's result. Throw a LucidError to fail the call; errors below 500 are shown to the caller. */
 export type ToolHandler<Input, Result, Execution> = (args: {
 	context: ServiceContext;
 	input: Input;
 	execution: Execution;
 	/** Trusted server helpers. They do not check the caller's permissions or scopes. */
 	toolkit: Toolkit;
-}) => ServiceResponse<Result>;
+}) => Result | Promise<Result>;
 
 export type AgentToolHandler<Input, Output> = ToolHandler<
 	Input,
@@ -317,9 +318,12 @@ export type DefineInteractiveAgentToolOptions<
 	handler: (
 		args: Parameters<AgentToolHandler<z.output<Input>, z.output<Output>>>[0] &
 			AgentToolAnswer<Data, Response, Skippable>,
-	) => ServiceResponse<
-		AgentToolResult<z.output<Output>> | AgentToolInteraction<z.input<Data>>
-	>;
+	) =>
+		| AgentToolResult<z.output<Output>>
+		| AgentToolInteraction<z.input<Data>>
+		| Promise<
+				AgentToolResult<z.output<Output>> | AgentToolInteraction<z.input<Data>>
+		  >;
 };
 
 export type AgentToolPreparation =

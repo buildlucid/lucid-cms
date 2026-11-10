@@ -34,12 +34,12 @@ export const JobSchedulesList: Component = () => {
 		schema: {
 			filters: {
 				name: textFilter(),
-				jobName: textFilter(),
+				jobKey: textFilter(),
 				state: textFilter(),
 			},
 			sorts: {
 				name: sort({ defaultValue: "asc" }),
-				jobName: sort(),
+				jobKey: sort(),
 				nextRunAt: sort(),
 			},
 			pagination: pagination({ defaultPerPage: 10 }),
@@ -89,8 +89,8 @@ export const JobSchedulesList: Component = () => {
 						}}
 						filterSubject={T()("routes.system.jobs.schedules.title")}
 						filterFields={[
-							{ label: T()("common.schedule"), key: "name", type: "text" },
-							{ label: T()("jobs.name"), key: "jobName", type: "text" },
+							{ label: T()("common.schedule"), key: "shortKey", type: "text" },
+							{ label: T()("jobs.key"), key: "jobKey", type: "text" },
 							{
 								label: T()("common.status"),
 								key: "state",
@@ -102,8 +102,8 @@ export const JobSchedulesList: Component = () => {
 							},
 						]}
 						sorts={[
-							{ label: T()("common.schedule"), key: "name" },
-							{ label: T()("jobs.name"), key: "jobName" },
+							{ label: T()("common.schedule"), key: "shortKey" },
+							{ label: T()("jobs.key"), key: "jobKey" },
 							{ label: T()("jobs.schedules.next.run"), key: "nextRunAt" },
 						]}
 						perPage={[5, 10, 20]}
@@ -134,14 +134,14 @@ export const JobSchedulesList: Component = () => {
 								},
 								{
 									label: T()("common.schedule"),
-									key: "name",
+									key: "shortKey",
 									icon: <TbOutlineLetterT />,
 									minWidth: 260,
 									sortable: true,
 								},
 								{
 									label: T()("common.job"),
-									key: "jobName",
+									key: "jobKey",
 									icon: <TbOutlineLetterT />,
 									minWidth: 260,
 									sortable: true,

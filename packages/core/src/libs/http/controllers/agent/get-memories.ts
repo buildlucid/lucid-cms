@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent-memories.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
@@ -36,7 +36,7 @@ const getMemoriesController = factory.createHandlers(
 				message: copy("server:core.routes.agent.error.message"),
 			},
 		})(context, { userId: c.get("auth").id });
-		if (memories.error) throw new LucidAPIError(memories.error);
+		if (memories.error) throw new LucidError(memories.error);
 
 		c.status(200);
 

@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import updateDeploy from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -27,19 +28,16 @@ export const updateDeployAgentTool = () =>
 				input,
 				actor: execution.actor,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy(
-						input.action === "cancel-queued"
-							? "admin:core.tools.deploys_update.summary.queued"
-							: "admin:core.tools.deploys_update.summary",
-						{ data: { deploy: input.key } },
-					),
-				},
+				output: result.data.output,
+				summary: copy(
+					input.action === "cancel-queued"
+						? "admin:core.tools.deploys_update.summary.queued"
+						: "admin:core.tools.deploys_update.summary",
+					{ data: { deploy: input.key } },
+				),
 			};
 		},
 	});

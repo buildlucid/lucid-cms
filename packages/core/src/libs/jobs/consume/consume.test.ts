@@ -11,6 +11,7 @@ import {
 } from "vitest";
 import z from "zod";
 import { jobFailedNotification } from "../../../services/jobs/notifications/job-failed.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import {
 	createJobsContext,
 	createTestQueueAdapter,
@@ -43,7 +44,7 @@ describe("consuming durable jobs", () => {
 		const onPermanentFailure = vi.fn(async () => undefined);
 		let executions = 0;
 		const job = defineJob({
-			name: "test:transaction-expired-lease",
+			key: "test:transaction-expired-lease",
 			version: 1,
 			input: z.object({}),
 			transaction: true,
@@ -58,7 +59,7 @@ describe("consuming durable jobs", () => {
 					.execute();
 				started.resolve();
 				await finish.promise;
-				return { error: undefined, data: undefined };
+				return;
 			},
 			onPermanentFailure,
 		});
@@ -109,7 +110,7 @@ describe("consuming durable jobs", () => {
 		const cause = new Error("Expected diagnostic context");
 		let failureHandled = false;
 		const job = defineJob({
-			name: "test:transaction-handler-failure",
+			key: "test:transaction-handler-failure",
 			version: 1,
 			input: z.object({}),
 			transaction: true,
@@ -120,13 +121,10 @@ describe("consuming durable jobs", () => {
 					.set({ display_data: { worked: true } })
 					.where("job_id", "=", execution.jobId)
 					.execute();
-				return {
-					error: {
-						message: copy.literal("Expected transaction failure"),
-						cause,
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					message: copy.literal("Expected transaction failure"),
+					cause,
+				});
 			},
 			onPermanentFailure: async ({ context, failure }) => {
 				expect(failure.error?.cause).toBe(cause);
@@ -155,7 +153,7 @@ describe("consuming durable jobs", () => {
 
 	test("rolls back transactional work when the completion write fails", async () => {
 		const job = defineJob({
-			name: "test:transaction-completion-failure",
+			key: "test:transaction-completion-failure",
 			version: 1,
 			input: z.object({}),
 			transaction: true,
@@ -165,7 +163,7 @@ describe("consuming durable jobs", () => {
 					.set({ display_data: { worked: true } })
 					.where("job_id", "=", execution.jobId)
 					.execute();
-				return { error: undefined, data: undefined };
+				return;
 			},
 		});
 		const context = await createJobsContext(testConfig, {
@@ -210,10 +208,9 @@ describe("consuming durable jobs", () => {
 			maximumActive = Math.max(maximumActive, active);
 			await new Promise((resolve) => setTimeout(resolve, 10));
 			active -= 1;
-			return { error: undefined, data: undefined };
 		};
 		const job = defineJob({
-			name: "test:global-concurrency",
+			key: "test:global-concurrency",
 			version: 1,
 			input: z.object({}),
 			handler,
@@ -240,9 +237,9 @@ describe("consuming durable jobs", () => {
 	});
 
 	test("cancels a queued job before its handler starts", async () => {
-		const handler = vi.fn(async () => ({ error: undefined, data: undefined }));
+		const handler = vi.fn(async () => {});
 		const job = defineJob({
-			name: "test:cancel-queued",
+			key: "test:cancel-queued",
 			version: 1,
 			input: z.object({}),
 			handler,
@@ -270,7 +267,7 @@ describe("consuming durable jobs", () => {
 	test("owns retries and permanent failure handling in core", async () => {
 		const onPermanentFailure = vi.fn(async () => undefined);
 		const job = defineJob({
-			name: "test:retry",
+			key: "test:retry",
 			version: 1,
 			input: z.object({ value: z.number() }),
 			retry: {
@@ -280,10 +277,9 @@ describe("consuming durable jobs", () => {
 				maxDelayMs: 0,
 				jitter: "none",
 			},
-			handler: async () => ({
-				error: { message: copy.literal("Expected failure") },
-				data: undefined,
-			}),
+			handler: async () => {
+				throw new LucidError({ message: "Expected failure" });
+			},
 			onPermanentFailure,
 		});
 		const context = await createJobsContext(testConfig, {
@@ -310,7 +306,9 @@ describe("consuming durable jobs", () => {
 				input: { value: 1 },
 				attempts: 2,
 				errorMessage: "Expected failure",
-				error: { message: copy.literal("Expected failure") },
+				error: expect.objectContaining({
+					message: copy.literal("Expected failure"),
+				}),
 			},
 			toolkit: expect.objectContaining({ jobs: expect.any(Object) }),
 		});
@@ -329,13 +327,13 @@ describe("consuming durable jobs", () => {
 
 	test("stores a thrown error's stack and notifies until the job next completes", async () => {
 		const job = defineJob({
-			name: "test:thrown-failure",
+			key: "test:thrown-failure",
 			version: 1,
 			input: z.object({ fail: z.boolean() }),
 			retry: { type: "none" },
 			handler: async ({ input }) => {
 				if (input.fail) throw new Error("Expected crash");
-				return { error: undefined, data: undefined };
+				return;
 			},
 		});
 		const context = await createJobsContext(testConfig, {
@@ -393,10 +391,10 @@ describe("consuming durable jobs", () => {
 
 	test("asks push transports to retry messages delivered before a job is ready", async () => {
 		const job = defineJob({
-			name: "test:early-delivery",
+			key: "test:early-delivery",
 			version: 1,
 			input: z.object({ value: z.number() }),
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const context = await createJobsContext(testConfig, {
 			jobs: [job],

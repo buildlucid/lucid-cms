@@ -1,4 +1,4 @@
-import { copy, defineJob, z } from "@lucidcms/core";
+import { copy, defineJob, z, LucidError } from "@lucidcms/core";
 import syncIndex from "../services/sync-index.js";
 import type { ResolvedOptions } from "../types.js";
 import type { SyncJob } from "./types.js";
@@ -9,7 +9,7 @@ import type { SyncJob } from "./types.js";
  */
 const createReconcileJob = (options: ResolvedOptions, sync: SyncJob) =>
 	defineJob({
-		name: "typesense:reconcile",
+		key: "typesense:reconcile",
 		version: 1,
 		input: z.object({ index: z.string() }),
 		retry: {
@@ -20,7 +20,7 @@ const createReconcileJob = (options: ResolvedOptions, sync: SyncJob) =>
 			jitter: "none",
 		},
 		schedules: options.indexes.map((index) => ({
-			name: index.key,
+			key: index.key,
 			cron: "* * * * *",
 			input: { index: index.key },
 			overlap: "skip",
@@ -29,18 +29,19 @@ const createReconcileJob = (options: ResolvedOptions, sync: SyncJob) =>
 		handler: async ({ context, input, execution, toolkit }) => {
 			const index = options.indexes.find((index) => index.key === input.index);
 			if (!index)
-				return {
-					error: { message: copy("server:plugin.typesense.index.missing") },
-					data: undefined,
-				};
+				throw new LucidError({
+					message: copy("server:plugin.typesense.index.missing"),
+				});
 
-			return syncIndex(context, {
+			const result = await syncIndex(context, {
 				options,
 				index,
 				job: sync,
 				execution,
 				toolkit,
 			});
+			if (result.error) throw new LucidError(result.error);
+			return;
 		},
 		describe: ({ input }) => ({ index: input.index }),
 	});

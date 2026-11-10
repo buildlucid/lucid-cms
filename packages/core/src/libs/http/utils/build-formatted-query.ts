@@ -7,7 +7,7 @@ import type {
 	QueryParamFilterGroups,
 	QueryParamFilters,
 } from "../../../types/query-params.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import { copy } from "../../i18n/index.js";
 import parseFormattedQuery from "./parse-formatted-query.js";
 
@@ -180,7 +180,7 @@ const buildFormattedQuery = async <T extends ZodType>(
 	);
 
 	if (!validateResult.success) {
-		throw new LucidAPIError({
+		throw new LucidError({
 			type: "validation",
 			message: copy("server:core.requests.query.validation.message"),
 			zod: validateResult.error,

@@ -10,7 +10,7 @@ interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: {
 		jobId?: Accessor<string>;
-		jobName?: Accessor<string>;
+		jobKey?: Accessor<string>;
 		scheduleKey?: Accessor<string | undefined>;
 		status?: Accessor<string[]>;
 		queueAdapterKey?: Accessor<string>;

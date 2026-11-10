@@ -22,7 +22,7 @@ import {
 	destroyMediaStorageAdapter,
 	getInitializedMediaStorageAdapter,
 } from "../media-storage/lifecycle.js";
-import type { MediaStorageAdapterInstance } from "../media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../media-storage/types.js";
 import {
 	destroyQueueAdapter,
 	getInitializedQueueAdapter,
@@ -34,7 +34,7 @@ import type { AdapterRuntimeContext, EnvironmentVariables } from "./types.js";
 export type LucidAdapterInstances = {
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
-	mediaStorage: MediaStorageAdapterInstance | null;
+	mediaStorage: ResolvedMediaStorageAdapter | null;
 	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
 	captcha: CaptchaAdapterInstance | null;
@@ -75,7 +75,7 @@ const createLucidAdapters = async (
 ): Promise<LucidAdapters> => {
 	let queue: QueueAdapterInstance | undefined;
 	let kv: KVAdapterInstance | undefined;
-	let mediaStorage: MediaStorageAdapterInstance | null | undefined;
+	let mediaStorage: ResolvedMediaStorageAdapter | null | undefined;
 	let mediaDelivery: MediaDeliveryAdapterInstance | undefined;
 	let email: EmailAdapterInstance | undefined;
 	let captcha: CaptchaAdapterInstance | null | undefined;

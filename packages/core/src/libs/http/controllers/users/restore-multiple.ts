@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { userServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -45,7 +45,7 @@ const restoreMultipleController = factory.createHandlers(
 				message: copy("server:core.routes.user.update.error.message"),
 			},
 		})(context, { ids, auth: c.get("auth") });
-		if (restoreRes.error) throw new LucidAPIError(restoreRes.error);
+		if (restoreRes.error) throw new LucidError(restoreRes.error);
 
 		c.status(204);
 		return c.body(null);

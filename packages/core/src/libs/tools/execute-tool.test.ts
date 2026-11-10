@@ -19,13 +19,10 @@ import type { AgentToolAuthority } from "./types.js";
 const testConfig = getTestConfig();
 let context: ServiceContext;
 const agentHandler = vi.fn(async () => ({
-	error: undefined,
-	data: { output: { source: "agent" }, summary: "Read the agent source." },
+	output: { source: "agent" },
+	summary: "Read the agent source.",
 }));
-const mcpHandler = vi.fn(async () => ({
-	error: undefined,
-	data: { output: { source: "mcp" } },
-}));
+const mcpHandler = vi.fn(async () => ({ output: { source: "mcp" } }));
 const schema = z.object({});
 const output = z.object({ source: z.string() });
 const agentTool = defineAgentTool({
@@ -181,10 +178,7 @@ test.each([
 			output,
 			permissions: [],
 			readOnly: true,
-			handler: async () => ({
-				error: undefined,
-				data: { output: { source: "agent" }, summary },
-			}),
+			handler: async () => ({ output: { source: "agent" }, summary }),
 		});
 		expect(
 			await executeAgentTool({
@@ -223,10 +217,7 @@ test.each([
 			permissions: [],
 			readOnly: true,
 			// @ts-expect-error Agent summaries only accept admin copy.
-			handler: async () => ({
-				error: undefined,
-				data: { output: { source: "agent" }, summary },
-			}),
+			handler: async () => ({ output: { source: "agent" }, summary }),
 		});
 		expect(
 			await executeAgentTool({
@@ -262,8 +253,8 @@ test("describes a call from its input, or by its title when the input is invalid
 		readOnly: true,
 		describe: ({ input }) => `Read source ${input.id}`,
 		handler: async () => ({
-			error: undefined,
-			data: { output: { source: "agent" }, summary: "Read the source." },
+			output: { source: "agent" },
+			summary: "Read the source.",
 		}),
 	});
 	expect(tool.describe({ id: 7 })).toEqual(copy.literal("Read source 7"));
@@ -291,12 +282,9 @@ test("keeps the resources a call changed and drops an invalid list without faili
 		output,
 		permissions: [],
 		handler: async () => ({
-			error: undefined,
-			data: {
-				output: { source: "agent" },
-				summary: "Changed the source.",
-				changes: [{ type: "request", requestId: 7 }],
-			},
+			output: { source: "agent" },
+			summary: "Changed the source.",
+			changes: [{ type: "request", requestId: 7 }],
 		}),
 	});
 	const invalid = defineAgentTool({
@@ -307,12 +295,9 @@ test("keeps the resources a call changed and drops an invalid list without faili
 		permissions: [],
 		// @ts-expect-error custom tools can still return unchecked values at runtime
 		handler: async () => ({
-			error: undefined,
-			data: {
-				output: { source: "agent" },
-				summary: "Changed the source.",
-				changes: [{ type: "request", requestId: "7" }],
-			},
+			output: { source: "agent" },
+			summary: "Changed the source.",
+			changes: [{ type: "request", requestId: "7" }],
 		}),
 	});
 
@@ -342,22 +327,16 @@ test("interaction schemas preserve raw JSON across validation and apply transfor
 					count: z.number().transform((count) => count + data.count),
 				}),
 			prepare: async () => ({
-				error: undefined,
-				data: {
-					interaction: {
-						title: "Choose",
-						placement: "inline",
-						data: { count: 1 },
-					},
+				interaction: {
+					title: "Choose",
+					placement: "inline",
+					data: { count: 1 },
 				},
 			}),
 		},
 		handler: async ({ response }) => ({
-			error: undefined,
-			data: {
-				output: response,
-				summary: "Accepted the transformed selection.",
-			},
+			output: response,
+			summary: "Accepted the transformed selection.",
 		}),
 	});
 	const execution = {

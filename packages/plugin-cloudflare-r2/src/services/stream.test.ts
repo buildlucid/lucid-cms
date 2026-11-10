@@ -33,10 +33,9 @@ describe("stream", () => {
 			},
 		);
 
-		expect(response.error).toBeUndefined();
-		expect(response.data?.notModified).toBe(true);
-		expect(response.data?.etag).toBe("etag");
-		expect(response.data?.body).toEqual(new Uint8Array());
+		expect(response.notModified).toBe(true);
+		expect(response.etag).toBe("etag");
+		expect(response.body).toEqual(new Uint8Array());
 
 		const options = get.mock.calls[0]?.[1];
 		if (!options) {

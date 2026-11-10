@@ -85,10 +85,7 @@ const confirmedWrite = defineAgentTool({
 	output: z.object({ done: z.boolean() }),
 	permissions: [],
 	requiresConfirmation: true,
-	handler: async () => ({
-		error: undefined,
-		data: { output: { done: true }, summary: "Wrote it." },
-	}),
+	handler: async () => ({ output: { done: true }, summary: "Wrote it." }),
 });
 const lead = defineAgent({
 	key: "lead",

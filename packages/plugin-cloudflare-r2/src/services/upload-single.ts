@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import { toWebReadable } from "@lucidcms/core/extension";
 import type {
 	MediaStorageAdapterServiceUploadSingle,
@@ -67,22 +67,17 @@ const uploadSingle = (
 			const object = await putObject(options, context, props);
 
 			return {
-				error: undefined,
-				data: {
-					etag: object?.etag,
-				},
+				etag: object?.etag,
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.cloudflare.r2.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.cloudflare.r2.errors.unknown"),
+			});
 		}
 	};
 };

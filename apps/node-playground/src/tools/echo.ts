@@ -9,10 +9,7 @@ export const echoTool = defineMcpTool({
 	input: echoInput,
 	output: z.object({ message: z.string() }),
 	scopes: [],
-	handler: async ({ input }) => ({
-		error: undefined,
-		data: { output: { message: input.message } },
-	}),
+	handler: async ({ input }) => ({ output: { message: input.message } }),
 	annotations: { readOnlyHint: true },
 });
 
@@ -24,11 +21,8 @@ export const echoAgentTool = defineAgentTool({
 	output: z.object({ message: z.string() }),
 	permissions: [],
 	handler: async ({ input }) => ({
-		error: undefined,
-		data: {
-			output: { message: input.message },
-			summary: `Echoed "${input.message}"`,
-		},
+		output: { message: input.message },
+		summary: `Echoed "${input.message}"`,
 	}),
 	readOnly: true,
 });

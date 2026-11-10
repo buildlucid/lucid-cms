@@ -1,4 +1,5 @@
 import type z from "zod";
+import { LucidError } from "../../../../utils/errors/index.js";
 import type { ServiceResponse } from "../../../../utils/services/types.js";
 import { copy } from "../../../i18n/index.js";
 import mapStandardUserInfo from "../../helpers/default-user-info-mapper.js";
@@ -202,15 +203,17 @@ export const mapProviderUserInfo = async (
 	rawUserInfo: Record<string, unknown>,
 	mapper?: (
 		response: Record<string, unknown>,
-	) =>
-		| Awaited<ServiceResponse<AuthProviderUserInfo>>
-		| ServiceResponse<AuthProviderUserInfo>,
+	) => AuthProviderUserInfo | Promise<AuthProviderUserInfo>,
 ): ServiceResponse<AuthProviderUserInfo> => {
 	try {
-		return await (mapper
-			? mapper(rawUserInfo)
-			: mapStandardUserInfo(rawUserInfo));
+		if (!mapper) return await mapStandardUserInfo(rawUserInfo);
+
+		return { error: undefined, data: await mapper(rawUserInfo) };
 	} catch (cause) {
+		if (cause instanceof LucidError) {
+			return { error: { ...cause.error }, data: undefined };
+		}
+
 		return {
 			error: {
 				type: "basic",

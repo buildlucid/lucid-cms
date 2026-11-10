@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
@@ -40,7 +41,7 @@ const afterUpsertHandler =
 				collectionInstance: meta.collection,
 				parentPathField: currentPathField,
 			});
-			if (docPathsRes.error) return docPathsRes;
+			if (docPathsRes.error) throw new LucidError(docPathsRes.error);
 
 			if (docPathsRes.data.length > 0) {
 				const updateRes = await updateRouteFields(context, {
@@ -52,7 +53,7 @@ const afterUpsertHandler =
 					tables: meta.collectionTableNames,
 					toolkit,
 				});
-				if (updateRes.error) return updateRes;
+				if (updateRes.error) throw new LucidError(updateRes.error);
 			}
 
 			//* the save wrote this page's own path, so updateRouteFields didn't record it
@@ -75,20 +76,22 @@ const afterUpsertHandler =
 					},
 				],
 			});
-			if (recordRes.error) return recordRes;
+			if (recordRes.error) throw new LucidError(recordRes.error);
 		}
 		if (scope.type !== "version") {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		// ----------------------------------------------------------------
-		return propagateRouteSegmentUpdates(context, {
+		const result = await propagateRouteSegmentUpdates(context, {
 			toolkit,
 			options,
 			targetCollectionKey: meta.collectionKey,
 			targetDocumentId: data.documentId,
 			targetVersionType: scope.versionType,
 		});
+		if (result.error) throw new LucidError(result.error);
+		return;
 	};
 
 export default afterUpsertHandler;

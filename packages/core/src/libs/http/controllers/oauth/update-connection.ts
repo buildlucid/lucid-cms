@@ -5,7 +5,7 @@ import {
 	oauthSchemas,
 } from "../../../../schemas/oauth.js";
 import { oauthServices, userServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import { canManageOAuthConnection } from "../../../permission/oauth-connections.js";
@@ -45,13 +45,13 @@ const updateConnectionController = factory.createHandlers(
 			transaction: false,
 			defaultError: { type: "basic" },
 		})(context, { id });
-		if (current.error) throw new LucidAPIError(current.error);
+		if (current.error) throw new LucidError(current.error);
 
 		if (
 			userId !== undefined &&
 			(current.data.principalType !== "user" || current.data.userId !== userId)
 		) {
-			throw new LucidAPIError({ type: "basic", status: 404 });
+			throw new LucidError({ type: "basic", status: 404 });
 		}
 		if (
 			!canManageOAuthConnection({
@@ -60,21 +60,21 @@ const updateConnectionController = factory.createHandlers(
 				systemPermission: Permissions.IntegrationUpdate,
 			})
 		) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		if (current.data.principalType === "user" && current.data.userId !== null) {
 			const userAccessRes = await userServices.checks.checkUserAccess(context, {
 				auth: c.get("auth"),
 				id: current.data.userId,
 			});
-			if (userAccessRes.error) throw new LucidAPIError(userAccessRes.error);
+			if (userAccessRes.error) throw new LucidError(userAccessRes.error);
 		}
 
 		const result = await serviceWrapper(oauthServices.updateConnection, {
 			transaction: true,
 			defaultError: { type: "basic" },
 		})(context, { id, name });
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		return c.json(formatAPIResponse(c, { data: result.data }));
 	},

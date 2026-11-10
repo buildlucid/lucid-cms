@@ -15,7 +15,7 @@ const getSingle: ServiceFn<
 		select: [
 			"id",
 			"job_id",
-			"job_name",
+			"job_key",
 			"job_version",
 			"trigger_type",
 			"schedule_key",

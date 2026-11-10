@@ -115,7 +115,9 @@ const getMultiple: ServiceFn<[{ actor: LucidActor }], Deploy[]> = async (
 						: null,
 				nextRunAt:
 					deploy.schedule && !override
-						? (new Cron(deploy.schedule, { timezone: "UTC" })
+						? (new Cron(deploy.schedule.cron, {
+								timezone: deploy.schedule.timezone,
+							})
 								.nextRun()
 								?.toISOString() ?? null)
 						: null,

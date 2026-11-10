@@ -5,7 +5,7 @@ import {
 	type OAuthResource,
 } from "../../../services/oauth/helpers/urls.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import { copy } from "../../i18n/index.js";
 import { filterExternalScopes } from "../../permission/scopes.js";
 import createServiceContext from "../utils/create-service-context.js";
@@ -39,7 +39,7 @@ export const externalScopeCheck = (
 			);
 		}
 
-		throw new LucidAPIError({
+		throw new LucidError({
 			type: "forbidden",
 			name: copy("server:core.integrations.scopes.error.name"),
 			message: copy("server:core.integrations.scopes.missing.message", {

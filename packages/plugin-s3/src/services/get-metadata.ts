@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -25,18 +25,15 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			const result = await fetch(response);
 
 			if (!result.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.metadata.fetch.failed", {
-							data: {
-								status: result.status,
-								statusText: result.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.metadata.fetch.failed", {
+						data: {
+							status: result.status,
+							statusText: result.statusText,
+						},
+					}),
+				});
 			}
 
 			const contentLength =
@@ -44,37 +41,29 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				parseStoredSize(result.headers.get(METADATA_SIZE_HEADER));
 
 			if (contentLength === null) {
-				return {
-					error: {
-						message: copy("server:plugin.s3.objects.metadata.missing"),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					message: copy("server:plugin.s3.objects.metadata.missing"),
+				});
 			}
 
 			const contentType = result.headers.get("content-type");
 			const etag = result.headers.get("etag");
 
 			return {
-				error: undefined,
-				data: {
-					size: contentLength,
-					mimeType: contentType || null,
-					etag: etag || null,
-					status: "ready",
-				},
+				size: contentLength,
+				mimeType: contentType || null,
+				etag: etag || null,
+				status: "ready",
 			};
 		} catch (e) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						e instanceof Error
-							? copy.literal(e.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (e instanceof LucidError) throw e;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					e instanceof Error
+						? copy.literal(e.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 	return getMetadata;

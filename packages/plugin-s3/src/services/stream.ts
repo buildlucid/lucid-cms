@@ -1,5 +1,5 @@
 import type { Readable } from "node:stream";
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceStream } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -37,38 +37,29 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 
 			if (result.status === 304) {
 				return {
-					error: undefined,
-					data: {
-						contentLength: undefined,
-						contentType: undefined,
-						body: new Uint8Array(),
-						etag: result.headers.get("etag"),
-						notModified: true,
-					},
+					contentLength: undefined,
+					contentType: undefined,
+					body: new Uint8Array(),
+					etag: result.headers.get("etag"),
+					notModified: true,
 				};
 			}
 
 			if (!result.ok) {
-				return {
-					error: {
-						message: copy("server:plugin.s3.objects.stream.failed", {
-							data: {
-								status: result.status,
-								statusText: result.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					message: copy("server:plugin.s3.objects.stream.failed", {
+						data: {
+							status: result.status,
+							statusText: result.statusText,
+						},
+					}),
+				});
 			}
 
 			if (!result.body) {
-				return {
-					error: {
-						message: copy("server:plugin.s3.objects.body.missing"),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					message: copy("server:plugin.s3.objects.body.missing"),
+				});
 			}
 
 			let isPartialContent = false;
@@ -93,32 +84,27 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			const etag = result.headers.get("etag");
 
 			return {
-				error: undefined,
-				data: {
-					contentLength: contentLength
-						? Number.parseInt(contentLength, 10)
-						: undefined,
-					contentType: contentType || undefined,
-					body: result.body as unknown as Readable,
-					etag: etag || null,
-					isPartialContent,
-					totalSize:
-						totalSize ||
-						(contentLength ? Number.parseInt(contentLength, 10) : undefined),
-					range: rangeRes,
-				},
+				contentLength: contentLength
+					? Number.parseInt(contentLength, 10)
+					: undefined,
+				contentType: contentType || undefined,
+				body: result.body as unknown as Readable,
+				etag: etag || null,
+				isPartialContent,
+				totalSize:
+					totalSize ||
+					(contentLength ? Number.parseInt(contentLength, 10) : undefined),
+				range: rangeRes,
 			};
 		} catch (e) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						e instanceof Error
-							? copy.literal(e.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (e instanceof LucidError) throw e;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					e instanceof Error
+						? copy.literal(e.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 

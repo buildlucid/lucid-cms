@@ -6,7 +6,7 @@ import {
 	authServices,
 	userLoginServices,
 } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
@@ -68,7 +68,7 @@ const acceptInvitationController = factory.createHandlers(
 			password: password,
 		});
 
-		if (acceptInvitation.error) throw new LucidAPIError(acceptInvitation.error);
+		if (acceptInvitation.error) throw new LucidError(acceptInvitation.error);
 
 		//* without a password to log in with, accepting the emailed invitation logs the user in
 		if (context.config.auth.password.enabled === false) {
@@ -76,7 +76,7 @@ const acceptInvitationController = factory.createHandlers(
 				userId: acceptInvitation.data.id,
 				authMethod: "invitation",
 			});
-			if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+			if (challengeRes.error) throw new LucidError(challengeRes.error);
 			if (challengeRes.data) {
 				c.status(200);
 				return c.json(
@@ -90,8 +90,8 @@ const acceptInvitationController = factory.createHandlers(
 				authServices.refreshToken.generateToken(c, acceptInvitation.data.id),
 				authServices.accessToken.generateToken(c, acceptInvitation.data.id),
 			]);
-			if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-			if (accessRes.error) throw new LucidAPIError(accessRes.error);
+			if (refreshRes.error) throw new LucidError(refreshRes.error);
+			if (accessRes.error) throw new LucidError(accessRes.error);
 
 			const userAgent = c.req.header("user-agent") || null;
 
@@ -113,7 +113,7 @@ const acceptInvitationController = factory.createHandlers(
 				userAgent: userAgent,
 			});
 			if (userLoginTrackRes.error)
-				throw new LucidAPIError(userLoginTrackRes.error);
+				throw new LucidError(userLoginTrackRes.error);
 		}
 
 		c.status(200);

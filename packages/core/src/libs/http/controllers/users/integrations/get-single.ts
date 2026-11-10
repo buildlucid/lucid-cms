@@ -5,7 +5,7 @@ import {
 	userIntegrationItemParamsSchema,
 } from "../../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { Permissions } from "../../../../permission/definitions.js";
@@ -42,7 +42,7 @@ const getSingleController = factory.createHandlers(
 				optionalPermissions: [Permissions.UsersRead, Permissions.UsersUpdate],
 			})
 		) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
 
@@ -57,7 +57,7 @@ const getSingleController = factory.createHandlers(
 			id,
 			userId,
 		});
-		if (getSingleRes.error) throw new LucidAPIError(getSingleRes.error);
+		if (getSingleRes.error) throw new LucidError(getSingleRes.error);
 
 		c.status(200);
 		return c.json(

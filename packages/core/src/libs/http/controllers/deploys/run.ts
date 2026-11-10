@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
 import { deployServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { getDeployPermission } from "../../../permission/deploy-permissions.js";
@@ -57,7 +57,7 @@ const runController = factory.createHandlers(
 			source: "manual",
 			userId: c.get("auth").id,
 		});
-		if (run.error) throw new LucidAPIError(run.error);
+		if (run.error) throw new LucidError(run.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: run.data }));

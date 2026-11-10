@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import { REDIRECTS_COLLECTION_KEY, redirectFields } from "../../constants.js";
 import type { RedirectsConfig } from "../../types/types.js";
@@ -16,7 +16,7 @@ const redirectBeforeUpsertHandler =
 	(config: RedirectsConfig): LucidHookDocuments<"beforeUpsert">["handler"] =>
 	async ({ context, data, meta }) => {
 		if (meta.collectionKey !== REDIRECTS_COLLECTION_KEY) {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		const fromField = data.fields?.find(
@@ -31,27 +31,24 @@ const redirectBeforeUpsertHandler =
 			defaultLocale: config.defaultLocale,
 			hasLocaleField: config.hasLocaleField,
 		});
-		if (!identity) return { error: undefined, data: undefined };
+		if (!identity) return;
 
 		if (isDirectSelfRedirect(identity)) {
 			const message = copy("server:plugin.pages.redirects.target.self");
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					message,
-					errors: {
-						fields: [
-							{
-								key: redirectFields.targetUrl,
-								localeCode: null,
-								message,
-							},
-						],
-					},
+			throw new LucidError({
+				type: "basic",
+				status: 400,
+				message,
+				errors: {
+					fields: [
+						{
+							key: redirectFields.targetUrl,
+							localeCode: null,
+							message,
+						},
+					],
 				},
-				data: undefined,
-			};
+			});
 		}
 
 		const uniqueRes = await checkRedirectUniqueness(context, {
@@ -61,13 +58,15 @@ const redirectBeforeUpsertHandler =
 			tables: meta.collectionTableNames,
 			hasLocaleField: config.hasLocaleField,
 		});
-		if (uniqueRes.error) return uniqueRes;
+		if (uniqueRes.error) throw new LucidError(uniqueRes.error);
 
-		return checkRedirectSource(context, {
+		const result = await checkRedirectSource(context, {
 			config,
 			identity,
 			versionType: data.versionType,
 		});
+		if (result.error) throw new LucidError(result.error);
+		return;
 	};
 
 export default redirectBeforeUpsertHandler;

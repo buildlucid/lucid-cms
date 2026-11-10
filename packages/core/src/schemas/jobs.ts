@@ -17,7 +17,7 @@ export const controllerSchemas = {
 			string: z
 				.object({
 					"filter[jobId]": queryString.schema.filter(false),
-					"filter[jobName]": queryString.schema.filter(false),
+					"filter[jobKey]": queryString.schema.filter(false),
 					"filter[jobVersion]": queryString.schema.filter(false),
 					"filter[triggerType]": queryString.schema.filter(false),
 					"filter[scheduleKey]": queryString.schema.filter(false),
@@ -49,7 +49,7 @@ export const controllerSchemas = {
 				filter: z
 					.strictObject({
 						jobId: queryFormatted.schema.filters.single.optional(),
-						jobName: queryFormatted.schema.filters.single.optional(),
+						jobKey: queryFormatted.schema.filters.single.optional(),
 						jobVersion: queryFormatted.schema.filters.single.optional(),
 						triggerType: queryFormatted.schema.filters.single.optional(),
 						scheduleKey: queryFormatted.schema.filters.single.optional(),
@@ -101,7 +101,7 @@ export const controllerSchemas = {
 			z.object({
 				id: z.number(),
 				jobId: z.string(),
-				jobName: z.string(),
+				jobKey: z.string(),
 				jobVersion: z.number(),
 				triggerType: jobTriggerTypeSchema,
 				scheduleKey: z.string().nullable(),
@@ -135,7 +135,7 @@ export const controllerSchemas = {
 		response: z.object({
 			id: z.number(),
 			jobId: z.string(),
-			jobName: z.string(),
+			jobKey: z.string(),
 			jobVersion: z.number(),
 			triggerType: jobTriggerTypeSchema,
 			scheduleKey: z.string().nullable(),
@@ -168,8 +168,8 @@ export const controllerSchemas = {
 			string: z
 				.object({
 					"filter[key]": queryString.schema.filter(false),
-					"filter[name]": queryString.schema.filter(false),
-					"filter[jobName]": queryString.schema.filter(false),
+					"filter[shortKey]": queryString.schema.filter(false),
+					"filter[jobKey]": queryString.schema.filter(false),
 					"filter[jobVersion]": queryString.schema.filter(false),
 					"filter[cron]": queryString.schema.filter(false),
 					"filter[timezone]": queryString.schema.filter(false),
@@ -181,7 +181,7 @@ export const controllerSchemas = {
 						nullable: true,
 					}),
 					sort: queryString.schema.sort(
-						"key,name,jobName,jobVersion,state,nextRunAt,pausedAt",
+						"key,shortKey,jobKey,jobVersion,state,nextRunAt,pausedAt",
 					),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -191,8 +191,8 @@ export const controllerSchemas = {
 				filter: z
 					.strictObject({
 						key: queryFormatted.schema.filters.single.optional(),
-						name: queryFormatted.schema.filters.single.optional(),
-						jobName: queryFormatted.schema.filters.single.optional(),
+						shortKey: queryFormatted.schema.filters.single.optional(),
+						jobKey: queryFormatted.schema.filters.single.optional(),
 						jobVersion: queryFormatted.schema.filters.single.optional(),
 						cron: queryFormatted.schema.filters.single.optional(),
 						timezone: queryFormatted.schema.filters.single.optional(),
@@ -209,8 +209,8 @@ export const controllerSchemas = {
 						z.object({
 							key: z.enum([
 								"key",
-								"name",
-								"jobName",
+								"shortKey",
+								"jobKey",
 								"jobVersion",
 								"state",
 								"nextRunAt",
@@ -228,8 +228,8 @@ export const controllerSchemas = {
 		response: z.array(
 			z.object({
 				key: z.string(),
-				name: z.string(),
-				jobName: z.string(),
+				shortKey: z.string(),
+				jobKey: z.string(),
 				jobVersion: z.number(),
 				cron: z.string(),
 				timezone: z.string(),
@@ -271,7 +271,7 @@ export const controllerSchemas = {
 		params: undefined,
 		response: z.object({
 			jobId: z.string(),
-			name: z.string(),
+			key: z.string(),
 			version: z.number(),
 		}),
 	} satisfies ControllerSchema,

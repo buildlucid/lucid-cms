@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/diagnostics.js";
 import { diagnosticServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -59,7 +59,7 @@ const runChecksController = factory.createHandlers(
 			checks: body.checks,
 			authUser: c.get("auth"),
 		});
-		if (results.error) throw new LucidAPIError(results.error);
+		if (results.error) throw new LucidError(results.error);
 
 		c.status(200);
 		return c.json(

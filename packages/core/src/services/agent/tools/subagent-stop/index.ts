@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import stopRun from "../../helpers/stop-run.js";
 import resolveSubagent from "../../helpers/subagents/resolve-subagent.js";
@@ -22,7 +23,7 @@ export const subagentStopAgentTool = () =>
 				execution,
 				subagentId: input.subagentId,
 			});
-			if (subagent.error) return subagent;
+			if (subagent.error) throw new LucidError(subagent.error);
 
 			const runId = subagent.data.active_run_id;
 			const stopped = runId
@@ -34,16 +35,13 @@ export const subagentStopAgentTool = () =>
 						tellParent: false,
 					})
 				: { error: undefined, data: false };
-			if (stopped.error) return stopped;
+			if (stopped.error) throw new LucidError(stopped.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: { subagentId: subagent.data.id, stopped: stopped.data },
-					summary: copy("admin:core.tools.lucid_subagent_stop.summary", {
-						data: { title: subagent.data.title },
-					}),
-				},
+				output: { subagentId: subagent.data.id, stopped: stopped.data },
+				summary: copy("admin:core.tools.lucid_subagent_stop.summary", {
+					data: { title: subagent.data.title },
+				}),
 			};
 		},
 	});

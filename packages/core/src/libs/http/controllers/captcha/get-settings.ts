@@ -4,7 +4,7 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/captcha.js";
 import { captchaServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
@@ -40,7 +40,7 @@ const getSettingsController = factory.createHandlers(
 				message: copy("server:core.routes.captcha.settings.error.message"),
 			},
 		})(context);
-		if (settingsRes.error) throw new LucidAPIError(settingsRes.error);
+		if (settingsRes.error) throw new LucidError(settingsRes.error);
 
 		c.status(200);
 		return c.json(

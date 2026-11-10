@@ -79,14 +79,14 @@ const createContext = async (options: {
 
 describe("job schedules", () => {
 	test("enqueues each occurrence once and exposes its trigger to the handler", async () => {
-		const handler = vi.fn(async () => ({ error: undefined, data: undefined }));
+		const handler = vi.fn(async () => {});
 		const job = defineJob({
-			name: "test:scheduled-job",
+			key: "test:scheduled-job",
 			version: 1,
 			input: z.object({ value: z.number() }),
 			schedules: [
 				{
-					name: "every-minute",
+					key: "every-minute",
 					cron: "* * * * *",
 					input: { value: 42 },
 				},
@@ -133,18 +133,18 @@ describe("job schedules", () => {
 
 	test("skips an overlapping schedule without creating another job", async () => {
 		const job = defineJob({
-			name: "test:no-overlap",
+			key: "test:no-overlap",
 			version: 1,
 			input: z.object({}),
 			schedules: [
 				{
-					name: "every-minute",
+					key: "every-minute",
 					cron: "* * * * *",
 					input: {},
 					overlap: "skip",
 				},
 			],
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const context = await createContext({ jobs: [job] });
 
@@ -167,14 +167,14 @@ describe("job schedules", () => {
 	});
 
 	test("runs scheduled jobs through the inline adapter when no external queue exists", async () => {
-		const handler = vi.fn(async () => ({ error: undefined, data: undefined }));
+		const handler = vi.fn(async () => {});
 		const job = defineJob({
-			name: "test:inline-schedule",
+			key: "test:inline-schedule",
 			version: 1,
 			input: z.null(),
 			schedules: [
 				{
-					name: "every-minute",
+					key: "every-minute",
 					cron: "* * * * *",
 					input: null,
 				},
@@ -202,7 +202,7 @@ describe("job schedules", () => {
 	test("leaves an inline retry queued until a scheduler tick after its backoff", async () => {
 		let attempts = 0;
 		const job = defineJob({
-			name: "test:inline-retry",
+			key: "test:inline-retry",
 			version: 1,
 			input: z.null(),
 			retry: {
@@ -212,16 +212,13 @@ describe("job schedules", () => {
 				maxDelayMs: 30_000,
 				jitter: "none",
 			},
-			schedules: [{ name: "every-minute", cron: "* * * * *", input: null }],
+			schedules: [{ key: "every-minute", cron: "* * * * *", input: null }],
 			handler: async () => {
 				attempts += 1;
 				if (attempts === 1) {
-					return {
-						error: { message: copy.literal("Expected failure") },
-						data: undefined,
-					};
+					throw new LucidError({ message: copy.literal("Expected failure") });
 				}
-				return { error: undefined, data: undefined };
+				return;
 			},
 		});
 		const context = await createContext({
@@ -256,17 +253,17 @@ describe("job schedules", () => {
 
 	test("manually triggers a registered schedule without moving the scheduler cursor", async () => {
 		const job = defineJob({
-			name: "test:manual-schedule",
+			key: "test:manual-schedule",
 			version: 1,
 			input: z.object({ value: z.number() }),
 			schedules: [
 				{
-					name: "nightly",
+					key: "nightly",
 					cron: "0 0 * * *",
 					input: { value: 7 },
 				},
 			],
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const context = await createContext({ jobs: [job] });
 
@@ -320,17 +317,17 @@ describe("job schedules", () => {
 
 	test("skips paused schedules and resumes without replaying missed minutes", async () => {
 		const job = defineJob({
-			name: "test:paused-schedule",
+			key: "test:paused-schedule",
 			version: 1,
 			input: z.object({}),
 			schedules: [
 				{
-					name: "every-minute",
+					key: "every-minute",
 					cron: "* * * * *",
 					input: {},
 				},
 			],
-			handler: async () => ({ error: undefined, data: undefined }),
+			handler: async () => {},
 		});
 		const context = await createContext({ jobs: [job] });
 		const scheduleKey = "test:paused-schedule/every-minute";
@@ -367,17 +364,17 @@ describe("job schedules", () => {
 
 describe("resolveRegisteredJobSchedule", () => {
 	const job = defineJob({
-		name: "test:generate-report",
+		key: "test:generate-report",
 		version: 1,
 		input: z.object({ type: z.string() }),
 		schedules: [
-			{ name: "daily", cron: "0 0 * * *", input: { type: "summary" } },
-			{ name: "weekly", cron: "0 0 * * 1", input: { type: "full" } },
+			{ key: "daily", cron: "0 0 * * *", input: { type: "summary" } },
+			{ key: "weekly", cron: "0 0 * * 1", input: { type: "full" } },
 		],
-		handler: async () => ({ error: undefined, data: undefined }),
+		handler: async () => {},
 	});
 	const schedules = job.schedules.map((schedule) => ({
-		key: `${job.name}/${schedule.name}`,
+		key: `${job.key}/${schedule.key}`,
 		job,
 		schedule,
 	}));
@@ -385,14 +382,14 @@ describe("resolveRegisteredJobSchedule", () => {
 	test("resolves an exact schedule key", () => {
 		expect(
 			resolveRegisteredJobSchedule(schedules, "test:generate-report/weekly")
-				?.schedule.name,
+				?.schedule.key,
 		).toBe("weekly");
 	});
 
-	test("uses the first schedule when given a job name", () => {
+	test("uses the first schedule when given a job key", () => {
 		expect(
 			resolveRegisteredJobSchedule(schedules, "test:generate-report")?.schedule
-				.name,
+				.key,
 		).toBe("daily");
 	});
 

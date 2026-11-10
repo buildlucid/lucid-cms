@@ -1,4 +1,4 @@
-import { LucidAPIError } from "@lucidcms/core";
+import { LucidError } from "@lucidcms/core";
 import { contentCacheTags } from "@lucidcms/core/extension";
 import type { Toolkit } from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
@@ -24,7 +24,7 @@ const mediaUrl = withRender(
 			libraryOnly: true,
 		});
 		if (response.error?.status === 404) return null;
-		if (response.error) throw new LucidAPIError(response.error);
+		if (response.error) throw new LucidError(response.error);
 
 		return response.data.url;
 	},

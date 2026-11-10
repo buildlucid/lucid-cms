@@ -15,6 +15,7 @@ import type {
 } from "../../utils/services/types.js";
 import type { CopyInput } from "../i18n/types.js";
 import type { ToolkitActor } from "../permission/toolkit-actor.js";
+import type { Toolkit } from "../toolkit/types.js";
 
 /** A bundled file for an import: already in storage from a browser upload, or bytes from a script. */
 export type TransferFileSource =
@@ -25,6 +26,13 @@ export type TransferFileSource =
 export type TransferFileReader = (
 	path: string,
 ) => Promise<MediaUploadFile | undefined>;
+
+/** What a transfer handler receives: its own props with the service context and toolkit. Throw a LucidError to fail. */
+export type TransferHandlerArgs<TProps> = TProps & {
+	context: ServiceContext;
+	/** Trusted server helpers bound to the current transaction. */
+	toolkit: Toolkit;
+};
 
 export type TransferExportProps = {
 	actor: ToolkitActor;
@@ -67,6 +75,7 @@ export type TransferImportOutcome = {
  * Describes how one kind of record is exported and imported. Core defines documents, media,
  * users and emails this way; projects and plugins register their own through `transfers` in config.
  * @remarks Handlers use method syntax so definitions with specific entry types stay assignable.
+ * They return their value and throw a LucidError to fail.
  */
 export type TransferDefinitionInput<
 	TKey extends string = string,
@@ -87,24 +96,20 @@ export type TransferDefinitionInput<
 	readonly reuse?: boolean;
 	/** Portable identities for records on this site, keyed by ID. Leave out records other entries can't link to. */
 	identify(
-		context: ServiceContext,
-		props: { ids: string[] },
-	): ServiceResponse<Map<string, string>>;
+		args: TransferHandlerArgs<{ ids: string[] }>,
+	): Map<string, string> | Promise<Map<string, string>>;
 	/** IDs on this site for portable identities, keyed by uid. Leave out records entries can't link to. */
 	match(
-		context: ServiceContext,
-		props: { uids: string[]; sameSite: boolean },
-	): ServiceResponse<Map<string, string>>;
+		args: TransferHandlerArgs<{ uids: string[]; sameSite: boolean }>,
+	): Map<string, string> | Promise<Map<string, string>>;
 	/** Builds entries for records on this site. */
 	export?(
-		context: ServiceContext,
-		props: TransferExportProps,
-	): ServiceResponse<TEntry[]>;
-	/** Creates or updates one entry, or checks it without saving when `dryRun`. */
+		args: TransferHandlerArgs<TransferExportProps>,
+	): TEntry[] | Promise<TEntry[]>;
+	/** Creates or updates one entry, or checks it without saving when `dryRun`. A throw fails that entry and the import carries on. */
 	import?(
-		context: ServiceContext,
-		props: TransferImportProps<TEntry>,
-	): ServiceResponse<TransferImportOutcome>;
+		args: TransferHandlerArgs<TransferImportProps<TEntry>>,
+	): TransferImportOutcome | Promise<TransferImportOutcome>;
 	/** Short name for an entry in import rows. Defaults to its uid. */
 	describe?(entry: TEntry): string;
 };

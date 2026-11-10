@@ -15,6 +15,7 @@ import restoreMultiple from "../../../services/documents/restore-multiple.js";
 import upsertSingle from "../../../services/documents/upsert-single.js";
 import syncCollections from "../../../services/sync/sync-collections.js";
 import syncLocales from "../../../services/sync/sync-locales.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
@@ -148,7 +149,7 @@ describe("document authoring toolkit", () => {
 				event: "afterUpsert",
 				handler: async () => {
 					saves();
-					return { error: undefined, data: undefined };
+					return;
 				},
 			},
 			{
@@ -157,7 +158,7 @@ describe("document authoring toolkit", () => {
 				handler: async ({ context, data }) => {
 					expect(context.db.isTransaction).toBe(true);
 					changed.push(data.ids);
-					return { error: undefined, data: undefined };
+					return;
 				},
 			},
 		];
@@ -207,10 +208,11 @@ describe("document authoring toolkit", () => {
 				{
 					service: "documents",
 					event: "afterChange",
-					handler: async () => ({
-						error: { message: copy("server:core.errors.default.message") },
-						data: undefined,
-					}),
+					handler: async () => {
+						throw new LucidError({
+							message: copy("server:core.errors.default.message"),
+						});
+					},
 				},
 			];
 			const failed = await create("Rolled back subscriber");
@@ -484,7 +486,7 @@ describe("document authoring toolkit", () => {
 					const read = await toolkit.documents.getEditable(target);
 					assert(read.data, JSON.stringify(read.error));
 					restored(read.data.id);
-					return { error: undefined, data: undefined };
+					return;
 				},
 			},
 		];
@@ -928,7 +930,7 @@ describe("document authoring toolkit", () => {
 					if (data.ids.includes(firstId))
 						throw new Error("Unexpected deletion hook failure.");
 
-					return { error: undefined, data: undefined };
+					return;
 				},
 			},
 		];
@@ -969,8 +971,8 @@ describe("document authoring toolkit", () => {
 		).toBe(404);
 	});
 
-	test.each(["returned", "thrown"])(
-		"isolates a %s hook failure inside an existing transaction",
+	test.each(["reported", "unexpected"])(
+		"isolates a hook's %s failure inside an existing transaction",
 		async (failure) => {
 			const created = await create();
 			assert(created.data);
@@ -982,16 +984,13 @@ describe("document authoring toolkit", () => {
 					service: "documents",
 					event: "afterUpsert",
 					handler: async () => {
-						if (failure === "thrown")
+						if (failure === "unexpected")
 							throw new Error("Unexpected hook failure.");
 
-						return {
-							error: {
-								status: 400,
-								message: copy("server:core.errors.default.message"),
-							},
-							data: undefined,
-						};
+						throw new LucidError({
+							status: 400,
+							message: copy("server:core.errors.default.message"),
+						});
 					},
 				},
 			];
@@ -1004,12 +1003,10 @@ describe("document authoring toolkit", () => {
 							actor,
 							data: { fields: { featured: true } },
 						});
-						expect(failed.error).toBeDefined();
-						if (failure === "thrown") {
-							expect(context.translate(failed.error?.message)).toBe(
-								"Lucid toolkit could not update the document.",
-							);
-						}
+						//* a reported failure keeps its status; anything else becomes a 500
+						expect(failed.error?.status).toBe(
+							failure === "unexpected" ? 500 : 400,
+						);
 
 						// The caller deliberately handles the error and commits its own transaction.
 						return { error: undefined, data: undefined };
@@ -1174,7 +1171,7 @@ describe("document authoring toolkit", () => {
 						data: { fields: { title: { en: "Nested" } } },
 					});
 					expect(nested.error?.status).toBe(409);
-					return { error: undefined, data: undefined };
+					return;
 				},
 			},
 		];

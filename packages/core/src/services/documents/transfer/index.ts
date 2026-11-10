@@ -1,5 +1,6 @@
 import { copy } from "../../../libs/i18n/index.js";
 import defineTransfer from "../../../libs/transfer/define-transfer.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import exportDocuments from "./export.js";
 import identifyDocuments from "./identify.js";
 import importDocument from "./import.js";
@@ -16,10 +17,26 @@ const documentsTransfer = defineTransfer({
 	entry: documentEntrySchema,
 	selection: documentSelectionSchema,
 	include: "linked",
-	identify: identifyDocuments,
-	match: matchDocuments,
-	export: exportDocuments,
-	import: importDocument,
+	identify: async ({ context, ...props }) => {
+		const result = await identifyDocuments(context, props);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
+	match: async ({ context, ...props }) => {
+		const result = await matchDocuments(context, props);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
+	export: async ({ context, ...props }) => {
+		const result = await exportDocuments(context, props);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
+	import: async ({ context, ...props }) => {
+		const result = await importDocument(context, props);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 	describe: (entry) => entry.label,
 });
 

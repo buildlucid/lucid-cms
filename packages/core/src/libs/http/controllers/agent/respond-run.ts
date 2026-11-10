@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import getAccessibleRun from "../../../../services/agent/helpers/get-accessible-run.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
@@ -47,7 +47,7 @@ const respondRunController = factory.createHandlers(
 			runId: c.req.valid("param").id,
 			userId: c.get("auth").id,
 		});
-		if (run.error) throw new LucidAPIError(run.error);
+		if (run.error) throw new LucidError(run.error);
 
 		return streamRun(c, context, {
 			runId: run.data.id,

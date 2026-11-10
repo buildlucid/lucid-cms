@@ -10,7 +10,7 @@ import type {
 	LucidExternalAuth,
 	LucidHonoContext,
 } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import { createWritePause } from "../../../utils/helpers/index.js";
 import { integrationApiKeyPrefix } from "../../../utils/integrations/encode-api-key.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
@@ -76,7 +76,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 
 		if ((!authorization && !apiKeyHeader) || (authorization && apiKeyHeader)) {
 			setOAuthBearerChallenge(c, context, undefined, resource);
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "authorisation",
 				message: copy("server:core.integrations.api.key.missing"),
 				status: 401,
@@ -93,7 +93,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 			const [scheme, credential] = parts;
 			if (parts.length !== 2 || !scheme || !credential) {
 				setOAuthBearerChallenge(c, context, undefined, resource);
-				throw new LucidAPIError({
+				throw new LucidError({
 					type: "authorisation",
 					message: copy("server:core.integrations.api.key.invalid"),
 					status: 401,
@@ -112,7 +112,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 		}
 
 		if (oauthCredential && context.config.role === "content") {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "authorisation",
 				message: copy("server:core.integrations.oauth.content.role"),
 				status: 401,
@@ -135,7 +135,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 				apiKey: integrationCredential,
 			});
 			if (verifyApiKey.error) {
-				throw new LucidAPIError({
+				throw new LucidError({
 					type: "authorisation",
 					message: copy("server:core.integrations.api.key.invalid"),
 					status: 401,
@@ -156,12 +156,12 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 			)(context, { accessToken: oauthCredential, resource });
 			if (verifyAccessToken.error) {
 				setOAuthBearerChallenge(c, context, "invalid_token", resource);
-				throw new LucidAPIError(verifyAccessToken.error);
+				throw new LucidError(verifyAccessToken.error);
 			}
 			externalAuth = verifyAccessToken.data;
 		} else {
 			setOAuthBearerChallenge(c, context, undefined, resource);
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "authorisation",
 				message: copy("server:core.integrations.api.key.invalid"),
 				status: 401,
@@ -170,7 +170,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 
 		if (options?.principalType !== undefined) {
 			if (externalAuth.principal.type !== options.principalType) {
-				throw new LucidAPIError({
+				throw new LucidError({
 					type: "forbidden",
 					message: copy("server:core.integrations.principal.required.message", {
 						data: {

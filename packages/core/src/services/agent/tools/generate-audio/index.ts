@@ -3,6 +3,7 @@ import { isAiFeatureEnabled } from "../../../../libs/config/ai-features.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { builderUpdateToolName } from "../builder-update/constants.js";
 import { generateAudioToolName } from "./constants.js";
@@ -35,8 +36,19 @@ export const generateAudioAgentTool = () =>
 			data: settingsSchema,
 			response: () => settingsSchema,
 			skippable: true,
-			prepare: ({ input }) => prepareAudioSettings({ input }),
+			prepare: async ({ input }) => {
+				const result = await prepareAudioSettings({ input });
+				if (result.error) throw new LucidError(result.error);
+				return result.data;
+			},
 		},
-		handler: ({ context, input, execution, response }) =>
-			generateAudio(context, { input, settings: response, execution }),
+		handler: async ({ context, input, execution, response }) => {
+			const result = await generateAudio(context, {
+				input,
+				settings: response,
+				execution,
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

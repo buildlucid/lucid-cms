@@ -1,6 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import runSchedule from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
@@ -28,16 +29,13 @@ export const runJobScheduleAgentTool = () =>
 					userId: principal.type === "user" ? principal.userId : null,
 				},
 			);
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy("admin:core.tools.jobs_run_schedule.summary", {
-						data: { schedule: input.scheduleKey },
-					}),
-				},
+				output: result.data.output,
+				summary: copy("admin:core.tools.jobs_run_schedule.summary", {
+					data: { schedule: input.scheduleKey },
+				}),
 			};
 		},
 	});

@@ -78,7 +78,7 @@ export type MediaStorageAdapterCreateUploadSessionParams = {
 export type MediaStorageAdapterServiceCreateUploadSession = (
 	context: ServiceContext,
 	params: MediaStorageAdapterCreateUploadSessionParams,
-) => ServiceResponse<MediaStorageAdapterCreateUploadSessionResponse>;
+) => Promise<MediaStorageAdapterCreateUploadSessionResponse>;
 
 export type MediaStorageAdapterGetUploadPartUrlsParams = {
 	key: string;
@@ -91,7 +91,7 @@ export type MediaStorageAdapterGetUploadPartUrlsParams = {
 export type MediaStorageAdapterServiceGetUploadPartUrls = (
 	context: ServiceContext,
 	params: MediaStorageAdapterGetUploadPartUrlsParams,
-) => ServiceResponse<{
+) => Promise<{
 	parts: Array<{
 		/** One-based multipart upload part number. */
 		partNumber: number;
@@ -109,7 +109,7 @@ export type MediaStorageAdapterListUploadPartsParams = {
 export type MediaStorageAdapterServiceListUploadParts = (
 	context: ServiceContext,
 	params: MediaStorageAdapterListUploadPartsParams,
-) => ServiceResponse<{
+) => Promise<{
 	uploadedParts: MediaStorageAdapterUploadPart[];
 }>;
 
@@ -134,7 +134,7 @@ export type MediaStorageAdapterCompleteUploadSessionParams =
 export type MediaStorageAdapterServiceCompleteUploadSession = (
 	context: ServiceContext,
 	params: MediaStorageAdapterCompleteUploadSessionParams,
-) => ServiceResponse<{
+) => Promise<{
 	etag?: string | null;
 }>;
 
@@ -158,7 +158,7 @@ export type MediaStorageAdapterAbortUploadSessionParams =
 export type MediaStorageAdapterServiceAbortUploadSession = (
 	context: ServiceContext,
 	params: MediaStorageAdapterAbortUploadSessionParams,
-) => ServiceResponse<undefined>;
+) => Promise<undefined>;
 
 export type MediaStorageAdapterGetDownloadUrlParams = {
 	key: string;
@@ -172,7 +172,7 @@ export type MediaStorageAdapterGetDownloadUrlParams = {
 export type MediaStorageAdapterServiceGetDownloadUrl = (
 	context: ServiceContext,
 	params: MediaStorageAdapterGetDownloadUrlParams,
-) => ServiceResponse<{
+) => Promise<{
 	url: string;
 }>;
 
@@ -184,7 +184,7 @@ export type MediaStorageAdapterGetMetaParams = {
 export type MediaStorageAdapterServiceGetMeta = (
 	context: ServiceContext,
 	params: MediaStorageAdapterGetMetaParams,
-) => ServiceResponse<{
+) => Promise<{
 	/** File size in bytes. */
 	size: number;
 	mimeType: string | null;
@@ -214,7 +214,7 @@ export type MediaStorageAdapterStreamParams = {
 export type MediaStorageAdapterServiceStream = (
 	context: ServiceContext,
 	params: MediaStorageAdapterStreamParams,
-) => ServiceResponse<{
+) => Promise<{
 	contentLength: number | undefined;
 	contentType: string | undefined;
 	body: MediaStorageAdapterStreamBody;
@@ -244,7 +244,7 @@ export type MediaStorageAdapterUploadSingleParams = {
 export type MediaStorageAdapterServiceUploadSingle = (
 	context: ServiceContext,
 	params: MediaStorageAdapterUploadSingleParams,
-) => ServiceResponse<{
+) => Promise<{
 	etag?: string;
 }>;
 
@@ -255,7 +255,7 @@ export type MediaStorageAdapterDeleteSingleParams = {
 export type MediaStorageAdapterServiceDeleteSingle = (
 	context: ServiceContext,
 	params: MediaStorageAdapterDeleteSingleParams,
-) => ServiceResponse<undefined>;
+) => Promise<undefined>;
 
 export type MediaStorageAdapterDeleteMultipleParams = {
 	keys: string[];
@@ -264,7 +264,7 @@ export type MediaStorageAdapterDeleteMultipleParams = {
 export type MediaStorageAdapterServiceDeleteMultiple = (
 	context: ServiceContext,
 	params: MediaStorageAdapterDeleteMultipleParams,
-) => ServiceResponse<undefined>;
+) => Promise<undefined>;
 
 export type MediaStorageAdapterRenameKeyParams = {
 	from: string;
@@ -274,7 +274,7 @@ export type MediaStorageAdapterRenameKeyParams = {
 export type MediaStorageAdapterServiceRenameKey = (
 	context: ServiceContext,
 	params: MediaStorageAdapterRenameKeyParams,
-) => ServiceResponse<undefined>;
+) => Promise<undefined>;
 
 /** Factory that returns a configured adapter, synchronously or asynchronously. */
 export type MediaStorageAdapter<T = undefined> = T extends undefined
@@ -285,7 +285,10 @@ export type MediaStorageAdapter<T = undefined> = T extends undefined
 			| MediaStorageAdapterInstance<T>
 			| Promise<MediaStorageAdapterInstance<T>>;
 
-/** Adapter contract used by Lucid. Use the context supplied to each operation for current request and transaction state. */
+/**
+ * Storage operations use the supplied request and transaction context. Return a value or throw
+ * LucidError.
+ */
 export type MediaStorageAdapterInstance<T = unknown> = {
 	/** The adapter type */
 	type: "media-storage-adapter";
@@ -339,4 +342,19 @@ export type FileSystemStorageAdapterOptions = {
 	uploadDir: string;
 	/** Signs media URLs. Defaults to the final config's secrets.encryption value. */
 	secretKey?: string;
+};
+
+/** Turns an adapter operation that throws into one that returns a service result. */
+type ResolvedAdapterOperation<Operation> = Operation extends (
+	context: ServiceContext,
+	params: infer Params,
+) => Promise<infer Result>
+	? (context: ServiceContext, params: Params) => ServiceResponse<Result>
+	: Operation;
+
+/** Storage adapter on `context.mediaStorage`, with operations returning service results. */
+export type ResolvedMediaStorageAdapter<T = unknown> = {
+	[Key in keyof MediaStorageAdapterInstance<T>]: ResolvedAdapterOperation<
+		MediaStorageAdapterInstance<T>[Key]
+	>;
 };

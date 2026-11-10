@@ -1,5 +1,5 @@
 import type { Readable } from "node:stream";
-import type { MediaStorageAdapterInstance } from "../../../libs/media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../../../libs/media-storage/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
 const MIME_SNIFF_BYTES = 8192;
@@ -45,7 +45,7 @@ const readBodyChunk = async (body: {
  */
 const detectStreamMimeType = async (
 	context: ServiceContext,
-	streamMedia: MediaStorageAdapterInstance["stream"],
+	streamMedia: ResolvedMediaStorageAdapter["stream"],
 	key: string,
 ) => {
 	const streamRes = await streamMedia(context, {

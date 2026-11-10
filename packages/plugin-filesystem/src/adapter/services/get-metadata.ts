@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceGetMeta,
@@ -19,13 +19,10 @@ export default (options: FileSystemStorageAdapterOptions) => {
 			try {
 				await access(targetPath, constants.F_OK);
 			} catch {
-				return {
-					error: {
-						message: copy("server:plugin.filesystem.media.files.not.found"),
-						status: 404,
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					message: copy("server:plugin.filesystem.media.files.not.found"),
+					status: 404,
+				});
 			}
 			const fileType = await import("file-type");
 			const [stats, fileTypeResult] = await Promise.all([
@@ -45,28 +42,20 @@ export default (options: FileSystemStorageAdapterOptions) => {
 				.update(`${stats.mtime.getTime()}-${stats.size}`)
 				.digest("hex");
 			return {
-				error: undefined,
-				data: {
-					size: stats.size,
-					mimeType: mimeType,
-					etag: etag,
-					status: "ready",
-				},
+				size: stats.size,
+				mimeType: mimeType,
+				etag: etag,
+				status: "ready",
 			};
 		} catch (e) {
+			if (e instanceof LucidError) throw e;
 			const error = e as Error;
-			return {
-				error: {
-					message: copy(
-						"server:plugin.filesystem.media.errors.default.message",
-						{
-							defaultMessage: error.message,
-						},
-					),
-					status: 500,
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				message: copy("server:plugin.filesystem.media.errors.default.message", {
+					defaultMessage: error.message,
+				}),
+				status: 500,
+			});
 		}
 	};
 	return getMetadata;

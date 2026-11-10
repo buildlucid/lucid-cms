@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import findOrphanedChildren from "../find-orphaned-children.js";
@@ -18,19 +18,16 @@ const beforeUnpublishHandler =
 			documentIds: data.ids,
 			excludeDocumentIds: data.ids,
 		});
-		if (segmentRes.error) return segmentRes;
+		if (segmentRes.error) throw new LucidError(segmentRes.error);
 
 		if (segmentRes.data.length > 0) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					message: copy("server:plugin.pages.unpublish.segment.dependents", {
-						data: { target: data.versionType },
-					}),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				type: "basic",
+				status: 400,
+				message: copy("server:plugin.pages.unpublish.segment.dependents", {
+					data: { target: data.versionType },
+				}),
+			});
 		}
 
 		const targetCollectionRes = getTargetCollection({
@@ -38,7 +35,7 @@ const beforeUnpublishHandler =
 			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		const orphansRes = await findOrphanedChildren(context, {
@@ -47,22 +44,19 @@ const beforeUnpublishHandler =
 			target: data.versionType,
 			documentIds: data.ids,
 		});
-		if (orphansRes.error) return orphansRes;
+		if (orphansRes.error) throw new LucidError(orphansRes.error);
 
 		if (orphansRes.data.length > 0) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					message: copy("server:plugin.pages.unpublish.children.published", {
-						data: { target: data.versionType },
-					}),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				type: "basic",
+				status: 400,
+				message: copy("server:plugin.pages.unpublish.children.published", {
+					data: { target: data.versionType },
+				}),
+			});
 		}
 
-		return { error: undefined, data: undefined };
+		return;
 	};
 
 export default beforeUnpublishHandler;

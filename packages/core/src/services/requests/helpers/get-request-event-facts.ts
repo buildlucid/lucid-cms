@@ -1,4 +1,4 @@
-import type { RoutineEventFacts } from "../../../libs/agent/routine-events.js";
+import type { ContentEventFacts } from "../../../libs/events/content-events.js";
 import {
 	RequestDocumentsRepository,
 	RequestsRepository,
@@ -8,7 +8,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 /** A request's type and collections, which routine event filters match on. */
 const getRequestEventFacts: ServiceFn<
 	[{ requestId: number }],
-	RoutineEventFacts
+	ContentEventFacts
 > = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
 	const RequestDocuments = new RequestDocumentsRepository(context.db);

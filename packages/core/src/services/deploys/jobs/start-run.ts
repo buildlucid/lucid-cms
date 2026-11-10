@@ -5,20 +5,21 @@ import type { DeployTriggerResult } from "../../../libs/deploys/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type {
-	JobHandler,
+	JobService,
 	JobPermanentFailureHandler,
 } from "../../../libs/jobs/types.js";
 import {
 	DeployOverridesRepository,
 	DeployRunsRepository,
 } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import applyRunUpdate from "../helpers/apply-run-update.js";
 
 type StartRunInput = { runId: number };
 
 /** Hands a starting run to its provider and records what the host said. Throws from the provider retry the job. */
-const startRun: JobHandler<StartRunInput> = async ({ context, input }) => {
+const startRun: JobService<StartRunInput> = async ({ context, input }) => {
 	const DeployRuns = new DeployRunsRepository(context.db);
 	const DeployOverrides = new DeployOverridesRepository(context.db);
 
@@ -118,7 +119,7 @@ const failRun: JobPermanentFailureHandler<StartRunInput> = async ({
 };
 
 export const startDeployRunJob = defineJob({
-	name: "core:deploy-start",
+	key: "core:deploy-start",
 	version: 1,
 	input: z.object({ runId: z.number().int().positive() }),
 	retry: {
@@ -130,6 +131,9 @@ export const startDeployRunJob = defineJob({
 	},
 	notifyOnFailure: false,
 	describe: ({ input }) => ({ runId: input.runId }),
-	handler: startRun,
+	handler: async (args) => {
+		const result = await startRun(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	onPermanentFailure: failRun,
 });

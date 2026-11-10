@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import collectSeeds from "./collect-seeds.js";
 
-const seed = async () => {};
+const seed = { run: async () => {} };
 
 test("names file seeds by their stem alongside inline definitions", () => {
 	const seeds = collectSeeds({

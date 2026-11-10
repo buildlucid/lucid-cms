@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { connectionServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -36,7 +36,7 @@ const disconnectController = factory.createHandlers(
 				message: copy("server:core.connection.retryable"),
 			},
 		})(context);
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");

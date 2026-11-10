@@ -13,7 +13,7 @@ import notifiesOnFailure from "./notifies-on-failure.js";
  */
 const resolveFailure = async (
 	context: ServiceContext,
-	job: { job_id: string; job_name: string; job_version: number },
+	job: { job_id: string; job_key: string; job_version: number },
 ) => {
 	if (!notifiesOnFailure(context, job)) return;
 
@@ -22,7 +22,7 @@ const resolveFailure = async (
 		(context) =>
 			resolveNotification(context, {
 				definition: jobFailedNotification,
-				key: jobNotificationKeys.failed(job.job_name),
+				key: jobNotificationKeys.failed(job.job_key),
 			}),
 		{ isolate: true },
 	).catch((error: unknown) => ({ error, data: undefined }));
@@ -32,7 +32,7 @@ const resolveFailure = async (
 			event: "jobs.failure-notification.resolve-failed",
 			message: "A job failure notification could not be resolved",
 			scope: constants.logScopes.jobs,
-			data: { jobId: job.job_id, jobName: job.job_name },
+			data: { jobId: job.job_id, jobKey: job.job_key },
 		});
 	}
 };

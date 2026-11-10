@@ -178,16 +178,16 @@ test("rejects static content-route scopes that cannot be granted", async () => {
 
 test("preserves job definitions from the array shorthand while merging config", async () => {
 	const job = defineJob({
-		name: "test:config-job",
+		key: "test:config-job",
 		version: 1,
 		input: z.object({ value: z.string() }),
-		handler: async () => ({ error: undefined, data: undefined }),
+		handler: async () => {},
 	});
 	const pluginJob = defineJob({
-		name: "test:plugin-job",
+		key: "test:plugin-job",
 		version: 1,
 		input: z.object({ value: z.string() }),
-		handler: async () => ({ error: undefined, data: undefined }),
+		handler: async () => {},
 	});
 	const processed = await processConfig(
 		{
@@ -210,23 +210,19 @@ test("preserves job definitions from the array shorthand while merging config", 
 	);
 
 	const storedConfigJob = processed.jobs.definitions.find(
-		(definition) => definition.name === job.name,
+		(definition) => definition.key === job.key,
 	);
 	const storedPluginJob = processed.jobs.definitions.find(
-		(definition) => definition.name === pluginJob.name,
+		(definition) => definition.key === pluginJob.key,
 	);
 	expect(
-		[...getJobRegistry(processed).values()].map(
-			(definition) => definition.name,
-		),
+		[...getJobRegistry(processed).values()].map((definition) => definition.key),
 	).toEqual(
-		[...coreJobDefinitions, job, pluginJob].map(
-			(definition) => definition.name,
-		),
+		[...coreJobDefinitions, job, pluginJob].map((definition) => definition.key),
 	);
 	expect(storedConfigJob).toMatchObject({
 		type: "job-definition",
-		name: "test:config-job",
+		key: "test:config-job",
 		version: 1,
 	});
 	expect(
@@ -239,10 +235,10 @@ test("preserves job definitions from the array shorthand while merging config", 
 
 test("rejects duplicate job definitions after plugin config is merged", async () => {
 	const job = defineJob({
-		name: "test:duplicate-job",
+		key: "test:duplicate-job",
 		version: 1,
 		input: z.object({}),
-		handler: async () => ({ error: undefined, data: undefined }),
+		handler: async () => {},
 	});
 
 	await expect(
@@ -287,17 +283,17 @@ test("rejects notification audiences with an unknown permission", async () => {
 
 test("rejects schedule input that does not match its job schema", async () => {
 	const job = defineJob({
-		name: "test:invalid-schedule-input",
+		key: "test:invalid-schedule-input",
 		version: 1,
 		input: z.object({ count: z.number() }),
 		schedules: [
 			{
-				name: "nightly",
+				key: "nightly",
 				cron: "0 0 * * *",
 				input: { count: "invalid" } as unknown as { count: number },
 			},
 		],
-		handler: async () => ({ error: undefined, data: undefined }),
+		handler: async () => {},
 	});
 
 	await expect(
@@ -319,11 +315,11 @@ test("rejects schedule input that does not match its job schema", async () => {
 
 test("rejects schedules that do not use minute precision", async () => {
 	const job = defineJob({
-		name: "test:invalid-schedule",
+		key: "test:invalid-schedule",
 		version: 1,
 		input: z.object({}),
-		schedules: [{ name: "seconds", cron: "* * * * * *", input: {} }],
-		handler: async () => ({ error: undefined, data: undefined }),
+		schedules: [{ key: "seconds", cron: "* * * * * *", input: {} }],
+		handler: async () => {},
 	});
 
 	await expect(
@@ -341,18 +337,18 @@ test("rejects schedules that do not use minute precision", async () => {
 
 test("rejects schedules with an invalid timezone", async () => {
 	const job = defineJob({
-		name: "test:invalid-timezone",
+		key: "test:invalid-timezone",
 		version: 1,
 		input: z.object({}),
 		schedules: [
 			{
-				name: "nightly",
+				key: "nightly",
 				cron: "0 0 * * *",
 				timezone: "Not/AZone",
 				input: {},
 			},
 		],
-		handler: async () => ({ error: undefined, data: undefined }),
+		handler: async () => {},
 	});
 
 	await expect(

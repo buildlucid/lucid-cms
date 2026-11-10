@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import getDeploys from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -20,21 +21,18 @@ export const getDeploysAgentTool = () =>
 				input,
 				actor: execution.actor,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary:
-						input.key === undefined
-							? copy("admin:core.tools.deploys_get.summary.list", {
-									data: { count: result.data.output.data.length },
-								})
-							: copy("admin:core.tools.deploys_get.summary", {
-									data: { name: result.data.output.data[0]?.name ?? input.key },
-								}),
-				},
+				output: result.data.output,
+				summary:
+					input.key === undefined
+						? copy("admin:core.tools.deploys_get.summary.list", {
+								data: { count: result.data.output.data.length },
+							})
+						: copy("admin:core.tools.deploys_get.summary", {
+								data: { name: result.data.output.data[0]?.name ?? input.key },
+							}),
 			};
 		},
 	});

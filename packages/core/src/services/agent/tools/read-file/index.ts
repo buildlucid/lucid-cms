@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import {
 	FILE_PAGE_CHARS,
@@ -28,6 +29,9 @@ export const readFileAgentTool = () =>
 		capabilities: {
 			media: { readFile: { mimeTypes: fileMimeTypeSchema.options } },
 		},
-		handler: ({ context, input, execution }) =>
-			readFile(context, { input, execution }),
+		handler: async ({ context, input, execution }) => {
+			const result = await readFile(context, { input, execution });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

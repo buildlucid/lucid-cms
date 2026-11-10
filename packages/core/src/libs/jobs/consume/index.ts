@@ -122,14 +122,14 @@ export const consumeJob = async (
 
 	const job = claimed.data;
 	const definition = getRegisteredJob(context.config, {
-		name: job.job_name,
+		key: job.job_key,
 		version: job.job_version,
 	});
 	if (!definition) {
 		return handleFailure(context, job, {
 			message: context.translate.english(
 				copy("server:core.jobs.definition.missing", {
-					data: { definition: `${job.job_name}@${job.job_version}` },
+					data: { definition: `${job.job_key}@${job.job_version}` },
 				}),
 			),
 			stack: null,
@@ -183,7 +183,7 @@ export const consumeJob = async (
 			event: "jobs.execution.failed",
 			message: "A job handler threw an error",
 			scope: constants.logScopes.jobs,
-			data: { jobId: job.job_id, jobName: job.job_name },
+			data: { jobId: job.job_id, jobKey: job.job_key },
 		});
 
 		return handleFailure(context, job, {

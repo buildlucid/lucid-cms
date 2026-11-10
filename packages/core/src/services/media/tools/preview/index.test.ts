@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, expect, test, vi } from "vitest";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
 import type { MediaDeliveryAdapterInstance } from "../../../../libs/media-delivery/types.js";
-import type { MediaStorageAdapterInstance } from "../../../../libs/media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../../../../libs/media-storage/types.js";
 import { toolDefinitionInternal } from "../../../../libs/tools/tool-definition-internal.js";
 import type { Media } from "../../../../types/response.js";
 import createServiceContext from "../../../../utils/services/create-service-context.js";
@@ -77,7 +77,7 @@ const run = async (
 	});
 	vi.mocked(checkHasMediaStorage).mockResolvedValue({
 		error: undefined,
-		data: { stream } as unknown as MediaStorageAdapterInstance,
+		data: { stream } as unknown as ResolvedMediaStorageAdapter,
 	});
 	const config = await testConfig.getConfig();
 	const baseContext = createServiceContext({
@@ -179,26 +179,20 @@ test("requests a 1024px thumbnail and retries until it fits 1MiB", async () => {
 	const processor = vi
 		.fn<NonNullable<MediaDeliveryAdapterInstance["processImage"]>>()
 		.mockResolvedValueOnce({
-			error: undefined,
-			data: {
-				processed: true,
-				buffer: Buffer.alloc(1024 * 1024 + 1),
-				mimeType: "image/webp",
-				size: 1024 * 1024 + 1,
-				extension: "webp",
-				shouldStore: false,
-			},
+			processed: true,
+			buffer: Buffer.alloc(1024 * 1024 + 1),
+			mimeType: "image/webp",
+			size: 1024 * 1024 + 1,
+			extension: "webp",
+			shouldStore: false,
 		})
 		.mockResolvedValueOnce({
-			error: undefined,
-			data: {
-				processed: true,
-				buffer: png,
-				mimeType: "image/png",
-				size: png.byteLength,
-				extension: "png",
-				shouldStore: false,
-			},
+			processed: true,
+			buffer: png,
+			mimeType: "image/png",
+			size: png.byteLength,
+			extension: "png",
+			shouldStore: false,
 		});
 	const { result, stream } = await run(image, false, processor);
 	expect(result.type).toBe("success");

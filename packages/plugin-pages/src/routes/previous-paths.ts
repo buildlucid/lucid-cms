@@ -1,7 +1,7 @@
 import {
 	defineRoute,
 	formatAPIResponse,
-	LucidAPIError,
+	LucidError,
 	middleware,
 	openAPI,
 	z,
@@ -43,7 +43,7 @@ const previousPathsRoutes = (collections: RedirectTargetCollection[]) =>
 						documentId: input.params.documentId,
 						environment: input.query.environment,
 					});
-					if (paths.error) throw new LucidAPIError(paths.error);
+					if (paths.error) throw new LucidError(paths.error);
 
 					hono.status(200);
 					return hono.json(formatAPIResponse(hono, { data: paths.data }));
@@ -74,7 +74,7 @@ const previousPathsRoutes = (collections: RedirectTargetCollection[]) =>
 						documentId: input.params.documentId,
 						id: input.params.id,
 					});
-					if (deleted.error) throw new LucidAPIError(deleted.error);
+					if (deleted.error) throw new LucidError(deleted.error);
 
 					hono.status(204);
 					return hono.body(null);

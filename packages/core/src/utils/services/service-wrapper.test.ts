@@ -1,8 +1,12 @@
 import { afterAll, beforeAll, expect, test } from "vitest";
 import createLucidDatabase from "../../libs/db/create-lucid-database.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
+import { createTranslationStore } from "../../libs/i18n/index.js";
 import passthroughKVAdapter from "../../libs/kv/adapters/passthrough.js";
 import inlineQueueAdapter from "../../libs/queue/adapters/inline.js";
+import { LucidError } from "../errors/index.js";
 import getTestConfig from "../test-helpers/get-test-config.js";
+import createServiceContext from "./create-service-context.js";
 import serviceWrapper from "./service-wrapper.js";
 import type { ServiceFn, ServiceResponse } from "./types.js";
 import mergeServiceError from "./utils/merge-errors.js";
@@ -459,4 +463,56 @@ test("transaction - two level deep service wrapper success and error", async () 
 
 	expect(successDocuments.length).toBe(2);
 	expect(errorDocuments.length).toBe(0);
+});
+
+test("transaction - a hook that throws a LucidError rolls back and keeps its details", async () => {
+	const config = await testConfig.getConfig();
+	const database = await testConfig.getDatabase();
+	const collectionKey = "transaction_test_hook_throw";
+	const context = createServiceContext({
+		config: {
+			...config,
+			hooks: [
+				{
+					service: "media",
+					event: "afterRestore",
+					handler: async () => {
+						throw new LucidError({ status: 409, message: "Not allowed" });
+					},
+				},
+			],
+		},
+		database,
+		translationStore: createTranslationStore({
+			defaultLocale: "en",
+			bundles: {},
+		}),
+	});
+
+	const createThenRunHooks: ServiceFn<[], undefined> = async (service) => {
+		await service.db.kysely
+			.insertInto("lucid_collections")
+			.values({ key: collectionKey })
+			.execute();
+
+		return executeHooks(
+			service,
+			{ service: "media", event: "afterRestore", config: service.config },
+			{ meta: {}, data: { ids: [1] } },
+		);
+	};
+
+	const result = await serviceWrapper(createThenRunHooks, {
+		transaction: true,
+	})(context);
+
+	expect(result.error?.status).toBe(409);
+	expect(context.translate(result.error?.message)).toBe("Not allowed");
+	expect(
+		await database.client
+			.selectFrom("lucid_collections")
+			.select("key")
+			.where("key", "=", collectionKey)
+			.executeTakeFirst(),
+	).toBeUndefined();
 });

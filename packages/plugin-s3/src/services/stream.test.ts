@@ -36,10 +36,9 @@ describe("stream", () => {
 			ifNoneMatch: '"etag"',
 		});
 
-		expect(response.error).toBeUndefined();
-		expect(response.data?.notModified).toBe(true);
-		expect(response.data?.etag).toBe('"etag"');
-		expect(response.data?.body).toEqual(new Uint8Array());
+		expect(response.notModified).toBe(true);
+		expect(response.etag).toBe('"etag"');
+		expect(response.body).toEqual(new Uint8Array());
 
 		const request = fetchMock.mock.calls[0]?.[0] as Request;
 		expect(request.headers.get("If-None-Match")).toBe('"etag"');

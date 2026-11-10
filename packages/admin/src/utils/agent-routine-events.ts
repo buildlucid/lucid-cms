@@ -1,8 +1,8 @@
 import type {
 	AgentRoutine,
-	AgentRoutineEvent,
-	AgentRoutineEventFilter,
-	AgentRoutineEventName,
+	ContentEvent,
+	ContentEventFilter,
+	ContentEventName,
 	AgentRoutineTrigger,
 	MediaType,
 } from "@types";
@@ -11,8 +11,8 @@ import { describeSchedule } from "@/utils/agent-schedule";
 
 /** An editable routine event whose unsupported filters are omitted when saved. */
 export interface RoutineEventDraft {
-	event: AgentRoutineEventName;
-	filter: AgentRoutineEventFilter;
+	event: ContentEventName;
+	filter: ContentEventFilter;
 }
 
 /** The most events a routine can listen for, matching the API's limit. */
@@ -57,16 +57,16 @@ const routineEvents = {
 		filters: ["mediaTypes", "fields"],
 	},
 } as const satisfies Record<
-	AgentRoutineEventName,
+	ContentEventName,
 	{
 		label: TranslationKeys;
-		filters: readonly (keyof AgentRoutineEventFilter)[];
+		filters: readonly (keyof ContentEventFilter)[];
 	}
 >;
 
 export const routineEventNames = Object.keys(
 	routineEvents,
-) as AgentRoutineEventName[];
+) as ContentEventName[];
 
 export const mediaTypes = [
 	"image",
@@ -77,20 +77,20 @@ export const mediaTypes = [
 	"unknown",
 ] as const satisfies MediaType[];
 
-export const routineEventLabel = (event: AgentRoutineEventName) =>
+export const routineEventLabel = (event: ContentEventName) =>
 	T()(routineEvents[event].label);
 
 export const offersRoutineFilter = (
-	event: AgentRoutineEventName,
-	filter: keyof AgentRoutineEventFilter,
+	event: ContentEventName,
+	filter: keyof ContentEventFilter,
 ) => {
-	const filters: readonly (keyof AgentRoutineEventFilter)[] =
+	const filters: readonly (keyof ContentEventFilter)[] =
 		routineEvents[event].filters;
 	return filters.includes(filter);
 };
 
 /** A routine's event labels, once each, in the order they were added. */
-export const routineEventLabels = (events: AgentRoutineEvent[]) => [
+export const routineEventLabels = (events: ContentEvent[]) => [
 	...new Set(events.map((event) => routineEventLabel(event.event))),
 ];
 
@@ -105,11 +105,11 @@ export const routineTriggerLabel = (trigger: AgentRoutineTrigger) =>
 	T()(triggerLabels[trigger]);
 
 /** Omits unsupported and empty filters, with omitted filters matching all values. */
-const pickFilter = <Key extends keyof AgentRoutineEventFilter>(
-	filter: AgentRoutineEventFilter,
+const pickFilter = <Key extends keyof ContentEventFilter>(
+	filter: ContentEventFilter,
 	keys: readonly Key[],
 ) => {
-	const picked: Partial<Pick<AgentRoutineEventFilter, Key>> = {};
+	const picked: Partial<Pick<ContentEventFilter, Key>> = {};
 	for (const key of keys) {
 		if (filter[key]?.length) picked[key] = filter[key];
 	}
@@ -120,7 +120,7 @@ const pickFilter = <Key extends keyof AgentRoutineEventFilter>(
  * Turns a draft into the event the API saves.
  * @remarks Separate branches preserve each event's filter type.
  */
-export const toRoutineEvent = (draft: RoutineEventDraft): AgentRoutineEvent => {
+export const toRoutineEvent = (draft: RoutineEventDraft): ContentEvent => {
 	switch (draft.event) {
 		case "documents:created":
 		case "documents:updated":
@@ -151,7 +151,7 @@ export const toRoutineEvent = (draft: RoutineEventDraft): AgentRoutineEvent => {
 };
 
 export const toRoutineEventDraft = (
-	event: AgentRoutineEvent,
+	event: ContentEvent,
 ): RoutineEventDraft => ({
 	event: event.event,
 	filter: { ...event.filter },

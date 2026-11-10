@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceCreateUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { DEFAULT_PART_SIZE, PRESIGNED_URL_EXPIRY } from "../../constants.js";
@@ -21,40 +21,28 @@ export const createUploadSession = (
 	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
-				return {
-					error: undefined,
-					data: createBindingSingleSession(props.key, props),
-				};
+				return createBindingSingleSession(props.key, props);
 			}
 
 			const http = pluginOptions.http;
 			if (props.size === 0) {
 				if (!client) {
-					return {
-						error: {
-							type: "plugin",
-							message: copy(
-								"server:plugin.cloudflare.r2.http.client.not.configured",
-							),
-						},
-						data: undefined,
-					};
-				}
-				return {
-					error: undefined,
-					data: await createSingleSession(client, http, props.key, props),
-				};
-			}
-			if (!client) {
-				return {
-					error: {
+					throw new LucidError({
 						type: "plugin",
 						message: copy(
 							"server:plugin.cloudflare.r2.http.client.not.configured",
 						),
-					},
-					data: undefined,
-				};
+					});
+				}
+				return await createSingleSession(client, http, props.key, props);
+			}
+			if (!client) {
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.client.not.configured",
+					),
+				});
 			}
 
 			const headers = new Headers();
@@ -68,60 +56,49 @@ export const createUploadSession = (
 			);
 			const response = await fetch(signed);
 			if (!response.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.upload.sessions.create.failed",
-							{
-								data: {
-									status: response.status,
-									statusText: response.statusText,
-								},
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.upload.sessions.create.failed",
+						{
+							data: {
+								status: response.status,
+								statusText: response.statusText,
 							},
-						),
-					},
-					data: undefined,
-				};
+						},
+					),
+				});
 			}
 
 			const uploadId = extractXmlValue(await response.text(), "UploadId");
 			if (!uploadId) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.upload.sessions.upload.id.missing",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.upload.sessions.upload.id.missing",
+					),
+				});
 			}
 
 			return {
-				error: undefined,
-				data: {
-					protocol: "multipart-parts",
-					key: props.key,
-					uploadId,
-					partSize: DEFAULT_PART_SIZE,
-					expiresAt: new Date(
-						Date.now() + PRESIGNED_URL_EXPIRY * 1000,
-					).toISOString(),
-					uploadedParts: [],
-				},
+				protocol: "multipart-parts",
+				key: props.key,
+				uploadId,
+				partSize: DEFAULT_PART_SIZE,
+				expiresAt: new Date(
+					Date.now() + PRESIGNED_URL_EXPIRY * 1000,
+				).toISOString(),
+				uploadedParts: [],
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.cloudflare.r2.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.cloudflare.r2.errors.unknown"),
+			});
 		}
 	};
 };

@@ -4,7 +4,7 @@ import getMigrationStatus from "../../../libs/collection/get-collection-migratio
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
-import LucidAPIError from "../../../utils/errors/lucid-api-error.js";
+import LucidError from "../../../utils/errors/lucid-error.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
@@ -66,7 +66,7 @@ const acquireDocumentWrites: ServiceFn<
 
 		claims.defer(async () => {
 			const released = await Documents.releaseWriteLock(lock, table);
-			if (released.error) throw new LucidAPIError(released.error);
+			if (released.error) throw new LucidError(released.error);
 		});
 	}
 

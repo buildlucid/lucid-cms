@@ -6,7 +6,7 @@ import {
 	authServices,
 	userLoginServices,
 } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
@@ -56,13 +56,13 @@ const magicLinkLoginController = factory.createHandlers(
 				message: copy("server:core.routes.login.error.message"),
 			},
 		})(context, body);
-		if (userRes.error) throw new LucidAPIError(userRes.error);
+		if (userRes.error) throw new LucidError(userRes.error);
 
 		const challengeRes = await authServices.twoFactor.startChallenge(c, {
 			userId: userRes.data.id,
 			authMethod: "magic_link",
 		});
-		if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+		if (challengeRes.error) throw new LucidError(challengeRes.error);
 		if (challengeRes.data) {
 			c.status(200);
 			return c.json(
@@ -76,8 +76,8 @@ const magicLinkLoginController = factory.createHandlers(
 			authServices.refreshToken.generateToken(c, userRes.data.id),
 			authServices.accessToken.generateToken(c, userRes.data.id),
 		]);
-		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-		if (accessRes.error) throw new LucidAPIError(accessRes.error);
+		if (refreshRes.error) throw new LucidError(refreshRes.error);
+		if (accessRes.error) throw new LucidError(accessRes.error);
 
 		const userAgent = c.req.header("user-agent") || null;
 
@@ -98,8 +98,7 @@ const magicLinkLoginController = factory.createHandlers(
 			ipAddress: getClientAddress(c),
 			userAgent: userAgent,
 		});
-		if (userLoginTrackRes.error)
-			throw new LucidAPIError(userLoginTrackRes.error);
+		if (userLoginTrackRes.error) throw new LucidError(userLoginTrackRes.error);
 
 		c.status(200);
 		return c.json(

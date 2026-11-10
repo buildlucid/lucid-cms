@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import constants from "../../constants/constants.js";
 import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
-import { agentRoutineEventsSchema } from "../../libs/agent/routine-events.js";
+import { contentEventsSchema } from "../../libs/events/content-events.js";
 import logger from "../../libs/logger/index.js";
 import {
 	AgentRoutinePendingRepository,
@@ -62,7 +62,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			: { error: undefined, data: null };
 		if (next.error) return next;
 		//* Normalize validated config events to match parsed database events before comparison.
-		const parsedEvents = agentRoutineEventsSchema.parse(routine.events);
+		const parsedEvents = contentEventsSchema.parse(routine.events);
 		const events = parsedEvents.length ? parsedEvents : null;
 
 		if (!current) {

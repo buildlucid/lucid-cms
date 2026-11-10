@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import getAccessibleRun from "../../../../services/agent/helpers/get-accessible-run.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
@@ -43,7 +43,7 @@ const watchRunController = factory.createHandlers(
 			runId: param.id,
 			userId: c.get("auth").id,
 		});
-		if (run.error) throw new LucidAPIError(run.error);
+		if (run.error) throw new LucidError(run.error);
 		c.header("X-Lucid-Agent-Run-ID", run.data.id);
 
 		//* An agent runner executes runs, so it also holds their live events

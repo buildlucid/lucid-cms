@@ -45,7 +45,10 @@ const promoteVersion: ServiceFn<
 			skipDocumentWriteClaims?: boolean;
 			/** The request doing the promoting, which keeps its approval and is left out of the target activity. */
 			requestId?: number;
-			/** Leaves versionPromote hooks, cache invalidation and change notifications to the caller, eg. a request that runs them once every document is in place. */
+			/**
+			 * Defers afterVersionPromote hooks, cache invalidation and notifications to the caller for
+			 * batch processing.
+			 */
 			deferEffects?: boolean;
 			/** Writes only these content locales' values onto the current latest and keeps the rest of it, eg. for a locale-limited request. Latest only. */
 			locales?: string[] | null;
@@ -376,7 +379,7 @@ const promoteVersion: ServiceFn<
 					context,
 					{
 						service: "documents",
-						event: "versionPromote",
+						event: "afterVersionPromote",
 						config: context.config,
 						collectionInstance: collectionRes.data,
 					},

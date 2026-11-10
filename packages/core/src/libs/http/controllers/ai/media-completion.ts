@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { mediaGenerationPermissions } from "../../../config/ai-features.js";
 import { copy } from "../../../i18n/index.js";
@@ -46,7 +46,7 @@ const mediaCompletionController = factory.createHandlers(
 			requestId: params.id,
 			user: c.get("auth"),
 		});
-		if (completionRes.error) throw new LucidAPIError(completionRes.error);
+		if (completionRes.error) throw new LucidError(completionRes.error);
 
 		const isPending =
 			"status" in completionRes.data &&

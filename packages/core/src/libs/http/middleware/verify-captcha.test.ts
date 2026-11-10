@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describe, expect, test, vi } from "vitest";
 import constants from "../../../constants/constants.js";
 import type { LucidHonoGeneric } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import type { CaptchaConfig } from "../../captcha/types.js";
 import verifyCaptcha from "./verify-captcha.js";
 
@@ -31,7 +31,7 @@ const createApp = (props: {
 		})
 		.post("/", verifyCaptcha("login"), (c) => c.body(null, 204))
 		.onError((error, c) =>
-			c.json(error instanceof LucidAPIError ? error.error : {}),
+			c.json(error instanceof LucidError ? error.error : {}),
 		);
 
 	return { adapter, app };

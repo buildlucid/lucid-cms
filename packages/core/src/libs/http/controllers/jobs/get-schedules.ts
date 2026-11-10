@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/jobs.js";
 import { jobServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -48,7 +48,7 @@ const getSchedulesController = factory.createHandlers(
 				message: copy("server:core.routes.job.fetch.error.message"),
 			},
 		})(context, { query: formattedQuery });
-		if (schedules.error) throw new LucidAPIError(schedules.error);
+		if (schedules.error) throw new LucidError(schedules.error);
 
 		c.status(200);
 		return c.json(

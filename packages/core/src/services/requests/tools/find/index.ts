@@ -9,6 +9,7 @@ import {
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import findRequests from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -24,8 +25,8 @@ export const findRequestsMcpTool = (options: CollectionToolOptions = {}) =>
 		output: outputSchema,
 		scopes: [ExternalScopes.RequestsRead],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			findRequests(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await findRequests(context, {
 				input,
 				actor: getMcpActor(execution.authority),
 				allowedCollectionKeys: getScopedCollectionKeys(
@@ -33,7 +34,10 @@ export const findRequestsMcpTool = (options: CollectionToolOptions = {}) =>
 					execution.authority.scopes,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const findRequestsAgentTool = (options: CollectionToolOptions = {}) =>
@@ -56,20 +60,17 @@ export const findRequestsAgentTool = (options: CollectionToolOptions = {}) =>
 					options.collections,
 				),
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const count = result.data.output.pagination.count;
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy(
-						count === 1
-							? "admin:core.tools.requests_find.summary.one"
-							: "admin:core.tools.requests_find.summary",
-						{ data: { count } },
-					),
-				},
+				output: result.data.output,
+				summary: copy(
+					count === 1
+						? "admin:core.tools.requests_find.summary.one"
+						: "admin:core.tools.requests_find.summary",
+					{ data: { count } },
+				),
 			};
 		},
 	});

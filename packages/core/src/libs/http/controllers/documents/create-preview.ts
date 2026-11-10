@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { previewSessionServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -57,7 +57,7 @@ const createPreviewController = factory.createHandlers(
 			locale,
 			creator: c.get("auth"),
 		});
-		if (previewRes.error) throw new LucidAPIError(previewRes.error);
+		if (previewRes.error) throw new LucidError(previewRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");

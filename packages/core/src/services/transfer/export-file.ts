@@ -3,9 +3,11 @@ import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import type { ToolkitActor } from "../../libs/permission/toolkit-actor.js";
+import createToolkit from "../../libs/toolkit/create-toolkit.js";
 import { getTransferRegistry } from "../../libs/transfer/registry.js";
 import type { TransferExportFile } from "../../libs/transfer/types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
+import runHandler from "../../utils/services/run-handler.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getOrCreateConnectionInstanceId from "../connection/helpers/get-or-create-instance-id.js";
 
@@ -26,6 +28,7 @@ const exportFile: ServiceFn<
 	TransferExportFile
 > = async (context, data) => {
 	const definitions = getTransferRegistry(context.config);
+	const toolkit = createToolkit(context);
 	const queue: Array<{ resource: string; ids: string[]; depth: number }> = [];
 	for (const [resource, selection] of Object.entries(data.select)) {
 		if (selection === undefined) continue;
@@ -74,53 +77,59 @@ const exportFile: ServiceFn<
 		if (ids.length === 0) continue;
 		for (const id of ids) seen.add(id);
 
-		const entriesRes = await definition.export(context, {
-			actor: data.actor,
-			ids,
-			linked: item.depth > 0,
-			link: async (targets) => {
-				const refs: TransferRefs = {};
-				for (const [resource, targetIds] of Object.entries(targets)) {
-					const target = definitions.get(resource);
-					if (!target) continue;
+		//* bound so the closure below keeps the definition as `this`
+		const exportEntries = definition.export.bind(definition);
+		const entriesRes = await runHandler(() =>
+			exportEntries({
+				context,
+				toolkit,
+				actor: data.actor,
+				ids,
+				linked: item.depth > 0,
+				link: async (targets) => {
+					const refs: TransferRefs = {};
+					for (const [resource, targetIds] of Object.entries(targets)) {
+						const target = definitions.get(resource);
+						if (!target) continue;
 
-					const known = identities.get(resource) ?? new Map();
-					identities.set(resource, known);
-					const unknown = Array.from(new Set(targetIds)).filter(
-						(id) => !known.has(id),
-					);
-					if (unknown.length > 0) {
-						const identifiedRes = await target.identify(context, {
-							ids: unknown,
-						});
-						if (identifiedRes.error) return identifiedRes;
+						const known = identities.get(resource) ?? new Map();
+						identities.set(resource, known);
+						const unknown = Array.from(new Set(targetIds)).filter(
+							(id) => !known.has(id),
+						);
+						if (unknown.length > 0) {
+							const identifiedRes = await runHandler(() =>
+								target.identify({ context, toolkit, ids: unknown }),
+							);
+							if (identifiedRes.error) return identifiedRes;
 
-						for (const id of unknown) {
-							known.set(id, identifiedRes.data.get(id) ?? null);
+							for (const id of unknown) {
+								known.set(id, identifiedRes.data.get(id) ?? null);
+							}
+						}
+
+						const linked: Record<string, string> = {};
+						for (const id of targetIds) {
+							const uid = known.get(id);
+							if (uid) linked[id] = uid;
+						}
+						refs[resource] = linked;
+
+						const include =
+							target.include === "always" ||
+							(target.include === "linked" && data.linked && item.depth === 0);
+						if (include && target.export) {
+							queue.push({
+								resource,
+								ids: Object.keys(linked),
+								depth: item.depth + 1,
+							});
 						}
 					}
-
-					const linked: Record<string, string> = {};
-					for (const id of targetIds) {
-						const uid = known.get(id);
-						if (uid) linked[id] = uid;
-					}
-					refs[resource] = linked;
-
-					const include =
-						target.include === "always" ||
-						(target.include === "linked" && data.linked && item.depth === 0);
-					if (include && target.export) {
-						queue.push({
-							resource,
-							ids: Object.keys(linked),
-							depth: item.depth + 1,
-						});
-					}
-				}
-				return { error: undefined, data: refs };
-			},
-		});
+					return { error: undefined, data: refs };
+				},
+			}),
+		);
 		if (entriesRes.error) return entriesRes;
 
 		resources[item.resource] = [

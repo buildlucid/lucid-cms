@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import saveMemory from "../../save-memory.js";
@@ -40,23 +41,23 @@ export const saveMemoryAgentTool = () =>
 			version: 1,
 			data: reviewDataSchema,
 			response: ({ data }) => reviewResponseSchema(data.scopes),
-			prepare: ({ context, input, execution }) =>
-				prepareMemoryReview(context, {
+			prepare: async ({ context, input, execution }) => {
+				const result = await prepareMemoryReview(context, {
 					input,
 					authority: execution.authority,
-				}),
+				});
+				if (result.error) throw new LucidError(result.error);
+				return result.data;
+			},
 		},
 		handler: async ({ context, execution, data, response }) => {
 			const { principal } = execution.authority;
 			if (principal.type !== "user") {
-				return {
-					data: undefined,
-					error: {
-						type: "basic",
-						status: 403,
-						message: copy("server:agent.tool.unavailable"),
-					},
-				};
+				throw new LucidError({
+					type: "basic",
+					status: 403,
+					message: copy("server:agent.tool.unavailable"),
+				});
 			}
 
 			const saved = await serviceWrapper(saveMemory, {
@@ -69,24 +70,21 @@ export const saveMemoryAgentTool = () =>
 				replaces: data.replaces.map((memory) => memory.id),
 				reviewed: data.replaces,
 			});
-			if (saved.error) return saved;
+			if (saved.error) throw new LucidError(saved.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: {
-						memory: {
-							id: saved.data.id,
-							scope: saved.data.scope,
-							content: saved.data.content,
-						},
+				output: {
+					memory: {
+						id: saved.data.id,
+						scope: saved.data.scope,
+						content: saved.data.content,
 					},
-					summary: copy(
-						saved.data.scope === "shared"
-							? "admin:core.tools.lucid_memory_save.summary.shared"
-							: "admin:core.tools.lucid_memory_save.summary",
-					),
 				},
+				summary: copy(
+					saved.data.scope === "shared"
+						? "admin:core.tools.lucid_memory_save.summary.shared"
+						: "admin:core.tools.lucid_memory_save.summary",
+				),
 			};
 		},
 	});

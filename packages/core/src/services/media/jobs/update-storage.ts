@@ -1,10 +1,11 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import { OptionsRepository } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import getStorageUsage from "../get-storage-usage.js";
 
-const updateMediaStorage: JobHandler = async ({ context }) => {
+const updateMediaStorage: JobService = async ({ context }) => {
 	const Options = new OptionsRepository(context.db);
 	const storageUsageRes = await getStorageUsage(context);
 	if (storageUsageRes.error) return storageUsageRes;
@@ -33,16 +34,19 @@ const updateMediaStorage: JobHandler = async ({ context }) => {
  * Recalculates and updates media storage usage.
  */
 export const updateMediaStorageJob = defineJob({
-	name: "core:recalculate-media-storage",
+	key: "core:recalculate-media-storage",
 	version: 1,
 	input: z.null(),
 	schedules: [
 		{
-			name: "automatic",
+			key: "automatic",
 			cron: "0 0 * * *",
 			timezone: "UTC",
 			input: null,
 		},
 	],
-	handler: updateMediaStorage,
+	handler: async (args) => {
+		const result = await updateMediaStorage(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 });

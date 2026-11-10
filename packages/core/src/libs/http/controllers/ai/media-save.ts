@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { mediaGenerationPermissions } from "../../../config/ai-features.js";
 import { copy } from "../../../i18n/index.js";
@@ -59,7 +59,7 @@ const mediaSaveController = factory.createHandlers(
 			userId: c.get("auth").id,
 			signal: c.req.raw.signal,
 		});
-		if (saved.error) throw new LucidAPIError(saved.error);
+		if (saved.error) throw new LucidError(saved.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: saved.data }));

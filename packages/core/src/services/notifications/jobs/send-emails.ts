@@ -1,8 +1,9 @@
 import z from "zod";
 import constants from "../../../constants/constants.js";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import { NotificationRecipientsRepository } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import emailNotification from "../helpers/email-notification.js";
 
 const input = z
@@ -15,7 +16,7 @@ const input = z
  * delay. Scheduled runs handle a batch, leaving the rest for the next one.
  * Emails overdue by more than `emailExpiryHours` are dropped rather than sent late.
  */
-const sendNotificationEmails: JobHandler<z.infer<typeof input>> = async ({
+const sendNotificationEmails: JobService<z.infer<typeof input>> = async ({
 	context,
 	input,
 }) => {
@@ -55,13 +56,16 @@ const sendNotificationEmails: JobHandler<z.infer<typeof input>> = async ({
 };
 
 export const sendNotificationEmailsJob = defineJob({
-	name: constants.notifications.emailJob.name,
+	key: constants.notifications.emailJob.key,
 	version: constants.notifications.emailJob.version,
 	input,
 	transaction: true,
 	schedules: [
-		{ name: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
+		{ key: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
 	],
-	handler: sendNotificationEmails,
+	handler: async (args) => {
+		const result = await sendNotificationEmails(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	describe: ({ input }) => input ?? {},
 });

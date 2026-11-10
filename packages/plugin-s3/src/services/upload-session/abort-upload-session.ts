@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceAbortUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types/types.js";
@@ -14,7 +14,7 @@ export const abortUploadSession = (
 ): MediaStorageAdapterServiceAbortUploadSession => {
 	return async (_context, props) => {
 		if (props.protocol !== "multipart-parts") {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		try {
@@ -30,35 +30,27 @@ export const abortUploadSession = (
 			);
 			const response = await fetch(signed);
 			if (!response.ok && response.status !== 404) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.delete.failed", {
-							data: {
-								status: response.status,
-								statusText: response.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.delete.failed", {
+						data: {
+							status: response.status,
+							statusText: response.statusText,
+						},
+					}),
+				});
 			}
 
-			return {
-				error: undefined,
-				data: undefined,
-			};
+			return;
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 };

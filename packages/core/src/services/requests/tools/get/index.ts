@@ -9,6 +9,7 @@ import {
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import getRequest from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -22,8 +23,8 @@ export const getRequestMcpTool = (options: CollectionToolOptions = {}) =>
 		output: outputSchema,
 		scopes: [ExternalScopes.RequestsRead],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			getRequest(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await getRequest(context, {
 				input,
 				actor: getMcpActor(execution.authority),
 				allowedCollectionKeys: getScopedCollectionKeys(
@@ -31,7 +32,10 @@ export const getRequestMcpTool = (options: CollectionToolOptions = {}) =>
 					execution.authority.scopes,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const getRequestAgentTool = (options: CollectionToolOptions = {}) =>
@@ -56,16 +60,13 @@ export const getRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				),
 				agentKey: execution.run.agentKey,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy("admin:core.tools.requests_get.summary", {
-						data: { id: input.requestId },
-					}),
-				},
+				output: result.data.output,
+				summary: copy("admin:core.tools.requests_get.summary", {
+					data: { id: input.requestId },
+				}),
 			};
 		},
 	});

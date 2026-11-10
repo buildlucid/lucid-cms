@@ -16,11 +16,7 @@ import type {
 	LucidExecutionContext,
 	LucidHonoGeneric,
 } from "../../types/hono.js";
-import {
-	LucidAPIError,
-	LucidError,
-	translateErrorData,
-} from "../../utils/errors/index.js";
+import { LucidError, translateErrorData } from "../../utils/errors/index.js";
 import type LucidDatabase from "../db/client/lucid-database.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
@@ -158,14 +154,25 @@ const createApp = async (props: {
 				locale,
 			});
 
-			if (err instanceof LucidAPIError) {
+			if (err instanceof LucidError) {
 				const error = translateErrorData(err.error, translate);
+				const status = error.status ?? 500;
 
-				c.status(error.status as StatusCode);
+				//* an error with no status was not written as a response, so it is unexpected here
+				if (error.status === undefined) {
+					logger.error({
+						error: err,
+						event: "http.unhandled.error",
+						message: err.message,
+						scope: constants.logScopes.http,
+					});
+				}
+
+				c.status(status as StatusCode);
 				return c.json({
 					name: error.name,
 					message: error.message,
-					status: error.status,
+					status,
 					errors: error.errors,
 					code: error.code,
 					key: error.key,

@@ -1,4 +1,5 @@
 import { LucidError } from "../../utils/errors/index.js";
+import runHandler from "../../utils/services/run-handler.js";
 import type {
 	DatabaseAdapterCreator,
 	DatabaseAdapterFactory,
@@ -103,12 +104,15 @@ const collectPluginPrepareArtifacts = async (props: {
 			continue;
 		}
 
-		const res = await plugin.hooks.runtime({
-			phase: "prepare",
-			env: props.env,
-			definition: props.definition,
-			paths: props.paths,
-		});
+		const runtime = plugin.hooks.runtime;
+		const res = await runHandler(() =>
+			runtime({
+				phase: "prepare",
+				env: props.env,
+				definition: props.definition,
+				paths: props.paths,
+			}),
+		);
 		if (res.error) {
 			throw new LucidError({
 				scope: plugin.key,

@@ -65,15 +65,17 @@ const checkDeploys = (
 			let next: Date | null = null;
 			try {
 				next =
-					deploy.schedule.split(" ").length === 5
-						? new Cron(deploy.schedule, { timezone: "UTC" }).nextRun()
+					deploy.schedule.cron.split(" ").length === 5
+						? new Cron(deploy.schedule.cron, {
+								timezone: deploy.schedule.timezone,
+							}).nextRun()
 						: null;
 			} catch {
 				next = null;
 			}
 			if (!next) {
 				throw new Error(
-					`Deploy "${deploy.key}" has an invalid schedule "${deploy.schedule}". Use a five-field cron expression.`,
+					`Deploy "${deploy.key}" has an invalid schedule "${deploy.schedule.cron}" (${deploy.schedule.timezone}). Use a five-field cron expression and an IANA timezone.`,
 				);
 			}
 		}

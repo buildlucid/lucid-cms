@@ -5,6 +5,7 @@ import {
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import commentOnRequest from "../comment/handler.js";
 import { outputSchema } from "../comment/schema.js";
@@ -37,17 +38,14 @@ export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					changes: [{ type: "request", requestId: input.requestId }],
-					summary: copy("admin:core.tools.requests_reply.summary", {
-						data: { id: input.requestId },
-					}),
-				},
+				output: result.data.output,
+				changes: [{ type: "request", requestId: input.requestId }],
+				summary: copy("admin:core.tools.requests_reply.summary", {
+					data: { id: input.requestId },
+				}),
 			};
 		},
 	});

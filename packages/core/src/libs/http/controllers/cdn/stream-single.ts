@@ -4,7 +4,7 @@ import { stream } from "hono/streaming";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { cdnServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import {
 	getKeyVisibility,
 	normalizeMediaKey,
@@ -180,7 +180,7 @@ const streamSingleController = factory.createHandlers(
 				error: response.error,
 			});
 			if (streamFallbackMedia.error)
-				throw new LucidAPIError(streamFallbackMedia.error);
+				throw new LucidError(streamFallbackMedia.error);
 
 			return c.redirect(streamFallbackMedia.data.redirectUrl, 302);
 		}

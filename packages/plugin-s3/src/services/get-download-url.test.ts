@@ -25,10 +25,9 @@ describe("getDownloadUrl", () => {
 			fileName: "Screenshot 2026-02-13 at 10.png",
 		});
 
-		expect(response.error).toBeUndefined();
-		expect(response.data?.url).toBeDefined();
+		expect(response.url).toBeDefined();
 
-		const signedUrl = new URL(response.data?.url ?? "");
+		const signedUrl = new URL(response.url ?? "");
 		expect(signedUrl.searchParams.get("response-content-disposition")).toBe(
 			'attachment; filename="Screenshot 2026-02-13 at 10.png"',
 		);
@@ -57,9 +56,7 @@ describe("getDownloadUrl", () => {
 			extension: "png",
 		});
 
-		expect(response.error).toBeUndefined();
-
-		const signedUrl = new URL(response.data?.url ?? "");
+		const signedUrl = new URL(response.url ?? "");
 		expect(signedUrl.searchParams.get("response-content-disposition")).toBe(
 			'attachment; filename="uuid.png"',
 		);
@@ -88,9 +85,7 @@ describe("getDownloadUrl", () => {
 			fileName: '../"Quarterly\r\nReport".png',
 		});
 
-		expect(response.error).toBeUndefined();
-
-		const signedUrl = new URL(response.data?.url ?? "");
+		const signedUrl = new URL(response.url ?? "");
 		expect(signedUrl.searchParams.get("response-content-disposition")).toBe(
 			'attachment; filename="Quarterly Report.png"',
 		);

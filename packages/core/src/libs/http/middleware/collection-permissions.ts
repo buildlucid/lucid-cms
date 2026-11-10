@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import collections from "../../collection/collections.js";
 import { copy } from "../../i18n/index.js";
 import { resolveCollectionPermission } from "../../permission/collection-permissions.js";
@@ -30,7 +30,7 @@ const collectionPermissions = (
 		});
 
 		if (collectionRes.error) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				...collectionRes.error,
 				name: copy("server:core.collections.permission.error.name"),
 			});
@@ -47,7 +47,7 @@ const collectionPermissions = (
 			requiredPermissions: [permission],
 		});
 		if (!access) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				name: copy("server:core.collections.permission.error.name"),
 				message: copy("server:core.collections.permission.error.message", {

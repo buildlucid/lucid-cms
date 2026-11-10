@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import deleteMemories from "../../delete-memories.js";
 import { saveMemoryToolName } from "../memory-save/constants.js";
@@ -34,23 +35,23 @@ export const deleteMemoryAgentTool = () =>
 			version: 1,
 			data: reviewDataSchema,
 			response: () => reviewResponseSchema,
-			prepare: ({ context, input, execution }) =>
-				prepareMemoryDelete(context, {
+			prepare: async ({ context, input, execution }) => {
+				const result = await prepareMemoryDelete(context, {
 					input,
 					authority: execution.authority,
-				}),
+				});
+				if (result.error) throw new LucidError(result.error);
+				return result.data;
+			},
 		},
 		handler: async ({ context, execution, data }) => {
 			const { principal } = execution.authority;
 			if (principal.type !== "user") {
-				return {
-					data: undefined,
-					error: {
-						type: "basic",
-						status: 403,
-						message: copy("server:agent.tool.unavailable"),
-					},
-				};
+				throw new LucidError({
+					type: "basic",
+					status: 403,
+					message: copy("server:agent.tool.unavailable"),
+				});
 			}
 
 			const memoryIds = data.memories.map((memory) => memory.id);
@@ -61,19 +62,16 @@ export const deleteMemoryAgentTool = () =>
 				ids: memoryIds,
 				reviewed: data.memories,
 			});
-			if (deleted.error) return deleted;
+			if (deleted.error) throw new LucidError(deleted.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: { memoryIds },
-					summary: copy(
-						memoryIds.length === 1
-							? "admin:core.tools.lucid_memory_delete.summary.one"
-							: "admin:core.tools.lucid_memory_delete.summary",
-						{ data: { count: memoryIds.length } },
-					),
-				},
+				output: { memoryIds },
+				summary: copy(
+					memoryIds.length === 1
+						? "admin:core.tools.lucid_memory_delete.summary.one"
+						: "admin:core.tools.lucid_memory_delete.summary",
+					{ data: { count: memoryIds.length } },
+				),
 			};
 		},
 	});

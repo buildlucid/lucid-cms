@@ -38,11 +38,12 @@ describe("filesystem signed URLs", () => {
 				? defaults.media.storage()
 				: defaults.media.storage);
 			const body = Buffer.from("signed media");
-			const stream = vi.fn<typeof storage.stream>(async () => ({
+			//* services reach storage through the context, where operations return service results
+			const stream = vi.fn(async () => ({
 				error: undefined,
 				data: { body, contentLength: body.length, contentType: "text/plain" },
 			}));
-			const upload = vi.fn<typeof storage.upload>(async () => ({
+			const upload = vi.fn(async () => ({
 				error: undefined,
 				data: { etag: "uploaded" },
 			}));
@@ -66,8 +67,7 @@ describe("filesystem signed URLs", () => {
 			};
 
 			const download = await storage.getDownloadUrl(context, params);
-			if (download.error) throw new Error("Could not sign download URL");
-			const downloadData = readSignedUrl(download.data.url);
+			const downloadData = readSignedUrl(download.url);
 			expect(
 				validateSignedMediaUrl({
 					...downloadData,
@@ -90,10 +90,10 @@ describe("filesystem signed URLs", () => {
 				mimeType: "text/plain",
 				size: body.length,
 			});
-			if (session.error || session.data.protocol !== "http") {
+			if (session.protocol !== "http") {
 				throw new Error("Could not create signed upload session");
 			}
-			const uploadData = readSignedUrl(session.data.request.url);
+			const uploadData = readSignedUrl(session.request.url);
 			expect(
 				validateSignedMediaUrl({
 					...uploadData,

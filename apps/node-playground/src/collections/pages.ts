@@ -25,42 +25,22 @@ const PageCollection = new CollectionBuilder("page", {
 		{
 			service: "documents",
 			event: "beforeUpsert",
-			handler: async () => {
-				return {
-					error: undefined,
-					data: undefined,
-				};
-			},
+			handler: async () => {},
 		},
 		{
 			service: "documents",
 			event: "afterUpsert",
-			handler: async () => {
-				return {
-					error: undefined,
-					data: undefined,
-				};
-			},
+			handler: async () => {},
 		},
 		{
 			service: "documents",
 			event: "beforeDelete",
-			handler: async () => {
-				return {
-					error: undefined,
-					data: undefined,
-				};
-			},
+			handler: async () => {},
 		},
 		{
 			service: "documents",
 			event: "afterDelete",
-			handler: async () => {
-				return {
-					error: undefined,
-					data: undefined,
-				};
-			},
+			handler: async () => {},
 		},
 	],
 	bricks: {

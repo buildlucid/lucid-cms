@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
@@ -47,7 +47,7 @@ const confirmEmailChangeController = factory.createHandlers(
 		});
 
 		if (confirmEmailChange.error) {
-			throw new LucidAPIError(confirmEmailChange.error);
+			throw new LucidError(confirmEmailChange.error);
 		}
 
 		c.status(204);

@@ -126,7 +126,7 @@ const buildJobRows = async (
 		const jobId = randomUUID();
 		rows.push({
 			job_id: jobId,
-			job_name: props.definition.name,
+			job_key: props.definition.key,
 			job_version: props.definition.version,
 			trigger_type: trigger?.type ?? "enqueue",
 			schedule_key: trigger?.type === "schedule" ? trigger.scheduleKey : null,
@@ -149,7 +149,7 @@ const buildJobRows = async (
 		});
 		receipts.push({
 			jobId,
-			name: props.definition.name,
+			key: props.definition.key,
 			version: props.definition.version,
 		});
 	}
@@ -221,7 +221,7 @@ export const enqueueJobs = async <Definition extends AnyJobDefinition>(
 		receipts = [
 			{
 				jobId: stored.data.job_id,
-				name: stored.data.job_name,
+				key: stored.data.job_key,
 				version: stored.data.job_version,
 			},
 		];

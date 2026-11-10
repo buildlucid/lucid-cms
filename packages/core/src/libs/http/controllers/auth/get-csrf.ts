@@ -4,7 +4,7 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/auth.js";
 import { authServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -29,7 +29,7 @@ const csrfController = factory.createHandlers(
 	}),
 	async (c: LucidHonoContext) => {
 		const tokenRes = await authServices.csrf.generateToken(c);
-		if (tokenRes.error) throw new LucidAPIError(tokenRes.error);
+		if (tokenRes.error) throw new LucidError(tokenRes.error);
 
 		c.status(200);
 		return c.json(

@@ -4,7 +4,7 @@ import { streamSSE } from "hono/streaming";
 import resolveSliceStart from "../../../services/agent/helpers/resolve-slice-start.js";
 import { agentServices } from "../../../services/index.js";
 import type { LucidHonoGeneric } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type {
 	ServiceContext,
@@ -74,11 +74,11 @@ export const streamRun = async (
 		//* the runner holds an answer until its slice runs, so it's checked first, as running in place would
 		if (input.answer) {
 			const checked = await resolveSliceStart(context, input);
-			if (checked.error) throw new LucidAPIError(checked.error);
+			if (checked.error) throw new LucidError(checked.error);
 		}
 
 		const started = await runner.start(context, input);
-		if (started.error) throw new LucidAPIError(started.error);
+		if (started.error) throw new LucidError(started.error);
 		c.header("X-Lucid-Agent-Run-ID", input.runId);
 
 		return streamEvents(c, (viewer) =>

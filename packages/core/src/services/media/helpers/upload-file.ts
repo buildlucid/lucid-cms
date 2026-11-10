@@ -1,7 +1,7 @@
 import type { Readable } from "node:stream";
 import { copy } from "../../../libs/i18n/index.js";
 import { toWebReadable } from "../../../libs/media-storage/normalize-body.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 
 /** Bytes with a filename and optional MIME type, or a binary stream with its exact size. */
 export type MediaUploadFile =
@@ -55,7 +55,7 @@ export const boundUploadBody = (
 					throw new TypeError("Upload streams must contain bytes.");
 				bytes += chunk.byteLength;
 				if (bytes > file.size) {
-					throw new LucidAPIError({
+					throw new LucidError({
 						status: 400,
 						code: "invalid_request",
 						message: copy("server:core.media.upload.size.mismatch"),
@@ -65,7 +65,7 @@ export const boundUploadBody = (
 			},
 			flush() {
 				if (bytes !== file.size) {
-					throw new LucidAPIError({
+					throw new LucidError({
 						status: 400,
 						code: "invalid_request",
 						message: copy("server:core.media.upload.size.mismatch"),

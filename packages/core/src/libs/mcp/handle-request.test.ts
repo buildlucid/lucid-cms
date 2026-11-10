@@ -7,7 +7,7 @@ import { Hono } from "hono";
 import { afterAll, expect, test, vi } from "vitest";
 import z from "zod";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import { LucidAPIError } from "../../utils/errors/index.js";
+import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { externalScopeCheck } from "../http/middleware/external-scopes.js";
@@ -23,12 +23,7 @@ const fixture = getTestConfig();
 afterAll(fixture.destroy);
 
 test("HTTP preflight challenges missing input-dependent scopes before running the tool", async () => {
-	const handler = vi.fn(async () => ({
-		error: undefined,
-		data: {
-			output: { ok: true },
-		},
-	}));
+	const handler = vi.fn(async () => ({ output: { ok: true } }));
 	const tool = defineMcpTool({
 		name: "test_dynamic",
 		description: "Checks input-dependent scope authorization",
@@ -59,7 +54,7 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 	let scopes: ExternalScope[] = [ExternalScopes.McpAccess];
 	const app = new Hono<LucidHonoGeneric>();
 	app.onError((error, c) => {
-		if (error instanceof LucidAPIError && error.error.status === 403) {
+		if (error instanceof LucidError && error.error.status === 403) {
 			return c.text(error.message, 403);
 		}
 		throw error;

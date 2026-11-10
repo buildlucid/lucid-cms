@@ -1,4 +1,4 @@
-import type { MediaStorageAdapterInstance } from "../../libs/media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../../libs/media-storage/types.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
@@ -7,7 +7,7 @@ import checkHasMediaStorage from "./checks/check-has-media-storage.js";
 const stream: ServiceFn<
 	[{ id: number; range?: { start: number; end?: number } }],
 	NonNullable<
-		Awaited<ReturnType<MediaStorageAdapterInstance["stream"]>>["data"]
+		Awaited<ReturnType<ResolvedMediaStorageAdapter["stream"]>>["data"]
 	> & {
 		fileName: string | null;
 	}

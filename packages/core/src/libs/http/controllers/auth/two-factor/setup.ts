@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
@@ -42,9 +42,9 @@ const setupTwoFactorChallengeController = factory.createHandlers(
 		const context = createServiceContext(c);
 
 		const challengeRes = await authServices.twoFactor.getChallenge(c);
-		if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+		if (challengeRes.error) throw new LucidError(challengeRes.error);
 		if (challengeRes.data.step !== "setup") {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				status: 400,
 				message: copy("server:core.auth.two.factor.setup.not.needed.message"),
@@ -61,7 +61,7 @@ const setupTwoFactorChallengeController = factory.createHandlers(
 		})(context, {
 			userId: challengeRes.data.userId,
 		});
-		if (setupRes.error) throw new LucidAPIError(setupRes.error);
+		if (setupRes.error) throw new LucidError(setupRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.status(200);

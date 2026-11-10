@@ -1,6 +1,6 @@
 import type { JSONColumnType } from "kysely";
 import z from "zod";
-import { agentRoutineEventNameSchema } from "../../agent/routine-events.js";
+import { contentEventNameSchema } from "../../events/content-events.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampDefaulted, TimestampImmutable } from "../types.js";
 
@@ -10,7 +10,7 @@ export const agentRoutinePendingTable = defineTable(
 		columns: {
 			id: { schema: z.uuid(), type: "text" },
 			routine_id: { schema: z.uuid(), type: "text" },
-			event: { schema: agentRoutineEventNameSchema, type: "text" },
+			event: { schema: contentEventNameSchema, type: "text" },
 			subject_type: {
 				schema: z.enum(["document", "media", "request"]),
 				type: "text",
@@ -35,7 +35,7 @@ export const agentRoutinePendingTable = defineTable(
 export interface LucidAgentRoutinePending {
 	id: string;
 	routine_id: string;
-	event: z.infer<typeof agentRoutineEventNameSchema>;
+	event: z.infer<typeof contentEventNameSchema>;
 	subject_type: "document" | "media" | "request";
 	subject_id: number;
 	/** Set for documents, which are read through their collection. */

@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/transfer.js";
 import { transferServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -49,7 +49,7 @@ const checkImportController = factory.createHandlers(
 			file: body.file,
 			mode: body.mode,
 		});
-		if (checkRes.error) throw new LucidAPIError(checkRes.error);
+		if (checkRes.error) throw new LucidError(checkRes.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: checkRes.data }));

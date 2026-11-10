@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
@@ -41,10 +42,7 @@ const beforeUpsertHandler =
 			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
-			return {
-				error: undefined,
-				data: undefined,
-			};
+			return;
 		}
 		const localization = resolvePagesCollectionLocalization({
 			localization: context.config.localization,
@@ -72,7 +70,8 @@ const beforeUpsertHandler =
 				),
 			},
 		});
-		if (checkFieldsExistRes.error) return checkFieldsExistRes;
+		if (checkFieldsExistRes.error)
+			throw new LucidError(checkFieldsExistRes.error);
 		const { slug, parentPage, path } = checkFieldsExistRes.data;
 
 		const checkParentIsPageOfSelfRes = checkParentIsPageOfSelf({
@@ -82,7 +81,8 @@ const beforeUpsertHandler =
 				parentPage: parentPage,
 			},
 		});
-		if (checkParentIsPageOfSelfRes.error) return checkParentIsPageOfSelfRes;
+		if (checkParentIsPageOfSelfRes.error)
+			throw new LucidError(checkParentIsPageOfSelfRes.error);
 
 		const checkRootSlugWithParentRes = checkRootSlugWithParent({
 			localized: localization.enabled,
@@ -92,7 +92,8 @@ const beforeUpsertHandler =
 				parentPage: parentPage,
 			},
 		});
-		if (checkRootSlugWithParentRes.error) return checkRootSlugWithParentRes;
+		if (checkRootSlugWithParentRes.error)
+			throw new LucidError(checkRootSlugWithParentRes.error);
 
 		// ----------------------------------------------------------------
 		// Build, validate and set path
@@ -111,7 +112,8 @@ const beforeUpsertHandler =
 				},
 				tables: meta.collectionTableNames,
 			});
-			if (circularParentsRes.error) return circularParentsRes;
+			if (circularParentsRes.error)
+				throw new LucidError(circularParentsRes.error);
 		}
 
 		for (let attempt = 0; ; attempt++) {
@@ -130,7 +132,7 @@ const beforeUpsertHandler =
 					all: data.fields ?? [],
 				},
 			});
-			if (pathRes.error) return pathRes;
+			if (pathRes.error) throw new LucidError(pathRes.error);
 
 			const candidatePathField = { ...path };
 			setPath({
@@ -157,7 +159,8 @@ const beforeUpsertHandler =
 				collectionInstance: meta.collection,
 				parentPathField: candidatePathField,
 			});
-			if (descendantPathsRes.error) return descendantPathsRes;
+			if (descendantPathsRes.error)
+				throw new LucidError(descendantPathsRes.error);
 			projectedPaths.push(...descendantPathsRes.data);
 
 			const checkPathUniquenessRes = await checkPathUniqueness(context, {
@@ -173,7 +176,7 @@ const beforeUpsertHandler =
 					attempt === MAX_DUPLICATE_SLUG_ATTEMPTS ||
 					!isPathCollisionError(checkPathUniquenessRes.error)
 				) {
-					return checkPathUniquenessRes;
+					throw new LucidError(checkPathUniquenessRes.error);
 				}
 				continue;
 			}
@@ -184,10 +187,7 @@ const beforeUpsertHandler =
 				fields: { path },
 			});
 
-			return {
-				error: undefined,
-				data: undefined,
-			};
+			return;
 		}
 	};
 

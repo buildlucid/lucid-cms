@@ -130,7 +130,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 	async selectSingleByIdempotencyKey(idempotencyKey: string) {
 		const query = this.db
 			.selectFrom("lucid_jobs")
-			.select(["job_id", "job_name", "job_version"])
+			.select(["job_id", "job_key", "job_version"])
 			.where("idempotency_key", "=", idempotencyKey);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
@@ -297,7 +297,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 			)
 			.returning([
 				"job_id",
-				"job_name",
+				"job_key",
 				"job_version",
 				"trigger_type",
 				"schedule_key",
@@ -596,7 +596,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 			.where("lease_expires_at", "<=", props.now)
 			.where("cancel_requested_at", "is", null)
 			.whereRef("attempts", ">=", "max_attempts")
-			.returning(["job_id", "job_name", "job_version", "payload", "attempts"]);
+			.returning(["job_id", "job_key", "job_version", "payload", "attempts"]);
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "failExhaustedLeases",

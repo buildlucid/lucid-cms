@@ -3,7 +3,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/diagnostics.js";
 import { diagnosticServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -53,7 +53,7 @@ const submitBugReportController = factory.createHandlers(
 	bodyLimit({
 		maxSize: MAX_BODY_BYTES,
 		onError: () => {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				status: 413,
 				name: copy("server:core.routes.diagnostics.bug.report.error.name"),
@@ -76,7 +76,7 @@ const submitBugReportController = factory.createHandlers(
 				),
 			},
 		})(context, body);
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		c.status(204);
 		return c.body(null);

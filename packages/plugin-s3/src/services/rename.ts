@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceRenameKey } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -30,18 +30,15 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			});
 			const copyRes = await fetch(copyReq);
 			if (!copyRes.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.copy.failed", {
-							data: {
-								status: copyRes.status,
-								statusText: copyRes.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.copy.failed", {
+						data: {
+							status: copyRes.status,
+							statusText: copyRes.statusText,
+						},
+					}),
+				});
 			}
 
 			const headReq = await signObjectRequest(props.to, "HEAD");
@@ -52,18 +49,15 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 					await fetch(cleanupReq);
 				} catch {}
 
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.copy.failed", {
-							data: {
-								status: headRes.status,
-								statusText: headRes.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.copy.failed", {
+						data: {
+							status: headRes.status,
+							statusText: headRes.statusText,
+						},
+					}),
+				});
 			}
 
 			// delete the old object
@@ -76,35 +70,27 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 					await fetch(cleanupReq);
 				} catch {}
 
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.delete.failed", {
-							data: {
-								status: deleteRes.status,
-								statusText: deleteRes.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.delete.failed", {
+						data: {
+							status: deleteRes.status,
+							statusText: deleteRes.statusText,
+						},
+					}),
+				});
 			}
 
-			return {
-				error: undefined,
-				data: undefined,
-			};
+			return;
 		} catch (e) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						e instanceof Error
-							? copy.literal(e.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (e instanceof LucidError) throw e;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					e instanceof Error
+						? copy.literal(e.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 	return rename;

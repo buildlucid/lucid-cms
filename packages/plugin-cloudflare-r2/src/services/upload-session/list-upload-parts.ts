@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceListUploadParts } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types.js";
@@ -15,27 +15,21 @@ export const listUploadParts = (
 	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.http.fallback.not.configured",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.fallback.not.configured",
+					),
+				});
 			}
 			const http = pluginOptions.http;
 			if (!client) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.http.client.not.configured",
-						),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy(
+						"server:plugin.cloudflare.r2.http.client.not.configured",
+					),
+				});
 			}
 			const signed = await client.sign(
 				new Request(
@@ -49,37 +43,29 @@ export const listUploadParts = (
 			);
 			const response = await fetch(signed);
 			if (!response.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy(
-							"server:plugin.cloudflare.r2.upload.sessions.parts.list.failed",
-							{
-								data: {
-									status: response.status,
-									statusText: response.statusText,
-								},
-							},
-						),
-					},
-					data: undefined,
-				};
-			}
-			return {
-				error: undefined,
-				data: { uploadedParts: parseParts(await response.text()) },
-			};
-		} catch (error) {
-			return {
-				error: {
+				throw new LucidError({
 					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.cloudflare.r2.errors.unknown"),
-				},
-				data: undefined,
-			};
+					message: copy(
+						"server:plugin.cloudflare.r2.upload.sessions.parts.list.failed",
+						{
+							data: {
+								status: response.status,
+								statusText: response.statusText,
+							},
+						},
+					),
+				});
+			}
+			return { uploadedParts: parseParts(await response.text()) };
+		} catch (error) {
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.cloudflare.r2.errors.unknown"),
+			});
 		}
 	};
 };

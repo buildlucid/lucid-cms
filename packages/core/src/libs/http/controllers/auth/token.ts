@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { authServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
@@ -30,7 +30,7 @@ const tokenController = factory.createHandlers(
 	}),
 	async (c) => {
 		const payloadRes = await authServices.refreshToken.verifyToken(c);
-		if (payloadRes.error) throw new LucidAPIError(payloadRes.error);
+		if (payloadRes.error) throw new LucidError(payloadRes.error);
 
 		const [refreshRes, accessRes] = await Promise.all([
 			authServices.refreshToken.generateToken(c, payloadRes.data.user_id, {
@@ -44,8 +44,8 @@ const tokenController = factory.createHandlers(
 			),
 		]);
 
-		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-		if (accessRes.error) throw new LucidAPIError(accessRes.error);
+		if (refreshRes.error) throw new LucidError(refreshRes.error);
+		if (accessRes.error) throw new LucidError(accessRes.error);
 
 		c.status(204);
 		return c.body(null);

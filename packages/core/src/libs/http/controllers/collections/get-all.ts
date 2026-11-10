@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/collections.js";
 import { collectionServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import hasAccess from "../../../permission/has-access.js";
@@ -38,7 +38,7 @@ const getAllController = factory.createHandlers(
 			includeFields: c.req.query("include")?.split(",").includes("fields"),
 			user: c.get("auth"),
 		});
-		if (collectionsRes.error) throw new LucidAPIError(collectionsRes.error);
+		if (collectionsRes.error) throw new LucidError(collectionsRes.error);
 
 		c.status(200);
 		return c.json(

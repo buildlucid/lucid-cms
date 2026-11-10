@@ -4,7 +4,7 @@ import { z } from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
@@ -49,7 +49,7 @@ const getShareAccessController = factory.createHandlers(
 			token,
 			sessionCookie,
 		});
-		if (accessRes.error) throw new LucidAPIError(accessRes.error);
+		if (accessRes.error) throw new LucidError(accessRes.error);
 
 		c.status(200);
 		return c.json(

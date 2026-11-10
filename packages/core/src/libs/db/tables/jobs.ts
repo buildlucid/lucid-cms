@@ -23,7 +23,7 @@ export const jobsTable = defineTable("lucid_jobs", () => ({
 	columns: {
 		id: { schema: z.number(), type: "primary" },
 		job_id: { schema: z.string(), type: "text" },
-		job_name: { schema: z.string(), type: "text" },
+		job_key: { schema: z.string(), type: "text" },
 		job_version: { schema: z.number(), type: "integer" },
 		trigger_type: { schema: jobTriggerTypeSchema, type: "text" },
 		schedule_key: { schema: z.string().nullable(), type: "text" },
@@ -97,7 +97,7 @@ export const jobsTable = defineTable("lucid_jobs", () => ({
 	query: {
 		filters: {
 			jobId: "job_id",
-			jobName: "job_name",
+			jobKey: "job_key",
 			jobVersion: "job_version",
 			triggerType: "trigger_type",
 			scheduleKey: "schedule_key",
@@ -121,7 +121,7 @@ export const jobsTable = defineTable("lucid_jobs", () => ({
 		},
 		sorts: {
 			jobId: "job_id",
-			jobName: "job_name",
+			jobKey: "job_key",
 			jobVersion: "job_version",
 			triggerType: "trigger_type",
 			scheduleKey: "schedule_key",
@@ -143,7 +143,7 @@ export const jobsTable = defineTable("lucid_jobs", () => ({
 			updatedAt: "updated_at",
 		},
 		operators: {
-			jobName: "contains",
+			jobKey: "contains",
 			queueAdapterKey: "contains",
 			dispatchError: "contains",
 			errorMessage: "contains",
@@ -154,7 +154,7 @@ export const jobsTable = defineTable("lucid_jobs", () => ({
 export interface LucidJobs {
 	id: Generated<number>;
 	job_id: string;
-	job_name: string;
+	job_key: string;
 	job_version: number;
 	trigger_type: JobTrigger["type"];
 	schedule_key: string | null;

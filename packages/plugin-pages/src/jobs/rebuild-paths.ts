@@ -1,4 +1,4 @@
-import { defineJob, z } from "@lucidcms/core";
+import { defineJob, z, LucidError } from "@lucidcms/core";
 import type { JobDefinition } from "@lucidcms/core/types";
 import rebuildPaths from "../services/rebuild-paths.js";
 import type { PluginOptionsInternal } from "../types/types.js";
@@ -13,13 +13,16 @@ const createRebuildPathsJob = (
 	options: PluginOptionsInternal,
 ): RebuildPathsJob =>
 	defineJob({
-		name: "pages:rebuild-paths",
+		key: "pages:rebuild-paths",
 		version: 1,
 		input: z.null(),
 		transaction: true,
 		retry: { type: "none" },
-		handler: ({ context, toolkit }) =>
-			rebuildPaths(context, { options, toolkit }),
+		handler: async ({ context, toolkit }) => {
+			const result = await rebuildPaths(context, { options, toolkit });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export default createRebuildPathsJob;

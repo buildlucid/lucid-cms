@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { Readable } from "node:stream";
+import { LucidError } from "@lucidcms/core";
 import type { MediaTransformationOptions } from "@lucidcms/core/types";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -69,15 +70,26 @@ const processImage = async (props?: {
 	}).processImage;
 
 	if (!processImage) throw new Error("Expected image processing support");
-	return await processImage(
-		{
-			env: props?.binding ? { [bindingName]: props.binding } : {},
-		} as never,
-		{
-			stream: Readable.from(props?.buffer ?? Buffer.from([1, 2, 3])),
-			options: props?.options ?? { format: "webp" },
-		},
-	);
+	//* core turns the adapter's outcome into a service result, so the tests read it the same way
+	try {
+		return {
+			error: undefined,
+			data: await processImage(
+				{
+					env: props?.binding ? { [bindingName]: props.binding } : {},
+				} as never,
+				{
+					stream: Readable.from(props?.buffer ?? Buffer.from([1, 2, 3])),
+					options: props?.options ?? { format: "webp" },
+				},
+			),
+		};
+	} catch (error) {
+		if (error instanceof LucidError) {
+			return { error: error.error, data: undefined };
+		}
+		throw error;
+	}
 };
 
 const expectErrorKey = (

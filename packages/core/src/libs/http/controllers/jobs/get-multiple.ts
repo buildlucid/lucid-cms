@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/jobs.js";
 import { jobServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -49,7 +49,7 @@ const getMultipleController = factory.createHandlers(
 		})(context, {
 			query: formattedQuery,
 		});
-		if (jobs.error) throw new LucidAPIError(jobs.error);
+		if (jobs.error) throw new LucidError(jobs.error);
 
 		c.status(200);
 		return c.json(

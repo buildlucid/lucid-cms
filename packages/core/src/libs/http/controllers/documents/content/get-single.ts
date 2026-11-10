@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/documents.js";
 import { documentServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
@@ -103,7 +103,7 @@ const getSingleController = factory.createHandlers(
 				c.get("externalAuth").scopes,
 			),
 		});
-		if (document.error) throw new LucidAPIError(document.error);
+		if (document.error) throw new LucidError(document.error);
 
 		if (preview !== undefined) {
 			c.header("Cache-Control", "private, no-store");

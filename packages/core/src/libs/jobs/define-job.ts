@@ -1,3 +1,4 @@
+import { LucidError } from "../../utils/errors/index.js";
 import { isJsonObject } from "../../utils/helpers/is-json-object.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -25,7 +26,7 @@ const normalizeSchedules = <Input extends JobPayload | null>(
 	schedules: DefineJobOptions<string, Input>["schedules"],
 ): readonly JobSchedule[] =>
 	(schedules ?? []).map((schedule) => ({
-		name: schedule.name,
+		key: schedule.key,
 		cron: schedule.cron.trim().split(/\s+/).join(" "),
 		timezone: (schedule.timezone ?? "UTC").trim(),
 		input: schedule.input,
@@ -38,37 +39,47 @@ const normalizeSchedules = <Input extends JobPayload | null>(
  *
  * @example
  * const rebuildIndexJob = defineJob({
- * 	name: "search:rebuild-index",
+ * 	key: "search:rebuild-index",
  * 	version: 1,
  * 	input: z.object({ documentId: z.number() }),
  * 	schedules: [{
- * 		name: "nightly",
+ * 		key: "nightly",
  * 		cron: "0 0 * * *",
  * 		timezone: "UTC",
  * 		input: { documentId: 1 },
  * 	}],
  * 	handler: async ({ context, input, execution, toolkit }) => {
  * 		await rebuildIndex(input.documentId, execution.jobId);
- * 		return { error: undefined, data: undefined };
  * 	},
  * });
  */
-const defineJob = <const Name extends string, Input extends JobPayload | null>(
-	options: DefineJobOptions<Name, Input>,
-): JobDefinition<Name, Input> => {
+const defineJob = <const Key extends string, Input extends JobPayload | null>(
+	options: DefineJobOptions<Key, Input>,
+): JobDefinition<Key, Input> => {
 	const retry = options.retry ?? DEFAULT_RETRY_POLICY;
 	const schedules = normalizeSchedules(options.schedules);
 
 	const execute: ServiceFn<
 		[input: Input, execution: JobExecution],
 		undefined
-	> = (context, input, execution) =>
-		options.handler({
-			context,
-			input,
-			execution,
-			toolkit: createToolkit(context),
-		});
+	> = async (context, input, execution) => {
+		try {
+			await options.handler({
+				context,
+				input,
+				execution,
+				toolkit: createToolkit(context),
+			});
+		} catch (error) {
+			//* a thrown LucidError is the handler reporting a failure; anything else is left for the consumer to log
+			if (error instanceof LucidError) {
+				return { error: { ...error.error }, data: undefined };
+			}
+			throw error;
+		}
+
+		return { error: undefined, data: undefined };
+	};
 
 	const handler = options.transaction
 		? serviceWrapper(execute, {
@@ -90,7 +101,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 				error: {
 					type: "validation" as const,
 					message: copy("server:core.jobs.payload.invalid", {
-						data: { job: options.name },
+						data: { job: options.key },
 					}),
 					zod: result.error,
 				},
@@ -102,7 +113,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 				error: {
 					type: "validation" as const,
 					message: copy("server:core.jobs.payload.not.json", {
-						data: { job: options.name },
+						data: { job: options.key },
 					}),
 				},
 			};
@@ -113,7 +124,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 
 	return {
 		type: "job-definition",
-		name: options.name,
+		key: options.key,
 		version: options.version,
 		retry,
 		schedules,
@@ -141,7 +152,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 							error: {
 								type: "validation",
 								message: copy("server:core.jobs.payload.invalid", {
-									data: { job: options.name },
+									data: { job: options.key },
 								}),
 								zod: parsed.error,
 							},
@@ -156,7 +167,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 								error: {
 									type: "validation",
 									message: copy("server:core.jobs.description.not.json", {
-										data: { job: options.name },
+										data: { job: options.key },
 									}),
 								},
 							};
@@ -167,7 +178,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 							success: false,
 							error: {
 								message: copy("server:core.jobs.description.failed", {
-									data: { job: options.name },
+									data: { job: options.key },
 								}),
 								cause,
 							},

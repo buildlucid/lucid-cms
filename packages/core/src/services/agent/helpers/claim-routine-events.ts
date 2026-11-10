@@ -1,11 +1,11 @@
 import constants from "../../../constants/constants.js";
 import { referenceKey } from "../../../libs/agent/references.js";
-import { agentRoutineEventNameSchema } from "../../../libs/agent/routine-events.js";
 import type { LucidAgentRoutinePending } from "../../../libs/db/tables/agent-routine-pending.js";
+import { contentEventNameSchema } from "../../../libs/events/content-events.js";
 import { AgentRoutinePendingRepository } from "../../../libs/repositories/index.js";
 import type {
 	AgentReferenceInput,
-	AgentRoutineEventName,
+	ContentEventName,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveUserAccess from "../../users/resolve-access.js";
@@ -14,7 +14,7 @@ import referenceAccess from "../references/reference-access.js";
 
 export type ClaimedRoutineEvent = {
 	reference: AgentReferenceInput;
-	events: AgentRoutineEventName[];
+	events: ContentEventName[];
 	/** What the changes touched, such as `["file"]`. */
 	fields: string[];
 };
@@ -58,7 +58,7 @@ const claimRoutineEvents: ServiceFn<
 		where: [{ key: "routine_id", operator: "=", value: input.routineId }],
 		orderBy: [{ column: "first_at", direction: "asc" }],
 		//* Allow one row per event for each resource selected for the run.
-		limit: subjectsPerRun * agentRoutineEventNameSchema.options.length,
+		limit: subjectsPerRun * contentEventNameSchema.options.length,
 		validation: { enabled: true },
 	});
 	if (waiting.error) return waiting;

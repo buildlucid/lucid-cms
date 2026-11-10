@@ -26,22 +26,22 @@ export const getRegisteredJobSchedules = (
 ): readonly RegisteredJobSchedule[] => {
 	const activeJobs = new Map<string, AnyJobDefinition>();
 	for (const job of getJobRegistry(context.config).values()) {
-		const current = activeJobs.get(job.name);
+		const current = activeJobs.get(job.key);
 		if (!current || job.version > current.version) {
-			activeJobs.set(job.name, job);
+			activeJobs.set(job.key, job);
 		}
 	}
 
 	return [...activeJobs.values()].flatMap((job) =>
 		job.schedules.map((schedule) => ({
-			key: `${job.name}/${schedule.name}`,
+			key: `${job.key}/${schedule.key}`,
 			job,
 			schedule,
 		})),
 	);
 };
 
-/** Finds a registered schedule by its `<job name>/<schedule name>` key. */
+/** Finds a registered schedule by its `<job key>/<schedule key>` key. */
 export const getRegisteredJobSchedule = (
 	context: Pick<ServiceContext, "config">,
 	scheduleKey: string,
@@ -50,13 +50,13 @@ export const getRegisteredJobSchedule = (
 		(schedule) => schedule.key === scheduleKey,
 	);
 
-/** Resolves a full schedule key, or the first schedule attached to a job name. */
+/** Resolves a full schedule key, or the first schedule attached to a job key. */
 export const resolveRegisteredJobSchedule = (
 	schedules: readonly RegisteredJobSchedule[],
 	reference: string,
 ) =>
 	schedules.find((schedule) => schedule.key === reference) ??
-	schedules.find((schedule) => schedule.job.name === reference);
+	schedules.find((schedule) => schedule.job.key === reference);
 
 /** Returns the explicit pause overrides stored for registered schedules. */
 export const getScheduleOverrides: ServiceFn<

@@ -1,4 +1,5 @@
 import { createDraft, enableMapSet, finishDraft } from "immer";
+import runHandler from "../../utils/services/run-handler.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -30,7 +31,9 @@ type HookArguments<
 type MatchingHookHandler<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
-> = (args: HookArguments<S, E>) => ServiceResponse<HookData<S, E>>;
+> = (
+	args: HookArguments<S, E>,
+) => HookData<S, E> | void | Promise<HookData<S, E> | void>;
 
 const getOrderedHooks = <
 	S extends keyof HookServiceHandlers,
@@ -55,7 +58,7 @@ const getOrderedHooks = <
 		);
 };
 
-/** Runs side effects in order, stopping at the first error. */
+/** Runs side effects in order, stopping at the first hook that throws. */
 const executeEffectHooks = async <
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
@@ -64,7 +67,7 @@ const executeEffectHooks = async <
 	args: HookArguments<S, E>,
 ): ServiceResponse<HookData<S, E>> => {
 	for (const handler of hooks) {
-		const result = await handler(args);
+		const result = await runHandler(() => handler(args));
 		if (result.error) return result;
 	}
 
@@ -89,7 +92,7 @@ const executeTransformHooks = async <
 
 	for (const handler of hooks) {
 		const draft = createDraft(currentData);
-		const result = await handler({ ...args, data: draft });
+		const result = await runHandler(() => handler({ ...args, data: draft }));
 		if (result.error) return result;
 
 		if (result.data === undefined || result.data === draft) {

@@ -92,40 +92,28 @@ test("collection options are correct along with field includes and filters", asy
 				service: "documents",
 				event: "beforeUpsert",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 			{
 				service: "documents",
 				event: "beforeDelete",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 			{
 				service: "documents",
 				event: "afterDelete",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 			{
 				service: "documents",
 				event: "afterUpsert",
 				handler: async () => {
-					return {
-						error: undefined,
-						data: undefined,
-					};
+					return;
 				},
 			},
 		],

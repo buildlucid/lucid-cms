@@ -1,6 +1,6 @@
 import type { RequestType } from "../../../libs/db/tables/requests.js";
 import type { DocumentChangeMetadata } from "../../../libs/hooks/types.js";
-import type { AgentRoutineEventName } from "../../../types/response.js";
+import type { ContentEventName } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import recordRoutineEvent from "../../agent/helpers/record-routine-event.js";
 import notifyChange from "../../documents/notify-change.js";
@@ -12,7 +12,7 @@ type ChangedDocument = Pick<
 >;
 
 const routineEvents: Partial<
-	Record<DocumentChangeMetadata["type"], AgentRoutineEventName>
+	Record<DocumentChangeMetadata["type"], ContentEventName>
 > = {
 	created: "documents:created",
 	updated: "documents:updated",

@@ -70,13 +70,13 @@ describe("Cloudflare Images plugin", () => {
 			definition: {} as never,
 		});
 
-		expect(defaultResult?.data?.artifacts).toEqual([
+		expect(defaultResult?.artifacts).toEqual([
 			{
 				type: "cloudflare:bindings",
 				custom: { bindings: { images: {} } },
 			},
 		]);
-		expect(customResult?.data?.artifacts).toEqual([
+		expect(customResult?.artifacts).toEqual([
 			{
 				type: "cloudflare:bindings",
 				custom: { bindings: { images: { binding: "CUSTOM_IMAGES" } } },

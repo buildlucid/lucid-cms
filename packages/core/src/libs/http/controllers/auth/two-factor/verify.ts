@@ -6,7 +6,7 @@ import {
 	authServices,
 	userLoginServices,
 } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
@@ -47,16 +47,16 @@ const verifyTwoFactorChallengeController = factory.createHandlers(
 		const context = createServiceContext(c);
 
 		const challengeRes = await authServices.twoFactor.getChallenge(c);
-		if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+		if (challengeRes.error) throw new LucidError(challengeRes.error);
 		if (challengeRes.data.step !== "verify") {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				status: 400,
 				message: copy("server:core.auth.two.factor.verify.not.ready.message"),
 			});
 		}
 		if (!challengeRes.data.methods.app) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				status: 400,
 				message: copy("server:core.auth.two.factor.app.unavailable.message"),
@@ -78,7 +78,7 @@ const verifyTwoFactorChallengeController = factory.createHandlers(
 			userId: challengeRes.data.userId,
 			proof: proof,
 		});
-		if (verifyRes.error) throw new LucidAPIError(verifyRes.error);
+		if (verifyRes.error) throw new LucidError(verifyRes.error);
 
 		deleteCookie(c, constants.cookies.twoFactorChallenge, { path: "/" });
 
@@ -86,8 +86,8 @@ const verifyTwoFactorChallengeController = factory.createHandlers(
 			authServices.refreshToken.generateToken(c, challengeRes.data.userId),
 			authServices.accessToken.generateToken(c, challengeRes.data.userId),
 		]);
-		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-		if (accessRes.error) throw new LucidAPIError(accessRes.error);
+		if (refreshRes.error) throw new LucidError(refreshRes.error);
+		if (accessRes.error) throw new LucidError(accessRes.error);
 
 		const userAgent = c.req.header("user-agent") || null;
 
@@ -108,8 +108,7 @@ const verifyTwoFactorChallengeController = factory.createHandlers(
 			ipAddress: getClientAddress(c),
 			userAgent: userAgent,
 		});
-		if (userLoginTrackRes.error)
-			throw new LucidAPIError(userLoginTrackRes.error);
+		if (userLoginTrackRes.error) throw new LucidError(userLoginTrackRes.error);
 
 		c.status(204);
 		return c.body(null);

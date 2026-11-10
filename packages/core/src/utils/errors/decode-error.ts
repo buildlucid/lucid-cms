@@ -2,7 +2,7 @@ import constants from "../../constants/constants.js";
 import type { PublicErrorData } from "../../exports/types.js";
 import { isTranslatableCopy } from "../../libs/i18n/copy.js";
 import { translate } from "../../libs/i18n/translate.js";
-import LucidAPIError from "./lucid-api-error.js";
+import LucidError from "./lucid-error.js";
 
 const translateNestedErrorCopy = (value: unknown): unknown => {
 	if (isTranslatableCopy(value)) return translate(value);
@@ -19,7 +19,7 @@ const translateNestedErrorCopy = (value: unknown): unknown => {
 };
 
 const decodeError = (error: Error): PublicErrorData => {
-	if (error instanceof LucidAPIError) {
+	if (error instanceof LucidError) {
 		return {
 			name: error.error.name
 				? translate(error.error.name)

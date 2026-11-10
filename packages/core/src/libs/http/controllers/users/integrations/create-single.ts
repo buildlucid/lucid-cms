@@ -5,7 +5,7 @@ import {
 	userIntegrationParamsSchema,
 } from "../../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -44,7 +44,7 @@ const createSingleController = factory.createHandlers(
 		const { userId } = c.req.valid("param");
 		const auth = c.get("auth");
 		if (userId !== auth.id && !auth.superAdmin) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
 
@@ -66,7 +66,7 @@ const createSingleController = factory.createHandlers(
 			scopes,
 			userId,
 		});
-		if (integrationRes.error) throw new LucidAPIError(integrationRes.error);
+		if (integrationRes.error) throw new LucidError(integrationRes.error);
 
 		c.status(200);
 		return c.json(

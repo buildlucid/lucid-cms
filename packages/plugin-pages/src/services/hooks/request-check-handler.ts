@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import { getCollectionTableNames } from "@lucidcms/core/extension";
 import type { LucidHook } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
@@ -6,16 +7,18 @@ import checkUnpublishDependents from "../check-unpublish-dependents.js";
 
 /** Checks page routes and prevents requests from leaving published pages without required parents or route segments. */
 const requestCheckHandler =
-	(options: PluginOptionsInternal): LucidHook<"requests", "check">["handler"] =>
+	(
+		options: PluginOptionsInternal,
+	): LucidHook<"requests", "afterCheck">["handler"] =>
 	async ({ context, data }) => {
 		if (data.request.type === "unpublish") {
 			const blockersRes = await checkUnpublishDependents(context, {
 				options,
 				documents: data.documents,
 			});
-			if (blockersRes.error) return blockersRes;
+			if (blockersRes.error) throw new LucidError(blockersRes.error);
 			data.blockers.push(...blockersRes.data);
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		for (const collection of options.collections) {
@@ -30,7 +33,7 @@ const requestCheckHandler =
 			if (documents.length === 0 || !collectionInstance) continue;
 
 			const tablesRes = await getCollectionTableNames(context, collection.key);
-			if (tablesRes.error) return tablesRes;
+			if (tablesRes.error) throw new LucidError(tablesRes.error);
 
 			const targets = new Set(
 				documents.flatMap((document) => document.targets),
@@ -49,12 +52,12 @@ const requestCheckHandler =
 							versionId: document.versionId,
 						})),
 				});
-				if (blockersRes.error) return blockersRes;
+				if (blockersRes.error) throw new LucidError(blockersRes.error);
 				data.blockers.push(...blockersRes.data);
 			}
 		}
 
-		return { error: undefined, data: undefined };
+		return;
 	};
 
 export default requestCheckHandler;

@@ -62,7 +62,7 @@ export interface Deploy {
 	disabledBy: UserDisplay | null;
 	/** Hook events that queue the deploy, such as `documents.afterChange`. */
 	triggers: string[];
-	schedule: { cron: string; nextRunAt: string | null } | null;
+	schedule: { cron: string; timezone: string; nextRunAt: string | null } | null;
 	/** Where the host sends status updates, for providers that receive them. */
 	webhookUrl: string | null;
 	/** Triggers waiting out the debounce before they become a run. */

@@ -1,6 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import findJobs from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -17,20 +18,17 @@ export const findJobsAgentTool = () =>
 		parallelSafe: true,
 		handler: async ({ context, input }) => {
 			const result = await findJobs(context, { input });
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const count = result.data.output.pagination.count;
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy(
-						count === 1
-							? "admin:core.tools.jobs_find.summary.one"
-							: "admin:core.tools.jobs_find.summary",
-						{ data: { count } },
-					),
-				},
+				output: result.data.output,
+				summary: copy(
+					count === 1
+						? "admin:core.tools.jobs_find.summary.one"
+						: "admin:core.tools.jobs_find.summary",
+					{ data: { count } },
+				),
 			};
 		},
 	});

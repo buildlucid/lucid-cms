@@ -10,6 +10,7 @@ import {
 	DeployOverridesRepository,
 	JobsRepository,
 } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import resolveActorUser from "../../users/helpers/resolve-actor-user.js";
 import runDeploy from "../run.js";
 
@@ -21,7 +22,7 @@ export const createRunScheduledDeployJob = (
 	deploys: readonly DeployDefinition[],
 ) =>
 	defineJob({
-		name: "core:deploy-schedule",
+		key: "core:deploy-schedule",
 		version: 1,
 		input: z.object({ deploy: z.string() }),
 		transaction: true,
@@ -30,9 +31,9 @@ export const createRunScheduledDeployJob = (
 			deploy.schedule
 				? [
 						{
-							name: deploy.key,
-							cron: deploy.schedule,
-							timezone: "UTC",
+							key: deploy.key,
+							cron: deploy.schedule.cron,
+							timezone: deploy.schedule.timezone,
 							input: { deploy: deploy.key },
 						},
 					]
@@ -46,28 +47,25 @@ export const createRunScheduledDeployJob = (
 				select: ["created_by_user_id"],
 				jobId: execution.jobId,
 			});
-			if (job.error) return job;
+			if (job.error) throw new LucidError(job.error);
 
 			const userId = job.data?.created_by_user_id ?? null;
 			if (userId !== null) {
 				const user = await resolveActorUser(context, {
 					actor: { type: "user", userId },
 				});
-				if (user.error) return user;
+				if (user.error) throw new LucidError(user.error);
 				if (
 					!hasAccess({
 						user: user.data,
 						requiredPermissions: [getDeployPermission(input.deploy, "run")],
 					})
 				) {
-					return {
-						error: {
-							type: "authorisation",
-							status: 403,
-							message: copy("server:core.deploys.run.forbidden"),
-						},
-						data: undefined,
-					};
+					throw new LucidError({
+						type: "authorisation",
+						status: 403,
+						message: copy("server:core.deploys.run.forbidden"),
+					});
 				}
 			}
 
@@ -75,13 +73,13 @@ export const createRunScheduledDeployJob = (
 				select: ["id"],
 				where: [{ key: "deploy_key", operator: "=", value: input.deploy }],
 			});
-			if (override.error) return override;
+			if (override.error) throw new LucidError(override.error);
 			if (override.data) {
 				logger.info({
 					message: `Skipped the scheduled ${input.deploy} deploy because it's turned off`,
 					scope: constants.logScopes.deploys,
 				});
-				return { error: undefined, data: undefined };
+				return;
 			}
 
 			const run = await runDeploy(context, {
@@ -89,8 +87,6 @@ export const createRunScheduledDeployJob = (
 				source: "schedule",
 				userId,
 			});
-			if (run.error) return run;
-
-			return { error: undefined, data: undefined };
+			if (run.error) throw new LucidError(run.error);
 		},
 	});

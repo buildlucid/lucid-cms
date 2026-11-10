@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal, RouteScope } from "../../types/types.js";
 import getRouteVersionTypes from "../../utils/get-route-version-types.js";
@@ -24,7 +24,7 @@ const beforeDeleteHandler =
 			targetCollectionKey: meta.collectionKey,
 			deletedDocumentIds: data.ids,
 		});
-		if (segmentUpdatesRes.error) return segmentUpdatesRes;
+		if (segmentUpdatesRes.error) throw new LucidError(segmentUpdatesRes.error);
 
 		// ----------------------------------------------------------------
 		// Validation / Setup
@@ -33,10 +33,7 @@ const beforeDeleteHandler =
 			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
-			return {
-				error: undefined,
-				data: undefined,
-			};
+			return;
 		}
 
 		for (const versionType of getRouteVersionTypes(meta.collection)) {
@@ -48,7 +45,7 @@ const beforeDeleteHandler =
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,
 			});
-			if (docPathsRes.error) return docPathsRes;
+			if (docPathsRes.error) throw new LucidError(docPathsRes.error);
 
 			if (docPathsRes.data.length === 0) {
 				continue;
@@ -65,7 +62,8 @@ const beforeDeleteHandler =
 				excludeDocumentIds: [...data.ids, ...projectedDocumentIds],
 				duplicateMessage: copy("server:plugin.pages.path.duplicate.on.delete"),
 			});
-			if (checkPathUniquenessRes.error) return checkPathUniquenessRes;
+			if (checkPathUniquenessRes.error)
+				throw new LucidError(checkPathUniquenessRes.error);
 
 			const updateRes = await updateRouteFields(context, {
 				toolkit,
@@ -76,13 +74,10 @@ const beforeDeleteHandler =
 				scope,
 				tables: meta.collectionTableNames,
 			});
-			if (updateRes.error) return updateRes;
+			if (updateRes.error) throw new LucidError(updateRes.error);
 		}
 
-		return {
-			error: undefined,
-			data: undefined,
-		};
+		return;
 	};
 
 export default beforeDeleteHandler;

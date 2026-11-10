@@ -1,7 +1,8 @@
 import z from "zod";
 import constants from "../../../constants/constants.js";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import resolve from "../../notifications/resolve.js";
 import upsert from "../../notifications/upsert.js";
 import getStorageUsage from "../get-storage-usage.js";
@@ -13,7 +14,7 @@ import { storageNotification } from "../notifications/storage.js";
  * audience, climbing to a higher one notifies them again, and dropping below
  * the lowest resolves the notification.
  */
-const checkStorage: JobHandler = async ({ context }) => {
+const checkStorage: JobService = async ({ context }) => {
 	const storageLimit = context.config.media.limits.storageBytes;
 	if (storageLimit === false) return { error: undefined, data: undefined };
 
@@ -52,17 +53,20 @@ const checkStorage: JobHandler = async ({ context }) => {
 };
 
 export const checkStorageJob = defineJob({
-	name: "core:check-storage",
+	key: "core:check-storage",
 	version: 1,
 	input: z.null(),
 	transaction: true,
 	schedules: [
 		{
-			name: "automatic",
+			key: "automatic",
 			cron: "0 0 * * *",
 			timezone: "UTC",
 			input: null,
 		},
 	],
-	handler: checkStorage,
+	handler: async (args) => {
+		const result = await checkStorage(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 });

@@ -5,6 +5,7 @@ import {
 } from "../../../../libs/agent/screen.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import resolveBuilderScreen from "../../helpers/builder/resolve-builder-screen.js";
 import screenCall from "../../helpers/builder/screen-call.js";
 import { builderReadToolName } from "./constants.js";
@@ -33,17 +34,17 @@ export const builderReadAgentTool = () =>
 			response: () => agentScreenResponseSchema,
 			prepare: async ({ context, execution }) => {
 				const resolved = resolveBuilderScreen(context, execution);
-				if (resolved.error) return resolved;
+				if (resolved.error) throw new LucidError(resolved.error);
 
-				return {
-					error: undefined,
-					data: screenCall({
-						title,
-						call: { action: "read", screen: resolved.data.screen },
-					}),
-				};
+				return screenCall({
+					title,
+					call: { action: "read", screen: resolved.data.screen },
+				});
 			},
 		},
-		handler: ({ context, input, execution, response }) =>
-			handler(context, { input, execution, response }),
+		handler: async ({ context, input, execution, response }) => {
+			const result = await handler(context, { input, execution, response });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

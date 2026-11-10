@@ -2,6 +2,7 @@ import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import writeChanges from "../helpers/write-changes.js";
 import type { DocumentWriteToolOptions } from "../types.js";
@@ -52,7 +53,7 @@ export const updateDocumentAgentTool = (
 					options.collections,
 				),
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const { output } = result.data;
 			const labels = context.config.collections.find(
@@ -60,23 +61,20 @@ export const updateDocumentAgentTool = (
 			)?.getData.details.labels;
 
 			return {
-				error: undefined,
-				data: {
-					output,
-					changes: writeChanges(output),
-					summary: copy(
-						output.outcome === "requested"
-							? "admin:core.tools.documents_update.summary.requested"
-							: "admin:core.tools.documents_update.summary",
-						{
-							data: {
-								id: output.document.id,
-								collection:
-									context.translate(labels?.singular) ?? input.collectionKey,
-							},
+				output,
+				changes: writeChanges(output),
+				summary: copy(
+					output.outcome === "requested"
+						? "admin:core.tools.documents_update.summary.requested"
+						: "admin:core.tools.documents_update.summary",
+					{
+						data: {
+							id: output.document.id,
+							collection:
+								context.translate(labels?.singular) ?? input.collectionKey,
 						},
-					),
-				},
+					},
+				),
 			};
 		},
 	});

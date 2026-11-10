@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/roles.js";
 import { roleServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -41,7 +41,7 @@ const getSingleController = factory.createHandlers(
 		})(context, {
 			id: Number.parseInt(id, 10),
 		});
-		if (role.error) throw new LucidAPIError(role.error);
+		if (role.error) throw new LucidError(role.error);
 
 		c.status(200);
 		return c.json(

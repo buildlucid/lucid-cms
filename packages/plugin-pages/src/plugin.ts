@@ -117,12 +117,12 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				});
 				draft.hooks.push({
 					service: "documents",
-					event: "versionPromote",
+					event: "afterVersionPromote",
 					handler: versionPromoteHandler(options),
 				});
 				draft.hooks.push({
 					service: "documents",
-					event: "versionCapture",
+					event: "afterVersionCapture",
 					handler: versionCaptureHandler(options),
 				});
 				draft.hooks.push({
@@ -132,17 +132,17 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				});
 				draft.hooks.push({
 					service: "requests",
-					event: "check",
+					event: "afterCheck",
 					handler: requestCheckHandler(options),
 				});
 				draft.hooks.push({
 					service: "requests",
-					event: "completed",
+					event: "afterComplete",
 					handler: requestCompletedHandler(options),
 				});
 				draft.hooks.push({
 					service: "requests",
-					event: "documentRemoved",
+					event: "afterDocumentRemove",
 					handler: requestDocumentRemovedHandler(options),
 				});
 			}

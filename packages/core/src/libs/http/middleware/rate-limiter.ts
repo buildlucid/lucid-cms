@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../exports/types.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
 import { supportsKVIncrement } from "../../kv/utils.js";
@@ -67,7 +67,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 				case "user": {
 					const auth = c.get("auth");
 					if (!auth) {
-						throw new LucidAPIError({
+						throw new LucidError({
 							type: "authorisation",
 							code: "authorisation",
 							message: copy("server:core.rate.limit.authentication.required"),
@@ -80,7 +80,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 				case "client": {
 					const externalAuth = c.get("externalAuth");
 					if (!externalAuth) {
-						throw new LucidAPIError({
+						throw new LucidError({
 							type: "authorisation",
 							message: copy("server:core.rate.limit.authentication.required"),
 							status: 401,
@@ -97,7 +97,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 				default: {
 					const address = getClientAddress(c);
 					if (!address) {
-						throw new LucidAPIError({
+						throw new LucidError({
 							type: "authorisation",
 							message: copy("server:core.rate.limit.ip.address.required"),
 							status: 401,
@@ -158,7 +158,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 
 		if (count > options.limit) {
 			c.header("Retry-After", resetSeconds.toString());
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "rate_limit",
 				code: "rate_limit",
 				message: copy("server:core.rate.limit.exceeded.message", {

@@ -22,7 +22,7 @@ import type { DefineDeployOptions, DeployDefinition } from "./types.js";
  * 				data.change?.type === "published" && data.change.version === "production",
  * 		},
  * 	],
- * 	schedule: "0 4 * * *",
+ * 	schedule: { cron: "0 4 * * *" },
  * });
  */
 const defineDeploy = (options: DefineDeployOptions): DeployDefinition => ({
@@ -36,7 +36,12 @@ const defineDeploy = (options: DefineDeployOptions): DeployDefinition => ({
 	})),
 	provider: options.provider,
 	triggers: options.triggers ?? [],
-	schedule: options.schedule?.trim().split(/\s+/).join(" ") ?? null,
+	schedule: options.schedule
+		? {
+				cron: options.schedule.cron.trim().split(/\s+/).join(" "),
+				timezone: (options.schedule.timezone ?? "UTC").trim(),
+			}
+		: null,
 	debounceSeconds: options.debounceSeconds ?? constants.deploys.debounceSeconds,
 	maxWaitSeconds: options.maxWaitSeconds ?? constants.deploys.maxWaitSeconds,
 	timeoutSeconds:

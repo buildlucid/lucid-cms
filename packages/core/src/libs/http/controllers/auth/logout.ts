@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { authServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
@@ -29,9 +29,9 @@ const logoutController = factory.createHandlers(
 			authServices.csrf.clearToken(c),
 		]);
 
-		if (clearRefreshRes.error) throw new LucidAPIError(clearRefreshRes.error);
-		if (clearAccessRes.error) throw new LucidAPIError(clearAccessRes.error);
-		if (clearCSRFRes.error) throw new LucidAPIError(clearCSRFRes.error);
+		if (clearRefreshRes.error) throw new LucidError(clearRefreshRes.error);
+		if (clearAccessRes.error) throw new LucidError(clearAccessRes.error);
+		if (clearCSRFRes.error) throw new LucidError(clearCSRFRes.error);
 
 		c.status(204);
 		return c.body(null);

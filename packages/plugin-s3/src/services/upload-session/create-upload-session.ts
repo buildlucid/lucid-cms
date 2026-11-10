@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceCreateUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { DEFAULT_PART_SIZE, PRESIGNED_URL_EXPIRY } from "../../constants.js";
@@ -21,15 +21,12 @@ export const createUploadSession = (
 	return async (_context, props) => {
 		try {
 			if (props.size === 0) {
-				return {
-					error: undefined,
-					data: await createSingleUploadSession(
-						client,
-						pluginOptions,
-						props.key,
-						props,
-					),
-				};
+				return await createSingleUploadSession(
+					client,
+					pluginOptions,
+					props.key,
+					props,
+				);
 			}
 
 			const headers = new Headers();
@@ -43,55 +40,44 @@ export const createUploadSession = (
 			);
 			const response = await fetch(signed);
 			if (!response.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.upload.failed", {
-							data: {
-								status: response.status,
-								statusText: response.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.upload.failed", {
+						data: {
+							status: response.status,
+							statusText: response.statusText,
+						},
+					}),
+				});
 			}
 
 			const uploadId = extractXmlValue(await response.text(), "UploadId");
 			if (!uploadId) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.upload.sessions.upload.id.missing"),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.upload.sessions.upload.id.missing"),
+				});
 			}
 
 			return {
-				error: undefined,
-				data: {
-					protocol: "multipart-parts",
-					key: props.key,
-					uploadId,
-					partSize: DEFAULT_PART_SIZE,
-					expiresAt: new Date(
-						Date.now() + PRESIGNED_URL_EXPIRY * 1000,
-					).toISOString(),
-					uploadedParts: [],
-				},
+				protocol: "multipart-parts",
+				key: props.key,
+				uploadId,
+				partSize: DEFAULT_PART_SIZE,
+				expiresAt: new Date(
+					Date.now() + PRESIGNED_URL_EXPIRY * 1000,
+				).toISOString(),
+				uploadedParts: [],
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 };

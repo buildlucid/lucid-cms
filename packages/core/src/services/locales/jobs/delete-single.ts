@@ -1,15 +1,16 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import {
 	DocumentReferencesRepository,
 	LocalesRepository,
 } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 
 const input = z.object({ localeCode: z.string().min(1) });
 
-const deleteLocale: JobHandler<z.infer<typeof input>> = async ({
+const deleteLocale: JobService<z.infer<typeof input>> = async ({
 	context,
 	input,
 }) => {
@@ -52,9 +53,12 @@ const deleteLocale: JobHandler<z.infer<typeof input>> = async ({
  * Deletes a single locale
  */
 export const deleteLocaleJob = defineJob({
-	name: "core:delete-locale",
+	key: "core:delete-locale",
 	version: 1,
 	input,
-	handler: deleteLocale,
+	handler: async (args) => {
+		const result = await deleteLocale(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	describe: ({ input: { localeCode } }) => ({ localeCode }),
 });

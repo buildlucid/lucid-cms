@@ -24,17 +24,17 @@ const checkJobDefinitions = async (
 		}
 		definitionKeys.add(definitionKey);
 
-		if (!/^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._-]*$/.test(definition.name)) {
+		if (!/^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._-]*$/.test(definition.key)) {
 			throw new Error(
 				translate("server:core.config.job.name.invalid", {
-					data: { job: definition.name },
+					data: { job: definition.key },
 				}),
 			);
 		}
 		if (!Number.isSafeInteger(definition.version) || definition.version < 1) {
 			throw new Error(
 				translate("server:core.config.job.version.invalid", {
-					data: { job: definition.name },
+					data: { job: definition.key },
 				}),
 			);
 		}
@@ -49,30 +49,30 @@ const checkJobDefinitions = async (
 		) {
 			throw new Error(
 				translate("server:core.config.job.retry.invalid", {
-					data: { job: definition.name },
+					data: { job: definition.key },
 				}),
 			);
 		}
 
-		const scheduleNames = new Set<string>();
+		const scheduleKeys = new Set<string>();
 		const runtime = getJobDefinitionRuntime(definition);
 		for (const schedule of definition.schedules) {
-			const scheduleKey = `${definition.name}/${schedule.name}`;
-			if (!/^[a-z0-9][a-z0-9._-]*$/.test(schedule.name)) {
+			const scheduleKey = `${definition.key}/${schedule.key}`;
+			if (!/^[a-z0-9][a-z0-9._-]*$/.test(schedule.key)) {
 				throw new Error(
-					translate("server:core.config.job.schedule.name.invalid", {
+					translate("server:core.config.job.schedule.key.invalid", {
 						data: { schedule: scheduleKey },
 					}),
 				);
 			}
-			if (scheduleNames.has(schedule.name)) {
+			if (scheduleKeys.has(schedule.key)) {
 				throw new Error(
 					translate("server:core.config.job.schedule.duplicate", {
 						data: { schedule: scheduleKey },
 					}),
 				);
 			}
-			scheduleNames.add(schedule.name);
+			scheduleKeys.add(schedule.key);
 
 			if (schedule.cron.split(/\s+/).length !== 5) {
 				throw new Error(

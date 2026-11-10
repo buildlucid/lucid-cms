@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthConnectionResponseSchema } from "../../../../schemas/oauth.js";
 import { oauthServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -32,7 +32,7 @@ const getSystemConnectionsController = factory.createHandlers(
 		})(context, {
 			principalType: "system",
 		});
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		return c.json(formatAPIResponse(c, { data: result.data }));
 	},

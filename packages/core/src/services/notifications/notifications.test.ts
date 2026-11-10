@@ -245,7 +245,7 @@ test("an upsert keeps the audience in step and emails people it adds", async () 
 			await context.db.kysely
 				.selectFrom("lucid_jobs")
 				.select(["job_id", "payload"])
-				.where("job_name", "=", "core:send-notification-emails")
+				.where("job_key", "=", "core:send-notification-emails")
 				.execute()
 		).filter((job) => job.payload?.notificationId === id);
 	const recipients = (id: number) =>

@@ -1,5 +1,5 @@
 import { copy } from "../../../libs/i18n/index.js";
-import type { MediaStorageAdapterInstance } from "../../../libs/media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../../../libs/media-storage/types.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -7,7 +7,7 @@ import type {
 
 const checkHasMediaStorage = async (
 	context: ServiceContext,
-): ServiceResponse<MediaStorageAdapterInstance> => {
+): ServiceResponse<ResolvedMediaStorageAdapter> => {
 	if (!context.mediaStorage) {
 		return {
 			error: {

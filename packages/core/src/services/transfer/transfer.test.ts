@@ -6,7 +6,7 @@ import CollectionBuilder from "../../libs/collection/builders/collection-builder
 import planCollectionMigrations from "../../libs/collection/plan-collection-migrations.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import { toWebReadable } from "../../libs/media-storage/normalize-body.js";
-import type { MediaStorageAdapterInstance } from "../../libs/media-storage/types.js";
+import type { ResolvedMediaStorageAdapter } from "../../libs/media-storage/types.js";
 import createToolkit from "../../libs/toolkit/create-toolkit.js";
 import type { TransferExportFile } from "../../libs/transfer/types.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
@@ -22,7 +22,7 @@ const png = Uint8Array.from(
 );
 
 /** Keeps uploaded files in memory, so each test site has its own storage. */
-const createMemoryStorage = (): MediaStorageAdapterInstance => {
+const createMemoryStorage = (): ResolvedMediaStorageAdapter => {
 	const files = new Map<string, Uint8Array>();
 	const missing = {
 		error: { status: 404, message: copy.literal("Missing file") },

@@ -127,6 +127,7 @@ let context: ServiceContext;
 let userId: number;
 let connectionId: number;
 let livePermissions: string[] = [];
+//* the handler mocks return service results, as core's own tool services do, and each tool throws for them
 const writeHandler = vi.fn(async () => ({
 	error: undefined,
 	data: { output: { done: true }, summary: "Completed the document action." },
@@ -137,7 +138,11 @@ const writeTool = defineAgentTool({
 	input: z.object({ content: z.string().optional() }),
 	output: z.object({ done: z.boolean() }),
 	permissions: [],
-	handler: writeHandler,
+	handler: async (args) => {
+		const result = await writeHandler(args);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 });
 const restrictedWriteTool = defineAgentTool({
 	name: "test_restricted_write",
@@ -146,7 +151,11 @@ const restrictedWriteTool = defineAgentTool({
 	output: z.object({ done: z.boolean() }),
 	permissions: [],
 	inputPermissions: () => ["users:create"],
-	handler: writeHandler,
+	handler: async (args) => {
+		const result = await writeHandler(args);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 });
 const readHandler = vi.fn(async () => ({
 	error: undefined,
@@ -159,7 +168,11 @@ const readTool = defineAgentTool({
 	output: z.object({ done: z.boolean() }),
 	permissions: [],
 	readOnly: true,
-	handler: readHandler,
+	handler: async (args) => {
+		const result = await readHandler(args);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 });
 const parallelHandler = vi.fn<
 	AgentToolHandler<
@@ -184,7 +197,11 @@ const parallelTool = defineAgentTool({
 		id === "restricted" ? ["users:create"] : [],
 	readOnly: true,
 	parallelSafe: true,
-	handler: parallelHandler,
+	handler: async (args) => {
+		const result = await parallelHandler(args);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 });
 const prepareSelection = vi.fn(async () => ({
 	error: undefined,
@@ -211,10 +228,17 @@ const selectionOptions = {
 		data: z.object({ ids: z.array(z.number()) }),
 		response: ({ data }: { data: { ids: number[] } }) =>
 			z.object({ id: z.number().refine((id) => data.ids.includes(id)) }),
-		prepare: prepareSelection,
+		prepare: async (args) => {
+			const result = await prepareSelection(args);
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	},
-	handler: async ({ response }: { response: { id: number } }) =>
-		selectedHandler(response),
+	handler: async ({ response }: { response: { id: number } }) => {
+		const result = await selectedHandler(response);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 };
 const selectionTool = defineAgentTool({
 	...selectionOptions,
@@ -258,23 +282,24 @@ const stepOptions = {
 		data: z.object({ step: z.number() }),
 		response: () => z.object({ value: z.string() }),
 		prepare: async () => ({
-			error: undefined,
-			data: {
-				interaction: {
-					title: "First question",
-					placement: "inline" as const,
-					data: { step: 1 },
-				},
+			interaction: {
+				title: "First question",
+				placement: "inline" as const,
+				data: { step: 1 },
 			},
 		}),
 	},
-	handler: ({
+	handler: async ({
 		data,
 		response,
 	}: {
 		data: { step: number };
 		response: { value: string };
-	}) => stepHandler({ data, response }),
+	}) => {
+		const result = await stepHandler({ data, response });
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 };
 const stepTool = defineAgentTool({
 	...stepOptions,
@@ -307,9 +332,8 @@ const skippableTool = defineAgentTool({
 		data: z.object({}),
 		response: () => z.object({ value: z.string() }),
 		skippable: true,
-		prepare: async ({ input }) => ({
-			error: undefined,
-			data: input.ask
+		prepare: async ({ input }) =>
+			input.ask
 				? {
 						interaction: {
 							title: "Pick a value",
@@ -318,9 +342,12 @@ const skippableTool = defineAgentTool({
 						},
 					}
 				: { proceed: true as const },
-		}),
 	},
-	handler: ({ response }) => skippableHandler({ response }),
+	handler: async ({ response }) => {
+		const result = await skippableHandler({ response });
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 });
 const screenHandler = vi.fn(async () => ({
 	error: undefined,
@@ -338,17 +365,18 @@ const screenTool = defineAgentTool({
 		data: z.object({ action: z.literal("read") }),
 		response: () => z.object({ status: z.literal("done") }),
 		prepare: async () => ({
-			error: undefined,
-			data: {
-				interaction: {
-					title: "Read the screen",
-					placement: "composer" as const,
-					data: { action: "read" as const },
-				},
+			interaction: {
+				title: "Read the screen",
+				placement: "composer" as const,
+				data: { action: "read" as const },
 			},
 		}),
 	},
-	handler: screenHandler,
+	handler: async (args) => {
+		const result = await screenHandler(args);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 });
 const confirmationTool = defineAgentTool({
 	name: "test_confirmation",
@@ -358,7 +386,11 @@ const confirmationTool = defineAgentTool({
 	requiresConfirmation: true,
 	input: z.object({}),
 	output: z.object({ done: z.boolean() }),
-	handler: writeHandler,
+	handler: async (args) => {
+		const result = await writeHandler(args);
+		if (result.error) throw new LucidError(result.error);
+		return result.data;
+	},
 });
 const testAgent = defineAgent({
 	key: "test",
@@ -2293,14 +2325,13 @@ describe("agent runner", () => {
 					{
 						service: "notifications",
 						event: "beforeSend",
-						handler: async () => ({
-							error: {
+						handler: async () => {
+							throw new LucidError({
 								type: "basic",
 								status: 500,
 								message: copy.literal("Refused"),
-							},
-							data: undefined,
-						}),
+							});
+						},
 					},
 				],
 			},
@@ -2340,10 +2371,10 @@ describe("agent runner", () => {
 					...context.config.hooks,
 					{
 						service: "agent",
-						event: "runFinished",
+						event: "afterRunFinish",
 						handler: async ({ meta, data }) => {
 							finished.push({ meta, data });
-							return { error: undefined, data: undefined };
+							return;
 						},
 					},
 				],
@@ -2378,15 +2409,14 @@ describe("agent runner", () => {
 					...context.config.hooks,
 					{
 						service: "agent",
-						event: "runFinished",
-						handler: async () => ({
-							error: {
+						event: "afterRunFinish",
+						handler: async () => {
+							throw new LucidError({
 								type: "basic",
 								status: 500,
 								message: copy.literal("Refused"),
-							},
-							data: undefined,
-						}),
+							});
+						},
 					},
 				],
 			},

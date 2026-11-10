@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { subagentWaitToolName } from "../subagent-wait/constants.js";
 import { subagentMessageToolName } from "./constants.js";
@@ -16,9 +17,15 @@ export const subagentMessageAgentTool = () =>
 		output: outputSchema,
 		permissions: [],
 		available: ({ mode }) => mode !== "subagent",
-		handler: ({ context, input, execution }) =>
-			serviceWrapper(handler, { transaction: true })(context, {
-				input,
-				execution,
-			}),
+		handler: async ({ context, input, execution }) => {
+			const result = await serviceWrapper(handler, { transaction: true })(
+				context,
+				{
+					input,
+					execution,
+				},
+			);
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

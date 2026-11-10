@@ -2,7 +2,7 @@ import { Readable } from "node:stream";
 import {
 	copy,
 	defineRoute,
-	LucidAPIError,
+	LucidError,
 	middleware,
 	serviceWrapper,
 } from "@lucidcms/core";
@@ -56,7 +56,7 @@ const routes = () => [
 				fileName: query.fileName,
 				extension: query.extension,
 			});
-			if (downloadMedia.error) throw new LucidAPIError(downloadMedia.error);
+			if (downloadMedia.error) throw new LucidError(downloadMedia.error);
 
 			const contentDisposition = buildDownloadContentDisposition({
 				key: query.key,
@@ -127,7 +127,7 @@ const routes = () => [
 				token: query.token,
 				timestamp: query.timestamp,
 			});
-			if (uploadMedia.error) throw new LucidAPIError(uploadMedia.error);
+			if (uploadMedia.error) throw new LucidError(uploadMedia.error);
 
 			hono.status(204);
 			return hono.body(null);

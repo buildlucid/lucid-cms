@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
@@ -58,7 +58,7 @@ const invitationPasskeyOptionsController = factory.createHandlers(
 		)(context, {
 			token: token,
 		});
-		if (optionsRes.error) throw new LucidAPIError(optionsRes.error);
+		if (optionsRes.error) throw new LucidError(optionsRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.status(200);

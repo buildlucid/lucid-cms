@@ -9,10 +9,7 @@ export const addTool = defineMcpTool({
 	input: addInput,
 	output: z.object({ sum: z.number() }),
 	scopes: [],
-	handler: async ({ input }) => ({
-		error: undefined,
-		data: { output: { sum: input.a + input.b } },
-	}),
+	handler: async ({ input }) => ({ output: { sum: input.a + input.b } }),
 	annotations: { readOnlyHint: true },
 });
 
@@ -24,11 +21,8 @@ export const addAgentTool = defineAgentTool({
 	output: z.object({ sum: z.number() }),
 	permissions: [],
 	handler: async ({ input }) => ({
-		error: undefined,
-		data: {
-			output: { sum: input.a + input.b },
-			summary: `Added ${input.a} and ${input.b} to get ${input.a + input.b}`,
-		},
+		output: { sum: input.a + input.b },
+		summary: `Added ${input.a} and ${input.b} to get ${input.a + input.b}`,
 	}),
 	readOnly: true,
 });

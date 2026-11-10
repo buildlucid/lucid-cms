@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/jobs.js";
 import { jobServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -44,7 +44,7 @@ const getSingleController = factory.createHandlers(
 		})(context, {
 			id: Number.parseInt(id, 10),
 		});
-		if (job.error) throw new LucidAPIError(job.error);
+		if (job.error) throw new LucidError(job.error);
 
 		c.status(200);
 		return c.json(

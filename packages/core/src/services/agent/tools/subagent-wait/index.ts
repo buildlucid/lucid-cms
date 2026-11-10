@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import { subagentReadToolName } from "../subagent-read/constants.js";
 import { subagentWaitToolName } from "./constants.js";
 import collect from "./handler.js";
@@ -33,9 +34,15 @@ export const subagentWaitAgentTool = () =>
 			version: 1,
 			data: waitDataSchema,
 			response: () => waitResponseSchema,
-			prepare: ({ context, input, execution }) =>
-				prepare(context, { input, execution }),
+			prepare: async ({ context, input, execution }) => {
+				const result = await prepare(context, { input, execution });
+				if (result.error) throw new LucidError(result.error);
+				return result.data;
+			},
 		},
-		handler: ({ context, execution, data }) =>
-			collect(context, { execution, wait: data }),
+		handler: async ({ context, execution, data }) => {
+			const result = await collect(context, { execution, wait: data });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

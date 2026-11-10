@@ -2,17 +2,18 @@ import z from "zod";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import {
 	CollectionsRepository,
 	DocumentReferencesRepository,
 } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import notifyCollection from "../../document-references/notify-collection.js";
 import detachDocuments from "../../requests/helpers/detach-documents.js";
 
 const input = z.object({ collectionKey: z.string().min(1) });
 
-const deleteCollection: JobHandler<z.infer<typeof input>> = async ({
+const deleteCollection: JobService<z.infer<typeof input>> = async ({
 	context,
 	input,
 }) => {
@@ -65,10 +66,13 @@ const deleteCollection: JobHandler<z.infer<typeof input>> = async ({
 };
 
 export const deleteCollectionJob = defineJob({
-	name: "core:delete-collection",
+	key: "core:delete-collection",
 	version: 1,
 	input,
 	transaction: true,
-	handler: deleteCollection,
+	handler: async (args) => {
+		const result = await deleteCollection(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	describe: ({ input: { collectionKey } }) => ({ collectionKey }),
 });

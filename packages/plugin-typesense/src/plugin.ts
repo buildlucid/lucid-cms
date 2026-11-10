@@ -42,8 +42,8 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 				{
 					service: "documents",
 					event: "afterChange",
-					handler: ({ context, toolkit, data, meta }) =>
-						recordChange(context, {
+					handler: async ({ context, toolkit, data, meta }) => {
+						const result = await recordChange(context, {
 							toolkit,
 							options,
 							job,
@@ -52,18 +52,24 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 								collectionKey: meta.collectionKey,
 								ids: data.ids,
 							},
-						}),
+						});
+						if (result.error) throw new LucidError(result.error);
+						return result.data;
+					},
 				},
 				{
 					service: "media",
 					event: "afterChange",
-					handler: ({ context, toolkit, data }) =>
-						recordChange(context, {
+					handler: async ({ context, toolkit, data }) => {
+						const result = await recordChange(context, {
 							toolkit,
 							options,
 							job,
 							change: { kind: "media", ids: data.ids },
-						}),
+						});
+						if (result.error) throw new LucidError(result.error);
+						return result.data;
+					},
 				},
 			);
 		},

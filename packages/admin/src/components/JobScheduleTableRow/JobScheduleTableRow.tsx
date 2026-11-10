@@ -93,8 +93,8 @@ const JobScheduleTableRow: Component<JobScheduleRowProps> = (props) => {
 			/>
 			<JobScheduleDetailsCell column="name" schedule={props.schedule} />
 			<Table.Text
-				column="jobName"
-				text={`${props.schedule.jobName} v${props.schedule.jobVersion}`}
+				column="jobKey"
+				text={`${props.schedule.jobKey} v${props.schedule.jobVersion}`}
 				minWidth={260}
 			/>
 			<Table.Date

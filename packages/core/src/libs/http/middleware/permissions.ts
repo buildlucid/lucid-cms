@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import { copy } from "../../i18n/index.js";
 import {
 	matchPermissions,
@@ -26,7 +26,7 @@ export const permissionCheck = (
 				matchPermissions(user.permissions, requirement)));
 
 	if (!access) {
-		throw new LucidAPIError({
+		throw new LucidError({
 			type: "basic",
 			name: copy("server:core.permissions.error.name"),
 			message: copy("server:core.permissions.denied"),

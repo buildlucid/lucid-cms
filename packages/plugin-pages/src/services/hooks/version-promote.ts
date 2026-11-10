@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import getTargetCollection from "../get-target-collection.js";
@@ -13,7 +14,7 @@ import refreshVersionRoute from "./helpers/refresh-version-route.js";
 const versionPromoteHandler =
 	(
 		options: PluginOptionsInternal,
-	): LucidHookDocuments<"versionPromote">["handler"] =>
+	): LucidHookDocuments<"afterVersionPromote">["handler"] =>
 	async ({ context, toolkit, data, meta }) => {
 		const targetCollectionRes = getTargetCollection({
 			options,
@@ -29,16 +30,18 @@ const versionPromoteHandler =
 				documentId: data.documentId,
 				versionId: data.versionId,
 			});
-			if (refreshRes.error) return refreshRes;
+			if (refreshRes.error) throw new LucidError(refreshRes.error);
 		}
 
-		return propagateRouteSegmentUpdates(context, {
+		const result = await propagateRouteSegmentUpdates(context, {
 			toolkit,
 			options,
 			targetCollectionKey: meta.collectionKey,
 			targetDocumentId: data.documentId,
 			targetVersionType: data.versionType,
 		});
+		if (result.error) throw new LucidError(result.error);
+		return;
 	};
 
 export default versionPromoteHandler;

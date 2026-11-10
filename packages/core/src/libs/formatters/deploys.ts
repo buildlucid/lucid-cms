@@ -91,7 +91,7 @@ const formatDeploy = (props: {
 		(trigger) => `${trigger.service}.${String(trigger.event)}`,
 	),
 	schedule: props.deploy.schedule
-		? { cron: props.deploy.schedule, nextRunAt: props.nextRunAt }
+		? { ...props.deploy.schedule, nextRunAt: props.nextRunAt }
 		: null,
 	webhookUrl: props.webhookUrl,
 	pending: props.pending,

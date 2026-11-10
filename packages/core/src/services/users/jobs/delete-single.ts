@@ -1,9 +1,10 @@
 import z from "zod";
 import formatter from "../../../libs/formatters/index.js";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import systemActor from "../../../libs/permission/system-actor.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import { invalidateAuthCache } from "../../auth/helpers/auth-cache.js";
 import removeTarget from "../../document-references/remove-target.js";
 import checkNotLastUser from "../checks/check-not-last-user.js";
@@ -12,7 +13,7 @@ import deleteOwnedMedia from "../helpers/delete-owned-media.js";
 
 const input = z.object({ id: z.number().int().positive() });
 
-const deleteUser: JobHandler<z.infer<typeof input>> = async ({
+const deleteUser: JobService<z.infer<typeof input>> = async ({
 	context,
 	input,
 }) => {
@@ -77,9 +78,12 @@ const deleteUser: JobHandler<z.infer<typeof input>> = async ({
 };
 
 export const deleteUserJob = defineJob({
-	name: "core:delete-user",
+	key: "core:delete-user",
 	version: 1,
 	input,
-	handler: deleteUser,
+	handler: async (args) => {
+		const result = await deleteUser(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	describe: ({ input: { id } }) => ({ userId: id }),
 });

@@ -6,6 +6,7 @@ import type {
 	HookServiceHandlers,
 } from "../hooks/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
+import type { ScheduleTiming } from "../jobs/types.js";
 import type { Toolkit } from "../toolkit/types.js";
 
 /** Hook events that only run side effects. Transform hooks such as `afterFetch` also run on reads. */
@@ -128,8 +129,8 @@ export type DefineDeployOptions = {
 	provider: DeployProviderInstance;
 	/** Hook events that queue the deploy. Queued triggers wait out `debounceSeconds` and start one run. */
 	triggers?: readonly DeployTrigger[];
-	/** A five-field cron expression, in UTC, for scheduled runs. */
-	schedule?: string;
+	/** When scheduled runs start. */
+	schedule?: ScheduleTiming;
 	/** Seconds of quiet after the last trigger before the run starts. Defaults to 60. */
 	debounceSeconds?: number;
 	/** Seconds a run waits at most after its first trigger, however many follow. Defaults to 900. */
@@ -147,7 +148,7 @@ export type DeployDefinition = {
 	readonly links: readonly { label: ResolvedAdminCopy; url: string }[];
 	readonly provider: DeployProviderInstance;
 	readonly triggers: readonly DeployTrigger[];
-	readonly schedule: string | null;
+	readonly schedule: Required<ScheduleTiming> | null;
 	readonly debounceSeconds: number;
 	readonly maxWaitSeconds: number;
 	readonly timeoutSeconds: number;

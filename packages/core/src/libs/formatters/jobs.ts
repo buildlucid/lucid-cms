@@ -15,7 +15,7 @@ type JobPropT = Pick<
 	Select<LucidJobs>,
 	| "id"
 	| "job_id"
-	| "job_name"
+	| "job_key"
 	| "job_version"
 	| "trigger_type"
 	| "schedule_key"
@@ -67,7 +67,7 @@ const formatSingle = (props: { job: JobPropT }): Job => {
 	return {
 		id: props.job.id,
 		jobId: props.job.job_id,
-		jobName: props.job.job_name,
+		jobKey: props.job.job_key,
 		jobVersion: props.job.job_version,
 		triggerType: props.job.trigger_type,
 		scheduleKey: props.job.schedule_key,
@@ -118,8 +118,8 @@ const formatSchedule = (props: {
 
 	return {
 		key: props.binding.key,
-		name: props.binding.schedule.name,
-		jobName: props.binding.job.name,
+		shortKey: props.binding.schedule.key,
+		jobKey: props.binding.job.key,
 		jobVersion: props.binding.job.version,
 		cron: props.binding.schedule.cron,
 		timezone: props.binding.schedule.timezone,

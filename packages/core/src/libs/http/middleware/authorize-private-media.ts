@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import {
 	canAccessMedia,
 	getKeyVisibility,
@@ -13,10 +13,8 @@ import { MediaRepository } from "../../repositories/index.js";
 import { authenticationCheck } from "./authenticate.js";
 
 /**
- * Requires admin authentication for private media keys. Public keys pass through.
- * Personal and system media is also checked against who is asking, so only its
- * owner, or holders of `media:read-all`, can stream it.
- * Register after validation of the route's key parameter.
+ * Allows public media through; private media requires admin authentication. Personal and system
+ * media requires ownership or `media:read-all`. Register after key validation.
  */
 const authorizePrivateMedia = createMiddleware(
 	async (c: LucidHonoContext, next) => {
@@ -24,7 +22,7 @@ const authorizePrivateMedia = createMiddleware(
 
 		//* try and use this middleware after the validate params one in the controller so this isnt ever hit - validation middleware will have nicer error messages
 		if (!key) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "validation",
 				message: copy("server:core.errors.validation.message"),
 			});
@@ -41,7 +39,7 @@ const authorizePrivateMedia = createMiddleware(
 				select: ["owner_user_id", "is_system"],
 				where: [{ key: "key", operator: "=", value: normalizedKey }],
 			});
-			if (mediaRes.error) throw new LucidAPIError(mediaRes.error);
+			if (mediaRes.error) throw new LucidError(mediaRes.error);
 
 			if (
 				mediaRes.data &&
@@ -51,7 +49,7 @@ const authorizePrivateMedia = createMiddleware(
 					action: "read",
 				})
 			) {
-				throw new LucidAPIError({
+				throw new LucidError({
 					type: "basic",
 					name: copy("server:core.media.not.found.name"),
 					message: copy("server:core.media.not.found.message"),

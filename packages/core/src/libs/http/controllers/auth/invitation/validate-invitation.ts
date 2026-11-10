@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
@@ -51,7 +51,7 @@ const validateInvitationController = factory.createHandlers(
 		)(context, {
 			token,
 		});
-		if (validateRes.error) throw new LucidAPIError(validateRes.error);
+		if (validateRes.error) throw new LucidError(validateRes.error);
 
 		c.status(200);
 		return c.json(

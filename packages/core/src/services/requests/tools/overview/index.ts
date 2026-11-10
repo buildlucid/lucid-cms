@@ -5,6 +5,7 @@ import {
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import getOverview from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -30,14 +31,11 @@ export const getRequestsOverviewAgentTool = (
 					options.collections,
 				),
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy("admin:core.tools.requests_overview.summary"),
-				},
+				output: result.data.output,
+				summary: copy("admin:core.tools.requests_overview.summary"),
 			};
 		},
 	});

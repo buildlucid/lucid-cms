@@ -3,7 +3,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { authServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -29,7 +29,7 @@ const getStatusController = factory.createHandlers(
 			accessToken: getCookie(c, constants.cookies.accessToken),
 			refreshToken: getCookie(c, constants.cookies.refreshToken),
 		});
-		if (statusRes.error) throw new LucidAPIError(statusRes.error);
+		if (statusRes.error) throw new LucidError(statusRes.error);
 
 		c.header("Cache-Control", "no-store");
 

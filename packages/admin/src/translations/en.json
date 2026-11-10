@@ -818,7 +818,7 @@
 	"common.priority": "Priority",
 	"common.scheduled.for": "Scheduled For",
 	"jobs.id": "Job ID",
-	"jobs.name": "Job Name",
+	"jobs.key": "Job Key",
 	"jobs.version": "Job Version",
 	"jobs.dispatch.status": "Dispatch Status",
 	"jobs.dispatched.at": "Dispatched At",

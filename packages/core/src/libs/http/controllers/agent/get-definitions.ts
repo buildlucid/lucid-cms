@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -33,7 +33,7 @@ const getDefinitionsController = factory.createHandlers(
 				message: copy("server:core.routes.agent.error.message"),
 			},
 		})(context, { authUser: c.get("auth") });
-		if (definitions.error) throw new LucidAPIError(definitions.error);
+		if (definitions.error) throw new LucidError(definitions.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: definitions.data }));

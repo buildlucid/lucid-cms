@@ -2,8 +2,9 @@ import z from "zod";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
 
@@ -12,7 +13,7 @@ const input = z.object({
 	retentionDays: z.number().int().nonnegative(),
 });
 
-const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async ({
+const deleteExpiredRevisions: JobService<z.infer<typeof input>> = async ({
 	context,
 	input,
 }) =>
@@ -84,10 +85,13 @@ const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async ({
  * 2. It is not referenced by any non-revision version's promoted_from field
  */
 export const deleteExpiredRevisionsJob = defineJob({
-	name: "core:delete-expired-revisions",
+	key: "core:delete-expired-revisions",
 	version: 1,
 	input,
-	handler: deleteExpiredRevisions,
+	handler: async (args) => {
+		const result = await deleteExpiredRevisions(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	describe: ({ input: { collectionKey, retentionDays } }) => ({
 		collectionKey,
 		retentionDays,

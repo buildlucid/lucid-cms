@@ -2,14 +2,16 @@ import z from "zod";
 import { mediaTypeSchema } from "../../schemas/media.js";
 import { requestTypeSchema } from "../../schemas/requests.js";
 import type {
-	AgentRoutineEvent,
-	AgentRoutineEventFilter,
-	AgentRoutineEventName,
+	ContentEvent,
+	ContentEventFilter,
+	ContentEventName,
 	MediaType,
 	RequestType,
 } from "../../types/response.js";
 
-/* Keep events and filters additive, and omitted filters unrestricted, so saved routines remain compatible. */
+/* Content events for saved subscriptions such as routines. Code uses hooks. */
+
+/* Keep events and filters additive, with omitted filters unrestricted, for saved subscriptions. */
 
 const collectionsSchema = z.array(z.string().trim().min(1)).min(1).max(100);
 const requestTypesSchema = z.array(requestTypeSchema).min(1);
@@ -27,7 +29,7 @@ const requestEventsSchema = z.enum([
 	"requests:completed",
 ]);
 
-export const agentRoutineEventSchema = z.discriminatedUnion("event", [
+export const contentEventSchema = z.discriminatedUnion("event", [
 	z
 		.object({
 			event: documentEventsSchema,
@@ -73,35 +75,33 @@ export const agentRoutineEventSchema = z.discriminatedUnion("event", [
 				.optional(),
 		})
 		.strict(),
-]) satisfies z.ZodType<AgentRoutineEvent>;
+]) satisfies z.ZodType<ContentEvent>;
 
-export const agentRoutineEventsSchema = z
-	.array(agentRoutineEventSchema)
-	.max(20);
+export const contentEventsSchema = z.array(contentEventSchema).max(20);
 
-export const agentRoutineEventNameSchema = z.enum([
+export const contentEventNameSchema = z.enum([
 	...documentEventsSchema.options,
 	...requestEventsSchema.options,
 	"media:created",
 	"media:updated",
-]) satisfies z.ZodType<AgentRoutineEventName>;
+]) satisfies z.ZodType<ContentEventName>;
 
-/** Event subject facts used to evaluate a routine's filters. */
-export type RoutineEventFacts = {
+/** Event subject facts used to evaluate a listener's filters. */
+export type ContentEventFacts = {
 	collections?: readonly string[];
 	requestType?: RequestType;
 	mediaType?: MediaType;
-	fields?: readonly NonNullable<AgentRoutineEventFilter["fields"]>[number][];
+	fields?: readonly NonNullable<ContentEventFilter["fields"]>[number][];
 };
 
 /** Matches the event name and every configured filter, treating omitted filters as unrestricted. */
-export const matchesRoutineEvent = (
-	trigger: AgentRoutineEvent,
-	event: AgentRoutineEventName,
-	facts: RoutineEventFacts,
+export const matchesContentEvent = (
+	trigger: ContentEvent,
+	event: ContentEventName,
+	facts: ContentEventFacts,
 ) => {
 	if (trigger.event !== event) return false;
-	const filter: AgentRoutineEventFilter = trigger.filter ?? {};
+	const filter: ContentEventFilter = trigger.filter ?? {};
 
 	if (
 		filter.collections &&

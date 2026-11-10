@@ -11,10 +11,10 @@ import {
 	aiModelSelectionSchema,
 } from "../libs/agent/model-selection.js";
 import {
-	agentRoutineEventNameSchema,
-	agentRoutineEventSchema,
-	agentRoutineEventsSchema,
-} from "../libs/agent/routine-events.js";
+	contentEventNameSchema,
+	contentEventSchema,
+	contentEventsSchema,
+} from "../libs/events/content-events.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type {
 	Agent,
@@ -257,7 +257,7 @@ export const agentRoutinePartSchema = z
 				z
 					.object({
 						reference: agentReferenceSnapshotSchema,
-						events: z.array(agentRoutineEventNameSchema),
+						events: z.array(contentEventNameSchema),
 						fields: z.array(z.string()).optional(),
 					})
 					.strict() satisfies z.ZodType<AgentRoutineEventSubject>,
@@ -471,7 +471,7 @@ const agentRoutineResponseSchema = z.object({
 	modelSelection: aiModelSelectionSchema.nullable(),
 	toolSettings: routineToolSettingsSchema,
 	schedule: agentRoutineScheduleSchema.nullable(),
-	events: z.array(agentRoutineEventSchema),
+	events: z.array(contentEventSchema),
 	enabled: z.boolean(),
 	nextRunAt: z.string().nullable(),
 	lastRun: agentRunResponseSchema
@@ -513,7 +513,7 @@ const routineBody = z.object({
 	modelSelection: aiModelSelectionSchema.nullable().optional(),
 	/** Null when the routine only runs on events. */
 	schedule: agentRoutineScheduleSchema.nullable(),
-	events: agentRoutineEventsSchema,
+	events: contentEventsSchema,
 	enabled: z.boolean(),
 });
 

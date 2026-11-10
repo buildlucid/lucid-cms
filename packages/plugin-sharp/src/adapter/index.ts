@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaDeliveryAdapterInstance } from "@lucidcms/core/types";
 import mime from "mime";
 import rotateFocalPoint from "./rotate-focal-point.js";
@@ -110,27 +110,22 @@ const sharpMediaDeliveryAdapter = (): MediaDeliveryAdapterInstance => ({
 			const mimeType = mime.getType(options.format || "jpg") || "image/jpeg";
 
 			return {
-				error: undefined,
-				data: {
-					processed: true,
-					buffer: outputBuffer,
-					mimeType: mimeType,
-					size: outputBuffer.length,
-					extension: mime.getExtension(mimeType) || "jpg",
-					shouldStore: true,
-				},
+				processed: true,
+				buffer: outputBuffer,
+				mimeType: mimeType,
+				size: outputBuffer.length,
+				extension: mime.getExtension(mimeType) || "jpg",
+				shouldStore: true,
 			};
 		} catch (error) {
-			return {
-				error: {
-					type: "basic",
-					message:
-						error instanceof Error && error.message
-							? copy.literal(error.message)
-							: copy("server:plugin.sharp.media.image.process.failed"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "basic",
+				message:
+					error instanceof Error && error.message
+						? copy.literal(error.message)
+						: copy("server:plugin.sharp.media.image.process.failed"),
+			});
 		}
 	},
 });

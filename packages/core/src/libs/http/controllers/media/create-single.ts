@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { mediaServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -73,7 +73,7 @@ const createSingleController = factory.createHandlers(
 			actor: { type: "user", user: c.get("auth") },
 			userId: c.get("auth").id,
 		});
-		if (mediaRes.error) throw new LucidAPIError(mediaRes.error);
+		if (mediaRes.error) throw new LucidError(mediaRes.error);
 
 		c.status(201);
 		return c.json(

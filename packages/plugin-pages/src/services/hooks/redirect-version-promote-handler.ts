@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import { REDIRECTS_COLLECTION_KEY } from "../../constants.js";
 import type { RedirectsConfig } from "../../types/types.js";
@@ -7,10 +8,12 @@ import getStoredRedirectIdentity from "../redirects/get-stored-redirect-identity
 
 /** Repeats the save checks against the destination, where other redirects and pages may differ. */
 const redirectVersionPromoteHandler =
-	(config: RedirectsConfig): LucidHookDocuments<"versionPromote">["handler"] =>
+	(
+		config: RedirectsConfig,
+	): LucidHookDocuments<"afterVersionPromote">["handler"] =>
 	async ({ context, data, meta }) => {
 		if (meta.collectionKey !== REDIRECTS_COLLECTION_KEY) {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		const identityRes = await getStoredRedirectIdentity(context, {
@@ -19,8 +22,8 @@ const redirectVersionPromoteHandler =
 			hasLocaleField: config.hasLocaleField,
 			defaultLocale: config.defaultLocale,
 		});
-		if (identityRes.error) return identityRes;
-		if (!identityRes.data) return { error: undefined, data: undefined };
+		if (identityRes.error) throw new LucidError(identityRes.error);
+		if (!identityRes.data) return;
 
 		const uniqueRes = await checkRedirectUniqueness(context, {
 			identity: identityRes.data,
@@ -29,13 +32,15 @@ const redirectVersionPromoteHandler =
 			tables: meta.collectionTableNames,
 			hasLocaleField: config.hasLocaleField,
 		});
-		if (uniqueRes.error) return uniqueRes;
+		if (uniqueRes.error) throw new LucidError(uniqueRes.error);
 
-		return checkRedirectSource(context, {
+		const result = await checkRedirectSource(context, {
 			config,
 			identity: identityRes.data,
 			versionType: data.versionType,
 		});
+		if (result.error) throw new LucidError(result.error);
+		return;
 	};
 
 export default redirectVersionPromoteHandler;

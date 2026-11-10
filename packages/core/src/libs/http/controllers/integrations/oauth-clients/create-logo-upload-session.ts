@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { oauthClientSchemas } from "../../../../../schemas/oauth-clients.js";
 import { oauthClientServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../../permission/definitions.js";
 import authenticate from "../../../middleware/authenticate.js";
@@ -53,7 +53,7 @@ const createLogoUploadSessionController = factory.createHandlers(
 			...body,
 			userId: c.get("auth").id,
 		});
-		if (uploadRes.error) throw new LucidAPIError(uploadRes.error);
+		if (uploadRes.error) throw new LucidError(uploadRes.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: uploadRes.data }));

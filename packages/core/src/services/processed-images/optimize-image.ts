@@ -3,6 +3,7 @@ import type {
 	MediaDeliveryProcessResult,
 	MediaTransformationOptions,
 } from "../../libs/media-delivery/types.js";
+import runHandler from "../../utils/services/run-handler.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const optimizeImage: ServiceFn<
@@ -21,10 +22,13 @@ const optimizeImage: ServiceFn<
 		};
 	}
 
-	return await context.mediaDelivery.processImage(context, {
-		stream: data.stream,
-		options: data.options,
-	});
+	const processImage = context.mediaDelivery.processImage.bind(
+		context.mediaDelivery,
+	);
+
+	return runHandler(() =>
+		processImage(context, { stream: data.stream, options: data.options }),
+	);
 };
 
 export default optimizeImage;

@@ -2,7 +2,7 @@ import { Readable } from "node:stream";
 import {
 	copy,
 	defineRoute,
-	LucidAPIError,
+	LucidError,
 	middleware,
 	serviceWrapper,
 } from "@lucidcms/core";
@@ -66,9 +66,9 @@ const routes = (pluginOptions: PluginOptions) => [
 				fileName: query.fileName,
 				extension: query.extension,
 			});
-			if (downloadMedia.error) throw new LucidAPIError(downloadMedia.error);
+			if (downloadMedia.error) throw new LucidError(downloadMedia.error);
 			if (!downloadMedia.data) {
-				throw new LucidAPIError({
+				throw new LucidError({
 					type: "basic",
 					status: 500,
 					message: copy(
@@ -150,7 +150,7 @@ const routes = (pluginOptions: PluginOptions) => [
 					: undefined,
 				body: hono.req.raw.body,
 			});
-			if (uploadMedia.error) throw new LucidAPIError(uploadMedia.error);
+			if (uploadMedia.error) throw new LucidError(uploadMedia.error);
 
 			hono.status(204);
 			return hono.body(null);

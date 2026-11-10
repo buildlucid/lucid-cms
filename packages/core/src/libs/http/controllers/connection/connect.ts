@@ -9,7 +9,7 @@ import {
 } from "../../../../services/connection/helpers/flow-security.js";
 import { getConnectionUrls } from "../../../../services/connection/helpers/urls.js";
 import { connectionServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -50,14 +50,14 @@ const connectController = factory.createHandlers(
 				message: copy("server:core.connection.failed"),
 			},
 		})(context, { browserBinding });
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		const callbackUrl = new URL(getConnectionUrls(context).callbackUrl);
 		const state = new URL(result.data.authorizationUrl).searchParams.get(
 			"state",
 		);
 		if (!state) {
-			throw new LucidAPIError({
+			throw new LucidError({
 				type: "basic",
 				status: 500,
 				message: copy("server:core.connection.failed"),

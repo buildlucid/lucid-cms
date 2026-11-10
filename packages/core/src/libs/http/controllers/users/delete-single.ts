@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { userServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -50,7 +50,7 @@ const deleteSingleController = factory.createHandlers(
 			userId: Number.parseInt(id, 10),
 			auth,
 		});
-		if (deleteSingle.error) throw new LucidAPIError(deleteSingle.error);
+		if (deleteSingle.error) throw new LucidError(deleteSingle.error);
 
 		c.status(204);
 		return c.body(null);

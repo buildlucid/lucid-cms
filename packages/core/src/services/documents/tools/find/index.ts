@@ -9,6 +9,7 @@ import {
 } from "../../../../libs/permission/readable-collections.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import findDocuments from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -29,15 +30,18 @@ export const findDocumentsMcpTool = (options: CollectionToolOptions = {}) =>
 				(collection) => ExternalScopes.DocumentRead(collection.key),
 			),
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input, execution }) =>
-			findDocuments(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await findDocuments(context, {
 				input,
 				allowedCollectionKeys: getScopedCollectionKeys(
 					context.config,
 					execution.authority.scopes,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
@@ -64,29 +68,26 @@ export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
 				),
 				reader: execution.authority,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const labels = context.config.collections.find(
 				(collection) => collection.key === input.collectionKey,
 			)?.getData.details.labels;
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy(
-						result.data.output.data.length === 1
-							? "admin:core.tools.documents_find.summary.one"
-							: "admin:core.tools.documents_find.summary",
-						{
-							data: {
-								count: result.data.output.data.length,
-								collection:
-									context.translate(labels?.plural) ?? input.collectionKey,
-							},
+				...result.data,
+				summary: copy(
+					result.data.output.data.length === 1
+						? "admin:core.tools.documents_find.summary.one"
+						: "admin:core.tools.documents_find.summary",
+					{
+						data: {
+							count: result.data.output.data.length,
+							collection:
+								context.translate(labels?.plural) ?? input.collectionKey,
 						},
-					),
-				},
+					},
+				),
 			};
 		},
 	});

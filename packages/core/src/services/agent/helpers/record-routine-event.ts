@@ -1,11 +1,11 @@
 import { referenceKey } from "../../../libs/agent/references.js";
 import { getAgents } from "../../../libs/agent/registry.js";
-import {
-	agentRoutineEventsSchema,
-	matchesRoutineEvent,
-	type RoutineEventFacts,
-} from "../../../libs/agent/routine-events.js";
 import type { LucidAgentRoutinePending } from "../../../libs/db/tables/agent-routine-pending.js";
+import {
+	contentEventsSchema,
+	matchesContentEvent,
+	type ContentEventFacts,
+} from "../../../libs/events/content-events.js";
 import {
 	AgentRoutinePendingRepository,
 	AgentRoutinesRepository,
@@ -13,7 +13,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import type {
 	AgentResource,
-	AgentRoutineEventName,
+	ContentEventName,
 } from "../../../types/response.js";
 import type {
 	ServiceFn,
@@ -61,13 +61,13 @@ const pendingSubject = (
 const recordRoutineEvent: ServiceFn<
 	[
 		{
-			event: AgentRoutineEventName;
+			event: ContentEventName;
 			subjects: AgentResource[];
 			/**
 			 * Subject facts matched against each routine's filters.
 			 * @remarks Use a function to defer queries until a routine listens for the event.
 			 */
-			facts: RoutineEventFacts | (() => ServiceResponse<RoutineEventFacts>);
+			facts: ContentEventFacts | (() => ServiceResponse<ContentEventFacts>);
 			/** The agent run that made the change, if any. */
 			agentRunId?: string | null;
 		},
@@ -109,7 +109,7 @@ const recordRoutineEvent: ServiceFn<
 	if (routines.error) return routines;
 
 	const listening = (routines.data ?? []).flatMap((routine) => {
-		const events = agentRoutineEventsSchema.safeParse(routine.events);
+		const events = contentEventsSchema.safeParse(routine.events);
 		return events.success &&
 			events.data.some((trigger) => trigger.event === input.event)
 			? [{ id: routine.id, events: events.data }]
@@ -117,7 +117,7 @@ const recordRoutineEvent: ServiceFn<
 	});
 	if (listening.length === 0) return { error: undefined, data: undefined };
 
-	let facts: RoutineEventFacts;
+	let facts: ContentEventFacts;
 	if (typeof input.facts === "function") {
 		const loaded = await input.facts();
 		if (loaded.error) return loaded;
@@ -128,7 +128,7 @@ const recordRoutineEvent: ServiceFn<
 
 	const routineIds = listening.flatMap((routine) =>
 		routine.events?.some((trigger) =>
-			matchesRoutineEvent(trigger, input.event, facts),
+			matchesContentEvent(trigger, input.event, facts),
 		)
 			? [routine.id]
 			: [],

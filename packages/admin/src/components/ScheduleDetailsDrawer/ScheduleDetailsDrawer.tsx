@@ -53,8 +53,8 @@ const ScheduleDetailsDrawer: Component<ScheduleDetailsPanelProps> = (props) => {
 					items={[
 						{ label: T()("common.status"), value: schedule()?.state },
 						{ label: T()("common.key"), value: schedule()?.key },
-						{ label: T()("common.schedule"), value: schedule()?.name },
-						{ label: T()("jobs.name"), value: schedule()?.jobName },
+						{ label: T()("common.schedule"), value: schedule()?.shortKey },
+						{ label: T()("jobs.key"), value: schedule()?.jobKey },
 						{ label: T()("jobs.version"), value: schedule()?.jobVersion },
 						{
 							label: T()("jobs.schedules.expression"),

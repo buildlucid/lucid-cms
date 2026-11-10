@@ -4,7 +4,7 @@ import {
 	integrationServices,
 	userServices,
 } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { Permissions } from "../../../../permission/definitions.js";
@@ -45,7 +45,7 @@ const deleteSingleController = factory.createHandlers(
 				requiredPermissions: [Permissions.UsersUpdate],
 			})
 		) {
-			throw new LucidAPIError({ type: "authorisation", status: 403 });
+			throw new LucidError({ type: "authorisation", status: 403 });
 		}
 		const context = createServiceContext(c);
 
@@ -53,7 +53,7 @@ const deleteSingleController = factory.createHandlers(
 			auth,
 			id: userId,
 		});
-		if (userAccessRes.error) throw new LucidAPIError(userAccessRes.error);
+		if (userAccessRes.error) throw new LucidError(userAccessRes.error);
 
 		const deleteSingleRes = await serviceWrapper(
 			integrationServices.deleteSingle,
@@ -69,7 +69,7 @@ const deleteSingleController = factory.createHandlers(
 			id,
 			userId,
 		});
-		if (deleteSingleRes.error) throw new LucidAPIError(deleteSingleRes.error);
+		if (deleteSingleRes.error) throw new LucidError(deleteSingleRes.error);
 
 		c.status(204);
 		return c.body(null);

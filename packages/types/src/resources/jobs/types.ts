@@ -16,7 +16,7 @@ export type JobTriggerType = "enqueue" | "schedule";
 export interface Job {
 	id: number;
 	jobId: string;
-	jobName: string;
+	jobKey: string;
 	jobVersion: number;
 	triggerType: JobTriggerType;
 	scheduleKey: string | null;
@@ -63,9 +63,11 @@ export type JobScheduleRun = Pick<
 
 /** A schedule registered on the latest version of a job definition. */
 export interface JobScheduleSummary {
+	/** The full key, `<jobKey>/<shortKey>`. */
 	key: string;
-	name: string;
-	jobName: string;
+	/** The schedule's own key within its job, eg. `nightly`. */
+	shortKey: string;
+	jobKey: string;
 	jobVersion: number;
 	cron: string;
 	timezone: string;

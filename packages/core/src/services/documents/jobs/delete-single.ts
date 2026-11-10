@@ -1,5 +1,6 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import deleteDocument from "../delete-single-permanently.js";
 
 const input = z.object({
@@ -12,10 +13,13 @@ const input = z.object({
  * Deletes a single document
  */
 export const deleteDocumentJob = defineJob({
-	name: "core:delete-document",
+	key: "core:delete-document",
 	version: 1,
 	input,
-	handler: ({ context, input }) => deleteDocument(context, input),
+	handler: async ({ context, input }) => {
+		const result = await deleteDocument(context, input);
+		if (result.error) throw new LucidError(result.error);
+	},
 	describe: ({ input: { id, collectionKey } }) => ({
 		documentId: id,
 		collectionKey,

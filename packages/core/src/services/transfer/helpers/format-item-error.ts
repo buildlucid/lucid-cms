@@ -1,6 +1,6 @@
 import type { PublicErrorData } from "@lucidcms/types";
 import type { LucidErrorData } from "../../../types/errors.js";
-import LucidAPIError from "../../../utils/errors/lucid-api-error.js";
+import LucidError from "../../../utils/errors/lucid-error.js";
 import translateErrorData from "../../../utils/errors/translate-error-data.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
@@ -10,7 +10,7 @@ const formatItemError = (
 	error: LucidErrorData,
 ): PublicErrorData => {
 	const translated = translateErrorData(
-		new LucidAPIError(error).error,
+		new LucidError(error).error,
 		context.translate,
 	);
 	return {

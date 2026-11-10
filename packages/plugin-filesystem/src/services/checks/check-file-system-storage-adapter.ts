@@ -1,13 +1,13 @@
 import type {
 	ErrorCopy,
 	FileSystemStorageAdapterOptions,
-	MediaStorageAdapterInstance,
+	ResolvedMediaStorageAdapter,
 	ServiceContext,
 	ServiceResponse,
 } from "@lucidcms/core/types";
 
 type FileSystemStorageAdapterInstance =
-	MediaStorageAdapterInstance<FileSystemStorageAdapterOptions>;
+	ResolvedMediaStorageAdapter<FileSystemStorageAdapterOptions>;
 
 const checkFileSystemStorageAdapter = async (
 	context: ServiceContext,

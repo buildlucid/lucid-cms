@@ -9,11 +9,8 @@ export const saveNoteTool = defineAgentTool({
 	output: z.object({ saved: z.boolean() }),
 	permissions: [],
 	handler: async ({ input }) => ({
-		error: undefined,
-		data: {
-			output: { saved: true },
-			summary: `Saved "${input.title}"`,
-			widgets: [{ key: "playground-note", version: 1, data: input }],
-		},
+		output: { saved: true },
+		summary: `Saved "${input.title}"`,
+		widgets: [{ key: "playground-note", version: 1, data: input }],
 	}),
 });

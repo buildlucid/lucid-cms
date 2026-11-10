@@ -35,26 +35,20 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 			runtime: async ({ phase }) => {
 				if (phase === "prepare") {
 					return {
-						error: undefined,
-						data: {
-							artifacts: [createBindingsArtifact(resolvedOptions)],
-						},
+						artifacts: [createBindingsArtifact(resolvedOptions)],
 					};
 				}
 
 				return {
-					error: undefined,
-					data: {
-						artifacts: [
-							{
-								type: "cloudflare:worker-handler",
-								custom: {
-									event: "queue",
-									module: "@lucidcms/plugin-cloudflare-queues/worker",
-								},
-							} satisfies CloudflareWorkerHandlerArtifact,
-						],
-					},
+					artifacts: [
+						{
+							type: "cloudflare:worker-handler",
+							custom: {
+								event: "queue",
+								module: "@lucidcms/plugin-cloudflare-queues/worker",
+							},
+						} satisfies CloudflareWorkerHandlerArtifact,
+					],
 				};
 			},
 		},

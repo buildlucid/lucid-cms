@@ -5,7 +5,7 @@ import {
 	documentRefsResponseSchema,
 } from "../../../../schemas/documents.js";
 import { documentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -59,7 +59,7 @@ const getMultipleController = factory.createHandlers(
 			query: formattedQuery,
 			user: c.get("auth"),
 		});
-		if (documents.error) throw new LucidAPIError(documents.error);
+		if (documents.error) throw new LucidError(documents.error);
 
 		c.status(200);
 		return c.json(

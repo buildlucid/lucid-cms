@@ -1,11 +1,14 @@
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { Toolkit } from "../toolkit/types.js";
 
-/** Repeatable async seed using the current service context. Throw on failure. */
-export type Seed = (args: {
-	context: ServiceContext;
-	toolkit: Toolkit;
-}) => Promise<void>;
+/** A repeatable seed created with `defineSeed`. */
+export type Seed = {
+	/** Writes the seed's data. It may run more than once. Throw on failure. */
+	run: (args: {
+		context: ServiceContext;
+		toolkit: Toolkit;
+	}) => void | Promise<void>;
+};
 
-/** Seed name and callback. Use a plugin namespace such as catalog:example to avoid collisions. */
+/** Seed name and definition. Use a plugin namespace such as catalog:example to avoid collisions. */
 export type SeedDefinition = { name: string; seed: Seed };

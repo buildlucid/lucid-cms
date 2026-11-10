@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/email.js";
 import { emailServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -46,7 +46,7 @@ const getSingleController = factory.createHandlers(
 			renderTemplate: true,
 			authUser: c.get("auth"),
 		});
-		if (email.error) throw new LucidAPIError(email.error);
+		if (email.error) throw new LucidError(email.error);
 
 		c.status(200);
 		return c.json(

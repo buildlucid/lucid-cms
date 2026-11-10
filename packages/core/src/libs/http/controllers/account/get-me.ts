@@ -3,7 +3,7 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -37,7 +37,7 @@ const getMeController = factory.createHandlers(
 			userId: c.get("auth").id,
 			authUser: c.get("auth"),
 		});
-		if (user.error) throw new LucidAPIError(user.error);
+		if (user.error) throw new LucidError(user.error);
 
 		c.status(200);
 		return c.json(

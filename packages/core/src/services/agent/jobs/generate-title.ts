@@ -1,10 +1,11 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import generateTitle from "../helpers/generate-title.js";
 
-const execute: JobHandler<{
+const execute: JobService<{
 	conversationId: string;
 	requestedAt: string;
 	scope: "first-message" | "conversation";
@@ -46,7 +47,7 @@ const execute: JobHandler<{
 };
 
 export const generateAgentTitleJob = defineJob({
-	name: "core:generate-agent-title",
+	key: "core:generate-agent-title",
 	version: 1,
 	input: z
 		.object({
@@ -56,7 +57,10 @@ export const generateAgentTitleJob = defineJob({
 			runId: z.uuid().optional(),
 		})
 		.strict(),
-	handler: execute,
+	handler: async (args) => {
+		const result = await execute(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 	onPermanentFailure: async ({ context, failure }) => {
 		const AgentConversations = new AgentConversationsRepository(context.db);
 		await AgentConversations.clearTitleGenerationRequest({

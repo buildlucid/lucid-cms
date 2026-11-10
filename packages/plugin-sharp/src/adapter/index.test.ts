@@ -26,10 +26,9 @@ describe("sharpMediaDeliveryAdapter", () => {
 			},
 		});
 
-		expect(result.error).toBeUndefined();
-		if (!result.data?.processed) throw new Error("Expected a processed image");
+		if (!result.processed) throw new Error("Expected a processed image");
 
-		const metadata = await sharp(result.data.buffer).metadata();
+		const metadata = await sharp(result.buffer).metadata();
 		expect(metadata.width).toBe(4);
 		expect(metadata.height).toBe(6);
 	});

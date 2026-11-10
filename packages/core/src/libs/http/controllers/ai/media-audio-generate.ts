@@ -6,7 +6,7 @@ import {
 	type MediaAudioGenerateBody,
 } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -61,7 +61,7 @@ const mediaAudioGenerateController = factory.createHandlers(
 			idempotencyKey: c.req.header(constants.headers.idempotencyKey),
 			userId: c.get("auth").id,
 		});
-		if (generateRes.error) throw new LucidAPIError(generateRes.error);
+		if (generateRes.error) throw new LucidError(generateRes.error);
 
 		c.status(202);
 		return c.json(

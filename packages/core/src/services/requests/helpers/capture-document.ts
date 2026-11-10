@@ -223,7 +223,7 @@ const captureDocument: ServiceFn<
 		context,
 		{
 			service: "documents",
-			event: "versionCapture",
+			event: "afterVersionCapture",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},

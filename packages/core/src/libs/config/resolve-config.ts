@@ -66,18 +66,19 @@ const resolveConfig = async (
 			});
 		}
 		if (pluginDef.hooks?.init) {
-			const res = await pluginDef.hooks.init();
-			if (res.error) {
-				//* will get caught by the CLI
+			//* a throw here gets caught by the CLI
+			try {
+				await pluginDef.hooks.init();
+			} catch (error) {
+				if (error instanceof LucidError) throw error;
 				throw new LucidError({
 					scope: pluginDef.key,
-					message:
-						translate(res.error.message) ??
-						translate("server:core.plugins.init.failed", {
-							data: {
-								key: pluginDef.key,
-							},
-						}),
+					message: translate("server:core.plugins.init.failed", {
+						data: {
+							key: pluginDef.key,
+						},
+					}),
+					cause: error,
 				});
 			}
 		}

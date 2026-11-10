@@ -5,7 +5,7 @@ import {
 	oauthSchemas,
 } from "../../../../schemas/oauth.js";
 import { oauthServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -42,7 +42,7 @@ const getUserConnectionsController = factory.createHandlers(
 			principalType: "user",
 			userId,
 		});
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		return c.json(formatAPIResponse(c, { data: result.data }));
 	},

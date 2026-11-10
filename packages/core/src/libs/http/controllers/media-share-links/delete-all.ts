@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { mediaShareLinkServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -37,7 +37,7 @@ const deleteAllController = factory.createHandlers(
 				),
 			},
 		})(context);
-		if (deleteRes.error) throw new LucidAPIError(deleteRes.error);
+		if (deleteRes.error) throw new LucidError(deleteRes.error);
 
 		c.status(204);
 		return c.body(null);

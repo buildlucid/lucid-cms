@@ -1,4 +1,4 @@
-import { copy, defineAgentTool, z } from "@lucidcms/core";
+import { copy, defineAgentTool, z, LucidError } from "@lucidcms/core";
 
 export const documentPickerData = z.object({
 	documents: z.array(z.object({ id: z.number().int(), label: z.string() })),
@@ -32,47 +32,40 @@ export const selectDocumentTool = defineAgentTool({
 				version: "latest",
 				perPage: 20,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 			if (!result.data.items.length) {
 				return {
-					error: undefined,
-					data: {
-						output: { documentId: null },
-						summary: "No documents available to select",
-					},
+					output: { documentId: null },
+					summary: "No documents available to select",
 				};
 			}
 
 			return {
-				error: undefined,
-				data: {
-					interaction: {
-						title: copy("admin:playground.document-picker.title"),
-						placement: input.placement,
-						data: {
-							documents: result.data.items.map((document) => {
-								const field = document.fields.page_title;
-								const titles =
-									typeof field === "string"
-										? [field]
-										: field && typeof field === "object"
-											? Object.values(field)
-											: [];
-								const title = titles.find(
-									(value): value is string =>
-										typeof value === "string" && value.trim().length > 0,
-								);
-								return {
-									id: document.id,
-									label:
-										title ??
-										context.translate(
-											"server:playground.document-picker.label",
-											{ data: { id: document.id } },
-										),
-								};
-							}),
-						},
+				interaction: {
+					title: copy("admin:playground.document-picker.title"),
+					placement: input.placement,
+					data: {
+						documents: result.data.items.map((document) => {
+							const field = document.fields.page_title;
+							const titles =
+								typeof field === "string"
+									? [field]
+									: field && typeof field === "object"
+										? Object.values(field)
+										: [];
+							const title = titles.find(
+								(value): value is string =>
+									typeof value === "string" && value.trim().length > 0,
+							);
+							return {
+								id: document.id,
+								label:
+									title ??
+									context.translate("server:playground.document-picker.label", {
+										data: { id: document.id },
+									}),
+							};
+						}),
 					},
 				},
 			};
@@ -84,22 +77,16 @@ export const selectDocumentTool = defineAgentTool({
 			version: "latest",
 			filter: { id: response.documentId },
 		});
-		if (result.error) return result;
+		if (result.error) throw new LucidError(result.error);
 		if (!result.data) {
 			return {
-				error: undefined,
-				data: {
-					output: { documentId: null },
-					summary: "The selected document no longer exists",
-				},
+				output: { documentId: null },
+				summary: "The selected document no longer exists",
 			};
 		}
 		return {
-			error: undefined,
-			data: {
-				output: { documentId: result.data.id },
-				summary: `Selected document ${result.data.id}`,
-			},
+			output: { documentId: result.data.id },
+			summary: `Selected document ${result.data.id}`,
 		};
 	},
 });

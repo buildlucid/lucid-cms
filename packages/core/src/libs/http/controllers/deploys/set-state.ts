@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/deploys.js";
 import { deployServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { getDeployPermission } from "../../../permission/deploy-permissions.js";
@@ -56,7 +56,7 @@ const setStateController = factory.createHandlers(
 			enabled: body.enabled,
 			userId: c.get("auth").id,
 		});
-		if (result.error) throw new LucidAPIError(result.error);
+		if (result.error) throw new LucidError(result.error);
 
 		c.status(204);
 		return c.body(null);

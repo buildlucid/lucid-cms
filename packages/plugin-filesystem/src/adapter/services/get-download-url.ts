@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import { createSignedMediaUrl } from "@lucidcms/core/extension";
 import type {
 	FileSystemStorageAdapterOptions,
@@ -13,34 +13,29 @@ export default (options: FileSystemStorageAdapterOptions) => {
 	) => {
 		try {
 			return {
-				error: undefined,
-				data: {
-					url: createSignedMediaUrl({
-						host: props.host,
-						path: FILE_SYSTEM_DOWNLOAD_PATH,
-						key: props.key,
-						secretKey: options.secretKey ?? context.config.secrets.encryption,
-						query: {
-							fileName: props.fileName ?? undefined,
-							extension: props.extension ?? undefined,
-						},
-					}),
-				},
+				url: createSignedMediaUrl({
+					host: props.host,
+					path: FILE_SYSTEM_DOWNLOAD_PATH,
+					key: props.key,
+					secretKey: options.secretKey ?? context.config.secrets.encryption,
+					query: {
+						fileName: props.fileName ?? undefined,
+						extension: props.extension ?? undefined,
+					},
+				}),
 			};
 		} catch (e) {
-			return {
-				error: {
-					message: copy(
-						"server:plugin.filesystem.media.download.url.sign.failed",
-						{
-							defaultMessage:
-								e instanceof Error ? e.message : "Failed to sign download URL",
-						},
-					),
-					status: 500,
-				},
-				data: undefined,
-			};
+			if (e instanceof LucidError) throw e;
+			throw new LucidError({
+				message: copy(
+					"server:plugin.filesystem.media.download.url.sign.failed",
+					{
+						defaultMessage:
+							e instanceof Error ? e.message : "Failed to sign download URL",
+					},
+				),
+				status: 500,
+			});
 		}
 	};
 

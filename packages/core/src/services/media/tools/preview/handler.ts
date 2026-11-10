@@ -5,6 +5,7 @@ import { toNodeReadable } from "../../../../libs/media-storage/normalize-body.js
 import readBoundedBody from "../../../../libs/media-storage/read-bounded-body.js";
 import type { McpToolResult } from "../../../../libs/tools/types.js";
 import type { Media } from "../../../../types/response.js";
+import runHandler from "../../../../utils/services/run-handler.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -95,16 +96,19 @@ const inlineImage = async (args: {
 			});
 			if (streamed.error) return streamed;
 
-			const processed = await processor(args.context, {
-				stream: toNodeReadable(streamed.data.body),
-				options: {
-					width: MAX_PREVIEW_DIMENSION,
-					height: MAX_PREVIEW_DIMENSION,
-					fit: "inside",
-					format: "webp",
-					quality,
-				},
-			});
+			const body = streamed.data.body;
+			const processed = await runHandler(() =>
+				processor(args.context, {
+					stream: toNodeReadable(body),
+					options: {
+						width: MAX_PREVIEW_DIMENSION,
+						height: MAX_PREVIEW_DIMENSION,
+						fit: "inside",
+						format: "webp",
+						quality,
+					},
+				}),
+			);
 			if (processed.error) return processed;
 			if (!processed.data.processed) break;
 			if (processed.data.buffer.byteLength <= MAX_PREVIEW_BYTES) {

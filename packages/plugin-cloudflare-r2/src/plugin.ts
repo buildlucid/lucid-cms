@@ -22,13 +22,8 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 		package: PACKAGE_INFO,
 		hooks: {
 			runtime: async ({ phase }) => ({
-				error: undefined,
-				data: {
-					artifacts:
-						phase === "prepare"
-							? [createBindingsArtifact(resolvedOptions)]
-							: [],
-				},
+				artifacts:
+					phase === "prepare" ? [createBindingsArtifact(resolvedOptions)] : [],
 			}),
 		},
 		checkCompatibility: ({ runtimeContext, config }) => {

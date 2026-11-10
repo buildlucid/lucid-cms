@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
@@ -50,7 +50,7 @@ const getMessagesController = factory.createHandlers(
 			limit: query.limit,
 			before: query.before,
 		});
-		if (messages.error) throw new LucidAPIError(messages.error);
+		if (messages.error) throw new LucidError(messages.error);
 
 		c.status(200);
 

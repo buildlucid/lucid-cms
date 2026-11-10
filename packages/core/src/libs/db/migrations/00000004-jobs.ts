@@ -13,7 +13,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("job_id", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("job_name", adapter.getDataType("text"), (col) =>
+				.addColumn("job_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
 				.addColumn("job_version", adapter.getDataType("integer"), (col) =>

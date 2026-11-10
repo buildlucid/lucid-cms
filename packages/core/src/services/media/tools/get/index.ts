@@ -2,6 +2,7 @@ import { copy } from "../../../../libs/i18n/index.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import getMedia from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -15,7 +16,11 @@ export const getMediaMcpTool = () =>
 		output: outputSchema,
 		scopes: [ExternalScopes.MediaRead],
 		annotations: { readOnlyHint: true },
-		handler: ({ context, input }) => getMedia(context, { input }),
+		handler: async ({ context, input }) => {
+			const result = await getMedia(context, { input });
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});
 
 export const getMediaAgentTool = () =>
@@ -35,16 +40,13 @@ export const getMediaAgentTool = () =>
 				input,
 				authority: execution.authority,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					summary: copy("admin:core.tools.media_get.summary", {
-						data: { id: input.mediaId },
-					}),
-				},
+				...result.data,
+				summary: copy("admin:core.tools.media_get.summary", {
+					data: { id: input.mediaId },
+				}),
 			};
 		},
 	});

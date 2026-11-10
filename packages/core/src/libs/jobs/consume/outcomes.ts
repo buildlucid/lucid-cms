@@ -159,7 +159,7 @@ export const handleFailure = async (
 	},
 ): Promise<JobConsumptionResult> => {
 	const definition = getRegisteredJob(context.config, {
-		name: job.job_name,
+		key: job.job_key,
 		version: job.job_version,
 	});
 	const policy = definition?.retry;

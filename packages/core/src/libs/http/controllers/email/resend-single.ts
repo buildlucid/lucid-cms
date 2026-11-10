@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/email.js";
 import { emailServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -58,7 +58,7 @@ const resendSingleController = factory.createHandlers(
 			id: Number.parseInt(id, 10),
 			authUser: c.get("auth"),
 		});
-		if (emailRes.error) throw new LucidAPIError(emailRes.error);
+		if (emailRes.error) throw new LucidError(emailRes.error);
 
 		c.status(200);
 		return c.json(

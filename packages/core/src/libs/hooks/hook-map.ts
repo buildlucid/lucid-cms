@@ -14,16 +14,16 @@ export const hookExecutionKinds: CoreHookExecutionKindMap = {
 		beforeUnpublish: "effect",
 		afterRestore: "effect",
 		afterDelete: "effect",
-		versionPromote: "effect",
-		versionCapture: "effect",
+		afterVersionPromote: "effect",
+		afterVersionCapture: "effect",
 	},
 	documentWorkflows: {
 		afterUpdate: "effect",
 	},
 	requests: {
-		check: "transform",
-		completed: "effect",
-		documentRemoved: "effect",
+		afterCheck: "transform",
+		afterComplete: "effect",
+		afterDocumentRemove: "effect",
 	},
 	notifications: {
 		beforeSend: "transform",
@@ -37,6 +37,6 @@ export const hookExecutionKinds: CoreHookExecutionKindMap = {
 		afterDelete: "effect",
 	},
 	agent: {
-		runFinished: "effect",
+		afterRunFinish: "effect",
 	},
 };

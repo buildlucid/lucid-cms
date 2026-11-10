@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import updateMedia from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
@@ -31,17 +32,14 @@ export const updateMediaAgentTool = () =>
 				conversationId: execution.run.conversationId,
 				toolName: name,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					changes: [{ type: "media", mediaId: input.mediaId }],
-					summary: copy("admin:core.tools.media_update.summary", {
-						data: { id: input.mediaId },
-					}),
-				},
+				...result.data,
+				changes: [{ type: "media", mediaId: input.mediaId }],
+				summary: copy("admin:core.tools.media_update.summary", {
+					data: { id: input.mediaId },
+				}),
 			};
 		},
 	});

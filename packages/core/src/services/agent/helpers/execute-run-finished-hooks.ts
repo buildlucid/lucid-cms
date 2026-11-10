@@ -7,7 +7,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 
 /**
- * Runs `agent.runFinished` hooks for a run that has stopped for good. Call in
+ * Runs `agent.afterRunFinish` hooks for a run that has stopped for good. Call in
  * the transaction that finishes the run. Hooks that fail are logged and rolled
  * back on their own, so they never stop the run finishing.
  */
@@ -35,7 +35,7 @@ const executeRunFinishedHooks: ServiceFn<
 
 				return executeHooks(
 					context,
-					{ service: "agent", event: "runFinished", config: context.config },
+					{ service: "agent", event: "afterRunFinish", config: context.config },
 					{
 						meta: { userId: run.user_id },
 						data: {

@@ -2,7 +2,7 @@ import { createWriteStream } from "node:fs";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceUploadSingle,
@@ -43,24 +43,16 @@ export default (options: FileSystemStorageAdapterOptions) => {
 				extension: props.extension,
 			});
 
-			return {
-				error: undefined,
-				data: {},
-			};
+			return {};
 		} catch (e) {
+			if (e instanceof LucidError) throw e;
 			await cleanup();
 			const error = e as Error;
-			return {
-				error: {
-					message: copy(
-						"server:plugin.filesystem.media.errors.default.message",
-						{
-							defaultMessage: error.message,
-						},
-					),
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				message: copy("server:plugin.filesystem.media.errors.default.message", {
+					defaultMessage: error.message,
+				}),
+			});
 		}
 	};
 	return uploadSingle;

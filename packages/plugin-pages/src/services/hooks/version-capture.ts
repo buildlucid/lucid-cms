@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import { requestScope } from "../../utils/route-scope.js";
@@ -12,7 +13,7 @@ import refreshVersionRoute from "./helpers/refresh-version-route.js";
 const versionCaptureHandler =
 	(
 		options: PluginOptionsInternal,
-	): LucidHookDocuments<"versionCapture">["handler"] =>
+	): LucidHookDocuments<"afterVersionCapture">["handler"] =>
 	async ({ context, toolkit, data, meta }) => {
 		const targetCollectionRes = getTargetCollection({
 			options,
@@ -23,10 +24,10 @@ const versionCaptureHandler =
 			data.sourceVersionType !== "latest" ||
 			!meta.request
 		) {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
-		return refreshVersionRoute(context, {
+		const result = await refreshVersionRoute(context, {
 			collection: targetCollectionRes.data,
 			collectionInstance: meta.collection,
 			tables: meta.collectionTableNames,
@@ -39,6 +40,8 @@ const versionCaptureHandler =
 			documentId: data.documentId,
 			versionId: data.versionId,
 		});
+		if (result.error) throw new LucidError(result.error);
+		return;
 	};
 
 export default versionCaptureHandler;

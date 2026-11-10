@@ -1,6 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { addMediaToLibraryToolName } from "./constants.js";
 import addMediaToLibrary from "./handler.js";
@@ -27,20 +28,17 @@ export const addMediaToLibraryAgentTool = () =>
 			const result = await serviceWrapper(addMediaToLibrary, {
 				transaction: true,
 			})(context, { input, authority: execution.authority });
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					...result.data,
-					changes: [{ type: "media", mediaId: input.mediaId }],
-					summary: copy(
-						input.public
-							? "admin:core.tools.media_add_to_library.public.summary"
-							: "admin:core.tools.media_add_to_library.summary",
-						{ data: { id: input.mediaId } },
-					),
-				},
+				...result.data,
+				changes: [{ type: "media", mediaId: input.mediaId }],
+				summary: copy(
+					input.public
+						? "admin:core.tools.media_add_to_library.public.summary"
+						: "admin:core.tools.media_add_to_library.summary",
+					{ data: { id: input.mediaId } },
+				),
 			};
 		},
 	});

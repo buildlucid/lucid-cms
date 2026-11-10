@@ -7,7 +7,7 @@ import { getJobDefinitionRuntime, getRegisteredJob } from "./registry.js";
 /** The stored job values a permanent failure hook is given. */
 type FailedJob = {
 	job_id: string;
-	job_name: string;
+	job_key: string;
 	job_version: number;
 	attempts: number;
 	payload: unknown;
@@ -22,7 +22,7 @@ export const runPermanentFailureHook = async (
 	props: { job: FailedJob; errorMessage: string; error?: LucidErrorData },
 ) => {
 	const definition = getRegisteredJob(context.config, {
-		name: props.job.job_name,
+		key: props.job.job_key,
 		version: props.job.job_version,
 	});
 	const hook =
@@ -43,7 +43,7 @@ export const runPermanentFailureHook = async (
 			event: "jobs.permanent-failure-hook.failed",
 			message: "A permanent job failure hook failed",
 			scope: constants.logScopes.jobs,
-			data: { jobId: props.job.job_id, jobName: props.job.job_name },
+			data: { jobId: props.job.job_id, jobKey: props.job.job_key },
 		});
 	}
 };

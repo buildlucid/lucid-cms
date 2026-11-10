@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -41,7 +41,7 @@ const cancelRunController = factory.createHandlers(
 			runId: param.id,
 			userId: c.get("auth").id,
 		});
-		if (cancelled.error) throw new LucidAPIError(cancelled.error);
+		if (cancelled.error) throw new LucidError(cancelled.error);
 
 		c.status(204);
 

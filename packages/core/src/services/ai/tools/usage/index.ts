@@ -1,6 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import getUsage from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -21,14 +22,11 @@ export const getAiUsageAgentTool = () =>
 				input,
 				viewerId: principal.type === "user" ? principal.userId : null,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy("admin:core.tools.ai_usage_get.summary"),
-				},
+				output: result.data.output,
+				summary: copy("admin:core.tools.ai_usage_get.summary"),
 			};
 		},
 	});

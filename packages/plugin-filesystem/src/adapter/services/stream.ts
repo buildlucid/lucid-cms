@@ -1,6 +1,6 @@
 import { constants, createReadStream } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceStream,
@@ -17,13 +17,10 @@ export default (adapterOptions: FileSystemStorageAdapterOptions) => {
 			try {
 				await access(targetPath, constants.F_OK);
 			} catch {
-				return {
-					error: {
-						message: copy("server:plugin.filesystem.media.files.not.found"),
-						status: 404,
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					message: copy("server:plugin.filesystem.media.files.not.found"),
+					status: 404,
+				});
 			}
 			const [stats, fileTypeResult] = await Promise.all([
 				stat(targetPath),
@@ -44,14 +41,11 @@ export default (adapterOptions: FileSystemStorageAdapterOptions) => {
 
 			if (!props.range && matchesETag(props.ifNoneMatch, etag)) {
 				return {
-					error: undefined,
-					data: {
-						contentLength: undefined,
-						contentType: mimeType || undefined,
-						body: new Uint8Array(),
-						etag,
-						notModified: true,
-					},
+					contentLength: undefined,
+					contentType: mimeType || undefined,
+					body: new Uint8Array(),
+					etag,
+					notModified: true,
 				};
 			}
 
@@ -61,58 +55,44 @@ export default (adapterOptions: FileSystemStorageAdapterOptions) => {
 				const end = props.range.end ?? totalSize - 1;
 				//* validate range
 				if (start >= totalSize || end >= totalSize || start > end) {
-					return {
-						error: {
-							message: copy(
-								"server:plugin.filesystem.media.stream.range.invalid",
-							),
-							status: 416,
-						},
-						data: undefined,
-					};
+					throw new LucidError({
+						message: copy(
+							"server:plugin.filesystem.media.stream.range.invalid",
+						),
+						status: 416,
+					});
 				}
 				const body = createReadStream(targetPath, { start, end });
 				const contentLength = end - start + 1;
 				return {
-					error: undefined,
-					data: {
-						contentLength,
-						contentType: mimeType || undefined,
-						body: body,
-						etag,
-						isPartialContent: true,
-						totalSize,
-						range: { start, end },
-					},
+					contentLength,
+					contentType: mimeType || undefined,
+					body: body,
+					etag,
+					isPartialContent: true,
+					totalSize,
+					range: { start, end },
 				};
 			}
 			//* normal streaming (no range)
 			const body = createReadStream(targetPath);
 			return {
-				error: undefined,
-				data: {
-					contentLength: totalSize,
-					contentType: mimeType || undefined,
-					body: body,
-					etag,
-					isPartialContent: false,
-					totalSize,
-				},
+				contentLength: totalSize,
+				contentType: mimeType || undefined,
+				body: body,
+				etag,
+				isPartialContent: false,
+				totalSize,
 			};
 		} catch (e) {
+			if (e instanceof LucidError) throw e;
 			const error = e as Error;
-			return {
-				error: {
-					message: copy(
-						"server:plugin.filesystem.media.errors.default.message",
-						{
-							defaultMessage: error.message,
-						},
-					),
-					status: 500,
-				},
-				data: undefined,
-			};
+			throw new LucidError({
+				message: copy("server:plugin.filesystem.media.errors.default.message", {
+					defaultMessage: error.message,
+				}),
+				status: 500,
+			});
 		}
 	};
 	return stream;

@@ -3,6 +3,7 @@ import { isAiFeatureEnabled } from "../../../../libs/config/ai-features.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { builderUpdateToolName } from "../builder-update/constants.js";
 import { generateImageToolName } from "./constants.js";
@@ -39,16 +40,22 @@ export const generateImageAgentTool = () =>
 			data: settingsDataSchema,
 			response: () => settingsResponseSchema,
 			skippable: true,
-			prepare: ({ input }) =>
-				prepareImageSettings({ input, editMediaId: null }),
+			prepare: async ({ input }) => {
+				const result = await prepareImageSettings({ input, editMediaId: null });
+				if (result.error) throw new LucidError(result.error);
+				return result.data;
+			},
 		},
-		handler: ({ context, input, execution, response }) =>
-			generateImage(context, {
+		handler: async ({ context, input, execution, response }) => {
+			const result = await generateImage(context, {
 				toolName: generateImageToolName,
 				input,
 				settings: response,
 				editMediaId: null,
 				execution,
 				summary: copy("admin:core.tools.media_generate_image.summary"),
-			}),
+			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
+		},
 	});

@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/diagnostics.js";
 import { diagnosticServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -37,7 +37,7 @@ const getPackageUpdatesController = factory.createHandlers(
 				message: copy("server:core.routes.diagnostics.updates.error.message"),
 			},
 		})(context);
-		if (updates.error) throw new LucidAPIError(updates.error);
+		if (updates.error) throw new LucidError(updates.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.status(200);

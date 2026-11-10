@@ -7,7 +7,7 @@ import type {
 	LucidAuth,
 	LucidHonoContext,
 } from "../../../types/hono.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import formatter, { userPermissionsFormatter } from "../../formatters/index.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
@@ -74,7 +74,7 @@ const fetchAuthState = async (
 			},
 		},
 	});
-	if (userRes.error) throw new LucidAPIError(userRes.error);
+	if (userRes.error) throw new LucidError(userRes.error);
 
 	const superAdmin = formatter.formatBoolean(userRes.data.super_admin ?? false);
 
@@ -134,7 +134,7 @@ export const authenticationCheck = async (
 ) => {
 	const accessTokenRes = await authServices.accessToken.verifyToken(c);
 	if (accessTokenRes.error) {
-		if (options?.soft !== true) throw new LucidAPIError(accessTokenRes.error);
+		if (options?.soft !== true) throw new LucidError(accessTokenRes.error);
 		return;
 	}
 	if (!accessTokenRes.data) return;

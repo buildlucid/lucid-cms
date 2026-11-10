@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/integrations.js";
 import { integrationServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -63,8 +63,7 @@ const regenerateKeysController = factory.createHandlers(
 			id: Number.parseInt(id, 10),
 			userId: null,
 		});
-		if (regenerateKeysRes.error)
-			throw new LucidAPIError(regenerateKeysRes.error);
+		if (regenerateKeysRes.error) throw new LucidError(regenerateKeysRes.error);
 
 		c.status(200);
 		return c.json(

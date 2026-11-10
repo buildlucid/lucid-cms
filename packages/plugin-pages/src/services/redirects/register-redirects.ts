@@ -68,7 +68,7 @@ const registerRedirects = (props: {
 		},
 		{
 			service: "documents",
-			event: "versionPromote",
+			event: "afterVersionPromote",
 			handler: redirectVersionPromoteHandler(config),
 		},
 	);

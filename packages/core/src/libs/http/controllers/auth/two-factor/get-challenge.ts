@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { LucidError } from "../../../../../utils/errors/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -30,7 +30,7 @@ const getTwoFactorChallengeController = factory.createHandlers(
 	}),
 	async (c) => {
 		const challengeRes = await authServices.twoFactor.getChallenge(c);
-		if (challengeRes.error) throw new LucidAPIError(challengeRes.error);
+		if (challengeRes.error) throw new LucidError(challengeRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.status(200);

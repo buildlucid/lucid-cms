@@ -1,7 +1,7 @@
 import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
 import { toolkitActorSchema } from "../../../libs/permission/toolkit-actor.js";
-import LucidAPIError from "../../../utils/errors/lucid-api-error.js";
+import LucidError from "../../../utils/errors/lucid-error.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import execute from "../execute.js";
 import RequestExecutionError from "../helpers/execution-error.js";
@@ -9,7 +9,7 @@ import recordFailure from "../helpers/record-failure.js";
 
 /** Completes an approved request now or as scheduled, recording failures for manual retry. */
 export const executeRequestJob = defineJob({
-	name: "core:execute-request",
+	key: "core:execute-request",
 	version: 1,
 	input: z.object({
 		requestId: z.number().int().positive(),
@@ -21,13 +21,15 @@ export const executeRequestJob = defineJob({
 	transaction: true,
 	//* request failures notify the people involved instead
 	notifyOnFailure: false,
-	handler: ({ context, input, execution }) =>
-		execute(context, {
+	handler: async ({ context, input, execution }) => {
+		const result = await execute(context, {
 			id: input.requestId,
 			jobId: execution.jobId,
 			revision: input.revision,
 			actor: input.actor,
-		}),
+		});
+		if (result.error) throw new LucidError(result.error);
+	},
 	onPermanentFailure: async ({ context, failure }) => {
 		const diagnostics = failure.error?.cause;
 		const failureRes = await serviceWrapper(recordFailure, {
@@ -51,7 +53,7 @@ export const executeRequestJob = defineJob({
 					? diagnostics.target
 					: null,
 		});
-		if (failureRes.error) throw new LucidAPIError(failureRes.error);
+		if (failureRes.error) throw new LucidError(failureRes.error);
 	},
 	describe: ({ input }) => ({
 		requestId: input.requestId,

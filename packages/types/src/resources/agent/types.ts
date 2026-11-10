@@ -1,3 +1,4 @@
+import type { ContentEvent, ContentEventName } from "../../common/events.js";
 import type { AiModelSelection, MediaGenerationType } from "../ai/types.js";
 import type {
 	DocumentVersionCheckBrick,
@@ -7,7 +8,6 @@ import type {
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType } from "../media/types.js";
 import type { Refs } from "../refs/types.js";
-import type { RequestType } from "../requests/types.js";
 import type { Permission, UserDisplay } from "../users/types.js";
 
 /** A media item, document or request in Lucid. */
@@ -498,48 +498,10 @@ export interface AgentRoutineSchedule {
 	timezone: string;
 }
 
-/** Optional routine-event filters, with omitted filters matching all values. */
-export interface AgentRoutineEventFilter {
-	/** Collection keys, matching requests that contain any document in those collections. */
-	collections?: string[];
-	requestTypes?: RequestType[];
-	mediaTypes?: MediaType[];
-	/** Only matches updates that changed one of these parts of the media. */
-	fields?: "file"[];
-}
-
-/**
- * A content event and filters that can trigger a routine.
- * @remarks Add events and filters without removing existing ones so saved routines remain valid.
- */
-export type AgentRoutineEvent =
-	| {
-			event: "documents:created" | "documents:updated" | "documents:published";
-			filter?: Pick<AgentRoutineEventFilter, "collections">;
-	  }
-	| {
-			event:
-				| "requests:created"
-				| "requests:updated"
-				| "requests:approved"
-				| "requests:completed";
-			filter?: Pick<AgentRoutineEventFilter, "collections" | "requestTypes">;
-	  }
-	| {
-			event: "media:created";
-			filter?: Pick<AgentRoutineEventFilter, "mediaTypes">;
-	  }
-	| {
-			event: "media:updated";
-			filter?: Pick<AgentRoutineEventFilter, "mediaTypes" | "fields">;
-	  };
-
-export type AgentRoutineEventName = AgentRoutineEvent["event"];
-
 /** A changed resource supplied to a routine run, with its matching events. */
 export interface AgentRoutineEventSubject {
 	reference: AgentReferenceSnapshot;
-	events: AgentRoutineEventName[];
+	events: ContentEventName[];
 	/** What the changes touched, such as `["file"]`, when known. */
 	fields?: string[];
 }
@@ -867,7 +829,7 @@ export interface AgentRoutine {
 	toolSettings: Record<string, AgentRoutineToolSettings>;
 	/** Null when the routine only runs on events. */
 	schedule: AgentRoutineSchedule | null;
-	events: AgentRoutineEvent[];
+	events: ContentEvent[];
 	enabled: boolean;
 	nextRunAt: string | null;
 	lastRun: Pick<

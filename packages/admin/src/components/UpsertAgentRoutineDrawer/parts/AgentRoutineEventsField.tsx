@@ -1,4 +1,4 @@
-import type { AgentRoutineEventFilter, ErrorResultObj } from "@types";
+import type { ContentEventFilter, ErrorResultObj } from "@types";
 import { TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, Index, Show } from "solid-js";
 import Button from "@/components/Button/Button";
@@ -78,10 +78,10 @@ const AgentRoutineEventsField: Component<{
 				position === index ? { ...draft, ...changes } : draft,
 			),
 		);
-	const setFilter = <Key extends keyof AgentRoutineEventFilter>(
+	const setFilter = <Key extends keyof ContentEventFilter>(
 		index: number,
 		key: Key,
-		value: AgentRoutineEventFilter[Key],
+		value: ContentEventFilter[Key],
 	) => {
 		const draft = props.value[index];
 		if (draft) update(index, { filter: { ...draft.filter, [key]: value } });

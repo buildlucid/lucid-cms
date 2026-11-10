@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import { agentServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import agentAccess from "../../middleware/agent-access.js";
@@ -45,7 +45,7 @@ const deleteReferenceController = factory.createHandlers(
 			referenceId: param.referenceId,
 			userId: c.get("auth").id,
 		});
-		if (deleted.error) throw new LucidAPIError(deleted.error);
+		if (deleted.error) throw new LucidError(deleted.error);
 
 		c.status(204);
 

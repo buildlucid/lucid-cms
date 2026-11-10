@@ -12,12 +12,13 @@ import type { TransferDefinition, TransferDefinitionInput } from "./types.js";
  *   label: { singular: "Booking", plural: "Bookings" },
  *   entry: z.object({ uid: z.string(), date: z.string() }),
  *   selection: z.array(z.number()).transform((ids) => ids.map(String)),
- *   identify: async (context, { ids }) => ({ error: undefined, data: new Map() }),
- *   match: async (context, { uids }) => ({ error: undefined, data: new Map() }),
- *   export: async (context, { ids }) => ({ error: undefined, data: [] }),
- *   import: async (context, { entry, existing }) => ({
- *     error: undefined,
- *     data: { status: existing ? "updated" : "created", id: null, warnings: [] },
+ *   identify: async ({ context, ids }) => new Map(),
+ *   match: async ({ context, uids }) => new Map(),
+ *   export: async ({ context, ids }) => [],
+ *   import: async ({ context, entry, existing }) => ({
+ *     status: existing ? "updated" : "created",
+ *     id: null,
+ *     warnings: [],
  *   }),
  * });
  *

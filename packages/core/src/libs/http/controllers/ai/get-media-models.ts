@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { mediaGenerationPermissions } from "../../../config/ai-features.js";
 import { copy } from "../../../i18n/index.js";
@@ -43,7 +43,7 @@ const getMediaModelsController = factory.createHandlers(
 				message: copy("server:core.ai.models.unavailable"),
 			},
 		})(context, { type });
-		if (models.error) throw new LucidAPIError(models.error);
+		if (models.error) throw new LucidError(models.error);
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: models.data }));

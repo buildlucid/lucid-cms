@@ -1,5 +1,6 @@
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
+import LucidError from "../errors/lucid-error.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -12,7 +13,7 @@ import withTransaction from "./with-transaction.js";
 /**
  * Wraps a service with error conversion and optional database transactions.
  * The returned function takes a ServiceContext followed by the service's arguments.
- * Returned errors roll back a transaction opened here; existing transactions are reused.
+ * Returned errors and thrown LucidErrors roll back a transaction opened here; existing transactions are reused.
  *
  * @example
  * ```ts
@@ -48,6 +49,17 @@ const serviceWrapper =
 
 			return result;
 		} catch (error) {
+			//* a thrown LucidError is a failure the code chose to report, so it keeps its details
+			if (error instanceof LucidError) {
+				return {
+					error: mergeServiceError(
+						{ ...error.error },
+						wrapperConfig.defaultError,
+					),
+					data: undefined,
+				};
+			}
+
 			if (wrapperConfig.logError) {
 				logger.error({
 					error,
@@ -60,19 +72,6 @@ const serviceWrapper =
 								: "An unknown error occurred",
 					},
 				});
-			}
-
-			if (error instanceof Error) {
-				return {
-					error: mergeServiceError(
-						{
-							message: copy("server:core.errors.default.message"),
-							cause: error,
-						},
-						wrapperConfig.defaultError,
-					),
-					data: undefined,
-				};
 			}
 
 			return {

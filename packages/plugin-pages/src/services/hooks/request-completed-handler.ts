@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import { getCollectionTableNames } from "@lucidcms/core/extension";
 import type { LucidHook } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
@@ -11,7 +12,7 @@ import refreshRequestTargetRoutes from "../refresh-request-target-routes.js";
 const requestCompletedHandler =
 	(
 		options: PluginOptionsInternal,
-	): LucidHook<"requests", "completed">["handler"] =>
+	): LucidHook<"requests", "afterComplete">["handler"] =>
 	async ({ context, toolkit, data }) => {
 		for (const collection of options.collections) {
 			const documents = data.documents.filter(
@@ -23,7 +24,7 @@ const requestCompletedHandler =
 			if (documents.length === 0 || !collectionInstance) continue;
 
 			const tablesRes = await getCollectionTableNames(context, collection.key);
-			if (tablesRes.error) return tablesRes;
+			if (tablesRes.error) throw new LucidError(tablesRes.error);
 
 			const targets = new Set(
 				documents.flatMap((document) =>
@@ -52,11 +53,11 @@ const requestCompletedHandler =
 							: [];
 					}),
 				});
-				if (refreshRes.error) return refreshRes;
+				if (refreshRes.error) throw new LucidError(refreshRes.error);
 			}
 		}
 
-		return { error: undefined, data: undefined };
+		return;
 	};
 
 export default requestCompletedHandler;

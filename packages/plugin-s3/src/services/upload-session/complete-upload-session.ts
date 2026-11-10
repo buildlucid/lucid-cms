@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, LucidError } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceCompleteUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types/types.js";
@@ -15,7 +15,7 @@ export const completeUploadSession = (
 	return async (_context, props) => {
 		try {
 			if (props.protocol !== "multipart-parts") {
-				return { error: undefined, data: {} };
+				return {};
 			}
 
 			const body = `<CompleteMultipartUpload>${props.parts
@@ -43,39 +43,31 @@ export const completeUploadSession = (
 			);
 			const response = await fetch(signed);
 			if (!response.ok) {
-				return {
-					error: {
-						type: "plugin",
-						message: copy("server:plugin.s3.objects.upload.failed", {
-							data: {
-								status: response.status,
-								statusText: response.statusText,
-							},
-						}),
-					},
-					data: undefined,
-				};
+				throw new LucidError({
+					type: "plugin",
+					message: copy("server:plugin.s3.objects.upload.failed", {
+						data: {
+							status: response.status,
+							statusText: response.statusText,
+						},
+					}),
+				});
 			}
 
 			const etag = extractXmlValue(await response.text(), "ETag")?.replace(
 				/"/g,
 				"",
 			);
-			return {
-				error: undefined,
-				data: { etag },
-			};
+			return { etag };
 		} catch (error) {
-			return {
-				error: {
-					type: "plugin",
-					message:
-						error instanceof Error
-							? copy.literal(error.message)
-							: copy("server:plugin.s3.errors.unknown"),
-				},
-				data: undefined,
-			};
+			if (error instanceof LucidError) throw error;
+			throw new LucidError({
+				type: "plugin",
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:plugin.s3.errors.unknown"),
+			});
 		}
 	};
 };

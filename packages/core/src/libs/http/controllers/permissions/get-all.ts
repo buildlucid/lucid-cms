@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import collections from "../../../collection/collections.js";
 import { permissionsFormatter } from "../../../formatters/index.js";
 import { getGrantablePermissionRegistry } from "../../../permission/registry.js";
@@ -26,7 +26,7 @@ const getAllController = factory.createHandlers(
 		const context = createServiceContext(c);
 		const collectionsRes = await collections.getAll(context, {});
 		if (collectionsRes.error) {
-			throw new LucidAPIError(collectionsRes.error);
+			throw new LucidError(collectionsRes.error);
 		}
 
 		c.status(200);

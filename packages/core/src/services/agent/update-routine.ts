@@ -10,7 +10,7 @@ import {
 import type {
 	AgentRoutine,
 	AgentRoutineConversationMode,
-	AgentRoutineEvent,
+	ContentEvent,
 	AgentRoutineSchedule,
 	AiModelSelection,
 } from "../../types/response.js";
@@ -36,7 +36,7 @@ const updateRoutine: ServiceFn<
 			instructions?: string;
 			/** Null removes the schedule, leaving the routine to run on events. */
 			schedule?: AgentRoutineSchedule | null;
-			events?: AgentRoutineEvent[];
+			events?: ContentEvent[];
 			enabled?: boolean;
 		},
 	],

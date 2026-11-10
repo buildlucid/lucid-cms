@@ -3,6 +3,7 @@ import { isAiFeatureEnabled } from "../../../../libs/config/ai-features.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import generateImage from "../generate-image/handler.js";
 import prepareImageSettings from "../generate-image/prepare.js";
@@ -48,12 +49,14 @@ export const editImageAgentTool = () =>
 					mediaId: input.mediaId,
 					execution,
 				});
-				if (source.error) return source;
+				if (source.error) throw new LucidError(source.error);
 
-				return prepareImageSettings({
+				const settings = await prepareImageSettings({
 					input,
 					editMediaId: input.mediaId,
 				});
+				if (settings.error) throw new LucidError(settings.error);
+				return settings.data;
 			},
 		},
 		handler: async ({ context, input, execution, response }) => {
@@ -61,9 +64,9 @@ export const editImageAgentTool = () =>
 				mediaId: input.mediaId,
 				execution,
 			});
-			if (source.error) return source;
+			if (source.error) throw new LucidError(source.error);
 
-			return generateImage(context, {
+			const result = await generateImage(context, {
 				toolName: editImageToolName,
 				input,
 				settings: response,
@@ -73,5 +76,7 @@ export const editImageAgentTool = () =>
 					data: { id: input.mediaId },
 				}),
 			});
+			if (result.error) throw new LucidError(result.error);
+			return result.data;
 		},
 	});

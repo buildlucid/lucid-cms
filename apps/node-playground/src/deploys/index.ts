@@ -27,7 +27,7 @@ const productionDeploy = defineDeploy({
 				data.change.version === "production",
 		},
 	],
-	schedule: "0 4 * * *",
+	schedule: { cron: "0 4 * * *" },
 });
 
 const stagingDeploy = defineDeploy({

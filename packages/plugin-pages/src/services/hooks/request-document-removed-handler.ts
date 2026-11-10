@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import { getCollectionTableNames } from "@lucidcms/core/extension";
 import type { LucidHook } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
@@ -14,7 +15,7 @@ import refreshVersionRoute from "./helpers/refresh-version-route.js";
 const requestDocumentRemovedHandler =
 	(
 		options: PluginOptionsInternal,
-	): LucidHook<"requests", "documentRemoved">["handler"] =>
+	): LucidHook<"requests", "afterDocumentRemove">["handler"] =>
 	async ({ context, toolkit, data }) => {
 		const targetCollectionRes = getTargetCollection({
 			options,
@@ -24,7 +25,7 @@ const requestDocumentRemovedHandler =
 			(instance) => instance.key === data.collectionKey,
 		);
 		if (targetCollectionRes.error || !collectionInstance) {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		const scope = requestScope({
@@ -33,14 +34,14 @@ const requestDocumentRemovedHandler =
 			fallback: "latest",
 		});
 		if (scope.type !== "request" || scope.versions.size === 0) {
-			return { error: undefined, data: undefined };
+			return;
 		}
 
 		const tablesRes = await getCollectionTableNames(
 			context,
 			data.collectionKey,
 		);
-		if (tablesRes.error) return tablesRes;
+		if (tablesRes.error) throw new LucidError(tablesRes.error);
 
 		const descendantsRes = await getDescendantFields(context, {
 			ids: [data.documentId],
@@ -48,7 +49,7 @@ const requestDocumentRemovedHandler =
 			collectionKey: data.collectionKey,
 			tables: tablesRes.data,
 		});
-		if (descendantsRes.error) return descendantsRes;
+		if (descendantsRes.error) throw new LucidError(descendantsRes.error);
 
 		for (const descendant of descendantsRes.data) {
 			const isChild = descendant.rows.some(
@@ -65,10 +66,10 @@ const requestDocumentRemovedHandler =
 				documentId: descendant.document_id,
 				versionId: descendant.document_version_id,
 			});
-			if (refreshRes.error) return refreshRes;
+			if (refreshRes.error) throw new LucidError(refreshRes.error);
 		}
 
-		return { error: undefined, data: undefined };
+		return;
 	};
 
 export default requestDocumentRemovedHandler;

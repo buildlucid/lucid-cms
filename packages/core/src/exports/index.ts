@@ -39,5 +39,5 @@ export { default as defineAgentTool } from "../libs/tools/define-agent-tool.js";
 export { default as defineMcpTool } from "../libs/tools/define-mcp-tool.js";
 export { default as defineTransfer } from "../libs/transfer/define-transfer.js";
 export { agentTools, mcpTools } from "../libs/tools/lucid-tools.js";
-export { LucidAPIError, LucidError } from "../utils/errors/index.js";
+export { LucidError } from "../utils/errors/index.js";
 export { default as serviceWrapper } from "../utils/services/service-wrapper.js";

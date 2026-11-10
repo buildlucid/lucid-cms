@@ -2,8 +2,9 @@ import z from "zod";
 import constants from "../../../constants/constants.js";
 import { getAgents } from "../../../libs/agent/registry.js";
 import defineJob from "../../../libs/jobs/define-job.js";
-import type { JobHandler } from "../../../libs/jobs/types.js";
+import type { JobService } from "../../../libs/jobs/types.js";
 import logger from "../../../libs/logger/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import dispatchDueRoutines from "../dispatch-due-routines.js";
 import dispatchEventRoutines from "../dispatch-event-routines.js";
 import expireScreenCalls from "../expire-screen-calls.js";
@@ -14,7 +15,7 @@ import recoverRuns from "../recover-runs.js";
 import resumeSubagentWaits from "../resume-subagent-waits.js";
 
 /** Recovers agent work, dispatches routines, expires screen calls, resumes finished sub-agent waits, notifies waiting users and reconciles usage. */
-const tick: JobHandler = async ({ context }) => {
+const tick: JobService = async ({ context }) => {
 	if (getAgents(context.config).length === 0) {
 		return { error: undefined, data: undefined };
 	}
@@ -43,11 +44,14 @@ const tick: JobHandler = async ({ context }) => {
 };
 
 export const agentTickJob = defineJob({
-	name: "core:agent-tick",
+	key: "core:agent-tick",
 	version: 1,
 	input: z.null(),
 	schedules: [
-		{ name: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
+		{ key: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
 	],
-	handler: tick,
+	handler: async (args) => {
+		const result = await tick(args);
+		if (result.error) throw new LucidError(result.error);
+	},
 });

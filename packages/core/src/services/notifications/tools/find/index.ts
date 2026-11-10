@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import { LucidError } from "../../../../utils/errors/index.js";
 import findNotifications from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
@@ -19,20 +20,17 @@ export const findNotificationsAgentTool = () =>
 				input,
 				actor: execution.actor,
 			});
-			if (result.error) return result;
+			if (result.error) throw new LucidError(result.error);
 
 			const count = result.data.output.pagination.count;
 			return {
-				error: undefined,
-				data: {
-					output: result.data.output,
-					summary: copy(
-						count === 1
-							? "admin:core.tools.notifications_find.summary.one"
-							: "admin:core.tools.notifications_find.summary",
-						{ data: { count } },
-					),
-				},
+				output: result.data.output,
+				summary: copy(
+					count === 1
+						? "admin:core.tools.notifications_find.summary.one"
+						: "admin:core.tools.notifications_find.summary",
+					{ data: { count } },
+				),
 			};
 		},
 	});
