@@ -281,7 +281,6 @@
 	"core.fields.condition.target.self": "The condition on field '{{field}}' cannot reference itself in {{type}}: {{typeKey}}.",
 	"core.fields.condition.target.invalid.type": "The condition on field '{{field}}' references '{{target}}' which is a {{targetType}} field and cannot be used as a condition target in {{type}}: {{typeKey}}.",
 	"core.fields.condition.target.out.of.scope": "The condition on field '{{field}}' references '{{target}}' which is not a direct sibling or ancestor-scope field in {{type}}: {{typeKey}}.",
-	"core.plugins.version.not.supported": "This plugin does not support version {{version}} of Lucid, only versions {{supportedVersions}}.",
 	"core.no.records.provided": "No records provided.",
 	"core.documents.create.failed": "Failed to create document or version.",
 	"core.media.name.invalid": "Invalid media name.",

@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { RequestCommentReply, RequestDetails } from "@types";
 import classNames from "classnames";
 import {

@@ -1,4 +1,4 @@
-import { clientSlot, defineUiRenderer } from "@lucidcms/plugin-site/ui";
+import { clientSlot, defineUiRenderer } from "@lucidcms/site/ui";
 import { type Component, Suspense } from "solid-js";
 import {
 	createComponent,

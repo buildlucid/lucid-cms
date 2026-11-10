@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import { useQueryClient } from "@tanstack/solid-query";
 import { Extension } from "@tiptap/core";
 import type { RequestDetails } from "@types";
@@ -17,10 +17,8 @@ import helpers from "@/utils/helpers";
 const MENTION_LIMIT = 8;
 
 /**
- * The box for writing a request's description, comments and replies. Typing
- * `@` mentions anyone who can see the request, and the round button or
- * Cmd/Ctrl+Enter sends it. It takes focus when it appears, and reports when
- * focus leaves it or Escape is pressed so callers can close it.
+ * Request editor with mentions and button or Cmd/Ctrl+Enter submission. Focuses on mount and
+ * reports blur or Escape so callers can close it.
  */
 export const RequestRichTextEditor: Component<{
 	request: RequestDetails;

@@ -104,10 +104,8 @@ if (result.data) {
 				"@lucidcms/core/types": [
 					join(root, "packages/core/src/exports/types.ts"),
 				],
-				"@lucidcms/db-sqlite": [join(root, "packages/db-sqlite/src/index.ts")],
-				"@lucidcms/runtime-node": [
-					join(root, "packages/runtime-node/src/index.ts"),
-				],
+				"@lucidcms/sqlite": [join(root, "packages/db-sqlite/src/index.ts")],
+				"@lucidcms/node": [join(root, "packages/runtime-node/src/index.ts")],
 			},
 		});
 		const diagnostics = ts

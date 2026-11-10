@@ -1,6 +1,6 @@
 import { definePlugin } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
-import { LUCID_VERSION, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
+import { PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
 import createSeoBrick from "./services/create-seo-brick.js";
 import resolvePluginOptions from "./services/plugin-options.js";
 import registerAdminSlots from "./services/register-admin-slots.js";
@@ -10,9 +10,8 @@ import type { SeoPluginOptions } from "./types.js";
 const plugin: LucidPlugin<SeoPluginOptions> = (options) =>
 	definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
-		sources: { translations: ["@lucidcms/plugin-seo/translations"] },
+		sources: { translations: ["@lucidcms/seo/translations"] },
 		configure: (draft) => {
 			const targets = resolvePluginOptions(options, draft.collections).map(
 				(target) => ({ ...target, brick: createSeoBrick(target) }),

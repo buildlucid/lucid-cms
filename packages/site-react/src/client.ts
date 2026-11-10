@@ -1,4 +1,4 @@
-import type { UiHydrate } from "@lucidcms/plugin-site/ui";
+import type { UiHydrate } from "@lucidcms/site/ui";
 import { type ComponentType, createElement } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, hydrateRoot } from "react-dom/client";

@@ -162,10 +162,6 @@ export type LucidPluginDefinition = {
 	 * Unique key using the package name for published plugins, such as `@acme/lucid-seo`, to avoid clashes, or a short project key such as `site-brand`.
 	 */
 	key: string;
-	/**
-	 * The Lucid CMS semver range that the plugin is compatible with.
-	 */
-	lucid: string;
 	/** Published package metadata for update checks. Omit for project plugins. */
 	package?: PackageInfo;
 	/**
@@ -177,11 +173,7 @@ export type LucidPluginDefinition = {
 		module: string;
 		options?: unknown;
 	};
-	/**
-	 * Can be used to check if the plugin is compatible with the current runtime context and state of the config.
-	 *
-	 * If the plugin is not compatible, you can throw either a LucidError or standard Error.
-	 */
+	/** Checks runtime and config compatibility. Throw LucidError or Error if incompatible. */
 	checkCompatibility?: (props: {
 		runtimeContext: AdapterRuntimeContext;
 		config: ResolvedLucidConfig;

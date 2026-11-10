@@ -7,23 +7,23 @@ This plugin registers a local `better-sqlite3` KV adapter for Lucid CMS.
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-sqlite-kv
+npm install @lucidcms/sqlite-kv
 ```
 
 ## Setup
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
+import { sqliteKV } from "@lucidcms/sqlite-kv";
 
 export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
     url: "https://cms.example.com",
-    plugins: [sqliteKVPlugin()],
+    plugins: [sqliteKV()],
   }),
 });
 ```

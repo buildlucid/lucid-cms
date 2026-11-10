@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { SQLiteAdapter } from "@lucidcms/db-sqlite";
+import { SQLiteAdapter } from "@lucidcms/sqlite";
 import { CompiledQuery } from "kysely";
 import { describe, expect, test, vi } from "vitest";
 import z from "zod";
@@ -74,7 +74,6 @@ const createFixture = () => {
 		definition: {
 			runtime: {
 				key: "test",
-				lucid: "0.0.0",
 			},
 			db: adapter,
 			config: () => ({
@@ -84,7 +83,6 @@ const createFixture = () => {
 				plugins: [
 					{
 						key: "host-lifecycle-test",
-						lucid: "*",
 						hooks: { init: pluginInit },
 						configure: () => undefined,
 					},
@@ -522,7 +520,7 @@ describe("createLucidHost content role", () => {
 	test("serves the content API from a read-only database, pausing last used writes", async () => {
 		const directory = await mkdtemp(path.join(tmpdir(), "lucid-read-only-"));
 		const database = path.join(directory, "db.sqlite");
-		const runtime = { key: "test", lucid: "0.0.0" };
+		const runtime = { key: "test" };
 		const config = () => ({
 			url: "http://localhost:6543",
 			secrets: testingConstants.key,

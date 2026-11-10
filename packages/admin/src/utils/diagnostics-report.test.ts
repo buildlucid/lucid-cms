@@ -43,7 +43,7 @@ const diagnostics: Diagnostics = {
 	},
 	packages: [
 		{ name: "@lucidcms/core", version: "0.20.0" },
-		{ name: "@lucidcms/db-sqlite", version: "1.2.2" },
+		{ name: "@lucidcms/sqlite", version: "1.2.2" },
 	],
 	plugins: [],
 	auth: {
@@ -102,7 +102,7 @@ describe("buildDiagnosticsReport", () => {
 
 	it("lists installed packages with their versions", () => {
 		expect(buildDiagnosticsReport(data)).toContain(
-			"## Packages\n- @lucidcms/core 0.20.0\n- @lucidcms/db-sqlite 1.2.2",
+			"## Packages\n- @lucidcms/core 0.20.0\n- @lucidcms/sqlite 1.2.2",
 		);
 	});
 

@@ -1,4 +1,4 @@
-import { defineSiteFunction, type SitePagePaths } from "@lucidcms/plugin-site";
+import { defineSiteFunction, type SitePagePaths } from "@lucidcms/site";
 
 /** Paths for pages under `pages/[locale]/`, one per site locale: `{% export paths = localePaths() %}`. */
 const localePaths = defineSiteFunction(

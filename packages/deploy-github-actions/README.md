@@ -2,6 +2,8 @@
 
 > The official GitHub Actions deploy provider for Lucid
 
+> **Experimental:** this package is new and may have breaking changes in any release, including minor ones. Check the changelog before you upgrade.
+
 The Lucid CMS GitHub Actions deploy provider runs a GitHub Actions workflow whenever a deploy runs, whether someone starts it from the admin, a trigger queues it or its schedule comes round. The admin shows each run's status and links to its log on GitHub.
 
 ## Installation
@@ -23,9 +25,9 @@ Create a fine-grained personal access token, or use a GitHub App token, with rea
 
 ```typescript
 import { defineConfig, defineDeploy } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
 import { githubActions } from "@lucidcms/deploy-github-actions";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,

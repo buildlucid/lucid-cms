@@ -1,4 +1,4 @@
-import { parseSourceHTML } from "@lucidcms/rich-text/server";
+import { parseSourceHTML } from "@lucidcms/richtext/server";
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";

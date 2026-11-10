@@ -1,14 +1,13 @@
 import { pluginPublicPath } from "@lucidcms/core/extension";
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-site";
-export const LUCID_VERSION = "0.x.x";
+export const PLUGIN_KEY = "@lucidcms/site";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,
 	version: packageJson.version,
 };
-export const COMPONENTS_MODULE = "@lucidcms/plugin-site/components";
+export const COMPONENTS_MODULE = "@lucidcms/site/components";
 /** Clears stored pages from the admin's Operations page. */
 export const CLEAR_CACHE_ROUTE = "/api/v1/site/clear-cache";
 
@@ -44,8 +43,8 @@ export const HEAD_OUTLET = "head";
 export const ISLANDS_URL = `/${pluginPublicPath(PLUGIN_KEY, "islands")}/`;
 
 /**
- * How long stored pages, their island entries and fragments stay in KV when no shorter TTL is given.
- * Token checks already catch stale entries, so this only bounds storage: each build uses a new cache namespace, which orphans the last build's entries.
+ * Default KV lifetime for pages, islands and fragments. Bounds storage for orphaned build
+ * namespaces; tokens handle stale entries.
  */
 export const DEFAULT_STORE_LIFETIME_SECONDS = 30 * 24 * 60 * 60;
 

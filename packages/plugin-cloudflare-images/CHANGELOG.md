@@ -1,18 +1,11 @@
-# @lucidcms/plugin-cloudflare-images
+# @lucidcms/cloudflare-images
 
-## v1.1.1 (unreleased)
+## v0.20.0 (unreleased)
+
+### Features:
 
 - The binding now reaches the Cloudflare runtime as a `cloudflare:bindings` artifact.
 
-## v1.1.0
+### Breaking Changes:
 
-- Migrated Cloudflare Images transformation to the media delivery adapter contract.
-- Added a direct `cloudflareImagesDeliveryAdapter` export for config-first usage.
-- Updated imports to use the reorganised `@lucidcms/core` entry points.
-- Moved translation registration to plugin `sources`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
-
-## v1.0.0
-
-- Added the first-party Cloudflare Images binding processor for Lucid CMS.
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
+- Renamed from `@lucidcms/plugin-cloudflare-images` to `@lucidcms/cloudflare-images`, and versions now match `@lucidcms/core`.

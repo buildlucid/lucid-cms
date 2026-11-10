@@ -2,6 +2,8 @@
 
 > The official Typesense plugin for Lucid
 
+> **Experimental:** this package is new and may have breaking changes in any release, including minor ones. Check the changelog before you upgrade.
+
 Search your Lucid content with Typesense. Choose the collections, publication versions, media and fields to index. The plugin keeps them up to date as content changes, including related content used by your search records.
 
 Updates run in the background, so search results may take a moment to reflect an edit.
@@ -9,7 +11,7 @@ Updates run in the background, so search results may take a moment to reflect an
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-typesense
+npm install @lucidcms/typesense
 ```
 
 ## Setup
@@ -18,9 +20,9 @@ Add the plugin to your Lucid config and provide your Typesense host and API key.
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { typesensePlugin } from "@lucidcms/plugin-typesense";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
+import { typesense } from "@lucidcms/typesense";
 
 export default defineConfig({
   runtime: node,
@@ -28,7 +30,7 @@ export default defineConfig({
   config: (env) => ({
     url: "https://cms.example.com",
     plugins: [
-      typesensePlugin({
+      typesense({
         host: env.TYPESENSE_HOST,
         apiKey: env.TYPESENSE_API_KEY,
         indexes: [

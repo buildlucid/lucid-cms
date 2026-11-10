@@ -1,4 +1,4 @@
-import { richTextNodeNames } from "@lucidcms/rich-text";
+import { richTextNodeNames } from "@lucidcms/richtext";
 import { getObject } from "./get-typed-value.js";
 
 const contentAtomTypes = new Set<string>([

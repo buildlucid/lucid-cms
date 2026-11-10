@@ -1,5 +1,5 @@
 import textLogo from "@assets/svgs/text-logo-light.svg?url";
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import {
 	TbOutlineAlertTriangle,
 	TbOutlineEye,

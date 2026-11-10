@@ -1,14 +1,13 @@
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-google-recaptcha";
-export const LUCID_VERSION = "0.x.x";
+export const PLUGIN_KEY = "@lucidcms/google-recaptcha";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,
 	version: packageJson.version,
 };
 export const PLUGIN_IDENTIFIER = "google-recaptcha";
-export const COMPONENTS_MODULE = "@lucidcms/plugin-google-recaptcha/components";
+export const COMPONENTS_MODULE = "@lucidcms/google-recaptcha/components";
 export const SCRIPT_URL = "https://www.google.com/recaptcha/enterprise.js";
 export const ASSESSMENTS_URL =
 	"https://recaptchaenterprise.googleapis.com/v1/projects";

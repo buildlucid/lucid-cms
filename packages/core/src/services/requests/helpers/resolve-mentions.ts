@@ -2,7 +2,7 @@ import {
 	extractRichTextReferences,
 	type RichTextJSON,
 	richTextNodeNames,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { RequestDocumentRecord } from "../types.js";

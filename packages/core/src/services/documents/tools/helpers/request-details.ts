@@ -1,4 +1,4 @@
-import { generateJSON } from "@lucidcms/rich-text/server";
+import { generateJSON } from "@lucidcms/richtext/server";
 
 const requestDetails = (
 	input: { title?: string; description?: string } | undefined,

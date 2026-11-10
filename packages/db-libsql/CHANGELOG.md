@@ -1,40 +1,11 @@
-# @lucidcms/db-libsql
+# @lucidcms/libsql
 
-## v1.2.3 (unreleased)
+## v0.20.0 (unreleased)
+
+### Breaking Changes:
+
+- Renamed from `@lucidcms/db-libsql` to `@lucidcms/libsql`, and versions now match `@lucidcms/core`.
+
+### Bug Fixes:
 
 - Database schema checks now correctly recognise foreign keys that use multiple columns.
-
-## v1.2.2
-
-- Updated imports to use the reorganised `@lucidcms/core` entry points.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
-
-## v1.2.1
-
-- Updated JSON handling to use Lucid's managed query layer, avoiding adapter-wide parsing of values that only look like JSON.
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v1.2.0
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-- Updated the adapter to use explicit database connections.
-- Fixed `dropAllTables` for remote databases with circular foreign-key relationships.
-
-## v1.1.0
-
-- Set `caseInsensitiveLikeOperator` configuration for core.
-- Added `real` data type support.
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v1.0.2
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-
-## v1.0.1
-
-- Fixed `dropAllTables` so it disables foreign key constraints before dropping tables. Allows us to drop tables even when tables contain circular references.
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v1.0.0
-
-- The initial release of the LibSQL database adapter for Lucid CMS.

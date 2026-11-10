@@ -93,7 +93,7 @@ const formatSingle = (props: {
 		})),
 		plugins: props.config.plugins.map((plugin) => ({
 			key: plugin.key,
-			lucid: plugin.lucid,
+			version: plugin.package?.version ?? null,
 		})),
 		auth: {
 			password: auth.password.enabled,

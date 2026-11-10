@@ -28,9 +28,7 @@ const PluginsSection: Component<{
 						variant="plain"
 						items={props.data.plugins.map((plugin) => ({
 							label: plugin.key,
-							value: T()("diagnostics.plugins.supports", {
-								range: plugin.lucid,
-							}),
+							value: plugin.version ?? "-",
 						}))}
 					/>
 				</Show>

@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import collections from "../../libs/collection/collections.js";
 import filterReadableData from "../../libs/collection/field-access/filter-readable-data.js";
 import getContentAccess from "../../libs/collection/field-access/get-content-access.js";

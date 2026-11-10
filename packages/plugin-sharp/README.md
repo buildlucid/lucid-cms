@@ -7,23 +7,23 @@ This plugin registers a Lucid media delivery adapter that uses Sharp for on-dema
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-sharp
+npm install @lucidcms/sharp
 ```
 
 ## Setup
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { sharpPlugin } from "@lucidcms/plugin-sharp";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sharp } from "@lucidcms/sharp";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
     url: "https://cms.example.com",
-    plugins: [sharpPlugin()],
+    plugins: [sharp()],
   }),
 });
 ```

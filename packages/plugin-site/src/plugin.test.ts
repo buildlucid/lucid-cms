@@ -14,7 +14,7 @@ const check = (host: string) =>
 		translate: (() => "") as unknown as Translator,
 	});
 
-describe("sitePlugin", () => {
+describe("site", () => {
 	test("runs on Lucid's own server but not inside a hosting framework", () => {
 		expect(() => check("lucid")).not.toThrow();
 		expect(() => check("astro")).toThrow(/can't run inside astro/);

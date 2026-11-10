@@ -1,37 +1,7 @@
-# @lucidcms/plugin-sharp
+# @lucidcms/sharp
 
-## v1.4.0
+## v0.20.0 (unreleased)
 
-- Migrated Sharp image transformation to the media delivery adapter contract.
-- Added a direct `sharpMediaDeliveryAdapter` export for config-first usage.
-- Updated imports to use the reorganised `@lucidcms/core` entry points.
-- Moved translation registration to plugin `sources`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
+### Breaking Changes:
 
-## v1.3.0
-
-- Added preset rotation after EXIF auto-orientation, including rotated focal-point crop handling.
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v1.2.1
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-
-## v1.2.0
-
-- Added configurable image fit modes and focal-point-aware cover resizing using normalized focal coordinates.
-- Updated Sharp output to report successful processing through the new result contract.
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v1.1.1
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-
-## v1.1.0
-
-- Updated to use the new image processor adapter pattern internally.
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v1.0.0
-
-- Initial release of the Sharp image processing plugin.
+- Renamed from `@lucidcms/plugin-sharp` to `@lucidcms/sharp`, and versions now match `@lucidcms/core`.

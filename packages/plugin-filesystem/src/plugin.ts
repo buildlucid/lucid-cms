@@ -3,7 +3,6 @@ import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import fileSystemStorageAdapter from "./adapter/index.js";
 import {
 	DEFAULT_UPLOAD_DIRECTORY,
-	LUCID_VERSION,
 	PACKAGE_INFO,
 	PLUGIN_KEY,
 } from "./constants.js";
@@ -16,13 +15,12 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		cli: {
-			module: "@lucidcms/plugin-filesystem/cli",
+			module: "@lucidcms/filesystem/cli",
 			options: { uploadDir },
 		},
-		sources: { translations: ["@lucidcms/plugin-filesystem/translations"] },
+		sources: { translations: ["@lucidcms/filesystem/translations"] },
 		defaults: {
 			media: {
 				storage: fileSystemStorageAdapter({

@@ -20,13 +20,13 @@
 	},
 	"dependencies": {
 		"@lucidcms/core": "*",
-		"@lucidcms/plugin-cloudflare-images": "*",
-		"@lucidcms/plugin-cloudflare-kv": "*",
-		"@lucidcms/plugin-cloudflare-queues": "*",
-		"@lucidcms/plugin-cloudflare-r2": "*",
-		"@lucidcms/plugin-pages": "*",
-		"@lucidcms/runtime-cloudflare": "*",
-		"@lucidcms/db-postgres": "*"
+		"@lucidcms/cloudflare-images": "*",
+		"@lucidcms/cloudflare-kv": "*",
+		"@lucidcms/cloudflare-queues": "*",
+		"@lucidcms/cloudflare-r2": "*",
+		"@lucidcms/pages": "*",
+		"@lucidcms/cloudflare": "*",
+		"@lucidcms/postgres": "*"
 	},
 	"author": "Build Lucid Ltd",
 	"license": "MIT",
@@ -38,6 +38,6 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	}
 }

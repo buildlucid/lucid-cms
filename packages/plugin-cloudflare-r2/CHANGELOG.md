@@ -1,41 +1,16 @@
-# @lucidcms/plugin-cloudflare-r2
+# @lucidcms/cloudflare-r2
 
-## v1.2.0 (unreleased)
+## v0.20.0 (unreleased)
 
-- Removed the `previewBucketName` option, which Cloudflare's `cf` CLI has no equivalent for.
+### Features:
+
 - The binding now reaches the Cloudflare runtime as a `cloudflare:bindings` artifact.
+
+### Breaking Changes:
+
+- Renamed from `@lucidcms/plugin-cloudflare-r2` to `@lucidcms/cloudflare-r2`, and versions now match `@lucidcms/core`.
+- Removed the `previewBucketName` option, which Cloudflare's `cf` CLI has no equivalent for.
+
+### Bug Fixes:
+
 - Fixed media uploads through the R2 binding failing with "Inter-TransformStream ReadableStream.pipeTo() is not implemented."
-
-## v1.1.0
-
-- Migrated to the media storage adapter contract with explicit ready status plus HTTP and multipart-parts upload-session support.
-- Added a direct `cloudflareR2StorageAdapter` export for config-first usage.
-- Updated imports to use the reorganised `@lucidcms/core` entry points.
-- Moved translation registration to plugin `sources`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
-
-## v1.0.5
-
-- Dropped `tenant` experiment support.
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v1.0.4
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-
-## v1.0.3
-
-- Updated the setup example to use the optional named environment schema export supported by `@lucidcms/core`.
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v1.0.2
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-
-## v1.0.1
-
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v1.0.0
-
-- The initial release of the Cloudflare R2 plugin for Lucid CMS.

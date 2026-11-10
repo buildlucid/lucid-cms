@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { RequestType } from "../../../../libs/db/tables/requests.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { AgentRequestReferencesRepository } from "../../../../libs/repositories/index.js";

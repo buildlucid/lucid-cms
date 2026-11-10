@@ -2,12 +2,14 @@
 
 > The official SEO plugin for Lucid
 
+> **Experimental:** this package is new and may have breaking changes in any release, including minor ones. Check the changelog before you upgrade.
+
 Adds an SEO fixed brick to your collections, with search and social metadata, images, indexing controls and structured data. Editors get live previews in the admin. Your website is responsible for rendering the metadata.
 
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-seo
+npm install @lucidcms/seo
 ```
 
 ## Setup
@@ -16,9 +18,9 @@ Add the plugin to your Lucid config and choose which collections should have SEO
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { seoPlugin } from "@lucidcms/plugin-seo";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { seo } from "@lucidcms/seo";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -27,7 +29,7 @@ export default defineConfig({
     url: "https://cms.example.com",
     // Register your collections here as usual.
     plugins: [
-      seoPlugin({
+      seo({
         collections: [{ key: "page" }],
       }),
     ],

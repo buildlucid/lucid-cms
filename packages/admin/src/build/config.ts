@@ -22,7 +22,7 @@ const browserEntrypoints: Record<string, string[]> = {
 	"@thisbeyond/solid-dnd": [],
 	"solid-toast": [],
 	"solid-icons": [],
-	"@lucidcms/rich-text": ["@lucidcms/rich-text/browser"],
+	"@lucidcms/richtext": ["@lucidcms/richtext/browser"],
 	"@tiptap/pm": ["@tiptap/pm/gapcursor", "@tiptap/pm/state"],
 	"@codemirror/legacy-modes": ["@codemirror/legacy-modes/mode/shell"],
 };

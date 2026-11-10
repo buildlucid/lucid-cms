@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import { describe, expect, test } from "vitest";
 import richText from "./rich-text.js";
 

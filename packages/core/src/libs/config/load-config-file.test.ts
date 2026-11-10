@@ -43,7 +43,7 @@ export const env = z.object({
 const describe = (values) => [typeof values.PORT, values.PORT, values.PARSE_COUNT ?? 0].join(":");
 export default {
     runtime: {
-        key: "test", lucid: "*",
+        key: "test",
         getEnvVars: () => ({ PORT: ${JSON.stringify(port) ?? "undefined"}, BINDING: binding }),
     },
     db: {

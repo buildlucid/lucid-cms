@@ -1,7 +1,6 @@
 import { copy, definePlugin } from "@lucidcms/core";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
-	LUCID_VERSION,
 	PACKAGE_INFO,
 	PLUGIN_IDENTIFIER,
 	PLUGIN_KEY,
@@ -16,9 +15,8 @@ import verifyTransporter from "./utils/verify-transporter.js";
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
-		sources: { translations: ["@lucidcms/plugin-nodemailer/translations"] },
+		sources: { translations: ["@lucidcms/nodemailer/translations"] },
 		defaults: () => {
 			let verification: Promise<void> | undefined;
 			const verifyOnce = () => {

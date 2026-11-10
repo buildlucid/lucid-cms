@@ -1,13 +1,12 @@
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-pages";
-export const LUCID_VERSION = "0.x.x";
+export const PLUGIN_KEY = "@lucidcms/pages";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,
 	version: packageJson.version,
 };
-export const COMPONENTS_MODULE = "@lucidcms/plugin-pages/components";
+export const COMPONENTS_MODULE = "@lucidcms/pages/components";
 export const REBUILD_PATHS_ROUTE = "/api/v1/pages/rebuild-paths";
 export const CLEAR_PATH_HISTORY_ROUTE = "/api/v1/pages/clear-path-history";
 export const PREVIOUS_PATHS_ROUTE = "/api/v1/pages/previous-paths";

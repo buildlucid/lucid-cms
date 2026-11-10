@@ -1,45 +1,7 @@
-# @lucidcms/plugin-resend
+# @lucidcms/resend
 
-## v1.1.6
+## v0.20.0 (unreleased)
 
-- Updated imports to use the reorganised `@lucidcms/core` entry points.
-- Moved translation registration to plugin `sources`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
+### Breaking Changes:
 
-## v1.1.5
-
-- Updated webhook database queries to use Lucid's managed database API, with consistent query error handling.
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v1.1.4
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-
-## v1.1.3
-
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v1.1.2
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-
-## v1.1.1
-
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v1.1.0
-
-- Added new `simulate` config option so you can stop emails been sent out in a dev environment but have them still registered as a success.
-- Implemented optional webhook support so you can track deliverability.
-- Bumped core peer dependency version to `0.13.0-alpha.0`.
-- Added translation support.
-- Added attachment support.
-- Added priority support.
-
-## v1.0.1
-
-- Bumped core peer dependency version to `0.12.0-alpha.1`.
-
-## v1.0.0
-
-- Initial release.
+- Renamed from `@lucidcms/plugin-resend` to `@lucidcms/resend`, and versions now match `@lucidcms/core`.

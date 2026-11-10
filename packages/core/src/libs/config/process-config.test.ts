@@ -65,7 +65,6 @@ test("applies plugin transforms during fresh config processing", async () => {
 			plugins: [
 				{
 					key: "test-plugin",
-					lucid: "*",
 					hooks: { init },
 					configure: (draft) => {
 						draft.tables.push(pluginTable);
@@ -98,7 +97,6 @@ test("rejects toolkit services that conflict with core services", async () => {
 				plugins: [
 					{
 						key: "documents-plugin",
-						lucid: "*",
 						toolkit: defineToolkit({
 							key: "documents",
 							create: () => ({}),
@@ -129,13 +127,11 @@ test("rejects duplicate plugin toolkit service keys", async () => {
 				plugins: [
 					{
 						key: "first-search-plugin",
-						lucid: "*",
 						toolkit,
 						configure: () => undefined,
 					},
 					{
 						key: "second-search-plugin",
-						lucid: "*",
 						toolkit,
 						configure: () => undefined,
 					},
@@ -196,7 +192,6 @@ test("preserves job definitions from the array shorthand while merging config", 
 			plugins: [
 				{
 					key: "job-plugin",
-					lucid: "*",
 					configure: (draft) => {
 						draft.jobs.definitions.push(pluginJob);
 					},
@@ -373,7 +368,6 @@ test("plugin defaults preserve project values and arrays replace defaults", asyn
 			plugins: [
 				{
 					key: "defaults",
-					lucid: "*",
 					defaults: {
 						brand: { name: "Plugin" },
 						build: { watch: { ignore: ["plugin/**"] } },
@@ -409,14 +403,12 @@ test("project configure has the final choice after ordered plugin transforms", a
 			plugins: [
 				{
 					key: "first",
-					lucid: "*",
 					configure: (draft) => {
 						draft.brand.name = "First";
 					},
 				},
 				{
 					key: "second",
-					lucid: "*",
 					configure: (draft) => {
 						expect(draft.brand.name).toBe("First");
 						draft.brand.name = "Second";
@@ -446,12 +438,10 @@ test("exclusive plugin providers report both conflicting plugin keys", async () 
 				plugins: [
 					{
 						key: "first-cache",
-						lucid: "*",
 						defaults: { kv: { adapter: passthrough() } },
 					},
 					{
 						key: "second-cache",
-						lucid: "*",
 						defaults: { kv: { adapter: passthrough() } },
 					},
 				],
@@ -476,7 +466,6 @@ test("each resolution owns collection mutations made by plugins", async () => {
 		plugins: [
 			{
 				key: "fields",
-				lucid: "*",
 				configure: (draft) => {
 					draft.collections[0]?.addText("pluginTitle");
 				},
@@ -550,7 +539,7 @@ test("rejects plugin keys that aren't package names or simple keys", async () =>
 				...config,
 				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
-				plugins: [{ key: "../escape", lucid: "*" }],
+				plugins: [{ key: "../escape" }],
 			},
 			{ resolvedDb: createAdapter("request") },
 		),

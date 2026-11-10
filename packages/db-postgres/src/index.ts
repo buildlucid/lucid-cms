@@ -385,5 +385,3 @@ export const postgres = createDatabaseAdapterCreator(createPostgresAdapter, {
 	adapter: "postgres",
 	resolve: () => new PostgresAdapter(),
 }) as PostgresAdapterCreator;
-
-export default postgres;

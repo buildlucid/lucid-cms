@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { RequestDetails } from "@types";
 import { TbOutlinePencil } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";

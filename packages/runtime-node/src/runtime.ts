@@ -1,5 +1,5 @@
 import type { EnvironmentVariables } from "@lucidcms/core/types";
-import { ADAPTER_KEY, LUCID_VERSION, PACKAGE_INFO } from "./constants.js";
+import { ADAPTER_KEY, PACKAGE_INFO } from "./constants.js";
 import adaptConfig from "./services/adapt-config.js";
 import type {
 	NodeAdapterOptions,
@@ -7,7 +7,7 @@ import type {
 	NodeRuntimeAdapter,
 } from "./types.js";
 
-/** Creates the Node runtime for `defineConfig` with options from environment values, using `@lucidcms/runtime-node/vite` to run and build it. */
+/** Creates the Node runtime for `defineConfig` with options from environment values, using `@lucidcms/node/vite` to run and build it. */
 export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	let resolvedOptions: NodeAdapterOptions | undefined =
 		typeof options === "function" ? undefined : options;
@@ -28,9 +28,8 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 
 	return {
 		key: ADAPTER_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
-		vite: "@lucidcms/runtime-node/vite",
+		vite: "@lucidcms/node/vite",
 		adaptConfig,
 		getEnvVars: async ({ logger }) => {
 			const { default: getEnvVars } =

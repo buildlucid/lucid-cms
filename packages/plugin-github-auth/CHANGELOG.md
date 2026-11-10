@@ -1,35 +1,11 @@
-# @lucidcms/plugin-github-auth
+# @lucidcms/github-auth
 
-## v1.1.0 (unreleased)
+## v0.20.0 (unreleased)
+
+### Features:
 
 - Added `bypassTwoFactor`, which skips Lucid's two-factor step for GitHub logins. Defaults to false.
 
-## v1.0.6
+### Breaking Changes:
 
-- Moved public asset registration to plugin `sources`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
-
-## v1.0.5
-
-- `type` correctly swapped over to `oauth2`.
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v1.0.4
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-
-## v1.0.3
-
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v1.0.2
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-
-## v1.0.1
-
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v1.0.0
-
-- The initial release of the GitHub auth plugin.
+- Renamed from `@lucidcms/plugin-github-auth` to `@lucidcms/github-auth`, and versions now match `@lucidcms/core`.

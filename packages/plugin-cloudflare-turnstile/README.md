@@ -7,7 +7,7 @@ The Lucid CMS Cloudflare Turnstile plugin registers a captcha adapter and a widg
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-cloudflare-turnstile
+npm install @lucidcms/cloudflare-turnstile
 ```
 
 ## Setup
@@ -15,10 +15,10 @@ npm install @lucidcms/plugin-cloudflare-turnstile
 Create a widget in the Cloudflare dashboard under Turnstile, add your CMS hostname to it, then add the plugin to your Lucid CMS config file with the widget's site key and secret key.
 
 ```typescript
+import { cloudflareTurnstile } from "@lucidcms/cloudflare-turnstile";
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { cloudflareTurnstilePlugin } from "@lucidcms/plugin-cloudflare-turnstile";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -26,7 +26,7 @@ export default defineConfig({
   config: (env) => ({
     url: "https://cms.example.com",
     plugins: [
-      cloudflareTurnstilePlugin({
+      cloudflareTurnstile({
         siteKey: env.TURNSTILE_SITE_KEY,
         secretKey: env.TURNSTILE_SECRET_KEY,
       }),
@@ -57,7 +57,7 @@ config: (env) => ({
   captcha: {
     forms: { resetPassword: true, acceptInvitation: true, sharePassword: false },
   },
-  plugins: [cloudflareTurnstilePlugin({ /* ... */ })],
+  plugins: [cloudflareTurnstile({ /* ... */ })],
 }),
 ```
 

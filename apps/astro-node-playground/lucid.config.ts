@@ -1,9 +1,9 @@
 import { defineConfig, z } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
-import { pagesPlugin } from "@lucidcms/plugin-pages";
-import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
-import { node } from "@lucidcms/runtime-node";
+import { filesystem } from "@lucidcms/filesystem";
+import { node } from "@lucidcms/node";
+import { pages } from "@lucidcms/pages";
+import { sqlite } from "@lucidcms/sqlite";
+import { sqliteKV } from "@lucidcms/sqlite-kv";
 import BlogCollection from "./src/lucid/collections/blogs.js";
 import PageCollection from "./src/lucid/collections/pages.js";
 
@@ -42,9 +42,9 @@ export default defineConfig({
 			defaultLocale: "en",
 		},
 		plugins: [
-			sqliteKVPlugin(),
-			filesystemPlugin(),
-			pagesPlugin({
+			sqliteKV(),
+			filesystem(),
+			pages({
 				collections: [
 					{
 						key: PageCollection.key,

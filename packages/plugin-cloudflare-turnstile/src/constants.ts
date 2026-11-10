@@ -1,15 +1,13 @@
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-cloudflare-turnstile";
-export const LUCID_VERSION = "0.x.x";
+export const PLUGIN_KEY = "@lucidcms/cloudflare-turnstile";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,
 	version: packageJson.version,
 };
 export const PLUGIN_IDENTIFIER = "cloudflare-turnstile";
-export const COMPONENTS_MODULE =
-	"@lucidcms/plugin-cloudflare-turnstile/components";
+export const COMPONENTS_MODULE = "@lucidcms/cloudflare-turnstile/components";
 export const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com";
 export const SCRIPT_URL = `${TURNSTILE_ORIGIN}/turnstile/v0/api.js?render=explicit`;
 export const SITEVERIFY_URL = `${TURNSTILE_ORIGIN}/turnstile/v0/siteverify`;

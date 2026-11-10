@@ -1,4 +1,4 @@
-import { SQLiteAdapter } from "@lucidcms/db-sqlite";
+import { SQLiteAdapter } from "@lucidcms/sqlite";
 import {
 	afterAll,
 	afterEach,

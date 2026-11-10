@@ -7,16 +7,16 @@ This plugin registers a local filesystem storage adapter and the upload/download
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-filesystem
+npm install @lucidcms/filesystem
 ```
 
 ## Setup
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
-import { node } from "@lucidcms/runtime-node";
+import { filesystem } from "@lucidcms/filesystem";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -24,7 +24,7 @@ export default defineConfig({
   config: () => ({
     url: "https://cms.example.com",
     plugins: [
-      filesystemPlugin({
+      filesystem({
         uploadDir: "uploads",
       }),
     ],

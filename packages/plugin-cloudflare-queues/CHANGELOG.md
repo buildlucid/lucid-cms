@@ -1,42 +1,13 @@
-# @lucidcms/plugin-cloudflare-queues
+# @lucidcms/cloudflare-queues
 
-## v1.3.0 (unreleased)
+## v0.20.0 (unreleased)
+
+### Features:
 
 - The binding and consumer now reach the Cloudflare runtime as a `cloudflare:bindings` artifact.
 - Moved the queue consumer into a typed Worker handler module, which now applies `configure` and plugin data.
+
+### Breaking Changes:
+
+- Renamed from `@lucidcms/plugin-cloudflare-queues` to `@lucidcms/cloudflare-queues`, and versions now match `@lucidcms/core`.
 - Development publishes to a local queue and consumes jobs with the Worker handler, as deployed, since Lucid's development server runs the Worker in workerd. Removed the inline development path.
-
-## v1.2.0
-
-- Updated Cloudflare Queue messages to carry durable job IDs while core owns payloads, retries, cancellation and job state.
-- Removed the top-level `maxRetries` and `baseDelaySeconds` options. Retry policy now belongs to each `defineJob` definition, while Cloudflare delivery retries remain under `consumer.maxRetries`.
-- Updated imports to use the reorganised `@lucidcms/core` entry points.
-- Moved translation registration to plugin `sources`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
-
-## v1.1.1
-
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v1.1.0
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-- Updated queue consumers to use the background Lucid host and one database connection for each batch.
-- Added structured event and error details to queue failure logs.
-
-## v1.0.3
-
-- Prevented queued emails from repeating email adapter readiness checks that only need to run when the runtime starts.
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v1.0.2
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-
-## v1.0.1
-
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v1.0.0
-
-- The initial release of the Cloudflare Queues plugin for Lucid CMS.

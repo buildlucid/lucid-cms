@@ -1,5 +1,5 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import { generateText } from "@lucidcms/rich-text/server";
+import type { RichTextJSON } from "@lucidcms/richtext";
+import { generateText } from "@lucidcms/richtext/server";
 
 /** The first line or so of a comment, for notification bodies. */
 const commentExcerpt = (body: RichTextJSON) => {

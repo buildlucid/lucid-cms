@@ -1,7 +1,7 @@
 import {
 	extractRichTextReferences,
 	type RichTextJSON,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import sendNotification from "../../notifications/send.js";
 import { mentionedNotification } from "../notifications/mentioned.js";

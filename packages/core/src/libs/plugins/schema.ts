@@ -18,7 +18,6 @@ export const PluginDefinitionSchema: z.ZodType<LucidPluginDefinition> =
 	z.strictObject({
 		// Keys appear in folder and URL paths, such as `.lucid/plugins/<key>`.
 		key: packageNameSchema,
-		lucid: z.string().trim().min(1),
 		package: z
 			.strictObject({
 				name: packageNameSchema,

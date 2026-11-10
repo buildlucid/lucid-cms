@@ -1,9 +1,9 @@
+import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareKV } from "@lucidcms/cloudflare-kv";
+import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig, z } from "@lucidcms/core";
-import { postgres } from "@lucidcms/db-postgres";
-import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
-import { pagesPlugin } from "@lucidcms/plugin-pages";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { pages } from "@lucidcms/pages";
+import { postgres } from "@lucidcms/postgres";
 import BlogCollection from "./src/lucid/collections/blogs.js";
 import PageCollection from "./src/lucid/collections/pages.js";
 
@@ -50,7 +50,7 @@ export default defineConfig({
 			defaultLocale: "en",
 		},
 		plugins: [
-			pagesPlugin({
+			pages({
 				collections: [
 					{
 						key: PageCollection.key,
@@ -62,8 +62,8 @@ export default defineConfig({
 					},
 				],
 			}),
-			cloudflareKVPlugin(),
-			cloudflareR2Plugin({
+			cloudflareKV(),
+			cloudflareR2({
 				bucketName: "lucid-astro-cloudflare-example-media",
 			}),
 		],

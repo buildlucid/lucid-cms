@@ -1,5 +1,1 @@
-import plugin from "./plugin.js";
-
-export { default as resendPlugin } from "./plugin.js";
-
-export default plugin;
+export { default as resend } from "./plugin.js";

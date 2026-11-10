@@ -18,13 +18,13 @@ const hostedServerId = "virtual:lucid/node-hosted-server";
 
 const entrySources: Record<string, string> = {
 	[serverEntryId]: `import build from "${buildModuleId}";
-import { startServer } from "@lucidcms/runtime-node/entry";
+import { startServer } from "@lucidcms/node/entry";
 
 startServer(build);
 `,
 	// Vite re-imports this after a project change, so the previous handler's host is destroyed first.
 	[devEntryId]: `import build from "${buildModuleId}";
-import { createRequestHandler } from "@lucidcms/runtime-node/handler";
+import { createRequestHandler } from "@lucidcms/node/handler";
 
 const handler = createRequestHandler(build, { compiled: false });
 if (import.meta.hot) import.meta.hot.dispose(() => handler.destroy());
@@ -193,7 +193,7 @@ const nodeVite: RuntimeViteIntegration<NodeRuntimeAdapter> = {
 		];
 	},
 	hosted: {
-		module: "@lucidcms/runtime-node/hosted",
+		module: "@lucidcms/node/hosted",
 		/** Wraps the host server entry to start Lucid's scheduler. Content deployments need no wrapper. */
 		plugins: (project, { serverEntry }) => {
 			if (project.config.role === "content") return [];
@@ -248,7 +248,7 @@ const nodeVite: RuntimeViteIntegration<NodeRuntimeAdapter> = {
 
 							// Node servers start from their named exports, such as `startServer`, which the wrapper keeps.
 							return `import lucid from "${hostedModuleId}";
-import { createNodeJobScheduler } from "@lucidcms/runtime-node";
+import { createNodeJobScheduler } from "@lucidcms/node";
 
 export * from ${JSON.stringify(entry)};
 

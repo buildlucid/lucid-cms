@@ -7,7 +7,7 @@ The Lucid CMS SQLite database adapter allows you to use SQLite as your database.
 ## Installation
 
 ```bash
-npm install @lucidcms/db-sqlite
+npm install @lucidcms/sqlite
 ```
 
 ## Setup
@@ -17,8 +17,8 @@ If you don't pass options, Lucid will instantiate `SQLiteAdapter` with the defau
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,

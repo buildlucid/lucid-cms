@@ -20,8 +20,8 @@
 		"rootDir": "./src",
 		"outDir": "./dist",
 		"paths": {
-			"@lucidcms/db-sqlite": ["../db-sqlite/src"],
-			"@lucidcms/runtime-node": ["../runtime-node/src"]
+			"@lucidcms/sqlite": ["../db-sqlite/src"],
+			"@lucidcms/node": ["../runtime-node/src"]
 		}
 	},
 	"exclude": [

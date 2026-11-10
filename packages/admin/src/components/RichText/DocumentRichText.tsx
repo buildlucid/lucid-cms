@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import {

@@ -61,7 +61,6 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 			plugins: [
 				{
 					key: "test-plugin",
-					lucid: "*",
 					configure: (draft) => {
 						draft.ai.mcp.tools.push(pluginTool);
 						draft.ai.agents.definitions.push(agent("plugin"));

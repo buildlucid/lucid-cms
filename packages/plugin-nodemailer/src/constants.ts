@@ -1,7 +1,6 @@
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-nodemailer";
-export const LUCID_VERSION = "0.x.x";
+export const PLUGIN_KEY = "@lucidcms/nodemailer";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,

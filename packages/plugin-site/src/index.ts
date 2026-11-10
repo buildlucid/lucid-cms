@@ -1,5 +1,3 @@
-import plugin from "./plugin.js";
-
 export type {
 	ContentBrick,
 	ContentDocument,
@@ -10,7 +8,7 @@ export type {
 	LocalizedUser,
 } from "@lucidcms/core/types";
 export { default as defineSiteFunction } from "./functions/define-site-function.js";
-export { default as sitePlugin } from "./plugin.js";
+export { default as site } from "./plugin.js";
 export type {
 	SiteExtension,
 	SiteFunctionContext,
@@ -23,5 +21,3 @@ export type {
 	SiteState,
 	SiteTranslationKey,
 } from "./types.js";
-
-export default plugin;

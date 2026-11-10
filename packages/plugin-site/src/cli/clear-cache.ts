@@ -17,7 +17,7 @@ const clearCache = async (
 	const { adapter } = await runTask<ClearCacheTask>("clear-cache", {});
 	if (adapter === "passthrough") {
 		logger.warn(
-			"No KV adapter is configured, so no pages were stored. Add a KV plugin, such as @lucidcms/plugin-sqlite-kv, to store ISR pages.",
+			"No KV adapter is configured, so no pages were stored. Add a KV plugin, such as @lucidcms/sqlite-kv, to store ISR pages.",
 		);
 		return;
 	}

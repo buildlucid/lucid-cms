@@ -1,5 +1,5 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import { generateText } from "@lucidcms/rich-text/browser";
+import type { RichTextJSON } from "@lucidcms/richtext";
+import { generateText } from "@lucidcms/richtext/browser";
 
 export const getRichTextPlainText = (value?: RichTextJSON | null): string => {
 	if (!value) return "";

@@ -24,7 +24,7 @@ export interface DiagnosticCheckResult {
 
 /** An installed Lucid package. Admin always shares core's version, so it isn't listed. */
 export interface DiagnosticPackage {
-	/** The npm package name, such as `@lucidcms/db-postgres`. */
+	/** The npm package name, such as `@lucidcms/postgres`. */
 	name: string;
 	version: string;
 }
@@ -103,8 +103,8 @@ export interface Diagnostics {
 	packages: DiagnosticPackage[];
 	plugins: {
 		key: string;
-		/** The Lucid version range the plugin supports. */
-		lucid: string;
+		/** The plugin package version, or null when the plugin does not declare its package. */
+		version: string | null;
 	}[];
 	auth: {
 		password: boolean;

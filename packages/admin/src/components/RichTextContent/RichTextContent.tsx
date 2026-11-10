@@ -1,5 +1,5 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import { generateHTML } from "@lucidcms/rich-text/browser";
+import type { RichTextJSON } from "@lucidcms/richtext";
+import { generateHTML } from "@lucidcms/richtext/browser";
 import classnames from "classnames";
 import DOMPurify from "dompurify";
 import { type Component, createMemo } from "solid-js";

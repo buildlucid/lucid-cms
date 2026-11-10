@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/email-templates",
-	"version": "0.0.0",
+	"version": "0.19.0-alpha.0",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -17,6 +17,6 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	}
 }

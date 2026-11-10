@@ -1,4 +1,4 @@
-import type { SiteMode, SitePluginOptions } from "@lucidcms/plugin-site";
+import type { SiteMode, SitePluginOptions } from "@lucidcms/site";
 import { react } from "@lucidcms/site-react";
 import { solid } from "@lucidcms/site-solid";
 import { svelte } from "@lucidcms/site-svelte";

@@ -112,9 +112,9 @@ describe("createFragmentCache", () => {
 			state,
 		});
 
-		expect(lifetimes.get("@lucidcms/plugin-site:fragment:hero")).toBe(
+		expect(lifetimes.get("@lucidcms/site:fragment:hero")).toBe(
 			DEFAULT_STORE_LIFETIME_SECONDS,
 		);
-		expect(lifetimes.get("@lucidcms/plugin-site:fragment:promo")).toBe(300);
+		expect(lifetimes.get("@lucidcms/site:fragment:promo")).toBe(300);
 	});
 });

@@ -1,4 +1,4 @@
-import { LucidMention } from "@lucidcms/rich-text";
+import { LucidMention } from "@lucidcms/richtext";
 import { PluginKey } from "@tiptap/pm/state";
 import {
 	exitSuggestion,

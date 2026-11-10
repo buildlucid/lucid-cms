@@ -146,7 +146,7 @@ const diagnosticsResponseSchema = z.object({
 			z.object({
 				name: z.string().meta({
 					description: "The npm package name",
-					example: "@lucidcms/db-postgres",
+					example: "@lucidcms/postgres",
 				}),
 				version: z.string().meta({
 					description: "The installed version",
@@ -162,11 +162,12 @@ const diagnosticsResponseSchema = z.object({
 		z.object({
 			key: z.string().meta({
 				description: "The plugin key",
-				example: "@lucidcms/plugin-pages",
+				example: "@lucidcms/pages",
 			}),
-			lucid: z.string().meta({
-				description: "The Lucid version range the plugin supports",
-				example: "^1.0.0",
+			version: z.string().nullable().meta({
+				description:
+					"The plugin package version, when the plugin declares its package",
+				example: "1.0.0",
 			}),
 		}),
 	),
@@ -237,7 +238,7 @@ const diagnosticsResponseSchema = z.object({
 const packageUpdateSchema = z.object({
 	name: z.string().meta({
 		description: "The npm package name",
-		example: "@lucidcms/db-postgres",
+		example: "@lucidcms/postgres",
 	}),
 	latest: z.string().nullable().meta({
 		description:

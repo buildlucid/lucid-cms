@@ -1,4 +1,4 @@
-import type { RichTextReference } from "@lucidcms/rich-text";
+import type { RichTextReference } from "@lucidcms/richtext";
 import { copy } from "../../../../../i18n/index.js";
 import { isFieldTypeRichTextVariable } from "../../../capabilities.js";
 import type { CustomFieldValidationError } from "../../../types.js";

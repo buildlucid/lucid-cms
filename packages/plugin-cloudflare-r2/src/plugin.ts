@@ -3,7 +3,6 @@ import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import cloudflareR2StorageAdapter from "./adapter.js";
 import {
 	DEFAULT_MAX_UPLOAD_SIZE,
-	LUCID_VERSION,
 	PACKAGE_INFO,
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
@@ -18,7 +17,6 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		hooks: {
 			runtime: async ({ phase }) => ({
@@ -44,7 +42,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 				});
 			}
 		},
-		sources: { translations: ["@lucidcms/plugin-cloudflare-r2/translations"] },
+		sources: { translations: ["@lucidcms/cloudflare-r2/translations"] },
 		defaults: {
 			media: { storage: cloudflareR2StorageAdapter(resolvedOptions) },
 		},

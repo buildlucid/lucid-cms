@@ -9,7 +9,7 @@ import type {
 	ServiceContext,
 	Toolkit,
 } from "@lucidcms/core/types";
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { KilnOptions, RenderAware, RenderInfo } from "@lucidkiln/core";
 import type { DocumentListOptions } from "./functions/document-list.js";
 import type { DocumentReadOptions } from "./functions/document.js";

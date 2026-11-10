@@ -1,24 +1,24 @@
-// import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
-// import { redisPlugin } from "@lucidcms/plugin-redis";
-// import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
+// import { cloudflareQueues } from "@lucidcms/cloudflare-queues";
+// import { redis } from "@lucidcms/redis";
+// import { cloudflareKV } from "@lucidcms/cloudflare-kv";
 import { defineConfig, lucidAgent, mcpTools, z } from "@lucidcms/core";
-// import { resendPlugin } from "@lucidcms/plugin-resend";
-// import { s3Plugin } from "@lucidcms/plugin-s3";
-import { sqlite } from "@lucidcms/db-sqlite";
-// import { cloudflareTurnstilePlugin } from "@lucidcms/plugin-cloudflare-turnstile";
-import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
-import { githubAuthPlugin } from "@lucidcms/plugin-github-auth";
-import { googleAuthPlugin } from "@lucidcms/plugin-google-auth";
-import { microsoftAuthPlugin } from "@lucidcms/plugin-microsoft-auth";
-import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
-import { pagesPlugin } from "@lucidcms/plugin-pages";
-import { seoPlugin } from "@lucidcms/plugin-seo";
-import { sharpPlugin } from "@lucidcms/plugin-sharp";
-import { sitePlugin } from "@lucidcms/plugin-site";
-import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
-import { typesensePlugin } from "@lucidcms/plugin-typesense";
-import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
-import { node } from "@lucidcms/runtime-node";
+// import { cloudflareTurnstile } from "@lucidcms/cloudflare-turnstile";
+import { filesystem } from "@lucidcms/filesystem";
+import { githubAuth } from "@lucidcms/github-auth";
+import { googleAuth } from "@lucidcms/google-auth";
+import { microsoftAuth } from "@lucidcms/microsoft-auth";
+import { node } from "@lucidcms/node";
+import { nodemailer } from "@lucidcms/nodemailer";
+import { pages } from "@lucidcms/pages";
+import { seo } from "@lucidcms/seo";
+import { sharp } from "@lucidcms/sharp";
+import { site } from "@lucidcms/site";
+// import { resend } from "@lucidcms/resend";
+// import { s3 } from "@lucidcms/s3";
+import { sqlite } from "@lucidcms/sqlite";
+import { sqliteKV } from "@lucidcms/sqlite-kv";
+import { typesense } from "@lucidcms/typesense";
+import { workerQueues } from "@lucidcms/worker-queues";
 import siteConfig from "./site/site.config.js";
 import diagnosticsRoute from "./src/admin/containers/DiagnosticsRoute/config.js";
 import publicRoute from "./src/admin/containers/PublicRoute/config.js";
@@ -244,14 +244,14 @@ export default defineConfig({
 			stylesheets: ["./src/admin/styles.css"],
 		},
 		plugins: [
-			sqliteKVPlugin(),
-			seoPlugin({ collections: [{ key: "page" }, { key: "settings" }] }),
-			workerQueuePlugin(),
-			// cloudflareTurnstilePlugin({
+			sqliteKV(),
+			seo({ collections: [{ key: "page" }, { key: "settings" }] }),
+			workerQueues(),
+			// cloudflareTurnstile({
 			// 	siteKey: "1x00000000000000000000AA",
 			// 	secretKey: "1x0000000000000000000000000000000AA",
 			// }),
-			typesensePlugin({
+			typesense({
 				host: env.TYPESENSE_HOST,
 				apiKey: env.TYPESENSE_API_KEY,
 				indexes: [
@@ -311,25 +311,25 @@ export default defineConfig({
 					},
 				],
 			}),
-			filesystemPlugin({
+			filesystem({
 				// uploadDir: "uploads",
 				// secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
 			}),
-			sharpPlugin(),
-			githubAuthPlugin({
+			sharp(),
+			githubAuth({
 				clientId: env.GITHUB_CLIENT_ID,
 				clientSecret: env.GITHUB_CLIENT_SECRET,
 			}),
-			googleAuthPlugin({
+			googleAuth({
 				clientId: env.GOOGLE_CLIENT_ID,
 				clientSecret: env.GOOGLE_CLIENT_SECRET,
 			}),
-			microsoftAuthPlugin({
+			microsoftAuth({
 				clientId: env.MICROSOFT_CLIENT_ID,
 				clientSecret: env.MICROSOFT_CLIENT_SECRET,
 				tenant: env.MICROSOFT_TENANT_ID,
 			}),
-			pagesPlugin({
+			pages({
 				collections: [
 					{
 						key: "page",
@@ -368,21 +368,21 @@ export default defineConfig({
 					},
 				],
 			}),
-			nodemailerPlugin({
+			nodemailer({
 				transporter: transporter,
 			}),
-			sitePlugin(siteConfig(env)),
-			// redisPlugin({
+			site(siteConfig(env)),
+			// redis({
 			// 	connection: env.REDIS_CONNECTION,
 			// }),
-			// resendPlugin({
+			// resend({
 			// 	apiKey: env.LUCID_RESEND_API_KEY,
 			// 	webhook: {
 			// 		enabled: true,
 			// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
 			// 	},
 			// }),
-			// s3Plugin({
+			// s3({
 			// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
 			// 	bucket: "headless-cms",
 			// 	clientOptions: {

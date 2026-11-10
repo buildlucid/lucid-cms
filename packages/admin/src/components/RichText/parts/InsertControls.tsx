@@ -1,4 +1,4 @@
-import { richTextNodeNames } from "@lucidcms/rich-text";
+import { richTextNodeNames } from "@lucidcms/richtext";
 import type { Editor, JSONContent } from "@tiptap/core";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { NodeSelection, Selection, TextSelection } from "@tiptap/pm/state";

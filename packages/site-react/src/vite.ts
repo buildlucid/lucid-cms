@@ -1,4 +1,4 @@
-import { defineUiVite } from "@lucidcms/plugin-site/ui";
+import { defineUiVite } from "@lucidcms/site/ui";
 import reactPlugin from "@vitejs/plugin-react";
 
 const PACKAGES = ["react", "react-dom"];

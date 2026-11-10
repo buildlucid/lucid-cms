@@ -7,7 +7,7 @@ The Lucid CMS Nodemailer plugin registers an email adapter and uses Nodemailer t
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-nodemailer
+npm install @lucidcms/nodemailer
 ```
 
 ## Setup
@@ -16,9 +16,9 @@ To use the Nodemailer plugin, you need to add it to your Lucid CMS config file. 
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { nodemailer } from "@lucidcms/nodemailer";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -26,7 +26,7 @@ export default defineConfig({
   config: () => ({
     url: "https://cms.example.com",
     plugins: [
-      nodemailerPlugin({
+      nodemailer({
         transporter,
       }),
     ],
@@ -54,7 +54,7 @@ When an email includes URL-based attachments, this plugin fetches those remote f
 You can configure the maximum remote attachment size and request timeout:
 
 ```typescript
-nodemailerPlugin({
+nodemailer({
   transporter,
   remoteAttachments: {
     maxBytes: 10 * 1024 * 1024,

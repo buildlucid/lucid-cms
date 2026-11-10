@@ -86,9 +86,9 @@
 		"@codemirror/view": "^6.43.15",
 		"@kobalte/core": "^0.13.14",
 		"@lezer/highlight": "^1.2.5",
-		"@lucidcms/client": "^0.5.0",
-		"@lucidcms/rich-text": "1.2.0",
-		"@lucidcms/types": "^0.6.0",
+		"@lucidcms/client": "0.19.0-alpha.0",
+		"@lucidcms/richtext": "0.19.0-alpha.0",
+		"@lucidcms/types": "0.19.0-alpha.0",
 		"@simplewebauthn/browser": "^14.0.0",
 		"@solid-primitives/scheduled": "^1.5.3",
 		"@solidjs/router": "^1.0.1",
@@ -130,7 +130,7 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"publishConfig": {
 		"access": "public"

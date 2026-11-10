@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { Extensions } from "@tiptap/core";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";

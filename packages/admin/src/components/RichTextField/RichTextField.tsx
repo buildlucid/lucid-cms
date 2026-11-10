@@ -1,7 +1,7 @@
 import {
 	extractEmbeddedBrickRefs,
 	type RichTextJSON,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import type {
 	DocumentRef,
 	FieldError,

@@ -1,13 +1,12 @@
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-typesense";
-export const LUCID_VERSION = "0.x.x";
+export const PLUGIN_KEY = "@lucidcms/typesense";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,
 	version: packageJson.version,
 };
-export const COMPONENTS_MODULE = "@lucidcms/plugin-typesense/components";
+export const COMPONENTS_MODULE = "@lucidcms/typesense/components";
 export const LEASE_MS = 120_000;
 
 export const IMPORT_BATCH_SIZE = 250;

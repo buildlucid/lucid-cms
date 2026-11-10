@@ -1,4 +1,4 @@
-import { parseSourceHTML } from "@lucidcms/rich-text/server";
+import { parseSourceHTML } from "@lucidcms/richtext/server";
 import z from "zod";
 import {
 	controllerSchemas,

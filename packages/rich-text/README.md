@@ -2,7 +2,7 @@
 
 > Shared Tiptap extensions and rich text utilities for Lucid CMS
 
-`@lucidcms/rich-text` centralises the rich text setup used across Lucid CMS.
+`@lucidcms/richtext` centralises the rich text setup used across Lucid CMS.
 
 It provides:
 
@@ -15,32 +15,32 @@ It provides:
 ## Installation
 
 ```bash
-npm install @lucidcms/rich-text
+npm install @lucidcms/richtext
 ```
 
 ## Exports
 
 This package provides three entry points:
 
-- `@lucidcms/rich-text`
-- `@lucidcms/rich-text/browser`
-- `@lucidcms/rich-text/server`
+- `@lucidcms/richtext`
+- `@lucidcms/richtext/browser`
+- `@lucidcms/richtext/server`
 
 ## Main Entry
 
 The main entry exports the shared extensions array and the `RichTextJSON` type.
 
 ```typescript
-import { extensions, type RichTextJSON } from "@lucidcms/rich-text";
+import { extensions, type RichTextJSON } from "@lucidcms/richtext";
 ```
 
 ## Browser Utilities
 
-Use browser-safe conversion helpers from `@lucidcms/rich-text/browser`.
+Use browser-safe conversion helpers from `@lucidcms/richtext/browser`.
 
 ```typescript
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import { generateHTML, generateJSON } from "@lucidcms/rich-text/browser";
+import type { RichTextJSON } from "@lucidcms/richtext";
+import { generateHTML, generateJSON } from "@lucidcms/richtext/browser";
 import Heading from "@tiptap/extension-heading";
 
 const json: RichTextJSON = {
@@ -70,10 +70,10 @@ Browser `generateHTML` accepts optional custom extensions, which are merged into
 
 ## Server Utilities
 
-Use server-safe conversion helpers from `@lucidcms/rich-text/server`.
+Use server-safe conversion helpers from `@lucidcms/richtext/server`.
 
 ```typescript
-import { generateHTML, generateJSON } from "@lucidcms/rich-text/server";
+import { generateHTML, generateJSON } from "@lucidcms/richtext/server";
 
 const html = generateHTML({
   type: "doc",
@@ -97,7 +97,7 @@ This means consumers do not need to provide extension definitions when convertin
 ## Rendering References
 
 ```typescript
-import { generateHTML } from "@lucidcms/rich-text/server";
+import { generateHTML } from "@lucidcms/richtext/server";
 
 const html = generateHTML(document.fields.body);
 

@@ -33,7 +33,7 @@ describe("checkHooks", () => {
 	test("accepts core events and events from configured plugins", () => {
 		expect(() =>
 			checkHooks({
-				plugins: [{ key: "test-plugin", lucid: "0.x.x", hookEvents }],
+				plugins: [{ key: "test-plugin", hookEvents }],
 				hooks,
 			}),
 		).not.toThrow();

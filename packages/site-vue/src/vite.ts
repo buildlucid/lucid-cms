@@ -1,4 +1,4 @@
-import { defineUiVite } from "@lucidcms/plugin-site/ui";
+import { defineUiVite } from "@lucidcms/site/ui";
 import vuePlugin from "@vitejs/plugin-vue";
 import type { Plugin, ViteDevServer } from "vite";
 

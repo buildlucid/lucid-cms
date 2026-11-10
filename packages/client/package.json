@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/client",
-	"version": "0.5.0",
+	"version": "0.19.0-alpha.0",
 	"private": false,
 	"description": "The official client package for Lucid CMS public integration endpoints.",
 	"type": "module",
@@ -9,20 +9,21 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"default": "./dist/index.js"
 		},
 		"./types": {
 			"types": "./dist/types.d.ts",
-			"import": "./dist/types.js"
+			"default": "./dist/types.js"
 		},
 		"./preview": {
 			"types": "./dist/preview.d.ts",
-			"import": "./dist/preview.js"
+			"default": "./dist/preview.js"
 		},
 		"./contract": {
 			"types": "./dist/contract.d.ts",
-			"import": "./dist/contract.js"
-		}
+			"default": "./dist/contract.js"
+		},
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -52,7 +53,7 @@
 		"typescript": "^6.0.3"
 	},
 	"dependencies": {
-		"@lucidcms/types": "^0.6.0"
+		"@lucidcms/types": "0.19.0-alpha.0"
 	},
 	"volta": {
 		"node": "26.12.1"

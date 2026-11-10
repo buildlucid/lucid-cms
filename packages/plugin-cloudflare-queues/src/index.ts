@@ -1,5 +1,1 @@
-import plugin from "./plugin.js";
-
-export { default as cloudflareQueuesPlugin } from "./plugin.js";
-
-export default plugin;
+export { default as cloudflareQueues } from "./plugin.js";

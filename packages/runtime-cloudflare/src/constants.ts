@@ -5,7 +5,6 @@ import type {
 } from "./types.js";
 
 export const ADAPTER_KEY = "cloudflare";
-export const LUCID_VERSION = "0.x.x";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,

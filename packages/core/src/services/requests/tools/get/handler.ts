@@ -1,4 +1,4 @@
-import { generateSourceHTML } from "@lucidcms/rich-text/server";
+import { generateSourceHTML } from "@lucidcms/richtext/server";
 import type z from "zod";
 import { formatPerson } from "../../../../libs/tools/person.js";
 import type { RequestEvent } from "../../../../types/response.js";

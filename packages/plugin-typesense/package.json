@@ -1,6 +1,6 @@
 {
-	"name": "@lucidcms/plugin-typesense",
-	"version": "0.1.0",
+	"name": "@lucidcms/typesense",
+	"version": "0.19.0-alpha.0",
 	"description": "The official Typesense content-indexing plugin for Lucid CMS",
 	"type": "module",
 	"types": "./dist/index.d.mts",
@@ -8,17 +8,18 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.mts",
-			"import": "./dist/index.mjs"
+			"default": "./dist/index.mjs"
 		},
 		"./cli": {
 			"types": "./dist/cli.d.mts",
-			"import": "./dist/cli.mjs"
+			"default": "./dist/cli.mjs"
 		},
 		"./translations": "./translations",
 		"./components": {
 			"types": "./dist/admin/components.d.mts",
 			"default": "./src/admin/components/index.ts"
-		}
+		},
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -51,14 +52,14 @@
 		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3",
 		"zod": "^4.6.6",
-		"@lucidcms/db-sqlite": "1.2.2",
+		"@lucidcms/sqlite": "0.19.0-alpha.0",
 		"@lucidcms/admin": "0.19.0-alpha.0",
 		"@tanstack/solid-query": "^5.105.0",
 		"solid-js": "^1.9.18"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.19.0-alpha.0",
-		"@lucidcms/admin": "^0.19.0-alpha.0",
+		"@lucidcms/core": "0.19.0-alpha.0",
+		"@lucidcms/admin": "0.19.0-alpha.0",
 		"@tanstack/solid-query": "^5.101.1",
 		"solid-js": "^1.9.13"
 	},
@@ -70,7 +71,7 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"license": "MIT",
 	"publishConfig": {

@@ -64,7 +64,6 @@ test("disabling a project directory preserves plugin sources", async () => {
 			plugins: [
 				{
 					key: "example",
-					lucid: "*",
 					sources: { translations: [pathToFileURL(path.dirname(pluginFile))] },
 					configure: () => {},
 				},
@@ -100,7 +99,6 @@ test("preserves source precedence and nested names for data and public resources
 			plugins: [
 				{
 					key: "example",
-					lucid: "*",
 					sources: { emails: ["./plugin/emails"] },
 					configure: () => {},
 				},
@@ -190,7 +188,6 @@ test("keeps the _lucid public folder for plugins", async () => {
 			plugins: [
 				{
 					key: "plugin-example",
-					lucid: "*",
 					sources: {
 						public: [
 							{

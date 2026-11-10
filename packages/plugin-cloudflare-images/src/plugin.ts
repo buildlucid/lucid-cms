@@ -2,7 +2,6 @@ import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import cloudflareImagesDeliveryAdapter from "./adapter/index.js";
 import {
-	LUCID_VERSION,
 	PACKAGE_INFO,
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
@@ -16,7 +15,6 @@ const plugin = (
 ): LucidPluginDefinition =>
 	definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		hooks: {
 			runtime: async ({ phase }) => ({
@@ -33,7 +31,7 @@ const plugin = (
 			}
 		},
 		sources: {
-			translations: ["@lucidcms/plugin-cloudflare-images/translations"],
+			translations: ["@lucidcms/cloudflare-images/translations"],
 		},
 		defaults: {
 			media: { delivery: cloudflareImagesDeliveryAdapter(pluginOptions) },

@@ -7,16 +7,16 @@ This plugin registers a Lucid media storage adapter using a Cloudflare R2 bindin
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-cloudflare-r2
+npm install @lucidcms/cloudflare-r2
 ```
 
 ## Setup
 
 ```ts
+import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig, z } from "@lucidcms/core";
-import { libsql } from "@lucidcms/db-libsql";
-import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { libsql } from "@lucidcms/libsql";
 
 export const env = z.object({
   LIBSQL_URL: z.string(),
@@ -29,7 +29,7 @@ export default defineConfig({
   config: (env) => ({
     url: "https://cms.example.com",
     plugins: [
-      cloudflareR2Plugin({
+      cloudflareR2({
         bucketName: "lucid-media",
       }),
     ],

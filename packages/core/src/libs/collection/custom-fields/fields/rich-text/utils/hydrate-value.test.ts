@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import { describe, expect, test } from "vitest";
 import type { CustomFieldResponseFormatContext } from "../../../types.js";
 import hydrateRichTextValue from "./hydrate-value.js";

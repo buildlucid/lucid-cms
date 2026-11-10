@@ -7,7 +7,7 @@ export type SiteFunctionSource = (
 ) => unknown;
 
 /** Registered symbol sharing callable sources across package copies so each Kiln instance can bind its own reads. */
-export const siteFunctionSource = Symbol.for("@lucidcms/plugin-site:function");
+export const siteFunctionSource = Symbol.for("@lucidcms/site:function");
 
 export const getSiteFunctionSource = (
 	callable: object,

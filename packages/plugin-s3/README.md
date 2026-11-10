@@ -7,7 +7,7 @@ The Lucid CMS S3 plugin registers a media storage adapter for streaming, uploadi
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-s3
+npm install @lucidcms/s3
 ```
 
 ## Setup
@@ -16,9 +16,9 @@ To use the S3 plugin, you need to add it to your Lucid CMS config file. You'll n
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { s3Plugin } from "@lucidcms/plugin-s3";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { s3 } from "@lucidcms/s3";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -26,7 +26,7 @@ export default defineConfig({
   config: (env) => ({
     url: "https://cms.example.com",
     plugins: [
-      s3Plugin({
+      s3({
         endpoint: env.S3_ENDPOINT,
         bucket: env.S3_BUCKET,
         clientOptions: {

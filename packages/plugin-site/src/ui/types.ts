@@ -4,7 +4,10 @@ export type UiFilter = {
 	exclude?: string[];
 };
 
-/** Lets templates render UI components using integrations such as `react()` from `@lucidcms/site-react`, with custom integrations defined using `defineUiIntegration` from `@lucidcms/plugin-site/ui`. */
+/**
+ * Enables template UI components through integrations such as `react()`. Define custom
+ * integrations with `defineUiIntegration` from `@lucidcms/site/ui`.
+ */
 export type UiIntegration = UiFilter & {
 	/** Names the library in errors, such as `react`. */
 	name: string;

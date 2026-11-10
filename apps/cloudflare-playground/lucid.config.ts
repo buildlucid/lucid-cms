@@ -1,11 +1,11 @@
+import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareImages } from "@lucidcms/cloudflare-images";
+import { cloudflareKV } from "@lucidcms/cloudflare-kv";
+import { cloudflareQueues } from "@lucidcms/cloudflare-queues";
+import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig, z } from "@lucidcms/core";
-import { postgres } from "@lucidcms/db-postgres";
-import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
-import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
-import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
-import { pagesPlugin } from "@lucidcms/plugin-pages";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { pages } from "@lucidcms/pages";
+import { postgres } from "@lucidcms/postgres";
 import PageCollection from "./src/collections/pages.js";
 
 export const env = z.object({
@@ -29,17 +29,17 @@ export default defineConfig({
 		},
 		collections: [PageCollection],
 		plugins: [
-			pagesPlugin({
+			pages({
 				collections: [
 					{
 						key: PageCollection.key,
 					},
 				],
 			}),
-			cloudflareImagesPlugin(),
-			cloudflareKVPlugin(),
-			cloudflareQueuesPlugin(),
-			cloudflareR2Plugin(),
+			cloudflareImages(),
+			cloudflareKV(),
+			cloudflareQueues(),
+			cloudflareR2(),
 		],
 	}),
 });

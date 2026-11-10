@@ -1,7 +1,7 @@
 import type {
 	RichTextHydratedImage,
 	RichTextHydratedMedia,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import type { Media, MediaPoster } from "../../../../../../types/response.js";
 import { getObject } from "../../../../../../utils/helpers/get-typed-value.js";
 import formatter from "../../../../../formatters/helpers.js";

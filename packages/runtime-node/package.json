@@ -1,6 +1,6 @@
 {
-	"name": "@lucidcms/runtime-node",
-	"version": "1.2.2",
+	"name": "@lucidcms/node",
+	"version": "0.19.0-alpha.0",
 	"private": false,
 	"description": "The official Node runtime for Lucid CMS",
 	"type": "module",
@@ -30,7 +30,8 @@
 		"./types": {
 			"types": "./dist/types.d.mts",
 			"default": "./dist/types.mjs"
-		}
+		},
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -66,7 +67,7 @@
 		"node-cron": "^4.6.0"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.19.0-alpha.0",
+		"@lucidcms/core": "0.19.0-alpha.0",
 		"hono": "^4.12.27",
 		"hono-openapi": "^1.3.0",
 		"vite": "^8.3.5"
@@ -75,7 +76,7 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"license": "MIT",
 	"publishConfig": {

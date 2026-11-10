@@ -1,4 +1,4 @@
-import { defineSiteFunction } from "@lucidcms/plugin-site";
+import { defineSiteFunction } from "@lucidcms/site";
 
 /** Waits up to three seconds and outputs nothing, so the islands lab can show a slow island's fallback. */
 const wait = defineSiteFunction(

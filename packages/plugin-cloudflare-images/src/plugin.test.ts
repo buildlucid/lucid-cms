@@ -49,7 +49,7 @@ describe("Cloudflare Images plugin", () => {
 		}
 
 		expect(instance.sources?.translations).toContain(
-			"@lucidcms/plugin-cloudflare-images/translations",
+			"@lucidcms/cloudflare-images/translations",
 		);
 		expect(adapter.key).toBe("cloudflare-images");
 	});

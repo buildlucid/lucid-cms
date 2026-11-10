@@ -347,5 +347,3 @@ export const sqlite = createDatabaseAdapterCreator(createSQLiteAdapter, {
 	adapter: "sqlite",
 	resolve: () => new SQLiteAdapter(),
 }) as SQLiteAdapterCreator;
-
-export default sqlite;

@@ -1,7 +1,7 @@
 import { definePlugin, logger } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import rebuildPathsConfig from "./admin/components/RebuildPaths/config.js";
-import { LUCID_VERSION, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
+import { PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
 import hookEvents from "./hook-events/index.js";
 import createRebuildPathsJob from "./jobs/rebuild-paths.js";
 import pathHistoryMigration from "./migrations/1789000000000-pages-path-history.js";
@@ -33,11 +33,10 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		toolkit,
 		hookEvents,
-		sources: { translations: ["@lucidcms/plugin-pages/translations"] },
+		sources: { translations: ["@lucidcms/pages/translations"] },
 		configure: (draft) => {
 			draft.migrations.definitions.push({
 				name: "1789000000000-pages-path-history",

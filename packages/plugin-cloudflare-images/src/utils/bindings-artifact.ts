@@ -1,4 +1,4 @@
-import type { CloudflareBindingsArtifact } from "@lucidcms/runtime-cloudflare/types";
+import type { CloudflareBindingsArtifact } from "@lucidcms/cloudflare/types";
 import type { CloudflareImagesPluginOptions } from "../types.js";
 
 /** Creates the bindings artifact the Cloudflare runtime adds to its Worker. */

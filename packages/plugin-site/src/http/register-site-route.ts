@@ -34,7 +34,7 @@ const canStorePages = (context: ServiceContext) => {
 		event: "plugin-site.isr.no-kv",
 		dedupeKey: `${PLUGIN_KEY}:isr-no-kv`,
 		message:
-			"ISR pages need a KV adapter to be stored, so they render on every request. Add a KV plugin, such as @lucidcms/plugin-sqlite-kv.",
+			"ISR pages need a KV adapter to be stored, so they render on every request. Add a KV plugin, such as @lucidcms/sqlite-kv.",
 	});
 	return false;
 };

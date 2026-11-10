@@ -1,5 +1,5 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import { generateHTML, generateText } from "@lucidcms/rich-text/server";
+import type { RichTextJSON } from "@lucidcms/richtext";
+import { generateHTML, generateText } from "@lucidcms/richtext/server";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";

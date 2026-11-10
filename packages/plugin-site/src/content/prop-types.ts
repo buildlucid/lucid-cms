@@ -3,7 +3,7 @@ import type {
 	ContentDocument,
 	LocalizedMedia,
 } from "@lucidcms/core/types";
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import isRecord from "../utils/is-record.js";
 
 /** Checks prop shapes because islands receive copies without their original identity. */

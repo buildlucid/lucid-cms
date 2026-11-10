@@ -1,6 +1,6 @@
 import { CollectionBuilder, copy, defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
 import testingConstants from "../../../constants/testing-constants.js";
 export default defineConfig({
 	runtime: node,

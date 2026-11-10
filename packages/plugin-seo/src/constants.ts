@@ -1,13 +1,12 @@
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-seo";
-export const LUCID_VERSION = "0.x.x";
+export const PLUGIN_KEY = "@lucidcms/seo";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,
 	version: packageJson.version,
 };
-export const COMPONENTS_MODULE = "@lucidcms/plugin-seo/components";
+export const COMPONENTS_MODULE = "@lucidcms/seo/components";
 export const fields = {
 	title: "title",
 	description: "description",

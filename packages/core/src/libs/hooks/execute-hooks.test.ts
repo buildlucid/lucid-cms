@@ -272,9 +272,7 @@ describe("execute hooks", () => {
 			...context,
 			config: {
 				...context.config,
-				plugins: [
-					{ key: "test-plugin", lucid: "0.x.x", hookEvents: testHookEvents },
-				],
+				plugins: [{ key: "test-plugin", hookEvents: testHookEvents }],
 				hooks: [
 					defineHook({
 						service: "test",

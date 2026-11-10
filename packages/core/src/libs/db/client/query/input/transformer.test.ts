@@ -1,4 +1,4 @@
-import { SQLiteAdapter } from "@lucidcms/db-sqlite";
+import { SQLiteAdapter } from "@lucidcms/sqlite";
 import { sql } from "kysely";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { z } from "zod";

@@ -1,4 +1,4 @@
-import { defineUiRenderer } from "@lucidcms/plugin-site/ui";
+import { defineUiRenderer } from "@lucidcms/site/ui";
 import { type Component, createSSRApp, h } from "vue";
 import { renderToString } from "vue/server-renderer";
 import { slotProps } from "./slots.js";

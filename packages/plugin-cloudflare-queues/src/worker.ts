@@ -1,6 +1,6 @@
+import type { CloudflareWorkerHandler } from "@lucidcms/cloudflare/types";
 import { consumeJob, logScopes } from "@lucidcms/core/extension";
 import { logger } from "@lucidcms/core/runtime";
-import type { CloudflareWorkerHandler } from "@lucidcms/runtime-cloudflare/types";
 import { PLUGIN_KEY } from "./constants.js";
 
 /** Matches the message body the queue adapter publishes. */

@@ -1,4 +1,4 @@
-import { SQLiteAdapter } from "@lucidcms/db-sqlite";
+import { SQLiteAdapter } from "@lucidcms/sqlite";
 import { describe, expect, test } from "vitest";
 import createLucidDatabase from "../db/create-lucid-database.js";
 import DocumentsRepository from "./documents.js";

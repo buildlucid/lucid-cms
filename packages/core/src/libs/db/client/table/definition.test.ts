@@ -1,4 +1,4 @@
-import { SQLiteAdapter } from "@lucidcms/db-sqlite";
+import { SQLiteAdapter } from "@lucidcms/sqlite";
 import { describe, expect, test } from "vitest";
 import { z } from "zod";
 import { codecs } from "../codecs/index.js";

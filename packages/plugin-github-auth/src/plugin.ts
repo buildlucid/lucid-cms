@@ -1,12 +1,7 @@
 import { definePlugin } from "@lucidcms/core";
 import { pluginPublicPath } from "@lucidcms/core/extension";
 import type { LucidPlugin } from "@lucidcms/core/types";
-import {
-	LUCID_VERSION,
-	PACKAGE_INFO,
-	PLUGIN_IDENTIFIER,
-	PLUGIN_KEY,
-} from "./constants.js";
+import { PACKAGE_INFO, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
 
 const ICON_PATH = pluginPublicPath(PLUGIN_KEY, "icon.svg");
@@ -15,7 +10,6 @@ const ICON_PATH = pluginPublicPath(PLUGIN_KEY, "icon.svg");
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		sources: {
 			public: [

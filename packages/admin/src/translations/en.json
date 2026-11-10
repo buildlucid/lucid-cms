@@ -1473,7 +1473,6 @@
 	"diagnostics.jobs.pending": "Waiting or running",
 	"diagnostics.jobs.failed": "Failed in the last 24 hours",
 	"diagnostics.plugins.description": "Plugins and admin extensions in use",
-	"diagnostics.plugins.supports": "Supports Lucid {{range}}",
 	"diagnostics.plugins.empty": "No plugins are installed.",
 	"diagnostics.extensions.title": "Admin Extensions",
 	"diagnostics.extensions.routes": "Routes",

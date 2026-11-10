@@ -9,7 +9,7 @@ Using this runtime is the most flexible way to run Lucid CMS. Out of the box, it
 ## Installation
 
 ```bash
-npm install @lucidcms/runtime-node
+npm install @lucidcms/node
 ```
 
 ## Setup
@@ -18,8 +18,8 @@ Use the Node runtime in your `lucid.config.ts` file.
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,

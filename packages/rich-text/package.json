@@ -1,6 +1,6 @@
 {
-	"name": "@lucidcms/rich-text",
-	"version": "1.2.0",
+	"name": "@lucidcms/richtext",
+	"version": "0.19.0-alpha.0",
 	"private": false,
 	"description": "Shared Tiptap extensions and rich text conversion utilities for Lucid CMS.",
 	"type": "module",
@@ -9,16 +9,17 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.mts",
-			"import": "./dist/index.mjs"
+			"default": "./dist/index.mjs"
 		},
 		"./browser": {
 			"types": "./dist/browser.d.mts",
-			"import": "./dist/browser.mjs"
+			"default": "./dist/browser.mjs"
 		},
 		"./server": {
 			"types": "./dist/server.d.mts",
-			"import": "./dist/server.mjs"
-		}
+			"default": "./dist/server.mjs"
+		},
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -46,7 +47,7 @@
 		"typescript": "^6.0.3"
 	},
 	"dependencies": {
-		"@lucidcms/types": "^0.6.0",
+		"@lucidcms/types": "0.19.0-alpha.0",
 		"@tiptap/core": "^3.32.2",
 		"@tiptap/extension-link": "^3.32.2",
 		"@tiptap/pm": "^3.32.2",
@@ -57,7 +58,7 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"license": "MIT",
 	"publishConfig": {

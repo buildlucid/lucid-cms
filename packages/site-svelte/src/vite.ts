@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { defineUiVite } from "@lucidcms/plugin-site/ui";
+import { defineUiVite } from "@lucidcms/site/ui";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 const svelteConfigFiles = [

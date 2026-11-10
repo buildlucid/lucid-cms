@@ -19,7 +19,7 @@ The intended use case for this plugin is to enable easy document fetching for fr
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-pages
+npm install @lucidcms/pages
 ```
 
 ## Setup
@@ -28,9 +28,9 @@ To use the Pages plugin, you need to add it to your Lucid CMS config file. You w
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { pagesPlugin } from "@lucidcms/plugin-pages";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { pages } from "@lucidcms/pages";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -38,7 +38,7 @@ export default defineConfig({
   config: () => ({
     url: "https://cms.example.com",
     plugins: [
-      pagesPlugin({
+      pages({
         collections: [
           {
             key: "page",
@@ -111,7 +111,7 @@ If set, the plugin prepends the given prefix to the start of the computed `path`
 Segments let a page route include values owned by other collections. The plugin registers each non-localized, required single relation on the page collection. The configured field must be a top-level text, textarea, select, or number field on its target collection.
 
 ```typescript
-pagesPlugin({
+pages({
   collections: [
     {
       key: "documentation",
@@ -138,7 +138,7 @@ Set `unique: false` to disable this route uniqueness validation for a collection
 The plugin also adds a `redirects` collection and keeps pages' old paths working. Set `redirects: false` to turn both off, or pass options:
 
 ```typescript
-pagesPlugin({
+pages({
   collections: [{ key: "page" }],
   redirects: {
     trackPathChanges: true,

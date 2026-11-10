@@ -7,16 +7,16 @@ This plugin registers a Node worker-thread queue adapter for background jobs and
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-worker-queues
+npm install @lucidcms/worker-queues
 ```
 
 ## Setup
 
 ```ts
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { workerQueuesPlugin } from "@lucidcms/plugin-worker-queues";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
+import { workerQueues } from "@lucidcms/worker-queues";
 
 export default defineConfig({
   runtime: node,
@@ -24,7 +24,7 @@ export default defineConfig({
   config: () => ({
     url: "https://cms.example.com",
     plugins: [
-      workerQueuesPlugin({
+      workerQueues({
         maxConcurrentJobs: 5,
         batchSize: 10,
       }),

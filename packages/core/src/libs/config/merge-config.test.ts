@@ -126,7 +126,6 @@ test("does not initialize a plugin default lifecycle for an explicit project ema
 			plugins: [
 				{
 					key: "email-default",
-					lucid: "*",
 					defaults: {
 						email: {
 							adapter: {

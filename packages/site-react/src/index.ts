@@ -1,4 +1,4 @@
-import { defineUiIntegration, type UiFilter } from "@lucidcms/plugin-site/ui";
+import { defineUiIntegration, type UiFilter } from "@lucidcms/site/ui";
 
 /** Renders React components through the site's `ui` option with development Fast Refresh; set `include` alongside another JSX library, such as Solid. */
 export const react = (filter: UiFilter = {}) =>

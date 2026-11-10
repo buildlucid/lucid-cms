@@ -1,16 +1,15 @@
 import { definePlugin } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import sqliteKVAdapter from "./adapter.js";
-import { LUCID_VERSION, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
+import { PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types.js";
 
 /** Provides KV storage in Lucid's database. Requires a SQLite-compatible database adapter. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
-		sources: { translations: ["@lucidcms/plugin-sqlite-kv/translations"] },
+		sources: { translations: ["@lucidcms/sqlite-kv/translations"] },
 		defaults: { kv: { adapter: sqliteKVAdapter(pluginOptions) } },
 	});
 };

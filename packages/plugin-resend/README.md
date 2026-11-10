@@ -7,7 +7,7 @@ The Lucid CMS Resend plugin registers an email adapter and uses Resend's REST AP
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-resend
+npm install @lucidcms/resend
 ```
 
 ## Setup
@@ -16,9 +16,9 @@ To use the Resend plugin, you need to add it to your Lucid CMS config file. You'
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { resendPlugin } from "@lucidcms/plugin-resend";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { resend } from "@lucidcms/resend";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -26,7 +26,7 @@ export default defineConfig({
   config: (env) => ({
     url: "https://cms.example.com",
     plugins: [
-      resendPlugin({
+      resend({
         apiKey: env.RESEND_API_KEY,
       }),
     ],

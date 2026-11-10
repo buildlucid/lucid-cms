@@ -1,9 +1,5 @@
 import type { EnvironmentVariables } from "@lucidcms/core/types";
-import constants, {
-	ADAPTER_KEY,
-	LUCID_VERSION,
-	PACKAGE_INFO,
-} from "./constants.js";
+import constants, { ADAPTER_KEY, PACKAGE_INFO } from "./constants.js";
 import adaptConfig from "./services/adapt-config.js";
 import type {
 	AdapterOptions,
@@ -11,7 +7,7 @@ import type {
 	CloudflareRuntimeAdapter,
 } from "./types.js";
 
-/** Creates the Cloudflare runtime for `defineConfig` with options from environment values, using `@lucidcms/runtime-cloudflare/vite` to run, build and execute Lucid commands in the Worker. */
+/** Creates the Cloudflare runtime for `defineConfig` with options from environment values, using `@lucidcms/cloudflare/vite` to run, build and execute Lucid commands in the Worker. */
 export const cloudflare = (
 	options?: CloudflareAdapterOptionsValue,
 ): CloudflareRuntimeAdapter => {
@@ -34,9 +30,8 @@ export const cloudflare = (
 
 	return {
 		key: ADAPTER_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
-		vite: "@lucidcms/runtime-cloudflare/vite",
+		vite: "@lucidcms/cloudflare/vite",
 		config: {
 			customBuildArtifacts: [constants.WORKER_HANDLER_ARTIFACT_TYPE],
 			customPrepareArtifacts: [constants.BINDINGS_ARTIFACT_TYPE],

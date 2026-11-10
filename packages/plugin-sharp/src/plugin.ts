@@ -2,7 +2,6 @@ import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import sharpMediaDeliveryAdapter from "./adapter/index.js";
 import {
-	LUCID_VERSION,
 	PACKAGE_INFO,
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
@@ -12,7 +11,6 @@ import {
 const plugin = (): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		checkCompatibility: ({ runtimeContext }) => {
 			if (runtimeContext.runtime !== SUPPORTED_RUNTIME_ADAPTER_KEY) {
@@ -22,7 +20,7 @@ const plugin = (): LucidPluginDefinition => {
 				});
 			}
 		},
-		sources: { translations: ["@lucidcms/plugin-sharp/translations"] },
+		sources: { translations: ["@lucidcms/sharp/translations"] },
 		defaults: { media: { delivery: sharpMediaDeliveryAdapter() } },
 	});
 };

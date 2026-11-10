@@ -30,7 +30,6 @@ test("generates project and plugin access keys and removes stale declarations", 
 				plugins: [
 					{
 						key: "exports",
-						lucid: "*",
 						configure(config) {
 							config.access.push({
 								key: "exports",

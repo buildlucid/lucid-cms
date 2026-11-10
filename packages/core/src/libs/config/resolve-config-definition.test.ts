@@ -17,7 +17,6 @@ test("resolves no-call runtime and database adapter creators", async () => {
 	const adapter = createAdapter("creator");
 	const runtime = () => ({
 		key: "node",
-		lucid: "0.0.0",
 	});
 	const db = createDatabaseAdapterCreator(() => adapter, {
 		adapter: "creator",
@@ -68,7 +67,6 @@ test("resolves a named env schema supplied separately from the config definition
 	const definition = defineConfig({
 		runtime: {
 			key: "node",
-			lucid: "0.0.0",
 		},
 		db: adapter,
 		config: (env) => {
@@ -110,7 +108,6 @@ test("skips env schema validation and fills missing secrets during build resolut
 	const definition = defineConfig({
 		runtime: {
 			key: "node",
-			lucid: "0.0.0",
 		},
 		db: adapter,
 		config: (env) => ({
@@ -158,7 +155,7 @@ test("parsed env output reaches every consumer while runtime bindings survive", 
 	const database = createAdapter("parsed-env");
 	const resolveDatabase = vi.fn(() => database);
 	const definition = defineConfig({
-		runtime: { key: "test", lucid: "*", resolveOptions },
+		runtime: { key: "test", resolveOptions },
 		db: createDatabaseAdapterCreator(() => database, {
 			adapter: "test",
 			resolve: resolveDatabase,

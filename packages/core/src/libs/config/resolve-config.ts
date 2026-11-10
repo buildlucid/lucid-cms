@@ -56,15 +56,6 @@ const resolveConfig = async (
 	}
 
 	for (const pluginDef of configRes.plugins) {
-		if (!options.skipValidation) {
-			const { default: checkPluginVersion } =
-				await import("./checks/check-plugin-version.js");
-
-			checkPluginVersion({
-				key: pluginDef.key,
-				requiredVersions: pluginDef.lucid,
-			});
-		}
 		if (pluginDef.hooks?.init) {
 			//* a throw here gets caught by the CLI
 			try {

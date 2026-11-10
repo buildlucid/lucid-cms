@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 
 /** Removes derived and obsolete render values without changing reference IDs. */
 const normalizeRichTextValue = (node: RichTextJSON): RichTextJSON => {

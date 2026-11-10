@@ -15,7 +15,7 @@ Use the Cloudflare deploy template to deploy a Lucid CMS Worker with Postgres th
 ## Installation
 
 ```bash
-npm install @lucidcms/runtime-cloudflare
+npm install @lucidcms/cloudflare
 ```
 
 ## Setup
@@ -23,9 +23,9 @@ npm install @lucidcms/runtime-cloudflare
 Use the Cloudflare runtime in your `lucid.config.ts` file.
 
 ```typescript
+import { cloudflare } from "@lucidcms/cloudflare";
 import { defineConfig } from "@lucidcms/core";
-import { libsql } from "@lucidcms/db-libsql";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { libsql } from "@lucidcms/libsql";
 
 export default defineConfig({
   runtime: cloudflare,
@@ -100,10 +100,10 @@ export default defineConfig({
 ```
 
 ```typescript
+import { cloudflare } from "@lucidcms/cloudflare";
 // lucid.config.ts
 import { defineConfig, z } from "@lucidcms/core";
-import { postgres } from "@lucidcms/db-postgres";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { postgres } from "@lucidcms/postgres";
 
 export const env = z.object({
   LUCID_DB: z.object({ connectionString: z.string() }),
@@ -147,7 +147,7 @@ Astro's Cloudflare adapter reads its Worker from `cloudflare.config.ts` alone. W
 
 ```typescript
 // cloudflare.config.ts
-import { withLucid } from "@lucidcms/runtime-cloudflare/config";
+import { withLucid } from "@lucidcms/cloudflare/config";
 import { bindings, defineConfig } from "cf/config";
 
 export default defineConfig({
@@ -165,13 +165,13 @@ Lucid's Worker entry runs Astro's Worker alongside Lucid's job scheduler and plu
 
 ## Bindings
 
-Cloudflare-aware Lucid packages can ask the runtime to generate their bindings. For example, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, `cloudflareQueuesPlugin()`, and `cloudflareImagesPlugin()` generate the matching KV, R2, Queue, and Images bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
+Cloudflare-aware Lucid packages can ask the runtime to generate their bindings. For example, `cloudflareKV()`, `cloudflareR2()`, `cloudflareQueues()`, and `cloudflareImages()` generate the matching KV, R2, Queue, and Images bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
 
 ```typescript
+import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig } from "@lucidcms/core";
-import { libsql } from "@lucidcms/db-libsql";
-import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { libsql } from "@lucidcms/libsql";
 
 export default defineConfig({
   runtime: cloudflare,
@@ -179,7 +179,7 @@ export default defineConfig({
   config: () => ({
     url: "https://cms.example.com",
     plugins: [
-      cloudflareR2Plugin({
+      cloudflareR2({
         bucketName: "lucid-media",
       }),
     ],
@@ -220,10 +220,10 @@ Lucid exports the object from its Worker entry as `LucidAgentRuns`, with SQLite 
 Due to the nature of Cloudflare Workers, they don't support file system operations. Because of this, you'll want to avoid the [LocalStorage](https://lucidjs.build/en/cms/docs/plugins/localstorage) plugin. For Cloudflare R2 bindings, we recommend the [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2) plugin. For other object stores, the [S3](https://lucidjs.build/en/cms/docs/plugins/s3) plugin remains the generic option.
 
 ```typescript
+import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig } from "@lucidcms/core";
-import { libsql } from "@lucidcms/db-libsql";
-import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { libsql } from "@lucidcms/libsql";
 
 export default defineConfig({
   runtime: cloudflare,
@@ -231,7 +231,7 @@ export default defineConfig({
   config: () => ({
     url: "https://cms.example.com",
     plugins: [
-      cloudflareR2Plugin({
+      cloudflareR2({
         bucketName: "lucid-media",
       }),
     ],
@@ -244,14 +244,14 @@ export default defineConfig({
 Media is streamed through Lucid's `cdn` endpoint, including preset-driven image processing and fallback images. Sharp cannot run inside a deployed Worker, so use the first-party [Cloudflare Images plugin](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-images) for on-demand processing:
 
 ```typescript
-import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
+import { cloudflareImages } from "@lucidcms/cloudflare-images";
 
 export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
     url: "https://cms.example.com",
-    plugins: [cloudflareImagesPlugin()],
+    plugins: [cloudflareImages()],
   }),
 });
 ```

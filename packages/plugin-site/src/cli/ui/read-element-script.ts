@@ -4,9 +4,7 @@ import { fileURLToPath } from "node:url";
 /** The `<client-component>` element's built script, which builds copy as is and development serves through Vite. */
 const readElementScript = () =>
 	readFile(
-		fileURLToPath(
-			import.meta.resolve("@lucidcms/plugin-site/client/component.js"),
-		),
+		fileURLToPath(import.meta.resolve("@lucidcms/site/client/component.js")),
 		"utf8",
 	);
 

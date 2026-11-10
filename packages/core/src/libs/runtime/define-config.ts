@@ -9,8 +9,8 @@ import type { LucidConfigDefinition } from "./types.js";
  * @example
  * ```ts
  * import { defineConfig, z } from "@lucidcms/core";
- * import { node } from "@lucidcms/runtime-node";
- * import { sqlite } from "@lucidcms/db-sqlite";
+ * import { node } from "@lucidcms/node";
+ * import { sqlite } from "@lucidcms/sqlite";
  *
  * export const env = z.object({
  *   SECRET: z.string().length(64),

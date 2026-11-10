@@ -1,6 +1,6 @@
 {
-	"name": "@lucidcms/plugin-cloudflare-r2",
-	"version": "1.1.0",
+	"name": "@lucidcms/cloudflare-r2",
+	"version": "0.19.0-alpha.0",
 	"description": "The official Cloudflare R2 plugin for Lucid CMS",
 	"type": "module",
 	"types": "./dist/index.d.mts",
@@ -8,9 +8,10 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.mts",
-			"import": "./dist/index.mjs"
+			"default": "./dist/index.mjs"
 		},
-		"./translations": "./translations"
+		"./translations": "./translations",
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -37,13 +38,13 @@
 	"devDependencies": {
 		"@cloudflare/workers-types": "^5.20261030.1",
 		"@lucidcms/core": "0.19.0-alpha.0",
-		"@lucidcms/runtime-cloudflare": "1.3.1",
+		"@lucidcms/cloudflare": "0.19.0-alpha.0",
 		"@types/node": "^24.19.2",
 		"tsdown": "^0.23.4",
 		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.19.0-alpha.0"
+		"@lucidcms/core": "0.19.0-alpha.0"
 	},
 	"dependencies": {
 		"aws4fetch": "^1.0.20",
@@ -53,7 +54,7 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"license": "MIT",
 	"publishConfig": {

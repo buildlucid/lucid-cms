@@ -1,8 +1,7 @@
 import packageJson from "../package.json" with { type: "json" };
 
-export const PLUGIN_KEY = "@lucidcms/plugin-cloudflare-r2";
+export const PLUGIN_KEY = "@lucidcms/cloudflare-r2";
 export const ADAPTER_KEY = "cloudflare-r2";
-export const LUCID_VERSION = "0.x.x";
 
 export const PACKAGE_INFO = {
 	name: packageJson.name,

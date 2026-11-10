@@ -75,7 +75,7 @@ Follow the [installation guide](https://lucidcms.io/en/cms/docs/getting-started/
 For a local Node.js project, the smallest useful setup is typically:
 
 ```bash
-npm install @lucidcms/core @lucidcms/runtime-node @lucidcms/db-sqlite @lucidcms/plugin-filesystem
+npm install @lucidcms/core @lucidcms/node @lucidcms/sqlite @lucidcms/filesystem
 ```
 
 Then create a `lucid.config.ts` file with a runtime, database adapter, the public `url`, secrets, media settings, and collections. SQLite plus the filesystem plugin is the fastest way to explore Lucid locally without external infrastructure.

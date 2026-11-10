@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
 import { requestCommentResolutionSchema } from "../../../schemas/requests.js";

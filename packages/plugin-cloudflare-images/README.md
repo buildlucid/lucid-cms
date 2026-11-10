@@ -7,16 +7,16 @@ This plugin registers a Lucid media delivery adapter backed by the Cloudflare Im
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-cloudflare-images
+npm install @lucidcms/cloudflare-images
 ```
 
 ## Setup
 
 ```ts
+import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareImages } from "@lucidcms/cloudflare-images";
 import { defineConfig } from "@lucidcms/core";
-import { libsql } from "@lucidcms/db-libsql";
-import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { libsql } from "@lucidcms/libsql";
 
 export default defineConfig({
   runtime: cloudflare,
@@ -37,12 +37,12 @@ export default defineConfig({
         },
       },
     },
-    plugins: [cloudflareImagesPlugin()],
+    plugins: [cloudflareImages()],
   }),
 });
 ```
 
-The plugin adds an Images binding named `LUCID_IMAGES` to the Worker. Use `cloudflareImagesPlugin({ binding: "CUSTOM_IMAGES" })` to select another binding name.
+The plugin adds an Images binding named `LUCID_IMAGES` to the Worker. Use `cloudflareImages({ binding: "CUSTOM_IMAGES" })` to select another binding name.
 
 ## Supported processing
 

@@ -1,5 +1,5 @@
 import { resolveConfigDefinition } from "@lucidcms/core/build";
-import { sqlite } from "@lucidcms/db-sqlite";
+import { sqlite } from "@lucidcms/sqlite";
 import { expect, test } from "vitest";
 import { node } from "../runtime.js";
 

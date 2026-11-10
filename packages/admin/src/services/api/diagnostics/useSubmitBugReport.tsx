@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";

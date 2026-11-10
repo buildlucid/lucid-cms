@@ -1,6 +1,6 @@
 {
-	"name": "@lucidcms/plugin-s3",
-	"version": "2.3.0",
+	"name": "@lucidcms/s3",
+	"version": "0.19.0-alpha.0",
 	"private": false,
 	"description": "The official S3 plugin for Lucid CMS",
 	"type": "module",
@@ -9,9 +9,10 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.mts",
-			"import": "./dist/index.mjs"
+			"default": "./dist/index.mjs"
 		},
-		"./translations": "./translations"
+		"./translations": "./translations",
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -41,7 +42,7 @@
 		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.19.0-alpha.0"
+		"@lucidcms/core": "0.19.0-alpha.0"
 	},
 	"dependencies": {
 		"aws4fetch": "^1.0.20"
@@ -50,7 +51,7 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"license": "MIT",
 	"publishConfig": {

@@ -9,7 +9,6 @@ import type { LucidPluginDefinition } from "./types.js";
  * ```ts
  * export default definePlugin({
  *   key: "site-brand",
- *   lucid: "0.x.x",
  *   defaults: {
  *     brand: { name: "Example Studio" },
  *   },

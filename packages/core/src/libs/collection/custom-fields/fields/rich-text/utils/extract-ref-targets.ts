@@ -1,7 +1,7 @@
 import {
 	extractRichTextReferences,
 	type RichTextJSON,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import type { RefTarget } from "../../../../../refs/types.js";
 import buildTableName from "../../../../helpers/build-table-name.js";
 

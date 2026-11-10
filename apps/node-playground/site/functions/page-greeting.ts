@@ -1,4 +1,4 @@
-import { defineSiteFunction } from "@lucidcms/plugin-site";
+import { defineSiteFunction } from "@lucidcms/site";
 
 const pageGreeting = defineSiteFunction(
 	async ({ functions, path, preview }, name: string) => {

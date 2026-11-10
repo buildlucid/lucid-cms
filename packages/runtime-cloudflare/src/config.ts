@@ -7,7 +7,7 @@ import type { WorkerConfig } from "@cloudflare/config";
  * ```ts
  * // cloudflare.config.ts
  * import { bindings, defineConfig } from "cf/config";
- * import { withLucid } from "@lucidcms/runtime-cloudflare/config";
+ * import { withLucid } from "@lucidcms/cloudflare/config";
  *
  * export default defineConfig({
  *   worker: withLucid({

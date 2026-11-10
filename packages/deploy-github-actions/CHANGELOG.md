@@ -1,5 +1,11 @@
 # @lucidcms/deploy-github-actions
 
-## 0.1.0
+## v0.20.0 (unreleased)
+
+### Features:
 
 - Runs Lucid deploys as GitHub Actions workflows.
+
+### Breaking Changes:
+
+- Versions now match `@lucidcms/core`.

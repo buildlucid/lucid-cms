@@ -1,102 +1,15 @@
-# @lucidcms/plugin-pages
+# @lucidcms/pages
 
-## v0.9.0 (unreleased)
+## v0.20.0 (unreleased)
 
-- Renamed the `fullSlug` field to `path`, and `toolkit.pages.getByFullSlug()` to `toolkit.pages.getByPath()`.
-- `toolkit.pages.getByPath()` now returns the document as the content API does, and accepts `locale`, `fallbackLocale` and `depth`.
+### Features:
+
 - Added a page path rebuild tile to System → Operations.
 - Added a `pages.afterRebuildPaths` hook event, so hooks and deploys can run after a path rebuild.
 - Added redirects, which replace `@lucidcms/plugin-redirects`, and pages' old paths now redirect to their current ones. `redirects: false` turns them off.
 
-## v0.8.0
+### Breaking Changes:
 
-- Added relation-derived route segments and automatic collection routing through `fullSlug`.
-- Added generated route-segment relation fields and propagation when referenced segment values change.
-- Simplified route uniqueness configuration to a boolean because segment values now form part of the complete route.
-- Replaced `ui.tab` with `ui.placement` for positioning generated fields at the collection root, inside tabs, or relative to existing fields.
-- Updated localized routes, slugs and hierarchy propagation to respect each collection's configured locale subset and default.
-- Updated imports to use the reorganised `@lucidcms/core` entry points.
-- Added `toolkit.pages.getByFullSlug()` to fetch pages by their full slug with collection-specific types and preview support.
-- Moved translation registration to plugin `sources`.
-- Fixed routes and page hierarchies when locales are added after content is created.
-- Fixed page paths retaining route segments from deleted documents.
-- Bumped `@lucidcms/admin` to `0.19.0-alpha.0`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
-
-## v0.7.0
-
-- Dropped `tenant` experiment support.
-- Updated page hierarchy, slug and route uniqueness queries to use Lucid's managed database API.
-- Added unique slug generation when duplicating pages.
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v0.6.0
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-- Replaced `collectionKey` with `key` in collection options.
-- Moved full slug visibility to `ui.fullSlug`.
-- Added `ui.tab` for placing plugin fields in an existing named collection tab.
-- Added `ui.widths` for overriding individual plugin field widths.
-- Added responsive field width defaults, including a 50/50 `fullSlug` and `slug` row when the full slug is visible.
-
-## v0.5.1
-
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v0.5.0
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-- Added computed `fullSlug` route uniqueness checks.
-- Added `unique.fields` to include selected top-level field values in uniqueness checks.
-- Fixed route collision checks for localized parent relations, root-parent routes, and descendant `fullSlug` updates.
-- Fixed descendant `fullSlug` updates after deleting a parent with collection prefixes configured.
-
-## v0.4.1
-
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v0.4.0
-
-- Bumped core peer dependency version to `0.13.0-alpha.0`.
-- Added translations support.
-
-## v0.3.3
-
-- Bumped core peer dependency version to `0.12.0-alpha.1`.
-
-## v0.3.2
-
-- Bumped core peer dependency version to `0.12.0-alpha.0`.
-- Fixed error response format.
-
-## v0.3.1
-
-- Updated to use `WITH RECURSIVE` instead of `WITH` so that the plugin works with the PostgreSQL adapter as well.
-
-## v0.3.0
-
-- Updated to support new generate document tables and bumped core peer dependency version.
-
-## v0.2.1
-
-- Bumped core peer dependency version.
-
-## v0.2.0
-
-- Updated the plugin to work with the draft and published versions document db changes and new versionPromote hook.
-
-## v0.1.3
-
-- Added is_deleted check to the duplicate parent slug check to ensure we don't check against deleted documents.
-
-## v0.1.2
-
-- Updated Lucid imports to match new export structure and bumped core peer dependency version.
-
-## v0.1.1
-
-- Fixed bug where the current documents fullSlug was being added each level of recursion when generating it's descendant fullSlugs within the afterUpsert hook.
-
-## v0.1.0
-
-- Released the first version of the plugin.
+- Renamed from `@lucidcms/plugin-pages` to `@lucidcms/pages`, and versions now match `@lucidcms/core`.
+- Renamed the `fullSlug` field to `path`, and `toolkit.pages.getByFullSlug()` to `toolkit.pages.getByPath()`.
+- `toolkit.pages.getByPath()` now returns the document as the content API does, and accepts `locale`, `fallbackLocale` and `depth`.

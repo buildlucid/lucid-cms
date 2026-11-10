@@ -336,5 +336,3 @@ export const libsql = createDatabaseAdapterCreator(createLibSQLAdapter, {
 	adapter: "libsql",
 	resolve: () => new LibSQLAdapter(),
 }) as LibSQLAdapterCreator;
-
-export default libsql;

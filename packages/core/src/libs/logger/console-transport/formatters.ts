@@ -142,7 +142,7 @@ export const formatStructuredValue = (value: unknown) => {
 	}
 };
 
-/** Shortens package-name owners and scopes, such as `@lucidcms/plugin-site`, to their last part. */
+/** Shortens package-name owners and scopes, such as `@lucidcms/site`, to their last part. */
 const shortName = (value: string) => value.slice(value.lastIndexOf("/") + 1);
 
 /**

@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import {

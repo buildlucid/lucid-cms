@@ -1,4 +1,4 @@
-import { withLucid } from "@lucidcms/runtime-cloudflare/config";
+import { withLucid } from "@lucidcms/cloudflare/config";
 import { bindings, defineConfig } from "cf/config";
 
 export default defineConfig({

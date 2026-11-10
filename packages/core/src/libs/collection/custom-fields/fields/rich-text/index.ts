@@ -3,12 +3,12 @@ import {
 	mapRichTextReferences,
 	type RichTextJSON,
 	removeRichTextEmbeddedBricks,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import {
 	generateSourceHTML,
 	generateText,
 	parseSourceHTML,
-} from "@lucidcms/rich-text/server";
+} from "@lucidcms/richtext/server";
 import isPlainObject from "../../../../../utils/helpers/is-plain-object.js";
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import type { FieldRefMapper, FieldTranslation } from "../../types.js";

@@ -1,55 +1,23 @@
 # @lucidcms/client
 
-## v0.6.0 (unreleased)
+## v0.20.0 (unreleased)
 
+### Features:
+
+- Added a `version` option to `createClient`, which document reads use by default.
+- Added `locale`, `fallbackLocale` and `depth` options to reads.
+- Added `include: ["transcripts"]` to `media.getMultiple` for audio transcripts.
+- Added `previewAttributes`, `recordPreviewTargets` and `getPreviewTarget` for marking fields, bricks and repeater items for visual editing.
+
+### Breaking Changes:
+
+- Versions now match `@lucidcms/core`.
 - Document responses now come with their references filled in, instead of `refs`.
 - Document reads now take `filter`, `sort`, `include`, `page` and `perPage` beside `collectionKey` instead of under `query`.
 - Filters now use `fields.<field>` and `bricks.<brick>.<field>` keys, accept plain values and can be a list of filters where any may match.
 - `media.getMultiple` now takes `filter`, `sort`, `include`, `page` and `perPage` directly instead of under `query`.
 - `documents.getSingle` now returns `null` when nothing matches, and list reads return `items` with their `pagination`. Results no longer have `meta`, `links` or `refs`.
-- Added a `version` option to `createClient`, which document reads use by default.
 - Collection types now come from one `Collections` registry, which Lucid's `build.clientTypes` option writes for you.
-- Added `locale`, `fallbackLocale` and `depth` options to reads.
-- Added `include: ["transcripts"]` to `media.getMultiple` for audio transcripts.
 - Removed `createDocumentView`, `createDocumentViews` and `toolbarFromToolkit`.
-- Added `previewAttributes`, `recordPreviewTargets` and `getPreviewTarget` for marking fields, bricks and repeater items for visual editing.
 - `setupPreview` now loads the builder's preview runtime from the CMS at its `host` option, and `morph: true` replaces `morphPage`.
 - The toolbar moved to `@lucidcms/admin/toolbar`, and `@lucidcms/client/bootstrap` was removed.
-
-## v0.5.0
-
-- Document responses now expose shared refs at the response level, and `asDocument` and `asDocuments` now accept one object containing the document data and refs.
-- Reworked the toolbar for SPAs and server-rendered sites, with automatic authentication and preview handling, route updates and a Toolkit adapter.
-- Preview resolution now accepts tokens in the request body and returns only their mode and expiry.
-- Document helpers now restrict locale arguments and translation records to each generated collection's supported locales.
-- Bumped `@lucidcms/types` to `0.6.0`.
-
-## v0.4.0
-
-- Auth updated to support `ApiKey` and `Bearer` token authentication.
-- Added `account.get()` for fetching the account associated with a user-scoped credential.
-- Bumped `@lucidcms/types` to `0.5.0`.
-
-## v0.3.1
-
-- Bumped `@lucidcms/types` to `0.4.0`.
-
-## v0.3.0
-
-- Filter operator types added.
-- Updated media types and document media refs for the new media response contract.
-- Added new `previews.resolve` method.
-- Added optional frontend toolbar and page builder preview integrations with explicit browser setup.
-- `asDocuments` support for multiple documents.
-
-## v0.2.0
-
-- Structured sort descriptors now use `direction` instead of `value`, for example `{ key: "updatedAt", direction: "desc" }`.
-
-## v0.1.1
-
-- Bumped `@lucidcms/types` to ^0.2.0.
-
-## v0.1.0
-
-- The initial release of the client.

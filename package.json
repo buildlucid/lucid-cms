@@ -12,18 +12,27 @@
 		"format:fix": "oxfmt",
 		"lint": "oxlint",
 		"lint:fix": "oxlint --fix",
-		"check": "oxfmt --check && oxlint && turbo run check",
+		"check": "oxfmt --check && oxlint && npm run release:check && turbo run check",
 		"check:fix": "oxfmt && oxlint --fix",
 		"fallow": "fallow --workspace \"@lucidcms/*,!@lucidcms/*playground\" --score",
 		"fallow:audit": "fallow audit --workspace \"@lucidcms/*,!@lucidcms/*playground\"",
 		"fallow:type-aware": "fallow dead-code --workspace \"@lucidcms/*,!@lucidcms/*playground\" --type-aware",
+		"release": "node scripts/release/index.ts --dry-run",
+		"release:check": "node scripts/release/index.ts --check",
 		"prepare": "husky"
 	},
 	"devDependencies": {
+		"@inquirer/confirm": "^6.3.5",
+		"@inquirer/input": "^5.1.9",
+		"@inquirer/select": "^5.2.8",
+		"@types/node": "^24.19.2",
+		"@types/semver": "^7.8.0",
 		"fallow": "^3.37.0",
 		"husky": "^9.1.7",
 		"oxfmt": "^0.75.0",
 		"oxlint": "^1.90.0",
+		"picocolors": "^1.1.1",
+		"semver": "^7.8.6",
 		"turbo": "^2.11.10",
 		"typescript": "^6.0.3",
 		"vitest": "^5.0.5"
@@ -38,7 +47,7 @@
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"author": "Build Lucid Ltd",
 	"license": "MIT",

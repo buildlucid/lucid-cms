@@ -1,6 +1,6 @@
 {
-	"name": "@lucidcms/plugin-google-recaptcha",
-	"version": "0.1.0",
+	"name": "@lucidcms/google-recaptcha",
+	"version": "0.19.0-alpha.0",
 	"description": "The official Google reCAPTCHA plugin for Lucid CMS",
 	"type": "module",
 	"types": "./dist/server/index.d.mts",
@@ -8,12 +8,13 @@
 	"exports": {
 		".": {
 			"types": "./dist/server/index.d.mts",
-			"import": "./dist/server/index.mjs"
+			"default": "./dist/server/index.mjs"
 		},
 		"./components": {
 			"types": "./dist/admin/components.d.mts",
 			"default": "./src/admin/components/index.ts"
-		}
+		},
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"build": "tsc --noEmit && tsdown",
@@ -51,15 +52,15 @@
 		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {
-		"@lucidcms/admin": "^0.19.0-alpha.0",
-		"@lucidcms/core": "^0.19.0-alpha.0",
+		"@lucidcms/admin": "0.19.0-alpha.0",
+		"@lucidcms/core": "0.19.0-alpha.0",
 		"solid-js": "^1.9.13"
 	},
 	"volta": {
 		"node": "26.12.1"
 	},
 	"engines": {
-		"node": "^24.0.0 || ^26.0.0"
+		"node": ">=24"
 	},
 	"license": "MIT",
 	"publishConfig": {

@@ -1,4 +1,4 @@
-import { defineUiVite } from "@lucidcms/plugin-site/ui";
+import { defineUiVite } from "@lucidcms/site/ui";
 import solidPlugin from "vite-plugin-solid";
 
 /** vite-plugin-solid, compiling components for hydration on the server and in the browser. */

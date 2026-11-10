@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { RequestDetails } from "@types";
 import classNames from "classnames";
 import { type Component, createSignal, Show } from "solid-js";
@@ -9,10 +9,8 @@ import userStore from "@/store/userStore/userStore";
 import { RequestRichTextEditor } from "./RequestRichTextEditor";
 
 /**
- * Writes a comment, or a reply when `parentId` is set. It starts as a single
- * line, opens into the editor when clicked and closes again if focus leaves
- * it, or Escape is pressed, before anything is written. The close button
- * discards what was written.
+ * Writes a comment or `parentId` reply. Expands on click; collapses on blur or Escape while empty.
+ * Closing discards the draft.
  */
 export const RequestCommentForm: Component<{
 	request: RequestDetails;

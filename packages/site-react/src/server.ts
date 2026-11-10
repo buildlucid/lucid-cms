@@ -1,4 +1,4 @@
-import { defineUiRenderer } from "@lucidcms/plugin-site/ui";
+import { defineUiRenderer } from "@lucidcms/site/ui";
 import { type ComponentType, createElement } from "react";
 import { renderToReadableStream } from "react-dom/server";
 import { slotProps } from "./slots.js";

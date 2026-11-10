@@ -1,7 +1,7 @@
 import {
 	extractRichTextReferences,
 	type RichTextJSON,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import z from "zod";
 import type { ServiceResponse } from "../../../../../exports/types.js";
 import { getObject } from "../../../../../utils/helpers/get-typed-value.js";

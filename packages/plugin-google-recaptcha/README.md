@@ -9,7 +9,7 @@ reCAPTCHA sets cookies, so visitors in the EU and UK may need to consent before 
 ## Installation
 
 ```bash
-npm install @lucidcms/plugin-google-recaptcha
+npm install @lucidcms/google-recaptcha
 ```
 
 ## Setup
@@ -20,9 +20,9 @@ npm install @lucidcms/plugin-google-recaptcha
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { sqlite } from "@lucidcms/db-sqlite";
-import { googleRecaptchaPlugin } from "@lucidcms/plugin-google-recaptcha";
-import { node } from "@lucidcms/runtime-node";
+import { googleRecaptcha } from "@lucidcms/google-recaptcha";
+import { node } from "@lucidcms/node";
+import { sqlite } from "@lucidcms/sqlite";
 
 export default defineConfig({
   runtime: node,
@@ -30,7 +30,7 @@ export default defineConfig({
   config: (env) => ({
     url: "https://cms.example.com",
     plugins: [
-      googleRecaptchaPlugin({
+      googleRecaptcha({
         siteKey: env.RECAPTCHA_SITE_KEY,
         projectId: env.RECAPTCHA_PROJECT_ID,
         apiKey: env.RECAPTCHA_API_KEY,
@@ -73,7 +73,7 @@ config: (env) => ({
   captcha: {
     forms: { resetPassword: true, acceptInvitation: true, sharePassword: false },
   },
-  plugins: [googleRecaptchaPlugin({ /* ... */ })],
+  plugins: [googleRecaptcha({ /* ... */ })],
 }),
 ```
 

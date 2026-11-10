@@ -1,6 +1,6 @@
 # @lucidcms/core
 
-## v0.20.0-alpha.0 (unreleased)
+## v0.20.0 (unreleased)
 
 ### Features:
 
@@ -59,6 +59,9 @@
 - Hook events now all start with `before` or `after`: `afterVersionPromote`, `afterVersionCapture`, `requests.afterCheck`, `requests.afterComplete`, `requests.afterDocumentRemove` and `agent.afterRunFinish`.
 - `defineJob` and its schedules now use `key` instead of `name`. The jobs API returns and filters on `jobKey` instead of `jobName`, and schedules return `shortKey` instead of `name`.
 - `defineSeed` now takes `{ run }` instead of a function.
+- Every `@lucidcms` package now shares one version, and the database, runtime and plugin packages dropped their `db-`, `runtime-` and `plugin-` prefixes, so `@lucidcms/db-sqlite` is now `@lucidcms/sqlite`. `@lucidcms/rich-text` is now `@lucidcms/richtext`.
+- Removed the `lucid` version range from `definePlugin` and runtime adapters. Packages declare the Lucid version they need as a peer dependency.
+- Plugins dropped the `Plugin` suffix from their exports, so `resendPlugin()` is now `resend()`. Plugins, database adapters and the GitHub Actions deploy provider no longer have default exports.
 
 ### Bug Fixes:
 

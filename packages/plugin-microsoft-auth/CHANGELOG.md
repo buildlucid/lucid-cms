@@ -1,34 +1,11 @@
-# @lucidcms/plugin-microsoft-auth
+# @lucidcms/microsoft-auth
 
-## v1.1.0 (unreleased)
+## v0.20.0 (unreleased)
+
+### Features:
 
 - Added `bypassTwoFactor`, which skips Lucid's two-factor step for Microsoft logins. Defaults to true, unless `tenant` allows personal accounts.
 
-## v1.0.6
+### Breaking Changes:
 
-- Moved public asset registration to plugin `sources`.
-- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
-
-## v1.0.5
-
-- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
-
-## v1.0.4
-
-- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
-
-## v1.0.3
-
-- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
-
-## v1.0.2
-
-- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
-
-## v1.0.1
-
-- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
-
-## v1.0.0
-
-- The initial release of the Microsoft auth plugin.
+- Renamed from `@lucidcms/plugin-microsoft-auth` to `@lucidcms/microsoft-auth`, and versions now match `@lucidcms/core`.

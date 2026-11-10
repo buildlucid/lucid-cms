@@ -41,7 +41,7 @@ const cloudflareVite: RuntimeViteIntegration<CloudflareRuntimeAdapter> = {
 		// for `lucidcms serve` are only previewed locally.
 		let deploy = false;
 		const entrySource = `import build from "${buildModuleId}";
-import { createAgentRuns, createWorker } from "@lucidcms/runtime-cloudflare/entry";
+import { createAgentRuns, createWorker } from "@lucidcms/cloudflare/entry";
 ${handlers.imports}
 
 export default createWorker(build, ${handlers.handlers});
@@ -64,7 +64,7 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 								},
 								optimizeDeps: {
 									entries: listOptimizeEntries(project, [
-										"@lucidcms/runtime-cloudflare/entry",
+										"@lucidcms/cloudflare/entry",
 										...handlers.modules,
 									]),
 								},
@@ -109,12 +109,12 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 		];
 	},
 	hosted: {
-		module: "@lucidcms/runtime-cloudflare/hosted",
+		module: "@lucidcms/cloudflare/hosted",
 		/** Serves `withLucid`'s Worker entry, which wraps the host's Worker with Lucid's scheduler, plugin handlers and agent run Durable Object, and caches built assets through `_headers`. */
 		plugins: (project, { workerEntry }) => {
 			if (!existsSync(path.join(project.projectRoot, constants.CONFIG_FILE))) {
 				throw new LucidError({
-					message: `The host's Cloudflare adapter reads the Worker from \`${constants.CONFIG_FILE}\`. Add one that wraps its Worker in \`withLucid\` from @lucidcms/runtime-cloudflare/config.`,
+					message: `The host's Cloudflare adapter reads the Worker from \`${constants.CONFIG_FILE}\`. Add one that wraps its Worker in \`withLucid\` from @lucidcms/cloudflare/config.`,
 				});
 			}
 
@@ -122,8 +122,8 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 			const serverEnvironment = {
 				optimizeDeps: {
 					entries: listOptimizeEntries(project, [
-						"@lucidcms/runtime-cloudflare/entry",
-						"@lucidcms/runtime-cloudflare/hosted",
+						"@lucidcms/cloudflare/entry",
+						"@lucidcms/cloudflare/hosted",
 						...handlers.modules,
 					]),
 					// Late optimization restarts the Worker while its initial modules are loading.
@@ -173,7 +173,7 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 
 							return `import lucid from "${hostedModuleId}";
 import hostWorker from ${JSON.stringify(entry)};
-import { createHostedAgentRuns, createHostedWorker } from "@lucidcms/runtime-cloudflare/entry";
+import { createHostedAgentRuns, createHostedWorker } from "@lucidcms/cloudflare/entry";
 ${handlers.imports}
 
 export default createHostedWorker(lucid, hostWorker, ${handlers.handlers});

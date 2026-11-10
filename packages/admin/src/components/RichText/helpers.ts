@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RichTextJSON } from "@lucidcms/richtext";
 import type { DocumentRef, RichTextUserVariableField, UserRef } from "@types";
 import T from "@/translations";
 import type { RichTextOptions, RichTextVariableSelection } from "./types";

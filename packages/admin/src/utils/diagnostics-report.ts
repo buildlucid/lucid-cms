@@ -145,8 +145,10 @@ export const buildDiagnosticsReport = (data: DiagnosticsReportData) => {
 			`- Failed in the last 24 hours: ${diagnostics.jobs.failedRecently}`,
 		]),
 		section("Plugins", [
-			...diagnostics.plugins.map(
-				(plugin) => `- ${plugin.key} (supports Lucid ${plugin.lucid})`,
+			...diagnostics.plugins.map((plugin) =>
+				plugin.version
+					? `- ${plugin.key} (${plugin.version})`
+					: `- ${plugin.key}`,
 			),
 			`- Admin extension routes: ${list(client.extensions.routes)}`,
 			`- Admin extension slots: ${client.extensions.slots}`,

@@ -1,4 +1,4 @@
-import { mergeExtensions, type RichTextJSON } from "@lucidcms/rich-text";
+import { mergeExtensions, type RichTextJSON } from "@lucidcms/richtext";
 import type { Editor, Extensions } from "@tiptap/core";
 import {
 	type Accessor,

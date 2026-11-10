@@ -1,4 +1,4 @@
-import { clientSlot, defineUiRenderer } from "@lucidcms/plugin-site/ui";
+import { clientSlot, defineUiRenderer } from "@lucidcms/site/ui";
 import type { Component } from "svelte";
 import { render } from "svelte/server";
 import { slotProps } from "./slots.js";

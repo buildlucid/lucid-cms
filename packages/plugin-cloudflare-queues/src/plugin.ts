@@ -1,9 +1,8 @@
+import type { CloudflareWorkerHandlerArtifact } from "@lucidcms/cloudflare/types";
 import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
-import type { CloudflareWorkerHandlerArtifact } from "@lucidcms/runtime-cloudflare/types";
 import cloudflareQueuesAdapter from "./adapter.js";
 import {
-	LUCID_VERSION,
 	PACKAGE_INFO,
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
@@ -29,7 +28,6 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		hooks: {
 			runtime: async ({ phase }) => {
@@ -45,7 +43,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 							type: "cloudflare:worker-handler",
 							custom: {
 								event: "queue",
-								module: "@lucidcms/plugin-cloudflare-queues/worker",
+								module: "@lucidcms/cloudflare-queues/worker",
 							},
 						} satisfies CloudflareWorkerHandlerArtifact,
 					],
@@ -61,7 +59,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 			}
 		},
 		sources: {
-			translations: ["@lucidcms/plugin-cloudflare-queues/translations"],
+			translations: ["@lucidcms/cloudflare-queues/translations"],
 		},
 		defaults: { queue: { adapter: cloudflareQueuesAdapter(resolvedOptions) } },
 	});

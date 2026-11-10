@@ -1,4 +1,4 @@
-import type { UiHydrate } from "@lucidcms/plugin-site/ui";
+import type { UiHydrate } from "@lucidcms/site/ui";
 import { type Component, createApp, createSSRApp, h } from "vue";
 import { slotProps } from "./slots.js";
 

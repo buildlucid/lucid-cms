@@ -1,5 +1,1 @@
-import plugin from "./plugin.js";
-
-export { default as cloudflareKVPlugin } from "./plugin.js";
-
-export default plugin;
+export { default as cloudflareKV } from "./plugin.js";

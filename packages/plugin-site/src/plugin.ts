@@ -1,12 +1,7 @@
 import { definePlugin, LucidError } from "@lucidcms/core";
 import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import clearPageCacheConfig from "./admin/components/ClearPageCache/config.js";
-import {
-	CLIENT_SCRIPT_PATH,
-	LUCID_VERSION,
-	PACKAGE_INFO,
-	PLUGIN_KEY,
-} from "./constants.js";
+import { CLIENT_SCRIPT_PATH, PACKAGE_INFO, PLUGIN_KEY } from "./constants.js";
 import registerSiteRoute from "./http/register-site-route.js";
 import routes from "./routes/index.js";
 import resolvePluginOptions from "./site/resolve-plugin-options.js";
@@ -19,7 +14,6 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 
 	return definePlugin({
 		key: PLUGIN_KEY,
-		lucid: LUCID_VERSION,
 		package: PACKAGE_INFO,
 		defaults: { siteUrl: "/" },
 		// Hosting frameworks, such as Astro, render the site themselves and only pass Lucid's own paths through.
@@ -32,15 +26,15 @@ const plugin = (given: SitePluginOptions = {}): LucidPluginDefinition => {
 			}
 		},
 		cli: {
-			module: "@lucidcms/plugin-site/cli",
+			module: "@lucidcms/site/cli",
 			options,
 		},
 		tasks: { build: renderSite(options), "clear-cache": clearCache },
 		sources: {
-			translations: ["@lucidcms/plugin-site/translations"],
+			translations: ["@lucidcms/site/translations"],
 			public: [
 				{
-					input: "@lucidcms/plugin-site/client/lucid.js",
+					input: "@lucidcms/site/client/lucid.js",
 					output: CLIENT_SCRIPT_PATH,
 				},
 			],

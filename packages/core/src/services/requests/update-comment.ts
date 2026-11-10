@@ -1,5 +1,5 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import { generateText } from "@lucidcms/rich-text/server";
+import type { RichTextJSON } from "@lucidcms/richtext";
+import { generateText } from "@lucidcms/richtext/server";
 import { copy } from "../../libs/i18n/index.js";
 import { RequestEventsRepository } from "../../libs/repositories/index.js";
 import type { LucidActor } from "../../types/hono.js";

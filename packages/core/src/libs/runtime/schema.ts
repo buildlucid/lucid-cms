@@ -10,7 +10,6 @@ const RuntimeAdapterSchema = z.object({
 		.optional(),
 	/** Module whose default export is the runtime's `RuntimeViteIntegration`, loaded by `@lucidcms/core/vite`. */
 	vite: z.string().optional(),
-	lucid: z.string(),
 	/** Published package metadata for update checks. */
 	package: z.object({ name: z.string(), version: z.string() }).optional(),
 });

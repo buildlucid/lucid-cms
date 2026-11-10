@@ -7,7 +7,7 @@ The Lucid CMS Postgres database adapter allows you to use PostgreSQL as your dat
 ## Installation
 
 ```bash
-npm install @lucidcms/db-postgres
+npm install @lucidcms/postgres
 ```
 
 ## Setup
@@ -16,8 +16,8 @@ To use the Postgres database adapter, you need to add it to your Lucid CMS confi
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { postgres } from "@lucidcms/db-postgres";
-import { node } from "@lucidcms/runtime-node";
+import { node } from "@lucidcms/node";
+import { postgres } from "@lucidcms/postgres";
 
 export default defineConfig({
   runtime: node,

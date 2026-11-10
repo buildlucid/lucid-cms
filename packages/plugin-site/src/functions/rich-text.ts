@@ -1,5 +1,5 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import { generateHTML } from "@lucidcms/rich-text/server";
+import type { RichTextJSON } from "@lucidcms/richtext";
+import { generateHTML } from "@lucidcms/richtext/server";
 import { type Markup, safe } from "@lucidkiln/core";
 import isRecord from "../utils/is-record.js";
 

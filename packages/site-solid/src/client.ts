@@ -1,4 +1,4 @@
-import type { UiHydrate } from "@lucidcms/plugin-site/ui";
+import type { UiHydrate } from "@lucidcms/site/ui";
 import { type Component, Suspense } from "solid-js";
 import { createComponent, hydrate, render as renderInto } from "solid-js/web";
 

@@ -3,7 +3,7 @@ import {
 	LucidEmbeddedBrick,
 	LucidMedia,
 	LucidVariable,
-} from "@lucidcms/rich-text";
+} from "@lucidcms/richtext";
 import type { Editor } from "@tiptap/core";
 import { createSignal, type JSX, untrack } from "solid-js";
 import { render } from "solid-js/web";

@@ -57,7 +57,6 @@ describe("createToolkit", () => {
 		});
 		const plugin: LucidPluginDefinition = {
 			key: "test-plugin",
-			lucid: "*",
 			toolkit: definition,
 			configure: () => undefined,
 		};
@@ -76,7 +75,6 @@ describe("createToolkit", () => {
 	test("supports class instances as services", () => {
 		const plugin: LucidPluginDefinition = {
 			key: "class-plugin",
-			lucid: "*",
 			toolkit: defineToolkit({
 				key: "classService",
 				create: () => new ClassToolkit(),
@@ -93,7 +91,6 @@ describe("createToolkit", () => {
 	test("rejects a service factory that does not return an object", () => {
 		const plugin: LucidPluginDefinition = {
 			key: "invalid-plugin",
-			lucid: "*",
 			toolkit: defineToolkit({
 				key: "invalidService",
 				// @ts-expect-error JavaScript callers can return a primitive
@@ -113,7 +110,6 @@ describe("createToolkit", () => {
 	test("rejects asynchronous factories at definition and runtime", () => {
 		const plugin: LucidPluginDefinition = {
 			key: "async-plugin",
-			lucid: "*",
 			toolkit: defineToolkit({
 				key: "asyncService",
 				// @ts-expect-error factories must return their service synchronously

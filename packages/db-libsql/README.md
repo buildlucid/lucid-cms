@@ -7,7 +7,7 @@ The Lucid CMS LibSQL database adapter allows you to use LibSQL as your database.
 ## Installation
 
 ```bash
-npm install @lucidcms/db-libsql
+npm install @lucidcms/libsql
 ```
 
 ## Setup
@@ -16,8 +16,8 @@ To use the LibSQL database adapter, you must add it to your Lucid CMS configurat
 
 ```typescript
 import { defineConfig } from "@lucidcms/core";
-import { libsql } from "@lucidcms/db-libsql";
-import { node } from "@lucidcms/runtime-node";
+import { libsql } from "@lucidcms/libsql";
+import { node } from "@lucidcms/node";
 
 export default defineConfig({
   runtime: node,

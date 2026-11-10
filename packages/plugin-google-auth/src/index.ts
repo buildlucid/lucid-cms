@@ -1,5 +1,1 @@
-import plugin from "./plugin.js";
-
-export { default as googleAuthPlugin } from "./plugin.js";
-
-export default plugin;
+export { default as googleAuth } from "./plugin.js";
