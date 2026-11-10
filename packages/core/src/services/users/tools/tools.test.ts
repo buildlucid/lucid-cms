@@ -393,17 +393,17 @@ test("MCP finds people with users:list and needs requests:read for canReview", a
 
 test("toolkit reads users with what the actor could see in the admin", async () => {
 	const users = createToolkit(context).users;
-	const query = { filter: { name: { value: "grace hop" } } };
+	const filter = { name: "grace hop" };
 
 	const asEditor = await users.getMultiple({
 		actor: { type: "user", userId: editor },
-		query,
+		filter,
 	});
 	assert(asEditor.data, JSON.stringify(asEditor.error));
 	expect(asEditor.data.pagination.total).toBe(1);
 	expect(asEditor.data.items[0]).not.toHaveProperty("invitationAccepted");
 
-	const asSystem = await users.getMultiple({ query });
+	const asSystem = await users.getMultiple({ filter });
 	assert(asSystem.data, JSON.stringify(asSystem.error));
 	expect(asSystem.data.items[0]).toMatchObject({
 		id: grace,

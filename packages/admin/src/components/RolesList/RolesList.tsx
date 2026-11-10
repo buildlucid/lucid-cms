@@ -137,7 +137,7 @@ export const RolesList: Component<{
 			</QueryBoundary>
 			<Pagination
 				queryState={props.state.searchParams}
-				meta={roles.data?.meta}
+				pagination={roles.data?.pagination}
 				loading={roles.isLoading}
 				padding="md"
 			/>

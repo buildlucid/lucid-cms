@@ -1,5 +1,10 @@
 import type { PreviewSession, PreviewTarget } from "@lucidcms/types";
 
+export {
+	default as flattenFilters,
+	type FlatFilterCondition,
+} from "./utils/flatten-filters.js";
+
 /**
  * Shared preview contract for URL parameters, frame names, field markup and script locations. Used
  * by admin and core.

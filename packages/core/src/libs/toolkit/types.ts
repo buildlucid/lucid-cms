@@ -1,3 +1,7 @@
+import type {
+	FilterCondition,
+	FilterObject,
+} from "../../types/query-params.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { ToolkitAgent } from "./agent/index.js";
 import type { ToolkitAuth } from "./auth/index.js";
@@ -17,6 +21,25 @@ import type { ToolkitTransfer } from "./transfer/index.js";
 import type { ToolkitUsers } from "./users/index.js";
 
 export type { ToolkitActor } from "../permission/toolkit-actor.js";
+
+type ToolkitListFilters<TFilters> = {
+	[TKey in keyof TFilters]?: FilterCondition<
+		Extract<TFilters[TKey], FilterObject>["value"]
+	>;
+};
+
+/**
+ * A list read's filters, keyed as its query's are. A plain value matches for equality and a list
+ * of values matches any of them. One filter object must match in full; a list of them matches any.
+ *
+ * @example
+ * ```ts
+ * { type: "image", title: { value: "hero", operator: "contains" } }
+ * ```
+ */
+export type ToolkitListFilterInput<TQuery extends { filter?: object }> =
+	| ToolkitListFilters<NonNullable<TQuery["filter"]>>
+	| Array<ToolkitListFilters<NonNullable<TQuery["filter"]>>>;
 
 /** Lucid service context used by `createToolkit()`. */
 export type ToolkitContext = ServiceContext;

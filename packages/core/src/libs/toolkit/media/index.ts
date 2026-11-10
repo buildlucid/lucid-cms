@@ -56,7 +56,7 @@ export type ToolkitMedia = {
 	deleteSingle: (
 		input: Parameters<typeof deleteSingle>[1],
 	) => ReturnType<typeof deleteSingle>;
-	/** Returns media `items` and `pagination` using admin ownership filters for system reads, user visibility or `libraryOnly` access, with localized text via `locale` and transcripts via `query.include: ["transcripts"]`. */
+	/** Returns media `items` and `pagination` using admin ownership filters for system reads, user visibility or `libraryOnly` access, with localized text via `locale` and transcripts via `include: ["transcripts"]`. */
 	getMultiple: <TLocale extends string | undefined = undefined>(
 		input?: ToolkitMediaGetMultipleInput<TLocale>,
 	) => ServiceResponse<ToolkitMediaGetMultipleResult<TLocale>>;

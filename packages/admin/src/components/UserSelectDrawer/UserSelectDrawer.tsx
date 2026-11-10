@@ -358,7 +358,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 			</QueryBoundary>
 			<Pagination
 				queryState={searchParams}
-				meta={users.data?.meta}
+				pagination={users.data?.pagination}
 				loading={users.isLoading}
 				variant="inline"
 			/>

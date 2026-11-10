@@ -127,7 +127,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						status: z
 							.object({
 								value: notificationStatusSchema,

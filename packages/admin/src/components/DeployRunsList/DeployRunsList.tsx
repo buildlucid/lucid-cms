@@ -199,7 +199,7 @@ export const DeployRunsList: Component<{
 				</QueryBoundary>
 				<Pagination
 					queryState={searchParams}
-					meta={runs.data?.meta}
+					pagination={runs.data?.pagination}
 					loading={runs.isLoading}
 					variant="footer"
 					padding="sm"

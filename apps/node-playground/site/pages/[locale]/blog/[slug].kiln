@@ -3,7 +3,7 @@
 {% export paths = documentPaths("blog") %}
 
 {% set post = document("blog", {
-	filter: { _path: route.path },
+	filter: { fields: { path: route.path } },
 	include: ["bricks", "meta"],
 }) ?? notFound() %}
 {% set alternates = post.route?.alternates %}

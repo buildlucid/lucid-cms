@@ -159,7 +159,10 @@ export type ContentRelatedDocument<
 	/** With `locale`, the locale its fields were read in, or null when its collection isn't localized. */
 	locale?: CollectionDocumentLocaleCode<TCollectionKey> | null;
 	route?: ContentRoute<TCollectionKey, TLocalized> | null;
-	fields?: Record<string, unknown> | null;
+	fields?: ContentFields<
+		CollectionDocument<TCollectionKey>["fields"],
+		TLocalized
+	> | null;
 };
 
 type CollectionBrick<TCollectionKey extends string> = NonNullable<
@@ -248,7 +251,7 @@ export type ContentDocument<
 	meta?: ContentDocumentMeta<TCollectionKey, TLocalized>;
 };
 
-/** Where a content list is, as the content API's response `meta` reports it. */
+/** Where a page of a list is, as API responses report it in `pagination`. */
 export type ContentPagination = {
 	currentPage: number;
 	perPage: number;

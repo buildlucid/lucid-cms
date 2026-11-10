@@ -2,7 +2,7 @@
 
 {% export paths = localePaths() %}
 
-{% set home = document("page", { filter: { _path: "/" ~ locale } }) %}
+{% set home = document("page", { filter: { fields: { path: "/" ~ locale } } }) %}
 {% set images = mediaList({ filter: { type: "image", public: true }, perPage: 6 }) %}
 
 {% block title %}Content functions | {{ parent() }}{% endblock %}

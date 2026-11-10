@@ -76,7 +76,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						title: queryFormatted.schema.filters.single.optional(),
 						parentFolderId: queryFormatted.schema.filters.single.optional(),
 					})

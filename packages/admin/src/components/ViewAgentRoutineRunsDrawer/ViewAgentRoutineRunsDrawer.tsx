@@ -218,7 +218,7 @@ const ViewAgentRoutineRunsContent: Component<
 				</QueryBoundary>
 				<Pagination
 					queryState={searchParams}
-					meta={runs.data?.meta}
+					pagination={runs.data?.pagination}
 					loading={runsList.loading()}
 					variant="inline"
 				/>

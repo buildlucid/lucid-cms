@@ -1,3 +1,4 @@
+import type { CustomPermissions } from "@lucidcms/types";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import type { agentPermissionActions } from "./agent-permissions.js";
 import type { collectionPermissionActions } from "./collection-permissions.js";
@@ -43,9 +44,7 @@ export type CorePermission =
 	| AgentPermission
 	| DeployPermission;
 
-/** Project permissions added by Lucid type generation or a plugin. */
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types and plugins augment this interface
-export interface CustomPermissions {}
+export type { CustomPermissions };
 
 export type Permission =
 	| CorePermission

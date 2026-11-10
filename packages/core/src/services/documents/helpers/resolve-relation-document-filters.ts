@@ -32,6 +32,7 @@ import type {
 	ServiceFn,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
+import checkFilterKeys from "../checks/check-filter-keys.js";
 
 type RelationFilterDescriptor = {
 	path: string;
@@ -42,13 +43,18 @@ type RelationFilterDescriptor = {
 export type PendingRelationDocumentFilter = {
 	targetCollectionKey: string;
 	relation: RelationDocumentFilter["relation"];
+	/** Conditions keyed as the target collection reads them. */
 	conditions: QueryParamFilterCondition[];
+	/** The same conditions' keys as the caller wrote them. */
+	sourceKeys: string[];
 };
 
 type RelationDocumentFilterPlan = {
 	filters: RelationDocumentFilter[];
 	filterOr: RelationDocumentFilter[][];
 	relationCollectionDefaults: ReadonlyMap<string, string>;
+	/** The source filter keys that reach through a relation, which these plans handle. */
+	traversalKeys: ReadonlySet<string>;
 };
 
 type ResolvedRelationFilterTarget = {
@@ -57,9 +63,6 @@ type ResolvedRelationFilterTarget = {
 	versionType: RelationDocumentFilter["target"]["versionType"];
 	relationCollectionDefaults: ReadonlyMap<string, string>;
 };
-
-const fieldFilterSegment = (fieldKey: string): string =>
-	fieldKey.startsWith("_") ? fieldKey : prefixGeneratedColName(fieldKey);
 
 const isPrefixedFieldColumn = (
 	column: CollectionSchemaColumn,
@@ -71,24 +74,14 @@ const collectionBricks = (collection: CollectionBuilder) => [
 	...(collection.config.bricks?.builder ?? []),
 ];
 
-/** Builds the public filter path for a relation table from its runtime scope. */
+/** Builds the public filter path for a relation field: `fields.<field>` or `bricks.<brick>.<field>`. */
 const relationFilterPath = (
 	schema: CollectionSchemaTable<LucidBrickTableName>,
 	fieldKey: string,
-	nearestTreeField: string | null,
-): string => {
-	const fieldSegment = fieldFilterSegment(fieldKey);
-
-	if (schema.key.brick) {
-		return [schema.key.brick, nearestTreeField, fieldSegment]
-			.filter((part): part is string => Boolean(part))
-			.join(".");
-	}
-	if (nearestTreeField) {
-		return ["fields", nearestTreeField, fieldSegment].join(".");
-	}
-	return fieldSegment;
-};
+): string =>
+	schema.key.brick
+		? ["bricks", schema.key.brick, fieldKey].join(".")
+		: ["fields", fieldKey].join(".");
 
 /** Resolves relation field paths and allowed target collections from source config. */
 const relationFilterDescriptors = (
@@ -126,7 +119,7 @@ const relationFilterDescriptors = (
 		}
 
 		descriptors.push({
-			path: relationFilterPath(schema, fieldKey, field.treeParent),
+			path: relationFilterPath(schema, fieldKey),
 			targetCollectionKeys: normalizeRelationCollections(
 				field.config.collection,
 			),
@@ -173,9 +166,11 @@ const groupConditions = (
 				0,
 				separatorIndex === -1 ? undefined : separatorIndex,
 			);
-			// Explicit collection segments win; unqualified paths use the first configured target.
+			// Explicit collection segments win; paths that go straight to `fields` or `bricks` use the first configured target.
 			const hasExplicitCollection =
 				separatorIndex !== -1 &&
+				possibleCollectionKey !== "fields" &&
+				possibleCollectionKey !== "bricks" &&
 				descriptor.targetCollectionKeys.includes(possibleCollectionKey);
 			const targetCollectionKey = hasExplicitCollection
 				? possibleCollectionKey
@@ -190,11 +185,13 @@ const groupConditions = (
 				targetCollectionKey,
 				relation: descriptor.relation,
 				conditions: [],
+				sourceKeys: [],
 			};
 			pending.conditions.push({
 				...condition,
 				key: targetFilterKey,
 			});
+			pending.sourceKeys.push(condition.key);
 			grouped.set(groupKey, pending);
 			break;
 		}
@@ -203,7 +200,7 @@ const groupConditions = (
 	return Array.from(grouped.values());
 };
 
-/** Relation-field filter paths such as `_author` or `hero._featured`, ordered longest first. */
+/** Relation-field filter paths such as `fields.author` or `bricks.hero.featured`, ordered longest first. */
 export const relationFilterPaths = (
 	collection: CollectionBuilder,
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
@@ -230,13 +227,17 @@ const filterConditions = (
 		? Object.entries(filters).map(([key, filter]) => ({ key, ...filter }))
 		: undefined;
 
+/** Plans each pending relation filter against its target, naming the source keys the target can't filter by. */
 const buildResolvedFilters = (props: {
 	pending: PendingRelationDocumentFilter[];
 	targets: Map<string, ResolvedRelationFilterTarget>;
-}): RelationDocumentFilter[] =>
-	props.pending.flatMap((pending) => {
+}): { filters: RelationDocumentFilter[]; unknownKeys: string[] } => {
+	const filters: RelationDocumentFilter[] = [];
+	const unknownKeys: string[] = [];
+
+	for (const pending of props.pending) {
 		const target = props.targets.get(pending.targetCollectionKey);
-		if (!target) return [];
+		if (!target) continue;
 
 		const grouped = groupDocumentFilterConditions(
 			target.bricksTableSchema,
@@ -245,26 +246,36 @@ const buildResolvedFilters = (props: {
 				relationCollectionDefaults: target.relationCollectionDefaults,
 			},
 		);
+		for (const [index, condition] of pending.conditions.entries()) {
+			const sourceKey = pending.sourceKeys[index];
+			if (
+				sourceKey !== undefined &&
+				grouped.unknownKeys.includes(condition.key)
+			) {
+				unknownKeys.push(sourceKey);
+			}
+		}
 		if (
 			grouped.documentFilters.length === 0 &&
 			grouped.brickFilters.length === 0
 		) {
-			return [];
+			continue;
 		}
 
-		return [
-			{
-				relation: pending.relation,
-				target: {
-					collectionKey: pending.targetCollectionKey,
-					versionType: target.versionType,
-					tables: target.tables,
-					documentFilters: grouped.documentFilters,
-					brickFilters: grouped.brickFilters,
-				},
+		filters.push({
+			relation: pending.relation,
+			target: {
+				collectionKey: pending.targetCollectionKey,
+				versionType: target.versionType,
+				tables: target.tables,
+				documentFilters: grouped.documentFilters,
+				brickFilters: grouped.brickFilters,
 			},
-		];
-	});
+		});
+	}
+
+	return { filters, unknownKeys };
+};
 
 /**
  * Resolves one-hop relation traversal filters into repository-ready table plans.
@@ -295,6 +306,7 @@ const resolveRelationDocumentFilters: ServiceFn<
 		groupConditions(descriptors, conditions),
 	);
 	const pending = [...filters, ...filterOr.flat()];
+	const traversalKeys = new Set(pending.flatMap((filter) => filter.sourceKeys));
 	const targetCollectionKeys = Array.from(
 		new Set(pending.map((filter) => filter.targetCollectionKey)),
 	);
@@ -329,6 +341,7 @@ const resolveRelationDocumentFilters: ServiceFn<
 				filters: [],
 				filterOr: filterOr.map(() => []),
 				relationCollectionDefaults,
+				traversalKeys,
 			},
 		};
 	}
@@ -382,14 +395,23 @@ const resolveRelationDocumentFilters: ServiceFn<
 		targets.set(targetResult.data.collectionKey, targetResult.data);
 	}
 
+	const resolved = buildResolvedFilters({ pending: filters, targets });
+	const resolvedOr = filterOr.map((group) =>
+		buildResolvedFilters({ pending: group, targets }),
+	);
+	const filterKeysRes = checkFilterKeys([
+		...resolved.unknownKeys,
+		...resolvedOr.flatMap((group) => group.unknownKeys),
+	]);
+	if (filterKeysRes.error) return filterKeysRes;
+
 	return {
 		error: undefined,
 		data: {
-			filters: buildResolvedFilters({ pending: filters, targets }),
-			filterOr: filterOr.map((group) =>
-				buildResolvedFilters({ pending: group, targets }),
-			),
+			filters: resolved.filters,
+			filterOr: resolvedOr.map((group) => group.filters),
 			relationCollectionDefaults,
+			traversalKeys,
 		},
 	};
 };

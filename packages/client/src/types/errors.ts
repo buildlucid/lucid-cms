@@ -1,4 +1,4 @@
-import type { ErrorResponse, ResponseBody } from "@lucidcms/types";
+import type { ErrorResponse } from "@lucidcms/types";
 
 export type LucidClientErrorKind =
 	| "http"
@@ -20,11 +20,9 @@ export interface LucidClientError {
 	cause?: unknown;
 }
 
-/** Successful result. The payload is data; refs, meta, links and the original Response are siblings. */
-export type LucidClientSuccess<TData, TRefs = never> = ResponseBody<
-	TData,
-	TRefs
-> & {
+/** Successful result, with the payload as data beside the original Response. */
+export type LucidClientSuccess<TData> = {
+	data: TData;
 	error: undefined;
 	response: Response;
 };
@@ -32,14 +30,11 @@ export type LucidClientSuccess<TData, TRefs = never> = ResponseBody<
 /** Failed result. Data is undefined; response is present only when an HTTP response was received. */
 export type LucidClientFailure = {
 	data: undefined;
-	refs?: undefined;
-	links?: undefined;
-	meta?: undefined;
 	error: LucidClientError;
 	response?: Response;
 };
 
 /** Check error before reading data. HTTP, network, parse, timeout and cancellation failures use the same result shape. */
-export type LucidClientResponse<TData, TRefs = never> =
-	| LucidClientSuccess<TData, TRefs>
+export type LucidClientResponse<TData> =
+	| LucidClientSuccess<TData>
 	| LucidClientFailure;

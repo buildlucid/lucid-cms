@@ -10,16 +10,21 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
-import { runToolkitService, toPagination } from "../../utils.js";
+import type { ToolkitListFilterInput } from "../../types.js";
+import {
+	parseListQuery,
+	runToolkitService,
+	toPagination,
+} from "../../utils.js";
 import resolveReadActor from "../resolve-read-actor.js";
-import { inputSchema, type querySchema } from "./schema.js";
+import { inputSchema, querySchema } from "./schema.js";
 
-export type ToolkitMediaGetMultipleQuery = z.input<typeof querySchema>;
-
-/** Optional filters, pagination, the actor or library-only access to read with, and a locale and fallback locale for media text. */
+/** Optional filters, sorts, pagination, the actor or library-only access to read with, and a locale and fallback locale for media text. */
 export type ToolkitMediaGetMultipleInput<
 	TLocale extends string | undefined = undefined,
-> = Omit<z.input<typeof inputSchema>, "locale"> & ContentLocaleInput<TLocale>;
+> = Omit<z.input<typeof inputSchema>, "locale" | "filter"> & {
+	filter?: ToolkitListFilterInput<z.input<typeof querySchema>>;
+} & ContentLocaleInput<TLocale>;
 
 /** A page of media, without audio transcripts unless included, and where the page is. */
 export type ToolkitMediaGetMultipleResult<
@@ -37,13 +42,16 @@ const getMultiple = async <TLocale extends string | undefined = undefined>(
 			const { default: getMultipleMedia } =
 				await import("../../../../services/media/get-multiple.js");
 
+			const queryRes = await parseListQuery(querySchema, data);
+			if (queryRes.error) return queryRes;
+
 			const actorRes = await resolveReadActor(context, data);
 			if (actorRes.error) return actorRes;
 
 			const result = await getMultipleMedia<
 				ContentMedia<MediaListItem, IsLocalized<TLocale>>
 			>(context, {
-				query: data.query,
+				query: queryRes.data,
 				actor: actorRes.data,
 				locale: data.locale,
 				fallbackLocale: data.fallbackLocale,
@@ -54,7 +62,7 @@ const getMultiple = async <TLocale extends string | undefined = undefined>(
 				error: undefined,
 				data: {
 					items: result.data.data,
-					pagination: toPagination(result.data.count, data.query),
+					pagination: toPagination(result.data.count, data),
 				},
 			};
 		},

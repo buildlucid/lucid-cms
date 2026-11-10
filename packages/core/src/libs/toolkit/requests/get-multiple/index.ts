@@ -5,13 +5,21 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
-import { runToolkitService, toPagination } from "../../utils.js";
-import { inputSchema, type querySchema } from "./schema.js";
-
-export type ToolkitRequestsGetMultipleQuery = z.input<typeof querySchema>;
+import type { ToolkitListFilterInput } from "../../types.js";
+import {
+	parseListQuery,
+	runToolkitService,
+	toPagination,
+} from "../../utils.js";
+import { inputSchema, querySchema } from "./schema.js";
 
 /** Optional actor, filters and pagination for listing requests. */
-export type ToolkitRequestsGetMultipleInput = z.input<typeof inputSchema>;
+export type ToolkitRequestsGetMultipleInput = Omit<
+	z.input<typeof inputSchema>,
+	"filter"
+> & {
+	filter?: ToolkitListFilterInput<z.input<typeof querySchema>>;
+};
 
 /** A page of matching requests as `items`, with its `pagination`. */
 export type ToolkitRequestsGetMultipleResult = ContentList<
@@ -35,12 +43,15 @@ const getMultiple = (
 					import("../../../../services/requests/get-multiple.js"),
 				]);
 
+			const queryRes = await parseListQuery(querySchema, data);
+			if (queryRes.error) return queryRes;
+
 			const userRes = await resolveActorUser(context, { actor: data.actor });
 			if (userRes.error) return userRes;
 
 			const result = await getMultiple(context, {
 				user: userRes.data,
-				query: data.query,
+				query: queryRes.data,
 			});
 			if (result.error) return result;
 
@@ -48,7 +59,7 @@ const getMultiple = (
 				error: undefined,
 				data: {
 					items: result.data.data,
-					pagination: toPagination(result.data.count, data.query),
+					pagination: toPagination(result.data.count, data),
 				},
 			};
 		},

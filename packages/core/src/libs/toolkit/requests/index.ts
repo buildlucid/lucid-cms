@@ -72,12 +72,7 @@ export type ToolkitRequests = {
 	 * @example
 	 * ```ts
 	 * await toolkit.requests.getMultiple({
-	 *   query: {
-	 *     filter: {
-	 *       status: { value: "open" },
-	 *       approval: { value: "pending" },
-	 *     },
-	 *   },
+	 *   filter: { status: "open", approval: "pending" },
 	 * });
 	 * ```
 	 */

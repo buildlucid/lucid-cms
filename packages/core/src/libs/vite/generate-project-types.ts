@@ -12,6 +12,7 @@ const generateProjectTypes = (project: LucidViteProject) =>
 		access: project.config.access,
 		collections: project.config.collections,
 		localization: project.config.localization,
+		clientTypes: project.config.build.clientTypes,
 	});
 
 export default generateProjectTypes;

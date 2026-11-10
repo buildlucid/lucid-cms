@@ -47,7 +47,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						jobId: queryFormatted.schema.filters.single.optional(),
 						jobName: queryFormatted.schema.filters.single.optional(),
 						jobVersion: queryFormatted.schema.filters.single.optional(),
@@ -189,7 +189,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						key: queryFormatted.schema.filters.single.optional(),
 						name: queryFormatted.schema.filters.single.optional(),
 						jobName: queryFormatted.schema.filters.single.optional(),

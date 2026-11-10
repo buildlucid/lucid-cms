@@ -1,11 +1,12 @@
-import { join, relative } from "node:path";
+import { mkdir } from "node:fs/promises";
+import { dirname, join, relative, resolve } from "node:path";
 import type { ZodType } from "zod";
 import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
 import writeFileIfChanged from "../../utils/helpers/write-file-if-changed.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import generateCollectionClientTypes from "../collection/type-gen/index.js";
+import generateCollectionTypes from "../collection/type-gen/index.js";
 import type { RenderedTemplates } from "../email/types.js";
 import logger from "../logger/index.js";
 import type { ResourceFile } from "../resources/types.js";
@@ -93,7 +94,10 @@ const buildCoreTypesFile = (props: {
 
 	return {
 		filename: constants.typeGeneration.files.core,
-		references: [`./${constants.typeGeneration.files.client}`],
+		references: [
+			`./${constants.typeGeneration.files.client}`,
+			`./${constants.typeGeneration.files.writes}`,
+		],
 		imports: Array.from(new Set(imports)),
 		declarations: Array.from(new Set(declarations)),
 		moduleAugmentations: mergeModuleAugmentations(props.contributions),
@@ -109,6 +113,8 @@ const generateTypes = async (props: {
 	collections: CollectionBuilder[];
 	access: ResolvedLucidConfig["access"];
 	localization: ResolvedLucidConfig["localization"];
+	/** Extra files, relative to the config, to write the collection types to for front ends that install `@lucidcms/client`. */
+	clientTypes?: string[];
 }) => {
 	const lucidDir = await ensureLucidDirectoryExists();
 	const configRelativePath = relative(lucidDir, props.configPath);
@@ -128,16 +134,35 @@ const generateTypes = async (props: {
 		])
 	).filter((result): result is TypeGenerationContribution => Boolean(result));
 
+	const collectionTypes = generateCollectionTypes({
+		collections: props.collections,
+		localization: props.localization,
+	});
 	const files: TypeGenerationFile[] = [
 		buildCoreTypesFile({
 			contributions,
 		}),
-		generateCollectionClientTypes({
-			collections: props.collections,
-			localization: props.localization,
-		}),
+		collectionTypes.client,
+		collectionTypes.writes,
 		...contributions.flatMap((contribution) => contribution.files ?? []),
 	];
+
+	if (props.clientTypes?.length) {
+		const clientFile = renderTypeGenerationFile(
+			generateCollectionTypes({
+				collections: props.collections,
+				localization: props.localization,
+				module: constants.typeGeneration.modules.clientTypes,
+			}).client,
+		);
+		await Promise.all(
+			props.clientTypes.map(async (path) => {
+				const filePath = resolve(dirname(props.configPath), path);
+				await mkdir(dirname(filePath), { recursive: true });
+				await writeFileIfChanged(filePath, clientFile);
+			}),
+		);
+	}
 
 	await Promise.all(
 		files.map(async (file) => {

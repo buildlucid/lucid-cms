@@ -306,7 +306,7 @@ export const JobsList: Component = () => {
 					</QueryBoundary>
 					<Pagination
 						queryState={searchParams}
-						meta={jobs.data?.meta}
+						pagination={jobs.data?.pagination}
 						loading={jobs.isLoading}
 						variant="footer"
 						padding="sm"

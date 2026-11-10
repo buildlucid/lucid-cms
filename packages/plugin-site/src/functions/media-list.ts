@@ -10,17 +10,14 @@ import { type RenderInfo, withRender } from "@lucidkiln/core";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
 import type { MediaReadOptions } from "./media.js";
-import normalizeFilter from "./normalize-filter.js";
 import readLocale from "./read-locale.js";
 
-type ListQuery = NonNullable<
-	NonNullable<Parameters<Toolkit["media"]["getMultiple"]>[0]>["query"]
->;
+type ListInput = NonNullable<Parameters<Toolkit["media"]["getMultiple"]>[0]>;
 
 export type MediaListOptions = MediaReadOptions & {
-	/** Toolkit filters, such as `{ type: "image" }`, with plain values as shorthand for equality. */
-	filter?: unknown;
-	sort?: ListQuery["sort"];
+	/** Filters such as `{ type: "image" }`, where a plain value matches for equality. A list of filter objects matches any of them. */
+	filter?: ListInput["filter"];
+	sort?: ListInput["sort"];
 	/** Defaults to 1. */
 	page?: number;
 	/** Defaults to 10; use -1 to return every match. */
@@ -38,12 +35,10 @@ const createMediaListFunction = (config: SiteConfig) =>
 
 			const response = await render.state.toolkit.media.getMultiple({
 				libraryOnly: true,
-				query: {
-					filter: normalizeFilter(options.filter) as ListQuery["filter"],
-					sort: options.sort,
-					page: options.page,
-					perPage: options.perPage,
-				},
+				filter: options.filter,
+				sort: options.sort,
+				page: options.page,
+				perPage: options.perPage,
 				locale: readLocale(config, render, options.locale),
 				fallbackLocale: options.fallbackLocale,
 			});

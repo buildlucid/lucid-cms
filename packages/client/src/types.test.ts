@@ -1,13 +1,9 @@
-import type {
-	CollectionDocumentTranslations as CoreCollectionDocumentTranslations,
-	DocumentBrick as CoreDocumentBrick,
-	RelationFieldValue as CoreRelationFieldValue,
-} from "@lucidcms/core/types";
 import { expectTypeOf, test } from "vitest";
 import { createClient } from "./index.js";
 import { createDocumentsClient } from "./resources/documents.js";
 import type {
 	CollectionDocument,
+	CollectionDocumentFilterInput,
 	CollectionDocumentFilters,
 	CollectionDocumentKey,
 	CollectionDocumentLocaleCode,
@@ -16,14 +12,15 @@ import type {
 	CollectionDocumentVersion,
 	CollectionDocumentVersionKey,
 	ContentDocument,
+	ContentDocumentInclude,
+	ContentPagination,
 	ContentRelatedDocument,
 	DocumentBrick,
-	DocumentMultipleInclude,
-	DocumentSingleInclude,
-	DocumentsGetMultipleQuery,
+	DocumentsGetMultipleInput,
 	DocumentsGetMultipleResponse,
-	DocumentsGetSingleQuery,
+	DocumentsGetSingleInput,
 	DocumentsGetSingleResponse,
+	FilterCondition,
 	FilterObject,
 	FilterOperator,
 	LucidClient,
@@ -39,118 +36,49 @@ test("filter objects can narrow their accepted values", () => {
 	}>();
 });
 
-declare module "./types.js" {
-	interface CollectionDocumentFieldsByCollection {
-		page: {
-			page_title: CollectionDocumentTranslations<string | null, "page">;
-			related_page: Array<RelationFieldValue<"page">>;
-			sections: Array<{
-				heading: string | null;
-			}>;
+type PageFilters = {
+	id?: FilterCondition<number | number[]>;
+	fields?: {
+		path?: FilterCondition<string>;
+	};
+	bricks?: {
+		banner?: {
+			title?: FilterCondition<string>;
 		};
-	}
+	};
+};
 
-	interface CollectionDocumentBricksByCollection {
-		page:
-			| DocumentBrick<
-					"banner",
-					"builder",
-					{
-						title: CollectionDocumentTranslations<string | null, "page">;
-					}
-			  >
-			| DocumentBrick<
-					"seo",
-					"fixed",
-					{
-						canonical_url: string | null;
-					}
-			  >;
-	}
-
-	interface CollectionDocumentLocaleCodesByCollection {
-		page: "en" | "fr";
-		article: "de";
-		settings: never;
-	}
-
-	interface CollectionDocumentFiltersByCollection {
+declare module "@lucidcms/types" {
+	interface Collections {
 		page: {
-			id?: {
-				value: number;
+			fields: {
+				page_title: CollectionDocumentTranslations<string | null, "page">;
+				related_page: Array<RelationFieldValue<"page">>;
+				sections: Array<{
+					heading: string | null;
+				}>;
 			};
-			_path?: {
-				value: string;
-			};
-			fields?: {
-				sections?: {
-					_heading?: {
-						value: string;
-					};
-				};
-			};
-			banner?: {
-				_title?: {
-					value: string;
-				};
-			};
+			bricks:
+				| DocumentBrick<
+						"banner",
+						"builder",
+						{
+							title: CollectionDocumentTranslations<string | null, "page">;
+						}
+				  >
+				| DocumentBrick<
+						"seo",
+						"fixed",
+						{
+							canonical_url: string | null;
+						}
+				  >;
+			locales: "en" | "fr";
+			filters: PageFilters;
+			sorts: "createdAt" | "updatedAt" | "fields.page_title";
+			versions: "latest" | "revision" | "snapshot" | "published";
+			versionKeys: "latest" | "published";
 		};
-	}
-
-	interface CollectionDocumentSortsByCollection {
-		page: "createdAt" | "updatedAt" | "_pageTitle";
-	}
-
-	interface CollectionDocumentVersionsByCollection {
-		page: "latest" | "revision" | "snapshot" | "published";
-	}
-
-	interface CollectionDocumentVersionKeysByCollection {
-		page: "latest" | "published";
-	}
-}
-
-declare module "@lucidcms/core/types" {
-	interface CollectionDocumentFieldsByCollection {
-		page: {
-			page_title: CoreCollectionDocumentTranslations<string | null, "page">;
-			related_page: Array<CoreRelationFieldValue<"page">>;
-			sections: Array<{
-				heading: string | null;
-			}>;
-		};
-	}
-
-	interface CollectionDocumentBricksByCollection {
-		page:
-			| CoreDocumentBrick<
-					"banner",
-					"builder",
-					{
-						title: CoreCollectionDocumentTranslations<string | null, "page">;
-					}
-			  >
-			| CoreDocumentBrick<
-					"seo",
-					"fixed",
-					{
-						canonical_url: string | null;
-					}
-			  >;
-	}
-
-	interface CollectionDocumentLocaleCodesByCollection {
-		page: "en" | "fr";
-		article: "de";
-		settings: never;
-	}
-
-	interface CollectionDocumentVersionsByCollection {
-		page: "latest" | "revision" | "snapshot" | "published";
-	}
-
-	interface CollectionDocumentVersionKeysByCollection {
-		page: "latest" | "published";
 	}
 }
 
@@ -244,10 +172,22 @@ test("content documents fill in references by field type and read in one locale"
 	>().toEqualTypeOf<string | null>();
 });
 
-test("document client methods infer the collection key through the response type", () => {
+test("document client methods infer the collection key through the response type", async () => {
 	const client = createDocumentsClient({
 		request: async () => ({}) as never,
 	});
+	const page = await createClient({
+		baseUrl: "",
+		auth: { type: "apiKey", apiKey: "" },
+		version: "published",
+	}).documents.getSingle({ collectionKey: "page", locale: "en" });
+
+	expectTypeOf(page.data).toEqualTypeOf<
+		ContentDocument<"page", true> | null | undefined
+	>();
+	expectTypeOf<
+		NonNullable<typeof page.data>["fields"]["page_title"]
+	>().toEqualTypeOf<string | null>();
 
 	const singleResponse = client.getSingle({
 		collectionKey: "page",
@@ -275,13 +215,17 @@ test("document results expose typed data directly", () => {
 		DocumentsGetMultipleResponse<"page">,
 		{ error: undefined }
 	>;
-	expectTypeOf<SingleSuccess["data"]>().toEqualTypeOf<
-		ContentDocument<"page">
-	>();
-	expectTypeOf<MultipleSuccess["data"]>().toEqualTypeOf<
-		Array<ContentDocument<"page">>
-	>();
+	expectTypeOf<
+		SingleSuccess["data"]
+	>().toEqualTypeOf<ContentDocument<"page"> | null>();
+	expectTypeOf<MultipleSuccess["data"]>().toEqualTypeOf<{
+		items: Array<ContentDocument<"page">>;
+		pagination: ContentPagination;
+	}>();
 	expectTypeOf<SingleSuccess["response"]>().toEqualTypeOf<Response>();
+	expectTypeOf<keyof SingleSuccess>().toEqualTypeOf<
+		"data" | "error" | "response"
+	>();
 });
 
 test("document reads with a locale return localized documents", () => {
@@ -295,9 +239,10 @@ test("document reads with a locale return localized documents", () => {
 	});
 	type Success = Extract<Awaited<typeof response>, { error: undefined }>;
 
-	expectTypeOf<Success["data"]>().toEqualTypeOf<
-		ContentDocument<"page", true>
-	>();
+	expectTypeOf<Success["data"]>().toEqualTypeOf<ContentDocument<
+		"page",
+		true
+	> | null>();
 });
 
 test("root client export returns the public LucidClient contract", () => {
@@ -333,32 +278,15 @@ test("document client queries narrow filters, includes, and sorts from the colle
 	>();
 	expectTypeOf<CollectionDocumentKey>().toMatchTypeOf<string>();
 	expectTypeOf<CollectionDocumentLocaleCode>().toMatchTypeOf<string>();
-	expectTypeOf<CollectionDocumentFilters<"page">>().toEqualTypeOf<{
-		id?: {
-			value: number;
-		};
-		_path?: {
-			value: string;
-		};
-		fields?: {
-			sections?: {
-				_heading?: {
-					value: string;
-				};
-			};
-		};
-		banner?: {
-			_title?: {
-				value: string;
-			};
-		};
-	}>();
+	expectTypeOf<
+		CollectionDocumentFilters<"page">
+	>().toEqualTypeOf<PageFilters>();
 
 	expectTypeOf<CollectionDocumentSortKey>().toEqualTypeOf<
-		"createdAt" | "updatedAt" | "order" | `_${string}`
+		"createdAt" | "updatedAt" | "order" | `fields.${string}`
 	>();
 	expectTypeOf<CollectionDocumentSortKey<"page">>().toEqualTypeOf<
-		"createdAt" | "updatedAt" | "_pageTitle"
+		"createdAt" | "updatedAt" | "fields.page_title"
 	>();
 	expectTypeOf<CollectionDocumentVersion<"page">>().toEqualTypeOf<
 		"latest" | "revision" | "snapshot" | "published"
@@ -367,18 +295,24 @@ test("document client queries narrow filters, includes, and sorts from the colle
 		"latest" | "published"
 	>();
 
-	expectTypeOf<DocumentsGetSingleQuery<"page">["filter"]>().toEqualTypeOf<
-		CollectionDocumentFilters<"page"> | undefined
+	expectTypeOf<CollectionDocumentFilterInput<"page">>().toEqualTypeOf<
+		PageFilters | PageFilters[]
 	>();
-	expectTypeOf<DocumentsGetSingleQuery<"page">["include"]>().toEqualTypeOf<
-		DocumentSingleInclude[] | undefined
+	expectTypeOf<DocumentsGetSingleInput<"page">["filter"]>().toEqualTypeOf<
+		CollectionDocumentFilterInput<"page"> | undefined
 	>();
-	expectTypeOf<DocumentsGetMultipleQuery<"page">["include"]>().toEqualTypeOf<
-		DocumentMultipleInclude[] | undefined
+	expectTypeOf<DocumentsGetSingleInput<"page">["include"]>().toEqualTypeOf<
+		ContentDocumentInclude[] | undefined
 	>();
-	expectTypeOf<DocumentsGetMultipleQuery<"page">["sort"]>().toEqualTypeOf<
+	expectTypeOf<DocumentsGetMultipleInput<"page">["include"]>().toEqualTypeOf<
+		ContentDocumentInclude[] | undefined
+	>();
+	expectTypeOf<DocumentsGetMultipleInput<"page">["version"]>().toEqualTypeOf<
+		"latest" | "published" | undefined
+	>();
+	expectTypeOf<DocumentsGetMultipleInput<"page">["sort"]>().toEqualTypeOf<
 		| Array<{
-				key: "createdAt" | "updatedAt" | "_pageTitle";
+				key: "createdAt" | "updatedAt" | "fields.page_title";
 				direction: "asc" | "desc";
 		  }>
 		| undefined
@@ -401,7 +335,8 @@ test("document client methods narrow version from the collection key", () => {
 		client.getMultiple({
 			collectionKey: "page",
 			version: "latest",
-			query: { include: ["bricks"] },
+			filter: [{ fields: { path: "/about" } }, { id: [1, 2] }],
+			include: ["bricks"],
 		}),
 	).toEqualTypeOf<Promise<DocumentsGetMultipleResponse<"page">>>();
 });
@@ -418,7 +353,8 @@ test("document reads with a locale that may be undefined may return either shape
 	});
 	type Success = Extract<Awaited<typeof response>, { error: undefined }>;
 
-	expectTypeOf<Success["data"]>().toEqualTypeOf<
-		ContentDocument<"page", boolean>
-	>();
+	expectTypeOf<Success["data"]>().toEqualTypeOf<ContentDocument<
+		"page",
+		boolean
+	> | null>();
 });

@@ -312,7 +312,7 @@ const ViewShareLinksPanelContent: Component<{
 				</QueryBoundary>
 				<Pagination
 					queryState={shareLinksSearchParams}
-					meta={shareLinks.data?.meta}
+					pagination={shareLinks.data?.pagination}
 					loading={shareLinksList.loading()}
 					variant="inline"
 				/>

@@ -4,17 +4,23 @@ import {
 	contentFallbackLocaleSchema,
 	contentLocaleSchema,
 } from "../../../../schemas/shared/content.js";
+import { filterInputSchema } from "../../schema.js";
 import { normalizeDocumentQuery } from "../../utils.js";
-import { documentFilterSchema, documentInputSchema } from "../schema.js";
+import { documentInputSchema } from "../schema.js";
 
-export const querySchema =
-	controllerSchemas.content.getSingle.query.formatted.extend({
-		filter: documentFilterSchema,
-	});
+const querySchema = controllerSchemas.content.getSingle.query.formatted
+	.omit({ filterOr: true })
+	.extend({ filter: filterInputSchema });
 
-export const inputSchema = documentInputSchema.extend({
-	locale: contentLocaleSchema.optional(),
-	fallbackLocale: contentFallbackLocaleSchema.optional(),
-	depth: contentDepthSchema.optional(),
-	query: querySchema.prefault({}).transform(normalizeDocumentQuery),
-});
+/** Converts toolkit read options to a content service query. */
+export const inputSchema = documentInputSchema
+	.extend({
+		locale: contentLocaleSchema.optional(),
+		fallbackLocale: contentFallbackLocaleSchema.optional(),
+		depth: contentDepthSchema.optional(),
+		...querySchema.shape,
+	})
+	.transform(({ filter, include, ...input }) => ({
+		...input,
+		query: normalizeDocumentQuery({ filter, include }),
+	}));

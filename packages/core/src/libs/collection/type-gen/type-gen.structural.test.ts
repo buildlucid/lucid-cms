@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { copy } from "../../i18n/index.js";
 import CollectionBuilder from "../builders/collection-builder/index.js";
-import generateCollectionClientTypes from "./index.js";
+import generateCollectionTypes from "./index.js";
 
 const buildCollection = (key: string) =>
 	new CollectionBuilder(key, {
@@ -28,12 +28,12 @@ test("client types nest section children and inline collapsible children", async
 		.addText("anchorLabel")
 		.endCollapsible();
 
-	const file = generateCollectionClientTypes({
+	const { client: file } = generateCollectionTypes({
 		collections: [collection],
 		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
-	const fieldsDeclaration = file.declarations.find(
+	const fieldsDeclaration = file.declarations?.find(
 		(declaration) =>
 			declaration.startsWith("export type Nav") &&
 			declaration.includes("CollectionDocumentFields ="),
@@ -65,15 +65,15 @@ test("sort key types only include order for orderable collections", async () => 
 	});
 	const standard = buildCollection("pages");
 
-	const file = generateCollectionClientTypes({
+	const { client: file } = generateCollectionTypes({
 		collections: [orderable, standard],
 		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
-	const orderableSortDeclaration = file.declarations.find((declaration) =>
+	const orderableSortDeclaration = file.declarations?.find((declaration) =>
 		declaration.startsWith("export type ProjectsCollectionDocumentSortKey ="),
 	);
-	const standardSortDeclaration = file.declarations.find((declaration) =>
+	const standardSortDeclaration = file.declarations?.find((declaration) =>
 		declaration.startsWith("export type PagesCollectionDocumentSortKey ="),
 	);
 
@@ -104,27 +104,27 @@ test("sort key types include sortable top-level custom fields regardless of list
 		.addText("itemLabel")
 		.endRepeater();
 
-	const file = generateCollectionClientTypes({
+	const { client: file } = generateCollectionTypes({
 		collections: [collection],
 		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
-	const sortDeclaration = file.declarations.find((declaration) =>
+	const sortDeclaration = file.declarations?.find((declaration) =>
 		declaration.startsWith("export type ArticlesCollectionDocumentSortKey ="),
 	);
 
 	expect(sortDeclaration).toBeDefined();
 	//* sortable types are included even when unlisted
-	expect(sortDeclaration).toContain('"_title"');
-	expect(sortDeclaration).toContain('"_summary"');
-	expect(sortDeclaration).toContain('"_views"');
-	expect(sortDeclaration).toContain('"_publishedAt"');
-	expect(sortDeclaration).toContain('"_category"');
-	expect(sortDeclaration).toContain('"_featured"');
+	expect(sortDeclaration).toContain('"fields.title"');
+	expect(sortDeclaration).toContain('"fields.summary"');
+	expect(sortDeclaration).toContain('"fields.views"');
+	expect(sortDeclaration).toContain('"fields.publishedAt"');
+	expect(sortDeclaration).toContain('"fields.category"');
+	expect(sortDeclaration).toContain('"fields.featured"');
 	//* unsupported types are excluded
-	expect(sortDeclaration).not.toContain('"_hero"');
-	expect(sortDeclaration).not.toContain('"_items"');
-	expect(sortDeclaration).not.toContain('"_itemLabel"');
+	expect(sortDeclaration).not.toContain('"fields.hero"');
+	expect(sortDeclaration).not.toContain('"fields.items"');
+	expect(sortDeclaration).not.toContain('"fields.itemLabel"');
 	//* core sort keys remain
 	expect(sortDeclaration).toContain('"createdAt"');
 	expect(sortDeclaration).toContain('"updatedAt"');
@@ -137,12 +137,12 @@ test("client types keep collection tabs transparent", async () => {
 		.addTab("seoTab")
 		.addText("metaTitle");
 
-	const file = generateCollectionClientTypes({
+	const { client: file } = generateCollectionTypes({
 		collections: [collection],
 		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
-	const fieldsDeclaration = file.declarations.find(
+	const fieldsDeclaration = file.declarations?.find(
 		(declaration) =>
 			declaration.startsWith("export type Pages") &&
 			declaration.includes("CollectionDocumentFields ="),

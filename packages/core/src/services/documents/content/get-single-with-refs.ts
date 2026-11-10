@@ -25,6 +25,7 @@ import getDocumentBricks from "../../documents-bricks/get-multiple.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import readPreviewDraft from "../../preview-sessions/helpers/read-draft.js";
 import type { PreviewSessionDocumentTarget } from "../../preview-sessions/types.js";
+import checkFilterKeys from "../checks/check-filter-keys.js";
 import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationDocumentFilters from "../helpers/resolve-relation-document-filters.js";
@@ -156,12 +157,13 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 		allowedCollectionKeys: data.allowedCollectionKeys,
 	});
 	if (relationFiltersRes.error) return relationFiltersRes;
-	const { documentFilters, brickFilters } = groupDocumentFilters(
+	const { documentFilters, brickFilters, unknownKeys } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
 		query.filter,
 		{
 			relationCollectionDefaults:
 				relationFiltersRes.data.relationCollectionDefaults,
+			handledKeys: relationFiltersRes.data.traversalKeys,
 		},
 	);
 
@@ -169,9 +171,16 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 		...groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
 			relationCollectionDefaults:
 				relationFiltersRes.data.relationCollectionDefaults,
+			handledKeys: relationFiltersRes.data.traversalKeys,
 		}),
 		relationDocumentFilters: relationFiltersRes.data.filterOr[index] ?? [],
 	}));
+
+	const filterKeysRes = checkFilterKeys([
+		...unknownKeys,
+		...(filterOr ?? []).flatMap((group) => group.unknownKeys),
+	]);
+	if (filterKeysRes.error) return filterKeysRes;
 
 	const documentRes = await Documents.selectSingleFiltered(
 		{
@@ -197,6 +206,7 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 			error: {
 				message: copy("server:core.documents.not.found.message"),
 				status: 404,
+				code: "document_not_found",
 			},
 			data: undefined,
 		};

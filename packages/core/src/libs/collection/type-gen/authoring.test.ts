@@ -5,7 +5,7 @@ import ts from "typescript";
 import { expect, test } from "vitest";
 import BrickBuilder from "../builders/brick-builder/index.js";
 import CollectionBuilder from "../builders/collection-builder/index.js";
-import generateCollectionClientTypes from "./index.js";
+import generateCollectionTypes from "./index.js";
 
 test("generated toolkit inputs and patch paths type-check real calls", async () => {
 	const collection = new CollectionBuilder("typed_article", {
@@ -28,7 +28,7 @@ test("generated toolkit inputs and patch paths type-check real calls", async () 
 			localized: false,
 			multiple: true,
 		});
-	const generated = generateCollectionClientTypes({
+	const generated = generateCollectionTypes({
 		collections: [collection],
 		localization: {
 			defaultLocale: "en",
@@ -37,16 +37,23 @@ test("generated toolkit inputs and patch paths type-check real calls", async () 
 	});
 	const directory = await mkdtemp(join(tmpdir(), "lucid-authoring-types-"));
 	try {
-		const augmentation = generated.moduleAugmentations.find(
-			(item) => item.module === "@lucidcms/core/types",
+		const files = [generated.client, generated.writes];
+		const augmentations = files.flatMap(
+			(file) => file.moduleAugmentations ?? [],
 		);
-		expect(augmentation).toBeDefined();
+		expect(augmentations.map((item) => item.module)).toEqual([
+			"@lucidcms/core/types",
+			"@lucidcms/core/types",
+		]);
 		await writeFile(
 			join(directory, "generated.mts"),
 			[
-				...generated.imports,
-				...generated.declarations,
-				`declare module "@lucidcms/core/types" { ${augmentation?.declarations.join("\n")} }`,
+				...new Set(files.flatMap((file) => file.imports ?? [])),
+				...files.flatMap((file) => file.declarations ?? []),
+				...augmentations.map(
+					(item) =>
+						`declare module "${item.module}" { ${item.declarations.join("\n")} }`,
+				),
 			].join("\n"),
 		);
 		const script = join(directory, "usage.mts");

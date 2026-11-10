@@ -127,15 +127,15 @@ describe("toolkit document query normalization", () => {
 		expect(
 			normalizeDocumentQuery({
 				filter: {
-					_path: {
-						value: "/about",
+					fields: {
+						path: "/about",
 					},
 				},
 				include: ["bricks"],
 			}),
 		).toEqual({
 			filter: {
-				_path: {
+				"fields.path": {
 					value: "/about",
 				},
 			},
@@ -147,18 +147,20 @@ describe("toolkit document query normalization", () => {
 		expect(
 			normalizeDocumentQuery({
 				filter: {
-					_author: {
-						_firstName: { value: "Will" },
-						people: {
-							_surname: { value: "Yallop" },
+					fields: {
+						author: {
+							fields: { firstName: "Will" },
+							people: {
+								fields: { surname: { value: "Yallop" } },
+							},
 						},
 					},
 				},
 			}),
 		).toEqual({
 			filter: {
-				"_author._firstName": { value: "Will" },
-				"_author.people._surname": { value: "Yallop" },
+				"fields.author.fields.firstName": { value: "Will" },
+				"fields.author.people.fields.surname": { value: "Yallop" },
 			},
 		});
 	});
@@ -168,18 +170,20 @@ describe("toolkit document query normalization", () => {
 			normalizeDocumentQuery({
 				filter: [
 					{
-						_path: {
-							value: "/",
+						fields: {
+							path: "/",
 						},
 					},
 					{
-						_path: {
-							value: "/about",
+						fields: {
+							path: ["/about", "/team"],
 						},
-						banner: {
-							_title: {
-								value: "About",
-								operator: "contains",
+						bricks: {
+							banner: {
+								title: {
+									value: "About",
+									operator: "contains",
+								},
 							},
 						},
 					},
@@ -189,17 +193,18 @@ describe("toolkit document query normalization", () => {
 			filterOr: [
 				[
 					{
-						key: "_path",
+						key: "fields.path",
 						value: "/",
 					},
 				],
 				[
 					{
-						key: "_path",
-						value: "/about",
+						key: "fields.path",
+						value: ["/about", "/team"],
+						operator: "in",
 					},
 					{
-						key: "banner._title",
+						key: "bricks.banner.title",
 						value: "About",
 						operator: "contains",
 					},
@@ -213,8 +218,8 @@ describe("toolkit document query normalization", () => {
 			normalizePaginatedDocumentQuery({
 				filter: [
 					{
-						_path: {
-							value: "/",
+						fields: {
+							path: "/",
 						},
 					},
 				],
@@ -223,7 +228,7 @@ describe("toolkit document query normalization", () => {
 			filterOr: [
 				[
 					{
-						key: "_path",
+						key: "fields.path",
 						value: "/",
 					},
 				],

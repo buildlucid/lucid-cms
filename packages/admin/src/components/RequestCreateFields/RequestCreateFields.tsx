@@ -88,7 +88,7 @@ const RequestCreateFields: Component<{
 					onChange={props.onTargetsChange}
 				/>
 			</div>
-			<Show when={requests.data?.meta.total}>
+			<Show when={requests.data?.pagination?.total}>
 				{(total) => (
 					<RequestOverlapNotice
 						requests={requests.data?.data ?? []}

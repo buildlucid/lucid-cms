@@ -58,7 +58,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						authMethod: queryFormatted.schema.filters.union.optional(),
 						ipAddress: queryFormatted.schema.filters.single.optional(),
 						userAgent: queryFormatted.schema.filters.single.optional(),

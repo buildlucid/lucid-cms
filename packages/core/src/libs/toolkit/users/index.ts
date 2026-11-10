@@ -20,12 +20,7 @@ export type ToolkitUsers = {
 	 * ```ts
 	 * await toolkit.users.getMultiple({
 	 *   actor: execution.actor,
-	 *   query: {
-	 *     filter: {
-	 *       name: { value: "ada" },
-	 *       isDeleted: { value: false },
-	 *     },
-	 *   },
+	 *   filter: { name: "ada", isDeleted: false },
 	 * });
 	 * ```
 	 */

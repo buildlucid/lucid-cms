@@ -19,6 +19,8 @@ export interface PublicErrorData {
 		| "authorisation"
 		| "rate_limit"
 		| "not_found"
+		/** A document read matched nothing, which the client and toolkit return as null. */
+		| "document_not_found"
 		| "preview_invalid"
 		| "preview_expired"
 		| "preview_scope"

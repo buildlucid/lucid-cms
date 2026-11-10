@@ -30,7 +30,7 @@ export const selectDocumentTool = defineAgentTool({
 			const result = await toolkit.documents.getMultiple({
 				collectionKey: "page",
 				version: "latest",
-				query: { perPage: 20 },
+				perPage: 20,
 			});
 			if (result.error) return result;
 			if (!result.data.items.length) {
@@ -82,9 +82,18 @@ export const selectDocumentTool = defineAgentTool({
 		const result = await toolkit.documents.getSingle({
 			collectionKey: "page",
 			version: "latest",
-			query: { filter: { id: { value: response.documentId, operator: "=" } } },
+			filter: { id: response.documentId },
 		});
 		if (result.error) return result;
+		if (!result.data) {
+			return {
+				error: undefined,
+				data: {
+					output: { documentId: null },
+					summary: "The selected document no longer exists",
+				},
+			};
+		}
 		return {
 			error: undefined,
 			data: {

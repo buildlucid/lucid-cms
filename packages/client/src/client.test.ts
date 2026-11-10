@@ -28,14 +28,6 @@ describe("@lucidcms/client", () => {
 						},
 					},
 					refs: {},
-					meta: {
-						links: [],
-						path: "https://example.com/api/v1/content/document/page",
-						currentPage: null,
-						lastPage: null,
-						perPage: null,
-						total: null,
-					},
 				}),
 				{
 					status: 200,
@@ -60,50 +52,44 @@ describe("@lucidcms/client", () => {
 			version: "latest",
 			preview: "a".repeat(43),
 			depth: 2,
-			query: {
-				filter: {
-					_path: {
+			filter: {
+				id: [1, 2],
+				fields: {
+					path: {
 						value: "/about",
 						operator: "starts-with",
 					},
-					banner: {
-						_title: {
-							value: "About us",
-						},
-					},
-					fields: {
-						sections: {
-							_section_title: {
-								value: "Hero",
-							},
-						},
-					},
-					_author: {
-						_first_name: {
-							value: "Will",
-						},
+					section_title: "Hero, intro",
+					parent: null,
+					author: {
 						people: {
-							_surname: {
-								value: "Yal",
-								operator: "starts-with",
+							fields: {
+								surname: {
+									value: "Yal",
+									operator: "starts-with",
+								},
 							},
 						},
 					},
 				},
-				include: ["bricks", "meta"],
+				bricks: {
+					banner: {
+						title: "About us",
+					},
+				},
 			},
+			include: ["bricks", "meta"],
 		});
 
 		expect(response.error).toBeUndefined();
 		expect(response.data?.id).toBe(1);
-		expect(response.meta?.path).toBe(
-			"https://example.com/api/v1/content/document/page",
-		);
+		expect(response).not.toHaveProperty("meta");
+		expect(response).not.toHaveProperty("refs");
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page?filter%5B_path%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&filter%5B_author._first_name%5D=Will&filter%5B_author.people._surname%3Astarts-with%5D=Yal&include=bricks%2Cmeta",
+			"/document/page?filter%5Bid%3Ain%5D=1&filter%5Bid%3Ain%5D=2&filter%5Bfields.path%3Astarts-with%5D=%2Fabout&filter%5Bfields.section_title%5D=Hero%2C+intro&filter%5Bfields.parent%3Ais%5D=&filter%5Bfields.author.people.fields.surname%3Astarts-with%5D=Yal&filter%5Bbricks.banner.title%5D=About+us&include=bricks%2Cmeta",
 		);
 		expect(new URL(String(url)).searchParams.get("preview")).toBe(
 			"a".repeat(43),
@@ -124,14 +110,6 @@ describe("@lucidcms/client", () => {
 					data: {
 						mode: "scoped",
 						expiresAt: "2099-01-01T00:00:00.000Z",
-					},
-					meta: {
-						links: [],
-						path: "https://example.com/api/v1/content/preview",
-						currentPage: null,
-						lastPage: null,
-						perPage: null,
-						total: null,
 					},
 				}),
 				{
@@ -191,9 +169,7 @@ describe("@lucidcms/client", () => {
 				new Response(
 					JSON.stringify({
 						data: [],
-						meta: {
-							links: [],
-							path: "https://example.com/api/v1/content/documents/page",
+						pagination: {
 							currentPage: 1,
 							lastPage: 1,
 							perPage: 10,
@@ -226,29 +202,26 @@ describe("@lucidcms/client", () => {
 		const response = await client.documents.getMultiple({
 			collectionKey: "page",
 			version: "latest",
-			query: {
-				include: ["meta"],
-				sort: [
-					{ key: "updatedAt", direction: "asc" },
-					{ key: "_pageTitle", direction: "desc" },
-				],
-			},
+			include: ["meta"],
+			sort: [
+				{ key: "updatedAt", direction: "asc" },
+				{ key: "fields.pageTitle", direction: "desc" },
+			],
+			page: 1,
+			perPage: 10,
 		});
 
 		expect(response.error).toBeUndefined();
-		expect(response.data).toEqual([]);
-		expect(response.meta?.total).toBe(0);
-		expect(response).toMatchObject({
-			data: [],
-			meta: {
-				links: [],
-				path: "https://example.com/api/v1/content/documents/page",
+		expect(response.data).toEqual({
+			items: [],
+			pagination: {
 				currentPage: 1,
 				lastPage: 1,
 				perPage: 10,
 				total: 0,
 			},
 		});
+		expect(response).not.toHaveProperty("meta");
 		expect(accessToken).toHaveBeenCalledTimes(2);
 		expect(fetchMock).toHaveBeenCalledTimes(2);
 		expect(
@@ -262,13 +235,106 @@ describe("@lucidcms/client", () => {
 		expect(firstRequestUrl.pathname).toBe("/api/v1/content/documents/page");
 		expect(firstRequestUrl.searchParams.get("version")).toBe("latest");
 		expect(firstRequestUrl.searchParams.get("include")).toBe("meta");
+		expect(firstRequestUrl.searchParams.get("page")).toBe("1");
+		expect(firstRequestUrl.searchParams.get("perPage")).toBe("10");
 		expect(firstRequestUrl.searchParams.get("sort")).toBe(
-			"updatedAt,-_pageTitle",
+			"updatedAt,-fields.pageTitle",
 		);
 		expect(secondRequestUrl.searchParams.get("include")).toBe("meta");
 		expect(secondRequestUrl.searchParams.get("sort")).toBe(
-			"updatedAt,-_pageTitle",
+			"updatedAt,-fields.pageTitle",
 		);
+	});
+
+	test("sends a list of filters as OR groups and an empty list as one empty value", async () => {
+		const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+			Response.json({
+				data: [],
+				pagination: { currentPage: 1, lastPage: 1, perPage: 10, total: 0 },
+			}),
+		);
+		const client = createClient({
+			baseUrl: "https://example.com",
+			auth: { type: "apiKey", apiKey: "client-key" },
+			fetch: fetchMock,
+			version: "latest",
+		});
+
+		await client.documents.getMultiple({
+			collectionKey: "page",
+			filter: [{ fields: { title: "Home" } }, { id: [] }],
+		});
+
+		const url = new URL(String(fetchMock.mock.calls[0]?.[0]));
+		expect([...url.searchParams.entries()]).toEqual([
+			["filter[or][0][fields.title]", "Home"],
+			["filter[or][1][id:in]", ""],
+			["version", "latest"],
+		]);
+	});
+
+	test("reads the client's default version unless a read names its own", async () => {
+		const fetchMock = vi.fn<typeof fetch>(async () =>
+			Response.json({ data: null }),
+		);
+		const auth = { type: "apiKey", apiKey: "client-key" } as const;
+		const client = createClient({
+			baseUrl: "https://example.com",
+			auth,
+			fetch: fetchMock,
+			version: "published",
+		});
+
+		await client.documents.getSingle({ collectionKey: "page" });
+		await client.documents.getSingle({
+			collectionKey: "page",
+			version: "latest",
+		});
+
+		expect(
+			fetchMock.mock.calls.map(([url]) =>
+				new URL(String(url)).searchParams.get("version"),
+			),
+		).toEqual(["published", "latest"]);
+
+		const withoutVersion = createClient({
+			baseUrl: "https://example.com",
+			auth,
+			fetch: fetchMock,
+		});
+		const response = await withoutVersion.documents.getMultiple({
+			collectionKey: "page",
+		});
+
+		expect(response.error?.kind).toBe("configuration");
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+	});
+
+	test("returns null data for a missing document and errors for other 404s", async () => {
+		const notFound = (code: string) =>
+			Response.json(
+				{ name: "Not found", message: "Not found", status: 404, code },
+				{ status: 404 },
+			);
+		const fetchMock = vi
+			.fn<typeof fetch>()
+			.mockResolvedValueOnce(notFound("document_not_found"))
+			.mockResolvedValueOnce(notFound("collection_not_found"));
+		const client = createClient({
+			baseUrl: "https://example.com",
+			auth: { type: "apiKey", apiKey: "client-key" },
+			fetch: fetchMock,
+			version: "latest",
+			retry: false,
+		});
+
+		const missing = await client.documents.getSingle({ collectionKey: "page" });
+		const failed = await client.documents.getSingle({ collectionKey: "page" });
+
+		expect(missing.error).toBeUndefined();
+		expect(missing.data).toBeNull();
+		expect(failed.data).toBeUndefined();
+		expect(failed.error).toMatchObject({ kind: "http", status: 404 });
 	});
 
 	test("does not retry POST requests by default", async () => {
@@ -485,14 +551,6 @@ describe("@lucidcms/client", () => {
 			new Response(
 				JSON.stringify({
 					data: [],
-					meta: {
-						links: [],
-						path: "https://example.com/api/v1/content/locales",
-						currentPage: null,
-						lastPage: null,
-						perPage: null,
-						total: null,
-					},
 				}),
 				{
 					status: 200,

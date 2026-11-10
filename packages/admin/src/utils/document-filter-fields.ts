@@ -141,8 +141,6 @@ const toFilterField = (
 interface CollectContext {
 	/** undefined for collection-level fields */
 	brickKey?: string;
-	/** nearest repeater ancestor - determines the tree-table path segment */
-	repeaterKey?: string;
 	/** brick display name - always leads the label when present */
 	brickLabel?: string;
 	/** ordered container (tab/section/collapsible/repeater) display names */
@@ -150,20 +148,13 @@ interface CollectContext {
 }
 
 /**
- * Builds the backend filter path for a leaf field:
- * - collection field: `_fieldKey`
- * - brick field: `brickKey._fieldKey`
- * - repeater child: `fields.repeaterKey._fieldKey` / `brickKey.repeaterKey._fieldKey`
+ * Builds `fields.<key>` or `bricks.<brick>.<key>`. Repeater children use the same paths because
+ * field keys are unique within each collection or brick.
  */
-const buildFilterKey = (context: CollectContext, fieldKey: string): string => {
-	if (context.repeaterKey !== undefined) {
-		return `${context.brickKey ?? "fields"}.${context.repeaterKey}._${fieldKey}`;
-	}
-	if (context.brickKey !== undefined) {
-		return `${context.brickKey}._${fieldKey}`;
-	}
-	return `_${fieldKey}`;
-};
+const buildFilterKey = (context: CollectContext, fieldKey: string): string =>
+	context.brickKey === undefined
+		? `fields.${fieldKey}`
+		: `bricks.${context.brickKey}.${fieldKey}`;
 
 /**
  * Collects supported filterable leaf fields. Field labels are not unique, so
@@ -196,7 +187,6 @@ const collectFilterFields = (
 				field.fields,
 				{
 					...context,
-					repeaterKey: field.key,
 					containerLabels: [
 						...(context.containerLabels ?? []),
 						fieldLabel(field),

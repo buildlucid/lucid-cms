@@ -1,3 +1,4 @@
+import type { CustomExternalScopes } from "@lucidcms/types";
 import type { CollectionPermissionAction } from "./types.js";
 
 const externalScopeValues = {
@@ -86,9 +87,7 @@ export type CoreExternalScope =
 
 export type ExternalPrincipalType = "system" | "user";
 
-/** Project scopes added by Lucid type generation or a plugin. */
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types and plugins augment this interface
-export interface CustomExternalScopes {}
+export type { CustomExternalScopes };
 
 export type ExternalScope =
 	| CoreExternalScope

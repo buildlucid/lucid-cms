@@ -266,10 +266,10 @@ const documentRefsIncludeSchema = z.union([
 	]),
 ]);
 
-//* underscore-prefixed top-level field sorts are resolved later
+//* `fields.<key>` sorts for top-level fields are resolved later
 const documentSortKeySchema = z.union([
 	z.enum(["createdAt", "updatedAt", "order"]),
-	z.string().regex(/^_[a-zA-Z0-9-_]+$/),
+	z.string().regex(/^fields\.[a-zA-Z0-9-_]+$/),
 ]);
 
 const documentSortSchema = z
@@ -873,7 +873,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						createdBy: z
 							.union([
 								queryFormatted.schema.filters.single,
@@ -948,30 +948,25 @@ export const controllerSchemas = {
 							"Filter by how an environment's version compares with latest: unpublished, out-of-sync or in-sync",
 						example: "out-of-sync",
 					}),
-					"filter[_customFieldKey]": queryString.schema.filter(true, {
+					"filter[fields.fieldKey]": queryString.schema.filter(true, {
 						description:
-							"Prefix custom field keys with an underscore to filter by them",
+							"Filter by a collection field, including fields inside repeaters",
 					}),
-					"filter[_relationFieldKey.targetCollectionKey._customFieldKey]":
+					"filter[bricks.brickKey.fieldKey]": queryString.schema.filter(true, {
+						description:
+							"Filter by a brick's field, including fields inside its repeaters",
+					}),
+					"filter[fields.relationFieldKey.targetCollectionKey.fields.fieldKey]":
 						queryString.schema.filter(true, {
 							description:
-								"Follow a relation field through its target collection to filter by a related document custom field",
+								"Follow a relation field through its target collection to filter by a related document's field",
 							example: "Author surname",
 						}),
-					"filter[_relationFieldKey._customFieldKey]":
+					"filter[fields.relationFieldKey.fields.fieldKey]":
 						queryString.schema.filter(true, {
 							description:
 								"Omit the target collection to use the relation field's first configured collection",
 							example: "Author surname",
-						}),
-					"filter[brickKey._customFieldKey]": queryString.schema.filter(true, {
-						description:
-							"Add a brick key before the custom field key to filter against the brick",
-					}),
-					"filter[brickKey.repeaterKey._customFieldKey]":
-						queryString.schema.filter(true, {
-							description:
-								"Target a repeater field by adding a repeater key after the brick key",
 						}),
 					include: queryString.schema.include(
 						"refs,refs.documents,refs.media,refs.users,refs.emails,refs.agents",
@@ -1233,33 +1228,28 @@ export const controllerSchemas = {
 						"filter[updatedAt]": queryString.schema.filter(false, {
 							example: "2025-03-15T09:22:10Z",
 						}),
-						"filter[_customFieldKey]": queryString.schema.filter(true, {
+						"filter[fields.fieldKey]": queryString.schema.filter(true, {
 							description:
-								"Prefix custom field keys with an underscore to filter by them",
+								"Filter by a collection field, including fields inside repeaters",
 						}),
-						"filter[_relationFieldKey.targetCollectionKey._customFieldKey]":
+						"filter[bricks.brickKey.fieldKey]": queryString.schema.filter(
+							true,
+							{
+								description:
+									"Filter by a brick's field, including fields inside its repeaters",
+							},
+						),
+						"filter[fields.relationFieldKey.targetCollectionKey.fields.fieldKey]":
 							queryString.schema.filter(true, {
 								description:
-									"Follow a relation field through its target collection to filter by a related document custom field",
+									"Follow a relation field through its target collection to filter by a related document's field",
 								example: "Author surname",
 							}),
-						"filter[_relationFieldKey._customFieldKey]":
+						"filter[fields.relationFieldKey.fields.fieldKey]":
 							queryString.schema.filter(true, {
 								description:
 									"Omit the target collection to use the relation field's first configured collection",
 								example: "Author surname",
-							}),
-						"filter[brickKey._customFieldKey]": queryString.schema.filter(
-							true,
-							{
-								description:
-									"Add a brick key before the custom field key to filter against the brick",
-							},
-						),
-						"filter[brickKey.repeaterKey._customFieldKey]":
-							queryString.schema.filter(true, {
-								description:
-									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include("bricks,meta"),
 						page: queryString.schema.page,
@@ -1322,33 +1312,28 @@ export const controllerSchemas = {
 						"filter[updatedAt]": queryString.schema.filter(false, {
 							example: "2025-03-15T09:22:10Z",
 						}),
-						"filter[_customFieldKey]": queryString.schema.filter(true, {
+						"filter[fields.fieldKey]": queryString.schema.filter(true, {
 							description:
-								"Prefix custom field keys with an underscore to filter by them",
+								"Filter by a collection field, including fields inside repeaters",
 						}),
-						"filter[_relationFieldKey.targetCollectionKey._customFieldKey]":
+						"filter[bricks.brickKey.fieldKey]": queryString.schema.filter(
+							true,
+							{
+								description:
+									"Filter by a brick's field, including fields inside its repeaters",
+							},
+						),
+						"filter[fields.relationFieldKey.targetCollectionKey.fields.fieldKey]":
 							queryString.schema.filter(true, {
 								description:
-									"Follow a relation field through its target collection to filter by a related document custom field",
+									"Follow a relation field through its target collection to filter by a related document's field",
 								example: "Author surname",
 							}),
-						"filter[_relationFieldKey._customFieldKey]":
+						"filter[fields.relationFieldKey.fields.fieldKey]":
 							queryString.schema.filter(true, {
 								description:
 									"Omit the target collection to use the relation field's first configured collection",
 								example: "Author surname",
-							}),
-						"filter[brickKey._customFieldKey]": queryString.schema.filter(
-							true,
-							{
-								description:
-									"Add a brick key before the custom field key to filter against the brick",
-							},
-						),
-						"filter[brickKey.repeaterKey._customFieldKey]":
-							queryString.schema.filter(true, {
-								description:
-									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include("bricks,meta"),
 						sort: queryString.schema.sort(

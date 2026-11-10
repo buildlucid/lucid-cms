@@ -114,6 +114,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	plugins: [],
 	build: {
 		outDir: "dist",
+		clientTypes: [],
 		watch: {
 			ignore: [],
 		},

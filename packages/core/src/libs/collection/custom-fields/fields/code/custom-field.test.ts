@@ -4,7 +4,7 @@ import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
-import generateCollectionClientTypes from "../../../type-gen/index.js";
+import generateCollectionTypes from "../../../type-gen/index.js";
 import CustomFieldSchema from "../../schema.js";
 import CodeCustomField from "./custom-field.js";
 
@@ -320,12 +320,12 @@ test("defines a nullable json column for storage", async () => {
 // -----------------------------------------------
 // Client type generation
 test("generates the code field client value type", async () => {
-	const file = generateCollectionClientTypes({
+	const { client: file } = generateCollectionTypes({
 		collections: [CodeCollection],
 		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
-	const fieldsDeclaration = file.declarations.find(
+	const fieldsDeclaration = file.declarations?.find(
 		(declaration) =>
 			declaration.startsWith("export type Collection") &&
 			declaration.includes("CollectionDocumentFields ="),

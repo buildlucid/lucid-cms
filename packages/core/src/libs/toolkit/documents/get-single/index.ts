@@ -20,26 +20,39 @@ const createGetSingle =
 		TLocale extends string | undefined = undefined,
 	>(
 		input: ToolkitDocumentsGetSingleInput<TCollectionKey, TLocale>,
-	): ServiceResponse<ContentDocument<TCollectionKey, IsLocalized<TLocale>>> =>
+	): ServiceResponse<ContentDocument<
+		TCollectionKey,
+		IsLocalized<TLocale>
+	> | null> =>
 		runToolkitService({
 			schema: inputSchema,
 			input,
-			handler: async (data) => {
+			handler: async (
+				data,
+			): ServiceResponse<ContentDocument<
+				TCollectionKey,
+				IsLocalized<TLocale>
+			> | null> => {
 				const { default: getSingle } =
 					await import("../../../../services/documents/content/get-single.js");
 
-				return getSingle<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>(
-					context,
-					{
-						collectionKey: input.collectionKey,
-						versionType: input.version,
-						preview: data.preview ?? undefined,
-						locale: data.locale,
-						fallbackLocale: data.fallbackLocale,
-						depth: data.depth,
-						query: data.query,
-					},
-				);
+				const result = await getSingle<
+					ContentDocument<TCollectionKey, IsLocalized<TLocale>>
+				>(context, {
+					collectionKey: input.collectionKey,
+					versionType: input.version,
+					preview: data.preview ?? undefined,
+					locale: data.locale,
+					fallbackLocale: data.fallbackLocale,
+					depth: data.depth,
+					query: data.query,
+				});
+				//* a read that matches nothing is null rather than an error
+				if (result.error?.code === "document_not_found") {
+					return { error: undefined, data: null };
+				}
+
+				return result;
 			},
 			name: {
 				key: "core.toolkit.documents.get.single.error.name",

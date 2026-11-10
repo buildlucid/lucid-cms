@@ -423,6 +423,7 @@ describe("groupDocumentFilters", () => {
 			documentFilters: {},
 			brickFilters: [],
 			environmentStatusFilters: [],
+			unknownKeys: [],
 		});
 	});
 
@@ -453,6 +454,7 @@ describe("groupDocumentFilters", () => {
 			documentFilters: {},
 			brickFilters: [],
 			environmentStatusFilters: [],
+			unknownKeys: ["workflowStage", "workflowAssignee"],
 		});
 
 		expect(
@@ -478,29 +480,9 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
-	it("should handle relation custom fields with _ prefix", () => {
+	it('should handle document fields with "fields.fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
-			_simpleHeading: { value: "Test Heading" },
-		};
-
-		const result = groupDocumentFilters(sampleSchema, filters);
-
-		expect(result.documentFilters).toEqual({});
-		expect(result.brickFilters).toHaveLength(1);
-		expect(result.brickFilters[0].table).toBe("lucid_document__simple__fld");
-		expect(result.brickFilters[0].filters).toEqual([
-			{
-				key: "simpleHeading",
-				value: "Test Heading",
-				operator: "=",
-				column: "_simpleHeading",
-			},
-		]);
-	});
-
-	it('should handle document fields accessed with "fields." prefix', () => {
-		const filters: QueryParamFilters = {
-			"fields._simpleHeading": { value: "Test Heading" },
+			"fields.simpleHeading": { value: "Test Heading" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -520,17 +502,19 @@ describe("groupDocumentFilters", () => {
 
 	it("should format column custom field filter values by field type", () => {
 		const filters: QueryParamFilters = {
-			_simpleHeading: { value: "Test Heading" },
-			_simpleNumber: { value: ["42", "not-a-number"] },
-			_simpleCheckbox: { value: ["true", "false", "maybe"] },
-			_simpleSelect: { value: "published" },
-			_simpleTextarea: { value: "Long text" },
-			_simpleColor: { value: "#ffffff" },
-			_simpleDate: { value: "2024-01-01T00:00:00.000Z" },
-			_simpleJson: { value: '{"ok":true}' },
-			_simpleCode: { value: '{"language":"ts","value":"const a = 1;"}' },
-			_simpleLink: { value: '{"url":"https://example.com"}' },
-			_simpleRichText: { value: '{"type":"doc","content":[]}' },
+			"fields.simpleHeading": { value: "Test Heading" },
+			"fields.simpleNumber": { value: ["42", "not-a-number"] },
+			"fields.simpleCheckbox": { value: ["true", "false", "maybe"] },
+			"fields.simpleSelect": { value: "published" },
+			"fields.simpleTextarea": { value: "Long text" },
+			"fields.simpleColor": { value: "#ffffff" },
+			"fields.simpleDate": { value: "2024-01-01T00:00:00.000Z" },
+			"fields.simpleJson": { value: '{"ok":true}' },
+			"fields.simpleCode": {
+				value: '{"language":"ts","value":"const a = 1;"}',
+			},
+			"fields.simpleLink": { value: '{"url":"https://example.com"}' },
+			"fields.simpleRichText": { value: '{"type":"doc","content":[]}' },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -613,9 +597,9 @@ describe("groupDocumentFilters", () => {
 
 	it("should handle relation custom fields stored in generated relation tables", () => {
 		const filters: QueryParamFilters = {
-			_author: { value: [1, 2] },
-			_heroImage: { value: 10 },
-			_relatedDocument: { value: 5 },
+			"fields.author": { value: [1, 2] },
+			"fields.heroImage": { value: 10 },
+			"fields.relatedDocument": { value: 5 },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -660,10 +644,10 @@ describe("groupDocumentFilters", () => {
 
 	it("should format generated relation table filter values by field type", () => {
 		const filters: QueryParamFilters = {
-			_author: { value: ["1", "not-a-number"] },
-			_heroImage: { value: "10" },
-			_relatedDocument: { value: "5" },
-			"simple._reviewer": { value: "3" },
+			"fields.author": { value: ["1", "not-a-number"] },
+			"fields.heroImage": { value: "10" },
+			"fields.relatedDocument": { value: "5" },
+			"bricks.simple.reviewer": { value: "3" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -719,7 +703,7 @@ describe("groupDocumentFilters", () => {
 
 	it("should filter decimal range values through their generated value table", () => {
 		const filters: QueryParamFilters = {
-			_priceRange: { value: "20.5", operator: ">=" },
+			"fields.priceRange": { value: "20.5", operator: ">=" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -742,11 +726,13 @@ describe("groupDocumentFilters", () => {
 
 	it("should split compound collectionKey:id relation values into same-table conditions", () => {
 		const filters: QueryParamFilters = {
-			_relatedDocument: { value: "pages:7" },
+			"fields.relatedDocument": { value: "pages:7" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters, {
-			relationCollectionDefaults: new Map([["_relatedDocument", "articles"]]),
+			relationCollectionDefaults: new Map([
+				["fields.relatedDocument", "articles"],
+			]),
 		});
 
 		expect(result.documentFilters).toEqual({});
@@ -773,11 +759,13 @@ describe("groupDocumentFilters", () => {
 
 	it("should scope unqualified relation ids to the configured default collection", () => {
 		const filters: QueryParamFilters = {
-			_relatedDocument: { value: 7 },
+			"fields.relatedDocument": { value: 7 },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters, {
-			relationCollectionDefaults: new Map([["_relatedDocument", "pages"]]),
+			relationCollectionDefaults: new Map([
+				["fields.relatedDocument", "pages"],
+			]),
 		});
 
 		expect(result.brickFilters).toEqual([
@@ -803,7 +791,7 @@ describe("groupDocumentFilters", () => {
 
 	it("should keep the filter operator on the document id for compound relation values", () => {
 		const filters: QueryParamFilters = {
-			_relatedDocument: { value: "articles:12", operator: "!=" },
+			"fields.relatedDocument": { value: "articles:12", operator: "!=" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -831,7 +819,7 @@ describe("groupDocumentFilters", () => {
 
 	it("should not split compound values for relation tables without a collection key column", () => {
 		const filters: QueryParamFilters = {
-			_author: { value: "pages:7" },
+			"fields.author": { value: "pages:7" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -855,7 +843,7 @@ describe("groupDocumentFilters", () => {
 
 	it("should not treat non-matching strings as compound relation values", () => {
 		const filters: QueryParamFilters = {
-			_relatedDocument: { value: "Pages:7" },
+			"fields.relatedDocument": { value: "Pages:7" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -877,10 +865,10 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
-	it('should handle brick fields with "brickKey._fieldKey" syntax', () => {
+	it('should handle brick fields with "bricks.brickKey.fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
-			"simple._heading": { value: "Brick Heading" },
-			"simple._image": { value: 5, operator: "!=" },
+			"bricks.simple.heading": { value: "Brick Heading" },
+			"bricks.simple.image": { value: 5, operator: "!=" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -906,7 +894,7 @@ describe("groupDocumentFilters", () => {
 
 	it("should handle brick custom fields stored in generated relation tables", () => {
 		const filters: QueryParamFilters = {
-			"simple._reviewer": { value: 3 },
+			"bricks.simple.reviewer": { value: 3 },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -927,9 +915,9 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
-	it('should handle repeater fields with "brickKey.repeaterKey._fieldKey" syntax', () => {
+	it('should find brick repeater fields by field key with "bricks.brickKey.fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
-			"simple.items._itemTitle": {
+			"bricks.simple.itemTitle": {
 				value: "Item Title",
 				operator: "contains",
 			},
@@ -952,10 +940,10 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
-	it("should handle nested repeater fields by finding matching repeater key", () => {
+	it("should find nested repeater fields by field key", () => {
 		const filters: QueryParamFilters = {
-			"simple.nestedItems._nestedItemTitle": { value: "Nested Title" },
-			"simple.nestedItems._nestedCheckbox": { value: "true" },
+			"bricks.simple.nestedItemTitle": { value: "Nested Title" },
+			"bricks.simple.nestedCheckbox": { value: "true" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -981,9 +969,9 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
-	it('should handle document field repeaters with "fields.repeaterKey._fieldKey" syntax', () => {
+	it('should find document repeater fields by field key with "fields.fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
-			"fields.people._firstName": {
+			"fields.firstName": {
 				value: "John",
 				operator: "starts-with",
 			},
@@ -1009,10 +997,10 @@ describe("groupDocumentFilters", () => {
 	it("should handle mixed filter types together", () => {
 		const filters: QueryParamFilters = {
 			id: { value: 1 },
-			_simpleHeading: { value: "Document Heading" },
-			"simple._heading": { value: "Brick Heading" },
-			"simple.items._itemTitle": { value: "Item Title" },
-			"fields.people._firstName": { value: "John" },
+			"fields.simpleHeading": { value: "Document Heading" },
+			"bricks.simple.heading": { value: "Brick Heading" },
+			"bricks.simple.itemTitle": { value: "Item Title" },
+			"fields.firstName": { value: "John" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -1078,28 +1066,34 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
-	it("should ignore filters for non-existent fields or tables", () => {
+	it("should report filters for non-existent fields or tables, unless something else handles them", () => {
 		const filters: QueryParamFilters = {
-			"nonExistent._field": { value: "Test" },
-			"simple._nonExistentField": { value: "Test" },
-			"simple.nonExistentRepeater._field": { value: "Test" },
+			"bricks.nonExistent.field": { value: "Test" },
+			"bricks.simple.nonExistentField": { value: "Test" },
+			"fields.nonExistentField": { value: "Test" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
 
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(0);
+		expect(result.unknownKeys).toEqual(Object.keys(filters));
+		expect(
+			groupDocumentFilters(sampleSchema, filters, {
+				handledKeys: new Set(["fields.nonExistentField"]),
+			}).unknownKeys,
+		).toEqual(["bricks.nonExistent.field", "bricks.simple.nonExistentField"]);
 	});
 
 	it("groups condition arrays for OR document filtering", () => {
 		const filters: QueryParamFilterCondition[] = [
 			{ key: "id", value: 1 },
 			{
-				key: "_simpleHeading",
+				key: "fields.simpleHeading",
 				value: "Document Heading",
 				operator: "contains",
 			},
-			{ key: "simple._heading", value: "Brick Heading" },
+			{ key: "bricks.simple.heading", value: "Brick Heading" },
 		];
 
 		const result = groupDocumentFilterConditions(sampleSchema, filters);

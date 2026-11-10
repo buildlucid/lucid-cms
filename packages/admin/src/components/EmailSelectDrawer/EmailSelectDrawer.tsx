@@ -347,7 +347,7 @@ const EmailSelectContent: Component<EmailSelectContentProps> = (props) => {
 			</QueryBoundary>
 			<Pagination
 				queryState={searchParams}
-				meta={emails.data?.meta}
+				pagination={emails.data?.pagination}
 				loading={emails.isLoading}
 				variant="inline"
 			/>

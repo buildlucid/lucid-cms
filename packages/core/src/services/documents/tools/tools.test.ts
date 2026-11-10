@@ -1531,8 +1531,10 @@ test("read tools leave out fields the reader can't see, in documents, filters an
 	}
 
 	for (const filter of [
-		{ filterOr: [[{ key: "_secret", value: "source secret" }]] },
-		{ filter: [{ key: "_related._secret", value: "target secret" }] },
+		{ filterOr: [[{ key: "fields.secret", value: "source secret" }]] },
+		{
+			filter: [{ key: "fields.related.fields.secret", value: "target secret" }],
+		},
 	]) {
 		const result = await run(agentTools.documents.find(), {
 			collectionKey: secrets.key,

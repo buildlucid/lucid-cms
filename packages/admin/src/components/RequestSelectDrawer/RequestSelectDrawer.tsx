@@ -296,7 +296,7 @@ const RequestSelectContent: Component<{
 			</QueryBoundary>
 			<Pagination
 				queryState={searchParams}
-				meta={requests.data?.meta}
+				pagination={requests.data?.pagination}
 				loading={requests.isLoading}
 				variant="inline"
 			/>

@@ -365,7 +365,7 @@ export const UserList: Component<{
 			</QueryBoundary>
 			<Pagination
 				queryState={props.state.searchParams}
-				meta={users.data?.meta}
+				pagination={users.data?.pagination}
 				loading={users.isLoading}
 				padding="md"
 			/>

@@ -21,10 +21,10 @@ import type {
 } from "../../types/query-params.js";
 import parseDocumentRefValue from "./parse-document-ref-value.js";
 
-const CUSTOMFIELD_FILTER_PREFIX = "_";
+const GENERATED_COLUMN_PREFIX = "_";
+const FILTER_KEY_SEPARATOR = ".";
 const DOCUMENT_FIELDS_KEY = "fields";
-const BRICK_SEPERATOR = ".";
-const TREE_TABLE_FILTER_MODE: FieldDatabaseMode = "tree-table";
+const BRICKS_KEY = "bricks";
 const RELATION_TABLE_FILTER_MODE: FieldDatabaseMode = "relation-table";
 const ENVIRONMENT_STATUS_FILTER_PREFIX = "envStatus.";
 
@@ -87,6 +87,8 @@ type DocumentFilterGroupingOptions = {
 	includeWorkflow?: boolean;
 	environmentKeys?: ReadonlySet<string>;
 	relationCollectionDefaults?: ReadonlyMap<string, string>;
+	/** Keys handled elsewhere, such as relation traversal filters. */
+	handledKeys?: ReadonlySet<string>;
 };
 
 const getFieldColumn = (
@@ -100,7 +102,7 @@ const getFieldColumn = (
 };
 
 const isPrefixedFieldColumn = (column: string): column is `_${string}` => {
-	return column.startsWith(CUSTOMFIELD_FILTER_PREFIX);
+	return column.startsWith(GENERATED_COLUMN_PREFIX);
 };
 
 const getRelationFilterColumn = (
@@ -266,15 +268,24 @@ const matchesStorageMode = (
 	return databaseConfig?.mode === mode;
 };
 
+/** Parses `fields.<field>` and `bricks.<brick>.<field>` filter keys. */
+const parseFieldFilterKey = (
+	key: string,
+): { brickKey: string | undefined; fieldKey: string } | null => {
+	const parts = key.split(FILTER_KEY_SEPARATOR);
+	if (parts[0] === DOCUMENT_FIELDS_KEY && parts.length === 2 && parts[1]) {
+		return { brickKey: undefined, fieldKey: parts[1] };
+	}
+	if (parts[0] === BRICKS_KEY && parts.length === 3 && parts[1] && parts[2]) {
+		return { brickKey: parts[1], fieldKey: parts[2] };
+	}
+	return null;
+};
+
 /**
- * Splits filters based on document columns and brick tables for custom fields.
- *
- * - `filter[_customFieldKey]` Targets the `document-fields` table and checks for a CF with a key of `customFieldKey`.
- * - `filter[fields._customFieldKey]` Targets the `document-fields` table and checks for a CF with a key of `customFieldKey`.
- * - `filter[brickKey._customFieldKey]` Targets the `brick` table with a key of `brickKey` and checks for a CF with a key of `customFieldKey`.
- * - `filter[brickKey.treeFieldKey._customFieldKey]` Targets a tree-table custom-field table scoped to the `brick` and checks for a CF with a key of `customFieldKey`.
- *
- * This supports filtering on any tree-table depth. Include the tree field key for the target table path segment.
+ * Groups document columns, `fields.<key>` and `bricks.<brick>.<key>` by storage table. Repeater
+ * fields use the same paths because keys are unique within a collection or brick. Returns
+ * unmatched keys in `unknownKeys` for callers to reject.
  */
 const groupDocumentFilterEntries = (
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
@@ -284,6 +295,7 @@ const groupDocumentFilterEntries = (
 	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];
 	environmentStatusFilters: DocumentEnvironmentStatusFilter[];
+	unknownKeys: string[];
 } => {
 	const validDocFilters = [
 		"id",
@@ -301,9 +313,11 @@ const groupDocumentFilterEntries = (
 	const documentFilters: QueryParamFilterCondition[] = [];
 	const brickFiltersMap = new Map<LucidBrickTableName, BrickFieldFilters[]>();
 	const environmentStatusFilters: DocumentEnvironmentStatusFilter[] = [];
+	const unknownKeys: string[] = [];
 
 	for (const filter of filters) {
 		const { key, value, operator } = filter;
+		if (options?.handledKeys?.has(key)) continue;
 
 		if (key.startsWith(ENVIRONMENT_STATUS_FILTER_PREFIX)) {
 			const environmentKey = key.slice(ENVIRONMENT_STATUS_FILTER_PREFIX.length);
@@ -317,6 +331,8 @@ const groupDocumentFilterEntries = (
 					environmentKey,
 					status: value as DocumentEnvironmentStatus,
 				});
+			} else {
+				unknownKeys.push(key);
 			}
 			continue;
 		}
@@ -331,140 +347,57 @@ const groupDocumentFilterEntries = (
 			continue;
 		}
 
-		//* handle relation custom fields (prefixed with _)
-		if (key.startsWith(CUSTOMFIELD_FILTER_PREFIX)) {
-			const fieldKey = key.substring(1);
-			const fieldTable = bricksTableSchema.find(
-				(schema) => schema.type === "document-fields",
-			);
-			const fieldColumn =
-				fieldTable !== undefined
-					? getFieldColumn(fieldTable, fieldKey)
-					: undefined;
-			if (fieldTable && fieldColumn) {
-				pushBrickFilter({
-					brickFiltersMap,
-					table: fieldTable.name,
-					fieldKey,
-					value,
-					operator,
-					schemaColumn: fieldColumn,
-				});
-				continue;
-			}
+		//* handle custom fields on the collection or one of its bricks
+		const fieldFilter = parseFieldFilterKey(key);
+		if (!fieldFilter) {
+			unknownKeys.push(key);
+			continue;
+		}
+		const { brickKey, fieldKey } = fieldFilter;
 
-			const relationTableFilter = getRelationTableFilterColumn({
-				bricksTableSchema,
-				brickKey: undefined,
+		let fieldColumn: CollectionSchemaColumn | undefined;
+		const fieldTable = bricksTableSchema.find((schema) => {
+			if (schema.key.brick !== brickKey) return false;
+			if (matchesStorageMode(schema, RELATION_TABLE_FILTER_MODE)) return false;
+			fieldColumn = getFieldColumn(schema, fieldKey);
+			return fieldColumn !== undefined;
+		});
+		if (fieldTable && fieldColumn) {
+			pushBrickFilter({
+				brickFiltersMap,
+				table: fieldTable.name,
 				fieldKey,
+				value,
+				operator,
+				schemaColumn: fieldColumn,
 			});
-			if (relationTableFilter) {
-				pushRelationTableFilter({
-					brickFiltersMap,
-					relationTableFilter,
-					fieldKey,
-					value,
-					operator,
-					defaultCollectionKey: options?.relationCollectionDefaults?.get(key),
-				});
-			}
 			continue;
 		}
 
-		//* handle brick fields and tree-table fields (format: "brickKey.fieldKey" or "brickKey.treeFieldKey._fieldKey")
-		const parts = key.split(BRICK_SEPERATOR);
-		if (parts.length >= 2) {
-			const brickKey = parts[0];
-			let tableName: LucidBrickTableName | null = null;
-			let fieldKey: string | null = null;
-			let schemaTable = null;
-
-			if (
-				parts.length === 2 &&
-				parts[1]?.startsWith(CUSTOMFIELD_FILTER_PREFIX)
-			) {
-				// direct brick field ("hero._title")
-				fieldKey = parts[1].substring(1);
-
-				// handle "fields" as brickKey (document-fields)
-				if (brickKey === DOCUMENT_FIELDS_KEY) {
-					schemaTable = bricksTableSchema.find(
-						(schema) => schema.type === "document-fields",
-					);
-				} else {
-					schemaTable = bricksTableSchema.find(
-						(schema) =>
-							schema.type === "brick" && schema.key.brick === brickKey,
-					);
-				}
-
-				if (schemaTable) tableName = schemaTable.name;
-			} else if (
-				parts.length === 3 &&
-				parts[2]?.startsWith(CUSTOMFIELD_FILTER_PREFIX)
-			) {
-				// tree-table field ("hero.items._text", "fields.people._name")
-				const treeFieldKey = parts[1];
-				fieldKey = parts[2].substring(1);
-
-				if (treeFieldKey) {
-					// handle document-fields tree tables vs brick-scoped tree tables
-					if (brickKey === DOCUMENT_FIELDS_KEY) {
-						schemaTable = bricksTableSchema.find(
-							(schema) =>
-								matchesStorageMode(schema, TREE_TABLE_FILTER_MODE) &&
-								schema.key.brick === undefined &&
-								schema.key.fieldPath?.includes(treeFieldKey),
-						);
-					} else {
-						schemaTable = bricksTableSchema.find(
-							(schema) =>
-								matchesStorageMode(schema, TREE_TABLE_FILTER_MODE) &&
-								schema.key.brick === brickKey &&
-								schema.key.fieldPath?.includes(treeFieldKey),
-						);
-					}
-
-					if (schemaTable) tableName = schemaTable.name;
-				}
-			}
-
-			if (fieldKey && schemaTable) {
-				const fieldColumn = getFieldColumn(schemaTable, fieldKey);
-				if (tableName && fieldColumn) {
-					pushBrickFilter({
-						brickFiltersMap,
-						table: tableName,
-						fieldKey,
-						value,
-						operator,
-						schemaColumn: fieldColumn,
-					});
-					continue;
-				}
-
-				const relationTableFilter = getRelationTableFilterColumn({
-					bricksTableSchema,
-					brickKey: brickKey === DOCUMENT_FIELDS_KEY ? undefined : brickKey,
-					fieldKey,
-				});
-				if (relationTableFilter) {
-					pushRelationTableFilter({
-						brickFiltersMap,
-						relationTableFilter,
-						fieldKey,
-						value,
-						operator,
-						defaultCollectionKey: options?.relationCollectionDefaults?.get(key),
-					});
-				}
-			}
+		const relationTableFilter = getRelationTableFilterColumn({
+			bricksTableSchema,
+			brickKey,
+			fieldKey,
+		});
+		if (relationTableFilter) {
+			pushRelationTableFilter({
+				brickFiltersMap,
+				relationTableFilter,
+				fieldKey,
+				value,
+				operator,
+				defaultCollectionKey: options?.relationCollectionDefaults?.get(key),
+			});
+			continue;
 		}
+
+		unknownKeys.push(key);
 	}
 
 	return {
 		documentFilters,
 		environmentStatusFilters,
+		unknownKeys,
 		brickFilters: Array.from(brickFiltersMap.entries()).map(
 			([table, filters]) => ({ table, filters }),
 		),
@@ -479,12 +412,14 @@ const groupDocumentFilters = (
 	documentFilters: QueryParamFilters;
 	brickFilters: BrickFilters[];
 	environmentStatusFilters: DocumentEnvironmentStatusFilter[];
+	unknownKeys: string[];
 } => {
 	if (!filters) {
 		return {
 			documentFilters: {},
 			brickFilters: [],
 			environmentStatusFilters: [],
+			unknownKeys: [],
 		};
 	}
 
@@ -504,6 +439,7 @@ const groupDocumentFilters = (
 		),
 		brickFilters: grouped.brickFilters,
 		environmentStatusFilters: grouped.environmentStatusFilters,
+		unknownKeys: grouped.unknownKeys,
 	};
 };
 
@@ -516,12 +452,14 @@ export const groupDocumentFilterConditions = (
 	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];
 	environmentStatusFilters: DocumentEnvironmentStatusFilter[];
+	unknownKeys: string[];
 } => {
 	if (!filters) {
 		return {
 			documentFilters: [],
 			brickFilters: [],
 			environmentStatusFilters: [],
+			unknownKeys: [],
 		};
 	}
 

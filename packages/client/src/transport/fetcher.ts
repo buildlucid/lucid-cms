@@ -1,4 +1,3 @@
-import type { ResponseBody } from "@lucidcms/types";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
 	CreateClientOptions,
@@ -35,9 +34,9 @@ export const createTransport = (
 	middleware: LucidMiddleware[],
 ): LucidTransport => {
 	return {
-		request: async <TData, TRefs = never>(
+		request: async <TData>(
 			descriptor: LucidRequestDescriptor,
-		): Promise<LucidClientResponse<TData, TRefs>> => {
+		): Promise<LucidClientResponse<TData>> => {
 			if (!options.baseUrl) {
 				return createConfigurationErrorResponse(
 					"`baseUrl` is required to create a Lucid client.",
@@ -213,6 +212,14 @@ export const createTransport = (
 
 				if (!response.ok) {
 					let httpError = createHttpError(response, parsedBody.data);
+					if (
+						descriptor.emptyCode !== undefined &&
+						httpError.status === 404 &&
+						httpError.code === descriptor.emptyCode
+					) {
+						return { data: null as TData, error: undefined, response };
+					}
+
 					const shouldRetryHttpError =
 						retryConfig !== false &&
 						retryConfig.methods.includes(descriptor.method) &&
@@ -246,15 +253,11 @@ export const createTransport = (
 					return createClientErrorResponse(httpError, response);
 				}
 
-				const body = parsedBody.data as ResponseBody<TData, TRefs>;
-				return {
-					data: body.data,
-					refs: body.refs,
-					links: body.links,
-					meta: body.meta,
-					error: undefined,
-					response,
-				};
+				const body = parsedBody.data as { data: unknown; pagination?: unknown };
+				const data = descriptor.list
+					? { items: body.data, pagination: body.pagination }
+					: body.data;
+				return { data: data as TData, error: undefined, response };
 			}
 		},
 	};

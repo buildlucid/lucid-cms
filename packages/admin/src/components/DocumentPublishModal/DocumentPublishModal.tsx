@@ -104,7 +104,8 @@ const DocumentPublishModal: Component<{
 		).filter(
 			(option) =>
 				(props.action === "publish" || option.value !== "now") &&
-				(option.value !== "existing" || (addable.data?.meta.total ?? 0) > 0),
+				(option.value !== "existing" ||
+					(addable.data?.pagination?.total ?? 0) > 0),
 		),
 	);
 	const heading = createMemo(() => {

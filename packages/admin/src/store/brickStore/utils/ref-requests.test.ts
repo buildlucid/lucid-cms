@@ -12,15 +12,6 @@ vi.mock("@/services/api", () => ({
 
 const flush = () => new Promise((resolve) => setTimeout(resolve));
 
-const meta = {
-	links: [],
-	path: "",
-	currentPage: null,
-	lastPage: null,
-	perPage: null,
-	total: null,
-};
-
 describe("ref requests", () => {
 	beforeEach(() => {
 		vi.mocked(api.documents.getEditorRefsReq).mockClear();
@@ -119,7 +110,7 @@ describe("ref requests", () => {
 		await flush();
 		store.get.setRefs({});
 		//* an empty list would still land if the late response weren't dropped
-		respond({ data: { users: [] }, meta });
+		respond({ data: { users: [] } });
 		await flush();
 		expect(store.get.refs.users).toBeUndefined();
 

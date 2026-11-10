@@ -87,7 +87,7 @@ test("user actors need email:read and don't see system emails, which the system 
 		(
 			await toolkit.email.getMultiple({
 				actor,
-				query: { filter: { subject: { value: subject } } },
+				filter: { subject },
 			})
 		).data?.items.map((email) => email.id);
 

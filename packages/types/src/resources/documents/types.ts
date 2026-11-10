@@ -111,50 +111,28 @@ export type DocumentEnvironmentStatus =
 
 export type DocumentFieldMap = Record<string, DocumentField>;
 
+/** Collection type registry populated by `lucidcms typegen`. */
 // oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentFieldsByCollection {}
+export interface Collections {}
 
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentBricksByCollection {}
+/** Looks up a generated collection type, falling back for ungenerated collections. */
+export type CollectionType<
+	TCollectionKey extends string,
+	TName extends string,
+	TFallback,
+> = TCollectionKey extends keyof Collections
+	? Collections[TCollectionKey] extends Record<TName, infer TValue>
+		? TValue
+		: TFallback
+	: TFallback;
 
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentLocaleCodesByCollection {}
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentVersionsByCollection {}
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentVersionKeysByCollection {}
-
-type CollectionDocumentBrickKey = Extract<
-	keyof CollectionDocumentBricksByCollection,
-	string
->;
-
-type CollectionDocumentFieldKey = Extract<
-	keyof CollectionDocumentFieldsByCollection,
-	string
->;
-
-type CollectionDocumentVersionCollectionKey = Extract<
-	keyof CollectionDocumentVersionsByCollection,
-	string
->;
-
-type CollectionDocumentVersionKeyKey = Extract<
-	keyof CollectionDocumentVersionKeysByCollection,
-	string
->;
-
-type KnownCollectionDocumentKey = CollectionDocumentFieldKey;
+type KnownCollectionDocumentKey = Extract<keyof Collections, string>;
 
 export type CollectionDocumentKey = KnownCollectionDocumentKey | (string & {});
 
 export type CollectionDocumentLocaleCode<
 	TCollectionKey extends string = string,
-> = TCollectionKey extends keyof CollectionDocumentLocaleCodesByCollection
-	? Extract<CollectionDocumentLocaleCodesByCollection[TCollectionKey], string>
-	: string;
+> = Extract<CollectionType<TCollectionKey, "locales", string>, string>;
 
 /** A translated field's values keyed by locale, marked so `ContentFields` can tell it apart from object values. */
 export type CollectionDocumentTranslations<
@@ -206,26 +184,20 @@ export type CollectionDocumentMeta<
 	updatedByRunId: string | null;
 };
 
+/** Every version type a collection's documents can report, including revisions and request snapshots. */
 export type CollectionDocumentVersion<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentVersionCollectionKey
-		? CollectionDocumentVersionsByCollection[TCollectionKey]
-		: DocumentVersionType;
+	CollectionType<TCollectionKey, "versions", DocumentVersionType>;
 
+/** The versions a collection's documents can be read from: latest and its environments. */
 export type CollectionDocumentVersionKey<
 	TCollectionKey extends string = string,
-> = TCollectionKey extends CollectionDocumentVersionKeyKey
-	? CollectionDocumentVersionKeysByCollection[TCollectionKey]
-	: string;
+> = CollectionType<TCollectionKey, "versionKeys", string>;
 
 type ResolveCollectionDocumentFields<TCollectionKey extends string> =
-	TCollectionKey extends CollectionDocumentFieldKey
-		? CollectionDocumentFieldsByCollection[TCollectionKey]
-		: DocumentFieldValueMap;
+	CollectionType<TCollectionKey, "fields", DocumentFieldValueMap>;
 
 type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
-	TCollectionKey extends CollectionDocumentBrickKey
-		? CollectionDocumentBricksByCollection[TCollectionKey]
-		: DocumentBrick;
+	CollectionType<TCollectionKey, "bricks", DocumentBrick>;
 
 type ResolveCollectionDocumentKey<TCollectionKey extends string> =
 	TCollectionKey;

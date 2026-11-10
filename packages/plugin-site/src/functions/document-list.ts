@@ -9,14 +9,13 @@ import type {
 import { type RenderInfo, withRender } from "@lucidkiln/core";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
-import type { DocumentFilter, DocumentReadOptions } from "./document.js";
-import normalizeFilter from "./normalize-filter.js";
+import type { DocumentReadOptions } from "./document.js";
 import readLocale from "./read-locale.js";
 
 type ListInput = Parameters<Toolkit["documents"]["getMultiple"]>[0];
 
 export type DocumentListOptions = DocumentReadOptions & {
-	sort?: NonNullable<ListInput["query"]>["sort"];
+	sort?: ListInput["sort"];
 	/** Defaults to 1. */
 	page?: number;
 	/** Defaults to 10; use -1 to return every match. */
@@ -53,13 +52,11 @@ const createDocumentListFunction = (config: SiteConfig) =>
 				locale: readLocale(config, render, options.locale),
 				fallbackLocale: options.fallbackLocale,
 				depth: options.depth,
-				query: {
-					filter: normalizeFilter(options.filter) as DocumentFilter | undefined,
-					sort: options.sort,
-					page: options.page,
-					perPage: options.perPage,
-					include: options.include,
-				},
+				filter: options.filter,
+				sort: options.sort,
+				page: options.page,
+				perPage: options.perPage,
+				include: options.include,
 			} satisfies ListInput;
 			const { documents } = render.state.toolkit;
 			let response = await documents.getMultiple(input);

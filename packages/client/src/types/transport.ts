@@ -52,6 +52,10 @@ export type LucidRequestDescriptor = {
 	query?: Record<string, unknown>;
 	body?: unknown;
 	request?: LucidRequestOptions;
+	/** Returns the response's rows and pagination as `{ items, pagination }`. */
+	list?: boolean;
+	/** The error code of a 404 that means nothing matched, which returns null data instead of an error. */
+	emptyCode?: string;
 };
 
 export type LucidMiddlewareRequestContext = {
@@ -112,10 +116,12 @@ export type CreateClientOptions = {
 	retry?: LucidRetryInput;
 	/** Transport callbacks, run in array order. */
 	middleware?: LucidMiddleware[];
+	/** The version document reads use unless they pass their own, such as `production`. */
+	version?: string;
 };
 
 export interface LucidTransport {
-	request<TData, TRefs = never>(
+	request<TData>(
 		descriptor: LucidRequestDescriptor,
-	): Promise<LucidClientResponse<TData, TRefs>>;
+	): Promise<LucidClientResponse<TData>>;
 }

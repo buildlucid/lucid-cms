@@ -302,7 +302,7 @@ export const IntegrationsList: Component<{
 							</QueryBoundary>
 							<Pagination
 								queryState={props.state.searchParams}
-								meta={integrations.data?.meta}
+								pagination={integrations.data?.pagination}
 								loading={integrations.isLoading}
 								variant="footer"
 								padding="sm"

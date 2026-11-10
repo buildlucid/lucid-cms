@@ -19,10 +19,24 @@ const querySchema = z.object({
 	perPage: queryFormatted.schema.perPage,
 });
 
-const contextWithQuery = (query: Record<string, string>) =>
+/** Fakes Hono's query readers: `query` gives each parameter's first value and `queries` gives them all. */
+const contextWithQuery = (query: Record<string, string | string[]>) =>
 	({
 		req: {
-			query: () => query,
+			query: () =>
+				Object.fromEntries(
+					Object.entries(query).map(([key, value]) => [
+						key,
+						Array.isArray(value) ? (value[0] ?? "") : value,
+					]),
+				),
+			queries: () =>
+				Object.fromEntries(
+					Object.entries(query).map(([key, value]) => [
+						key,
+						Array.isArray(value) ? value : [value],
+					]),
+				),
 		},
 	}) as LucidHonoContext;
 
@@ -49,7 +63,7 @@ describe("buildFormattedQuery", () => {
 				"filter[title:contains]": "home",
 				"filter[or][1][slug]": "about",
 				"filter[or][0][title:starts-with]": "landing",
-				"filter[or][0][createdBy:not-in]": "1,2",
+				"filter[or][0][createdBy:not-in]": ["1", "2"],
 			}),
 			querySchema,
 		);
@@ -86,26 +100,26 @@ describe("buildFormattedQuery", () => {
 	test("accepts comparison and semantic text operators", async () => {
 		const query = await buildFormattedQuery(
 			contextWithQuery({
-				"filter[_title:contains]": "home, 50%_page\\",
-				"filter[_summary:not-ends-with]": "draft",
-				"filter[_amount:>=]": "10",
-				"filter[_amount:<]": "100",
-				"filter[or][0][_publishedAt:>]": "2026-01-01",
-				"filter[or][0][_publishedAt:<=]": "2026-12-31",
+				"filter[fields.title:contains]": "home, 50%_page\\",
+				"filter[fields.summary:not-ends-with]": "draft",
+				"filter[fields.amount:>=]": "10",
+				"filter[fields.amount:<]": "100",
+				"filter[or][0][fields.publishedAt:>]": "2026-01-01",
+				"filter[or][0][fields.publishedAt:<=]": "2026-12-31",
 			}),
 			querySchema,
 		);
 
 		expect(query.filter).toEqual({
-			_title: {
+			"fields.title": {
 				value: "home, 50%_page\\",
 				operator: "contains",
 			},
-			_summary: {
+			"fields.summary": {
 				value: "draft",
 				operator: "not-ends-with",
 			},
-			_amount: {
+			"fields.amount": {
 				value: "100",
 				operator: "<",
 			},
@@ -113,17 +127,90 @@ describe("buildFormattedQuery", () => {
 		expect(query.filterOr).toEqual([
 			[
 				{
-					key: "_publishedAt",
+					key: "fields.publishedAt",
 					value: "2026-01-01",
 					operator: ">",
 				},
 				{
-					key: "_publishedAt",
+					key: "fields.publishedAt",
 					value: "2026-12-31",
 					operator: "<=",
 				},
 			],
 		]);
+	});
+
+	test("keeps commas inside an equality value", async () => {
+		const query = await buildFormattedQuery(
+			contextWithQuery({
+				"filter[fields.title]": "Hello, world",
+				"filter[or][0][fields.title]": "Goodbye, world",
+			}),
+			querySchema,
+		);
+
+		expect(query.filter).toEqual({
+			"fields.title": {
+				value: "Hello, world",
+				operator: undefined,
+			},
+		});
+		expect(query.filterOr).toEqual([
+			[
+				{
+					key: "fields.title",
+					value: "Goodbye, world",
+					operator: undefined,
+				},
+			],
+		]);
+	});
+
+	test("reads repeated in parameters as a list", async () => {
+		const query = await buildFormattedQuery(
+			contextWithQuery({
+				"filter[id:in]": ["1", "2"],
+				"filter[fields.title:not-in]": "Hello, world",
+			}),
+			querySchema,
+		);
+
+		expect(query.filter).toEqual({
+			id: {
+				value: ["1", "2"],
+				operator: "in",
+			},
+			"fields.title": {
+				value: ["Hello, world"],
+				operator: "not-in",
+			},
+		});
+	});
+
+	test("reads an empty value as null for the is and is-not operators", async () => {
+		const query = await buildFormattedQuery(
+			contextWithQuery({
+				"filter[deletedBy:is]": "",
+				"filter[fields.title:is-not]": "",
+				"filter[fields.summary]": "",
+			}),
+			querySchema,
+		);
+
+		expect(query.filter).toEqual({
+			deletedBy: {
+				value: null,
+				operator: "is",
+			},
+			"fields.title": {
+				value: null,
+				operator: "is-not",
+			},
+			"fields.summary": {
+				value: "",
+				operator: undefined,
+			},
+		});
 	});
 
 	test("applies nullable field handling inside OR groups", async () => {

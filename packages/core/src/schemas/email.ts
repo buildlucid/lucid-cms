@@ -200,7 +200,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						fromAddress: queryFormatted.schema.filters.single.optional(),
 						toAddress: queryFormatted.schema.filters.single.optional(),
 						subject: queryFormatted.schema.filters.single.optional(),
@@ -306,7 +306,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						deliveryStatus: queryFormatted.schema.filters.union.optional(),
 						strategyIdentifier: queryFormatted.schema.filters.single.optional(),
 						message: queryFormatted.schema.filters.single.optional(),

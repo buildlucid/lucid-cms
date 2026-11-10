@@ -17,6 +17,7 @@
 	"core.documents.authoring.items.locked": "You don't have permission to add, remove or reorder items in {{path}}.",
 	"core.documents.authoring.brick.locked": "You don't have permission to add or remove {{key}} bricks at {{path}}.",
 	"core.documents.filter.field.hidden": "You can't filter or sort by {{key}}.",
+	"core.documents.filter.key.unknown": "{{key}} isn't a filter this collection supports.",
 	"core.documents.authoring.item.invalid": "Invalid item at {{path}}[{{index}}]. Supply fields and an optional ref.",
 	"core.documents.authoring.item.not.found": "No item has ref {{ref}}.",
 	"core.documents.authoring.items.invalid": "Invalid items in {{key}}.",

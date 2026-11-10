@@ -2,7 +2,7 @@
 
 > The official client package for Lucid CMS
 
-The Lucid CMS client provides a lightweight way to call Lucid's public document, media, and locale endpoints from browsers, edge runtimes, and modern Node environments. It unwraps response data and returns shared refs and response metadata alongside it. It never throws request or response errors.
+The Lucid CMS client provides a lightweight way to call Lucid's public document, media, and locale endpoints from browsers, edge runtimes, and modern Node environments. It unwraps response data and returns it beside the original response. It never throws request or response errors.
 
 ## Installation
 
@@ -70,23 +70,46 @@ Use the documents client to fetch a single document or a paginated list of docum
 const page = await client.documents.getSingle({
   collectionKey: "page",
   version: "published",
-  query: {
-    filter: {
-      _path: {
-        value: "/about",
-      },
-    },
-  },
+  filter: { fields: { path: "/about" } },
 });
 
 const pages = await client.documents.getMultiple({
   collectionKey: "page",
   version: "published",
-  query: {
-    page: 1,
-    perPage: 10,
-  },
+  page: 1,
+  perPage: 10,
 });
+```
+
+`getSingle` returns `data: null` when nothing matches. `getMultiple` returns `data: { items, pagination }`.
+
+Set `version` once with `createClient({ version: "published" })` to leave it out of each read.
+
+### Filters
+
+Filters are shaped like the document: document properties such as `id` at the top, then `fields` by field key and `bricks` by brick and field key. A plain value matches for equality, a list matches any of its values, and `{ value, operator }` uses another operator. Fields inside repeaters use the same keys. Pass a list of filter objects to match any of them.
+
+```typescript
+const posts = await client.documents.getMultiple({
+  collectionKey: "blog",
+  version: "published",
+  filter: {
+    id: [1, 2, 3],
+    fields: { title: { value: "News", operator: "starts-with" } },
+    bricks: { hero: { heading: "Welcome" } },
+  },
+  sort: [{ key: "fields.title", direction: "asc" }],
+});
+```
+
+### Types
+
+Lucid generates your collection types into `.lucid/client.d.ts`. For a front end in another folder or package, list where to write a copy in your Lucid config, and include that file in the front end's TypeScript project:
+
+```typescript
+build: {
+  clientTypes: ["../web/src/lucid.d.ts"],
+}
 ```
 
 ## Media
@@ -95,13 +118,7 @@ Use the media client to fetch media items or resolve transformed media URLs.
 
 ```typescript
 const media = await client.media.getMultiple({
-  query: {
-    filter: {
-      title: {
-        value: "Hero",
-      },
-    },
-  },
+  filter: { type: "image", title: { value: "Hero", operator: "contains" } },
 });
 
 const resolved = await client.media.resolveUrl({
@@ -139,12 +156,10 @@ const response = await client.documents.getSingle({
   version: "published",
   locale: "fr",
   fallbackLocale: "en",
-  query: {
-    include: ["bricks"],
-  },
+  include: ["bricks"],
 });
 
-if (!response.error) {
+if (response.data) {
   const page = response.data;
 
   console.log(page.fields.page_title, page.route?.path);
@@ -200,9 +215,7 @@ const page = await client.documents.getSingle({
   collectionKey: "page",
   version: "published",
   preview: token,
-  query: {
-    filter: { _path: { value: "/about" } },
-  },
+  filter: { fields: { path: "/about" } },
 });
 ```
 
@@ -235,7 +248,7 @@ preview.onUpdate(async ({ signal }) => {
     collectionKey: "page",
     version: "published",
     preview: preview.token ?? undefined,
-    query: { filter: { _path: { value: location.pathname } } },
+    filter: { fields: { path: location.pathname } },
     request: { signal },
   });
   if (response.data) render(response.data);

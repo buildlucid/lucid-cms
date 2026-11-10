@@ -27,6 +27,7 @@ import {
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFilterAccess from "./checks/check-filter-access.js";
+import checkFilterKeys from "./checks/check-filter-keys.js";
 import collectDocumentRefTargets from "./helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveDocumentRefs from "./helpers/resolve-document-refs.js";
@@ -166,13 +167,24 @@ const getMultiple: ServiceFn<
 		),
 	);
 
-	const { documentFilters, brickFilters, environmentStatusFilters } =
-		groupDocumentFilters(bricksTableSchemaRes.data, data.query.filter, {
-			includeWorkflow,
-			environmentKeys,
-			relationCollectionDefaults:
-				relationFiltersRes.data.relationCollectionDefaults,
-		});
+	//* relation plans cover filters through a relation, and `pending` picks the version above
+	const handledKeys = new Set([
+		...relationFiltersRes.data.traversalKeys,
+		"pending",
+	]);
+
+	const {
+		documentFilters,
+		brickFilters,
+		environmentStatusFilters,
+		unknownKeys,
+	} = groupDocumentFilters(bricksTableSchemaRes.data, data.query.filter, {
+		includeWorkflow,
+		environmentKeys,
+		relationCollectionDefaults:
+			relationFiltersRes.data.relationCollectionDefaults,
+		handledKeys,
+	});
 
 	const workflowAssigneeFilterValues = getFilterValues(
 		documentFilters.workflowAssignee,
@@ -184,9 +196,16 @@ const getMultiple: ServiceFn<
 			environmentKeys,
 			relationCollectionDefaults:
 				relationFiltersRes.data.relationCollectionDefaults,
+			handledKeys,
 		}),
 		relationDocumentFilters: relationFiltersRes.data.filterOr[index] ?? [],
 	}));
+
+	const filterKeysRes = checkFilterKeys([
+		...unknownKeys,
+		...(filterOr ?? []).flatMap((group) => group.unknownKeys),
+	]);
+	if (filterKeysRes.error) return filterKeysRes;
 	const include = resolveDocumentIncludes(data.query.include);
 
 	const documentsRes = await Document.selectMultipleFiltered(

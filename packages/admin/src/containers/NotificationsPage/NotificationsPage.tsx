@@ -324,7 +324,7 @@ const NotificationsPage: Component = () => {
 				/>
 				<Pagination
 					queryState={searchParams}
-					meta={notifications.data?.meta}
+					pagination={notifications.data?.pagination}
 					loading={notifications.isLoading}
 					padding="md"
 				/>

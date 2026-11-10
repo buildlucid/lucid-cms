@@ -692,7 +692,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 							</QueryBoundary>
 							<Pagination
 								queryState={searchParams}
-								meta={documents.data?.meta}
+								pagination={documents.data?.pagination}
 								loading={documentsList.loading()}
 								variant="inline"
 							/>

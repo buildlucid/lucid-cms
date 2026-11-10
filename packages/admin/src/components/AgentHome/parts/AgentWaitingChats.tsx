@@ -30,7 +30,7 @@ const AgentWaitingChats: Component<{
 	// Memos
 	const conversations = createMemo(() => waiting.data?.data ?? []);
 	const total = createMemo(
-		() => waiting.data?.meta.total ?? conversations().length,
+		() => waiting.data?.pagination?.total ?? conversations().length,
 	);
 	const historyHref = createMemo(() => {
 		const params = new URLSearchParams({ "filter[status]": "waiting" });

@@ -222,7 +222,7 @@ const AiUsageSessionRecords: Component<{
 			</QueryBoundary>
 			<Pagination
 				queryState={searchParams}
-				meta={records.data?.meta}
+				pagination={records.data?.pagination}
 				loading={recordsList.loading()}
 				variant="inline"
 			/>

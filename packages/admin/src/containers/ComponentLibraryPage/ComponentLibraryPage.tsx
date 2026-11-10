@@ -1368,9 +1368,7 @@ const ComponentLibraryPage: Component = () => {
 												variant={variant}
 												padding="sm"
 												queryState={queryState}
-												meta={{
-													links: [],
-													path: "/admin/components",
+												pagination={{
 													currentPage: 2,
 													perPage: 10,
 													total: 48,

@@ -218,7 +218,7 @@ describe("document authoring toolkit", () => {
 			const read = await toolkit.documents.getMultiple({
 				collectionKey: collection.key,
 				version: "latest",
-				query: { filter: { title: { value: "Rolled back subscriber" } } },
+				filter: { fields: { title: "Rolled back subscriber" } },
 			});
 			assert(read.data);
 			expect(read.data.items).toHaveLength(0);
@@ -269,11 +269,11 @@ describe("document authoring toolkit", () => {
 		const second = await create("Second batch document");
 		assert(first.data && second.data);
 		const ids = [first.data.id, second.data.id];
-		const filter = { id: { value: ids, operator: "in" as const } };
+		const filter = { id: ids };
 		const defaults = await toolkit.documents.getMultiple({
 			collectionKey: collection.key,
 			version: "latest",
-			query: { filter },
+			filter,
 		});
 		assert(defaults.data, JSON.stringify(defaults.error));
 		expect(defaults.data.pagination.total).toBe(2);
@@ -284,7 +284,8 @@ describe("document authoring toolkit", () => {
 		const included = await toolkit.documents.getMultiple({
 			collectionKey: collection.key,
 			version: "latest",
-			query: { filter, include: ["bricks"] },
+			filter,
+			include: ["bricks"],
 		});
 		assert(included.data, JSON.stringify(included.error));
 		expect(included.data.pagination.total).toBe(2);
@@ -292,10 +293,8 @@ describe("document authoring toolkit", () => {
 			const single = await toolkit.documents.getSingle({
 				collectionKey: collection.key,
 				version: "latest",
-				query: {
-					filter: { id: { value: document.id } },
-					include: ["bricks"],
-				},
+				filter: { id: document.id },
+				include: ["bricks"],
 			});
 			assert(single.data, JSON.stringify(single.error));
 			expect(document.bricks).toEqual(single.data.bricks);

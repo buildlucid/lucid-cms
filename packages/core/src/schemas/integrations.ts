@@ -204,7 +204,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						key: queryFormatted.schema.filters.single.optional(),
 						name: queryFormatted.schema.filters.single.optional(),
 						description: queryFormatted.schema.filters.single.optional(),

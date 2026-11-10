@@ -61,7 +61,7 @@ test("publishes and unpublishes directly only where review isn't required", asyn
 		toolkit.documents.getSingle({
 			collectionKey: collection.key,
 			version: "staging",
-			query: { filter: { id: { value: document.id } } },
+			filter: { id: document.id },
 		});
 
 	const user = await context.db.kysely
@@ -115,5 +115,5 @@ test("publishes and unpublishes directly only where review isn't required", asyn
 		environment: "staging",
 	});
 	expect(unpublished.error).toBeUndefined();
-	expect((await readStaging()).error?.status).toBe(404);
+	expect(await readStaging()).toEqual({ error: undefined, data: null });
 });

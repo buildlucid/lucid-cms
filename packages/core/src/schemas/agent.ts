@@ -620,7 +620,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						title: queryFormatted.schema.filters.single.optional(),
 						agentKey: queryFormatted.schema.filters.union.optional(),
 						routineId: queryFormatted.schema.filters.single.optional(),
@@ -855,7 +855,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						name: queryFormatted.schema.filters.single.optional(),
 						agentKey: queryFormatted.schema.filters.single.optional(),
 						ownerId: queryFormatted.schema.filters.union.optional(),
@@ -923,7 +923,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						status: queryFormatted.schema.filters.union.optional(),
 						conversationId: queryFormatted.schema.filters.single.optional(),
 					})

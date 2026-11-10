@@ -113,14 +113,6 @@ describe("media upload sessions", () => {
 					metadata: { filetype: "video/mp4", title: file.name },
 					expiresAt: "2099-01-01T00:00:00.000Z",
 				},
-				meta: {
-					links: [],
-					path: "",
-					currentPage: null,
-					lastPage: null,
-					perPage: null,
-					total: null,
-				},
 			}),
 		});
 

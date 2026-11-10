@@ -19,9 +19,9 @@ export type PaginationVariant = "footer" | "inline";
 export type PaginationPadding = "none" | "sm" | "md";
 
 export interface PaginationProps {
-	/** The `meta` from a list response. */
-	meta?: ResponseBody<unknown>["meta"];
-	/** Shows a skeleton in place of the summary, for a first load with no `meta` yet. */
+	/** The `pagination` from a list response. */
+	pagination?: ResponseBody<unknown>["pagination"];
+	/** Shows a skeleton in place of the summary, for a first load with no `pagination` yet. */
 	loading?: boolean;
 	queryState: QueryStateResponse;
 	/** `inline` is for use inside a card. @default "footer" */
@@ -42,7 +42,7 @@ export interface PaginationProps {
  *
  * return (
  * 	<Pagination
- * 		meta={redirects.data?.meta}
+ * 		pagination={redirects.data?.pagination}
  * 		loading={redirects.isLoading}
  * 		queryState={queryState}
  * 		padding="md"
@@ -61,20 +61,20 @@ const Pagination: Component<PaginationProps> = (props) => {
 	const padding = createMemo(() => props.padding ?? "none");
 	const textData = createMemo(() => {
 		return {
-			page: props.meta?.currentPage ?? 1,
-			lastPage: props.meta?.lastPage ?? 1,
-			total: props.meta?.total ?? 0,
+			page: props.pagination?.currentPage ?? 1,
+			lastPage: props.pagination?.lastPage ?? 1,
+			total: props.pagination?.total ?? 0,
 		};
 	});
 	const lastPage = createMemo(() => {
-		return props.meta?.lastPage ?? 1;
+		return props.pagination?.lastPage ?? 1;
 	});
-	const isEmpty = createMemo(() => (props.meta?.total ?? 0) === 0);
+	const isEmpty = createMemo(() => (props.pagination?.total ?? 0) === 0);
 
 	// -------------------------------------
 	// Effects
 	createEffect(() => {
-		setPage(props.meta?.currentPage ?? 1);
+		setPage(props.pagination?.currentPage ?? 1);
 	});
 
 	// -------------------------------------
@@ -107,7 +107,7 @@ const Pagination: Component<PaginationProps> = (props) => {
 								</span>
 							</Match>
 							{/* nothing has loaded, so there is nothing to count */}
-							<Match when={props.meta === undefined}>&nbsp;</Match>
+							<Match when={props.pagination === undefined}>&nbsp;</Match>
 							<Match when={textData().total === 0}>
 								{T()("empty.states.pagination")}
 							</Match>
@@ -128,7 +128,7 @@ const Pagination: Component<PaginationProps> = (props) => {
 								props.queryState.setParams({
 									pagination: {
 										page: nextPage,
-										perPage: props.meta?.perPage || undefined,
+										perPage: props.pagination?.perPage || undefined,
 									},
 								});
 								setPage(nextPage);

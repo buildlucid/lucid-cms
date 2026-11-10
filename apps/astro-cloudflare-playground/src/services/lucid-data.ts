@@ -39,21 +39,17 @@ const getLucidData = async ({ path, locale, astro }: GetLucidDataOptions) => {
 					version: "production",
 					preview: activePreview?.token,
 					locale,
-					query: {
-						filter: { _path: { value: path } },
-						include: ["bricks", "meta"],
-					},
+					filter: { fields: { path } },
+					include: ["bricks", "meta"],
 				}),
 				toolkit.documents.getMultiple({
 					collectionKey: "blog",
 					version: "production",
 					preview: activePreview?.token,
 					locale,
-					query: {
-						page: 1,
-						perPage: 3,
-						sort: [{ key: "createdAt", direction: "desc" }],
-					},
+					page: 1,
+					perPage: 3,
+					sort: [{ key: "createdAt", direction: "desc" }],
 				}),
 			]);
 

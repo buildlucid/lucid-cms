@@ -169,7 +169,7 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 			</QueryBoundary>
 			<Pagination
 				queryState={props.searchParams}
-				meta={routines.data?.meta}
+				pagination={routines.data?.pagination}
 				loading={routines.isLoading}
 				padding="md"
 			/>

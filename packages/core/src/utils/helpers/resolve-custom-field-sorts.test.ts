@@ -72,21 +72,21 @@ describe("resolveCustomFieldSorts", () => {
 
 	it("resolves sorts for supported top-level custom fields", () => {
 		const result = resolveCustomFieldSorts(documentFieldsTableSchema, [
-			{ key: "_title", direction: "asc" },
-			{ key: "_summary", direction: "desc" },
-			{ key: "_views", direction: "asc" },
-			{ key: "_publishedAt", direction: "desc" },
-			{ key: "_category", direction: "asc" },
-			{ key: "_featured", direction: "desc" },
+			{ key: "fields.title", direction: "asc" },
+			{ key: "fields.summary", direction: "desc" },
+			{ key: "fields.views", direction: "asc" },
+			{ key: "fields.publishedAt", direction: "desc" },
+			{ key: "fields.category", direction: "asc" },
+			{ key: "fields.featured", direction: "desc" },
 		]);
 
 		expect(result).toEqual([
-			{ key: "_title", column: "_title", localized: true },
-			{ key: "_summary", column: "_summary", localized: false },
-			{ key: "_views", column: "_views", localized: false },
-			{ key: "_publishedAt", column: "_publishedAt", localized: false },
-			{ key: "_category", column: "_category", localized: false },
-			{ key: "_featured", column: "_featured", localized: false },
+			{ key: "fields.title", column: "_title", localized: true },
+			{ key: "fields.summary", column: "_summary", localized: false },
+			{ key: "fields.views", column: "_views", localized: false },
+			{ key: "fields.publishedAt", column: "_publishedAt", localized: false },
+			{ key: "fields.category", column: "_category", localized: false },
+			{ key: "fields.featured", column: "_featured", localized: false },
 		]);
 	});
 
@@ -102,7 +102,7 @@ describe("resolveCustomFieldSorts", () => {
 
 	it("ignores custom field sort keys that have no matching column", () => {
 		const result = resolveCustomFieldSorts(documentFieldsTableSchema, [
-			{ key: "_missing", direction: "asc" },
+			{ key: "fields.missing", direction: "asc" },
 		]);
 
 		expect(result).toEqual([]);
@@ -110,7 +110,7 @@ describe("resolveCustomFieldSorts", () => {
 
 	it("ignores custom fields whose type does not support sorting", () => {
 		const result = resolveCustomFieldSorts(documentFieldsTableSchema, [
-			{ key: "_accent", direction: "asc" },
+			{ key: "fields.accent", direction: "asc" },
 		]);
 
 		expect(result).toEqual([]);
@@ -119,7 +119,9 @@ describe("resolveCustomFieldSorts", () => {
 	it("returns nothing when the sort or schema is missing", () => {
 		expect(resolveCustomFieldSorts(documentFieldsTableSchema)).toEqual([]);
 		expect(
-			resolveCustomFieldSorts(undefined, [{ key: "_title", direction: "asc" }]),
+			resolveCustomFieldSorts(undefined, [
+				{ key: "fields.title", direction: "asc" },
+			]),
 		).toEqual([]);
 	});
 });

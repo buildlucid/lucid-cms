@@ -596,6 +596,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 	plugins: z.array(PluginDefinitionSchema),
 	build: z.strictObject({
 		outDir: z.string(),
+		clientTypes: z.array(z.string()),
 		watch: z.strictObject({
 			ignore: z.array(z.string()),
 		}),

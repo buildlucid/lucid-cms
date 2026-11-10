@@ -135,14 +135,12 @@ test("reads reach every media item for the system, and library media with librar
 	const library = await insertMedia();
 	const personal = await insertMedia(await insertUser(false));
 	const toolkit = createToolkit(context);
-	const ids = { id: { value: [library.id, personal.id] } };
+	const ids = { id: [library.id, personal.id] };
 	const listed = async (libraryOnly: boolean) =>
 		(
 			await toolkit.media.getMultiple({
 				libraryOnly,
-				query: {
-					filter: { ...ids, ownership: { value: ["library", "user"] } },
-				},
+				filter: { ...ids, ownership: ["library", "user"] },
 			})
 		).data?.items.map((item) => item.id);
 
@@ -157,6 +155,24 @@ test("reads reach every media item for the system, and library media with librar
 		expect.arrayContaining([library.id, personal.id]),
 	);
 	expect(await listed(true)).toEqual([library.id]);
+});
+
+test("lists refuse filter keys media doesn't have, alone or in an OR group", async () => {
+	const toolkit = createToolkit(context);
+
+	expect(
+		// @ts-expect-error the filter's keys are typed
+		(await toolkit.media.getMultiple({ filter: { tpye: "image" } })).error
+			?.status,
+	).toBe(400);
+	expect(
+		(
+			await toolkit.media.getMultiple({
+				// @ts-expect-error the filter's keys are typed
+				filter: [{ type: "image" }, { tpye: "video" }],
+			})
+		).error?.status,
+	).toBe(400);
 });
 
 test("lists include audio transcripts only when asked", async () => {
@@ -185,7 +201,8 @@ test("lists include audio transcripts only when asked", async () => {
 		.execute();
 	const list = async (include?: "transcripts"[]) => {
 		const res = await createToolkit(context).media.getMultiple({
-			query: { filter: { id: { value: audio.id } }, include },
+			filter: { id: audio.id },
+			include,
 		});
 		assert(res.data, JSON.stringify(res.error));
 		return res.data.items[0];
@@ -235,12 +252,7 @@ test("folders are created by the system or users with media:create, and listed b
 	const listed = async (parentFolderId: number | null) =>
 		(
 			await toolkit.media.folders.getMultiple({
-				query: {
-					filter: {
-						title: { value: title },
-						parentFolderId: { value: parentFolderId },
-					},
-				},
+				filter: { title, parentFolderId },
 			})
 		).data?.items;
 	expect(await listed(null)).toEqual([

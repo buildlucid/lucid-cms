@@ -30,7 +30,7 @@ const buildCollection = (
 	}) as unknown as Collection;
 
 describe("documentFilterFields", () => {
-	it("maps supported collection fields to underscore-prefixed keys", () => {
+	it("maps supported collection fields to `fields.` keys", () => {
 		const fields = documentFilterFields(
 			buildCollection([
 				{ key: "title", type: "text", details: { label: literal("Title") } },
@@ -40,9 +40,9 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields).toEqual([
-			{ key: "_title", label: "Title", type: "text" },
-			{ key: "_amount", label: "amount", type: "number" },
-			{ key: "_price", label: "price", type: "range" },
+			{ key: "fields.title", label: "Title", type: "text" },
+			{ key: "fields.amount", label: "amount", type: "number" },
+			{ key: "fields.price", label: "price", type: "range" },
 		]);
 	});
 
@@ -91,12 +91,16 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields).toEqual([
-			{ key: "_metaTitle", label: "Main > SEO > Meta title", type: "text" },
-			{ key: "_tabField", label: "Main > Tab field", type: "text" },
+			{
+				key: "fields.metaTitle",
+				label: "Main > SEO > Meta title",
+				type: "text",
+			},
+			{ key: "fields.tabField", label: "Main > Tab field", type: "text" },
 		]);
 	});
 
-	it("traverses repeater children using the tree-table filter path", () => {
+	it("traverses repeater children, which share the field and brick key forms", () => {
 		const fields = documentFilterFields(
 			buildCollection(
 				[
@@ -137,16 +141,16 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields).toEqual([
-			{ key: "fields.people._name", label: "People > Name", type: "text" },
+			{ key: "fields.name", label: "People > Name", type: "text" },
 			{
-				key: "hero.items._itemTitle",
+				key: "bricks.hero.itemTitle",
 				label: "Hero > Items > Item title",
 				type: "text",
 			},
 		]);
 	});
 
-	it("uses the innermost repeater key for nested repeater children", () => {
+	it("leaves repeater keys out of nested repeater children", () => {
 		const fields = documentFilterFields(
 			buildCollection([
 				{
@@ -166,11 +170,7 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields).toEqual([
-			{
-				key: "fields.inner._note",
-				label: "outer > inner > note",
-				type: "text",
-			},
+			{ key: "fields.note", label: "outer > inner > note", type: "text" },
 		]);
 	});
 
@@ -208,8 +208,8 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields).toEqual([
-			{ key: "hero._heading", label: "Hero > Heading", type: "text" },
-			{ key: "banner._image", label: "Banner > Image", type: "media" },
+			{ key: "bricks.hero.heading", label: "Hero > Heading", type: "text" },
+			{ key: "bricks.banner.image", label: "Banner > Image", type: "media" },
 		]);
 	});
 
@@ -222,7 +222,7 @@ describe("documentFilterFields", () => {
 		const fields = documentFilterFields(buildCollection([], [brick], [brick]));
 
 		expect(fields).toHaveLength(1);
-		expect(fields[0]?.key).toBe("hero._heading");
+		expect(fields[0]?.key).toBe("bricks.hero.heading");
 	});
 
 	it("carries select options, datetime time flag and checkbox labels", () => {
@@ -247,17 +247,17 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields[0]).toMatchObject({
-			key: "_status",
+			key: "fields.status",
 			type: "select",
 			options: [{ value: "draft", label: "Draft" }],
 		});
 		expect(fields[1]).toMatchObject({
-			key: "_publishedAt",
+			key: "fields.publishedAt",
 			type: "datetime",
 			time: false,
 		});
 		expect(fields[2]).toMatchObject({
-			key: "_featured",
+			key: "fields.featured",
 			type: "checkbox",
 			trueLabel: "Shown",
 			falseLabel: "Hidden",
@@ -283,12 +283,12 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields[0]).toMatchObject({
-			key: "_author",
+			key: "fields.author",
 			type: "relation",
 			collections: ["people"],
 		});
 		expect(fields[1]).toMatchObject({
-			key: "_related",
+			key: "fields.related",
 			type: "relation",
 			collections: ["pages", "articles"],
 		});
@@ -311,13 +311,13 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields[0]).toMatchObject({
-			key: "_thumbnail",
+			key: "fields.thumbnail",
 			type: "media",
 			mediaType: "image",
 			mediaExtensions: "png,jpg",
 		});
 		expect(fields[1]).toEqual({
-			key: "_attachment",
+			key: "fields.attachment",
 			label: "attachment",
 			type: "media",
 		});
@@ -328,7 +328,9 @@ describe("documentFilterFields", () => {
 			buildCollection([{ key: "owner", type: "user", details: {} }]),
 		);
 
-		expect(fields).toEqual([{ key: "_owner", label: "owner", type: "user" }]);
+		expect(fields).toEqual([
+			{ key: "fields.owner", label: "owner", type: "user" },
+		]);
 	});
 });
 
@@ -390,7 +392,7 @@ describe("documentFilterPanelFields", () => {
 		expect(documentFilterPanelFields(collection)).toEqual(
 			expect.arrayContaining([
 				{ key: "id", label: "Document ID", type: "number" },
-				{ key: "_title", label: "Title", type: "text" },
+				{ key: "fields.title", label: "Title", type: "text" },
 				{
 					key: "workflowStage",
 					label: "Workflow Stage",
@@ -453,7 +455,7 @@ describe("documentFilterPanelFields", () => {
 			"workflowStage",
 			"workflowAssignee",
 			"pending",
-			"_title",
+			"fields.title",
 			"createdBy",
 			"updatedBy",
 			"createdAt",
@@ -475,35 +477,55 @@ describe("isEntityPickerFieldType", () => {
 describe("filterValueInputType", () => {
 	it("falls back to ID inputs for entity picker fields", () => {
 		expect(
-			filterValueInputType({ key: "_owner", label: "Owner", type: "user" }),
+			filterValueInputType({
+				key: "fields.owner",
+				label: "Owner",
+				type: "user",
+			}),
 		).toBe("number");
 		//* relation values also accept the `collectionKey:id` form
 		expect(
 			filterValueInputType({
-				key: "_author",
+				key: "fields.author",
 				label: "Author",
 				type: "relation",
 				collections: ["people"],
 			}),
 		).toBe("text");
 		expect(
-			filterValueInputType({ key: "_image", label: "Image", type: "media" }),
+			filterValueInputType({
+				key: "fields.image",
+				label: "Image",
+				type: "media",
+			}),
 		).toBe("number");
 	});
 
 	it("keeps existing input types for non-entity fields", () => {
 		expect(
-			filterValueInputType({ key: "_title", label: "Title", type: "text" }),
+			filterValueInputType({
+				key: "fields.title",
+				label: "Title",
+				type: "text",
+			}),
 		).toBe("text");
 		expect(
-			filterValueInputType({ key: "_amount", label: "Amount", type: "number" }),
-		).toBe("number");
-		expect(
-			filterValueInputType({ key: "_price", label: "Price", type: "range" }),
+			filterValueInputType({
+				key: "fields.amount",
+				label: "Amount",
+				type: "number",
+			}),
 		).toBe("number");
 		expect(
 			filterValueInputType({
-				key: "_publishedAt",
+				key: "fields.price",
+				label: "Price",
+				type: "range",
+			}),
+		).toBe("number");
+		expect(
+			filterValueInputType({
+				key: "fields.publishedAt",
 				label: "Published",
 				type: "datetime",
 				time: false,
@@ -511,13 +533,17 @@ describe("filterValueInputType", () => {
 		).toBe("date");
 		expect(
 			filterValueInputType({
-				key: "_publishedAt",
+				key: "fields.publishedAt",
 				label: "Published",
 				type: "datetime",
 			}),
 		).toBe("datetime-local");
 		expect(
-			filterValueInputType({ key: "_tint", label: "Tint", type: "color" }),
+			filterValueInputType({
+				key: "fields.tint",
+				label: "Tint",
+				type: "color",
+			}),
 		).toBe("color");
 		expect(filterValueInputType(undefined)).toBe("text");
 	});
@@ -560,20 +586,20 @@ describe("operatorsForFieldType", () => {
 describe("buildDocumentFilterSchema", () => {
 	it("maps field types to their filter codecs", () => {
 		const schema = buildDocumentFilterSchema([
-			{ key: "_title", label: "Title", type: "text" },
-			{ key: "_featured", label: "Featured", type: "checkbox" },
-			{ key: "_author", label: "Author", type: "user" },
-			{ key: "_price", label: "Price", type: "range" },
-			{ key: "_related", label: "Related", type: "relation" },
+			{ key: "fields.title", label: "Title", type: "text" },
+			{ key: "fields.featured", label: "Featured", type: "checkbox" },
+			{ key: "fields.author", label: "Author", type: "user" },
+			{ key: "fields.price", label: "Price", type: "range" },
+			{ key: "fields.related", label: "Related", type: "relation" },
 			{ key: "id", label: "Document ID", type: "number" },
 		]);
 
-		expect(schema._title?.type).toBe("text");
-		expect(schema._featured?.type).toBe("boolean");
-		expect(schema._author?.type).toBe("number");
-		expect(schema._price?.type).toBe("number");
+		expect(schema["fields.title"]?.type).toBe("text");
+		expect(schema["fields.featured"]?.type).toBe("boolean");
+		expect(schema["fields.author"]?.type).toBe("number");
+		expect(schema["fields.price"]?.type).toBe("number");
 		//* relation values may be `collectionKey:id` strings
-		expect(schema._related?.type).toBe("text");
+		expect(schema["fields.related"]?.type).toBe("text");
 		expect(schema.id?.type).toBe("number");
 	});
 });

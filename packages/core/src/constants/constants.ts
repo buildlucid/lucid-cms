@@ -181,6 +181,7 @@ export default Object.freeze({
 		files: {
 			core: "types.d.ts",
 			client: "client.d.ts",
+			writes: "writes.d.ts",
 			emails: "emails.d.ts",
 		},
 		disclaimer:

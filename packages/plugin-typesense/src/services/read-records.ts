@@ -28,11 +28,9 @@ const readRecords: ServiceFn<
 			if (data.source.kind === "media") {
 				const result = await data.toolkit.media.getMultiple({
 					libraryOnly: true,
-					query: {
-						filter: { id: { value: ids, operator: "in" } },
-						include: ["transcripts"],
-						perPage: ids.length,
-					},
+					filter: { id: ids },
+					include: ["transcripts"],
+					perPage: ids.length,
 				});
 				if (result.error) return result;
 
@@ -48,11 +46,9 @@ const readRecords: ServiceFn<
 				collectionKey: data.source.collection,
 				version: data.source.version,
 				depth: data.source.depth,
-				query: {
-					filter: { id: { value: ids, operator: "in" } },
-					include: [...(data.source.include ?? [])],
-					perPage: ids.length,
-				},
+				filter: { id: ids },
+				include: [...(data.source.include ?? [])],
+				perPage: ids.length,
 			});
 			if (result.error) return result;
 

@@ -452,7 +452,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			</QueryBoundary>
 			<Pagination
 				queryState={searchParams}
-				meta={media.data?.meta}
+				pagination={media.data?.pagination}
 				loading={media.isLoading}
 				variant="inline"
 			/>

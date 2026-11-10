@@ -1,10 +1,7 @@
 import type { Context } from "hono";
-import type { ResolvedLucidConfig } from "../../../types/config.js";
 import type { ResponseBody } from "../../../types/response.js";
 import getLastPage from "../../../utils/helpers/get-last-page.js";
 
-// --------------------------------------------------
-// Types
 interface BuildResponseParams<Data = unknown, Refs = unknown> {
 	data: Data;
 	refs?: Refs;
@@ -19,143 +16,26 @@ type FormattedAPIResponse<Data, Refs> = Omit<ResponseBody<Data>, "refs"> & {
 	refs?: Refs;
 };
 
-// --------------------------------------------------
-// Helpers
-
-const constructBaseUrl = (c: Context): URL => {
-	const requestUrl = new URL(c.req.url);
-	const config = c.get("config") as
-		| Pick<ResolvedLucidConfig, "url">
-		| undefined;
-
-	if (!config) return requestUrl;
-
-	return new URL(`${requestUrl.pathname}${requestUrl.search}`, config.url);
-};
-
-const getPath = (c: Context) => {
-	try {
-		const url = constructBaseUrl(c);
-		return url.toString().split("?")[0] || "";
-	} catch (_error) {
-		return c.req.url || "";
-	}
-};
-
-const buildMetaLinks = (
-	c: Context,
-	params: BuildResponseParams,
-): ResponseBody["meta"]["links"] => {
-	const links: ResponseBody["meta"]["links"] = [];
-	if (!params.pagination) return links;
-
-	const { page, perPage, count } = params.pagination;
-	const totalPages =
-		perPage === -1 ? (count > 0 ? 1 : 0) : Math.ceil(count / Number(perPage));
-
-	try {
-		const baseUrl = constructBaseUrl(c);
-
-		for (let i = 0; i < totalPages; i++) {
-			const pageUrl = new URL(baseUrl.toString());
-			if (i !== 0) pageUrl.searchParams.set("page", String(i + 1));
-			else pageUrl.searchParams.delete("page");
-
-			links.push({
-				active: page === i + 1,
-				label: String(i + 1),
-				url: pageUrl.toString(),
-				page: i + 1,
-			});
-		}
-		return links;
-	} catch (error) {
-		console.error("Error in buildMetaLinks:", error);
-		return links;
-	}
-};
-
-const buildLinks = (
-	c: Context,
-	params: BuildResponseParams,
-): ResponseBody["links"] => {
-	if (!params.pagination) return undefined;
-
-	try {
-		const { page, perPage, count } = params.pagination;
-		const totalPages =
-			perPage === -1 ? (count > 0 ? 1 : 0) : Math.ceil(count / Number(perPage));
-		const baseUrl = constructBaseUrl(c);
-
-		const links: ResponseBody["links"] = {
-			first: null,
-			last: null,
-			next: null,
-			prev: null,
-		};
-
-		// Set First
-		const firstUrl = new URL(baseUrl.toString());
-		firstUrl.searchParams.delete("page");
-		links.first = firstUrl.toString();
-
-		// Set Last
-		const lastUrl = new URL(baseUrl.toString());
-		if (totalPages > 0 && page !== totalPages)
-			lastUrl.searchParams.set("page", String(totalPages));
-		links.last = lastUrl.toString();
-
-		// Set Next
-		if (totalPages > 0 && page < totalPages) {
-			const nextUrl = new URL(baseUrl.toString());
-			nextUrl.searchParams.set("page", String(Number(page) + 1));
-			links.next = nextUrl.toString();
-		}
-
-		// Set Prev
-		if (page !== 1) {
-			const prevUrl = new URL(baseUrl.toString());
-			prevUrl.searchParams.set("page", String(Number(page) - 1));
-			links.prev = prevUrl.toString();
-		}
-
-		return links;
-	} catch (error) {
-		console.error("Error in buildLinks:", error);
-		return undefined; // Return undefined on error
-	}
-};
-
-// --------------------------------------------------
-// Main
-
-/** Builds the standard data, refs, meta and pagination links envelope. Pass the result to hono.json(); this helper does not send a response. */
+/** Builds the data, refs and optional pagination envelope for `hono.json()`. */
 const formatAPIResponse = <Data, Refs = never>(
-	c: Context,
+	_c: Context,
 	params: BuildResponseParams<Data, Refs>,
-): FormattedAPIResponse<Data, Refs> => {
-	const lastPage = params.pagination
-		? getLastPage(params.pagination.count, Number(params.pagination.perPage))
-		: null;
-	const meta: ResponseBody["meta"] = {
-		path: getPath(c),
-		links: buildMetaLinks(c, params),
-		currentPage: params.pagination?.page ?? null,
-		perPage: params.pagination?.perPage ?? null,
-		total:
-			params.pagination?.count === undefined
-				? null
-				: Number(params.pagination.count),
-		lastPage: lastPage,
-	};
-	const links = buildLinks(c, params);
-
-	return {
-		data: params.data,
-		...(params.refs === undefined ? {} : { refs: params.refs }),
-		meta: meta,
-		links,
-	};
-};
+): FormattedAPIResponse<Data, Refs> => ({
+	data: params.data,
+	...(params.refs === undefined ? {} : { refs: params.refs }),
+	...(params.pagination === undefined
+		? {}
+		: {
+				pagination: {
+					currentPage: params.pagination.page,
+					perPage: params.pagination.perPage,
+					total: Number(params.pagination.count),
+					lastPage: getLastPage(
+						params.pagination.count,
+						Number(params.pagination.perPage),
+					),
+				},
+			}),
+});
 
 export default formatAPIResponse;

@@ -1,141 +1,24 @@
-export type FilterValue =
-	| string
-	| string[]
-	| number
-	| number[]
-	| boolean
-	| boolean[]
-	| null;
+import type { FilterCondition, SortDirection } from "@lucidcms/types";
 
-export type FilterOperator =
-	| "="
-	| "!="
-	| ">"
-	| ">="
-	| "<"
-	| "<="
-	| "in"
-	| "not-in"
-	| "is"
-	| "is-not"
-	| "contains"
-	| "not-contains"
-	| "starts-with"
-	| "not-starts-with"
-	| "ends-with"
-	| "not-ends-with";
-
-export type FilterObject<TValue extends FilterValue = FilterValue> = {
-	value: TValue;
-	operator?: FilterOperator;
-};
-
-export type SortDirection = "asc" | "desc";
-export type DefaultCollectionDocumentSortKey =
-	| "createdAt"
-	| "updatedAt"
-	| "order"
-	| `_${string}`;
-
-export type QueryFilters = {
-	[key: string]: FilterObject | QueryFilters | undefined;
-};
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentFiltersByCollection {}
-
-type CollectionDocumentFilterCollectionKey = Extract<
-	keyof CollectionDocumentFiltersByCollection,
-	string
+/** Media filters. A plain value matches for equality and a list of values matches any of them. */
+export type MediaFilters = Partial<
+	Record<
+		| "title"
+		| "key"
+		| "mimeType"
+		| "folderId"
+		| "type"
+		| "extension"
+		| "public"
+		| "origin",
+		FilterCondition
+	>
 >;
 
-export type CollectionDocumentFilters<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentFilterCollectionKey
-		? CollectionDocumentFiltersByCollection[TCollectionKey]
-		: QueryFilters;
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentSortsByCollection {}
-
-type CollectionDocumentSortCollectionKey = Extract<
-	keyof CollectionDocumentSortsByCollection,
-	string
->;
-
-export type CollectionDocumentSortKey<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentSortCollectionKey
-		? CollectionDocumentSortsByCollection[TCollectionKey]
-		: DefaultCollectionDocumentSortKey;
-
-export type CollectionDocumentSorts<TCollectionKey extends string = string> =
-	Array<{
-		key: CollectionDocumentSortKey<TCollectionKey>;
-		direction: SortDirection;
-	}>;
-
-export type DefaultCollectionDocumentVersion = "latest" | "revision" | string;
-export type DefaultCollectionDocumentVersionKey = string;
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentVersionsByCollection {}
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentVersionKeysByCollection {}
-
-type CollectionDocumentVersionCollectionKey = Extract<
-	keyof CollectionDocumentVersionsByCollection,
-	string
->;
-
-type CollectionDocumentVersionKeyCollectionKey = Extract<
-	keyof CollectionDocumentVersionKeysByCollection,
-	string
->;
-
-export type CollectionDocumentVersion<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentVersionCollectionKey
-		? CollectionDocumentVersionsByCollection[TCollectionKey]
-		: DefaultCollectionDocumentVersion;
-
-export type CollectionDocumentVersionKey<
-	TCollectionKey extends string = string,
-> = TCollectionKey extends CollectionDocumentVersionKeyCollectionKey
-	? CollectionDocumentVersionKeysByCollection[TCollectionKey]
-	: DefaultCollectionDocumentVersionKey;
-
-/** Optional document sections returned by content reads. */
-export type ContentDocumentInclude = "bricks" | "meta";
-export type DocumentSingleInclude = ContentDocumentInclude;
-export type DocumentMultipleInclude = ContentDocumentInclude;
-
-export type DocumentsGetSingleQuery<TCollectionKey extends string = string> = {
-	filter?: CollectionDocumentFilters<TCollectionKey>;
-	include?: DocumentSingleInclude[];
-};
-
-export type DocumentsGetMultipleQuery<TCollectionKey extends string = string> =
-	{
-		filter?: CollectionDocumentFilters<TCollectionKey>;
-		sort?: CollectionDocumentSorts<TCollectionKey>;
-		include?: DocumentMultipleInclude[];
-		page?: number;
-		perPage?: number;
-	};
-
-export type MediaGetMultipleQuery = {
-	filter?: Partial<
-		Record<
-			| "title"
-			| "key"
-			| "mimeType"
-			| "folderId"
-			| "type"
-			| "extension"
-			| "public"
-			| "origin",
-			FilterObject
-		>
-	>;
+/** What a read of a page of media takes, apart from its locale. */
+export type MediaListOptions = {
+	/** One filter object, whose conditions must all match, or a list of them, where any may match. */
+	filter?: MediaFilters | MediaFilters[];
 	sort?: Array<{
 		key:
 			| "createdAt"
@@ -150,6 +33,8 @@ export type MediaGetMultipleQuery = {
 	}>;
 	/** Audio transcripts, which lists otherwise leave out. */
 	include?: "transcripts"[];
+	/** One-based page number. */
 	page?: number;
+	/** Maximum media per page. Use -1 for all matches. */
 	perPage?: number;
 };

@@ -181,7 +181,7 @@ export const JobSchedulesList: Component = () => {
 					</QueryBoundary>
 					<Pagination
 						queryState={searchParams}
-						meta={schedules.data?.meta}
+						pagination={schedules.data?.pagination}
 						loading={schedules.isLoading}
 						variant="footer"
 						padding="sm"

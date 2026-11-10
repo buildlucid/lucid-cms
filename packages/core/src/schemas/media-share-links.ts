@@ -89,7 +89,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						token: queryFormatted.schema.filters.single.optional(),
 						name: queryFormatted.schema.filters.single.optional(),
 						createdBy: queryFormatted.schema.filters.union.optional(),

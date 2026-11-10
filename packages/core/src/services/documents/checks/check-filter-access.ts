@@ -17,31 +17,17 @@ import {
 	relationFilterPaths,
 } from "../helpers/resolve-relation-document-filters.js";
 
-const DOCUMENT_FIELDS_KEY = "fields";
-const FIELD_PREFIX = "_";
-
-/** Identifies hidden filter fields in `_field`, `fields._field`, `brick._field` or `scope.repeater._field` form, trimming relation traversals to the relation first. */
+/** Identifies hidden filter fields in `fields.<field>` or `bricks.<brick>.<field>` form, with relation traversals trimmed to the relation first. */
 const isHiddenKey = (access: ContentAccess, key: string) => {
 	const [scope, ...path] = key.split(".");
-	if (scope === undefined) return false;
 
-	const brick =
-		path.length > 0 && scope !== DOCUMENT_FIELDS_KEY
-			? access.bricks.get(scope)
-			: undefined;
-	const fieldKeys = scope.startsWith(FIELD_PREFIX)
-		? [scope]
-		: brick || scope === DOCUMENT_FIELDS_KEY
-			? path
-			: [];
-	const fields = brick?.fields ?? access.fields;
-
-	return fieldKeys.some(
-		(fieldKey) =>
-			fields.get(
-				fieldKey.startsWith(FIELD_PREFIX) ? fieldKey.slice(1) : fieldKey,
-			) === "hidden",
-	);
+	if (scope === "fields") {
+		return path[0] !== undefined && access.fields.get(path[0]) === "hidden";
+	}
+	if (scope === "bricks" && path[0] !== undefined && path[1] !== undefined) {
+		return access.bricks.get(path[0])?.fields.get(path[1]) === "hidden";
+	}
+	return false;
 };
 
 /**

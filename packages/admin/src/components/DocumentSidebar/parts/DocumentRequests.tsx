@@ -49,7 +49,7 @@ export const DocumentRequests: Component<{
 				title={T()("requests.title")}
 				icon={<TbOutlineExternalLink size={12} />}
 				preferenceKey="pageBuilder.sidebar.requests"
-				meta={requests.data?.meta.total || undefined}
+				meta={requests.data?.pagination?.total || undefined}
 			>
 				{/* a failed load would otherwise read as "no open requests" */}
 				<QueryBoundary

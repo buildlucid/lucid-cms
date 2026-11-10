@@ -622,7 +622,7 @@ export const MediaList: Component<{
 			</QueryBoundary>
 			<Pagination
 				queryState={props.state.searchParams}
-				meta={media.data?.meta}
+				pagination={media.data?.pagination}
 				loading={media.isLoading}
 				padding="md"
 			/>

@@ -4,7 +4,6 @@ import type {
 	DocumentFieldValueMap,
 	DocumentRef,
 	DocumentRoute,
-	DocumentVersionSummary,
 	Locale,
 	Media,
 	MediaAdapterData,
@@ -43,105 +42,49 @@ import type {
 	UserRef,
 } from "@lucidcms/types";
 import type { LucidClient } from "./client.js";
-import type {
-	CollectionDocumentVersion,
-	CollectionDocumentVersionKey,
-} from "./types/contracts.js";
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentFieldsByCollection {}
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentBricksByCollection {}
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentLocaleCodesByCollection {}
-
-type CollectionDocumentBrickKey = Extract<
-	keyof CollectionDocumentBricksByCollection,
-	string
->;
-
-type CollectionDocumentFieldKey = Extract<
-	keyof CollectionDocumentFieldsByCollection,
-	string
->;
-
-type KnownCollectionDocumentKey = CollectionDocumentFieldKey;
-export type CollectionDocumentKey = KnownCollectionDocumentKey | (string & {});
-
-export type CollectionDocumentLocaleCode<
-	TCollectionKey extends string = string,
-> = TCollectionKey extends keyof CollectionDocumentLocaleCodesByCollection
-	? Extract<CollectionDocumentLocaleCodesByCollection[TCollectionKey], string>
-	: string;
-
-type ResolveCollectionDocumentFields<TCollectionKey extends string> =
-	TCollectionKey extends CollectionDocumentFieldKey
-		? CollectionDocumentFieldsByCollection[TCollectionKey]
-		: DocumentFieldValueMap;
-
-type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
-	TCollectionKey extends CollectionDocumentBrickKey
-		? CollectionDocumentBricksByCollection[TCollectionKey]
-		: DocumentBrick;
-
-type ResolveCollectionDocumentKey<TCollectionKey extends string> =
-	TCollectionKey;
-
-type ResolveCollectionDocumentVersion<TCollectionKey extends string> =
-	CollectionDocumentVersion<
-		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
-	>;
-
-export type CollectionDocumentMeta<
-	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = {
-	versionId: number | null;
-	versions: Record<
-		CollectionDocumentVersionKey<TCollectionKey>,
-		DocumentVersionSummary | null
-	>;
-	createdAt: string | null;
-	updatedAt: string | null;
-	createdBy: number | null;
-	updatedBy: number | null;
-	/** The agent run that acted for createdBy. */
-	createdByRunId: string | null;
-	/** The agent run that acted for updatedBy. */
-	updatedByRunId: string | null;
-};
-
-export interface CollectionDocument<
-	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> {
-	id: number;
-	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
-	version: ResolveCollectionDocumentVersion<TCollectionKey> | null;
-	route: DocumentRoute<TCollectionKey> | null;
-	fields: ResolveCollectionDocumentFields<TCollectionKey>;
-	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
-	meta?: CollectionDocumentMeta<
-		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
-	>;
-}
 
 export type {
+	CollectionDocument,
+	CollectionDocumentFilterInput,
+	CollectionDocumentFilters,
+	CollectionDocumentKey,
+	CollectionDocumentLocaleCode,
+	CollectionDocumentMeta,
+	CollectionDocumentSortKey,
+	CollectionDocumentSorts,
 	CollectionDocumentTranslations,
+	CollectionDocumentVersion,
+	CollectionDocumentVersionKey,
+	Collections,
 	ContentBrick,
 	ContentDocument,
+	ContentDocumentInclude,
 	ContentDocumentMeta,
 	ContentFields,
+	ContentList,
 	ContentLocaleInput,
 	ContentMedia,
 	ContentRelatedDocument,
 	ContentRoute,
+	ContentPagination,
 	ContentUser,
+	DocumentFilters,
+	DocumentListInput,
+	DocumentReadInput,
+	EmailFieldValue,
+	FilterCondition,
+	FilterObject,
+	FilterOperator,
+	FilterValue,
 	IsLocalized,
 	LocalizedDocumentRoute,
 	LocalizedMedia,
 	LocalizedUser,
+	MediaFieldValue,
 	MediaListItem,
+	RichTextFieldValue,
+	SortDirection,
+	UserFieldValue,
 } from "@lucidcms/types";
 
 export type {
@@ -180,28 +123,7 @@ export type {
 	PreviewsResolveResponse,
 } from "./resources/previews.js";
 
-export type {
-	CollectionDocumentFilters,
-	CollectionDocumentFiltersByCollection,
-	CollectionDocumentSortKey,
-	CollectionDocumentSorts,
-	CollectionDocumentSortsByCollection,
-	CollectionDocumentVersion,
-	CollectionDocumentVersionKey,
-	CollectionDocumentVersionKeysByCollection,
-	CollectionDocumentVersionsByCollection,
-	ContentDocumentInclude,
-	DocumentMultipleInclude,
-	DocumentSingleInclude,
-	DocumentsGetMultipleQuery,
-	DocumentsGetSingleQuery,
-	FilterObject,
-	FilterOperator,
-	FilterValue,
-	MediaGetMultipleQuery,
-	QueryFilters,
-	SortDirection,
-} from "./types/contracts.js";
+export type { MediaFilters, MediaListOptions } from "./types/contracts.js";
 
 export type {
 	LucidClientError,

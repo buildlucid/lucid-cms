@@ -1,10 +1,6 @@
+import type { SortDirection } from "@lucidcms/types";
 import { CONTENT_BASE_PATH } from "../constants.js";
-import type {
-	FilterObject,
-	FilterValue,
-	QueryFilters,
-	SortDirection,
-} from "../types/contracts.js";
+import flattenFilters, { type FlatFilterCondition } from "./flatten-filters.js";
 
 /**
  * Keeps generic query serialization predictable by narrowing values to URL-safe primitives.
@@ -18,92 +14,52 @@ const isPrimitive = (
 	typeof value === "number" ||
 	typeof value === "boolean";
 
-/**
- * Normalizes Lucid filter values into the string format expected in query params.
- */
-const serializeFilterValue = (value: FilterValue): string => {
-	if (value === null) return "";
-	if (Array.isArray(value)) return value.join(",");
-	return String(value);
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
- * Keeps Lucid filter key formatting in one place before writing into the search params.
+ * Writes one condition as `filter[key:operator]`. Lists repeat the parameter for each value, so
+ * values can contain commas, and null is sent as an empty value.
  */
-const appendFilter = (
+const appendCondition = (
 	params: URLSearchParams,
-	key: string,
-	filter: FilterObject,
+	prefix: string,
+	condition: FlatFilterCondition,
 ) => {
-	const suffix = filter.operator ? `:${filter.operator}` : "";
-	params.set(`filter[${key}${suffix}]`, serializeFilterValue(filter.value));
-};
+	const suffix = condition.operator ? `:${condition.operator}` : "";
+	const name = `${prefix}[${condition.key}${suffix}]`;
 
-/**
- * Detects Lucid's filter leaf shape so nested filter objects can be flattened safely.
- */
-const isFilterObject = (value: unknown): value is FilterObject => {
-	if (!value || typeof value !== "object" || Array.isArray(value)) {
-		return false;
+	if (!Array.isArray(condition.value)) {
+		params.append(
+			name,
+			condition.value === null ? "" : String(condition.value),
+		);
+		return;
 	}
-
-	const keys = Object.keys(value);
-
-	return (
-		keys.length > 0 &&
-		keys.every((key) => key === "value" || key === "operator") &&
-		"value" in value
-	);
-};
-
-/**
- * Recursively flattens nested filter objects into Lucid's dotted query param key format.
- */
-const flattenFilterBranch = (
-	value: Record<string, unknown>,
-	path: string[],
-	flattened: Record<string, FilterObject>,
-) => {
-	for (const [key, branchValue] of Object.entries(value)) {
-		if (branchValue === undefined || branchValue === null) continue;
-
-		if (isFilterObject(branchValue)) {
-			flattened[[...path, key].join(".")] = branchValue;
-			continue;
-		}
-
-		if (typeof branchValue === "object" && !Array.isArray(branchValue)) {
-			flattenFilterBranch(
-				branchValue as Record<string, unknown>,
-				[...path, key],
-				flattened,
-			);
-		}
+	if (condition.value.length === 0) {
+		params.append(name, "");
+		return;
+	}
+	for (const value of condition.value) {
+		params.append(name, String(value));
 	}
 };
 
-/**
- * Converts DX-friendly nested filter objects into the flat query param keys the API expects.
- */
-const flattenFilters = (
-	filters: QueryFilters,
-): Record<string, FilterObject> => {
-	const flattened: Record<string, FilterObject> = {};
-
-	for (const [key, value] of Object.entries(filters)) {
-		if (value === undefined || value === null) continue;
-
-		if (isFilterObject(value)) {
-			flattened[key] = value;
-			continue;
+/** One filter object is sent as `filter[...]`; a list is sent as `filter[or][index][...]` groups, where any may match. */
+const appendFilters = (params: URLSearchParams, filter: unknown) => {
+	if (Array.isArray(filter)) {
+		for (const [index, group] of filter.filter(isRecord).entries()) {
+			for (const condition of flattenFilters(group)) {
+				appendCondition(params, `filter[or][${index}]`, condition);
+			}
 		}
-
-		if (typeof value === "object" && !Array.isArray(value)) {
-			flattenFilterBranch(value as Record<string, unknown>, [key], flattened);
+		return;
+	}
+	if (isRecord(filter)) {
+		for (const condition of flattenFilters(filter)) {
+			appendCondition(params, "filter", condition);
 		}
 	}
-
-	return flattened;
 };
 
 /**
@@ -149,13 +105,8 @@ export const serializeQuery = (query?: Record<string, unknown>): string => {
 	for (const [key, value] of Object.entries(query)) {
 		if (value === undefined) continue;
 
-		if (key === "filter" && value && typeof value === "object") {
-			for (const [filterKey, filterValue] of Object.entries(
-				flattenFilters(value as QueryFilters),
-			)) {
-				if (!filterValue) continue;
-				appendFilter(params, filterKey, filterValue);
-			}
+		if (key === "filter") {
+			appendFilters(params, value);
 			continue;
 		}
 

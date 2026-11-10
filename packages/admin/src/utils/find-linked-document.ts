@@ -44,7 +44,7 @@ export const findLinkedDocument = async (props: {
 					collectionKey: collection.key,
 					versionType: "latest",
 					query: {
-						filters: { [`_${collection.routing.field}:in`]: paths },
+						filters: { [`fields.${collection.routing.field}:in`]: paths },
 						perPage: 1,
 					},
 					displayErrorToast: false,

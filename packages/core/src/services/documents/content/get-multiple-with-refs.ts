@@ -29,6 +29,7 @@ import authorizePreview from "../../preview-sessions/authorize.js";
 import readPreviewDraft from "../../preview-sessions/helpers/read-draft.js";
 import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
 import checkFilterAccess from "../checks/check-filter-access.js";
+import checkFilterKeys from "../checks/check-filter-keys.js";
 import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveDocumentRefs from "../helpers/resolve-document-refs.js";
@@ -189,12 +190,13 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 		allowedCollectionKeys: data.allowedCollectionKeys,
 	});
 	if (relationFiltersRes.error) return relationFiltersRes;
-	const { documentFilters, brickFilters } = groupDocumentFilters(
+	const { documentFilters, brickFilters, unknownKeys } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
 		query.filter,
 		{
 			relationCollectionDefaults:
 				relationFiltersRes.data.relationCollectionDefaults,
+			handledKeys: relationFiltersRes.data.traversalKeys,
 		},
 	);
 
@@ -202,9 +204,16 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 		...groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
 			relationCollectionDefaults:
 				relationFiltersRes.data.relationCollectionDefaults,
+			handledKeys: relationFiltersRes.data.traversalKeys,
 		}),
 		relationDocumentFilters: relationFiltersRes.data.filterOr[index] ?? [],
 	}));
+
+	const filterKeysRes = checkFilterKeys([
+		...unknownKeys,
+		...(filterOr ?? []).flatMap((group) => group.unknownKeys),
+	]);
+	if (filterKeysRes.error) return filterKeysRes;
 
 	const collectionFieldsTableSchemas = bricksTableSchemaRes.data.filter(
 		(schema) => include.bricks || schema.key.brick === undefined,

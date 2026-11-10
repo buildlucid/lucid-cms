@@ -294,7 +294,16 @@ describe("buildQueryString", () => {
 			filters: { author: [1, 2] },
 		});
 		const params = new URLSearchParams(buildQueryString(state, schema));
-		expect(params.get("filter[author:in]")).toBe("1,2");
+		expect(params.getAll("filter[author:in]")).toEqual(["1", "2"]);
+	});
+
+	it("sends text typed with commas as a repeated `in` list", () => {
+		const state = applyParams(defaultQueryState(schema), schema, {
+			filters: { title: "png,jpg" },
+		});
+		const params = new URLSearchParams(buildQueryString(state, schema));
+		expect(params.get("filter[title]")).toBeNull();
+		expect(params.getAll("filter[title:in]")).toEqual(["png", "jpg"]);
 	});
 
 	it("serialises filters without operator as filter[key]", () => {

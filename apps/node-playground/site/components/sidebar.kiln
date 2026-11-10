@@ -1,7 +1,7 @@
 {# The site's navigation: the header menu, the site's own sections, the lab, and language links. #}
 {% props title: string, logo: string | null, path: string, alternates = null %}
 
-{% set menu = documentList("main-menu", { filter: { _location: "header" }, perPage: 1 }).items|first %}
+{% set menu = documentList("main-menu", { filter: { fields: { location: "header" } }, perPage: 1 }).items|first %}
 {% set base = "/" ~ locale %}
 {% set sections = [
 	{ label: translate("nav.blog"), href: base ~ "/blog" },

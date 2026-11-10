@@ -178,7 +178,7 @@ export const AiUsageSessionList: Component<{
 					</QueryBoundary>
 					<Pagination
 						queryState={props.state.searchParams}
-						meta={sessions.data?.meta}
+						pagination={sessions.data?.pagination}
 						loading={sessions.isLoading}
 						variant="footer"
 						padding="sm"

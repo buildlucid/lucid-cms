@@ -1,4 +1,5 @@
 import type {
+	ContentList,
 	ContentLocaleInput,
 	ContentMedia,
 	IsLocalized,
@@ -7,7 +8,7 @@ import type {
 	MediaResolveUrlOptions,
 	MediaUrl,
 } from "@lucidcms/types";
-import type { MediaGetMultipleQuery } from "../types/contracts.js";
+import type { MediaListOptions } from "../types/contracts.js";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
 	LucidRequestOptions,
@@ -29,8 +30,7 @@ export type MediaGetSingleInput<
 
 export type MediaGetMultipleInput<
 	TLocale extends string | undefined = undefined,
-> = {
-	query?: MediaGetMultipleQuery;
+> = MediaListOptions & {
 	/** The locale empty text falls back to, such as the default locale. */
 	fallbackLocale?: string;
 	request?: LucidRequestOptions;
@@ -40,10 +40,12 @@ export type MediaGetSingleResponse<
 	TLocale extends string | undefined = undefined,
 > = LucidClientResponse<ContentMedia<Media, IsLocalized<TLocale>>>;
 
-/** List items leave out audio transcripts unless the query includes `transcripts`. */
+/** List items leave out audio transcripts unless `include` has `transcripts`. */
 export type MediaGetMultipleResponse<
 	TLocale extends string | undefined = undefined,
-> = LucidClientResponse<ContentMedia<MediaListItem, IsLocalized<TLocale>>[]>;
+> = LucidClientResponse<
+	ContentList<ContentMedia<MediaListItem, IsLocalized<TLocale>>>
+>;
 
 export type MediaResolveUrlInput = MediaResolveUrlOptions & {
 	key: string;
@@ -85,17 +87,22 @@ export const createMediaClient = (
 		input: MediaGetMultipleInput<TLocale> = {},
 	) =>
 		await transport.request<
-			ContentMedia<MediaListItem, IsLocalized<TLocale>>[]
+			ContentList<ContentMedia<MediaListItem, IsLocalized<TLocale>>>
 		>({
 			operation: "media.getMultiple",
 			method: "GET",
 			path: "/media",
 			query: {
-				...input.query,
+				filter: input.filter,
+				sort: input.sort,
+				include: input.include,
+				page: input.page,
+				perPage: input.perPage,
 				locale: input.locale,
 				fallbackLocale: input.fallbackLocale,
 			},
 			request: input.request,
+			list: true,
 		}),
 	resolveUrl: async (input) =>
 		await transport.request<MediaUrl>({

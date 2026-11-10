@@ -233,7 +233,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 				</QueryBoundary>
 				<Pagination
 					queryState={searchParams}
-					meta={jobs.data?.meta}
+					pagination={jobs.data?.pagination}
 					loading={jobsList.loading()}
 					variant="inline"
 				/>

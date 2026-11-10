@@ -751,6 +751,12 @@ export interface LucidConfig {
 	build?: {
 		/** The output directory. Defaults to "dist". */
 		outDir?: string;
+		/**
+		 * Extra files to write the collection types to, relative to lucid.config, for front ends in
+		 * another folder or package that read content with `@lucidcms/client`, such as
+		 * `["../web/src/lucid.d.ts"]`. Type generation rewrites them whenever collections change.
+		 */
+		clientTypes?: string[];
 		/** Files excluded from development rebuilds. */
 		watch?: {
 			/**
@@ -918,6 +924,7 @@ export interface ResolvedLucidConfig {
 	};
 	build: {
 		outDir: string;
+		clientTypes: string[];
 		watch: {
 			ignore: string[];
 		};

@@ -3,28 +3,22 @@ import { contentCacheTags } from "@lucidcms/core/extension";
 import type {
 	CollectionDocumentKey,
 	ContentDocument,
+	DocumentFilters,
 } from "@lucidcms/core/types";
 import { type RenderInfo, withRender } from "@lucidkiln/core";
 import type { SiteConfig } from "../site/create-site-config.js";
 import type { SiteState } from "../types.js";
-import normalizeFilter from "./normalize-filter.js";
 import readLocale from "./read-locale.js";
-
-type ReadQuery = NonNullable<
-	Parameters<SiteState["toolkit"]["documents"]["getSingle"]>[0]["query"]
->;
-
-export type DocumentFilter = NonNullable<ReadQuery["filter"]>;
 
 type ReadInput = Parameters<SiteState["toolkit"]["documents"]["getSingle"]>[0];
 
 export type DocumentReadOptions = {
 	/** What to read alongside fields, such as `["bricks"]`. */
-	include?: ReadQuery["include"];
+	include?: ReadInput["include"];
 	/** Depth of related documents to fill in, from 0 to 3, defaulting to 1. */
 	depth?: ReadInput["depth"];
-	/** Toolkit filters, with plain values as shorthand for equality; a list of filters matches any of them. */
-	filter?: unknown;
+	/** The toolkit's document filters, such as `{ fields: { path: "/about" } }`; a list of filters matches any of them. */
+	filter?: DocumentFilters | DocumentFilters[];
 	/** One of the site's locales, defaulting to the render's `locale`. */
 	locale?: string;
 	/** The locale an empty translation falls back to, such as the default locale. */
@@ -53,13 +47,12 @@ const createDocumentFunction = (config: SiteConfig) =>
 				locale: readLocale(config, render, options.locale),
 				fallbackLocale: options.fallbackLocale,
 				depth: options.depth,
-				query: {
-					filter: normalizeFilter(options.filter) as DocumentFilter | undefined,
-					include: options.include,
-				},
+				filter: options.filter,
+				include: options.include,
 			});
 			if (response.error?.status === 404) return null;
 			if (response.error) throw new LucidAPIError(response.error);
+			if (response.data === null) return null;
 
 			// Documents include their media, so any media change can affect them.
 			render.tagCache(contentCacheTags.media);

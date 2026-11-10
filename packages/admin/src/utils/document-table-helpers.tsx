@@ -106,14 +106,9 @@ export const collectionFieldSorts = (collection?: Collection) => {
 	return sortsRes;
 };
 
-/**
- * Formats fields ready for filter query params. Fields are all prefixed with an underscore. Brick and repeaters are seperated with a . and must be followed with a field key (_fieldKey).
- *
- * _${fieldKey}
- * ${brickKey}.${repeaterKey}._${fieldKey}
- */
+/** Formats a collection field's key for filter and sort query params, as `fields.<fieldKey>`. */
 export const formatFieldFilters = (props: { fieldKey: string }) => {
-	return `_${props.fieldKey}`;
+	return `fields.${props.fieldKey}`;
 };
 
 export const collectionFieldIncludes = (collection?: Collection) => {

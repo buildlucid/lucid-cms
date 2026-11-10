@@ -9,6 +9,7 @@ import type {
 } from "../../../types/query-params.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import { copy } from "../../i18n/index.js";
+import parseFormattedQuery from "./parse-formatted-query.js";
 
 const buildSort = (query: unknown) => {
 	const queryObject = query as Record<string, string>;
@@ -28,69 +29,75 @@ const buildSort = (query: unknown) => {
 	});
 };
 
-/** Splits set values while preserving commas in semantic text filters. */
-const parseFilterValue = (value: string, operator?: string): FilterValue => {
-	if (operator === "in" || operator === "not-in") return value.split(",");
-	if (operator !== undefined && operator !== "") return value;
-	return value.includes(",") ? value.split(",") : value;
+type FilterParams = Record<string, string[]>;
+
+const filterPattern = /^filter\[([^\]:]+):?([^\]]*)\]$/;
+const filterOrPattern = /^filter\[or\]\[(\d+)\]\[([^\]:]+):?([^\]]*)\]$/;
+
+/**
+ * Reads repeated values for `in`/`not-in`; other operators use the first value. Commas stay
+ * literal. Empty values become null for `is`/`is-not` and controller-specified nullable fields.
+ */
+const parseFilterValue = (props: {
+	name: string;
+	values: string[];
+	operator: string;
+	nullableFields?: string[];
+}): FilterValue => {
+	if (props.operator === "in" || props.operator === "not-in") {
+		return props.values;
+	}
+
+	const value = props.values[0] ?? "";
+	const nullable =
+		props.operator === "is" ||
+		props.operator === "is-not" ||
+		props.nullableFields?.includes(props.name) === true;
+
+	return value === "" && nullable ? null : value;
 };
 
-const buildFilter = (query: unknown, nullableFields?: string[]) => {
-	return Object.entries(
-		query as Record<string, string>,
-	).reduce<QueryParamFilters>((acc, [key, value]) => {
-		if (key.includes("filter[")) {
-			const match = key.match(/^filter\[([^\]:]+):?([^\]]*)\]$/);
-			if (!match) return acc;
-			const [, name, operator] = match;
-			if (!name) return acc;
+const toOperator = (operator: string): FilterOperator | undefined =>
+	operator === "" ? undefined : (operator as FilterOperator);
 
-			let processedValue = parseFilterValue(value, operator);
+const buildFilter = (query: FilterParams, nullableFields?: string[]) => {
+	const filters: QueryParamFilters = {};
 
-			if (nullableFields?.includes(name) && processedValue === "") {
-				processedValue = null;
-			}
+	for (const [key, values] of Object.entries(query)) {
+		const match = key.match(filterPattern);
+		if (!match) continue;
 
-			acc[name] = {
-				value: processedValue,
-				operator:
-					operator === "" || operator === undefined
-						? undefined
-						: (operator as FilterOperator),
-			};
-		}
-		return acc;
-	}, {});
+		const [, name, operator = ""] = match;
+		if (!name) continue;
+
+		filters[name] = {
+			value: parseFilterValue({ name, values, operator, nullableFields }),
+			operator: toOperator(operator),
+		};
+	}
+
+	return filters;
 };
 
 /** Parses grouped OR params while preserving numeric group order. */
-const buildFilterOr = (query: unknown, nullableFields?: string[]) => {
+const buildFilterOr = (query: FilterParams, nullableFields?: string[]) => {
 	const groups = new Map<number, QueryParamFilterGroups[number]>();
 
-	for (const [key, value] of Object.entries(query as Record<string, string>)) {
-		const match = key.match(/^filter\[or\]\[(\d+)\]\[([^\]:]+):?([^\]]*)\]$/);
+	for (const [key, values] of Object.entries(query)) {
+		const match = key.match(filterOrPattern);
 		if (!match) continue;
 
-		const [, groupIndexRaw, name, operator] = match;
+		const [, groupIndexRaw, name, operator = ""] = match;
 		if (!groupIndexRaw || !name) continue;
 
 		const groupIndex = Number.parseInt(groupIndexRaw, 10);
 		if (Number.isNaN(groupIndex)) continue;
 
-		let processedValue = parseFilterValue(value, operator);
-
-		if (nullableFields?.includes(name) && processedValue === "") {
-			processedValue = null;
-		}
-
 		const group = groups.get(groupIndex) ?? [];
 		group.push({
 			key: name,
-			value: processedValue,
-			operator:
-				operator === "" || operator === undefined
-					? undefined
-					: (operator as FilterOperator),
+			value: parseFilterValue({ name, values, operator, nullableFields }),
+			operator: toOperator(operator),
 		});
 		groups.set(groupIndex, group);
 	}
@@ -154,11 +161,12 @@ const buildFormattedQuery = async <T extends ZodType>(
 	const querySchema = schema ?? z.object({});
 
 	const queryParams = c.req.query();
+	const filterParams = c.req.queries();
 
 	const formattedQueryObject = {
 		sort: buildSort(queryParams),
-		filter: buildFilter(queryParams, options?.nullableFields),
-		filterOr: buildFilterOr(queryParams, options?.nullableFields),
+		filter: buildFilter(filterParams, options?.nullableFields),
+		filterOr: buildFilterOr(filterParams, options?.nullableFields),
 		include: buildInclude(queryParams),
 		exclude: buildExclude(queryParams),
 		page: buildPage(queryParams),
@@ -166,7 +174,10 @@ const buildFormattedQuery = async <T extends ZodType>(
 		...addRemainingQuery(queryParams),
 	};
 
-	const validateResult = await querySchema.safeParseAsync(formattedQueryObject);
+	const validateResult = await parseFormattedQuery(
+		querySchema,
+		formattedQueryObject,
+	);
 
 	if (!validateResult.success) {
 		throw new LucidAPIError({

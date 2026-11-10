@@ -1,3 +1,4 @@
+import { flattenFilters } from "@lucidcms/client/contract";
 import type z from "zod";
 import constants from "../../constants/constants.js";
 import type {
@@ -5,14 +6,14 @@ import type {
 	ContentGetSingleQueryParams,
 } from "../../schemas/documents.js";
 import type {
-	QueryFilters,
-	QueryParamFilters,
+	DocumentFilters,
+	QueryParamFilterCondition,
 } from "../../types/query-params.js";
 import type { ContentPagination } from "../../types/response.js";
 import decodeError from "../../utils/errors/decode-error.js";
-import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
 import getLastPage from "../../utils/helpers/get-last-page.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
+import parseFormattedQuery from "../http/utils/parse-formatted-query.js";
 import { copy, type ServerCopyDescriptor } from "../i18n/index.js";
 
 type PaginatedQuery = {
@@ -21,7 +22,7 @@ type PaginatedQuery = {
 };
 
 type DocumentQuery = {
-	filter?: QueryFilters | QueryFilters[];
+	filter?: DocumentFilters | DocumentFilters[];
 };
 
 type ResolvedServiceResponse<T> = Awaited<ServiceResponse<T>>;
@@ -64,32 +65,28 @@ type NormalizedDocumentFilters = {
 	filterOr?: ServiceDocumentFilterOr;
 };
 
-/** Converts one flattened filter map into an AND group for filterOr. */
-const toFilterGroup = (
-	filters?: QueryParamFilters,
-): ServiceDocumentFilterOr[number] =>
-	Object.entries(filters ?? {}).map(([key, filter]) => ({
-		key,
-		...filter,
-	})) as ServiceDocumentFilterOr[number];
-
-/** Maps toolkit filter shorthand to the service filter/filterOr shape. */
+/** Maps one filter object to a query's AND filters, and a list of them to its OR groups. */
 const normalizeToolkitDocumentFilters = (
-	filters?: QueryFilters | QueryFilters[],
+	filters?: DocumentFilters | DocumentFilters[],
 ): NormalizedDocumentFilters => {
 	if (!filters) return {};
 
 	if (!Array.isArray(filters)) {
+		const conditions: QueryParamFilterCondition[] = flattenFilters(filters);
 		return {
-			filter: flattenDocumentFilters(filters) as ServiceDocumentFilter,
+			filter: Object.fromEntries(
+				conditions.map(({ key, ...filter }) => [key, filter]),
+			) as ServiceDocumentFilter,
 		};
 	}
 
 	const filterOr = filters
-		.map((filterGroup) => toFilterGroup(flattenDocumentFilters(filterGroup)))
+		.map((filterGroup) => flattenFilters(filterGroup))
 		.filter((filterGroup) => filterGroup.length > 0);
 
-	return filterOr.length > 0 ? { filterOr } : {};
+	return filterOr.length > 0
+		? { filterOr: filterOr as ServiceDocumentFilterOr }
+		: {};
 };
 
 /** Flattens nested document filters so toolkit calls match the internal service query shape. */
@@ -125,6 +122,39 @@ export const normalizePaginatedDocumentQuery = <
 		page: page ?? constants.query.page,
 		perPage: perPage ?? constants.query.perPage,
 	};
+};
+
+/**
+ * Flattens list options into a validated service query, treating a list of filter objects as OR
+ * groups.
+ */
+export const parseListQuery = async <T extends z.ZodType>(
+	schema: T,
+	options: DocumentQuery & {
+		sort?: unknown;
+		include?: unknown;
+		page: number;
+		perPage: number;
+	},
+): ServiceResponse<z.infer<T>> => {
+	const parsed = await parseFormattedQuery(
+		schema,
+		normalizeDocumentQuery({
+			filter: options.filter,
+			sort: options.sort,
+			include: options.include,
+			page: options.page,
+			perPage: options.perPage,
+		}),
+	);
+	if (!parsed.success) {
+		return {
+			error: { type: "validation", status: 400, zod: parsed.error },
+			data: undefined,
+		};
+	}
+
+	return { error: undefined, data: parsed.data };
 };
 
 /** Validates optional input, passes parsed values to the handler and converts unexpected errors to service results. */

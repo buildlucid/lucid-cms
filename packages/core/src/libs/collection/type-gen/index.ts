@@ -1,5 +1,8 @@
 import constants from "../../../constants/constants.js";
-import type { TypeGenerationFile } from "../../type-generation/types.js";
+import type {
+	TypeGenerationFile,
+	TypeGenerationModule,
+} from "../../type-generation/types.js";
 import type BrickBuilder from "../builders/brick-builder/index.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../builders/field-builder/index.js";
@@ -80,11 +83,7 @@ const collectCustomFieldSortKeys = (
 		if (fieldConfig.database.mode !== "column") continue;
 		if (!fieldConfig.capabilities.sortable) continue;
 
-		sortKeys.push(
-			field.key.startsWith(constants.db.generatedColumnPrefix)
-				? field.key
-				: `${constants.db.generatedColumnPrefix}${field.key}`,
-		);
+		sortKeys.push(`fields.${field.key}`);
 	}
 
 	return sortKeys;
@@ -111,7 +110,7 @@ const createFilterTreeNode = (): FilterTreeNode => ({
 const addFilterPath = (
 	tree: FilterTreeNode,
 	path: string[],
-	filterType = "FilterObject",
+	filterType = "FilterCondition",
 ) => {
 	if (path.length === 0) return;
 
@@ -339,11 +338,13 @@ const buildBrickFieldsTypeName = (props: {
 	return `${buildBrickTypeName(props)}Fields`;
 };
 
-/** Collects the runtime filter paths supported by a field, including nested repeater children. */
+/**
+ * Collects `fields.<key>` or `bricks.<brick>.<key>` paths, including repeater children whose keys
+ * are unique within the collection or brick.
+ */
 const collectFieldFilterPaths = (
 	field: FieldConfig<FieldTypes>,
 	scope: FilterScope,
-	path: string[] = [],
 ): string[][] => {
 	const fieldDefinition = registeredFields[field.type];
 	const storageMode = storageModes[fieldDefinition.config.database.mode];
@@ -356,29 +357,15 @@ const collectFieldFilterPaths = (
 		const childFields = storageMode.getChildFieldConfigs(field) ?? [];
 
 		return childFields.flatMap((childField) =>
-			collectFieldFilterPaths(childField, scope, [...path, field.key]),
+			collectFieldFilterPaths(childField, scope),
 		);
 	}
 
-	const fieldSegment = field.key.startsWith(constants.db.generatedColumnPrefix)
-		? field.key
-		: `${constants.db.generatedColumnPrefix}${field.key}`;
-
 	if (scope.kind === "collection") {
-		if (path.length === 0) {
-			return [[fieldSegment]];
-		}
-
-		return [["fields", path[path.length - 1] as string, fieldSegment]];
+		return [["fields", field.key]];
 	}
 
-	return [
-		[
-			scope.brickKey,
-			...(path.length > 0 ? [path[path.length - 1] as string] : []),
-			fieldSegment,
-		],
-	];
+	return [["bricks", scope.brickKey, field.key]];
 };
 
 /** Builds the nested DX filter tree for a collection field tree or brick field tree. */
@@ -454,7 +441,7 @@ const relationIdFilterType = (collection: string | string[]): string => {
 		(collectionKey) => `\`${collectionKey}:\${number}\``,
 	);
 
-	return `FilterObject<${["number", "number[]", ...explicitIds].join(" | ")}>`;
+	return `FilterCondition<${["number", "number[]", ...explicitIds].join(" | ")}>`;
 };
 
 /** Narrows relation ID leaves without adding another traversal level. */
@@ -462,7 +449,6 @@ const applyRelationIdFilterTypes = (props: {
 	tree: FilterTreeNode;
 	fields: FieldConfig<FieldTypes>[];
 	scope: FilterScope;
-	path?: string[];
 }): void => {
 	for (const field of props.fields) {
 		const fieldDefinition = registeredFields[field.type];
@@ -472,17 +458,12 @@ const applyRelationIdFilterTypes = (props: {
 			applyRelationIdFilterTypes({
 				...props,
 				fields: storageMode.getChildFieldConfigs(field) ?? [],
-				path: [...(props.path ?? []), field.key],
 			});
 			continue;
 		}
 		if (field.type !== "relation") continue;
 
-		const relationPath = collectFieldFilterPaths(
-			field,
-			props.scope,
-			props.path,
-		)[0];
+		const relationPath = collectFieldFilterPaths(field, props.scope)[0];
 		if (!relationPath) continue;
 
 		setFilterTypeAtPath(
@@ -528,7 +509,6 @@ const addRelationDocumentFilterBranches = (props: {
 	fields: FieldConfig<FieldTypes>[];
 	scope: FilterScope;
 	collectionsByKey: Map<string, CollectionBuilder>;
-	path?: string[];
 }): void => {
 	for (const field of props.fields) {
 		const fieldDefinition = registeredFields[field.type];
@@ -538,17 +518,12 @@ const addRelationDocumentFilterBranches = (props: {
 			addRelationDocumentFilterBranches({
 				...props,
 				fields: storageMode.getChildFieldConfigs(field) ?? [],
-				path: [...(props.path ?? []), field.key],
 			});
 			continue;
 		}
 		if (field.type !== "relation") continue;
 
-		const relationPath = collectFieldFilterPaths(
-			field,
-			props.scope,
-			props.path,
-		)[0];
+		const relationPath = collectFieldFilterPaths(field, props.scope)[0];
 		if (!relationPath) continue;
 		setFilterTypeAtPath(
 			props.tree,
@@ -643,9 +618,6 @@ const buildCollectionTypeDeclarations = (
 	for (const filterKey of collectionDocumentFilterKeys) {
 		addFilterPath(filterTree, [filterKey]);
 	}
-	if (collection.getData.publishing.workflow) {
-		addFilterPath(filterTree, ["workflowStage"]);
-	}
 
 	mergeFilterTree(
 		filterTree,
@@ -733,28 +705,56 @@ const buildCollectionTypeDeclarations = (
 	};
 };
 
-/** Combines all collection declarations into the generated collection lookup maps. */
-const buildGeneratedMapsDeclaration = (props: {
+const valueTypeImports = [
+	"CollectionDocumentTranslations",
+	"DocumentBrick",
+	"EmailFieldValue",
+	"FilterCondition",
+	"MediaFieldValue",
+	"RelationFieldValue",
+	"RichTextFieldValue",
+	"UserFieldValue",
+];
+
+const renderImport = (module: string): string =>
+	`import type {\n${valueTypeImports.map((name) => `\t${name},`).join("\n")}\n} from "${module}";`;
+
+/** Renders one registry interface with an entry of named types for each collection. */
+const renderRegistry = (
+	name: string,
+	entries: Array<{ collectionKey: string; types: Record<string, string> }>,
+): string => {
+	const members = entries.map((entry) => {
+		const types = Object.entries(entry.types).map(
+			([key, type]) => `${key}: ${type};`,
+		);
+		return `${stringLiteral(entry.collectionKey)}: {\n${indentBlock(types.join("\n"))}\n};`;
+	});
+
+	return `interface ${name} {\n${indentBlock(members.join("\n"))}\n}`;
+};
+
+/**
+ * Generates read types in `client` and server write types in `writes`. Read types augment
+ * `Collections` in the selected core or client module.
+ */
+const generateCollectionTypes = (props: {
 	collections: CollectionBuilder[];
 	localization: CollectionTypeGenLocalization;
-}) => {
-	const dataEntries: string[] = [];
-	const editableEntries: string[] = [];
-	const patchEntries: string[] = [];
-	const localeEntries: string[] = [];
-	const fieldEntries: string[] = [];
-	const brickEntries: string[] = [];
-	const filterEntries: string[] = [];
-	const sortEntries: string[] = [];
-	const versionEntries: string[] = [];
-	const versionKeyEntries: string[] = [];
-	const declarations: string[] = [];
+	/** The module the read types are imported from and merged into. Defaults to core's types. */
+	module?: TypeGenerationModule;
+}): { client: TypeGenerationFile; writes: TypeGenerationFile } => {
+	const module = props.module ?? constants.typeGeneration.modules.coreTypes;
+	const readDeclarations: string[] = [];
+	const writeDeclarations: string[] = [];
+	const readEntries: Parameters<typeof renderRegistry>[1] = [];
+	const writeEntries: Parameters<typeof renderRegistry>[1] = [];
 	const collectionsByKey = new Map(
 		props.collections.map((collection) => [collection.key, collection]),
 	);
 
 	for (const collection of props.collections) {
-		const generatedCollection = buildCollectionTypeDeclarations(
+		const generated = buildCollectionTypeDeclarations(
 			collection,
 			collectionsByKey,
 			props.localization,
@@ -763,7 +763,6 @@ const buildGeneratedMapsDeclaration = (props: {
 			localization: props.localization,
 			collection,
 		});
-
 		const authoring = generateAuthoringTypes(
 			{ collection, localization: props.localization },
 			(shape) =>
@@ -774,130 +773,64 @@ const buildGeneratedMapsDeclaration = (props: {
 					withinGroup: false,
 				}),
 		);
-		declarations.push(...authoring.declarations);
-		dataEntries.push(
-			`${stringLiteral(collection.key)}: ${authoring.dataName};`,
-		);
-		editableEntries.push(
-			`${stringLiteral(collection.key)}: ${authoring.editableName};`,
-		);
-		patchEntries.push(
-			`${stringLiteral(collection.key)}: ${authoring.patchName};`,
-		);
-		declarations.push(...generatedCollection.declarations);
-		fieldEntries.push(
-			`${stringLiteral(collection.key)}: ${generatedCollection.collectionFieldsTypeName};`,
-		);
-		brickEntries.push(
-			`${stringLiteral(collection.key)}: ${generatedCollection.collectionBricksTypeName};`,
-		);
-		localeEntries.push(
-			`${stringLiteral(collection.key)}: ${
-				localization.locales.length > 0
-					? localization.locales.map(stringLiteral).join(" | ")
-					: "never"
-			};`,
-		);
-		filterEntries.push(
-			`${stringLiteral(collection.key)}: ${generatedCollection.collectionFiltersTypeName};`,
-		);
-		sortEntries.push(
-			`${stringLiteral(collection.key)}: ${generatedCollection.collectionSortKeyTypeName};`,
-		);
-		versionEntries.push(
-			`${stringLiteral(collection.key)}: ${generatedCollection.collectionVersionTypeName};`,
-		);
-		versionKeyEntries.push(
-			`${stringLiteral(collection.key)}: ${generatedCollection.collectionVersionKeyTypeName};`,
-		);
+
+		readDeclarations.push(...generated.declarations);
+		readEntries.push({
+			collectionKey: collection.key,
+			types: {
+				fields: generated.collectionFieldsTypeName,
+				bricks: generated.collectionBricksTypeName,
+				locales:
+					localization.locales.length > 0
+						? localization.locales.map(stringLiteral).join(" | ")
+						: "never",
+				filters: generated.collectionFiltersTypeName,
+				sorts: generated.collectionSortKeyTypeName,
+				versions: generated.collectionVersionTypeName,
+				versionKeys: generated.collectionVersionKeyTypeName,
+			},
+		});
+		writeDeclarations.push(...authoring.declarations);
+		writeEntries.push({
+			collectionKey: collection.key,
+			types: {
+				data: authoring.dataName,
+				editable: authoring.editableName,
+				patch: authoring.patchName,
+			},
+		});
 	}
 
-	declarations.push(
-		`export interface GeneratedCollectionDocumentDataByCollection { ${dataEntries.join("\n")} }`,
-		`export interface GeneratedCollectionDocumentEditableByCollection { ${editableEntries.join("\n")} }`,
-		`export interface GeneratedCollectionDocumentPatchByCollection { ${patchEntries.join("\n")} }`,
-		`export interface GeneratedCollectionDocumentLocaleCodesByCollection {\n${localeEntries.length > 0 ? indentBlock(localeEntries.join("\n")) : ""}\n}`,
-		`export type CollectionDocumentLocaleCode<TCollectionKey extends string = string> = TCollectionKey extends keyof GeneratedCollectionDocumentLocaleCodesByCollection ? Extract<GeneratedCollectionDocumentLocaleCodesByCollection[TCollectionKey], string> : string;`,
-		`export interface GeneratedCollectionDocumentFieldsByCollection {\n${fieldEntries.length > 0 ? indentBlock(fieldEntries.join("\n")) : ""}\n}`,
-		`export interface GeneratedCollectionDocumentBricksByCollection {\n${brickEntries.length > 0 ? indentBlock(brickEntries.join("\n")) : ""}\n}`,
-		`export interface GeneratedCollectionDocumentFiltersByCollection {\n${filterEntries.length > 0 ? indentBlock(filterEntries.join("\n")) : ""}\n}`,
-		`export interface GeneratedCollectionDocumentSortsByCollection {\n${sortEntries.length > 0 ? indentBlock(sortEntries.join("\n")) : ""}\n}`,
-		`export interface GeneratedCollectionDocumentVersionsByCollection {\n${versionEntries.length > 0 ? indentBlock(versionEntries.join("\n")) : ""}\n}`,
-		`export interface GeneratedCollectionDocumentVersionKeysByCollection {\n${versionKeyEntries.length > 0 ? indentBlock(versionKeyEntries.join("\n")) : ""}\n}`,
-		`export type GeneratedCollectionDocumentKey = Extract<keyof GeneratedCollectionDocumentFieldsByCollection, string>;`,
-		`export type CollectionDocumentKey = GeneratedCollectionDocumentKey | (string & {});`,
-		`export type CollectionDocument<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
-		`export type Document<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
-		`export type CollectionDocumentFilters<TCollectionKey extends string = string> = CoreCollectionDocumentFilters<TCollectionKey>;`,
-		`export type CollectionDocumentFilterInput<TCollectionKey extends string = string> = CoreCollectionDocumentFilterInput<TCollectionKey>;`,
-		`export type CollectionDocumentVersion<TCollectionKey extends string = string> = CoreCollectionDocumentVersion<TCollectionKey>;`,
-		`export type CollectionDocumentSortKey<TCollectionKey extends string = string> = CoreCollectionDocumentSortKey<TCollectionKey>;`,
-		`export type CollectionDocumentSorts<TCollectionKey extends string = string> = CoreCollectionDocumentSorts<TCollectionKey>;`,
-		`export type CollectionDocumentVersionKey<TCollectionKey extends string = string> = CoreCollectionDocumentVersionKey<TCollectionKey>;`,
-	);
-
-	return dedupeStrings(declarations);
-};
-
-/** Generates the `.lucid/client.d.ts` file for collection-aware content-facing types. */
-const generateCollectionClientTypes = (props: {
-	collections: CollectionBuilder[];
-	localization: CollectionTypeGenLocalization;
-}): TypeGenerationFile => {
-	const generatedMaps = buildGeneratedMapsDeclaration(props);
-
 	return {
-		filename: constants.typeGeneration.files.client,
-		imports: [
-			`import type {
-\tCollectionDocument as CoreCollectionDocument,
-\tCollectionDocumentFilterInput as CoreCollectionDocumentFilterInput,
-\tCollectionDocumentFilters as CoreCollectionDocumentFilters,
-\tCollectionDocumentVersion as CoreCollectionDocumentVersion,
-\tCollectionDocumentSortKey as CoreCollectionDocumentSortKey,
-\tCollectionDocumentSorts as CoreCollectionDocumentSorts,
-\tCollectionDocumentTranslations,
-\tCollectionDocumentVersionKey as CoreCollectionDocumentVersionKey,
-\tDocumentBrick,
-\tEmailFieldValue,
-\tFilterObject,
-\tMediaFieldValue,
-\tRelationFieldValue,
-\tRichTextFieldValue,
-\tUserFieldValue,
-} from "${constants.typeGeneration.modules.coreTypes}";`,
-		],
-		declarations: generatedMaps,
-		moduleAugmentations: [
-			{
-				module: constants.typeGeneration.modules.coreTypes,
-				declarations: [
-					"interface CollectionDocumentDataByCollection extends GeneratedCollectionDocumentDataByCollection {}",
-					"interface CollectionDocumentEditableByCollection extends GeneratedCollectionDocumentEditableByCollection {}",
-					"interface CollectionDocumentPatchByCollection extends GeneratedCollectionDocumentPatchByCollection {}",
-					"interface CollectionDocumentLocaleCodesByCollection extends GeneratedCollectionDocumentLocaleCodesByCollection {}",
-					"interface CollectionDocumentFieldsByCollection extends GeneratedCollectionDocumentFieldsByCollection {}",
-					"interface CollectionDocumentBricksByCollection extends GeneratedCollectionDocumentBricksByCollection {}",
-					"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
-					"interface CollectionDocumentVersionsByCollection extends GeneratedCollectionDocumentVersionsByCollection {}",
-					"interface CollectionDocumentSortsByCollection extends GeneratedCollectionDocumentSortsByCollection {}",
-					"interface CollectionDocumentVersionKeysByCollection extends GeneratedCollectionDocumentVersionKeysByCollection {}",
-				],
-			},
-			{
-				module: constants.typeGeneration.modules.clientTypes,
-				declarations: [
-					"interface CollectionDocumentLocaleCodesByCollection extends GeneratedCollectionDocumentLocaleCodesByCollection {}",
-					"interface CollectionDocumentFieldsByCollection extends GeneratedCollectionDocumentFieldsByCollection {}",
-					"interface CollectionDocumentBricksByCollection extends GeneratedCollectionDocumentBricksByCollection {}",
-					"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
-					"interface CollectionDocumentVersionsByCollection extends GeneratedCollectionDocumentVersionsByCollection {}",
-					"interface CollectionDocumentSortsByCollection extends GeneratedCollectionDocumentSortsByCollection {}",
-					"interface CollectionDocumentVersionKeysByCollection extends GeneratedCollectionDocumentVersionKeysByCollection {}",
-				],
-			},
-		],
+		client: {
+			filename: constants.typeGeneration.files.client,
+			imports: [renderImport(module)],
+			declarations: dedupeStrings(readDeclarations),
+			moduleAugmentations: [
+				{
+					module,
+					declarations: [
+						indentBlock(renderRegistry("Collections", readEntries)).trimStart(),
+					],
+				},
+			],
+		},
+		writes: {
+			filename: constants.typeGeneration.files.writes,
+			imports: [renderImport(constants.typeGeneration.modules.coreTypes)],
+			declarations: dedupeStrings(writeDeclarations),
+			moduleAugmentations: [
+				{
+					module: constants.typeGeneration.modules.coreTypes,
+					declarations: [
+						indentBlock(
+							renderRegistry("CollectionWrites", writeEntries),
+						).trimStart(),
+					],
+				},
+			],
+		},
 	};
 };
 
-export default generateCollectionClientTypes;
+export default generateCollectionTypes;

@@ -236,9 +236,9 @@ test("MCP discovery describes routing and excludes inaccessible collections", as
 
 test("MCP document reads use real custom-field, brick and repeater filters", async () => {
 	for (const filter of [
-		[{ key: "_path", value: "/about" }],
-		[{ key: "hero._heading", value: "About heading" }],
-		[{ key: "fields.links._caption", value: "Team" }],
+		[{ key: "fields.path", value: "/about" }],
+		[{ key: "bricks.hero.heading", value: "About heading" }],
+		[{ key: "fields.caption", value: "Team" }],
 	]) {
 		const result = await call("documents_find", {
 			collectionKey: pages.key,
@@ -309,10 +309,10 @@ test("MCP document reads respect pagination, field selection and content locales
 
 test("MCP document filters preserve content API operators and OR groups", async () => {
 	for (const filter of [
-		[{ key: "_path", operator: "contains", value: "bout" }],
-		[{ key: "_path", operator: "starts-with", value: "/abo" }],
-		[{ key: "_path", operator: "!=", value: "/contact" }],
-		[{ key: "_path", operator: "in", value: ["/about"] }],
+		[{ key: "fields.path", operator: "contains", value: "bout" }],
+		[{ key: "fields.path", operator: "starts-with", value: "/abo" }],
+		[{ key: "fields.path", operator: "!=", value: "/contact" }],
+		[{ key: "fields.path", operator: "in", value: ["/about"] }],
 	]) {
 		const result = await call("documents_find", {
 			collectionKey: pages.key,
@@ -329,14 +329,14 @@ test("MCP document filters preserve content API operators and OR groups", async 
 		collectionKey: pages.key,
 		query: {
 			filterOr: [
-				[{ key: "hero._heading", operator: "contains", value: "About" }],
 				[
 					{
-						key: "fields.links._caption",
-						operator: "starts-with",
-						value: "Email",
+						key: "bricks.hero.heading",
+						operator: "contains",
+						value: "About",
 					},
 				],
+				[{ key: "fields.caption", operator: "starts-with", value: "Email" }],
 			],
 		},
 	});

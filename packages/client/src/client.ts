@@ -33,8 +33,8 @@ export interface LucidClient {
 
 /**
  * Creates a client for Lucid's external content endpoints.
- * Results contain data with sibling refs, meta, links and response properties.
- * Check error before reading data. Pass request.signal to cancel a request.
+ * Results contain data beside the original response. Check error before reading data.
+ * Pass request.signal to cancel a request.
  *
  * @example
  * ```ts
@@ -46,18 +46,12 @@ export interface LucidClient {
  * 		type: "apiKey",
  * 		apiKey: "<your-integration-key>",
  * 	},
+ * 	version: "production",
  * });
  *
  * const result = await client.documents.getSingle({
  * 	collectionKey: "page",
- * 	version: "published",
- * 	query: {
- * 		filter: {
- * 			_path: {
- * 				value: "/about",
- * 			},
- * 		},
- * 	},
+ * 	filter: { fields: { path: "/about" } },
  * });
  * ```
  */
@@ -67,7 +61,7 @@ export const createClient = (options: CreateClientOptions): LucidClient => {
 
 	return {
 		account: createAccountClient(transport),
-		documents: createDocumentsClient(transport),
+		documents: createDocumentsClient(transport, options.version),
 		locales: createLocalesClient(transport),
 		media: createMediaClient(transport),
 		previews: createPreviewsClient(transport),

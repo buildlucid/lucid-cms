@@ -236,7 +236,7 @@ const ViewUserLoginsPanelContent: Component<{
 				</QueryBoundary>
 				<Pagination
 					queryState={loginsSearchParams}
-					meta={userLogins.data?.meta}
+					pagination={userLogins.data?.pagination}
 					loading={userLoginsList.loading()}
 					variant="inline"
 				/>

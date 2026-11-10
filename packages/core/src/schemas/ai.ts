@@ -367,7 +367,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						sessionType: queryFormatted.schema.filters.union.optional(),
 						userId: queryFormatted.schema.filters.union.optional(),
 						requestId: queryFormatted.schema.filters.single.optional(),

@@ -55,22 +55,22 @@ describe("checkFilterAccess", async () => {
 	test("allows filters on fields the reader can see", () => {
 		expect(
 			check({
-				filter: { _title: { value: "Hello" } },
-				filterOr: [[{ key: "_author._name", value: "Will" }]],
+				filter: { "fields.title": { value: "Hello" } },
+				filterOr: [[{ key: "fields.author.fields.name", value: "Will" }]],
 			}).error,
 		).toBeUndefined();
 	});
 
 	test("rejects hidden fields in filters, OR groups and sorts", () => {
 		for (const query of [
-			{ filter: { _secret: { value: "x" } } },
+			{ filter: { "fields.secret": { value: "x" } } },
 			{
 				filterOr: [
-					[{ key: "_title", value: "x" }],
-					[{ key: "_secret", value: "x" }],
+					[{ key: "fields.title", value: "x" }],
+					[{ key: "fields.secret", value: "x" }],
 				],
 			},
-			{ sortKeys: ["_secret"] },
+			{ sortKeys: ["fields.secret"] },
 		]) {
 			expect(check(query).error?.status).toBe(400);
 		}
@@ -78,16 +78,20 @@ describe("checkFilterAccess", async () => {
 
 	test("rejects hidden fields in the collection a relation filter reaches", () => {
 		expect(
-			check({ filter: { "_author._salary": { value: 100 } } }).error?.status,
+			check({ filter: { "fields.author.fields.salary": { value: 100 } } }).error
+				?.status,
 		).toBe(400);
 	});
 
 	test("checks a brick relation's target fields against the target collection only", () => {
 		expect(
-			check({ filter: { "hero._featured._name": { value: "Will" } } }).error,
+			check({
+				filter: { "bricks.hero.featured.fields.name": { value: "Will" } },
+			}).error,
 		).toBeUndefined();
 		expect(
-			check({ filter: { "hero._name": { value: "Will" } } }).error?.status,
+			check({ filter: { "bricks.hero.name": { value: "Will" } } }).error
+				?.status,
 		).toBe(400);
 	});
 });

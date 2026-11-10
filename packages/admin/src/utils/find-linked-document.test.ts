@@ -40,7 +40,7 @@ describe("findLinkedDocument", () => {
 			expect.objectContaining({
 				collectionKey: "page",
 				query: {
-					filters: { "_path:in": ["/fr/a-propos", "/fr/a-propos/"] },
+					filters: { "fields.path:in": ["/fr/a-propos", "/fr/a-propos/"] },
 					perPage: 1,
 				},
 			}),

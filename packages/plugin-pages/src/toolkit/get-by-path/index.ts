@@ -5,24 +5,22 @@ import type {
 	ContentLocaleInput,
 	CoreToolkit,
 	ToolkitDocumentsGetSingleInput,
-	ToolkitDocumentsGetSingleQuery,
 } from "@lucidcms/core/types";
 
-/** Collection, version and path to look up. Additional query options control included content. */
+/** Collection, version and path to look up, with the other document read options such as `include`. */
 export type PagesGetByPathInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
 > = Omit<
 	ToolkitDocumentsGetSingleInput<TCollectionKey, TLocale>,
-	"query" | "locale"
+	"filter" | "locale"
 > &
 	ContentLocaleInput<TLocale> & {
 		/** The complete page path, including any locale or collection prefix. */
 		path: string;
-		query?: Omit<ToolkitDocumentsGetSingleQuery<TCollectionKey>, "filter">;
 	};
 
-/** Finds a document in a pages collection by its path, as the content API returns it. */
+/** Finds a document in a pages collection by its path, as the content API returns it, or null when no page has it. */
 const getByPath = <
 	TCollectionKey extends CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
@@ -32,16 +30,13 @@ const getByPath = <
 ) =>
 	runToolkitService({
 		handler: () => {
-			const { path, query, ...options } = input;
+			const { path, ...options } = input;
 			return core.documents.getSingle({
 				...options,
-				query: {
-					...query,
-					// Pages registers this field; collection filter types come from the consuming project.
-					filter: {
-						_path: { value: path },
-					} as CollectionDocumentFilters<TCollectionKey>,
-				},
+				// Pages registers this field; collection filter types come from the consuming project.
+				filter: {
+					fields: { path },
+				} as CollectionDocumentFilters<TCollectionKey>,
 			});
 		},
 		name: {

@@ -38,14 +38,6 @@ describe("draft validation after reverting edits", () => {
 				.mockRejectedValueOnce(new Error("Invalid repeater group"))
 				.mockResolvedValue({
 					data: { fields: [], bricks: [] },
-					meta: {
-						links: [],
-						path: "",
-						currentPage: null,
-						lastPage: null,
-						perPage: null,
-						total: null,
-					},
 				});
 			const save =
 				vi.fn<
@@ -102,14 +94,6 @@ describe("draft validation after reverting edits", () => {
 	it("pauses an in-flight validation during alignment and resumes autosave when cancelled", async () => {
 		const response = {
 			data: { fields: [], bricks: [] },
-			meta: {
-				links: [],
-				path: "",
-				currentPage: null,
-				lastPage: null,
-				perPage: null,
-				total: null,
-			},
 		};
 		let complete: (() => void) | undefined;
 		const check = vi

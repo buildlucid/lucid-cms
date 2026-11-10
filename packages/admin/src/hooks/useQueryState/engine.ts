@@ -1,3 +1,4 @@
+import appendFilterParam from "@/utils/append-filter-param";
 import {
 	arrayFilter,
 	booleanFilter,
@@ -347,6 +348,24 @@ export const stateToStorageSearch = (
 	return params.toString();
 };
 
+/** Adds a filter the codec doesn't count as empty to the API query. */
+const appendApiFilter = (
+	params: URLSearchParams,
+	name: (operator: string | undefined) => string,
+	filter: { value: FilterValue; operator?: string },
+	codec: FilterCodec,
+) => {
+	const serialized = codec.serialize(filter.value);
+	if (serialized === undefined) return;
+
+	const value = codec.normalize(filter.value);
+	appendFilterParam(params, {
+		name,
+		value: Array.isArray(value) ? value : serialized,
+		operator: filter.operator,
+	});
+};
+
 //* builds the API query string - identical for URL and memory modes
 export const buildQueryString = (
 	state: QueryStateModel,
@@ -355,20 +374,21 @@ export const buildQueryString = (
 	const params = new URLSearchParams();
 
 	for (const [key, filter] of Object.entries(state.filters)) {
-		const codec = codecForKey(schema, key, filter.value);
-		const serialized = codec.serialize(filter.value);
-		if (serialized === undefined) continue;
-		params.set(filterParamKey(key, filter.operator), serialized);
+		appendApiFilter(
+			params,
+			(operator) => filterParamKey(key, operator),
+			filter,
+			codecForKey(schema, key, filter.value),
+		);
 	}
 
 	for (const [groupIndex, group] of (state.orFilterGroups ?? []).entries()) {
 		for (const condition of group) {
-			const codec = codecForKey(schema, condition.key, condition.value);
-			const serialized = codec.serialize(condition.value);
-			if (serialized === undefined) continue;
-			params.set(
-				orFilterParamKey(groupIndex, condition.key, condition.operator),
-				serialized,
+			appendApiFilter(
+				params,
+				(operator) => orFilterParamKey(groupIndex, condition.key, operator),
+				condition,
+				codecForKey(schema, condition.key, condition.value),
 			);
 		}
 	}

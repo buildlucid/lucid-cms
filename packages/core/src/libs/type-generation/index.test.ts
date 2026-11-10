@@ -46,11 +46,11 @@ test("generates project and plugin access keys and removes stale declarations", 
 		await generateTypes({ ...config, projectRoot, configPath });
 		const outputPath = path.join(projectRoot, ".lucid", "types.d.ts");
 		const generated = await readFile(outputPath, "utf8");
-		for (const module of ["@lucidcms/core/types", "@lucidcms/types"]) {
-			expect(generated).toContain(`declare module '${module}'`);
-		}
-		expect(generated.match(/"reports:read": true;/g)).toHaveLength(2);
-		expect(generated.match(/"exports:read": true;/g)).toHaveLength(2);
+		expect(generated.match(/declare module '[^']+'/g)).toEqual([
+			"declare module '@lucidcms/core/types'",
+		]);
+		expect(generated.match(/"reports:read": true;/g)).toHaveLength(1);
+		expect(generated.match(/"exports:read": true;/g)).toHaveLength(1);
 		await generateTypes({ ...config, access: [], projectRoot, configPath });
 		const regenerated = await readFile(outputPath, "utf8");
 		expect(regenerated).not.toContain("reports:read");
@@ -187,6 +187,7 @@ test("generates collection-aware client document types that lean on the public L
 				],
 				defaultLocale: "en",
 			},
+			clientTypes: ["site/lucid.d.ts"],
 		});
 
 		const typesContent = await readFile(
@@ -197,8 +198,17 @@ test("generates collection-aware client document types that lean on the public L
 			path.join(tempDir, ".lucid", "client.d.ts"),
 			"utf8",
 		);
+		const writesContent = await readFile(
+			path.join(tempDir, ".lucid", "writes.d.ts"),
+			"utf8",
+		);
+		const siteClientContent = await readFile(
+			path.join(tempDir, "site", "lucid.d.ts"),
+			"utf8",
+		);
 
 		expect(typesContent).toContain('/// <reference path="./client.d.ts" />');
+		expect(typesContent).toContain('/// <reference path="./writes.d.ts" />');
 		expect(typesContent).toContain(
 			'import type translationSource0 from "../translations/en.admin.json";',
 		);
@@ -227,14 +237,6 @@ test("generates collection-aware client document types that lean on the public L
 		expect(typesContent).not.toContain('"server:custom.server.error": true;');
 		expect(clientContent).toContain(`from "@lucidcms/core/types";`);
 		expect(clientContent)
-			.toContain(`export interface GeneratedCollectionDocumentLocaleCodesByCollection {
-	"page": "en" | "fr";
-	"article": "de";
-}`);
-		expect(clientContent).toContain(
-			`export type CollectionDocumentLocaleCode<TCollectionKey extends string = string> = TCollectionKey extends keyof GeneratedCollectionDocumentLocaleCodesByCollection ? Extract<GeneratedCollectionDocumentLocaleCodesByCollection[TCollectionKey], string> : string;`,
-		);
-		expect(clientContent)
 			.toContain(`export type PageCollectionDocumentFields = {
 	"_page_title": CollectionDocumentTranslations<string | null, "page">;
 	"_related_page": Array<RelationFieldValue<"page">>;
@@ -245,102 +247,86 @@ test("generates collection-aware client document types that lean on the public L
 }`);
 		expect(clientContent)
 			.toContain(`export type PageCollectionDocumentFilters = {
-	"id"?: FilterObject;
-	"createdBy"?: FilterObject;
-	"updatedBy"?: FilterObject;
-	"createdAt"?: FilterObject;
-	"updatedAt"?: FilterObject;
-	"_page_title"?: FilterObject;
-	"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`> | {
-		"page"?: {
-			"_page_title"?: FilterObject;
-			"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
-			"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
-			"fields"?: {
-				"sections"?: {
-					"_section_title"?: FilterObject;
-				};
-			};
-			"banner"?: {
-				"_title"?: FilterObject;
-				"call_to_actions"?: {
-					"_label"?: FilterObject;
-				};
-			};
-		};
-		"_page_title"?: FilterObject;
-		"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
-		"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
-		"fields"?: {
-			"sections"?: {
-				"_section_title"?: FilterObject;
-			};
-		};
-		"banner"?: {
-			"_title"?: FilterObject;
-			"call_to_actions"?: {
-				"_label"?: FilterObject;
-			};
-		};
-	};
-	"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`> | {
-		"page"?: {
-			"_page_title"?: FilterObject;
-			"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
-			"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
-			"fields"?: {
-				"sections"?: {
-					"_section_title"?: FilterObject;
-				};
-			};
-			"banner"?: {
-				"_title"?: FilterObject;
-				"call_to_actions"?: {
-					"_label"?: FilterObject;
-				};
-			};
-		};
-		"_page_title"?: FilterObject;
-		"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
-		"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
-		"fields"?: {
-			"sections"?: {
-				"_section_title"?: FilterObject;
-			};
-		};
-		"banner"?: {
-			"_title"?: FilterObject;
-			"call_to_actions"?: {
-				"_label"?: FilterObject;
-			};
-		};
-	};
+	"id"?: FilterCondition;
+	"createdBy"?: FilterCondition;
+	"updatedBy"?: FilterCondition;
+	"createdAt"?: FilterCondition;
+	"updatedAt"?: FilterCondition;
 	"fields"?: {
-		"sections"?: {
-			"_section_title"?: FilterObject;
+		"_page_title"?: FilterCondition;
+		"_related_page"?: FilterCondition<number | number[] | \`page:\${number}\`> | {
+			"page"?: {
+				"fields"?: {
+					"_page_title"?: FilterCondition;
+					"_related_page"?: FilterCondition<number | number[] | \`page:\${number}\`>;
+					"_related_content"?: FilterCondition<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+					"_section_title"?: FilterCondition;
+				};
+				"bricks"?: {
+					"banner"?: {
+						"title"?: FilterCondition;
+						"label"?: FilterCondition;
+					};
+				};
+			};
+			"fields"?: {
+				"_page_title"?: FilterCondition;
+				"_related_page"?: FilterCondition<number | number[] | \`page:\${number}\`>;
+				"_related_content"?: FilterCondition<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+				"_section_title"?: FilterCondition;
+			};
+			"bricks"?: {
+				"banner"?: {
+					"title"?: FilterCondition;
+					"label"?: FilterCondition;
+				};
+			};
 		};
+		"_related_content"?: FilterCondition<number | number[] | \`page:\${number}\` | \`blog:\${number}\`> | {
+			"page"?: {
+				"fields"?: {
+					"_page_title"?: FilterCondition;
+					"_related_page"?: FilterCondition<number | number[] | \`page:\${number}\`>;
+					"_related_content"?: FilterCondition<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+					"_section_title"?: FilterCondition;
+				};
+				"bricks"?: {
+					"banner"?: {
+						"title"?: FilterCondition;
+						"label"?: FilterCondition;
+					};
+				};
+			};
+			"fields"?: {
+				"_page_title"?: FilterCondition;
+				"_related_page"?: FilterCondition<number | number[] | \`page:\${number}\`>;
+				"_related_content"?: FilterCondition<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+				"_section_title"?: FilterCondition;
+			};
+			"bricks"?: {
+				"banner"?: {
+					"title"?: FilterCondition;
+					"label"?: FilterCondition;
+				};
+			};
+		};
+		"_section_title"?: FilterCondition;
 	};
-	"banner"?: {
-		"_title"?: FilterObject;
-		"call_to_actions"?: {
-			"_label"?: FilterObject;
+	"bricks"?: {
+		"banner"?: {
+			"title"?: FilterCondition;
+			"label"?: FilterCondition;
 		};
 	};
 }`);
 		expect(clientContent).toContain(
-			`export type PageCollectionDocumentSortKey = "createdAt" | "updatedAt" | "_page_title";`,
+			`export type PageCollectionDocumentSortKey = "createdAt" | "updatedAt" | "fields._page_title";`,
 		);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentVersion = "latest" | "revision" | "snapshot" | "published";`,
 		);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentVersionKey = "latest" | "published";`,
-		);
-		expect(clientContent).toContain(
-			`export type GeneratedCollectionDocumentKey = Extract<keyof GeneratedCollectionDocumentFieldsByCollection, string>;`,
-		);
-		expect(clientContent).toContain(
-			`export type CollectionDocumentKey = GeneratedCollectionDocumentKey | (string & {});`,
 		);
 		expect(clientContent)
 			.toContain(`export type PageBannerBuilderBrickFields = {
@@ -349,29 +335,50 @@ test("generates collection-aware client document types that lean on the public L
 		"label": string | null;
 	}>;
 }`);
-		expect(clientContent).toContain(
-			`export type CollectionDocument<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
-		);
-		expect(clientContent).toContain(
-			`export type CollectionDocumentFilterInput<TCollectionKey extends string = string> = CoreCollectionDocumentFilterInput<TCollectionKey>;`,
-		);
 		expect(clientContent).not.toContain('"content_tab"');
-		expect(clientContent).toContain("declare module '@lucidcms/core/types'");
-		expect(clientContent).toContain("declare module '@lucidcms/client/types'");
-		expect(clientContent).toContain(
-			"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
+		expect(clientContent.match(/declare module '[^']+'/g)).toEqual([
+			"declare module '@lucidcms/core/types'",
+		]);
+		expect(clientContent).toContain(`declare module '@lucidcms/core/types' {
+	interface Collections {
+		"page": {
+			fields: PageCollectionDocumentFields;
+			bricks: PageCollectionDocumentBrick;
+			locales: "en" | "fr";
+			filters: PageCollectionDocumentFilters;
+			sorts: PageCollectionDocumentSortKey;
+			versions: PageCollectionDocumentVersion;
+			versionKeys: PageCollectionDocumentVersionKey;
+		};
+		"article": {
+			fields: ArticleCollectionDocumentFields;
+			bricks: ArticleCollectionDocumentBrick;
+			locales: "de";
+			filters: ArticleCollectionDocumentFilters;
+			sorts: ArticleCollectionDocumentSortKey;
+			versions: ArticleCollectionDocumentVersion;
+			versionKeys: ArticleCollectionDocumentVersionKey;
+		};
+	}
+}`);
+		expect(clientContent.match(/^\tinterface \w+/gm)).toEqual([
+			"\tinterface Collections",
+		]);
+		expect(writesContent.match(/declare module '[^']+'/g)).toEqual([
+			"declare module '@lucidcms/core/types'",
+		]);
+		expect(writesContent.match(/^\tinterface \w+/gm)).toEqual([
+			"\tinterface CollectionWrites",
+		]);
+		expect(siteClientContent).toBe(
+			clientContent.replaceAll(
+				"@lucidcms/core/types",
+				"@lucidcms/client/types",
+			),
 		);
-		expect(clientContent).toContain(
-			"interface CollectionDocumentVersionsByCollection extends GeneratedCollectionDocumentVersionsByCollection {}",
-		);
-		expect(clientContent).toContain(
-			"interface CollectionDocumentSortsByCollection extends GeneratedCollectionDocumentSortsByCollection {}",
-		);
-		expect(clientContent).toContain(
-			"interface CollectionDocumentVersionKeysByCollection extends GeneratedCollectionDocumentVersionKeysByCollection {}",
-		);
-		expect(clientContent).toContain(
-			"interface CollectionDocumentLocaleCodesByCollection extends GeneratedCollectionDocumentLocaleCodesByCollection {}",
+		expect(siteClientContent).toContain(`from "@lucidcms/client/types";`);
+		expect(siteClientContent).toContain(
+			"declare module '@lucidcms/client/types'",
 		);
 	} finally {
 		process.chdir(cwd);

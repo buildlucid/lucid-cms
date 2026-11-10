@@ -16,25 +16,32 @@ export type DocumentEditableData = z.infer<typeof documentEditableDataSchema>;
 /** Operations run in order and validate the resulting document together. */
 export type DocumentPatch = z.infer<typeof documentPatchSchema>;
 
+/**
+ * Each collection's generated write types by collection key, which `lucidcms typegen` merges in:
+ * `data`, `editable` and `patch`.
+ */
 // oxlint-disable-next-line typescript/no-empty-object-type -- generated collection types extend this map
-export interface CollectionDocumentDataByCollection {}
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated collection types extend this map
-export interface CollectionDocumentEditableByCollection {}
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated collection types extend this map
-export interface CollectionDocumentPatchByCollection {}
+export interface CollectionWrites {}
 
-export type CollectionDocumentData<K extends string = string> =
-	K extends keyof CollectionDocumentDataByCollection
-		? CollectionDocumentDataByCollection[K]
-		: DocumentData;
+type CollectionWrite<
+	K extends string,
+	TName extends string,
+	TFallback,
+> = K extends keyof CollectionWrites
+	? CollectionWrites[K] extends Record<TName, infer TValue>
+		? TValue
+		: TFallback
+	: TFallback;
+
+export type CollectionDocumentData<K extends string = string> = CollectionWrite<
+	K,
+	"data",
+	DocumentData
+>;
 export type CollectionDocumentEditable<K extends string = string> =
-	K extends keyof CollectionDocumentEditableByCollection
-		? CollectionDocumentEditableByCollection[K]
-		: DocumentEditableData;
+	CollectionWrite<K, "editable", DocumentEditableData>;
 export type CollectionDocumentPatch<K extends string = string> =
-	K extends keyof CollectionDocumentPatchByCollection
-		? CollectionDocumentPatchByCollection[K]
-		: DocumentPatch;
+	CollectionWrite<K, "patch", DocumentPatch>;
 
 /** Identifies the saved content without fetching a rendered document. */
 export type DocumentWriteResult = NonNullable<

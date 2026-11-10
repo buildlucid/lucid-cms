@@ -469,7 +469,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						type: queryFormatted.schema.filters.single.optional(),
 						title: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),

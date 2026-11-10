@@ -2,60 +2,13 @@ import type { OpenAPIV3 } from "openapi-types";
 import constants from "../../../constants/constants.js";
 import { translate } from "../../i18n/index.js";
 
-const metaObject: OpenAPIV3.SchemaObject = {
+const paginationObject: OpenAPIV3.SchemaObject = {
 	type: "object",
 	properties: {
-		path: { type: "string" },
-		links: { type: "array", items: {} },
-		currentPage: { type: "number", nullable: true, example: null },
-		lastPage: { type: "number", nullable: true, example: null },
-		perPage: { type: "number", nullable: true, example: null },
-		total: { type: "number", nullable: true, example: null },
-	},
-};
-
-const paginatedMetaObject: OpenAPIV3.SchemaObject = {
-	type: "object",
-	properties: {
-		path: { type: "string" },
-		links: {
-			type: "array",
-			items: {
-				type: "object",
-				properties: {
-					active: { type: "boolean" },
-					label: { type: "string" },
-					url: { type: "string", nullable: true },
-					page: { type: "number" },
-				},
-			},
-		},
-		currentPage: {
-			type: "number",
-			nullable: true,
-			example: constants.query.page,
-		},
-		lastPage: {
-			type: "number",
-			nullable: true,
-			example: 200 / constants.query.perPage,
-		},
-		perPage: {
-			type: "number",
-			nullable: true,
-			example: constants.query.perPage,
-		},
-		total: { type: "number", nullable: true, example: 200 },
-	},
-};
-
-const linksObject: OpenAPIV3.SchemaObject = {
-	type: "object",
-	properties: {
-		first: { type: "string", nullable: true },
-		last: { type: "string", nullable: true },
-		next: { type: "string", nullable: true },
-		prev: { type: "string", nullable: true },
+		currentPage: { type: "number", example: constants.query.page },
+		lastPage: { type: "number", example: 200 / constants.query.perPage },
+		perPage: { type: "number", example: constants.query.perPage },
+		total: { type: "number", example: 200 },
 	},
 };
 
@@ -106,7 +59,7 @@ const responses = (config?: {
 	stream?: true;
 	/** OpenAPI schema for the sibling refs registry. */
 	refsSchema?: unknown;
-	/** Include pagination metadata and links. */
+	/** Include the pagination of a list. */
 	paginated?: boolean;
 	/** Describe an unspecified nullable object instead of envelope properties. */
 	noProperties?: boolean;
@@ -141,8 +94,9 @@ const responses = (config?: {
 									properties: {
 										data: config.dataSchema,
 										...(config.refsSchema ? { refs: config.refsSchema } : {}),
-										meta: config.paginated ? paginatedMetaObject : metaObject,
-										...(config.paginated ? { links: linksObject } : {}),
+										...(config.paginated
+											? { pagination: paginationObject }
+											: {}),
 									},
 								},
 				},

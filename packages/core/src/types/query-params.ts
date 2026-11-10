@@ -1,130 +1,38 @@
-import type { DocumentVersionType } from "../libs/db/tables/index.js";
-import type { RefResource } from "./response.js";
+import type { FilterObject, SortDirection } from "@lucidcms/types";
+
+export type {
+	CollectionDocumentFilterInput,
+	CollectionDocumentFilters,
+	CollectionDocumentSortKey,
+	CollectionDocumentSorts,
+	CollectionDocumentVersion,
+	CollectionDocumentVersionKey,
+	ContentDocumentInclude,
+	DefaultCollectionDocumentSortKey,
+	DocumentFilters,
+	DocumentListInput,
+	DocumentReadInput,
+	FilterCondition,
+	FilterObject,
+	FilterOperator,
+	FilterValue,
+	SortDirection,
+} from "@lucidcms/types";
 
 // -----------------------------------------------
 // Filters
-export type FilterValue =
-	| string
-	| Array<string>
-	| boolean
-	| Array<boolean>
-	| number
-	| Array<number>
-	| null;
-export type FilterOperator =
-	| "="
-	| "!="
-	| ">"
-	| ">="
-	| "<"
-	| "<="
-	| "in"
-	| "not-in"
-	| "is"
-	| "is-not"
-	| "contains"
-	| "not-contains"
-	| "starts-with"
-	| "not-starts-with"
-	| "ends-with"
-	| "not-ends-with";
-export type FilterObject<TValue extends FilterValue = FilterValue> = {
-	value: TValue;
-	operator?: FilterOperator;
-};
 export type QueryParamFilters = Record<string, FilterObject>;
 export type QueryParamFilterCondition = FilterObject & {
 	key: string;
 };
 export type QueryParamFilterGroups = QueryParamFilterCondition[][];
-export type QueryFilters = {
-	[key: string]: FilterObject | QueryFilters | undefined;
-};
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentFiltersByCollection {}
-
-type CollectionDocumentFilterCollectionKey = Extract<
-	keyof CollectionDocumentFiltersByCollection,
-	string
->;
-
-export type CollectionDocumentFilters<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentFilterCollectionKey
-		? CollectionDocumentFiltersByCollection[TCollectionKey]
-		: QueryFilters;
-
-/** Accepts one AND filter object or OR groups represented as filter objects. */
-export type CollectionDocumentFilterInput<
-	TCollectionKey extends string = string,
-> =
-	| CollectionDocumentFilters<TCollectionKey>
-	| Array<CollectionDocumentFilters<TCollectionKey>>;
 
 // -----------------------------------------------
 // Sorts
-export type SortDirection = "asc" | "desc";
 export type QueryParamSorts = Array<{
 	key: string;
 	direction: SortDirection;
 }>;
-
-export type DefaultCollectionDocumentSortKey =
-	| "createdAt"
-	| "updatedAt"
-	| "order"
-	| `_${string}`;
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentSortsByCollection {}
-
-type CollectionDocumentSortCollectionKey = Extract<
-	keyof CollectionDocumentSortsByCollection,
-	string
->;
-
-export type CollectionDocumentSortKey<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentSortCollectionKey
-		? CollectionDocumentSortsByCollection[TCollectionKey]
-		: DefaultCollectionDocumentSortKey;
-
-export type CollectionDocumentSorts<TCollectionKey extends string = string> =
-	Array<{
-		key: CollectionDocumentSortKey<TCollectionKey>;
-		direction: SortDirection;
-	}>;
-
-// -----------------------------------------------
-// Versions
-export type DefaultCollectionDocumentVersion = DocumentVersionType;
-export type DefaultCollectionDocumentVersionKey = string;
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentVersionsByCollection {}
-
-// oxlint-disable-next-line typescript/no-empty-object-type -- generated types merge into this interface via module augmentation.
-export interface CollectionDocumentVersionKeysByCollection {}
-
-type CollectionDocumentVersionCollectionKey = Extract<
-	keyof CollectionDocumentVersionsByCollection,
-	string
->;
-
-type CollectionDocumentVersionKeyCollectionKey = Extract<
-	keyof CollectionDocumentVersionKeysByCollection,
-	string
->;
-
-export type CollectionDocumentVersion<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentVersionCollectionKey
-		? CollectionDocumentVersionsByCollection[TCollectionKey]
-		: DefaultCollectionDocumentVersion;
-
-export type CollectionDocumentVersionKey<
-	TCollectionKey extends string = string,
-> = TCollectionKey extends CollectionDocumentVersionKeyCollectionKey
-	? CollectionDocumentVersionKeysByCollection[TCollectionKey]
-	: DefaultCollectionDocumentVersionKey;
 
 // -----------------------------------------------
 // Includes
@@ -151,55 +59,4 @@ export type QueryParams = {
 	exclude: QueryParamExcludes | undefined;
 	page: QueryParamPagination["page"];
 	perPage: QueryParamPagination["perPage"];
-};
-
-export type CollectionDocumentRefInclude = "refs" | `refs.${RefResource}`;
-export type CollectionDocumentSingleInclude =
-	| "bricks"
-	| "meta"
-	| CollectionDocumentRefInclude;
-export type CollectionDocumentMultipleInclude =
-	| "bricks"
-	| "meta"
-	| CollectionDocumentRefInclude;
-
-/** What content API document reads can include. */
-export type ContentDocumentInclude = "bricks" | "meta";
-
-/** A content API read of one document: filters and what to include. */
-export type ContentDocumentSingleQuery<TCollectionKey extends string = string> =
-	Omit<CollectionDocumentSingleQuery<TCollectionKey>, "include"> & {
-		include?: ContentDocumentInclude[];
-	};
-
-/** A content API read of a document list: filters, sorting, pagination and what to include. */
-export type ContentDocumentMultipleQuery<
-	TCollectionKey extends string = string,
-> = Omit<CollectionDocumentMultipleQuery<TCollectionKey>, "include"> & {
-	include?: ContentDocumentInclude[];
-};
-
-/** Filters and optional content to include when reading one document. */
-export type CollectionDocumentSingleQuery<
-	TCollectionKey extends string = string,
-> = {
-	/** One filter object combines conditions with AND; an array combines filter groups with OR. */
-	filter?: CollectionDocumentFilterInput<TCollectionKey>;
-	/** Request bricks, metadata or shared references in the response. */
-	include?: CollectionDocumentSingleInclude[];
-};
-
-/** Filters, sorting, includes and pagination for a document list. */
-export type CollectionDocumentMultipleQuery<
-	TCollectionKey extends string = string,
-> = {
-	/** One filter object combines conditions with AND; an array combines filter groups with OR. */
-	filter?: CollectionDocumentFilterInput<TCollectionKey>;
-	sort?: CollectionDocumentSorts<TCollectionKey>;
-	/** Request bricks, metadata or shared references in the response. */
-	include?: CollectionDocumentMultipleInclude[];
-	/** One-based page number. */
-	page?: QueryParamPagination["page"];
-	/** Maximum documents per page. Use -1 for all matches. */
-	perPage?: QueryParamPagination["perPage"];
 };

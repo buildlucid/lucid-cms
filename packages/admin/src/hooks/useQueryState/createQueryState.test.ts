@@ -120,8 +120,8 @@ describe("createQueryState - memory mode", () => {
 
 			expect(memory.queryString()).toBe(url.queryString());
 			expect(
-				new URLSearchParams(memory.queryString()).get("filter[author:in]"),
-			).toBe("1,2");
+				new URLSearchParams(memory.queryString()).getAll("filter[author:in]"),
+			).toEqual(["1", "2"]);
 			dispose();
 		});
 	});
@@ -145,8 +145,8 @@ describe("createQueryState - memory mode", () => {
 			expect(storageParams.get("filter[author]")).toBeNull();
 			expect(storageParams.get("filter[author:in]")).toBe("1,2");
 			expect(
-				new URLSearchParams(query.queryString()).get("filter[author:in]"),
-			).toBe("1,2");
+				new URLSearchParams(query.queryString()).getAll("filter[author:in]"),
+			).toEqual(["1", "2"]);
 			dispose();
 		});
 	});
@@ -180,10 +180,10 @@ describe("createQueryState - memory mode", () => {
 				),
 			).toBe("home");
 			expect(
-				new URLSearchParams(query.queryString()).get(
+				new URLSearchParams(query.queryString()).getAll(
 					"filter[or][0][author:in]",
 				),
-			).toBe("1,2");
+			).toEqual(["1", "2"]);
 			dispose();
 		});
 	});

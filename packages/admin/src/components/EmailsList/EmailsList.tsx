@@ -168,7 +168,7 @@ export const EmailsList: Component<{
 			</QueryBoundary>
 			<Pagination
 				queryState={props.state.searchParams}
-				meta={emails.data?.meta}
+				pagination={emails.data?.pagination}
 				loading={emails.isLoading}
 				padding="md"
 			/>

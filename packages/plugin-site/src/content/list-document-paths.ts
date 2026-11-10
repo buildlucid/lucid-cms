@@ -11,7 +11,7 @@ const listDocumentPaths = async (
 	const response = await toolkit.documents.getMultiple({
 		collectionKey,
 		version,
-		query: { perPage: -1 },
+		perPage: -1,
 	});
 	if (response.error) throw new LucidAPIError(response.error);
 

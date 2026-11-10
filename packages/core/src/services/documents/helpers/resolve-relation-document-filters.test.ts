@@ -44,12 +44,12 @@ describe("relation document filter grouping", async () => {
 			collection: Articles,
 			bricksTableSchema: schema,
 			conditions: [
-				{ key: "_author.people._first_name", value: "Will" },
-				{ key: "_author._last_name", value: "Yallop" },
-				{ key: "_author.teams._name", value: "Core" },
-				{ key: "hero._featured._slug", value: "home" },
-				{ key: "fields.cards._cta.pages._slug", value: "contact" },
-				{ key: "_author", value: "people:1" },
+				{ key: "fields.author.people.fields.first_name", value: "Will" },
+				{ key: "fields.author.fields.last_name", value: "Yallop" },
+				{ key: "fields.author.teams.fields.name", value: "Core" },
+				{ key: "bricks.hero.featured.fields.slug", value: "home" },
+				{ key: "fields.cta.pages.fields.slug", value: "contact" },
+				{ key: "fields.author", value: "people:1" },
 			],
 		});
 
@@ -58,13 +58,13 @@ describe("relation document filter grouping", async () => {
 			grouped.find((group) => group.targetCollectionKey === "people")
 				?.conditions,
 		).toEqual([
-			{ key: "_first_name", value: "Will" },
-			{ key: "_last_name", value: "Yallop" },
+			{ key: "fields.first_name", value: "Will" },
+			{ key: "fields.last_name", value: "Yallop" },
 		]);
 		expect(
 			grouped.find((group) => group.targetCollectionKey === "teams")
 				?.conditions,
-		).toEqual([{ key: "_name", value: "Core" }]);
+		).toEqual([{ key: "fields.name", value: "Core" }]);
 		expect(grouped.map((group) => group.relation.table)).toEqual(
 			expect.arrayContaining([
 				"lucid_document__articles__fld__rel__author",

@@ -29,11 +29,7 @@ export type ToolkitEmail = {
 	 * @example
 	 * ```ts
 	 * await toolkit.email.getMultiple({
-	 *   query: {
-	 *     filter: {
-	 *       currentStatus: { value: ["failed", "bounced"], operator: "in" },
-	 *     },
-	 *   },
+	 *   filter: { currentStatus: ["failed", "bounced"] },
 	 * });
 	 * ```
 	 */

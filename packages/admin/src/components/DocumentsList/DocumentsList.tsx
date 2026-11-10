@@ -902,7 +902,7 @@ export const DocumentsList: Component<{
 			</QueryBoundary>
 			<Pagination
 				queryState={props.state.searchParams}
-				meta={documents.data?.meta}
+				pagination={documents.data?.pagination}
 				loading={documentsList.loading()}
 				padding="md"
 			/>

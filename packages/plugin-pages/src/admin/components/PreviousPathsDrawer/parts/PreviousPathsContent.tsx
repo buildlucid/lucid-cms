@@ -104,9 +104,7 @@ const PreviousPathsContent: Component<{ onClose: () => void }> = (props) => {
 				(currentPage - 1) * perPage,
 				currentPage * perPage,
 			),
-			meta: {
-				links: [],
-				path: "",
+			pagination: {
 				currentPage,
 				lastPage,
 				perPage,
@@ -233,7 +231,11 @@ const PreviousPathsContent: Component<{ onClose: () => void }> = (props) => {
 					</Index>
 				</Table.Root>
 			</QueryBoundary>
-			<Pagination queryState={queryState} meta={page().meta} variant="inline" />
+			<Pagination
+				queryState={queryState}
+				pagination={page().pagination}
+				variant="inline"
+			/>
 			<Modal.Confirm
 				open={removing() !== undefined}
 				onOpenChange={(open) => {

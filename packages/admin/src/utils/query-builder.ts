@@ -1,3 +1,5 @@
+import appendFilterParam from "@/utils/append-filter-param";
+
 export interface QueryBuilderProps {
 	queryString?: string;
 	filters?: Record<
@@ -36,13 +38,14 @@ const queryBuilder = (query: QueryBuilderProps) => {
 			const value = query.filters ? query.filters[key] : "";
 			if (value === undefined || value === null) continue;
 
-			if (Array.isArray(value)) {
-				params.set(`filter[${key}]`, value.join(","));
-			}
-
-			if (typeof value === "string" || typeof value === "number") {
-				params.set(`filter[${key}]`, value.toString());
-			}
+			//* a key such as `path:in` names its own operator
+			const [name, operator] = key.split(":");
+			appendFilterParam(params, {
+				name: (resolved) =>
+					resolved ? `filter[${name}:${resolved}]` : `filter[${name}]`,
+				value,
+				operator,
+			});
 		}
 	}
 

@@ -239,7 +239,7 @@ const ViewEmailTransactionsPanelContent: Component<
 				</QueryBoundary>
 				<Pagination
 					queryState={searchParams}
-					meta={transactions.data?.meta}
+					pagination={transactions.data?.pagination}
 					loading={transactionsList.loading()}
 					variant="inline"
 				/>

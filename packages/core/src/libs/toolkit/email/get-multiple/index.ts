@@ -4,13 +4,22 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
-import { runToolkitService, toPagination } from "../../utils.js";
+import type { ToolkitListFilterInput } from "../../types.js";
+import {
+	parseListQuery,
+	runToolkitService,
+	toPagination,
+} from "../../utils.js";
 import resolveReadActor from "../resolve-read-actor.js";
-import { inputSchema, type querySchema } from "./schema.js";
+import { inputSchema, querySchema } from "./schema.js";
 
-export type ToolkitEmailGetMultipleQuery = z.input<typeof querySchema>;
-
-export type ToolkitEmailGetMultipleInput = z.input<typeof inputSchema>;
+/** Optional actor, filters, sorts and pagination for listing email. */
+export type ToolkitEmailGetMultipleInput = Omit<
+	z.input<typeof inputSchema>,
+	"filter"
+> & {
+	filter?: ToolkitListFilterInput<z.input<typeof querySchema>>;
+};
 
 export type ToolkitEmailGetMultipleResult = ContentList<Email>;
 
@@ -26,11 +35,14 @@ const getMultiple = (
 			const { default: getMultiple } =
 				await import("../../../../services/email/get-multiple.js");
 
+			const queryRes = await parseListQuery(querySchema, data);
+			if (queryRes.error) return queryRes;
+
 			const actorRes = await resolveReadActor(context, data);
 			if (actorRes.error) return actorRes;
 
 			const result = await getMultiple(context, {
-				query: data.query,
+				query: queryRes.data,
 				authUser: actorRes.data,
 			});
 			if (result.error) return result;
@@ -39,7 +51,7 @@ const getMultiple = (
 				error: undefined,
 				data: {
 					items: result.data.data,
-					pagination: toPagination(result.data.count, data.query),
+					pagination: toPagination(result.data.count, data),
 				},
 			};
 		},

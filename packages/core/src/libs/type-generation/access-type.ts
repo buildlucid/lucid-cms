@@ -21,10 +21,7 @@ const generateAccessTypes = (
 				.join("\n")}\n\t}`,
 	);
 	return {
-		moduleAugmentations: [
-			{ module: "@lucidcms/core/types", declarations },
-			{ module: "@lucidcms/types", declarations },
-		],
+		moduleAugmentations: [{ module: "@lucidcms/core/types", declarations }],
 	};
 };
 

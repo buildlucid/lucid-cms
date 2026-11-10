@@ -5,7 +5,7 @@ import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
-import generateCollectionClientTypes from "../../../type-gen/index.js";
+import generateCollectionTypes from "../../../type-gen/index.js";
 import CustomFieldSchema from "../../schema.js";
 import { formatNumberFilterValue } from "../../utils/filter-values.js";
 import RangeCustomField from "./custom-field.js";
@@ -203,7 +203,7 @@ test("formats decimal filter values", () => {
 });
 
 test("generates a number array client value type", () => {
-	const file = generateCollectionClientTypes({
+	const { client: file } = generateCollectionTypes({
 		collections: [RangeCollection],
 		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
@@ -219,5 +219,7 @@ test("generates a number array client value type", () => {
 	expect(fieldsDeclaration).toBeDefined();
 	expect(fieldsDeclaration).toContain('"standard_range"');
 	expect(fieldsDeclaration).toContain("number[]");
-	expect(filtersDeclaration).toContain('"_standard_range"');
+	expect(filtersDeclaration).toMatch(
+		/"fields"\?: \{[^}]*"standard_range"\?: FilterCondition;/,
+	);
 });

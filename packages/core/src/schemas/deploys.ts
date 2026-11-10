@@ -103,7 +103,7 @@ export const controllerSchemas = {
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({
+					.strictObject({
 						deployKey: queryFormatted.schema.filters.union.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
 						source: queryFormatted.schema.filters.union.optional(),

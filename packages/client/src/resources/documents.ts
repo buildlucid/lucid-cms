@@ -1,71 +1,65 @@
 import type {
 	CollectionDocumentKey,
-	ContentDocument,
-	ContentLocaleInput,
-	IsLocalized,
-} from "../types.js";
-import type {
 	CollectionDocumentVersionKey,
-	DocumentsGetMultipleQuery,
-	DocumentsGetSingleQuery,
-} from "../types/contracts.js";
+	ContentDocument,
+	ContentList,
+	ContentLocaleInput,
+	DocumentListOptions,
+	DocumentReadOptions,
+	IsLocalized,
+} from "@lucidcms/types";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
 	LucidRequestOptions,
 	LucidTransport,
 } from "../types/transport.js";
+import { createConfigurationErrorResponse } from "../utils/transport/errors.js";
 import { encodePathSegment } from "../utils/url.js";
+
+/** What the client adds to the shared read inputs. */
+type ClientReadOptions<TCollectionKey extends CollectionDocumentKey> = {
+	/** Defaults to the client's `version`. */
+	version?: CollectionDocumentVersionKey<TCollectionKey>;
+	/** Preview token overriding the requested version and adding `editable()` markers. */
+	preview?: string;
+	request?: LucidRequestOptions;
+};
 
 /** Input for fetching one document from a collection. */
 export type DocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
-> = {
-	collectionKey: TCollectionKey;
-	version: CollectionDocumentVersionKey<TCollectionKey>;
-	/** Preview token overriding the requested version and adding `editable()` markers. */
-	preview?: string;
-	/** The locale empty translations fall back to, such as the default locale. */
-	fallbackLocale?: string;
-	/** How many levels of related documents to fill in, from 0 to 3, defaulting to 1. */
-	depth?: number;
-	query?: DocumentsGetSingleQuery<TCollectionKey>;
-	request?: LucidRequestOptions;
-} & ContentLocaleInput<TLocale>;
+> = Omit<DocumentReadOptions<TCollectionKey>, "version"> &
+	ClientReadOptions<TCollectionKey> &
+	ContentLocaleInput<TLocale>;
 
 /** Input for fetching multiple documents from a collection. */
 export type DocumentsGetMultipleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
-> = {
-	collectionKey: TCollectionKey;
-	version: CollectionDocumentVersionKey<TCollectionKey>;
-	/** Preview token overriding the requested version and adding `editable()` markers. */
-	preview?: string;
-	/** The locale empty translations fall back to, such as the default locale. */
-	fallbackLocale?: string;
-	/** How many levels of related documents to fill in, from 0 to 3, defaulting to 1. */
-	depth?: number;
-	query?: DocumentsGetMultipleQuery<TCollectionKey>;
-	request?: LucidRequestOptions;
-} & ContentLocaleInput<TLocale>;
+> = Omit<DocumentListOptions<TCollectionKey>, "version"> &
+	ClientReadOptions<TCollectionKey> &
+	ContentLocaleInput<TLocale>;
 
-/** The client result for one document, with its media, users and related documents filled in. */
+/** The client result for one document, with its media, users and related documents filled in, or null when nothing matched. */
 export type DocumentsGetSingleResponse<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
-> = LucidClientResponse<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>;
+> = LucidClientResponse<ContentDocument<
+	TCollectionKey,
+	IsLocalized<TLocale>
+> | null>;
 
-/** The client result for multiple documents, with their references filled in, and pagination. */
+/** The client result for a page of documents, with their references filled in, and where the page is. */
 export type DocumentsGetMultipleResponse<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 	TLocale extends string | undefined = undefined,
 > = LucidClientResponse<
-	Array<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>
+	ContentList<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>
 >;
 
 export interface LucidDocumentsClient {
-	/** Fetches one document from a collection. */
+	/** Fetches one document from a collection, with null data when nothing matches. */
 	getSingle<
 		TCollectionKey extends CollectionDocumentKey,
 		TLocale extends string | undefined = undefined,
@@ -73,7 +67,7 @@ export interface LucidDocumentsClient {
 		input: DocumentsGetSingleInput<TCollectionKey, TLocale>,
 	): Promise<DocumentsGetSingleResponse<TCollectionKey, TLocale>>;
 
-	/** Fetches a paginated list of documents from a collection. */
+	/** Fetches a page of documents from a collection. */
 	getMultiple<
 		TCollectionKey extends CollectionDocumentKey,
 		TLocale extends string | undefined = undefined,
@@ -82,9 +76,13 @@ export interface LucidDocumentsClient {
 	): Promise<DocumentsGetMultipleResponse<TCollectionKey, TLocale>>;
 }
 
-/** Creates the documents resource used by the public Lucid client. */
+const missingVersionMessage =
+	"`version` is required to read documents. Pass it to the read or set a default with `createClient({ version })`.";
+
+/** Creates the documents resource used by the public Lucid client, reading `defaultVersion` unless a read names its own. */
 export const createDocumentsClient = (
 	transport: LucidTransport,
+	defaultVersion?: string,
 ): LucidDocumentsClient => ({
 	getSingle: async <
 		TCollectionKey extends CollectionDocumentKey,
@@ -92,21 +90,29 @@ export const createDocumentsClient = (
 	>(
 		input: DocumentsGetSingleInput<TCollectionKey, TLocale>,
 	) => {
-		return transport.request<
-			ContentDocument<TCollectionKey, IsLocalized<TLocale>>
-		>({
+		const version = input.version ?? defaultVersion;
+		if (!version) {
+			return createConfigurationErrorResponse(missingVersionMessage);
+		}
+
+		return transport.request<ContentDocument<
+			TCollectionKey,
+			IsLocalized<TLocale>
+		> | null>({
 			operation: "documents.getSingle",
 			method: "GET",
 			path: `/document/${encodePathSegment(input.collectionKey)}`,
 			query: {
-				...input.query,
-				version: input.version,
+				filter: input.filter,
+				include: input.include,
+				version,
 				preview: input.preview,
 				locale: input.locale,
 				fallbackLocale: input.fallbackLocale,
 				depth: input.depth,
 			},
 			request: input.request,
+			emptyCode: "document_not_found",
 		});
 	},
 	getMultiple: async <
@@ -115,21 +121,31 @@ export const createDocumentsClient = (
 	>(
 		input: DocumentsGetMultipleInput<TCollectionKey, TLocale>,
 	) => {
+		const version = input.version ?? defaultVersion;
+		if (!version) {
+			return createConfigurationErrorResponse(missingVersionMessage);
+		}
+
 		return transport.request<
-			Array<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>
+			ContentList<ContentDocument<TCollectionKey, IsLocalized<TLocale>>>
 		>({
 			operation: "documents.getMultiple",
 			method: "GET",
 			path: `/documents/${encodePathSegment(input.collectionKey)}`,
 			query: {
-				...input.query,
-				version: input.version,
+				filter: input.filter,
+				sort: input.sort,
+				include: input.include,
+				page: input.page,
+				perPage: input.perPage,
+				version,
 				preview: input.preview,
 				locale: input.locale,
 				fallbackLocale: input.fallbackLocale,
 				depth: input.depth,
 			},
 			request: input.request,
+			list: true,
 		});
 	},
 });

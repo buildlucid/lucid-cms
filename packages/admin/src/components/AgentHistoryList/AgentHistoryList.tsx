@@ -127,7 +127,7 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 			</QueryBoundary>
 			<Pagination
 				queryState={props.searchParams}
-				meta={conversations.data?.meta}
+				pagination={conversations.data?.pagination}
 				loading={conversations.isLoading}
 				padding="md"
 			/>

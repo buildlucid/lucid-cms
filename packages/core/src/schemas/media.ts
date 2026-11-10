@@ -588,7 +588,7 @@ const mediaFilterShape = {
 };
 
 const mediaGetMultipleQueryFormattedSchema = z.object({
-	filter: z.object(mediaFilterShape).optional(),
+	filter: z.strictObject(mediaFilterShape).optional(),
 	filterOr: queryFormatted.schema.filterOr,
 	sort: z
 		.array(
@@ -618,7 +618,7 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 const mediaAdminGetMultipleQueryFormattedSchema =
 	mediaGetMultipleQueryFormattedSchema.extend({
 		filter: z
-			.object({
+			.strictObject({
 				...mediaFilterShape,
 				ownership: queryFormatted.schema.filters.union.optional(),
 				ownerId: queryFormatted.schema.filters.union.optional(),

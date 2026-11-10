@@ -30,6 +30,7 @@
 - Plugins can now add their own hook events with `defineHookEvents`, for project hooks and deploy triggers to subscribe to.
 - Added `toolkit.redirects.resolve()` and a content API route for finding where a missing page moved, with `redirects` in config for plugins to answer from.
 - Added AI translation, which translates documents into a request per language for review and tracks which translations are out of date.
+- Added `build.clientTypes`, which writes your collection types to front ends that use `@lucidcms/client`.
 
 ### Breaking Changes:
 
@@ -46,6 +47,13 @@
 - Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails.
 - Renamed `host` to `url`, which is now required. Lucid no longer falls back to the request's address.
 - Replaced `http.security.trustProxyHeaders` with `http.security.proxy`, which says how to find visitors' addresses behind a proxy. Secure cookies now follow `url`.
+- Document filters and sorts now use `fields.<field>` and `bricks.<brick>.<field>` keys in the content API, toolkit and tools, replacing the `_` prefix and repeater segments.
+- `toolkit.documents` reads now take `filter`, `sort`, `include`, `page` and `perPage` beside `collectionKey` instead of under `query`, accept plain filter values, and `getSingle` returns `null` when nothing matches.
+- Filter query parameters without an operator are no longer split on commas. `in` and `not-in` repeat the parameter for each value.
+- `toolkit.media`, `toolkit.media.folders`, `toolkit.email`, `toolkit.users` and `toolkit.requests` lists now take `filter`, `sort`, `page` and `perPage` directly instead of under `query`, and accept plain filter values.
+- Filter keys a list doesn't support are now refused with a 400 instead of being ignored.
+- API responses now return `pagination` on lists instead of `meta` and `links`.
+- Generated collection types now merge into one `Collections` registry, and document write types into `CollectionWrites`.
 
 ### Bug Fixes:
 

@@ -197,10 +197,8 @@ describe("content document reads", () => {
 			collectionKey: "pages",
 			version: "latest",
 			locale: "fr",
-			query: {
-				filter: { id: { value: pageId } },
-				include: ["bricks"],
-			},
+			filter: { id: pageId },
+			include: ["bricks"],
 		});
 		assert(res.data, JSON.stringify(res.error));
 
@@ -234,7 +232,7 @@ describe("content document reads", () => {
 				version: "latest",
 				locale: "fr",
 				fallbackLocale,
-				query: { filter: { id: { value: pageId } } },
+				filter: { id: pageId },
 			});
 
 		expect((await read())?.data?.fields.intro).toBe("");
@@ -246,7 +244,7 @@ describe("content document reads", () => {
 			collectionKey: "pages",
 			version: "latest",
 			depth: 0,
-			query: { filter: { id: { value: pageId } } },
+			filter: { id: pageId },
 		});
 		assert(res.data, JSON.stringify(res.error));
 
@@ -261,7 +259,7 @@ describe("content document reads", () => {
 		const res = await toolkit.documents.getMultiple({
 			collectionKey: "pages",
 			version: "latest",
-			query: { perPage: 1 },
+			perPage: 1,
 		});
 		assert(res.data, JSON.stringify(res.error));
 
@@ -279,7 +277,7 @@ describe("content document reads", () => {
 			collectionKey: "pages",
 			version: "latest",
 			locale: " fr ",
-			query: { filter: { id: { value: pageId } } },
+			filter: { id: pageId },
 		});
 		assert(trimmed.data, JSON.stringify(trimmed.error));
 		expect(trimmed.data.fields.title).toBe("À propos");
@@ -345,7 +343,7 @@ describe("content document reads", () => {
 				locale: "fr",
 				fallbackLocale,
 				depth: 0,
-				query: { filter: { id: { value: source.data?.id } } },
+				filter: { id: source.data?.id },
 			});
 			assert(res.data, JSON.stringify(res.error));
 			return res.data.fields.body;
@@ -390,7 +388,7 @@ describe("content document reads", () => {
 				version: "latest",
 				locale: "fr",
 				depth,
-				query: { filter: { id: { value: source } } },
+				filter: { id: source },
 			});
 			assert(res.data, JSON.stringify(res.error));
 			return res.data.fields.related;
@@ -423,7 +421,7 @@ describe("content document reads", () => {
 			collectionKey: "notes",
 			version: "latest",
 			locale: "fr",
-			query: { filter: { id: { value: note.data.id } } },
+			filter: { id: note.data.id },
 		});
 		assert(res.data, JSON.stringify(res.error));
 
@@ -452,7 +450,7 @@ describe("content document reads", () => {
 		const res = await toolkit.documents.getSingle({
 			collectionKey: "pages",
 			version: "latest",
-			query: { filter: { id: { value: page.data.id } } },
+			filter: { id: page.data.id },
 		});
 		assert(res.data, JSON.stringify(res.error));
 
@@ -567,7 +565,7 @@ describe("content document reads", () => {
 			collectionKey: "boards",
 			version: "production",
 			depth: 2,
-			query: { filter: { id: { value: board } } },
+			filter: { id: board },
 		});
 		assert(res.data, JSON.stringify(res.error));
 		// Boards read labels from staging, while cards read them from production.
@@ -605,7 +603,7 @@ describe("content document reads", () => {
 			version: "latest",
 			locale: "fr",
 			fallbackLocale: "en",
-			query: { filter: { id: { value: page.data.id } } },
+			filter: { id: page.data.id },
 		});
 		assert(res.data, JSON.stringify(res.error));
 
@@ -633,22 +631,35 @@ describe("content document reads", () => {
 			).error,
 		).toBeUndefined();
 
-		const filter = {
-			id: { value: target.id },
-			isDeleted: { value: true },
-		};
+		const filter = { id: target.id, isDeleted: true };
 		const single = await toolkit.documents.getSingle({
 			collectionKey: "settings",
 			version: "latest",
-			query: { filter },
+			filter,
 		});
-		expect(single.error?.status).toBe(404);
+		expect(single).toEqual({ error: undefined, data: null });
 		const multiple = await toolkit.documents.getMultiple({
 			collectionKey: "settings",
 			version: "latest",
-			query: { filter },
+			filter,
 		});
 		assert(multiple.data, JSON.stringify(multiple.error));
 		expect(multiple.data.items).toEqual([]);
+	});
+
+	test("refuses filter keys that match nothing, alone or in an OR group", async () => {
+		const single = await toolkit.documents.getSingle({
+			collectionKey: "pages",
+			version: "latest",
+			filter: { _path: "/about" },
+		});
+		expect(single.error?.status).toBe(400);
+
+		const multiple = await toolkit.documents.getMultiple({
+			collectionKey: "pages",
+			version: "latest",
+			filter: [{ id: 1 }, { fields: { missing: "x" } }],
+		});
+		expect(multiple.error?.status).toBe(400);
 	});
 });

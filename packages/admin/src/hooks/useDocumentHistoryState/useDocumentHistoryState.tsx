@@ -169,10 +169,10 @@ export function useDocumentHistoryState() {
 	const isEmpty = createMemo(
 		() => isSuccess() && accumulatedRevisions().length === 0,
 	);
-	const meta = createMemo(() => revisionsQuery.data?.meta);
+	const meta = createMemo(() => revisionsQuery.data?.pagination);
 	const hasMore = createMemo(() => {
 		const m = meta();
-		if (!m || m.currentPage === null || m.lastPage === null) return false;
+		if (!m) return false;
 		return m.currentPage < m.lastPage;
 	});
 	const collectionName = createMemo(
