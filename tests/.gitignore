@@ -1,0 +1,9 @@
+# harness run output: reports, logs and databases
+.harness
+
+# what building a setup writes
+setups/*/.lucid
+setups/*/.cloudflare
+setups/*/.wrangler
+setups/*/dist
+setups/*/node_modules

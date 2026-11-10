@@ -1,0 +1,29 @@
+# Services for setups that need a server. The harness starts the ones a run needs and leaves
+# them running. Stop them with `docker compose down` in this folder.
+services:
+  # A real Postgres for setups that ask for the postgres database.
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54329:5432"
+    # Test data is thrown away, so skip the disk syncs that make each write slow.
+    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c max_connections=300
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  # A libSQL server for setups that ask for the libsql database. Each database is a namespace,
+  # chosen by subdomain, and the admin API on the second port creates and copies them.
+  libsql:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    command: sqld --http-listen-addr 0.0.0.0:8080 --admin-listen-addr 0.0.0.0:9090 --enable-namespaces
+    ports:
+      - "58080:8080"
+      - "59090:9090"

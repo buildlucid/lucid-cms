@@ -1,0 +1,143 @@
+name: Harness
+
+# Pull requests run the `pr` profile: everything except integration tests against the built
+# server, which already run in-process. Pushes to master, the nightly run and manual runs
+# cover everything.
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: harness-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HARNESS_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'full' }}
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    outputs:
+      setups: ${{ steps.list.outputs.setups }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+      - run: npm install
+      # One job per folder in tests/setups, so a new setup needs no change here.
+      - id: list
+        run: echo "setups=$(node tests/harness/src/cli/index.ts list --json --profile $HARNESS_PROFILE)" >> "$GITHUB_OUTPUT"
+
+  run:
+    name: ${{ matrix.setup }}
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        setup: ${{ fromJson(needs.plan.outputs.setups) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+      - run: npm install
+      - run: npm run build
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+      # The harness starts the Docker services the setup needs, such as Postgres.
+      # Every setup shares a seed, so the report can compare simulations between them.
+      - name: Run the harness
+        run: node tests/harness/src/cli/index.ts run --profile $HARNESS_PROFILE --setup ${{ matrix.setup }} --seed ${{ github.run_number }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: harness-${{ matrix.setup }}
+          path: tests/.harness/runs
+          include-hidden-files: true
+          retention-days: 14
+
+  report:
+    name: Report
+    needs: run
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+      - run: npm install
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: harness-*
+          path: harness-reports
+
+      # Writes the job summary, and fails when any setup failed or setups disagreed.
+      - name: Merge the reports
+        id: merge
+        env:
+          HARNESS_POSTHOG_KEY: ${{ github.event_name != 'pull_request' && secrets.HARNESS_POSTHOG_KEY || '' }}
+          HARNESS_POSTHOG_HOST: ${{ vars.HARNESS_POSTHOG_HOST }}
+        run: node tests/harness/src/cli/index.ts merge harness-reports/*/*/report.json ${{ env.HARNESS_PROFILE == 'full' && '--complete' || '' }}
+
+      # The merged report is the baseline that later pull requests are compared with.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: harness-report
+          path: tests/.harness/runs/merged-*/
+          include-hidden-files: true
+          retention-days: 90
+
+      - name: Fetch the latest master report
+        id: baseline
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh run list --workflow harness.yml --branch master --status completed --limit 1 --json databaseId --jq '.[0].databaseId')
+          gh run download "$run_id" --name harness-report --dir harness-baseline
+
+      # Timings are reported only. A larger build fails this step.
+      - name: Compare with master
+        id: compare
+        if: always() && steps.baseline.outcome == 'success'
+        run: |
+          node tests/harness/src/cli/index.ts compare harness-baseline/report.json tests/.harness/latest/report.json
+          cat tests/.harness/comparison/comparison.md >> "$GITHUB_STEP_SUMMARY"
+
+      # One comment per pull request, updated on each run, for reviewers and review agents to read.
+      - name: Build the pull request comment
+        if: always() && github.event_name == 'pull_request'
+        run: cat tests/.harness/latest/summary.md tests/.harness/comparison/comparison.md > harness-comment.md 2>/dev/null || cp tests/.harness/latest/summary.md harness-comment.md
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          header: lucid-harness
+          path: harness-comment.md
+
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.compare.outcome != 'skipped'
+        with:
+          name: harness-comparison
+          path: tests/.harness/comparison
+          include-hidden-files: true

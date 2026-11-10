@@ -1,0 +1,40 @@
+{
+	"name": "@lucidcms/tests",
+	"private": true,
+	"description": "Test harness that runs one set of tests against many Lucid CMS setups.",
+	"type": "module",
+	"imports": {
+		"#harness/*": "./harness/src/entries/*.ts",
+		"#shared/*": "./shared/*.ts"
+	},
+	"scripts": {
+		"harness": "node harness/src/cli/index.ts",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@lucidcms/cloudflare": "*",
+		"@lucidcms/core": "*",
+		"@lucidcms/libsql": "*",
+		"@lucidcms/node": "*",
+		"@lucidcms/pages": "*",
+		"@lucidcms/postgres": "*",
+		"@lucidcms/sqlite": "*"
+	},
+	"devDependencies": {
+		"@electric-sql/pglite": "^0.5.16",
+		"@electric-sql/pglite-socket": "^0.2.19",
+		"@playwright/test": "^1.65.0",
+		"@types/node": "^24.19.2",
+		"fast-check": "^4.10.2",
+		"picocolors": "^1.1.1",
+		"postgres": "^4.0.0",
+		"typescript": "^6.0.3",
+		"vitest": "^5.0.5"
+	},
+	"volta": {
+		"node": "26.12.1"
+	},
+	"engines": {
+		"node": ">=24"
+	}
+}

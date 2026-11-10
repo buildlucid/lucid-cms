@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"verbatimModuleSyntax": true,
+		"erasableSyntaxOnly": true,
+		"moduleDetection": "force",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"target": "ESNext",
+		"lib": ["ESNext", "DOM"],
+		"types": ["node"],
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"skipLibCheck": true,
+		"noEmit": true
+	},
+	"include": ["harness", "setups", "shared", "suites"],
+	"exclude": ["node_modules", "**/dist", "**/.lucid", ".harness"]
+}

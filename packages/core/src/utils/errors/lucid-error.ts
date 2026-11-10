@@ -21,6 +21,12 @@ export type LucidErrorOptions = Omit<LucidErrorData, "name" | "message"> & {
 };
 
 /**
+ * Marks LucidError instances. It is registered globally, so every loaded copy of this module
+ * shares it.
+ */
+const lucidErrorBrand = Symbol.for("@lucidcms/core:LucidError");
+
+/**
  * Lucid's error. Throw it from any handler you write, such as a route, hook, job or tool, and Lucid
  * turns it into the response, tool result or job failure. Pass a failed toolkit result's `error`
  * to pass that failure on.
@@ -40,6 +46,18 @@ export type LucidErrorOptions = Omit<LucidErrorData, "name" | "message"> & {
  * ```
  */
 class LucidError extends Error {
+	/**
+	 * Recognises errors from any copy of this class. A project can load core twice, such as a
+	 * config loaded apart from the runtime or a plugin with its own install, and an error thrown
+	 * by one copy must still be handled as a LucidError by the other.
+	 */
+	static override [Symbol.hasInstance](value: unknown): boolean {
+		return (
+			typeof value === "object" && value !== null && lucidErrorBrand in value
+		);
+	}
+
+	readonly [lucidErrorBrand] = true;
 	/** The failure as services return it, with `name` and `message` still translatable. */
 	readonly error: LucidErrorData;
 	readonly scope?: string;

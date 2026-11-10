@@ -19,7 +19,8 @@
 		"fallow:type-aware": "fallow dead-code --workspace \"@lucidcms/*,!@lucidcms/*playground\" --type-aware",
 		"release": "node scripts/release/index.ts --dry-run",
 		"release:check": "node scripts/release/index.ts --check",
-		"prepare": "husky"
+		"prepare": "husky",
+		"harness": "npm run harness --workspace @lucidcms/tests --"
 	},
 	"devDependencies": {
 		"@inquirer/confirm": "^6.3.5",
@@ -41,7 +42,8 @@
 	"packageManager": "npm@11.20.0",
 	"workspaces": [
 		"apps/*",
-		"packages/*"
+		"packages/*",
+		"tests"
 	],
 	"volta": {
 		"node": "26.12.1"
