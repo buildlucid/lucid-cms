@@ -52,7 +52,7 @@ beforeAll(async () => {
 			ai: {
 				...config.ai,
 				mcp: { enabled: true, tools: [mcpTools.media.get()], skills: [] },
-				agents: { enabled: true, definitions: [agent] },
+				agents: [agent],
 			},
 		},
 		database: await fixture.getDatabase(),

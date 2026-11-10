@@ -3,8 +3,8 @@ import LucidError from "../../../utils/errors/lucid-error.js";
 
 const getProviders = (config: Partial<LucidConfig>) =>
 	[
-		["media.storage", config.media?.storage],
-		["media.delivery", config.media?.delivery],
+		["media.storageAdapter", config.media?.storageAdapter],
+		["media.deliveryAdapter", config.media?.deliveryAdapter],
 		["email.adapter", config.email?.adapter],
 		["captcha.adapter", config.captcha?.adapter],
 		["kv.adapter", config.kv?.adapter],

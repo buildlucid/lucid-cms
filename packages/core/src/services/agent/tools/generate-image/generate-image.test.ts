@@ -173,7 +173,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: { enabled: true, definitions: [agent, withoutLibrary] },
+				agents: [agent, withoutLibrary],
 			},
 		},
 		database: await fixture.getDatabase(),
@@ -679,10 +679,7 @@ test("editing an image the agent hasn't seen asks it to look first, unless it ca
 					...context.config,
 					ai: {
 						...context.config.ai,
-						agents: {
-							enabled: true,
-							definitions: [agent, withoutLibrary, withoutAnalysis],
-						},
+						agents: [agent, withoutLibrary, withoutAnalysis],
 					},
 				},
 			},

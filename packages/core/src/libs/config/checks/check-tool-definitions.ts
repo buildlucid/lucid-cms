@@ -172,7 +172,7 @@ const checkPlacement = (
 	for (const tool of tools) {
 		if (!isToolDefinition(tool) || tool.kind !== kind) {
 			throw new Error(
-				`${label} tools must be created with ${kind === "mcp" ? "defineMcpTool" : "defineAgentTool"}.`,
+				`${label} tools must be created with defineTool and have ${kind === "mcp" ? "an `mcp`" : "an `agent`"} block.`,
 			);
 		}
 
@@ -193,7 +193,7 @@ const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 	checkPlacement("MCP", "mcp", mcpTools);
 	for (const tool of mcpTools) checked.add(tool);
 
-	for (const agent of config.ai.agents.definitions) {
+	for (const agent of config.ai.agents) {
 		const label = `Agent "${agent.key}"`;
 		const tools = agent.tools;
 		checkPlacement(label, "agent", tools);

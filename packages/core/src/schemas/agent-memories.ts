@@ -1,11 +1,11 @@
 import z from "zod";
 import constants from "../constants/constants.js";
-import type { ControllerSchema } from "../exports/types.js";
 import type {
 	AgentMemories,
 	AgentMemory,
 	AgentMemoryScope,
 } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { agentActorSchema } from "./shared/agent-actor.js";
 import { userDisplaySchema } from "./shared/user-display.js";
 

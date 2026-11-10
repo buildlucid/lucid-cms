@@ -178,7 +178,9 @@ const createLucidHost = async (
 		const env =
 			parseEnv(
 				rawEnv,
-				"definition" in options ? options.envSchema : undefined,
+				"definition" in options
+					? (options.envSchema ?? options.definition.env)
+					: undefined,
 			) ?? rawEnv;
 		invocationEnvs.set(rawEnv, env);
 		invocationEnvs.set(env, env);

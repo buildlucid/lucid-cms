@@ -4,7 +4,7 @@ import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import updateRequestComment from "./handler.js";
@@ -15,14 +15,16 @@ const name = "requests_update_comment";
 export const updateRequestCommentAgentTool = (
 	options: CollectionToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.requests_update_comment.title"),
 		description:
 			"Resolve, close, reopen, edit or remove a comment you wrote on a request. Comments by people and other agents can't be changed: answer them with requests_reply instead.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
+		agent: {
+			permissions: [Permissions.RequestsRead],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(updateRequestComment, {
 				transaction: true,
@@ -48,4 +50,4 @@ export const updateRequestCommentAgentTool = (
 				),
 			};
 		},
-	});
+	}).agent;

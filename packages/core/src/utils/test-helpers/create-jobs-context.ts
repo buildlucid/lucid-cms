@@ -15,7 +15,7 @@ export const createJobsContext = async (
 	const baseConfig = await testConfig.getConfig();
 	const config: ResolvedLucidConfig = {
 		...baseConfig,
-		jobs: { ...baseConfig.jobs, definitions: options.jobs },
+		jobs: options.jobs,
 	};
 
 	return createServiceContext({

@@ -6,7 +6,7 @@ import { DEFAULT_MAX_UPLOAD_SIZE } from "./constants.js";
 import plugin from "./plugin.js";
 
 type PluginDraft = {
-	i18n: {
+	translations: {
 		sources: Array<string | URL>;
 	};
 	media: Record<string, unknown>;
@@ -16,7 +16,7 @@ type PluginDraft = {
 };
 
 const buildDraft = (): PluginDraft => ({
-	i18n: {
+	translations: {
 		sources: [],
 	},
 	media: {},
@@ -91,7 +91,7 @@ describe("Cloudflare R2 plugin", () => {
 		if (!defaults || typeof defaults === "function") {
 			throw new Error("R2 plugin did not provide adapter defaults.");
 		}
-		const adapter = defaults.media?.storage;
+		const adapter = defaults.media?.storageAdapter;
 		if (
 			!adapter ||
 			adapter instanceof Promise ||

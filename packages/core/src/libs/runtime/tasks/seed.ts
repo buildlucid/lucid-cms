@@ -17,7 +17,7 @@ const seedTask = defineRuntimeTask({
 	run: async (context, input) => {
 		const { config } = context.host;
 		const seeds = collectSeeds({
-			definitions: config.seeds.definitions,
+			definitions: config.seeds,
 			modules: await loadDevModules(context.dev.seeds),
 		});
 		const selected = input.names.map((name) => {

@@ -1,13 +1,12 @@
-import confirm from "@inquirer/confirm";
 import type { RuntimeTaskClient } from "../../vite/create-task-client.js";
 import cliLogger from "../logger.js";
-import runPrompt from "../services/run-prompt.js";
+import confirmCommand from "../services/confirm-command.js";
 import runTaskCommand from "../services/run-task-command.js";
 import type { TaskServerOptions } from "../services/start-task-server.js";
 
-type UserCommandOptions = { force?: boolean } & TaskServerOptions;
+type UserCommandOptions = { yes?: boolean } & TaskServerOptions;
 
-/** Runs a change to a user in the runtime, after confirming unless forced. */
+/** Runs a change to a user in the runtime, after confirming unless `--yes` is passed. */
 const runUserCommand = (props: {
 	failure: string;
 	question: string;
@@ -19,11 +18,10 @@ const runUserCommand = (props: {
 	runTaskCommand(
 		props.failure,
 		async (run, elapsed) => {
-			const proceed =
-				props.options?.force ||
-				(await runPrompt((output) =>
-					confirm({ message: props.question, default: false }, { output }),
-				));
+			const proceed = await confirmCommand({
+				message: props.question,
+				yes: props.options?.yes,
+			});
 			if (!proceed) {
 				cliLogger.info("Cancelled");
 				return 0;

@@ -16,7 +16,7 @@ Lucid CMS starter for Cloudflare Workers, Postgres through Hyperdrive, KV, R2, I
 | `npm run sync`             | Sync Lucid config changes                       |
 | `npm run migrate`          | Run pending database migrations                 |
 | `npm run migrate:rollback` | Roll back the last migration batch              |
-| `npm run migrate:reset`    | Roll back all migrations                        |
+| `npm run migrate:reset`    | Drop all database tables                        |
 | `npm run migrate:fresh`    | Reset the database and run all migrations again |
 
 ## Database

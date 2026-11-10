@@ -43,19 +43,6 @@ export type LucidRouteMethod =
 
 type InferSchemaValue<T> = T extends z.ZodType ? z.infer<T> : undefined;
 
-type InferRouteQuery<TSchema> = TSchema extends {
-	query: {
-		formatted?: infer FormattedSchema;
-		string?: infer StringSchema;
-	};
-}
-	? FormattedSchema extends z.ZodType
-		? z.infer<FormattedSchema>
-		: StringSchema extends z.ZodType
-			? z.infer<StringSchema>
-			: undefined
-	: undefined;
-
 /** Validated body, path parameters and query. Parts without a schema are undefined. */
 export type LucidRouteInput<TSchema> = {
 	body: TSchema extends { body: infer BodySchema }
@@ -64,7 +51,9 @@ export type LucidRouteInput<TSchema> = {
 	params: TSchema extends { params: infer ParamsSchema }
 		? InferSchemaValue<ParamsSchema>
 		: undefined;
-	query: InferRouteQuery<TSchema>;
+	query: TSchema extends { query: infer QuerySchema }
+		? InferSchemaValue<QuerySchema>
+		: undefined;
 };
 
 export type LucidRouteHandlerResponse =
@@ -143,7 +132,7 @@ export type LucidContentRouteAccess =
 export type LucidContentRouteDefinitionInput<
 	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
 > = Omit<LucidRouteDefinitionInput<TSchema>, "path"> & {
-	/** Path relative to `/api/v1/content`. */
+	/** Path relative to `/api/v1/content/e`, the prefix for routes that projects and plugins add, as `/admin/e` is in the admin. */
 	path: `/${string}`;
 	/** External access required before the route handler can run. */
 	access: LucidContentRouteAccess;

@@ -196,7 +196,7 @@ const handler: ServiceFn<
 	}
 
 	const translate = context.translate.forLocale(
-		context.config.i18n.defaultLocale,
+		context.config.translations.defaultLocale,
 	);
 
 	return {

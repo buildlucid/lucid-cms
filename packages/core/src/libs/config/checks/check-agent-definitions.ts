@@ -70,7 +70,7 @@ const checkAgentDefinitions = (config: {
 }) => {
 	const keys = new Set<string>();
 
-	for (const agent of config.ai.agents.definitions) {
+	for (const agent of config.ai.agents) {
 		if (agent.key.length > 64 || !keyPattern.test(agent.key)) {
 			throw new Error(
 				`Invalid agent key "${agent.key}". Use lowercase letters, numbers and single hyphens.`,
@@ -227,7 +227,7 @@ const checkAgentDefinitions = (config: {
 	}
 
 	//* checked once every key is known, since agents can name agents registered after them
-	for (const agent of config.ai.agents.definitions) {
+	for (const agent of config.ai.agents) {
 		const unknown = agent.features.subagents.agents?.find(
 			(key) => !keys.has(key),
 		);

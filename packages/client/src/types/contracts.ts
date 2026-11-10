@@ -35,6 +35,6 @@ export type MediaListOptions = {
 	include?: "transcripts"[];
 	/** One-based page number. */
 	page?: number;
-	/** Maximum media per page. Use -1 for all matches. */
+	/** Media per page, up to 100. */
 	perPage?: number;
 };

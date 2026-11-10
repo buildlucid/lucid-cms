@@ -195,7 +195,7 @@ test("preserves job definitions from the array shorthand while merging config", 
 				{
 					key: "job-plugin",
 					configure: (draft) => {
-						draft.jobs.definitions.push(pluginJob);
+						draft.jobs.push(pluginJob);
 					},
 				},
 			],
@@ -206,10 +206,10 @@ test("preserves job definitions from the array shorthand while merging config", 
 		},
 	);
 
-	const storedConfigJob = processed.jobs.definitions.find(
+	const storedConfigJob = processed.jobs.find(
 		(definition) => definition.key === job.key,
 	);
-	const storedPluginJob = processed.jobs.definitions.find(
+	const storedPluginJob = processed.jobs.find(
 		(definition) => definition.key === pluginJob.key,
 	);
 	expect(
@@ -244,7 +244,7 @@ test("rejects duplicate job definitions after plugin config is merged", async ()
 				...config,
 				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
-				jobs: { definitions: [job, job] },
+				jobs: [job, job],
 			},
 			{ resolvedDb: createAdapter("request") },
 		),
@@ -299,7 +299,7 @@ test("rejects schedule input that does not match its job schema", async () => {
 				...config,
 				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
-				jobs: { definitions: [job] },
+				jobs: [job],
 			},
 			{
 				resolvedDb: createAdapter("request"),
@@ -325,7 +325,7 @@ test("rejects schedules that do not use minute precision", async () => {
 				...config,
 				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
-				jobs: { definitions: [job] },
+				jobs: [job],
 			},
 			{ resolvedDb: createAdapter("request") },
 		),
@@ -354,7 +354,7 @@ test("rejects schedules with an invalid timezone", async () => {
 				...config,
 				url: "http://localhost:6543",
 				secrets: "a".repeat(64),
-				jobs: { definitions: [job] },
+				jobs: [job],
 			},
 			{ resolvedDb: createAdapter("request") },
 		),

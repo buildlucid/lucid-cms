@@ -4,7 +4,7 @@ import { translate } from "../../i18n/index.js";
 const checkLocales = (
 	localesConfig:
 		| ResolvedLucidConfig["localization"]
-		| ResolvedLucidConfig["i18n"],
+		| ResolvedLucidConfig["translations"],
 ) => {
 	if (
 		localesConfig.defaultLocale === null &&

@@ -701,6 +701,7 @@ export type {
 	AgentToolAvailabilityProps,
 	AgentToolCapabilities,
 	AgentToolDefinition,
+	AgentToolListItem,
 	AgentToolDescription,
 	AgentToolDescriptionProps,
 	AgentToolExecution,
@@ -708,12 +709,11 @@ export type {
 	AgentToolInteraction,
 	AgentToolProceed,
 	AgentToolResult,
-	DefineAgentToolOptions,
-	DefineInteractiveAgentToolOptions,
-	DefineMcpToolOptions,
 	McpToolAnnotations,
 	McpToolAuthority,
 	McpToolDefinition,
+	McpToolListItem,
+	Tool,
 	McpToolExecution,
 	McpToolHandler,
 	McpToolResult,
@@ -724,7 +724,7 @@ export type {
 	AiModelConfig,
 	HttpConfig,
 	HttpSecurityConfig,
-	I18nConfig,
+	TranslationsConfig,
 	LocalizationConfig,
 	LucidConfig,
 	LucidRole,
@@ -787,11 +787,7 @@ export type {
 	SortDirection,
 } from "../types/query-params.js";
 export type * from "../types/response.js";
-export type {
-	ControllerSchema,
-	FieldInputSchema,
-	RouteSchema,
-} from "../types/schema.js";
+export type { FieldInputSchema, RouteSchema } from "../types/schema.js";
 export type { JsonValue } from "../utils/helpers/is-json-object.js";
 export type {
 	CreateServiceContextOptions,

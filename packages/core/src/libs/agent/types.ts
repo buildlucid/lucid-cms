@@ -24,7 +24,7 @@ import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import type { ScheduleTiming } from "../jobs/types.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
 import type { SkillDefinition } from "../skills/types.js";
-import type { AgentToolDefinition } from "../tools/types.js";
+import type { AgentToolDefinition, AgentToolListItem } from "../tools/types.js";
 import {
 	agentInteractiveWidgetSchema,
 	agentMessagePartSchema,
@@ -280,8 +280,8 @@ export type DefineAgentOptions<Key extends string> = {
 	description: AdminCopyInput;
 	/** Added to the agent's system prompt. Common indentation is removed. */
 	instructions?: string;
-	/** The tools the agent can call, such as `agentTools.read()` or your own `defineAgentTool` tools. Bundles are flattened. */
-	tools?: readonly (AgentToolDefinition | readonly AgentToolDefinition[])[];
+	/** The tools the agent can call, such as `agentTools.read()` or your own `defineTool` tools with an `agent` block. Bundles are flattened. */
+	tools?: readonly (AgentToolListItem | readonly AgentToolListItem[])[];
 	skills?: readonly SkillDefinition[];
 	/** Built-in features and the tools behind them. Every feature is enabled unless set to false. */
 	features?: AgentFeatureOptions;

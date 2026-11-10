@@ -4,7 +4,7 @@ import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import completeRequest from "./handler.js";
@@ -13,7 +13,7 @@ import { inputSchema, outputSchema } from "./schema.js";
 const name = "requests_complete";
 
 export const completeRequestAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.requests_complete.title"),
 		description: ({ mode }) =>
@@ -22,8 +22,10 @@ export const completeRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				: "Complete an approved request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests the person asked you to. To complete one later, use requests_schedule.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
-		requiresConfirmation: true,
+		agent: {
+			permissions: [Permissions.RequestsRead],
+			requiresConfirmation: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(completeRequest, {
 				transaction: true,
@@ -48,4 +50,4 @@ export const completeRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				}),
 			};
 		},
-	});
+	}).agent;

@@ -16,6 +16,7 @@ export const env = z.object({
 });
 
 export default defineConfig({
+	env: env,
 	runtime: cloudflare,
 	db: postgres((env) => ({ url: env.LUCID_DB.connectionString })),
 	config: (env) => ({

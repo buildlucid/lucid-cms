@@ -1,4 +1,4 @@
-import { copy, defineAgentTool, z, LucidError } from "@lucidcms/core";
+import { defineTool, copy, z, LucidError } from "@lucidcms/core";
 
 export const documentPickerData = z.object({
 	documents: z.array(z.object({ id: z.number().int(), label: z.string() })),
@@ -7,7 +7,7 @@ const documentPickerResponse = z.object({
 	documentId: z.number().int(),
 });
 
-export const selectDocumentTool = defineAgentTool({
+export const selectDocumentTool = defineTool({
 	name: "playground_select_document",
 	title: "Select document",
 	description:
@@ -16,59 +16,66 @@ export const selectDocumentTool = defineAgentTool({
 		placement: z.enum(["inline", "composer"]).default("inline"),
 	}),
 	output: z.object({ documentId: z.number().nullable() }),
-	permissions: ["documents:page:read"],
 	readOnly: true,
-	interaction: {
-		key: "playground-document-picker",
-		version: 1,
-		data: documentPickerData,
-		response: ({ data }) =>
-			documentPickerResponse.refine((response) =>
-				data.documents.some((document) => document.id === response.documentId),
-			),
-		prepare: async ({ context, input, toolkit }) => {
-			const result = await toolkit.documents.getMultiple({
-				collectionKey: "page",
-				version: "latest",
-				perPage: 20,
-			});
-			if (result.error) throw new LucidError(result.error);
-			if (!result.data.items.length) {
-				return {
-					output: { documentId: null },
-					summary: "No documents available to select",
-				};
-			}
+	agent: {
+		permissions: ["documents:page:read"],
+		interaction: {
+			key: "playground-document-picker",
+			version: 1,
+			data: documentPickerData,
+			response: ({ data }) =>
+				documentPickerResponse.refine((response) =>
+					data.documents.some(
+						(document) => document.id === response.documentId,
+					),
+				),
+			prepare: async ({ context, input, toolkit }) => {
+				const result = await toolkit.documents.getMultiple({
+					collectionKey: "page",
+					version: "latest",
+					perPage: 20,
+				});
+				if (result.error) throw new LucidError(result.error);
+				if (!result.data.items.length) {
+					return {
+						output: { documentId: null },
+						summary: "No documents available to select",
+					};
+				}
 
-			return {
-				interaction: {
-					title: copy("admin:playground.document-picker.title"),
-					placement: input.placement,
-					data: {
-						documents: result.data.items.map((document) => {
-							const field = document.fields.page_title;
-							const titles =
-								typeof field === "string"
-									? [field]
-									: field && typeof field === "object"
-										? Object.values(field)
-										: [];
-							const title = titles.find(
-								(value): value is string =>
-									typeof value === "string" && value.trim().length > 0,
-							);
-							return {
-								id: document.id,
-								label:
-									title ??
-									context.translate("server:playground.document-picker.label", {
-										data: { id: document.id },
-									}),
-							};
-						}),
+				return {
+					interaction: {
+						title: copy("admin:playground.document-picker.title"),
+						placement: input.placement,
+						data: {
+							documents: result.data.items.map((document) => {
+								const field = document.fields.page_title;
+								const titles =
+									typeof field === "string"
+										? [field]
+										: field && typeof field === "object"
+											? Object.values(field)
+											: [];
+								const title = titles.find(
+									(value): value is string =>
+										typeof value === "string" && value.trim().length > 0,
+								);
+								return {
+									id: document.id,
+									label:
+										title ??
+										context.translate(
+											"server:playground.document-picker.label",
+											{
+												data: { id: document.id },
+											},
+										),
+								};
+							}),
+						},
 					},
-				},
-			};
+				};
+			},
 		},
 	},
 	handler: async ({ response, toolkit }) => {

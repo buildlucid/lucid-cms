@@ -1,6 +1,6 @@
 import * as z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
 import type { MediaType } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import mediaAdapterDataSchema from "../utils/media/adapter-data.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import {
@@ -1349,8 +1349,11 @@ export const controllerSchemas = {
 				string: mediaGetMultipleQueryStringSchema.extend({
 					locale: contentLocaleSchema.optional(),
 					fallbackLocale: contentFallbackLocaleSchema.optional(),
+					perPage: queryString.schema.contentPerPage,
 				}),
-				formatted: mediaGetMultipleQueryFormattedSchema,
+				formatted: mediaGetMultipleQueryFormattedSchema.extend({
+					perPage: queryFormatted.schema.contentPerPage,
+				}),
 			},
 			params: undefined,
 			body: undefined,

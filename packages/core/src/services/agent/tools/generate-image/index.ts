@@ -2,7 +2,7 @@ import constants from "../../../../constants/constants.js";
 import { isAiFeatureEnabled } from "../../../../libs/config/ai-features.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { builderUpdateToolName } from "../builder-update/constants.js";
@@ -18,7 +18,7 @@ import {
 
 /** Creates a new image from a text instruction, optionally letting the person check the settings first. */
 export const generateImageAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: generateImageToolName,
 		title: copy("admin:core.tools.media_generate_image.title"),
 		description: dedent(`
@@ -29,21 +29,26 @@ export const generateImageAgentTool = () =>
 		`),
 		input: inputSchema,
 		output: outputSchema,
-		outputVersion: 1,
-		permissions: [Permissions.AiImageGenerate],
-		capabilities: { media: { generate: { image: true } } },
-		available: ({ config, aiAccess }) =>
-			isAiFeatureEnabled(config, "imageGeneration", aiAccess),
-		interaction: {
-			key: constants.agent.widgets.imageSettings,
-			version: 1,
-			data: settingsDataSchema,
-			response: () => settingsResponseSchema,
-			skippable: true,
-			prepare: async ({ input }) => {
-				const result = await prepareImageSettings({ input, editMediaId: null });
-				if (result.error) throw new LucidError(result.error);
-				return result.data;
+		agent: {
+			outputVersion: 1,
+			permissions: [Permissions.AiImageGenerate],
+			capabilities: { media: { generate: { image: true } } },
+			available: ({ config, aiAccess }) =>
+				isAiFeatureEnabled(config, "imageGeneration", aiAccess),
+			interaction: {
+				key: constants.agent.widgets.imageSettings,
+				version: 1,
+				data: settingsDataSchema,
+				response: () => settingsResponseSchema,
+				skippable: true,
+				prepare: async ({ input }) => {
+					const result = await prepareImageSettings({
+						input,
+						editMediaId: null,
+					});
+					if (result.error) throw new LucidError(result.error);
+					return result.data;
+				},
 			},
 		},
 		handler: async ({ context, input, execution, response }) => {
@@ -58,4 +63,4 @@ export const generateImageAgentTool = () =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).agent;

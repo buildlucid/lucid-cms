@@ -26,7 +26,7 @@ const agent = defineAgent({
 const check = (agents: AgentDefinition[]) => () =>
 	checkAgentDefinitions(
 		ConfigSchema.pick({ ai: true }).parse({
-			ai: { agents: { definitions: agents } },
+			ai: { agents },
 		}),
 	);
 
@@ -34,30 +34,13 @@ test("MCP stays off until it is configured, and agents default to Lucid's", () =
 	const config = ConfigSchema.pick({ ai: true });
 	expect(config.parse({}).ai).toMatchObject({
 		mcp: { enabled: false, tools: [], skills: [] },
-		agents: { enabled: true, definitions: [lucidAgent] },
+		agents: [lucidAgent],
 	});
-	expect(config.parse({ ai: { agents: true } }).ai.agents.definitions).toEqual([
-		lucidAgent,
-	]);
-	expect(config.parse({ ai: { agents: [] } }).ai.agents.definitions).toEqual(
-		[],
-	);
+	expect(config.parse({ ai: { agents: [] } }).ai.agents).toEqual([]);
+	expect(config.parse({ ai: { agents: false } }).ai.agents).toEqual([]);
 	expect(config.parse({ ai: { mcp: {} } }).ai.mcp.enabled).toBe(true);
 	expect(config.parse({ ai: { mcp: false } }).ai.mcp.enabled).toBe(false);
 	expect(config.parse({ ai: false }).ai.enabled).toBe(false);
-});
-
-test("agent shorthands resolve to the same config", () => {
-	const schema = ConfigSchema.pick({ ai: true });
-	const shorthand = schema.parse({ ai: { agents: [agent] } });
-	const object = schema.parse({ ai: { agents: { definitions: [agent] } } });
-
-	expect(shorthand.ai.agents).toEqual({ enabled: true, definitions: [agent] });
-	expect(object.ai.agents).toEqual(shorthand.ai.agents);
-	expect(schema.parse({ ai: { agents: false } }).ai.agents).toEqual({
-		enabled: false,
-		definitions: [],
-	});
 });
 
 test("media generation takes a boolean for every type, or settings per type", () => {
@@ -92,7 +75,7 @@ test("only enabled agents are used, and only while their feature is on", () => {
 			ConfigSchema.pick({ ai: true }).parse({
 				ai: {
 					enabled,
-					agents: { enabled: agentsEnabled, definitions: [agent, off] },
+					agents: agentsEnabled ? [agent, off] : false,
 				},
 			}),
 		).map((item) => item.key);

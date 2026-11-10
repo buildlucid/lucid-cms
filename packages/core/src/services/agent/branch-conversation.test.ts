@@ -25,17 +25,14 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: {
-					enabled: true,
-					definitions: [
-						defineAgent({
-							key: "seo",
-							name: "seo",
-							description: "seo",
-							tools: [],
-						}),
-					],
-				},
+				agents: [
+					defineAgent({
+						key: "seo",
+						name: "seo",
+						description: "seo",
+						tools: [],
+					}),
+				],
 			},
 		},
 		database: await testConfig.getDatabase(),

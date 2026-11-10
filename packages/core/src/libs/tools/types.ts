@@ -156,7 +156,7 @@ export type AgentToolAvailabilityProps = {
 	mode?: RunMode;
 };
 
-type ToolOptions<
+export type ToolOptions<
 	Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
@@ -172,7 +172,7 @@ type ToolOptions<
 	output: Output;
 };
 
-type ToolScopeOptions<Input> =
+export type ToolScopeOptions<Input> =
 	| {
 			/** Checked for each call against its validated input, eg. read access to the requested collection. */
 			inputScopes: (props: { input: Input }) => readonly ExternalScope[];
@@ -211,7 +211,7 @@ type AgentToolReadOptions =
 	| { readOnly?: false; parallelSafe?: never };
 
 /** Options shared by ordinary and interactive agent tools. */
-type AgentToolBaseOptions<
+export type AgentToolBaseOptions<
 	Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
@@ -275,7 +275,7 @@ export type ResolvedAgentToolInteraction<Data> = {
 export type AgentToolProceed = { proceed: true };
 
 /** Supplies no answer when a skippable interaction is skipped. */
-type AgentToolAnswer<
+export type AgentToolAnswer<
 	Data extends z.ZodType,
 	Response extends z.ZodType,
 	Skippable extends boolean,
@@ -433,7 +433,21 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	};
 };
 
-/** An opaque tool created with `defineMcpTool` for `ai.mcp.tools`, or `defineAgentTool` for an agent's `tools`. */
+/** One surface's opaque definition of a `defineTool` tool, for `ai.mcp.tools` or an agent's `tools`. */
 export type ToolDefinition<Name extends string = string> =
 	| AgentToolDefinition<Name>
 	| McpToolDefinition<Name>;
+
+/** A tool from `defineTool`, holding one definition per surface it has a block for. */
+export type Tool<
+	Name extends string = string,
+	Surface extends "agent" | "mcp" = "agent" | "mcp",
+> = { readonly type: "tool"; readonly name: Name } & ("agent" extends Surface
+	? { readonly agent: AgentToolDefinition<Name> }
+	: unknown) &
+	("mcp" extends Surface ? { readonly mcp: McpToolDefinition<Name> } : unknown);
+
+/** What an agent's `tools` list takes: a `defineTool` tool with an `agent` block, or a tool from a bundle such as `agentTools.read()`. */
+export type AgentToolListItem = AgentToolDefinition | Tool<string, "agent">;
+/** What `ai.mcp.tools` takes: a `defineTool` tool with an `mcp` block, or a tool from a bundle such as `mcpTools.all()`. */
+export type McpToolListItem = McpToolDefinition | Tool<string, "mcp">;

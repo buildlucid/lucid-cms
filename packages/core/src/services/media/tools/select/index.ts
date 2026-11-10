@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import selectMedia from "./handler.js";
 import prepareSelectMedia from "./prepare.js";
@@ -15,24 +15,29 @@ import {
 const name = "media_select";
 
 export const selectMediaAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.media_select.title"),
 		description:
 			"Ask the person to pick media from the library or upload new files, and pause until they choose. Use it when the person should decide which media to use, eg. a hero image. The picked media is linked to this chat.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.MediaRead],
 		readOnly: true,
-		interaction: {
-			key: constants.agent.widgets.mediaSelect,
-			version: 1,
-			data: dataSchema,
-			response: ({ data }) => responseSchema(data),
-			prepare: async ({ context, input, execution }) => {
-				const result = await prepareSelectMedia(context, { input, execution });
-				if (result.error) throw new LucidError(result.error);
-				return result.data;
+		agent: {
+			permissions: [Permissions.MediaRead],
+			interaction: {
+				key: constants.agent.widgets.mediaSelect,
+				version: 1,
+				data: dataSchema,
+				response: ({ data }) => responseSchema(data),
+				prepare: async ({ context, input, execution }) => {
+					const result = await prepareSelectMedia(context, {
+						input,
+						execution,
+					});
+					if (result.error) throw new LucidError(result.error);
+					return result.data;
+				},
 			},
 		},
 		handler: async ({ context, input, execution, data, response }) => {
@@ -57,4 +62,4 @@ export const selectMediaAgentTool = () =>
 				),
 			};
 		},
-	});
+	}).agent;

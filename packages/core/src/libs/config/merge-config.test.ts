@@ -42,8 +42,8 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 	};
 	const project = {
 		media: {
-			storage,
-			delivery: passthroughMediaDeliveryAdapter(),
+			storageAdapter: storage,
+			deliveryAdapter: passthroughMediaDeliveryAdapter(),
 			limits: { uploadBytes: 20 },
 		},
 		email: {
@@ -56,12 +56,12 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 	} satisfies Partial<LucidConfig>;
 	const defaults = {
 		media: {
-			storage: {
+			storageAdapter: {
 				...storage,
 				lifecycle,
 				completeUploadSession: unusedStorageOperation,
 			},
-			delivery: { ...passthroughMediaDeliveryAdapter(), lifecycle },
+			deliveryAdapter: { ...passthroughMediaDeliveryAdapter(), lifecycle },
 			limits: { storageBytes: 100, uploadBytes: 10 },
 		},
 		email: {
@@ -74,16 +74,16 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 	} satisfies Partial<LucidConfig>;
 	const merged = mergeConfig(project, defaults);
 	const selected = [
-		merged.media?.storage,
-		merged.media?.delivery,
+		merged.media?.storageAdapter,
+		merged.media?.deliveryAdapter,
 		merged.email?.adapter,
 		merged.kv?.adapter,
 		merged.queue?.adapter,
 		merged.captcha?.adapter,
 	];
 	const authored = [
-		project.media.storage,
-		project.media.delivery,
+		project.media.storageAdapter,
+		project.media.deliveryAdapter,
 		project.email.adapter,
 		project.kv.adapter,
 		project.queue.adapter,
@@ -93,15 +93,19 @@ test("replaces each exclusive provider as a whole instance while merging its opt
 		expect(adapter).toBe(authored[index]);
 		expect(adapter).not.toHaveProperty("lifecycle");
 	}
-	expect(merged.media?.storage).not.toHaveProperty("completeUploadSession");
+	expect(merged.media?.storageAdapter).not.toHaveProperty(
+		"completeUploadSession",
+	);
 	expect(merged.media?.limits).toEqual({ storageBytes: 100, uploadBytes: 20 });
 	expect(merged.email?.from).toEqual({
 		name: "Default name",
 		email: "project@example.com",
 	});
 	expect(merged.captcha?.forms).toEqual({ login: false, setup: false });
-	expect(defaults.media.storage.lifecycle).toBe(lifecycle);
-	expect(mergeConfig({}, defaults).media?.storage).toBe(defaults.media.storage);
+	expect(defaults.media.storageAdapter.lifecycle).toBe(lifecycle);
+	expect(mergeConfig({}, defaults).media?.storageAdapter).toBe(
+		defaults.media.storageAdapter,
+	);
 });
 
 test("keeps opaque provider state without traversing its object graph", () => {

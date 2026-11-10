@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -19,7 +19,7 @@ import {
  * @remarks Only offered in chats to collect memories from user instructions.
  */
 export const saveMemoryAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: saveMemoryToolName,
 		title: copy("admin:core.tools.lucid_memory_save.title"),
 		description: dedent(`
@@ -31,23 +31,25 @@ export const saveMemoryAgentTool = () =>
 		`),
 		input: inputSchema,
 		output: outputSchema,
-		outputVersion: 1,
-		permissions: [],
-		available: ({ config, mode }) =>
-			mode === "chat" &&
-			(config.ai.memory.personal.enabled || config.ai.memory.shared.enabled),
-		interaction: {
-			key: constants.agent.widgets.memoryReview,
-			version: 1,
-			data: reviewDataSchema,
-			response: ({ data }) => reviewResponseSchema(data.scopes),
-			prepare: async ({ context, input, execution }) => {
-				const result = await prepareMemoryReview(context, {
-					input,
-					authority: execution.authority,
-				});
-				if (result.error) throw new LucidError(result.error);
-				return result.data;
+		agent: {
+			outputVersion: 1,
+			permissions: [],
+			available: ({ config, mode }) =>
+				mode === "chat" &&
+				(config.ai.memory.personal.enabled || config.ai.memory.shared.enabled),
+			interaction: {
+				key: constants.agent.widgets.memoryReview,
+				version: 1,
+				data: reviewDataSchema,
+				response: ({ data }) => reviewResponseSchema(data.scopes),
+				prepare: async ({ context, input, execution }) => {
+					const result = await prepareMemoryReview(context, {
+						input,
+						authority: execution.authority,
+					});
+					if (result.error) throw new LucidError(result.error);
+					return result.data;
+				},
 			},
 		},
 		handler: async ({ context, execution, data, response }) => {
@@ -87,4 +89,4 @@ export const saveMemoryAgentTool = () =>
 				),
 			};
 		},
-	});
+	}).agent;

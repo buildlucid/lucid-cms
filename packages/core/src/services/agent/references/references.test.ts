@@ -100,8 +100,8 @@ beforeAll(async () => {
 			...config,
 			collections: [collection],
 			deploys: [production],
-			jobs: { definitions: [...config.jobs.definitions, startDeployRunJob] },
-			ai: { ...config.ai, agents: { enabled: true, definitions: [agent] } },
+			jobs: [...config.jobs, startDeployRunJob],
+			ai: { ...config.ai, agents: [agent] },
 		},
 		database: await fixture.getDatabase(),
 		translationStore: createTranslationStore({
@@ -1380,7 +1380,7 @@ test("upload-only agents accept owned files without enabling existing media or d
 			...context.config,
 			ai: {
 				...context.config.ai,
-				agents: { enabled: true, definitions: [uploadOnly] },
+				agents: [uploadOnly],
 			},
 		},
 	};
@@ -1422,16 +1422,13 @@ test("chat uploads only take the uploader's own images as posters", async () => 
 			...context.config,
 			ai: {
 				...context.config.ai,
-				agents: {
-					enabled: true,
-					definitions: [
-						defineAgent({
-							key: agent.key,
-							name: agent.name,
-							description: agent.description,
-						}),
-					],
-				},
+				agents: [
+					defineAgent({
+						key: agent.key,
+						name: agent.name,
+						description: agent.description,
+					}),
+				],
 			},
 		},
 	};

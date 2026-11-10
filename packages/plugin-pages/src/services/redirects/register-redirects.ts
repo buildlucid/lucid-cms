@@ -78,7 +78,7 @@ const registerRedirects = (props: {
 
 	if (config.trackPathChanges) {
 		const clearPathHistoryJob = createClearPathHistoryJob(props.options);
-		draft.jobs.definitions.push(clearPathHistoryJob);
+		draft.jobs.push(clearPathHistoryJob);
 		draft.http.routes.push(
 			...previousPathsRoutes(config.collections),
 			clearPathHistoryRoute(clearPathHistoryJob),

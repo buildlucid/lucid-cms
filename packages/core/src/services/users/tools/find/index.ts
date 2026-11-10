@@ -6,26 +6,27 @@ import {
 	getPermittedCollectionKeys,
 	getScopedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import findUsers from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const findUsersMcpTool = (options: CollectionToolOptions = {}) =>
-	defineMcpTool({
+	defineTool({
 		name: "users_find",
 		title: copy("admin:core.tools.users_find.title"),
 		description:
 			"Find people who use the CMS, eg. to see who a user field or request names. Call it without a query to list everyone, and search by name to narrow that down. Find who can approve a request with canReview.",
 		input: inputSchema,
 		output: outputSchema,
-		scopes: [ExternalScopes.UsersList],
-		inputScopes: ({ input: { query } }) =>
-			query.canReview === undefined ? [] : [ExternalScopes.RequestsRead],
-		possibleScopes: () => [ExternalScopes.RequestsRead],
-		annotations: { readOnlyHint: true },
+		readOnly: true,
+		mcp: {
+			scopes: [ExternalScopes.UsersList],
+			inputScopes: ({ input: { query } }) =>
+				query.canReview === undefined ? [] : [ExternalScopes.RequestsRead],
+			possibleScopes: () => [ExternalScopes.RequestsRead],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await findUsers(context, {
 				input,
@@ -40,21 +41,23 @@ export const findUsersMcpTool = (options: CollectionToolOptions = {}) =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).mcp;
 
 export const findUsersAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name: "users_find",
 		title: copy("admin:core.tools.users_find.title"),
 		description:
 			"Find people who use the CMS, eg. to fill a user field, mention someone in a comment or choose who reviews a request. Call it without a query to list everyone, and search by name to narrow that down. Before changing a request's reviewers, find who can approve it with canReview.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
-		inputPermissions: ({ input: { query } }) =>
-			query.canReview === undefined ? [] : [Permissions.RequestsRead],
 		readOnly: true,
-		parallelSafe: true,
+		agent: {
+			permissions: [],
+			inputPermissions: ({ input: { query } }) =>
+				query.canReview === undefined ? [] : [Permissions.RequestsRead],
+			parallelSafe: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await findUsers(context, {
 				input,
@@ -79,4 +82,4 @@ export const findUsersAgentTool = (options: CollectionToolOptions = {}) =>
 				),
 			};
 		},
-	});
+	}).agent;

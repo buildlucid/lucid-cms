@@ -20,7 +20,7 @@ const getAgentActors: ServiceFn<
 	if (attributionsRes.error) return attributionsRes;
 
 	//* disabled agents keep their name, so past work still reads the same
-	const definitions = context.config.ai.agents.definitions;
+	const definitions = context.config.ai.agents;
 	return {
 		error: undefined,
 		data: new Map(

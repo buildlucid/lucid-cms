@@ -14,9 +14,8 @@ import resolveRoutineConversation from "../agent/helpers/resolve-routine-convers
 import saveRoutineTools from "../agent/helpers/save-routine-tools.js";
 
 /**
- * Syncs routines defined in code with the database. New routines start enabled,
- * changed ones are updated and rescheduled, and removed ones are deleted while
- * their past chats are kept. Whether a routine is paused is kept between syncs.
+ * Syncs code-defined routines, enabling new ones and rescheduling changes. Preserves pause state
+ * and keeps past chats when removing routines.
  */
 const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
@@ -48,7 +47,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 	);
 	if (storedTools.error) return storedTools;
 
-	const defined = context.config.ai.agents.definitions.flatMap((agent) =>
+	const defined = context.config.ai.agents.flatMap((agent) =>
 		agent.routines.map((routine) => ({ agentKey: agent.key, routine })),
 	);
 	const now = new Date().toISOString();

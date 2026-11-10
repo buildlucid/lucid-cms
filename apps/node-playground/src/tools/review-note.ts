@@ -1,4 +1,4 @@
-import { copy, defineAgentTool, z } from "@lucidcms/core";
+import { defineTool, copy, z } from "@lucidcms/core";
 
 const noteData = z.object({
 	title: z.string().trim().min(1).max(100),
@@ -7,27 +7,29 @@ const noteData = z.object({
 
 export type NoteData = z.infer<typeof noteData>;
 
-export const reviewNoteTool = defineAgentTool({
+export const reviewNoteTool = defineTool({
 	name: "playground_review_note",
 	title: "Review note",
 	description:
 		"Ask the person to edit a note in the composer, then display the submitted note as a simulated save.",
 	input: z.object({ title: z.string().max(100), body: z.string().max(1000) }),
 	output: z.object({ saved: z.boolean(), title: z.string(), body: z.string() }),
-	permissions: [],
-	requiresConfirmation: true,
-	interaction: {
-		key: "playground-note-editor",
-		version: 1,
-		data: z.object({ title: z.string(), body: z.string() }),
-		response: () => noteData,
-		prepare: async ({ input }) => ({
-			interaction: {
-				title: copy("admin:playground.note-editor.title"),
-				placement: "composer",
-				data: input,
-			},
-		}),
+	agent: {
+		permissions: [],
+		requiresConfirmation: true,
+		interaction: {
+			key: "playground-note-editor",
+			version: 1,
+			data: z.object({ title: z.string(), body: z.string() }),
+			response: () => noteData,
+			prepare: async ({ input }) => ({
+				interaction: {
+					title: copy("admin:playground.note-editor.title"),
+					placement: "composer",
+					data: input,
+				},
+			}),
+		},
 	},
 	handler: async ({ response }) => ({
 		output: { saved: true, ...response },

@@ -32,6 +32,8 @@ export type LoadConfigResult = {
 	config: ResolvedLucidConfig;
 	adapter: RuntimeAdapter;
 	envSchema?: ZodType;
+	/** Whether lucid.config exports the schema as `env`, which generated types read. */
+	envExported: boolean;
 	env: EnvironmentVariables | undefined;
 	/** Original values for integrations that create another runtime host. */
 	rawEnv: Record<string, unknown> | undefined;
@@ -48,7 +50,7 @@ const loadConfigFile = async (props?: {
 	collectConfigDependencies?: boolean;
 	/** False keeps env values the schema rejects raw, rather than failing, for reading the config in Node. */
 	validateEnvSchema?: boolean;
-	/** Overrides the named env export before raw environment values are parsed. */
+	/** Overrides the definition's `env` schema before raw environment values are parsed. */
 	envSchema?: ZodType;
 	/** Loads environment values once the adapter resolves, instead of the adapter's own `getEnvVars`. */
 	loadEnv?: Parameters<typeof resolveConfigDefinition>[0]["loadEnv"];
@@ -88,8 +90,7 @@ const loadConfigFile = async (props?: {
 				});
 			},
 			definition: configModule.default,
-			envSchema:
-				props?.envSchema ?? (hasNamedEnvExport ? configModule.env : undefined),
+			envSchema: props?.envSchema,
 			loadEnv: props?.loadEnv,
 			meta,
 			validateEnvSchema: props?.validateEnvSchema,
@@ -109,6 +110,7 @@ const loadConfigFile = async (props?: {
 			config: resolved.config,
 			adapter: resolved.adapter,
 			envSchema: resolved.envSchema,
+			envExported: hasNamedEnvExport,
 			env: resolved.env,
 			rawEnv: resolved.rawEnv,
 			definition: resolved.definition,

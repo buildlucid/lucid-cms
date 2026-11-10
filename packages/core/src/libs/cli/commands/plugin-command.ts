@@ -36,11 +36,16 @@ const logger: LucidPluginCommandLogger = {
 /** Runs a plugin's command, which reaches the runtime through the plugin's tasks. */
 const pluginCommand =
 	(command: LucidPluginCommand, key: string, loaded: LoadConfigResult) =>
-	(options: TaskServerOptions) =>
+	(
+		options: TaskServerOptions &
+			Parameters<LucidPluginCommand["run"]>[0]["options"],
+	) =>
 		runTaskCommand(
 			`"${command.name}" failed`,
 			async (run, elapsed) => {
+				const { remote: _remote, ...commandOptions } = options;
 				await command.run({
+					options: commandOptions,
 					config: loaded.config,
 					projectRoot: loaded.projectRoot,
 					publicFiles: loaded.resources.files.public,
@@ -83,17 +88,24 @@ const pluginCommand =
 			options,
 		);
 
-/** Registers plugin commands after loading the project as `lucid()` does, only for unknown commands so they stay out of `lucidcms --help`. */
+/**
+ * Loads project plugin commands, including for `--help`. Built-in commands skip project loading.
+ */
 export const registerPluginCommands = async (program: Command) => {
 	const requested = process.argv[2];
-	if (!requested || requested.startsWith("-") || requested === "help") return;
+	const help = !requested || requested.startsWith("-") || requested === "help";
 
 	const known = new Set(
 		program.commands.flatMap((item) => [item.name(), ...item.aliases()]),
 	);
-	if (known.has(requested)) return;
+	if (requested && known.has(requested)) return;
 
-	const { project: loaded } = await loadProject();
+	//* help still works outside a project, or in one whose config doesn't load
+	const project = help
+		? await loadProject().catch(() => undefined)
+		: await loadProject();
+	if (!project) return;
+	const { project: loaded } = project;
 
 	for (const { key, cli } of await loadPluginClis(
 		loaded.config,
@@ -107,9 +119,13 @@ export const registerPluginCommands = async (program: Command) => {
 			}
 
 			known.add(command.name);
-			program
+			const registered = program
 				.command(command.name)
-				.description(command.description)
+				.description(command.description);
+			for (const option of command.options ?? []) {
+				registered.option(option.flags, option.description);
+			}
+			registered
 				.option("--remote", remoteOptionDescription)
 				.action(pluginCommand(command, key, loaded));
 		}

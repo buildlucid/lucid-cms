@@ -21,7 +21,7 @@ const plugin = (): LucidPluginDefinition => {
 			}
 		},
 		sources: { translations: ["@lucidcms/sharp/translations"] },
-		defaults: { media: { delivery: sharpMediaDeliveryAdapter() } },
+		defaults: { media: { deliveryAdapter: sharpMediaDeliveryAdapter() } },
 	});
 };
 

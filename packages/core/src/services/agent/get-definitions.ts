@@ -19,7 +19,7 @@ const getDefinitions: ServiceFn<
 			aiAccess: aiAccess.data,
 			authUser: input.authUser,
 			adminTranslations: context.translate
-				.forLocale(context.config.i18n.defaultLocale)
+				.forLocale(context.config.translations.defaultLocale)
 				.adminBundle(),
 		}),
 	};

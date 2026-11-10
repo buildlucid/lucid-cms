@@ -86,14 +86,14 @@ const processConfig = async (
 		...(configRes.deploys.some((deploy) => deploy.schedule)
 			? [createRunScheduledDeployJob(configRes.deploys)]
 			: []),
-		...configRes.jobs.definitions,
+		...configRes.jobs,
 	];
 	const notificationDefinitions = [
 		...coreNotificationDefinitions,
 		...(hasDeploys
 			? [deployFailedNotification, deploySucceededNotification]
 			: []),
-		...configRes.notifications.definitions,
+		...configRes.notifications,
 	];
 	const transferDefinitions = [
 		...coreTransferDefinitions,
@@ -105,7 +105,7 @@ const processConfig = async (
 			...locale,
 			direction: locale.direction ?? "ltr",
 		}));
-		draft.i18n.locales = draft.i18n.locales.map((locale) => ({
+		draft.translations.locales = draft.translations.locales.map((locale) => ({
 			...locale,
 			direction: locale.direction ?? "ltr",
 		}));
@@ -113,14 +113,8 @@ const processConfig = async (
 
 	configRes = {
 		...configRes,
-		jobs: {
-			...configRes.jobs,
-			definitions: jobDefinitions,
-		},
-		notifications: {
-			...configRes.notifications,
-			definitions: notificationDefinitions,
-		},
+		jobs: jobDefinitions,
+		notifications: notificationDefinitions,
 		transfers: transferDefinitions,
 		hooks: [...configRes.hooks, ...createDeployTriggerHooks(configRes.deploys)],
 	};
@@ -141,7 +135,7 @@ const processConfig = async (
 		checkTwoFactor(configRes);
 
 		// job definitions
-		await checkJobDefinitions(configRes.jobs.definitions);
+		await checkJobDefinitions(configRes.jobs);
 
 		// plugin toolkit definitions
 		checkToolkitDefinitions(configRes.plugins);
@@ -160,7 +154,7 @@ const processConfig = async (
 
 		// i18n checks
 		checkLocales(configRes.localization);
-		checkLocales(configRes.i18n);
+		checkLocales(configRes.translations);
 
 		// create / check job registry
 		getJobRegistry(configRes);

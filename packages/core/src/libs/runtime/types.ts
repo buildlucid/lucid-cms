@@ -29,7 +29,6 @@ export type LucidBuild = {
 	/** Spread into `createLucidHost` alongside the runtime's own options. */
 	host: {
 		definition: LucidConfigDefinition;
-		envSchema?: z.ZodType;
 		translationBundles: TranslationBundles;
 		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates" | "admin" | "host">;
 		/** During development, sends runtime logs to Lucid's Vite plugin to print. */
@@ -147,9 +146,8 @@ export type DatabaseConnectionScope = "runtime" | "invocation";
 export type AdapterLifecycleContext = {
 	config: ResolvedLucidConfig;
 	/**
-	 * Host environment available during adapter setup. Request-isolated runtimes
-	 * must resolve live I/O bindings from each service context instead of retaining
-	 * them from this host-scoped lifecycle context.
+	 * Host environment for adapter setup. Request-isolated runtimes must read live I/O bindings from
+	 * each service context.
 	 */
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
@@ -194,6 +192,8 @@ export type DatabaseAdapterValue =
 
 /** Runtime, database and project configuration passed to defineConfig. */
 export type LucidConfigDefinition = {
+	/** Validates and parses environment variables before `config` and `db` receive them. */
+	env?: z.ZodType;
 	/** Runtime adapter or factory for the deployment platform. */
 	runtime: RuntimeAdapterValue;
 	/** Database adapter or environment-aware factory. */

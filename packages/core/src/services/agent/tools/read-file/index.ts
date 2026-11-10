@@ -1,5 +1,5 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import {
@@ -12,7 +12,7 @@ import { fileMimeTypeSchema, inputSchema, outputSchema } from "./schema.js";
 
 /** Reads or searches a Lucid text file in bounded passages. */
 export const readFileAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: readFileToolName,
 		title: copy("admin:core.tools.media_read_file.title"),
 		description: dedent(`
@@ -22,16 +22,18 @@ export const readFileAgentTool = () =>
 		`),
 		input: inputSchema,
 		output: outputSchema,
-		outputVersion: 1,
-		permissions: [],
 		readOnly: true,
-		parallelSafe: true,
-		capabilities: {
-			media: { readFile: { mimeTypes: fileMimeTypeSchema.options } },
+		agent: {
+			outputVersion: 1,
+			permissions: [],
+			parallelSafe: true,
+			capabilities: {
+				media: { readFile: { mimeTypes: fileMimeTypeSchema.options } },
+			},
 		},
 		handler: async ({ context, input, execution }) => {
 			const result = await readFile(context, { input, execution });
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).agent;

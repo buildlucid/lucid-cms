@@ -4,7 +4,7 @@ import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import commentOnRequest from "./handler.js";
@@ -15,14 +15,16 @@ const name = "requests_comment";
 export const commentOnRequestAgentTool = (
 	options: CollectionToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.requests_comment.title"),
 		description:
 			"Post a new comment on a request. Comments are how to ask for changes: each dismisses approvals and blocks approval until it is resolved or closed. People taking part are notified. To answer an existing comment, use requests_reply.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
+		agent: {
+			permissions: [Permissions.RequestsRead],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(commentOnRequest, {
 				transaction: true,
@@ -47,4 +49,4 @@ export const commentOnRequestAgentTool = (
 				}),
 			};
 		},
-	});
+	}).agent;

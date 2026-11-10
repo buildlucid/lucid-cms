@@ -6,7 +6,7 @@ type SearchHit = {
 	path?: string;
 };
 
-/** Searches published pages via the public `/api/v1/content/site-search` route; the form submits `?q=` without JavaScript for the island to read on load. */
+/** Searches published pages via the public `/api/v1/content/e/site-search` route; the form submits `?q=` without JavaScript for the island to read on load. */
 export default function Search(props: {
 	locale: string;
 	labels: {
@@ -21,7 +21,7 @@ export default function Search(props: {
 	const [results] = createResource(
 		() => query() || false,
 		async (value) => {
-			const url = new URL("/api/v1/content/site-search", location.origin);
+			const url = new URL("/api/v1/content/e/site-search", location.origin);
 			url.search = new URLSearchParams({
 				query: value,
 				locale: props.locale,

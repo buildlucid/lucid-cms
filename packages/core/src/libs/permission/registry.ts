@@ -150,7 +150,7 @@ export const getGrantablePermissionRegistry = (config: AccessConfig) => {
 		getAgents(config).map((agent) => `agents:${agent.key}`),
 	);
 	const switchedOffAgents = new Set(
-		config.ai.agents.definitions
+		config.ai.agents
 			.map((agent) => `agents:${agent.key}`)
 			.filter((key) => !offeredAgents.has(key)),
 	);

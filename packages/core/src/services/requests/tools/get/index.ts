@@ -6,23 +6,24 @@ import {
 	getPermittedCollectionKeys,
 	getScopedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import getRequest from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const getRequestMcpTool = (options: CollectionToolOptions = {}) =>
-	defineMcpTool({
+	defineTool({
 		name: "requests_get",
 		title: copy("admin:core.tools.requests_get.title"),
 		description:
 			"Read a request: its documents and targets, approvals, blockers and comment threads.",
 		input: inputSchema,
 		output: outputSchema,
-		scopes: [ExternalScopes.RequestsRead],
-		annotations: { readOnlyHint: true },
+		readOnly: true,
+		mcp: {
+			scopes: [ExternalScopes.RequestsRead],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await getRequest(context, {
 				input,
@@ -36,19 +37,21 @@ export const getRequestMcpTool = (options: CollectionToolOptions = {}) =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).mcp;
 
 export const getRequestAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name: "requests_get",
 		title: copy("admin:core.tools.requests_get.title"),
 		description:
 			"Read a request: its documents and targets, approvals, blockers, comment threads and what you can do. To review a proposal, read it with documents_get and version request:ID, and compare it with the target version. To request changes, comment with requests_comment. Change your own comments, marked byYou, with requests_update_comment.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
 		readOnly: true,
-		parallelSafe: true,
+		agent: {
+			permissions: [Permissions.RequestsRead],
+			parallelSafe: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await getRequest(context, {
 				input,
@@ -69,4 +72,4 @@ export const getRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				}),
 			};
 		},
-	});
+	}).agent;

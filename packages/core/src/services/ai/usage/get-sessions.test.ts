@@ -91,12 +91,9 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: {
-					enabled: true,
-					definitions: [
-						defineAgent({ key: "test", name: "Test", description: "Tests." }),
-					],
-				},
+				agents: [
+					defineAgent({ key: "test", name: "Test", description: "Tests." }),
+				],
 			},
 		},
 		database,

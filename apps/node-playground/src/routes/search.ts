@@ -26,7 +26,7 @@ export default defineContentApiRoute({
 	method: "get",
 	path: "/search",
 	access: { type: "scoped", scopes: [ExternalScopes.DocumentRead("page")] },
-	schema: { query: { string: querySchema, formatted: querySchema } },
+	schema: { query: querySchema },
 	openAPI: {
 		summary: "Search published playground pages",
 		tags: ["Playground"],

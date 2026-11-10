@@ -66,7 +66,7 @@ beforeAll(async () => {
 			collections: [pages, posts],
 			ai: {
 				...config.ai,
-				agents: { enabled: true, definitions: [reviewer, editor] },
+				agents: [reviewer, editor],
 			},
 		},
 		database: await fixture.getDatabase(),
@@ -908,17 +908,14 @@ test("people attach requests they can read in every collection, unless the agent
 			...context.config,
 			ai: {
 				...context.config.ai,
-				agents: {
-					enabled: true,
-					definitions: [
-						defineAgent({
-							key: reviewer.key,
-							name: reviewer.name,
-							description: reviewer.description,
-							features: { requests: { attach: false } },
-						}),
-					],
-				},
+				agents: [
+					defineAgent({
+						key: reviewer.key,
+						name: reviewer.name,
+						description: reviewer.description,
+						features: { requests: { attach: false } },
+					}),
+				],
 			},
 		},
 	};

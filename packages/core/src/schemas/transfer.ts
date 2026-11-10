@@ -1,9 +1,9 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
 import type {
 	TransferImportMode,
 	TransferItemStatus,
 } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 
 /** What an import does with entries already on the site: update them, skip them or import copies. */
 export const transferImportModeSchema = z.enum([

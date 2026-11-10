@@ -26,7 +26,7 @@ export default defineContentApiRoute({
 	method: "get",
 	path: "/site-search",
 	access: { type: "public" },
-	schema: { query: { string: querySchema, formatted: querySchema } },
+	schema: { query: querySchema },
 	openAPI: {
 		summary: "Search published playground pages from the website",
 		tags: ["Playground"],

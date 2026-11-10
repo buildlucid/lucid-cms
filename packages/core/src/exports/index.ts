@@ -35,8 +35,7 @@ export { default as definePluginTask } from "../libs/plugins/define-plugin-task.
 export { default as defineConfig } from "../libs/runtime/define-config.js";
 export { default as defineSeed } from "../libs/seed/define-seed.js";
 export { default as defineSkill } from "../libs/skills/define-skill.js";
-export { default as defineAgentTool } from "../libs/tools/define-agent-tool.js";
-export { default as defineMcpTool } from "../libs/tools/define-mcp-tool.js";
+export { default as defineTool } from "../libs/tools/define-tool.js";
 export { default as defineTransfer } from "../libs/transfer/define-transfer.js";
 export { agentTools, mcpTools } from "../libs/tools/lucid-tools.js";
 export { LucidError } from "../utils/errors/index.js";

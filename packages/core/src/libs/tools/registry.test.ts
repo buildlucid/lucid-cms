@@ -56,14 +56,14 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 			secrets: "a".repeat(64),
 			ai: {
 				mcp: { tools: [echo] },
-				agents: { definitions: [agent("configured")] },
+				agents: [agent("configured")],
 			},
 			plugins: [
 				{
 					key: "test-plugin",
 					configure: (draft) => {
 						draft.ai.mcp.tools.push(pluginTool);
-						draft.ai.agents.definitions.push(agent("plugin"));
+						draft.ai.agents.push(agent("plugin"));
 					},
 				},
 			],
@@ -75,7 +75,7 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 		"plugin_dummy",
 		"test_echo",
 	]);
-	expect(config.ai.agents.definitions.map((agent) => agent.key)).toEqual([
+	expect(config.ai.agents.map((agent) => agent.key)).toEqual([
 		"configured",
 		"plugin",
 	]);
@@ -94,7 +94,7 @@ test("ai boolean shorthand keeps the remaining AI defaults", async () => {
 		enabled: false,
 		mediaGeneration: { image: { enabled: true } },
 		mcp: { enabled: false, tools: [], skills: [] },
-		agents: { enabled: true, definitions: [lucidAgent] },
+		agents: [lucidAgent],
 	});
 });
 
@@ -103,7 +103,7 @@ test("Lucid's agent passes config checks when no agents are given", async () => 
 		{ url: "http://localhost:6543", secrets: "a".repeat(64) },
 		{ resolvedDb: adapter },
 	);
-	expect(config.ai.agents.definitions).toEqual([lucidAgent]);
+	expect(config.ai.agents).toEqual([lucidAgent]);
 });
 
 test("names are unique within a placement, which only holds its own target", async () => {
@@ -137,7 +137,9 @@ test("names are unique within a placement, which only holds its own target", asy
 			},
 			options,
 		),
-	).rejects.toThrow('Agent "test" tools must be created with defineAgentTool.');
+	).rejects.toThrow(
+		'Agent "test" tools must be created with defineTool and have an `agent` block.',
+	);
 
 	const config = await processConfig(
 		{
@@ -148,7 +150,7 @@ test("names are unique within a placement, which only holds its own target", asy
 		options,
 	);
 	expect(getMcpToolRegistry(config).get("test_echo")).toEqual(echo);
-	expect(config.ai.agents.definitions[1]?.tools).toContainEqual(agentEcho);
+	expect(config.ai.agents[1]?.tools).toContainEqual(agentEcho);
 });
 
 test("a tool name can only be registered once in each placement", async () => {
@@ -221,7 +223,7 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets, e
 			...base,
 			ai: {
 				...base.ai,
-				agents: { enabled: true, definitions: [agent("test", [tool])] },
+				agents: [agent("test", [tool])],
 			},
 		});
 
@@ -245,24 +247,21 @@ test("only Lucid's own tools can use the lucid_ name prefix", async () => {
 			...base,
 			ai: {
 				...base.ai,
-				agents: {
-					enabled: true,
-					definitions: [
-						agent("test", [
-							defineAgentTool({
-								name,
-								description: "Saves a note",
-								input: z.object({}),
-								output: z.object({}),
-								permissions: [],
-								handler: async () => ({
-									output: {},
-									summary: "Saved the note.",
-								}),
+				agents: [
+					agent("test", [
+						defineAgentTool({
+							name,
+							description: "Saves a note",
+							input: z.object({}),
+							output: z.object({}),
+							permissions: [],
+							handler: async () => ({
+								output: {},
+								summary: "Saved the note.",
 							}),
-						]),
-					],
-				},
+						}),
+					]),
+				],
 			},
 		});
 

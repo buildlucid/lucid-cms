@@ -1,7 +1,7 @@
 import { agentTools, defineAgent } from "@lucidcms/core";
 import demoAgentSkill from "../skills/demo.js";
-import { addAgentTool } from "../tools/add.js";
-import { echoAgentTool } from "../tools/echo.js";
+import { addTool } from "../tools/add.js";
+import { echoTool } from "../tools/echo.js";
 import { reviewNoteTool } from "../tools/review-note.js";
 import { saveNoteTool } from "../tools/save-note.js";
 import { selectDocumentTool } from "../tools/select-document.js";
@@ -24,8 +24,8 @@ export const assistantAgent = defineAgent({
 		agentTools.media.select(),
 		agentTools.system(),
 		agentTools.notifications.find(),
-		echoAgentTool,
-		addAgentTool,
+		echoTool,
+		addTool,
 		saveNoteTool,
 		selectDocumentTool,
 		reviewNoteTool,

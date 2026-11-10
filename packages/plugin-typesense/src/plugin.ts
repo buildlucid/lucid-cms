@@ -30,11 +30,11 @@ const plugin: LucidPlugin<PluginOptions> = (input) => {
 			status: readStatuses(options),
 		},
 		configure: (draft) => {
-			draft.migrations.definitions.push({
+			draft.migrations.push({
 				name: "1788900000000-typesense",
 				migration,
 			});
-			draft.jobs.definitions.push(job, createReconcileJob(options, job));
+			draft.jobs.push(job, createReconcileJob(options, job));
 			draft.http.routes.push(...routes(options, job));
 			draft.admin.slots.push(rebuildIndexesConfig());
 			draft.hooks.push(

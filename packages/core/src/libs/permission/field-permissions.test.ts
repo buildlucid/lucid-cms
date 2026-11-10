@@ -18,7 +18,7 @@ const accessConfig = (collection: CollectionDefinition): AccessConfig => ({
 			image: { enabled: false, models: {} },
 			audio: { enabled: false, models: {} },
 		},
-		agents: { enabled: false, definitions: [] },
+		agents: [],
 		mcp: { enabled: false, tools: [], skills: [] },
 	},
 	deploys: [],

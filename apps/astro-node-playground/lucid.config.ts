@@ -15,6 +15,7 @@ export const env = z.object({
 });
 
 export default defineConfig({
+	env: env,
 	runtime: node,
 	db: sqlite,
 	config: (env) => ({

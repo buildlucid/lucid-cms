@@ -10,7 +10,7 @@ const aiConfig = (mcp: boolean) => ({
 		image: { enabled: true, models: {} },
 		audio: { enabled: true, models: {} },
 	},
-	agents: { enabled: true, definitions: [] },
+	agents: [],
 	mcp: { enabled: mcp, tools: [], skills: [] },
 });
 

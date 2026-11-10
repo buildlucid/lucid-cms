@@ -1,7 +1,10 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AnyJobDefinition } from "./types.js";
 
-/** Registered symbol that identifies job definitions across core copies, including copies evaluated by config loaders, while keeping runtime handlers out of public fields. */
+/**
+ * Identifies job definitions across core copies and config loaders without exposing runtime
+ * handlers.
+ */
 export const jobDefinitionInternal = Symbol.for(
 	"@lucidcms/core/job-definition-internal",
 );
@@ -37,7 +40,7 @@ export const getJobRegistry = (
 	if (existing) return existing;
 
 	const registry = new Map(
-		config.jobs.definitions.map((definition) => [
+		config.jobs.map((definition) => [
 			getJobDefinitionKey(definition),
 			definition,
 		]),

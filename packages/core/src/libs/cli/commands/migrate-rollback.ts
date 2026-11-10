@@ -1,13 +1,12 @@
-import confirm from "@inquirer/confirm";
 import { LucidError } from "../../../utils/errors/index.js";
 import cliLogger from "../logger.js";
-import runPrompt from "../services/run-prompt.js";
+import confirmCommand from "../services/confirm-command.js";
 import runTaskCommand from "../services/run-task-command.js";
 import type { TaskServerOptions } from "../services/start-task-server.js";
 
-/** Rolls back the most recently executed migrations in the runtime, after confirming the plan unless forced. */
+/** Rolls back the most recently executed migrations in the runtime, after confirming the plan unless `--yes` is passed. */
 const migrateRollbackCommand = (
-	options?: { force?: boolean; steps?: string } & TaskServerOptions,
+	options?: { yes?: boolean; steps?: string } & TaskServerOptions,
 ) =>
 	runTaskCommand(
 		"Rollback failed",
@@ -68,17 +67,10 @@ const migrateRollbackCommand = (
 							`Preparing to rollback ${result.migrations.length} migration(s)`,
 						);
 
-						const proceed =
-							options?.force ||
-							(await runPrompt((output) =>
-								confirm(
-									{
-										message: `Are you sure you want to rollback ${result.migrations.length} migration(s)? This action cannot be undone.`,
-										default: false,
-									},
-									{ output },
-								),
-							));
+						const proceed = await confirmCommand({
+							message: `Are you sure you want to rollback ${result.migrations.length} migration(s)? This action cannot be undone.`,
+							yes: options?.yes,
+						});
 						if (!proceed) {
 							cliLogger.info("Rollback cancelled");
 							return 0;

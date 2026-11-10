@@ -1,6 +1,6 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
 import type { DeployRunSource, DeployRunStatus } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { agentActorSchema } from "./shared/agent-actor.js";
 import { userDisplaySchema } from "./shared/user-display.js";

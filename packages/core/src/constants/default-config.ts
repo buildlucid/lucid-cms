@@ -53,7 +53,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		resendWindowDays: 7,
 	},
 	localization: { locales: [], defaultLocale: null },
-	i18n: {
+	translations: {
 		locales: [
 			{
 				label: "English",
@@ -63,12 +63,8 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		],
 		defaultLocale: "en",
 	},
-	migrations: {
-		definitions: [],
-	},
-	seeds: {
-		definitions: [],
-	},
+	migrations: [],
+	seeds: [],
 	media: {
 		limits: {
 			storageBytes: false,
@@ -101,14 +97,10 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		video: {},
 	},
 	queue: {},
-	jobs: {
-		definitions: [],
-	},
+	jobs: [],
 	deploys: [],
 	redirects: [],
-	notifications: {
-		definitions: [],
-	},
+	notifications: [],
 	hooks: [],
 	collections: [],
 	plugins: [],

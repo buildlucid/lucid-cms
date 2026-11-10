@@ -5,7 +5,6 @@ import type {
 } from "@lucidcms/types";
 import z from "zod";
 import constants from "../constants/constants.js";
-import type { ControllerSchema } from "../exports/types.js";
 import {
 	aiModelCatalogSchema,
 	aiModelSelectionSchema,
@@ -38,6 +37,7 @@ import type {
 	AgentToolStatus,
 	AgentToolSummary,
 } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import {
 	agentMessageReferenceInputSchema,
 	agentReferenceInputSchema,

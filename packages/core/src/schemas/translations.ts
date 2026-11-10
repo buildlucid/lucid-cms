@@ -1,10 +1,10 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
 import type {
 	DocumentTranslationStatus,
 	TranslateDocumentsResponse,
 	TranslationSettings,
 } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { brickInputSchema } from "./collection-bricks.js";
 import { fieldInputSchema } from "./collection-fields.js";
 import { translationSourceSchema } from "./shared/translation-source.js";

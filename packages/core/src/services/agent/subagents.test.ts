@@ -254,7 +254,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: { enabled: true, definitions: [lead, helper] },
+				agents: [lead, helper],
 			},
 		},
 		database,

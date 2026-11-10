@@ -106,6 +106,8 @@ const buildCoreTypesFile = (props: {
 
 const generateTypes = async (props: {
 	envSchema?: ZodType;
+	/** Whether lucid.config exports the schema as `env`. */
+	envExported?: boolean;
 	configPath: string;
 	projectRoot?: string;
 	translationFiles?: ResourceFile[];
@@ -124,6 +126,7 @@ const generateTypes = async (props: {
 			generateAccessTypes(props.access),
 			generateEnvTypes({
 				schema: props.envSchema,
+				exported: props.envExported ?? false,
 				configRelativePath,
 			}),
 			generateTranslationCopyTypes({

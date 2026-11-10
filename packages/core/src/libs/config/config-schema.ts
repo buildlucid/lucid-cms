@@ -43,6 +43,7 @@ import {
 } from "../resources/schema.js";
 import { isSkillDefinition } from "../skills/registry.js";
 import type { SkillDefinition } from "../skills/types.js";
+import { toMcpTools } from "../tools/define-tool.js";
 import { isToolDefinition } from "../tools/registry.js";
 import type { McpToolDefinition } from "../tools/types.js";
 import { isTransferDefinition } from "../transfer/registry.js";
@@ -117,7 +118,7 @@ const NotificationDefinitionSchema = z.custom<AnyNotificationDefinition>(
 const McpToolDefinitionSchema = z.custom<McpToolDefinition>(
 	(value) => isToolDefinition(value) && value.kind === "mcp",
 	{
-		message: "Expected an MCP tool definition created with defineMcpTool",
+		message: "Expected a tool created with defineTool that has an `mcp` block",
 	},
 );
 
@@ -144,9 +145,6 @@ const AiModelConfigSchema = z
 
 const enabledShorthand = (value: unknown) =>
 	typeof value === "boolean" ? { enabled: value } : value;
-
-const definitionsShorthand = (value: unknown) =>
-	Array.isArray(value) ? { definitions: value } : value;
 
 const MediaGenerationTypeSchema = z
 	.preprocess(
@@ -217,33 +215,18 @@ const AiConfigSchema = z.strictObject({
 		)
 		.prefault({}),
 	agents: z
-		.preprocess(
-			(value) => enabledShorthand(definitionsShorthand(value)),
-			z
-				.strictObject({
-					enabled: z.boolean().default(true),
-					definitions: z.array(AgentDefinitionSchema).optional(),
-				})
-				.transform(({ enabled, definitions }) => ({
-					enabled,
-					definitions: definitions ?? (enabled ? [lucidAgent] : []),
-				})),
-		)
-		.prefault({}),
+		.union([z.literal(false), z.array(AgentDefinitionSchema)])
+		.default([lucidAgent])
+		.transform((agents) => agents || []),
 	mcp: z
 		.preprocess(
 			enabledShorthand,
 			z.strictObject({
 				enabled: z.boolean().default(true),
-				tools: z
-					.array(
-						z.union([
-							McpToolDefinitionSchema,
-							z.array(McpToolDefinitionSchema),
-						]),
-					)
-					.default([])
-					.transform((tools) => tools.flat()),
+				tools: z.preprocess(
+					(tools) => (Array.isArray(tools) ? toMcpTools(tools) : tools),
+					z.array(McpToolDefinitionSchema).default([]),
+				),
 				skills: z.array(SkillDefinitionSchema).default([]),
 			}),
 		)
@@ -450,7 +433,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		),
 		defaultLocale: z.string().nullable(),
 	}),
-	i18n: z.strictObject({
+	translations: z.strictObject({
 		locales: z.array(
 			z.strictObject({
 				label: z.string(),
@@ -460,25 +443,13 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		),
 		defaultLocale: z.string(),
 	}),
-	migrations: z.preprocess(
-		definitionsShorthand,
+	migrations: z.array(
 		z.strictObject({
-			definitions: z.array(
-				z.strictObject({
-					name: z.string(),
-					migration: migrationSchema,
-				}),
-			),
+			name: z.string(),
+			migration: migrationSchema,
 		}),
 	),
-	seeds: z.preprocess(
-		definitionsShorthand,
-		z.strictObject({
-			definitions: z.array(
-				z.strictObject({ name: z.string(), seed: seedSchema }),
-			),
-		}),
-	),
+	seeds: z.array(z.strictObject({ name: z.string(), seed: seedSchema })),
 	email: z.strictObject({
 		from: z
 			.strictObject({
@@ -511,8 +482,8 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		})
 		.optional(),
 	media: z.strictObject({
-		storage: MediaStorageAdapterSchema.optional(),
-		delivery: MediaDeliveryAdapterSchema.optional(),
+		storageAdapter: MediaStorageAdapterSchema.optional(),
+		deliveryAdapter: MediaDeliveryAdapterSchema.optional(),
 		limits: z.strictObject({
 			storageBytes: z.union([z.number(), z.literal(false)]),
 			uploadBytes: z.number(),
@@ -560,12 +531,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 	queue: z.strictObject({
 		adapter: QueueAdapterSchema.optional(),
 	}),
-	jobs: z.preprocess(
-		definitionsShorthand,
-		z.strictObject({
-			definitions: z.array(JobDefinitionSchema),
-		}),
-	),
+	jobs: z.array(JobDefinitionSchema),
 	deploys: z.array(
 		z.custom<DeployDefinition>(isDeployDefinition, {
 			message: "Expected a deploy created with defineDeploy",
@@ -576,12 +542,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			message: "Expected a redirect resolver function",
 		}),
 	),
-	notifications: z.preprocess(
-		definitionsShorthand,
-		z.strictObject({
-			definitions: z.array(NotificationDefinitionSchema),
-		}),
-	),
+	notifications: z.array(NotificationDefinitionSchema),
 	kv: z
 		.strictObject({
 			adapter: KVAdapterSchema.optional(),

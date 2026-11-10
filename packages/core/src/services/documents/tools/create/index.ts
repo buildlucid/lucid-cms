@@ -1,7 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import requiresReview from "../../helpers/requires-review.js";
@@ -15,7 +15,7 @@ const name = "documents_create";
 export const createDocumentAgentTool = (
 	options: DocumentWriteToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.documents_create.title"),
 		description: options.direct
@@ -23,20 +23,22 @@ export const createDocumentAgentTool = (
 			: "Create a document in a collection. Use collections_describe first for its fields, bricks and writing instructions. It opens a create request, and the document stays hidden until people approve it. To change it before then, call documents_update with the returned requestId.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
-		//* Requests already receive review, so only direct writes need confirmation.
-		requiresConfirmation: options.direct
-			? ({ input, config }) =>
-					!requiresReview(
-						config.collections.find(
-							(collection) => collection.key === input.collectionKey,
-						),
-						{ type: "create" },
-					)
-			: false,
-		inputPermissions: ({ input: { collectionKey } }) => [
-			getCollectionPermission(collectionKey, "read"),
-		],
+		agent: {
+			permissions: [],
+			//* Requests already receive review, so only direct writes need confirmation.
+			requiresConfirmation: options.direct
+				? ({ input, config }) =>
+						!requiresReview(
+							config.collections.find(
+								(collection) => collection.key === input.collectionKey,
+							),
+							{ type: "create" },
+						)
+				: false,
+			inputPermissions: ({ input: { collectionKey } }) => [
+				getCollectionPermission(collectionKey, "read"),
+			],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(createDocument, {
 				transaction: true,
@@ -76,4 +78,4 @@ export const createDocumentAgentTool = (
 				),
 			};
 		},
-	});
+	}).agent;

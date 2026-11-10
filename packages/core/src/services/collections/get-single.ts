@@ -35,7 +35,7 @@ const getSingle: ServiceFn<
 	if (migrationStatus.error) return migrationStatus;
 
 	const adminTranslations = context.translate
-		.forLocale(context.config.i18n.defaultLocale)
+		.forLocale(context.config.translations.defaultLocale)
 		.adminBundle();
 
 	if (collectionRes.data.getData.mode === "single") {

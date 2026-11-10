@@ -20,6 +20,7 @@ import { webReadAgentTool } from "../../services/web/tools/read/index.js";
 import { webSearchAgentTool } from "../../services/web/tools/search/index.js";
 import dedent from "../../utils/helpers/dedent.js";
 import { normalizeCopy } from "../i18n/copy.js";
+import { toAgentTools } from "../tools/define-tool.js";
 import type {
 	AgentDefinition,
 	AgentFeatures,
@@ -101,7 +102,7 @@ const defineAgent = <const Key extends string>(
 		name: normalizeCopy(options.name),
 		description: normalizeCopy(options.description),
 		instructions: options.instructions ? dedent(options.instructions) : "",
-		tools: [
+		tools: toAgentTools([
 			...(features.media.analyze ? [analyzeMediaAgentTool()] : []),
 			...(features.media.readFile ? [readFileAgentTool()] : []),
 			...(features.media.generate.image
@@ -140,8 +141,8 @@ const defineAgent = <const Key extends string>(
 						subagentStopAgentTool(),
 					]
 				: []),
-			...(options.tools?.flat() ?? []),
-		],
+			...(options.tools ?? []),
+		]),
 		skills: options.skills ?? [],
 		models: options.models,
 		features,

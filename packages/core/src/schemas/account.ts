@@ -1,7 +1,7 @@
 import z from "zod";
 import constants from "../constants/constants.js";
-import type { ControllerSchema } from "../exports/types.js";
 import { translate } from "../libs/i18n/index.js";
+import type { ControllerSchema } from "../types/schema.js";
 import {
 	passkeyAuthenticationResponseSchema,
 	passkeyLoginOptionsSchema,

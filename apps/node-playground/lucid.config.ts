@@ -70,6 +70,7 @@ export const env = z.object({
 });
 
 export default defineConfig({
+	env: env,
 	runtime: node,
 	// runtime: node({
 	// 	server: {
@@ -143,7 +144,7 @@ export default defineConfig({
 			],
 			defaultLocale: "en",
 		},
-		i18n: {
+		translations: {
 			locales: [
 				{
 					label: "English",

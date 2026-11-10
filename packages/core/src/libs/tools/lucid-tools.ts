@@ -31,10 +31,7 @@ import { findJobsAgentTool } from "../../services/jobs/tools/find/index.js";
 import { getJobAgentTool } from "../../services/jobs/tools/get/index.js";
 import { listJobSchedulesAgentTool } from "../../services/jobs/tools/list-schedules/index.js";
 import { runJobScheduleAgentTool } from "../../services/jobs/tools/run-schedule/index.js";
-import {
-	listLocalesAgentTool,
-	listLocalesMcpTool,
-} from "../../services/locales/tools/list/index.js";
+import { listLocalesTool } from "../../services/locales/tools/list/index.js";
 import {
 	findMediaAgentTool,
 	findMediaMcpTool,
@@ -132,7 +129,7 @@ export const agentTools = {
 	},
 	locales: {
 		/** Lists content and interface languages. */
-		list: listLocalesAgentTool,
+		list: () => listLocalesTool().agent,
 	},
 	users: {
 		/** Finds people, eg. for user fields, mentions and request reviewers. */
@@ -206,7 +203,7 @@ export const agentTools = {
 		getDocumentAgentTool(options),
 		findMediaAgentTool(),
 		getMediaAgentTool(),
-		listLocalesAgentTool(),
+		listLocalesTool().agent,
 		findUsersAgentTool(options),
 	],
 	/** Creates, updates, deletes, unpublishes and translates documents for use alongside `read()`. */
@@ -273,7 +270,7 @@ export const mcpTools = {
 	},
 	locales: {
 		/** Lists content and interface languages. */
-		list: listLocalesMcpTool,
+		list: () => listLocalesTool().mcp,
 	},
 	users: {
 		/** Finds people, eg. who a user field or request names. */
@@ -294,7 +291,7 @@ export const mcpTools = {
 		findMediaMcpTool(),
 		getMediaMcpTool(),
 		previewMediaMcpTool(),
-		listLocalesMcpTool(),
+		listLocalesTool().mcp,
 		findUsersMcpTool(options),
 		findRequestsMcpTool(options),
 		getRequestMcpTool(options),

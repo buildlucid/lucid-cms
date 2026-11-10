@@ -4,7 +4,7 @@ import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import scheduleRequest from "./handler.js";
@@ -13,15 +13,17 @@ import { inputSchema, outputSchema } from "./schema.js";
 const name = "requests_schedule";
 
 export const scheduleRequestAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.requests_schedule.title"),
 		description:
 			"Schedule when a request completes once it is approved, or pass at as null to remove the schedule. Changes go live at that time, so only schedule requests the person asked you to.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
-		requiresConfirmation: true,
+		agent: {
+			permissions: [Permissions.RequestsRead],
+			requiresConfirmation: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(scheduleRequest, {
 				transaction: true,
@@ -49,4 +51,4 @@ export const scheduleRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				),
 			};
 		},
-	});
+	}).agent;

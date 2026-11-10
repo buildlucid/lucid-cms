@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../../constants/constants.js";
 
 export const filterOperators = z
 	.enum([
@@ -29,8 +30,8 @@ export const queryString = {
 				example?: string;
 				description?: string;
 				/**
-				 * When true, if the filter value is empty it will be treated as you querying for the column being equal to null.
-				 * You'll also need to mark the column as nullable in the buildFormattedQuery helper in your controller.
+				 * Treats empty filter values as null. Also mark the column nullable in the controller's
+				 * buildFormattedQuery call.
 				 */
 				nullable?: boolean;
 			},
@@ -94,6 +95,15 @@ export const queryString = {
 				"Sets the number of items per page (use positive integer or -1 for all items)",
 			)
 			.optional(),
+		/** The content API's `perPage`, which is capped and has no "all items" value. */
+		contentPerPage: z
+			.string()
+			.trim()
+			.regex(/^[1-9][0-9]*$/)
+			.describe(
+				`Sets the number of items per page, up to ${constants.query.maxContentPerPage}`,
+			)
+			.optional(),
 	},
 	meta: {
 		patternProperties: {
@@ -112,24 +122,7 @@ export const queryString = {
 	},
 };
 
-/**
- * @description The entire queryFromatted schema
- * ```typescript
- *  filter: z.object({}).optional(),
- *  sort: z
- *      .array(
- *          z.object({
- *              key: z.string(),
- *              direction: z.enum(["asc", "desc"]),
- *          }),
- *      )
- *      .optional(),
- *  include: z.array(z.string()).optional(),
- *  exclude: z.array(z.string()).optional(),
- *  page: z.number(),
- *  perPage: z.number(),
- * ```
- */
+/** Shared schemas for parsed query parameters. */
 export const queryFormatted = {
 	schema: {
 		filters: {
@@ -170,5 +163,11 @@ export const queryFormatted = {
 			.optional(),
 		page: z.number(),
 		perPage: z.number(),
+		/** The content API's `perPage`, which is capped and has no "all items" value. */
+		contentPerPage: z
+			.number()
+			.int()
+			.min(1)
+			.max(constants.query.maxContentPerPage),
 	},
 };

@@ -79,7 +79,7 @@ export const aiFeatureFlags = (
 	imageGeneration: ai.mediaGeneration.image.enabled,
 	audioGeneration: ai.mediaGeneration.audio.enabled,
 	translation: ai.translation,
-	agents: ai.agents.enabled,
+	agents: ai.agents.length > 0,
 	mcp: ai.mcp.enabled,
 });
 

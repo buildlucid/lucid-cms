@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { queryString } from "./helpers/querystring.js";
 
 /** A root-relative path on the website, such as `/about`, shared by the content route and toolkit. */

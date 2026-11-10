@@ -537,8 +537,8 @@ export default function Integrations(props: {
 						/>
 						<datalist id="integrations-paths">
 							<option value="/api/v1/content/locales" />
-							<option value="/api/v1/content/search?query=page&locale=en" />
-							<option value="/api/v1/content/search/media?query=image&locale=en" />
+							<option value="/api/v1/content/e/search?query=page&locale=en" />
+							<option value="/api/v1/content/e/search/media?query=image&locale=en" />
 							<option value="/api/v1/content/documents/page" />
 						</datalist>
 					</label>

@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
+import type { ControllerSchema } from "../types/schema.js";
 
 const localeResponseSchema = z.object({
 	code: z.string().meta({

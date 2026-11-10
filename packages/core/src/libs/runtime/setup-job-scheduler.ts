@@ -23,7 +23,7 @@ const runScheduler: ServiceFn<
 		return { error: undefined, data: undefined };
 	}
 
-	const locale = context.config.i18n.defaultLocale;
+	const locale = context.config.translations.defaultLocale;
 	const schedulerContext = {
 		...context,
 		translate: context.translate.forLocale(locale),

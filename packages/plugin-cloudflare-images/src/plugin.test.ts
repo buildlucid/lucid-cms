@@ -39,7 +39,7 @@ describe("Cloudflare Images plugin", () => {
 		if (!defaults || typeof defaults === "function") {
 			throw new Error("Images plugin did not provide adapter defaults.");
 		}
-		const adapter = defaults.media?.delivery;
+		const adapter = defaults.media?.deliveryAdapter;
 		if (
 			!adapter ||
 			adapter instanceof Promise ||

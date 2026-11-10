@@ -61,7 +61,7 @@ describe("route segments", () => {
 			details,
 		});
 		const draft = {
-			i18n: { sources: [] },
+			translations: { sources: [] },
 			admin: {
 				agentHomescreen: true,
 				slots: [],
@@ -71,8 +71,8 @@ describe("route segments", () => {
 			},
 			collections: [documentation, product],
 			hooks: [],
-			jobs: { definitions: [] },
-			migrations: { definitions: [] },
+			jobs: [],
+			migrations: [],
 			redirects: [],
 			localization: { locales: [], defaultLocale: null },
 			http: { routes: [] },

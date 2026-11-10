@@ -43,7 +43,7 @@ const getScopes: ServiceFn<
 		data: hydrateAdminCopyDefaults(
 			groups,
 			context.translate
-				.forLocale(context.config.i18n.defaultLocale)
+				.forLocale(context.config.translations.defaultLocale)
 				.adminBundle(),
 		),
 	};

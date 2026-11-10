@@ -15,7 +15,7 @@ const handler: ServiceFn<
 	AgentToolResult<z.output<typeof outputSchema>>
 > = async (context, input) => {
 	const translate = context.translate.forLocale(
-		context.config.i18n.defaultLocale,
+		context.config.translations.defaultLocale,
 	);
 	const agents = [];
 

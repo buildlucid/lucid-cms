@@ -1,8 +1,8 @@
 import z from "zod";
 import constants from "../constants/constants.js";
-import type { ControllerSchema } from "../exports/types.js";
 import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 import { translate } from "../libs/i18n/index.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { usernameSchema } from "./shared/username.js";
 
 const providerCallbackStateSchema = z

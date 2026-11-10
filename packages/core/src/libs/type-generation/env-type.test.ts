@@ -4,6 +4,7 @@ import generateEnvTypes from "./env-type.js";
 test("generates environment types from the named env export", async () => {
 	const result = await generateEnvTypes({
 		schema: {} as never,
+		exported: true,
 		configRelativePath: "../lucid.config.ts",
 	});
 
@@ -19,6 +20,7 @@ test("generates environment types from the named env export", async () => {
 test("generates fallback environment types without a named env export", async () => {
 	const result = await generateEnvTypes({
 		schema: undefined,
+		exported: false,
 		configRelativePath: "../lucid.config.ts",
 	});
 

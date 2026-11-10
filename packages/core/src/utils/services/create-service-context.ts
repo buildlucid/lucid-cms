@@ -13,7 +13,7 @@ import type { CreateServiceContextOptions, ServiceContext } from "./types.js";
 const createServiceContext = (
 	options: CreateServiceContextOptions,
 ): ServiceContext => {
-	const locale = options.config.i18n.defaultLocale;
+	const locale = options.config.translations.defaultLocale;
 
 	return {
 		db:

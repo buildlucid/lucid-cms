@@ -18,7 +18,6 @@ const renderBuildModule = (props: {
 }) => {
 	const { project, dev } = props;
 	const json = JSON.stringify;
-	const hasEnvSchema = project.envSchema !== undefined;
 
 	const meta = [
 		`emailTemplates: ${json(project.emailTemplates)}`,
@@ -27,7 +26,6 @@ const renderBuildModule = (props: {
 	];
 	const host = [
 		"definition",
-		`envSchema: ${hasEnvSchema ? "env" : "undefined"}`,
 		`translationBundles: ${json(project.translationStore.bundles)}`,
 		`meta: { ${meta.join(", ")} }`,
 		...(dev
@@ -60,7 +58,7 @@ const renderBuildModule = (props: {
 	}
 
 	const lines = [
-		`import definition${hasEnvSchema ? ", { env }" : ""} from ${importPath(project.configPath)};`,
+		`import definition from ${importPath(project.configPath)};`,
 		...(dev
 			? [
 					`import { ${dev.taskServer ? "createHotLogTransport, inlineQueueAdapter" : "createHotLogTransport"} } from "@lucidcms/core/runtime";`,

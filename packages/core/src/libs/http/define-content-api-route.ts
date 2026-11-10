@@ -12,7 +12,7 @@ export const isContentRouteDefinition = (
 	"type" in route && route.type === "content-route";
 
 /**
- * Defines a custom route beneath Lucid's content endpoint with explicit external
+ * Defines a custom route beneath `/api/v1/content/e` with explicit external
  * access rules. Add it to `config.http.routes`.
  *
  * @example

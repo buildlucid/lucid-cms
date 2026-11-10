@@ -90,7 +90,11 @@ export type LucidPluginCommand = {
 	/** Plugin command name, such as `site:build`, which cannot replace a built-in command. */
 	name: string;
 	description: string;
+	/** Flags the command accepts, in commander syntax such as `--only <path>`. `--remote` is always available. */
+	options?: Array<{ flags: string; description: string }>;
 	run: (props: {
+		/** Values of the command's `options`, keyed by camel-cased flag name, eg. `only`. */
+		options: Record<string, string | boolean | string[] | undefined>;
 		config: ResolvedLucidConfig;
 		/** The folder holding lucid.config. */
 		projectRoot: string;

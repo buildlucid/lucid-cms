@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import deleteMemories from "../../delete-memories.js";
@@ -19,29 +19,31 @@ import {
  * @remarks Only offered in chats, like `lucid_memory_save`.
  */
 export const deleteMemoryAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: deleteMemoryToolName,
 		title: copy("admin:core.tools.lucid_memory_delete.title"),
 		description: `Forget memories, eg. when the person asks you to forget something, or a memory is wrong or out of date. The person checks which memories will be forgotten first. Use the IDs of the memories in your instructions. To change a memory instead, use ${saveMemoryToolName} with replaces.`,
 		input: inputSchema,
 		output: outputSchema,
-		outputVersion: 1,
-		permissions: [],
-		available: ({ config, mode }) =>
-			mode === "chat" &&
-			(config.ai.memory.personal.enabled || config.ai.memory.shared.enabled),
-		interaction: {
-			key: constants.agent.widgets.memoryReview,
-			version: 1,
-			data: reviewDataSchema,
-			response: () => reviewResponseSchema,
-			prepare: async ({ context, input, execution }) => {
-				const result = await prepareMemoryDelete(context, {
-					input,
-					authority: execution.authority,
-				});
-				if (result.error) throw new LucidError(result.error);
-				return result.data;
+		agent: {
+			outputVersion: 1,
+			permissions: [],
+			available: ({ config, mode }) =>
+				mode === "chat" &&
+				(config.ai.memory.personal.enabled || config.ai.memory.shared.enabled),
+			interaction: {
+				key: constants.agent.widgets.memoryReview,
+				version: 1,
+				data: reviewDataSchema,
+				response: () => reviewResponseSchema,
+				prepare: async ({ context, input, execution }) => {
+					const result = await prepareMemoryDelete(context, {
+						input,
+						authority: execution.authority,
+					});
+					if (result.error) throw new LucidError(result.error);
+					return result.data;
+				},
 			},
 		},
 		handler: async ({ context, execution, data }) => {
@@ -74,4 +76,4 @@ export const deleteMemoryAgentTool = () =>
 				),
 			};
 		},
-	});
+	}).agent;

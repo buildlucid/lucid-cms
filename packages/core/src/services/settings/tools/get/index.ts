@@ -1,21 +1,23 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import getSettings from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const getSettingsAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: "settings_get",
 		title: copy("admin:core.tools.settings_get.title"),
 		description:
 			"Read how this CMS is set up: the runtime, database, queue, KV, email and media adapters, media storage used and remaining, whether emails are simulated, the email templates, the AI features and agents that are on, the MCP tools served, and the website's URL.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.SettingsRead],
 		readOnly: true,
-		parallelSafe: true,
+		agent: {
+			permissions: [Permissions.SettingsRead],
+			parallelSafe: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await getSettings(context, {
 				input,
@@ -28,4 +30,4 @@ export const getSettingsAgentTool = () =>
 				summary: copy("admin:core.tools.settings_get.summary"),
 			};
 		},
-	});
+	}).agent;

@@ -7,8 +7,7 @@ import {
 	getScopedCollectionKeys,
 	limitCollections,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import describeCollection from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
@@ -16,22 +15,24 @@ import { inputSchema, outputSchema } from "./schema.js";
 export const describeCollectionMcpTool = (
 	options: CollectionToolOptions = {},
 ) =>
-	defineMcpTool({
+	defineTool({
 		name: "collections_describe",
 		title: copy("admin:core.tools.collections_describe.title"),
 		description:
 			"Describe a collection's fields, bricks, routing, content languages, publishing options, and instructions for writing its content. Returns paginated details.",
 		input: inputSchema,
 		output: outputSchema,
-		scopes: [],
-		inputScopes: ({ input: { collectionKey } }) => [
-			ExternalScopes.DocumentRead(collectionKey),
-		],
-		possibleScopes: ({ config }) =>
-			limitCollections(config.collections, options.collections).map(
-				(collection) => ExternalScopes.DocumentRead(collection.key),
-			),
-		annotations: { readOnlyHint: true },
+		readOnly: true,
+		mcp: {
+			scopes: [],
+			inputScopes: ({ input: { collectionKey } }) => [
+				ExternalScopes.DocumentRead(collectionKey),
+			],
+			possibleScopes: ({ config }) =>
+				limitCollections(config.collections, options.collections).map(
+					(collection) => ExternalScopes.DocumentRead(collection.key),
+				),
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await describeCollection(context, {
 				input,
@@ -44,24 +45,26 @@ export const describeCollectionMcpTool = (
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).mcp;
 
 export const describeCollectionAgentTool = (
 	options: CollectionToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name: "collections_describe",
 		title: copy("admin:core.tools.collections_describe.title"),
 		description:
 			"Describe a collection's fields, bricks, routing, content languages, publishing options, and instructions for writing its content. Returns paginated details.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
 		readOnly: true,
-		parallelSafe: true,
-		inputPermissions: ({ input: { collectionKey } }) => [
-			getCollectionPermission(collectionKey, "read"),
-		],
+		agent: {
+			permissions: [],
+			parallelSafe: true,
+			inputPermissions: ({ input: { collectionKey } }) => [
+				getCollectionPermission(collectionKey, "read"),
+			],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await describeCollection(context, {
 				input,
@@ -81,4 +84,4 @@ export const describeCollectionAgentTool = (
 				}),
 			};
 		},
-	});
+	}).agent;

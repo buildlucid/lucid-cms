@@ -1,5 +1,5 @@
 import { z } from "@lucidcms/core";
-import type { ControllerSchema } from "@lucidcms/core/types";
+import type { RouteSchema } from "@lucidcms/core/types";
 
 export const controllerSchemas = {
 	webhook: {
@@ -66,11 +66,8 @@ export const controllerSchemas = {
 					.optional(),
 			}),
 		}),
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
+		query: undefined,
 		params: undefined,
 		response: undefined,
-	} satisfies ControllerSchema,
+	} satisfies RouteSchema,
 };

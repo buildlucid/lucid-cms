@@ -29,11 +29,11 @@ const coreTranslationStore = createTranslationStore({
  * ```
  */
 export const resolveInterfaceLocale = (props: {
-	config: Pick<ResolvedLucidConfig, "i18n">;
+	config: Pick<ResolvedLucidConfig, "translations">;
 	locale?: string | null;
 	acceptLanguage?: string | null;
 }) => {
-	const configuredLocales = props.config.i18n.locales.map(
+	const configuredLocales = props.config.translations.locales.map(
 		(locale) => locale.code,
 	);
 
@@ -47,7 +47,7 @@ export const resolveInterfaceLocale = (props: {
 		if (baseLocale && configuredLocales.includes(baseLocale)) return baseLocale;
 	}
 
-	return props.config.i18n.defaultLocale;
+	return props.config.translations.defaultLocale;
 };
 
 /**

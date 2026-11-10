@@ -4,22 +4,23 @@ import {
 	getPermittedCollectionKeys,
 	getScopedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import listCollections from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const listCollectionsMcpTool = (options: CollectionToolOptions = {}) =>
-	defineMcpTool({
+	defineTool({
 		name: "collections_list",
 		title: copy("admin:core.tools.collections_list.title"),
 		description:
 			"List accessible collections with summaries of their content structure and routing. Routing fields store the full public path, including parent segments.",
 		input: inputSchema,
 		output: outputSchema,
-		scopes: [],
-		annotations: { readOnlyHint: true },
+		readOnly: true,
+		mcp: {
+			scopes: [],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await listCollections(context, {
 				input,
@@ -32,19 +33,21 @@ export const listCollectionsMcpTool = (options: CollectionToolOptions = {}) =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).mcp;
 
 export const listCollectionsAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name: "collections_list",
 		title: copy("admin:core.tools.collections_list.title"),
 		description:
 			"List accessible collections with summaries of their content structure and routing. Routing fields store the full public path, including parent segments.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
 		readOnly: true,
-		parallelSafe: true,
+		agent: {
+			permissions: [],
+			parallelSafe: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await listCollections(context, {
 				input,
@@ -68,4 +71,4 @@ export const listCollectionsAgentTool = (options: CollectionToolOptions = {}) =>
 				),
 			};
 		},
-	});
+	}).agent;

@@ -1,5 +1,5 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import stopRun from "../../helpers/stop-run.js";
@@ -9,15 +9,17 @@ import { inputSchema, outputSchema } from "./schema.js";
 
 /** Stops a sub-agent that is still working. Its chat and what it already did are kept. */
 export const subagentStopAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: subagentStopToolName,
 		title: copy("admin:core.tools.lucid_subagent_stop.title"),
 		description:
 			"Stop one of your sub-agents that is still working, eg. when its task is no longer needed or it went off track. Its chat and anything it already changed are kept.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
-		available: ({ mode }) => mode !== "subagent",
+		agent: {
+			permissions: [],
+			available: ({ mode }) => mode !== "subagent",
+		},
 		handler: async ({ context, input, execution }) => {
 			const subagent = await resolveSubagent(context, {
 				execution,
@@ -44,4 +46,4 @@ export const subagentStopAgentTool = () =>
 				}),
 			};
 		},
-	});
+	}).agent;

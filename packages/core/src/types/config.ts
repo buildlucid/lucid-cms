@@ -46,7 +46,10 @@ import type {
 } from "../libs/resources/types.js";
 import type { SeedDefinition } from "../libs/seed/types.js";
 import type { SkillDefinition } from "../libs/skills/types.js";
-import type { McpToolDefinition } from "../libs/tools/types.js";
+import type {
+	McpToolDefinition,
+	McpToolListItem,
+} from "../libs/tools/types.js";
 import type { TransferDefinition } from "../libs/transfer/types.js";
 import type {
 	AgentMemoryScope,
@@ -80,7 +83,7 @@ export type LocalizationConfig = {
 };
 
 /** Languages offered for the admin interface and server messages. Defaults to English. */
-export type I18nConfig = {
+export type TranslationsConfig = {
 	/**
 	 * A list of locales supported by the Lucid CMS interface.
 	 */
@@ -505,17 +508,11 @@ export interface LucidConfig {
 							shared?: AgentMemoryScopeConfig;
 					  };
 				/**
-				 * Configures `defineAgent` agents requiring a connected Lucid AI account.
-				 * @remarks Arrays mean `{ definitions }`; booleans mean `{ enabled }`.
+				 * `defineAgent` agents, which need a connected Lucid AI account. Defaults to `[lucidAgent]`.
+				 * @remarks Set false to turn agents off. To pause one agent and keep its role permissions, set
+				 * `enabled: false` on the agent. Plugins can add theirs from `configure`.
 				 */
-				agents?:
-					| boolean
-					| AgentDefinition[]
-					| {
-							/** Defaults to true. */
-							enabled?: boolean;
-							definitions?: AgentDefinition[];
-					  };
+				agents?: AgentDefinition[] | false;
 				/**
 				 * Serves tools and skills at `/mcp`, disabled unless configured.
 				 * @remarks Booleans mean `{ enabled }`.
@@ -527,9 +524,9 @@ export interface LucidConfig {
 							enabled?: boolean;
 							/**
 							 * Tools MCP clients can call, including flattened bundles such as
-							 * `mcpTools.all()` and custom `defineMcpTool` tools.
+							 * `mcpTools.all()` and your own `defineTool` tools with an `mcp` block.
 							 */
-							tools?: (McpToolDefinition | readonly McpToolDefinition[])[];
+							tools?: (McpToolListItem | readonly McpToolListItem[])[];
 							skills?: SkillDefinition[];
 					  };
 		  };
@@ -538,29 +535,19 @@ export interface LucidConfig {
 	 */
 	localization?: LocalizationConfig;
 	/**
-	 * Internationalisation settings for the admin UI and API messages.
+	 * Languages for the admin UI and server messages. Translation files come from `directories.translations`.
 	 */
-	i18n?: I18nConfig;
-	/** Configures `defineMigration` migrations, with arrays as shorthand for `{ definitions }`. */
-	migrations?:
-		| MigrationDefinition[]
-		| {
-				/**
-				 * Named migrations run after core migrations, generated collection migrations and collection sync.
-				 * @remarks Names must start with a 13-digit timestamp, such as `1751400000000-example`.
-				 */
-				definitions?: MigrationDefinition[];
-		  };
-	/** Configures repeatable `defineSeed` seeds, with arrays as shorthand for `{ definitions }`. */
-	seeds?:
-		| SeedDefinition[]
-		| {
-				/**
-				 * Named seed definitions, with namespaced plugin names such as `pages:example`
-				 * recommended to avoid collisions.
-				 */
-				definitions?: SeedDefinition[];
-		  };
+	translations?: TranslationsConfig;
+	/**
+	 * Named `defineMigration` migrations run after core migrations, generated collection migrations and collection sync.
+	 * @remarks Names must start with a 13-digit timestamp, such as `1751400000000-example`.
+	 */
+	migrations?: MigrationDefinition[];
+	/**
+	 * Named, repeatable `defineSeed` seeds, with namespaced plugin names such as `pages:example`
+	 * recommended to avoid collisions.
+	 */
+	seeds?: SeedDefinition[];
 	/**
 	 * Email settings.
 	 */
@@ -609,14 +596,14 @@ export interface LucidConfig {
 		/**
 		 * The storage adapter used to store, retrieve and delete media files.
 		 */
-		storage?:
+		storageAdapter?:
 			| MediaStorageAdapter
 			| MediaStorageAdapterInstance
 			| Promise<MediaStorageAdapterInstance>;
 		/**
 		 * The delivery adapter used to resolve media URLs and optional transformations.
 		 */
-		delivery?:
+		deliveryAdapter?:
 			| MediaDeliveryAdapter
 			| MediaDeliveryAdapterInstance
 			| Promise<MediaDeliveryAdapterInstance>;
@@ -691,24 +678,14 @@ export interface LucidConfig {
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
 	};
-	/** Configures durable `defineJob` jobs, with arrays as shorthand for `{ definitions }`. */
-	jobs?:
-		| AnyJobDefinition[]
-		| {
-				/** Job definitions registered by the project and its plugins. */
-				definitions?: AnyJobDefinition[];
-		  };
+	/** Durable `defineJob` jobs registered by the project and its plugins. */
+	jobs?: AnyJobDefinition[];
 	/** Deploys created with `defineDeploy`, which people with the deploy permissions can run from the admin. */
 	deploys?: DeployDefinition[];
 	/** Sources of website redirects, asked in order by `toolkit.redirects.resolve()`. Plugins such as the pages plugin add theirs. */
 	redirects?: RedirectResolver[];
-	/** Configures `defineNotification` types, with arrays as shorthand for `{ definitions }`. */
-	notifications?:
-		| AnyNotificationDefinition[]
-		| {
-				/** Notification types registered by the project and its plugins. */
-				definitions?: AnyNotificationDefinition[];
-		  };
+	/** `defineNotification` types registered by the project and its plugins. */
+	notifications?: AnyNotificationDefinition[];
 	/** Retention periods for deleted data, job history and notifications, in non-negative whole days. */
 	retention?: {
 		/** Deleted documents. Defaults to 30. */
@@ -792,12 +769,8 @@ export interface ResolvedLucidConfig {
 	db: DatabaseAdapter;
 	tables: TableDefinition[];
 	transfers: TransferDefinition[];
-	migrations: {
-		definitions: MigrationDefinition[];
-	};
-	seeds: {
-		definitions: SeedDefinition[];
-	};
+	migrations: MigrationDefinition[];
+	seeds: SeedDefinition[];
 	secrets: SecretConfig;
 	telemetry: boolean;
 	announcements: boolean;
@@ -855,7 +828,8 @@ export interface ResolvedLucidConfig {
 		>;
 		context: AiContextEntry[];
 		memory: Record<AgentMemoryScope, { enabled: boolean; limit: number }>;
-		agents: { enabled: boolean; definitions: AgentDefinition[] };
+		/** Empty when agents are turned off. */
+		agents: AgentDefinition[];
 		mcp: {
 			enabled: boolean;
 			tools: McpToolDefinition[];
@@ -863,13 +837,13 @@ export interface ResolvedLucidConfig {
 		};
 	};
 	localization: LocalizationConfig;
-	i18n: Required<I18nConfig>;
+	translations: Required<TranslationsConfig>;
 	media: {
-		storage?:
+		storageAdapter?:
 			| MediaStorageAdapter
 			| MediaStorageAdapterInstance
 			| Promise<MediaStorageAdapterInstance>;
-		delivery?:
+		deliveryAdapter?:
 			| MediaDeliveryAdapter
 			| MediaDeliveryAdapterInstance
 			| Promise<MediaDeliveryAdapterInstance>;
@@ -906,14 +880,10 @@ export interface ResolvedLucidConfig {
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
 	};
-	jobs: {
-		definitions: AnyJobDefinition[];
-	};
+	jobs: AnyJobDefinition[];
 	deploys: DeployDefinition[];
 	redirects: RedirectResolver[];
-	notifications: {
-		definitions: AnyNotificationDefinition[];
-	};
+	notifications: AnyNotificationDefinition[];
 	retention: Required<NonNullable<LucidConfig["retention"]>>;
 	hooks: Array<AllHooks>;
 	collections: CollectionDefinition[];

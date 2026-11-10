@@ -1,8 +1,8 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
 import { aiModelSelectionSchema } from "../libs/agent/model-selection.js";
 import { translate } from "../libs/i18n/index.js";
 import type { HomeWidgetSize, UserPreferences } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import {
 	mediaCropInputSchema,

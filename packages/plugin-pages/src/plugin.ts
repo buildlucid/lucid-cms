@@ -38,11 +38,11 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 		hookEvents,
 		sources: { translations: ["@lucidcms/pages/translations"] },
 		configure: (draft) => {
-			draft.migrations.definitions.push({
+			draft.migrations.push({
 				name: "1789000000000-pages-path-history",
 				migration: pathHistoryMigration,
 			});
-			draft.jobs.definitions.push(rebuildPathsJob);
+			draft.jobs.push(rebuildPathsJob);
 			draft.http.routes.push(rebuildPathsRoute(rebuildPathsJob));
 			draft.admin.slots.push(rebuildPathsConfig());
 

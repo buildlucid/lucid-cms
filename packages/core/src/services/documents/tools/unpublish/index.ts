@@ -1,7 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import writeChanges from "../helpers/write-changes.js";
@@ -15,7 +15,7 @@ const name = "documents_unpublish";
 export const unpublishDocumentAgentTool = (
 	options: DocumentWriteToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.documents_unpublish.title"),
 		description: options.direct
@@ -23,14 +23,16 @@ export const unpublishDocumentAgentTool = (
 			: "Request unpublishing a document from an environment, eg. production. It opens an unpublish request, and the document stays published until people approve it. This chat's open unpublish request for the document is reused. Pass requestId to add it to another open unpublish request.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
-		//* Requests already receive review, so only direct writes need confirmation.
-		requiresConfirmation: options.direct
-			? ({ input, config }) => !unpublishRequested(config, input)
-			: false,
-		inputPermissions: ({ input: { collectionKey } }) => [
-			getCollectionPermission(collectionKey, "read"),
-		],
+		agent: {
+			permissions: [],
+			//* Requests already receive review, so only direct writes need confirmation.
+			requiresConfirmation: options.direct
+				? ({ input, config }) => !unpublishRequested(config, input)
+				: false,
+			inputPermissions: ({ input: { collectionKey } }) => [
+				getCollectionPermission(collectionKey, "read"),
+			],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(unpublishDocument, {
 				transaction: true,
@@ -71,4 +73,4 @@ export const unpublishDocumentAgentTool = (
 				),
 			};
 		},
-	});
+	}).agent;

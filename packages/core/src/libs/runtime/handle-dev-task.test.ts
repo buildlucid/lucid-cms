@@ -15,7 +15,7 @@ const dev = { token: "task-token", migrations: [], seeds: [] };
 const taskHost = {
 	config: {
 		db: { registerExternalMigrations: () => {} },
-		migrations: { definitions: [] },
+		migrations: [],
 	},
 } as unknown as LucidHost;
 

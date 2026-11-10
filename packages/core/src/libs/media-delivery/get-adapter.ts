@@ -8,10 +8,10 @@ import type { MediaDeliveryAdapterInstance } from "./types.js";
 const getMediaDeliveryAdapter = async (
 	config: ResolvedLucidConfig,
 ): Promise<MediaDeliveryAdapterInstance> => {
-	if (config.media.delivery) {
-		return typeof config.media.delivery === "function"
-			? await config.media.delivery()
-			: await config.media.delivery;
+	if (config.media.deliveryAdapter) {
+		return typeof config.media.deliveryAdapter === "function"
+			? await config.media.deliveryAdapter()
+			: await config.media.deliveryAdapter;
 	}
 
 	logger.debug({

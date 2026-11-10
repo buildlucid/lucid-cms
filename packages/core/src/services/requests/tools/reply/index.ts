@@ -4,7 +4,7 @@ import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import commentOnRequest from "../comment/handler.js";
@@ -14,14 +14,16 @@ import { inputSchema } from "./schema.js";
 const name = "requests_reply";
 
 export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.requests_reply.title"),
 		description:
 			"Reply to a comment on a request, using a comment ID from requests_get. Replies join its thread and don't block approval. To raise something new, use requests_comment.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
+		agent: {
+			permissions: [Permissions.RequestsRead],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(commentOnRequest, {
 				transaction: true,
@@ -48,4 +50,4 @@ export const replyToRequestAgentTool = (options: CollectionToolOptions = {}) =>
 				}),
 			};
 		},
-	});
+	}).agent;

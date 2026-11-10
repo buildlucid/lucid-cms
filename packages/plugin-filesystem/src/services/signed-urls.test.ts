@@ -30,13 +30,13 @@ describe("filesystem signed URLs", () => {
 			if (
 				!defaults ||
 				typeof defaults === "function" ||
-				!defaults.media?.storage
+				!defaults.media?.storageAdapter
 			) {
 				throw new Error("Missing filesystem adapter defaults");
 			}
-			const storage = await (typeof defaults.media.storage === "function"
-				? defaults.media.storage()
-				: defaults.media.storage);
+			const storage = await (typeof defaults.media.storageAdapter === "function"
+				? defaults.media.storageAdapter()
+				: defaults.media.storageAdapter);
 			const body = Buffer.from("signed media");
 			//* services reach storage through the context, where operations return service results
 			const stream = vi.fn(async () => ({

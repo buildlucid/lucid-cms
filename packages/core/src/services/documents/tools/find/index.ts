@@ -7,29 +7,30 @@ import {
 	getScopedCollectionKeys,
 	limitCollections,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import findDocuments from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const findDocumentsMcpTool = (options: CollectionToolOptions = {}) =>
-	defineMcpTool({
+	defineTool({
 		name: "documents_find",
 		title: copy("admin:core.tools.documents_find.title"),
 		description:
 			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated summaries; read a document with documents_get for its bricks.",
 		input: inputSchema,
 		output: outputSchema,
-		scopes: [],
-		inputScopes: ({ input: { collectionKey } }) => [
-			ExternalScopes.DocumentRead(collectionKey),
-		],
-		possibleScopes: ({ config }) =>
-			limitCollections(config.collections, options.collections).map(
-				(collection) => ExternalScopes.DocumentRead(collection.key),
-			),
-		annotations: { readOnlyHint: true },
+		readOnly: true,
+		mcp: {
+			scopes: [],
+			inputScopes: ({ input: { collectionKey } }) => [
+				ExternalScopes.DocumentRead(collectionKey),
+			],
+			possibleScopes: ({ config }) =>
+				limitCollections(config.collections, options.collections).map(
+					(collection) => ExternalScopes.DocumentRead(collection.key),
+				),
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await findDocuments(context, {
 				input,
@@ -42,22 +43,24 @@ export const findDocumentsMcpTool = (options: CollectionToolOptions = {}) =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).mcp;
 
 export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name: "documents_find",
 		title: copy("admin:core.tools.documents_find.title"),
 		description:
 			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated summaries; read a document with documents_get for its bricks and before updating it.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
 		readOnly: true,
-		parallelSafe: true,
-		inputPermissions: ({ input: { collectionKey } }) => [
-			getCollectionPermission(collectionKey, "read"),
-		],
+		agent: {
+			permissions: [],
+			parallelSafe: true,
+			inputPermissions: ({ input: { collectionKey } }) => [
+				getCollectionPermission(collectionKey, "read"),
+			],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await findDocuments(context, {
 				input,
@@ -90,4 +93,4 @@ export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
 				),
 			};
 		},
-	});
+	}).agent;

@@ -1,6 +1,5 @@
 import z from "zod";
 import constants from "../constants/constants.js";
-import type { ControllerSchema } from "../exports/types.js";
 import { mediaGenerationTypes } from "../libs/config/ai-features.js";
 import {
 	cmsAiGenerateAcceptedDataSchema,
@@ -18,6 +17,7 @@ import type {
 	MediaGenerationType,
 	SavedGeneratedMedia,
 } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { userDisplaySchema } from "./shared/user-display.js";
 

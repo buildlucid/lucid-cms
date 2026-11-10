@@ -52,7 +52,7 @@ describe("registerCustomRoutes", () => {
 			}),
 		]);
 
-		const response = await app.request("/api/v1/content/hello");
+		const response = await app.request("/api/v1/content/e/hello");
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ message: "hello" });
@@ -81,7 +81,7 @@ describe("registerCustomRoutes", () => {
 			}),
 		]);
 
-		const response = await app.request("/api/v1/content/protected");
+		const response = await app.request("/api/v1/content/e/protected");
 
 		expect(response.status).toBe(401);
 		expect(caughtError).toBeInstanceOf(LucidError);
@@ -90,7 +90,7 @@ describe("registerCustomRoutes", () => {
 
 	test("rejects a content route that shadows an existing route", () => {
 		const app = new Hono<LucidHonoGeneric>();
-		app.get("/api/v1/content/hello", (hono) => hono.text("core"));
+		app.get("/api/v1/content/e/hello", (hono) => hono.text("core"));
 
 		expect(() =>
 			registerCustomRoutes(app, [
@@ -117,11 +117,11 @@ describe("registerCustomRoutes", () => {
 				}),
 				defineRoute({
 					method: "get",
-					path: "/api/v1/content/hello",
+					path: "/api/v1/content/e/hello",
 					handler: ({ hono }) => hono.text("custom"),
 				}),
 			]),
-		).toThrow('Route "GET /api/v1/content/hello" is already registered.');
+		).toThrow('Route "GET /api/v1/content/e/hello" is already registered.');
 		expect(app.routes).toHaveLength(0);
 	});
 
@@ -132,7 +132,7 @@ describe("registerCustomRoutes", () => {
 		"rejects equivalent parameterised routes: %s",
 		(existing, custom) => {
 			const app = new Hono<LucidHonoGeneric>();
-			app.get(`/api/v1/content${existing}`, (hono) => hono.text("core"));
+			app.get(`/api/v1/content/e${existing}`, (hono) => hono.text("core"));
 			const originalRouteCount = app.routes.length;
 
 			expect(() =>
@@ -172,11 +172,11 @@ describe("registerCustomRoutes", () => {
 			}),
 		]);
 
-		expect(await (await app.request("/api/v1/content/lookup/123")).text()).toBe(
-			"numeric",
-		);
 		expect(
-			await (await app.request("/api/v1/content/lookup/pages")).text(),
+			await (await app.request("/api/v1/content/e/lookup/123")).text(),
+		).toBe("numeric");
+		expect(
+			await (await app.request("/api/v1/content/e/lookup/pages")).text(),
 		).toBe("slug");
 	});
 });

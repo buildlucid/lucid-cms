@@ -34,7 +34,7 @@ export default defineContentApiRoute({
 	method: "get",
 	path: "/search/media",
 	access: { type: "scoped", scopes: [ExternalScopes.MediaRead] },
-	schema: { query: { string: querySchema, formatted: querySchema } },
+	schema: { query: querySchema },
 	openAPI: {
 		summary: "Search public playground media",
 		tags: ["Playground"],

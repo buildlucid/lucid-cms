@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { brickInputSchema, brickResponseSchema } from "./collection-bricks.js";
 import { fieldInputSchema, fieldResponseSchema } from "./collection-fields.js";
 import {
@@ -1340,7 +1340,7 @@ export const controllerSchemas = {
 							"createdAt,updatedAt,order,_customFieldKey",
 						),
 						page: queryString.schema.page,
-						perPage: queryString.schema.perPage,
+						perPage: queryString.schema.contentPerPage,
 					})
 					.meta(queryString.meta),
 				formatted: z.object({
@@ -1381,7 +1381,7 @@ export const controllerSchemas = {
 					sort: documentSortSchema,
 					include: z.array(contentDocumentIncludeSchema).optional(),
 					page: queryFormatted.schema.page,
-					perPage: queryFormatted.schema.perPage,
+					perPage: queryFormatted.schema.contentPerPage,
 				}),
 			},
 			params: z.object({

@@ -1,5 +1,5 @@
 import { z } from "@lucidcms/core";
-import type { ControllerSchema } from "@lucidcms/core/types";
+import type { RouteSchema } from "@lucidcms/core/types";
 
 const documentIdSchema = z.coerce.number().int().positive().meta({
 	description: "The page's document ID",
@@ -29,25 +29,19 @@ export type PreviousPath = z.infer<typeof previousPathSchema>;
 export const controllerSchemas = {
 	getMultiple: {
 		body: undefined,
-		query: {
-			string: z.object({
-				environment: z.string().trim().min(1).optional().meta({
-					description:
-						"Only paths published to this environment. Leave out for every environment",
-					example: "production",
-				}),
+		query: z.object({
+			environment: z.string().trim().min(1).optional().meta({
+				description:
+					"Only paths published to this environment. Leave out for every environment",
+				example: "production",
 			}),
-			formatted: undefined,
-		},
+		}),
 		params: z.object({ documentId: documentIdSchema }),
 		response: z.array(previousPathSchema),
-	} satisfies ControllerSchema,
+	} satisfies RouteSchema,
 	deleteSingle: {
 		body: undefined,
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
+		query: undefined,
 		params: z.object({
 			documentId: documentIdSchema,
 			id: z.coerce.number().int().positive().meta({
@@ -56,5 +50,5 @@ export const controllerSchemas = {
 			}),
 		}),
 		response: undefined,
-	} satisfies ControllerSchema,
+	} satisfies RouteSchema,
 };

@@ -34,7 +34,7 @@ const previousPathsRoutes = (collections: RedirectTargetCollection[]) =>
 					}),
 					parameters: openAPI.parameters({
 						params: controllerSchemas.getMultiple.params,
-						query: controllerSchemas.getMultiple.query.string,
+						query: controllerSchemas.getMultiple.query,
 					}),
 				},
 				handler: async ({ hono, context, input }) => {

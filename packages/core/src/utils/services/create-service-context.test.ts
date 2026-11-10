@@ -9,8 +9,8 @@ test("uses the configured interface locale outside the HTTP request pipeline", a
 	const database = await testConfig.getDatabase();
 	const localizedConfig = {
 		...config,
-		i18n: {
-			...config.i18n,
+		translations: {
+			...config.translations,
 			defaultLocale: "fr",
 		},
 	};

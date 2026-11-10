@@ -21,8 +21,8 @@
 		"seed": "lucidcms seed",
 		"seed:new": "lucidcms seed:new",
 		"seed:list": "lucidcms seed:list",
-		"job:delete-expired-data": "lucidcms jobs:schedule core:delete-expired-data",
-		"job:check-storage": "lucidcms jobs:schedule core:check-storage"
+		"job:delete-expired-data": "lucidcms jobs:run core:delete-expired-data",
+		"job:check-storage": "lucidcms jobs:run core:check-storage"
 	},
 	"dependencies": {
 		"@lucidcms/github-auth": "*",

@@ -94,7 +94,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: { enabled: true, definitions: [agent] } },
+			ai: { ...config.ai, agents: [agent] },
 		},
 		database: await fixture.getDatabase(),
 		translationStore: createTranslationStore({

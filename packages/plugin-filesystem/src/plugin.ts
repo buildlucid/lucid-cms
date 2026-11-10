@@ -23,7 +23,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 		sources: { translations: ["@lucidcms/filesystem/translations"] },
 		defaults: {
 			media: {
-				storage: fileSystemStorageAdapter({
+				storageAdapter: fileSystemStorageAdapter({
 					uploadDir,
 					secretKey: pluginOptions?.secretKey,
 				}),

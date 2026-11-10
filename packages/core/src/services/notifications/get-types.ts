@@ -15,7 +15,7 @@ const getTypes: ServiceFn<[], NotificationTypeSettings[]> = async (context) => {
 	return {
 		error: undefined,
 		data: notificationsFormatter.formatTypes({
-			definitions: context.config.notifications.definitions,
+			definitions: context.config.notifications,
 			settings: settingsRes.data ?? [],
 			translate: context.translate,
 		}),

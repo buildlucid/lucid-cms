@@ -6,8 +6,7 @@ import {
 	getPermittedCollectionKeys,
 	getScopedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import getMcpActor from "../../../../libs/tools/get-mcp-actor.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import findRequests from "./handler.js";
@@ -17,14 +16,16 @@ const description =
 	"Find requests for creating, publishing, unpublishing or deleting documents. Call it without a query to list every open request, most recently changed first, and add filters only to narrow that down. Read one with requests_get for its documents, comments and blockers.";
 
 export const findRequestsMcpTool = (options: CollectionToolOptions = {}) =>
-	defineMcpTool({
+	defineTool({
 		name: "requests_find",
 		title: copy("admin:core.tools.requests_find.title"),
 		description,
 		input: inputSchema,
 		output: outputSchema,
-		scopes: [ExternalScopes.RequestsRead],
-		annotations: { readOnlyHint: true },
+		readOnly: true,
+		mcp: {
+			scopes: [ExternalScopes.RequestsRead],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await findRequests(context, {
 				input,
@@ -38,18 +39,20 @@ export const findRequestsMcpTool = (options: CollectionToolOptions = {}) =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).mcp;
 
 export const findRequestsAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name: "requests_find",
 		title: copy("admin:core.tools.requests_find.title"),
 		description,
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
 		readOnly: true,
-		parallelSafe: true,
+		agent: {
+			permissions: [Permissions.RequestsRead],
+			parallelSafe: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await findRequests(context, {
 				input,
@@ -73,4 +76,4 @@ export const findRequestsAgentTool = (options: CollectionToolOptions = {}) =>
 				),
 			};
 		},
-	});
+	}).agent;

@@ -1,21 +1,23 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import listSchedules from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const listJobSchedulesAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: "jobs_list_schedules",
 		title: copy("admin:core.tools.jobs_list_schedules.title"),
 		description:
 			"List the registered job schedules with their cron expression, whether they are active or paused, when they next run and how their last run went. Run one early with jobs_run_schedule.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.JobsRead],
 		readOnly: true,
-		parallelSafe: true,
+		agent: {
+			permissions: [Permissions.JobsRead],
+			parallelSafe: true,
+		},
 		handler: async ({ context, input }) => {
 			const result = await listSchedules(context, { input });
 			if (result.error) throw new LucidError(result.error);
@@ -31,4 +33,4 @@ export const listJobSchedulesAgentTool = () =>
 				),
 			};
 		},
-	});
+	}).agent;

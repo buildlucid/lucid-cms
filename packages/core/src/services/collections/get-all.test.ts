@@ -38,7 +38,7 @@ import getAll from "./get-all.js";
 const context = {
 	db: {},
 	config: {
-		i18n: {
+		translations: {
 			defaultLocale: "en",
 		},
 	},

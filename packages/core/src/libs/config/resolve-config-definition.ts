@@ -28,7 +28,7 @@ const defaultLoggerInstance = {
 
 const invalidConfigDefinitionMessage =
 	"Lucid config must default export defineConfig({ runtime, db, config }).";
-const supportedKeys = new Set(["runtime", "db", "config", "configure"]);
+const supportedKeys = new Set(["env", "runtime", "db", "config", "configure"]);
 
 export type ResolveConfigDefinitionResult = {
 	config: ResolvedLucidConfig;
@@ -78,7 +78,7 @@ const assertConfigDefinition = (value: unknown): LucidConfigDefinition => {
 	);
 	if (unknownKeys.length) {
 		throw new LucidError({
-			message: `Unknown config definition keys: ${unknownKeys.join(", ")}. Use runtime, db, config and configure.`,
+			message: `Unknown config definition keys: ${unknownKeys.join(", ")}. Use env, runtime, db, config and configure.`,
 		});
 	}
 
@@ -152,7 +152,7 @@ export const resolveConfigDefinition = async (props: {
 		(await props.loadEnv?.(adapter)) ??
 		(adapter.getEnvVars ? await adapter.getEnvVars({ logger }) : undefined);
 
-	const envSchema = props.envSchema;
+	const envSchema = props.envSchema ?? definition.env;
 
 	// Reading the config in Node doesn't need every value, such as secrets only the deployed runtime has, so values the
 	// schema rejects stay raw there. The runtime validates the env before using it.

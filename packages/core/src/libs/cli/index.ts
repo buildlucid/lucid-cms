@@ -76,7 +76,9 @@ program
 
 program
 	.command("sync")
-	.description("Run sync")
+	.description(
+		"Sync collections, locales and other config-defined records to the database",
+	)
 	.option("--remote", remoteOptionDescription)
 	.action(syncCommand);
 
@@ -94,14 +96,14 @@ program
 	.command("migrate:rollback")
 	.description("Rollback the last database migration")
 	.option("-s, --steps <number>", "Number of migrations to rollback", "1")
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(migrateRollbackCommand);
 
 program
 	.command("migrate:reset")
 	.description("Drop all database tables")
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(migrateResetCommand);
 
@@ -113,7 +115,7 @@ program
 program
 	.command("migrate:fresh")
 	.description("Drop all tables and re-run all migrations")
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(migrateFreshCommand);
 
@@ -136,8 +138,10 @@ program
 	.action(seedNewCommand);
 
 program
-	.command("jobs:schedule [job-or-schedule]")
-	.description("Run a registered job schedule")
+	.command("jobs:run [job-or-schedule]")
+	.description(
+		"Run a registered job schedule now, picked from a list when omitted",
+	)
 	.option("--remote", remoteOptionDescription)
 	.action(jobSchedulerCommand);
 
@@ -146,6 +150,7 @@ program
 	.description(
 		"Clear Lucid's KV store, such as cached responses and rate limits",
 	)
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(kvClearCommand);
 
@@ -168,7 +173,7 @@ program
 	.description(
 		"Turn off a user's two-factor authentication, for when they've lost their app and recovery codes",
 	)
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(usersResetTwoFactorCommand);
 
@@ -177,7 +182,7 @@ program
 	.description(
 		"Remove all of a user's passkeys, for when a device is lost and nobody can reset them in the admin",
 	)
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(usersResetPasskeysCommand);
 
@@ -186,14 +191,14 @@ program
 	.description(
 		"Give a user a temporary password, which they have to change when they next log in",
 	)
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(usersResetPasswordCommand);
 
 program
 	.command("users:super-admin <email>")
 	.description("Make a user a super admin, for when no super admin can log in")
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Skip the confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(usersSuperAdminCommand);
 

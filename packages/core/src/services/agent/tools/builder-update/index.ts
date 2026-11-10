@@ -3,7 +3,7 @@ import {
 	agentScreenCallSchema,
 	agentScreenResponseSchema,
 } from "../../../../libs/agent/screen.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import resolveBuilderScreen from "../../helpers/builder/resolve-builder-screen.js";
 import screenCall from "../../helpers/builder/screen-call.js";
@@ -13,31 +13,33 @@ import { inputSchema, outputSchema } from "./schema.js";
 
 /** Applies changed content to the open builder as unsaved edits. */
 export const builderUpdateAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: builderUpdateToolName,
 		title: builderUpdateTitle,
 		description:
 			"Change the document the person has open in the document builder, sending only what changes, in the shape documents_update takes. Read it with lucid_builder_read first and reuse its refs. Before writing new copy, check collections_describe for the collection's writing instructions. Changes show in the builder as unsaved edits for them to review and save, so nothing is saved for them. Returns any validation errors the changed content has, so fix those before finishing. It is refused when they edited the same fields or bricks while it applied, so read it again and retry.",
 		input: inputSchema,
 		output: outputSchema,
-		//* collection read access is checked against the open screen when the call runs
-		permissions: [],
 		//* Record unsaved edits as writes; users review them before saving, so confirmation is optional by default.
 		readOnly: false,
-		available: ({ screen }) => screen === "document",
-		interaction: {
-			key: constants.agent.widgets.screen,
-			version: 1,
-			data: agentScreenCallSchema,
-			response: () => agentScreenResponseSchema,
-			prepare: async ({ context, execution }) => {
-				const resolved = resolveBuilderScreen(context, execution);
-				if (resolved.error) throw new LucidError(resolved.error);
+		agent: {
+			//* collection read access is checked against the open screen when the call runs
+			permissions: [],
+			available: ({ screen }) => screen === "document",
+			interaction: {
+				key: constants.agent.widgets.screen,
+				version: 1,
+				data: agentScreenCallSchema,
+				response: () => agentScreenResponseSchema,
+				prepare: async ({ context, execution }) => {
+					const resolved = resolveBuilderScreen(context, execution);
+					if (resolved.error) throw new LucidError(resolved.error);
 
-				return screenCall({
-					title: builderUpdateTitle,
-					call: { action: "read", screen: resolved.data.screen },
-				});
+					return screenCall({
+						title: builderUpdateTitle,
+						call: { action: "read", screen: resolved.data.screen },
+					});
+				},
 			},
 		},
 		handler: async ({ context, input, execution, data, response }) => {
@@ -50,4 +52,4 @@ export const builderUpdateAgentTool = () =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).agent;

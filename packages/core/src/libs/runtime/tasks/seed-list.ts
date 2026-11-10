@@ -9,7 +9,7 @@ const seedListTask = defineRuntimeTask({
 	run: async (context) =>
 		Object.keys(
 			collectSeeds({
-				definitions: context.host.config.seeds.definitions,
+				definitions: context.host.config.seeds,
 				modules: await loadDevModules(context.dev.seeds),
 			}),
 		).sort(),

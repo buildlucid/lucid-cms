@@ -536,7 +536,7 @@ export const getCapabilityRegistry = (
 		...getStaticCapabilityGroups(),
 		...getCollectionCapabilityGroups(config.collections),
 		//* every configured agent, even switched off, so its grants survive while it's off
-		...getAgentCapabilityGroups(config.ai.agents.definitions),
+		...getAgentCapabilityGroups(config.ai.agents),
 		localesCapabilityGroup,
 		redirectsCapabilityGroup,
 		...(isAiFeatureEnabled(config, "mcp") ? [mcpCapabilityGroup] : []),

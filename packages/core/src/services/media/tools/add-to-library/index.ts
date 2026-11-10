@@ -1,6 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { addMediaToLibraryToolName } from "./constants.js";
@@ -8,22 +8,24 @@ import addMediaToLibrary from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const addMediaToLibraryAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: addMediaToLibraryToolName,
 		title: copy("admin:core.tools.media_add_to_library.title"),
 		description:
 			"Add personal media to the media library so it can be used in documents. Only the person who owns it can do this. Asks them to confirm first, as it may make the file public.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.MediaCreate],
-		requiresConfirmation: true,
-		describe: ({ input }) =>
-			copy(
-				input.public
-					? "admin:core.tools.media_add_to_library.public.describe"
-					: "admin:core.tools.media_add_to_library.describe",
-				{ data: { id: input.mediaId } },
-			),
+		agent: {
+			permissions: [Permissions.MediaCreate],
+			requiresConfirmation: true,
+			describe: ({ input }) =>
+				copy(
+					input.public
+						? "admin:core.tools.media_add_to_library.public.describe"
+						: "admin:core.tools.media_add_to_library.describe",
+					{ data: { id: input.mediaId } },
+				),
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(addMediaToLibrary, {
 				transaction: true,
@@ -41,4 +43,4 @@ export const addMediaToLibraryAgentTool = () =>
 				),
 			};
 		},
-	});
+	}).agent;

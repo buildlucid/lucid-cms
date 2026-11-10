@@ -1,14 +1,11 @@
-import confirm from "@inquirer/confirm";
 import runMigrateTask from "../../vite/run-migrate-task.js";
 import cliLogger from "../logger.js";
-import runPrompt from "../services/run-prompt.js";
+import confirmCommand from "../services/confirm-command.js";
 import runTaskCommand from "../services/run-task-command.js";
 import type { TaskServerOptions } from "../services/start-task-server.js";
 
-/** Drops every database table and runs all migrations again in the runtime, after confirming unless forced. */
-const migrateFreshCommand = (
-	options?: { force?: boolean } & TaskServerOptions,
-) =>
+/** Drops every database table and runs all migrations again in the runtime, after confirming unless `--yes` is passed. */
+const migrateFreshCommand = (options?: { yes?: boolean } & TaskServerOptions) =>
 	runTaskCommand(
 		"Fresh migration failed",
 		async (run, elapsed) => {
@@ -16,18 +13,11 @@ const migrateFreshCommand = (
 				"This will drop all database tables and re-run all migrations",
 			);
 
-			const proceed =
-				options?.force ||
-				(await runPrompt((output) =>
-					confirm(
-						{
-							message:
-								"Are you sure you want to fresh migrate the database? This will drop ALL tables and re-run migrations. This action cannot be undone.",
-							default: false,
-						},
-						{ output },
-					),
-				));
+			const proceed = await confirmCommand({
+				message:
+					"Are you sure you want to fresh migrate the database? This will drop ALL tables and re-run migrations. This action cannot be undone.",
+				yes: options?.yes,
+			});
 			if (!proceed) {
 				cliLogger.info("Fresh migration cancelled");
 				return 0;

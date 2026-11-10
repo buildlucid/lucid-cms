@@ -5,6 +5,7 @@ import type { LucidViteProject } from "./types.js";
 const generateProjectTypes = (project: LucidViteProject) =>
 	generateTypes({
 		envSchema: project.envSchema,
+		envExported: project.envExported,
 		configPath: project.configPath,
 		projectRoot: project.projectRoot,
 		translationFiles: project.resources.files.translations,

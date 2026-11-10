@@ -111,6 +111,8 @@ export default Object.freeze({
 	query: {
 		page: 1,
 		perPage: 10,
+		/** The most items the content API returns per page. Toolkit and admin reads are not capped. */
+		maxContentPerPage: 100,
 		/** How many levels of related documents content reads fill in, by default and at most. */
 		depth: { default: 1, max: 3 },
 	},

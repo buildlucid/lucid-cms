@@ -33,7 +33,7 @@ let operator: number;
 beforeAll(async () => {
 	const config = await fixture.getConfig();
 	context = createServiceContext({
-		config: { ...config, jobs: { ...config.jobs, definitions: [tidyJob] } },
+		config: { ...config, jobs: [tidyJob] },
 		database: await fixture.getDatabase(),
 		translationStore: createTranslationStore({
 			defaultLocale: "en",

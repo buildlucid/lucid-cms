@@ -60,7 +60,7 @@ const formatMultiple = (props: {
 		id: notification.id,
 		type: notification.type,
 		category: formatCategory({
-			definition: props.config.notifications.definitions.find(
+			definition: props.config.notifications.find(
 				(definition) => definition.key === notification.type,
 			),
 			fallbackKey: notification.category,

@@ -24,7 +24,7 @@ const getAll: ServiceFn<
 	const collectionDefinitions = collectionsRes.data;
 
 	const adminTranslations = context.translate
-		.forLocale(context.config.i18n.defaultLocale)
+		.forLocale(context.config.translations.defaultLocale)
 		.adminBundle();
 
 	if (data.includeDocumentId === true) {

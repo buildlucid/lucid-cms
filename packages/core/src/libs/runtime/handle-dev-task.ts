@@ -38,7 +38,7 @@ const handleDevTask = async (props: {
 	try {
 		config.db.registerExternalMigrations(
 			collectExternalMigrations({
-				definitions: config.migrations.definitions,
+				definitions: config.migrations,
 				modules: await loadDevModules(props.dev.migrations),
 			}),
 		);

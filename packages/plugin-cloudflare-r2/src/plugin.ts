@@ -44,7 +44,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 		},
 		sources: { translations: ["@lucidcms/cloudflare-r2/translations"] },
 		defaults: {
-			media: { storage: cloudflareR2StorageAdapter(resolvedOptions) },
+			media: { storageAdapter: cloudflareR2StorageAdapter(resolvedOptions) },
 		},
 		configure: (draft) => {
 			if (!resolvedOptions.http) {

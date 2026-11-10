@@ -1,7 +1,7 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import writeChanges from "../helpers/write-changes.js";
@@ -14,7 +14,7 @@ const name = "documents_update";
 export const updateDocumentAgentTool = (
 	options: DocumentWriteToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.documents_update.title"),
 		description: ({ screen }) =>
@@ -30,14 +30,16 @@ export const updateDocumentAgentTool = (
 				.join(" "),
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
-		//* Requests already receive review, so only direct writes need confirmation.
-		requiresConfirmation: options.direct
-			? ({ input }) => input.requestId === undefined
-			: false,
-		inputPermissions: ({ input: { collectionKey } }) => [
-			getCollectionPermission(collectionKey, "read"),
-		],
+		agent: {
+			permissions: [],
+			//* Requests already receive review, so only direct writes need confirmation.
+			requiresConfirmation: options.direct
+				? ({ input }) => input.requestId === undefined
+				: false,
+			inputPermissions: ({ input: { collectionKey } }) => [
+				getCollectionPermission(collectionKey, "read"),
+			],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(updateDocument, {
 				transaction: true,
@@ -77,4 +79,4 @@ export const updateDocumentAgentTool = (
 				),
 			};
 		},
-	});
+	}).agent;

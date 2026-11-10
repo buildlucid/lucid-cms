@@ -3,7 +3,8 @@ import constants from "../../../constants/constants.js";
 import { isContentRouteDefinition } from "../define-content-api-route.js";
 import type { LucidCustomRouteDefinition } from "../types.js";
 
-const contentRoutePrefix = `${constants.paths.api}/v1/content`;
+//* custom content routes have their own prefix so endpoints core adds later can never clash with a project's
+const contentRoutePrefix = `${constants.paths.api}/v1/content/e`;
 
 /** Ignores parameter names while preserving regex constraints and optionality. */
 export const getRouteKey = (route: { method: string; path: string }) =>

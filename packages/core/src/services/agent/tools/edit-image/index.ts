@@ -2,7 +2,7 @@ import constants from "../../../../constants/constants.js";
 import { isAiFeatureEnabled } from "../../../../libs/config/ai-features.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import generateImage from "../generate-image/handler.js";
@@ -18,7 +18,7 @@ import { inputSchema } from "./schema.js";
 
 /** Creates an edited copy of a Lucid image, preserving the original. */
 export const editImageAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: editImageToolName,
 		title: copy("admin:core.tools.media_edit_image.title"),
 		description: dedent(`
@@ -29,34 +29,36 @@ export const editImageAgentTool = () =>
 		`),
 		input: inputSchema,
 		output: outputSchema,
-		outputVersion: 1,
-		permissions: [Permissions.AiImageGenerate],
-		capabilities: { media: { generate: { image: true } } },
-		available: ({ config, aiAccess }) =>
-			isAiFeatureEnabled(config, "imageGeneration", aiAccess),
-		describe: ({ input }) =>
-			copy("admin:core.tools.media_edit_image.describe", {
-				data: { id: input.mediaId },
-			}),
-		interaction: {
-			key: constants.agent.widgets.imageSettings,
-			version: 1,
-			data: settingsDataSchema,
-			response: () => settingsResponseSchema,
-			skippable: true,
-			prepare: async ({ context, input, execution }) => {
-				const source = await checkSource(context, {
-					mediaId: input.mediaId,
-					execution,
-				});
-				if (source.error) throw new LucidError(source.error);
+		agent: {
+			outputVersion: 1,
+			permissions: [Permissions.AiImageGenerate],
+			capabilities: { media: { generate: { image: true } } },
+			available: ({ config, aiAccess }) =>
+				isAiFeatureEnabled(config, "imageGeneration", aiAccess),
+			describe: ({ input }) =>
+				copy("admin:core.tools.media_edit_image.describe", {
+					data: { id: input.mediaId },
+				}),
+			interaction: {
+				key: constants.agent.widgets.imageSettings,
+				version: 1,
+				data: settingsDataSchema,
+				response: () => settingsResponseSchema,
+				skippable: true,
+				prepare: async ({ context, input, execution }) => {
+					const source = await checkSource(context, {
+						mediaId: input.mediaId,
+						execution,
+					});
+					if (source.error) throw new LucidError(source.error);
 
-				const settings = await prepareImageSettings({
-					input,
-					editMediaId: input.mediaId,
-				});
-				if (settings.error) throw new LucidError(settings.error);
-				return settings.data;
+					const settings = await prepareImageSettings({
+						input,
+						editMediaId: input.mediaId,
+					});
+					if (settings.error) throw new LucidError(settings.error);
+					return settings.data;
+				},
 			},
 		},
 		handler: async ({ context, input, execution, response }) => {
@@ -79,4 +81,4 @@ export const editImageAgentTool = () =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).agent;

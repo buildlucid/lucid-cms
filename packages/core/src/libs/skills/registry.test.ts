@@ -34,7 +34,7 @@ test("a skill can be shared by MCP and several agents", async () => {
 		{ resolvedDb: adapter },
 	);
 	expect(config.ai.mcp.skills).toEqual([shared]);
-	expect(config.ai.agents.definitions.map((agent) => agent.skills)).toEqual([
+	expect(config.ai.agents.map((agent) => agent.skills)).toEqual([
 		[shared],
 		[shared],
 	]);

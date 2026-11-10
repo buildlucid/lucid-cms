@@ -7,7 +7,7 @@ const checkNotificationDefinitions = (config: ResolvedLucidConfig) => {
 	const keys = new Set<string>();
 	const permissions = new Set(getValidPermissions(config));
 
-	for (const definition of config.notifications.definitions) {
+	for (const definition of config.notifications) {
 		if (keys.has(definition.key)) {
 			throw new Error(
 				translate("server:core.config.notification.definition.duplicate", {

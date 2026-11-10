@@ -1,30 +1,20 @@
-import confirm from "@inquirer/confirm";
 import cliLogger from "../logger.js";
-import runPrompt from "../services/run-prompt.js";
+import confirmCommand from "../services/confirm-command.js";
 import runTaskCommand from "../services/run-task-command.js";
 import type { TaskServerOptions } from "../services/start-task-server.js";
 
-/** Drops every database table in the runtime, after confirming unless forced. */
-const migrateResetCommand = (
-	options?: { force?: boolean } & TaskServerOptions,
-) =>
+/** Drops every database table in the runtime, after confirming unless `--yes` is passed. */
+const migrateResetCommand = (options?: { yes?: boolean } & TaskServerOptions) =>
 	runTaskCommand(
 		"Database reset failed",
 		async (run, elapsed) => {
 			cliLogger.warn("This will drop all database tables");
 
-			const proceed =
-				options?.force ||
-				(await runPrompt((output) =>
-					confirm(
-						{
-							message:
-								"Are you sure you want to reset the database? This will drop ALL tables and cannot be undone.",
-							default: false,
-						},
-						{ output },
-					),
-				));
+			const proceed = await confirmCommand({
+				message:
+					"Are you sure you want to reset the database? This will drop ALL tables and cannot be undone.",
+				yes: options?.yes,
+			});
 			if (!proceed) {
 				cliLogger.info("Reset cancelled");
 				return 0;

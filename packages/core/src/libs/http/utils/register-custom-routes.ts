@@ -17,7 +17,6 @@ import type {
 	LucidCustomRouteDefinition,
 	LucidRouteInput,
 } from "../types.js";
-import buildFormattedQuery from "./build-formatted-query.js";
 import createServiceContext from "./create-service-context.js";
 import { getRouteKey, getRoutePath } from "./route-identity.js";
 
@@ -45,7 +44,7 @@ const buildOpenAPIOptions = (
 				? { authorization: true }
 				: undefined,
 		params: schema?.params,
-		query: schema?.query?.string,
+		query: schema?.query,
 	});
 
 	return {
@@ -70,24 +69,17 @@ const buildOpenAPIOptions = (
 	};
 };
 
-/**
- * Creates the handler input after validators have run, using formatted query
- * output when a route defines one.
- */
-const buildInput = async (
+/** Creates the handler input after validators have run. */
+const buildInput = (
 	hono: LucidHonoContext,
 	route: LucidCustomRouteDefinition,
-): Promise<LucidRouteInput<typeof route.schema>> => {
+): LucidRouteInput<typeof route.schema> => {
 	const schema = route.schema;
 
 	return {
 		body: schema?.body ? getValidatedValue(hono, "json") : undefined,
 		params: schema?.params ? getValidatedValue(hono, "param") : undefined,
-		query: schema?.query?.formatted
-			? await buildFormattedQuery(hono, schema.query.formatted)
-			: schema?.query?.string
-				? getValidatedValue(hono, "query")
-				: undefined,
+		query: schema?.query ? getValidatedValue(hono, "query") : undefined,
 	} as LucidRouteInput<typeof route.schema>;
 };
 
@@ -134,9 +126,7 @@ const buildRouteHandlers = (
 	...(isContentRouteDefinition(route) ? buildContentAccessHandlers(route) : []),
 	...(route.middleware ?? []),
 	...(route.schema?.params ? [validate("param", route.schema.params)] : []),
-	...(route.schema?.query?.string
-		? [validate("query", route.schema.query.string)]
-		: []),
+	...(route.schema?.query ? [validate("query", route.schema.query)] : []),
 	...(route.schema?.body ? [validate("json", route.schema.body)] : []),
 	async (hono) => {
 		const context = createServiceContext(hono);
@@ -144,7 +134,7 @@ const buildRouteHandlers = (
 			hono,
 			context,
 			toolkit: createToolkit(context),
-			input: await buildInput(hono, route),
+			input: buildInput(hono, route),
 		});
 	},
 ];

@@ -1,5 +1,5 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
 import { subagentAgentsToolName } from "../subagent-agents/constants.js";
@@ -13,7 +13,7 @@ import { inputSchema, outputSchema } from "./schema.js";
 export const subagentStartAgentTool = (options: {
 	agents?: readonly string[];
 }) =>
-	defineAgentTool({
+	defineTool({
 		name: subagentStartToolName,
 		title: copy("admin:core.tools.lucid_subagent_start.title"),
 		description: dedent(`
@@ -23,13 +23,15 @@ export const subagentStartAgentTool = (options: {
 		`),
 		input: inputSchema,
 		output: outputSchema,
-		outputVersion: 1,
-		permissions: [],
-		available: ({ mode }) => mode !== "subagent",
-		describe: ({ input }) =>
-			copy("admin:core.tools.lucid_subagent_start.describe", {
-				data: { agent: input.agentKey },
-			}),
+		agent: {
+			outputVersion: 1,
+			permissions: [],
+			available: ({ mode }) => mode !== "subagent",
+			describe: ({ input }) =>
+				copy("admin:core.tools.lucid_subagent_start.describe", {
+					data: { agent: input.agentKey },
+				}),
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await handler(context, {
 				input,
@@ -39,4 +41,4 @@ export const subagentStartAgentTool = (options: {
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).agent;

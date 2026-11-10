@@ -1,25 +1,27 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import runSchedule from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const runJobScheduleAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: "jobs_run_schedule",
 		title: copy("admin:core.tools.jobs_run_schedule.title"),
 		description:
 			"Queue a registered job schedule to run now instead of waiting for its next cron time, eg. a nightly clean-up the person wants done today. Schedules that skip overlapping runs refuse while one is still running. Only run schedules the person asked you to.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.JobsRun],
-		requiresConfirmation: true,
-		describe: ({ input }) =>
-			copy("admin:core.tools.jobs_run_schedule.describe", {
-				data: { schedule: input.scheduleKey },
-			}),
+		agent: {
+			permissions: [Permissions.JobsRun],
+			requiresConfirmation: true,
+			describe: ({ input }) =>
+				copy("admin:core.tools.jobs_run_schedule.describe", {
+					data: { schedule: input.scheduleKey },
+				}),
+		},
 		handler: async ({ context, input, execution }) => {
 			const { principal } = execution.authority;
 			const result = await serviceWrapper(runSchedule, { transaction: true })(
@@ -38,4 +40,4 @@ export const runJobScheduleAgentTool = () =>
 				}),
 			};
 		},
-	});
+	}).agent;

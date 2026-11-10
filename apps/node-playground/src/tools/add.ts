@@ -1,28 +1,16 @@
-import { defineAgentTool, defineMcpTool, z } from "@lucidcms/core";
+import { defineTool, z } from "@lucidcms/core";
 
-const addInput = z.object({ a: z.number(), b: z.number() });
-
-export const addTool = defineMcpTool({
+export const addTool = defineTool({
 	name: "playground_add",
 	title: "Add numbers",
 	description: "Add two numbers and return their sum.",
-	input: addInput,
+	input: z.object({ a: z.number(), b: z.number() }),
 	output: z.object({ sum: z.number() }),
-	scopes: [],
-	handler: async ({ input }) => ({ output: { sum: input.a + input.b } }),
-	annotations: { readOnlyHint: true },
-});
-
-export const addAgentTool = defineAgentTool({
-	name: "playground_add",
-	title: "Add numbers",
-	description: "Add two numbers and return their sum.",
-	input: addInput,
-	output: z.object({ sum: z.number() }),
-	permissions: [],
+	readOnly: true,
+	agent: { permissions: [] },
+	mcp: { scopes: [] },
 	handler: async ({ input }) => ({
 		output: { sum: input.a + input.b },
 		summary: `Added ${input.a} and ${input.b} to get ${input.a + input.b}`,
 	}),
-	readOnly: true,
 });

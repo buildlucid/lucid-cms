@@ -34,7 +34,9 @@ const plugin = (
 			translations: ["@lucidcms/cloudflare-images/translations"],
 		},
 		defaults: {
-			media: { delivery: cloudflareImagesDeliveryAdapter(pluginOptions) },
+			media: {
+				deliveryAdapter: cloudflareImagesDeliveryAdapter(pluginOptions),
+			},
 		},
 	});
 

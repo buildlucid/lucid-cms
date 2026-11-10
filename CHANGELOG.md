@@ -5,7 +5,7 @@
 ### Features:
 
 - Lucid now runs on Vite.
-- Added an MCP server at `/mcp`, with `defineMcpTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
+- Added an MCP server at `/mcp`, with `defineTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
 - Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them.
 - Added admin keyboard shortcuts for saving, previewing, creating and switching locales, with a shortcuts list on `?` and in the account menu.
 - Added captcha adapters to protect login and other public forms, with `toolkit.captcha` for your own endpoints and new Cloudflare Turnstile and Google reCAPTCHA plugins.
@@ -32,6 +32,7 @@
 - Added AI translation, which translates documents into a request per language for review and tracks which translations are out of date.
 - Added `build.clientTypes`, which writes your collection types to front ends that use `@lucidcms/client`.
 - Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label.
+- Plugin commands can now take their own options, and `lucidcms --help` lists them when run inside a project.
 
 ### Breaking Changes:
 
@@ -67,6 +68,13 @@
 - Admin slot and route components are now typed from their definition with `SlotComponent<typeof slot>` and `RouteComponent<typeof route>`, replacing the per-slot component types.
 - `@lucidcms/admin/services` now only exports the `queryKeys` its `queries` read, and `useTranslation` only accepts your own keys and Lucid's `common.*` keys.
 - Exclusive admin slots at the same priority now go to the more specific `match`.
+- `migrations`, `seeds`, `jobs` and `notifications` in the config are now plain arrays, and `ai.agents` is an array or `false`. Plugins add theirs with `draft.jobs.push(...)`.
+- Renamed the `i18n` config option to `translations`, and `media.storage` and `media.delivery` to `media.storageAdapter` and `media.deliveryAdapter`.
+- Pass your `env` schema to `defineConfig({ env })` as well as exporting it, which types the `config(env)` callback without generated types.
+- Custom route schemas now take one `query` schema in place of `query: { string, formatted }`.
+- Routes made with `defineContentApiRoute` now live under `/api/v1/content/e`, so they can never clash with Lucid's own content endpoints.
+- Content API lists now return at most 100 items per page, and no longer accept `perPage=-1`.
+- CLI commands that ask for confirmation now take `--yes` in place of `--force` and fail when there's no terminal to ask in, `kv:clear` now asks first, and `jobs:schedule` is now `jobs:run`.
 
 ### Bug Fixes:
 

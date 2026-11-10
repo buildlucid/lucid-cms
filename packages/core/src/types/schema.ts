@@ -2,6 +2,7 @@ import type z from "zod";
 
 export type { FieldInputSchema } from "../schemas/collection-fields.js";
 
+/** Schemas for Lucid's own controllers, whose list queries also have a formatted form. */
 export type ControllerSchema = {
 	query: {
 		string: z.ZodType | undefined;
@@ -12,15 +13,10 @@ export type ControllerSchema = {
 	response: z.ZodType | undefined;
 };
 
-/** Request schemas accepted by route factories. Inferred handler input follows the body, params and formatted query schemas. */
+/** Request schemas accepted by route factories. Handler input is inferred from the body, params and query schemas. */
 export type RouteSchema = {
-	/** Raw query validation and optional formatted query validation. */
-	query?: {
-		/** Validate string values from the URL query. */
-		string?: z.ZodType | undefined;
-		/** Validate query values after Lucid formats query parameters. */
-		formatted?: z.ZodType | undefined;
-	};
+	/** Validate the URL query. Values arrive as strings, so coerce numbers and booleans, eg. `z.coerce.number()`. */
+	query?: z.ZodType | undefined;
 	/** Validate path parameters. */
 	params?: z.ZodType | undefined;
 	/** Validate the JSON request body. */

@@ -3,7 +3,7 @@ import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import { getPermittedCollectionKeys } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import type { AgentResource } from "../../../../types/response.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import dedent from "../../../../utils/helpers/dedent.js";
@@ -17,7 +17,7 @@ const name = "documents_translate";
 export const translateDocumentAgentTool = (
 	options: DocumentWriteToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.documents_translate.title"),
 		description: dedent(`
@@ -31,19 +31,21 @@ export const translateDocumentAgentTool = (
 		`),
 		input: inputSchema,
 		output: outputSchema,
-		permissions: options.direct
-			? [Permissions.AiTranslate]
-			: [Permissions.AiTranslate, Permissions.RequestsRead],
-		available: ({ config, aiAccess }) =>
-			isAiFeatureEnabled(config, "translation", aiAccess),
-		//* requests already receive review, so only saving to latest needs confirmation
-		requiresConfirmation: options.direct
-			? ({ input }) => input.requestId === undefined
-			: false,
-		inputPermissions: ({ input: { collectionKey } }) => [
-			getCollectionPermission(collectionKey, "read"),
-			getCollectionPermission(collectionKey, "update"),
-		],
+		agent: {
+			permissions: options.direct
+				? [Permissions.AiTranslate]
+				: [Permissions.AiTranslate, Permissions.RequestsRead],
+			available: ({ config, aiAccess }) =>
+				isAiFeatureEnabled(config, "translation", aiAccess),
+			//* requests already receive review, so only saving to latest needs confirmation
+			requiresConfirmation: options.direct
+				? ({ input }) => input.requestId === undefined
+				: false,
+			inputPermissions: ({ input: { collectionKey } }) => [
+				getCollectionPermission(collectionKey, "read"),
+				getCollectionPermission(collectionKey, "update"),
+			],
+		},
 		//* translating calls Lucid AI for a while, so requests open in their own transactions
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(translateDocumentsTool, {
@@ -96,4 +98,4 @@ export const translateDocumentAgentTool = (
 				),
 			};
 		},
-	});
+	}).agent;

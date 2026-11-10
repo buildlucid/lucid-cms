@@ -1,6 +1,6 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
 import { aiAccessSchema } from "../libs/lucid-remote/schema/connection.js";
+import type { ControllerSchema } from "../types/schema.js";
 
 const connectionStatusResponseSchema = z
 	.object({

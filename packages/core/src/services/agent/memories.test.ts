@@ -24,16 +24,13 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				agents: {
-					enabled: true,
-					definitions: [
-						defineAgent({
-							key: "writer",
-							name: "Writer",
-							description: "Writes.",
-						}),
-					],
-				},
+				agents: [
+					defineAgent({
+						key: "writer",
+						name: "Writer",
+						description: "Writes.",
+					}),
+				],
 				memory: {
 					personal: { enabled: true, limit: 2 },
 					shared: { enabled: true, limit: 5 },

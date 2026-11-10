@@ -54,7 +54,7 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 			image: { enabled: true, models: {} },
 			audio: { enabled: true, models: {} },
 		},
-		agents: { enabled: true, definitions: [] },
+		agents: [],
 		mcp: { enabled: false, tools: [], skills: [] },
 	},
 	deploys: [],
@@ -69,7 +69,7 @@ test("role grants put content and agents before administration and destructive a
 			details: { labels: { singular: "Page", plural: "Pages" } },
 		}),
 	];
-	resolved.ai.agents.definitions = [
+	resolved.ai.agents = [
 		defineAgent({ key: "seo", name: "SEO", description: "SEO", tools: [] }),
 	];
 	const groups = getGrantablePermissionRegistry(resolved);
@@ -117,7 +117,7 @@ test("role grants put content and agents before administration and destructive a
 test("roles are only offered AI permissions for the AI features switched on, which stay valid", () => {
 	const resolved = config();
 	resolved.ai.mediaGeneration.audio.enabled = false;
-	resolved.ai.agents.enabled = false;
+	resolved.ai.agents = [];
 	expect(
 		getGrantablePermissionRegistry(resolved)
 			.find((value) => value.key === "ai_permissions")
@@ -136,10 +136,15 @@ test("roles are only offered AI permissions for the AI features switched on, whi
 
 test("switched-off agents keep their permissions valid, but roles aren't offered them", () => {
 	const resolved = config();
-	resolved.ai.agents.definitions = [
-		defineAgent({ key: "seo", name: "SEO", description: "SEO", tools: [] }),
+	resolved.ai.agents = [
+		defineAgent({
+			key: "seo",
+			name: "SEO",
+			description: "SEO",
+			tools: [],
+			enabled: false,
+		}),
 	];
-	resolved.ai.agents.enabled = false;
 
 	expect(
 		getGrantablePermissionRegistry(resolved).some(

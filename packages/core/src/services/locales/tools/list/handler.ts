@@ -20,12 +20,12 @@ const listLocales: ServiceFn<
 			direction: locale.direction,
 			isDefault: locale.isDefault,
 		})),
-		...context.config.i18n.locales.map((locale) => ({
+		...context.config.translations.locales.map((locale) => ({
 			purpose: "interface" as const,
 			code: locale.code,
 			name: locale.label,
 			direction: locale.direction ?? "ltr",
-			isDefault: locale.code === context.config.i18n.defaultLocale,
+			isDefault: locale.code === context.config.translations.defaultLocale,
 		})),
 	];
 
@@ -40,9 +40,9 @@ const listLocales: ServiceFn<
 						availableCount: localesRes.data.length,
 					},
 					interface: {
-						defaultLocale: context.config.i18n.defaultLocale,
+						defaultLocale: context.config.translations.defaultLocale,
 						currentLocale: context.request.locale,
-						availableCount: context.config.i18n.locales.length,
+						availableCount: context.config.translations.locales.length,
 					},
 				},
 			},

@@ -21,7 +21,7 @@ const getAdminTranslations: ServiceFn<
 		translations: Record<string, string>;
 	}
 > = async (context, data) => {
-	const defaultLocale = context.config.i18n.defaultLocale;
+	const defaultLocale = context.config.translations.defaultLocale;
 
 	const resolvedLocale = data.locale
 		? resolveInterfaceLocale({
@@ -30,12 +30,14 @@ const getAdminTranslations: ServiceFn<
 			})
 		: context.request.locale;
 
-	const locales = context.config.i18n.locales.map((interfaceLocale) => ({
-		code: interfaceLocale.code,
-		label: interfaceLocale.label,
-		direction: interfaceLocale.direction ?? "ltr",
-		isDefault: interfaceLocale.code === defaultLocale,
-	}));
+	const locales = context.config.translations.locales.map(
+		(interfaceLocale) => ({
+			code: interfaceLocale.code,
+			label: interfaceLocale.label,
+			direction: interfaceLocale.direction ?? "ltr",
+			isDefault: interfaceLocale.code === defaultLocale,
+		}),
+	);
 
 	const localeMeta =
 		locales.find(

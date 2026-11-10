@@ -4,8 +4,8 @@ import defineAgent from "./define-agent.js";
 
 /**
  * Lucid's general-purpose agent, with every built-in tool and feature.
- * @remarks Used when agents are enabled and definitions are omitted.
- * Include it in custom definitions to retain it, or use `lucid-agent` as a custom agent's key to retain existing chats and permissions.
+ * @remarks Used when `ai.agents` is omitted.
+ * Include it in `ai.agents` to retain it, or use `lucid-agent` as a custom agent's key to retain existing chats and permissions.
  */
 const lucidAgent = defineAgent({
 	key: "lucid-agent",

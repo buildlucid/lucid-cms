@@ -138,9 +138,9 @@ const resolveRunSetup = (
 		instructions: buildInstructions({
 			//* the prompt stays the same for everyone, so the name uses the default language
 			agent: {
-				name: context.translate.forLocale(context.config.i18n.defaultLocale)(
-					agent.name,
-				),
+				name: context.translate.forLocale(
+					context.config.translations.defaultLocale,
+				)(agent.name),
 				instructions: agent.instructions,
 			},
 			siteContext: context.config.ai.context,

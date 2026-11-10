@@ -7,29 +7,30 @@ import {
 	getScopedCollectionKeys,
 	limitCollections,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
-import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import getDocument from "./handler.js";
 import { agentInputSchema, inputSchema, outputSchema } from "./schema.js";
 
 export const getDocumentMcpTool = (options: CollectionToolOptions = {}) =>
-	defineMcpTool({
+	defineTool({
 		name: "documents_get",
 		title: copy("admin:core.tools.documents_get.title"),
 		description:
 			"Read a document's selected content fields and bricks from a collection.",
 		input: inputSchema,
 		output: outputSchema,
-		scopes: [],
-		inputScopes: ({ input: { collectionKey } }) => [
-			ExternalScopes.DocumentRead(collectionKey),
-		],
-		possibleScopes: ({ config }) =>
-			limitCollections(config.collections, options.collections).map(
-				(collection) => ExternalScopes.DocumentRead(collection.key),
-			),
-		annotations: { readOnlyHint: true },
+		readOnly: true,
+		mcp: {
+			scopes: [],
+			inputScopes: ({ input: { collectionKey } }) => [
+				ExternalScopes.DocumentRead(collectionKey),
+			],
+			possibleScopes: ({ config }) =>
+				limitCollections(config.collections, options.collections).map(
+					(collection) => ExternalScopes.DocumentRead(collection.key),
+				),
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await getDocument(context, {
 				input,
@@ -42,22 +43,24 @@ export const getDocumentMcpTool = (options: CollectionToolOptions = {}) =>
 			if (result.error) throw new LucidError(result.error);
 			return result.data;
 		},
-	});
+	}).mcp;
 
 export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
-	defineAgentTool({
+	defineTool({
 		name: "documents_get",
 		title: copy("admin:core.tools.documents_get.title"),
 		description:
 			"Read a document's selected content fields and bricks from a collection, or its proposal in a request with version request:ID. Values use the shape documents_update accepts.",
 		input: agentInputSchema,
 		output: outputSchema,
-		permissions: [],
 		readOnly: true,
-		parallelSafe: true,
-		inputPermissions: ({ input: { collectionKey } }) => [
-			getCollectionPermission(collectionKey, "read"),
-		],
+		agent: {
+			permissions: [],
+			parallelSafe: true,
+			inputPermissions: ({ input: { collectionKey } }) => [
+				getCollectionPermission(collectionKey, "read"),
+			],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await getDocument(context, {
 				input,
@@ -86,4 +89,4 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 				}),
 			};
 		},
-	});
+	}).agent;

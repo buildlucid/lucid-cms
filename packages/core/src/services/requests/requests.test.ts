@@ -203,12 +203,9 @@ beforeAll(async () => {
 		config: {
 			...config,
 			collections,
-			jobs: {
-				...config.jobs,
-				definitions: config.jobs.definitions.map((job) =>
-					job.name === executeRequestJob.name ? executeRequestJob : job,
-				),
-			},
+			jobs: config.jobs.map((job) =>
+				job.name === executeRequestJob.name ? executeRequestJob : job,
+			),
 			email: { ...config.email, simulate: true },
 		},
 		database: await fixture.getDatabase(),

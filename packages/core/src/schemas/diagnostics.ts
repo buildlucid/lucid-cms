@@ -1,12 +1,12 @@
 import z from "zod";
 import constants from "../constants/constants.js";
-import type { ControllerSchema } from "../exports/types.js";
 import type {
 	DiagnosticCheckKey,
 	DiagnosticCheckResult,
 	DiagnosticPackageUpdate,
 	Diagnostics,
 } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { controllerSchemas as settingsControllerSchemas } from "./settings.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
 

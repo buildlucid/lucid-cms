@@ -4,7 +4,7 @@ import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import acknowledgeRequest from "./handler.js";
@@ -15,14 +15,16 @@ const name = "requests_acknowledge";
 export const acknowledgeRequestAgentTool = (
 	options: CollectionToolOptions = {},
 ) =>
-	defineAgentTool({
+	defineTool({
 		name,
 		title: copy("admin:core.tools.requests_acknowledge.title"),
 		description:
 			"Acknowledge targets someone else published to after the request was opened, once you have compared what they now hold with the request. Requests can't be approved until these are acknowledged.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [Permissions.RequestsRead],
+		agent: {
+			permissions: [Permissions.RequestsRead],
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await serviceWrapper(acknowledgeRequest, {
 				transaction: true,
@@ -51,4 +53,4 @@ export const acknowledgeRequestAgentTool = (
 				),
 			};
 		},
-	});
+	}).agent;

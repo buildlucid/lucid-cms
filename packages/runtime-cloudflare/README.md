@@ -129,7 +129,7 @@ CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_LUCID_DB="postgres://..." lucidcms
 
 ## Commands
 
-Commands such as `migrate`, `migrate:status`, `sync`, `seed`, `jobs:schedule` and plugin commands such as `site:build` run inside the Worker, through a short-lived dev server. They use the same bindings and local state as `lucidcms dev`, and can run while it does.
+Commands such as `migrate`, `migrate:status`, `sync`, `seed`, `jobs:run` and plugin commands such as `site:build` run inside the Worker, through a short-lived dev server. They use the same bindings and local state as `lucidcms dev`, and can run while it does.
 
 To use the deployed resources behind Lucid's bindings, such as KV and R2, pass `--remote` to `lucidcms dev` or a command:
 

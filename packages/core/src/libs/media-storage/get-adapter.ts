@@ -46,15 +46,15 @@ export const resolveMediaStorageAdapter = (
 
 /** Resolves the configured media storage adapter for services, returning null when omitted. */
 const getMediaStorageAdapter = async (config: {
-	media: Pick<ResolvedLucidConfig["media"], "storage">;
+	media: Pick<ResolvedLucidConfig["media"], "storageAdapter">;
 }): Promise<ResolvedMediaStorageAdapter | null> => {
-	if (!config.media.storage) return null;
+	if (!config.media.storageAdapter) return null;
 
 	try {
 		return resolveMediaStorageAdapter(
-			await (typeof config.media.storage === "function"
-				? config.media.storage()
-				: config.media.storage),
+			await (typeof config.media.storageAdapter === "function"
+				? config.media.storageAdapter()
+				: config.media.storageAdapter),
 		);
 	} catch (error) {
 		if (error instanceof LucidError) throw error;

@@ -80,7 +80,6 @@ const getConfig = async (): Promise<{
 
 		const resolved = await resolveConfigDefinition({
 			definition: build.host.definition,
-			envSchema: build.host.envSchema,
 			env: runtime.env,
 			meta: build.host.meta,
 			processConfigOptions: {

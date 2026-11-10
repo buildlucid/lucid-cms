@@ -21,7 +21,7 @@ export const getAgents = (
 	config: Pick<ResolvedLucidConfig, "ai">,
 ): readonly AgentDefinition[] =>
 	isAiFeatureEnabled(config, "agents")
-		? config.ai.agents.definitions.filter((agent) => agent.enabled)
+		? config.ai.agents.filter((agent) => agent.enabled)
 		: [];
 
 export const getAgent = (config: ResolvedLucidConfig, key: string) =>

@@ -10,6 +10,6 @@
 		"skipLibCheck": true,
 		"outDir": "dist"
 	},
-	"include": ["lucid.config.ts", "src/**/*", "lucid/**/*"],
+	"include": ["lucid.config.ts", "src/**/*"],
 	"exclude": ["node_modules"]
 }

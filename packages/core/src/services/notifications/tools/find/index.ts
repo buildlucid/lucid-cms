@@ -1,20 +1,22 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import findNotifications from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 export const findNotificationsAgentTool = () =>
-	defineAgentTool({
+	defineTool({
 		name: "notifications_find",
 		title: copy("admin:core.tools.notifications_find.title"),
 		description:
 			"Find notifications sent to the person you act for, eg. to-dos, mentions, request updates and failures. Use it to see what needs their attention.",
 		input: inputSchema,
 		output: outputSchema,
-		permissions: [],
 		readOnly: true,
-		parallelSafe: true,
+		agent: {
+			permissions: [],
+			parallelSafe: true,
+		},
 		handler: async ({ context, input, execution }) => {
 			const result = await findNotifications(context, {
 				input,
@@ -33,4 +35,4 @@ export const findNotificationsAgentTool = () =>
 				),
 			};
 		},
-	});
+	}).agent;

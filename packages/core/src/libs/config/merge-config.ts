@@ -8,8 +8,8 @@ const withoutAdapters = (
 	...config,
 	media: config.media && {
 		...config.media,
-		storage: undefined,
-		delivery: undefined,
+		storageAdapter: undefined,
+		deliveryAdapter: undefined,
 	},
 	email: config.email && { ...config.email, adapter: undefined },
 	captcha: config.captcha && { ...config.captcha, adapter: undefined },
@@ -26,14 +26,14 @@ const mergeConfig = (
 		withoutAdapters(config),
 	);
 	if (merged.media) {
-		merged.media.storage =
-			config.media?.storage !== undefined
-				? config.media.storage
-				: defaultConfig.media?.storage;
-		merged.media.delivery =
-			config.media?.delivery !== undefined
-				? config.media.delivery
-				: defaultConfig.media?.delivery;
+		merged.media.storageAdapter =
+			config.media?.storageAdapter !== undefined
+				? config.media.storageAdapter
+				: defaultConfig.media?.storageAdapter;
+		merged.media.deliveryAdapter =
+			config.media?.deliveryAdapter !== undefined
+				? config.media.deliveryAdapter
+				: defaultConfig.media?.deliveryAdapter;
 	}
 	if (merged.email)
 		merged.email.adapter =

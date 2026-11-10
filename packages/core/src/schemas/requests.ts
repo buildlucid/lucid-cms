@@ -1,5 +1,4 @@
 import z from "zod";
-import type { ControllerSchema } from "../exports/types.js";
 import { jobStatusSchema } from "../libs/jobs/payload.js";
 import type {
 	RequestCommentResolution,
@@ -7,6 +6,7 @@ import type {
 	RequestStatus,
 	RequestType,
 } from "../types/response.js";
+import type { ControllerSchema } from "../types/schema.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { agentActorSchema } from "./shared/agent-actor.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";

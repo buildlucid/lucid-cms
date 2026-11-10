@@ -163,7 +163,7 @@ test("prepares a translation store from project and core translations", async ()
 
 	const result = await prepareTranslations({
 		config: {
-			i18n: {
+			translations: {
 				defaultLocale: "en",
 			},
 		} as ResolvedLucidConfig,

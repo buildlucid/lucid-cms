@@ -89,7 +89,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: { enabled: true, definitions: [testAgent] } },
+			ai: { ...config.ai, agents: [testAgent] },
 		},
 		database,
 		translationStore: createTranslationStore({
@@ -559,7 +559,7 @@ describe("code routines", () => {
 				...context.config,
 				ai: {
 					...context.config.ai,
-					agents: { enabled: true, definitions: [renamed] },
+					agents: [renamed],
 				},
 			},
 		});
@@ -579,7 +579,7 @@ describe("code routines", () => {
 				...context.config,
 				ai: {
 					...context.config.ai,
-					agents: { enabled: true, definitions: [] },
+					agents: [],
 				},
 			},
 		});
@@ -601,17 +601,12 @@ describe("code routines", () => {
 			...context.config,
 			ai: {
 				...context.config.ai,
-				agents: {
-					enabled: true,
-					definitions: [
-						{
-							...testAgent,
-							routines: [
-								{ ...auditRoutine, conversationMode: "reuse" as const },
-							],
-						},
-					],
-				},
+				agents: [
+					{
+						...testAgent,
+						routines: [{ ...auditRoutine, conversationMode: "reuse" as const }],
+					},
+				],
 			},
 		};
 		await syncAgentRoutines({ ...context, config });

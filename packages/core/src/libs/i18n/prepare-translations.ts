@@ -15,7 +15,7 @@ const prepareTranslations = async (props: {
 	bundles?: TranslationBundles;
 }): Promise<PrepareTranslationsResult> => {
 	const translationStore = createTranslationStore({
-		defaultLocale: props.config.i18n.defaultLocale,
+		defaultLocale: props.config.translations.defaultLocale,
 		bundles:
 			props.bundles ??
 			(await loadTranslationSources({

@@ -59,14 +59,12 @@ beforeAll(async () => {
 		config: {
 			...config,
 			deploys: [production],
-			jobs: { definitions: [...config.jobs.definitions, startDeployRunJob] },
-			notifications: {
-				definitions: [
-					...config.notifications.definitions,
-					deployFailedNotification,
-					deploySucceededNotification,
-				],
-			},
+			jobs: [...config.jobs, startDeployRunJob],
+			notifications: [
+				...config.notifications,
+				deployFailedNotification,
+				deploySucceededNotification,
+			],
 		},
 		database: await testConfig.getDatabase(),
 		translationStore: createTranslationStore({

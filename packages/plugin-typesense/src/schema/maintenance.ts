@@ -1,5 +1,5 @@
 import { z } from "@lucidcms/core";
-import type { ControllerSchema } from "@lucidcms/core/types";
+import type { RouteSchema } from "@lucidcms/core/types";
 import type { TypesenseStatus } from "../toolkit/get-status/index.js";
 
 const statusSchema = z.object({
@@ -36,10 +36,7 @@ const statusSchema = z.object({
 export const controllerSchemas = {
 	rebuild: {
 		body: undefined,
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
+		query: undefined,
 		params: undefined,
 		response: z.array(
 			z.object({
@@ -48,14 +45,11 @@ export const controllerSchemas = {
 				jobId: z.string(),
 			}),
 		),
-	} satisfies ControllerSchema,
+	} satisfies RouteSchema,
 	status: {
 		body: undefined,
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
+		query: undefined,
 		params: undefined,
 		response: z.array(statusSchema),
-	} satisfies ControllerSchema,
+	} satisfies RouteSchema,
 };

@@ -21,6 +21,7 @@ export const env = z.object({
 });
 
 export default defineConfig({
+	env: env,
 	runtime: cloudflare,
 	db: postgres((env) => ({
 		url: env.BUILDLUCID_CMS_DB?.connectionString ?? env.DATABASE_URL,
