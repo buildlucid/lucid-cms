@@ -16,7 +16,6 @@ import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetMultipleQueryParams } from "../../../schemas/documents.js";
 import {
-	applyDefaultQueryFilters,
 	getBaseUrl,
 	groupDocumentFilterConditions,
 	groupDocumentFilters,
@@ -161,11 +160,13 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 
 	const query: ContentGetMultipleQueryParams = {
 		...data.query,
-		filter: applyDefaultQueryFilters(data.query.filter, {
+		filter: {
+			...data.query.filter,
+			//* Always exclude deleted documents from content reads.
 			isDeleted: {
 				value: context.config.db.getDefault("boolean", "false"),
 			},
-		}),
+		},
 	};
 	const include = resolveDocumentIncludes(query.include);
 	const [tableNameRes, relationVersionTypeRes] = await Promise.all([

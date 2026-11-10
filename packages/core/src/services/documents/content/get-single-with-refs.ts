@@ -13,7 +13,6 @@ import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetSingleQueryParams } from "../../../schemas/documents.js";
 import {
-	applyDefaultQueryFilters,
 	getBaseUrl,
 	groupDocumentFilterConditions,
 	groupDocumentFilters,
@@ -130,11 +129,11 @@ const getSingleWithRefs: ContentDocumentsGetSingleWithRefsService = async <
 	const query: ContentGetSingleQueryParams = {
 		...data.query,
 		filter: {
-			...applyDefaultQueryFilters(data.query.filter, {
-				isDeleted: {
-					value: context.config.db.getDefault("boolean", "false"),
-				},
-			}),
+			...data.query.filter,
+			//* Always exclude deleted documents from content reads.
+			isDeleted: {
+				value: context.config.db.getDefault("boolean", "false"),
+			},
 			...(preview?.mode === "scoped" && preview.target === "entry"
 				? { id: { value: preview.entry.documentId } }
 				: {}),

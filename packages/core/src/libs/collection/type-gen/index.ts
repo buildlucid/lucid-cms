@@ -65,8 +65,6 @@ const collectionDocumentFilterKeys = [
 	"updatedBy",
 	"createdAt",
 	"updatedAt",
-	"isDeleted",
-	"deletedBy",
 ] as const;
 
 const collectionDocumentSortKeys = ["createdAt", "updatedAt"] as const;

@@ -4,7 +4,10 @@ import cliLogger from "../logger.js";
 import runTaskCommand from "../services/run-task-command.js";
 import type { TaskServerOptions } from "../services/start-task-server.js";
 
-/** Runs database and collection migrations in the runtime, asking in the terminal about any that need review. */
+/**
+ * Runs migrations with terminal approval where required. Fails if review is required but
+ * unavailable.
+ */
 const migrateCommand = (
 	options?: RuntimeTaskInput<"migrate"> & TaskServerOptions,
 ) =>
@@ -13,7 +16,7 @@ const migrateCommand = (
 		async (run, elapsed) => {
 			const result = await runMigrateTask(run, options);
 			if (result.status === "declined") {
-				return result.gate === "reject-destructive" ? 1 : 0;
+				return result.unanswered ? 1 : 0;
 			}
 
 			if (result.status === "failed") return 1;

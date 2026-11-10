@@ -131,8 +131,6 @@ export type MediaGetMultipleQuery = {
 			| "folderId"
 			| "type"
 			| "extension"
-			| "isDeleted"
-			| "deletedBy"
 			| "public"
 			| "origin",
 			FilterObject
@@ -147,9 +145,7 @@ export type MediaGetMultipleQuery = {
 			| "width"
 			| "height"
 			| "mimeType"
-			| "extension"
-			| "deletedBy"
-			| "isDeletedAt";
+			| "extension";
 		direction: SortDirection;
 	}>;
 	/** Audio transcripts, which lists otherwise leave out. */

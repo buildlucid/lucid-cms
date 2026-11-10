@@ -3,7 +3,10 @@ import type { RuntimeTaskInput } from "../runtime/tasks/index.js";
 import type { RuntimeTaskClient } from "./create-task-client.js";
 import requestMigrationApproval from "./request-migration-approval.js";
 
-/** Runs runtime migrations, requesting terminal approval and resubmitting without repeating approved plans, returning declined when approval is refused or `signal` closes the prompt. */
+/**
+ * Runs migrations without repeating approved plans. Returns declined for refusal or abort;
+ * `unanswered` marks unavailable approval, which commands treat as failure.
+ */
 const runMigrateTask = async (
 	run: RuntimeTaskClient,
 	options: RuntimeTaskInput<"migrate"> = {},
@@ -21,11 +24,16 @@ const runMigrateTask = async (
 			result.gate === "reject-destructive" && !options.yes
 				? "prompt-destructive"
 				: result.gate;
-		if (!(await requestMigrationApproval(gate, signal))) {
-			if (gate !== "reject-destructive" && !signal?.aborted) {
+		const approval = await requestMigrationApproval(gate, signal);
+		if (approval !== "approved") {
+			if (approval === "declined" && !signal?.aborted) {
 				cliLogger.info("The remaining migrations didn't run.");
 			}
-			return { status: "declined", gate } as const;
+			return {
+				status: "declined",
+				gate,
+				unanswered: approval === "unanswered",
+			} as const;
 		}
 
 		input =

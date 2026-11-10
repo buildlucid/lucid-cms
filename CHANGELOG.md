@@ -82,6 +82,9 @@
 - Fixed `/cdn` image responses missing `Vary: Accept` when `media.images.allowFormatQuery` picks the format from the browser.
 - Fixed CDNs being allowed to keep copies of private `/cdn` media and share link media. Share link media could also be cached for a year, past its expiry or revocation.
 - Fixed failed jobs on the built-in inline queue retrying straight away instead of waiting for their backoff.
+- Fixed the content API returning deleted documents and media. Content reads now always leave them out, and no longer accept an `isDeleted` filter.
+- Fixed `lucidcms migrate` and `serve` exiting successfully when migrations needed review and there was no terminal to ask in.
+- Fixed admin route navigation rejecting the `notifications` and `translations` icons.
 
 ## v0.19.0-alpha.0
 

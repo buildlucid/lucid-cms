@@ -615,4 +615,40 @@ describe("content document reads", () => {
 		});
 		expect(res.data.fields.summary).toMatchObject(doc("English summary"));
 	});
+
+	test("never returns binned documents, whatever the filters ask for", async () => {
+		const setting = await toolkit.documents.createSingle({
+			collectionKey: "settings",
+			actor: { type: "system" },
+			data: { fields: { label: { en: "Binned" } } },
+		});
+		assert(setting.data, JSON.stringify(setting.error));
+		const target = { collectionKey: "settings", id: setting.data.id };
+		expect(
+			(
+				await toolkit.documents.deleteSingle({
+					...target,
+					actor: { type: "system" },
+				})
+			).error,
+		).toBeUndefined();
+
+		const filter = {
+			id: { value: target.id },
+			isDeleted: { value: true },
+		};
+		const single = await toolkit.documents.getSingle({
+			collectionKey: "settings",
+			version: "latest",
+			query: { filter },
+		});
+		expect(single.error?.status).toBe(404);
+		const multiple = await toolkit.documents.getMultiple({
+			collectionKey: "settings",
+			version: "latest",
+			query: { filter },
+		});
+		assert(multiple.data, JSON.stringify(multiple.error));
+		expect(multiple.data.items).toEqual([]);
+	});
 });

@@ -12,6 +12,7 @@ import createServiceContext from "../../utils/services/create-service-context.js
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import getMultiple from "./get-multiple.js";
+import getSingle from "./get-single.js";
 
 const fixture = getTestConfig();
 let context: ServiceContext;
@@ -118,4 +119,35 @@ test("lists library media by default, and personal or system media only for thos
 		),
 	).toEqual([media.logo]);
 	expect(await ids({ type: "content" }, everything)).toEqual([media.library]);
+});
+
+test("content actors never reach binned media, whatever the filters ask for", async () => {
+	const id = await createMedia();
+	const Media = new MediaRepository(context.db);
+	const binned = await Media.updateSingle({
+		data: { is_deleted: true, is_deleted_at: new Date().toISOString() },
+		where: [{ key: "id", operator: "=", value: id }],
+	});
+	expect(binned.error).toBeUndefined();
+
+	const list = await getMultiple(context, {
+		actor: { type: "content" },
+		query: {
+			filter: {
+				id: { value: [id], operator: "in" },
+				isDeleted: { value: true, operator: "=" },
+			},
+			page: 1,
+			perPage: 10,
+		},
+	});
+	assert(list.data, JSON.stringify(list.error));
+	expect(list.data.data).toEqual([]);
+	expect(
+		(await getSingle(context, { id, actor: { type: "content" } })).error
+			?.status,
+	).toBe(404);
+	expect(
+		(await getSingle(context, { id, actor: { type: "internal" } })).error,
+	).toBeUndefined();
 });

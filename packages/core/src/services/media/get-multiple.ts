@@ -14,8 +14,9 @@ import type {
 import { checkContentLocale } from "../locales/checks/index.js";
 
 /**
- * Lists media allowed by the ownership filter and actor access, leaving out audio transcripts unless the query includes
- * them, with text in `locale` when given, falling back to `fallbackLocale`. Callers type the localized shape.
+ * Lists media by ownership and access, with optional locale and fallback. Transcripts require
+ * explicit inclusion. Content actors exclude deleted media regardless of filters. Callers supply
+ * the localized result type.
  */
 const getMultiple = async <TMedia = MediaListItem>(
 	context: ServiceContext,
@@ -35,7 +36,16 @@ const getMultiple = async <TMedia = MediaListItem>(
 	const Media = new MediaRepository(context.db);
 
 	const mediaRes = await Media.selectMultipleFilteredFixed({
-		queryParams: data.query,
+		queryParams:
+			data.actor.type === "content"
+				? {
+						...data.query,
+						filter: {
+							...data.query.filter,
+							isDeleted: { value: false, operator: "=" },
+						},
+					}
+				: data.query,
 		access: getMediaListAccess(data.actor),
 		validation: {
 			enabled: true,

@@ -121,29 +121,32 @@ const homeCard = z
 		{ path: ["size"], message: "Pick a default size from the card's sizes." },
 	);
 
-const navigationIcon = z.enum([
-	"home",
-	"agent",
-	"chat",
-	"history",
-	"routines",
-	"memories",
-	"collection-multiple",
-	"collection-single",
-	"media",
-	"users",
-	"overview",
-	"usage",
-	"roles",
-	"email",
-	"logout",
-	"queue",
-	"integrations",
-	"settings",
-	"requests",
-	"publishing",
-	"extensions",
-]) satisfies z.ZodType<AdminNavigationIcon>;
+//* keyed by icon, so an icon missing here fails the type check
+const navigationIcon = z.enum({
+	home: "home",
+	agent: "agent",
+	chat: "chat",
+	history: "history",
+	routines: "routines",
+	memories: "memories",
+	"collection-multiple": "collection-multiple",
+	"collection-single": "collection-single",
+	media: "media",
+	users: "users",
+	overview: "overview",
+	usage: "usage",
+	roles: "roles",
+	email: "email",
+	logout: "logout",
+	queue: "queue",
+	integrations: "integrations",
+	settings: "settings",
+	requests: "requests",
+	publishing: "publishing",
+	extensions: "extensions",
+	notifications: "notifications",
+	translations: "translations",
+} satisfies { [Icon in AdminNavigationIcon]: Icon });
 
 /** Navigation and maintenance group keys. */
 const groupKey = z

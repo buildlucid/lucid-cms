@@ -250,8 +250,6 @@ test("generates collection-aware client document types that lean on the public L
 	"updatedBy"?: FilterObject;
 	"createdAt"?: FilterObject;
 	"updatedAt"?: FilterObject;
-	"isDeleted"?: FilterObject;
-	"deletedBy"?: FilterObject;
 	"_page_title"?: FilterObject;
 	"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`> | {
 		"page"?: {

@@ -37,14 +37,11 @@ const serveCommand = async () => {
 		const migration = await runMigrateTask(tasks.run, { quiet: true }).finally(
 			tasks.close,
 		);
-		// Exits as `lucidcms migrate` does: refusing a destructive migration or a failure is an error, declining isn't.
+		// Exits as `lucidcms migrate` does: a failure or nobody to ask is an error, declining isn't.
 		if (migration.status !== "complete") {
 			cliSpinner.stop();
 			process.exit(
-				migration.status === "declined" &&
-					migration.gate !== "reject-destructive"
-					? 0
-					: 1,
+				migration.status === "declined" && !migration.unanswered ? 0 : 1,
 			);
 		}
 

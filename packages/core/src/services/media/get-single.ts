@@ -1,4 +1,4 @@
-import { mediaFormatter } from "../../libs/formatters/index.js";
+import formatter, { mediaFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { Media } from "../../types/response.js";
@@ -16,8 +16,8 @@ import type {
 import { checkContentLocale } from "../locales/checks/index.js";
 
 /**
- * Reads one media item the actor can reach, with its text in `locale` when given, falling back to `fallbackLocale`
- * for empty text. Callers type the localized shape, as the toolkit does by locale.
+ * Reads accessible media with optional locale and fallback. Content actors exclude deleted media.
+ * Callers supply the localized result type.
  */
 const getSingle = async <TMedia = Media>(
 	context: ServiceContext,
@@ -47,6 +47,8 @@ const getSingle = async <TMedia = Media>(
 
 	const ownership = getMediaOwnership(mediaRes.data);
 	if (
+		(data.actor.type === "content" &&
+			formatter.formatBoolean(mediaRes.data.is_deleted)) ||
 		!canAccessMedia({ actor: data.actor, ownership, action: "read" }) ||
 		!canBrowseMedia({ actor: data.actor, ownership })
 	) {
