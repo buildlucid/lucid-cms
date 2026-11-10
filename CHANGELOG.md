@@ -4,116 +4,116 @@
 
 ### Features:
 
-- Lucid now runs on Vite.
-- Added an MCP server at `/mcp`, with `defineTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
-- Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them.
-- Added admin keyboard shortcuts for saving, previewing, creating and switching locales, with a shortcuts list on `?` and in the account menu.
-- Added captcha adapters to protect login and other public forms, with `toolkit.captcha` for your own endpoints and new Cloudflare Turnstile and Google reCAPTCHA plugins.
-- Added magic link login with `auth.magicLink`, which emails users a login link and code.
-- Added two-factor authentication with `auth.twoFactor`, which can be required for everyone, super admins or specific roles.
-- Added `lucidcms users:` commands for getting back into the admin when you're locked out.
-- Added `lucidcms kv:clear`, `email:test` and `storage:test` commands for clearing KV and testing your email and media storage adapters.
-- Added passkey login with `auth.passkeys`, which also works as two-factor authentication.
-- Added a `locale` option to content API and toolkit document and media reads, which returns translations in one locale.
-- Added a `fallbackLocale` option to content API and toolkit reads, which fills empty translations from another locale.
-- Added a `depth` option to content API and toolkit document reads, which fills in related documents up to three levels deep. It defaults to 1; 0 returns only their IDs and collection.
-- Added an `actor` option to `toolkit.media` reads, and an `ownership` filter to its lists.
-- Added toolkit helpers for reading sent emails, finding and creating media folders, and publishing or unpublishing documents.
-- Added `role: "content"` for public deployments that only serve content and media.
-- Media share links now come with a QR code you can copy or download, and media can be sent through your device's share menu from the media library and share pages.
-- Added document import and export, with their media, to move content between Lucid sites, plus `toolkit.transfer` and `defineTransfer` for scripts and plugins.
-- The system overview is now a Diagnostics page, with health checks for the database, KV, media storage and email, and a report you can copy or download for support.
-- Added a bug report button to the admin, for sending bugs to the Lucid team.
-- Lucid now sends security alerts and announcements for your version as notifications, which `announcements: false` turns off.
-- Diagnostics now shows when your Lucid packages are out of date, which `updateChecks: false` turns off.
-- Added deploys, for running and tracking site builds from the admin, plus a GitHub Actions provider.
-- Plugins can now add their own hook events with `defineHookEvents`, for project hooks and deploy triggers to subscribe to.
-- Added `toolkit.redirects.resolve()` and a content API route for finding where a missing page moved, with `redirects` in config for plugins to answer from.
-- Added AI translation, which translates documents into a request per language for review and tracks which translations are out of date.
-- Added `build.clientTypes`, which writes your collection types to front ends that use `@lucidcms/client`.
-- Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label.
-- Plugin commands can now take their own options, and `lucidcms --help` lists them when run inside a project.
+- Added an AI agent that edits content, manages media and runs routines on a schedule or when content changes, with its changes sent as requests for review. ([912ce16](https://github.com/buildlucid/lucid-cms/commit/912ce1634b7fac8233bf6985ce9e761e591ef9b4))
+- Added an MCP server at `/mcp`, with `defineTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`. ([5ee7adf](https://github.com/buildlucid/lucid-cms/commit/5ee7adf847a90b6ca1f944ad3212a7d9b09a9da8))
+- Lucid now runs on Vite. ([224ed66](https://github.com/buildlucid/lucid-cms/commit/224ed6681d22ac954eab19cccef074e920773f60))
+- Added AI audio generation to the media library, for turning text into speech. ([3cc200e](https://github.com/buildlucid/lucid-cms/commit/3cc200ea3b694c068f9708ac7d140be2d5a07391))
+- Added AI translation, which translates documents into a request per language for review and tracks which translations are out of date. ([d8b9fbc](https://github.com/buildlucid/lucid-cms/commit/d8b9fbc0662f71ce62aff262ce68a8ecbb21d5cc))
+- Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them. ([f28e928](https://github.com/buildlucid/lucid-cms/commit/f28e9283e8f165c0329bea0eccd1964cd65094a5))
+- Added notifications in the admin and by email. ([8b02c5e](https://github.com/buildlucid/lucid-cms/commit/8b02c5ec47d9b621ef10b0b3efe25acedec9c2e0))
+- Added document import and export, with their media, to move content between Lucid sites, plus `toolkit.transfer` and `defineTransfer` for scripts and plugins. ([0308676](https://github.com/buildlucid/lucid-cms/commit/03086762f322458d13f57f25d5cc30921119de31))
+- Added `toolkit.redirects.resolve()` and a content API route for finding where a missing page moved, with `redirects` in config for plugins to answer from. ([7bf2931](https://github.com/buildlucid/lucid-cms/commit/7bf2931ba82ab48a3e6dd0dd41d5c69b1de084de))
+- Added admin keyboard shortcuts for saving, previewing, creating and switching locales, with a shortcuts list on `?` and in the account menu. ([74530d5](https://github.com/buildlucid/lucid-cms/commit/74530d5fa153948e0a8a237d0e622f4f9eecf1ec))
+- Media share links now come with a QR code you can copy or download, and media can be sent through your device's share menu from the media library and share pages. ([43ebd69](https://github.com/buildlucid/lucid-cms/commit/43ebd69191c4ef4498fbe46eff098e1a31622b69))
+- Added captcha adapters to protect login and other public forms, with `toolkit.captcha` for your own endpoints and new Cloudflare Turnstile and Google reCAPTCHA plugins. ([fda7d14](https://github.com/buildlucid/lucid-cms/commit/fda7d14ffc4abecde1eba4af3217b74f3ca98060))
+- Added magic link login with `auth.magicLink`, which emails users a login link and code. ([ad94add](https://github.com/buildlucid/lucid-cms/commit/ad94add3576c2969d3cbe44969f9ec4cb4244ffa))
+- Added two-factor authentication with `auth.twoFactor`, which can be required for everyone, super admins or specific roles. ([45b31ec](https://github.com/buildlucid/lucid-cms/commit/45b31eca158ec9e6c43be544ca98eb4c84087bc5))
+- Added passkey login with `auth.passkeys`, which also works as two-factor authentication. ([bb4680e](https://github.com/buildlucid/lucid-cms/commit/bb4680e13343adfef59444897d404142520cbad1))
+- Added `lucidcms users:` commands for getting back into the admin when you're locked out. ([45b31ec](https://github.com/buildlucid/lucid-cms/commit/45b31eca158ec9e6c43be544ca98eb4c84087bc5))
+- Added `locale`, `fallbackLocale` and `depth` options to content API and toolkit reads, for choosing a locale, filling empty translations from another locale and filling in related documents. ([7abb351](https://github.com/buildlucid/lucid-cms/commit/7abb3516b22e7909a8cb548c27a4e99fecbe39cd))
+- Added toolkit helpers for reading sent emails, finding and creating media folders, and publishing or unpublishing documents. ([405334f](https://github.com/buildlucid/lucid-cms/commit/405334f6d72cfba1a6610c919847d8152d5e6b8d))
+- Added `build.clientTypes`, which writes your collection types to front ends that use `@lucidcms/client`. ([cb401aa](https://github.com/buildlucid/lucid-cms/commit/cb401aa805e935eb5fd0356dcba2b422d71bc74e))
+- Added `role: "content"` for public deployments that only serve content and media. ([2501a1a](https://github.com/buildlucid/lucid-cms/commit/2501a1a2480792fe137cef0fee7f275d6f842b3a))
+- Added deploys, for running and tracking site builds from the admin, plus a GitHub Actions provider. ([36ef96f](https://github.com/buildlucid/lucid-cms/commit/36ef96f233a6d204c6fc649c74315601ffef17fc))
+- The system overview is now a Diagnostics page, with health checks for the database, KV, media storage and email, and a report you can copy or download for support. ([ec1932c](https://github.com/buildlucid/lucid-cms/commit/ec1932ccd146a4aa2ed5d820f28454db266cea34))
+- Diagnostics now shows when your Lucid packages are out of date, which `updateChecks: false` turns off. ([bcd8ef5](https://github.com/buildlucid/lucid-cms/commit/bcd8ef51922212679d25cce355ebe2910d47e45f))
+- Lucid now sends security alerts and announcements for your version as notifications, which `announcements: false` turns off. ([f869e63](https://github.com/buildlucid/lucid-cms/commit/f869e638ef8319fbb56df0bfce8724c251f93ce5))
+- Added a bug report button to the admin, for sending bugs to the Lucid team. ([8f7514b](https://github.com/buildlucid/lucid-cms/commit/8f7514b0af067f7bf167c5e1b305a8dfa0945eae))
+- Added `lucidcms kv:clear`, `email:test` and `storage:test` commands for clearing KV and testing your email and media storage adapters. ([b8b650f](https://github.com/buildlucid/lucid-cms/commit/b8b650f536ddc0a52a3369ca85aef3eb5a824d7a))
+- Plugins can now add their own hook events with `defineHookEvents`, for project hooks and deploy triggers to subscribe to. ([8996a28](https://github.com/buildlucid/lucid-cms/commit/8996a28fe2007c08a906357e96bcce6754af926a))
+- Plugins can now add their own `lucidcms` commands, which `lucidcms --help` lists when run inside a project. ([bf8f9bd](https://github.com/buildlucid/lucid-cms/commit/bf8f9bd4a85d5279e3baf2794a521e88d248a5ae))
+- Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
 
 ### Breaking Changes:
 
-- Removed the `/lucid` URL prefix. The admin is at `/admin`, including login, share links and the OAuth consent page. The API is at `/api/v1`, with `/api/oauth`, `/api/openapi`, `/api/documentation` and `/api/health` beside it. MCP is at `/mcp`, media at `/cdn`, and plugin public files under `/_plugins/<plugin key>`. The OAuth issuer is now the site origin, so its metadata is at `/.well-known/oauth-authorization-server`. `admin`, `api`, `mcp` and `cdn` are reserved public folders.
-- Replaced the `./lucid/<resource>` folder defaults with `./database/migrations`, `./database/seeds`, `./translations` and `./emails`. The `templates` resource is now `emails` in `directories` and `sources`.
-- Document and version links now use shared identity tables with automatic cleanup on deletion.
-- Removed system alerts in favour of the new notification system.
-- Content API document responses now fill in their references instead of returning `refs`, with bricks split into `bricks` and `fixed`.
-- `toolkit.documents` reads now match the content API.
-- Toolkit list reads (`documents`, `media`, `requests` and `users`) now return `items` with their `pagination` instead of `data` and `count`.
-- Replaced Lucid's own bundler, development server and runtime adapters' CLI handlers with Vite, so projects have no `vite.config.ts`. Plugin CLI `dev` and `build` hooks are replaced by `vite`.
-- Removed the D1 database adapter. Database adapters must now support transactions.
-- Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module.
-- Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails.
-- Renamed `host` to `url`, which is now required. Lucid no longer falls back to the request's address.
-- Replaced `http.security.trustProxyHeaders` with `http.security.proxy`, which says how to find visitors' addresses behind a proxy. Secure cookies now follow `url`.
-- Document filters and sorts now use `fields.<field>` and `bricks.<brick>.<field>` keys in the content API, toolkit and tools, replacing the `_` prefix and repeater segments.
-- `toolkit.documents` reads now take `filter`, `sort`, `include`, `page` and `perPage` beside `collectionKey` instead of under `query`, accept plain filter values, and `getSingle` returns `null` when nothing matches.
-- Filter query parameters without an operator are no longer split on commas. `in` and `not-in` repeat the parameter for each value.
-- `toolkit.media`, `toolkit.media.folders`, `toolkit.email`, `toolkit.users` and `toolkit.requests` lists now take `filter`, `sort`, `page` and `perPage` directly instead of under `query`, and accept plain filter values.
-- Filter keys a list doesn't support are now refused with a 400 instead of being ignored.
-- API responses now return `pagination` on lists instead of `meta` and `links`.
-- Generated collection types now merge into one `Collections` registry, and document write types into `CollectionWrites`.
-- Hooks, jobs, tools, transfers and plugin `init` and `runtime` hooks now return their value and throw `LucidError` to fail, instead of returning `{ error, data }`. The toolkit still returns `{ error, data }`.
-- Replaced `LucidAPIError` with `LucidError`, which now takes a status, code and field errors and accepts plain text for its message.
-- Hook events now all start with `before` or `after`: `afterVersionPromote`, `afterVersionCapture`, `requests.afterCheck`, `requests.afterComplete`, `requests.afterDocumentRemove` and `agent.afterRunFinish`.
-- `defineJob` and its schedules now use `key` instead of `name`. The jobs API returns and filters on `jobKey` instead of `jobName`, and schedules return `shortKey` instead of `name`.
-- `defineSeed` now takes `{ run }` instead of a function.
-- Every `@lucidcms` package now shares one version, and the database, runtime and plugin packages dropped their `db-`, `runtime-` and `plugin-` prefixes, so `@lucidcms/db-sqlite` is now `@lucidcms/sqlite`. `@lucidcms/rich-text` is now `@lucidcms/richtext`.
-- Removed the `lucid` version range from `definePlugin` and runtime adapters. Packages declare the Lucid version they need as a peer dependency.
-- Plugins dropped the `Plugin` suffix from their exports, so `resendPlugin()` is now `resend()`. Plugins, database adapters and the GitHub Actions deploy provider no longer have default exports.
-- Collections and bricks are now defined with `defineCollection`, `defineBrick` and nested `field` helpers, replacing `CollectionBuilder`, `BrickBuilder` and their chained `add` methods. Plugins add fields with `collection.insertFields`, and the types are now `CollectionDefinition` and `BrickDefinition`.
-- Admin slot and route components are now typed from their definition with `SlotComponent<typeof slot>` and `RouteComponent<typeof route>`, replacing the per-slot component types.
-- `@lucidcms/admin/services` now only exports the `queryKeys` its `queries` read, and `useTranslation` only accepts your own keys and Lucid's `common.*` keys.
-- Exclusive admin slots at the same priority now go to the more specific `match`.
-- `migrations`, `seeds`, `jobs` and `notifications` in the config are now plain arrays, and `ai.agents` is an array or `false`. Plugins add theirs with `draft.jobs.push(...)`.
-- Renamed the `i18n` config option to `translations`, and `media.storage` and `media.delivery` to `media.storageAdapter` and `media.deliveryAdapter`.
-- Pass your `env` schema to `defineConfig({ env })` as well as exporting it, which types the `config(env)` callback without generated types.
-- Custom route schemas now take one `query` schema in place of `query: { string, formatted }`.
-- Routes made with `defineContentApiRoute` now live under `/api/v1/content/e`, so they can never clash with Lucid's own content endpoints.
-- Content API lists now return at most 100 items per page, and no longer accept `perPage=-1`.
-- CLI commands that ask for confirmation now take `--yes` in place of `--force` and fail when there's no terminal to ask in, `kv:clear` now asks first, and `jobs:schedule` is now `jobs:run`.
+- Removed the `/lucid` URL prefix. The admin is at `/admin`, including login, share links and the OAuth consent page. The API is at `/api/v1`, with `/api/oauth`, `/api/openapi`, `/api/documentation` and `/api/health` beside it. Media is at `/cdn`, and plugin public files are under `/_plugins/<plugin key>`. The OAuth issuer is now the site origin, so its metadata is at `/.well-known/oauth-authorization-server`. `admin`, `api`, `mcp` and `cdn` are reserved public folders. ([a5f1118](https://github.com/buildlucid/lucid-cms/commit/a5f1118bd3f6c4e8cbb175fd6fdae6811880eb0b))
+- Replaced the `./lucid/<resource>` folder defaults with `./database/migrations`, `./database/seeds`, `./translations` and `./emails`. The `templates` resource is now `emails` in `directories` and `sources`. ([5adc56a](https://github.com/buildlucid/lucid-cms/commit/5adc56a7e4956123586a815035f50d445ee1bd75))
+- Renamed `host` to `url`, which is now required. Lucid no longer falls back to the request's address. ([3c99c8f](https://github.com/buildlucid/lucid-cms/commit/3c99c8fb45befa8ac2e9b51692e735e988521cfc))
+- Replaced `http.security.trustProxyHeaders` with `http.security.proxy`, which says how to find visitors' addresses behind a proxy. Secure cookies now follow `url`. ([dfa3e3d](https://github.com/buildlucid/lucid-cms/commit/dfa3e3df8000fc0bb9aa2c070a4965ee4f067da8))
+- `migrations`, `seeds` and `jobs` in the config are now plain arrays. Plugins add theirs with `draft.jobs.push(...)`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
+- Renamed the `i18n` config option to `translations`, and `media.storage` and `media.delivery` to `media.storageAdapter` and `media.deliveryAdapter`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
+- Pass your `env` schema to `defineConfig({ env })` as well as exporting it, which types the `config(env)` callback without generated types. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
+- Every `@lucidcms` package now shares one version, and the database, runtime and plugin packages dropped their `db-`, `runtime-` and `plugin-` prefixes, so `@lucidcms/db-sqlite` is now `@lucidcms/sqlite`. `@lucidcms/rich-text` is now `@lucidcms/richtext`. ([1b306d9](https://github.com/buildlucid/lucid-cms/commit/1b306d966b47249986ddc8cd20b5fe33408225d0))
+- Removed the `lucid` version range from `definePlugin` and runtime adapters. Packages declare the Lucid version they need as a peer dependency. ([1b306d9](https://github.com/buildlucid/lucid-cms/commit/1b306d966b47249986ddc8cd20b5fe33408225d0))
+- Plugins dropped the `Plugin` suffix from their exports, so `resendPlugin()` is now `resend()`. Plugins and database adapters no longer have default exports. ([1b306d9](https://github.com/buildlucid/lucid-cms/commit/1b306d966b47249986ddc8cd20b5fe33408225d0))
+- Removed system alerts in favour of the new notification system. ([8b02c5e](https://github.com/buildlucid/lucid-cms/commit/8b02c5ec47d9b621ef10b0b3efe25acedec9c2e0))
+- Publishing requests are now called requests. Their API moved from `/api/v1/publishing` to `/api/v1/requests`, and the `publish-operations:read` permission is now `requests:read`. ([3ee99f1](https://github.com/buildlucid/lucid-cms/commit/3ee99f1a1a61293fc936cae5cdd439d7ea600da1))
+- Removed AI generation for individual custom fields, including the field `ai` option, the `ai.features.customFieldGeneration` flag and the `ai:custom-field-value` permission. ([8b26feb](https://github.com/buildlucid/lucid-cms/commit/8b26feb6fb99ed1650c29a87e331e1373799ce9d))
+- Content API document responses now fill in their references instead of returning `refs`, with bricks split into `bricks` and `fixed`. ([7abb351](https://github.com/buildlucid/lucid-cms/commit/7abb3516b22e7909a8cb548c27a4e99fecbe39cd))
+- `toolkit.documents` reads now match the content API. ([7abb351](https://github.com/buildlucid/lucid-cms/commit/7abb3516b22e7909a8cb548c27a4e99fecbe39cd))
+- Toolkit list reads (`documents`, `media`, `requests` and `users`) now return `items` with their `pagination` instead of `data` and `count`. ([7abb351](https://github.com/buildlucid/lucid-cms/commit/7abb3516b22e7909a8cb548c27a4e99fecbe39cd))
+- Toolkit reads now take `filter`, `sort`, `page` and `perPage` directly instead of under `query`, and accept plain filter values. `toolkit.documents` reads also take `include` beside `collectionKey`, and `getSingle` returns `null` when nothing matches. ([cb401aa](https://github.com/buildlucid/lucid-cms/commit/cb401aa805e935eb5fd0356dcba2b422d71bc74e))
+- Document filters and sorts now use `fields.<field>` and `bricks.<brick>.<field>` keys in the content API, toolkit and tools, replacing the `_` prefix and repeater segments. ([cb401aa](https://github.com/buildlucid/lucid-cms/commit/cb401aa805e935eb5fd0356dcba2b422d71bc74e))
+- Filter query parameters without an operator are no longer split on commas. `in` and `not-in` repeat the parameter for each value. ([cb401aa](https://github.com/buildlucid/lucid-cms/commit/cb401aa805e935eb5fd0356dcba2b422d71bc74e))
+- Filter keys a list doesn't support are now refused with a 400 instead of being ignored. ([cb401aa](https://github.com/buildlucid/lucid-cms/commit/cb401aa805e935eb5fd0356dcba2b422d71bc74e))
+- API responses now return `pagination` on lists instead of `meta` and `links`. ([cb401aa](https://github.com/buildlucid/lucid-cms/commit/cb401aa805e935eb5fd0356dcba2b422d71bc74e))
+- Content API lists now return at most 100 items per page, and no longer accept `perPage=-1`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
+- Routes made with `defineContentApiRoute` now live under `/api/v1/content/e`, so they can never clash with Lucid's own content endpoints. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
+- Custom route schemas now take one `query` schema in place of `query: { string, formatted }`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
+- Generated collection types now merge into one `Collections` registry, and document write types into `CollectionWrites`. ([cb401aa](https://github.com/buildlucid/lucid-cms/commit/cb401aa805e935eb5fd0356dcba2b422d71bc74e))
+- Hooks, jobs and plugin `init` and `runtime` hooks now return their value and throw `LucidError` to fail, instead of returning `{ error, data }`. The toolkit still returns `{ error, data }`. ([25ef1aa](https://github.com/buildlucid/lucid-cms/commit/25ef1aa8b94c315dd4a415d43bf2b93b831a8e81))
+- Replaced `LucidAPIError` with `LucidError`, which now takes a status, code and field errors and accepts plain text for its message. ([25ef1aa](https://github.com/buildlucid/lucid-cms/commit/25ef1aa8b94c315dd4a415d43bf2b93b831a8e81))
+- Hook events now all start with `before` or `after`, such as `afterVersionPromote`. ([25ef1aa](https://github.com/buildlucid/lucid-cms/commit/25ef1aa8b94c315dd4a415d43bf2b93b831a8e81))
+- `defineJob` and its schedules now use `key` instead of `name`. The jobs API returns and filters on `jobKey` instead of `jobName`, and schedules return `shortKey` instead of `name`. ([25ef1aa](https://github.com/buildlucid/lucid-cms/commit/25ef1aa8b94c315dd4a415d43bf2b93b831a8e81))
+- `defineSeed` now takes `{ run }` instead of a function. ([25ef1aa](https://github.com/buildlucid/lucid-cms/commit/25ef1aa8b94c315dd4a415d43bf2b93b831a8e81))
+- Collections and bricks are now defined with `defineCollection`, `defineBrick` and nested `field` helpers, replacing `CollectionBuilder`, `BrickBuilder` and their chained `add` methods. Plugins add fields with `collection.insertFields`, and the types are now `CollectionDefinition` and `BrickDefinition`. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
+- Admin slot and route components are now typed from their definition with `SlotComponent<typeof slot>` and `RouteComponent<typeof route>`, replacing the per-slot component types. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
+- `@lucidcms/admin/services` now only exports the `queryKeys` its `queries` read, and `useTranslation` only accepts your own keys and Lucid's `common.*` keys. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
+- Exclusive admin slots at the same priority now go to the more specific `match`. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
+- Replaced Lucid's own bundler, development server and runtime adapters' CLI handlers with Vite, so projects have no `vite.config.ts`. Plugin CLI `dev` and `build` hooks are replaced by `vite`. ([224ed66](https://github.com/buildlucid/lucid-cms/commit/224ed6681d22ac954eab19cccef074e920773f60))
+- Removed the D1 database adapter. Database adapters must now support transactions. ([224ed66](https://github.com/buildlucid/lucid-cms/commit/224ed6681d22ac954eab19cccef074e920773f60))
+- Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module. ([3d70045](https://github.com/buildlucid/lucid-cms/commit/3d70045394d133d17481d72ceaab2baf5a8161e5))
+- Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails. ([cd96ff7](https://github.com/buildlucid/lucid-cms/commit/cd96ff79eb4c910eb011ce8938f821d4ead238ab))
+- CLI commands that ask for confirmation now take `--yes` in place of `--force` and fail when there's no terminal to ask in, and `jobs:schedule` is now `jobs:run`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
 
 ### Bug Fixes:
 
-- Fixed API dates being read in the server or browser's local timezone. Dates are now always returned as UTC ISO strings, and Postgres timestamps use `timestamptz`.
-- Fixed migrations failing after removing a plugin that had its own migrations. They are now skipped with a warning, and their tables are left in place.
-- Fixed checkbox fields ignoring their `default` when a value is missing.
-- Fixed wrapped service errors dropping their `key`.
-- Fixed password hashing blocking the server. Hashing now runs off the main thread, and existing hashes still verify.
-- Fixed every API key and OAuth client secret check running a slow password hash.
-- Fixed job and routine schedules that are empty or can never run, such as 31 February, passing config checks.
-- Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once.
-- Fixed embedded bricks in localized rich text requiring values in every locale.
-- Fixed password reset, invitation and email change links being kept in email history.
-- Fixed other sessions staying logged in after a password change or account recovery.
-- Fixed reusing an OAuth refresh token not revoking the tokens issued after it.
-- Fixed people who manage users or roles being able to give access they don't have.
-- Fixed two refreshes of the same session at once both getting a new session.
-- Fixed a second email change cancelling the undo link sent to the old address.
-- Fixed password reset links still working after the password is reset or the email changes.
-- Fixed login showing whether an account exists, is locked or is suspended to someone without its password.
-- Fixed tokens from emailed links being written to request logs.
-- Fixed provider invitation logins storing the invitation token unencrypted.
-- Fixed role, permission and user status changes sometimes taking a minute to apply.
-- Fixed rate limits trusting addresses that visitors can write into `X-Forwarded-For`.
-- Fixed wrong passwords having no limit per account. Each account now allows 10 every 15 minutes.
-- Fixed OAuth client metadata requests reaching private network addresses through hostnames that point to them.
-- Fixed OAuth connections being allowed without a recent login, which creating an API key needs.
-- Fixed the OAuth consent page naming the publisher a client claims, rather than the site its client ID comes from.
-- Fixed a username set to someone else's email stopping them logging in with it. Usernames can no longer contain `@`.
-- Fixed people who manage users renaming or revoking super admins' OAuth connections.
-- Fixed password reset emails having no limit per account. Each account now gets at most one a minute and 5 an hour.
-- Fixed deleting an email not checking the CSRF token.
-- Fixed `/cdn` resizing images again to check whether a browser's copy is current, when the resized image isn't stored.
-- Fixed `/cdn` image responses missing `Vary: Accept` when `media.images.allowFormatQuery` picks the format from the browser.
-- Fixed CDNs being allowed to keep copies of private `/cdn` media and share link media. Share link media could also be cached for a year, past its expiry or revocation.
-- Fixed failed jobs on the built-in inline queue retrying straight away instead of waiting for their backoff.
-- Fixed the content API returning deleted documents and media. Content reads now always leave them out, and no longer accept an `isDeleted` filter.
-- Fixed `lucidcms migrate` and `serve` exiting successfully when migrations needed review and there was no terminal to ask in.
-- Fixed admin route navigation rejecting the `notifications` and `translations` icons.
+- Fixed API dates being read in the server or browser's local timezone. Dates are now always returned as UTC ISO strings, and Postgres timestamps use `timestamptz`. ([3aa60ed](https://github.com/buildlucid/lucid-cms/commit/3aa60ed42c9ef377de512e4688250d1e807cda46))
+- Fixed JSON columns being stored as JSON strings on Postgres, which stopped SQL from reading inside them. JSON values now go through the adapter's `formatInsertValue`, so each adapter encodes them once. ([190b3d4](https://github.com/buildlucid/lucid-cms/commit/190b3d483f107adb29d192514d8b5969f5ecd37d))
+- Fixed the content API returning deleted documents and media. Content reads now always leave them out, and no longer accept an `isDeleted` filter. ([eaf605d](https://github.com/buildlucid/lucid-cms/commit/eaf605db85f9b80bc3bbc31f2a2c8f9d962ad46f))
+- Fixed checkbox fields ignoring their `default` when a value is missing. ([7abb351](https://github.com/buildlucid/lucid-cms/commit/7abb3516b22e7909a8cb548c27a4e99fecbe39cd))
+- Fixed embedded bricks in localized rich text requiring values in every locale. ([677dd6f](https://github.com/buildlucid/lucid-cms/commit/677dd6f378b5d1ee6e598257c3e94e16aa686607))
+- Fixed wrapped service errors dropping their `key`. ([036ba67](https://github.com/buildlucid/lucid-cms/commit/036ba677dcff65dd68c96f747c5145e5c9223c81))
+- Fixed migrations failing after removing a plugin that had its own migrations. They are now skipped with a warning, and their tables are left in place. ([33a66b8](https://github.com/buildlucid/lucid-cms/commit/33a66b87904d44c0a2c3120185e2e6e1fa04f71c))
+- Fixed `lucidcms migrate` and `serve` exiting successfully when migrations needed review and there was no terminal to ask in. ([eaf605d](https://github.com/buildlucid/lucid-cms/commit/eaf605db85f9b80bc3bbc31f2a2c8f9d962ad46f))
+- Fixed password hashing blocking the server. Hashing now runs off the main thread, and existing hashes still verify. ([e031c52](https://github.com/buildlucid/lucid-cms/commit/e031c52bca645661f71988cd89bad8540cd2348d))
+- Fixed every API key and OAuth client secret check running a slow password hash. ([6f33fab](https://github.com/buildlucid/lucid-cms/commit/6f33fab4fe85577fd6fe24f050f607b07a1e44eb))
+- Fixed other sessions staying logged in after a password change or account recovery. ([3c99c8f](https://github.com/buildlucid/lucid-cms/commit/3c99c8fb45befa8ac2e9b51692e735e988521cfc))
+- Fixed reusing an OAuth refresh token not revoking the tokens issued after it. ([3c99c8f](https://github.com/buildlucid/lucid-cms/commit/3c99c8fb45befa8ac2e9b51692e735e988521cfc))
+- Fixed two refreshes of the same session at once both getting a new session. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
+- Fixed login showing whether an account exists, is locked or is suspended to someone without its password. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
+- Fixed wrong passwords having no limit per account. Each account now allows 10 every 15 minutes. ([dfa3e3d](https://github.com/buildlucid/lucid-cms/commit/dfa3e3df8000fc0bb9aa2c070a4965ee4f067da8))
+- Fixed rate limits trusting addresses that visitors can write into `X-Forwarded-For`. ([dfa3e3d](https://github.com/buildlucid/lucid-cms/commit/dfa3e3df8000fc0bb9aa2c070a4965ee4f067da8))
+- Fixed password reset links still working after the password is reset or the email changes. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
+- Fixed password reset emails having no limit per account. Each account now gets at most one a minute and 5 an hour. ([1fe8f3b](https://github.com/buildlucid/lucid-cms/commit/1fe8f3b394362628207d0df2fd1a63362ed43aff))
+- Fixed password reset, invitation and email change links being kept in email history. ([ad94add](https://github.com/buildlucid/lucid-cms/commit/ad94add3576c2969d3cbe44969f9ec4cb4244ffa))
+- Fixed tokens from emailed links being written to request logs. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
+- Fixed a second email change cancelling the undo link sent to the old address. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
+- Fixed provider invitation logins storing the invitation token unencrypted. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
+- Fixed a username set to someone else's email stopping them logging in with it. Usernames can no longer contain `@`. ([1fe8f3b](https://github.com/buildlucid/lucid-cms/commit/1fe8f3b394362628207d0df2fd1a63362ed43aff))
+- Fixed people who manage users or roles being able to give access they don't have. ([f7d7ee0](https://github.com/buildlucid/lucid-cms/commit/f7d7ee0dcc9df9f860af6a0f92bf7d1abc239eed))
+- Fixed role, permission and user status changes sometimes taking a minute to apply. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
+- Fixed people who manage users renaming or revoking super admins' OAuth connections. ([1fe8f3b](https://github.com/buildlucid/lucid-cms/commit/1fe8f3b394362628207d0df2fd1a63362ed43aff))
+- Fixed OAuth connections being allowed without a recent login, which creating an API key needs. ([1fe8f3b](https://github.com/buildlucid/lucid-cms/commit/1fe8f3b394362628207d0df2fd1a63362ed43aff))
+- Fixed the OAuth consent page naming the publisher a client claims, rather than the site its client ID comes from. ([1fe8f3b](https://github.com/buildlucid/lucid-cms/commit/1fe8f3b394362628207d0df2fd1a63362ed43aff))
+- Fixed OAuth client metadata requests reaching private network addresses through hostnames that point to them. ([3ea9b66](https://github.com/buildlucid/lucid-cms/commit/3ea9b666020b8838fb13438ca761c3b2373c80ef))
+- Fixed deleting an email not checking the CSRF token. ([1fe8f3b](https://github.com/buildlucid/lucid-cms/commit/1fe8f3b394362628207d0df2fd1a63362ed43aff))
+- Fixed `/cdn` resizing images again to check whether a browser's copy is current, when the resized image isn't stored. ([3f4c243](https://github.com/buildlucid/lucid-cms/commit/3f4c243c1267ef868124bd1a58c0ba5cc2276723))
+- Fixed `/cdn` image responses missing `Vary: Accept` when `media.images.allowFormatQuery` picks the format from the browser. ([3f4c243](https://github.com/buildlucid/lucid-cms/commit/3f4c243c1267ef868124bd1a58c0ba5cc2276723))
+- Fixed CDNs being allowed to keep copies of private `/cdn` media and share link media. Share link media could also be cached for a year, past its expiry or revocation. ([3f4c243](https://github.com/buildlucid/lucid-cms/commit/3f4c243c1267ef868124bd1a58c0ba5cc2276723))
+- Fixed job schedules that are empty or can never run, such as 31 February, passing config checks. ([e031c52](https://github.com/buildlucid/lucid-cms/commit/e031c52bca645661f71988cd89bad8540cd2348d))
+- Fixed failed jobs on the built-in inline queue retrying straight away instead of waiting for their backoff. ([2edd5ec](https://github.com/buildlucid/lucid-cms/commit/2edd5ec3485a67e172ceaf859d20fbcf16475269))
+- Fixed admin route navigation rejecting the `notifications` and `translations` icons. ([eaf605d](https://github.com/buildlucid/lucid-cms/commit/eaf605db85f9b80bc3bbc31f2a2c8f9d962ad46f))
 
 ## v0.19.0-alpha.0
 
