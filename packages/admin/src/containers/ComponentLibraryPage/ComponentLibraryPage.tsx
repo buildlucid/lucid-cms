@@ -1886,7 +1886,7 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- Table */}
 					<InfoRow.Root
 						title={"Table"}
-						description={"columns, rows, cells, selection, loading"}
+						description={"columns, rows, cells, selection, loading, stale"}
 					>
 						<InfoRow.Content title={"Rows and cells"}>
 							<Table.Root
@@ -1953,6 +1953,26 @@ const ComponentLibraryPage: Component = () => {
 								]}
 							>
 								<span />
+							</Table.Root>
+						</InfoRow.Content>
+						<InfoRow.Content title={"Stale"}>
+							<Table.Root
+								id="components.table.stale"
+								rowCount={demoRows.length}
+								stale={true}
+								columns={[
+									{ key: "name", label: "Name" },
+									{ key: "status", label: "Status" },
+								]}
+							>
+								<Index each={demoRows}>
+									{(row, index) => (
+										<Table.Row index={index}>
+											<Table.Text column="name" text={row().name} />
+											<Table.Text column="status" text={row().status} />
+										</Table.Row>
+									)}
+								</Index>
 							</Table.Root>
 						</InfoRow.Content>
 					</InfoRow.Root>

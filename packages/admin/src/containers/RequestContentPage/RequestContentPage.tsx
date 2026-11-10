@@ -64,7 +64,7 @@ const RequestContentPage: Component = () => {
 						<PageLayout.Body class="rounded-t-xl">
 							<QueryBoundary
 								class="grow"
-								error={query.isError}
+								error={query.isLoadingError}
 								empty={true}
 								emptyFallback={
 									<EmptyState

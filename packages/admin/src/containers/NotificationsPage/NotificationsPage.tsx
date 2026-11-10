@@ -243,7 +243,7 @@ const NotificationsPage: Component = () => {
 			</PageLayout.Header>
 			<PageLayout.Body>
 				<QueryBoundary
-					error={summary.isError || notifications.isError}
+					error={summary.isLoadingError || notifications.isLoadingError}
 					empty={notifications.data?.data.length === 0}
 					queryState={searchParams}
 					emptyFallback={
@@ -261,6 +261,7 @@ const NotificationsPage: Component = () => {
 						selection={selection}
 						queryState={searchParams}
 						loading={summary.isLoading || notifications.isLoading}
+						stale={notifications.isPlaceholderData}
 						selectActions={selectActions()}
 						columns={[
 							{
@@ -324,6 +325,7 @@ const NotificationsPage: Component = () => {
 				<Pagination
 					queryState={searchParams}
 					meta={notifications.data?.meta}
+					loading={notifications.isLoading}
 					padding="md"
 				/>
 			</PageLayout.Body>

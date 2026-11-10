@@ -71,7 +71,7 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 	return (
 		<>
 			<QueryBoundary
-				error={routines.isError}
+				error={routines.isLoadingError}
 				empty={routines.data?.data.length === 0}
 				queryState={props.searchParams}
 				emptyFallback={
@@ -86,7 +86,8 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 					id="agent.routines.list"
 					rowCount={routines.data?.data.length ?? 0}
 					queryState={props.searchParams}
-					loading={routines.isFetching}
+					loading={routines.isLoading}
+					stale={routines.isPlaceholderData}
 					columns={[
 						{
 							label: T()("common.name"),
@@ -169,6 +170,7 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 			<Pagination
 				queryState={props.searchParams}
 				meta={routines.data?.meta}
+				loading={routines.isLoading}
 				padding="md"
 			/>
 			<UpsertAgentRoutineDrawer

@@ -29,6 +29,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -114,6 +115,7 @@ const ViewEmailTransactionsPanelContent: Component<
 		},
 		enabled: canFetch,
 	});
+	const transactionsList = useScopedListState(transactions, () => props.id());
 
 	// ----------------------------------
 	// Render
@@ -174,7 +176,7 @@ const ViewEmailTransactionsPanelContent: Component<
 					embedded
 				/>
 				<QueryBoundary
-					error={transactions.isError}
+					error={transactions.isLoadingError}
 					empty={transactions.data?.data.length === 0}
 					emptyFallback={
 						<EmptyState
@@ -220,7 +222,8 @@ const ViewEmailTransactionsPanelContent: Component<
 								sortable: true,
 							},
 						]}
-						loading={transactions.isFetching}
+						loading={transactionsList.loading()}
+						stale={transactionsList.stale()}
 						padding="sm"
 						variant="secondary"
 					>
@@ -237,6 +240,7 @@ const ViewEmailTransactionsPanelContent: Component<
 				<Pagination
 					queryState={searchParams}
 					meta={transactions.data?.meta}
+					loading={transactionsList.loading()}
 					variant="inline"
 				/>
 			</Show>

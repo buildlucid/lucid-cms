@@ -101,7 +101,7 @@ const SystemDeploysPage: Component = () => {
 					>
 						<QueryBoundary
 							loading={deploys.isLoading}
-							error={deploys.isError}
+							error={deploys.isLoadingError}
 							empty={list().length === 0}
 							appearance="card"
 							onRetry={() => deploys.refetch()}

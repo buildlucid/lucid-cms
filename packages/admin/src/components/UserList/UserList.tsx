@@ -138,7 +138,7 @@ export const UserList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				error={users.isError}
+				error={users.isLoadingError}
 				empty={users.data?.data.length === 0}
 				queryState={props.state.searchParams}
 				emptyFallback={
@@ -203,6 +203,7 @@ export const UserList: Component<{
 						},
 					]}
 					loading={isLoading()}
+					stale={users.isPlaceholderData}
 					allowRestore={props.state.showingDeleted() && canRestoreUsers()}
 					allowDeletePermanently={
 						props.state.showingDeleted() && canDeleteUsersPermanently()
@@ -365,6 +366,7 @@ export const UserList: Component<{
 			<Pagination
 				queryState={props.state.searchParams}
 				meta={users.data?.meta}
+				loading={users.isLoading}
 				padding="md"
 			/>
 		</>

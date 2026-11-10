@@ -29,6 +29,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -123,6 +124,7 @@ const ViewUserLoginsPanelContent: Component<{
 		},
 		enabled: canFetch,
 	});
+	const userLoginsList = useScopedListState(userLogins, () => props.id);
 
 	// ---------------------------------
 	// Render
@@ -181,7 +183,7 @@ const ViewUserLoginsPanelContent: Component<{
 					embedded={true}
 				/>
 				<QueryBoundary
-					error={userLogins.isError}
+					error={userLogins.isLoadingError}
 					empty={userLogins.data?.data.length === 0}
 					queryState={loginsSearchParams}
 					emptyFallback={
@@ -222,7 +224,8 @@ const ViewUserLoginsPanelContent: Component<{
 								sortable: true,
 							},
 						]}
-						loading={userLogins.isFetching}
+						loading={userLoginsList.loading()}
+						stale={userLoginsList.stale()}
 						padding="sm"
 						variant="secondary"
 					>
@@ -234,6 +237,7 @@ const ViewUserLoginsPanelContent: Component<{
 				<Pagination
 					queryState={loginsSearchParams}
 					meta={userLogins.data?.meta}
+					loading={userLoginsList.loading()}
 					variant="inline"
 				/>
 			</Show>

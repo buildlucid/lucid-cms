@@ -60,7 +60,7 @@ const SystemOperationsPage: Component = () => {
 					>
 						<QueryBoundary
 							loading={settingsData.isLoading}
-							error={settingsData.isError}
+							error={settingsData.isLoadingError}
 							loadingFallback={
 								<div class="grid gap-2 sm:grid-cols-2">
 									<span class="skeleton block h-48 w-full" />

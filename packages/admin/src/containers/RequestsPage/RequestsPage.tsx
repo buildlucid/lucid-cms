@@ -109,7 +109,7 @@ const RequestsPage: Component = () => {
 				count: overviewData
 					? countRequestQueue(overviewData, queue)
 					: undefined,
-				loading: overview.isFetching,
+				loading: overview.isLoading,
 				filters: queue.filters,
 			})),
 			...requestTypeKeys.map((type): FilterPreset => ({
@@ -118,7 +118,7 @@ const RequestsPage: Component = () => {
 				count: overviewData
 					? overviewData[type].awaitingApproval + overviewData[type].approved
 					: undefined,
-				loading: overview.isFetching,
+				loading: overview.isLoading,
 				filters: {
 					status: { value: "open", operator: "=" },
 					type: { value: type, operator: "=" },
@@ -291,7 +291,7 @@ const RequestsPage: Component = () => {
 			</PageLayout.Header>
 			<PageLayout.Body>
 				<QueryBoundary
-					error={requests.isError}
+					error={requests.isLoadingError}
 					empty={requests.data?.data.length === 0}
 					queryState={searchParams}
 					emptyFallback={
@@ -360,7 +360,8 @@ const RequestsPage: Component = () => {
 								sortable: true,
 							},
 						]}
-						loading={requests.isFetching}
+						loading={requests.isLoading}
+						stale={requests.isPlaceholderData}
 					>
 						<Index each={requests.data?.data ?? []}>
 							{(request, index) => (
@@ -376,6 +377,7 @@ const RequestsPage: Component = () => {
 				<Pagination
 					queryState={searchParams}
 					meta={requests.data?.meta}
+					loading={requests.isLoading}
 					padding="md"
 				/>
 			</PageLayout.Body>

@@ -35,6 +35,7 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -154,6 +155,7 @@ const ViewShareLinksPanelContent: Component<{
 		},
 		enabled: canFetch,
 	});
+	const shareLinksList = useScopedListState(shareLinks, () => props.id);
 
 	// ---------------------------------
 	// Render
@@ -235,7 +237,7 @@ const ViewShareLinksPanelContent: Component<{
 					embedded={true}
 				/>
 				<QueryBoundary
-					error={shareLinks.isError}
+					error={shareLinks.isLoadingError}
 					empty={shareLinks.data?.data.length === 0}
 					queryState={shareLinksSearchParams}
 					emptyFallback={
@@ -288,7 +290,8 @@ const ViewShareLinksPanelContent: Component<{
 								sortable: true,
 							},
 						]}
-						loading={shareLinks.isFetching}
+						loading={shareLinksList.loading()}
+						stale={shareLinksList.stale()}
 						padding="sm"
 						variant="secondary"
 					>
@@ -310,6 +313,7 @@ const ViewShareLinksPanelContent: Component<{
 				<Pagination
 					queryState={shareLinksSearchParams}
 					meta={shareLinks.data?.meta}
+					loading={shareLinksList.loading()}
 					variant="inline"
 				/>
 			</Show>

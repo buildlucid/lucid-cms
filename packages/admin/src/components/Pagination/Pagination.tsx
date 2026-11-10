@@ -21,6 +21,8 @@ export type PaginationPadding = "none" | "sm" | "md";
 export interface PaginationProps {
 	/** The `meta` from a list response. */
 	meta?: ResponseBody<unknown>["meta"];
+	/** Shows a skeleton in place of the summary, for a first load with no `meta` yet. */
+	loading?: boolean;
 	queryState: QueryStateResponse;
 	/** `inline` is for use inside a card. @default "footer" */
 	variant?: PaginationVariant;
@@ -38,7 +40,14 @@ export interface PaginationProps {
  * ```tsx
  * import { Pagination } from "@lucidcms/admin/components";
  *
- * return <Pagination meta={redirects.data?.meta} queryState={queryState} padding="md" />;
+ * return (
+ * 	<Pagination
+ * 		meta={redirects.data?.meta}
+ * 		loading={redirects.isLoading}
+ * 		queryState={queryState}
+ * 		padding="md"
+ * 	/>
+ * );
  * ```
  */
 const Pagination: Component<PaginationProps> = (props) => {
@@ -88,9 +97,17 @@ const Pagination: Component<PaginationProps> = (props) => {
 					props.class,
 				)}
 			>
-				<div class="flex md:flex-row flex-col justify-between md:items-center gap-2">
-					<span class="text-sm text-body md:mb-0">
+				{/* as tall as the page buttons, so the footer keeps its height when they come and go */}
+				<div class="flex md:flex-row flex-col justify-between md:items-center gap-2 md:min-h-8.5">
+					<span class="text-sm text-body md:mb-0" aria-busy={props.loading}>
 						<Switch>
+							<Match when={props.loading}>
+								<span class="skeleton block w-44" aria-hidden="true">
+									&nbsp;
+								</span>
+							</Match>
+							{/* nothing has loaded, so there is nothing to count */}
+							<Match when={props.meta === undefined}>&nbsp;</Match>
 							<Match when={textData().total === 0}>
 								{T()("empty.states.pagination")}
 							</Match>
@@ -103,7 +120,7 @@ const Pagination: Component<PaginationProps> = (props) => {
 							</Match>
 						</Switch>
 					</span>
-					<Show when={lastPage() > 1}>
+					<Show when={lastPage() > 1 && !props.loading}>
 						<KobPagination.Root
 							class="flex [&>ul]:flex [&>ul]:border [&>ul]:border-border [&>ul]:rounded-md [&>ul]:overflow-hidden"
 							page={page()}

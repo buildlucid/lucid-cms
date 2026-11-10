@@ -270,7 +270,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 			/>
 
 			<QueryBoundary
-				error={users.isError}
+				error={users.isLoadingError}
 				empty={users.data?.data.length === 0}
 				queryState={searchParams}
 				onResetFilters={searchParams.clearFilters}
@@ -320,6 +320,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 							: []),
 					]}
 					loading={isLoading()}
+					stale={users.isPlaceholderData}
 					padding="sm"
 					variant="secondary"
 				>
@@ -358,6 +359,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 			<Pagination
 				queryState={searchParams}
 				meta={users.data?.meta}
+				loading={users.isLoading}
 				variant="inline"
 			/>
 

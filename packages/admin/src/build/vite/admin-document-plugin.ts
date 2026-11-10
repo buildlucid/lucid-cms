@@ -29,6 +29,9 @@ const iconKeys = ["ico", "svg", "appleTouch"] as const satisfies ReadonlyArray<
 	keyof AdminDocumentIcons
 >;
 
+/** Preloads first-screen font weights to prevent fallback-font layout shifts. */
+const preloadedFonts = /\/inter-(regular|medium|semibold)-[^/]+\.woff2$/;
+
 /** Collects the chunks an entry loads statically, so the document can preload them and link their CSS. */
 const collectStaticChunks = (
 	bundle: Rolldown.OutputBundle,
@@ -102,6 +105,12 @@ const adminDocumentPlugin = (props: {
 			]
 				.map((file) => `<link rel="stylesheet" href="${url(file)}">`)
 				.concat(
+					Object.keys(bundle)
+						.filter((fileName) => preloadedFonts.test(fileName))
+						.map(
+							(fileName) =>
+								`<link rel="preload" as="font" type="font/woff2" crossorigin href="${url(fileName)}">`,
+						),
 					chunks
 						.filter((chunk) => chunk !== entry)
 						.map(

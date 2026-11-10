@@ -155,8 +155,9 @@ export const sendRequest = async <Data = unknown>(
 			throw new LucidError(error.message, error);
 		}
 
-		if (params.displayErrorToast !== false) handleSiteErrors(error);
-		throw new LucidError(error.message, error);
+		const toasted = params.displayErrorToast !== false;
+		if (toasted) handleSiteErrors(error);
+		throw new LucidError(error.message, error, toasted);
 	}
 };
 

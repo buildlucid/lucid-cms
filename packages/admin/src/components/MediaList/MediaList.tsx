@@ -352,9 +352,20 @@ export const MediaList: Component<{
 			),
 	);
 	const isError = createMemo(() => {
-		return media.isError || folders.isError;
+		return media.isLoadingError || folders.isLoadingError;
 	});
-	const isFetching = createMemo(() => media.isFetching || folders.isFetching);
+	//* nothing has settled yet: a first load, or cards kept from the previous folder or filter
+	const isSettling = createMemo(
+		() =>
+			media.isLoading ||
+			folders.isLoading ||
+			media.isPlaceholderData ||
+			folders.isPlaceholderData,
+	);
+	//* skeletons only stand in when there are no cards to keep on screen
+	const mediaSkeleton = createMemo(
+		() => media.isLoading || (media.isPlaceholderData && mediaCount() === 0),
+	);
 	const containerEmpty = createMemo(() => {
 		if (props.state.showingDeleted() || !isLibraryView()) {
 			return mediaCount() === 0;
@@ -447,9 +458,9 @@ export const MediaList: Component<{
 		<>
 			<QueryBoundary
 				error={isError()}
-				//* nothing has arrived yet on a first load, which would otherwise read
-				//* as empty and hide the skeletons behind the empty state
-				empty={containerEmpty() && !isFetching()}
+				//* nothing has settled yet, which would otherwise read as empty and
+				//* hide the skeletons behind the empty state
+				empty={containerEmpty() && !isSettling()}
 				queryState={props.state.searchParams}
 				emptyFallback={
 					<EmptyState
@@ -478,14 +489,15 @@ export const MediaList: Component<{
 						/>
 						<Grid
 							class={classNames(
-								"border-b border-border pb-4 md:pb-6 mb-4 md:mb-6",
+								"border-b border-border pb-4 md:pb-6 mb-4 md:mb-6 transition-opacity",
 								{
 									"mt-4": foldersCount() > 0,
+									"list-stale": folders.isPlaceholderData,
 								},
 							)}
 						>
 							<Show
-								when={folders.isFetching}
+								when={folders.isLoading}
 								fallback={
 									<For each={folders.data?.data.folders}>
 										{(folder) => (
@@ -507,7 +519,7 @@ export const MediaList: Component<{
 
 					{/* Media */}
 					<Show
-						when={media.isFetching || mediaCount() > 0}
+						when={mediaSkeleton() || mediaCount() > 0}
 						fallback={
 							<div class="flex flex-1 items-center justify-center">
 								<EmptyState
@@ -524,9 +536,13 @@ export const MediaList: Component<{
 							</div>
 						}
 					>
-						<Grid>
+						<Grid
+							class={classNames("transition-opacity", {
+								"list-stale": media.isPlaceholderData && !mediaSkeleton(),
+							})}
+						>
 							<Show
-								when={media.isFetching}
+								when={mediaSkeleton()}
 								fallback={
 									<For each={media.data?.data}>
 										{(item) => (
@@ -607,6 +623,7 @@ export const MediaList: Component<{
 			<Pagination
 				queryState={props.state.searchParams}
 				meta={media.data?.meta}
+				loading={media.isLoading}
 				padding="md"
 			/>
 

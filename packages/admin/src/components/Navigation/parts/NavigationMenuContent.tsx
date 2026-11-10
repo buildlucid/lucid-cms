@@ -258,7 +258,7 @@ export const NavigationMenuContent: Component<{
 								<Match when={collections.isLoading}>
 									<li class="skeleton block h-7 w-full mb-0.5" />
 									<li class="skeleton block h-7 w-full mb-0.5" />
-									<li class="skeleton block h-8 w-full" />
+									<li class="skeleton block h-7 w-full" />
 								</Match>
 								<Match when={collections.isError}>
 									<li class="bg-background rounded-md p-2">

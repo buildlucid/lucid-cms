@@ -192,6 +192,12 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			},
 		},
 	});
+	//* skeletons only stand in when there are no cards to keep on screen
+	const mediaSkeleton = createMemo(
+		() =>
+			media.isLoading ||
+			(media.isPlaceholderData && media.data?.data.length === 0),
+	);
 
 	// ----------------------------------
 	// Effects
@@ -393,10 +399,10 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			/>
 
 			<QueryBoundary
-				error={media.isError}
-				//* keepPreviousData holds the last page during a refetch, so an empty
-				//* one would otherwise cover the skeletons until the new page lands
-				empty={media.data?.data.length === 0 && !media.isFetching}
+				error={media.isLoadingError}
+				//* keepPreviousData holds the last page while the next one loads, so an
+				//* empty one would otherwise cover the skeletons until it lands
+				empty={media.data?.data.length === 0 && !media.isPlaceholderData}
 				queryState={searchParams}
 				onResetFilters={searchParams.clearFilters}
 				emptyFallback={
@@ -413,9 +419,13 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 					}),
 				)}
 			>
-				<Grid>
+				<Grid
+					class={classNames("transition-opacity", {
+						"list-stale": media.isPlaceholderData && !mediaSkeleton(),
+					})}
+				>
 					<Show
-						when={media.isFetching}
+						when={mediaSkeleton()}
 						fallback={
 							<For each={media.data?.data || []}>
 								{(mediaItem) => (
@@ -443,6 +453,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			<Pagination
 				queryState={searchParams}
 				meta={media.data?.meta}
+				loading={media.isLoading}
 				variant="inline"
 			/>
 

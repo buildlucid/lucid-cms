@@ -216,7 +216,7 @@ const RequestSelectContent: Component<{
 			/>
 
 			<QueryBoundary
-				error={requests.isError}
+				error={requests.isLoadingError}
 				empty={requests.data?.data.length === 0}
 				queryState={searchParams}
 				onResetFilters={searchParams.clearFilters}
@@ -273,7 +273,8 @@ const RequestSelectContent: Component<{
 							sortable: true,
 						},
 					]}
-					loading={requests.isFetching}
+					loading={requests.isLoading}
+					stale={requests.isPlaceholderData}
 					padding="sm"
 					variant="secondary"
 				>
@@ -296,6 +297,7 @@ const RequestSelectContent: Component<{
 			<Pagination
 				queryState={searchParams}
 				meta={requests.data?.meta}
+				loading={requests.isLoading}
 				variant="inline"
 			/>
 

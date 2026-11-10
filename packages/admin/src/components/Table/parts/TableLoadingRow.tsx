@@ -7,6 +7,8 @@ interface TableLoadingRowProps {
 	/** Head keys, so hidden columns are skipped the same way real rows skip them. */
 	columns: string[];
 	hasReorderColumn: boolean;
+	/** The row's height in pixels, matching the table's real rows. */
+	height: number;
 }
 
 const TableLoadingRow: Component<TableLoadingRowProps> = (props) => {
@@ -18,6 +20,8 @@ const TableLoadingRow: Component<TableLoadingRowProps> = (props) => {
 	// Render
 	return (
 		<tr
+			aria-hidden="true"
+			style={{ height: `${props.height}px` }}
 			class={classNames({
 				"bg-background":
 					table.variant() === "primary" || table.variant() === undefined,

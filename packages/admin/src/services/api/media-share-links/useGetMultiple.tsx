@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/solid-query";
+import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { MediaShareLink, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
@@ -34,6 +34,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 				query: queryParams(),
 				method: "GET",
 			}),
+		placeholderData: keepPreviousData,
 		get enabled() {
 			return params.enabled ? params.enabled() : true;
 		},

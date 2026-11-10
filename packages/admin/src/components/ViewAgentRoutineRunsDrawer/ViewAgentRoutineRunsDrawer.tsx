@@ -28,6 +28,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import api from "@/services/api";
 import T from "@/translations";
 import { runStatusFilters } from "@/utils/agent-chat";
@@ -110,6 +111,7 @@ const ViewAgentRoutineRunsContent: Component<
 		queryParams: { queryString: searchParams.queryString },
 		enabled: canFetch,
 	});
+	const runsList = useScopedListState(runs, () => props.id());
 
 	// ----------------------------------------
 	// Render
@@ -149,7 +151,7 @@ const ViewAgentRoutineRunsContent: Component<
 					embedded={true}
 				/>
 				<QueryBoundary
-					error={runs.isError}
+					error={runs.isLoadingError}
 					empty={runs.data?.data.length === 0}
 					queryState={searchParams}
 					emptyFallback={
@@ -198,7 +200,8 @@ const ViewAgentRoutineRunsContent: Component<
 								icon: <TbOutlineCalendar />,
 							},
 						]}
-						loading={runs.isFetching}
+						loading={runsList.loading()}
+						stale={runsList.stale()}
 						padding="sm"
 						variant="secondary"
 					>
@@ -216,6 +219,7 @@ const ViewAgentRoutineRunsContent: Component<
 				<Pagination
 					queryState={searchParams}
 					meta={runs.data?.meta}
+					loading={runsList.loading()}
 					variant="inline"
 				/>
 			</Show>

@@ -46,7 +46,7 @@ const NotificationPreferences: Component = () => {
 		<QueryBoundary
 			appearance="contained"
 			loading={preferences.isLoading}
-			error={preferences.isError}
+			error={preferences.isLoadingError}
 			onRetry={() => preferences.refetch()}
 			loadingFallback={
 				<ul class="divide-y divide-border">

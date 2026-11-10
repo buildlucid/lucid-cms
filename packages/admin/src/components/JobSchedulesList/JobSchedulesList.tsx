@@ -61,7 +61,7 @@ export const JobSchedulesList: Component = () => {
 	// ----------------------------------
 	// Memos
 	const showingState = createMemo(
-		() => schedules.isError || schedules.data?.data.length === 0,
+		() => schedules.isLoadingError || schedules.data?.data.length === 0,
 	);
 	const showToolbar = createMemo(
 		() => !showingState() || !searchParams.filtersAreDefault(),
@@ -113,7 +113,7 @@ export const JobSchedulesList: Component = () => {
 				<InfoRow.Content padding="none">
 					<QueryBoundary
 						appearance="inline"
-						error={schedules.isError}
+						error={schedules.isLoadingError}
 						onRetry={() => schedules.refetch()}
 						empty={schedules.data?.data.length === 0}
 						queryState={searchParams}
@@ -158,7 +158,8 @@ export const JobSchedulesList: Component = () => {
 									icon: <TbOutlineCircleCheck />,
 								},
 							]}
-							loading={schedules.isFetching}
+							loading={schedules.isLoading}
+							stale={schedules.isPlaceholderData}
 							padding="sm"
 							variant="contained"
 							class="border-y-0"
@@ -181,6 +182,7 @@ export const JobSchedulesList: Component = () => {
 					<Pagination
 						queryState={searchParams}
 						meta={schedules.data?.meta}
+						loading={schedules.isLoading}
 						variant="footer"
 						padding="sm"
 						hideWhenEmpty

@@ -41,6 +41,7 @@ import useQueryState, {
 	pagination,
 	sort,
 } from "@/hooks/useQueryState/useQueryState";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
@@ -287,6 +288,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			activeCollection()?.mode !== "single" &&
 			filterSchemaContextKey() === filterSchemaContext(),
 	});
+	const documentsList = useScopedListState(documents, collectionKey);
 	const singleDocument = api.documents.useGetSingle({
 		queryParams: {
 			location: {
@@ -602,7 +604,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 					fallback={
 						<>
 							<QueryBoundary
-								error={documents.isError || collectionIsError()}
+								error={documents.isLoadingError || collectionIsError()}
 								empty={documents.data?.data.length === 0}
 								queryState={searchParams}
 								onResetFilters={searchParams.clearFilters}
@@ -652,7 +654,8 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 											icon: <TbOutlineCalendar />,
 										},
 									]}
-									loading={documents.isFetching || collectionIsLoading()}
+									loading={documentsList.loading() || collectionIsLoading()}
+									stale={documentsList.stale()}
 									padding="sm"
 									variant="secondary"
 								>
@@ -690,6 +693,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 							<Pagination
 								queryState={searchParams}
 								meta={documents.data?.meta}
+								loading={documentsList.loading()}
 								variant="inline"
 							/>
 						</>

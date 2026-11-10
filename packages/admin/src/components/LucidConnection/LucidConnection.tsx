@@ -124,7 +124,7 @@ const LucidConnection: Component = () => {
 		<>
 			<QueryBoundary
 				loading={status.isLoading}
-				error={status.isError}
+				error={status.isLoadingError}
 				appearance="card"
 				onRetry={() => status.refetch()}
 				loadingFallback={<span class="skeleton block h-40 w-full" />}

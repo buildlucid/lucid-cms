@@ -51,7 +51,7 @@ export const RolesList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				error={roles.isError}
+				error={roles.isLoadingError}
 				empty={roles.data?.data.length === 0}
 				queryState={props.state.searchParams}
 				emptyFallback={
@@ -98,7 +98,8 @@ export const RolesList: Component<{
 							icon: <TbOutlineCalendar />,
 						},
 					]}
-					loading={roles.isFetching}
+					loading={roles.isLoading}
+					stale={roles.isPlaceholderData}
 				>
 					<Index each={roles.data?.data || []}>
 						{(role, i) => (
@@ -137,6 +138,7 @@ export const RolesList: Component<{
 			<Pagination
 				queryState={props.state.searchParams}
 				meta={roles.data?.meta}
+				loading={roles.isLoading}
 				padding="md"
 			/>
 		</>

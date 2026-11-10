@@ -28,6 +28,7 @@ import useQueryState, {
 	pagination,
 	sort,
 } from "@/hooks/useQueryState/useQueryState";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAiUsageSessionLabel } from "@/utils/ai-usage";
@@ -140,6 +141,10 @@ const AiUsageSessionRecords: Component<{
 		queryParams: { queryString: searchParams.queryString },
 		enabled: () => props.open && searchParams.ready(),
 	});
+	const recordsList = useScopedListState(
+		records,
+		() => `${props.session()?.type}:${props.session()?.id}`,
+	);
 
 	// ----------------------------------------
 	// Render
@@ -153,7 +158,7 @@ const AiUsageSessionRecords: Component<{
 				<PerPageSelect options={[10, 20, 50]} queryState={searchParams} />
 			</div>
 			<QueryBoundary
-				error={records.isError}
+				error={records.isLoadingError}
 				empty={records.data?.data.length === 0}
 				queryState={searchParams}
 				emptyFallback={
@@ -203,7 +208,8 @@ const AiUsageSessionRecords: Component<{
 							minWidth: 170,
 						},
 					]}
-					loading={records.isFetching}
+					loading={recordsList.loading()}
+					stale={recordsList.stale()}
 					padding="sm"
 					variant="secondary"
 				>
@@ -217,6 +223,7 @@ const AiUsageSessionRecords: Component<{
 			<Pagination
 				queryState={searchParams}
 				meta={records.data?.meta}
+				loading={recordsList.loading()}
 				variant="inline"
 			/>
 		</>

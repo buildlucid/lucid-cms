@@ -53,7 +53,7 @@ export const EmailsList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				error={emails.isError}
+				error={emails.isLoadingError}
 				empty={emails.data?.data.length === 0}
 				queryState={props.state.searchParams}
 				emptyFallback={
@@ -120,7 +120,8 @@ export const EmailsList: Component<{
 							minWidth: 170,
 						},
 					]}
-					loading={emails.isFetching}
+					loading={emails.isLoading}
+					stale={emails.isPlaceholderData}
 				>
 					<Index each={emails.data?.data || []}>
 						{(email, i) => (
@@ -168,6 +169,7 @@ export const EmailsList: Component<{
 			<Pagination
 				queryState={props.state.searchParams}
 				meta={emails.data?.meta}
+				loading={emails.isLoading}
 				padding="md"
 			/>
 		</>

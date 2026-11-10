@@ -105,7 +105,7 @@ const AiCreditsSummary: Component = () => {
 	return (
 		<QueryBoundary
 			loading={credits.isLoading}
-			error={credits.isError}
+			error={credits.isLoadingError}
 			appearance="card"
 			onRetry={() => credits.refetch()}
 			loadingFallback={

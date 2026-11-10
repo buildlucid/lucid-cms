@@ -86,7 +86,7 @@ export const JobsList: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const showingState = createMemo(
-		() => jobs.isError || jobs.data?.data.length === 0,
+		() => jobs.isLoadingError || jobs.data?.data.length === 0,
 	);
 	const showToolbar = createMemo(
 		() => !showingState() || !searchParams.filtersAreDefault(),
@@ -234,7 +234,7 @@ export const JobsList: Component = () => {
 				<InfoRow.Content padding="none">
 					<QueryBoundary
 						appearance="inline"
-						error={jobs.isError}
+						error={jobs.isLoadingError}
 						onRetry={() => jobs.refetch()}
 						empty={jobs.data?.data.length === 0}
 						queryState={searchParams}
@@ -282,7 +282,8 @@ export const JobsList: Component = () => {
 									icon: <TbOutlineCalendar />,
 								},
 							]}
-							loading={jobs.isFetching}
+							loading={jobs.isLoading}
+							stale={jobs.isPlaceholderData}
 							padding="sm"
 							variant="contained"
 							class="border-y-0"
@@ -306,6 +307,7 @@ export const JobsList: Component = () => {
 					<Pagination
 						queryState={searchParams}
 						meta={jobs.data?.meta}
+						loading={jobs.isLoading}
 						variant="footer"
 						padding="sm"
 						hideWhenEmpty

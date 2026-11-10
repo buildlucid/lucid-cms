@@ -105,6 +105,11 @@
 		margin: 0;
 	}
 
+	/* rows or cards kept on screen while newer ones load. Dimming waits a moment, so a quick response doesn't flicker */
+	.list-stale {
+		@apply pointer-events-none opacity-50 transition-opacity delay-150 duration-200;
+	}
+
 	.skeleton {
 		@apply bg-input rounded-md animate-pulse;
 	}

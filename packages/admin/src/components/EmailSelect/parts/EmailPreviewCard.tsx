@@ -137,6 +137,18 @@ export const EmailPreviewCard: Component<{
 									<span class="skeleton block size-full rounded-none" />
 								</Skeleton>
 							</Match>
+							<Match when={email.isLoadingError}>
+								<div class="flex h-full flex-col items-center justify-center gap-2 bg-card px-6 text-center">
+									<p class="text-sm text-muted">{T()("states.load.failed")}</p>
+									<Button
+										variant="ghost"
+										size="xs"
+										onClick={() => void email.refetch()}
+									>
+										{T()("common.try.again")}
+									</Button>
+								</div>
+							</Match>
 							<Match when={email.data}>
 								<iframe
 									class="pointer-events-none absolute top-0 left-0 block border-0 bg-white"

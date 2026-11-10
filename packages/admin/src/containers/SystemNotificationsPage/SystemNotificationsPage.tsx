@@ -38,7 +38,7 @@ const SystemNotificationsPage: Component = () => {
 			<PageLayout.Body>
 				<QueryBoundary
 					loading={types.isLoading || roles.isLoading}
-					error={types.isError || roles.isError}
+					error={types.isLoadingError || roles.isLoadingError}
 					loadingFallback={
 						<Index each={Array.from({ length: 2 })}>
 							{() => (

@@ -57,7 +57,7 @@ export const DeployRunsList: Component<{
 	// ----------------------------------------
 	// Memos
 	const showingState = createMemo(
-		() => runs.isError || runs.data?.data.length === 0,
+		() => runs.isLoadingError || runs.data?.data.length === 0,
 	);
 	const showToolbar = createMemo(
 		() => !showingState() || !searchParams.filtersAreDefault(),
@@ -134,7 +134,7 @@ export const DeployRunsList: Component<{
 			<InfoRow.Content padding="none">
 				<QueryBoundary
 					appearance="inline"
-					error={runs.isError}
+					error={runs.isLoadingError}
 					onRetry={() => runs.refetch()}
 					empty={runs.data?.data.length === 0}
 					queryState={searchParams}
@@ -179,7 +179,8 @@ export const DeployRunsList: Component<{
 							},
 						]}
 						//* background polls keep the rows still, so only new queries show loading
-						loading={runs.isLoading || runs.isPlaceholderData}
+						loading={runs.isLoading}
+						stale={runs.isPlaceholderData}
 						padding="sm"
 						variant="contained"
 						class="border-y-0"
@@ -199,6 +200,7 @@ export const DeployRunsList: Component<{
 				<Pagination
 					queryState={searchParams}
 					meta={runs.data?.meta}
+					loading={runs.isLoading}
 					variant="footer"
 					padding="sm"
 					hideWhenEmpty

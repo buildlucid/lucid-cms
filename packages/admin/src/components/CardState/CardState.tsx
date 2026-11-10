@@ -31,7 +31,7 @@ export interface CardStateProps {
  * 	<InfoRow.Content padding="none">
  * 		<QueryBoundary
  * 			appearance="contained"
- * 			error={redirects.isError}
+ * 			error={redirects.isLoadingError}
  * 			empty={redirects.data?.data.length === 0}
  * 			onRetry={() => redirects.refetch()}
  * 			emptyFallback={

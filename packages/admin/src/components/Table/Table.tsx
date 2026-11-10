@@ -28,7 +28,8 @@ export type { TableColumn, TablePadding, TableVariant } from "./TableContext";
  * 	<Table.Root
  * 		id="redirects"
  * 		rowCount={redirects.data?.data.length ?? 0}
- * 		loading={redirects.isFetching}
+ * 		loading={redirects.isLoading}
+ * 		stale={redirects.isPlaceholderData}
  * 		queryState={queryState}
  * 		columns={[
  * 			{ key: "from", label: t("redirects.from"), sortable: true },

@@ -476,7 +476,7 @@ const DocumentsPage: Component = () => {
 						listing: getCollectionFieldIncludes,
 						relationCollections: relationCollectionData,
 						searchParams: searchParams,
-						isLoading: collection.isFetching,
+						isLoading: collection.isLoading,
 						collectionIsSuccess: collectionIsSuccess,
 						showingDeleted: showingDeleted,
 						showingRequests: showingRequests,

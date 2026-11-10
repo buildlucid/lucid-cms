@@ -64,7 +64,7 @@ export const OAuthClientsList: Component<{
 						appearance="contained"
 						loading={clients.isLoading}
 						loadingFallback={<SkeletonCardRows variant="row" />}
-						error={clients.isError}
+						error={clients.isLoadingError}
 						onRetry={() => clients.refetch()}
 						empty={clients.isSuccess && clients.data.data.length === 0}
 						emptyFallback={

@@ -114,7 +114,7 @@ const ReviewOverviewPage: Component = () => {
 			<PageLayout.Body>
 				<QueryBoundary
 					loading={collections.isLoading || overview.isLoading}
-					error={collections.isError || overview.isError}
+					error={collections.isLoadingError || overview.isLoadingError}
 					loadingFallback={
 						<div class="flex flex-col gap-8">
 							<div>

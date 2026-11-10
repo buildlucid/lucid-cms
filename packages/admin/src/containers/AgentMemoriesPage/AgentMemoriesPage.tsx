@@ -94,7 +94,7 @@ const AgentMemoriesPage: Component = () => {
 			<PageLayout.Body>
 				<QueryBoundary
 					loading={memories.isLoading}
-					error={memories.isError}
+					error={memories.isLoadingError}
 					empty={sections().length === 0}
 					loadingFallback={
 						<div class="flex flex-col gap-8">
@@ -141,7 +141,7 @@ const AgentMemoriesPage: Component = () => {
 											id={`agent.memories.${section.scope}`}
 											memories={section.list.memories}
 											editable={section.editable}
-											loading={memories.isFetching}
+											loading={memories.isLoading}
 											onEdit={openUpsert}
 											onDelete={openDelete}
 										/>

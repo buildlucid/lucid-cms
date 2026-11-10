@@ -42,6 +42,7 @@ import { resolveSlots } from "@/extensions/slot-policy";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import { useTableSelection } from "@/hooks/useTableSelection/useTableSelection";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
@@ -395,6 +396,7 @@ export const DocumentsList: Component<{
 		},
 		enabled: () => documentQueryEnabled(),
 	});
+	const documentsList = useScopedListState(documents, collectionKey);
 
 	// ----------------------------------
 	// Mutations
@@ -520,7 +522,7 @@ export const DocumentsList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				error={documents.isError}
+				error={documents.isLoadingError}
 				empty={documents.data?.data.length === 0}
 				queryState={props.state.searchParams}
 				emptyFallback={
@@ -573,7 +575,8 @@ export const DocumentsList: Component<{
 							sortable: !props.state.orderMode(),
 						},
 					]}
-					loading={documents.isFetching || props.state.isLoading}
+					loading={documentsList.loading() || props.state.isLoading}
+					stale={documentsList.stale()}
 					//* bulk selection is off while reordering, and requests are managed from their request
 					selectable={
 						!props.state.orderMode() && !props.state.showingRequests()
@@ -900,6 +903,7 @@ export const DocumentsList: Component<{
 			<Pagination
 				queryState={props.state.searchParams}
 				meta={documents.data?.meta}
+				loading={documentsList.loading()}
 				padding="md"
 			/>
 		</>

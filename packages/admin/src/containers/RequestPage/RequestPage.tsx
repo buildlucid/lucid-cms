@@ -137,7 +137,7 @@ const RequestPage: Component = () => {
 	return (
 		<PageLayout.Root>
 			<Show when={!requestQuery.isLoading} fallback={<RequestPageSkeleton />}>
-				<QueryBoundary class="grow" error={requestQuery.isError}>
+				<QueryBoundary class="grow" error={requestQuery.isLoadingError}>
 					<Show when={request()}>
 						{(data) => (
 							<>

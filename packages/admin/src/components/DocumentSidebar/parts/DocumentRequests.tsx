@@ -1,6 +1,7 @@
 import { TbOutlineExternalLink } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import DocumentSidebarSection from "@/components/DocumentSidebarSection/DocumentSidebarSection";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RequestCompactList from "@/components/RequestCompactList/RequestCompactList";
 import ViewAllLink from "@/components/ViewAllLink/ViewAllLink";
 import { Permissions } from "@/constants/permissions";
@@ -50,10 +51,17 @@ export const DocumentRequests: Component<{
 				preferenceKey="pageBuilder.sidebar.requests"
 				meta={requests.data?.meta.total || undefined}
 			>
-				<RequestCompactList
-					requests={requests.data?.data ?? []}
-					loading={requests.isLoading}
-				/>
+				{/* a failed load would otherwise read as "no open requests" */}
+				<QueryBoundary
+					appearance="inline"
+					error={requests.isLoadingError}
+					onRetry={() => void requests.refetch()}
+				>
+					<RequestCompactList
+						requests={requests.data?.data ?? []}
+						loading={requests.isLoading}
+					/>
+				</QueryBoundary>
 				<Show when={(requests.data?.data.length ?? 0) > 0}>
 					<ViewAllLink
 						class="mt-2 -ms-1 w-fit"

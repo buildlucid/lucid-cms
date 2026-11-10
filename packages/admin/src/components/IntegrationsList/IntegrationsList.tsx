@@ -79,7 +79,7 @@ export const IntegrationsList: Component<{
 		return userStore.get.hasPermission([Permissions.IntegrationsCreate]).all;
 	});
 	const showingState = createMemo(
-		() => integrations.isError || integrations.data?.data.length === 0,
+		() => integrations.isLoadingError || integrations.data?.data.length === 0,
 	);
 	const showToolbar = createMemo(
 		() => !showingState() || !props.state.searchParams.filtersAreDefault(),
@@ -220,7 +220,7 @@ export const IntegrationsList: Component<{
 						<InfoRow.Content padding="none">
 							<QueryBoundary
 								appearance="contained"
-								error={integrations.isError}
+								error={integrations.isLoadingError}
 								onRetry={() => integrations.refetch()}
 								empty={integrations.data?.data.length === 0}
 								queryState={props.state.searchParams}
@@ -283,7 +283,8 @@ export const IntegrationsList: Component<{
 											icon: <TbOutlineCalendar />,
 										},
 									]}
-									loading={integrations.isFetching}
+									loading={integrations.isLoading}
+									stale={integrations.isPlaceholderData}
 									padding="sm"
 									variant="contained"
 									class="border-y-0"
@@ -302,6 +303,7 @@ export const IntegrationsList: Component<{
 							<Pagination
 								queryState={props.state.searchParams}
 								meta={integrations.data?.meta}
+								loading={integrations.isLoading}
 								variant="footer"
 								padding="sm"
 								hideWhenEmpty

@@ -109,7 +109,7 @@ export const AiUsageSessionList: Component<{
 				<InfoRow.Content padding="none">
 					<QueryBoundary
 						appearance="inline"
-						error={sessions.isError}
+						error={sessions.isLoadingError}
 						onRetry={() => sessions.refetch()}
 						empty={sessions.data?.data.length === 0}
 						queryState={props.state.searchParams}
@@ -159,7 +159,8 @@ export const AiUsageSessionList: Component<{
 									minWidth: 170,
 								},
 							]}
-							loading={sessions.isFetching}
+							loading={sessions.isLoading}
+							stale={sessions.isPlaceholderData}
 							padding="sm"
 							variant="contained"
 							class="border-y-0"
@@ -178,6 +179,7 @@ export const AiUsageSessionList: Component<{
 					<Pagination
 						queryState={props.state.searchParams}
 						meta={sessions.data?.meta}
+						loading={sessions.isLoading}
 						variant="footer"
 						padding="sm"
 						hideWhenEmpty

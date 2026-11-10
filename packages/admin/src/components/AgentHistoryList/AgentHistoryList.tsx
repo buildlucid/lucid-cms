@@ -43,7 +43,7 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 	return (
 		<>
 			<QueryBoundary
-				error={conversations.isError && !conversations.data}
+				error={conversations.isLoadingError}
 				empty={conversations.data?.data.length === 0}
 				queryState={props.searchParams}
 				emptyFallback={
@@ -63,7 +63,8 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 					id="agent.history.list"
 					rowCount={conversations.data?.data.length ?? 0}
 					queryState={props.searchParams}
-					loading={conversations.isPending || conversations.isPlaceholderData}
+					loading={conversations.isPending}
+					stale={conversations.isPlaceholderData}
 					columns={[
 						{
 							label: T()("common.title"),
@@ -127,6 +128,7 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 			<Pagination
 				queryState={props.searchParams}
 				meta={conversations.data?.meta}
+				loading={conversations.isLoading}
 				padding="md"
 			/>
 			<RenameAgentConversationModal

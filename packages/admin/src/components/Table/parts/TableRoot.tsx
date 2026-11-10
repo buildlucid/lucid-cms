@@ -16,6 +16,7 @@ import TableSelectAction, {
 	type TableSelectActionItem,
 } from "@/components/Table/parts/TableSelectAction";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
+import { readRowHeight, rememberRowHeight } from "@/components/Table/rowHeight";
 import {
 	type TableColumn,
 	TableContext,
@@ -41,8 +42,14 @@ export interface TableRootProps<TRow extends { id: TableRowId }> {
 	columns: TableColumn[];
 	/** Required for sortable columns. */
 	queryState?: QueryStateResponse;
+	/**
+	 * Shows initial skeleton rows without affecting layout height. Fills available space and clips
+	 * excess rows.
+	 */
 	loading?: boolean;
-	/** Number of placeholder rows shown while loading. @default 10 */
+	/** Dims retained rows while a page, sort or filter change loads. */
+	stale?: boolean;
+	/** Fallback loading height in rows when no parent height is available. @default 5 */
 	loadingRows?: number;
 	caption?: string;
 	/** Turns on row checkboxes when an action can take the selected rows. Requires `data`. */
@@ -76,6 +83,8 @@ export interface TableRootProps<TRow extends { id: TableRowId }> {
 }
 
 const tableScrollPositions = new Map<string, number>();
+/** Header height including its border, reserved above loading rows. */
+const HEADER_HEIGHT = 37;
 //* only one table can own the shared selection bar
 const [selectionOwner, setSelectionOwner] = createSignal<symbol>();
 
@@ -84,6 +93,7 @@ const TableRoot = <TRow extends { id: TableRowId }>(
 	props: TableRootProps<TRow>,
 ): JSXElement => {
 	let overflowRef: HTMLDivElement | undefined;
+	let bodyRef: HTMLTableSectionElement | undefined;
 
 	const selectionKey = Symbol(props.id);
 	const [dragIndex, setDragIndex] = createSignal<number | null>(null);
@@ -240,6 +250,11 @@ const TableRoot = <TRow extends { id: TableRowId }>(
 		});
 	});
 	const hiddenColumnKeys = createMemo(() => new Set(hiddenColumns()));
+	const loadingRowHeight = createMemo(() => readRowHeight(props.id));
+	//* enough rows to fill the screen, as the table clips the ones that don't fit
+	const loadingRowCount = createMemo(() =>
+		Math.ceil(window.innerHeight / loadingRowHeight()),
+	);
 
 	const context: TableContextValue = {
 		padding,
@@ -279,6 +294,25 @@ const TableRoot = <TRow extends { id: TableRowId }>(
 
 		restoreScrollPosition();
 	});
+	//* loading rows match the height real rows had, so the lines don't move when
+	//* data lands. Watched for size, as cells can fill in after their rows render
+	onMount(() => {
+		if (!bodyRef) return;
+
+		const observer = new ResizeObserver(() => {
+			if (props.loading || props.rowCount === 0 || !bodyRef) return;
+
+			const heights = Array.from(
+				bodyRef.rows,
+				(row) => row.offsetHeight,
+			).filter((height) => height > 0);
+			if (heights.length > 0) {
+				rememberRowHeight(props.id, Math.min(...heights));
+			}
+		});
+		observer.observe(bodyRef);
+		onCleanup(() => observer.disconnect());
+	});
 	createEffect(() => {
 		if (isSelectable()) return;
 		props.selection?.clear();
@@ -302,19 +336,31 @@ const TableRoot = <TRow extends { id: TableRowId }>(
 			<div
 				data-table
 				class={classNames(
-					"w-full overflow-x-auto scrollbar",
+					"w-full scrollbar",
 					{
+						"overflow-x-auto": !props.loading,
+						//* fills the room its parent has and clips the loading rows, which sit out of flow
+						"relative flex-1 basis-0 overflow-hidden": props.loading,
 						"border-y border-border bg-card": props.variant === "contained",
 					},
 					props.class,
 				)}
+				style={{
+					"min-height": props.loading
+						? `${(props.loadingRows ?? 5) * loadingRowHeight() + HEADER_HEIGHT}px`
+						: undefined,
+				}}
 				ref={overflowRef}
 				onScroll={() => {
 					if (!overflowRef) return;
 					tableScrollPositions.set(props.id, overflowRef.scrollLeft);
 				}}
 			>
-				<table class="w-full table h-auto border-collapse">
+				<table
+					class={classNames("w-full table h-auto border-collapse", {
+						"absolute inset-x-0 top-0": props.loading,
+					})}
+				>
 					<Show when={props.caption}>
 						<div class="caption-bottom border-t-primary border-t-2 border-b border-b-border bg-input text-title py-2 text-sm">
 							{props.caption}
@@ -353,19 +399,22 @@ const TableRoot = <TRow extends { id: TableRowId }>(
 							</TableHeaderCell>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody
+						ref={bodyRef}
+						class={classNames("transition-opacity", {
+							"list-stale": props.stale && !props.loading,
+						})}
+						aria-busy={props.loading || props.stale}
+					>
 						<Show
 							when={!props.loading}
 							fallback={
-								<Index
-									each={Array.from({
-										length: props.loadingRows ?? 10,
-									})}
-								>
+								<Index each={Array.from({ length: loadingRowCount() })}>
 									{() => (
 										<TableLoadingRow
 											columns={props.columns.map((head) => head.key)}
 											hasReorderColumn={rowReorderEnabled()}
+											height={loadingRowHeight()}
 										/>
 									)}
 								</Index>

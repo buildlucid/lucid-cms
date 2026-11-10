@@ -205,6 +205,8 @@
 	"empty.states.results.description": "Try adjusting your filters to see more results",
 	"states.empty": "There's nothing here yet.",
 	"states.load.failed": "This couldn't be loaded.",
+	"states.refresh.failed.title": "Couldn't Refresh",
+	"states.refresh.failed.message": "The latest data couldn't be loaded, so you're seeing what was loaded before.",
 	"states.results.none": "No results match your filters.",
 	"auth.password.reset.required.message": "Please reset your password before continuing.",
 	"auth.password.reset.required.title": "Password Reset Required",

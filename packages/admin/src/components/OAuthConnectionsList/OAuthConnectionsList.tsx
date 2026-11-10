@@ -37,7 +37,7 @@ export const OAuthConnectionsList: Component<{
 			appearance={isRows() ? "contained" : "inline"}
 			loading={connections.isLoading}
 			loadingFallback={<SkeletonCardRows variant={isRows() ? "row" : "card"} />}
-			error={connections.isError}
+			error={connections.isLoadingError}
 			onRetry={() => connections.refetch()}
 			empty={connections.isSuccess && connections.data.data.length === 0}
 			emptyFallback={

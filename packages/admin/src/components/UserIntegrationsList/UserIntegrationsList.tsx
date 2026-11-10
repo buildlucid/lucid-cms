@@ -49,7 +49,7 @@ export const UserIntegrationsList: Component<{
 				appearance="inline"
 				loading={integrations.isLoading}
 				loadingFallback={<SkeletonCardRows />}
-				error={integrations.isError}
+				error={integrations.isLoadingError}
 				onRetry={() => integrations.refetch()}
 				empty={integrations.isSuccess && integrations.data.data.length === 0}
 				emptyFallback={

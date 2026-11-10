@@ -292,7 +292,7 @@ const AgentHome: Component<{
 					</section>
 				</Show>
 			}
-			error={definitions.isError}
+			error={definitions.isLoadingError}
 			empty={!definitions.data?.data.enabled || agents().length === 0}
 		>
 			<Show when={agent()}>

@@ -252,7 +252,7 @@ const EmailSelectContent: Component<EmailSelectContentProps> = (props) => {
 			/>
 
 			<QueryBoundary
-				error={emails.isError}
+				error={emails.isLoadingError}
 				empty={emails.data?.data.length === 0}
 				queryState={searchParams}
 				onResetFilters={searchParams.clearFilters}
@@ -303,6 +303,7 @@ const EmailSelectContent: Component<EmailSelectContentProps> = (props) => {
 						},
 					]}
 					loading={emails.isLoading}
+					stale={emails.isPlaceholderData}
 					padding="sm"
 					variant="secondary"
 				>
@@ -347,6 +348,7 @@ const EmailSelectContent: Component<EmailSelectContentProps> = (props) => {
 			<Pagination
 				queryState={searchParams}
 				meta={emails.data?.meta}
+				loading={emails.isLoading}
 				variant="inline"
 			/>
 

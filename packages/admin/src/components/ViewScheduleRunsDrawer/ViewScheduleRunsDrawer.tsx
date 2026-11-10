@@ -28,6 +28,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import useScopedListState from "@/hooks/useScopedListState/useScopedListState";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -111,6 +112,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 		},
 		enabled: canFetch,
 	});
+	const jobsList = useScopedListState(jobs, () => props.id());
 
 	// ----------------------------------
 	// Render
@@ -167,7 +169,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 					embedded
 				/>
 				<QueryBoundary
-					error={jobs.isError}
+					error={jobs.isLoadingError}
 					empty={jobs.data?.data.length === 0}
 					emptyFallback={
 						<EmptyState
@@ -219,7 +221,8 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 								icon: <TbOutlineCalendar />,
 							},
 						]}
-						loading={jobs.isFetching}
+						loading={jobsList.loading()}
+						stale={jobsList.stale()}
 						padding="sm"
 						variant="secondary"
 					>
@@ -231,6 +234,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 				<Pagination
 					queryState={searchParams}
 					meta={jobs.data?.meta}
+					loading={jobsList.loading()}
 					variant="inline"
 				/>
 			</Show>

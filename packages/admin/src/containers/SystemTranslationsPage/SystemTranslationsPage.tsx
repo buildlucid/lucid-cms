@@ -90,7 +90,7 @@ const SystemTranslationsPage: Component = () => {
 			<PageLayout.Body>
 				<QueryBoundary
 					loading={settings.isLoading}
-					error={settings.isError}
+					error={settings.isLoadingError}
 					loadingFallback={
 						<InfoRow.Root loading>
 							<span class="skeleton block h-48 w-full" />

@@ -16,11 +16,14 @@ import spawnToast from "@/utils/spawn-toast";
  */
 export class LucidError extends Error {
 	errorRes: ErrorResponse;
-	constructor(message: string, errorRes: ErrorResponse) {
+	/** Whether the request already told the user with an error toast. */
+	toasted: boolean;
+	constructor(message: string, errorRes: ErrorResponse, toasted = false) {
 		super(message);
 		this.name = this.constructor.name;
 		// Error.captureStackTrace(this, this.constructor);
 		this.errorRes = errorRes;
+		this.toasted = toasted;
 	}
 }
 
